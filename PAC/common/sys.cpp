@@ -1,4 +1,4 @@
-#include "sys.h"
+п»ї#include "sys.h"
 
 #ifdef DEBUG
 #include <string.h>
@@ -90,7 +90,7 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
     char      mem_name[ 10 ];
 #endif // DEBUG
 
-    // Выбор памяти, с которой будем работать.
+    // Р’С‹Р±РѕСЂ РїР°РјСЏС‚Рё, СЃ РєРѕС‚РѕСЂРѕР№ Р±СѓРґРµРј СЂР°Р±РѕС‚Р°С‚СЊ.
     switch ( m_type )
         {
         case MT_NVRAM:

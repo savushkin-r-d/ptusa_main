@@ -1,4 +1,4 @@
-#include "param_ex.h"
+﻿#include "param_ex.h"
 
 params_manager* params_manager::instance = 0;
 NV_memory_manager *G_NV_MEMORY_MANAGER = new NV_memory_manager_7186();
