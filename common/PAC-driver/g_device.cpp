@@ -930,10 +930,14 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
 #ifdef DEBUG_DEV_CMCTR
             Print( "GET_PAC_ERRORS\n" );
 #endif
+
+#if defined I7186_E
             if ( g_pac_critical_errors )
                 {
                 answer_size = g_pac_critical_errors->save_to_stream( outdata );
                 }
+#endif // defined I7186_E
+
 #ifdef DEBUG_DEV_CMCTR
             Print( "Critical errors count = %d, answer size = %d\n",
                 outdata[ 2 ], 
