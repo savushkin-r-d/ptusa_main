@@ -1,4 +1,4 @@
-п»ї#include <string.h>
+#include <string.h>
 #include <stdio.h>
 
 #include "g_device.h"
@@ -27,14 +27,6 @@ extern PAC_critical_errors_manager *g_pac_critical_errors;
 extern device_communicator  *g_dev_cmmctr;
 unsigned int        device_communicator::dev_cnt;
 i_complex_device ** device_communicator::dev;
-
-#if defined I7186_E || defined I7188_E
-extern tcpCommunicator      *g_cmctr;
-#endif // defined I7186_E || defined I7188_E
-
-#ifdef I7188
-extern communicator         *g_cmctr;
-#endif // I7188
 
 #endif // PAC
 
@@ -157,16 +149,16 @@ i_save_device*  complex_device::get_save_dev( u_int_4 idx ) const
     return sub_dev[ idx ];
     }
 //-----------------------------------------------------------------------------
-// Р”Р°РЅРЅС‹Рµ РіСЂСѓРїРїС‹ (buff) РІ СЃР»РµРґСѓСЋС‰РµРј РІРёРґРµ:
-//    1 Р±Р°Р№С‚  - С‚РёРї;                                    (1)
-//            0 - СЃР»РѕР¶РЅРѕРµ СѓСЃС‚СЂРѕР№СЃС‚РІРѕ;
-//            1 - РіСЂСѓРїРїР° СѓСЃС‚СЂРѕР№СЃС‚РІ СЃ СЂР°Р·РјРµСЂРЅРѕСЃС‚СЊСЋ РґР°РЅРЅС‹С… 1 Р±Р°Р№С‚;
-//            2 - РіСЂСѓРїРїР° СѓСЃС‚СЂРѕР№СЃС‚РІ СЃ СЂР°Р·РјРµСЂРЅРѕСЃС‚СЊСЋ РґР°РЅРЅС‹С… 4 Р±Р°Р№С‚Р°;
-//    4 Р±Р°Р№С‚Р° - РЅРѕРјРµСЂ;                                  (2)
-//    1 Р±Р°Р№С‚  - РґР»РёРЅР° РёРјРµРЅРё РіСЂСѓРїРїС‹ СѓСЃС‚СЂРѕР№СЃС‚РІР°;          (3)
-//    С… Р±Р°Р№С‚  - РёРјСЏ РіСЂСѓРїРїС‹ СѓСЃС‚СЂРѕР№СЃС‚РІР°;                  (4)
-//    4 Р±Р°Р№С‚Р° - РєРѕР»РёС‡РµСЃС‚РІРѕ РїРѕРґСѓСЃС‚СЂРѕР№СЃС‚РІ;                (5)
-//    РґР°Р»РµРµ   - РґР°РЅРЅС‹Рµ РїРѕРґСѓСЃС‚СЂРѕР№СЃС‚РІ.
+// Данные группы (buff) в следующем виде:
+//    1 байт  - тип;                                    (1)
+//            0 - сложное устройство;
+//            1 - группа устройств с размерностью данных 1 байт;
+//            2 - группа устройств с размерностью данных 4 байта;
+//    4 байта - номер;                                  (2)
+//    1 байт  - длина имени группы устройства;          (3)
+//    х байт  - имя группы устройства;                  (4)
+//    4 байта - количество подустройств;                (5)
+//    далее   - данные подустройств.
 int  complex_device::save_device( char *buff )
     {
     int idx = 0;
@@ -200,10 +192,10 @@ int  complex_device::save_device( char *buff )
     return idx;
     }
 //-----------------------------------------------------------------------------
-// Р”Р°РЅРЅС‹Рµ РіСЂСѓРїРїС‹ (buff) РІ СЃР»РµРґСѓСЋС‰РµРј РІРёРґРµ:
-//  4 Р±Р°Р№С‚Р° - РЅРѕРјРµСЂ СѓСЃС‚СЂРѕР№СЃС‚РІР°;                         (1)
-//  4 Р±Р°Р№С‚Р° - РєРѕР»РёС‡РµСЃС‚РІРѕ РїРѕРґСѓСЃС‚СЂРѕР№СЃС‚РІ;                  (2)
-//  РґР°Р»РµРµ   - РґР°РЅРЅС‹Рµ РєР°Р¶РґРѕРіРѕ РїРѕРґСѓСЃС‚СЂРѕР№СЃС‚РІР°.
+// Данные группы (buff) в следующем виде:
+//  4 байта - номер устройства;                         (1)
+//  4 байта - количество подустройств;                  (2)
+//  далее   - данные каждого подустройства.
 int  complex_device::save_state( char *buff )
     {
     ( ( u_int_4* ) buff )[ 0 ] = get_n();               //(1)
@@ -262,16 +254,16 @@ i_load_device* complex_device::get_load_dev( u_int_4 idx )
     return sub_dev[ idx ];
     }
 //-----------------------------------------------------------------------------
-// Р”Р°РЅРЅС‹Рµ РіСЂСѓРїРїС‹ (buff) РІ СЃР»РµРґСѓСЋС‰РµРј РІРёРґРµ:
-//    1 Р±Р°Р№С‚  - С‚РёРї;                                    (1)
-//            0 - СЃР»РѕР¶РЅРѕРµ СѓСЃС‚СЂРѕР№СЃС‚РІРѕ;
-//            1 - РіСЂСѓРїРїР° СѓСЃС‚СЂРѕР№СЃС‚РІ СЃ СЂР°Р·РјРµСЂРЅРѕСЃС‚СЊСЋ РґР°РЅРЅС‹С… 1 Р±Р°Р№С‚;
-//            2 - РіСЂСѓРїРїР° СѓСЃС‚СЂРѕР№СЃС‚РІ СЃ СЂР°Р·РјРµСЂРЅРѕСЃС‚СЊСЋ РґР°РЅРЅС‹С… 4 Р±Р°Р№С‚Р°;
-//    4 Р±Р°Р№С‚Р° - РЅРѕРјРµСЂ;                                  (2)
-//    1 Р±Р°Р№С‚  - РґР»РёРЅР° РёРјРµРЅРё РіСЂСѓРїРїС‹ СѓСЃС‚СЂРѕР№СЃС‚РІР°;          (3)
-//    С… Р±Р°Р№С‚  - РёРјСЏ РіСЂСѓРїРїС‹ СѓСЃС‚СЂРѕР№СЃС‚РІР°;                  (4)
-//    4 Р±Р°Р№С‚Р° - РєРѕР»РёС‡РµСЃС‚РІРѕ РїРѕРґСѓСЃС‚СЂРѕР№СЃС‚РІ;                (5)
-//    РґР°Р»РµРµ   - РґР°РЅРЅС‹Рµ РїРѕРґСѓСЃС‚СЂРѕР№СЃС‚РІ.
+// Данные группы (buff) в следующем виде:
+//    1 байт  - тип;                                    (1)
+//            0 - сложное устройство;
+//            1 - группа устройств с размерностью данных 1 байт;
+//            2 - группа устройств с размерностью данных 4 байта;
+//    4 байта - номер;                                  (2)
+//    1 байт  - длина имени группы устройства;          (3)
+//    х байт  - имя группы устройства;                  (4)
+//    4 байта - количество подустройств;                (5)
+//    далее   - данные подустройств.
 int  complex_device::load_device( char *buff )
     {
 #ifdef WIN32
@@ -287,7 +279,7 @@ int  complex_device::load_device( char *buff )
     if ( buff[ name_len ] != 0 )
         {            
         sprintf_s( bug_log::msg, bug_log::msg_size, 
-            "i_complex_device::load_device( char *buff ) - РЅРµРІРµСЂРЅРѕРµ РёРјСЏ СѓСЃС‚СЂРѕР№СЃС‚РІР°!" );
+            "i_complex_device::load_device( char *buff ) - неверное имя устройства!" );
         //bug_log::println_msg();
         bug_log::add_warning_msg( "Driver", "" );
         return -1;
@@ -334,7 +326,7 @@ int  complex_device::load_device( char *buff )
                 catch ( std::bad_alloc exception )
                     {                        
                     bug_log::add_warning_msg( "Driver", 
-                        "complex_device::load_device - РЅРµ СѓРґР°Р»РѕСЃСЊ РІС‹РґРµР»РёС‚СЊ РїР°РјСЏС‚СЊ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ РѕР±СЉРµРєС‚Р°!" );
+                        "complex_device::load_device - не удалось выделить память для создания объекта!" );
                     return -2;
                     }                
 
@@ -362,7 +354,7 @@ int  complex_device::load_device( char *buff )
 
             default:                    
                 sprintf_s( bug_log::msg, bug_log::msg_size, 
-                    "i_complex_device::load_device( char *buff ) - РЅРµРІРµСЂРЅС‹Р№ С‚РёРї СѓСЃС‚СЂРѕР№СЃС‚РІР° = %d!",
+                    "i_complex_device::load_device( char *buff ) - неверный тип устройства = %d!",
                     type );
                 bug_log::add_warning_msg( "Driver", "" );
 #ifdef _DEBUG
@@ -384,10 +376,10 @@ int  complex_device::load_device( char *buff )
 #endif
     }
 //-----------------------------------------------------------------------------
-// Р”Р°РЅРЅС‹Рµ РіСЂСѓРїРїС‹ (buff) РІ СЃР»РµРґСѓСЋС‰РµРј РІРёРґРµ:
-//  4 Р±Р°Р№С‚Р° - РЅРѕРјРµСЂ СѓСЃС‚СЂРѕР№СЃС‚РІР°;                         (1)
-//  4 Р±Р°Р№С‚Р° - РєРѕР»РёС‡РµСЃС‚РІРѕ РїРѕРґСѓСЃС‚СЂРѕР№СЃС‚РІ;                  (2)
-//  РґР°Р»РµРµ   - РґР°РЅРЅС‹Рµ РєР°Р¶РґРѕРіРѕ РїРѕРґСѓСЃС‚СЂРѕР№СЃС‚РІР°.
+// Данные группы (buff) в следующем виде:
+//  4 байта - номер устройства;                         (1)
+//  4 байта - количество подустройств;                  (2)
+//  далее   - данные каждого подустройства.
 int  complex_device::load_state( char *buff  )
     {
 #ifdef WIN32
@@ -473,7 +465,7 @@ void complex_device::print() const
 //-----------------------------------------------------------------------------
 i_simple_device* complex_device::get_sub_dev( u_int_4 id ) const
     {
-    //-Р‘РёРЅР°СЂРЅС‹Р№ РїРѕРёСЃРє.
+    //-Бинарный поиск.
     int l = 0;
     int u = sub_dev_cnt - 1;
     int i;
@@ -495,15 +487,15 @@ i_simple_device* complex_device::get_sub_dev( u_int_4 id ) const
             u = i - 1;
             }
         }
-    //-Р‘РёРЅР°СЂРЅС‹Р№ РїРѕРёСЃРє.-!>
+    //-Бинарный поиск.-!>
 
     return 0;
     }
 //-----------------------------------------------------------------------------
-//Р’С‹РїРѕР»РЅРµРЅРёРµ РєРѕРјР°РЅРґС‹, С…СЂР°РЅСЏС‰РµР№СЃСЏ РІ Р±СѓС„РµСЂРµ.
-//РЎС‚СЂСѓРєС‚СѓСЂР° РґР°РЅРЅС‹С… buff:
-//    4 Р±Р°Р№С‚Р° - РёРЅРґРµРєСЃ СѓСЃС‚СЂРѕР№СЃС‚РІР° РІ РјР°СЃСЃРёРІРµ СѓСЃС‚СЂРѕР№СЃС‚РІ;
-//    С… Р±Р°Р№С‚  - РґР°РЅРЅС‹Рµ РєРѕРјР°РЅРґС‹ СѓСЃС‚СЂРѕР№СЃС‚РІР°.
+//Выполнение команды, хранящейся в буфере.
+//Структура данных buff:
+//    4 байта - индекс устройства в массиве устройств;
+//    х байт  - данные команды устройства.
 int complex_device::parse_cmd( char *buff  ) 
     {
     u_int_4 dev_n = ( ( u_int_4* )( buff ) )[ 0 ];
@@ -545,10 +537,10 @@ i_complex_device* complex_device::get_sub_complex_dev( char *sub_dev_name ) cons
     return 0;
     }
 //-----------------------------------------------------------------------------
-// Р”Р°РЅРЅС‹Рµ РіСЂСѓРїРїС‹ (buff) РІ СЃР»РµРґСѓСЋС‰РµРј РІРёРґРµ:
-//  2 Р±Р°Р№С‚Р° - РєРѕР»РёС‡РµСЃС‚РІР° СѓСЃС‚СЂРѕР№СЃС‚РІ;                                 (1)
-//  2 Р±Р°Р№С‚Р° - РёРЅРґРµРєСЃ СѓСЃС‚СЂРѕР№СЃС‚РІР° РІ РјР°СЃСЃРёРІРµ СѓСЃС‚СЂРѕР№СЃС‚РІ;                (2)
-//  РґР°Р»РµРµ   - РґР°РЅРЅС‹Рµ РєР°Р¶РґРѕРіРѕ РїРѕРґСѓСЃС‚СЂРѕР№СЃС‚РІР°.                         (3)
+// Данные группы (buff) в следующем виде:
+//  2 байта - количества устройств;                                 (1)
+//  2 байта - индекс устройства в массиве устройств;                (2)
+//  далее   - данные каждого подустройства.                         (3)
 int complex_device::load_changed_state( char *buff )
     {
 #ifdef WIN32 
@@ -582,14 +574,14 @@ int complex_device::load_changed_state( char *buff )
 #endif // WIN32
     }
 //-----------------------------------------------------------------------------
-// Р”Р°РЅРЅС‹Рµ РіСЂСѓРїРїС‹ (buff) РІ СЃР»РµРґСѓСЋС‰РµРј РІРёРґРµ:          
-//  2 Р±Р°Р№С‚Р° - РєРѕР»РёС‡РµСЃС‚РІРѕ СѓСЃС‚СЂРѕР№СЃС‚РІ, РёР·РјРµРЅРµРЅРЅС‹С… СЃРІРѕРµ СЃРѕСЃС‚РѕРЅРёРµ;   (1)
-//  2 Р±Р°Р№С‚Р° - РЅРѕРјРµСЂ СѓСЃС‚СЂРѕР№СЃС‚РІР° РІ РјР°СЃСЃРёРІРµ СѓСЃС‚СЂРѕР№СЃС‚РІ.             (2)
-//  РґР°Р»РµРµ   - РµРіРѕ РёР·РјРµРЅРµРЅС‹Рµ РґР°РЅРЅС‹Рµ                              (3)
-//РР·РјРµРЅСЏРµРј СЂР°Р·РјРµСЂ РѕС‚РІРµС‚Р°.                                       (4)
-//РЈРІРµР»РёС‡РёРІР°РµРј РЅР° 1 РєРѕР»РёС‡РµСЃС‚РІРѕ СѓСЃС‚СЂРѕР№СЃС‚РІ, РёР·РјРµРЅРёРІС‰РёС… СЃРІРѕРµ
-//СЃРѕСЃС‚РѕСЏРЅРёРµ.                                                    (5)
-//Р•СЃР»Рё РЅРµ СѓСЃС‚СЂРѕР№СЃС‚РІ, РёР·РјРµРЅРёРІС€РёС… СЃРІРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ, РІРѕР·РІСЂР°С‰Р°РµРј 0.   (6)
+// Данные группы (buff) в следующем виде:          
+//  2 байта - количество устройств, измененных свое состоние;   (1)
+//  2 байта - номер устройства в массиве устройств.             (2)
+//  далее   - его измененые данные                              (3)
+//Изменяем размер ответа.                                       (4)
+//Увеличиваем на 1 количество устройств, изменивщих свое
+//состояние.                                                    (5)
+//Если не устройств, изменивших свое состояние, возвращаем 0.   (6)
 int complex_device::save_changed_state( char *buff )
     {
     u_int_2 *changed_sub_dev_cnt = ( u_int_2* ) buff;           //1
@@ -649,9 +641,9 @@ i_complex_device* device_communicator::get_group( char* dev_name, u_int_4 dev_n,
 //-----------------------------------------------------------------------------
 int device_communicator::load_state( char *buff  )
     {
-    //РЎС‚СЂСѓРєС‚СѓСЂР° РїРѕР»СѓС‡РµРЅРЅС‹С… РѕС‚ РєРѕРЅС‚СЂРѕР»Р»РµСЂР° РґР°РЅРЅС‹С…:
-    // 4 Р±Р°Р№С‚Р° - РєРѕР»РёС‡РµСЃС‚РІРѕ СѓСЃС‚СЂРѕР№СЃС‚РІ;
-    // РїРѕС‚РѕРј РёРґСѓС‚ РґР°РЅРЅС‹Рµ РєР°Р¶РґРѕР№ РіСЂСѓРїРїС‹.
+    //Структура полученных от контроллера данных:
+    // 4 байта - количество устройств;
+    // потом идут данные каждой группы.
 
     //int rec_groups_cnt = ( ( u_int_4* ) buff )[ 0 ]; 
     buff += 4;
@@ -674,15 +666,15 @@ int device_communicator::load_state( char *buff  )
 //-----------------------------------------------------------------------------
 int device_communicator::load_device( char *buff  ) 
     {
-    //РЎС‚СЂСѓРєС‚СѓСЂР° РїРѕР»СѓС‡РµРЅРЅС‹С… РѕС‚ РєРѕРЅС‚СЂРѕР»Р»РµСЂР° РґР°РЅРЅС‹С…:
-    // 4 Р±Р°Р№С‚Р° - РєРѕР»РёС‡РµСЃС‚РІРѕ РіСЂСѓРїРї СѓСЃС‚СЂРѕР№СЃС‚РІ;
-    // РїРѕС‚РѕРј РёРґСѓС‚ РґР°РЅРЅС‹Рµ РєР°Р¶РґРѕР№ РіСЂСѓРїРїС‹.
+    //Структура полученных от контроллера данных:
+    // 4 байта - количество групп устройств;
+    // потом идут данные каждой группы.
 #ifdef WIN32
     dev_cnt = ( ( u_int_4* ) buff )[ 0 ]; 
     buff += 4;
     if ( dev )
         {        
-        bug_log::add_msg( "Driver", "", "РЈРґР°Р»РµРЅС‹ РїСЂРµРґС‹РґСѓС‰РёРµ СѓСЃС‚СЂРѕР№СЃС‚РІР° PAC!" );
+        bug_log::add_msg( "Driver", "", "Удалены предыдущие устройства PAC!" );
         delete[] dev;
         dev = 0;
         }
@@ -693,7 +685,7 @@ int device_communicator::load_device( char *buff  )
     catch ( std::bad_alloc exception )
         {                        
         bug_log::add_warning_msg( "Driver", "",
-            "device_communicator::load_device(...) - РЅРµ СѓРґР°Р»РѕСЃСЊ РІС‹РґРµР»РёС‚СЊ РїР°РјСЏС‚СЊ!" );
+            "device_communicator::load_device(...) - не удалось выделить память!" );
         return -2;
         }
 #else
@@ -711,7 +703,7 @@ int device_communicator::load_device( char *buff  )
         catch ( std::bad_alloc exception )
             {                                    
             bug_log::add_warning_msg( "Driver", "",
-                "device_communicator::load_device(...) - РЅРµ СѓРґР°Р»РѕСЃСЊ РІС‹РґРµР»РёС‚СЊ РїР°РјСЏС‚СЊ!" );
+                "device_communicator::load_device(...) - не удалось выделить память!" );
             return -2;
             }
 #else
@@ -753,11 +745,11 @@ void device_communicator::print() const
 //-----------------------------------------------------------------------------
 int device_communicator::load_changed_state( char *buff )
     {
-    // РЎС‚СЂСѓРєС‚СѓСЂР° РїРѕР»СѓС‡РµРЅРЅС‹С… РѕС‚ РєРѕРЅС‚СЂРѕР»Р»РµСЂР° РґР°РЅРЅС‹С…:
-    //2 Р±Р°Р№С‚Р° - РєРѕР»РёС‡РµСЃС‚РІРѕ СѓСЃС‚СЂРѕР№СЃС‚РІ;                           (1)
-    //Р”Р»СЏ РєР°Р¶РґРѕРіРѕ СѓСЃС‚СЂРѕР№СЃС‚РІР°:                                   (2)
-    //РїРѕС‚РѕРј РёРґСѓС‚ РЅРѕРјРµСЂ СѓСЃС‚СЂРѕР№СЃС‚РІР° РІ РјР°СЃСЃРёРІРµ СѓСЃС‚СЂРѕР№СЃС‚РІ,          (3)
-    //РґР°Р»РµРµ РґР°РЅРЅС‹Рµ СѓСЃС‚СЂРѕР№СЃС‚РІР°.                                  (4)                               
+    // Структура полученных от контроллера данных:
+    //2 байта - количество устройств;                           (1)
+    //Для каждого устройства:                                   (2)
+    //потом идут номер устройства в массиве устройств,          (3)
+    //далее данные устройства.                                  (4)                               
 
     u_int_2 rec_dev_cnt = ( ( u_int_2* ) buff )[ 0 ];           //1 
     buff += sizeof( rec_dev_cnt );
@@ -772,7 +764,7 @@ int device_communicator::load_changed_state( char *buff )
             {
 #ifdef WIN32
             sprintf_s( bug_log::msg, bug_log::msg_size,
-                "device_communicator::load_changed_state(...) - РЅРѕРјРµСЂ СѓСЃС‚СЂРѕР№СЃС‚РІР° [ %d ] Р±РѕР»СЊС€Рµ РєРѕР»РёС‡РµСЃС‚РІР° СѓСЃС‚СЂРѕР№СЃС‚РІ [ %d ]!",
+                "device_communicator::load_changed_state(...) - номер устройства [ %d ] больше количества устройств [ %d ]!",
                 device_idx, dev_cnt );
             bug_log::add_warning_msg( "Driver", "" );
 #endif //WIN32
@@ -806,9 +798,9 @@ extern dev_errors_manager *g_dev_errors_manager;
 long device_communicator::write_devices_states_service( DESTDATA dest,
                                                        long len, 
                                                        unsigned char *data, 
-                                                       unsigned  char *outdata )                                                                                 
+                                                       unsigned char *outdata )                                                                                 
     {
-    if ( DESTMEM == dest ); // Р—Р°РіР»СѓС€РєР°, С‡С‚РѕР±С‹ РЅРµ Р±С‹Р»Рѕ Warning'Р°.
+    if ( DESTMEM == dest ); // Заглушка, чтобы не было Warning'а.
     if ( len < 1 ) return 0;
 
     int i;
@@ -828,12 +820,12 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
                 g_cmctr->hostname );            
 #endif // DEBUG_DEV_CMCTR
 
-            ( ( u_int_2* ) outdata )[ 0 ] = G_PROTOCOL_VERSION;   //Р’РµСЂСЃРёСЏ РїСЂРѕС‚РѕРєРѕР»Р°.
+            ( ( u_int_2* ) outdata )[ 0 ] = G_PROTOCOL_VERSION; //Версия протокола.
             outdata += 2;
             answer_size += 2;
 
-            strcpy( outdata, g_cmctr->hostname );
-            answer_size += strlen( g_cmctr->hostname ) + 1;
+            strcpy( outdata, tcp_communicator::get_instance()->hostname );
+            answer_size += strlen( tcp_communicator::get_instance() ) + 1;
             return answer_size;
 
         case GET_DEVICES:
@@ -848,12 +840,14 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
             ( ( u_int_4* ) ( outdata + answer_size ) )[ 0 ] = dev_cnt;
             answer_size += 4;
 
-            for ( unsigned int i = 0; i < dev_cnt; i++ )
+            for ( i = 0; i < dev_cnt; i++ )
                 {
-                answer_size += dev[ i ]->save_device( outdata + answer_size );                
+                answer_size += dev[ i ]->save_device( ( char* ) outdata + 
+                    answer_size );                
                 }      
 #ifdef DEBUG_DEV_CMCTR
-            Print( "Devices size = %lu, g_devices_request_id = %d\n", answer_size, 
+            Print( "Devices size = %lu, g_devices_request_id = %d\n", 
+                answer_size, 
                 g_devices_request_id );
 
             Print( "Operation time = %lu\n", MyGetMS() - start_time );
@@ -868,11 +862,12 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
 
             for ( i = 0; i < dev_cnt; i++ )
                 {
-                answer_size += dev[ i ]->save_state( outdata + answer_size );
+                answer_size += dev[ i ]->save_state( ( char* ) outdata + 
+                    answer_size );
                 }
 #ifdef DEBUG_DEV_CMCTR
-            Print( "Devices states size = %lu, g_devices_request_id = %d\n", answer_size, 
-                g_devices_request_id );
+            Print( "Devices states size = %lu, g_devices_request_id = %d\n", 
+                answer_size, g_devices_request_id );
 
             Print( "Operation time = %lu\n", MyGetMS() - start_time );
 #endif // DEBUG_DEV_CMCTR
@@ -886,10 +881,12 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
 
             for ( i = 0; i < dev_cnt; i++ )
                 {
-                u_int_2 res = dev[ i ]->save_changed_state( outdata + answer_size + 2 );
+                u_int_2 res = dev[ i ]->save_changed_state( ( char* ) outdata +
+                    answer_size + 2 );
                 if ( res )
                     {
-                    ( ( u_int_2* ) ( outdata + answer_size ) )[ 0 ]  = i;
+                    ( ( u_int_2* ) ( ( char* ) outdata + 
+                        answer_size ) )[ 0 ] = i;
                     answer_size += 2;
                     answer_size += res;
                     ( ( u_int_2* ) outdata )[ 1 ]++;
@@ -905,12 +902,14 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
         case EXEC_DEVICE_CMD:
 #ifdef DEBUG_DEV_CMCTR
             Print( "\nEXEC_DEVICE_CMD\n" );
-            Print( "unsigned long buff[1] - %lu; ", ( ( u_int_4* ) ( data + 1 ) )[ 1 ] );
+            Print( "unsigned long buff[1] - %lu; ", 
+                ( ( u_int_4* ) ( data + 1 ) )[ 1 ] );
             Print( "[2] - %lu; ", ( ( u_int_4* ) ( data + 1 ) )[ 2 ] );
             Print( "[3] - %lu; ", ( ( u_int_4* ) ( data + 1 ) )[ 3 ] );
             Print( "[4] - %lu\n", ( ( u_int_4* ) ( data + 1 ) )[ 4 ] );
 
-            Print( "float         buff[1] - %f; ", ( ( float* ) ( data + 1 ) )[ 1 ] );
+            Print( "float         buff[1] - %f; ", 
+                ( ( float* ) ( data + 1 ) )[ 1 ] );
             Print( "[2] - %f; ", ( ( float* ) ( data + 1 ) )[ 2 ] );
             Print( "[3] - %f; ", ( ( float* ) ( data + 1 ) )[ 3 ] );
             Print( "[4] - %f\n", ( ( float* ) ( data + 1 ) )[ 4 ] );
@@ -921,11 +920,12 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
 #ifdef DEBUG_DEV_CMCTR
             Print( "Operation time = %lu\n", MyGetMS() - start_time );
 #endif // DEBUG_DEV_CMCTR
-            ( ( u_int_2* ) ( outdata + answer_size ) )[ 0 ] = 0; //Р’РѕР·РІСЂР°С‰Р°РµРј 0.
+            ( ( u_int_2* ) ( outdata + answer_size ) )[ 0 ] = 0; //Возвращаем 0.
             answer_size += 2;
             return answer_size;
 
         case GET_PAC_ERRORS:
+            {            
 #ifdef DEBUG_DEV_CMCTR
             Print( "GET_PAC_ERRORS\n" );
 #endif
@@ -934,7 +934,8 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
                 answer_size = g_pac_critical_errors->save_to_stream( outdata );
                 }
 #ifdef DEBUG_DEV_CMCTR
-            Print( "Critical errors count = %d, answer size = %d\n",  outdata[ 2 ], 
+            Print( "Critical errors count = %d, answer size = %d\n",
+                outdata[ 2 ], 
                 answer_size );
 #endif // DEBUG_DEV_CMCTR
 
@@ -946,21 +947,22 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
                 ( outdata + answer_size )[ 4 ], answer_size );
 #endif // DEBUG_DEV_CMCTR
 #endif // USE_SIMPLE_DEV_ERRORS
-            
+
             return answer_size;
+            }
 
 #ifdef USE_SIMPLE_DEV_ERRORS
         case SET_PAC_ERROR_CMD:            
             unsigned int count = *( ( u_int_2* ) ( data + 1 ) ); 
-            
+
             unsigned int *uint_cmd = ( unsigned int* ) ( data + 1 + 2 );
             for ( i = 0; i < count; i++ )
                 {
 #ifdef DEBUG_DEV_CMCTR
                 Print( "SET_PAC_ERROR_CMD" );
                 Print( "cmd = %u, object_type = %u, object_number = %u, \
-                       object_alarm_number = %u\n", uint_cmd[ 0 ], uint_cmd[ 1 ],
-                       uint_cmd[ 2 ], uint_cmd[ 3 ]   );
+                       object_alarm_number = %u\n", uint_cmd[ 0 ],
+                       uint_cmd[ 1 ], uint_cmd[ 2 ], uint_cmd[ 3 ]   );
 #endif // DEBUG_DEV_CMCTR
 
                 g_dev_errors_manager->set_cmd( uint_cmd[ 0 ], uint_cmd[ 1 ],
@@ -969,9 +971,9 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
                 uint_cmd += 4;
                 }
 
-            ( ( u_int_2* ) ( outdata + answer_size ) )[ 0 ] = 0; //Р’РѕР·РІСЂР°С‰Р°РµРј 0.
+            ( ( u_int_2* ) ( outdata + answer_size ) )[ 0 ] = 0; //Возвращаем 0.
             answer_size += 2;
-            
+
             return answer_size;
 #endif // USE_SIMPLE_DEV_ERRORS
         }

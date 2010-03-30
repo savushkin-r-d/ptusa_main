@@ -22,21 +22,21 @@
 #define AknData             8
 #define AknOK               12
 
-#define BUFSIZE 	16384      			/*Р Р°Р·РјРµСЂ Р±СѓС„РµСЂР°*/
-#define PORT 		10000      			/*РџРѕСЂС‚*/
-#define MAX_SOCKETS 32         			/*РњР°РєСЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ СЃРѕРєРµС‚РѕРІ*/
-#define QLEN  		MAX_SOCKETS - 1  	/*РњР°РєСЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ СЃРѕРµРґРёРЅРµРЅРёР№*/
+#define BUFSIZE 	16384      			/*Размер буфера*/
+#define PORT 		10000      			/*Порт*/
+#define MAX_SOCKETS 32         			/*Максимальное количество сокетов*/
+#define QLEN  		MAX_SOCKETS - 1  	/*Максимальное количество соединений*/
 
 #define uchar unsigned char
 
 typedef struct socket_state
 	{
-	int                active;    /* СЃРѕРєРµС‚ Р°РєС‚РёРІРµРЅ*/
-	int                init;      /* СЃРѕРєРµС‚ С‚РѕР»СЊРєРѕ С‡С‚Рѕ Р±С‹Р» Р°РєС‚РёРІРёСЂРѕРІР°РЅ */
-	int                islistener;/*СЃРѕРєРµС‚ СЏРІР»СЏРµС‚СЃСЏ РёРЅРёС†РёР°С‚РѕСЂРѕРј СЃРѕРµРґРёРЅРёСЏ(=0)/СЃРѕРєРµС‚ СЏРІР»СЏРµС‚СЃСЏ СЃР»СѓС€Р°С‚РµР»РµРј(!=0)*/
-	int                evaluated; /*РІ РґР°РЅРЅРѕРј С†РёРєР»Рµ СѓР¶Рµ РїСЂРѕРёР·РѕС€РµР» РѕР±РјРµРЅ РёРЅС„РѕСЂРјР°С†РёРµР№ РїРѕ РґР°РЅРЅРѕРјСѓ СЃРѕРєРµС‚Сѓ*/
-	int                clID;      /*РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РєР»РёРµРЅС‚Р° РґР»СЏ РёРґРµРЅС‚РёС„РёРєР°С†РёРё С‚РѕРіРѕ, РЅРµ Р·Р°РЅСЏС‚ Р»Рё СѓР¶Рµ СЃРѕРєРµС‚ РґСЂСѓРіРёРј РєР»РёРµРЅС‚РѕРј*/
-	struct sockaddr_in sin;       /* Р°РґСЂРµСЃ РєР»РёРµРЅС‚Р° */
+	int                active;    /* сокет активен*/
+	int                init;      /* сокет только что был активирован */
+	int                islistener;/*сокет является инициатором соединия(=0)/сокет является слушателем(!=0)*/
+	int                evaluated; /*в данном цикле уже произошел обмен информацией по данному сокету*/
+	int                clID;      /*идентификатор клиента для идентификации того, не занят ли уже сокет другим клиентом*/
+	struct sockaddr_in sin;       /* адрес клиента */
 	} socket_state;
 
 enum DESTDATA
@@ -56,12 +56,14 @@ typedef SrvProc *SrvPtr;
 
 /// @brief
 ///
-/// Р Р°Р·РІРµСЂРЅСѓС‚РѕРµ РѕРїРёСЃР°РЅРёРµ РєР»Р°СЃСЃР°.
+/// Развернутое описание класса.
 /// @param
 /// @return
 class tcp_communicator
 	{
 	public:
+        static tcp_communicator* get_instance();
+
 		tcp_communicator();
 		~tcp_communicator();
 		
@@ -69,21 +71,23 @@ class tcp_communicator
 		SrvPtr regService( unsigned char srvID, SrvPtr fk );
 
 	private:
+        static tcp_communicator* instance;
+
 		enum CONSTANTS
 			{
 			TC_MAX_HOST_NAME = 20,
 			TC_MAX_SERVICE_NUMBER = 16,
 			};
 
-		struct sockaddr_in 	ssin; 			/* Р°РґСЂРµСЃ РєР»РёРµРЅС‚Р° */
-		unsigned int 		sin_len;    	/* РґР»РёРЅР° Р°РґСЂРµСЃР° */
-		int 				master_socket;	/* РјР°СЃС‚РµСЂ-СЃРѕРєРµС‚ РґР»СЏ РїСЂРѕСЃР»СѓС€РёРІР°РЅРёСЏ */
+		struct sockaddr_in 	ssin; 			/* адрес клиента */
+		unsigned int 		sin_len;    	/* длина адреса */
+		int 				master_socket;	/* мастер-сокет для прослушивания */
 
 #ifdef MODBUS
-		int modbus_socket;				     /*РјРѕРґР±Р°СЃ СЃРѕРєРµС‚*/
+		int modbus_socket;				     /*модбас сокет*/
 #endif
-		int ss;                  /* СЃР»РµР№РІ-СЃРѕРєРµС‚, РїРѕР»СѓС‡Р°РµРјС‹Р№ РїСЂРё РїРѕРґРєР»СЋС‡РµРЅРёРё РєР»РёРµРЅС‚Р° */
-		int rc;                  /* РєРѕРґ РІРѕР·РІСЂР°С‚Р° selectsocket */
+		int ss;                  /* слейв-сокет, получаемый при подключении клиента */
+		int rc;                  /* код возврата selectsocket */
 		
 		unsigned int inBufCnt;
 		int count_cycles;
@@ -101,14 +105,14 @@ class tcp_communicator
 		int reboot;
 		int glob_cmctr_ok;
 		unsigned char* buf;
-		int max_cycles;                   /*РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ С†РёРєР»РѕРІ РѕР±СЂР°Р±РѕС‚РєРё СЃРѕСЃС‚РѕСЏРЅРёР№ СЃРѕРєРµС‚РѕРІ Р·Р° 1 РїСЂРѕС…РѕРґ */
-		timeval tv;                       /* Р·Р°РґРµСЂР¶РєР° РѕР¶РёРґР°РЅРёСЏ С„СѓРЅРєС†РёРё РѕРїСЂРѕСЃР° СЃРѕСЃС‚РѕСЏРЅРёР№ СЃРѕРєРµС‚РѕРІ 0 РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ */
-		static fd_set rfds;               /* РЅР°Р±РѕСЂ РґРµСЃРєСЂРёРїС‚РѕСЂРѕРІ СЃРѕРєРµС‚РЅС‹С… С„Р°Р№Р»РѕРІ РґР»СЏ С‡С‚РµРЅРёСЏ */
-		static socket_state sst[ MAX_SOCKETS ]; /* С‚Р°Р±Р»РёС†Р° СЃРѕСЃС‚РѕСЏРЅРёСЏ СЃРѕРєРµС‚РѕРІ */
-		static struct ip host_ip;
-		static char host_name[ TC_MAX_HOST_NAME ];
-		static int netOK;
-		static int tcpipClientID;
+		int max_cycles;                     /*максимальное количество циклов обработки состояний сокетов за 1 проход */
+		timeval tv;                         /* задержка ожидания функции опроса состояний сокетов 0 по умолчанию */
+		fd_set rfds;                        /* набор дескрипторов сокетных файлов для чтения */
+		socket_state sst[ MAX_SOCKETS ];    /* таблица состояния сокетов */
+		struct ip host_ip;
+		char host_name[ TC_MAX_HOST_NAME ];
+		int netOK;
+		int tcpipClientID;
 
 		void killsockets ();
 		int net_init();
