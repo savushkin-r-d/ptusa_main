@@ -506,4 +506,9 @@ tcp_communicator* tcp_communicator::get_instance()
     return instance;
     }
 //------------------------------------------------------------------------------
+char tcp_communicator::get_host_name()
+    {
+    return host_name;
+    }
+//------------------------------------------------------------------------------
 

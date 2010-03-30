@@ -824,9 +824,9 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
             outdata += 2;
             answer_size += 2;
 
-            strcpy( outdata, tcp_communicator::get_instance()->host_name );
+            strcpy( outdata, tcp_communicator::get_instance()->get_host_name() );
             answer_size += strlen( 
-                tcp_communicator::get_instance()->host_name ) + 1;
+                tcp_communicator::get_instance()->get_host_name() ) + 1;
             return answer_size;
 
         case GET_DEVICES:
@@ -917,7 +917,7 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
 #endif // DEBUG_DEV_CMCTR
 
             dev[ ( ( u_int_4* )( ( char* ) data + 1 ) )[ 0 ] ]->parse_cmd( 
-                data + 5 );
+                ( char* ) data + 5 );
 #ifdef DEBUG_DEV_CMCTR
             Print( "Operation time = %lu\n", MyGetMS() - start_time );
 #endif // DEBUG_DEV_CMCTR
