@@ -15,17 +15,24 @@
 #ifndef PAC 
 #ifndef WIN32
 #define PAC
-#endif
-#endif
-
+#endif // WIN32
+#endif // PAC 
 
 #ifdef PAC
-#if !defined I7186_E && !defined I7188_E
+
+#ifdef I7188
 #include "cmmctr.h"
-#else
+#endif // I7188
+
+#if defined I7186_E || defined I7188_E
 #include "tcpcmctr.h"
-#endif
-#endif //!defined I7186_E && !defined I7188_E
+#endif // defined I7186_E || defined I7188_E
+
+#ifdef W750
+#include "tcp_cmctr.h"
+#endif // defined I7186_E || defined I7188_E
+
+#endif // PAC
 
 #ifdef WIN32
 #include "CmnHdr.h"
@@ -36,16 +43,30 @@ typedef unsigned short  u_int_2;
 typedef unsigned char   uchar;
 typedef unsigned int    uint;
 
-
 #define Print           printf
+
 #endif //WIN32
 
 #ifdef PAC
-typedef int             int_2;
 
-typedef unsigned long   u_int_4;
-typedef unsigned int    u_int_2;
-typedef unsigned char   u_char;
+#include "sys.h"
+
+#ifdef I7188
+#include "sys_7188.h"
+#endif // I7188
+
+#ifdef I7188_E
+#include "sys7188e.h"
+#endif // I7188
+
+#ifdef I7186_E 
+#include "sys_7186.h"
+#endif // I7186_E
+
+#ifdef W750
+#include "sys_W750.h"
+#endif // W750
+
 #endif //PAC
 
 //-----------------------------------------------------------------------------

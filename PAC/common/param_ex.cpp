@@ -1,15 +1,28 @@
-﻿#include "param_ex.h"
+#include "param_ex.h"
 
 params_manager* params_manager::instance = 0;
-NV_memory_manager *G_NV_MEMORY_MANAGER = new NV_memory_manager_7186();
+
+#ifdef USE_SIMPLE_DEV_ERRORS
+#include "errors.h"
+
+extern dev_errors_manager *g_dev_errors_manager; 
+#endif // USE_SIMPLE_DEV_ERRORS
+
+#ifndef USE_NO_TANK_COMB_DEVICE
+#include "priem.h"
+
+extern TTank            **g_tanks;
+extern TMyComb          **g_combs;
+#endif //USE_NO_TANK_COMB_DEVICE
+
 //-----------------------------------------------------------------------------
 params_manager::params_manager()
     {
     last_idx = 0;
-    params_mem = G_NV_MEMORY_MANAGER->get_memory_block( 
+    params_mem = NV_memory_manager::get_instance()->get_memory_block( 
         NV_memory_manager::MT_EEPROM, C_TOTAL_PARAMS_SIZE );
 
-    CRC_mem = G_NV_MEMORY_MANAGER->get_memory_block(
+    CRC_mem = NV_memory_manager::get_instance()->get_memory_block(
         NV_memory_manager::MT_NVRAM, 2 );
 
     memset( params, 0, C_TOTAL_PARAMS_SIZE );
@@ -214,69 +227,6 @@ params_manager* params_manager::get_instance()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-template < class type >
-parameters<type>::parameters( int count, 
-                             type *value /*= 0 */ ) : count( count ),
-                             values( value )
-    {
-#ifdef DEBUG
-    if ( 0 == count )
-        {
-        Print( "parameters(...) - error: count = 0!\n" );
-        }
-#endif // DEBUG
-    if ( count > 0 && 0 == value )
-        {
-        values = new type[ count ];
-        memset( values, 0, count * sizeof( type ) );
-        }
-    }
-//-----------------------------------------------------------------------------
-template < class type >
-type& parameters<type>::operator[]( unsigned int index )
-    {
-    if ( index < count )
-        {
-        return values[ index ];
-        }
-#ifdef DEBUG
-    else
-        {
-        Print( "parameters[] - error: index[ %u ] > count [ %u ]\n",
-            index, count );
-        }
-#endif // DEBUG
-
-    stub = 0;
-    return stub;
-    }
-//-----------------------------------------------------------------------------
-template < class type >
-type parameters<type>::get_val( int idx )
-    {
-    return this->operator []( idx );
-    }
-//-----------------------------------------------------------------------------
-template < class type >
-int parameters<type>::parse_cmd( char *buff )
-    {
-    int par_n = *( ( u_int_4* ) buff );
-    this[ par_n ] = *( ( type* ) ( buff + sizeof( u_int_4 ) ) );
-
-    return sizeof( u_int_4 ) + sizeof( type );
-    }
-//-----------------------------------------------------------------------------
-template < class type > u_int parameters<type>::get_count() const
-    {
-    return count;
-    }
-//-----------------------------------------------------------------------------
-template < class type > type* parameters<type>::get_values()
-    {
-    return values;
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 run_time_params_float::run_time_params_float( int count 
                                              ):parameters < float >( count ),
                                              array_device < float >( 1, 
@@ -324,50 +274,6 @@ int run_time_params_ulong::parse_cmd( char *buff )
         *( ( u_int_4* ) buff ), 
         *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
 #endif //DEBUG
-    return res;
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-template < class type > saved_params<type>::
-saved_params( int count ) : parameters < type >( 
-    count,
-    ( type* ) params_manager::get_instance()->get_params_data( 
-    count * sizeof( type ), start_pos ) )
-    {
-    }
-//-----------------------------------------------------------------------------
-template < class type >
-int saved_params<type>::parse_cmd( char *buff )
-    {
-    int res = parameters< type >::parse_cmd( buff );
-
-    u_int_4 idx = *( ( u_int_4* ) buff );
-
-    params_manager::get_instance()->save( 
-        start_pos + idx, sizeof( u_int_4* ) );
-
-    return res;
-    }
-//-----------------------------------------------------------------------------
-template < class type >
-int saved_params< type >::save( u_int idx, type value )
-    {
-    int res = 1;
-    if ( idx < get_count() )
-        {
-        get_values()[ idx ] = value;
-
-        params_manager::get_instance()->save( 
-            start_pos + idx * sizeof( type ), sizeof( type ) );
-        res = 0;
-        }
-#ifdef DEBUG
-    else
-        {
-        Print( "parameters:save - index[ %u ] > count [ %u ]\n",
-            idx, get_count() );
-        }
-#endif // DEBUG
     return res;
     }
 //-----------------------------------------------------------------------------

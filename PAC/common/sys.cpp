@@ -1,13 +1,4 @@
-п»ї#include "sys.h"
-
-#ifdef DEBUG
-#include <string.h>
-#include <stdio.h>
-#include <conio.h>
-
-#include "7186e.h"
-#endif // DEBUG
-
+#include "sys.h"
 //-----------------------------------------------------------------------------
 NV_memory::NV_memory( u_int total_size,
                      u_int available_start_pos,
@@ -90,7 +81,7 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
     char      mem_name[ 10 ];
 #endif // DEBUG
 
-    // Р’С‹Р±РѕСЂ РїР°РјСЏС‚Рё, СЃ РєРѕС‚РѕСЂРѕР№ Р±СѓРґРµРј СЂР°Р±РѕС‚Р°С‚СЊ.
+    // Выбор памяти, с которой будем работать.
     switch ( m_type )
         {
         case MT_NVRAM:
@@ -147,5 +138,10 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
     *last_mem_pos += count;
 
     return res;
+    }
+//-----------------------------------------------------------------------------
+NV_memory_manager* NV_memory_manager::get_instance()
+    {
+    return instance;
     }
 //-----------------------------------------------------------------------------

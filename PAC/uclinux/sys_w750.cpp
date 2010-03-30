@@ -1,6 +1,8 @@
 ﻿#include "sys_w750.h"
 #include "fcntl.h"
 #include "stdio.h"
+
+NV_memory_manager* NV_memory_manager::instance = new NV_memory_manager_W750();
 //-----------------------------------------------------------------------------
 SRAM::SRAM( u_int total_size, 
            u_int available_start_pos, 

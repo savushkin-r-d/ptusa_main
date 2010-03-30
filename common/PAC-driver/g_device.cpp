@@ -8,29 +8,22 @@
 #include "pc_device.h"
 
 #pragma warning( disable : 4996 ) //sprintf to sprintf_s
-#else
+#endif // WIN32
+
+#ifdef PAC
+
+#if defined I7186_E || defined I7188_E || defined I7188
 #include "utils.h"
 #include "PAC_err.h"
 
 extern PAC_critical_errors_manager *g_pac_critical_errors;
+#endif // defined I7186_E || defined I7188_E || defined I7188
 
-#ifdef I7186_E
-#include "7186e.h"
-#endif // I7186_E
-
-#ifdef I7188_E
-#include "7188e.h"
-#endif // I7188_E
-
-#ifdef I7188
-#include "I7188.h"
-#endif // I7188
-
-#endif //WIN32
+#endif // PAC
 
 
-#ifdef WIN32
-#else
+#ifdef PAC
+
 extern device_communicator  *g_dev_cmmctr;
 unsigned int        device_communicator::dev_cnt;
 i_complex_device ** device_communicator::dev;
@@ -43,8 +36,7 @@ extern tcpCommunicator      *g_cmctr;
 extern communicator         *g_cmctr;
 #endif // I7188
 
-
-#endif
+#endif // PAC
 
 int complex_device::MAX_NAME_LENGTH = 20;
 
@@ -785,30 +777,21 @@ int device_communicator::load_changed_state( char *buff )
     }
 //-----------------------------------------------------------------------------
 #ifdef PAC
-#ifdef POST
-#include "post.h"
-#include "utils.h"
-extern TPost *Post;
-#endif //POST
 
 #ifdef USE_SIMPLE_DEV_ERRORS
 #include "errors.h"
 
 extern dev_errors_manager *g_dev_errors_manager; 
-
 #endif // USE_SIMPLE_DEV_ERRORS
 
-long device_communicator::write_devices_states_service( DESTDATA dest, long len, 
+long device_communicator::write_devices_states_service( DESTDATA dest,
+                                                       long len, 
                                                        unsigned char *data, 
                                                        unsigned  char *outdata )                                                                                 
     {
-    if ( DESTMEM == dest ) ;    //Заглушка, чтобы не было Warning'а.
+    if ( DESTMEM == dest ); // Заглушка, чтобы не было Warning'а.
     if ( len < 1 ) return 0;
 
-#ifdef POST
-    //Check time
-    Post->lt = MyGetMS();
-#endif //POST
     int i;
     unsigned long answer_size = 0;
 
@@ -853,8 +836,7 @@ long device_communicator::write_devices_states_service( DESTDATA dest, long len,
 #ifdef DEBUG_DEV_CMCTR
             Print( "Devices size = %lu, g_devices_request_id = %d\n", answer_size, 
                 g_devices_request_id );
-#endif // DEBUG_DEV_CMCTR
-#ifdef DEBUG_DEV_CMCTR
+
             Print( "Operation time = %lu\n", MyGetMS() - start_time );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
@@ -872,8 +854,7 @@ long device_communicator::write_devices_states_service( DESTDATA dest, long len,
 #ifdef DEBUG_DEV_CMCTR
             Print( "Devices states size = %lu, g_devices_request_id = %d\n", answer_size, 
                 g_devices_request_id );
-#endif // DEBUG_DEV_CMCTR          
-#ifdef DEBUG_DEV_CMCTR
+
             Print( "Operation time = %lu\n", MyGetMS() - start_time );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
@@ -897,8 +878,7 @@ long device_communicator::write_devices_states_service( DESTDATA dest, long len,
                 }
 #ifdef DEBUG_DEV_CMCTR
             Print( "\nChanged states size = %d\n", answer_size );
-#endif // DEBUG_DEV_CMCTR         
-#ifdef DEBUG_DEV_CMCTR
+
             Print( "Operation time = %lu\n", MyGetMS() - start_time );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
