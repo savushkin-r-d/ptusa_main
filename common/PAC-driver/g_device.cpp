@@ -390,6 +390,7 @@ int  complex_device::load_device( char *buff )
 //  далее   - данные каждого подустройства.
 int  complex_device::load_state( char *buff  )
     {
+#ifdef WIN32
     u_int_4 rec_id = ( ( u_int_4* ) buff )[ 0 ];        //(1) 
     u_int_4 rec_groups_cnt = ( ( u_int_4* ) buff )[ 1 ];//(2) 
     buff += 8;
@@ -399,13 +400,8 @@ int  complex_device::load_state( char *buff  )
         rec_groups_cnt != get_subdev_quantity() )
         {
         char err_str[ 600 ];
-#ifndef WIN32
         sprintf( err_str, "i_complex_device::load_state( char *buff ) - Error! rec_id = %lu, rec_groups_cnt=%lu, get_n() = %lu, get_subdev_quantity() = %lu!\n", 
             rec_id, rec_groups_cnt, get_n(), get_subdev_quantity() );
-#else
-        sprintf( err_str, "i_complex_device::load_state( char *buff ) - Error! rec_id = %lu, rec_groups_cnt=%lu, get_n() = %lu, get_subdev_quantity() = %lu!\n", 
-            rec_id, rec_groups_cnt, get_n(), get_subdev_quantity() );
-#endif  
         print_str( err_str );
         return -1;
         }
@@ -425,6 +421,11 @@ int  complex_device::load_state( char *buff  )
         }
 
     return idx;
+
+#else
+    buff;
+    return 0;
+#endif // WIN32     
     }    
 //-----------------------------------------------------------------------------
 void complex_device::print() const
@@ -435,7 +436,18 @@ void complex_device::print() const
     start_pos += 4;
     indent[ start_pos ] = 0;
 
-    char tmp_str[ 200 ];    
+    char tmp_str[ 200 ];  
+
+#if defined WIN32 || defined W750
+    if ( start_pos > 4 )
+        {
+        sprintf( tmp_str, "\"%s\"[ %3u ], \ttype = %d", name, sub_dev_cnt, type );
+        }
+    else
+        {
+        sprintf( tmp_str, "\"%s%u\"[ %3u ], \ttype = %d", name, get_n(), sub_dev_cnt, type );
+        }
+#else
     if ( start_pos > 4 )
         {
         sprintf( tmp_str, "\"%s\"[ %3lu ], \ttype = %d", name, sub_dev_cnt, type );
@@ -444,6 +456,7 @@ void complex_device::print() const
         {
         sprintf( tmp_str, "\"%s%lu\"[ %3lu ], \ttype = %d", name, get_n(), sub_dev_cnt, type );
         }
+#endif // defined WIN32 || defined W750
 
     print_str( tmp_str );  
 
@@ -538,6 +551,7 @@ i_complex_device* complex_device::get_sub_complex_dev( char *sub_dev_name ) cons
 //  далее   - данные каждого подустройства.                         (3)
 int complex_device::load_changed_state( char *buff )
     {
+#ifdef WIN32 
     u_int_2 rec_groups_cnt = ( ( u_int_2* ) buff )[ 0 ];            //1 
     buff += 2;
     int idx = 2;
@@ -561,6 +575,11 @@ int complex_device::load_changed_state( char *buff )
         }
 
     return idx;
+
+#else
+    buff;
+    return 0;
+#endif // WIN32
     }
 //-----------------------------------------------------------------------------
 // Данные группы (buff) в следующем виде:          

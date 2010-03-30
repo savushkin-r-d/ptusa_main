@@ -117,7 +117,7 @@ class NV_memory : public i_memory
 /// @brief Работа с блоком памяти.
 class memory_range: public i_memory
     {
-    friend NV_memory_manager;
+    friend class NV_memory_manager;
 
     public:
         /// @brief Метод интерфейса @ref i_memory.

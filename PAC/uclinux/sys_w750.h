@@ -43,7 +43,7 @@ class SRAM: public NV_memory
 class NV_memory_manager_W750: public NV_memory_manager
     {    
     public:
-        NV_memory_manager_7186();
+        NV_memory_manager_W750();
     };
 //-----------------------------------------------------------------------------
-#endif SYS_7186_H
+#endif // SYS_7186_H
