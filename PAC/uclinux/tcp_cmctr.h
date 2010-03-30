@@ -70,7 +70,7 @@ class tcp_communicator
 		int Evaluate();
 		SrvPtr regService( unsigned char srvID, SrvPtr fk );
 
-        char get_host_name();
+        char* get_host_name();
 
 	private:
         static tcp_communicator* instance;
