@@ -108,8 +108,7 @@ class tcp_communicator
 		int max_cycles;                     /*максимальное количество циклов обработки состояний сокетов за 1 проход */
 		timeval tv;                         /* задержка ожидания функции опроса состояний сокетов 0 по умолчанию */
 		fd_set rfds;                        /* набор дескрипторов сокетных файлов для чтения */
-		socket_state sst[ MAX_SOCKETS ];    /* таблица состояния сокетов */
-		struct ip host_ip;
+		socket_state sst[ MAX_SOCKETS ];    /* таблица состояния сокетов */		
 		char host_name[ TC_MAX_HOST_NAME ];
 		int netOK;
 		int tcpipClientID;

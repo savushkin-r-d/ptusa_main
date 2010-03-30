@@ -824,8 +824,9 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
             outdata += 2;
             answer_size += 2;
 
-            strcpy( outdata, tcp_communicator::get_instance()->hostname );
-            answer_size += strlen( tcp_communicator::get_instance() ) + 1;
+            strcpy( outdata, tcp_communicator::get_instance()->host_name );
+            answer_size += strlen( 
+                tcp_communicator::get_instance()->host_name ) + 1;
             return answer_size;
 
         case GET_DEVICES:
@@ -915,8 +916,8 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
             Print( "[4] - %f\n", ( ( float* ) ( data + 1 ) )[ 4 ] );
 #endif // DEBUG_DEV_CMCTR
 
-            u_int_4 dev_n = ( ( u_int_4* )( data + 1 ) )[ 0 ];
-            dev[ dev_n ]->parse_cmd( data + 5 );
+            dev[ ( ( u_int_4* )( ( char* ) data + 1 ) )[ 0 ] ]->parse_cmd( 
+                data + 5 );
 #ifdef DEBUG_DEV_CMCTR
             Print( "Operation time = %lu\n", MyGetMS() - start_time );
 #endif // DEBUG_DEV_CMCTR
@@ -924,8 +925,7 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
             answer_size += 2;
             return answer_size;
 
-        case GET_PAC_ERRORS:
-            {            
+        case GET_PAC_ERRORS:            
 #ifdef DEBUG_DEV_CMCTR
             Print( "GET_PAC_ERRORS\n" );
 #endif
@@ -949,7 +949,6 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
 #endif // USE_SIMPLE_DEV_ERRORS
 
             return answer_size;
-            }
 
 #ifdef USE_SIMPLE_DEV_ERRORS
         case SET_PAC_ERROR_CMD:            
