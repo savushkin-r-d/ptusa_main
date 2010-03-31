@@ -201,7 +201,7 @@ template < class type > class parameters
         int parse_cmd( char *buff )
             {
             int par_n = *( ( u_int_4* ) buff );
-            this[ par_n ] = *( ( type* ) ( buff + sizeof( u_int_4 ) ) );
+            ( *this )[ par_n ] = *( ( type* ) ( buff + sizeof( u_int_4 ) ) );
 
             return sizeof( u_int_4 ) + sizeof( type );
             }
@@ -310,7 +310,7 @@ class run_time_params_ulong: public parameters < u_int_4 >,
 #ifdef DEBUG
 
 #ifdef W750
-            Print( "Set val work param ulong[ %lu ] = %u\n",
+            Print( "Set val work param ulong[ %u ] = %u\n",
                 *( ( u_int_4* ) buff ), 
                 *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
 #else
@@ -396,7 +396,7 @@ class saved_params_ulong: public saved_params < u_int_4 >,
 #ifdef DEBUG
 
 #ifdef W750
-              Print( "Set val saved param ulong[ %lu ] = %u\n",
+              Print( "Set val saved param ulong[ %u ] = %u\n",
                   *( ( u_int_4* ) buff ), 
                   *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
 #else

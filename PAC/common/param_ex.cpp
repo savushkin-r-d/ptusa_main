@@ -112,7 +112,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
                                 void ( *custom_init_params_function )() /*= 0 */ )
     {
 #ifdef DEBUG
-    Print( "Total memory used: %u [ %i% ]. \n", 
+    Print( "Total memory used: %u [ %i percent ]. \n", 
         last_idx, last_idx / C_TOTAL_PARAMS_SIZE * 100 );
 #endif // DEBUG
 
