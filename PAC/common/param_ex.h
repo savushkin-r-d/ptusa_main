@@ -299,9 +299,9 @@ public parameters < type >
         int save( u_int idx, type value )
             {
             int res = 1;
-            if ( idx < get_count() )
+            if ( idx < parameters< type >::get_count() )
                 {
-                get_values()[ idx ] = value;
+                parameters< type >::get_values()[ idx ] = value;
 
                 params_manager::get_instance()->save( 
                     start_pos + idx * sizeof( type ), sizeof( type ) );

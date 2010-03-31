@@ -1,8 +1,18 @@
-﻿#include "sys_w750.h"
+#include "sys_w750.h"
 #include "fcntl.h"
+#include "unistd.h"
 #include "stdio.h"
 
 NV_memory_manager* NV_memory_manager::instance = new NV_memory_manager_W750();
+
+int read_file( int file, void *buff, u_int count )
+    {
+    return read( file, buff, count );
+    }
+int write_file( int file, void *buff, u_int count )
+    {
+    return write( file, buff, count );
+    }
 //-----------------------------------------------------------------------------
 SRAM::SRAM( u_int total_size, 
            u_int available_start_pos, 
@@ -12,30 +22,29 @@ SRAM::SRAM( u_int total_size,
     {
     if( ( file = open( "/dev/nvram" ) ) < 0 )  
         {  
-        printf( "SRAM() - ERROR: Can't open device 
-            (\"/dev/nvram\")\n" );  
+        printf( "SRAM() - ERROR: Can't open device (\"/dev/nvram\")\n" );  
         close( file );  
         file = 0;
         } 
     } 
 //-----------------------------------------------------------------------------
-SRAM::read( void *buff, u_int count, u_int start_pos )
+int SRAM::read( void *buff, u_int count, u_int start_pos )
     {
     if ( file )
     	{
         lseek( file, get_available_start_pos() + start_pos, SEEK_SET );
-        return read( file, buff, count );
+        return read_file( file, buff, count );
     	}
 
     return 0;
     }
 //-----------------------------------------------------------------------------
-SRAM::write( void *buff, u_int count, u_int start_pos )
+int SRAM::write( void *buff, u_int count, u_int start_pos )
     {
     if ( file )
         {
         lseek( file, get_available_start_pos() + start_pos, SEEK_SET );
-        return write( file, buff, count );
+        return write_file( file, buff, count );
         }
 
     return 0;
