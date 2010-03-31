@@ -4,12 +4,13 @@
 #include "stdio.h"
 
 NV_memory_manager* NV_memory_manager::instance = new NV_memory_manager_W750();
-
-int read_file( int file, void *buff, u_int count )
+//-----------------------------------------------------------------------------
+int SRAM::read_file( int file, void *buff, u_int count )
     {
     return read( file, buff, count );
     }
-int write_file( int file, void *buff, u_int count )
+//-----------------------------------------------------------------------------
+int SRAM::write_file( int file, void *buff, u_int count )
     {
     return write( file, buff, count );
     }
@@ -20,7 +21,7 @@ SRAM::SRAM( u_int total_size,
            available_start_pos,      
            available_end_pos )
     {
-    if( ( file = open( "/dev/nvram" ) ) < 0 )  
+    if( ( file = open( "/dev/nvram", O_RDWR ) ) < 0 )  
         {  
         printf( "SRAM() - ERROR: Can't open device (\"/dev/nvram\")\n" );  
         close( file );  

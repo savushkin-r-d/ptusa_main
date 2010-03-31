@@ -26,16 +26,24 @@ typedef unsigned int       u_int_4;
 /// Имеет ограничения на количество циклов записи/чтения - 1 миллион.
 class SRAM: public NV_memory 
     {
-    int file;
+    friend class NV_memory_manager_W750;
 
-    SRAM( u_int total_size, u_int available_start_pos, 
-        u_int available_end_pos );
+    private:
 
-    /// @brief Метод интерфейса @ref i_memory.
-    int read( void *buff, u_int count, u_int start_pos );
+        int file;
 
-    /// @brief Метод интерфейса @ref i_memory.
-    int write( void *buff, u_int count, u_int start_pos );
+        SRAM( u_int total_size, u_int available_start_pos, 
+            u_int available_end_pos );
+
+        /// @brief Метод интерфейса @ref i_memory.
+        int read( void *buff, u_int count, u_int start_pos );
+
+        /// @brief Метод интерфейса @ref i_memory.
+        int write( void *buff, u_int count, u_int start_pos );
+
+        int read_file( int file, void *buff, u_int count );
+
+        int write_file( int file, void *buff, u_int count );
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с энергонезависимой ОЗУ. Представляет абстракцию от 
