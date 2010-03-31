@@ -40,10 +40,6 @@ class SRAM: public NV_memory
 
         /// @brief Метод интерфейса @ref i_memory.
         int write( void *buff, u_int count, u_int start_pos );
-
-        int read_file( int file, void *buff, u_int count );
-
-        int write_file( int file, void *buff, u_int count );
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с энергонезависимой ОЗУ. Представляет абстракцию от 

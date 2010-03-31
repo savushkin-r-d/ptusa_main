@@ -5,12 +5,12 @@
 
 NV_memory_manager* NV_memory_manager::instance = new NV_memory_manager_W750();
 //-----------------------------------------------------------------------------
-int SRAM::read_file( int file, void *buff, u_int count )
+int read_file( int file, void *buff, u_int count )
     {
     return read( file, buff, count );
     }
 //-----------------------------------------------------------------------------
-int SRAM::write_file( int file, void *buff, u_int count )
+int write_file( int file, void *buff, u_int count )
     {
     return write( file, buff, count );
     }

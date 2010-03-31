@@ -255,22 +255,58 @@ class run_time_params_float: public parameters < float >,
     array_device < float >
     {
     public:
-        run_time_params_float( int count );
+        run_time_params_float( int count ):parameters < float >( count ),
+            array_device < float >( 1, 
+            "RT_PARAM_F", 
+            count, 
+            i_complex_device::ARRAY_DEV_FLOAT )
+            {
+            }
 
-        float get_val( int idx ) const;
+        float get_val( int idx )
+            {
+            return parameters< float >::get_val( idx );
+            }
 
-        int parse_cmd( char *buff  );
+        int parse_cmd( char *buff )
+            {
+            int res = parameters< float >::parse_cmd( buff );
+#ifdef DEBUG
+            Print( "Set val work param float[ %lu ] = %f\n",
+                *( ( u_int_4* ) buff ), 
+                *( ( float* ) ( buff + sizeof( u_int_4 ) ) ) );
+#endif //DEBUG
+            return res;
+            }
+
     };
 //-----------------------------------------------------------------------------
 class run_time_params_ulong: public parameters < u_int_4 >, 
     array_device < u_int_4 >
     {
     public:
-        run_time_params_ulong( int count );
+        run_time_params_ulong( int count ) : parameters < u_int_4 >( count ),
+            array_device < u_int_4 >( 1, "RT_PARAM_UL", count, 
+            i_complex_device::ARRAY_DEV_ULONG )
+            {
+            }
 
-        u_int_4 get_val( int idx );
+        u_int_4 get_val( int idx )
+            {
+            return parameters< u_int_4 >::get_val( idx );
+            }
 
-        int parse_cmd( char *buff  );
+        int parse_cmd( char *buff )
+            {
+            int res = parameters< u_int_4 >::parse_cmd( buff );
+#ifdef DEBUG
+            Print( "Set val work param ulong[ %lu ] = %lu\n",
+                *( ( u_int_4* ) buff ), 
+                *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
+#endif //DEBUG
+            return res;
+            }
+
     };
 //-----------------------------------------------------------------------------
 template < class type > class saved_params:
@@ -284,7 +320,7 @@ public parameters < type >
             {
             }
         //---------------------------------------------------------------------
-        int parse_cmd( char *buff  )
+        int parse_cmd( char *buff )
             {
             int res = parameters< type >::parse_cmd( buff );
 
@@ -325,22 +361,56 @@ class saved_params_ulong: public saved_params < u_int_4 >,
     array_device < u_int_4 >
     {
     public:
-        saved_params_ulong( int count );
+        saved_params_ulong( int count ) :
+          saved_params < u_int_4 >( count ),
+              array_device < u_int_4 >( 1, "S_PARAM_UL", count, 
+              i_complex_device::ARRAY_DEV_ULONG )
+              {
+              }
 
-        u_int_4 get_val( int idx );
+          u_int_4 get_val( int idx )
+              {
+              return saved_params< u_int_4 >::get_val( idx );
+              }
 
-        int parse_cmd( char *buff  );
+          int parse_cmd( char *buff )
+              {
+              int res = saved_params< u_int_4 >::parse_cmd( buff );
+#ifdef DEBUG
+              Print( "Set val saved param ulong[ %lu ] = %lu\n",
+                  *( ( u_int_4* ) buff ), 
+                  *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
+#endif //DEBUG
+              return res;
+              }
     };
 //-----------------------------------------------------------------------------
 class saved_params_float: public saved_params < float >, 
     array_device < float >
     {
     public:
-        saved_params_float( int count );
+        saved_params_float( int count ):
+          saved_params < float >( count ),
+              array_device < float >( 1, "S_PARAM_F", count, 
+              i_complex_device::ARRAY_DEV_FLOAT )
+              {
+              }
 
-        float get_val( int idx );
+          float get_val( int idx )
+              {
+              return saved_params< float >::get_val( idx );
+              }
 
-        int parse_cmd( char *buff  );
+          int parse_cmd( char *buff )
+              {
+              int res = saved_params< float >::parse_cmd( buff );
+#ifdef DEBUG
+              Print( "Set val saved param float[ %lu ] = %f\n",
+                  *( ( u_int_4* ) buff ), 
+                  *( ( float* ) ( buff + sizeof( u_int_4 ) ) ) );
+#endif //DEBUG
+              return res;
+              }
     };
 //-----------------------------------------------------------------------------
 class params_test
