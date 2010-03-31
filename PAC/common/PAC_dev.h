@@ -41,7 +41,7 @@ template < class data_type > class array_device: public i_simple_device
 
     public:        
         array_device( u_int_4 n, 
-            char *new_name,
+            const char *new_name,
             u_int_2 new_subdev_cnt,
             char type ): sub_dev_cnt( new_subdev_cnt ), 
             type( type ), 
@@ -148,12 +148,19 @@ template < class data_type > class array_device: public i_simple_device
         void    print() const
             {
             char tmp_str[ 100 ];    
-            //sprintf( tmp_str, "\"%s\", \t[ %3lu ]", name, sub_dev_cnt );
+#ifdef W750
+            if ( strlen( name ) < 8 ) 
+                {
+                sprintf( tmp_str, "\"%s\", \t\t[ %3u ]", name, sub_dev_cnt );
+                }
+            else sprintf( tmp_str, "\"%s\", \t[ %3u ]", name, sub_dev_cnt );
+#else
             if ( strlen( name ) < 8 ) 
                 {
                 sprintf( tmp_str, "\"%s\", \t\t[ %3lu ]", name, sub_dev_cnt );
                 }
             else sprintf( tmp_str, "\"%s\", \t[ %3lu ]", name, sub_dev_cnt );
+#endif // W750
 
             print_str( tmp_str );
             }
