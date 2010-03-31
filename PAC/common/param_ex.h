@@ -272,9 +272,17 @@ class run_time_params_float: public parameters < float >,
             {
             int res = parameters< float >::parse_cmd( buff );
 #ifdef DEBUG
+
+#ifdef W750
+            Print( "Set val work param float[ %u ] = %f\n",
+                *( ( u_int_4* ) buff ), 
+                *( ( float* ) ( buff + sizeof( u_int_4 ) ) ) );
+#else
             Print( "Set val work param float[ %lu ] = %f\n",
                 *( ( u_int_4* ) buff ), 
                 *( ( float* ) ( buff + sizeof( u_int_4 ) ) ) );
+#endif // W750
+
 #endif //DEBUG
             return res;
             }
@@ -300,9 +308,17 @@ class run_time_params_ulong: public parameters < u_int_4 >,
             {
             int res = parameters< u_int_4 >::parse_cmd( buff );
 #ifdef DEBUG
+
+#ifdef W750
+            Print( "Set val work param ulong[ %lu ] = %u\n",
+                *( ( u_int_4* ) buff ), 
+                *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
+#else
             Print( "Set val work param ulong[ %lu ] = %lu\n",
                 *( ( u_int_4* ) buff ), 
                 *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
+#endif // W750
+
 #endif //DEBUG
             return res;
             }
@@ -347,7 +363,7 @@ public parameters < type >
             else
                 {
                 Print( "parameters:save - index[ %u ] > count [ %u ]\n",
-                    idx, get_count() );
+                    idx, parameters< type >::get_count() );
                 }
 #endif // DEBUG
             return res;
@@ -363,6 +379,7 @@ class saved_params_ulong: public saved_params < u_int_4 >,
     public:
         saved_params_ulong( int count ) :
           saved_params < u_int_4 >( count ),
+              
               array_device < u_int_4 >( 1, "S_PARAM_UL", count, 
               i_complex_device::ARRAY_DEV_ULONG )
               {
@@ -377,9 +394,17 @@ class saved_params_ulong: public saved_params < u_int_4 >,
               {
               int res = saved_params< u_int_4 >::parse_cmd( buff );
 #ifdef DEBUG
+
+#ifdef W750
+              Print( "Set val saved param ulong[ %lu ] = %u\n",
+                  *( ( u_int_4* ) buff ), 
+                  *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
+#else
               Print( "Set val saved param ulong[ %lu ] = %lu\n",
                   *( ( u_int_4* ) buff ), 
                   *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
+#endif // W750
+
 #endif //DEBUG
               return res;
               }
@@ -405,9 +430,17 @@ class saved_params_float: public saved_params < float >,
               {
               int res = saved_params< float >::parse_cmd( buff );
 #ifdef DEBUG
+              
+#ifdef W750
+              Print( "Set val saved param float[ %u ] = %f\n",
+                  *( ( u_int_4* ) buff ), 
+                  *( ( float* ) ( buff + sizeof( u_int_4 ) ) ) );
+#else
               Print( "Set val saved param float[ %lu ] = %f\n",
                   *( ( u_int_4* ) buff ), 
                   *( ( float* ) ( buff + sizeof( u_int_4 ) ) ) );
+#endif // W750
+              
 #endif //DEBUG
               return res;
               }

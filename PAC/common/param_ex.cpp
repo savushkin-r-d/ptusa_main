@@ -72,6 +72,7 @@ int params_manager::init( unsigned int project_id /*= 65535 */ )
     {
     params_manager::project_id = project_id;
 
+    memset( params, 0, C_TOTAL_PARAMS_SIZE );
     params_mem->read( params, C_TOTAL_PARAMS_SIZE, 0 );
 
     int chk = check_CRC();
@@ -111,7 +112,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
                                 void ( *custom_init_params_function )() /*= 0 */ )
     {
 #ifdef DEBUG
-    Print( "Total memory used: %u [ %f% ]. \n", 
+    Print( "Total memory used: %u [ %i% ]. \n", 
         last_idx, last_idx / C_TOTAL_PARAMS_SIZE * 100 );
 #endif // DEBUG
 

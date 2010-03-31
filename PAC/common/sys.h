@@ -21,7 +21,6 @@ typedef unsigned int  u_int;
 #ifdef DEBUG
 #include <string.h>
 #include <stdio.h>
-#include <conio.h>
 
 #ifdef I7186_E
 #include "7186e.h"
@@ -31,7 +30,7 @@ typedef unsigned int  u_int;
 
 #if defined W750 || defined WIN
 #define Print printf
-#define Getch getch
+#define Getch getchar
 #endif // defined W750 || defined WIN
 
 //-----------------------------------------------------------------------------
