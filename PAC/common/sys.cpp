@@ -1,5 +1,24 @@
 #include "sys.h"
 //-----------------------------------------------------------------------------
+#if defined W750 && defined DEBUG
+#include <termios.h>
+#include <unistd.h>
+
+int Getch()
+    {
+    struct termios oldt;
+    struct termios newt;
+    int ch;
+    tcgetattr( STDIN_FILENO, &oldt );
+    newt = oldt;
+    newt.c_lflag &= ~( ICANON | ECHO );
+    tcsetattr( STDIN_FILENO, TCSANOW, &newt );
+    ch = getchar();
+    tcsetattr( STDIN_FILENO, TCSANOW, &oldt );
+    return ch;
+    }
+#endif // defined W750 && defined DEBUG
+//-----------------------------------------------------------------------------
 NV_memory::NV_memory( u_int total_size,
                      u_int available_start_pos,
                      u_int available_end_pos ) : total_size( total_size ),
@@ -144,4 +163,9 @@ NV_memory_manager* NV_memory_manager::get_instance()
     {
     return instance;
     }
+//-----------------------------------------------------------------------------
+void NV_memory_manager::set_instance( NV_memory_manager* new_instance )
+{
+    instance = new_instance;
+}
 //-----------------------------------------------------------------------------

@@ -5,8 +5,12 @@
 ///
 /// @par Описание директив препроцессора:
 /// @c DEBUG   - компиляция c выводом отладочной информации в консоль.@n@n
+///
+/// @c WIN32   - компиляция для OS Windows.@n
 /// @c W750    - компиляция для PAC Wago 750.@n
-/// @c I7186_E - компиляция для PAC I7186_E.
+/// @c I7186_E - компиляция для PAC I7186_E. Данные директивы определяют
+/// специфичную для платформы реализацию работы с консолью (@ref Getch и @ref
+/// Printf), куда выводятся сообщения об ошибках в отладочном режиме.
 /// 
 /// @par Текущая версия:
 /// @$Rev: $.\n
@@ -15,10 +19,10 @@
 #ifndef SYS_H
 #define SYS_H
 
-typedef unsigned char u_char;
-typedef unsigned int  u_int;
+typedef unsigned char       u_char;
+typedef unsigned int        u_int;
+typedef unsigned long int   u_long;
 
-#ifdef DEBUG
 #include <string.h>
 #include <stdio.h>
 
@@ -26,12 +30,25 @@ typedef unsigned int  u_int;
 #include "7186e.h"
 #endif // I7186_E
 
+#ifdef WIN32
+#include <conio.h>
+
+#define Print printf
+
+#ifdef DEBUG
+#define Getch getch
 #endif // DEBUG
 
-#if defined W750 || defined WIN
+#endif // WIN32
+
+#ifdef W750
 #define Print printf
-#define Getch getchar
-#endif // defined W750 || defined WIN
+
+#ifdef DEBUG
+int Getch();
+#endif // DEBUG
+
+#endif // W750
 
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс доступа к памяти.
@@ -67,21 +84,7 @@ class i_memory
 /// @brief Работа напрямую с энергонезависимой ОЗУ. Представляет абстракцию от 
 /// аппаратной реализации памяти.
 class NV_memory : public i_memory
-    {
-    //  [ 1 ]
-    /// @var total_size
-    /// @brief Общий размер памяти.
-    //  [ 2 ]
-    /// @var available_start_pos
-    /// @brief Начальный доступный адрес.
-    /// @details Для пропуска зарезервированной системной области.
-    //  [ 3 ]
-    /// @var available_end_pos
-    /// @brief Конечный доступный адрес.
-    /// @details Для пропуска зарезервированной системной области.
-    u_int total_size;           // 1   
-    u_int available_start_pos;  // 2   
-    u_int available_end_pos;    // 3   
+    {  
 
     public:
         /// @param total_size           - общий размер памяти.
@@ -111,6 +114,22 @@ class NV_memory : public i_memory
             {
             return available_end_pos;
             }
+
+    private:
+        //  [ 1 ]
+    /// @var total_size
+    /// @brief Общий размер памяти.
+    //  [ 2 ]
+    /// @var available_start_pos
+    /// @brief Начальный доступный адрес.
+    /// @details Для пропуска зарезервированной системной области.
+    //  [ 3 ]
+    /// @var available_end_pos
+    /// @brief Конечный доступный адрес.
+    /// @details Для пропуска зарезервированной системной области.
+    u_int total_size;           // 1
+    u_int available_start_pos;  // 2
+    u_int available_end_pos;    // 3
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с блоком памяти.
@@ -132,40 +151,30 @@ class memory_range: public i_memory
         int write( void *buf, u_int count, u_int start_pos );
 
     private:
-    //  [ 1 ]
-    /// @var memory
-    /// @brief Указатель на объект памяти.
-    //  [ 2 ]
-    /// @var start_pos
-    /// @brief Начальный адрес.
-    //  [ 3 ]
-    /// @var size
-    /// @brief Размер.
-    i_memory    *memory;    // 1
-    u_int       start_pos;  // 2
-    u_int       size;       // 3
+        i_memory    *memory;    ///< Указатель на объект памяти.
+        u_int       start_pos;  ///< Начальный адрес.
+        u_int       size;       ///< Размер блока памяти в байтах.
 
-    /// @brief Закрытый конструктор.
-    ///
-    /// Создание объектов осуществляется через метод @ref get_memory_block 
-    /// класса @ref NV_memory_manager.
-    memory_range( i_memory *memory, u_int start_pos, u_int size );
+        /// @brief Закрытый конструктор.
+        ///
+        /// Создание объектов осуществляется через метод @ref get_memory_block
+        /// класса @ref NV_memory_manager.
+        memory_range( i_memory *memory, u_int start_pos, u_int size );
 
-    /// @brief Проверка на корректность параметров.
-    /// 
-    /// @return - результат проверки
-    ///    0 - Ок.
-    ///    1 - Ошибка.
-    int check_params( u_int count, u_int start_pos );   
+        /// @brief Проверка на корректность параметров.
+        ///
+        /// @return - результат проверки
+        ///    0 - Ок.
+        ///    1 - Ошибка.
+        int check_params( u_int count, u_int start_pos );
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с энергонезависимой ОЗУ. Представляет абстракцию от 
 /// физического распределения памяти.
 class NV_memory_manager
     {
-    public:
-        /// @brief Типы энергонезависимой памяти.
-        enum MEMORY_TYPE
+    public:        
+        enum MEMORY_TYPE ///< Типы энергонезависимой памяти.
             {
             MT_NVRAM,
             MT_EEPROM,
@@ -187,6 +196,8 @@ class NV_memory_manager
         /// @return - указатель на единственный объект класса @ref
         /// NV_memory_manager.
         static NV_memory_manager* get_instance();
+
+        static void set_instance( NV_memory_manager* new_instance );
                 
     protected:
         /// Статический экземпляр класса для вызова методов.
