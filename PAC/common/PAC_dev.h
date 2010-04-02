@@ -18,8 +18,8 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "g_device.h"
 
+#include "g_device.h"
 //-----------------------------------------------------------------------------
 /// @brief Шаблон класса, который используется для передачи состояния устройств,
 /// которые представляются массивом некоторого типа.
@@ -27,7 +27,12 @@
 /// Например: параметры, состояния и т.д.
 template < class data_type > class array_device: public i_simple_device
     {
-    public:        
+    public:
+        /// @param n        - номер.
+        /// @param new_name - имя.
+        /// @param new_subdev_cnt - количество элементов в массиве.
+        /// @param type     - тип. Для сохранения устройств и передачи на
+        /// сервер.
         array_device( u_int_4 n, 
             const char *new_name,
             u_int_2 new_subdev_cnt,
@@ -45,6 +50,14 @@ template < class data_type > class array_device: public i_simple_device
                 }              
             }
 
+        /// @brief Сохранение устройства в байтовый поток.
+        ///
+        /// Для передачи устройства на сервер.
+        ///
+        /// @param buff [out] - указатель на байтовый буфер, куда будет
+        /// произведено сохранение устройства.
+        ///
+        /// @return - количество сохраненных байт.
         int  save_device( char *buff )
             {
             // Данные группы (buff) в следующем виде:
@@ -66,9 +79,16 @@ template < class data_type > class array_device: public i_simple_device
             idx += 4;           
 
             return idx;
-
             }
 
+        /// @brief Сохранение состояния устройства в байтовый поток.
+        ///
+        /// Для передачи состояния устройства на сервер.
+        ///
+        /// @param buff [out] - указатель на байтовый буфер, куда будет
+        /// произведено сохранение состояния устройства.
+        ///
+        /// @return - количество сохраненных байт.
         int  save_state( char *buff )
             {
             // Данные группы (buff) в следующем виде:
@@ -89,8 +109,16 @@ template < class data_type > class array_device: public i_simple_device
                 }      
 
             return answer_size;
-
             }
+
+        /// @brief Сохранение изменившегося состояния устройства в байтовый поток.
+        ///
+        /// Для передачи состояния устройства на сервер.
+        ///
+        /// @param buff [out] - указатель на байтовый буфер, куда будет
+        /// произведено сохранение состояния устройства.
+        ///
+        /// @return - количество сохраненных байт.
         int  save_changed_state( char *buff )
             {
             // Данные группы (buff) в следующем виде:          
@@ -128,9 +156,17 @@ template < class data_type > class array_device: public i_simple_device
 
             }
 
+        /// @brief Получение элемента через индекс.
+        ///
+        /// @param idx - индекс элемента.
+        ///
+        /// @return - значение элемента с индексом @ref idx.
         virtual data_type get_val( int idx ) = 0;
 
-        void    print() const
+        /// @brief Вывод объекта в консоль.
+        ///
+        /// Для использования в отладочных целях.
+        void print() const
             {
             char tmp_str[ 100 ];    
 
@@ -145,40 +181,47 @@ template < class data_type > class array_device: public i_simple_device
             print_str( tmp_str );
             }
 
+        /// @brief Реализация-заглушка интерфейса класса @ref i_simple_device.
         u_int_4 get_n() const
             { 
             return 0; 
             } 
 
+        /// @brief Реализация-заглушка интерфейса класса @ref i_simple_device.
         int load_state( char *buff )
             { 
             buff++; // Чтобы не было warning'а.
             return 0; 
             } 
 
+        /// @brief Реализация-заглушка интерфейса класса @ref i_simple_device.
         int load_changed_state( char *buff )
             { 
             buff++; // Чтобы не было warning'а.
             return 0; 
             } 
 
+        /// @brief Реализация-заглушка интерфейса класса @ref i_simple_device.
         int load_device( char *buff )
             { 
             buff++; // Чтобы не было warning'а.
             return 0; 
             } 
 
-        int     parse_cmd( char *buff  )
+        /// @brief Реализация-заглушка интерфейса класса @ref i_simple_device.
+        int parse_cmd( char *buff  )
             {      
             buff++; // Чтобы не было warning'а.
             return 0; 
             } 
 
+        /// @brief Реализация-заглушка интерфейса класса @ref i_simple_device.
         u_int_4 get_idx()
             {
             return 0;
             }
 
+        /// @brief Реализация-заглушка интерфейса класса @ref i_simple_device.
         void set_idx( u_int_4 new_idx )
             {  
             new_idx++; // Чтобы не было warning'а.
@@ -193,6 +236,5 @@ template < class data_type > class array_device: public i_simple_device
         data_type*      prev_val;       ///< Массив предыдущих значений.
     };
 //-----------------------------------------------------------------------------
-
 #endif // PAC_DEVICES_H
 

@@ -30,10 +30,11 @@ class SRAM: public NV_memory
 
     private:
 
-        int file;
+        static int file;
 
         SRAM( u_int total_size, u_int available_start_pos, 
             u_int available_end_pos );
+        virtual ~SRAM();
 
         /// @brief Метод интерфейса @ref i_memory.
         int read( void *buff, u_int count, u_int start_pos );

@@ -13,8 +13,8 @@ unsigned int maxBufUse = 0;
 
 //------------------------------------------------------------------------------
 tcp_communicator::tcp_communicator():
-tcpipClientID( 1 ),
-netOK( 0 )
+netOK( 0 ),
+tcpipClientID( 1 )
 	{
 	buf = new unsigned char[ BUFSIZE ];
 	reboot = 0;
@@ -52,8 +52,8 @@ void tcp_communicator::killsockets()
 int tcp_communicator::net_init()
 	{
 	int type = SOCK_STREAM;
-	int protocol = 0;        /* всегда 0 */
-	int err = master_socket = socket( PF_INET, type, protocol ); // Cоздание мастер-сокета.
+	int protocol = 0;        /* пїЅпїЅпїЅпїЅпїЅпїЅ 0 */
+	int err = master_socket = socket( PF_INET, type, protocol ); // CпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅ.
 
 #ifdef DEBUG
 	printf( "tcp_communicator:net_init() - master socket created. Has number %d\n\r",
@@ -70,14 +70,14 @@ int tcp_communicator::net_init()
 		return -4;
 		}
 
-	// Переводим в неблокирующий режим.
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.
 	fcntl( master_socket, F_SETFL, O_NONBLOCK );
-	// Адресация мастер-сокета.
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅ.
 	memset( &sst[ master_socket ].sin, 0, sizeof( sst[ master_socket ].sin ) );
 	sst[ master_socket ].sin.sin_family 	 = AF_INET;
 	sst[ master_socket ].sin.sin_addr.s_addr = INADDR_ANY;
 	sst[ master_socket ].sin.sin_port 		 = htons ( PORT );
-	// Привязка сокета.
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
 	err = bind( master_socket, ( struct sockaddr * ) & sst[ master_socket ].sin,
 	            sizeof( sst[ master_socket ].sin ) );
 	if ( err < 0 )
@@ -91,7 +91,7 @@ int tcp_communicator::net_init()
 		return -5;
 		}
 
-	err = listen( master_socket, QLEN ); // Делаем мастер-сокет слушателем.
+	err = listen( master_socket, QLEN ); // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 	if ( type == SOCK_STREAM && err < 0 )
 		{
 		close ( master_socket );
@@ -102,7 +102,7 @@ int tcp_communicator::net_init()
 		}
 
 #ifdef MODBUS
-	// Создание серверного сокета modbus_socket.
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ modbus_socket.
 	err = modbus_socket = socket ( PF_INET, type, protocol );
 
 #ifdef DEBUG
@@ -120,13 +120,13 @@ int tcp_communicator::net_init()
 
 		return -4;
 		}
-	// Адресация modbus_socket сокета.
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ modbus_socket пїЅпїЅпїЅпїЅпїЅпїЅ.
 	memset( &sst[ modbus_socket ].simodbus_socket 0, sizeof ( sst[ modbus_socket ].sin ) );
 	sst[ modbus_socket ].sin.sin_family 	  = AF_INET;
 	sst[ modbus_socket ].sin.sin_addr.s_addr = 0;
-	sst[ modbus_socket ].sin.sin_port 		  = htons ( 502 ); // Порт.
+	sst[ modbus_socket ].sin.sin_port 		  = htons ( 502 ); // пїЅпїЅпїЅпїЅ.
 	err = bind( modbus_socket, ( struct sockaddr * ) & sst[ modbus_socket ].sin,
-	            sizeof ( sst[ modbus_socket ].sin ) );	   // Привязка сокета.
+	            sizeof ( sst[ modbus_socket ].sin ) );	   // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
 	if ( err < 0 )
 		{
 #ifdef DEBUGmodbus_socket	printf( "tcp_communicator:net_init(modbus_socket- can't bind modbus socket to port %d, error %d\n\r",
@@ -137,7 +137,7 @@ int tcp_communicator::net_init()
 		close( modbus_socket );
 		return -5;
 		}
-	err = listen( modbus_socket, QLEN ); // Делаем слушателем.
+	err = listen( modbus_socket, QLEN ); // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 	if ( type == SOCK_STREAM && err < 0 )
 		{
 		close( modbus_socket );
@@ -154,8 +154,8 @@ int tcp_communicator::net_init()
 		sst[ i ].active = 0;
 		sst[ i ].init   = 0;
 		}
-	sst[ master_socket ].active = 1;  	 //мастер-сокет всегда активный
-	sst[ master_socket ].islistener = 1; //сокет является слушателем
+	sst[ master_socket ].active = 1;  	 //пїЅпїЅпїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	sst[ master_socket ].islistener = 1; //пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 #ifdef MODBUS
 	sst[ modbus_socket ].active = 1;
@@ -183,7 +183,7 @@ int tcp_communicator::Evaluate()
 	int err = 0;
 	count_cycles = 0;
 
-	// Проверка связи с сервером.
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 	if ( difftime( time( NULL ), glob_last_trans ) > 5 )
 		{
 		if ( glob_cmctr_ok )
@@ -200,15 +200,15 @@ int tcp_communicator::Evaluate()
 			//ResetGlobalError ( EC_NO_CONNECTION, ES_EASYSERVER, ES_EASYSERVER );
 			}
 		}
-	// Проверка связи с сервером.-!>
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.-!>
 
-	// Инициализация сети, при необходимости.
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 	if ( !netOK )
 		{
 		net_init();
 		if ( !netOK ) return -100;
 		}
-	// Инициализация сети, при необходимости.-!>
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.-!>
 
 	while ( count_cycles < max_cycles )
 		{
@@ -223,11 +223,11 @@ int tcp_communicator::Evaluate()
 				}
 			}
 
-		// Задаем таймаут.
+		// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 		tv.tv_sec  = 0;
-		tv.tv_usec = 600000; // 0.6 сек.
+		tv.tv_usec = 600000; // 0.6 пїЅпїЅпїЅ.
 
-		// Ждём события в одном из сокетов.
+		// пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 		rc = select ( MAX_SOCKETS, &rfds, NULL, NULL, &tv );
 		if ( rc < 0 )
 			{
@@ -243,7 +243,7 @@ int tcp_communicator::Evaluate()
 
 		for ( int i = 0; i < MAX_SOCKETS; i++ )  /* scan all possible sockets */
 			{
-			// Поступил новый запрос на соединение.
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 			if ( FD_ISSET ( i, &rfds ) )
 				{
 #ifndef MODBUS
@@ -304,22 +304,22 @@ int tcp_communicator::Evaluate()
 //------------------------------------------------------------------------------
 int tcp_communicator::recvtimeout( uint s, uchar *buf, int len, int timeout, int usec )
 	{
-	// Настраиваем  file descriptor set.
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ  file descriptor set.
 	fd_set fds;
 	FD_ZERO( &fds );
 	FD_SET( s, &fds );
 
-	// Настраиваем время на таймаут.
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 	struct timeval tv;
 	tv.tv_sec = timeout;
 	tv.tv_usec = usec;
 
-	// Ждем таймаута или полученных данных.
+	// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
 	int n = select( s + 1, &fds, NULL, NULL, &tv );
 	if ( 0 == n ) return -2;  // timeout!
 	if ( -1 == n ) return -1; // error
 
-	// Данные должны быть здесь, поэтому делаем обычный recv().
+	// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ recv().
 	return recv( s, buf, len, 0 );
 	}
 //------------------------------------------------------------------------------

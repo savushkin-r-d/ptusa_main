@@ -19,11 +19,6 @@
 extern PAC_critical_errors_manager *g_pac_critical_errors;
 #endif // defined I7186_E || defined I7188_E || defined I7188
 
-#endif // PAC
-
-
-#ifdef PAC
-
 extern device_communicator  *g_dev_cmmctr;
 unsigned int        device_communicator::dev_cnt;
 i_complex_device ** device_communicator::dev;
@@ -47,19 +42,21 @@ u_int_2 G_PROTOCOL_VERSION = 2;
 //-----------------------------------------------------------------------------
 void print_str( char *err_str, char is_need_CR )
     {    
-#ifdef _WIN32
+#ifdef WIN32
     bug_log::add_msg( "System", "", err_str );
 #else
     Print( "%s", err_str  );
     if ( is_need_CR )
         {
         Print( "\n" );
-        }    
-#endif
+        }
+#endif // WIN32
     }
 //-----------------------------------------------------------------------------
-complex_device::complex_device(): type( 0 ), 
-n( 0 ), sub_dev_cnt( 0 ), sub_dev( 0 ) 
+complex_device::complex_device(): sub_dev( 0 ),
+        n( 0 ),
+        sub_dev_cnt( 0 ),
+        type( 0 )        
     {  
     name = new char[ MAX_NAME_LENGTH ];
 #ifdef WIN32
@@ -70,8 +67,9 @@ n( 0 ), sub_dev_cnt( 0 ), sub_dev( 0 )
     }
 //-----------------------------------------------------------------------------
 complex_device::complex_device( u_int_4 n, char *new_name, 
-                               u_int_2 new_subdev_cnt, char type ): type( type ), 
-                               n( n ), sub_dev_cnt( new_subdev_cnt )
+                               u_int_2 new_subdev_cnt, char type ): n( n ),
+        sub_dev_cnt( new_subdev_cnt ),
+        type( type )
     {           
     name = new char[ MAX_NAME_LENGTH ];
 #ifdef WIN32
@@ -415,7 +413,7 @@ int  complex_device::load_state( char *buff  )
     return idx;
 
 #else
-    buff;
+    buff++;
     return 0;
 #endif // WIN32     
     }    
@@ -430,25 +428,17 @@ void complex_device::print() const
 
     char tmp_str[ 200 ];  
 
-#if defined WIN32 || defined W750
     if ( start_pos > 4 )
         {
-        sprintf( tmp_str, "\"%s\"[ %3u ], \ttype = %d", name, sub_dev_cnt, type );
+        sprintf( tmp_str, "\"%s\"[ %3lu ], \ttype = %d", name,
+            ( unsigned long int  ) sub_dev_cnt, type );
         }
     else
         {
-        sprintf( tmp_str, "\"%s%u\"[ %3u ], \ttype = %d", name, get_n(), sub_dev_cnt, type );
+        sprintf( tmp_str, "\"%s%lu\"[ %3lu ], \ttype = %d", 
+                name, ( unsigned long int  ) get_n(),
+                ( unsigned long int  ) sub_dev_cnt, type );
         }
-#else
-    if ( start_pos > 4 )
-        {
-        sprintf( tmp_str, "\"%s\"[ %3lu ], \ttype = %d", name, sub_dev_cnt, type );
-        }
-    else
-        {
-        sprintf( tmp_str, "\"%s%lu\"[ %3lu ], \ttype = %d", name, get_n(), sub_dev_cnt, type );
-        }
-#endif // defined WIN32 || defined W750
 
     print_str( tmp_str );  
 
@@ -569,7 +559,7 @@ int complex_device::load_changed_state( char *buff )
     return idx;
 
 #else
-    buff;
+    buff++;
     return 0;
 #endif // WIN32
     }
@@ -728,7 +718,7 @@ void device_communicator::print() const
     {  
     char tmp_str[ 200 ];
 
-    sprintf( tmp_str, "\nDevice communicator. Dev count = %d.", dev_cnt );
+    sprintf( tmp_str, "\nDevice communicator. Dev count = %u.", dev_cnt );
     print_str( tmp_str );
 
     if ( !dev_cnt ) return;
@@ -803,12 +793,12 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
     if ( DESTMEM == dest ); // Заглушка, чтобы не было Warning'а.
     if ( len < 1 ) return 0;
 
-    int i;
+    unsigned int i;
     unsigned long answer_size = 0;
 
     //  [3/25/2009 id]
 #ifdef DEBUG_DEV_CMCTR
-    unsigned long start_time = MyGetMS();    
+    //unsigned long start_time = MyGetMS();
 #endif // DEBUG_DEV_CMCTR             
     //
 
@@ -817,7 +807,7 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
         case GET_INFO_ON_CONNECT:
 #ifdef DEBUG_DEV_CMCTR
             Print( "G_PROTOCOL_VERSION = %u, host =[%s]\n", G_PROTOCOL_VERSION, 
-                g_cmctr->hostname );            
+                tcp_communicator::get_instance()->get_host_name() );
 #endif // DEBUG_DEV_CMCTR
 
             ( ( u_int_2* ) outdata )[ 0 ] = G_PROTOCOL_VERSION; //Версия протокола.
@@ -852,7 +842,7 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
                 answer_size, 
                 g_devices_request_id );
 
-            Print( "Operation time = %lu\n", MyGetMS() - start_time );
+            //Print( "Operation time = %lu\n", MyGetMS() - start_time );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
 
@@ -871,7 +861,7 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
             Print( "Devices states size = %lu, g_devices_request_id = %d\n", 
                 answer_size, g_devices_request_id );
 
-            Print( "Operation time = %lu\n", MyGetMS() - start_time );
+            //Print( "Operation time = %lu\n", MyGetMS() - start_time );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
 
@@ -897,7 +887,7 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
 #ifdef DEBUG_DEV_CMCTR
             Print( "\nChanged states size = %d\n", answer_size );
 
-            Print( "Operation time = %lu\n", MyGetMS() - start_time );
+            //Print( "Operation time = %lu\n", MyGetMS() - start_time );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
 
@@ -920,7 +910,7 @@ long device_communicator::write_devices_states_service( DESTDATA dest,
             dev[ ( ( u_int_4* )( ( char* ) data + 1 ) )[ 0 ] ]->parse_cmd( 
                 ( char* ) data + 5 );
 #ifdef DEBUG_DEV_CMCTR
-            Print( "Operation time = %lu\n", MyGetMS() - start_time );
+            //Print( "Operation time = %lu\n", MyGetMS() - start_time );
 #endif // DEBUG_DEV_CMCTR
             ( ( u_int_2* ) ( outdata + answer_size ) )[ 0 ] = 0; //Возвращаем 0.
             answer_size += 2;

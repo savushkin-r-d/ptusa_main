@@ -4,15 +4,13 @@
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
-/// @c DEBUG - компиляция с выводом отладочной информации в консоль.@n@n
+/// @c DEBUG - компиляция с выводом отладочной информации в консоль.@n
+/// @c KEY_CONFIRM - переход к следующему отладочному сообщению по нажатии
+/// клавиши.@n@n
 /// @c USE_SIMPLE_DEV_ERRORS   - компиляция с модулем ошибок устройств.@n
 /// @c USE_NO_TANK_COMB_DEVICE - компиляция без объектов Танк и Гребенка. Для 
 /// уменьшения размера программы при отсутствии таковых технологических
-/// объектов.@n@n
-/// @c I7186_E - компиляция для PAC I7186_E.@n
-/// @c I7188_E - компиляция для PAC I7188_E.@n
-/// @c I7188   - компиляция для PAC I7188.@n
-/// @c W750    - компиляция для PAC W750.@n
+/// объектов.
 /// 
 /// @par Текущая версия:
 /// @$Rev$.\n
@@ -23,17 +21,9 @@
 #define PARAMS_EX_H
 
 #include <string.h>
-#include "g_device.h"
-
-#ifdef I7186_E
-#include "plc_dev.h"
-#endif // I7186_E
-
-#ifdef W750
-#include "PAC_dev.h"
-#endif // I7186_E   
 
 #include "sys.h"
+#include "PAC_dev.h"
 //-----------------------------------------------------------------------------
 /// @brief Работа с параметрами. 
 /// 
@@ -118,19 +108,21 @@ class params_manager
         /// Рабочий массив параметров.
         char params[ C_TOTAL_PARAMS_SIZE ];  
 
-        /// Используется при создании экземпляра класса @ref parameters.
-        int  last_idx; 
+        /// Номер последнего выделенного параметра. Используется при создании
+        /// экземпляра класса @ref parameters.
+        u_int last_idx;
 
-        /// Признак корректной загрузки параметров (верна контрольная сумма).
-        int  loaded;
+        /// Признак корректной загрузки параметров (достоверность контрольной
+        /// суммы).
+        int loaded;
 
-        unsigned int project_id;
+        u_int project_id;   ///< Номер проекта (для уникальности параметров).
 
-        memory_range *params_mem;
-        memory_range *CRC_mem;
+        memory_range *params_mem; ///< Память параметров.
+        memory_range *CRC_mem;    ///< Память контрольной суммы.
 
-        // Высчитывает контрольную сумму.
-        unsigned int solve_CRC();
+        // Высчитывание контрольной суммы.
+        u_int solve_CRC();
 
         /// @brief Проверка контрольной суммы.
         ///
@@ -244,17 +236,23 @@ template < class type > class parameters
             return values;
             }
 
-        // Заглушка для обращения через индекс с выходом за диапазон.
-        type            stub; 
+        /// Заглушка для обращения через индекс с выходом за диапазон.
+        type         stub; 
 
-        type            *values;
-        unsigned int    count;
+        unsigned int count;     ///< Количестов элементов.
+        type         *values;   ///< Указатель на массив значений элементов.
     };
 //-----------------------------------------------------------------------------
+/// @brief Работа с параметрами времени выполнения типа float.
+///
+/// Данные параметры передаются на сервер через соответствующие теги.
 class run_time_params_float: public parameters < float >, 
     array_device < float >
     {
     public:
+        /// @brief Конструктор.
+        ///
+        /// @param count - количество параметров.
         run_time_params_float( int count ):parameters < float >( count ),
             array_device < float >( 1, 
             "RT_PARAM_F", 
@@ -263,25 +261,20 @@ class run_time_params_float: public parameters < float >,
             {
             }
 
+        /// @brief Реализация интерфейса класса @ref array_device.
         float get_val( int idx )
             {
             return parameters< float >::get_val( idx );
             }
 
+        /// @brief Реализация интерфейса класса @ref array_device.
         int parse_cmd( char *buff )
             {
             int res = parameters< float >::parse_cmd( buff );
 #ifdef DEBUG
-
-#ifdef W750
-            Print( "Set val work param float[ %u ] = %f\n",
-                *( ( u_int_4* ) buff ), 
-                *( ( float* ) ( buff + sizeof( u_int_4 ) ) ) );
-#else
             Print( "Set val work param float[ %lu ] = %f\n",
-                *( ( u_int_4* ) buff ), 
+                ( u_long ) *( ( u_int_4* ) buff ),
                 *( ( float* ) ( buff + sizeof( u_int_4 ) ) ) );
-#endif // W750
 
 #endif //DEBUG
             return res;
@@ -289,53 +282,62 @@ class run_time_params_float: public parameters < float >,
 
     };
 //-----------------------------------------------------------------------------
-class run_time_params_ulong: public parameters < u_int_4 >, 
+/// @brief Работа с параметрами времени выполнения типа @ref u_int_4.
+///
+/// Данные параметры передаются на сервер через соответствующие теги.
+class run_time_params_u_int_4: public parameters < u_int_4 >,
     array_device < u_int_4 >
     {
     public:
-        run_time_params_ulong( int count ) : parameters < u_int_4 >( count ),
+        /// @brief Конструктор.
+        ///
+        /// @param count - количество параметров.
+        run_time_params_u_int_4( int count ) : parameters < u_int_4 >( count ),
             array_device < u_int_4 >( 1, "RT_PARAM_UL", count, 
             i_complex_device::ARRAY_DEV_ULONG )
             {
             }
 
+        /// @brief Реализация интерфейса класса @ref array_device.
         u_int_4 get_val( int idx )
             {
             return parameters< u_int_4 >::get_val( idx );
             }
 
+        /// @brief Реализация интерфейса класса @ref array_device.
         int parse_cmd( char *buff )
             {
             int res = parameters< u_int_4 >::parse_cmd( buff );
 #ifdef DEBUG
 
-#ifdef W750
-            Print( "Set val work param ulong[ %u ] = %u\n",
-                *( ( u_int_4* ) buff ), 
-                *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
-#else
-            Print( "Set val work param ulong[ %lu ] = %lu\n",
-                *( ( u_int_4* ) buff ), 
-                *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
-#endif // W750
+            Print( "Set val work param u_int_4[ %lu ] = %lu\n",
+                ( u_long ) *( ( u_int_4* ) buff ),
+                ( u_long ) *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
 
 #endif //DEBUG
             return res;
             }
-
     };
 //-----------------------------------------------------------------------------
+/// @brief Работа с сохраняемыми параметрами.
+///
+/// Данные параметры передаются на сервер через соответствующие теги. При
+/// перезагрузке PAC их значения сохраняются.
 template < class type > class saved_params:
 public parameters < type > 
     {
     public:
+        /// @brief Конструктор.
+        ///
+        /// @param count - количество параметров.
         saved_params( int count ) : parameters < type >( 
             count,
             ( type* ) params_manager::get_instance()->get_params_data( 
             count * sizeof( type ), start_pos ) )
             {
             }
-        //---------------------------------------------------------------------
+
+        /// @brief Реализация интерфейса класса @ref array_device.
         int parse_cmd( char *buff )
             {
             int res = parameters< type >::parse_cmd( buff );
@@ -347,7 +349,12 @@ public parameters < type >
 
             return res;
             }
-        //---------------------------------------------------------------------
+
+        /// @brief Сохранение значения параметра в энергонезависимой памяти.
+        ///
+        /// Операция доступа через индекс сохраняет значение параметра только
+        /// в буфере, так что для сохранения его в энергонезависимой памяти надо
+        /// использовать данный метод.
         int save( u_int idx, type value )
             {
             int res = 1;
@@ -370,50 +377,55 @@ public parameters < type >
             }
 
     private:
+        /// Индекс начала значений в общем массиве, для сохранения значения
+        /// параметра в энергонезависимой памяти (@ref save).
         int start_pos;
     };
 //-----------------------------------------------------------------------------
-class saved_params_ulong: public saved_params < u_int_4 >, 
+/// @brief Работа с сохраняемыми параметрами типа @ref u_int_4.
+class saved_params_u_int_4: public saved_params < u_int_4 >,
     array_device < u_int_4 >
     {
     public:
-        saved_params_ulong( int count ) :
-          saved_params < u_int_4 >( count ),
-              
+        /// @brief Конструктор.
+        ///
+        /// @param count - количество параметров.
+        saved_params_u_int_4( int count ) :
+          saved_params < u_int_4 >( count ),              
               array_device < u_int_4 >( 1, "S_PARAM_UL", count, 
               i_complex_device::ARRAY_DEV_ULONG )
               {
               }
 
+          /// @brief Реализация интерфейса класса @ref array_device.
           u_int_4 get_val( int idx )
               {
               return saved_params< u_int_4 >::get_val( idx );
               }
 
+          /// @brief Реализация интерфейса класса @ref array_device.
           int parse_cmd( char *buff )
               {
               int res = saved_params< u_int_4 >::parse_cmd( buff );
 #ifdef DEBUG
 
-#ifdef W750
-              Print( "Set val saved param ulong[ %u ] = %u\n",
-                  *( ( u_int_4* ) buff ), 
-                  *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
-#else
-              Print( "Set val saved param ulong[ %lu ] = %lu\n",
-                  *( ( u_int_4* ) buff ), 
-                  *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
-#endif // W750
+              Print( "Set val saved param u-int_4[ %lu ] = %lu\n",
+                  ( u_long ) *( ( u_int_4* ) buff ),
+                  ( u_long ) *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
 
 #endif //DEBUG
               return res;
               }
     };
 //-----------------------------------------------------------------------------
+/// @brief Работа с сохраняемыми параметрами типа float.
 class saved_params_float: public saved_params < float >, 
     array_device < float >
     {
     public:
+        /// @brief Конструктор.
+        ///
+        /// @param count - количество параметров.
         saved_params_float( int count ):
           saved_params < float >( count ),
               array_device < float >( 1, "S_PARAM_F", count, 
@@ -421,34 +433,34 @@ class saved_params_float: public saved_params < float >,
               {
               }
 
+          /// @brief Реализация интерфейса класса @ref array_device.
           float get_val( int idx )
               {
               return saved_params< float >::get_val( idx );
               }
 
+          /// @brief Реализация интерфейса класса @ref array_device.
           int parse_cmd( char *buff )
               {
               int res = saved_params< float >::parse_cmd( buff );
 #ifdef DEBUG
-              
-#ifdef W750
-              Print( "Set val saved param float[ %u ] = %f\n",
-                  *( ( u_int_4* ) buff ), 
-                  *( ( float* ) ( buff + sizeof( u_int_4 ) ) ) );
-#else
               Print( "Set val saved param float[ %lu ] = %f\n",
-                  *( ( u_int_4* ) buff ), 
+                  ( u_long ) *( ( u_int_4* ) buff ),
                   *( ( float* ) ( buff + sizeof( u_int_4 ) ) ) );
-#endif // W750
-              
 #endif //DEBUG
               return res;
               }
     };
 //-----------------------------------------------------------------------------
+/// @brief Класс для тестирования классов работы с параметрами.
 class params_test
     {
     public:
+        /// @brief Тестирование классов работы с параметрами.
+        ///
+        /// @return 0 - Ок.
+        /// @return 1 - Ошибка.
         static int make_test();
     };
+//-----------------------------------------------------------------------------
 #endif // PARAMS_EX_H

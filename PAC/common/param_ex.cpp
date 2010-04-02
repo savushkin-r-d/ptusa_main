@@ -68,7 +68,7 @@ unsigned int params_manager::solve_CRC()
     return CRC;
     }
 //-----------------------------------------------------------------------------
-int params_manager::init( unsigned int project_id /*= 65535 */ )
+int params_manager::init( unsigned int project_id )
     {
     params_manager::project_id = project_id;
 
@@ -96,10 +96,12 @@ int params_manager::init( unsigned int project_id /*= 65535 */ )
 //-----------------------------------------------------------------------------
 int params_manager::check_CRC()
     {
-    char buff[ 2 ];
-    CRC_mem->read( buff, 2, 0 );
+    unsigned char buff[ 2 ];
+    CRC_mem->read( ( char* ) buff, 2, 0 );
 
-    if ( solve_CRC() == *( ( int* ) buff ) )  
+    u_int read_CRC = 256 * buff[ 1 ] + buff[ 0 ];
+
+    if ( solve_CRC() == read_CRC )
         {
         return 0;
         }
@@ -112,12 +114,15 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
                                 void ( *custom_init_params_function )() /*= 0 */ )
     {
 #ifdef DEBUG
-    Print( "Total memory used: %u [ %i percent ]. \n", 
-        last_idx, last_idx / C_TOTAL_PARAMS_SIZE * 100 );
+    Print( "Total memory used: %u of %u bytes[ %.2f%c ]. \n",
+        last_idx, C_TOTAL_PARAMS_SIZE, 
+        100. * last_idx / C_TOTAL_PARAMS_SIZE, '%' );
 #endif // DEBUG
 
     if ( -1 == loaded )
         {
+        memset( params, 0, C_TOTAL_PARAMS_SIZE );
+
         if ( custom_init_params_function != 0 ) 
             {
             ( *custom_init_params_function )();
@@ -145,11 +150,12 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
         if ( auto_init_work_params ) 
             {
 #ifndef USE_NO_TANK_COMB_DEVICE
-            for ( int i = 0; i < TTank::TankCnt; i++ )
+            int i;
+            for ( i = 0; i < TTank::TankCnt; i++ )
                 {
                 g_tanks[ i ]->InitWorkParams();
                 }
-            for ( i = 0; i< TMyComb::CombCnt; i++ )
+            for ( i = 0; i < TMyComb::CombCnt; i++ )
                 {   
                 g_combs[ i ]->InitWorkParams();
                 }
@@ -168,7 +174,21 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
         Getch();
         Print( "\n" );
 #endif // KEY_CONFIRM
-#endif
+#endif // DEBUG
+        }
+    else
+        {
+#ifdef DEBUG
+        if ( check_CRC() == 0 )
+            Print( "PARAMS OK: DON'T NEED REINITIALIZING.\n\r" );
+        else
+            Print( "PARAMS: FATAL ERROR.\n\r" );
+#ifdef KEY_CONFIRM
+        Print( "Press any key to continue..." );
+        Getch();
+        Print( "\n" );
+#endif // KEY_CONFIRM
+#endif // DEBUG
         }
     }
 //-----------------------------------------------------------------------------
@@ -230,9 +250,14 @@ params_manager* params_manager::get_instance()
 //-----------------------------------------------------------------------------
 int params_test::make_test()
     {
-    params_manager::get_instance()->init( 2 );
+#ifdef DEBUG
+    Print( "Start params test.\n" );
+#endif // DEBUG
 
-    saved_params_ulong test1( 10 );
+    const u_int POJECT_ID = 2;
+    params_manager::get_instance()->init( POJECT_ID );
+
+    saved_params_u_int_4 test1( 10 );
     test1.save( 0, 5120 );        
     test1.save( 1, 120 );        
     test1.save( 2, 130 );
@@ -242,7 +267,8 @@ int params_test::make_test()
     test.save( 1, 12 );        
     test.save( 2, 13 );
 
-    params_manager::get_instance()->init( 2 );
+    params_manager::get_instance()->init( POJECT_ID );
+    params_manager::get_instance()->final_init();
 
     if ( 
         test1[ 0 ] != 5120 || 
@@ -253,21 +279,28 @@ int params_test::make_test()
         test[ 2 ] != 13 )
         {
 #ifdef DEBUG
-        Print( "Error passing test!\n" );
+        Print( "Error passing params test!\n" );
         Print( "test[ 0 ] = %f\n", test[ 0 ] );
         Print( "test[ 1 ] = %f\n", test[ 1 ] );
         Print( "test[ 2 ] = %f\n", test[ 2 ] );
+
+        Print( "test1[ 0 ] = %lu\n", test1[ 0 ] );
+        Print( "test1[ 1 ] = %lu\n", test1[ 1 ] );
+        Print( "test1[ 2 ] = %lu\n", test1[ 2 ] );
         Getch();
 #endif // DEBUG
         return 1;
         }
 
 #ifdef DEBUG
-    Print( "Passing test - ok!\n" );
-    Print( "test[ 0 ] = %f\n", test[ 0 ] );
-    Print( "test[ 1 ] = %f\n", test[ 1 ] );
-    Print( "test[ 2 ] = %f\n", test[ 2 ] );
+    Print( "Passing params test - ok!\n" );
+
+#ifdef KEY_CONFIRM
+    Print( "Press any key to continue..." );
     Getch();
+    Print( "\n" );
+#endif // KEY_CONFIRM
+
 #endif // DEBUG
 
     return 0;
