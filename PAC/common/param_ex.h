@@ -15,8 +15,8 @@
 /// @c W750    - компиляция для PAC W750.@n
 /// 
 /// @par Текущая версия:
-/// @$Rev: $.\n
-/// @$Author: $.\n
+/// @$Rev$.\n
+/// @$Author$.\n
 /// @$Date::                     $.
 
 #ifndef PARAMS_EX_H
