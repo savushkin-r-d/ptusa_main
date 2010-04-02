@@ -17,7 +17,7 @@
 /// @par Текущая версия:
 /// @$Rev: $.\n
 /// @$Author: $.\n
-/// @$Date::                    #$.
+/// @$Date::                     $.
 
 #ifndef PARAMS_EX_H
 #define PARAMS_EX_H

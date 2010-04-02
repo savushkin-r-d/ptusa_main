@@ -9,7 +9,7 @@
 /// @par Текущая версия:
 /// @$Rev: $.\n
 /// @$Author: $.\n
-/// @$Date::                    #$.
+/// @$Date::                     $.
 
 #ifndef SYS_7186_H
 #define SYS_7186_H
