@@ -39,7 +39,7 @@ class tcp_communicator
         /// @ref tcp_communicator.
         static void set_instance( tcp_communicator* new_instance );
 
-        /// @brief Итерация обмена данными.
+        /// @brief Итерация обмена данными с сервером.
         virtual int evaluate() = 0;
 
         /// @brief Добавление пользовательской функции по обмену данными - 

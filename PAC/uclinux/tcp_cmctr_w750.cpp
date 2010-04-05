@@ -11,8 +11,7 @@ unsigned int max_buffer_use = 0;
 
 //------------------------------------------------------------------------------
 tcp_communicator_w750::tcp_communicator_w750():tcp_communicator(),
-netOK( 0 ),
-tcpipClientID( 1 )
+netOK( 0 )
     {
     tv.tv_sec = 0;
     tv.tv_usec = 0;
@@ -179,7 +178,7 @@ int tcp_communicator_w750::evaluate()
     int count_cycles = 0;
 
     // Проверка связи с сервером.
-    if ( difftime( time( NULL ), glob_last_trans ) > 5 )
+    if ( difftime( time( NULL ), glob_last_transfer_time ) > 5 )
         {
         if ( glob_cmctr_ok )
             {
@@ -223,11 +222,11 @@ int tcp_communicator_w750::evaluate()
         tv.tv_usec = 600000; // 0.6 сек.
 
         // Ждём события в одном из сокетов.
-        rc = select ( MAX_SOCKETS, &rfds, NULL, NULL, &tv );
+        rc = select( MAX_SOCKETS, &rfds, NULL, NULL, &tv );
         if ( rc < 0 )
             {
 #ifdef DEBUG
-            printf ( "selectsocket error %d\n\r", rc );
+            printf( "selectsocket error %d\n\r", rc );
             perror( "select" );
 #endif
             break;
@@ -253,8 +252,16 @@ int tcp_communicator_w750::evaluate()
 
 #ifdef DEBUG
                     hostent *client = gethostbyaddr( &ssin.sin_addr, 4, PF_INET );
-                    printf( "Accepted connection on %d socket from %s [ %s ]\n\r",
-                        ss, inet_ntoa( ssin.sin_addr ), "sd"  );
+                    if ( client )
+                        {
+                        printf( "Accepted connection on %d socket from %s [ %s ].\n\r",
+                            ss, inet_ntoa( ssin.sin_addr ), client->h_name  );
+                        }
+                    else
+                        {
+                        printf( "Accepted connection on %d socket from %s.\n\r",
+                            ss, inet_ntoa( ssin.sin_addr ) );
+                        }
 #endif // DEBUG
 
                     if ( err < 0 )
@@ -284,7 +291,7 @@ int tcp_communicator_w750::evaluate()
                 else         /* slave socket */
                     {
                     err = do_echo ( i );
-                    glob_last_trans = time( NULL );
+                    glob_last_transfer_time = time( NULL );
                     }
                 }
             }
@@ -306,12 +313,12 @@ int tcp_communicator_w750::recvtimeout( uint s, u_char *buf,
     FD_SET( s, &fds );
 
     // Настраиваем время на таймаут.
-    struct timeval tv;
-    tv.tv_sec = timeout;
-    tv.tv_usec = usec;
+    timeval rec_tv;
+    rec_tv.tv_sec = timeout;
+    rec_tv.tv_usec = usec;
 
     // Ждем таймаута или полученных данных.
-    int n = select( s + 1, &fds, NULL, NULL, &tv );
+    int n = select( s + 1, &fds, NULL, NULL, &rec_tv );
     if ( 0 == n ) return -2;  // timeout!
     if ( -1 == n ) return -1; // error
 

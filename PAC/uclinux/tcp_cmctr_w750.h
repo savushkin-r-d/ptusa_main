@@ -1,3 +1,16 @@
+/// @file tcp_cmctr_w750.h
+/// @brief Содержит описания классов, которые предназначены для обмена данными
+/// PAC-сервер по протоколу TCP для PAC WAGO 750.
+///
+/// @author  Иванюк Дмитрий Сергеевич.
+///
+/// @par Описание директив препроцессора:
+///
+/// @par Текущая версия:
+/// @$Rev: 39 $.\n
+/// @$Author: id@BMK $.\n
+/// @$Date:: 2010-04-02 17:22:01#$.
+
 #ifndef TCP_CMCTR_W750
 #define TCP_CMCTR_W750
 
@@ -12,15 +25,16 @@
 #include <fcntl.h>
 #include <stdio.h>
 //-----------------------------------------------------------------------------
-typedef struct socket_state
+/// @brief Состояние сокета.
+struct socket_state
     {
-    int active;    ///< Сокет активен.
-    int init;      ///< Сокет только что был активирован.
-    int islistener;///< Сокет является инициатором соединения ( = 0 )/сокет является слушателем ( != 0 ).
-    int evaluated; ///< В данном цикле уже произошел обмен информацией по данному сокету.
-    int clID;      ///< Идентификатор клиента для идентификации того, не занят ли уже сокет другим клиентом.
-    struct sockaddr_in sin;       ///< Адрес клиента.
-    } socket_state;
+    int active;      ///< Сокет активен.
+    int init;        ///< Сокет только что был активирован.
+    int islistener;  ///< Сокет является инициатором соединения ( = 0 )/сокет является слушателем ( != 0 ).
+    int evaluated;   ///< В данном цикле уже произошел обмен информацией по данному сокету.
+    int clID;        ///< Идентификатор клиента для идентификации того, не занят ли уже сокет другим клиентом.
+    sockaddr_in sin; ///< Адрес клиента.
+    };
 //-----------------------------------------------------------------------------
 /// @brief Коммуникатор для PAC WAGO 750 - обмен данными PAC-сервер.
 class tcp_communicator_w750 : public tcp_communicator 
@@ -29,34 +43,52 @@ class tcp_communicator_w750 : public tcp_communicator
             tcp_communicator_w750();
             virtual ~tcp_communicator_w750();
 
+            /// @brief Итерация обмена данными с сервером.
             int evaluate();
 
 	private:
-            struct sockaddr_in 	ssin; 	        ///< Адрес клиента.
-            u_int               sin_len;    	///< Длина адреса.
-            int                 master_socket;	///< Мастер-сокет для прослушивания.
+            sockaddr_in ssin; 	        ///< Адрес клиента.
+            u_int       sin_len;    	///< Длина адреса.
+            int         master_socket;	///< Мастер-сокет для прослушивания.
 
 #ifdef MODBUS
-            int modbus_socket;	     ///< Модбас сокет.
+            int modbus_socket;          ///< Модбас сокет.
 #endif
-            int ss;                  ///< Слейв-сокет, получаемый при подключении клиента.
-            int rc;                  ///< Код возврата selectsocket.
-		
+            int ss; ///< Слейв-сокет, получаемый при подключении клиента.
+            int rc; ///< Код возврата selectsocket.
+
+            /// @brief Посылка ответных данных на сервер.
+            ///
+            /// @param skt - сокет.
             int do_echo( int skt );
-            int netInit();
+            
+            u_long glob_last_transfer_time;  ///< Время последней успешной передачи данных.
 
-            u_long glob_last_trans;
+            timeval tv;                      ///< Задержка ожидания функции опроса состояний сокетов, 0 по умолчанию.
+            fd_set rfds;                     ///< Набор дескрипторов сокетных файлов для чтения.
+            socket_state sst[ MAX_SOCKETS ]; ///< Таблица состояния сокетов.
+            int netOK;                       ///< Признак успешной инициализиции сети.
 
-            timeval tv;                         ///< Задержка ожидания функции опроса состояний сокетов 0 по умолчанию.
-            fd_set rfds;                        ///< Набор дескрипторов сокетных файлов для чтения.
-            socket_state sst[ MAX_SOCKETS ];    ///< Таблици состояния сокетов.
-            int netOK;
-            int tcpipClientID;
-
+            /// @brief Уничтожение сокетов.
             void killsockets ();
+
+            /// @brief Инициализация сети.
             int  net_init();
+
+            /// @brief Закрытие сети.
             void net_terminate();
-		
+
+            /// @brief Получение данных с таймаутом.
+            ///
+            /// @param s        - сокет.
+            /// @param buf      - буфер для записи полученных данных.
+            /// @param len      - количество считываемых байт.
+            /// @param timeout  - время ожидания, сек.
+            /// @param usec     - время ожидания, мк сек.
+            ///
+            /// @return -1   - ошибка работы с сокетом.
+            /// @return -2   - ошибка таймаута.
+            /// @return >= 0 - размер реально считанных данных.
             int  recvtimeout( uint s, u_char *buf, int len,
                 int timeout, int usec );
 	};
