@@ -16,17 +16,15 @@
 
 #include "sys.h"
 
-enum ERRORS_SUBCLASS
-    {
-    ES_MODBUS_DEVICE = 1,
-    ES_EASYSERVER,
-    };
-
 //-----------------------------------------------------------------------------
 /// @brief Базовый класс коммуникатор - обмен данными PAC-сервер.
 class tcp_communicator
     {
     public:
+        /// @brief Определение функции сервиса.
+        typedef long int srv_proc( long int, u_char *, u_char * );
+        typedef srv_proc *srv_ptr;
+
         /// @brief Получение единственного экземпляра класса для работы с 
         /// коммуникатором.
         ///
@@ -39,17 +37,17 @@ class tcp_communicator
         ///
         /// @param - указатель на единственный объект класса, производного от
         /// @ref tcp_communicator.
-        static set_instance( tcp_communicator* new_instance );
+        static void set_instance( tcp_communicator* new_instance );
 
         /// @brief Итерация обмена данными.
-        virtual int evaluate();
+        virtual int evaluate() = 0;
 
         /// @brief Добавление пользовательской функции по обмену данными - 
         /// сервиса.
         ///
         /// @param srv_id - номер, за которым будет закреплен сервис.
         /// @param fk     - указатель на объект выделенного блока памяти.        
-        srv_ptr reg_service( unsigned char srv_id, srv_ptr fk );
+        srv_ptr reg_service( u_char srv_id, srv_ptr fk );
 
         /// @brief Получение сетевого имени PAC.
         ///
@@ -58,10 +56,6 @@ class tcp_communicator
 
     protected:
         tcp_communicator();
-
-        /// @brief Определение функции сервиса.
-        typedef long int srv_proc( long int, unsigned char *, unsigned char * );
-        typedef srv_proc *srv_ptr;
 
         //ERRORS DEFINITION
         enum ERRORS
@@ -75,40 +69,38 @@ class tcp_communicator
         //COMMANDS DEFINITION  
         enum COMMANDS 
             {
-            FrameSingle = 1,
-            AknErr      = 7,
-            AknData     = 8,
-            AknOK       = 12,
+            FRAME_SINGLE = 1,
+            AKN_ERR      = 7,
+            AKN_DATA     = 8,
+            AKN_OK       = 12,
             };
 
         enum CONSTANTS
             {
             BUFSIZE     = 16384,           ///< Размер буфера.
-            PORT 	    = 10000,           ///< Порт.
+            PORT 	= 10000,           ///< Порт.
             MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
             QLEN        = MAX_SOCKETS - 1, ///< Максимальное количество соединений.
-            };
 
-        static tcp_communicator* instance;
-
-        enum CONSTANTS
-            {
-            TC_MAX_HOST_NAME = 20,
+            TC_MAX_HOST_NAME      = 20,
             TC_MAX_SERVICE_NUMBER = 16,
+
             };
 
+        static tcp_communicator* instance;          ///< Экземпляр класса.
+        
         srv_ptr services[ TC_MAX_SERVICE_NUMBER ];  ///< Массив сервисов.
         char    host_name[ TC_MAX_HOST_NAME ];      ///< Сетевое имя PAC.
 
-        int max_cycles;     ///< Максимальное количество циклов обработки состояний сокетов за 1 проход.
-        int reboot;         ///< Флаг перезагрузки PAC.
-        int glob_cmctr_ok;  ///< Флаг активности обмена с сервером.
+        int max_cycles;         ///< Максимальное количество циклов обработки состояний сокетов за 1 проход.
+        int is_going_to_reboot; ///< Флаг перезагрузки PAC.
+        int glob_cmctr_ok;      ///< Флаг активности обмена с сервером.
 
-        u_int inBufCnt; ///< Количество данных в буфере.
-        u_char* buf;    ///< Буфер.
+        u_int   in_buffer_count;///< Количество данных в буфере.
+        u_char* buf;            ///< Буфер.
 
-        u_char pidx;    ///< Номер ответа.
-        int    NetId;   ///< Номер PAC.
+        u_char pidx;            ///< Номер ответа.
+        int    net_id;          ///< Номер PAC.
 
         void _ErrorAkn( u_char error );
         void _AknData( u_long len );

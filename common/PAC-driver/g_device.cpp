@@ -785,12 +785,10 @@ int device_communicator::load_changed_state( char *buff )
 extern dev_errors_manager *g_dev_errors_manager; 
 #endif // USE_SIMPLE_DEV_ERRORS
 
-long device_communicator::write_devices_states_service( DESTDATA dest,
-                                                       long len, 
-                                                       unsigned char *data, 
-                                                       unsigned char *outdata )                                                                                 
+long device_communicator::write_devices_states_service( long len, 
+                                                       u_char *data,
+                                                       u_char *outdata )
     {
-    if ( DESTMEM == dest ); // Заглушка, чтобы не было Warning'а.
     if ( len < 1 ) return 0;
 
     unsigned int i;

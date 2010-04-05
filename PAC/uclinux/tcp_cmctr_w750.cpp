@@ -6,7 +6,7 @@
 #include "tcp_cmctr_w750.h"
 
 #ifdef DEBUG
-unsigned int maxBufUse = 0;
+unsigned int max_buffer_use = 0;
 #endif
 
 //------------------------------------------------------------------------------
@@ -47,8 +47,8 @@ void tcp_communicator_w750::killsockets()
 int tcp_communicator_w750::net_init()
     {
     int type = SOCK_STREAM;
-    int protocol = 0;        /* пїЅпїЅпїЅпїЅпїЅпїЅ 0 */
-    int err = master_socket = socket( PF_INET, type, protocol ); // CпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅ.
+    int protocol = 0;        /* всегда 0 */
+    int err = master_socket = socket( PF_INET, type, protocol ); // Cоздание мастер-сокета.
 
 #ifdef DEBUG
     printf( "tcp_communicator_w750:net_init() - master socket created. Has number %d\n\r",
@@ -65,14 +65,14 @@ int tcp_communicator_w750::net_init()
         return -4;
         }
 
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.
+    // Переводим в неблокирующий режим.
     fcntl( master_socket, F_SETFL, O_NONBLOCK );
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅ.
+    // Адресация мастер-сокета.
     memset( &sst[ master_socket ].sin, 0, sizeof( sst[ master_socket ].sin ) );
     sst[ master_socket ].sin.sin_family 	 = AF_INET;
     sst[ master_socket ].sin.sin_addr.s_addr = INADDR_ANY;
     sst[ master_socket ].sin.sin_port 		 = htons ( PORT );
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
+    // Привязка сокета.
     err = bind( master_socket, ( struct sockaddr * ) & sst[ master_socket ].sin,
         sizeof( sst[ master_socket ].sin ) );
     if ( err < 0 )
@@ -86,7 +86,7 @@ int tcp_communicator_w750::net_init()
         return -5;
         }
 
-    err = listen( master_socket, QLEN ); // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+    err = listen( master_socket, QLEN ); // Делаем мастер-сокет слушателем.
     if ( type == SOCK_STREAM && err < 0 )
         {
         close ( master_socket );
@@ -97,7 +97,7 @@ int tcp_communicator_w750::net_init()
         }
 
 #ifdef MODBUS
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ modbus_socket.
+    // Создание серверного сокета modbus_socket.
     err = modbus_socket = socket ( PF_INET, type, protocol );
 
 #ifdef DEBUG
@@ -115,13 +115,13 @@ int tcp_communicator_w750::net_init()
 
         return -4;
         }
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ modbus_socket пїЅпїЅпїЅпїЅпїЅпїЅ.
+    // Адресация modbus_socket сокета.
     memset( &sst[ modbus_socket ].simodbus_socket 0, sizeof ( sst[ modbus_socket ].sin ) );
     sst[ modbus_socket ].sin.sin_family 	  = AF_INET;
     sst[ modbus_socket ].sin.sin_addr.s_addr = 0;
-    sst[ modbus_socket ].sin.sin_port 		  = htons ( 502 ); // пїЅпїЅпїЅпїЅ.
+    sst[ modbus_socket ].sin.sin_port 		  = htons ( 502 ); // Порт.
     err = bind( modbus_socket, ( struct sockaddr * ) & sst[ modbus_socket ].sin,
-        sizeof ( sst[ modbus_socket ].sin ) );	   // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
+        sizeof ( sst[ modbus_socket ].sin ) );	   // Привязка сокета.
     if ( err < 0 )
         {
 #ifdef DEBUGmodbus_socket	printf( "tcp_communicator_w750:net_init(modbus_socket- can't bind modbus socket to port %d, error %d\n\r",
@@ -132,7 +132,7 @@ int tcp_communicator_w750::net_init()
         close( modbus_socket );
         return -5;
         }
-    err = listen( modbus_socket, QLEN ); // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+    err = listen( modbus_socket, QLEN ); // Делаем слушателем.
     if ( type == SOCK_STREAM && err < 0 )
         {
         close( modbus_socket );
@@ -149,8 +149,8 @@ int tcp_communicator_w750::net_init()
         sst[ i ].active = 0;
         sst[ i ].init   = 0;
         }
-    sst[ master_socket ].active = 1;  	 //пїЅпїЅпїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
-    sst[ master_socket ].islistener = 1; //пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+    sst[ master_socket ].active = 1;  	 // мастер-сокет всегда активный.
+    sst[ master_socket ].islistener = 1; // сокет является слушателем.
 
 #ifdef MODBUS
     sst[ modbus_socket ].active = 1;
@@ -173,12 +173,12 @@ tcp_communicator_w750::~tcp_communicator_w750()
     delete buf;
     }
 //------------------------------------------------------------------------------
-int tcp_communicator_w750::Evaluate()
+int tcp_communicator_w750::evaluate()
     {
     int err = 0;
-    count_cycles = 0;
+    int count_cycles = 0;
 
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+    // Проверка связи с сервером.
     if ( difftime( time( NULL ), glob_last_trans ) > 5 )
         {
         if ( glob_cmctr_ok )
@@ -195,15 +195,15 @@ int tcp_communicator_w750::Evaluate()
             //ResetGlobalError ( EC_NO_CONNECTION, ES_EASYSERVER, ES_EASYSERVER );
             }
         }
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.-!>
+    // Проверка связи с сервером.-!>
 
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+	// Инициализация сети, при необходимости.
     if ( !netOK )
         {
         net_init();
         if ( !netOK ) return -100;
         }
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.-!>
+    // Инициализация сети, при необходимости.-!>
 
     while ( count_cycles < max_cycles )
         {
@@ -218,11 +218,11 @@ int tcp_communicator_w750::Evaluate()
                 }
             }
 
-        // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+        // Задаем таймаут.
         tv.tv_sec  = 0;
-        tv.tv_usec = 600000; // 0.6 пїЅпїЅпїЅ.
+        tv.tv_usec = 600000; // 0.6 сек.
 
-        // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+        // Ждём события в одном из сокетов.
         rc = select ( MAX_SOCKETS, &rfds, NULL, NULL, &tv );
         if ( rc < 0 )
             {
@@ -238,7 +238,7 @@ int tcp_communicator_w750::Evaluate()
 
         for ( int i = 0; i < MAX_SOCKETS; i++ )  /* scan all possible sockets */
             {
-            // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+            // Поступил новый запрос на соединение.
             if ( FD_ISSET ( i, &rfds ) )
                 {
 #ifndef MODBUS
@@ -246,7 +246,7 @@ int tcp_communicator_w750::Evaluate()
 #else
                 if ( i == master_socket || i == modbus_socket )
 #endif
-                    {
+                     {
                     /* master socket */
                     memset( &ssin, 0, sizeof ( ssin ) );
                     err = ss = accept ( i, ( struct sockaddr * ) &ssin, &sin_len );
@@ -254,7 +254,7 @@ int tcp_communicator_w750::Evaluate()
 #ifdef DEBUG
                     hostent *client = gethostbyaddr( &ssin.sin_addr, 4, PF_INET );
                     printf( "Accepted connection on %d socket from %s [ %s ]\n\r",
-                        ss, inet_ntoa( ssin.sin_addr ), client->h_name  );
+                        ss, inet_ntoa( ssin.sin_addr ), "sd"  );
 #endif // DEBUG
 
                     if ( err < 0 )
@@ -297,24 +297,25 @@ int tcp_communicator_w750::Evaluate()
     return err;
     }
 //------------------------------------------------------------------------------
-int tcp_communicator_w750::recvtimeout( uint s, uchar *buf, int len, int timeout, int usec )
+int tcp_communicator_w750::recvtimeout( uint s, u_char *buf,
+    int len, int timeout, int usec )
     {
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ  file descriptor set.
+    // Настраиваем  file descriptor set.
     fd_set fds;
     FD_ZERO( &fds );
     FD_SET( s, &fds );
 
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+    // Настраиваем время на таймаут.
     struct timeval tv;
     tv.tv_sec = timeout;
     tv.tv_usec = usec;
 
-    // пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
+    // Ждем таймаута или полученных данных.
     int n = select( s + 1, &fds, NULL, NULL, &tv );
     if ( 0 == n ) return -2;  // timeout!
     if ( -1 == n ) return -1; // error
 
-    // пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ recv().
+    // Данные должны быть здесь, поэтому делаем обычный recv().
     return recv( s, buf, len, 0 );
     }
 //------------------------------------------------------------------------------
@@ -335,7 +336,7 @@ int tcp_communicator_w750::do_echo ( int skt )
         }
     sst[ skt ].evaluated = 1;
 
-    err = inBufCnt = recvtimeout( skt, buf, BUFSIZE, 0, 500000 );
+    err = in_buffer_count = recvtimeout( skt, buf, BUFSIZE, 0, 500000 );
 
     if ( err < 0 )               /* read error */
         {
@@ -350,16 +351,16 @@ int tcp_communicator_w750::do_echo ( int skt )
         return err;
         }
 #ifdef DEBUG
-    if ( inBufCnt > maxBufUse )
+    if ( in_buffer_count > max_buffer_use )
         {
-        maxBufUse = inBufCnt;
-        printf( "Max buffer use %u\n", maxBufUse );
+        max_buffer_use = in_buffer_count;
+        printf( "Max buffer use %u\n", max_buffer_use );
         }
 #endif // DEBUG
 
-    NetId = buf[ 0 ];
+    net_id = buf[ 0 ];
     pidx = buf[ 3 ];
-    if ( NetId != 0x73 && ( buf[ 2 ] + buf[ 3 ] ) )
+    if ( net_id != 0x73 && ( buf[ 2 ] + buf[ 3 ] ) )
         {
         FD_CLR( skt, &rfds );
 #ifdef DEBUG
@@ -368,14 +369,13 @@ int tcp_communicator_w750::do_echo ( int skt )
         return ERR_RETRIVE;
         }
 
-    if ( buf[ 1 ] < TC_MAX_SERVICE_NUMBER && Services[ buf[ 1 ] ] != NULL &&
+    if ( buf[ 1 ] < TC_MAX_SERVICE_NUMBER && services[ buf[ 1 ] ] != NULL &&
         ( buf[ 2 ] + buf[ 3 ] != 0 ) )
         {
         switch ( buf[ 2 ] )
             {
-            case FrameSingle:
-                res = Services[ buf[ 1 ] ] ( DESTMEM, ( unsigned int )
-                    ( buf[ 4 ] * 256 + buf[ 5 ] ),
+            case FRAME_SINGLE:
+                res = services[ buf[ 1 ] ] ( ( u_int ) ( buf[ 4 ] * 256 + buf[ 5 ] ),
                     buf + 6, buf + 5 );
                 if ( res == 0 )
                     {
@@ -385,9 +385,9 @@ int tcp_communicator_w750::do_echo ( int skt )
                     {
                     _AknData( res );
 #ifdef DEBUG
-                    if ( ( unsigned int ) res > maxBufUse )
+                    if ( ( unsigned int ) res > max_buffer_use )
                         {
-                        maxBufUse = res;
+                        max_buffer_use = res;
                         printf( "Max buffer use %u\n", res );
                         }
 #endif
@@ -404,17 +404,16 @@ int tcp_communicator_w750::do_echo ( int skt )
         }
     else
         {
-        if ( ( Services[ 15 ] != NULL ) && ( 0 == buf[ 2 ] + buf[ 3 ] ) ) //MODBUS
+        if ( ( services[ 15 ] != NULL ) && ( 0 == buf[ 2 ] + buf[ 3 ] ) ) //MODBUS
             {
-            res = Services[ 15 ] ( DESTMEM, ( unsigned int )
-                ( buf[4] * 256 + buf[5] ),
+            res = services[ 15 ] ( ( u_int ) ( buf[4] * 256 + buf[5] ),
                 buf + 6,
                 buf + 6 );
             if ( res > 0 )
                 {
                 buf[ 4 ] = ( res >> 8 ) & 0xFF;
                 buf[ 5 ] = res & 0xFF;
-                inBufCnt = res + 6;
+                in_buffer_count = res + 6;
                 }
             sst[ skt ].evaluated = 0;
             }
@@ -427,8 +426,8 @@ int tcp_communicator_w750::do_echo ( int skt )
             }
         }
 
-    err = send( skt, buf, inBufCnt, 0 );
-    if ( reboot )
+    err = send( skt, buf, in_buffer_count, 0 );
+    if ( is_going_to_reboot )
         {
         killsockets();
         usleep( 800000 );

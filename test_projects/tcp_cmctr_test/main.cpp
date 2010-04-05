@@ -1,7 +1,7 @@
-#include "tcp_cmctr.h"
+#include "tcp_cmctr_w750.h"
 
-long int test_f( DESTDATA type, long int size, unsigned char *in_buff,
-                 unsigned char *out_buff )
+long int test_f( long int size, u_char *in_buff,
+                 u_char *out_buff )
 	{
 	out_buff[ 0 ] = 't';
 	out_buff[ 1 ] = 'e';
@@ -14,11 +14,11 @@ long int test_f( DESTDATA type, long int size, unsigned char *in_buff,
 
 int main()
 	{
-	tcp_communicator test_cmctr;
-	test_cmctr.regService( 1, test_f );
+	tcp_communicator::set_instance( new tcp_communicator_w750() );
+	tcp_communicator::get_instance()->reg_service( 1, test_f );
 	while ( 1 )
 		{
-		test_cmctr.Evaluate();
+		tcp_communicator::get_instance()->evaluate();
 
 		printf( "main cycle\n" );
 		}

@@ -31,7 +31,8 @@ OBJECTDIR=build/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/src/PAC/uclinux/tcp_cmctr.o \
+	${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/tcp_cmctr.o \
+	${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/tcp_cmctr_w750.o \
 	${OBJECTDIR}/main.o
 
 # C Compiler Flags
@@ -52,21 +53,26 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	${MAKE}  -f nbproject/Makefile-Debug.mk dist/Debug/GNU-Linux-x86/test_tcp_communicator
+	${MAKE}  -f nbproject/Makefile-Debug.mk dist/Debug/GNU-Linux-x86/tcp_cmctr_test
 
-dist/Debug/GNU-Linux-x86/test_tcp_communicator: ${OBJECTFILES}
+dist/Debug/GNU-Linux-x86/tcp_cmctr_test: ${OBJECTFILES}
 	${MKDIR} -p dist/Debug/GNU-Linux-x86
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/test_tcp_communicator ${OBJECTFILES} ${LDLIBSOPTIONS} 
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/tcp_cmctr_test ${OBJECTFILES} ${LDLIBSOPTIONS} 
 
-${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/src/PAC/uclinux/tcp_cmctr.o: nbproject/Makefile-${CND_CONF}.mk ../../src/PAC/uclinux/tcp_cmctr.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/src/PAC/uclinux
+${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/tcp_cmctr.o: nbproject/Makefile-${CND_CONF}.mk ../../PAC/common/tcp_cmctr.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common
 	${RM} $@.d
-	$(COMPILE.cc) -g -DDEBUG -I../../src/PAC/uclinux/ -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/src/PAC/uclinux/tcp_cmctr.o ../../src/PAC/uclinux/tcp_cmctr.cpp
+	$(COMPILE.cc) -g -DDEBUG -I../../PAC/uclinux/ -I../../PAC/common -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/tcp_cmctr.o ../../PAC/common/tcp_cmctr.cpp
+
+${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/tcp_cmctr_w750.o: nbproject/Makefile-${CND_CONF}.mk ../../PAC/uclinux/tcp_cmctr_w750.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux
+	${RM} $@.d
+	$(COMPILE.cc) -g -DDEBUG -I../../PAC/uclinux/ -I../../PAC/common -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/tcp_cmctr_w750.o ../../PAC/uclinux/tcp_cmctr_w750.cpp
 
 ${OBJECTDIR}/main.o: nbproject/Makefile-${CND_CONF}.mk main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -DDEBUG -I../../src/PAC/uclinux/ -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.cpp
+	$(COMPILE.cc) -g -DDEBUG -I../../PAC/uclinux/ -I../../PAC/common -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.cpp
 
 # Subprojects
 .build-subprojects:
@@ -74,7 +80,7 @@ ${OBJECTDIR}/main.o: nbproject/Makefile-${CND_CONF}.mk main.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r build/Debug
-	${RM} dist/Debug/GNU-Linux-x86/test_tcp_communicator
+	${RM} dist/Debug/GNU-Linux-x86/tcp_cmctr_test
 
 # Subprojects
 .clean-subprojects:

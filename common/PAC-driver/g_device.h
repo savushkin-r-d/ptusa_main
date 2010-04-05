@@ -345,8 +345,8 @@ class device_communicator: public i_load_device
         int add_device( i_complex_device *dev );
 
         /// @brief Сервис для работы с device_communicator.
-        static long write_devices_states_service( DESTDATA dest, long len, 
-            unsigned char *data, unsigned  char *outdata );
+        static long write_devices_states_service( long len, u_char *data,
+            u_char *outdata );
 #endif //PAC
     };
 //-----------------------------------------------------------------------------

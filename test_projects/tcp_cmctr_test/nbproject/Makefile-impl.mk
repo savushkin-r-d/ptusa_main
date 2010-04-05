@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=test_tcp_communicator
+PROJECTNAME=tcp_cmctr_test
 
 # Active Configuration
 DEFAULTCONF=Debug

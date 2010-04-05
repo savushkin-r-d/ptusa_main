@@ -258,14 +258,14 @@ int params_test::make_test()
     params_manager::get_instance()->init( POJECT_ID );
 
     saved_params_u_int_4 test1( 10 );
-    test1.save( 0, 5120 );        
-    test1.save( 1, 120 );        
-    test1.save( 2, 130 );
+    //test1.save( 0, 5120 );
+    //test1.save( 1, 120 );
+    //test1.save( 2, 130 );
 
     saved_params_float test( 10 );
-    test.save( 0, 512 );        
-    test.save( 1, 12 );        
-    test.save( 2, 13 );
+    //test.save( 0, 512 );
+    //test.save( 1, 12 );
+    //test.save( 2, 13 );
 
     params_manager::get_instance()->init( POJECT_ID );
     params_manager::get_instance()->final_init();
@@ -293,6 +293,16 @@ int params_test::make_test()
         }
 
 #ifdef DEBUG
+        Print( "Error passing params test!\n" );
+        Print( "test[ 0 ] = %f\n", test[ 0 ] );
+        Print( "test[ 1 ] = %f\n", test[ 1 ] );
+        Print( "test[ 2 ] = %f\n", test[ 2 ] );
+
+        Print( "test1[ 0 ] = %lu\n", test1[ 0 ] );
+        Print( "test1[ 1 ] = %lu\n", test1[ 1 ] );
+        Print( "test1[ 2 ] = %lu\n", test1[ 2 ] );
+        Getch();
+
     Print( "Passing params test - ok!\n" );
 
 #ifdef KEY_CONFIRM

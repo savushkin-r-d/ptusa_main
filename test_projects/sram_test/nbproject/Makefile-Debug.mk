@@ -31,10 +31,10 @@ OBJECTDIR=build/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
-	${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/tcp_cmctr.o \
 	${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/sys_w750.o \
 	${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/common/PAC-driver/g_device.o \
 	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/tcp_cmctr.o \
 	${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/PAC_dev.o \
 	${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/sys.o \
 	${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/param_ex.o
@@ -63,11 +63,6 @@ dist/Debug/GNU-Linux-x86/sram_test: ${OBJECTFILES}
 	${MKDIR} -p dist/Debug/GNU-Linux-x86
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/sram_test ${OBJECTFILES} ${LDLIBSOPTIONS} 
 
-${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/tcp_cmctr.o: nbproject/Makefile-${CND_CONF}.mk ../../PAC/uclinux/tcp_cmctr.cpp 
-	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux
-	${RM} $@.d
-	$(COMPILE.cc) -g -Wall -DUSE_NO_TANK_COMB_DEVICE -DW750 -DPAC -DDEBUG -I../../src/PAC/uclinux -I../../src/PAC/common -I../../src/common/PAC-driver -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/tcp_cmctr.o ../../PAC/uclinux/tcp_cmctr.cpp
-
 ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/sys_w750.o: nbproject/Makefile-${CND_CONF}.mk ../../PAC/uclinux/sys_w750.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux
 	${RM} $@.d
@@ -82,6 +77,11 @@ ${OBJECTDIR}/main.o: nbproject/Makefile-${CND_CONF}.mk main.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.cc) -g -Wall -DUSE_NO_TANK_COMB_DEVICE -DW750 -DPAC -DDEBUG -I../../src/PAC/uclinux -I../../src/PAC/common -I../../src/common/PAC-driver -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.cpp
+
+${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/tcp_cmctr.o: nbproject/Makefile-${CND_CONF}.mk ../../PAC/common/tcp_cmctr.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common
+	${RM} $@.d
+	$(COMPILE.cc) -g -Wall -DUSE_NO_TANK_COMB_DEVICE -DW750 -DPAC -DDEBUG -I../../src/PAC/uclinux -I../../src/PAC/common -I../../src/common/PAC-driver -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/tcp_cmctr.o ../../PAC/common/tcp_cmctr.cpp
 
 ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/PAC_dev.o: nbproject/Makefile-${CND_CONF}.mk ../../PAC/common/PAC_dev.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common
