@@ -100,6 +100,7 @@ class i_save_device
         virtual int save_device( char *buff ) = 0;      
     };
 //-----------------------------------------------------------------------------
+#ifdef DRIVER
 /// @brief Итерфейс устройства, позволяющий считать его из потока байтов.
 class i_load_device    
     {    
@@ -125,6 +126,7 @@ class i_load_device
         /// @return >= 0 - количество считанных байт.
         virtual int load_device( char *buff ) = 0; 
     };
+#endif // DRIVER
 //-----------------------------------------------------------------------------
 /// @brief Итерфейс устройства, которое выполняет команду, сохраненную  в
 /// потоке байтов.
@@ -144,12 +146,14 @@ class i_cmd_device
 /// Устройство хранится в массиве.
 class i_device    
     {    
-    public:        
+    public:
+#ifdef DRIVER
         /// @brief Получение номера устройства в массиве устройств.
         virtual u_int_4 get_idx() = 0;                  
 
         /// @brief Установление номера устройства в массиве устройств.
-        virtual void set_idx( u_int_4 new_idx ) = 0; 
+        virtual void set_idx( u_int_4 new_idx ) = 0;
+#endif // DRIVER
 
         /// @brief Возвращает номер устройства.
         virtual u_int_4 get_n() const = 0;
@@ -159,8 +163,12 @@ class i_device
     };
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс простого устройства.
-class i_simple_device: public i_device, public i_cmd_device, 
-    public i_load_device, public i_save_device
+class i_simple_device: public i_device, 
+        public i_cmd_device,
+#ifdef DRIVER
+        public i_load_device,
+#endif // DRIVER
+        public i_save_device
     {     
     };
 //-----------------------------------------------------------------------------
@@ -203,7 +211,9 @@ class i_complex_device: public i_simple_device
         virtual int             set_n( u_int_4 new_n ) = 0;
         virtual int             set_name( char * new_name ) = 0;
         virtual int             set_subdev_quantity( u_int_4 new_dev_cnt ) = 0;
-        virtual i_load_device*  get_load_dev( u_int_4 idx ) = 0;        
+#ifdef DRIVER
+        virtual i_load_device*  get_load_dev( u_int_4 idx ) = 0;
+#endif // DRIVER        
     };
 //-----------------------------------------------------------------------------
 /// @brief Базовое сложное устройства.
@@ -253,7 +263,10 @@ class complex_device: public i_complex_device
         int             set_n( u_int_4 new_n );
         int             set_name( char * new_name );
         int             set_subdev_quantity( u_int_4 new_dev_cnt );
+#ifdef DRIVER        
         i_load_device*  get_load_dev( u_int_4 idx );
+#endif // DRIVER                
+        
 
         i_simple_device* get_sub_dev( u_int_4 id ) const;
         i_complex_device* get_sub_complex_dev( char *sub_dev_name ) const;
@@ -286,7 +299,10 @@ class complex_device: public i_complex_device
 //-----------------------------------------------------------------------------
 /// @brief Коммуникатор устройств - содержит все устройства одного PAC. Служит
 /// для передачи информации о них и их состоянии на сервер (PC).
-class device_communicator: public i_load_device
+class device_communicator
+#ifdef DRIVER        
+: public i_load_device        
+#endif // DRIVER                
     {   
     public:
         enum CMD
@@ -330,7 +346,7 @@ class device_communicator: public i_load_device
         /// @brief Вывод на консоль устройств группы.
         void print() const;
 
-
+#ifdef DRIVER        
         /// @brief Метод интерфейса @ref i_load_device.
         int load_state( char *buff );
 
@@ -338,7 +354,9 @@ class device_communicator: public i_load_device
         int load_changed_state( char *buff );
 
         /// @brief Метод интерфейса @ref i_load_device.
-        int load_device( char *buff );
+        int load_device( char *buff );        
+#endif // DRIVER               
+
         
 #ifdef PAC
         /// @brief Добавление устройства.

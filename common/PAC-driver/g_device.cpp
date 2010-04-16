@@ -240,6 +240,7 @@ int complex_device::set_subdev_quantity( u_int_4 new_dev_cnt )
     return 0;
     }
 //-----------------------------------------------------------------------------
+#ifdef DRIVER        
 i_load_device* complex_device::get_load_dev( u_int_4 idx )
     {
 #if defined DEBUG && defined WIN32
@@ -250,7 +251,8 @@ i_load_device* complex_device::get_load_dev( u_int_4 idx )
 #endif // DEBUG
 
     return sub_dev[ idx ];
-    }
+    }        
+#endif // DRIVER                
 //-----------------------------------------------------------------------------
 // Данные группы (buff) в следующем виде:
 //    1 байт  - тип;                                    (1)
@@ -629,6 +631,7 @@ i_complex_device* device_communicator::get_group( char* dev_name, u_int_4 dev_n,
     return 0;
     }
 //-----------------------------------------------------------------------------
+#ifdef DRIVER        
 int device_communicator::load_state( char *buff  )
     {
     //Структура полученных от контроллера данных:
@@ -652,7 +655,7 @@ int device_communicator::load_state( char *buff  )
         }
 
     return 0;
-    }
+    }        
 //-----------------------------------------------------------------------------
 int device_communicator::load_device( char *buff  ) 
     {
@@ -712,7 +715,8 @@ int device_communicator::load_device( char *buff  )
         }
 
     return 0;
-    }
+    }        
+#endif // DRIVER                
 //-----------------------------------------------------------------------------
 void device_communicator::print() const
     {  
@@ -733,6 +737,7 @@ void device_communicator::print() const
     print_str( tmp_str );
     }
 //-----------------------------------------------------------------------------
+#ifdef DRIVER        
 int device_communicator::load_changed_state( char *buff )
     {
     // Структура полученных от контроллера данных:
@@ -775,7 +780,8 @@ int device_communicator::load_changed_state( char *buff )
         }
 
     return 0;
-    }
+    }        
+#endif // DRIVER                
 //-----------------------------------------------------------------------------
 #ifdef PAC
 

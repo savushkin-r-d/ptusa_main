@@ -1,3 +1,4 @@
+#include "sys.h"
 //-----------------------------------------------------------------------------
 /// @brief 
 //
@@ -32,18 +33,39 @@ struct wago_table
 class wago_manager
     {
     public:
-        int read_inputs() = 0;
-        int write_outputs() = 0;
+        virtual int read_inputs()
+            {
+            return 0;
+            }
+        virtual int write_outputs()
+            {
+            return 0;
+            }
 
-        int load_from_stream( char *stream ) = 0;
+        virtual int load_from_stream( char *stream )
+            {
+            return 0;
+            }
 
-        wago_manager* get_instance();
+        static wago_manager* get_instance()
+            {
+            return instance;
+            }
 
-    private:
-        wago_table **tables;
+        static void set_instance( wago_manager* new_instance )
+            {
+            instance = new_instance;
+            }
 
-        int get_DO( u_int table_n, u_int offset );
-        int set_DO( u_int table_n, u_int offset, char value );
+        int get_DO( u_int table_n, u_int offset )
+            {
+            return 0;
+            }
+        
+        int set_DO( u_int table_n, u_int offset, char value )
+            {
+            return 0;
+            }
 
         int get_DI( u_int table_n, u_int offset );
         int set_DI( u_int table_n, u_int offset, char value );
@@ -53,5 +75,10 @@ class wago_manager
 
         float get_AI( u_int table_n, u_int offset );
         int   set_AI( u_int table_n, u_int offset, float value );
+
+    private:
+        wago_table **tables;
+
+        static wago_manager* instance;
     };
 //-----------------------------------------------------------------------------
