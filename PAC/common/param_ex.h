@@ -254,7 +254,7 @@ class run_time_params_float: public parameters < float >,
         ///
         /// @param count - количество параметров.
         run_time_params_float( int count ):parameters < float >( count ),
-            array_device < float >( 1, 
+            array_device < float >( 1,
             "RT_PARAM_F", 
             count, 
             i_complex_device::ARRAY_DEV_FLOAT )
@@ -293,7 +293,7 @@ class run_time_params_u_int_4: public parameters < u_int_4 >,
         ///
         /// @param count - количество параметров.
         run_time_params_u_int_4( int count ) : parameters < u_int_4 >( count ),
-            array_device < u_int_4 >( 1, "RT_PARAM_UL", count, 
+            array_device < u_int_4 >( 1, "RT_PARAM_UL", count,
             i_complex_device::ARRAY_DEV_ULONG )
             {
             }
@@ -392,7 +392,7 @@ class saved_params_u_int_4: public saved_params < u_int_4 >,
         /// @param count - количество параметров.
         saved_params_u_int_4( int count ) :
           saved_params < u_int_4 >( count ),              
-              array_device < u_int_4 >( 1, "S_PARAM_UL", count, 
+              array_device < u_int_4 >( 1, "S_PARAM_UL", count,
               i_complex_device::ARRAY_DEV_ULONG )
               {
               }

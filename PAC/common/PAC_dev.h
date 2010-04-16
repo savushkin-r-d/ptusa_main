@@ -30,7 +30,7 @@
 /// которые представляются массивом некоторого типа.
 //
 /// Например: параметры, состояния и т.д.
-template < class data_type > class i_array_device: public i_simple_device
+template < class data_type > class array_device: public i_simple_device
     {
     public:
         /// @param n        - номер.
@@ -38,7 +38,7 @@ template < class data_type > class i_array_device: public i_simple_device
         /// @param new_subdev_cnt - количество элементов в массиве.
         /// @param type     - тип. Для сохранения устройств и передачи на
         /// сервер.
-        i_array_device( u_int_4 n, 
+        array_device( u_int_4 n, 
             const char *new_name,
             u_int_2 new_subdev_cnt,
             char type ): sub_dev_cnt( new_subdev_cnt ), 
@@ -518,7 +518,7 @@ class DO_1 : public char_state_device,
 
         int set_value( float new_value )
             {
-            return set_state( new_value );
+            return set_state( ( int ) new_value );
             }
          
         int get_state()
