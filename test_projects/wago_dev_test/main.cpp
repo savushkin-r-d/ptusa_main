@@ -6,6 +6,7 @@
  */
 
 #include <stdlib.h>
+
 #include "PAC_dev.h"
 #include "tcp_cmctr_w750.h"
 
@@ -20,12 +21,15 @@ int main( int argc, char** argv )
     DO_1 do_test;
     do_test.print();
 
-
-    DO_device *test = &do_test;
-
-    Print( " state = %d\n", test->get_state() );
-
-    V( 0 )->get_state();
+    while ( 1 )
+        {
+        V( 1 )->on();
+        Print( " state = %d\n",V( 1 )->get_state() );
+        sleep( 1 );
+        V( 1 )->off();
+        Print( " state = %d\n",V( 1 )->get_state() );
+        sleep( 1 );
+        }
 
     return( EXIT_SUCCESS );
     }

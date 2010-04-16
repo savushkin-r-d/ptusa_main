@@ -43,8 +43,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include
+CXXFLAGS=-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -61,42 +61,42 @@ LDLIBSOPTIONS=
 
 dist/Debug_ucLinux/arm-uclinux-elf-Linux-x86/wago_dev_test: ${OBJECTFILES}
 	${MKDIR} -p dist/Debug_ucLinux/arm-uclinux-elf-Linux-x86
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/wago_dev_test ${OBJECTFILES} ${LDLIBSOPTIONS} 
+	${LINK.cc} -Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -Wl,-elf2flt /home/id/uclinux-dist/lib/uClibc/lib/crt0.o /home/id/uclinux-dist/lib/uClibc/lib/crti.o /home/id/uclinux-dist/lib/uClibc/lib/crtn.o -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/wago_dev_test ${OBJECTFILES} ${LDLIBSOPTIONS} 
 
 ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/sys_w750.o: nbproject/Makefile-${CND_CONF}.mk ../../PAC/uclinux/sys_w750.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux
 	${RM} $@.d
-	$(COMPILE.cc) -g -I../../PAC/common -I../../common/PAC-driver -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/sys_w750.o ../../PAC/uclinux/sys_w750.cpp
+	$(COMPILE.cc) -g -Wall -DPAC -DW750 -DDEBUG -I../../PAC/common -I../../common/PAC-driver -I../../PAC/uclinux -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/sys_w750.o ../../PAC/uclinux/sys_w750.cpp
 
 ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/wago.o: nbproject/Makefile-${CND_CONF}.mk ../../PAC/common/wago.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common
 	${RM} $@.d
-	$(COMPILE.cc) -g -I../../PAC/common -I../../common/PAC-driver -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/wago.o ../../PAC/common/wago.cpp
+	$(COMPILE.cc) -g -Wall -DPAC -DW750 -DDEBUG -I../../PAC/common -I../../common/PAC-driver -I../../PAC/uclinux -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/wago.o ../../PAC/common/wago.cpp
 
 ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/common/PAC-driver/g_device.o: nbproject/Makefile-${CND_CONF}.mk ../../common/PAC-driver/g_device.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/common/PAC-driver
 	${RM} $@.d
-	$(COMPILE.cc) -g -I../../PAC/common -I../../common/PAC-driver -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/common/PAC-driver/g_device.o ../../common/PAC-driver/g_device.cpp
+	$(COMPILE.cc) -g -DPAC -DW750 -DDEBUG -I../../PAC/common -I../../common/PAC-driver -I../../PAC/uclinux -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/common/PAC-driver/g_device.o ../../common/PAC-driver/g_device.cpp
 
 ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/tcp_cmctr_w750.o: nbproject/Makefile-${CND_CONF}.mk ../../PAC/uclinux/tcp_cmctr_w750.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux
 	${RM} $@.d
-	$(COMPILE.cc) -g -I../../PAC/common -I../../common/PAC-driver -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/tcp_cmctr_w750.o ../../PAC/uclinux/tcp_cmctr_w750.cpp
+	$(COMPILE.cc) -g -Wall -DPAC -DW750 -DDEBUG -I../../PAC/common -I../../common/PAC-driver -I../../PAC/uclinux -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/tcp_cmctr_w750.o ../../PAC/uclinux/tcp_cmctr_w750.cpp
 
 ${OBJECTDIR}/main.o: nbproject/Makefile-${CND_CONF}.mk main.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -g -I../../PAC/common -I../../common/PAC-driver -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.cpp
+	$(COMPILE.cc) -g -DPAC -DW750 -DDEBUG -I../../PAC/common -I../../common/PAC-driver -I../../PAC/uclinux -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.cpp
 
 ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/tcp_cmctr.o: nbproject/Makefile-${CND_CONF}.mk ../../PAC/common/tcp_cmctr.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common
 	${RM} $@.d
-	$(COMPILE.cc) -g -I../../PAC/common -I../../common/PAC-driver -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/tcp_cmctr.o ../../PAC/common/tcp_cmctr.cpp
+	$(COMPILE.cc) -g -Wall -DPAC -DW750 -DDEBUG -I../../PAC/common -I../../common/PAC-driver -I../../PAC/uclinux -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/tcp_cmctr.o ../../PAC/common/tcp_cmctr.cpp
 
 ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/sys.o: nbproject/Makefile-${CND_CONF}.mk ../../PAC/common/sys.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common
 	${RM} $@.d
-	$(COMPILE.cc) -g -I../../PAC/common -I../../common/PAC-driver -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/sys.o ../../PAC/common/sys.cpp
+	$(COMPILE.cc) -g -DPAC -DW750 -DDEBUG -I../../PAC/common -I../../common/PAC-driver -I../../PAC/uclinux -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/sys.o ../../PAC/common/sys.cpp
 
 # Subprojects
 .build-subprojects:
