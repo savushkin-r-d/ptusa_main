@@ -1,6 +1,7 @@
 /// @file PAC_dev.h
 /// @brief Содержит описания классов, которые реализуют функции передачи 
-/// состояния устройств PAC на сервер. Классы используются ТОЛЬКО в 
+/// состояния устройств PAC на сервер. Также реализованы классы для работы с 
+/// устройствами ( клапана, насосы,... ). Классы используются ТОЛЬКО в 
 /// контроллере ( PAC ).
 /// 
 /// @author  Иванюк Дмитрий Сергеевич.
@@ -15,8 +16,6 @@
 
 #ifndef PAC_DEVICES_H
 #define PAC_DEVICES_H
-
-#include <limits.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -203,349 +202,375 @@ template < class data_type > class array_device: public i_simple_device
         data_type*      prev_val;       ///< Массив предыдущих значений.
     };
 //-----------------------------------------------------------------------------
-/// @brief 
-//
-///
+/// @brief Класс универсального простого устройства, который используется в 
+/// режимах.
 class device : public i_simple_device
     {
     public:
-        device(): number( 0 )
-        {
-        }
+        device();
 
+        enum CONSTANTS
+            {
+            C_DEVICE_TYPE_CNT = 14,     ///< Количество типов устройств.
+            };
+
+        /// Типы устройств.
         enum DEVICE_TYPE
             {
-            DT_V = 0, 
-            DT_N,
-            DT_M,
-            DT_LS,     
-            DT_TE,     
-            DT_FE,     
-            DT_FS,     
-            DT_CTR,    
-            DT_AO,     
-            DT_LE,
-            DT_FB,     
-            DT_UPR,    
-            DT_QE,    
-            DT_AI,
+            DT_V = 0,   ///< Клапан. 
+            DT_N,       ///< Насос.
+            DT_M,       ///< Мешалка.
+            DT_LS,      ///< Уровень (есть/нет).
+            DT_TE,      ///< Температура.
+            DT_FE,      ///< Расход (значение).
+            DT_FS,      ///< Расход (есть/нет).
+            DT_CTR,     ///< Счетчик.
+            DT_AO,      ///< Аналоговый выход.
+            DT_LE,      ///< Уровень (значение).
+            DT_FB,      ///< Обратная связь.
+            DT_UPR,     ///< Канал управления.
+            DT_QE,      ///< Концентрация.
+            DT_AI,      ///< Аналоговый вход.
             };
 
+        /// Подтипы устройств.
         enum DEVICE_SUB_TYPE
             {
+            DST_NONE = 0,       ///< Подтип неопределен.
+
             //DT_V = 0, 
-            DST_V_1DO = 0,            
-            DST_V_2DO,
-            DST_V_1DO_1DI,
-            DST_V_1DO_2DI,
-            DST_V_2DO_2DI,
-            DST_V_1DO_3DI, 
-            DST_V_1DO_2DI_S,    // 2 FB на одно из состояний.
-            DST_V_AS_MIX,       // Микспруф с AS интерфейсом.
+            DST_V_1DO = 0,      ///< Клапан с одним каналом управления.
+            DST_V_2DO,          ///< Клапан с двумя каналами управления.
+            DST_V_1DO_1DI,      ///< Клапан с одним каналом управления и одной обратной связью.
+            DST_V_1DO_2DI,      ///< Клапан с одним каналом управления и двумя обратными связями.
+            DST_V_2DO_2DI,      ///< Клапан с двумя каналами управления и двумя обратными связями (микспруф).
+            DST_V_1DO_3DI,      ///< Клапан с одним каналом управления и тремя обратными связями.
+            DST_V_1DO_2DI_S,    ///< Клапан с одним каналом управления и двумя обратными связями на одно из состояний.
+            DST_V_AS_MIX,       ///< Клапан с двумя каналами управления и двумя обратными связями с AS интерфейсом (микспруф).
             };
 
+        /// @brief Включение устройства.
+        ///
+        /// Установка устройства в активное состояние. Для клапана это означает
+        /// его активирование, то есть если он нормально закрытый - открытие.
         virtual void on() = 0;
+
+        /// @brief Выключение устройства.
+        ///
+        /// Установка устройства в пассивное состояние. Для клапана это означает
+        /// его деактивирование, то есть если он нормально закрытый - закрытие.
         virtual void off() = 0;
-        virtual int  get_state() = 0;
-        virtual int  set_state( int new_state ) = 0;
 
+        /// @brief Получение текущего состояния устройства.
+        ///
+        /// @return - текущее состояние устройства в виде целого числа.
+        virtual int get_state() = 0;
+
+        /// @brief Установка нового состояния устройства.
+        ///
+        /// @param new_state - новое состояние объекта.
+        ///
+        /// @return -  0 - Ок.
+        /// @return - >0 - ошибка.
+        virtual int set_state( int new_state ) = 0;
+
+        /// @brief Получение текущего состояния устройства.
+        ///
+        /// @return - текущее состояние устройства в виде дробного числа.
         virtual float get_value() = 0;
-        virtual int   set_value( float new_value ) = 0;
 
-        // Сохранение самого устройства в буфер.
-        int save_device( char *buff  )
-            {
-            ( ( u_int_4* ) buff )[ 0 ] = number;
-            return sizeof( u_int_4 );
-            }
-     
-        void print() const
-            {  
-#ifdef DEBUG
-            Print( "%5lu\n", ( unsigned long ) number );
-#endif // DEBUG            
-            }
+        /// @brief Установка текущего состояния устройства.
+        ///
+        /// @param new_value - новое состояние устройства.
+        ///
+        /// @return -  0 - Ок.
+        /// @return - >0 - ошибка.
+        virtual int set_value( float new_value ) = 0;
 
-        virtual int load( char *stream )
-            {
-            number = *( ( u_int_4* ) stream );
-            return sizeof( u_int_4 );
-            }
+        /// @brief Сохранение самого устройства в буфер.
+        ///
+        /// @param buff - буфер для сохранения устройства.
+        ///
+        /// @return -  количество записанных байт.
+        int save_device( char *buff  );
 
-        //Возвращает номер устройства.
-        u_int_4 get_n() const
-            {
-            return number;
-            }
+        /// @brief Вывод объекта в консоль.
+        ///
+        /// Для использования в отладочных целях.
+        void print() const;
+
+        /// @brief Загрузка самого устройства из буфера.
+        ///
+        /// @param buff - буфер для считывания устройства.
+        ///
+        /// @return -  количество считанных байт.
+        virtual int load( char *stream );
+
+        /// @brief Получение номера устройства.
+        ///
+        /// @return -  номер устройства.
+        u_int_4 get_n() const;
 
     protected:
-        u_int_4 number;
+        u_int_4 number;             ///< Номер устройства.
 
-        DEVICE_TYPE     type;
-        DEVICE_SUB_TYPE sub_type;
-    };
-
+        DEVICE_TYPE     type;       ///< Тип устройства.
+        DEVICE_SUB_TYPE sub_type;   ///< Подтип устройства.
+    }; 
 //-----------------------------------------------------------------------------
-/// @brief
+/// @brief Устройство, для хранения состояния которого необходим один байт.
 ///
-///
+/// Это клапаны, насосы, мешалки, обратные связи и т.д.
 class char_state_device : public device
     {
     public:
-         // Сохранение измененного состояния устройства в буфер.
-        int save_changed_state( char *buff )
-            {
-            if ( prev_state != get_state() )
-                {
-                buff[ 0 ] = get_state();
-                prev_state = get_state();
-                return sizeof( char );
-                }
-            return 0;
-            }
+        /// @brief Реализация интерфейса @ref i_save_device.
+        int save_changed_state( char *buff );
 
-        // Сохранение состояния устройства в буфер.
-        int save_state( char *buff  )
-            {
-            buff[ 0 ] = get_state();
-            prev_state = get_state();
-            return sizeof( char );
-            }
+        /// @brief Реализация интерфейса @ref i_save_device.
+        int save_state( char *buff  );
 
     private:
-        char prev_state;
+        char prev_state;    ///< Предыдущее состояние устройства.
     };
 //-----------------------------------------------------------------------------
-/// @brief 
+/// @brief Устройство с дискретным входом. 
 ///
-/// 
+/// Устройства типа обратной связи, уровня и т.д. реализуют данный интерфейс.
 class DI_device
     {
     public:
+        /// @brief Получение текущего состояния устройства.
+        ///
+        /// @return - текущее состояние устройства в виде целого числа.
         virtual int get_state() = 0;
     };
 //-----------------------------------------------------------------------------
-/// @brief 
-//
-/// 
+/// @brief Устройство с дискретным выходом. 
+///
+/// Устройства типа клапана, мешалки и т.д. реализуют данный интерфейс.
 class DO_device: public DI_device
     {
     public:
+        /// @brief Включение устройства.
+        ///
+        /// Установка устройства в активное состояние. Для клапана это означает
+        /// его активирование, то есть если он нормально закрытый - открытие.
         virtual void on() = 0;
+
+        /// @brief Выключение устройства.
+        ///
+        /// Установка устройства в пассивное состояние. Для клапана это означает
+        /// его деактивирование, то есть если он нормально закрытый - закрытие.
         virtual void off() = 0;
 
+        /// @brief Установка нового состояния устройства.
+        ///
+        /// @param new_state - новое состояние объекта.
+        ///
+        /// @return -  0 - Ок.
+        /// @return - >0 - ошибка.
         virtual int set_state( int new_state ) = 0;
     };
 //-----------------------------------------------------------------------------
-/// @brief 
-//
-/// 
+/// @brief Устройство с аналоговым входом. 
+///
+/// Устройства типа температуры, расхода и т.д. реализуют данный интерфейс.
 class AI_device
     {
     public:
+        /// @brief Получение текущего состояния устройства.
+        ///
+        /// @return - текущее состояние устройства в виде дробного числа.
         virtual float get_value() = 0;
     };
 //-----------------------------------------------------------------------------
-/// @brief 
-//
-/// 
+/// @brief Устройство с аналоговым выходом. 
+///
+/// Устройства типа аналогового каналы управления и т.д. реализуют данный
+/// интерфейс.
 class AO_device: public AI_device
     {
     public:
-        virtual int off() = 0;
+        /// @brief Выключение устройства.
+        ///
+        /// Установка устройства в пассивное состояние. Для клапана это означает
+        /// его деактивирование, то есть если он нормально закрытый - закрытие.
+        virtual void off() = 0;
 
-        virtual float set_value( float new_value ) = 0;
+        /// @brief Установка текущего состояния устройства.
+        ///
+        /// @param new_value - новое состояние устройства.
+        ///
+        /// @return -  0 - Ок.
+        /// @return - >0 - ошибка.
+        virtual int set_value( float new_value ) = 0;
     };
 //-----------------------------------------------------------------------------
-/// @brief 
-//
+/// @brief Устройство на основе модулей ввода/вывода WAGO. 
 /// 
+/// В общем случае у устройства может быть один или несколько каналов
+/// ввода/вывода (дискретных или аналоговых).
 class wago_device
     {
     public:
-        wago_device(): DI_count( 0 ), DI_tables( 0 ), DI_offsets( 0 ),
-            DO_count( 0 ), DO_tables( 0 ), DO_offsets( 0 ),
-            AI_count( 0 ), AI_tables( 0 ), AI_offsets( 0 ),
-            AO_count( 0 ), AO_tables( 0 ), AO_offsets( 0 )
-            {
-            }            
-
-        virtual int load( char *stream )
-            {
-            //[ 0   ] - номер устройства.
-            //[ 1   ] - 
-            //[ 2   ] - 
-            //[ 3   ] - 
-            int pos = 0;
-
-            //[ 4   ] - количество DI.
-            //[ 5   ] - 
-            //[ 6   ] - номер таблицы DI.
-            //[ 7   ] - 
-            //[ 8   ] - смещение в пределах таблицы.
-            //[ ... ] -   
-            //[ x1  ] - количество DO.
-            //[ ... ] -   
-            //[ x2  ] - количество AO.
-            //[ ... ] -   
-            //[ x3  ] - количество AI.
-            //[ ... ] -            
-            pos += load_table( stream + pos, DI_count, DI_tables, DI_offsets );
-            pos += load_table( stream + pos, DO_count, DO_tables, DO_offsets );
-            pos += load_table( stream + pos, AI_count, AI_tables, AI_offsets );
-            pos += load_table( stream + pos, AO_count, AO_tables, AO_offsets );
-            return pos;
-            }
+        /// @brief Загрузка самого устройства из буфера.
+        ///
+        /// @param buff - буфер для считывания устройства.
+        ///
+        /// @return -  количество считанных байт.
+        virtual int load( char *stream );
 
     protected:
-        int get_DO( u_int index )
-            {
-            if ( index < DO_count && DO_tables && DO_offsets )
-                {
-                return wago_manager::get_instance()->get_DO( DO_tables[ index ],
-                DO_offsets[ index ] );
-                }
+        /// @brief Получение состояния канала дискретного выхода.
+        ///
+        /// @param index - индекс канала в таблице дискретных выходных каналов 
+        /// устройства.
+        ///
+        /// @return -  0 - Ок.
+        /// @return - >0 - ошибка.
+        int get_DO( u_int index );
 
-#ifdef DEBUG
-                Print( "wago_device->get_DO(...) - error!\n" );
-#endif // DEBUG
+        /// @brief Установка состояния канала дискретного выхода.
+        ///
+        /// @param index - индекс канала в таблице дискретных выходных каналов 
+        /// устройства.
+        /// @param value - новое состояние канала.
+        ///
+        /// @return -  0 - Ок.
+        /// @return - >0 - ошибка.
+        int set_DO( u_int index, char value );
 
-            return 0;
-            }
+        /// @brief Получение состояния канала дискретного входа.
+        ///
+        /// @param index - индекс канала в таблице дискретных входных каналов 
+        /// устройства.
+        ///
+        /// @return -  0 - Ок.
+        /// @return - >0 - ошибка.
+        int get_DI( u_int index );
 
-        int set_DO( u_int index, char value )
-            {
-            return wago_manager::get_instance()->set_DO( DO_tables[ index ],
-                DO_offsets[ index ], value );
-            }
+        /// @brief Установка состояния канала дискретного входа.
+        ///
+        /// @param index - индекс канала в таблице дискретных входных каналов 
+        /// устройства.
+        /// @param value - новое состояние канала.
+        ///
+        /// @return -  0 - Ок.
+        /// @return - >0 - ошибка.
+        int set_DI( u_int index, char value );
 
-        int get_DI( u_int index )
-            {
-            return wago_manager::get_instance()->get_DI( DO_tables[ index ],
-                DO_offsets[ index ] );
-            }
-        int set_DI( u_int index, char value )
-            {
-            return wago_manager::get_instance()->set_DI( DO_tables[ index ],
-                DO_offsets[ index ], value );
-            }
+        /// @brief Получение состояния канала аналогового выхода.
+        ///
+        /// @param index - индекс канала в таблице аналоговых выходных каналов 
+        /// устройства.
+        ///
+        /// @return -  0 - Ок.
+        /// @return - >0 - ошибка.
+        float get_AO( u_int index );
 
-        float get_AO( u_int index )
-            {
-            return wago_manager::get_instance()->get_AO( DO_tables[ index ],
-                DO_offsets[ index ] );
-            }
-        int   set_AO( u_int index, float value )
-            {
-            return wago_manager::get_instance()->set_AO( DO_tables[ index ],
-                DO_offsets[ index ], value );
-            }
+        /// @brief Установка состояния канала аналогового выхода.
+        ///
+        /// @param index - индекс канала в таблице аналоговых выходных каналов 
+        /// устройства.
+        /// @param value - новое состояние канала.
+        ///
+        /// @return -  0 - Ок.
+        /// @return - >0 - ошибка.
+        int   set_AO( u_int index, float value );
 
-        float get_AI( u_int index )
-            {
-            return wago_manager::get_instance()->get_AI( DO_tables[ index ],
-                DO_offsets[ index ] );
-            }
-        int   set_AI( u_int index, float value )
-            {
-            return wago_manager::get_instance()->set_AI( DO_tables[ index ],
-                DO_offsets[ index ], value );
-            }
+        /// @brief Получение состояния канала аналогового входа.
+        ///
+        /// @param index - индекс канала в таблице аналоговых входных каналов 
+        /// устройства.
+        ///
+        /// @return -  0 - Ок.
+        /// @return - >0 - ошибка.
+        float get_AI( u_int index );
+
+        /// @brief Установка состояния канала аналогового входа.
+        ///
+        /// @param index - индекс канала в таблице аналоговых входных каналов 
+        /// устройства.
+        /// @param value - новое состояние канала.
+        ///
+        /// @return -  0 - Ок.
+        /// @return - >0 - ошибка.
+        int   set_AI( u_int index, float value );
 
     private:
-        u_int_2  DI_count;
-        u_int_2* DI_tables;
-        u_int_2* DI_offsets;
-
-        u_int_2  DO_count;
-        u_int_2* DO_tables;
-        u_int_2* DO_offsets;
-
-        u_int_2  AI_count;
-        u_int_2* AI_tables;
-        u_int_2* AI_offsets;
-
-        u_int_2  AO_count;
-        u_int_2* AO_tables;
-        u_int_2* AO_offsets;
-
-        int load_table( char *stream, u_int_2 &count, u_int_2 *tables,
-            u_int_2 *offsets )
+        /// @brief Группа каналов ввода/вывода устройства.
+        struct IO_channels
             {
-            //[ 0   ] - количество DI (например).
-            //[ 1   ] - 
-            //[ 2   ] - номер таблицы DI №1.
-            //[ 3   ] - 
-            //[ 4   ] - смещение в пределах таблицы №1.
-            //[ 5   ] -
-            //[ 6   ] - номер таблицы DI №2.
-            //[ 7   ] - 
-            //[ 8   ] - смещение в пределах таблицы №2.
-            //[ ... ] -  
-            count = *( ( u_int_2 * ) stream );
-            int pos = sizeof( u_int_2 );
+            u_int  count;   ///< Количество каналов.
+            u_int* tables;  ///< Массив таблиц.
+            u_int* offsets; ///< Массив смещений в пределах таблиц.
 
-            if ( count > 0 )
+            IO_channels() : count( 0 ), tables( 0 ), offsets( 0 )
                 {
-                tables = new u_int_2[ count ];
-                offsets = new u_int_2[ count ];
-                for ( u_int i = 0; i < count; i++ )
-                    {
-                    tables[ i ] = *( ( u_int_2 * ) ( stream + pos ) );
-                    pos += sizeof( u_int_2 );
-
-                    offsets[ i ] = *( ( u_int_2 * ) ( stream + pos ) );
-                    pos += sizeof( u_int_2 );
-                    }
                 }
+            };
 
-            return pos;
-            }
+        IO_channels DI_channels;    ///< Каналы дискретного входа.
+        IO_channels DO_channels;    ///< Каналы дискретного выхода.    
+        IO_channels AI_channels;    ///< Каналы аналогового входа.
+        IO_channels AO_channels;    ///< Каналы аналогового выхода.     
+
+        /// @brief Загрузка информации о группе каналов ввода/вывода из 
+        /// байтового потока.
+        /// 
+        /// @param stream - буфер для считывания устройства.
+        /// @param [out] channels - группа, в которая считывается.
+        ///
+        /// @return -  количество считанных байт.
+        int load_table( char *stream, IO_channels &channels );
     };
 //-----------------------------------------------------------------------------
-/// @brief 
-//
-/// 
-class DO_1 : public char_state_device,
-        public DO_device,
-        public wago_device
+/// @brief Виртуальное устройство.
+///
+/// Необходимо для возвращения результата поиска устройства с несуществующим
+/// номером. Методы данного класса ничего не делают. 
+class dev_stub : public char_state_device,
+    public DO_device,
+    public AO_device
     {
     public:
-        float get_value()
-            {
-            return get_state();
-            }
+        float get_value();
 
-        int set_value( float new_value )
-            {
-            return set_state( ( int ) new_value );
-            }
-         
-        int get_state()
-            {
-            return get_DO( DO_INDEX );
-            }
+        int set_value( float new_value );
 
-        void on()
-            {
-            set_DO( DO_INDEX, 1 );
-            }
+        int get_state();
 
-        void off()
-            {
-            set_DO( DO_INDEX, 0 );
-            }
+        void on();
 
-        int set_state( int new_state )
-            {
-            return set_DO( DO_INDEX, new_state );
-            }
+        void off();
 
-        int parse_cmd( char *buff  )
-            {
-            set_state( buff[ 0 ] );
-            return sizeof( char );
-            }
+        int set_state( int new_state );
+
+        int parse_cmd( char *buff );
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с одним дискретным выходом.
+///
+/// Это может быть клапан, насос, канал управления...
+class DO_1 : public char_state_device,
+    public DO_device,
+    public wago_device
+    {
+    public:
+        float get_value();
+
+        int set_value( float new_value );
+
+        int get_state();
+
+        void on();
+
+        void off();
+
+        int set_state( int new_state );
+
+        int parse_cmd( char *buff  );
 
     private:
         enum CONSTANTS
@@ -554,25 +579,41 @@ class DO_1 : public char_state_device,
             };
     };
 //-----------------------------------------------------------------------------
-/// @brief 
-//
-/// 
+/// @brief Менеджер устройств.
+///
+/// Содержит информацию обо всех устройствах проекта.
 class device_manager
     {
     public:
         int load_from_stream( char *stream );
 
-        static DO_device* get_V( int number )
-            {
-            return 0;
-            }
-            
+        DO_device* get_V( int number );
+
+        static device_manager* get_instance();
+
+        static void set_instance( device_manager* new_instance );
+
     private:
+        dev_stub stub;
+
+        struct range
+            {
+            int start_pos;
+            int end_pos;
+            };
+
+        range dev_types_ranges[ device::C_DEVICE_TYPE_CNT ];
+
+        /// @brief Получение устройства по его номеру.
+        ///
+        int get_device( device::DEVICE_TYPE dev_type, int dev_number );
+
         device **project_devices;
+
+        static device_manager* instance;
     };
 //-----------------------------------------------------------------------------
-
-#define V device_manager::get_V
-
-
+/// Получение клапана по его номеру.
+#define V device_manager::get_instance()->get_V
+//-----------------------------------------------------------------------------
 #endif // PAC_DEVICES_H
