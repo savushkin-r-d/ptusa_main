@@ -52,4 +52,24 @@ class NV_memory_manager_W750: public NV_memory_manager
         NV_memory_manager_W750();
     };
 //-----------------------------------------------------------------------------
+class file_w750 : public file
+    {
+    public:
+        int open( char file_name )
+            {
+            return 0;
+            }
+        int read( void *buffer, int count )
+            {
+            return 0;
+            }
+        char* get_line()
+            {
+            return 0;
+            }
+        void close()
+            {
+            }
+    };
+//-----------------------------------------------------------------------------
 #endif // SYS_7186_H

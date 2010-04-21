@@ -40,7 +40,7 @@ class wago_manager
         
         virtual int write_outputs() = 0;
 
-        int load_from_stream( char *stream )
+        int load_from_cfg_file( file *cfg_file )
             {
             return 0;
             }

@@ -325,6 +325,11 @@ int device_manager::get_device( device::DEVICE_TYPE dev_type, int dev_number )
     return -1;
     }
 //-----------------------------------------------------------------------------
+int device_manager::load_from_cfg_file( file *cfg_file )
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float dev_stub::get_value()
     {

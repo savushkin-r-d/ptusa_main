@@ -585,7 +585,7 @@ class DO_1 : public char_state_device,
 class device_manager
     {
     public:
-        int load_from_stream( char *stream );
+        int load_from_cfg_file( file *cfg_file );
 
         DO_device* get_V( int number );
 

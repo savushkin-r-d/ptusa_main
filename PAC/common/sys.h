@@ -222,4 +222,13 @@ class NV_memory_manager
         u_int last_EEPROM_pos; ///< Индекс крайнего свободного элемента EEPROM.
     };
 //-----------------------------------------------------------------------------
+class file
+    {
+    public:
+        int open( char file_name ) = 0;
+        int read( void *buffer, int count ) = 0;
+        char* get_line() = 0;
+        void close() = 0;
+    };
+//-----------------------------------------------------------------------------
 #endif // SYS_H
