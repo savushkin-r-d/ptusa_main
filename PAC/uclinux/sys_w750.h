@@ -57,81 +57,17 @@ class NV_memory_manager_W750: public NV_memory_manager
 class file_w750 : public file
     {
     public:
-        file_w750() : f( 0 )
-            {
-            }
-        
-        int fopen( const char* file_name )
-            {
-            f = open( file_name, O_RDONLY );
-            return f;
-            }
+        file_w750();
 
-        int fread( void *buffer, int count )
-            {
-            int res = 0;
-            if ( f > 0 )
-                {
-                res = read( f, buffer, count );
-                }
+        int fopen( const char* file_name );
 
-            return res;
-            }
+        int fread( void *buffer, int count );
 
-        char* fget_line()
-            {
-            buf[ 0 ] = 0;
+        char* fget_line();
 
-            char *tmp_buff = buf;
-            int pos = 1;
-            read( f, tmp_buff, 1 );
-            while ( tmp_buff[ 0 ] != '\n' )
-                {
-                tmp_buff++;
-                int res = 0;
+        char* pfget_line();
 
-                res = read( f, tmp_buff, 1 );
-           
-
-                if ( res != 1 )
-                    {
-#ifdef DEBUG
-                    Print( "Error reading file - can\'t read more!\n" );
-#endif // DEBUG
-                    break;
-                    }
-
-                pos++;
-                if ( pos >= C_MAX_BUFFER_SIZE )
-                    {
-#ifdef DEBUG
-                    Print( "Error reading file - line is too long!\n" );
-#endif // DEBUG
-                    break;
-                    }
-                }
-
-            buf[ pos ] = 0;
-            return buf;
-            }
-
-        char* pfget_line()
-            {
-            fget_line();
-            int str_len = strlen( buf );
-            lseek( f, -str_len, SEEK_CUR );
-            return buf;
-            }
-
-        void fclose()
-            {
-            if ( f > 0 )
-                {
-                close( f );
-                f = 0;
-                }
-            }
-            
+        void fclose();            
 
     private:
         enum CONSTANTS

@@ -13,7 +13,7 @@
 /// @par ќписание директив препроцессора:
 /// @c DEBUG   - компил€ци€ c выводом отладочной информации в консоль.@n@n
 ///
-/// @c WIN32   - компил€ци€ дл€ драйвера в OS Windows.@n
+/// @c DRIVER  - компил€ци€ дл€ драйвера в OS Windows.@n
 /// @c PAC     - компил€ци€ дл€ PAC.@n
 /// @c W750    - компил€ци€ дл€ PAC Wago 750.@n
 /// @c I7186_E - компил€ци€ дл€ PAC I7186_E.@n
@@ -32,18 +32,18 @@
 #define GENERAL_DEVICE_H
 
 #ifndef PAC 
-#ifndef WIN32
+#ifndef DRIVER
 #define PAC
-#endif // WIN32
+#endif // DRIVER
 #endif // PAC 
 
-#ifdef WIN32
+#ifdef DRIVER
 #include "CmnHdr.h"
 typedef short           int_2;
 
 typedef unsigned int    u_int_4;
 typedef unsigned short  u_int_2;
-#endif //WIN32
+#endif // DRIVER
 
 #ifdef PAC
 #include "sys.h"
@@ -178,10 +178,10 @@ class i_complex_device: public i_simple_device
     {
     public:
 
-#ifdef WIN32
+#ifdef DRIVER
         /// ”стройства, которые вход€т данное сложное устройство.
         i_complex_device  *compl_dev;  
-#endif //WIN32
+#endif // DRIVER
 
         /// “ипы сложных устройств.
         enum TYPES
@@ -236,12 +236,12 @@ class complex_device: public i_complex_device
         complex_device( u_int_4 n, char *new_name, u_int_2 new_subdev_cnt, 
             char type );
 
-#ifdef WIN32
+#ifdef DRIVER
         ~complex_device();
 
         complex_device( u_int_4 n, char *new_name, u_int_2 new_subdev_cnt, 
             char type, i_complex_device *owner_compl_dev );
-#endif //WIN32
+#endif // DRIVER
 
         char            get_type() const;
         u_int_4         get_n() const;

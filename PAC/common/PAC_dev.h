@@ -303,7 +303,8 @@ class device : public i_simple_device
 
         /// @brief Загрузка самого устройства из буфера.
         ///
-        /// @param buff - буфер для считывания устройства.
+        /// @param cfg_file - дескриптор открытого текстового файла с описанием
+        ///   устройства.
         ///
         /// @return - 0 - ок.
         virtual int load( file *cfg_file );
@@ -334,6 +335,25 @@ class char_state_device : public device
 
     private:
         char prev_state;    ///< Предыдущее состояние устройства.
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство, для хранения состояния которого необходимо 4 байта.
+///
+/// Это счетчик.
+class u_int_4_state_device : public device
+    {
+    public:
+        /// @brief Реализация интерфейса @ref i_save_device.
+        int save_changed_state( char *buff );
+
+        /// @brief Реализация интерфейса @ref i_save_device.
+        int save_state( char *buff  );
+
+        /// @brief Для сохранения состояния устройства.                
+        virtual u_int_4 get_u_int_4_state() = 0;
+
+    private:
+        u_int_4 prev_state;    ///< Предыдущее состояние устройства.
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретным входом. 
@@ -418,7 +438,8 @@ class wago_device
     public:
         /// @brief Загрузка самого устройства из буфера.
         ///
-        /// @param buff - буфер для считывания устройства.
+        /// @param cfg_file - дескриптор открытого текстового файла с описанием
+        ///   устройства.
         ///
         /// @return -  количество считанных байт.
         virtual int load( file *cfg_file );
@@ -523,21 +544,7 @@ class wago_device
         u_int   params_count;
         float   *params;
 
-        void print_table( const char *str, const IO_channels &channels ) const
-            {
-            Print( "%s:%d", str, channels.count );
-            if ( channels.count )
-                {
-                Print( "[ " );
-                for ( u_int i = 0; i < channels.count; i++ )
-                    {
-                    Print("%d:%d", channels.tables[ i ],
-                        channels.offsets[ i ] );
-                    if ( i < channels.count - 1 ) Print( "; " );
-                    }
-                Print( " ]" );
-                }            
-            }
+        void print_table( const char *str, const IO_channels &channels ) const;
 
         /// @brief Загрузка информации о группе каналов ввода/вывода из 
         /// байтового потока.
@@ -595,19 +602,9 @@ class DO_1 : public char_state_device,
 
         int parse_cmd( char *buff  );
 
-        virtual int load( file *cfg_file )
-            {
-            char_state_device::load( cfg_file );
-            wago_device::load( cfg_file );
+        int load( file *cfg_file );
 
-            return 0;
-            }
-
-        void print()
-            {
-            device::print();
-            wago_device::print();
-            }
+        void print() const;
 
     private:
         enum CONSTANTS
@@ -618,58 +615,30 @@ class DO_1 : public char_state_device,
 //-----------------------------------------------------------------------------
 /// @brief Счетчик.
 ///
-class counter : public char_state_device,
+class counter : public u_int_4_state_device,
     public AI_device,
     public wago_device
     {
-    public:
+    public:        
+        float get_value();
+
+        int set_value( float new_value );
+
+        int get_state();
+
+        void on();
+
+        void off();
+
+        int set_state( int new_state );
+
+        int parse_cmd( char *buff  );
+
+        int load( file *cfg_file );
         
-        float get_value()
-            {
-            return 0;
-            }
+        void print() const;
 
-        int set_value( float new_value )
-            {
-            return 0;
-            }
-
-        int get_state()
-            {
-            return 0;
-            }
-
-        void on()
-            {
-            }
-
-        void off()
-            {            
-            }
-
-        int set_state( int new_state )
-            {
-            return 0;
-            }
-
-        int parse_cmd( char *buff  )
-            {
-            return 0;
-            }
-
-        virtual int load( file *cfg_file )
-            {
-            char_state_device::load( cfg_file );
-            wago_device::load( cfg_file );
-
-            return 0;
-            }
-        
-        void print() const
-            {
-            device::print();
-            wago_device::print();
-            }
+        u_int_4 get_u_int_4_state();
 
     private:
         enum CONSTANTS

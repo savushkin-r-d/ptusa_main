@@ -105,9 +105,7 @@ int char_state_device::save_changed_state( char *buff )
     {
     if ( prev_state != get_state() )
         {
-        buff[ 0 ] = get_state();
-        prev_state = get_state();
-        return sizeof( char );
+        return save_state( buff );
         }
     return 0;
     }
@@ -117,6 +115,23 @@ int char_state_device::save_state( char *buff )
     buff[ 0 ] = get_state();
     prev_state = get_state();
     return sizeof( char );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int u_int_4_state_device::save_changed_state( char *buff )
+    {
+    if ( prev_state != get_state() )
+        {
+        return save_state( buff );
+        }
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int u_int_4_state_device::save_state( char *buff )
+    {
+    *( ( u_int_4* ) buff ) = ( u_int_4 ) get_u_int_4_state();
+    prev_state = ( u_int_4 ) get_u_int_4_state();
+    return sizeof( u_int_4 );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -308,6 +323,23 @@ int wago_device::load_table_from_string( char *str, IO_channels &channels )
     return 0;
     }
 //-----------------------------------------------------------------------------
+void wago_device::print_table( const char *str, 
+                              const IO_channels &channels ) const
+    {
+    Print( "%s:%d", str, channels.count );
+    if ( channels.count )
+        {
+        Print( "[ " );
+        for ( u_int i = 0; i < channels.count; i++ )
+            {
+            Print("%d:%d", channels.tables[ i ],
+                channels.offsets[ i ] );
+            if ( i < channels.count - 1 ) Print( "; " );
+            }
+        Print( " ]" );
+        }
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float DO_1::get_value()
     {
@@ -343,6 +375,20 @@ int DO_1::parse_cmd( char *buff )
     {
     set_state( buff[ 0 ] );
     return sizeof( char );
+    }
+//-----------------------------------------------------------------------------
+int DO_1::load( file *cfg_file )
+    {
+    device::load( cfg_file );
+    wago_device::load( cfg_file );
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void DO_1::print() const
+    {
+    device::print();
+    wago_device::print();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -473,6 +519,61 @@ int dev_stub::set_state( int new_state )
     }
 //-----------------------------------------------------------------------------
 int dev_stub::parse_cmd( char *buff )
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float counter::get_value()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int counter::set_value( float new_value )
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int counter::get_state()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void counter::on()
+    {
+
+    }
+//-----------------------------------------------------------------------------
+void counter::off()
+    {
+
+    }
+//-----------------------------------------------------------------------------
+int counter::set_state( int new_state )
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int counter::parse_cmd( char *buff )
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int counter::load( file *cfg_file )
+    {
+    char_state_device::load( cfg_file );
+    wago_device::load( cfg_file );
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void counter::print() const
+    {
+    device::print();
+    wago_device::print();
+    }
+//-----------------------------------------------------------------------------
+u_int_4 counter::get_u_int_4_state()
     {
     return 0;
     }
