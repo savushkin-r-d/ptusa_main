@@ -1,12 +1,12 @@
-#ifndef PRJ_MANAGER_W750_H
-#define PRJ_MANAGER_W750_H
+#ifndef PRJ_MANAGER_H
+#define PRJ_MANAGER_H
 
 #include "sys.h"
 
 class project_manager
     {
     public:
-        int load_configuration( char *file_name );
+        int load_configuration( const char *file_name );
 
         static project_manager* get_instance();
 
@@ -19,4 +19,4 @@ class project_manager
         static project_manager* instance;
     };
 
-#endif // PRJ_MANAGER_W750_H
+#endif // PRJ_MANAGER_H

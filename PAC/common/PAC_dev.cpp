@@ -4,7 +4,10 @@ device_manager* device_manager::instance;
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-device::device() : number( 0 )
+device::device() : number( 0 ),
+        type( DEVICE_TYPE( 0 ) ),
+        sub_type( DEVICE_SUB_TYPE( 0 ) )
+        
     { 
     }
 //-----------------------------------------------------------------------------
@@ -17,14 +20,79 @@ int device::save_device( char *buff )
 void device::print() const
     {
 #ifdef DEBUG
-    Print( "%5lu\n", ( unsigned long ) number );
+    switch ( type )
+        {
+        case DT_V:
+            Print( "V  " );
+            break;
+
+        case DT_N:
+            Print( "N  " );
+            break;
+
+        case DT_M:
+            Print( "M  " );
+            break;
+
+        case DT_LS:
+            Print( "LS " );
+            break;
+
+        case DT_TE:
+            Print( "TE " );
+            break;
+
+        case DT_FE:
+            Print( "FE " );
+            break;
+
+        case DT_FS:
+            Print( "FS " );
+            break;
+
+        case DT_CTR:
+            Print( "CTR" );
+            break;
+
+        case DT_AO:
+            Print( "AO " );
+            break;
+
+        case DT_LE:
+            Print( "LE " );
+            break;
+
+        case DT_FB:
+            Print( "FB " );
+            break;
+
+        case DT_UPR:
+            Print( "UPR" );
+            break;
+
+        case DT_QE:
+            Print( "QE " );
+            break;
+
+        case DT_AI:
+            Print( "AI " );
+            break;
+
+        default:
+            Print( "Uknown" );
+            break;
+        }
+    Print( "%5lu\t", ( u_long ) number );
+
 #endif // DEBUG
     }
 //-----------------------------------------------------------------------------
-int device::load( char *stream )
-    {
-    number = *( ( u_int_4* ) stream );
-    return sizeof( u_int_4 );
+int device::load( file *cfg_file )
+    {    
+    sscanf( cfg_file->fget_line(), "%u %u %u", ( u_int* ) &type,
+        ( u_int* ) &sub_type, &number );
+    
+    return 0;
     }
 //-----------------------------------------------------------------------------
 u_int_4 device::get_n() const
@@ -52,30 +120,27 @@ int char_state_device::save_state( char *buff )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int wago_device::load( char *stream )
-    {
-    //[ 0   ] - номер устройства.
-    //[ 1   ] - 
-    //[ 2   ] - 
-    //[ 3   ] - 
-    int pos = 0;
+int wago_device::load( file *cfg_file )
+    {           
+    load_table_from_string( cfg_file->fget_line(), DI_channels );
+    load_table_from_string( cfg_file->fget_line(), DO_channels );
+    load_table_from_string( cfg_file->fget_line(), AI_channels );
+    load_table_from_string( cfg_file->fget_line(), AO_channels );
 
-    //[ 4   ] - количество DI.
-    //[ 5   ] - 
-    //[ 6   ] - номер таблицы DI.
-    //[ 7   ] - 
-    //[ 8   ] - смещение в пределах таблицы.
-    //[ ... ] -   
-    //[ x1  ] - количество DO.
-    //[ ... ] -   
-    //[ x2  ] - количество AO.
-    //[ ... ] -   
-    //[ x3  ] - количество AI.
-    //[ ... ] -            
-    pos += load_table( stream + pos, DI_channels );
-    pos += load_table( stream + pos, DI_channels );
-    pos += load_table( stream + pos, DI_channels );
-    pos += load_table( stream + pos, DI_channels );
+    // 2 1.1 2.1
+    // количество значение_№1 значение_№2 ...
+    char *str = cfg_file->fget_line();    
+    int pos = sscanf( str, "%u", &params_count );
+
+    if ( params_count > 0 )
+        {        
+        params = new float [ params_count ];
+        for ( u_int i = 0; i < params_count; i++ )
+            {
+            pos += sscanf( str + pos, " %f", &params[ i ] );
+            }
+        }
+
     return pos;
     }
 //-----------------------------------------------------------------------------
@@ -203,42 +268,44 @@ int wago_device::set_AI( u_int index, float value )
 #ifdef DEBUG
     Print( "wago_device->set_AI(...) - error!\n" );
 #endif // DEBUG
-
+    
     return 1;
     }
 //-----------------------------------------------------------------------------
-int wago_device::load_table( char *stream, IO_channels &channels )
+void wago_device::print() const
     {
-    //[ 0   ] - количество DI (например).
-    //[ 1   ] - 
-    //[ 2   ] - номер таблицы DI №1.
-    //[ 3   ] - 
-    //[ 4   ] - смещение в пределах таблицы №1.
-    //[ 5   ] -
-    //[ 6   ] - номер таблицы DI №2.
-    //[ 7   ] - 
-    //[ 8   ] - смещение в пределах таблицы №2.
-    //[ ... ] -  
-    count = *( ( u_int_2 * ) stream );
-    int pos = sizeof( u_int_2 );
+    print_table( "DI", DI_channels );
+    Print( "; " );
+    print_table( "DO", DO_channels );
+    Print( "; " );
+    print_table( "AI", AI_channels );
+    Print( "; " );
+    print_table( "AO", AO_channels );
+    Print( ".\n" );
+    }
+//-----------------------------------------------------------------------------
+int wago_device::load_table_from_string( char *str, IO_channels &channels )
+    {
+    // 2 1 2 1 3
+    // количество_DI_(например) номер_таблицы_DI_№1 смещение_в_пределах_таблицы_№1 номер_таблицы_DI_№2 ...
+    u_int cnt;
+    int pos = sscanf( str, "%d", &cnt );
 
-    if ( count > 0 )
+    if ( cnt > 0 )
         {
-        channels.count = count;
+        channels.count = cnt;
 
-        channels.tables = new u_int_2[ count ];
-        channels.offsets = new u_int_2[ count ];
-        for ( u_int i = 0; i < count; i++ )
+        channels.tables = new u_int[ cnt ];
+        channels.offsets = new u_int[ cnt ];
+        
+        for ( u_int i = 0; i < cnt; i++ )
             {
-            channels.tables[ i ] = *( ( u_int_2 * ) ( stream + pos ) );
-            pos += sizeof( u_int_2 );
-
-            channels.offsets[ i ] = *( ( u_int_2 * ) ( stream + pos ) );
-            pos += sizeof( u_int_2 );
+            pos += sscanf( str + pos, " %d %d", &channels.tables[ i ],
+                &channels.offsets[ i ] );
             }
         }
 
-    return pos;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -287,10 +354,10 @@ DO_device* device_manager::get_V( int number )
 #ifdef DEBUG
         Print( "V[ %d ] not found!\n", number );
 #endif // DEBUG
-        return stub;
+        return &stub;
     	}
 
-    return project_devices[ res ];    
+    return ( DO_device* ) project_devices[ res ];
     }
 //-----------------------------------------------------------------------------
 device_manager* device_manager::get_instance()
@@ -303,7 +370,7 @@ void device_manager::set_instance( device_manager* new_instance )
     instance = new_instance;
     }
 //-----------------------------------------------------------------------------
-int device_manager::get_device( device::DEVICE_TYPE dev_type, int dev_number )
+int device_manager::get_device( device::DEVICE_TYPE dev_type, u_int dev_number )
     {
     int l = dev_types_ranges[ dev_type ].start_pos;
     int u = dev_types_ranges[ dev_type ].end_pos;
@@ -327,6 +394,50 @@ int device_manager::get_device( device::DEVICE_TYPE dev_type, int dev_number )
 //-----------------------------------------------------------------------------
 int device_manager::load_from_cfg_file( file *cfg_file )
     {
+    cfg_file->fget_line();                      // Пропускаем заголовок.
+    sscanf( cfg_file->fget_line(), "%d", &devices_count );
+    cfg_file->fget_line();                      // Пропускаем пустую строку.
+
+#ifdef DEBUG
+    Print( "Total devices count %d.\n", devices_count );
+#endif // DEBUG
+
+    if ( devices_count )
+        {
+        project_devices = new device* [ devices_count ];
+        for ( int i = 0; i < devices_count; i++ )
+            {
+            int dev_type = 0;
+            int dev_sub_type = 0;
+            sscanf( cfg_file->pfget_line(), "%d %d", &dev_type, &dev_sub_type );
+            
+            switch ( dev_type )
+                {
+                case device::DT_V:
+                    switch ( dev_type )
+                        {
+                        case device::DST_V_1DO:
+                            project_devices[ i ] = new DO_1();
+                            project_devices[ i ]->load( cfg_file );
+
+                            break;                    
+                        }
+                    break;
+
+                case device::DT_CTR:
+                    project_devices[ i ] = new counter();
+                    project_devices[ i ]->load( cfg_file );
+
+                    break;
+                }
+
+             project_devices[ i ]->print();
+
+            }
+        }
+
+
+     
     return 0;
     }
 //-----------------------------------------------------------------------------

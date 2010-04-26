@@ -4,7 +4,7 @@
 #include "prj_mngr.h"
 #include "sys_w750.h"
 
-class project_manager_w750
+class project_manager_w750 : public project_manager
     {
     public:
        project_manager_w750()

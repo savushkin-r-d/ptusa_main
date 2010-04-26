@@ -246,8 +246,8 @@ template < class type > class parameters
 /// @brief –абота с параметрами времени выполнени€ типа float.
 ///
 /// ƒанные параметры передаютс€ на сервер через соответствующие теги.
-class run_time_params_float: public parameters < float >, 
-    array_device < float >
+class run_time_params_float: public parameters < float >,
+    public array_device < float >
     {
     public:
         /// @brief  онструктор.

@@ -225,10 +225,11 @@ class NV_memory_manager
 class file
     {
     public:
-        int open( char file_name ) = 0;
-        int read( void *buffer, int count ) = 0;
-        char* get_line() = 0;
-        void close() = 0;
+        virtual int fopen( const char *file_name ) = 0;
+        virtual int fread( void *buffer, int count ) = 0;
+        virtual char* fget_line() = 0;
+        virtual char* pfget_line() = 0;
+        virtual void fclose() = 0;
     };
 //-----------------------------------------------------------------------------
 #endif // SYS_H

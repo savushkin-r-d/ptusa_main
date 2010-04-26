@@ -6,6 +6,7 @@
                    projectFiles="true">
       <logicalFolder name="f1" displayName="common" projectFiles="true">
         <itemPath>../../PAC/common/PAC_dev.h</itemPath>
+        <itemPath>../../PAC/common/prj_mngr.h</itemPath>
         <itemPath>../../PAC/common/sys.h</itemPath>
         <itemPath>../../PAC/common/tcp_cmctr.h</itemPath>
         <itemPath>../../PAC/common/wago.h</itemPath>
@@ -14,8 +15,10 @@
         <itemPath>../../common/PAC-driver/g_device.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f3" displayName="uclinux" projectFiles="true">
+        <itemPath>../../PAC/uclinux/prj_mngr_w750.h</itemPath>
         <itemPath>../../PAC/uclinux/sys_w750.h</itemPath>
         <itemPath>../../PAC/uclinux/tcp_cmctr_w750.h</itemPath>
+        <itemPath>../../PAC/uclinux/wago_w750.h</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -26,6 +29,8 @@
                    displayName="Source Files"
                    projectFiles="true">
       <logicalFolder name="f2" displayName="common" projectFiles="true">
+        <itemPath>../../PAC/common/PAC_dev.cpp</itemPath>
+        <itemPath>../../PAC/common/prj_mngr.cpp</itemPath>
         <itemPath>../../PAC/common/sys.cpp</itemPath>
         <itemPath>../../PAC/common/tcp_cmctr.cpp</itemPath>
         <itemPath>../../PAC/common/wago.cpp</itemPath>
@@ -34,8 +39,10 @@
         <itemPath>../../common/PAC-driver/g_device.cpp</itemPath>
       </logicalFolder>
       <logicalFolder name="f3" displayName="uclinux" projectFiles="true">
+        <itemPath>../../PAC/uclinux/prj_mngr_w750.cpp</itemPath>
         <itemPath>../../PAC/uclinux/sys_w750.cpp</itemPath>
         <itemPath>../../PAC/uclinux/tcp_cmctr_w750.cpp</itemPath>
+        <itemPath>../../PAC/uclinux/wago_w750.cpp</itemPath>
       </logicalFolder>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>

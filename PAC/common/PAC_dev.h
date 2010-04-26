@@ -24,6 +24,8 @@
 #include "wago.h"
 
 #include "g_device.h"
+
+//#include "param_ex.h"
 //-----------------------------------------------------------------------------
 /// @brief Шаблон класса, который используется для передачи состояния устройств,
 /// которые представляются массивом некоторого типа.
@@ -207,8 +209,6 @@ template < class data_type > class array_device: public i_simple_device
 class device : public i_simple_device
     {
     public:
-        device();
-
         enum CONSTANTS
             {
             C_DEVICE_TYPE_CNT = 14,     ///< Количество типов устройств.
@@ -218,7 +218,7 @@ class device : public i_simple_device
         enum DEVICE_TYPE
             {
             DT_V = 0,   ///< Клапан. 
-            DT_N,       ///< Насос.
+            DT_N = 5,   ///< Насос.
             DT_M,       ///< Мешалка.
             DT_LS,      ///< Уровень (есть/нет).
             DT_TE,      ///< Температура.
@@ -248,6 +248,8 @@ class device : public i_simple_device
             DST_V_1DO_2DI_S,    ///< Клапан с одним каналом управления и двумя обратными связями на одно из состояний.
             DST_V_AS_MIX,       ///< Клапан с двумя каналами управления и двумя обратными связями с AS интерфейсом (микспруф).
             };
+
+        device();
 
         /// @brief Включение устройства.
         ///
@@ -303,8 +305,8 @@ class device : public i_simple_device
         ///
         /// @param buff - буфер для считывания устройства.
         ///
-        /// @return -  количество считанных байт.
-        virtual int load( char *stream );
+        /// @return - 0 - ок.
+        virtual int load( file *cfg_file );
 
         /// @brief Получение номера устройства.
         ///
@@ -419,7 +421,7 @@ class wago_device
         /// @param buff - буфер для считывания устройства.
         ///
         /// @return -  количество считанных байт.
-        virtual int load( char *stream );
+        virtual int load( file *cfg_file );
 
     protected:
         /// @brief Получение состояния канала дискретного выхода.
@@ -498,6 +500,8 @@ class wago_device
         /// @return - >0 - ошибка.
         int   set_AI( u_int index, float value );
 
+        virtual void print() const;
+
     private:
         /// @brief Группа каналов ввода/вывода устройства.
         struct IO_channels
@@ -514,7 +518,26 @@ class wago_device
         IO_channels DI_channels;    ///< Каналы дискретного входа.
         IO_channels DO_channels;    ///< Каналы дискретного выхода.    
         IO_channels AI_channels;    ///< Каналы аналогового входа.
-        IO_channels AO_channels;    ///< Каналы аналогового выхода.     
+        IO_channels AO_channels;    ///< Каналы аналогового выхода.
+
+        u_int   params_count;
+        float   *params;
+
+        void print_table( const char *str, const IO_channels &channels ) const
+            {
+            Print( "%s:%d", str, channels.count );
+            if ( channels.count )
+                {
+                Print( "[ " );
+                for ( u_int i = 0; i < channels.count; i++ )
+                    {
+                    Print("%d:%d", channels.tables[ i ],
+                        channels.offsets[ i ] );
+                    if ( i < channels.count - 1 ) Print( "; " );
+                    }
+                Print( " ]" );
+                }            
+            }
 
         /// @brief Загрузка информации о группе каналов ввода/вывода из 
         /// байтового потока.
@@ -523,7 +546,7 @@ class wago_device
         /// @param [out] channels - группа, в которая считывается.
         ///
         /// @return -  количество считанных байт.
-        int load_table( char *stream, IO_channels &channels );
+        int load_table_from_string( char *str, IO_channels &channels );
     };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство.
@@ -572,10 +595,86 @@ class DO_1 : public char_state_device,
 
         int parse_cmd( char *buff  );
 
+        virtual int load( file *cfg_file )
+            {
+            char_state_device::load( cfg_file );
+            wago_device::load( cfg_file );
+
+            return 0;
+            }
+
+        void print()
+            {
+            device::print();
+            wago_device::print();
+            }
+
     private:
         enum CONSTANTS
             {
             DO_INDEX = 0,
+            };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Счетчик.
+///
+class counter : public char_state_device,
+    public AI_device,
+    public wago_device
+    {
+    public:
+        
+        float get_value()
+            {
+            return 0;
+            }
+
+        int set_value( float new_value )
+            {
+            return 0;
+            }
+
+        int get_state()
+            {
+            return 0;
+            }
+
+        void on()
+            {
+            }
+
+        void off()
+            {            
+            }
+
+        int set_state( int new_state )
+            {
+            return 0;
+            }
+
+        int parse_cmd( char *buff  )
+            {
+            return 0;
+            }
+
+        virtual int load( file *cfg_file )
+            {
+            char_state_device::load( cfg_file );
+            wago_device::load( cfg_file );
+
+            return 0;
+            }
+        
+        void print() const
+            {
+            device::print();
+            wago_device::print();
+            }
+
+    private:
+        enum CONSTANTS
+            {
+            AI_INDEX = 0,
             };
     };
 //-----------------------------------------------------------------------------
@@ -606,8 +705,9 @@ class device_manager
 
         /// @brief Получение устройства по его номеру.
         ///
-        int get_device( device::DEVICE_TYPE dev_type, int dev_number );
+        int get_device( device::DEVICE_TYPE dev_type, u_int dev_number );
 
+        int    devices_count;
         device **project_devices;
 
         static device_manager* instance;
