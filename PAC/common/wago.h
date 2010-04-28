@@ -38,11 +38,11 @@ struct wago_table
 
         int modules_count = 0;
         sscanf( cfg_file->fget_line(), "%d", &modules_count );
-
-        sscanf( cfg_file->fget_line(), "%d", &DO_cnt );
+        
         sscanf( cfg_file->fget_line(), "%d", &DI_cnt );
-        sscanf( cfg_file->fget_line(), "%d", &AO_cnt );
+        sscanf( cfg_file->fget_line(), "%d", &DO_cnt );
         sscanf( cfg_file->fget_line(), "%d", &AI_cnt );
+        sscanf( cfg_file->fget_line(), "%d", &AO_cnt );
         cfg_file->fget_line();
 
 #ifdef DEBUG

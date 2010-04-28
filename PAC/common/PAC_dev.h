@@ -218,7 +218,7 @@ class device : public i_simple_device
         enum DEVICE_TYPE
             {
             DT_V = 0,   ///< Клапан. 
-            DT_N = 5,   ///< Насос.
+            DT_N,       ///< Насос.
             DT_M,       ///< Мешалка.
             DT_LS,      ///< Уровень (есть/нет).
             DT_TE,      ///< Температура.
@@ -239,14 +239,12 @@ class device : public i_simple_device
             DST_NONE = 0,       ///< Подтип неопределен.
 
             //DT_V = 0, 
-            DST_V_1DO = 0,      ///< Клапан с одним каналом управления.
-            DST_V_2DO,          ///< Клапан с двумя каналами управления.
-            DST_V_1DO_1DI,      ///< Клапан с одним каналом управления и одной обратной связью.
-            DST_V_1DO_2DI,      ///< Клапан с одним каналом управления и двумя обратными связями.
-            DST_V_2DO_2DI,      ///< Клапан с двумя каналами управления и двумя обратными связями (микспруф).
-            DST_V_1DO_3DI,      ///< Клапан с одним каналом управления и тремя обратными связями.
-            DST_V_1DO_2DI_S,    ///< Клапан с одним каналом управления и двумя обратными связями на одно из состояний.
-            DST_V_AS_MIX,       ///< Клапан с двумя каналами управления и двумя обратными связями с AS интерфейсом (микспруф).
+            DST_V_DO_1 = 1,     ///< Клапан с одним каналом управления.
+            DST_V_DO_2,         ///< Клапан с двумя каналами управления.
+            DST_V_DO_1_DI_1,    ///< Клапан с одним каналом управления и одной обратной связью.
+            DST_V_DO_1_DI_2,    ///< Клапан с одним каналом управления и двумя обратными связями.
+            DST_V_DO_2_DI_2,    ///< Клапан с двумя каналами управления и двумя обратными связями.
+            DST_V_MIXPROOF,     ///< Клапан микспруф.
             };
 
         device();
@@ -359,7 +357,7 @@ class u_int_4_state_device : public device
 /// @brief Устройство с дискретным входом. 
 ///
 /// Устройства типа обратной связи, уровня и т.д. реализуют данный интерфейс.
-class DI_device
+class i_DI_device
     {
     public:
         /// @brief Получение текущего состояния устройства.
@@ -371,7 +369,7 @@ class DI_device
 /// @brief Устройство с дискретным выходом. 
 ///
 /// Устройства типа клапана, мешалки и т.д. реализуют данный интерфейс.
-class DO_device: public DI_device
+class i_DO_device: public i_DI_device
     {
     public:
         /// @brief Включение устройства.
@@ -398,7 +396,7 @@ class DO_device: public DI_device
 /// @brief Устройство с аналоговым входом. 
 ///
 /// Устройства типа температуры, расхода и т.д. реализуют данный интерфейс.
-class AI_device
+class i_AI_device
     {
     public:
         /// @brief Получение текущего состояния устройства.
@@ -411,7 +409,7 @@ class AI_device
 ///
 /// Устройства типа аналогового каналы управления и т.д. реализуют данный
 /// интерфейс.
-class AO_device: public AI_device
+class i_AO_device: public i_AI_device
     {
     public:
         /// @brief Выключение устройства.
@@ -521,6 +519,20 @@ class wago_device
         /// @return - >0 - ошибка.
         int   set_AI( u_int index, float value );
 
+        float get_par( u_int index )
+            {
+            if ( index < params_count && params )
+                {
+                return params[ index ];
+                }
+
+#ifdef DEBUG
+            Print( "wago_device->get_par(...) - error!\n" );
+#endif // DEBUG
+
+            return 0;
+            }
+
         virtual void print() const;
 
     private:
@@ -561,8 +573,8 @@ class wago_device
 /// Необходимо для возвращения результата поиска устройства с несуществующим
 /// номером. Методы данного класса ничего не делают. 
 class dev_stub : public char_state_device,
-    public DO_device,
-    public AO_device
+    public i_DO_device,
+    public i_AO_device
     {
     public:
         float get_value();
@@ -580,31 +592,75 @@ class dev_stub : public char_state_device,
         int parse_cmd( char *buff );
     };
 //-----------------------------------------------------------------------------
-/// @brief Устройство с одним дискретным выходом.
+/// @brief Устройство с дискретными входами/выходами.
 ///
-/// Это может быть клапан, насос, канал управления...
-class DO_1 : public char_state_device,
-    public DO_device,
+/// Базовый клас для различных дискретных устройств.
+class digital_device : public char_state_device,
     public wago_device
     {
     public:
-        float get_value();
+        float get_value()
+            {
+            return get_state();
+            }
 
-        int set_value( float new_value );
+        int set_value( float new_value )
+            {
+            return set_state( ( int ) new_value );
+            }
 
+        int set_state( int new_state )
+            {
+            if ( new_state ) on();
+            else off();
+
+            return 0;
+            }
+
+        int parse_cmd( char *buff )
+            {
+            set_state( buff[ 0 ] );
+            return sizeof( char );
+            }
+
+        int load( file *cfg_file )
+            {
+            device::load( cfg_file );
+            wago_device::load( cfg_file );
+
+            return 0;
+            }
+
+        void print() const
+            {
+            device::print();
+            wago_device::print();
+            }
+
+    protected:
+        enum CONSTANTS
+            {
+            C_SWITCH_TIME = 5000,
+            };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с одним дискретным выходом.
+///
+/// Это может быть клапан, насос, канал управления...
+class DO_1 : public digital_device,
+    public i_DO_device
+    {
+    public:
         int get_state();
 
         void on();
 
         void off();
 
-        int set_state( int new_state );
-
-        int parse_cmd( char *buff  );
-
-        int load( file *cfg_file );
-
-        void print() const;
+        int set_state( int new_state )
+            {
+            return digital_device::set_state( new_state );
+            }
 
     private:
         enum CONSTANTS
@@ -613,10 +669,408 @@ class DO_1 : public char_state_device,
             };
     };
 //-----------------------------------------------------------------------------
+/// @brief Устройство с двумя дискретными выходами.
+///
+/// Это может быть клапан, насос...
+class DO_2 : public digital_device,
+    public i_DO_device
+    {
+    public:
+
+        int get_state()
+            {            
+            int b1 = get_DO( DO_INDEX_1 );
+            int b2 = get_DO( DO_INDEX_2 );
+            if ( b1 == b2 ) return -1;
+            return b2;            
+            }
+
+        void on()
+            {
+            set_DO( DO_INDEX_1, 0 );
+            set_DO( DO_INDEX_2, 1 );
+            }
+
+        void off()
+            {
+            set_DO( DO_INDEX_1, 1 );
+            set_DO( DO_INDEX_2, 0 );
+            }
+
+        int set_state( int new_state )
+            {
+            return digital_device::set_state( new_state );
+            }
+
+    private:
+        enum CONSTANTS
+            {
+            DO_INDEX_1 = 0,
+            DO_INDEX_2,
+            };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с одним дискретным выходом и одним дискретным входом.
+///
+/// Это может быть клапан, насос...
+class DO_1_DI_1 : public digital_device,
+    public i_DO_device
+    {
+    public:
+
+        int get_state()
+            {
+            int o = get_DO( DO_INDEX );
+            int i = get_DI( DI_INDEX );
+
+            if ( get_par( PAR_FB_STATE ) == 0 )
+                {
+                if ( ( o == 0 && i == 1 ) || ( o == 1 && i == 0 ) )
+                    {
+                    switch_time = get_ms();
+                    return o;
+                    }
+                }
+            else
+                {
+                if ( o == i )
+                    {
+                    switch_time = get_ms();
+                    return i;
+                    }
+                }
+
+            if ( get_ms() - switch_time > C_SWITCH_TIME )
+                {
+                return -1;
+                }
+            else
+                {
+                if ( get_par( PAR_FB_STATE ) == 0 ) return !i;
+                else return i;
+                }
+            }
+
+        void on()
+            {
+            int o = get_DO( DO_INDEX );
+            if ( 0 == o )
+                {
+                switch_time = get_ms();
+                set_DO( DO_INDEX, 1 );
+                }            
+            }
+
+        void off()
+            {
+            int o = get_DO( DO_INDEX );
+            if ( o != 0 )
+                {
+                switch_time = get_ms();
+                set_DO( DO_INDEX, 0 );
+                }
+            }
+
+        int set_state( int new_state )
+            {
+            return digital_device::set_state( new_state );
+            }
+
+    private:
+        enum CONSTANTS
+            {
+            DO_INDEX = 0,
+            DI_INDEX = 0,
+
+            PAR_FB_STATE = 0,
+            };
+
+        u_long switch_time;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с одним дискретным выходом и двумя дискретными входами.
+///
+/// Это может быть клапан, насос...
+class DO_1_DI_2 : public digital_device,
+    public i_DO_device
+    {
+    public:
+
+        int get_state()
+            {
+            int o = get_DO( DO_INDEX );
+            int i0 = get_DI( DI_INDEX_1 );
+            int i1 = get_DI( DI_INDEX_2 );
+
+            if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+                ( o == 1 && i1 == 1 && i0 ==0 ) )
+                {
+                switch_time = get_ms();
+                return o;
+                }
+
+            if ( get_ms() - switch_time > C_SWITCH_TIME )
+                {
+                return -1;
+                }
+            else
+                {
+                return o;
+                }
+            }
+
+        void on()
+            {
+            int o = get_DO( DO_INDEX );
+            if ( 0 == o )
+                {
+                switch_time = get_ms();
+                set_DO( DO_INDEX, 1 );
+                }
+            }
+
+        void off()
+            {
+            int o = get_DO( DO_INDEX );
+            if ( o != 0 )
+                {
+                switch_time = get_ms();
+                set_DO( DO_INDEX, 0 );
+                }
+            }
+
+        int set_state( int new_state )
+            {
+            return digital_device::set_state( new_state );
+            }
+
+    private:
+        enum CONSTANTS
+            {
+            DO_INDEX = 0,
+
+            DI_INDEX_1 = 0,
+            DI_INDEX_2,
+            };
+
+        u_long switch_time;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с двумя дискретными выходами и двумя дискретными входами.
+///
+/// Это может быть клапан, насос...
+class DO_2_DI_2 : public digital_device,
+    public i_DO_device
+    {
+    public:
+
+        int get_state()
+            {
+            int o0 = get_DO( DO_INDEX_1 );
+            int o1 = get_DO( DO_INDEX_2 );
+            int i0 = get_DI( DI_INDEX_1 );
+            int i1 = get_DI( DI_INDEX_2 );
+
+            if ( ( o1 == i1 ) && ( o0 == i0 ) )
+                {
+                switch_time = get_ms();
+                return o1;
+                };
+
+            if ( get_ms() - switch_time > C_SWITCH_TIME )
+                {
+                return -1;
+                }
+            else
+                {
+                return o1;
+                }
+            }
+
+        void on()
+            {
+            int o = get_DO( DO_INDEX_1 );
+            if ( 0 == o )
+                {
+                switch_time = get_ms();
+                set_DO( DO_INDEX_1, 1 );
+                set_DO( DO_INDEX_2, 0 );
+                }
+            }
+
+        void off()
+            {
+            int o = get_DO( DO_INDEX_2 );
+            if ( 0 == o )
+                {
+                switch_time = get_ms();
+                set_DO( DO_INDEX_1, 0 );
+                set_DO( DO_INDEX_2, 1 );
+                }
+            }
+
+        int set_state( int new_state )
+            {
+            return digital_device::set_state( new_state );
+            }
+
+    private:
+        enum CONSTANTS
+            {
+            DO_INDEX_1 = 0,
+            DO_INDEX_2,
+
+            DI_INDEX_1 = 0,
+            DI_INDEX_2,
+            };
+
+        u_long switch_time;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан mixproof.
+class mix_proof : public digital_device,
+    public i_DO_device
+    {
+    public:
+
+        int get_state()
+            {
+            int o = get_DO( DO_INDEX );            
+            int i0 = get_DI( DI_INDEX_U );
+            int i1 = get_DI( DI_INDEX_L );
+
+            if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+                ( o == 1 && i1 == 1 && i0 == 0 ) )
+                {
+                switch_time = get_ms();
+                if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return 2;
+                if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return 3;
+                return o;
+                }
+
+            if ( get_ms() - switch_time > C_SWITCH_TIME )
+                {
+                return -1;
+                }
+            else
+                {
+                return o;
+                }
+            }
+
+        void on()
+            {
+            set_DO( DO_INDEX_U, 0 );
+            set_DO( DO_INDEX_L, 0 );
+            int o = get_DO( DO_INDEX );
+
+            if ( 0 == o )
+                {
+                switch_time = get_ms();
+                set_DO( DO_INDEX, 1 );
+                }
+            }
+
+        void open_upper_seat()
+            {
+            off();
+            set_DO( DO_INDEX_U, 1 );
+            }
+
+        void open_low_seat()
+            {
+            off();
+            set_DO( DO_INDEX_L, 1 );
+            }
+
+        void off()
+            {
+            set_DO( DO_INDEX_U, 0 );
+            set_DO( DO_INDEX_L, 0 );
+            int o = get_DO( DO_INDEX );
+
+            if ( o != 0 )
+                {
+                switch_time = get_ms();
+                set_DO( DO_INDEX, 0 );
+                }
+            }
+
+        int set_state( int new_state )
+            {
+            switch ( new_state )
+                {
+                case 0:
+                    off();
+                    break;
+
+                case 1:
+                    on();
+                    break;
+
+                case 2:
+                    open_upper_seat();
+                    break;
+
+                case 3:
+                    open_low_seat();
+                    break;
+
+                default:
+                    on();
+                    break;
+                }
+
+            return 0;
+            }
+
+    private:
+        enum CONSTANTS
+            {
+            DO_INDEX = 0,
+            DO_INDEX_U,
+            DO_INDEX_L,
+
+            DI_INDEX_U = 0,
+            DI_INDEX_L,
+            };
+
+        u_long switch_time;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с одним дискретным входом.
+///
+/// Это может обратная связь, расход (есть/нет)...
+class DI : public digital_device,
+    public i_DI_device
+    {
+    public:
+        int get_state()
+            {
+            return get_DI( DI_INDEX );
+            }
+
+        void on()
+            {
+            set_DI( DI_INDEX, 1 );
+            }
+
+        void off()
+            {
+            set_DI( DI_INDEX, 0 );
+            }
+
+    private:
+        enum CONSTANTS
+            {
+            DI_INDEX = 0,
+            };
+    };
+//-----------------------------------------------------------------------------
 /// @brief Счетчик.
 ///
 class counter : public u_int_4_state_device,
-    public AI_device,
+    public i_AI_device,
     public wago_device
     {
     public:        
@@ -655,9 +1109,19 @@ class device_manager
     public:
         int load_from_cfg_file( file *cfg_file );
 
-        DO_device* get_V( int number );
+        i_DO_device* get_V( int number );
 
         static device_manager* get_instance();
+
+        void print() const
+            {
+            for ( int i = 0; i < devices_count; i++ )
+                {
+                Print( "    " );
+                project_devices[ i ]->print();
+                }
+
+            }
 
         static void set_instance( device_manager* new_instance );
 

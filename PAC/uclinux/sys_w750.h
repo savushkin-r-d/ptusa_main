@@ -18,6 +18,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <sys/timeb.h>
+#include <time.h>
+
 typedef short int          int_2;
 typedef int                int_4;
 typedef unsigned short int u_int_2;

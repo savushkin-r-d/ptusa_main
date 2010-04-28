@@ -6,6 +6,7 @@
  */
 
 #include <stdlib.h>
+#include <time.h>
 
 #include "PAC_dev.h"
 #include "tcp_cmctr_w750.h"
@@ -22,9 +23,10 @@ int main( int argc, char** argv )
     project_manager::set_instance( new project_manager_w750() );
     device_manager::set_instance( new device_manager() );
 
-
     project_manager::get_instance()->load_configuration( 
-        "/home/id/src/test_projects/wago_dev_test/wago.ds5" );
+        "/home/id/src/test_projects/wago_dev_test/Whey_out.ds5" );
+
+    device_manager::get_instance()->print();
 
     DO_1 do_test;
     do_test.print();

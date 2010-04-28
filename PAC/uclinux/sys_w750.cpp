@@ -173,3 +173,9 @@ void file_w750::fclose()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+u_long get_ms()
+    {    
+    timeb timebuffer;
+    ftime( &timebuffer );
+    return timebuffer.time * 1000 + timebuffer.millitm;
+    }

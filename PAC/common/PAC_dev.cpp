@@ -19,7 +19,7 @@ int device::save_device( char *buff )
 //-----------------------------------------------------------------------------
 void device::print() const
     {
-#ifdef DEBUG
+#ifdef DEBUG    
     switch ( type )
         {
         case DT_V:
@@ -120,7 +120,7 @@ int char_state_device::save_state( char *buff )
 //-----------------------------------------------------------------------------
 int u_int_4_state_device::save_changed_state( char *buff )
     {
-    if ( prev_state != get_state() )
+    if ( prev_state != get_u_int_4_state() )
         {
         return save_state( buff );
         }
@@ -144,7 +144,7 @@ int wago_device::load( file *cfg_file )
 
     // 2 1.1 2.1
     // количество значение_№1 значение_№2 ...
-    char *str = cfg_file->fget_line();    
+    char *str = cfg_file->fget_line();
     int pos = sscanf( str, "%u", &params_count );
 
     if ( params_count > 0 )
@@ -155,8 +155,9 @@ int wago_device::load( file *cfg_file )
             pos += sscanf( str + pos, " %f", &params[ i ] );
             }
         }
+    cfg_file->fget_line();
 
-    return pos;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 int wago_device::get_DO( u_int index )
@@ -268,7 +269,7 @@ float wago_device::get_AI( u_int index )
     Print( "wago_device->get_AI(...) - error!\n" );
 #endif // DEBUG
 
-    return 1;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 int wago_device::set_AI( u_int index, float value )
@@ -341,16 +342,6 @@ void wago_device::print_table( const char *str,
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-float DO_1::get_value()
-    {
-    return get_state();
-    }
-//-----------------------------------------------------------------------------
-int DO_1::set_value( float new_value )
-    {
-    return set_state( ( int ) new_value );
-    }
-//-----------------------------------------------------------------------------
 int DO_1::get_state()
     {
     return get_DO( DO_INDEX );
@@ -366,33 +357,8 @@ void DO_1::off()
     set_DO( DO_INDEX, 0 );
     }
 //-----------------------------------------------------------------------------
-int DO_1::set_state( int new_state )
-    {
-    return set_DO( DO_INDEX, new_state );
-    }
 //-----------------------------------------------------------------------------
-int DO_1::parse_cmd( char *buff )
-    {
-    set_state( buff[ 0 ] );
-    return sizeof( char );
-    }
-//-----------------------------------------------------------------------------
-int DO_1::load( file *cfg_file )
-    {
-    device::load( cfg_file );
-    wago_device::load( cfg_file );
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-void DO_1::print() const
-    {
-    device::print();
-    wago_device::print();
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-DO_device* device_manager::get_V( int number )
+i_DO_device* device_manager::get_V( int number )
     {
     int res = get_device( device::DT_V, number );
     if ( -1 == res )
@@ -403,7 +369,7 @@ DO_device* device_manager::get_V( int number )
         return &stub;
     	}
 
-    return ( DO_device* ) project_devices[ res ];
+    return ( i_DO_device* ) project_devices[ res ];
     }
 //-----------------------------------------------------------------------------
 device_manager* device_manager::get_instance()
@@ -460,25 +426,101 @@ int device_manager::load_from_cfg_file( file *cfg_file )
             switch ( dev_type )
                 {
                 case device::DT_V:
-                    switch ( dev_type )
+                    switch ( dev_sub_type )
                         {
-                        case device::DST_V_1DO:
+                        case device::DST_V_DO_1:
                             project_devices[ i ] = new DO_1();
-                            project_devices[ i ]->load( cfg_file );
+                            break;
 
-                            break;                    
+                        case device::DST_V_DO_2:
+                            project_devices[ i ] = new DO_2();
+                            break;
+
+                        case device::DST_V_DO_1_DI_1:
+                            project_devices[ i ] = new DO_1_DI_1();
+                            break;
+
+                        case device::DST_V_DO_1_DI_2:
+                            project_devices[ i ] = new DO_1_DI_2();
+                            break;
+
+                        case device::DST_V_DO_2_DI_2:
+                            project_devices[ i ] = new DO_2_DI_2();
+                            break;
+                            
+                        case device::DST_V_MIXPROOF:
+                            project_devices[ i ] = new mix_proof();
+                            break;
+                            
+                        default:
+#ifdef DEBUG
+                            Print( "Unknown V device subtype %d!\n", dev_sub_type );
+#endif // DEBUG
+                            project_devices[ i ] = new dev_stub();
+                            break;
                         }
+                    break;
+
+                case device::DT_N:
+                    project_devices[ i ] = new DO_1_DI_1();
+                    break;
+
+                case device::DT_M:
+                    project_devices[ i ] = new DO_1_DI_1();
+                    break;
+
+                case device::DT_LS:
+                    project_devices[ i ] = new DI();
+                    break;
+
+                case device::DT_TE:
+                    //project_devices[ i ] = new ();
+                    break;
+
+                case device::DT_FE:
+                    //project_devices[ i ] = new ();
+                    break;
+
+                case device::DT_FS:
+                    project_devices[ i ] = new DI();
                     break;
 
                 case device::DT_CTR:
                     project_devices[ i ] = new counter();
-                    project_devices[ i ]->load( cfg_file );
+                    break;
 
+                case device::DT_AO:
+                    //project_devices[ i ] = new ();
+                    break;
+
+                case device::DT_LE:
+                    //project_devices[ i ] = new ();
+                    break;
+
+                case device::DT_FB:
+                    project_devices[ i ] = new DI();
+                    break;
+
+                case device::DT_UPR:
+                    project_devices[ i ] = new DO_1();
+                    break;
+
+                case device::DT_QE:
+                    //project_devices[ i ] = new ();
+                    break;
+
+                case device::DT_AI:
+                    //project_devices[ i ] = new ();
+                    break;
+
+                 default:
+#ifdef DEBUG
+                    Print( "Unknown device type %d!\n", dev_type );
+#endif // DEBUG
+                    project_devices[ i ] = new dev_stub();
                     break;
                 }
-
-             project_devices[ i ]->print();
-
+                project_devices[ i ]->load( cfg_file );
             }
         }
 
@@ -561,7 +603,7 @@ int counter::parse_cmd( char *buff )
 //-----------------------------------------------------------------------------
 int counter::load( file *cfg_file )
     {
-    char_state_device::load( cfg_file );
+    device::load( cfg_file );
     wago_device::load( cfg_file );
 
     return 0;
