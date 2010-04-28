@@ -5,9 +5,9 @@ device_manager* device_manager::instance;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 device::device() : number( 0 ),
-        type( DEVICE_TYPE( 0 ) ),
-        sub_type( DEVICE_SUB_TYPE( 0 ) )
-        
+type( DEVICE_TYPE( 0 ) ),
+sub_type( DEVICE_SUB_TYPE( 0 ) )
+
     { 
     }
 //-----------------------------------------------------------------------------
@@ -91,7 +91,7 @@ int device::load( file *cfg_file )
     {    
     sscanf( cfg_file->fget_line(), "%u %u %u", ( u_int* ) &type,
         ( u_int* ) &sub_type, &number );
-    
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -284,7 +284,7 @@ int wago_device::set_AI( u_int index, float value )
 #ifdef DEBUG
     Print( "wago_device->set_AI(...) - error!\n" );
 #endif // DEBUG
-    
+
     return 1;
     }
 //-----------------------------------------------------------------------------
@@ -313,7 +313,7 @@ int wago_device::load_table_from_string( char *str, IO_channels &channels )
 
         channels.tables = new u_int[ cnt ];
         channels.offsets = new u_int[ cnt ];
-        
+
         for ( u_int i = 0; i < cnt; i++ )
             {
             pos += sscanf( str + pos, " %d %d", &channels.tables[ i ],
@@ -341,6 +341,20 @@ void wago_device::print_table( const char *str,
         }
     }
 //-----------------------------------------------------------------------------
+float wago_device::get_par( u_int index )
+    {
+    if ( index < params_count && params )
+        {
+        return params[ index ];
+        }
+
+#ifdef DEBUG
+    Print( "wago_device->get_par(...) - error!\n" );
+#endif // DEBUG
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int DO_1::get_state()
     {
@@ -357,17 +371,22 @@ void DO_1::off()
     set_DO( DO_INDEX, 0 );
     }
 //-----------------------------------------------------------------------------
+int DO_1::set_state( int new_state )
+    {
+    return digital_device::set_state( new_state );
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_V( int number )
     {
     int res = get_device( device::DT_V, number );
     if ( -1 == res )
-    	{
+        {
 #ifdef DEBUG
         Print( "V[ %d ] not found!\n", number );
 #endif // DEBUG
         return &stub;
-    	}
+        }
 
     return ( i_DO_device* ) project_devices[ res ];
     }
@@ -422,7 +441,7 @@ int device_manager::load_from_cfg_file( file *cfg_file )
             int dev_type = 0;
             int dev_sub_type = 0;
             sscanf( cfg_file->pfget_line(), "%d %d", &dev_type, &dev_sub_type );
-            
+
             switch ( dev_type )
                 {
                 case device::DT_V:
@@ -447,11 +466,11 @@ int device_manager::load_from_cfg_file( file *cfg_file )
                         case device::DST_V_DO_2_DI_2:
                             project_devices[ i ] = new DO_2_DI_2();
                             break;
-                            
+
                         case device::DST_V_MIXPROOF:
                             project_devices[ i ] = new mix_proof();
                             break;
-                            
+
                         default:
 #ifdef DEBUG
                             Print( "Unknown V device subtype %d!\n", dev_sub_type );
@@ -513,20 +532,27 @@ int device_manager::load_from_cfg_file( file *cfg_file )
                     //project_devices[ i ] = new ();
                     break;
 
-                 default:
+                default:
 #ifdef DEBUG
                     Print( "Unknown device type %d!\n", dev_type );
 #endif // DEBUG
                     project_devices[ i ] = new dev_stub();
                     break;
                 }
-                project_devices[ i ]->load( cfg_file );
+            project_devices[ i ]->load( cfg_file );
             }
         }
 
-
-     
     return 0;
+    }
+//-----------------------------------------------------------------------------
+void device_manager::print() const
+    {
+    for ( int i = 0; i < devices_count; i++ )
+        {
+        Print( "    " );
+        project_devices[ i ]->print();
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -618,6 +644,338 @@ void counter::print() const
 u_int_4 counter::get_u_int_4_state()
     {
     return 0;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float digital_device::get_value()
+    {
+    return get_state();
+    }
+//-----------------------------------------------------------------------------
+int digital_device::set_value( float new_value )
+    {
+    return set_state( ( int ) new_value );
+    }
+//-----------------------------------------------------------------------------
+int digital_device::set_state( int new_state )
+    {
+    if ( new_state ) on();
+    else off();
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int digital_device::parse_cmd( char *buff )
+    {
+    set_state( buff[ 0 ] );
+    return sizeof( char );
+    }
+//-----------------------------------------------------------------------------
+int digital_device::load( file *cfg_file )
+    {
+    device::load( cfg_file );
+    wago_device::load( cfg_file );
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void digital_device::print() const
+    {
+    device::print();
+    wago_device::print();
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int DO_2::get_state()
+    {
+    int b1 = get_DO( DO_INDEX_1 );
+    int b2 = get_DO( DO_INDEX_2 );
+    if ( b1 == b2 ) return -1;
+    return b2;
+    }
+//-----------------------------------------------------------------------------
+void DO_2::on()
+    {
+    set_DO( DO_INDEX_1, 0 );
+    set_DO( DO_INDEX_2, 1 );
+    }
+//-----------------------------------------------------------------------------
+void DO_2::off()
+    {
+    set_DO( DO_INDEX_1, 1 );
+    set_DO( DO_INDEX_2, 0 );
+    }
+//-----------------------------------------------------------------------------
+int DO_2::set_state( int new_state )
+    {
+    return digital_device::set_state( new_state );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int DO_1_DI_1::get_state()
+    {
+    int o = get_DO( DO_INDEX );
+    int i = get_DI( DI_INDEX );
+
+    if ( get_par( PAR_FB_STATE ) == 0 )
+        {
+        if ( ( o == 0 && i == 1 ) || ( o == 1 && i == 0 ) )
+            {
+            switch_time = get_ms();
+            return o;
+            }
+        }
+    else
+        {
+        if ( o == i )
+            {
+            switch_time = get_ms();
+            return i;
+            }
+        }
+
+    if ( get_ms() - switch_time > C_SWITCH_TIME )
+        {
+        return -1;
+        }
+    else
+        {
+        if ( get_par( PAR_FB_STATE ) == 0 ) return !i;
+        else return i;
+        }
+    }
+//-----------------------------------------------------------------------------
+void DO_1_DI_1::on()
+    {
+    int o = get_DO( DO_INDEX );
+    if ( 0 == o )
+        {
+        switch_time = get_ms();
+        set_DO( DO_INDEX, 1 );
+        }
+    }
+//-----------------------------------------------------------------------------
+void DO_1_DI_1::off()
+    {
+    int o = get_DO( DO_INDEX );
+    if ( o != 0 )
+        {
+        switch_time = get_ms();
+        set_DO( DO_INDEX, 0 );
+        }
+    }
+//-----------------------------------------------------------------------------
+int DO_1_DI_1::set_state( int new_state )
+    {
+    return digital_device::set_state( new_state );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int DO_1_DI_2::get_state()
+    {
+    int o = get_DO( DO_INDEX );
+    int i0 = get_DI( DI_INDEX_1 );
+    int i1 = get_DI( DI_INDEX_2 );
+
+    if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+        ( o == 1 && i1 == 1 && i0 ==0 ) )
+        {
+        switch_time = get_ms();
+        return o;
+        }
+
+    if ( get_ms() - switch_time > C_SWITCH_TIME )
+        {
+        return -1;
+        }
+    else
+        {
+        return o;
+        }
+    }
+//-----------------------------------------------------------------------------
+void DO_1_DI_2::on()
+    {
+    int o = get_DO( DO_INDEX );
+    if ( 0 == o )
+        {
+        switch_time = get_ms();
+        set_DO( DO_INDEX, 1 );
+        }
+    }
+//-----------------------------------------------------------------------------
+void DO_1_DI_2::off()
+    {
+    int o = get_DO( DO_INDEX );
+    if ( o != 0 )
+        {
+        switch_time = get_ms();
+        set_DO( DO_INDEX, 0 );
+        }
+    }
+//-----------------------------------------------------------------------------
+int DO_1_DI_2::set_state( int new_state )
+    {
+    return digital_device::set_state( new_state );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int DO_2_DI_2::get_state()
+    {
+    int o0 = get_DO( DO_INDEX_1 );
+    int o1 = get_DO( DO_INDEX_2 );
+    int i0 = get_DI( DI_INDEX_1 );
+    int i1 = get_DI( DI_INDEX_2 );
+
+    if ( ( o1 == i1 ) && ( o0 == i0 ) )
+        {
+        switch_time = get_ms();
+        return o1;
+        };
+
+    if ( get_ms() - switch_time > C_SWITCH_TIME )
+        {
+        return -1;
+        }
+    else
+        {
+        return o1;
+        }
+    }
+//-----------------------------------------------------------------------------
+void DO_2_DI_2::on()
+    {
+    int o = get_DO( DO_INDEX_1 );
+    if ( 0 == o )
+        {
+        switch_time = get_ms();
+        set_DO( DO_INDEX_1, 1 );
+        set_DO( DO_INDEX_2, 0 );
+        }
+    }
+//-----------------------------------------------------------------------------
+void DO_2_DI_2::off()
+    {
+    int o = get_DO( DO_INDEX_2 );
+    if ( 0 == o )
+        {
+        switch_time = get_ms();
+        set_DO( DO_INDEX_1, 0 );
+        set_DO( DO_INDEX_2, 1 );
+        }
+    }
+//-----------------------------------------------------------------------------
+int DO_2_DI_2::set_state( int new_state )
+    {
+    return digital_device::set_state( new_state );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int mix_proof::get_state()
+    {
+    int o = get_DO( DO_INDEX );            
+    int i0 = get_DI( DI_INDEX_U );
+    int i1 = get_DI( DI_INDEX_L );
+
+    if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+        ( o == 1 && i1 == 1 && i0 == 0 ) )
+        {
+        switch_time = get_ms();
+        if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return 2;
+        if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return 3;
+        return o;
+        }
+
+    if ( get_ms() - switch_time > C_SWITCH_TIME )
+        {
+        return -1;
+        }
+    else
+        {
+        return o;
+        }
+    }
+//-----------------------------------------------------------------------------
+void mix_proof::on()
+    {
+    set_DO( DO_INDEX_U, 0 );
+    set_DO( DO_INDEX_L, 0 );
+    int o = get_DO( DO_INDEX );
+
+    if ( 0 == o )
+        {
+        switch_time = get_ms();
+        set_DO( DO_INDEX, 1 );
+        }
+    }
+//-----------------------------------------------------------------------------
+void mix_proof::open_upper_seat()
+    {
+    off();
+    set_DO( DO_INDEX_U, 1 );
+    }
+//-----------------------------------------------------------------------------
+void mix_proof::open_low_seat()
+    {
+    off();
+    set_DO( DO_INDEX_L, 1 );
+    }
+//-----------------------------------------------------------------------------
+void mix_proof::off()
+    {
+    set_DO( DO_INDEX_U, 0 );
+    set_DO( DO_INDEX_L, 0 );
+    int o = get_DO( DO_INDEX );
+
+    if ( o != 0 )
+        {
+        switch_time = get_ms();
+        set_DO( DO_INDEX, 0 );
+        }
+    }
+//-----------------------------------------------------------------------------
+int mix_proof::set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case 0:
+            off();
+            break;
+
+        case 1:
+            on();
+            break;
+
+        case 2:
+            open_upper_seat();
+            break;
+
+        case 3:
+            open_low_seat();
+            break;
+
+        default:
+            on();
+            break;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int DI::get_state()
+    {
+    return get_DI( DI_INDEX );
+    }
+//-----------------------------------------------------------------------------
+void DI::on()
+    {
+    set_DI( DI_INDEX, 1 );
+    }
+//-----------------------------------------------------------------------------
+void DI::off()
+    {
+    set_DI( DI_INDEX, 0 );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
