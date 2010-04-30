@@ -312,6 +312,15 @@ class device : public i_simple_device
         /// @return -  номер устройства.
         u_int_4 get_n() const;
 
+        int get_type() const
+            {
+            return type;
+            }
+
+        int get_sub_type() const
+            {
+            return sub_type;
+            }
     protected:
         u_int_4 number;             ///< Номер устройства.
 
@@ -335,9 +344,10 @@ class char_state_device : public device
         char prev_state;    ///< Предыдущее состояние устройства.
     };
 //-----------------------------------------------------------------------------
-/// @brief Устройство, для хранения состояния которого необходимо 4 байта.
+/// @brief Устройство, для хранения состояния которого необходимо беззнаковое
+/// целое размером 4 байта.
 ///
-/// Это счетчик.
+/// Например счетчик.
 class u_int_4_state_device : public device
     {
     public:
@@ -352,6 +362,35 @@ class u_int_4_state_device : public device
 
     private:
         u_int_4 prev_state;    ///< Предыдущее состояние устройства.
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство, для хранения состояния которого необходимо дробное число
+/// размером 4 байта.
+///
+/// Например температура.
+class float_state_device : public device
+    {
+    public:
+        /// @brief Реализация интерфейса @ref i_save_device.
+        int save_changed_state( char *buff )
+            {
+            if ( prev_state != get_value() )
+                {
+                return save_state( buff );
+                }
+            return 0;
+            }
+
+        /// @brief Реализация интерфейса @ref i_save_device.
+        int save_state( char *buff  )
+            {
+            *( ( float* ) buff ) = get_value();
+            prev_state = get_value();
+            return sizeof( float );
+            }
+        
+    private:
+        float prev_state;    ///< Предыдущее состояние устройства.
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретным входом. 
@@ -562,7 +601,8 @@ class wago_device
 /// номером. Методы данного класса ничего не делают. 
 class dev_stub : public char_state_device,
     public i_DO_device,
-    public i_AO_device
+    public i_AO_device,
+    public wago_device
     {
     public:
         float get_value();
@@ -578,6 +618,14 @@ class dev_stub : public char_state_device,
         int set_state( int new_state );
 
         int parse_cmd( char *buff );
+
+        int load( file *cfg_file )
+            {
+            device::load( cfg_file );
+            wago_device::load( cfg_file );
+
+            return 0;
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретными входами/выходами.
@@ -766,9 +814,137 @@ class mix_proof : public digital_device,
         u_long switch_time;
     };
 //-----------------------------------------------------------------------------
+/// @brief Устройство с одним аналоговым входом.
+///
+/// Это может быть температура, расход (величина)...
+class AI :public float_state_device,
+    public wago_device,
+    public i_AI_device
+    {
+    public:
+        float get_value()
+            {
+            return get_AI( AI_INDEX );
+            }
+
+        int parse_cmd( char *buff )
+            {
+            set_value( *( ( float* ) buff ) );
+            return sizeof( float );
+            }
+
+        void on()
+            {
+            }
+
+        void off()
+            {
+            set_value( 0 );
+            }
+
+        int get_state()
+            {
+            return ( int ) get_value();
+            }
+
+        int set_value( float new_value )
+            {
+            return set_AI( AI_INDEX, new_value );
+            }
+
+        int set_state( int new_state )
+            {
+            return set_value( new_state );
+            }
+
+        int load( file *cfg_file )
+            {
+            device::load( cfg_file );
+            wago_device::load( cfg_file );
+
+            return 0;
+            }
+
+        void print() const
+            {
+            device::print();
+            wago_device::print();
+            }
+
+    private:
+        enum CONSTANTS
+            {
+            AI_INDEX = 0,
+            };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с одним аналоговым входом.
+///
+/// Это может быть управляемый клапан...
+class AO :public float_state_device,
+    public wago_device,
+    public i_AO_device
+    {
+    public:
+        float get_value()
+            {
+            return get_AO( AO_INDEX );
+            }
+
+        int parse_cmd( char *buff )
+            {
+            set_value( *( ( float* ) buff ) );
+            return sizeof( float );
+            }
+
+        void on()
+            {
+            }
+
+        void off()
+            {
+            set_value( 0 );
+            }
+
+        int get_state()
+            {
+            return ( int ) get_value();
+            }
+
+        int set_value( float new_value )
+            {
+            return set_AO( AO_INDEX, new_value );
+            }
+
+        int set_state( int new_state )
+            {
+            return set_value( new_state );
+            }
+
+        int load( file *cfg_file )
+            {
+            device::load( cfg_file );
+            wago_device::load( cfg_file );
+
+            return 0;
+            }
+
+        void print() const
+            {
+            device::print();
+            wago_device::print();
+            }
+
+    private:
+        enum CONSTANTS
+            {
+            AO_INDEX = 0,
+            };
+    };
+//-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным входом.
 ///
-/// Это может обратная связь, расход (есть/нет)...
+/// Это может быть обратная связь, расход (есть/нет)...
 class DI : public digital_device,
     public i_DI_device
     {
@@ -826,6 +1002,16 @@ class counter : public u_int_4_state_device,
 class device_manager
     {
     public:
+        device_manager()
+            {
+            for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
+                {
+                dev_types_ranges[ i ].start_pos = 0;
+                dev_types_ranges[ i ].end_pos = 0;
+                }
+            }
+        
+
         int load_from_cfg_file( file *cfg_file );
 
         i_DO_device* get_V( int number );

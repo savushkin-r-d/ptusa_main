@@ -6,10 +6,10 @@
 /// @brief 
 //
 /// 
-struct wago_table 
+struct wago_node
     {
 
-    wago_table() : state( 0 ),
+    wago_node() : state( 0 ),
         number( 0 ),
         type( 0 ),
         DO_cnt( 0 ),
@@ -45,6 +45,25 @@ struct wago_table
         sscanf( cfg_file->fget_line(), "%d", &AO_cnt );
         cfg_file->fget_line();
 
+        if ( DI_cnt )
+            {
+            DI = new u_char [ DI_cnt ];
+            }
+        if ( DO_cnt )
+            {
+            DO = new u_char [ DO_cnt ];
+            _DO = new u_char [ DO_cnt ];
+            }
+        if ( AI_cnt )
+            {
+            AI = new float [ AI_cnt ];
+            }
+        if ( AO_cnt )
+            {
+            AO = new float [ AO_cnt ];
+            _AO = new float [ AO_cnt ];
+            }
+
 #ifdef DEBUG
             Print( "type %d, number %d, ip %d.%d.%d.%d. ",
                 type, number, ip_addres[ 0 ], ip_addres[ 1 ], ip_addres[ 2 ],
@@ -75,21 +94,21 @@ struct wago_table
     int     ip_addres[ 4 ];
 
     // Digital outputs ( DO ).
-    int DO_cnt;  ///< Amount of DO.
+    u_int DO_cnt;///< Amount of DO.
     u_char *DO;  ///< Current values.
     u_char *_DO; ///< To write.
 
     // Analog outputs ( AO ).
-    int AO_cnt;  ///< Amount of AO.
+    u_int AO_cnt;///< Amount of AO.
     float *AO;   ///< Current values.
     float *_AO;  ///< To write.
 
     // Digital inputs ( DI ).
-    int DI_cnt;  ///< Amount of DI.
+    u_int DI_cnt;///< Amount of DI.
     u_char *DI;  ///< Current values.
 
     // Analog inputs ( AI ).
-    int AI_cnt;  ///< Amount of AI.
+    u_int AI_cnt;///< Amount of AI.
     float *AI;   ///< Current values.
     };
 //-----------------------------------------------------------------------------
@@ -115,17 +134,17 @@ class wago_manager
 #endif // DEBUG
             cfg_file->fget_line();
 
-            tables_count = nodes_count;
+           this-> nodes_count = nodes_count;
             if ( nodes_count )
                 {
-                tables = new wago_table*[ nodes_count ];
+                nodes = new wago_node*[ nodes_count ];
                 for ( int i = 0; i < nodes_count; i++ )
                     {
-                     tables[ i ] = new wago_table;
+                     nodes[ i ] = new wago_node;
 #ifdef DEBUG
                     Print( "    %d. ", i );
 #endif // DEBUG
-                     tables[ i ]->load_from_cfg_file( cfg_file );
+                     nodes[ i ]->load_from_cfg_file( cfg_file );
                     }
                 }
 
@@ -144,45 +163,62 @@ class wago_manager
             instance = new_instance;
             }
 
-        virtual int get_DO( u_int table_n, u_int offset )
+        virtual int get_DO( u_int node_n, u_int offset )
+            {
+            if ( node_n < nodes_count && nodes )
+                {
+                if ( nodes[ node_n ] && offset < nodes[ node_n ]->DO_cnt )
+                    {
+                    return nodes[ node_n ]->_DO[ offset ];
+                    }
+                }
+
+            return 0;
+            }
+        
+        virtual int set_DO( u_int node_n, u_int offset, char value )
+            {
+            if ( node_n < nodes_count && nodes )
+                {
+                if ( nodes[ node_n ] && offset < nodes[ node_n ]->DO_cnt )
+                    {
+                    nodes[ node_n ]->_DO[ offset ] = value;
+                    return 0;
+                    }
+                }
+            return 1;
+            }
+
+        virtual int get_DI( u_int node_n, u_int offset )
             {
             return 0;
-            }        
-        virtual int set_DO( u_int table_n, u_int offset, char value )
+            }
+        virtual int set_DI( u_int node_n, u_int offset, char value )
             {
             return 0;
             }
 
-        virtual int get_DI( u_int table_n, u_int offset )
+        virtual float get_AO( u_int node_n, u_int offset )
             {
             return 0;
             }
-        virtual int set_DI( u_int table_n, u_int offset, char value )
-            {
-            return 0;
-            }
-
-        virtual float get_AO( u_int table_n, u_int offset )
-            {
-            return 0;
-            }
-        virtual int   set_AO( u_int table_n, u_int offset, float value )
+        virtual int   set_AO( u_int node_n, u_int offset, float value )
             {
             return 0;
             }
 
-        virtual float get_AI( u_int table_n, u_int offset )
+        virtual float get_AI( u_int node_n, u_int offset )
             {
             return 0;
             }
-        virtual int   set_AI( u_int table_n, u_int offset, float value )
+        virtual int   set_AI( u_int node_n, u_int offset, float value )
             {
             return 0;
             }
 
-    private:
-        int        tables_count;
-        wago_table **tables;
+    protected:
+        u_int       nodes_count;
+        wago_node **nodes;
 
         static wago_manager* instance;
     };

@@ -333,7 +333,7 @@ void wago_device::print_table( const char *str,
         Print( "[ " );
         for ( u_int i = 0; i < channels.count; i++ )
             {
-            Print("%d:%d", channels.tables[ i ],
+            Print("%d:%2d", channels.tables[ i ],
                 channels.offsets[ i ] );
             if ( i < channels.count - 1 ) Print( "; " );
             }
@@ -386,9 +386,47 @@ i_DO_device* device_manager::get_V( int number )
         Print( "V[ %d ] not found!\n", number );
 #endif // DEBUG
         return &stub;
-        }
+        } 
+    
+    switch (  project_devices[ res ]->get_type() )
+        {
+        case device::DT_V:     
+            switch ( project_devices[ res ]->get_sub_type() )
+                {
+                case device::DST_V_DO_1:
+                    return ( DO_1* ) project_devices[ res ];
+                    
+                case device::DST_V_DO_2:
+                    return ( DO_2* ) project_devices[ res ];
+                    
+                case device::DST_V_DO_1_DI_1:
+                    return ( DO_1_DI_1* ) project_devices[ res ];
+                    
+                case device::DST_V_DO_1_DI_2:
+                    return ( DO_1_DI_2* ) project_devices[ res ];
+                    
+                case device::DST_V_DO_2_DI_2:
+                    return ( DO_2_DI_2* ) project_devices[ res ];
+                    
+                case device::DST_V_MIXPROOF:
+                    return ( mix_proof* ) project_devices[ res ];
+                    
+                default:
+#ifdef DEBUG
+                    Print( "device_manager::get_V(...) - unknown V device subtype %d!\n",
+                        project_devices[ res ]->get_sub_type() );
+#endif // DEBUG
+                    return &stub;
+                }
+            break;
 
-    return ( i_DO_device* ) project_devices[ res ];
+        default:
+#ifdef DEBUG
+            Print( "device_manager::get_V(...) - unknown device type %d!\n",
+                project_devices[ res ]->get_sub_type() );
+#endif // DEBUG
+            return &stub;
+        }
     }
 //-----------------------------------------------------------------------------
 device_manager* device_manager::get_instance()
@@ -435,6 +473,8 @@ int device_manager::load_from_cfg_file( file *cfg_file )
 
     if ( devices_count )
         {
+        char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
+
         project_devices = new device* [ devices_count ];
         for ( int i = 0; i < devices_count; i++ )
             {
@@ -444,7 +484,7 @@ int device_manager::load_from_cfg_file( file *cfg_file )
 
             switch ( dev_type )
                 {
-                case device::DT_V:
+                case device::DT_V:     
                     switch ( dev_sub_type )
                         {
                         case device::DST_V_DO_1:
@@ -493,14 +533,15 @@ int device_manager::load_from_cfg_file( file *cfg_file )
                     break;
 
                 case device::DT_TE:
-                    //project_devices[ i ] = new ();
+                    project_devices[ i ] = new AI();
                     break;
 
                 case device::DT_FE:
-                    //project_devices[ i ] = new ();
+                    project_devices[ i ] = new AI();
                     break;
 
                 case device::DT_FS:
+                    project_devices[ i ] = new dev_stub();
                     project_devices[ i ] = new DI();
                     break;
 
@@ -509,11 +550,11 @@ int device_manager::load_from_cfg_file( file *cfg_file )
                     break;
 
                 case device::DT_AO:
-                    //project_devices[ i ] = new ();
+                    project_devices[ i ] = new AO();
                     break;
 
                 case device::DT_LE:
-                    //project_devices[ i ] = new ();
+                    project_devices[ i ] = new AI();
                     break;
 
                 case device::DT_FB:
@@ -525,11 +566,11 @@ int device_manager::load_from_cfg_file( file *cfg_file )
                     break;
 
                 case device::DT_QE:
-                    //project_devices[ i ] = new ();
+                    project_devices[ i ] = new AI();
                     break;
 
                 case device::DT_AI:
-                    //project_devices[ i ] = new ();
+                    project_devices[ i ] = new AI();
                     break;
 
                 default:
@@ -539,6 +580,17 @@ int device_manager::load_from_cfg_file( file *cfg_file )
                     project_devices[ i ] = new dev_stub();
                     break;
                 }
+
+            if ( dev_type < device::C_DEVICE_TYPE_CNT )
+                {
+                if ( 0 == is_first_device[ dev_type ] )
+                    {
+                    dev_types_ranges[ dev_type ].start_pos = i;
+                    is_first_device[ dev_type ] = 1;
+                    }
+                dev_types_ranges[ dev_type ].end_pos = i;
+                }
+
             project_devices[ i ]->load( cfg_file );
             }
         }
@@ -553,6 +605,7 @@ void device_manager::print() const
         Print( "    " );
         project_devices[ i ]->print();
         }
+    Print( "\n" );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

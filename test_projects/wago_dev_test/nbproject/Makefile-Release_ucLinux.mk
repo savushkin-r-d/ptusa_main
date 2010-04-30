@@ -41,6 +41,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/wago_w750.o \
 	${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/tcp_cmctr.o \
 	${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/PAC_dev.o \
+	${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/kbusapi.o \
 	${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/sys.o
 
 # C Compiler Flags
@@ -116,6 +117,11 @@ ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/PAC_dev.o: nbproject/Makefile-${CND
 	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common
 	${RM} $@.d
 	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/PAC_dev.o ../../PAC/common/PAC_dev.cpp
+
+${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/kbusapi.o: nbproject/Makefile-${CND_CONF}.mk ../../PAC/uclinux/kbusapi.cpp 
+	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux
+	${RM} $@.d
+	$(COMPILE.cc) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/uclinux/kbusapi.o ../../PAC/uclinux/kbusapi.cpp
 
 ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common/sys.o: nbproject/Makefile-${CND_CONF}.mk ../../PAC/common/sys.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/_DOTDOT/_DOTDOT/PAC/common

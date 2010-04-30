@@ -39,6 +39,7 @@
         <itemPath>../../common/PAC-driver/g_device.cpp</itemPath>
       </logicalFolder>
       <logicalFolder name="f3" displayName="uclinux" projectFiles="true">
+        <itemPath>../../PAC/uclinux/kbusapi.cpp</itemPath>
         <itemPath>../../PAC/uclinux/prj_mngr_w750.cpp</itemPath>
         <itemPath>../../PAC/uclinux/sys_w750.cpp</itemPath>
         <itemPath>../../PAC/uclinux/tcp_cmctr_w750.cpp</itemPath>
@@ -71,6 +72,7 @@
             <Elem>PAC</Elem>
             <Elem>W750</Elem>
             <Elem>DEBUG</Elem>
+            <Elem>LINUX</Elem>
           </preprocessorList>
           <warningLevel>2</warningLevel>
         </ccTool>
