@@ -92,4 +92,5 @@ class wago_manager_w750 : public wago_manager
             return 0;
             }
     };
+
     
