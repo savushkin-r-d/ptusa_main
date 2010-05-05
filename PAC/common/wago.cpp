@@ -81,7 +81,7 @@ int wago_manager::get_DO_data( u_int node_n, u_int offset, u_char *p_read,
     return 1;
     }
 //-----------------------------------------------------------------------------
-int wago_manager::get_AI_data( u_int node_n, u_int offset, float *p_read )
+int wago_manager::get_AI_data( u_int node_n, u_int offset, u_int *p_read )
     {
     if ( node_n < nodes_count && nodes )
         {
@@ -100,7 +100,7 @@ int wago_manager::get_AI_data( u_int node_n, u_int offset, float *p_read )
     }
 //-----------------------------------------------------------------------------
 int wago_manager::get_AO_data( u_int node_n, u_int offset, 
-                              float *p_read, float *p_write )
+                              u_int *p_read, u_int *p_write )
     {
     if ( node_n < nodes_count && nodes )
         {
@@ -170,7 +170,7 @@ int wago_manager::wago_node::load_from_cfg_file( file *cfg_file )
     sscanf( cfg_file->fget_line(), "%d", &AI_cnt );
     if ( AI_cnt )
         {
-        AI = new float [ AI_cnt ];
+        AI = new u_int [ AI_cnt ];
         AI_offsets = new u_int [ AI_cnt ];
         AI_types = new u_int [ AI_cnt ];
         }
@@ -184,8 +184,8 @@ int wago_manager::wago_node::load_from_cfg_file( file *cfg_file )
     sscanf( cfg_file->fget_line(), "%d", &AO_cnt );
     if ( AO_cnt )
         {
-        AO = new float [ AO_cnt ];
-        AO_ = new float [ AO_cnt ];
+        AO = new u_int [ AO_cnt ];
+        AO_ = new u_int [ AO_cnt ];
         AO_types = new u_int [ AO_cnt ];
         AO_offsets = new u_int [ AO_cnt ];
         }

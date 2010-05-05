@@ -25,7 +25,6 @@
 
 #include "g_device.h"
 
-//#include "param_ex.h"
 //-----------------------------------------------------------------------------
 /// @brief Шаблон класса, который используется для передачи состояния устройств,
 /// которые представляются массивом некоторого типа.
@@ -472,6 +471,11 @@ class wago_device
         virtual int load( file *cfg_file );
 
     protected:
+        enum CONSTANTS
+            {
+            C_MAX_ANALOG_CHANNEL_VALUE = 65535,
+            };
+
         /// @brief Получение состояния канала дискретного выхода.
         ///
         /// @param index - индекс канала в таблице дискретных выходных каналов 
@@ -517,7 +521,7 @@ class wago_device
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
-        float get_AO( u_int index );
+        u_int get_AO( u_int index );
 
         /// @brief Установка состояния канала аналогового выхода.
         ///
@@ -527,7 +531,7 @@ class wago_device
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
-        int   set_AO( u_int index, float value );
+        int set_AO( u_int index, u_int value );
 
         /// @brief Получение состояния канала аналогового входа.
         ///
@@ -536,7 +540,7 @@ class wago_device
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
-        float get_AI( u_int index );
+        u_int get_AI( u_int index );
 
         /// @brief Установка состояния канала аналогового входа.
         ///
@@ -546,7 +550,7 @@ class wago_device
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
-        int   set_AI( u_int index, float value );
+        int   set_AI( u_int index, u_int value );
 
         float get_par( u_int index );
 
@@ -568,14 +572,14 @@ class wago_device
             u_int* tables;  ///< Массив таблиц.
             u_int* offsets; ///< Массив смещений в пределах таблиц.
 
-            float** float_read_values;   ///< Массив значений для чтения.
-            float** float_write_values;  ///< Массив значений для записи.
-            u_char** char_read_values;   ///< Массив значений для чтения.
-            u_char** char_write_values;  ///< Массив значений для записи.
+            u_int  **int_read_values;    ///< Массив значений для чтения.
+            u_int  **int_write_values;   ///< Массив значений для записи.
+            u_char **char_read_values;   ///< Массив значений для чтения.
+            u_char **char_write_values;  ///< Массив значений для записи.
 
             IO_channels( CHANNEL_TYPE type ) : count( 0 ), tables( 0 ),
                 offsets( 0 ), 
-                float_read_values( 0 ), float_write_values( 0 ),
+                int_read_values( 0 ), int_write_values( 0 ),
                 char_read_values( 0 ), char_write_values( 0 ),
                 type( type )
                 {
@@ -820,12 +824,16 @@ class mix_proof : public digital_device,
 /// @brief Устройство с одним аналоговым входом.
 ///
 /// Это может быть температура, расход (величина)...
-class AI :public float_state_device,
+class AI_1 :public float_state_device,
     public wago_device,
     public i_AI_device
     {
     public:
-        float get_value();
+        float get_value()
+            {
+            return get_AI( AI_INDEX ) / C_MAX_ANALOG_CHANNEL_VALUE *
+                get_max_val();
+            }
 
         int parse_cmd( char *buff );
 
@@ -835,7 +843,22 @@ class AI :public float_state_device,
 
         int get_state();
 
-        int set_value( float new_value );
+        int set_value( float new_value )
+            {
+            if ( new_value < get_min_val() )
+                {
+                new_value = get_min_val();
+                }
+            if ( new_value > get_max_val() )
+                {
+                new_value = get_max_val();
+                }
+
+            u_int value = ( u_int ) ( C_MAX_ANALOG_CHANNEL_VALUE * 
+                new_value / get_max_val() );
+
+            return set_AI( AI_INDEX, value );
+            }
 
         int set_state( int new_state );
 
@@ -843,17 +866,118 @@ class AI :public float_state_device,
 
         void print() const;
 
-    private:
+        virtual float get_max_val() = 0;
+        virtual float get_min_val() = 0;
+
+    protected:
         enum CONSTANTS
             {
             AI_INDEX = 0,
             };
     };
+//---------------------------------l--------------------------------------------
+/// @brief Устройство ...
+class temperature_e : public AI_1
+    {
+    public:
+        float get_max_val()
+            {
+            return C_MAX_ANALOG_CHANNEL_VALUE;
+            }
+        float get_min_val()
+            {
+            return 0;
+            }
+
+        float get_value()
+            {
+            short int tmp = get_AI( AI_INDEX );
+            float val = 0.1 * tmp;
+            val = val >= -50 && val <= 150 ? val : -1000;
+
+            return val;
+            }
+
+        int set_value( float new_value )
+            {
+            return set_AI( AI_INDEX, ( int ) ( 10 * new_value ) );
+            }
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство ...
+class level_e : public AI_1
+    {
+    public:
+        float get_max_val()
+            {
+            return 100;
+            }
+        float get_min_val()
+            {
+            return 0;
+            }
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство ...
+class flow_e : public AI_1
+    {
+    public:
+        float get_max_val()
+            {
+            return get_par( C_MAX_PAR_NUMBER );
+            }
+        float get_min_val()
+            {
+            return get_par( C_MIN_PAR_NUMBER );
+            }
+        
+    private:
+        enum CONSTANTS
+            {
+            C_MIN_PAR_NUMBER = 0,
+            C_MAX_PAR_NUMBER,
+            };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство ...
+class concentration_e : public AI_1
+    {
+    public:
+        float get_max_val()
+            {
+            return get_par( C_MAX_PAR_NUMBER );
+            }
+        float get_min_val()
+            {
+            return get_par( C_MIN_PAR_NUMBER );
+            }
+
+    private:
+        enum CONSTANTS
+            {
+            C_MIN_PAR_NUMBER = 0,
+            C_MAX_PAR_NUMBER,
+            };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство ...
+class analog_input_4_20 : public AI_1
+    {
+    public:
+        float get_max_val()
+            {
+            return 20;
+            }
+        float get_min_val()
+            {
+            return 4;
+            }
+    };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым входом.
 ///
 /// Это может быть управляемый клапан...
-class AO :public float_state_device,
+class AO_1 :public float_state_device,
     public wago_device,
     public i_AO_device
     {
@@ -880,13 +1004,16 @@ class AO :public float_state_device,
         enum CONSTANTS
             {
             AO_INDEX = 0,
+
+            C_AO_MIN_VALUE = 0,
+            C_AO_MAX_VALUE = 100,
             };
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным входом.
 ///
 /// Это может быть обратная связь, расход (есть/нет)...
-class DI : public digital_device,
+class DI_1 : public digital_device,
     public i_DI_device
     {
     public:
@@ -950,6 +1077,188 @@ class device_manager
 
         i_DO_device* get_V( int number );
 
+        i_DO_device* get_N( int number )
+            {
+            int res = get_device( device::DT_N, number );
+            if ( -1 == res )
+                {
+#ifdef DEBUG
+                Print( "N[ %d ] not found!\n", number );
+#endif // DEBUG
+                return &stub;
+                }
+
+            return ( DO_1_DI_1* ) project_devices[ res ];
+            }
+
+       i_DO_device* get_M( int number )
+            {
+            int res = get_device( device::DT_M, number );
+            if ( -1 == res )
+                {
+#ifdef DEBUG
+                Print( "M[ %d ] not found!\n", number );
+#endif // DEBUG
+                return &stub;
+                }
+
+            return ( DO_1_DI_1* ) project_devices[ res ];
+            }
+
+       i_DI_device* get_LS( int number )
+            {
+            int res = get_device( device::DT_LS, number );
+            if ( -1 == res )
+                {
+#ifdef DEBUG
+                Print( "LS[ %d ] not found!\n", number );
+#endif // DEBUG
+                return &stub;
+                }
+
+            return ( DI_1* ) project_devices[ res ];
+            }
+
+       i_DI_device* get_FS( int number )
+            {
+            int res = get_device( device::DT_FS, number );
+            if ( -1 == res )
+                {
+#ifdef DEBUG
+                Print( "FS[ %d ] not found!\n", number );
+#endif // DEBUG
+                return &stub;
+                }
+
+            return ( DI_1* ) project_devices[ res ];
+            }
+
+       i_AI_device* get_AI( int number )
+            {
+            int res = get_device( device::DT_AI, number );
+            if ( -1 == res )
+                {
+#ifdef DEBUG
+                Print( "AI[ %d ] not found!\n", number );
+#endif // DEBUG
+                return &stub;
+                }
+
+            return ( analog_input_4_20* ) project_devices[ res ];
+            }
+
+       i_AO_device* get_AO( int number )
+            {
+            int res = get_device( device::DT_AO, number );
+            if ( -1 == res )
+                {
+#ifdef DEBUG
+                Print( "AO[ %d ] not found!\n", number );
+#endif // DEBUG
+                return &stub;
+                }
+
+            return ( AO_1* ) project_devices[ res ];
+            }
+
+       counter* get_CTR( int number )
+            {
+            int res = get_device( device::DT_AI, number );
+            if ( -1 == res )
+                {
+#ifdef DEBUG
+                Print( "counter[ %d ] not found!\n", number );
+#endif // DEBUG
+                return 0;
+                }
+
+            return ( counter* ) project_devices[ res ];
+            }
+
+        i_AI_device* get_TE( int number )
+            {
+            int res = get_device( device::DT_TE, number );
+            if ( -1 == res )
+                {
+#ifdef DEBUG
+                Print( "TE[ %d ] not found!\n", number );
+#endif // DEBUG
+                return &stub;
+                }
+
+            return ( temperature_e* ) project_devices[ res ];
+            }
+
+         i_AI_device* get_FE( int number )
+            {
+            int res = get_device( device::DT_AI, number );
+            if ( -1 == res )
+                {
+#ifdef DEBUG
+                Print( "FE[ %d ] not found!\n", number );
+#endif // DEBUG
+                return &stub;
+                }
+
+            return ( flow_e* ) project_devices[ res ];
+            }
+
+          i_AI_device* get_LE( int number )
+            {
+            int res = get_device( device::DT_LE, number );
+            if ( -1 == res )
+                {
+#ifdef DEBUG
+                Print( "LE[ %d ] not found!\n", number );
+#endif // DEBUG
+                return &stub;
+                }
+
+            return ( level_e* ) project_devices[ res ];
+            }
+
+       i_DI_device* get_FB( int number )
+            {
+            int res = get_device( device::DT_FB, number );
+            if ( -1 == res )
+                {
+#ifdef DEBUG
+                Print( "FB[ %d ] not found!\n", number );
+#endif // DEBUG
+                return &stub;
+                }
+
+            return ( DI_1* ) project_devices[ res ];
+            }
+
+       i_DO_device* get_UPR( int number )
+            {
+            int res = get_device( device::DT_UPR, number );
+            if ( -1 == res )
+                {
+#ifdef DEBUG
+                Print( "UPR[ %d ] not found!\n", number );
+#endif // DEBUG
+                return &stub;
+                }
+
+            return ( DO_1* ) project_devices[ res ];
+            }
+
+       i_AI_device* get_QE( int number )
+            {
+            int res = get_device( device::DT_QE, number );
+            if ( -1 == res )
+                {
+#ifdef DEBUG
+                Print( "QE[ %d ] not found!\n", number );
+#endif // DEBUG
+                return &stub;
+                }
+
+            return ( concentration_e* ) project_devices[ res ];
+            }
+
         static device_manager* get_instance();
 
         void print() const;
@@ -977,7 +1286,20 @@ class device_manager
         static device_manager* instance;
     };
 //-----------------------------------------------------------------------------
-/// Получение клапана по его номеру.
+// Получение соответствующего устройства по его номеру.
 #define V device_manager::get_instance()->get_V
+#define N device_manager::get_instance()->get_N
+#define M device_manager::get_instance()->get_M
+#define LS device_manager::get_instance()->get_LS
+#define FS device_manager::get_instance()->get_FS
+#define AI device_manager::get_instance()->get_AI
+#define AO device_manager::get_instance()->get_AO
+#define CTR device_manager::get_instance()->get_counter
+#define TE device_manager::get_instance()->get_TE
+#define FE device_manager::get_instance()->get_FE
+#define LE device_manager::get_instance()->get_LE
+#define FB device_manager::get_instance()->get_FB
+#define UPR device_manager::get_instance()->get_UPR
+#define QE device_manager::get_instance()->get_QE
 //-----------------------------------------------------------------------------
 #endif // PAC_DEVICES_H

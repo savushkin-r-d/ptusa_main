@@ -24,10 +24,10 @@ class wago_manager
         int get_DO_data( u_int node_n, u_int offset, u_char *p_read,
             u_char *p_write );
 
-        int get_AI_data( u_int node_n, u_int offset, float *p_read );
+        int get_AI_data( u_int node_n, u_int offset, u_int *p_read );
 
-        int get_AO_data( u_int node_n, u_int offset, float *p_read,
-            float *p_write );
+        int get_AO_data( u_int node_n, u_int offset, u_int *p_read,
+            u_int *p_write );
 
 
     protected:
@@ -53,8 +53,8 @@ class wago_manager
 
             // Analog outputs ( AO ).
             u_int AO_cnt;       ///< Amount of AO.
-            float *AO;          ///< Current values.
-            float *AO_;         ///< To write.
+            u_int *AO;          ///< Current values.
+            u_int *AO_;         ///< To write.
             u_int *AO_offsets;  ///< Offsets in common data.
             u_int *AO_types;    ///< Channels type.
 
@@ -64,7 +64,7 @@ class wago_manager
 
             // Analog inputs ( AI ).
             u_int AI_cnt;       ///< Amount of AI.
-            float *AI;          ///< Current values.
+            u_int *AI;          ///< Current values.
             u_int *AI_offsets;  ///< Offsets in common data.
             u_int *AI_types;    ///< Channels type.
             };

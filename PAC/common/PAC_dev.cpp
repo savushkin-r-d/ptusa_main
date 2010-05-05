@@ -154,14 +154,14 @@ int wago_device::load( file *cfg_file )
     for ( u_int i = 0; i < AI_channels.count; i++ )
         {
         wago_manager::get_instance()->get_AI_data( AI_channels.tables[ i ],
-            AI_channels.offsets[ i ], AI_channels.float_read_values[ i ] );
+            AI_channels.offsets[ i ], AI_channels.int_read_values[ i ] );
         }
     load_table_from_string( cfg_file->fget_line(), AO_channels );
     for ( u_int i = 0; i < AO_channels.count; i++ )
         {
         wago_manager::get_instance()->get_AO_data( AO_channels.tables[ i ],
-            AO_channels.offsets[ i ], AO_channels.float_read_values[ i ],
-            AO_channels.float_write_values[ i ] );
+            AO_channels.offsets[ i ], AO_channels.int_read_values[ i ],
+            AO_channels.int_write_values[ i ] );
         }
 
     // 2 1.1 2.1
@@ -248,13 +248,13 @@ int wago_device::set_DI( u_int index, char value )
     return 0;
     }
 //-----------------------------------------------------------------------------
-float wago_device::get_AO( u_int index )
+u_int wago_device::get_AO( u_int index )
     {
     if ( index < AO_channels.count &&
         AO_channels.char_read_values &&
         AO_channels.char_read_values[ index ] )
         {
-        return *AO_channels.float_read_values[ index ];
+        return *AO_channels.int_read_values[ index ];
         }
 
 #ifdef DEBUG
@@ -264,13 +264,13 @@ float wago_device::get_AO( u_int index )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int wago_device::set_AO( u_int index, float value )
+int wago_device::set_AO( u_int index, u_int value )
     {
     if ( index < AO_channels.count &&
         AO_channels.char_read_values &&
         AO_channels.char_read_values[ index ] )
         {
-        *AO_channels.float_write_values[ index ] = value;
+        *AO_channels.int_write_values[ index ] = value;
         return 0;
         }
 
@@ -281,13 +281,13 @@ int wago_device::set_AO( u_int index, float value )
     return 0;
     }
 //-----------------------------------------------------------------------------
-float wago_device::get_AI( u_int index )
+u_int wago_device::get_AI( u_int index )
     {
     if ( index < AI_channels.count &&
         AI_channels.char_read_values &&
         AI_channels.char_read_values[ index ] )
         {
-        return *AI_channels.float_read_values[ index ];
+        return *AI_channels.int_read_values[ index ];
         }
 
 #ifdef DEBUG
@@ -297,13 +297,13 @@ float wago_device::get_AI( u_int index )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int wago_device::set_AI( u_int index, float value )
+int wago_device::set_AI( u_int index, u_int value )
     {
     if ( index < AI_channels.count &&
         AI_channels.char_read_values &&
         AI_channels.char_read_values[ index ] )
         {
-        *AI_channels.float_read_values[ index ] = value;
+        *AI_channels.int_read_values[ index ] = value;
         return 0;
         }
 
@@ -349,12 +349,12 @@ int wago_device::load_table_from_string( char *str, IO_channels &channels )
                 break;
 
             case IO_channels::CT_AI:
-                channels.float_read_values = new float*[ cnt ];
+                channels.int_read_values = new u_int*[ cnt ];
                 break;
 
             case IO_channels::CT_AO:
-                channels.float_read_values = new float*[ cnt ];
-                channels.float_write_values = new float*[ cnt ];
+                channels.int_read_values = new u_int*[ cnt ];
+                channels.int_write_values = new u_int*[ cnt ];
                 break;
             }
 
@@ -585,19 +585,19 @@ int device_manager::load_from_cfg_file( file *cfg_file )
                     break;
 
                 case device::DT_LS:
-                    project_devices[ i ] = new DI();
+                    project_devices[ i ] = new DI_1();
                     break;
 
                 case device::DT_TE:
-                    project_devices[ i ] = new AI();
+                    project_devices[ i ] = new temperature_e();
                     break;
 
                 case device::DT_FE:
-                    project_devices[ i ] = new AI();
+                    project_devices[ i ] = new flow_e();
                     break;
 
                 case device::DT_FS:                    
-                    project_devices[ i ] = new DI();
+                    project_devices[ i ] = new DI_1();
                     break;
 
                 case device::DT_CTR:
@@ -605,15 +605,15 @@ int device_manager::load_from_cfg_file( file *cfg_file )
                     break;
 
                 case device::DT_AO:
-                    project_devices[ i ] = new AO();
+                    project_devices[ i ] = new AO_1();
                     break;
 
                 case device::DT_LE:
-                    project_devices[ i ] = new AI();
+                    project_devices[ i ] = new level_e();
                     break;
 
                 case device::DT_FB:
-                    project_devices[ i ] = new DI();
+                    project_devices[ i ] = new DI_1();
                     break;
 
                 case device::DT_UPR:
@@ -621,11 +621,11 @@ int device_manager::load_from_cfg_file( file *cfg_file )
                     break;
 
                 case device::DT_QE:
-                    project_devices[ i ] = new AI();
+                    project_devices[ i ] = new concentration_e();
                     break;
 
                 case device::DT_AI:
-                    project_devices[ i ] = new AI();
+                    project_devices[ i ] = new analog_input_4_20();
                     break;
 
                 default:
@@ -1088,17 +1088,17 @@ int mix_proof::set_state( int new_state )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int DI::get_state()
+int DI_1::get_state()
     {
     return get_DI( DI_INDEX );
     }
 //-----------------------------------------------------------------------------
-void DI::on()
+void DI_1::on()
     {
     set_DI( DI_INDEX, 1 );
     }
 //-----------------------------------------------------------------------------
-void DI::off()
+void DI_1::off()
     {
     set_DI( DI_INDEX, 0 );
     }
@@ -1122,42 +1122,42 @@ int float_state_device::save_state( char *buff )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-float AI::get_value()
-    {
-    return get_AI( AI_INDEX );
-    }
+//float AI::get_value()
+//    {
+//    return get_AI( AI_INDEX );
+//    }
 //-----------------------------------------------------------------------------
-int AI::parse_cmd( char *buff )
+int AI_1::parse_cmd( char *buff )
     {
     set_value( *( ( float* ) buff ) );
     return sizeof( float );
     }
 //-----------------------------------------------------------------------------
-void AI::on()
+void AI_1::on()
     {
     }
 //-----------------------------------------------------------------------------
-void AI::off()
+void AI_1::off()
     {
     set_value( 0 );
     }
 //-----------------------------------------------------------------------------
-int AI::get_state()
+int AI_1::get_state()
     {
     return ( int ) get_value();
     }
 //-----------------------------------------------------------------------------
-int AI::set_value( float new_value )
-    {
-    return set_AI( AI_INDEX, new_value );
-    }
+//int AI::set_value( float new_value )
+//    {
+//    return set_AI( AI_INDEX, new_value );
+//    }
 //-----------------------------------------------------------------------------
-int AI::set_state( int new_state )
+int AI_1::set_state( int new_state )
     {
     return set_value( new_state );
     }
 //-----------------------------------------------------------------------------
-int AI::load( file *cfg_file )
+int AI_1::load( file *cfg_file )
     {
     device::load( cfg_file );
     wago_device::load( cfg_file );
@@ -1165,49 +1165,62 @@ int AI::load( file *cfg_file )
     return 0;
     }
 //-----------------------------------------------------------------------------
-void AI::print() const
+void AI_1::print() const
     {
     device::print();
     wago_device::print();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-float AO::get_value()
+float AO_1::get_value()
     {
-    return get_AO( AO_INDEX );
+    return get_AO( AO_INDEX ) / C_MAX_ANALOG_CHANNEL_VALUE * C_AO_MAX_VALUE;
     }
 //-----------------------------------------------------------------------------
-int AO::parse_cmd( char *buff )
+int AO_1::parse_cmd( char *buff )
     {
     set_value( *( ( float* ) buff ) );
     return sizeof( float );
     }
 //-----------------------------------------------------------------------------
-void AO::on()
+void AO_1::on()
     {
     }
 //-----------------------------------------------------------------------------
-void AO::off()
+void AO_1::off()
     {
     set_value( 0 );
     }
 //-----------------------------------------------------------------------------
-int AO::get_state()
+int AO_1::get_state()
     {
     return ( int ) get_value();
     }
 //-----------------------------------------------------------------------------
-int AO::set_value( float new_value )
+int AO_1::set_value( float new_value )
     {
-    return set_AO( AO_INDEX, new_value );
+    // Работаем в диапазоне 0-100.
+    if ( new_value < C_AO_MIN_VALUE )
+        {
+        new_value = C_AO_MIN_VALUE;
+        }
+    if ( new_value > C_AO_MAX_VALUE )
+        {
+        new_value = C_AO_MAX_VALUE;
+        }
+
+    u_int_2 value = ( u_int_2 ) ( C_MAX_ANALOG_CHANNEL_VALUE * new_value /
+        C_AO_MAX_VALUE );
+
+    return set_AO( AO_INDEX, value );
     }
 //-----------------------------------------------------------------------------
-int AO::set_state( int new_state )
+int AO_1::set_state( int new_state )
     {
     return set_value( new_state );
     }
 //-----------------------------------------------------------------------------
-int AO::load( file *cfg_file )
+int AO_1::load( file *cfg_file )
     {
     device::load( cfg_file );
     wago_device::load( cfg_file );
@@ -1215,7 +1228,7 @@ int AO::load( file *cfg_file )
     return 0;
     }
 //-----------------------------------------------------------------------------
-void AO::print() const
+void AO_1::print() const
     {
     device::print();
     wago_device::print();

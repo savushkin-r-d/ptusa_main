@@ -43,19 +43,12 @@ int wago_manager_w750::read_inputs()
             // AI
             for ( u_int j = 0; j < nodes[ i ]->AI_cnt; j++ )
                 {
-                float val = 0;
+                u_int val = 0;
                 u_int offset = nodes[ i ]->AI_offsets[ j ];
 
                 switch ( nodes[ i ]->AI_types[ j ] )
                     {
                     case 461:
-                        short int tmp = 256 * pstPabIN->uc.Pab[ offset ] +
-                            pstPabIN->uc.Pab[ offset + 1 ];
-                        val = 0.1 * tmp;
-
-                        val = val >= -50 && val <= 150 ? val : -1000; 
-                        break;
-
                     case 466:
                         val = 256 * pstPabIN->uc.Pab[ offset ] +
                             pstPabIN->uc.Pab[ offset + 1 ];
@@ -68,7 +61,7 @@ int wago_manager_w750::read_inputs()
                     }
                 nodes[ i ]->AI[ j ] = val;
 #ifdef DEBUG
-                Print( "%d -> %f\n, ", j, nodes[ i ]->AI[ j ] );
+                Print( "%d -> %u\n, ", j, nodes[ i ]->AI[ j ] );
 #endif // DEBUG
                 }
             }
@@ -120,7 +113,7 @@ int wago_manager_w750::write_outputs()
                 {
                 if ( nodes[ i ]->AO[ j ] != nodes[ i ]->AO_[ j ] )
                     {
-                    u_int val = ( u_int ) nodes[ i ]->AO_[ j ];
+                    int val = nodes[ i ]->AO_[ j ];
                     u_int offset = nodes[ i ]->AO_offsets[ j ];
 
                     switch ( nodes[ i ]->AO_types[ j ] )
@@ -133,7 +126,7 @@ int wago_manager_w750::write_outputs()
                     nodes[ i ]->AO[ j ] = nodes[ i ]->AO_[ j ];
                     }
 #ifdef DEBUG
-                Print( "%d -> %f\n, ", j, nodes[ i ]->AO_[ j ] );
+                Print( "%d -> %u\n, ", j, nodes[ i ]->AO_[ j ] );
 #endif // DEBUG
                 }
             }
