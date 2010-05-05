@@ -4,115 +4,6 @@
 #include "sys.h"
 //-----------------------------------------------------------------------------
 /// @brief 
-//
-/// 
-struct wago_node
-    {
-
-    wago_node() : state( 0 ),
-        number( 0 ),
-        type( 0 ),
-        DO_cnt( 0 ),
-        DO( 0 ),
-        _DO( 0 ),
-        AO_cnt( 0 ),
-        AO( 0 ),
-        _AO( 0 ),
-        DI_cnt( 0 ),
-        DI( 0 ),
-        AI_cnt( 0 ),
-        AI( 0 )
-        {
-        memset( ip_addres, 0, 4 * sizeof( int ) );
-        }
-
-    int load_from_cfg_file( file *cfg_file )
-        {
-        state = 0;
-        sscanf( cfg_file->fget_line(), "%d", &type );
-        sscanf( cfg_file->fget_line(), "%d", &number );
-        char tmp_dot;
-        sscanf( cfg_file->fget_line(), "%d%c%d%c%d%c%d",
-            &ip_addres[ 0 ], &tmp_dot, &ip_addres[ 1 ], &tmp_dot,
-            &ip_addres[ 2 ],  &tmp_dot, &ip_addres[ 3 ] );
-
-        int modules_count = 0;
-        sscanf( cfg_file->fget_line(), "%d", &modules_count );
-        
-        sscanf( cfg_file->fget_line(), "%d", &DI_cnt );
-        sscanf( cfg_file->fget_line(), "%d", &DO_cnt );
-        sscanf( cfg_file->fget_line(), "%d", &AI_cnt );
-        sscanf( cfg_file->fget_line(), "%d", &AO_cnt );
-        cfg_file->fget_line();
-
-        if ( DI_cnt )
-            {
-            DI = new u_char [ DI_cnt ];
-            }
-        if ( DO_cnt )
-            {
-            DO = new u_char [ DO_cnt ];
-            _DO = new u_char [ DO_cnt ];
-            }
-        if ( AI_cnt )
-            {
-            AI = new float [ AI_cnt ];
-            }
-        if ( AO_cnt )
-            {
-            AO = new float [ AO_cnt ];
-            _AO = new float [ AO_cnt ];
-            }
-
-#ifdef DEBUG
-            Print( "type %d, number %d, ip %d.%d.%d.%d. ",
-                type, number, ip_addres[ 0 ], ip_addres[ 1 ], ip_addres[ 2 ],
-                ip_addres[ 3 ] );
-             Print( "DO %d, DI %d, AO %d, AI %d.\n",
-                DO_cnt, DI_cnt, AO_cnt, AI_cnt );
-#endif // DEBUG
-
-        for ( int i = 0; i < modules_count; i++ )
-            {
-            cfg_file->fget_line(); // Тип модуля.
-
-            cfg_file->fget_line(); // Комментарий.
-            cfg_file->fget_line(); // Комментарий.
-            cfg_file->fget_line(); // Комментарий.
-            cfg_file->fget_line(); // Комментарий.
-            cfg_file->fget_line(); // Комментарий.
-
-            cfg_file->fget_line(); // пустая строка.
-            }
-
-        return 0;
-        }
-
-    int     state;
-    u_int   number;
-    u_int   type;
-    int     ip_addres[ 4 ];
-
-    // Digital outputs ( DO ).
-    u_int DO_cnt;///< Amount of DO.
-    u_char *DO;  ///< Current values.
-    u_char *_DO; ///< To write.
-
-    // Analog outputs ( AO ).
-    u_int AO_cnt;///< Amount of AO.
-    float *AO;   ///< Current values.
-    float *_AO;  ///< To write.
-
-    // Digital inputs ( DI ).
-    u_int DI_cnt;///< Amount of DI.
-    u_char *DI;  ///< Current values.
-
-    // Analog inputs ( AI ).
-    u_int AI_cnt;///< Amount of AI.
-    float *AI;   ///< Current values.
-    };
-//-----------------------------------------------------------------------------
-/// @brief 
 ///
 /// 
 class wago_manager
@@ -142,7 +33,7 @@ class wago_manager
                     {
                      nodes[ i ] = new wago_node;
 #ifdef DEBUG
-                    Print( "    %d. ", i );
+                    Print( "    %d. ", i + 1 );
 #endif // DEBUG
                      nodes[ i ]->load_from_cfg_file( cfg_file );
                     }
@@ -163,65 +54,234 @@ class wago_manager
             instance = new_instance;
             }
 
-        virtual int get_DO( u_int node_n, u_int offset )
+        int get_DI_data( u_int node_n, u_int offset, u_char *p_read )
             {
             if ( node_n < nodes_count && nodes )
                 {
-                if ( nodes[ node_n ] && offset < nodes[ node_n ]->DO_cnt )
+                if ( nodes[ node_n ] && offset < nodes[ node_n ]->DI_cnt )
                     {
-                    return nodes[ node_n ]->_DO[ offset ];
-                    }
-                }
-
-            return 0;
-            }
-        
-        virtual int set_DO( u_int node_n, u_int offset, char value )
-            {
-            if ( node_n < nodes_count && nodes )
-                {
-                if ( nodes[ node_n ] && offset < nodes[ node_n ]->DO_cnt )
-                    {
-                    nodes[ node_n ]->_DO[ offset ] = value;
+                    p_read = &nodes[ node_n ]->DI[ offset ];
                     return 0;
                     }
                 }
+#ifdef DEBUG
+            Print( "get_DI_data() - error!\n" );
+            while( 1 ) ;
+#endif // DEBUG
+
             return 1;
             }
 
-        virtual int get_DI( u_int node_n, u_int offset )
+        int get_DO_data( u_int node_n, u_int offset, u_char *p_read,
+            u_char *p_write )
             {
-            return 0;
+            if ( node_n < nodes_count && nodes )
+                {
+                if ( nodes[ node_n ] && offset < nodes[ node_n ]->DO_cnt )
+                    {
+                    p_read = &nodes[ node_n ]->DO[ offset ];
+                    p_write = &nodes[ node_n ]->DO_[ offset ];
+                    return 0;
+                    }
+                }
+#ifdef DEBUG
+            Print( "get_DO_data() - error!\n" );
+            while( 1 ) ;
+#endif // DEBUG
+
+            return 1;
             }
-        virtual int set_DI( u_int node_n, u_int offset, char value )
+        
+        int get_AI_data( u_int node_n, u_int offset, float *p_read )
             {
-            return 0;
+            if ( node_n < nodes_count && nodes )
+                {
+                if ( nodes[ node_n ] && offset < nodes[ node_n ]->AI_cnt )
+                    {
+                    p_read = &nodes[ node_n ]->AI[ offset ];                    
+                    return 0;
+                    }
+                }
+#ifdef DEBUG
+            Print( "get_AI_data() - error!\n" );
+            while( 1 ) ;
+#endif // DEBUG
+
+            return 1;
+            }
+        
+        int get_AO_data( u_int node_n, u_int offset, float *p_read,
+            float *p_write )
+            {
+            if ( node_n < nodes_count && nodes )
+                {
+                if ( nodes[ node_n ] && offset < nodes[ node_n ]->AO_cnt )
+                    {
+                    p_read = &nodes[ node_n ]->AO[ offset ];
+                    p_write = &nodes[ node_n ]->AO_[ offset ];
+                    return 0;
+                    }
+                }
+#ifdef DEBUG
+            Print( "get_AO_data() - error!\n" );
+            while( 1 ) ;
+#endif // DEBUG
+
+            return 1;
             }
 
-        virtual float get_AO( u_int node_n, u_int offset )
-            {
-            return 0;
-            }
-        virtual int   set_AO( u_int node_n, u_int offset, float value )
-            {
-            return 0;
-            }
-
-        virtual float get_AI( u_int node_n, u_int offset )
-            {
-            return 0;
-            }
-        virtual int   set_AI( u_int node_n, u_int offset, float value )
-            {
-            return 0;
-            }
 
     protected:
-        u_int       nodes_count;
-        wago_node **nodes;
+        //---------------------------------------------------------------------
+        /// @brief
+        //
+        ///
+        struct wago_node
+            {
+            wago_node() : state( 0 ),
+                number( 0 ),
+                type( 0 ),
+                DO_cnt( 0 ),
+                DO( 0 ),
+                DO_( 0 ),
+                AO_cnt( 0 ),
+                AO( 0 ),
+                AO_( 0 ),
+                AO_offsets( 0 ),
+                AO_types( 0 ),
+                DI_cnt( 0 ),
+                DI( 0 ),
+                AI_cnt( 0 ),
+                AI( 0 ),
+                AI_offsets( 0 ),
+                AI_types( 0 )
+                {
+                memset( ip_addres, 0, 4 * sizeof( int ) );
+                }
 
-        static wago_manager* instance;
-    };
-//-----------------------------------------------------------------------------
+            int load_from_cfg_file( file *cfg_file )
+                {
+                state = 0;
+                sscanf( cfg_file->fget_line(), "%d", &type );
+                sscanf( cfg_file->fget_line(), "%d", &number );
+                char tmp_dot;
+                sscanf( cfg_file->fget_line(), "%d%c%d%c%d%c%d",
+                    &ip_addres[ 0 ], &tmp_dot, &ip_addres[ 1 ], &tmp_dot,
+                    &ip_addres[ 2 ],  &tmp_dot, &ip_addres[ 3 ] );
+
+                int modules_count = 0;
+                sscanf( cfg_file->fget_line(), "%d", &modules_count );
+
+                sscanf( cfg_file->fget_line(), "%d", &DI_cnt );
+                if ( DI_cnt )
+                    {
+                    DI = new u_char [ DI_cnt ];
+                    }
+
+                sscanf( cfg_file->fget_line(), "%d", &DO_cnt );
+                if ( DO_cnt )
+                    {
+                    DO = new u_char [ DO_cnt ];
+                    DO_ = new u_char [ DO_cnt ];
+                    }
+
+                sscanf( cfg_file->fget_line(), "%d", &AI_cnt );
+                if ( AI_cnt )
+                    {
+                    AI = new float [ AI_cnt ];
+                    AI_offsets = new u_int [ AI_cnt ];
+                    AI_types = new u_int [ AI_cnt ];
+                    }
+                for ( u_int i = 0; i < AI_cnt; i++ )
+                    {
+                    int tmp;
+                    sscanf( cfg_file->fget_line(), "%d %u %u",
+                        &tmp, &AI_types[ i ], &AI_offsets[ i ] );
+                    }
+
+                sscanf( cfg_file->fget_line(), "%d", &AO_cnt );
+                if ( AO_cnt )
+                    {
+                    AO = new float [ AO_cnt ];
+                    AO_ = new float [ AO_cnt ];
+                    AO_types = new u_int [ AO_cnt ];
+                    AO_offsets = new u_int [ AO_cnt ];
+                    }
+                for ( u_int i = 0; i < AO_cnt; i++ )
+                    {
+                    int tmp;
+                    sscanf( cfg_file->fget_line(), "%d %u %u",
+                        &tmp, &AO_types[ i ], &AO_offsets[ i ] );
+                    }
+                cfg_file->fget_line();
+
+#ifdef DEBUG
+                Print( "type %d, number %d, ip %d.%d.%d.%d. ",
+                        type, number, ip_addres[ 0 ], ip_addres[ 1 ], 
+                        ip_addres[ 2 ], ip_addres[ 3 ] );
+                Print( "DI %d, DO %d, AI %d, AO %d.\n",
+                        DI_cnt, DO_cnt, AI_cnt, AO_cnt );
+                for ( u_int i = 0; i < AI_cnt; i++ )
+                    {
+                    if ( 0 == i ) Print( "\tAI\n");
+                    Print( "\t%2.d %u %u\n", i + 1, AI_types[ i ], AI_offsets[ i ] );
+                    }
+                for ( u_int i = 0; i < AO_cnt; i++ )
+                    {
+                    if ( 0 == i ) Print( "\tAO\n");
+                    Print( "\t%2.d %u %u\n", i + 1, AO_types[ i ], AO_offsets[ i ] );
+                    }
+#endif // DEBUG
+
+                for ( int i = 0; i < modules_count; i++ )
+                    {
+                    cfg_file->fget_line(); // Тип модуля.
+
+                    cfg_file->fget_line(); // Комментарий.
+                    cfg_file->fget_line(); // Комментарий.
+                    cfg_file->fget_line(); // Комментарий.
+                    cfg_file->fget_line(); // Комментарий.
+                    cfg_file->fget_line(); // Комментарий.
+
+                    cfg_file->fget_line(); // пустая строка.
+                    }
+
+                return 0;
+                }
+
+            int     state;
+            u_int   number;
+            u_int   type;
+            int     ip_addres[ 4 ];
+
+            // Digital outputs ( DO ).
+            u_int  DO_cnt;      ///< Amount of DO.
+            u_char *DO;         ///< Current values.
+            u_char *DO_;        ///< To write.
+
+            // Analog outputs ( AO ).
+            u_int AO_cnt;       ///< Amount of AO.
+            float *AO;          ///< Current values.
+            float *AO_;         ///< To write.
+            u_int *AO_offsets;  ///< Offsets in common data.
+            u_int *AO_types;    ///< Chennels type.
+
+            // Digital inputs ( DI ).
+            u_int  DI_cnt;      ///< Amount of DI.
+            u_char *DI;         ///< Current values.
+
+            // Analog inputs ( AI ).
+            u_int AI_cnt;       ///< Amount of AI.
+            float *AI;          ///< Current values.
+            u_int *AI_offsets;  ///< Offsets in common data.
+            u_int *AI_types;    ///< Chennels type.
+            };
+
+                u_int       nodes_count;
+                wago_node **nodes;
+
+                static wago_manager* instance;
+        };
+        //---------------------------------------------------------------------
 #endif // WAGO_H 
 

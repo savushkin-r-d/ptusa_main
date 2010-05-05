@@ -473,6 +473,13 @@ class i_AO_device: public i_AI_device
 class wago_device
     {
     public:
+        wago_device():DI_channels( IO_channels::CT_DI ), 
+            DO_channels( IO_channels::CT_DO ),
+            AI_channels( IO_channels::CT_AI ),
+            AO_channels( IO_channels::CT_AO )
+            {
+            }
+
         /// @brief Загрузка самого устройства из буфера.
         ///
         /// @param cfg_file - дескриптор открытого текстового файла с описанием
@@ -564,19 +571,38 @@ class wago_device
 
     private:
         /// @brief Группа каналов ввода/вывода устройства.
-        struct IO_channels
+       struct IO_channels
             {
+            enum CHANNEL_TYPE
+                {
+                CT_DI = 1,
+                CT_DO,
+                CT_AI,
+                CT_AO,
+                };
+
             u_int  count;   ///< Количество каналов.
             u_int* tables;  ///< Массив таблиц.
             u_int* offsets; ///< Массив смещений в пределах таблиц.
 
-            IO_channels() : count( 0 ), tables( 0 ), offsets( 0 )
+            float** float_read_values;   ///< Массив значений для чтения.
+            float** float_write_values;  ///< Массив значений для записи.
+            u_char** char_read_values;   ///< Массив значений для чтения.
+            u_char** char_write_values;  ///< Массив значений для записи.
+
+            IO_channels( CHANNEL_TYPE type ) : count( 0 ), tables( 0 ),
+                offsets( 0 ), 
+                float_read_values( 0 ), float_write_values( 0 ),
+                char_read_values( 0 ), char_write_values( 0 ),
+                type( type )
                 {
                 }
+            
+            CHANNEL_TYPE type;
             };
 
         IO_channels DI_channels;    ///< Каналы дискретного входа.
-        IO_channels DO_channels;    ///< Каналы дискретного выхода.    
+        IO_channels DO_channels;    ///< Каналы дискретного выхода.
         IO_channels AI_channels;    ///< Каналы аналогового входа.
         IO_channels AO_channels;    ///< Каналы аналогового выхода.
 

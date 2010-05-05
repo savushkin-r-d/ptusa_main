@@ -23,12 +23,12 @@ int main( int argc, char** argv )
     project_manager::set_instance( new project_manager_w750() );
     device_manager::set_instance( new device_manager() );
 
-#ifdef LINUX
+#ifdef UCLINUX
+    project_manager::get_instance()->load_configuration( "Whey_out.ds5" );
+#else
     project_manager::get_instance()->load_configuration(
         "/home/id/src/test_projects/wago_dev_test/Whey_out.ds5" );
-#else     
-    project_manager::get_instance()->load_configuration( "Whey_out.ds5" );
-#endif // LINUX
+#endif // UCLINUX
 
     device_manager::get_instance()->print();
 

@@ -138,9 +138,31 @@ int u_int_4_state_device::save_state( char *buff )
 int wago_device::load( file *cfg_file )
     {           
     load_table_from_string( cfg_file->fget_line(), DI_channels );
+    for ( u_int i = 0; i < DI_channels.count; i++ )
+        {
+        wago_manager::get_instance()->get_DI_data( DI_channels.tables[ i ],
+            DI_channels.offsets[ i ], DI_channels.char_read_values[ i ] );
+        }
     load_table_from_string( cfg_file->fget_line(), DO_channels );
+    for ( u_int i = 0; i < DO_channels.count; i++ )
+        {
+        wago_manager::get_instance()->get_DO_data( DO_channels.tables[ i ],
+            DO_channels.offsets[ i ], DO_channels.char_read_values[ i ],
+            DO_channels.char_write_values[ i ] );
+        }
     load_table_from_string( cfg_file->fget_line(), AI_channels );
+    for ( u_int i = 0; i < AI_channels.count; i++ )
+        {
+        wago_manager::get_instance()->get_AI_data( AI_channels.tables[ i ],
+            AI_channels.offsets[ i ], AI_channels.float_read_values[ i ] );
+        }
     load_table_from_string( cfg_file->fget_line(), AO_channels );
+    for ( u_int i = 0; i < AO_channels.count; i++ )
+        {
+        wago_manager::get_instance()->get_AO_data( AO_channels.tables[ i ],
+            AO_channels.offsets[ i ], AO_channels.float_read_values[ i ],
+            AO_channels.float_write_values[ i ] );
+        }
 
     // 2 1.1 2.1
     // количество значение_№1 значение_№2 ...
@@ -162,27 +184,28 @@ int wago_device::load( file *cfg_file )
 //-----------------------------------------------------------------------------
 int wago_device::get_DO( u_int index )
     {
-    if ( index < DO_channels.count && 
-        DO_channels.tables && DO_channels.offsets )
+    if ( index < DO_channels.count &&
+        DO_channels.char_read_values &&
+        DO_channels.char_read_values[ index ] )
         {
-        return wago_manager::get_instance()->get_DO( DO_channels.tables[ index ],
-            DO_channels.offsets[ index ] );
+        return *DO_channels.char_read_values[ index ];
         }
 
 #ifdef DEBUG
     Print( "wago_device->get_DO(...) - error!\n" );
 #endif // DEBUG
 
-    return 1;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 int wago_device::set_DO( u_int index, char value )
     {
     if ( index < DO_channels.count && 
-        DO_channels.tables && DO_channels.offsets )
+        DO_channels.char_write_values &&
+        DO_channels.char_write_values[ index ] )
         {
-        return wago_manager::get_instance()->set_DO( DO_channels.tables[ index ],
-            DO_channels.offsets[ index ], value );
+        *DO_channels.char_write_values[ index ] = value;
+        return 0;
         }
 
 #ifdef DEBUG
@@ -194,75 +217,77 @@ int wago_device::set_DO( u_int index, char value )
 //-----------------------------------------------------------------------------
 int wago_device::get_DI( u_int index )
     {
-    if ( index < DI_channels.count && 
-        DI_channels.tables && DI_channels.offsets )
+    if ( index < DI_channels.count &&
+        DI_channels.char_read_values &&
+        DI_channels.char_read_values[ index ] )
         {
-        return wago_manager::get_instance()->get_DI( DI_channels.tables[ index ],
-            DI_channels.offsets[ index ] );
+        return *DI_channels.char_read_values[ index ];
         }
 
 #ifdef DEBUG
     Print( "wago_device->get_DI(...) - error!\n" );
 #endif // DEBUG
 
-    return 1;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 int wago_device::set_DI( u_int index, char value )
     {
-    if ( index < DI_channels.count && 
-        DI_channels.tables && DI_channels.offsets )
+    if ( index < DI_channels.count &&
+        DI_channels.char_read_values &&
+        DI_channels.char_read_values[ index ] )
         {
-        return wago_manager::get_instance()->set_DI( DI_channels.tables[ index ],
-            DI_channels.offsets[ index ], value );
+        *DI_channels.char_read_values[ index ] = value;
+        return 0;
         }
 
 #ifdef DEBUG
     Print( "wago_device->set_DI(...) - error!\n" );
 #endif // DEBUG
 
-    return 1;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 float wago_device::get_AO( u_int index )
     {
-    if ( index < AO_channels.count && 
-        AO_channels.tables && AO_channels.offsets )
+    if ( index < AO_channels.count &&
+        AO_channels.char_read_values &&
+        AO_channels.char_read_values[ index ] )
         {
-        return wago_manager::get_instance()->get_AO( AO_channels.tables[ index ],
-            AO_channels.offsets[ index ] );
+        return *AO_channels.float_read_values[ index ];
         }
 
 #ifdef DEBUG
     Print( "wago_device->get_AO(...) - error!\n" );
 #endif // DEBUG
 
-    return 1;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 int wago_device::set_AO( u_int index, float value )
     {
-    if ( index < AO_channels.count && 
-        AO_channels.tables && AO_channels.offsets )
+    if ( index < AO_channels.count &&
+        AO_channels.char_read_values &&
+        AO_channels.char_read_values[ index ] )
         {
-        return wago_manager::get_instance()->set_AO( AO_channels.tables[ index ],
-            AO_channels.offsets[ index ], value );
+        *AO_channels.float_write_values[ index ] = value;
+        return 0;
         }
 
 #ifdef DEBUG
     Print( "wago_device->set_AO(...) - error!\n" );
 #endif // DEBUG
 
-    return 1;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 float wago_device::get_AI( u_int index )
     {
-    if ( index < AI_channels.count && 
-        AI_channels.tables && AI_channels.offsets )
+    if ( index < AI_channels.count &&
+        AI_channels.char_read_values &&
+        AI_channels.char_read_values[ index ] )
         {
-        return wago_manager::get_instance()->get_AI( AI_channels.tables[ index ],
-            AI_channels.offsets[ index ] );
+        return *AI_channels.float_read_values[ index ];
         }
 
 #ifdef DEBUG
@@ -274,30 +299,28 @@ float wago_device::get_AI( u_int index )
 //-----------------------------------------------------------------------------
 int wago_device::set_AI( u_int index, float value )
     {
-    if ( index < AI_channels.count && 
-        AI_channels.tables && AI_channels.offsets )
+    if ( index < AI_channels.count &&
+        AI_channels.char_read_values &&
+        AI_channels.char_read_values[ index ] )
         {
-        return wago_manager::get_instance()->set_AI( AI_channels.tables[ index ],
-            AI_channels.offsets[ index ], value );
+        *AI_channels.float_read_values[ index ] = value;
+        return 0;
         }
 
 #ifdef DEBUG
     Print( "wago_device->set_AI(...) - error!\n" );
 #endif // DEBUG
 
-    return 1;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 void wago_device::print() const
     {
-    print_table( "DI", DI_channels );
-    Print( "; " );
-    print_table( "DO", DO_channels );
-    Print( "; " );
-    print_table( "AI", AI_channels );
-    Print( "; " );
+    print_table( "DI", DI_channels );    
+    print_table( "DO", DO_channels );    
+    print_table( "AI", AI_channels );    
     print_table( "AO", AO_channels );
-    Print( ".\n" );
+    Print( "\n" );
     }
 //-----------------------------------------------------------------------------
 int wago_device::load_table_from_string( char *str, IO_channels &channels )
@@ -314,6 +337,27 @@ int wago_device::load_table_from_string( char *str, IO_channels &channels )
         channels.tables = new u_int[ cnt ];
         channels.offsets = new u_int[ cnt ];
 
+        switch ( channels.type )
+            {
+            case IO_channels::CT_DI:
+                channels.char_read_values = new u_char*[ cnt ];
+                break;
+
+            case IO_channels::CT_DO:
+                channels.char_read_values = new u_char*[ cnt ];
+                channels.char_write_values = new u_char*[ cnt ];
+                break;
+
+            case IO_channels::CT_AI:
+                channels.float_read_values = new float*[ cnt ];
+                break;
+
+            case IO_channels::CT_AO:
+                channels.float_read_values = new float*[ cnt ];
+                channels.float_write_values = new float*[ cnt ];
+                break;
+            }
+
         for ( u_int i = 0; i < cnt; i++ )
             {
             pos += sscanf( str + pos, " %d %d", &channels.tables[ i ],
@@ -327,17 +371,21 @@ int wago_device::load_table_from_string( char *str, IO_channels &channels )
 void wago_device::print_table( const char *str, 
                               const IO_channels &channels ) const
     {
-    Print( "%s:%d", str, channels.count );
     if ( channels.count )
         {
-        Print( "[ " );
-        for ( u_int i = 0; i < channels.count; i++ )
+        Print( "%s:%d", str, channels.count );
+        if ( channels.count )
             {
-            Print("%d:%2d", channels.tables[ i ],
-                channels.offsets[ i ] );
-            if ( i < channels.count - 1 ) Print( "; " );
+            Print( "[ " );
+            for ( u_int i = 0; i < channels.count; i++ )
+                {
+                Print("%d:%2d", channels.tables[ i ],
+                    channels.offsets[ i ] );
+                if ( i < channels.count - 1 ) Print( "; " );
+                }
+            Print( " ]" );
             }
-        Print( " ]" );
+        Print( "; " );
         }
     }
 //-----------------------------------------------------------------------------
@@ -480,6 +528,7 @@ int device_manager::load_from_cfg_file( file *cfg_file )
             {
             int dev_type = 0;
             int dev_sub_type = 0;
+            cfg_file->fget_line();              // Пропускаем комментарий.
             sscanf( cfg_file->pfget_line(), "%d %d", &dev_type, &dev_sub_type );
 
             switch ( dev_type )
@@ -540,8 +589,7 @@ int device_manager::load_from_cfg_file( file *cfg_file )
                     project_devices[ i ] = new AI();
                     break;
 
-                case device::DT_FS:
-                    project_devices[ i ] = new dev_stub();
+                case device::DT_FS:                    
                     project_devices[ i ] = new DI();
                     break;
 

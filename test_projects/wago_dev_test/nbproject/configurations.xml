@@ -116,6 +116,9 @@
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
+          <preprocessorList>
+            <Elem>UCLINUX</Elem>
+          </preprocessorList>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
@@ -144,6 +147,7 @@
             <Elem>PAC</Elem>
             <Elem>W750</Elem>
             <Elem>DEBUG</Elem>
+            <Elem>UCLINUX</Elem>
           </preprocessorList>
         </ccTool>
         <linkerTool>
