@@ -13,20 +13,20 @@ int project_manager::load_configuration( const char *file_name )
 #endif // DEBUG
 
     if ( cfg_file->fopen( file_name ) <= 0 )
-    	{
+        {
 #ifdef DEBUG
         Print( "project_manager:load_configuration(...) - file not found!\n" );            
 #endif // DEBUG
         while ( 1 ) { }
-    	}
+        }
 
     const char *SIGNATURE            = "WG {4B714C08-9602-4130-8563-4B51E08BB9D7}";
     const int   SIGNATURE_SIZE       = 42;    
     char        id[ SIGNATURE_SIZE ] = { 0 };
-    
+
     cfg_file->fread( id, SIGNATURE_SIZE - 1 );
     cfg_file->fget_line();
-    
+
     if ( strcmp( id, SIGNATURE ) != 0 )
         {
 #ifdef DEBUG
@@ -34,7 +34,7 @@ int project_manager::load_configuration( const char *file_name )
 #endif // DEBUG
         while ( 1 ) { }
         }
-        
+
     //-Editor editor_version.
     const int CURRENT_EDITOR_VERSION = 12;
     int       editor_version = 0;

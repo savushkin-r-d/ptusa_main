@@ -372,23 +372,11 @@ class float_state_device : public device
     {
     public:
         /// @brief Реализация интерфейса @ref i_save_device.
-        int save_changed_state( char *buff )
-            {
-            if ( prev_state != get_value() )
-                {
-                return save_state( buff );
-                }
-            return 0;
-            }
+        int save_changed_state( char *buff );
 
         /// @brief Реализация интерфейса @ref i_save_device.
-        int save_state( char *buff  )
-            {
-            *( ( float* ) buff ) = get_value();
-            prev_state = get_value();
-            return sizeof( float );
-            }
-        
+        int save_state( char *buff  );
+
     private:
         float prev_state;    ///< Предыдущее состояние устройства.
     };
@@ -473,12 +461,7 @@ class i_AO_device: public i_AI_device
 class wago_device
     {
     public:
-        wago_device():DI_channels( IO_channels::CT_DI ), 
-            DO_channels( IO_channels::CT_DO ),
-            AI_channels( IO_channels::CT_AI ),
-            AO_channels( IO_channels::CT_AO )
-            {
-            }
+        wago_device();
 
         /// @brief Загрузка самого устройства из буфера.
         ///
@@ -571,7 +554,7 @@ class wago_device
 
     private:
         /// @brief Группа каналов ввода/вывода устройства.
-       struct IO_channels
+        struct IO_channels
             {
             enum CHANNEL_TYPE
                 {
@@ -597,7 +580,7 @@ class wago_device
                 type( type )
                 {
                 }
-            
+
             CHANNEL_TYPE type;
             };
 
@@ -645,13 +628,7 @@ class dev_stub : public char_state_device,
 
         int parse_cmd( char *buff );
 
-        int load( file *cfg_file )
-            {
-            device::load( cfg_file );
-            wago_device::load( cfg_file );
-
-            return 0;
-            }
+        int load( file *cfg_file );
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретными входами/выходами.
@@ -848,54 +825,23 @@ class AI :public float_state_device,
     public i_AI_device
     {
     public:
-        float get_value()
-            {
-            return get_AI( AI_INDEX );
-            }
+        float get_value();
 
-        int parse_cmd( char *buff )
-            {
-            set_value( *( ( float* ) buff ) );
-            return sizeof( float );
-            }
+        int parse_cmd( char *buff );
 
-        void on()
-            {
-            }
+        void on();
 
-        void off()
-            {
-            set_value( 0 );
-            }
+        void off();
 
-        int get_state()
-            {
-            return ( int ) get_value();
-            }
+        int get_state();
 
-        int set_value( float new_value )
-            {
-            return set_AI( AI_INDEX, new_value );
-            }
+        int set_value( float new_value );
 
-        int set_state( int new_state )
-            {
-            return set_value( new_state );
-            }
+        int set_state( int new_state );
 
-        int load( file *cfg_file )
-            {
-            device::load( cfg_file );
-            wago_device::load( cfg_file );
+        int load( file *cfg_file );
 
-            return 0;
-            }
-
-        void print() const
-            {
-            device::print();
-            wago_device::print();
-            }
+        void print() const;
 
     private:
         enum CONSTANTS
@@ -912,54 +858,23 @@ class AO :public float_state_device,
     public i_AO_device
     {
     public:
-        float get_value()
-            {
-            return get_AO( AO_INDEX );
-            }
+        float get_value();
 
-        int parse_cmd( char *buff )
-            {
-            set_value( *( ( float* ) buff ) );
-            return sizeof( float );
-            }
+        int parse_cmd( char *buff );
 
-        void on()
-            {
-            }
+        void on();
 
-        void off()
-            {
-            set_value( 0 );
-            }
+        void off();
 
-        int get_state()
-            {
-            return ( int ) get_value();
-            }
+        int get_state();
 
-        int set_value( float new_value )
-            {
-            return set_AO( AO_INDEX, new_value );
-            }
+        int set_value( float new_value );
 
-        int set_state( int new_state )
-            {
-            return set_value( new_state );
-            }
+        int set_state( int new_state );
 
-        int load( file *cfg_file )
-            {
-            device::load( cfg_file );
-            wago_device::load( cfg_file );
+        int load( file *cfg_file );
 
-            return 0;
-            }
-
-        void print() const
-            {
-            device::print();
-            wago_device::print();
-            }
+        void print() const;
 
     private:
         enum CONSTANTS
@@ -1010,7 +925,7 @@ class counter : public u_int_4_state_device,
         int parse_cmd( char *buff  );
 
         int load( file *cfg_file );
-        
+
         void print() const;
 
         u_int_4 get_u_int_4_state();
@@ -1028,15 +943,8 @@ class counter : public u_int_4_state_device,
 class device_manager
     {
     public:
-        device_manager()
-            {
-            for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
-                {
-                dev_types_ranges[ i ].start_pos = 0;
-                dev_types_ranges[ i ].end_pos = 0;
-                }
-            }
-        
+        device_manager();
+
 
         int load_from_cfg_file( file *cfg_file );
 

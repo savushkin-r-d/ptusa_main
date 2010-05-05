@@ -38,7 +38,7 @@ memory_range::memory_range( i_memory *memory, u_int start_pos,
 int memory_range::read( void *buf, u_int count, u_int start_pos )
     {
     if ( memory )
-    	{
+        {
         if ( check_params( count, start_pos ) != 0 )
             {
 #ifdef DEBUG
@@ -49,7 +49,7 @@ int memory_range::read( void *buf, u_int count, u_int start_pos )
             }
 
         return memory->read( buf, count, this->start_pos + start_pos );
-    	} 
+        } 
 
     return 0;
     }
@@ -57,18 +57,18 @@ int memory_range::read( void *buf, u_int count, u_int start_pos )
 int memory_range::write( void *buf, u_int count, u_int start_pos )
     {
     if ( memory )
-    	{
+        {
         if ( check_params( count, start_pos ) != 0 )
-        	{
+            {
 #ifdef DEBUG
             Print( "memory_range::write(...) - size[ %u ], incorrect params -> count[ %u ], start_pos[ %u ] \n", 
                 size, count, start_pos );
 #endif // DEBUG
             return 0;
-        	}
+            }
 
         return memory->write( buf, count, this->start_pos + start_pos );
-    	} 
+        } 
 
     return 0;
     }
@@ -76,9 +76,9 @@ int memory_range::write( void *buf, u_int count, u_int start_pos )
 int memory_range::check_params( u_int count, u_int start_pos )
     {
     if ( size < start_pos + count )
-    	{
+        {
         return 1;
-    	}
+        }
 
     return 0;
     }
@@ -136,7 +136,7 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
 #endif // DEBUG
         new memory_range( 0, 0, 0 );
         }
-    
+
     if ( *last_mem_pos + count > 
         memory->get_available_end_pos() )
         {
@@ -165,8 +165,8 @@ NV_memory_manager* NV_memory_manager::get_instance()
     }
 //-----------------------------------------------------------------------------
 void NV_memory_manager::set_instance( NV_memory_manager* new_instance )
-{
+    {
     instance = new_instance;
-}
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
