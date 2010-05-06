@@ -258,19 +258,16 @@ class complex_device: public i_complex_device
         /// @brief Метод интерфейса @ref i_save_device.
         int save_state( char *buff );
 
-
         int             set_type( char new_type );
         int             set_n( u_int_4 new_n );
         int             set_name( char * new_name );
         int             set_subdev_quantity( u_int_4 new_dev_cnt );
 #ifdef DRIVER        
         i_load_device*  get_load_dev( u_int_4 idx );
-#endif // DRIVER                
-        
 
         i_simple_device* get_sub_dev( u_int_4 id ) const;
         i_complex_device* get_sub_complex_dev( char *sub_dev_name ) const;
-
+#endif // DRIVER        
 
         /// @brief Метод интерфейса @ref i_load_device.
         int load_device( char *buff );
@@ -281,10 +278,8 @@ class complex_device: public i_complex_device
         /// @brief Метод интерфейса @ref i_load_device.
         int load_state( char *buff  );
 
-
         /// @brief Вывод на консоль устройств группы.
         void print() const;
-
 
         /// @brief Метод интерфейса @ref i_cmd_device.
         int     parse_cmd( char *buff );

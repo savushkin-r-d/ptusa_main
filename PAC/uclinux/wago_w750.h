@@ -21,3 +21,4 @@ class wago_manager_w750 : public wago_manager
     };
 
 #endif // WAGO_750_H
+

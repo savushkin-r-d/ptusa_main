@@ -7,9 +7,7 @@
 class project_manager_w750 : public project_manager
     {
     public:
-        project_manager_w750()
-            {
-            cfg_file = new file_w750();
-            }
+        project_manager_w750();
     };
 #endif // PRJ_MANAGER_W750_H
+

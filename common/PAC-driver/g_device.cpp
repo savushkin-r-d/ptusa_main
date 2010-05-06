@@ -455,6 +455,7 @@ void complex_device::print() const
     indent[ start_pos ] = 0;    
     }
 //-----------------------------------------------------------------------------
+#ifdef DRIVER 
 i_simple_device* complex_device::get_sub_dev( u_int_4 id ) const
     {
     //-Бинарный поиск.
@@ -484,6 +485,24 @@ i_simple_device* complex_device::get_sub_dev( u_int_4 id ) const
     return 0;
     }
 //-----------------------------------------------------------------------------
+i_complex_device* complex_device::get_sub_complex_dev( char *sub_dev_name ) const
+    {
+    if ( !sub_dev ) return 0;
+    if ( GROUP_DEV_BYTE == type || GROUP_DEV_FLOAT == type ) return 0;
+
+    for ( unsigned int i = 0; i < sub_dev_cnt; i++ ) 
+        {
+        if ( strcmp( ( ( i_complex_device* )sub_dev[ i ] )->get_name(), 
+            sub_dev_name ) == 0 )
+            {
+            return ( i_complex_device* ) sub_dev[ i ];
+            }
+        }
+
+    return 0;
+    }
+#endif // DRIVER
+//-----------------------------------------------------------------------------
 //Выполнение команды, хранящейся в буфере.
 //Структура данных buff:
 //    4 байта - индекс устройства в массиве устройств;
@@ -510,23 +529,6 @@ u_int_4 complex_device::get_idx()
 void complex_device::set_idx( u_int_4 new_idx )
     {
     idx = new_idx;
-    }
-//-----------------------------------------------------------------------------
-i_complex_device* complex_device::get_sub_complex_dev( char *sub_dev_name ) const
-    {
-    if ( !sub_dev ) return 0;
-    if ( GROUP_DEV_BYTE == type || GROUP_DEV_FLOAT == type ) return 0;
-
-    for ( unsigned int i = 0; i < sub_dev_cnt; i++ ) 
-        {
-        if ( strcmp( ( ( i_complex_device* )sub_dev[ i ] )->get_name(), 
-            sub_dev_name ) == 0 )
-            {
-            return ( i_complex_device* ) sub_dev[ i ];
-            }
-        }
-
-    return 0;
     }
 //-----------------------------------------------------------------------------
 // Данные группы (buff) в следующем виде:

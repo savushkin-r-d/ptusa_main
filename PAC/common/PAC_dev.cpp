@@ -644,6 +644,188 @@ device_manager::device_manager()
         }
     }
 //-----------------------------------------------------------------------------
+i_DO_device* device_manager::get_N( int number )
+    {
+    int res = get_device( device::DT_N, number );
+    if ( -1 == res )
+        {
+#ifdef DEBUG
+        Print( "N[ %d ] not found!\n", number );
+#endif // DEBUG
+        return &stub;
+        }
+
+    return project_devices[ res ];
+    }
+//-----------------------------------------------------------------------------
+i_DO_device* device_manager::get_M( int number )
+    {
+    int res = get_device( device::DT_M, number );
+    if ( -1 == res )
+        {
+#ifdef DEBUG
+        Print( "M[ %d ] not found!\n", number );
+#endif // DEBUG
+        return &stub;
+        }
+
+    return project_devices[ res ];
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_LS( int number )
+    {
+    int res = get_device( device::DT_LS, number );
+    if ( -1 == res )
+        {
+#ifdef DEBUG
+        Print( "LS[ %d ] not found!\n", number );
+#endif // DEBUG
+        return &stub;
+        }
+
+    return project_devices[ res ];
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_FS( int number )
+    {
+    int res = get_device( device::DT_FS, number );
+    if ( -1 == res )
+        {
+#ifdef DEBUG
+        Print( "FS[ %d ] not found!\n", number );
+#endif // DEBUG
+        return &stub;
+        }
+
+    return project_devices[ res ];
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* device_manager::get_AI( int number )
+    {
+    int res = get_device( device::DT_AI, number );
+    if ( -1 == res )
+        {
+#ifdef DEBUG
+        Print( "AI[ %d ] not found!\n", number );
+#endif // DEBUG
+        return &stub;
+        }
+
+    return project_devices[ res ];
+    }
+//-----------------------------------------------------------------------------
+i_AO_device* device_manager::get_AO( int number )
+    {
+    int res = get_device( device::DT_AO, number );
+    if ( -1 == res )
+        {
+#ifdef DEBUG
+        Print( "AO[ %d ] not found!\n", number );
+#endif // DEBUG
+        return &stub;
+        }
+
+    return project_devices[ res ];
+    }
+//-----------------------------------------------------------------------------
+counter* device_manager::get_CTR( int number )
+    {
+    int res = get_device( device::DT_AI, number );
+    if ( -1 == res )
+        {
+#ifdef DEBUG
+        Print( "counter[ %d ] not found!\n", number );
+#endif // DEBUG
+        return 0;
+        }
+
+    return ( counter* ) project_devices[ res ];
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* device_manager::get_TE( int number )
+    {
+    int res = get_device( device::DT_TE, number );
+    if ( -1 == res )
+        {
+#ifdef DEBUG
+        Print( "TE[ %d ] not found!\n", number );
+#endif // DEBUG
+        return &stub;
+        }
+
+    return project_devices[ res ];
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* device_manager::get_FE( int number )
+    {
+    int res = get_device( device::DT_AI, number );
+    if ( -1 == res )
+        {
+#ifdef DEBUG
+        Print( "FE[ %d ] not found!\n", number );
+#endif // DEBUG
+        return &stub;
+        }
+
+    return project_devices[ res ];
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* device_manager::get_LE( int number )
+    {
+    int res = get_device( device::DT_LE, number );
+    if ( -1 == res )
+        {
+#ifdef DEBUG
+        Print( "LE[ %d ] not found!\n", number );
+#endif // DEBUG
+        return &stub;
+        }
+
+    return project_devices[ res ];
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_FB( int number )
+    {
+    int res = get_device( device::DT_FB, number );
+    if ( -1 == res )
+        {
+#ifdef DEBUG
+        Print( "FB[ %d ] not found!\n", number );
+#endif // DEBUG
+        return &stub;
+        }
+
+    return project_devices[ res ];
+    }
+//-----------------------------------------------------------------------------
+i_DO_device* device_manager::get_UPR( int number )
+    {
+    int res = get_device( device::DT_UPR, number );
+    if ( -1 == res )
+        {
+#ifdef DEBUG
+        Print( "UPR[ %d ] not found!\n", number );
+#endif // DEBUG
+        return &stub;
+        }
+
+    return project_devices[ res ];
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* device_manager::get_QE( int number )
+    {
+    int res = get_device( device::DT_QE, number );
+    if ( -1 == res )
+        {
+#ifdef DEBUG
+        Print( "QE[ %d ] not found!\n", number );
+#endif // DEBUG
+        return &stub;
+        }
+
+    return project_devices[ res ];
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float dev_stub::get_value()
     {
@@ -1143,6 +1325,29 @@ void AI_1::print() const
     wago_device::print();
     }
 //-----------------------------------------------------------------------------
+float AI_1::get_value()
+    {
+    return get_AI( AI_INDEX ) / C_MAX_ANALOG_CHANNEL_VALUE *
+        get_max_val();
+    }
+//-----------------------------------------------------------------------------
+int AI_1::set_value( float new_value )
+    {
+    if ( new_value < get_min_val() )
+        {
+        new_value = get_min_val();
+        }
+    if ( new_value > get_max_val() )
+        {
+        new_value = get_max_val();
+        }
+
+    u_int value = ( u_int ) ( C_MAX_ANALOG_CHANNEL_VALUE * 
+        new_value / get_max_val() );
+
+    return set_AI( AI_INDEX, value );
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float AO_1::get_value()
     {
@@ -1204,6 +1409,75 @@ void AO_1::print() const
     {
     device::print();
     wago_device::print();
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float temperature_e::get_max_val()
+    {
+    return C_MAX_ANALOG_CHANNEL_VALUE;
+    }
+//-----------------------------------------------------------------------------
+float temperature_e::get_min_val()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+float temperature_e::get_value()
+    {
+    short int tmp = get_AI( AI_INDEX );
+    float val = 0.1 * tmp;
+    val = val >= -50 && val <= 150 ? val : -1000;
+
+    return val;
+    }
+//-----------------------------------------------------------------------------
+int temperature_e::set_value( float new_value )
+    {
+    return set_AI( AI_INDEX, ( int ) ( 10 * new_value ) );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float level_e::get_max_val()
+    {
+    return 100;
+    }
+//-----------------------------------------------------------------------------
+float level_e::get_min_val()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float flow_e::get_max_val()
+    {
+    return get_par( C_MAX_PAR_NUMBER );
+    }
+//-----------------------------------------------------------------------------
+float flow_e::get_min_val()
+    {
+    return get_par( C_MIN_PAR_NUMBER );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float concentration_e::get_max_val()
+    {
+    return get_par( C_MAX_PAR_NUMBER );
+    }
+//-----------------------------------------------------------------------------
+float concentration_e::get_min_val()
+    {
+    return get_par( C_MIN_PAR_NUMBER );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float analog_input_4_20::get_max_val()
+    {
+    return 20;
+    }
+//-----------------------------------------------------------------------------
+float analog_input_4_20::get_min_val()
+    {
+    return 4;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

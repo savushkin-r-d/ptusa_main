@@ -323,43 +323,11 @@ class device : public i_simple_device,
 
         device();
 
-        /// @brief Включение устройства.
-        ///
-        /// Установка устройства в активное состояние. Для клапана это означает
-        /// его активирование, то есть если он нормально закрытый - открытие.
-        virtual void on() = 0;
-
         /// @brief Выключение устройства.
         ///
         /// Установка устройства в пассивное состояние. Для клапана это означает
         /// его деактивирование, то есть если он нормально закрытый - закрытие.
         virtual void off() = 0;
-
-        /// @brief Получение текущего состояния устройства.
-        ///
-        /// @return - текущее состояние устройства в виде целого числа.
-        virtual int get_state() = 0;
-
-        /// @brief Установка нового состояния устройства.
-        ///
-        /// @param new_state - новое состояние объекта.
-        ///
-        /// @return -  0 - Ок.
-        /// @return - >0 - ошибка.
-        virtual int set_state( int new_state ) = 0;
-
-        /// @brief Получение текущего состояния устройства.
-        ///
-        /// @return - текущее состояние устройства в виде дробного числа.
-        virtual float get_value() = 0;
-
-        /// @brief Установка текущего состояния устройства.
-        ///
-        /// @param new_value - новое состояние устройства.
-        ///
-        /// @return -  0 - Ок.
-        /// @return - >0 - ошибка.
-        virtual int set_value( float new_value ) = 0;
 
         /// @brief Сохранение самого устройства в буфер.
         ///
@@ -418,7 +386,7 @@ class char_state_device : public device
         char prev_state;    ///< Предыдущее состояние устройства.
     };
 //-----------------------------------------------------------------------------
-/// @brief Устройство, для хранения состояния которого необходимо беззнаковое
+/// @brief Устройство, для хранения состояния которого необходимо без знаковое
 /// целое размером 4 байта.
 ///
 /// Например счетчик.
@@ -824,11 +792,7 @@ class AI_1 :public float_state_device,
     public wago_device
     {
     public:
-        float get_value()
-            {
-            return get_AI( AI_INDEX ) / C_MAX_ANALOG_CHANNEL_VALUE *
-                get_max_val();
-            }
+        float get_value();
 
         int parse_cmd( char *buff );
 
@@ -838,22 +802,7 @@ class AI_1 :public float_state_device,
 
         int get_state();
 
-        int set_value( float new_value )
-            {
-            if ( new_value < get_min_val() )
-                {
-                new_value = get_min_val();
-                }
-            if ( new_value > get_max_val() )
-                {
-                new_value = get_max_val();
-                }
-
-            u_int value = ( u_int ) ( C_MAX_ANALOG_CHANNEL_VALUE * 
-                new_value / get_max_val() );
-
-            return set_AI( AI_INDEX, value );
-            }
+        int set_value( float new_value );
 
         int set_state( int new_state );
 
@@ -875,57 +824,29 @@ class AI_1 :public float_state_device,
 class temperature_e : public AI_1
     {
     public:
-        float get_max_val()
-            {
-            return C_MAX_ANALOG_CHANNEL_VALUE;
-            }
-        float get_min_val()
-            {
-            return 0;
-            }
+        float get_max_val();
+        float get_min_val();
 
-        float get_value()
-            {
-            short int tmp = get_AI( AI_INDEX );
-            float val = 0.1 * tmp;
-            val = val >= -50 && val <= 150 ? val : -1000;
+        float get_value();
 
-            return val;
-            }
-
-        int set_value( float new_value )
-            {
-            return set_AI( AI_INDEX, ( int ) ( 10 * new_value ) );
-            }
+        int set_value( float new_value );
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство ...
 class level_e : public AI_1
     {
     public:
-        float get_max_val()
-            {
-            return 100;
-            }
-        float get_min_val()
-            {
-            return 0;
-            }
+        float get_max_val();
+        float get_min_val();
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство ...
 class flow_e : public AI_1
     {
     public:
-        float get_max_val()
-            {
-            return get_par( C_MAX_PAR_NUMBER );
-            }
-        float get_min_val()
-            {
-            return get_par( C_MIN_PAR_NUMBER );
-            }
-        
+        float get_max_val();
+        float get_min_val();
+
     private:
         enum CONSTANTS
             {
@@ -938,14 +859,8 @@ class flow_e : public AI_1
 class concentration_e : public AI_1
     {
     public:
-        float get_max_val()
-            {
-            return get_par( C_MAX_PAR_NUMBER );
-            }
-        float get_min_val()
-            {
-            return get_par( C_MIN_PAR_NUMBER );
-            }
+        float get_max_val();
+        float get_min_val();
 
     private:
         enum CONSTANTS
@@ -959,14 +874,8 @@ class concentration_e : public AI_1
 class analog_input_4_20 : public AI_1
     {
     public:
-        float get_max_val()
-            {
-            return 20;
-            }
-        float get_min_val()
-            {
-            return 4;
-            }
+        float get_max_val();
+        float get_min_val();
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым входом.
@@ -1064,192 +973,35 @@ class device_manager
     public:
         device_manager();
 
-
         int load_from_cfg_file( file *cfg_file );
 
         i_DO_device* get_V( int number );
 
-        i_DO_device* get_N( int number )
-            {
-            int res = get_device( device::DT_N, number );
-            if ( -1 == res )
-                {
-#ifdef DEBUG
-                Print( "N[ %d ] not found!\n", number );
-#endif // DEBUG
-                return &stub;
-                }
+        i_DO_device* get_N( int number );
 
-            return project_devices[ res ];
-            }
+        i_DO_device* get_M( int number );
 
-       i_DO_device* get_M( int number )
-            {
-            int res = get_device( device::DT_M, number );
-            if ( -1 == res )
-                {
-#ifdef DEBUG
-                Print( "M[ %d ] not found!\n", number );
-#endif // DEBUG
-                return &stub;
-                }
+        i_DI_device* get_LS( int number );
 
-            return project_devices[ res ];
-            }
+        i_DI_device* get_FS( int number );
 
-       i_DI_device* get_LS( int number )
-            {
-            int res = get_device( device::DT_LS, number );
-            if ( -1 == res )
-                {
-#ifdef DEBUG
-                Print( "LS[ %d ] not found!\n", number );
-#endif // DEBUG
-                return &stub;
-                }
+        i_AI_device* get_AI( int number );
 
-            return project_devices[ res ];
-            }
+        i_AO_device* get_AO( int number );
 
-       i_DI_device* get_FS( int number )
-            {
-            int res = get_device( device::DT_FS, number );
-            if ( -1 == res )
-                {
-#ifdef DEBUG
-                Print( "FS[ %d ] not found!\n", number );
-#endif // DEBUG
-                return &stub;
-                }
+        counter* get_CTR( int number );
 
-            return project_devices[ res ];
-            }
+        i_AI_device* get_TE( int number );
 
-       i_AI_device* get_AI( int number )
-            {
-            int res = get_device( device::DT_AI, number );
-            if ( -1 == res )
-                {
-#ifdef DEBUG
-                Print( "AI[ %d ] not found!\n", number );
-#endif // DEBUG
-                return &stub;
-                }
+        i_AI_device* get_FE( int number );
 
-            return project_devices[ res ];
-            }
+        i_AI_device* get_LE( int number );
 
-       i_AO_device* get_AO( int number )
-            {
-            int res = get_device( device::DT_AO, number );
-            if ( -1 == res )
-                {
-#ifdef DEBUG
-                Print( "AO[ %d ] not found!\n", number );
-#endif // DEBUG
-                return &stub;
-                }
+        i_DI_device* get_FB( int number );
 
-            return project_devices[ res ];
-            }
+        i_DO_device* get_UPR( int number );
 
-       counter* get_CTR( int number )
-            {
-            int res = get_device( device::DT_AI, number );
-            if ( -1 == res )
-                {
-#ifdef DEBUG
-                Print( "counter[ %d ] not found!\n", number );
-#endif // DEBUG
-                return 0;
-                }
-
-            return ( counter* ) project_devices[ res ];
-            }
-
-        i_AI_device* get_TE( int number )
-            {
-            int res = get_device( device::DT_TE, number );
-            if ( -1 == res )
-                {
-#ifdef DEBUG
-                Print( "TE[ %d ] not found!\n", number );
-#endif // DEBUG
-                return &stub;
-                }
-
-            return project_devices[ res ];
-            }
-
-         i_AI_device* get_FE( int number )
-            {
-            int res = get_device( device::DT_AI, number );
-            if ( -1 == res )
-                {
-#ifdef DEBUG
-                Print( "FE[ %d ] not found!\n", number );
-#endif // DEBUG
-                return &stub;
-                }
-
-            return project_devices[ res ];
-            }
-
-          i_AI_device* get_LE( int number )
-            {
-            int res = get_device( device::DT_LE, number );
-            if ( -1 == res )
-                {
-#ifdef DEBUG
-                Print( "LE[ %d ] not found!\n", number );
-#endif // DEBUG
-                return &stub;
-                }
-
-            return project_devices[ res ];
-            }
-
-       i_DI_device* get_FB( int number )
-            {
-            int res = get_device( device::DT_FB, number );
-            if ( -1 == res )
-                {
-#ifdef DEBUG
-                Print( "FB[ %d ] not found!\n", number );
-#endif // DEBUG
-                return &stub;
-                }
-
-            return project_devices[ res ];
-            }
-
-       i_DO_device* get_UPR( int number )
-            {
-            int res = get_device( device::DT_UPR, number );
-            if ( -1 == res )
-                {
-#ifdef DEBUG
-                Print( "UPR[ %d ] not found!\n", number );
-#endif // DEBUG
-                return &stub;
-                }
-
-            return project_devices[ res ];
-            }
-
-       i_AI_device* get_QE( int number )
-            {
-            int res = get_device( device::DT_QE, number );
-            if ( -1 == res )
-                {
-#ifdef DEBUG
-                Print( "QE[ %d ] not found!\n", number );
-#endif // DEBUG
-                return &stub;
-                }
-
-            return project_devices[ res ];
-            }
+        i_AI_device* get_QE( int number );
 
         static device_manager* get_instance();
 
@@ -1279,19 +1031,19 @@ class device_manager
     };
 //-----------------------------------------------------------------------------
 // Получение соответствующего устройства по его номеру.
-#define V device_manager::get_instance()->get_V
-#define N device_manager::get_instance()->get_N
-#define M device_manager::get_instance()->get_M
-#define LS device_manager::get_instance()->get_LS
-#define FS device_manager::get_instance()->get_FS
-#define AI device_manager::get_instance()->get_AI
-#define AO device_manager::get_instance()->get_AO
-#define CTR device_manager::get_instance()->get_counter
-#define TE device_manager::get_instance()->get_TE
-#define FE device_manager::get_instance()->get_FE
-#define LE device_manager::get_instance()->get_LE
-#define FB device_manager::get_instance()->get_FB
+#define V   device_manager::get_instance()->get_V
+#define N   device_manager::get_instance()->get_N
+#define M   device_manager::get_instance()->get_M
+#define LS  device_manager::get_instance()->get_LS
+#define FS  device_manager::get_instance()->get_FS
+#define AI  device_manager::get_instance()->get_AI
+#define AO  device_manager::get_instance()->get_AO
+#define CTR device_manager::get_instance()->get_CTR
+#define TE  device_manager::get_instance()->get_TE
+#define FE  device_manager::get_instance()->get_FE
+#define LE  device_manager::get_instance()->get_LE
+#define FB  device_manager::get_instance()->get_FB
 #define UPR device_manager::get_instance()->get_UPR
-#define QE device_manager::get_instance()->get_QE
+#define QE  device_manager::get_instance()->get_QE
 //-----------------------------------------------------------------------------
 #endif // PAC_DEVICES_H
