@@ -19,15 +19,45 @@ class wago_manager
 
         static void set_instance( wago_manager* new_instance );
 
-        int get_DI_data( u_int node_n, u_int offset, u_char *p_read );
+        u_char* get_DI_read_data( u_int node_n, u_int offset );
 
-        int get_DO_data( u_int node_n, u_int offset, u_char *p_read,
-            u_char *p_write );
+        u_char* get_DO_read_data( u_int node_n, u_int offset );
+        u_char* get_DO_write_data( u_int node_n, u_int offset )
+            {
+            if ( node_n < nodes_count && nodes )
+                {
+                if ( nodes[ node_n ] && offset < nodes[ node_n ]->DO_cnt )
+                    {
+                    return &nodes[ node_n ]->DO_[ offset ];
+                    }
+                }
+#ifdef DEBUG
+            Print( "get_DO_write_data() - error!\n" );
+            while( 1 ) ;
+#endif // DEBUG
 
-        int get_AI_data( u_int node_n, u_int offset, u_int *p_read );
+            return 0;
+            }
 
-        int get_AO_data( u_int node_n, u_int offset, u_int *p_read,
-            u_int *p_write );
+        u_int* get_AI_read_data( u_int node_n, u_int offset );
+
+        u_int* get_AO_read_data( u_int node_n, u_int offset );
+        u_int* get_AO_write_data( u_int node_n, u_int offset )
+            {
+            if ( node_n < nodes_count && nodes )
+                {
+                if ( nodes[ node_n ] && offset < nodes[ node_n ]->AO_cnt )
+                    {
+                    return &nodes[ node_n ]->AO_[ offset ];
+                    }
+                }
+#ifdef DEBUG
+            Print( "get_AO_write_data() - error!\n" );
+            while( 1 ) ;
+#endif // DEBUG
+
+            return 0;
+            }
 
 
     protected:

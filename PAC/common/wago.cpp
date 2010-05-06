@@ -43,14 +43,13 @@ void wago_manager::set_instance( wago_manager* new_instance )
     instance = new_instance;
     }
 //-----------------------------------------------------------------------------
-int wago_manager::get_DI_data( u_int node_n, u_int offset, u_char *p_read )
+u_char* wago_manager::get_DI_read_data( u_int node_n, u_int offset )
     {
     if ( node_n < nodes_count && nodes )
         {
         if ( nodes[ node_n ] && offset < nodes[ node_n ]->DI_cnt )
             {
-            p_read = &nodes[ node_n ]->DI[ offset ];
-            return 0;
+            return &nodes[ node_n ]->DI[ offset ];
             }
         }
 #ifdef DEBUG
@@ -58,19 +57,16 @@ int wago_manager::get_DI_data( u_int node_n, u_int offset, u_char *p_read )
     while( 1 ) ;
 #endif // DEBUG
 
-    return 1;
+    return 0;
     }
 //-----------------------------------------------------------------------------
-int wago_manager::get_DO_data( u_int node_n, u_int offset, u_char *p_read,
-                              u_char *p_write )
+u_char* wago_manager::get_DO_read_data( u_int node_n, u_int offset )
     {
     if ( node_n < nodes_count && nodes )
         {
         if ( nodes[ node_n ] && offset < nodes[ node_n ]->DO_cnt )
             {
-            p_read = &nodes[ node_n ]->DO[ offset ];
-            p_write = &nodes[ node_n ]->DO_[ offset ];
-            return 0;
+            return &nodes[ node_n ]->DO[ offset ];
             }
         }
 #ifdef DEBUG
@@ -78,17 +74,16 @@ int wago_manager::get_DO_data( u_int node_n, u_int offset, u_char *p_read,
     while( 1 ) ;
 #endif // DEBUG
 
-    return 1;
+    return 0;
     }
 //-----------------------------------------------------------------------------
-int wago_manager::get_AI_data( u_int node_n, u_int offset, u_int *p_read )
+u_int* wago_manager::get_AI_read_data( u_int node_n, u_int offset )
     {
     if ( node_n < nodes_count && nodes )
         {
         if ( nodes[ node_n ] && offset < nodes[ node_n ]->AI_cnt )
             {
-            p_read = &nodes[ node_n ]->AI[ offset ];                    
-            return 0;
+            return &nodes[ node_n ]->AI[ offset ];
             }
         }
 #ifdef DEBUG
@@ -96,19 +91,16 @@ int wago_manager::get_AI_data( u_int node_n, u_int offset, u_int *p_read )
     while( 1 ) ;
 #endif // DEBUG
 
-    return 1;
+    return 0;
     }
 //-----------------------------------------------------------------------------
-int wago_manager::get_AO_data( u_int node_n, u_int offset, 
-                              u_int *p_read, u_int *p_write )
+u_int* wago_manager::get_AO_read_data( u_int node_n, u_int offset )
     {
     if ( node_n < nodes_count && nodes )
         {
         if ( nodes[ node_n ] && offset < nodes[ node_n ]->AO_cnt )
             {
-            p_read = &nodes[ node_n ]->AO[ offset ];
-            p_write = &nodes[ node_n ]->AO_[ offset ];
-            return 0;
+            return &nodes[ node_n ]->AO[ offset ];
             }
         }
 #ifdef DEBUG
@@ -116,7 +108,7 @@ int wago_manager::get_AO_data( u_int node_n, u_int offset,
     while( 1 ) ;
 #endif // DEBUG
 
-    return 1;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

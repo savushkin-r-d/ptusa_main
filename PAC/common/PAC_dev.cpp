@@ -1,13 +1,13 @@
 #include "PAC_dev.h"
 
 device_manager* device_manager::instance;
+char wago_device::debug_mode;
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 device::device() : number( 0 ),
-type( DEVICE_TYPE( 0 ) ),
-sub_type( DEVICE_SUB_TYPE( 0 ) )
-
+    type( DEVICE_TYPE( 0 ) ),
+    sub_type( DEVICE_SUB_TYPE( 0 ) )
     { 
     }
 //-----------------------------------------------------------------------------
@@ -140,28 +140,30 @@ int wago_device::load( file *cfg_file )
     load_table_from_string( cfg_file->fget_line(), DI_channels );
     for ( u_int i = 0; i < DI_channels.count; i++ )
         {
-        wago_manager::get_instance()->get_DI_data( DI_channels.tables[ i ],
-            DI_channels.offsets[ i ], DI_channels.char_read_values[ i ] );
+        DI_channels.char_read_values[ i ] = wago_manager::get_instance()->
+             get_DI_read_data( DI_channels.tables[ i ], DI_channels.offsets[ i ] );
         }
     load_table_from_string( cfg_file->fget_line(), DO_channels );
     for ( u_int i = 0; i < DO_channels.count; i++ )
-        {
-        wago_manager::get_instance()->get_DO_data( DO_channels.tables[ i ],
-            DO_channels.offsets[ i ], DO_channels.char_read_values[ i ],
-            DO_channels.char_write_values[ i ] );
+        {        
+        DO_channels.char_read_values[ i ] = wago_manager::get_instance()->
+            get_DO_read_data( DO_channels.tables[ i ], DO_channels.offsets[ i ] );
+        DO_channels.char_write_values[ i ] = wago_manager::get_instance()->
+            get_DO_write_data( DO_channels.tables[ i ], DO_channels.offsets[ i ] );
         }
     load_table_from_string( cfg_file->fget_line(), AI_channels );
     for ( u_int i = 0; i < AI_channels.count; i++ )
         {
-        wago_manager::get_instance()->get_AI_data( AI_channels.tables[ i ],
-            AI_channels.offsets[ i ], AI_channels.int_read_values[ i ] );
+        AI_channels.int_read_values[ i ] = wago_manager::get_instance()->
+            get_AI_read_data( AI_channels.tables[ i ], AI_channels.offsets[ i ] );
         }
     load_table_from_string( cfg_file->fget_line(), AO_channels );
     for ( u_int i = 0; i < AO_channels.count; i++ )
         {
-        wago_manager::get_instance()->get_AO_data( AO_channels.tables[ i ],
-            AO_channels.offsets[ i ], AO_channels.int_read_values[ i ],
-            AO_channels.int_write_values[ i ] );
+        AO_channels.int_read_values[ i ] = wago_manager::get_instance()->
+            get_AO_read_data( AO_channels.tables[ i ], AO_channels.offsets[ i ] );
+        AO_channels.int_write_values[ i ] = wago_manager::get_instance()->
+            get_AO_write_data( AO_channels.tables[ i ], AO_channels.offsets[ i ] );
         }
 
     // 2 1.1 2.1
@@ -205,6 +207,10 @@ int wago_device::set_DO( u_int index, char value )
         DO_channels.char_write_values[ index ] )
         {
         *DO_channels.char_write_values[ index ] = value;
+        if ( debug_mode )
+            {
+            *DO_channels.char_read_values[ index ] = value;
+            }
         return 0;
         }
 
@@ -271,6 +277,10 @@ int wago_device::set_AO( u_int index, u_int value )
         AO_channels.char_read_values[ index ] )
         {
         *AO_channels.int_write_values[ index ] = value;
+        if ( debug_mode )
+            {
+            *AO_channels.int_read_values[ index ] = value;
+            }
         return 0;
         }
 
@@ -441,47 +451,9 @@ i_DO_device* device_manager::get_V( int number )
         Print( "V[ %d ] not found!\n", number );
 #endif // DEBUG
         return &stub;
-        } 
-    
-    switch (  project_devices[ res ]->get_type() )
-        {
-        case device::DT_V:     
-            switch ( project_devices[ res ]->get_sub_type() )
-                {
-                case device::DST_V_DO_1:
-                    return ( DO_1* ) project_devices[ res ];
-                    
-                case device::DST_V_DO_2:
-                    return ( DO_2* ) project_devices[ res ];
-                    
-                case device::DST_V_DO_1_DI_1:
-                    return ( DO_1_DI_1* ) project_devices[ res ];
-                    
-                case device::DST_V_DO_1_DI_2:
-                    return ( DO_1_DI_2* ) project_devices[ res ];
-                    
-                case device::DST_V_DO_2_DI_2:
-                    return ( DO_2_DI_2* ) project_devices[ res ];
-                    
-                case device::DST_V_MIXPROOF:
-                    return ( mix_proof* ) project_devices[ res ];
-                    
-                default:
-#ifdef DEBUG
-                    Print( "device_manager::get_V(...) - unknown V device subtype %d!\n",
-                        project_devices[ res ]->get_sub_type() );
-#endif // DEBUG
-                    return &stub;
-                }
-            break;
-
-        default:
-#ifdef DEBUG
-            Print( "device_manager::get_V(...) - unknown device type %d!\n",
-                project_devices[ res ]->get_sub_type() );
-#endif // DEBUG
-            return &stub;
         }
+
+    return project_devices[ res ];
     }
 //-----------------------------------------------------------------------------
 device_manager* device_manager::get_instance()

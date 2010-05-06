@@ -2,7 +2,7 @@
  * File:   main.cpp
  * Author: id
  *
- * Created on 9 ΠΠΏΡ€ΠµΠ»Ρ 2010 Π³., 15:03
+ * Created on 9 ΐοπελό 2010 γ., 15:03
  */
 
 #include <stdlib.h>
@@ -16,7 +16,7 @@
 /*
  * 
  */
-int main( int argc, char** argv )
+int main()
     {
     tcp_communicator::set_instance( new tcp_communicator_w750() );
     wago_manager::set_instance( new wago_manager_w750() );
@@ -25,12 +25,14 @@ int main( int argc, char** argv )
 
 #ifdef UCLINUX
     project_manager::get_instance()->load_configuration( "Whey_out.ds5" );
-#else
+#else  // UCLINUX
     project_manager::get_instance()->load_configuration(
         "/home/id/src/test_projects/wago_dev_test/Whey_out.ds5" );
-#endif // UCLINUX
+#endif // UCLINUX else
 
     device_manager::get_instance()->print();
+
+    wago_device::debug_mode = 0;
 
     while ( 1 )
         {

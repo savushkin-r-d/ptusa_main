@@ -203,9 +203,84 @@ template < class data_type > class array_device: public i_simple_device
         data_type*      prev_val;       ///< Массив предыдущих значений.
     };
 //-----------------------------------------------------------------------------
+/// @brief Устройство с дискретным входом.
+///
+/// Устройства типа обратной связи, уровня и т.д. реализуют данный интерфейс.
+class i_DI_device
+    {
+    public:
+        /// @brief Получение текущего состояния устройства.
+        ///
+        /// @return - текущее состояние устройства в виде целого числа.
+        virtual int get_state() = 0;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с дискретным выходом.
+///
+/// Устройства типа клапана, мешалки и т.д. реализуют данный интерфейс.
+class i_DO_device: public i_DI_device
+    {
+    public:
+        /// @brief Включение устройства.
+        ///
+        /// Установка устройства в активное состояние. Для клапана это означает
+        /// его активирование, то есть если он нормально закрытый - открытие.
+        virtual void on() = 0;
+
+        /// @brief Выключение устройства.
+        ///
+        /// Установка устройства в пассивное состояние. Для клапана это означает
+        /// его деактивирование, то есть если он нормально закрытый - закрытие.
+        virtual void off() = 0;
+
+        /// @brief Установка нового состояния устройства.
+        ///
+        /// @param new_state - новое состояние объекта.
+        ///
+        /// @return -  0 - Ок.
+        /// @return - >0 - ошибка.
+        virtual int set_state( int new_state ) = 0;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с аналоговым входом.
+///
+/// Устройства типа температуры, расхода и т.д. реализуют данный интерфейс.
+class i_AI_device
+    {
+    public:
+        /// @brief Получение текущего состояния устройства.
+        ///
+        /// @return - текущее состояние устройства в виде дробного числа.
+        virtual float get_value() = 0;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с аналоговым выходом.
+///
+/// Устройства типа аналогового каналы управления и т.д. реализуют данный
+/// интерфейс.
+class i_AO_device: public i_AI_device
+    {
+    public:
+        /// @brief Выключение устройства.
+        ///
+        /// Установка устройства в пассивное состояние. Для клапана это означает
+        /// его деактивирование, то есть если он нормально закрытый - закрытие.
+        virtual void off() = 0;
+
+        /// @brief Установка текущего состояния устройства.
+        ///
+        /// @param new_value - новое состояние устройства.
+        ///
+        /// @return -  0 - Ок.
+        /// @return - >0 - ошибка.
+        virtual int set_value( float new_value ) = 0;
+    };
+//-----------------------------------------------------------------------------
 /// @brief Класс универсального простого устройства, который используется в 
 /// режимах.
-class device : public i_simple_device
+class device : public i_simple_device,    
+    public i_AO_device,    
+    public i_DO_device
     {
     public:
         enum CONSTANTS
@@ -380,79 +455,6 @@ class float_state_device : public device
         float prev_state;    ///< Предыдущее состояние устройства.
     };
 //-----------------------------------------------------------------------------
-/// @brief Устройство с дискретным входом. 
-///
-/// Устройства типа обратной связи, уровня и т.д. реализуют данный интерфейс.
-class i_DI_device
-    {
-    public:
-        /// @brief Получение текущего состояния устройства.
-        ///
-        /// @return - текущее состояние устройства в виде целого числа.
-        virtual int get_state() = 0;
-    };
-//-----------------------------------------------------------------------------
-/// @brief Устройство с дискретным выходом. 
-///
-/// Устройства типа клапана, мешалки и т.д. реализуют данный интерфейс.
-class i_DO_device: public i_DI_device
-    {
-    public:
-        /// @brief Включение устройства.
-        ///
-        /// Установка устройства в активное состояние. Для клапана это означает
-        /// его активирование, то есть если он нормально закрытый - открытие.
-        virtual void on() = 0;
-
-        /// @brief Выключение устройства.
-        ///
-        /// Установка устройства в пассивное состояние. Для клапана это означает
-        /// его деактивирование, то есть если он нормально закрытый - закрытие.
-        virtual void off() = 0;
-
-        /// @brief Установка нового состояния устройства.
-        ///
-        /// @param new_state - новое состояние объекта.
-        ///
-        /// @return -  0 - Ок.
-        /// @return - >0 - ошибка.
-        virtual int set_state( int new_state ) = 0;
-    };
-//-----------------------------------------------------------------------------
-/// @brief Устройство с аналоговым входом. 
-///
-/// Устройства типа температуры, расхода и т.д. реализуют данный интерфейс.
-class i_AI_device
-    {
-    public:
-        /// @brief Получение текущего состояния устройства.
-        ///
-        /// @return - текущее состояние устройства в виде дробного числа.
-        virtual float get_value() = 0;
-    };
-//-----------------------------------------------------------------------------
-/// @brief Устройство с аналоговым выходом. 
-///
-/// Устройства типа аналогового каналы управления и т.д. реализуют данный
-/// интерфейс.
-class i_AO_device: public i_AI_device
-    {
-    public:
-        /// @brief Выключение устройства.
-        ///
-        /// Установка устройства в пассивное состояние. Для клапана это означает
-        /// его деактивирование, то есть если он нормально закрытый - закрытие.
-        virtual void off() = 0;
-
-        /// @brief Установка текущего состояния устройства.
-        ///
-        /// @param new_value - новое состояние устройства.
-        ///
-        /// @return -  0 - Ок.
-        /// @return - >0 - ошибка.
-        virtual int set_value( float new_value ) = 0;
-    };
-//-----------------------------------------------------------------------------
 /// @brief Устройство на основе модулей ввода/вывода WAGO. 
 /// 
 /// В общем случае у устройства может быть один или несколько каналов
@@ -460,6 +462,8 @@ class i_AO_device: public i_AI_device
 class wago_device
     {
     public:
+        static char debug_mode;
+
         wago_device();
 
         /// @brief Загрузка самого устройства из буфера.
@@ -613,8 +617,6 @@ class wago_device
 /// Необходимо для возвращения результата поиска устройства с несуществующим
 /// номером. Методы данного класса ничего не делают. 
 class dev_stub : public char_state_device,
-    public i_DO_device,
-    public i_AO_device,
     public wago_device
     {
     public:
@@ -664,8 +666,7 @@ class digital_device : public char_state_device,
 /// @brief Устройство с одним дискретным выходом.
 ///
 /// Это может быть клапан, насос, канал управления...
-class DO_1 : public digital_device,
-    public i_DO_device
+class DO_1 : public digital_device
     {
     public:
         int get_state();
@@ -686,8 +687,7 @@ class DO_1 : public digital_device,
 /// @brief Устройство с двумя дискретными выходами.
 ///
 /// Это может быть клапан, насос...
-class DO_2 : public digital_device,
-    public i_DO_device
+class DO_2 : public digital_device
     {
     public:
         int get_state();
@@ -709,8 +709,7 @@ class DO_2 : public digital_device,
 /// @brief Устройство с одним дискретным выходом и одним дискретным входом.
 ///
 /// Это может быть клапан, насос...
-class DO_1_DI_1 : public digital_device,
-    public i_DO_device
+class DO_1_DI_1 : public digital_device
     {
     public:
 
@@ -737,8 +736,7 @@ class DO_1_DI_1 : public digital_device,
 /// @brief Устройство с одним дискретным выходом и двумя дискретными входами.
 ///
 /// Это может быть клапан, насос...
-class DO_1_DI_2 : public digital_device,
-    public i_DO_device
+class DO_1_DI_2 : public digital_device
     {
     public:
         int get_state();
@@ -764,8 +762,7 @@ class DO_1_DI_2 : public digital_device,
 /// @brief Устройство с двумя дискретными выходами и двумя дискретными входами.
 ///
 /// Это может быть клапан, насос...
-class DO_2_DI_2 : public digital_device,
-    public i_DO_device
+class DO_2_DI_2 : public digital_device
     {
     public:
         int get_state();
@@ -790,8 +787,7 @@ class DO_2_DI_2 : public digital_device,
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан mixproof.
-class mix_proof : public digital_device,
-    public i_DO_device
+class mix_proof : public digital_device
     {
     public:
 
@@ -825,8 +821,7 @@ class mix_proof : public digital_device,
 ///
 /// Это может быть температура, расход (величина)...
 class AI_1 :public float_state_device,
-    public wago_device,
-    public i_AI_device
+    public wago_device
     {
     public:
         float get_value()
@@ -978,8 +973,7 @@ class analog_input_4_20 : public AI_1
 ///
 /// Это может быть управляемый клапан...
 class AO_1 :public float_state_device,
-    public wago_device,
-    public i_AO_device
+    public wago_device
     {
     public:
         float get_value();
@@ -1013,8 +1007,7 @@ class AO_1 :public float_state_device,
 /// @brief Устройство с одним дискретным входом.
 ///
 /// Это может быть обратная связь, расход (есть/нет)...
-class DI_1 : public digital_device,
-    public i_DI_device
+class DI_1 : public digital_device
     {
     public:
         int get_state();
@@ -1033,7 +1026,6 @@ class DI_1 : public digital_device,
 /// @brief Счетчик.
 ///
 class counter : public u_int_4_state_device,
-    public i_AI_device,
     public wago_device
     {
     public:        
@@ -1088,7 +1080,7 @@ class device_manager
                 return &stub;
                 }
 
-            return ( DO_1_DI_1* ) project_devices[ res ];
+            return project_devices[ res ];
             }
 
        i_DO_device* get_M( int number )
@@ -1102,7 +1094,7 @@ class device_manager
                 return &stub;
                 }
 
-            return ( DO_1_DI_1* ) project_devices[ res ];
+            return project_devices[ res ];
             }
 
        i_DI_device* get_LS( int number )
@@ -1116,7 +1108,7 @@ class device_manager
                 return &stub;
                 }
 
-            return ( DI_1* ) project_devices[ res ];
+            return project_devices[ res ];
             }
 
        i_DI_device* get_FS( int number )
@@ -1130,7 +1122,7 @@ class device_manager
                 return &stub;
                 }
 
-            return ( DI_1* ) project_devices[ res ];
+            return project_devices[ res ];
             }
 
        i_AI_device* get_AI( int number )
@@ -1144,7 +1136,7 @@ class device_manager
                 return &stub;
                 }
 
-            return ( analog_input_4_20* ) project_devices[ res ];
+            return project_devices[ res ];
             }
 
        i_AO_device* get_AO( int number )
@@ -1158,7 +1150,7 @@ class device_manager
                 return &stub;
                 }
 
-            return ( AO_1* ) project_devices[ res ];
+            return project_devices[ res ];
             }
 
        counter* get_CTR( int number )
@@ -1186,7 +1178,7 @@ class device_manager
                 return &stub;
                 }
 
-            return ( temperature_e* ) project_devices[ res ];
+            return project_devices[ res ];
             }
 
          i_AI_device* get_FE( int number )
@@ -1200,7 +1192,7 @@ class device_manager
                 return &stub;
                 }
 
-            return ( flow_e* ) project_devices[ res ];
+            return project_devices[ res ];
             }
 
           i_AI_device* get_LE( int number )
@@ -1214,7 +1206,7 @@ class device_manager
                 return &stub;
                 }
 
-            return ( level_e* ) project_devices[ res ];
+            return project_devices[ res ];
             }
 
        i_DI_device* get_FB( int number )
@@ -1228,7 +1220,7 @@ class device_manager
                 return &stub;
                 }
 
-            return ( DI_1* ) project_devices[ res ];
+            return project_devices[ res ];
             }
 
        i_DO_device* get_UPR( int number )
@@ -1242,7 +1234,7 @@ class device_manager
                 return &stub;
                 }
 
-            return ( DO_1* ) project_devices[ res ];
+            return project_devices[ res ];
             }
 
        i_AI_device* get_QE( int number )
@@ -1256,7 +1248,7 @@ class device_manager
                 return &stub;
                 }
 
-            return ( concentration_e* ) project_devices[ res ];
+            return project_devices[ res ];
             }
 
         static device_manager* get_instance();
