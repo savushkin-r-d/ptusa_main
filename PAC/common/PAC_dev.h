@@ -397,7 +397,7 @@ class u_int_4_state_device : public device
         int save_changed_state( char *buff );
 
         /// @brief Реализация интерфейса @ref i_save_device.
-        int save_state( char *buff  );
+        int save_state( char *buff );
 
         /// @brief Для сохранения состояния устройства.                
         virtual u_int_4 get_u_int_4_state() = 0;
