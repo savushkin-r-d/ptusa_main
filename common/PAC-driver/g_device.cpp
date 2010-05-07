@@ -616,6 +616,7 @@ device_communicator::device_communicator()
 #endif // PAC
     }
 //-----------------------------------------------------------------------------
+#ifdef DRIVER        
 i_complex_device* device_communicator::get_group( char* dev_name, u_int_4 dev_n, 
                                                  char* name ) const
     {
@@ -633,7 +634,6 @@ i_complex_device* device_communicator::get_group( char* dev_name, u_int_4 dev_n,
     return 0;
     }
 //-----------------------------------------------------------------------------
-#ifdef DRIVER        
 int device_communicator::load_state( char *buff  )
     {
     //—труктура полученных от контроллера данных:

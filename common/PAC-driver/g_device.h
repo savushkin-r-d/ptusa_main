@@ -327,6 +327,10 @@ class device_communicator
     public:
         device_communicator();
 
+        /// @brief Вывод на консоль устройств группы.
+        void print() const;
+
+#ifdef DRIVER
         /// @brief Получение устройства по имени.
         ///
         /// @param dev_name - имя устройства.
@@ -338,10 +342,6 @@ class device_communicator
         i_complex_device* get_group( char* dev_name, u_int_4 dev_n, 
             char* name ) const;
 
-        /// @brief Вывод на консоль устройств группы.
-        void print() const;
-
-#ifdef DRIVER        
         /// @brief Метод интерфейса @ref i_load_device.
         int load_state( char *buff );
 
