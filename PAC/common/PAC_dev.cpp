@@ -444,16 +444,7 @@ int DO_1::set_state( int new_state )
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_V( int number )
     {
-    int res = get_device( device::DT_V, number );
-    if ( -1 == res )
-        {
-#ifdef DEBUG
-        Print( "V[ %d ] not found!\n", number );
-#endif // DEBUG
-        return &stub;
-        }
-
-    return project_devices[ res ];
+    return get_device( device::DT_V, number, "V" );
     }
 //-----------------------------------------------------------------------------
 device_manager* device_manager::get_instance()
@@ -466,7 +457,8 @@ void device_manager::set_instance( device_manager* new_instance )
     instance = new_instance;
     }
 //-----------------------------------------------------------------------------
-int device_manager::get_device( device::DEVICE_TYPE dev_type, u_int dev_number )
+int device_manager::get_device_n( device::DEVICE_TYPE dev_type, 
+    u_int dev_number )
     {
     int l = dev_types_ranges[ dev_type ].start_pos;
     int u = dev_types_ranges[ dev_type ].end_pos;
@@ -475,7 +467,11 @@ int device_manager::get_device( device::DEVICE_TYPE dev_type, u_int dev_number )
         {
         int i = ( l + u ) / 2;
 
-        if ( dev_number == project_devices[ i ]->get_n() ) return i;
+        if ( dev_number == project_devices[ i ]->get_n() ) 
+            {
+            return i;
+            }
+        
         if ( dev_number > project_devices[ i ]->get_n() )
             {
             l = i + 1;
@@ -483,9 +479,29 @@ int device_manager::get_device( device::DEVICE_TYPE dev_type, u_int dev_number )
         else 
             {
             u = i - 1;
-            }
+            }        
         }
+    
     return -1;
+    }
+//-----------------------------------------------------------------------------
+device* device_manager::get_device( device::DEVICE_TYPE dev_type,
+        u_int dev_number, char const * dev_name )
+    {
+    int dev_n = get_device_n( dev_type, dev_number );
+
+    if ( dev_n >= 0 )
+        {
+        return project_devices[ dev_n ];
+        }
+    else
+        {
+#ifdef DEBUG
+    Print( "%s[ %d ] not found!\n", dev_name, dev_number );
+#endif // DEBUG
+        }
+
+    return &stub;
     }
 //-----------------------------------------------------------------------------
 int device_manager::load_from_cfg_file( file *cfg_file )
@@ -646,184 +662,71 @@ device_manager::device_manager()
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_N( int number )
     {
-    int res = get_device( device::DT_N, number );
-    if ( -1 == res )
-        {
-#ifdef DEBUG
-        Print( "N[ %d ] not found!\n", number );
-#endif // DEBUG
-        return &stub;
-        }
-
-    return project_devices[ res ];
+    return get_device( device::DT_N, number, "N" );
     }
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_M( int number )
     {
-    int res = get_device( device::DT_M, number );
-    if ( -1 == res )
-        {
-#ifdef DEBUG
-        Print( "M[ %d ] not found!\n", number );
-#endif // DEBUG
-        return &stub;
-        }
-
-    return project_devices[ res ];
+    return get_device( device::DT_M, number, "M" );
     }
 //-----------------------------------------------------------------------------
 i_DI_device* device_manager::get_LS( int number )
     {
-    int res = get_device( device::DT_LS, number );
-    if ( -1 == res )
-        {
-#ifdef DEBUG
-        Print( "LS[ %d ] not found!\n", number );
-#endif // DEBUG
-        return &stub;
-        }
-
-    return project_devices[ res ];
+    return get_device( device::DT_LS, number, "LS" );
     }
 //-----------------------------------------------------------------------------
 i_DI_device* device_manager::get_FS( int number )
     {
-    int res = get_device( device::DT_FS, number );
-    if ( -1 == res )
-        {
-#ifdef DEBUG
-        Print( "FS[ %d ] not found!\n", number );
-#endif // DEBUG
-        return &stub;
-        }
-
-    return project_devices[ res ];
+    return get_device( device::DT_FS, number, "FS" );
     }
 //-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_AI( int number )
     {
-    int res = get_device( device::DT_AI, number );
-    if ( -1 == res )
-        {
-#ifdef DEBUG
-        Print( "AI[ %d ] not found!\n", number );
-#endif // DEBUG
-        return &stub;
-        }
-
-    return project_devices[ res ];
+    return get_device( device::DT_AI, number, "AI" );
     }
 //-----------------------------------------------------------------------------
 i_AO_device* device_manager::get_AO( int number )
     {
-    int res = get_device( device::DT_AO, number );
-    if ( -1 == res )
-        {
-#ifdef DEBUG
-        Print( "AO[ %d ] not found!\n", number );
-#endif // DEBUG
-        return &stub;
-        }
-
-    return project_devices[ res ];
+    return get_device( device::DT_AO, number, "AO" );
     }
 //-----------------------------------------------------------------------------
 counter* device_manager::get_CTR( int number )
     {
-    int res = get_device( device::DT_AI, number );
-    if ( -1 == res )
-        {
-#ifdef DEBUG
-        Print( "counter[ %d ] not found!\n", number );
-#endif // DEBUG
-        return 0;
-        }
+    int res = get_device_n( device::DT_CTR, number );
 
-    return ( counter* ) project_devices[ res ];
+    if ( res >= 0 ) return ( counter* ) project_devices[ res ];
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_TE( int number )
     {
-    int res = get_device( device::DT_TE, number );
-    if ( -1 == res )
-        {
-#ifdef DEBUG
-        Print( "TE[ %d ] not found!\n", number );
-#endif // DEBUG
-        return &stub;
-        }
-
-    return project_devices[ res ];
+    return get_device( device::DT_TE, number, "TE" );
     }
 //-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_FE( int number )
     {
-    int res = get_device( device::DT_AI, number );
-    if ( -1 == res )
-        {
-#ifdef DEBUG
-        Print( "FE[ %d ] not found!\n", number );
-#endif // DEBUG
-        return &stub;
-        }
-
-    return project_devices[ res ];
+    return get_device( device::DT_FE, number, "FE" );
     }
 //-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_LE( int number )
     {
-    int res = get_device( device::DT_LE, number );
-    if ( -1 == res )
-        {
-#ifdef DEBUG
-        Print( "LE[ %d ] not found!\n", number );
-#endif // DEBUG
-        return &stub;
-        }
-
-    return project_devices[ res ];
+    return get_device( device::DT_LE, number, "LE" );
     }
 //-----------------------------------------------------------------------------
 i_DI_device* device_manager::get_FB( int number )
     {
-    int res = get_device( device::DT_FB, number );
-    if ( -1 == res )
-        {
-#ifdef DEBUG
-        Print( "FB[ %d ] not found!\n", number );
-#endif // DEBUG
-        return &stub;
-        }
-
-    return project_devices[ res ];
+    return get_device( device::DT_FB, number, "UPR" );
     }
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_UPR( int number )
     {
-    int res = get_device( device::DT_UPR, number );
-    if ( -1 == res )
-        {
-#ifdef DEBUG
-        Print( "UPR[ %d ] not found!\n", number );
-#endif // DEBUG
-        return &stub;
-        }
-
-    return project_devices[ res ];
+    return get_device( device::DT_UPR, number, "UPR" );
     }
 //-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_QE( int number )
     {
-    int res = get_device( device::DT_QE, number );
-    if ( -1 == res )
-        {
-#ifdef DEBUG
-        Print( "QE[ %d ] not found!\n", number );
-#endif // DEBUG
-        return &stub;
-        }
-
-    return project_devices[ res ];
+    return get_device( device::DT_QE, number, "QE" );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -844,12 +747,10 @@ int dev_stub::get_state()
 //-----------------------------------------------------------------------------
 void dev_stub::on()
     {
-
     }
 //-----------------------------------------------------------------------------
 void dev_stub::off()
     {
-
     }
 //-----------------------------------------------------------------------------
 int dev_stub::set_state( int new_state )
@@ -865,8 +766,6 @@ int dev_stub::parse_cmd( char *buff )
 int dev_stub::load( file *cfg_file )
     {
     device::load( cfg_file );
-    wago_device::load( cfg_file );
-
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -888,12 +787,10 @@ int counter::get_state()
 //-----------------------------------------------------------------------------
 void counter::on()
     {
-
     }
 //-----------------------------------------------------------------------------
 void counter::off()
     {
-
     }
 //-----------------------------------------------------------------------------
 int counter::set_state( int new_state )
@@ -1213,23 +1110,23 @@ void mix_proof::off()
         }
     }
 //-----------------------------------------------------------------------------
-int mix_proof::set_state( int new_state )
+int mix_proof::set_state( STATES new_state )
     {
     switch ( new_state )
         {
-        case 0:
+        case ST_CLOSE:
             off();
             break;
 
-        case 1:
+        case ST_OPEN:
             on();
             break;
 
-        case 2:
+        case ST_UPPER_SEAT:
             open_upper_seat();
             break;
 
-        case 3:
+        case ST_LOW_SEAT:
             open_low_seat();
             break;
 
@@ -1258,7 +1155,6 @@ void DI_1::off()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-
 int float_state_device::save_changed_state( char *buff )
     {
     if ( prev_state != get_value() )
@@ -1275,55 +1171,6 @@ int float_state_device::save_state( char *buff )
     return sizeof( float );
     }
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//float AI::get_value()
-//    {
-//    return get_AI( AI_INDEX );
-//    }
-//-----------------------------------------------------------------------------
-int AI_1::parse_cmd( char *buff )
-    {
-    set_value( *( ( float* ) buff ) );
-    return sizeof( float );
-    }
-//-----------------------------------------------------------------------------
-void AI_1::on()
-    {
-    }
-//-----------------------------------------------------------------------------
-void AI_1::off()
-    {
-    set_value( 0 );
-    }
-//-----------------------------------------------------------------------------
-int AI_1::get_state()
-    {
-    return ( int ) get_value();
-    }
-//-----------------------------------------------------------------------------
-//int AI::set_value( float new_value )
-//    {
-//    return set_AI( AI_INDEX, new_value );
-//    }
-//-----------------------------------------------------------------------------
-int AI_1::set_state( int new_state )
-    {
-    return set_value( new_state );
-    }
-//-----------------------------------------------------------------------------
-int AI_1::load( file *cfg_file )
-    {
-    device::load( cfg_file );
-    wago_device::load( cfg_file );
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-void AI_1::print() const
-    {
-    device::print();
-    wago_device::print();
-    }
 //-----------------------------------------------------------------------------
 float AI_1::get_value()
     {
@@ -1354,26 +1201,6 @@ float AO_1::get_value()
     return get_AO( AO_INDEX ) / C_MAX_ANALOG_CHANNEL_VALUE * C_AO_MAX_VALUE;
     }
 //-----------------------------------------------------------------------------
-int AO_1::parse_cmd( char *buff )
-    {
-    set_value( *( ( float* ) buff ) );
-    return sizeof( float );
-    }
-//-----------------------------------------------------------------------------
-void AO_1::on()
-    {
-    }
-//-----------------------------------------------------------------------------
-void AO_1::off()
-    {
-    set_value( 0 );
-    }
-//-----------------------------------------------------------------------------
-int AO_1::get_state()
-    {
-    return ( int ) get_value();
-    }
-//-----------------------------------------------------------------------------
 int AO_1::set_value( float new_value )
     {
     // Работаем в диапазоне 0-100.
@@ -1390,25 +1217,6 @@ int AO_1::set_value( float new_value )
         C_AO_MAX_VALUE );
 
     return set_AO( AO_INDEX, value );
-    }
-//-----------------------------------------------------------------------------
-int AO_1::set_state( int new_state )
-    {
-    return set_value( new_state );
-    }
-//-----------------------------------------------------------------------------
-int AO_1::load( file *cfg_file )
-    {
-    device::load( cfg_file );
-    wago_device::load( cfg_file );
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-void AO_1::print() const
-    {
-    device::print();
-    wago_device::print();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

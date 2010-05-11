@@ -373,7 +373,7 @@ class device : public i_simple_device,
 /// @brief Устройство, для хранения состояния которого необходим один байт.
 ///
 /// Это клапаны, насосы, мешалки, обратные связи и т.д.
-class char_state_device : public device
+class char_state_device
     {
     public:
         /// @brief Реализация интерфейса @ref i_save_device.
@@ -381,6 +381,9 @@ class char_state_device : public device
 
         /// @brief Реализация интерфейса @ref i_save_device.
         int save_state( char *buff  );
+
+        /// @brief .
+        virtual int get_state() = 0;
 
     private:
         char prev_state;    ///< Предыдущее состояние устройства.
@@ -390,14 +393,14 @@ class char_state_device : public device
 /// целое размером 4 байта.
 ///
 /// Например счетчик.
-class u_int_4_state_device : public device
+class u_int_4_state_device
     {
     public:
         /// @brief Реализация интерфейса @ref i_save_device.
-        int save_changed_state( char *buff );
+        virtual int save_changed_state( char *buff );
 
         /// @brief Реализация интерфейса @ref i_save_device.
-        int save_state( char *buff );
+        virtual int save_state( char *buff );
 
         /// @brief Для сохранения состояния устройства.                
         virtual u_int_4 get_u_int_4_state() = 0;
@@ -410,14 +413,17 @@ class u_int_4_state_device : public device
 /// размером 4 байта.
 ///
 /// Например температура.
-class float_state_device : public device
+class float_state_device
     {
     public:
         /// @brief Реализация интерфейса @ref i_save_device.
-        int save_changed_state( char *buff );
+        virtual int save_changed_state( char *buff );
 
         /// @brief Реализация интерфейса @ref i_save_device.
-        int save_state( char *buff  );
+        virtual int save_state( char *buff );
+
+        /// @brief .
+        virtual float get_value() = 0;
 
     private:
         float prev_state;    ///< Предыдущее состояние устройства.
@@ -584,10 +590,32 @@ class wago_device
 ///
 /// Необходимо для возвращения результата поиска устройства с несуществующим
 /// номером. Методы данного класса ничего не делают. 
-class dev_stub : public char_state_device,
-    public wago_device
+class dev_stub : public device
     {
     public:
+        int save_state( char *buff )
+            {
+            return 0;
+            }
+        int save_changed_state( char *buff )
+            {
+            return 0;
+            }
+        int save_device( char *buff )
+            {
+            return 0;
+            }
+        u_int_4 get_n() const
+            {
+            return 0;
+            }
+        void print() const
+            {
+#ifdef DEBUG
+            Print( "virtual device" );
+#endif // DEBUG
+            }
+
         float get_value();
 
         int set_value( float new_value );
@@ -608,7 +636,8 @@ class dev_stub : public char_state_device,
 /// @brief Устройство с дискретными входами/выходами.
 ///
 /// Базовый клас для различных дискретных устройств.
-class digital_device : public char_state_device,
+class digital_device : public device,
+    public char_state_device,
     public wago_device
     {
     public:
@@ -624,11 +653,88 @@ class digital_device : public char_state_device,
 
         void print() const;
 
+        /// @brief Реализация интерфейса @ref i_save_device.
+        int save_changed_state( char *buff )
+            {
+            return char_state_device::save_changed_state( buff );
+            }
+
+        /// @brief Реализация интерфейса @ref i_save_device.
+        int save_state( char *buff )
+            {
+            return char_state_device::save_state( buff );
+            }
+
+        /// @brief .
+        int get_state() = 0;
+
     protected:
         enum CONSTANTS
             {
             C_SWITCH_TIME = 5000,
             };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с аналоговыми входами/выходами.
+///
+/// Базовый клас для различных аналоговых устройств.
+class analog_device : public device,
+    public float_state_device,
+    public wago_device
+    {
+    public:
+        float get_value() = 0;
+
+        int set_state( int new_state )
+            {
+            return set_value( new_state );
+            }
+
+        int get_state()
+            {
+            return ( int ) get_value();
+            }
+
+        int parse_cmd( char *buff )
+            {
+            set_value( *( ( float* ) buff ) );
+            return sizeof( float );
+            }
+
+        int load( file *cfg_file )
+            {
+            device::load( cfg_file );
+            wago_device::load( cfg_file );
+
+            return 0;
+            }
+
+        void print() const
+            {
+            device::print();
+            wago_device::print();
+            }
+
+        void on()
+            {
+            }
+
+        void off()
+            {
+            set_value( 0 );
+            }
+
+        /// @brief Реализация интерфейса @ref i_save_device.
+        int save_changed_state( char *buff )
+            {
+            return float_state_device::save_changed_state( buff );
+            }
+
+        /// @brief Реализация интерфейса @ref i_save_device.
+        int save_state( char *buff )
+            {
+            return float_state_device::save_state( buff );
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным выходом.
@@ -769,7 +875,15 @@ class mix_proof : public digital_device
 
         void off();
 
-        int set_state( int new_state );
+        enum STATES
+            {
+            ST_CLOSE = 0,
+            ST_OPEN,
+            ST_UPPER_SEAT,
+            ST_LOW_SEAT,
+            };
+
+        int set_state( STATES new_state );
 
     private:
         enum CONSTANTS
@@ -788,27 +902,12 @@ class mix_proof : public digital_device
 /// @brief Устройство с одним аналоговым входом.
 ///
 /// Это может быть температура, расход (величина)...
-class AI_1 :public float_state_device,
-    public wago_device
+class AI_1 : public analog_device
     {
     public:
         float get_value();
 
-        int parse_cmd( char *buff );
-
-        void on();
-
-        void off();
-
-        int get_state();
-
         int set_value( float new_value );
-
-        int set_state( int new_state );
-
-        int load( file *cfg_file );
-
-        void print() const;
 
         virtual float get_max_val() = 0;
         virtual float get_min_val() = 0;
@@ -881,27 +980,12 @@ class analog_input_4_20 : public AI_1
 /// @brief Устройство с одним аналоговым входом.
 ///
 /// Это может быть управляемый клапан...
-class AO_1 :public float_state_device,
-    public wago_device
+class AO_1 : public analog_device
     {
     public:
         float get_value();
 
-        int parse_cmd( char *buff );
-
-        void on();
-
-        void off();
-
-        int get_state();
-
         int set_value( float new_value );
-
-        int set_state( int new_state );
-
-        int load( file *cfg_file );
-
-        void print() const;
 
     private:
         enum CONSTANTS
@@ -934,7 +1018,8 @@ class DI_1 : public digital_device
 //-----------------------------------------------------------------------------
 /// @brief Счетчик.
 ///
-class counter : public u_int_4_state_device,
+class counter : public device,
+    public u_int_4_state_device,
     public wago_device
     {
     public:        
@@ -957,6 +1042,18 @@ class counter : public u_int_4_state_device,
         void print() const;
 
         u_int_4 get_u_int_4_state();
+
+        /// @brief Реализация интерфейса @ref i_save_device.
+        int save_changed_state( char *buff )
+            {
+            return u_int_4_state_device::save_changed_state( buff );
+            }
+
+        /// @brief Реализация интерфейса @ref i_save_device.
+        int save_state( char *buff )
+            {
+            return u_int_4_state_device::save_state( buff );
+            }
 
     private:
         enum CONSTANTS
@@ -1022,7 +1119,12 @@ class device_manager
 
         /// @brief Получение устройства по его номеру.
         ///
-        int get_device( device::DEVICE_TYPE dev_type, u_int dev_number );
+        device* get_device( device::DEVICE_TYPE dev_type, u_int dev_number,
+            char const * dev_name );
+
+        /// @brief Получение индееекса устройства по его номеру.
+        ///
+        int get_device_n( device::DEVICE_TYPE dev_type, u_int dev_number );
 
         int    devices_count;
         device **project_devices;
