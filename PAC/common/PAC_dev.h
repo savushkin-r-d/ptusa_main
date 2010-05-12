@@ -291,6 +291,8 @@ class device : public i_simple_device,
         /// Типы устройств.
         enum DEVICE_TYPE
             {
+            DT_NONE = -1,      ///< Тип неопределен.
+
             DT_V = 0,   ///< Клапан. 
             DT_N,       ///< Насос.
             DT_M,       ///< Мешалка.
@@ -310,7 +312,7 @@ class device : public i_simple_device,
         /// Подтипы устройств.
         enum DEVICE_SUB_TYPE
             {
-            DST_NONE = 0,       ///< Подтип неопределен.
+            DST_NONE = -1,      ///< Подтип неопределен.
 
             //DT_V = 0, 
             DST_V_DO_1 = 1,     ///< Клапан с одним каналом управления.
@@ -666,7 +668,7 @@ class digital_device : public device,
             }
 
         /// @brief .
-        int get_state() = 0;
+        virtual int get_state() = 0;
 
     protected:
         enum CONSTANTS
@@ -749,7 +751,7 @@ class DO_1 : public digital_device
 
         void off();
 
-        int set_state( int new_state );
+        //int set_state( int new_state );
 
     private:
         enum CONSTANTS
@@ -768,9 +770,7 @@ class DO_2 : public digital_device
 
         void on();
 
-        void off();
-
-        int set_state( int new_state );
+        void off();        
 
     private:
         enum CONSTANTS
@@ -792,8 +792,6 @@ class DO_1_DI_1 : public digital_device
         void on();
 
         void off();
-
-        int set_state( int new_state );
 
     private:
         enum CONSTANTS
@@ -819,8 +817,6 @@ class DO_1_DI_2 : public digital_device
 
         void off();
 
-        int set_state( int new_state );
-
     private:
         enum CONSTANTS
             {
@@ -844,8 +840,6 @@ class DO_2_DI_2 : public digital_device
         void on();
 
         void off();
-
-        int set_state( int new_state );
 
     private:
         enum CONSTANTS
