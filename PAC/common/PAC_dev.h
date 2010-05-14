@@ -203,6 +203,28 @@ template < class data_type > class array_device: public i_simple_device
         data_type*      prev_val;       ///< Массив предыдущих значений.
     };
 //-----------------------------------------------------------------------------
+/// @brief Счетчик.
+///
+class i_counter
+    {
+    virtual void pause()
+        {
+        }
+
+    virtual void start()
+        {
+        }
+
+    virtual void reset()
+        {
+        }
+
+    virtual u_int get_quantity()
+        {
+        return 0;
+        }
+    };
+//-----------------------------------------------------------------------------
 /// @brief Устройство с дискретным входом.
 ///
 /// Устройства типа обратной связи, уровня и т.д. реализуют данный интерфейс.
@@ -336,7 +358,7 @@ class device : public i_simple_device,
         /// @param buff - буфер для сохранения устройства.
         ///
         /// @return -  количество записанных байт.
-        int save_device( char *buff  );
+        int save_device( char *buff );
 
         /// @brief Вывод объекта в консоль.
         ///
@@ -855,7 +877,7 @@ class DO_2_DI_2 : public digital_device
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан mixproof.
-class mix_proof : public digital_device
+class valve_mix_proof : public digital_device
     {
     public:
 
@@ -977,6 +999,9 @@ class analog_input_4_20 : public AI_1
 class AO_1 : public analog_device
     {
     public:
+        virtual float get_max_val() = 0;
+        virtual float get_min_val() = 0;
+
         float get_value();
 
         int set_value( float new_value );
@@ -985,7 +1010,28 @@ class AO_1 : public analog_device
         enum CONSTANTS
             {
             AO_INDEX = 0,
+            };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с одним аналоговым входом.
+///
+/// Это может быть управляемый клапан...
+class AO_0_100 : public AO_1
+    {
+    public:
+        virtual float get_max_val()
+            {
+            return C_AO_MIN_VALUE;
+            }
 
+        virtual float get_min_val()
+            {
+            return C_AO_MAX_VALUE;
+            }
+
+    private:
+        enum CONSTANTS
+            {
             C_AO_MIN_VALUE = 0,
             C_AO_MAX_VALUE = 100,
             };
@@ -1010,9 +1056,115 @@ class DI_1 : public digital_device
             };
     };
 //-----------------------------------------------------------------------------
+/// @brief Насос.
+///
+class valve_DO_1 : public DO_1
+    {
+    };
+//-----------------------------------------------------------------------------
+/// @brief Насос.
+///
+class valve_DO_2 : public DO_2
+    {
+    };
+//-----------------------------------------------------------------------------
+/// @brief Насос.
+///
+class valve_DO_1_DI_1 : public DO_1_DI_1
+    {
+    };
+//-----------------------------------------------------------------------------
+/// @brief Насос.
+///
+class valve_DO_1_DI_2 : public DO_1_DI_2
+    {
+    };
+//-----------------------------------------------------------------------------
+/// @brief Насос.
+///
+class valve_DO_2_DI_2 : public DO_2_DI_2
+    {
+    };
+//-----------------------------------------------------------------------------
+/// @brief Счетчик.
+///
+class valve : public digital_device
+    {
+    public:
+        valve( device::DEVICE_SUB_TYPE valve_type )
+            {
+            
+            }
+
+        virtual void off()
+            {
+            dev->off();
+            }
+
+        virtual void on()
+            {
+            dev->on();
+            }
+
+        virtual int get_state()
+            {
+            return dev->get_state();
+            }
+
+        virtual int load( file *cfg_file )
+            {
+            return dev->load( cfg_file );
+            }
+
+        operator device* ()
+            {
+            return dev;
+            }
+
+    private:
+        device  *dev;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Насос.
+///
+class pump : public DO_1_DI_1
+    {
+    };
+//-----------------------------------------------------------------------------
+/// @brief Мешалка.
+///
+class mixer : public DO_1_DI_1
+    {
+    };
+//-----------------------------------------------------------------------------
+/// @brief Датчик сигнализатора уровня.
+///
+class level_s : public DI_1
+    {
+    };
+//-----------------------------------------------------------------------------
+/// @brief Датчик сигнализатора расхода.
+///
+class flow_s : public DI_1
+    {
+    };
+//-----------------------------------------------------------------------------
+/// @brief Датчик обратной связи.
+///
+class feedback : public DI_1
+    {
+    };
+//-----------------------------------------------------------------------------
+/// @brief Сигнал управления
+///
+class control_s : public DO_1
+    {
+    };
+//-----------------------------------------------------------------------------
 /// @brief Счетчик.
 ///
 class counter : public device,
+    public i_counter,
     public u_int_4_state_device,
     public wago_device
     {
@@ -1080,7 +1232,7 @@ class device_manager
 
         i_AO_device* get_AO( int number );
 
-        counter* get_CTR( int number );
+        i_counter* get_CTR( int number );
 
         i_AI_device* get_TE( int number );
 
@@ -1122,6 +1274,8 @@ class device_manager
 
         int    devices_count;
         device **project_devices;
+
+        valve **project_valves;
 
         static device_manager* instance;
     };

@@ -519,61 +519,66 @@ int device_manager::load_from_cfg_file( file *cfg_file )
         char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
 
         project_devices = new device* [ devices_count ];
+        project_valves = new valve* [ devices_count ];
+
         for ( int i = 0; i < devices_count; i++ )
             {
             int dev_type = 0;
             int dev_sub_type = 0;
             cfg_file->fget_line();              // Пропускаем комментарий.
             sscanf( cfg_file->pfget_line(), "%d %d", &dev_type, &dev_sub_type );
-
+            
             switch ( dev_type )
-                {
-                case device::DT_V:     
+                {                
+                case device::DT_V:
+                    {
                     switch ( dev_sub_type )
                         {
                         case device::DST_V_DO_1:
-                            project_devices[ i ] = new DO_1();
+                            project_devices[ i ] = new valve_DO_1();
                             break;
 
                         case device::DST_V_DO_2:
-                            project_devices[ i ] = new DO_2();
+                            project_devices[ i ] = new valve_DO_2();
                             break;
 
                         case device::DST_V_DO_1_DI_1:
-                            project_devices[ i ] = new DO_1_DI_1();
+                            project_devices[ i ] = new valve_DO_1_DI_1();
                             break;
 
                         case device::DST_V_DO_1_DI_2:
-                            project_devices[ i ] = new DO_1_DI_2();
+                            project_devices[ i ] = new valve_DO_1_DI_2();
                             break;
 
                         case device::DST_V_DO_2_DI_2:
-                            project_devices[ i ] = new DO_2_DI_2();
+                            project_devices[ i ] = new valve_DO_2_DI_2();
                             break;
 
                         case device::DST_V_MIXPROOF:
-                            project_devices[ i ] = new mix_proof();
+                            project_devices[ i ] = new valve_mix_proof();
                             break;
 
                         default:
 #ifdef DEBUG
                             Print( "Unknown V device subtype %d!\n", dev_sub_type );
+                            Getch();
 #endif // DEBUG
                             project_devices[ i ] = new dev_stub();
                             break;
                         }
                     break;
+                    }
 
                 case device::DT_N:
-                    project_devices[ i ] = new DO_1_DI_1();
+                    project_devices[ i ] = new pump();
                     break;
 
                 case device::DT_M:
-                    project_devices[ i ] = new DO_1_DI_1();
+                    project_devices[ i ] = new mixer();
                     break;
 
                 case device::DT_LS:
-                    project_devices[ i ] = new DI_1();
+                    project_devices[ i ] = new level_s();
                     break;
 
                 case device::DT_TE:
@@ -585,7 +590,7 @@ int device_manager::load_from_cfg_file( file *cfg_file )
                     break;
 
                 case device::DT_FS:                    
-                    project_devices[ i ] = new DI_1();
+                    project_devices[ i ] = new flow_s();
                     break;
 
                 case device::DT_CTR:
@@ -593,7 +598,7 @@ int device_manager::load_from_cfg_file( file *cfg_file )
                     break;
 
                 case device::DT_AO:
-                    project_devices[ i ] = new AO_1();
+                    project_devices[ i ] = new AO_0_100();
                     break;
 
                 case device::DT_LE:
@@ -601,11 +606,11 @@ int device_manager::load_from_cfg_file( file *cfg_file )
                     break;
 
                 case device::DT_FB:
-                    project_devices[ i ] = new DI_1();
+                    project_devices[ i ] = new feedback();
                     break;
 
                 case device::DT_UPR:
-                    project_devices[ i ] = new DO_1();
+                    project_devices[ i ] = new control_s();
                     break;
 
                 case device::DT_QE:
@@ -690,11 +695,11 @@ i_AO_device* device_manager::get_AO( int number )
     return get_device( device::DT_AO, number, "AO" );
     }
 //-----------------------------------------------------------------------------
-counter* device_manager::get_CTR( int number )
+i_counter* device_manager::get_CTR( int number )
     {
     int res = get_device_n( device::DT_CTR, number );
 
-    if ( res >= 0 ) return ( counter* ) project_devices[ res ];
+    if ( res >= 0 ) return ( i_counter* ) project_devices[ res ];
 
     return 0;
     }
@@ -1027,7 +1032,7 @@ void DO_2_DI_2::off()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int mix_proof::get_state()
+int valve_mix_proof::get_state()
     {
     int o = get_DO( DO_INDEX );            
     int i0 = get_DI( DI_INDEX_U );
@@ -1052,7 +1057,7 @@ int mix_proof::get_state()
         }
     }
 //-----------------------------------------------------------------------------
-void mix_proof::on()
+void valve_mix_proof::on()
     {
     set_DO( DO_INDEX_U, 0 );
     set_DO( DO_INDEX_L, 0 );
@@ -1065,19 +1070,19 @@ void mix_proof::on()
         }
     }
 //-----------------------------------------------------------------------------
-void mix_proof::open_upper_seat()
+void valve_mix_proof::open_upper_seat()
     {
     off();
     set_DO( DO_INDEX_U, 1 );
     }
 //-----------------------------------------------------------------------------
-void mix_proof::open_low_seat()
+void valve_mix_proof::open_low_seat()
     {
     off();
     set_DO( DO_INDEX_L, 1 );
     }
 //-----------------------------------------------------------------------------
-void mix_proof::off()
+void valve_mix_proof::off()
     {
     set_DO( DO_INDEX_U, 0 );
     set_DO( DO_INDEX_L, 0 );
@@ -1090,7 +1095,7 @@ void mix_proof::off()
         }
     }
 //-----------------------------------------------------------------------------
-int mix_proof::set_state( STATES new_state )
+int valve_mix_proof::set_state( STATES new_state )
     {
     switch ( new_state )
         {
@@ -1178,23 +1183,23 @@ int AI_1::set_value( float new_value )
 //-----------------------------------------------------------------------------
 float AO_1::get_value()
     {
-    return get_AO( AO_INDEX ) / C_MAX_ANALOG_CHANNEL_VALUE * C_AO_MAX_VALUE;
+    return get_AO( AO_INDEX ) / C_MAX_ANALOG_CHANNEL_VALUE * get_max_val();
     }
 //-----------------------------------------------------------------------------
 int AO_1::set_value( float new_value )
     {
     // Работаем в диапазоне 0-100.
-    if ( new_value < C_AO_MIN_VALUE )
+    if ( new_value < get_min_val() )
         {
-        new_value = C_AO_MIN_VALUE;
+        new_value = get_min_val();
         }
-    if ( new_value > C_AO_MAX_VALUE )
+    if ( new_value > get_max_val() )
         {
-        new_value = C_AO_MAX_VALUE;
+        new_value = get_max_val();
         }
 
     u_int_2 value = ( u_int_2 ) ( C_MAX_ANALOG_CHANNEL_VALUE * new_value /
-        C_AO_MAX_VALUE );
+        get_max_val() );
 
     return set_AO( AO_INDEX, value );
     }
