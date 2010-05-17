@@ -1,6 +1,6 @@
-/// @file tcp_cmctr_w750.h
+/// @file tcp_cmctr_lin.h
 /// @brief Содержит описания классов, которые предназначены для обмена данными
-/// PAC-сервер по протоколу TCP для PAC WAGO 750.
+/// PAC-сервер по протоколу TCP для OC Linux.
 ///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
@@ -11,8 +11,8 @@
 /// @$Author: id@BMK $.\n
 /// @$Date:: 2010-04-02 17:22:01#$.
 
-#ifndef TCP_CMCTR_W750
-#define TCP_CMCTR_W750
+#ifndef TCP_CMCTR_LINUX
+#define TCP_CMCTR_LINUX
 
 #include "tcp_cmctr.h"
 
@@ -25,7 +25,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 //-----------------------------------------------------------------------------
-/// @brief Состояние сокета.
+/// @brief Cостояние сокета.
 struct socket_state
     {
     int active;      ///< Сокет активен.
@@ -36,12 +36,12 @@ struct socket_state
     sockaddr_in sin; ///< Адрес клиента.
     };
 //-----------------------------------------------------------------------------
-/// @brief Коммуникатор для PAC WAGO 750 - обмен данными PAC-сервер.
-class tcp_communicator_w750 : public tcp_communicator 
+/// @brief Коммуникатор для Linux - обмен данными PAC<->сервер.
+class tcp_communicator_linux : public tcp_communicator 
     {
         public:
-            tcp_communicator_w750();
-            virtual ~tcp_communicator_w750();
+            tcp_communicator_linux();
+            virtual ~tcp_communicator_linux();
 
             /// @brief Итерация обмена данными с сервером.
             int evaluate();
@@ -55,7 +55,7 @@ class tcp_communicator_w750 : public tcp_communicator
             int modbus_socket;          ///< Модбас сокет.
 #endif
             int ss; ///< Слейв-сокет, получаемый при подключении клиента.
-            int rc; ///< Код возврата selectsocket.
+            int rc; ///< Код возврата select.
 
             /// @brief Посылка ответных данных на сервер.
             ///
@@ -67,7 +67,7 @@ class tcp_communicator_w750 : public tcp_communicator
             timeval tv;                      ///< Задержка ожидания функции опроса состояний сокетов, 0 по умолчанию.
             fd_set rfds;                     ///< Набор дескрипторов сокетных файлов для чтения.
             socket_state sst[ MAX_SOCKETS ]; ///< Таблица состояния сокетов.
-            int netOK;                       ///< Признак успешной инициализиции сети.
+            int netOK;                       ///< Признак успешной инициализации сети.
 
             /// @brief Уничтожение сокетов.
             void killsockets ();
@@ -89,8 +89,8 @@ class tcp_communicator_w750 : public tcp_communicator
             /// @return -1   - ошибка работы с сокетом.
             /// @return -2   - ошибка таймаута.
             /// @return >= 0 - размер реально считанных данных.
-            int  recvtimeout( uint s, u_char *buf, int len,
+            int  recvtimeout( u_int s, u_char *buf, int len,
                 int timeout, int usec );
 	};
 	
-#endif //TCP_CMCTR_W750
+#endif //TCP_CMCTR_LINUX

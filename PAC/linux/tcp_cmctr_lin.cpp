@@ -10,7 +10,7 @@ unsigned int max_buffer_use = 0;
 #endif
 
 //------------------------------------------------------------------------------
-tcp_communicator_w750::tcp_communicator_w750():tcp_communicator(),
+tcp_communicator_linux::tcp_communicator_linux():tcp_communicator(),
 netOK( 0 )
     {
     tv.tv_sec = 0;
@@ -22,13 +22,13 @@ netOK( 0 )
 
     gethostname( host_name, TC_MAX_HOST_NAME );
 #ifdef DEBUG
-    printf ( "tcp_communicator_w750() - host name is \"%s\".\n", host_name );
+    printf ( "tcp_communicator_linux() - host name is \"%s\".\n", host_name );
 #endif // DEBUG
 
     net_init();
     }
 //------------------------------------------------------------------------------
-void tcp_communicator_w750::killsockets()
+void tcp_communicator_linux::killsockets()
     {
     FD_ZERO( &rfds ); /* clear FD set */
 
@@ -43,23 +43,23 @@ void tcp_communicator_w750::killsockets()
         }
     }
 //------------------------------------------------------------------------------
-int tcp_communicator_w750::net_init()
+int tcp_communicator_linux::net_init()
     {
     int type = SOCK_STREAM;
     int protocol = 0;        /* всегда 0 */
     int err = master_socket = socket( PF_INET, type, protocol ); // Cоздание мастер-сокета.
 
 #ifdef DEBUG
-    printf( "tcp_communicator_w750:net_init() - master socket created. Has number %d\n\r",
+    printf( "tcp_communicator_linux:net_init() - master socket created. Has number %d\n\r",
         master_socket );
 #endif // DEBUG
 
     if ( master_socket < 0 )
         {
 #ifdef DEBUG
-        printf( "tcp_communicator_w750:net_init() - can't create master socket! Error %d\n\r",
+        printf( "tcp_communicator_linux:net_init() - can't create master socket! Error %d\n\r",
             err );
-        perror( "tcp_communicator_w750:net_init() " );
+        perror( "tcp_communicator_linux:net_init() " );
 #endif // DEBUG
         return -4;
         }
@@ -77,9 +77,9 @@ int tcp_communicator_w750::net_init()
     if ( err < 0 )
         {
 #ifdef DEBUG
-        printf( "tcp_communicator_w750:net_init() - can't bind master socket to port %d, error %d\n\r",
+        printf( "tcp_communicator_linux:net_init() - can't bind master socket to port %d, error %d\n\r",
             PORT, err );
-        perror( "tcp_communicator_w750:net_init()" );
+        perror( "tcp_communicator_linux:net_init()" );
 #endif // DEBUG
         close( master_socket );
         return -5;
@@ -90,7 +90,7 @@ int tcp_communicator_w750::net_init()
         {
         close ( master_socket );
 #ifdef DEBUG
-        perror( "tcp_communicator_w750:net_init()" );
+        perror( "tcp_communicator_linux:net_init()" );
 #endif // DEBUG
         return -6;
         }
@@ -100,14 +100,14 @@ int tcp_communicator_w750::net_init()
     err = modbus_socket = socket ( PF_INET, type, protocol );
 
 #ifdef DEBUG
-    printf( "tcp_communicator_w750:net_init() - modbus socket created. Has number %d\n\r",
+    printf( "tcp_communicator_linux:net_init() - modbus socket created. Has number %d\n\r",
         modbus_socket );
 #endif // DEBUG
 
     if ( modbus_socket < 0 )
         {
 #ifdef DEBUG
-        printf ( "tcp_communicator_w750:net_init() - can't crmodbus_sockette modbus socket! error %modbus_socketn\r",
+        printf ( "tcp_communicator_linux:net_init() - can't crmodbus_sockette modbus socket! error %modbus_socketn\r",
             err );
         perror( "tcp_communimodbus_sockettor:net_init() " );
 #endif //DEBUG
@@ -123,9 +123,9 @@ int tcp_communicator_w750::net_init()
         sizeof ( sst[ modbus_socket ].sin ) );	   // Привязка сокета.
     if ( err < 0 )
         {
-#ifdef DEBUGmodbus_socket	printf( "tcp_communicator_w750:net_init(modbus_socket- can't bind modbus socket to port %d, error %d\n\r",
+#ifdef DEBUGmodbus_socket	printf( "tcp_communicator_linux:net_init(modbus_socket- can't bind modbus socket to port %d, error %d\n\r",
         502, err );
-        perror( "tcp_communicator_w750:net_init() " );
+        perror( "tcp_communicator_linux:net_init() " );
 #endif // DEBUG
 
         close( modbus_socket );
@@ -136,7 +136,7 @@ int tcp_communicator_w750::net_init()
         {
         close( modbus_socket );
 #ifdef DEBUG
-        perror( "tcp_communicator_w750:net_init() " );
+        perror( "tcp_communicator_linux:net_init() " );
 #endif // DEBUG
         return -6;
         }
@@ -160,19 +160,19 @@ int tcp_communicator_w750::net_init()
     return 0;
     }
 //------------------------------------------------------------------------------
-void tcp_communicator_w750::net_terminate()
+void tcp_communicator_linux::net_terminate()
     {
     killsockets();
     netOK = 0;
     }
 //------------------------------------------------------------------------------
-tcp_communicator_w750::~tcp_communicator_w750()
+tcp_communicator_linux::~tcp_communicator_linux()
     {
     killsockets();
     delete buf;
     }
 //------------------------------------------------------------------------------
-int tcp_communicator_w750::evaluate()
+int tcp_communicator_linux::evaluate()
     {
     int err = 0;
     int count_cycles = 0;
@@ -304,7 +304,7 @@ int tcp_communicator_w750::evaluate()
     return err;
     }
 //------------------------------------------------------------------------------
-int tcp_communicator_w750::recvtimeout( uint s, u_char *buf,
+int tcp_communicator_linux::recvtimeout( u_int s, u_char *buf,
     int len, int timeout, int usec )
     {
     // Настраиваем  file descriptor set.
@@ -326,7 +326,7 @@ int tcp_communicator_w750::recvtimeout( uint s, u_char *buf,
     return recv( s, buf, len, 0 );
     }
 //------------------------------------------------------------------------------
-int tcp_communicator_w750::do_echo ( int skt )
+int tcp_communicator_linux::do_echo ( int skt )
     {
     int err = 0, res;
 

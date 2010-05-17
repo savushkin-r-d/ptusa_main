@@ -35,8 +35,8 @@ class tcp_communicator
         /// @brief »нициализаци€ единственного экземпл€ра класса дл€ работы с 
         /// коммуникатором.
         ///
-        /// @param - указатель на единственный объект класса, производного от
-        /// @ref tcp_communicator.
+        /// @param new_instance - указатель на единственный объект класса, 
+        /// производного от @ref tcp_communicator.
         static void set_instance( tcp_communicator* new_instance );
 
         /// @brief »тераци€ обмена данными с сервером.

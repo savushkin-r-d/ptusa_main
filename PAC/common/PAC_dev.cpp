@@ -135,292 +135,6 @@ int u_int_4_state_device::save_state( char *buff )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int wago_device::load( file *cfg_file )
-    {           
-    load_table_from_string( cfg_file->fget_line(), DI_channels );
-    for ( u_int i = 0; i < DI_channels.count; i++ )
-        {
-        DI_channels.char_read_values[ i ] = wago_manager::get_instance()->
-             get_DI_read_data( DI_channels.tables[ i ], DI_channels.offsets[ i ] );
-        }
-    load_table_from_string( cfg_file->fget_line(), DO_channels );
-    for ( u_int i = 0; i < DO_channels.count; i++ )
-        {        
-        DO_channels.char_read_values[ i ] = wago_manager::get_instance()->
-            get_DO_read_data( DO_channels.tables[ i ], DO_channels.offsets[ i ] );
-        DO_channels.char_write_values[ i ] = wago_manager::get_instance()->
-            get_DO_write_data( DO_channels.tables[ i ], DO_channels.offsets[ i ] );
-        }
-    load_table_from_string( cfg_file->fget_line(), AI_channels );
-    for ( u_int i = 0; i < AI_channels.count; i++ )
-        {
-        AI_channels.int_read_values[ i ] = wago_manager::get_instance()->
-            get_AI_read_data( AI_channels.tables[ i ], AI_channels.offsets[ i ] );
-        }
-    load_table_from_string( cfg_file->fget_line(), AO_channels );
-    for ( u_int i = 0; i < AO_channels.count; i++ )
-        {
-        AO_channels.int_read_values[ i ] = wago_manager::get_instance()->
-            get_AO_read_data( AO_channels.tables[ i ], AO_channels.offsets[ i ] );
-        AO_channels.int_write_values[ i ] = wago_manager::get_instance()->
-            get_AO_write_data( AO_channels.tables[ i ], AO_channels.offsets[ i ] );
-        }
-
-    // 2 1.1 2.1
-    // количество значение_№1 значение_№2 ...
-    char *str = cfg_file->fget_line();
-    int pos = sscanf( str, "%u", &params_count );
-
-    if ( params_count > 0 )
-        {        
-        params = new float [ params_count ];
-        for ( u_int i = 0; i < params_count; i++ )
-            {
-            pos += sscanf( str + pos, " %f", &params[ i ] );
-            }
-        }
-    cfg_file->fget_line();
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int wago_device::get_DO( u_int index )
-    {
-    if ( index < DO_channels.count &&
-        DO_channels.char_read_values &&
-        DO_channels.char_read_values[ index ] )
-        {
-        return *DO_channels.char_read_values[ index ];
-        }
-
-#ifdef DEBUG
-    Print( "wago_device->get_DO(...) - error!\n" );
-#endif // DEBUG
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int wago_device::set_DO( u_int index, char value )
-    {
-    if ( index < DO_channels.count && 
-        DO_channels.char_write_values &&
-        DO_channels.char_write_values[ index ] )
-        {
-        *DO_channels.char_write_values[ index ] = value;
-        if ( debug_mode )
-            {
-            *DO_channels.char_read_values[ index ] = value;
-            }
-        return 0;
-        }
-
-#ifdef DEBUG
-    Print( "wago_device->set_DO(...) - error!\n" );
-#endif // DEBUG
-
-    return 1;
-    }
-//-----------------------------------------------------------------------------
-int wago_device::get_DI( u_int index )
-    {
-    if ( index < DI_channels.count &&
-        DI_channels.char_read_values &&
-        DI_channels.char_read_values[ index ] )
-        {
-        return *DI_channels.char_read_values[ index ];
-        }
-
-#ifdef DEBUG
-    Print( "wago_device->get_DI(...) - error!\n" );
-#endif // DEBUG
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int wago_device::set_DI( u_int index, char value )
-    {
-    if ( index < DI_channels.count &&
-        DI_channels.char_read_values &&
-        DI_channels.char_read_values[ index ] )
-        {
-        *DI_channels.char_read_values[ index ] = value;
-        return 0;
-        }
-
-#ifdef DEBUG
-    Print( "wago_device->set_DI(...) - error!\n" );
-#endif // DEBUG
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-u_int wago_device::get_AO( u_int index )
-    {
-    if ( index < AO_channels.count &&
-        AO_channels.char_read_values &&
-        AO_channels.char_read_values[ index ] )
-        {
-        return *AO_channels.int_read_values[ index ];
-        }
-
-#ifdef DEBUG
-    Print( "wago_device->get_AO(...) - error!\n" );
-#endif // DEBUG
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int wago_device::set_AO( u_int index, u_int value )
-    {
-    if ( index < AO_channels.count &&
-        AO_channels.char_read_values &&
-        AO_channels.char_read_values[ index ] )
-        {
-        *AO_channels.int_write_values[ index ] = value;
-        if ( debug_mode )
-            {
-            *AO_channels.int_read_values[ index ] = value;
-            }
-        return 0;
-        }
-
-#ifdef DEBUG
-    Print( "wago_device->set_AO(...) - error!\n" );
-#endif // DEBUG
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-u_int wago_device::get_AI( u_int index )
-    {
-    if ( index < AI_channels.count &&
-        AI_channels.char_read_values &&
-        AI_channels.char_read_values[ index ] )
-        {
-        return *AI_channels.int_read_values[ index ];
-        }
-
-#ifdef DEBUG
-    Print( "wago_device->get_AI(...) - error!\n" );
-#endif // DEBUG
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int wago_device::set_AI( u_int index, u_int value )
-    {
-    if ( index < AI_channels.count &&
-        AI_channels.char_read_values &&
-        AI_channels.char_read_values[ index ] )
-        {
-        *AI_channels.int_read_values[ index ] = value;
-        return 0;
-        }
-
-#ifdef DEBUG
-    Print( "wago_device->set_AI(...) - error!\n" );
-#endif // DEBUG
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-void wago_device::print() const
-    {
-    print_table( "DI", DI_channels );    
-    print_table( "DO", DO_channels );    
-    print_table( "AI", AI_channels );    
-    print_table( "AO", AO_channels );
-    Print( "\n" );
-    }
-//-----------------------------------------------------------------------------
-int wago_device::load_table_from_string( char *str, IO_channels &channels )
-    {
-    // 2 1 2 1 3
-    // количество_DI_(например) номер_таблицы_DI_№1 смещение_в_пределах_таблицы_№1 номер_таблицы_DI_№2 ...
-    u_int cnt;
-    int pos = sscanf( str, "%d", &cnt );
-
-    if ( cnt > 0 )
-        {
-        channels.count = cnt;
-
-        channels.tables = new u_int[ cnt ];
-        channels.offsets = new u_int[ cnt ];
-
-        switch ( channels.type )
-            {
-            case IO_channels::CT_DI:
-                channels.char_read_values = new u_char*[ cnt ];
-                break;
-
-            case IO_channels::CT_DO:
-                channels.char_read_values = new u_char*[ cnt ];
-                channels.char_write_values = new u_char*[ cnt ];
-                break;
-
-            case IO_channels::CT_AI:
-                channels.int_read_values = new u_int*[ cnt ];
-                break;
-
-            case IO_channels::CT_AO:
-                channels.int_read_values = new u_int*[ cnt ];
-                channels.int_write_values = new u_int*[ cnt ];
-                break;
-            }
-
-        for ( u_int i = 0; i < cnt; i++ )
-            {
-            pos += sscanf( str + pos, " %d %d", &channels.tables[ i ],
-                &channels.offsets[ i ] );
-            }
-        }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-void wago_device::print_table( const char *str, 
-                              const IO_channels &channels ) const
-    {
-    if ( channels.count )
-        {
-        Print( "%s:%d", str, channels.count );
-        if ( channels.count )
-            {
-            Print( "[ " );
-            for ( u_int i = 0; i < channels.count; i++ )
-                {
-                Print("%d:%2d", channels.tables[ i ],
-                    channels.offsets[ i ] );
-                if ( i < channels.count - 1 ) Print( "; " );
-                }
-            Print( " ]" );
-            }
-        Print( "; " );
-        }
-    }
-//-----------------------------------------------------------------------------
-float wago_device::get_par( u_int index )
-    {
-    if ( index < params_count && params )
-        {
-        return params[ index ];
-        }
-
-#ifdef DEBUG
-    Print( "wago_device->get_par(...) - error!\n" );
-#endif // DEBUG
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-wago_device::wago_device() :DI_channels( IO_channels::CT_DI ), 
-DO_channels( IO_channels::CT_DO ),
-AI_channels( IO_channels::CT_AI ),
-AO_channels( IO_channels::CT_AO )
-    {
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 int DO_1::get_state()
     {
     return get_DO( DO_INDEX );
@@ -697,11 +411,11 @@ i_AO_device* device_manager::get_AO( int number )
 //-----------------------------------------------------------------------------
 i_counter* device_manager::get_CTR( int number )
     {
-    int res = get_device_n( device::DT_CTR, number );
+    int res = get_device( device::DT_CTR, number );
 
-    if ( res >= 0 ) return ( i_counter* ) project_devices[ res ];
+    if ( res >= 0 ) return ( counter* ) project_devices[ res ];
 
-    return 0;
+    return stub;
     }
 //-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_TE( int number )
@@ -770,7 +484,51 @@ int dev_stub::parse_cmd( char *buff )
 //-----------------------------------------------------------------------------
 int dev_stub::load( file *cfg_file )
     {
-    device::load( cfg_file );
+    return device::load( cfg_file );    
+    }
+//-----------------------------------------------------------------------------
+int dev_stub::save_state( char *buff )
+    {
+    this->s
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int dev_stub::save_changed_state( char *buff )
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int dev_stub::save_device( char *buff )
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+u_int_4 dev_stub::get_n() const
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::print() const
+    {
+#ifdef DEBUG
+    Print( "virtual device" );
+#endif // DEBUG
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::pause()
+    {
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::start()
+    {
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::reset()
+    {
+    }
+//-----------------------------------------------------------------------------
+u_int dev_stub::get_quantity()
+    {
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -827,6 +585,36 @@ u_int_4 counter::get_u_int_4_state()
     return 0;
     }
 //-----------------------------------------------------------------------------
+int counter::save_changed_state( char *buff )
+    {
+    return u_int_4_state_device::save_changed_state( buff );
+    }
+//-----------------------------------------------------------------------------
+int counter::save_state( char *buff )
+    {
+    return u_int_4_state_device::save_state( buff );
+    }
+//-----------------------------------------------------------------------------
+void counter::pause()
+    {
+
+    }
+//-----------------------------------------------------------------------------
+void counter::start()
+    {
+
+    }
+//-----------------------------------------------------------------------------
+void counter::reset()
+    {
+
+    }
+//-----------------------------------------------------------------------------
+u_int counter::get_quantity()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float digital_device::get_value()
     {
@@ -866,6 +654,16 @@ void digital_device::print() const
     wago_device::print();
     }
 //-----------------------------------------------------------------------------
+int digital_device::save_changed_state( char *buff )
+    {
+    return char_state_device::save_changed_state( buff );
+    }
+//-----------------------------------------------------------------------------
+int digital_device::save_state( char *buff )
+    {
+    return char_state_device::save_state( buff );
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int DO_2::get_state()
     {
@@ -897,7 +695,7 @@ int DO_1_DI_1::get_state()
         {
         if ( ( o == 0 && i == 1 ) || ( o == 1 && i == 0 ) )
             {
-            switch_time = get_ms();
+            start_switch_time = get_ms();
             return o;
             }
         }
@@ -905,12 +703,12 @@ int DO_1_DI_1::get_state()
         {
         if ( o == i )
             {
-            switch_time = get_ms();
+            start_switch_time = get_ms();
             return i;
             }
         }
 
-    if ( get_ms() - switch_time > C_SWITCH_TIME )
+    if ( get_ms() - start_switch_time > C_SWITCH_TIME )
         {
         return -1;
         }
@@ -926,7 +724,7 @@ void DO_1_DI_1::on()
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
         {
-        switch_time = get_ms();
+        start_switch_time = get_ms();
         set_DO( DO_INDEX, 1 );
         }
     }
@@ -936,7 +734,7 @@ void DO_1_DI_1::off()
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
         {
-        switch_time = get_ms();
+        start_switch_time = get_ms();
         set_DO( DO_INDEX, 0 );
         }
     }
@@ -951,11 +749,11 @@ int DO_1_DI_2::get_state()
     if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 ==0 ) )
         {
-        switch_time = get_ms();
+        start_switch_time = get_ms();
         return o;
         }
 
-    if ( get_ms() - switch_time > C_SWITCH_TIME )
+    if ( get_ms() - start_switch_time > C_SWITCH_TIME )
         {
         return -1;
         }
@@ -970,7 +768,7 @@ void DO_1_DI_2::on()
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
         {
-        switch_time = get_ms();
+        start_switch_time = get_ms();
         set_DO( DO_INDEX, 1 );
         }
     }
@@ -980,7 +778,7 @@ void DO_1_DI_2::off()
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
         {
-        switch_time = get_ms();
+        start_switch_time = get_ms();
         set_DO( DO_INDEX, 0 );
         }
     }
@@ -995,11 +793,11 @@ int DO_2_DI_2::get_state()
 
     if ( ( o1 == i1 ) && ( o0 == i0 ) )
         {
-        switch_time = get_ms();
+        start_switch_time = get_ms();
         return o1;
         };
 
-    if ( get_ms() - switch_time > C_SWITCH_TIME )
+    if ( get_ms() - start_switch_time > C_SWITCH_TIME )
         {
         return -1;
         }
@@ -1014,7 +812,7 @@ void DO_2_DI_2::on()
     int o = get_DO( DO_INDEX_1 );
     if ( 0 == o )
         {
-        switch_time = get_ms();
+        start_switch_time = get_ms();
         set_DO( DO_INDEX_1, 1 );
         set_DO( DO_INDEX_2, 0 );
         }
@@ -1025,7 +823,7 @@ void DO_2_DI_2::off()
     int o = get_DO( DO_INDEX_2 );
     if ( 0 == o )
         {
-        switch_time = get_ms();
+        start_switch_time = get_ms();
         set_DO( DO_INDEX_1, 0 );
         set_DO( DO_INDEX_2, 1 );
         }
@@ -1041,13 +839,13 @@ int valve_mix_proof::get_state()
     if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
         {
-        switch_time = get_ms();
+        start_switch_time = get_ms();
         if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return ST_UPPER_SEAT;
         if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return ST_LOW_SEAT;
         return o;
         }
 
-    if ( get_ms() - switch_time > C_SWITCH_TIME )
+    if ( get_ms() - start_switch_time > C_SWITCH_TIME )
         {
         return -1;
         }
@@ -1065,7 +863,7 @@ void valve_mix_proof::on()
 
     if ( 0 == o )
         {
-        switch_time = get_ms();
+        start_switch_time = get_ms();
         set_DO( DO_INDEX, 1 );
         }
     }
@@ -1090,12 +888,12 @@ void valve_mix_proof::off()
 
     if ( o != 0 )
         {
-        switch_time = get_ms();
+        start_switch_time = get_ms();
         set_DO( DO_INDEX, 0 );
         }
     }
 //-----------------------------------------------------------------------------
-int valve_mix_proof::set_state( STATES new_state )
+int valve_mix_proof::set_state( int new_state )
     {
     switch ( new_state )
         {
@@ -1271,6 +1069,66 @@ float analog_input_4_20::get_max_val()
 float analog_input_4_20::get_min_val()
     {
     return 4;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int analog_device::set_state( int new_state )
+    {
+    return set_value( new_state );
+    }
+//-----------------------------------------------------------------------------
+int analog_device::get_state()
+    {
+    return ( int ) get_value();
+    }
+//-----------------------------------------------------------------------------
+int analog_device::parse_cmd( char *buff )
+    {
+    set_value( *( ( float* ) buff ) );
+    return sizeof( float );
+    }
+//-----------------------------------------------------------------------------
+int analog_device::load( file *cfg_file )
+    {
+    device::load( cfg_file );
+    wago_device::load( cfg_file );
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void analog_device::print() const
+    {
+    device::print();
+    wago_device::print();
+    }
+//-----------------------------------------------------------------------------
+void analog_device::on()
+    {
+    }
+//-----------------------------------------------------------------------------
+void analog_device::off()
+    {
+    set_value( 0 );
+    }
+//-----------------------------------------------------------------------------
+int analog_device::save_changed_state( char *buff )
+    {
+    return float_state_device::save_changed_state( buff );
+    }
+//-----------------------------------------------------------------------------
+int analog_device::save_state( char *buff )
+    {
+    return float_state_device::save_state( buff );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float AO_0_100::get_max_val()
+    {
+    return C_AO_MIN_VALUE;
+//-----------------------------------------------------------------------------
+float AO_0_100::get_min_val()
+    {
+    return C_AO_MAX_VALUE;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

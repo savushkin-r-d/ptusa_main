@@ -1,26 +1,3 @@
-//
-//  -----------------------------------------------------------------------------
-// |  WAGO Kontakttechnik GmbH & Co. KG |                                        |
-// |  Hansastr. 27                      |  Technical Support                     |
-// |  D-32423 Minden                    |                                        |
-// |  Tel.: +49(0)571 / 887 - 0         |  Tel.: +49(0)571 / 887 - 555           |
-// |  Fax.: +49(0)571 / 887 - 169       |  Fax.: +49(0)571 / 887 - 8555          |
-// |  Mail: info@wago.com               |  Mail: support@wago.com                |
-// |  www : http://www.wago.com         |                                        |
-// \-----------------------------------------------------------------------------/
-/// \file       wagoset.c       
-/// \version    0.02
-/// \date       18-MAY-2006
-/// \author     Florian Reckmann
-///
-/// \description :
-/// This programm set the configuration of the Fieldbus-Controller in the Flash
-/// The Flash is reading from the Bootloader if it start the Linux-Kernel 
-///
-/// \par History:
-/// \history 01.12.2004  Init(LF)
-///
-
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
@@ -53,17 +30,17 @@ int iFD;
 // -------------------------------------------------------------------------------
 
 int KbusOpen( )
-{
+    {
     iFD = open( "/dev/kbus", O_WRONLY );
 
     if( iFD < 1 )
-    {
+        {
         printf( "KBUSAPI: Failed opening fifo for writing: %s", strerror( errno ) );
         return errno;
-    }
+        }
 
     return 0;
-}
+    }
 
 // -------------------------------------------------------------------------------
 /// Aktualisiert Prozessdaten und Prozessabbild. Kann nur nach KbusOpen()
@@ -73,7 +50,7 @@ int KbusOpen( )
 // -------------------------------------------------------------------------------
 
 int KbusUpdate( )
-{
+    {
     int iBytes = 0;
     int iTmp;
 
@@ -83,13 +60,13 @@ int KbusUpdate( )
     if( 0 >= iBytes )
         return -EINVAL;
     return 0;
-}
+    }
 
 // -------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------
 
 int KbusGetBinaryInputOffset( )
-{
+    {
     int iBytes = 0;
     int iInputOffset = 0;
 
@@ -99,13 +76,13 @@ int KbusGetBinaryInputOffset( )
     if( 0 >= iBytes )
         return -EINVAL;
     return iInputOffset;
-}
+    }
 
 // -------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------
 
 int KbusGetBinaryOutputOffset( )
-{
+    {
     int iBytes = 0;
     int iOutputOffset = 0;
 
@@ -115,7 +92,7 @@ int KbusGetBinaryOutputOffset( )
     if( 0 >= iBytes )
         return -EINVAL;
     return iOutputOffset;
-}
+    }
 
 // -------------------------------------------------------------------------------
 /// Schliesst den Kanal zum Kbus und gibt allozierte Resourcen wieder frei.
@@ -124,8 +101,8 @@ int KbusGetBinaryOutputOffset( )
 // -------------------------------------------------------------------------------
 
 int KbusClose( )
-{
+    {
     /* Close /dev/kbus */
     close( iFD );
     return 0;
-}
+    }
