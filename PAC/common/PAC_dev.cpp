@@ -233,7 +233,6 @@ int device_manager::load_from_cfg_file( file *cfg_file )
         char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
 
         project_devices = new device* [ devices_count ];
-        project_valves = new valve* [ devices_count ];
 
         for ( int i = 0; i < devices_count; i++ )
             {
@@ -411,11 +410,11 @@ i_AO_device* device_manager::get_AO( int number )
 //-----------------------------------------------------------------------------
 i_counter* device_manager::get_CTR( int number )
     {
-    int res = get_device( device::DT_CTR, number );
+    int res = get_device_n( device::DT_CTR, number );
 
     if ( res >= 0 ) return ( counter* ) project_devices[ res ];
 
-    return stub;
+    return &stub;
     }
 //-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_TE( int number )
@@ -489,7 +488,6 @@ int dev_stub::load( file *cfg_file )
 //-----------------------------------------------------------------------------
 int dev_stub::save_state( char *buff )
     {
-    this->s
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -1125,6 +1123,7 @@ int analog_device::save_state( char *buff )
 float AO_0_100::get_max_val()
     {
     return C_AO_MIN_VALUE;
+    }
 //-----------------------------------------------------------------------------
 float AO_0_100::get_min_val()
     {
