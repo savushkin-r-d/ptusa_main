@@ -19,16 +19,12 @@
 #ifndef SYS_H
 #define SYS_H
 
-typedef unsigned char       u_char;
-typedef unsigned int        u_int;
-typedef unsigned long int   u_long;
+typedef unsigned char           u_char;
+typedef unsigned int            u_int;
+typedef unsigned long int       u_long;
 
 #include <string.h>
 #include <stdio.h>
-
-#ifdef I7186_E
-#include "7186e.h"
-#endif // I7186_E
 
 #ifdef WIN32
 #include <conio.h>
@@ -41,20 +37,35 @@ typedef unsigned long int   u_long;
 
 #endif // WIN32
 
-#ifdef W750
+#if defined LINUX || defined UCLINUX
+
 #define Print printf
 
 #ifdef DEBUG
 int Getch();
 #endif // DEBUG
 
-#endif // W750
+#endif // defined LINUX || defined UCLINUX
 
 //-----------------------------------------------------------------------------
-/// @brief Получение текущего времени в миллисекундах.
-/// 
-/// @return Текущее время в миллисекундах.
-u_long get_ms();
+/// @brief Получение текущего времени в секундах.
+///
+/// @return Текущее время (секунды с 01.01.1970, в 2038 произойдет переполнение).
+u_long get_sec();
+//-----------------------------------------------------------------------------
+/// @brief Получение времени в миллисекундах.
+///
+/// Так как за 4 дня происходит переполнение и отсчет продолжается с 0, то для
+/// вычисления разности времени использовать @ref get_delta_millisec.
+///
+/// @return Время с момента запуска программы в мииллисекундах.
+u_long get_millisec();
+//-----------------------------------------------------------------------------
+/// @brief Получение разности времени в миллисекундах.
+///
+/// @param time1     - начальное время.
+/// @return Разность времени в миллисекундах.
+u_long get_delta_millisec( u_long time1 );
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс доступа к памяти.
 class i_memory
@@ -178,7 +189,7 @@ class NV_memory_manager
         enum MEMORY_TYPE ///< Типы энергонезависимой памяти.
             {
             MT_NVRAM,
-            MT_EEPROM,
+            MT_EEPROM
             };
 
         /// @brief Получение объекта для работы с блоком памяти.
