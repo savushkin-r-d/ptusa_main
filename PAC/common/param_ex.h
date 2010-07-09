@@ -420,7 +420,7 @@ class saved_params_u_int_4: public saved_params < u_int_4 >,
 //-----------------------------------------------------------------------------
 /// @brief Работа с сохраняемыми параметрами типа float.
 class saved_params_float: public saved_params < float >, 
-    array_device < float >
+    public array_device < float >
     {
     public:
         /// @brief Конструктор.
