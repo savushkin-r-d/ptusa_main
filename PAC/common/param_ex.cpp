@@ -284,9 +284,9 @@ int params_test::make_test()
         Print( "test[ 1 ] = %f\n", test[ 1 ] );
         Print( "test[ 2 ] = %f\n", test[ 2 ] );
 
-        Print( "test1[ 0 ] = %lu\n", test1[ 0 ] );
-        Print( "test1[ 1 ] = %lu\n", test1[ 1 ] );
-        Print( "test1[ 2 ] = %lu\n", test1[ 2 ] );
+        Print( "test1[ 0 ] = %lu\n", ( u_long ) test1[ 0 ] );
+        Print( "test1[ 1 ] = %lu\n", ( u_long ) test1[ 1 ] );
+        Print( "test1[ 2 ] = %lu\n", ( u_long ) test1[ 2 ] );
         Getch();
 #endif // DEBUG
         return 1;
@@ -298,9 +298,9 @@ int params_test::make_test()
         Print( "test[ 1 ] = %f\n", test[ 1 ] );
         Print( "test[ 2 ] = %f\n", test[ 2 ] );
 
-        Print( "test1[ 0 ] = %lu\n", test1[ 0 ] );
-        Print( "test1[ 1 ] = %lu\n", test1[ 1 ] );
-        Print( "test1[ 2 ] = %lu\n", test1[ 2 ] );
+        Print( "test1[ 0 ] = %lu\n", ( u_long ) test1[ 0 ] );
+        Print( "test1[ 1 ] = %lu\n", ( u_long ) test1[ 1 ] );
+        Print( "test1[ 2 ] = %lu\n", ( u_long ) test1[ 2 ] );
         Getch();
 
     Print( "Passing params test - ok!\n" );
