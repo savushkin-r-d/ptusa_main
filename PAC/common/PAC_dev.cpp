@@ -1,8 +1,388 @@
 #include "PAC_dev.h"
 
 device_manager* device_manager::instance;
-char wago_device::debug_mode;
+char            wago_device::debug_mode;
 
+const char device::DEV_NAMES[][ 5 ] = { "V", "N", "M", "LS", "TE", "FE", "FS",
+    "CTR", "AO", "LE", "FB", "UPR", "QE", "AI" };
+
+const char device::DEV_TYPES[] =        { 1,    1,   1,   1,    4,    4,    1,
+     2,      4,    4,    1,    1,     4,    4 };
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+char single_state::get_val( int idx )
+    {
+    return ( ( unsigned long )( state [ idx / 32 ] >> idx % 32 ) & 1 );
+    }  
+//-----------------------------------------------------------------------------
+int single_state::parse_cmd( char *buff  )   
+    { 
+#ifdef USE_NO_TANK_COMB_DEVICE
+    buff++;
+    return 0;
+#else // USE_NO_TANK_COMB_DEVICE
+
+    switch ( owner_type )
+        {
+        case T_TANK:
+            ( ( TTank* ) owner_object )->SetMode( ( ( u_int_4* ) buff )[ 1 ] - 1, 
+                ( ( u_int_4* ) buff )[ 2 ] );                      
+            break;
+
+        case T_COMB:
+            ( ( TMyComb* ) owner_object )->SetMode( ( ( u_int_4* ) buff )[ 1 ] - 1, 
+                ( ( u_int_4* ) buff )[ 2 ] );                      
+            break;
+        }
+    return 12;
+#endif // USE_NO_TANK_COMB_DEVICE     
+    } 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+complex_state::complex_state( const char *name, int n, u_int_4 *state,
+                             void *owner_object, char owner_type, int size ):
+device_state < u_int_4 >( n, 
+                         name, 
+                         size, 
+                         i_complex_device::ARRAY_DEV_LONG, 
+                         state,
+                         owner_object, 
+                         owner_type )
+
+    {                     
+    } 
+//-----------------------------------------------------------------------------
+u_int_4 complex_state::get_val( int idx )
+    {    
+    return state[ idx ];
+    }     
+//-----------------------------------------------------------------------------
+//void complex_state::print() const 
+//    {
+//    char tmp_str[ 100 ];    
+//    sprintf( tmp_str, "%s%d[%d]", name, n, size );
+//    print_str( tmp_str );
+//    }
+//-----------------------------------------------------------------------------
+int complex_state::parse_cmd( char *buff  )   
+    {    
+#if !defined USE_NO_TANK_COMB_DEVICE && !defined POST && !defined MSA
+#define SIMPLE_PROJECT
+#endif
+
+#ifdef WATER_CNT 
+    switch ( owner_type ) 
+        { 
+        case T_CNTR: 
+            ( ( counter* ) owner_object )->SetComand( (( char* )buff )[ 0 ], 
+                ((u_int_4* )buff)[ 1 ], name ); 
+            break;
+
+        case T_MNGR: 
+            ( ( data_time_manager* ) owner_object )->SetComand( ((u_int_4* )buff)[ 1 ], 
+                name ); 
+            break;		
+        }
+#endif // WATER_CNT
+
+#ifdef POST
+    if ( strcmp( name, "CMD" ) == 0 || 
+        strcmp( name, "Cmd" ) == 0 ||  
+        strcmp( name, "cmd" ) == 0 ) 
+        {
+        if ( T_POST == owner_type )
+            {
+            ( ( TPost* ) owner_object )->SetCommand( ( ( u_int_4* ) buff )[ 1 ] );
+            }
+        }
+#endif // POST 
+
+#ifdef MSA
+#ifdef MSA1
+    if ( strcmp( name, "CMD" ) == 0 ) 
+        {
+        if ( T_MSA == owner_type )
+            {
+            ( ( TPostM* ) owner_object )->SetCommand( ( ( u_int_4* ) buff )[ 1 ] );
+            }
+        }
+#else
+    if ( strcmp( name, "CMD" ) == 0 ) 
+        {
+        if ( T_MSA == owner_type )
+            {
+            ( ( TModule* ) owner_object )->SetCommand( ( ( u_int_4* ) buff )[ 1 ] );
+            }
+        }
+#endif // MSA1
+#endif // MSA
+
+#ifdef POURING 
+    switch ( owner_type ) 
+        { 
+        case T_PACK_DEVICE: 
+            ( ( Device* ) owner_object )->SetWaitTime( ( (u_int_4* )buff )[ 1 ] ); 
+            break;
+        }
+#endif // USE_NO_TANK_COMB_DEVICE
+
+#ifdef SIMPLE_PROJECT
+    if (	( strcmp( name, "CMD" ) == 0 ) 
+        ||	( strcmp( name, "Cmd" ) == 0 ) 
+        ||	( strcmp( name, "cmd" ) == 0 )) 
+        {
+        u_int_4 new_mode = ( ( u_int_4* ) buff )[ 1 ] ;
+        int new_state = 0;
+        if ( 0 == new_mode )
+            {
+            state[ 0 ] = 0;
+            return 0;
+            }
+
+        if ( new_mode >= 1000 && new_mode < 2000 ) //On mode.
+            {
+            new_mode -= 1000;
+            new_state = 1;
+            }
+        else
+            {      
+            if ( new_mode >= 2000 && new_mode < 3000 ) //Off mode.
+                {
+                new_mode -= 2000;
+                new_state = 0;
+                }
+            else
+                {
+#ifdef DEBUG
+                Print( "Error complex_state::parse_cmd - new_mode = %lu\n", new_mode );
+#endif //DEBUG
+                return -1;
+                }
+            }
+
+        switch ( owner_type )
+            {
+            case T_TANK:
+                state[ 0 ] = ( ( TTank* ) owner_object )->SetMode( new_mode, 
+                    new_state );                      
+                break;
+
+            case T_COMB:
+                state[ 0 ] = ( ( TMyComb* ) owner_object )->SetMode( new_mode, 
+                    new_state );                      
+                break;
+            }
+
+        return 0; 
+        }	
+    else // if ( strcmp( name, "CMD" ) != 0 )
+        {
+        return -1; //Обработка только тега команд.	
+        }
+#else // SIMPLE_PROJECT 
+    return 0;
+#endif // SIMPLE_PROJECT    
+    } 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+uint_state::uint_state( const char *name, int n, u_int_4 *state,
+                       void *owner_object, char owner_type, int size ):
+device_state < u_int_2 >( n, 
+                         name, 
+                         size, 
+                         i_complex_device::ARRAY_DEV_UINT,
+                         state,
+                         owner_object, 
+                         owner_type )
+    {                     
+    } 
+//-----------------------------------------------------------------------------
+u_int_2 uint_state::get_val( int idx )
+    {    
+    return state[ idx ];
+    }     
+//-----------------------------------------------------------------------------
+int uint_state::parse_cmd( char *buff  )   
+    {    
+#ifdef WATER_CNT 
+    switch ( owner_type ) 
+        { 
+        case T_CNTR: 
+            ( ( counter* ) owner_object )->SetComand( (( char* )buff )[ 0 ], 
+                ((u_int_4* )buff)[ 1 ], name ); 
+            break;
+
+        case T_MNGR: 
+            ( ( data_time_manager* ) owner_object )->SetComand( ((u_int_4* )buff)[ 1 ], 
+                name ); 
+            break;		
+        }
+#endif // WATER_CNT
+
+#ifdef POURING
+    switch ( owner_type ) 
+        { 
+        case T_F_DEVICE: 
+            ( ( Facility* ) owner_object )->setLineN( ( ( u_int_4* ) buff )[ 1 ] ); 
+            break;   
+
+        case T_PACK_DEVICE: 
+            ( ( Device* ) owner_object )->SetProduct( ( ( u_int_4* ) buff )[ 1 ] );
+#ifdef DEBUG
+            Print( "n = %lu\n", ( ( u_int_4* ) buff )[ 1 ] );
+#endif
+            break;   
+        }
+#endif // POURING
+
+    buff++;     //Чтобы не было Warning'a.
+    return 0;
+    } 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int_state::int_state( const char *name, int n, int_2 *state, void *owner_object,
+                     char owner_type, int size /*= 1 */ ):
+array_device < int_2 >( n, name, size, i_complex_device::ARRAY_DEV_INT ),
+state( state )
+    {   
+    owner_type++;           
+    if ( owner_object );       //Чтобы не было Warning'a.
+    } 
+//-----------------------------------------------------------------------------
+int_2 int_state::get_val( int idx )
+    {
+    return state[ idx ];
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+string_device::string_device( u_int_4 n, const char *new_name,
+                             char* str, int max_str_len ): n( n ),
+                             str( str ),
+                             max_str_len( max_str_len )
+    {
+    name = new char[ strlen( new_name ) + 1 ];
+    strcpy( name, new_name );
+    }
+//-----------------------------------------------------------------------------
+// Данные группы (buff) в следующем виде:
+//    1 байт  - тип;                                  (1)
+//    4 байта - номер;                                (2)
+//    1 байт  - длина имени группы устройства;        (3)
+//    х байт  - имя группы устройства;                (4)
+//    4 байта - количество подустройств;              (5)
+int string_device::save_device( char *buff )
+    {
+    u_int_2 idx = 0;
+
+    buff[ idx++ ] = complex_device::ARRAY_DEV_STR;    //(1)                            
+    ( ( u_int_4* ) ( buff + idx ) )[ 0 ] = n;         //(2)
+    idx += 4;
+    buff[ idx++ ] = strlen( name );                   //(3)              
+    strcpy( buff + idx, name );                       //(4)
+    idx += strlen( name ) + 1;
+    ( ( u_int_4* ) ( buff + idx ) )[ 0 ] = 1;         //(5)
+    idx += 4;           
+
+    return idx;
+    }
+//-----------------------------------------------------------------------------
+// Данные группы (buff) в следующем виде:
+//  4 байта - номер устройства;                       (1)
+//  4 байта - количество подустройств;                (2)
+//  далее   - данные каждого подустройства.
+int string_device::save_state( char *buff )
+    {
+    ( ( u_int_4* ) buff )[ 0 ] = n;         //(1)
+    ( ( u_int_4* ) buff )[ 1 ] = 1;	        //(2)
+    u_int_2 answer_size = 8;
+
+    int str_len = strlen( str );
+#ifdef DEBUG
+    if ( str_len > 200 )
+        {
+        Print( "string_device::save_state(...) - strlen [ %d ] > 200!\n", 
+            str_len );
+        Getch();
+        }
+#endif // DEBUG
+
+    strcpy( buff + answer_size, str );
+
+    
+    answer_size += str_len + 1;      
+
+    return answer_size;
+    }
+//-----------------------------------------------------------------------------
+int string_device::save_changed_state( char *buff )
+    {
+    return save_state( buff );
+    }
+//-----------------------------------------------------------------------------
+void string_device::print() const
+    {
+    char tmp_str[ 100 ];    
+    sprintf( tmp_str, "\"%s\", \t[ %3lu ]", name, 1UL );
+
+    print_str( tmp_str );
+    }
+//-----------------------------------------------------------------------------
+u_int_4 string_device::get_n() const
+    {
+    return 0; 
+    }
+//-----------------------------------------------------------------------------
+int string_device::load_state( char *buff )
+    {
+    //buff;
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int string_device::load_changed_state( char *buff )
+    {
+    //buff;
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int string_device::load_device( char *buff )
+    {
+    //buff;
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int string_device::parse_cmd( char *buff )
+    {
+	buff += 4; //пропуск номера объекта
+    int new_str_len = strlen( buff );
+    if ( new_str_len > max_str_len - 1 )
+    	{
+#ifdef DEBUG
+        Print( "string_device::parse_cmd(...) - str_len[ %d ] > max_str_len[ %d ]!\n",
+            new_str_len, max_str_len );
+        Getch();
+#endif // DEBUG
+    	}
+    else
+        {
+        strcpy( str, buff );
+        }
+
+    return new_str_len + 1;
+    }
+//-----------------------------------------------------------------------------
+u_int_4 string_device::get_idx()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void string_device::set_idx( u_int_4 new_idx )
+    {
+    //new_idx;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 device::device() : number( 0 ),
@@ -13,8 +393,8 @@ device::device() : number( 0 ),
 //-----------------------------------------------------------------------------
 int device::save_device( char *buff )
     {
-    ( ( u_int_4* ) buff )[ 0 ] = number;
-    return sizeof( u_int_4 );
+    memcpy( buff, &number, sizeof( number ) );
+    return sizeof( number );
     }
 //-----------------------------------------------------------------------------
 void device::print() const
@@ -129,9 +509,9 @@ int u_int_4_state_device::save_changed_state( char *buff )
 //-----------------------------------------------------------------------------
 int u_int_4_state_device::save_state( char *buff )
     {
-    *( ( u_int_4* ) buff ) = ( u_int_4 ) get_u_int_4_state();
     prev_state = ( u_int_4 ) get_u_int_4_state();
-    return sizeof( u_int_4 );
+    memcpy( buff, &prev_state, sizeof( prev_state ) );
+    return sizeof( prev_state );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -176,6 +556,8 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type,
     {
     int l = dev_types_ranges[ dev_type ].start_pos;
     int u = dev_types_ranges[ dev_type ].end_pos;
+
+    if ( -1 == l ) return -1; // Нет устройств.
 
     while ( l <= u ) 
         {
@@ -373,8 +755,8 @@ device_manager::device_manager()
     {
     for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
         {
-        dev_types_ranges[ i ].start_pos = 0;
-        dev_types_ranges[ i ].end_pos = 0;
+        dev_types_ranges[ i ].start_pos = -1;
+        dev_types_ranges[ i ].end_pos = -1;
         }
     }
 //-----------------------------------------------------------------------------
@@ -693,7 +1075,7 @@ int DO_1_DI_1::get_state()
         {
         if ( ( o == 0 && i == 1 ) || ( o == 1 && i == 0 ) )
             {
-            start_switch_time = get_ms();
+            start_switch_time = get_sec();
             return o;
             }
         }
@@ -701,12 +1083,12 @@ int DO_1_DI_1::get_state()
         {
         if ( o == i )
             {
-            start_switch_time = get_ms();
+            start_switch_time = get_sec();
             return i;
             }
         }
 
-    if ( get_ms() - start_switch_time > C_SWITCH_TIME )
+    if ( get_delta_millisec( start_switch_time ) > C_SWITCH_TIME )
         {
         return -1;
         }
@@ -722,7 +1104,7 @@ void DO_1_DI_1::on()
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
         {
-        start_switch_time = get_ms();
+        start_switch_time = get_sec();
         set_DO( DO_INDEX, 1 );
         }
     }
@@ -732,7 +1114,7 @@ void DO_1_DI_1::off()
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
         {
-        start_switch_time = get_ms();
+        start_switch_time = get_sec();
         set_DO( DO_INDEX, 0 );
         }
     }
@@ -747,11 +1129,11 @@ int DO_1_DI_2::get_state()
     if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 ==0 ) )
         {
-        start_switch_time = get_ms();
+        start_switch_time = get_sec();
         return o;
         }
 
-    if ( get_ms() - start_switch_time > C_SWITCH_TIME )
+    if ( get_delta_millisec( start_switch_time ) > C_SWITCH_TIME )
         {
         return -1;
         }
@@ -766,7 +1148,7 @@ void DO_1_DI_2::on()
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
         {
-        start_switch_time = get_ms();
+        start_switch_time = get_sec();
         set_DO( DO_INDEX, 1 );
         }
     }
@@ -776,7 +1158,7 @@ void DO_1_DI_2::off()
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
         {
-        start_switch_time = get_ms();
+        start_switch_time = get_sec();
         set_DO( DO_INDEX, 0 );
         }
     }
@@ -791,11 +1173,11 @@ int DO_2_DI_2::get_state()
 
     if ( ( o1 == i1 ) && ( o0 == i0 ) )
         {
-        start_switch_time = get_ms();
+        start_switch_time = get_sec();
         return o1;
         };
 
-    if ( get_ms() - start_switch_time > C_SWITCH_TIME )
+    if ( get_delta_millisec( start_switch_time ) > C_SWITCH_TIME )
         {
         return -1;
         }
@@ -810,7 +1192,7 @@ void DO_2_DI_2::on()
     int o = get_DO( DO_INDEX_1 );
     if ( 0 == o )
         {
-        start_switch_time = get_ms();
+        start_switch_time = get_sec();
         set_DO( DO_INDEX_1, 1 );
         set_DO( DO_INDEX_2, 0 );
         }
@@ -821,7 +1203,7 @@ void DO_2_DI_2::off()
     int o = get_DO( DO_INDEX_2 );
     if ( 0 == o )
         {
-        start_switch_time = get_ms();
+        start_switch_time = get_sec();
         set_DO( DO_INDEX_1, 0 );
         set_DO( DO_INDEX_2, 1 );
         }
@@ -837,13 +1219,13 @@ int valve_mix_proof::get_state()
     if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
         {
-        start_switch_time = get_ms();
+        start_switch_time = get_sec();
         if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return ST_UPPER_SEAT;
         if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return ST_LOW_SEAT;
         return o;
         }
 
-    if ( get_ms() - start_switch_time > C_SWITCH_TIME )
+    if ( get_delta_millisec( start_switch_time ) > C_SWITCH_TIME )
         {
         return -1;
         }
@@ -861,7 +1243,7 @@ void valve_mix_proof::on()
 
     if ( 0 == o )
         {
-        start_switch_time = get_ms();
+        start_switch_time = get_sec();
         set_DO( DO_INDEX, 1 );
         }
     }
@@ -886,7 +1268,7 @@ void valve_mix_proof::off()
 
     if ( o != 0 )
         {
-        start_switch_time = get_ms();
+        start_switch_time = get_sec();
         set_DO( DO_INDEX, 0 );
         }
     }
@@ -947,9 +1329,9 @@ int float_state_device::save_changed_state( char *buff )
 //-----------------------------------------------------------------------------
 int float_state_device::save_state( char *buff )
     {
-    *( ( float* ) buff ) = get_value();
     prev_state = get_value();
-    return sizeof( float );
+    memcpy( buff, &prev_state, sizeof( prev_state ) );
+    return sizeof( prev_state );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1131,3 +1513,101 @@ float AO_0_100::get_min_val()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+int timer::save( char *buff )
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int timer::load( char *buff )
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int timer::get_saved_size() const
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+timer::timer(): last_time( 0 ),
+    work_time( 0 ),
+    state( S_STOP ),
+    countdown_time( 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+void timer::start()
+    {
+    if ( S_STOP == state )
+        {        
+        work_time = 0;
+        }
+
+    if ( S_PAUSE == state || S_STOP == state )
+        {
+        state = S_WORK;
+        last_time = get_millisec();
+        }
+    }
+//-----------------------------------------------------------------------------
+void timer::reset()
+    {
+    state = S_STOP;
+    work_time = 0;
+    }
+//-----------------------------------------------------------------------------
+void timer::pause()
+    {
+    if ( S_WORK == state )
+        {
+        work_time += get_delta_millisec( last_time );
+        }
+    state = S_STOP;
+    }
+//-----------------------------------------------------------------------------
+bool timer::is_time_up() const
+    {
+    if ( state != S_STOP )
+        {
+        if ( work_time + get_delta_millisec( last_time ) < countdown_time )
+            {
+            return 0;
+            }
+        else
+            {
+            return 1;
+            }
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+u_long timer::get_work_time() const
+    {
+    return work_time + get_delta_millisec( last_time );
+    }
+//-----------------------------------------------------------------------------
+void timer::set_countdown_time( u_long new_countdown_time )
+    {
+#ifdef DEBUG
+    if ( 0 == new_countdown_time )
+        {
+        Print( "Error void timer::set_countdown_time( u_long time ), time = %lu!\n",
+                new_countdown_time );
+        }
+#endif
+
+    countdown_time = new_countdown_time;
+    }
+//-----------------------------------------------------------------------------
+u_long timer::get_countdown_time() const
+    {
+    return countdown_time;
+    }
+//-----------------------------------------------------------------------------
+timer::STATE timer::get_state() const
+    {
+    return state;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+

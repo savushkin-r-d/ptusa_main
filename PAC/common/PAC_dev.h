@@ -203,6 +203,147 @@ template < class data_type > class array_device: public i_simple_device
         data_type*      prev_val;       ///< Массив предыдущих значений.
     };
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//ОБЩЕЕ ОПИСАНИЕ.
+//  Служит для представления состояния сложных объектов (танк, гребенка).
+template < class data_type > class device_state:
+public array_device < data_type >
+    {
+    public:
+        enum OBJECT_TYPE
+            {
+            T_TANK = 1,
+            T_COMB,
+            T_POST,
+            T_CNTR,
+            T_MNGR,
+            T_PACK_DEVICE,
+            T_F_DEVICE,
+            T_MSA,
+
+            T_PATH_COMB,   //Гребенка маршрутов.
+            };
+
+
+            device_state( u_int_4 n,
+                         const char *new_name,
+                         u_int_2 new_subdev_cnt,
+                         char type,
+                         u_int_4 *state,
+                         void *owner_object,
+                         char owner_type ):
+            array_device < data_type >( n,
+                                       new_name,
+                                       new_subdev_cnt,
+                                       type ),
+
+                                       
+                                       state( state ),
+                                       owner_object( owner_object ),
+                                       owner_type( owner_type )
+                {
+                }
+
+    protected:
+        u_int_4     *state;
+        void        *owner_object;
+        char        owner_type;
+    };
+//-----------------------------------------------------------------------------
+//ОБЩЕЕ ОПИСАНИЕ.
+//  Служит для представления состояния сложных объектов (танк, гребенка).
+//  Каждый режим передается через 1 байт.
+class single_state: public device_state < char >
+    {
+
+    public:
+        single_state( const char *name, int n, u_int_4 *state,
+                                   void *owner_object, char owner_type, int size ):
+        device_state < char >( n, name, size*32,
+                              i_complex_device::ARRAY_DEV_BYTE,
+                              state,
+                              owner_object,
+                              owner_type )
+    {
+    }
+
+        char get_val( int idx );
+        int  parse_cmd( char *buff  );
+    };
+//-----------------------------------------------------------------------------
+//ОБЩЕЕ ОПИСАНИЕ.
+//  Служит для представления состояния сложных объектов (танк, гребенка).
+//  Каждые 32 режима передаются как одно слово (4 байта).
+class complex_state: public device_state < u_int_4 >
+    {
+    public:
+        complex_state( const char *name, int n, u_int_4 *state,
+            void *owner_object, char owner_type, int size = 1 );
+
+        u_int_4 get_val( int idx );
+        int     parse_cmd( char *buff  );
+        //void    print() const;
+    };
+//-----------------------------------------------------------------------------
+//ОБЩЕЕ ОПИСАНИЕ.
+//  Служит для представления состояния сложных объектов.
+//  Каждое состояние передается как одно слово (2 байта).
+class uint_state: public device_state < u_int_2 >
+    {
+    public:
+        uint_state( const char *name, int n, u_int_4 *state,
+            void *owner_object, char owner_type, int size = 1 );
+
+        u_int_2 get_val( int idx );
+        int     parse_cmd( char *buff  );
+        //void    print() const;
+    };
+//-----------------------------------------------------------------------------
+//ОБЩЕЕ ОПИСАНИЕ.
+//  Служит для представления состояния сложных объектов.
+//  Каждое состояние передается как одно слово (2 байта) со знаком.
+class int_state: public array_device < int_2 >
+    {
+    public:
+        int_state( const char *name, int n, int_2 *state,
+            void *owner_object, char owner_type, int size = 1 );
+
+        int_2 get_val( int idx );
+
+    private:
+        int_2 *state;
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//ОБЩЕЕ ОПИСАНИЕ.
+//  Шаблон класса, который используется для передачи строк.
+class string_device: public i_simple_device
+    {
+    protected:
+        char    *name;          // Имя.
+        u_int_4 n;              // Уникальный номер.
+        char    *str;           // Строка.
+        int     max_str_len;    // Максимальная длина строки, для set_value().
+
+    public:
+        string_device( u_int_4 n, const char *new_name, char* str, int max_str_len );
+
+        int  save_device( char *buff );
+        int  save_state( char *buff );
+        int  save_changed_state( char *buff );
+
+        void    print() const;
+        u_int_4 get_n() const;
+
+        int load_state( char *buff );
+        int load_changed_state( char *buff );
+        int load_device( char *buff );
+
+        int     parse_cmd( char *buff  );
+        u_int_4 get_idx();
+        void    set_idx( u_int_4 new_idx );
+	};
+//-----------------------------------------------------------------------------
 /// @brief Интерфейс счетчика.
 class i_counter
     {
@@ -306,6 +447,9 @@ class device : public i_simple_device,
             {
             C_DEVICE_TYPE_CNT = 14,     ///< Количество типов устройств.
             };
+
+        static const char DEV_NAMES[][ 5 ];
+        static const char DEV_TYPES[];
 
         /// Типы устройств.
         enum DEVICE_TYPE
@@ -531,7 +675,7 @@ class digital_device : public device,
     protected:
         enum CONSTANTS
             {
-            C_SWITCH_TIME = 5000, ///< Время переключения клапана, мсек.
+            C_SWITCH_TIME = 5, ///< Время переключения клапана, сек.
             };
     };
 //-----------------------------------------------------------------------------
@@ -610,7 +754,7 @@ class DO_1_DI_1 : public digital_device
             PAR_FB_STATE = 0,       ///< Индекс параметра учета обратной связи.
             };
 
-        u_long start_switch_time;   ///< Время начала переключения клапана.
+        u_long start_switch_time;  ///< Время начала переключения клапана.
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным выходом и двумя дискретными входами.
@@ -978,7 +1122,7 @@ class device_manager
         /// @brief Установка единственного экземпляра класса.
         static void set_instance( device_manager* new_instance );
 
-    private:
+    public:
         dev_stub stub;  ///< Устройство-заглушка, фиктивное устройство. 
 
         struct range    ///< Диапазон устройств одного типа. 
@@ -1003,19 +1147,66 @@ class device_manager
         static device_manager* instance;    ///< Единственный экземпляр класса.
     };
 //-----------------------------------------------------------------------------
-#define V   device_manager::get_instance()->get_V   ///< Получение клапана по номеру.
-#define N   device_manager::get_instance()->get_N   ///< Получение насоса по номеру.
-#define M   device_manager::get_instance()->get_M   ///< Получение мешалки по номеру.
-#define LS  device_manager::get_instance()->get_LS  ///< Получение сигнального уровня по номеру.
-#define FS  device_manager::get_instance()->get_FS  ///< Получение сигнального расхода по номеру.
-#define AI  device_manager::get_instance()->get_AI  ///< Получение аналогового входа по номеру.
-#define AO  device_manager::get_instance()->get_AO  ///< Получение аналогового выхода по номеру.
-#define CTR device_manager::get_instance()->get_CTR ///< Получение счетчика по номеру.
-#define TE  device_manager::get_instance()->get_TE  ///< Получение температуры по номеру.
-#define FE  device_manager::get_instance()->get_FE  ///< Получение текущего расхода по номеру.
-#define LE  device_manager::get_instance()->get_LE  ///< Получение текущего уровня по номеру.
-#define FB  device_manager::get_instance()->get_FB  ///< Получение обратной связи по номеру.
-#define UPR device_manager::get_instance()->get_UPR ///< Получение канала управления по номеру.
-#define QE  device_manager::get_instance()->get_QE  ///< Получение текущей концентрации по номеру.
+/// @brief таймер.
+///
+/// Предоставляет функциональность таймера.
+class timer
+    {
+    public:
+        enum STATE
+            {
+            S_STOP = 0, ///< Не работает.
+            S_WORK,     ///< Работает.
+            S_PAUSE,    ///< Пауза.
+            };
+
+        int save( char *buff );
+
+        int load( char *buff );
+
+        int get_saved_size() const;
+
+        timer();
+
+        void    start();
+
+        void    reset();
+
+        void    pause();
+
+        bool    is_time_up() const;
+
+        u_long  get_work_time() const;
+
+        void    set_countdown_time( u_long new_countdown_time );
+
+        u_long  get_countdown_time() const;
+
+        STATE   get_state() const;
+
+    private:
+        u_long     last_time;  ///< Время, когда таймер был запущен/остановлен.
+        u_long      work_time;  ///< Время работы таймера.
+
+        STATE       state;           ///< Состояние.
+        u_long      countdown_time;  ///< Задание таймера.
+    };
+//-----------------------------------------------------------------------------
+#define G_DEVICE_MANAGER device_manager::get_instance()
+//-----------------------------------------------------------------------------
+#define V   G_DEVICE_MANAGER->get_V   ///< Получение клапана по номеру.
+#define N   G_DEVICE_MANAGER->get_N   ///< Получение насоса по номеру.
+#define M   G_DEVICE_MANAGER->get_M   ///< Получение мешалки по номеру.
+#define LS  G_DEVICE_MANAGER->get_LS  ///< Получение сигнального уровня по номеру.
+#define FS  G_DEVICE_MANAGER->get_FS  ///< Получение сигнального расхода по номеру.
+#define AI  G_DEVICE_MANAGER->get_AI  ///< Получение аналогового входа по номеру.
+#define AO  G_DEVICE_MANAGER->get_AO  ///< Получение аналогового выхода по номеру.
+#define CTR G_DEVICE_MANAGER->get_CTR ///< Получение счетчика по номеру.
+#define TE  G_DEVICE_MANAGER->get_TE  ///< Получение температуры по номеру.
+#define FE  G_DEVICE_MANAGER->get_FE  ///< Получение текущего расхода по номеру.
+#define LE  G_DEVICE_MANAGER->get_LE  ///< Получение текущего уровня по номеру.
+#define FB  G_DEVICE_MANAGER->get_FB  ///< Получение обратной связи по номеру.
+#define UPR G_DEVICE_MANAGER->get_UPR ///< Получение канала управления по номеру.
+#define QE  G_DEVICE_MANAGER->get_QE  ///< Получение текущей концентрации по номеру.
 //-----------------------------------------------------------------------------
 #endif // PAC_DEVICES_H
