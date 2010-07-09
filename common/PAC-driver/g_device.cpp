@@ -19,8 +19,8 @@
 extern PAC_critical_errors_manager *g_pac_critical_errors;
 #endif // defined I7186_E || defined I7188_E || defined I7188
 
-extern device_communicator  *g_dev_cmmctr;
-unsigned int        device_communicator::dev_cnt;
+device_communicator* device_communicator::instance;
+u_int_4 device_communicator::dev_cnt;
 i_complex_device ** device_communicator::dev;
 
 #endif // PAC
@@ -66,7 +66,7 @@ complex_device::complex_device(): sub_dev( 0 ),
 #endif
     }
 //-----------------------------------------------------------------------------
-complex_device::complex_device( u_int_4 n, char *new_name, 
+complex_device::complex_device( u_int_4 n, const char *new_name,
                                u_int_2 new_subdev_cnt, char type ): n( n ),
         sub_dev_cnt( new_subdev_cnt ),
         type( type )
@@ -164,9 +164,9 @@ int  complex_device::save_device( char *buff )
     buff[ 0 ] = get_type();                             //(1)
     buff++;
     idx++;
-    ( ( u_int_4* ) buff )[ 0 ] = get_n();               //(2)
-    buff += 4;
-    idx += 4;
+    memcpy( buff, &n, sizeof( n ) );                    //(2)
+    buff += sizeof( n );
+    idx += sizeof( n );
     buff[ 0 ] = ( unsigned char ) strlen( get_name() ); //(3)
     buff++;
     idx++;
@@ -177,9 +177,11 @@ int  complex_device::save_device( char *buff )
 #endif
     buff += strlen( get_name() ) + 1;
     idx += strlen( get_name() ) + 1;
-    ( ( u_int_4* ) buff )[ 0 ] = get_subdev_quantity(); //(5)
-    buff += 4;
-    idx += 4;
+    memcpy( buff, &sub_dev_cnt, sizeof( sub_dev_cnt ) );//(5)
+    buff += sizeof( sub_dev_cnt );
+    idx += sizeof( sub_dev_cnt );
+
+    Print( "Start save device!\n" );
 
     for ( u_int_4 i = 0; i < get_subdev_quantity(); i++ )
         {
@@ -196,9 +198,10 @@ int  complex_device::save_device( char *buff )
 //  далее   - данные каждого подустройства.
 int  complex_device::save_state( char *buff )
     {
-    ( ( u_int_4* ) buff )[ 0 ] = get_n();               //(1)
-    ( ( u_int_4* ) buff )[ 1 ] = get_subdev_quantity(); //(2)
-    unsigned int answer_size = 8;
+    memcpy( buff, &n, sizeof( n ) );                    //(1)
+    memcpy( buff, &sub_dev_cnt, sizeof( sub_dev_cnt ) );//(2)
+
+    unsigned int answer_size = sizeof( n ) + sizeof( sub_dev_cnt );
 
     for ( unsigned int i = 0; i < get_subdev_quantity(); i++ )
         {
@@ -509,7 +512,8 @@ i_complex_device* complex_device::get_sub_complex_dev( char *sub_dev_name ) cons
 //    х байт  - данные команды устройства.
 int complex_device::parse_cmd( char *buff  ) 
     {
-    u_int_4 dev_n = ( ( u_int_4* )( buff ) )[ 0 ];
+    u_int_4 dev_n;
+    memcpy( &dev_n, buff, sizeof( dev_n ) );
 
 #if defined DEBUG && defined WIN32
     if ( dev_n >= sub_dev_cnt )
@@ -518,7 +522,7 @@ int complex_device::parse_cmd( char *buff  )
         }
 #endif // DEBUG
 
-    return 4 + sub_dev[ dev_n ]->parse_cmd( buff + 4 );
+    return sizeof( dev_n ) + sub_dev[ dev_n ]->parse_cmd( buff + sizeof( dev_n ) );
     }
 //-----------------------------------------------------------------------------
 u_int_4 complex_device::get_idx()
@@ -608,8 +612,8 @@ device_communicator::device_communicator()
     dev = 0;
 
 #ifdef PAC
-    dev = new i_complex_device*[ 40 ];
-    for ( int i = 0; i < 40; i++ )
+    dev = new i_complex_device*[ C_MAX_COMLEX_DEVICES ];
+    for ( int i = 0; i < C_MAX_COMLEX_DEVICES; i++ )
         {
         dev[ i ] = 0;
         }
@@ -799,44 +803,48 @@ long device_communicator::write_devices_states_service( long len,
     {
     if ( len < 1 ) return 0;
 
-    unsigned int i;
-    unsigned long answer_size = 0;
+    u_int_2 i;
+    u_long  answer_size = 0;
 
-    //  [3/25/2009 id]
 #ifdef DEBUG_DEV_CMCTR
-    //unsigned long start_time = MyGetMS();
+    u_long start_time = get_ms();
 #endif // DEBUG_DEV_CMCTR             
-    //
 
+    u_int param_size = 0;
     switch ( data[ 0 ] )
         {
-        case GET_INFO_ON_CONNECT:
-#ifdef DEBUG_DEV_CMCTR
-            Print( "G_PROTOCOL_VERSION = %u, host =[%s]\n", G_PROTOCOL_VERSION, 
-                tcp_communicator::get_instance()->get_host_name() );
-#endif // DEBUG_DEV_CMCTR
+        case GET_INFO_ON_CONNECT:            
+            param_size = sizeof( G_PROTOCOL_VERSION );
+            memcpy( outdata, &G_PROTOCOL_VERSION, param_size ); //-Версия протокола.
 
-            ( ( u_int_2* ) outdata )[ 0 ] = G_PROTOCOL_VERSION; //Версия протокола.
-            outdata += 2;
-            answer_size += 2;
+            outdata     += param_size;
+            answer_size += param_size;
 
             strcpy( ( char* ) outdata, 
-                tcp_communicator::get_instance()->get_host_name() );
+                tcp_communicator::get_instance()->get_host_name() );            
             answer_size += strlen( 
                 tcp_communicator::get_instance()->get_host_name() ) + 1;
+
+#ifdef DEBUG_DEV_CMCTR
+            Print( "G_PROTOCOL_VERSION = %u, host =[%s]\n", G_PROTOCOL_VERSION,
+                tcp_communicator::get_instance()->get_host_name() );
+#endif // DEBUG_DEV_CMCTR
             return answer_size;
 
         case GET_DEVICES:
             static u_int_2 g_devices_request_id = 0;
+            param_size = sizeof( g_devices_request_id );
             if ( 0 == g_devices_request_id )
                 {
-                g_devices_request_id = ( ( u_int_2* ) ( data + 1 ) )[ 0 ];                        
+                memcpy( &g_devices_request_id, data + 1, param_size );
                 }
 
-            ( ( u_int_2* ) outdata )[ 0 ] = g_devices_request_id;
-            answer_size += 2;
-            ( ( u_int_4* ) ( outdata + answer_size ) )[ 0 ] = dev_cnt;
-            answer_size += 4;
+            memcpy( outdata, &g_devices_request_id, param_size );
+            answer_size += param_size;
+
+            param_size = sizeof( dev_cnt );
+            memcpy( outdata + answer_size, &dev_cnt, param_size );
+            answer_size += param_size;
 
             for ( i = 0; i < dev_cnt; i++ )
                 {
@@ -844,85 +852,119 @@ long device_communicator::write_devices_states_service( long len,
                     answer_size );                
                 }      
 #ifdef DEBUG_DEV_CMCTR
-            Print( "Devices size = %lu, g_devices_request_id = %d\n", 
+            Print( "Devices size = %lu, g_devices_request_id = %u\n",
                 answer_size, 
                 g_devices_request_id );
 
-            //Print( "Operation time = %lu\n", MyGetMS() - start_time );
+            Print( "Operation time = %lu\n", get_ms() - start_time );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
 
         case GET_DEVICES_STATES:
-            ( ( u_int_2* ) outdata )[ 0 ] = g_devices_request_id;
-            answer_size += 2;
-            ( ( u_int_4* ) ( outdata + answer_size ) )[ 0 ] = dev_cnt;
-            answer_size += 4;
+            param_size = sizeof( g_devices_request_id );
+            memcpy( outdata, &g_devices_request_id, param_size );
+            answer_size += param_size;
+
+            param_size = sizeof( dev_cnt );
+            memcpy( outdata + answer_size, &dev_cnt, param_size );
+            answer_size += param_size;
 
             for ( i = 0; i < dev_cnt; i++ )
                 {
-                answer_size += dev[ i ]->save_state( ( char* ) outdata + 
+                answer_size += dev[ i ]->save_state( ( char* ) outdata +
                     answer_size );
                 }
 #ifdef DEBUG_DEV_CMCTR
-            Print( "Devices states size = %lu, g_devices_request_id = %d\n", 
+            Print( "Devices states size = %lu, g_devices_request_id = %d\n",
                 answer_size, g_devices_request_id );
 
-            //Print( "Operation time = %lu\n", MyGetMS() - start_time );
+            Print( "Operation time = %lu\n", get_ms() - start_time );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
 
         case GET_DEVICES_CHANGED_STATES:
-            ( ( u_int_2* ) outdata )[ 0 ] = g_devices_request_id;
-            answer_size += 2;
-            ( ( u_int_2* ) ( outdata + answer_size ) )[ 0 ] = 0;
-            answer_size += 2;
+            {
+            param_size = sizeof( g_devices_request_id );
+            memcpy( outdata, &g_devices_request_id, param_size );
+            answer_size += param_size;
+
+            u_int_2 changed_device_cnt = 0;
+
+            param_size = sizeof( changed_device_cnt );
+            memcpy( outdata + answer_size, &changed_device_cnt, param_size );
+            answer_size += param_size;
 
             for ( i = 0; i < dev_cnt; i++ )
                 {
                 u_int_2 res = dev[ i ]->save_changed_state( ( char* ) outdata +
-                    answer_size + 2 );
+                    answer_size + sizeof( i ) );
                 if ( res )
                     {
-                    ( ( u_int_2* ) ( ( char* ) outdata + 
-                        answer_size ) )[ 0 ] = i;
-                    answer_size += 2;
-                    answer_size += res;
-                    ( ( u_int_2* ) outdata )[ 1 ]++;
+                    param_size = sizeof( i );
+                    memcpy( outdata + answer_size, &i, param_size );
+                    answer_size += res + param_size;
+                    changed_device_cnt++;
                     }                
                 }
+
+            param_size = sizeof( changed_device_cnt );
+            memcpy( outdata + sizeof( g_devices_request_id ),
+                &changed_device_cnt, param_size );
+
 #ifdef DEBUG_DEV_CMCTR
             Print( "\nChanged states size = %d\n", answer_size );
 
-            //Print( "Operation time = %lu\n", MyGetMS() - start_time );
+            Print( "Operation time = %lu\n", get_ms() - start_time );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
+            }
 
         case EXEC_DEVICE_CMD:
+            {
 #ifdef DEBUG_DEV_CMCTR
             Print( "\nEXEC_DEVICE_CMD\n" );
-            Print( "unsigned long buff[1] - %lu; ", 
-                ( ( u_int_4* ) ( data + 1 ) )[ 1 ] );
-            Print( "[2] - %lu; ", ( ( u_int_4* ) ( data + 1 ) )[ 2 ] );
-            Print( "[3] - %lu; ", ( ( u_int_4* ) ( data + 1 ) )[ 3 ] );
-            Print( "[4] - %lu\n", ( ( u_int_4* ) ( data + 1 ) )[ 4 ] );
+            u_int_4 par = 0;
+            param_size = sizeof( par );
+            memcpy( &par, data + 1, param_size );
+            Print( "unsigned long buff[1] - %lu; ", par );
+            memcpy( &par, data + 1 + param_size, param_size );
+            Print( "[2] - %lu; ", par );
+            memcpy( &par, data + 1 + 2 * param_size, param_size );
+            Print( "[3] - %lu; ", par );
+            memcpy( &par, data + 1 + 3 * param_size, param_size );
+            Print( "[4] - %lu\n", par );
 
-            Print( "float         buff[1] - %f; ", 
-                ( ( float* ) ( data + 1 ) )[ 1 ] );
-            Print( "[2] - %f; ", ( ( float* ) ( data + 1 ) )[ 2 ] );
-            Print( "[3] - %f; ", ( ( float* ) ( data + 1 ) )[ 3 ] );
-            Print( "[4] - %f\n", ( ( float* ) ( data + 1 ) )[ 4 ] );
+            float par_float = 0;
+            param_size = sizeof( par_float );
+            memcpy( &par_float, data + 1, param_size );
+            Print( "float         buff[1] - %f; ", par_float );
+            memcpy( &par_float, data + 1 + param_size, param_size );
+            Print( "[2] - %f; ", par_float );
+            memcpy( &par_float, data + 1 + 2 * param_size, param_size );
+            Print( "[3] - %f; ", par_float );
+            memcpy( &par_float, data + 1 + 3 * param_size, param_size );
+            Print( "[4] - %f\n", par_float );
 #endif // DEBUG_DEV_CMCTR
 
-            dev[ ( ( u_int_4* )( ( char* ) data + 1 ) )[ 0 ] ]->parse_cmd( 
-                ( char* ) data + 5 );
+            u_int_4 dev_n = 0;
+            param_size = sizeof( dev_n );
+            memcpy( &dev_n, data + 1 , param_size );
+            dev[ dev_n ]->parse_cmd( ( char* ) data + 5 );
+
 #ifdef DEBUG_DEV_CMCTR
-            //Print( "Operation time = %lu\n", MyGetMS() - start_time );
+            Print( "Operation time = %lu\n", get_ms() - start_time );
 #endif // DEBUG_DEV_CMCTR
-            ( ( u_int_2* ) ( outdata + answer_size ) )[ 0 ] = 0; //Возвращаем 0.
-            answer_size += 2;
+            
+            outdata[ 0 ] = 0;
+            outdata[ 1 ] = 0; //Возвращаем 0.
+            answer_size = 2;
             return answer_size;
+            }
 
-        case GET_PAC_ERRORS:            
+        case GET_PAC_ERRORS:
+            outdata[ 0 ] = 0;
+            outdata[ 1 ] = 0; //Возвращаем 0.
+            answer_size = 2;
 #ifdef DEBUG_DEV_CMCTR
             Print( "GET_PAC_ERRORS\n" );
 #endif
@@ -983,7 +1025,17 @@ long device_communicator::write_devices_states_service( long len,
 //-----------------------------------------------------------------------------
 int device_communicator::add_device( i_complex_device *device )
     {
-    dev[ dev_cnt++ ] = device;
+    if ( dev_cnt < C_MAX_COMLEX_DEVICES )
+        {
+        dev[ dev_cnt++ ] = device;
+        }
+    else
+        {
+#ifdef DEBUG
+        Print( "device_communicator::add_device() - Error : max devices is used!\n" );
+#endif // DEBUG
+        }
+
     return 0;
     }
 //-----------------------------------------------------------------------------

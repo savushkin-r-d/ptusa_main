@@ -233,7 +233,7 @@ class complex_device: public i_complex_device
 
     public:      
         complex_device();
-        complex_device( u_int_4 n, char *new_name, u_int_2 new_subdev_cnt, 
+        complex_device( u_int_4 n, const char *new_name, u_int_2 new_subdev_cnt,
             char type );
 
 #ifdef DRIVER
@@ -303,11 +303,33 @@ class device_communicator
             SET_PAC_ERROR_CMD,
             };
 
-    private:
+    
 #ifdef PAC
-        static unsigned int     dev_cnt;
+    private:
+        static u_int dev_cnt;
+
+        static device_communicator* instance; ///< Единственный экземпляр класса.
 
     public:
+        /// @brief Получение единственного экземпляра класса.
+        static device_communicator* get_instance()
+            {
+            return instance;
+            }
+
+
+        /// @brief Установка единственного экземпляра класса.
+        static void set_instance( device_communicator* new_instance )
+            {
+            instance = new_instance;
+            }
+
+        enum CONSTANTS
+            {
+            C_SERVICE_N = 1,
+            C_MAX_COMLEX_DEVICES = 40,
+            };
+
         static i_complex_device **dev;
 #else
         unsigned int     dev_cnt;
@@ -353,4 +375,8 @@ class device_communicator
 #endif //PAC
     };
 //-----------------------------------------------------------------------------
+#ifdef PAC
+#define G_DEVICE_CMMCTR device_communicator::get_instance()
+#endif //PAC
+    
 #endif // DEVICES_H
