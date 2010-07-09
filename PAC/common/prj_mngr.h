@@ -38,4 +38,6 @@ class project_manager
         static project_manager* instance;   ///< ≈динственный экземпл€р класса.
     };
 //-----------------------------------------------------------------------------
+#define G_PROJECT_MANAGER project_manager::get_instance()
+//-----------------------------------------------------------------------------
 #endif // PRJ_MANAGER_H

@@ -67,6 +67,39 @@ int project_manager::load_configuration( const char *file_name )
     device_manager::get_instance()->load_from_cfg_file( cfg_file );
 
     cfg_file->fclose();
+
+    G_DEVICE_CMMCTR->add_device(
+        new complex_device( 0, "GLB", device::C_DEVICE_TYPE_CNT, 0 ) );
+
+    for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
+        {
+        int dev_cnt = G_DEVICE_MANAGER->dev_types_ranges[ i ].end_pos -
+            G_DEVICE_MANAGER->dev_types_ranges[ i ].start_pos + 1;
+
+        if ( G_DEVICE_MANAGER->dev_types_ranges[ i ].start_pos == -1 )
+            {
+            dev_cnt = 0;
+            }
+
+        ( ( complex_device* ) G_DEVICE_CMMCTR->dev[ 0 ] )->sub_dev[ i ] =
+            new complex_device( 0, device::DEV_NAMES[ i ], dev_cnt,
+            device::DEV_TYPES[ i ] );
+
+        complex_device* complex_dev =
+            ( ( complex_device* ) ( ( complex_device* ) G_DEVICE_CMMCTR->dev[ 0 ] )->sub_dev[ i ] );
+
+        if ( dev_cnt )
+            {
+            int pos = 0;
+            for ( int j = G_DEVICE_MANAGER->dev_types_ranges[ i ].start_pos;
+                j <= G_DEVICE_MANAGER->dev_types_ranges[ i ].end_pos; j++ )
+                {
+                complex_dev->sub_dev[ pos++ ] =
+                    G_DEVICE_MANAGER->project_devices[ j ];
+                }
+            }
+        }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
