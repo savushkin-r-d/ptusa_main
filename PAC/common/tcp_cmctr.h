@@ -107,4 +107,6 @@ class tcp_communicator
         void _AknOK();
     };
 //-----------------------------------------------------------------------------
+#define G_CMMCTR tcp_communicator::get_instance()
+
 #endif //TCP_CMCTR_H
