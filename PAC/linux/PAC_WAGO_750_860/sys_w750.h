@@ -18,8 +18,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <sys/timeb.h>
-#include <time.h>
+#include <sys/time.h>
 
 typedef short int          int_2;
 typedef int                int_4;
@@ -75,7 +74,7 @@ class file_w750 : public file
     private:
         enum CONSTANTS
             {
-            C_MAX_BUFFER_SIZE = 200,
+            C_MAX_BUFFER_SIZE = 200
             };
 
         int f;

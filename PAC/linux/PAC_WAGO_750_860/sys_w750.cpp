@@ -2,6 +2,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <limits.h>
+
 
 NV_memory_manager* NV_memory_manager::instance = 0;
 int SRAM::file = 0;
@@ -178,11 +180,38 @@ void file_w750::fclose()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-u_long get_ms()
-    {    
-    timeb timebuffer;
-    ftime( &timebuffer );
-    return timebuffer.time * 1000 + timebuffer.millitm;
+u_long get_millisec()
+    {   
+    static timeval start_tv;
+    static char is_init = 0;
+    if ( 0 == is_init )
+        {
+        gettimeofday( &start_tv, NULL );
+        is_init = 1;
+        }
+
+    timeval tv;
+    gettimeofday( &tv, NULL );
+
+    u_long now = 1000UL * ( tv.tv_sec - start_tv.tv_sec ) +
+            ( tv.tv_usec - start_tv.tv_usec ) / 1000;
+
+    return now;
+    }
+//-----------------------------------------------------------------------------
+u_long get_sec()
+    {
+    timeval tv;
+    gettimeofday( &tv, NULL );
+    
+    return tv.tv_sec;
+    }
+//-----------------------------------------------------------------------------
+u_long get_delta_millisec( u_long time1 )
+    {
+    u_long now = get_millisec();
+
+    return now > time1 ? now - time1 : ULONG_MAX - time1 + now;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
