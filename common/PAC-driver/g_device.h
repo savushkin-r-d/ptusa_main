@@ -223,9 +223,13 @@ class complex_device: public i_complex_device
         i_simple_device **sub_dev;  ///< Подустройства.
 
     protected:
+        enum CONSTANTS
+            {
+            MAX_NAME_LENGTH = 20 ///< Максимальная длина имени.
+            };
+
         u_int_4     n;              ///< Уникальный номер.
-        u_int_4     sub_dev_cnt;    ///< Количество подустройств.
-        static int  MAX_NAME_LENGTH;///< Максимальная длина имени.
+        u_int_4     sub_dev_cnt;    ///< Количество подустройств.        
         char        *name;          ///< Имя.
 
         char        type;           ///< Тип.
@@ -236,9 +240,9 @@ class complex_device: public i_complex_device
         complex_device( u_int_4 n, const char *new_name, u_int_2 new_subdev_cnt,
             char type );
 
-#ifdef DRIVER
         ~complex_device();
 
+#ifdef DRIVER
         complex_device( u_int_4 n, char *new_name, u_int_2 new_subdev_cnt, 
             char type, i_complex_device *owner_compl_dev );
 #endif // DRIVER

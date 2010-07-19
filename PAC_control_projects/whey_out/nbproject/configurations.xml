@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="62">
+<configurationDescriptor version="69">
   <logicalFolder name="root" displayName="root" projectFiles="true">
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
@@ -8,14 +8,17 @@
         <itemPath>../../PAC/common/PAC_dev.h</itemPath>
         <itemPath>../../PAC/common/PAC_err.h</itemPath>
         <itemPath>../../PAC/common/param_ex.h</itemPath>
-        <itemPath>../../PAC/common/priem.h</itemPath>
         <itemPath>../../PAC/common/prj_mngr.h</itemPath>
         <itemPath>../../PAC/common/sys.h</itemPath>
         <itemPath>../../PAC/common/tcp_cmctr.h</itemPath>
+        <itemPath>../../PAC/common/tech_def.h</itemPath>
         <itemPath>../../PAC/common/wago.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="common_PAC-driver" projectFiles="true">
         <itemPath>../../common/PAC-driver/g_device.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="f3" displayName="common_util" projectFiles="true">
+        <itemPath>../../common/util/util.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f4" displayName="linux" projectFiles="true">
         <logicalFolder name="f1" displayName="PAC_wago_750" projectFiles="true">
@@ -38,10 +41,10 @@
         <itemPath>../../PAC/common/PAC_dev.cpp</itemPath>
         <itemPath>../../PAC/common/PAC_err.cpp</itemPath>
         <itemPath>../../PAC/common/param_ex.cpp</itemPath>
-        <itemPath>../../PAC/common/priem.cpp</itemPath>
         <itemPath>../../PAC/common/prj_mngr.cpp</itemPath>
         <itemPath>../../PAC/common/sys.cpp</itemPath>
         <itemPath>../../PAC/common/tcp_cmctr.cpp</itemPath>
+        <itemPath>../../PAC/common/tech_def.cpp</itemPath>
         <itemPath>../../PAC/common/wago.cpp</itemPath>
       </logicalFolder>
       <logicalFolder name="f1" displayName="common_PAC-driver" projectFiles="true">
@@ -66,7 +69,7 @@
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
-    <conf name="Debug" type="1">
+    <conf name="debug_linux" type="1">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <compilerSet>GNU|GNU</compilerSet>
@@ -80,6 +83,7 @@
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
             <pElem>/usr/include</pElem>
+            <pElem>../../common/util</pElem>
           </incDir>
           <preprocessorList>
             <Elem>PAC</Elem>
@@ -90,13 +94,9 @@
           </preprocessorList>
           <warningLevel>2</warningLevel>
         </ccTool>
-        <linkerTool>
-          <linkerLibItems>
-          </linkerLibItems>
-        </linkerTool>
       </compileType>
     </conf>
-    <conf name="Release" type="1">
+    <conf name="release_linux" type="1">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <compilerSet>GNU|GNU</compilerSet>
@@ -113,6 +113,8 @@
             <pElem>../../common/PAC-driver</pElem>
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
+            <pElem>/usr/include</pElem>
+            <pElem>../../common/../../common/util</pElem>
           </incDir>
           <preprocessorList>
             <Elem>PAC</Elem>
@@ -124,13 +126,9 @@
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
         </fortranCompilerTool>
-        <linkerTool>
-          <linkerLibItems>
-          </linkerLibItems>
-        </linkerTool>
       </compileType>
     </conf>
-    <conf name="Release_ucLinux" type="1">
+    <conf name="release_ucLinux" type="1">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <compilerSet>arm-uclinux-elf|GNU</compilerSet>
@@ -147,6 +145,7 @@
             <pElem>../../common/PAC-driver</pElem>
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
+            <pElem>../../common/../../common/util</pElem>
           </incDir>
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
           <preprocessorList>
@@ -160,13 +159,11 @@
           <developmentMode>5</developmentMode>
         </fortranCompilerTool>
         <linkerTool>
-          <linkerLibItems>
-          </linkerLibItems>
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -Wl,-elf2flt /home/id/uclinux-dist/lib/uClibc/lib/crt0.o /home/id/uclinux-dist/lib/uClibc/lib/crti.o /home/id/uclinux-dist/lib/uClibc/lib/crtn.o -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
         </linkerTool>
       </compileType>
     </conf>
-    <conf name="Debug_ucLinux" type="1">
+    <conf name="debug_ucLinux" type="1">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <compilerSet>arm-uclinux-elf|GNU</compilerSet>
@@ -179,6 +176,7 @@
             <pElem>../../common/PAC-driver</pElem>
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
+            <pElem>../../common/../../common/util</pElem>
           </incDir>
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
           <preprocessorList>
@@ -191,10 +189,35 @@
           </preprocessorList>
         </ccTool>
         <linkerTool>
-          <linkerLibItems>
-          </linkerLibItems>
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -Wl,-elf2flt /home/id/uclinux-dist/lib/uClibc/lib/crt0.o /home/id/uclinux-dist/lib/uClibc/lib/crti.o /home/id/uclinux-dist/lib/uClibc/lib/crtn.o -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
         </linkerTool>
+      </compileType>
+    </conf>
+    <conf name="full_debug_linux" type="1">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <compilerSet>GNU|GNU</compilerSet>
+        <platform>2</platform>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <incDir>
+            <pElem>../../PAC/common</pElem>
+            <pElem>../../common/PAC-driver</pElem>
+            <pElem>../../PAC/linux</pElem>
+            <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
+            <pElem>/usr/include</pElem>
+            <pElem>../../common/util</pElem>
+          </incDir>
+          <preprocessorList>
+            <Elem>PAC</Elem>
+            <Elem>W750</Elem>
+            <Elem>LINUX</Elem>
+            <Elem>DEBUG</Elem>
+            <Elem>DEBUG_TRACE</Elem>
+          </preprocessorList>
+          <warningLevel>2</warningLevel>
+        </ccTool>
       </compileType>
     </conf>
   </confs>

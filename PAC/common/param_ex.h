@@ -198,6 +198,15 @@ template < class type > class parameters
             return sizeof( u_int_4 ) + sizeof( type );
             }
 
+        /// @brief —брасывает все значени€ параметров в 0.
+        virtual void reset_to_0()
+            {
+            for ( u_int i = 0; i < count; i++ )
+                {
+                values[ i ] = 0;
+                }
+            }
+
         /// @brief ѕолучение количества параметров.
         ///
         /// @return - количество параметров.
@@ -253,7 +262,7 @@ class run_time_params_float: public parameters < float >,
         /// @brief  онструктор.
         ///
         /// @param count - количество параметров.
-        run_time_params_float( int count ):parameters < float >( count ),
+        run_time_params_float( int count = 0 ):parameters < float >( count ),
             array_device < float >( 1,
             "RT_PARAM_F", 
             count, 
@@ -286,14 +295,15 @@ class run_time_params_float: public parameters < float >,
 ///
 /// ƒанные параметры передаютс€ на сервер через соответствующие теги.
 class run_time_params_u_int_4: public parameters < u_int_4 >,
-    array_device < u_int_4 >
+    public array_device < u_int_4 >
     {
     public:
         /// @brief  онструктор.
         ///
         /// @param count - количество параметров.
-        run_time_params_u_int_4( int count ) : parameters < u_int_4 >( count ),
-            array_device < u_int_4 >( 1, "RT_PARAM_UL", count,
+        run_time_params_u_int_4( int count = 0,
+            const char* name = "RT_PARAM_UL" ) : parameters < u_int_4 >( count ),
+            array_device < u_int_4 >( 1, name, count,
             i_complex_device::ARRAY_DEV_ULONG )
             {
             }
@@ -330,7 +340,7 @@ public parameters < type >
         /// @brief  онструктор.
         ///
         /// @param count - количество параметров.
-        saved_params( int count ) : parameters < type >( 
+        saved_params( int count ) : parameters < type >(
             count,
             ( type* ) params_manager::get_instance()->get_params_data( 
             count * sizeof( type ), start_pos ) )
@@ -376,6 +386,17 @@ public parameters < type >
             return res;
             }
 
+        void reset_to_0()
+            {
+            for ( u_int i = 0; i <  parameters< type >::get_count(); i++ )
+                {
+                parameters< type >::get_values()[ i ] = 0;
+                }
+
+            params_manager::get_instance()->save(
+                start_pos, sizeof( type ) * parameters< type >::get_count() );
+            }
+
     private:
         /// »ндекс начала значений в общем массиве, дл€ сохранени€ значени€
         /// параметра в энергонезависимой пам€ти (@ref save).
@@ -384,13 +405,13 @@ public parameters < type >
 //-----------------------------------------------------------------------------
 /// @brief –абота с сохран€емыми параметрами типа @ref u_int_4.
 class saved_params_u_int_4: public saved_params < u_int_4 >,
-    array_device < u_int_4 >
+    public array_device < u_int_4 >
     {
     public:
         /// @brief  онструктор.
         ///
         /// @param count - количество параметров.
-        saved_params_u_int_4( int count ) :
+        saved_params_u_int_4( int count = 0 ) :
           saved_params < u_int_4 >( count ),              
               array_device < u_int_4 >( 1, "S_PARAM_UL", count,
               i_complex_device::ARRAY_DEV_ULONG )
@@ -426,7 +447,7 @@ class saved_params_float: public saved_params < float >,
         /// @brief  онструктор.
         ///
         /// @param count - количество параметров.
-        saved_params_float( int count ):
+        saved_params_float( int count = 0 ):
           saved_params < float >( count ),
               array_device < float >( 1, "S_PARAM_F", count, 
               i_complex_device::ARRAY_DEV_FLOAT )

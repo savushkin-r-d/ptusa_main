@@ -3,8 +3,28 @@
 #include "prj_mngr.h"
 #include "wago.h"
 #include "PAC_dev.h"
+#include "param_ex.h"
 
-project_manager* project_manager::instance;
+smart_ptr< project_manager > project_manager::instance;
+//-----------------------------------------------------------------------------
+int project_manager::proc_main_params( int argc, char *argv[] )
+    {
+      if ( argc > 1 )
+        {
+        if ( strcmp( argv[ 1 ], "rcrc" ) == 0 )
+            {
+#ifdef DEBUG
+            Print( "\nReset CRC..." );
+#endif
+            params_manager::get_instance()->reset_CRC();
+#ifdef DEBUG
+            Print( " Ok!\n" );
+#endif
+            }
+
+        }
+    return 0;
+    }
 //-----------------------------------------------------------------------------
 int project_manager::load_configuration( const char *file_name )
     {

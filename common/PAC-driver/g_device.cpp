@@ -25,8 +25,6 @@ i_complex_device ** device_communicator::dev;
 
 #endif // PAC
 
-int complex_device::MAX_NAME_LENGTH = 20;
-
 #ifdef WIN32
 u_int_2 G_PROTOCOL_VERSION = 3;
 #else 
@@ -82,7 +80,7 @@ complex_device::complex_device( u_int_4 n, const char *new_name,
     else sub_dev = 0;
     }
 //-----------------------------------------------------------------------------
-#ifdef WIN32
+#ifdef DRIVER
 complex_device::complex_device( u_int_4 n,
                                char *new_name, 
                                u_int_2 new_subdev_cnt, 
@@ -100,9 +98,10 @@ complex_device::complex_device( u_int_4 n,
     compl_dev = owner_compl_dev;
     }
 //-----------------------------------------------------------------------------
+#endif // DRIVER
 complex_device::~complex_device()
     {
-    if ( name ) 
+    if ( name )
         {
         delete [] name;
         name = 0;
@@ -113,7 +112,6 @@ complex_device::~complex_device()
         sub_dev = 0;
         }
     }
-#endif //WIN32
 //-----------------------------------------------------------------------------
 char complex_device::get_type() const
     {
@@ -180,8 +178,6 @@ int  complex_device::save_device( char *buff )
     memcpy( buff, &sub_dev_cnt, sizeof( sub_dev_cnt ) );//(5)
     buff += sizeof( sub_dev_cnt );
     idx += sizeof( sub_dev_cnt );
-
-    Print( "Start save device!\n" );
 
     for ( u_int_4 i = 0; i < get_subdev_quantity(); i++ )
         {

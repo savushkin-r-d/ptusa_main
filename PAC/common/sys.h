@@ -16,6 +16,7 @@
 /// @$Rev$.\n
 /// @$Author$.\n
 /// @$Date::                     $.
+
 #ifndef SYS_H
 #define SYS_H
 
@@ -25,6 +26,8 @@ typedef unsigned long int       u_long;
 
 #include <string.h>
 #include <stdio.h>
+
+#include "util.h"
 
 #ifdef WIN32
 #include <conio.h>

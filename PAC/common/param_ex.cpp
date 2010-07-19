@@ -9,10 +9,7 @@ extern dev_errors_manager *g_dev_errors_manager;
 #endif // USE_SIMPLE_DEV_ERRORS
 
 #ifndef USE_NO_TANK_COMB_DEVICE
-#include "priem.h"
-
-extern TTank            **g_tanks;
-extern TMyComb          **g_combs;
+#include "tech_def.h"
 #endif //USE_NO_TANK_COMB_DEVICE
 
 //-----------------------------------------------------------------------------
@@ -131,15 +128,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
         if ( auto_init_params ) 
             {
 #ifndef USE_NO_TANK_COMB_DEVICE
-            int i;
-            for ( i = 0; i < TTank::TankCnt; i++ )
-                {
-                g_tanks[ i ]->InitParams();
-                }
-            for ( i = 0; i< TMyComb::CombCnt; i++)
-                {    
-                g_combs[ i ]->InitParams();
-                }
+            tech_object_manager::get_instance()->init_params();
 #endif // USE_NO_TANK_COMB_DEVICE
 
 #ifdef USE_SIMPLE_DEV_ERRORS 
@@ -150,15 +139,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
         if ( auto_init_work_params ) 
             {
 #ifndef USE_NO_TANK_COMB_DEVICE
-            int i;
-            for ( i = 0; i < TTank::TankCnt; i++ )
-                {
-                g_tanks[ i ]->InitWorkParams();
-                }
-            for ( i = 0; i < TMyComb::CombCnt; i++ )
-                {   
-                g_combs[ i ]->InitWorkParams();
-                }
+            tech_object_manager::get_instance()->init_runtime_params();
 #endif // USE_NO_TANK_COMB_DEVICE 
             }
 

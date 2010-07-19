@@ -10,6 +10,14 @@
             <header-extensions>h</header-extensions>
             <sourceEncoding>windows-1251</sourceEncoding>
             <make-dep-projects/>
+            <sourceRootList/>
+            <confList>
+                <confElem>debug_linux</confElem>
+                <confElem>release_linux</confElem>
+                <confElem>release_ucLinux</confElem>
+                <confElem>debug_ucLinux</confElem>
+                <confElem>full_debug_linux</confElem>
+            </confList>
         </data>
     </configuration>
 </project>

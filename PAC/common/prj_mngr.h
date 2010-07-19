@@ -20,6 +20,13 @@
 class project_manager
     {
     public:
+        
+        /// @brief Обработка параметров командной строки.
+        /// 
+        /// @param argc - количество параметров.
+        /// @param argv - массив параметров.
+        int proc_main_params( int argc, char *argv[] );
+
         /// @brief Загрузка конфигурации проекта.
         /// 
         /// @param file_name - имя конфигурационного файла проекта.
@@ -32,10 +39,10 @@ class project_manager
         static void set_instance( project_manager* new_instance );
 
     protected:
-        file *cfg_file;                     ///< Конфигурационный файл.
+        file *cfg_file;     ///< Конфигурационный файл.
 
     private:
-        static project_manager* instance;   ///< Единственный экземпляр класса.
+        static smart_ptr< project_manager > instance;   ///< Единственный экземпляр класса.
     };
 //-----------------------------------------------------------------------------
 #define G_PROJECT_MANAGER project_manager::get_instance()

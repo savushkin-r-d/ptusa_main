@@ -1,4 +1,5 @@
 #include "PAC_dev.h"
+#include "tech_def.h"
 
 device_manager* device_manager::instance;
 char            wago_device::debug_mode;
@@ -19,19 +20,13 @@ char single_state::get_val( int idx )
 int single_state::parse_cmd( char *buff  )   
     { 
 #ifdef USE_NO_TANK_COMB_DEVICE
-    buff++;
     return 0;
 #else // USE_NO_TANK_COMB_DEVICE
 
     switch ( owner_type )
         {
-        case T_TANK:
-            ( ( TTank* ) owner_object )->SetMode( ( ( u_int_4* ) buff )[ 1 ] - 1, 
-                ( ( u_int_4* ) buff )[ 2 ] );                      
-            break;
-
-        case T_COMB:
-            ( ( TMyComb* ) owner_object )->SetMode( ( ( u_int_4* ) buff )[ 1 ] - 1, 
+        case T_TECH_OBJECT:
+            ( ( tech_object* ) owner_object )->set_mode( ( ( u_int_4* ) buff )[ 1 ] - 1,
                 ( ( u_int_4* ) buff )[ 2 ] );                      
             break;
         }
@@ -58,74 +53,11 @@ u_int_4 complex_state::get_val( int idx )
     return state[ idx ];
     }     
 //-----------------------------------------------------------------------------
-//void complex_state::print() const 
-//    {
-//    char tmp_str[ 100 ];    
-//    sprintf( tmp_str, "%s%d[%d]", name, n, size );
-//    print_str( tmp_str );
-//    }
-//-----------------------------------------------------------------------------
 int complex_state::parse_cmd( char *buff  )   
     {    
-#if !defined USE_NO_TANK_COMB_DEVICE && !defined POST && !defined MSA
+#if !defined USE_NO_TANK_COMB_DEVICE 
 #define SIMPLE_PROJECT
 #endif
-
-#ifdef WATER_CNT 
-    switch ( owner_type ) 
-        { 
-        case T_CNTR: 
-            ( ( counter* ) owner_object )->SetComand( (( char* )buff )[ 0 ], 
-                ((u_int_4* )buff)[ 1 ], name ); 
-            break;
-
-        case T_MNGR: 
-            ( ( data_time_manager* ) owner_object )->SetComand( ((u_int_4* )buff)[ 1 ], 
-                name ); 
-            break;		
-        }
-#endif // WATER_CNT
-
-#ifdef POST
-    if ( strcmp( name, "CMD" ) == 0 || 
-        strcmp( name, "Cmd" ) == 0 ||  
-        strcmp( name, "cmd" ) == 0 ) 
-        {
-        if ( T_POST == owner_type )
-            {
-            ( ( TPost* ) owner_object )->SetCommand( ( ( u_int_4* ) buff )[ 1 ] );
-            }
-        }
-#endif // POST 
-
-#ifdef MSA
-#ifdef MSA1
-    if ( strcmp( name, "CMD" ) == 0 ) 
-        {
-        if ( T_MSA == owner_type )
-            {
-            ( ( TPostM* ) owner_object )->SetCommand( ( ( u_int_4* ) buff )[ 1 ] );
-            }
-        }
-#else
-    if ( strcmp( name, "CMD" ) == 0 ) 
-        {
-        if ( T_MSA == owner_type )
-            {
-            ( ( TModule* ) owner_object )->SetCommand( ( ( u_int_4* ) buff )[ 1 ] );
-            }
-        }
-#endif // MSA1
-#endif // MSA
-
-#ifdef POURING 
-    switch ( owner_type ) 
-        { 
-        case T_PACK_DEVICE: 
-            ( ( Device* ) owner_object )->SetWaitTime( ( (u_int_4* )buff )[ 1 ] ); 
-            break;
-        }
-#endif // USE_NO_TANK_COMB_DEVICE
 
 #ifdef SIMPLE_PROJECT
     if (	( strcmp( name, "CMD" ) == 0 ) 
@@ -155,7 +87,8 @@ int complex_state::parse_cmd( char *buff  )
             else
                 {
 #ifdef DEBUG
-                Print( "Error complex_state::parse_cmd - new_mode = %lu\n", new_mode );
+                Print( "Error complex_state::parse_cmd - new_mode = %lu\n", 
+                    ( unsigned long int ) new_mode );
 #endif //DEBUG
                 return -1;
                 }
@@ -163,14 +96,9 @@ int complex_state::parse_cmd( char *buff  )
 
         switch ( owner_type )
             {
-            case T_TANK:
-                state[ 0 ] = ( ( TTank* ) owner_object )->SetMode( new_mode, 
-                    new_state );                      
-                break;
-
-            case T_COMB:
-                state[ 0 ] = ( ( TMyComb* ) owner_object )->SetMode( new_mode, 
-                    new_state );                      
+            case T_TECH_OBJECT:
+                ( ( tech_object* ) owner_object )->set_mode( ( ( u_int_4* ) buff )[ 1 ] - 1,
+                    ( ( u_int_4* ) buff )[ 2 ] );
                 break;
             }
 
@@ -180,82 +108,11 @@ int complex_state::parse_cmd( char *buff  )
         {
         return -1; //Обработка только тега команд.	
         }
-#else // SIMPLE_PROJECT 
+#else // SIMPLE_PROJECT
+
     return 0;
 #endif // SIMPLE_PROJECT    
     } 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-uint_state::uint_state( const char *name, int n, u_int_4 *state,
-                       void *owner_object, char owner_type, int size ):
-device_state < u_int_2 >( n, 
-                         name, 
-                         size, 
-                         i_complex_device::ARRAY_DEV_UINT,
-                         state,
-                         owner_object, 
-                         owner_type )
-    {                     
-    } 
-//-----------------------------------------------------------------------------
-u_int_2 uint_state::get_val( int idx )
-    {    
-    return state[ idx ];
-    }     
-//-----------------------------------------------------------------------------
-int uint_state::parse_cmd( char *buff  )   
-    {    
-#ifdef WATER_CNT 
-    switch ( owner_type ) 
-        { 
-        case T_CNTR: 
-            ( ( counter* ) owner_object )->SetComand( (( char* )buff )[ 0 ], 
-                ((u_int_4* )buff)[ 1 ], name ); 
-            break;
-
-        case T_MNGR: 
-            ( ( data_time_manager* ) owner_object )->SetComand( ((u_int_4* )buff)[ 1 ], 
-                name ); 
-            break;		
-        }
-#endif // WATER_CNT
-
-#ifdef POURING
-    switch ( owner_type ) 
-        { 
-        case T_F_DEVICE: 
-            ( ( Facility* ) owner_object )->setLineN( ( ( u_int_4* ) buff )[ 1 ] ); 
-            break;   
-
-        case T_PACK_DEVICE: 
-            ( ( Device* ) owner_object )->SetProduct( ( ( u_int_4* ) buff )[ 1 ] );
-#ifdef DEBUG
-            Print( "n = %lu\n", ( ( u_int_4* ) buff )[ 1 ] );
-#endif
-            break;   
-        }
-#endif // POURING
-
-    buff++;     //Чтобы не было Warning'a.
-    return 0;
-    } 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-int_state::int_state( const char *name, int n, int_2 *state, void *owner_object,
-                     char owner_type, int size /*= 1 */ ):
-array_device < int_2 >( n, name, size, i_complex_device::ARRAY_DEV_INT ),
-state( state )
-    {   
-    owner_type++;           
-    if ( owner_object );       //Чтобы не было Warning'a.
-    } 
-//-----------------------------------------------------------------------------
-int_2 int_state::get_val( int idx )
-    {
-    return state[ idx ];
-    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 string_device::string_device( u_int_4 n, const char *new_name,
@@ -335,24 +192,6 @@ u_int_4 string_device::get_n() const
     return 0; 
     }
 //-----------------------------------------------------------------------------
-int string_device::load_state( char *buff )
-    {
-    //buff;
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int string_device::load_changed_state( char *buff )
-    {
-    //buff;
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int string_device::load_device( char *buff )
-    {
-    //buff;
-    return 0;
-    }
-//-----------------------------------------------------------------------------
 int string_device::parse_cmd( char *buff )
     {
 	buff += 4; //пропуск номера объекта
@@ -371,16 +210,6 @@ int string_device::parse_cmd( char *buff )
         }
 
     return new_str_len + 1;
-    }
-//-----------------------------------------------------------------------------
-u_int_4 string_device::get_idx()
-    {
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-void string_device::set_idx( u_int_4 new_idx )
-    {
-    //new_idx;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

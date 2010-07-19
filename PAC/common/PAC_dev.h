@@ -20,6 +20,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <string>
+
 #include "sys.h"
 #include "wago.h"
 
@@ -199,7 +201,7 @@ template < class data_type > class array_device: public i_simple_device
         char            *name;          ///< Имя.
         char            type;           ///< Тип.
         u_int_4         n;              ///< Уникальный номер.
-
+        
         data_type*      prev_val;       ///< Массив предыдущих значений.
     };
 //-----------------------------------------------------------------------------
@@ -212,8 +214,7 @@ public array_device < data_type >
     public:
         enum OBJECT_TYPE
             {
-            T_TANK = 1,
-            T_COMB,
+            T_TECH_OBJECT = 1,
             T_POST,
             T_CNTR,
             T_MNGR,
@@ -223,7 +224,6 @@ public array_device < data_type >
 
             T_PATH_COMB,   //Гребенка маршрутов.
             };
-
 
             device_state( u_int_4 n,
                          const char *new_name,
@@ -255,11 +255,10 @@ public array_device < data_type >
 //  Каждый режим передается через 1 байт.
 class single_state: public device_state < char >
     {
-
     public:
         single_state( const char *name, int n, u_int_4 *state,
                                    void *owner_object, char owner_type, int size ):
-        device_state < char >( n, name, size*32,
+        device_state < char >( n, name, size,
                               i_complex_device::ARRAY_DEV_BYTE,
                               state,
                               owner_object,
@@ -285,35 +284,6 @@ class complex_state: public device_state < u_int_4 >
         //void    print() const;
     };
 //-----------------------------------------------------------------------------
-//ОБЩЕЕ ОПИСАНИЕ.
-//  Служит для представления состояния сложных объектов.
-//  Каждое состояние передается как одно слово (2 байта).
-class uint_state: public device_state < u_int_2 >
-    {
-    public:
-        uint_state( const char *name, int n, u_int_4 *state,
-            void *owner_object, char owner_type, int size = 1 );
-
-        u_int_2 get_val( int idx );
-        int     parse_cmd( char *buff  );
-        //void    print() const;
-    };
-//-----------------------------------------------------------------------------
-//ОБЩЕЕ ОПИСАНИЕ.
-//  Служит для представления состояния сложных объектов.
-//  Каждое состояние передается как одно слово (2 байта) со знаком.
-class int_state: public array_device < int_2 >
-    {
-    public:
-        int_state( const char *name, int n, int_2 *state,
-            void *owner_object, char owner_type, int size = 1 );
-
-        int_2 get_val( int idx );
-
-    private:
-        int_2 *state;
-    };
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //ОБЩЕЕ ОПИСАНИЕ.
 //  Шаблон класса, который используется для передачи строк.
@@ -335,13 +305,7 @@ class string_device: public i_simple_device
         void    print() const;
         u_int_4 get_n() const;
 
-        int load_state( char *buff );
-        int load_changed_state( char *buff );
-        int load_device( char *buff );
-
         int     parse_cmd( char *buff  );
-        u_int_4 get_idx();
-        void    set_idx( u_int_4 new_idx );
 	};
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс счетчика.
@@ -1185,11 +1149,59 @@ class timer
         STATE   get_state() const;
 
     private:
-        u_long     last_time;  ///< Время, когда таймер был запущен/остановлен.
-        u_long      work_time;  ///< Время работы таймера.
+        u_long  last_time;  ///< Время, когда таймер был запущен/остановлен.
+        u_long  work_time;  ///< Время работы таймера.
 
-        STATE       state;           ///< Состояние.
-        u_long      countdown_time;  ///< Задание таймера.
+        STATE   state;           ///< Состояние.
+        u_long  countdown_time;  ///< Задание таймера.
+    };
+//-----------------------------------------------------------------------------
+/// @brief таймер.
+///
+/// Предоставляет группу таймеров.
+class timer_manager
+    {
+    public:
+        timer_manager( u_int timers_count ): timers_cnt( timers_count ),
+            timers( 0 )
+        {
+        if ( timers_cnt )
+            {
+            timers = new timer[ timers_cnt ];
+            }   
+        }
+
+        ~timer_manager()
+            {
+            if ( timers )
+                {
+                delete [] timers;
+                timers = 0;
+                }
+            }
+
+    timer& operator[] ( unsigned int index )
+        {
+        if ( index < timers_cnt )
+                {
+                return timers[ index ];
+                }
+#ifdef DEBUG
+            else
+                {
+                Print( "timer_manager[] - error: index[ %u ] > count [ %u ]\n",
+                    index, timers_cnt );
+                }
+#endif // DEBUG
+
+            return stub;
+        }
+
+    private:
+        u_int   timers_cnt;
+        timer   *timers;
+
+        timer   stub;
     };
 //-----------------------------------------------------------------------------
 #define G_DEVICE_MANAGER device_manager::get_instance()
