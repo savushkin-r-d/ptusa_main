@@ -5,7 +5,7 @@
 #include "PAC_dev.h"
 #include "param_ex.h"
 
-smart_ptr< project_manager > project_manager::instance;
+project_manager *project_manager::instance;
 //-----------------------------------------------------------------------------
 int project_manager::proc_main_params( int argc, char *argv[] )
     {

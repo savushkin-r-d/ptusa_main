@@ -58,7 +58,7 @@ class tech_object
         ///
         /// @return  0 - ок.
         /// @return >0 - ошибка.
-        int set_mode( u_int mode, int new_state );
+        virtual int set_mode( u_int mode, int new_state );
 
         /// @brief Получение состояния режима.
         ///
@@ -66,7 +66,7 @@ class tech_object
         ///
         /// @return 1 - режим включен.
         /// @return 0 - режим не включен.
-        inline int get_mode( int mode );
+        int get_mode( int mode );
 
         /// @brief Проверка возможности включения режима.
         ///
@@ -84,7 +84,7 @@ class tech_object
         /// @param mode - режим.
         ///
         /// @return 0 - ок.
-        virtual int init_mode( int mode );
+        virtual int init_mode( u_int mode );
 
         /// @brief Выполнение включенных режимов.
         ///
@@ -110,7 +110,7 @@ class tech_object
         /// @param mode - режим.
         ///
         /// @return 0 - ок.
-        virtual int final_mode( int mode );
+        virtual int final_mode( u_int mode );
 
         /// @brief Инициализирует сохраняемые параметры значением 0.
         ///
@@ -125,6 +125,16 @@ class tech_object
             return com_dev;
             }
 
+        int get_number() const
+            {
+            return number;
+            }
+        
+        saved_params_float  par_float;      ///< Сохраняемые параметры, тип float.
+        run_time_params_float rt_par_float; ///< Рабочие параметры, тип float.
+        saved_params_u_int_4 par_uint;      ///< Сохраняемые параметры, тип u_int.
+        run_time_params_u_int_4 rt_par_uint;///< Рабочие параметры, тип u_int.
+
     protected:
         smart_ptr< complex_device > com_dev; ///< Связь с сервером.
 
@@ -135,29 +145,21 @@ class tech_object
         std::vector< u_int_4 >  state;  ///< Состояние объекта.
         timer_manager           timers; ///< Таймеры объекта.
 
-        std::vector< u_int_4 >  mode_start_time;        ///< Время начала режима.
-        smart_ptr< run_time_params_u_int_4 > mode_time; ///< Время режимов, сек.
+        std::vector< u_int_4 >  mode_start_time;    ///< Время начала режима.
+        run_time_params_u_int_4 mode_time;          ///< Время режимов, сек.
 
-        /// @brief Сохраняемые параметры, тип float.
-        smart_ptr< saved_params_float >      par_float;
 
-        /// @brief Рабочие параметры, тип float.
-        smart_ptr< run_time_params_float >   rt_par_float;
-
-        /// @brief Сохраняемые параметры, тип unsigned int.
-        smart_ptr< saved_params_u_int_4 >    par_uint;
-
-        /// @brief Рабочие параметры, тип unsigned int.
-        smart_ptr< run_time_params_u_int_4 > rt_par_uint;
     };
 //-----------------------------------------------------------------------------
 class tech_object_manager
     {
     public:
-        /// @brief Инициализация сохраняемых параметров всех технологических объектов.
+        /// @brief Инициализация сохраняемых параметров всех технологических
+        /// объектов.
         int init_params();
 
-        /// @brief Инициализация рабочих параметров всех технологических объектов.
+        /// @brief Инициализация рабочих параметров всех технологических
+        /// объектов.
         int init_runtime_params();
 
         /// @brief Получение единственного экземпляра класса.
@@ -166,10 +168,48 @@ class tech_object_manager
         /// @brief Установка единственного экземпляра класса.
         static int set_instance( tech_object_manager* new_instance );
 
+        int get_object_with_active_mode( u_int mode, u_int start_idx,
+            u_int end_idx )
+            {
+            for ( u_int i = start_idx; 
+                i <= end_idx && i < tech_objects.size(); i++ )
+                {
+                if ( tech_objects.at( i )->get_mode( mode ) ) return i;
+                }
+
+            return -1;
+            }
+
+        tech_object* get_tech_objects( u_int idx )
+            {
+            return tech_objects.at( idx );
+            }
+
+        u_int get_count() const
+            {
+            return tech_objects.size();
+            }
+
+        void evaluate()
+            {
+            for ( u_int i = 0; i < tech_objects.size(); i++ )
+                {
+                tech_objects.at( i )->evaluate();
+                }
+            }
+
+        void add_tech_object( tech_object* new_tech_object )
+            {
+            tech_objects.push_back( new_tech_object );
+            }
+
     private:
         static tech_object_manager* instance; ///< Единственный экземпляр класса.
 
-        std::vector< tech_object > tech_objects; ///< Технологические объекты.
+        std::vector< tech_object* > tech_objects; ///< Технологические объекты.
     };
+//-----------------------------------------------------------------------------
+#define G_TECH_OBJECT_MNGR tech_object_manager::get_instance()
+#define G_TECH_OBJECTS tech_object_manager::get_instance()->get_tech_objects
 //-----------------------------------------------------------------------------
 #endif // TECH_PROCESS_H

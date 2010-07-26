@@ -42,7 +42,7 @@ class project_manager
         file *cfg_file;     ///< Конфигурационный файл.
 
     private:
-        static smart_ptr< project_manager > instance;   ///< Единственный экземпляр класса.
+        static project_manager* instance;   ///< Единственный экземпляр класса.
     };
 //-----------------------------------------------------------------------------
 #define G_PROJECT_MANAGER project_manager::get_instance()

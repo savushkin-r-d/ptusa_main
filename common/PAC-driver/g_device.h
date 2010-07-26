@@ -240,7 +240,7 @@ class complex_device: public i_complex_device
         complex_device( u_int_4 n, const char *new_name, u_int_2 new_subdev_cnt,
             char type );
 
-        ~complex_device();
+        virtual ~complex_device();
 
 #ifdef DRIVER
         complex_device( u_int_4 n, char *new_name, u_int_2 new_subdev_cnt, 

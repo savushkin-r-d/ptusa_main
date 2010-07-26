@@ -1,5 +1,5 @@
 #include "tech_def.h"
-#include "string.h"
+#include "sys.h"
 //-----------------------------------------------------------------------------
 tech_object_manager* tech_object_manager::instance;
 //-----------------------------------------------------------------------------
@@ -8,13 +8,15 @@ tech_object::tech_object( const char* name, u_int number, u_int states_count,
     u_int timers_count,
     u_int par_float_count, u_int runtime_par_float_count,
     u_int par_uint_count,
-    u_int runtime_par_uint_count) : states_count( states_count ),
-        timers( timers_count ),        
-        mode_time( new run_time_params_u_int_4( states_count, "MODE_TIME" ) ),
-        par_float( new saved_params_float( par_float_count ) ),
-        rt_par_float( new run_time_params_float( runtime_par_float_count ) ),
-        par_uint( new saved_params_u_int_4( par_uint_count ) ),
-        rt_par_uint( new run_time_params_u_int_4( runtime_par_uint_count ) )
+    u_int runtime_par_uint_count) :        
+        par_float( saved_params_float( par_float_count ) ),
+        rt_par_float( run_time_params_float( runtime_par_float_count ) ),
+        par_uint( saved_params_u_int_4( par_uint_count ) ),
+        rt_par_uint( run_time_params_u_int_4( runtime_par_uint_count ) ),
+        number( number ),
+        states_count( states_count ),
+        timers( timers_count ),
+        mode_time( run_time_params_u_int_4( states_count, "MODE_TIME" ) )
     {
     u_int state_size_in_int4 = states_count / 32; // Размер состояния в double word.
     if ( states_count % 32 > 0 ) state_size_in_int4++;
@@ -31,16 +33,21 @@ tech_object::tech_object( const char* name, u_int number, u_int states_count,
             i_complex_device::COMPLEX_DEV );
 
     com_dev->sub_dev[ 0 ] = new single_state( "SINGLE_STATE", number,
-            state.data(), this, single_state::T_TECH_OBJECT, states_count );
+            &state.front(), this, single_state::T_TECH_OBJECT, states_count );
     com_dev->sub_dev[ 1 ] = new complex_state( "STATE", number,
-            state.data(), this, single_state::T_TECH_OBJECT, state_size_in_int4 );
+            &state.front(), this, single_state::T_TECH_OBJECT, state_size_in_int4 );
     com_dev->sub_dev[ 2 ] = new complex_state( "CMD", number,
             &cmd, this,single_state::T_TECH_OBJECT );
-    com_dev->sub_dev[ 3 ] = par_float;
-    com_dev->sub_dev[ 4 ] = rt_par_float;
-    com_dev->sub_dev[ 5 ] = par_uint;
-    com_dev->sub_dev[ 6 ] = rt_par_uint;
-    com_dev->sub_dev[ 7 ] = mode_time;
+    com_dev->sub_dev[ 3 ] = &par_float;
+    com_dev->sub_dev[ 4 ] = &rt_par_float;
+    com_dev->sub_dev[ 5 ] = &par_uint;
+    com_dev->sub_dev[ 6 ] = &rt_par_uint;
+    com_dev->sub_dev[ 7 ] = &mode_time;
+
+    for ( u_int i = 0; i < states_count; i++ )
+        {
+        mode_start_time.at( i ) = get_sec();
+        }
     }
 //-----------------------------------------------------------------------------
 tech_object::~tech_object()
@@ -55,16 +62,16 @@ tech_object::~tech_object()
 //-----------------------------------------------------------------------------
 int tech_object::init_params()
     {
-    par_float->reset_to_0();
-    par_uint->reset_to_0();
+    par_float.reset_to_0();
+    par_uint.reset_to_0();
 
     return 0;
     }
 //-----------------------------------------------------------------------------
 int tech_object::init_runtime_params()
     {
-    rt_par_float->reset_to_0();
-    rt_par_uint->reset_to_0();
+    rt_par_float.reset_to_0();
+    rt_par_uint.reset_to_0();
 
     return 0;
     }
@@ -90,13 +97,13 @@ int tech_object::set_mode( u_int mode, int newm )
 
                 if ( ( res = can_final_mode( mode ) ) == 0 ) // Check if possible.
                     {
-                    state[ mode / 32 ] = state[ mode / 32 ] & ~( 1L << mode % 32 );
+                    state[ mode / 32 ] = state[ mode / 32 ] & ~( 1UL << mode % 32 );
                     final_mode( mode );
-
-#ifndef USE_NO_COMB
-//                g_greb->close_path( paths[ mode ].in_x, paths[ mode ].in_y,
-//                    paths[ mode ].out_x, paths[ mode ].out_y );
-#endif // USE_NO_COMB
+                    res = mode + 2000;
+#ifdef USE_COMB
+                g_greb->close_path( paths[ mode ].in_x, paths[ mode ].in_y,
+                    paths[ mode ].out_x, paths[ mode ].out_y );
+#endif // USE_COMB
                     }
                 }
             else
@@ -104,13 +111,13 @@ int tech_object::set_mode( u_int mode, int newm )
                 if ( ( res = can_init_mode( mode ) ) == 0 ) // Check if possible.
                     {
                     init_mode( mode );
-                    state[ mode / 32 ] = state[ mode / 32 ] | 1L << mode % 32;
-
-#ifndef USE_NO_COMB
-//                    g_greb->open_path( paths[ mode ].in_x, paths[ mode ].in_y,
-//                        paths[ mode ].out_x, paths[ mode ].out_y, comb_path::OT_COMB,
-//                        this, mode );
-#endif // USE_NO_COMB
+                    state[ mode / 32 ] = state[ mode / 32 ] | 1UL << mode % 32;
+                    res = mode + 1000;
+#ifdef USE_COMB
+                    g_greb->open_path( paths[ mode ].in_x, paths[ mode ].in_y,
+                        paths[ mode ].out_x, paths[ mode ].out_y, comb_path::OT_COMB,
+                        this, mode );
+#endif // USE_COMB
                     }
                 }
             }
@@ -125,7 +132,8 @@ int tech_object::set_mode( u_int mode, int newm )
         }
     Print( "\n" );
 #endif
-    
+
+    cmd = 1000;
     return res;
     }
 //-----------------------------------------------------------------------------
@@ -139,13 +147,22 @@ int tech_object::can_init_mode( int mode )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int tech_object::init_mode( int mode )
+int tech_object::init_mode( u_int mode )
     {
+    if ( mode < states_count )
+        {
+        mode_start_time.at( mode ) = get_sec();
+        }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
 int tech_object::evaluate()
     {
+    for ( u_int i = 0; i < states_count; i++ )
+        {
+        mode_time[ i ] = get_sec() - mode_start_time.at( i );
+        }
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -154,8 +171,12 @@ int tech_object::can_final_mode( int mode )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int tech_object::final_mode( int mode )
+int tech_object::final_mode( u_int mode )
     {
+    if ( mode < states_count )
+        {
+        mode_start_time.at( mode ) = get_sec();
+        }
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -164,7 +185,7 @@ int tech_object_manager::init_params()
     {
     for( u_int i = 0; i < tech_objects.size( ); i++ )
         {
-        tech_objects[ i ].init_params( );
+        tech_objects[ i ]->init_params( );
         }
 
     return 0;
@@ -174,7 +195,7 @@ int tech_object_manager::init_runtime_params()
     {
     for ( u_int i = 0; i < tech_objects.size(); i++ )
         {
-        tech_objects[ i ].init_runtime_params();
+        tech_objects[ i ]->init_runtime_params();
         }
 
     return 0;

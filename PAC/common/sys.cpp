@@ -1,6 +1,8 @@
 #include "sys.h"
+
+NV_memory_manager* NV_memory_manager::instance;
 //-----------------------------------------------------------------------------
-#if defined W750 && defined DEBUG
+#if ( defined LINUX || defined UCLINUX ) && defined DEBUG
 #include <termios.h>
 #include <unistd.h>
 
@@ -17,7 +19,7 @@ int Getch()
     tcsetattr( STDIN_FILENO, TCSANOW, &oldt );
     return ch;
     }
-#endif // defined W750 && defined DEBUG
+#endif // ( defined LINUX || defined UCLINUX ) && defined DEBUG
 //-----------------------------------------------------------------------------
 NV_memory::NV_memory( u_int total_size,
                      u_int available_start_pos,

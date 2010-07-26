@@ -194,10 +194,10 @@ int  complex_device::save_device( char *buff )
 //  далее   - данные каждого подустройства.
 int  complex_device::save_state( char *buff )
     {
-    memcpy( buff, &n, sizeof( n ) );                    //(1)
-    memcpy( buff, &sub_dev_cnt, sizeof( sub_dev_cnt ) );//(2)
-
-    unsigned int answer_size = sizeof( n ) + sizeof( sub_dev_cnt );
+    memcpy( buff, &n, sizeof( n ) );                                    //(1)
+    unsigned int answer_size = sizeof( n );
+    memcpy( buff + answer_size, &sub_dev_cnt, sizeof( sub_dev_cnt ) );  //(2)
+    answer_size += sizeof( sub_dev_cnt );
 
     for ( unsigned int i = 0; i < get_subdev_quantity(); i++ )
         {
@@ -799,11 +799,10 @@ long device_communicator::write_devices_states_service( long len,
     {
     if ( len < 1 ) return 0;
 
-    u_int_2 i;
-    u_long  answer_size = 0;
-
+    u_int answer_size = 0;
+    
 #ifdef DEBUG_DEV_CMCTR
-    u_long start_time = get_ms();
+    u_long start_time = get_millisec();
 #endif // DEBUG_DEV_CMCTR             
 
     u_int param_size = 0;
@@ -842,17 +841,17 @@ long device_communicator::write_devices_states_service( long len,
             memcpy( outdata + answer_size, &dev_cnt, param_size );
             answer_size += param_size;
 
-            for ( i = 0; i < dev_cnt; i++ )
+            for ( u_int i = 0; i < dev_cnt; i++ )
                 {
                 answer_size += dev[ i ]->save_device( ( char* ) outdata + 
-                    answer_size );                
+                    answer_size );
                 }      
 #ifdef DEBUG_DEV_CMCTR
-            Print( "Devices size = %lu, g_devices_request_id = %u\n",
+            Print( "Devices size = %u, g_devices_request_id = %u\n",
                 answer_size, 
                 g_devices_request_id );
 
-            Print( "Operation time = %lu\n", get_ms() - start_time );
+            Print( "Operation time = %lu\n", get_delta_millisec( start_time ) );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
 
@@ -865,16 +864,16 @@ long device_communicator::write_devices_states_service( long len,
             memcpy( outdata + answer_size, &dev_cnt, param_size );
             answer_size += param_size;
 
-            for ( i = 0; i < dev_cnt; i++ )
+            for ( u_int i = 0; i < dev_cnt; i++ )
                 {
                 answer_size += dev[ i ]->save_state( ( char* ) outdata +
                     answer_size );
                 }
 #ifdef DEBUG_DEV_CMCTR
-            Print( "Devices states size = %lu, g_devices_request_id = %d\n",
+            Print( "Devices states size = %u, g_devices_request_id = %d\n",
                 answer_size, g_devices_request_id );
 
-            Print( "Operation time = %lu\n", get_ms() - start_time );
+            Print( "Operation time = %lu\n", get_delta_millisec( start_time ) );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
 
@@ -890,7 +889,7 @@ long device_communicator::write_devices_states_service( long len,
             memcpy( outdata + answer_size, &changed_device_cnt, param_size );
             answer_size += param_size;
 
-            for ( i = 0; i < dev_cnt; i++ )
+            for ( u_int i = 0; i < dev_cnt; i++ )
                 {
                 u_int_2 res = dev[ i ]->save_changed_state( ( char* ) outdata +
                     answer_size + sizeof( i ) );
@@ -910,7 +909,7 @@ long device_communicator::write_devices_states_service( long len,
 #ifdef DEBUG_DEV_CMCTR
             Print( "\nChanged states size = %d\n", answer_size );
 
-            Print( "Operation time = %lu\n", get_ms() - start_time );
+            Print( "Operation time = %lu\n", get_delta_millisec( start_time ) );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
             }
@@ -919,7 +918,7 @@ long device_communicator::write_devices_states_service( long len,
             {
 #ifdef DEBUG_DEV_CMCTR
             Print( "\nEXEC_DEVICE_CMD\n" );
-            u_int_4 par = 0;
+            u_long par = 0;
             param_size = sizeof( par );
             memcpy( &par, data + 1, param_size );
             Print( "unsigned long buff[1] - %lu; ", par );
@@ -948,7 +947,7 @@ long device_communicator::write_devices_states_service( long len,
             dev[ dev_n ]->parse_cmd( ( char* ) data + 5 );
 
 #ifdef DEBUG_DEV_CMCTR
-            Print( "Operation time = %lu\n", get_ms() - start_time );
+            Print( "Operation time = %lu\n", get_delta_millisec( start_time ) );
 #endif // DEBUG_DEV_CMCTR
             
             outdata[ 0 ] = 0;

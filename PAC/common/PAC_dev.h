@@ -20,12 +20,23 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <string>
+//#include <string>
 
 #include "sys.h"
 #include "wago.h"
 
 #include "g_device.h"
+
+//for levels
+#if defined LEVEL_REVERSE
+#define LIS     1
+#define LNO     0
+#else
+#define LIS     0
+#define LNO     1
+#endif
+#define OFF     0
+#define ON      1
 
 //-----------------------------------------------------------------------------
 /// @brief Шаблон класса, который используется для передачи состояния устройств,
@@ -77,13 +88,13 @@ template < class data_type > class array_device: public i_simple_device
             u_int_2 idx = 0;
 
             buff[ idx++ ] = type;                               //(1)
-            ( ( u_int_4* ) ( buff + idx ) )[ 0 ] = n;           //(2)
-            idx += 4;
+            memcpy( buff + idx, &n, sizeof( n ) );              //(2)
+            idx += sizeof( n );
             buff[ idx++ ] = strlen( name );                     //(3)
             strcpy( buff + idx, name );                         //(4)
             idx += strlen( name ) + 1;
-            ( ( u_int_4* ) ( buff + idx ) )[ 0 ] = sub_dev_cnt; //(5)
-            idx += 4;           
+            memcpy( buff + idx, &sub_dev_cnt, sizeof( sub_dev_cnt ) );  //(5)
+            idx += sizeof( sub_dev_cnt );
 
             return idx;
             }
@@ -102,16 +113,18 @@ template < class data_type > class array_device: public i_simple_device
             //  4 байта - номер устройства;                     (1)
             //  4 байта - количество подустройств;              (2)
             //  далее   - данные каждого подустройства.
-            ( ( u_int_4* ) buff )[ 0 ] = n;                     //(1)
-            ( ( u_int_4* ) buff )[ 1 ] = sub_dev_cnt;           //(2)
-            u_int_2 answer_size = 8;
+            u_int_2 answer_size = 0;
+            memcpy( buff + answer_size, &n, sizeof( n ) );                    //(1)
+            answer_size += sizeof( n );
+            memcpy( buff + answer_size, &sub_dev_cnt, sizeof( sub_dev_cnt ) );//(2)
+            answer_size += sizeof( sub_dev_cnt );
 
             for ( u_int_4 i = 0; i < sub_dev_cnt; i++ )
                 {
-                ( ( data_type* ) ( buff + 8 ) )[ 0 ] = 
-                    get_val( i );
-                buff += sizeof( data_type );
-                prev_val[ i ] = get_val( i );
+                data_type val = get_val( i );
+                memcpy( buff + answer_size, &val, sizeof( val ) );
+
+                prev_val[ i ] = val;
                 answer_size += sizeof( data_type );      
                 }      
 
@@ -281,7 +294,6 @@ class complex_state: public device_state < u_int_4 >
 
         u_int_4 get_val( int idx );
         int     parse_cmd( char *buff  );
-        //void    print() const;
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

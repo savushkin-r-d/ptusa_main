@@ -24,7 +24,7 @@ int wago_manager_w750::read_inputs()
             // DI
             int start_pos = KbusGetBinaryInputOffset() / 8;
 #ifdef DEBUG
-            Print( "start_pos=%d\n", start_pos );
+//            Print( "start_pos=%d\n", start_pos );
 #endif // DEBUG
             for ( u_int j = 0; j < nodes[ i ]->DI_cnt; j++ )
                 {
@@ -33,11 +33,11 @@ int wago_manager_w750::read_inputs()
                 nodes[ i ]->DI[ j ] = ( ( tmp &
                     pstPabIN->uc.Pab[ start_pos + j / 8 ] ) > 0 );
 #ifdef DEBUG
-                Print( "%d -> %d, ", j, nodes[ i ]->DI[ j ] );
+//                Print( "%d -> %d, ", j, nodes[ i ]->DI[ j ] );
 #endif // DEBUG
                 }
 #ifdef DEBUG
-            Print( "\n" );
+//            Print( "\n" );
 #endif // DEBUG
 
             // AI
@@ -61,7 +61,7 @@ int wago_manager_w750::read_inputs()
                     }
                 nodes[ i ]->AI[ j ] = val;
 #ifdef DEBUG
-                Print( "%d -> %u\n, ", j, nodes[ i ]->AI[ j ] );
+//                Print( "%d -> %u\n, ", j, nodes[ i ]->AI[ j ] );
 #endif // DEBUG
                 }
             }
@@ -83,7 +83,7 @@ int wago_manager_w750::write_outputs()
             // DO
             int start_pos = KbusGetBinaryOutputOffset() / 8;
 #ifdef DEBUG
-            Print( "start_pos = %d\n", start_pos );
+//            Print( "start_pos = %d\n", start_pos );
 #endif // DEBUG
             for ( u_int j = 0; j < nodes[ i ]->DI_cnt; j++ )
                 {
@@ -101,11 +101,11 @@ int wago_manager_w750::write_outputs()
                     nodes[ i ]->DO[ j ] = nodes[ i ]->DO_[ j ];
                     }
 #ifdef DEBUG
-                Print( "%d -> %d, ", j, nodes[ i ]->DO_[ j ] );
+//                Print( "%d -> %d, ", j, nodes[ i ]->DO_[ j ] );
 #endif // DEBUG
                 }
 #ifdef DEBUG
-            Print( "\n" );
+//            Print( "\n" );
 #endif // DEBUG
 
             // AO
@@ -126,7 +126,7 @@ int wago_manager_w750::write_outputs()
                     nodes[ i ]->AO[ j ] = nodes[ i ]->AO_[ j ];
                     }
 #ifdef DEBUG
-                Print( "%d -> %u\n, ", j, nodes[ i ]->AO_[ j ] );
+//                Print( "%d -> %u\n, ", j, nodes[ i ]->AO_[ j ] );
 #endif // DEBUG
                 }
             }

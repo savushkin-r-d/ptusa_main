@@ -17,8 +17,7 @@
 //-----------------------------------------------------------------------------
 /// @brief Защищенная работа с указателем.
 ///
-/// Реализована проверка на работу с null указателем, автоматическое удаление
-/// объекта.
+/// Реализована проверка на работу с null указателем.
 template < class type > class smart_ptr
     {
 private:
@@ -39,17 +38,16 @@ public:
 
     smart_ptr< type >& operator = ( type* new_t )
         {
-        if ( pointer ) delete pointer;
         pointer = new_t;
         
         return *this;
         }
 
-    ~smart_ptr()
-        {
-        if ( pointer ) delete pointer;
-        pointer = NULL;
-        }
+//    ~smart_ptr()
+//        {
+//        if ( pointer ) delete pointer;
+//        pointer = NULL;
+//        }
 
     operator type*()
         {
@@ -87,7 +85,7 @@ public:
 
 #endif // DEBUG
 
-            pointer = new type;
+            //pointer = new type;
             }
         return pointer;
         }

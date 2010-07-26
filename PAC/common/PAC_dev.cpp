@@ -64,7 +64,8 @@ int complex_state::parse_cmd( char *buff  )
         ||	( strcmp( name, "Cmd" ) == 0 ) 
         ||	( strcmp( name, "cmd" ) == 0 )) 
         {
-        u_int_4 new_mode = ( ( u_int_4* ) buff )[ 1 ] ;
+        u_int_4 new_mode = 0;
+        memcpy( &new_mode, buff + sizeof( u_int_4 ), sizeof( new_mode ) );
         int new_state = 0;
         if ( 0 == new_mode )
             {
@@ -97,8 +98,8 @@ int complex_state::parse_cmd( char *buff  )
         switch ( owner_type )
             {
             case T_TECH_OBJECT:
-                ( ( tech_object* ) owner_object )->set_mode( ( ( u_int_4* ) buff )[ 1 ] - 1,
-                    ( ( u_int_4* ) buff )[ 2 ] );
+                state[ 0 ] = ( ( tech_object* ) owner_object )->set_mode(
+                    new_mode, new_state );
                 break;
             }
 
@@ -645,7 +646,7 @@ i_AI_device* device_manager::get_LE( int number )
 //-----------------------------------------------------------------------------
 i_DI_device* device_manager::get_FB( int number )
     {
-    return get_device( device::DT_FB, number, "UPR" );
+    return get_device( device::DT_FB, number, "FB" );
     }
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_UPR( int number )

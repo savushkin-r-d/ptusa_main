@@ -5,7 +5,6 @@
 #include <limits.h>
 
 
-NV_memory_manager* NV_memory_manager::instance = 0;
 int SRAM::file = 0;
 //-----------------------------------------------------------------------------
 int read_file( int file, void *buff, u_int count )

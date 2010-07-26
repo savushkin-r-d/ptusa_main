@@ -125,8 +125,8 @@ int wago_device::set_DI( u_int index, char value )
 u_int wago_device::get_AO( u_int index )
     {
     if ( index < AO_channels.count &&
-        AO_channels.char_read_values &&
-        AO_channels.char_read_values[ index ] )
+        AO_channels.int_read_values &&
+        AO_channels.int_read_values[ index ] )
         {
         return *AO_channels.int_read_values[ index ];
         }
@@ -141,8 +141,8 @@ u_int wago_device::get_AO( u_int index )
 int wago_device::set_AO( u_int index, u_int value )
     {
     if ( index < AO_channels.count &&
-        AO_channels.char_read_values &&
-        AO_channels.char_read_values[ index ] )
+        AO_channels.int_write_values &&
+        AO_channels.int_write_values[ index ] )
         {
         *AO_channels.int_write_values[ index ] = value;
         if ( debug_mode )
@@ -162,14 +162,17 @@ int wago_device::set_AO( u_int index, u_int value )
 u_int wago_device::get_AI( u_int index )
     {
     if ( index < AI_channels.count &&
-        AI_channels.char_read_values &&
-        AI_channels.char_read_values[ index ] )
+        AI_channels.int_read_values &&
+        AI_channels.int_read_values[ index ] )
         {
         return *AI_channels.int_read_values[ index ];
         }
 
 #ifdef DEBUG
     Print( "wago_device->get_AI(...) - error!\n" );
+    Print( "index=%d, AI_channels.count=%d, AI_channels.char_read_values=%d, AI_channels.char_read_values[ index ]=%d\n",
+       index, AI_channels.count, ( int ) AI_channels.char_read_values,
+       ( int ) AI_channels.char_read_values[ index ] );
 #endif // DEBUG
 
     return 0;
@@ -178,8 +181,8 @@ u_int wago_device::get_AI( u_int index )
 int wago_device::set_AI( u_int index, u_int value )
     {
     if ( index < AI_channels.count &&
-        AI_channels.char_read_values &&
-        AI_channels.char_read_values[ index ] )
+        AI_channels.int_read_values &&
+        AI_channels.int_read_values[ index ] )
         {
         *AI_channels.int_read_values[ index ] = value;
         return 0;
@@ -276,6 +279,8 @@ float wago_device::get_par( u_int index )
 
 #ifdef DEBUG
     Print( "wago_device->get_par(...) - error!\n" );
+    Print( "index=%d, params_count=%d, params=%d\n",
+        index, params_count, ( int ) params );
 #endif // DEBUG
 
     return 0;

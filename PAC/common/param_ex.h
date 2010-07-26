@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "sys.h"
+#include "sys_w750.h"
 #include "PAC_dev.h"
 //-----------------------------------------------------------------------------
 /// @brief –абота с параметрами. 
@@ -192,10 +193,13 @@ template < class type > class parameters
         /// @return - количество обработанных байт команды.
         int parse_cmd( char *buff )
             {
-            int par_n = *( ( u_int_4* ) buff );
-            ( *this )[ par_n ] = *( ( type* ) ( buff + sizeof( u_int_4 ) ) );
+            u_int_4 par_n;
+            memcpy( &par_n, buff, sizeof( par_n ) );
+            buff += sizeof( par_n );
 
-            return sizeof( u_int_4 ) + sizeof( type );
+            memcpy( &( ( *this )[ par_n ] ), buff, sizeof( type ) );
+
+            return sizeof( par_n ) + sizeof( type );
             }
 
         /// @brief —брасывает все значени€ параметров в 0.
@@ -281,11 +285,14 @@ class run_time_params_float: public parameters < float >,
             {
             int res = parameters< float >::parse_cmd( buff );
 #ifdef DEBUG
-            Print( "Set val work param float[ %lu ] = %f\n",
-                ( u_long ) *( ( u_int_4* ) buff ),
-                *( ( float* ) ( buff + sizeof( u_int_4 ) ) ) );
+            float   val;
+            u_int_4 idx;
+            memcpy( &idx, buff, sizeof( idx ) );
+            buff += sizeof( idx );
+            memcpy( &val, buff, sizeof( val ) );
 
-#endif //DEBUG
+            Print( "Set val work param float[ %u ] = %f\n", idx, val );
+#endif // DEBUG
             return res;
             }
 
@@ -319,12 +326,14 @@ class run_time_params_u_int_4: public parameters < u_int_4 >,
             {
             int res = parameters< u_int_4 >::parse_cmd( buff );
 #ifdef DEBUG
+            u_int_4 val;
+            u_int_4 idx;
+            memcpy( &idx, buff, sizeof( idx ) );
+            buff += sizeof( idx );
+            memcpy( &val, buff, sizeof( val ) );
 
-            Print( "Set val work param u_int_4[ %lu ] = %lu\n",
-                ( u_long ) *( ( u_int_4* ) buff ),
-                ( u_long ) *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
-
-#endif //DEBUG
+            Print( "Set val work param u_int_4[ %u ] = %u\n", idx, val );
+#endif // DEBUG
             return res;
             }
     };
@@ -352,10 +361,11 @@ public parameters < type >
             {
             int res = parameters< type >::parse_cmd( buff );
 
-            u_int_4 idx = *( ( u_int_4* ) buff );
+            u_int_4 idx;
+            memcpy( &idx, buff, sizeof( idx ) );
 
             params_manager::get_instance()->save( 
-                start_pos + idx, sizeof( u_int_4* ) );
+                start_pos + idx * sizeof( type ), sizeof( type ) );
 
             return res;
             }
@@ -384,6 +394,19 @@ public parameters < type >
                 }
 #endif // DEBUG
             return res;
+            }
+
+        /// @brief —охранение значени€ всех параметов в энергонезависимой пам€ти.
+        ///
+        /// ќпераци€ доступа через индекс сохран€ет значение параметра только
+        /// в буфере, так что дл€ сохранени€ его в энергонезависимой пам€ти надо
+        /// использовать данный метод.
+        int save_all()
+            {
+            params_manager::get_instance()->save(
+                    start_pos,  parameters< type >::get_count() * sizeof( type ) );
+
+            return 0;
             }
 
         void reset_to_0()
@@ -429,12 +452,15 @@ class saved_params_u_int_4: public saved_params < u_int_4 >,
               {
               int res = saved_params< u_int_4 >::parse_cmd( buff );
 #ifdef DEBUG
+              u_int_4  val;
+              u_int_4 idx;
+              memcpy( &idx, buff, sizeof( idx ) );
+              buff += sizeof( idx );
+              memcpy( &val, buff, sizeof( val ) );
 
-              Print( "Set val saved param u-int_4[ %lu ] = %lu\n",
-                  ( u_long ) *( ( u_int_4* ) buff ),
-                  ( u_long ) *( ( u_int_4* ) ( buff + sizeof( u_int_4 ) ) ) );
+             Print( "Set val saved param u-int_4[ %u ] = %u\n", idx, val );
+#endif // DEBUG
 
-#endif //DEBUG
               return res;
               }
     };
@@ -465,9 +491,13 @@ class saved_params_float: public saved_params < float >,
               {
               int res = saved_params< float >::parse_cmd( buff );
 #ifdef DEBUG
-              Print( "Set val saved param float[ %lu ] = %f\n",
-                  ( u_long ) *( ( u_int_4* ) buff ),
-                  *( ( float* ) ( buff + sizeof( u_int_4 ) ) ) );
+              float   val;
+              u_int_4 idx;
+              memcpy( &idx, buff, sizeof( idx ) );
+              buff += sizeof( idx );
+              memcpy( &val, buff, sizeof( val ) );
+
+             Print( "Set val saved param float[ %u ] = %f\n", idx, val );
 #endif //DEBUG
               return res;
               }
