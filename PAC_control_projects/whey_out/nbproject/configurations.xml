@@ -29,10 +29,8 @@
         </logicalFolder>
         <itemPath>../../PAC/linux/tcp_cmctr_lin.h</itemPath>
       </logicalFolder>
-    </logicalFolder>
-    <logicalFolder name="ResourceFiles"
-                   displayName="Resource Files"
-                   projectFiles="true">
+      <itemPath>init.h</itemPath>
+      <itemPath>priem.h</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -59,12 +57,15 @@
         </logicalFolder>
         <itemPath>../../PAC/linux/tcp_cmctr_lin.cpp</itemPath>
       </logicalFolder>
+      <itemPath>init.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
+      <itemPath>priem.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="false">
       <itemPath>Makefile</itemPath>
+      <itemPath>Whey_out.ds5</itemPath>
     </logicalFolder>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
@@ -90,7 +91,7 @@
             <Elem>W750</Elem>
             <Elem>DEBUG</Elem>
             <Elem>LINUX</Elem>
-            <Elem>USE_NO_TANK_COMB_DEVICE</Elem>
+            <Elem>DEBUG_DEV_CMCTR</Elem>
           </preprocessorList>
           <warningLevel>2</warningLevel>
         </ccTool>
@@ -114,7 +115,7 @@
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
             <pElem>/usr/include</pElem>
-            <pElem>../../common/../../common/util</pElem>
+            <pElem>/../../common/util</pElem>
           </incDir>
           <preprocessorList>
             <Elem>PAC</Elem>
@@ -145,7 +146,9 @@
             <pElem>../../common/PAC-driver</pElem>
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
-            <pElem>../../common/../../common/util</pElem>
+            <pElem>../../common/util</pElem>
+            <pElem>/usr/local/arm-uclinux-tools/include/c++/3.4.3</pElem>
+            <pElem>/usr/local/arm-uclinux-tools/arm-uclinux-elf/include</pElem>
           </incDir>
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
           <preprocessorList>
@@ -176,7 +179,7 @@
             <pElem>../../common/PAC-driver</pElem>
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
-            <pElem>../../common/../../common/util</pElem>
+            <pElem>../../common/util</pElem>
           </incDir>
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
           <preprocessorList>
@@ -185,7 +188,6 @@
             <Elem>DEBUG</Elem>
             <Elem>UCLINUX</Elem>
             <Elem>DEBUG_DEV_CMCTR</Elem>
-            <Elem>USE_NO_TANK_COMB_DEVICE</Elem>
           </preprocessorList>
         </ccTool>
         <linkerTool>
