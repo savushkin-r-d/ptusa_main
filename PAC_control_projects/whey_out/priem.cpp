@@ -2,9 +2,17 @@
 
 dev_stub *G_DEV_STUB = new dev_stub;
 //-----------------------------------------------------------------------------
-whey_tank::whey_tank( int par_count, int n, int tmr_cnt ): tech_object( "TANK",
-     n, 20, tmr_cnt, par_count, 10, 1, 1 ),
-     V1( V( number * 100 + 1 ) ),
+#define G_COMB G_TECH_OBJECTS( C_COMB_IDX )
+#define POST1  G_TECH_OBJECTS( C_POST1_IDX )
+#define POST2  G_TECH_OBJECTS( C_POST2_IDX )
+#define TANK1  G_TECH_OBJECTS( C_T1_IDX )
+#define TANK2  G_TECH_OBJECTS( C_T2_IDX )
+#define TANK3  G_TECH_OBJECTS( C_T3_IDX )
+#define TANK4  G_TECH_OBJECTS( C_T4_IDX )
+//-----------------------------------------------------------------------------
+whey_tank::whey_tank( int n ): tech_object( "TANK",
+    n, 20, 5 /*timers_count*/, 1 /*par_count*/, 10 /*work_par_count*/, 1, 1 ),
+    V1( V( number * 100 + 1 ) ),
     V2( V( number * 100 + 2 ) ),
     V3( V( number * 100 + 3 ) ),
     V4( V( number * 100 + 4 ) ),
@@ -18,7 +26,7 @@ whey_tank::whey_tank( int par_count, int n, int tmr_cnt ): tech_object( "TANK",
     {
     }
 //-----------------------------------------------------------------------------
-whey_tank::~whey_tank( )
+whey_tank::~whey_tank()
     {
     }
 //-----------------------------------------------------------------------------
@@ -30,8 +38,8 @@ int whey_tank::set_mode( u_int mode, int newm )
 #ifdef DEBUG
     Print ("Set tank n=%d mode = %d, %d\n", number, mode, newm );
 #ifdef STOP
-    //  Print ("Press any key to continue...\n" );
-    //  Getch( );
+    Print ("Press any key to continue...\n" );
+    Getch();
 #endif
 #endif
 
@@ -43,41 +51,48 @@ int whey_tank::set_mode( u_int mode, int newm )
         final_mode( mode );
         res = mode + 2000;
 
-        //-При отключении приёмки/выдачи включаем при наличии ожидающие приёмку/выдачу.
+        //-При отключении приёмки/выдачи включаем при наличии ожидающие
+        // приёмку/выдачу.
         if ( mode >= T_WHEY_ACCEPTING && mode <= T_WHEY_OUT_P2 )
             {
-            idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode( mode + T_WHEY_WACCEPTING,
-                C_TANK_1_INDEX, C_TANK_4_INDEX );
+            idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode( 
+                mode + T_WHEY_WACCEPTING, C_T1_IDX, C_T4_IDX );
 
             if ( idx >= 0 )
                 {
                 G_TECH_OBJECTS( idx )->set_mode( mode + T_WHEY_WACCEPTING, 0 );
                 G_TECH_OBJECTS( idx )->set_mode( mode, 1 );
                 if ( T_WHEY_ACCEPTING == mode )
-                    G_TECH_OBJECTS( idx )->rt_par_float[ T_WARNING_REASON ] = tankInStart;
+                    {
+                    G_TECH_OBJECTS( idx )->rt_par_float[ T_WARNING_REASON ] = 
+                       TW_TANK_IN_START;
+                    }
                 }
             else
                 {
                 if ( T_WHEY_ACCEPTING == mode )
-                    rt_par_float[ T_WARNING_REASON ] = tankInStop;
+                    rt_par_float[ T_WARNING_REASON ] = TW_TANK_IN_STOP;
                 }
             }
-        //-При отключении приёмки/выдачи включаем при наличии ожидающие приёмку/выдачу-!>
+        //-При отключении приёмки/выдачи включаем при наличии ожидающие
+        // приёмку/выдачу-!>
         }
     else
         {  //try to set
-        //-При включени приёмки/выдачи при необходимости ставим в ожидание приёмку/выдачу.
+        //-При включени приёмки/выдачи при необходимости ставим в ожидание
+        // приёмку/выдачу.
         if ( mode >= T_WHEY_ACCEPTING && mode <= T_WHEY_OUT_P2 )
             {
             idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode( mode,
-                C_TANK_1_INDEX, C_TANK_4_INDEX );
+                C_T1_IDX, C_T4_IDX );
             if ( idx >= 0 )
                 {
                 set_mode( mode + T_WHEY_WACCEPTING, 1 );
                 return mode + 1000;
                 }
             }
-        //-При включени приёмки/выдачи при необходимости ставим в ожидание приёмку/выдачу.-!>
+        //-При включени приёмки/выдачи при необходимости ставим в ожидание
+        // приёмку/выдачу.-!>
 
         res = init_mode( mode );
         if ( res == 0 )
@@ -93,139 +108,138 @@ int whey_tank::set_mode( u_int mode, int newm )
     return res;
     }
 //-----------------------------------------------------------------------------
-int whey_tank::evaluate( )
+int whey_tank::evaluate()
     {
-    tech_object::evaluate( );
-
-    int i;
-    for ( i = 0; i < 32; i++ )
+    tech_object::evaluate();
+    
+    for ( u_int i = 0; i < get_modes_count(); i++ )
         {
         if ( get_mode( i ) )
             {
             switch ( i )
                 {
-                case T_WHEY_ACCEPTING:            //Приёмка сыворотки
-                    V1->on( );
-                    V2->on( );
-                    V4->off( );
-                    V( 106 )->off( );
+                case T_WHEY_ACCEPTING:        
+                    V1->on();
+                    V2->on();
+                    V4->off();
+                    V( 106 )->off();
 
-                    if ( LSH->get_state( ) == LIS ) set_mode( T_WHEY_ACCEPTING, 0 );
-
+                    if ( LSH->get_state() == LIS ) set_mode( T_WHEY_ACCEPTING, 0 );
                     break;
-                case T_WHEY_OUT_P1:               //Выдача сыворотки пост 1
 
-                    V1->on( );
-                    //        V2->off( );
+                case T_WHEY_OUT_P1: 
+                    V1->on();
 
-                    if ( number == 1 || number == 2 )
+                    if ( 1 == number || 2 == number )
                         {
-                        V3->off( );
-                        if ( G_TECH_OBJECTS( C_POST_1_INDEX )->get_mode( POST_WHEY_ACCEPTING ) ) V4->on( );
-                        else V4->off( );
+                        V3->off();
+                        if ( POST1->get_mode( POST_WHEY_ACCEPTING ) ) V4->on();
+                        else V4->off();
                         }
                     else
                         {
-                        V3->on( );
-                        V4->off( );
+                        V3->on();
+                        V4->off();
 
-                        V( 107 )->off( );
-                        V( 207 )->on( );
-                        V( 206 )->off( );
-                        V( 307 )->on( );
-                        V( 507 )->off( );
+                        V( 107 )->off();
+                        V( 207 )->on();
+                        V( 206 )->off();
+                        V( 307 )->on();
+                        V( 507 )->off();
 
-                        V_1->off( );
-                        V_2->off( );
-                        V_3->on( );
-                        if ( G_TECH_OBJECTS( C_POST_1_INDEX )->get_mode( POST_WHEY_ACCEPTING ) ) V_4->on( );
-                        else V_4->off( );
+                        V_1->off();
+                        V_2->off();
+                        V_3->on();
+                        if ( POST1->get_mode( POST_WHEY_ACCEPTING ) ) V_4->on();
+                        else V_4->off();
                         }
 
-                    if ( ( LSL->get_state( ) == LNO ) ||
-                        ( G_TECH_OBJECTS( C_POST_1_INDEX )->get_mode( POST_WHEY_ACCEPTING ) &&
-                        ( ( post* ) G_TECH_OBJECTS( C_POST_1_INDEX ) )->flow->get_state( ) == 0 ) )
+                    if ( ( LSL->get_state() == LNO ) ||
+                        ( POST1->get_mode( POST_WHEY_ACCEPTING ) &&
+                        ( ( post* ) POST1 )->flow->get_state() == 0 ) )
                         {
-                        int idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode( T_WHEY_WOUT_P1,
-                            C_TANK_1_INDEX, C_TANK_4_INDEX );
+                        int idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode(
+                            T_WHEY_WOUT_P1, C_T1_IDX, C_T4_IDX );
                 
                         if ( idx >= 0 &&
-                            LE1->get_value( ) < G_TECH_OBJECTS( C_POST_1_INDEX )->rt_par_float[ post::T_LE_MIN ] )
+                            LE1->get_value() < POST1->par_float[ post::S_F__LE_MIN ] )
                             set_mode( T_WHEY_OUT_P1, 0 );
                         else
                             {
-                            G_TECH_OBJECTS( C_POST_1_INDEX )->set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
-                            G_TECH_OBJECTS( C_POST_1_INDEX )->rt_par_float[ post::P_WARNING_REASON ] = post::noFlowPost;
+                            POST1->set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
+                            POST1->rt_par_float[ post::RT_F__WARNING_REASON ] =
+                                post::W_NO_FLOW;
                             }
                         }
                     break;
-                case T_WHEY_OUT_P2:               //Выдача сыворотки пост 2
 
-                    V1->on( );
-                    //V2->off( );
+                case T_WHEY_OUT_P2:      
+                    V1->on();
 
-                    if ( number == 3 || number == 4 )
+                    if ( 3 == number || 4 == number )
                         {
-                        V3->off( );
-                        if ( G_TECH_OBJECTS( C_POST_2_INDEX )->get_mode( POST_WHEY_ACCEPTING ) ) V4->on( );
-                        else V4->off( );
+                        V3->off();
+                        if ( POST2->get_mode( POST_WHEY_ACCEPTING ) ) V4->on();
+                        else V4->off();
                         }
                     else
                         {
-                        V3->on( );
-                        V4->off( );
+                        V3->on();
+                        V4->off();
 
-                        V( 107 )->off( );
-                        V( 207 )->on( );
-                        V( 206 )->off( );
-                        V( 307 )->on( );
-                        V( 507 )->off( );
+                        V( 107 )->off();
+                        V( 207 )->on();
+                        V( 206 )->off();
+                        V( 307 )->on();
+                        V( 507 )->off();
 
-                        V_1->off( );
-                        V_2->off( );
-                        V_3->on( );
+                        V_1->off();
+                        V_2->off();
+                        V_3->on();
 
-                        if ( G_TECH_OBJECTS( C_POST_2_INDEX )->get_mode( POST_WHEY_ACCEPTING ) ) V_4->on( );
-                        else V_4->off( );
+                        if ( POST2->get_mode( POST_WHEY_ACCEPTING ) ) V_4->on();
+                        else V_4->off();
                         }
 
-                    if ( ( LSL->get_state( ) == LNO ) ||
-                        ( G_TECH_OBJECTS( C_POST_2_INDEX )->get_mode( POST_WHEY_ACCEPTING ) &&
-                        ( (post*) G_TECH_OBJECTS( C_POST_2_INDEX ) )->flow->get_state( ) == 0 ) )
+                    if ( ( LSL->get_state() == LNO ) ||
+                        ( POST2->get_mode( POST_WHEY_ACCEPTING ) &&
+                        ( ( post* ) POST2 )->flow->get_state() == 0 ) )
                         {
-                        int idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode( T_WHEY_WOUT_P2,
-                            C_TANK_1_INDEX, C_TANK_4_INDEX );
+                        int idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode(
+                            T_WHEY_WOUT_P2, C_T1_IDX, C_T4_IDX );
                         
                         if ( idx >= 0 ) set_mode( T_WHEY_OUT_P2, 0 );
                         else
                             {
-                            G_TECH_OBJECTS( C_POST_2_INDEX )->set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
-                            G_TECH_OBJECTS( C_POST_2_INDEX )->rt_par_float[ post::P_WARNING_REASON ] =
-                                post::noFlowPost;
+                            POST2->set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
+                            POST2->rt_par_float[ post::RT_F__WARNING_REASON ] =
+                                post::W_NO_FLOW;
                             }
                         }
+                    break;
 
+                case T_WASH:                
+                    V1->on();
+                    V2->off();
+                    V3->on();
+                    V4->off();
+                    V5->on();
+                    V7_1->off();
+                    V7_2->on();
+                    V( 108 )->off();
+                    V( 206 )->on();
+                    V( 208 )->on();
+                    V( 109 )->on();
+                    N( 2202 )->on();
                     break;
-                case T_WASH:                      //Мойка
-                    V1->on( );
-                    V2->off( );
-                    V3->on( );
-                    V4->off( );
-                    V5->on( );
-                    V7_1->off( );
-                    V7_2->on( );
-                    V( 108 )->off( );
-                    V( 206 )->on( );
-                    V( 208 )->on( );
-                    V( 109 )->on( );
-                    N( 2202 )->on( );
 
+                case T_WHEY_WACCEPTING:       
                     break;
-                case T_WHEY_WACCEPTING:           //Ожидание приёмки сыворотки
+
+                case T_WHEY_WOUT_P1:          
                     break;
-                case T_WHEY_WOUT_P1:              //Ожидание выдачи сыворотки пост 1
-                    break;
-                case T_WHEY_WOUT_P2:              //Ожидание выдачи сыворотки пост 2
+
+                case T_WHEY_WOUT_P2:          
                     break;
                 }
             }
@@ -243,58 +257,60 @@ int whey_tank::final_mode( u_int mode )
 
     switch ( mode )
         {
-        case T_WHEY_ACCEPTING:            //Приёмка сыворотки.
-            V1->off( );
-            V2->off( );
-
+        case T_WHEY_ACCEPTING:          
+            V1->off();
+            V2->off();
             break;
-        case T_WHEY_OUT_P1:               //Выдача сыворотки пост 1
-            V1->off( );
 
-            if ( number == 1 || number == 2 ) V4->off( );
+        case T_WHEY_OUT_P1:
+            V1->off();
+
+            if ( 1 == number || 2 == number ) V4->off();
             else
                 {
-                V3->off( );
-                V( 207 )->off( );
-                V( 307 )->off( );
-                V_3->off( );
-                V_4->off( );
+                V3->off();
+                V( 207 )->off();
+                V( 307 )->off();
+                V_3->off();
+                V_4->off();
                 }
-
             break;
-        case T_WHEY_OUT_P2:               //Выдача сыворотки пост 2
-            V1->off( );
 
-            if ( number == 3 || number == 4 ) V4->off( );
+        case T_WHEY_OUT_P2:               
+            V1->off();
+
+            if ( 3 == number || 4 == number ) V4->off();
             else
                 {
-                V3->off( );
+                V3->off();
 
-                V( 207 )->off( );
-                V( 307 )->off( );
+                V( 207 )->off();
+                V( 307 )->off();
 
-                V_3->off( );
-                V_4->off( );
+                V_3->off();
+                V_4->off();
                 }
+            break;
 
-            break;
-        case T_WASH:                      //Мойка
-            V1->off( );
-            V3->off( );
-            V5->off( );
+        case T_WASH:                     
+            V1->off();
+            V3->off();
+            V5->off();
 
-            V7_2->off( );
-            V( 206 )->off( );
-            V( 208 )->off( );
-            V( 109 )->off( );
-            N( 2202 )->off( );
+            V7_2->off();
+            V( 206 )->off();
+            V( 208 )->off();
+            V( 109 )->off();
+            N( 2202 )->off();
+            break;
 
+        case T_WHEY_WACCEPTING:           
             break;
-        case T_WHEY_WACCEPTING:           //Ожидание приёмки сыворотки
+
+        case T_WHEY_WOUT_P1:              
             break;
-        case T_WHEY_WOUT_P1:              //Ожидание выдачи сыворотки пост 1
-            break;
-        case T_WHEY_WOUT_P2:              //Ожидание выдачи сыворотки пост 2
+
+        case T_WHEY_WOUT_P2:              
             break;
         }
 
@@ -313,186 +329,178 @@ int whey_tank::init_mode( u_int mode )
 
     switch ( mode )
         {
-        case T_WHEY_ACCEPTING:            //Приёмка сыворотки:
-
-            if ( get_mode ( T_WASH ) ||                //Во время мойки танка нельзя принимать.
-                G_TECH_OBJECTS( C_COMB_INDEX )->get_mode( my_comb::C_WASH ) ) return 1;     //Во время мойки линии приёмки нельзя принимать.
-
+        case T_WHEY_ACCEPTING:            
+            if ( get_mode ( T_WASH ) ||               // Во время мойки танка нельзя принимать.
+                G_COMB->get_mode( my_comb::C_WASH ) ) // Во время мойки линии приёмки нельзя принимать.
+                return 1;
             break;
-        case T_WHEY_OUT_P1:               //Выдача сыворотки пост 1
 
-            if ( get_mode ( T_WASH ) ) return 1;       //Во время мойки танка нельзя выдавать.
+        case T_WHEY_OUT_P1:               
+            if ( get_mode ( T_WASH ) ) return 1;       // Во время мойки танка нельзя выдавать.
 
-            if ( number == 3 || number == 4 )
+            if ( 3 == number || 4 == number )
                 {
-                if ( G_TECH_OBJECTS( C_TANK_1_INDEX )->get_mode( T_WHEY_OUT_P2 ) || //Выдача сыворотки танком 1
-                   G_TECH_OBJECTS( C_TANK_2_INDEX )->get_mode( T_WHEY_OUT_P2 ) ||    //Выдача сыворотки танком 2
-                    G_TECH_OBJECTS( C_TANK_1_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 1
-                   G_TECH_OBJECTS( C_TANK_2_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 2
-                   G_TECH_OBJECTS( C_TANK_3_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 3
-                   G_TECH_OBJECTS( C_TANK_4_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 4
-                    ( G_TECH_OBJECTS( C_TANK_1_INDEX )->get_mode( T_WHEY_ACCEPTING ) &&
-                   G_TECH_OBJECTS( C_TANK_2_INDEX )->get_mode( T_WHEY_WACCEPTING ) ) || //Приёмка т. 1 и ожидание т. 2
-                    ( G_TECH_OBJECTS( C_TANK_1_INDEX )->get_mode( T_WHEY_WACCEPTING ) &&
-                   G_TECH_OBJECTS( C_TANK_2_INDEX )->get_mode( T_WHEY_ACCEPTING ) ) //Приёмка т. 2 и ожидание т. 1
+                if ( TANK1->get_mode( T_WHEY_OUT_P2 ) ||  // Выдача сыворотки танком 1.
+                   TANK2->get_mode( T_WHEY_OUT_P2 ) ||    // Выдача сыворотки танком 2.
+                    TANK1->get_mode( T_WASH ) ||          // Мойка танка 1.
+                   TANK2->get_mode( T_WASH ) ||           // Мойка танка 2.
+                   TANK3->get_mode( T_WASH ) ||           // Мойка танка 3.
+                   TANK4->get_mode( T_WASH ) ||           // Мойка танка 4.
+                    ( TANK1->get_mode( T_WHEY_ACCEPTING ) &&
+                   TANK2->get_mode( T_WHEY_WACCEPTING ) ) ||    // Приёмка т. 1 и ожидание т. 2.
+                    ( TANK1->get_mode( T_WHEY_WACCEPTING ) &&
+                   TANK2->get_mode( T_WHEY_ACCEPTING ) )        // Приёмка т. 2 и ожидание т. 1.
                     ) return 1;
 
-                //-В зависимости от того, в какой танк идёт приёмка ( или ни в какой ), определяем клапаны перехода.
+                //-В зависимости от того, в какой танк идёт приёмка ( или ни
+                // в какой ), определяем клапаны перехода.
                 V_1 = V( 101 );
                 V_2 = V( 102 );
                 V_3 = V( 103 );
                 V_4 = V( 104 );
 
-                if ( G_TECH_OBJECTS( C_TANK_1_INDEX )->get_mode( T_WHEY_ACCEPTING ) )
+                if ( TANK1->get_mode( T_WHEY_ACCEPTING ) )
                     {
                     return 1;
-                    //V_1 = V( 201 );
-                    //V_2 = V( 202 );
-                    //V_3 = V( 203 );
-                    //V_4 = V( 204 );
                     }
-                //-В зависимости от того, в какой танк идёт приёмка ( или ни в какой ), определяем клапаны перехода.-!>
+                //-В зависимости от того, в какой танк идёт приёмка ( или ни
+                // в какой ), определяем клапаны перехода.-!>
                 }
 
             //( (post*) &G_TECH_OBJECTS[ C_POST_1_INDEX ] )->flow->set_state( 1 );
             break;
-        case T_WHEY_OUT_P2:               //Выдача сыворотки пост 2
+        case T_WHEY_OUT_P2:             
 
-            if ( get_mode ( T_WASH ) ) return 1;       //Во время мойки танка нельзя выдавать.
+            if ( get_mode ( T_WASH ) ) return 1;       // Во время мойки танка нельзя выдавать.
 
-            if ( number == 1 || number == 2 )
+            if ( 1 == number || 2 == number )
                 {
-                if (G_TECH_OBJECTS( C_TANK_3_INDEX )->get_mode( T_WHEY_OUT_P1 ) || //Выдача сыворотки танком 3
-                   G_TECH_OBJECTS( C_TANK_4_INDEX )->get_mode( T_WHEY_OUT_P1 ) ||    //Выдача сыворотки танком 4
-                    G_TECH_OBJECTS( C_TANK_1_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 1
-                   G_TECH_OBJECTS( C_TANK_2_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 2
-                   G_TECH_OBJECTS( C_TANK_3_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 3
-                   G_TECH_OBJECTS( C_TANK_4_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 4
-                    (G_TECH_OBJECTS( C_TANK_3_INDEX )->get_mode( T_WHEY_ACCEPTING ) &&
-                   G_TECH_OBJECTS( C_TANK_4_INDEX )->get_mode( T_WHEY_WACCEPTING ) ) || //Приёмка т. 3 и ожидание т. 4
-                    (G_TECH_OBJECTS( C_TANK_3_INDEX )->get_mode( T_WHEY_WACCEPTING ) &&
-                   G_TECH_OBJECTS( C_TANK_4_INDEX )->get_mode( T_WHEY_ACCEPTING ) ) //Приёмка т. 4 и ожидание т. 3
+                if ( TANK3->get_mode( T_WHEY_OUT_P1 ) ||   // Выдача сыворотки танком 3.
+                    TANK4->get_mode( T_WHEY_OUT_P1 ) ||    // Выдача сыворотки танком 4.
+                    TANK1->get_mode( T_WASH ) ||           // Мойка танка 1.
+                    TANK2->get_mode( T_WASH ) ||           // Мойка танка 2.
+                    TANK3->get_mode( T_WASH ) ||           // Мойка танка 3.
+                    TANK4->get_mode( T_WASH ) ||           // Мойка танка 4.
+                    ( TANK3->get_mode( T_WHEY_ACCEPTING ) &&
+                    TANK4->get_mode( T_WHEY_WACCEPTING ) ) ||   // Приёмка т. 3 и ожидание т. 4.
+                    ( TANK3->get_mode( T_WHEY_WACCEPTING ) &&
+                    TANK4->get_mode( T_WHEY_ACCEPTING ) )       // Приёмка т. 4 и ожидание т. 3.
                     ) return 1;
 
-                //-В зависимости от того, в какой танк идёт приёмка ( или ни в какой ), определяем клапаны перехода.
+                //-В зависимости от того, в какой танк идёт приёмка ( или ни
+                // в какой ), определяем клапаны перехода.
                 V_1 = V( 401 );
                 V_2 = V( 402 );
                 V_3 = V( 403 );
                 V_4 = V( 404 );
 
-                if (G_TECH_OBJECTS( C_TANK_4_INDEX )->get_mode( T_WHEY_ACCEPTING ) )
+                if ( TANK4->get_mode( T_WHEY_ACCEPTING ) )
                     {
                     return 1;
-                    //V_1 = V( 301 );
-                    //V_2 = V( 302 );
-                    //V_3 = V( 303 );
-                    //V_4 = V( 304 );
                     }
-                //-В зависимости от того, в какой танк идёт приёмка ( или ни в какой ), определяем клапаны перехода.-!>
+                //-В зависимости от того, в какой танк идёт приёмка ( или
+                // ни в какой ), определяем клапаны перехода.-!>
                 }
 
             //( (post*) G_TECH_OBJECTS( C_POST_2_INDEX ) )->flow->set_state( 1 );
             break;
-        case T_WASH:                      //Мойка
+        case T_WASH:                    
             if  ( get_mode ( T_WHEY_WACCEPTING ) ||
                 get_mode ( T_WHEY_WOUT_P1 ) ||
                 get_mode ( T_WHEY_WOUT_P2 ) ||
                 get_mode ( T_WHEY_ACCEPTING ) ||
                 get_mode ( T_WHEY_OUT_P1 ) ||
                 get_mode ( T_WHEY_OUT_P2 ) ||
-                G_TECH_OBJECTS( C_COMB_INDEX )->get_mode( my_comb::C_WASH ) ) return 1;
+                G_COMB->get_mode( my_comb::C_WASH ) ) return 1;
 
-            if ( G_TECH_OBJECTS( C_TANK_1_INDEX )->get_mode( T_WHEY_OUT_P2 ) ||
-                G_TECH_OBJECTS( C_TANK_1_INDEX )->get_mode( T_WHEY_WOUT_P2 )||
-               G_TECH_OBJECTS( C_TANK_2_INDEX )->get_mode( T_WHEY_OUT_P2 ) ||
-               G_TECH_OBJECTS( C_TANK_2_INDEX )->get_mode( T_WHEY_WOUT_P2 )||
-               G_TECH_OBJECTS( C_TANK_3_INDEX )->get_mode( T_WHEY_OUT_P1 ) ||
-               G_TECH_OBJECTS( C_TANK_3_INDEX )->get_mode( T_WHEY_WOUT_P1 )||
-               G_TECH_OBJECTS( C_TANK_4_INDEX )->get_mode( T_WHEY_OUT_P1 ) ||
-               G_TECH_OBJECTS( C_TANK_4_INDEX )->get_mode( T_WHEY_WOUT_P1 ) )
+            if ( TANK1->get_mode( T_WHEY_OUT_P2 ) ||
+                TANK1->get_mode( T_WHEY_WOUT_P2 )||
+                TANK2->get_mode( T_WHEY_OUT_P2 ) ||
+                TANK2->get_mode( T_WHEY_WOUT_P2 )||
+                TANK3->get_mode( T_WHEY_OUT_P1 ) ||
+                TANK3->get_mode( T_WHEY_WOUT_P1 )||
+                TANK4->get_mode( T_WHEY_OUT_P1 ) ||
+                TANK4->get_mode( T_WHEY_WOUT_P1 ) )
                 return 1;
             break;
 
-        case T_WHEY_WACCEPTING:           //Ожидание приёмки сыворотки
+        case T_WHEY_WACCEPTING:          
             break;
 
-        case T_WHEY_WOUT_P1:              //Ожидание выдачи сыворотки пост 1
-            if ( get_mode ( T_WASH ) ) return 1;       //Во время мойки танка нельзя выдавать.
+        case T_WHEY_WOUT_P1:             
+            if ( get_mode ( T_WASH ) ) return 1;    // Во время мойки танка нельзя выдавать.
 
-            if ( number == 3 || number == 4 )
+            if ( 3 == number || 4 == number )
                 {
-                if ( G_TECH_OBJECTS( C_TANK_1_INDEX )->get_mode( T_WHEY_OUT_P2 ) || //Выдача сыворотки танком 1
-                   G_TECH_OBJECTS( C_TANK_2_INDEX )->get_mode( T_WHEY_OUT_P2 ) ||    //Выдача сыворотки танком 2
-                    G_TECH_OBJECTS( C_TANK_1_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 1
-                   G_TECH_OBJECTS( C_TANK_2_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 2
-                   G_TECH_OBJECTS( C_TANK_3_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 3
-                   G_TECH_OBJECTS( C_TANK_4_INDEX )->get_mode( T_WASH ) )            //Мойка танка 4
+                if ( TANK1->get_mode( T_WHEY_OUT_P2 ) || // Выдача сыворотки танком 1.
+                   TANK2->get_mode( T_WHEY_OUT_P2 ) ||   // Выдача сыворотки танком 2.
+                    TANK1->get_mode( T_WASH ) ||         // Мойка танка 1.
+                   TANK2->get_mode( T_WASH ) ||          // Мойка танка 2.
+                   TANK3->get_mode( T_WASH ) ||          // Мойка танка 3.
+                   TANK4->get_mode( T_WASH ) )           // Мойка танка 4.
                     return 1;
                 }
             break;
 
-        case T_WHEY_WOUT_P2:              //Ожидание выдачи сыворотки пост 2
-            if ( get_mode ( T_WASH ) ) return 1;       //Во время мойки танка нельзя выдавать.
+        case T_WHEY_WOUT_P2:              
+            if ( get_mode ( T_WASH ) ) return 1;    // Во время мойки танка нельзя выдавать.
 
-            if ( number == 1 || number == 2 )
+            if ( 1 == number || 2 == number )
                 {
-                if (G_TECH_OBJECTS( C_TANK_3_INDEX )->get_mode( T_WHEY_OUT_P1 ) || //Выдача сыворотки танком 1
-                   G_TECH_OBJECTS( C_TANK_4_INDEX )->get_mode( T_WHEY_OUT_P1 ) ||    //Выдача сыворотки танком 2
-                    G_TECH_OBJECTS( C_TANK_1_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 1
-                   G_TECH_OBJECTS( C_TANK_2_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 2
-                   G_TECH_OBJECTS( C_TANK_3_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 3
-                   G_TECH_OBJECTS( C_TANK_4_INDEX )->get_mode( T_WASH ) )            //Мойка танка 4
+                if( TANK3->get_mode( T_WHEY_OUT_P1 ) || // Выдача сыворотки танком 1.
+                    TANK4->get_mode( T_WHEY_OUT_P1 ) || // Выдача сыворотки танком 2.
+                    TANK1->get_mode( T_WASH ) ||        // Мойка танка 1.
+                    TANK2->get_mode( T_WASH ) ||        // Мойка танка 2.
+                    TANK3->get_mode( T_WASH ) ||        // Мойка танка 3.
+                    TANK4->get_mode( T_WASH ) )         // Мойка танка 4.
                     return 1;
                 }
             break;
 
-        case RESET_TANK_POST1:            //Выключает режим выдачи для танка и, если надо, поста 1
-            idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode( T_WHEY_WOUT_P1,
-                C_TANK_1_INDEX, C_TANK_4_INDEX );
+        case RESET_TANK_POST1:           
+            idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode(
+                T_WHEY_WOUT_P1, C_T1_IDX, C_T4_IDX );
 
-            if ( idx == -1 ) G_TECH_OBJECTS( C_POST_1_INDEX )->set_mode( RESET_POST, 1 ); //Сбрасываем пост 1.
+            if ( idx == -1 ) POST1->set_mode( RESET_POST, 1 ); // Сбрасываем пост 1.
             set_mode( T_WHEY_OUT_P1, 0 );
 
             return 2;
 
-        case RESET_TANK_POST2:            //Выключает режим выдачи для танка и, если надо, поста 2
-            idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode( T_WHEY_WOUT_P2,
-                C_TANK_1_INDEX, C_TANK_4_INDEX );
+        case RESET_TANK_POST2:           
+            idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode( 
+                T_WHEY_WOUT_P2, C_T1_IDX, C_T4_IDX );
 
-            if ( idx == -1 ) G_TECH_OBJECTS( C_POST_2_INDEX )->set_mode( RESET_POST, 1 ); //Сбрасываем пост 2.
+            if ( idx == -1 ) POST2->set_mode( RESET_POST, 1 ); // Сбрасываем пост 2.
             set_mode( T_WHEY_OUT_P2, 0 );
 
             return 2;
-        case SET_POST1_AND_TANK:          //Включить танк и пост 1
-            if ( get_mode ( T_WASH ) ||              //Во время мойки танка нельзя.
-                //         get_mode( T_WHEY_ACCEPTING ) ||
-                //         get_mode( T_WHEY_WACCEPTING ) ||
+
+        case SET_POST1_AND_TANK:          
+            if ( get_mode ( T_WASH ) ||   // Во время мойки танка нельзя.
                 get_mode( T_WHEY_OUT_P2 ) ||
                 get_mode( T_WHEY_WOUT_P2 ) ) return 1;
 
             if ( set_mode( T_WHEY_OUT_P1, 1 ) == 1000 + T_WHEY_OUT_P1 )
-                G_TECH_OBJECTS( C_POST_1_INDEX )->set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
+                POST1->set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
             return 2;
 
-        case SET_POST2_AND_TANK:          //Включить танк и пост 2
-            if ( get_mode ( T_WASH ) ||              //Во время мойки танка нельзя.
-                //         get_mode( T_WHEY_ACCEPTING ) ||
-                //         get_mode( T_WHEY_WACCEPTING ) ||
+        case SET_POST2_AND_TANK:          
+            if ( get_mode ( T_WASH ) ||   // Во время мойки танка нельзя.
                 get_mode( T_WHEY_OUT_P1 ) ||
                 get_mode( T_WHEY_WOUT_P1 ) ) return 1;
 
             if ( set_mode( T_WHEY_OUT_P2, 1 ) == 1000 + T_WHEY_OUT_P2 )
-                G_TECH_OBJECTS( C_POST_2_INDEX )->set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
+                POST2->set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
             return 2;
 
-        case SET_HEATING_POST1_AND_TANK:  //Включить танк и подогрев пост 1
+        case SET_HEATING_POST1_AND_TANK:  
             set_mode( SET_POST1_AND_TANK, 1 );
-            G_TECH_OBJECTS( C_POST_1_INDEX )->set_mode( POST_WHEY_HEATING, 1 );
+            POST1->set_mode( POST_WHEY_HEATING, 1 );
             return 2;
 
-        case SET_HEATING_POST2_AND_TANK:  //Включить танк и подогрев пост 2
+        case SET_HEATING_POST2_AND_TANK:  
             set_mode( SET_POST2_AND_TANK, 1 );
-            G_TECH_OBJECTS( C_POST_2_INDEX )->set_mode( POST_WHEY_HEATING, 1 );
+            POST2->set_mode( POST_WHEY_HEATING, 1 );
             return 2;
         }
 
@@ -500,144 +508,165 @@ int whey_tank::init_mode( u_int mode )
     return 0;
     }
 //-----------------------------------------------------------------------------
-post::post( int par_count, int n, 
-    int tmr_cnt ): tech_object( "TANK", n, 32, tmr_cnt, par_count, 23, 1, 1 ),
-    V1 ( G_DEV_STUB ),
+post::post( int n ): tech_object( "TANK", n, 32, 5, 5 /*par_count*/,
+    20 /*work_par_count*/, 1, 1 ),
     btnStartPrevState( 0 ),
-    btnPausePrevState( 0 )    
+    btnPausePrevState( 0 ),
+
+    V1( V( number - 5 ) ),
+    outTE( 6 == number ? TE( 5 ) : TE( 6 ) ),
+    N1( N( number - 5 ) ),
+    ctr( CTR( number - 5 ) ),
+    flow( 6 == number ? FB( 5 ) : FB( 6 ) ),
+        
+    lampReady( 6 == number ? UPR( 1 ) : UPR( 3 ) ),
+    lampWorking( 6 == number ? UPR( 2 ) : UPR( 4 ) ),
+    btnStart( 6 == number ? FB( 1 ) : FB( 3 ) ),
+    btnPause( 6 == number ? FB( 2 ) : FB( 4 ) )
     {
     shutDown = 1;
 
-    timers[ delayTempTmr ].set_countdown_time( 2000 );
-    timers[ delayTempTmr ].reset();
+    timers[ TMR_DELAY_TEMP ].set_countdown_time( 2000 );
+    timers[ TMR_DELAY_TEMP ].reset();
     }
 //-----------------------------------------------------------------------------
-post::~post( )
+post::~post()
     {
     }
 //-----------------------------------------------------------------------------
-int post::init_params( )
+int post::init_params()
     {
-    par_float[ T_OUT_MAX ] = 50;
-    par_float[ post::T_OUT_NORMAL ] = 40;
-    par_float[ post::T_LE_MIN ] = 1;
-    par_float[ post::PAUSE_TIME_MAX ] = 5;
-    par_float.save_all();
-
+    par_float[ S_F__LE_MIN ]         = 1;
+    par_float[ S_F__T_OUT_MAX ]      = 50;
+    par_float[ S_F__OUT_NORMAL ]     = 40;
+    par_float[ S_F__PAUSE_TIME_MAX ] = 5;
+    
     return 0;
     }
 //-----------------------------------------------------------------------------
 int post::evaluate()
     {
-    tech_object::evaluate( );
+    tech_object::evaluate();
 
-    int i;
-    for ( i = 0; i < 32; i++ )
+    for ( u_int i = 0; i < get_modes_count(); i++ )
         {
         if ( get_mode( i ) )
             {
             switch ( i )
                 {
-                case POST_WHEY_HEATING:         //Подогрев сыворотки постом
+                case POST_WHEY_HEATING:         
 
                     if ( get_mode( POST_WHEY_ACCEPTING ) && flow->get_state() == 1 &&
-                        outTE->get_value() <= par_float[ T_OUT_NORMAL ] )
+                        outTE->get_value() <= par_float[ S_F__OUT_NORMAL ] )
                         {
-                        V1->on( );
+                        V1->on();
                         }
-                    else V1->off( );
+                    else V1->off();
 
                     //-Клапан подогрева.
                     if ( get_mode( POST_WHEY_ACCEPTING ) )
                         {
-                        if ( outTE->get_value() > par_float[ T_OUT_MAX ] )
+                        if ( outTE->get_value() > par_float[ S_F__T_OUT_MAX ] )
                             {
-                            if ( timers[ delayTempTmr ].get_state() )
+                            if ( timers[ TMR_DELAY_TEMP ].get_state() )
                                 {
-                                if ( timers[ delayTempTmr ].is_time_up() )
+                                if ( timers[ TMR_DELAY_TEMP ].is_time_up() )
                                     {
-                                    rt_par_float[ P_WARNING_REASON ] = maxTPost;
+                                    rt_par_float[ RT_F__WARNING_REASON ] =
+                                        W_MAX_OUT_TEMPER;
 
                                     set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
-                                    timers[ delayTempTmr ].reset();
+                                    timers[ TMR_DELAY_TEMP ].reset();
                                     }
                                 }
                             else
                                 {
-                                timers[ delayTempTmr ].set_countdown_time( 2000 );
-                                timers[ delayTempTmr ].reset();
-                                timers[ delayTempTmr ].start();
+                                timers[ TMR_DELAY_TEMP ].set_countdown_time( 2000 );
+                                timers[ TMR_DELAY_TEMP ].reset();
+                                timers[ TMR_DELAY_TEMP ].start();
                                 }
                             }
-                        else timers[ delayTempTmr ].reset();
+                        else timers[ TMR_DELAY_TEMP ].reset();
                         }
                     //-Клапан подогрева.-!>
                     break;
 
-                case POST_WHEY_ACCEPTING:       //Приёмка сыворотки постом
-                    N1->on( );
-                    lampReady->on( );
-                    lampWorking->on( );
+                case POST_WHEY_ACCEPTING:      
+                    N1->on();
+                    lampReady->on();
+                    lampWorking->on();
 
-                    if ( ctr->get_quantity() >= par_float[ TOT_VOL ] )/*Общее заполнение машины*/
+                    if ( ctr->get_quantity() >=
+                        par_float[ RT_F__TOT_VOL ] ) // Общее заполнение машины.
                         set_mode( RESET_POST, 1 );
                     else
                         {
                         if ( ctr->get_quantity() - prevSectVol >=
-                            rt_par_float[ ( u_int ) rt_par_float[ CURRENT_SEC ] + SECTION1 - 1 ] ) //Заполнение текущей секции.
+                            rt_par_float[ ( u_int ) rt_par_float[ RT_F__CURRENT_SEC ] +
+                            RT_F__SECTION1 - 1 ] ) // Заполнение текущей секции.
                             {
-                            prevSectVol += ( u_int ) rt_par_float[ ( u_int ) rt_par_float[ CURRENT_SEC ] + SECTION1 - 1 ];
-                            rt_par_float[ CURRENT_SEC ] = rt_par_float[ CURRENT_SEC ] + 1;
+                            prevSectVol += ( u_int ) rt_par_float[ 
+                                ( u_int ) rt_par_float[ RT_F__CURRENT_SEC ] +
+                                RT_F__SECTION1 - 1 ];
+                            rt_par_float[ RT_F__CURRENT_SEC ] =
+                                 rt_par_float[ RT_F__CURRENT_SEC ] + 1;
 
-                            if ( rt_par_float[ CURRENT_SEC ] < rt_par_float[ CURRENT_SEC ] + 1 )/*Есть секции*/
+                            if ( rt_par_float[ RT_F__CURRENT_SEC ] <
+                                rt_par_float[ RT_F__CURRENT_SEC ] + 1 ) // Есть секции.
                                 set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
                             else set_mode( RESET_POST, 1 );
                             }
                         }
                     break;
 
-                case POST_WHEY_ACCEPTING_PAUSE: //Пауза приёмки сыворотки постом
-                    if ( timers[ pauseTimeTmr ].is_time_up() )
+                case POST_WHEY_ACCEPTING_PAUSE:
+                    if ( timers[ TMR_PAUSE_TIME ].is_time_up() )
                         {
-                        timers[ pauseTimeTmr ].reset();
-                        timers[ pauseTimeTmr ].start();
-                        rt_par_float[ P_WARNING_REASON ] = pauseTimeLeft;
+                        timers[ TMR_PAUSE_TIME ].reset();
+                        timers[ TMR_PAUSE_TIME ].start();
+                        rt_par_float[ RT_F__WARNING_REASON ] = W_PAUSE_TIME_LEFT;
                         }
 
-                    lampReady->on( );
+                    lampReady->on();
                     break;
 
-                case POST_WHEY_ACCEPTING_END: //Завершение приёмки сыворотки постом
+                case POST_WHEY_ACCEPTING_END: 
                     break;
                 }
             }
         }
 
     //-Start and stop buttons.
-    if ( btnStart->get_state( ) == 1 && btnStartPrevState == 0  )
+    if ( btnStart->get_state() == 1 && btnStartPrevState == 0  )
         {
 #ifdef DEBUG
         Print("Pressed start button post 1!\n\r");
 #endif
-        if ( lampReady->get_state( ) == 1 ) set_mode( POST_WHEY_ACCEPTING, 1 );
+        if ( lampReady->get_state() == 1 ) 
+            {
+            set_mode( POST_WHEY_ACCEPTING, 1 );
+            }
         btnStartPrevState = 1;
         }
 
-    if ( btnStart->get_state( ) == 0 && btnStartPrevState == 1  )
+    if ( btnStart->get_state() == 0 && btnStartPrevState == 1  )
         {
         btnStartPrevState = 0;
         }
 
-    if ( btnPause->get_state( ) == 0 && btnPausePrevState == 1 )
+    if ( btnPause->get_state() == 0 && btnPausePrevState == 1 )
         {
 #ifdef DEBUG
         Print("Pressed pause button post 1!\n\r");
 #endif
-        if ( lampWorking->get_state( ) == 1 ) set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
+        if ( lampWorking->get_state() == 1 )
+            {
+            set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
+            }
         btnPausePrevState = 0;
         }
 
-    if ( btnPause->get_state( ) == 1 && btnPausePrevState == 0 )
+    if ( btnPause->get_state() == 1 && btnPausePrevState == 0 )
         {
         btnPausePrevState = 1;
         }
@@ -656,21 +685,21 @@ int post::final_mode( u_int mode )
 
     switch ( mode )
         {
-        case POST_WHEY_HEATING:         //Подогрев сыворотки постом
-            V1->off( );
+        case POST_WHEY_HEATING:         // Подогрев сыворотки постом.
+            V1->off();
 
             break;
-        case POST_WHEY_ACCEPTING:       //Приёмка сыворотки постом
-            N1->off( );
-            lampWorking->off( );
-            lampReady->off( );
+        case POST_WHEY_ACCEPTING:       // Приёмка сыворотки постом.
+            N1->off();
+            lampWorking->off();
+            lampReady->off();
             break;
 
-        case POST_WHEY_ACCEPTING_PAUSE: //Пауза приёмки сыворотки постом
-            lampReady->off( );
+        case POST_WHEY_ACCEPTING_PAUSE: // Пауза приёмки сыворотки постом.
+            lampReady->off();
             break;
 
-        case POST_WHEY_ACCEPTING_END: //Завершение приёмки сыворотки постом
+        case POST_WHEY_ACCEPTING_END:   //Завершение приёмки сыворотки постом.
             break;
         }
     return 0;
@@ -686,83 +715,106 @@ int post::init_mode( u_int mode )
 
     switch ( mode )
         {
-        case POST_WHEY_HEATING:         //Подогрев сыворотки постом
+        case POST_WHEY_HEATING:       
             if ( !( get_mode( POST_WHEY_ACCEPTING ) ||
                 get_mode( POST_WHEY_ACCEPTING_PAUSE ) ) ) return 1;
             break;
 
-        case POST_WHEY_ACCEPTING:       //Приёмка сыворотки постом
+        case POST_WHEY_ACCEPTING:     
             //flow->set_state( 1 );
 
-            rt_par_float[ P_WARNING_REASON ] = 0;
+            rt_par_float[ RT_F__WARNING_REASON ] = 0;
             set_mode( POST_WHEY_ACCEPTING_PAUSE, 0 );
             set_mode( POST_WHEY_ACCEPTING_END, 0 );
             break;
 
-        case POST_WHEY_ACCEPTING_PAUSE: //Пауза приёмки сыворотки постом
-            if ( rt_par_float[ IS_RESET_POST ] == 1 )
+        case POST_WHEY_ACCEPTING_PAUSE:
+            if ( rt_par_float[ RT_F__IS_RESET_POST ] == 1 )
                 {
                 ctr->reset();
                 ctr->start();
 
                 prevSectVol = 0;
-                rt_par_float[ CURRENT_SEC ] = 1;
-                rt_par_float[ IS_RESET_POST ] = 0;
+                rt_par_float[ RT_F__CURRENT_SEC ] = 1;
+                rt_par_float[ RT_F__IS_RESET_POST ] = 0;
                 }
 
-            timers[ pauseTimeTmr ].set_countdown_time(
-                60UL * 1000UL * ( u_long ) par_float[ PAUSE_TIME_MAX ] );
-            timers[ pauseTimeTmr ].reset();
-            timers[ pauseTimeTmr ].start();
+            timers[ TMR_PAUSE_TIME ].set_countdown_time(
+                60UL * 1000UL * ( u_long ) par_float[ S_F__PAUSE_TIME_MAX ] );
+            timers[ TMR_PAUSE_TIME ].reset();
+            timers[ TMR_PAUSE_TIME ].start();
 
             set_mode( POST_WHEY_ACCEPTING, 0 );
             set_mode( POST_WHEY_ACCEPTING_END, 0 );
             break;
 
-        case POST_WHEY_ACCEPTING_END: //Завершение приёмки сыворотки постом
+        case POST_WHEY_ACCEPTING_END:
             break;
 
-        case RESET_POST:             //Выключает пауза/работу, подогрев и включает режим выдача завершена
+        case RESET_POST:             
             set_mode( POST_WHEY_ACCEPTING_PAUSE, 0 );
             set_mode( POST_WHEY_ACCEPTING, 0 );
             set_mode( POST_WHEY_HEATING, 0 );
             set_mode( POST_WHEY_ACCEPTING_END, 1 );
 
-            int postMode1, postMode2;
-            if ( number == 6 ) //Пост №1
+            int postMode1;
+            int postMode2;
+            if ( 6 == number )  // Пост №1.
                 {
                 postMode1 = T_WHEY_OUT_P1;
                 postMode2 = T_WHEY_WOUT_P1;
                 }
-            else           //Пост №2
+            else                // Пост №2.
                 {
                 postMode1 = T_WHEY_OUT_P2;
                 postMode2 = T_WHEY_WOUT_P2;
                 }
 
-            G_TECH_OBJECTS( C_TANK_1_INDEX )->set_mode( postMode1, 0 );
-            G_TECH_OBJECTS( C_TANK_1_INDEX )->set_mode( postMode2, 0 );
-           G_TECH_OBJECTS( C_TANK_2_INDEX )->set_mode( postMode1, 0 );
-           G_TECH_OBJECTS( C_TANK_2_INDEX )->set_mode( postMode2, 0 );
-           G_TECH_OBJECTS( C_TANK_3_INDEX )->set_mode( postMode1, 0 );
-           G_TECH_OBJECTS( C_TANK_3_INDEX )->set_mode( postMode2, 0 );
-           G_TECH_OBJECTS( C_TANK_4_INDEX )->set_mode( postMode1, 0 );
-           G_TECH_OBJECTS( C_TANK_4_INDEX )->set_mode( postMode2, 0 );
+            TANK1->set_mode( postMode1, 0 );
+            TANK1->set_mode( postMode2, 0 );
+            TANK2->set_mode( postMode1, 0 );
+            TANK2->set_mode( postMode2, 0 );
+            TANK3->set_mode( postMode1, 0 );
+            TANK3->set_mode( postMode2, 0 );
+            TANK4->set_mode( postMode1, 0 );
+            TANK4->set_mode( postMode2, 0 );
             return 1;
 
-        case SET_PAUSE_AND_HEATING:       //Включает пауза и подогрев
+        case SET_PAUSE_AND_HEATING:      
             set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
             set_mode( POST_WHEY_HEATING, 1 );
 
             return 1;
         }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int my_comb::evaluate()
     {
-    tech_object::evaluate( );
+    tech_object::evaluate();
+
+    for ( u_int i = 0; i < get_modes_count(); i++ )
+        {
+        if ( get_mode( i ) )
+            {
+            switch ( i )
+                {
+                case C_WASH:
+                    V( 106 )->on();
+                    V( 108 )->on();
+                    V( 109 )->on();
+
+                    V( 102 )->off();
+                    V( 202 )->off();
+                    V( 208 )->off();
+                    V( 302 )->off();
+                    V( 402 )->off();
+                    break;
+                }
+            }
+        }
 
     return 0;
     }
@@ -770,6 +822,15 @@ int my_comb::evaluate()
 int my_comb::final_mode( u_int mode )
     {
     tech_object::final_mode( mode );
+
+    switch ( mode )
+        {
+        case C_WASH:
+            V( 106 )->off();
+            V( 108 )->off();
+            V( 109 )->off();
+            break;
+        }
 
     return 0;
     }
@@ -782,16 +843,16 @@ int my_comb::init_mode( u_int mode )
 
     switch ( mode )
         {
-        case C_WASH:     //
-            if ( G_TECH_OBJECTS( C_TANK_1_INDEX )->get_mode ( T_WHEY_ACCEPTING ) ||  //Во время приёмки нельзя мыть.
-               G_TECH_OBJECTS( C_TANK_2_INDEX )->get_mode ( T_WHEY_ACCEPTING ) ||
-               G_TECH_OBJECTS( C_TANK_3_INDEX )->get_mode ( T_WHEY_ACCEPTING ) ||
-               G_TECH_OBJECTS( C_TANK_4_INDEX )->get_mode ( T_WHEY_ACCEPTING ) ||
+        case C_WASH:     
+            if ( TANK1->get_mode( T_WHEY_ACCEPTING ) || // Во время приёмки нельзя мыть.
+               TANK2->get_mode( T_WHEY_ACCEPTING ) ||
+               TANK3->get_mode( T_WHEY_ACCEPTING ) ||
+               TANK4->get_mode( T_WHEY_ACCEPTING ) ||
                     
-                G_TECH_OBJECTS( C_TANK_1_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 1
-               G_TECH_OBJECTS( C_TANK_2_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 2
-               G_TECH_OBJECTS( C_TANK_3_INDEX )->get_mode( T_WASH ) ||           //Мойка танка 3
-               G_TECH_OBJECTS( C_TANK_4_INDEX )->get_mode( T_WASH ) )            //Мойка танка 4
+               TANK1->get_mode( T_WASH ) ||             // Мойка танка 1.
+               TANK2->get_mode( T_WASH ) ||             // Мойка танка 2.
+               TANK3->get_mode( T_WASH ) ||             // Мойка танка 3.
+               TANK4->get_mode( T_WASH ) )              // Мойка танка 4.
                 return 1;
             break;
         }
@@ -804,7 +865,7 @@ my_comb::my_comb( int states_count, int params_count, int rt_param_count,
     {
     }
 //-----------------------------------------------------------------------------
-my_comb::~my_comb( )
+my_comb::~my_comb()
     {
     }
 //-----------------------------------------------------------------------------
@@ -817,4 +878,3 @@ int evaluate_all()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-

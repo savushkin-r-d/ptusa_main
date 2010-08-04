@@ -17,6 +17,8 @@
                 <confElem>release_ucLinux</confElem>
                 <confElem>debug_ucLinux</confElem>
                 <confElem>full_debug_linux</confElem>
+                <confElem>full_debug_ucLinux</confElem>
+                <confElem>no_wago_full_debug_ucLinux</confElem>
             </confList>
         </data>
     </configuration>

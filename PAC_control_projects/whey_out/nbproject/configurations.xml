@@ -115,7 +115,7 @@
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
             <pElem>/usr/include</pElem>
-            <pElem>/../../common/util</pElem>
+            <pElem>../../common/util</pElem>
           </incDir>
           <preprocessorList>
             <Elem>PAC</Elem>
@@ -127,6 +127,9 @@
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
         </fortranCompilerTool>
+        <linkerTool>
+          <commandLine>-pg</commandLine>
+        </linkerTool>
       </compileType>
     </conf>
     <conf name="release_ucLinux" type="1">
@@ -211,6 +214,7 @@
             <pElem>/usr/include</pElem>
             <pElem>../../common/util</pElem>
           </incDir>
+          <commandLine>-pg</commandLine>
           <preprocessorList>
             <Elem>PAC</Elem>
             <Elem>W750</Elem>
@@ -220,6 +224,69 @@
           </preprocessorList>
           <warningLevel>2</warningLevel>
         </ccTool>
+        <linkerTool>
+          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/whey_out</output>
+          <commandLine>-pg</commandLine>
+        </linkerTool>
+      </compileType>
+    </conf>
+    <conf name="full_debug_ucLinux" type="1">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <compilerSet>arm-uclinux-elf|GNU</compilerSet>
+        <platform>2</platform>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <incDir>
+            <pElem>../../PAC/common</pElem>
+            <pElem>../../common/PAC-driver</pElem>
+            <pElem>../../PAC/linux</pElem>
+            <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
+            <pElem>../../common/util</pElem>
+          </incDir>
+          <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
+          <preprocessorList>
+            <Elem>PAC</Elem>
+            <Elem>W750</Elem>
+            <Elem>UCLINUX</Elem>
+            <Elem>DEBUG</Elem>
+          </preprocessorList>
+        </ccTool>
+        <linkerTool>
+          <output>/home/id/id_share/out/whey_out</output>
+          <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -Wl,-elf2flt /home/id/uclinux-dist/lib/uClibc/lib/crt0.o /home/id/uclinux-dist/lib/uClibc/lib/crti.o /home/id/uclinux-dist/lib/uClibc/lib/crtn.o -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
+        </linkerTool>
+      </compileType>
+    </conf>
+    <conf name="no_wago_full_debug_ucLinux" type="1">
+      <toolsSet>
+        <developmentServer>localhost</developmentServer>
+        <compilerSet>arm-uclinux-elf|GNU</compilerSet>
+        <platform>2</platform>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <incDir>
+            <pElem>../../PAC/common</pElem>
+            <pElem>../../common/PAC-driver</pElem>
+            <pElem>../../PAC/linux</pElem>
+            <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
+            <pElem>../../common/util</pElem>
+          </incDir>
+          <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
+          <preprocessorList>
+            <Elem>PAC</Elem>
+            <Elem>W750</Elem>
+            <Elem>UCLINUX</Elem>
+            <Elem>DEBUG</Elem>
+            <Elem>DEBUG_NO_WAGO_MODULES</Elem>
+          </preprocessorList>
+        </ccTool>
+        <linkerTool>
+          <output>/home/id/id_share/out/whey_out</output>
+          <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -Wl,-elf2flt /home/id/uclinux-dist/lib/uClibc/lib/crt0.o /home/id/uclinux-dist/lib/uClibc/lib/crti.o /home/id/uclinux-dist/lib/uClibc/lib/crtn.o -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
+        </linkerTool>
       </compileType>
     </conf>
   </confs>
