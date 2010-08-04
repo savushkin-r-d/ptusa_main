@@ -2,8 +2,12 @@
 #include <time.h>
 #include <sys/ioctl.h>
 #include <string.h>
+#include <stdio.h>
+#include <unistd.h>
+#include <errno.h>
 
 #include "tcp_cmctr_lin.h"
+#include "PAC_err.h"
 
 #ifdef DEBUG
 unsigned int max_buffer_use = 0;
@@ -13,11 +17,10 @@ unsigned int max_buffer_use = 0;
 tcp_communicator_linux::tcp_communicator_linux():tcp_communicator(),
 netOK( 0 )
     {
-    tv.tv_sec = 0;
-    tv.tv_usec = 0;
-    max_cycles = 1;
+    // Задаем таймаут.
+    tv.tv_sec  = 0;
+    tv.tv_usec = 10000; // 0.01 сек.
 
-    glob_cmctr_ok = 1;
     sin_len = sizeof( ssin );
 
     memset( host_name, 0, TC_MAX_HOST_NAME );    
@@ -38,7 +41,7 @@ void tcp_communicator_linux::killsockets()
         if ( sst[ i ].active )
             {
             sst[ i ].clID = -1;
-            shutdown( i, 0 );
+            shutdown( i, SHUT_RDWR );
             close( i );
             }
         }
@@ -58,29 +61,37 @@ int tcp_communicator_linux::net_init()
     if ( master_socket < 0 )
         {
 #ifdef DEBUG
-        printf( "tcp_communicator_linux:net_init() - can't create master socket! Error %d\n\r",
-            err );
-        perror( "tcp_communicator_linux:net_init() - " );
+        perror( "tcp_communicator_linux:net_init() - can't create master socket" );
 #endif // DEBUG
         return -4;
         }
 
     // Переводим в неблокирующий режим.
     fcntl( master_socket, F_SETFL, O_NONBLOCK );
+
     // Адресация мастер-сокета.
     memset( &sst[ master_socket ].sin, 0, sizeof( sst[ master_socket ].sin ) );
     sst[ master_socket ].sin.sin_family 	 = AF_INET;
     sst[ master_socket ].sin.sin_addr.s_addr = INADDR_ANY;
     sst[ master_socket ].sin.sin_port 		 = htons ( PORT );
+
+    const int on = 1;
+
+    if ( setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof( on ) ) )
+        {
+        perror( "tcp_communicator_linux:net_init() - ошибка  вызова  setsockopt" );
+        close( master_socket );
+        return -5;
+        }
+
     // Привязка сокета.
     err = bind( master_socket, ( struct sockaddr * ) & sst[ master_socket ].sin,
         sizeof( sst[ master_socket ].sin ) );
     if ( err < 0 )
         {
 #ifdef DEBUG
-        printf( "tcp_communicator_linux:net_init() - can't bind master socket to port %d, error %d\n\r",
-            PORT, err );
-        perror( "tcp_communicator_linux:net_init() - " );
+        printf( "tcp_communicator_linux:net_init() - can't bind master socket to port %d : %s\n",
+            PORT, strerror( errno ) );
 #endif // DEBUG
         close( master_socket );
         return -5;
@@ -89,13 +100,15 @@ int tcp_communicator_linux::net_init()
     err = listen( master_socket, QLEN ); // Делаем мастер-сокет слушателем.
     if ( type == SOCK_STREAM && err < 0 )
         {
-        close ( master_socket );
+        close( master_socket );
 #ifdef DEBUG
-        perror( "tcp_communicator_linux:net_init() - " );
+        perror( "tcp_communicator_linux:net_init() - listen" );
 #endif // DEBUG
         return -6;
         }
 
+    int val = 1;
+    setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, &val, sizeof( val ) );
 #ifdef MODBUS
     // Создание серверного сокета modbus_socket.
     err = modbus_socket = socket ( PF_INET, type, protocol );
@@ -108,9 +121,7 @@ int tcp_communicator_linux::net_init()
     if ( modbus_socket < 0 )
         {
 #ifdef DEBUG
-        printf ( "tcp_communicator_linux:net_init() - can't crmodbus_sockette modbus socket! error %modbus_socketn\r",
-            err );
-        perror( "tcp_communimodbus_sockettor:net_init() " );
+        perror( "tcp_communicator_linux:net_init() - can't create modbus socket" );
 #endif //DEBUG
 
         return -4;
@@ -124,9 +135,9 @@ int tcp_communicator_linux::net_init()
         sizeof ( sst[ modbus_socket ].sin ) );	   // Привязка сокета.
     if ( err < 0 )
         {
-#ifdef DEBUGmodbus_socket	printf( "tcp_communicator_linux:net_init(modbus_socket- can't bind modbus socket to port %d, error %d\n\r",
-        502, err );
-        perror( "tcp_communicator_linux:net_init() " );
+#ifdef DEBUG
+        printf( "tcp_communicator_linux:net_init() - can't bind modbus socket to port %d : %s\n",
+            502, strerror( errno ) );
 #endif // DEBUG
 
         close( modbus_socket );
@@ -137,7 +148,7 @@ int tcp_communicator_linux::net_init()
         {
         close( modbus_socket );
 #ifdef DEBUG
-        perror( "tcp_communicator_linux:net_init() " );
+        perror( "tcp_communicator_linux:net_init() - listen" );
 #endif // DEBUG
         return -6;
         }
@@ -150,11 +161,11 @@ int tcp_communicator_linux::net_init()
         sst[ i ].init   = 0;
         }
     sst[ master_socket ].active = 1;  	 // мастер-сокет всегда активный.
-    sst[ master_socket ].islistener = 1; // сокет является слушателем.
+    sst[ master_socket ].is_listener = 1; // сокет является слушателем.
 
 #ifdef MODBUS
     sst[ modbus_socket ].active = 1;
-    sst[ modbus_socket ].islistener = 1;
+    sst[ modbus_socket ].is_listener = 1;
 #endif // MODBUS
 
     netOK = 1;
@@ -169,22 +180,20 @@ void tcp_communicator_linux::net_terminate()
 //------------------------------------------------------------------------------
 tcp_communicator_linux::~tcp_communicator_linux()
     {
-    killsockets();
+    net_terminate();
     delete buf;
     }
 //------------------------------------------------------------------------------
 int tcp_communicator_linux::evaluate()
     {
-    int err = 0;
-    int count_cycles = 0;
-
     // Проверка связи с сервером.
-    if ( difftime( time( NULL ), glob_last_transfer_time ) > 5 )
+    if ( get_sec() - glob_last_transfer_time > 5 )
         {
         if ( glob_cmctr_ok )
             {
             glob_cmctr_ok = 0;
-            //SetGlobalError ( EC_NO_CONNECTION, ES_EASYSERVER, ES_EASYSERVER );
+            PAC_critical_errors_manager::get_instance()->set_global_error(
+                EC_NO_CONNECTION, ES_EASYSERVER, ES_EASYSERVER );
             }
         }
     else
@@ -192,7 +201,8 @@ int tcp_communicator_linux::evaluate()
         if ( glob_cmctr_ok == 0 )
             {
             glob_cmctr_ok = 1;
-            //ResetGlobalError ( EC_NO_CONNECTION, ES_EASYSERVER, ES_EASYSERVER );
+            PAC_critical_errors_manager::get_instance()->reset_global_error(
+                EC_NO_CONNECTION, ES_EASYSERVER, ES_EASYSERVER );
             }
         }
     // Проверка связи с сервером.-!>
@@ -205,6 +215,7 @@ int tcp_communicator_linux::evaluate()
         }
     // Инициализация сети, при необходимости.-!>
 
+    int count_cycles = 0;
     while ( count_cycles < max_cycles )
         {
         /* service loop */
@@ -214,30 +225,25 @@ int tcp_communicator_linux::evaluate()
         for ( int i = 0; i < MAX_SOCKETS; i++ )
             {
             if ( sst[ i ].active && 
-                 sst[ i ].islistener &&
-                 !sst[ i ].evaluated )
+                sst[ i ].is_listener &&
+                !sst[ i ].evaluated )
                 {
                 /* re-join active sockets */
                 FD_SET( i, &rfds );
                 }
             }
-        
-        // Задаем таймаут.
-        tv.tv_sec  = 0;
-        tv.tv_usec = 600000; // 0.6 сек.
 
         // Ждём события в одном из сокетов.
         rc = select( MAX_SOCKETS + 1, &rfds, NULL, NULL, &tv );
-        if ( rc == 0 )
-            return 0;
+
+        if ( 0 == rc ) continue; // Ничего не произошло.
 
         if ( rc < 0 )
             {
-#ifdef DEBUG
-            printf( "selectsocket error %d - ", rc );
-            perror( "" );
+#ifdef DEBUG            
+            perror( "selectsocket() error" );
 #endif
-            break;
+            continue;
             }
 
         for ( int i = 0; i < MAX_SOCKETS; i++ )  /* scan all possible sockets */
@@ -253,50 +259,71 @@ int tcp_communicator_linux::evaluate()
                      {
                     /* master socket */
                     memset( &ssin, 0, sizeof ( ssin ) );
-                    err = ss = accept ( i, ( struct sockaddr * ) &ssin, &sin_len );
-                    fcntl( ss, F_SETFL, O_NONBLOCK );
-#ifdef DEBUG
-//                    hostent *client = gethostbyaddr( &ssin.sin_addr, 4, PF_INET );
-//                    if ( client )
-//                        {
-//                        printf( "Accepted connection on %d socket from %s [ %s ].\n\r",
-//                            ss, inet_ntoa( ssin.sin_addr ), client->h_name  );
-//                        }
-//                    else
-//                        {
-                        printf( "Accepted connection on %d socket from %s.\n\r",
-                            ss, inet_ntoa( ssin.sin_addr ) );
-//                        }
-#endif // DEBUG
+                    slave_socket = accept ( i, 
+                        ( struct sockaddr * ) &ssin, &sin_len );
 
-                    if ( err < 0 )
+                    if ( slave_socket <= 0 )    // Ошибка.
                         {
 #ifdef DEBUG
-                        printf ( "accept error %d - ", err );
-                        perror( "" );
-#endif
-                        break;
+                        perror( "accept() error" );
+#endif                        
+                        continue;   
                         }
+
+                    // Установка сокета в неблокирующий режим.
+                    if ( fcntl( slave_socket, F_SETFL, O_NONBLOCK ) < 0 ) 
+                        {
+                        // Ошибка, разрушаем сокет.
+                        shutdown( slave_socket, 0 );
+                        close( slave_socket );
+                        continue;
+                        }
+
+                    // Проверка на актульность запроса на соединение.
+                    if ( 0 == recv( slave_socket, buf, 1, MSG_PEEK ) )
+                        {
+                         // Клиент уже закрыл соединение, разрушаем сокет.
+                        shutdown( slave_socket, 0 );
+                        close( slave_socket );
+                        continue;
+                        }
+#ifdef DEBUG
+                    // Определение имени клиента.
+                    hostent *client = gethostbyaddr( &ssin.sin_addr, 4, AF_INET );
+                    
+                    if ( client )
+                        {
+                        printf( "Accepted connection on %d socket from %s [ %s ].\n",
+                            slave_socket, inet_ntoa( ssin.sin_addr ), client->h_name  );
+                        }
+                    else
+                        {
+                        herror( "Error getting client name" );
+                        Print( "Accepted connection on %d socket from %s.\n",
+                            slave_socket, inet_ntoa( ssin.sin_addr ) );
+                        }
+#endif // DEBUG
+
 #ifdef MODBUS
                     if ( i != modbus_socket )
                         {
 #endif
-                        char Message1[] = "I7188e accept";
-                        err = send ( ss, Message1, strlen ( Message1 ), MSG_NOSIGNAL );
+                        char Message1[] = "PAC accept";
+                        send( slave_socket, Message1, strlen ( Message1 ), MSG_NOSIGNAL );
 #ifdef MODBUS
                         }
 #endif
-                    FD_SET ( ss, &rfds );
-                    sst[ ss ].active = 1;
-                    sst[ ss ].init   = 1;
-                    sst[ ss ].islistener = 1;
-                    sst[ ss ].evaluated = 0;
-                    memcpy ( &sst[ ss ].sin, &ssin, sin_len );
+                    FD_SET( slave_socket, &rfds );
+                    sst[ slave_socket ].active = 1;
+                    sst[ slave_socket ].init   = 1;
+                    sst[ slave_socket ].is_listener = 1;
+                    sst[ slave_socket ].evaluated = 0;
+                    memcpy( &sst[ slave_socket ].sin, &ssin, sin_len );
                     }
                 else         /* slave socket */
                     {
-                    err = do_echo ( i );
-                    glob_last_transfer_time = time( NULL );
+                    do_echo ( i );
+                    glob_last_transfer_time = get_sec();
                     }
                 }
             }
@@ -306,7 +333,8 @@ int tcp_communicator_linux::evaluate()
         {
         sst[ i ].evaluated = 0;
         }
-    return err;
+
+    return 0;
     }
 //------------------------------------------------------------------------------
 int tcp_communicator_linux::recvtimeout( u_int s, u_char *buf,
@@ -327,8 +355,8 @@ int tcp_communicator_linux::recvtimeout( u_int s, u_char *buf,
     if ( 0 == n ) return -2;  // timeout!
     if ( -1 == n ) return -1; // error
 
-    // Данные должны быть здесь, поэтому делаем обычный recv().
-    return recv( s, buf, len, 0 );
+    // Данные должны быть здесь, поэтому делаем обычный recv().    
+    return recv( s, buf, len, MSG_NOSIGNAL );
     }
 //------------------------------------------------------------------------------
 int tcp_communicator_linux::do_echo ( int skt )
@@ -336,37 +364,55 @@ int tcp_communicator_linux::do_echo ( int skt )
     FD_CLR( skt, &rfds );
     
     int err = 0, res;
-
+    
     if ( sst[ skt ].init )         /* socket is just initiated */
         {
         sst[ skt ].init = 0;
-#ifdef DEBUG
-        printf( "Socket connected.\n" );
-#endif // DEBUG
 
 #ifdef  MODBUS
         return err;
 #endif // MODBUS
-
-        //FD_CLR( skt, &rfds );
-        //return 0;
         }
+
     sst[ skt ].evaluated = 1;
-
-    err = in_buffer_count = recvtimeout( skt, buf, BUFSIZE, 0, 500000 );
-
+    memset( buf, 0, BUFSIZE );
+    
+    // Ожидаем данные с таймаутом 1 сек.
+    err = in_buffer_count = recvtimeout( skt, buf, BUFSIZE, 1, 0 );
+  
     if ( err <= 0 )               /* read error */
         {
+#ifdef DEBUG
+        switch ( err )
+            {
+            case 0:
+                printf( "Socket %d->\"%s\" was closed.\n",
+                        skt, inet_ntoa( sst[ skt ].sin.sin_addr ) );
+                break;
+
+            case -1:
+                printf( "Socket %d->\"%s\" disconnected on read try : %s\n",
+                    skt, inet_ntoa( sst[ skt ].sin.sin_addr ), strerror( errno ) );
+                break;
+
+            case -2:
+                printf( "Socket %d->\"%s\" disconnected on read try - timeout.\n",
+                    skt, inet_ntoa( sst[ skt ].sin.sin_addr ) );
+                break;
+
+            default:
+                printf( "Socket %d->\"%s\" disconnected on read try : %s\n",
+                    skt, inet_ntoa( sst[ skt ].sin.sin_addr ), strerror( errno ) );
+                break;
+            }
+#endif // DEBUG
+
         shutdown( skt, 0 );
         close( skt );
-        FD_CLR( skt, &rfds );
         sst[ skt ].active = 0;
-#ifdef DEBUG
-        printf( "Socket %d disconnected on read try - ", skt );
-        perror( "" );
-#endif // DEBUG
         return err;
         }
+
 #ifdef DEBUG
     if ( in_buffer_count > max_buffer_use )
         {
@@ -377,11 +423,11 @@ int tcp_communicator_linux::do_echo ( int skt )
 
     net_id = buf[ 0 ];
     pidx = buf[ 3 ];
-    if ( net_id != 0x73 && ( buf[ 2 ] + buf[ 3 ] ) )
+    if ( net_id != 's' )
         {
-        FD_CLR( skt, &rfds );
 #ifdef DEBUG
-        printf( "Incorrect input data at %d socket\n", skt );
+        printf( "Incorrect input data at socket %d->\"%s\"\n",
+            skt, inet_ntoa( sst[ skt ].sin.sin_addr ) );
 #endif // DEBUG
         return ERR_RETRIVE;
         }
@@ -393,8 +439,8 @@ int tcp_communicator_linux::do_echo ( int skt )
             {
             case FRAME_SINGLE:
 
-                res = services[ buf[ 1 ] ] ( ( u_int ) ( buf[ 4 ] * 256 + buf[ 5 ] ),
-                    buf + 6, buf + 5 );
+                res = services[ buf[ 1 ] ] ( 
+                    ( u_int ) ( buf[ 4 ] * 256 + buf[ 5 ] ), buf + 6, buf + 5 );
 
                 if ( res == 0 )
                     {
@@ -416,7 +462,8 @@ int tcp_communicator_linux::do_echo ( int skt )
             default:
                 _ErrorAkn( ERR_WRONG_CMD );
 #ifdef DEBUG
-                printf( "Wrong command received on %d socket\n\r", skt );
+                printf( "Wrong command received on socket %d->\"%s\"\n",
+                    skt, inet_ntoa( sst[ skt ].sin.sin_addr ) );
 #endif // DEBUG
                 break;
             }
@@ -440,8 +487,8 @@ int tcp_communicator_linux::do_echo ( int skt )
             {
             _ErrorAkn( ERR_WRONG_SERVICE );
 #ifdef DEBUG
-            printf( "No such service %d at %d socket\n",  buf[ 1 ], skt );
-            
+            printf( "No such service %d at socket %d->\"%s\"\n",
+                buf[ 1 ], skt, inet_ntoa( sst[ skt ].sin.sin_addr ) );
 #endif // DEBUG
             }
         }
@@ -453,18 +500,16 @@ int tcp_communicator_linux::do_echo ( int skt )
         usleep( 800000 );
         }
 
-    if ( err < 0 )               /* write error */
+    if ( err <= 0 )               /* write error */
         {
 #ifdef DEBUG
-        perror( "Write error " );
-#endif
+        printf( "Socket %d->\"%s\" disconnected on write try : %s\n",
+            skt, inet_ntoa( sst[ skt ].sin.sin_addr ), strerror( errno ) );
+#endif // DEBUG
+
         shutdown( skt, 0 );
         close( skt );
-        FD_CLR( skt, &rfds );
         sst[ skt ].active = 0;
-#ifdef DEBUG
-        printf( "Socket %d disconnected on write try\n", skt );
-#endif // DEBUG
         return err;
         }
 

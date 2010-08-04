@@ -5,6 +5,21 @@ NV_memory_manager* NV_memory_manager::instance;
 #if ( defined LINUX || defined UCLINUX ) && defined DEBUG
 #include <termios.h>
 #include <unistd.h>
+#include <fcntl.h>
+
+int kbhit()
+    {
+    int tem = fcntl( 0, F_GETFL, 0 );
+    fcntl( 0, F_SETFL, ( tem | O_NDELAY ) );
+    char c = getchar();
+    fcntl( 0, F_SETFL, tem );
+    if ( c > 0 && c != 255 )
+        {
+        return 1;
+        }
+
+    return 0;
+    }
 
 int Getch()
     {

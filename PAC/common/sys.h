@@ -45,6 +45,8 @@ typedef unsigned long int       u_long;
 #define Print printf
 
 #ifdef DEBUG
+int kbhit();
+
 int Getch();
 #endif // DEBUG
 

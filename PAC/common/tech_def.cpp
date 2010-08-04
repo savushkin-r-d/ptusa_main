@@ -4,7 +4,7 @@
 tech_object_manager* tech_object_manager::instance;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-tech_object::tech_object( const char* name, u_int number, u_int states_count,
+tech_object::tech_object( const char* name, u_int number, u_int modes_count,
     u_int timers_count,
     u_int par_float_count, u_int runtime_par_float_count,
     u_int par_uint_count,
@@ -14,17 +14,17 @@ tech_object::tech_object( const char* name, u_int number, u_int states_count,
         par_uint( saved_params_u_int_4( par_uint_count ) ),
         rt_par_uint( run_time_params_u_int_4( runtime_par_uint_count ) ),
         number( number ),
-        states_count( states_count ),
+        modes_count( modes_count ),
         timers( timers_count ),
-        mode_time( run_time_params_u_int_4( states_count, "MODE_TIME" ) )
+        mode_time( run_time_params_u_int_4( modes_count, "MODE_TIME" ) )
     {
-    u_int state_size_in_int4 = states_count / 32; // Размер состояния в double word.
-    if ( states_count % 32 > 0 ) state_size_in_int4++;
+    u_int state_size_in_int4 = modes_count / 32; // Размер состояния в double word.
+    if ( modes_count % 32 > 0 ) state_size_in_int4++;
     for( u_int i = 0; i < state_size_in_int4; i++ )
         {
         state.push_back( 0 );
         }
-    for( u_int i = 0; i < states_count; i++ )
+    for( u_int i = 0; i < modes_count; i++ )
         {
         mode_start_time.push_back( 0 );
         }
@@ -33,7 +33,7 @@ tech_object::tech_object( const char* name, u_int number, u_int states_count,
             i_complex_device::COMPLEX_DEV );
 
     com_dev->sub_dev[ 0 ] = new single_state( "SINGLE_STATE", number,
-            &state.front(), this, single_state::T_TECH_OBJECT, states_count );
+            &state.front(), this, single_state::T_TECH_OBJECT, modes_count );
     com_dev->sub_dev[ 1 ] = new complex_state( "STATE", number,
             &state.front(), this, single_state::T_TECH_OBJECT, state_size_in_int4 );
     com_dev->sub_dev[ 2 ] = new complex_state( "CMD", number,
@@ -44,7 +44,7 @@ tech_object::tech_object( const char* name, u_int number, u_int states_count,
     com_dev->sub_dev[ 6 ] = &rt_par_uint;
     com_dev->sub_dev[ 7 ] = &mode_time;
 
-    for ( u_int i = 0; i < states_count; i++ )
+    for ( u_int i = 0; i < modes_count; i++ )
         {
         mode_start_time.at( i ) = get_sec();
         }
@@ -86,7 +86,7 @@ int tech_object::set_mode( u_int mode, int newm )
 #endif
 
     if ( newm != 0 ) newm = 1;
-    if ( mode > states_count - 1 ) res = 3;
+    if ( mode > modes_count - 1 ) res = 3;
     else
         {
         if ( get_mode( mode ) == newm ) res = 1;
@@ -149,7 +149,7 @@ int tech_object::can_init_mode( int mode )
 //-----------------------------------------------------------------------------
 int tech_object::init_mode( u_int mode )
     {
-    if ( mode < states_count )
+    if ( mode < modes_count )
         {
         mode_start_time.at( mode ) = get_sec();
         }
@@ -159,7 +159,7 @@ int tech_object::init_mode( u_int mode )
 //-----------------------------------------------------------------------------
 int tech_object::evaluate()
     {
-    for ( u_int i = 0; i < states_count; i++ )
+    for ( u_int i = 0; i < modes_count; i++ )
         {
         mode_time[ i ] = get_sec() - mode_start_time.at( i );
         }
@@ -173,7 +173,7 @@ int tech_object::can_final_mode( int mode )
 //-----------------------------------------------------------------------------
 int tech_object::final_mode( u_int mode )
     {
-    if ( mode < states_count )
+    if ( mode < modes_count )
         {
         mode_start_time.at( mode ) = get_sec();
         }

@@ -20,6 +20,7 @@
 #define PAC_ERRORS_H
 
 #include <string.h>
+#include <vector>
 
 #include "sys.h"
 //-----------------------------------------------------------------------------
@@ -104,22 +105,12 @@ enum ERRORS_SUBCLASS
 //
 //13 - ошибки времени работы:
 //  1, n  - нажата аварийная кнопка с номером обратной связи n. 
-
-
-//-----------------------------------------------------------------------------
-void SetGlobalError( ERRORS_CLASS eclass, ERRORS_SUBCLASS p1, unsigned long p2 );
-void ResetGlobalError( ERRORS_CLASS eclass, ERRORS_SUBCLASS p1, unsigned long p2 );
-void InitGlobalErrors();
-void ShowErrors();
 //-----------------------------------------------------------------------------
 class PAC_critical_errors_manager
     {
     public:
         enum GE_CONST
             {
-            GE_ERRORS_MAX_COUNT = 10,
-            GE_ERRORS_STRING_LENGTH = 41,
-
             GE_ERROR_SIZE = 3,      //Размер одной ошибки, байт.
             };
 
@@ -134,34 +125,37 @@ class PAC_critical_errors_manager
         int save_to_stream( char *buff );
         unsigned char save_to_stream_2( char *buff );
 
-    private:
-        struct TGError 
+        static int set_instance( PAC_critical_errors_manager *new_instance )
             {
-            int             eclass;
+            instance = new_instance;
+            return 0;
+            }
+
+        static PAC_critical_errors_manager * get_instance()
+            {
+            return instance;
+            }
+        
+    private:
+        static PAC_critical_errors_manager *instance;
+        
+        struct critical_error
+            {
+            int             err_class;
             unsigned int    p1;
             unsigned int    p2;
-            };
 
-        struct TEShow 
-            {
-            char            MSG[ GE_ERRORS_STRING_LENGTH ];
-            int             cur_err;
-            int             cur_pos;
-            unsigned long   tm;
-            unsigned int    speed;  
-
-            TEShow()
+            critical_error( int err_class, u_int p1, u_int p2 ):err_class( err_class ),
+                p1( p1 ), p2( p2 )
                 {
-                memset( MSG, 0, GE_ERRORS_STRING_LENGTH );
                 }
             };
-        
-        TGError  errors[ GE_ERRORS_MAX_COUNT ];
-        TEShow   error_show_params;
-        u_int    erros_id;
-        int      global_ok;
 
-        int get_no( char ch );
+        
+        std::vector< critical_error >  errors;
+
+        u_int    errors_id;
+        int      global_ok;        
     };
 //-----------------------------------------------------------------------------
 #endif // PAC_ERRORS_H

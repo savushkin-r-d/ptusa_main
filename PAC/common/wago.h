@@ -24,10 +24,6 @@
 class wago_device
     {
     public:
-        /// Работа в отладочном режиме (одновременная запись считанных 
-        /// и установленных значений для DO и AO).
-        static char debug_mode; 
-
         wago_device();
 
         /// @brief Загрузка самого устройства из буфера.
@@ -39,11 +35,6 @@ class wago_device
         virtual int load( file *cfg_file );
 
     protected:
-        enum CONSTANTS
-            {
-            C_MAX_ANALOG_CHANNEL_VALUE = 65535,
-            };
-
         /// @brief Получение состояния канала дискретного выхода.
         ///
         /// @param index - индекс канала в таблице дискретных выходных каналов 
@@ -72,16 +63,6 @@ class wago_device
         /// @return - >0 - ошибка.
         int get_DI( u_int index );
 
-        /// @brief Установка состояния канала дискретного входа.
-        ///
-        /// @param index - индекс канала в таблице дискретных входных каналов 
-        /// устройства.
-        /// @param value - новое состояние канала.
-        ///
-        /// @return -  0 - Ок.
-        /// @return - >0 - ошибка.
-        int set_DI( u_int index, char value );
-
         /// @brief Получение состояния канала аналогового выхода.
         ///
         /// @param index - индекс канала в таблице аналоговых выходных каналов 
@@ -89,7 +70,7 @@ class wago_device
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
-        u_int get_AO( u_int index );
+        float get_AO( u_int index, float min_value, float max_value );
 
         /// @brief Установка состояния канала аналогового выхода.
         ///
@@ -99,7 +80,8 @@ class wago_device
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
-        int set_AO( u_int index, u_int value );
+        int set_AO( u_int index, float value, float min_value = 0,
+            float max_value = 0 );
 
         /// @brief Получение состояния канала аналогового входа.
         ///
@@ -108,17 +90,7 @@ class wago_device
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
-        u_int get_AI( u_int index );
-
-        /// @brief Установка состояния канала аналогового входа.
-        ///
-        /// @param index - индекс канала в таблице аналоговых входных каналов 
-        /// устройства.
-        /// @param value - новое состояние канала.
-        ///
-        /// @return -  0 - Ок.
-        /// @return - >0 - ошибка.
-        int   set_AI( u_int index, u_int value );
+        float get_AI( u_int index, float min_value = 0, float max_value = 0 );
 
         /// @brief Получение значения параметра.
         ///
@@ -151,7 +123,7 @@ class wago_device
             u_char **char_write_values;  ///< Массив значений для записи.
 
             IO_channels( CHANNEL_TYPE type ) : count( 0 ), tables( 0 ),
-                offsets( 0 ), 
+                offsets( 0 ),
                 int_read_values( 0 ), int_write_values( 0 ),
                 char_read_values( 0 ), char_write_values( 0 ),
                 type( type )
@@ -317,6 +289,12 @@ class wago_manager
         wago_node **nodes;              ///< Узлы.
 
         static wago_manager* instance;  ///< Единственный экземпляр класса.
+
+public:
+        wago_node * get_node( int node_n )
+            {
+            return nodes[ node_n ];
+            }
     };
 //-----------------------------------------------------------------------------
 #define G_WAGO_MANAGER wago_manager::get_instance()

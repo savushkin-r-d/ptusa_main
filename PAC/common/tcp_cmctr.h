@@ -39,6 +39,8 @@ class tcp_communicator
         /// производного от @ref tcp_communicator.
         static void set_instance( tcp_communicator* new_instance );
 
+        static void free_instance();
+
         /// @brief Итерация обмена данными с сервером.
         virtual int evaluate() = 0;
 
@@ -53,6 +55,10 @@ class tcp_communicator
         ///
         /// @return - сетевое имя PAC.
         char* get_host_name();
+
+        virtual ~tcp_communicator()
+            {            
+            }
 
     protected:
         tcp_communicator();

@@ -6,7 +6,7 @@ tcp_communicator::tcp_communicator()
     {
     buf                 = new u_char[ BUFSIZE ];
     is_going_to_reboot  = 0;
-    max_cycles          = 1;
+    max_cycles          = 4;
     glob_cmctr_ok       = 1;
     for ( int i = 0; i < TC_MAX_SERVICE_NUMBER; i++ ) services[ i ] = NULL;
     }
@@ -64,6 +64,12 @@ tcp_communicator* tcp_communicator::get_instance()
 void tcp_communicator::set_instance( tcp_communicator* new_instance )
     {
     instance = new_instance;
+    }
+//------------------------------------------------------------------------------
+void tcp_communicator::free_instance()
+    {
+    if ( instance ) delete instance;
+    instance = NULL;
     }
 //------------------------------------------------------------------------------
 char* tcp_communicator::get_host_name()

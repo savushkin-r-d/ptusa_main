@@ -2,7 +2,6 @@
 #include "tech_def.h"
 
 device_manager* device_manager::instance;
-char            wago_device::debug_mode;
 
 const char device::DEV_NAMES[][ 5 ] = { "V", "N", "M", "LS", "TE", "FE", "FS",
     "CTR", "AO", "LE", "FB", "UPR", "QE", "AI" };
@@ -345,6 +344,8 @@ int u_int_4_state_device::save_state( char *buff )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+
 int DO_1::get_state()
     {
     return get_DO( DO_INDEX );
@@ -359,11 +360,8 @@ void DO_1::off()
     {
     set_DO( DO_INDEX, 0 );
     }
-//-----------------------------------------------------------------------------
-//int DO_1::set_state( int new_state )
-//    {
-//    return digital_device::set_state( new_state );
-//    }
+
+#endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_V( int number )
@@ -743,37 +741,62 @@ u_int dev_stub::get_quantity()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+counter::counter() : value( 0 ), last_read_value( 0 ), state( S_WORK )
+    {
+    }
+//-----------------------------------------------------------------------------
 float counter::get_value()
     {
-    return 0;
+    return get_quantity();
     }
 //-----------------------------------------------------------------------------
 int counter::set_value( float new_value )
     {
+    value = ( u_int ) new_value;
+
     return 0;
     }
 //-----------------------------------------------------------------------------
 int counter::get_state()
     {
-    return 0;
+    return state;
     }
 //-----------------------------------------------------------------------------
 void counter::on()
     {
+    start();
     }
 //-----------------------------------------------------------------------------
 void counter::off()
     {
+    reset();
     }
 //-----------------------------------------------------------------------------
 int counter::set_state( int new_state )
     {
+    switch ( new_state )
+        {
+        case S_STOP:
+            reset();
+            break;
+
+        case S_WORK:
+            start();
+            break;
+
+        case S_PAUSE:
+            pause();
+            break;
+        }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
 int counter::parse_cmd( char *buff )
     {
-    return 0;
+    memcpy( &value, buff, sizeof( value ) );
+
+    return sizeof( value );
     }
 //-----------------------------------------------------------------------------
 int counter::load( file *cfg_file )
@@ -792,7 +815,7 @@ void counter::print() const
 //-----------------------------------------------------------------------------
 u_int_4 counter::get_u_int_4_state()
     {
-    return 0;
+    return get_quantity();
     }
 //-----------------------------------------------------------------------------
 int counter::save_changed_state( char *buff )
@@ -807,22 +830,54 @@ int counter::save_state( char *buff )
 //-----------------------------------------------------------------------------
 void counter::pause()
     {
+    get_quantity(); // Пересчитываем значение счетчика.
 
+    state = S_PAUSE;
     }
 //-----------------------------------------------------------------------------
 void counter::start()
     {
-
+    if ( S_STOP == state || S_PAUSE == state )
+        {
+        if ( S_STOP == state )
+            {
+            value = 0;
+            }
+        
+        state = S_WORK;
+        last_read_value = ( u_int ) get_AI( AI_INDEX );
+        }
     }
 //-----------------------------------------------------------------------------
 void counter::reset()
     {
-
+    state = S_STOP;
+    value = 0;
     }
 //-----------------------------------------------------------------------------
 u_int counter::get_quantity()
     {
-    return 0;
+    if ( S_WORK == state )
+        {
+        u_int delta;
+        u_int current = ( u_int ) get_AI( AI_INDEX );
+
+        if ( current < last_read_value )
+            {
+            delta = MAX_VAL - last_read_value + current;
+            }
+        else
+            {
+            delta = current - last_read_value;
+            }
+            if ( delta > 0 )
+                {
+                value += delta;
+                last_read_value = current;
+                }
+        }
+
+    return value;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -874,7 +929,28 @@ int digital_device::save_state( char *buff )
     return char_state_device::save_state( buff );
     }
 //-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_WAGO_MODULES
+
+int digital_device::get_state()
+    {
+    return state;
+    }
 //-----------------------------------------------------------------------------
+void digital_device::on()
+    {
+    state = 1;
+    }
+//-----------------------------------------------------------------------------
+void digital_device::off()
+    {
+    state = 0;
+    }
+
+#endif // DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+
 int DO_2::get_state()
     {
     int b1 = get_DO( DO_INDEX_1 );
@@ -894,8 +970,12 @@ void DO_2::off()
     set_DO( DO_INDEX_1, 1 );
     set_DO( DO_INDEX_2, 0 );
     }
+
+#endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+
 int DO_1_DI_1::get_state()
     {
     int o = get_DO( DO_INDEX );
@@ -918,7 +998,7 @@ int DO_1_DI_1::get_state()
             }
         }
 
-    if ( get_delta_millisec( start_switch_time ) > C_SWITCH_TIME )
+    if ( get_sec() - start_switch_time > C_SWITCH_TIME )
         {
         return -1;
         }
@@ -948,8 +1028,12 @@ void DO_1_DI_1::off()
         set_DO( DO_INDEX, 0 );
         }
     }
+
+#endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+
 int DO_1_DI_2::get_state()
     {
     int o = get_DO( DO_INDEX );
@@ -963,7 +1047,7 @@ int DO_1_DI_2::get_state()
         return o;
         }
 
-    if ( get_delta_millisec( start_switch_time ) > C_SWITCH_TIME )
+    if ( get_sec() - start_switch_time > C_SWITCH_TIME )
         {
         return -1;
         }
@@ -992,8 +1076,12 @@ void DO_1_DI_2::off()
         set_DO( DO_INDEX, 0 );
         }
     }
+
+#endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+
 int DO_2_DI_2::get_state()
     {
     int o0 = get_DO( DO_INDEX_1 );
@@ -1007,7 +1095,7 @@ int DO_2_DI_2::get_state()
         return o1;
         };
 
-    if ( get_delta_millisec( start_switch_time ) > C_SWITCH_TIME )
+    if ( get_sec() - start_switch_time > C_SWITCH_TIME )
         {
         return -1;
         }
@@ -1038,8 +1126,22 @@ void DO_2_DI_2::off()
         set_DO( DO_INDEX_2, 1 );
         }
     }
+
+#endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+void valve_mix_proof::open_upper_seat()
+    {
+    set_state( ST_UPPER_SEAT );
+    }
+//-----------------------------------------------------------------------------
+void valve_mix_proof::open_low_seat()
+    {
+    set_state( ST_LOW_SEAT );
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+
 int valve_mix_proof::get_state()
     {
     int o = get_DO( DO_INDEX );            
@@ -1055,7 +1157,7 @@ int valve_mix_proof::get_state()
         return o;
         }
 
-    if ( get_delta_millisec( start_switch_time ) > C_SWITCH_TIME )
+    if ( get_sec() - start_switch_time > C_SWITCH_TIME )
         {
         return -1;
         }
@@ -1076,18 +1178,6 @@ void valve_mix_proof::on()
         start_switch_time = get_sec();
         set_DO( DO_INDEX, 1 );
         }
-    }
-//-----------------------------------------------------------------------------
-void valve_mix_proof::open_upper_seat()
-    {
-    off();
-    set_DO( DO_INDEX_U, 1 );
-    }
-//-----------------------------------------------------------------------------
-void valve_mix_proof::open_low_seat()
-    {
-    off();
-    set_DO( DO_INDEX_L, 1 );
     }
 //-----------------------------------------------------------------------------
 void valve_mix_proof::off()
@@ -1116,11 +1206,13 @@ int valve_mix_proof::set_state( int new_state )
             break;
 
         case ST_UPPER_SEAT:
-            open_upper_seat();
+            off();
+            set_DO( DO_INDEX_U, 1 );
             break;
 
         case ST_LOW_SEAT:
-            open_low_seat();
+            off();
+            set_DO( DO_INDEX_L, 1 );
             break;
 
         default:
@@ -1130,22 +1222,46 @@ int valve_mix_proof::set_state( int new_state )
 
     return 0;
     }
+
+#endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+
+DI_1::DI_1( u_int dt ): last_check_time( get_millisec() ),
+    state( 0 ), 
+    dt( dt )
+    {
+    }
 //-----------------------------------------------------------------------------
 int DI_1::get_state()
     {
-    return get_DI( DI_INDEX );
+    if ( dt > 0 )
+        {
+        if ( state != get_DI( DI_INDEX ) )
+            {
+            if ( get_delta_millisec( last_check_time ) > dt  )
+                {
+                state = get_DI( DI_INDEX );
+                }
+            }
+
+        last_check_time = get_millisec();
+        }
+    else state = get_DI( DI_INDEX );
+
+    return state;
     }
 //-----------------------------------------------------------------------------
 void DI_1::on()
     {
-    set_DI( DI_INDEX, 1 );
     }
 //-----------------------------------------------------------------------------
 void DI_1::off()
     {
-    set_DI( DI_INDEX, 0 );
     }
+
+#endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int float_state_device::save_changed_state( char *buff )
@@ -1165,76 +1281,44 @@ int float_state_device::save_state( char *buff )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+
 float AI_1::get_value()
     {
-    return get_AI( AI_INDEX ) / C_MAX_ANALOG_CHANNEL_VALUE *
-        get_max_val();
+    return get_AI( AI_INDEX, get_min_val(), get_max_val() );
     }
 //-----------------------------------------------------------------------------
 int AI_1::set_value( float new_value )
     {
-    if ( new_value < get_min_val() )
-        {
-        new_value = get_min_val();
-        }
-    if ( new_value > get_max_val() )
-        {
-        new_value = get_max_val();
-        }
-
-    u_int value = ( u_int ) ( C_MAX_ANALOG_CHANNEL_VALUE * 
-        new_value / get_max_val() );
-
-    return set_AI( AI_INDEX, value );
+    return 0;
     }
+
+#endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+
 float AO_1::get_value()
     {
-    return get_AO( AO_INDEX ) / C_MAX_ANALOG_CHANNEL_VALUE * get_max_val();
+    return get_AO( AO_INDEX, get_min_val(), get_max_val() );
     }
 //-----------------------------------------------------------------------------
 int AO_1::set_value( float new_value )
     {
-    // Работаем в диапазоне 0-100.
-    if ( new_value < get_min_val() )
-        {
-        new_value = get_min_val();
-        }
-    if ( new_value > get_max_val() )
-        {
-        new_value = get_max_val();
-        }
-
-    u_int_2 value = ( u_int_2 ) ( C_MAX_ANALOG_CHANNEL_VALUE * new_value /
-        get_max_val() );
-
-    return set_AO( AO_INDEX, value );
+    return set_AO( AO_INDEX, new_value, get_min_val(), get_max_val() );
     }
+
+#endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float temperature_e::get_max_val()
     {
-    return C_MAX_ANALOG_CHANNEL_VALUE;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 float temperature_e::get_min_val()
     {
     return 0;
-    }
-//-----------------------------------------------------------------------------
-float temperature_e::get_value()
-    {
-    short int tmp = get_AI( AI_INDEX );
-    float val = 0.1 * tmp;
-    val = val >= -50 && val <= 150 ? val : -1000;
-
-    return val;
-    }
-//-----------------------------------------------------------------------------
-int temperature_e::set_value( float new_value )
-    {
-    return set_AI( AI_INDEX, ( int ) ( 10 * new_value ) );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1294,7 +1378,12 @@ int analog_device::get_state()
 //-----------------------------------------------------------------------------
 int analog_device::parse_cmd( char *buff )
     {
-    set_value( *( ( float* ) buff ) );
+    float val;
+    memcpy( &val, buff, sizeof( float ) );
+
+    Print( "val=%f\n", val );
+
+    set_value( val );
     return sizeof( float );
     }
 //-----------------------------------------------------------------------------
@@ -1320,6 +1409,21 @@ void analog_device::off()
     {
     set_value( 0 );
     }
+//-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_WAGO_MODULES
+
+float analog_device::get_value()
+    {
+    return value;
+    }
+//-----------------------------------------------------------------------------
+int analog_device::set_value( float new_value )
+    {
+    value = new_value;
+    return 0;
+    }
+
+#endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 int analog_device::save_changed_state( char *buff )
     {

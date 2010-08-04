@@ -1,3 +1,5 @@
+#include <unistd.h>
+
 #include "wago_w750.h"
 //-----------------------------------------------------------------------------
 wago_manager_w750::wago_manager_w750()
@@ -33,11 +35,11 @@ int wago_manager_w750::read_inputs()
                 nodes[ i ]->DI[ j ] = ( ( tmp &
                     pstPabIN->uc.Pab[ start_pos + j / 8 ] ) > 0 );
 #ifdef DEBUG
-//                Print( "%d -> %d, ", j, nodes[ i ]->DI[ j ] );
+                //Print( "%d -> %d, ", j, nodes[ i ]->DI[ j ] );
 #endif // DEBUG
                 }
 #ifdef DEBUG
-//            Print( "\n" );
+            //Print( "\n" );
 #endif // DEBUG
 
             // AI
@@ -48,15 +50,15 @@ int wago_manager_w750::read_inputs()
 
                 switch ( nodes[ i ]->AI_types[ j ] )
                     {
-                    case 461:
                     case 466:
-                        val = 256 * pstPabIN->uc.Pab[ offset ] +
-                            pstPabIN->uc.Pab[ offset + 1 ];
+                    case 461:                    
+                        val = pstPabIN->uc.Pab[ offset ] +
+                            256 * pstPabIN->uc.Pab[ offset + 1 ];
                         break;
 
                     case 638:
-                        val = 256 * pstPabIN->uc.Pab[ offset + 2 ] +
-                            pstPabIN->uc.Pab[ offset + 3 ];
+                        val = pstPabIN->uc.Pab[ offset + 2 ] +
+                            256 * pstPabIN->uc.Pab[ offset + 3 ];
                         break;
                     }
                 nodes[ i ]->AI[ j ] = val;
@@ -78,17 +80,13 @@ int wago_manager_w750::write_outputs()
         {
         if ( nodes[ i ]->type == 0 ) // KBus
             {
-            KbusUpdate();
-
             // DO
             int start_pos = KbusGetBinaryOutputOffset() / 8;
 #ifdef DEBUG
-//            Print( "start_pos = %d\n", start_pos );
+            //Print( "start_pos = %d\n", start_pos );
 #endif // DEBUG
-            for ( u_int j = 0; j < nodes[ i ]->DI_cnt; j++ )
+            for ( u_int j = 0; j < nodes[ i ]->DO_cnt; j++ )
                 {
-                if ( nodes[ i ]->DO[ j ] != nodes[ i ]->DO_[ j ] )
-                    {
                     char tmp =  1 << ( j % 8 );
                     if ( nodes[ i ]->DO_[ j ] )
                         {
@@ -99,36 +97,30 @@ int wago_manager_w750::write_outputs()
                         pstPabOUT->uc.Pab[ start_pos + j / 8 ] &= ~tmp;
                         }
                     nodes[ i ]->DO[ j ] = nodes[ i ]->DO_[ j ];
-                    }
 #ifdef DEBUG
-//                Print( "%d -> %d, ", j, nodes[ i ]->DO_[ j ] );
+                //Print( "%d -> %d, ", j, nodes[ i ]->DO_[ j ] );
 #endif // DEBUG
                 }
 #ifdef DEBUG
-//            Print( "\n" );
+            //Print( "\n" );
 #endif // DEBUG
 
             // AO
             for ( u_int j = 0; j < nodes[ i ]->AO_cnt; j++ )
                 {
-                if ( nodes[ i ]->AO[ j ] != nodes[ i ]->AO_[ j ] )
-                    {
-                    int val = nodes[ i ]->AO_[ j ];
-                    u_int offset = nodes[ i ]->AO_offsets[ j ];
+                int val = nodes[ i ]->AO_[ j ];
+                u_int offset = nodes[ i ]->AO_offsets[ j ];
 
-                    switch ( nodes[ i ]->AO_types[ j ] )
-                        {
-                        case 554:
-                            pstPabIN->uc.Pab[ offset ] = val >> 8;
-                            pstPabIN->uc.Pab[ offset + 1 ] = val & 0xFF;
-                            break;
-                        }
-                    nodes[ i ]->AO[ j ] = nodes[ i ]->AO_[ j ];
-                    }
+                pstPabIN->uc.Pab[ offset ] = val & 0xFF;
+                pstPabIN->uc.Pab[ offset + 1 ] = val >> 8;
+
+                nodes[ i ]->AO[ j ] = nodes[ i ]->AO_[ j ];
 #ifdef DEBUG
-//                Print( "%d -> %u\n, ", j, nodes[ i ]->AO_[ j ] );
+                //Print( "%d -> %u\n, ", j, nodes[ i ]->AO_[ j ] );
 #endif // DEBUG
                 }
+
+            KbusUpdate();
             }
         }
 

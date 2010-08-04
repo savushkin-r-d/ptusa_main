@@ -7,7 +7,9 @@
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
-/// @c DEBUG   - компиляция c выводом отладочной информации в консоль.
+/// @c DEBUG - компиляция c выводом отладочной информации в консоль.
+/// @c DEBUG_NO_WAGO_MODULES - простые устройства работают без модулей
+/// wago (состояния хранят в себе).
 /// 
 /// @par Текущая версия:
 /// @$Rev$.\n
@@ -35,6 +37,7 @@
 #define LIS     0
 #define LNO     1
 #endif
+
 #define OFF     0
 #define ON      1
 
@@ -645,14 +648,30 @@ class digital_device : public device,
         void    print() const;
 
         int save_changed_state( char *buff );
-        int save_state( char *buff );        
+        int save_state( char *buff );                
+
+#ifdef DEBUG_NO_WAGO_MODULES
+
+        int  get_state();
+        void on();
+        void off();
+
+#else  // DEBUG_NO_WAGO_MODULES
+
         int get_state() = 0;
+
+#endif // DEBUG_NO_WAGO_MODULES
 
     protected:
         enum CONSTANTS
             {
-            C_SWITCH_TIME = 5, ///< Время переключения клапана, сек.
+            C_SWITCH_TIME = 3, ///< Время переключения устройства, сек.
             };
+
+    private:
+#ifdef DEBUG_NO_WAGO_MODULES
+        char state;  ///< Состояние устройства.
+#endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с аналоговыми входами/выходами.
@@ -663,17 +682,32 @@ class analog_device : public device,
     public wago_device
     {
     public:
-        float   get_value() = 0;
-        int     set_state( int new_state );
-        int     get_state();
-        int     parse_cmd( char *buff );
-        int     load( file *cfg_file );
-        void    print() const;
-        void    on();        
-        void    off();
+        int   set_state( int new_state );
+        int   get_state();
+        int   parse_cmd( char *buff );
+        int   load( file *cfg_file );
+        void  print() const;
+        void  on();        
+        void  off();
+
+#ifdef DEBUG_NO_WAGO_MODULES
+
+        float get_value();
+        int   set_value( float new_value );
+
+#else  // DEBUG_NO_WAGO_MODULES
+
+        float get_value() = 0;
+
+#endif // DEBUG_NO_WAGO_MODULES
 
         int save_changed_state( char *buff );
         int save_state( char *buff );
+
+#ifdef DEBUG_NO_WAGO_MODULES
+    private:
+        float value;    ///< Состояние устройства.
+#endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным выходом.
@@ -681,6 +715,7 @@ class analog_device : public device,
 /// Это может быть клапан, насос, канал управления...
 class DO_1 : public digital_device
     {
+#ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state();
         void on();
@@ -691,6 +726,7 @@ class DO_1 : public digital_device
             {
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
             };
+#endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с двумя дискретными выходами.
@@ -698,6 +734,7 @@ class DO_1 : public digital_device
 /// Это может быть клапан, насос...
 class DO_2 : public digital_device
     {
+#ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state();
         void on();
@@ -709,6 +746,7 @@ class DO_2 : public digital_device
             DO_INDEX_1 = 0, ///< Индекс канала дискретного выхода №1.
             DO_INDEX_2,     ///< Индекс канала дискретного выхода №2.
             };
+#endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным выходом и одним дискретным входом.
@@ -716,6 +754,7 @@ class DO_2 : public digital_device
 /// Это может быть клапан, насос...
 class DO_1_DI_1 : public digital_device
     {
+#ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state();
         void on();
@@ -731,6 +770,7 @@ class DO_1_DI_1 : public digital_device
             };
 
         u_long start_switch_time;  ///< Время начала переключения клапана.
+#endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным выходом и двумя дискретными входами.
@@ -738,6 +778,7 @@ class DO_1_DI_1 : public digital_device
 /// Это может быть клапан, насос...
 class DO_1_DI_2 : public digital_device
     {
+#ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state();
         void on();
@@ -753,6 +794,7 @@ class DO_1_DI_2 : public digital_device
             };
 
         u_long start_switch_time;   ///< Время начала переключения клапана.
+#endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с двумя дискретными выходами и двумя дискретными входами.
@@ -760,6 +802,7 @@ class DO_1_DI_2 : public digital_device
 /// Это может быть клапан, насос...
 class DO_2_DI_2 : public digital_device
     {
+#ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state();
         void on();
@@ -776,26 +819,28 @@ class DO_2_DI_2 : public digital_device
             };
 
         u_long start_switch_time;   ///< Время начала переключения клапана.
+#endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан mixproof.
 class valve_mix_proof : public digital_device
     {
     public:
-        int  get_state();
-        void on();
+        enum STATES
+        {
+        ST_CLOSE = 0,   ///< Закрыт.
+        ST_OPEN,        ///< Открыт.
+        ST_UPPER_SEAT,  ///< Открыть верхнее седло.
+        ST_LOW_SEAT,    ///< Открыть нижнее седло.
+        };
+
         void open_upper_seat();
         void open_low_seat();
+
+#ifndef DEBUG_NO_WAGO_MODULES
+        int  get_state();
+        void on();
         void off();
-
-        enum STATES
-            {
-            ST_CLOSE = 0,   ///< Закрыт.
-            ST_OPEN,        ///< Открыт.
-            ST_UPPER_SEAT,  ///< Открыть верхнее седло.
-            ST_LOW_SEAT,    ///< Открыть нижнее седло.
-            };
-
         int set_state( int new_state );
 
     private:
@@ -810,6 +855,7 @@ class valve_mix_proof : public digital_device
             };
 
         u_long start_switch_time;   ///< Время начала переключения клапана.
+#endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым входом.
@@ -817,6 +863,7 @@ class valve_mix_proof : public digital_device
 /// Это может быть температура, расход (величина)...
 class AI_1 : public analog_device
     {
+#ifndef DEBUG_NO_WAGO_MODULES
     public:
         float get_value();
         int   set_value( float new_value );
@@ -832,17 +879,15 @@ class AI_1 : public analog_device
             {
             AI_INDEX = 0,   ///< Индекс канала аналогового входа.
             };
+#endif // DEBUG_NO_WAGO_MODULES
     };
-//---------------------------------l--------------------------------------------
+//-----------------------------------------------------------------------------
 /// @brief Температура.
 class temperature_e : public AI_1
     {
     public:
         float get_max_val();
         float get_min_val();
-
-        float get_value();
-        int   set_value( float new_value );
     };
 //-----------------------------------------------------------------------------
 /// @brief Текущий уровень.
@@ -896,6 +941,7 @@ class analog_input_4_20 : public AI_1
 /// Это может быть управляемый клапан...
 class AO_1 : public analog_device
     {
+#ifndef DEBUG_NO_WAGO_MODULES
     public:
         /// @brief Получение максимального значения выхода устройства.
         virtual float get_max_val() = 0;
@@ -911,6 +957,7 @@ class AO_1 : public analog_device
             {
             AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
             };
+#endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым входом.
@@ -935,7 +982,10 @@ class AO_0_100 : public AO_1
 /// Это может быть обратная связь, расход (есть/нет)...
 class DI_1 : public digital_device
     {
+#ifndef DEBUG_NO_WAGO_MODULES
     public:
+        DI_1( u_int dt = 500 );
+
         int  get_state();
         void on();
         void off();
@@ -945,6 +995,11 @@ class DI_1 : public digital_device
             {
             DI_INDEX = 0,   ///< Индекс канала дискретного входа.
             };
+
+        u_int last_check_time;///< Время последней проверки состояния.
+        int   state;          ///< Предыдущее состояние, для исключения дребезга.
+        u_int dt;             ///< Интервал установления состояния, мсек.
+#endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним каналом управления.
@@ -1008,7 +1063,9 @@ class counter : public device,
     public u_int_4_state_device,
     public wago_device
     {
-    public:        
+    public:
+        counter();
+
         float get_value();
         int   set_value( float new_value );
         int   get_state();
@@ -1030,10 +1087,24 @@ class counter : public device,
         u_int get_quantity();
 
     private:
+        enum STATES
+            {
+            S_STOP,
+            S_WORK,
+            S_PAUSE,
+            };
+
         enum CONSTANTS
             {
-            AI_INDEX = 0, ///< Индекс канала аналогового входа.
+            AI_INDEX = 0,       ///< Индекс канала аналогового входа.
+
+            MAX_VAL = 65535,    ///< Максимальное значение счетчика.
             };
+
+        u_int value;
+        u_int last_read_value;
+
+        STATES state;
     };
 //-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.

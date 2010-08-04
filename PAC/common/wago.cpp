@@ -19,12 +19,14 @@ int wago_device::load( file *cfg_file )
         DO_channels.char_write_values[ i ] = wago_manager::get_instance()->
             get_DO_write_data( DO_channels.tables[ i ], DO_channels.offsets[ i ] );
         }
+
     load_table_from_string( cfg_file->fget_line(), AI_channels );
     for ( u_int i = 0; i < AI_channels.count; i++ )
         {
         AI_channels.int_read_values[ i ] = wago_manager::get_instance()->
             get_AI_read_data( AI_channels.tables[ i ], AI_channels.offsets[ i ] );
         }
+
     load_table_from_string( cfg_file->fget_line(), AO_channels );
     for ( u_int i = 0; i < AO_channels.count; i++ )
         {
@@ -75,10 +77,6 @@ int wago_device::set_DO( u_int index, char value )
         DO_channels.char_write_values[ index ] )
         {
         *DO_channels.char_write_values[ index ] = value;
-        if ( debug_mode )
-            {
-            *DO_channels.char_read_values[ index ] = value;
-            }
         return 0;
         }
 
@@ -105,30 +103,66 @@ int wago_device::get_DI( u_int index )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int wago_device::set_DI( u_int index, char value )
-    {
-    if ( index < DI_channels.count &&
-        DI_channels.char_read_values &&
-        DI_channels.char_read_values[ index ] )
-        {
-        *DI_channels.char_read_values[ index ] = value;
-        return 0;
-        }
-
-#ifdef DEBUG
-    Print( "wago_device->set_DI(...) - error!\n" );
-#endif // DEBUG
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-u_int wago_device::get_AO( u_int index )
+float wago_device::get_AO( u_int index, float min_value, float max_value )
     {
     if ( index < AO_channels.count &&
         AO_channels.int_read_values &&
         AO_channels.int_read_values[ index ] )
         {
-        return *AO_channels.int_read_values[ index ];
+        float val = *AO_channels.int_read_values[ index ];
+
+        u_int table_n = AO_channels.tables[ index ];
+        u_int offset = AO_channels.offsets[ index ];
+        u_int module_type = G_WAGO_MANAGER->get_node( table_n )->AO_types[ offset ];
+
+        switch ( module_type )
+            {
+// Выход модуля 554.
+// Три наименне значащих бита не учитываются.
+//    -----------------------------------------------------------------------
+//    Output          Output          Binary value
+//    current 0-20	  current 4-20                            Hex.      Dec.
+//    -----------------------------------------------------------------------
+//    20              20              0111 1111 1111 1111     7F FF     32767
+//    10              12              0100 0000 0000 0xxx     40 00     16384
+//    5               8               0010 0000 0000 0xxx     20 00      8192
+//    2.5             6               0001 0000 0000 0xxx     10 00      4096
+//    0.156           4.125           0000 0001 0000 0xxx     01 00       256
+//    0.01            4.0078          0000 0000 0001 0xxx     00 10        16
+//    0.005           4.0039          0000 0000 0000 1xxx     00 08         8
+//    0               4               0000 0000 0000 0111     00 07         7
+//    0               4               0000 0000 0000 0000     00 00         0
+//
+            case 554:
+                if ( 0 == min_value && 0 == max_value )
+                    {
+                    if ( val < 7 )
+                        {
+                        val = 0;
+                        }
+                    else
+                        {
+                        val = 4 + val / 2047.5;
+                        }
+                    }
+                else
+                    {
+                    if ( val < 7 )
+                        {
+                        val = 4;
+                        }
+                    else
+                        {
+                        val = 4 + val / 2047.5;
+                        }
+                    val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
+                    }
+
+                return val;
+
+            default:
+                return val;
+            }
         }
 
 #ifdef DEBUG
@@ -138,17 +172,31 @@ u_int wago_device::get_AO( u_int index )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int wago_device::set_AO( u_int index, u_int value )
+int wago_device::set_AO( u_int index, float value, float min_value,
+    float max_value )
     {
     if ( index < AO_channels.count &&
         AO_channels.int_write_values &&
         AO_channels.int_write_values[ index ] )
         {
-        *AO_channels.int_write_values[ index ] = value;
-        if ( debug_mode )
+        u_int table_n = AI_channels.tables[ index ];
+        u_int offset = AI_channels.offsets[ index ];
+        u_int module_type = G_WAGO_MANAGER->get_node( table_n )->AI_types[ offset ];
+        
+        switch ( module_type )
             {
-            *AO_channels.int_read_values[ index ] = value;
+            case 554:
+                if ( 0 != min_value || 0 != max_value )
+                   {
+                   value = 4 + 16 * ( value - min_value ) / ( max_value - min_value );
+                   }
+                if ( value < 4 ) value = 4;
+                if ( value > 20 ) value = 20;
+                value = 2047.5 * ( value - 4 );                   
             }
+                
+        *AO_channels.int_write_values[ index ] = ( u_int ) value;
+
         return 0;
         }
 
@@ -159,13 +207,88 @@ int wago_device::set_AO( u_int index, u_int value )
     return 0;
     }
 //-----------------------------------------------------------------------------
-u_int wago_device::get_AI( u_int index )
+float wago_device::get_AI( u_int index, float min_value, float max_value )
     {
     if ( index < AI_channels.count &&
         AI_channels.int_read_values &&
         AI_channels.int_read_values[ index ] )
         {
-        return *AI_channels.int_read_values[ index ];
+        float val = *AI_channels.int_read_values[ index ];
+
+        u_int table_n = AI_channels.tables[ index ];
+        u_int offset = AI_channels.offsets[ index ];
+        u_int module_type = G_WAGO_MANAGER->get_node( table_n )->AI_types[ offset ];
+
+        switch ( module_type )
+            {
+// Выход модуля 461.
+//   -------------------------------------------------------------------------
+//   Temperature  Voltage     Voltage     Binary value
+//   °C           (Ohm)       (Ohm)                               Hex.     Dec.
+//   -------------------------------------------------------------------------
+//                >400
+//   850          390.481     1384,998    0010 0001 0011 0100     2134     8500
+//   100          138.506     1099,299    0000 0011 1110 1000     03E8     1000
+//   25.5         109.929     1000,391    0000 0000 1111 1111     00FF      255
+//   0.1          100.039     1000        0000 0000 0000 0001     0001        1
+//   0            100         999,619     0000 0000 0000 0000     0000        0
+//  -0.1          99.970      901,929     1111 1111 1111 1111     FFFF       -1
+//  -25.5         90.389      184,936     1111 1111 0000 0001     FF01     -255
+//  -200          18.192                  1111 1000 0011 0000     F830    -2000
+//                <18                     1000 0000 0000 0000     8000   -32767
+//
+            case 461:
+                val *= 0.1;
+                val = val >= -50 && val <= 150 ? val : -1000;
+                return val;
+
+// Выход модуля 446.
+// Три наименне значащих бита не учитываются.
+//    -----------------------------------------------------------------------
+//    Input           Input           Binary value
+//    current 0-20	  current 4-20                            Hex.      Dec.
+//    -----------------------------------------------------------------------
+//   >20.5           >20.5            0111 1111 1111 1111     7F FF     32767
+//    20              20              0111 1111 1111 1111     7F FF     32767
+//    10              12              0100 0000 0000 0xxx     40 00     16384
+//    5               8               0010 0000 0000 0xxx     20 00      8192
+//    2.5             6               0001 0000 0000 0xxx     10 00      4096
+//    0.156           4.125           0000 0001 0000 0xxx     01 00       256
+//    0.01            4.0078          0000 0000 0001 0xxx     00 10        16
+//    0.005           4.0039          0000 0000 0000 1xxx     00 08         8
+//    0               4               0000 0000 0000 0111     00 07         7
+//    0               4               0000 0000 0000 0000     00 00         0
+//
+            case 466:                
+                if ( 0 == min_value && 0 == max_value )
+                    {
+                    if ( val < 7 )
+                        {
+                        val = 0;
+                        }
+                    else
+                        {
+                        val = 4 + val / 2047.5;
+                        }
+                    }
+                else
+                    {
+                    if ( val < 7 )
+                        {
+                        val = 4;
+                        }
+                    else
+                        {
+                        val = 4 + val / 2047.5;
+                        }
+                    val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
+                    }
+
+                return val;
+
+            default:
+                return val;
+            }
         }
 
 #ifdef DEBUG
@@ -173,23 +296,6 @@ u_int wago_device::get_AI( u_int index )
     Print( "index=%d, AI_channels.count=%d, AI_channels.char_read_values=%d, AI_channels.char_read_values[ index ]=%d\n",
        index, AI_channels.count, ( int ) AI_channels.char_read_values,
        ( int ) AI_channels.char_read_values[ index ] );
-#endif // DEBUG
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int wago_device::set_AI( u_int index, u_int value )
-    {
-    if ( index < AI_channels.count &&
-        AI_channels.int_read_values &&
-        AI_channels.int_read_values[ index ] )
-        {
-        *AI_channels.int_read_values[ index ] = value;
-        return 0;
-        }
-
-#ifdef DEBUG
-    Print( "wago_device->set_AI(...) - error!\n" );
 #endif // DEBUG
 
     return 0;
@@ -206,8 +312,9 @@ void wago_device::print() const
 //-----------------------------------------------------------------------------
 int wago_device::load_table_from_string( char *str, IO_channels &channels )
     {
-    // 2 1 2 1 3
-    // количество_DI_(например) номер_таблицы_DI_№1 смещение_в_пределах_таблицы_№1 номер_таблицы_DI_№2 ...
+    // Пример:
+    // 2 1 2 1 3 ...
+    // количество_DI номер_таблицы_DI_№1 смещение_в_пределах_таблицы_№1 номер_таблицы_DI_№2 ...
     u_int cnt;
     int pos = sscanf( str, "%d", &cnt );
 
@@ -375,7 +482,7 @@ u_int* wago_manager::get_AI_read_data( u_int node_n, u_int offset )
         {
         if ( nodes[ node_n ] && offset < nodes[ node_n ]->AI_cnt )
             {
-            return &nodes[ node_n ]->AI[ offset ];
+            return &( nodes[ node_n ]->AI[ offset ] );
             }
         }
 #ifdef DEBUG
@@ -476,6 +583,7 @@ int wago_manager::wago_node::load_from_cfg_file( file *cfg_file )
     if ( DI_cnt )
         {
         DI = new u_char [ DI_cnt ];
+        memset( DI, 0, DI_cnt );
         }
 
     sscanf( cfg_file->fget_line(), "%d", &DO_cnt );
@@ -483,6 +591,8 @@ int wago_manager::wago_node::load_from_cfg_file( file *cfg_file )
         {
         DO = new u_char [ DO_cnt ];
         DO_ = new u_char [ DO_cnt ];
+        memset( DO, 0, DO_cnt );
+        memset( DO_, 0, DO_cnt );
         }
 
     sscanf( cfg_file->fget_line(), "%d", &AI_cnt );
@@ -491,6 +601,8 @@ int wago_manager::wago_node::load_from_cfg_file( file *cfg_file )
         AI = new u_int [ AI_cnt ];
         AI_offsets = new u_int [ AI_cnt ];
         AI_types = new u_int [ AI_cnt ];
+
+        memset( AI, 0, AI_cnt * sizeof( u_int ) );
         }
     for ( u_int i = 0; i < AI_cnt; i++ )
         {
@@ -506,6 +618,9 @@ int wago_manager::wago_node::load_from_cfg_file( file *cfg_file )
         AO_ = new u_int [ AO_cnt ];
         AO_types = new u_int [ AO_cnt ];
         AO_offsets = new u_int [ AO_cnt ];
+
+        memset( AO, 0, AO_cnt * sizeof( u_int ) );
+        memset( AO_, 0, AO_cnt * sizeof( u_int ) );
         }
     for ( u_int i = 0; i < AO_cnt; i++ )
         {

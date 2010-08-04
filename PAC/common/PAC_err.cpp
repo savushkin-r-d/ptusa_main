@@ -2,133 +2,117 @@
 
 #include "PAC_err.h"
 
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
 
+PAC_critical_errors_manager* PAC_critical_errors_manager::instance;
+//--------------------------------------------------------------------------------
+/// Kommandos fuer das Interface Programm <--> Hardware
+//--------------------------------------------------------------------------------
+#define WAGO_FBK_LED_CMD_SET	0x01	/* turn on briefly to show activity */
+#define WAGO_FBK_LED_CMD_ON     0x02	/* turn LED on permanently */
+#define WAGO_FBK_LED_CMD_OFF	0x03	/* turn LED off permanently */
+#define WAGO_FBK_LED_CMD_FLASH	0x04	/* flash this LED */
+
+//--------------------------------------------------------------------------------
+/// Hardware Index Programm <--> Hardware
+//--------------------------------------------------------------------------------
+#define WAGO_FBK_LED_STATUS_RED       2
+#define WAGO_FBK_LED_STATUS_GREEN     3
+#define WAGO_FBK_LED_SERVICE_RED      4
+#define WAGO_FBK_LED_SERVICE_GREEN    5
+#define WAGO_FBK_LED_USER_RED	      6
+#define WAGO_FBK_LED_USER_GREEN	      7
+#define WAGO_FBK_LED_ALL              8
 //-----------------------------------------------------------------------------
-int PAC_critical_errors_manager::get_no( char ch ) 
+int ledman_cmd( int cmd, int led )
     {
-    if ( ch >= '0' && ch <= '9' ) return ch - '0';
-    if ( ch >= 'A' && ch <= 'F' ) return ch - 'A' + 10;
-    return 17;
+	int fd;
+	if ( ( fd = open( "/dev/ledman", O_RDWR ) ) != -1 )
+        {
+		ioctl( fd, cmd, led );
+		close( fd );
+        return 0;
+        }
+
+    return 1;
     }
 //-----------------------------------------------------------------------------
 PAC_critical_errors_manager::PAC_critical_errors_manager(
-    ): erros_id( 0 ),
+    ): errors_id( 0 ),
     global_ok( 0 )
     {
-    //Init5DigitLed();
-    //LedOff();
-    for ( int i = 0; i < GE_ERRORS_MAX_COUNT; i++ )
-        {
-        errors[ i ].eclass = -1;
-        }
-    error_show_params.tm = get_millisec();
-    error_show_params.cur_err = -1;
-    error_show_params.cur_pos = -1;
-    error_show_params.speed = 500;
-    error_show_params.MSG[ GE_ERRORS_STRING_LENGTH - 1 ] = 0;    
+    errors.clear();
     }
 //-----------------------------------------------------------------------------
 void PAC_critical_errors_manager::show_errors()
     {
-    static unsigned long st_time = get_millisec();
-    static char intense = 0;
-    static char intense_sign = 1;
+    static u_char is_error = 0;
+    static u_char is_ok = 0;
 
-    if ( get_delta_millisec( st_time ) > 100 )
+    static u_char show_step = 0;
+    static u_long start_time = get_millisec();
+
+    if ( errors.size() > 0 )    // Есть ошибки.
         {
-        //Set5DigitLedIntensity( intense );
-        intense += intense_sign;
-        st_time = get_millisec();
-        if ( 0 == intense || 15 == intense )
+        switch ( show_step )
             {
-            intense_sign *= -1;
+            case 0:
+                if ( get_delta_millisec( start_time ) > 500 )
+                    {
+                    show_step = 1;
+                    ledman_cmd( WAGO_FBK_LED_CMD_ON, WAGO_FBK_LED_STATUS_RED );
+                    start_time = get_millisec();
+                    }
+                break;
+
+            case 1:
+                if ( get_delta_millisec( start_time ) > 500 )
+                    {
+                    show_step = 0;
+                    ledman_cmd( WAGO_FBK_LED_CMD_OFF, WAGO_FBK_LED_STATUS_RED );
+                    start_time = get_millisec();
+                    }
+                break;
             }
-        }   
+        if ( 0 == is_error )
+            {
+            is_error = 1;
+            is_ok = 0;
 
-    int i, idx;
-    if ( get_delta_millisec( error_show_params.tm ) >= error_show_params.speed )
+            ledman_cmd( WAGO_FBK_LED_CMD_OFF, WAGO_FBK_LED_ALL );
+            }
+        }
+    else                        // Нет ошибок.
         {
-        if ( error_show_params.cur_err >= 0 ) 
+        switch ( show_step )
             {
-            error_show_params.tm = get_millisec();
-            error_show_params.cur_pos++;
-            sprintf( error_show_params.MSG, "     E%u %u %u", 
-                ( unsigned int )errors[ error_show_params.cur_err ].eclass,
-                errors[ error_show_params.cur_err ].p1, 
-                errors[ error_show_params.cur_err ].p2 );
-            if ( error_show_params.MSG[ error_show_params.cur_pos ] == 0 )
-                {
-                error_show_params.cur_pos = -1;
-                //find next error;
-                idx = 0;
-                for ( i = error_show_params.cur_err + 1; i < GE_ERRORS_MAX_COUNT; i++ )
+             case 0:
+                if ( get_delta_millisec( start_time ) > 500 )
                     {
-                    if ( errors[ i ].eclass >= 0 )
-                        {
-                        error_show_params.cur_err = i;
-                        idx = 1;
-                        break;
-                        }
+                    show_step = 1;
+                    ledman_cmd( WAGO_FBK_LED_CMD_ON, WAGO_FBK_LED_STATUS_GREEN );
+                    start_time = get_millisec();
                     }
-                if ( idx == 0 )
+                break;
+
+            case 1:
+                if ( get_delta_millisec( start_time ) > 500 )
                     {
-                    for ( i = 0; i < error_show_params.cur_err; i++ )
-                        {
-                        if ( errors[ i ].eclass >= 0 ) 
-                            {
-                            error_show_params.cur_err = i;
-                            break;
-                            }
-                        }
+                    show_step = 0;
+                    ledman_cmd( WAGO_FBK_LED_CMD_OFF, WAGO_FBK_LED_STATUS_GREEN );
+                    start_time = get_millisec();
                     }
-                }
-            for ( i = 1; i < 6; i++ )
-                {
-                //Show5DigitLed( i, get_no( error_show_params.MSG[
-                //    error_show_params.cur_pos + i ] ) );
-                }
-            } 
-        else 
+                break;
+            }
+
+        if ( 0 == is_ok )
             {
-            for ( i = 0; i < GE_ERRORS_MAX_COUNT; i++ )
-                {
-                if ( errors[ i ].eclass >= 0 )
-                    {
-                    error_show_params.cur_err = i;
-                    break;
-                    }
-                }
-            if ( error_show_params.cur_err < 0 && error_show_params.cur_pos >= 0 )
-                {
-                error_show_params.cur_pos = -1;
-                //Init5DigitLed();
-                }
-            if ( error_show_params.cur_err < 0 )
-                {
-                if ( !global_ok ) 
-                    {
-                    //LedOn();
-                    //Init5DigitLed();
-                    //Show5DigitLedSeg( 1, 103 );
-                    //Show5DigitLed( 2, 10 );
-                    //Show5DigitLedSeg( 3, 223 );
-                    //Show5DigitLedSeg( 4, 0 );
-                    //Show5DigitLedSeg( 5, 0 );
-                    //if (IsResetByWatchDogTimer() )
-                    //    {
-                    //    Show5DigitLed( 5,17 );
-                    //    }
-                    global_ok = 1;
-                    }
-                } 
-            else 
-                {
-                if ( global_ok )
-                    {
-                    //LedOff();
-                    global_ok = 0;
-                    }
-                }                
+            is_ok = 1;
+            is_error = 0;
+
+            ledman_cmd( WAGO_FBK_LED_CMD_OFF, WAGO_FBK_LED_ALL );
             }
         }
     }
@@ -136,16 +120,12 @@ void PAC_critical_errors_manager::show_errors()
 void PAC_critical_errors_manager::set_global_error( ERRORS_CLASS eclass,
                                                    ERRORS_SUBCLASS p1, unsigned long p2 )
     {
-    int i, b, idx;
-    b = 0;
-    idx = -1;
-    //1.try to find
-    for ( i = 0; i < GE_ERRORS_MAX_COUNT; i++ ) 
-        {
-        if ( errors[ i ].eclass == -1 && idx == -1 )
-            idx = i;
+    int b = 0;
 
-        if ( errors[ i ].eclass == eclass && 
+    //1.try to find
+    for ( u_int i = 0; i < errors.size(); i++ )
+        {
+        if ( errors[ i ].err_class == eclass &&
             ( unsigned int ) p1 == errors[ i ].p1 && 
             ( unsigned int ) p2 == errors[ i ].p2 )
             {
@@ -153,16 +133,15 @@ void PAC_critical_errors_manager::set_global_error( ERRORS_CLASS eclass,
             break;
             }
         }
-    if ( b == 0 && idx != -1 )
+
+    if ( b == 0 )
         {
 #ifdef DEBUG
         Print( "Set Error: class: %d, p1: %d, p2: %lu.\n\r", eclass, p1, p2 );
 #endif // DEBUG
-        errors[ idx ].eclass = eclass;
-        errors[ idx ].p1 = p1;
-        errors[ idx ].p2 = p2;
+        errors.push_back( critical_error( eclass, p1, p2 ) );
 
-        erros_id++;
+        errors_id++;
         }
     }
 //-----------------------------------------------------------------------------
@@ -170,9 +149,9 @@ void PAC_critical_errors_manager::reset_global_error( ERRORS_CLASS eclass,
                                                      ERRORS_SUBCLASS p1, unsigned long p2 )
     {
     int idx = -1;
-    for ( int i = 0; i < GE_ERRORS_MAX_COUNT; i++ )
+    for ( u_int i = 0; i < errors.size(); i++ )
         {
-        if ( errors[ i ].eclass == eclass && 
+        if ( errors[ i ].err_class == eclass &&
             ( unsigned int ) p1 == errors[ i ].p1 &&
             ( unsigned int ) p2 == errors[ i ].p2 )
             {
@@ -180,15 +159,15 @@ void PAC_critical_errors_manager::reset_global_error( ERRORS_CLASS eclass,
             break;
             }
         }
+
     if ( idx >= 0 )
         {
-        errors[ idx ].eclass = -1;
+        errors.erase( errors.begin() + idx );
 #ifdef DEBUG
         Print( "Reset Error: class: %d, p1: %d, p2: %lu \n\r", eclass, p1, p2 );
 #endif // DEBUG
-        if ( error_show_params.cur_err == idx ) error_show_params.cur_err = -1;
 
-        erros_id++;
+        errors_id++;
         }
     }
 //-----------------------------------------------------------------------------
@@ -207,7 +186,7 @@ int PAC_critical_errors_manager::save_to_stream( char *buff )
     {
     int answer_size = 0;
 
-    *( ( unsigned int* ) buff ) = erros_id;
+    *( ( unsigned int* ) buff ) = errors_id;
     buff += 2;
     answer_size += 2;
     unsigned char *erros_cnt = ( unsigned char* ) buff;
@@ -215,21 +194,18 @@ int PAC_critical_errors_manager::save_to_stream( char *buff )
     buff++;
     answer_size++;
 
-    for ( int i = 0; i < GE_ERRORS_MAX_COUNT; i++ ) 
+    for ( u_int i = 0; i < errors.size(); i++ )
         {
-        if ( errors[ i ].eclass > -1 )
-            {
-            erros_cnt[ 0 ]++;
-            buff[ 0 ] = errors[ i ].eclass;
-            buff[ 1 ] = errors[ i ].p1;
-            buff[ 2 ] = errors[ i ].p2;
-            buff += 3;
-            answer_size += 3;
-            }            
+        erros_cnt[ 0 ]++;
+        buff[ 0 ] = errors[ i ].err_class;
+        buff[ 1 ] = errors[ i ].p1;
+        buff[ 2 ] = errors[ i ].p2;
+        buff += 3;
+        answer_size += 3;
         }
 
 #ifdef DEBUG_PAC_ERR   
-    Print( " erros_id = %u\n", erros_id );
+    Print( " erros_id = %u\n", errors_id );
     Print( " erros_cnt = %d\n", erros_cnt[ 0 ] );
     Print( " answer_size = %d\n", answer_size );
 #endif // DEBUG_PAC_ERR
@@ -240,55 +216,16 @@ int PAC_critical_errors_manager::save_to_stream( char *buff )
 unsigned char PAC_critical_errors_manager::save_to_stream_2( char *buff )
     {
     unsigned char answer_size = 0;
-    for ( int i = 0; i < GE_ERRORS_MAX_COUNT; i++ ) 
+    for ( u_int i = 0; i < errors.size(); i++ )
         {
-        if ( errors[ i ].eclass > -1 )
-            {           
-            buff[ 0 ] = errors[ i ].eclass;
-            buff[ 1 ] = errors[ i ].p1;
-            buff[ 2 ] = errors[ i ].p2;
-            buff += 3;
-            answer_size += 3;
-            }            
+        buff[ 0 ] = errors[ i ].err_class;
+        buff[ 1 ] = errors[ i ].p1;
+        buff[ 2 ] = errors[ i ].p2;
+        buff += 3;
+        answer_size += 3;
         }
 
     return answer_size; 
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-PAC_critical_errors_manager *g_pac_critical_errors = 0;
-//-----------------------------------------------------------------------------
-void InitGlobalErrors ()
-    {  
-    g_pac_critical_errors = new PAC_critical_errors_manager;
-    }
-//-----------------------------------------------------------------------------
-void ShowErrors() 
-    {
-    if ( g_pac_critical_errors )
-        {
-        g_pac_critical_errors->show_errors();
-        }    
-    }
-//-----------------------------------------------------------------------------
-void SetGlobalError( ERRORS_CLASS eclass, ERRORS_SUBCLASS p1,
-                    unsigned long p2 )
-    {
-    if ( g_pac_critical_errors )
-        {
-        g_pac_critical_errors->set_global_error( eclass, p1, p2 );
-        }
-    }
-//-----------------------------------------------------------------------------
-void ResetGlobalError( ERRORS_CLASS eclass, ERRORS_SUBCLASS p1,
-                      unsigned long p2 )
-    {
-    if ( g_pac_critical_errors )
-        {
-        g_pac_critical_errors->reset_global_error( eclass, p1, p2 );
-        }    
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-
-

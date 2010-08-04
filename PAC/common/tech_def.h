@@ -129,6 +129,11 @@ class tech_object
             {
             return number;
             }
+
+        u_int get_modes_count() const
+            {
+            return modes_count;
+            }
         
         saved_params_float  par_float;      ///< Сохраняемые параметры, тип float.
         run_time_params_float rt_par_float; ///< Рабочие параметры, тип float.
@@ -140,7 +145,7 @@ class tech_object
 
         u_int   number;         ///< Номер объекта.
         u_int_4 cmd;            ///< Хранение команды объекта.
-        u_int   states_count;   ///< Количество режимов.
+        u_int   modes_count;    ///< Количество режимов.
 
         std::vector< u_int_4 >  state;  ///< Состояние объекта.
         timer_manager           timers; ///< Таймеры объекта.
