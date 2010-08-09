@@ -23,7 +23,7 @@
 #include <string.h>
 
 #include "sys.h"
-#include "sys_w750.h"
+#include "sys_linux.h"
 #include "PAC_dev.h"
 //-----------------------------------------------------------------------------
 /// @brief Работа с параметрами. 

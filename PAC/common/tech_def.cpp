@@ -86,7 +86,7 @@ int tech_object::set_mode( u_int mode, int newm )
     static char   white_spaces[ 256 ] = "";
     static u_char idx = 0;
 
-    Print ( "%sStart %s[ %2u ] set mode = %2u --> %s.\n",
+    print_time( "%sStart %s[ %2u ] set mode = %2u --> %s.\n",
         white_spaces, com_dev->get_name(), number, mode, 
         newm == 0 ? "OFF" : " ON" );
 
@@ -137,7 +137,7 @@ int tech_object::set_mode( u_int mode, int newm )
     idx -= 4;
     white_spaces[ idx ] = 0;
     
-    Print( "%sEnd   %s[ %2u ] set mode = %2u --> %s, res = %d. \n",
+    print_time( "%sEnd   %s[ %2u ] set mode = %2u --> %s, res = %d. \n",
         white_spaces, com_dev->get_name(), number, mode,
         newm == 0 ? "OFF" : " ON", res );
 

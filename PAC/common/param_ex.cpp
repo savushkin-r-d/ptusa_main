@@ -147,9 +147,13 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
 
 #ifdef DEBUG
         if ( check_CRC() == 0 )
-            Print( "PARAMS OK: PARAMS SUCCESFULLY REINITIALIZED.\n\r" );
+            {
+            Print( "PARAMS OK: PARAMS SUCCESFULLY REINITIALIZED.\n" );
+            }
         else
+            {
             Print( "PARAMS: FATAL ERROR.\n\r" );
+            }
 #ifdef KEY_CONFIRM
         Print( "Press any key to continue..." );
         get_char();
@@ -161,9 +165,13 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
         {
 #ifdef DEBUG
         if ( check_CRC() == 0 )
-            Print( "PARAMS OK: DON'T NEED REINITIALIZING.\n\r" );
+            {
+            Print( "PARAMS OK: DON'T NEED REINITIALIZING.\n" );
+            }
         else
+            {
             Print( "PARAMS: FATAL ERROR.\n\r" );
+            }
 #ifdef KEY_CONFIRM
         Print( "Press any key to continue..." );
         get_char();

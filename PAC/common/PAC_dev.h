@@ -22,11 +22,8 @@
 #include <string.h>
 #include <stdio.h>
 
-//#include <string>
-
 #include "sys.h"
 #include "wago.h"
-
 #include "g_device.h"
 
 //for levels

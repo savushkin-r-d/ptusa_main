@@ -1,4 +1,4 @@
-/// @file tech_proc.h
+/// @file tech_def.h
 /// @brief Реализована базовая функциональность следующих объектов, описывающих
 /// технологический процесс - танк (технологическая емкость),
 /// гребенка (совокупность клапанов) и т.д.
@@ -13,8 +13,8 @@
 /// @$Author: id@BMK $.\n
 /// @$Date:: 2010-07-09 15:57:50#$.
 
-#ifndef TECH_PROCESS_H
-#define TECH_PROCESS_H
+#ifndef TECH_DEFINITION_H
+#define TECH_DEFINITION_H
 
 #include <stdio.h>
 #include <vector>
@@ -228,4 +228,4 @@ class tech_object_manager
 #define G_TECH_OBJECT_MNGR tech_object_manager::get_instance()
 #define G_TECH_OBJECTS tech_object_manager::get_instance()->get_tech_objects
 //-----------------------------------------------------------------------------
-#endif // TECH_PROCESS_H
+#endif // TECH_DEFINITION_H

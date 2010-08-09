@@ -83,10 +83,6 @@ int project_manager::load_configuration( const char *file_name )
     //-Wago data.
     wago_manager::get_instance()->load_from_cfg_file( cfg_file );
     
-#ifdef UCLINUX
-        G_WAGO_MANAGER->read_inputs();
-#endif // UCLINUX
-
     //-Devices data.
     device_manager::get_instance()->load_from_cfg_file( cfg_file );
 

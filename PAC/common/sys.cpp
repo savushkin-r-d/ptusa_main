@@ -2,11 +2,12 @@
 
 NV_memory_manager* NV_memory_manager::instance;
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #if ( defined LINUX || defined UCLINUX ) && defined DEBUG
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
-
+//-----------------------------------------------------------------------------
 int kbhit()
     {
     int tem = fcntl( 0, F_GETFL, 0 );
@@ -20,7 +21,7 @@ int kbhit()
 
     return 0;
     }
-
+//-----------------------------------------------------------------------------
 void print_binary( u_int c )
     {
     if ( 0 == c )
@@ -37,7 +38,7 @@ void print_binary( u_int c )
         mask >>= 1;
         }
     }
-
+//-----------------------------------------------------------------------------
 int get_char()
     {
     struct termios oldt;
@@ -52,6 +53,7 @@ int get_char()
     return ch;
     }
 #endif // ( defined LINUX || defined UCLINUX ) && defined DEBUG
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 NV_memory::NV_memory( u_int total_size,
                      u_int available_start_pos,
