@@ -1,12 +1,21 @@
 #include <stdlib.h>
+#if defined UCLINUX || defined LINUX
 #include <time.h>
-
+#endif // defined UCLINUX || defined LINUX
 
 #include "sys.h"
 #include "PAC_dev.h"
 #include "tcp_cmctr_linux.h"
+#include "prj_mngr_linux.h"
+
+#ifdef PAC_W750
 #include "wago_w750.h"
-#include "prj_mngr_w750.h"
+#endif // PAC_W750
+
+#ifdef PAC_PC
+#include "sys_PC.h"
+#include "wago_PC.h"
+#endif // PAC_PC
 
 #include "tech_def.h"
 #include "init.h"
@@ -21,18 +30,29 @@
 
 int main( int argc, char *argv[] )
     {
+#if defined UCLINUX || defined LINUX
     time_t t = time( 0 );
     fprintf( stderr, "Program started - %s\n", asctime( localtime( &t ) ) );
-
-    project_manager::set_instance( new project_manager_w750() );
+#endif // defined UCLINUX || defined LINUX
+    
+    project_manager::set_instance( new project_manager_linux() );
     tcp_communicator::set_instance( new tcp_communicator_linux() );
+#ifdef PAC_W750
     wago_manager::set_instance( new wago_manager_w750() );
+#endif // PAC_W750
+#ifdef PAC_PC
+    wago_manager::set_instance( new wago_manager_PC() );
+#endif // PAC_PC
     device_manager::set_instance( new device_manager() );
     device_communicator::set_instance( new device_communicator() );
+#ifdef PAC_W750
     NV_memory_manager::set_instance( new NV_memory_manager_W750() );
+#endif // PAC_W750
+#ifdef PAC_PC
+    NV_memory_manager::set_instance( new NV_memory_manager_PC() );
+#endif // PAC_PC
 
     tech_object_manager::set_instance( new tech_object_manager() );
-
     PAC_critical_errors_manager::set_instance( new PAC_critical_errors_manager() );
 
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
@@ -41,10 +61,10 @@ int main( int argc, char *argv[] )
     G_PROJECT_MANAGER->load_configuration( "Whey_out.ds5" );
 #endif // UCLINUX
 
-#ifdef LINUX
+#ifdef PAC_PC
     G_PROJECT_MANAGER->load_configuration(
         "/home/id/src/PAC_control_projects/whey_out/Whey_out.ds5" );
-#endif // LINUX
+#endif // PAC_PC
 
 #ifdef DEBUG
     G_DEVICE_MANAGER->print();
@@ -97,12 +117,12 @@ int main( int argc, char *argv[] )
        const u_int MAX_ITERATION = 10000;
 #endif // LINUX
 #ifdef UCLINUX
-       const u_int MAX_ITERATION = 1000000;
+       const u_int MAX_ITERATION = 1000;
 #endif // UCLINUX
 
         if ( cycles_cnt > MAX_ITERATION )
             {
-            Print( "\tMain cycle avg time = %lu\n", all_time / cycles_cnt  );
+            print_time( "\tMain cycle avg time = %lu\n", all_time / cycles_cnt  );
             all_time = 0;
             cycles_cnt = 0;
             }

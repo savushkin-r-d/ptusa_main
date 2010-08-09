@@ -1,7 +1,7 @@
 #include "init.h"
 #include "priem.h"
 
-int G_PROJECT_ID = 69;
+const int G_PROJECT_ID = 69;
 //-----------------------------------------------------------------------------
 int init_tech_process()
     {

@@ -27,12 +27,7 @@ whey_tank::whey_tank( int n ): tech_object( "TANK",
     LSL( LS( number * 100 + 1 ) ),
     LE1( LE( number ) ),
     LSH( LS( number * 100 + 2 ) ),        
-    T( TE( number ) )//,
-
-   // V_1( new dev_stub ),
-   // V_2( new dev_stub ),
-   // V_3( new dev_stub ),
-   // V_4( new dev_stub )
+    T( TE( number ) )
     {
     }
 //-----------------------------------------------------------------------------

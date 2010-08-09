@@ -12,11 +12,11 @@
             <make-dep-projects/>
             <sourceRootList/>
             <confList>
-                <confElem>debug_linux</confElem>
                 <confElem>release_linux</confElem>
+                <confElem>debug_linux</confElem>
+                <confElem>full_debug_linux</confElem>
                 <confElem>release_ucLinux</confElem>
                 <confElem>debug_ucLinux</confElem>
-                <confElem>full_debug_linux</confElem>
                 <confElem>full_debug_ucLinux</confElem>
                 <confElem>no_wago_full_debug_ucLinux</confElem>
             </confList>
