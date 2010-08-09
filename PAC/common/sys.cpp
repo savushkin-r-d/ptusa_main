@@ -21,7 +21,24 @@ int kbhit()
     return 0;
     }
 
-int Getch()
+void print_binary( u_int c )
+    {
+    if ( 0 == c )
+        {
+        printf( "0" );
+        return;
+        }
+
+    u_int mask = 0x80000000;
+    while( !( c & mask ) ) mask >>= 1;
+    while ( mask )
+        {
+        printf( "%d", ( c & mask ) > 0 ? 1 : 0 );
+        mask >>= 1;
+        }
+    }
+
+int get_char()
     {
     struct termios oldt;
     struct termios newt;
@@ -139,7 +156,7 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
         default:
 #ifdef DEBUG
             Print( "NV_memory_manager:get_memory_block(...) - incorrect memory type!\n" );
-            Getch();
+            get_char();
 #endif // DEBUG
 
             return new memory_range( 0, 0, 0 );
@@ -149,7 +166,7 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
         {
 #ifdef DEBUG
         Print( "NV_memory_manager:get_memory_block(...) - memory = NULL!\n" );
-        Getch();
+        get_char();
 #endif // DEBUG
         new memory_range( 0, 0, 0 );
         }
@@ -165,7 +182,7 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
             memory->get_size(),            
             memory->get_available_start_pos(),
             memory->get_available_end_pos() );
-        Getch();
+        get_char();
 #endif // DEBUG
         new memory_range( 0, 0, 0 );
         }

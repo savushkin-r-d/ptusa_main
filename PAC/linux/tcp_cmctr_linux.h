@@ -1,4 +1,4 @@
-/// @file tcp_cmctr_lin.h
+/// @file tcp_cmctr_linux.h
 /// @brief —одержит описани€ классов, которые предназначены дл€ обмена данными
 /// PAC-сервер по протоколу TCP дл€ OC Linux.
 ///

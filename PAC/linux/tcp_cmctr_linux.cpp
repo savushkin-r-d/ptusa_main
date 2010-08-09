@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "tcp_cmctr_lin.h"
+#include "tcp_cmctr_linux.h"
 #include "PAC_err.h"
 
 #ifdef DEBUG

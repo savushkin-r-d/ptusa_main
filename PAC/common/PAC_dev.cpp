@@ -61,44 +61,56 @@ int complex_state::parse_cmd( char *buff  )
 #ifdef SIMPLE_PROJECT
     if (	( strcmp( name, "CMD" ) == 0 ) 
         ||	( strcmp( name, "Cmd" ) == 0 ) 
-        ||	( strcmp( name, "cmd" ) == 0 )) 
+        ||	( strcmp( name, "cmd" ) == 0 ) )
         {
-        u_int_4 new_mode = 0;
-        memcpy( &new_mode, buff + sizeof( u_int_4 ), sizeof( new_mode ) );
-        int new_state = 0;
-        if ( 0 == new_mode )
-            {
-            state[ 0 ] = 0;
-            return 0;
-            }
-
-        if ( new_mode >= 1000 && new_mode < 2000 ) //On mode.
-            {
-            new_mode -= 1000;
-            new_state = 1;
-            }
-        else
-            {      
-            if ( new_mode >= 2000 && new_mode < 3000 ) //Off mode.
-                {
-                new_mode -= 2000;
-                new_state = 0;
-                }
-            else
-                {
-#ifdef DEBUG
-                Print( "Error complex_state::parse_cmd - new_mode = %lu\n", 
-                    ( unsigned long int ) new_mode );
-#endif //DEBUG
-                return -1;
-                }
-            }
-
+ 
         switch ( owner_type )
             {
             case T_TECH_OBJECT:
-                state[ 0 ] = ( ( tech_object* ) owner_object )->set_mode(
-                    new_mode, new_state );
+                u_int_4 new_mode = 0;
+                memcpy( &new_mode, buff + sizeof( u_int_4 ), sizeof( new_mode ) );
+                int new_state = 0;
+                if ( 0 == new_mode )
+                    {
+                    state[ 0 ] = 0;
+                    return 0;
+                    }
+
+                if ( new_mode >= 1000 && new_mode < 2000 )      // On mode.
+                    {
+                    new_mode -= 1000;
+                    new_state = 1;
+                    }
+                else
+                    {
+                    if ( new_mode >= 2000 && new_mode < 3000 )  // Off mode.
+                        {
+                        new_mode -= 2000;
+                        new_state = 0;
+                        }
+                    else
+                        {
+#ifdef DEBUG
+                        Print( "Error complex_state::parse_cmd - new_mode = %lu\n",
+                            ( unsigned long int ) new_mode );
+#endif // DEBUG
+                        return -1;
+                        }
+                    }
+
+                if ( new_mode >
+                    ( ( tech_object* ) owner_object )->get_modes_count() )
+                    {
+                    // Command.
+                    state[ 0 ] = ( ( tech_object* ) owner_object )->exec_cmd(
+                    new_mode );
+                    }
+                else
+                    {
+                    // On/off mode.
+                    state[ 0 ] = ( ( tech_object* ) owner_object )->set_mode(
+                        new_mode, new_state );
+                    }
                 break;
             }
 
@@ -162,7 +174,7 @@ int string_device::save_state( char *buff )
         {
         Print( "string_device::save_state(...) - strlen [ %d ] > 200!\n", 
             str_len );
-        Getch();
+        get_char();
         }
 #endif // DEBUG
 
@@ -201,7 +213,7 @@ int string_device::parse_cmd( char *buff )
 #ifdef DEBUG
         Print( "string_device::parse_cmd(...) - str_len[ %d ] > max_str_len[ %d ]!\n",
             new_str_len, max_str_len );
-        Getch();
+        get_char();
 #endif // DEBUG
     	}
     else
@@ -346,7 +358,7 @@ int u_int_4_state_device::save_state( char *buff )
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-int DO_1::get_state()
+int DO_1::get_state_now()
     {
     return get_DO( DO_INDEX );
     }
@@ -484,7 +496,7 @@ int device_manager::load_from_cfg_file( file *cfg_file )
                         default:
 #ifdef DEBUG
                             Print( "Unknown V device subtype %d!\n", dev_sub_type );
-                            Getch();
+                            get_char();
 #endif // DEBUG
                             project_devices[ i ] = new dev_stub();
                             break;
@@ -668,7 +680,7 @@ int dev_stub::set_value( float new_value )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int dev_stub::get_state()
+int dev_stub::get_state_now()
     {
     return 0;
     }
@@ -757,7 +769,7 @@ int counter::set_value( float new_value )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int counter::get_state()
+int counter::get_state_now()
     {
     return state;
     }
@@ -883,7 +895,7 @@ u_int counter::get_quantity()
 //-----------------------------------------------------------------------------
 float digital_device::get_value()
     {
-    return get_state();
+    return get_state_now();
     }
 //-----------------------------------------------------------------------------
 int digital_device::set_value( float new_value )
@@ -931,7 +943,7 @@ int digital_device::save_state( char *buff )
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_WAGO_MODULES
 
-int digital_device::get_state()
+int digital_device::get_state_now()
     {
     return state;
     }
@@ -951,7 +963,7 @@ void digital_device::off()
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-int DO_2::get_state()
+int DO_2::get_state_now()
     {
     int b1 = get_DO( DO_INDEX_1 );
     int b2 = get_DO( DO_INDEX_2 );
@@ -976,7 +988,7 @@ void DO_2::off()
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-int DO_1_DI_1::get_state()
+int DO_1_DI_1::get_state_now()
     {
     int o = get_DO( DO_INDEX );
     int i = get_DI( DI_INDEX );
@@ -1034,7 +1046,7 @@ void DO_1_DI_1::off()
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-int DO_1_DI_2::get_state()
+int DO_1_DI_2::get_state_now()
     {
     int o = get_DO( DO_INDEX );
     int i0 = get_DI( DI_INDEX_1 );
@@ -1082,7 +1094,7 @@ void DO_1_DI_2::off()
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-int DO_2_DI_2::get_state()
+int DO_2_DI_2::get_state_now()
     {
     int o0 = get_DO( DO_INDEX_1 );
     int o1 = get_DO( DO_INDEX_2 );
@@ -1142,7 +1154,7 @@ void valve_mix_proof::open_low_seat()
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-int valve_mix_proof::get_state()
+int valve_mix_proof::get_state_now()
     {
     int o = get_DO( DO_INDEX );            
     int i0 = get_DI( DI_INDEX_U );
@@ -1228,29 +1240,14 @@ int valve_mix_proof::set_state( int new_state )
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-DI_1::DI_1( u_int dt ): last_check_time( get_millisec() ),
-    state( 0 ), 
-    dt( dt )
+DI_1::DI_1( u_int dt )
     {
+    set_dt( dt );
     }
 //-----------------------------------------------------------------------------
-int DI_1::get_state()
+int DI_1::get_state_now()
     {
-    if ( dt > 0 )
-        {
-        if ( state != get_DI( DI_INDEX ) )
-            {
-            if ( get_delta_millisec( last_check_time ) > dt  )
-                {
-                state = get_DI( DI_INDEX );
-                }
-            }
-
-        last_check_time = get_millisec();
-        }
-    else state = get_DI( DI_INDEX );
-
-    return state;
+    return get_DI( DI_INDEX );
     }
 //-----------------------------------------------------------------------------
 void DI_1::on()
@@ -1371,7 +1368,7 @@ int analog_device::set_state( int new_state )
     return set_value( new_state );
     }
 //-----------------------------------------------------------------------------
-int analog_device::get_state()
+int analog_device::get_state_now()
     {
     return ( int ) get_value();
     }
@@ -1502,7 +1499,8 @@ bool timer::is_time_up() const
     {
     if ( state != S_STOP )
         {
-        if ( work_time + get_delta_millisec( last_time ) < countdown_time )
+        u_int time = work_time + get_delta_millisec( last_time );
+        if (  time <= countdown_time )
             {
             return 0;
             }

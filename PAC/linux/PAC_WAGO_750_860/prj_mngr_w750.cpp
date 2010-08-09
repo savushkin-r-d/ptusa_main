@@ -2,5 +2,5 @@
 
 project_manager_w750::project_manager_w750()
     {
-    cfg_file = new file_w750();
+    cfg_file = new data_file();
     }

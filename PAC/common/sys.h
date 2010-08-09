@@ -35,7 +35,7 @@ typedef unsigned long int       u_long;
 #define Print printf
 
 #ifdef DEBUG
-#define Getch getch
+#define get_char getch
 #endif // DEBUG
 
 #endif // WIN32
@@ -45,9 +45,10 @@ typedef unsigned long int       u_long;
 #define Print printf
 
 #ifdef DEBUG
-int kbhit();
+int  kbhit();
+int  get_char();
 
-int Getch();
+void print_binary( u_int c );
 #endif // DEBUG
 
 #endif // defined LINUX || defined UCLINUX

@@ -152,7 +152,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
             Print( "PARAMS: FATAL ERROR.\n\r" );
 #ifdef KEY_CONFIRM
         Print( "Press any key to continue..." );
-        Getch();
+        get_char();
         Print( "\n" );
 #endif // KEY_CONFIRM
 #endif // DEBUG
@@ -166,7 +166,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
             Print( "PARAMS: FATAL ERROR.\n\r" );
 #ifdef KEY_CONFIRM
         Print( "Press any key to continue..." );
-        Getch();
+        get_char();
         Print( "\n" );
 #endif // KEY_CONFIRM
 #endif // DEBUG
@@ -268,7 +268,7 @@ int params_test::make_test()
         Print( "test1[ 0 ] = %lu\n", ( u_long ) test1[ 0 ] );
         Print( "test1[ 1 ] = %lu\n", ( u_long ) test1[ 1 ] );
         Print( "test1[ 2 ] = %lu\n", ( u_long ) test1[ 2 ] );
-        Getch();
+        get_char();
 #endif // DEBUG
         return 1;
         }
@@ -282,13 +282,13 @@ int params_test::make_test()
         Print( "test1[ 0 ] = %lu\n", ( u_long ) test1[ 0 ] );
         Print( "test1[ 1 ] = %lu\n", ( u_long ) test1[ 1 ] );
         Print( "test1[ 2 ] = %lu\n", ( u_long ) test1[ 2 ] );
-        Getch();
+        get_char();
 
     Print( "Passing params test - ok!\n" );
 
 #ifdef KEY_CONFIRM
     Print( "Press any key to continue..." );
-    Getch();
+    get_char();
     Print( "\n" );
 #endif // KEY_CONFIRM
 

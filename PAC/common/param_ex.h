@@ -291,7 +291,7 @@ class run_time_params_float: public parameters < float >,
             buff += sizeof( idx );
             memcpy( &val, buff, sizeof( val ) );
 
-            Print( "Set val work param float[ %u ] = %f\n", idx, val );
+            Print( "Set val work param float[ %2u ] = %f\n", idx, val );
 #endif // DEBUG
             return res;
             }
@@ -332,7 +332,7 @@ class run_time_params_u_int_4: public parameters < u_int_4 >,
             buff += sizeof( idx );
             memcpy( &val, buff, sizeof( val ) );
 
-            Print( "Set val work param u_int_4[ %u ] = %u\n", idx, val );
+            Print( "Set val work param u_int_4[ %2u ] = %u\n", idx, val );
 #endif // DEBUG
             return res;
             }
@@ -458,7 +458,7 @@ class saved_params_u_int_4: public saved_params < u_int_4 >,
               buff += sizeof( idx );
               memcpy( &val, buff, sizeof( val ) );
 
-             Print( "Set val saved param u-int_4[ %u ] = %u\n", idx, val );
+             Print( "Set val saved param u-int_4[ %2u ] = %u\n", idx, val );
 #endif // DEBUG
 
               return res;
@@ -497,7 +497,7 @@ class saved_params_float: public saved_params < float >,
               buff += sizeof( idx );
               memcpy( &val, buff, sizeof( val ) );
 
-             Print( "Set val saved param float[ %u ] = %f\n", idx, val );
+             Print( "Set val saved param float[ %2u ] = %f\n", idx, val );
 #endif //DEBUG
               return res;
               }

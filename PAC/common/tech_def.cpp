@@ -1,3 +1,5 @@
+#include <vector>
+
 #include "tech_def.h"
 #include "sys.h"
 //-----------------------------------------------------------------------------
@@ -81,8 +83,17 @@ int tech_object::set_mode( u_int mode, int newm )
     int res = 0;
 
 #ifdef DEBUG
-    Print ( "Start %s[ %d ]::set_mode mode ( mode = %d, new state = %d ). \n",
-        com_dev->get_name(), number, mode, newm );
+    static char   white_spaces[ 256 ] = "";
+    static u_char idx = 0;
+
+    Print ( "%sStart %s[ %2u ] set mode = %2u --> %s.\n",
+        white_spaces, com_dev->get_name(), number, mode, 
+        newm == 0 ? "OFF" : " ON" );
+
+    white_spaces[ idx++ ] = ' ';
+    white_spaces[ idx++ ] = ' ';
+    white_spaces[ idx++ ] = ' ';
+    white_spaces[ idx++ ] = 0;
 #endif
 
     if ( newm != 0 ) newm = 1;
@@ -95,7 +106,7 @@ int tech_object::set_mode( u_int mode, int newm )
             if ( newm == 0 ) // Off mode.
                 {
 
-                if ( ( res = can_final_mode( mode ) ) == 0 ) // Check if possible.
+                if ( ( res = check_off_mode( mode ) ) == 0 ) // Check if possible.
                     {
                     state[ mode / 32 ] = state[ mode / 32 ] & ~( 1UL << mode % 32 );
                     final_mode( mode );
@@ -108,7 +119,7 @@ int tech_object::set_mode( u_int mode, int newm )
                 }
             else
                 {
-                if ( ( res = can_init_mode( mode ) ) == 0 ) // Check if possible.
+                if ( ( res = check_on_mode( mode ) ) == 0 ) // Check if possible.
                     {
                     init_mode( mode );
                     state[ mode / 32 ] = state[ mode / 32 ] | 1UL << mode % 32;
@@ -123,38 +134,44 @@ int tech_object::set_mode( u_int mode, int newm )
             }
         }
 #ifdef DEBUG
-    Print( "End %s[ %d ]::set_mode mode = %d, [ %d ], res = %d. \n",
-        com_dev->get_name(), number, mode, newm, res );
+    idx -= 4;
+    white_spaces[ idx ] = 0;
+    
+    Print( "%sEnd   %s[ %2u ] set mode = %2u --> %s, res = %d. \n",
+        white_spaces, com_dev->get_name(), number, mode,
+        newm == 0 ? "OFF" : " ON", res );
 
     for ( u_int i = 0; i < state.size(); i++ )
         {
-        Print( " state[ %d ] = %u \n", i, state[ i ] );
+        Print( "%sstate[ %d ] = %u (",
+            white_spaces, i, state[ i ] );
+        print_binary( state[ i ] );
+        Print( ")\n" );
         }
     Print( "\n" );
 #endif
-
-    cmd = 1000;
+  
     return res;
     }
 //-----------------------------------------------------------------------------
-int tech_object::get_mode( int mode )
+int tech_object::get_mode( u_int mode )
     {
-    return ( int )( ( unsigned long )( state [ mode / 32 ] >> mode % 32 ) & 1 );
+    if ( mode >= modes_count ) return 0;
+
+    return ( int )( ( u_int_4 ) ( state.at( mode / 32 ) >> mode % 32 ) & 1 );
     }
 //-----------------------------------------------------------------------------
-int tech_object::can_init_mode( int mode )
+int tech_object::check_on_mode( u_int mode )
     {
     return 0;
     }
 //-----------------------------------------------------------------------------
-int tech_object::init_mode( u_int mode )
+void tech_object::init_mode( u_int mode )
     {
     if ( mode < modes_count )
         {
         mode_start_time.at( mode ) = get_sec();
         }
-
-    return 0;
     }
 //-----------------------------------------------------------------------------
 int tech_object::evaluate()
@@ -166,7 +183,7 @@ int tech_object::evaluate()
     return 0;
     }
 //-----------------------------------------------------------------------------
-int tech_object::can_final_mode( int mode )
+int tech_object::check_off_mode( u_int mode )
     {
     return 0;
     }

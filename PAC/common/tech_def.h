@@ -55,9 +55,6 @@ class tech_object
         ///
         /// @param mode      - режим.
         /// @param new_state - новое состояние режима.
-        ///
-        /// @return  0 - ок.
-        /// @return >0 - ошибка.
         virtual int set_mode( u_int mode, int new_state );
 
         /// @brief Получение состояния режима.
@@ -66,15 +63,31 @@ class tech_object
         ///
         /// @return 1 - режим включен.
         /// @return 0 - режим не включен.
-        int get_mode( int mode );
+        int get_mode( u_int mode );
 
         /// @brief Проверка возможности включения режима.
+        ///
+        /// Если данный метод возвращает 1, то тогда режим не включается.
         ///
         /// @param mode - режим.
         ///
         /// @return 1 - режим нельзя включить.
         /// @return 0 - режим можно включить.
-        virtual int can_init_mode( int mode );
+        virtual int check_on_mode( u_int mode );
+
+        /// @brief Выполнение команды.
+        ///
+        /// Здесь могут выполняться какие-либо действия (включаться/выключаться
+        /// другие режимы).
+        ///
+        virtual int exec_cmd( u_int cmd )
+            {
+#ifdef DEBUG
+            Print ( "Exec command %s[ %2d ] command = %2d\n",
+                com_dev->get_name(), number, cmd );
+#endif
+            return 0;
+            }
 
         /// @brief Инициализация режима.
         ///
@@ -82,9 +95,7 @@ class tech_object
         /// включение маршрута, включение/выключение клапанов и т.д.
         ///
         /// @param mode - режим.
-        ///
-        /// @return 0 - ок.
-        virtual int init_mode( u_int mode );
+        virtual void init_mode( u_int mode );
 
         /// @brief Выполнение включенных режимов.
         ///
@@ -100,7 +111,7 @@ class tech_object
         ///
         /// @return 1 - режим нельзя выключить.
         /// @return 0 - режим можно выключить.
-        virtual int can_final_mode( int mode );
+        virtual int check_off_mode( u_int mode );
 
         /// @brief Завершение режима.
         ///

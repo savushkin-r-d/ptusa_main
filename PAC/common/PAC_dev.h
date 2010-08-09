@@ -348,10 +348,55 @@ class i_counter
 class i_DI_device
     {
     public:
+        i_DI_device():last_check_time( get_millisec() ),
+            state( 0 ),
+            dt( 0 )
+            {
+            }
+
         /// @brief Получение текущего состояния устройства.
         ///
         /// @return - текущее состояние устройства в виде целого числа.
-        virtual int get_state() = 0;
+        virtual int get_state_now() = 0;
+
+        /// @brief Получение текущего состояния устройства.
+        ///
+        /// @return - текущее состояние устройства в виде целого числа.
+        virtual int get_state()
+            {
+            if ( dt > 0 )
+                {
+                if ( state != get_state_now() )
+                    {
+                    if ( get_delta_millisec( last_check_time ) > dt  )
+                        {
+                        state = get_state_now();
+                        }
+                    }
+                else
+                    {
+                    last_check_time = get_millisec();
+                    }
+                }
+            else state = get_state_now();
+
+            return state;
+            }
+
+       void set_dt( u_int time )
+            {
+            dt = time;
+            }
+
+        void set_st_state( int new_state )
+            {
+            state = new_state;
+            }
+
+    protected:
+        u_int last_check_time;///< Время последней проверки состояния.
+        int   state;     ///< Предыдущее состояние, для исключения дребезга.
+        u_int dt;             ///< Интервал установления состояния, мсек.
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретным выходом.
@@ -620,7 +665,7 @@ class dev_stub : public device,
         void    on();                
         void    off();                
         int     set_state( int new_state );
-        int     get_state();
+        int     get_state_now();
                 
         int     parse_cmd( char *buff );
                
@@ -651,16 +696,15 @@ class digital_device : public device,
         int save_state( char *buff );                
 
 #ifdef DEBUG_NO_WAGO_MODULES
-
-        int  get_state();
+        int  get_state_now();
         void on();
         void off();
-
-#else  // DEBUG_NO_WAGO_MODULES
-
-        int get_state() = 0;
-
 #endif // DEBUG_NO_WAGO_MODULES
+        
+        int get_state()
+            {
+            return i_DI_device::get_state();
+            }
 
     protected:
         enum CONSTANTS
@@ -683,7 +727,7 @@ class analog_device : public device,
     {
     public:
         int   set_state( int new_state );
-        int   get_state();
+        int   get_state_now();
         int   parse_cmd( char *buff );
         int   load( file *cfg_file );
         void  print() const;
@@ -717,7 +761,7 @@ class DO_1 : public digital_device
     {
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
-        int  get_state();
+        int  get_state_now();
         void on();
         void off();
 
@@ -736,7 +780,7 @@ class DO_2 : public digital_device
     {
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
-        int  get_state();
+        int  get_state_now();
         void on();
         void off();        
 
@@ -756,7 +800,7 @@ class DO_1_DI_1 : public digital_device
     {
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
-        int  get_state();
+        int  get_state_now();
         void on();
         void off();
 
@@ -780,7 +824,7 @@ class DO_1_DI_2 : public digital_device
     {
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
-        int  get_state();
+        int  get_state_now();
         void on();
         void off();
 
@@ -804,7 +848,7 @@ class DO_2_DI_2 : public digital_device
     {
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
-        int  get_state();
+        int  get_state_now();
         void on();
         void off();
 
@@ -838,7 +882,7 @@ class valve_mix_proof : public digital_device
         void open_low_seat();
 
 #ifndef DEBUG_NO_WAGO_MODULES
-        int  get_state();
+        int  get_state_now();
         void on();
         void off();
         int set_state( int new_state );
@@ -984,9 +1028,9 @@ class DI_1 : public digital_device
     {
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
-        DI_1( u_int dt = 500 );
+    DI_1( u_int dt = 0 );
 
-        int  get_state();
+        int  get_state_now();
         void on();
         void off();
 
@@ -995,10 +1039,6 @@ class DI_1 : public digital_device
             {
             DI_INDEX = 0,   ///< Индекс канала дискретного входа.
             };
-
-        u_int last_check_time;///< Время последней проверки состояния.
-        int   state;          ///< Предыдущее состояние, для исключения дребезга.
-        u_int dt;             ///< Интервал установления состояния, мсек.
 #endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
@@ -1040,6 +1080,11 @@ class mixer : public DO_1_DI_1
 /// @brief Датчик сигнализатора уровня.
 class level_s : public DI_1
     {
+    public:
+        level_s( u_int dt = 1000 )
+            {
+            set_dt( dt );
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора расхода.
@@ -1068,7 +1113,7 @@ class counter : public device,
 
         float get_value();
         int   set_value( float new_value );
-        int   get_state();
+        int   get_state_now();
         void  on();
         void  off();
         int   set_state( int new_state );
