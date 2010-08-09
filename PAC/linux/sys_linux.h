@@ -32,6 +32,7 @@ typedef unsigned int       u_int_4;
 class SRAM: public NV_memory
     {
     friend class NV_memory_manager_W750;
+    friend class NV_memory_manager_PC;
 
     private:
         enum CONSTANTS

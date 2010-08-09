@@ -1,6 +1,6 @@
-/// @file prj_mngr_w750.h
+/// @file prj_mngr_linux.h
 /// @brief Работа с загрузкой конфигурации проекта, инициализация объектов и 
-/// т.д. для PAC WAGO 750-860.
+/// т.д. для PAC с ОС linux.
 /// 
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
@@ -9,20 +9,20 @@
 /// @$Author: id@BMK $.\n
 /// @$Date:: 2010-04-26 15:27:20#$.
 
-#ifndef PRJ_MANAGER_W750_H
-#define PRJ_MANAGER_W750_H
+#ifndef PRJ_MANAGER_LINUX_H
+#define PRJ_MANAGER_LINUX_H
 
 #include "prj_mngr.h"
-#include "sys_w750.h"
+#include "sys_linux.h"
 //-----------------------------------------------------------------------------
 /// @brief Инициализация проекта.
 ///
 /// 
-class project_manager_w750 : public project_manager
+class project_manager_linux : public project_manager
     {
     public:
-        project_manager_w750();
+        project_manager_linux();
     };
 //-----------------------------------------------------------------------------
-#endif // PRJ_MANAGER_W750_H
+#endif // PRJ_MANAGER_LINUX_H
 
