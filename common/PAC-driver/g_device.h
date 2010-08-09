@@ -15,7 +15,7 @@
 ///
 /// @c DRIVER  - компиляция для драйвера в OS Windows.@n
 /// @c PAC     - компиляция для PAC.@n
-/// @c W750    - компиляция для PAC Wago 750.@n
+/// @c PAC_W750    - компиляция для PAC Wago 750.@n
 /// @c I7186_E - компиляция для PAC I7186_E.@n
 /// @c I7188_E - компиляция для PAC I7188_E.@n
 /// @c I7188   - компиляция для PAC I7188. Данные директивы кроме необходимой 
@@ -49,21 +49,13 @@ typedef unsigned short  u_int_2;
 #include "sys.h"
 #include "tcp_cmctr.h"
 
-#ifdef I7188
-#include "sys_7188.h"
-#endif // I7188
+#if defined LINUX || defined UCLINUX
+#include "sys_linux.h"
+#endif // defined LINUX || defined UCLINUX
 
-#ifdef I7188_E
-#include "sys7188e.h"
-#endif // I7188
-
-#ifdef I7186_E
-#include "sys_7186.h"
-#endif // I7186_E
-
-#ifdef W750
+#ifdef PAC_W750
 #include "sys_w750.h"
-#endif // W750
+#endif // PAC_W750
 
 #endif // PAC
 

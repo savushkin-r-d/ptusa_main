@@ -59,10 +59,7 @@ public:
             debug_break;
 #endif // DEBUG_TRACE
 
-#if defined LINUX || defined UCLINUX
             printf( "smart_ptr - pointer is NULL!\n" );
-#endif // defined LINUX || defined UCLINUX
-
 #endif // DEBUG
             pointer = new type;
             }
@@ -75,9 +72,7 @@ public:
         if ( pointer == NULL )
             {
 #ifdef DEBUG
-#if defined LINUX || defined UCLINUX
             printf( "smart_ptr - dereferencing NULL!\n" );
-#endif // defined LINUX || defined UCLINUX
 
 #ifdef DEBUG_TRACE
             debug_break;
@@ -96,7 +91,7 @@ private:
         return pointer;
         }
 
-    smart_ptr< type >& operator = ( const smart_ptr< type >& new_t )
+    smart_ptr< type >& operator = ( const smart_ptr< type > &new_t )
         {
         return *this;
         }
