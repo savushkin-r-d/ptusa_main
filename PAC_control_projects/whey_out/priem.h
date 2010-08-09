@@ -14,11 +14,13 @@ class my_comb : public tech_object
             };
         //-End of comb modes.-!>
 
-        int init_mode( u_int mode );
-        int evaluate();
-        int final_mode( u_int mode );
         my_comb( int stCnt, int parCnt, int workParCnt, int tmrCnt );
         ~my_comb();
+
+        int evaluate();
+        int final_mode( u_int mode );
+
+        int check_on_mode( int mode );
     };
 //-----------------------------------------------------------------------------
 // Индексы объектов.
@@ -55,15 +57,15 @@ enum TANK_MODES
     //--Режимы поста.!->
 
     //--Команды.
-    RESET_POST = 30,             // Выключает пауза/работу, включает Выдача завершена.
-    SET_PAUSE_AND_HEATING,       // Включает пауза и подогрев.
-    RESET_TANK_POST1,            // Выключает режим выдачи для танка и, если надо, поста 1.
-    RESET_TANK_POST2,            // Выключает режим выдачи для танка и, если надо, поста 2.
+    CMD_RESET_POST = 30,             // Выключает пауза/работу, включает Выдача завершена.
+    CMD_SET_PAUSE_AND_HEATING,       // Включает пауза и подогрев.
+    CMD_RESET_TANK_POST1,            // Выключает режим выдачи для танка и, если надо, поста 1.
+    CMD_RESET_TANK_POST2,            // Выключает режим выдачи для танка и, если надо, поста 2.
 
-    SET_POST1_AND_TANK,          // Включить танк и пост 1.
-    SET_POST2_AND_TANK,          // Включить танк и пост 2.
-    SET_HEATING_POST1_AND_TANK,  // Включить танк и подогрев пост 1.
-    SET_HEATING_POST2_AND_TANK,  // Включить танк и подогрев пост 2.
+    CMD_SET_POST1_AND_TANK,          // Включить танк и пост 1.
+    CMD_SET_POST2_AND_TANK,          // Включить танк и пост 2.
+    CMD_SET_HEATING_POST1_AND_TANK,  // Включить танк и подогрев пост 1.
+    CMD_SET_HEATING_POST2_AND_TANK,  // Включить танк и подогрев пост 2.
     };
 //-End of tank modes.!->
 //-----------------------------------------------------------------------------
@@ -110,10 +112,12 @@ class whey_tank : public tech_object
     //-Для выдачи с переходом.-!>
 
     public:
-        int set_mode( u_int mode, int newm );
-        int evaluate();
-        int final_mode( u_int mode );
-        int init_mode( u_int mode );
+        int  check_on_mode( u_int mode );
+        void init_mode( u_int mode );
+        int  evaluate();
+        int  final_mode( u_int mode );
+
+        int exec_cmd( u_int cmd );
 
         whey_tank( int n );
         ~whey_tank();
@@ -194,9 +198,12 @@ class post : public tech_object
     smart_ptr< i_DI_device > btnPause;  // Stop button.
 
     public:
-        int evaluate();
-        int final_mode( u_int mode );
-        int init_mode( u_int mode );
+        int  check_on_mode( u_int mode );
+        void init_mode( u_int mode );        
+        int  evaluate();
+        int  final_mode( u_int mode );
+
+        int exec_cmd( u_int cmd );
 
         int init_params();
 

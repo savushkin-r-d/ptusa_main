@@ -27,7 +27,8 @@
           <itemPath>../../PAC/linux/PAC_WAGO_750_860/sys_w750.h</itemPath>
           <itemPath>../../PAC/linux/PAC_WAGO_750_860/wago_w750.h</itemPath>
         </logicalFolder>
-        <itemPath>../../PAC/linux/tcp_cmctr_lin.h</itemPath>
+        <itemPath>../../PAC/linux/sys_linux.h</itemPath>
+        <itemPath>../../PAC/linux/tcp_cmctr_linux.h</itemPath>
       </logicalFolder>
       <itemPath>init.h</itemPath>
       <itemPath>priem.h</itemPath>
@@ -55,7 +56,8 @@
           <itemPath>../../PAC/linux/PAC_WAGO_750_860/sys_w750.cpp</itemPath>
           <itemPath>../../PAC/linux/PAC_WAGO_750_860/wago_w750.cpp</itemPath>
         </logicalFolder>
-        <itemPath>../../PAC/linux/tcp_cmctr_lin.cpp</itemPath>
+        <itemPath>../../PAC/linux/sys_linux.cpp</itemPath>
+        <itemPath>../../PAC/linux/tcp_cmctr_linux.cpp</itemPath>
       </logicalFolder>
       <itemPath>init.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
@@ -221,6 +223,7 @@
             <Elem>LINUX</Elem>
             <Elem>DEBUG</Elem>
             <Elem>DEBUG_TRACE</Elem>
+            <Elem>DEBUG_NO_WAGO_MODULES</Elem>
           </preprocessorList>
           <warningLevel>2</warningLevel>
         </ccTool>

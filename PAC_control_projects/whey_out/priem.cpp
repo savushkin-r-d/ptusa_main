@@ -1,6 +1,5 @@
 #include "priem.h"
 
-dev_stub *G_DEV_STUB = new dev_stub;
 //-----------------------------------------------------------------------------
 #define G_COMB G_TECH_OBJECTS( C_COMB_IDX )
 #define POST1  G_TECH_OBJECTS( C_POST1_IDX )
@@ -11,7 +10,13 @@ dev_stub *G_DEV_STUB = new dev_stub;
 #define TANK4  G_TECH_OBJECTS( C_T4_IDX )
 //-----------------------------------------------------------------------------
 whey_tank::whey_tank( int n ): tech_object( "TANK",
-    n, 20, 5 /*timers_count*/, 1 /*par_count*/, 10 /*work_par_count*/, 1, 1 ),
+    n,  // Number.
+    20, // States count.
+    5,  // Timers_count.
+    1,  // Params count float.
+    10, // Work params count float.
+    1,  // Params count u_int.
+    1 ),// Work params count u_int.
     V1( V( number * 100 + 1 ) ),
     V2( V( number * 100 + 2 ) ),
     V3( V( number * 100 + 3 ) ),
@@ -22,90 +27,17 @@ whey_tank::whey_tank( int n ): tech_object( "TANK",
     LSL( LS( number * 100 + 1 ) ),
     LE1( LE( number ) ),
     LSH( LS( number * 100 + 2 ) ),        
-    T( TE( number ) )
+    T( TE( number ) )//,
+
+   // V_1( new dev_stub ),
+   // V_2( new dev_stub ),
+   // V_3( new dev_stub ),
+   // V_4( new dev_stub )
     {
     }
 //-----------------------------------------------------------------------------
 whey_tank::~whey_tank()
     {
-    }
-//-----------------------------------------------------------------------------
-int whey_tank::set_mode( u_int mode, int newm )
-    {
-    int res = 0;
-    int idx;
-
-#ifdef DEBUG
-    Print ("Set tank n=%d mode = %d, %d\n", number, mode, newm );
-#ifdef STOP
-    Print ("Press any key to continue...\n" );
-    Getch();
-#endif
-#endif
-
-    if ( mode > 63 ) return 1;
-    if ( get_mode( mode ) == newm ) return 0;
-    if ( newm == 0 )
-        {  //off mode
-        state[ mode / 32 ] = state[ mode / 32 ] & ( ~1UL << mode );
-        final_mode( mode );
-        res = mode + 2000;
-
-        //-При отключении приёмки/выдачи включаем при наличии ожидающие
-        // приёмку/выдачу.
-        if ( mode >= T_WHEY_ACCEPTING && mode <= T_WHEY_OUT_P2 )
-            {
-            idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode( 
-                mode + T_WHEY_WACCEPTING, C_T1_IDX, C_T4_IDX );
-
-            if ( idx >= 0 )
-                {
-                G_TECH_OBJECTS( idx )->set_mode( mode + T_WHEY_WACCEPTING, 0 );
-                G_TECH_OBJECTS( idx )->set_mode( mode, 1 );
-                if ( T_WHEY_ACCEPTING == mode )
-                    {
-                    G_TECH_OBJECTS( idx )->rt_par_float[ T_WARNING_REASON ] = 
-                       TW_TANK_IN_START;
-                    }
-                }
-            else
-                {
-                if ( T_WHEY_ACCEPTING == mode )
-                    rt_par_float[ T_WARNING_REASON ] = TW_TANK_IN_STOP;
-                }
-            }
-        //-При отключении приёмки/выдачи включаем при наличии ожидающие
-        // приёмку/выдачу-!>
-        }
-    else
-        {  //try to set
-        //-При включени приёмки/выдачи при необходимости ставим в ожидание
-        // приёмку/выдачу.
-        if ( mode >= T_WHEY_ACCEPTING && mode <= T_WHEY_OUT_P2 )
-            {
-            idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode( mode,
-                C_T1_IDX, C_T4_IDX );
-            if ( idx >= 0 )
-                {
-                set_mode( mode + T_WHEY_WACCEPTING, 1 );
-                return mode + 1000;
-                }
-            }
-        //-При включени приёмки/выдачи при необходимости ставим в ожидание
-        // приёмку/выдачу.-!>
-
-        res = init_mode( mode );
-        if ( res == 0 )
-            {
-            state[ mode / 32 ] = state[ mode / 32 ] | 1UL << mode;
-            return mode + 1000;
-            }
-
-        if ( res == 2 ) return mode + 1000;
-        else return 0;
-        }
-
-    return res;
     }
 //-----------------------------------------------------------------------------
 int whey_tank::evaluate()
@@ -251,10 +183,6 @@ int whey_tank::final_mode( u_int mode )
     {
     tech_object::final_mode( mode );
 
-#ifdef DEBUG
-    Print( "Final mode %d\n\r", mode );
-#endif
-
     switch ( mode )
         {
         case T_WHEY_ACCEPTING:          
@@ -305,72 +233,136 @@ int whey_tank::final_mode( u_int mode )
             break;
 
         case T_WHEY_WACCEPTING:           
-            break;
-
         case T_WHEY_WOUT_P1:              
-            break;
-
         case T_WHEY_WOUT_P2:              
             break;
         }
 
+    //-При отключении приёмки/выдачи включаем при наличии ожидающие
+    // приёмку/выдачу.
+    if ( mode >= T_WHEY_ACCEPTING && mode <= T_WHEY_OUT_P2 )
+        {
+        int idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode(
+            mode + T_WHEY_WACCEPTING, C_T1_IDX, C_T4_IDX );
+
+        if ( idx >= 0 )
+            {
+            G_TECH_OBJECTS( idx )->set_mode( mode + T_WHEY_WACCEPTING, 0 );
+            G_TECH_OBJECTS( idx )->set_mode( mode, 1 );
+            if ( T_WHEY_ACCEPTING == mode )
+                {
+                G_TECH_OBJECTS( idx )->rt_par_float[ T_WARNING_REASON ] =
+                   TW_TANK_IN_START;
+                }
+            }
+        else
+            {
+            if ( T_WHEY_ACCEPTING == mode )
+                rt_par_float[ T_WARNING_REASON ] = TW_TANK_IN_STOP;
+            }
+        }
+    //-При отключении приёмки/выдачи включаем при наличии ожидающие
+    // приёмку/выдачу-!>
+
     return 0;
     }
 //-----------------------------------------------------------------------------
-int whey_tank::init_mode( u_int mode )
+int whey_tank::exec_cmd( u_int cmd )
     {
-    tech_object::init_mode( mode );
+    tech_object::exec_cmd( cmd );
 
-#ifdef DEBUG
-    Print( "Init mode %d\n\r", mode );
-#endif
+    int idx = -1;
+    switch ( cmd )
+        {
+        case CMD_RESET_TANK_POST1:
+            idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode(
+                T_WHEY_WOUT_P1, C_T1_IDX, C_T4_IDX );
 
-    int idx = 0;
+            if ( idx == -1 ) POST1->exec_cmd( CMD_RESET_POST ); // Сбрасываем пост 1.
+            set_mode( T_WHEY_OUT_P1, 0 );
+            break;
+
+        case CMD_RESET_TANK_POST2:
+            idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode(
+                T_WHEY_WOUT_P2, C_T1_IDX, C_T4_IDX );
+
+            if ( idx == -1 ) POST2->exec_cmd( CMD_RESET_POST ); // Сбрасываем пост 2.
+            set_mode( T_WHEY_OUT_P2, 0 );
+            break;
+
+        case CMD_SET_POST1_AND_TANK:
+            if ( get_mode ( T_WASH ) ||   // Во время мойки танка нельзя.
+                get_mode( T_WHEY_OUT_P2 ) ||
+                get_mode( T_WHEY_WOUT_P2 ) ) return 1;
+
+            if ( set_mode( T_WHEY_OUT_P1, 1 ) == 1000 + T_WHEY_OUT_P1 )
+                POST1->set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
+            break;
+
+        case CMD_SET_POST2_AND_TANK:
+            if ( get_mode ( T_WASH ) ||   // Во время мойки танка нельзя.
+                get_mode( T_WHEY_OUT_P1 ) ||
+                get_mode( T_WHEY_WOUT_P1 ) ) return 1;
+
+            if ( set_mode( T_WHEY_OUT_P2, 1 ) == 1000 + T_WHEY_OUT_P2 )
+                POST2->set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
+            break;
+
+        case CMD_SET_HEATING_POST1_AND_TANK:
+            exec_cmd( CMD_SET_POST1_AND_TANK );
+            POST1->set_mode( POST_WHEY_HEATING, 1 );
+            break;
+
+        case CMD_SET_HEATING_POST2_AND_TANK:
+            exec_cmd( CMD_SET_POST2_AND_TANK );
+            POST2->set_mode( POST_WHEY_HEATING, 1 );
+            break;
+        }
+
+    rt_par_float[ T_WARNING_REASON ] = 0;
+    
+    return 1000 + cmd;
+    }
+//-----------------------------------------------------------------------------
+int whey_tank::check_on_mode( u_int mode )
+    {
+    tech_object::check_on_mode( mode );
 
     switch ( mode )
         {
-        case T_WHEY_ACCEPTING:            
+        case T_WHEY_ACCEPTING:
             if ( get_mode ( T_WASH ) ||               // Во время мойки танка нельзя принимать.
                 G_COMB->get_mode( my_comb::C_WASH ) ) // Во время мойки линии приёмки нельзя принимать.
                 return 1;
             break;
 
-        case T_WHEY_OUT_P1:               
+        case T_WHEY_OUT_P1:
             if ( get_mode ( T_WASH ) ) return 1;       // Во время мойки танка нельзя выдавать.
 
             if ( 3 == number || 4 == number )
                 {
                 if ( TANK1->get_mode( T_WHEY_OUT_P2 ) ||  // Выдача сыворотки танком 1.
-                   TANK2->get_mode( T_WHEY_OUT_P2 ) ||    // Выдача сыворотки танком 2.
+                    TANK2->get_mode( T_WHEY_OUT_P2 ) ||   // Выдача сыворотки танком 2.
                     TANK1->get_mode( T_WASH ) ||          // Мойка танка 1.
-                   TANK2->get_mode( T_WASH ) ||           // Мойка танка 2.
-                   TANK3->get_mode( T_WASH ) ||           // Мойка танка 3.
-                   TANK4->get_mode( T_WASH ) ||           // Мойка танка 4.
-                    ( TANK1->get_mode( T_WHEY_ACCEPTING ) &&
-                   TANK2->get_mode( T_WHEY_WACCEPTING ) ) ||    // Приёмка т. 1 и ожидание т. 2.
-                    ( TANK1->get_mode( T_WHEY_WACCEPTING ) &&
-                   TANK2->get_mode( T_WHEY_ACCEPTING ) )        // Приёмка т. 2 и ожидание т. 1.
-                    ) return 1;
-
-                //-В зависимости от того, в какой танк идёт приёмка ( или ни
-                // в какой ), определяем клапаны перехода.
-                V_1 = V( 101 );
-                V_2 = V( 102 );
-                V_3 = V( 103 );
-                V_4 = V( 104 );
+                    TANK2->get_mode( T_WASH ) ||          // Мойка танка 2.
+                    TANK3->get_mode( T_WASH ) ||          // Мойка танка 3.
+                    TANK4->get_mode( T_WASH ) ||          // Мойка танка 4.
+                                                          // Приёмка т. 1 и ожидание т. 2.
+                    ( TANK1->get_mode( T_WHEY_ACCEPTING ) && TANK2->get_mode( T_WHEY_WACCEPTING ) ) ||
+                                                          // Приёмка т. 2 и ожидание т. 1.
+                    ( TANK1->get_mode( T_WHEY_WACCEPTING ) && TANK2->get_mode( T_WHEY_ACCEPTING ) ) )
+                    {
+                    return 1;
+                    }
 
                 if ( TANK1->get_mode( T_WHEY_ACCEPTING ) )
                     {
                     return 1;
                     }
-                //-В зависимости от того, в какой танк идёт приёмка ( или ни
-                // в какой ), определяем клапаны перехода.-!>
                 }
-
-            //( (post*) &G_TECH_OBJECTS[ C_POST_1_INDEX ] )->flow->set_state( 1 );
             break;
-        case T_WHEY_OUT_P2:             
 
+        case T_WHEY_OUT_P2:
             if ( get_mode ( T_WASH ) ) return 1;       // Во время мойки танка нельзя выдавать.
 
             if ( 1 == number || 2 == number )
@@ -387,24 +379,14 @@ int whey_tank::init_mode( u_int mode )
                     TANK4->get_mode( T_WHEY_ACCEPTING ) )       // Приёмка т. 4 и ожидание т. 3.
                     ) return 1;
 
-                //-В зависимости от того, в какой танк идёт приёмка ( или ни
-                // в какой ), определяем клапаны перехода.
-                V_1 = V( 401 );
-                V_2 = V( 402 );
-                V_3 = V( 403 );
-                V_4 = V( 404 );
-
                 if ( TANK4->get_mode( T_WHEY_ACCEPTING ) )
                     {
                     return 1;
                     }
-                //-В зависимости от того, в какой танк идёт приёмка ( или
-                // ни в какой ), определяем клапаны перехода.-!>
                 }
-
-            //( (post*) G_TECH_OBJECTS( C_POST_2_INDEX ) )->flow->set_state( 1 );
             break;
-        case T_WASH:                    
+
+        case T_WASH:
             if  ( get_mode ( T_WHEY_WACCEPTING ) ||
                 get_mode ( T_WHEY_WOUT_P1 ) ||
                 get_mode ( T_WHEY_WOUT_P2 ) ||
@@ -424,10 +406,7 @@ int whey_tank::init_mode( u_int mode )
                 return 1;
             break;
 
-        case T_WHEY_WACCEPTING:          
-            break;
-
-        case T_WHEY_WOUT_P1:             
+        case T_WHEY_WOUT_P1:
             if ( get_mode ( T_WASH ) ) return 1;    // Во время мойки танка нельзя выдавать.
 
             if ( 3 == number || 4 == number )
@@ -442,7 +421,7 @@ int whey_tank::init_mode( u_int mode )
                 }
             break;
 
-        case T_WHEY_WOUT_P2:              
+        case T_WHEY_WOUT_P2:
             if ( get_mode ( T_WASH ) ) return 1;    // Во время мойки танка нельзя выдавать.
 
             if ( 1 == number || 2 == number )
@@ -455,61 +434,70 @@ int whey_tank::init_mode( u_int mode )
                     TANK4->get_mode( T_WASH ) )         // Мойка танка 4.
                     return 1;
                 }
-            break;
-
-        case RESET_TANK_POST1:           
-            idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode(
-                T_WHEY_WOUT_P1, C_T1_IDX, C_T4_IDX );
-
-            if ( idx == -1 ) POST1->set_mode( RESET_POST, 1 ); // Сбрасываем пост 1.
-            set_mode( T_WHEY_OUT_P1, 0 );
-
-            return 2;
-
-        case RESET_TANK_POST2:           
-            idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode( 
-                T_WHEY_WOUT_P2, C_T1_IDX, C_T4_IDX );
-
-            if ( idx == -1 ) POST2->set_mode( RESET_POST, 1 ); // Сбрасываем пост 2.
-            set_mode( T_WHEY_OUT_P2, 0 );
-
-            return 2;
-
-        case SET_POST1_AND_TANK:          
-            if ( get_mode ( T_WASH ) ||   // Во время мойки танка нельзя.
-                get_mode( T_WHEY_OUT_P2 ) ||
-                get_mode( T_WHEY_WOUT_P2 ) ) return 1;
-
-            if ( set_mode( T_WHEY_OUT_P1, 1 ) == 1000 + T_WHEY_OUT_P1 )
-                POST1->set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
-            return 2;
-
-        case SET_POST2_AND_TANK:          
-            if ( get_mode ( T_WASH ) ||   // Во время мойки танка нельзя.
-                get_mode( T_WHEY_OUT_P1 ) ||
-                get_mode( T_WHEY_WOUT_P1 ) ) return 1;
-
-            if ( set_mode( T_WHEY_OUT_P2, 1 ) == 1000 + T_WHEY_OUT_P2 )
-                POST2->set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
-            return 2;
-
-        case SET_HEATING_POST1_AND_TANK:  
-            set_mode( SET_POST1_AND_TANK, 1 );
-            POST1->set_mode( POST_WHEY_HEATING, 1 );
-            return 2;
-
-        case SET_HEATING_POST2_AND_TANK:  
-            set_mode( SET_POST2_AND_TANK, 1 );
-            POST2->set_mode( POST_WHEY_HEATING, 1 );
-            return 2;
+            break;       
         }
+
+    //-При включени приёмки/выдачи при необходимости ставим в ожидание
+    // приёмку/выдачу.
+    if ( mode >= T_WHEY_ACCEPTING && mode <= T_WHEY_OUT_P2 )
+        {
+        int idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode( mode,
+            C_T1_IDX, C_T4_IDX );
+        if ( idx >= 0 )
+            {
+            set_mode( mode + T_WHEY_WACCEPTING, 1 );
+            return mode + 1000;
+            }
+        }
+    //-При включени приёмки/выдачи при необходимости ставим в ожидание
+    // приёмку/выдачу.-!>
 
     rt_par_float[ T_WARNING_REASON ] = 0;
     return 0;
     }
 //-----------------------------------------------------------------------------
-post::post( int n ): tech_object( "TANK", n, 32, 5, 5 /*par_count*/,
-    20 /*work_par_count*/, 1, 1 ),
+void whey_tank::init_mode( u_int mode )
+    {
+    tech_object::init_mode( mode );
+
+    switch ( mode )
+        {
+        case T_WHEY_OUT_P1:               
+            if ( 3 == number || 4 == number )
+                {
+                //-В зависимости от того, в какой танк идёт приёмка ( или ни
+                // в какой ), определяем клапаны перехода.
+                V_1 = V( 101 );
+                V_2 = V( 102 );
+                V_3 = V( 103 );
+                V_4 = V( 104 );
+                }
+        break;
+
+        case T_WHEY_OUT_P2:             
+            if ( 1 == number || 2 == number )
+                {
+                //-В зависимости от того, в какой танк идёт приёмка ( или ни
+                // в какой ), определяем клапаны перехода.
+                V_1 = V( 401 );
+                V_2 = V( 402 );
+                V_3 = V( 403 );
+                V_4 = V( 404 );
+                }
+            break;
+        }    
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+post::post( int n ): tech_object( "TANK",
+    n,  // Number.
+    20, // States count.
+    5,  // Timers_count.
+    5,  // Params count float.
+    20, // Work params count float.
+    1,  // Params count u_int.
+    1 ),// Work params count u_int.
+        
     btnStartPrevState( 0 ),
     btnPausePrevState( 0 ),
 
@@ -528,6 +516,8 @@ post::post( int n ): tech_object( "TANK", n, 32, 5, 5 /*par_count*/,
 
     timers[ TMR_DELAY_TEMP ].set_countdown_time( 2000 );
     timers[ TMR_DELAY_TEMP ].reset();
+
+    flow->set_dt( 5000 );
     }
 //-----------------------------------------------------------------------------
 post::~post()
@@ -597,8 +587,8 @@ int post::evaluate()
                     lampWorking->on();
 
                     if ( ctr->get_quantity() >=
-                        par_float[ RT_F__TOT_VOL ] ) // Общее заполнение машины.
-                        set_mode( RESET_POST, 1 );
+                        rt_par_float[ RT_F__TOT_VOL ] ) // Общее заполнение машины.
+                        set_mode( CMD_RESET_POST, 1 );
                     else
                         {
                         if ( ctr->get_quantity() - prevSectVol >=
@@ -613,8 +603,13 @@ int post::evaluate()
 
                             if ( rt_par_float[ RT_F__CURRENT_SEC ] <
                                 rt_par_float[ RT_F__CURRENT_SEC ] + 1 ) // Есть секции.
+                                {
                                 set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
-                            else set_mode( RESET_POST, 1 );
+                                }
+                            else
+                                {
+                                set_mode( CMD_RESET_POST, 1 );
+                                }
                             }
                         }
                     break;
@@ -640,9 +635,9 @@ int post::evaluate()
     if ( btnStart->get_state() == 1 && btnStartPrevState == 0  )
         {
 #ifdef DEBUG
-        Print("Pressed start button post 1!\n\r");
+        Print( "Pressed start button post 1!\n" );
 #endif
-        if ( lampReady->get_state() == 1 ) 
+        if ( lampReady->get_state() == 1 )
             {
             set_mode( POST_WHEY_ACCEPTING, 1 );
             }
@@ -657,7 +652,7 @@ int post::evaluate()
     if ( btnPause->get_state() == 0 && btnPausePrevState == 1 )
         {
 #ifdef DEBUG
-        Print("Pressed pause button post 1!\n\r");
+        Print( "Pressed pause button post 1!\n" );
 #endif
         if ( lampWorking->get_state() == 1 )
             {
@@ -678,10 +673,6 @@ int post::evaluate()
 int post::final_mode( u_int mode )
     {
     tech_object::final_mode( mode );
-
-#ifdef DEBUG
-    Print( "Final mode %d\n\r", mode );
-#endif
 
     switch ( mode )
         {
@@ -705,23 +696,14 @@ int post::final_mode( u_int mode )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int post::init_mode( u_int mode )
+void post::init_mode( u_int mode )
     {
     tech_object::init_mode( mode );
 
-#ifdef DEBUG
-    Print( "TPost init mode %d\n\r", mode );
-#endif
-
     switch ( mode )
         {
-        case POST_WHEY_HEATING:       
-            if ( !( get_mode( POST_WHEY_ACCEPTING ) ||
-                get_mode( POST_WHEY_ACCEPTING_PAUSE ) ) ) return 1;
-            break;
-
         case POST_WHEY_ACCEPTING:     
-            //flow->set_state( 1 );
+            flow->set_st_state( 1 );
 
             rt_par_float[ RT_F__WARNING_REASON ] = 0;
             set_mode( POST_WHEY_ACCEPTING_PAUSE, 0 );
@@ -747,11 +729,16 @@ int post::init_mode( u_int mode )
             set_mode( POST_WHEY_ACCEPTING, 0 );
             set_mode( POST_WHEY_ACCEPTING_END, 0 );
             break;
+        }    
+    }
+//-----------------------------------------------------------------------------
+int post::exec_cmd( u_int cmd )
+    {
+    tech_object::exec_cmd( cmd );
 
-        case POST_WHEY_ACCEPTING_END:
-            break;
-
-        case RESET_POST:             
+    switch ( cmd )
+        {
+        case CMD_RESET_POST:
             set_mode( POST_WHEY_ACCEPTING_PAUSE, 0 );
             set_mode( POST_WHEY_ACCEPTING, 0 );
             set_mode( POST_WHEY_HEATING, 0 );
@@ -778,13 +765,25 @@ int post::init_mode( u_int mode )
             TANK3->set_mode( postMode2, 0 );
             TANK4->set_mode( postMode1, 0 );
             TANK4->set_mode( postMode2, 0 );
-            return 1;
+            break;
 
-        case SET_PAUSE_AND_HEATING:      
+        case CMD_SET_PAUSE_AND_HEATING:
             set_mode( POST_WHEY_ACCEPTING_PAUSE, 1 );
             set_mode( POST_WHEY_HEATING, 1 );
+            break;
+        }
 
-            return 1;
+    return 1000 + cmd;
+    }
+//-----------------------------------------------------------------------------
+int post::check_on_mode( u_int mode )
+    {
+    switch ( mode )
+        {
+        case POST_WHEY_HEATING:
+            if ( !( get_mode( POST_WHEY_ACCEPTING ) ||
+                get_mode( POST_WHEY_ACCEPTING_PAUSE ) ) ) return 1;
+            break;
         }
 
     return 0;
@@ -835,27 +834,23 @@ int my_comb::final_mode( u_int mode )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int my_comb::init_mode( u_int mode )
+int my_comb::check_on_mode( int mode )
     {
-#ifdef DEBUG
-    Print( "Init comb mode = %d", mode );
-#endif
-
     switch ( mode )
-        {
-        case C_WASH:     
-            if ( TANK1->get_mode( T_WHEY_ACCEPTING ) || // Во время приёмки нельзя мыть.
-               TANK2->get_mode( T_WHEY_ACCEPTING ) ||
-               TANK3->get_mode( T_WHEY_ACCEPTING ) ||
-               TANK4->get_mode( T_WHEY_ACCEPTING ) ||
-                    
-               TANK1->get_mode( T_WASH ) ||             // Мойка танка 1.
-               TANK2->get_mode( T_WASH ) ||             // Мойка танка 2.
-               TANK3->get_mode( T_WASH ) ||             // Мойка танка 3.
-               TANK4->get_mode( T_WASH ) )              // Мойка танка 4.
-                return 1;
-            break;
+    {
+    case C_WASH:
+        if ( TANK1->get_mode( T_WHEY_ACCEPTING ) || // Во время приёмки нельзя мыть.
+            TANK2->get_mode( T_WHEY_ACCEPTING ) ||
+            TANK3->get_mode( T_WHEY_ACCEPTING ) ||
+            TANK4->get_mode( T_WHEY_ACCEPTING ) ||
+
+            TANK1->get_mode( T_WASH ) ||             // Мойка танка 1.
+            TANK2->get_mode( T_WASH ) ||             // Мойка танка 2.
+            TANK3->get_mode( T_WASH ) ||             // Мойка танка 3.
+            TANK4->get_mode( T_WASH ) )              // Мойка танка 4.
+            return 1;
         }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
