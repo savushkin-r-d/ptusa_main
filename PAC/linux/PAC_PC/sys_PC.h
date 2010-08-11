@@ -21,7 +21,7 @@
 class NV_memory_manager_PC: public NV_memory_manager
     {    
     public:
-        NV_memory_manager_PC();
+        NV_memory_manager_PC();       
     };
 //-----------------------------------------------------------------------------
 #endif // SYS_7186_H

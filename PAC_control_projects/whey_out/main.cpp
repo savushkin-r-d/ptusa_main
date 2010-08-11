@@ -34,24 +34,20 @@ int main( int argc, char *argv[] )
     time_t t = time( 0 );
     fprintf( stderr, "Program started - %s\n", asctime( localtime( &t ) ) );
 #endif // defined UCLINUX || defined LINUX
-    
+
     project_manager::set_instance( new project_manager_linux() );
     tcp_communicator::set_instance( new tcp_communicator_linux() );
-#ifdef PAC_W750
-    wago_manager::set_instance( new wago_manager_w750() );
-#endif // PAC_W750
-#ifdef PAC_PC
-    wago_manager::set_instance( new wago_manager_PC() );
-#endif // PAC_PC
     device_manager::set_instance( new device_manager() );
     device_communicator::set_instance( new device_communicator() );
 #ifdef PAC_W750
+    wago_manager::set_instance( new wago_manager_w750() );
     NV_memory_manager::set_instance( new NV_memory_manager_W750() );
 #endif // PAC_W750
 #ifdef PAC_PC
+    wago_manager::set_instance( new wago_manager_PC() );
     NV_memory_manager::set_instance( new NV_memory_manager_PC() );
 #endif // PAC_PC
-
+//
     tech_object_manager::set_instance( new tech_object_manager() );
     PAC_critical_errors_manager::set_instance( new PAC_critical_errors_manager() );
 
@@ -77,9 +73,7 @@ int main( int argc, char *argv[] )
 
 #ifdef DEBUG
     G_DEVICE_CMMCTR->print();
-#endif // DEBUG
 
-#ifdef DEBUG
     ulong st_time;
     ulong all_time = 0;
     ulong cycles_cnt = 0;
@@ -90,23 +84,23 @@ int main( int argc, char *argv[] )
 #else
     while ( 1 )
 #endif // DEBUG
-        {    
+        {
 #ifdef DEBUG
         st_time = get_millisec();
         cycles_cnt++;
 #endif // DEBUG
 
-#if defined UCLINUX && !defined DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_WAGO_MODULES
        G_WAGO_MANAGER->read_inputs();
-#endif // defined UCLINUX && !defined DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_WAGO_MODULES
 
         evaluate_all();
 
         G_CMMCTR->evaluate();
 
-#if defined UCLINUX && !defined DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_WAGO_MODULES
        G_WAGO_MANAGER->write_outputs();
-#endif // defined UCLINUX && !defined DEBUG_NO_WAGO_MODULES
+#endif // ifndef
 
         PAC_critical_errors_manager::get_instance()->show_errors();
 
@@ -128,8 +122,6 @@ int main( int argc, char *argv[] )
             }
 #endif // DEBUG
         }
-
-    tcp_communicator::free_instance();
 
     return( EXIT_SUCCESS );
     }

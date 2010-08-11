@@ -3,7 +3,7 @@
 #include "tech_def.h"
 #include "sys.h"
 //-----------------------------------------------------------------------------
-tech_object_manager* tech_object_manager::instance;
+auto_smart_ptr < tech_object_manager > tech_object_manager::instance;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 tech_object::tech_object( const char* name, u_int number, u_int modes_count,
@@ -29,6 +29,7 @@ tech_object::tech_object( const char* name, u_int number, u_int modes_count,
     for( u_int i = 0; i < modes_count; i++ )
         {
         mode_start_time.push_back( 0 );
+        mode_start_time.at( i ) = get_sec();
         }
     
     com_dev = new complex_device( number, name, 8,
@@ -45,11 +46,6 @@ tech_object::tech_object( const char* name, u_int number, u_int modes_count,
     com_dev->sub_dev[ 5 ] = &par_uint;
     com_dev->sub_dev[ 6 ] = &rt_par_uint;
     com_dev->sub_dev[ 7 ] = &mode_time;
-
-    for ( u_int i = 0; i < modes_count; i++ )
-        {
-        mode_start_time.at( i ) = get_sec();
-        }
     }
 //-----------------------------------------------------------------------------
 tech_object::~tech_object()
@@ -60,6 +56,10 @@ tech_object::~tech_object()
     com_dev->sub_dev[ 1 ] = 0;
     delete com_dev->sub_dev[ 2 ];
     com_dev->sub_dev[ 2 ] = 0;
+
+    delete com_dev;
+
+    mode_start_time.clear();
     }
 //-----------------------------------------------------------------------------
 int tech_object::init_params()

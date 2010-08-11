@@ -137,7 +137,7 @@ class PAC_critical_errors_manager
             }
         
     private:
-        static PAC_critical_errors_manager *instance;
+        static auto_smart_ptr < PAC_critical_errors_manager > instance;
         
         struct critical_error
             {

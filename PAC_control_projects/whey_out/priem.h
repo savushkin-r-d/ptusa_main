@@ -15,7 +15,7 @@ class my_comb : public tech_object
         //-End of comb modes.-!>
 
         my_comb( int stCnt, int parCnt, int workParCnt, int tmrCnt );
-        ~my_comb();
+        virtual ~my_comb();
 
         int evaluate();
         int final_mode( u_int mode );
@@ -120,7 +120,7 @@ class whey_tank : public tech_object
         int exec_cmd( u_int cmd );
 
         whey_tank( int n );
-        ~whey_tank();
+        virtual ~whey_tank();
     };
 //-----------------------------------------------------------------------------
 class post : public tech_object
@@ -208,7 +208,7 @@ class post : public tech_object
         int init_params();
 
         post( int n );
-        ~post();
+        virtual ~post();
     };
 //-----------------------------------------------------------------------------
 #endif	// PRIEM_H

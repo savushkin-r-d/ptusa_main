@@ -68,6 +68,20 @@ template < class data_type > class array_device: public i_simple_device
                 }              
             }
 
+        virtual ~array_device()
+            {
+            if ( name )
+                {
+                delete [] name;
+                name = 0;
+                }
+            if ( prev_val )
+                {
+                delete [] prev_val;
+                prev_val = 0;
+                }
+            }
+
         /// @brief Сохранение устройства в байтовый поток.
         ///
         /// Для передачи устройства на сервер.
@@ -257,6 +271,10 @@ public array_device < data_type >
                 {
                 }
 
+            virtual ~device_state()
+                {
+                }
+
     protected:
         u_int_4     *state;
         void        *owner_object;
@@ -276,8 +294,12 @@ class single_state: public device_state < char >
                               state,
                               owner_object,
                               owner_type )
-    {
-    }
+        {
+        }
+        
+        virtual ~single_state()
+            {            
+            }
 
         char get_val( int idx );
         int  parse_cmd( char *buff  );
@@ -291,6 +313,10 @@ class complex_state: public device_state < u_int_4 >
     public:
         complex_state( const char *name, int n, u_int_4 *state,
             void *owner_object, char owner_type, int size = 1 );
+
+        virtual ~complex_state()
+            {
+            }
 
         u_int_4 get_val( int idx );
         int     parse_cmd( char *buff  );
@@ -337,6 +363,10 @@ class i_counter
 
         /// @brief Получение значения счетчика.
         virtual u_int get_quantity() = 0;
+
+        virtual ~i_counter()
+            {
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретным входом.
@@ -508,6 +538,10 @@ class device : public i_simple_device,
             };
 
         device();
+
+        virtual ~device()
+            {
+            }
 
         /// @brief Выключение устройства.
         ///
@@ -682,6 +716,17 @@ class digital_device : public device,
     public wago_device
     {
     public:
+        digital_device()
+#ifdef DEBUG_NO_WAGO_MODULES
+        :state( 0 )
+#endif // DEBUG_NO_WAGO_MODULES
+            {
+            }
+
+        virtual ~digital_device()
+            {
+            }
+        
         float   get_value();
         int     set_value( float new_value );
         int     set_state( int new_state );  
@@ -1108,6 +1153,10 @@ class counter : public device,
     public:
         counter();
 
+        virtual ~counter()
+        {            
+        }
+
         float get_value();
         int   set_value( float new_value );
         int   get_state_now();
@@ -1154,9 +1203,13 @@ class counter : public device,
 /// Содержит информацию обо всех устройствах проекта.
 class device_manager
     {
+    friend class simple_device_communicator;
+    
     public:
         device_manager();
 
+        ~device_manager();
+        
         /// @brief Загрузка из файла конфигурации.
         int load_from_cfg_file( file *cfg_file );
 
@@ -1211,7 +1264,7 @@ class device_manager
         /// @brief Установка единственного экземпляра класса.
         static void set_instance( device_manager* new_instance );
 
-    public:
+    protected:
         dev_stub stub;  ///< Устройство-заглушка, фиктивное устройство. 
 
         struct range    ///< Диапазон устройств одного типа. 
@@ -1233,7 +1286,8 @@ class device_manager
         int    devices_count;               ///< Количество устройств.
         device **project_devices;           ///< Все устройства.
 
-        static device_manager* instance;    ///< Единственный экземпляр класса.
+        /// @brief Единственный экземпляр класса.
+        static auto_smart_ptr < device_manager > instance;
     };
 //-----------------------------------------------------------------------------
 /// @brief таймер.
@@ -1301,7 +1355,8 @@ class timer_manager
             if ( timers )
                 {
                 delete [] timers;
-                timers = 0;
+                timers     = 0;
+                timers_cnt = 0;
                 }
             }
 

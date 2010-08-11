@@ -26,6 +26,15 @@ class wago_device
     public:
         wago_device();
 
+        virtual ~wago_device()
+            {
+            if ( params )
+                {
+                delete [] params;
+                params = 0;
+                }
+            }
+
         /// @brief Загрузка самого устройства из буфера.
         ///
         /// @param cfg_file - дескриптор открытого текстового файла с описанием
@@ -130,6 +139,37 @@ class wago_device
                 {
                 }
 
+            ~IO_channels()
+                {
+                if ( count )
+                    {
+                    delete [] tables;
+                    delete [] offsets;
+                    count = 0;
+                    }
+                if ( int_read_values )
+                    {
+                    delete [] int_read_values;
+                    int_read_values = 0;
+                    }
+                if ( int_write_values )
+                    {
+                    delete [] int_write_values;
+                    int_write_values = 0;
+                    }
+                if ( char_read_values )
+                    {
+                    delete [] char_read_values;  
+                    char_read_values = 0;
+                    }
+                
+                if ( char_write_values )
+                    {
+                    delete [] char_write_values;
+                    char_write_values = 0;
+                    }
+                }
+
             CHANNEL_TYPE type;
             };
 
@@ -159,6 +199,24 @@ class wago_device
 class wago_manager
     {
     public:
+        wago_manager():nodes_count( 0 ), nodes( 0 )
+            {
+            }
+
+        virtual ~wago_manager()
+            {
+            if ( nodes_count && nodes )
+                {
+                for ( u_int i = 0; i < nodes_count; i++ )
+                    {
+                    delete nodes[ i ];
+                    }
+
+                delete [] nodes;
+                nodes = 0;
+                nodes_count = 0;
+                }
+            }
         /// @brief Чтение модулей ввода.
         ///
         /// @return - 0 - Ок.
@@ -246,6 +304,8 @@ class wago_manager
             {
             wago_node();
 
+            ~wago_node();
+
             /// @brief Загрузка конфигурации из файла.
             ///
             /// Указатель в файле должен указывать на начало соответствующих 
@@ -288,7 +348,8 @@ class wago_manager
         u_int       nodes_count;        ///< Количество узлов.
         wago_node **nodes;              ///< Узлы.
 
-        static wago_manager* instance;  ///< Единственный экземпляр класса.
+        /// Единственный экземпляр класса.
+        static auto_smart_ptr < wago_manager > instance;
 
 public:
         wago_node * get_node( int node_n )

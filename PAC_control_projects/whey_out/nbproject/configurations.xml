@@ -132,10 +132,11 @@
             <pElem>../../common/util</pElem>
           </incDir>
           <preprocessorList>
-            <Elem>PAC</Elem>
-            <Elem>W750</Elem>
-            <Elem>DEBUG</Elem>
             <Elem>LINUX</Elem>
+            <Elem>PAC</Elem>
+            <Elem>PAC_PC</Elem>
+            <Elem>DEBUG</Elem>
+            <Elem>DEBUG_NO_WAGO_MODULES</Elem>
             <Elem>DEBUG_DEV_CMCTR</Elem>
           </preprocessorList>
           <warningLevel>2</warningLevel>
@@ -160,9 +161,9 @@
           </incDir>
           <commandLine>-pg</commandLine>
           <preprocessorList>
+            <Elem>LINUX</Elem>
             <Elem>PAC</Elem>
             <Elem>PAC_PC</Elem>
-            <Elem>LINUX</Elem>
             <Elem>DEBUG</Elem>
             <Elem>DEBUG_TRACE</Elem>
             <Elem>DEBUG_NO_WAGO_MODULES</Elem>

@@ -221,9 +221,23 @@ class NV_memory_manager
 
         static void set_instance( NV_memory_manager* new_instance );
 
+        virtual ~NV_memory_manager()
+            {
+            if ( PAC_NVRAM )
+                {
+                delete PAC_NVRAM;
+                PAC_NVRAM = 0;
+                }
+            if ( PAC_EEPROM )
+                {
+                delete PAC_EEPROM;
+                PAC_EEPROM = 0;
+                }
+            }
+
     protected:
         /// Статический экземпляр класса для вызова методов.
-        static NV_memory_manager *instance;
+        static auto_smart_ptr < NV_memory_manager > instance;
 
         NV_memory_manager();
 

@@ -97,6 +97,20 @@ class params_manager
         /// @return 1 - Ошибка контрольной суммы. 
         char* get_params_data( int size, int &start_pos );
 
+        ~params_manager()
+            {
+            if ( CRC_mem )
+                {
+                delete params_mem;
+                params_mem = 0;
+                }
+            if ( CRC_mem )
+                {
+                delete CRC_mem;
+                CRC_mem = 0;
+                }
+            }
+
     private:
         /// @brief Закрытый конструктор. 
         /// 
@@ -104,7 +118,7 @@ class params_manager
         params_manager();
 
         /// Статический экземпляр класса для вызова методов.
-        static params_manager *instance;
+        static auto_smart_ptr< params_manager > instance;
 
         /// Рабочий массив параметров.
         char params[ C_TOTAL_PARAMS_SIZE ];  
@@ -232,14 +246,28 @@ template < class type > class parameters
                 Print( "parameters(...) - error: count = 0!\n" );
                 }
 #endif // DEBUG
+            is_delete = 0;
             if ( count > 0 && 0 == values )
                 {
+                is_delete = 1;
                 values = new type[ count ];
                 memset( values, 0, count * sizeof( type ) );
                 }
             }
 
+        virtual ~parameters()
+            {
+            if ( 1 == is_delete && count > 0 && values > 0 )
+                {
+                delete [] values;
+                values = 0;
+                count = 0;
+                }
+            }
+
     protected:
+        char is_delete;
+
         /// @brief Получение указателя на буфер для хранения значений
         /// параметров.
         ///
@@ -266,7 +294,7 @@ class run_time_params_float: public parameters < float >,
         /// @brief Конструктор.
         ///
         /// @param count - количество параметров.
-        run_time_params_float( int count = 0 ):parameters < float >( count ),
+        run_time_params_float( int count ):parameters < float >( count ),
             array_device < float >( 1,
             "RT_PARAM_F", 
             count, 
@@ -308,12 +336,16 @@ class run_time_params_u_int_4: public parameters < u_int_4 >,
         /// @brief Конструктор.
         ///
         /// @param count - количество параметров.
-        run_time_params_u_int_4( int count = 0,
+        run_time_params_u_int_4( int count,
             const char* name = "RT_PARAM_UL" ) : parameters < u_int_4 >( count ),
             array_device < u_int_4 >( 1, name, count,
             i_complex_device::ARRAY_DEV_ULONG )
             {
             }
+
+        virtual ~run_time_params_u_int_4()
+                {
+                }
 
         /// @brief Реализация интерфейса класса @ref array_device.
         u_int_4 get_val( int idx )
@@ -353,6 +385,10 @@ public parameters < type >
             count,
             ( type* ) params_manager::get_instance()->get_params_data( 
             count * sizeof( type ), start_pos ) )
+            {
+            }
+
+        virtual ~saved_params()
             {
             }
 
@@ -434,7 +470,7 @@ class saved_params_u_int_4: public saved_params < u_int_4 >,
         /// @brief Конструктор.
         ///
         /// @param count - количество параметров.
-        saved_params_u_int_4( int count = 0 ) :
+        saved_params_u_int_4( int count ) :
           saved_params < u_int_4 >( count ),              
               array_device < u_int_4 >( 1, "S_PARAM_UL", count,
               i_complex_device::ARRAY_DEV_ULONG )
@@ -473,12 +509,16 @@ class saved_params_float: public saved_params < float >,
         /// @brief Конструктор.
         ///
         /// @param count - количество параметров.
-        saved_params_float( int count = 0 ):
+        saved_params_float( int count ):
           saved_params < float >( count ),
               array_device < float >( 1, "S_PARAM_F", count, 
               i_complex_device::ARRAY_DEV_FLOAT )
               {
               }
+
+          virtual ~saved_params_float()
+            {
+            }
 
           /// @brief Реализация интерфейса класса @ref array_device.
           float get_val( int idx )

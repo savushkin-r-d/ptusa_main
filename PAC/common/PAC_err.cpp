@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 
-PAC_critical_errors_manager* PAC_critical_errors_manager::instance;
+auto_smart_ptr < PAC_critical_errors_manager > PAC_critical_errors_manager::instance;
 //--------------------------------------------------------------------------------
 /// Kommandos fuer das Interface Programm <--> Hardware
 //--------------------------------------------------------------------------------

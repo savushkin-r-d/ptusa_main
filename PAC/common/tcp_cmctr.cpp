@@ -1,6 +1,6 @@
 #include "tcp_cmctr.h"
 
-tcp_communicator * tcp_communicator::instance = 0;
+auto_smart_ptr < tcp_communicator > tcp_communicator::instance = 0;
 //------------------------------------------------------------------------------
 tcp_communicator::tcp_communicator()
     {
@@ -66,15 +66,19 @@ void tcp_communicator::set_instance( tcp_communicator* new_instance )
     instance = new_instance;
     }
 //------------------------------------------------------------------------------
-void tcp_communicator::free_instance()
-    {
-    if ( instance ) delete instance;
-    instance = NULL;
-    }
-//------------------------------------------------------------------------------
 char* tcp_communicator::get_host_name()
     {
     return host_name;
     }
 //------------------------------------------------------------------------------
+tcp_communicator::~tcp_communicator()
+    {
+    if ( buf )
+        {
+        delete [] buf;
+        buf = 0;
+        }
+    }
+//------------------------------------------------------------------------------
+
 

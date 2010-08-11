@@ -19,8 +19,7 @@
 /// 
 class project_manager
     {
-    public:
-        
+    public:        
         /// @brief ќбработка параметров командной строки.
         /// 
         /// @param argc - количество параметров.
@@ -38,11 +37,14 @@ class project_manager
         /// @brief ”становка единственного экземпл€ра класса.
         static void set_instance( project_manager* new_instance );
 
+        virtual ~project_manager();
+
     protected:
         file *cfg_file;     ///<  онфигурационный файл.
 
     private:
-        static project_manager* instance;   ///< ≈динственный экземпл€р класса.
+        /// @brief ≈динственный экземпл€р класса.
+        static auto_smart_ptr < project_manager > instance;
     };
 //-----------------------------------------------------------------------------
 #define G_PROJECT_MANAGER project_manager::get_instance()

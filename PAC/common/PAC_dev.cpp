@@ -1,7 +1,7 @@
 #include "PAC_dev.h"
 #include "tech_def.h"
 
-device_manager* device_manager::instance;
+auto_smart_ptr < device_manager > device_manager::instance;
 
 const char device::DEV_NAMES[][ 5 ] = { "V", "N", "M", "LS", "TE", "FE", "FS",
     "CTR", "AO", "LE", "FB", "UPR", "QE", "AI" };
@@ -591,12 +591,25 @@ void device_manager::print() const
     Print( "\n" );
     }
 //-----------------------------------------------------------------------------
-device_manager::device_manager()
+device_manager::device_manager():project_devices( 0 )
     {
     for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
         {
         dev_types_ranges[ i ].start_pos = -1;
         dev_types_ranges[ i ].end_pos = -1;
+        }
+    }
+//-----------------------------------------------------------------------------
+device_manager::~device_manager()
+    {
+    if ( project_devices )
+        {
+        for ( int i = 0; i < devices_count; i++ )
+            {
+            delete project_devices[ i ];
+            }
+        delete [] project_devices;
+        project_devices = 0;        
         }
     }
 //-----------------------------------------------------------------------------

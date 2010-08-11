@@ -5,7 +5,7 @@
 #include "PAC_dev.h"
 #include "param_ex.h"
 
-project_manager *project_manager::instance;
+auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
 int project_manager::proc_main_params( int argc, char *argv[] )
     {
@@ -87,39 +87,11 @@ int project_manager::load_configuration( const char *file_name )
     device_manager::get_instance()->load_from_cfg_file( cfg_file );
 
     cfg_file->fclose();
-
-    G_DEVICE_CMMCTR->add_device(
-        new complex_device( 0, "GLB", device::C_DEVICE_TYPE_CNT, 0 ) );
-
-    for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
-        {
-        int dev_cnt = G_DEVICE_MANAGER->dev_types_ranges[ i ].end_pos -
-            G_DEVICE_MANAGER->dev_types_ranges[ i ].start_pos + 1;
-
-        if ( G_DEVICE_MANAGER->dev_types_ranges[ i ].start_pos == -1 )
-            {
-            dev_cnt = 0;
-            }
-
-        ( ( complex_device* ) G_DEVICE_CMMCTR->dev[ 0 ] )->sub_dev[ i ] =
-            new complex_device( 0, device::DEV_NAMES[ i ], dev_cnt,
-            device::DEV_TYPES[ i ] );
-
-        complex_device* complex_dev =
-            ( ( complex_device* ) ( ( complex_device* ) G_DEVICE_CMMCTR->dev[ 0 ] )->sub_dev[ i ] );
-
-        if ( dev_cnt )
-            {
-            int pos = 0;
-            for ( int j = G_DEVICE_MANAGER->dev_types_ranges[ i ].start_pos;
-                j <= G_DEVICE_MANAGER->dev_types_ranges[ i ].end_pos; j++ )
-                {
-                complex_dev->sub_dev[ pos++ ] =
-                    G_DEVICE_MANAGER->project_devices[ j ];
-                }
-            }
-        }
-
+    
+    simple_device_communicator::set_instance( new simple_device_communicator() );
+    G_DEVICE_CMMCTR->add_device( 
+        simple_device_communicator::get_instance()->get_simple_devices() );
+  
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -131,5 +103,14 @@ project_manager* project_manager::get_instance()
 void project_manager::set_instance( project_manager* new_instance )
     {
     instance = new_instance;
+    }
+//-----------------------------------------------------------------------------
+project_manager::~project_manager()
+    {
+    if ( cfg_file )
+        {
+        delete cfg_file;
+        cfg_file = 0;
+        }
     }
 //-----------------------------------------------------------------------------

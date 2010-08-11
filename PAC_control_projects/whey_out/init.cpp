@@ -21,7 +21,7 @@ int init_tech_process()
         {
         G_TECH_OBJECTS( i )->init_runtime_params();
 
-        G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS( i )->get_complex_dev() );
+        //G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS( i )->get_complex_dev() );
         }
 
     params_manager::get_instance()->final_init();

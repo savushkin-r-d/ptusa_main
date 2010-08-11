@@ -161,7 +161,11 @@ class i_simple_device: public i_device,
         public i_load_device,
 #endif // DRIVER
         public i_save_device
-    {     
+    {  
+    public:
+        virtual ~i_simple_device()
+            {
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс сложного устройства. Оно состоит из групп простых
@@ -193,6 +197,10 @@ class i_complex_device: public i_simple_device
             ARRAY_DEV_ULONG,    ///< -//- тип unsigned long int.
             };
 
+        virtual ~i_complex_device()
+            {
+            }
+        
         virtual char            get_type() const = 0;
         virtual u_int_4         get_n() const = 0;
         virtual const char*     get_name() const = 0;
@@ -220,12 +228,12 @@ class complex_device: public i_complex_device
             MAX_NAME_LENGTH = 20 ///< Максимальная длина имени.
             };
 
-        u_int_4     n;              ///< Уникальный номер.
-        u_int_4     sub_dev_cnt;    ///< Количество подустройств.        
-        char        *name;          ///< Имя.
+        u_int_4 n;              ///< Уникальный номер.
+        u_int_4 sub_dev_cnt;    ///< Количество подустройств.        
+        char    name[ MAX_NAME_LENGTH ]; ///< Имя.
 
-        char        type;           ///< Тип.
-        u_int_4     idx;            ///< Номер устройства массиве устройств.
+        char    type;           ///< Тип.
+        u_int_4 idx;            ///< Номер устройства массиве устройств.
 
     public:      
         complex_device();
@@ -278,6 +286,28 @@ class complex_device: public i_complex_device
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+class simple_device_communicator
+    {
+    public:
+        simple_device_communicator();
+
+        ~simple_device_communicator();
+
+        static simple_device_communicator* get_instance();
+        static int set_instance( simple_device_communicator* new_instance );
+        
+        complex_device* get_simple_devices()
+            {
+            return devices;
+            }
+
+    private:
+        static auto_smart_ptr < simple_device_communicator > instance;
+
+        complex_device *devices;
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 /// @brief Коммуникатор устройств - содержит все устройства одного PAC. Служит
 /// для передачи информации о них и их состоянии на сервер (PC).
 class device_communicator
@@ -304,7 +334,8 @@ class device_communicator
     private:
         static u_int dev_cnt;
 
-        static device_communicator* instance; ///< Единственный экземпляр класса.
+        /// Единственный экземпляр класса.
+        static auto_smart_ptr < device_communicator > instance;
 
     public:
         /// @brief Получение единственного экземпляра класса.
@@ -312,7 +343,6 @@ class device_communicator
             {
             return instance;
             }
-
 
         /// @brief Установка единственного экземпляра класса.
         static void set_instance( device_communicator* new_instance )
@@ -326,7 +356,7 @@ class device_communicator
             C_MAX_COMLEX_DEVICES = 40,
             };
 
-        static i_complex_device **dev;
+        static i_complex_device *dev[ C_MAX_COMLEX_DEVICES ];
 #else
         unsigned int     dev_cnt;
         i_complex_device **dev;
@@ -334,6 +364,10 @@ class device_communicator
 
     public:
         device_communicator();
+
+        ~device_communicator()
+            {
+            }
 
         /// @brief Вывод на консоль устройств группы.
         void print() const;
@@ -373,6 +407,6 @@ class device_communicator
 //-----------------------------------------------------------------------------
 #ifdef PAC
 #define G_DEVICE_CMMCTR device_communicator::get_instance()
-#endif //PAC
+#endif // PAC
     
 #endif // DEVICES_H

@@ -1,6 +1,6 @@
 #include "sys.h"
 
-NV_memory_manager* NV_memory_manager::instance;
+auto_smart_ptr < NV_memory_manager > NV_memory_manager::instance;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #if ( defined LINUX || defined UCLINUX ) && defined DEBUG

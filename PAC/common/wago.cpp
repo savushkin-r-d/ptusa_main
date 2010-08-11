@@ -1,6 +1,6 @@
 #include "wago.h"
 
-wago_manager* wago_manager::instance;
+auto_smart_ptr < wago_manager > wago_manager::instance;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int wago_device::load( file *cfg_file )
@@ -332,7 +332,7 @@ int wago_device::load_table_from_string( char *str, IO_channels &channels )
                 break;
 
             case IO_channels::CT_DO:
-                channels.char_read_values = new u_char*[ cnt ];
+                channels.char_read_values  = new u_char*[ cnt ];
                 channels.char_write_values = new u_char*[ cnt ];
                 break;
 
@@ -394,9 +394,10 @@ float wago_device::get_par( u_int index )
     }
 //-----------------------------------------------------------------------------
 wago_device::wago_device() :DI_channels( IO_channels::CT_DI ), 
-DO_channels( IO_channels::CT_DO ),
-AI_channels( IO_channels::CT_AI ),
-AO_channels( IO_channels::CT_AO )
+    DO_channels( IO_channels::CT_DO ),
+    AI_channels( IO_channels::CT_AI ),
+    AO_channels( IO_channels::CT_AO ),
+    params( 0 )
     {
     }
 //-----------------------------------------------------------------------------
@@ -564,6 +565,39 @@ AI_offsets( 0 ),
 AI_types( 0 )
     {
     memset( ip_addres, 0, 4 * sizeof( int ) );
+    }
+//-----------------------------------------------------------------------------
+wago_manager::wago_node::~wago_node()
+    {
+    if ( DO_cnt )
+        {
+        delete [] DO;
+        delete [] DO_;
+        DO_cnt = 0;
+        }
+
+    if ( AO_cnt )
+        {
+        delete [] AO;
+        delete [] AO_;
+        delete [] AO_offsets;
+        delete [] AO_types;
+        AO_cnt = 0;
+        }
+
+    if ( DI_cnt )
+        {
+        delete [] DI;
+        DI_cnt = 0;
+        }
+
+    if ( AI_cnt )
+        {
+        delete [] AI;
+        delete [] AI_offsets;
+        delete [] AI_types;
+        AI_cnt = 0;
+        }
     }
 //-----------------------------------------------------------------------------
 int wago_manager::wago_node::load_from_cfg_file( file *cfg_file )

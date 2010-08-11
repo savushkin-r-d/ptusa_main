@@ -39,8 +39,6 @@ class tcp_communicator
         /// производного от @ref tcp_communicator.
         static void set_instance( tcp_communicator* new_instance );
 
-        static void free_instance();
-
         /// @brief »тераци€ обмена данными с сервером.
         virtual int evaluate() = 0;
 
@@ -56,9 +54,7 @@ class tcp_communicator
         /// @return - сетевое им€ PAC.
         char* get_host_name();
 
-        virtual ~tcp_communicator()
-            {            
-            }
+        virtual ~tcp_communicator();
 
     protected:
         tcp_communicator();
@@ -93,7 +89,7 @@ class tcp_communicator
 
             };
 
-        static tcp_communicator* instance;          ///< Ёкземпл€р класса.
+        static auto_smart_ptr < tcp_communicator > instance;///< Ёкземпл€р класса.
         
         srv_ptr services[ TC_MAX_SERVICE_NUMBER ];  ///< ћассив сервисов.
         char    host_name[ TC_MAX_HOST_NAME ];      ///< —етевое им€ PAC.

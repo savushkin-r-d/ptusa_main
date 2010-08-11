@@ -11,18 +11,13 @@
 #endif // WIN32
 
 #ifdef PAC
+#include "PAC_dev.h"
 
-#if defined I7186_E || defined I7188_E || defined I7188
-#include "utils.h"
-#include "PAC_err.h"
-
-extern PAC_critical_errors_manager *g_pac_critical_errors;
-#endif // defined I7186_E || defined I7188_E || defined I7188
-
-device_communicator* device_communicator::instance;
+auto_smart_ptr < device_communicator > device_communicator::instance;
 u_int_4 device_communicator::dev_cnt;
-i_complex_device ** device_communicator::dev;
+i_complex_device *device_communicator::dev[ device_communicator::C_MAX_COMLEX_DEVICES ];
 
+auto_smart_ptr < simple_device_communicator > simple_device_communicator::instance;
 #endif // PAC
 
 #ifdef WIN32
@@ -55,8 +50,7 @@ complex_device::complex_device(): sub_dev( 0 ),
         n( 0 ),
         sub_dev_cnt( 0 ),
         type( 0 )        
-    {  
-    name = new char[ MAX_NAME_LENGTH ];
+    {      
 #ifdef WIN32
     strcpy_s( name, MAX_NAME_LENGTH - 1, "?" );    
 #else
@@ -69,14 +63,17 @@ complex_device::complex_device( u_int_4 n, const char *new_name,
         sub_dev_cnt( new_subdev_cnt ),
         type( type )
     {           
-    name = new char[ MAX_NAME_LENGTH ];
 #ifdef WIN32
     strcpy_s( name, MAX_NAME_LENGTH - 1, new_name );    
 #else
     strcpy( name, new_name );   
 #endif
 
-    if ( sub_dev_cnt ) sub_dev = new i_simple_device*[ sub_dev_cnt ];
+    if ( sub_dev_cnt ) 
+        {
+        sub_dev = new i_simple_device*[ sub_dev_cnt ];
+        for ( u_int i = 0; i < sub_dev_cnt; i++ ) sub_dev[ i ] = 0;
+        }
     else sub_dev = 0;
     }
 //-----------------------------------------------------------------------------
@@ -101,16 +98,12 @@ complex_device::complex_device( u_int_4 n,
 #endif // DRIVER
 complex_device::~complex_device()
     {
-    if ( name )
-        {
-        delete [] name;
-        name = 0;
-        }
-    if ( sub_dev )
+    if ( sub_dev_cnt )
         {
         delete [] sub_dev;
         sub_dev = 0;
-        }
+        sub_dev_cnt = 0;
+        }    
     }
 //-----------------------------------------------------------------------------
 char complex_device::get_type() const
@@ -443,11 +436,13 @@ void complex_device::print() const
 
     print_str( tmp_str );  
 
+
+
     for ( unsigned int i = 0; i < sub_dev_cnt; i++ ) 
         {
         sprintf( tmp_str, "%s[ %3d ] ", indent, i );
         print_str( tmp_str, 0 );
-        sub_dev[ i ]->print();        
+        sub_dev[ i ]->print();
         }
 
     start_pos -= 4;
@@ -602,13 +597,70 @@ int complex_device::save_changed_state( char *buff )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+ simple_device_communicator::simple_device_communicator()
+    {
+    devices = new complex_device( 0, "GLB", device::C_DEVICE_TYPE_CNT, 0 );
+
+    for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
+        {
+        int dev_cnt = G_DEVICE_MANAGER->dev_types_ranges[ i ].end_pos -
+            G_DEVICE_MANAGER->dev_types_ranges[ i ].start_pos + 1;
+
+        if ( G_DEVICE_MANAGER->dev_types_ranges[ i ].start_pos == -1 )
+            {
+            dev_cnt = 0;
+            }
+       
+        devices->sub_dev[ i ] =
+            new complex_device( 0, device::DEV_NAMES[ i ], dev_cnt,
+            device::DEV_TYPES[ i ] );
+
+        if ( dev_cnt )
+            {
+            int pos = 0;
+            for ( int j = G_DEVICE_MANAGER->dev_types_ranges[ i ].start_pos;
+                j <= G_DEVICE_MANAGER->dev_types_ranges[ i ].end_pos; j++ )
+                {
+                ( ( complex_device* ) ( devices->sub_dev[ i ] ) )->sub_dev[ pos++ ] =
+                    G_DEVICE_MANAGER->project_devices[ j ];
+                }
+            }
+        }
+    }
+ //-----------------------------------------------------------------------------
+ simple_device_communicator::~simple_device_communicator()
+    {
+    for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
+        {
+        if ( devices->sub_dev[ i ] )
+            {
+            delete devices->sub_dev[ i ];
+            devices->sub_dev[ i ] = 0;
+            }
+        }
+
+    delete devices;
+    devices = 0;
+    }
+ //-----------------------------------------------------------------------------
+ simple_device_communicator* simple_device_communicator::get_instance()
+    { 
+    return instance;
+    }
+ //-----------------------------------------------------------------------------
+ int simple_device_communicator::set_instance(
+    simple_device_communicator* new_instance )
+    {
+    instance = new_instance;
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 device_communicator::device_communicator()
     {  
     dev_cnt = 0;
-    dev = 0;
-
+    
 #ifdef PAC
-    dev = new i_complex_device*[ C_MAX_COMLEX_DEVICES ];
     for ( int i = 0; i < C_MAX_COMLEX_DEVICES; i++ )
         {
         dev[ i ] = 0;

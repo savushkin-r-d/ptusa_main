@@ -30,6 +30,8 @@ netOK( 0 )
 #endif // DEBUG
 
     net_init();
+
+    glob_last_transfer_time = get_sec();
     }
 //------------------------------------------------------------------------------
 void tcp_communicator_linux::killsockets()
@@ -157,15 +159,18 @@ int tcp_communicator_linux::net_init()
     FD_ZERO ( &rfds );
     for ( int i = 0; i < MAX_SOCKETS; i++ )
         {
-        sst[ i ].active = 0;
-        sst[ i ].init   = 0;
+        sst[ i ].active     = 0;
+        sst[ i ].init       = 0;
+        sst[ i ].evaluated  = 0;
         }
-    sst[ master_socket ].active = 1;  	 // мастер-сокет всегда активный.
+    sst[ master_socket ].active      = 1; // мастер-сокет всегда активный.
     sst[ master_socket ].is_listener = 1; // сокет является слушателем.
+    sst[ master_socket ].evaluated   = 0;
 
 #ifdef MODBUS
-    sst[ modbus_socket ].active = 1;
+    sst[ modbus_socket ].active      = 1;
     sst[ modbus_socket ].is_listener = 1;
+    sst[ modbus_socket ].evaluated   = 0;
 #endif // MODBUS
 
     netOK = 1;
@@ -181,7 +186,6 @@ void tcp_communicator_linux::net_terminate()
 tcp_communicator_linux::~tcp_communicator_linux()
     {
     net_terminate();
-    delete buf;
     }
 //------------------------------------------------------------------------------
 int tcp_communicator_linux::evaluate()

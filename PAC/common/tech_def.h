@@ -163,8 +163,6 @@ class tech_object
 
         std::vector< u_int_4 >  mode_start_time;    ///< Время начала режима.
         run_time_params_u_int_4 mode_time;          ///< Время режимов, сек.
-
-
     };
 //-----------------------------------------------------------------------------
 class tech_object_manager
@@ -214,13 +212,22 @@ class tech_object_manager
                 }
             }
 
+        ~tech_object_manager()
+            {
+            for ( u_int i = 0; i < tech_objects.size(); i++ )
+                {
+                delete tech_objects[ i ];
+                }
+            }
+
         void add_tech_object( tech_object* new_tech_object )
             {
             tech_objects.push_back( new_tech_object );
             }
 
     private:
-        static tech_object_manager* instance; ///< Единственный экземпляр класса.
+        /// Единственный экземпляр класса.
+        static auto_smart_ptr < tech_object_manager > instance;
 
         std::vector< tech_object* > tech_objects; ///< Технологические объекты.
     };

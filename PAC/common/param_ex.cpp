@@ -1,6 +1,6 @@
 #include "param_ex.h"
 
-params_manager* params_manager::instance = 0;
+auto_smart_ptr< params_manager > params_manager::instance = 0;
 
 #ifdef USE_SIMPLE_DEV_ERRORS
 #include "errors.h"
@@ -93,7 +93,7 @@ int params_manager::init( unsigned int project_id )
 //-----------------------------------------------------------------------------
 int params_manager::check_CRC()
     {
-    unsigned char buff[ 2 ];
+    unsigned char buff[ 2 ] = { 0 };
     CRC_mem->read( ( char* ) buff, 2, 0 );
 
     u_int read_CRC = 256 * buff[ 1 ] + buff[ 0 ];
@@ -229,8 +229,10 @@ char* params_manager::get_params_data( int size, int &start_pos )
 //-----------------------------------------------------------------------------
 params_manager* params_manager::get_instance()
     {
-    if ( 0 == instance )
+    static char is_init = 0;
+    if ( 0 == is_init )
         {
+        is_init = 1;
         instance = new params_manager;
         }
     return instance;
