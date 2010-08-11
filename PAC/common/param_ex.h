@@ -97,19 +97,7 @@ class params_manager
         /// @return 1 - Ошибка контрольной суммы. 
         char* get_params_data( int size, int &start_pos );
 
-        ~params_manager()
-            {
-            if ( CRC_mem )
-                {
-                delete params_mem;
-                params_mem = 0;
-                }
-            if ( CRC_mem )
-                {
-                delete CRC_mem;
-                CRC_mem = 0;
-                }
-            }
+        ~params_manager();
 
     private:
         /// @brief Закрытый конструктор. 
@@ -266,7 +254,7 @@ template < class type > class parameters
             }
 
     protected:
-        char is_delete;
+        char is_delete; ///< Признак удаления буфера при удалении объекта.
 
         /// @brief Получение указателя на буфер для хранения значений
         /// параметров.
@@ -280,7 +268,7 @@ template < class type > class parameters
         /// Заглушка для обращения через индекс с выходом за диапазон.
         type         stub; 
 
-        unsigned int count;     ///< Количестов элементов.
+        unsigned int count;     ///< Количество элементов.
         type         *values;   ///< Указатель на массив значений элементов.
     };
 //-----------------------------------------------------------------------------
@@ -336,6 +324,7 @@ class run_time_params_u_int_4: public parameters < u_int_4 >,
         /// @brief Конструктор.
         ///
         /// @param count - количество параметров.
+        /// @param name  - имя параметров.
         run_time_params_u_int_4( int count,
             const char* name = "RT_PARAM_UL" ) : parameters < u_int_4 >( count ),
             array_device < u_int_4 >( 1, name, count,
@@ -344,8 +333,8 @@ class run_time_params_u_int_4: public parameters < u_int_4 >,
             }
 
         virtual ~run_time_params_u_int_4()
-                {
-                }
+            {
+            }
 
         /// @brief Реализация интерфейса класса @ref array_device.
         u_int_4 get_val( int idx )
@@ -440,7 +429,7 @@ public parameters < type >
         int save_all()
             {
             params_manager::get_instance()->save(
-                    start_pos,  parameters< type >::get_count() * sizeof( type ) );
+                start_pos,  parameters< type >::get_count() * sizeof( type ) );
 
             return 0;
             }
@@ -494,7 +483,7 @@ class saved_params_u_int_4: public saved_params < u_int_4 >,
               buff += sizeof( idx );
               memcpy( &val, buff, sizeof( val ) );
 
-             Print( "Set val saved param u-int_4[ %2u ] = %u\n", idx, val );
+              Print( "Set val saved param u-int_4[ %2u ] = %u\n", idx, val );
 #endif // DEBUG
 
               return res;
@@ -517,8 +506,8 @@ class saved_params_float: public saved_params < float >,
               }
 
           virtual ~saved_params_float()
-            {
-            }
+              {
+              }
 
           /// @brief Реализация интерфейса класса @ref array_device.
           float get_val( int idx )
@@ -537,7 +526,7 @@ class saved_params_float: public saved_params < float >,
               buff += sizeof( idx );
               memcpy( &val, buff, sizeof( val ) );
 
-             Print( "Set val saved param float[ %2u ] = %f\n", idx, val );
+              Print( "Set val saved param float[ %2u ] = %f\n", idx, val );
 #endif //DEBUG
               return res;
               }

@@ -156,11 +156,11 @@ class i_device
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс простого устройства.
 class i_simple_device: public i_device, 
-        public i_cmd_device,
+    public i_cmd_device,
 #ifdef DRIVER
-        public i_load_device,
+    public i_load_device,
 #endif // DRIVER
-        public i_save_device
+    public i_save_device
     {  
     public:
         virtual ~i_simple_device()
@@ -200,7 +200,7 @@ class i_complex_device: public i_simple_device
         virtual ~i_complex_device()
             {
             }
-        
+
         virtual char            get_type() const = 0;
         virtual u_int_4         get_n() const = 0;
         virtual const char*     get_name() const = 0;
@@ -272,7 +272,7 @@ class complex_device: public i_complex_device
         i_simple_device* get_sub_dev( u_int_4 id ) const;
         i_complex_device* get_sub_complex_dev( char *sub_dev_name ) const;
 #endif // DRIVER        
-                
+
         int load_device( char *buff );        
         int load_changed_state( char *buff );
         int load_state( char *buff  );
@@ -290,7 +290,7 @@ class complex_device: public i_complex_device
 /// для передачи информации о них и их состоянии на сервер (PC).
 class device_communicator
 #ifdef DRIVER        
-: public i_load_device        
+    : public i_load_device        
 #endif // DRIVER                
     {   
     public:
@@ -307,7 +307,7 @@ class device_communicator
             SET_PAC_ERROR_CMD,
             };
 
-    
+
 #ifdef PAC
     private:
         static u_int dev_cnt;
@@ -344,7 +344,7 @@ class device_communicator
         device_communicator();
 
         ~device_communicator();
-        
+
         /// @brief Вывод на консоль устройств группы.
         void print() const;
 
@@ -370,7 +370,7 @@ class device_communicator
         int load_device( char *buff );        
 #endif // DRIVER               
 
-        
+
 #ifdef PAC
         /// @brief Добавление устройства.
         int add_device( i_complex_device *dev );
@@ -384,5 +384,5 @@ class device_communicator
 #ifdef PAC
 #define G_DEVICE_CMMCTR device_communicator::get_instance()
 #endif // PAC
-    
+
 #endif // DEVICES_H

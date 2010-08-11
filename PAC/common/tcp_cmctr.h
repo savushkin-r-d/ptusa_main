@@ -80,17 +80,16 @@ class tcp_communicator
         enum CONSTANTS
             {
             BUFSIZE     = 16384,           ///< Размер буфера.
-            PORT 	= 10000,           ///< Порт.
+            PORT 	    = 10000,           ///< Порт.
             MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
             QLEN        = MAX_SOCKETS - 1, ///< Максимальное количество соединений.
 
             TC_MAX_HOST_NAME      = 20,
             TC_MAX_SERVICE_NUMBER = 16,
-
             };
 
         static auto_smart_ptr < tcp_communicator > instance;///< Экземпляр класса.
-        
+
         srv_ptr services[ TC_MAX_SERVICE_NUMBER ];  ///< Массив сервисов.
         char    host_name[ TC_MAX_HOST_NAME ];      ///< Сетевое имя PAC.
 

@@ -24,18 +24,22 @@ template < class type > class smart_ptr
         type* pointer;
 
     public:
+        /// @brief Конструктор по умолчанию.
         smart_ptr() : pointer( NULL )
             {
             }
 
+        /// @brief Конструктор на основе указателя.
         smart_ptr( type* p ) : pointer( p )
             {
             }
 
+        /// @brief Конструктор копирования.
         smart_ptr( const smart_ptr< type > &ptr ) : pointer( ptr.pointer )
             {
             }
 
+        /// @brief Оператор присваивания указателя.
         smart_ptr< type >& operator = ( type* new_t )
             {
             pointer = new_t;
@@ -43,6 +47,7 @@ template < class type > class smart_ptr
             return *this;
             }
 
+        /// @brief Оператор приведения типа к указателю.
         operator type*()
             {
             if ( pointer == NULL )
@@ -60,6 +65,7 @@ template < class type > class smart_ptr
             return pointer;
             }
 
+        /// @brief Оператор обращения к членам класса.
         type* operator->()
             {
             if ( pointer == NULL )
@@ -77,40 +83,51 @@ template < class type > class smart_ptr
             }
 
     private:
+        /// @brief Закрытый оператор индексирования - запрет использования.
         type* operator[] ( unsigned int index )
             {
             return pointer;
             }
 
+        /// @brief Закрытый оператор присваивания - запрет использования.
         smart_ptr< type >& operator = ( const smart_ptr< type > &new_t )
             {
             return *this;
             }
-
     };
 //-----------------------------------------------------------------------------
 /// @brief Защищенная работа с указателем.
 ///
-/// Автоосвобождение памяти при уничтожении объекта.
+/// Автоматическое освобождение памяти при уничтожении, переприсваивании объекта.
 template < class type > class auto_smart_ptr : public smart_ptr< type >
     {
     public:
+        /// @brief Конструктор по умолчанию.
         auto_smart_ptr() : smart_ptr< type >( NULL )
             {
             }
 
+        /// @brief Конструктор на основе указателя.
         auto_smart_ptr( type* p ) : smart_ptr< type >( p )
             {
             }
 
         virtual ~auto_smart_ptr()
             {
-            if ( smart_ptr< type >::pointer ) delete smart_ptr< type >::pointer;
-            smart_ptr< type >::pointer = NULL;
+            if ( smart_ptr< type >::pointer )
+                {
+                delete smart_ptr< type >::pointer;
+                smart_ptr< type >::pointer = NULL;
+                }
             }
 
+        /// @brief Оператор присваивания указателя.
         auto_smart_ptr< type >& operator = ( type* new_t )
             {
+            if ( smart_ptr< type >::pointer )
+                {
+                delete smart_ptr< type >::pointer;
+                }
             smart_ptr< type >::pointer = new_t;
             return *this;
             }

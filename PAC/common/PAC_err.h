@@ -4,9 +4,9 @@
 /// 
 /// Класс @ref PAC_critical_errors_manager, служащий для организации работы с 
 /// ошибками простых устройств, содержит всю необходимую информацию. Для сбора 
-/// всех ошибок служит структура @ref TGError. 
+/// всех ошибок служит структура @ref PAC_critical_errors_manager::critical_error. 
 /// 
-/// @author  ??ванюк Дмитрий Сергеевич.
+/// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
 /// @c PAC_ERRORS_H - включение данного файла в компиляцию только один раз.@n
@@ -111,47 +111,36 @@ class PAC_critical_errors_manager
     public:
         enum GE_CONST
             {
-            GE_ERROR_SIZE = 3,      //Размер одной ошибки, байт.
+            GE_ERROR_SIZE = 3,      ///< Размер одной ошибки, байт.
             };
 
         PAC_critical_errors_manager();
 
         void show_errors();
         void set_global_error( ERRORS_CLASS eclass, ERRORS_SUBCLASS p1, 
-            unsigned long p2 );
+            unsigned long param );
         void reset_global_error( ERRORS_CLASS eclass, ERRORS_SUBCLASS p1, 
-            unsigned long p2 );
+            unsigned long param );
 
         int save_to_stream( char *buff );
         unsigned char save_to_stream_2( char *buff );
 
-        static int set_instance( PAC_critical_errors_manager *new_instance )
-            {
-            instance = new_instance;
-            return 0;
-            }
+        static int set_instance( PAC_critical_errors_manager *new_instance );
 
-        static PAC_critical_errors_manager * get_instance()
-            {
-            return instance;
-            }
-        
+        static PAC_critical_errors_manager * get_instance();
+
     private:
         static auto_smart_ptr < PAC_critical_errors_manager > instance;
-        
+
         struct critical_error
             {
-            int             err_class;
-            unsigned int    p1;
-            unsigned int    p2;
+            int             err_class;     ///< Класс ошибки.
+            unsigned int    err_sub_class; ///< Подкласс ошибки.
+            unsigned int    param;         ///< Параметр ошибки.
 
-            critical_error( int err_class, u_int p1, u_int p2 ):err_class( err_class ),
-                p1( p1 ), p2( p2 )
-                {
-                }
+            critical_error( int err_class, u_int err_sub_class, u_int param );
             };
 
-        
         std::vector< critical_error >  errors;
 
         u_int    errors_id;

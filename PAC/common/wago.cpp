@@ -401,6 +401,58 @@ wago_device::wago_device() :DI_channels( IO_channels::CT_DI ),
     {
     }
 //-----------------------------------------------------------------------------
+wago_device::~wago_device()
+    {
+    if ( params )
+        {
+        delete [] params;
+        params = 0;
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+wago_device::IO_channels::IO_channels( CHANNEL_TYPE type ) : count( 0 ), 
+    tables( 0 ),
+    offsets( 0 ),
+    int_read_values( 0 ), int_write_values( 0 ),
+    char_read_values( 0 ), char_write_values( 0 ),
+    type( type )
+    {
+    }
+//-----------------------------------------------------------------------------
+wago_device::IO_channels::~IO_channels()
+    {
+    if ( count )
+        {
+        delete [] tables;
+        delete [] offsets;
+        count = 0;
+        }
+    if ( int_read_values )
+        {
+        delete [] int_read_values;
+        int_read_values = 0;
+        }
+    if ( int_write_values )
+        {
+        delete [] int_write_values;
+        int_write_values = 0;
+        }
+    if ( char_read_values )
+        {
+        delete [] char_read_values;  
+        char_read_values = 0;
+        }
+
+    if ( char_write_values )
+        {
+        delete [] char_write_values;
+        char_write_values = 0;
+        }
+    }
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int wago_manager::load_from_cfg_file( file *cfg_file )
     {
@@ -543,6 +595,30 @@ u_int* wago_manager::get_AO_write_data( u_int node_n, u_int offset )
 #endif // DEBUG
 
     return 0;
+    }
+//-----------------------------------------------------------------------------
+wago_manager::wago_manager() :nodes_count( 0 ), nodes( 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+wago_manager::~wago_manager()
+    {
+    if ( nodes_count && nodes )
+        {
+        for ( u_int i = 0; i < nodes_count; i++ )
+            {
+            delete nodes[ i ];
+            }
+
+        delete [] nodes;
+        nodes = 0;
+        nodes_count = 0;
+        }
+    }
+//-----------------------------------------------------------------------------
+wago_node * wago_manager::get_node( int node_n )
+    {
+    return nodes[ node_n ];
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -697,5 +773,3 @@ int wago_manager::wago_node::load_from_cfg_file( file *cfg_file )
 
     return 0;
     }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------

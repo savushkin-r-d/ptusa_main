@@ -205,4 +205,19 @@ void NV_memory_manager::set_instance( NV_memory_manager* new_instance )
     instance = new_instance;
     }
 //-----------------------------------------------------------------------------
+NV_memory_manager::~NV_memory_manager()
+    {
+    if ( PAC_NVRAM )
+        {
+        delete PAC_NVRAM;
+        PAC_NVRAM = 0;
+        }
+    if ( PAC_EEPROM )
+        {
+        delete PAC_EEPROM;
+        PAC_EEPROM = 0;
+        }
+    }
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

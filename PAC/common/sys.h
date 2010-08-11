@@ -45,7 +45,7 @@ typedef unsigned long int       u_long;
 #include <time.h>
 
 #define print_time printf( "%02lu:%02lu:%02lu ", ( time( 0 ) / 3600 ) % 24, \
-( time( 0 ) / 60 ) % 60, time( 0 ) % 60 ); printf
+    ( time( 0 ) / 60 ) % 60, time( 0 ) % 60 ); printf
 
 #define Print printf
 
@@ -53,6 +53,9 @@ typedef unsigned long int       u_long;
 int  kbhit();
 int  get_char();
 
+/// @brief Вывод числа в консоль в двоичном виде.
+///
+/// @param с - выводимое число.
 void print_binary( u_int c );
 #endif // DEBUG
 
@@ -212,28 +215,21 @@ class NV_memory_manager
         virtual memory_range* get_memory_block( MEMORY_TYPE m_type,
             u_int count );
 
-        /// @brief Возвращает единственный экземпляр класса для работы с 
+        /// @brief Получение единственного экземпляра класса для работы с 
         /// параметрами.
         ///
         /// @return - указатель на единственный объект класса @ref
         /// NV_memory_manager.
         static NV_memory_manager* get_instance();
 
+        /// @brief Установка единственного экземпляра класса для работы с 
+        /// параметрами.
+        ///
+        /// @param new_instance - новый указатель на единственный объект 
+        /// класса @ref NV_memory_manager.
         static void set_instance( NV_memory_manager* new_instance );
 
-        virtual ~NV_memory_manager()
-            {
-            if ( PAC_NVRAM )
-                {
-                delete PAC_NVRAM;
-                PAC_NVRAM = 0;
-                }
-            if ( PAC_EEPROM )
-                {
-                delete PAC_EEPROM;
-                PAC_EEPROM = 0;
-                }
-            }
+        virtual ~NV_memory_manager();
 
     protected:
         /// Статический экземпляр класса для вызова методов.

@@ -48,7 +48,7 @@ class tech_object
             u_int timers_count = 3,
             u_int par_float_count = 5, u_int runtime_par_float_count = 5,
             u_int par_uint_count = 5, u_int runtime_par_uint_count = 5 );
-       
+
         virtual ~tech_object();
 
         /// @brief Включение/выключение режима.
@@ -145,7 +145,7 @@ class tech_object
             {
             return modes_count;
             }
-        
+
         saved_params_float  par_float;      ///< Сохраняемые параметры, тип float.
         run_time_params_float rt_par_float; ///< Рабочие параметры, тип float.
         saved_params_u_int_4 par_uint;      ///< Сохраняемые параметры, тип u_int.
@@ -182,48 +182,23 @@ class tech_object_manager
         /// @brief Установка единственного экземпляра класса.
         static int set_instance( tech_object_manager* new_instance );
 
+        /// @brief Получение объекта с заданным активным режимом.
         int get_object_with_active_mode( u_int mode, u_int start_idx,
-            u_int end_idx )
-            {
-            for ( u_int i = start_idx; 
-                i <= end_idx && i < tech_objects.size(); i++ )
-                {
-                if ( tech_objects.at( i )->get_mode( mode ) ) return i;
-                }
+            u_int end_idx );
 
-            return -1;
-            }
+        /// @brief Получение объекта по номеру.
+        tech_object* get_tech_objects( u_int idx );
 
-        tech_object* get_tech_objects( u_int idx )
-            {
-            return tech_objects.at( idx );
-            }
+        /// @brief Получение количества объектов.
+        u_int get_count() const;
 
-        u_int get_count() const
-            {
-            return tech_objects.size();
-            }
+        /// @brief Выполнение итерации технологического процесса.
+        void evaluate();
 
-        void evaluate()
-            {
-            for ( u_int i = 0; i < tech_objects.size(); i++ )
-                {
-                tech_objects.at( i )->evaluate();
-                }
-            }
+        ~tech_object_manager();
 
-        ~tech_object_manager()
-            {
-            for ( u_int i = 0; i < tech_objects.size(); i++ )
-                {
-                delete tech_objects[ i ];
-                }
-            }
-
-        void add_tech_object( tech_object* new_tech_object )
-            {
-            tech_objects.push_back( new_tech_object );
-            }
+        /// @brief Добавление технологического объекта.
+        void add_tech_object( tech_object* new_tech_object );
 
     private:
         /// Единственный экземпляр класса.

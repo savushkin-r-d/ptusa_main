@@ -28,11 +28,11 @@ auto_smart_ptr < PAC_critical_errors_manager > PAC_critical_errors_manager::inst
 //-----------------------------------------------------------------------------
 int ledman_cmd( int cmd, int led )
     {
-	int fd;
-	if ( ( fd = open( "/dev/ledman", O_RDWR ) ) != -1 )
+    int fd;
+    if ( ( fd = open( "/dev/ledman", O_RDWR ) ) != -1 )
         {
-		ioctl( fd, cmd, led );
-		close( fd );
+        ioctl( fd, cmd, led );
+        close( fd );
         return 0;
         }
 
@@ -58,23 +58,23 @@ void PAC_critical_errors_manager::show_errors()
         {
         switch ( show_step )
             {
-            case 0:
-                if ( get_delta_millisec( start_time ) > 500 )
-                    {
-                    show_step = 1;
-                    ledman_cmd( WAGO_FBK_LED_CMD_ON, WAGO_FBK_LED_STATUS_RED );
-                    start_time = get_millisec();
-                    }
-                break;
+        case 0:
+            if ( get_delta_millisec( start_time ) > 500 )
+                {
+                show_step = 1;
+                ledman_cmd( WAGO_FBK_LED_CMD_ON, WAGO_FBK_LED_STATUS_RED );
+                start_time = get_millisec();
+                }
+            break;
 
-            case 1:
-                if ( get_delta_millisec( start_time ) > 500 )
-                    {
-                    show_step = 0;
-                    ledman_cmd( WAGO_FBK_LED_CMD_OFF, WAGO_FBK_LED_STATUS_RED );
-                    start_time = get_millisec();
-                    }
-                break;
+        case 1:
+            if ( get_delta_millisec( start_time ) > 500 )
+                {
+                show_step = 0;
+                ledman_cmd( WAGO_FBK_LED_CMD_OFF, WAGO_FBK_LED_STATUS_RED );
+                start_time = get_millisec();
+                }
+            break;
             }
         if ( 0 == is_error )
             {
@@ -88,23 +88,23 @@ void PAC_critical_errors_manager::show_errors()
         {
         switch ( show_step )
             {
-             case 0:
-                if ( get_delta_millisec( start_time ) > 500 )
-                    {
-                    show_step = 1;
-                    ledman_cmd( WAGO_FBK_LED_CMD_ON, WAGO_FBK_LED_STATUS_GREEN );
-                    start_time = get_millisec();
-                    }
-                break;
+        case 0:
+            if ( get_delta_millisec( start_time ) > 500 )
+                {
+                show_step = 1;
+                ledman_cmd( WAGO_FBK_LED_CMD_ON, WAGO_FBK_LED_STATUS_GREEN );
+                start_time = get_millisec();
+                }
+            break;
 
-            case 1:
-                if ( get_delta_millisec( start_time ) > 500 )
-                    {
-                    show_step = 0;
-                    ledman_cmd( WAGO_FBK_LED_CMD_OFF, WAGO_FBK_LED_STATUS_GREEN );
-                    start_time = get_millisec();
-                    }
-                break;
+        case 1:
+            if ( get_delta_millisec( start_time ) > 500 )
+                {
+                show_step = 0;
+                ledman_cmd( WAGO_FBK_LED_CMD_OFF, WAGO_FBK_LED_STATUS_GREEN );
+                start_time = get_millisec();
+                }
+            break;
             }
 
         if ( 0 == is_ok )
@@ -118,7 +118,7 @@ void PAC_critical_errors_manager::show_errors()
     }
 //-----------------------------------------------------------------------------
 void PAC_critical_errors_manager::set_global_error( ERRORS_CLASS eclass,
-                                                   ERRORS_SUBCLASS p1, unsigned long p2 )
+    ERRORS_SUBCLASS p1, unsigned long p2 )
     {
     int b = 0;
 
@@ -126,8 +126,8 @@ void PAC_critical_errors_manager::set_global_error( ERRORS_CLASS eclass,
     for ( u_int i = 0; i < errors.size(); i++ )
         {
         if ( errors[ i ].err_class == eclass &&
-            ( unsigned int ) p1 == errors[ i ].p1 && 
-            ( unsigned int ) p2 == errors[ i ].p2 )
+            ( unsigned int ) p1 == errors[ i ].err_sub_class && 
+            ( unsigned int ) p2 == errors[ i ].param )
             {
             b = 1;
             break;
@@ -146,14 +146,14 @@ void PAC_critical_errors_manager::set_global_error( ERRORS_CLASS eclass,
     }
 //-----------------------------------------------------------------------------
 void PAC_critical_errors_manager::reset_global_error( ERRORS_CLASS eclass, 
-                                                     ERRORS_SUBCLASS p1, unsigned long p2 )
+    ERRORS_SUBCLASS p1, unsigned long p2 )
     {
     int idx = -1;
     for ( u_int i = 0; i < errors.size(); i++ )
         {
         if ( errors[ i ].err_class == eclass &&
-            ( unsigned int ) p1 == errors[ i ].p1 &&
-            ( unsigned int ) p2 == errors[ i ].p2 )
+            ( unsigned int ) p1 == errors[ i ].err_sub_class &&
+            ( unsigned int ) p2 == errors[ i ].param )
             {
             idx = i;
             break;
@@ -198,8 +198,8 @@ int PAC_critical_errors_manager::save_to_stream( char *buff )
         {
         erros_cnt[ 0 ]++;
         buff[ 0 ] = errors[ i ].err_class;
-        buff[ 1 ] = errors[ i ].p1;
-        buff[ 2 ] = errors[ i ].p2;
+        buff[ 1 ] = errors[ i ].err_sub_class;
+        buff[ 2 ] = errors[ i ].param;
         buff += 3;
         answer_size += 3;
         }
@@ -219,13 +219,33 @@ unsigned char PAC_critical_errors_manager::save_to_stream_2( char *buff )
     for ( u_int i = 0; i < errors.size(); i++ )
         {
         buff[ 0 ] = errors[ i ].err_class;
-        buff[ 1 ] = errors[ i ].p1;
-        buff[ 2 ] = errors[ i ].p2;
+        buff[ 1 ] = errors[ i ].err_sub_class;
+        buff[ 2 ] = errors[ i ].param;
         buff += 3;
         answer_size += 3;
         }
 
     return answer_size; 
+    }
+//-----------------------------------------------------------------------------
+int PAC_critical_errors_manager::set_instance( PAC_critical_errors_manager *new_instance )
+    {
+    instance = new_instance;
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+PAC_critical_errors_manager * PAC_critical_errors_manager::get_instance()
+    {
+    return instance;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+PAC_critical_errors_manager::critical_error::critical_error( int err_class,
+    u_int err_sub_class,
+    u_int param ) :err_class( err_class ),
+    p1( err_sub_class ), 
+    p2( param )
+    {
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

@@ -228,7 +228,7 @@ template < class data_type > class array_device: public i_simple_device
         char            *name;          ///< Имя.
         char            type;           ///< Тип.
         u_int_4         n;              ///< Уникальный номер.
-        
+
         data_type*      prev_val;       ///< Массив предыдущих значений.
     };
 //-----------------------------------------------------------------------------
@@ -252,28 +252,26 @@ public array_device < data_type >
             T_PATH_COMB,   //Гребенка маршрутов.
             };
 
-            device_state( u_int_4 n,
-                         const char *new_name,
-                         u_int_2 new_subdev_cnt,
-                         char type,
-                         u_int_4 *state,
-                         void *owner_object,
-                         char owner_type ):
-            array_device < data_type >( n,
-                                       new_name,
-                                       new_subdev_cnt,
-                                       type ),
+        device_state( u_int_4 n,
+            const char *new_name,
+            u_int_2 new_subdev_cnt,
+            char type,
+            u_int_4 *state,
+            void *owner_object,
+            char owner_type ):
+        array_device < data_type >( n,
+            new_name,
+            new_subdev_cnt,
+            type ),                                       
+            state( state ),
+            owner_object( owner_object ),
+            owner_type( owner_type )
+            {
+            }
 
-                                       
-                                       state( state ),
-                                       owner_object( owner_object ),
-                                       owner_type( owner_type )
-                {
-                }
-
-            virtual ~device_state()
-                {
-                }
+        virtual ~device_state()
+            {
+            }
 
     protected:
         u_int_4     *state;
@@ -288,15 +286,15 @@ class single_state: public device_state < char >
     {
     public:
         single_state( const char *name, int n, u_int_4 *state,
-                                   void *owner_object, char owner_type, int size ):
+            void *owner_object, char owner_type, int size ):
         device_state < char >( n, name, size,
-                              i_complex_device::ARRAY_DEV_BYTE,
-                              state,
-                              owner_object,
-                              owner_type )
-        {
-        }
-        
+            i_complex_device::ARRAY_DEV_BYTE,
+            state,
+            owner_object,
+            owner_type )
+            {
+            }
+
         virtual ~single_state()
             {            
             }
@@ -344,7 +342,7 @@ class string_device: public i_simple_device
         u_int_4 get_n() const;
 
         int     parse_cmd( char *buff  );
-	};
+    };
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс счетчика.
 class i_counter
@@ -375,11 +373,7 @@ class i_counter
 class i_DI_device
     {
     public:
-        i_DI_device():last_check_time( get_millisec() ),
-            state( 0 ),
-            dt( 0 )
-            {
-            }
+        i_DI_device();
 
         /// @brief Получение текущего состояния устройства.
         ///
@@ -389,40 +383,21 @@ class i_DI_device
         /// @brief Получение текущего состояния устройства.
         ///
         /// @return - текущее состояние устройства в виде целого числа.
-        virtual int get_state()
-            {
-            if ( dt > 0 )
-                {
-                if ( state != get_state_now() )
-                    {
-                    if ( get_delta_millisec( last_check_time ) > dt  )
-                        {
-                        state = get_state_now();
-                        }
-                    }
-                else
-                    {
-                    last_check_time = get_millisec();
-                    }
-                }
-            else state = get_state_now();
+        virtual int get_state();
 
-            return state;
-            }
+        /// @brief Установка времени ожидания изменения состояния.
+        ///
+        /// @param time - время ожидания изменения состояния.
+        void set_dt( u_int time );
 
-       void set_dt( u_int time )
-            {
-            dt = time;
-            }
-
-        void set_st_state( int new_state )
-            {
-            state = new_state;
-            }
+        /// @brief Установка состояния.
+        ///
+        /// @param new_state - новое состояние.
+        void set_st_state( int new_state );
 
     protected:
         u_int last_check_time;///< Время последней проверки состояния.
-        int   state;     ///< Предыдущее состояние, для исключения дребезга.
+        int   state;          ///< Предыдущее состояние, для исключения дребезга.
         u_int dt;             ///< Интервал установления состояния, мсек.
     };
 //-----------------------------------------------------------------------------
@@ -585,6 +560,7 @@ class device : public i_simple_device,
             {
             return sub_type;
             }
+
     protected:
         u_int_4 number;             ///< Номер устройства.
 
@@ -692,14 +668,14 @@ class dev_stub : public device,
 
         float   get_value();
         int     set_value( float new_value );                
-                        
+
         void    on();                
         void    off();                
         int     set_state( int new_state );
         int     get_state_now();
-                
+
         int     parse_cmd( char *buff );
-               
+
         int     load( file *cfg_file ); 
 
         void    pause();
@@ -718,7 +694,7 @@ class digital_device : public device,
     public:
         digital_device()
 #ifdef DEBUG_NO_WAGO_MODULES
-        :state( 0 )
+            :state( 0 )
 #endif // DEBUG_NO_WAGO_MODULES
             {
             }
@@ -726,7 +702,7 @@ class digital_device : public device,
         virtual ~digital_device()
             {
             }
-        
+
         float   get_value();
         int     set_value( float new_value );
         int     set_state( int new_state );  
@@ -738,15 +714,16 @@ class digital_device : public device,
         int save_state( char *buff );                
 
 #ifdef DEBUG_NO_WAGO_MODULES
+        /// @brief Получение мгновенного состояния объекта.        
+        ///        
+        /// @return - мгновенное состояние объекта.
         int  get_state_now();
+
         void on();
         void off();
 #endif // DEBUG_NO_WAGO_MODULES
-        
-        int get_state()
-            {
-            return i_DI_device::get_state();
-            }
+
+        int get_state();
 
     protected:
         enum CONSTANTS
@@ -913,12 +890,12 @@ class valve_mix_proof : public digital_device
     {
     public:
         enum STATES
-        {
-        ST_CLOSE = 0,   ///< Закрыт.
-        ST_OPEN,        ///< Открыт.
-        ST_UPPER_SEAT,  ///< Открыть верхнее седло.
-        ST_LOW_SEAT,    ///< Открыть нижнее седло.
-        };
+            {
+            ST_CLOSE = 0,   ///< Закрыт.
+            ST_OPEN,        ///< Открыт.
+            ST_UPPER_SEAT,  ///< Открыть верхнее седло.
+            ST_LOW_SEAT,    ///< Открыть нижнее седло.
+            };
 
         void open_upper_seat();
         void open_low_seat();
@@ -1070,7 +1047,7 @@ class DI_1 : public digital_device
     {
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
-    DI_1( u_int dt = 0 );
+        DI_1( u_int dt = 0 );
 
         int  get_state_now();
         void on();
@@ -1123,10 +1100,7 @@ class mixer : public DO_1_DI_1
 class level_s : public DI_1
     {
     public:
-        level_s( u_int dt = 1000 )
-            {
-            set_dt( dt );
-            }
+        level_s( u_int dt = 1000 );
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора расхода.
@@ -1154,8 +1128,8 @@ class counter : public device,
         counter();
 
         virtual ~counter()
-        {            
-        }
+            {            
+            }
 
         float get_value();
         int   set_value( float new_value );
@@ -1207,7 +1181,7 @@ class device_manager
         device_manager();
 
         ~device_manager();
-        
+
         /// @brief Загрузка из файла конфигурации.
         int load_from_cfg_file( file *cfg_file );
 
@@ -1262,12 +1236,14 @@ class device_manager
         /// @brief Установка единственного экземпляра класса.
         static void set_instance( device_manager* new_instance );
 
+        /// @brief Получение всех простых устройств, для передачи на сервер.
         complex_device * get_device()
             {
             return devices;
             }
-        
+
     protected:
+        /// Все простые устройства, для передачи на сервер.
         complex_device *devices;
 
         dev_stub stub;  ///< Устройство-заглушка, фиктивное устройство. 
@@ -1308,29 +1284,61 @@ class timer
             S_PAUSE,    ///< Пауза.
             };
 
+        /// @brief Сохранение состояния устройства в буфер.
+        ///
+        /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
+        ///        
+        /// @return >= 0 - количество записанных байт.
         int save( char *buff );
 
+        /// @brief Считывание состояния устройства из буфера.
+        ///
+        /// @param buff [ out ] - адрес буфера, откуда будут считываться данные.
+        ///        
+        /// @return >= 0 - количество считанных байт.
         int load( char *buff );
 
+        /// @brief Получение размера буфера для сохранения состояния устройства.
+        ///
+        /// @return >= 0 - размер буфера, байт.
         int get_saved_size() const;
 
         timer();
 
-        void    start();
+        /// @brief Запуск таймера.
+        void start();
 
-        void    reset();
+        /// @brief Сброс таймера.
+        void reset();
 
-        void    pause();
+        /// @brief Пауза таймера.
+        void pause();
 
-        bool    is_time_up() const;
+        /// @brief Проверка исхода времени таймера.
+        ///
+        /// @return 1 - время вышло.
+        /// @return 0 - время не вышло.
+        bool is_time_up() const;
 
+        /// @brief Получение времени работы таймера.
+        ///
+        /// @return - время работы таймера.
         u_long  get_work_time() const;
 
-        void    set_countdown_time( u_long new_countdown_time );
+        /// @brief Установка задания таймера.
+        ///
+        /// @param new_countdown_time - задание.
+        void set_countdown_time( u_long new_countdown_time );
 
+        /// @brief Получение задания таймера.
+        ///
+        /// @return - задание таймера.
         u_long  get_countdown_time() const;
 
-        STATE   get_state() const;
+        /// @brief Получение состояния таймера.
+        ///
+        /// @return - состояние таймера.
+        STATE get_state() const;
 
     private:
         u_long  last_time;  ///< Время, когда таймер был запущен/остановлен.
@@ -1342,51 +1350,28 @@ class timer
 //-----------------------------------------------------------------------------
 /// @brief таймер.
 ///
-/// Предоставляет группу таймеров.
+/// Реализация группы таймеров.
 class timer_manager
     {
     public:
-        timer_manager( u_int timers_count ): timers_cnt( timers_count ),
-            timers( 0 )
-        {
-        if ( timers_cnt )
-            {
-            timers = new timer[ timers_cnt ];
-            }   
-        }
+        /// @param timers_count - количество таймеров в группе.
+        timer_manager( u_int timers_count );
 
-        ~timer_manager()
-            {
-            if ( timers )
-                {
-                delete [] timers;
-                timers     = 0;
-                timers_cnt = 0;
-                }
-            }
+        ~timer_manager();
 
-    timer& operator[] ( unsigned int index )
-        {
-        if ( index < timers_cnt )
-                {
-                return timers[ index ];
-                }
-#ifdef DEBUG
-            else
-                {
-                Print( "timer_manager[] - error: index[ %u ] > count [ %u ]\n",
-                    index, timers_cnt );
-                }
-#endif // DEBUG
-
-            return stub;
-        }
+        /// @brief Безопасное получение таймера по индексу.
+        ///
+        /// @param index - индекс таймера.
+        ///
+        /// @return - таймер с нужным индексом, заглушка - в случае выхода за 
+        /// диапазон.
+        timer& operator[] ( unsigned int index );
 
     private:
-        u_int   timers_cnt;
-        timer   *timers;
+        u_int   timers_cnt; ///< Количество таймеров.
+        timer   *timers;    ///< Таймеры.
 
-        timer   stub;
+        timer   stub;       ///< Заглушка.
     };
 //-----------------------------------------------------------------------------
 #define G_DEVICE_MANAGER device_manager::get_instance()

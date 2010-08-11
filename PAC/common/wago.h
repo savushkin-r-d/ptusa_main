@@ -26,14 +26,7 @@ class wago_device
     public:
         wago_device();
 
-        virtual ~wago_device()
-            {
-            if ( params )
-                {
-                delete [] params;
-                params = 0;
-                }
-            }
+        virtual ~wago_device();
 
         /// @brief Загрузка самого устройства из буфера.
         ///
@@ -76,6 +69,8 @@ class wago_device
         ///
         /// @param index - индекс канала в таблице аналоговых выходных каналов 
         /// устройства.
+        /// @param min_value - минимальное значение канала.
+        /// @param max_value - максимальное значение канала.
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
@@ -86,6 +81,8 @@ class wago_device
         /// @param index - индекс канала в таблице аналоговых выходных каналов 
         /// устройства.
         /// @param value - новое состояние канала.
+        /// @param min_value - минимальное значение канала.
+        /// @param max_value - максимальное значение канала.
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
@@ -96,6 +93,8 @@ class wago_device
         ///
         /// @param index - индекс канала в таблице аналоговых входных каналов 
         /// устройства.
+        /// @param min_value - минимальное значение канала.
+        /// @param max_value - максимальное значение канала.
         ///
         /// @return -  0 - Ок.
         /// @return - >0 - ошибка.
@@ -131,46 +130,11 @@ class wago_device
             u_char **char_read_values;   ///< Массив значений для чтения.
             u_char **char_write_values;  ///< Массив значений для записи.
 
-            IO_channels( CHANNEL_TYPE type ) : count( 0 ), tables( 0 ),
-                offsets( 0 ),
-                int_read_values( 0 ), int_write_values( 0 ),
-                char_read_values( 0 ), char_write_values( 0 ),
-                type( type )
-                {
-                }
+            CHANNEL_TYPE type;           ///< Тип канала.
 
-            ~IO_channels()
-                {
-                if ( count )
-                    {
-                    delete [] tables;
-                    delete [] offsets;
-                    count = 0;
-                    }
-                if ( int_read_values )
-                    {
-                    delete [] int_read_values;
-                    int_read_values = 0;
-                    }
-                if ( int_write_values )
-                    {
-                    delete [] int_write_values;
-                    int_write_values = 0;
-                    }
-                if ( char_read_values )
-                    {
-                    delete [] char_read_values;  
-                    char_read_values = 0;
-                    }
-                
-                if ( char_write_values )
-                    {
-                    delete [] char_write_values;
-                    char_write_values = 0;
-                    }
-                }
+            IO_channels( CHANNEL_TYPE type );
 
-            CHANNEL_TYPE type;
+            ~IO_channels();            
             };
 
         IO_channels DI_channels;    ///< Каналы дискретного входа.
@@ -178,8 +142,8 @@ class wago_device
         IO_channels AI_channels;    ///< Каналы аналогового входа.
         IO_channels AO_channels;    ///< Каналы аналогового выхода.
 
-        u_int   params_count;
-        float   *params;
+        u_int   params_count;       ///< Количество параметров устройства.
+        float   *params;            ///< Параметры устройства.
 
         void print_table( const char *str, const IO_channels &channels ) const;
 
@@ -199,24 +163,10 @@ class wago_device
 class wago_manager
     {
     public:
-        wago_manager():nodes_count( 0 ), nodes( 0 )
-            {
-            }
+        wago_manager();
 
-        virtual ~wago_manager()
-            {
-            if ( nodes_count && nodes )
-                {
-                for ( u_int i = 0; i < nodes_count; i++ )
-                    {
-                    delete nodes[ i ];
-                    }
+        virtual ~wago_manager();
 
-                delete [] nodes;
-                nodes = 0;
-                nodes_count = 0;
-                }
-            }
         /// @brief Чтение модулей ввода.
         ///
         /// @return - 0 - Ок.
@@ -351,11 +301,8 @@ class wago_manager
         /// Единственный экземпляр класса.
         static auto_smart_ptr < wago_manager > instance;
 
-public:
-        wago_node * get_node( int node_n )
-            {
-            return nodes[ node_n ];
-            }
+    public:
+        wago_node * get_node( int node_n );
     };
 //-----------------------------------------------------------------------------
 #define G_WAGO_MANAGER wago_manager::get_instance()

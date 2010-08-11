@@ -229,4 +229,47 @@ int tech_object_manager::set_instance( tech_object_manager* new_instance )
     return 0;
     }
 //-----------------------------------------------------------------------------
+int tech_object_manager::get_object_with_active_mode( u_int mode,
+    u_int start_idx, u_int end_idx )
+    {
+    for ( u_int i = start_idx; 
+        i <= end_idx && i < tech_objects.size(); i++ )
+        {
+        if ( tech_objects.at( i )->get_mode( mode ) ) return i;
+        }
+
+    return -1;
+    }
+//-----------------------------------------------------------------------------
+tech_object* tech_object_manager::get_tech_objects( u_int idx )
+    {
+    return tech_objects.at( idx );
+    }
+//-----------------------------------------------------------------------------
+u_int tech_object_manager::get_count() const
+    {
+    return tech_objects.size();
+    }
+//-----------------------------------------------------------------------------
+void tech_object_manager::evaluate()
+    {
+    for ( u_int i = 0; i < tech_objects.size(); i++ )
+        {
+        tech_objects.at( i )->evaluate();
+        }
+    }
+//-----------------------------------------------------------------------------
+tech_object_manager::~tech_object_manager()
+    {
+    for ( u_int i = 0; i < tech_objects.size(); i++ )
+        {
+        delete tech_objects[ i ];
+        }
+    }
+//-----------------------------------------------------------------------------
+void tech_object_manager::add_tech_object( tech_object* new_tech_object )
+    {
+    tech_objects.push_back( new_tech_object );
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

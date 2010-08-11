@@ -32,7 +32,7 @@ enum CONSTANTS
     C_T2_IDX = 2,
     C_T3_IDX = 3,
     C_T4_IDX = 4,
-    
+
     C_POST1_IDX = 5,
     C_POST2_IDX = 6,
     };

@@ -723,6 +723,44 @@ i_AI_device* device_manager::get_QE( int number )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+i_DI_device::i_DI_device() :last_check_time( get_millisec() ),
+    state( 0 ),
+    dt( 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+void i_DI_device::set_dt( u_int time )
+    {
+    dt = time;
+    }
+//-----------------------------------------------------------------------------
+void i_DI_device::set_st_state( int new_state )
+    {
+    state = new_state;
+    }
+//-----------------------------------------------------------------------------
+int i_DI_device::get_state()
+    {
+    if ( dt > 0 )
+        {
+        if ( state != get_state_now() )
+            {
+            if ( get_delta_millisec( last_check_time ) > dt  )
+                {
+                state = get_state_now();
+                }
+            }
+        else
+            {
+            last_check_time = get_millisec();
+            }
+        }
+    else state = get_state_now();
+
+    return state;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 float dev_stub::get_value()
     {
     return 0;
@@ -992,6 +1030,11 @@ int digital_device::save_changed_state( char *buff )
 int digital_device::save_state( char *buff )
     {
     return char_state_device::save_state( buff );
+    }
+//-----------------------------------------------------------------------------
+int digital_device::get_state()
+    {
+    return i_DI_device::get_state();
     }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_WAGO_MODULES
@@ -1595,4 +1638,46 @@ timer::STATE timer::get_state() const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+level_s::level_s( u_int dt /*= 1000 */ )
+    {
+    set_dt( dt );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+timer_manager::timer_manager( u_int timers_count ) : timers_cnt( timers_count ),
+    timers( 0 )
+    {
+    if ( timers_cnt )
+        {
+        timers = new timer[ timers_cnt ];
+        }
+    }
+//-----------------------------------------------------------------------------
+timer_manager::~timer_manager()
+    {
+    if ( timers )
+        {
+        delete [] timers;
+        timers     = 0;
+        timers_cnt = 0;
+        }
+    }
+//-----------------------------------------------------------------------------
+timer& timer_manager::operator[]( unsigned int index )
+    {
+    if ( index < timers_cnt )
+        {
+        return timers[ index ];
+        }
+#ifdef DEBUG
+    else
+        {
+        Print( "timer_manager[] - error: index[ %u ] > count [ %u ]\n",
+            index, timers_cnt );
+        }
+#endif // DEBUG
 
+    return stub;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------

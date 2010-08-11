@@ -238,6 +238,21 @@ params_manager* params_manager::get_instance()
     return instance;
     }
 //-----------------------------------------------------------------------------
+params_manager::~params_manager()
+    {
+    if ( CRC_mem )
+        {
+        delete params_mem;
+        params_mem = 0;
+        }
+    if ( CRC_mem )
+        {
+        delete CRC_mem;
+        CRC_mem = 0;
+        }
+    }
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int params_test::make_test()
     {
