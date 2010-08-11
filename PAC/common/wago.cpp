@@ -616,7 +616,7 @@ wago_manager::~wago_manager()
         }
     }
 //-----------------------------------------------------------------------------
-wago_node * wago_manager::get_node( int node_n )
+wago_manager::wago_node * wago_manager::get_node( int node_n )
     {
     return nodes[ node_n ];
     }

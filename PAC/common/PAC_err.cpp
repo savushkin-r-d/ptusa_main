@@ -243,8 +243,8 @@ PAC_critical_errors_manager * PAC_critical_errors_manager::get_instance()
 PAC_critical_errors_manager::critical_error::critical_error( int err_class,
     u_int err_sub_class,
     u_int param ) :err_class( err_class ),
-    p1( err_sub_class ), 
-    p2( param )
+    err_sub_class( err_sub_class ),
+    param( param )
     {
     }
 //-----------------------------------------------------------------------------
