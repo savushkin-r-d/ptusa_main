@@ -578,6 +578,34 @@ int device_manager::load_from_cfg_file( file *cfg_file )
             }
         }
 
+        devices = new complex_device( 0, "GLB", device::C_DEVICE_TYPE_CNT, 0 );
+
+        for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
+            {
+            int dev_cnt = dev_types_ranges[ i ].end_pos -
+                dev_types_ranges[ i ].start_pos + 1;
+
+            if ( dev_types_ranges[ i ].start_pos == -1 )
+                {
+                dev_cnt = 0;
+                }
+
+            devices->sub_dev[ i ] =
+                new complex_device( 0, device::DEV_NAMES[ i ], dev_cnt,
+                device::DEV_TYPES[ i ] );
+
+            if ( dev_cnt )
+                {
+                int pos = 0;
+                for ( int j = dev_types_ranges[ i ].start_pos;
+                    j <= dev_types_ranges[ i ].end_pos; j++ )
+                    {
+                    ( ( complex_device* ) ( devices->sub_dev[ i ] ) )->sub_dev[ pos++ ] =
+                        project_devices[ j ];
+                    }
+                }
+            }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -611,6 +639,18 @@ device_manager::~device_manager()
         delete [] project_devices;
         project_devices = 0;        
         }
+
+   for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
+        {
+        if ( devices->sub_dev[ i ] )
+            {
+            delete devices->sub_dev[ i ];
+            devices->sub_dev[ i ] = 0;
+            }
+        }
+
+    delete devices;
+    devices = 0;
     }
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_N( int number )

@@ -286,28 +286,6 @@ class complex_device: public i_complex_device
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-class simple_device_communicator
-    {
-    public:
-        simple_device_communicator();
-
-        ~simple_device_communicator();
-
-        static simple_device_communicator* get_instance();
-        static int set_instance( simple_device_communicator* new_instance );
-        
-        complex_device* get_simple_devices()
-            {
-            return devices;
-            }
-
-    private:
-        static auto_smart_ptr < simple_device_communicator > instance;
-
-        complex_device *devices;
-    };
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 /// @brief Коммуникатор устройств - содержит все устройства одного PAC. Служит
 /// для передачи информации о них и их состоянии на сервер (PC).
 class device_communicator
@@ -365,10 +343,8 @@ class device_communicator
     public:
         device_communicator();
 
-        ~device_communicator()
-            {
-            }
-
+        ~device_communicator();
+        
         /// @brief Вывод на консоль устройств группы.
         void print() const;
 

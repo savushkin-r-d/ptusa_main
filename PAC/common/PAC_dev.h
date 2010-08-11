@@ -1203,8 +1203,6 @@ class counter : public device,
 /// Содержит информацию обо всех устройствах проекта.
 class device_manager
     {
-    friend class simple_device_communicator;
-    
     public:
         device_manager();
 
@@ -1264,7 +1262,14 @@ class device_manager
         /// @brief Установка единственного экземпляра класса.
         static void set_instance( device_manager* new_instance );
 
+        complex_device * get_device()
+            {
+            return devices;
+            }
+        
     protected:
+        complex_device *devices;
+
         dev_stub stub;  ///< Устройство-заглушка, фиктивное устройство. 
 
         struct range    ///< Диапазон устройств одного типа. 

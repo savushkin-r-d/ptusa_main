@@ -87,10 +87,8 @@ int project_manager::load_configuration( const char *file_name )
     device_manager::get_instance()->load_from_cfg_file( cfg_file );
 
     cfg_file->fclose();
-    
-    simple_device_communicator::set_instance( new simple_device_communicator() );
-    G_DEVICE_CMMCTR->add_device( 
-        simple_device_communicator::get_instance()->get_simple_devices() );
+
+    G_DEVICE_CMMCTR->add_device( device_manager::get_instance()->get_device() );
   
     return 0;
     }

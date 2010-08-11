@@ -17,7 +17,6 @@ auto_smart_ptr < device_communicator > device_communicator::instance;
 u_int_4 device_communicator::dev_cnt;
 i_complex_device *device_communicator::dev[ device_communicator::C_MAX_COMLEX_DEVICES ];
 
-auto_smart_ptr < simple_device_communicator > simple_device_communicator::instance;
 #endif // PAC
 
 #ifdef WIN32
@@ -597,65 +596,6 @@ int complex_device::save_changed_state( char *buff )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
- simple_device_communicator::simple_device_communicator()
-    {
-    devices = new complex_device( 0, "GLB", device::C_DEVICE_TYPE_CNT, 0 );
-
-    for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
-        {
-        int dev_cnt = G_DEVICE_MANAGER->dev_types_ranges[ i ].end_pos -
-            G_DEVICE_MANAGER->dev_types_ranges[ i ].start_pos + 1;
-
-        if ( G_DEVICE_MANAGER->dev_types_ranges[ i ].start_pos == -1 )
-            {
-            dev_cnt = 0;
-            }
-       
-        devices->sub_dev[ i ] =
-            new complex_device( 0, device::DEV_NAMES[ i ], dev_cnt,
-            device::DEV_TYPES[ i ] );
-
-        if ( dev_cnt )
-            {
-            int pos = 0;
-            for ( int j = G_DEVICE_MANAGER->dev_types_ranges[ i ].start_pos;
-                j <= G_DEVICE_MANAGER->dev_types_ranges[ i ].end_pos; j++ )
-                {
-                ( ( complex_device* ) ( devices->sub_dev[ i ] ) )->sub_dev[ pos++ ] =
-                    G_DEVICE_MANAGER->project_devices[ j ];
-                }
-            }
-        }
-    }
- //-----------------------------------------------------------------------------
- simple_device_communicator::~simple_device_communicator()
-    {
-    for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
-        {
-        if ( devices->sub_dev[ i ] )
-            {
-            delete devices->sub_dev[ i ];
-            devices->sub_dev[ i ] = 0;
-            }
-        }
-
-    delete devices;
-    devices = 0;
-    }
- //-----------------------------------------------------------------------------
- simple_device_communicator* simple_device_communicator::get_instance()
-    { 
-    return instance;
-    }
- //-----------------------------------------------------------------------------
- int simple_device_communicator::set_instance(
-    simple_device_communicator* new_instance )
-    {
-    instance = new_instance;
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 device_communicator::device_communicator()
     {  
     dev_cnt = 0;
@@ -666,6 +606,10 @@ device_communicator::device_communicator()
         dev[ i ] = 0;
         }
 #endif // PAC
+    }
+//-----------------------------------------------------------------------------
+device_communicator::~device_communicator()
+    {
     }
 //-----------------------------------------------------------------------------
 #ifdef DRIVER        
