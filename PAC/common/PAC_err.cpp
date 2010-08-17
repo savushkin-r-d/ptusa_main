@@ -1,56 +1,36 @@
 #include <stdio.h>
 
 #include "PAC_err.h"
+#ifdef UCLINUX
+#include "sys_w750.h"
+#endif // UCLINUX
+#ifdef LINUX
+#include "sys_PC.h"
+#endif // LINUX
 
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 
 auto_smart_ptr < PAC_critical_errors_manager > PAC_critical_errors_manager::instance;
-//--------------------------------------------------------------------------------
-/// Kommandos fuer das Interface Programm <--> Hardware
-//--------------------------------------------------------------------------------
-#define WAGO_FBK_LED_CMD_SET	0x01	/* turn on briefly to show activity */
-#define WAGO_FBK_LED_CMD_ON     0x02	/* turn LED on permanently */
-#define WAGO_FBK_LED_CMD_OFF	0x03	/* turn LED off permanently */
-#define WAGO_FBK_LED_CMD_FLASH	0x04	/* flash this LED */
-
-//--------------------------------------------------------------------------------
-/// Hardware Index Programm <--> Hardware
-//--------------------------------------------------------------------------------
-#define WAGO_FBK_LED_STATUS_RED       2
-#define WAGO_FBK_LED_STATUS_GREEN     3
-#define WAGO_FBK_LED_SERVICE_RED      4
-#define WAGO_FBK_LED_SERVICE_GREEN    5
-#define WAGO_FBK_LED_USER_RED	      6
-#define WAGO_FBK_LED_USER_GREEN	      7
-#define WAGO_FBK_LED_ALL              8
-//-----------------------------------------------------------------------------
-int ledman_cmd( int cmd, int led )
-    {
-    int fd;
-    if ( ( fd = open( "/dev/ledman", O_RDWR ) ) != -1 )
-        {
-        ioctl( fd, cmd, led );
-        close( fd );
-        return 0;
-        }
-
-    return 1;
-    }
 //-----------------------------------------------------------------------------
 PAC_critical_errors_manager::PAC_critical_errors_manager(
     ): errors_id( 0 ),
-    global_ok( 0 )
+    global_ok( 0 )    
     {
     errors.clear();
+    
+#ifdef UCLINUX
+    wago_led = new led_W750();
+#endif // UCLINUX
+
+#ifdef LINUX
+    wago_led = new led_PC();
+#endif // UCLINUX
     }
 //-----------------------------------------------------------------------------
 void PAC_critical_errors_manager::show_errors()
     {
-    static u_char is_error = 0;
-    static u_char is_ok = 0;
-
     static u_char show_step = 0;
     static u_long start_time = get_millisec();
 
@@ -62,7 +42,7 @@ void PAC_critical_errors_manager::show_errors()
             if ( get_delta_millisec( start_time ) > 500 )
                 {
                 show_step = 1;
-                ledman_cmd( WAGO_FBK_LED_CMD_ON, WAGO_FBK_LED_STATUS_RED );
+                wago_led->on( led::L_STATUS, led::C_RED );
                 start_time = get_millisec();
                 }
             break;
@@ -71,17 +51,10 @@ void PAC_critical_errors_manager::show_errors()
             if ( get_delta_millisec( start_time ) > 500 )
                 {
                 show_step = 0;
-                ledman_cmd( WAGO_FBK_LED_CMD_OFF, WAGO_FBK_LED_STATUS_RED );
+                wago_led->off( led::L_STATUS );
                 start_time = get_millisec();
                 }
             break;
-            }
-        if ( 0 == is_error )
-            {
-            is_error = 1;
-            is_ok = 0;
-
-            ledman_cmd( WAGO_FBK_LED_CMD_OFF, WAGO_FBK_LED_ALL );
             }
         }
     else                        // Нет ошибок.
@@ -92,7 +65,7 @@ void PAC_critical_errors_manager::show_errors()
             if ( get_delta_millisec( start_time ) > 500 )
                 {
                 show_step = 1;
-                ledman_cmd( WAGO_FBK_LED_CMD_ON, WAGO_FBK_LED_STATUS_GREEN );
+                wago_led->on( led::L_STATUS, led::C_GREEN );
                 start_time = get_millisec();
                 }
             break;
@@ -101,18 +74,10 @@ void PAC_critical_errors_manager::show_errors()
             if ( get_delta_millisec( start_time ) > 500 )
                 {
                 show_step = 0;
-                ledman_cmd( WAGO_FBK_LED_CMD_OFF, WAGO_FBK_LED_STATUS_GREEN );
+                wago_led->off( led::L_STATUS );                
                 start_time = get_millisec();
                 }
             break;
-            }
-
-        if ( 0 == is_ok )
-            {
-            is_ok = 1;
-            is_error = 0;
-
-            ledman_cmd( WAGO_FBK_LED_CMD_OFF, WAGO_FBK_LED_ALL );
             }
         }
     }

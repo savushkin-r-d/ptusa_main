@@ -3,7 +3,7 @@
 auto_smart_ptr < NV_memory_manager > NV_memory_manager::instance;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#if ( defined LINUX || defined UCLINUX ) && defined DEBUG
+#if defined DEBUG
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -52,7 +52,7 @@ int get_char()
     tcsetattr( STDIN_FILENO, TCSANOW, &oldt );
     return ch;
     }
-#endif // ( defined LINUX || defined UCLINUX ) && defined DEBUG
+#endif // defined DEBUG
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 NV_memory::NV_memory( u_int total_size,

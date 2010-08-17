@@ -114,7 +114,7 @@ class PAC_critical_errors_manager
             GE_ERROR_SIZE = 3,      ///< Размер одной ошибки, байт.
             };
 
-        PAC_critical_errors_manager();
+        PAC_critical_errors_manager();        
 
         void show_errors();
         void set_global_error( ERRORS_CLASS eclass, ERRORS_SUBCLASS p1, 
@@ -143,8 +143,10 @@ class PAC_critical_errors_manager
 
         std::vector< critical_error >  errors;
 
-        u_int    errors_id;
-        int      global_ok;        
+        u_int errors_id;
+        int   global_ok;
+
+        auto_smart_ptr< led > wago_led;
     };
 //-----------------------------------------------------------------------------
 #endif // PAC_ERRORS_H

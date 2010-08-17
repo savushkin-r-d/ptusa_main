@@ -16,12 +16,28 @@
 
 #include "sys_linux.h"
 //-----------------------------------------------------------------------------
-/// @brief Работа с энергонезависимой ОЗУ. Представляет абстракцию от 
-/// физического распределения памяти.
+/// @brief Работа с энергонезависимой ОЗУ. 
 class NV_memory_manager_PC: public NV_memory_manager
     {    
     public:
         NV_memory_manager_PC();       
+    };
+//-----------------------------------------------------------------------------
+/// @brief Работа с диодными индикаторами.
+class led_PC : public led
+    {
+    public:
+        void on( LEDS_NAMES led, COLOUR led_color )
+            {
+            }
+
+        void off( LEDS_NAMES led )
+            {
+            }
+
+        void blink( LEDS_NAMES led, COLOUR led_color )
+            {
+            }
     };
 //-----------------------------------------------------------------------------
 #endif // SYS_7186_H

@@ -29,17 +29,23 @@ typedef unsigned long int       u_long;
 
 #include "util.h"
 //-----------------------------------------------------------------------------
-#ifdef WIN32
-#include <conio.h>
-
-#define Print printf
-
 #ifdef DEBUG
-#define get_char getch
+/// @brief Проверка нажатия клавиши.
+///
+/// @return 0 - нет нажатий клавиш.
+/// @return 1 - нажата клавиша.
+int  kbhit();
+
+/// @brief Считывание нажатого символа с консоли.
+///
+/// @return - символ нажатой клавиши.
+int  get_char();
+
+/// @brief Вывод числа в консоль в двоичном виде.
+///
+/// @param с - выводимое число.
+void print_binary( u_int c );
 #endif // DEBUG
-
-#endif // WIN32
-
 //-----------------------------------------------------------------------------
 #if defined LINUX || defined UCLINUX
 #include <time.h>
@@ -48,16 +54,6 @@ typedef unsigned long int       u_long;
     ( time( 0 ) / 60 ) % 60, time( 0 ) % 60 ); printf
 
 #define Print printf
-
-#ifdef DEBUG
-int  kbhit();
-int  get_char();
-
-/// @brief Вывод числа в консоль в двоичном виде.
-///
-/// @param с - выводимое число.
-void print_binary( u_int c );
-#endif // DEBUG
 
 #endif // defined LINUX || defined UCLINUX
 //-----------------------------------------------------------------------------
@@ -293,6 +289,42 @@ class file
         ///    0   - Ок.
         ///    0 < - Ошибка.
         virtual void fclose() = 0;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Работа с диодными индикаторами. Представляет абстракцию от
+/// физической реализации таковых.
+class led
+    {
+    public:
+        enum COLOUR
+            {
+            C_GREEN = 1,
+            C_YELLOW,
+            C_RED
+            };
+
+        enum LEDS_NAMES
+            {
+            L_ALL = 1,
+            L_STATUS,
+            L_SERVICE,
+            L_USER
+            };
+
+        /// @brief Включить диодный индикатор.
+        ///
+        /// @param led       - диод.
+        /// @param led_color - цвет.
+        virtual void on( LEDS_NAMES led, COLOUR led_color ) = 0;
+
+        /// @brief Выключить диодный индикатор.
+        virtual void off( LEDS_NAMES led ) = 0;
+
+        /// @brief Включить мигание диодного индикатора.
+        ///
+        /// @param led       - диод.
+        /// @param led_color - цвет.
+        virtual void blink( LEDS_NAMES led, COLOUR led_color ) = 0;
     };
 //-----------------------------------------------------------------------------
 #endif // SYS_H
