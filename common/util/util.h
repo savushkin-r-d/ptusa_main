@@ -11,9 +11,9 @@
 /// @$Date:: 2010-07-09 15:57:50#$.
 
 //-----------------------------------------------------------------------------
-#if defined LINUX || defined UCLINUX
+#if defined LINUX_OS && !defined PAC_WAGO_750_860
 #define debug_break asm ( "int" "3" ) ///< Установка точки прерывания.
-#endif // defined LINUX || defined UCLINUX
+#endif // defined LINUX_OS
 //-----------------------------------------------------------------------------
 /// @brief Защищенная работа с указателем.
 ///
@@ -54,9 +54,9 @@ template < class type > class smart_ptr
                 {
     #ifdef DEBUG
 
-    #ifdef DEBUG_TRACE
+    #ifdef PAC_PC
                 debug_break;
-    #endif // DEBUG_TRACE
+    #endif // PAC_PC
 
                 printf( "smart_ptr - pointer is NULL!\n" );
     #endif // DEBUG
@@ -73,9 +73,9 @@ template < class type > class smart_ptr
     #ifdef DEBUG
                 printf( "smart_ptr - dereferencing NULL!\n" );
 
-    #ifdef DEBUG_TRACE
+    #ifdef PAC_PC
                 debug_break;
-    #endif // DEBUG_TRACE
+    #endif // PAC_PC
 
     #endif // DEBUG
                 }

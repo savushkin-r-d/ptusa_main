@@ -1,16 +1,24 @@
+/// @par Описание директив препроцессора:
+/// @c LINUX_OS         - компиляция для ОС linux.
+/// @c PAC_PC           - компиляция для PAC на PC с ОС linux.
+/// @c PAC_WAGO_750_860 - компиляция для PAC Wago 750-860.
+///
+/// @c DEBUG - компиляция c выводом отладочной информации в консоль.
+
 #include <stdlib.h>
-#if defined UCLINUX || defined LINUX
+#if defined LINUX_OS
 #include <time.h>
-#endif // defined UCLINUX || defined LINUX
+#endif // defined LINUX_OS
 
 #include "sys.h"
 #include "PAC_dev.h"
 #include "tcp_cmctr_linux.h"
 #include "prj_mngr_linux.h"
 
-#ifdef PAC_W750
+#ifdef PAC_WAGO_750_860
+#include "sys_w750.h"
 #include "wago_w750.h"
-#endif // PAC_W750
+#endif // PAC_WAGO_750_860
 
 #ifdef PAC_PC
 #include "sys_PC.h"
@@ -20,47 +28,41 @@
 #include "tech_def.h"
 #include "init.h"
 
-#if !defined UCLINUX && !defined LINUX
+#if !defined PAC_WAGO_750_860 && !defined PAC_PC
 #error
 #endif
 
-#if defined UCLINUX && defined LINUX
+#if defined PAC_WAGO_750_860 && defined PAC_PC
 #error
 #endif
 
 int main( int argc, char *argv[] )
     {
-#if defined UCLINUX || defined LINUX
+#if defined LINUX_OS
     time_t t = time( 0 );
     fprintf( stderr, "Program started - %s\n", asctime( localtime( &t ) ) );
-#endif // defined UCLINUX || defined LINUX
+#endif // defined LINUX_OS
 
     project_manager::set_instance( new project_manager_linux() );
     tcp_communicator::set_instance( new tcp_communicator_linux() );
     device_manager::set_instance( new device_manager() );
     device_communicator::set_instance( new device_communicator() );
-#ifdef PAC_W750
+#if defined LINUX_OS
+#ifdef PAC_WAGO_750_860
     wago_manager::set_instance( new wago_manager_w750() );
     NV_memory_manager::set_instance( new NV_memory_manager_W750() );
-#endif // PAC_W750
+#endif // PAC_WAGO_750_860
 #ifdef PAC_PC
     wago_manager::set_instance( new wago_manager_PC() );
     NV_memory_manager::set_instance( new NV_memory_manager_PC() );
 #endif // PAC_PC
-//
+#endif // defined LINUX_OS
+
     tech_object_manager::set_instance( new tech_object_manager() );
     PAC_critical_errors_manager::set_instance( new PAC_critical_errors_manager() );
 
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
-
-#ifdef UCLINUX
     G_PROJECT_MANAGER->load_configuration( "Whey_out.ds5" );
-#endif // UCLINUX
-
-#ifdef PAC_PC
-    G_PROJECT_MANAGER->load_configuration(
-        "/home/id/src/PAC_control_projects/whey_out/Whey_out.ds5" );
-#endif // PAC_PC
 
 #ifdef DEBUG
     G_DEVICE_MANAGER->print();
@@ -107,12 +109,14 @@ int main( int argc, char *argv[] )
 #ifdef DEBUG
         all_time += get_millisec() - st_time;
 
-#ifdef LINUX
+#if defined LINUX_OS
+#ifdef PAC_PC
        const u_int MAX_ITERATION = 10000;
-#endif // LINUX
-#ifdef UCLINUX
+#endif // PAC_PC
+#ifdef PAC_WAGO_750_860
        const u_int MAX_ITERATION = 1000;
-#endif // UCLINUX
+#endif // PAC_WAGO_750_860
+#endif // defined LINUX_OS
 
         if ( cycles_cnt > MAX_ITERATION )
             {

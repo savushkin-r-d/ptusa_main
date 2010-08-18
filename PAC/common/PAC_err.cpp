@@ -1,12 +1,18 @@
 #include <stdio.h>
 
 #include "PAC_err.h"
-#ifdef UCLINUX
+
+#if defined LINUX_OS
+
+#ifdef PAC_WAGO_750_860
 #include "sys_w750.h"
-#endif // UCLINUX
-#ifdef LINUX
+#endif // PAC_WAGO_750_860
+
+#endif // defined LINUX_OS
+
+#ifdef PAC_PC
 #include "sys_PC.h"
-#endif // LINUX
+#endif // PAC_PC
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -19,14 +25,18 @@ PAC_critical_errors_manager::PAC_critical_errors_manager(
     global_ok( 0 )    
     {
     errors.clear();
-    
-#ifdef UCLINUX
-    wago_led = new led_W750();
-#endif // UCLINUX
 
-#ifdef LINUX
+#ifdef PAC_PC
     wago_led = new led_PC();
-#endif // UCLINUX
+#endif // PAC_PC
+    
+#if defined LINUX_OS
+
+#ifdef PAC_WAGO_750_860
+    wago_led = new led_W750();
+#endif // PAC_WAGO_750_860
+
+#endif // defined LINUX_OS
     }
 //-----------------------------------------------------------------------------
 void PAC_critical_errors_manager::show_errors()

@@ -25,7 +25,7 @@
           <itemPath>../../PAC/linux/PAC_PC/sys_PC.h</itemPath>
           <itemPath>../../PAC/linux/PAC_PC/wago_PC.h</itemPath>
         </logicalFolder>
-        <logicalFolder name="f1" displayName="PAC_wago_750" projectFiles="true">
+        <logicalFolder name="f1" displayName="PAC_wago_750-860" projectFiles="true">
           <itemPath>../../PAC/linux/PAC_WAGO_750_860/kbusapi.h</itemPath>
           <itemPath>../../PAC/linux/PAC_WAGO_750_860/sys_w750.h</itemPath>
           <itemPath>../../PAC/linux/PAC_WAGO_750_860/wago_w750.h</itemPath>
@@ -58,7 +58,7 @@
           <itemPath>../../PAC/linux/PAC_PC/sys_PC.cpp</itemPath>
           <itemPath>../../PAC/linux/PAC_PC/wago_PC.cpp</itemPath>
         </logicalFolder>
-        <logicalFolder name="f1" displayName="PAC_wago_750" projectFiles="true">
+        <logicalFolder name="f1" displayName="PAC_wago_750-860" projectFiles="true">
           <itemPath>../../PAC/linux/PAC_WAGO_750_860/kbusapi.cpp</itemPath>
           <itemPath>../../PAC/linux/PAC_WAGO_750_860/sys_w750.cpp</itemPath>
           <itemPath>../../PAC/linux/PAC_WAGO_750_860/wago_w750.cpp</itemPath>
@@ -80,7 +80,7 @@
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
-    <conf name="release_linux" type="1">
+    <conf name="release_PC" type="1">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <compilerSet>GNU|GNU</compilerSet>
@@ -101,10 +101,9 @@
             <pElem>../../common/util</pElem>
           </incDir>
           <preprocessorList>
+            <Elem>LINUX_OS</Elem>
             <Elem>PAC</Elem>
             <Elem>PAC_PC</Elem>
-            <Elem>LINUX</Elem>
-            <Elem>USE_NO_TANK_COMB_DEVICE</Elem>
           </preprocessorList>
         </ccTool>
         <fortranCompilerTool>
@@ -115,35 +114,7 @@
         </linkerTool>
       </compileType>
     </conf>
-    <conf name="debug_linux" type="1">
-      <toolsSet>
-        <developmentServer>localhost</developmentServer>
-        <compilerSet>GNU|GNU</compilerSet>
-        <platform>2</platform>
-      </toolsSet>
-      <compileType>
-        <ccTool>
-          <incDir>
-            <pElem>../../PAC/common</pElem>
-            <pElem>../../common/PAC-driver</pElem>
-            <pElem>../../PAC/linux</pElem>
-            <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
-            <pElem>/usr/include</pElem>
-            <pElem>../../common/util</pElem>
-          </incDir>
-          <preprocessorList>
-            <Elem>LINUX</Elem>
-            <Elem>PAC</Elem>
-            <Elem>PAC_PC</Elem>
-            <Elem>DEBUG</Elem>
-            <Elem>DEBUG_NO_WAGO_MODULES</Elem>
-            <Elem>DEBUG_DEV_CMCTR</Elem>
-          </preprocessorList>
-          <warningLevel>2</warningLevel>
-        </ccTool>
-      </compileType>
-    </conf>
-    <conf name="full_debug_linux" type="1">
+    <conf name="debug_PC" type="1">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <compilerSet>GNU|GNU</compilerSet>
@@ -161,11 +132,10 @@
           </incDir>
           <commandLine>-pg</commandLine>
           <preprocessorList>
-            <Elem>LINUX</Elem>
+            <Elem>LINUX_OS</Elem>
             <Elem>PAC</Elem>
             <Elem>PAC_PC</Elem>
             <Elem>DEBUG</Elem>
-            <Elem>DEBUG_TRACE</Elem>
             <Elem>DEBUG_NO_WAGO_MODULES</Elem>
           </preprocessorList>
           <warningLevel>2</warningLevel>
@@ -176,7 +146,7 @@
         </linkerTool>
       </compileType>
     </conf>
-    <conf name="release_ucLinux" type="1">
+    <conf name="release_wago_750-860" type="1">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <compilerSet>arm-uclinux-elf|GNU</compilerSet>
@@ -199,9 +169,9 @@
           </incDir>
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
           <preprocessorList>
-            <Elem>UCLINUX</Elem>
+            <Elem>LINUX_OS</Elem>
             <Elem>PAC</Elem>
-            <Elem>PAC_W750</Elem>
+            <Elem>PAC_WAGO_750_860</Elem>
             <Elem>USE_NO_TANK_COMB_DEVICE</Elem>
           </preprocessorList>
         </ccTool>
@@ -213,7 +183,7 @@
         </linkerTool>
       </compileType>
     </conf>
-    <conf name="debug_ucLinux" type="1">
+    <conf name="debug_wago_750-860" type="1">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <compilerSet>arm-uclinux-elf|GNU</compilerSet>
@@ -230,38 +200,9 @@
           </incDir>
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
           <preprocessorList>
-            <Elem>UCLINUX</Elem>
+            <Elem>LINUX_OS</Elem>
             <Elem>PAC</Elem>
-            <Elem>PAC_W750</Elem>
-            <Elem>DEBUG</Elem>
-            <Elem>DEBUG_DEV_CMCTR</Elem>
-          </preprocessorList>
-        </ccTool>
-        <linkerTool>
-          <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -Wl,-elf2flt /home/id/uclinux-dist/lib/uClibc/lib/crt0.o /home/id/uclinux-dist/lib/uClibc/lib/crti.o /home/id/uclinux-dist/lib/uClibc/lib/crtn.o -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
-        </linkerTool>
-      </compileType>
-    </conf>
-    <conf name="full_debug_ucLinux" type="1">
-      <toolsSet>
-        <developmentServer>localhost</developmentServer>
-        <compilerSet>arm-uclinux-elf|GNU</compilerSet>
-        <platform>2</platform>
-      </toolsSet>
-      <compileType>
-        <ccTool>
-          <incDir>
-            <pElem>../../PAC/common</pElem>
-            <pElem>../../common/PAC-driver</pElem>
-            <pElem>../../PAC/linux</pElem>
-            <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
-            <pElem>../../common/util</pElem>
-          </incDir>
-          <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
-          <preprocessorList>
-            <Elem>PAC</Elem>
-            <Elem>PAC_W750</Elem>
-            <Elem>UCLINUX</Elem>
+            <Elem>PAC_WAGO_750_860</Elem>
             <Elem>DEBUG</Elem>
           </preprocessorList>
         </ccTool>
@@ -271,7 +212,7 @@
         </linkerTool>
       </compileType>
     </conf>
-    <conf name="no_wago_full_debug_ucLinux" type="1">
+    <conf name="no_wagoIO_debug_wago_750-860" type="1">
       <toolsSet>
         <developmentServer>localhost</developmentServer>
         <compilerSet>arm-uclinux-elf|GNU</compilerSet>
@@ -288,9 +229,9 @@
           </incDir>
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
           <preprocessorList>
-            <Elem>UCLINUX</Elem>
+            <Elem>LINUX_OS</Elem>
             <Elem>PAC</Elem>
-            <Elem>PAC_W750</Elem>
+            <Elem>PAC_WAGO_750_860</Elem>
             <Elem>DEBUG</Elem>
             <Elem>DEBUG_NO_WAGO_MODULES</Elem>
           </preprocessorList>

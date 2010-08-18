@@ -7,7 +7,7 @@
 /// @c DEBUG    - компил€ци€ c выводом отладочной информации в консоль.@n@n
 ///
 /// @c WIN32    - компил€ци€ дл€ OS Windows.@n
-/// @c PAC_W750 - компил€ци€ дл€ PAC Wago 750.@n
+/// @c PAC_WAGO_750_860 - компил€ци€ дл€ PAC Wago 750.@n
 /// @c I7186_E  - компил€ци€ дл€ PAC I7186_E. ƒанные директивы определ€ют
 /// специфичную дл€ платформы реализацию работы с консолью, куда вывод€тс€
 /// сообщени€ об ошибках в отладочном режиме.
@@ -47,7 +47,7 @@ int  get_char();
 void print_binary( u_int c );
 #endif // DEBUG
 //-----------------------------------------------------------------------------
-#if defined LINUX || defined UCLINUX
+#if defined LINUX_OS
 #include <time.h>
 
 #define print_time printf( "%02lu:%02lu:%02lu ", ( time( 0 ) / 3600 ) % 24, \
@@ -55,7 +55,7 @@ void print_binary( u_int c );
 
 #define Print printf
 
-#endif // defined LINUX || defined UCLINUX
+#endif // defined LINUX_OS
 //-----------------------------------------------------------------------------
 /// @brief ѕолучение текущего времени в секундах.
 ///
