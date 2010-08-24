@@ -37,7 +37,7 @@
 #endif
 
 int main( int argc, char *argv[] )
-    {
+    {    
 #if defined LINUX_OS
     time_t t = time( 0 );
     fprintf( stderr, "Program started - %s\n", asctime( localtime( &t ) ) );
@@ -62,7 +62,7 @@ int main( int argc, char *argv[] )
     PAC_critical_errors_manager::set_instance( new PAC_critical_errors_manager() );
 
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
-    G_PROJECT_MANAGER->load_configuration( "Whey_out.ds5" );
+    G_PROJECT_MANAGER->load_configuration( "./whey_out.ds5" );
 
 #ifdef DEBUG
     G_DEVICE_MANAGER->print();
@@ -118,14 +118,18 @@ int main( int argc, char *argv[] )
 #endif // PAC_WAGO_750_860
 #endif // defined LINUX_OS
 
-        if ( cycles_cnt > MAX_ITERATION )
+       static char print_cycle_time_count = 0;
+       if ( print_cycle_time_count < 10 && cycles_cnt > MAX_ITERATION )
             {
             print_time( "\tMain cycle avg time = %lu\n", all_time / cycles_cnt  );
             all_time = 0;
             cycles_cnt = 0;
+
+            print_cycle_time_count++;
             }
 #endif // DEBUG
-        }
+       }
 
     return( EXIT_SUCCESS );
     }
+
