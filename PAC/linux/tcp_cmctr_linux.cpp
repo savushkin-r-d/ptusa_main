@@ -14,7 +14,7 @@ unsigned int max_buffer_use = 0;
 #endif
 
 //------------------------------------------------------------------------------
-tcp_communicator_linux::tcp_communicator_linux():tcp_communicator(),
+tcp_communicator_linux::tcp_communicator_linux( const char *name ):tcp_communicator(),
 netOK( 0 )
     {
     // Задаем таймаут.
@@ -22,11 +22,12 @@ netOK( 0 )
     tv.tv_usec = 10000; // 0.01 сек.
 
     sin_len = sizeof( ssin );
-
-    memset( host_name, 0, TC_MAX_HOST_NAME );    
-    gethostname( host_name, TC_MAX_HOST_NAME );
+    strcpy( host_name, name );
+    
 #ifdef DEBUG
-    printf ( "tcp_communicator_linux() - host name is \"%s\".\n", host_name );
+//    printf ( "tcp_communicator_linux() - host name is \"%s\".\n",
+//        gethostname( host_name, TC_MAX_HOST_NAME ) );
+    printf ( "PAC name \"%s\".\n", host_name );
 #endif // DEBUG
 
     net_init();

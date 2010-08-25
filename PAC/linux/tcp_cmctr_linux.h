@@ -40,7 +40,7 @@ struct socket_state
 class tcp_communicator_linux : public tcp_communicator 
     {
         public:
-            tcp_communicator_linux();
+            tcp_communicator_linux( const char *name );
             virtual ~tcp_communicator_linux();
 
             /// @brief Итерация обмена данными с сервером.

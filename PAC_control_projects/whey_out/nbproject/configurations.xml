@@ -172,7 +172,6 @@
             <Elem>LINUX_OS</Elem>
             <Elem>PAC</Elem>
             <Elem>PAC_WAGO_750_860</Elem>
-            <Elem>USE_NO_TANK_COMB_DEVICE</Elem>
           </preprocessorList>
         </ccTool>
         <fortranCompilerTool>

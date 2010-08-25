@@ -44,7 +44,8 @@ int main( int argc, char *argv[] )
 #endif // defined LINUX_OS
 
     project_manager::set_instance( new project_manager_linux() );
-    tcp_communicator::set_instance( new tcp_communicator_linux() );
+    tcp_communicator::set_instance( 
+        new tcp_communicator_linux( "Выдача сыворотки" ) );
     device_manager::set_instance( new device_manager() );
     device_communicator::set_instance( new device_communicator() );
 #if defined LINUX_OS
