@@ -583,7 +583,7 @@ int post::evaluate()
 
                     if ( ctr->get_quantity() >=
                         rt_par_float[ RT_F__TOT_VOL ] ) // Общее заполнение машины.
-                        set_mode( CMD_RESET_POST, 1 );
+                        exec_cmd( CMD_RESET_POST );
                     else
                         {
                         if ( ctr->get_quantity() - prevSectVol >=
@@ -603,7 +603,7 @@ int post::evaluate()
                                 }
                             else
                                 {
-                                set_mode( CMD_RESET_POST, 1 );
+                                exec_cmd( CMD_RESET_POST );
                                 }
                             }
                         }
