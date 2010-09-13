@@ -4,56 +4,58 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <logicalFolder name="f1" displayName="common_PAC" projectFiles="true">
-        <itemPath>../../PAC/common/PAC_dev.h</itemPath>
-        <itemPath>../../PAC/common/PAC_err.h</itemPath>
-        <itemPath>../../PAC/common/param_ex.h</itemPath>
-        <itemPath>../../PAC/common/prj_mngr.h</itemPath>
-        <itemPath>../../PAC/common/sys.h</itemPath>
-        <itemPath>../../PAC/common/tcp_cmctr.h</itemPath>
-        <itemPath>../../PAC/common/tech_def.h</itemPath>
-        <itemPath>../../PAC/common/wago.h</itemPath>
-      </logicalFolder>
-      <logicalFolder name="f2" displayName="common_PAC-driver" projectFiles="true">
-        <itemPath>../../common/PAC-driver/g_device.h</itemPath>
-      </logicalFolder>
-      <logicalFolder name="f5" displayName="common_sys" projectFiles="true">
-        <logicalFolder name="f1" displayName="lua" projectFiles="true">
-          <itemPath>../../common/lua/lapi.h</itemPath>
-          <itemPath>../../common/lua/lauxlib.h</itemPath>
-          <itemPath>../../common/lua/lcode.h</itemPath>
-          <itemPath>../../common/lua/ldebug.h</itemPath>
-          <itemPath>../../common/lua/ldo.h</itemPath>
-          <itemPath>../../common/lua/lfunc.h</itemPath>
-          <itemPath>../../common/lua/lgc.h</itemPath>
-          <itemPath>../../common/lua/llex.h</itemPath>
-          <itemPath>../../common/lua/llimits.h</itemPath>
-          <itemPath>../../common/lua/lmem.h</itemPath>
-          <itemPath>../../common/lua/lobject.h</itemPath>
-          <itemPath>../../common/lua/lopcodes.h</itemPath>
-          <itemPath>../../common/lua/lparser.h</itemPath>
-          <itemPath>../../common/lua/lstate.h</itemPath>
-          <itemPath>../../common/lua/lstring.h</itemPath>
-          <itemPath>../../common/lua/ltable.h</itemPath>
-          <itemPath>../../common/lua/ltm.h</itemPath>
-          <itemPath>../../common/lua/lua.h</itemPath>
-          <itemPath>../../common/lua/luaconf.h</itemPath>
-          <itemPath>../../common/lua/lualib.h</itemPath>
-          <itemPath>../../common/lua/lundump.h</itemPath>
-          <itemPath>../../common/lua/lvm.h</itemPath>
-          <itemPath>../../common/lua/lzio.h</itemPath>
+      <logicalFolder name="f6" displayName="common" projectFiles="true">
+        <logicalFolder name="f1" displayName="PAC" projectFiles="true">
+          <itemPath>../../PAC/common/PAC_dev.h</itemPath>
+          <itemPath>../../PAC/common/PAC_err.h</itemPath>
+          <itemPath>../../PAC/common/param_ex.h</itemPath>
+          <itemPath>../../PAC/common/prj_mngr.h</itemPath>
+          <itemPath>../../PAC/common/sys.h</itemPath>
+          <itemPath>../../PAC/common/tcp_cmctr.h</itemPath>
+          <itemPath>../../PAC/common/tech_def.h</itemPath>
+          <itemPath>../../PAC/common/wago.h</itemPath>
         </logicalFolder>
-        <logicalFolder name="f2" displayName="tolua++" projectFiles="true">
-          <logicalFolder name="f1" displayName="pkg" projectFiles="true">
-            <itemPath>../../common/tolua++/pkg/PAC_dev.pkg</itemPath>
+        <logicalFolder name="f2" displayName="PAC-driver" projectFiles="true">
+          <itemPath>../../common/PAC-driver/g_device.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f3" displayName="sys" projectFiles="true">
+          <logicalFolder name="f1" displayName="lua" projectFiles="true">
+            <itemPath>../../common/lua/lapi.h</itemPath>
+            <itemPath>../../common/lua/lauxlib.h</itemPath>
+            <itemPath>../../common/lua/lcode.h</itemPath>
+            <itemPath>../../common/lua/ldebug.h</itemPath>
+            <itemPath>../../common/lua/ldo.h</itemPath>
+            <itemPath>../../common/lua/lfunc.h</itemPath>
+            <itemPath>../../common/lua/lgc.h</itemPath>
+            <itemPath>../../common/lua/llex.h</itemPath>
+            <itemPath>../../common/lua/llimits.h</itemPath>
+            <itemPath>../../common/lua/lmem.h</itemPath>
+            <itemPath>../../common/lua/lobject.h</itemPath>
+            <itemPath>../../common/lua/lopcodes.h</itemPath>
+            <itemPath>../../common/lua/lparser.h</itemPath>
+            <itemPath>../../common/lua/lstate.h</itemPath>
+            <itemPath>../../common/lua/lstring.h</itemPath>
+            <itemPath>../../common/lua/ltable.h</itemPath>
+            <itemPath>../../common/lua/ltm.h</itemPath>
+            <itemPath>../../common/lua/lua.h</itemPath>
+            <itemPath>../../common/lua/luaconf.h</itemPath>
+            <itemPath>../../common/lua/lualib.h</itemPath>
+            <itemPath>../../common/lua/lundump.h</itemPath>
+            <itemPath>../../common/lua/lvm.h</itemPath>
+            <itemPath>../../common/lua/lzio.h</itemPath>
           </logicalFolder>
-          <itemPath>../../common/tolua++/tolua++.h</itemPath>
-          <itemPath>../../common/tolua++/tolua_base.h</itemPath>
-          <itemPath>../../common/tolua++/tolua_event.h</itemPath>
+          <logicalFolder name="f2" displayName="tolua++" projectFiles="true">
+            <logicalFolder name="f1" displayName="pkg" projectFiles="true">
+              <itemPath>../../common/tolua++/pkg/PAC_dev.pkg</itemPath>
+            </logicalFolder>
+            <itemPath>../../common/tolua++/tolua++.h</itemPath>
+            <itemPath>../../common/tolua++/tolua_base.h</itemPath>
+            <itemPath>../../common/tolua++/tolua_event.h</itemPath>
+          </logicalFolder>
         </logicalFolder>
-      </logicalFolder>
-      <logicalFolder name="f3" displayName="common_util" projectFiles="true">
-        <itemPath>../../common/util/util.h</itemPath>
+        <logicalFolder name="f4" displayName="util" projectFiles="true">
+          <itemPath>../../common/util/util.h</itemPath>
+        </logicalFolder>
       </logicalFolder>
       <logicalFolder name="f4" displayName="linux" projectFiles="true">
         <logicalFolder name="f2" displayName="PAC_PC" projectFiles="true">
