@@ -144,7 +144,7 @@ class params_manager
 /// 
 /// Служит для создания конкретных типов параметров. Реализованы операции
 /// доступа через индекс ( [] ).
-template < class type > class parameters
+template < class type > class parameters 
     {
     public:      
         /// @brief Получение элемента через операцию индексирования.
@@ -170,6 +170,12 @@ template < class type > class parameters
 
             stub = 0;
             return stub;
+            }
+
+        int save( u_int idx, type val )
+            {
+            this->operator []( idx ) = val;
+            return 0;
             }
 
         /// @brief Получение элемента через индекс.

@@ -102,7 +102,7 @@ int complex_state::parse_cmd( char *buff  )
                     ( ( tech_object* ) owner_object )->get_modes_count() )
                     {
                     // Command.
-                    state[ 0 ] = ( ( tech_object* ) owner_object )->exec_cmd(
+                    state[ 0 ] = ( ( tech_object* ) owner_object )->lua_exec_cmd(
                     new_mode );
                     }
                 else
@@ -1678,6 +1678,82 @@ timer& timer_manager::operator[]( unsigned int index )
 #endif // DEBUG
 
     return stub;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+device_manager* G_DEVICE_MANAGER()
+  {
+  return device_manager::get_instance();
+  }
+//-----------------------------------------------------------------------------
+i_DO_device* V( int number )
+    {
+    return G_DEVICE_MANAGER()->get_V( number );
+    }
+//-----------------------------------------------------------------------------
+i_DO_device* N( int number )
+    {
+    return G_DEVICE_MANAGER()->get_N( number );
+    }
+//-----------------------------------------------------------------------------
+i_DO_device* M( int number )
+    {
+    return G_DEVICE_MANAGER()->get_M( number );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* LS( int number )
+    {
+    return G_DEVICE_MANAGER()->get_LS( number );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* FS( int number )
+    {
+    return G_DEVICE_MANAGER()->get_FS( number );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* AI( int number )
+    {
+    return G_DEVICE_MANAGER()->get_AI( number );
+    }
+//-----------------------------------------------------------------------------
+i_AO_device* AO( int number )
+    {
+    return G_DEVICE_MANAGER()->get_AO( number );
+    }
+//-----------------------------------------------------------------------------
+i_counter* CTR( int number )
+    {
+    return G_DEVICE_MANAGER()->get_CTR( number );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* TE( int number )
+    {
+    return G_DEVICE_MANAGER()->get_TE( number );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* FE( int number )
+    {
+    return G_DEVICE_MANAGER()->get_FE( number );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* LE( int number )
+    {
+    return G_DEVICE_MANAGER()->get_LE( number );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* FB( int number )
+    {
+    return G_DEVICE_MANAGER()->get_FB( number );
+    }
+//-----------------------------------------------------------------------------
+i_DO_device* UPR( int number )
+    {
+    return G_DEVICE_MANAGER()->get_UPR( number );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* QE( int number )
+    {
+    return G_DEVICE_MANAGER()->get_QE( number );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

@@ -27,6 +27,21 @@
 #include "tcp_cmctr.h"
 #include "param_ex.h"
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
+#include    "lua.h"
+#include    "lauxlib.h"
+#include    "lualib.h"
+
+#ifdef  __cplusplus
+    };
+#endif
+#include    "tolua++.h"
+
+//-----------------------------------------------------------------------------
+int add_file_and_line( const char *c_function_name, lua_State* L, int res );
 //-----------------------------------------------------------------------------
 /// @brief Работа с технологическим объектом.
 ///
@@ -55,7 +70,7 @@ class tech_object
         ///
         /// @param mode      - режим.
         /// @param new_state - новое состояние режима.
-        virtual int set_mode( u_int mode, int new_state );
+        int set_mode( u_int mode, int new_state );
 
         /// @brief Получение состояния режима.
         ///
@@ -73,14 +88,14 @@ class tech_object
         ///
         /// @return 1 - режим нельзя включить.
         /// @return 0 - режим можно включить.
-        virtual int check_on_mode( u_int mode );
+        int check_on_mode( u_int mode );
 
         /// @brief Выполнение команды.
         ///
         /// Здесь могут выполняться какие-либо действия (включаться/выключаться
         /// другие режимы).
         ///
-        virtual int exec_cmd( u_int cmd )
+        int exec_cmd( u_int cmd )
             {
 #ifdef DEBUG
             Print ( "Exec command %s[ %2d ] command = %2d\n",
@@ -95,7 +110,7 @@ class tech_object
         /// включение маршрута, включение/выключение клапанов и т.д.
         ///
         /// @param mode - режим.
-        virtual void init_mode( u_int mode );
+        void init_mode( u_int mode );
 
         /// @brief Выполнение включенных режимов.
         ///
@@ -103,7 +118,7 @@ class tech_object
         /// обновление маршрута, включение/выключение клапанов и т.д.
         ///
         /// @return 0 - ок.
-        virtual int evaluate();
+        int evaluate();
 
         /// @brief Проверка возможности выключения режима.
         ///
@@ -111,7 +126,7 @@ class tech_object
         ///
         /// @return 1 - режим нельзя выключить.
         /// @return 0 - режим можно выключить.
-        virtual int check_off_mode( u_int mode );
+        int check_off_mode( u_int mode );
 
         /// @brief Завершение режима.
         ///
@@ -121,15 +136,15 @@ class tech_object
         /// @param mode - режим.
         ///
         /// @return 0 - ок.
-        virtual int final_mode( u_int mode );
+        int final_mode( u_int mode );
 
         /// @brief Инициализирует сохраняемые параметры значением 0.
         ///
         /// Данные нулевые значения сохраняются в энергонезависимой памяти.
-        virtual int init_params();
+        int init_params();
 
         /// @brief Инициализирует рабочие параметры значением 0.
-        virtual int init_runtime_params();
+        int init_runtime_params();
 
         complex_device* get_complex_dev()
             {
@@ -145,11 +160,23 @@ class tech_object
             {
             return modes_count;
             }
+   
+        saved_params_float      par_float;      ///< Сохраняемые параметры, тип float.
+        run_time_params_float   rt_par_float;   ///< Рабочие параметры, тип float.
+        saved_params_u_int_4    par_uint;       ///< Сохраняемые параметры, тип u_int.
+        run_time_params_u_int_4 rt_par_uint;    ///< Рабочие параметры, тип u_int.
+        
+        //--Lua implemented methods.
+        int lua_exec_cmd( u_int cmd );
 
-        saved_params_float  par_float;      ///< Сохраняемые параметры, тип float.
-        run_time_params_float rt_par_float; ///< Рабочие параметры, тип float.
-        saved_params_u_int_4 par_uint;      ///< Сохраняемые параметры, тип u_int.
-        run_time_params_u_int_4 rt_par_uint;///< Рабочие параметры, тип u_int.
+        int  lua_check_on_mode( u_int mode );
+        void lua_init_mode( u_int mode );
+        int  lua_evaluate();
+        int  lua_check_off_mode( u_int mode );
+        int  lua_final_mode( u_int mode );
+        int  lua_init_params();
+        int  lua_init_runtime_params();
+        //--Lua implemented methods.--!>
 
     protected:
         smart_ptr< complex_device > com_dev; ///< Связь с сервером.
@@ -163,6 +190,14 @@ class tech_object
 
         std::vector< u_int_4 >  mode_start_time;    ///< Время начала режима.
         run_time_params_u_int_4 mode_time;          ///< Время режимов, сек.
+
+        enum CONSTANTS
+            {
+            C_MAX_NAME_LENGTH = 30,
+            };
+        char name[ C_MAX_NAME_LENGTH ];    ///< Имя объекта.
+
+        int exec_lua_chunk( int cmd, const char *function_name ) const;
     };
 //-----------------------------------------------------------------------------
 class tech_object_manager
@@ -195,6 +230,8 @@ class tech_object_manager
         /// @brief Выполнение итерации технологического процесса.
         void evaluate();
 
+        int init_objects();
+
         ~tech_object_manager();
 
         /// @brief Добавление технологического объекта.
@@ -207,7 +244,8 @@ class tech_object_manager
         std::vector< tech_object* > tech_objects; ///< Технологические объекты.
     };
 //-----------------------------------------------------------------------------
-#define G_TECH_OBJECT_MNGR tech_object_manager::get_instance()
-#define G_TECH_OBJECTS tech_object_manager::get_instance()->get_tech_objects
+tech_object_manager* G_TECH_OBJECT_MNGR();
+//-----------------------------------------------------------------------------
+tech_object* G_TECH_OBJECTS( u_int idx );
 //-----------------------------------------------------------------------------
 #endif // TECH_DEFINITION_H

@@ -28,6 +28,25 @@
 #include "tech_def.h"
 #include "init.h"
 
+//-------------------
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
+#include    "lua.h"
+#include    "lauxlib.h"
+#include    "lualib.h"
+
+#ifdef  __cplusplus
+    };
+#endif
+
+#include    "tolua++.h"
+
+TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S);
+lua_State * G_LUA;
+
+
 #if !defined PAC_WAGO_750_860 && !defined PAC_PC
 #error
 #endif
@@ -42,6 +61,26 @@ int main( int argc, char *argv[] )
     time_t t = time( 0 );
     fprintf( stderr, "Program started - %s\n", asctime( localtime( &t ) ) );
 #endif // defined LINUX_OS
+
+    //-Инициализация Lua.
+    G_LUA = lua_open();   // Create Lua context.
+
+    if ( G_LUA == NULL )
+        {
+        printf ( "Error creating Lua context.\n" );
+        return 1;
+        }
+
+    luaL_openlibs       ( G_LUA );    // Open standard libraries.
+    tolua_PAC_dev_open  ( G_LUA );
+
+    int i_line = luaL_loadfile( G_LUA, "main.lua" );
+    if( i_line != 0 )
+		{
+        add_file_and_line( "main", G_LUA, i_line );
+        return 1;
+		}    
+    //-Инициализация Lua.--!>
 
     project_manager::set_instance( new project_manager_linux() );
     tcp_communicator::set_instance( 
@@ -66,23 +105,36 @@ int main( int argc, char *argv[] )
     G_PROJECT_MANAGER->load_configuration( "./whey_out.ds5" );
 
 #ifdef DEBUG
-    G_DEVICE_MANAGER->print();
+    G_DEVICE_MANAGER()->print();
 #endif // DEBUG
 
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
 
-    init_tech_process();
+    //init_tech_process();
 
+    i_line = lua_pcall( G_LUA, 0, LUA_MULTRET, 0 );
+    if( i_line != 0 )
+		{
+        add_file_and_line( "main", G_LUA, i_line );
+        return 1;
+		}
+
+    G_TECH_OBJECT_MNGR()->init_objects();    
+    for ( u_int i = 0; i < G_TECH_OBJECT_MNGR()->get_count(); i++ )
+        {
+        G_TECH_OBJECTS( i )->lua_init_runtime_params();
+
+        G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS( i )->get_complex_dev() );        
+        }
+    
 #ifdef DEBUG
     G_DEVICE_CMMCTR->print();
 
     ulong st_time;
     ulong all_time = 0;
     ulong cycles_cnt = 0;
-#endif // DEBUG
 
-#ifdef DEBUG
     while ( !kbhit() )
 #else
     while ( 1 )
@@ -97,7 +149,7 @@ int main( int argc, char *argv[] )
        G_WAGO_MANAGER->read_inputs();
 #endif // DEBUG_NO_WAGO_MODULES
 
-        evaluate_all();
+        G_TECH_OBJECT_MNGR()->evaluate();
 
         G_CMMCTR->evaluate();
 
@@ -112,7 +164,7 @@ int main( int argc, char *argv[] )
 
 #if defined LINUX_OS
 #ifdef PAC_PC
-       const u_int MAX_ITERATION = 10000;
+       const u_int MAX_ITERATION = 100000;
 #endif // PAC_PC
 #ifdef PAC_WAGO_750_860
        const u_int MAX_ITERATION = 1000;
@@ -131,6 +183,7 @@ int main( int argc, char *argv[] )
 #endif // DEBUG
        }
 
+    lua_close     ( G_LUA );
+
     return( EXIT_SUCCESS );
     }
-

@@ -85,7 +85,7 @@ int whey_tank::evaluate()
                         ( POST1->get_mode( POST_WHEY_ACCEPTING ) &&
                         ( ( post* ) POST1 )->flow->get_state() == 0 ) )
                         {
-                        int idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode(
+                        int idx = G_TECH_OBJECT_MNGR()->get_object_with_active_mode(
                             T_WHEY_WOUT_P1, C_T1_IDX, C_T4_IDX );
                 
                         if ( idx >= 0 &&
@@ -132,7 +132,7 @@ int whey_tank::evaluate()
                         ( POST2->get_mode( POST_WHEY_ACCEPTING ) &&
                         ( ( post* ) POST2 )->flow->get_state() == 0 ) )
                         {
-                        int idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode(
+                        int idx = G_TECH_OBJECT_MNGR()->get_object_with_active_mode(
                             T_WHEY_WOUT_P2, C_T1_IDX, C_T4_IDX );
                         
                         if ( idx >= 0 ) set_mode( T_WHEY_OUT_P2, 0 );
@@ -237,7 +237,7 @@ int whey_tank::final_mode( u_int mode )
     // приЄмку/выдачу.
     if ( mode >= T_WHEY_ACCEPTING && mode <= T_WHEY_OUT_P2 )
         {
-        int idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode(
+        int idx = G_TECH_OBJECT_MNGR()->get_object_with_active_mode(
             mode + T_WHEY_WACCEPTING, C_T1_IDX, C_T4_IDX );
 
         if ( idx >= 0 )
@@ -270,7 +270,7 @@ int whey_tank::exec_cmd( u_int cmd )
     switch ( cmd )
         {
         case CMD_RESET_TANK_POST1:
-            idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode(
+            idx = G_TECH_OBJECT_MNGR()->get_object_with_active_mode(
                 T_WHEY_WOUT_P1, C_T1_IDX, C_T4_IDX );
 
             if ( idx == -1 ) POST1->exec_cmd( CMD_RESET_POST ); // —брасываем пост 1.
@@ -278,7 +278,7 @@ int whey_tank::exec_cmd( u_int cmd )
             break;
 
         case CMD_RESET_TANK_POST2:
-            idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode(
+            idx = G_TECH_OBJECT_MNGR()->get_object_with_active_mode(
                 T_WHEY_WOUT_P2, C_T1_IDX, C_T4_IDX );
 
             if ( idx == -1 ) POST2->exec_cmd( CMD_RESET_POST ); // —брасываем пост 2.
@@ -436,7 +436,7 @@ int whey_tank::check_on_mode( u_int mode )
     // приЄмку/выдачу.
     if ( mode >= T_WHEY_ACCEPTING && mode <= T_WHEY_OUT_P2 )
         {
-        int idx = G_TECH_OBJECT_MNGR->get_object_with_active_mode( mode,
+        int idx = G_TECH_OBJECT_MNGR()->get_object_with_active_mode( mode,
             C_T1_IDX, C_T4_IDX );
         if ( idx >= 0 )
             {
@@ -857,14 +857,6 @@ my_comb::my_comb( int states_count, int params_count, int rt_param_count,
 //-----------------------------------------------------------------------------
 my_comb::~my_comb()
     {
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-int evaluate_all()
-    {
-    G_TECH_OBJECT_MNGR->evaluate();
-
-    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

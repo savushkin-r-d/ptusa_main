@@ -1025,6 +1025,7 @@ int device_communicator::add_device( i_complex_device *device )
 #ifdef DEBUG
         Print( "device_communicator::add_device() - Error : max devices is used!\n" );
 #endif // DEBUG
+        return 1;
         }
 
     return 0;
