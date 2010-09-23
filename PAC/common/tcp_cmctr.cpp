@@ -4,11 +4,15 @@ auto_smart_ptr < tcp_communicator > tcp_communicator::instance = 0;
 //------------------------------------------------------------------------------
 tcp_communicator::tcp_communicator()
     {
-    buf                 = new u_char[ BUFSIZE ];
+    //buf                 = new u_char[ BUFSIZE ];
+    //memset( buf, 0, BUFSIZE );
+    
     is_going_to_reboot  = 0;
     max_cycles          = 4;
     glob_cmctr_ok       = 1;
     for ( int i = 0; i < TC_MAX_SERVICE_NUMBER; i++ ) services[ i ] = NULL;
+    
+    memset( host_name, 0, TC_MAX_HOST_NAME );
     }
 //------------------------------------------------------------------------------
 tcp_communicator::srv_ptr tcp_communicator::reg_service( u_char srv_id,
@@ -73,11 +77,11 @@ char* tcp_communicator::get_host_name()
 //------------------------------------------------------------------------------
 tcp_communicator::~tcp_communicator()
     {
-    if ( buf )
-        {
-        delete [] buf;
-        buf = 0;
-        }
+//    if ( buf )
+//        {
+//        delete [] buf;
+//        buf = 0;
+//        }
     }
 //------------------------------------------------------------------------------
 

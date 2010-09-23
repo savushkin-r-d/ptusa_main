@@ -853,7 +853,10 @@ static int tolua_PAC_dev_tech_object_new00_local(lua_State* tolua_S)
   unsigned int par_uint_count = ((unsigned int)  tolua_tonumber(tolua_S,8,5));
   unsigned int runtime_par_uint_count = ((unsigned int)  tolua_tonumber(tolua_S,9,5));
   {
-   tech_object* tolua_ret = (tech_object*)  Mtolua_new((tech_object)(name,number,states_count,timers_count,par_float_count,runtime_par_float_count,par_uint_count,runtime_par_uint_count));
+   tech_object* tolua_ret = (tech_object*)  Mtolua_new((tech_object)(
+       name,number,states_count,timers_count,par_float_count,
+       runtime_par_float_count,par_uint_count,runtime_par_uint_count));
+   
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"tech_object");
     tolua_register_gc(tolua_S,lua_gettop(tolua_S));
   }

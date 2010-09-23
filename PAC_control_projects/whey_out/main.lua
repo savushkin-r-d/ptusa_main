@@ -25,8 +25,6 @@ function project_tech_object:new( o )
     setmetatable( o, self )
     self.__index = self
 
-    print( "project_tech_object:new( o ), n = ", o.number )
-
    --Создаем системный объект.
     o.sys_tech_object = tech_object( o.name, o.number, o.states_count,
         o.timers_count, o.params_float_count, o.runtime_params_float_count,
@@ -99,6 +97,7 @@ object_manager =
 
     --Получение количества пользовательских технологических объектов.
     get_objects_count = function( self )
+        print( #self.objects )
         return #self.objects
     end,
 
@@ -339,16 +338,17 @@ function whey_tank:final_mode( mode )
             mode + self.MODES.WHEY_WACCEPTING, CONSTANTS.TANK1_IDX, CONSTANTS.TANK2_IDX )
 
         if idx >= 0 then
-            G_TECH_OBJECTS( idx ):set_mode( mode + self.MODES.WHEY_WACCEPTING, 0 )
-            G_TECH_OBJECTS( idx ):set_mode( mode, 1 )
-            if self.MODES.WHEY_ACCEPTING == mode then
-                G_TECH_OBJECTS( idx ).rt_par_float:save(
+            local post_obj = G_TECH_OBJECTS( idx )
+            post_obj:set_mode( mode + self.MODES.WHEY_WACCEPTING, 0 )
+            post_obj:set_mode( mode, 1 )
+            if self.MODES.WHEY_ACCEPTING == mode then                
+                post_obj.rt_par_float:save(
                     self.PARAMETERS.WARNING_REASON, self.WARNINGS.TANK_IN_START )
             end
         else
             if self.MODES.WHEY_ACCEPTING == mode then
-                self.sys_tech_object.rt_par_float:save( self.PARAMETERS.WARNING_REASON,
-                    self.WARNINGS.TANK_IN_STOP )
+                self.sys_tech_object.rt_par_float:save( 
+                    self.PARAMETERS.WARNING_REASON, self.WARNINGS.TANK_IN_STOP )
             end
         end
     end
@@ -401,8 +401,8 @@ function whey_tank:on_whey_out( out_post )
             self:set_mode( self.MODES.WHEY_OUT_P1, 0 )
         else
             out_post:set_mode( post.MODES.WHEY_ACCEPTING_PAUSE, 1 )
-            out_post.sys_tech_object.rt_par_float:save( post.PARAMETERS.RT_F__WARNING_REASON,
-                post.WARNINGS.NO_FLOW )
+            out_post.sys_tech_object.rt_par_float:save( 
+                post.PARAMETERS.RT_F__WARNING_REASON, post.WARNINGS.NO_FLOW )
         end
     end
 end
@@ -486,8 +486,6 @@ function whey_tank:exec_cmd( cmd )
     end
 
     if cmd == CMD.SET_POST1_AND_TANK then
-        print( "exec_cmd( CMD.SET_POST1_AND_TANK )")
-
         if self:get_mode( self.MODES.WASH ) == 1 or   -- Во время мойки танка нельзя.
             self:get_mode( self.MODES.WHEY_OUT_P2 ) == 1 or
             self:get_mode( self.MODES.WHEY_WOUT_P2 ) == 1 then
@@ -513,11 +511,8 @@ function whey_tank:exec_cmd( cmd )
         end
     end
 
-   if cmd == CMD.SET_HEATING_POST1_AND_TANK then
-        print( "self:exec_cmd( CMD.SET_POST1_AND_TANK )")
+    if cmd == CMD.SET_HEATING_POST1_AND_TANK then
         self:exec_cmd( CMD.SET_POST1_AND_TANK )
-        print( "after self:exec_cmd( CMD.SET_POST1_AND_TANK )")
-
         POST1:set_mode( POST1.MODES.WHEY_HEATING, 1 )
     end
 
@@ -525,7 +520,6 @@ function whey_tank:exec_cmd( cmd )
         self:exec_cmd( CMD.SET_POST2_AND_TANK )
         POST2:set_mode( POST1.MODES.WHEY_HEATING, 1 )
     end
-
 
     self.sys_tech_object.rt_par_float:save(
         self.PARAMETERS.WARNING_REASON, 0 )
@@ -538,16 +532,15 @@ end
 function post:init()
     --Клапана.
     self.V1     = V( self.number - 5 )
-    self.outTE  = ( 6 == self.number or TE( 5 ) ) and TE( 6 )
+    self.outTE  = 6 == self.number and TE( 5 ) or TE( 6 )
     self.N1     = N( self.number - 5 )
     self.ctr    = CTR( self.number - 5 )
-    self.flow   = ( 6 == self.number or FB( 5 ) ) and FB( 6 )
+    self.flow   = 6 == self.number and FB( 5 ) or FB( 6 )
 
-    self.lampReady  = ( 6 == self.number or UPR( 1 ) ) and UPR( 3 )
-    self.lampWorking= ( 6 == self.number or UPR( 2 ) ) and UPR( 4 )
-    self.btnStart   = ( 6 == self.number or FB( 1 ) ) and FB( 3 )
-    self.btnPause   = ( 6 == self.number or FB( 2 ) ) and FB( 4 )
-
+    self.lampReady  = 6 == self.number and UPR( 1 ) or UPR( 3 )
+    self.lampWorking= 6 == self.number and UPR( 2 ) or UPR( 4 )
+    self.btnStart   = 6 == self.number and FB( 1 )  or FB( 3 )
+    self.btnPause   = 6 == self.number and FB( 2 )  or FB( 4 )
 end
 -- ----------------------------------------------------------------------------
 -- Создание необходимых объектов.
@@ -565,7 +558,9 @@ POST1 = post:new{ number = 6 }
 POST2 = post:new{ number = 7 }
 POST1:init()
 POST2:init()
-
+-- ----------------------------------------------------------------------------
+-- Регистрация необходимых объектов.
+-- ----------------------------------------------------------------------------
 object_manager:add_object( TANK1 )
 object_manager:add_object( TANK2 )
 object_manager:add_object( TANK3 )
@@ -573,6 +568,8 @@ object_manager:add_object( TANK4 )
 object_manager:add_object( POST1 ) -- Пост 1.
 object_manager:add_object( POST2 ) -- Пост 2.
 
+-- Создаем копии объектов со стандартными именем - TANK[номер танка] - для
+-- корректной работы скрипта.
 TANK6 = POST1
 TANK7 = POST2
 -- ----------------------------------------------------------------------------

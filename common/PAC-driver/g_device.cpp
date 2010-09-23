@@ -789,6 +789,8 @@ int device_communicator::load_changed_state( char *buff )
 extern dev_errors_manager *g_dev_errors_manager; 
 #endif // USE_SIMPLE_DEV_ERRORS
 
+//#define DEBUG_DEV_CMCTR
+
 long device_communicator::write_devices_states_service( long len, 
                                                        u_char *data,
                                                        u_char *outdata )

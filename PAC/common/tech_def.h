@@ -195,9 +195,7 @@ class tech_object
             {
             C_MAX_NAME_LENGTH = 30,
             };
-        char name[ C_MAX_NAME_LENGTH ];    ///< Имя объекта.
-
-        int exec_lua_chunk( int cmd, const char *function_name ) const;
+        char name[ C_MAX_NAME_LENGTH ];    ///< Имя объекта.        
     };
 //-----------------------------------------------------------------------------
 class tech_object_manager

@@ -79,8 +79,8 @@ class tcp_communicator
 
         enum CONSTANTS
             {
-            BUFSIZE     = 16384,           ///< Размер буфера.
-            PORT 	    = 10000,           ///< Порт.
+            BUFSIZE     = 32000,           ///< Размер буфера.
+            PORT 	= 10000,           ///< Порт.
             MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
             QLEN        = MAX_SOCKETS - 1, ///< Максимальное количество соединений.
 
@@ -98,7 +98,7 @@ class tcp_communicator
         int glob_cmctr_ok;      ///< Флаг активности обмена с сервером.
 
         u_int   in_buffer_count;///< Количество данных в буфере.
-        u_char* buf;            ///< Буфер.
+        u_char  buf[ BUFSIZE ]; ///< Буфер.
 
         u_char pidx;            ///< Номер ответа.
         int    net_id;          ///< Номер PAC.

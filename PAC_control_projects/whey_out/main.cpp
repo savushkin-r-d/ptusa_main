@@ -28,24 +28,7 @@
 #include "tech_def.h"
 #include "init.h"
 
-//-------------------
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
-#include    "lua.h"
-#include    "lauxlib.h"
-#include    "lualib.h"
-
-#ifdef  __cplusplus
-    };
-#endif
-
-#include    "tolua++.h"
-
-TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S);
-lua_State * G_LUA;
-
+#include "lua_manager.h"
 
 #if !defined PAC_WAGO_750_860 && !defined PAC_PC
 #error
@@ -61,26 +44,6 @@ int main( int argc, char *argv[] )
     time_t t = time( 0 );
     fprintf( stderr, "Program started - %s\n", asctime( localtime( &t ) ) );
 #endif // defined LINUX_OS
-
-    //-Инициализация Lua.
-    G_LUA = lua_open();   // Create Lua context.
-
-    if ( G_LUA == NULL )
-        {
-        printf ( "Error creating Lua context.\n" );
-        return 1;
-        }
-
-    luaL_openlibs       ( G_LUA );    // Open standard libraries.
-    tolua_PAC_dev_open  ( G_LUA );
-
-    int i_line = luaL_loadfile( G_LUA, "main.lua" );
-    if( i_line != 0 )
-		{
-        add_file_and_line( "main", G_LUA, i_line );
-        return 1;
-		}    
-    //-Инициализация Lua.--!>
 
     project_manager::set_instance( new project_manager_linux() );
     tcp_communicator::set_instance( 
@@ -110,16 +73,9 @@ int main( int argc, char *argv[] )
 
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
-
-    //init_tech_process();
-
-    i_line = lua_pcall( G_LUA, 0, LUA_MULTRET, 0 );
-    if( i_line != 0 )
-		{
-        add_file_and_line( "main", G_LUA, i_line );
-        return 1;
-		}
-
+    
+    lua_manager::get_instance()->init();        //-Инициализация Lua.
+    
     G_TECH_OBJECT_MNGR()->init_objects();    
     for ( u_int i = 0; i < G_TECH_OBJECT_MNGR()->get_count(); i++ )
         {
@@ -181,9 +137,7 @@ int main( int argc, char *argv[] )
             print_cycle_time_count++;
             }
 #endif // DEBUG
-       }
-
-    lua_close     ( G_LUA );
+       }   
 
     return( EXIT_SUCCESS );
     }

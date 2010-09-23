@@ -4,77 +4,11 @@
 #include "tech_def.h"
 #include "sys.h"
 
+#include "lua_manager.h"
+
 #include <string>
 #include <sstream>
 #include <iostream>
-
-extern lua_State * G_LUA;
-
-lua_State *getthread (lua_State *L, int *arg)
-{
-  if (lua_isthread(L, 1)) {
-    *arg = 1;
-    return lua_tothread(L, 1);
-  }
-  else {
-    *arg = 0;
-    return L;
-  }
-}
-
-  int error_trace( lua_State * L )
-    {
-    lua_Debug ar;
-    int level = 1;
-
-    int arg;
-    lua_State *L1 = getthread( L, &arg);
-
-    while( lua_getstack( L1, level, &ar ) )
-        {
-        lua_getinfo(L1, "Sln", &ar );
-        Print( "source %s\n", ar.source);
-        Print( "short_src %s\n", ar.short_src);
-        Print( "linedefined %d\n", ar.linedefined);
-        Print( "lastlinedefined %d\n", ar.lastlinedefined);
-        Print( "what %s\n", ar.what);
-        level++;
-        }
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int add_file_and_line( const char *c_function_name, lua_State* L, int res )
-    {
-    Print( "C++ call - %s():\n", c_function_name );
-    Print( "lua [file = %s]\n", "main.lua" );
-	Print( "lua [ #line = %d]\n", res );
-	Print( "lua [%s]\n", lua_tostring( G_LUA, -1 ) );
-    lua_pop( G_LUA, 1 );
-
-
-//   lua_Debug d;
-//   lua_getstack(L, 1, &d);
-//
-//   std::string err = lua_tostring(L, -1);
-//   lua_pop(L, 1);
-//   std::cout << d.short_src << ":" << d.currentline;
-//
-//   if (d.name != 0)
-//       {
-//       std::cout << "(" << d.namewhat << " " << d.name << ")";
-//       }
-//   std::cout << " " << err;
-
-    
-//    lua_getinfo(L, "Snl", &ar);
-//    Print( "source %s\n", ar.source);
-//    Print( "short_src %s\n", ar.short_src);
-//    Print( "linedefined %d\n", ar.linedefined);
-//    Print( "lastlinedefined %d\n", ar.lastlinedefined);
-//    Print( "what %s\n", ar.what);
-
-    exit( 1 );
-    }
 //-----------------------------------------------------------------------------
 auto_smart_ptr < tech_object_manager > tech_object_manager::instance;
 //-----------------------------------------------------------------------------
@@ -89,9 +23,10 @@ tech_object::tech_object( const char* new_name, u_int number, u_int modes_count,
         par_uint( saved_params_u_int_4( par_uint_count ) ),
         rt_par_uint( run_time_params_u_int_4( runtime_par_uint_count ) ),
         number( number ),
+        cmd( 0 ),
         modes_count( modes_count ),
         timers( timers_count ),
-        mode_time( run_time_params_u_int_4( modes_count, "MODE_TIME" ) )
+        mode_time( run_time_params_u_int_4( modes_count, "MODE_TIME" ) )       
     {
     u_int state_size_in_int4 = modes_count / 32; // Размер состояния в double word.
     if ( modes_count % 32 > 0 ) state_size_in_int4++;
@@ -113,7 +48,7 @@ tech_object::tech_object( const char* new_name, u_int number, u_int modes_count,
     com_dev->sub_dev[ 1 ] = new complex_state( "STATE", number,
             &state.front(), this, single_state::T_TECH_OBJECT, state_size_in_int4 );
     com_dev->sub_dev[ 2 ] = new complex_state( "CMD", number,
-            &cmd, this,single_state::T_TECH_OBJECT );
+            &cmd, this, single_state::T_TECH_OBJECT, 1 );
     com_dev->sub_dev[ 3 ] = &par_float;
     com_dev->sub_dev[ 4 ] = &rt_par_float;
     com_dev->sub_dev[ 5 ] = &par_uint;
@@ -273,64 +208,55 @@ int tech_object::final_mode( u_int mode )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int tech_object::exec_lua_chunk( int cmd, const char *function_name ) const
-    {
-    lua_getfield( G_LUA, LUA_GLOBALSINDEX, name );
-    lua_getfield( G_LUA, -1, function_name );
-    lua_remove( G_LUA, -2 );
-    lua_getfield( G_LUA, LUA_GLOBALSINDEX, name );
-    lua_pushnumber( G_LUA, cmd );
-    
-    int res = lua_pcall( G_LUA, 2, 1, 0 );
-    if ( res )
-        {
-        add_file_and_line( function_name, G_LUA, res );
-        return -1;
-        }
-
-    res = tolua_tonumber( G_LUA, -1, NULL );
-    lua_pop( G_LUA, 1 );
-    return res;
-    }
-//-----------------------------------------------------------------------------
 int tech_object::lua_exec_cmd( u_int cmd )
     {
-    return exec_lua_chunk( cmd, "exec_cmd" );
+    tech_object::exec_cmd( cmd );
+    return lua_manager::get_instance()->int_exec_lua_method( name, "exec_cmd",
+        cmd, "int tech_object::lua_exec_cmd( u_int cmd )" );
     }
 //-----------------------------------------------------------------------------
-int  tech_object::lua_check_on_mode( u_int mode )
+int tech_object::lua_check_on_mode( u_int mode )
     {
-    return exec_lua_chunk( mode, "check_on_mode" );
+    return lua_manager::get_instance()->int_exec_lua_method( name, 
+        "check_on_mode", mode, "int tech_object::lua_check_on_mode( u_int mode )" );
     }
 //-----------------------------------------------------------------------------
 void tech_object::lua_init_mode( u_int mode )
     {
-    exec_lua_chunk( mode, "init_mode" );
+    lua_manager::get_instance()->int_exec_lua_method( name,
+        "init_mode", mode, "void tech_object::lua_init_mode( u_int mode )" );
     }
 //-----------------------------------------------------------------------------
-int  tech_object::lua_evaluate()
+int tech_object::lua_evaluate()
     {
-    return exec_lua_chunk( 0, "evaluate" );
+    tech_object::evaluate();
+    return lua_manager::get_instance()->void_exec_lua_method( name,
+        "evaluate", "int tech_object::lua_evaluate()" );
     }
 //-----------------------------------------------------------------------------
-int  tech_object::lua_check_off_mode( u_int mode )
+int tech_object::lua_check_off_mode( u_int mode )
     {
-    return exec_lua_chunk( mode, "check_off_mode" );
+    return lua_manager::get_instance()->int_exec_lua_method( name,
+        "check_off_mode", mode, "int tech_object::lua_check_off_mode( u_int mode )" );    
     }
 //-----------------------------------------------------------------------------
 int  tech_object::lua_final_mode( u_int mode )
     {
-    return exec_lua_chunk( mode, "final_mode" );
+    lua_manager::get_instance()->int_exec_lua_method( name,
+        "final_mode", mode, "int tech_object::lua_final_mode( u_int mode )" );
+    return 0;
     }
 //-----------------------------------------------------------------------------
-int  tech_object::lua_init_params()
+int tech_object::lua_init_params()
     {
-    return exec_lua_chunk( 0, "init_params" );
+    return lua_manager::get_instance()->int_exec_lua_method( name,
+        "init_params", 0, "int tech_object::lua_init_params()" );
     }
 //-----------------------------------------------------------------------------
-int  tech_object::lua_init_runtime_params()
+int tech_object::lua_init_runtime_params()
     {
-    return exec_lua_chunk( 0, "init_runtime_params" );
+    return lua_manager::get_instance()->int_exec_lua_method( name,
+        "init_runtime_params", 0, "int tech_object::lua_init_runtime_params()" );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -397,34 +323,28 @@ void tech_object_manager::evaluate()
 //-----------------------------------------------------------------------------
 int tech_object_manager::init_objects()
     {
-    lua_getfield( G_LUA, LUA_GLOBALSINDEX, "object_manager" );
-    lua_getfield( G_LUA, -1, "get_objects_count" );
-    lua_remove( G_LUA, -2 );
-    lua_getfield( G_LUA, LUA_GLOBALSINDEX, "object_manager" );
-    int res = lua_pcall( G_LUA, 1, 1, 0 );
-    if ( res )
+    int res = lua_manager::get_instance()->int_exec_lua_method( "object_manager",
+        "get_objects_count", 0, "int tech_object_manager::init_objects()" );
+    if ( res < 0 )
         {
-        add_file_and_line( "object_manager:get_objects_count", G_LUA, res );
-        return -1;
+        Print( "Fatal error!\n" );
+        exit( 1 );
         }
 
-    int objects_count = tolua_tonumber( G_LUA, -1, NULL );
+    int objects_count = res;
     for ( int i = 1; i <= objects_count; i++ )
         {
-        lua_getfield( G_LUA, LUA_GLOBALSINDEX, "object_manager" );
-        lua_getfield( G_LUA, -1, "get_object" );
-        lua_remove( G_LUA, -2 );
-        lua_getfield( G_LUA, LUA_GLOBALSINDEX, "object_manager" );
-        lua_pushinteger( G_LUA, i );
-        int res = lua_pcall( G_LUA, 2, 1, 0 );
-        if ( res )
+        void * res_object = lua_manager::get_instance()->user_object_exec_lua_method(
+             "object_manager", "get_object", i,
+             "int tech_object_manager::init_objects()" );
+
+        if ( 0 == res_object )
             {
-            add_file_and_line( "object_manager:get_object", G_LUA, res );
-            return -1;
+            Print( "Fatal error!\n" );
+            exit( 1 );
             }
 
-        tech_object *lua_object = ( tech_object* ) tolua_tousertype( G_LUA, -1, NULL );
-        add_tech_object( lua_object );
+        add_tech_object( ( tech_object * ) res_object );
         }
 
     return 0;
@@ -437,7 +357,6 @@ tech_object_manager::~tech_object_manager()
 //        {
 //        delete tech_objects[ i ];
 //        }
-
     }
 //-----------------------------------------------------------------------------
 void tech_object_manager::add_tech_object( tech_object* new_tech_object )

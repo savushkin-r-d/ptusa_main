@@ -25,8 +25,6 @@ netOK( 0 )
     strcpy( host_name, name );
     
 #ifdef DEBUG
-//    printf ( "tcp_communicator_linux() - host name is \"%s\".\n",
-//        gethostname( host_name, TC_MAX_HOST_NAME ) );
     printf ( "PAC name \"%s\".\n", host_name );
 #endif // DEBUG
 
@@ -295,7 +293,6 @@ int tcp_communicator_linux::evaluate()
 #ifdef DEBUG
                     // ќпределение имени клиента.
                     hostent *client = gethostbyaddr( &ssin.sin_addr, 4, AF_INET );
-                    
                     if ( client )
                         {
                         printf( "Accepted connection on %d socket from %s [ %s ].\n",
@@ -327,7 +324,7 @@ int tcp_communicator_linux::evaluate()
                     }
                 else         /* slave socket */
                     {
-                    do_echo ( i );
+                    do_echo( i );
                     glob_last_transfer_time = get_sec();
                     }
                 }
@@ -384,7 +381,7 @@ int tcp_communicator_linux::do_echo ( int skt )
     
     // ќжидаем данные с таймаутом 1 сек.
     err = in_buffer_count = recvtimeout( skt, buf, BUFSIZE, 1, 0 );
-  
+
     if ( err <= 0 )               /* read error */
         {
 #ifdef DEBUG
@@ -444,7 +441,7 @@ int tcp_communicator_linux::do_echo ( int skt )
             {
             case FRAME_SINGLE:
 
-                res = services[ buf[ 1 ] ] ( 
+                res = services[ buf[ 1 ] ] (
                     ( u_int ) ( buf[ 4 ] * 256 + buf[ 5 ] ), buf + 6, buf + 5 );
 
                 if ( res == 0 )
