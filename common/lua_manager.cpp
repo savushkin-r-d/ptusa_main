@@ -28,7 +28,12 @@ int lua_manager::init()
     luaL_openlibs( L );    // Open standard libraries.
     tolua_PAC_dev_open( L );
 
+#if defined WIN_OS && defined DEBUG
+    if( luaL_loadfile( L, "../main.lua" ) != 0 )
+#else
     if( luaL_loadfile( L, "main.lua" ) != 0 )
+#endif // defined OS_WIN && defined DEBUG
+
         {
 #ifdef DEBUG
         Print( "Init lua error!\n" );

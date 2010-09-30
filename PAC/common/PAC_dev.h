@@ -754,6 +754,9 @@ class analog_device : public device,
         void  off();
 
 #ifdef DEBUG_NO_WAGO_MODULES
+        analog_device() : value( 0 )
+            {
+            }
 
         float get_value();
         int   set_value( float new_value );

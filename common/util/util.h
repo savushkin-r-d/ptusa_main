@@ -14,6 +14,10 @@
 #if defined LINUX_OS && !defined PAC_WAGO_750_860
 #define debug_break asm ( "int" "3" ) ///< Установка точки прерывания.
 #endif // defined LINUX_OS
+
+#ifdef WIN_OS
+#define debug_break _asm { int 3 }
+#endif
 //-----------------------------------------------------------------------------
 /// @brief Защищенная работа с указателем.
 ///
@@ -112,13 +116,18 @@ template < class type > class auto_smart_ptr : public smart_ptr< type >
             {
             }
 
-        virtual ~auto_smart_ptr()
+        void free()
             {
             if ( smart_ptr< type >::pointer )
                 {
                 delete smart_ptr< type >::pointer;
                 smart_ptr< type >::pointer = NULL;
                 }
+            }
+
+        virtual ~auto_smart_ptr()
+            {
+            free();
             }
 
         /// @brief Оператор присваивания указателя.

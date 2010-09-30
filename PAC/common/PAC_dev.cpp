@@ -206,16 +206,16 @@ u_int_4 string_device::get_n() const
 //-----------------------------------------------------------------------------
 int string_device::parse_cmd( char *buff )
     {
-	buff += 4; //пропуск номера объекта
+    buff += 4; //пропуск номера объекта
     int new_str_len = strlen( buff );
     if ( new_str_len > max_str_len - 1 )
-    	{
+        {
 #ifdef DEBUG
         Print( "string_device::parse_cmd(...) - str_len[ %d ] > max_str_len[ %d ]!\n",
             new_str_len, max_str_len );
         get_char();
 #endif // DEBUG
-    	}
+        }
     else
         {
         strcpy( str, buff );
@@ -310,7 +310,8 @@ void device::print() const
 //-----------------------------------------------------------------------------
 int device::load( file *cfg_file )
     {    
-    sscanf( cfg_file->fget_line(), "%u %u %u", ( u_int* ) &type,
+    char *tmp = cfg_file->fget_line();
+    sscanf( tmp, "%u %u %u", ( u_int* ) &type,
         ( u_int* ) &sub_type, &number );
 
     return 0;
@@ -461,7 +462,10 @@ int device_manager::load_from_cfg_file( file *cfg_file )
             int dev_type = 0;
             int dev_sub_type = 0;
             cfg_file->fget_line();              // Пропускаем комментарий.
-            sscanf( cfg_file->pfget_line(), "%d %d", &dev_type, &dev_sub_type );
+
+            char *tmp = cfg_file->pfget_line();
+
+            sscanf( tmp, "%d %d", &dev_type, &dev_sub_type );
             
             switch ( dev_type )
                 {                
@@ -619,7 +623,7 @@ void device_manager::print() const
     Print( "\n" );
     }
 //-----------------------------------------------------------------------------
-device_manager::device_manager():project_devices( 0 )
+device_manager::device_manager():project_devices( 0 ), devices( 0 )
     {
     for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
         {
@@ -640,17 +644,20 @@ device_manager::~device_manager()
         project_devices = 0;        
         }
 
-   for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
+    if ( devices )
         {
-        if ( devices->sub_dev[ i ] )
+        for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
             {
-            delete devices->sub_dev[ i ];
-            devices->sub_dev[ i ] = 0;
+            if ( devices->sub_dev[ i ] )
+                {
+                delete devices->sub_dev[ i ];
+                devices->sub_dev[ i ] = 0;
+                }
             }
-        }
 
-    delete devices;
-    devices = 0;
+        delete devices;
+        devices = 0;
+        }
     }
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_N( int number )

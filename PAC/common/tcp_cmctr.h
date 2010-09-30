@@ -39,6 +39,10 @@ class tcp_communicator
         /// производного от @ref tcp_communicator.
         static void set_instance( tcp_communicator* new_instance );
 
+        /// @brief Удаление единственного экземпляра класса для работы с 
+        /// коммуникатором.
+        static void free_instance();
+
         /// @brief Итерация обмена данными с сервером.
         virtual int evaluate() = 0;
 
@@ -80,8 +84,13 @@ class tcp_communicator
         enum CONSTANTS
             {
             BUFSIZE     = 32000,           ///< Размер буфера.
-            PORT 	= 10000,           ///< Порт.
+            PORT 	    = 10000,           ///< Порт.
+#ifdef LINUX_OS
             MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
+#endif // LINUX_OS
+#ifdef WIN_OS
+            MAX_SOCKETS = 32,            ///< Максимальное количество сокетов.
+#endif // WIN_OS            
             QLEN        = MAX_SOCKETS - 1, ///< Максимальное количество соединений.
 
             TC_MAX_HOST_NAME      = 20,

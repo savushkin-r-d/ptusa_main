@@ -23,7 +23,13 @@
 #include <string.h>
 
 #include "sys.h"
+#ifdef LINUX_OS
 #include "sys_linux.h"
+#endif // LINUX_OS
+
+#ifdef WIN_OS
+#include "sys_win.h"
+#endif // WIN_OS
 #include "PAC_dev.h"
 //-----------------------------------------------------------------------------
 /// @brief Работа с параметрами. 

@@ -4,6 +4,8 @@ auto_smart_ptr < NV_memory_manager > NV_memory_manager::instance;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #if defined DEBUG
+
+#ifdef LINUX_OS
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -21,6 +23,7 @@ int kbhit()
 
     return 0;
     }
+#endif // LINUX_OS
 //-----------------------------------------------------------------------------
 void print_binary( u_int c )
     {
@@ -39,6 +42,7 @@ void print_binary( u_int c )
         }
     }
 //-----------------------------------------------------------------------------
+#ifdef LINUX_OS
 int get_char()
     {
     struct termios oldt;
@@ -52,6 +56,8 @@ int get_char()
     tcsetattr( STDIN_FILENO, TCSANOW, &oldt );
     return ch;
     }
+#endif // LINUX_OS
+
 #endif // defined DEBUG
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

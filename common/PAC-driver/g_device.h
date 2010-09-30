@@ -50,6 +50,10 @@ typedef unsigned short  u_int_2;
 #include "sys_linux.h"
 #endif // defined LINUX_OS
 
+#if defined WIN_OS
+#include "sys_win.h"
+#endif // defined WIN_OS
+
 #endif // PAC
 
 //-----------------------------------------------------------------------------

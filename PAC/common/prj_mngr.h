@@ -37,6 +37,9 @@ class project_manager
         /// @brief Установка единственного экземпляра класса.
         static void set_instance( project_manager* new_instance );
 
+        /// @brief Удаление единственного экземпляра класса.
+        static void free_instance();
+
         virtual ~project_manager();
 
     protected:

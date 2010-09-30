@@ -117,51 +117,51 @@ float wago_device::get_AO( u_int index, float min_value, float max_value )
 
         switch ( module_type )
             {
-// Выход модуля 554.
-// Три наименне значащих бита не учитываются.
-//    -----------------------------------------------------------------------
-//    Output          Output          Binary value
-//    current 0-20	  current 4-20                            Hex.      Dec.
-//    -----------------------------------------------------------------------
-//    20              20              0111 1111 1111 1111     7F FF     32767
-//    10              12              0100 0000 0000 0xxx     40 00     16384
-//    5               8               0010 0000 0000 0xxx     20 00      8192
-//    2.5             6               0001 0000 0000 0xxx     10 00      4096
-//    0.156           4.125           0000 0001 0000 0xxx     01 00       256
-//    0.01            4.0078          0000 0000 0001 0xxx     00 10        16
-//    0.005           4.0039          0000 0000 0000 1xxx     00 08         8
-//    0               4               0000 0000 0000 0111     00 07         7
-//    0               4               0000 0000 0000 0000     00 00         0
-//
-            case 554:
-                if ( 0 == min_value && 0 == max_value )
+            // Выход модуля 554.
+            // Три наименне значащих бита не учитываются.
+            //    -----------------------------------------------------------------------
+            //    Output          Output          Binary value
+            //    current 0-20	  current 4-20                            Hex.      Dec.
+            //    -----------------------------------------------------------------------
+            //    20              20              0111 1111 1111 1111     7F FF     32767
+            //    10              12              0100 0000 0000 0xxx     40 00     16384
+            //    5               8               0010 0000 0000 0xxx     20 00      8192
+            //    2.5             6               0001 0000 0000 0xxx     10 00      4096
+            //    0.156           4.125           0000 0001 0000 0xxx     01 00       256
+            //    0.01            4.0078          0000 0000 0001 0xxx     00 10        16
+            //    0.005           4.0039          0000 0000 0000 1xxx     00 08         8
+            //    0               4               0000 0000 0000 0111     00 07         7
+            //    0               4               0000 0000 0000 0000     00 00         0
+            //
+        case 554:
+            if ( 0 == min_value && 0 == max_value )
+                {
+                if ( val < 7 )
                     {
-                    if ( val < 7 )
-                        {
-                        val = 0;
-                        }
-                    else
-                        {
-                        val = 4 + val / 2047.5;
-                        }
+                    val = 0;
                     }
                 else
                     {
-                    if ( val < 7 )
-                        {
-                        val = 4;
-                        }
-                    else
-                        {
-                        val = 4 + val / 2047.5;
-                        }
-                    val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
+                    val = 4 + val / 2047.5;
                     }
+                }
+            else
+                {
+                if ( val < 7 )
+                    {
+                    val = 4;
+                    }
+                else
+                    {
+                    val = 4 + val / 2047.5;
+                    }
+                val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
+                }
 
-                return val;
+            return val;
 
-            default:
-                return val;
+        default:
+            return val;
             }
         }
 
@@ -182,19 +182,19 @@ int wago_device::set_AO( u_int index, float value, float min_value,
         u_int table_n = AI_channels.tables[ index ];
         u_int offset = AI_channels.offsets[ index ];
         u_int module_type = G_WAGO_MANAGER->get_node( table_n )->AI_types[ offset ];
-        
+
         switch ( module_type )
             {
-            case 554:
-                if ( 0 != min_value || 0 != max_value )
-                   {
-                   value = 4 + 16 * ( value - min_value ) / ( max_value - min_value );
-                   }
-                if ( value < 4 ) value = 4;
-                if ( value > 20 ) value = 20;
-                value = 2047.5 * ( value - 4 );                   
+        case 554:
+            if ( 0 != min_value || 0 != max_value )
+                {
+                value = 4 + 16 * ( value - min_value ) / ( max_value - min_value );
+                }
+            if ( value < 4 ) value = 4;
+            if ( value > 20 ) value = 20;
+            value = 2047.5 * ( value - 4 );                   
             }
-                
+
         *AO_channels.int_write_values[ index ] = ( u_int ) value;
 
         return 0;
@@ -221,81 +221,81 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
 
         switch ( module_type )
             {
-// Выход модуля 461.
-//   -------------------------------------------------------------------------
-//   Temperature  Voltage     Voltage     Binary value
-//   °C           (Ohm)       (Ohm)                               Hex.     Dec.
-//   -------------------------------------------------------------------------
-//                >400
-//   850          390.481     1384,998    0010 0001 0011 0100     2134     8500
-//   100          138.506     1099,299    0000 0011 1110 1000     03E8     1000
-//   25.5         109.929     1000,391    0000 0000 1111 1111     00FF      255
-//   0.1          100.039     1000        0000 0000 0000 0001     0001        1
-//   0            100         999,619     0000 0000 0000 0000     0000        0
-//  -0.1          99.970      901,929     1111 1111 1111 1111     FFFF       -1
-//  -25.5         90.389      184,936     1111 1111 0000 0001     FF01     -255
-//  -200          18.192                  1111 1000 0011 0000     F830    -2000
-//                <18                     1000 0000 0000 0000     8000   -32767
-//
-            case 461:
-                val *= 0.1;
-                val = val >= -50 && val <= 150 ? val : -1000;
-                return val;
+            // Выход модуля 461.
+            //   -------------------------------------------------------------------------
+            //   Temperature  Voltage     Voltage     Binary value
+            //   °C           (Ohm)       (Ohm)                               Hex.     Dec.
+            //   -------------------------------------------------------------------------
+            //                >400
+            //   850          390.481     1384,998    0010 0001 0011 0100     2134     8500
+            //   100          138.506     1099,299    0000 0011 1110 1000     03E8     1000
+            //   25.5         109.929     1000,391    0000 0000 1111 1111     00FF      255
+            //   0.1          100.039     1000        0000 0000 0000 0001     0001        1
+            //   0            100         999,619     0000 0000 0000 0000     0000        0
+            //  -0.1          99.970      901,929     1111 1111 1111 1111     FFFF       -1
+            //  -25.5         90.389      184,936     1111 1111 0000 0001     FF01     -255
+            //  -200          18.192                  1111 1000 0011 0000     F830    -2000
+            //                <18                     1000 0000 0000 0000     8000   -32767
+            //
+        case 461:
+            val *= 0.1;
+            val = val >= -50 && val <= 150 ? val : -1000;
+            return val;
 
-// Выход модуля 446.
-// Три наименне значащих бита не учитываются.
-//    -----------------------------------------------------------------------
-//    Input           Input           Binary value
-//    current 0-20	  current 4-20                            Hex.      Dec.
-//    -----------------------------------------------------------------------
-//   >20.5           >20.5            0111 1111 1111 1111     7F FF     32767
-//    20              20              0111 1111 1111 1111     7F FF     32767
-//    10              12              0100 0000 0000 0xxx     40 00     16384
-//    5               8               0010 0000 0000 0xxx     20 00      8192
-//    2.5             6               0001 0000 0000 0xxx     10 00      4096
-//    0.156           4.125           0000 0001 0000 0xxx     01 00       256
-//    0.01            4.0078          0000 0000 0001 0xxx     00 10        16
-//    0.005           4.0039          0000 0000 0000 1xxx     00 08         8
-//    0               4               0000 0000 0000 0111     00 07         7
-//    0               4               0000 0000 0000 0000     00 00         0
-//
-            case 466:                
-                if ( 0 == min_value && 0 == max_value )
+            // Выход модуля 446.
+            // Три наименне значащих бита не учитываются.
+            //    -----------------------------------------------------------------------
+            //    Input           Input           Binary value
+            //    current 0-20	  current 4-20                            Hex.      Dec.
+            //    -----------------------------------------------------------------------
+            //   >20.5           >20.5            0111 1111 1111 1111     7F FF     32767
+            //    20              20              0111 1111 1111 1111     7F FF     32767
+            //    10              12              0100 0000 0000 0xxx     40 00     16384
+            //    5               8               0010 0000 0000 0xxx     20 00      8192
+            //    2.5             6               0001 0000 0000 0xxx     10 00      4096
+            //    0.156           4.125           0000 0001 0000 0xxx     01 00       256
+            //    0.01            4.0078          0000 0000 0001 0xxx     00 10        16
+            //    0.005           4.0039          0000 0000 0000 1xxx     00 08         8
+            //    0               4               0000 0000 0000 0111     00 07         7
+            //    0               4               0000 0000 0000 0000     00 00         0
+            //
+        case 466:                
+            if ( 0 == min_value && 0 == max_value )
+                {
+                if ( val < 7 )
                     {
-                    if ( val < 7 )
-                        {
-                        val = 0;
-                        }
-                    else
-                        {
-                        val = 4 + val / 2047.5;
-                        }
+                    val = 0;
                     }
                 else
                     {
-                    if ( val < 7 )
-                        {
-                        val = 4;
-                        }
-                    else
-                        {
-                        val = 4 + val / 2047.5;
-                        }
-                    val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
+                    val = 4 + val / 2047.5;
                     }
+                }
+            else
+                {
+                if ( val < 7 )
+                    {
+                    val = 4;
+                    }
+                else
+                    {
+                    val = 4 + val / 2047.5;
+                    }
+                val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
+                }
 
-                return val;
+            return val;
 
-            default:
-                return val;
+        default:
+            return val;
             }
         }
 
 #ifdef DEBUG
     Print( "wago_device->get_AI(...) - error!\n" );
     Print( "index=%d, AI_channels.count=%d, AI_channels.char_read_values=%d, AI_channels.char_read_values[ index ]=%d\n",
-       index, AI_channels.count, ( int ) AI_channels.char_read_values,
-       ( int ) AI_channels.char_read_values[ index ] );
+        index, AI_channels.count, ( int ) AI_channels.char_read_values,
+        ( int ) AI_channels.char_read_values[ index ] );
 #endif // DEBUG
 
     return 0;
@@ -327,23 +327,23 @@ int wago_device::load_table_from_string( char *str, IO_channels &channels )
 
         switch ( channels.type )
             {
-            case IO_channels::CT_DI:
-                channels.char_read_values = new u_char*[ cnt ];
-                break;
+        case IO_channels::CT_DI:
+            channels.char_read_values = new u_char*[ cnt ];
+            break;
 
-            case IO_channels::CT_DO:
-                channels.char_read_values  = new u_char*[ cnt ];
-                channels.char_write_values = new u_char*[ cnt ];
-                break;
+        case IO_channels::CT_DO:
+            channels.char_read_values  = new u_char*[ cnt ];
+            channels.char_write_values = new u_char*[ cnt ];
+            break;
 
-            case IO_channels::CT_AI:
-                channels.int_read_values = new u_int*[ cnt ];
-                break;
+        case IO_channels::CT_AI:
+            channels.int_read_values = new u_int*[ cnt ];
+            break;
 
-            case IO_channels::CT_AO:
-                channels.int_read_values = new u_int*[ cnt ];
-                channels.int_write_values = new u_int*[ cnt ];
-                break;
+        case IO_channels::CT_AO:
+            channels.int_read_values = new u_int*[ cnt ];
+            channels.int_write_values = new u_int*[ cnt ];
+            break;
             }
 
         for ( u_int i = 0; i < cnt; i++ )
@@ -357,7 +357,7 @@ int wago_device::load_table_from_string( char *str, IO_channels &channels )
     }
 //-----------------------------------------------------------------------------
 void wago_device::print_table( const char *str, 
-                              const IO_channels &channels ) const
+    const IO_channels &channels ) const
     {
     if ( channels.count )
         {
@@ -466,7 +466,7 @@ int wago_manager::load_from_cfg_file( file *cfg_file )
 #endif // DEBUG
     cfg_file->fget_line();
 
-    this-> nodes_count = nodes_count;
+    this->nodes_count = nodes_count;
     if ( nodes_count )
         {
         nodes = new wago_node*[ nodes_count ];
@@ -476,7 +476,8 @@ int wago_manager::load_from_cfg_file( file *cfg_file )
 #ifdef DEBUG
             Print( "    %d. ", i + 1 );
 #endif // DEBUG
-            nodes[ i ]->load_from_cfg_file( cfg_file );
+
+            nodes[ i ]->load_from_cfg_file( cfg_file );            
             }
         }
 
@@ -623,22 +624,22 @@ wago_manager::wago_node * wago_manager::get_node( int node_n )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 wago_manager::wago_node::wago_node() : state( 0 ),
-number( 0 ),
-type( 0 ),
-DO_cnt( 0 ),
-DO( 0 ),
-DO_( 0 ),
-AO_cnt( 0 ),
-AO( 0 ),
-AO_( 0 ),
-AO_offsets( 0 ),
-AO_types( 0 ),
-DI_cnt( 0 ),
-DI( 0 ),
-AI_cnt( 0 ),
-AI( 0 ),
-AI_offsets( 0 ),
-AI_types( 0 )
+    number( 0 ),
+    type( 0 ),
+    DO_cnt( 0 ),
+    DO( 0 ),
+    DO_( 0 ),
+    AO_cnt( 0 ),
+    AO( 0 ),
+    AO_( 0 ),
+    AO_offsets( 0 ),
+    AO_types( 0 ),
+    DI_cnt( 0 ),
+    DI( 0 ),
+    AI_cnt( 0 ),
+    AI( 0 ),
+    AI_offsets( 0 ),
+    AI_types( 0 )
     {
     memset( ip_addres, 0, 4 * sizeof( int ) );
     }
@@ -688,8 +689,8 @@ int wago_manager::wago_node::load_from_cfg_file( file *cfg_file )
 
     int modules_count = 0;
     sscanf( cfg_file->fget_line(), "%d", &modules_count );
-
     sscanf( cfg_file->fget_line(), "%d", &DI_cnt );
+
     if ( DI_cnt )
         {
         DI = new u_char [ DI_cnt ];
@@ -745,17 +746,26 @@ int wago_manager::wago_node::load_from_cfg_file( file *cfg_file )
         type, number, ip_addres[ 0 ], ip_addres[ 1 ], 
         ip_addres[ 2 ], ip_addres[ 3 ] );
     Print( "DI %d, DO %d, AI %d, AO %d.\n",
-        DI_cnt, DO_cnt, AI_cnt, AO_cnt );
-    for ( u_int i = 0; i < AI_cnt; i++ )
-        {
-        if ( 0 == i ) Print( "\tAI\n");
-        Print( "\t%2.d %u %u\n", i + 1, AI_types[ i ], AI_offsets[ i ] );
-        }
-    for ( u_int i = 0; i < AO_cnt; i++ )
-        {
-        if ( 0 == i ) Print( "\tAO\n");
-        Print( "\t%2.d %u %u\n", i + 1, AO_types[ i ], AO_offsets[ i ] );
-        }
+        DI_cnt, DO_cnt, AI_cnt, AO_cnt );   
+
+    //for ( u_int i = 0; i < AI_cnt; i++ )
+    //    {
+    //    if ( 0 == i )
+    //        {
+    //        Print( "\tAI\n");
+    //        }
+    //    Print( "\t%u %u\n", AI_types[ i ], AI_offsets[ i ] );        
+    //    }
+
+    //for ( u_int i = 0; i < AO_cnt; i++ )
+    //    {
+    //    if ( 0 == i ) 
+    //        {
+    //        Print( "\tAO\n");
+    //        }
+    //    Print( "\t%2.d %u %u\n", i + 1, AO_types[ i ], AO_offsets[ i ] );
+    //    }
+
 #endif // DEBUG
 
     for ( int i = 0; i < modules_count; i++ )

@@ -14,10 +14,6 @@
 #include "sys_PC.h"
 #endif // PAC_PC
 
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-
 auto_smart_ptr < PAC_critical_errors_manager > PAC_critical_errors_manager::instance;
 //-----------------------------------------------------------------------------
 PAC_critical_errors_manager::PAC_critical_errors_manager(

@@ -27,14 +27,21 @@ typedef unsigned long int       u_long;
 #include <string.h>
 #include <stdio.h>
 
+#ifdef WIN_OS
+#include <time.h>
+#endif // WIN_OS
+
 #include "util.h"
 //-----------------------------------------------------------------------------
 #ifdef DEBUG
+
 /// @brief Проверка нажатия клавиши.
 ///
 /// @return 0 - нет нажатий клавиш.
 /// @return 1 - нажата клавиша.
+#if defined LINUX_OS
 int  kbhit();
+#endif // defined LINUX_O
 
 /// @brief Считывание нажатого символа с консоли.
 ///
@@ -56,6 +63,18 @@ void print_binary( u_int c );
 #define Print printf
 
 #endif // defined LINUX_OS
+
+#ifdef WIN_OS
+#pragma warning( disable : 4996 ) //strcpy and others unsafe functions
+
+#define Print printf
+
+#define snprintf _snprintf
+
+#define print_time printf( "%02lu:%02lu:%02lu ", ( time( 0 ) / 3600 ) % 24, \
+    ( time( 0 ) / 60 ) % 60, time( 0 ) % 60 ); printf
+
+#endif // WIN_OS
 //-----------------------------------------------------------------------------
 /// @brief Получение текущего времени в секундах.
 ///
@@ -262,7 +281,7 @@ class file
         /// @return - результат 
         ///    0   - Ок.
         ///    0 < - Ошибка.
-        virtual int fopen( const char *file_name ) = 0;
+        virtual int file_open( const char *file_name ) = 0;
 
         /// @brief Чтение из файла блока данных.
         ///
@@ -270,7 +289,7 @@ class file
         /// @param count - количество считываемых байт. 
         ///
         /// @return - количество считанных байт. 
-        virtual int fread( void *buffer, int count ) = 0;
+        virtual int file_read( void *buffer, int count ) = 0;
 
         /// @brief Чтение из файла строки.
         ///
@@ -288,7 +307,7 @@ class file
         /// @return - результат 
         ///    0   - Ок.
         ///    0 < - Ошибка.
-        virtual void fclose() = 0;
+        virtual void file_close() = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с диодными индикаторами. Представляет абстракцию от

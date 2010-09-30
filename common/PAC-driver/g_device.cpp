@@ -3,12 +3,12 @@
 
 #include "g_device.h"
 
-#ifdef WIN32
+#ifdef DRIVER
 #include "bug_log.h"
 #include "pc_device.h"
 
 #pragma warning( disable : 4996 ) //sprintf to sprintf_s
-#endif // WIN32
+#endif // DRIVER
 
 #ifdef PAC
 #include "PAC_dev.h"
@@ -19,7 +19,7 @@ i_complex_device *device_communicator::dev[ device_communicator::C_MAX_COMLEX_DE
 
 #endif // PAC
 
-#ifdef WIN32
+#ifdef DRIVER
 u_int_2 G_PROTOCOL_VERSION = 3;
 #else 
 
@@ -29,12 +29,12 @@ u_int_2 G_PROTOCOL_VERSION = 3;
 u_int_2 G_PROTOCOL_VERSION = 2;
 #endif // USE_SIMPLE_DEV_ERRORS
 
-#endif // WIN32
+#endif // DRIVER
 
 //-----------------------------------------------------------------------------
 void print_str( char *err_str, char is_need_CR )
     {    
-#ifdef WIN32
+#ifdef DRIVER
     bug_log::add_msg( "System", "", err_str );
 #else
     Print( "%s", err_str  );
@@ -42,7 +42,7 @@ void print_str( char *err_str, char is_need_CR )
         {
         Print( "\n" );
         }
-#endif // WIN32
+#endif // DRIVER
     }
 //-----------------------------------------------------------------------------
 complex_device::complex_device(): sub_dev( 0 ),
@@ -50,7 +50,7 @@ complex_device::complex_device(): sub_dev( 0 ),
         sub_dev_cnt( 0 ),
         type( 0 )        
     {      
-#ifdef WIN32
+#ifdef DRIVER
     strcpy_s( name, MAX_NAME_LENGTH - 1, "?" );    
 #else
     strcpy( name, "?" );   
@@ -62,7 +62,7 @@ complex_device::complex_device( u_int_4 n, const char *new_name,
         sub_dev_cnt( new_subdev_cnt ),
         type( type )
     {           
-#ifdef WIN32
+#ifdef DRIVER
     strcpy_s( name, MAX_NAME_LENGTH - 1, new_name );    
 #else
     strcpy( name, new_name );   
@@ -127,7 +127,7 @@ u_int_4 complex_device::get_subdev_quantity() const
 //-----------------------------------------------------------------------------
 i_save_device*  complex_device::get_save_dev( u_int_4 idx ) const
     {
-#if defined DEBUG && defined WIN32
+#if defined DEBUG && defined DRIVER
     if ( idx >= sub_dev_cnt )
         {
         _DebugBreak();
@@ -160,7 +160,7 @@ int  complex_device::save_device( char *buff )
     buff[ 0 ] = ( unsigned char ) strlen( get_name() ); //(3)
     buff++;
     idx++;
-#ifndef WIN32
+#ifndef DRIVER
     strcpy( buff, get_name() );                         //(4)
 #else
     strcpy_s( buff, 255, get_name() );                  //(4)
@@ -214,7 +214,7 @@ int  complex_device::set_name( char * new_name )
     {
     if ( name )         
         {
-#ifdef WIN32
+#ifdef DRIVER
         strcpy_s( name, MAX_NAME_LENGTH - 1, new_name );    
 #else
         strcpy( name, new_name );   
@@ -234,12 +234,12 @@ int complex_device::set_subdev_quantity( u_int_4 new_dev_cnt )
 #ifdef DRIVER        
 i_load_device* complex_device::get_load_dev( u_int_4 idx )
     {
-#if defined DEBUG && defined WIN32
+#if defined DEBUG 
     if ( idx >= sub_dev_cnt )
         {
         _DebugBreak();
         }
-#endif // DEBUG
+#endif // DRIVER
 
     return sub_dev[ idx ];
     }        
@@ -257,7 +257,7 @@ i_load_device* complex_device::get_load_dev( u_int_4 idx )
 //    далее   - данные подустройств.
 int  complex_device::load_device( char *buff )
     {
-#ifdef WIN32
+#ifdef DRIVER
     int idx = 0;
     set_type( buff++[ 0 ] );                            //(1)
     idx++;
@@ -373,7 +373,7 @@ int  complex_device::load_device( char *buff )
 //  далее   - данные каждого подустройства.
 int  complex_device::load_state( char *buff  )
     {
-#ifdef WIN32
+#ifdef DRIVER
     u_int_4 rec_id = ( ( u_int_4* ) buff )[ 0 ];        //(1) 
     u_int_4 rec_groups_cnt = ( ( u_int_4* ) buff )[ 1 ];//(2) 
     buff += 8;
@@ -408,7 +408,7 @@ int  complex_device::load_state( char *buff  )
 #else
     buff++;
     return 0;
-#endif // WIN32     
+#endif // DRIVER     
     }    
 //-----------------------------------------------------------------------------
 void complex_device::print() const
@@ -505,7 +505,7 @@ int complex_device::parse_cmd( char *buff  )
     u_int_4 dev_n;
     memcpy( &dev_n, buff, sizeof( dev_n ) );
 
-#if defined DEBUG && defined WIN32
+#if defined DEBUG && defined DRIVER
     if ( dev_n >= sub_dev_cnt )
         {
         _DebugBreak();
@@ -531,7 +531,7 @@ void complex_device::set_idx( u_int_4 new_idx )
 //  далее   - данные каждого подустройства.                         (3)
 int complex_device::load_changed_state( char *buff )
     {
-#ifdef WIN32 
+#ifdef DRIVER 
     u_int_2 rec_groups_cnt = ( ( u_int_2* ) buff )[ 0 ];            //1 
     buff += 2;
     int idx = 2;
@@ -559,7 +559,7 @@ int complex_device::load_changed_state( char *buff )
 #else
     buff++;
     return 0;
-#endif // WIN32
+#endif // DRIVER
     }
 //-----------------------------------------------------------------------------
 // ƒанные группы (buff) в следующем виде:          
@@ -660,7 +660,7 @@ int device_communicator::load_device( char *buff  )
     //—труктура полученных от контроллера данных:
     // 4 байта - количество групп устройств;
     // потом идут данные каждой группы.
-#ifdef WIN32
+
     dev_cnt = ( ( u_int_4* ) buff )[ 0 ]; 
     buff += 4;
     if ( dev )
@@ -679,14 +679,11 @@ int device_communicator::load_device( char *buff  )
             "device_communicator::load_device(...) - не удалось выделить пам€ть!" );
         return -2;
         }
-#else
-    dev = new i_complex_device*[ dev_cnt ];  
-#endif
 
     int res = 0;
     for ( unsigned int i = 0; i < dev_cnt; i++ )
         {
-#ifdef WIN32
+
         try
             {
             dev[ i ] = new complex_device(); 
@@ -697,9 +694,6 @@ int device_communicator::load_device( char *buff  )
                 "device_communicator::load_device(...) - не удалось выделить пам€ть!" );
             return -2;
             }
-#else
-        dev[ i ] = new complex_device(); 
-#endif
 
         dev[ i ]->set_idx( i ); 
 
@@ -804,6 +798,8 @@ long device_communicator::write_devices_states_service( long len,
 #endif // DEBUG_DEV_CMCTR             
 
     u_int param_size = 0;
+    static u_int_2 g_devices_request_id = 0;
+
     switch ( data[ 0 ] )
         {
         case GET_INFO_ON_CONNECT:            
@@ -825,7 +821,7 @@ long device_communicator::write_devices_states_service( long len,
             return answer_size;
 
         case GET_DEVICES:
-            static u_int_2 g_devices_request_id = 0;
+            {            
             param_size = sizeof( g_devices_request_id );
             if ( 0 == g_devices_request_id )
                 {
@@ -852,8 +848,10 @@ long device_communicator::write_devices_states_service( long len,
             Print( "Operation time = %lu\n", get_delta_millisec( start_time ) );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
+            }
 
         case GET_DEVICES_STATES:
+            {            
             param_size = sizeof( g_devices_request_id );
             memcpy( outdata, &g_devices_request_id, param_size );
             answer_size += param_size;
@@ -874,6 +872,7 @@ long device_communicator::write_devices_states_service( long len,
             Print( "Operation time = %lu\n", get_delta_millisec( start_time ) );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
+            }
 
         case GET_DEVICES_CHANGED_STATES:
             {

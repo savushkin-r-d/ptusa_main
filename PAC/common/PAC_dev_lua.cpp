@@ -24,50 +24,50 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 static int tolua_collect_run_time_params_float (lua_State* tolua_S)
 {
  run_time_params_float* self = (run_time_params_float*) tolua_tousertype(tolua_S,1,0);
-	Mtolua_delete(self);
-	return 0;
+    Mtolua_delete(self);
+    return 0;
 }
 
 static int tolua_collect_i_DO_device (lua_State* tolua_S)
 {
  i_DO_device* self = (i_DO_device*) tolua_tousertype(tolua_S,1,0);
-	Mtolua_delete(self);
-	return 0;
+    Mtolua_delete(self);
+    return 0;
 }
 
 static int tolua_collect_saved_params_u_int_4 (lua_State* tolua_S)
 {
  saved_params_u_int_4* self = (saved_params_u_int_4*) tolua_tousertype(tolua_S,1,0);
-	Mtolua_delete(self);
-	return 0;
+    Mtolua_delete(self);
+    return 0;
 }
 
 static int tolua_collect_saved_params_float (lua_State* tolua_S)
 {
  saved_params_float* self = (saved_params_float*) tolua_tousertype(tolua_S,1,0);
-	Mtolua_delete(self);
-	return 0;
+    Mtolua_delete(self);
+    return 0;
 }
 
 static int tolua_collect_run_time_params_u_int_4 (lua_State* tolua_S)
 {
  run_time_params_u_int_4* self = (run_time_params_u_int_4*) tolua_tousertype(tolua_S,1,0);
-	Mtolua_delete(self);
-	return 0;
+    Mtolua_delete(self);
+    return 0;
 }
 
 static int tolua_collect_i_DI_device (lua_State* tolua_S)
 {
  i_DI_device* self = (i_DI_device*) tolua_tousertype(tolua_S,1,0);
-	Mtolua_delete(self);
-	return 0;
+    Mtolua_delete(self);
+    return 0;
 }
 
 static int tolua_collect_tech_object (lua_State* tolua_S)
 {
  tech_object* self = (tech_object*) tolua_tousertype(tolua_S,1,0);
-	Mtolua_delete(self);
-	return 0;
+    Mtolua_delete(self);
+    return 0;
 }
 #endif
 
@@ -2409,141 +2409,149 @@ static int tolua_PAC_dev_run_time_params_float_reset_to_000(lua_State* tolua_S)
 /* Open function */
 TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
 {
- tolua_open(tolua_S);
- tolua_reg_types(tolua_S);
- tolua_module(tolua_S,NULL,0);
- tolua_beginmodule(tolua_S,NULL);
-  #ifdef __cplusplus
-  tolua_cclass(tolua_S,"i_DI_device","i_DI_device","",tolua_collect_i_DI_device);
-  #else
-  tolua_cclass(tolua_S,"i_DI_device","i_DI_device","",NULL);
-  #endif
-  tolua_beginmodule(tolua_S,"i_DI_device");
-   tolua_function(tolua_S,"delete",tolua_PAC_dev_i_DI_device_delete00);
-   tolua_function(tolua_S,"get_state_now",tolua_PAC_dev_i_DI_device_get_state_now00);
-   tolua_function(tolua_S,"get_state",tolua_PAC_dev_i_DI_device_get_state00);
-   tolua_function(tolua_S,"set_dt",tolua_PAC_dev_i_DI_device_set_dt00);
-   tolua_function(tolua_S,"set_st_state",tolua_PAC_dev_i_DI_device_set_st_state00);
-  tolua_endmodule(tolua_S);
-  #ifdef __cplusplus
-  tolua_cclass(tolua_S,"i_DO_device","i_DO_device","i_DI_device",tolua_collect_i_DO_device);
-  #else
-  tolua_cclass(tolua_S,"i_DO_device","i_DO_device","i_DI_device",NULL);
-  #endif
-  tolua_beginmodule(tolua_S,"i_DO_device");
-   tolua_function(tolua_S,"delete",tolua_PAC_dev_i_DO_device_delete00);
-   tolua_function(tolua_S,"on",tolua_PAC_dev_i_DO_device_on00);
-   tolua_function(tolua_S,"off",tolua_PAC_dev_i_DO_device_off00);
-   tolua_function(tolua_S,"set_state",tolua_PAC_dev_i_DO_device_set_state00);
-  tolua_endmodule(tolua_S);
-  tolua_function(tolua_S,"V",tolua_PAC_dev_V00);
-  tolua_function(tolua_S,"N",tolua_PAC_dev_N00);
-  tolua_function(tolua_S,"M",tolua_PAC_dev_M00);
-  tolua_function(tolua_S,"LS",tolua_PAC_dev_LS00);
-  tolua_function(tolua_S,"FS",tolua_PAC_dev_FS00);
-  tolua_function(tolua_S,"AI",tolua_PAC_dev_AI00);
-  tolua_function(tolua_S,"AO",tolua_PAC_dev_AO00);
-  tolua_function(tolua_S,"CTR",tolua_PAC_dev_CTR00);
-  tolua_function(tolua_S,"TE",tolua_PAC_dev_TE00);
-  tolua_function(tolua_S,"FE",tolua_PAC_dev_FE00);
-  tolua_function(tolua_S,"LE",tolua_PAC_dev_LE00);
-  tolua_function(tolua_S,"FB",tolua_PAC_dev_FB00);
-  tolua_function(tolua_S,"UPR",tolua_PAC_dev_UPR00);
-  tolua_function(tolua_S,"QE",tolua_PAC_dev_QE00);
-  #ifdef __cplusplus
-  tolua_cclass(tolua_S,"tech_object","tech_object","",tolua_collect_tech_object);
-  #else
-  tolua_cclass(tolua_S,"tech_object","tech_object","",NULL);
-  #endif
-  tolua_beginmodule(tolua_S,"tech_object");
-   tolua_function(tolua_S,"new",tolua_PAC_dev_tech_object_new00);
-   tolua_function(tolua_S,"new_local",tolua_PAC_dev_tech_object_new00_local);
-   tolua_function(tolua_S,".call",tolua_PAC_dev_tech_object_new00_local);
-   tolua_function(tolua_S,"delete",tolua_PAC_dev_tech_object_delete00);
-   tolua_function(tolua_S,"set_mode",tolua_PAC_dev_tech_object_set_mode00);
-   tolua_function(tolua_S,"get_mode",tolua_PAC_dev_tech_object_get_mode00);
-   tolua_function(tolua_S,"check_on_mode",tolua_PAC_dev_tech_object_check_on_mode00);
-   tolua_function(tolua_S,"exec_cmd",tolua_PAC_dev_tech_object_exec_cmd00);
-   tolua_function(tolua_S,"init_mode",tolua_PAC_dev_tech_object_init_mode00);
-   tolua_function(tolua_S,"evaluate",tolua_PAC_dev_tech_object_evaluate00);
-   tolua_function(tolua_S,"check_off_mode",tolua_PAC_dev_tech_object_check_off_mode00);
-   tolua_function(tolua_S,"final_mode",tolua_PAC_dev_tech_object_final_mode00);
-   tolua_function(tolua_S,"init_params",tolua_PAC_dev_tech_object_init_params00);
-   tolua_function(tolua_S,"init_runtime_params",tolua_PAC_dev_tech_object_init_runtime_params00);
-   tolua_function(tolua_S,"get_number",tolua_PAC_dev_tech_object_get_number00);
-   tolua_function(tolua_S,"get_modes_count",tolua_PAC_dev_tech_object_get_modes_count00);
-   tolua_variable(tolua_S,"par_float",tolua_get_tech_object_par_float,tolua_set_tech_object_par_float);
-   tolua_variable(tolua_S,"rt_par_float",tolua_get_tech_object_rt_par_float,tolua_set_tech_object_rt_par_float);
-   tolua_variable(tolua_S,"par_uint",tolua_get_tech_object_par_uint,tolua_set_tech_object_par_uint);
-   tolua_variable(tolua_S,"rt_par_uint",tolua_get_tech_object_rt_par_uint,tolua_set_tech_object_rt_par_uint);
-  tolua_endmodule(tolua_S);
-  tolua_function(tolua_S,"G_TECH_OBJECT_MNGR",tolua_PAC_dev_G_TECH_OBJECT_MNGR00);
-  tolua_function(tolua_S,"G_TECH_OBJECTS",tolua_PAC_dev_G_TECH_OBJECTS00);
-  tolua_cclass(tolua_S,"tech_object_manager","tech_object_manager","",NULL);
-  tolua_beginmodule(tolua_S,"tech_object_manager");
-   tolua_function(tolua_S,"get_object_with_active_mode",tolua_PAC_dev_tech_object_manager_get_object_with_active_mode00);
-   tolua_function(tolua_S,"get_tech_objects",tolua_PAC_dev_tech_object_manager_get_tech_objects00);
-   tolua_function(tolua_S,"get_count",tolua_PAC_dev_tech_object_manager_get_count00);
-  tolua_endmodule(tolua_S);
-  #ifdef __cplusplus
-  tolua_cclass(tolua_S,"saved_params_float","saved_params_float","",tolua_collect_saved_params_float);
-  #else
-  tolua_cclass(tolua_S,"saved_params_float","saved_params_float","",NULL);
-  #endif
-  tolua_beginmodule(tolua_S,"saved_params_float");
-   tolua_function(tolua_S,"new",tolua_PAC_dev_saved_params_float_new00);
-   tolua_function(tolua_S,"new_local",tolua_PAC_dev_saved_params_float_new00_local);
-   tolua_function(tolua_S,".call",tolua_PAC_dev_saved_params_float_new00_local);
-   tolua_function(tolua_S,"delete",tolua_PAC_dev_saved_params_float_delete00);
-   tolua_function(tolua_S,"get_val",tolua_PAC_dev_saved_params_float_get_val00);
-   tolua_function(tolua_S,"save",tolua_PAC_dev_saved_params_float_save00);
-   tolua_function(tolua_S,"save_all",tolua_PAC_dev_saved_params_float_save_all00);
-   tolua_function(tolua_S,"reset_to_0",tolua_PAC_dev_saved_params_float_reset_to_000);
-  tolua_endmodule(tolua_S);
-  #ifdef __cplusplus
-  tolua_cclass(tolua_S,"saved_params_u_int_4","saved_params_u_int_4","",tolua_collect_saved_params_u_int_4);
-  #else
-  tolua_cclass(tolua_S,"saved_params_u_int_4","saved_params_u_int_4","",NULL);
-  #endif
-  tolua_beginmodule(tolua_S,"saved_params_u_int_4");
-   tolua_function(tolua_S,"new",tolua_PAC_dev_saved_params_u_int_4_new00);
-   tolua_function(tolua_S,"new_local",tolua_PAC_dev_saved_params_u_int_4_new00_local);
-   tolua_function(tolua_S,".call",tolua_PAC_dev_saved_params_u_int_4_new00_local);
-   tolua_function(tolua_S,"delete",tolua_PAC_dev_saved_params_u_int_4_delete00);
-   tolua_function(tolua_S,"get_val",tolua_PAC_dev_saved_params_u_int_4_get_val00);
-   tolua_function(tolua_S,"save",tolua_PAC_dev_saved_params_u_int_4_save00);
-   tolua_function(tolua_S,"save_all",tolua_PAC_dev_saved_params_u_int_4_save_all00);
-   tolua_function(tolua_S,"reset_to_0",tolua_PAC_dev_saved_params_u_int_4_reset_to_000);
-  tolua_endmodule(tolua_S);
-  #ifdef __cplusplus
-  tolua_cclass(tolua_S,"run_time_params_u_int_4","run_time_params_u_int_4","",tolua_collect_run_time_params_u_int_4);
-  #else
-  tolua_cclass(tolua_S,"run_time_params_u_int_4","run_time_params_u_int_4","",NULL);
-  #endif
-  tolua_beginmodule(tolua_S,"run_time_params_u_int_4");
-   tolua_function(tolua_S,"new",tolua_PAC_dev_run_time_params_u_int_4_new00);
-   tolua_function(tolua_S,"new_local",tolua_PAC_dev_run_time_params_u_int_4_new00_local);
-   tolua_function(tolua_S,".call",tolua_PAC_dev_run_time_params_u_int_4_new00_local);
-   tolua_function(tolua_S,"delete",tolua_PAC_dev_run_time_params_u_int_4_delete00);
-   tolua_function(tolua_S,"get_val",tolua_PAC_dev_run_time_params_u_int_4_get_val00);
-   tolua_function(tolua_S,"save",tolua_PAC_dev_run_time_params_u_int_4_save00);
-   tolua_function(tolua_S,"reset_to_0",tolua_PAC_dev_run_time_params_u_int_4_reset_to_000);
-  tolua_endmodule(tolua_S);
-  #ifdef __cplusplus
-  tolua_cclass(tolua_S,"run_time_params_float","run_time_params_float","",tolua_collect_run_time_params_float);
-  #else
-  tolua_cclass(tolua_S,"run_time_params_float","run_time_params_float","",NULL);
-  #endif
-  tolua_beginmodule(tolua_S,"run_time_params_float");
-   tolua_function(tolua_S,"new",tolua_PAC_dev_run_time_params_float_new00);
-   tolua_function(tolua_S,"new_local",tolua_PAC_dev_run_time_params_float_new00_local);
-   tolua_function(tolua_S,".call",tolua_PAC_dev_run_time_params_float_new00_local);
-   tolua_function(tolua_S,"delete",tolua_PAC_dev_run_time_params_float_delete00);
-   tolua_function(tolua_S,"get_val",tolua_PAC_dev_run_time_params_float_get_val00);
-   tolua_function(tolua_S,"save",tolua_PAC_dev_run_time_params_float_save00);
-   tolua_function(tolua_S,"reset_to_0",tolua_PAC_dev_run_time_params_float_reset_to_000);
-  tolua_endmodule(tolua_S);
- tolua_endmodule(tolua_S);
+int top = lua_gettop( tolua_S );
+
+tolua_open(tolua_S);
+
+
+tolua_reg_types(tolua_S);
+
+tolua_module(tolua_S,NULL,0);
+
+
+
+tolua_beginmodule(tolua_S,NULL);
+#ifdef __cplusplus
+tolua_cclass(tolua_S,"i_DI_device","i_DI_device","",tolua_collect_i_DI_device);
+#else
+tolua_cclass(tolua_S,"i_DI_device","i_DI_device","",NULL);
+#endif
+tolua_beginmodule(tolua_S,"i_DI_device");
+tolua_function(tolua_S,"delete",tolua_PAC_dev_i_DI_device_delete00);
+tolua_function(tolua_S,"get_state_now",tolua_PAC_dev_i_DI_device_get_state_now00);
+tolua_function(tolua_S,"get_state",tolua_PAC_dev_i_DI_device_get_state00);
+tolua_function(tolua_S,"set_dt",tolua_PAC_dev_i_DI_device_set_dt00);
+tolua_function(tolua_S,"set_st_state",tolua_PAC_dev_i_DI_device_set_st_state00);
+tolua_endmodule(tolua_S);
+#ifdef __cplusplus
+tolua_cclass(tolua_S,"i_DO_device","i_DO_device","i_DI_device",tolua_collect_i_DO_device);
+#else
+tolua_cclass(tolua_S,"i_DO_device","i_DO_device","i_DI_device",NULL);
+#endif
+tolua_beginmodule(tolua_S,"i_DO_device");
+tolua_function(tolua_S,"delete",tolua_PAC_dev_i_DO_device_delete00);
+tolua_function(tolua_S,"on",tolua_PAC_dev_i_DO_device_on00);
+tolua_function(tolua_S,"off",tolua_PAC_dev_i_DO_device_off00);
+tolua_function(tolua_S,"set_state",tolua_PAC_dev_i_DO_device_set_state00);
+tolua_endmodule(tolua_S);
+tolua_function(tolua_S,"V",tolua_PAC_dev_V00);
+tolua_function(tolua_S,"N",tolua_PAC_dev_N00);
+tolua_function(tolua_S,"M",tolua_PAC_dev_M00);
+tolua_function(tolua_S,"LS",tolua_PAC_dev_LS00);
+tolua_function(tolua_S,"FS",tolua_PAC_dev_FS00);
+tolua_function(tolua_S,"AI",tolua_PAC_dev_AI00);
+tolua_function(tolua_S,"AO",tolua_PAC_dev_AO00);
+tolua_function(tolua_S,"CTR",tolua_PAC_dev_CTR00);
+tolua_function(tolua_S,"TE",tolua_PAC_dev_TE00);
+tolua_function(tolua_S,"FE",tolua_PAC_dev_FE00);
+tolua_function(tolua_S,"LE",tolua_PAC_dev_LE00);
+tolua_function(tolua_S,"FB",tolua_PAC_dev_FB00);
+tolua_function(tolua_S,"UPR",tolua_PAC_dev_UPR00);
+tolua_function(tolua_S,"QE",tolua_PAC_dev_QE00);
+#ifdef __cplusplus
+tolua_cclass(tolua_S,"tech_object","tech_object","",tolua_collect_tech_object);
+#else
+tolua_cclass(tolua_S,"tech_object","tech_object","",NULL);
+#endif
+tolua_beginmodule(tolua_S,"tech_object");
+tolua_function(tolua_S,"new",tolua_PAC_dev_tech_object_new00);
+tolua_function(tolua_S,"new_local",tolua_PAC_dev_tech_object_new00_local);
+tolua_function(tolua_S,".call",tolua_PAC_dev_tech_object_new00_local);
+tolua_function(tolua_S,"delete",tolua_PAC_dev_tech_object_delete00);
+tolua_function(tolua_S,"set_mode",tolua_PAC_dev_tech_object_set_mode00);
+tolua_function(tolua_S,"get_mode",tolua_PAC_dev_tech_object_get_mode00);
+tolua_function(tolua_S,"check_on_mode",tolua_PAC_dev_tech_object_check_on_mode00);
+tolua_function(tolua_S,"exec_cmd",tolua_PAC_dev_tech_object_exec_cmd00);
+tolua_function(tolua_S,"init_mode",tolua_PAC_dev_tech_object_init_mode00);
+tolua_function(tolua_S,"evaluate",tolua_PAC_dev_tech_object_evaluate00);
+tolua_function(tolua_S,"check_off_mode",tolua_PAC_dev_tech_object_check_off_mode00);
+tolua_function(tolua_S,"final_mode",tolua_PAC_dev_tech_object_final_mode00);
+tolua_function(tolua_S,"init_params",tolua_PAC_dev_tech_object_init_params00);
+tolua_function(tolua_S,"init_runtime_params",tolua_PAC_dev_tech_object_init_runtime_params00);
+tolua_function(tolua_S,"get_number",tolua_PAC_dev_tech_object_get_number00);
+tolua_function(tolua_S,"get_modes_count",tolua_PAC_dev_tech_object_get_modes_count00);
+tolua_variable(tolua_S,"par_float",tolua_get_tech_object_par_float,tolua_set_tech_object_par_float);
+tolua_variable(tolua_S,"rt_par_float",tolua_get_tech_object_rt_par_float,tolua_set_tech_object_rt_par_float);
+tolua_variable(tolua_S,"par_uint",tolua_get_tech_object_par_uint,tolua_set_tech_object_par_uint);
+tolua_variable(tolua_S,"rt_par_uint",tolua_get_tech_object_rt_par_uint,tolua_set_tech_object_rt_par_uint);
+tolua_endmodule(tolua_S);
+tolua_function(tolua_S,"G_TECH_OBJECT_MNGR",tolua_PAC_dev_G_TECH_OBJECT_MNGR00);
+tolua_function(tolua_S,"G_TECH_OBJECTS",tolua_PAC_dev_G_TECH_OBJECTS00);
+tolua_cclass(tolua_S,"tech_object_manager","tech_object_manager","",NULL);
+tolua_beginmodule(tolua_S,"tech_object_manager");
+tolua_function(tolua_S,"get_object_with_active_mode",tolua_PAC_dev_tech_object_manager_get_object_with_active_mode00);
+tolua_function(tolua_S,"get_tech_objects",tolua_PAC_dev_tech_object_manager_get_tech_objects00);
+tolua_function(tolua_S,"get_count",tolua_PAC_dev_tech_object_manager_get_count00);
+tolua_endmodule(tolua_S);
+#ifdef __cplusplus
+tolua_cclass(tolua_S,"saved_params_float","saved_params_float","",tolua_collect_saved_params_float);
+#else
+tolua_cclass(tolua_S,"saved_params_float","saved_params_float","",NULL);
+#endif
+tolua_beginmodule(tolua_S,"saved_params_float");
+tolua_function(tolua_S,"new",tolua_PAC_dev_saved_params_float_new00);
+tolua_function(tolua_S,"new_local",tolua_PAC_dev_saved_params_float_new00_local);
+tolua_function(tolua_S,".call",tolua_PAC_dev_saved_params_float_new00_local);
+tolua_function(tolua_S,"delete",tolua_PAC_dev_saved_params_float_delete00);
+tolua_function(tolua_S,"get_val",tolua_PAC_dev_saved_params_float_get_val00);
+tolua_function(tolua_S,"save",tolua_PAC_dev_saved_params_float_save00);
+tolua_function(tolua_S,"save_all",tolua_PAC_dev_saved_params_float_save_all00);
+tolua_function(tolua_S,"reset_to_0",tolua_PAC_dev_saved_params_float_reset_to_000);
+tolua_endmodule(tolua_S);
+#ifdef __cplusplus
+tolua_cclass(tolua_S,"saved_params_u_int_4","saved_params_u_int_4","",tolua_collect_saved_params_u_int_4);
+#else
+tolua_cclass(tolua_S,"saved_params_u_int_4","saved_params_u_int_4","",NULL);
+#endif
+tolua_beginmodule(tolua_S,"saved_params_u_int_4");
+tolua_function(tolua_S,"new",tolua_PAC_dev_saved_params_u_int_4_new00);
+tolua_function(tolua_S,"new_local",tolua_PAC_dev_saved_params_u_int_4_new00_local);
+tolua_function(tolua_S,".call",tolua_PAC_dev_saved_params_u_int_4_new00_local);
+tolua_function(tolua_S,"delete",tolua_PAC_dev_saved_params_u_int_4_delete00);
+tolua_function(tolua_S,"get_val",tolua_PAC_dev_saved_params_u_int_4_get_val00);
+tolua_function(tolua_S,"save",tolua_PAC_dev_saved_params_u_int_4_save00);
+tolua_function(tolua_S,"save_all",tolua_PAC_dev_saved_params_u_int_4_save_all00);
+tolua_function(tolua_S,"reset_to_0",tolua_PAC_dev_saved_params_u_int_4_reset_to_000);
+tolua_endmodule(tolua_S);
+#ifdef __cplusplus
+tolua_cclass(tolua_S,"run_time_params_u_int_4","run_time_params_u_int_4","",tolua_collect_run_time_params_u_int_4);
+#else
+tolua_cclass(tolua_S,"run_time_params_u_int_4","run_time_params_u_int_4","",NULL);
+#endif
+tolua_beginmodule(tolua_S,"run_time_params_u_int_4");
+tolua_function(tolua_S,"new",tolua_PAC_dev_run_time_params_u_int_4_new00);
+tolua_function(tolua_S,"new_local",tolua_PAC_dev_run_time_params_u_int_4_new00_local);
+tolua_function(tolua_S,".call",tolua_PAC_dev_run_time_params_u_int_4_new00_local);
+tolua_function(tolua_S,"delete",tolua_PAC_dev_run_time_params_u_int_4_delete00);
+tolua_function(tolua_S,"get_val",tolua_PAC_dev_run_time_params_u_int_4_get_val00);
+tolua_function(tolua_S,"save",tolua_PAC_dev_run_time_params_u_int_4_save00);
+tolua_function(tolua_S,"reset_to_0",tolua_PAC_dev_run_time_params_u_int_4_reset_to_000);
+tolua_endmodule(tolua_S);
+#ifdef __cplusplus
+tolua_cclass(tolua_S,"run_time_params_float","run_time_params_float","",tolua_collect_run_time_params_float);
+#else
+tolua_cclass(tolua_S,"run_time_params_float","run_time_params_float","",NULL);
+#endif
+tolua_beginmodule(tolua_S,"run_time_params_float");
+tolua_function(tolua_S,"new",tolua_PAC_dev_run_time_params_float_new00);
+tolua_function(tolua_S,"new_local",tolua_PAC_dev_run_time_params_float_new00_local);
+tolua_function(tolua_S,".call",tolua_PAC_dev_run_time_params_float_new00_local);
+tolua_function(tolua_S,"delete",tolua_PAC_dev_run_time_params_float_delete00);
+tolua_function(tolua_S,"get_val",tolua_PAC_dev_run_time_params_float_get_val00);
+tolua_function(tolua_S,"save",tolua_PAC_dev_run_time_params_float_save00);
+tolua_function(tolua_S,"reset_to_0",tolua_PAC_dev_run_time_params_float_reset_to_000);
+tolua_endmodule(tolua_S);
+tolua_endmodule(tolua_S);
  return 1;
 }
 
@@ -2553,4 +2561,3 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
  return tolua_PAC_dev_open(tolua_S);
 };
 #endif
-

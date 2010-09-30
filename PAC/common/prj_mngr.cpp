@@ -32,7 +32,7 @@ int project_manager::load_configuration( const char *file_name )
     Print( "Reading description from %s....\n", file_name );
 #endif // DEBUG
 
-    if ( cfg_file->fopen( file_name ) <= 0 )
+    if ( cfg_file->file_open( file_name ) <= 0 )
         {
 #ifdef DEBUG
         Print( "project_manager:load_configuration(...) - file not found!\n" );            
@@ -44,7 +44,7 @@ int project_manager::load_configuration( const char *file_name )
     const int   SIGNATURE_SIZE       = 42;    
     char        id[ SIGNATURE_SIZE ] = { 0 };
 
-    cfg_file->fread( id, SIGNATURE_SIZE - 1 );
+    cfg_file->file_read( id, SIGNATURE_SIZE - 1 );
     cfg_file->fget_line();
 
     if ( strcmp( id, SIGNATURE ) != 0 )
@@ -86,7 +86,7 @@ int project_manager::load_configuration( const char *file_name )
     //-Devices data.
     device_manager::get_instance()->load_from_cfg_file( cfg_file );
 
-    cfg_file->fclose();
+    cfg_file->file_close();
 
     G_DEVICE_CMMCTR->add_device( device_manager::get_instance()->get_device() );
   
@@ -110,5 +110,10 @@ project_manager::~project_manager()
         delete cfg_file;
         cfg_file = 0;
         }
+    }
+//-----------------------------------------------------------------------------
+void project_manager::free_instance()
+    {
+    instance.free();
     }
 //-----------------------------------------------------------------------------

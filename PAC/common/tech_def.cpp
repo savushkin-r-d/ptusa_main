@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <vector>
+#include <stdio.h>
 
 #include "tech_def.h"
 #include "sys.h"
