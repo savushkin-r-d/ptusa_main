@@ -105,13 +105,13 @@ data_file::data_file() : f( 0 )
     {
     }
 //-----------------------------------------------------------------------------
-int data_file::fopen( const char* file_name )
+int data_file::file_open( const char* file_name )
     {
     f = open( file_name, O_RDONLY );
     return f;
     }
 //-----------------------------------------------------------------------------
-int data_file::fread( void *buffer, int count )
+int data_file::file_read( void *buffer, int count )
     {
     int res = 0;
     if ( f > 0 )
@@ -172,7 +172,7 @@ char* data_file::pfget_line()
     return buf;
     }
 //-----------------------------------------------------------------------------
-void data_file::fclose()
+void data_file::file_close()
     {
     if ( f > 0 )
         {

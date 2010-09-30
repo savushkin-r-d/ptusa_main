@@ -623,7 +623,7 @@ void device_manager::print() const
     Print( "\n" );
     }
 //-----------------------------------------------------------------------------
-device_manager::device_manager():project_devices( 0 ), devices( 0 )
+device_manager::device_manager(): devices( 0 ), project_devices( 0 )
     {
     for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
         {

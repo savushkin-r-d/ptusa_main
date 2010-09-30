@@ -60,15 +60,15 @@ class data_file : public file
     public:
         data_file();
 
-        int fopen( const char* file_name );
+        int file_open( const char* file_name );
 
-        int fread( void *buffer, int count );
+        int file_read( void *buffer, int count );
 
         char* fget_line();
 
         char* pfget_line();
 
-        void fclose();
+        void file_close();
 
     private:
         enum CONSTANTS

@@ -2409,17 +2409,9 @@ static int tolua_PAC_dev_run_time_params_float_reset_to_000(lua_State* tolua_S)
 /* Open function */
 TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
 {
-int top = lua_gettop( tolua_S );
-
 tolua_open(tolua_S);
-
-
 tolua_reg_types(tolua_S);
-
 tolua_module(tolua_S,NULL,0);
-
-
-
 tolua_beginmodule(tolua_S,NULL);
 #ifdef __cplusplus
 tolua_cclass(tolua_S,"i_DI_device","i_DI_device","",tolua_collect_i_DI_device);
