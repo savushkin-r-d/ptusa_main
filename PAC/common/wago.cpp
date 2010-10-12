@@ -109,7 +109,7 @@ float wago_device::get_AO( u_int index, float min_value, float max_value )
         AO_channels.int_read_values &&
         AO_channels.int_read_values[ index ] )
         {
-        float val = *AO_channels.int_read_values[ index ];
+        float val = ( float ) *AO_channels.int_read_values[ index ];
 
         u_int table_n = AO_channels.tables[ index ];
         u_int offset = AO_channels.offsets[ index ];
@@ -142,7 +142,7 @@ float wago_device::get_AO( u_int index, float min_value, float max_value )
                     }
                 else
                     {
-                    val = 4 + val / 2047.5;
+                    val = 4 + val / 2047.5f;
                     }
                 }
             else
@@ -153,7 +153,7 @@ float wago_device::get_AO( u_int index, float min_value, float max_value )
                     }
                 else
                     {
-                    val = 4 + val / 2047.5;
+                    val = 4 + val / 2047.5f;
                     }
                 val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
                 }
@@ -192,7 +192,7 @@ int wago_device::set_AO( u_int index, float value, float min_value,
                 }
             if ( value < 4 ) value = 4;
             if ( value > 20 ) value = 20;
-            value = 2047.5 * ( value - 4 );                   
+            value = 2047.5f * ( value - 4 );                   
             }
 
         *AO_channels.int_write_values[ index ] = ( u_int ) value;
@@ -213,7 +213,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
         AI_channels.int_read_values &&
         AI_channels.int_read_values[ index ] )
         {
-        float val = *AI_channels.int_read_values[ index ];
+        float val = ( float ) *AI_channels.int_read_values[ index ];
 
         u_int table_n = AI_channels.tables[ index ];
         u_int offset = AI_channels.offsets[ index ];
@@ -238,7 +238,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
             //                <18                     1000 0000 0000 0000     8000   -32767
             //
         case 461:
-            val *= 0.1;
+            val *= 0.1f;
             val = val >= -50 && val <= 150 ? val : -1000;
             return val;
 
@@ -268,7 +268,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
                     }
                 else
                     {
-                    val = 4 + val / 2047.5;
+                    val = 4 + val / 2047.5f;
                     }
                 }
             else
@@ -279,7 +279,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
                     }
                 else
                     {
-                    val = 4 + val / 2047.5;
+                    val = 4 + val / 2047.5f;
                     }
                 val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
                 }

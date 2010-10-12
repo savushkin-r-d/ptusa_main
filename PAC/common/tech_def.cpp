@@ -212,18 +212,23 @@ int tech_object::final_mode( u_int mode )
 int tech_object::lua_exec_cmd( u_int cmd )
     {
     tech_object::exec_cmd( cmd );
+
     return lua_manager::get_instance()->int_exec_lua_method( name, "exec_cmd",
         cmd, "int tech_object::lua_exec_cmd( u_int cmd )" );
     }
 //-----------------------------------------------------------------------------
 int tech_object::lua_check_on_mode( u_int mode )
     {
+    tech_object::check_on_mode( mode );
+
     return lua_manager::get_instance()->int_exec_lua_method( name, 
         "check_on_mode", mode, "int tech_object::lua_check_on_mode( u_int mode )" );
     }
 //-----------------------------------------------------------------------------
 void tech_object::lua_init_mode( u_int mode )
     {
+    tech_object::init_mode( mode );
+
     lua_manager::get_instance()->int_exec_lua_method( name,
         "init_mode", mode, "void tech_object::lua_init_mode( u_int mode )" );
     }
@@ -231,18 +236,23 @@ void tech_object::lua_init_mode( u_int mode )
 int tech_object::lua_evaluate()
     {
     tech_object::evaluate();
+
     return lua_manager::get_instance()->void_exec_lua_method( name,
         "evaluate", "int tech_object::lua_evaluate()" );
     }
 //-----------------------------------------------------------------------------
 int tech_object::lua_check_off_mode( u_int mode )
     {
+    tech_object::check_off_mode( mode );
+
     return lua_manager::get_instance()->int_exec_lua_method( name,
         "check_off_mode", mode, "int tech_object::lua_check_off_mode( u_int mode )" );    
     }
 //-----------------------------------------------------------------------------
 int  tech_object::lua_final_mode( u_int mode )
     {
+    tech_object::final_mode( mode );
+
     lua_manager::get_instance()->int_exec_lua_method( name,
         "final_mode", mode, "int tech_object::lua_final_mode( u_int mode )" );
     return 0;
@@ -250,12 +260,16 @@ int  tech_object::lua_final_mode( u_int mode )
 //-----------------------------------------------------------------------------
 int tech_object::lua_init_params()
     {
+    tech_object::init_params();
+
     return lua_manager::get_instance()->int_exec_lua_method( name,
         "init_params", 0, "int tech_object::lua_init_params()" );
     }
 //-----------------------------------------------------------------------------
 int tech_object::lua_init_runtime_params()
     {
+    tech_object::init_runtime_params();
+
     return lua_manager::get_instance()->int_exec_lua_method( name,
         "init_runtime_params", 0, "int tech_object::lua_init_runtime_params()" );
     }
@@ -346,6 +360,13 @@ int tech_object_manager::init_objects()
             }
 
         add_tech_object( ( tech_object * ) res_object );
+        }
+
+    for ( u_int i = 0; i < get_count(); i++ )
+        {
+        G_TECH_OBJECTS( i )->lua_init_runtime_params();
+
+        G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS( i )->get_complex_dev() );        
         }
 
     return 0;

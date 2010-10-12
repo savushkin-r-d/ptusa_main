@@ -21,7 +21,7 @@ class lua_manager
     public:
         static lua_manager* get_instance();
 
-        int init();
+        int init( lua_State* L = 0 );
         
         ~lua_manager();
 
@@ -37,7 +37,7 @@ class lua_manager
             const char *c_function_name ) const;
 
     private:
-        lua_manager() 
+        lua_manager() : is_free_lua( 0 ) 
             {
             }
 
@@ -48,7 +48,9 @@ class lua_manager
         int exec_lua_method( const char *object_name,
             const char *function_name, int param, int is_use_param = 1,
             int is_use_lua_return_value = 1 ) const;
-        
+
         int err_func;
         lua_State * L;
+
+        int is_free_lua;
     };

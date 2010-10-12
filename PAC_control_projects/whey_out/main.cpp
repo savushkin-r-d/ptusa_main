@@ -111,15 +111,13 @@ int main( int argc, char *argv[] )
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
 
-    lua_manager::get_instance()->init();        //-Инициализация Lua.
+    int res = lua_manager::get_instance()->init(); //-Инициализация Lua.
+    if ( res ) //-Ошибка инициализации.
+    	{
+        return EXIT_FAILURE;
+    	}    
 
     G_TECH_OBJECT_MNGR()->init_objects();    
-    for ( u_int i = 0; i < G_TECH_OBJECT_MNGR()->get_count(); i++ )
-        {
-        G_TECH_OBJECTS( i )->lua_init_runtime_params();
-
-        G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS( i )->get_complex_dev() );        
-        }
 
 #ifdef DEBUG
     G_DEVICE_CMMCTR->print();

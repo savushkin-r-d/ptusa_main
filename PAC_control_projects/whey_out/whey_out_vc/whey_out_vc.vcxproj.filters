@@ -73,14 +73,11 @@
     <Filter Include="Source Files\PAC\sys\tolua++">
       <UniqueIdentifier>{8fd73d80-cc1f-4162-b290-fe4606cac801}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\common\sys\tolua++\pkg">
+      <UniqueIdentifier>{9bc28f0a-d9e9-46de-8825-5c55d7f0672a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\init.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\priem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\PAC_dev.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
@@ -209,13 +206,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\init.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\priem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\PAC_dev.cpp">
@@ -374,6 +365,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\main.lua">
+      <Filter>Lua Source</Filter>
+    </None>
+    <None Include="..\..\..\common\tolua++\pkg\PAC_dev.pkg">
+      <Filter>Header Files\common\sys\tolua++\pkg</Filter>
+    </None>
+    <None Include="..\sys.lua">
       <Filter>Lua Source</Filter>
     </None>
   </ItemGroup>

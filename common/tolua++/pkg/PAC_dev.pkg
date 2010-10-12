@@ -64,6 +64,59 @@ class i_DO_device: public i_DI_device
         /// @return - >0 - ошибка.
         virtual int set_state( int new_state ) = 0;
     };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с аналоговым входом.
+///
+/// Устройства типа температуры, расхода и т.д. реализуют данный интерфейс.
+class i_AI_device
+    {
+    public:
+        /// @brief Получение текущего состояния устройства.
+        ///
+        /// @return - текущее состояние устройства в виде дробного числа.
+        virtual float get_value() = 0;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Устройство с аналоговым выходом.
+///
+/// Устройства типа аналогового каналы управления и т.д. реализуют данный
+/// интерфейс.
+class i_AO_device: public i_AI_device
+    {
+    public:
+        /// @brief Выключение устройства.
+        ///
+        /// Установка устройства в пассивное состояние. Для клапана это означает
+        /// его деактивирование, то есть если он нормально закрытый - закрытие.
+        virtual void off() = 0;
+
+        /// @brief Установка текущего состояния устройства.
+        ///
+        /// @param new_value - новое состояние устройства.
+        ///
+        /// @return -  0 - Ок.
+        /// @return - >0 - ошибка.
+        virtual int set_value( float new_value ) = 0;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Интерфейс счетчика.
+class i_counter
+    {
+    public:
+        /// @brief Приостановка работы счетчика.
+        virtual void pause() = 0;
+
+        /// @brief Возобновление работы счетчика.
+        virtual void start() = 0;
+
+        /// @brief Сброс счетчика.
+        /// 
+        /// После сброса для продолжения работы необходимо вызвать @ref start().
+        virtual void reset() = 0;
+
+        /// @brief Получение значения счетчика.
+        virtual unsigned long get_quantity() = 0;
+    }
 //-----------------------------------------------------------------------------     
 i_DO_device* V( int number );
 //-----------------------------------------------------------------------------
@@ -92,6 +145,30 @@ i_DI_device* FB( int number );  ///< Получение обратной связи по номеру.
 i_DO_device* UPR( int number ); ///< Получение канала управления по номеру.
 //-----------------------------------------------------------------------------
 i_AI_device* QE( int number );  ///< Получение текущей концентрации по номеру.
+//-----------------------------------------------------------------------------
+dev_stub* STUB();
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+/// @brief Виртуальное устройство.
+///
+/// Необходимо для возвращения результата поиска устройства с несуществующим
+/// номером. Методы данного класса ничего не делают. 
+class dev_stub
+    {
+    public:
+        float   get_value();
+        int     set_value( float new_value );                
+
+        void    on();                
+        void    off();                
+        int     set_state( int new_state );
+        int     get_state_now();
+
+        void    pause();
+        void    start();
+        void    reset();
+        u_int   get_quantity();
+    };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 class tech_object 
@@ -178,14 +255,6 @@ class tech_object
         /// @return 0 - ок.
         virtual int final_mode( unsigned int mode );
 
-        /// @brief Инициализирует сохраняемые параметры значением 0.
-        ///
-        /// Данные нулевые значения сохраняются в энергонезависимой памяти.
-        virtual int init_params();
-
-        /// @brief Инициализирует рабочие параметры значением 0.
-        virtual int init_runtime_params();
-
         int get_number() const;
 
         unsigned int get_modes_count() const;
@@ -194,6 +263,8 @@ class tech_object
         run_time_params_float   rt_par_float;   ///< Рабочие параметры, тип float.
         saved_params_u_int_4    par_uint;       ///< Сохраняемые параметры, тип unsigned int.
         run_time_params_u_int_4 rt_par_uint;    ///< Рабочие параметры, тип unsigned int.
+
+        timer_manager           timers;			///< Таймеры объекта.
     };
 //-----------------------------------------------------------------------------
 tech_object_manager* G_TECH_OBJECT_MNGR();
@@ -211,9 +282,82 @@ class tech_object_manager
         tech_object* get_tech_objects( unsigned int idx );
 
         /// @brief Получение количества объектов.
-        unsigned int get_count() const;
-    };     
+        unsigned int get_count() const;     
+    };   
+//-----------------------------------------------------------------------------
+device_manager* G_DEVICE_MANAGER();
 //-----------------------------------------------------------------------------    
+/// @brief Менеджер устройств.
+///
+/// Содержит информацию обо всех устройствах проекта.
+class device_manager
+    {
+    public:
+        /// @brief Отладочная печать объекта в консоль.
+        void print() const;
+    }	
+//-----------------------------------------------------------------------------
+/// @brief Таймер.
+///
+/// Реализация группы таймеров.
+class timer_manager
+    {
+    public:
+        /// @brief Безопасное получение таймера по индексу.
+        ///
+        /// @param index - индекс таймера.
+        ///
+        /// @return - таймер с нужным индексом, заглушка - в случае выхода за 
+        /// диапазон.
+        timer& operator[] ( unsigned int index );
+    };	
+//-----------------------------------------------------------------------------	  
+class timer
+    {
+    public:
+        enum STATE
+            {
+            S_STOP = 0, ///< Не работает.
+            S_WORK,     ///< Работает.
+            S_PAUSE,    ///< Пауза.
+            };
+
+        /// @brief Запуск таймера.
+        void start();
+
+        /// @brief Сброс таймера.
+        void reset();
+
+        /// @brief Пауза таймера.
+        void pause();
+
+        /// @brief Проверка исхода времени таймера.
+        ///
+        /// @return 1 - время вышло.
+        /// @return 0 - время не вышло.
+        bool is_time_up() const;
+
+        /// @brief Получение времени работы таймера.
+        ///
+        /// @return - время работы таймера.
+        unsigned long  get_work_time() const;
+
+        /// @brief Установка задания таймера.
+        ///
+        /// @param new_countdown_time - задание.
+        void set_countdown_time( unsigned long new_countdown_time );
+
+        /// @brief Получение задания таймера.
+        ///
+        /// @return - задание таймера.
+        unsigned long  get_countdown_time() const;
+
+        /// @brief Получение состояния таймера.
+        ///
+        /// @return - состояние таймера.
+        STATE get_state() const;
+    };
+//-----------------------------------------------------------------------------
 class saved_params_float
     {
     public:
@@ -225,12 +369,11 @@ class saved_params_float
         virtual ~saved_params_float();
 
         /// @brief Реализация интерфейса класса @ref array_device.
-        float get_val( int idx );
-
-        /// @brief Реализация интерфейса класса @ref array_device.
         int save( unsigned int idx, float value );
         
         int save_all();  
+
+        float& operator[] ( unsigned int index );
         
         void reset_to_0();
     };
@@ -246,12 +389,11 @@ class saved_params_u_int_4
         virtual ~saved_params_u_int_4();
 
         /// @brief Реализация интерфейса класса @ref array_device.
-        unsigned int get_val( int idx );
-
-        /// @brief Реализация интерфейса класса @ref array_device.
         int save( unsigned int idx, unsigned int value );
         
         int save_all();  
+
+        unsigned int& operator[] ( unsigned int index );
         
         void reset_to_0();
     }; 
@@ -265,13 +407,9 @@ class run_time_params_u_int_4
         run_time_params_u_int_4( int count );
 
         virtual ~run_time_params_u_int_4();
-
-        /// @brief Реализация интерфейса класса @ref array_device.
-        unsigned int get_val( int idx );
-
-        /// @brief Реализация интерфейса класса @ref array_device.
-        int save( unsigned int idx, unsigned int value );
         
+        unsigned int& operator[] ( unsigned int index );
+
         void reset_to_0();
     }; 
 //-----------------------------------------------------------------------------
@@ -284,13 +422,9 @@ class run_time_params_float
         run_time_params_float( int count );
 
         virtual ~run_time_params_float();
-
-        /// @brief Реализация интерфейса класса @ref array_device.
-        float get_val( int idx );
-
-        /// @brief Реализация интерфейса класса @ref array_device.
-        int save( unsigned int idx, float value );
         
+        float& operator[] ( unsigned int index );
+
         void reset_to_0();
     };
 //-----------------------------------------------------------------------------

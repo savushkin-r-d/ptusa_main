@@ -9,27 +9,41 @@ auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
 int project_manager::proc_main_params( int argc, char *argv[] )
     {
-      if ( argc > 1 )
+//      if ( argc > 1 )
+//        {
+//        if ( strcmp( argv[ 1 ], "rcrc" ) == 0 )
+//            {
+//#ifdef DEBUG
+//            Print( "\nReset CRC..." );
+//#endif
+//            params_manager::get_instance()->reset_CRC();
+//#ifdef DEBUG
+//            Print( " Ok!\n" );
+//#endif
+//            }
+//
+//        }
+    for ( int i = 1; i < argc; i++ )
         {
-        if ( strcmp( argv[ 1 ], "rcrc" ) == 0 )
+        if ( strcmp( argv[ i ], "rcrc" ) == 0 )
             {
 #ifdef DEBUG
-            Print( "\nReset CRC..." );
+            Print( "Resetting CRC ...\n" );
 #endif
             params_manager::get_instance()->reset_CRC();
 #ifdef DEBUG
-            Print( " Ok!\n" );
+            Print( "Resetting CRC completed.\n" );
 #endif
             }
-
         }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
 int project_manager::load_configuration( const char *file_name )
     {
 #ifdef DEBUG
-    Print( "Reading description from %s....\n", file_name );
+    Print( "\nReading description from \"%s\" ...\n", file_name );
 #endif // DEBUG
 
     if ( cfg_file->file_open( file_name ) <= 0 )
@@ -75,7 +89,7 @@ int project_manager::load_configuration( const char *file_name )
     sscanf( cfg_file->fget_line(), "%d", &file_version );
 #ifdef DEBUG
     Print( "Editor version - %d.\n", editor_version );
-    Print( "File version - %d.\n", file_version );
+    Print( "File version   - %d.\n", file_version );
 #endif // DEBUG
 
     cfg_file->fget_line();
@@ -90,6 +104,10 @@ int project_manager::load_configuration( const char *file_name )
 
     G_DEVICE_CMMCTR->add_device( device_manager::get_instance()->get_device() );
   
+#ifdef DEBUG
+    Print( "Reading completed.\n\n", file_name );
+#endif // DEBUG
+
     return 0;
     }
 //-----------------------------------------------------------------------------

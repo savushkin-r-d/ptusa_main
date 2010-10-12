@@ -744,6 +744,7 @@ void i_DI_device::set_dt( u_int time )
 void i_DI_device::set_st_state( int new_state )
     {
     state = new_state;
+    last_check_time = get_millisec();
     }
 //-----------------------------------------------------------------------------
 int i_DI_device::get_state()
@@ -857,7 +858,7 @@ counter::counter() : value( 0 ), last_read_value( 0 ), state( S_WORK )
 //-----------------------------------------------------------------------------
 float counter::get_value()
     {
-    return get_quantity();
+    return ( float ) get_quantity();
     }
 //-----------------------------------------------------------------------------
 int counter::set_value( float new_value )
@@ -993,7 +994,7 @@ u_int counter::get_quantity()
 //-----------------------------------------------------------------------------
 float digital_device::get_value()
     {
-    return get_state_now();
+    return ( float ) get_state_now();
     }
 //-----------------------------------------------------------------------------
 int digital_device::set_value( float new_value )
@@ -1468,7 +1469,7 @@ float analog_input_4_20::get_min_val()
 //-----------------------------------------------------------------------------
 int analog_device::set_state( int new_state )
     {
-    return set_value( new_state );
+    return set_value( ( float ) new_state );
     }
 //-----------------------------------------------------------------------------
 int analog_device::get_state_now()
@@ -1618,6 +1619,8 @@ bool timer::is_time_up() const
 //-----------------------------------------------------------------------------
 u_long timer::get_work_time() const
     {
+    Print( " %d\n", work_time + get_delta_millisec( last_time ) );
+
     return work_time + get_delta_millisec( last_time );
     }
 //-----------------------------------------------------------------------------
@@ -1761,6 +1764,11 @@ i_DO_device* UPR( int number )
 i_AI_device* QE( int number )
     {
     return G_DEVICE_MANAGER()->get_QE( number );
+    }
+//-----------------------------------------------------------------------------
+dev_stub* STUB()
+    {
+    return G_DEVICE_MANAGER()->get_stub();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

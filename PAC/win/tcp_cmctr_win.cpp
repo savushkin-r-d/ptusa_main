@@ -30,11 +30,25 @@ tcp_communicator(),
 #ifdef DEBUG
     char tmp_host_name[ TC_MAX_HOST_NAME ] = { 0 };
     gethostname( tmp_host_name, TC_MAX_HOST_NAME );
-    printf ( "tcp_communicator_linux() - host name is \"%s\".\n",
-        tmp_host_name );
-    printf ( "PAC name \"%s\".\n", host_name );
-#endif // DEBUG
+    printf ( "Host name - \"%s\".\n", tmp_host_name );    
+    hostent *server = gethostbyname( tmp_host_name );
+    if ( server )
+        {
+        if ( server->h_addr_list[ 0 ] )
+        	{
+            struct in_addr addr;
+            addr.s_addr = *( u_long * ) ( server->h_addr_list[ 0 ] );
+            printf( "Host IP   - \"%s\".\n", inet_ntoa( addr ) );
+        	}       
+        }
+    else
+        {
+        Print( "Ошибка получения адреса сервера: %s\n",
+            WSA_Err_Decode( WSAGetLastError() ) );
+        }
 
+    printf ( "PAC name  - \"%s\".\n", host_name );
+#endif // DEBUG
 
     glob_last_transfer_time = get_sec();
     }
@@ -75,14 +89,14 @@ int tcp_communicator_win::net_init()
     if ( master_socket < 0 )
         {
 #ifdef DEBUG
-        Print( "tcp_communicator_linux:net_init() - can't create master socket: %s\n",
+        Print( "tcp_communicator_windows:net_init() - can't create master socket: %s\n",
             WSA_Err_Decode( WSAGetLastError() ) );
 #endif // DEBUG
         return -4;
         }
 
 #ifdef DEBUG
-    printf( "tcp_communicator_linux:net_init() - master socket created. Has number %d\n\r",
+    printf( "tcp_communicator_windows:net_init() - master socket [ %d ] created.\n",
         master_socket );
 #endif // DEBUG
 
@@ -91,7 +105,7 @@ int tcp_communicator_win::net_init()
     int res = ioctlsocket( master_socket, FIONBIO, &mode );
     if ( res == SOCKET_ERROR )
         { 
-        Print( "tcp_communicator_linux:net_init() - ошибка  вызова  ioctlsocket: %s\n",
+        Print( "tcp_communicator_windows:net_init() - ошибка  вызова  ioctlsocket: %s\n",
             WSA_Err_Decode( WSAGetLastError() ) );
         closesocket( master_socket );
         return -1;
@@ -115,7 +129,7 @@ int tcp_communicator_win::net_init()
     if ( setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, 
         ( char* ) &on, sizeof( on ) ) )
         {
-        Print( "tcp_communicator_linux:net_init() - ошибка  вызова  setsockopt: %s\n",
+        Print( "tcp_communicator_windows:net_init() - ошибка  вызова  setsockopt: %s\n",
             WSA_Err_Decode( WSAGetLastError() ) );        
         closesocket( master_socket );
         return -5;
@@ -127,7 +141,7 @@ int tcp_communicator_win::net_init()
     if ( err < 0 )
         {
 #ifdef DEBUG
-        Print( "tcp_communicator_linux:net_init() - can't bind master socket to port %d : %s\n",
+        Print( "tcp_communicator_windows:net_init() - can't bind master socket to port %d : %s\n",
             PORT, WSA_Err_Decode( WSAGetLastError() ) );
 #endif // DEBUG
         closesocket( master_socket );
@@ -139,7 +153,7 @@ int tcp_communicator_win::net_init()
         {
         closesocket( master_socket );
 #ifdef DEBUG
-        Print( "tcp_communicator_linux:net_init() - listen: %s\n",
+        Print( "tcp_communicator_windows:net_init() - listen: %s\n",
             WSA_Err_Decode( WSAGetLastError() ) );        
 #endif // DEBUG
         return -6;
@@ -153,14 +167,14 @@ int tcp_communicator_win::net_init()
     err = modbus_socket = socket ( PF_INET, type, protocol );
 
 #ifdef DEBUG
-    printf( "tcp_communicator_linux:net_init() - modbus socket created. Has number %d\n\r",
+    printf( "tcp_communicator_windows:net_init() - modbus socket created. Has number %d\n\r",
         modbus_socket );
 #endif // DEBUG
 
     if ( modbus_socket < 0 )
         {
 #ifdef DEBUG
-        perror( "tcp_communicator_linux:net_init() - can't create modbus socket" );
+        perror( "tcp_communicator_windows:net_init() - can't create modbus socket" );
 #endif //DEBUG
 
         return -4;
@@ -183,7 +197,7 @@ int tcp_communicator_win::net_init()
     if ( err < 0 )
         {
 #ifdef DEBUG
-        printf( "tcp_communicator_linux:net_init() - can't bind modbus socket to port %d : %s\n",
+        printf( "tcp_communicator_windows:net_init() - can't bind modbus socket to port %d : %s\n",
             502, strerror( errno ) );
 #endif // DEBUG
 
@@ -195,7 +209,7 @@ int tcp_communicator_win::net_init()
         {
         closesocket( modbus_socket );
 #ifdef DEBUG
-        perror( "tcp_communicator_linux:net_init() - listen" );
+        perror( "tcp_communicator_windows:net_init() - listen" );
 #endif // DEBUG
         return -6;
         }

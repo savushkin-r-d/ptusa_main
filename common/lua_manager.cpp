@@ -1,3 +1,5 @@
+#include <cstdlib>
+
 #include "lua_manager.h"
 //-----------------------------------------------------------------------------
 auto_smart_ptr< lua_manager > lua_manager::instance;
@@ -14,38 +16,67 @@ lua_manager* lua_manager::get_instance()
      return instance;
     }
 //-----------------------------------------------------------------------------
-int lua_manager::init()
+int lua_manager::init( lua_State* lua_state )
     {
-    //-Инициализация Lua.
-    L = lua_open();   // Create Lua context.
-
-    if ( NULL == L )
+    if ( 0 == lua_state )
         {
-        printf( "Error creating Lua context.\n" );
-        return 1;
-        }
+        //-Инициализация Lua.
+        L = lua_open();   // Create Lua context.        
 
-    luaL_openlibs( L );    // Open standard libraries.
-    tolua_PAC_dev_open( L );
+        if ( NULL == L )
+            {
+            printf( "Error creating Lua context.\n" );
+            return 1;
+            }
+        is_free_lua = 1;
+
+        luaL_openlibs( L );    // Open standard libraries.
+        tolua_PAC_dev_open( L );
 
 #if defined WIN_OS && defined DEBUG
-    if( luaL_loadfile( L, "../main.lua" ) != 0 )
+        if( luaL_dofile( L, "../sys.lua" ) != 0 )
 #else
-    if( luaL_loadfile( L, "main.lua" ) != 0 )
+        if( luaL_dofile( L, "sys.lua" ) != 0 )
 #endif // defined OS_WIN && defined DEBUG
-
-        {
+            {
 #ifdef DEBUG
-        Print( "Init lua error!\n" );
+            Print( "Load Lua system script error!\n" );
+            Print( "\t%s\n", lua_tostring( L, -1 ) );
 #endif // DEBUG
-        return 1;
-        }
-    //-Инициализация Lua.--!>
+            lua_pop( L, 1 );
+            return 1;
+            }
 
-    int i_line = lua_pcall( L, 0, LUA_MULTRET, 0 );
-    if ( i_line != 0 )
+#if defined WIN_OS && defined DEBUG
+        if( luaL_loadfile( L, "../main.lua" ) != 0 )
+#else
+        if( luaL_loadfile( L, "main.lua" ) != 0 )
+#endif // defined OS_WIN && defined DEBUG
+            {
+#ifdef DEBUG
+            Print( "Load Lua script error!\n" );
+            Print( "\t%s\n", lua_tostring( L, -1 ) );
+#endif // DEBUG
+            lua_pop( L, 1 );
+            return 1;
+            }
+        //-Инициализация Lua.--!>
+
+        int i_line = lua_pcall( L, 0, LUA_MULTRET, 0 );
+        if ( i_line != 0 )
+            {
+#ifdef DEBUG
+            Print( "Evaluate Lua script error!\n" );
+            Print( "\t%s\n", lua_tostring( L, -1 ) );
+#endif // DEBUG
+            lua_pop( L, 1 );            
+            return 1;
+            }        
+    	}
+    else
         {
-        return 1;
+        L = lua_state;
+        is_free_lua = 0;
         }
 
     return 0;
@@ -53,11 +84,14 @@ int lua_manager::init()
 //-----------------------------------------------------------------------------
 lua_manager::~lua_manager()
     {
-     if ( L )
-        {
-        lua_close( L );
-        L = NULL;
-        }
+    if ( 1 == is_free_lua )
+    	{
+        if ( L )
+            {
+            lua_close( L );
+            L = NULL;
+            }
+    	}    
     }
 //-----------------------------------------------------------------------------
 int lua_manager::void_exec_lua_method( const char *object_name,
@@ -84,7 +118,7 @@ int lua_manager::int_exec_lua_method( const char *object_name,
     int res = 0;
     if ( 0 == exec_lua_method( object_name, function_name, param ) )
         {
-        res = tolua_tonumber( L, -1, 0 );
+        res = ( int ) tolua_tonumber( L, -1, 0 );
         lua_remove( L, -1 );
         }
     else
@@ -128,7 +162,7 @@ int lua_manager::exec_lua_method( const char *object_name,
 //        is_init = 1;
 //        }
 
-    lua_pushcclosure( instance->L, error_trace, 0 );
+    lua_pushcclosure( lua_manager::L, error_trace, 0 );
     instance->err_func = lua_gettop( L );
 
     lua_getfield( L, LUA_GLOBALSINDEX, object_name );

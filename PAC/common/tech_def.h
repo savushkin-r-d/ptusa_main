@@ -165,6 +165,8 @@ class tech_object
         run_time_params_float   rt_par_float;   ///< Рабочие параметры, тип float.
         saved_params_u_int_4    par_uint;       ///< Сохраняемые параметры, тип u_int.
         run_time_params_u_int_4 rt_par_uint;    ///< Рабочие параметры, тип u_int.
+
+        timer_manager           timers;         ///< Таймеры объекта.
         
         //--Lua implemented methods.
         int lua_exec_cmd( u_int cmd );
@@ -186,8 +188,7 @@ class tech_object
         u_int   modes_count;    ///< Количество режимов.
 
         std::vector< u_int_4 >  state;  ///< Состояние объекта.
-        timer_manager           timers; ///< Таймеры объекта.
-
+        
         std::vector< u_int_4 >  mode_start_time;    ///< Время начала режима.
         run_time_params_u_int_4 mode_time;          ///< Время режимов, сек.
 

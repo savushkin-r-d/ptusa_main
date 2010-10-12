@@ -71,8 +71,8 @@ void print_binary( u_int c );
 
 #define snprintf _snprintf
 
-#define print_time printf( "%02lu:%02lu:%02lu ", ( time( 0 ) / 3600 ) % 24, \
-    ( time( 0 ) / 60 ) % 60, time( 0 ) % 60 ); printf
+#define print_time printf( "%02lu:%02lu:%02lu ", ( ( u_long ) time( 0 ) / 3600 ) \
+% 24, ( ( u_long ) time( 0 ) / 60 ) % 60, ( u_long ) time( 0 ) % 60 ); printf
 
 #endif // WIN_OS
 //-----------------------------------------------------------------------------

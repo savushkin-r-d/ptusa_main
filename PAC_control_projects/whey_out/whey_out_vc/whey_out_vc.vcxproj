@@ -47,7 +47,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <WarningLevel>Level4</WarningLevel>
+      <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -117,8 +117,6 @@
     <ClInclude Include="..\..\..\PAC\win\prj_mngr_win.h" />
     <ClInclude Include="..\..\..\PAC\win\sys_win.h" />
     <ClInclude Include="..\..\..\PAC\win\tcp_cmctr_win.h" />
-    <ClInclude Include="..\init.h" />
-    <ClInclude Include="..\priem.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\common\lua\lapi.c" />
@@ -172,12 +170,12 @@
     <ClCompile Include="..\..\..\PAC\win\prj_mngr_win.cpp" />
     <ClCompile Include="..\..\..\PAC\win\sys_win.cpp" />
     <ClCompile Include="..\..\..\PAC\win\tcp_cmctr_win.cpp" />
-    <ClCompile Include="..\init.cpp" />
     <ClCompile Include="..\main.cpp" />
-    <ClCompile Include="..\priem.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\common\tolua++\pkg\PAC_dev.pkg" />
     <None Include="..\main.lua" />
+    <None Include="..\sys.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

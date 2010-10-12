@@ -12,6 +12,10 @@
 ** enhancements, or modifications.
 */
 
+#ifdef WIN32
+#pragma warning(disable:4996) //strncat to strncat_s and others...
+#endif // WIN32
+
 #include "tolua++.h"
 #include "tolua_event.h"
 #include "lauxlib.h"

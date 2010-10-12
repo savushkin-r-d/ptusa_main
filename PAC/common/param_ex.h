@@ -303,12 +303,6 @@ class run_time_params_float: public parameters < float >,
             }
 
         /// @brief Реализация интерфейса класса @ref array_device.
-        float get_val( int idx )
-            {
-            return parameters< float >::get_val( idx );
-            }
-
-        /// @brief Реализация интерфейса класса @ref array_device.
         int parse_cmd( char *buff )
             {
             int res = parameters< float >::parse_cmd( buff );
@@ -324,6 +318,12 @@ class run_time_params_float: public parameters < float >,
             return res;
             }
 
+    protected:
+        /// @brief Реализация интерфейса класса @ref array_device.
+        float get_val( int idx )
+            {
+            return parameters< float >::get_val( idx );
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с параметрами времени выполнения типа @ref u_int_4.
@@ -349,12 +349,6 @@ class run_time_params_u_int_4: public parameters < u_int_4 >,
             }
 
         /// @brief Реализация интерфейса класса @ref array_device.
-        u_int_4 get_val( int idx )
-            {
-            return parameters< u_int_4 >::get_val( idx );
-            }
-
-        /// @brief Реализация интерфейса класса @ref array_device.
         int parse_cmd( char *buff )
             {
             int res = parameters< u_int_4 >::parse_cmd( buff );
@@ -368,6 +362,13 @@ class run_time_params_u_int_4: public parameters < u_int_4 >,
             Print( "Set val work param u_int_4[ %2u ] = %u\n", idx, val );
 #endif // DEBUG
             return res;
+            }
+
+    protected:
+        /// @brief Реализация интерфейса класса @ref array_device.
+        u_int_4 get_val( int idx )
+            {
+            return parameters< u_int_4 >::get_val( idx );
             }
     };
 //-----------------------------------------------------------------------------
@@ -479,12 +480,6 @@ class saved_params_u_int_4: public saved_params < u_int_4 >,
               }
 
           /// @brief Реализация интерфейса класса @ref array_device.
-          u_int_4 get_val( int idx )
-              {
-              return saved_params< u_int_4 >::get_val( idx );
-              }
-
-          /// @brief Реализация интерфейса класса @ref array_device.
           int parse_cmd( char *buff )
               {
               int res = saved_params< u_int_4 >::parse_cmd( buff );
@@ -500,6 +495,13 @@ class saved_params_u_int_4: public saved_params < u_int_4 >,
 
               return res;
               }
+
+    protected:
+        /// @brief Реализация интерфейса класса @ref array_device.
+        u_int_4 get_val( int idx )
+            {
+            return saved_params< u_int_4 >::get_val( idx );
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с сохраняемыми параметрами типа float.
@@ -522,12 +524,6 @@ class saved_params_float: public saved_params < float >,
               }
 
           /// @brief Реализация интерфейса класса @ref array_device.
-          float get_val( int idx )
-              {
-              return saved_params< float >::get_val( idx );
-              }
-
-          /// @brief Реализация интерфейса класса @ref array_device.
           int parse_cmd( char *buff )
               {
               int res = saved_params< float >::parse_cmd( buff );
@@ -542,6 +538,13 @@ class saved_params_float: public saved_params < float >,
 #endif //DEBUG
               return res;
               }
+
+    protected:
+        /// @brief Реализация интерфейса класса @ref array_device.
+        float get_val( int idx )
+            {
+            return saved_params< float >::get_val( idx );
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Класс для тестирования классов работы с параметрами.
