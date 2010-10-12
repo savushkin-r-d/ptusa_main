@@ -173,6 +173,7 @@
     <ClCompile Include="..\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\common\tolua++\pkg\make.cmd" />
     <None Include="..\..\..\common\tolua++\pkg\PAC_dev.pkg" />
     <None Include="..\main.lua" />
     <None Include="..\sys.lua" />

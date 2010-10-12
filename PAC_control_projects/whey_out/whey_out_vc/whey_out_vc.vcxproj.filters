@@ -373,5 +373,8 @@
     <None Include="..\sys.lua">
       <Filter>Lua Source</Filter>
     </None>
+    <None Include="..\..\..\common\tolua++\pkg\make.cmd">
+      <Filter>Header Files\common\sys\tolua++\pkg</Filter>
+    </None>
   </ItemGroup>
 </Project>
