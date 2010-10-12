@@ -8,6 +8,9 @@
 ** implementation for Windows, and a stub for other systems.
 */
 
+#ifdef WIN32
+#pragma warning(disable:4996) //strncat to strncat_s and others...
+#endif // WIN32
 
 #include <stdlib.h>
 #include <string.h>
