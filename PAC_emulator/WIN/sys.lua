@@ -75,11 +75,6 @@ end
 
 --Функции, которые переадресуются в вызовы соответствующих функций
 --системного технологического объекта (релизованы на С++).
-
-function project_tech_object:get_number()
-    return self.sys_tech_object:get_number()
-end
-
 function project_tech_object:get_modes_count()
     return self.sys_tech_object:get_modes_count()
 end
@@ -92,6 +87,9 @@ function project_tech_object:set_mode( mode, new_state )
     return self.sys_tech_object:set_mode( mode, new_state )
 end
 
+function project_tech_object:exec_cmd( cmd )
+    return self.sys_tech_object:exec_cmd( cmd )
+end
 --Представление всех созданных пользовательских технологических объектов.
 object_manager =
     {

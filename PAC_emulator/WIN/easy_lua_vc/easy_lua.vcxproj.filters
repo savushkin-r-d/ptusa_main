@@ -73,7 +73,10 @@
     <Filter Include="Source Files\PAC\sys\tolua++">
       <UniqueIdentifier>{8fd73d80-cc1f-4162-b290-fe4606cac801}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\common\sys\tolua++\pkg">
+    <Filter Include="Header Files\PAC\common\tolua++">
+      <UniqueIdentifier>{c43592f5-4957-438d-afe8-773b456dae9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\PAC\common\tolua++\pkg">
       <UniqueIdentifier>{c50e872f-ea33-4d02-a073-89693bb366d5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -367,11 +370,11 @@
     <None Include="..\test.lua">
       <Filter>Lua Source</Filter>
     </None>
-    <None Include="..\..\..\common\tolua++\pkg\PAC_dev.pkg">
-      <Filter>Header Files\common\sys\tolua++\pkg</Filter>
-    </None>
     <None Include="..\sys.lua">
       <Filter>Lua Source</Filter>
+    </None>
+    <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg">
+      <Filter>Header Files\PAC\common\tolua++\pkg</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <windows.h>
 
 #include "lua_manager.h"
 //-----------------------------------------------------------------------------
@@ -153,14 +154,10 @@ void* lua_manager::user_object_exec_lua_method( const char *object_name,
 int lua_manager::exec_lua_method( const char *object_name,
     const char *function_name, int param, int is_use_param,
     int is_use_lua_return_value ) const
-    {
-//    static int is_init = 0;
-//    if ( 0 == is_init )
-//        {
-//        lua_pushcclosure( L, error_trace, 0 );
-//        instance->err_func = lua_gettop( L );
-//        is_init = 1;
-//        }
+    {   
+    //-Вычисление времени выполнения функций Lua.
+    //LARGE_INTEGER start_time;
+    //QueryPerformanceCounter( &start_time );
 
     lua_pushcclosure( lua_manager::L, error_trace, 0 );
     instance->err_func = lua_gettop( L );
@@ -179,6 +176,15 @@ int lua_manager::exec_lua_method( const char *object_name,
     int res = lua_pcall( L, param_count, results_count, err_func );
 
     lua_remove( L, -2 );
+
+    //LARGE_INTEGER finish_time;
+    //QueryPerformanceCounter( &finish_time );
+    //LARGE_INTEGER tick_per_sec;
+    //QueryPerformanceFrequency( &tick_per_sec );
+    //LONGLONG call_time = finish_time.QuadPart - start_time.QuadPart;    
+    //int tiks_per_mcsec = tick_per_sec.QuadPart / ( 1000 * 1000 );
+    //double dt = call_time / tiks_per_mcsec;
+    //dt += 1;
 
     return res;
     }

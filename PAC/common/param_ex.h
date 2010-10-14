@@ -216,7 +216,7 @@ template < class type > class parameters
             return sizeof( par_n ) + sizeof( type );
             }
 
-        /// @brief Сбрасывает все значения параметров в 0.
+        /// @brief Установка всех параметров в нулевое значение.
         virtual void reset_to_0()
             {
             for ( u_int i = 0; i < count; i++ )
@@ -447,6 +447,8 @@ public parameters < type >
             return 0;
             }
 
+        /// @brief Установка всех параметров в нулевое значение и сохранение
+        /// в энергонезависимой памяти.
         void reset_to_0()
             {
             for ( u_int i = 0; i <  parameters< type >::get_count(); i++ )

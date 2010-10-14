@@ -620,10 +620,8 @@ end
 -- ----------------------------------------------------------------------------
 function post:init_mode( mode )
     if mode == post.MODES.W_ACCEPTING then
-
-        print( "Init post.MODES.W_ACCEPTING" )
-        self.flow:set_st_state( 1 )
-        self.flow:set_dt( 5000 )
+        self.flow:set_state( 1 )
+        self.flow:set_change_time( 5000 )
 
 
         self.rt_par_float[ post.RT_F_PAR.WARNING_REASON ] = 0
@@ -725,7 +723,9 @@ end
 -- ----------------------------------------------------------------------------
 -- Описание - гребенка.
 -- ----------------------------------------------------------------------------
-comb = project_tech_object:new{ name = "COMB" }
+comb = project_tech_object:new{ name = "COMB",
+    runtime_params_float_count = 5,
+    params_float_count = 20 }
 
 --Режимы.
 comb.MODES =

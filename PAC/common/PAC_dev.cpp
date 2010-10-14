@@ -736,12 +736,12 @@ i_DI_device::i_DI_device() :last_check_time( get_millisec() ),
     {
     }
 //-----------------------------------------------------------------------------
-void i_DI_device::set_dt( u_int time )
+void i_DI_device::set_change_time( u_int time )
     {
     dt = time;
     }
 //-----------------------------------------------------------------------------
-void i_DI_device::set_st_state( int new_state )
+void i_DI_device::set_state( int new_state )
     {
     state = new_state;
     last_check_time = get_millisec();
@@ -774,9 +774,8 @@ float dev_stub::get_value()
     return 0;
     }
 //-----------------------------------------------------------------------------
-int dev_stub::set_value( float new_value )
-    {
-    return 0;
+void dev_stub::set_value( float new_value )
+    {    
     }
 //-----------------------------------------------------------------------------
 int dev_stub::get_state_now()
@@ -792,9 +791,8 @@ void dev_stub::off()
     {
     }
 //-----------------------------------------------------------------------------
-int dev_stub::set_state( int new_state )
+void dev_stub::set_state( int new_state )
     {
-    return 0;
     }
 //-----------------------------------------------------------------------------
 int dev_stub::parse_cmd( char *buff )
@@ -861,11 +859,9 @@ float counter::get_value()
     return ( float ) get_quantity();
     }
 //-----------------------------------------------------------------------------
-int counter::set_value( float new_value )
+void counter::set_value( float new_value )
     {
-    value = ( u_int ) new_value;
-
-    return 0;
+    value = ( u_int ) new_value;    
     }
 //-----------------------------------------------------------------------------
 int counter::get_state_now()
@@ -883,7 +879,7 @@ void counter::off()
     reset();
     }
 //-----------------------------------------------------------------------------
-int counter::set_state( int new_state )
+void counter::set_state( int new_state )
     {
     switch ( new_state )
         {
@@ -899,8 +895,6 @@ int counter::set_state( int new_state )
             pause();
             break;
         }
-
-    return 0;
     }
 //-----------------------------------------------------------------------------
 int counter::parse_cmd( char *buff )
@@ -997,17 +991,15 @@ float digital_device::get_value()
     return ( float ) get_state_now();
     }
 //-----------------------------------------------------------------------------
-int digital_device::set_value( float new_value )
+void digital_device::set_value( float new_value )
     {
     return set_state( ( int ) new_value );
     }
 //-----------------------------------------------------------------------------
-int digital_device::set_state( int new_state )
+void digital_device::set_state( int new_state )
     {
     if ( new_state ) on();
-    else off();
-
-    return 0;
+    else off();    
     }
 //-----------------------------------------------------------------------------
 int digital_device::parse_cmd( char *buff )
@@ -1346,7 +1338,7 @@ int valve_mix_proof::set_state( int new_state )
 
 DI_1::DI_1( u_int dt )
     {
-    set_dt( dt );
+    set_change_time( dt );
     }
 //-----------------------------------------------------------------------------
 int DI_1::get_state_now()
@@ -1467,7 +1459,7 @@ float analog_input_4_20::get_min_val()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int analog_device::set_state( int new_state )
+void analog_device::set_state( int new_state )
     {
     return set_value( ( float ) new_state );
     }
@@ -1518,10 +1510,9 @@ float analog_device::get_value()
     return value;
     }
 //-----------------------------------------------------------------------------
-int analog_device::set_value( float new_value )
+void analog_device::set_value( float new_value )
     {
-    value = new_value;
-    return 0;
+    value = new_value;    
     }
 
 #endif // DEBUG_NO_WAGO_MODULES
@@ -1650,7 +1641,7 @@ timer::STATE timer::get_state() const
 //-----------------------------------------------------------------------------
 level_s::level_s( u_int dt /*= 1000 */ )
     {
-    set_dt( dt );
+    set_change_time( dt );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

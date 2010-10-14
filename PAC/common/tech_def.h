@@ -41,8 +41,6 @@ extern "C" {
 #include    "tolua++.h"
 
 //-----------------------------------------------------------------------------
-int add_file_and_line( const char *c_function_name, lua_State* L, int res );
-//-----------------------------------------------------------------------------
 /// @brief Работа с технологическим объектом.
 ///
 /// Базовый класс для технологического объекта (танка, гребенки). Содержит
@@ -160,14 +158,14 @@ class tech_object
             {
             return modes_count;
             }
-   
+
         saved_params_float      par_float;      ///< Сохраняемые параметры, тип float.
         run_time_params_float   rt_par_float;   ///< Рабочие параметры, тип float.
         saved_params_u_int_4    par_uint;       ///< Сохраняемые параметры, тип u_int.
         run_time_params_u_int_4 rt_par_uint;    ///< Рабочие параметры, тип u_int.
 
         timer_manager           timers;         ///< Таймеры объекта.
-        
+
         //--Lua implemented methods.
         int lua_exec_cmd( u_int cmd );
 
@@ -188,7 +186,7 @@ class tech_object
         u_int   modes_count;    ///< Количество режимов.
 
         std::vector< u_int_4 >  state;  ///< Состояние объекта.
-        
+
         std::vector< u_int_4 >  mode_start_time;    ///< Время начала режима.
         run_time_params_u_int_4 mode_time;          ///< Время режимов, сек.
 
@@ -196,7 +194,7 @@ class tech_object
             {
             C_MAX_NAME_LENGTH = 30,
             };
-        char name[ C_MAX_NAME_LENGTH ];    ///< Имя объекта.        
+        char name[ C_MAX_NAME_LENGTH ];    ///< Имя объекта.
     };
 //-----------------------------------------------------------------------------
 class tech_object_manager

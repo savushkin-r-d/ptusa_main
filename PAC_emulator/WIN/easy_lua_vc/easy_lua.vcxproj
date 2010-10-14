@@ -179,7 +179,7 @@ copy "$(TargetDir)$(TargetFileName)" "d:\Program Files\Lua\5.1\lua.exe"</Command
     <ClCompile Include="..\luac.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\common\tolua++\pkg\PAC_dev.pkg" />
+    <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg" />
     <None Include="..\sys.lua" />
     <None Include="..\test.lua" />
   </ItemGroup>
