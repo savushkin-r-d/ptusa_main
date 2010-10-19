@@ -387,7 +387,8 @@ static int pmain (lua_State *L) {
     lua_manager::get_instance()->init( L );
 
     G_PROJECT_MANAGER->load_configuration( "wago.ds5" );
-    
+    G_DEVICE_MANAGER()->print();
+
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
 
@@ -445,6 +446,7 @@ int main (int argc, char **argv)
         }
     else
         {
+
         s.argc = argc;
         s.argv = argv;
         status = lua_cpcall(L, &pmain, &s);
