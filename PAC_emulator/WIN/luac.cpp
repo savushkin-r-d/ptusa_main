@@ -386,9 +386,8 @@ static int pmain (lua_State *L) {
     tolua_PAC_dev_open( L );
     lua_manager::get_instance()->init( L );
 
-    G_PROJECT_MANAGER->load_configuration( "test.ds5" );
-    //G_DEVICE_MANAGER()->print();
-
+    G_PROJECT_MANAGER->load_configuration( "wago.ds5" );
+    
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
 
@@ -433,19 +432,13 @@ int main (int argc, char **argv)
         return EXIT_FAILURE;
         }
 
-    // Выполнение системного настроечного скрипта sys.lua.
-    char tmp[ 100 ] = { 0 };
-    strcpy( tmp, argv[ 1 ] );
-    int i = strlen( tmp );
-    while ( tmp[ i ] != '\\' && i > 0 ) i--;
-    tmp[ i ] = 0;
-
-    strncat( tmp, "sys.lua", 7 );
-    int res = luaL_dofile( L, tmp );
+    // Выполнение системного системного скрипта sys.lua.    
+    const char *lua_start_up_script = "sys.lua";    
+    int res = luaL_dofile( L, lua_start_up_script );
     if ( res )
         {
 #ifdef DEBUG
-        Print( "Load Lua system script error!\n" );
+        Print( "Load Lua system script \"%s\" error!\n", lua_start_up_script );
         Print( "\t%s\n", lua_tostring( L, -1 ) );
 #endif // DEBUG
         lua_pop( L, 1 );        
@@ -507,7 +500,7 @@ int main (int argc, char **argv)
 #endif // defined LINUX_OS
 
 #ifdef WIN_OS
-                const u_int MAX_ITERATION = 100;
+                const u_int MAX_ITERATION = 10000;
 #endif // WIN_OS
 
                 static char print_cycle_time_count = 0;

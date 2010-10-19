@@ -45,6 +45,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -59,8 +60,8 @@
       <AdditionalDependencies>ws2_32.lib;User32.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>echo start copy "$(TargetDir)$(TargetFileName)" "d:\Program Files\Lua\5.1\lua.exe"
-copy "$(TargetDir)$(TargetFileName)" "d:\Program Files\Lua\5.1\lua.exe"</Command>
+      <Command>copy "$(TargetDir)$(TargetFileName)" "D:\Program Files\SciTE_ASUTP\bin_lua\lua\lua.exe"</Command>
+      <Message>Копирование интерпретатора Lua.</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -71,14 +72,21 @@ copy "$(TargetDir)$(TargetFileName)" "d:\Program Files\Lua\5.1\lua.exe"</Command
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ws2_32.lib;User32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PostBuildEvent>
+      <Command>copy "$(TargetDir)$(TargetFileName)" "d:\Program Files\SciTE_ASUTP\bin_lua\lua.exe"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Копирование интерпретатора Lua.</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\common\lua\lapi.h" />
