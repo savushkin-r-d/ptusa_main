@@ -76,16 +76,17 @@ int complex_state::parse_cmd( char *buff  )
                     return 0;
                     }
 
+                u_int mode = 0;
                 if ( new_mode >= 1000 && new_mode < 2000 )      // On mode.
                     {
-                    new_mode -= 1000;
+                    mode = new_mode - 1000;
                     new_state = 1;
                     }
                 else
                     {
                     if ( new_mode >= 2000 && new_mode < 3000 )  // Off mode.
                         {
-                        new_mode -= 2000;
+                        mode = new_mode - 2000;
                         new_state = 0;
                         }
                     else
@@ -98,18 +99,26 @@ int complex_state::parse_cmd( char *buff  )
                         }
                     }
 
-                if ( new_mode >
+                if ( mode >
                     ( ( tech_object* ) owner_object )->get_modes_count() )
                     {
                     // Command.
                     state[ 0 ] = ( ( tech_object* ) owner_object )->lua_exec_cmd(
-                    new_mode );
+                        mode );
                     }
                 else
                     {
                     // On/off mode.
-                    state[ 0 ] = ( ( tech_object* ) owner_object )->set_mode(
-                        new_mode, new_state );
+                    int res = ( ( tech_object* ) owner_object )->set_mode(
+                        mode, new_state );
+                    if ( 0 == res )
+                    	{
+                        state[ 0 ] = new_mode; // Ok.
+                    	}
+                    else
+                        {
+                        state[ 0 ] = res;      // Ошибка.
+                        }                    
                     }
                 break;
             }
@@ -498,9 +507,9 @@ int device_manager::load_from_cfg_file( file *cfg_file )
                             break;
 
                         default:
-#ifdef DEBUG
-                            Print( "Unknown V device subtype %d!\n", dev_sub_type );
-                            get_char();
+#ifdef DEBUG                        
+                        Print( "Unknown V device subtype %d!\n", dev_sub_type );                        
+                        get_char();
 #endif // DEBUG
                             project_devices[ i ] = new dev_stub();
                             break;
@@ -617,7 +626,7 @@ void device_manager::print() const
     {
     for ( int i = 0; i < devices_count; i++ )
         {
-        Print( "    " );
+        Print( "    %3i. ", i + 1 );
         project_devices[ i ]->print();
         }
     Print( "\n" );
@@ -828,7 +837,7 @@ u_int_4 dev_stub::get_n() const
 void dev_stub::print() const
     {
 #ifdef DEBUG
-    Print( "virtual device" );
+    Print( "virtual device\n" );
 #endif // DEBUG
     }
 //-----------------------------------------------------------------------------
