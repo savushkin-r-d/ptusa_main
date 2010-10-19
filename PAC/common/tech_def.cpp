@@ -121,8 +121,7 @@ int tech_object::set_mode( u_int mode, int newm )
                 if ( ( res = lua_check_off_mode( mode ) ) == 0 ) // Check if possible.
                     {
                     state[ mode / 32 ] = state[ mode / 32 ] & ~( 1UL << mode % 32 );
-                    lua_final_mode( mode );
-                    res = mode + 2000;
+                    lua_final_mode( mode );                    
 #ifdef USE_COMB
                 g_greb->close_path( paths[ mode ].in_x, paths[ mode ].in_y,
                     paths[ mode ].out_x, paths[ mode ].out_y );
@@ -134,8 +133,7 @@ int tech_object::set_mode( u_int mode, int newm )
                 if ( ( res = lua_check_on_mode( mode ) ) == 0 ) // Check if possible.
                     {
                     lua_init_mode( mode );
-                    state[ mode / 32 ] = state[ mode / 32 ] | 1UL << mode % 32;
-                    res = mode + 1000;
+                    state[ mode / 32 ] = state[ mode / 32 ] | 1UL << mode % 32;                    
 #ifdef USE_COMB
                     g_greb->open_path( paths[ mode ].in_x, paths[ mode ].in_y,
                         paths[ mode ].out_x, paths[ mode ].out_y, comb_path::OT_COMB,
@@ -149,9 +147,18 @@ int tech_object::set_mode( u_int mode, int newm )
     idx -= 4;
     white_spaces[ idx ] = 0;
     
-    Print( "%sEnd   %s[ %2u ] set mode = %2u --> %s, res = %d. \n",
+    Print( "%sEnd   %s[ %2u ] set mode = %2u --> %s, res = %d",
         white_spaces, com_dev->get_name(), number, mode,
         newm == 0 ? "OFF" : " ON", res );
+
+    if ( 1 == res )
+    	{
+        Print( "( is already %s).\n", newm == 0 ? "OFF" : " ON" );
+    	}
+    if ( 0 == res )
+        {
+        Print( ".\n" );
+        }
 
     for ( u_int i = 0; i < state.size(); i++ )
         {

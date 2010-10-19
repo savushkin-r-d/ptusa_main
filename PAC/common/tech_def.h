@@ -68,6 +68,10 @@ class tech_object
         ///
         /// @param mode      - режим.
         /// @param new_state - новое состояние режима.
+        ///
+        /// @return  0 - режим включен (отключен).
+        /// @return  1 - режим ранее был включен (отключен).
+        /// @return  3 - нет такого режима.
         int set_mode( u_int mode, int new_state );
 
         /// @brief Получение состояния режима.
