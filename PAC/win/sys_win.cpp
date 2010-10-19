@@ -210,7 +210,7 @@ u_long get_delta_millisec( u_long time1 )
     return now >= time1 ? now - time1 : ULONG_MAX - time1 + now;
     }
 //-----------------------------------------------------------------------------
-int  get_char()
+int get_char()
     {
-    return _getch();
+    return 0; // В режиме эмуляции просто выводим на консоль сообщение.
     }
