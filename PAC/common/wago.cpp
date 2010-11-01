@@ -1,4 +1,5 @@
 #include "wago.h"
+#include "lua_manager.h"
 
 auto_smart_ptr < wago_manager > wago_manager::instance;
 //-----------------------------------------------------------------------------
@@ -113,7 +114,7 @@ float wago_device::get_AO( u_int index, float min_value, float max_value )
 
         u_int table_n = AO_channels.tables[ index ];
         u_int offset = AO_channels.offsets[ index ];
-        u_int module_type = G_WAGO_MANAGER->get_node( table_n )->AO_types[ offset ];
+        u_int module_type = G_WAGO_MANAGER()->get_node( table_n )->AO_types[ offset ];
 
         switch ( module_type )
             {
@@ -181,7 +182,7 @@ int wago_device::set_AO( u_int index, float value, float min_value,
         {
         u_int table_n = AI_channels.tables[ index ];
         u_int offset = AI_channels.offsets[ index ];
-        u_int module_type = G_WAGO_MANAGER->get_node( table_n )->AI_types[ offset ];
+        u_int module_type = G_WAGO_MANAGER()->get_node( table_n )->AI_types[ offset ];
 
         switch ( module_type )
             {
@@ -217,7 +218,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
 
         u_int table_n = AI_channels.tables[ index ];
         u_int offset = AI_channels.offsets[ index ];
-        u_int module_type = G_WAGO_MANAGER->get_node( table_n )->AI_types[ offset ];
+        u_int module_type = G_WAGO_MANAGER()->get_node( table_n )->AI_types[ offset ];
 
         switch ( module_type )
             {
@@ -303,10 +304,10 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
 //-----------------------------------------------------------------------------
 void wago_device::print() const
     {
-    print_table( "DI", DI_channels );    
-    print_table( "DO", DO_channels );    
-    print_table( "AI", AI_channels );    
-    print_table( "AO", AO_channels );
+    DI_channels.print();        
+    DO_channels.print();    
+    AI_channels.print();    
+    AO_channels.print();
     Print( "\n" );
     }
 //-----------------------------------------------------------------------------
@@ -356,27 +357,6 @@ int wago_device::load_table_from_string( char *str, IO_channels &channels )
     return 0;
     }
 //-----------------------------------------------------------------------------
-void wago_device::print_table( const char *str, 
-    const IO_channels &channels ) const
-    {
-    if ( channels.count )
-        {
-        Print( "%s:%d", str, channels.count );
-        if ( channels.count )
-            {
-            Print( "[ " );
-            for ( u_int i = 0; i < channels.count; i++ )
-                {
-                Print("%d:%2d", channels.tables[ i ],
-                    channels.offsets[ i ] );
-                if ( i < channels.count - 1 ) Print( "; " );
-                }
-            Print( " ]" );
-            }
-        Print( "; " );
-        }
-    }
-//-----------------------------------------------------------------------------
 float wago_device::get_par( u_int index )
     {
     if ( index < params_count && params )
@@ -407,6 +387,56 @@ wago_device::~wago_device()
         {
         delete [] params;
         params = 0;
+        }
+    }
+//-----------------------------------------------------------------------------
+void wago_device::init( int DO_count, int DI_count, int AO_count,
+    int AI_count, int par_count )
+    {
+    if ( DO_count > 0 )
+        {      
+        DO_channels.init( DO_count );
+        }
+    if ( DI_count > 0 )
+        {      
+        DI_channels.init( DI_count );
+        }
+    if ( AO_count > 0 )
+        {      
+        AO_channels.init( AO_count );
+        }
+    if ( AI_count > 0 )
+        {      
+        AI_channels.init( AI_count );
+        }
+
+    // Параметры.
+    if ( par_count > 0 )
+        {      
+        params_count = par_count;
+        params = new float [ params_count ];
+        }
+    }
+//-----------------------------------------------------------------------------
+void wago_device::init_channel( int type, int ch_index, int node, int offset )
+    {
+    switch ( type )
+        {
+    case IO_channels::CT_DI:
+        DI_channels.init_channel( ch_index, node, offset );
+        break;
+
+    case IO_channels::CT_DO:
+        DO_channels.init_channel( ch_index, node, offset );
+        break;
+
+    case IO_channels::CT_AI:
+        AI_channels.init_channel( ch_index, node, offset );
+        break;
+
+    case IO_channels::CT_AO:
+        AO_channels.init_channel( ch_index, node, offset );
+        break;
         }
     }
 //-----------------------------------------------------------------------------
@@ -451,7 +481,116 @@ wago_device::IO_channels::~IO_channels()
         }
     }
 //-----------------------------------------------------------------------------
+void wago_device::IO_channels::init( int ch_count )
+    {
+    if ( ch_count > 0 )
+        {
+        count = ch_count;
 
+        tables  = new u_int[ count ];
+        offsets = new u_int[ count ];
+
+        switch ( type )
+            {
+        case IO_channels::CT_DI:
+            char_read_values = new u_char*[ count ];
+            break;
+
+        case IO_channels::CT_DO:
+            char_read_values  = new u_char*[ count ];
+            char_write_values = new u_char*[ count ];
+            break;
+
+        case IO_channels::CT_AI:
+            int_read_values = new u_int*[ count ];
+            break;
+
+        case IO_channels::CT_AO:
+            int_read_values  = new u_int*[ count ];
+            int_write_values = new u_int*[ count ];
+            break;
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void wago_device::IO_channels::print() const
+    {
+    if ( count )
+        {
+        switch ( type )
+            {
+        case CT_DI:
+            Print( "DI" );
+            break;
+
+        case CT_DO:
+            Print( "DO" );
+            break;
+
+        case CT_AI:
+            Print( "AI" );
+            break;
+
+        case CT_AO:
+            Print( "AO" );
+            break;
+            }
+
+        Print( ":%d", count );
+        if ( count )
+            {
+            Print( "[ " );
+            for ( u_int i = 0; i < count; i++ )
+                {
+                Print("%d:%2d", tables[ i ], offsets[ i ] );
+                if ( i < count - 1 ) Print( "; " );
+                }
+            Print( " ]" );
+            }
+        Print( "; " );
+        }
+    }
+//-----------------------------------------------------------------------------
+void wago_device::IO_channels::init_channel( u_int ch_index, int node, int offset )
+    {
+    if ( ch_index < count )
+        {
+        tables[ ch_index ]  = node;
+        offsets[ ch_index ] = offset;
+        switch ( type )
+            {
+        case CT_DI:
+            char_read_values[ ch_index ] = wago_manager::get_instance()->
+                get_DI_read_data( tables[ ch_index ], offsets[ ch_index ] );
+            break;
+
+        case CT_DO:
+            char_read_values[ ch_index ] = wago_manager::get_instance()->
+                get_DO_read_data( tables[ ch_index ], offsets[ ch_index ] );
+            char_read_values[ ch_index ] = wago_manager::get_instance()->
+                get_DO_write_data( tables[ ch_index ], offsets[ ch_index ] );
+            break;
+
+        case CT_AI:
+            int_read_values[ ch_index ] = wago_manager::get_instance()->
+                get_AI_read_data( tables[ ch_index ], offsets[ ch_index ] );
+            break;
+
+        case CT_AO:
+            int_read_values[ ch_index ] = wago_manager::get_instance()->
+                get_AO_read_data( tables[ ch_index ], offsets[ ch_index ] );
+            int_write_values[ ch_index ] = wago_manager::get_instance()->
+                get_AO_write_data( tables[ ch_index ], offsets[ ch_index ] );
+            break;
+            }        
+        }
+    else
+        {
+#ifdef DEBUG
+        Print( "Error wago_device::IO_channels::init_channel - index out of bound!\n" );
+#endif // DEBUG
+        }
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int wago_manager::load_from_cfg_file( file *cfg_file )
@@ -484,6 +623,21 @@ int wago_manager::load_from_cfg_file( file *cfg_file )
     cfg_file->fget_line(); // Пропускаем пустую строку.
 
     return 0;
+    }
+//-----------------------------------------------------------------------------
+void wago_manager::init( int nodes_count )
+    {
+    this->nodes_count = nodes_count;
+
+    if ( nodes_count )
+        {
+        nodes = new wago_node*[ nodes_count ];
+        for ( int i = 0; i < nodes_count; i++ )
+            {
+            nodes[ i ] = 0;
+            }
+        }
+
     }
 //-----------------------------------------------------------------------------
 wago_manager* wago_manager::get_instance()
@@ -622,6 +776,45 @@ wago_manager::wago_node * wago_manager::get_node( int node_n )
     return nodes[ node_n ];
     }
 //-----------------------------------------------------------------------------
+void wago_manager::add_node( u_int index, int ntype, int address,
+    char* IP_address, int DO_cnt, int DI_cnt, int AO_cnt, int AI_cnt )
+    {
+    if ( index < nodes_count )
+        {
+        nodes[ index ] = new wago_node( ntype, address, IP_address, DO_cnt,
+            DI_cnt, AO_cnt, AI_cnt );     
+        }
+    }
+//-----------------------------------------------------------------------------
+void wago_manager::init_node_AO( u_int node_index, u_int AO_index,
+    u_int type, u_int offset )
+    {
+    if ( node_index < nodes_count && AO_index < nodes[ node_index ]->AO_cnt )
+        {
+        nodes[ node_index ]->AO_types[ AO_index ]   = type;
+        nodes[ node_index ]->AO_offsets[ AO_index ] = offset;
+        }
+    }
+//-----------------------------------------------------------------------------
+void wago_manager::init_node_AI( u_int node_index, u_int AI_index,
+    u_int type, u_int offset )
+    {
+    if ( node_index < nodes_count && AI_index < nodes[ node_index ]->AI_cnt )
+        {
+        nodes[ node_index ]->AI_types[ AI_index ]   = type;
+        nodes[ node_index ]->AI_offsets[ AI_index ] = offset;
+        }
+    }
+//-----------------------------------------------------------------------------
+void wago_manager::print() const
+    {
+    Print( "Total Wago modules count %d.\n", nodes_count );
+    for ( u_int i = 0; i < nodes_count; i++ )
+        {
+        nodes[ i ]->print();
+        }
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 wago_manager::wago_node::wago_node() : state( 0 ),
     number( 0 ),
@@ -641,7 +834,7 @@ wago_manager::wago_node::wago_node() : state( 0 ),
     AI_offsets( 0 ),
     AI_types( 0 )
     {
-    memset( ip_addres, 0, 4 * sizeof( int ) );
+    memset( ip_address, 0, 4 * sizeof( int ) );
     }
 //-----------------------------------------------------------------------------
 wago_manager::wago_node::~wago_node()
@@ -684,8 +877,8 @@ int wago_manager::wago_node::load_from_cfg_file( file *cfg_file )
     sscanf( cfg_file->fget_line(), "%d", &number );
     char tmp_dot;
     sscanf( cfg_file->fget_line(), "%d%c%d%c%d%c%d",
-        &ip_addres[ 0 ], &tmp_dot, &ip_addres[ 1 ], &tmp_dot,
-        &ip_addres[ 2 ],  &tmp_dot, &ip_addres[ 3 ] );
+        &ip_address[ 0 ], &tmp_dot, &ip_address[ 1 ], &tmp_dot,
+        &ip_address[ 2 ],  &tmp_dot, &ip_address[ 3 ] );
 
     int modules_count = 0;
     sscanf( cfg_file->fget_line(), "%d", &modules_count );
@@ -743,8 +936,8 @@ int wago_manager::wago_node::load_from_cfg_file( file *cfg_file )
 
 #ifdef DEBUG
     Print( "type %d, number %d, ip %d.%d.%d.%d. ",
-        type, number, ip_addres[ 0 ], ip_addres[ 1 ], 
-        ip_addres[ 2 ], ip_addres[ 3 ] );
+        type, number, ip_address[ 0 ], ip_address[ 1 ], 
+        ip_address[ 2 ], ip_address[ 3 ] );
     Print( "DI %d, DO %d, AI %d, AO %d.\n",
         DI_cnt, DO_cnt, AI_cnt, AO_cnt );   
 
@@ -783,3 +976,93 @@ int wago_manager::wago_node::load_from_cfg_file( file *cfg_file )
 
     return 0;
     }
+//-----------------------------------------------------------------------------
+wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
+    int DO_cnt, int DI_cnt, int AO_cnt, int AI_cnt ): state( 0 ),
+    type( type ), 
+    number( number ), 
+    DI_cnt( DI_cnt ),
+    DO_cnt( DO_cnt ),
+    AI_cnt( AI_cnt ),
+    AO_cnt( AO_cnt )
+    {
+    char tmp_dot;
+    if ( str_ip_address )
+        {
+        sscanf( str_ip_address, "%d%c%d%c%d%c%d",
+            &ip_address[ 0 ], &tmp_dot, &ip_address[ 1 ], &tmp_dot,
+            &ip_address[ 2 ],  &tmp_dot, &ip_address[ 3 ] );
+        }
+    else
+        {
+        memset( ip_address, 0, sizeof( ip_address ) );
+        }
+
+    if ( DI_cnt )
+        {
+        DI = new u_char [ DI_cnt ];
+        memset( DI, 0, DI_cnt );
+        }
+    if ( DO_cnt )
+        {
+        DO = new u_char [ DO_cnt ];
+        DO_ = new u_char [ DO_cnt ];
+        memset( DO, 0, DO_cnt );
+        memset( DO_, 0, DO_cnt );
+        }
+    if ( AI_cnt )
+        {
+        AI = new u_int [ AI_cnt ];
+        AI_offsets = new u_int [ AI_cnt ];
+        AI_types = new u_int [ AI_cnt ];
+
+        memset( AI, 0, AI_cnt * sizeof( u_int ) );
+        }
+    if ( AO_cnt )
+        {
+        AO = new u_int [ AO_cnt ];
+        AO_ = new u_int [ AO_cnt ];
+        AO_types = new u_int [ AO_cnt ];
+        AO_offsets = new u_int [ AO_cnt ];
+
+        memset( AO, 0, AO_cnt * sizeof( u_int ) );
+        memset( AO_, 0, AO_cnt * sizeof( u_int ) );
+        }
+    }
+//-----------------------------------------------------------------------------
+void wago_manager::wago_node::print()
+    {
+#ifdef DEBUG
+    Print( "Node type %d, number %d, ip \'%d.%d.%d.%d\'. ",
+        type, number, ip_address[ 0 ], ip_address[ 1 ], 
+        ip_address[ 2 ], ip_address[ 3 ] );
+    Print( "DI %d, DO %d, AI %d, AO %d.\n",
+        DI_cnt, DO_cnt, AI_cnt, AO_cnt );   
+
+    for ( u_int i = 0; i < AI_cnt; i++ )
+        {
+        if ( 0 == i )
+            {
+            Print( "\tAI\n");
+            }
+        Print( "\t%2.d %u %2.u\n", i + 1, AI_types[ i ], AI_offsets[ i ] );        
+        }
+
+    for ( u_int i = 0; i < AO_cnt; i++ )
+        {
+        if ( 0 == i ) 
+            {
+            Print( "\tAO\n");
+            }
+        Print( "\t%2.d %u %2.u\n", i + 1, AO_types[ i ], AO_offsets[ i ] );
+        }
+#endif // DEBUG
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+wago_manager* G_WAGO_MANAGER()
+    {
+    return wago_manager::get_instance();
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------

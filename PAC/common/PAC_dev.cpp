@@ -7,7 +7,7 @@ const char device::DEV_NAMES[][ 5 ] = { "V", "N", "M", "LS", "TE", "FE", "FS",
     "CTR", "AO", "LE", "FB", "UPR", "QE", "AI" };
 
 const char device::DEV_TYPES[] =        { 1,    1,   1,   1,    4,    4,    1,
-     2,      4,    4,    1,    1,     4,    4 };
+    2,      4,    4,    1,    1,     4,    4 };
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -24,10 +24,10 @@ int single_state::parse_cmd( char *buff  )
 
     switch ( owner_type )
         {
-        case T_TECH_OBJECT:
-            ( ( tech_object* ) owner_object )->set_mode( ( ( u_int_4* ) buff )[ 1 ] - 1,
-                ( ( u_int_4* ) buff )[ 2 ] );                      
-            break;
+    case T_TECH_OBJECT:
+        ( ( tech_object* ) owner_object )->set_mode( ( ( u_int_4* ) buff )[ 1 ] - 1,
+            ( ( u_int_4* ) buff )[ 2 ] );                      
+        break;
         }
     return 12;
 #endif // USE_NO_TANK_COMB_DEVICE     
@@ -35,14 +35,14 @@ int single_state::parse_cmd( char *buff  )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 complex_state::complex_state( const char *name, int n, u_int_4 *state,
-                             void *owner_object, char owner_type, int size ):
+    void *owner_object, char owner_type, int size ):
 device_state < u_int_4 >( n, 
-                         name, 
-                         size, 
-                         i_complex_device::ARRAY_DEV_LONG, 
-                         state,
-                         owner_object, 
-                         owner_type )
+    name, 
+    size, 
+    i_complex_device::ARRAY_DEV_LONG, 
+    state,
+    owner_object, 
+    owner_type )
 
     {                     
     } 
@@ -63,64 +63,64 @@ int complex_state::parse_cmd( char *buff  )
         ||	( strcmp( name, "Cmd" ) == 0 ) 
         ||	( strcmp( name, "cmd" ) == 0 ) )
         {
- 
+
         switch ( owner_type )
             {
-            case T_TECH_OBJECT:
-                u_int_4 new_mode = 0;
-                memcpy( &new_mode, buff + sizeof( u_int_4 ), sizeof( new_mode ) );
-                int new_state = 0;
-                if ( 0 == new_mode )
-                    {
-                    state[ 0 ] = 0;
-                    return 0;
-                    }
+        case T_TECH_OBJECT:
+            u_int_4 new_mode = 0;
+            memcpy( &new_mode, buff + sizeof( u_int_4 ), sizeof( new_mode ) );
+            int new_state = 0;
+            if ( 0 == new_mode )
+                {
+                state[ 0 ] = 0;
+                return 0;
+                }
 
-                u_int mode = 0;
-                if ( new_mode >= 1000 && new_mode < 2000 )      // On mode.
+            u_int mode = 0;
+            if ( new_mode >= 1000 && new_mode < 2000 )      // On mode.
+                {
+                mode = new_mode - 1000;
+                new_state = 1;
+                }
+            else
+                {
+                if ( new_mode >= 2000 && new_mode < 3000 )  // Off mode.
                     {
-                    mode = new_mode - 1000;
-                    new_state = 1;
+                    mode = new_mode - 2000;
+                    new_state = 0;
                     }
                 else
                     {
-                    if ( new_mode >= 2000 && new_mode < 3000 )  // Off mode.
-                        {
-                        mode = new_mode - 2000;
-                        new_state = 0;
-                        }
-                    else
-                        {
 #ifdef DEBUG
-                        Print( "Error complex_state::parse_cmd - new_mode = %lu\n",
-                            ( unsigned long int ) new_mode );
+                    Print( "Error complex_state::parse_cmd - new_mode = %lu\n",
+                        ( unsigned long int ) new_mode );
 #endif // DEBUG
-                        return -1;
-                        }
+                    return -1;
                     }
+                }
 
-                if ( mode >
-                    ( ( tech_object* ) owner_object )->get_modes_count() )
+            if ( mode >
+                ( ( tech_object* ) owner_object )->get_modes_count() )
+                {
+                // Command.
+                state[ 0 ] = ( ( tech_object* ) owner_object )->lua_exec_cmd(
+                    mode );
+                }
+            else
+                {
+                // On/off mode.
+                int res = ( ( tech_object* ) owner_object )->set_mode(
+                    mode, new_state );
+                if ( 0 == res )
                     {
-                    // Command.
-                    state[ 0 ] = ( ( tech_object* ) owner_object )->lua_exec_cmd(
-                        mode );
+                    state[ 0 ] = new_mode; // Ok.
                     }
                 else
                     {
-                    // On/off mode.
-                    int res = ( ( tech_object* ) owner_object )->set_mode(
-                        mode, new_state );
-                    if ( 0 == res )
-                    	{
-                        state[ 0 ] = new_mode; // Ok.
-                    	}
-                    else
-                        {
-                        state[ 0 ] = res;      // Ошибка.
-                        }                    
-                    }
-                break;
+                    state[ 0 ] = res;      // Ошибка.
+                    }                    
+                }
+            break;
             }
 
         return 0; 
@@ -137,9 +137,9 @@ int complex_state::parse_cmd( char *buff  )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 string_device::string_device( u_int_4 n, const char *new_name,
-                             char* str, int max_str_len ): n( n ),
-                             str( str ),
-                             max_str_len( max_str_len )
+    char* str, int max_str_len ): n( n ),
+    str( str ),
+    max_str_len( max_str_len )
     {
     name = new char[ strlen( new_name ) + 1 ];
     strcpy( name, new_name );
@@ -189,7 +189,7 @@ int string_device::save_state( char *buff )
 
     strcpy( buff + answer_size, str );
 
-    
+
     answer_size += str_len + 1;      
 
     return answer_size;
@@ -234,13 +234,6 @@ int string_device::parse_cmd( char *buff )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-device::device() : number( 0 ),
-    type( DT_NONE ),
-    sub_type( DST_NONE )
-    { 
-    }
-//-----------------------------------------------------------------------------
 int device::save_device( char *buff )
     {
     memcpy( buff, &number, sizeof( number ) );
@@ -252,65 +245,65 @@ void device::print() const
 #ifdef DEBUG    
     switch ( type )
         {
-        case DT_V:
-            Print( "V  " );
-            break;
+    case DT_V:
+        Print( "V  " );
+        break;
 
-        case DT_N:
-            Print( "N  " );
-            break;
+    case DT_N:
+        Print( "N  " );
+        break;
 
-        case DT_M:
-            Print( "M  " );
-            break;
+    case DT_M:
+        Print( "M  " );
+        break;
 
-        case DT_LS:
-            Print( "LS " );
-            break;
+    case DT_LS:
+        Print( "LS " );
+        break;
 
-        case DT_TE:
-            Print( "TE " );
-            break;
+    case DT_TE:
+        Print( "TE " );
+        break;
 
-        case DT_FE:
-            Print( "FE " );
-            break;
+    case DT_FE:
+        Print( "FE " );
+        break;
 
-        case DT_FS:
-            Print( "FS " );
-            break;
+    case DT_FS:
+        Print( "FS " );
+        break;
 
-        case DT_CTR:
-            Print( "CTR" );
-            break;
+    case DT_CTR:
+        Print( "CTR" );
+        break;
 
-        case DT_AO:
-            Print( "AO " );
-            break;
+    case DT_AO:
+        Print( "AO " );
+        break;
 
-        case DT_LE:
-            Print( "LE " );
-            break;
+    case DT_LE:
+        Print( "LE " );
+        break;
 
-        case DT_FB:
-            Print( "FB " );
-            break;
+    case DT_FB:
+        Print( "FB " );
+        break;
 
-        case DT_UPR:
-            Print( "UPR" );
-            break;
+    case DT_UPR:
+        Print( "UPR" );
+        break;
 
-        case DT_QE:
-            Print( "QE " );
-            break;
+    case DT_QE:
+        Print( "QE " );
+        break;
 
-        case DT_AI:
-            Print( "AI " );
-            break;
+    case DT_AI:
+        Print( "AI " );
+        break;
 
-        default:
-            Print( "Uknown" );
-            break;
+    default:
+        Print( "Unknown" );
+        break;
         }
     Print( "%5lu\t", ( u_long ) number );
 
@@ -417,7 +410,7 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type,
             {
             return i;
             }
-        
+
         if ( dev_number > project_devices[ i ]->get_n() )
             {
             l = i + 1;
@@ -427,12 +420,12 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type,
             u = i - 1;
             }        
         }
-    
+
     return -1;
     }
 //-----------------------------------------------------------------------------
 device* device_manager::get_device( device::DEVICE_TYPE dev_type,
-        u_int dev_number, char const * dev_name )
+    u_int dev_number, char const * dev_name )
     {
     int dev_n = get_device_n( dev_type, dev_number );
 
@@ -443,7 +436,7 @@ device* device_manager::get_device( device::DEVICE_TYPE dev_type,
     else
         {
 #ifdef DEBUG
-    Print( "%s[ %d ] not found!\n", dev_name, dev_number );
+        Print( "%s[ %d ] not found!\n", dev_name, dev_number );
 #endif // DEBUG
         }
 
@@ -452,179 +445,23 @@ device* device_manager::get_device( device::DEVICE_TYPE dev_type,
 //-----------------------------------------------------------------------------
 int device_manager::load_from_cfg_file( file *cfg_file )
     {
-    cfg_file->fget_line();                      // Пропускаем заголовок.
-    sscanf( cfg_file->fget_line(), "%d", &devices_count );
-    cfg_file->fget_line();                      // Пропускаем пустую строку.
+    //project_devices[ i ]->load( cfg_file );
 
-#ifdef DEBUG
-    Print( "Total devices count %d.\n", devices_count );
-#endif // DEBUG
 
-    if ( devices_count )
-        {
-        char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
+    //
+    //            project_devices[ i ]->load( cfg_file );
+    //            }
+    //        }
+    //
 
-        project_devices = new device* [ devices_count ];
-
-        for ( int i = 0; i < devices_count; i++ )
-            {
-            int dev_type = 0;
-            int dev_sub_type = 0;
-            cfg_file->fget_line();              // Пропускаем комментарий.
-
-            char *tmp = cfg_file->pfget_line();
-
-            sscanf( tmp, "%d %d", &dev_type, &dev_sub_type );
-            
-            switch ( dev_type )
-                {                
-                case device::DT_V:
-                    {
-                    switch ( dev_sub_type )
-                        {
-                        case device::DST_V_DO_1:
-                            project_devices[ i ] = new valve_DO_1();
-                            break;
-
-                        case device::DST_V_DO_2:
-                            project_devices[ i ] = new valve_DO_2();
-                            break;
-
-                        case device::DST_V_DO_1_DI_1:
-                            project_devices[ i ] = new valve_DO_1_DI_1();
-                            break;
-
-                        case device::DST_V_DO_1_DI_2:
-                            project_devices[ i ] = new valve_DO_1_DI_2();
-                            break;
-
-                        case device::DST_V_DO_2_DI_2:
-                            project_devices[ i ] = new valve_DO_2_DI_2();
-                            break;
-
-                        case device::DST_V_MIXPROOF:
-                            project_devices[ i ] = new valve_mix_proof();
-                            break;
-
-                        default:
-#ifdef DEBUG                        
-                        Print( "Unknown V device subtype %d!\n", dev_sub_type );                        
-                        get_char();
-#endif // DEBUG
-                            project_devices[ i ] = new dev_stub();
-                            break;
-                        }
-                    break;
-                    }
-
-                case device::DT_N:
-                    project_devices[ i ] = new pump();
-                    break;
-
-                case device::DT_M:
-                    project_devices[ i ] = new mixer();
-                    break;
-
-                case device::DT_LS:
-                    project_devices[ i ] = new level_s();
-                    break;
-
-                case device::DT_TE:
-                    project_devices[ i ] = new temperature_e();
-                    break;
-
-                case device::DT_FE:
-                    project_devices[ i ] = new flow_e();
-                    break;
-
-                case device::DT_FS:                    
-                    project_devices[ i ] = new flow_s();
-                    break;
-
-                case device::DT_CTR:
-                    project_devices[ i ] = new counter();
-                    break;
-
-                case device::DT_AO:
-                    project_devices[ i ] = new AO_0_100();
-                    break;
-
-                case device::DT_LE:
-                    project_devices[ i ] = new level_e();
-                    break;
-
-                case device::DT_FB:
-                    project_devices[ i ] = new feedback();
-                    break;
-
-                case device::DT_UPR:
-                    project_devices[ i ] = new control_s();
-                    break;
-
-                case device::DT_QE:
-                    project_devices[ i ] = new concentration_e();
-                    break;
-
-                case device::DT_AI:
-                    project_devices[ i ] = new analog_input_4_20();
-                    break;
-
-                default:
-#ifdef DEBUG
-                    Print( "Unknown device type %d!\n", dev_type );
-#endif // DEBUG
-                    project_devices[ i ] = new dev_stub();
-                    break;
-                }
-
-            if ( dev_type < device::C_DEVICE_TYPE_CNT )
-                {
-                if ( 0 == is_first_device[ dev_type ] )
-                    {
-                    dev_types_ranges[ dev_type ].start_pos = i;
-                    is_first_device[ dev_type ] = 1;
-                    }
-                dev_types_ranges[ dev_type ].end_pos = i;
-                }
-
-            project_devices[ i ]->load( cfg_file );
-            }
-        }
-
-        devices = new complex_device( 0, "GLB", device::C_DEVICE_TYPE_CNT, 0 );
-
-        for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
-            {
-            int dev_cnt = dev_types_ranges[ i ].end_pos -
-                dev_types_ranges[ i ].start_pos + 1;
-
-            if ( dev_types_ranges[ i ].start_pos == -1 )
-                {
-                dev_cnt = 0;
-                }
-
-            devices->sub_dev[ i ] =
-                new complex_device( 0, device::DEV_NAMES[ i ], dev_cnt,
-                device::DEV_TYPES[ i ] );
-
-            if ( dev_cnt )
-                {
-                int pos = 0;
-                for ( int j = dev_types_ranges[ i ].start_pos;
-                    j <= dev_types_ranges[ i ].end_pos; j++ )
-                    {
-                    ( ( complex_device* ) ( devices->sub_dev[ i ] ) )->sub_dev[ pos++ ] =
-                        project_devices[ j ];
-                    }
-                }
-            }
 
     return 0;
     }
 //-----------------------------------------------------------------------------
 void device_manager::print() const
     {
-    for ( int i = 0; i < devices_count; i++ )
+    Print( "\nProject devices:\n" );
+    for ( u_int i = 0; i < project_devices.size(); i++ )
         {
         Print( "    %3i. ", i + 1 );
         project_devices[ i ]->print();
@@ -643,15 +480,11 @@ device_manager::device_manager(): devices( 0 ), project_devices( 0 )
 //-----------------------------------------------------------------------------
 device_manager::~device_manager()
     {
-    if ( project_devices )
+    for ( u_int i = 0; i < project_devices.size(); i++ )
         {
-        for ( int i = 0; i < devices_count; i++ )
-            {
-            delete project_devices[ i ];
-            }
-        delete [] project_devices;
-        project_devices = 0;        
+        delete project_devices[ i ];
         }
+    project_devices.clear();
 
     if ( devices )
         {
@@ -736,6 +569,150 @@ i_DO_device* device_manager::get_UPR( int number )
 i_AI_device* device_manager::get_QE( int number )
     {
     return get_device( device::DT_QE, number, "QE" );
+    }
+//-----------------------------------------------------------------------------
+wago_device* device_manager::add_device( int dev_type, int dev_sub_type,
+    u_int number, char * descr )
+    {
+    static char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
+
+    device* new_device = 0;
+    wago_device* new_wago_device = 0;
+
+    switch ( dev_type )
+        {                
+    case device::DT_V:
+        {
+        switch ( dev_sub_type )
+            {
+        case device::DST_V_DO_1:
+            new_device      = new valve_DO_1( number );
+            new_wago_device = ( valve_DO_1* ) new_device;
+            break;
+
+        case device::DST_V_DO_2:
+            new_device      = new valve_DO_2( number );
+            new_wago_device = ( valve_DO_2* ) new_device;
+            break;
+
+        case device::DST_V_DO_1_DI_1:
+            new_device      = new valve_DO_1_DI_1( number );
+            new_wago_device = ( valve_DO_1_DI_1* ) new_device;
+            break;
+
+        case device::DST_V_DO_1_DI_2:
+            new_device      = new valve_DO_1_DI_2( number );
+            new_wago_device = ( valve_DO_1_DI_2* ) new_device;
+            break;
+
+        case device::DST_V_DO_2_DI_2:
+            new_device      = new valve_DO_2_DI_2( number );
+            new_wago_device = ( valve_DO_2_DI_2* ) new_device;
+            break;
+
+        case device::DST_V_MIXPROOF:
+            new_device      = new valve_mix_proof( number );
+            new_wago_device = ( valve_mix_proof* ) new_device;
+            break;
+
+        default:
+#ifdef DEBUG                        
+            Print( "Unknown V device subtype %d!\n", dev_sub_type );                        
+            get_char();
+#endif // DEBUG
+            new_device      = new dev_stub();
+            break;
+            }
+        break;
+        }
+
+    case device::DT_N:
+        new_device      = new pump( number );
+        new_wago_device = ( pump* ) new_device;
+        break;
+
+    case device::DT_M:
+        new_device      = new mixer( number );
+        new_wago_device = ( mixer* ) new_device;
+        break;
+
+    case device::DT_LS:
+        new_device      = new level_s( number );
+        new_wago_device = ( level_s* ) new_device;
+        break;
+
+    case device::DT_TE:
+        new_device      = new temperature_e( number );
+        new_wago_device = ( temperature_e* ) new_device;
+        break;
+
+    case device::DT_FE:
+        new_device      = new flow_e( number );
+        new_wago_device = ( flow_e* ) new_device;
+        break;
+
+    case device::DT_FS:                    
+        new_device      = new flow_s( number );
+        new_wago_device = ( flow_s* ) new_device;
+        break;
+
+    case device::DT_CTR:
+        new_device      = new counter( number );
+        new_wago_device = ( counter* ) new_device;
+        break;
+
+    case device::DT_AO:
+        new_device      = new AO_0_100( number );
+        new_wago_device = ( AO_0_100* ) new_device;
+        break;
+
+    case device::DT_LE:
+        new_device      = new level_e( number );
+        new_wago_device = ( level_e* ) new_device;
+        break;
+
+    case device::DT_FB:
+        new_device      = new feedback( number );
+        new_wago_device = ( feedback* ) new_device;
+        break;
+
+    case device::DT_UPR:
+        new_device      = new control_s( number );
+        new_wago_device = ( control_s* ) new_device;
+        break;
+
+    case device::DT_QE:
+        new_device      = new concentration_e( number );
+        new_wago_device = ( concentration_e* ) new_device;
+        break;
+
+    case device::DT_AI:
+        new_device      = new analog_input_4_20( number );
+        new_wago_device = ( analog_input_4_20* ) new_device;
+        break;
+
+    default:
+#ifdef DEBUG
+        Print( "Unknown device type %d!\n", dev_type );
+#endif // DEBUG
+        new_device = new dev_stub();
+        break;        
+        }
+
+    u_int new_dev_index = project_devices.size();
+    project_devices.push_back( new_device );
+
+    if ( dev_type < device::C_DEVICE_TYPE_CNT )
+        {
+        if ( 0 == is_first_device[ dev_type ] )
+            {
+            dev_types_ranges[ dev_type ].start_pos = new_dev_index;
+            is_first_device[ dev_type ] = 1;
+            }
+        dev_types_ranges[ dev_type ].end_pos = new_dev_index;
+        }    
+
+    return new_wago_device;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -859,10 +836,6 @@ u_int dev_stub::get_quantity()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-counter::counter() : value( 0 ), last_read_value( 0 ), state( S_WORK )
-    {
-    }
-//-----------------------------------------------------------------------------
 float counter::get_value()
     {
     return ( float ) get_quantity();
@@ -892,17 +865,17 @@ void counter::set_state( int new_state )
     {
     switch ( new_state )
         {
-        case S_STOP:
-            reset();
-            break;
+    case S_STOP:
+        reset();
+        break;
 
-        case S_WORK:
-            start();
-            break;
+    case S_WORK:
+        start();
+        break;
 
-        case S_PAUSE:
-            pause();
-            break;
+    case S_PAUSE:
+        pause();
+        break;
         }
     }
 //-----------------------------------------------------------------------------
@@ -957,7 +930,7 @@ void counter::start()
             {
             value = 0;
             }
-        
+
         state = S_WORK;
         last_read_value = ( u_int ) get_AI( AI_INDEX );
         }
@@ -984,11 +957,11 @@ u_int counter::get_quantity()
             {
             delta = current - last_read_value;
             }
-            if ( delta > 0 )
-                {
-                value += delta;
-                last_read_value = current;
-                }
+        if ( delta > 0 )
+            {
+            value += delta;
+            last_read_value = current;
+            }
         }
 
     return value;
@@ -1314,27 +1287,27 @@ int valve_mix_proof::set_state( int new_state )
     {
     switch ( new_state )
         {
-        case ST_CLOSE:
-            off();
-            break;
+    case ST_CLOSE:
+        off();
+        break;
 
-        case ST_OPEN:
-            on();
-            break;
+    case ST_OPEN:
+        on();
+        break;
 
-        case ST_UPPER_SEAT:
-            off();
-            set_DO( DO_INDEX_U, 1 );
-            break;
+    case ST_UPPER_SEAT:
+        off();
+        set_DO( DO_INDEX_U, 1 );
+        break;
 
-        case ST_LOW_SEAT:
-            off();
-            set_DO( DO_INDEX_L, 1 );
-            break;
+    case ST_LOW_SEAT:
+        off();
+        set_DO( DO_INDEX_L, 1 );
+        break;
 
-        default:
-            on();
-            break;
+    default:
+        on();
+        break;
         }
 
     return 0;
@@ -1345,11 +1318,6 @@ int valve_mix_proof::set_state( int new_state )
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-DI_1::DI_1( u_int dt )
-    {
-    set_change_time( dt );
-    }
-//-----------------------------------------------------------------------------
 int DI_1::get_state_now()
     {
     return get_DI( DI_INDEX );
@@ -1630,7 +1598,7 @@ void timer::set_countdown_time( u_long new_countdown_time )
     if ( 0 == new_countdown_time )
         {
         Print( "Error void timer::set_countdown_time( u_long time ), time = %lu!\n",
-                new_countdown_time );
+            new_countdown_time );
         }
 #endif
 
@@ -1645,12 +1613,6 @@ u_long timer::get_countdown_time() const
 timer::STATE timer::get_state() const
     {
     return state;
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-level_s::level_s( u_int dt /*= 1000 */ )
-    {
-    set_change_time( dt );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1692,9 +1654,9 @@ timer& timer_manager::operator[]( unsigned int index )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 device_manager* G_DEVICE_MANAGER()
-  {
-  return device_manager::get_instance();
-  }
+    {
+    return device_manager::get_instance();
+    }
 //-----------------------------------------------------------------------------
 i_DO_device* V( int number )
     {

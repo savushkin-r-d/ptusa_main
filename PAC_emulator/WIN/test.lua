@@ -334,8 +334,7 @@ function whey_tank:exec_cmd( cmd )
             return 1
         end
 
-        if self:set_mode( self.MODES.W_OUT_P1, 1 ) ==
-            1000 + self.MODES.W_OUT_P1 then
+        if self:set_mode( self.MODES.W_OUT_P1, 1 ) == 0 then
             POST1:set_mode( POST1.MODES.W_ACCEPTING_PAUSE, 1 )
         end
     end
@@ -348,13 +347,15 @@ function whey_tank:exec_cmd( cmd )
         end
 
         if self:set_mode( self.MODES.W_OUT_P2, 1 ) ==
-            1000 + self.MODES.W_OUT_P2 then
+            self.MODES.W_OUT_P2 then
             POST2:set_mode( POST1.MODES.W_ACCEPTING_PAUSE, 1 )
         end
     end
 
     if cmd == CMD.SET_HEATING_POST1_AND_TANK then
+        print( "safassf" )
         self:exec_cmd( CMD.SET_POST1_AND_TANK )
+        print( "safassf" )
         POST1:set_mode( POST1.MODES.W_HEATING, 1 )
     end
 

@@ -211,3 +211,22 @@ int lua_manager::error_trace( lua_State * L )
     return 0;
     }
 //-----------------------------------------------------------------------------
+int lua_manager::int_no_param_exec_lua_method( const char *object_name, 
+    const char *function_name, const char *c_function_name ) const
+    {
+    int res = 0;
+    if ( 0 == exec_lua_method( object_name, function_name, 0, 0, 1 ) )
+        {
+        res = ( int ) tolua_tonumber( L, -1, 0 );
+        lua_remove( L, -1 );
+        }
+    else
+        {
+#ifdef DEBUG
+        Print( "Error during C++ call - \"%s\"\n", c_function_name );
+#endif // DEBUG
+        }
+
+    return res;
+    }
+//-----------------------------------------------------------------------------

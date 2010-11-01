@@ -31,6 +31,11 @@ class project_manager
         /// @param file_name - имя конфигурационного файла проекта.
         int load_configuration( const char *file_name );
 
+        /// @brief Загрузка конфигурации проекта.
+        /// 
+        /// @param file_name - имя конфигурационного файла проекта.
+        int lua_load_configuration( const char *file_name );
+
         /// @brief Получение единственного экземпляра класса.
         static project_manager* get_instance();
 

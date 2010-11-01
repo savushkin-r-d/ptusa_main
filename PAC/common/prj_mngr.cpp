@@ -6,6 +6,8 @@
 #include "PAC_dev.h"
 #include "param_ex.h"
 
+#include "lua_manager.h"
+
 auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
 int project_manager::proc_main_params( int argc, char *argv[] )
@@ -121,5 +123,56 @@ project_manager::~project_manager()
 void project_manager::free_instance()
     {
     instance.free();
+    }
+//-----------------------------------------------------------------------------
+int project_manager::lua_load_configuration( const char *file_name )
+    {
+#ifdef DEBUG
+    Print( "\nRead configuration...\n" );
+#endif // DEBUG
+
+    //-File editor_version.
+    int file_version = 
+        lua_manager::get_instance()->int_no_param_exec_lua_method( "G_SYSTEM",
+        "get_file_version", "lua_load_configuration" );
+    
+    //-Editor editor_version.
+    const int CURRENT_EDITOR_VERSION = 12;
+    int editor_version =  
+        lua_manager::get_instance()->int_no_param_exec_lua_method( "G_SYSTEM",
+        "get_editor_version", "lua_load_configuration" );
+        
+    if ( editor_version < CURRENT_EDITOR_VERSION )
+        {
+#ifdef DEBUG
+        Print( "project_manager:load_configuration(...) - not correct editor editor_version - %d, must be %d!\n",
+            editor_version, CURRENT_EDITOR_VERSION );
+#endif // DEBUG
+        exit( 1 );
+        }
+    
+    //-Wago data.
+    lua_manager::get_instance()->void_exec_lua_method( "G_SYSTEM", 
+        "init_wago", "lua_load_configuration" );
+
+    wago_manager::get_instance()->print();
+
+    //-Devices data.
+    fflush( stdout );
+    lua_manager::get_instance()->void_exec_lua_method( "G_SYSTEM", 
+        "init_devices", "lua_load_configuration" );
+
+    //device_manager::get_instance()->load_from_cfg_file( cfg_file );
+
+    //cfg_file->file_close();
+
+    G_DEVICE_CMMCTR->add_device( device_manager::get_instance()->get_device() );
+    G_DEVICE_CMMCTR->print();
+
+#ifdef DEBUG
+    Print( "Reading configuration completed.\n\n" );
+#endif // DEBUG
+
+    return 0;
     }
 //-----------------------------------------------------------------------------

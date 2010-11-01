@@ -134,7 +134,13 @@ class wago_device
 
             IO_channels( CHANNEL_TYPE type );
 
-            ~IO_channels();            
+            ~IO_channels();
+
+            void init( int ch_count );
+
+            void init_channel( u_int ch_index, int node, int offset );
+
+            void print() const;
             };
 
         IO_channels DI_channels;    ///< Каналы дискретного входа.
@@ -145,8 +151,6 @@ class wago_device
         u_int   params_count;       ///< Количество параметров устройства.
         float   *params;            ///< Параметры устройства.
 
-        void print_table( const char *str, const IO_channels &channels ) const;
-
         /// @brief Загрузка информации о группе каналов ввода/вывода из 
         /// строки описания.
         /// 
@@ -155,6 +159,13 @@ class wago_device
         ///
         /// @return -  количество считанных байт.
         int load_table_from_string( char *str, IO_channels &channels );
+
+    public:
+        // Lua.
+        void init( int DO_count, int DI_count,
+            int AO_count, int AI_count, int par_count );
+
+        void init_channel( int type, int ch_inex, int node, int offset );  
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с модулями ввода/вывода Wago.
@@ -166,6 +177,8 @@ class wago_manager
         wago_manager();
 
         virtual ~wago_manager();
+
+        void print() const;
 
         /// @brief Чтение модулей ввода.
         ///
@@ -254,7 +267,12 @@ class wago_manager
             {
             wago_node();
 
+            wago_node( int type, int number, char *str_ip_addres, 
+                int DO_cnt, int DI_cnt, int AO_cnt, int AI_cnt );
+
             ~wago_node();
+
+            void print();
 
             /// @brief Загрузка конфигурации из файла.
             ///
@@ -269,7 +287,7 @@ class wago_manager
             int     state;          ///< Cостояние работы с узлом.
             u_int   number;         ///< Номер.
             u_int   type;           ///< Тип.
-            int     ip_addres[ 4 ]; ///< IP-адрес.
+            int     ip_address[ 4 ]; ///< IP-адрес.
 
             // Digital outputs ( DO ).
             u_int  DO_cnt;      ///< Amount of DO.
@@ -303,9 +321,33 @@ class wago_manager
 
     public:
         wago_node * get_node( int node_n );
+
+        /// @brief Установка числа модулей.
+        ///
+        /// Вызывается из Lua.
+        void init( int nodes_count );
+
+        /// @brief Инициализация модуля Wago.
+        ///
+        /// Вызывается из Lua.
+        void add_node( u_int index, int ntype, int address, char* IP_address, 
+            int DO_cnt, int DI_cnt, int AO_cnt, int AI_cnt );
+
+        /// @brief Инициализация параметров канала аналогового вывода.
+        ///
+        /// Вызывается из Lua.
+        void init_node_AO( u_int node_index, u_int AO_index, 
+            u_int type, u_int offset );
+
+        /// @brief Инициализация параметров канала аналогового ввода.
+        ///
+        /// Вызывается из Lua.
+        void init_node_AI( u_int node_index, u_int AI_index, 
+            u_int type, u_int offset );
+
     };
 //-----------------------------------------------------------------------------
-#define G_WAGO_MANAGER wago_manager::get_instance()
+wago_manager* G_WAGO_MANAGER();
 //-----------------------------------------------------------------------------
 #endif // WAGO_H 
 

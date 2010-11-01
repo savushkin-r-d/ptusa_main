@@ -386,7 +386,7 @@ static int pmain (lua_State *L) {
     tolua_PAC_dev_open( L );
     lua_manager::get_instance()->init( L );
 
-    G_PROJECT_MANAGER->load_configuration( "wago.ds5" );
+    G_PROJECT_MANAGER->lua_load_configuration( "main.wago.lua" );
     G_DEVICE_MANAGER()->print();
 
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
@@ -433,20 +433,58 @@ int main (int argc, char **argv)
         return EXIT_FAILURE;
         }
 
-    // Выполнение системного системного скрипта sys.lua.    
+    lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
+    luaL_openlibs(L);          /* open libraries */
+
+    // Выполнение системных скриптов sys.lua.    
     const char *lua_start_up_script = "sys.lua";    
     int res = luaL_dofile( L, lua_start_up_script );
+
+    const char *lua_start_up_wago_script = "sys.wago.lua";    
+    int res1 = luaL_dofile( L, lua_start_up_wago_script );
+
+    const char *lua_wago_script = "main.wago.lua";    
+    int res2 = luaL_dofile( L, lua_wago_script );
+
     if ( res )
         {
 #ifdef DEBUG
         Print( "Load Lua system script \"%s\" error!\n", lua_start_up_script );
         Print( "\t%s\n", lua_tostring( L, -1 ) );
 #endif // DEBUG
-        lua_pop( L, 1 );        
-        }
-    else
-        {
+        lua_pop( L, 1 ); 
 
+        status = 1;
+        }
+
+    if ( res1 )
+        {
+#ifdef DEBUG
+        Print( "Load Lua wago system script \"%s\" error!\n", 
+            lua_start_up_wago_script );
+        Print( "\t%s\n", lua_tostring( L, -1 ) );
+#endif // DEBUG
+        lua_pop( L, 1 );  
+
+        status = 1;
+        }
+
+    if ( res2 )
+        {
+#ifdef DEBUG
+        Print( "Load Lua wago script \"%s\" error!\n", 
+            lua_wago_script );
+        Print( "\t%s\n", lua_tostring( L, -1 ) );
+#endif // DEBUG
+        lua_pop( L, 1 );
+
+        status = 1;
+        }
+
+    lua_gc(L, LUA_GCRESTART, 0);
+
+    if ( res == 0 && res1 == 0 && res2 == 0 )
+        {
         s.argc = argc;
         s.argv = argv;
         status = lua_cpcall(L, &pmain, &s);

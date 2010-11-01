@@ -60,7 +60,7 @@
       <AdditionalDependencies>ws2_32.lib;User32.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetDir)$(TargetFileName)" "D:\Program Files\SciTE_ASUTP\bin_lua\lua\lua.exe"</Command>
+      <Command>copy "$(TargetDir)$(TargetFileName)" "d:\Program Files\SciTE_ASUTP\bin_lua\lua.exe"</Command>
       <Message>Копирование интерпретатора Lua.</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>

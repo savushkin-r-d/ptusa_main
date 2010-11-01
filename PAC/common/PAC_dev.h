@@ -22,6 +22,8 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <vector>
+
 #include "sys.h"
 #include "wago.h"
 #include "g_device.h"
@@ -513,7 +515,13 @@ class device : public i_simple_device,
             DST_V_MIXPROOF,     ///< Клапан микспруф.
             };
 
-        device();
+        device( int number, 
+            device::DEVICE_TYPE type, 
+            device::DEVICE_SUB_TYPE sub_type ): number( number ),
+            type( type ),
+            sub_type( sub_type )
+            { 
+            }
 
         virtual ~device()
             {
@@ -660,6 +668,10 @@ class dev_stub : public device,
     public i_counter
     {
     public:
+        dev_stub(): device( 0, DT_NONE, DST_NONE )
+            {
+            }
+
         int     save_state( char *buff );        
         int     save_changed_state( char *buff );
         int     save_device( char *buff );
@@ -693,9 +705,10 @@ class digital_device : public device,
     public wago_device
     {
     public:
-        digital_device()
+        digital_device( int number, device::DEVICE_TYPE type, 
+            device::DEVICE_SUB_TYPE sub_type ): device( number, type, sub_type )
 #ifdef DEBUG_NO_WAGO_MODULES
-            :state( 0 )
+            , state( 0 )
 #endif // DEBUG_NO_WAGO_MODULES
             {
             }
@@ -746,6 +759,15 @@ class analog_device : public device,
     public wago_device
     {
     public:
+        analog_device( int number, 
+            device::DEVICE_TYPE type, 
+            device::DEVICE_SUB_TYPE sub_type ): device( number, type, sub_type )
+#ifdef DEBUG_NO_WAGO_MODULES
+            ,value( 0 )
+#endif  // DEBUG_NO_WAGO_MODULES
+            {
+            }
+
         void  set_state( int new_state );
         int   get_state_now();
         int   parse_cmd( char *buff );
@@ -755,10 +777,6 @@ class analog_device : public device,
         void  off();
 
 #ifdef DEBUG_NO_WAGO_MODULES
-        analog_device() : value( 0 )
-            {
-            }
-
         float get_value();
         void set_value( float new_value );
 
@@ -782,6 +800,12 @@ class analog_device : public device,
 /// Это может быть клапан, насос, канал управления...
 class DO_1 : public digital_device
     {
+    public:
+        DO_1( int number, device::DEVICE_TYPE type, 
+            device::DEVICE_SUB_TYPE sub_type ): digital_device( number, type, sub_type )
+            {
+            }
+
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state_now();
@@ -801,6 +825,12 @@ class DO_1 : public digital_device
 /// Это может быть клапан, насос...
 class DO_2 : public digital_device
     {
+    public:
+        DO_2( int number, device::DEVICE_TYPE type, 
+            device::DEVICE_SUB_TYPE sub_type ): digital_device( number, type, sub_type )
+            {
+            }
+
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state_now();
@@ -821,6 +851,12 @@ class DO_2 : public digital_device
 /// Это может быть клапан, насос...
 class DO_1_DI_1 : public digital_device
     {
+    public:
+        DO_1_DI_1( int number, device::DEVICE_TYPE type, 
+            device::DEVICE_SUB_TYPE sub_type ): digital_device( number, type, sub_type )
+            {
+            }
+
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state_now();
@@ -845,6 +881,12 @@ class DO_1_DI_1 : public digital_device
 /// Это может быть клапан, насос...
 class DO_1_DI_2 : public digital_device
     {
+    public:
+        DO_1_DI_2( int number, device::DEVICE_TYPE type, 
+            device::DEVICE_SUB_TYPE sub_type ): digital_device( number, type, sub_type )
+            {
+            }
+
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state_now();
@@ -869,6 +911,12 @@ class DO_1_DI_2 : public digital_device
 /// Это может быть клапан, насос...
 class DO_2_DI_2 : public digital_device
     {
+    public:
+        DO_2_DI_2( int number, device::DEVICE_TYPE type, 
+            device::DEVICE_SUB_TYPE sub_type ): digital_device( number, type, sub_type )
+            {
+            }
+
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state_now();
@@ -893,6 +941,10 @@ class DO_2_DI_2 : public digital_device
 class valve_mix_proof : public digital_device
     {
     public:
+        valve_mix_proof( u_int number ): digital_device( number, DT_V, DST_V_MIXPROOF )
+            {
+            }
+
         enum STATES
             {
             ST_CLOSE = 0,   ///< Закрыт.
@@ -930,6 +982,12 @@ class valve_mix_proof : public digital_device
 /// Это может быть температура, расход (величина)...
 class AI_1 : public analog_device
     {
+    public:
+        AI_1( u_int number, 
+            device::DEVICE_TYPE type, 
+            device::DEVICE_SUB_TYPE sub_type ): analog_device( number, type, sub_type )
+            {
+            }
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         float get_value();
@@ -953,6 +1011,10 @@ class AI_1 : public analog_device
 class temperature_e : public AI_1
     {
     public:
+        temperature_e( u_int number ): AI_1( number, DT_TE, DST_NONE )
+            {
+            }
+
         float get_max_val();
         float get_min_val();
     };
@@ -961,6 +1023,10 @@ class temperature_e : public AI_1
 class level_e : public AI_1
     {
     public:
+        level_e( u_int number ): AI_1( number, DT_LE, DST_NONE )
+            {
+            }
+
         float get_max_val();
         float get_min_val();
     };
@@ -969,6 +1035,10 @@ class level_e : public AI_1
 class flow_e : public AI_1
     {
     public:
+        flow_e( u_int number ): AI_1( number, DT_FE, DST_NONE )
+            {
+            }
+
         float get_max_val();
         float get_min_val();
 
@@ -984,6 +1054,10 @@ class flow_e : public AI_1
 class concentration_e : public AI_1
     {
     public:
+        concentration_e( u_int number ): AI_1( number, DT_QE, DST_NONE )
+            {
+            }
+
         float get_max_val();
         float get_min_val();
 
@@ -999,6 +1073,10 @@ class concentration_e : public AI_1
 class analog_input_4_20 : public AI_1
     {
     public:
+        analog_input_4_20( u_int number ): AI_1( number, DT_AI, DST_NONE )
+            {
+            }
+
         float get_max_val();
         float get_min_val();
     };
@@ -1008,6 +1086,13 @@ class analog_input_4_20 : public AI_1
 /// Это может быть управляемый клапан...
 class AO_1 : public analog_device
     {
+    public:
+        AO_1( u_int number, 
+            device::DEVICE_TYPE type, 
+            device::DEVICE_SUB_TYPE sub_type ): analog_device( number, type, sub_type )
+            {
+            }
+
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         /// @brief Получение максимального значения выхода устройства.
@@ -1033,6 +1118,10 @@ class AO_1 : public analog_device
 class AO_0_100 : public AO_1
     {
     public:
+        AO_0_100( u_int number ) : AO_1( number, DT_AO, DST_NONE )
+            {
+            }
+
         float get_max_val();
         float get_min_val();
 
@@ -1049,10 +1138,17 @@ class AO_0_100 : public AO_1
 /// Это может быть обратная связь, расход (есть/нет)...
 class DI_1 : public digital_device
     {
+    public:
+        DI_1( u_int number, 
+            device::DEVICE_TYPE type, 
+            device::DEVICE_SUB_TYPE sub_type, u_int dt = 0 ):
+        digital_device( number, type, sub_type )
+            {
+            set_change_time( dt );
+            }
+
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
-        DI_1( u_int dt = 0 );
-
         int  get_state_now();
         void on();
         void off();
@@ -1068,58 +1164,101 @@ class DI_1 : public digital_device
 /// @brief Клапан с одним каналом управления.
 class valve_DO_1 : public DO_1
     {
+    public:
+        valve_DO_1( u_int number ) : DO_1( number, DT_V, DST_V_DO_1 )
+            {
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с двумя каналами управления.
 class valve_DO_2 : public DO_2
     {
+    public:
+        valve_DO_2( u_int number ): DO_2( number, DT_V, DST_V_DO_2 )
+            {
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним каналом управления и одной обратной связью.
 class valve_DO_1_DI_1 : public DO_1_DI_1
     {
+    public:
+        valve_DO_1_DI_1( u_int number ): DO_1_DI_1( number, DT_V, DST_V_DO_1_DI_1 )
+            {
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним каналом управления и двумя обратными связями.
 class valve_DO_1_DI_2 : public DO_1_DI_2
     {
+    public:
+        valve_DO_1_DI_2( u_int number ): DO_1_DI_2( number, DT_V, DST_V_DO_1_DI_2 )
+            {
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с двумя каналами управления и двумя обратными связями.
 class valve_DO_2_DI_2 : public DO_2_DI_2
     {
+    public:
+        valve_DO_2_DI_2( u_int number ): DO_2_DI_2( number, DT_V, DST_V_DO_2_DI_2 )
+            {
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Насос.
 class pump : public DO_1_DI_1
     {
+    public:
+        pump( u_int number ): DO_1_DI_1( number, DT_N, DST_NONE )
+            {
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Мешалка.
 class mixer : public DO_1_DI_1
     {
+    public:
+        mixer( u_int number ): DO_1_DI_1( number, DT_M, DST_NONE )
+            {
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора уровня.
 class level_s : public DI_1
     {
     public:
-        level_s( u_int dt = 1000 );
+        level_s( u_int number, u_int dt = 1000 ): DI_1( number, DT_LS, DST_NONE )
+            {
+            set_change_time( dt );
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора расхода.
 class flow_s : public DI_1
     {
+    public:
+        flow_s( u_int number ): DI_1( number, DT_FS, DST_NONE )
+            {            
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик обратной связи.
 class feedback : public DI_1
     {
+    public:
+        feedback( u_int number ): DI_1( number, DT_FB, DST_NONE )
+            {            
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Сигнал управления
 class control_s : public DO_1
     {
+    public:
+        control_s( u_int number ): DO_1( number, DT_UPR, DST_NONE )
+            {            
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Счетчик.
@@ -1129,7 +1268,11 @@ class counter : public device,
     public wago_device
     {
     public:
-        counter();
+        counter( u_int number ): device( number, DT_CTR, DST_NONE ), 
+            value( 0 ),
+            last_read_value( 0 )
+            {            
+            }
 
         virtual ~counter()
             {            
@@ -1274,11 +1417,48 @@ class device_manager
         /// @brief Получение индекса устройства по его номеру.        
         int get_device_n( device::DEVICE_TYPE dev_type, u_int dev_number );
 
-        int    devices_count;               ///< Количество устройств.
-        device **project_devices;           ///< Все устройства.
+        std::vector< device* > project_devices; ///< Все устройства.
 
         /// @brief Единственный экземпляр класса.
         static auto_smart_ptr < device_manager > instance;
+
+    public:
+        // @brief Установка числа устройств.
+        //
+        // Вызывается из Lua.
+        wago_device* add_device( int dev_type, int dev_sub_type, 
+            u_int number, char * descr );
+
+        void complete_init()
+            {
+            devices = new complex_device( 0, "GLB", device::C_DEVICE_TYPE_CNT, 0 );
+
+            for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
+                {
+                int dev_cnt = dev_types_ranges[ i ].end_pos -
+                    dev_types_ranges[ i ].start_pos + 1;
+
+                if ( dev_types_ranges[ i ].start_pos == -1 )
+                    {
+                    dev_cnt = 0;
+                    }
+
+                devices->sub_dev[ i ] =
+                    new complex_device( 0, device::DEV_NAMES[ i ], dev_cnt,
+                    device::DEV_TYPES[ i ] );
+
+                if ( dev_cnt )
+                    {
+                    int pos = 0;
+                    for ( int j = dev_types_ranges[ i ].start_pos;
+                        j <= dev_types_ranges[ i ].end_pos; j++ )
+                        {
+                        ( ( complex_device* ) ( devices->sub_dev[ i ] ) )->sub_dev[ pos++ ] =
+                            project_devices[ j ];
+                        }
+                    }
+                }
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief таймер.

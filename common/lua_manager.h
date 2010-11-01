@@ -32,6 +32,9 @@ class lua_manager
             const char *function_name, int param,
             const char *c_function_name ) const;
 
+        int int_no_param_exec_lua_method( const char *object_name, 
+            const char *function_name, const char *c_function_name ) const;
+
         void* user_object_exec_lua_method( const char *object_name,
             const char *function_name, int param,
             const char *c_function_name ) const;
