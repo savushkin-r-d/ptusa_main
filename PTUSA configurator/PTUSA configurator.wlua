@@ -1,5 +1,5 @@
 -- ----------------------------------------------------------------------------
-require("wx")
+require( "wx" )
 -- ----------------------------------------------------------------------------
 -- Тестовая конфигурация.
 project =
@@ -11,9 +11,7 @@ project =
             {
             ntype   = 0,
             address = 1,
-
 			comment = "Базовый узел",
-
             modules =
                 {
                 { 466, '', '', '', '', '',  },
@@ -60,10 +58,104 @@ project =
 
     }
 -- ----------------------------------------------------------------------------
-g_prev_activ_item = nil
-g_data			  = {}
+g_prev_activ_item  	 = nil
+g_data			  	 = {}
+g_selected_tree_item = nil
 -- ----------------------------------------------------------------------------
-local function print_table( tbl, tree, level )
+-- Сохранение таблицы.
+local function save_table_to_file( tbl, table_name, filename )
+
+	local function delete_sys_info( tbl )
+		for fields, value in pairs( tbl ) do
+			if type( value ) == "function" or
+				type( value ) == "userdata" or
+				string.sub( fields, 1, 4 ) == "sys_" then
+
+				tbl[ fields ] = nil
+			end
+
+			if type( value ) == "table" then
+				delete_sys_info( value )
+			end
+		end
+
+	end
+
+	local function save_table( tbl, str, table_name, tab_str )
+		--Проверка на массив.
+		local is_array = false
+		for fields, value in pairs( tbl ) do
+			if type( value ) == "table" then
+				is_array = true
+				break
+			end
+		end
+		if is_array == false then
+			str = str..tab_str..'{ '
+
+			for fields, value in pairs( tbl ) do
+				local field_value = value
+				if type( value ) == "string" then
+					field_value = "'"..field_value.."'"
+				end
+
+			str = str..field_value..', '
+			end
+
+			str = string.sub( str, 1, string.len( str ) - 2 )
+			return str..' },\n'
+		end
+
+		str = str..tab_str..table_name..' = \n'..tab_str..'\t{\n'
+
+		for fields, value in pairs( tbl ) do
+
+			local field_name = fields
+			if type( field_name ) == "number" then
+				field_name = "["..field_name.."]"
+			end
+
+			local field_value = value
+			if type( value ) == "string" then
+				field_value = "'"..field_value.."'"
+			end
+
+			if type( fields ) == "string" and type( value ) ~= "table" then
+				str = str..tab_str..'\t'..field_name..' = '..field_value..',\n'
+			end
+
+			if type( fields ) == "number" and type( value ) ~= "table" then
+				str = str..tab_str..'\t'..field_value..',\n '
+			end
+
+			if type( value ) == "table" then
+				str = save_table( value, str, field_name, tab_str..'\t' )
+			end
+
+		end
+
+		str = string.sub( str, 1, string.len( str ) - 2 )
+
+
+		str = str..'\n'..tab_str..'\t},\n\n'
+
+		return str
+	end
+
+	delete_sys_info( tbl )
+
+	local str = ''
+	str = save_table( tbl, str, table_name, '' )
+	--Удаляем лишнюю запятую.
+	str = string.sub( str, 1, string.len( str ) - 3 )
+
+	local file = io.open( filename, "w+" )
+	file:write( str )
+	io.close( file )
+end
+-- ----------------------------------------------------------------------------
+-- Отображение таблицы в виде дерева.
+local function create_tree_veiw( tbl, tree, level, parent_property_name )
 
 	local root_id
 	if level == nil then
@@ -92,148 +184,61 @@ local function print_table( tbl, tree, level )
 	end
 
 	g_data[ root_id:GetValue() ] = tbl
+	g_data[ root_id:GetValue() ].sys_parent_property_name =
+		parent_property_name
 
+	if tbl.sys_selected ~= nil then
+		g_selected_tree_item = root_id
+		tbl.sys_selected = nil
+	end
 
     for fields, value in pairs( tbl ) do
-		if type( value ) == "table" then
-
-			print_table( value, tree, root_id )
+		if type( value ) == "table" and
+		not ( type( fields ) == "string" and
+		string.sub( fields, 1, 4 ) == "sys_" ) then
+			create_tree_veiw( value, tree, root_id, fields )
 		end
     end
 
 end
 -- ----------------------------------------------------------------------------
-project.get_name = function( self )
-	return self.name
-end
 -- ----------------------------------------------------------------------------
-project.show = function( self, panel, is_show )
-
-	if is_show == true then
-		staticText = wx.wxStaticText( panel, wx.wxID_ANY, "Имя проекта" )
-
-		text = wx.wxTextCtrl( panel, 10 , self.name, wx.wxDefaultPosition,
-			wx.wxDefaultSize, wx.wxTE_PROCESS_ENTER )
-
-		text:Connect( 10, wx.wxEVT_COMMAND_TEXT_ENTER,
-			function( event )
-
-			project.name = text:GetValue()
-
-			tree:SetItemText( tree:GetSelection(), text:GetValue() )
-			--tree:DeleteAllItems()
-			--print_table( project, tree )
-
-			--tree:Collapse( 1 )
-
-
-        end )
-
-		flex_grid_sizer = wx.wxFlexGridSizer( 2, 2, 5, 5 )
-		flex_grid_sizer:AddGrowableCol( 1 )
-		flex_grid_sizer:Add( staticText, 0,
-			wx.wxALIGN_CENTER_VERTICAL + wx.wxALL, 5 )
-		flex_grid_sizer:Add( text, 0,
-			wx.wxGROW + wx.wxALIGN_CENTER_VERTICAL + wx.wxALL, 5 )
-		panel:SetSizer( flex_grid_sizer )
-		panel:Layout() -- help sizing the windows before being shown
-
-	else
-		staticText:Destroy()
-		staticText = nil
-		text:Destroy()
-		text = nil
-
-		flex_grid_sizer = nil
-
-		panel:Layout() -- help sizing the windows before being shown
-
+function add_visual_behavior( project )
+	--Отображение проекта.
+	project.get_name = function( self )
+		return self.name
 	end
-end
--- ----------------------------------------------------------------------------
-project.G_NODES.get_name = function( self )
-	return "Узлы Wago ("..#self..")"
-end
--- ----------------------------------------------------------------------------
-for fields, value in pairs( project.G_NODES ) do
-	if type( value ) == "table" then
 
-		value.get_name = function( self )
-			return self.address..". ".."Узел Wago"
-		end
+	--Отображение всех узлов Wago.
+	project.G_NODES.get_name = function( self )
+		return "Узлы Wago ("..#self..")"
+	end
 
-		value.set_property = function( self, prop, new_value )
+	--Отображение каждого узла Wago.
+	for fields, value in pairs( project.G_NODES ) do
+		if type( value ) == "table" then
 
-			if prop == 'ntype' then
-				value.ntype = new_value
-
-			elseif prop == 'address' then
-				value.address = new_value
-
-			elseif prop == 'comment' then
-				value.comment = new_value
-
+			value.sys_parent_property_name = fields
+			value.get_name = function( self )
+				return self.sys_parent_property_name..". ".."Узел Wago"
 			end
 
-		end
+			--Отображение каждого модуля Wago.
+			for fields, value in pairs( value ) do
+				if fields == "modules" then
 
-		value.show = function( self, panel, is_show )
+					value.get_name = function( self )
+						return "Модули ("..#self..")"
+					end
 
-            if is_show == true then
-                staticText = wx.wxStaticText( panel, wx.wxID_ANY, "Комментарий" )
+					for fields, value in pairs( value ) do
+						if type( value ) == "table" then
 
-                text = wx.wxTextCtrl( panel, 10 , value.comment, wx.wxDefaultPosition, wx.wxDefaultSize, wx.wxTE_PROCESS_ENTER )
-
-                text:Connect( 10, wx.wxEVT_COMMAND_TEXT_ENTER,
-                    function( event )
-
-					print( text:GetValue() )
-
-                    --project.name = text:GetValue()
-
-                    --tree:SetItemText( tree:GetSelection(), text:GetValue() )
-                    --tree:DeleteAllItems()
-                    --print_table( project, tree )
-
-                    --tree:Collapse( 1 )
-
-
-                end )
-
-                flex_grid_sizer = wx.wxFlexGridSizer( 2, 2, 5, 5 )
-                flex_grid_sizer:AddGrowableCol( 1 )
-                flex_grid_sizer:Add( staticText, 0, wx.wxALIGN_CENTER_VERTICAL + wx.wxALL, 6 )
-                flex_grid_sizer:Add( text, 0, wx.wxGROW + wx.wxALIGN_CENTER_VERTICAL + wx.wxALL, 6 )
-                panel:SetSizer( flex_grid_sizer )
-                panel:Layout() -- help sizing the windows before being shown
-
-            else
-                staticText:Destroy()
-                staticText = nil
-                text:Destroy()
-                text = nil
-
-                flex_grid_sizer = nil
-
-                panel:Layout() -- help sizing the windows before being shown
-
-            end
-        end
-
-		for fields, value in pairs( value ) do
-			if fields == "modules" then
-
-				value.get_name = function( self )
-					return "Модули ("..#self..")"
-				end
-
-
-				for fields, value in pairs( value ) do
-					if type( value ) == "table" then
-
-						value.get_name = function( self )
-							return string.format( "%d", value[ 1 ] )
+							value.get_name = function( self )
+								return string.format( "%d", self[ 1 ] )
+							end
 						end
+
 					end
 
 				end
@@ -241,9 +246,9 @@ for fields, value in pairs( project.G_NODES ) do
 			end
 
 		end
-
 	end
 end
+-- ----------------------------------------------------------------------------
 -- ----------------------------------------------------------------------------
 function main()
     frame = wx.wxFrame( wx.NULL, wx.wxID_ANY, "wxLua wxTreeCtrl Sample",
@@ -252,9 +257,15 @@ function main()
 
     -- create the menubar and attach it
     local fileMenu = wx.wxMenu()
-    fileMenu:Append(wx.wxID_EXIT, "E&xit", "Quit the program")
+	fileMenu:Append( wx.wxID_NEW, "N&ew\tCtrl+N", "New description" )
+	fileMenu:Append( wx.wxID_OPEN, "O&pen\tCtrl+O", "Open description" )
+	fileMenu:Append( wx.wxID_SAVE, "S&ave\tCtrl+S", "Save description" )
+
+	fileMenu:AppendSeparator()
+	fileMenu:Append( wx.wxID_EXIT, "E&xit\tAlt+F4", "Quit the program" )
     local helpMenu = wx.wxMenu()
-    helpMenu:Append(wx.wxID_ABOUT, "&About", "About the wxLua wxTreeCtrl Sample")
+    helpMenu:Append(wx.wxID_ABOUT, "&About",
+		"About the wxLua wxTreeCtrl Sample")
 
     local menuBar = wx.wxMenuBar()
     menuBar:Append(fileMenu, "&File")
@@ -272,13 +283,23 @@ function main()
     -- connect the selection event of the about menu item
     frame:Connect(wx.wxID_ABOUT, wx.wxEVT_COMMAND_MENU_SELECTED,
         function (event)
-            wx.wxMessageBox('This is the "About" dialog of the wxLua wxTreeCtrl sample.\n'..
-                            wxlua.wxLUA_VERSION_STRING.." built with "..wx.wxVERSION_STRING,
-                            "About wxLua",
-                            wx.wxOK + wx.wxICON_INFORMATION,
-                            frame)
+            wx.wxMessageBox( 'This is the "About" dialog of the wxLua'..
+				'wxTreeCtrl sample.\n'..
+				wxlua.wxLUA_VERSION_STRING.." built with "..
+				wx.wxVERSION_STRING,
+				"About wxLua", wx.wxOK + wx.wxICON_INFORMATION, frame )
         end )
 
+	--
+    frame:Connect(wx.wxID_SAVE, wx.wxEVT_COMMAND_MENU_SELECTED,
+        function (event)
+            local filename = wx.wxFileSelector( 'Choose a file to open',
+				'', '', 'prj.lua',
+				"Project description (*.prj.lua)|*.prj.lua" )
+
+			save_table_to_file( project, "project", filename )
+			add_visual_behavior( project )
+        end )
 
     splitter = wx.wxSplitterWindow(frame, wx.wxID_ANY)
     splitter:SetMinimumPaneSize(50) -- don't let it unsplit
@@ -295,63 +316,116 @@ function main()
 
     frame:Layout() -- help sizing the windows before being shown
 
-	print_table( project, tree )
 
---~ 	tree:Connect( wx.wxEVT_COMMAND_TREE_SEL_CHANGED,
---~ 		function( event )
---~ 			print( event:GetString() )
---~ 		end )
+	add_visual_behavior( project )
+	create_tree_veiw( project, tree )
 
 
-g_selected_object = nil
 
- tree:Connect( wx.wxEVT_COMMAND_TREE_KEY_DOWN,
-        function( event )
-			print( event:GetKeyCode() )
+	g_selected_object = nil
 
+	tree:Connect( wx.wxEVT_COMMAND_TREE_KEY_DOWN,
+		function( event )
+			--print( event:GetKeyCode() )
+
+			--Insert key.
+			if event:GetKeyCode() == 322 then
+
+				if g_selected_object == nil then
+					return
+				end
+
+				local owner_tree_object = tree:GetItemParent(
+					tree:GetSelection() )
+				local owner_object = g_data[ owner_tree_object:GetValue() ]
+				local insert_index = g_selected_object.sys_parent_property_name
+
+				--Добавляем новый элемент.
+				owner_object[ #owner_object + 1 ] = {}
+				for i = #owner_object, insert_index + 1, -1 do
+
+					for fields, value in pairs( owner_object[ i - 1 ] ) do
+						owner_object[ i ][ fields ] =
+						owner_object[ i - 1 ][ fields ]
+					end
+
+					owner_object[ i ].sys_parent_property_name = i
+				end
+
+				owner_object[ insert_index + 1 ].sys_selected = true
+
+				tree:DeleteAllItems()
+				create_tree_veiw( project, tree )
+				--panel:Show( true )
+				--tree:Show( true )
+				--tree:SetFocus()
+				tree:SelectItem( g_selected_tree_item )
+
+			end
+
+			--Delete key.
 			if event:GetKeyCode() == 127 then
 
 				if g_selected_object == nil then
 					return
 				end
 
-				for fields, value in pairs( g_selected_object ) do
-					print( fields, ' -- ', value )
+				local owner_tree_object = tree:GetItemParent(
+					tree:GetSelection() )
+				local owner_object = g_data[ owner_tree_object:GetValue() ]
+				local delete_index = g_selected_object.sys_parent_property_name
 
+				--Удаляем поле, индексируемое числом.
+				if type( delete_index ) == "number" then
+					for i = delete_index, #owner_object - 1 do
+							owner_object[ i ] = owner_object[ i + 1 ]
+						end
+
+					owner_object[ #owner_object ] = nil
+
+					if owner_object[ delete_index ] ~= nil then
+						owner_object[ delete_index ].sys_selected = true
+					else
+						owner_object.sys_selected = true
+					end
+
+				--Удаляем поле, индексируемое свойством.
+				else
+					owner_object[ delete_index ] = nil
+					owner_object.sys_selected = true
 				end
 
-				g_selected_object[ 1 ] = nil
-
+				--panel:Hide()
+				--tree:Hide()
 				tree:DeleteAllItems()
-			    print_table( project, tree )
-
+				create_tree_veiw( project, tree )
+				--panel:Show( true )
+				--tree:Show( true )
+				--tree:SetFocus()
+				tree:SelectItem( g_selected_tree_item )
 			end
-
-
-		end)
+		end )
 
 
     tree:Connect( wx.wxEVT_COMMAND_TREE_SEL_CHANGED,
         function( event )
+			panel:Hide()
+
             local item_id = event:GetItem()
 			local object = g_data[ item_id:GetValue() ]
 
 			g_selected_object = object
 
-			--if g_prev_activ_item ~= nil and g_prev_activ_item.show ~= nil then
-				--g_prev_activ_item:show( panel, false )
-			--end
+			if g_prev_activ_item ~= nil and
+				g_prev_activ_item.sys_static_text ~= nil then
 
-			if g_prev_activ_item ~= nil and g_prev_activ_item.staticText ~= nil then
+				for i = 1, #g_prev_activ_item.sys_static_text do
 
-				--print( #g_prev_activ_item.staticText )
-				for i = 1, #g_prev_activ_item.staticText do
+					g_prev_activ_item.sys_static_text[ i ]:Destroy()
+					g_prev_activ_item.sys_static_text[ i ] = nil
 
-					g_prev_activ_item.staticText[ i ]:Destroy()
-					g_prev_activ_item.staticText[ i ] = nil
-
-					g_prev_activ_item.Text[ i ]:Destroy()
-					g_prev_activ_item.Text[ i ] = nil
+					g_prev_activ_item.sys_text[ i ]:Destroy()
+					g_prev_activ_item.sys_text[ i ] = nil
 				end
 
                 g_prev_activ_item.flex_grid_sizer = nil
@@ -359,57 +433,43 @@ g_selected_object = nil
                 panel:Layout() -- help sizing the windows before being shown
 			end
 
-
 			--Отображаем все поля.
 			index = 1
-			object.staticText = {}
-			object.Text = {}
+			object.sys_static_text = {}
+			object.sys_text = {}
 
 			for fields, value in pairs( object ) do
 
-				if type( value ) == "string" then
+				if ( type( value ) == "string" or
+					type( value ) == "number" ) and
+					not ( type( fields ) == "string" and
+					string.sub( fields, 1, 4 ) == "sys_" ) then
 
 				    local par_name = fields
 				    if type( fields ) == "number" then
 						par_name = string.format( "[ %d ]", fields )
 					end
 
-					object.staticText[ index ] = wx.wxStaticText( panel, wx.wxID_ANY, par_name )
-					object.Text[ index ] = wx.wxTextCtrl( panel, 10 , value, wx.wxDefaultPosition, wx.wxDefaultSize, wx.wxTE_PROCESS_ENTER )
-
-					object.Text[ index ]:Connect( 10, wx.wxEVT_COMMAND_TEXT_ENTER,
-						function( event )
-
-						object[ fields ] = event:GetString()
-
-						if object.get_name ~= nil then
-							tree:SetItemText( tree:GetSelection(), object:get_name() )
-						end
-
-					end )
-
-
-					index = index + 1
-				end
-
-				if type( value ) == "number" then
-
-				    local par_name = fields
-				    if type( fields ) == "number" then
-						par_name = string.format( "[ %d ]", fields )
+					local par_value = value
+				    if type( par_value ) == "number" then
+						par_value = string.format( "%d", par_value )
 					end
 
-					object.staticText[ index ] = wx.wxStaticText( panel, wx.wxID_ANY, par_name )
-					object.Text[ index ] = wx.wxTextCtrl( panel, 10 , string.format( "%d", value ),
-						wx.wxDefaultPosition, wx.wxDefaultSize, wx.wxTE_PROCESS_ENTER )
+					object.sys_static_text[ index ] = wx.wxStaticText( panel,
+						wx.wxID_ANY, par_name )
+					object.sys_text[ index ] = wx.wxTextCtrl( panel, 10 ,
+						par_value, wx.wxDefaultPosition, wx.wxDefaultSize,
+						wx.wxTE_PROCESS_ENTER )
 
-					object.Text[ index ]:Connect( 10, wx.wxEVT_COMMAND_TEXT_ENTER,
+					object.sys_text[ index ]:Connect( 10,
+						wx.wxEVT_COMMAND_TEXT_ENTER,
 						function( event )
 
 						object[ fields ] = event:GetString()
 
 						if object.get_name ~= nil then
-							tree:SetItemText( tree:GetSelection(), object:get_name() )
+							tree:SetItemText( tree:GetSelection(),
+								object:get_name() )
 						end
 
 					end )
@@ -417,7 +477,7 @@ g_selected_object = nil
 					index = index + 1
 				end
 
-
+			panel:Show( true )
 			end
 
 			if index > 1 then
@@ -425,8 +485,10 @@ g_selected_object = nil
 				object.flex_grid_sizer:AddGrowableCol( 1 )
 
 				for i = 1, index - 1 do
-					object.flex_grid_sizer:Add( object.staticText[ i ], 0, wx.wxALIGN_CENTER_VERTICAL + wx.wxALL, 5 )
-					object.flex_grid_sizer:Add( object.Text[ i ], 0, wx.wxGROW + wx.wxALIGN_CENTER_VERTICAL + wx.wxALL, 5 )
+					object.flex_grid_sizer:Add( object.sys_static_text[ i ], 0,
+						wx.wxALIGN_CENTER_VERTICAL + wx.wxALL, 5 )
+					object.flex_grid_sizer:Add( object.sys_text[ i ], 0,
+						wx.wxGROW + wx.wxALIGN_CENTER_VERTICAL + wx.wxALL, 5 )
 					panel:SetSizer( object.flex_grid_sizer )
 					panel:Layout() -- help sizing the windows before being shown
 				end
@@ -435,13 +497,11 @@ g_selected_object = nil
 
 			g_prev_activ_item = object
 
-			if object.show ~= nil then
+--[[			if object.show ~= nil then
 				--object:show( panel, true )
-			end
+			end]]
 
 		end)
-
-
 
 	wx.wxGetApp():SetTopWindow(frame)
 
@@ -462,7 +522,9 @@ local cookie = 0
 local child = tree:GetFirstChild( root, cookie )
 child = tree:GetFirstChild( child, cookie )
 child = tree:GetFirstChild( child, cookie )
+--tree:SortChildren( child )
 child = tree:GetFirstChild( child, cookie )
+--tree:SortChildren( child )
 --print( child )
 --tree:Expand( child )
 
