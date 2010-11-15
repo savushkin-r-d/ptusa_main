@@ -19,7 +19,6 @@
 #endif // LINUX_OS
 
 #ifdef WIN_OS
-#include "StdAfx.h"
 
 #include <conio.h>
 
@@ -104,8 +103,7 @@ int main( int argc, char *argv[] )
     if ( res ) //-Ошибка инициализации.
     	{
         return EXIT_FAILURE;
-    	}    
-
+    	}           
     G_TECH_OBJECT_MNGR()->init_objects();    
 
 #ifdef DEBUG
