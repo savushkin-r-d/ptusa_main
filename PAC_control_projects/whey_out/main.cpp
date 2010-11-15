@@ -92,17 +92,6 @@ int main( int argc, char *argv[] )
     PAC_critical_errors_manager::set_instance( new PAC_critical_errors_manager() );
 
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
-#ifdef LINUX_OS
-    G_PROJECT_MANAGER->load_configuration( "./whey_out.ds5" );
-#endif // LINUX_OS
-
-#ifdef WIN_OS
-#ifdef DEBUG
-     G_PROJECT_MANAGER->load_configuration( "..\\whey_out.ds5" );
-#else
-    G_PROJECT_MANAGER->load_configuration( "whey_out.ds5" );
-#endif // DEBUG
-#endif // WIN_OS
 
 #ifdef DEBUG
     G_DEVICE_MANAGER()->print();

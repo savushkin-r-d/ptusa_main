@@ -34,6 +34,26 @@ int lua_manager::init( lua_State* lua_state )
         luaL_openlibs( L );    // Open standard libraries.
         tolua_PAC_dev_open( L );
 
+        if( luaL_dofile( L, "sys.wago.lua" ) != 0 )
+            {
+#ifdef DEBUG
+            Print( "Load Wago Lua system script error!\n" );
+            Print( "\t%s\n", lua_tostring( L, -1 ) );
+#endif // DEBUG
+            lua_pop( L, 1 );
+            return 1;
+            }
+
+        if( luaL_dofile( L, "main.wago.lua" ) != 0 )
+            {
+#ifdef DEBUG
+            Print( "Load description Wago Lua script error!\n" );
+            Print( "\t%s\n", lua_tostring( L, -1 ) );
+#endif // DEBUG
+            lua_pop( L, 1 );
+            return 1;
+            }
+
 #if defined WIN_OS && defined DEBUG
         if( luaL_dofile( L, "../sys.lua" ) != 0 )
 #else
@@ -47,6 +67,8 @@ int lua_manager::init( lua_State* lua_state )
             lua_pop( L, 1 );
             return 1;
             }
+
+        
 
 #if defined WIN_OS && defined DEBUG
         if( luaL_loadfile( L, "../main.lua" ) != 0 )
