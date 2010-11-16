@@ -53,10 +53,10 @@ void project_manager::free_instance()
     instance.free();
     }
 //-----------------------------------------------------------------------------
-int project_manager::lua_load_configuration( const char *file_name )
+int project_manager::lua_load_configuration()
     {
 #ifdef DEBUG
-    Print( "\nRead configuration...\n" );
+    Print( "\nproject_manager - read configuration...\n" );
 #endif // DEBUG
 
     //-File editor_version.
@@ -89,8 +89,7 @@ int project_manager::lua_load_configuration( const char *file_name )
     lua_manager::get_instance()->void_exec_lua_method( "system", 
         "init_devices", "lua_load_configuration" );
 
-    G_DEVICE_CMMCTR->add_device( device_manager::get_instance()->get_device() );
-    G_DEVICE_CMMCTR->print();
+    G_DEVICE_CMMCTR->add_device( device_manager::get_instance()->get_device() );    
 
 #ifdef DEBUG
     Print( "Reading configuration completed.\n\n" );

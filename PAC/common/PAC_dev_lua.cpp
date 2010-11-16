@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 10/29/10 12:51:51.
+** Generated automatically by tolua++-1.0.92 on 11/16/10 15:50:16.
 */
 
 #ifndef __cplusplus
@@ -1890,8 +1890,8 @@ static int tolua_PAC_dev_device_manager_add_device00(lua_State* tolua_S)
 #endif //#ifndef TOLUA_DISABLE
 
 /* method: complete_init of class  device_manager */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_manager_init_complete00
-static int tolua_PAC_dev_device_manager_init_complete00(lua_State* tolua_S)
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_manager_complete_init00
+static int tolua_PAC_dev_device_manager_complete_init00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -3140,7 +3140,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_beginmodule(tolua_S,"device_manager");
    tolua_function(tolua_S,"print",tolua_PAC_dev_device_manager_print00);
    tolua_function(tolua_S,"add_device",tolua_PAC_dev_device_manager_add_device00);
-   tolua_function(tolua_S,"complete_init",tolua_PAC_dev_device_manager_init_complete00);
+   tolua_function(tolua_S,"complete_init",tolua_PAC_dev_device_manager_complete_init00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"wago_device","wago_device","",NULL);
   tolua_beginmodule(tolua_S,"wago_device");

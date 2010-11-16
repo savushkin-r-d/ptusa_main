@@ -513,6 +513,10 @@ class device : public i_simple_device,
             DST_V_DO_1_DI_2,    ///< Клапан с одним каналом управления и двумя обратными связями.
             DST_V_DO_2_DI_2,    ///< Клапан с двумя каналами управления и двумя обратными связями.
             DST_V_MIXPROOF,     ///< Клапан микспруф.
+
+            DST_V_1DO_3DI,      ///< Клапан с одним каналом управления и тремя обратными связями.
+            DST_V_1DO_2DI_S,    ///< Клапан с одним каналом управления и двумя обратными связями на одно из состояний.
+            DST_V_AS_MIXPROOF,       ///< Клапан с двумя каналами управления и двумя обратными связями с AS интерфейсом (микспруф).
             };
 
         device( int number, 
@@ -544,14 +548,6 @@ class device : public i_simple_device,
         ///
         /// Для использования в отладочных целях.
         void print() const;
-
-        /// @brief Загрузка самого устройства из буфера.
-        ///
-        /// @param cfg_file - дескриптор открытого текстового файла с описанием
-        ///   устройства.
-        ///
-        /// @return - 0 - ок.
-        virtual int load( file *cfg_file );
 
         /// @brief Получение номера устройства.
         ///
@@ -689,8 +685,6 @@ class dev_stub : public device,
 
         int     parse_cmd( char *buff );
 
-        int     load( file *cfg_file ); 
-
         void    pause();
         void    start();
         void    reset();
@@ -718,10 +712,9 @@ class digital_device : public device,
             }
 
         float   get_value();
-        void set_value( float new_value );
+        void    set_value( float new_value );
         void    set_state( int new_state );  
-        int     parse_cmd( char *buff );                     
-        int     load( file *cfg_file );      
+        int     parse_cmd( char *buff );                        
         void    print() const;
 
         int save_changed_state( char *buff );
@@ -771,7 +764,7 @@ class analog_device : public device,
         void  set_state( int new_state );
         int   get_state_now();
         int   parse_cmd( char *buff );
-        int   load( file *cfg_file );
+        
         void  print() const;
         void  on();        
         void  off();
@@ -971,6 +964,46 @@ class valve_mix_proof : public digital_device
 
             DI_INDEX_U = 0, ///< Индекс канала дискретного входа верхнего седла.
             DI_INDEX_L,     ///< Индекс канала дискретного входа нижнего седла.
+            };
+
+        u_long start_switch_time;   ///< Время начала переключения клапана.
+#endif // DEBUG_NO_WAGO_MODULES
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан AS-mixproof.
+class valve_AS_mix_proof : public digital_device
+    {
+    public:
+        valve_AS_mix_proof( u_int number ): digital_device( number, DT_V, DST_V_AS_MIXPROOF )
+            {
+            }
+
+        enum STATES
+            {
+            ST_CLOSE = 0,   ///< Закрыт.
+            ST_OPEN,        ///< Открыт.
+            ST_UPPER_SEAT,  ///< Открыть верхнее седло.
+            ST_LOW_SEAT,    ///< Открыть нижнее седло.
+            };
+
+        void open_upper_seat()
+            {
+            set_state( ST_UPPER_SEAT );
+            }
+        void open_low_seat()
+            {
+            set_state( ST_LOW_SEAT );
+            }
+
+#ifndef DEBUG_NO_WAGO_MODULES
+        int  get_state_now();
+        void on();
+        void off();
+        int set_state( int new_state );
+
+    private:
+        enum CONSTANTS
+            {
             };
 
         u_long start_switch_time;   ///< Время начала переключения клапана.
@@ -1285,7 +1318,6 @@ class counter : public device,
         void  off();
         void  set_state( int new_state );
         int   parse_cmd( char *buff  );
-        int   load( file *cfg_file );
         void  print() const;
 
         u_int_4 get_u_int_4_state();
@@ -1328,9 +1360,6 @@ class device_manager
         device_manager();
 
         ~device_manager();
-
-        /// @brief Загрузка из файла конфигурации.
-        int load_from_cfg_file( file *cfg_file );
 
         /// @brief Получение клапана по его номеру.
         i_DO_device* get_V( int number );

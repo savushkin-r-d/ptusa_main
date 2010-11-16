@@ -28,14 +28,6 @@ class wago_device
 
         virtual ~wago_device();
 
-        /// @brief Загрузка самого устройства из буфера.
-        ///
-        /// @param cfg_file - дескриптор открытого текстового файла с описанием
-        ///   устройства.
-        ///
-        /// @return -  количество считанных байт.
-        virtual int load( file *cfg_file );
-
     protected:
         /// @brief Получение состояния канала дискретного выхода.
         ///
@@ -190,16 +182,6 @@ class wago_manager
         /// @return - 0 - Ок.
         virtual int write_outputs() = 0;
 
-        /// @brief Загрузка конфигурации из файла.
-        ///
-        /// Указатель в файле должен указывать на начало соответствующих 
-        /// данных.
-        ///
-        /// @param cfg_file - конфигурационный файл.
-        ///
-        /// @return - 0 - Ок.
-        int load_from_cfg_file( file *cfg_file );
-
         /// @brief Получение единственного экземпляра класса.
         static wago_manager* get_instance();
 
@@ -273,16 +255,6 @@ class wago_manager
             ~wago_node();
 
             void print();
-
-            /// @brief Загрузка конфигурации из файла.
-            ///
-            /// Указатель в файле должен указывать на начало соответствующих 
-            /// данных.
-            ///
-            /// @param cfg_file - конфигурационный файл.
-            ///
-            /// @return - 0 - Ок.
-            int load_from_cfg_file( file *cfg_file );
 
             int     state;          ///< Cостояние работы с узлом.
             u_int   number;         ///< Номер.

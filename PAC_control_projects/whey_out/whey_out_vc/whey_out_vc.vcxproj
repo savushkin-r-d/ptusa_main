@@ -173,10 +173,12 @@
     <ClCompile Include="..\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\common\tolua++\pkg\make.cmd" />
-    <None Include="..\..\..\common\tolua++\pkg\PAC_dev.pkg" />
+    <None Include="..\..\..\PAC\common\Lua\sys.lua" />
+    <None Include="..\..\..\PAC\common\Lua\sys_wago.lua" />
+    <None Include="..\..\..\PAC\common\toloa++\pkg\make.cmd" />
+    <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg" />
     <None Include="..\main.lua" />
-    <None Include="..\sys.lua" />
+    <None Include="..\main.wago.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

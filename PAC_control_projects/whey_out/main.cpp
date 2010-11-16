@@ -38,7 +38,6 @@
 #endif // PAC_PC
 
 #include "tech_def.h"
-#include "init.h"
 
 #include "lua_manager.h"
 
@@ -92,10 +91,6 @@ int main( int argc, char *argv[] )
 
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
-#ifdef DEBUG
-    G_DEVICE_MANAGER()->print();
-#endif // DEBUG
-
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
 
@@ -107,6 +102,7 @@ int main( int argc, char *argv[] )
     G_TECH_OBJECT_MNGR()->init_objects();    
 
 #ifdef DEBUG
+    G_DEVICE_MANAGER()->print();
     G_DEVICE_CMMCTR->print();
 
     u_long st_time;

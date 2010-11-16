@@ -2,6 +2,8 @@
 #include <windows.h>
 
 #include "lua_manager.h"
+
+#include "prj_mngr.h"
 //-----------------------------------------------------------------------------
 auto_smart_ptr< lua_manager > lua_manager::instance;
 //-----------------------------------------------------------------------------
@@ -34,17 +36,29 @@ int lua_manager::init( lua_State* lua_state )
         luaL_openlibs( L );    // Open standard libraries.
         tolua_PAC_dev_open( L );
 
-        if( luaL_dofile( L, "sys.wago.lua" ) != 0 )
-            {
 #ifdef DEBUG
-            Print( "Load Wago Lua system script error!\n" );
+        const char *ADDITIONAL_PATH_CMD = 
+#ifdef WIN_OS
+            "package.path = package.path..\';../../../PAC/common/Lua/?.lua;\'";
+#else
+            "package.path = package.path..\';./?.lua;\'";
+#endif  // WIN_OS
+        
+        if( luaL_dostring( L, ADDITIONAL_PATH_CMD ) != 0 )
+            {
+            Print( "Set additional search path error!\n" );
             Print( "\t%s\n", lua_tostring( L, -1 ) );
-#endif // DEBUG
+
             lua_pop( L, 1 );
             return 1;
             }
+#endif // DEBUG
 
-        if( luaL_dofile( L, "main.wago.lua" ) != 0 )
+#if defined WIN_OS && defined DEBUG
+            if( luaL_dofile( L, "../main.wago.lua" ) != 0 )
+#else
+            if( luaL_dofile( L, "main.wago.lua" ) != 0 )
+#endif // defined OS_WIN && defined DEBUG
             {
 #ifdef DEBUG
             Print( "Load description Wago Lua script error!\n" );
@@ -54,21 +68,7 @@ int lua_manager::init( lua_State* lua_state )
             return 1;
             }
 
-#if defined WIN_OS && defined DEBUG
-        if( luaL_dofile( L, "../sys.lua" ) != 0 )
-#else
-        if( luaL_dofile( L, "sys.lua" ) != 0 )
-#endif // defined OS_WIN && defined DEBUG
-            {
-#ifdef DEBUG
-            Print( "Load Lua system script error!\n" );
-            Print( "\t%s\n", lua_tostring( L, -1 ) );
-#endif // DEBUG
-            lua_pop( L, 1 );
-            return 1;
-            }
-
-        
+            G_PROJECT_MANAGER->lua_load_configuration();       
 
 #if defined WIN_OS && defined DEBUG
         if( luaL_loadfile( L, "../main.lua" ) != 0 )

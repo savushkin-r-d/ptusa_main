@@ -246,77 +246,68 @@ void device::print() const
     switch ( type )
         {
     case DT_V:
-        Print( "V  " );
+        Print( "V   " );
         break;
 
     case DT_N:
-        Print( "N  " );
+        Print( "N   " );
         break;
 
     case DT_M:
-        Print( "M  " );
+        Print( "M   " );
         break;
 
     case DT_LS:
-        Print( "LS " );
+        Print( "LS  " );
         break;
 
     case DT_TE:
-        Print( "TE " );
+        Print( "TE  " );
         break;
 
     case DT_FE:
-        Print( "FE " );
+        Print( "FE  " );
         break;
 
     case DT_FS:
-        Print( "FS " );
+        Print( "FS  " );
         break;
 
     case DT_CTR:
-        Print( "CTR" );
+        Print( "CTR " );
         break;
 
     case DT_AO:
-        Print( "AO " );
+        Print( "AO  " );
         break;
 
     case DT_LE:
-        Print( "LE " );
+        Print( "LE  " );
         break;
 
     case DT_FB:
-        Print( "FB " );
+        Print( "FB  " );
         break;
 
     case DT_UPR:
-        Print( "UPR" );
+        Print( "UPR " );
         break;
 
     case DT_QE:
-        Print( "QE " );
+        Print( "QE  " );
         break;
 
     case DT_AI:
-        Print( "AI " );
+        Print( "AI  " );
         break;
 
     default:
-        Print( "Unknown" );
+        Print( "Unknown " );
         break;
         }
     Print( "%5lu\t", ( u_long ) number );
 
 #endif // DEBUG
-    }
-//-----------------------------------------------------------------------------
-int device::load( file *cfg_file )
-    {    
-    char *tmp = cfg_file->fget_line();
-    sscanf( tmp, "%u %u %u", ( u_int* ) &type,
-        ( u_int* ) &sub_type, &number );
-
-    return 0;
     }
 //-----------------------------------------------------------------------------
 u_int_4 device::get_n() const
@@ -441,21 +432,6 @@ device* device_manager::get_device( device::DEVICE_TYPE dev_type,
         }
 
     return &stub;
-    }
-//-----------------------------------------------------------------------------
-int device_manager::load_from_cfg_file( file *cfg_file )
-    {
-    //project_devices[ i ]->load( cfg_file );
-
-
-    //
-    //            project_devices[ i ]->load( cfg_file );
-    //            }
-    //        }
-    //
-
-
-    return 0;
     }
 //-----------------------------------------------------------------------------
 void device_manager::print() const
@@ -613,6 +589,11 @@ wago_device* device_manager::add_device( int dev_type, int dev_sub_type,
         case device::DST_V_MIXPROOF:
             new_device      = new valve_mix_proof( number );
             new_wago_device = ( valve_mix_proof* ) new_device;
+            break;
+
+        case device::DST_V_AS_MIXPROOF:
+            new_device      = new valve_AS_mix_proof( number );
+            new_wago_device = ( valve_AS_mix_proof* ) new_device;
             break;
 
         default:
@@ -786,11 +767,6 @@ int dev_stub::parse_cmd( char *buff )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int dev_stub::load( file *cfg_file )
-    {
-    return device::load( cfg_file );    
-    }
-//-----------------------------------------------------------------------------
 int dev_stub::save_state( char *buff )
     {
     return 0;
@@ -884,14 +860,6 @@ int counter::parse_cmd( char *buff )
     memcpy( &value, buff, sizeof( value ) );
 
     return sizeof( value );
-    }
-//-----------------------------------------------------------------------------
-int counter::load( file *cfg_file )
-    {
-    device::load( cfg_file );
-    wago_device::load( cfg_file );
-
-    return 0;
     }
 //-----------------------------------------------------------------------------
 void counter::print() const
@@ -988,14 +956,6 @@ int digital_device::parse_cmd( char *buff )
     {
     set_state( buff[ 0 ] );
     return sizeof( char );
-    }
-//-----------------------------------------------------------------------------
-int digital_device::load( file *cfg_file )
-    {
-    device::load( cfg_file );
-    wago_device::load( cfg_file );
-
-    return 0;
     }
 //-----------------------------------------------------------------------------
 void digital_device::print() const
@@ -1455,14 +1415,6 @@ int analog_device::parse_cmd( char *buff )
 
     set_value( val );
     return sizeof( float );
-    }
-//-----------------------------------------------------------------------------
-int analog_device::load( file *cfg_file )
-    {
-    device::load( cfg_file );
-    wago_device::load( cfg_file );
-
-    return 0;
     }
 //-----------------------------------------------------------------------------
 void analog_device::print() const

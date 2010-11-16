@@ -26,15 +26,8 @@ class project_manager
         /// @param argv - массив параметров.
         int proc_main_params( int argc, char *argv[] );
 
-        /// @brief Загрузка конфигурации проекта.
-        /// 
-        /// @param file_name - имя конфигурационного файла проекта.
-        int load_configuration( const char *file_name );
-
-        /// @brief Загрузка конфигурации проекта.
-        /// 
-        /// @param file_name - имя конфигурационного файла проекта.
-        int lua_load_configuration( const char *file_name );
+        /// @brief Загрузка конфигурации проекта на основе скрипта.
+        int lua_load_configuration();
 
         /// @brief Получение единственного экземпляра класса.
         static project_manager* get_instance();
