@@ -57,13 +57,15 @@ int project_manager::lua_load_configuration()
     {
 #ifdef DEBUG
     Print( "\nproject_manager - read configuration...\n" );
-#endif // DEBUG
 
     //-File editor_version.
     int file_version = 
         lua_manager::get_instance()->int_no_param_exec_lua_method( "system",
         "get_file_version", "lua_load_configuration" );
-    
+
+    Print( "file_version %d\n", file_version );
+#endif // DEBUG
+
     //-Editor editor_version.
     const int CURRENT_EDITOR_VERSION = 12;
     int editor_version =  

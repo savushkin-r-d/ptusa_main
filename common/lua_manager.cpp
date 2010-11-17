@@ -1,5 +1,7 @@
 #include <cstdlib>
+#ifdef OS_WIN
 #include <windows.h>
+#endif // OS_WIN
 
 #include "lua_manager.h"
 

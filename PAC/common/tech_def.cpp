@@ -6,10 +6,6 @@
 #include "sys.h"
 
 #include "lua_manager.h"
-
-#include <string>
-#include <sstream>
-#include <iostream>
 //-----------------------------------------------------------------------------
 auto_smart_ptr < tech_object_manager > tech_object_manager::instance;
 //-----------------------------------------------------------------------------
@@ -23,10 +19,10 @@ tech_object::tech_object( const char* new_name, u_int number, u_int modes_count,
         rt_par_float( run_time_params_float( runtime_par_float_count ) ),
         par_uint( saved_params_u_int_4( par_uint_count ) ),
         rt_par_uint( run_time_params_u_int_4( runtime_par_uint_count ) ),
+        timers( timers_count ),
         number( number ),
         cmd( 0 ),
-        modes_count( modes_count ),
-        timers( timers_count ),
+        modes_count( modes_count ),        
         mode_time( run_time_params_u_int_4( modes_count, "MODE_TIME" ) )       
     {
     u_int state_size_in_int4 = modes_count / 32; // Размер состояния в double word.

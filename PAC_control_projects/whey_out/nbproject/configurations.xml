@@ -72,8 +72,6 @@
         <itemPath>../../PAC/linux/sys_linux.h</itemPath>
         <itemPath>../../PAC/linux/tcp_cmctr_linux.h</itemPath>
       </logicalFolder>
-      <itemPath>init.h</itemPath>
-      <itemPath>priem.h</itemPath>
     </logicalFolder>
     <logicalFolder name="f1" displayName="Lua source " projectFiles="true">
       <itemPath>main.lua</itemPath>
@@ -153,9 +151,7 @@
         <itemPath>../../PAC/linux/sys_linux.cpp</itemPath>
         <itemPath>../../PAC/linux/tcp_cmctr_linux.cpp</itemPath>
       </logicalFolder>
-      <itemPath>init.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
-      <itemPath>priem.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -255,6 +251,9 @@
       <compileType>
         <cTool>
           <developmentMode>5</developmentMode>
+          <incDir>
+            <pElem>../../common/lua</pElem>
+          </incDir>
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
@@ -263,9 +262,10 @@
             <pElem>../../common/PAC-driver</pElem>
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
+            <pElem>../../common</pElem>
             <pElem>../../common/util</pElem>
-            <pElem>/usr/local/arm-uclinux-tools/include/c++/3.4.3</pElem>
-            <pElem>/usr/local/arm-uclinux-tools/arm-uclinux-elf/include</pElem>
+            <pElem>../../common/lua</pElem>
+            <pElem>../../common/tolua++</pElem>
           </incDir>
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
           <preprocessorList>
@@ -303,6 +303,7 @@
             <pElem>../../common/PAC-driver</pElem>
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
+            <pElem>../../common</pElem>
             <pElem>../../common/util</pElem>
             <pElem>../../common/lua</pElem>
             <pElem>../../common/tolua++</pElem>
@@ -328,13 +329,21 @@
         <platform>2</platform>
       </toolsSet>
       <compileType>
+        <cTool>
+          <incDir>
+            <pElem>../../common/lua</pElem>
+          </incDir>
+        </cTool>
         <ccTool>
           <incDir>
             <pElem>../../PAC/common</pElem>
             <pElem>../../common/PAC-driver</pElem>
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
+            <pElem>../../common</pElem>
             <pElem>../../common/util</pElem>
+            <pElem>../../common/lua</pElem>
+            <pElem>../../common/tolua++</pElem>
           </incDir>
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
           <preprocessorList>

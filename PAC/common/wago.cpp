@@ -733,9 +733,9 @@ void wago_manager::print() const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-wago_manager::wago_node::wago_node() : state( 0 ),
-    number( 0 ),
+wago_manager::wago_node::wago_node() : state( 0 ),    
     type( 0 ),
+    number( 0 ),
     DO_cnt( 0 ),
     DO( 0 ),
     DO_( 0 ),
@@ -790,11 +790,11 @@ wago_manager::wago_node::~wago_node()
 wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
     int DO_cnt, int DI_cnt, int AO_cnt, int AI_cnt ): state( 0 ),
     type( type ), 
-    number( number ), 
-    DI_cnt( DI_cnt ),
+    number( number ),
     DO_cnt( DO_cnt ),
-    AI_cnt( AI_cnt ),
-    AO_cnt( AO_cnt )
+    AO_cnt( AO_cnt ),
+    DI_cnt( DI_cnt ),
+    AI_cnt( AI_cnt )
     {
     char tmp_dot;
     if ( str_ip_address )

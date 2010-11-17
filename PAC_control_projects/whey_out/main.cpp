@@ -120,7 +120,7 @@ int main( int argc, char *argv[] )
 #endif // DEBUG
 
 #ifndef DEBUG_NO_WAGO_MODULES
-        G_WAGO_MANAGER->read_inputs();
+        G_WAGO_MANAGER()->read_inputs();
 #endif // DEBUG_NO_WAGO_MODULES
 
         G_TECH_OBJECT_MNGR()->evaluate();
@@ -128,7 +128,7 @@ int main( int argc, char *argv[] )
         G_CMMCTR->evaluate();
 
 #ifndef DEBUG_NO_WAGO_MODULES
-        G_WAGO_MANAGER->write_outputs();
+        G_WAGO_MANAGER()->write_outputs();
 #endif // ifndef
 
         PAC_critical_errors_manager::get_instance()->show_errors();

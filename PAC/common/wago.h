@@ -257,8 +257,8 @@ class wago_manager
             void print();
 
             int     state;          ///< Cостояние работы с узлом.
-            u_int   number;         ///< Номер.
             u_int   type;           ///< Тип.
+            u_int   number;         ///< Номер.
             int     ip_address[ 4 ]; ///< IP-адрес.
 
             // Digital outputs ( DO ).

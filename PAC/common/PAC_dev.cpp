@@ -1243,7 +1243,7 @@ void valve_mix_proof::off()
         }
     }
 //-----------------------------------------------------------------------------
-int valve_mix_proof::set_state( int new_state )
+void valve_mix_proof::set_state( int new_state )
     {
     switch ( new_state )
         {
@@ -1268,9 +1268,7 @@ int valve_mix_proof::set_state( int new_state )
     default:
         on();
         break;
-        }
-
-    return 0;
+        }    
     }
 
 #endif // DEBUG_NO_WAGO_MODULES
@@ -1318,9 +1316,8 @@ float AI_1::get_value()
     return get_AI( AI_INDEX, get_min_val(), get_max_val() );
     }
 //-----------------------------------------------------------------------------
-int AI_1::set_value( float new_value )
-    {
-    return 0;
+void AI_1::set_value( float new_value )
+    {    
     }
 
 #endif // DEBUG_NO_WAGO_MODULES
@@ -1333,9 +1330,9 @@ float AO_1::get_value()
     return get_AO( AO_INDEX, get_min_val(), get_max_val() );
     }
 //-----------------------------------------------------------------------------
-int AO_1::set_value( float new_value )
+void AO_1::set_value( float new_value )
     {
-    return set_AO( AO_INDEX, new_value, get_min_val(), get_max_val() );
+    set_AO( AO_INDEX, new_value, get_min_val(), get_max_val() );
     }
 
 #endif // DEBUG_NO_WAGO_MODULES
@@ -1684,5 +1681,42 @@ dev_stub* STUB()
     {
     return G_DEVICE_MANAGER()->get_stub();
     }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_AS_mix_proof::valve_AS_mix_proof( u_int number ) : digital_device( number,
+    DT_V, DST_V_AS_MIXPROOF )
+    {
+    }
+//-----------------------------------------------------------------------------
+void valve_AS_mix_proof::open_upper_seat()
+    {
+    set_state( ST_UPPER_SEAT );
+    }
+//-----------------------------------------------------------------------------
+void valve_AS_mix_proof::open_low_seat()
+    {
+    set_state( ST_LOW_SEAT );
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+
+int  valve_AS_mix_proof::get_state_now()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void valve_AS_mix_proof::on()
+    {
+    }
+//-----------------------------------------------------------------------------
+void valve_AS_mix_proof::off()
+    {
+    }
+//-----------------------------------------------------------------------------
+void valve_AS_mix_proof::set_state( int new_state )
+    {
+    }
+
+#endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

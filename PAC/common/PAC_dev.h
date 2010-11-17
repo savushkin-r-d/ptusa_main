@@ -953,7 +953,7 @@ class valve_mix_proof : public digital_device
         int  get_state_now();
         void on();
         void off();
-        int set_state( int new_state );
+        void set_state( int new_state );
 
     private:
         enum CONSTANTS
@@ -974,9 +974,7 @@ class valve_mix_proof : public digital_device
 class valve_AS_mix_proof : public digital_device
     {
     public:
-        valve_AS_mix_proof( u_int number ): digital_device( number, DT_V, DST_V_AS_MIXPROOF )
-            {
-            }
+        valve_AS_mix_proof( u_int number );
 
         enum STATES
             {
@@ -986,20 +984,14 @@ class valve_AS_mix_proof : public digital_device
             ST_LOW_SEAT,    ///< ќткрыть нижнее седло.
             };
 
-        void open_upper_seat()
-            {
-            set_state( ST_UPPER_SEAT );
-            }
-        void open_low_seat()
-            {
-            set_state( ST_LOW_SEAT );
-            }
+        void open_upper_seat();
+        void open_low_seat();
 
 #ifndef DEBUG_NO_WAGO_MODULES
         int  get_state_now();
         void on();
         void off();
-        int set_state( int new_state );
+        void set_state( int new_state );
 
     private:
         enum CONSTANTS
@@ -1024,7 +1016,7 @@ class AI_1 : public analog_device
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         float get_value();
-        int   set_value( float new_value );
+        void   set_value( float new_value );
 
         /// @brief ѕолучение максимального значени€ выхода устройства.
         virtual float get_max_val() = 0;
@@ -1135,7 +1127,7 @@ class AO_1 : public analog_device
         virtual float get_min_val() = 0;
 
         float get_value();
-        int   set_value( float new_value );
+        void  set_value( float new_value );
 
     private:
         enum CONSTANTS
