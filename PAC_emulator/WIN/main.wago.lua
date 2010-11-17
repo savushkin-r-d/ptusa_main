@@ -1,52 +1,54 @@
+require "sys_wago" --Системные функции.
+
 editor_version = 12
 file_version   = 13
 
 --Узлы WAGO
-nodes = 
+nodes =
     {
         {
         ntype   = 0,
         address = 1,
-        modules = 
+        modules =
             {
-            { 466, '', '', '', '', '' }, 
-            { 466, '', '', '', '', '' }, 
-            { 402, '', '', '', '', '' }, 
-            { 402, '', '', '', '', '' }, 
-            { 402, '', '', '', '', '' }, 
-            { 402, '', '', '', '', '' }, 
-            { 504, '', '', '', '', '' }, 
-            { 504, '', '', '', '', '' }, 
-            { 504, '', '', '', '', '' }, 
-            { 504, '', '', '', '', '' }, 
-            { 504, '', '', '', '', '' }, 
-            { 504, '', '', '', '', '' }, 
-            { 504, '', '', '', '', '' }, 
-            { 504, '', '', '', '', '' }, 
-            { 504, '', '', '', '', '' }, 
-            { 638, '', '', '', '', '' }, 
-            { 461, '', '', '', '', '' }, 
-            { 461, '', '', '', '', '' }, 
-            { 461, '', '', '', '', '' }, 
-            { 612, '', '', '', '', '' }, 
-            { 512, '', '', '', '', '' }, 
-            { 512, '', '', '', '', '' }, 
-            { 602, '', '', '', '', '' }, 
-            { 402, '', '', '', '', '' }, 
-            { 600, '', '', '', '', '' }, 
+            { 466, '', '', '', '', '' },
+            { 466, '', '', '', '', '' },
+            { 402, '', '', '', '', '' },
+            { 402, '', '', '', '', '' },
+            { 402, '', '', '', '', '' },
+            { 402, '', '', '', '', '' },
+            { 504, '', '', '', '', '' },
+            { 504, '', '', '', '', '' },
+            { 504, '', '', '', '', '' },
+            { 504, '', '', '', '', '' },
+            { 504, '', '', '', '', '' },
+            { 504, '', '', '', '', '' },
+            { 504, '', '', '', '', '' },
+            { 504, '', '', '', '', '' },
+            { 504, '', '', '', '', '' },
+            { 638, '', '', '', '', '' },
+            { 461, '', '', '', '', '' },
+            { 461, '', '', '', '', '' },
+            { 461, '', '', '', '', '' },
+            { 612, '', '', '', '', '' },
+            { 512, '', '', '', '', '' },
+            { 512, '', '', '', '', '' },
+            { 602, '', '', '', '', '' },
+            { 402, '', '', '', '', '' },
+            { 600, '', '', '', '', '' },
             }
         },
     }
 
 --Устройства
-devices = 
+devices =
     {
         {
         descr   = 'Счетчик №1',
         dtype   = 7,
         subtype = 0,
         number  = 1,
-        AI  = 
+        AI  =
             {
                 {
                 node   = 0,
@@ -60,7 +62,7 @@ devices =
         dtype   = 7,
         subtype = 0,
         number  = 2,
-        AI  = 
+        AI  =
             {
                 {
                 node   = 0,
@@ -74,7 +76,7 @@ devices =
         dtype   = 9,
         subtype = 0,
         number  = 1,
-        AI  = 
+        AI  =
             {
                 {
                 node   = 0,
@@ -88,7 +90,7 @@ devices =
         dtype   = 9,
         subtype = 0,
         number  = 2,
-        AI  = 
+        AI  =
             {
                 {
                 node   = 0,
@@ -102,7 +104,7 @@ devices =
         dtype   = 9,
         subtype = 0,
         number  = 3,
-        AI  = 
+        AI  =
             {
                 {
                 node   = 0,
@@ -116,7 +118,7 @@ devices =
         dtype   = 9,
         subtype = 0,
         number  = 4,
-        AI  = 
+        AI  =
             {
                 {
                 node   = 0,
@@ -130,7 +132,7 @@ devices =
         dtype   = 3,
         subtype = 0,
         number  = 101,
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -144,7 +146,7 @@ devices =
         dtype   = 3,
         subtype = 0,
         number  = 102,
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -158,7 +160,7 @@ devices =
         dtype   = 3,
         subtype = 0,
         number  = 201,
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -172,7 +174,7 @@ devices =
         dtype   = 3,
         subtype = 0,
         number  = 202,
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -186,7 +188,7 @@ devices =
         dtype   = 3,
         subtype = 0,
         number  = 301,
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -200,7 +202,7 @@ devices =
         dtype   = 3,
         subtype = 0,
         number  = 302,
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -214,7 +216,7 @@ devices =
         dtype   = 3,
         subtype = 0,
         number  = 401,
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -228,7 +230,7 @@ devices =
         dtype   = 3,
         subtype = 0,
         number  = 402,
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -242,14 +244,14 @@ devices =
         dtype   = 1,
         subtype = 0,
         number  = 1,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 36
                 }
             },
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -263,14 +265,14 @@ devices =
         dtype   = 1,
         subtype = 0,
         number  = 2,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 37
                 }
             },
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -284,14 +286,14 @@ devices =
         dtype   = 1,
         subtype = 0,
         number  = 2202,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 38
                 }
             },
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -305,7 +307,7 @@ devices =
         dtype   = 10,
         subtype = 0,
         number  = 1,
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -319,7 +321,7 @@ devices =
         dtype   = 10,
         subtype = 0,
         number  = 2,
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -333,7 +335,7 @@ devices =
         dtype   = 10,
         subtype = 0,
         number  = 3,
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -347,7 +349,7 @@ devices =
         dtype   = 10,
         subtype = 0,
         number  = 4,
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -361,7 +363,7 @@ devices =
         dtype   = 10,
         subtype = 0,
         number  = 5,
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -375,7 +377,7 @@ devices =
         dtype   = 10,
         subtype = 0,
         number  = 6,
-        DI  = 
+        DI  =
             {
                 {
                 node   = 0,
@@ -389,7 +391,7 @@ devices =
         dtype   = 4,
         subtype = 0,
         number  = 1,
-        AI  = 
+        AI  =
             {
                 {
                 node   = 0,
@@ -403,7 +405,7 @@ devices =
         dtype   = 4,
         subtype = 0,
         number  = 2,
-        AI  = 
+        AI  =
             {
                 {
                 node   = 0,
@@ -417,7 +419,7 @@ devices =
         dtype   = 4,
         subtype = 0,
         number  = 3,
-        AI  = 
+        AI  =
             {
                 {
                 node   = 0,
@@ -431,7 +433,7 @@ devices =
         dtype   = 4,
         subtype = 0,
         number  = 4,
-        AI  = 
+        AI  =
             {
                 {
                 node   = 0,
@@ -445,7 +447,7 @@ devices =
         dtype   = 4,
         subtype = 0,
         number  = 5,
-        AI  = 
+        AI  =
             {
                 {
                 node   = 0,
@@ -459,7 +461,7 @@ devices =
         dtype   = 4,
         subtype = 0,
         number  = 6,
-        AI  = 
+        AI  =
             {
                 {
                 node   = 0,
@@ -473,7 +475,7 @@ devices =
         dtype   = 11,
         subtype = 0,
         number  = 1,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
@@ -487,7 +489,7 @@ devices =
         dtype   = 11,
         subtype = 0,
         number  = 2,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
@@ -501,7 +503,7 @@ devices =
         dtype   = 11,
         subtype = 0,
         number  = 3,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
@@ -515,7 +517,7 @@ devices =
         dtype   = 11,
         subtype = 0,
         number  = 4,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
@@ -529,14 +531,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 1,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 28
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -544,14 +546,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 2,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 30
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -559,14 +561,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 101,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 0
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -574,14 +576,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 102,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 2
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -589,14 +591,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 103,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 1
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -604,14 +606,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 104,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 3
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -619,14 +621,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 105,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 4
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -634,14 +636,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 106,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 6
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -649,14 +651,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 107,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 5
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -664,14 +666,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 108,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 7
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -679,14 +681,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 109,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 29
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -694,14 +696,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 201,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 8
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -709,14 +711,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 202,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 10
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -724,14 +726,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 203,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 9
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -739,14 +741,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 204,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 11
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -754,14 +756,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 205,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 12
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -769,14 +771,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 206,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 14
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -784,14 +786,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 207,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 13
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -799,14 +801,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 208,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 15
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -814,14 +816,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 301,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 16
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -829,14 +831,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 302,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 18
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -844,14 +846,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 303,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 17
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -859,14 +861,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 304,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 19
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -874,14 +876,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 305,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 20
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -889,14 +891,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 307,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 22
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -904,14 +906,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 401,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 21
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -919,14 +921,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 402,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 23
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -934,14 +936,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 403,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 24
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -949,14 +951,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 404,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 26
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -964,14 +966,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 405,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 25
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
         {
@@ -979,14 +981,14 @@ devices =
         dtype   = 0,
         subtype = 1,
         number  = 507,
-        DO  = 
+        DO  =
             {
                 {
                 node   = 0,
                 offset = 27
                 }
             },
-        par = { 0 } 
+        par = { 0 }
         },
 
     }

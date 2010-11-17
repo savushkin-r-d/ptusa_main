@@ -386,9 +386,8 @@ static int pmain (lua_State *L) {
     tolua_PAC_dev_open( L );
     lua_manager::get_instance()->init( L );
 
-    G_PROJECT_MANAGER->lua_load_configuration( "main.wago.lua" );
-    G_DEVICE_MANAGER()->print();
-
+    G_PROJECT_MANAGER->lua_load_configuration();
+    
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
 
@@ -436,43 +435,31 @@ int main (int argc, char **argv)
     lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
     luaL_openlibs(L);          /* open libraries */
 
-    // Выполнение системных скриптов sys.lua.    
-    const char *lua_start_up_script = "sys.lua";    
-    int res = luaL_dofile( L, lua_start_up_script );
+    // Выполнение системных скриптов sys.lua. 
+    int res = 0;
+#ifdef DEBUG
+    const char *ADDITIONAL_PATH_CMD = 
+        "package.path = package.path..\';../../PAC/common/Lua/?.lua;\'";
 
-    const char *lua_start_up_wago_script = "sys.wago.lua";    
-    int res1 = luaL_dofile( L, lua_start_up_wago_script );
+    if( luaL_dostring( L, ADDITIONAL_PATH_CMD ) != 0 )
+        {
+        Print( "Set additional search path error!\n" );
+        Print( "\t%s\n", lua_tostring( L, -1 ) );
+
+        lua_pop( L, 1 );
+
+        status = 1;
+        res = 1;
+        }
+#endif // DEBUG
 
     const char *lua_wago_script = "main.wago.lua";    
     int res2 = luaL_dofile( L, lua_wago_script );
 
-    if ( res )
-        {
-#ifdef DEBUG
-        Print( "Load Lua system script \"%s\" error!\n", lua_start_up_script );
-        Print( "\t%s\n", lua_tostring( L, -1 ) );
-#endif // DEBUG
-        lua_pop( L, 1 ); 
-
-        status = 1;
-        }
-
-    if ( res1 )
-        {
-#ifdef DEBUG
-        Print( "Load Lua wago system script \"%s\" error!\n", 
-            lua_start_up_wago_script );
-        Print( "\t%s\n", lua_tostring( L, -1 ) );
-#endif // DEBUG
-        lua_pop( L, 1 );  
-
-        status = 1;
-        }
-
     if ( res2 )
         {
 #ifdef DEBUG
-        Print( "Load Lua wago script \"%s\" error!\n", 
+        Print( "Load Lua Wago script \"%s\" error!\n", 
             lua_wago_script );
         Print( "\t%s\n", lua_tostring( L, -1 ) );
 #endif // DEBUG
@@ -483,7 +470,7 @@ int main (int argc, char **argv)
 
     lua_gc(L, LUA_GCRESTART, 0);
 
-    if ( res == 0 && res1 == 0 && res2 == 0 )
+    if ( res == 0 && res2 == 0 )
         {
         s.argc = argc;
         s.argv = argv;
@@ -499,6 +486,9 @@ int main (int argc, char **argv)
             G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
 #ifdef DEBUG
+            G_DEVICE_MANAGER()->print();
+            G_DEVICE_CMMCTR->print();
+
             u_long st_time;
             u_long all_time = 0;
             u_long cycles_cnt = 0;

@@ -187,8 +187,10 @@
     <ClCompile Include="..\luac.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\PAC\common\Lua\sys.lua" />
+    <None Include="..\..\..\PAC\common\Lua\sys_wago.lua" />
     <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg" />
-    <None Include="..\sys.lua" />
+    <None Include="..\main.wago.lua" />
     <None Include="..\test.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
