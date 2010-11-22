@@ -104,8 +104,10 @@
     <ClInclude Include="..\..\..\common\tolua++\tolua_base.h" />
     <ClInclude Include="..\..\..\common\tolua++\tolua_event.h" />
     <ClInclude Include="..\..\..\common\util\util.h" />
+    <ClInclude Include="..\..\..\PAC\common\mode_mngr.h" />
     <ClInclude Include="..\..\..\PAC\common\PAC_dev.h" />
     <ClInclude Include="..\..\..\PAC\common\PAC_err.h" />
+    <ClInclude Include="..\..\..\PAC\common\PAC_info.h" />
     <ClInclude Include="..\..\..\PAC\common\param_ex.h" />
     <ClInclude Include="..\..\..\PAC\common\prj_mngr.h" />
     <ClInclude Include="..\..\..\PAC\common\sys.h" />
@@ -156,9 +158,11 @@
     <ClCompile Include="..\..\..\common\tolua++\tolua_map.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_push.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_to.c" />
+    <ClCompile Include="..\..\..\PAC\common\mode_mngr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_dev.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_dev_lua.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_err.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\PAC_info.cpp" />
     <ClCompile Include="..\..\..\PAC\common\param_ex.cpp" />
     <ClCompile Include="..\..\..\PAC\common\prj_mngr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys.cpp" />

@@ -210,6 +210,12 @@
     <ClInclude Include="..\..\..\common\tolua++\tolua++.h">
       <Filter>Header Files\common\sys\tolua++</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\mode_mngr.h">
+      <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\PAC_info.h">
+      <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -367,6 +373,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\print.c">
       <Filter>Source Files\PAC\sys\lua</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\mode_mngr.cpp">
+      <Filter>Source Files\PAC\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\PAC_info.cpp">
+      <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

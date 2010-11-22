@@ -346,6 +346,117 @@ class string_device: public i_simple_device
         int     parse_cmd( char *buff  );
     };
 //-----------------------------------------------------------------------------
+//ОБЩЕЕ ОПИСАНИЕ.
+//  Состояние переменной с определенным именем.
+class var_state:public i_simple_device
+    {    
+    public:
+        var_state( char *new_name, char type,
+            u_int_4 &var ):var( var ),
+            type( type )
+            {            
+            strlcpy( name, new_name, C_MAX_NAME_LENGTH );
+            }
+
+        int parse_cmd( char *buff  )
+            {
+            var = ( ( u_int_4* ) ( buff + 4 ) )[ 0 ];
+            return 4 + 4;
+            }
+
+        int save_device( char *buff )
+            {
+            // Данные группы (buff) в следующем виде:
+            //    1 байт  - тип;                              (1)
+            //    4 байта - номер;                            (2)
+            //    1 байт  - длина имени группы устройства;    (3)
+            //    х байт  - имя группы устройства;            (4)
+            //    4 байта - количество подустройств;          (5)
+            u_int_2 idx = 0;
+
+            buff[ idx++ ] = type;                             //(1)                            
+            ( ( u_int_4* ) ( buff + idx ) )[ 0 ] = 1;         //(2)
+            idx += 4;
+            buff[ idx++ ] = strlen( name );                   //(3)              
+            strcpy( buff + idx, name );                       //(4)
+            idx += strlen( name ) + 1;
+            ( ( u_int_4* ) ( buff + idx ) )[ 0 ] = 1;         //(5)
+            idx += 4;           
+
+            return idx;
+            }
+
+        int save_state( char *buff )
+            {
+            // Данные группы (buff) в следующем виде:
+            //  4 байта - номер устройства;           (1)
+            //  4 байта - количество подустройств;    (2)
+            //  4 байта - данные переменной.          (3)  
+
+            ( ( u_int_4* ) buff )[ 0 ] = 1;           //(1)
+            ( ( u_int_4* ) buff )[ 1 ] = 1;           //(2)
+
+            ( ( u_int_4* ) buff )[ 2 ] = var;         //(3)
+            return 4 + 4 + 4;
+            }
+
+        int save_changed_state( char *buff )
+            {
+            return save_state( buff );
+            }
+
+        void print() const
+            {
+            char tmp_str[ 100 ];    
+            sprintf( tmp_str, "\"%s\" ", name );
+
+            print_str( tmp_str );
+            }
+
+        u_int_4 get_n() const
+            {
+            return 1;
+            }
+
+        int load_state( char *buff )
+            {
+            buff++;
+            return 0;
+            }
+
+        int load_changed_state( char *buff )
+            {
+            buff++;
+            return 0;
+            }
+
+        int load_device( char *buff )
+            {
+            buff++;
+            return 0;
+            }
+
+        u_int_4 get_idx()
+            {
+            return 1;
+            }
+
+        void set_idx( u_int_4 new_idx )
+            {
+            new_idx++;
+            }
+
+    private:
+        enum CONSTANTS
+            {
+            C_MAX_NAME_LENGTH = 20,
+            };
+
+        u_int_4 &var;
+        char    type;
+        char    name[ C_MAX_NAME_LENGTH ];          //Имя.
+    };
+//-----------------------------------------------------------------------------
 /// @brief Интерфейс счетчика.
 class i_counter
     {
