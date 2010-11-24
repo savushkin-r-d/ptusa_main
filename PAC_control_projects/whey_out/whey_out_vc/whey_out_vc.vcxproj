@@ -158,6 +158,7 @@
     <ClCompile Include="..\..\..\common\tolua++\tolua_map.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_push.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_to.c" />
+    <ClCompile Include="..\..\..\common\util\util.cpp" />
     <ClCompile Include="..\..\..\PAC\common\mode_mngr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_dev.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_dev_lua.cpp" />

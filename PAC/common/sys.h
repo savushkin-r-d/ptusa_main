@@ -33,10 +33,6 @@ typedef unsigned long int       u_long;
 
 #include "util.h"
 //-----------------------------------------------------------------------------
-#if !defined LINUX_OS
-size_t strlcpy( char *dst, const char *src, size_t siz );
-#endif // !defined LINUX_OS
-//-----------------------------------------------------------------------------
 #ifdef DEBUG
 
 /// @brief Проверка нажатия клавиши.

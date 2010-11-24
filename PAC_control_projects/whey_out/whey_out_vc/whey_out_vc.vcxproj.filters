@@ -58,20 +58,11 @@
     <Filter Include="Header Files\common\sys">
       <UniqueIdentifier>{8bad2652-4d71-4370-96cd-fc9c903e17b9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\PAC\sys">
-      <UniqueIdentifier>{3dc256aa-d4bd-489b-ad49-510d28e5cfe2}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\common\sys\tolua++">
       <UniqueIdentifier>{ac0a524d-fc3c-4adc-9856-acbc86a850e4}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\common\sys\lua">
       <UniqueIdentifier>{ae23b814-5b2d-4d41-8b99-688bd3639c28}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\PAC\sys\lua">
-      <UniqueIdentifier>{569bd168-5ef4-44de-944a-522440d0c290}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\PAC\sys\tolua++">
-      <UniqueIdentifier>{8fd73d80-cc1f-4162-b290-fe4606cac801}</UniqueIdentifier>
     </Filter>
     <Filter Include="Lua Source\common">
       <UniqueIdentifier>{a55f18b0-87a0-4af9-a1ef-b45afb0fc00d}</UniqueIdentifier>
@@ -81,6 +72,18 @@
     </Filter>
     <Filter Include="Header Files\PAC\common\tolua++\pkg">
       <UniqueIdentifier>{8bf1182a-7a70-4917-9e52-f374f455835d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\common\sys">
+      <UniqueIdentifier>{3dc256aa-d4bd-489b-ad49-510d28e5cfe2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\common\sys\lua">
+      <UniqueIdentifier>{569bd168-5ef4-44de-944a-522440d0c290}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\common\sys\tolua++">
+      <UniqueIdentifier>{8fd73d80-cc1f-4162-b290-fe4606cac801}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\common\util">
+      <UniqueIdentifier>{98288ce7-605e-4b9b-8e8c-737b9f0db0f6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -267,118 +270,121 @@
       <Filter>Source Files\PAC\win\PAC_PC</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua_manager.cpp">
-      <Filter>Source Files\PAC\sys</Filter>
+      <Filter>Source Files\common\sys</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\tolua++\tolua_event.c">
-      <Filter>Source Files\PAC\sys\tolua++</Filter>
+      <Filter>Source Files\common\sys\tolua++</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\tolua++\tolua_is.c">
-      <Filter>Source Files\PAC\sys\tolua++</Filter>
+      <Filter>Source Files\common\sys\tolua++</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\tolua++\tolua_map.c">
-      <Filter>Source Files\PAC\sys\tolua++</Filter>
+      <Filter>Source Files\common\sys\tolua++</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\tolua++\tolua_push.c">
-      <Filter>Source Files\PAC\sys\tolua++</Filter>
+      <Filter>Source Files\common\sys\tolua++</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\tolua++\tolua_to.c">
-      <Filter>Source Files\PAC\sys\tolua++</Filter>
+      <Filter>Source Files\common\sys\tolua++</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lapi.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lauxlib.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lbaselib.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lcode.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\ldblib.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\ldebug.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\ldo.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\ldump.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lfunc.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lgc.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\linit.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\liolib.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\llex.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lmathlib.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lmem.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\loadlib.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lobject.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lopcodes.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\loslib.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lparser.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lstate.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lstring.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lstrlib.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\ltable.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\ltablib.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\ltm.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lundump.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lvm.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lzio.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\print.c">
-      <Filter>Source Files\PAC\sys\lua</Filter>
+      <Filter>Source Files\common\sys\lua</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\mode_mngr.cpp">
       <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\PAC_info.cpp">
       <Filter>Source Files\PAC\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\util\util.cpp">
+      <Filter>Source Files\common\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
