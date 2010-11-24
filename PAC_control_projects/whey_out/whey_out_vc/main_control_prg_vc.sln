@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "whey_out_vc", "whey_out_vc.vcxproj", "{C97BEA2A-017D-41B6-8F4B-39026C548DE7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "main_control_prg_vc", "main_control_prg_vc.vcxproj", "{C97BEA2A-017D-41B6-8F4B-39026C548DE7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
