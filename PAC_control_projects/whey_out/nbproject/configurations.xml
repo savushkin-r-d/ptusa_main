@@ -8,6 +8,8 @@
         <logicalFolder name="f1" displayName="PAC" projectFiles="true">
           <itemPath>../../PAC/common/PAC_dev.h</itemPath>
           <itemPath>../../PAC/common/PAC_err.h</itemPath>
+          <itemPath>../../PAC/common/PAC_info.h</itemPath>
+          <itemPath>../../PAC/common/mode_mngr.h</itemPath>
           <itemPath>../../PAC/common/param_ex.h</itemPath>
           <itemPath>../../PAC/common/prj_mngr.h</itemPath>
           <itemPath>../../PAC/common/sys.h</itemPath>
@@ -52,7 +54,7 @@
             <itemPath>../../common/tolua++/tolua_base.h</itemPath>
             <itemPath>../../common/tolua++/tolua_event.h</itemPath>
           </logicalFolder>
-          <itemPath>../../common/lua_manager.cpp</itemPath>
+          <itemPath>../../common/lua_manager.h</itemPath>
         </logicalFolder>
         <logicalFolder name="f4" displayName="util" projectFiles="true">
           <itemPath>../../common/util/util.h</itemPath>
@@ -74,7 +76,12 @@
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="f1" displayName="Lua source " projectFiles="true">
+      <logicalFolder name="f1" displayName="common" projectFiles="true">
+        <itemPath>../../PAC/common/Lua/sys.lua</itemPath>
+        <itemPath>../../PAC/common/Lua/sys_wago.lua</itemPath>
+      </logicalFolder>
       <itemPath>main.lua</itemPath>
+      <itemPath>main.wago.lua</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -84,6 +91,8 @@
           <itemPath>../../PAC/common/PAC_dev.cpp</itemPath>
           <itemPath>../../PAC/common/PAC_dev_lua.cpp</itemPath>
           <itemPath>../../PAC/common/PAC_err.cpp</itemPath>
+          <itemPath>../../PAC/common/PAC_info.cpp</itemPath>
+          <itemPath>../../PAC/common/mode_mngr.cpp</itemPath>
           <itemPath>../../PAC/common/param_ex.cpp</itemPath>
           <itemPath>../../PAC/common/prj_mngr.cpp</itemPath>
           <itemPath>../../PAC/common/sys.cpp</itemPath>
@@ -134,7 +143,10 @@
             <itemPath>../../common/tolua++/tolua_push.c</itemPath>
             <itemPath>../../common/tolua++/tolua_to.c</itemPath>
           </logicalFolder>
-          <itemPath>../../common/lua_manager.h</itemPath>
+          <itemPath>../../common/lua_manager.cpp</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f4" displayName="util" projectFiles="true">
+          <itemPath>../../common/util/util.cpp</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="f4" displayName="linux" projectFiles="true">

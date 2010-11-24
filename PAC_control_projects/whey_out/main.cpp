@@ -37,6 +37,7 @@
 #include "wago_PC.h"
 #endif // PAC_PC
 
+#include "PAC_info.h"
 #include "tech_def.h"
 
 #include "lua_manager.h"
@@ -48,6 +49,8 @@
 #if defined PAC_WAGO_750_860 && defined PAC_PC
 #error
 #endif
+
+PAC_info *g_PAC_system;
 
 int main( int argc, char *argv[] )
     {    
@@ -99,11 +102,16 @@ int main( int argc, char *argv[] )
     	{
         return EXIT_FAILURE;
     	}           
-    G_TECH_OBJECT_MNGR()->init_objects();    
+    G_TECH_OBJECT_MNGR()->init_objects();
+
+    //-ƒобавление системных тегов контроллера.
+    g_PAC_system = new PAC_info();
+    G_DEVICE_CMMCTR->add_device( g_PAC_system->com_dev );
 
 #ifdef DEBUG
     G_DEVICE_MANAGER()->print();
     G_DEVICE_CMMCTR->print();
+    G_TECH_OBJECT_MNGR()->print();
 
     u_long st_time;
     u_long all_time = 0;
@@ -132,6 +140,8 @@ int main( int argc, char *argv[] )
 #endif // ifndef
 
         PAC_critical_errors_manager::get_instance()->show_errors();
+
+        g_PAC_system->eval();
 
 #ifdef DEBUG
         all_time += get_millisec() - st_time;

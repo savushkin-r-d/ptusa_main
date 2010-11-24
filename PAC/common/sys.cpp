@@ -3,6 +3,7 @@
 auto_smart_ptr < NV_memory_manager > NV_memory_manager::instance;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#if !defined LINUX_OS
 size_t strlcpy(char *dst, const char *src, size_t siz)
     {
     char *d = dst;
@@ -27,6 +28,7 @@ size_t strlcpy(char *dst, const char *src, size_t siz)
 
     return(s - src - 1);	/* count does not include NUL */
     }
+#endif // !defined LINUX_OS
 //-----------------------------------------------------------------------------
 #if defined DEBUG
 

@@ -351,7 +351,7 @@ class string_device: public i_simple_device
 class var_state:public i_simple_device
     {    
     public:
-        var_state( char *new_name, char type,
+        var_state( const char *new_name, char type,
             u_int_4 &var ):var( var ),
             type( type )
             {            

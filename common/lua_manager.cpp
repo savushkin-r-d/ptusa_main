@@ -40,11 +40,15 @@ int lua_manager::init( lua_State* lua_state )
 
 #ifdef DEBUG
         const char *ADDITIONAL_PATH_CMD = 
-#ifdef WIN_OS
-            "package.path = package.path..\';../../../PAC/common/Lua/?.lua;\'";
+#if defined WIN_OS 
+        "package.path = package.path..\';../../../PAC/common/Lua/?.lua;\'";
+        
+#elif defined LINUX_OS && defined PAC_PC
+        "package.path = package.path..\';../../PAC/common/Lua/?.lua;\'";
+
 #else
-            "package.path = package.path..\';./?.lua;\'";
-#endif  // WIN_OS
+        "package.path = package.path..\';./?.lua;\'";
+#endif  // defined WIN_OS || ( defined LINUX_OS && defined PAC_PC )
         
         if( luaL_dostring( L, ADDITIONAL_PATH_CMD ) != 0 )
             {

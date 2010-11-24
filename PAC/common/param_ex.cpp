@@ -12,6 +12,9 @@ extern dev_errors_manager *g_dev_errors_manager;
 #include "tech_def.h"
 #endif //USE_NO_TANK_COMB_DEVICE
 
+#include "PAC_info.h"
+extern PAC_info *g_PAC_system;
+
 //-----------------------------------------------------------------------------
 params_manager::params_manager()
     {
@@ -142,6 +145,9 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
             tech_object_manager::get_instance()->init_runtime_params();
 #endif // USE_NO_TANK_COMB_DEVICE 
             }
+
+
+        g_PAC_system->reset_params();
 
         save();
 

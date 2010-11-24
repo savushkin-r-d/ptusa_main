@@ -23,7 +23,9 @@ tech_object::tech_object( const char* new_name, u_int number, u_int modes_count,
         number( number ),
         cmd( 0 ),
         modes_count( modes_count ),        
-        mode_time( run_time_params_u_int_4( modes_count, "MODE_TIME" ) )       
+        mode_time( run_time_params_u_int_4( modes_count, "MODE_TIME" ) ),
+
+        modes_manager( 0 )
     {
     u_int state_size_in_int4 = modes_count / 32; // Размер состояния в double word.
     if ( modes_count % 32 > 0 ) state_size_in_int4++;
@@ -54,6 +56,9 @@ tech_object::tech_object( const char* new_name, u_int number, u_int modes_count,
 
     strncpy( name, new_name, C_MAX_NAME_LENGTH );
     snprintf( name + strlen( name ), C_MAX_NAME_LENGTH, "%d", number );
+
+    modes_manager = new mode_manager( modes_count );    
+    modes_manager->set_param( &par_uint );
     }
 //-----------------------------------------------------------------------------
 tech_object::~tech_object()
@@ -68,6 +73,9 @@ tech_object::~tech_object()
     delete com_dev;
 
     mode_start_time.clear();
+
+    delete modes_manager;
+    modes_manager = 0;
     }
 //-----------------------------------------------------------------------------
 int tech_object::init_params()

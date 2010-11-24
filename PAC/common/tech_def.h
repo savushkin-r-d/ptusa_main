@@ -27,6 +27,8 @@
 #include "tcp_cmctr.h"
 #include "param_ex.h"
 
+#include "mode_mngr.h"
+
 #ifdef  __cplusplus
 extern "C" {
 #endif
@@ -182,6 +184,13 @@ class tech_object
         int  lua_init_runtime_params();
         //--Lua implemented methods.--!>
 
+        /// @brief Отладочная печать объекта.
+        void print()
+            {
+            Print( "Object \"%s\"\n", name );
+            modes_manager->print();
+            }
+
     protected:
         smart_ptr< complex_device > com_dev; ///< Связь с сервером.
 
@@ -198,7 +207,10 @@ class tech_object
             {
             C_MAX_NAME_LENGTH = 30,
             };
-        char name[ C_MAX_NAME_LENGTH ];    ///< Имя объекта.
+        char name[ C_MAX_NAME_LENGTH ];    ///< Имя объекта + номер объекта.
+
+
+        mode_manager    *modes_manager;    ///< Шаги режимов.
     };
 //-----------------------------------------------------------------------------
 class tech_object_manager
@@ -237,6 +249,22 @@ class tech_object_manager
 
         /// @brief Добавление технологического объекта.
         void add_tech_object( tech_object* new_tech_object );
+
+        /// @brief Отладочная печать объекта.
+        void print()
+            {
+            Print( "Technological objects manager\n" );
+            for ( u_int i = 0; i < tech_objects.size(); i++ )
+                {
+                tech_objects[ i ]->print();
+
+#ifdef KEY_CONFIRM
+                Print( "Press any key to continue..." );
+                Getch();
+                Print( "\n" );
+#endif // KEY_CONFIRM
+                }
+            }
 
     private:
         /// Единственный экземпляр класса.

@@ -110,13 +110,13 @@ void step_path::set_start_time( u_int_4 start_time )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 mode_manager::mode_manager( u_int_2 new_modes_cnt
-                           ): active_step( 0 ),
-                           par( 0 ),
-                           steps_cnt( 0 ),
-                           steps( 0 ),
+                           ): par( 0 ),                           
                            step_duration_par_n( 0 ),
                            next_step_n( 0 ),
-                           modes_cnt( new_modes_cnt )
+                           modes_cnt( new_modes_cnt ),
+                           steps_cnt( 0 ),                           
+                           steps( 0 ),
+                           active_step( 0 )
     {
     if ( 0 == new_modes_cnt )
         {

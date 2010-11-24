@@ -1536,7 +1536,7 @@ bool timer::is_time_up() const
 //-----------------------------------------------------------------------------
 u_long timer::get_work_time() const
     {
-    Print( " %d\n", work_time + get_delta_millisec( last_time ) );
+    Print( " %lu\n", work_time + get_delta_millisec( last_time ) );
 
     return work_time + get_delta_millisec( last_time );
     }
