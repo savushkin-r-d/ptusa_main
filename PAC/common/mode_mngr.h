@@ -24,7 +24,8 @@
 
 #include "PAC_dev.h"
 #include "param_ex.h"
-
+//-----------------------------------------------------------------------------
+class mode_manager;
 //-----------------------------------------------------------------------------
 /// @brief —одержит информацию об устройствах, которые вход€т в шаг (открываютс€/
 /// закрываютс€).
@@ -32,6 +33,7 @@
 /// ” режима может быть активным (выполн€тьс€) только один шаг.
 class step_path
     {
+    friend mode_manager;
     public:
         step_path();
 
@@ -127,6 +129,24 @@ class mode_manager
         /// @return   0 - ок.
         int add_opened_dev( u_int_2 mode, u_char step, device *dev );
 
+        /// @brief ƒобавление закрываемое устройство дл€ режима.
+        ///
+        /// @param [in] mode - режим;
+        /// @param [in] dev  - указатель на закрываемое устройство.
+        ///
+        /// @return < 0 - ошибка.
+        /// @return   0 - ок.
+        int add_mode_closed_dev( u_int_2 mode, device *dev );
+
+        /// @brief ƒобавление открываемое устройство дл€ режима.
+        ///
+        /// @param [in] mode - режим.
+        /// @param [in] dev  - указатель на открываемое устройство.       
+        ///
+        /// @return < 0 - ошибка.
+        /// @return   0 - ок.
+        int add_mode_opened_dev( u_int_2 mode, device *dev );
+
         /// @brief ѕроверка времени выполнени€ шага.
         ///
         /// @return  < 0 - ошибка.
@@ -155,6 +175,9 @@ class mode_manager
 
         u_char  *active_step;           ///< Ўаги, выполн€емые в текущий момент.
         u_char  *is_active_mode;        ///< јктивен ли режим.
+
+        /// @brief ”стройства режимов.
+        std::vector < step_path* > modes_devices; 
 
         /// @brief ѕроверка, €вл€етс€ ли номер режима и шага допустимым.
         ///

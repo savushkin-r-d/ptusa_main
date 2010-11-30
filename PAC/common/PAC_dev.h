@@ -1464,6 +1464,9 @@ class device_manager
 
         ~device_manager();
 
+        /// @brief ѕолучение устройства по его номеру.        
+        device* get_device( device::DEVICE_TYPE dev_type, u_int dev_number );
+
         /// @brief ѕолучение клапана по его номеру.
         i_DO_device* get_V( int number );
 
@@ -1516,7 +1519,7 @@ class device_manager
         static void set_instance( device_manager* new_instance );
 
         /// @brief ѕолучение всех простых устройств, дл€ передачи на сервер.
-        complex_device * get_device()
+        complex_device * get_communication_device()
             {
             return devices;
             }
@@ -1541,11 +1544,7 @@ class device_manager
 
         /// ƒиапазоны устройств всех типов.
         range dev_types_ranges[ device::C_DEVICE_TYPE_CNT ];
-
-        /// @brief ѕолучение устройства по его номеру.        
-        device* get_device( device::DEVICE_TYPE dev_type, u_int dev_number,
-            char const * dev_name );
-
+        
         /// @brief ѕолучение индекса устройства по его номеру.        
         int get_device_n( device::DEVICE_TYPE dev_type, u_int dev_number );
 

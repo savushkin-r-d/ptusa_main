@@ -67,34 +67,25 @@ int step_path::final()
     }
 //-----------------------------------------------------------------------------
 void step_path::print() const
-    {
-    
+    {    
     if ( open_devices.size() )
         {
-        Print( " On [ %u ] - ", open_devices.size() );
+        Print( "      On [ %u ]:\n", open_devices.size() );
         for ( u_int i = 0; i < open_devices.size(); i++ )
             {
-            Print( "%u", open_devices[ i ]->get_n() );
-            if ( i < open_devices.size() - 1 )
-                {
-                Print( ", " );
-                }
-            }
-        Print( ".\n" );
+            Print( "\t" );
+            open_devices[ i ]->print();            
+            }        
         }
 
     if ( close_devices.size() )
         {
-        Print( "Off [ %u ] - ", close_devices.size() );
+        Print( "      Off [ %u ]:\n", close_devices.size() );
         for ( u_int i = 0; i < close_devices.size(); i++ )
             {
-            Print( "%u", close_devices[ i ]->get_n() );
-            if ( i < close_devices.size() - 1 )
-                {
-                Print( ", " );
-                }
-            }
-        Print( ".\n" );
+            Print( "\t" );
+            close_devices[ i ]->print();            
+            }        
         }
     }
 //-----------------------------------------------------------------------------
@@ -137,10 +128,18 @@ mode_manager::mode_manager( u_int_2 new_modes_cnt
 
     is_active_mode = new u_char[ new_modes_cnt ];
     memset( is_active_mode, 0, new_modes_cnt );
+
+    for ( int i = 0; i < new_modes_cnt; i++ )
+    	{        
+        modes_devices.push_back( new step_path() );
+    	}
+
     }
 //-----------------------------------------------------------------------------
 int mode_manager::init( u_int_2 mode, u_char start_step, void *object )
     {
+    modes_devices.at( mode )->init();
+
     if ( 0 == steps_cnt[ mode ] )
         {
         return 0;
@@ -166,6 +165,8 @@ int mode_manager::init( u_int_2 mode, u_char start_step, void *object )
 //-----------------------------------------------------------------------------
 int mode_manager::final( u_int_2 mode )
     {
+    modes_devices.at( mode )->final();
+
     if ( 0 == steps_cnt[ mode ] )
         {
         return 0;
@@ -188,6 +189,8 @@ int mode_manager::final( u_int_2 mode )
 //-----------------------------------------------------------------------------
 int mode_manager::evaluate( u_int_2 mode )
     {
+    modes_devices.at( mode )->evaluate();
+
     if ( 0 == steps_cnt[ mode ] )
         {
         return 0;
@@ -298,7 +301,7 @@ int mode_manager::to_step( u_int_2 mode, u_char new_step )
 //-----------------------------------------------------------------------------
 int mode_manager::add_closed_dev( u_int_2 mode, u_char step, device *dev )
     {
-    if ( check_correct_step_n( mode, active_step[ mode ] ) ) 
+    if ( check_correct_step_n( mode, step ) ) 
         {
         return -1;
         }
@@ -307,7 +310,7 @@ int mode_manager::add_closed_dev( u_int_2 mode, u_char step, device *dev )
 //-----------------------------------------------------------------------------
 int mode_manager::add_opened_dev( u_int_2 mode, u_char step, device *dev )
     {
-    if ( check_correct_step_n( mode, active_step[ mode ] ) ) 
+    if ( check_correct_step_n( mode, step ) ) 
         {
         return -1;
         }
@@ -318,16 +321,27 @@ void mode_manager::print()
     {
     Print( "mode_manager[%u]\n", modes_cnt );
     for ( int j = 0; j < modes_cnt; j++ )
-        {
+        {        
+        if ( modes_devices.at( j )->close_devices.size() > 0 ||
+             modes_devices.at( j )->open_devices.size() > 0 ||
+             steps_cnt[ j ] > 0 )
+            {
+            Print( "  [%d]\n", j );            
+            }
+
+        modes_devices.at( j )->print();
+
         if ( steps_cnt[ j ] > 0 )
             {
-            Print( "  [%d] - [%u] \n", j, steps_cnt[ j ] );
+            Print( "     steps count - %u \n", steps_cnt[ j ] );
             for ( int i = 0; i < steps_cnt[ j ]; i++ )
                 {
-                Print( "    [%2d], time step par[%d]; next step[%d]; ", 
-                    i, step_duration_par_n[ j ][ i ], next_step_n[ j ][ i ] );                                                
+                Print( "    [%2d], time step par[%d]; next step[%d]\n", 
+                    i + 1, step_duration_par_n[ j ][ i ], next_step_n[ j ][ i ] );                                                
                 steps[ j ][ i ].print();
                 }
+
+            Print( "\n" );
             }
         }             
     }
@@ -375,5 +389,35 @@ unsigned long mode_manager::get_current_step_evaluation_time( u_int_2 mode )
     u_char step_n = active_step[ mode ];
 
     return get_millisec() - steps[ mode ][ step_n ].get_start_time();
+    }
+//-----------------------------------------------------------------------------
+int mode_manager::add_mode_closed_dev( u_int_2 mode, device *dev )
+    {
+    if ( mode >= modes_cnt )
+    	{
+#ifdef DEBUG
+        Print( "Error! mode_manager:: mode[ %u ] >= modes count[ %u ]!\n",
+               mode, modes_cnt );
+#endif // DEBUG
+        return 2;
+    	}
+
+    modes_devices.at( mode)->add_closed_dev( dev );
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int mode_manager::add_mode_opened_dev( u_int_2 mode, device *dev )
+    {
+    if ( mode >= modes_cnt )
+        {
+#ifdef DEBUG
+        Print( "Error! mode_manager:: mode[ %u ] >= modes count[ %u ]!\n",
+            mode, modes_cnt );
+#endif // DEBUG
+        return 2;
+        }
+
+    modes_devices.at( mode)->add_opened_dev( dev );
+    return 0;
     }
 //-----------------------------------------------------------------------------

@@ -91,7 +91,8 @@ int project_manager::lua_load_configuration()
     lua_manager::get_instance()->void_exec_lua_method( "system", 
         "init_devices", "lua_load_configuration" );
 
-    G_DEVICE_CMMCTR->add_device( device_manager::get_instance()->get_device() );    
+    G_DEVICE_CMMCTR->add_device( 
+        device_manager::get_instance()->get_communication_device() );    
 
 #ifdef DEBUG
     Print( "Reading configuration completed.\n\n" );

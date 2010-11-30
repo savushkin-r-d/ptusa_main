@@ -372,7 +372,7 @@ void DO_1::off()
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_V( int number )
     {
-    return get_device( device::DT_V, number, "V" );
+    return get_device( device::DT_V, number );
     }
 //-----------------------------------------------------------------------------
 device_manager* device_manager::get_instance()
@@ -416,7 +416,7 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type,
     }
 //-----------------------------------------------------------------------------
 device* device_manager::get_device( device::DEVICE_TYPE dev_type,
-    u_int dev_number, char const * dev_name )
+    u_int dev_number )
     {
     int dev_n = get_device_n( dev_type, dev_number );
 
@@ -427,7 +427,71 @@ device* device_manager::get_device( device::DEVICE_TYPE dev_type,
     else
         {
 #ifdef DEBUG
-        Print( "%s[ %d ] not found!\n", dev_name, dev_number );
+        switch ( dev_type )
+            {
+        case device::DT_V:
+            Print( "V   " );
+            break;
+
+        case device::DT_N:
+            Print( "N   " );
+            break;
+
+        case device::DT_M:
+            Print( "M   " );
+            break;
+
+        case device::DT_LS:
+            Print( "LS  " );
+            break;
+
+        case device::DT_TE:
+            Print( "TE  " );
+            break;
+
+        case device::DT_FE:
+            Print( "FE  " );
+            break;
+
+        case device::DT_FS:
+            Print( "FS  " );
+            break;
+
+        case device::DT_CTR:
+            Print( "CTR " );
+            break;
+
+        case device::DT_AO:
+            Print( "AO  " );
+            break;
+
+        case device::DT_LE:
+            Print( "LE  " );
+            break;
+
+        case device::DT_FB:
+            Print( "FB  " );
+            break;
+
+        case device::DT_UPR:
+            Print( "UPR " );
+            break;
+
+        case device::DT_QE:
+            Print( "QE  " );
+            break;
+
+        case device::DT_AI:
+            Print( "AI  " );
+            break;
+
+        default:
+            Print( "Unknown " );
+            break;
+            }
+
+        Print( "%5lu\t", ( u_long ) dev_number );
+        Print( "not found!\n" );
 #endif // DEBUG
         }
 
@@ -480,71 +544,71 @@ device_manager::~device_manager()
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_N( int number )
     {
-    return get_device( device::DT_N, number, "N" );
+    return get_device( device::DT_N, number );
     }
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_M( int number )
     {
-    return get_device( device::DT_M, number, "M" );
+    return get_device( device::DT_M, number );
     }
 //-----------------------------------------------------------------------------
 i_DI_device* device_manager::get_LS( int number )
     {
-    return get_device( device::DT_LS, number, "LS" );
+    return get_device( device::DT_LS, number );
     }
 //-----------------------------------------------------------------------------
 i_DI_device* device_manager::get_FS( int number )
     {
-    return get_device( device::DT_FS, number, "FS" );
+    return get_device( device::DT_FS, number );
     }
 //-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_AI( int number )
     {
-    return get_device( device::DT_AI, number, "AI" );
+    return get_device( device::DT_AI, number );
     }
 //-----------------------------------------------------------------------------
 i_AO_device* device_manager::get_AO( int number )
     {
-    return get_device( device::DT_AO, number, "AO" );
+    return get_device( device::DT_AO, number );
     }
 //-----------------------------------------------------------------------------
 i_counter* device_manager::get_CTR( int number )
     {
     int res = get_device_n( device::DT_CTR, number );
 
-    if ( res >= 0 ) return ( counter* ) project_devices[ res ];
+    if ( res >= 0 ) return ( counter* ) project_devices.at( res );
 
     return &stub;
     }
 //-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_TE( int number )
     {
-    return get_device( device::DT_TE, number, "TE" );
+    return get_device( device::DT_TE, number );
     }
 //-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_FE( int number )
     {
-    return get_device( device::DT_FE, number, "FE" );
+    return get_device( device::DT_FE, number );
     }
 //-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_LE( int number )
     {
-    return get_device( device::DT_LE, number, "LE" );
+    return get_device( device::DT_LE, number );
     }
 //-----------------------------------------------------------------------------
 i_DI_device* device_manager::get_FB( int number )
     {
-    return get_device( device::DT_FB, number, "FB" );
+    return get_device( device::DT_FB, number );
     }
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_UPR( int number )
     {
-    return get_device( device::DT_UPR, number, "UPR" );
+    return get_device( device::DT_UPR, number );
     }
 //-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_QE( int number )
     {
-    return get_device( device::DT_QE, number, "QE" );
+    return get_device( device::DT_QE, number );
     }
 //-----------------------------------------------------------------------------
 wago_device* device_manager::add_device( int dev_type, int dev_sub_type,

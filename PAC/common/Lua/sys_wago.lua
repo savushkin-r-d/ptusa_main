@@ -274,4 +274,101 @@ system =
 
         G_DEVICE_MANAGER():complete_init()
     end,
+
+	init_tech_dev_modes = function()
+
+        local get_dev_type = function( dev_name )
+            local dev_type = -1
+            if     dev_name == 'V'  then dev_type = device.DT_V
+            elseif dev_name == 'N'  then dev_type = device.DT_N
+            elseif dev_name == 'FB' then dev_type = device.DT_FB end
+
+            return dev_type
+        end
+
+		for fields, value in ipairs( init_tech_objects_modes() ) do
+			local object_n = value.n - 1
+			local object   = G_TECH_OBJECT_MNGR():get_tech_objects( object_n )
+
+			local modes_manager = object:get_modes_manager()
+
+			for fields, value in ipairs( value.modes ) do
+
+                local mode_n	  = fields - 1
+
+                if value.opened_devices ~= nil then
+
+                    for field, value in pairs( value.opened_devices ) do
+
+                        local dev_type = get_dev_type( field )
+
+                        for field, value in ipairs( value ) do
+                            local dev = G_DEVICE_MANAGER():get_device(
+                                dev_type, value )
+                            print( 'value.opened_devices - ', value )
+
+                            modes_manager:add_mode_opened_dev(
+                                mode_n, dev )
+                        end
+                    end
+                end
+
+                if value.closed_devices ~= nil then
+                    for field, value in pairs( value.closed_devices ) do
+                        local dev_type = get_dev_type( field )
+
+                        for field, value in ipairs( value ) do
+                            local dev = G_DEVICE_MANAGER():get_device(
+                                dev_type, value )
+                            modes_manager:add_mode_closed_dev(
+                                mode_n, dev )
+                        end
+                    end
+                end
+
+
+
+                if value.steps ~= nil then
+                    local steps_count = #value.steps
+                    modes_manager:set_mode_config( mode_n, steps_count )
+
+                    for fields, value in ipairs( value.steps ) do
+                        local step_n = fields - 1
+
+                        if value.opened_devices ~= nil then
+                            for field, value in pairs( value.opened_devices ) do
+
+                                local dev_type = get_dev_type( field )
+
+                                for field, value in ipairs( value ) do
+                                    local dev = G_DEVICE_MANAGER():get_device(
+                                        dev_type, value )
+                                    modes_manager:add_opened_dev(
+                                        mode_n, step_n, dev )
+                                end
+                            end
+                        end
+
+                        if value.closed_devices ~= nil then
+                            for field, value in pairs( value.closed_devices ) do
+                                local dev_type = get_dev_type( field )
+
+                                for field, value in ipairs( value ) do
+                                    local dev = G_DEVICE_MANAGER():get_device(
+                                        dev_type, value )
+                                    modes_manager:add_closed_dev(
+                                        mode_n, step_n, dev )
+                                end
+                            end
+                        end
+
+                    end --for fields, value in ipairs( value.steps ) do
+				end --if value.steps ~= nil then
+			end --for fields, value in ipairs( value.modes ) do
+		end --for fields, value in ipairs( tech_objects ) do
+
+		print( 'init OK' )
+		return 0
+	end,
     }
+

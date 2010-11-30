@@ -122,6 +122,31 @@ class i_counter
         unsigned long get_quantity();
     };
 //-----------------------------------------------------------------------------
+class device
+    {
+    public:
+        /// Типы устройств.
+        enum DEVICE_TYPE
+            {
+            DT_NONE = -1,      ///< Тип не определен.
+
+            DT_V = 0,   ///< Клапан.
+            DT_N,       ///< Насос.
+            DT_M,       ///< Мешалка.
+            DT_LS,      ///< Уровень (есть/нет).
+            DT_TE,      ///< Температура.
+            DT_FE,      ///< Расход (значение).
+            DT_FS,      ///< Расход (есть/нет).
+            DT_CTR,     ///< Счетчик.
+            DT_AO,      ///< Аналоговый выход.
+            DT_LE,      ///< Уровень (значение).
+            DT_FB,      ///< Обратная связь.
+            DT_UPR,     ///< Канал управления.
+            DT_QE,      ///< Концентрация.
+            DT_AI,      ///< Аналоговый вход.
+            };
+	};
+//-----------------------------------------------------------------------------
 /// @brief Получение клапана по номеру.
 ///
 /// @param number - номер клапана.
@@ -336,6 +361,8 @@ class tech_object
         run_time_params_u_int_4 rt_par_uint;    ///< Рабочие параметры, тип unsigned int.
 
         timer_manager           timers;			///< Таймеры объекта.
+
+		mode_manager* get_modes_manager();
     };
 //-----------------------------------------------------------------------------
 ///@brief Получение менеджера технологических объектов.
@@ -355,6 +382,85 @@ class tech_object_manager
 
         /// @brief Получение технологического объекта по его порядковому номеру.
         tech_object* get_tech_objects( unsigned int idx );
+
+		/// @brief Отладочная печать объекта.
+        void print();        
+    };
+//-----------------------------------------------------------------------------
+class mode_manager
+    {
+    public:
+     
+        /// @brief Устанавливает количество шагов для режима.
+        ///
+        /// @return < 0 - ошибка.
+        /// @return   0 - ок.
+        int set_mode_config( unsigned int mode, unsigned char new_steps_cnt );
+
+
+        /// @brief Переход к шагу.
+        ///
+        /// @param [in] mode     - режим.
+        /// @param [in] new_step - шаг, диапазон 0..255.
+        ///
+        /// @return < 0 - ошибка.
+        /// @return   0 - ок.
+        int to_step( unsigned int mode, unsigned char new_step );
+
+
+        /// @brief Добавление закрываемое устройство для шага.
+        ///
+        /// @param [in] mode - режим;
+        /// @param [in] step - шаг, диапазон 0..255.
+        /// @param [in] dev  - указатель на закрываемое устройство.
+        ///
+        /// @return < 0 - ошибка.
+        /// @return   0 - ок.
+        int add_closed_dev( unsigned int mode, unsigned char step, device *dev );
+
+        /// @brief Добавление открываемое устройство для шага.
+        ///
+        /// @param [in] mode - режим.
+        /// @param [in] step - шаг, диапазон 0..255.
+        /// @param [in] dev  - указатель на открываемое устройство.       
+        ///
+        /// @return < 0 - ошибка.
+        /// @return   0 - ок.
+        int add_opened_dev( unsigned int mode, unsigned char step, device *dev );
+
+        /// @brief Добавление закрываемое устройство для режима.
+        ///
+        /// @param [in] mode - режим;
+        /// @param [in] dev  - указатель на закрываемое устройство.
+        ///
+        /// @return < 0 - ошибка.
+        /// @return   0 - ок.
+        int add_mode_closed_dev( unsigned int mode, device *dev );
+
+        /// @brief Добавление открываемое устройство для режима.
+        ///
+        /// @param [in] mode - режим.
+        /// @param [in] dev  - указатель на открываемое устройство.       
+        ///
+        /// @return < 0 - ошибка.
+        /// @return   0 - ок.
+        int add_mode_opened_dev( unsigned int mode, device *dev );
+
+        /// @brief Проверка времени выполнения шага.
+        ///
+        /// @return  < 0 - ошибка.
+        /// @return    0 - время не вышло.
+        /// @return    1 - время вышло.
+        int is_current_step_evaluation_time_left( unsigned int mode );
+
+        /// @brief Время выполнения шага.
+        ///
+        /// @return    1 - время выполнения шага.
+        unsigned long get_current_step_evaluation_time( unsigned int mode );
+
+        int get_active_step( unsigned int mode );
+
+        void print();    
     };
 //-----------------------------------------------------------------------------
 ///@brief Получение менеджера устройств.
@@ -378,6 +484,10 @@ class device_manager
 			char * descr );
 
 		void complete_init();
+
+		/// @brief Получение устройства по его номеру.
+        device* get_device( device::DEVICE_TYPE dev_type,
+			unsigned int dev_number );
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе модулей ввода/вывода WAGO. 

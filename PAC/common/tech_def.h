@@ -191,6 +191,11 @@ class tech_object
             modes_manager->print();
             }
 
+        mode_manager* get_modes_manager()
+            {
+            return modes_manager;
+            }
+
     protected:
         smart_ptr< complex_device > com_dev; ///< Связь с сервером.
 
@@ -210,7 +215,7 @@ class tech_object
         char name[ C_MAX_NAME_LENGTH ];    ///< Имя объекта + номер объекта.
 
 
-        mode_manager    *modes_manager;    ///< Шаги режимов.
+        smart_ptr< mode_manager > modes_manager; ///< Шаги режимов.
     };
 //-----------------------------------------------------------------------------
 class tech_object_manager

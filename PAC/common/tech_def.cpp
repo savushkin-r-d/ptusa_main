@@ -380,6 +380,14 @@ int tech_object_manager::init_objects()
         G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS( i )->get_complex_dev() );        
         }
 
+    res = lua_manager::get_instance()->int_exec_lua_method( "system",
+        "init_tech_dev_modes", 0, "int tech_object_manager::init_objects()" );
+    if ( res < 0 )
+        {
+        Print( "Fatal error!\n" );
+        exit( 1 );
+        }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
