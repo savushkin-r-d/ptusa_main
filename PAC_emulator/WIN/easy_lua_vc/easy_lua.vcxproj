@@ -60,7 +60,7 @@
       <AdditionalDependencies>ws2_32.lib;User32.lib</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetDir)$(TargetFileName)" "d:\Program Files\SciTE_ASUTP\bin_lua\lua.exe"</Command>
+      <Command>copy "$(TargetDir)$(TargetFileName)" "p:\PTUSA projects\editor\bin_lua\lua.exe"</Command>
       <Message>Копирование интерпретатора Lua.</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -82,7 +82,8 @@
       <AdditionalDependencies>ws2_32.lib;User32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetDir)$(TargetFileName)" "d:\Program Files\SciTE_ASUTP\bin_lua\lua.exe"</Command>
+      <Command>copy "$(TargetDir)$(TargetFileName)" "p:\PTUSA projects\editor\bin_lua\lua.exe"
+"d:\Program Files\upx\upx.exe" -9 "p:\PTUSA projects\editor\bin_lua\lua.exe"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Копирование интерпретатора Lua.</Message>
@@ -118,9 +119,12 @@
     <ClInclude Include="..\..\..\common\tolua++\tolua_base.h" />
     <ClInclude Include="..\..\..\common\tolua++\tolua_event.h" />
     <ClInclude Include="..\..\..\common\util\util.h" />
+    <ClInclude Include="..\..\..\PAC\common\mode_mngr.h" />
     <ClInclude Include="..\..\..\PAC\common\PAC_dev.h" />
     <ClInclude Include="..\..\..\PAC\common\PAC_err.h" />
+    <ClInclude Include="..\..\..\PAC\common\PAC_info.h" />
     <ClInclude Include="..\..\..\PAC\common\param_ex.h" />
+    <ClInclude Include="..\..\..\PAC\common\PID.h" />
     <ClInclude Include="..\..\..\PAC\common\prj_mngr.h" />
     <ClInclude Include="..\..\..\PAC\common\sys.h" />
     <ClInclude Include="..\..\..\PAC\common\tcp_cmctr.h" />
@@ -170,10 +174,14 @@
     <ClCompile Include="..\..\..\common\tolua++\tolua_map.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_push.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_to.c" />
+    <ClCompile Include="..\..\..\common\util\util.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\mode_mngr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_dev.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_dev_lua.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_err.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\PAC_info.cpp" />
     <ClCompile Include="..\..\..\PAC\common\param_ex.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\PID.cpp" />
     <ClCompile Include="..\..\..\PAC\common\prj_mngr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys.cpp" />
     <ClCompile Include="..\..\..\PAC\common\tcp_cmctr.cpp" />
@@ -190,8 +198,6 @@
     <None Include="..\..\..\PAC\common\Lua\sys.lua" />
     <None Include="..\..\..\PAC\common\Lua\sys_wago.lua" />
     <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg" />
-    <None Include="..\main.wago.lua" />
-    <None Include="..\test.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

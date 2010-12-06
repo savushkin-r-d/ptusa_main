@@ -111,6 +111,7 @@
     <ClInclude Include="..\..\..\PAC\common\PAC_err.h" />
     <ClInclude Include="..\..\..\PAC\common\PAC_info.h" />
     <ClInclude Include="..\..\..\PAC\common\param_ex.h" />
+    <ClInclude Include="..\..\..\PAC\common\PID.h" />
     <ClInclude Include="..\..\..\PAC\common\prj_mngr.h" />
     <ClInclude Include="..\..\..\PAC\common\sys.h" />
     <ClInclude Include="..\..\..\PAC\common\tcp_cmctr.h" />
@@ -167,6 +168,7 @@
     <ClCompile Include="..\..\..\PAC\common\PAC_err.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_info.cpp" />
     <ClCompile Include="..\..\..\PAC\common\param_ex.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\PID.cpp" />
     <ClCompile Include="..\..\..\PAC\common\prj_mngr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys.cpp" />
     <ClCompile Include="..\..\..\PAC\common\tcp_cmctr.cpp" />
@@ -184,8 +186,6 @@
     <None Include="..\..\..\PAC\common\Lua\sys_wago.lua" />
     <None Include="..\..\..\PAC\common\toloa++\pkg\make.cmd" />
     <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg" />
-    <None Include="..\main.lua" />
-    <None Include="..\main.wago.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -68,7 +68,7 @@ int main( int argc, char *argv[] )
 #ifdef WIN_OS
     project_manager::set_instance( new project_manager_win() );
     tcp_communicator::set_instance( 
-        new tcp_communicator_win( "Выдача сыворотки" ) );
+        new tcp_communicator_win( "Установка №2" ) );
 #endif // WIN_OS
 
     device_manager::set_instance( new device_manager() );
@@ -97,7 +97,7 @@ int main( int argc, char *argv[] )
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
 
-    int res = lua_manager::get_instance()->init(); //-Инициализация Lua.
+    int res = lua_manager::get_instance()->init( 0, argv[ 1 ] ); //-Инициализация Lua.
     if ( res ) //-Ошибка инициализации.
     	{
         return EXIT_FAILURE;

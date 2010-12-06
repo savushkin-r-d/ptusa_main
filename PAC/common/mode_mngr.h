@@ -24,6 +24,8 @@
 
 #include "PAC_dev.h"
 #include "param_ex.h"
+
+class tech_object;
 //-----------------------------------------------------------------------------
 class mode_manager;
 //-----------------------------------------------------------------------------
@@ -82,8 +84,6 @@ class step_path
 class mode_manager
     {
     public:
-        saved_params_u_int_4 *par;       ///< Параметры, содержащие продолжительность шагов.
-
         mode_manager( u_int_2 new_modes_cnt );
 
         /// Добавление параметра с временами шагов.
@@ -95,7 +95,7 @@ class mode_manager
         /// @return   0 - ок.
         int set_mode_config( u_int_2 mode, u_char new_steps_cnt );
 
-        int init( u_int_2 mode, u_char start_step = 0, void *object = 0 );
+        int init( u_int_2 mode, u_char start_step = 0, tech_object *object = 0 );
         int evaluate( u_int_2 mode );
         int final( u_int_2 mode );
 
@@ -159,17 +159,34 @@ class mode_manager
         /// @return    1 - время выполнения шага.
         unsigned long get_current_step_evaluation_time( u_int_2 mode );
 
+
+        /// @brief Время выполнения режима.
+        ///
+        /// @param [in] mode - режим.
+        ///
+        /// @return - время выполнения режима.
+        unsigned long get_mode_evaluation_time( int mode );
+
         int get_active_step( u_int_2 mode );
 
         void print();
 
     private:
+        /// @brief Технологический объект.
+        tech_object *owner;
+
+        /// @brief Параметры, содержащие продолжительность шагов, режимов.
+        saved_params_u_int_4 *par;      
+
         u_char  **step_duration_par_n;  ///< Номера параметров времени шага.    
         u_char  **next_step_n;          ///< Номера шагов, к которым перейти при  
                                         ///< завершении времени шагов.
 
         u_int_2 modes_cnt;              ///< Количество режимов.
         u_char  *steps_cnt;             ///< Количество шагов.
+
+        std::vector < u_int_4 > modes_start_time; ///< Время начала режима.
+
 
         step_path **steps;              ///< Шаги для каждого режима.
 

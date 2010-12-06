@@ -12,6 +12,7 @@ $#include "PAC_dev.h"
 $#include "tech_def.h"
 $#include "wago.h"
 $#include "tolua_base.h"
+$#include "PID.h"
 
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе дискретного входа.
@@ -695,4 +696,28 @@ class wago_manager
 ///
 ///@return Менеджер устройств проекта.
 wago_manager* G_WAGO_MANAGER();
+//-----------------------------------------------------------------------------
+class PID 
+    {  
+    public:
+         PID( saved_params_float* par, 
+			run_time_params_float *w_par,
+			int start_param_index = 0, 
+            int start_work_params_index = 0 );
+
+        void  on( char is_down_to_inaccel_mode = 0 );
+        void  off();
+        float eval( float current_value, int delta_sign = 1 );
+
+        void  reset();
+        void  reset( float new_uk_1 );
+        void  set( float new_z );         //Установить новое задание ПИД.
+
+        void init_param( int par_n, float val );
+        void init_work_param( int par_n, float val );
+        void save_param();
+
+
+        void  set_used_par ( int par_n ); //Использовать kN, TiN, TdN.       
+    };
 //-----------------------------------------------------------------------------

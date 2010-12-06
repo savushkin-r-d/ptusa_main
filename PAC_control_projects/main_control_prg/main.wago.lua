@@ -1,82 +1,42 @@
 require "sys_wago" --Системные функции.
 -- ----------------------------------------------------------------------------
 editor_version = 12
-file_version   = 13
--- ----------------------------------------------------------------------------
+file_version   = 74
+
 --Узлы WAGO
-nodes =
+nodes = 
     {
         {
-        ntype   = 0,
+        ntype   = 1,
         address = 1,
-        modules =
+        modules = 
             {
-            { 466, '', '', '', '', '' },
-            { 466, '', '', '', '', '' },
-            { 402, '', '', '', '', '' },
-            { 402, '', '', '', '', '' },
-            { 402, '', '', '', '', '' },
-            { 402, '', '', '', '', '' },
-            { 504, '', '', '', '', '' },
-            { 504, '', '', '', '', '' },
-            { 504, '', '', '', '', '' },
-            { 504, '', '', '', '', '' },
-            { 504, '', '', '', '', '' },
-            { 504, '', '', '', '', '' },
-            { 504, '', '', '', '', '' },
-            { 504, '', '', '', '', '' },
-            { 504, '', '', '', '', '' },
-            { 638, '', '', '', '', '' },
-            { 461, '', '', '', '', '' },
-            { 461, '', '', '', '', '' },
-            { 461, '', '', '', '', '' },
-            { 612, '', '', '', '', '' },
-            { 512, '', '', '', '', '' },
-            { 512, '', '', '', '', '' },
-            { 602, '', '', '', '', '' },
-            { 402, '', '', '', '', '' },
-            { 600, '', '', '', '', '' },
+            { 504, '', '', '', '', '' }, 
+            { 530, '', '', '', '', '' }, 
+            { 402, '', '', '', '', '' }, 
+            { 430, '', '', '', '', '' }, 
+            { 530, '', '', '', '', '' }, 
+            { 504, '', '', '', '', '' }, 
+            { 554, '', '', '', '', '' }, 
+            { 554, '', '', '', '', '' }, 
+            { 638, '', '', '', '', '' }, 
+            { 466, '', '', '', '', '' }, 
+            { 461, '', '', '', '', '' }, 
+            { 461, '', '', '', '', '' }, 
+            { 600, '', '', '', '', '' }, 
             }
         },
     }
--- ----------------------------------------------------------------------------
+
 --Устройства
-devices =
+devices = 
     {
         {
-        descr   = 'Счетчик №1',
-        dtype   = 7,
+        descr   = 'VC100 рег. 1-ый контур подогрева',
+        dtype   = 8,
         subtype = 0,
-        number  = 1,
-        AI  =
-            {
-                {
-                node   = 0,
-                offset = 4
-                }
-            },
-        },
-
-        {
-        descr   = 'Счетчик №2',
-        dtype   = 7,
-        subtype = 0,
-        number  = 2,
-        AI  =
-            {
-                {
-                node   = 0,
-                offset = 5
-                }
-            },
-        },
-
-        {
-        descr   = 'Текущий уровень 1',
-        dtype   = 9,
-        subtype = 0,
-        number  = 1,
-        AI  =
+        number  = 100,
+        AO  = 
             {
                 {
                 node   = 0,
@@ -86,53 +46,11 @@ devices =
         },
 
         {
-        descr   = 'Текущий уровень 2',
-        dtype   = 9,
-        subtype = 0,
-        number  = 2,
-        AI  =
-            {
-                {
-                node   = 0,
-                offset = 1
-                }
-            },
-        },
-
-        {
-        descr   = 'Текущий уровень 3',
-        dtype   = 9,
-        subtype = 0,
-        number  = 3,
-        AI  =
-            {
-                {
-                node   = 0,
-                offset = 2
-                }
-            },
-        },
-
-        {
-        descr   = 'Текущий уровень 4',
-        dtype   = 9,
-        subtype = 0,
-        number  = 4,
-        AI  =
-            {
-                {
-                node   = 0,
-                offset = 3
-                }
-            },
-        },
-
-        {
-        descr   = '1LS1-Н.У. Танк № 1',
-        dtype   = 3,
+        descr   = 'VC101 рег. 2-ой контур подогрева',
+        dtype   = 8,
         subtype = 0,
         number  = 101,
-        DI  =
+        AO  = 
             {
                 {
                 node   = 0,
@@ -142,39 +60,11 @@ devices =
         },
 
         {
-        descr   = '1LS2-В.У. Танк № 1',
-        dtype   = 3,
+        descr   = 'Частота насоса N101',
+        dtype   = 8,
         subtype = 0,
-        number  = 102,
-        DI  =
-            {
-                {
-                node   = 0,
-                offset = 0
-                }
-            },
-        },
-
-        {
-        descr   = '2LS1-Н.У. Танк № 2',
-        dtype   = 3,
-        subtype = 0,
-        number  = 201,
-        DI  =
-            {
-                {
-                node   = 0,
-                offset = 3
-                }
-            },
-        },
-
-        {
-        descr   = '2LS2-В.У. Танк № 2',
-        dtype   = 3,
-        subtype = 0,
-        number  = 202,
-        DI  =
+        number  = 1001,
+        AO  = 
             {
                 {
                 node   = 0,
@@ -184,228 +74,89 @@ devices =
         },
 
         {
-        descr   = '3LS1-Н.У. Танк № 3',
-        dtype   = 3,
+        descr   = 'Счетчик продукта',
+        dtype   = 7,
         subtype = 0,
-        number  = 301,
-        DI  =
+        number  = 101,
+        AI  = 
             {
                 {
                 node   = 0,
-                offset = 5
+                offset = 0
                 }
             },
         },
 
         {
-        descr   = '3LS2-В.У. Танк № 3',
-        dtype   = 3,
+        descr   = 'Расход продукта',
+        dtype   = 5,
         subtype = 0,
-        number  = 302,
-        DI  =
+        number  = 101,
+        AI  = 
             {
                 {
                 node   = 0,
-                offset = 4
+                offset = 2
                 }
             },
+        par = { 0, 30 } 
         },
 
         {
-        descr   = '4LS1-Н.У. Танк № 4',
+        descr   = 'Н.У. бачка с продуктом',
         dtype   = 3,
-        subtype = 0,
-        number  = 401,
-        DI  =
-            {
-                {
-                node   = 0,
-                offset = 7
-                }
-            },
-        },
-
-        {
-        descr   = '4LS2-2.У. Танк № 4',
-        dtype   = 3,
-        subtype = 0,
-        number  = 402,
-        DI  =
-            {
-                {
-                node   = 0,
-                offset = 6
-                }
-            },
-        },
-
-        {
-        descr   = 'N1-Насос выдачи №1',
-        dtype   = 1,
         subtype = 0,
         number  = 1,
-        DO  =
+        DI  = 
             {
                 {
                 node   = 0,
-                offset = 36
-                }
-            },
-        DI  =
-            {
-                {
-                node   = 0,
-                offset = 8
+                offset = 0
                 }
             },
         },
 
         {
-        descr   = 'N-Насос выдачи №2',
-        dtype   = 1,
+        descr   = 'Ср.У. бачка с продуктом',
+        dtype   = 3,
         subtype = 0,
         number  = 2,
-        DO  =
+        DI  = 
             {
                 {
                 node   = 0,
-                offset = 37
-                }
-            },
-        DI  =
-            {
-                {
-                node   = 0,
-                offset = 10
+                offset = 2
                 }
             },
         },
 
         {
-        descr   = '22N2 -Возврат мойки',
-        dtype   = 1,
-        subtype = 0,
-        number  = 2202,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 38
-                }
-            },
-        DI  =
-            {
-                {
-                node   = 0,
-                offset = 9
-                }
-            },
-        },
-
-        {
-        descr   = 'SB1 старт выдача 1',
-        dtype   = 10,
-        subtype = 0,
-        number  = 1,
-        DI  =
-            {
-                {
-                node   = 0,
-                offset = 12
-                }
-            },
-        },
-
-        {
-        descr   = 'SB2 стоп выдача 11',
-        dtype   = 10,
-        subtype = 0,
-        number  = 2,
-        DI  =
-            {
-                {
-                node   = 0,
-                offset = 14
-                }
-            },
-        },
-
-        {
-        descr   = 'SB3 старт выдачи 2',
-        dtype   = 10,
+        descr   = 'Ср.У. бачка с продуктом',
+        dtype   = 3,
         subtype = 0,
         number  = 3,
-        DI  =
+        DI  = 
             {
                 {
                 node   = 0,
-                offset = 13
+                offset = 1
                 }
             },
         },
 
         {
-        descr   = 'SB4 стоп выдачи 2',
-        dtype   = 10,
+        descr   = 'М1 - гомогенизатор',
+        dtype   = 2,
         subtype = 0,
-        number  = 4,
-        DI  =
-            {
-                {
-                node   = 0,
-                offset = 15
-                }
-            },
-        },
-
-        {
-        descr   = 'Есть поток выдача 1',
-        dtype   = 10,
-        subtype = 0,
-        number  = 5,
-        DI  =
-            {
-                {
-                node   = 0,
-                offset = 16
-                }
-            },
-        },
-
-        {
-        descr   = 'Есть поток выдача 2',
-        dtype   = 10,
-        subtype = 0,
-        number  = 6,
-        DI  =
+        number  = 1,
+        DO  = 
             {
                 {
                 node   = 0,
                 offset = 18
                 }
             },
-        },
-
-        {
-        descr   = 'Температура Т. №1',
-        dtype   = 4,
-        subtype = 0,
-        number  = 1,
-        AI  =
-            {
-                {
-                node   = 0,
-                offset = 6
-                }
-            },
-        },
-
-        {
-        descr   = 'Температура Т. №2',
-        dtype   = 4,
-        subtype = 0,
-        number  = 2,
-        AI  =
+        DI  = 
             {
                 {
                 node   = 0,
@@ -415,11 +166,53 @@ devices =
         },
 
         {
-        descr   = 'Температура Т. №3',
-        dtype   = 4,
+        descr   = 'N100 - насос первого контура подогрева',
+        dtype   = 1,
         subtype = 0,
-        number  = 3,
-        AI  =
+        number  = 100,
+        DO  = 
+            {
+                {
+                node   = 0,
+                offset = 2
+                }
+            },
+        DI  = 
+            {
+                {
+                node   = 0,
+                offset = 4
+                }
+            },
+        },
+
+        {
+        descr   = 'N101 - насос продукта',
+        dtype   = 1,
+        subtype = 0,
+        number  = 101,
+        DO  = 
+            {
+                {
+                node   = 0,
+                offset = 1
+                }
+            },
+        DI  = 
+            {
+                {
+                node   = 0,
+                offset = 6
+                }
+            },
+        },
+
+        {
+        descr   = 'т.1-12 готовы к выдаче',
+        dtype   = 10,
+        subtype = 0,
+        number  = 21,
+        DI  = 
             {
                 {
                 node   = 0,
@@ -429,25 +222,11 @@ devices =
         },
 
         {
-        descr   = 'Температура Т. №4',
-        dtype   = 4,
+        descr   = 'т.32-38 готовы к приемке',
+        dtype   = 10,
         subtype = 0,
-        number  = 4,
-        AI  =
-            {
-                {
-                node   = 0,
-                offset = 9
-                }
-            },
-        },
-
-        {
-        descr   = 'темп. выдачи 1даче 1',
-        dtype   = 4,
-        subtype = 0,
-        number  = 5,
-        AI  =
+        number  = 22,
+        DI  = 
             {
                 {
                 node   = 0,
@@ -457,11 +236,53 @@ devices =
         },
 
         {
-        descr   = 'темп. выдачи 2даче 1',
-        dtype   = 4,
+        descr   = 'из т.1-12 продукт идет',
+        dtype   = 10,
         subtype = 0,
-        number  = 6,
-        AI  =
+        number  = 23,
+        DI  = 
+            {
+                {
+                node   = 0,
+                offset = 5
+                }
+            },
+        },
+
+        {
+        descr   = 'Запрос мойки R3 из т.32-38',
+        dtype   = 10,
+        subtype = 0,
+        number  = 24,
+        DI  = 
+            {
+                {
+                node   = 0,
+                offset = 3
+                }
+            },
+        },
+
+        {
+        descr   = 'Тумблер проталкивания до бачка',
+        dtype   = 10,
+        subtype = 0,
+        number  = 25,
+        DI  = 
+            {
+                {
+                node   = 0,
+                offset = 9
+                }
+            },
+        },
+
+        {
+        descr   = 'Открыть маршрут мойки л. уст. №7',
+        dtype   = 10,
+        subtype = 0,
+        number  = 26,
+        DI  = 
             {
                 {
                 node   = 0,
@@ -471,525 +292,711 @@ devices =
         },
 
         {
-        descr   = 'HL1 готов к выдаче 1',
-        dtype   = 11,
+        descr   = 'выход продукта с 1-ого контура подогрева',
+        dtype   = 4,
         subtype = 0,
-        number  = 1,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 32
-                }
-            },
-        },
-
-        {
-        descr   = 'HL2 выдача идет 1е 2',
-        dtype   = 11,
-        subtype = 0,
-        number  = 2,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 34
-                }
-            },
-        },
-
-        {
-        descr   = 'HL3 готов к выдаче 2',
-        dtype   = 11,
-        subtype = 0,
-        number  = 3,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 33
-                }
-            },
-        },
-
-        {
-        descr   = 'HL4 идет выдача 2',
-        dtype   = 11,
-        subtype = 0,
-        number  = 4,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 35
-                }
-            },
-        },
-
-        {
-        descr   = 'V1- Запорный пар',
-        dtype   = 0,
-        subtype = 1,
-        number  = 1,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 28
-                }
-            },
-        par = { 0 }
-        },
-
-        {
-        descr   = 'V2- Запорный пар',
-        dtype   = 0,
-        subtype = 1,
-        number  = 2,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 30
-                }
-            },
-        par = { 0 }
-        },
-
-        {
-        descr   = '1V1-Донный Т. №1',
-        dtype   = 0,
-        subtype = 1,
-        number  = 101,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 0
-                }
-            },
-        par = { 0 }
-        },
-
-        {
-        descr   = '1V2-Наполнение Т.№1',
-        dtype   = 0,
-        subtype = 1,
-        number  = 102,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 2
-                }
-            },
-        par = { 0 }
-        },
-
-        {
-        descr   = '1V3-Выдача  Т.№1',
-        dtype   = 0,
-        subtype = 1,
-        number  = 103,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 1
-                }
-            },
-        par = { 0 }
-        },
-
-        {
-        descr   = '1V4- Выдача  Т.№1',
-        dtype   = 0,
-        subtype = 1,
-        number  = 104,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 3
-                }
-            },
-        par = { 0 }
-        },
-
-        {
-        descr   = '1V5-Мойка  Т.№1',
-        dtype   = 0,
-        subtype = 1,
-        number  = 105,
-        DO  =
+        number  = 100,
+        AI  = 
             {
                 {
                 node   = 0,
                 offset = 4
                 }
             },
-        par = { 0 }
         },
 
         {
-        descr   = '1V6-Запорный Л.сыво',
-        dtype   = 0,
-        subtype = 1,
-        number  = 106,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 6
-                }
-            },
-        par = { 0 }
-        },
-
-        {
-        descr   = '1V7-Зпорный Л.Выдачи',
-        dtype   = 0,
-        subtype = 1,
-        number  = 107,
-        DO  =
+        descr   = 'выход продукта со 2-ого контура подогрева',
+        dtype   = 4,
+        subtype = 0,
+        number  = 101,
+        AI  = 
             {
                 {
                 node   = 0,
                 offset = 5
                 }
             },
-        par = { 0 }
         },
 
         {
-        descr   = '1V8-Вид. разр. Л.сыв',
-        dtype   = 0,
-        subtype = 1,
-        number  = 108,
-        DO  =
+        descr   = 'теплоноситель 1-ого контура подогрева',
+        dtype   = 4,
+        subtype = 0,
+        number  = 102,
+        AI  = 
             {
                 {
                 node   = 0,
-                offset = 7
+                offset = 6
                 }
             },
-        par = { 0 }
         },
 
         {
-        descr   = '1V9-Запорный Л.мойки',
-        dtype   = 0,
-        subtype = 1,
-        number  = 109,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 29
-                }
-            },
-        par = { 0 }
-        },
-
-        {
-        descr   = '2V1-Донный Т.№2',
-        dtype   = 0,
-        subtype = 1,
-        number  = 201,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 8
-                }
-            },
-        par = { 0 }
-        },
-
-        {
-        descr   = '2V2-Наполнение  Т.№2',
-        dtype   = 0,
-        subtype = 1,
-        number  = 202,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 10
-                }
-            },
-        par = { 0 }
-        },
-
-        {
-        descr   = '2V3-  Выдача  Т.№2',
-        dtype   = 0,
-        subtype = 1,
-        number  = 203,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 9
-                }
-            },
-        par = { 0 }
-        },
-
-        {
-        descr   = '2V4- Выдача  Т.№2',
-        dtype   = 0,
-        subtype = 1,
-        number  = 204,
-        DO  =
+        descr   = 'Сирена',
+        dtype   = 11,
+        subtype = 0,
+        number  = 1,
+        DO  = 
             {
                 {
                 node   = 0,
                 offset = 11
                 }
             },
-        par = { 0 }
         },
 
         {
-        descr   = '2V5-Мойка  Т.№2',
-        dtype   = 0,
-        subtype = 1,
-        number  = 205,
-        DO  =
+        descr   = 'Уст. №2 готова к приемке',
+        dtype   = 11,
+        subtype = 0,
+        number  = 21,
+        DO  = 
             {
                 {
                 node   = 0,
-                offset = 12
+                offset = 4
                 }
             },
-        par = { 0 }
         },
 
         {
-        descr   = '2V6-Выход мойки танк',
-        dtype   = 0,
-        subtype = 1,
-        number  = 206,
-        DO  =
+        descr   = 'Работа от установки N2',
+        dtype   = 11,
+        subtype = 0,
+        number  = 22,
+        DO  = 
+            {
+                {
+                node   = 0,
+                offset = 6
+                }
+            },
+        },
+
+        {
+        descr   = 'З.П. в т. 1-12',
+        dtype   = 11,
+        subtype = 0,
+        number  = 23,
+        DO  = 
+            {
+                {
+                node   = 0,
+                offset = 8
+                }
+            },
+        },
+
+        {
+        descr   = 'Мойка идет для т.32-38',
+        dtype   = 11,
+        subtype = 0,
+        number  = 24,
+        DO  = 
+            {
+                {
+                node   = 0,
+                offset = 3
+                }
+            },
+        },
+
+        {
+        descr   = 'Лампочка тумблера проталкивания до бачка',
+        dtype   = 11,
+        subtype = 0,
+        number  = 25,
+        DO  = 
             {
                 {
                 node   = 0,
                 offset = 14
                 }
             },
-        par = { 0 }
         },
 
         {
-        descr   = '2V7-Зпорный Л.Выдачи',
-        dtype   = 0,
-        subtype = 1,
-        number  = 207,
-        DO  =
+        descr   = 'Маршрут мойки л. уст. №7 открыт',
+        dtype   = 11,
+        subtype = 0,
+        number  = 26,
+        DO  = 
+            {
+                {
+                node   = 0,
+                offset = 12
+                }
+            },
+        },
+
+        {
+        descr   = 'Вода в т.32-38',
+        dtype   = 11,
+        subtype = 0,
+        number  = 100,
+        DO  = 
             {
                 {
                 node   = 0,
                 offset = 13
                 }
             },
-        par = { 0 }
         },
 
         {
-        descr   = '2V8- Вид.разрыв мойк',
-        dtype   = 0,
-        subtype = 1,
-        number  = 208,
-        DO  =
+        descr   = 'Белая фаза в т.32-38',
+        dtype   = 11,
+        subtype = 0,
+        number  = 101,
+        DO  = 
             {
                 {
                 node   = 0,
                 offset = 15
                 }
             },
-        par = { 0 }
         },
 
         {
-        descr   = '3V1-Донный Т.№3',
-        dtype   = 0,
-        subtype = 1,
-        number  = 301,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 16
-                }
-            },
-        par = { 0 }
-        },
-
-        {
-        descr   = '3V2-Наполнение  Т.№3',
-        dtype   = 0,
-        subtype = 1,
-        number  = 302,
-        DO  =
-            {
-                {
-                node   = 0,
-                offset = 18
-                }
-            },
-        par = { 0 }
-        },
-
-        {
-        descr   = '3V3-  Выдача  Т.№3',
-        dtype   = 0,
-        subtype = 1,
-        number  = 303,
-        DO  =
+        descr   = 'Продукт в т.32-38',
+        dtype   = 11,
+        subtype = 0,
+        number  = 102,
+        DO  = 
             {
                 {
                 node   = 0,
                 offset = 17
                 }
             },
-        par = { 0 }
         },
 
         {
-        descr   = '3V4- Выдача  Т.№3',
-        dtype   = 0,
-        subtype = 1,
-        number  = 304,
-        DO  =
+        descr   = 'Циркуляция в т.32-38',
+        dtype   = 11,
+        subtype = 0,
+        number  = 103,
+        DO  = 
             {
                 {
                 node   = 0,
                 offset = 19
                 }
             },
-        par = { 0 }
         },
 
         {
-        descr   = '3V5-Мойка  Т.№3',
+        descr   = 'V22 - клапан набора давления 1-ого этапа',
         dtype   = 0,
         subtype = 1,
-        number  = 305,
-        DO  =
+        number  = 22,
+        DO  = 
             {
                 {
                 node   = 0,
                 offset = 20
                 }
             },
-        par = { 0 }
+        par = { 0 } 
         },
 
         {
-        descr   = '3V7-Зпорный Л.Выдачи',
+        descr   = 'V23 - клапан набора давления 2-ого этапа',
         dtype   = 0,
         subtype = 1,
-        number  = 307,
-        DO  =
+        number  = 23,
+        DO  = 
             {
                 {
                 node   = 0,
                 offset = 22
                 }
             },
-        par = { 0 }
+        par = { 0 } 
         },
 
         {
-        descr   = '4V1-Донный Т.№4',
+        descr   = 'V94 - дренаж (NO)',
         dtype   = 0,
         subtype = 1,
-        number  = 401,
-        DO  =
+        number  = 94,
+        DO  = 
             {
                 {
                 node   = 0,
-                offset = 21
+                offset = 0
                 }
             },
-        par = { 0 }
+        par = { 1 } 
         },
 
         {
-        descr   = '4V2-Наполнение  Т.№7',
+        descr   = 'V95 - в бачок',
         dtype   = 0,
         subtype = 1,
-        number  = 402,
-        DO  =
+        number  = 95,
+        DO  = 
             {
                 {
                 node   = 0,
-                offset = 23
+                offset = 5
                 }
             },
-        par = { 0 }
+        par = { 0 } 
         },
 
         {
-        descr   = '4V3-  Выдача  Т.№4',
+        descr   = 'V96+V97 - вода',
         dtype   = 0,
         subtype = 1,
-        number  = 403,
-        DO  =
+        number  = 96,
+        DO  = 
             {
                 {
                 node   = 0,
-                offset = 24
+                offset = 16
                 }
             },
-        par = { 0 }
+        par = { 0 } 
         },
 
         {
-        descr   = '4V4- Выдача  Т.№4',
+        descr   = 'V97 - вода',
         dtype   = 0,
         subtype = 1,
-        number  = 404,
-        DO  =
+        number  = 97,
+        DO  = 
             {
                 {
                 node   = 0,
-                offset = 26
+                offset = 16
                 }
             },
-        par = { 0 }
+        par = { 0 } 
         },
 
         {
-        descr   = '4V5-Мойка  Т.№4',
+        descr   = 'V98(99) отсечной в л. под. молока на уст.№2 (NO)',
         dtype   = 0,
         subtype = 1,
-        number  = 405,
-        DO  =
+        number  = 98,
+        DO  = 
             {
                 {
                 node   = 0,
-                offset = 25
+                offset = 10
                 }
             },
-        par = { 0 }
+        par = { 1 } 
         },
 
         {
-        descr   = '5V7-Зпорный Л.Выдачи',
+        descr   = 'под. молока в бачок уст.№2',
         dtype   = 0,
         subtype = 1,
-        number  = 507,
-        DO  =
+        number  = 99,
+        DO  = 
             {
                 {
                 node   = 0,
-                offset = 27
+                offset = 10
                 }
             },
-        par = { 0 }
+        par = { 0 } 
+        },
+
+        {
+        descr   = 'R3V7(8) R3- в уст. №2 (NC)',
+        dtype   = 0,
+        subtype = 1,
+        number  = 54307,
+        DO  = 
+            {
+                {
+                node   = 0,
+                offset = 7
+                }
+            },
+        par = { 1 } 
+        },
+
+        {
+        descr   = 'R3V8 R3- в уст. №2(N0)',
+        dtype   = 0,
+        subtype = 1,
+        number  = 54308,
+        DO  = 
+            {
+                {
+                node   = 0,
+                offset = 7
+                }
+            },
+        par = { 0 } 
+        },
+
+        {
+        descr   = 'R3V9(10) R3+ из уст. №2 (NC)',
+        dtype   = 0,
+        subtype = 1,
+        number  = 54309,
+        DO  = 
+            {
+                {
+                node   = 0,
+                offset = 9
+                }
+            },
+        par = { 1 } 
+        },
+
+        {
+        descr   = 'R3V10 R3+ из уст. №2(N0)',
+        dtype   = 0,
+        subtype = 1,
+        number  = 54310,
+        DO  = 
+            {
+                {
+                node   = 0,
+                offset = 9
+                }
+            },
+        par = { 0 } 
         },
 
     }
--- ----------------------------------------------------------------------------
+
+init_tech_objects_modes = function()
+	return
+	{
+		{
+		n = 1,
+		name = 'Grebenka',
+		modes = 
+			{
+			[ 1 ] = 
+				{
+				name = 'Мойка л. уст. №7',
+				opened_devices = 
+					{
+					V = { 54309, 54310 }
+					},
+				pair_dev = 
+					{
+					pair = { { 26, 26 } }
+					},
+				},
+			},
+		},
+		{
+		n = 2,
+		name = 'Установка',
+		modes = 
+			{
+			[ 1 ] = 
+				{
+				name = 'Работа установки',
+
+				steps = 
+					{
+					[ 1 ] = 
+						{
+						name = 'Работа установки',
+						},
+					},
+				},
+			[ 2 ] = 
+				{
+				name = 'Мойка установки',
+
+				steps = 
+					{
+					[ 1 ] = 
+						{
+						name = 'Мойка установки',
+						},
+					},
+				},
+			[ 3 ] = 
+				{
+				name = 'Выход на режим',
+
+				steps = 
+					{
+					[ 1 ] = 
+						{
+						name = 'Выход на режим',
+						opened_devices = 
+							{
+							V = { 54307, 54308, 94, 98, 99 }
+							},
+						closed_devices = 
+							{
+							V = { 54309, 54310, 95 }
+							},
+						},
+					[ 2 ] = 
+						{
+						name = 'Выход на режим рецепта',
+						opened_devices = 
+							{
+							V = { 54307, 54308, 94, 98, 99 }
+							},
+						closed_devices = 
+							{
+							V = { 54309, 54310, 95 }
+							},
+						},
+					[ 3 ] = 
+						{
+						name = 'Готов к производству',
+						opened_devices = 
+							{
+							V = { 54307, 54308, 94, 98, 99 }
+							},
+						closed_devices = 
+							{
+							V = { 54309, 54310, 95 }
+							},
+						},
+					},
+				},
+			[ 4 ] = 
+				{
+				name = 'Заполнение продуктом',
+
+				steps = 
+					{
+					[ 1 ] = 
+						{
+						name = 'Заполнение продуктом',
+						opened_devices = 
+							{
+							V = { 54307, 54308, 94, 98, 99 }
+							},
+						},
+					},
+				},
+			[ 5 ] = 
+				{
+				name = 'Проталкивание продукта в установку',
+
+				steps = 
+					{
+					[ 1 ] = 
+						{
+						name = 'Проталкивание продукта в установку',
+						opened_devices = 
+							{
+							V = { 54307, 54308, 94, 98, 99 }
+							},
+						closed_devices = 
+							{
+							V = { 54309, 54310, 95 }
+							},
+						},
+					[ 2 ] = 
+						{
+						name = 'Заполнение  продукта до гомогенизатора',
+						opened_devices = 
+							{
+							V = { 54307, 54308, 94, 95, 98, 99 }
+							},
+						closed_devices = 
+							{
+							V = { 54309, 54310 }
+							},
+						},
+					[ 3 ] = 
+						{
+						name = 'Заполнение установки',
+						opened_devices = 
+							{
+							V = { 54307, 54308, 94, 95, 98, 99 }
+							},
+						closed_devices = 
+							{
+							V = { 54309, 54310 }
+							},
+						},
+					[ 4 ] = 
+						{
+						name = 'Проталкивание белой воды',
+						opened_devices = 
+							{
+							V = { 54307, 54308, 94, 95, 98, 99 }
+							},
+						closed_devices = 
+							{
+							V = { 54309, 54310 }
+							},
+						},
+					},
+				},
+			[ 6 ] = 
+				{
+				name = 'Пастеризация',
+
+				steps = 
+					{
+					[ 1 ] = 
+						{
+						name = 'Пастеризация',
+						opened_devices = 
+							{
+							V = { 54307, 54308, 94, 95, 98, 99 }
+							},
+						closed_devices = 
+							{
+							V = { 54309, 54310 }
+							},
+						},
+					},
+				},
+			[ 7 ] = 
+				{
+				name = 'Циркуляция',
+
+				steps = 
+					{
+					[ 1 ] = 
+						{
+						name = 'Циркуляция',
+						opened_devices = 
+							{
+							V = { 94, 95, 98, 99 }
+							},
+						closed_devices = 
+							{
+							V = { 54307, 54308, 54309, 54310 }
+							},
+						},
+					},
+				},
+			[ 8 ] = 
+				{
+				name = 'Вытеснение продукта',
+
+				steps = 
+					{
+					[ 1 ] = 
+						{
+						name = 'Вытеснение продукта',
+						opened_devices = 
+							{
+							V = { 54307, 54308 }
+							},
+						},
+					[ 2 ] = 
+						{
+						name = 'Вытеснение установки',
+						opened_devices = 
+							{
+							V = { 54307, 54308 }
+							},
+						},
+					[ 3 ] = 
+						{
+						name = 'Вытеснение белой воды',
+						opened_devices = 
+							{
+							V = { 54307, 54308 }
+							},
+						},
+					[ 4 ] = 
+						{
+						name = 'Заполнение водой линии  до приемника',
+						opened_devices = 
+							{
+							V = { 54307, 54308 }
+							},
+						},
+					},
+				},
+			[ 9 ] = 
+				{
+				name = 'Дезинфекция',
+
+				steps = 
+					{
+					[ 1 ] = 
+						{
+						name = 'Дезинфекция',
+						closed_devices = 
+							{
+							V = { 54307, 54308, 54309, 54310 }
+							},
+						},
+					},
+				},
+			[ 10 ] = 
+				{
+				name = 'Кислота',
+
+				steps = 
+					{
+					[ 1 ] = 
+						{
+						name = 'Кислота',
+						},
+					},
+				},
+			[ 11 ] = 
+				{
+				name = 'Щелочь',
+
+				steps = 
+					{
+					[ 1 ] = 
+						{
+						name = 'Щелочь',
+						},
+					},
+				},
+			[ 12 ] = 
+				{
+				name = 'Ополаскивание',
+
+				steps = 
+					{
+					[ 1 ] = 
+						{
+						name = 'Ополаскивание',
+						opened_devices = 
+							{
+							V = { 54307, 54308 }
+							},
+						},
+					[ 2 ] = 
+						{
+						name = 'Ополаскивание',
+						opened_devices = 
+							{
+							V = { 54307, 54308 }
+							},
+						},
+					},
+				},
+			[ 13 ] = 
+				{
+				name = 'Проталкивание от установки N7',
+
+				steps = 
+					{
+					[ 1 ] = 
+						{
+						name = 'Проталкивание от установки N7',
+						opened_devices = 
+							{
+							V = { 54307, 54308, 54309, 54310 }
+							},
+						},
+					},
+				},
+			}
+		}
+    }
+end

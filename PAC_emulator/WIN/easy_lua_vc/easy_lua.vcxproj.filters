@@ -82,6 +82,9 @@
     <Filter Include="Lua Source\common">
       <UniqueIdentifier>{8074c9c5-7488-459e-b304-6661c61d00d0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\common\util">
+      <UniqueIdentifier>{a9f605da-328a-47dc-a022-056fb398dcba}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\PAC\common\PAC_dev.h">
@@ -209,6 +212,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\common\tolua++\tolua++.h">
       <Filter>Header Files\common\sys\tolua++</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\mode_mngr.h">
+      <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\PID.h">
+      <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\PAC_info.h">
+      <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -368,16 +380,22 @@
     <ClCompile Include="..\luac.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\mode_mngr.cpp">
+      <Filter>Source Files\PAC\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\PID.cpp">
+      <Filter>Source Files\PAC\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\PAC_info.cpp">
+      <Filter>Source Files\PAC\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\util\util.cpp">
+      <Filter>Source Files\common\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\test.lua">
-      <Filter>Lua Source</Filter>
-    </None>
     <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg">
       <Filter>Header Files\PAC\common\tolua++\pkg</Filter>
-    </None>
-    <None Include="..\main.wago.lua">
-      <Filter>Lua Source</Filter>
     </None>
     <None Include="..\..\..\PAC\common\Lua\sys.lua">
       <Filter>Lua Source\common</Filter>

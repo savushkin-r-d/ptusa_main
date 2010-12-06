@@ -40,6 +40,8 @@ extern "C" {
 #include "tech_def.h"
 #include "lua_manager.h"
 
+#include "PAC_info.h"
+
 static lua_State *globalL = NULL;
 
 static const char *progname = LUA_PROGNAME;
@@ -367,7 +369,38 @@ static int pmain (lua_State *L) {
     globalL = L;
     if (argv[0] && argv[0][0]) progname = argv[0];
     lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
-    luaL_openlibs(L);          /* open libraries */
+    //luaL_openlibs(L);          /* open libraries */
+
+    // Выполнение системных скриптов sys.lua. 
+#ifdef DEBUG
+    const char *ADDITIONAL_PATH_CMD = 
+        "package.path = package.path..\';../../system scripts/?.lua\'";        
+
+    if( luaL_dostring( L, ADDITIONAL_PATH_CMD ) != 0 )
+        {
+        Print( "Set additional search path error!\n" );
+        Print( "\t%s\n", lua_tostring( L, -1 ) );
+
+        lua_pop( L, 1 );
+                
+        return 1;
+        }
+#endif // DEBUG
+
+    const char *lua_wago_script = "main.wago.plua";    
+
+    if ( luaL_dofile( L, lua_wago_script ) != 0 )
+        {
+#ifdef DEBUG
+        Print( "Load Lua Wago script \"%s\" error!\n", 
+            lua_wago_script );
+        Print( "\t%s\n", lua_tostring( L, -1 ) );
+#endif // DEBUG
+        lua_pop( L, 1 );
+
+        return 1;
+        }
+
 
     project_manager::set_instance( new project_manager_win() );
 
@@ -384,7 +417,7 @@ static int pmain (lua_State *L) {
     PAC_critical_errors_manager::set_instance( new PAC_critical_errors_manager() );
 
     tolua_PAC_dev_open( L );
-    lua_manager::get_instance()->init( L );
+    lua_manager::get_instance()->init( L, 0 );
 
     G_PROJECT_MANAGER->lua_load_configuration();
     
@@ -421,6 +454,7 @@ static int pmain (lua_State *L) {
     return 0;
     }
 
+PAC_info *g_PAC_system;
 
 int main (int argc, char **argv) 
     {
@@ -434,119 +468,87 @@ int main (int argc, char **argv)
 
     lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
     luaL_openlibs(L);          /* open libraries */
-
-    // Выполнение системных скриптов sys.lua. 
-    int res = 0;
-#ifdef DEBUG
-    const char *ADDITIONAL_PATH_CMD = 
-        "package.path = package.path..\';../../PAC/common/Lua/?.lua;\'";
-
-    if( luaL_dostring( L, ADDITIONAL_PATH_CMD ) != 0 )
-        {
-        Print( "Set additional search path error!\n" );
-        Print( "\t%s\n", lua_tostring( L, -1 ) );
-
-        lua_pop( L, 1 );
-
-        status = 1;
-        res = 1;
-        }
-#endif // DEBUG
-
-    const char *lua_wago_script = "main.wago.lua";    
-    int res2 = luaL_dofile( L, lua_wago_script );
-
-    if ( res2 )
-        {
-#ifdef DEBUG
-        Print( "Load Lua Wago script \"%s\" error!\n", 
-            lua_wago_script );
-        Print( "\t%s\n", lua_tostring( L, -1 ) );
-#endif // DEBUG
-        lua_pop( L, 1 );
-
-        status = 1;
-        }
-
     lua_gc(L, LUA_GCRESTART, 0);
 
-    if ( res == 0 && res2 == 0 )
+    s.argc = argc;
+    s.argv = argv;
+    status = lua_cpcall(L, &pmain, &s);
+
+    if ( status || s.status ) //Ошибка.
         {
-        s.argc = argc;
-        s.argv = argv;
-        status = lua_cpcall(L, &pmain, &s);
+        }
+    else
+        {
+        G_TECH_OBJECT_MNGR()->init_objects();
 
-        if ( status || s.status ) //Ошибка.
-            {
-            }
-        else
-            {
-            G_TECH_OBJECT_MNGR()->init_objects();
+        //-Добавление системных тегов контроллера.
+        g_PAC_system = new PAC_info();
+        G_DEVICE_CMMCTR->add_device( g_PAC_system->com_dev );
 
-            G_PROJECT_MANAGER->proc_main_params( argc, argv );
+        G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
 #ifdef DEBUG
-            G_DEVICE_MANAGER()->print();
-            G_DEVICE_CMMCTR->print();
+        G_DEVICE_MANAGER()->print();
+        G_DEVICE_CMMCTR->print();
 
-            u_long st_time;
-            u_long all_time = 0;
-            u_long cycles_cnt = 0;
+        u_long st_time;
+        u_long all_time = 0;
+        u_long cycles_cnt = 0;
 
-            while ( !kbhit() )
+        while ( !kbhit() )
 #else
-            while ( 1 )
+        while ( 1 )
 #endif // DEBUG
-                {
+            {
 #ifdef DEBUG
-                st_time = get_millisec();
-                cycles_cnt++;
+            st_time = get_millisec();
+            cycles_cnt++;
 #endif // DEBUG
 
 #ifndef DEBUG_NO_WAGO_MODULES
-                G_WAGO_MANAGER->read_inputs();
+            G_WAGO_MANAGER->read_inputs();
 #endif // DEBUG_NO_WAGO_MODULES
 
-                G_TECH_OBJECT_MNGR()->evaluate();
+            G_TECH_OBJECT_MNGR()->evaluate();
 
-                G_CMMCTR->evaluate();
+            G_CMMCTR->evaluate();
 
 #ifndef DEBUG_NO_WAGO_MODULES
-                G_WAGO_MANAGER->write_outputs();
+            G_WAGO_MANAGER->write_outputs();
 #endif // ifndef
 
-                PAC_critical_errors_manager::get_instance()->show_errors();
+            PAC_critical_errors_manager::get_instance()->show_errors();
 
 #ifdef DEBUG
-                all_time += get_millisec() - st_time;
+            all_time += get_millisec() - st_time;
 
 #if defined LINUX_OS
 #ifdef PAC_PC
-                const u_int MAX_ITERATION = 100000;
+            const u_int MAX_ITERATION = 100000;
 #endif // PAC_PC
 #ifdef PAC_WAGO_750_860
-                const u_int MAX_ITERATION = 1000;
+            const u_int MAX_ITERATION = 1000;
 #endif // PAC_WAGO_750_860
 #endif // defined LINUX_OS
 
 #ifdef WIN_OS
-                const u_int MAX_ITERATION = 10000;
+            const u_int MAX_ITERATION = 10000;
 #endif // WIN_OS
 
-                static char print_cycle_time_count = 0;
-                if ( print_cycle_time_count < 10 && cycles_cnt > MAX_ITERATION )
-                    {
-                    print_time( "\tMain cycle avg time = %lu ms\n", all_time / cycles_cnt  );
+            static char print_cycle_time_count = 0;
+            if ( print_cycle_time_count < 10 && cycles_cnt > MAX_ITERATION )
+                {
+                print_time( "\tMain cycle avg time = %lu ms\n", all_time / cycles_cnt  );
 
-                    all_time = 0;
-                    cycles_cnt = 0;
+                all_time = 0;
+                cycles_cnt = 0;
 
-                    print_cycle_time_count++;
-                    }
-#endif // DEBUG
+                print_cycle_time_count++;
                 }
+#endif // DEBUG
             }
         }
+
 
     report(L, status);
     lua_close(L);

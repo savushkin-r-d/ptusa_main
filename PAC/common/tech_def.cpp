@@ -191,6 +191,14 @@ int tech_object::check_on_mode( u_int mode )
 //-----------------------------------------------------------------------------
 void tech_object::init_mode( u_int mode )
     {
+
+#ifdef DEBUG
+    Print( "new_name = %s\n", name );
+    Print( "par_float_count = %d\n", par_float.get_count() );
+    Print( "runtime_par_float_count = %d\n", rt_par_float.get_count() );
+    Print( "par_uint_count = %d\n", par_uint.get_count() );
+#endif // DEBUG
+
     if ( mode < modes_count )
         {
         mode_start_time.at( mode ) = get_sec();
@@ -331,7 +339,17 @@ int tech_object_manager::get_object_with_active_mode( u_int mode,
 //-----------------------------------------------------------------------------
 tech_object* tech_object_manager::get_tech_objects( u_int idx )
     {
-    return tech_objects.at( idx );
+    try
+        {
+        return tech_objects.at( idx );
+        }
+    catch (...)
+        {
+        debug_break;    
+
+        return 0;
+        }   
+    
     }
 //-----------------------------------------------------------------------------
 u_int tech_object_manager::get_count() const

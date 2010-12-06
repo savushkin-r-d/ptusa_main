@@ -88,8 +88,9 @@
 #define LUA_LDIR	"!\\lua\\"
 #define LUA_CDIR	"!\\"
 #define LUA_PATH_DEFAULT  \
-    ".\\?.lua;"  LUA_LDIR"?.lua;"  LUA_LDIR"?\\init.lua;" \
-    LUA_CDIR"?.lua;"  LUA_CDIR"?\\init.lua"
+".\\?.lua;"  LUA_LDIR"?.lua;" \
+LUA_CDIR"?.lua;"
+
 #define LUA_CPATH_DEFAULT \
     ".\\?.dll;"  LUA_CDIR"?.dll;" LUA_CDIR"loadall.dll"
 
@@ -98,8 +99,9 @@
 #define LUA_LDIR	LUA_ROOT "share/lua/5.1/"
 #define LUA_CDIR	LUA_ROOT "lib/lua/5.1/"
 #define LUA_PATH_DEFAULT  \
-    "./?.lua;"  LUA_LDIR"?.lua;"  LUA_LDIR"?/init.lua;" \
-    LUA_CDIR"?.lua;"  LUA_CDIR"?/init.lua"
+".\\?.lua;"  LUA_LDIR"?.lua;" \
+LUA_CDIR"?.lua;"
+
 #define LUA_CPATH_DEFAULT \
     "./?.so;"  LUA_CDIR"?.so;" LUA_CDIR"loadall.so"
 #endif
@@ -647,6 +649,10 @@ union luai_Cast { double l_d; long l_l; };
 #include <fcntl.h>
 #define _S_IREAD 256
 #define _S_IWRITE 128
+
+extern int mktemp( char * );
+extern int open( char *, int, int );
+
 int mkstemp(char *tmpl)
     {
     int ret=-1;

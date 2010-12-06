@@ -21,7 +21,7 @@ lua_manager* lua_manager::get_instance()
      return instance;
     }
 //-----------------------------------------------------------------------------
-int lua_manager::init( lua_State* lua_state )
+int lua_manager::init( lua_State* lua_state, char* script_name )
     {
     if ( 0 == lua_state )
         {
@@ -41,7 +41,7 @@ int lua_manager::init( lua_State* lua_state )
 #ifdef DEBUG
         const char *ADDITIONAL_PATH_CMD = 
 #if defined WIN_OS 
-        "package.path = package.path..\';../../../PAC/common/Lua/?.lua;\'";
+        "package.path = package.path..\';../../system scripts/?.lua;\'";
         
 #elif defined LINUX_OS && defined PAC_PC
         "package.path = package.path..\';../../PAC/common/Lua/?.lua;\'";
@@ -61,9 +61,9 @@ int lua_manager::init( lua_State* lua_state )
 #endif // DEBUG
 
 #if defined WIN_OS && defined DEBUG
-            if( luaL_dofile( L, "../main.wago.lua" ) != 0 )
+            if( luaL_dofile( L, "main.wago.plua" ) != 0 )
 #else
-            if( luaL_dofile( L, "main.wago.lua" ) != 0 )
+            if( luaL_dofile( L, "main.wago.plua" ) != 0 )
 #endif // defined OS_WIN && defined DEBUG
             {
 #ifdef DEBUG
@@ -77,13 +77,13 @@ int lua_manager::init( lua_State* lua_state )
             G_PROJECT_MANAGER->lua_load_configuration();       
 
 #if defined WIN_OS && defined DEBUG
-        if( luaL_loadfile( L, "../main.lua" ) != 0 )
+        if( luaL_loadfile( L, script_name ) != 0 )
 #else
-        if( luaL_loadfile( L, "main.lua" ) != 0 )
+        if( luaL_loadfile( L, script_name ) != 0 )
 #endif // defined OS_WIN && defined DEBUG
             {
 #ifdef DEBUG
-            Print( "Load Lua script error!\n" );
+            Print( "Load Lua main script error!\n" );
             Print( "\t%s\n", lua_tostring( L, -1 ) );
 #endif // DEBUG
             lua_pop( L, 1 );

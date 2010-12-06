@@ -132,12 +132,17 @@ mode_manager::mode_manager( u_int_2 new_modes_cnt
     for ( int i = 0; i < new_modes_cnt; i++ )
     	{        
         modes_devices.push_back( new step_path() );
+
+        modes_start_time.push_back( 0 );
     	}
+    modes_start_time.push_back( 0 );
 
     }
 //-----------------------------------------------------------------------------
-int mode_manager::init( u_int_2 mode, u_char start_step, void *object )
+int mode_manager::init( u_int_2 mode, u_char start_step, tech_object *object )
     {
+    owner = object;
+
     modes_devices.at( mode )->init();
 
     if ( 0 == steps_cnt[ mode ] )
@@ -159,6 +164,8 @@ int mode_manager::init( u_int_2 mode, u_char start_step, void *object )
     Print( " NEXT STEP -> %d \n", 
         next_step_n[ mode ][ active_step[ mode ] ] );        
 #endif      
+
+    modes_start_time.at( mode + 1 ) = get_millisec();
 
     return 0;
     }
@@ -184,6 +191,10 @@ int mode_manager::final( u_int_2 mode )
     steps[ mode ][ active_step[ mode ] ].final();
 
     active_step[ mode ] = 0;
+
+    modes_start_time.at( mode + 1 ) = get_millisec();
+    modes_start_time.at( 0 ) = get_millisec();
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -305,6 +316,7 @@ int mode_manager::add_closed_dev( u_int_2 mode, u_char step, device *dev )
         {
         return -1;
         }
+    
     return steps[ mode ][ step ].add_closed_dev( dev );
     }
 //-----------------------------------------------------------------------------
@@ -348,7 +360,7 @@ void mode_manager::print()
 //-----------------------------------------------------------------------------
 int mode_manager::get_active_step( u_int_2 mode )
     {
-    return active_step[ mode ];
+    return 1 + active_step[ mode ];
     }
 //-----------------------------------------------------------------------------
 int mode_manager::is_current_step_evaluation_time_left( u_int_2 mode )
@@ -400,9 +412,18 @@ int mode_manager::add_mode_closed_dev( u_int_2 mode, device *dev )
                mode, modes_cnt );
 #endif // DEBUG
         return 2;
-    	}
+    	}   
 
-    modes_devices.at( mode)->add_closed_dev( dev );
+    try
+        {
+        modes_devices.at( mode)->add_closed_dev( dev );
+        }
+    catch (...)
+        {
+        debug_break;
+        return 1;
+        }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -417,7 +438,33 @@ int mode_manager::add_mode_opened_dev( u_int_2 mode, device *dev )
         return 2;
         }
 
-    modes_devices.at( mode)->add_opened_dev( dev );
+    try
+    	{
+        modes_devices.at( mode)->add_opened_dev( dev );
+    	}
+    catch (...)
+    	{
+        debug_break;
+    	return 1;
+    	}
+       
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+unsigned long mode_manager::get_mode_evaluation_time( int mode )
+    {
+    if ( -1 == mode )
+    	{
+        return get_millisec() - modes_start_time.at( 0 );
+    	}
+    else
+        {
+        if ( mode > 0 && mode < modes_cnt )
+        	{
+            return get_millisec() - modes_start_time.at( mode + 1 );
+        	}        
+        }
+
     return 0;
     }
 //-----------------------------------------------------------------------------

@@ -219,6 +219,9 @@
     <ClInclude Include="..\..\..\PAC\common\PAC_info.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\PID.h">
+      <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -386,16 +389,13 @@
     <ClCompile Include="..\..\..\common\util\util.cpp">
       <Filter>Source Files\common\util</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\PID.cpp">
+      <Filter>Source Files\PAC\common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\main.lua">
-      <Filter>Lua Source</Filter>
-    </None>
     <None Include="..\..\..\PAC\common\Lua\sys.lua">
       <Filter>Lua Source\common</Filter>
-    </None>
-    <None Include="..\main.wago.lua">
-      <Filter>Lua Source</Filter>
     </None>
     <None Include="..\..\..\PAC\common\Lua\sys_wago.lua">
       <Filter>Lua Source\common</Filter>

@@ -10,6 +10,9 @@
 /// @$Author: id@BMK $.\n
 /// @$Date:: 2010-07-09 15:57:50#$.
 
+#ifndef _UTIL_H
+#define _UTIL_H
+
 #include <stddef.h>
 #include <stdio.h>
 //-----------------------------------------------------------------------------
@@ -146,3 +149,4 @@ template < class type > class auto_smart_ptr : public smart_ptr< type >
             }
     };
 //-----------------------------------------------------------------------------
+#endif // _UTIL_H
