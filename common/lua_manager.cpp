@@ -6,6 +6,9 @@
 #include "lua_manager.h"
 
 #include "prj_mngr.h"
+
+#include "tcp_cmctr_win.h"
+
 //-----------------------------------------------------------------------------
 auto_smart_ptr< lua_manager > lua_manager::instance;
 //-----------------------------------------------------------------------------
@@ -246,6 +249,25 @@ int lua_manager::int_no_param_exec_lua_method( const char *object_name,
     if ( 0 == exec_lua_method( object_name, function_name, 0, 0, 1 ) )
         {
         res = ( int ) tolua_tonumber( L, -1, 0 );
+        lua_remove( L, -1 );
+        }
+    else
+        {
+#ifdef DEBUG
+        Print( "Error during C++ call - \"%s\"\n", c_function_name );
+#endif // DEBUG
+        }
+
+    return res;
+    }
+
+const char* lua_manager::char_no_param_exec_lua_method( const char *object_name, 
+    const char *function_name, const char *c_function_name ) const
+    {
+    const char* res = 0;
+    if ( 0 == exec_lua_method( object_name, function_name, 0, 0, 1 ) )
+        {
+        res = tolua_tostring( L, -1, 0 );
         lua_remove( L, -1 );
         }
     else

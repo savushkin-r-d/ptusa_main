@@ -244,7 +244,7 @@ public array_device < data_type >
         enum OBJECT_TYPE
             {
             T_TECH_OBJECT = 1,
-            T_POST,
+            T_PID,
             T_CNTR,
             T_MNGR,
             T_PACK_DEVICE,
@@ -467,10 +467,13 @@ class i_counter
         /// @brief Возобновление работы счетчика.
         virtual void start() = 0;
 
-        /// @brief Сброс счетчика.
+        /// @brief Сброс счетчика и остановка счета.
         /// 
         /// После сброса для продолжения работы необходимо вызвать @ref start().
         virtual void reset() = 0;
+
+        /// @brief Сброс счетчика и продолжение счета.
+        void restart();
 
         /// @brief Получение значения счетчика.
         virtual u_int get_quantity() = 0;
@@ -798,7 +801,7 @@ class dev_stub : public device,
 
         void    pause();
         void    start();
-        void    reset();
+        void    reset();        
         u_int   get_quantity();
     };
 //-----------------------------------------------------------------------------

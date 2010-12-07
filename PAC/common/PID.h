@@ -29,65 +29,62 @@ class PID
     //Надо ли при старте регулятора уменьшать, а не увеличивать выходную величину.
     char is_down_to_inaccel_mode;  
 
-
     saved_params_float    *par;
     run_time_params_float *w_par;
 
-    int state;
-
-    int start_param_index;  
-    enum PARAM 
-        {
-        PAR_Z,            //0 Требуемое значение.
-        PAR_k,            //1 Параметр k.
-        PAR_Ti,           //2 Параметр Ti.
-        PAR_Td,           //3 Параметр Td.
-        PAR_dt,           //4 Интервал расчёта
-        PAR_dmax,         //5 Мax значение входной величины.
-        PAR_dmin,         //6 Мin значение входной величины.
-        PAR_AccelTime,    //7 Время выхода на режим регулирования.
-        PAR_IsManualMode, //8 Ручной режим.
-        PAR_UManual,      //9 Заданное ручное значение выходного сигнала.
-        PAR_Uk,           //10 Выход ПИД.
-
-        PAR_k2,           //11 Параметр k2.
-        PAR_Ti2,          //12 Параметр Ti2.
-        PAR_Td2,          //13 Параметр Td2. 
-        }; 
-
-    int start_work_params_index;
-    enum WORK_PARAMS 
-        {
-        WPAR_Uk,          //1 Выход ПИД-регулятора.
-        WPAR_Z,           //2 Требуемое значение ПИД.
-        };
-
-    enum ADDITIONAL_PARAM 
-        {    
-   
-        };
+    u_int_4 state;
 
     int   used_par_n;
 
+    smart_ptr< complex_device > com_dev; ///< Связь с сервером.
+
+    void reset();
+
     public:
-        PID( saved_params_float* par, run_time_params_float *w_par,
-            int start_param_index = 0, 
-            int start_work_params_index = 0 );
+        enum PARAM 
+            {        
+            P_k = 0,               ///< Параметр k.
+            P_Ti,                  ///< Параметр Ti.
+            P_Td,                  ///< Параметр Td.
+            P_dt,                  ///< Интервал расчёта
+            P_max,                 ///< Мax значение входной величины.
+            P_min,                 ///< Мin значение входной величины.
+            P_acceleration_time,   ///< Время выхода на режим регулирования.
+            P_is_manual_mode,      ///< Ручной режим.
+            P_U_manual,            ///< Заданное ручное значение выходного сигнала.        
+
+            P_k2,                  ///< Параметр k2.
+            P_Ti2,                 ///< Параметр Ti2.
+            P_Td2,                 ///< Параметр Td2. 
+            }; 
+
+        enum WORK_PARAMS 
+            {
+            WP_Z,  ///< Требуемое значение.
+            WP_Uk, ///< Выход ПИД.
+            };
+
+        PID( int n );
 
         ~PID(); 
                 
         void  on( char is_down_to_inaccel_mode = 0 );
         void  off();
+
         float eval( float current_value, int delta_sign = 1 );
 
-        void  reset();
-        void  reset( float new_uk_1 );
-        void  set( float new_z );         //Установить новое задание ПИД.
+        /// @brief Установка нового задания ПИД.
+        void set( float new_z );    
+
+        /// @brief Получение задания ПИД.
+        float get_assignment();
 
         void init_param( int par_n, float val );
         void init_work_param( int par_n, float val );
+
         void save_param();
 
-        void set_used_par ( int par_n ); //Использовать kN, TiN, TdN.       
+        /// @brief Использование kN, TiN, TdN.     
+        void set_used_par ( int par_n ); 
     };
 #endif

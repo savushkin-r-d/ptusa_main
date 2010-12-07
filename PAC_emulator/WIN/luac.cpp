@@ -369,8 +369,7 @@ static int pmain (lua_State *L) {
     globalL = L;
     if (argv[0] && argv[0][0]) progname = argv[0];
     lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
-    //luaL_openlibs(L);          /* open libraries */
-
+    
     // Выполнение системных скриптов sys.lua. 
 #ifdef DEBUG
     const char *ADDITIONAL_PATH_CMD = 
@@ -404,8 +403,7 @@ static int pmain (lua_State *L) {
 
     project_manager::set_instance( new project_manager_win() );
 
-    tcp_communicator::set_instance( 
-        new tcp_communicator_win( "Выдача сыворотки" ) );
+  
 
     device_manager::set_instance( new device_manager() );
     device_communicator::set_instance( new device_communicator() );
@@ -420,6 +418,13 @@ static int pmain (lua_State *L) {
     lua_manager::get_instance()->init( L, 0 );
 
     G_PROJECT_MANAGER->lua_load_configuration();
+
+    const char *prj_name = 
+        lua_manager::get_instance()->char_no_param_exec_lua_method( "system",
+        "get_PAC_name", "lua_manager::init" );
+
+    tcp_communicator::set_instance( 
+        new tcp_communicator_win( prj_name ) );
     
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );

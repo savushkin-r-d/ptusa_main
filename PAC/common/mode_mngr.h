@@ -95,7 +95,7 @@ class mode_manager
         /// @return   0 - ок.
         int set_mode_config( u_int_2 mode, u_char new_steps_cnt );
 
-        int init( u_int_2 mode, u_char start_step = 0, tech_object *object = 0 );
+        int init( u_int_2 mode, u_char start_step = 0 );
         int evaluate( u_int_2 mode );
         int final( u_int_2 mode );
 
@@ -159,16 +159,24 @@ class mode_manager
         /// @return    1 - время выполнения шага.
         unsigned long get_current_step_evaluation_time( u_int_2 mode );
 
-
         /// @brief Время выполнения режима.
         ///
         /// @param [in] mode - режим.
         ///
         /// @return - время выполнения режима.
-        unsigned long get_mode_evaluation_time( int mode );
+        unsigned long get_mode_evaluation_time( unsigned int mode );
 
-        int get_active_step( u_int_2 mode );
+        /// @brief Время бездействия (нет включенных режимов).
+        ///
+        /// @return - время системы без активных режимов.
+        unsigned long get_idle_time();
 
+        /// @brief Получение активного шага заданного режима.
+        ///
+        /// @return - активный шаг режима.
+        u_int get_active_step( u_int mode );
+
+        /// @brief Отладочный вывод объекта в консоль.
         void print();
 
     private:

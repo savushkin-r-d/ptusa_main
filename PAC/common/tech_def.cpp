@@ -23,7 +23,7 @@ tech_object::tech_object( const char* new_name, u_int number, u_int modes_count,
         number( number ),
         cmd( 0 ),
         modes_count( modes_count ),        
-        mode_time( run_time_params_u_int_4( modes_count, "MODE_TIME" ) ),
+        mode_time( run_time_params_u_int_4( modes_count + 1, "MODE_TIME" ) ),
 
         modes_manager( 0 )
     {
@@ -32,11 +32,6 @@ tech_object::tech_object( const char* new_name, u_int number, u_int modes_count,
     for( u_int i = 0; i < state_size_in_int4; i++ )
         {
         state.push_back( 0 );
-        }
-    for( u_int i = 0; i < modes_count; i++ )
-        {
-        mode_start_time.push_back( 0 );
-        mode_start_time.at( i ) = get_sec();
         }
     
     com_dev = new complex_device( number, new_name, 8,
@@ -71,8 +66,7 @@ tech_object::~tech_object()
     com_dev->sub_dev[ 2 ] = 0;
 
     delete com_dev;
-
-    mode_start_time.clear();
+    com_dev = 0;
 
     delete modes_manager;
     modes_manager = 0;
@@ -199,17 +193,21 @@ void tech_object::init_mode( u_int mode )
     Print( "par_uint_count = %d\n", par_uint.get_count() );
 #endif // DEBUG
 
-    if ( mode < modes_count )
-        {
-        mode_start_time.at( mode ) = get_sec();
-        }
+    modes_manager->init( mode );
     }
 //-----------------------------------------------------------------------------
 int tech_object::evaluate()
     {
+    mode_time[ 0 ] = modes_manager->get_idle_time() / 1000;
+
     for ( u_int i = 0; i < modes_count; i++ )
         {
-        mode_time[ i ] = get_sec() - mode_start_time.at( i );        
+        mode_time[ i + 1 ] = modes_manager->get_mode_evaluation_time( i ) / 1000;
+
+        if ( get_mode( i ) == 1 )
+        	{
+            modes_manager->evaluate( i );
+        	}
         }
     return 0;
     }
@@ -223,8 +221,9 @@ int tech_object::final_mode( u_int mode )
     {
     if ( mode < modes_count )
         {
-        mode_start_time.at( mode ) = get_sec();
+        modes_manager->final( mode );
         }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -367,6 +366,9 @@ void tech_object_manager::evaluate()
 //-----------------------------------------------------------------------------
 int tech_object_manager::init_objects()
     {
+     Print( "init ok\n" ) ;
+
+
     int res = lua_manager::get_instance()->int_exec_lua_method( "object_manager",
         "get_objects_count", 0, "int tech_object_manager::init_objects()" );
     if ( res < 0 )
@@ -374,6 +376,8 @@ int tech_object_manager::init_objects()
         Print( "Fatal error!\n" );
         exit( 1 );
         }
+
+    Print( "init ok\n" ) ;
 
     int objects_count = res;
     for ( int i = 1; i <= objects_count; i++ )
@@ -390,7 +394,7 @@ int tech_object_manager::init_objects()
 
         add_tech_object( ( tech_object * ) res_object );
         }
-
+    
     for ( u_int i = 0; i < get_count(); i++ )
         {
         G_TECH_OBJECTS( i )->lua_init_runtime_params();

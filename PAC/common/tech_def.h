@@ -205,7 +205,6 @@ class tech_object
 
         std::vector< u_int_4 >  state;  ///< Состояние объекта.
 
-        std::vector< u_int_4 >  mode_start_time;    ///< Время начала режима.
         run_time_params_u_int_4 mode_time;          ///< Время режимов, сек.
 
         enum CONSTANTS

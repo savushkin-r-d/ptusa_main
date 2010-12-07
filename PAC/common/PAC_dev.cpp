@@ -43,7 +43,6 @@ device_state < u_int_4 >( n,
     state,
     owner_object, 
     owner_type )
-
     {                     
     } 
 //-----------------------------------------------------------------------------
@@ -127,6 +126,10 @@ int complex_state::parse_cmd( char *buff  )
         }	
     else // if ( strcmp( name, "CMD" ) != 0 )
         {
+#ifdef DEBUG
+        Print( "Error complex_state::parse_cmd - bad tag name %s != \'cmd\'\n",
+            name );
+#endif // DEBUG
         return -1; //Обработка только тега команд.	
         }
 #else // SIMPLE_PROJECT
@@ -759,6 +762,15 @@ wago_device* device_manager::add_device( int dev_type, int dev_sub_type,
 
     return new_wago_device;
     }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+void i_counter::restart()
+    {
+    reset();
+    start();
+    }
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 i_DI_device::i_DI_device() :last_check_time( get_millisec() ),

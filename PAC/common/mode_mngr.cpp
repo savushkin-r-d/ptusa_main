@@ -139,10 +139,8 @@ mode_manager::mode_manager( u_int_2 new_modes_cnt
 
     }
 //-----------------------------------------------------------------------------
-int mode_manager::init( u_int_2 mode, u_char start_step, tech_object *object )
+int mode_manager::init( u_int_2 mode, u_char start_step )
     {
-    owner = object;
-
     modes_devices.at( mode )->init();
 
     if ( 0 == steps_cnt[ mode ] )
@@ -358,7 +356,7 @@ void mode_manager::print()
         }             
     }
 //-----------------------------------------------------------------------------
-int mode_manager::get_active_step( u_int_2 mode )
+u_int mode_manager::get_active_step( u_int mode )
     {
     return 1 + active_step[ mode ];
     }
@@ -451,20 +449,18 @@ int mode_manager::add_mode_opened_dev( u_int_2 mode, device *dev )
     return 0;
     }
 //-----------------------------------------------------------------------------
-unsigned long mode_manager::get_mode_evaluation_time( int mode )
+unsigned long mode_manager::get_mode_evaluation_time( u_int mode )
     {
-    if ( -1 == mode )
-    	{
-        return get_millisec() - modes_start_time.at( 0 );
-    	}
-    else
+    if ( mode >= 0 && mode < modes_cnt )
         {
-        if ( mode > 0 && mode < modes_cnt )
-        	{
-            return get_millisec() - modes_start_time.at( mode + 1 );
-        	}        
-        }
+        return get_millisec() - modes_start_time.at( mode + 1 );
+        }        
 
     return 0;
+    }
+//-----------------------------------------------------------------------------
+unsigned long mode_manager::get_idle_time()
+    {
+    return get_millisec() - modes_start_time.at( 0 );
     }
 //-----------------------------------------------------------------------------

@@ -88,6 +88,12 @@
     <PostBuildEvent>
       <Message>Копирование интерпретатора Lua.</Message>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>tolua++ -o "c:\ptusa\trunk\src\PAC\common\PAC_dev_lua.cpp" "c:\ptusa\trunk\src\PAC\common\toloa++\pkg\PAC_dev.pkg"</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>toLua++</Message>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\common\lua\lapi.h" />
