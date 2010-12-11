@@ -1,3 +1,16 @@
+/// @file PID.h
+/// @brief Содержит описание класса ПИД-контроллера.
+/// 
+/// @author  Иванюк Дмитрий Сергеевич.
+///
+/// @par Описание директив препроцессора:
+/// @c DEBUG    - компиляция c выводом отладочной информации в консоль.@n@n
+///
+/// @par Текущая версия:
+/// @$Rev: 1 $.\n
+/// @$Author: id $.\n
+/// @$Date:: 2010-11-24 09:18:37#$.
+
 #ifndef _PID_H
 #define _PID_H
 
@@ -26,7 +39,8 @@ class PID
 
     char prev_manual_mode;
 
-    //Надо ли при старте регулятора уменьшать, а не увеличивать выходную величину.
+    /// @brief Надо ли при старте регулятора уменьшать, а не увеличивать
+    /// выходную величину.
     char is_down_to_inaccel_mode;  
 
     saved_params_float    *par;
@@ -39,6 +53,11 @@ class PID
     smart_ptr< complex_device > com_dev; ///< Связь с сервером.
 
     void reset();
+    void acceleration( float accel_time );
+
+    float start_value;
+
+    int number; ///< Номер ПИД.
 
     public:
         enum PARAM 
@@ -58,19 +77,22 @@ class PID
             P_Td2,                 ///< Параметр Td2. 
             }; 
 
-        enum WORK_PARAMS 
+        enum WORK_PARAM 
             {
             WP_Z,  ///< Требуемое значение.
-            WP_Uk, ///< Выход ПИД.
+            WP_U,  ///< Выход ПИД.
             };
 
         PID( int n );
-
         ~PID(); 
                 
+        /// @brief Включение ПИД.
         void  on( char is_down_to_inaccel_mode = 0 );
+
+        /// @brief Выключение ПИД.
         void  off();
 
+        /// @brief Работа ПИД.
         float eval( float current_value, int delta_sign = 1 );
 
         /// @brief Установка нового задания ПИД.
@@ -79,10 +101,17 @@ class PID
         /// @brief Получение задания ПИД.
         float get_assignment();
 
-        void init_param( int par_n, float val );
-        void init_work_param( int par_n, float val );
+        /// @brief Инициализация параметра ПИД.
+        void init_param( PARAM par_n, float val );
 
+        /// @brief Инициализация рабочего параметра ПИД.
+        void init_work_param( WORK_PARAM par_n, float val );
+
+        /// @brief Сохранение параметров ПИД.
         void save_param();
+
+        /// @brief Отладочный вывод в консоль ПИД.
+        void print();
 
         /// @brief Использование kN, TiN, TdN.     
         void set_used_par ( int par_n ); 

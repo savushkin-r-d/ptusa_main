@@ -524,6 +524,8 @@ int main (int argc, char **argv)
 
             PAC_critical_errors_manager::get_instance()->show_errors();
 
+            g_PAC_system->eval();
+
 #ifdef DEBUG
             all_time += get_millisec() - st_time;
 

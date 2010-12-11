@@ -299,10 +299,10 @@ int mode_manager::set_mode_config( u_int_2 mode, u_char new_steps_cnt )
 //-----------------------------------------------------------------------------
 int mode_manager::to_step( u_int_2 mode, u_char new_step )
     {
-    if ( check_correct_step_n( mode, new_step ) ) return -1;
+    if ( check_correct_step_n( mode, new_step - 1 ) ) return -1;
 
     final( mode );
-    init( mode, new_step );
+    init( mode, new_step - 1 );
     evaluate( mode );
 
     return 0;

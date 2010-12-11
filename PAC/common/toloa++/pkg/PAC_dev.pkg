@@ -754,11 +754,13 @@ class PID
 		/// @brief Получение задания ПИД.
         float get_assignment();
 
-        void init_param( int par_n, float val );
-        void init_work_param( int par_n, float val );
+        void init_param( PARAM par_n, float val );
+        void init_work_param( WORK_PARAMS par_n, float val );
         void save_param();
 
 
-        void  set_used_par ( int par_n ); //Использовать kN, TiN, TdN.       
+        void  set_used_par ( int par_n ); //Использовать kN, TiN, TdN.    
+		
+		void print();   
     };
 //-----------------------------------------------------------------------------

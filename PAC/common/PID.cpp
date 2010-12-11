@@ -10,7 +10,9 @@ PID::PID( int n ): par( new saved_params_float( 12 ) ),
     last_time( get_millisec() ), 
     used_par_n( 1 ),
     prev_manual_mode( 0 ), 
-    is_down_to_inaccel_mode( 0 )
+    is_down_to_inaccel_mode( 0 ),
+    number( n ),
+    start_value( 0 )
     {  
 
     com_dev = new complex_device( n, "PID", 3,
@@ -73,7 +75,7 @@ float PID::eval( float currentValue, int deltaSign )
 #endif
         } 
 
-    float ek = deltaSign * 100 * ( par[ 0 ][ WP_Z ] - currentValue ) / 
+    float ek = deltaSign * 100 * ( w_par[ 0 ][ WP_Z ] - currentValue ) / 
         ( dmax - dmin );
 
 #ifdef DEBUG
@@ -99,61 +101,54 @@ float PID::eval( float currentValue, int deltaSign )
         q0 = K * ( 1 + TD / dt );
         q1 = K * ( -1 - 2 * TD / dt + 2 * dt / TI );
         q2 = K * TD / dt;
+
         dUk = q0 * ek + q1 * ek_1 + q2 * ek_2;
         Uk = uk_1 + dUk;
         if ( Uk > 100 ) Uk = 100;
         if ( Uk < 0 ) Uk = 0;     
-
+        
         uk_1 = Uk;
         ek_2 = ek_1;
         ek_1 = ek;
 
-        //-Зона разгона.        
+        //-Зона разгона.   
         if ( get_millisec() - start_time < 
             par[ 0 ][ P_acceleration_time ] * 1000 ) 
             {
-            float deltaTime = ( float ) get_delta_millisec( start_time )/1000;
-            float res = 100 * deltaTime / 
-                par[ 0 ][ P_acceleration_time ];
-
-            if ( is_down_to_inaccel_mode ) 
-                { 
-                res = 100 - res;
-                if ( Uk < res ) Uk = res;
-                }
-            else
-                {
-                if ( Uk > res ) Uk = res;
-                }
+            acceleration( par[ 0 ][ P_acceleration_time ] );
             }
         //-Зона разгона.-!>
+
         last_time = get_millisec();
         } // if ( get_millisec() - last_time > dt*1000L ) 
 
     //-Мягкий пуск.
-    if ( par[ 0 ][ P_is_manual_mode ] && 
-        prev_manual_mode == 0 ) 
+    // Включили ручной режим.
+    if ( par[ 0 ][ P_is_manual_mode ] && 0 == prev_manual_mode ) 
         {
         prev_manual_mode = 1;
-        par[ 0 ][ P_U_manual ] = 
-            par[ 0 ][ WP_Uk ];
+        par[ 0 ][ P_U_manual ] = w_par[ 0 ][ WP_U ];
         }
 
-    if ( par[ 0 ][ P_is_manual_mode ] == 0 && 
-        prev_manual_mode == 1 ) 
+    // Выключили ручной режим.
+    if ( par[ 0 ][ P_is_manual_mode ] == 0 && 1 == prev_manual_mode ) 
         {
         prev_manual_mode = 0;
-
         reset(); 
 
-        //Сохраняем предыдущий ручной выход в качестве стартового для ПИД.
-        uk_1 =  par[ 0 ][ P_U_manual ];                  
+        // Начинаем заново разгон регулятора.
+        start_time = get_millisec(); 
+
+        // Устанавливаем начальное значение для разгона регулятора.
+        start_value = par[ 0 ][ P_U_manual ];
+
+        return par[ 0 ][ P_U_manual ];
         }
     //-Мягкий пуск.-!>
 
-    w_par[ 0 ][ WP_Uk ] = Uk;
+    w_par[ 0 ][ WP_U ] = Uk;
 
-    if ( par[ 0 ][ P_is_manual_mode ] == 1 ) 
+    if ( 1 == par[ 0 ][ P_is_manual_mode ] ) 
         {
         return par[ 0 ][ P_U_manual ];
         }
@@ -183,15 +178,16 @@ void PID::on( char is_down_to_inaccel_mode )
         this->is_down_to_inaccel_mode = is_down_to_inaccel_mode; 
 
         reset(); //Сбрасываем все переменные.
+        start_value = 0;
         }
     }
 //-----------------------------------------------------------------------------
-void  PID::set ( float new_out )
+void  PID::set( float new_out )
     {
     w_par[ 0 ][ WP_Z ] = new_out;   
     }
 //-----------------------------------------------------------------------------
-void  PID::set_used_par ( int parN )
+void  PID::set_used_par( int parN )
     {
     if ( parN < 1 || parN > 2 )
         {
@@ -205,12 +201,12 @@ void  PID::set_used_par ( int parN )
     else used_par_n = parN;
     }
 //-----------------------------------------------------------------------------
-void PID::init_param( int par_n, float val )
+void PID::init_param( PARAM par_n, float val )
     {
     par[ 0 ][ par_n ] = val;
     }
 //-----------------------------------------------------------------------------
-void PID::init_work_param( int par_n, float val )
+void PID::init_work_param( WORK_PARAM par_n, float val )
     {
     w_par[ 0 ][ par_n ] = val;
     }
@@ -232,7 +228,7 @@ void PID::reset()
         Uk = 100;
         }
 
-    w_par[ 0 ][ WP_Uk ] = 0;
+    w_par[ 0 ][ WP_U ] = 0;
 
     par[ 0 ][ P_is_manual_mode ] = 0;
 
@@ -242,5 +238,31 @@ void PID::reset()
 float PID::get_assignment()
     {
     return w_par[ 0 ][ WP_Z ];
+    }
+//-----------------------------------------------------------------------------
+void PID::print()
+    {
+    Print( "PID\n" );
+
+    par->print();
+    Print( "P_k = %f\n", par[ 0 ][ P_k ] );
+
+    w_par->print();
+    }
+//-----------------------------------------------------------------------------
+void PID::acceleration( float accel_time )
+    {
+    float deltaTime = ( float ) get_delta_millisec( start_time ) / 1000;
+    float res = 100 * deltaTime / accel_time;
+
+    if ( is_down_to_inaccel_mode ) 
+        { 
+        res = 100 - res + start_value;
+        if ( Uk < res ) Uk = res;
+        }
+    else
+        {
+        if ( Uk > res ) Uk = res + start_value;
+        }       
     }
 //-----------------------------------------------------------------------------
