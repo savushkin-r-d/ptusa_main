@@ -1,6 +1,8 @@
 #include "PAC_dev.h"
 #include "tech_def.h"
 
+#include "errors.h"
+
 auto_smart_ptr < device_manager > device_manager::instance;
 
 const char device::DEV_NAMES[][ 5 ] = { "V", "N", "M", "LS", "TE", "FE", "FS",
@@ -747,6 +749,9 @@ wago_device* device_manager::add_device( int dev_type, int dev_sub_type,
         break;        
         }
 
+    // Îøèáêè.
+    G_DEV_ERRORS_MANAGER->add_error( new simple_error( new_device ) );
+
     u_int new_dev_index = project_devices.size();
     project_devices.push_back( new_device );
 
@@ -1024,7 +1029,11 @@ void digital_device::set_value( float new_value )
 //-----------------------------------------------------------------------------
 void digital_device::set_state( int new_state )
     {
-    if ( new_state ) on();
+    if ( new_state ) 
+        {    
+        if ( -1 == new_state ) state = -1;
+        else on();
+        }
     else off();    
     }
 //-----------------------------------------------------------------------------

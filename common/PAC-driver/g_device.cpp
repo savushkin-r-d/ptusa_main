@@ -13,23 +13,16 @@
 #ifdef PAC
 #include "PAC_dev.h"
 
+#include "PAC_err.h"
+#include "errors.h"
+
 auto_smart_ptr < device_communicator > device_communicator::instance;
 u_int_4 device_communicator::dev_cnt;
 i_complex_device *device_communicator::dev[ device_communicator::C_MAX_COMLEX_DEVICES ];
 
 #endif // PAC
 
-#ifdef DRIVER
 u_int_2 G_PROTOCOL_VERSION = 3;
-#else 
-
-#ifdef USE_SIMPLE_DEV_ERRORS
-u_int_2 G_PROTOCOL_VERSION = 3;
-#else
-u_int_2 G_PROTOCOL_VERSION = 2;
-#endif // USE_SIMPLE_DEV_ERRORS
-
-#endif // DRIVER
 
 //-----------------------------------------------------------------------------
 void print_str( char *err_str, char is_need_CR )
@@ -777,14 +770,6 @@ int device_communicator::load_changed_state( char *buff )
 //-----------------------------------------------------------------------------
 #ifdef PAC
 
-#ifdef USE_SIMPLE_DEV_ERRORS
-#include "errors.h"
-
-extern dev_errors_manager *g_dev_errors_manager; 
-#endif // USE_SIMPLE_DEV_ERRORS
-
-//#define DEBUG_DEV_CMCTR
-
 long device_communicator::write_devices_states_service( long len, 
                                                        u_char *data,
                                                        u_char *outdata )
@@ -954,53 +939,51 @@ long device_communicator::write_devices_states_service( long len,
             }
 
         case GET_PAC_ERRORS:
-            outdata[ 0 ] = 0;
-            outdata[ 1 ] = 0; //Возвращаем 0.
-            answer_size = 2;
+            {
 #ifdef DEBUG_DEV_CMCTR
             Print( "GET_PAC_ERRORS\n" );
 #endif
 
-#if defined I7186_E
-            if ( g_pac_critical_errors )
-                {
-                answer_size = g_pac_critical_errors->save_to_stream( outdata );
-                }
-#endif // defined I7186_E
+           answer_size = PAC_critical_errors_manager::get_instance()->save_to_stream( 
+               ( char* ) outdata + answer_size );                
 
 #ifdef DEBUG_DEV_CMCTR
+           int critical_errors_size = answer_size;
             Print( "Critical errors count = %d, answer size = %d\n",
-                outdata[ 2 ], 
-                answer_size );
+                outdata[ 2 ], critical_errors_size );
 #endif // DEBUG_DEV_CMCTR
 
-#ifdef USE_SIMPLE_DEV_ERRORS
-            answer_size += g_dev_errors_manager->save_to_stream( outdata + 
+            answer_size += G_DEV_ERRORS_MANAGER->save_to_stream( outdata + 
                 answer_size );
+
 #ifdef DEBUG_DEV_CMCTR
-            Print( "Simple devices errors count = %d, answer size = %d\n", 
-                ( outdata + answer_size )[ 4 ], answer_size );
+            Print( "Simple devices errors errors count = %d, answer size = %d\n", 
+                *( ( u_int_2* ) (outdata + critical_errors_size + 2 ) ),
+                answer_size - critical_errors_size );
 #endif // DEBUG_DEV_CMCTR
-#endif // USE_SIMPLE_DEV_ERRORS
 
             return answer_size;
+            }
 
-#ifdef USE_SIMPLE_DEV_ERRORS
         case SET_PAC_ERROR_CMD:            
             unsigned int count = *( ( u_int_2* ) ( data + 1 ) ); 
 
-            unsigned int *uint_cmd = ( unsigned int* ) ( data + 1 + 2 );
-            for ( i = 0; i < count; i++ )
+            u_int_2 *uint_cmd = ( u_int_2* ) ( data + 1 + 2 );
+            for ( u_int i = 0; i < count; i++ )
                 {
-#ifdef DEBUG_DEV_CMCTR
+                u_int_2 object_type = uint_cmd[ 1 ];
+                u_int_2 object_number = uint_cmd[ 2 ];
+                u_int_2 object_alarm_number = uint_cmd[ 3 ];
+
+//#ifdef DEBUG_DEV_CMCTR
                 Print( "SET_PAC_ERROR_CMD" );
                 Print( "cmd = %u, object_type = %u, object_number = %u, \
                        object_alarm_number = %u\n", uint_cmd[ 0 ],
-                       uint_cmd[ 1 ], uint_cmd[ 2 ], uint_cmd[ 3 ]   );
-#endif // DEBUG_DEV_CMCTR
+                       object_type, object_number, object_alarm_number );
+//#endif // DEBUG_DEV_CMCTR
 
-                g_dev_errors_manager->set_cmd( uint_cmd[ 0 ], uint_cmd[ 1 ],
-                    uint_cmd[ 2 ], uint_cmd[ 3 ] );
+                G_DEV_ERRORS_MANAGER->set_cmd( uint_cmd[ 0 ], object_type,
+                    object_number, object_alarm_number );
 
                 uint_cmd += 4;
                 }
@@ -1009,7 +992,6 @@ long device_communicator::write_devices_states_service( long len,
             answer_size += 2;
 
             return answer_size;
-#endif // USE_SIMPLE_DEV_ERRORS
         }
 
     return answer_size;

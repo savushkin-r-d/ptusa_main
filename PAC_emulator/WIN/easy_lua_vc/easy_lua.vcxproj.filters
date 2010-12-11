@@ -222,6 +222,9 @@
     <ClInclude Include="..\..\..\PAC\common\PAC_info.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\common\PAC-driver\errors.h">
+      <Filter>Header Files\common\PAC-driver</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\PAC\common\PAC_dev.cpp">
@@ -391,6 +394,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\common\util\util.cpp">
       <Filter>Source Files\common\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp">
+      <Filter>Source Files\common\PAC-driver</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

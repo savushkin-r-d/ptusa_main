@@ -15,6 +15,7 @@ extern dev_errors_manager *g_dev_errors_manager;
 #include "PAC_info.h"
 extern PAC_info *g_PAC_system;
 
+#include "errors.h"
 //-----------------------------------------------------------------------------
 params_manager::params_manager()
     {
@@ -134,9 +135,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
             tech_object_manager::get_instance()->init_params();
 #endif // USE_NO_TANK_COMB_DEVICE
 
-#ifdef USE_SIMPLE_DEV_ERRORS 
-            g_dev_errors_manager->reset_errors_params();
-#endif // USE_SIMPLE_DEV_ERRORS
+            G_DEV_ERRORS_MANAGER->reset_errors_params();
             }
 
         if ( auto_init_work_params ) 

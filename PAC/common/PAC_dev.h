@@ -28,6 +28,8 @@
 #include "wago.h"
 #include "g_device.h"
 
+class saved_params_u_int_4;
+
 //for levels
 #if defined LEVEL_REVERSE
 #define LIS     1
@@ -586,6 +588,22 @@ class device : public i_simple_device,
     public i_DO_device
     {
     public:
+        //-Ошибки.
+        saved_params_u_int_4 *err_par;
+
+        enum DEV_ERROR_PARAMS  ///< Параметры ошибки, определяют номера битов.
+            {
+            DE_IS_ENABLE = 1,  ///< Блокировка тревоги на этапе проектирования.    
+            DE_IS_INHIBIT = 2, ///< Блокировка тревоги во время работы.    
+            DE_IS_SUPPRESS = 4,///< Подавление тревоги клиентами.
+            };
+
+        const char * get_name() const
+            {
+            return "";
+            }
+        //-Ошибки.!->
+
         enum CONSTANTS
             {
             C_DEVICE_TYPE_CNT = 14,     ///< Количество типов устройств.
@@ -637,7 +655,7 @@ class device : public i_simple_device,
             device::DEVICE_TYPE type, 
             device::DEVICE_SUB_TYPE sub_type ): number( number ),
             type( type ),
-            sub_type( sub_type )
+            sub_type( sub_type )            
             { 
             }
 
