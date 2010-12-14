@@ -389,6 +389,22 @@ void wago_device::init_channel( int type, int ch_index, int node, int offset )
         }
     }
 //-----------------------------------------------------------------------------
+void wago_device::init_par( u_int index, float value )
+    {
+    if ( index < params_count && params )
+        {
+        params[ index ] = value;
+        }
+#ifdef DEBUG
+    else
+        {                
+        Print( "wago_device->init_par(...) - error!" );
+        Print( " index=%d, params_count=%d, params=%d\n",
+            index, params_count, ( int ) params );
+        }
+#endif // DEBUG
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 wago_device::IO_channels::IO_channels( CHANNEL_TYPE type ) : count( 0 ), 
     tables( 0 ),

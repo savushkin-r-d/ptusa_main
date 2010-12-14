@@ -158,6 +158,8 @@ class wago_device
             int AO_count, int AI_count, int par_count );
 
         void init_channel( int type, int ch_inex, int node, int offset );  
+
+        void init_par( u_int index, float value );
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с модулями ввода/вывода Wago.
