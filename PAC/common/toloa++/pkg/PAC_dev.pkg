@@ -49,6 +49,9 @@ class i_DI_device
         ///
         /// @param new_state - новое состояние.
         void set_state( int new_state );
+
+        // @brief Получение логического активного состояния устройства.
+        bool is_active();
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе дискретного выхода.
@@ -119,7 +122,7 @@ class i_counter
         ///
         /// После сброса для продолжения работы необходимо вызвать @ref start().
         void reset();
-				
+                
         /// @brief Сброс счетчика и продолжение счета.
         void restart();
 
@@ -150,7 +153,7 @@ class device
             DT_QE,      ///< Концентрация.
             DT_AI,      ///< Аналоговый вход.
             };
-	};
+    };
 //-----------------------------------------------------------------------------
 /// @brief Получение клапана по номеру.
 ///
@@ -367,7 +370,7 @@ class tech_object
 
         timer_manager           timers;			///< Таймеры объекта.
 
-		mode_manager* get_modes_manager();
+        mode_manager* get_modes_manager();
     };
 //-----------------------------------------------------------------------------
 ///@brief Получение менеджера технологических объектов.
@@ -388,7 +391,7 @@ class tech_object_manager
         /// @brief Получение технологического объекта по его порядковому номеру.
         tech_object* get_tech_objects( unsigned int idx );
 
-		/// @brief Отладочная печать объекта.
+        /// @brief Отладочная печать объекта.
         void print();        
     };
 //-----------------------------------------------------------------------------
@@ -498,17 +501,17 @@ class device_manager
         /// @brief Отладочная печать объекта в консоль.
         void print() const;
 
-		// @brief Установка числа устройств.
-		//
-		// Вызывается из Lua.
-		wago_device* add_device( int dev_type, int dev_sub_type, unsigned int number,
-			char * descr );
+        // @brief Установка числа устройств.
+        //
+        // Вызывается из Lua.
+        wago_device* add_device( int dev_type, int dev_sub_type, unsigned int number,
+            char * descr );
 
-		void complete_init();
+        void complete_init();
 
-		/// @brief Получение устройства по его номеру.
+        /// @brief Получение устройства по его номеру.
         device* get_device( device::DEVICE_TYPE dev_type,
-			unsigned int dev_number );
+            unsigned int dev_number );
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе модулей ввода/вывода WAGO. 
@@ -517,13 +520,15 @@ class device_manager
 /// ввода/вывода (дискретных или аналоговых).
 class wago_device
     {
-	public:
+    public:
         // Lua.
         void init( int DO_count, int DI_count,
             int AO_count, int AI_count, int par_count );
 
         void init_channel( int type, int ch_inex, int node, int offset );  		
-	};
+
+        void init_par( unsigned int index, float value );
+    };
 //-----------------------------------------------------------------------------
 /// @brief Группа таймеров.
 class timer_manager
@@ -720,7 +725,7 @@ wago_manager* G_WAGO_MANAGER();
 class PID 
     {  
     public:
-	    enum PARAM 
+        enum PARAM 
         {        
         P_k = 0,               //0 Параметр k.
         P_Ti,                  //1 Параметр Ti.
@@ -737,13 +742,13 @@ class PID
         P_Td2,                 //11 Параметр Td2. 
         }; 
 
-    enum WORK_PARAMS 
+    enum WORK_PARAM 
         {
         WP_Z,  //0 Требуемое значение.
-        WP_Uk, //1 Выход ПИД.
+        WP_U,  //1 Выход ПИД.
         };
 
-		PID( int n );
+        PID( int n );
 
         void  on( char is_down_to_inaccel_mode = 0 );
         void  off();
@@ -751,16 +756,16 @@ class PID
 
         void  set( float new_z );         //Установить новое задание ПИД.
 
-		/// @brief Получение задания ПИД.
+        /// @brief Получение задания ПИД.
         float get_assignment();
 
         void init_param( PARAM par_n, float val );
-        void init_work_param( WORK_PARAMS par_n, float val );
+        void init_work_param( WORK_PARAM par_n, float val );
         void save_param();
 
 
         void  set_used_par ( int par_n ); //Использовать kN, TiN, TdN.    
-		
-		void print();   
+        
+        void print();   
     };
 //-----------------------------------------------------------------------------
