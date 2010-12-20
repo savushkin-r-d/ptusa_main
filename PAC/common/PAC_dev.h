@@ -521,6 +521,14 @@ class i_DI_device
         /// @param new_state - новое состояние.
         void set_state( int new_state );
 
+        /// @brief Проверка активного состояния.
+        ///
+        /// Для уровня - сработал он или нет.
+        ///
+        /// @return - 1 - устройство активно.
+        /// @return - 0 - устройство неактивно.
+        virtual bool is_active();
+
     protected:
         u_int last_check_time;///< Время последней проверки состояния.
         int   state;          ///< Предыдущее состояние, для исключения дребезга.
@@ -1385,10 +1393,15 @@ class mixer : public DO_1_DI_1
 class level_s : public DI_1
     {
     public:
-        level_s( u_int number, u_int dt = 1000 ): DI_1( number, DT_LS, DST_NONE )
+        level_s( u_int number, u_int dt = 1000 );
+
+        bool is_active();
+
+    private:
+        enum CONSTANTS
             {
-            set_change_time( dt );
-            }
+            C_ACTIVE_STATE = 0
+            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора расхода.
