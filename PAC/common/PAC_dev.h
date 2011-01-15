@@ -30,15 +30,6 @@
 
 class saved_params_u_int_4;
 
-//for levels
-#if defined LEVEL_REVERSE
-#define LIS     1
-#define LNO     0
-#else
-#define LIS     0
-#define LNO     1
-#endif
-
 #define OFF     0
 #define ON      1
 
