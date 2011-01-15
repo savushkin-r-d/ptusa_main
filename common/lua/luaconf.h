@@ -645,7 +645,7 @@ union luai_Cast { double l_d; long l_l; };
 */
 #if defined(loslib_c) || defined(luaall_c)
 
-#ifdef WIN_OS
+#ifdef WIN32
 #include <fcntl.h>
 #define _S_IREAD 256
 #define _S_IWRITE 128
@@ -661,7 +661,7 @@ int mkstemp(char *tmpl)
 
     return ret;
     }
-#endif // WIN_OS
+#endif // WIN32
 
 #if defined(LUA_USE_MKSTEMP)
 #include <unistd.h>
