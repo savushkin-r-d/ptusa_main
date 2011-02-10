@@ -304,6 +304,7 @@ class simple_error: public base_error
     {
     public:
         simple_error( device* simple_device = 0 );
+        virtual ~simple_error();
 
         /// @brief —брос параметров ошибки в значение по умолчанию (0).
         void reset_errors_params();
@@ -346,6 +347,8 @@ class simple_error: public base_error
 class dev_errors_manager
     {
     public:
+        ~dev_errors_manager();
+        
         int is_any_error() const;
             
         /// @brief —охранение всех ошибок в поток дл€ передачи на сервер.

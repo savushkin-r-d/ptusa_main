@@ -1,18 +1,19 @@
-#include "pid.h"
+#include "PID.h"
 //-----------------------------------------------------------------------------
-PID::PID( int n ): par( new saved_params_float( 12 ) ),
-    w_par( new run_time_params_float( 2 ) ),
-    state( STATE_OFF ), 
+PID::PID( int n ): 
     uk_1( 0 ), 
     ek_1( 0 ), 
     ek_2( 0 ),
-    start_time( get_millisec() ), 
-    last_time( get_millisec() ), 
-    used_par_n( 1 ),
-    prev_manual_mode( 0 ), 
+    start_time( get_millisec() ),
+    last_time( get_millisec() ),
+    prev_manual_mode( 0 ),
     is_down_to_inaccel_mode( 0 ),
-    number( n ),
-    start_value( 0 )
+    par( new saved_params_float( 12 ) ),
+    w_par( new run_time_params_float( 2 ) ),    
+    state( STATE_OFF ),
+    used_par_n( 1 ),    
+    start_value( 0 ),
+    number( n )
     {  
 
     com_dev = new complex_device( n, "PID", 3,

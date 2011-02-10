@@ -19,7 +19,7 @@ netOK( 0 )
     {
     // Задаем таймаут.
     tv.tv_sec  = 0;
-    tv.tv_usec = 10000; // 0.01 сек.
+    tv.tv_usec = 2500; // 0.0025 сек.
 
     sin_len = sizeof( ssin );
     strcpy( host_name, name );
@@ -28,7 +28,7 @@ netOK( 0 )
     printf ( "PAC name \"%s\".\n", host_name );
 #endif // DEBUG
 
-    net_init();
+    //net_init();
 
     glob_last_transfer_time = get_sec();
     }
@@ -239,7 +239,7 @@ int tcp_communicator_linux::evaluate()
         // Ждём события в одном из сокетов.
         rc = select( MAX_SOCKETS + 1, &rfds, NULL, NULL, &tv );
 
-        if ( 0 == rc ) continue; // Ничего не произошло.
+        if ( 0 == rc ) break; // Ничего не произошло.
 
         if ( rc < 0 )
             {
@@ -273,23 +273,28 @@ int tcp_communicator_linux::evaluate()
                         continue;   
                         }
 
+#ifdef MODBUS
+                    if ( i != modbus_socket )
+                        {
+#endif
+                        char Message1[] = "PAC accept";
+                        send( slave_socket, Message1, strlen ( Message1 ), MSG_NOSIGNAL );
+#ifdef MODBUS
+                        }
+#endif
                     // Установка сокета в неблокирующий режим.
                     if ( fcntl( slave_socket, F_SETFL, O_NONBLOCK ) < 0 ) 
                         {
                         // Ошибка, разрушаем сокет.
                         shutdown( slave_socket, 0 );
                         close( slave_socket );
+
+#ifdef DEBUG
+                        perror( "fcntl() error" );
+#endif
                         continue;
                         }
 
-                    // Проверка на актульность запроса на соединение.
-                    if ( 0 == recv( slave_socket, buf, 1, MSG_PEEK ) )
-                        {
-                         // Клиент уже закрыл соединение, разрушаем сокет.
-                        shutdown( slave_socket, 0 );
-                        close( slave_socket );
-                        continue;
-                        }
 #ifdef DEBUG
                     // Определение имени клиента.
                     hostent *client = gethostbyaddr( &ssin.sin_addr, 4, AF_INET );
@@ -306,15 +311,6 @@ int tcp_communicator_linux::evaluate()
                         }
 #endif // DEBUG
 
-#ifdef MODBUS
-                    if ( i != modbus_socket )
-                        {
-#endif
-                        char Message1[] = "PAC accept";
-                        send( slave_socket, Message1, strlen ( Message1 ), MSG_NOSIGNAL );
-#ifdef MODBUS
-                        }
-#endif
                     FD_SET( slave_socket, &rfds );
                     sst[ slave_socket ].active = 1;
                     sst[ slave_socket ].init   = 1;
@@ -380,7 +376,7 @@ int tcp_communicator_linux::do_echo ( int skt )
     memset( buf, 0, BUFSIZE );
     
     // Ожидаем данные с таймаутом 1 сек.
-    err = in_buffer_count = recvtimeout( skt, buf, BUFSIZE, 1, 0 );
+    err = in_buffer_count = recvtimeout( skt, buf, BUFSIZE, 5, 0 );
 
     if ( err <= 0 )               /* read error */
         {
@@ -388,22 +384,22 @@ int tcp_communicator_linux::do_echo ( int skt )
         switch ( err )
             {
             case 0:
-                printf( "Socket %d->\"%s\" was closed.\n",
+                print_time( "Socket %d->\"%s\" was closed.\n",
                         skt, inet_ntoa( sst[ skt ].sin.sin_addr ) );
                 break;
 
             case -1:
-                printf( "Socket %d->\"%s\" disconnected on read try : %s\n",
+                print_time( "Socket %d->\"%s\" disconnected on read try : %s\n",
                     skt, inet_ntoa( sst[ skt ].sin.sin_addr ), strerror( errno ) );
                 break;
 
             case -2:
-                printf( "Socket %d->\"%s\" disconnected on read try - timeout.\n",
+                print_time( "Socket %d->\"%s\" disconnected on read try - timeout.\n",
                     skt, inet_ntoa( sst[ skt ].sin.sin_addr ) );
                 break;
 
             default:
-                printf( "Socket %d->\"%s\" disconnected on read try : %s\n",
+                print_time( "Socket %d->\"%s\" disconnected on read try : %s\n",
                     skt, inet_ntoa( sst[ skt ].sin.sin_addr ), strerror( errno ) );
                 break;
             }

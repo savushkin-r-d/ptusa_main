@@ -28,204 +28,12 @@
 #include "wago.h"
 #include "g_device.h"
 
-class saved_params_u_int_4;
+//class saved_params_u_int_4;
+#include "param_ex.h"
 
 #define OFF     0
 #define ON      1
 
-//-----------------------------------------------------------------------------
-/// @brief Шаблон класса, который используется для передачи состояния устройств,
-/// которые представляются массивом некоторого типа.
-//
-/// Например: параметры, состояния и т.д.
-template < class data_type > class array_device: public i_simple_device
-    {
-    public:
-        /// @param n        - номер.
-        /// @param new_name - имя.
-        /// @param new_subdev_cnt - количество элементов в массиве.
-        /// @param type     - тип. Для сохранения устройств и передачи на
-        /// сервер.
-        array_device( u_int_4 n, 
-            const char *new_name,
-            u_int_2 new_subdev_cnt,
-            char type ): sub_dev_cnt( new_subdev_cnt ), 
-            type( type ), 
-            n( n )
-            {
-            name = new char[ strlen( new_name ) + 1 ];
-            strcpy( name, new_name );
-
-            prev_val = new data_type[ sub_dev_cnt ];
-            for ( unsigned int i = 0; i < sub_dev_cnt; i++ )
-                {
-                prev_val[ i ] = 0;
-                }              
-            }
-
-        virtual ~array_device()
-            {
-            if ( name )
-                {
-                delete [] name;
-                name = 0;
-                }
-            if ( prev_val )
-                {
-                delete [] prev_val;
-                prev_val = 0;
-                }
-            }
-
-        /// @brief Сохранение устройства в байтовый поток.
-        ///
-        /// Для передачи устройства на сервер.
-        ///
-        /// @param buff [out] - указатель на байтовый буфер, куда будет
-        /// произведено сохранение устройства.
-        ///
-        /// @return - количество сохраненных байт.
-        int  save_device( char *buff )
-            {
-            // Данные группы (buff) в следующем виде:
-            //    1 байт  - тип;                                (1)
-            //    4 байта - номер;                              (2)
-            //    1 байт  - длина имени группы устройства;      (3)
-            //    х байт  - имя группы устройства;              (4)
-            //    4 байта - количество подустройств;            (5)
-
-            u_int_2 idx = 0;
-
-            buff[ idx++ ] = type;                               //(1)
-            memcpy( buff + idx, &n, sizeof( n ) );              //(2)
-            idx += sizeof( n );
-            buff[ idx++ ] = strlen( name );                     //(3)
-            strcpy( buff + idx, name );                         //(4)
-            idx += strlen( name ) + 1;
-            memcpy( buff + idx, &sub_dev_cnt, sizeof( sub_dev_cnt ) );  //(5)
-            idx += sizeof( sub_dev_cnt );
-
-            return idx;
-            }
-
-        /// @brief Сохранение состояния устройства в байтовый поток.
-        ///
-        /// Для передачи состояния устройства на сервер.
-        ///
-        /// @param buff [out] - указатель на байтовый буфер, куда будет
-        /// произведено сохранение состояния устройства.
-        ///
-        /// @return - количество сохраненных байт.
-        int  save_state( char *buff )
-            {
-            // Данные группы (buff) в следующем виде:
-            //  4 байта - номер устройства;                     (1)
-            //  4 байта - количество подустройств;              (2)
-            //  далее   - данные каждого подустройства.
-            u_int_2 answer_size = 0;
-            memcpy( buff + answer_size, &n, sizeof( n ) );                    //(1)
-            answer_size += sizeof( n );
-            memcpy( buff + answer_size, &sub_dev_cnt, sizeof( sub_dev_cnt ) );//(2)
-            answer_size += sizeof( sub_dev_cnt );
-
-            for ( u_int_4 i = 0; i < sub_dev_cnt; i++ )
-                {
-                data_type val = get_val( i );
-                memcpy( buff + answer_size, &val, sizeof( val ) );
-
-                prev_val[ i ] = val;
-                answer_size += sizeof( data_type );      
-                }      
-
-            return answer_size;
-            }
-
-        /// @brief Сохранение изменившегося состояния устройства в байтовый поток.
-        ///
-        /// Для передачи состояния устройства на сервер.
-        ///
-        /// @param buff [out] - указатель на байтовый буфер, куда будет
-        /// произведено сохранение состояния устройства.
-        ///
-        /// @return - количество сохраненных байт.
-        int  save_changed_state( char *buff )
-            {
-            // Данные группы (buff) в следующем виде:          
-            //  2 байта - количество устройств, изменивших свое состояние;  (1)
-            //  2 байта - номер устройства в массиве устройств.             (2)
-            //  далее   - его измененное состояние                          (3)
-            // Сохраняем переданное значение как предыдущее значение.       (4)
-            //Изменяем размер ответа.                                       (5)
-            //Увеличиваем на 1 количество устройств, изменивших свое
-            //состояние.                                                    (6)
-            //Если нет устройств, изменивших свое состояние, возвращаем 0.  (7)
-            u_int_2 *changed_dev_cnt = ( u_int_2* ) ( buff );               //1
-            *changed_dev_cnt = 0;
-            u_int_2 answer_size = 2;
-
-            for ( u_int_2 i = 0; i < sub_dev_cnt; i++ )
-                {
-                if ( get_val( i ) != prev_val[ i ] )
-                    {
-                    ( ( u_int_2* ) ( buff + answer_size ) )[ 0 ] = i;       //2
-                    answer_size += 2;
-                    ( ( data_type* ) ( buff + answer_size ) )[ 0 ] =        //3
-                        get_val( i );
-                    prev_val[ i ] = get_val( i );                           //4
-                    answer_size += sizeof( data_type );                     //5
-                    ( *changed_dev_cnt )++;                                 //6
-                    }
-                }
-            if ( 2 == answer_size )                                         //7
-                {
-                return 0;
-                }
-
-            return answer_size;              
-            }
-
-        /// @brief Получение значения элемента через индекс. 
-        ///
-        /// Это значение потом, например, может используется для сохранения 
-        /// объекта в поток ( @ref save_state ).
-        ///
-        /// @param idx - индекс элемента.
-        ///
-        /// @return - значение элемента с заданным индексом.
-        virtual data_type get_val( int idx ) = 0;
-
-        /// @brief Вывод объекта в консоль.
-        ///
-        /// Для использования в отладочных целях.
-        void print() const
-            {
-            char tmp_str[ 100 ];    
-
-            if ( strlen( name ) < 8 ) 
-                {
-                sprintf( tmp_str, "\"%s\", \t\t[ %3lu ]", 
-                    name, ( unsigned long int ) sub_dev_cnt );
-                }
-            else sprintf( tmp_str, "\"%s\", \t[ %3lu ]", 
-                name, ( unsigned long int ) sub_dev_cnt );
-
-            print_str( tmp_str );
-            }
-
-        /// @brief Реализация-заглушка интерфейса класса @ref i_simple_device.
-        u_int_4 get_n() const
-            { 
-            return 0; 
-            } 
-
-    protected:
-        u_int_4         sub_dev_cnt;    ///< Количество подустройств.
-        char            *name;          ///< Имя.
-        char            type;           ///< Тип.
-        u_int_4         n;              ///< Уникальный номер.
-
-        data_type*      prev_val;       ///< Массив предыдущих значений.
-    };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //ОБЩЕЕ ОПИСАНИЕ.
@@ -329,6 +137,12 @@ class string_device: public i_simple_device
     public:
         string_device( u_int_4 n, const char *new_name, char* str, int max_str_len );
 
+        virtual ~string_device()
+            {
+            delete [] name;
+            name = 0;
+            }
+
         int  save_device( char *buff );
         int  save_state( char *buff );
         int  save_changed_state( char *buff );
@@ -348,12 +162,16 @@ class var_state:public i_simple_device
             u_int_4 &var ):var( var ),
             type( type )
             {            
-            strlcpy( name, new_name, C_MAX_NAME_LENGTH );
+            strlcpy_( name, new_name, C_MAX_NAME_LENGTH );
+            }
+
+        virtual ~var_state()
+            {
             }
 
         int parse_cmd( char *buff  )
             {
-            var = ( ( u_int_4* ) ( buff + 4 ) )[ 0 ];
+            memcpy( &var, buff + 4, sizeof( u_int_4 ) );
             return 4 + 4;
             }
 
@@ -367,13 +185,17 @@ class var_state:public i_simple_device
             //    4 байта - количество подустройств;          (5)
             u_int_2 idx = 0;
 
-            buff[ idx++ ] = type;                             //(1)                            
-            ( ( u_int_4* ) ( buff + idx ) )[ 0 ] = 1;         //(2)
+            buff[ idx++ ] = type;                             //(1)
+
+            const u_int_4 DEV_CONST = 1;
+            memcpy( buff + idx, &DEV_CONST, sizeof( DEV_CONST ) ); //(2)
             idx += 4;
+
             buff[ idx++ ] = strlen( name );                   //(3)              
             strcpy( buff + idx, name );                       //(4)
             idx += strlen( name ) + 1;
-            ( ( u_int_4* ) ( buff + idx ) )[ 0 ] = 1;         //(5)
+
+            memcpy( buff + idx, &DEV_CONST, sizeof( DEV_CONST ) ); //(5)
             idx += 4;           
 
             return idx;
@@ -386,10 +208,11 @@ class var_state:public i_simple_device
             //  4 байта - количество подустройств;    (2)
             //  4 байта - данные переменной.          (3)  
 
-            ( ( u_int_4* ) buff )[ 0 ] = 1;           //(1)
-            ( ( u_int_4* ) buff )[ 1 ] = 1;           //(2)
+            const u_int_4 DEV_CONST = 1;
+            memcpy( buff, &DEV_CONST, sizeof( DEV_CONST ) );     //(1)
+            memcpy( buff + 4, &DEV_CONST, sizeof( DEV_CONST ) ); //(2
 
-            ( ( u_int_4* ) buff )[ 2 ] = var;         //(3)
+            memcpy( buff + 4 + 4, &var, sizeof( var ) );          //(3)
             return 4 + 4 + 4;
             }
 
@@ -588,7 +411,7 @@ class device : public i_simple_device,
     {
     public:
         //-Ошибки.
-        saved_params_u_int_4 *err_par;
+        saved_params_u_int_4 err_par;
 
         enum DEV_ERROR_PARAMS  ///< Параметры ошибки, определяют номера битов.
             {
@@ -652,14 +475,15 @@ class device : public i_simple_device,
 
         device( int number, 
             device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): number( number ),
+            device::DEVICE_SUB_TYPE sub_type ): err_par( 1 ),
+            number( number ),
             type( type ),
             sub_type( sub_type )            
-            { 
+            {
             }
 
         virtual ~device()
-            {
+            {           
             }
 
         /// @brief Выключение устройства.
@@ -992,8 +816,6 @@ class DO_1_DI_1 : public digital_device
             {
             DO_INDEX = 0,           ///< Индекс канала дискретного выхода.
             DI_INDEX = 0,           ///< Индекс канала дискретного входа.
-
-            PAR_FB_STATE = 0,       ///< Индекс параметра учета обратной связи.
             };
 
         u_long start_switch_time;  ///< Время начала переключения клапана.

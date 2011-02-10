@@ -35,7 +35,7 @@ class mode_manager;
 /// ” режима может быть активным (выполн€тьс€) только один шаг.
 class step_path
     {
-    friend mode_manager;
+    friend class mode_manager;
     public:
         step_path();
 
@@ -86,6 +86,8 @@ class mode_manager
     public:
         mode_manager( u_int_2 new_modes_cnt );
 
+        ~mode_manager();
+        
         /// ƒобавление параметра с временами шагов.
         int set_param( saved_params_u_int_4 *par );
 

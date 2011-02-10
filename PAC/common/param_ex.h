@@ -30,7 +30,9 @@
 #ifdef WIN_OS
 #include "sys_win.h"
 #endif // WIN_OS
-#include "PAC_dev.h"
+
+#include "g_device.h"
+
 //-----------------------------------------------------------------------------
 /// @brief Работа с параметрами. 
 /// 
@@ -481,6 +483,10 @@ class saved_params_u_int_4: public saved_params < u_int_4 >,
               {
               }
 
+          virtual ~saved_params_u_int_4()
+            {
+            }
+          
           /// @brief Реализация интерфейса класса @ref array_device.
           int parse_cmd( char *buff )
               {

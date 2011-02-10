@@ -27,8 +27,13 @@ int single_state::parse_cmd( char *buff  )
     switch ( owner_type )
         {
     case T_TECH_OBJECT:
-        ( ( tech_object* ) owner_object )->set_mode( ( ( u_int_4* ) buff )[ 1 ] - 1,
-            ( ( u_int_4* ) buff )[ 2 ] );                      
+
+        u_int_4 mode;
+        u_int_4 new_state;
+        memcpy( &mode, buff + 4, 4 );
+        memcpy( &new_state, buff + 4 + 4, 4 );
+
+        ( ( tech_object* ) owner_object )->set_mode( mode - 1, new_state );
         break;
         }
     return 12;
@@ -142,7 +147,8 @@ int complex_state::parse_cmd( char *buff  )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 string_device::string_device( u_int_4 n, const char *new_name,
-    char* str, int max_str_len ): n( n ),
+    char* str, int max_str_len ): name( 0 ),
+    n( n ),
     str( str ),
     max_str_len( max_str_len )
     {
@@ -160,13 +166,15 @@ int string_device::save_device( char *buff )
     {
     u_int_2 idx = 0;
 
-    buff[ idx++ ] = complex_device::ARRAY_DEV_STR;    //(1)                            
-    ( ( u_int_4* ) ( buff + idx ) )[ 0 ] = n;         //(2)
+    buff[ idx++ ] = complex_device::ARRAY_DEV_STR;    //(1)
+    memcpy( buff + idx, &n, sizeof( n ) );            //(2)
     idx += 4;
     buff[ idx++ ] = strlen( name );                   //(3)              
     strcpy( buff + idx, name );                       //(4)
     idx += strlen( name ) + 1;
-    ( ( u_int_4* ) ( buff + idx ) )[ 0 ] = 1;         //(5)
+
+    u_int_4 DEV_CONST = 1;
+    memcpy( buff + idx, &DEV_CONST, sizeof( DEV_CONST ) ); //(5)
     idx += 4;           
 
     return idx;
@@ -178,8 +186,10 @@ int string_device::save_device( char *buff )
 //  далее   - данные каждого подустройства.
 int string_device::save_state( char *buff )
     {
-    ( ( u_int_4* ) buff )[ 0 ] = n;         //(1)
-    ( ( u_int_4* ) buff )[ 1 ] = 1;	        //(2)
+    memcpy( buff, &n, sizeof( n ) );                     //(1)
+
+    u_int_4 DEV_CONST = 1;
+    memcpy( buff + 4, &DEV_CONST, sizeof( DEV_CONST ) ); //(2)
     u_int_2 answer_size = 8;
 
     int str_len = strlen( str );
@@ -1121,22 +1131,11 @@ int DO_1_DI_1::get_state_now()
     int o = get_DO( DO_INDEX );
     int i = get_DI( DI_INDEX );
 
-    if ( get_par( PAR_FB_STATE ) == 0 )
+    if ( o == i )
         {
-        if ( ( o == 0 && i == 1 ) || ( o == 1 && i == 0 ) )
-            {
-            start_switch_time = get_sec();
-            return o;
-            }
-        }
-    else
-        {
-        if ( o == i )
-            {
-            start_switch_time = get_sec();
-            return i;
-            }
-        }
+        start_switch_time = get_sec();
+        return i;
+        }   
 
     if ( get_sec() - start_switch_time > C_SWITCH_TIME )
         {
@@ -1144,8 +1143,7 @@ int DO_1_DI_1::get_state_now()
         }
     else
         {
-        if ( get_par( PAR_FB_STATE ) == 0 ) return !i;
-        else return i;
+        return i;
         }
     }
 //-----------------------------------------------------------------------------
@@ -1515,8 +1513,6 @@ int analog_device::parse_cmd( char *buff )
     {
     float val;
     memcpy( &val, buff, sizeof( float ) );
-
-    Print( "val=%f\n", val );
 
     set_value( val );
     return sizeof( float );

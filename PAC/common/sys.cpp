@@ -29,7 +29,7 @@ void print_binary( u_int c )
     {
     if ( 0 == c )
         {
-        printf( "0" );
+        Print( "0" );
         return;
         }
 
@@ -37,7 +37,7 @@ void print_binary( u_int c )
     while( !( c & mask ) ) mask >>= 1;
     while ( mask )
         {
-        printf( "%d", ( c & mask ) > 0 ? 1 : 0 );
+        Print( "%d", ( c & mask ) > 0 ? 1 : 0 );
         mask >>= 1;
         }
     }
@@ -59,6 +59,8 @@ int get_char()
 #endif // LINUX_OS
 
 #endif // defined DEBUG
+
+time_t g_t; // Для работы print_time.
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 NV_memory::NV_memory( u_int total_size,

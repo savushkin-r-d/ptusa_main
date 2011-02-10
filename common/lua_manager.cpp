@@ -6,8 +6,7 @@
 #include "lua_manager.h"
 
 #include "prj_mngr.h"
-
-#include "tcp_cmctr_win.h"
+#include "PAC_dev.h"
 
 //-----------------------------------------------------------------------------
 auto_smart_ptr< lua_manager > lua_manager::instance;
@@ -33,26 +32,22 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
 
         if ( NULL == L )
             {
-            printf( "Error creating Lua context.\n" );
+            Print( "Error creating Lua context.\n" );
             return 1;
             }
         is_free_lua = 1;
 
         luaL_openlibs( L );    // Open standard libraries.
+
         tolua_PAC_dev_open( L );
 
-#ifdef DEBUG
-        const char *ADDITIONAL_PATH_CMD = 
-#if defined WIN_OS 
+        const char *ADDITIONAL_PATH_CMD =
+#ifdef PAC_PC
         "package.path = package.path..\';../../system scripts/?.lua;\'";
-        
-#elif defined LINUX_OS && defined PAC_PC
-        "package.path = package.path..\';../../PAC/common/Lua/?.lua;\'";
-
 #else
         "package.path = package.path..\';./?.lua;\'";
-#endif  // defined WIN_OS || ( defined LINUX_OS && defined PAC_PC )
-        
+#endif // PAC_PC
+      
         if( luaL_dostring( L, ADDITIONAL_PATH_CMD ) != 0 )
             {
             Print( "Set additional search path error!\n" );
@@ -61,34 +56,23 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             lua_pop( L, 1 );
             return 1;
             }
-#endif // DEBUG
 
-#if defined WIN_OS && defined DEBUG
-            if( luaL_dofile( L, "main.wago.plua" ) != 0 )
-#else
-            if( luaL_dofile( L, "main.wago.plua" ) != 0 )
-#endif // defined OS_WIN && defined DEBUG
+        if( luaL_dofile( L, "main.wago.plua" ) != 0 )
             {
-#ifdef DEBUG
             Print( "Load description Wago Lua script error!\n" );
             Print( "\t%s\n", lua_tostring( L, -1 ) );
-#endif // DEBUG
+
             lua_pop( L, 1 );
             return 1;
             }
 
-            G_PROJECT_MANAGER->lua_load_configuration();       
+        G_PROJECT_MANAGER->lua_load_configuration();       
 
-#if defined WIN_OS && defined DEBUG
         if( luaL_loadfile( L, script_name ) != 0 )
-#else
-        if( luaL_loadfile( L, script_name ) != 0 )
-#endif // defined OS_WIN && defined DEBUG
             {
-#ifdef DEBUG
             Print( "Load Lua main script error!\n" );
             Print( "\t%s\n", lua_tostring( L, -1 ) );
-#endif // DEBUG
+
             lua_pop( L, 1 );
             return 1;
             }
@@ -97,10 +81,9 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         int i_line = lua_pcall( L, 0, LUA_MULTRET, 0 );
         if ( i_line != 0 )
             {
-#ifdef DEBUG
             Print( "Evaluate Lua script error!\n" );
             Print( "\t%s\n", lua_tostring( L, -1 ) );
-#endif // DEBUG
+
             lua_pop( L, 1 );            
             return 1;
             }        
@@ -190,6 +173,9 @@ int lua_manager::exec_lua_method( const char *object_name,
     //LARGE_INTEGER start_time;
     //QueryPerformanceCounter( &start_time );
 
+//    u_long start_time;
+//    start_time = get_millisec();
+
     lua_pushcclosure( lua_manager::L, error_trace, 0 );
     instance->err_func = lua_gettop( L );
 
@@ -216,6 +202,11 @@ int lua_manager::exec_lua_method( const char *object_name,
     //int tiks_per_mcsec = tick_per_sec.QuadPart / ( 1000 * 1000 );
     //double dt = call_time / tiks_per_mcsec;
     //dt += 1;
+
+//    u_long finish_time;
+//    finish_time = get_millisec();
+//    u_long call_time = finish_time - start_time;
+//    Print( "Lua call time - %lums\n", call_time );
 
     return res;
     }

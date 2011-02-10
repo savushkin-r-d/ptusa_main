@@ -42,7 +42,7 @@ class lua_manager
             const char *function_name, int param,
             const char *c_function_name ) const;
 
-    private:
+    public:
         lua_manager() : is_free_lua( 0 ) 
             {
             }

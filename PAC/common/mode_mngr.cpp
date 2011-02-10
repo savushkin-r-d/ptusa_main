@@ -118,6 +118,12 @@ mode_manager::mode_manager( u_int_2 new_modes_cnt
         }
     step_duration_par_n = new u_char*[ new_modes_cnt ];
     next_step_n = new u_char*[ new_modes_cnt ];
+    for ( int i = 0; i < new_modes_cnt; i++ )
+    	{
+        step_duration_par_n[ i ] = 0;
+        next_step_n[ i ] = 0;
+    	}
+
 
     steps_cnt = new u_char[ new_modes_cnt ];
     active_step = new u_char[ new_modes_cnt ];
@@ -125,6 +131,10 @@ mode_manager::mode_manager( u_int_2 new_modes_cnt
     memset( active_step, 0, new_modes_cnt );
 
     steps = new step_path*[ new_modes_cnt ];
+    for ( int i = 0; i < new_modes_cnt; i++ )
+    	{
+        steps[ i ] = 0;
+    	}
 
     is_active_mode = new u_char[ new_modes_cnt ];
     memset( is_active_mode, 0, new_modes_cnt );
@@ -137,6 +147,40 @@ mode_manager::mode_manager( u_int_2 new_modes_cnt
     	}
     modes_start_time.push_back( 0 );
 
+    }
+//-----------------------------------------------------------------------------
+ mode_manager::~mode_manager()
+    {
+    for ( u_int i = 0; i < modes_devices.size(); i++ )
+        {
+        delete modes_devices.at( i );
+        }
+
+
+    for ( int i = 0; i < modes_cnt; i++ )
+        {
+        delete [] next_step_n[ i ];
+        next_step_n[ i ] = 0;
+
+        delete [] step_duration_par_n[ i ];
+        step_duration_par_n[ i ] = 0;
+
+        delete [] steps[ i ];
+        steps[ i ] = 0;
+        }
+    delete [] next_step_n;
+    next_step_n = 0;
+    delete [] step_duration_par_n;
+    step_duration_par_n = 0;
+    delete [] steps;
+    steps = 0;
+
+    delete [] steps_cnt;
+    steps_cnt = 0;
+    delete []  active_step;
+    active_step = 0;
+    delete []  is_active_mode;
+    is_active_mode = 0;
     }
 //-----------------------------------------------------------------------------
 int mode_manager::init( u_int_2 mode, u_char start_step )
@@ -418,7 +462,9 @@ int mode_manager::add_mode_closed_dev( u_int_2 mode, device *dev )
         }
     catch (...)
         {
+#ifdef PAC_PC
         debug_break;
+#endif // PAC_PC
         return 1;
         }
 
@@ -442,7 +488,9 @@ int mode_manager::add_mode_opened_dev( u_int_2 mode, device *dev )
     	}
     catch (...)
     	{
+#ifdef PAC_PC
         debug_break;
+#endif // PAC_PC
     	return 1;
     	}
        

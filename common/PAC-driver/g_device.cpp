@@ -565,27 +565,7 @@ int complex_device::load_changed_state( char *buff )
 //Если не устройств, изменивших свое состояние, возвращаем 0.   (6)
 int complex_device::save_changed_state( char *buff )
     {
-    u_int_2 *changed_sub_dev_cnt = ( u_int_2* ) buff;           //1
-    *changed_sub_dev_cnt = 0;
-    int answer_size = 2;
-
-    for ( u_int_2 i = 0; i < get_subdev_quantity(); i++ )
-        {
-        ( ( u_int_2* ) ( buff + answer_size ) )[ 0 ] = i;       //2        
-        int res = get_save_dev( i )->save_changed_state( 
-            buff + answer_size + 2 );                           //3
-        if ( res ) 
-            {            
-            answer_size = answer_size + 2 + res;                //4
-            ( *changed_sub_dev_cnt )++;                         //5
-            }
-        }
-    if ( 2 == answer_size )                                     //6             
-        {
-        return 0;
-        }
-
-    return answer_size;    
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -806,7 +786,7 @@ long device_communicator::write_devices_states_service( long len,
             return answer_size;
 
         case GET_DEVICES:
-            {            
+            {
             param_size = sizeof( g_devices_request_id );
             if ( 0 == g_devices_request_id )
                 {
@@ -957,38 +937,47 @@ long device_communicator::write_devices_states_service( long len,
                 answer_size );
 
 #ifdef DEBUG_DEV_CMCTR
+            u_int_2 cnt = 0;
+            memcpy( &cnt, outdata + critical_errors_size + 2, sizeof( u_int_2 ) );
             Print( "Simple devices errors errors count = %d, answer size = %d\n", 
-                *( ( u_int_2* ) (outdata + critical_errors_size + 2 ) ),
-                answer_size - critical_errors_size );
+                cnt, answer_size - critical_errors_size );
 #endif // DEBUG_DEV_CMCTR
 
             return answer_size;
             }
 
         case SET_PAC_ERROR_CMD:            
-            unsigned int count = *( ( u_int_2* ) ( data + 1 ) ); 
+            u_int_2 count = 0;
 
-            u_int_2 *uint_cmd = ( u_int_2* ) ( data + 1 + 2 );
+            memcpy( &count, data + 1, sizeof( count ) );
+
+#ifdef DEBUG_DEV_CMCTR
+                Print( "SET_PAC_ERROR_CMD\t" );
+                Print( "Error count = %u\n", count );
+#endif // DEBUG_DEV_CMCTR
+
+            u_int_2 uint_cmd[ 1000 ];
+            memcpy( uint_cmd, data + 1 + 2, ( 2 * 4 ) * count );
+
             for ( u_int i = 0; i < count; i++ )
                 {
-                u_int_2 object_type = uint_cmd[ 1 ];
-                u_int_2 object_number = uint_cmd[ 2 ];
-                u_int_2 object_alarm_number = uint_cmd[ 3 ];
+                u_int_2 object_type = uint_cmd[ 4 * i + 1 ];
+                u_int_2 object_number = uint_cmd[ 4 * i +  2 ];
+                u_int_2 object_alarm_number = uint_cmd[ 4 * i + 3 ];
 
-//#ifdef DEBUG_DEV_CMCTR
-                Print( "SET_PAC_ERROR_CMD" );
+#ifdef DEBUG_DEV_CMCTR
+                Print( "SET_PAC_ERROR_CMD\t" );
                 Print( "cmd = %u, object_type = %u, object_number = %u, \
-                       object_alarm_number = %u\n", uint_cmd[ 0 ],
+                       object_alarm_number = %u\n", uint_cmd[ 4 * i ],
                        object_type, object_number, object_alarm_number );
-//#endif // DEBUG_DEV_CMCTR
+#endif // DEBUG_DEV_CMCTR
 
-                G_DEV_ERRORS_MANAGER->set_cmd( uint_cmd[ 0 ], object_type,
+                G_DEV_ERRORS_MANAGER->set_cmd( uint_cmd[ 4 * i ], object_type,
                     object_number, object_alarm_number );
-
-                uint_cmd += 4;
                 }
 
-            ( ( u_int_2* ) ( outdata + answer_size ) )[ 0 ] = 0; //Возвращаем 0.
+            const u_int_2 RES = 0;
+            memcpy( outdata, &RES, sizeof( RES ) ); // Возвращаем 0.
             answer_size += 2;
 
             return answer_size;

@@ -367,7 +367,6 @@ system =
 			end --for fields, value in ipairs( value.modes ) do
 		end --for fields, value in ipairs( tech_objects ) do
 
-		print( 'init OK' )
 		return 0
 	end,
     }

@@ -495,13 +495,16 @@ base_error::base_error(): error_state( AS_NORMAL )
 simple_error::simple_error( device* simple_device
                            ): base_error(),
                            simple_device( simple_device )                           
+    {     
+    }
+//-----------------------------------------------------------------------------
+simple_error::~simple_error()
     { 
-    simple_device->err_par = new saved_params_u_int_4( 1 );
     }
 //-----------------------------------------------------------------------------
 void simple_error::reset_errors_params()
     {
-    simple_device->err_par[ 0 ][ 0 ] = 0;    
+    simple_device->err_par[ 0 ] = 0;    
     }
 //-----------------------------------------------------------------------------
 int simple_error::save_to_stream( u_char *stream, char &is_new_state )
@@ -574,15 +577,18 @@ int simple_error::save_to_stream( u_char *stream, char &is_new_state )
         //[ .. ]
         //[ 62 ] - описание ошибки
         stream[ 0 ] = AT_DISCRETE;
-        unsigned char alarm_params = simple_device->err_par[ 0 ][ 0 ];
+        unsigned char alarm_params = simple_device->err_par[ 0 ];
 
         stream[ 1  ] = device::DE_IS_ENABLE == ( device::DE_IS_ENABLE & alarm_params );
         stream[ 2  ] = device::DE_IS_INHIBIT == ( device::DE_IS_INHIBIT & alarm_params );            
         stream[ 3  ] = device::DE_IS_SUPPRESS == ( device::DE_IS_SUPPRESS & alarm_params );            
         stream[ 4  ] = error_state;
         stream[ 5  ] = 0;
-        *( ( u_int_2 * ) ( stream + 6 ) ) = ( u_int_2 ) SE_PRIORITY;        
-        *( ( u_int_2 * ) ( stream + 8 ) ) = ( u_int_2 ) simple_device->get_n();
+
+        u_int_2 prior = SE_PRIORITY;
+        memcpy( stream + 6, &prior, sizeof( u_int_2 ) );
+        u_int_2 dev_n = simple_device->get_n();
+        memcpy( stream + 8, &dev_n, sizeof( u_int_2 ) );
 
         stream[ 10 ] = SE_ERROR_CODE;
         stream[ 11 ] = 0;
@@ -640,7 +646,7 @@ void simple_error::print() const
         }
     Print( "[ %5u ]", simple_device->get_n() );
     Print( ", state[ %3d ]", error_state );
-    Print( ", par[ %2.0f ]\n", simple_device->err_par[ 0 ][ 0 ] );
+    Print( ", par[ %d ]\n", simple_device->err_par[ 0 ] );
 
 #endif // DEBUG
     }
@@ -668,18 +674,18 @@ int simple_error::set_cmd( int cmd )
         {
         case BE_CMD_SUPPRESS:
             {            
-            int current_state = simple_device->err_par[ 0 ][ 0 ];
+            int current_state = simple_device->err_par[ 0 ];
             current_state |= device::DE_IS_SUPPRESS; 
-            simple_device->err_par[ 0 ][ 0 ] = current_state;
+            simple_device->err_par[ 0 ] = current_state;
             break;
             }
 
          case BE_CMD_UNSET_SUPPRESS:
              {
-             int current_state = simple_device->err_par[ 0 ][ 0 ];
+             int current_state = simple_device->err_par[ 0 ];
              current_state |= device::DE_IS_SUPPRESS; 
              current_state ^= device::DE_IS_SUPPRESS; 
-             simple_device->err_par[ 0 ][ 0 ] = current_state;
+             simple_device->err_par[ 0 ] = current_state;
              break;
              }
 
@@ -729,12 +735,17 @@ int dev_errors_manager::save_to_stream( u_char *stream )
 
     is_any_err = 0;
 
-    u_int_2 *answer_errors_id = ( u_int_2* ) stream;
-    u_int_2 *errors_cnt = ( u_int_2* ) stream + 1;
-    errors_cnt[ 0 ] = 0;
+    u_char *answer_errors_id = stream;
+    u_char *answer_errors_cnt = stream + 2;
+
+#ifdef DEBUG_DEV_CMCTR
+    Print( "Got here! 1234\n" );
+#endif // DEBUG_DEV_CMCTR
 
     int answer_size = 4;
     stream += answer_size;
+
+    u_int_2 errors_cnt = 0;
 
     for ( u_int i = 0; i < s_errors_vector.size(); i++ )
         {
@@ -751,10 +762,10 @@ int dev_errors_manager::save_to_stream( u_char *stream )
             {
             is_any_err = 1;
 
-            errors_cnt[ 0 ]++;
+            errors_cnt++;
             answer_size += res;
             stream += res;
-            if ( DEM_MAX_ERRORS_CNT <= errors_cnt[ 0 ] )
+            if ( DEM_MAX_ERRORS_CNT <= errors_cnt )
                 {
 #ifdef DEBUG
                 Print( "dev_errors_manager::save_to_stream(...) - max\
@@ -765,7 +776,8 @@ int dev_errors_manager::save_to_stream( u_char *stream )
             }
         }
 
-    *answer_errors_id = errors_id;
+    memcpy( answer_errors_id, &errors_id, sizeof( errors_id ) );
+    memcpy( answer_errors_cnt, &errors_cnt, sizeof( errors_cnt ) );
 
     return answer_size;
     }
@@ -838,6 +850,15 @@ void dev_errors_manager::set_cmd( unsigned int cmd, unsigned int object_type,
     //print();    
 #endif // DEBUG
 
+    }
+//-----------------------------------------------------------------------------
+dev_errors_manager::~dev_errors_manager()
+    {
+    for ( u_int i = 0; i < s_errors_vector.size(); i++ )
+        {
+        delete s_errors_vector.at( i );
+        s_errors_vector.at( i ) = 0;
+        }
     }
 //-----------------------------------------------------------------------------
 int dev_errors_manager::is_any_error() const

@@ -31,7 +31,10 @@ int wago_device::set_DO( u_int index, char value )
         }
 
 #ifdef DEBUG
-    Print( "wago_device->set_DO(...) - error!\n" );
+    Print( "wago_device->set_DO(...) - error! %d, %d, %d, %d\n",
+            index, DO_channels.count, ( int ) DO_channels.char_write_values,
+            ( int ) DO_channels.char_write_values[ index ] );
+    print();
 #endif // DEBUG
 
     return 1;
@@ -319,6 +322,8 @@ float wago_device::get_par( u_int index )
         index, params_count, ( int ) params );
 #endif // DEBUG
 
+    print();
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -532,7 +537,7 @@ void wago_device::IO_channels::init_channel( u_int ch_index, int node, int offse
         case CT_DO:
             char_read_values[ ch_index ] = wago_manager::get_instance()->
                 get_DO_read_data( tables[ ch_index ], offsets[ ch_index ] );
-            char_read_values[ ch_index ] = wago_manager::get_instance()->
+            char_write_values[ ch_index ] = wago_manager::get_instance()->
                 get_DO_write_data( tables[ ch_index ], offsets[ ch_index ] );
             break;
 
@@ -549,12 +554,14 @@ void wago_device::IO_channels::init_channel( u_int ch_index, int node, int offse
             break;
             }        
         }
+
+
     else
         {
 #ifdef DEBUG
         Print( "Error wago_device::IO_channels::init_channel - index out of bound!\n" );
 #endif // DEBUG
-        }
+        }   
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

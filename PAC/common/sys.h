@@ -57,8 +57,12 @@ void print_binary( u_int c );
 #if defined LINUX_OS
 #include <time.h>
 
-#define print_time printf( "%02lu:%02lu:%02lu ", ( time( 0 ) / 3600 ) % 24, \
-    ( time( 0 ) / 60 ) % 60, time( 0 ) % 60 ); printf
+extern time_t g_t;
+//#define print_time g_t = time( 0 ); Print( "%s ", asctime( localtime( &g_t ) ) ); Print
+#define print_time g_t = time( 0 ); Print( "%02lu:%02lu:%02lu ", localtime( &g_t )->tm_hour, \
+localtime( &g_t )->tm_min, localtime( &g_t )->tm_sec ); Print
+
+//#define print_time Print( "%02lu:%02lu:%02lu ", ( time( 0 ) / 3600 ) % 24, ( time( 0 ) / 60 ) % 60, time( 0 ) % 60 ); Print
 
 #define Print printf
 

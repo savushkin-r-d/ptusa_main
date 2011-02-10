@@ -24,7 +24,7 @@
 #define debug_break _asm { int 3 }
 #endif
 //-----------------------------------------------------------------------------
-size_t strlcpy( char *dst, const char *src, size_t siz );
+size_t strlcpy_( char *dst, const char *src, size_t siz );
 //-----------------------------------------------------------------------------
 /// @brief Защищенная работа с указателем.
 ///
@@ -69,7 +69,7 @@ template < class type > class smart_ptr
                 debug_break;
     #endif // PAC_PC
 
-                printf( "smart_ptr - pointer is NULL!\n" );
+                Print( "smart_ptr - pointer is NULL!\n" );
     #endif // DEBUG
                 }
 
@@ -82,7 +82,7 @@ template < class type > class smart_ptr
             if ( pointer == NULL )
                 {
     #ifdef DEBUG
-                printf( "smart_ptr - dereferencing NULL!\n" );
+                Print( "smart_ptr - dereferencing NULL!\n" );
 
     #ifdef PAC_PC
                 debug_break;

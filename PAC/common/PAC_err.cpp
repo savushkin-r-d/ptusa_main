@@ -157,7 +157,7 @@ int PAC_critical_errors_manager::save_to_stream( char *buff )
     {
     int answer_size = 0;
 
-    *( ( unsigned int* ) buff ) = errors_id;
+    memcpy( buff, &errors_id, sizeof( errors_id ) );
     buff += 2;
     answer_size += 2;
     unsigned char *erros_cnt = ( unsigned char* ) buff;

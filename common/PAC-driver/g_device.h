@@ -165,6 +165,163 @@ class i_simple_device: public i_device,
             }
     };
 //-----------------------------------------------------------------------------
+/// @brief Шаблон класса, который используется для передачи состояния устройств,
+/// которые представляются массивом некоторого типа.
+//
+/// Например: параметры, состояния и т.д.
+template < class data_type > class array_device: public i_simple_device
+    {
+    public:
+        /// @param n        - номер.
+        /// @param new_name - имя.
+        /// @param new_subdev_cnt - количество элементов в массиве.
+        /// @param type     - тип. Для сохранения устройств и передачи на
+        /// сервер.
+        array_device( u_int_4 n,
+            const char *new_name,
+            u_int_2 new_subdev_cnt,
+            char type ): sub_dev_cnt( new_subdev_cnt ),
+            type( type ),
+            n( n )
+            {
+            name = new char[ strlen( new_name ) + 1 ];
+            strcpy( name, new_name );
+
+            prev_val = new data_type[ sub_dev_cnt ];
+            for ( unsigned int i = 0; i < sub_dev_cnt; i++ )
+                {
+                prev_val[ i ] = 0;
+                }
+            }
+
+        virtual ~array_device()
+            {
+            delete [] name;
+            name = 0;
+
+            delete [] prev_val;
+            prev_val = 0;
+            }
+
+        /// @brief Сохранение устройства в байтовый поток.
+        ///
+        /// Для передачи устройства на сервер.
+        ///
+        /// @param buff [out] - указатель на байтовый буфер, куда будет
+        /// произведено сохранение устройства.
+        ///
+        /// @return - количество сохраненных байт.
+        int  save_device( char *buff )
+            {
+            // Данные группы (buff) в следующем виде:
+            //    1 байт  - тип;                                (1)
+            //    4 байта - номер;                              (2)
+            //    1 байт  - длина имени группы устройства;      (3)
+            //    х байт  - имя группы устройства;              (4)
+            //    4 байта - количество подустройств;            (5)
+
+            u_int_2 idx = 0;
+
+            buff[ idx++ ] = type;                               //(1)
+            memcpy( buff + idx, &n, sizeof( n ) );              //(2)
+            idx += sizeof( n );
+            buff[ idx++ ] = strlen( name );                     //(3)
+            strcpy( buff + idx, name );                         //(4)
+            idx += strlen( name ) + 1;
+            memcpy( buff + idx, &sub_dev_cnt, sizeof( sub_dev_cnt ) );  //(5)
+            idx += sizeof( sub_dev_cnt );
+
+            return idx;
+            }
+
+        /// @brief Сохранение состояния устройства в байтовый поток.
+        ///
+        /// Для передачи состояния устройства на сервер.
+        ///
+        /// @param buff [out] - указатель на байтовый буфер, куда будет
+        /// произведено сохранение состояния устройства.
+        ///
+        /// @return - количество сохраненных байт.
+        int  save_state( char *buff )
+            {
+            // Данные группы (buff) в следующем виде:
+            //  4 байта - номер устройства;                     (1)
+            //  4 байта - количество подустройств;              (2)
+            //  далее   - данные каждого подустройства.
+            u_int_2 answer_size = 0;
+            memcpy( buff + answer_size, &n, sizeof( n ) );                    //(1)
+            answer_size += sizeof( n );
+            memcpy( buff + answer_size, &sub_dev_cnt, sizeof( sub_dev_cnt ) );//(2)
+            answer_size += sizeof( sub_dev_cnt );
+
+            for ( u_int_4 i = 0; i < sub_dev_cnt; i++ )
+                {
+                data_type val = get_val( i );
+                memcpy( buff + answer_size, &val, sizeof( val ) );
+
+                prev_val[ i ] = val;
+                answer_size += sizeof( data_type );
+                }
+
+            return answer_size;
+            }
+
+        /// @brief Сохранение изменившегося состояния устройства в байтовый поток.
+        ///
+        /// Для передачи состояния устройства на сервер.
+        ///
+        /// @param buff [out] - указатель на байтовый буфер, куда будет
+        /// произведено сохранение состояния устройства.
+        ///
+        /// @return - количество сохраненных байт.
+        int  save_changed_state( char *buff )
+            {
+            return 0;
+            }
+
+        /// @brief Получение значения элемента через индекс.
+        ///
+        /// Это значение потом, например, может используется для сохранения
+        /// объекта в поток ( @ref save_state ).
+        ///
+        /// @param idx - индекс элемента.
+        ///
+        /// @return - значение элемента с заданным индексом.
+        virtual data_type get_val( int idx ) = 0;
+
+        /// @brief Вывод объекта в консоль.
+        ///
+        /// Для использования в отладочных целях.
+        void print() const
+            {
+            char tmp_str[ 100 ];
+
+            if ( strlen( name ) < 8 )
+                {
+                sprintf( tmp_str, "\"%s\", \t\t[ %3lu ]",
+                    name, ( unsigned long int ) sub_dev_cnt );
+                }
+            else sprintf( tmp_str, "\"%s\", \t[ %3lu ]",
+                name, ( unsigned long int ) sub_dev_cnt );
+
+            print_str( tmp_str );
+            }
+
+        /// @brief Реализация-заглушка интерфейса класса @ref i_simple_device.
+        u_int_4 get_n() const
+            {
+            return 0;
+            }
+
+    protected:
+        u_int_4         sub_dev_cnt;    ///< Количество подустройств.
+        char            *name;          ///< Имя.
+        char            type;           ///< Тип.
+        u_int_4         n;              ///< Уникальный номер.
+
+        data_type*      prev_val;       ///< Массив предыдущих значений.
+    };
+//-----------------------------------------------------------------------------
 /// @brief Интерфейс сложного устройства. Оно состоит из групп простых
 /// устройств.
 class i_complex_device: public i_simple_device

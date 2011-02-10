@@ -26,6 +26,21 @@ PAC_info::PAC_info() :
     com_dev->sub_dev[ 6 ] = par;
     }
 //-----------------------------------------------------------------------------
+PAC_info::~PAC_info()
+    {
+    delete com_dev->sub_dev[ 0 ];
+    delete com_dev->sub_dev[ 1 ];
+    delete com_dev->sub_dev[ 2 ];
+    delete com_dev->sub_dev[ 3 ];
+    delete com_dev->sub_dev[ 4 ];
+
+    delete com_dev;
+    com_dev = 0;
+
+    delete par;
+    par = 0;
+    }
+//-----------------------------------------------------------------------------
 void PAC_info::eval()
     {
     if ( get_delta_millisec( last_check_time ) > 1000 )

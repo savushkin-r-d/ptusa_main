@@ -23,6 +23,10 @@
 #include <vector>
 
 #include "sys.h"
+
+#ifdef LINUX_OS
+#include "sys_linux.h"
+#endif
 //-----------------------------------------------------------------------------
 enum ERRORS_CLASS
     {
@@ -143,7 +147,7 @@ class PAC_critical_errors_manager
 
         std::vector< critical_error >  errors;
 
-        u_int errors_id;
+        u_int_2 errors_id;
         int   global_ok;
 
         auto_smart_ptr< led > wago_led;

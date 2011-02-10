@@ -253,10 +253,10 @@ void tech_object::lua_init_mode( u_int mode )
 //-----------------------------------------------------------------------------
 int tech_object::lua_evaluate()
     {
-    tech_object::evaluate();
+    //return lua_manager::get_instance()->void_exec_lua_method( name,
+    //    "evaluate", "int tech_object::lua_evaluate()" );
 
-    return lua_manager::get_instance()->void_exec_lua_method( name,
-        "evaluate", "int tech_object::lua_evaluate()" );
+    return 0;
     }
 //-----------------------------------------------------------------------------
 int tech_object::lua_check_off_mode( u_int mode )
@@ -344,7 +344,9 @@ tech_object* tech_object_manager::get_tech_objects( u_int idx )
         }
     catch (...)
         {
-        debug_break;    
+#ifdef PAC_PC
+        debug_break;
+#endif // PAC_PC
 
         return 0;
         }   
@@ -360,15 +362,23 @@ void tech_object_manager::evaluate()
     {
     for ( u_int i = 0; i < tech_objects.size(); i++ )
         {
-        tech_objects.at( i )->lua_evaluate();
+        tech_objects.at( i )->evaluate();
         }
+
+    static int call_count = 0;
+    ++call_count;
+
+    if ( call_count > 2 )
+        {
+        lua_getfield( lua_manager::get_instance()->L, LUA_GLOBALSINDEX, "eval" );
+        lua_call( lua_manager::get_instance()->L, 0, 0 );
+        call_count = 0;
+        }
+    
     }
 //-----------------------------------------------------------------------------
 int tech_object_manager::init_objects()
     {
-     Print( "init ok\n" ) ;
-
-
     int res = lua_manager::get_instance()->int_exec_lua_method( "object_manager",
         "get_objects_count", 0, "int tech_object_manager::init_objects()" );
     if ( res < 0 )
@@ -376,8 +386,6 @@ int tech_object_manager::init_objects()
         Print( "Fatal error!\n" );
         exit( 1 );
         }
-
-    Print( "init ok\n" ) ;
 
     int objects_count = res;
     for ( int i = 1; i <= objects_count; i++ )

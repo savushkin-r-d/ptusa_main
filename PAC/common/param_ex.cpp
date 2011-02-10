@@ -79,17 +79,17 @@ int params_manager::init( unsigned int project_id )
     int chk = check_CRC();
     if ( 0 == chk ) 
         {
-#ifdef DEBUG
-        Print( "PARAMS OK. PARAMS LOADED.\n\r" );
-#endif
+//#ifdef DEBUG
+        Print( "PARAMS OK. PARAMS LOADED.\n" );
+//#endif
         loaded = 1;
         } 
     else 
         {
-#ifdef DEBUG
+//#ifdef DEBUG
         Print( "Project id = %u. PARAMS CRC CHECK FAILED: Trying to reinitialize...\n\r", 
             project_id );
-#endif
+//#endif
         loaded = -1;
         }
     return chk;
@@ -114,11 +114,11 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
                                 int auto_init_work_params /*= 1*/, 
                                 void ( *custom_init_params_function )() /*= 0 */ )
     {
-#ifdef DEBUG
+//#ifdef DEBUG
     Print( "Total memory used: %u of %u bytes[ %.2f%c ]. \n",
         last_idx, C_TOTAL_PARAMS_SIZE, 
         100. * last_idx / C_TOTAL_PARAMS_SIZE, '%' );
-#endif // DEBUG
+//#endif // DEBUG
 
     if ( -1 == loaded )
         {
@@ -145,12 +145,11 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
 #endif // USE_NO_TANK_COMB_DEVICE 
             }
 
-
         g_PAC_system->reset_params();
 
         save();
 
-#ifdef DEBUG
+//#ifdef DEBUG
         if ( check_CRC() == 0 )
             {
             Print( "PARAMS OK: PARAMS SUCCESFULLY REINITIALIZED.\n" );
@@ -164,7 +163,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
         get_char();
         Print( "\n" );
 #endif // KEY_CONFIRM
-#endif // DEBUG
+//#endif // DEBUG
         }
     else
         {

@@ -15,6 +15,7 @@
 #define _PID_H
 
 #include "param_ex.h"
+#include "PAC_dev.h"
 #include "util.h"
 #include "sys.h"
 

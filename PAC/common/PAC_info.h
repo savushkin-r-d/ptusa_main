@@ -10,6 +10,8 @@ class PAC_info
     public:
         PAC_info();
 
+        ~PAC_info();
+
         void eval();
 
         complex_device  *com_dev;

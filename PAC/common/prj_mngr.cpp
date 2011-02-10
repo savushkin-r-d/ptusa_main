@@ -85,8 +85,10 @@ int project_manager::lua_load_configuration()
     lua_manager::get_instance()->void_exec_lua_method( "system", 
         "init_wago", "lua_load_configuration" );
 
+#ifdef DEBUG
     wago_manager::get_instance()->print();
-
+#endif // DEBUG
+    
     //-Devices data.    
     lua_manager::get_instance()->void_exec_lua_method( "system", 
         "init_devices", "lua_load_configuration" );
