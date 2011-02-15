@@ -369,8 +369,8 @@ class digital_device : public device,
 
         int save_device( char *buff, const char *prefix )
             {	
-			sprintf( buff, "%s[%d]={st=%d, ptr=%d},\n", 
-				prefix, get_n(),  get_state(), ( i_cmd_device* ) this );
+			sprintf( buff, "%s[%d]={st=%d},\n", 
+				prefix, get_n(),  get_state() );
 
             return strlen( buff );
             }

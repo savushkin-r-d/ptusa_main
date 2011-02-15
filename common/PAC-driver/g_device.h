@@ -54,16 +54,6 @@ class i_Lua_save_device
         virtual int save_device( char *buff ) = 0; 
 
 		virtual void print() const = 0;
-
-		virtual int parse_cmd( char* cmd ) 
-			{
-			return 0;
-			}
-
-		void save_ptr( char *buff )
-			{
-			sprintf( buff, "ptr=%d,", this );
-			}    
     };
 
 class i_cmd_device    
