@@ -6,37 +6,18 @@ const u_int_4 PAC_info::MSEC_IN_DAY = 24UL * 60UL * 60UL * 1000UL;
 PAC_info::PAC_info() :
     par( new saved_params_u_int_4( P_PARAMS_COUNT ) ),
     up_days( 0 ),
-    up_msec( 0 ),        
+    up_hours( 0 ),
+    up_mins( 0 ),
+    up_secs( 0 ),
+    up_msec( 0 ),    
     last_check_time( get_millisec() ),
-    reset_type( 1 ), //+ IsResetByWatchDogTimer()
-    str_datatime( 1, "UP_TIME", up_time_str, C_MAX_STR_LENGTH )    
-    {
-    com_dev = new complex_device( 1, "SYSTEM", 7, i_complex_device::COMPLEX_DEV );
-    com_dev->sub_dev[ 0 ] = new var_state( "UP_DAYS",
-        i_complex_device::ARRAY_DEV_LONG, up_days );
-    com_dev->sub_dev[ 1 ] = new var_state( "UP_HOURS",
-        i_complex_device::ARRAY_DEV_LONG, up_hours );
-    com_dev->sub_dev[ 2 ] = new var_state( "UP_MINS",
-        i_complex_device::ARRAY_DEV_LONG, up_mins );
-    com_dev->sub_dev[ 3 ] = new var_state( "UP_SECS",
-        i_complex_device::ARRAY_DEV_LONG, up_secs );    
-    com_dev->sub_dev[ 4 ] = new var_state( "RESET_BY",
-       i_complex_device::ARRAY_DEV_LONG, reset_type );
-    com_dev->sub_dev[ 5 ] = &str_datatime;
-    com_dev->sub_dev[ 6 ] = par;
+    reset_type( 1 ) //+ IsResetByWatchDogTimer()    
+    {  
+    strncpy( up_time_str, "0 дн. 0:0:0", sizeof( up_time_str ) );
     }
 //-----------------------------------------------------------------------------
 PAC_info::~PAC_info()
     {
-    delete com_dev->sub_dev[ 0 ];
-    delete com_dev->sub_dev[ 1 ];
-    delete com_dev->sub_dev[ 2 ];
-    delete com_dev->sub_dev[ 3 ];
-    delete com_dev->sub_dev[ 4 ];
-
-    delete com_dev;
-    com_dev = 0;
-
     delete par;
     par = 0;
     }
@@ -67,6 +48,62 @@ void PAC_info::reset_params()
     {
     par[ 0 ] [ P_CTR_ERROR_TIME ] = 10000;
     par->save_all();
+    }
+//-----------------------------------------------------------------------------
+int PAC_info::save_device( char *buff )
+    {
+    //sprintf( buff, "t.SYSTEM=t.SYSTEM or {}\n" );
+    //int answer_size = strlen( buff );
+
+    //sprintf( buff + answer_size, "t.SYSTEM.RESET_BY=%d\n", reset_type );
+    //answer_size += strlen( buff + answer_size );
+
+    //sprintf( buff + answer_size, "t.SYSTEM.UP_DAYS=%d\n", up_days );
+    //answer_size += strlen( buff + answer_size );
+
+    //sprintf( buff + answer_size, "t.SYSTEM.UP_HOURS=%d\n", up_hours );
+    //answer_size += strlen( buff + answer_size );
+
+    //sprintf( buff + answer_size, "t.SYSTEM.UP_MINS=%d\n", up_mins );
+    //answer_size += strlen( buff + answer_size );
+
+    //sprintf( buff + answer_size, "t.SYSTEM.UP_SECS=%d\n", up_secs );
+    //answer_size += strlen( buff + answer_size );
+
+    //sprintf( buff + answer_size, "t.SYSTEM.UP_TIME=t.SYSTEM.UP_TIME or {}; t.SYSTEM.UP_TIME.v=\"%s\"\n", 
+    //    up_time_str );
+    //answer_size += strlen( buff + answer_size );
+
+    //answer_size += par->save_device( buff + answer_size, "t.SYSTEM." );
+
+    sprintf( buff, "t.SYSTEM = \n\t{\n" );
+    int answer_size = strlen( buff );
+
+    sprintf( buff + answer_size, "\tRESET_BY=%d,\n", reset_type );
+    answer_size += strlen( buff + answer_size );
+
+    sprintf( buff + answer_size, "\tUP_DAYS=%d,\n", up_days );
+    answer_size += strlen( buff + answer_size );
+
+    sprintf( buff + answer_size, "\tUP_HOURS=%d,\n", up_hours );
+    answer_size += strlen( buff + answer_size );
+
+    sprintf( buff + answer_size, "\tUP_MINS=%d,\n", up_mins );
+    answer_size += strlen( buff + answer_size );
+
+    sprintf( buff + answer_size, "\tUP_SECS=%d,\n", up_secs );
+    answer_size += strlen( buff + answer_size );
+
+    sprintf( buff + answer_size, "\tUP_TIME=\"%s\",\n", 
+        up_time_str );
+    answer_size += strlen( buff + answer_size );
+
+    answer_size += par->save_device( buff + answer_size, "\t" );
+
+    sprintf( buff + answer_size, "\t}\n" );
+    answer_size += strlen( buff );
+
+    return answer_size;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

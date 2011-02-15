@@ -35,244 +35,6 @@
 #define ON      1
 
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//ОБЩЕЕ ОПИСАНИЕ.
-//  Служит для представления состояния сложных объектов (танк, гребенка).
-template < class data_type > class device_state:
-public array_device < data_type >
-    {
-    public:
-        enum OBJECT_TYPE
-            {
-            T_TECH_OBJECT = 1,
-            T_PID,
-            T_CNTR,
-            T_MNGR,
-            T_PACK_DEVICE,
-            T_F_DEVICE,
-            T_MSA,
-
-            T_PATH_COMB,   //Гребенка маршрутов.
-            };
-
-        device_state( u_int_4 n,
-            const char *new_name,
-            u_int_2 new_subdev_cnt,
-            char type,
-            u_int_4 *state,
-            void *owner_object,
-            char owner_type ):
-        array_device < data_type >( n,
-            new_name,
-            new_subdev_cnt,
-            type ),                                       
-            state( state ),
-            owner_object( owner_object ),
-            owner_type( owner_type )
-            {
-            }
-
-        virtual ~device_state()
-            {
-            }
-
-    protected:
-        u_int_4     *state;
-        void        *owner_object;
-        char        owner_type;
-    };
-//-----------------------------------------------------------------------------
-//ОБЩЕЕ ОПИСАНИЕ.
-//  Служит для представления состояния сложных объектов (танк, гребенка).
-//  Каждый режим передается через 1 байт.
-class single_state: public device_state < char >
-    {
-    public:
-        single_state( const char *name, int n, u_int_4 *state,
-            void *owner_object, char owner_type, int size ):
-        device_state < char >( n, name, size,
-            i_complex_device::ARRAY_DEV_BYTE,
-            state,
-            owner_object,
-            owner_type )
-            {
-            }
-
-        virtual ~single_state()
-            {            
-            }
-
-        char get_val( int idx );
-        int  parse_cmd( char *buff  );
-    };
-//-----------------------------------------------------------------------------
-//ОБЩЕЕ ОПИСАНИЕ.
-//  Служит для представления состояния сложных объектов (танк, гребенка).
-//  Каждые 32 режима передаются как одно слово (4 байта).
-class complex_state: public device_state < u_int_4 >
-    {
-    public:
-        complex_state( const char *name, int n, u_int_4 *state,
-            void *owner_object, char owner_type, int size = 1 );
-
-        virtual ~complex_state()
-            {
-            }
-
-        u_int_4 get_val( int idx );
-        int     parse_cmd( char *buff  );
-    };
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//ОБЩЕЕ ОПИСАНИЕ.
-//  Шаблон класса, который используется для передачи строк.
-class string_device: public i_simple_device
-    {
-    protected:
-        char    *name;          // Имя.
-        u_int_4 n;              // Уникальный номер.
-        char    *str;           // Строка.
-        int     max_str_len;    // Максимальная длина строки, для set_value().
-
-    public:
-        string_device( u_int_4 n, const char *new_name, char* str, int max_str_len );
-
-        virtual ~string_device()
-            {
-            delete [] name;
-            name = 0;
-            }
-
-        int  save_device( char *buff );
-        int  save_state( char *buff );
-        int  save_changed_state( char *buff );
-
-        void    print() const;
-        u_int_4 get_n() const;
-
-        int     parse_cmd( char *buff  );
-    };
-//-----------------------------------------------------------------------------
-//ОБЩЕЕ ОПИСАНИЕ.
-//  Состояние переменной с определенным именем.
-class var_state:public i_simple_device
-    {    
-    public:
-        var_state( const char *new_name, char type,
-            u_int_4 &var ):var( var ),
-            type( type )
-            {            
-            strlcpy_( name, new_name, C_MAX_NAME_LENGTH );
-            }
-
-        virtual ~var_state()
-            {
-            }
-
-        int parse_cmd( char *buff  )
-            {
-            memcpy( &var, buff + 4, sizeof( u_int_4 ) );
-            return 4 + 4;
-            }
-
-        int save_device( char *buff )
-            {
-            // Данные группы (buff) в следующем виде:
-            //    1 байт  - тип;                              (1)
-            //    4 байта - номер;                            (2)
-            //    1 байт  - длина имени группы устройства;    (3)
-            //    х байт  - имя группы устройства;            (4)
-            //    4 байта - количество подустройств;          (5)
-            u_int_2 idx = 0;
-
-            buff[ idx++ ] = type;                             //(1)
-
-            const u_int_4 DEV_CONST = 1;
-            memcpy( buff + idx, &DEV_CONST, sizeof( DEV_CONST ) ); //(2)
-            idx += 4;
-
-            buff[ idx++ ] = strlen( name );                   //(3)              
-            strcpy( buff + idx, name );                       //(4)
-            idx += strlen( name ) + 1;
-
-            memcpy( buff + idx, &DEV_CONST, sizeof( DEV_CONST ) ); //(5)
-            idx += 4;           
-
-            return idx;
-            }
-
-        int save_state( char *buff )
-            {
-            // Данные группы (buff) в следующем виде:
-            //  4 байта - номер устройства;           (1)
-            //  4 байта - количество подустройств;    (2)
-            //  4 байта - данные переменной.          (3)  
-
-            const u_int_4 DEV_CONST = 1;
-            memcpy( buff, &DEV_CONST, sizeof( DEV_CONST ) );     //(1)
-            memcpy( buff + 4, &DEV_CONST, sizeof( DEV_CONST ) ); //(2
-
-            memcpy( buff + 4 + 4, &var, sizeof( var ) );          //(3)
-            return 4 + 4 + 4;
-            }
-
-        int save_changed_state( char *buff )
-            {
-            return save_state( buff );
-            }
-
-        void print() const
-            {
-            char tmp_str[ 100 ];    
-            sprintf( tmp_str, "\"%s\" ", name );
-
-            print_str( tmp_str );
-            }
-
-        u_int_4 get_n() const
-            {
-            return 1;
-            }
-
-        int load_state( char *buff )
-            {
-            buff++;
-            return 0;
-            }
-
-        int load_changed_state( char *buff )
-            {
-            buff++;
-            return 0;
-            }
-
-        int load_device( char *buff )
-            {
-            buff++;
-            return 0;
-            }
-
-        u_int_4 get_idx()
-            {
-            return 1;
-            }
-
-        void set_idx( u_int_4 new_idx )
-            {
-            new_idx++;
-            }
-
-    private:
-        enum CONSTANTS
-            {
-            C_MAX_NAME_LENGTH = 20,
-            };
-
-        u_int_4 &var;
-        char    type;
-        char    name[ C_MAX_NAME_LENGTH ];          //Имя.
-    };
-//-----------------------------------------------------------------------------
 /// @brief Интерфейс счетчика.
 class i_counter
     {
@@ -405,11 +167,33 @@ class i_AO_device: public i_AI_device
 //-----------------------------------------------------------------------------
 /// @brief Класс универсального простого устройства, который используется в 
 /// режимах.
-class device : public i_simple_device,    
-    public i_AO_device,    
-    public i_DO_device
+class device : public i_AO_device,    
+    public i_DO_device, public i_cmd_device
     {
     public:
+        int set_cmd( const char *prop, u_int idx, double val ) 
+            {
+            if ( strcmp( prop, "st" ) == 0 )
+                {
+                set_state( ( int ) val );
+                }
+
+            if ( strcmp( prop, "v" ) == 0 )
+                {
+                set_value( ( float ) val );
+                }
+            
+            return 0;
+            }
+
+        virtual int save_device( char *buff, const char *prefix )
+            {
+            sprintf( buff, "%s[%d]={st=%d, v=%.2f},\n", 
+                prefix, get_n(),  get_state(), get_value() );
+
+            return strlen( buff );
+            }
+
         //-Ошибки.
         saved_params_u_int_4 err_par;
 
@@ -419,11 +203,6 @@ class device : public i_simple_device,
             DE_IS_INHIBIT = 2, ///< Блокировка тревоги во время работы.    
             DE_IS_SUPPRESS = 4,///< Подавление тревоги клиентами.
             };
-
-        const char * get_name() const
-            {
-            return "";
-            }
         //-Ошибки.!->
 
         enum CONSTANTS
@@ -486,28 +265,29 @@ class device : public i_simple_device,
             {           
             }
 
+        char *get_name() const
+            {
+            return "";
+            }
+
         /// @brief Выключение устройства.
         ///
         /// Установка устройства в пассивное состояние. Для клапана это означает
         /// его деактивирование, то есть если он нормально закрытый - закрытие.
         virtual void off() = 0;
 
-        /// @brief Сохранение самого устройства в буфер.
-        ///
-        /// @param buff - буфер для сохранения устройства.
-        ///
-        /// @return -  количество записанных байт.
-        int save_device( char *buff );
-
         /// @brief Вывод объекта в консоль.
         ///
         /// Для использования в отладочных целях.
-        void print() const;
+        virtual void print() const;
 
         /// @brief Получение номера устройства.
         ///
         /// @return -  номер устройства.
-        u_int_4 get_n() const;
+        u_int_4 get_n() const
+            {
+            return number;
+            }
 
         /// @brief Получение типа устройства.
         int get_type() const
@@ -528,89 +308,6 @@ class device : public i_simple_device,
         DEVICE_SUB_TYPE sub_type;   ///< Подтип устройства.
     }; 
 //-----------------------------------------------------------------------------
-/// @brief Устройство, для хранения состояния которого необходим один байт.
-///
-/// Это клапаны, насосы, мешалки, обратные связи и т.д.
-class char_state_device
-    {
-    public:
-        /// @brief Сохранение измененного состояния устройства в буфер.
-        ///
-        /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
-        ///
-        /// @return >= 0 - количество записанных байт.
-        int save_changed_state( char *buff );
-
-        /// @brief Сохранение состояния устройства в буфер.
-        ///
-        /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
-        ///        
-        /// @return >= 0 - количество записанных байт.
-        int save_state( char *buff  );
-
-        /// @brief Получение состояния устройства.
-        virtual int get_state() = 0;
-
-    private:
-        char prev_state;    ///< Предыдущее состояние устройства.
-    };
-//-----------------------------------------------------------------------------
-/// @brief Устройство, для хранения состояния которого необходимо без знаковое
-/// целое размером 4 байта.
-///
-/// Например счетчик.
-class u_int_4_state_device
-    {
-    public:
-        /// @brief Сохранение измененного состояния устройства в буфер.
-        ///
-        /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
-        ///
-        /// @return >= 0 - количество записанных байт.
-        virtual int save_changed_state( char *buff );
-
-        /// @brief Сохранение состояния устройства в буфер.
-        ///
-        /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
-        ///        
-        /// @return >= 0 - количество записанных байт.
-        virtual int save_state( char *buff );
-
-        /// @brief Получение состояния устройства.
-        virtual u_int_4 get_u_int_4_state() = 0;
-
-    private:
-        u_int_4 prev_state;    ///< Предыдущее состояние устройства.
-    };
-//-----------------------------------------------------------------------------
-/// @brief Устройство, для хранения состояния которого необходимо дробное число
-/// размером 4 байта.
-///
-/// Например температура.
-class float_state_device
-    {
-    public:
-        /// @brief Сохранение измененного состояния устройства в буфер.
-        ///
-        /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
-        ///
-        /// @return >= 0 - количество записанных байт.
-        virtual int save_changed_state( char *buff );
-
-        /// @brief Сохранение состояния устройства в буфер.
-        ///
-        /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
-        ///        
-        /// @return >= 0 - количество записанных байт.
-        virtual int save_state( char *buff );
-
-        /// @brief Получение состояния устройства.
-        virtual float get_value() = 0;
-
-    private:
-        float prev_state;    ///< Предыдущее состояние устройства.
-    };
-//-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство.
 ///
 /// Необходимо для возвращения результата поиска устройства с несуществующим
@@ -623,10 +320,6 @@ class dev_stub : public device,
             {
             }
 
-        int     save_state( char *buff );        
-        int     save_changed_state( char *buff );
-        int     save_device( char *buff );
-
         u_int_4 get_n() const;                
         void    print() const;                
 
@@ -638,8 +331,6 @@ class dev_stub : public device,
         void    set_state( int new_state );
         int     get_state_now();
 
-        int     parse_cmd( char *buff );
-
         void    pause();
         void    start();
         void    reset();        
@@ -649,8 +340,7 @@ class dev_stub : public device,
 /// @brief Устройство с дискретными входами/выходами.
 ///
 /// Базовый класс для различных дискретных устройств.
-class digital_device : public device,
-    public char_state_device,
+class digital_device : public device,  
     public wago_device
     {
     public:
@@ -666,14 +356,24 @@ class digital_device : public device,
             {
             }
 
+		int parse_cmd( char* cmd ) 
+			{
+			int val = 0;
+			return 4;
+			}
+
         float   get_value();
         void    set_value( float new_value );
         void    set_state( int new_state );  
-        int     parse_cmd( char *buff );                        
         void    print() const;
 
-        int save_changed_state( char *buff );
-        int save_state( char *buff );                
+        int save_device( char *buff, const char *prefix )
+            {	
+			sprintf( buff, "%s[%d]={st=%d, ptr=%d},\n", 
+				prefix, get_n(),  get_state(), ( i_cmd_device* ) this );
+
+            return strlen( buff );
+            }
 
 #ifdef DEBUG_NO_WAGO_MODULES
         /// @brief Получение мгновенного состояния объекта.        
@@ -702,8 +402,7 @@ class digital_device : public device,
 /// @brief Устройство с аналоговыми входами/выходами.
 ///
 /// Базовый класс для различных аналоговых устройств.
-class analog_device : public device,
-    public float_state_device,
+class analog_device : public device,   
     public wago_device
     {
     public:
@@ -718,11 +417,18 @@ class analog_device : public device,
 
         void  set_state( int new_state );
         int   get_state_now();
-        int   parse_cmd( char *buff );
         
         void  print() const;
         void  on();        
         void  off();
+
+        int save_device( char *buff, const char *prefix )
+            {
+            sprintf( buff, "%s[%d]={v=%.2f},\n", 
+                prefix, get_n(), get_value() );
+
+            return strlen( buff );
+            }
 
 #ifdef DEBUG_NO_WAGO_MODULES
         float get_value();
@@ -734,8 +440,6 @@ class analog_device : public device,
 
 #endif // DEBUG_NO_WAGO_MODULES
 
-        int save_changed_state( char *buff );
-        int save_state( char *buff );
 
 #ifdef DEBUG_NO_WAGO_MODULES
     private:
@@ -1246,8 +950,7 @@ class control_s : public DO_1
 //-----------------------------------------------------------------------------
 /// @brief Счетчик.
 class counter : public device,
-    public i_counter,
-    public u_int_4_state_device,
+    public i_counter,   
     public wago_device
     {
     public:
@@ -1267,13 +970,7 @@ class counter : public device,
         void  on();
         void  off();
         void  set_state( int new_state );
-        int   parse_cmd( char *buff  );
         void  print() const;
-
-        u_int_4 get_u_int_4_state();
-
-        int save_changed_state( char *buff );
-        int save_state( char *buff );
 
         void  pause();
         void  start();
@@ -1304,7 +1001,7 @@ class counter : public device,
 /// @brief Менеджер устройств.
 ///
 /// Содержит информацию обо всех устройствах проекта.
-class device_manager
+class device_manager: public i_Lua_save_device
     {
     public:
         device_manager();
@@ -1365,22 +1062,41 @@ class device_manager
         /// @brief Установка единственного экземпляра класса.
         static void set_instance( device_manager* new_instance );
 
-        /// @brief Получение всех простых устройств, для передачи на сервер.
-        complex_device * get_communication_device()
-            {
-            return devices;
-            }
-
         /// @brief Получение фиктивного устройства.
         dev_stub* get_stub()
             {
             return &stub;
             }
 
-    protected:
-        /// Все простые устройства, для передачи на сервер.
-        complex_device *devices;
+        int save_device( char *buff )
+            {
+            sprintf( buff, "t=t or {}\n\r" );
+            int answer_size = strlen( buff );
 
+            for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++)
+                {
+                sprintf( buff + answer_size, "t.%s=\n\t{\n", device::DEV_NAMES[ i ] );
+                answer_size += strlen( buff + answer_size );
+
+                int l = dev_types_ranges[ i ].start_pos;
+                int u = dev_types_ranges[ i ].end_pos;
+
+                if ( -1 != l ) // Есть устройства.
+                    {
+                    for ( int j = l; j <= u; j++ )
+                        {
+                        answer_size += project_devices[ j ]->save_device( buff + answer_size, "\t");
+                        }
+                    }
+
+                sprintf( buff + answer_size, "\t}\n" );
+                answer_size += strlen( buff + answer_size );
+                }
+
+            return answer_size;
+            }
+
+    protected:
         dev_stub stub;  ///< Устройство-заглушка, фиктивное устройство. 
 
         struct range    ///< Диапазон устройств одного типа. 
@@ -1409,33 +1125,6 @@ class device_manager
 
         void complete_init()
             {
-            devices = new complex_device( 0, "GLB", device::C_DEVICE_TYPE_CNT, 0 );
-
-            for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
-                {
-                int dev_cnt = dev_types_ranges[ i ].end_pos -
-                    dev_types_ranges[ i ].start_pos + 1;
-
-                if ( dev_types_ranges[ i ].start_pos == -1 )
-                    {
-                    dev_cnt = 0;
-                    }
-
-                devices->sub_dev[ i ] =
-                    new complex_device( 0, device::DEV_NAMES[ i ], dev_cnt,
-                    device::DEV_TYPES[ i ] );
-
-                if ( dev_cnt )
-                    {
-                    int pos = 0;
-                    for ( int j = dev_types_ranges[ i ].start_pos;
-                        j <= dev_types_ranges[ i ].end_pos; j++ )
-                        {
-                        ( ( complex_device* ) ( devices->sub_dev[ i ] ) )->sub_dev[ pos++ ] =
-                            project_devices[ j ];
-                        }
-                    }
-                }
             }
     };
 //-----------------------------------------------------------------------------

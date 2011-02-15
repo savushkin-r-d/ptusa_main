@@ -28,444 +28,85 @@
 #ifndef GENERAL_DEVICE_H
 #define GENERAL_DEVICE_H
 
-#ifndef PAC 
 #ifndef DRIVER
-#define PAC
-#endif // DRIVER
-#endif // PAC 
-
-#ifdef DRIVER
-#include "CmnHdr.h"
-typedef short           int_2;
-
-typedef unsigned int    u_int_4;
-typedef unsigned short  u_int_2;
-#endif // DRIVER
-
-#ifdef PAC
 #include "sys.h"
 #include "tcp_cmctr.h"
+#include <vector>
 
 #if defined LINUX_OS
 #include "sys_linux.h"
 #endif // defined LINUX_OS
 
-#if defined WIN_OS
+#if defined WIN32
 #include "sys_win.h"
-#endif // defined WIN_OS
+#endif // defined WIN32
 
-#endif // PAC
-
-//-----------------------------------------------------------------------------
-/// @brief Вывод сообщения на консоль (для PAC), или в окно драйвера (для PC).
-///
-/// @param err_str    - сообщение.
-/// @param is_need_CR - флаг перевода каретки на новую строку.
-void print_str( char *err_str, char is_need_CR = 1 );
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс устройства, позволяющий сохранить его в потоке байтов.
-class i_save_device    
+class i_Lua_save_device    
     {    
     public:
-        /// @brief Сохранение состояния устройства в буфер.
-        ///
-        /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
-        ///        
-        /// @return >= 0 - количество записанных байт.
-        virtual int save_state( char *buff ) = 0;
-
-        /// @brief Сохранение измененного состояния устройства в буфер.
-        ///
-        /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
-        ///
-        /// @return >= 0 - количество записанных байт.
-        virtual int save_changed_state( char *buff ) = 0;
-
         /// @brief Сохранение самого устройства в буфер.
         ///
         /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
         ///
         /// @return >= 0 - количество записанных байт.
-        virtual int save_device( char *buff ) = 0;      
-    };
-//-----------------------------------------------------------------------------
-#ifdef DRIVER
-/// @brief Интерфейс устройства, позволяющий считать его из потока байтов.
-class i_load_device    
-    {    
-    public:
-        /// @brief Считывание состояния устройства из буфера.
-        ///
-        /// @param buff [ out ] - адрес буфера, откуда считываются данные.
-        ///
-        /// @return >= 0 - количество считанных байт.
-        virtual int load_state( char *buff ) = 0;
+        virtual int save_device( char *buff ) = 0; 
 
-        /// @brief Считывание измененного состояния устройства из буфера.
-        ///
-        /// @param buff [ out ] - адрес буфера, откуда считываются данные.
-        ///
-        /// @return >= 0 - количество считанных байт.
-        virtual int load_changed_state( char *buff ) = 0;  
+		virtual void print() const = 0;
 
-        /// @brief Считывание самого устройства из буфера.
-        ///
-        /// @param buff [ out ] - адрес буфера, откуда считываются данные.
-        ///
-        /// @return >= 0 - количество считанных байт.
-        virtual int load_device( char *buff ) = 0; 
+		virtual int parse_cmd( char* cmd ) 
+			{
+			return 0;
+			}
+
+		void save_ptr( char *buff )
+			{
+			sprintf( buff, "ptr=%d,", this );
+			}    
     };
-#endif // DRIVER
-//-----------------------------------------------------------------------------
-/// @brief Интерфейс устройства, которое выполняет команду, сохраненную  в
-/// потоке байтов.
+
 class i_cmd_device    
-    {    
-    public:
-        /// @brief Выполнение команды, хранящейся в буфере.
-        ///
-        /// @param buff [ out ] - адрес буфера, откуда считываются данные.
-        ///
-        /// @return >= 0 - количество считанных байт.
-        virtual int parse_cmd( char *buff  ) = 0;    
-    };
-//-----------------------------------------------------------------------------
-/// @brief Интерфейс устройства, которое характеризуется некоторым значением.
-///
-/// Устройство хранится в массиве.
-class i_device    
-    {    
-    public:
-#ifdef DRIVER
-        /// @brief Получение номера устройства в массиве устройств.
-        virtual u_int_4 get_idx() = 0;                  
-
-        /// @brief Установление номера устройства в массиве устройств.
-        virtual void set_idx( u_int_4 new_idx ) = 0;
-#endif // DRIVER
-
-        /// @brief Возвращает номер устройства.
-        virtual u_int_4 get_n() const = 0;
-
-        /// @brief Вывод на консоль устройства.
-        virtual void print() const = 0;         
-    };
-//-----------------------------------------------------------------------------
-/// @brief Интерфейс простого устройства.
-class i_simple_device: public i_device, 
-    public i_cmd_device,
-#ifdef DRIVER
-    public i_load_device,
-#endif // DRIVER
-    public i_save_device
-    {  
-    public:
-        virtual ~i_simple_device()
+	{      
+	public:
+        virtual int set_cmd( const char *prop, u_int idx, double val ) 
             {
-            }
-    };
-//-----------------------------------------------------------------------------
-/// @brief Шаблон класса, который используется для передачи состояния устройств,
-/// которые представляются массивом некоторого типа.
-//
-/// Например: параметры, состояния и т.д.
-template < class data_type > class array_device: public i_simple_device
-    {
-    public:
-        /// @param n        - номер.
-        /// @param new_name - имя.
-        /// @param new_subdev_cnt - количество элементов в массиве.
-        /// @param type     - тип. Для сохранения устройств и передачи на
-        /// сервер.
-        array_device( u_int_4 n,
-            const char *new_name,
-            u_int_2 new_subdev_cnt,
-            char type ): sub_dev_cnt( new_subdev_cnt ),
-            type( type ),
-            n( n )
-            {
-            name = new char[ strlen( new_name ) + 1 ];
-            strcpy( name, new_name );
-
-            prev_val = new data_type[ sub_dev_cnt ];
-            for ( unsigned int i = 0; i < sub_dev_cnt; i++ )
-                {
-                prev_val[ i ] = 0;
-                }
-            }
-
-        virtual ~array_device()
-            {
-            delete [] name;
-            name = 0;
-
-            delete [] prev_val;
-            prev_val = 0;
-            }
-
-        /// @brief Сохранение устройства в байтовый поток.
-        ///
-        /// Для передачи устройства на сервер.
-        ///
-        /// @param buff [out] - указатель на байтовый буфер, куда будет
-        /// произведено сохранение устройства.
-        ///
-        /// @return - количество сохраненных байт.
-        int  save_device( char *buff )
-            {
-            // Данные группы (buff) в следующем виде:
-            //    1 байт  - тип;                                (1)
-            //    4 байта - номер;                              (2)
-            //    1 байт  - длина имени группы устройства;      (3)
-            //    х байт  - имя группы устройства;              (4)
-            //    4 байта - количество подустройств;            (5)
-
-            u_int_2 idx = 0;
-
-            buff[ idx++ ] = type;                               //(1)
-            memcpy( buff + idx, &n, sizeof( n ) );              //(2)
-            idx += sizeof( n );
-            buff[ idx++ ] = strlen( name );                     //(3)
-            strcpy( buff + idx, name );                         //(4)
-            idx += strlen( name ) + 1;
-            memcpy( buff + idx, &sub_dev_cnt, sizeof( sub_dev_cnt ) );  //(5)
-            idx += sizeof( sub_dev_cnt );
-
-            return idx;
-            }
-
-        /// @brief Сохранение состояния устройства в байтовый поток.
-        ///
-        /// Для передачи состояния устройства на сервер.
-        ///
-        /// @param buff [out] - указатель на байтовый буфер, куда будет
-        /// произведено сохранение состояния устройства.
-        ///
-        /// @return - количество сохраненных байт.
-        int  save_state( char *buff )
-            {
-            // Данные группы (buff) в следующем виде:
-            //  4 байта - номер устройства;                     (1)
-            //  4 байта - количество подустройств;              (2)
-            //  далее   - данные каждого подустройства.
-            u_int_2 answer_size = 0;
-            memcpy( buff + answer_size, &n, sizeof( n ) );                    //(1)
-            answer_size += sizeof( n );
-            memcpy( buff + answer_size, &sub_dev_cnt, sizeof( sub_dev_cnt ) );//(2)
-            answer_size += sizeof( sub_dev_cnt );
-
-            for ( u_int_4 i = 0; i < sub_dev_cnt; i++ )
-                {
-                data_type val = get_val( i );
-                memcpy( buff + answer_size, &val, sizeof( val ) );
-
-                prev_val[ i ] = val;
-                answer_size += sizeof( data_type );
-                }
-
-            return answer_size;
-            }
-
-        /// @brief Сохранение изменившегося состояния устройства в байтовый поток.
-        ///
-        /// Для передачи состояния устройства на сервер.
-        ///
-        /// @param buff [out] - указатель на байтовый буфер, куда будет
-        /// произведено сохранение состояния устройства.
-        ///
-        /// @return - количество сохраненных байт.
-        int  save_changed_state( char *buff )
-            {
+            Print( "set_cmd: prop=%s, idx=%u, n=%f\n",
+                prop, idx, val );
             return 0;
             }
 
-        /// @brief Получение значения элемента через индекс.
-        ///
-        /// Это значение потом, например, может используется для сохранения
-        /// объекта в поток ( @ref save_state ).
-        ///
-        /// @param idx - индекс элемента.
-        ///
-        /// @return - значение элемента с заданным индексом.
-        virtual data_type get_val( int idx ) = 0;
-
-        /// @brief Вывод объекта в консоль.
-        ///
-        /// Для использования в отладочных целях.
-        void print() const
+        virtual int set_cmd( const char *prop, u_int idx, char *val ) 
             {
-            char tmp_str[ 100 ];
-
-            if ( strlen( name ) < 8 )
-                {
-                sprintf( tmp_str, "\"%s\", \t\t[ %3lu ]",
-                    name, ( unsigned long int ) sub_dev_cnt );
-                }
-            else sprintf( tmp_str, "\"%s\", \t[ %3lu ]",
-                name, ( unsigned long int ) sub_dev_cnt );
-
-            print_str( tmp_str );
-            }
-
-        /// @brief Реализация-заглушка интерфейса класса @ref i_simple_device.
-        u_int_4 get_n() const
-            {
+            Print( "set_cmd: prop=%s, idx=%u, n=%s\n",
+                prop, idx, val );
             return 0;
             }
+	};
 
-    protected:
-        u_int_4         sub_dev_cnt;    ///< Количество подустройств.
-        char            *name;          ///< Имя.
-        char            type;           ///< Тип.
-        u_int_4         n;              ///< Уникальный номер.
-
-        data_type*      prev_val;       ///< Массив предыдущих значений.
-    };
-//-----------------------------------------------------------------------------
-/// @brief Интерфейс сложного устройства. Оно состоит из групп простых
-/// устройств.
-class i_complex_device: public i_simple_device
-    {
-    public:
-
-#ifdef DRIVER
-        /// Устройства, которые входят данное сложное устройство.
-        i_complex_device  *compl_dev;  
 #endif // DRIVER
-
-        /// Типы сложных устройств.
-        enum TYPES
-            {
-            COMPLEX_DEV,        ///< Сложное устройство.
-            GROUP_DEV_BYTE,     ///< Группа устройств с размерностью данных 1 байт, тип byte.
-            GROUP_DEV_LONG,     ///< -//- 4 байта, тип unsigned long.
-            GROUP_DEV_FLOAT = 4,///< -//- 4 байта, тип float.
-            ARRAY_DEV_BYTE,     ///< Сложное устройство. Данные в виде массива, тип byte.
-            ARRAY_DEV_FLOAT,    ///< -//- тип float.
-            ARRAY_DEV_LONG,     ///< -//- тип long int.
-            ARRAY_DEV_UINT,     ///< -//- тип unsigned int.
-
-            ARRAY_DEV_INT,      ///< -//- тип int.
-
-            ARRAY_DEV_STR,      ///< -//- тип строка.
-            ARRAY_DEV_ULONG,    ///< -//- тип unsigned long int.
-            };
-
-        virtual ~i_complex_device()
-            {
-            }
-
-        virtual char            get_type() const = 0;
-        virtual u_int_4         get_n() const = 0;
-        virtual const char*     get_name() const = 0;
-        virtual u_int_4         get_subdev_quantity() const = 0;
-        virtual i_save_device*  get_save_dev( u_int_4 idx ) const = 0;
-
-        virtual int             set_type( char new_type ) = 0;
-        virtual int             set_n( u_int_4 new_n ) = 0;
-        virtual int             set_name( char * new_name ) = 0;
-        virtual int             set_subdev_quantity( u_int_4 new_dev_cnt ) = 0;
-#ifdef DRIVER
-        virtual i_load_device*  get_load_dev( u_int_4 idx ) = 0;
-#endif // DRIVER        
-    };
-//-----------------------------------------------------------------------------
-/// @brief Базовое сложное устройства.
-class complex_device: public i_complex_device
-    {
-    public:
-        i_simple_device **sub_dev;  ///< Подустройства.
-
-    protected:
-        enum CONSTANTS
-            {
-            MAX_NAME_LENGTH = 20 ///< Максимальная длина имени.
-            };
-
-        u_int_4 n;              ///< Уникальный номер.
-        u_int_4 sub_dev_cnt;    ///< Количество подустройств.        
-        char    name[ MAX_NAME_LENGTH ]; ///< Имя.
-
-        char    type;           ///< Тип.
-        u_int_4 idx;            ///< Номер устройства массиве устройств.
-
-    public:      
-        complex_device();
-        complex_device( u_int_4 n, const char *new_name, u_int_2 new_subdev_cnt,
-            char type );
-
-        virtual ~complex_device();
-
-#ifdef DRIVER
-        complex_device( u_int_4 n, char *new_name, u_int_2 new_subdev_cnt, 
-            char type, i_complex_device *owner_compl_dev );
-#endif // DRIVER
-
-        char            get_type() const;
-        u_int_4         get_n() const;
-        const char*     get_name() const;
-        u_int_4         get_subdev_quantity() const;
-        i_save_device*  get_save_dev( u_int_4 idx ) const;
-
-        /// @brief Метод интерфейса @ref i_save_device.
-        int save_device( char *buff );
-
-        /// @brief Метод интерфейса @ref i_save_device.
-        int save_changed_state( char *buff );
-
-        /// @brief Метод интерфейса @ref i_save_device.
-        int save_state( char *buff );
-
-        int             set_type( char new_type );
-        int             set_n( u_int_4 new_n );
-        int             set_name( char * new_name );
-        int             set_subdev_quantity( u_int_4 new_dev_cnt );
-#ifdef DRIVER        
-        i_load_device*  get_load_dev( u_int_4 idx );
-
-        i_simple_device* get_sub_dev( u_int_4 id ) const;
-        i_complex_device* get_sub_complex_dev( char *sub_dev_name ) const;
-#endif // DRIVER        
-
-        int load_device( char *buff );        
-        int load_changed_state( char *buff );
-        int load_state( char *buff  );
-
-        /// @brief Вывод на консоль устройств группы.
-        void print() const;
-
-        int     parse_cmd( char *buff );
-        u_int_4 get_idx();
-        void    set_idx( u_int_4 new_idx );
-    };
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /// @brief Коммуникатор устройств - содержит все устройства одного PAC. Служит
 /// для передачи информации о них и их состоянии на сервер (PC).
-class device_communicator
-#ifdef DRIVER        
-    : public i_load_device        
-#endif // DRIVER                
+class device_communicator             
     {   
     public:
         enum CMD
             {
-            GET_INFO_ON_CONNECT = 10, ///< Запрос инф. о PAC перед дальнейшей работой.
+            CMD_GET_INFO_ON_CONNECT = 10, ///< Запрос инф. о PAC перед дальнейшей работой.
 
-            GET_DEVICES = 100,
-            GET_DEVICES_STATES,
-            GET_DEVICES_CHANGED_STATES,
-            EXEC_DEVICE_CMD,
+            CMD_GET_DEVICES = 100,
+            CMD_GET_DEVICES_STATES,
+            CMD_EXEC_DEVICE_COMMAND,
 
-            GET_PAC_ERRORS,
-            SET_PAC_ERROR_CMD,
+            CMD_GET_PAC_ERRORS,
+            CMD_SET_PAC_ERROR_CMD,
             };
+#ifdef DRIVER
+    };
+#else // DRIVER
 
-
-#ifdef PAC
     private:
-        static u_int dev_cnt;
-
         /// Единственный экземпляр класса.
         static auto_smart_ptr < device_communicator > instance;
 
@@ -473,6 +114,13 @@ class device_communicator
         /// @brief Получение единственного экземпляра класса.
         static device_communicator* get_instance()
             {
+            static char is_init = 0;
+            if ( 0 == is_init )
+            	{
+                is_init = 1;
+                instance = new device_communicator();
+            	}
+
             return instance;
             }
 
@@ -488,55 +136,30 @@ class device_communicator
             C_MAX_COMLEX_DEVICES = 40,
             };
 
-        static i_complex_device *dev[ C_MAX_COMLEX_DEVICES ];
-#else
-        unsigned int     dev_cnt;
-        i_complex_device **dev;
-#endif // PAC
+        static std::vector< i_Lua_save_device* > dev;
 
     public:
-        device_communicator();
+        device_communicator()
+            {            
+            }
 
-        ~device_communicator();
+        ~device_communicator()
+            {
+            }
 
         /// @brief Вывод на консоль устройств группы.
         void print() const;
 
-#ifdef DRIVER
-        /// @brief Получение устройства по имени.
-        ///
-        /// @param dev_name - имя устройства.
-        /// @param dev_n    - номер устройства.
-        /// @param name     -  имя группы.
-        ///
-        /// @return > 0 - указатель на сложное устройство.
-        /// @return   0 - не найдено сложное устройство.
-        i_complex_device* get_group( char* dev_name, u_int_4 dev_n, 
-            char* name ) const;
-
-        /// @brief Метод интерфейса @ref i_load_device.
-        int load_state( char *buff );
-
-        /// @brief Метод интерфейса @ref i_load_device.
-        int load_changed_state( char *buff );
-
-        /// @brief Метод интерфейса @ref i_load_device.
-        int load_device( char *buff );        
-#endif // DRIVER               
-
-
-#ifdef PAC
         /// @brief Добавление устройства.
-        int add_device( i_complex_device *dev );
+        int add_device( i_Lua_save_device *dev );
 
         /// @brief Сервис для работы с device_communicator.
         static long write_devices_states_service( long len, u_char *data,
             u_char *outdata );
-#endif //PAC
     };
 //-----------------------------------------------------------------------------
-#ifdef PAC
 #define G_DEVICE_CMMCTR device_communicator::get_instance()
-#endif // PAC
+
+#endif // DRIVER
 
 #endif // DEVICES_H

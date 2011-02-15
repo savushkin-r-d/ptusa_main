@@ -1,0 +1,1 @@
+char* WSA_Err_Decode (int ErrCode);

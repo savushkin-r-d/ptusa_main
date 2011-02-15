@@ -400,17 +400,14 @@ static int pmain (lua_State *L) {
         return 1;
         }
 
-
-    project_manager::set_instance( new project_manager_win() );
-
-  
+	NV_memory_manager::set_instance( new NV_memory_manager_PC() );
+    project_manager::set_instance( new project_manager_win() );  
 
     device_manager::set_instance( new device_manager() );
     device_communicator::set_instance( new device_communicator() );
 
     wago_manager::set_instance( new wago_manager_PC() );
-    NV_memory_manager::set_instance( new NV_memory_manager_PC() );
-
+    
     tech_object_manager::set_instance( new tech_object_manager() );
     PAC_critical_errors_manager::set_instance( new PAC_critical_errors_manager() );
 
@@ -488,7 +485,7 @@ int main (int argc, char **argv)
 
         //-ƒобавление системных тегов контроллера.
         g_PAC_system = new PAC_info();
-        G_DEVICE_CMMCTR->add_device( g_PAC_system->com_dev );
+        G_DEVICE_CMMCTR->add_device( g_PAC_system );
 
         G_PROJECT_MANAGER->proc_main_params( argc, argv );
 

@@ -15,6 +15,14 @@
 
 #include <stddef.h>
 #include <stdio.h>
+
+#ifdef WIN_OS
+#define Print printf
+#endif // WIN_OS
+
+#ifdef LINUX_OS
+#define Print printf
+#endif // LINUX_OS
 //-----------------------------------------------------------------------------
 #if defined LINUX_OS && !defined PAC_WAGO_750_860
 #define debug_break asm ( "int" "3" ) ///< Установка точки прерывания.
@@ -89,6 +97,23 @@ template < class type > class smart_ptr
     #endif // PAC_PC
 
     #endif // DEBUG
+                }
+            return pointer;
+            }
+
+        /// @brief Оператор обращения к членам класса.
+        type* operator->() const
+            {
+            if ( pointer == NULL )
+                {
+#ifdef DEBUG
+                printf( "smart_ptr - dereferencing NULL!\n" );
+
+#ifdef PAC_PC
+                debug_break;
+#endif // PAC_PC
+
+#endif // DEBUG
                 }
             return pointer;
             }

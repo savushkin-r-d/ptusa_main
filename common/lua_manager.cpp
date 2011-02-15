@@ -271,3 +271,29 @@ const char* lua_manager::char_no_param_exec_lua_method( const char *object_name,
     return res;
     }
 //-----------------------------------------------------------------------------
+int lua_manager::exec_Lua_str( const char *Lua_str, const char *error_str,
+    bool is_print_error_msg /*= true */ ) const
+    {
+    int res = luaL_dostring( L, Lua_str );
+
+    if( res != 0  )
+        {
+        if ( is_print_error_msg )
+            {
+            Print( "Error during C++ call - \"%s\" - %s\n", 
+                error_str, lua_tostring( L, -1 ) );
+            }
+
+        lua_pop( L, 1 );
+        return 1;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+lua_State * lua_manager::get_Lua() const
+    {
+    return L;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------

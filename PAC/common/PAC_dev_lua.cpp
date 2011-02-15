@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 12/14/10 10:13:55.
+** Generated automatically by tolua++-1.0.92 on 02/15/11 16:30:37.
 */
 
 #ifndef __cplusplus
@@ -20,6 +20,7 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 #include "tolua_base.h"
 #include "PID.h"
 #include "sys.h"
+#include "g_device.h"
 
 /* function to release collected object via destructor */
 #ifdef __cplusplus
@@ -51,7 +52,8 @@ static int tolua_collect_tech_object (lua_State* tolua_S)
 static void tolua_reg_types (lua_State* tolua_S)
 {
  tolua_usertype(tolua_S,"wago_device");
- tolua_usertype(tolua_S,"device_manager");
+ tolua_usertype(tolua_S,"i_DO_device");
+ tolua_usertype(tolua_S,"u_int");
  tolua_usertype(tolua_S,"PID");
  tolua_usertype(tolua_S,"wago_manager");
  tolua_usertype(tolua_S,"run_time_params_float");
@@ -67,7 +69,7 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"i_AI_device");
  tolua_usertype(tolua_S,"mode_manager");
  tolua_usertype(tolua_S,"timer");
- tolua_usertype(tolua_S,"i_DO_device");
+ tolua_usertype(tolua_S,"device_manager");
  tolua_usertype(tolua_S,"tech_object");
  tolua_usertype(tolua_S,"dev_stub");
 }
@@ -576,6 +578,44 @@ static int tolua_PAC_dev_i_counter_get_quantity00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'get_quantity'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_cmd of class  device */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_set_cmd00
+static int tolua_PAC_dev_device_set_cmd00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"device",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  device* self = (device*)  tolua_tousertype(tolua_S,1,0);
+  const char* prop = ((const char*)  tolua_tostring(tolua_S,2,0));
+  unsigned int idx = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
+  double val = ((double)  tolua_tonumber(tolua_S,4,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_cmd'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->set_cmd(prop,idx,val);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_cmd'.",&tolua_err);
  return 0;
 #endif
 }
@@ -1358,6 +1398,44 @@ static int tolua_PAC_dev_dev_stub_get_quantity00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'get_quantity'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_cmd of class  tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_tech_object_set_cmd00
+static int tolua_PAC_dev_tech_object_set_cmd00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"tech_object",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  tech_object* self = (tech_object*)  tolua_tousertype(tolua_S,1,0);
+  const char* prop = ((const char*)  tolua_tostring(tolua_S,2,0));
+  unsigned int idx = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
+  double val = ((double)  tolua_tonumber(tolua_S,4,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_cmd'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->set_cmd(prop,idx,val);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_cmd'.",&tolua_err);
  return 0;
 #endif
 }
@@ -2370,6 +2448,35 @@ static int tolua_PAC_dev_G_DEVICE_MANAGER00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'G_DEVICE_MANAGER'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* function: G_TECH_OBJECTS */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_G_TECH_OBJECTS00
+static int tolua_PAC_dev_G_TECH_OBJECTS00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     (tolua_isvaluenil(tolua_S,1,&tolua_err) || !tolua_isusertype(tolua_S,1,"u_int",0,&tolua_err)) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  u_int idx = *((u_int*)  tolua_tousertype(tolua_S,1,0));
+  {
+   tech_object* tolua_ret = (tech_object*)  G_TECH_OBJECTS(idx);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"tech_object");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'G_TECH_OBJECTS'.",&tolua_err);
  return 0;
 #endif
 }
@@ -4063,6 +4170,35 @@ static int tolua_PAC_dev_PID_print00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* function: get_delta_millisec */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_get_delta_millisec00
+static int tolua_PAC_dev_get_delta_millisec00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  unsigned long time1 = ((unsigned long)  tolua_tonumber(tolua_S,1,0));
+  {
+   unsigned long tolua_ret = (unsigned long)  get_delta_millisec(time1);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_delta_millisec'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* Open function */
 TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
 {
@@ -4103,6 +4239,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"device","device","",NULL);
   tolua_beginmodule(tolua_S,"device");
+   tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_device_set_cmd00);
    tolua_constant(tolua_S,"DT_NONE",device::DT_NONE);
    tolua_constant(tolua_S,"DT_V",device::DT_V);
    tolua_constant(tolua_S,"DT_N",device::DT_N);
@@ -4154,6 +4291,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_cclass(tolua_S,"tech_object","tech_object","",NULL);
   #endif
   tolua_beginmodule(tolua_S,"tech_object");
+   tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_tech_object_set_cmd00);
    tolua_function(tolua_S,"new",tolua_PAC_dev_tech_object_new00);
    tolua_function(tolua_S,"new_local",tolua_PAC_dev_tech_object_new00_local);
    tolua_function(tolua_S,".call",tolua_PAC_dev_tech_object_new00_local);
@@ -4192,6 +4330,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"print",tolua_PAC_dev_mode_manager_print00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_DEVICE_MANAGER",tolua_PAC_dev_G_DEVICE_MANAGER00);
+  tolua_function(tolua_S,"G_TECH_OBJECTS",tolua_PAC_dev_G_TECH_OBJECTS00);
   tolua_cclass(tolua_S,"device_manager","device_manager","",NULL);
   tolua_beginmodule(tolua_S,"device_manager");
    tolua_function(tolua_S,"print",tolua_PAC_dev_device_manager_print00);
@@ -4298,6 +4437,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"set_used_par",tolua_PAC_dev_PID_set_used_par00);
    tolua_function(tolua_S,"print",tolua_PAC_dev_PID_print00);
   tolua_endmodule(tolua_S);
+  tolua_function(tolua_S,"get_delta_millisec",tolua_PAC_dev_get_delta_millisec00);
  tolua_endmodule(tolua_S);
  return 1;
 }

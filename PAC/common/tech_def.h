@@ -47,7 +47,7 @@ extern "C" {
 ///
 /// Базовый класс для технологического объекта (танка, гребенки). Содержит
 /// основные методы работы - работа с режимами и т.д.
-class tech_object
+class tech_object: public i_Lua_save_device
     {
     public:
         /// @param name                     - название (tank, comb).
@@ -63,6 +63,11 @@ class tech_object
             u_int timers_count = 3,
             u_int par_float_count = 5, u_int runtime_par_float_count = 5,
             u_int par_uint_count = 5, u_int runtime_par_uint_count = 5 );
+
+        const char* get_object_name()
+            {
+            return object_name;
+            }
 
         virtual ~tech_object();
 
@@ -93,20 +98,6 @@ class tech_object
         /// @return 1 - режим нельзя включить.
         /// @return 0 - режим можно включить.
         int check_on_mode( u_int mode );
-
-        /// @brief Выполнение команды.
-        ///
-        /// Здесь могут выполняться какие-либо действия (включаться/выключаться
-        /// другие режимы).
-        ///
-        int exec_cmd( u_int cmd )
-            {
-#ifdef DEBUG
-            Print ( "Exec command %s[ %2d ] command = %2d\n",
-                com_dev->get_name(), number, cmd );
-#endif
-            return 0;
-            }
 
         /// @brief Инициализация режима.
         ///
@@ -150,9 +141,18 @@ class tech_object
         /// @brief Инициализирует рабочие параметры значением 0.
         int init_runtime_params();
 
-        complex_device* get_complex_dev()
+        /// @brief Выполнение команды.
+        ///
+        /// Здесь могут выполняться какие-либо действия (включаться/выключаться
+        /// другие режимы).
+        ///
+        int exec_cmd( u_int cmd )
             {
-            return com_dev;
+#ifdef DEBUG
+            Print ( "Exec command %s[ %2d ] command = %2d\n",
+                get_object_name(), number, cmd );
+#endif
+            return 0;
             }
 
         int get_number() const
@@ -185,7 +185,7 @@ class tech_object
         //--Lua implemented methods.--!>
 
         /// @brief Отладочная печать объекта.
-        void print()
+        void print() const
             {
             Print( "Object \"%s\"\n", name );
             modes_manager->print();
@@ -196,9 +196,33 @@ class tech_object
             return modes_manager;
             }
 
-    protected:
-        smart_ptr< complex_device > com_dev; ///< Связь с сервером.
+        int save_device( char *buff );
 
+        int set_cmd( const char *prop, u_int idx, double val )
+            {
+            if ( strcmp( prop, "CMD" ) == 0 )
+                {
+                int mode = ( int ) val;
+                if ( mode < 2000 )
+                    {
+                    set_mode( mode - 1000, 1 );
+                    }
+                else
+                    {
+                    set_mode( mode - 2000, 0 );
+                    }
+                cmd = mode;
+                }
+
+            if ( strcmp( prop, "PAR_F" ) == 0 )
+                {
+                par_float[ idx ] = ( float ) val;
+                }
+            
+            return 0;
+            }
+
+    protected:
         u_int   number;         ///< Номер объекта.
         u_int_4 cmd;            ///< Хранение команды объекта.
         u_int   modes_count;    ///< Количество режимов.
@@ -211,7 +235,8 @@ class tech_object
             {
             C_MAX_NAME_LENGTH = 30,
             };
-        char name[ C_MAX_NAME_LENGTH ];    ///< Имя объекта + номер объекта.
+        char name[ C_MAX_NAME_LENGTH ];        ///< Имя объекта + номер объекта.
+        char object_name[ C_MAX_NAME_LENGTH ]; ///< Имя объекта.
 
 
         smart_ptr< mode_manager > modes_manager; ///< Шаги режимов.

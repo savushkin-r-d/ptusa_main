@@ -42,7 +42,12 @@ class lua_manager
             const char *function_name, int param,
             const char *c_function_name ) const;
 
-    public:
+		int exec_Lua_str( const char *Lua_str, const char *error_str, 
+			bool is_print_error_msg = true ) const;
+
+        lua_State * get_Lua() const;
+
+    private:
         lua_manager() : is_free_lua( 0 ) 
             {
             }

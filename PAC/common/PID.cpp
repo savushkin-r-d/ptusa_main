@@ -15,16 +15,7 @@ PID::PID( int n ):
     start_value( 0 ),
     number( n )
     {  
-
-    com_dev = new complex_device( n, "PID", 3,
-        i_complex_device::COMPLEX_DEV );    
-    com_dev->sub_dev[ 0 ] = new complex_state( "STATE", n,
-        &state, this, single_state::T_PID, 1 );
-
-    com_dev->sub_dev[ 1 ] = par;
-    com_dev->sub_dev[ 2 ] = w_par;
-
-    G_DEVICE_CMMCTR->add_device( com_dev ); 
+    //G_DEVICE_CMMCTR->add_device( this ); 
     }
 //-----------------------------------------------------------------------------
 PID::~PID() 
@@ -241,7 +232,7 @@ float PID::get_assignment()
     return w_par[ 0 ][ WP_Z ];
     }
 //-----------------------------------------------------------------------------
-void PID::print()
+void PID::print() const
     {
     Print( "PID\n" );
 

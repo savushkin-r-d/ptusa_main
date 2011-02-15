@@ -34,22 +34,9 @@ tech_object::tech_object( const char* new_name, u_int number, u_int modes_count,
         state.push_back( 0 );
         }
     
-    com_dev = new complex_device( number, new_name, 8,
-            i_complex_device::COMPLEX_DEV );
-
-    com_dev->sub_dev[ 0 ] = new single_state( "SINGLE_STATE", number,
-            &state.front(), this, single_state::T_TECH_OBJECT, modes_count );
-    com_dev->sub_dev[ 1 ] = new complex_state( "STATE", number,
-            &state.front(), this, single_state::T_TECH_OBJECT, state_size_in_int4 );
-    com_dev->sub_dev[ 2 ] = new complex_state( "CMD", number,
-            &cmd, this, single_state::T_TECH_OBJECT, 1 );
-    com_dev->sub_dev[ 3 ] = &par_float;
-    com_dev->sub_dev[ 4 ] = &rt_par_float;
-    com_dev->sub_dev[ 5 ] = &par_uint;
-    com_dev->sub_dev[ 6 ] = &rt_par_uint;
-    com_dev->sub_dev[ 7 ] = &mode_time;
-
     strncpy( name, new_name, C_MAX_NAME_LENGTH );
+    strncpy( object_name, new_name, C_MAX_NAME_LENGTH );
+    
     snprintf( name + strlen( name ), C_MAX_NAME_LENGTH, "%d", number );
 
     modes_manager = new mode_manager( modes_count );    
@@ -58,16 +45,6 @@ tech_object::tech_object( const char* new_name, u_int number, u_int modes_count,
 //-----------------------------------------------------------------------------
 tech_object::~tech_object()
     {
-    delete com_dev->sub_dev[ 0 ];
-    com_dev->sub_dev[ 0 ] = 0;
-    delete com_dev->sub_dev[ 1 ];
-    com_dev->sub_dev[ 1 ] = 0;
-    delete com_dev->sub_dev[ 2 ];
-    com_dev->sub_dev[ 2 ] = 0;
-
-    delete com_dev;
-    com_dev = 0;
-
     delete modes_manager;
     modes_manager = 0;
     }
@@ -97,7 +74,7 @@ int tech_object::set_mode( u_int mode, int newm )
     static u_char idx = 0;
 
     Print( "%sStart %s[ %2u ] set mode = %2u --> %s.\n",
-        white_spaces, com_dev->get_name(), number, mode, 
+        white_spaces, get_object_name(), number, mode, 
         newm == 0 ? "OFF" : " ON" );
 
     white_spaces[ idx++ ] = ' ';
@@ -146,7 +123,7 @@ int tech_object::set_mode( u_int mode, int newm )
     white_spaces[ idx ] = 0;
     
     Print( "%sEnd   %s[ %2u ] set mode = %2u --> %s, res = %d",
-        white_spaces, com_dev->get_name(), number, mode,
+        white_spaces, get_object_name(), number, mode,
         newm == 0 ? "OFF" : " ON", res );
 
     if ( 1 == res )
@@ -292,6 +269,26 @@ int tech_object::lua_init_runtime_params()
         "init_runtime_params", 0, "int tech_object::lua_init_runtime_params()" );
     }
 //-----------------------------------------------------------------------------
+int tech_object::save_device( char *buff )
+    {
+    sprintf( buff, "t.%s = {}\nt.%s[%d]=\n\t{\n", 
+        get_object_name(), 
+        get_object_name(), get_number() );
+
+    int answer_size = strlen( buff );
+
+    sprintf( buff + answer_size, "\tSTATE=%lu, CMD=%lu,\n", state[ 0 ], cmd );
+    answer_size += strlen( buff + answer_size );
+
+    answer_size += par_float.save_device( buff + answer_size, "\t" );
+
+    sprintf( buff + answer_size, "\t}\n" );
+    answer_size += strlen( buff + answer_size );
+
+
+    return answer_size;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int tech_object_manager::init_params()
     {
@@ -370,8 +367,9 @@ void tech_object_manager::evaluate()
 
     if ( call_count > 2 )
         {
-        lua_getfield( lua_manager::get_instance()->L, LUA_GLOBALSINDEX, "eval" );
-        lua_call( lua_manager::get_instance()->L, 0, 0 );
+        lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
+            "eval" );
+        lua_call( lua_manager::get_instance()->get_Lua(), 0, 0 );
         call_count = 0;
         }
     
@@ -407,7 +405,7 @@ int tech_object_manager::init_objects()
         {
         G_TECH_OBJECTS( i )->lua_init_runtime_params();
 
-        G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS( i )->get_complex_dev() );        
+        G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS( i ) );        
         }
 
     res = lua_manager::get_instance()->int_exec_lua_method( "system",

@@ -118,6 +118,10 @@ int main( int argc, char *argv[] )
     	}           
     G_TECH_OBJECT_MNGR()->init_objects();
 
+    //-ƒобавление системных тегов контроллера.
+    g_PAC_system = new PAC_info();
+    G_DEVICE_CMMCTR->add_device( g_PAC_system );
+
     params_manager::get_instance()->init( 10 );
     params_manager::get_instance()->final_init();
 

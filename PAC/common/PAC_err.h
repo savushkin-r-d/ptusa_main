@@ -27,6 +27,10 @@
 #ifdef LINUX_OS
 #include "sys_linux.h"
 #endif
+
+#ifdef WIN_OS
+#include "sys_win.h"
+#endif
 //-----------------------------------------------------------------------------
 enum ERRORS_CLASS
     {

@@ -19,7 +19,7 @@
 #include "util.h"
 #include "sys.h"
 
-class PID 
+class PID
     { 
     enum STATES 
         {
@@ -50,8 +50,6 @@ class PID
     u_int_4 state;
 
     int   used_par_n;
-
-    smart_ptr< complex_device > com_dev; ///< Связь с сервером.
 
     void reset();
     void acceleration( float accel_time );
@@ -112,7 +110,7 @@ class PID
         void save_param();
 
         /// @brief Отладочный вывод в консоль ПИД.
-        void print();
+        void print() const;
 
         /// @brief Использование kN, TiN, TdN.     
         void set_used_par ( int par_n ); 

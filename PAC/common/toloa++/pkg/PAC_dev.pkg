@@ -14,6 +14,7 @@ $#include "wago.h"
 $#include "tolua_base.h"
 $#include "PID.h"
 $#include "sys.h"
+$#include "g_device.h"
 
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе дискретного входа.
@@ -133,6 +134,8 @@ class i_counter
 class device
     {
     public:
+		int set_cmd( const char *prop, unsigned int idx, double val );
+		
         /// Типы устройств.
         enum DEVICE_TYPE
             {
@@ -318,7 +321,9 @@ class dev_stub
 /// основные методы работы - работа с режимами и т.д.
 class tech_object
     {
-    public:
+    public:		
+		int set_cmd( const char *prop, unsigned int idx, double val );
+		
         /// @param name                     - название (TANK, COMB).
         /// @param number                   - номер.
         /// @param states_count             - количество режимов.
@@ -491,6 +496,8 @@ class mode_manager
 ///
 ///@return Менеджер устройств проекта.
 device_manager* G_DEVICE_MANAGER();
+
+tech_object* G_TECH_OBJECTS( u_int idx );
 //-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.
 ///
@@ -769,3 +776,4 @@ class PID
         void print();   
     };
 //-----------------------------------------------------------------------------
+unsigned long get_delta_millisec( unsigned long time1 );

@@ -5,7 +5,7 @@
 #include "PAC_dev.h"
 #include "param_ex.h"
 
-class PAC_info
+class PAC_info: public i_Lua_save_device
     {
     public:
         PAC_info();
@@ -13,8 +13,6 @@ class PAC_info
         ~PAC_info();
 
         void eval();
-
-        complex_device  *com_dev;
 
         enum PARAMETERS
             {
@@ -26,6 +24,13 @@ class PAC_info
         saved_params_u_int_4 *par;
 
         void reset_params();
+
+        int save_device( char *buff );
+
+		void print() const
+			{
+			Print( "PAC_info\n" );
+			}
 
     private:    
         static const u_int_4 MSEC_IN_DAY; 
@@ -44,7 +49,6 @@ class PAC_info
 
         u_int_4 reset_type;
 
-        string_device str_datatime;
         char up_time_str[ C_MAX_STR_LENGTH ];
     };
 #endif // PAC_INFO_H

@@ -10,250 +10,7 @@ const char device::DEV_NAMES[][ 5 ] = { "V", "N", "M", "LS", "TE", "FE", "FS",
 
 const char device::DEV_TYPES[] =        { 1,    1,   1,   1,    4,    4,    1,
     2,      4,    4,    1,    1,     4,    4 };
-
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-char single_state::get_val( int idx )
-    {
-    return ( ( unsigned long )( state [ idx / 32 ] >> idx % 32 ) & 1 );
-    }  
-//-----------------------------------------------------------------------------
-int single_state::parse_cmd( char *buff  )   
-    { 
-#ifdef USE_NO_TANK_COMB_DEVICE
-    return 0;
-#else // USE_NO_TANK_COMB_DEVICE
-
-    switch ( owner_type )
-        {
-    case T_TECH_OBJECT:
-
-        u_int_4 mode;
-        u_int_4 new_state;
-        memcpy( &mode, buff + 4, 4 );
-        memcpy( &new_state, buff + 4 + 4, 4 );
-
-        ( ( tech_object* ) owner_object )->set_mode( mode - 1, new_state );
-        break;
-        }
-    return 12;
-#endif // USE_NO_TANK_COMB_DEVICE     
-    } 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-complex_state::complex_state( const char *name, int n, u_int_4 *state,
-    void *owner_object, char owner_type, int size ):
-device_state < u_int_4 >( n, 
-    name, 
-    size, 
-    i_complex_device::ARRAY_DEV_LONG, 
-    state,
-    owner_object, 
-    owner_type )
-    {                     
-    } 
-//-----------------------------------------------------------------------------
-u_int_4 complex_state::get_val( int idx )
-    {    
-    return state[ idx ];
-    }     
-//-----------------------------------------------------------------------------
-int complex_state::parse_cmd( char *buff  )   
-    {    
-#if !defined USE_NO_TANK_COMB_DEVICE 
-#define SIMPLE_PROJECT
-#endif
-
-#ifdef SIMPLE_PROJECT
-    if (	( strcmp( name, "CMD" ) == 0 ) 
-        ||	( strcmp( name, "Cmd" ) == 0 ) 
-        ||	( strcmp( name, "cmd" ) == 0 ) )
-        {
-
-        switch ( owner_type )
-            {
-        case T_TECH_OBJECT:
-            u_int_4 new_mode = 0;
-            memcpy( &new_mode, buff + sizeof( u_int_4 ), sizeof( new_mode ) );
-            int new_state = 0;
-            if ( 0 == new_mode )
-                {
-                state[ 0 ] = 0;
-                return 0;
-                }
-
-            u_int mode = 0;
-            if ( new_mode >= 1000 && new_mode < 2000 )      // On mode.
-                {
-                mode = new_mode - 1000;
-                new_state = 1;
-                }
-            else
-                {
-                if ( new_mode >= 2000 && new_mode < 3000 )  // Off mode.
-                    {
-                    mode = new_mode - 2000;
-                    new_state = 0;
-                    }
-                else
-                    {
-#ifdef DEBUG
-                    Print( "Error complex_state::parse_cmd - new_mode = %lu\n",
-                        ( unsigned long int ) new_mode );
-#endif // DEBUG
-                    return -1;
-                    }
-                }
-
-            if ( mode >
-                ( ( tech_object* ) owner_object )->get_modes_count() )
-                {
-                // Command.
-                state[ 0 ] = ( ( tech_object* ) owner_object )->lua_exec_cmd(
-                    mode );
-                }
-            else
-                {
-                // On/off mode.
-                int res = ( ( tech_object* ) owner_object )->set_mode(
-                    mode, new_state );
-                if ( 0 == res )
-                    {
-                    state[ 0 ] = new_mode; // Ok.
-                    }
-                else
-                    {
-                    state[ 0 ] = res;      // Ошибка.
-                    }                    
-                }
-            break;
-            }
-
-        return 0; 
-        }	
-    else // if ( strcmp( name, "CMD" ) != 0 )
-        {
-#ifdef DEBUG
-        Print( "Error complex_state::parse_cmd - bad tag name %s != \'cmd\'\n",
-            name );
-#endif // DEBUG
-        return -1; //Обработка только тега команд.	
-        }
-#else // SIMPLE_PROJECT
-
-    return 0;
-#endif // SIMPLE_PROJECT    
-    } 
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-string_device::string_device( u_int_4 n, const char *new_name,
-    char* str, int max_str_len ): name( 0 ),
-    n( n ),
-    str( str ),
-    max_str_len( max_str_len )
-    {
-    name = new char[ strlen( new_name ) + 1 ];
-    strcpy( name, new_name );
-    }
-//-----------------------------------------------------------------------------
-// Данные группы (buff) в следующем виде:
-//    1 байт  - тип;                                  (1)
-//    4 байта - номер;                                (2)
-//    1 байт  - длина имени группы устройства;        (3)
-//    х байт  - имя группы устройства;                (4)
-//    4 байта - количество подустройств;              (5)
-int string_device::save_device( char *buff )
-    {
-    u_int_2 idx = 0;
-
-    buff[ idx++ ] = complex_device::ARRAY_DEV_STR;    //(1)
-    memcpy( buff + idx, &n, sizeof( n ) );            //(2)
-    idx += 4;
-    buff[ idx++ ] = strlen( name );                   //(3)              
-    strcpy( buff + idx, name );                       //(4)
-    idx += strlen( name ) + 1;
-
-    u_int_4 DEV_CONST = 1;
-    memcpy( buff + idx, &DEV_CONST, sizeof( DEV_CONST ) ); //(5)
-    idx += 4;           
-
-    return idx;
-    }
-//-----------------------------------------------------------------------------
-// Данные группы (buff) в следующем виде:
-//  4 байта - номер устройства;                       (1)
-//  4 байта - количество подустройств;                (2)
-//  далее   - данные каждого подустройства.
-int string_device::save_state( char *buff )
-    {
-    memcpy( buff, &n, sizeof( n ) );                     //(1)
-
-    u_int_4 DEV_CONST = 1;
-    memcpy( buff + 4, &DEV_CONST, sizeof( DEV_CONST ) ); //(2)
-    u_int_2 answer_size = 8;
-
-    int str_len = strlen( str );
-#ifdef DEBUG
-    if ( str_len > 200 )
-        {
-        Print( "string_device::save_state(...) - strlen [ %d ] > 200!\n", 
-            str_len );
-        get_char();
-        }
-#endif // DEBUG
-
-    strcpy( buff + answer_size, str );
-
-
-    answer_size += str_len + 1;      
-
-    return answer_size;
-    }
-//-----------------------------------------------------------------------------
-int string_device::save_changed_state( char *buff )
-    {
-    return save_state( buff );
-    }
-//-----------------------------------------------------------------------------
-void string_device::print() const
-    {
-    char tmp_str[ 100 ];    
-    sprintf( tmp_str, "\"%s\", \t[ %3lu ]", name, 1UL );
-
-    print_str( tmp_str );
-    }
-//-----------------------------------------------------------------------------
-u_int_4 string_device::get_n() const
-    {
-    return 0; 
-    }
-//-----------------------------------------------------------------------------
-int string_device::parse_cmd( char *buff )
-    {
-    buff += 4; //пропуск номера объекта
-    int new_str_len = strlen( buff );
-    if ( new_str_len > max_str_len - 1 )
-        {
-#ifdef DEBUG
-        Print( "string_device::parse_cmd(...) - str_len[ %d ] > max_str_len[ %d ]!\n",
-            new_str_len, max_str_len );
-        get_char();
-#endif // DEBUG
-        }
-    else
-        {
-        strcpy( str, buff );
-        }
-
-    return new_str_len + 1;
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-int device::save_device( char *buff )
-    {
-    memcpy( buff, &number, sizeof( number ) );
-    return sizeof( number );
-    }
 //-----------------------------------------------------------------------------
 void device::print() const
     {
@@ -323,45 +80,6 @@ void device::print() const
     Print( "%5lu\t", ( u_long ) number );
 
 #endif // DEBUG
-    }
-//-----------------------------------------------------------------------------
-u_int_4 device::get_n() const
-    {
-    return number;
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-int char_state_device::save_changed_state( char *buff )
-    {
-    if ( prev_state != get_state() )
-        {
-        return save_state( buff );
-        }
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int char_state_device::save_state( char *buff )
-    {
-    buff[ 0 ] = get_state();
-    prev_state = get_state();
-    return sizeof( char );
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-int u_int_4_state_device::save_changed_state( char *buff )
-    {
-    if ( prev_state != get_u_int_4_state() )
-        {
-        return save_state( buff );
-        }
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int u_int_4_state_device::save_state( char *buff )
-    {
-    prev_state = ( u_int_4 ) get_u_int_4_state();
-    memcpy( buff, &prev_state, sizeof( prev_state ) );
-    return sizeof( prev_state );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -524,13 +242,15 @@ void device_manager::print() const
     Print( "\n" );
     }
 //-----------------------------------------------------------------------------
-device_manager::device_manager(): devices( 0 ), project_devices( 0 )
+device_manager::device_manager(): project_devices( 0 )
     {
     for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
         {
         dev_types_ranges[ i ].start_pos = -1;
         dev_types_ranges[ i ].end_pos = -1;
         }
+
+    G_DEVICE_CMMCTR->add_device( this );
     }
 //-----------------------------------------------------------------------------
 device_manager::~device_manager()
@@ -541,20 +261,20 @@ device_manager::~device_manager()
         }
     project_devices.clear();
 
-    if ( devices )
-        {
-        for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
-            {
-            if ( devices->sub_dev[ i ] )
-                {
-                delete devices->sub_dev[ i ];
-                devices->sub_dev[ i ] = 0;
-                }
-            }
+    //if ( devices )
+    //    {
+    //    for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
+    //        {
+    //        if ( devices->sub_dev[ i ] )
+    //            {
+    //            delete devices->sub_dev[ i ];
+    //            devices->sub_dev[ i ] = 0;
+    //            }
+    //        }
 
-        delete devices;
-        devices = 0;
-        }
+    //    delete devices;
+        //devices = 0;
+        //}
     }
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_N( int number )
@@ -858,26 +578,6 @@ void dev_stub::set_state( int new_state )
     {
     }
 //-----------------------------------------------------------------------------
-int dev_stub::parse_cmd( char *buff )
-    {
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int dev_stub::save_state( char *buff )
-    {
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int dev_stub::save_changed_state( char *buff )
-    {
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int dev_stub::save_device( char *buff )
-    {
-    return 0;
-    }
-//-----------------------------------------------------------------------------
 u_int_4 dev_stub::get_n() const
     {
     return 0;
@@ -951,32 +651,10 @@ void counter::set_state( int new_state )
         }
     }
 //-----------------------------------------------------------------------------
-int counter::parse_cmd( char *buff )
-    {
-    memcpy( &value, buff, sizeof( value ) );
-
-    return sizeof( value );
-    }
-//-----------------------------------------------------------------------------
 void counter::print() const
     {
     device::print();
     wago_device::print();
-    }
-//-----------------------------------------------------------------------------
-u_int_4 counter::get_u_int_4_state()
-    {
-    return get_quantity();
-    }
-//-----------------------------------------------------------------------------
-int counter::save_changed_state( char *buff )
-    {
-    return u_int_4_state_device::save_changed_state( buff );
-    }
-//-----------------------------------------------------------------------------
-int counter::save_state( char *buff )
-    {
-    return u_int_4_state_device::save_state( buff );
     }
 //-----------------------------------------------------------------------------
 void counter::pause()
@@ -1052,26 +730,10 @@ void digital_device::set_state( int new_state )
     else off();    
     }
 //-----------------------------------------------------------------------------
-int digital_device::parse_cmd( char *buff )
-    {
-    set_state( buff[ 0 ] );
-    return sizeof( char );
-    }
-//-----------------------------------------------------------------------------
 void digital_device::print() const
     {
     device::print();
     wago_device::print();
-    }
-//-----------------------------------------------------------------------------
-int digital_device::save_changed_state( char *buff )
-    {
-    return char_state_device::save_changed_state( buff );
-    }
-//-----------------------------------------------------------------------------
-int digital_device::save_state( char *buff )
-    {
-    return char_state_device::save_state( buff );
     }
 //-----------------------------------------------------------------------------
 int digital_device::get_state()
@@ -1095,7 +757,6 @@ void digital_device::off()
     {
     state = 0;
     }
-
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1380,23 +1041,6 @@ void DI_1::off()
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int float_state_device::save_changed_state( char *buff )
-    {
-    if ( prev_state != get_value() )
-        {
-        return save_state( buff );
-        }
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int float_state_device::save_state( char *buff )
-    {
-    prev_state = get_value();
-    memcpy( buff, &prev_state, sizeof( prev_state ) );
-    return sizeof( prev_state );
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
 float AI_1::get_value()
@@ -1509,15 +1153,6 @@ int analog_device::get_state_now()
     return ( int ) get_value();
     }
 //-----------------------------------------------------------------------------
-int analog_device::parse_cmd( char *buff )
-    {
-    float val;
-    memcpy( &val, buff, sizeof( float ) );
-
-    set_value( val );
-    return sizeof( float );
-    }
-//-----------------------------------------------------------------------------
 void analog_device::print() const
     {
     device::print();
@@ -1546,16 +1181,6 @@ void analog_device::set_value( float new_value )
     }
 
 #endif // DEBUG_NO_WAGO_MODULES
-//-----------------------------------------------------------------------------
-int analog_device::save_changed_state( char *buff )
-    {
-    return float_state_device::save_changed_state( buff );
-    }
-//-----------------------------------------------------------------------------
-int analog_device::save_state( char *buff )
-    {
-    return float_state_device::save_state( buff );
-    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float AO_0_100::get_max_val()
