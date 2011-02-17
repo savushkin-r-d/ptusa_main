@@ -12,9 +12,9 @@
 /// @c PAC_ERRORS_H - включение данного файла в компиляцию только один раз.@n
 /// 
 /// @par Текущая версия:
-/// @$Rev: 1631 $.\n
-/// @$Author: id $.\n
-/// @$Date:: 2009-12-24 10:18:10#$.
+/// @$Rev$.\n
+/// @$Author$.\n
+/// @$Date::                     $.
 
 #ifndef PAC_ERRORS_H
 #define PAC_ERRORS_H

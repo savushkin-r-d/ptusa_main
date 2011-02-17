@@ -1,11 +1,9 @@
-#pragma once
-
-#include "stdafx.h"
 #include "WSA_err_decode.h"
+#include <windows.h>
 //-----------------------------------------------------------------------------
-char* WSA_Err_Decode (int ErrCode)
+char* WSA_Err_Decode ( int err_code )
     {
-    switch (ErrCode)
+    switch ( err_code )
         {
     case WSANOTINITIALISED:
         return "A successful WSAStartup must occur before using this function.";

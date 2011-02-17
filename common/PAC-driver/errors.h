@@ -13,9 +13,9 @@
 /// @c WIN32 - компиляция для Windows.
 /// 
 /// @par Текущая версия:
-/// @$Rev: 1631 $.\n
-/// @$Author: id $.\n
-/// @$Date:: 2009-12-24 10:18:10#$.
+/// @$Rev$.\n
+/// @$Author$.\n
+/// @$Date::                     $.
 
 #ifndef ERRORS_H
 #define ERRORS_H

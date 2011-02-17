@@ -9,9 +9,9 @@
 /// @c DEBUG   - компиляция c выводом отладочной информации в консоль.
 ///
 /// @par Текущая версия:
-/// @$Rev: 96 $.\n
-/// @$Author: id@BMK $.\n
-/// @$Date:: 2010-07-09 15:57:50#$.
+/// @$Rev$.\n
+/// @$Author$.\n
+/// @$Date::                     $.
 
 #ifndef TECH_DEFINITION_H
 #define TECH_DEFINITION_H

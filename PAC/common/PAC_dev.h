@@ -186,6 +186,11 @@ class device : public i_AO_device,
             return 0;
             }
 
+        int set_cmd( const char *prop, u_int idx, char *val )
+            {
+            return 0;
+            }
+
         virtual int save_device( char *buff, const char *prefix )
             {
             sprintf( buff, "%s[%d]={st=%d, v=%.2f},\n", 

@@ -7,9 +7,9 @@
 /// @par Описание директив препроцессора:
 /// 
 /// @par Текущая версия:
-/// @$Rev: 39 $.\n
-/// @$Author: id@BMK $.\n
-/// @$Date:: 2010-04-02 17:22:01#$.
+/// @$Rev$.\n
+/// @$Author$.\n
+/// @$Date::                     $.
 
 #ifndef TCP_CMCTR_H
 #define TCP_CMCTR_H

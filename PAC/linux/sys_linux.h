@@ -7,9 +7,9 @@
 /// @par Описание директив препроцессора:
 ///
 /// @par Текущая версия:
-/// @$Rev: 65 $.\n
-/// @$Author: id@BMK $.\n
-/// @$Date:: 2010-05-06 12:38:39#$.
+/// @$Rev$.\n
+/// @$Author$.\n
+/// @$Date::                     $.
 
 #ifndef SYS_LINUX
 #define SYS_LINUX
