@@ -392,6 +392,9 @@
     <ClCompile Include="..\..\..\PAC\common\PID.cpp">
       <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp">
+      <Filter>Source Files\common\PAC-driver</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\PAC\common\Lua\sys.lua">

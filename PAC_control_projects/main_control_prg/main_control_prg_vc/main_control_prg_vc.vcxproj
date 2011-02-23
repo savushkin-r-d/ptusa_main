@@ -155,6 +155,7 @@
     <ClCompile Include="..\..\..\common\lua\lzio.c" />
     <ClCompile Include="..\..\..\common\lua\print.c" />
     <ClCompile Include="..\..\..\common\lua_manager.cpp" />
+    <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp" />
     <ClCompile Include="..\..\..\common\PAC-driver\g_device.cpp" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_event.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_is.c" />

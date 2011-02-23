@@ -101,7 +101,7 @@ int main( int argc, char *argv[] )
 
     //-Добавление системных тегов контроллера.
     g_PAC_system = new PAC_info();
-    G_DEVICE_CMMCTR->add_device( g_PAC_system->com_dev );
+    G_DEVICE_CMMCTR->add_device( g_PAC_system );
 
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
@@ -109,7 +109,7 @@ int main( int argc, char *argv[] )
         device_communicator::write_devices_states_service );
 
     int res = lua_manager::get_instance()->init( 0, argv[ 1 ] ); //-Инициализация Lua.
-    lua_gc( lua_manager::get_instance()->L, LUA_GCSTOP, 0 );
+    lua_gc( lua_manager::get_instance()->get_Lua(), LUA_GCSTOP, 0 );
 
     if ( res ) //-Ошибка инициализации.
     	{
@@ -132,15 +132,15 @@ int main( int argc, char *argv[] )
 #endif // DEBUG
     
     print_time( "Lua mem = %d b\n",
-        lua_gc( lua_manager::get_instance()->L, LUA_GCCOUNT, 0 ) * 1024 +
-        lua_gc( lua_manager::get_instance()->L, LUA_GCCOUNTB, 0 ) );
+        lua_gc( lua_manager::get_instance()->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
+        lua_gc( lua_manager::get_instance()->get_Lua(), LUA_GCCOUNTB, 0 ) );
 
-    lua_gc( lua_manager::get_instance()->L, LUA_GCRESTART, 0 );
-    lua_gc( lua_manager::get_instance()->L, LUA_GCCOLLECT, 0 );
+    lua_gc( lua_manager::get_instance()->get_Lua(), LUA_GCRESTART, 0 );
+    lua_gc( lua_manager::get_instance()->get_Lua(), LUA_GCCOLLECT, 0 );
 
     print_time( "Lua mem = %d b\n",
-        lua_gc( lua_manager::get_instance()->L, LUA_GCCOUNT, 0 ) * 1024 +
-        lua_gc( lua_manager::get_instance()->L, LUA_GCCOUNTB, 0 ) );
+        lua_gc( lua_manager::get_instance()->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
+        lua_gc( lua_manager::get_instance()->get_Lua(), LUA_GCCOUNTB, 0 ) );
     fflush( stdout );
     fprintf( stderr, "Start main loop!\n" );
     
@@ -150,8 +150,12 @@ int main( int argc, char *argv[] )
     while ( 1 )
 #endif // DEBUG
         {
-        lua_gc( lua_manager::get_instance()->L, LUA_GCSTEP, 200 );
+        lua_gc( lua_manager::get_instance()->get_Lua(), LUA_GCSTEP, 200 );
+#ifdef WIN_OS
+        Sleep( 1 );
+#else 
         usleep( 1 );
+#endif // WIN_OS       
         
         static u_long st_time;
         static u_long all_time   = 0;
@@ -198,8 +202,8 @@ int main( int argc, char *argv[] )
             max_cycle_time = cycle_time;
             print_time( "\tMain cycle avg time = %lu msec, max time = %4u, Lua mem = %d b\n",
                 all_time / cycles_cnt, max_cycle_time,
-                lua_gc( lua_manager::get_instance()->L, LUA_GCCOUNT, 0 ) * 1024 +
-                lua_gc( lua_manager::get_instance()->L, LUA_GCCOUNTB, 0 ) );
+                lua_gc( lua_manager::get_instance()->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
+                lua_gc( lua_manager::get_instance()->get_Lua(), LUA_GCCOUNTB, 0 ) );
             fflush( stdout );
             }
 
@@ -210,8 +214,8 @@ int main( int argc, char *argv[] )
                 {
                 print_time( "\tMain cycle avg time = %lu msec, max time = %4u, Lua mem = %d b\n",
                     all_time / cycles_cnt, max_cycle_time,
-                    lua_gc( lua_manager::get_instance()->L, LUA_GCCOUNT, 0 ) * 1024 +
-                    lua_gc( lua_manager::get_instance()->L, LUA_GCCOUNTB, 0 ) );
+                    lua_gc( lua_manager::get_instance()->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
+                    lua_gc( lua_manager::get_instance()->get_Lua(), LUA_GCCOUNTB, 0 ) );
                     print_cycle_time_count++;
                 fflush( stdout );
                 }

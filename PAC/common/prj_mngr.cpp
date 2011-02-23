@@ -31,6 +31,7 @@ int project_manager::proc_main_params( int argc, char *argv[] )
 //-----------------------------------------------------------------------------
 project_manager* project_manager::get_instance()
     {
+
     return instance;
     }
 //-----------------------------------------------------------------------------
