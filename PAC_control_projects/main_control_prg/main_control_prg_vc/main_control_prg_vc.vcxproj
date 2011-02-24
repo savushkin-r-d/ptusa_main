@@ -39,19 +39,20 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;$(IncludePath)</IncludePath>
+    <IncludePath>../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;$(IncludePath)</IncludePath>
     <TargetName>ptusa</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>ptusa</TargetName>
+    <IncludePath>../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;;../../../PAC/common/sys;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG;TEST_SPEED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -67,7 +68,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -105,7 +106,7 @@
     <ClInclude Include="..\..\..\common\tolua++\tolua++.h" />
     <ClInclude Include="..\..\..\common\tolua++\tolua_base.h" />
     <ClInclude Include="..\..\..\common\tolua++\tolua_event.h" />
-    <ClInclude Include="..\..\..\common\util\util.h" />
+    <ClInclude Include="..\..\..\common\util\smart_ptr.h" />
     <ClInclude Include="..\..\..\PAC\common\mode_mngr.h" />
     <ClInclude Include="..\..\..\PAC\common\PAC_dev.h" />
     <ClInclude Include="..\..\..\PAC\common\PAC_err.h" />
@@ -113,15 +114,21 @@
     <ClInclude Include="..\..\..\PAC\common\param_ex.h" />
     <ClInclude Include="..\..\..\PAC\common\PID.h" />
     <ClInclude Include="..\..\..\PAC\common\prj_mngr.h" />
-    <ClInclude Include="..\..\..\PAC\common\sys.h" />
+    <ClInclude Include="..\..\..\PAC\common\sys\debug.h" />
+    <ClInclude Include="..\..\..\PAC\common\sys\led.h" />
+    <ClInclude Include="..\..\..\PAC\common\sys\console.h" />
+    <ClInclude Include="..\..\..\PAC\common\sys\mem.h" />
+    <ClInclude Include="..\..\..\PAC\common\sys\dtime.h" />
+    <ClInclude Include="..\..\..\PAC\common\sys\types.h" />
     <ClInclude Include="..\..\..\PAC\common\tcp_cmctr.h" />
     <ClInclude Include="..\..\..\PAC\common\tech_def.h" />
     <ClInclude Include="..\..\..\PAC\common\wago.h" />
-    <ClInclude Include="..\..\..\PAC\win\PAC_PC\sys_PC.h" />
     <ClInclude Include="..\..\..\PAC\win\PAC_PC\wago_PC.h" />
-    <ClInclude Include="..\..\..\PAC\win\prj_mngr_win.h" />
-    <ClInclude Include="..\..\..\PAC\win\sys_win.h" />
-    <ClInclude Include="..\..\..\PAC\win\tcp_cmctr_win.h" />
+    <ClInclude Include="..\..\..\PAC\win\w_tcp_cmctr.h" />
+    <ClInclude Include="..\..\..\pac\win\w_console.h" />
+    <ClInclude Include="..\..\..\PAC\win\w_led.h" />
+    <ClInclude Include="..\..\..\PAC\win\w_mem.h" />
+    <ClInclude Include="..\..\..\PAC\win\w_types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\common\lua\lapi.c" />
@@ -162,7 +169,6 @@
     <ClCompile Include="..\..\..\common\tolua++\tolua_map.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_push.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_to.c" />
-    <ClCompile Include="..\..\..\common\util\util.cpp" />
     <ClCompile Include="..\..\..\PAC\common\mode_mngr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_dev.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_dev_lua.cpp" />
@@ -171,15 +177,17 @@
     <ClCompile Include="..\..\..\PAC\common\param_ex.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PID.cpp" />
     <ClCompile Include="..\..\..\PAC\common\prj_mngr.cpp" />
-    <ClCompile Include="..\..\..\PAC\common\sys.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\sys\io.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\sys\led.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\sys\mem.cpp" />
     <ClCompile Include="..\..\..\PAC\common\tcp_cmctr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\tech_def.cpp" />
     <ClCompile Include="..\..\..\PAC\common\wago.cpp" />
-    <ClCompile Include="..\..\..\PAC\win\PAC_PC\sys_PC.cpp" />
     <ClCompile Include="..\..\..\PAC\win\PAC_PC\wago_PC.cpp" />
-    <ClCompile Include="..\..\..\PAC\win\prj_mngr_win.cpp" />
-    <ClCompile Include="..\..\..\PAC\win\sys_win.cpp" />
-    <ClCompile Include="..\..\..\PAC\win\tcp_cmctr_win.cpp" />
+    <ClCompile Include="..\..\..\PAC\win\w_tcp_cmctr.cpp" />
+    <ClCompile Include="..\..\..\PAC\win\w_dtime.cpp" />
+    <ClCompile Include="..\..\..\PAC\win\w_console.cpp" />
+    <ClCompile Include="..\..\..\PAC\win\w_mem.cpp" />
     <ClCompile Include="..\main.cpp" />
   </ItemGroup>
   <ItemGroup>

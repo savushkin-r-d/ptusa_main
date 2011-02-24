@@ -14,7 +14,9 @@
 #ifndef TCP_CMCTR_H
 #define TCP_CMCTR_H
 
-#include "sys.h"
+//#include "sys.h"
+#include "types.h"
+#include "smart_ptr.h"
 
 //-----------------------------------------------------------------------------
 /// @brief Ѕазовый класс коммуникатор - обмен данными PAC-сервер.
@@ -32,16 +34,7 @@ class tcp_communicator
         /// tcp_communicator.
         static tcp_communicator* get_instance();
 
-        /// @brief »нициализаци€ единственного экземпл€ра класса дл€ работы с 
-        /// коммуникатором.
-        ///
-        /// @param new_instance - указатель на единственный объект класса, 
-        /// производного от @ref tcp_communicator.
-        static void set_instance( tcp_communicator* new_instance );
-
-        /// @brief ”даление единственного экземпл€ра класса дл€ работы с 
-        /// коммуникатором.
-        static void free_instance();
+        static void init_instance( const char *name );
 
         /// @brief »тераци€ обмена данными с сервером.
         virtual int evaluate() = 0;

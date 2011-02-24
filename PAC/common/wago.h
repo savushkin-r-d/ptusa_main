@@ -15,7 +15,7 @@
 #ifndef WAGO_H
 #define WAGO_H
 
-#include "sys.h"
+#include "smart_ptr.h"
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе модулей ввода/вывода WAGO. 
 /// 
@@ -186,9 +186,6 @@ class wago_manager
 
         /// @brief Получение единственного экземпляра класса.
         static wago_manager* get_instance();
-
-        /// @brief Установка единственного экземпляра класса.
-        static void set_instance( wago_manager* new_instance );
 
         /// @brief Получение области данных заданного канала дискретного входа.
         ///

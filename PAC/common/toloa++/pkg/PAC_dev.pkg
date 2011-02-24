@@ -13,7 +13,6 @@ $#include "tech_def.h"
 $#include "wago.h"
 $#include "tolua_base.h"
 $#include "PID.h"
-$#include "sys.h"
 $#include "g_device.h"
 
 //-----------------------------------------------------------------------------

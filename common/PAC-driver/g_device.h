@@ -23,7 +23,9 @@
 #define GENERAL_DEVICE_H
 
 #ifndef DRIVER
-#include "sys.h"
+
+#include "smart_ptr.h"
+
 #include "tcp_cmctr.h"
 #include <vector>
 
@@ -31,9 +33,6 @@
 #include "sys_linux.h"
 #endif // defined LINUX_OS
 
-#if defined WIN32
-#include "sys_win.h"
-#endif // defined WIN32
 
 //-----------------------------------------------------------------------------
 /// @brief »нтерфейс устройства, позвол€ющий сохранить его в потоке байтов.
@@ -48,13 +47,13 @@ class i_Lua_save_device
         virtual int save_device( char *buff ) = 0; 
 
         /// @brief ќтладочна€ печать объекта в консоль.
-		virtual void print() const = 0;
+        virtual void print() const = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief »нтерфейс устройства, позвол€ющий получать команды от сервера.
 class i_cmd_device    
-	{      
-	public:
+    {      
+    public:
         /// @brief ¬ыполнение числовой команды.
         ///
         /// @param prop [ in ] - им€ свойства.
@@ -74,7 +73,7 @@ class i_cmd_device
         /// @return 0 - ок.
         /// @return 1 - ќшибка.
         virtual int set_cmd( const char *prop, u_int idx, char *val ) = 0;
-	};
+    };
 
 #endif // DRIVER
 //-----------------------------------------------------------------------------
@@ -106,20 +105,12 @@ class device_communicator
         /// @brief ѕолучение единственного экземпл€ра класса.
         static device_communicator* get_instance()
             {
-            static char is_init = 0;
-            if ( 0 == is_init )
-            	{
-                is_init = 1;
+            if ( instance.is_null() )
+                {
                 instance = new device_communicator();
-            	}
+                }
 
             return instance;
-            }
-
-        /// @brief ”становка единственного экземпл€ра класса.
-        static void set_instance( device_communicator* new_instance )
-            {
-            instance = new_instance;
             }
 
         enum CONSTANTS

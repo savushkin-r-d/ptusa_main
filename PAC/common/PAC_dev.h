@@ -24,7 +24,7 @@
 
 #include <vector>
 
-#include "sys.h"
+//#include "sys.h"
 #include "wago.h"
 #include "g_device.h"
 
@@ -361,11 +361,11 @@ class digital_device : public device,
             {
             }
 
-		int parse_cmd( char* cmd ) 
-			{
-			int val = 0;
-			return 4;
-			}
+        int parse_cmd( char* cmd ) 
+            {
+            int val = 0;
+            return 4;
+            }
 
         float   get_value();
         void    set_value( float new_value );
@@ -374,8 +374,8 @@ class digital_device : public device,
 
         int save_device( char *buff, const char *prefix )
             {	
-			sprintf( buff, "%s[%d]={st=%d},\n", 
-				prefix, get_n(),  get_state() );
+            sprintf( buff, "%s[%d]={st=%d},\n", 
+                prefix, get_n(),  get_state() );
 
             return strlen( buff );
             }
@@ -1063,9 +1063,6 @@ class device_manager: public i_Lua_save_device
 
         /// @brief Отладочная печать объекта в консоль.
         void print() const;
-
-        /// @brief Установка единственного экземпляра класса.
-        static void set_instance( device_manager* new_instance );
 
         /// @brief Получение фиктивного устройства.
         dev_stub* get_stub()

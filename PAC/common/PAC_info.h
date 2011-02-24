@@ -1,15 +1,14 @@
 #ifndef PAC_INFO_H
 #define PAC_INFO_H
 
+#include "dtime.h"
+
 #include "g_device.h"
-#include "PAC_dev.h"
 #include "param_ex.h"
 
 class PAC_info: public i_Lua_save_device
     {
     public:
-        PAC_info();
-
         ~PAC_info();
 
         void eval();
@@ -27,12 +26,21 @@ class PAC_info: public i_Lua_save_device
 
         int save_device( char *buff );
 
-		void print() const
-			{
-			Print( "PAC_info\n" );
-			}
+        void print() const
+            {
+            Print( "PAC_info\n" );
+            }
 
-    private:    
+        /// @brief ѕолучение единственного экземпл€ра класса дл€ работы.
+        ///
+        /// @return - указатель на единственный объект класса @ref PAC_info.
+        static PAC_info* get_instance();
+
+    private:   
+        PAC_info();
+
+        static auto_smart_ptr < PAC_info > instance;///< Ёкземпл€р класса.
+
         static const u_int_4 MSEC_IN_DAY; 
         enum CONSTANTS
             {

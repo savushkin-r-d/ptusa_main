@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #include "tech_def.h"
-#include "sys.h"
+//#include "sys.h"
 
 #include "lua_manager.h"
 //-----------------------------------------------------------------------------
@@ -312,13 +312,12 @@ int tech_object_manager::init_runtime_params()
 //-----------------------------------------------------------------------------
 tech_object_manager* tech_object_manager::get_instance()
     {
+    if ( instance.is_null() )
+        {
+        instance = new tech_object_manager();
+        }
+
     return instance;
-    }
-//-----------------------------------------------------------------------------
-int tech_object_manager::set_instance( tech_object_manager* new_instance )
-    {
-    instance = new_instance;
-    return 0;
     }
 //-----------------------------------------------------------------------------
 int tech_object_manager::get_object_with_active_mode( u_int mode,

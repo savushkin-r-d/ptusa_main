@@ -10,10 +10,6 @@
 
 #endif // defined LINUX_OS
 
-#ifdef PAC_PC
-#include "sys_PC.h"
-#endif // PAC_PC
-
 auto_smart_ptr < PAC_critical_errors_manager > PAC_critical_errors_manager::instance;
 //-----------------------------------------------------------------------------
 PAC_critical_errors_manager::PAC_critical_errors_manager(
@@ -21,18 +17,6 @@ PAC_critical_errors_manager::PAC_critical_errors_manager(
     global_ok( 0 )    
     {
     errors.clear();
-
-#ifdef PAC_PC
-    wago_led = new led_PC();
-#endif // PAC_PC
-    
-#if defined LINUX_OS
-
-#ifdef PAC_WAGO_750_860
-    wago_led = new led_W750();
-#endif // PAC_WAGO_750_860
-
-#endif // defined LINUX_OS
     }
 //-----------------------------------------------------------------------------
 void PAC_critical_errors_manager::show_errors()
@@ -48,7 +32,7 @@ void PAC_critical_errors_manager::show_errors()
             if ( get_delta_millisec( start_time ) > 500 )
                 {
                 show_step = 1;
-                wago_led->on( led::L_STATUS, led::C_RED );
+                get_led()->on( led::L_STATUS, led::C_RED );
                 start_time = get_millisec();
                 }
             break;
@@ -57,7 +41,7 @@ void PAC_critical_errors_manager::show_errors()
             if ( get_delta_millisec( start_time ) > 500 )
                 {
                 show_step = 0;
-                wago_led->off( led::L_STATUS );
+                get_led()->off( led::L_STATUS );
                 start_time = get_millisec();
                 }
             break;
@@ -71,7 +55,7 @@ void PAC_critical_errors_manager::show_errors()
             if ( get_delta_millisec( start_time ) > 500 )
                 {
                 show_step = 1;
-                wago_led->on( led::L_STATUS, led::C_GREEN );
+                get_led()->on( led::L_STATUS, led::C_GREEN );
                 start_time = get_millisec();
                 }
             break;
@@ -80,7 +64,7 @@ void PAC_critical_errors_manager::show_errors()
             if ( get_delta_millisec( start_time ) > 500 )
                 {
                 show_step = 0;
-                wago_led->off( led::L_STATUS );                
+                get_led()->off( led::L_STATUS );                
                 start_time = get_millisec();
                 }
             break;
@@ -199,14 +183,13 @@ unsigned char PAC_critical_errors_manager::save_to_stream_2( char *buff )
     return answer_size; 
     }
 //-----------------------------------------------------------------------------
-int PAC_critical_errors_manager::set_instance( PAC_critical_errors_manager *new_instance )
-    {
-    instance = new_instance;
-    return 0;
-    }
-//-----------------------------------------------------------------------------
 PAC_critical_errors_manager * PAC_critical_errors_manager::get_instance()
     {
+    if ( instance.is_null() )
+        {
+        instance = new PAC_critical_errors_manager();
+        }
+
     return instance;
     }
 //-----------------------------------------------------------------------------

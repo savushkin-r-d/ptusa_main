@@ -22,15 +22,11 @@
 #include <string.h>
 #include <vector>
 
-#include "sys.h"
+//#include "sys.h"
+#include "smart_ptr.h"
+#include "dtime.h"
+#include "led.h"
 
-#ifdef LINUX_OS
-#include "sys_linux.h"
-#endif
-
-#ifdef WIN_OS
-#include "sys_win.h"
-#endif
 //-----------------------------------------------------------------------------
 enum ERRORS_CLASS
     {
@@ -133,8 +129,6 @@ class PAC_critical_errors_manager
         int save_to_stream( char *buff );
         unsigned char save_to_stream_2( char *buff );
 
-        static int set_instance( PAC_critical_errors_manager *new_instance );
-
         static PAC_critical_errors_manager * get_instance();
 
     private:
@@ -154,7 +148,7 @@ class PAC_critical_errors_manager
         u_int_2 errors_id;
         int   global_ok;
 
-        auto_smart_ptr< led > wago_led;
+//        auto_smart_ptr< led > wago_led;
     };
 //-----------------------------------------------------------------------------
 #endif // PAC_ERRORS_H

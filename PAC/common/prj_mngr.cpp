@@ -1,3 +1,7 @@
+#if !defined WIN_OS
+#error You must define OS!
+#endif // !defined WIN_OS
+
 #include <string.h>
 #include <stdlib.h>
 
@@ -7,6 +11,10 @@
 #include "param_ex.h"
 
 #include "lua_manager.h"
+
+#ifdef WIN_OS
+#include "w_mem.h"
+#endif // WIN_OS
 
 auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
@@ -31,13 +39,16 @@ int project_manager::proc_main_params( int argc, char *argv[] )
 //-----------------------------------------------------------------------------
 project_manager* project_manager::get_instance()
     {
+    if ( instance.is_null() )
+        {
+        instance = new project_manager();
+
+#ifdef WIN_OS
+        instance->cfg_file = new data_file();
+#endif // WIN_OS        
+        }
 
     return instance;
-    }
-//-----------------------------------------------------------------------------
-void project_manager::set_instance( project_manager* new_instance )
-    {
-    instance = new_instance;
     }
 //-----------------------------------------------------------------------------
 project_manager::~project_manager()
@@ -47,11 +58,6 @@ project_manager::~project_manager()
         delete cfg_file;
         cfg_file = 0;
         }
-    }
-//-----------------------------------------------------------------------------
-void project_manager::free_instance()
-    {
-    instance.free();
     }
 //-----------------------------------------------------------------------------
 int project_manager::lua_load_configuration()

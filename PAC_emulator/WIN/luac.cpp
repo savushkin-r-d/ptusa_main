@@ -25,18 +25,13 @@ extern "C" {
     };
 #endif
 
+#include <conio.h>
+
 #include "tolua++.h"
 
-#include "sys.h"
 #include "PAC_dev.h"
-
-#include <conio.h>
-#include "tcp_cmctr_win.h"
-#include "prj_mngr_win.h"
-
-#include "sys_PC.h"
-#include "wago_PC.h"
-
+#include "tcp_cmctr.h"
+#include "prj_mngr.h"
 #include "tech_def.h"
 #include "lua_manager.h"
 
@@ -45,8 +40,6 @@ extern "C" {
 static lua_State *globalL = NULL;
 
 static const char *progname = LUA_PROGNAME;
-
-
 
 static void lstop (lua_State *L, lua_Debug *ar) {
     (void)ar;  /* unused arg. */
@@ -400,28 +393,27 @@ static int pmain (lua_State *L) {
         return 1;
         }
 
-	NV_memory_manager::set_instance( new NV_memory_manager_PC() );
-    project_manager::set_instance( new project_manager_win() );  
+    //NV_memory_manager::set_instance( new NV_memory_manager_PC() );
+   //project_manager::set_instance( new project_manager_win() );  
 
-    device_manager::set_instance( new device_manager() );
-    device_communicator::set_instance( new device_communicator() );
+    //device_manager::set_instance( new device_manager() );
+    //device_communicator::set_instance( new device_communicator() );
 
-    wago_manager::set_instance( new wago_manager_PC() );
+    //wago_manager::set_instance( new wago_manager_PC() );
     
-    tech_object_manager::set_instance( new tech_object_manager() );
-    PAC_critical_errors_manager::set_instance( new PAC_critical_errors_manager() );
+    //tech_object_manager::set_instance( new tech_object_manager() );
+    //PAC_critical_errors_manager::set_instance( new PAC_critical_errors_manager() );
 
     tolua_PAC_dev_open( L );
     lua_manager::get_instance()->init( L, 0 );
 
     G_PROJECT_MANAGER->lua_load_configuration();
 
-    const char *prj_name = 
+    const char *PAC_name = 
         lua_manager::get_instance()->char_no_param_exec_lua_method( "system",
         "get_PAC_name", "lua_manager::init" );
 
-    tcp_communicator::set_instance( 
-        new tcp_communicator_win( prj_name ) );
+    tcp_communicator::init_instance( PAC_name );
     
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
@@ -456,8 +448,6 @@ static int pmain (lua_State *L) {
     return 0;
     }
 
-PAC_info *g_PAC_system;
-
 int main (int argc, char **argv) 
     {
     int status;
@@ -484,8 +474,7 @@ int main (int argc, char **argv)
         G_TECH_OBJECT_MNGR()->init_objects();
 
         //-ƒобавление системных тегов контроллера.
-        g_PAC_system = new PAC_info();
-        G_DEVICE_CMMCTR->add_device( g_PAC_system );
+        G_DEVICE_CMMCTR->add_device( PAC_info::get_instance() );
 
         G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
@@ -521,7 +510,7 @@ int main (int argc, char **argv)
 
             PAC_critical_errors_manager::get_instance()->show_errors();
 
-            g_PAC_system->eval();
+            PAC_info::get_instance()->eval();
 
 #ifdef DEBUG
             all_time += get_millisec() - st_time;

@@ -14,10 +14,11 @@
 #ifndef _PID_H
 #define _PID_H
 
+#include "dtime.h"
+
 #include "param_ex.h"
 #include "PAC_dev.h"
-#include "util.h"
-#include "sys.h"
+//#include "sys.h"
 
 class PID
     { 

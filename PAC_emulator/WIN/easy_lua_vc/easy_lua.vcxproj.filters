@@ -82,8 +82,8 @@
     <Filter Include="Lua Source\common">
       <UniqueIdentifier>{8074c9c5-7488-459e-b304-6661c61d00d0}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\common\util">
-      <UniqueIdentifier>{a9f605da-328a-47dc-a022-056fb398dcba}</UniqueIdentifier>
+    <Filter Include="Source Files\PAC\common\sys">
+      <UniqueIdentifier>{834642ab-5d0b-4943-9ee9-a527a38e2e66}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -99,9 +99,6 @@
     <ClInclude Include="..\..\..\PAC\common\prj_mngr.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\PAC\common\sys.h">
-      <Filter>Header Files\PAC\common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\tcp_cmctr.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
@@ -111,23 +108,8 @@
     <ClInclude Include="..\..\..\PAC\common\wago.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\common\util\util.h">
-      <Filter>Header Files\common\util</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\common\PAC-driver\g_device.h">
       <Filter>Header Files\common\PAC-driver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\PAC\win\prj_mngr_win.h">
-      <Filter>Header Files\PAC\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\PAC\win\sys_win.h">
-      <Filter>Header Files\PAC\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\PAC\win\tcp_cmctr_win.h">
-      <Filter>Header Files\PAC\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\PAC\win\PAC_PC\sys_PC.h">
-      <Filter>Header Files\PAC\win\PAC_PC</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\win\PAC_PC\wago_PC.h">
       <Filter>Header Files\PAC\win\PAC_PC</Filter>
@@ -225,6 +207,24 @@
     <ClInclude Include="..\..\..\common\PAC-driver\errors.h">
       <Filter>Header Files\common\PAC-driver</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\common\util\smart_ptr.h">
+      <Filter>Header Files\common\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\win\w_console.h">
+      <Filter>Header Files\PAC\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\win\w_led.h">
+      <Filter>Header Files\PAC\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\win\w_mem.h">
+      <Filter>Header Files\PAC\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\win\w_types.h">
+      <Filter>Header Files\PAC\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\win\w_tcp_cmctr.h">
+      <Filter>Header Files\PAC\win</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\PAC\common\PAC_dev.cpp">
@@ -242,9 +242,6 @@
     <ClCompile Include="..\..\..\PAC\common\prj_mngr.cpp">
       <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\PAC\common\sys.cpp">
-      <Filter>Source Files\PAC\common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\tcp_cmctr.cpp">
       <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
@@ -256,18 +253,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\common\PAC-driver\g_device.cpp">
       <Filter>Source Files\common\PAC-driver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\PAC\win\prj_mngr_win.cpp">
-      <Filter>Source Files\PAC\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\PAC\win\sys_win.cpp">
-      <Filter>Source Files\PAC\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\PAC\win\tcp_cmctr_win.cpp">
-      <Filter>Source Files\PAC\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\PAC\win\PAC_PC\sys_PC.cpp">
-      <Filter>Source Files\PAC\win\PAC_PC</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\win\PAC_PC\wago_PC.cpp">
       <Filter>Source Files\PAC\win\PAC_PC</Filter>
@@ -392,11 +377,29 @@
     <ClCompile Include="..\..\..\PAC\common\PAC_info.cpp">
       <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\common\util\util.cpp">
-      <Filter>Source Files\common\util</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp">
       <Filter>Source Files\common\PAC-driver</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\win\w_console.cpp">
+      <Filter>Source Files\PAC\win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\win\w_dtime.cpp">
+      <Filter>Source Files\PAC\win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\win\w_mem.cpp">
+      <Filter>Source Files\PAC\win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\sys\io.cpp">
+      <Filter>Source Files\PAC\common\sys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\sys\led.cpp">
+      <Filter>Source Files\PAC\common\sys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\sys\mem.cpp">
+      <Filter>Source Files\PAC\common\sys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\win\w_tcp_cmctr.cpp">
+      <Filter>Source Files\PAC\win</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -12,7 +12,9 @@
 #ifndef PRJ_MANAGER_H
 #define PRJ_MANAGER_H
 
-#include "sys.h"
+#include "smart_ptr.h"
+#include "mem.h"
+
 //-----------------------------------------------------------------------------
 /// @brief Инициализация проекта.
 ///
@@ -31,12 +33,6 @@ class project_manager
 
         /// @brief Получение единственного экземпляра класса.
         static project_manager* get_instance();
-
-        /// @brief Установка единственного экземпляра класса.
-        static void set_instance( project_manager* new_instance );
-
-        /// @brief Удаление единственного экземпляра класса.
-        static void free_instance();
 
         virtual ~project_manager();
 

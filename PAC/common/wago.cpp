@@ -1,5 +1,13 @@
+#if !defined WIN_OS
+#error You must define OS!
+#endif // !defined WIN_OS
+
 #include "wago.h"
 #include "lua_manager.h"
+
+#ifdef WIN_OS
+#include "wago_PC.h"
+#endif // WIN_OS
 
 auto_smart_ptr < wago_manager > wago_manager::instance;
 //-----------------------------------------------------------------------------
@@ -582,12 +590,14 @@ void wago_manager::init( int nodes_count )
 //-----------------------------------------------------------------------------
 wago_manager* wago_manager::get_instance()
     {
+    if ( instance.is_null() )
+        {
+#ifdef WIN_OS
+        instance = new wago_manager_PC();
+#endif // WIN_OS        
+        }
+
     return instance;
-    }
-//-----------------------------------------------------------------------------
-void wago_manager::set_instance( wago_manager* new_instance )
-    {
-    instance = new_instance;
     }
 //-----------------------------------------------------------------------------
 u_char* wago_manager::get_DI_read_data( u_int node_n, u_int offset )

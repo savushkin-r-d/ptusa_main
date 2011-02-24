@@ -1,21 +1,28 @@
-#ifndef SYS_WIN_H
-#define SYS_WIN_H
+/// @file w_mem.h
+/// @brief Содержит описания классов, которые реализуют аппаратную часть PAC 
+/// по работе с памятью.
+/// 
+/// @author  Иванюк Дмитрий Сергеевич.
+///
+/// @par Описание директив препроцессора:
+/// @c DEBUG    - компиляция c выводом отладочной информации в консоль.@n@n
+/// 
+/// @par Текущая версия:
+/// @$Rev: 220 $.\n
+/// @$Author: id $.\n
+/// @$Date:: 2011-02-15 16:58:56#$.
 
-#include "sys.h"
+#ifndef SYS_MEM_WIN_H
+#define SYS_MEM_WIN_H
 
-typedef short int            int_2;
-typedef int                  int_4;
-typedef unsigned short int u_int_2;
-
-typedef unsigned int       u_int_4;
+#include "mem.h"
 //-----------------------------------------------------------------------------
 /// @brief Работа с энергонезависимой ОЗУ (Static Memory).
 ///
 /// Имеет ограничения на количество циклов записи/чтения - 1 миллион.
 class SRAM: public NV_memory
     {
-    friend class NV_memory_manager_W750;
-    friend class NV_memory_manager_PC;
+    friend class NV_memory_manager;
 
     private:
         enum CONSTANTS
@@ -63,5 +70,4 @@ class data_file : public file
         char buf[ C_MAX_BUFFER_SIZE ];
     };
 //-----------------------------------------------------------------------------
-
-#endif // SYS_WIN_H
+#endif // SYS_MEM_WIN_H

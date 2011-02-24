@@ -110,12 +110,11 @@ i_DO_device* device_manager::get_V( int number )
 //-----------------------------------------------------------------------------
 device_manager* device_manager::get_instance()
     {
+    if ( instance.is_null() )
+        {
+        instance = new device_manager();
+        }
     return instance;
-    }
-//-----------------------------------------------------------------------------
-void device_manager::set_instance( device_manager* new_instance )
-    {
-    instance = new_instance;
     }
 //-----------------------------------------------------------------------------
 int device_manager::get_device_n( device::DEVICE_TYPE dev_type, 

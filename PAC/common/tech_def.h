@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <vector>
 
-#include "sys.h"
+//#include "sys.h"
 #include "g_device.h"
 #include "PAC_dev.h"
 #include "PAC_err.h"
@@ -256,9 +256,6 @@ class tech_object_manager
         /// @brief Получение единственного экземпляра класса.
         static tech_object_manager* get_instance();
 
-        /// @brief Установка единственного экземпляра класса.
-        static int set_instance( tech_object_manager* new_instance );
-
         /// @brief Получение объекта с заданным активным режимом.
         int get_object_with_active_mode( u_int mode, u_int start_idx,
             u_int end_idx );
@@ -286,6 +283,7 @@ class tech_object_manager
             for ( u_int i = 0; i < tech_objects.size(); i++ )
                 {
                 tech_objects[ i ]->print();
+                Print( "\n" );
 
 #ifdef KEY_CONFIRM
                 Print( "Press any key to continue..." );

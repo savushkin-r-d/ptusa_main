@@ -1,12 +1,17 @@
+#if !defined WIN_OS
+#error You must define OS!
+#endif // !defined WIN_OS
+
 #include "tcp_cmctr.h"
+
+#ifdef WIN_OS
+#include "w_tcp_cmctr.h"
+#endif // WIN_OS
 
 auto_smart_ptr < tcp_communicator > tcp_communicator::instance = 0;
 //------------------------------------------------------------------------------
 tcp_communicator::tcp_communicator()
-    {
-    //buf                 = new u_char[ BUFSIZE ];
-    //memset( buf, 0, BUFSIZE );
-    
+    {   
     is_going_to_reboot  = 0;
     max_cycles          = 4;
     glob_cmctr_ok       = 1;
@@ -61,13 +66,8 @@ void tcp_communicator::_AknOK()
     }
 //------------------------------------------------------------------------------
 tcp_communicator* tcp_communicator::get_instance()
-    {
+    {   
     return instance;
-    }
-//------------------------------------------------------------------------------
-void tcp_communicator::set_instance( tcp_communicator* new_instance )
-    {
-    instance = new_instance;
     }
 //------------------------------------------------------------------------------
 char* tcp_communicator::get_host_name()
@@ -77,15 +77,12 @@ char* tcp_communicator::get_host_name()
 //------------------------------------------------------------------------------
 tcp_communicator::~tcp_communicator()
     {
-//    if ( buf )
-//        {
-//        delete [] buf;
-//        buf = 0;
-//        }
     }
 //------------------------------------------------------------------------------
-void tcp_communicator::free_instance()
+void tcp_communicator::init_instance( const char *name )
     {
-    instance.free();
+#ifdef WIN_OS
+    instance = new tcp_communicator_win( name );
+#endif // WIN_OS
     }
 //------------------------------------------------------------------------------

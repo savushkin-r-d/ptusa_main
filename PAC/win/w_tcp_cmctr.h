@@ -1,6 +1,6 @@
-/// @file tcp_cmctr_linux.h
+/// @file w_tcp_cmctr.h
 /// @brief Содержит описания классов, которые предназначены для обмена данными
-/// PAC-сервер по протоколу TCP для OC Linux.
+/// PAC-сервер по протоколу TCP для OC Windows.
 ///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
@@ -31,7 +31,7 @@ struct socket_state
     sockaddr_in sin; ///< Адрес клиента.
     };
 //-----------------------------------------------------------------------------
-/// @brief Коммуникатор для Linux - обмен данными PAC<->сервер.
+/// @brief Коммуникатор для Windows - обмен данными PAC<->сервер.
 class tcp_communicator_win : public tcp_communicator 
     {
         public:

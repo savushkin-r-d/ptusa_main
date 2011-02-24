@@ -1,11 +1,5 @@
-#include "sys_win.h"
-
-#include <stdio.h>
-#include <time.h>
-#include <sys/types.h>
-#include <sys/timeb.h>
-#include <Winsock2.h>
-#include <conio.h>
+#include "w_mem.h"
+#include "stdlib.h"
 
 #pragma warning( disable : 4244 ) //conversion from '__time64_t' to 'u_long', possible loss of data
 FILE* SRAM::file = 0;
@@ -102,10 +96,10 @@ int data_file::file_open( const char* file_name )
     {
     f = fopen( file_name, "r" );
     if ( 0 == f )
-    	{
+        {
         Print( "Error open file \"%s\".\n", file_name );
         return 0;
-    	}
+        }
 
     return 1;
     }
@@ -181,39 +175,3 @@ void data_file::file_close()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-u_long get_millisec()
-    {
-    struct _timeb tstruct;
-    _ftime( &tstruct );
-
-    static time_t first_time = 0;
-    if ( 0 == first_time )
-    	{
-        first_time = tstruct.time;
-    	}
-
-    return ( tstruct.time - first_time ) * 1000 + tstruct.millitm;
-    }
-//-----------------------------------------------------------------------------
-u_long get_sec()
-    {
-    time_t ltime;
-    time( &ltime );
-
-    return ltime;
-    }
-//-----------------------------------------------------------------------------
-u_long get_delta_millisec( u_long time1 )
-    {
-    u_long now = get_millisec();
-
-    return now >= time1 ? now - time1 : ULONG_MAX - time1 + now;
-    }
-//-----------------------------------------------------------------------------
-int get_char()
-    {
-    //fflush( stdout );
-    //getch();
-
-    return 0; // В режиме эмуляции просто выводим на консоль сообщение.
-    }

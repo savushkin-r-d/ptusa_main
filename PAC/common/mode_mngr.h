@@ -22,6 +22,8 @@
 #ifndef MODE_MNGR 
 #define MODE_MNGR 
 
+#include "dtime.h"
+
 #include "PAC_dev.h"
 #include "param_ex.h"
 

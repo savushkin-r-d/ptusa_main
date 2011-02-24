@@ -1,4 +1,4 @@
-/// @file util.h
+/// @file smart_ptr.h
 /// @brief Реализованы различные полезные функции.
 ///
 /// @author  Иванюк Дмитрий Сергеевич.
@@ -13,26 +13,10 @@
 #ifndef _UTIL_H
 #define _UTIL_H
 
-#include <stddef.h>
-#include <stdio.h>
+#include "console.h"
+#include "types.h"
+#include "debug.h"
 
-#ifdef WIN_OS
-#define Print printf
-#endif // WIN_OS
-
-#ifdef LINUX_OS
-#define Print printf
-#endif // LINUX_OS
-//-----------------------------------------------------------------------------
-#if defined LINUX_OS && !defined PAC_WAGO_750_860
-#define debug_break asm ( "int" "3" ) ///< Установка точки прерывания.
-#endif // defined LINUX_OS
-
-#ifdef WIN_OS
-#define debug_break _asm { int 3 }
-#endif
-//-----------------------------------------------------------------------------
-size_t strlcpy_( char *dst, const char *src, size_t siz );
 //-----------------------------------------------------------------------------
 /// @brief Защищенная работа с указателем.
 ///
@@ -71,14 +55,8 @@ template < class type > class smart_ptr
             {
             if ( pointer == NULL )
                 {
-    #ifdef DEBUG
-
-    #ifdef PAC_PC
-                debug_break;
-    #endif // PAC_PC
-
                 Print( "smart_ptr - pointer is NULL!\n" );
-    #endif // DEBUG
+                debug_break;
                 }
 
             return pointer;
@@ -89,14 +67,8 @@ template < class type > class smart_ptr
             {
             if ( pointer == NULL )
                 {
-    #ifdef DEBUG
                 Print( "smart_ptr - dereferencing NULL!\n" );
-
-    #ifdef PAC_PC
                 debug_break;
-    #endif // PAC_PC
-
-    #endif // DEBUG
                 }
             return pointer;
             }
@@ -106,16 +78,15 @@ template < class type > class smart_ptr
             {
             if ( pointer == NULL )
                 {
-#ifdef DEBUG
-                printf( "smart_ptr - dereferencing NULL!\n" );
-
-#ifdef PAC_PC
+                Print( "smart_ptr - dereferencing NULL!\n" );
                 debug_break;
-#endif // PAC_PC
-
-#endif // DEBUG
                 }
             return pointer;
+            }
+
+        inline bool is_null()
+            {
+            return pointer == NULL;
             }
 
     private:

@@ -5,7 +5,9 @@
 
 #include <tchar.h>
 
-#include "tcp_cmctr_win.h"
+#include "dtime.h"
+
+#include "w_tcp_cmctr.h"
 #include "PAC_err.h"
 //------------------------------------------------------------------------------
 #ifdef DEBUG
@@ -261,7 +263,7 @@ int tcp_communicator_win::evaluate()
         if ( !netOK ) return -100;
         }
     // Инициализация сети, при необходимости.-!>
-
+    
     int count_cycles = 0;
     while ( count_cycles < max_cycles )
         {
@@ -278,12 +280,11 @@ int tcp_communicator_win::evaluate()
                 //- Re-join active sockets.
                 FD_SET( sst[ i ].socket, &rfds );
                 }
-            }
+            }              
 
         //-Ждём события в одном из сокетов.
         rc = select( 0/*Не учитывается*/, &rfds, NULL, NULL, &tv );
-
-        if ( 0 == rc ) continue; // Ничего не произошло.
+        if ( 0 == rc ) break; // Ничего не произошло.
 
         if ( rc < 0 )
             {

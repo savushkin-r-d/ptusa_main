@@ -4,8 +4,6 @@ auto_smart_ptr< params_manager > params_manager::instance = 0;
 
 #ifdef USE_SIMPLE_DEV_ERRORS
 #include "errors.h"
-
-extern dev_errors_manager *g_dev_errors_manager; 
 #endif // USE_SIMPLE_DEV_ERRORS
 
 #ifndef USE_NO_TANK_COMB_DEVICE
@@ -13,8 +11,6 @@ extern dev_errors_manager *g_dev_errors_manager;
 #endif //USE_NO_TANK_COMB_DEVICE
 
 #include "PAC_info.h"
-extern PAC_info *g_PAC_system;
-
 #include "errors.h"
 //-----------------------------------------------------------------------------
 params_manager::params_manager()
@@ -145,7 +141,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
 #endif // USE_NO_TANK_COMB_DEVICE 
             }
 
-        g_PAC_system->reset_params();
+        PAC_info::get_instance()->reset_params();
 
         save();
 

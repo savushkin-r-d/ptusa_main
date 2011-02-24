@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 02/16/11 17:17:09.
+** Generated automatically by tolua++-1.0.92 on 02/24/11 17:17:09.
 */
 
 #ifndef __cplusplus
@@ -19,7 +19,6 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 #include "wago.h"
 #include "tolua_base.h"
 #include "PID.h"
-#include "sys.h"
 #include "g_device.h"
 
 /* function to release collected object via destructor */

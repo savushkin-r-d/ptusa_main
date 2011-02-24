@@ -1,4 +1,4 @@
-#include "sys.h"
+#include "smart_ptr.h"
 
 #ifdef  __cplusplus
 extern "C" {
@@ -42,8 +42,8 @@ class lua_manager
             const char *function_name, int param,
             const char *c_function_name ) const;
 
-		int exec_Lua_str( const char *Lua_str, const char *error_str, 
-			bool is_print_error_msg = true ) const;
+        int exec_Lua_str( const char *Lua_str, const char *error_str, 
+            bool is_print_error_msg = true ) const;
 
         lua_State * get_Lua() const;
 
@@ -65,3 +65,7 @@ class lua_manager
 
         int is_free_lua;
     };
+//-----------------------------------------------------------------------------
+#define G_LUA_MANAGER lua_manager::get_instance()
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
