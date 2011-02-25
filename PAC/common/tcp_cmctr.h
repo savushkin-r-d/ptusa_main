@@ -14,8 +14,8 @@
 #ifndef TCP_CMCTR_H
 #define TCP_CMCTR_H
 
-//#include "sys.h"
-#include "types.h"
+#include <stdio.h>
+
 #include "smart_ptr.h"
 
 //-----------------------------------------------------------------------------

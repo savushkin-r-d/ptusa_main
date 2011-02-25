@@ -14,11 +14,11 @@
 #ifndef DTIME_H
 #define DTIME_H
 
-#if !defined WIN_OS
+#if !defined WIN_OS && !defined LINUX_OS
 #error You must define OS!
-#endif // !defined WIN_OS
+#endif 
 
-#include "types.h"
+#include "s_types.h"
 
 //-----------------------------------------------------------------------------
 /// @brief ѕолучение текущего времени в секундах.
@@ -40,6 +40,9 @@ u_long get_millisec();
 /// @return –азность времени в миллисекундах.
 u_long get_delta_millisec( u_long time1 );
 //-----------------------------------------------------------------------------
+/// @brief ќжидание заданное врем€.
+///
+/// @param ms - врем€ ожидани€, мс.
 void sleep_ms( u_int ms );
 //-----------------------------------------------------------------------------
 #endif // DTIME_H

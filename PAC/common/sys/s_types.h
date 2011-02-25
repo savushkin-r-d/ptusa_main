@@ -1,4 +1,4 @@
-/// @file types.h
+/// @file s_types.h
 /// @brief Ќекоторые переименовани€ типов простых чисел дл€ обеспечени€ 
 /// совместимости при сериализации вне зависимости от разр€дности процессора, 
 /// также дл€ обеспечени€ более удобной короткой записи.
@@ -16,14 +16,18 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#if !defined WIN_OS
+#if !defined WIN_OS && !defined LINUX_OS
 #error You must define OS!
-#endif // !defined WIN_OS
+#endif 
 
 #ifdef WIN_OS
 #include "w_types.h"
 #endif // WIN_OS
 
+#ifdef LINUX_OS
+#include "l_types.h"
+#endif // LINUX_OS
+//-----------------------------------------------------------------------------
 typedef unsigned char     u_char;
 typedef unsigned int      u_int;
 typedef unsigned long int u_long;

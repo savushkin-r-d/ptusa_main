@@ -1,6 +1,6 @@
-#if !defined WIN_OS
+#if !defined WIN_OS && !( defined LINUX_OS && defined PAC_PC ) && !( defined LINUX_OS && defined PAC_WAGO_750_860 )
 #error You must define OS!
-#endif // !defined WIN_OS
+#endif 
 
 #include "led.h"
 #include "smart_ptr.h"
@@ -8,6 +8,14 @@
 #ifdef WIN_OS
 #include "w_led.h"
 #endif // WIN_OS
+
+#if defined LINUX_OS && defined PAC_PC
+#include "led_PC.h"
+#endif
+
+#if defined LINUX_OS && defined PAC_WAGO_750_860
+#include "led_w750.h"
+#endif
 
 led* get_led()
     {
@@ -19,6 +27,14 @@ led* get_led()
 #ifdef WIN_OS
         led_instance = new led_PC();
 #endif // WIN_OS
+
+#if defined LINUX_OS && defined PAC_PC
+        led_instance = new led_PC();
+#endif
+
+#if defined LINUX_OS && defined PAC_WAGO_750_860
+        led_instance = new led_W750();
+#endif
         }
 
     return led_instance;

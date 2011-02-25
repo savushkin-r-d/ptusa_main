@@ -20,6 +20,14 @@
 #ifndef ERRORS_H
 #define ERRORS_H
 
+#if !( defined PAC_PC || defined PAC_WAGO_750_860 ) && !defined DRIVER
+#error You must define type!
+#endif
+
+#if ( defined PAC_PC || defined PAC_WAGO_750_860 ) && !defined PAC
+#define PAC
+#endif
+
 #ifdef DRIVER
 typedef unsigned char uchar;
 
@@ -29,7 +37,7 @@ typedef unsigned char uchar;
 #include "PAC_err.h"
 #endif // DRIVER
 //-----------------------------------------------------------------------------
-#if ( defined PAC || defined PAC_PC ) || defined WIN32
+#if defined PAC || defined DRIVER
 enum ALARM_STATE
     {
     AS_NORMAL,
@@ -241,7 +249,7 @@ class alarm_manager
     };
 #endif // DRIVER
 
-#if defined PAC || defined PAC_PC
+#ifdef PAC
 
 #include "errors.h"
 #include "param_ex.h"
@@ -402,6 +410,6 @@ class dev_errors_manager
 //-----------------------------------------------------------------------------
 #define G_DEV_ERRORS_MANAGER dev_errors_manager::get_instance()
 //-----------------------------------------------------------------------------
-#endif // PAC || PAC_PC
+#endif // PAC 
 
 #endif //ERRORS_H

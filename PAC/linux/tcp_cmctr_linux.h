@@ -92,5 +92,5 @@ class tcp_communicator_linux : public tcp_communicator
             int  recvtimeout( u_int s, u_char *buf, int len,
                 int timeout, int usec );
 	};
-	
+//-----------------------------------------------------------------------------
 #endif //TCP_CMCTR_LINUX

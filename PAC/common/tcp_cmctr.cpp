@@ -1,12 +1,16 @@
-#if !defined WIN_OS
+#if !defined WIN_OS && !defined LINUX_OS
 #error You must define OS!
-#endif // !defined WIN_OS
+#endif 
 
 #include "tcp_cmctr.h"
 
 #ifdef WIN_OS
 #include "w_tcp_cmctr.h"
 #endif // WIN_OS
+
+#ifdef LINUX_OS
+#include "tcp_cmctr_linux.h"
+#endif
 
 auto_smart_ptr < tcp_communicator > tcp_communicator::instance = 0;
 //------------------------------------------------------------------------------
@@ -84,5 +88,9 @@ void tcp_communicator::init_instance( const char *name )
 #ifdef WIN_OS
     instance = new tcp_communicator_win( name );
 #endif // WIN_OS
+
+#ifdef LINUX_OS
+    instance = new tcp_communicator_linux( name );
+#endif
     }
 //------------------------------------------------------------------------------

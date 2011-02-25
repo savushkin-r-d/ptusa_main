@@ -270,7 +270,7 @@ class device : public i_AO_device,
             {           
             }
 
-        char *get_name() const
+        const char *get_name() const
             {
             return "";
             }
@@ -359,12 +359,6 @@ class digital_device : public device,
 
         virtual ~digital_device()
             {
-            }
-
-        int parse_cmd( char* cmd ) 
-            {
-            int val = 0;
-            return 4;
             }
 
         float   get_value();
@@ -1011,7 +1005,7 @@ class device_manager: public i_Lua_save_device
     public:
         device_manager();
 
-        ~device_manager();
+        virtual ~device_manager();
 
         /// @brief Получение устройства по его номеру.        
         device* get_device( device::DEVICE_TYPE dev_type, u_int dev_number );

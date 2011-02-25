@@ -74,7 +74,7 @@ int main( int argc, char *argv[] )
     fprintf( stderr, "Start main loop!\n" );
 
 #ifdef DEBUG
-    while ( !kbhit() )
+    while ( !kb_hit() )
 #else
     while ( 1 )
 #endif // DEBUG

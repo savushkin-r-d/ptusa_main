@@ -6,6 +6,14 @@
                    projectFiles="true">
       <logicalFolder name="f6" displayName="common" projectFiles="true">
         <logicalFolder name="f1" displayName="PAC" projectFiles="true">
+          <logicalFolder name="f1" displayName="sys" projectFiles="true">
+            <itemPath>../../PAC/common/sys/console.h</itemPath>
+            <itemPath>../../PAC/common/sys/debug.h</itemPath>
+            <itemPath>../../PAC/common/sys/dtime.h</itemPath>
+            <itemPath>../../PAC/common/sys/led.h</itemPath>
+            <itemPath>../../PAC/common/sys/mem.h</itemPath>
+            <itemPath>../../PAC/common/sys/s_types.h</itemPath>
+          </logicalFolder>
           <itemPath>../../PAC/common/PAC_dev.h</itemPath>
           <itemPath>../../PAC/common/PAC_err.h</itemPath>
           <itemPath>../../PAC/common/PAC_info.h</itemPath>
@@ -13,7 +21,6 @@
           <itemPath>../../PAC/common/mode_mngr.h</itemPath>
           <itemPath>../../PAC/common/param_ex.h</itemPath>
           <itemPath>../../PAC/common/prj_mngr.h</itemPath>
-          <itemPath>../../PAC/common/sys.h</itemPath>
           <itemPath>../../PAC/common/tcp_cmctr.h</itemPath>
           <itemPath>../../PAC/common/tech_def.h</itemPath>
           <itemPath>../../PAC/common/wago.h</itemPath>
@@ -59,21 +66,22 @@
           <itemPath>../../common/lua_manager.h</itemPath>
         </logicalFolder>
         <logicalFolder name="f4" displayName="util" projectFiles="true">
-          <itemPath>../../common/util/util.h</itemPath>
+          <itemPath>../../common/util/smart_ptr.h</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="f4" displayName="linux" projectFiles="true">
         <logicalFolder name="f2" displayName="PAC_PC" projectFiles="true">
-          <itemPath>../../PAC/linux/PAC_PC/sys_PC.h</itemPath>
+          <itemPath>../../PAC/linux/led_PC.h</itemPath>
           <itemPath>../../PAC/linux/PAC_PC/wago_PC.h</itemPath>
         </logicalFolder>
         <logicalFolder name="f1" displayName="PAC_wago_750-860" projectFiles="true">
           <itemPath>../../PAC/linux/PAC_WAGO_750_860/kbusapi.h</itemPath>
-          <itemPath>../../PAC/linux/PAC_WAGO_750_860/sys_w750.h</itemPath>
+          <itemPath>../../PAC/linux/PAC_WAGO_750_860/led_w750.h</itemPath>
           <itemPath>../../PAC/linux/PAC_WAGO_750_860/wago_w750.h</itemPath>
         </logicalFolder>
-        <itemPath>../../PAC/linux/prj_mngr_linux.h</itemPath>
-        <itemPath>../../PAC/linux/sys_linux.h</itemPath>
+        <itemPath>../../PAC/linux/l_console.h</itemPath>
+        <itemPath>../../PAC/linux/l_mem.h</itemPath>
+        <itemPath>../../PAC/linux/l_types.h</itemPath>
         <itemPath>../../PAC/linux/tcp_cmctr_linux.h</itemPath>
       </logicalFolder>
     </logicalFolder>
@@ -88,6 +96,11 @@
                    projectFiles="true">
       <logicalFolder name="f5" displayName="common" projectFiles="true">
         <logicalFolder name="f1" displayName="PAC" projectFiles="true">
+          <logicalFolder name="f1" displayName="sys" projectFiles="true">
+            <itemPath>../../PAC/common/sys/io.cpp</itemPath>
+            <itemPath>../../PAC/common/sys/led.cpp</itemPath>
+            <itemPath>../../PAC/common/sys/mem.cpp</itemPath>
+          </logicalFolder>
           <itemPath>../../PAC/common/PAC_dev.cpp</itemPath>
           <itemPath>../../PAC/common/PAC_dev_lua.cpp</itemPath>
           <itemPath>../../PAC/common/PAC_err.cpp</itemPath>
@@ -96,7 +109,6 @@
           <itemPath>../../PAC/common/mode_mngr.cpp</itemPath>
           <itemPath>../../PAC/common/param_ex.cpp</itemPath>
           <itemPath>../../PAC/common/prj_mngr.cpp</itemPath>
-          <itemPath>../../PAC/common/sys.cpp</itemPath>
           <itemPath>../../PAC/common/tcp_cmctr.cpp</itemPath>
           <itemPath>../../PAC/common/tech_def.cpp</itemPath>
           <itemPath>../../PAC/common/wago.cpp</itemPath>
@@ -148,21 +160,20 @@
           <itemPath>../../common/lua_manager.cpp</itemPath>
         </logicalFolder>
         <logicalFolder name="f4" displayName="util" projectFiles="true">
-          <itemPath>../../common/util/util.cpp</itemPath>
         </logicalFolder>
       </logicalFolder>
       <logicalFolder name="f4" displayName="linux" projectFiles="true">
         <logicalFolder name="f2" displayName="PAC_PC" projectFiles="true">
-          <itemPath>../../PAC/linux/PAC_PC/sys_PC.cpp</itemPath>
           <itemPath>../../PAC/linux/PAC_PC/wago_PC.cpp</itemPath>
         </logicalFolder>
         <logicalFolder name="f1" displayName="PAC_wago_750-860" projectFiles="true">
           <itemPath>../../PAC/linux/PAC_WAGO_750_860/kbusapi.cpp</itemPath>
-          <itemPath>../../PAC/linux/PAC_WAGO_750_860/sys_w750.cpp</itemPath>
+          <itemPath>../../PAC/linux/PAC_WAGO_750_860/led_w750.cpp</itemPath>
           <itemPath>../../PAC/linux/PAC_WAGO_750_860/wago_w750.cpp</itemPath>
         </logicalFolder>
-        <itemPath>../../PAC/linux/prj_mngr_linux.cpp</itemPath>
-        <itemPath>../../PAC/linux/sys_linux.cpp</itemPath>
+        <itemPath>../../PAC/linux/l_console.cpp</itemPath>
+        <itemPath>../../PAC/linux/l_dtime.cpp</itemPath>
+        <itemPath>../../PAC/linux/l_mem.cpp</itemPath>
         <itemPath>../../PAC/linux/tcp_cmctr_linux.cpp</itemPath>
       </logicalFolder>
       <itemPath>main.cpp</itemPath>
@@ -191,19 +202,19 @@
         <ccTool>
           <developmentMode>5</developmentMode>
           <incDir>
+            <pElem>/usr/include</pElem>
+            <pElem>../../PAC/common/sys</pElem>
             <pElem>../../PAC/common</pElem>
-            <pElem>../../common/PAC-driver</pElem>
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_PC</pElem>
-            <pElem>/usr/include</pElem>
+            <pElem>../../common</pElem>
+            <pElem>../../common/PAC-driver</pElem>
             <pElem>../../common/util</pElem>
             <pElem>../../common/lua</pElem>
             <pElem>../../common/tolua++</pElem>
-            <pElem>../../common</pElem>
           </incDir>
           <preprocessorList>
             <Elem>LINUX_OS</Elem>
-            <Elem>PAC</Elem>
             <Elem>PAC_PC</Elem>
           </preprocessorList>
         </ccTool>
@@ -230,11 +241,12 @@
         </cTool>
         <ccTool>
           <incDir>
+            <pElem>/usr/include</pElem>
             <pElem>../../PAC/common</pElem>
+            <pElem>../../PAC/common/sys</pElem>
             <pElem>../../common/PAC-driver</pElem>
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_PC</pElem>
-            <pElem>/usr/include</pElem>
             <pElem>../../common/util</pElem>
             <pElem>../../common/lua</pElem>
             <pElem>../../common/tolua++</pElem>
@@ -247,6 +259,7 @@
             <Elem>PAC_PC</Elem>
             <Elem>DEBUG</Elem>
             <Elem>DEBUG_NO_WAGO_MODULES</Elem>
+            <Elem>TEST_SPEED</Elem>
           </preprocessorList>
           <warningLevel>2</warningLevel>
         </ccTool>
@@ -255,6 +268,14 @@
           <commandLine>-pg</commandLine>
         </linkerTool>
       </compileType>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.cpp" ex="true" tool="1">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.h" ex="true" tool="3">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.cpp" ex="true" tool="1">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.h" ex="true" tool="3">
+      </item>
     </conf>
     <conf name="release_wago_750-860" type="1">
       <toolsSet>
@@ -275,10 +296,11 @@
           <developmentMode>6</developmentMode>
           <incDir>
             <pElem>../../PAC/common</pElem>
-            <pElem>../../common/PAC-driver</pElem>
+            <pElem>../../PAC/common/sys</pElem>
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
             <pElem>../../common</pElem>
+            <pElem>../../common/PAC-driver</pElem>
             <pElem>../../common/util</pElem>
             <pElem>../../common/lua</pElem>
             <pElem>../../common/tolua++</pElem>
@@ -286,7 +308,6 @@
           <commandLine>-Wall -O3 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
           <preprocessorList>
             <Elem>LINUX_OS</Elem>
-            <Elem>PAC</Elem>
             <Elem>PAC_WAGO_750_860</Elem>
           </preprocessorList>
         </ccTool>
@@ -319,10 +340,11 @@
           <commandlineTool>g++</commandlineTool>
           <incDir>
             <pElem>../../PAC/common</pElem>
-            <pElem>../../common/PAC-driver</pElem>
+            <pElem>../../PAC/common/sys</pElem>
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
             <pElem>../../common</pElem>
+            <pElem>../../common/PAC-driver</pElem>
             <pElem>../../common/util</pElem>
             <pElem>../../common/lua</pElem>
             <pElem>../../common/tolua++</pElem>
@@ -333,6 +355,7 @@
             <Elem>PAC</Elem>
             <Elem>PAC_WAGO_750_860</Elem>
             <Elem>DEBUG</Elem>
+            <Elem>TEST_SPEED</Elem>
           </preprocessorList>
         </ccTool>
         <linkerTool>
@@ -340,6 +363,12 @@
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -Wl,-elf2flt /home/id/uclinux-dist/lib/uClibc/lib/crt0.o /home/id/uclinux-dist/lib/uClibc/lib/crti.o /home/id/uclinux-dist/lib/uClibc/lib/crtn.o -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
         </linkerTool>
       </compileType>
+      <item path="../../PAC/linux/PAC_PC/wago_PC.cpp" ex="true" tool="1">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/wago_PC.h" ex="true" tool="3">
+      </item>
+      <item path="../../PAC/linux/led_PC.h" ex="true" tool="3">
+      </item>
     </conf>
     <conf name="no_wagoIO_debug_wago_750-860" type="1">
       <toolsSet>
@@ -357,10 +386,11 @@
         <ccTool>
           <incDir>
             <pElem>../../PAC/common</pElem>
-            <pElem>../../common/PAC-driver</pElem>
+            <pElem>../../PAC/common/sys</pElem>
             <pElem>../../PAC/linux</pElem>
             <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
             <pElem>../../common</pElem>
+            <pElem>../../common/PAC-driver</pElem>
             <pElem>../../common/util</pElem>
             <pElem>../../common/lua</pElem>
             <pElem>../../common/tolua++</pElem>

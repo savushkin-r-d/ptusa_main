@@ -14,7 +14,7 @@
 #define _UTIL_H
 
 #include "console.h"
-#include "types.h"
+#include "s_types.h"
 #include "debug.h"
 
 //-----------------------------------------------------------------------------

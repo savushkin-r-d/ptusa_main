@@ -1,6 +1,6 @@
-#if !defined WIN_OS
+#if !defined WIN_OS && !defined LINUX_OS
 #error You must define OS!
-#endif // !defined WIN_OS
+#endif 
 
 #include <string.h>
 #include <stdlib.h>
@@ -14,7 +14,11 @@
 
 #ifdef WIN_OS
 #include "w_mem.h"
-#endif // WIN_OS
+#endif
+
+#ifdef LINUX_OS
+#include "l_mem.h"
+#endif
 
 auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
@@ -45,7 +49,11 @@ project_manager* project_manager::get_instance()
 
 #ifdef WIN_OS
         instance->cfg_file = new data_file();
-#endif // WIN_OS        
+#endif // WIN_OS
+
+#ifdef LINUX_OS
+        instance->cfg_file = new data_file();
+#endif // LINUX_OS
         }
 
     return instance;

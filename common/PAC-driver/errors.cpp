@@ -1,3 +1,9 @@
+#ifdef DRIVER
+#include "stdafx.h"
+#else
+#include <errors.h>
+#endif
+
 #ifdef DRIVER 
 
 #include "stdafx.h"
@@ -481,8 +487,7 @@ int alarm_manager::add_PAC_critical_errors( CRITICAL_ERRORS type,
 //-----------------------------------------------------------------------------
 #endif // DRIVER
 
-#if defined PAC || defined PAC_PC 
-#include <errors.h>
+#ifdef PAC
 
 auto_smart_ptr < dev_errors_manager > dev_errors_manager::instance;
 //-----------------------------------------------------------------------------
@@ -878,4 +883,4 @@ dev_errors_manager* dev_errors_manager::get_instance()
     return instance;
     }
 //-----------------------------------------------------------------------------
-#endif // defined PAC || PAC_PC
+#endif // PAC

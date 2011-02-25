@@ -1,12 +1,16 @@
-#if !defined WIN_OS
+#if !defined WIN_OS && !( defined LINUX_OS && defined PAC_PC ) && !( defined LINUX_OS && defined PAC_WAGO_750_860 )
 #error You must define OS!
-#endif // !defined WIN_OS
+#endif 
 
 #include "mem.h"
 
 #ifdef WIN_OS
 #include "w_mem.h"
 #endif // WIN_OS
+
+#ifdef LINUX_OS
+#include "l_mem.h"
+#endif // LINUX_OS
 
 auto_smart_ptr < NV_memory_manager > NV_memory_manager::instance;
 //-----------------------------------------------------------------------------
@@ -86,10 +90,22 @@ NV_memory_manager::NV_memory_manager() : PAC_NVRAM( 0 ),
 #ifdef WIN_OS
     // FIXME Реализовать создание файла при его отсутствии.
     PAC_NVRAM  = new SRAM( "./nvram.txt", 32768, 0, 30 );
-    PAC_EEPROM = new SRAM( "./nvram.txt", 32768, 31, 32767 );
+    PAC_EEPROM = new SRAM( "./nvram.txt", 32768, 31, 32767 ); 
+#endif // WIN_OS
+
+#if defined LINUX_OS && defined PAC_PC
+    // FIXME Реализовать создание файла при его отсутствии.
+    PAC_NVRAM  = new SRAM( "./nvram.txt", 32768, 0, 30 );
+    PAC_EEPROM = new SRAM( "./nvram.txt", 32768, 31, 32767 );   
+#endif
+
+#if defined LINUX_OS && defined PAC_WAGO_750_860
+    PAC_NVRAM  = new SRAM( "/dev/nvram", 32768, 0, 30 );
+    PAC_EEPROM = new SRAM( "/dev/nvram", 32768, 31, 32767 );
+#endif
+
     last_NVRAM_pos  = PAC_NVRAM->get_available_start_pos();
     last_EEPROM_pos = PAC_EEPROM->get_available_start_pos();
-#endif // WIN_OS
     }
 //-----------------------------------------------------------------------------
 memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,

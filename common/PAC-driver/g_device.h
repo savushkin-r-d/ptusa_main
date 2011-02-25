@@ -29,11 +29,6 @@
 #include "tcp_cmctr.h"
 #include <vector>
 
-#if defined LINUX_OS
-#include "sys_linux.h"
-#endif // defined LINUX_OS
-
-
 //-----------------------------------------------------------------------------
 /// @brief »нтерфейс устройства, позвол€ющий сохранить его в потоке байтов.
 class i_Lua_save_device    

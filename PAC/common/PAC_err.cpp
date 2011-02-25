@@ -2,14 +2,6 @@
 
 #include "PAC_err.h"
 
-#if defined LINUX_OS
-
-#ifdef PAC_WAGO_750_860
-#include "sys_w750.h"
-#endif // PAC_WAGO_750_860
-
-#endif // defined LINUX_OS
-
 auto_smart_ptr < PAC_critical_errors_manager > PAC_critical_errors_manager::instance;
 //-----------------------------------------------------------------------------
 PAC_critical_errors_manager::PAC_critical_errors_manager(

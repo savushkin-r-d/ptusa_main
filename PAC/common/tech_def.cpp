@@ -277,7 +277,8 @@ int tech_object::save_device( char *buff )
 
     int answer_size = strlen( buff );
 
-    sprintf( buff + answer_size, "\tSTATE=%lu, CMD=%lu,\n", state[ 0 ], cmd );
+    sprintf( buff + answer_size, "\tSTATE=%lu, CMD=%lu,\n", 
+            ( u_long ) state[ 0 ], ( u_long ) cmd );
     answer_size += strlen( buff + answer_size );
 
     answer_size += par_float.save_device( buff + answer_size, "\t" );

@@ -239,7 +239,7 @@ template < class type > class parameters
             printf( "param %d\n", count );
             }
         
-        virtual int save_device( char *buff, char *prefix ) = 0;
+        virtual int save_device( char *buff, const char *prefix ) = 0;
 
     protected:
         char is_delete; ///< Признак удаления буфера при удалении объекта.
@@ -273,7 +273,7 @@ class run_time_params_float: public parameters < float >
             {
             }
 
-        int save_device( char *buff, char *prefix )
+        int save_device( char *buff, const char *prefix )
             {
             sprintf( buff, "%sRT_PAR_F = {}\n\r", prefix );
             int answer_size = strlen( buff );
@@ -316,7 +316,7 @@ class run_time_params_u_int_4: public parameters < u_int_4 >
             {
             }
 
-        int save_device( char *buff, char *prefix )
+        int save_device( char *buff, const char *prefix )
             {
             sprintf( buff, "%sRT_PAR_UI = {}\n\r", prefix );
             int answer_size = strlen( buff );
@@ -324,7 +324,7 @@ class run_time_params_u_int_4: public parameters < u_int_4 >
             for ( u_int i = 0; i < count; i++ )
                 {
                 sprintf( buff + answer_size, "%sRT_PAR_UI[%d] = %lu\n\r", 
-                    prefix, i + 1, get_val( i ) );
+                    prefix, i + 1, ( unsigned long int ) get_val( i ) );
 
                 answer_size += strlen( buff + answer_size );
                 }
@@ -416,7 +416,7 @@ public parameters < type >
 
         void print() const
             {
-            printf( "saved param %d\n", count );
+            //printf( "saved param %d\n", count );
             }
 
     private:
@@ -457,7 +457,7 @@ class saved_params_u_int_4: public saved_params < u_int_4 >
           //    return answer_size;
           //    }
 
-          int save_device( char *buff, char *prefix )
+          int save_device( char *buff, const char *prefix )
               {
               sprintf( buff, "%sPAR_UI = \n%s\t{\n", prefix, prefix );
               int answer_size = strlen( buff );
@@ -499,7 +499,7 @@ class saved_params_float: public saved_params < float >
               {
               }
 
-          int save_device( char *buff, char *prefix )
+          int save_device( char *buff, const char *prefix )
               {
               sprintf( buff, "%sPAR_F = \n%s\t{\n", prefix, prefix );
               int answer_size = strlen( buff );

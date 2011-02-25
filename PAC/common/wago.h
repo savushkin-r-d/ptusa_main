@@ -167,9 +167,7 @@ class wago_device
 /// Реализация чтения и записи состояний модулей ввода/вывода Wago.
 class wago_manager
     {
-    public:
-        wago_manager();
-
+    public:       
         virtual ~wago_manager();
 
         void print() const;
@@ -240,6 +238,8 @@ class wago_manager
         u_int* get_AO_write_data( u_int node_n, u_int offset );
 
     protected:
+        wago_manager();
+
         //---------------------------------------------------------------------
         /// @brief Узел модулей ввода/вывода Wago.
         //

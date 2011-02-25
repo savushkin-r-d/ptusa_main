@@ -127,10 +127,10 @@ long device_communicator::write_devices_states_service( long len,
 
      case CMD_EXEC_DEVICE_COMMAND:
             {            
-//#ifdef DEBUG_DEV_CMCTR
+#ifdef DEBUG_DEV_CMCTR
             Print( "\nEXEC_DEVICE_CMD\n" );
             Print( "cmd = %s\n",  data + 1 );
-//#endif // DEBUG_DEV_CMCTR
+#endif // DEBUG_DEV_CMCTR
 			
 			int res = lua_manager::get_instance()->exec_Lua_str( ( char* ) data + 1, 
                 "CMD_EXEC_DEVICE_COMMAND ");
@@ -193,16 +193,16 @@ long device_communicator::write_devices_states_service( long len,
 
             for ( u_int i = 0; i < count; i++ )
                 {
+#ifdef DEBUG_DEV_CMCTR
                 u_int_2 object_type = uint_cmd[ 4 * i + 1 ];
                 u_int_2 object_number = uint_cmd[ 4 * i +  2 ];
                 u_int_2 object_alarm_number = uint_cmd[ 4 * i + 3 ];
 
-//#ifdef DEBUG_DEV_CMCTR
                 Print( "CMD_SET_PAC_ERROR_CMD" );
                 Print( "cmd = %u, object_type = %u, object_number = %u, \
                        object_alarm_number = %u\n", uint_cmd[ 4 * i ],
                        object_type, object_number, object_alarm_number );
-//#endif // DEBUG_DEV_CMCTR
+#endif // DEBUG_DEV_CMCTR
 
      //           G_DEV_ERRORS_MANAGER->set_cmd( uint_cmd[ 0 ], object_type,
     //                object_number, object_alarm_number );
@@ -236,7 +236,8 @@ void device_communicator::print() const
     {  
     char tmp_str[ 200 ];
 
-    sprintf( tmp_str, "\nDevice communicator. Dev count = %u.", dev.size() );
+    snprintf( tmp_str, sizeof( tmp_str ),
+            "\nDevice communicator. Dev count = %d.", ( int ) dev.size() );
     print_str( tmp_str, 1 );
 
     if ( !dev.size() ) return;

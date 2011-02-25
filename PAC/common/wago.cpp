@@ -1,13 +1,21 @@
-#if !defined WIN_OS
+#if !defined WIN_OS && !( defined LINUX_OS && defined PAC_PC ) && !( defined LINUX_OS && defined PAC_WAGO_750_860 )
 #error You must define OS!
-#endif // !defined WIN_OS
+#endif 
 
 #include "wago.h"
 #include "lua_manager.h"
 
 #ifdef WIN_OS
 #include "wago_PC.h"
-#endif // WIN_OS
+#endif 
+
+#if defined LINUX_OS && defined PAC_PC
+#include "wago_PC.h"
+#endif 
+
+#if defined LINUX_OS && defined PAC_WAGO_750_860
+#include "wago_w750.h"
+#endif 
 
 auto_smart_ptr < wago_manager > wago_manager::instance;
 //-----------------------------------------------------------------------------
@@ -594,7 +602,15 @@ wago_manager* wago_manager::get_instance()
         {
 #ifdef WIN_OS
         instance = new wago_manager_PC();
-#endif // WIN_OS        
+#endif // WIN_OS
+
+#if defined LINUX_OS && defined PAC_PC
+        instance = new wago_manager_PC();
+#endif // defined LINUX_OS && defined PAC_PC
+
+#if defined LINUX_OS && defined PAC_WAGO_750_860
+        instance = new wago_manager_w750();
+#endif // defined LINUX_OS && defined PAC_WAGO_750_860
         }
 
     return instance;

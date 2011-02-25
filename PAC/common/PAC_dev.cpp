@@ -723,7 +723,7 @@ void digital_device::set_state( int new_state )
     {
     if ( new_state ) 
         {    
-        if ( -1 == new_state ) state = -1;
+        if ( -1 == new_state ) state = ( char ) -1;
         else on();
         }
     else off();    
