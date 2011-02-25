@@ -12,8 +12,8 @@
 /// @$Author: id $.\n
 /// @$Date:: 2011-02-15 16:58:56#$.
 
-#ifndef SYS_MEM_WIN_H
-#define SYS_MEM_WIN_H
+#ifndef W_MEM_H
+#define W_MEM_H
 
 #include "mem.h"
 //-----------------------------------------------------------------------------
@@ -70,4 +70,4 @@ class data_file : public file
         char buf[ C_MAX_BUFFER_SIZE ];
     };
 //-----------------------------------------------------------------------------
-#endif // SYS_MEM_WIN_H
+#endif // W_MEM_H
