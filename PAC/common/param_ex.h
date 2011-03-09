@@ -20,6 +20,7 @@
 #ifndef PARAMS_EX_H
 #define PARAMS_EX_H
 
+#include <math.h>
 #include <string.h>
 
 #include "mem.h"
@@ -449,7 +450,7 @@ class saved_params_u_int_4: public saved_params < u_int_4, false >
         ///
         /// @param count - количество параметров.
         saved_params_u_int_4( int count ) :
-          saved_params < u_int_4, false >( count, "PAR_UI" )
+          saved_params < u_int_4, false >( count, "S_PAR_UI" )
               {
               }
 
@@ -473,7 +474,7 @@ class saved_params_float: public saved_params < float, true >
         ///
         /// @param count - количество параметров.
         saved_params_float( int count ):
-          saved_params < float, true >( count, "PAR_F" )
+          saved_params < float, true >( count, "S_PAR_F" )
               {
               }
 

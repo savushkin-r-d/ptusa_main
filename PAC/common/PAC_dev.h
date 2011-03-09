@@ -193,7 +193,7 @@ class device : public i_AO_device,
 
         virtual int save_device( char *buff, const char *prefix )
             {
-            sprintf( buff, "%s[%d]={st=%d, v=%.2f},\n", 
+            sprintf( buff, "%s[%d]={ST=%d, V=%.2f},\n",
                 prefix, get_n(),  get_state(), get_value() );
 
             return strlen( buff );
@@ -368,7 +368,7 @@ class digital_device : public device,
 
         int save_device( char *buff, const char *prefix )
             {	
-            sprintf( buff, "%s[%d]={st=%d},\n", 
+            sprintf( buff, "%s[%d]={ST=%d},\n",
                 prefix, get_n(),  get_state() );
 
             return strlen( buff );
@@ -425,11 +425,11 @@ class analog_device : public device,
             {
             if ( get_value() == 0 )
                 {
-                sprintf( buff, "%s[%d]={v=0},\n", prefix, get_n() );
+                sprintf( buff, "%s[%d]={V=0},\n", prefix, get_n() );
                 }
             else
                 {
-                sprintf( buff, "%s[%d]={v=%.2f},\n", 
+                sprintf( buff, "%s[%d]={V=%.2f},\n",
                     prefix, get_n(), get_value() );
                 }
 

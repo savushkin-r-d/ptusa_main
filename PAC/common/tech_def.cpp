@@ -271,19 +271,29 @@ int tech_object::lua_init_runtime_params()
 //-----------------------------------------------------------------------------
 int tech_object::save_device( char *buff )
     {
-    sprintf( buff, "t.%s = {}\nt.%s[%d]=\n\t{\n", 
-        get_object_name(), 
+    sprintf( buff, "t.%s = t.%s or {}\nt.%s[%d]=\n\t{\n",
+        get_object_name(), get_object_name(), 
         get_object_name(), get_number() );
 
     int answer_size = strlen( buff );
 
     //Состояние и команда.
-    sprintf( buff + answer_size, "\tSTATE=%lu, CMD=%lu,\n", 
+    sprintf( buff + answer_size, "\tCMD=%lu,\n",
             ( u_long ) state[ 0 ], ( u_long ) cmd );
     answer_size += strlen( buff + answer_size );
 
+    sprintf( buff + answer_size, "\tST=\n\t\t{\n\t\t" );
+    answer_size += strlen( buff + answer_size );
+    for ( u_int i = 0; i < state.size(); i++ )
+        {
+        sprintf( buff + answer_size, "%lu, ", state[ i ] );
+        answer_size += strlen( buff + answer_size );
+        }
+    sprintf( buff + answer_size, "\n\t\t},\n" );
+    answer_size += strlen( buff + answer_size );
+
     //Режимы.
-    sprintf( buff + answer_size, "\tMODES=\n\t{\n\t" );
+    sprintf( buff + answer_size, "\tMODES=\n\t\t{\n\t\t" );
     answer_size += strlen( buff + answer_size );
     for ( u_int i = 0; i < modes_count; i++ )
         {
@@ -291,11 +301,11 @@ int tech_object::save_device( char *buff )
             get_mode( i ) ? 1 : 0 );
         answer_size += strlen( buff + answer_size );
         }
-    sprintf( buff + answer_size, "\n\t},\n" );
+    sprintf( buff + answer_size, "\n\t\t},\n" );
     answer_size += strlen( buff + answer_size );
 
     //Шаги.
-    sprintf( buff + answer_size, "\tMODES_STEPS=\n\t{\n\t" );
+    sprintf( buff + answer_size, "\tMODES_STEPS=\n\t\t{\n\t\t" );
     answer_size += strlen( buff + answer_size );
     for ( u_int i = 0; i < modes_count; i++ )
         {
@@ -303,7 +313,7 @@ int tech_object::save_device( char *buff )
             modes_manager->get_active_step( i ) );
         answer_size += strlen( buff + answer_size );
         }
-    sprintf( buff + answer_size, "\n\t},\n" );
+    sprintf( buff + answer_size, "\n\t\t},\n" );
     answer_size += strlen( buff + answer_size );
     
     //Параметры.
