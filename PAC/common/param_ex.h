@@ -504,15 +504,35 @@ class saved_params_float: public saved_params < float >
               sprintf( buff, "%sPAR_F = \n%s\t{\n", prefix, prefix );
               int answer_size = strlen( buff );
 
+              sprintf( buff + answer_size, "%s\t", prefix );
+              answer_size += strlen( buff + answer_size );
+
               for ( u_int i = 0; i < count; i++ )
                   {
-                  sprintf( buff + answer_size, "%s\t[%d] = %.2f,\n", 
-                     prefix, i + 1, get_val( i ) );
+                  float val  = get_val( i );
+                  //sprintf( buff + answer_size, "%s\t[%d] = %.2f,\n", 
+                  //   prefix, i + 1, get_val( i ) );
+                  if ( 0 == val )
+                      {
+                      sprintf( buff + answer_size, "0, " );
+                      }
+                  else
+                      {         
+                      double tmp;
+                      if ( modf( val, &tmp ) == 0 )
+                          {
+                          sprintf( buff + answer_size, "%d, ", ( int ) val );
+                          }
+                      else
+                          {
+                          sprintf( buff + answer_size, "%.2f, ", val );
+                          }                      
+                      }
 
                   answer_size += strlen( buff + answer_size );
                   }
 
-              sprintf( buff + answer_size, "%s\t},\n", prefix );
+              sprintf( buff + answer_size, "\n%s\t},\n", prefix );
               answer_size += strlen( buff + answer_size );
               return answer_size;
               }

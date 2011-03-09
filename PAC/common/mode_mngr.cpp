@@ -402,7 +402,7 @@ void mode_manager::print()
 //-----------------------------------------------------------------------------
 u_int mode_manager::get_active_step( u_int mode )
     {
-    return 1 + active_step[ mode ];
+    return is_active_mode[ mode ] ? 1 + active_step[ mode ] : 0;
     }
 //-----------------------------------------------------------------------------
 int mode_manager::is_current_step_evaluation_time_left( u_int_2 mode )

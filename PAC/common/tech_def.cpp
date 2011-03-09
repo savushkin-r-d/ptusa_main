@@ -277,11 +277,40 @@ int tech_object::save_device( char *buff )
 
     int answer_size = strlen( buff );
 
+    //Состояние и команда.
     sprintf( buff + answer_size, "\tSTATE=%lu, CMD=%lu,\n", 
             ( u_long ) state[ 0 ], ( u_long ) cmd );
     answer_size += strlen( buff + answer_size );
 
+    //Режимы.
+    sprintf( buff + answer_size, "\tMODES=\n\t{\n\t" );
+    answer_size += strlen( buff + answer_size );
+    for ( u_int i = 0; i < modes_count; i++ )
+        {
+        sprintf( buff + answer_size, "%d, ",
+            get_mode( i ) ? 1 : 0 );
+        answer_size += strlen( buff + answer_size );
+        }
+    sprintf( buff + answer_size, "\n\t},\n" );
+    answer_size += strlen( buff + answer_size );
+
+    //Шаги.
+    sprintf( buff + answer_size, "\tMODES_STEPS=\n\t{\n\t" );
+    answer_size += strlen( buff + answer_size );
+    for ( u_int i = 0; i < modes_count; i++ )
+        {
+        sprintf( buff + answer_size, "%d, ",
+            modes_manager->get_active_step( i ) );
+        answer_size += strlen( buff + answer_size );
+        }
+    sprintf( buff + answer_size, "\n\t},\n" );
+    answer_size += strlen( buff + answer_size );
+    
+    //Параметры.
     answer_size += par_float.save_device( buff + answer_size, "\t" );
+    answer_size += par_uint.save_device( buff + answer_size, "\t" );
+    answer_size += rt_par_float.save_device( buff + answer_size, "\t" );
+    answer_size += rt_par_uint.save_device( buff + answer_size, "\t" );
 
     sprintf( buff + answer_size, "\t}\n" );
     answer_size += strlen( buff + answer_size );

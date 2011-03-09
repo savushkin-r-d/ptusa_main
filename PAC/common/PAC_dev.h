@@ -423,8 +423,15 @@ class analog_device : public device,
 
         int save_device( char *buff, const char *prefix )
             {
-            sprintf( buff, "%s[%d]={v=%.2f},\n", 
-                prefix, get_n(), get_value() );
+            if ( get_value() == 0 )
+                {
+                sprintf( buff, "%s[%d]={v=0},\n", prefix, get_n() );
+                }
+            else
+                {
+                sprintf( buff, "%s[%d]={v=%.2f},\n", 
+                    prefix, get_n(), get_value() );
+                }
 
             return strlen( buff );
             }
@@ -955,7 +962,8 @@ class counter : public device,
     public:
         counter( u_int number ): device( number, DT_CTR, DST_NONE ), 
             value( 0 ),
-            last_read_value( 0 )
+            last_read_value( 0 ),
+            state( S_STOP )
             {            
             }
 
