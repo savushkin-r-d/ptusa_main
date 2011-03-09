@@ -143,8 +143,11 @@ class params_manager
 /// 
 /// Служит для создания конкретных типов параметров. Реализованы операции
 /// доступа через индекс ( [] ).
-template < class type > class parameters
+template < class type, bool is_float > class parameters
     {
+    private:
+        char name[ 20 ];
+
     public:      
         /// @brief Получение элемента через операцию индексирования.
         ///
@@ -206,9 +209,11 @@ template < class type > class parameters
         ///
         /// @param count - количество параметров.
         /// @param value - указатель на буфер для хранения значений параметров.
-        parameters( int count, type *value = 0 ): count( count ),
+        parameters( int count, const char *name, type *value = 0 ): count( count ),
             values( value )
             {
+            strncpy( this->name, name, sizeof( this->name ) );                
+
 #ifdef DEBUG
             if ( 0 == count )
                 {
@@ -239,7 +244,50 @@ template < class type > class parameters
             printf( "param %d\n", count );
             }
         
-        virtual int save_device( char *buff, const char *prefix ) = 0;
+        int save_device( char *buff, const char *prefix )
+            {
+            sprintf( buff, "%s%s = \n%s\t{\n", prefix, name, prefix );
+            int answer_size = strlen( buff );
+
+            sprintf( buff + answer_size, "%s\t", prefix );
+            answer_size += strlen( buff + answer_size );
+
+            for ( u_int i = 0; i < count; i++ )
+                {
+                if ( is_float )
+                    {
+                    float val  = ( float ) get_val( i );
+                    //sprintf( buff + answer_size, "%s\t[%d] = %.2f,\n", 
+                    //   prefix, i + 1, get_val( i ) );
+                    if ( 0 == val )
+                        {
+                        sprintf( buff + answer_size, "0, " );
+                        }
+                    else
+                        {         
+                        double tmp;
+                        if ( modf( val, &tmp ) == 0 )
+                            {
+                            sprintf( buff + answer_size, "%d, ", ( int ) val );
+                            }
+                        else
+                            {
+                            sprintf( buff + answer_size, "%.2f, ", val );
+                            }                      
+                        }
+                    }        
+                else
+                    {
+                    sprintf( buff + answer_size, "%u, ", get_val( i ) );
+                    }
+
+                answer_size += strlen( buff + answer_size );
+                }
+
+            sprintf( buff + answer_size, "\n%s\t},\n", prefix );
+            answer_size += strlen( buff + answer_size );
+            return answer_size;
+            }
 
     protected:
         char is_delete; ///< Признак удаления буфера при удалении объекта.
@@ -263,44 +311,28 @@ template < class type > class parameters
 /// @brief Работа с параметрами времени выполнения типа float.
 ///
 /// Данные параметры передаются на сервер через соответствующие теги.
-class run_time_params_float: public parameters < float >
+class run_time_params_float: public parameters < float, true >
     {
     public:
         /// @brief Конструктор.
         ///
         /// @param count - количество параметров.
-        run_time_params_float( int count ):parameters < float >( count )
+        run_time_params_float( int count ):parameters < float, true >( count, "RT_PAR_F" )
             {
-            }
-
-        int save_device( char *buff, const char *prefix )
-            {
-            sprintf( buff, "%sRT_PAR_F = {}\n\r", prefix );
-            int answer_size = strlen( buff );
-
-            for ( u_int i = 0; i < count; i++ )
-                {
-                sprintf( buff + answer_size, "%sRT_PAR_F[%d] = %.2f\n\r", 
-                    prefix, i + 1, get_val( i ) );
-
-                answer_size += strlen( buff + answer_size );
-                }
-
-            return answer_size;
             }
 
     protected:
         /// @brief Реализация интерфейса класса @ref array_device.
         float get_val( int idx )
             {
-            return parameters< float >::get_val( idx );
+            return parameters< float, true >::get_val( idx );
             }
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с параметрами времени выполнения типа @ref u_int_4.
 ///
 /// Данные параметры передаются на сервер через соответствующие теги.
-class run_time_params_u_int_4: public parameters < u_int_4 >
+class run_time_params_u_int_4: public parameters < u_int_4, false >
     {
     public:
         /// @brief Конструктор.
@@ -308,7 +340,7 @@ class run_time_params_u_int_4: public parameters < u_int_4 >
         /// @param count - количество параметров.
         /// @param name  - имя параметров.
         run_time_params_u_int_4( int count,
-            const char* name = "RT_PARAM_UL" ) : parameters < u_int_4 >( count )           
+            const char *name = "RT_PARAM_UI" ) : parameters < u_int_4, false >( count, name )           
             {
             }
 
@@ -316,27 +348,11 @@ class run_time_params_u_int_4: public parameters < u_int_4 >
             {
             }
 
-        int save_device( char *buff, const char *prefix )
-            {
-            sprintf( buff, "%sRT_PAR_UI = {}\n\r", prefix );
-            int answer_size = strlen( buff );
-
-            for ( u_int i = 0; i < count; i++ )
-                {
-                sprintf( buff + answer_size, "%sRT_PAR_UI[%d] = %lu\n\r", 
-                    prefix, i + 1, ( unsigned long int ) get_val( i ) );
-
-                answer_size += strlen( buff + answer_size );
-                }
-
-            return answer_size;
-            }
-
     protected:
         /// @brief Реализация интерфейса класса @ref array_device.
         u_int_4 get_val( int idx )
             {
-            return parameters< u_int_4 >::get_val( idx );
+            return parameters< u_int_4, false >::get_val( idx );
             }
     };
 //-----------------------------------------------------------------------------
@@ -344,15 +360,15 @@ class run_time_params_u_int_4: public parameters < u_int_4 >
 ///
 /// Данные параметры передаются на сервер через соответствующие теги. При
 /// перезагрузке PAC их значения сохраняются.
-template < class type > class saved_params:
-public parameters < type >
+template < class type, bool is_float > class saved_params:
+public parameters < type, is_float >
     {
     public:
         /// @brief Конструктор.
         ///
         /// @param count - количество параметров.
-        saved_params( int count ) : parameters < type >(
-            count,
+        saved_params( int count, const char *name ) : parameters < type, is_float >(
+            count, name,
             ( type* ) params_manager::get_instance()->get_params_data( 
             count * sizeof( type ), start_pos ) )
             {
@@ -370,9 +386,9 @@ public parameters < type >
         int save( u_int idx, type value )
             {
             int res = 1;
-            if ( idx < parameters< type >::get_count() )
+            if ( idx < parameters< type, is_float >::get_count() )
                 {
-                parameters< type >::get_values()[ idx ] = value;
+                parameters< type, is_float >::get_values()[ idx ] = value;
 
                 params_manager::get_instance()->save( 
                     start_pos + idx * sizeof( type ), sizeof( type ) );
@@ -382,7 +398,7 @@ public parameters < type >
             else
                 {
                 Print( "parameters:save - index[ %u ] > count [ %u ]\n",
-                    idx, parameters< type >::get_count() );
+                    idx, parameters< type, is_float >::get_count() );
                 }
 #endif // DEBUG
             return res;
@@ -396,7 +412,7 @@ public parameters < type >
         int save_all()
             {
             params_manager::get_instance()->save(
-                start_pos,  parameters< type >::get_count() * sizeof( type ) );
+                start_pos,  parameters< type, is_float >::get_count() * sizeof( type ) );
 
             return 0;
             }
@@ -405,13 +421,13 @@ public parameters < type >
         /// в энергонезависимой памяти.
         void reset_to_0()
             {
-            for ( u_int i = 0; i <  parameters< type >::get_count(); i++ )
+            for ( u_int i = 0; i <  parameters< type, is_float >::get_count(); i++ )
                 {
-                parameters< type >::get_values()[ i ] = 0;
+                parameters< type, is_float >::get_values()[ i ] = 0;
                 }
 
             params_manager::get_instance()->save(
-                start_pos, sizeof( type ) * parameters< type >::get_count() );
+                start_pos, sizeof( type ) * parameters< type, is_float >::get_count() );
             }
 
         void print() const
@@ -426,14 +442,14 @@ public parameters < type >
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с сохраняемыми параметрами типа @ref u_int_4.
-class saved_params_u_int_4: public saved_params < u_int_4 >
+class saved_params_u_int_4: public saved_params < u_int_4, false >
     {
     public:
         /// @brief Конструктор.
         ///
         /// @param count - количество параметров.
         saved_params_u_int_4( int count ) :
-          saved_params < u_int_4 >( count )
+          saved_params < u_int_4, false >( count, "PAR_UI" )
               {
               }
 
@@ -441,57 +457,23 @@ class saved_params_u_int_4: public saved_params < u_int_4 >
               {
               }
 
-          //int save_device( char *buff, char *prefix )
-          //    {
-          //    sprintf( buff, "%sPAR_UI = {}\n\r", prefix );
-          //    int answer_size = strlen( buff );
-
-          //    for ( u_int i = 0; i < count; i++ )
-          //        {
-          //        sprintf( buff + answer_size, "%sPAR_UI[%d] = %lu\n\r", 
-          //            prefix, i + 1, get_val( i ) );
-
-          //        answer_size += strlen( buff + answer_size );
-          //        }
-
-          //    return answer_size;
-          //    }
-
-          int save_device( char *buff, const char *prefix )
-              {
-              sprintf( buff, "%sPAR_UI = \n%s\t{\n", prefix, prefix );
-              int answer_size = strlen( buff );
-
-              for ( u_int i = 0; i < count; i++ )
-                  {
-                  sprintf( buff + answer_size, "%s\t[%d] = %u,\n", 
-                      prefix, i + 1, get_val( i ) );
-
-                  answer_size += strlen( buff + answer_size );
-                  }
-
-              sprintf( buff + answer_size, "%s\t},\n", prefix );
-              answer_size += strlen( buff + answer_size );
-              return answer_size;
-              }
-
     protected:
         /// @brief Реализация интерфейса класса @ref array_device.
         u_int_4 get_val( int idx )
             {
-            return saved_params< u_int_4 >::get_val( idx );
+            return saved_params< u_int_4, false >::get_val( idx );
             }
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с сохраняемыми параметрами типа float.
-class saved_params_float: public saved_params < float >     
+class saved_params_float: public saved_params < float, true >     
     {
     public:
         /// @brief Конструктор.
         ///
         /// @param count - количество параметров.
         saved_params_float( int count ):
-          saved_params < float >( count )
+          saved_params < float, true >( count, "PAR_F" )
               {
               }
 
@@ -499,49 +481,11 @@ class saved_params_float: public saved_params < float >
               {
               }
 
-          int save_device( char *buff, const char *prefix )
-              {
-              sprintf( buff, "%sPAR_F = \n%s\t{\n", prefix, prefix );
-              int answer_size = strlen( buff );
-
-              sprintf( buff + answer_size, "%s\t", prefix );
-              answer_size += strlen( buff + answer_size );
-
-              for ( u_int i = 0; i < count; i++ )
-                  {
-                  float val  = get_val( i );
-                  //sprintf( buff + answer_size, "%s\t[%d] = %.2f,\n", 
-                  //   prefix, i + 1, get_val( i ) );
-                  if ( 0 == val )
-                      {
-                      sprintf( buff + answer_size, "0, " );
-                      }
-                  else
-                      {         
-                      double tmp;
-                      if ( modf( val, &tmp ) == 0 )
-                          {
-                          sprintf( buff + answer_size, "%d, ", ( int ) val );
-                          }
-                      else
-                          {
-                          sprintf( buff + answer_size, "%.2f, ", val );
-                          }                      
-                      }
-
-                  answer_size += strlen( buff + answer_size );
-                  }
-
-              sprintf( buff + answer_size, "\n%s\t},\n", prefix );
-              answer_size += strlen( buff + answer_size );
-              return answer_size;
-              }
-
     protected:
         /// @brief Реализация интерфейса класса @ref array_device.
         float get_val( int idx )
             {
-            return saved_params< float >::get_val( idx );
+            return saved_params< float, true >::get_val( idx );
             }
     };
 //-----------------------------------------------------------------------------
