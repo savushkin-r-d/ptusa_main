@@ -279,7 +279,7 @@ int tech_object::save_device( char *buff )
 
     //Состояние и команда.
     sprintf( buff + answer_size, "\tCMD=%lu,\n",
-            ( u_long ) state[ 0 ], ( u_long ) cmd );
+        ( u_long ) cmd );
     answer_size += strlen( buff + answer_size );
 
     sprintf( buff + answer_size, "\tST=\n\t\t{\n\t\t" );
@@ -327,6 +327,100 @@ int tech_object::save_device( char *buff )
 
 
     return answer_size;
+    }
+//-----------------------------------------------------------------------------
+int tech_object::set_cmd( const char *prop, u_int idx, double val )
+    {
+    if ( strcmp( prop, "CMD" ) == 0 )
+        {
+#ifdef DEBUG      
+        Print( "tech_object::set_cmd() - prop = \"%s\", val = %f\n", 
+            prop, val );      
+#endif // DEBUG
+
+        if ( 0. == val )
+            {
+            cmd = 0;
+            return 0;
+            }
+
+        u_int mode     = ( int ) val;
+        char new_state = 0;
+
+        if ( mode >= 1000 && mode < 2000 )      // On mode.
+            {
+            mode = mode - 1000;
+            new_state = 1;
+            }
+        else
+            {
+            if ( mode >= 2000 && mode < 3000 )  // Off mode.
+                {
+                mode = mode - 2000;
+                new_state = 0;
+                }
+            else
+                {
+#ifdef DEBUG
+                Print( "Error complex_state::parse_cmd - new_mode = %lu\n",
+                    ( unsigned long int ) mode );
+#endif // DEBUG
+                return 1;
+                }
+            }
+
+        if ( mode > get_modes_count() )
+            {
+            // Command.
+            cmd = lua_exec_cmd( mode );
+            }
+        else
+            {
+            // On/off mode.
+            int res = set_mode( mode, new_state );
+            if ( 0 == res )
+                {
+                cmd = ( int ) val;  // Ok.
+                }
+            else
+                {
+                cmd = res;          // Ошибка.
+                }                    
+            }  
+
+        return 0;
+        }
+
+    if ( strcmp( prop, "S_PAR_F" ) == 0 )
+        {
+        par_float[ idx - 1 ] = ( float ) val;
+        return 0;
+        }
+
+    if ( strcmp( prop, "RT_PAR_F" ) == 0 )
+        {
+        rt_par_float[ idx - 1 ] = ( float ) val;
+        return 0;
+        }
+
+    if ( strcmp( prop, "S_PAR_UI" ) == 0 )
+        {
+        par_uint[ idx - 1 ] = ( u_int_4 ) val;
+        return 0;
+        }
+
+    if ( strcmp( prop, "RT_PAR_UI" ) == 0 )
+        {
+        rt_par_uint[ idx - 1 ] = ( u_int_4 ) val;
+        return 0;
+        }
+
+#ifdef DEBUG
+        Print( "Eror tech_object::set_cmd(...), prop = \"%s\", idx = %u, val = %f\n",
+            prop, idx, val );
+#endif // DEBUG
+
+    return 1;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

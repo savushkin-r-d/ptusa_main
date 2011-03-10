@@ -198,29 +198,7 @@ class tech_object: public i_Lua_save_device
 
         int save_device( char *buff );
 
-        int set_cmd( const char *prop, u_int idx, double val )
-            {
-            if ( strcmp( prop, "CMD" ) == 0 )
-                {
-                int mode = ( int ) val;
-                if ( mode < 2000 )
-                    {
-                    set_mode( mode - 1000, 1 );
-                    }
-                else
-                    {
-                    set_mode( mode - 2000, 0 );
-                    }
-                cmd = mode;
-                }
-
-            if ( strcmp( prop, "PAR_F" ) == 0 )
-                {
-                par_float[ idx ] = ( float ) val;
-                }
-            
-            return 0;
-            }
+        int set_cmd( const char *prop, u_int idx, double val );
 
     protected:
         u_int   number;         ///< Номер объекта.

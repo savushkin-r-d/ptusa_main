@@ -173,21 +173,34 @@ class device : public i_AO_device,
     public:
         int set_cmd( const char *prop, u_int idx, double val ) 
             {
-            if ( strcmp( prop, "st" ) == 0 )
+            int res = 1;
+
+            if ( strcmp( prop, "ST" ) == 0 )
                 {
                 set_state( ( int ) val );
+                res = 0;
                 }
-
-            if ( strcmp( prop, "v" ) == 0 )
+            if ( strcmp( prop, "V" ) == 0 )
                 {
                 set_value( ( float ) val );
+                res = 0;
                 }
+
+#ifdef DEBUG
+            if ( res )
+                {
+                Print( "Error device::set_cmd() - prop =%s, val = %f\n", 
+                    prop, val );
+                }
+#endif // DEBUG
             
-            return 0;
+            return res;
             }
 
         int set_cmd( const char *prop, u_int idx, char *val )
             {
+
+
             return 0;
             }
 
