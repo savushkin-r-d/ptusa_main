@@ -286,7 +286,7 @@ int tech_object::save_device( char *buff )
     answer_size += strlen( buff + answer_size );
     for ( u_int i = 0; i < state.size(); i++ )
         {
-        sprintf( buff + answer_size, "%lu, ", state[ i ] );
+        sprintf( buff + answer_size, "%lu, ", ( long int ) state[ i ] );
         answer_size += strlen( buff + answer_size );
         }
     sprintf( buff + answer_size, "\n\t\t},\n" );

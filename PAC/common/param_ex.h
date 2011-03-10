@@ -279,7 +279,7 @@ template < class type, bool is_float > class parameters
                     }        
                 else
                     {
-                    sprintf( buff + answer_size, "%u, ", get_val( i ) );
+                    sprintf( buff + answer_size, "%u, ", ( u_int ) get_val( i ) );
                     }
 
                 answer_size += strlen( buff + answer_size );
