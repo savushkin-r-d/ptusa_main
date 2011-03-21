@@ -15,7 +15,7 @@
 #ifndef W_MEM_H
 #define W_MEM_H
 
-#include "mem.h"
+#include "base_mem.h"
 //-----------------------------------------------------------------------------
 /// @brief Работа с энергонезависимой ОЗУ (Static Memory).
 ///

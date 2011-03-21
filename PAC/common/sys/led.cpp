@@ -1,4 +1,6 @@
-#if !defined WIN_OS && !( defined LINUX_OS && defined PAC_PC ) && !( defined LINUX_OS && defined PAC_WAGO_750_860 )
+#if !defined WIN_OS && !( defined LINUX_OS && defined PAC_PC ) && \
+    !( defined LINUX_OS && defined PAC_WAGO_750_860 ) && \
+    !( defined MINIOS7 && defined UPAC_7186E )
 #error You must define OS!
 #endif 
 
@@ -15,6 +17,10 @@
 
 #if defined LINUX_OS && defined PAC_WAGO_750_860
 #include "led_w750.h"
+#endif
+
+#if defined MINIOS7 && defined UPAC_7186E
+#include "mos7_led.h"
 #endif
 
 led* get_led()
@@ -34,6 +40,10 @@ led* get_led()
 
 #if defined LINUX_OS && defined PAC_WAGO_750_860
         led_instance = new led_W750();
+#endif
+
+#if defined MINIOS7 && defined UPAC_7186E
+        led_instance = new led_mos7();
 #endif
         }
 

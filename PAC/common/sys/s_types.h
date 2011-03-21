@@ -16,7 +16,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#if !defined WIN_OS && !defined LINUX_OS
+#if !defined WIN_OS && !defined LINUX_OS && !defined MINIOS7
 #error You must define OS!
 #endif 
 
@@ -26,6 +26,10 @@
 
 #ifdef LINUX_OS
 #include "l_types.h"
+#endif // LINUX_OS
+
+#ifdef MINIOS7
+#include "mos7_types.h"
 #endif // LINUX_OS
 //-----------------------------------------------------------------------------
 typedef unsigned char     u_char;

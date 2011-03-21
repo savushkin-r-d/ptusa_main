@@ -8,7 +8,9 @@ PAC_critical_errors_manager::PAC_critical_errors_manager(
     ): errors_id( 0 ),
     global_ok( 0 )    
     {
+#ifndef __BORLANDC__
     errors.clear();
+#endif // __BORLANDC__
     }
 //-----------------------------------------------------------------------------
 void PAC_critical_errors_manager::show_errors()

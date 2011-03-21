@@ -117,9 +117,9 @@
     <ClInclude Include="..\..\..\PAC\common\sys\debug.h" />
     <ClInclude Include="..\..\..\PAC\common\sys\led.h" />
     <ClInclude Include="..\..\..\PAC\common\sys\console.h" />
-    <ClInclude Include="..\..\..\PAC\common\sys\mem.h" />
+    <ClInclude Include="..\..\..\PAC\common\sys\base_mem.h" />
     <ClInclude Include="..\..\..\PAC\common\sys\dtime.h" />
-    <ClInclude Include="..\..\..\PAC\common\sys\types.h" />
+    <ClInclude Include="..\..\..\PAC\common\sys\s_types.h" />
     <ClInclude Include="..\..\..\PAC\common\tcp_cmctr.h" />
     <ClInclude Include="..\..\..\PAC\common\tech_def.h" />
     <ClInclude Include="..\..\..\PAC\common\wago.h" />
@@ -179,7 +179,7 @@
     <ClCompile Include="..\..\..\PAC\common\prj_mngr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys\io.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys\led.cpp" />
-    <ClCompile Include="..\..\..\PAC\common\sys\mem.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\sys\base_mem.cpp" />
     <ClCompile Include="..\..\..\PAC\common\tcp_cmctr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\tech_def.cpp" />
     <ClCompile Include="..\..\..\PAC\common\wago.cpp" />
@@ -191,8 +191,8 @@
     <ClCompile Include="..\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\PAC\common\Lua\sys.lua" />
-    <None Include="..\..\..\PAC\common\Lua\sys_wago.lua" />
+    <None Include="..\..\..\..\PTUSA projects\system scripts\sys.lua" />
+    <None Include="..\..\..\..\PTUSA projects\system scripts\sys_wago.lua" />
     <None Include="..\..\..\PAC\common\toloa++\pkg\make.cmd" />
     <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg" />
   </ItemGroup>

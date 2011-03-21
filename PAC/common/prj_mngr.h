@@ -13,7 +13,7 @@
 #define PRJ_MANAGER_H
 
 #include "smart_ptr.h"
-#include "mem.h"
+#include "base_mem.h"
 
 //-----------------------------------------------------------------------------
 /// @brief Инициализация проекта.

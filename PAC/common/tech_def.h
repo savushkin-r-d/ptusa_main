@@ -19,7 +19,12 @@
 #include <stdio.h>
 #include <vector>
 
-//#include "sys.h"
+#ifdef __BORLANDC__
+extern "C" {
+extern int snprintf(char *, size_t, const char *, /*args*/ ...);
+    };
+#endif // __BORLANDC__
+
 #include "g_device.h"
 #include "PAC_dev.h"
 #include "PAC_err.h"
@@ -254,6 +259,10 @@ class tech_object_manager
         /// @brief Добавление технологического объекта.
         void add_tech_object( tech_object* new_tech_object );
 
+#ifdef __BORLANDC__
+#pragma option -w-inl
+#endif // __BORLANDC__
+
         /// @brief Отладочная печать объекта.
         void print()
             {
@@ -270,6 +279,9 @@ class tech_object_manager
 #endif // KEY_CONFIRM
                 }
             }
+#ifdef __BORLANDC__
+#pragma option -w.inl
+#endif // __BORLANDC__
 
     private:
         /// Единственный экземпляр класса.

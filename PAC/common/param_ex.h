@@ -23,8 +23,15 @@
 #include <math.h>
 #include <string.h>
 
-#include "mem.h"
+#include "base_mem.h"
 #include "g_device.h"
+
+#ifdef __BORLANDC__
+#pragma option -w-inl
+#pragma option -w-ccc
+#pragma option -w-rch
+#endif // __BORLANDC__
+
 //-----------------------------------------------------------------------------
 /// @brief Работа с параметрами. 
 /// 
@@ -68,7 +75,7 @@ class params_manager
         /// tank и comb.
         /// @param auto_init_work_params - вызывать ли функцию init_work_params 
         /// классов tank и comb.
-        /// @param custom_init_params_function - пользовательская функция 
+        /// @param custom_init_params_function - пользовательская функция
         /// инициализации параметров.
         void final_init( int auto_init_params = 1, 
             int auto_init_work_params = 1,
@@ -94,7 +101,7 @@ class params_manager
         /// параметров. Необходим для дальнейшей записи параметров в память.
         ///
         /// @return 0 - ОК.
-        /// @return 1 - Ошибка контрольной суммы. 
+        /// @return 1 - Ошибка контрольной суммы.
         char* get_params_data( int size, int &start_pos );
 
         ~params_manager();
@@ -140,21 +147,22 @@ class params_manager
         void make_CRC();
     };
 //-----------------------------------------------------------------------------
-/// @brief Работа с массивом параметров. 
-/// 
+/// @brief Работа с массивом параметров.
+///
 /// Служит для создания конкретных типов параметров. Реализованы операции
 /// доступа через индекс ( [] ).
+
 template < class type, bool is_float > class parameters
     {
     private:
         char name[ 20 ];
 
-    public:      
+    public:
         /// @brief Получение элемента через операцию индексирования.
         ///
         /// @param index - индекс элемента.
         ///
-        /// @return - значение элемента с заданным индексом. Если индекс 
+        /// @return - значение элемента с заданным индексом. Если индекс
         /// выходит за диапазон, возвращается значение заглушки - поля @ref
         /// stub ( значение 0 ).
         type& operator[] ( unsigned int index )
@@ -181,7 +189,7 @@ template < class type, bool is_float > class parameters
         ///
         /// @param idx - индекс элемента.
         ///
-        /// @return - значение элемента с заданным индексом. Если индекс 
+        /// @return - значение элемента с заданным индексом. Если индекс
         /// выходит за диапазон, возвращается значение заглушки - поля @ref
         /// stub ( значение 0 ).
         type get_val( int idx )
@@ -213,7 +221,7 @@ template < class type, bool is_float > class parameters
         parameters( int count, const char *name, type *value = 0 ): count( count ),
             values( value )
             {
-            strncpy( this->name, name, sizeof( this->name ) );                
+            strncpy( this->name, name, sizeof( this->name ) );
 
 #ifdef DEBUG
             if ( 0 == count )
@@ -244,7 +252,7 @@ template < class type, bool is_float > class parameters
             {
             printf( "param %d\n", count );
             }
-        
+
         int save_device( char *buff, const char *prefix )
             {
             sprintf( buff, "%s%s = \n%s\t{\n", prefix, name, prefix );
@@ -258,14 +266,14 @@ template < class type, bool is_float > class parameters
                 if ( is_float )
                     {
                     float val  = ( float ) get_val( i );
-                    //sprintf( buff + answer_size, "%s\t[%d] = %.2f,\n", 
+                    //sprintf( buff + answer_size, "%s\t[%d] = %.2f,\n",
                     //   prefix, i + 1, get_val( i ) );
-                    if ( 0 == val )
+                    if ( 0. == val )
                         {
                         sprintf( buff + answer_size, "0, " );
                         }
                     else
-                        {         
+                        {
                         double tmp;
                         if ( modf( val, &tmp ) == 0 )
                             {
@@ -274,9 +282,9 @@ template < class type, bool is_float > class parameters
                         else
                             {
                             sprintf( buff + answer_size, "%.2f, ", val );
-                            }                      
+                            }
                         }
-                    }        
+                    }
                 else
                     {
                     sprintf( buff + answer_size, "%u, ", ( u_int ) get_val( i ) );
@@ -501,4 +509,10 @@ class params_test
         static int make_test();
     };
 //-----------------------------------------------------------------------------
+#ifdef __BORLANDC__
+#pragma option -w.inl
+#pragma option -w.ccc
+#pragma option -w.rch
+#endif // __BORLANDC__
+
 #endif // PARAMS_EX_H

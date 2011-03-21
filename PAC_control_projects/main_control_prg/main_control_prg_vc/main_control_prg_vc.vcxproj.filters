@@ -207,12 +207,6 @@
     <ClInclude Include="..\..\..\PAC\common\PID.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\PAC\common\sys\mem.h">
-      <Filter>Header Files\PAC\common\sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\PAC\common\sys\types.h">
-      <Filter>Header Files\PAC\common\sys</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\sys\dtime.h">
       <Filter>Header Files\PAC\common\sys</Filter>
     </ClInclude>
@@ -242,6 +236,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\win\w_tcp_cmctr.h">
       <Filter>Header Files\PAC\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\sys\s_types.h">
+      <Filter>Header Files\PAC\common\sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\sys\base_mem.h">
+      <Filter>Header Files\PAC\common\sys</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -398,9 +398,6 @@
     <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp">
       <Filter>Source Files\common\PAC-driver</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\PAC\common\sys\mem.cpp">
-      <Filter>Source Files\PAC\common\sys</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\sys\io.cpp">
       <Filter>Source Files\PAC\common\sys</Filter>
     </ClCompile>
@@ -419,19 +416,22 @@
     <ClCompile Include="..\..\..\PAC\win\w_tcp_cmctr.cpp">
       <Filter>Source Files\PAC\win</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\sys\base_mem.cpp">
+      <Filter>Source Files\PAC\common\sys</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\PAC\common\Lua\sys.lua">
-      <Filter>Lua Source\common</Filter>
-    </None>
-    <None Include="..\..\..\PAC\common\Lua\sys_wago.lua">
-      <Filter>Lua Source\common</Filter>
-    </None>
     <None Include="..\..\..\PAC\common\toloa++\pkg\make.cmd">
       <Filter>Header Files\PAC\common\tolua++\pkg</Filter>
     </None>
     <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg">
       <Filter>Header Files\PAC\common\tolua++\pkg</Filter>
+    </None>
+    <None Include="..\..\..\..\PTUSA projects\system scripts\sys.lua">
+      <Filter>Lua Source\common</Filter>
+    </None>
+    <None Include="..\..\..\..\PTUSA projects\system scripts\sys_wago.lua">
+      <Filter>Lua Source\common</Filter>
     </None>
   </ItemGroup>
 </Project>

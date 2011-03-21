@@ -9,7 +9,7 @@ void print_binary( unsigned int c )
         return;
         }
 
-    u_int mask = 0x80000000;
+    u_int_4 mask = 0x80000000L;
     while( !( c & mask ) ) mask >>= 1;
     while ( mask )
         {

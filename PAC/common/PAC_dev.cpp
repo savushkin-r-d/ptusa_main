@@ -258,7 +258,9 @@ device_manager::~device_manager()
         {
         delete project_devices[ i ];
         }
-    project_devices.clear();
+#ifndef __BORLANDC__
+  project_devices.clear();
+#endif  
 
     //if ( devices )
     //    {
@@ -716,17 +718,17 @@ float digital_device::get_value()
 //-----------------------------------------------------------------------------
 void digital_device::set_value( float new_value )
     {
-    return set_state( ( int ) new_value );
+    set_state( ( int ) new_value );
     }
 //-----------------------------------------------------------------------------
 void digital_device::set_state( int new_state )
     {
-    if ( new_state ) 
-        {    
+    if ( new_state )
+        {
         if ( -1 == new_state ) state = ( char ) -1;
         else on();
         }
-    else off();    
+    else off();
     }
 //-----------------------------------------------------------------------------
 void digital_device::print() const
@@ -1144,7 +1146,7 @@ float analog_input_4_20::get_min_val()
 //-----------------------------------------------------------------------------
 void analog_device::set_state( int new_state )
     {
-    return set_value( ( float ) new_state );
+    set_value( ( float ) new_state );
     }
 //-----------------------------------------------------------------------------
 int analog_device::get_state_now()

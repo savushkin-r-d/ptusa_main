@@ -1,4 +1,4 @@
-#if !defined WIN_OS && !defined LINUX_OS
+#if !defined WIN_OS && !defined LINUX_OS && !defined MINIOS7
 #error You must define OS!
 #endif 
 
@@ -18,6 +18,10 @@
 
 #ifdef LINUX_OS
 #include "l_mem.h"
+#endif
+
+#ifdef MINIOS7
+#include "mos7_mem.h"
 #endif
 
 auto_smart_ptr < project_manager > project_manager::instance;

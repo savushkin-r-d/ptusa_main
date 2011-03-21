@@ -1,8 +1,10 @@
-#if !defined WIN_OS && !( defined LINUX_OS && defined PAC_PC ) && !( defined LINUX_OS && defined PAC_WAGO_750_860 )
+#if !defined WIN_OS && !( defined LINUX_OS && defined PAC_PC ) && \
+    !( defined LINUX_OS && defined PAC_WAGO_750_860 ) && \
+    !( defined MINIOS7 && defined UPAC_7186E )
 #error You must define OS!
 #endif 
 
-#include "mem.h"
+#include "base_mem.h"
 
 #ifdef WIN_OS
 #include "w_mem.h"
@@ -11,6 +13,10 @@
 #ifdef LINUX_OS
 #include "l_mem.h"
 #endif // LINUX_OS
+
+#ifdef MINIOS7
+#include "mos7_mem.h"
+#endif // MINIOS7
 
 auto_smart_ptr < NV_memory_manager > NV_memory_manager::instance;
 //-----------------------------------------------------------------------------
@@ -102,6 +108,11 @@ NV_memory_manager::NV_memory_manager() : PAC_NVRAM( 0 ),
 #if defined LINUX_OS && defined PAC_WAGO_750_860
     PAC_NVRAM  = new SRAM( "/dev/nvram", 32768, 0, 30 );
     PAC_EEPROM = new SRAM( "/dev/nvram", 32768, 31, 32767 );
+#endif
+
+#if defined MINIOS7 && defined UPAC_7186E
+    PAC_NVRAM = new NVRAM_7186();
+    PAC_EEPROM = new EEPROM_7186();
 #endif
 
     last_NVRAM_pos  = PAC_NVRAM->get_available_start_pos();

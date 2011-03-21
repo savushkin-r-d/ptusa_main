@@ -45,8 +45,8 @@ tech_object::tech_object( const char* new_name, u_int number, u_int modes_count,
 //-----------------------------------------------------------------------------
 tech_object::~tech_object()
     {
-    delete modes_manager;
-    modes_manager = 0;
+    //delete modes_manager;
+    //modes_manager = 0;
     }
 //-----------------------------------------------------------------------------
 int tech_object::init_params()

@@ -140,7 +140,8 @@ class PAC_critical_errors_manager
             unsigned int    err_sub_class; ///< Подкласс ошибки.
             unsigned int    param;         ///< Параметр ошибки.
 
-            critical_error( int err_class, u_int err_sub_class, u_int param );
+            critical_error( int err_class = 0, u_int err_sub_class = 0,
+                u_int param = 0 );
             };
 
         std::vector< critical_error >  errors;

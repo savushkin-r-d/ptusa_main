@@ -10,6 +10,11 @@
 
 #include <stdlib.h>
 
+#ifdef __BORLANDC__
+#include <sys\types.h>
+#include <time.h>
+#endif // __BORLANDC__
+
 #include "dtime.h"
 
 #include "prj_mngr.h"
@@ -20,6 +25,11 @@
 
 int main( int argc, char *argv[] )
     {
+#ifdef MINIOS7
+    EnableHighRam();
+    InitLib();
+#endif
+
     if ( argc < 2 )
         {
         Print( "Usage: main script.plua\n" );
@@ -159,3 +169,7 @@ int main( int argc, char *argv[] )
 
     return( EXIT_SUCCESS );
     }
+
+
+
+

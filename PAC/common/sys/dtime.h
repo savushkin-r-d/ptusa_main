@@ -14,7 +14,7 @@
 #ifndef DTIME_H
 #define DTIME_H
 
-#if !defined WIN_OS && !defined LINUX_OS
+#if !defined WIN_OS && !defined LINUX_OS && !defined MINIOS7
 #error You must define OS!
 #endif 
 

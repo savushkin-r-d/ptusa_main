@@ -1009,7 +1009,7 @@ class counter : public device,
             {
             AI_INDEX = 0,       ///< Индекс канала аналогового входа.
 
-            MAX_VAL = 65535,    ///< Максимальное значение счетчика.
+            MAX_VAL = 65535L,   ///< Максимальное значение счетчика.
             };
 
         u_int value;
@@ -1085,6 +1085,9 @@ class device_manager: public i_Lua_save_device
             return &stub;
             }
 
+#ifdef __BORLANDC__
+#pragma option -w-inl
+#endif // __BORLANDC__
         int save_device( char *buff )
             {
             sprintf( buff, "t=t or {}\n\r" );
@@ -1113,10 +1116,14 @@ class device_manager: public i_Lua_save_device
             return answer_size;
             }
 
-    protected:
-        dev_stub stub;  ///< Устройство-заглушка, фиктивное устройство. 
+#ifdef __BORLANDC__
+#pragma option -w.inl
+#endif // __BORLANDC__
 
-        struct range    ///< Диапазон устройств одного типа. 
+    protected:
+        dev_stub stub;  ///< Устройство-заглушка, фиктивное устройство.
+
+        struct range    ///< Диапазон устройств одного типа.
             {
             int start_pos;
             int end_pos;

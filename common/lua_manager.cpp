@@ -21,19 +21,19 @@ auto_smart_ptr< lua_manager > lua_manager::instance;
 lua_manager* lua_manager::get_instance()
     {
     static int is_init = 0;
-     if ( 0 == is_init )
+    if ( 0 == is_init )
         {
         instance = new lua_manager();
         is_init = 1;
         }
 
-     return instance;
+    return instance;
     }
 //-----------------------------------------------------------------------------
 int lua_manager::init( lua_State* lua_state, char* script_name )
     {
 #if defined DEBUG && defined MINIOS7
-        Print( "\n Memory free: %lu bytes. ", ( unsigned long ) coreleft() );
+    Print( "\n Memory free: %lu bytes. ", ( unsigned long ) coreleft() );
 #endif    
     Print( "Init Lua.\n" );
 
@@ -68,11 +68,11 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
 
         const char *ADDITIONAL_PATH_CMD =
 #ifdef PAC_PC
-        "package.path = package.path..\';../../system scripts/?.lua;\'";
+            "package.path = package.path..\';../../system scripts/?.lua;\'";
 #else
-        "package.path = package.path..\';./?.lua;\'";
+            "package.path = package.path..\';./?.lua;\'";
 #endif // PAC_PC
-      
+
         if( luaL_dostring( L, ADDITIONAL_PATH_CMD ) != 0 )
             {
             Print( "Set additional search path error!\n" );
@@ -95,7 +95,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         memcpy( script_src, wago_data_script->addr, wago_data_script->size );
 
         if( 0 == wago_data_script ||
-        luaL_loadstring( L, script_src ) != 0 )
+            luaL_loadstring( L, script_src ) != 0 )
 #else
         if( luaL_dofile( L, "main.wago.plua" ) != 0 )
 #endif
@@ -133,7 +133,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             lua_pop( L, 1 );            
             return 1;
             }        
-    	}
+        }
     else
         {
         L = lua_state;
@@ -146,13 +146,13 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
 lua_manager::~lua_manager()
     {
     if ( 1 == is_free_lua )
-    	{
+        {
         if ( L )
             {
             lua_close( L );
             L = NULL;
             }
-    	}    
+        }    
     }
 //-----------------------------------------------------------------------------
 int lua_manager::void_exec_lua_method( const char *object_name,
@@ -219,8 +219,8 @@ int lua_manager::exec_lua_method( const char *object_name,
     //LARGE_INTEGER start_time;
     //QueryPerformanceCounter( &start_time );
 
-//    u_long start_time;
-//    start_time = get_millisec();
+    //    u_long start_time;
+    //    start_time = get_millisec();
 
     lua_pushcclosure( lua_manager::L, error_trace, 0 );
     instance->err_func = lua_gettop( L );
@@ -249,10 +249,10 @@ int lua_manager::exec_lua_method( const char *object_name,
     //double dt = call_time / tiks_per_mcsec;
     //dt += 1;
 
-//    u_long finish_time;
-//    finish_time = get_millisec();
-//    u_long call_time = finish_time - start_time;
-//    Print( "Lua call time - %lums\n", call_time );
+    //    u_long finish_time;
+    //    finish_time = get_millisec();
+    //    u_long call_time = finish_time - start_time;
+    //    Print( "Lua call time - %lums\n", call_time );
 
     return res;
     }
