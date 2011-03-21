@@ -1,7 +1,14 @@
+#ifndef __BORLANDC__
 #include <cstdlib>
+#endif
+
 #ifdef OS_WIN
 #include <windows.h>
 #endif // OS_WIN
+
+#if defined MINIOS7
+#include <alloc.h>
+#endif
 
 #include "lua_manager.h"
 
@@ -25,10 +32,17 @@ lua_manager* lua_manager::get_instance()
 //-----------------------------------------------------------------------------
 int lua_manager::init( lua_State* lua_state, char* script_name )
     {
+#if defined DEBUG && defined MINIOS7
+        Print( "\n Memory free: %lu bytes. ", ( unsigned long ) coreleft() );
+#endif    
+    Print( "Init Lua.\n" );
+
     if ( 0 == lua_state )
         {
         //-Инициализация Lua.
-        L = lua_open();   // Create Lua context.        
+        L = lua_open();   // Create Lua context.
+
+        Print( "Init Lua 1.\n" );
 
         if ( NULL == L )
             {
@@ -37,9 +51,20 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             }
         is_free_lua = 1;
 
+#if defined DEBUG && defined MINIOS7
+        Print( "\n Memory free: %lu bytes. ", ( unsigned long ) coreleft() );
+#endif
         luaL_openlibs( L );    // Open standard libraries.
 
+        Print( "Init Lua 2.\n" );
+
+#if defined DEBUG && defined MINIOS7
+        Print( "\n Memory free: %lu bytes. ", ( unsigned long ) coreleft() );
+#endif
+
         tolua_PAC_dev_open( L );
+
+        Print( "Init Lua 3.\n" );
 
         const char *ADDITIONAL_PATH_CMD =
 #ifdef PAC_PC
@@ -57,7 +82,23 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             return 1;
             }
 
+#if defined MINIOS7
+        Print( "\n Memory free: %lu bytes. ", ( unsigned long ) coreleft() );
+#endif
+
+#ifdef MINIOS7
+        FILE_DATA far *wago_data_script = GetFileInfoByName(
+            "mwago.lua" );
+
+        char *script_src = new char[ wago_data_script->size + 1 ];
+        memset( script_src, 0, wago_data_script->size + 1 );
+        memcpy( script_src, wago_data_script->addr, wago_data_script->size );
+
+        if( 0 == wago_data_script ||
+        luaL_loadstring( L, script_src ) != 0 )
+#else
         if( luaL_dofile( L, "main.wago.plua" ) != 0 )
+#endif
             {
             Print( "Load description Wago Lua script error!\n" );
             Print( "\t%s\n", lua_tostring( L, -1 ) );
@@ -66,7 +107,12 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             return 1;
             }
 
-        G_PROJECT_MANAGER->lua_load_configuration();       
+#if defined MINIOS7
+        Print( "Init Lua 5. \n" );
+        Print( "Memory free: %lu bytes. \n", ( unsigned long ) coreleft() );
+#endif
+
+        G_PROJECT_MANAGER->lua_load_configuration();
 
         if( luaL_loadfile( L, script_name ) != 0 )
             {

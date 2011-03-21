@@ -24,6 +24,12 @@
 
 #ifndef DRIVER
 
+#ifdef __BORLANDC__
+extern "C" {
+#include "snprintf.h"
+    };
+#endif // __BORLANDC__
+
 #include "smart_ptr.h"
 
 #include "tcp_cmctr.h"
