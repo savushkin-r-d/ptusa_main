@@ -1,34 +1,27 @@
 #include <stdio.h>
 #include <limits.h>
+#include <time.h>
 #include <sys/time.h>
 #include <unistd.h>
+
+#include "console.h"
 
 //-----------------------------------------------------------------------------
 unsigned long get_millisec()
     {
-    static timeval start_tv;
-    static char is_init = 0;
-    if ( 0 == is_init )
-        {
-        gettimeofday( &start_tv, NULL );
-        is_init = 1;
-        }
+    timespec start_tv;
+    clock_gettime( 0, &start_tv );
 
-    timeval tv;
-    gettimeofday( &tv, NULL );
-
-    unsigned long now = 1000UL * ( tv.tv_sec - start_tv.tv_sec ) +
-            ( tv.tv_usec - start_tv.tv_usec ) / 1000;
-
+    unsigned long now = 1000UL * start_tv.tv_sec + start_tv.tv_nsec / 1000000;
     return now;
     }
 //-----------------------------------------------------------------------------
 unsigned long get_sec()
     {
-    timeval tv;
-    gettimeofday( &tv, NULL );
+    timespec start_tv;
+    clock_gettime( 1, &start_tv );
 
-    return tv.tv_sec;
+    return start_tv.tv_sec;
     }
 //-----------------------------------------------------------------------------
 unsigned long get_delta_millisec( unsigned long time1 )

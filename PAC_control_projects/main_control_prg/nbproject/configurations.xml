@@ -7,11 +7,11 @@
       <logicalFolder name="f6" displayName="common" projectFiles="true">
         <logicalFolder name="f1" displayName="PAC" projectFiles="true">
           <logicalFolder name="f1" displayName="sys" projectFiles="true">
+            <itemPath>../../PAC/common/sys/base_mem.h</itemPath>
             <itemPath>../../PAC/common/sys/console.h</itemPath>
             <itemPath>../../PAC/common/sys/debug.h</itemPath>
             <itemPath>../../PAC/common/sys/dtime.h</itemPath>
             <itemPath>../../PAC/common/sys/led.h</itemPath>
-            <itemPath>../../PAC/common/sys/mem.h</itemPath>
             <itemPath>../../PAC/common/sys/s_types.h</itemPath>
           </logicalFolder>
           <itemPath>../../PAC/common/PAC_dev.h</itemPath>
@@ -87,6 +87,8 @@
     </logicalFolder>
     <logicalFolder name="f1" displayName="Lua source " projectFiles="true">
       <logicalFolder name="f1" displayName="common" projectFiles="true">
+        <itemPath>../../../PTUSA_projects/system scripts/sys.lua</itemPath>
+        <itemPath>../../../PTUSA_projects/system scripts/sys_wago.lua</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
@@ -95,9 +97,9 @@
       <logicalFolder name="f5" displayName="common" projectFiles="true">
         <logicalFolder name="f1" displayName="PAC" projectFiles="true">
           <logicalFolder name="f1" displayName="sys" projectFiles="true">
+            <itemPath>../../PAC/common/sys/base_mem.cpp</itemPath>
             <itemPath>../../PAC/common/sys/io.cpp</itemPath>
             <itemPath>../../PAC/common/sys/led.cpp</itemPath>
-            <itemPath>../../PAC/common/sys/mem.cpp</itemPath>
           </logicalFolder>
           <itemPath>../../PAC/common/PAC_dev.cpp</itemPath>
           <itemPath>../../PAC/common/PAC_dev_lua.cpp</itemPath>
@@ -256,7 +258,7 @@
             <pElem>../../common/tolua++</pElem>
             <pElem>../../common</pElem>
           </incDir>
-          <commandLine>-pg</commandLine>
+          <commandLine>-pg -lrt</commandLine>
           <preprocessorList>
             <Elem>LINUX_OS</Elem>
             <Elem>PAC</Elem>

@@ -136,7 +136,8 @@ int main( int argc, char *argv[] )
         const u_int END_ITERATION = 1000;        
 
         static u_int max_cycle_time = 0;
-        u_int cycle_time = get_millisec() - st_time;
+        u_int cycle_time = get_delta_millisec( st_time );
+
         if ( max_cycle_time < cycle_time ) 
             {
             max_cycle_time = cycle_time;

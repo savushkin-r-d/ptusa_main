@@ -59,7 +59,7 @@ build: .build-post
 
 .build-post: .build-impl
 # Add your post 'build' code here...
-
+	cp ${CND_ARTIFACT_PATH_${CONF}} /home/id/id_share/out/main_release
 
 # clean
 clean: .clean-post
