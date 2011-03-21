@@ -1,4 +1,4 @@
-#include "sys_7186.h"
+#include "mos7_mem.h"
 #include "7186e.h"
 //-----------------------------------------------------------------------------
 EEPROM_7186::EEPROM_7186():NV_memory( 16383, 8192, 16127 )
@@ -97,11 +97,4 @@ int NVRAM_7186::write( void *buff, u_int count, u_int start_pos )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-NV_memory_manager_7186::NV_memory_manager_7186():NV_memory_manager()
-    {
-    PAC_NVRAM = new NVRAM_7186();
-    PAC_EEPROM = new EEPROM_7186();
-    last_NVRAM_pos = PAC_NVRAM->get_available_start_pos();
-    last_EEPROM_pos = PAC_EEPROM->get_available_start_pos();
-    }
-//-----------------------------------------------------------------------------
+
