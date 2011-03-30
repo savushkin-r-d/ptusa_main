@@ -122,7 +122,7 @@ class i_counter
         ///
         /// После сброса для продолжения работы необходимо вызвать @ref start().
         void reset();
-                
+
         /// @brief Сброс счетчика и продолжение счета.
         void restart();
 
@@ -130,12 +130,23 @@ class i_counter
         unsigned long get_quantity();
     };
 //-----------------------------------------------------------------------------
+/// @brief Простое физическое устройство.
+///
+/// Примеры таких устройств: клапан, насос, мешалка и т.д.
 class device
     {
     public:
+        /// @brief Выполнение команды устройством.
+        ///
+        /// Для обработки команд, полученных от сервера.
 		int set_cmd( const char *prop, unsigned int idx, double val );
-		
-        /// Типы устройств.
+
+        /// @brief Типы физических устройств.
+        ///
+        /// Устройства, которые могут быть в проекте. При выполнении режимов,
+        /// над ними можно как совершать какие-либо действия (включить\
+        /// выключить и т.д.), так и считывать их состояние (значение выхода
+        /// и т.д.).
         enum DEVICE_TYPE
             {
             DT_NONE = -1,      ///< Тип не определен.
@@ -320,22 +331,24 @@ class dev_stub
 /// основные методы работы - работа с режимами и т.д.
 class tech_object
     {
-    public:		
+    public:
 		int set_cmd( const char *prop, unsigned int idx, double val );
-		
-        /// @param name                     - название (TANK, COMB).
-        /// @param number                   - номер.
-        /// @param states_count             - количество режимов.
-        /// @param timers_count             - количество таймеров.
-        /// @param par_float_count          - количество сохраняемых параметров типа float.
-        /// @param runtime_par_float_count  - количество рабочих параметров типа float.
-        /// @param par_uint_count           - количество сохраняемых параметров типа uint.
-        /// @param runtime_par_uint_count   - количество рабочих параметров типа uint.
+
+        /// @param name                  - название (TANK, COMB).
+        /// @param number                - номер.
+        /// @param states_count          - количество режимов.
+        /// @param timers_count          - количество таймеров.
+        /// @param par_float_count       - кол-во сохраняемых пар-ров типа float.
+        /// @param runtime_par_float_count - кол-во рабочих пар-ров типа float.
+        /// @param par_uint_count         - кол-во сохраняемых пар-ров типа uint.
+        /// @param runtime_par_uint_count - кол-во рабочих параметров типа uint.
         tech_object( const char* name = "tech_object", unsigned int number = 0,
             unsigned int states_count = 1,
             unsigned int timers_count = 3,
-            unsigned int par_float_count = 5, unsigned int runtime_par_float_count = 5,
-            unsigned int par_uint_count = 5, unsigned int runtime_par_uint_count = 5 );
+            unsigned int par_float_count = 5,
+            unsigned int runtime_par_float_count = 5,
+            unsigned int par_uint_count = 5,
+            unsigned int runtime_par_uint_count = 5 );
 
         ~tech_object();
 
@@ -367,12 +380,12 @@ class tech_object
         /// другие режимы, включаться/выключаться какие-либо устройства).
         unsigned int get_modes_count() const;
 
-        saved_params_float      par_float;      ///< Сохраняемые параметры, тип float.
-        run_time_params_float   rt_par_float;   ///< Рабочие параметры, тип float.
-        saved_params_u_int_4    par_uint;       ///< Сохраняемые параметры, тип unsigned int.
-        run_time_params_u_int_4 rt_par_uint;    ///< Рабочие параметры, тип unsigned int.
+        saved_params_float      par_float;   ///< Сохраняемые пар-ры, тип float.
+        run_time_params_float   rt_par_float;///< Рабочие параметры, тип float.
+        saved_params_u_int_4    par_uint;    ///< Сохраняемые пар-ры, тип uint.
+        run_time_params_u_int_4 rt_par_uint; ///< Рабочие пар-ры, тип uint.
 
-        timer_manager           timers;			///< Таймеры объекта.
+        timer_manager           timers;		 ///< Таймеры объекта.
 
         mode_manager* get_modes_manager();
     };
@@ -396,13 +409,20 @@ class tech_object_manager
         tech_object* get_tech_objects( unsigned int idx );
 
         /// @brief Отладочная печать объекта.
-        void print();        
+        void print();
     };
 //-----------------------------------------------------------------------------
+/// @brief Менеджер режимов технологического объекта.
+///
+/// Содержит информацию обо всех режимах объекта. Режим - может быть активным
+/// (включен) либо неактивным (выключен). В режиме могут включаться/выключаться
+/// устройства и т.д. У объекта может быть активно одновременно несколько
+/// режимов. Режим может содержать в себе шаги - при этом у режма в один момент
+/// времени может быть активным только один шаг.
 class mode_manager
     {
     public:
-     
+
         /// @brief Устанавливает количество шагов для режима.
         ///
         /// @return < 0 - ошибка.
@@ -434,7 +454,7 @@ class mode_manager
         ///
         /// @param [in] mode - режим.
         /// @param [in] step - шаг, диапазон 0..255.
-        /// @param [in] dev  - указатель на открываемое устройство.       
+        /// @param [in] dev  - указатель на открываемое устройство.
         ///
         /// @return < 0 - ошибка.
         /// @return   0 - ок.
@@ -452,7 +472,7 @@ class mode_manager
         /// @brief Добавление открываемое устройство для режима.
         ///
         /// @param [in] mode - режим.
-        /// @param [in] dev  - указатель на открываемое устройство.       
+        /// @param [in] dev  - указатель на открываемое устройство.
         ///
         /// @return < 0 - ошибка.
         /// @return   0 - ок.
@@ -488,7 +508,7 @@ class mode_manager
         unsigned int get_active_step( unsigned int mode );
 
         /// @brief Отладочный вывод объекта в консоль.
-        void print();   
+        void print();
     };
 //-----------------------------------------------------------------------------
 ///@brief Получение менеджера устройств.
@@ -496,6 +516,9 @@ class mode_manager
 ///@return Менеджер устройств проекта.
 device_manager* G_DEVICE_MANAGER();
 
+///@brief Получение технологического объекта по номеру.
+///
+///@return Технологический объект.
 tech_object* G_TECH_OBJECTS( u_int idx );
 //-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.
@@ -510,18 +533,16 @@ class device_manager
         // @brief Установка числа устройств.
         //
         // Вызывается из Lua.
-        wago_device* add_device( int dev_type, int dev_sub_type, unsigned int number,
-            char * descr );
-
-        void complete_init();
+        wago_device* add_device( int dev_type, int dev_sub_type,
+            unsigned int number, char * descr );
 
         /// @brief Получение устройства по его номеру.
         device* get_device( device::DEVICE_TYPE dev_type,
             unsigned int dev_number );
     };
 //-----------------------------------------------------------------------------
-/// @brief Устройство на основе модулей ввода/вывода WAGO. 
-/// 
+/// @brief Устройство на основе модулей ввода/вывода WAGO.
+///
 /// В общем случае у устройства может быть один или несколько каналов
 /// ввода/вывода (дискретных или аналоговых).
 class wago_device
@@ -531,7 +552,7 @@ class wago_device
         void init( int DO_count, int DI_count,
             int AO_count, int AI_count, int par_count );
 
-        void init_channel( int type, int ch_inex, int node, int offset );  		
+        void init_channel( int type, int ch_inex, int node, int offset );
 
         void init_par( unsigned int index, float value );
     };
@@ -697,12 +718,12 @@ class run_time_params_float
 /// Реализация чтения и записи состояний модулей ввода/вывода Wago.
 class wago_manager
     {
-    public:   
+    public:
         /// @brief Установка числа модулей.
         ///
         /// Вызывается из Lua.
         void init( int nodes_count );
-           
+
         /// @brief Инициализация модуля Wago.
         ///
         /// Вызывается из Lua.
@@ -712,13 +733,13 @@ class wago_manager
         /// @brief Инициализация параметров канала аналогового вывода.
         ///
         /// Вызывается из Lua.
-        void init_node_AO( unsigned int node_index, unsigned int AO_index, 
+        void init_node_AO( unsigned int node_index, unsigned int AO_index,
             unsigned int type, unsigned int offset );
 
         /// @brief Инициализация параметров канала аналогового ввода.
         ///
         /// Вызывается из Lua.
-        void init_node_AI( unsigned int node_index, unsigned int AI_index, 
+        void init_node_AI( unsigned int node_index, unsigned int AI_index,
             unsigned int type, unsigned int offset );
 
     };
@@ -728,51 +749,73 @@ class wago_manager
 ///@return Менеджер устройств проекта.
 wago_manager* G_WAGO_MANAGER();
 //-----------------------------------------------------------------------------
-class PID 
-    {  
+///@brief ПИД-регулятор.
+///
+///
+class PID
+    {
     public:
-        enum PARAM 
-        {        
-        P_k = 0,               //0 Параметр k.
-        P_Ti,                  //1 Параметр Ti.
-        P_Td,                  //2 Параметр Td.
-        P_dt,                  //3 Интервал расчёта
-        P_max,                 //4 Мax значение входной величины.
-        P_min,                 //5 Мin значение входной величины.
-        P_acceleration_time,   //6 Время выхода на режим регулирования.
-        P_is_manual_mode,      //7 Ручной режим.
-        P_U_manual,            //8 Заданное ручное значение выходного сигнала.        
 
-        P_k2,                  //9 Параметр k2.
-        P_Ti2,                 //10 Параметр Ti2.
-        P_Td2,                 //11 Параметр Td2. 
-        }; 
-
-    enum WORK_PARAM 
+        ///@brief Основные сохраняемые параметры.
+        enum PARAM
         {
-        WP_Z,  //0 Требуемое значение.
-        WP_U,  //1 Выход ПИД.
+        P_k = 0,               ///< Параметр k.
+        P_Ti,                  ///< Параметр Ti.
+        P_Td,                  ///< Параметр Td.
+        P_dt,                  ///< Интервал расчёта
+        P_max,                 ///< Мax значение входной величины.
+        P_min,                 ///< Мin значение входной величины.
+        P_acceleration_time,   ///< Время выхода на режим регулирования.
+        P_is_manual_mode,      ///< Ручной режим.
+        P_U_manual,            ///< Заданное ручное значение выходного сигнала.
+
+        P_k2,                  ///< Параметр k2.
+        P_Ti2,                 ///< Параметр Ti2.
+        P_Td2,                 ///< Параметр Td2.
         };
 
-        PID( int n );
+        ///@brief Рабочие параметры.
+        enum WORK_PARAM
+        {
+        WP_Z,  ///< Требуемое значение.
+        WP_U,  ///< Выход ПИД.
+        };
 
+        ///@brief Включение регулятора.
         void  on( char is_down_to_inaccel_mode = 0 );
+
+        ///@brief Выключение регулятора.
         void  off();
+
+        ///@brief Получение следующего значения выхода на основе текущего
+        /// значения входа.
         float eval( float current_value, int delta_sign = 1 );
 
-        void  set( float new_z );         //Установить новое задание ПИД.
+        ///@brief Задание новое задание ПИД.
+        void  set( float new_z );
 
         /// @brief Получение задания ПИД.
         float get_assignment();
 
+        /// @brief Запись сохраняемого параметра.
         void init_param( PARAM par_n, float val );
+
+        /// @brief Запись рабочего параметра.
         void init_work_param( WORK_PARAM par_n, float val );
+
+        /// @brief Запись сохраняемых параметров в EEPROM.
         void save_param();
 
+        /// @brief Задание для использования дополнительных P_k2, P_Ti2, P_Td2.
+        void  set_used_par ( int par_n );
 
-        void  set_used_par ( int par_n ); //Использовать kN, TiN, TdN.    
-        
-        void print();   
+        /// @brief Отладочная печать объекта в консоль.
+        void print();
     };
 //-----------------------------------------------------------------------------
+/// @brief Получение разницы во времени.
+///
+/// @param time1 - предыдущий момент времени.
+/// @return - разница во времени между прошлым моментом времени и текущим
+/// временем, мс.
 unsigned long get_delta_millisec( unsigned long time1 );
