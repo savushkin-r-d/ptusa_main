@@ -82,6 +82,58 @@ void device::print() const
 #endif // DEBUG
     }
 //-----------------------------------------------------------------------------
+const char * device::get_name() const
+    {
+    return "";
+    }
+//-----------------------------------------------------------------------------
+void device::off()
+    {
+    if ( !get_manual_mode() )
+        {
+        direct_off();
+        }
+    }
+//-----------------------------------------------------------------------------
+int device::save_device( char *buff, const char *prefix )
+    {
+    sprintf( buff, "%s[%d]={ST=%d, V=%.2f },\n",
+        prefix, get_n(),  get_state(), get_value() );
+
+    return strlen( buff );
+    }
+//-----------------------------------------------------------------------------
+int device::set_cmd( const char *prop, u_int idx, char *val )
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int device::set_cmd( const char *prop, u_int idx, double val )
+    {
+    if ( strcmp( prop, "ST" ) == 0 )
+        {       
+        direct_set_state( ( int ) val );
+        return 0;
+        }
+    if ( strcmp( prop, "V" ) == 0 )
+        {
+        direct_set_value( ( float ) val );
+        return 0;
+        }
+    if ( strcmp( prop, "M" ) == 0 )
+        {
+        is_manual_mode = ( bool ) val;
+        return 0;
+        }
+
+#ifdef DEBUG
+    Print( "Error device::set_cmd() - prop = %s, val = %f\n", 
+        prop, val );
+#endif // DEBUG
+
+    return 1;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
@@ -90,12 +142,12 @@ int DO_1::get_state_now()
     return get_DO( DO_INDEX );
     }
 //-----------------------------------------------------------------------------
-void DO_1::on()
+void DO_1::direct_on()
     {
     set_DO( DO_INDEX, 1 );
     }
 //-----------------------------------------------------------------------------
-void DO_1::off()
+void DO_1::direct_off()
     {
     set_DO( DO_INDEX, 0 );
     }
@@ -558,7 +610,7 @@ float dev_stub::get_value()
     return 0;
     }
 //-----------------------------------------------------------------------------
-void dev_stub::set_value( float new_value )
+void dev_stub::direct_set_value( float new_value )
     {    
     }
 //-----------------------------------------------------------------------------
@@ -567,15 +619,15 @@ int dev_stub::get_state_now()
     return 0;
     }
 //-----------------------------------------------------------------------------
-void dev_stub::on()
+void dev_stub::direct_on()
     {
     }
 //-----------------------------------------------------------------------------
-void dev_stub::off()
+void dev_stub::direct_off()
     {
     }
 //-----------------------------------------------------------------------------
-void dev_stub::set_state( int new_state )
+void dev_stub::direct_set_state( int new_state )
     {
     }
 //-----------------------------------------------------------------------------
@@ -614,7 +666,7 @@ float counter::get_value()
     return ( float ) get_quantity();
     }
 //-----------------------------------------------------------------------------
-void counter::set_value( float new_value )
+void counter::direct_set_value( float new_value )
     {
     value = ( u_int ) new_value;    
     }
@@ -624,17 +676,17 @@ int counter::get_state_now()
     return state;
     }
 //-----------------------------------------------------------------------------
-void counter::on()
+void counter::direct_on()
     {
     start();
     }
 //-----------------------------------------------------------------------------
-void counter::off()
+void counter::direct_off()
     {
     reset();
     }
 //-----------------------------------------------------------------------------
-void counter::set_state( int new_state )
+void counter::direct_set_state( int new_state )
     {
     switch ( new_state )
         {
@@ -716,19 +768,19 @@ float digital_device::get_value()
     return ( float ) get_state_now();
     }
 //-----------------------------------------------------------------------------
-void digital_device::set_value( float new_value )
+void digital_device::direct_set_value( float new_value )
     {
-    set_state( ( int ) new_value );
+    direct_set_state( ( int ) new_value );
     }
 //-----------------------------------------------------------------------------
-void digital_device::set_state( int new_state )
+void digital_device::direct_set_state( int new_state )
     {
     if ( new_state )
         {
         if ( -1 == new_state ) state = ( char ) -1;
-        else on();
+        else direct_on();
         }
-    else off();
+    else direct_off();
     }
 //-----------------------------------------------------------------------------
 void digital_device::print() const
@@ -749,12 +801,12 @@ int digital_device::get_state_now()
     return state;
     }
 //-----------------------------------------------------------------------------
-void digital_device::on()
+void digital_device::direct_on()
     {
     state = 1;
     }
 //-----------------------------------------------------------------------------
-void digital_device::off()
+void digital_device::direct_off()
     {
     state = 0;
     }
@@ -771,13 +823,13 @@ int DO_2::get_state_now()
     return b2;
     }
 //-----------------------------------------------------------------------------
-void DO_2::on()
+void DO_2::direct_on()
     {
     set_DO( DO_INDEX_1, 0 );
     set_DO( DO_INDEX_2, 1 );
     }
 //-----------------------------------------------------------------------------
-void DO_2::off()
+void DO_2::direct_off()
     {
     set_DO( DO_INDEX_1, 1 );
     set_DO( DO_INDEX_2, 0 );
@@ -809,7 +861,7 @@ int DO_1_DI_1::get_state_now()
         }
     }
 //-----------------------------------------------------------------------------
-void DO_1_DI_1::on()
+void DO_1_DI_1::direct_on()
     {
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
@@ -819,7 +871,7 @@ void DO_1_DI_1::on()
         }
     }
 //-----------------------------------------------------------------------------
-void DO_1_DI_1::off()
+void DO_1_DI_1::direct_off()
     {
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
@@ -857,7 +909,7 @@ int DO_1_DI_2::get_state_now()
         }
     }
 //-----------------------------------------------------------------------------
-void DO_1_DI_2::on()
+void DO_1_DI_2::direct_on()
     {
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
@@ -867,7 +919,7 @@ void DO_1_DI_2::on()
         }
     }
 //-----------------------------------------------------------------------------
-void DO_1_DI_2::off()
+void DO_1_DI_2::direct_off()
     {
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
@@ -905,7 +957,7 @@ int DO_2_DI_2::get_state_now()
         }
     }
 //-----------------------------------------------------------------------------
-void DO_2_DI_2::on()
+void DO_2_DI_2::direct_on()
     {
     int o = get_DO( DO_INDEX_1 );
     if ( 0 == o )
@@ -916,7 +968,7 @@ void DO_2_DI_2::on()
         }
     }
 //-----------------------------------------------------------------------------
-void DO_2_DI_2::off()
+void DO_2_DI_2::direct_off()
     {
     int o = get_DO( DO_INDEX_2 );
     if ( 0 == o )
@@ -932,12 +984,12 @@ void DO_2_DI_2::off()
 //-----------------------------------------------------------------------------
 void valve_mix_proof::open_upper_seat()
     {
-    set_state( ST_UPPER_SEAT );
+    direct_set_state( ST_UPPER_SEAT );
     }
 //-----------------------------------------------------------------------------
 void valve_mix_proof::open_low_seat()
     {
-    set_state( ST_LOW_SEAT );
+    direct_set_state( ST_LOW_SEAT );
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
@@ -967,7 +1019,7 @@ int valve_mix_proof::get_state_now()
         }
     }
 //-----------------------------------------------------------------------------
-void valve_mix_proof::on()
+void valve_mix_proof::direct_on()
     {
     set_DO( DO_INDEX_U, 0 );
     set_DO( DO_INDEX_L, 0 );
@@ -980,7 +1032,7 @@ void valve_mix_proof::on()
         }
     }
 //-----------------------------------------------------------------------------
-void valve_mix_proof::off()
+void valve_mix_proof::direct_off()
     {
     set_DO( DO_INDEX_U, 0 );
     set_DO( DO_INDEX_L, 0 );
@@ -993,30 +1045,30 @@ void valve_mix_proof::off()
         }
     }
 //-----------------------------------------------------------------------------
-void valve_mix_proof::set_state( int new_state )
+void valve_mix_proof::direct_set_state( int new_state )
     {
     switch ( new_state )
         {
     case ST_CLOSE:
-        off();
+        direct_off();
         break;
 
     case ST_OPEN:
-        on();
+        direct_on();
         break;
 
     case ST_UPPER_SEAT:
-        off();
+        direct_off();
         set_DO( DO_INDEX_U, 1 );
         break;
 
     case ST_LOW_SEAT:
-        off();
+        direct_off();
         set_DO( DO_INDEX_L, 1 );
         break;
 
     default:
-        on();
+        direct_on();
         break;
         }    
     }
@@ -1031,11 +1083,11 @@ int DI_1::get_state_now()
     return get_DI( DI_INDEX );
     }
 //-----------------------------------------------------------------------------
-void DI_1::on()
+void DI_1::direct_on()
     {
     }
 //-----------------------------------------------------------------------------
-void DI_1::off()
+void DI_1::direct_off()
     {
     }
 
@@ -1049,7 +1101,7 @@ float AI_1::get_value()
     return get_AI( AI_INDEX, get_min_val(), get_max_val() );
     }
 //-----------------------------------------------------------------------------
-void AI_1::set_value( float new_value )
+void AI_1::direct_set_value( float new_value )
     {    
     }
 
@@ -1063,7 +1115,7 @@ float AO_1::get_value()
     return get_AO( AO_INDEX, get_min_val(), get_max_val() );
     }
 //-----------------------------------------------------------------------------
-void AO_1::set_value( float new_value )
+void AO_1::direct_set_value( float new_value )
     {
     set_AO( AO_INDEX, new_value, get_min_val(), get_max_val() );
     }
@@ -1144,9 +1196,9 @@ float analog_input_4_20::get_min_val()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void analog_device::set_state( int new_state )
+void analog_device::direct_set_state( int new_state )
     {
-    set_value( ( float ) new_state );
+    direct_set_value( ( float ) new_state );
     }
 //-----------------------------------------------------------------------------
 int analog_device::get_state_now()
@@ -1160,13 +1212,13 @@ void analog_device::print() const
     wago_device::print();
     }
 //-----------------------------------------------------------------------------
-void analog_device::on()
+void analog_device::direct_on()
     {
     }
 //-----------------------------------------------------------------------------
-void analog_device::off()
+void analog_device::direct_off()
     {
-    set_value( 0 );
+    direct_set_value( 0 );
     }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_WAGO_MODULES
@@ -1176,7 +1228,7 @@ float analog_device::get_value()
     return value;
     }
 //-----------------------------------------------------------------------------
-void analog_device::set_value( float new_value )
+void analog_device::direct_set_value( float new_value )
     {
     value = new_value;    
     }
@@ -1420,12 +1472,12 @@ valve_AS_mix_proof::valve_AS_mix_proof( u_int number ) : digital_device( number,
 //-----------------------------------------------------------------------------
 void valve_AS_mix_proof::open_upper_seat()
     {
-    set_state( ST_UPPER_SEAT );
+    direct_set_state( ST_UPPER_SEAT );
     }
 //-----------------------------------------------------------------------------
 void valve_AS_mix_proof::open_low_seat()
     {
-    set_state( ST_LOW_SEAT );
+    direct_set_state( ST_LOW_SEAT );
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
@@ -1435,15 +1487,15 @@ int  valve_AS_mix_proof::get_state_now()
     return 0;
     }
 //-----------------------------------------------------------------------------
-void valve_AS_mix_proof::on()
+void valve_AS_mix_proof::direct_on()
     {
     }
 //-----------------------------------------------------------------------------
-void valve_AS_mix_proof::off()
+void valve_AS_mix_proof::direct_off()
     {
     }
 //-----------------------------------------------------------------------------
-void valve_AS_mix_proof::set_state( int new_state )
+void valve_AS_mix_proof::direct_set_state( int new_state )
     {
     }
 //-----------------------------------------------------------------------------

@@ -24,11 +24,9 @@
 
 #include <vector>
 
-//#include "sys.h"
 #include "wago.h"
 #include "g_device.h"
 
-//class saved_params_u_int_4;
 #include "param_ex.h"
 
 #define OFF     0
@@ -89,13 +87,13 @@ class i_DI_device
         /// @param time - время ожидания изменения состояния.
         void set_change_time( u_int time );
 
-        /// @brief Установка состояния.
+        /// @brief Установка состояния с учетом ручного режима.
         ///
         /// Данный метод используется для задания состояния устройства перед
         /// его проверкой.
         ///
         /// @param new_state - новое состояние.
-        void set_state( int new_state );
+        virtual void set_state( int new_state );
 
         /// @brief Проверка активного состояния.
         ///
@@ -117,22 +115,40 @@ class i_DI_device
 class i_DO_device: public i_DI_device
     {
     public:
+        /// @brief Включение устройства с учетом ручного режима.
+        virtual void on()
+            {
+            if ( !get_manual_mode() )
+                {
+                direct_on();
+                }
+            }
+
+        /// @brief Выключение устройства с учетом ручного режима.
+        virtual void off() = 0;
+
+        /// @brief Установка нового состояния устройства с учетом ручного режима.
+        virtual void set_state( int new_state )
+            {
+            if ( !get_manual_mode() )
+                {
+                direct_set_state( new_state );
+                }
+            }
+
+    protected:
+        /// @brief Установка нового состояния устройства.
+        ///
+        /// @param new_state - новое состояние объекта.
+        virtual void direct_set_state( int new_state ) = 0;
+
         /// @brief Включение устройства.
         ///
         /// Установка устройства в активное состояние. Для клапана это означает
         /// его активирование, то есть если он нормально закрытый - открытие.
-        virtual void on() = 0;
+        virtual void direct_on() = 0;
 
-        /// @brief Выключение устройства.
-        ///
-        /// Установка устройства в пассивное состояние. Для клапана это означает
-        /// его деактивирование, то есть если он нормально закрытый - закрытие.
-        virtual void off() = 0;
-
-        /// @brief Установка нового состояния устройства.
-        ///
-        /// @param new_state - новое состояние объекта.
-        virtual void set_state( int new_state ) = 0;
+        virtual bool get_manual_mode() const = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство на на основе аналогового входа.
@@ -153,16 +169,26 @@ class i_AI_device
 class i_AO_device: public i_AI_device
     {
     public:
-        /// @brief Выключение устройства.
-        ///
-        /// Установка устройства в пассивное состояние. Для клапана это означает
-        /// его деактивирование, то есть если он нормально закрытый - закрытие.
+        /// @brief Выключение устройства с учетом ручного режима.
         virtual void off() = 0;
+
+        /// @brief Установка текущего состояния устройства с учетом ручного режима.
+        virtual void set_value( float new_value )
+            {
+            if ( !get_manual_mode() )
+                {
+                direct_set_value( new_value );
+                }
+            }
+
+    protected:
 
         /// @brief Установка текущего состояния устройства.
         ///
         /// @param new_value - новое состояние устройства.
-        virtual void set_value( float new_value ) = 0;
+        virtual void direct_set_value( float new_value ) = 0;
+
+        virtual bool get_manual_mode() const = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Класс универсального простого устройства, который используется в 
@@ -171,46 +197,11 @@ class device : public i_AO_device,
     public i_DO_device, public i_cmd_device
     {
     public:
-        int set_cmd( const char *prop, u_int idx, double val ) 
-            {
-            int res = 1;
+        int set_cmd( const char *prop, u_int idx, double val );
 
-            if ( strcmp( prop, "ST" ) == 0 )
-                {
-                set_state( ( int ) val );
-                res = 0;
-                }
-            if ( strcmp( prop, "V" ) == 0 )
-                {
-                set_value( ( float ) val );
-                res = 0;
-                }
+        int set_cmd( const char *prop, u_int idx, char *val );
 
-#ifdef DEBUG
-            if ( res )
-                {
-                Print( "Error device::set_cmd() - prop =%s, val = %f\n", 
-                    prop, val );
-                }
-#endif // DEBUG
-            
-            return res;
-            }
-
-        int set_cmd( const char *prop, u_int idx, char *val )
-            {
-
-
-            return 0;
-            }
-
-        virtual int save_device( char *buff, const char *prefix )
-            {
-            sprintf( buff, "%s[%d]={ST=%d, V=%.2f},\n",
-                prefix, get_n(),  get_state(), get_value() );
-
-            return strlen( buff );
-            }
+        virtual int save_device( char *buff, const char *prefix );
 
         //-Ошибки.
         saved_params_u_int_4 err_par;
@@ -267,7 +258,7 @@ class device : public i_AO_device,
 
             DST_V_1DO_3DI,      ///< Клапан с одним каналом управления и тремя обратными связями.
             DST_V_1DO_2DI_S,    ///< Клапан с одним каналом управления и двумя обратными связями на одно из состояний.
-            DST_V_AS_MIXPROOF,       ///< Клапан с двумя каналами управления и двумя обратными связями с AS интерфейсом (микспруф).
+            DST_V_AS_MIXPROOF,  ///< Клапан с двумя каналами управления и двумя обратными связями с AS интерфейсом (микспруф).
             };
 
         device( int number, 
@@ -275,7 +266,8 @@ class device : public i_AO_device,
             device::DEVICE_SUB_TYPE sub_type ): err_par( 1 ),
             number( number ),
             type( type ),
-            sub_type( sub_type )            
+            sub_type( sub_type ),
+            is_manual_mode( false )
             {
             }
 
@@ -283,16 +275,16 @@ class device : public i_AO_device,
             {           
             }
 
-        const char *get_name() const
-            {
-            return "";
-            }
+        const char *get_name() const;
 
         /// @brief Выключение устройства.
         ///
         /// Установка устройства в пассивное состояние. Для клапана это означает
         /// его деактивирование, то есть если он нормально закрытый - закрытие.
-        virtual void off() = 0;
+        virtual void direct_off() = 0;
+
+        ///// @brief Выключение устройства с учетом ручного режима.
+        void off();
 
         /// @brief Вывод объекта в консоль.
         ///
@@ -324,6 +316,14 @@ class device : public i_AO_device,
 
         DEVICE_TYPE     type;       ///< Тип устройства.
         DEVICE_SUB_TYPE sub_type;   ///< Подтип устройства.
+
+        bool get_manual_mode() const
+            {
+            return is_manual_mode;
+            }
+
+    private:
+        bool is_manual_mode;
     }; 
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство.
@@ -342,11 +342,11 @@ class dev_stub : public device,
         void    print() const;                
 
         float   get_value();
-        void    set_value( float new_value );
+        void    direct_set_value( float new_value );
 
-        void    on();                
-        void    off();                
-        void    set_state( int new_state );
+        void    direct_on();                
+        void    direct_off();                
+        void    direct_set_state( int new_state );
         int     get_state_now();
 
         void    pause();
@@ -375,14 +375,14 @@ class digital_device : public device,
             }
 
         float   get_value();
-        void    set_value( float new_value );
-        void    set_state( int new_state );  
+        void    direct_set_value( float new_value );
+        void    direct_set_state( int new_state );  
         void    print() const;
 
         int save_device( char *buff, const char *prefix )
             {	
-            sprintf( buff, "%s[%d]={ST=%d},\n",
-                prefix, get_n(),  get_state() );
+            sprintf( buff, "%s[%d]={ST=%d, M=%d},\n",
+                prefix, get_n(),  get_state(), get_manual_mode() );
 
             return strlen( buff );
             }
@@ -393,8 +393,8 @@ class digital_device : public device,
         /// @return - мгновенное состояние объекта.
         int  get_state_now();
 
-        void on();
-        void off();
+        void direct_on();
+        void direct_off();
 #endif // DEBUG_NO_WAGO_MODULES
 
         int get_state();
@@ -427,31 +427,33 @@ class analog_device : public device,
             {
             }
 
-        void  set_state( int new_state );
+        void  direct_set_state( int new_state );
         int   get_state_now();
         
         void  print() const;
-        void  on();        
-        void  off();
+        void  direct_on();        
+        void  direct_off();
 
         int save_device( char *buff, const char *prefix )
             {
+            sprintf( buff, "%s[%d]={V=", prefix, get_n() );
+
             if ( get_value() == 0 )
                 {
-                sprintf( buff, "%s[%d]={V=0},\n", prefix, get_n() );
+                sprintf( buff + strlen( buff ), "0" );
                 }
             else
                 {
-                sprintf( buff, "%s[%d]={V=%.2f},\n",
-                    prefix, get_n(), get_value() );
+                sprintf( buff + strlen( buff ), "%.2f", get_value() );
                 }
+            sprintf( buff + strlen( buff ), ", M=%d},\n", get_manual_mode() );
 
             return strlen( buff );
             }
 
 #ifdef DEBUG_NO_WAGO_MODULES
         float get_value();
-        void set_value( float new_value );
+        void direct_set_value( float new_value );
 
 #else  // DEBUG_NO_WAGO_MODULES
 
@@ -480,8 +482,8 @@ class DO_1 : public digital_device
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state_now();
-        void on();
-        void off();
+        void direct_on();
+        void direct_off();
 
     private:
         enum CONSTANTS
@@ -505,8 +507,8 @@ class DO_2 : public digital_device
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state_now();
-        void on();
-        void off();        
+        void direct_on();
+        void direct_off();        
 
     private:
         enum CONSTANTS
@@ -531,8 +533,8 @@ class DO_1_DI_1 : public digital_device
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state_now();
-        void on();
-        void off();
+        void direct_on();
+        void direct_off();
 
     private:
         enum CONSTANTS
@@ -559,8 +561,8 @@ class DO_1_DI_2 : public digital_device
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state_now();
-        void on();
-        void off();
+        void direct_on();
+        void direct_off();
 
     private:
         enum CONSTANTS
@@ -589,8 +591,8 @@ class DO_2_DI_2 : public digital_device
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state_now();
-        void on();
-        void off();
+        void direct_on();
+        void direct_off();
 
     private:
         enum CONSTANTS
@@ -627,9 +629,9 @@ class valve_mix_proof : public digital_device
 
 #ifndef DEBUG_NO_WAGO_MODULES
         int  get_state_now();
-        void on();
-        void off();
-        void set_state( int new_state );
+        void direct_on();
+        void direct_off();
+        void direct_set_state( int new_state );
 
     private:
         enum CONSTANTS
@@ -665,9 +667,9 @@ class valve_AS_mix_proof : public digital_device
 
 #ifndef DEBUG_NO_WAGO_MODULES
         int  get_state_now();
-        void on();
-        void off();
-        void set_state( int new_state );
+        void direct_on();
+        void direct_off();
+        void direct_set_state( int new_state );
 
     private:
         enum CONSTANTS
@@ -692,7 +694,7 @@ class AI_1 : public analog_device
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         float get_value();
-        void   set_value( float new_value );
+        void   direct_set_value( float new_value );
 
         /// @brief Получение максимального значения выхода устройства.
         virtual float get_max_val() = 0;
@@ -803,7 +805,7 @@ class AO_1 : public analog_device
         virtual float get_min_val() = 0;
 
         float get_value();
-        void  set_value( float new_value );
+        void  direct_set_value( float new_value );
 
     private:
         enum CONSTANTS
@@ -851,8 +853,8 @@ class DI_1 : public digital_device
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         int  get_state_now();
-        void on();
-        void off();
+        void direct_on();
+        void direct_off();
 
     private:
         enum CONSTANTS
@@ -985,11 +987,11 @@ class counter : public device,
             }
 
         float get_value();
-        void  set_value( float new_value );
+        void  direct_set_value( float new_value );
         int   get_state_now();
-        void  on();
-        void  off();
-        void  set_state( int new_state );
+        void  direct_on();
+        void  direct_off();
+        void  direct_set_state( int new_state );
         void  print() const;
 
         void  pause();
@@ -1145,11 +1147,7 @@ class device_manager: public i_Lua_save_device
         //
         // Вызывается из Lua.
         wago_device* add_device( int dev_type, int dev_sub_type, 
-            u_int number, char * descr );
-
-        void complete_init()
-            {
-            }
+            u_int number, char * descr );  
     };
 //-----------------------------------------------------------------------------
 /// @brief таймер.

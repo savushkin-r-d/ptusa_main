@@ -185,8 +185,6 @@ template < class type, bool is_float > class parameters
 
         /// @brief Получение элемента через индекс.
         ///
-        /// Для реализации интерфейса класса @ref array_device.
-        ///
         /// @param idx - индекс элемента.
         ///
         /// @return - значение элемента с заданным индексом. Если индекс
@@ -217,6 +215,7 @@ template < class type, bool is_float > class parameters
         /// @brief Конструктор.
         ///
         /// @param count - количество параметров.
+        /// @param name  - имя объекта.
         /// @param value - указатель на буфер для хранения значений параметров.
         parameters( int count, const char *name, type *value = 0 ): count( count ),
             values( value )
@@ -331,7 +330,7 @@ class run_time_params_float: public parameters < float, true >
             }
 
     protected:
-        /// @brief Реализация интерфейса класса @ref array_device.
+        
         float get_val( int idx )
             {
             return parameters< float, true >::get_val( idx );
@@ -357,8 +356,7 @@ class run_time_params_u_int_4: public parameters < u_int_4, false >
             {
             }
 
-    protected:
-        /// @brief Реализация интерфейса класса @ref array_device.
+    protected:        
         u_int_4 get_val( int idx )
             {
             return parameters< u_int_4, false >::get_val( idx );
@@ -376,6 +374,7 @@ public parameters < type, is_float >
         /// @brief Конструктор.
         ///
         /// @param count - количество параметров.
+        /// @param name  - имя объекта.
         saved_params( int count, const char *name ) : parameters < type, is_float >(
             count, name,
             ( type* ) params_manager::get_instance()->get_params_data( 
@@ -466,8 +465,7 @@ class saved_params_u_int_4: public saved_params < u_int_4, false >
               {
               }
 
-    protected:
-        /// @brief Реализация интерфейса класса @ref array_device.
+    protected:        
         u_int_4 get_val( int idx )
             {
             return saved_params< u_int_4, false >::get_val( idx );
@@ -490,8 +488,7 @@ class saved_params_float: public saved_params < float, true >
               {
               }
 
-    protected:
-        /// @brief Реализация интерфейса класса @ref array_device.
+    protected:        
         float get_val( int idx )
             {
             return saved_params< float, true >::get_val( idx );

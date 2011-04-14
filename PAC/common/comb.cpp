@@ -7,7 +7,7 @@
 
 
 //--------------------------------------------------------------------------------
-comb::comb( char rows,
+comb::comb( char rows, 
     char cols ):
     cmd( 0 ),
     rows_cnt( rows ),
@@ -16,12 +16,6 @@ comb::comb( char rows,
     {   
     if ( rows_cnt > 0 && columns_cnt > 0 )
         {               
-
-        com_dev = new complex_device( 1, "PATH_COMB", 2, i_complex_device::COMPLEX_DEV );
-        com_dev->sub_dev[ 0 ] = new complex_state( "CMD", 1, &cmd );
-
-        com_dev->sub_dev[ 1 ] = &rt_par_uint;
-
         mMatrix = new comb_element*[ rows_cnt ];	    
         for ( char i = 0; i < rows_cnt; i++ )
             {

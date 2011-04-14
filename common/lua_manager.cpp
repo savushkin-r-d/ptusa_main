@@ -2,8 +2,8 @@
 #include <cstdlib>
 #endif
 
-#ifdef OS_WIN
-#include <windows.h>
+#ifdef WIN_OS
+#include <Windows.h>
 #endif // OS_WIN
 
 #if defined MINIOS7
@@ -32,17 +32,15 @@ lua_manager* lua_manager::get_instance()
 //-----------------------------------------------------------------------------
 int lua_manager::init( lua_State* lua_state, char* script_name )
     {
-#if defined DEBUG && defined MINIOS7
-    Print( "\n Memory free: %lu bytes. ", ( unsigned long ) coreleft() );
-#endif    
     Print( "Init Lua.\n" );
 
+#if defined DEBUG && defined MINIOS7
+    Print( "Memory free: %lu bytes.\n", ( unsigned long ) coreleft() );
+#endif    
     if ( 0 == lua_state )
         {
         //-Инициализация Lua.
         L = lua_open();   // Create Lua context.
-
-        Print( "Init Lua 1.\n" );
 
         if ( NULL == L )
             {
@@ -52,19 +50,18 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         is_free_lua = 1;
 
 #if defined DEBUG && defined MINIOS7
-        Print( "\n Memory free: %lu bytes. ", ( unsigned long ) coreleft() );
+        Print( "lua_open() - memory free: %lu bytes.\n",
+            ( unsigned long ) coreleft() );
 #endif
+
         luaL_openlibs( L );    // Open standard libraries.
 
-        Print( "Init Lua 2.\n" );
-
 #if defined DEBUG && defined MINIOS7
-        Print( "\n Memory free: %lu bytes. ", ( unsigned long ) coreleft() );
+        Print( "luaL_openlibs(...) - memory free: %lu bytes.\n",
+            ( unsigned long ) coreleft() );
 #endif
 
         tolua_PAC_dev_open( L );
-
-        Print( "Init Lua 3.\n" );
 
         const char *ADDITIONAL_PATH_CMD =
 #ifdef PAC_PC
@@ -82,8 +79,9 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             return 1;
             }
 
-#if defined MINIOS7
-        Print( "\n Memory free: %lu bytes. ", ( unsigned long ) coreleft() );
+#if defined DEBUG && defined MINIOS7
+        Print( "tolua_PAC_dev_open(...) - memory free: %lu bytes.\n", 
+            ( unsigned long ) coreleft() );
 #endif
 
 #ifdef MINIOS7
@@ -107,12 +105,16 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             return 1;
             }
 
-#if defined MINIOS7
-        Print( "Init Lua 5. \n" );
-        Print( "Memory free: %lu bytes. \n", ( unsigned long ) coreleft() );
+#if defined DEBUG && defined MINIOS7
+        Print( "luaL_dofile( ..., "main.wago.plua" ) - memory free: %lu bytes. \n",
+            ( unsigned long ) coreleft() );
 #endif
-
         G_PROJECT_MANAGER->lua_load_configuration();
+
+#if defined DEBUG && defined MINIOS7
+        Print( "G_PROJECT_MANAGER->lua_load_configuration() - memory free: %lu bytes. \n",
+            ( unsigned long ) coreleft() );
+#endif
 
         if( luaL_loadfile( L, script_name ) != 0 )
             {
@@ -139,6 +141,11 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         L = lua_state;
         is_free_lua = 0;
         }
+
+#if defined DEBUG && defined MINIOS7
+        Print( "Load Lua main script - memory free: %lu bytes. \n",
+            ( unsigned long ) coreleft() );
+#endif
 
     return 0;
     }
