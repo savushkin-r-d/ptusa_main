@@ -110,28 +110,28 @@ int device::set_cmd( const char *prop, u_int idx, char *val )
 //-----------------------------------------------------------------------------
 int device::set_cmd( const char *prop, u_int idx, double val )
     {
-    if ( strcmp( prop, "ST" ) == 0 )
-        {       
+    switch ( prop[ 0 ] )
+        {
+    case 'S':
         direct_set_state( ( int ) val );
-        return 0;
-        }
-    if ( strcmp( prop, "V" ) == 0 )
-        {
+        break;
+
+    case 'V':
         direct_set_value( ( float ) val );
-        return 0;
-        }
-    if ( strcmp( prop, "M" ) == 0 )
-        {
-        is_manual_mode = ( bool ) val;
-        return 0;
-        }
+        break;
 
+    case 'M':
+        is_manual_mode = val == 0. ? false : true;
+        break;
+
+    default:
 #ifdef DEBUG
-    Print( "Error device::set_cmd() - prop = %s, val = %f\n", 
-        prop, val );
+        Print( "Error device::set_cmd() - prop = %s, val = %f\n", 
+            prop, val );
 #endif // DEBUG
+        }
 
-    return 1;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

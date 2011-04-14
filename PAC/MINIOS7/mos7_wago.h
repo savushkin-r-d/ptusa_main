@@ -1,5 +1,5 @@
-/// @file wago_PC.h
-/// @brief Работа с Wago для PC.
+/// @file mos7_wago.h
+/// @brief Работа с Wago для MINIOS7.
 /// 
 /// @author  Иванюк Дмитрий Сергеевич.
 ///

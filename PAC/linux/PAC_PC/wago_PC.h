@@ -1,4 +1,4 @@
-/// @file wago_PC.h
+/// @file linux\PAC_PC\wago_PC.h
 /// @brief Работа с Wago для PC.
 /// 
 /// @author  Иванюк Дмитрий Сергеевич.

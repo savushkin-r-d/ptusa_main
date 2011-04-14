@@ -10,9 +10,6 @@
 #ifndef _TCOMB_H_
 #define _TCOMB_H_
 
-#include "sys.h"
-#include "sys_linux.h"
-
 #include "PAC_dev.h"
 #include "param_ex.h"
 #include "tech_def.h"
@@ -84,7 +81,7 @@ class comb
     public:
         //-Для передачи данных в сервер.
         u_int_4   cmd;                //Команда.
-        complex_device  *com_dev;
+        //complex_device  *com_dev;
         //-Для передачи данных в сервер.-!>
 
         enum COMB_PARAMS
