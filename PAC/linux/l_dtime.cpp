@@ -19,7 +19,7 @@ unsigned long get_millisec()
 unsigned long get_sec()
     {
     timespec start_tv;
-    clock_gettime( 1, &start_tv );
+    clock_gettime( 0, &start_tv );
 
     return start_tv.tv_sec;
     }
