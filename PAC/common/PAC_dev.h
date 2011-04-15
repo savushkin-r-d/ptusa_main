@@ -93,7 +93,7 @@ class i_DI_device
         /// его проверкой.
         ///
         /// @param new_state - новое состояние.
-        virtual void set_state( int new_state );
+        void set_state( int new_state );
 
         /// @brief Проверка активного состояния.
         ///
