@@ -105,11 +105,21 @@ int device::save_device( char *buff, const char *prefix )
 //-----------------------------------------------------------------------------
 int device::set_cmd( const char *prop, u_int idx, char *val )
     {
+#ifdef DEBUG
+        Print( "device::set_cmd() - prop = %s, idx = %d, val = %s\n",
+            prop, idx, val );
+#endif // DEBUG
+
     return 0;
     }
 //-----------------------------------------------------------------------------
 int device::set_cmd( const char *prop, u_int idx, double val )
     {
+#ifdef DEBUG
+        Print( "device::set_cmd() - prop = %s, idx = %d, val = %f\n",
+            prop, idx, val );
+#endif // DEBUG
+
     switch ( prop[ 0 ] )
         {
     case 'S':
@@ -124,8 +134,8 @@ int device::set_cmd( const char *prop, u_int idx, double val )
         is_manual_mode = val == 0. ? false : true;
         break;
 
-    default:
 #ifdef DEBUG
+    default:
         Print( "Error device::set_cmd() - prop = %s, val = %f\n", 
             prop, val );
 #endif // DEBUG
