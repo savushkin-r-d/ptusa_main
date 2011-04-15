@@ -50,6 +50,10 @@ CP=cp
 CCADMIN=CCadmin
 RANLIB=ranlib
 
+#my var
+out_dir     = "${HOME}/id_share/out/"
+lua_sys_dir = ""${HOME}/PTUSA_projects/system scripts/""
+lua_prg_dir = ""${HOME}/PTUSA_projects/projects/whey_out/""
 
 # build
 build: .build-post
@@ -59,7 +63,25 @@ build: .build-post
 
 .build-post: .build-impl
 # Add your post 'build' code here...
-	cp ${CND_ARTIFACT_PATH_${CONF}} /home/id/id_share/out/main_release
+	@if [ ${CONF} = "release_wago_750-860" ]; then \
+		echo ;\
+		echo copying files...;\
+\
+		echo "${CND_ARTIFACT_PATH_${CONF}}main >>  ${out_dir}main";\
+		cp    ${CND_ARTIFACT_PATH_${CONF}} ${out_dir}main;\
+\
+		echo "${lua_sys_dir}sys_wago.lua\t >> ${out_dir}sys_wago.lua";\
+		cp   "${lua_sys_dir}sys_wago.lua" ${out_dir};\
+		echo "${lua_sys_dir}sys.lua\t      >> ${out_dir}sys.lua";\
+		cp   "${lua_sys_dir}sys.lua" ${out_dir};\
+\
+		echo "${lua_prg_dir}main.wago.plua    >> ${out_dir}";\
+		cp   "${lua_prg_dir}main.wago.plua" ${out_dir};\
+		echo "${lua_prg_dir}main.plua\t >> ${out_dir}";\
+		cp   "${lua_prg_dir}main.plua" ${out_dir};\
+\
+		echo done;\
+	fi 	
 
 # clean
 clean: .clean-post
