@@ -161,7 +161,7 @@ int main( int argc, char *argv[] )
                 fflush( stdout );
                 }
 
-            all_time = 0;
+            all_time   = 0;
             cycles_cnt = 0;
             }
         //-Информация о времени выполнения цикла программы.!->
@@ -170,7 +170,3 @@ int main( int argc, char *argv[] )
 
     return( EXIT_SUCCESS );
     }
-
-
-
-

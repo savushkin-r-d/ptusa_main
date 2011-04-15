@@ -22,7 +22,8 @@
 #define Print    printf
 #endif // DEBUG
 //-----------------------------------------------------------------------------
-#define print_time printf( "%02lu:%02lu:%02lu ", ( time( 0 ) / 3600 ) % 24 + 2,\
-    ( time( 0 ) / 60 ) % 60, time( 0 ) % 60 ); printf
+extern time_t t_;
+#define print_time t_ = time( 0 ); printf( "%02d:%02d:%02d ", localtime( &t_ )->tm_hour,\
+     localtime( &t_ )->tm_min,  localtime( &t_ )->tm_sec ); printf
 //-----------------------------------------------------------------------------
 #endif // L_CONSOLE_H

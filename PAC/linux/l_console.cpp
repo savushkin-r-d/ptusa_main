@@ -3,6 +3,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 
+time_t t_;
+
 #include "l_console.h"
 //-----------------------------------------------------------------------------
 int kb_hit()
