@@ -399,7 +399,7 @@ i_AI_device* device_manager::get_QE( int number )
     return get_device( device::DT_QE, number );
     }
 //-----------------------------------------------------------------------------
-wago_device* device_manager::add_device( int dev_type, int dev_sub_type,
+wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
     u_int number, char * descr )
     {
     static char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
@@ -441,11 +441,6 @@ wago_device* device_manager::add_device( int dev_type, int dev_sub_type,
         case device::DST_V_MIXPROOF:
             new_device      = new valve_mix_proof( number );
             new_wago_device = ( valve_mix_proof* ) new_device;
-            break;
-
-        case device::DST_V_AS_MIXPROOF:
-            new_device      = new valve_AS_mix_proof( number );
-            new_wago_device = ( valve_AS_mix_proof* ) new_device;
             break;
 
         default:
@@ -763,17 +758,17 @@ u_int counter::get_quantity()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-float digital_device::get_value()
+float digital_wago_device::get_value()
     {
     return ( float ) get_state_now();
     }
 //-----------------------------------------------------------------------------
-void digital_device::direct_set_value( float new_value )
+void digital_wago_device::direct_set_value( float new_value )
     {
     direct_set_state( ( int ) new_value );
     }
 //-----------------------------------------------------------------------------
-void digital_device::direct_set_state( int new_state )
+void digital_wago_device::direct_set_state( int new_state )
     {
     if ( new_state )
         {
@@ -783,30 +778,30 @@ void digital_device::direct_set_state( int new_state )
     else direct_off();
     }
 //-----------------------------------------------------------------------------
-void digital_device::print() const
+void digital_wago_device::print() const
     {
     device::print();
     wago_device::print();
     }
 //-----------------------------------------------------------------------------
-int digital_device::get_state()
+int digital_wago_device::get_state()
     {
     return i_DI_device::get_state();
     }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_WAGO_MODULES
 
-int digital_device::get_state_now()
+int digital_wago_device::get_state_now()
     {
     return state;
     }
 //-----------------------------------------------------------------------------
-void digital_device::direct_on()
+void digital_wago_device::direct_on()
     {
     state = 1;
     }
 //-----------------------------------------------------------------------------
-void digital_device::direct_off()
+void digital_wago_device::direct_off()
     {
     state = 0;
     }
@@ -1196,44 +1191,60 @@ float analog_input_4_20::get_min_val()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void analog_device::direct_set_state( int new_state )
+void analog_wago_device::direct_set_state( int new_state )
     {
     direct_set_value( ( float ) new_state );
     }
 //-----------------------------------------------------------------------------
-int analog_device::get_state_now()
+int analog_wago_device::get_state_now()
     {
     return ( int ) get_value();
     }
 //-----------------------------------------------------------------------------
-void analog_device::print() const
+void analog_wago_device::print() const
     {
     device::print();
     wago_device::print();
     }
 //-----------------------------------------------------------------------------
-void analog_device::direct_on()
+void analog_wago_device::direct_on()
     {
     }
 //-----------------------------------------------------------------------------
-void analog_device::direct_off()
+void analog_wago_device::direct_off()
     {
     direct_set_value( 0 );
     }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_WAGO_MODULES
 
-float analog_device::get_value()
+float analog_wago_device::get_value()
     {
     return value;
     }
 //-----------------------------------------------------------------------------
-void analog_device::direct_set_value( float new_value )
+void analog_wago_device::direct_set_value( float new_value )
     {
     value = new_value;    
     }
-
 #endif // DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
+int analog_wago_device::save_device( char *buff, const char *prefix )
+    {
+    sprintf( buff, "%s[%d]={V=", prefix, get_n() );
+
+    if ( get_value() == 0 )
+        {
+        sprintf( buff + strlen( buff ), "0" );
+        }
+    else
+        {
+        sprintf( buff + strlen( buff ), "%.2f", get_value() );
+        }
+    sprintf( buff + strlen( buff ), ", M=%d},\n", get_manual_mode() );
+
+    return strlen( buff );
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float AO_0_100::get_max_val()
@@ -1465,7 +1476,7 @@ dev_stub* STUB()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-valve_AS_mix_proof::valve_AS_mix_proof( u_int number ) : digital_device( number,
+valve_AS_mix_proof::valve_AS_mix_proof( u_int number ) : device( number,
     DT_V, DST_V_AS_MIXPROOF )
     {
     }
@@ -1480,24 +1491,50 @@ void valve_AS_mix_proof::open_low_seat()
     direct_set_state( ST_LOW_SEAT );
     }
 //-----------------------------------------------------------------------------
-#ifndef DEBUG_NO_WAGO_MODULES
-
-int  valve_AS_mix_proof::get_state_now()
+int valve_AS_mix_proof::get_state_now()
     {
+#ifdef DEBUG_NO_WAGO_MODULES
+    return state;
+#else
     return 0;
+#endif // DEBUG_NO_WAGO_MODULES
     }
 //-----------------------------------------------------------------------------
 void valve_AS_mix_proof::direct_on()
     {
+#ifdef DEBUG_NO_WAGO_MODULES
+    state = ST_OPEN;
+#else
+#endif // DEBUG_NO_WAGO_MODULES
     }
 //-----------------------------------------------------------------------------
 void valve_AS_mix_proof::direct_off()
     {
+#ifdef DEBUG_NO_WAGO_MODULES
+    state = ST_CLOSE;
+#else
+#endif // DEBUG_NO_WAGO_MODULES
     }
 //-----------------------------------------------------------------------------
 void valve_AS_mix_proof::direct_set_state( int new_state )
     {
+#ifdef DEBUG_NO_WAGO_MODULES
+    state = ( STATES ) new_state;
+#else
+#endif // DEBUG_NO_WAGO_MODULES
+    }
+//-----------------------------------------------------------------------------
+float valve_AS_mix_proof::get_value()
+    {
+#ifdef DEBUG_NO_WAGO_MODULES
+    return ( float ) state;
+#else
+    return 0;
+#endif // DEBUG_NO_WAGO_MODULES
+    }
+//-----------------------------------------------------------------------------
+void valve_AS_mix_proof::direct_set_value( float new_value )
+    {
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-#endif // DEBUG_NO_WAGO_MODULES

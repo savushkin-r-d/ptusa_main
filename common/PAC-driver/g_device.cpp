@@ -249,7 +249,7 @@ void device_communicator::print() const
 
         dev[ i ]->print();
         } 
-    sprintf( tmp_str, "Done." );
+    sprintf( tmp_str, "Done.\n" );
     print_str( tmp_str, 1 );
     }
 //-----------------------------------------------------------------------------

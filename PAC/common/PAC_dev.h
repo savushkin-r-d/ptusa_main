@@ -358,11 +358,11 @@ class dev_stub : public device,
 /// @brief Устройство с дискретными входами/выходами.
 ///
 /// Базовый класс для различных дискретных устройств.
-class digital_device : public device,  
+class digital_wago_device : public device,  
     public wago_device
     {
     public:
-        digital_device( int number, device::DEVICE_TYPE type, 
+        digital_wago_device( int number, device::DEVICE_TYPE type, 
             device::DEVICE_SUB_TYPE sub_type ): device( number, type, sub_type )
 #ifdef DEBUG_NO_WAGO_MODULES
             , state( 0 )
@@ -370,7 +370,7 @@ class digital_device : public device,
             {
             }
 
-        virtual ~digital_device()
+        virtual ~digital_wago_device()
             {
             }
 
@@ -414,11 +414,10 @@ class digital_device : public device,
 /// @brief Устройство с аналоговыми входами/выходами.
 ///
 /// Базовый класс для различных аналоговых устройств.
-class analog_device : public device,   
-    public wago_device
+class analog_wago_device : public device, public wago_device      
     {
     public:
-        analog_device( int number, 
+        analog_wago_device( int number, 
             device::DEVICE_TYPE type, 
             device::DEVICE_SUB_TYPE sub_type ): device( number, type, sub_type )
 #ifdef DEBUG_NO_WAGO_MODULES
@@ -434,22 +433,7 @@ class analog_device : public device,
         void  direct_on();        
         void  direct_off();
 
-        int save_device( char *buff, const char *prefix )
-            {
-            sprintf( buff, "%s[%d]={V=", prefix, get_n() );
-
-            if ( get_value() == 0 )
-                {
-                sprintf( buff + strlen( buff ), "0" );
-                }
-            else
-                {
-                sprintf( buff + strlen( buff ), "%.2f", get_value() );
-                }
-            sprintf( buff + strlen( buff ), ", M=%d},\n", get_manual_mode() );
-
-            return strlen( buff );
-            }
+        int save_device( char *buff, const char *prefix );
 
 #ifdef DEBUG_NO_WAGO_MODULES
         float get_value();
@@ -471,11 +455,12 @@ class analog_device : public device,
 /// @brief Устройство с одним дискретным выходом.
 ///
 /// Это может быть клапан, насос, канал управления...
-class DO_1 : public digital_device
+class DO_1 : public digital_wago_device
     {
     public:
         DO_1( int number, device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): digital_device( number, type, sub_type )
+            device::DEVICE_SUB_TYPE sub_type ): digital_wago_device( number, type,
+            sub_type )
             {
             }
 
@@ -496,11 +481,11 @@ class DO_1 : public digital_device
 /// @brief Устройство с двумя дискретными выходами.
 ///
 /// Это может быть клапан, насос...
-class DO_2 : public digital_device
+class DO_2 : public digital_wago_device
     {
     public:
         DO_2( int number, device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): digital_device( number, type, sub_type )
+            device::DEVICE_SUB_TYPE sub_type ): digital_wago_device( number, type, sub_type )
             {
             }
 
@@ -522,11 +507,11 @@ class DO_2 : public digital_device
 /// @brief Устройство с одним дискретным выходом и одним дискретным входом.
 ///
 /// Это может быть клапан, насос...
-class DO_1_DI_1 : public digital_device
+class DO_1_DI_1 : public digital_wago_device
     {
     public:
         DO_1_DI_1( int number, device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): digital_device( number, type, sub_type )
+            device::DEVICE_SUB_TYPE sub_type ): digital_wago_device( number, type, sub_type )
             {
             }
 
@@ -550,11 +535,11 @@ class DO_1_DI_1 : public digital_device
 /// @brief Устройство с одним дискретным выходом и двумя дискретными входами.
 ///
 /// Это может быть клапан, насос...
-class DO_1_DI_2 : public digital_device
+class DO_1_DI_2 : public digital_wago_device
     {
     public:
         DO_1_DI_2( int number, device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): digital_device( number, type, sub_type )
+            device::DEVICE_SUB_TYPE sub_type ): digital_wago_device( number, type, sub_type )
             {
             }
 
@@ -580,11 +565,11 @@ class DO_1_DI_2 : public digital_device
 /// @brief Устройство с двумя дискретными выходами и двумя дискретными входами.
 ///
 /// Это может быть клапан, насос...
-class DO_2_DI_2 : public digital_device
+class DO_2_DI_2 : public digital_wago_device
     {
     public:
         DO_2_DI_2( int number, device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): digital_device( number, type, sub_type )
+            device::DEVICE_SUB_TYPE sub_type ): digital_wago_device( number, type, sub_type )
             {
             }
 
@@ -608,14 +593,10 @@ class DO_2_DI_2 : public digital_device
 #endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
-/// @brief Клапан mixproof.
-class valve_mix_proof : public digital_device
+/// @brief Интерфейс mixproof.
+class i_mix_proof 
     {
     public:
-        valve_mix_proof( u_int number ): digital_device( number, DT_V, DST_V_MIXPROOF )
-            {
-            }
-
         enum STATES
             {
             ST_CLOSE = 0,   ///< Закрыт.
@@ -623,6 +604,19 @@ class valve_mix_proof : public digital_device
             ST_UPPER_SEAT,  ///< Открыть верхнее седло.
             ST_LOW_SEAT,    ///< Открыть нижнее седло.
             };
+
+        virtual void open_upper_seat() = 0;
+        virtual void open_low_seat() = 0;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан mixproof.
+class valve_mix_proof : public digital_wago_device, public i_mix_proof
+    {
+    public:
+        valve_mix_proof( u_int number ): digital_wago_device( number, DT_V,
+            DST_V_MIXPROOF )
+            {
+            }
 
         void open_upper_seat();
         void open_low_seat();
@@ -649,46 +643,41 @@ class valve_mix_proof : public digital_device
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан AS-mixproof.
-class valve_AS_mix_proof : public digital_device
+class valve_AS_mix_proof : public device, public i_mix_proof
     {
     public:
         valve_AS_mix_proof( u_int number );
 
-        enum STATES
-            {
-            ST_CLOSE = 0,   ///< Закрыт.
-            ST_OPEN,        ///< Открыт.
-            ST_UPPER_SEAT,  ///< Открыть верхнее седло.
-            ST_LOW_SEAT,    ///< Открыть нижнее седло.
-            };
-
         void open_upper_seat();
         void open_low_seat();
 
-#ifndef DEBUG_NO_WAGO_MODULES
-        int  get_state_now();
-        void direct_on();
-        void direct_off();
+        float get_value();
+
         void direct_set_state( int new_state );
 
-    private:
-        enum CONSTANTS
-            {
-            };
+        void direct_set_value( float new_value );
 
-        u_long start_switch_time;   ///< Время начала переключения клапана.
+        void direct_off();
+
+        void direct_on();
+
+        int get_state_now();
+
+    private:
+#ifdef DEBUG_NO_WAGO_MODULES
+        STATES state;  ///< Состояние устройства.
 #endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым входом.
 ///
 /// Это может быть температура, расход (величина)...
-class AI_1 : public analog_device
+class AI_1 : public analog_wago_device
     {
     public:
         AI_1( u_int number, 
             device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): analog_device( number, type, sub_type )
+            device::DEVICE_SUB_TYPE sub_type ): analog_wago_device( number, type, sub_type )
             {
             }
 #ifndef DEBUG_NO_WAGO_MODULES
@@ -787,12 +776,12 @@ class analog_input_4_20 : public AI_1
 /// @brief Устройство с одним аналоговым выходом.
 ///
 /// Это может быть управляемый клапан...
-class AO_1 : public analog_device
+class AO_1 : public analog_wago_device
     {
     public:
         AO_1( u_int number, 
             device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): analog_device( number, type, sub_type )
+            device::DEVICE_SUB_TYPE sub_type ): analog_wago_device( number, type, sub_type )
             {
             }
 
@@ -839,13 +828,13 @@ class AO_0_100 : public AO_1
 /// @brief Устройство с одним дискретным входом.
 ///
 /// Это может быть обратная связь, расход (есть/нет)...
-class DI_1 : public digital_device
+class DI_1 : public digital_wago_device
     {
     public:
         DI_1( u_int number, 
             device::DEVICE_TYPE type, 
             device::DEVICE_SUB_TYPE sub_type, u_int dt = 0 ):
-        digital_device( number, type, sub_type )
+        digital_wago_device( number, type, sub_type )
             {
             set_change_time( dt );
             }
@@ -1092,7 +1081,7 @@ class device_manager: public i_Lua_save_device
 #endif // __BORLANDC__
         int save_device( char *buff )
             {
-            sprintf( buff, "t=t or {}\n\r" );
+            sprintf( buff, "t={}\n" );
             int answer_size = strlen( buff );
 
             for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++)
@@ -1146,7 +1135,7 @@ class device_manager: public i_Lua_save_device
         // @brief Установка числа устройств.
         //
         // Вызывается из Lua.
-        wago_device* add_device( int dev_type, int dev_sub_type, 
+        wago_device* add_wago_device( int dev_type, int dev_sub_type, 
             u_int number, char * descr );  
     };
 //-----------------------------------------------------------------------------

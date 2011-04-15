@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/07/11 14:50:38.
+** Generated automatically by tolua++-1.0.92 on 04/15/11 11:22:24.
 */
 
 #ifndef __cplusplus
@@ -2505,9 +2505,9 @@ static int tolua_PAC_dev_device_manager_print00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: add_device of class  device_manager */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_manager_add_device00
-static int tolua_PAC_dev_device_manager_add_device00(lua_State* tolua_S)
+/* method: add_wago_device of class  device_manager */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_manager_add_wago_device00
+static int tolua_PAC_dev_device_manager_add_wago_device00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -2529,17 +2529,17 @@ static int tolua_PAC_dev_device_manager_add_device00(lua_State* tolua_S)
   unsigned int number = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
   char* descr = ((char*)  tolua_tostring(tolua_S,5,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_device'", NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_wago_device'", NULL);
 #endif
   {
-   wago_device* tolua_ret = (wago_device*)  self->add_device(dev_type,dev_sub_type,number,descr);
+   wago_device* tolua_ret = (wago_device*)  self->add_wago_device(dev_type,dev_sub_type,number,descr);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"wago_device");
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'add_device'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'add_wago_device'.",&tolua_err);
  return 0;
 #endif
 }
@@ -4234,7 +4234,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_cclass(tolua_S,"device_manager","device_manager","",NULL);
   tolua_beginmodule(tolua_S,"device_manager");
    tolua_function(tolua_S,"print",tolua_PAC_dev_device_manager_print00);
-   tolua_function(tolua_S,"add_device",tolua_PAC_dev_device_manager_add_device00);
+   tolua_function(tolua_S,"add_wago_device",tolua_PAC_dev_device_manager_add_wago_device00);
    tolua_function(tolua_S,"get_device",tolua_PAC_dev_device_manager_get_device00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"wago_device","wago_device","",NULL);

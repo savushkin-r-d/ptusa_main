@@ -533,7 +533,7 @@ class device_manager
         // @brief Установка числа устройств.
         //
         // Вызывается из Lua.
-        wago_device* add_device( int dev_type, int dev_sub_type,
+        wago_device* add_wago_device( int dev_type, int dev_sub_type,
             unsigned int number, char * descr );
 
         /// @brief Получение устройства по его номеру.

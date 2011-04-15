@@ -54,30 +54,6 @@ void PAC_info::reset_params()
 //-----------------------------------------------------------------------------
 int PAC_info::save_device( char *buff )
     {
-    //sprintf( buff, "t.SYSTEM=t.SYSTEM or {}\n" );
-    //int answer_size = strlen( buff );
-
-    //sprintf( buff + answer_size, "t.SYSTEM.RESET_BY=%d\n", reset_type );
-    //answer_size += strlen( buff + answer_size );
-
-    //sprintf( buff + answer_size, "t.SYSTEM.UP_DAYS=%d\n", up_days );
-    //answer_size += strlen( buff + answer_size );
-
-    //sprintf( buff + answer_size, "t.SYSTEM.UP_HOURS=%d\n", up_hours );
-    //answer_size += strlen( buff + answer_size );
-
-    //sprintf( buff + answer_size, "t.SYSTEM.UP_MINS=%d\n", up_mins );
-    //answer_size += strlen( buff + answer_size );
-
-    //sprintf( buff + answer_size, "t.SYSTEM.UP_SECS=%d\n", up_secs );
-    //answer_size += strlen( buff + answer_size );
-
-    //sprintf( buff + answer_size, "t.SYSTEM.UP_TIME=t.SYSTEM.UP_TIME or {}; t.SYSTEM.UP_TIME.v=\"%s\"\n", 
-    //    up_time_str );
-    //answer_size += strlen( buff + answer_size );
-
-    //answer_size += par->save_device( buff + answer_size, "t.SYSTEM." );
-
     sprintf( buff, "t.SYSTEM = \n\t{\n" );
     int answer_size = strlen( buff );
 
