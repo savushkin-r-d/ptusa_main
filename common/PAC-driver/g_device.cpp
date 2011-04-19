@@ -12,7 +12,7 @@
 
 auto_smart_ptr < device_communicator > device_communicator::instance;
 
-u_int_2 G_PROTOCOL_VERSION = 1;
+u_int_2 G_PROTOCOL_VERSION = 100;
 
 std::vector< i_Lua_save_device* > device_communicator::dev;
 

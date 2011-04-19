@@ -15,9 +15,9 @@ class PAC_info: public i_Lua_save_device
 
         enum PARAMETERS
             {
-            P_PARAMS_COUNT  = 1,  // Количество параметров.
+            P_PARAMS_COUNT  = 1,  ///< Количество параметров.
 
-            P_CTR_ERROR_TIME = 0, // Время ожидания ошибки счетчика, мсек.
+            P_CTR_ERROR_TIME = 0, ///< Время ожидания ошибки счетчика, мсек.
             };
 
         saved_params_u_int_4 *par;
@@ -26,10 +26,7 @@ class PAC_info: public i_Lua_save_device
 
         int save_device( char *buff );
 
-        void print() const
-            {
-            Print( "PAC_info\n" );
-            }
+        void print() const;
 
         /// @brief Получение единственного экземпляра класса для работы.
         ///
