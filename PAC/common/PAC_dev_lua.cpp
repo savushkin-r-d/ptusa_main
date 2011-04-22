@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/19/11 08:29:33.
+** Generated automatically by tolua++-1.0.92 on 04/22/11 11:01:34.
 */
 
 #ifndef __cplusplus
@@ -2418,6 +2418,42 @@ static int tolua_PAC_dev_mode_manager_print00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: add_mode_on_FB of class  mode_manager */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_mode_manager_add_mode_on_FB00
+static int tolua_PAC_dev_mode_manager_add_mode_on_FB00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"mode_manager",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,3,"device",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  mode_manager* self = (mode_manager*)  tolua_tousertype(tolua_S,1,0);
+  unsigned int mode = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
+  device* dev = ((device*)  tolua_tousertype(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_mode_on_FB'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->add_mode_on_FB(mode,dev);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'add_mode_on_FB'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* function: G_DEVICE_MANAGER */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_G_DEVICE_MANAGER00
 static int tolua_PAC_dev_G_DEVICE_MANAGER00(lua_State* tolua_S)
@@ -4228,6 +4264,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"get_idle_time",tolua_PAC_dev_mode_manager_get_idle_time00);
    tolua_function(tolua_S,"get_active_step",tolua_PAC_dev_mode_manager_get_active_step00);
    tolua_function(tolua_S,"print",tolua_PAC_dev_mode_manager_print00);
+   tolua_function(tolua_S,"add_mode_on_FB",tolua_PAC_dev_mode_manager_add_mode_on_FB00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_DEVICE_MANAGER",tolua_PAC_dev_G_DEVICE_MANAGER00);
   tolua_function(tolua_S,"G_TECH_OBJECTS",tolua_PAC_dev_G_TECH_OBJECTS00);

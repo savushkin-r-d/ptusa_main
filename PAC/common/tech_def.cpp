@@ -130,7 +130,7 @@ int tech_object::set_mode( u_int mode, int newm )
     	{
         Print( "( is already %s).\n", newm == 0 ? "OFF" : " ON" );
     	}
-    if ( 0 == res )
+    else
         {
         Print( ".\n" );
         }
@@ -157,19 +157,11 @@ int tech_object::get_mode( u_int mode )
 //-----------------------------------------------------------------------------
 int tech_object::check_on_mode( u_int mode )
     {
-    return 0;
+    return modes_manager->check_on_mode( mode ) ? 0 : 1;
     }
 //-----------------------------------------------------------------------------
 void tech_object::init_mode( u_int mode )
     {
-
-#ifdef DEBUG
-    Print( "new_name = %s\n", name );
-    Print( "par_float_count = %d\n", par_float.get_count() );
-    Print( "runtime_par_float_count = %d\n", rt_par_float.get_count() );
-    Print( "par_uint_count = %d\n", par_uint.get_count() );
-#endif // DEBUG
-
     modes_manager->init( mode );
     }
 //-----------------------------------------------------------------------------
@@ -214,7 +206,7 @@ int tech_object::lua_exec_cmd( u_int cmd )
 //-----------------------------------------------------------------------------
 int tech_object::lua_check_on_mode( u_int mode )
     {
-    tech_object::check_on_mode( mode );
+    if ( int res = tech_object::check_on_mode( mode ) ) return 1000 + res;
 
     return lua_manager::get_instance()->int_exec_lua_method( name, 
         "check_on_mode", mode, "int tech_object::lua_check_on_mode( u_int mode )" );

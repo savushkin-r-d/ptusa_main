@@ -144,8 +144,14 @@ mode_manager::mode_manager( u_int_2 new_modes_cnt
         modes_devices.push_back( new step_path() );
 
         modes_start_time.push_back( 0 );
+
+        // Обратные связи для включения режима.
+        std::vector < device* > fb;
+        modes_on_FB.push_back( fb );
     	}
     modes_start_time.push_back( 0 );
+
+    
 
     }
 //-----------------------------------------------------------------------------
@@ -185,6 +191,9 @@ mode_manager::mode_manager( u_int_2 new_modes_cnt
 //-----------------------------------------------------------------------------
 int mode_manager::init( u_int_2 mode, u_char start_step )
     {
+    // На корректность номер режима не проверяем ( это делается в 
+    // int tech_object::set_mode( u_int mode, int newm )).
+
     modes_devices.at( mode )->init();
 
     if ( 0 == steps_cnt[ mode ] )
@@ -214,6 +223,9 @@ int mode_manager::init( u_int_2 mode, u_char start_step )
 //-----------------------------------------------------------------------------
 int mode_manager::final( u_int_2 mode )
     {
+    // На корректность номер режима не проверяем ( это делается в 
+    // int tech_object::set_mode( u_int mode, int newm )).
+
     modes_devices.at( mode )->final();
 
     if ( 0 == steps_cnt[ mode ] )
@@ -242,6 +254,9 @@ int mode_manager::final( u_int_2 mode )
 //-----------------------------------------------------------------------------
 int mode_manager::evaluate( u_int_2 mode )
     {
+    // На корректность номер режима не проверяем ( это делается в 
+    // int tech_object::set_mode( u_int mode, int newm )).
+
     modes_devices.at( mode )->evaluate();
 
     if ( 0 == steps_cnt[ mode ] )
@@ -375,12 +390,24 @@ void mode_manager::print()
     {
     Print( "mode_manager[%u]\n", modes_cnt );
     for ( int j = 0; j < modes_cnt; j++ )
-        {        
+        {     
+
         if ( modes_devices.at( j )->close_devices.size() > 0 ||
              modes_devices.at( j )->open_devices.size() > 0 ||
              steps_cnt[ j ] > 0 )
             {
             Print( "  [%d]\n", j );            
+            }
+
+        if ( modes_on_FB.at( j ).size() )
+            {
+            Print( "  Required FB: %d", modes_on_FB.at( j ).at( 0 )->get_n() );
+
+            for ( u_int i = 1; i < modes_on_FB.at( j ).size(); i++ )
+                {
+                Print( ", %d",  modes_on_FB.at( j ).at( i )->get_n() );
+                }
+            Print( ";\n" ); 
             }
 
         modes_devices.at( j )->print();
@@ -511,4 +538,56 @@ unsigned long mode_manager::get_idle_time()
     {
     return get_millisec() - modes_start_time.at( 0 );
     }
+//-----------------------------------------------------------------------------
+int mode_manager::add_mode_on_FB( u_int_2 mode, device *dev )
+    {
+    if ( mode >= modes_cnt )
+        {
+#ifdef DEBUG
+        Print( "Error! mode_manager::add_mode_on_FB(...) mode[ %u ] >= "
+            "modes count[ %u ]!\n",
+            mode, modes_cnt );
+#endif // DEBUG
+        return 2;
+        }
+
+    try
+        {
+        modes_on_FB.at( mode).push_back( dev );
+        }
+    catch (...)
+        {
+#ifdef PAC_PC
+        debug_break;
+#endif // PAC_PC
+        return 1;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+bool mode_manager::check_on_mode( u_int_2 mode )
+    {
+    // На корректность номер режима не проверяем ( это делается в 
+    // int tech_object::set_mode( u_int mode, int newm )).
+
+    u_int on_FB_cnt = modes_on_FB.at( mode ).size();
+    if ( on_FB_cnt )
+        {
+        for ( u_int i = 0; i < on_FB_cnt; i++ )
+            {
+            if ( modes_on_FB.at( mode ).at( i )->is_active() == false )
+                {
+#ifdef DEBUG
+                Print( "No FB[ %d ]!\n",
+                    modes_on_FB.at( mode ).at( i )->get_n() );
+#endif // DEBUG
+                return false;
+                }
+            }
+        }
+
+    return true;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

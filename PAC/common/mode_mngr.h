@@ -73,10 +73,10 @@ class step_path
         void print() const;
 
     private: 
-        std::vector< device* > close_devices;  ///< Закрываемые устройства.   
-        std::vector< device* > open_devices;   ///< Открываемые устройства.    
+        std::vector< device* > close_devices;   ///< Закрываемые устройства.   
+        std::vector< device* > open_devices;    ///< Открываемые устройства.    
         
-        u_int_4 start_time;                   ///< Время старта шага.
+        u_int_4 start_time;                     ///< Время старта шага.
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию о всех шагах какого-либо объекта (танк, 
@@ -111,7 +111,6 @@ class mode_manager
         /// @return < 0 - ошибка.
         /// @return   0 - ок.
         int to_step( u_int_2 mode, u_char new_step );
-
 
         /// @brief Добавление закрываемое устройство для шага.
         ///
@@ -183,6 +182,24 @@ class mode_manager
         /// @brief Отладочный вывод объекта в консоль.
         void print();
 
+
+        /// @brief Добавление проверяемой обратной связи при включении режима.
+        ///
+        /// @param [in] mode - режим;
+        /// @param [in] dev  - указатель на проверяемую обратную связь.
+        ///
+        /// @return < 0 - ошибка.
+        /// @return   0 - ок.
+        int add_mode_on_FB( u_int_2 mode, device *dev );
+
+        /// @brief Проверка на возможность включения режима.
+        ///
+        /// @param [in] mode - режим;
+        ///
+        /// @return false - ошибка.
+        /// @return true  - ок.
+        bool check_on_mode( u_int_2 mode );
+
     private:
         /// @brief Технологический объект.
         tech_object *owner;
@@ -207,6 +224,9 @@ class mode_manager
 
         /// @brief Устройства режимов.
         std::vector < step_path* > modes_devices; 
+
+        /// @brief Обратная связь для включения режима.
+        std::vector < std::vector < device* > > modes_on_FB; 
 
         /// @brief Проверка, является ли номер режима и шага допустимым.
         ///
