@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/22/11 11:01:34.
+** Generated automatically by tolua++-1.0.92 on 04/25/11 08:31:46.
 */
 
 #ifndef __cplusplus
@@ -44,8 +44,7 @@ static int tolua_collect_tech_object (lua_State* tolua_S)
 static void tolua_reg_types (lua_State* tolua_S)
 {
  tolua_usertype(tolua_S,"wago_device");
- tolua_usertype(tolua_S,"i_DO_device");
- tolua_usertype(tolua_S,"u_int");
+ tolua_usertype(tolua_S,"device_manager");
  tolua_usertype(tolua_S,"PID");
  tolua_usertype(tolua_S,"wago_manager");
  tolua_usertype(tolua_S,"run_time_params_float");
@@ -61,7 +60,7 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"i_AI_device");
  tolua_usertype(tolua_S,"mode_manager");
  tolua_usertype(tolua_S,"timer");
- tolua_usertype(tolua_S,"device_manager");
+ tolua_usertype(tolua_S,"i_DO_device");
  tolua_usertype(tolua_S,"tech_object");
  tolua_usertype(tolua_S,"dev_stub");
 }
@@ -2454,6 +2453,80 @@ static int tolua_PAC_dev_mode_manager_add_mode_on_FB00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: add_mode_FB_group of class  mode_manager */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_mode_manager_add_mode_FB_group00
+static int tolua_PAC_dev_mode_manager_add_mode_FB_group00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"mode_manager",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,3,"device",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  mode_manager* self = (mode_manager*)  tolua_tousertype(tolua_S,1,0);
+  int mode = ((int)  tolua_tonumber(tolua_S,2,0));
+  device* control_FB_dev = ((device*)  tolua_tousertype(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_mode_FB_group'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->add_mode_FB_group(mode,control_FB_dev);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'add_mode_FB_group'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: add_mode_pair_dev of class  mode_manager */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_mode_manager_add_mode_pair_dev00
+static int tolua_PAC_dev_mode_manager_add_mode_pair_dev00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"mode_manager",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,4,"device",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  mode_manager* self = (mode_manager*)  tolua_tousertype(tolua_S,1,0);
+  int mode = ((int)  tolua_tonumber(tolua_S,2,0));
+  unsigned int pair_n = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
+  device* open_dev = ((device*)  tolua_tousertype(tolua_S,4,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_mode_pair_dev'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->add_mode_pair_dev(mode,pair_n,open_dev);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'add_mode_pair_dev'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* function: G_DEVICE_MANAGER */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_G_DEVICE_MANAGER00
 static int tolua_PAC_dev_G_DEVICE_MANAGER00(lua_State* tolua_S)
@@ -2488,14 +2561,14 @@ static int tolua_PAC_dev_G_TECH_OBJECTS00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     (tolua_isvaluenil(tolua_S,1,&tolua_err) || !tolua_isusertype(tolua_S,1,"u_int",0,&tolua_err)) ||
+     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  u_int idx = *((u_int*)  tolua_tousertype(tolua_S,1,0));
+  unsigned int idx = ((unsigned int)  tolua_tonumber(tolua_S,1,0));
   {
    tech_object* tolua_ret = (tech_object*)  G_TECH_OBJECTS(idx);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"tech_object");
@@ -4265,6 +4338,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"get_active_step",tolua_PAC_dev_mode_manager_get_active_step00);
    tolua_function(tolua_S,"print",tolua_PAC_dev_mode_manager_print00);
    tolua_function(tolua_S,"add_mode_on_FB",tolua_PAC_dev_mode_manager_add_mode_on_FB00);
+   tolua_function(tolua_S,"add_mode_FB_group",tolua_PAC_dev_mode_manager_add_mode_FB_group00);
+   tolua_function(tolua_S,"add_mode_pair_dev",tolua_PAC_dev_mode_manager_add_mode_pair_dev00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_DEVICE_MANAGER",tolua_PAC_dev_G_DEVICE_MANAGER00);
   tolua_function(tolua_S,"G_TECH_OBJECTS",tolua_PAC_dev_G_TECH_OBJECTS00);

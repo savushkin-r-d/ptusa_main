@@ -51,18 +51,43 @@ int step_path::evaluate() const
         close_devices[ i ]->off();
         }
 
+    // Работа с группой устройств, включаемых при наличии ОС.
+    for ( u_int i = 0; i < FB_group_devices.size(); i++ )
+        {
+        const FB_group_dev &group = FB_group_devices[ i ];
+        for ( u_int j = 0; j < group.open_devices.size(); j++ )
+            {
+            if ( group.fb->is_active() )
+                {
+                group.open_devices[ j ]->on();
+                }
+            else
+                {
+                group.open_devices[ j ]->off();
+                }            
+            }
+        }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
 int step_path::final()
     {
-
     for ( u_int i = 0; i < open_devices.size(); i++ )
         {
         open_devices[ i ]->off();
         }
     start_time = 0;
 
+    // Работа с группой устройств, включаемых при наличии ОС.
+    for ( u_int i = 0; i < FB_group_devices.size(); i++ )
+        {
+        const FB_group_dev &group = FB_group_devices[ i ];
+        for ( u_int j = 0; j < group.open_devices.size(); j++ )
+            {
+            group.open_devices[ j ]->off();
+            }
+        }
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -87,6 +112,21 @@ void step_path::print() const
             close_devices[ i ]->print();            
             }        
         }
+
+    if ( FB_group_devices.size() )
+        {
+        Print( "      FB group [ %u ]:\n", FB_group_devices.size() );
+        for ( u_int i = 0; i < FB_group_devices.size(); i++ )
+            {            
+            Print( "\t" );
+            FB_group_devices[ i ].fb->print();            
+            for ( u_int j = 0; j < FB_group_devices[ i ].open_devices.size(); j++ )
+                {
+                Print( "\t\t" );
+                FB_group_devices[ i ].open_devices[ j ]->print();                
+                }                 
+            } 
+        }
     }
 //-----------------------------------------------------------------------------
 u_int_4 step_path::get_start_time() const
@@ -97,6 +137,31 @@ u_int_4 step_path::get_start_time() const
 void step_path::set_start_time( u_int_4 start_time ) 
     {
     this->start_time = start_time;
+    }
+//-----------------------------------------------------------------------------
+int step_path::add_FB_group( device *control_FB_dev )
+    {
+    FB_group_dev group( control_FB_dev );
+
+    FB_group_devices.push_back( group );
+    return FB_group_devices.size() - 1;
+    }
+//-----------------------------------------------------------------------------
+int step_path::add_pair_dev( u_int pair_n, device *open_dev )
+    {
+    try 
+        {
+        FB_group_devices.at( pair_n ).open_devices.push_back( open_dev );
+        }
+    catch(...) 
+        {
+#ifdef DEBUG
+        Print( "Error add_pair_dev - pair_n = %d, dev = %s[%d]\n", 
+            pair_n, open_dev->get_name(), open_dev->get_n() );
+#endif // DEBUG
+        }    
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -588,6 +653,16 @@ bool mode_manager::check_on_mode( u_int_2 mode )
         }
 
     return true;
+    }
+//-----------------------------------------------------------------------------
+int mode_manager::add_mode_FB_group( int mode, device *control_FB_dev )
+    {
+    return modes_devices.at( mode )->add_FB_group( control_FB_dev );
+    }
+//-----------------------------------------------------------------------------
+int mode_manager::add_mode_pair_dev( int mode, u_int pair_n, device *open_dev )
+    {
+    return modes_devices.at( mode )->add_pair_dev( pair_n, open_dev );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
