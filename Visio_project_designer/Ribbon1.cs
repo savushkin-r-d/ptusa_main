@@ -15,7 +15,6 @@ namespace Visio_project_designer
         {
         private void Ribbon1_Load( object sender, RibbonUIEventArgs e )
             {
-
             }
 
         private void button1_Click( object sender, RibbonControlEventArgs e )

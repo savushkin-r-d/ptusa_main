@@ -49,6 +49,30 @@ namespace Visio_project_designer
             m_Application.BeforeShapeDelete +=
                 new Microsoft.Office.Interop.Visio.EApplication_BeforeShapeDeleteEventHandler(
                     m_Application_shape_deleted );
+
+            m_Application.ConnectionsAdded +=
+                new Microsoft.Office.Interop.Visio.EApplication_ConnectionsAddedEventHandler(
+                    m_Application_connections_added );
+            }
+
+        void m_Application_connections_added( Microsoft.Office.Interop.Visio.Connects connect )
+            {
+            Microsoft.Office.Interop.Visio.Shape obj_2 = 
+                Globals.ThisAddIn.Application.ActivePage.Shapes[ connect.FromSheet.Name ];
+            Microsoft.Office.Interop.Visio.Shape obj_1 =
+                Globals.ThisAddIn.Application.ActivePage.Shapes[ connect.ToSheet.Name ];
+
+            switch( obj_1.Data1 )
+                {
+                case "750-860":
+                    obj_2.Cells[ "Prop.Number" ].Formula = "1";
+                    break;
+
+                default:
+                    int new_number = Convert.ToInt32( obj_1.Cells[ "Prop.Number" ].Formula ) + 1;
+                    obj_2.Cells[ "Prop.Number" ].Formula = Convert.ToString( new_number );
+                    break;
+                }
             }
 
         void m_Application_shape_deleted( Microsoft.Office.Interop.Visio.Shape shape )
@@ -78,12 +102,9 @@ namespace Visio_project_designer
                         {
                         MessageBox.Show( "Только один контроллер может быть в проекте!");
                         shape.DeleteEx( 0 );
-                        }
-
-                    
+                        }                    
                     break;
                 }
-
             }
 
         void m_Application_DocumentCreated( Microsoft.Office.Interop.Visio.Document Doc )
@@ -94,8 +115,6 @@ namespace Visio_project_designer
                     MessageBox.Show( "MyDemoItem was clicked" );
                     break;
                 }
-                 
-
             }
 
         private void ThisAddIn_Shutdown( object sender, System.EventArgs e )
