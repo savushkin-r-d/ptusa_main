@@ -45,9 +45,12 @@ namespace Visio_project_designer
                             config_f.WriteLine( "-- ----------------------------------------------------------------------------" );
                             config_f.WriteLine( "--Узлы WAGO" );
 
-                            string lua_str = ThisAddIn.g_PAC.lua_save();
-
+                            config_f.WriteLine( "nodes = " );
+                            config_f.WriteLine( "\t{" );
+                            string lua_str = ThisAddIn.g_PAC.lua_save( "\t\t" );
                             config_f.WriteLine( lua_str );
+                            config_f.WriteLine( "\t}" );
+
                             config_f.Flush();
                             config_f.Close();
                             }
