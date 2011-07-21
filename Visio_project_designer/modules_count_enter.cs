@@ -11,7 +11,8 @@ namespace Visio_project_designer
     {
     public partial class modules_count_enter : Form
         {
-        public int modules_count = 0;
+        public int modules_count    = 1;
+        public string modules_type  = "504";
 
         public modules_count_enter()
             {
@@ -22,6 +23,16 @@ namespace Visio_project_designer
             {
             NumericUpDown cnt = ( NumericUpDown ) sender;
             modules_count = ( int ) cnt.Value;
+            }
+
+        private void comboBox_type_TextChanged( object sender, EventArgs e )
+            {
+            modules_type = ( ( ComboBox ) sender).Text;
+            }
+
+        private void button_ok_Click( object sender, EventArgs e )
+            {
+
             }
         }
     }

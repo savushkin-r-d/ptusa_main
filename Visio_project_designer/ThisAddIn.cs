@@ -11,11 +11,38 @@ using System.Text.RegularExpressions;
 
 public class io_module
     {
+    private Visio.Shape shape;
+
     public int type;
 
-    public io_module( int type )
+    public io_module( int type, Visio.Shape shape )
         {
-        this.type = type;
+        this.type  = type;
+        this.shape = shape;
+        }
+
+    public void activate( int clamp, int color = 0 )
+        {
+        shape.Shapes[ "red_boder" ].Cells[ "LineColor" ].Formula =
+            Convert.ToString( color );
+
+        shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].Formula = "0%";
+        string clamp_name = "clamp_" + Convert.ToString( clamp );
+        shape.Shapes[ "type_skin" ].Shapes[ clamp_name ].Cells[
+            "FillForegnd" ].Formula = Convert.ToString( color );
+        }
+
+    public void deactivate()
+        {
+        for( int i = 1; i < 9; i++ )
+            {
+            string clamp_name = "clamp_" + Convert.ToString( i );
+
+            shape.Shapes[ "type_skin" ].Shapes[ clamp_name ].Cells[
+                "FillForegnd" ].Formula = "16";
+            }        
+
+        shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].Formula = "100%";
         }
 
     public string lua_save()
@@ -26,17 +53,34 @@ public class io_module
 
 public class PAC
     {
+    public Visio.Shape shape;
+
     public string ip_addres;
     public string PAC_name;
 
     private List<io_module> io_modules;
 
-    public PAC( string PAC_name, string ip_addres )
+    public PAC( string PAC_name, string ip_addres, Visio.Shape shape )
         {
         this.PAC_name = PAC_name;
         this.ip_addres = ip_addres;
 
         io_modules = new List<io_module>();
+
+        this.shape = shape;
+        }
+
+    public void activate( int module, int clamp, int color )
+        {
+        io_modules[ module ].activate( clamp, color );        
+        }
+
+    public void deactivate()
+        {
+        foreach( io_module module in io_modules )
+            {
+            module.deactivate();
+            }        
         }
 
     public string lua_save( string prefix = "\t" )
@@ -58,44 +102,224 @@ public class PAC
         return res;
         }
 
-    public void add_io_module( int type )
+    public void add_io_module( int type, Visio.Shape shape )
         {
-        io_modules.Add( new io_module( type ) );
+        io_modules.Add( new io_module( type, shape ) );
         }
     }
-
-
-
 
 namespace Visio_project_designer
     {
     public partial class ThisAddIn
         {
-        public static PAC g_PAC;
+        public static PAC g_PAC = null;                 ///Объект контроллера.
 
-        private Visio.Application m_Application;
+        public static bool is_device_edit_mode = false; /// Режим привязки устройств к модулям.
+
+        public static AnchorBarsUsage edit_io_frm; ///Форма редактирования привязки к каналам. 
+
+        //Константы для обращения к окнам Visio.
+        public enum VISIO_WNDOWS : short
+            {
+            MAIN    = 1,
+            IO_EDIT = 2,
+            };
+
+
+        private Visio.Application visio_app;
 
         private void ThisAddIn_Startup( object sender, System.EventArgs e )
             {
-            m_Application = this.Application;
-            m_Application.DocumentCreated +=
+            visio_app = this.Application;
+            visio_app.DocumentCreated +=
                 new Microsoft.Office.Interop.Visio.EApplication_DocumentCreatedEventHandler(
                     m_Application_DocumentCreated );
 
-            m_Application.ShapeAdded +=
+            visio_app.ShapeAdded +=
                 new Microsoft.Office.Interop.Visio.EApplication_ShapeAddedEventHandler(
                     m_Application_shape_added );
 
-            m_Application.BeforeShapeDelete +=
+            visio_app.BeforeShapeDelete +=
                 new Microsoft.Office.Interop.Visio.EApplication_BeforeShapeDeleteEventHandler(
                     m_Application_shape_deleted );
 
-            m_Application.ConnectionsAdded +=
+            visio_app.ConnectionsAdded +=
                 new Microsoft.Office.Interop.Visio.EApplication_ConnectionsAddedEventHandler(
                     m_Application_connections_added );
 
-            m_Application.FormulaChanged += new Microsoft.Office.Interop.Visio.EApplication_FormulaChangedEventHandler(
+            visio_app.FormulaChanged += new Microsoft.Office.Interop.Visio.EApplication_FormulaChangedEventHandler(
                     m_Application_formula_changed );
+
+
+            visio_app.SelectionChanged += new Microsoft.Office.Interop.Visio.EApplication_SelectionChangedEventHandler(
+                    m_Application_selection_changed );
+
+            visio_app.DocumentOpened += new Microsoft.Office.Interop.Visio.EApplication_DocumentOpenedEventHandler(
+                 m_Application_document_opened );
+
+            visio_app.MouseMove += new Visio.EApplication_MouseMoveEventHandler(
+                visio_app_mouse_move );
+            }
+
+        //static int is_hit = 0;
+
+        void visio_app_mouse_move( int Button,
+            int KeyButtonState, double x, double y, ref bool CancelDefault )
+            {            
+            //if( g_PAC.shape.HitTest( x, y, 0.1 ) > 0 )
+            //    {
+            //    CancelDefault = true;
+            //    if( is_hit == 0 )
+            //        {
+            //        g_PAC.shape.Cells[ "Prop.ip_address" ].Formula = "2";
+            //        is_hit = 1;
+            //        }
+            //    }
+            //else
+            //    {
+            //    if( is_hit == 1 ) 
+            //        {
+            //        g_PAC.shape.Cells[ "Prop.ip_address" ].Formula = "1";                
+            //        is_hit = 0;
+            //        }
+            //    }
+            }
+
+        void m_Application_document_opened( Visio.Document target )
+            {
+
+            //Считывание устройств Wago.
+            foreach( Visio.Shape shape in target.Pages[ "Wago" ].Shapes )
+                {
+                if( shape.Data1 == "750" && shape.Data2 == "860" )
+                    {
+                    string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
+                    string name = shape.Cells[ "Prop.PAC_name" ].Formula;
+
+                    g_PAC = new PAC( name.Substring( 1, name.Length - 2 ),
+                        ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
+                    }
+
+                if( shape.Data1 == "750" && shape.Data2 != "860" )
+                    {
+                    g_PAC.add_io_module( Convert.ToUInt16( shape.Data2 ), shape );
+                    }
+                }
+            }
+
+        void refresh_prop_wnd( Microsoft.Office.Interop.Visio.Shape shape )
+            {
+            Microsoft.Office.Interop.Visio.Window main_wnd = visio_app.Windows[
+                ( short ) ThisAddIn.VISIO_WNDOWS.MAIN ];
+
+            if( shape != null )
+                {
+                //Обновляем таблицу свойств.                
+                edit_io_frm.listForm.enable_prop();
+                edit_io_frm.listForm.change_type( shape.Cells[ "Prop.type" ].get_ResultStr( "" ) );
+
+                //string tmp = main_wnd.Page.Shapes[ "main_PAC.750-504.1" ].Shapes[
+                //    "red_boder" ].Cells[ "LineColorTrans" ].Formula;
+
+                //if( tmp == "0%" )
+                //    {
+                //    tmp = "100%";
+                //    }
+                //else
+                //    {
+                //    tmp = "0%";
+                //    }
+
+                //main_wnd.Page.Shapes[ "main_PAC.750-504.1" ].Shapes[
+                //    "red_boder" ].Cells[ "LineColorTrans" ].Formula = tmp;
+
+                }
+            else //if( shape != null )
+                {
+                //Сбрасываем таблицу свойств.
+                edit_io_frm.listForm.clear_prop();
+                edit_io_frm.listForm.disable_prop();
+                }
+            }
+
+        void m_Application_selection_changed( Microsoft.Office.Interop.Visio.Window Window )
+            {
+
+            // Проверка на режим привязки устройств к каналам ввода\вывода.
+            if( ThisAddIn.is_device_edit_mode ) 
+                {
+                // Проверка на активность окна редактирования.
+                if( Window.Index == ( short ) VISIO_WNDOWS.IO_EDIT )
+                    {
+
+                    // Проверка на активность страницы с устройствами (клапанами т.д.).
+                    if( Window.Page.Name == "Устройства" )
+                        {
+
+                        const int IO_PROP_WINDOW_INDEX = 8;
+
+                        Window.Windows[ IO_PROP_WINDOW_INDEX ].Caption =
+                                "Каналы";
+
+                        if( Window.Selection.Count > 0 )
+                            {
+                            Window.Windows[ IO_PROP_WINDOW_INDEX ].Caption =
+                                Window.Windows[ IO_PROP_WINDOW_INDEX ].Caption +
+                                " - " + Window.Selection[ 1 ].Name;
+
+                            //Обновление окна со свойствами привязки.
+                            Microsoft.Office.Interop.Visio.Shape selected_shape = Window.Selection[ 1 ];                            
+                            refresh_prop_wnd( selected_shape );
+
+                            //Обновление подсвечиваемых модулей Wago.
+                            g_PAC.deactivate();
+                                                        
+                            //Значение привязки имеет следующий формат:
+                            // -> узел 1 модуль 2 клемма 3;
+                            //на его основе получаем индекс подсвечиваемого объекта 
+                            //(номер узла и модуля) и номер клеммы:
+                            // -> 1, 2, 3.
+                            string value_DO1 = selected_shape.Cells[ "Prop.DO1" ].Formula;
+                            select_channel( value_DO1, 2 );
+
+                            string value_DO2 = selected_shape.Cells[ "Prop.DO2" ].Formula;
+                            select_channel( value_DO2, 2 );
+
+                            string value_DI1 = selected_shape.Cells[ "Prop.DI1" ].Formula;
+                            select_channel( value_DI1, 2 );
+
+                            string value_DI2 = selected_shape.Cells[ "Prop.DI2" ].Formula;
+                            select_channel( value_DI2, 2 );
+
+
+                            } //if( Window.Selection.Count > 0 )
+                        else
+                            {
+                            //Обновление подсвечиваемых модулей Wago.
+                            g_PAC.deactivate();
+
+                            refresh_prop_wnd( null );
+                            }
+
+                        } //if( Window.Page.Name == "Устройства" )
+                    } //if( Window.Index == ( short ) VISIO_WNDOWS.IO_EDIT )
+                } //if( ThisAddIn.is_device_edit_mode ) 
+            }
+
+        public void select_channel( string channel, int color )
+            {
+            Regex rex = new Regex( @"\w+\s(\d+)\s\w+\s(\d+)\s\w+\s(\d+)",
+                RegexOptions.IgnoreCase );
+            if( rex.IsMatch( channel ) )
+                {
+                Match mtc = rex.Match( channel );
+
+                int n_1 = Convert.ToInt16( mtc.Groups[ 1 ].ToString() ) - 1;
+                int n_2 = Convert.ToInt16( mtc.Groups[ 2 ].ToString() ) - 1;
+                int n_3 = Convert.ToInt16( mtc.Groups[ 3 ].ToString() );
+
+                g_PAC.activate( n_2, n_3, color );
+                }
             }
 
         void m_Application_formula_changed( Microsoft.Office.Interop.Visio.Cell Cell )
@@ -111,7 +335,7 @@ namespace Visio_project_designer
 
                 if( Cell.Name == "Prop.type" )
                     {
-                    int type = Convert.ToInt16( Cell.Shape.Cells[ "Prop.type" ].ResultStr[ "" ] );
+                    int type = ( int ) Convert.ToDouble( Cell.Shape.Cells[ "Prop.type" ].ResultStr[ "" ] );
 
                     Cell.Shape.Data2 = Convert.ToString( type );
                     Cell.Shape.Shapes[ "type_str" ].Text = Convert.ToString( type );
@@ -121,16 +345,16 @@ namespace Visio_project_designer
                         {
                         case 461:
                         case 466:
-                            colour = "9";
+                            colour = "RGB( 180, 228, 180 )";
                             break;
 
                         case 504:
                         case 512:
-                            colour = "2";
+                            colour = "RGB( 255, 128, 128 )";
                             break;
 
                         case 402:
-                            colour = "5";
+                            colour = "RGB( 255, 255, 128 )";
                             break;
 
                         case 602:
@@ -155,29 +379,28 @@ namespace Visio_project_designer
                 {
                 switch( Cell.Name )
                     {
-                    case "Prop.type":
-                        string type = Cell.Shape.Cells[ "Prop.type" ].get_ResultStr( 0 );
+                    //case "Prop.type":
+                    //    string type = Cell.Shape.Cells[ "Prop.type" ].get_ResultStr( 0 );
 
-                        switch( type )
-                            {
-                            case "1 КУ":
-                                short tmp = 1;
-                                //Cell.Shape.AddSection( Cell.Shape.get_CellsRowIndex );
-                                int idx = Cell.Shape.get_CellsRowIndex( "Prop.type" );
+                    //    switch( type )
+                    //        {
+                    //        case "1 КУ":
+                    //            //Cell.Shape.AddSection( Cell.Shape.get_CellsRowIndex );
+                    //            int idx = Cell.Shape.get_CellsRowIndex( "Prop.type" );
 
-                                Cell.Shape.AddNamedRow(
-                                    ( short ) Visio.VisSectionIndices.visSectionUser, "DO",
-                                    ( short ) Visio.VisRowTags.visTagDefault );
+                    //            Cell.Shape.AddNamedRow(
+                    //                ( short ) Visio.VisSectionIndices.visSectionUser, "DO",
+                    //                ( short ) Visio.VisRowTags.visTagDefault );
 
-                                Cell.Shape.AddNamedRow(
-                                    ( short ) Visio.VisSectionIndices.visSectionProp, "hf",
-                                    ( short ) 0 );
+                    //            Cell.Shape.AddNamedRow(
+                    //                ( short ) Visio.VisSectionIndices.visSectionProp, "hf",
+                    //                ( short ) 0 );
 
 
-                                break;
-                            }
+                    //            break;
+                    //        }
 
-                        break;
+                    //    break;
 
                     case "Prop.name":
                         string str = Cell.Shape.Cells[ "Prop.name" ].Formula;
@@ -197,6 +420,10 @@ namespace Visio_project_designer
                                 Convert.ToUInt16( n_part_2 );
 
                             Cell.Shape.Cells[ "Prop.number" ].Formula = n.ToString();
+
+                            str = str.Replace( "\"", "" );
+                            Cell.Shape.Name = str;
+                            Cell.Shape.Shapes[ "name" ].Text = str;
                             break;
                             }
 
@@ -216,6 +443,10 @@ namespace Visio_project_designer
                             n += Convert.ToUInt16( mtc.Groups[ 3 ].ToString() );
 
                             Cell.Shape.Cells[ "Prop.number" ].Formula = n.ToString();
+
+                            str = str.Replace( "\"", "" );
+                            Cell.Shape.Name = str;                                                        
+                            Cell.Shape.Shapes[ "name" ].Text = str;
                             break;
                             }
 
@@ -229,10 +460,13 @@ namespace Visio_project_designer
 
         void m_Application_connections_added( Microsoft.Office.Interop.Visio.Connects connect )
             {
+
+            //Globals.ThisAddIn.Application.BuiltInToolbars. BuiltInToolbars 
+            //--
             Microsoft.Office.Interop.Visio.Shape obj_2 =
-                Globals.ThisAddIn.Application.ActivePage.Shapes[ connect.FromSheet.Name ];
+                visio_app.ActivePage.Shapes[ connect.FromSheet.Name ];
             Microsoft.Office.Interop.Visio.Shape obj_1 =
-                Globals.ThisAddIn.Application.ActivePage.Shapes[ connect.ToSheet.Name ];
+                visio_app.ActivePage.Shapes[ connect.ToSheet.Name ];
 
             switch( obj_1.Data1 )
                 {
@@ -281,6 +515,9 @@ namespace Visio_project_designer
 
         void m_Application_shape_added( Microsoft.Office.Interop.Visio.Shape shape )
             {
+           
+            //shape.HitTest()
+
             //Проверяем, нужный ли нам объект мы добавляем на лист. Выводим окно
             //с запросом количества элементов. Помещаем на форму первый элемент,
             //остальные приклеиваем к нему путем дублирования вставляемого 
@@ -314,7 +551,7 @@ namespace Visio_project_designer
                     string name = shape.Cells[ "Prop.PAC_name" ].Formula;
 
                     g_PAC = new PAC( name.Substring( 1, name.Length - 2 ),
-                        ip_addr.Substring( 1, ip_addr.Length - 2 ) );
+                        ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
                     }
                 else
                     {
@@ -331,7 +568,11 @@ namespace Visio_project_designer
                 modules_count_enter_form.ShowDialog();
                 duplicate_count = modules_count_enter_form.modules_count - 1;
 
-                g_PAC.add_io_module( Convert.ToUInt16( shape.Data2 ) );
+
+                g_PAC.add_io_module( Convert.ToUInt16( shape.Data2 ), shape );
+                
+                shape.Cells[ "Prop.type" ].Formula = 
+                    modules_count_enter_form.modules_type;                                
 
                 for( int i = 0; i < duplicate_count; i++ )
                     {
@@ -339,17 +580,18 @@ namespace Visio_project_designer
                     new_shape = shape.Duplicate();
                     old_shape = shape;
 
-                    g_PAC.add_io_module( Convert.ToUInt16( shape.Data2 ) );
+                    g_PAC.add_io_module( Convert.ToUInt16( shape.Data2 ), shape );
 
                     string str_x = string.Format( "PNTX(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+6 mm",
                         old_shape.Name );
-                    string str_y = string.Format( "PNTY(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+-41.8142 mm",
+                    string str_y = string.Format( "PNTY(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+-47 mm",
                         old_shape.Name );
 
                     new_shape.Cells[ "PinX" ].Formula = str_x;
                     new_shape.Cells[ "PinY" ].Formula = str_y;
 
                     shape = new_shape;
+                    m_Application_formula_changed( shape.Cells[ "Prop.type" ] );
                     }
                 }
             }

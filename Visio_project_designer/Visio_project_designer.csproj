@@ -194,6 +194,9 @@
     can be found.
   -->
   <ItemGroup>
+    <Compile Include="edit_io.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="modules_count_enter.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -203,6 +206,9 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <EmbeddedResource Include="edit_io.resx">
+      <DependentUpon>edit_io.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="modules_count_enter.resx">
       <DependentUpon>modules_count_enter.cs</DependentUpon>
     </EmbeddedResource>
@@ -216,8 +222,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="Ribbon1.resx">
-      <DependentUpon>Ribbon1.cs</DependentUpon>
+    <EmbeddedResource Include="main_ribbon.resx">
+      <DependentUpon>main_ribbon.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -227,11 +233,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Ribbon1.cs">
+    <Compile Include="main_ribbon.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Ribbon1.Designer.cs">
-      <DependentUpon>Ribbon1.cs</DependentUpon>
+    <Compile Include="main_ribbon.Designer.cs">
+      <DependentUpon>main_ribbon.cs</DependentUpon>
     </Compile>
     <Compile Include="ThisAddIn.cs">
       <SubType>Code</SubType>

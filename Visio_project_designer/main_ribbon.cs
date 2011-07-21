@@ -8,13 +8,17 @@ using System.Windows.Forms;
 
 using System.IO;
 
+using System.Runtime.InteropServices; //
 
 namespace Visio_project_designer
     {
-    public partial class Ribbon1
+    public partial class main_ribbon
         {
+        private Microsoft.Office.Interop.Visio.Application visio_app;
+
         private void Ribbon1_Load( object sender, RibbonUIEventArgs e )
             {
+            visio_app = Globals.ThisAddIn.Application;
             }
 
         private void button1_Click( object sender, RibbonControlEventArgs e )
@@ -62,6 +66,47 @@ namespace Visio_project_designer
                     {
                     MessageBox.Show( ex.Message );
                     }
+
+                }
+            }
+
+        private void toggleButton_edit_mode_Click( object sender, RibbonControlEventArgs e )
+            {
+            ThisAddIn.is_device_edit_mode = this.toggleButton_edit_mode.Checked;
+
+            Microsoft.Office.Interop.Visio.Windows visio_wnds = visio_app.Windows;
+
+            // Переход в режим привязки устройств к каналам ввода\вывода.
+            if( ThisAddIn.is_device_edit_mode )
+                {
+                //Закрываем другие окна при их наличии.
+                for( short i = 2; i < visio_app.Windows.Count; i++ )
+                    {
+                    visio_wnds[ i ].Close();
+                    }
+
+                visio_wnds[ ( short ) ThisAddIn.VISIO_WNDOWS.MAIN ].NewWindow();
+                visio_wnds[ ( short ) ThisAddIn.VISIO_WNDOWS.MAIN ].Activate();
+                visio_wnds.Arrange();
+                //visio_wnds[ ( short ) ThisAddIn.VISIO_WNDOWS.IO_EDIT ].Windows.ItemEx[ 
+                //    "Фигуры" ].Close();
+
+
+                visio_wnds[ ( short ) ThisAddIn.VISIO_WNDOWS.MAIN ].Page =
+                    visio_app.ActiveDocument.Pages[ "Wago" ];
+                visio_wnds[ ( short ) ThisAddIn.VISIO_WNDOWS.IO_EDIT ].Page =
+                    visio_app.ActiveDocument.Pages[ "Устройства" ];
+
+                visio_wnds[ ( short ) ThisAddIn.VISIO_WNDOWS.IO_EDIT ].Activate();
+
+                AnchorBarsUsage tmp = new AnchorBarsUsage();
+                tmp.DemoAnchorBar( visio_app, true );
+                ThisAddIn.edit_io_frm = tmp;                
+                }
+            else
+                {
+                visio_wnds[ ( short ) ThisAddIn.VISIO_WNDOWS.IO_EDIT ].Close();
+                visio_wnds[ ( short ) ThisAddIn.VISIO_WNDOWS.MAIN ].Activate();
 
 
                 }
