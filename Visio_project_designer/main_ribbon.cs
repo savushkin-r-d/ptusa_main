@@ -18,7 +18,9 @@ namespace Visio_project_designer
 
         private void Ribbon1_Load( object sender, RibbonUIEventArgs e )
             {
-            visio_app = Globals.ThisAddIn.Application;
+            ThisAddIn.vis_main_ribbon = this;
+
+            visio_app = Globals.ThisAddIn.Application;            
             }
 
         private void button1_Click( object sender, RibbonControlEventArgs e )
@@ -107,8 +109,7 @@ namespace Visio_project_designer
                 {
                 visio_wnds[ ( short ) ThisAddIn.VISIO_WNDOWS.IO_EDIT ].Close();
                 visio_wnds[ ( short ) ThisAddIn.VISIO_WNDOWS.MAIN ].Activate();
-
-
+                //1 КУ;2 КУ;1 КУ 1 ОС;1 КУ 2 ОС;2 КУ 2 ОС
                 }
             }
         }

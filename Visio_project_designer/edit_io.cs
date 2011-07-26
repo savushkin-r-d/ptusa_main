@@ -58,15 +58,15 @@ namespace Visio_project_designer
             item.SubItems.Add( value );
             }
 
-        public void change_type( string type )
+        public void change_type( int type )
             {
-            if( type == ( string ) comboBox_type.SelectedItem )
+            if( type == comboBox_type.SelectedIndex )
                 {
                 comboBox_type_SelectedIndexChanged( null, null );
                 }
             else
                 {
-                comboBox_type.SelectedItem = type;
+                comboBox_type.SelectedIndex = type;
                 }            
             }
         /// <summary>The Visio Application property</summary>
@@ -118,11 +118,11 @@ namespace Visio_project_designer
         private void InitializeComponent()
             {
             this.myListView = new System.Windows.Forms.ListView();
+            this.channel = ( ( System.Windows.Forms.ColumnHeader ) ( new System.Windows.Forms.ColumnHeader() ) );
+            this.columnHeader2 = ( ( System.Windows.Forms.ColumnHeader ) ( new System.Windows.Forms.ColumnHeader() ) );
             this.comboBox_type = new System.Windows.Forms.ComboBox();
             this.label_type = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.channel = ( ( System.Windows.Forms.ColumnHeader ) ( new System.Windows.Forms.ColumnHeader() ) );
-            this.columnHeader2 = ( ( System.Windows.Forms.ColumnHeader ) ( new System.Windows.Forms.ColumnHeader() ) );
             this.SuspendLayout();
             // 
             // myListView
@@ -133,6 +133,8 @@ namespace Visio_project_designer
             this.myListView.Columns.AddRange( new System.Windows.Forms.ColumnHeader[] {
             this.channel,
             this.columnHeader2} );
+            this.myListView.GridLines = true;
+            this.myListView.HideSelection = false;
             this.myListView.Location = new System.Drawing.Point( 1, 43 );
             this.myListView.MultiSelect = false;
             this.myListView.Name = "myListView";
@@ -143,6 +145,15 @@ namespace Visio_project_designer
             this.myListView.Visible = false;
             this.myListView.SelectedIndexChanged += new System.EventHandler( this.myListView_SelectedIndexChanged );
             this.myListView.DoubleClick += new System.EventHandler( this.myListView_DoubleClick );
+            // 
+            // channel
+            // 
+            this.channel.Text = "Канал";
+            // 
+            // columnHeader2
+            // 
+            this.columnHeader2.Text = "Привязка";
+            this.columnHeader2.Width = 159;
             // 
             // comboBox_type
             // 
@@ -185,15 +196,6 @@ namespace Visio_project_designer
             this.label2.TabIndex = 3;
             this.label2.Text = "Каналов нет";
             // 
-            // channel
-            // 
-            this.channel.Text = "Канал";
-            // 
-            // columnHeader2
-            // 
-            this.columnHeader2.Text = "Привязка";
-            this.columnHeader2.Width = 159;
-            // 
             // AnchorBarForm
             // 
             this.AutoScaleBaseSize = new System.Drawing.Size( 5, 13 );
@@ -223,84 +225,71 @@ namespace Visio_project_designer
 
         private void myListView_DoubleClick( object sender, EventArgs e )
             {
-            //myListView.SelectedItems[ 0 ].Font. BackColor = System.Drawing.Color.FromName( "DarkSeaGreen" );
-            //myListView.Refresh();
-            //myListView.HideSelection = true;
-            //myListView.SelectedItems.Clear();
+            // Выделяем все доступные клеммы.
+            ThisAddIn.g_PAC.mark_suitable( 1 );
 
-            // Выделяем все задействованные клеммы.
-            for( int i = 0; i < myListView.Items.Count; i++ )
-                {
-                string channel = myListView.Items[ i ].SubItems[ 1 ].Text;
-                Globals.ThisAddIn.select_channel( channel, 2 );
-                }
 
-            // Выделяем текущую клемму.    
-            string tmp = myListView.SelectedItems[ 0 ].SubItems[ 1 ].Text;
-            Globals.ThisAddIn.select_channel( tmp, 5 );
+            Globals.ThisAddIn.is_selecting_clamp = true; 
             }
 
         private void comboBox_type_SelectedIndexChanged( object sender, EventArgs e )
             {
-            Microsoft.Office.Interop.Visio.Shape shape =
-                visioApplication.Windows[ ( short ) ThisAddIn.VISIO_WNDOWS.IO_EDIT ].Selection[ 1 ];
+            //if ()
+            //    {
+            //    }
+            //System.Windows.Forms.ListViewItem item;
+            //item = myListView.Items.Add( name );
+            //item.SubItems.Add( value );
 
-            string tmp = ( string ) comboBox_type.SelectedItem;
-            shape.Cells[ "Prop.type" ].Formula = 
-                string.Format( "INDEX({0};Prop.type.Format)", comboBox_type.SelectedIndex );
 
-            //Обновляем таблицу свойств.
-            clear_prop();
+            //Microsoft.Office.Interop.Visio.Shape shape =
+            //    visioApplication.Windows[ ( short ) ThisAddIn.VISIO_WNDOWS.IO_EDIT ].Selection[ 1 ];
 
-            add_prop( "DO1",
-                shape.Cells[ "Prop.DO1" ].Formula );
+            //string tmp = ( string ) comboBox_type.SelectedItem;
+            //shape.Cells[ "Prop.type" ].Formula = 
+            //    string.Format( "INDEX({0};Prop.type.Format)", comboBox_type.SelectedIndex );
 
-            switch( ( string ) comboBox_type.SelectedItem )
-                {
-                case "2 КУ":
-                    add_prop( "DO2",
-                        shape.Cells[ "Prop.DO2" ].Formula );
-                    break;
+            ////Обновляем таблицу свойств.
+            //clear_prop();
 
-                case "1 КУ 1 ОС":
-                    add_prop( "DI1",
-                        shape.Cells[ "Prop.DI1" ].Formula );
-                    break;
+            //add_prop( "DO1",
+            //    shape.Cells[ "Prop.DO1" ].Formula );
 
-                case "1 КУ 2 ОС":
-                    add_prop( "DI1",
-                        shape.Cells[ "Prop.DI1" ].Formula );
-                    add_prop( "DI2",
-                        shape.Cells[ "Prop.DI2" ].Formula );
-                    break;
+            //switch( ( string ) comboBox_type.SelectedItem )
+            //    {
+            //    case "2 КУ":
+            //        add_prop( "DO2",
+            //            shape.Cells[ "Prop.DO2" ].Formula );
+            //        break;
 
-                case "2 КУ 2 ОС":
-                    add_prop( "DO2",
-                        shape.Cells[ "Prop.DO2" ].Formula );
+            //    case "1 КУ 1 ОС":
+            //        add_prop( "DI1",
+            //            shape.Cells[ "Prop.DI1" ].Formula );
+            //        break;
 
-                    add_prop( "DI1",
-                        shape.Cells[ "Prop.DI1" ].Formula );
-                    add_prop( "DI2",
-                        shape.Cells[ "Prop.DI2" ].Formula );
-                    break;
-                }
+            //    case "1 КУ 2 ОС":
+            //        add_prop( "DI1",
+            //            shape.Cells[ "Prop.DI1" ].Formula );
+            //        add_prop( "DI2",
+            //            shape.Cells[ "Prop.DI2" ].Formula );
+            //        break;
+
+            //    case "2 КУ 2 ОС":
+            //        add_prop( "DO2",
+            //            shape.Cells[ "Prop.DO2" ].Formula );
+
+            //        add_prop( "DI1",
+            //            shape.Cells[ "Prop.DI1" ].Formula );
+            //        add_prop( "DI2",
+            //            shape.Cells[ "Prop.DI2" ].Formula );
+            //        break;
+            //    }
             }
 
         private void myListView_SelectedIndexChanged( object sender, EventArgs e )
             {
-            // Выделяем все задействованные клеммы.
-            for( int i = 0; i < myListView.Items.Count; i++  )
-                {
-                string channel = myListView.Items[ i ].SubItems[ 1 ].Text;
-                Globals.ThisAddIn.select_channel( channel, 2 );
-                }
-
-            // Выделяем текущую клемму.
-            if( myListView.SelectedItems.Count > 0 )
-                {
-                string channel = myListView.SelectedItems[ 0 ].SubItems[ 1 ].Text;
-                Globals.ThisAddIn.select_channel( channel, 5 );
-                }          
+            Globals.ThisAddIn.current_selected_dev.select_channels(
+                myListView.SelectedItems[ 0 ].Name );        
             }
 
         }

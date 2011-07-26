@@ -2,6 +2,18 @@
     {
     partial class main_ribbon : Microsoft.Office.Tools.Ribbon.RibbonBase
         {
+        public void show()
+            {
+            tab1.Visible = true;
+            PerformLayout();
+            }
+
+        public void hide()
+            {
+            tab1.Visible = false;
+            PerformLayout();
+            }
+
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -36,8 +48,8 @@
             {
             this.tab1 = this.Factory.CreateRibbonTab();
             this.group1 = this.Factory.CreateRibbonGroup();
-            this.toggleButton_edit_mode = this.Factory.CreateRibbonToggleButton();
             this.group2 = this.Factory.CreateRibbonGroup();
+            this.toggleButton_edit_mode = this.Factory.CreateRibbonToggleButton();
             this.button2 = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
@@ -45,11 +57,11 @@
             // 
             // tab1
             // 
-            this.tab1.ControlId.ControlIdType = Microsoft.Office.Tools.Ribbon.RibbonControlIdType.Office;
             this.tab1.Groups.Add( this.group1 );
             this.tab1.Groups.Add( this.group2 );
             this.tab1.Label = "Описание техпроцесса";
             this.tab1.Name = "tab1";
+            this.tab1.Visible = false;
             // 
             // group1
             // 
@@ -57,17 +69,17 @@
             this.group1.Label = "Редактирование";
             this.group1.Name = "group1";
             // 
-            // toggleButton_edit_mode
-            // 
-            this.toggleButton_edit_mode.Label = "Привязка";
-            this.toggleButton_edit_mode.Name = "toggleButton_edit_mode";
-            this.toggleButton_edit_mode.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.toggleButton_edit_mode_Click );
-            // 
             // group2
             // 
             this.group2.Items.Add( this.button2 );
             this.group2.Label = "Редактор WAGO";
             this.group2.Name = "group2";
+            // 
+            // toggleButton_edit_mode
+            // 
+            this.toggleButton_edit_mode.Label = "Привязка";
+            this.toggleButton_edit_mode.Name = "toggleButton_edit_mode";
+            this.toggleButton_edit_mode.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.toggleButton_edit_mode_Click );
             // 
             // button2
             // 
@@ -78,9 +90,9 @@
             this.button2.ShowImage = true;
             this.button2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.button1_Click );
             // 
-            // Ribbon1
+            // main_ribbon
             // 
-            this.Name = "Ribbon1";
+            this.Name = "main_ribbon";
             this.RibbonType = "Microsoft.Visio.Drawing";
             this.Tabs.Add( this.tab1 );
             this.Load += new Microsoft.Office.Tools.Ribbon.RibbonUIEventHandler( this.Ribbon1_Load );
@@ -95,11 +107,11 @@
 
         #endregion
 
-        internal Microsoft.Office.Tools.Ribbon.RibbonTab tab1;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group1;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group2;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button2;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton toggleButton_edit_mode;
+        internal Microsoft.Office.Tools.Ribbon.RibbonTab tab1;
         }
 
     partial class ThisRibbonCollection

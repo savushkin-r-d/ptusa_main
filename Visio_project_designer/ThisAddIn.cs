@@ -9,48 +9,267 @@ using Office = Microsoft.Office.Core;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 
+//-----------------------------------------------------------------------------
+/// @brief Модуль ввода/вывода WAGO. 
+/// 
+///
 public class io_module
     {
-    private Visio.Shape shape;
-
-    public int type;
-
-    public io_module( int type, Visio.Shape shape )
+    public enum KINDS ///< Виды модулей. 
         {
-        this.type  = type;
+        SPECIAL,
+        DO,
+        DI,
+        AO,
+        AI
+        };
+
+    public enum TYPES ///< Типы модулей. 
+        {
+        T_UNKNOWN = 0,
+        T_504     = 504,
+        T_402     = 402,
+        T_466     = 466
+        };
+
+    public enum CLAMPS_COUNT ///< Количество клемм. 
+        {
+        СLAMP_8 = 8,
+        СLAMP_16 = 16
+        };
+
+    internal KINDS        kind;          ///< Вид модуля. 
+    internal TYPES        type;          ///< Тип модуля. 
+    public   CLAMPS_COUNT total_clamps;  ///< Общее количество клемм. 
+                                         ///
+    internal int order_number; ///< Порядковый номер в сборке.
+    internal int node_number;  ///< Номер узла.
+
+    public bool[] free_clamp_flags;      ///< Флаг свободности клеммы.
+
+    /// @brief Конструктор.
+    ///
+    /// @param type  - тип модуля.
+    /// @param shape - визуальная фигура Visio.
+    public io_module( Visio.Shape shape )
+        {
+        this.clamp_names = new List<string>();
+                                              
         this.shape = shape;
-        }
 
-    public void activate( int clamp, int color = 0 )
-        {
-        shape.Shapes[ "red_boder" ].Cells[ "LineColor" ].Formula =
-            Convert.ToString( color );
-
-        shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].Formula = "0%";
-        string clamp_name = "clamp_" + Convert.ToString( clamp );
-        shape.Shapes[ "type_skin" ].Shapes[ clamp_name ].Cells[
-            "FillForegnd" ].Formula = Convert.ToString( color );
-        }
-
-    public void deactivate()
-        {
-        for( int i = 1; i < 9; i++ )
+        type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].ResultStr[ "" ] );
+        order_number = Convert.ToUInt16( shape.Cells[ "Prop.order_number" ].Formula );
+        node_number = Convert.ToUInt16( shape.Cells[ "Prop.node_number" ].Formula );
+        
+        //Определяем количество клемм.
+        switch( type )
             {
-            string clamp_name = "clamp_" + Convert.ToString( i );
+            case TYPES.T_402:
+            case TYPES.T_466:
+            case TYPES.T_504:
+                total_clamps = CLAMPS_COUNT.СLAMP_8;
 
-            shape.Shapes[ "type_skin" ].Shapes[ clamp_name ].Cells[
-                "FillForegnd" ].Formula = "16";
-            }        
+                free_clamp_flags     = new bool[ ( int ) total_clamps ];
+                suitable_clamp_flags = new bool[ ( int ) total_clamps ];
 
-        shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].Formula = "100%";
+                for( int i = 0; i < ( int ) total_clamps; i++ )
+                    {
+                    free_clamp_flags[ i ]     = true;
+                    suitable_clamp_flags[ i ] = false;
+
+                    clamp_names.Add( "clamp_" + i + 1 );
+                    }
+                break;
+
+            default:
+                Exception exc = new Exception(
+                    "Неизвестный тип модуля - \"" + type + "\"!" );
+                throw exc;
+            }
+
+        //Определяем вид.
+        switch( type )
+            {
+            case TYPES.T_402:
+                kind = KINDS.DI;
+                break;
+
+            case TYPES.T_466:
+                kind = KINDS.AI;
+                break;
+
+            case TYPES.T_504:
+                kind = KINDS.DO;
+                break;
+            }
         }
 
     public string lua_save()
         {
         return "{ " + type + " }";
         }
-    }
 
+    
+    //Визуальное представление.
+    Visio.Shape shape;           ///< Фигура Visio модуля.
+    List < string > clamp_names; ///< Имена клемм.
+
+
+    public bool[] suitable_clamp_flags;      ///< Флаг подходящих для привязки клемм.
+                                             
+    /// @brief Затемнение доступных клемм.
+    public void mark_suitable()
+        {
+        for( int i = 0; i < ( int ) total_clamps; i++ )
+            {
+            if( free_clamp_flags[ i ] )
+                {                
+                shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ i ] ].Cells[
+                    "FillForegnd" ].Formula = "RGB( 127, 127, 127 )";
+
+                suitable_clamp_flags[ i ] = true;
+                }
+            }
+        }
+
+    /// @brief 
+    public void unmark()
+        {
+        for( int i = 0; i < ( int ) total_clamps; i++ )
+            {
+            suitable_clamp_flags[ i ] = false;
+            }
+        }
+
+    private int selected_clamp = 0;
+
+    public int get_selected()
+        {
+        return selected_clamp;
+        }
+
+    public void magnify_on_mouse_move( double x, double y )
+        {
+        if( shape.HitTest( x, y, 0.01 ) > 0 )
+            {
+            for( int i = 0; i < ( int ) total_clamps; i++ )
+                {
+                double new_x = x;
+                double new_y = y;
+
+                new_x -= shape.Cells[ "PinX" ].Result[ 0 ] -
+                    shape.Cells[ "Width" ].Result[ 0 ] / 2;
+                new_x -= shape.Shapes[ "type_skin" ].Cells[ "PinX" ].Result[ 0 ] -
+                    shape.Shapes[ "type_skin" ].Cells[ "Width" ].Result[ 0 ] / 2;
+
+                new_y -= shape.Cells[ "PinY" ].Result[ 0 ] -
+                    shape.Cells[ "Height" ].Result[ 0 ] / 2; ;
+                new_y -= shape.Shapes[ "type_skin" ].Cells[ "PinY" ].Result[ 0 ] -
+                    shape.Shapes[ "type_skin" ].Cells[ "Height" ].Result[ 0 ] / 2;
+
+                if( shape.Shapes[ "type_skin" ].Shapes[
+                    clamp_names[ i ] ].HitTest( new_x, new_y, 0.01 ) > 0 )
+                    {
+                    if ( suitable_clamp_flags[ i ] == false )
+                        {
+                        //Клемма недоступна, выходим.
+                        break;
+                        }
+
+                    if( selected_clamp != i + 1 )
+                        {
+                        unmagnify_clamp( selected_clamp );
+                        selected_clamp = i + 1;
+                        magnify_clamp( selected_clamp );
+                        }
+                    return;
+                    }
+                }
+
+            if( selected_clamp > 0 )
+                {
+                unmagnify_clamp( selected_clamp  );
+                selected_clamp = 0;
+                }
+            }
+        else
+            {
+            if( selected_clamp > 0 )
+                {
+                unmagnify_clamp( selected_clamp );
+                selected_clamp = 0;
+                }
+            }
+        }
+
+    internal void magnify_clamp( int clamp )
+        {
+        shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ] ].Cells[
+            "Width" ].Formula = string.Format( "=Sheet.{0}!Width*0.66",
+            shape.Shapes[ "type_skin" ].ID );
+
+        shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ] ].Cells[
+            "Height" ].Formula = string.Format( "=Sheet.{0}!Height*0.09",
+            shape.Shapes[ "type_skin" ].ID );
+        }
+
+    void unmagnify_clamp( int clamp )
+        {
+        shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ]
+            ].Cells[ "Width" ].Formula = string.Format( "=Sheet.{0}!Width*0.33",
+            shape.Shapes[ "type_skin" ].ID );
+
+        shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ]
+            ].Cells[ "Height" ].Formula = string.Format( "=Sheet.{0}!Height*0.045",
+            shape.Shapes[ "type_skin" ].ID );
+        }
+
+    public void activate( int clamp )
+        {
+        string color = "0";
+
+        switch ( kind )
+            {
+            case io_module.KINDS.AI:        //Зеленый.
+                color = "3";
+                break;
+
+            case io_module.KINDS.AO:        //Синий.
+                color = "4";
+                break;
+            
+            case io_module.KINDS.DI:        //Желтый.
+                color = "5";
+                break;
+
+            case io_module.KINDS.DO:        //Красный.
+                color = "2";
+                break;
+
+            case io_module.KINDS.SPECIAL:   //Серый.
+                color = "14";
+                break;
+            }
+
+        shape.Shapes[ "red_boder" ].Cells[ "LineColor" ].Formula = color;            
+        shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].Formula = "0%";
+
+        shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ] ].Cells[
+            "FillForegnd" ].Formula = color;
+        }
+
+    public void deactivate()
+        {
+        foreach( string clamp in clamp_names )
+            {
+            shape.Shapes[ "type_skin" ].Shapes[ clamp ].Cells[
+                "FillForegnd" ].Formula = "16";
+            }
+
+        shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].Formula = "100%";
+        }
+    }
+//-----------------------------------------------------------------------------
 public class PAC
     {
     public Visio.Shape shape;
@@ -58,30 +277,63 @@ public class PAC
     public string ip_addres;
     public string PAC_name;
 
-    private List<io_module> io_modules;
+    private List< io_module > io_modules;
+
+    public List< io_module > get_io_modules()
+        {
+        return io_modules;
+        }
 
     public PAC( string PAC_name, string ip_addres, Visio.Shape shape )
         {
         this.PAC_name = PAC_name;
         this.ip_addres = ip_addres;
 
-        io_modules = new List<io_module>();
+        io_modules = new List< io_module >();
 
         this.shape = shape;
         }
 
-    public void activate( int module, int clamp, int color )
-        {
-        io_modules[ module ].activate( clamp, color );        
-        }
-
-    public void deactivate()
+    public void unmark()
         {
         foreach( io_module module in io_modules )
             {
-            module.deactivate();
+            module.unmark();
             }        
         }
+
+    public void mark_suitable( int kind )
+        {
+        foreach( io_module module in io_modules )
+            {
+            module.unmark();
+
+            if( ( io_module.KINDS ) kind == module.kind )
+                {
+                module.mark_suitable();
+                }
+            }                
+        }
+
+    //Значение привязки имеет следующий формат:
+    // -> узел 1 модуль 2 клемма 3;
+    //на его основе получаем индекс подсвечиваемого объекта 
+    //(номер узла и модуля) и номер клеммы:
+    // -> 1, 2, 3.
+        //node   = 0;
+        //module = 0;
+        //clamp  = 0;
+
+        //Regex rex = new Regex( @"\w+\s(\d+)\s\w+\s(\d+)\s\w+\s(\d+)",
+        //    RegexOptions.IgnoreCase );
+        //if( rex.IsMatch( str ) )
+        //    {
+        //    Match mtc = rex.Match( str );
+
+        //    node = Convert.ToInt16( mtc.Groups[ 1 ].ToString() ) - 1;
+        //    module = Convert.ToInt16( mtc.Groups[ 2 ].ToString() ) - 1;
+        //    clamp = Convert.ToInt16( mtc.Groups[ 3 ].ToString() );
+        //    }
 
     public string lua_save( string prefix = "\t" )
         {
@@ -102,16 +354,184 @@ public class PAC
         return res;
         }
 
-    public void add_io_module( int type, Visio.Shape shape )
+    public void add_io_module( Visio.Shape shape )
         {
-        io_modules.Add( new io_module( type, shape ) );
+        io_modules.Add( new io_module( shape ) );
         }
+    }
+
+public class wago_channel
+    {
+    internal io_module.KINDS kind;
+
+    internal io_module module;    
+    internal int       clamp;
+
+    public wago_channel( io_module module, int clamp )
+        {
+        this.module = module;
+        this.clamp = clamp;        
+        }
+
+    public wago_channel( io_module.KINDS kind )
+        {
+        this.module = null;
+        this.clamp = 0;
+
+        this.kind = kind;
+        }
+
+    }
+
+public class wago_device
+    {
+    internal Dictionary< string, wago_channel > wago_channels;
+
+    public wago_device()
+        {
+        wago_channels = new Dictionary< string, wago_channel >();
+        }
+
+    internal void add_wago_channel( string name, io_module module, int clamp )
+        {
+        wago_channels.Add( name, new wago_channel( module, clamp ) );        
+        }
+
+    internal void add_wago_channel( string name, io_module.KINDS kind )
+        {
+        wago_channels.Add( name, new wago_channel( kind ) );
+        }
+    }
+
+public class device: wago_device
+    {
+    int n;
+
+    public int get_n() 
+        {
+        return n;
+        }
+    
+    public enum TYPES
+        {
+        T_V = 0,
+        }
+
+    public enum SUB_TYPES
+        {
+        V_1_CONTROL_CHANNEL = 0,
+        V_2_CONTROL_CHANNEL,
+
+        V_1_CONTROL_CHANNEL_1_FB,
+        V_1_CONTROL_CHANNEL_2_FB,
+        V_2_CONTROL_CHANNEL_2_FB,
+        }
+
+    TYPES       type;
+    SUB_TYPES   sub_type;
+
+    public Dictionary< string, string > to_str()
+        {
+        Dictionary< string, string > res = new Dictionary< string, string >();
+
+        foreach( KeyValuePair<string, wago_channel> channel in wago_channels )
+            {
+            string description = "не привязан";
+            if ( channel.Value.module != null )
+                {
+                description = string.Format( "узел {0}, модуль{1}, клемма{2}", 
+                    channel.Value.module.node_number, 
+                    channel.Value.module.order_number, channel.Value.clamp );
+                }
+
+            res.Add( channel.Key, description );            
+            }
+
+        return res;
+        }
+
+    public int get_type()
+        {
+        return ( int ) type;
+        }
+
+    Visio.Shape shape;
+
+    string [] NAMES = 
+        {
+        "Клапан",
+        };
+
+    string [] SUB_NAMES = 
+        {
+        "1 КУ",
+        "2 КУ",
+        "1 КУ 1 ОС",
+        "1 КУ 2 ОС",
+        "2 КУ 2 ОС"
+        };
+
+    public device( Visio.Shape shape )
+        {
+        n    = Convert.ToUInt16( shape.Cells[ "Prop.n" ] );
+        type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].Formula );
+        sub_type = ( SUB_TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.sub_type" ] );
+
+        switch( type )
+            {
+            case TYPES.T_V:
+
+                switch( sub_type )
+                    {
+                    case SUB_TYPES.V_1_CONTROL_CHANNEL:
+                        add_wago_channel( "DO1", io_module.KINDS.DO );
+                        break;
+                    }
+                break;
+            }
+        }
+
+    public void set_channel( string channel_name, io_module module, int clamp )
+        {
+        wago_channels[ channel_name ].module = module;
+        wago_channels[ channel_name ].clamp = clamp;
+        }
+
+    public void unselect_channels()
+        {
+        foreach( KeyValuePair< string, wago_channel > channel in wago_channels )
+            {
+            channel.Value.module.deactivate();
+            }
+        }
+
+    public void select_channels( string magnify_channel_name = null )
+        {
+        foreach( KeyValuePair<string, wago_channel> channel in wago_channels )
+            {
+            channel.Value.module.activate( channel.Value.clamp );
+            }
+
+        if( magnify_channel_name != null )
+            {
+            wago_channels[ magnify_channel_name ].module.magnify_clamp(
+                wago_channels[ magnify_channel_name ].clamp );
+            }
+        }
+
     }
 
 namespace Visio_project_designer
     {
     public partial class ThisAddIn
         {
+        public bool is_selecting_clamp = false;
+
+
+        public static main_ribbon vis_main_ribbon;
+
+        public static List< device > g_devices; // Все устройства.
+
         public static PAC g_PAC = null;                 ///Объект контроллера.
 
         public static bool is_device_edit_mode = false; /// Режим привязки устройств к модулям.
@@ -158,15 +578,92 @@ namespace Visio_project_designer
                  m_Application_document_opened );
 
             visio_app.MouseMove += new Visio.EApplication_MouseMoveEventHandler(
-                visio_app_mouse_move );
+                visio_app_mouse_move );            
+
+            visio_app.MouseDown +=new Visio.EApplication_MouseDownEventHandler(
+                 visio_app_mouse_down );
+
+            g_devices = new List< device > ();
             }
 
-        //static int is_hit = 0;
+        void visio_app_mouse_down( int Button, int KeyButtonState, double x,
+            double y, ref bool CancelDefault )
+            {
+            if( is_selecting_clamp )
+                {
+                foreach( io_module module in g_PAC.get_io_modules() )
+                    {
+                    int clamp = module.get_selected();
+                    if( clamp > 0 )
+                        {
+                        m_Application_selection_changed( visio_app.Windows[ 2 ] );
+                        //string value_DO1 = selected_shape.Cells[ "Prop.DO1" ].Formula;
+                        //select_channel( value_DO1, 2 );
+
+                        //string value_DO2 = selected_shape.Cells[ "Prop.DO2" ].Formula;
+                        //select_channel( value_DO2, 2 );
+
+                        //string value_DI1 = selected_shape.Cells[ "Prop.DI1" ].Formula;
+                        //select_channel( value_DI1, 2 );
+
+                        //string value_DI2 = selected_shape.Cells[ "Prop.DI2" ].Formula;
+                        //select_channel( value_DI2, 2 );
+
+                        //Обновление подсвечиваемых модулей Wago.
+                        //g_PAC.deactivate();
+                        //g_PAC.activate(  module.shape, );
+
+                        //refresh_prop_wnd( null );
+
+                        //MessageBox.Show( module.shape.Name );
+                        is_selecting_clamp = false;
+
+                        CancelDefault = true;
+                        return;
+                        }
+                    }
+
+                MessageBox.Show( "No clamp!" );
+                is_selecting_clamp = false;
+                }
+            }
 
         void visio_app_mouse_move( int Button,
             int KeyButtonState, double x, double y, ref bool CancelDefault )
-            {            
-            //if( g_PAC.shape.HitTest( x, y, 0.1 ) > 0 )
+            {
+            if( is_selecting_clamp )
+                {
+                foreach( io_module module in g_PAC.get_io_modules() )
+                    {
+                    module.magnify_on_mouse_move( x, y );
+                    }
+                }
+
+            //if( Globals.ThisAddIn.Application.ActivePage.Shapes.get_ItemFromID(
+            //    167 ).SpatialNeighbors( ) ( x, y, 0.1 ) > 0 )
+            //    {
+            //    MessageBox.Show( "sd1" );
+            //    }
+
+            //if( Globals.ThisAddIn.Application.ActivePage.Shapes[
+            //    "750-xxx.27" ].HitTest( x, y, 0.1 ) > 0 )
+            //    {
+            //    MessageBox.Show( Convert.ToString( Globals.ThisAddIn.Application.ActivePage.Shapes[
+            //            "750-xxx.27" ].Shapes[ "red_boder" ].HitTest( x - , 0.2, 0.01 ) ) );
+
+                //if( Globals.ThisAddIn.Application.ActivePage.SpatialSearch[ x, y,
+                //    ( short ) Visio.VisSpatialRelationCodes.visSpatialContainedIn |
+                //    ( short ) Visio.VisSpatialRelationCodes.visSpatialContain, 0.02,
+                //    ( short ) Visio.VisSpatialRelationFlags.visSpatialFrontToBack ].Count > 0 )
+
+                //    {
+                //    MessageBox.Show( Globals.ThisAddIn.Application.ActivePage.Shapes[
+                //        "750-xxx.27" ].SpatialSearch[ 0.2, 0.2,
+                //        ( short ) Visio.VisSpatialRelationCodes.visSpatialContain, 0.2, 0 ][ 1 ].Name );
+                //    }
+               // }
+
+               //if( g_PAC.shape.HitTest( x, y, 0.1 ) > 0 )
             //    {
             //    CancelDefault = true;
             //    if( is_hit == 0 )
@@ -187,22 +684,43 @@ namespace Visio_project_designer
 
         void m_Application_document_opened( Visio.Document target )
             {
-
-            //Считывание устройств Wago.
-            foreach( Visio.Shape shape in target.Pages[ "Wago" ].Shapes )
+            if( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
                 {
-                if( shape.Data1 == "750" && shape.Data2 == "860" )
+                if( target.Template.Contains( "PTUSA project" ) )
                     {
-                    string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
-                    string name = shape.Cells[ "Prop.PAC_name" ].Formula;
+                    vis_main_ribbon.show();
 
-                    g_PAC = new PAC( name.Substring( 1, name.Length - 2 ),
-                        ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
+                    //Считывание устройств Wago.
+                    foreach( Visio.Shape shape in target.Pages[ "Wago" ].Shapes )
+                        {
+                        if( shape.Data1 == "750" && shape.Data2 == "860" )
+                            {
+                            string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
+                            string name = shape.Cells[ "Prop.PAC_name" ].Formula;
+
+                            g_PAC = new PAC( name.Substring( 1, name.Length - 2 ),
+                                ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
+
+                            }
+
+                        if( shape.Data1 == "750" && shape.Data2 != "860" )
+                            {
+                            g_PAC.add_io_module( shape );
+                            }
+                        }
+
+                    //Считывание устройств.
+                    foreach( Visio.Shape shape in target.Pages[ "Устройства" ].Shapes )
+                        {
+                        if( shape.Data1 == "V" )
+                            {
+                            g_devices.Add( new device( shape ) );
+                            }
+                        }
                     }
-
-                if( shape.Data1 == "750" && shape.Data2 != "860" )
+                else
                     {
-                    g_PAC.add_io_module( Convert.ToUInt16( shape.Data2 ), shape );
+                    vis_main_ribbon.hide();
                     }
                 }
             }
@@ -216,22 +734,8 @@ namespace Visio_project_designer
                 {
                 //Обновляем таблицу свойств.                
                 edit_io_frm.listForm.enable_prop();
-                edit_io_frm.listForm.change_type( shape.Cells[ "Prop.type" ].get_ResultStr( "" ) );
-
-                //string tmp = main_wnd.Page.Shapes[ "main_PAC.750-504.1" ].Shapes[
-                //    "red_boder" ].Cells[ "LineColorTrans" ].Formula;
-
-                //if( tmp == "0%" )
-                //    {
-                //    tmp = "100%";
-                //    }
-                //else
-                //    {
-                //    tmp = "0%";
-                //    }
-
-                //main_wnd.Page.Shapes[ "main_PAC.750-504.1" ].Shapes[
-                //    "red_boder" ].Cells[ "LineColorTrans" ].Formula = tmp;
+                edit_io_frm.listForm.change_type( 
+                    Convert.ToInt16( shape.Cells[ "Prop.type" ].Formula ) );
 
                 }
             else //if( shape != null )
@@ -241,6 +745,9 @@ namespace Visio_project_designer
                 edit_io_frm.listForm.disable_prop();
                 }
             }
+
+        device previous_selected_dev = null;
+        internal device current_selected_dev = null;
 
         void m_Application_selection_changed( Microsoft.Office.Interop.Visio.Window Window )
             {
@@ -271,32 +778,36 @@ namespace Visio_project_designer
                             Microsoft.Office.Interop.Visio.Shape selected_shape = Window.Selection[ 1 ];                            
                             refresh_prop_wnd( selected_shape );
 
-                            //Обновление подсвечиваемых модулей Wago.
-                            g_PAC.deactivate();
-                                                        
-                            //Значение привязки имеет следующий формат:
-                            // -> узел 1 модуль 2 клемма 3;
-                            //на его основе получаем индекс подсвечиваемого объекта 
-                            //(номер узла и модуля) и номер клеммы:
-                            // -> 1, 2, 3.
-                            string value_DO1 = selected_shape.Cells[ "Prop.DO1" ].Formula;
-                            select_channel( value_DO1, 2 );
+                            //Снятие ранее подсвеченных модулей Wago.
+                            if( previous_selected_dev != null )
+                                {
+                                previous_selected_dev.unselect_channels();
+                                }
+                            
+                            //Поиск по shape объекта device.
+                            int dev_n    = Convert.ToInt16( selected_shape.Cells[ "Prop.n" ].Formula );
+                            int dev_type = Convert.ToInt16( selected_shape.Cells[ "Prop.type" ].Formula );
 
-                            string value_DO2 = selected_shape.Cells[ "Prop.DO2" ].Formula;
-                            select_channel( value_DO2, 2 );
+                            current_selected_dev = g_devices.Find( delegate( device dev )
+                                {
+                                return dev.get_n() == dev_n && dev.get_type() == dev_type; 
+                                }
+                                );
 
-                            string value_DI1 = selected_shape.Cells[ "Prop.DI1" ].Formula;
-                            select_channel( value_DI1, 2 );
-
-                            string value_DI2 = selected_shape.Cells[ "Prop.DI2" ].Formula;
-                            select_channel( value_DI2, 2 );
-
+                            if( current_selected_dev != null )
+                                {
+                                current_selected_dev.select_channels();
+                                }
 
                             } //if( Window.Selection.Count > 0 )
                         else
                             {
-                            //Обновление подсвечиваемых модулей Wago.
-                            g_PAC.deactivate();
+                            //Снятие ранее подсвеченных модулей Wago.
+                            if( previous_selected_dev != null )
+                                {
+                                previous_selected_dev.unselect_channels();
+                                previous_selected_dev = null;
+                                }
 
                             refresh_prop_wnd( null );
                             }
@@ -304,22 +815,6 @@ namespace Visio_project_designer
                         } //if( Window.Page.Name == "Устройства" )
                     } //if( Window.Index == ( short ) VISIO_WNDOWS.IO_EDIT )
                 } //if( ThisAddIn.is_device_edit_mode ) 
-            }
-
-        public void select_channel( string channel, int color )
-            {
-            Regex rex = new Regex( @"\w+\s(\d+)\s\w+\s(\d+)\s\w+\s(\d+)",
-                RegexOptions.IgnoreCase );
-            if( rex.IsMatch( channel ) )
-                {
-                Match mtc = rex.Match( channel );
-
-                int n_1 = Convert.ToInt16( mtc.Groups[ 1 ].ToString() ) - 1;
-                int n_2 = Convert.ToInt16( mtc.Groups[ 2 ].ToString() ) - 1;
-                int n_3 = Convert.ToInt16( mtc.Groups[ 3 ].ToString() );
-
-                g_PAC.activate( n_2, n_3, color );
-                }
             }
 
         void m_Application_formula_changed( Microsoft.Office.Interop.Visio.Cell Cell )
@@ -569,7 +1064,7 @@ namespace Visio_project_designer
                 duplicate_count = modules_count_enter_form.modules_count - 1;
 
 
-                g_PAC.add_io_module( Convert.ToUInt16( shape.Data2 ), shape );
+                g_PAC.add_io_module( shape );
                 
                 shape.Cells[ "Prop.type" ].Formula = 
                     modules_count_enter_form.modules_type;                                
@@ -579,9 +1074,7 @@ namespace Visio_project_designer
                     is_duplicating = true;
                     new_shape = shape.Duplicate();
                     old_shape = shape;
-
-                    g_PAC.add_io_module( Convert.ToUInt16( shape.Data2 ), shape );
-
+                                        
                     string str_x = string.Format( "PNTX(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+6 mm",
                         old_shape.Name );
                     string str_y = string.Format( "PNTY(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+-47 mm",
@@ -591,18 +1084,27 @@ namespace Visio_project_designer
                     new_shape.Cells[ "PinY" ].Formula = str_y;
 
                     shape = new_shape;
+
+                    g_PAC.add_io_module( shape );
                     m_Application_formula_changed( shape.Cells[ "Prop.type" ] );
                     }
+                }
+
+            if( shape.Data1 == "V" )
+                {
+                g_devices.Add( new device( shape ) );
                 }
             }
 
         void m_Application_DocumentCreated( Microsoft.Office.Interop.Visio.Document Doc )
             {
-            switch( Doc.Name )
+            if( Doc.Template.Contains( "PTUSA project" ) )
                 {
-                case "MyDemoItem":
-                    MessageBox.Show( "MyDemoItem was clicked" );
-                    break;
+                vis_main_ribbon.show();
+                }
+            else
+                {
+                vis_main_ribbon.hide();
                 }
             }
 
