@@ -57,7 +57,7 @@ public class io_module
                                               
         this.shape = shape;
 
-        type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].ResultStr[ "" ] );
+        type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].Formula );
         order_number = Convert.ToUInt16( shape.Cells[ "Prop.order_number" ].Formula );
         node_number = Convert.ToUInt16( shape.Cells[ "Prop.node_number" ].Formula );
         
@@ -77,7 +77,7 @@ public class io_module
                     free_clamp_flags[ i ]     = true;
                     suitable_clamp_flags[ i ] = false;
 
-                    clamp_names.Add( "clamp_" + i + 1 );
+                    clamp_names.Add( "clamp_" + ( i + 1 ) );
                     }
                 break;
 
@@ -135,17 +135,35 @@ public class io_module
     /// @brief 
     public void unmark()
         {
+        if ( magnified_clamp > -1 )
+            {
+            unmagnify_clamp( magnified_clamp );
+            }
+
         for( int i = 0; i < ( int ) total_clamps; i++ )
             {
+            shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ i ] ].Cells[
+                   "FillForegnd" ].Formula = "RGB( 200, 200, 200 )";
+
             suitable_clamp_flags[ i ] = false;
             }
         }
 
-    private int selected_clamp = 0;
+    private int magnified_clamp = -1;
+
+    public void free( int clamp )
+        {
+        free_clamp_flags[ clamp ] = true;
+        }
+
+    public void use( int clamp )
+        {
+        free_clamp_flags[ clamp ] = false;
+        }
 
     public int get_selected()
         {
-        return selected_clamp;
+        return magnified_clamp;
         }
 
     public void magnify_on_mouse_move( double x, double y )
@@ -176,33 +194,33 @@ public class io_module
                         break;
                         }
 
-                    if( selected_clamp != i + 1 )
+                    if( magnified_clamp != i )
                         {
-                        unmagnify_clamp( selected_clamp );
-                        selected_clamp = i + 1;
-                        magnify_clamp( selected_clamp );
+                        if( magnified_clamp > -1 ) unmagnify_clamp( magnified_clamp );
+                        magnified_clamp = i;
+                        magnify_clamp( magnified_clamp );
                         }
                     return;
                     }
                 }
 
-            if( selected_clamp > 0 )
+            if( magnified_clamp > -1 )
                 {
-                unmagnify_clamp( selected_clamp  );
-                selected_clamp = 0;
+                unmagnify_clamp( magnified_clamp  );
+                magnified_clamp = -1;
                 }
             }
         else
             {
-            if( selected_clamp > 0 )
+            if( magnified_clamp > -1 )
                 {
-                unmagnify_clamp( selected_clamp );
-                selected_clamp = 0;
+                unmagnify_clamp( magnified_clamp );
+                magnified_clamp = -1;
                 }
             }
         }
 
-    internal void magnify_clamp( int clamp )
+    public void magnify_clamp( int clamp )
         {
         shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ] ].Cells[
             "Width" ].Formula = string.Format( "=Sheet.{0}!Width*0.66",
@@ -256,14 +274,19 @@ public class io_module
 
         shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ] ].Cells[
             "FillForegnd" ].Formula = color;
+
+        unmagnify_clamp( clamp );
         }
 
     public void deactivate()
         {
+        int i = 0;
         foreach( string clamp in clamp_names )
             {
             shape.Shapes[ "type_skin" ].Shapes[ clamp ].Cells[
                 "FillForegnd" ].Formula = "16";
+
+            unmagnify_clamp( i++ );
             }
 
         shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].Formula = "100%";
@@ -302,13 +325,37 @@ public class PAC
             }        
         }
 
-    public void mark_suitable( int kind )
+    public void mark_suitable( string kind )
         {
+        io_module.KINDS io_module_kind = 0;
+        switch ( kind )
+            {
+            case "AI":
+                io_module_kind = io_module.KINDS.AI;
+                break;
+
+            case "AO":
+                io_module_kind = io_module.KINDS.AO;
+                break;
+
+            case "DI":
+                io_module_kind = io_module.KINDS.DI;
+                break;
+
+            case "DO":
+                io_module_kind = io_module.KINDS.DO;
+                break;
+
+            case "SPECIAL":
+                io_module_kind = io_module.KINDS.SPECIAL;
+                break;
+            }
+        
         foreach( io_module module in io_modules )
             {
             module.unmark();
 
-            if( ( io_module.KINDS ) kind == module.kind )
+            if( io_module_kind == module.kind )
                 {
                 module.mark_suitable();
                 }
@@ -392,16 +439,12 @@ public class wago_device
         wago_channels = new Dictionary< string, wago_channel >();
         }
 
-    internal void add_wago_channel( string name, io_module module, int clamp )
-        {
-        wago_channels.Add( name, new wago_channel( module, clamp ) );        
-        }
-
     internal void add_wago_channel( string name, io_module.KINDS kind )
         {
         wago_channels.Add( name, new wago_channel( kind ) );
         }
     }
+
 
 public class device: wago_device
     {
@@ -430,6 +473,40 @@ public class device: wago_device
     TYPES       type;
     SUB_TYPES   sub_type;
 
+    string active_channel_name = ""; ///< Выбранный канал устройства.
+                                
+    public string get_active_channel()
+        {
+        return active_channel_name;
+        }
+
+    public void refresh_edit_window( ComboBox cbox, ListView lview, bool only_list_view = false )
+        {
+        if ( only_list_view == false )
+            {
+            cbox.Items.Clear();
+            cbox.Items.AddRange( SUB_NAMES );
+
+            cbox.SelectedIndex = ( int ) sub_type;
+            }
+
+        lview.Items.Clear();
+        
+        Dictionary<string, string> items_str = to_str();
+        foreach( KeyValuePair< string, string > item_str in items_str )
+            {
+            System.Windows.Forms.ListViewItem item;
+            item = lview.Items.Add( item_str.Key );
+            item.SubItems.Add( item_str.Value );
+
+            if( active_channel_name == item_str.Key )
+                {
+                item.Selected = true;
+                lview.Focus();
+                }
+            }
+        }
+
     public Dictionary< string, string > to_str()
         {
         Dictionary< string, string > res = new Dictionary< string, string >();
@@ -439,9 +516,9 @@ public class device: wago_device
             string description = "не привязан";
             if ( channel.Value.module != null )
                 {
-                description = string.Format( "узел {0}, модуль{1}, клемма{2}", 
+                description = string.Format( "узел {0} модуль {1} клемма {2}", 
                     channel.Value.module.node_number, 
-                    channel.Value.module.order_number, channel.Value.clamp );
+                    channel.Value.module.order_number, channel.Value.clamp + 1 );
                 }
 
             res.Add( channel.Key, description );            
@@ -453,6 +530,11 @@ public class device: wago_device
     public int get_type()
         {
         return ( int ) type;
+        }
+
+    public int get_sub_type()
+        {
+        return ( int ) sub_type;
         }
 
     Visio.Shape shape;
@@ -471,51 +553,236 @@ public class device: wago_device
         "2 КУ 2 ОС"
         };
 
-    public device( Visio.Shape shape )
+    public bool get_n_from_str( string str, out int node, out int module,
+        out int clamp )
         {
-        n    = Convert.ToUInt16( shape.Cells[ "Prop.n" ] );
-        type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].Formula );
-        sub_type = ( SUB_TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.sub_type" ] );
+        //Значение привязки имеет следующий формат:
+        // -> узел 1 модуль 2 клемма 3;
+        //на его основе получаем индекс подсвечиваемого объекта 
+        //(номер узла и модуля) и номер клеммы:
+        // -> 1, 2, 3.
+        node = 0;
+        module = 0;
+        clamp = 0;
+        
+        Regex rex = new Regex( @"\w+\s(\d+)\s\w+\s(\d+)\s\w+\s(\d+)",
+            RegexOptions.IgnoreCase );
+        if( rex.IsMatch( str ) )
+            {
+            Match mtc = rex.Match( str );
+
+            node = Convert.ToInt16( mtc.Groups[ 1 ].ToString() ) - 1;
+            module = Convert.ToInt16( mtc.Groups[ 2 ].ToString() ) - 1;
+            clamp = Convert.ToInt16( mtc.Groups[ 3 ].ToString() ) - 1;
+            return true;
+            }
+
+        return false;
+        }
+
+    public void change_sub_type( SUB_TYPES sub_type, PAC pac )
+        {
+        this.sub_type = sub_type;
+        shape.Cells[ "Prop.sub_type" ].Formula = Convert.ToString(  ( int ) sub_type );
+        
+        switch_sub_type( sub_type, pac ); 
+        }
+
+    void switch_sub_type( SUB_TYPES sub_type, PAC pac )
+        {
+        wago_channels.Clear();
 
         switch( type )
             {
             case TYPES.T_V:
 
+                string str_DO1 = shape.Cells[ "Prop.DO1" ].Formula;
+                string str_DO2 = shape.Cells[ "Prop.DO2" ].Formula;
+                string str_DI1 = shape.Cells[ "Prop.DI1" ].Formula;
+                string str_DI2 = shape.Cells[ "Prop.DI2" ].Formula;
+
+                int node;
+                int module;
+                int clamp;
+
                 switch( sub_type )
                     {
                     case SUB_TYPES.V_1_CONTROL_CHANNEL:
                         add_wago_channel( "DO1", io_module.KINDS.DO );
+                        if( get_n_from_str( str_DO1, out node, out module, out clamp ) )
+                            {
+                            wago_channels[ "DO1" ].clamp = clamp;
+                            wago_channels[ "DO1" ].module = pac.get_io_modules()[ module ];
+                            }
+
+                        break;
+
+                    case SUB_TYPES.V_2_CONTROL_CHANNEL:
+                        add_wago_channel( "DO1", io_module.KINDS.DO );
+                        add_wago_channel( "DO2", io_module.KINDS.DO );
+
+                        if( get_n_from_str( str_DO1, out node, out module, out clamp ) )
+                            {
+                            wago_channels[ "DO1" ].clamp = clamp;
+                            wago_channels[ "DO1" ].module = pac.get_io_modules()[ module ];
+                            }
+
+                        if( get_n_from_str( str_DO2, out node, out module, out clamp ) )
+                            {
+                            wago_channels[ "DO2" ].clamp = clamp;
+                            wago_channels[ "DO2" ].module = pac.get_io_modules()[ module ];
+                            }
+
+                        break;
+
+                    case SUB_TYPES.V_1_CONTROL_CHANNEL_1_FB:
+                        add_wago_channel( "DO1", io_module.KINDS.DO );
+                        add_wago_channel( "DI1", io_module.KINDS.DI );
+
+                        if( get_n_from_str( str_DO1, out node, out module, out clamp ) )
+                            {
+                            wago_channels[ "DO1" ].clamp = clamp;
+                            wago_channels[ "DO1" ].module = pac.get_io_modules()[ module ];
+                            }
+
+                        if( get_n_from_str( str_DI1, out node, out module, out clamp ) )
+                            {
+                            wago_channels[ "DI1" ].clamp = clamp;
+                            wago_channels[ "DI1" ].module = pac.get_io_modules()[ module ];
+                            }
+
+                        break;
+
+                    case SUB_TYPES.V_1_CONTROL_CHANNEL_2_FB:
+                        add_wago_channel( "DO1", io_module.KINDS.DO );
+                        add_wago_channel( "DI1", io_module.KINDS.DI );
+                        add_wago_channel( "DI2", io_module.KINDS.DI );
+
+                        if( get_n_from_str( str_DO1, out node, out module, out clamp ) )
+                            {
+                            wago_channels[ "DO1" ].clamp = clamp;
+                            wago_channels[ "DO1" ].module = pac.get_io_modules()[ module ];
+                            }
+
+                        if( get_n_from_str( str_DI1, out node, out module, out clamp ) )
+                            {
+                            wago_channels[ "DI1" ].clamp = clamp;
+                            wago_channels[ "DI1" ].module = pac.get_io_modules()[ module ];
+                            }
+
+
+                        if( get_n_from_str( str_DI2, out node, out module, out clamp ) )
+                            {
+                            wago_channels[ "DI2" ].clamp = clamp;
+                            wago_channels[ "DI2" ].module = pac.get_io_modules()[ module ];
+                            }
+
+                        break;
+
+                    case SUB_TYPES.V_2_CONTROL_CHANNEL_2_FB:
+                        add_wago_channel( "DO1", io_module.KINDS.DO );
+                        add_wago_channel( "DO2", io_module.KINDS.DO );
+                        add_wago_channel( "DI1", io_module.KINDS.DI );
+                        add_wago_channel( "DI2", io_module.KINDS.DI );
+
+                        if( get_n_from_str( str_DO1, out node, out module, out clamp ) )
+                            {
+                            wago_channels[ "DO1" ].clamp = clamp;
+                            wago_channels[ "DO1" ].module = pac.get_io_modules()[ module ];
+                            }
+
+                        if( get_n_from_str( str_DO2, out node, out module, out clamp ) )
+                            {
+                            wago_channels[ "DO2" ].clamp = clamp;
+                            wago_channels[ "DO2" ].module = pac.get_io_modules()[ module ];
+                            }
+
+                        if( get_n_from_str( str_DI1, out node, out module, out clamp ) )
+                            {
+                            wago_channels[ "DI1" ].clamp = clamp;
+                            wago_channels[ "DI1" ].module = pac.get_io_modules()[ module ];
+                            }
+
+
+                        if( get_n_from_str( str_DI2, out node, out module, out clamp ) )
+                            {
+                            wago_channels[ "DI2" ].clamp = clamp;
+                            wago_channels[ "DI2" ].module = pac.get_io_modules()[ module ];
+                            }
+
                         break;
                     }
                 break;
             }
+
+        }
+
+    public device( Visio.Shape shape, PAC pac )
+        {
+        n = Convert.ToUInt16( shape.Cells[ "Prop.number" ].Formula );
+        type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].Formula );
+        sub_type = ( SUB_TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.sub_type" ].Formula );
+
+        this.shape = shape;
+                
+        switch_sub_type( sub_type, pac ); 
         }
 
     public void set_channel( string channel_name, io_module module, int clamp )
         {
+        //Освобождаем при наличии ранее привязанную клемму.
+
+        if( wago_channels[ channel_name ].module != null )
+            {
+            wago_channels[ channel_name ].module.free(
+                wago_channels[ channel_name ].clamp );
+            }
         wago_channels[ channel_name ].module = module;
         wago_channels[ channel_name ].clamp = clamp;
+
+        string prop = "Prop." + channel_name;
+        string value = string.Format( 
+            "\"узел {0} модуль {1} клемма {2}\"",
+            module.node_number, module.order_number, clamp + 1 );
+
+        shape.Cells[ prop ].Formula = value;
+
+
+        module.use( clamp );
+        }
+
+    public void set_active_channel( string channel_name )
+        {
+        active_channel_name = channel_name;
         }
 
     public void unselect_channels()
         {
         foreach( KeyValuePair< string, wago_channel > channel in wago_channels )
             {
-            channel.Value.module.deactivate();
+            if( channel.Value.module != null )
+                {
+                channel.Value.module.deactivate();
+                }            
             }
         }
 
-    public void select_channels( string magnify_channel_name = null )
-        {
+    public void select_channels()
+        {        
         foreach( KeyValuePair<string, wago_channel> channel in wago_channels )
             {
-            channel.Value.module.activate( channel.Value.clamp );
+            if ( channel.Value.module != null )
+                {
+                channel.Value.module.activate( channel.Value.clamp );
+                }
             }
 
-        if( magnify_channel_name != null )
+        if( active_channel_name != "" &&
+            wago_channels.ContainsKey( active_channel_name ) &&
+            wago_channels[ active_channel_name ].module != null )
             {
-            wago_channels[ magnify_channel_name ].module.magnify_clamp(
-                wago_channels[ magnify_channel_name ].clamp );
+            wago_channels[ active_channel_name ].module.magnify_clamp(
+                wago_channels[ active_channel_name ].clamp );
             }
         }
 
@@ -577,8 +844,8 @@ namespace Visio_project_designer
             visio_app.DocumentOpened += new Microsoft.Office.Interop.Visio.EApplication_DocumentOpenedEventHandler(
                  m_Application_document_opened );
 
-            visio_app.MouseMove += new Visio.EApplication_MouseMoveEventHandler(
-                visio_app_mouse_move );            
+            //visio_app.MouseMove += new Visio.EApplication_MouseMoveEventHandler(
+            //    visio_app_mouse_move );            
 
             visio_app.MouseDown +=new Visio.EApplication_MouseDownEventHandler(
                  visio_app_mouse_down );
@@ -594,9 +861,17 @@ namespace Visio_project_designer
                 foreach( io_module module in g_PAC.get_io_modules() )
                     {
                     int clamp = module.get_selected();
-                    if( clamp > 0 )
+                    if( clamp > -1 )
                         {
-                        m_Application_selection_changed( visio_app.Windows[ 2 ] );
+                        g_PAC.unmark();
+
+                        current_selected_dev.set_channel( 
+                            current_selected_dev.get_active_channel(), module, clamp );
+
+                        m_Application_selection_changed( visio_app.Windows[ 
+                            ( short ) ThisAddIn.VISIO_WNDOWS.IO_EDIT ] );
+
+                        //m_Application_selection_changed( visio_app.Windows[ 2 ] );
                         //string value_DO1 = selected_shape.Cells[ "Prop.DO1" ].Formula;
                         //select_channel( value_DO1, 2 );
 
@@ -616,70 +891,49 @@ namespace Visio_project_designer
                         //refresh_prop_wnd( null );
 
                         //MessageBox.Show( module.shape.Name );
+                        visio_app.Windows[ ( short ) ThisAddIn.VISIO_WNDOWS.MAIN ].MouseMove -=
+                            new Microsoft.Office.Interop.Visio.EWindow_MouseMoveEventHandler(
+                            Globals.ThisAddIn.visio_app_mouse_move );
                         is_selecting_clamp = false;
 
                         CancelDefault = true;
+
                         return;
                         }
                     }
 
                 MessageBox.Show( "No clamp!" );
+
+                g_PAC.unmark();
+                m_Application_selection_changed( visio_app.Windows[
+                    ( short ) ThisAddIn.VISIO_WNDOWS.IO_EDIT ] );
+
+                visio_app.Windows[ ( short ) ThisAddIn.VISIO_WNDOWS.MAIN ].MouseMove -=
+                    new Microsoft.Office.Interop.Visio.EWindow_MouseMoveEventHandler(
+                    Globals.ThisAddIn.visio_app_mouse_move );
                 is_selecting_clamp = false;
                 }
             }
 
-        void visio_app_mouse_move( int Button,
+        public void visio_app_mouse_move( int Button,
             int KeyButtonState, double x, double y, ref bool CancelDefault )
             {
-            if( is_selecting_clamp )
+
+            try
                 {
-                foreach( io_module module in g_PAC.get_io_modules() )
+                if( is_selecting_clamp )
                     {
-                    module.magnify_on_mouse_move( x, y );
+                    foreach( io_module module in g_PAC.get_io_modules() )
+                        {
+                        module.magnify_on_mouse_move( x, y );
+                        }
                     }
+
                 }
-
-            //if( Globals.ThisAddIn.Application.ActivePage.Shapes.get_ItemFromID(
-            //    167 ).SpatialNeighbors( ) ( x, y, 0.1 ) > 0 )
-            //    {
-            //    MessageBox.Show( "sd1" );
-            //    }
-
-            //if( Globals.ThisAddIn.Application.ActivePage.Shapes[
-            //    "750-xxx.27" ].HitTest( x, y, 0.1 ) > 0 )
-            //    {
-            //    MessageBox.Show( Convert.ToString( Globals.ThisAddIn.Application.ActivePage.Shapes[
-            //            "750-xxx.27" ].Shapes[ "red_boder" ].HitTest( x - , 0.2, 0.01 ) ) );
-
-                //if( Globals.ThisAddIn.Application.ActivePage.SpatialSearch[ x, y,
-                //    ( short ) Visio.VisSpatialRelationCodes.visSpatialContainedIn |
-                //    ( short ) Visio.VisSpatialRelationCodes.visSpatialContain, 0.02,
-                //    ( short ) Visio.VisSpatialRelationFlags.visSpatialFrontToBack ].Count > 0 )
-
-                //    {
-                //    MessageBox.Show( Globals.ThisAddIn.Application.ActivePage.Shapes[
-                //        "750-xxx.27" ].SpatialSearch[ 0.2, 0.2,
-                //        ( short ) Visio.VisSpatialRelationCodes.visSpatialContain, 0.2, 0 ][ 1 ].Name );
-                //    }
-               // }
-
-               //if( g_PAC.shape.HitTest( x, y, 0.1 ) > 0 )
-            //    {
-            //    CancelDefault = true;
-            //    if( is_hit == 0 )
-            //        {
-            //        g_PAC.shape.Cells[ "Prop.ip_address" ].Formula = "2";
-            //        is_hit = 1;
-            //        }
-            //    }
-            //else
-            //    {
-            //    if( is_hit == 1 ) 
-            //        {
-            //        g_PAC.shape.Cells[ "Prop.ip_address" ].Formula = "1";                
-            //        is_hit = 0;
-            //        }
-            //    }
+            catch( System.Exception ex )
+                {
+                MessageBox.Show( ex.Message );
+                }
             }
 
         void m_Application_document_opened( Visio.Document target )
@@ -714,7 +968,7 @@ namespace Visio_project_designer
                         {
                         if( shape.Data1 == "V" )
                             {
-                            g_devices.Add( new device( shape ) );
+                            g_devices.Add( new device( shape, g_PAC ) );
                             }
                         }
                     }
@@ -774,18 +1028,17 @@ namespace Visio_project_designer
                                 Window.Windows[ IO_PROP_WINDOW_INDEX ].Caption +
                                 " - " + Window.Selection[ 1 ].Name;
 
-                            //Обновление окна со свойствами привязки.
-                            Microsoft.Office.Interop.Visio.Shape selected_shape = Window.Selection[ 1 ];                            
-                            refresh_prop_wnd( selected_shape );
-
                             //Снятие ранее подсвеченных модулей Wago.
                             if( previous_selected_dev != null )
                                 {
                                 previous_selected_dev.unselect_channels();
                                 }
-                            
+
+                            Microsoft.Office.Interop.Visio.Shape selected_shape =
+                                Window.Selection[ 1 ];
+
                             //Поиск по shape объекта device.
-                            int dev_n    = Convert.ToInt16( selected_shape.Cells[ "Prop.n" ].Formula );
+                            int dev_n    = Convert.ToInt16( selected_shape.Cells[ "Prop.number" ].Formula );
                             int dev_type = Convert.ToInt16( selected_shape.Cells[ "Prop.type" ].Formula );
 
                             current_selected_dev = g_devices.Find( delegate( device dev )
@@ -797,7 +1050,18 @@ namespace Visio_project_designer
                             if( current_selected_dev != null )
                                 {
                                 current_selected_dev.select_channels();
+
+                                //Обновление окна со свойствами привязки.
+                                edit_io_frm.listForm.enable_prop();
+
+                                current_selected_dev.refresh_edit_window(
+                                    edit_io_frm.listForm.comboBox_type,
+                                    edit_io_frm.listForm.myListView );
+
+                                //refresh_prop_wnd( selected_shape );
                                 }
+
+                                previous_selected_dev = current_selected_dev;
 
                             } //if( Window.Selection.Count > 0 )
                         else
@@ -809,7 +1073,8 @@ namespace Visio_project_designer
                                 previous_selected_dev = null;
                                 }
 
-                            refresh_prop_wnd( null );
+                            //refresh_prop_wnd( null );
+                            edit_io_frm.listForm.disable_prop();
                             }
 
                         } //if( Window.Page.Name == "Устройства" )
@@ -1092,7 +1357,7 @@ namespace Visio_project_designer
 
             if( shape.Data1 == "V" )
                 {
-                g_devices.Add( new device( shape ) );
+                g_devices.Add( new device( shape, g_PAC ) );
                 }
             }
 

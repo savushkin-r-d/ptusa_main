@@ -18,11 +18,11 @@ namespace Visio_project_designer
         {
 
         /// <summary>Required list view variable</summary>
-        private System.Windows.Forms.ListView myListView;
+        public System.Windows.Forms.ListView myListView;
 
         /// <summary>Required by the Windows Form Designer</summary>
         private System.ComponentModel.Container components = null;
-        private System.Windows.Forms.ComboBox comboBox_type;
+        public  System.Windows.Forms.ComboBox comboBox_type;
         private System.Windows.Forms.Label label_type;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ColumnHeader channel;
@@ -226,14 +226,35 @@ namespace Visio_project_designer
         private void myListView_DoubleClick( object sender, EventArgs e )
             {
             // Выделяем все доступные клеммы.
-            ThisAddIn.g_PAC.mark_suitable( 1 );
+            ThisAddIn.g_PAC.mark_suitable( 
+                myListView.SelectedItems[ 0 ].Text.Substring( 0, myListView.SelectedItems[ 0 ].Text.Length - 1 ) );
+                        
+
+            // Выделяем задействованные устройством клеммы.
+            Globals.ThisAddIn.current_selected_dev.select_channels();
 
 
-            Globals.ThisAddIn.is_selecting_clamp = true; 
+            Globals.ThisAddIn.is_selecting_clamp = true;
+
+
+            visioApplication.Windows[ ( short ) ThisAddIn.VISIO_WNDOWS.MAIN ].MouseMove +=
+                new Microsoft.Office.Interop.Visio.EWindow_MouseMoveEventHandler(
+                Globals.ThisAddIn.visio_app_mouse_move );
             }
 
         private void comboBox_type_SelectedIndexChanged( object sender, EventArgs e )
             {
+            if( Globals.ThisAddIn.current_selected_dev.get_sub_type() != comboBox_type.SelectedIndex )
+                {
+                Globals.ThisAddIn.current_selected_dev.change_sub_type(
+                    ( device.SUB_TYPES ) comboBox_type.SelectedIndex, ThisAddIn.g_PAC );
+
+                Globals.ThisAddIn.current_selected_dev.refresh_edit_window(
+                    comboBox_type, myListView, true );
+                Globals.ThisAddIn.current_selected_dev.select_channels();
+                }
+
+
             //if ()
             //    {
             //    }
@@ -288,8 +309,17 @@ namespace Visio_project_designer
 
         private void myListView_SelectedIndexChanged( object sender, EventArgs e )
             {
-            Globals.ThisAddIn.current_selected_dev.select_channels(
-                myListView.SelectedItems[ 0 ].Name );        
+            if( myListView.SelectedItems.Count > 0 )
+                {
+                Globals.ThisAddIn.current_selected_dev.set_active_channel(
+                    myListView.SelectedItems[ 0 ].Text );                
+                }
+            else
+                {
+                Globals.ThisAddIn.current_selected_dev.set_active_channel( "" );
+                }
+
+            Globals.ThisAddIn.current_selected_dev.select_channels();
             }
 
         }

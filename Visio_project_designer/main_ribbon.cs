@@ -103,7 +103,12 @@ namespace Visio_project_designer
 
                 AnchorBarsUsage tmp = new AnchorBarsUsage();
                 tmp.DemoAnchorBar( visio_app, true );
-                ThisAddIn.edit_io_frm = tmp;                
+                ThisAddIn.edit_io_frm = tmp;
+
+                //visio_wnds[ ( short ) ThisAddIn.VISIO_WNDOWS.MAIN ].MouseMove -=
+                //    new Microsoft.Office.Interop.Visio.EWindow_MouseMoveEventHandler(
+                //    Globals.ThisAddIn.visio_app_mouse_move );  
+
                 }
             else
                 {
