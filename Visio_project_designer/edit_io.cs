@@ -254,57 +254,6 @@ namespace Visio_project_designer
                 Globals.ThisAddIn.current_selected_dev.select_channels();
                 }
 
-
-            //if ()
-            //    {
-            //    }
-            //System.Windows.Forms.ListViewItem item;
-            //item = myListView.Items.Add( name );
-            //item.SubItems.Add( value );
-
-
-            //Microsoft.Office.Interop.Visio.Shape shape =
-            //    visioApplication.Windows[ ( short ) ThisAddIn.VISIO_WNDOWS.IO_EDIT ].Selection[ 1 ];
-
-            //string tmp = ( string ) comboBox_type.SelectedItem;
-            //shape.Cells[ "Prop.type" ].Formula = 
-            //    string.Format( "INDEX({0};Prop.type.Format)", comboBox_type.SelectedIndex );
-
-            ////Обновляем таблицу свойств.
-            //clear_prop();
-
-            //add_prop( "DO1",
-            //    shape.Cells[ "Prop.DO1" ].Formula );
-
-            //switch( ( string ) comboBox_type.SelectedItem )
-            //    {
-            //    case "2 КУ":
-            //        add_prop( "DO2",
-            //            shape.Cells[ "Prop.DO2" ].Formula );
-            //        break;
-
-            //    case "1 КУ 1 ОС":
-            //        add_prop( "DI1",
-            //            shape.Cells[ "Prop.DI1" ].Formula );
-            //        break;
-
-            //    case "1 КУ 2 ОС":
-            //        add_prop( "DI1",
-            //            shape.Cells[ "Prop.DI1" ].Formula );
-            //        add_prop( "DI2",
-            //            shape.Cells[ "Prop.DI2" ].Formula );
-            //        break;
-
-            //    case "2 КУ 2 ОС":
-            //        add_prop( "DO2",
-            //            shape.Cells[ "Prop.DO2" ].Formula );
-
-            //        add_prop( "DI1",
-            //            shape.Cells[ "Prop.DI1" ].Formula );
-            //        add_prop( "DI2",
-            //            shape.Cells[ "Prop.DI2" ].Formula );
-            //        break;
-            //    }
             }
 
         private void myListView_SelectedIndexChanged( object sender, EventArgs e )

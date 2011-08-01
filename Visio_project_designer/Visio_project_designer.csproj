@@ -35,7 +35,7 @@
     <PublishUrl>publish\</PublishUrl>
     <InstallUrl />
     <TargetCulture>en</TargetCulture>
-    <ApplicationVersion>1.0.0.10</ApplicationVersion>
+    <ApplicationVersion>1.0.0.15</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -48,9 +48,9 @@
     <LoadBehavior>3</LoadBehavior>
   </PropertyGroup>
   <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 and x64%29</ProductName>
+      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -62,6 +62,11 @@
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.VSTORuntime.4.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft Visual Studio 2010 Tools for Office Runtime %28x86 and x64%29</ProductName>
+      <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
       <Visible>False</Visible>

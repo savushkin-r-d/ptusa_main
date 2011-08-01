@@ -1,18 +1,28 @@
-﻿using System;
+﻿/// @file ThisAddIn.cs
+/// @brief Классы, которые реализуют дополнение к Visio.
+/// 
+/// @author  Иванюк Дмитрий Сергеевич.
+/// 
+/// @par Текущая версия:
+/// @$Rev: 269 $.\n
+/// @$Author: id $.\n
+/// @$Date:: 2011-04-15 16:25:19#$.
+/// 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using Visio = Microsoft.Office.Interop.Visio;
+using Visio  = Microsoft.Office.Interop.Visio;
 using Office = Microsoft.Office.Core;
 
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 
 //-----------------------------------------------------------------------------
-/// @brief Модуль ввода/вывода WAGO. 
-/// 
+/// <summary> Модуль ввода/вывода WAGO. </summary>
 ///
+/// <remarks> Id, 01.08.2011. </remarks>
 public class io_module
     {
     public enum KINDS ///< Виды модулей. 
@@ -41,25 +51,29 @@ public class io_module
     internal KINDS        kind;          ///< Вид модуля. 
     internal TYPES        type;          ///< Тип модуля. 
     public   CLAMPS_COUNT total_clamps;  ///< Общее количество клемм. 
-                                         ///
+
     internal int order_number; ///< Порядковый номер в сборке.
     internal int node_number;  ///< Номер узла.
 
     public bool[] free_clamp_flags;      ///< Флаг свободности клеммы.
+    public bool[] available_clamp_flags; ///< Флаг доступности клеммы.
 
-    /// @brief Конструктор.
+    /// <summary> Constructor. На основе свойств фигуры создается объект.</summary>
     ///
-    /// @param type  - тип модуля.
-    /// @param shape - визуальная фигура Visio.
+    /// <remarks> Id, 01.08.2011. </remarks>
+    ///
+    /// <exception cref="Exception"> Thrown when exception. </exception>
+    ///
+    /// <param name="shape"> Visio фигура модуля. </param>
     public io_module( Visio.Shape shape )
         {
         this.clamp_names = new List<string>();
                                               
         this.shape = shape;
 
-        type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].Formula );
-        order_number = Convert.ToUInt16( shape.Cells[ "Prop.order_number" ].Formula );
-        node_number = Convert.ToUInt16( shape.Cells[ "Prop.node_number" ].Formula );
+        type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].FormulaU );
+        order_number = Convert.ToUInt16( shape.Cells[ "Prop.order_number" ].FormulaU );
+        node_number = Convert.ToUInt16( shape.Cells[ "Prop.node_number" ].FormulaU );
         
         //Определяем количество клемм.
         switch( type )
@@ -69,16 +83,23 @@ public class io_module
             case TYPES.T_504:
                 total_clamps = CLAMPS_COUNT.СLAMP_8;
 
-                free_clamp_flags     = new bool[ ( int ) total_clamps ];
-                suitable_clamp_flags = new bool[ ( int ) total_clamps ];
+                free_clamp_flags      = new bool[ ( int ) total_clamps ];
+                available_clamp_flags = new bool[ ( int ) total_clamps ];
+                suitable_clamp_flags  = new bool[ ( int ) total_clamps ];
 
                 for( int i = 0; i < ( int ) total_clamps; i++ )
                     {
-                    free_clamp_flags[ i ]     = true;
-                    suitable_clamp_flags[ i ] = false;
+                    free_clamp_flags[ i ]      = true;
+                    available_clamp_flags[ i ] = false;
+                    suitable_clamp_flags[ i ]  = false;                                        
 
                     clamp_names.Add( "clamp_" + ( i + 1 ) );
                     }
+
+                available_clamp_flags[ 1 - 1 ] = true;
+                available_clamp_flags[ 4 - 1 ] = true;
+                available_clamp_flags[ 5 - 1 ] = true;
+                available_clamp_flags[ 8 - 1 ] = true;
                 break;
 
             default:
@@ -104,68 +125,98 @@ public class io_module
             }
         }
 
+    /// <summary> Сохранение в виде скрипта Lua. </summary>
+    ///
+    /// <remarks> Id, 01.08.2011. </remarks>
+    ///
+    /// <returns> Lua-скрипт, представляющий объект. </returns>
     public string lua_save()
         {
         return "{ " + type + " }";
         }
 
-    
-    //Визуальное представление.
     Visio.Shape shape;           ///< Фигура Visio модуля.
     List < string > clamp_names; ///< Имена клемм.
 
-
     public bool[] suitable_clamp_flags;      ///< Флаг подходящих для привязки клемм.
-                                             
-    /// @brief Затемнение доступных клемм.
+
+    /// <summary> Пометка доступных клемм (для режима привязки устройств). </summary>
+    ///
+    /// <remarks> Id, 01.08.2011. </remarks>
     public void mark_suitable()
         {
         for( int i = 0; i < ( int ) total_clamps; i++ )
             {
-            if( free_clamp_flags[ i ] )
+            if( available_clamp_flags[ i ] && free_clamp_flags[ i ] )
                 {                
                 shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ i ] ].Cells[
-                    "FillForegnd" ].Formula = "RGB( 127, 127, 127 )";
+                    "FillForegnd" ].FormulaU = "RGB( 127, 127, 127 )";
 
                 suitable_clamp_flags[ i ] = true;
                 }
             }
         }
 
-    /// @brief 
-    public void unmark()
+    /// <summary> Снятие пометки о доступности клемм. </summary>
+    ///
+    /// <remarks> Id, 01.08.2011. </remarks>
+    public void unmark_suitable()
         {
         if ( magnified_clamp > -1 )
             {
             unmagnify_clamp( magnified_clamp );
+            magnified_clamp = -1;
             }
 
         for( int i = 0; i < ( int ) total_clamps; i++ )
             {
             shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ i ] ].Cells[
-                   "FillForegnd" ].Formula = "RGB( 200, 200, 200 )";
+                   "FillForegnd" ].FormulaU = "RGB( 200, 200, 200 )";
 
             suitable_clamp_flags[ i ] = false;
             }
         }
 
-    private int magnified_clamp = -1;
-
+    /// <summary> Пометка клеммы как свободной. </summary>
+    ///
+    /// <remarks> Id, 01.08.2011. </remarks>
+    ///
+    /// <param name="clamp"> Номер помечаемой клеммы ( >= 0 ). </param>
     public void free( int clamp )
         {
         free_clamp_flags[ clamp ] = true;
         }
 
+    /// <summary> Пометка клеммы как занятой. </summary>
+    ///
+    /// <remarks> Id, 01.08.2011. </remarks>
+    ///
+    /// <param name="clamp"> Номер помечаемой клеммы ( >= 0 ). </param>
     public void use( int clamp )
         {
         free_clamp_flags[ clamp ] = false;
         }
 
-    public int get_selected()
+    /// <summary> Получение клеммы, выделенной мышкой. </summary>
+    ///
+    /// <remarks> Id, 01.08.2011. </remarks>
+    ///
+    /// <returns> Номер клеммы, выделенной мышкой ( >= 0
+    /// 		   ). </returns>
+    public int get_mouse_selection()
         {
         return magnified_clamp;
         }
 
+    /// В текущий момент выделенная мышкой клемма ( >= 0 ).
+    private int magnified_clamp = -1; 
+
+    /// <summary> Выделение клеммы под курсором мыши. </summary>
+    ///
+    /// <remarks> Id, 01.08.2011. </remarks>
+    ///
+    /// <param name="x"> The x coordinate. </param>
+    /// <param name="y"> The y coordinate. </param>
     public void magnify_on_mouse_move( double x, double y )
         {
         if( shape.HitTest( x, y, 0.01 ) > 0 )
@@ -220,28 +271,44 @@ public class io_module
             }
         }
 
+    /// <summary> Увеличить размер клеммы. </summary>
+    ///
+    /// <remarks> Id, 01.08.2011. </remarks>
+    ///
+    /// <param name="clamp"> Номер клеммы ( >= 0 ). </param>
     public void magnify_clamp( int clamp )
         {
         shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ] ].Cells[
-            "Width" ].Formula = string.Format( "=Sheet.{0}!Width*0.66",
+            "Width" ].FormulaU = string.Format( "=Sheet.{0}!Width*0.66",
             shape.Shapes[ "type_skin" ].ID );
 
         shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ] ].Cells[
-            "Height" ].Formula = string.Format( "=Sheet.{0}!Height*0.09",
+            "Height" ].FormulaU = string.Format( "=Sheet.{0}!Height*0.09",
             shape.Shapes[ "type_skin" ].ID );
         }
 
+    /// <summary> Вернуть нормальный размер клеммы. </summary>
+    ///
+    /// <remarks> Id, 01.08.2011. </remarks>
+    ///
+    /// <param name="clamp"> Номер помечаемой клеммы ( >= 0 ). </param>
     void unmagnify_clamp( int clamp )
         {
         shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ]
-            ].Cells[ "Width" ].Formula = string.Format( "=Sheet.{0}!Width*0.33",
+            ].Cells[ "Width" ].FormulaU = string.Format( "=Sheet.{0}!Width*0.33",
             shape.Shapes[ "type_skin" ].ID );
 
         shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ]
-            ].Cells[ "Height" ].Formula = string.Format( "=Sheet.{0}!Height*0.045",
+            ].Cells[ "Height" ].FormulaU = string.Format( "=Sheet.{0}!Height*0.045",
             shape.Shapes[ "type_skin" ].ID );
         }
 
+    /// <summary> "Подсветить" модуль и заданную клемму. При этом подсветка
+    /// зависит от вида модуля. </summary>
+    ///
+    /// <remarks> Id, 01.08.2011. </remarks>
+    ///
+    /// <param name="clamp"> Номер подсвечиваемой клеммы ( >= 0 ). </param>
     public void activate( int clamp )
         {
         string color = "0";
@@ -269,30 +336,36 @@ public class io_module
                 break;
             }
 
-        shape.Shapes[ "red_boder" ].Cells[ "LineColor" ].Formula = color;            
-        shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].Formula = "0%";
+        shape.Shapes[ "red_boder" ].Cells[ "LineColor" ].FormulaU = color;            
+        shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].FormulaU = "0%";
 
         shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ] ].Cells[
-            "FillForegnd" ].Formula = color;
+            "FillForegnd" ].FormulaU = color;
 
         unmagnify_clamp( clamp );
         }
 
+    /// <summary> Убрать подсветку с модуля. </summary>
+    ///
+    /// <remarks> Id, 01.08.2011. </remarks>
     public void deactivate()
         {
         int i = 0;
         foreach( string clamp in clamp_names )
             {
             shape.Shapes[ "type_skin" ].Shapes[ clamp ].Cells[
-                "FillForegnd" ].Formula = "16";
+                "FillForegnd" ].FormulaU = "16";
 
             unmagnify_clamp( i++ );
             }
 
-        shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].Formula = "100%";
+        shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].FormulaU = "100%";
         }
     }
 //-----------------------------------------------------------------------------
+/// <summary> Промышленный контроллер. </summary>
+///
+/// <remarks> Id, 01.08.2011. </remarks>
 public class PAC
     {
     public Visio.Shape shape;
@@ -321,7 +394,7 @@ public class PAC
         {
         foreach( io_module module in io_modules )
             {
-            module.unmark();
+            module.unmark_suitable();
             }        
         }
 
@@ -353,7 +426,7 @@ public class PAC
         
         foreach( io_module module in io_modules )
             {
-            module.unmark();
+            module.unmark_suitable();
 
             if( io_module_kind == module.kind )
                 {
@@ -422,10 +495,20 @@ public class wago_channel
 
     public wago_channel( io_module.KINDS kind )
         {
-        this.module = null;
+        this.module = null; 
         this.clamp = 0;
 
         this.kind = kind;
+        }
+
+    public void set( PAC pac, int module, int clamp )
+        {
+        if( module > 0 )
+            {
+            this.module = pac.get_io_modules()[ module ];
+            this.clamp = clamp;
+            this.module.use( clamp );
+            }
         }
 
     }
@@ -439,7 +522,7 @@ public class wago_device
         wago_channels = new Dictionary< string, wago_channel >();
         }
 
-    internal void add_wago_channel( string name, io_module.KINDS kind )
+    public void add_wago_channel( string name, io_module.KINDS kind )
         {
         wago_channels.Add( name, new wago_channel( kind ) );
         }
@@ -583,7 +666,7 @@ public class device: wago_device
     public void change_sub_type( SUB_TYPES sub_type, PAC pac )
         {
         this.sub_type = sub_type;
-        shape.Cells[ "Prop.sub_type" ].Formula = Convert.ToString(  ( int ) sub_type );
+        shape.Cells[ "Prop.sub_type" ].FormulaU = Convert.ToString(  ( int ) sub_type );
         
         switch_sub_type( sub_type, pac ); 
         }
@@ -609,11 +692,8 @@ public class device: wago_device
                     {
                     case SUB_TYPES.V_1_CONTROL_CHANNEL:
                         add_wago_channel( "DO1", io_module.KINDS.DO );
-                        if( get_n_from_str( str_DO1, out node, out module, out clamp ) )
-                            {
-                            wago_channels[ "DO1" ].clamp = clamp;
-                            wago_channels[ "DO1" ].module = pac.get_io_modules()[ module ];
-                            }
+                        get_n_from_str( str_DO1, out node, out module, out clamp );
+                        wago_channels[ "DO1" ].set( pac, module, clamp );
 
                         break;
 
@@ -621,17 +701,11 @@ public class device: wago_device
                         add_wago_channel( "DO1", io_module.KINDS.DO );
                         add_wago_channel( "DO2", io_module.KINDS.DO );
 
-                        if( get_n_from_str( str_DO1, out node, out module, out clamp ) )
-                            {
-                            wago_channels[ "DO1" ].clamp = clamp;
-                            wago_channels[ "DO1" ].module = pac.get_io_modules()[ module ];
-                            }
+                        get_n_from_str( str_DO1, out node, out module, out clamp );
+                        wago_channels[ "DO1" ].set( pac, module, clamp );
 
-                        if( get_n_from_str( str_DO2, out node, out module, out clamp ) )
-                            {
-                            wago_channels[ "DO2" ].clamp = clamp;
-                            wago_channels[ "DO2" ].module = pac.get_io_modules()[ module ];
-                            }
+                        get_n_from_str( str_DO2, out node, out module, out clamp );
+                        wago_channels[ "DO2" ].set( pac, module, clamp );
 
                         break;
 
@@ -639,18 +713,11 @@ public class device: wago_device
                         add_wago_channel( "DO1", io_module.KINDS.DO );
                         add_wago_channel( "DI1", io_module.KINDS.DI );
 
-                        if( get_n_from_str( str_DO1, out node, out module, out clamp ) )
-                            {
-                            wago_channels[ "DO1" ].clamp = clamp;
-                            wago_channels[ "DO1" ].module = pac.get_io_modules()[ module ];
-                            }
+                        get_n_from_str( str_DO1, out node, out module, out clamp );
+                        wago_channels[ "DO1" ].set( pac, module, clamp );
 
-                        if( get_n_from_str( str_DI1, out node, out module, out clamp ) )
-                            {
-                            wago_channels[ "DI1" ].clamp = clamp;
-                            wago_channels[ "DI1" ].module = pac.get_io_modules()[ module ];
-                            }
-
+                        get_n_from_str( str_DI1, out node, out module, out clamp );
+                        wago_channels[ "DI1" ].set( pac, module, clamp );
                         break;
 
                     case SUB_TYPES.V_1_CONTROL_CHANNEL_2_FB:
@@ -658,24 +725,14 @@ public class device: wago_device
                         add_wago_channel( "DI1", io_module.KINDS.DI );
                         add_wago_channel( "DI2", io_module.KINDS.DI );
 
-                        if( get_n_from_str( str_DO1, out node, out module, out clamp ) )
-                            {
-                            wago_channels[ "DO1" ].clamp = clamp;
-                            wago_channels[ "DO1" ].module = pac.get_io_modules()[ module ];
-                            }
+                        get_n_from_str( str_DO1, out node, out module, out clamp );
+                        wago_channels[ "DO1" ].set( pac, module, clamp );
 
-                        if( get_n_from_str( str_DI1, out node, out module, out clamp ) )
-                            {
-                            wago_channels[ "DI1" ].clamp = clamp;
-                            wago_channels[ "DI1" ].module = pac.get_io_modules()[ module ];
-                            }
+                        get_n_from_str( str_DI1, out node, out module, out clamp );
+                        wago_channels[ "DI1" ].set( pac, module, clamp );
 
-
-                        if( get_n_from_str( str_DI2, out node, out module, out clamp ) )
-                            {
-                            wago_channels[ "DI2" ].clamp = clamp;
-                            wago_channels[ "DI2" ].module = pac.get_io_modules()[ module ];
-                            }
+                        get_n_from_str( str_DI2, out node, out module, out clamp );
+                        wago_channels[ "DI2" ].set( pac, module, clamp );
 
                         break;
 
@@ -685,30 +742,17 @@ public class device: wago_device
                         add_wago_channel( "DI1", io_module.KINDS.DI );
                         add_wago_channel( "DI2", io_module.KINDS.DI );
 
-                        if( get_n_from_str( str_DO1, out node, out module, out clamp ) )
-                            {
-                            wago_channels[ "DO1" ].clamp = clamp;
-                            wago_channels[ "DO1" ].module = pac.get_io_modules()[ module ];
-                            }
+                        get_n_from_str( str_DO1, out node, out module, out clamp );
+                        wago_channels[ "DO1" ].set( pac, module, clamp );
 
-                        if( get_n_from_str( str_DO2, out node, out module, out clamp ) )
-                            {
-                            wago_channels[ "DO2" ].clamp = clamp;
-                            wago_channels[ "DO2" ].module = pac.get_io_modules()[ module ];
-                            }
+                        get_n_from_str( str_DO2, out node, out module, out clamp );
+                        wago_channels[ "DO2" ].set( pac, module, clamp );
 
-                        if( get_n_from_str( str_DI1, out node, out module, out clamp ) )
-                            {
-                            wago_channels[ "DI1" ].clamp = clamp;
-                            wago_channels[ "DI1" ].module = pac.get_io_modules()[ module ];
-                            }
+                        get_n_from_str( str_DI1, out node, out module, out clamp );
+                        wago_channels[ "DI1" ].set( pac, module, clamp );
 
-
-                        if( get_n_from_str( str_DI2, out node, out module, out clamp ) )
-                            {
-                            wago_channels[ "DI2" ].clamp = clamp;
-                            wago_channels[ "DI2" ].module = pac.get_io_modules()[ module ];
-                            }
+                        get_n_from_str( str_DI2, out node, out module, out clamp );
+                        wago_channels[ "DI2" ].set( pac, module, clamp );
 
                         break;
                     }
@@ -719,9 +763,9 @@ public class device: wago_device
 
     public device( Visio.Shape shape, PAC pac )
         {
-        n = Convert.ToUInt16( shape.Cells[ "Prop.number" ].Formula );
-        type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].Formula );
-        sub_type = ( SUB_TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.sub_type" ].Formula );
+        n = Convert.ToUInt16( shape.Cells[ "Prop.number" ].FormulaU );
+        type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].FormulaU );
+        sub_type = ( SUB_TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.sub_type" ].FormulaU );
 
         this.shape = shape;
                 
@@ -745,7 +789,7 @@ public class device: wago_device
             "\"узел {0} модуль {1} клемма {2}\"",
             module.node_number, module.order_number, clamp + 1 );
 
-        shape.Cells[ prop ].Formula = value;
+        shape.Cells[ prop ].FormulaU = value;
 
 
         module.use( clamp );
@@ -860,7 +904,7 @@ namespace Visio_project_designer
                 {
                 foreach( io_module module in g_PAC.get_io_modules() )
                     {
-                    int clamp = module.get_selected();
+                    int clamp = module.get_mouse_selection();
                     if( clamp > -1 )
                         {
                         g_PAC.unmark();
@@ -871,26 +915,6 @@ namespace Visio_project_designer
                         m_Application_selection_changed( visio_app.Windows[ 
                             ( short ) ThisAddIn.VISIO_WNDOWS.IO_EDIT ] );
 
-                        //m_Application_selection_changed( visio_app.Windows[ 2 ] );
-                        //string value_DO1 = selected_shape.Cells[ "Prop.DO1" ].Formula;
-                        //select_channel( value_DO1, 2 );
-
-                        //string value_DO2 = selected_shape.Cells[ "Prop.DO2" ].Formula;
-                        //select_channel( value_DO2, 2 );
-
-                        //string value_DI1 = selected_shape.Cells[ "Prop.DI1" ].Formula;
-                        //select_channel( value_DI1, 2 );
-
-                        //string value_DI2 = selected_shape.Cells[ "Prop.DI2" ].Formula;
-                        //select_channel( value_DI2, 2 );
-
-                        //Обновление подсвечиваемых модулей Wago.
-                        //g_PAC.deactivate();
-                        //g_PAC.activate(  module.shape, );
-
-                        //refresh_prop_wnd( null );
-
-                        //MessageBox.Show( module.shape.Name );
                         visio_app.Windows[ ( short ) ThisAddIn.VISIO_WNDOWS.MAIN ].MouseMove -=
                             new Microsoft.Office.Interop.Visio.EWindow_MouseMoveEventHandler(
                             Globals.ThisAddIn.visio_app_mouse_move );
@@ -902,7 +926,7 @@ namespace Visio_project_designer
                         }
                     }
 
-                MessageBox.Show( "No clamp!" );
+                //MessageBox.Show( "No clamp!" );
 
                 g_PAC.unmark();
                 m_Application_selection_changed( visio_app.Windows[
@@ -989,7 +1013,7 @@ namespace Visio_project_designer
                 //Обновляем таблицу свойств.                
                 edit_io_frm.listForm.enable_prop();
                 edit_io_frm.listForm.change_type( 
-                    Convert.ToInt16( shape.Cells[ "Prop.type" ].Formula ) );
+                    Convert.ToInt16( shape.Cells[ "Prop.type" ].FormulaU ) );
 
                 }
             else //if( shape != null )
@@ -1038,8 +1062,8 @@ namespace Visio_project_designer
                                 Window.Selection[ 1 ];
 
                             //Поиск по shape объекта device.
-                            int dev_n    = Convert.ToInt16( selected_shape.Cells[ "Prop.number" ].Formula );
-                            int dev_type = Convert.ToInt16( selected_shape.Cells[ "Prop.type" ].Formula );
+                            int dev_n    = Convert.ToInt16( selected_shape.Cells[ "Prop.number" ].FormulaU );
+                            int dev_type = Convert.ToInt16( selected_shape.Cells[ "Prop.type" ].FormulaU );
 
                             current_selected_dev = g_devices.Find( delegate( device dev )
                                 {
@@ -1129,9 +1153,9 @@ namespace Visio_project_designer
                         }
 
                     Cell.Shape.Shapes[ "type_skin" ].Shapes[ "module_number" ].Cells[ 
-                        "FillForegnd" ].Formula = colour;
+                        "FillForegnd" ].FormulaU = colour;
                     Cell.Shape.Shapes[ "type_skin" ].Shapes[ "3" ].Cells[
-                        "FillForegnd" ].Formula = colour;
+                        "FillForegnd" ].FormulaU = colour;
                     }
                 }
 
@@ -1179,7 +1203,7 @@ namespace Visio_project_designer
                             int n = Convert.ToUInt16( n_part_1 ) * 100 +
                                 Convert.ToUInt16( n_part_2 );
 
-                            Cell.Shape.Cells[ "Prop.number" ].Formula = n.ToString();
+                            Cell.Shape.Cells[ "Prop.number" ].FormulaU = n.ToString();
 
                             str = str.Replace( "\"", "" );
                             Cell.Shape.Name = str;
@@ -1202,7 +1226,7 @@ namespace Visio_project_designer
                             //Клапан.
                             n += Convert.ToUInt16( mtc.Groups[ 3 ].ToString() );
 
-                            Cell.Shape.Cells[ "Prop.number" ].Formula = n.ToString();
+                            Cell.Shape.Cells[ "Prop.number" ].FormulaU = n.ToString();
 
                             str = str.Replace( "\"", "" );
                             Cell.Shape.Name = str;                                                        
@@ -1212,7 +1236,7 @@ namespace Visio_project_designer
 
                         MessageBox.Show( "Неверная маркировка клапана - \"" +
                             str + "\"!" );
-                        Cell.Shape.Cells[ "Prop.name" ].Formula = "\"V19\"";
+                        Cell.Shape.Cells[ "Prop.name" ].FormulaU = "\"V19\"";
                         break;
                     }
                 }
@@ -1233,12 +1257,12 @@ namespace Visio_project_designer
                 case "750":
                     if( obj_1.Data2 == "860" )
                         {
-                        obj_2.Cells[ "Prop.order_number" ].Formula = "1";
+                        obj_2.Cells[ "Prop.order_number" ].FormulaU = "1";
                         }
                     else
                         {
-                        int new_number = Convert.ToInt32( obj_1.Cells[ "Prop.order_number" ].Formula ) + 1;
-                        obj_2.Cells[ "Prop.order_number" ].Formula = Convert.ToString( new_number );
+                        int new_number = Convert.ToInt32( obj_1.Cells[ "Prop.order_number" ].FormulaU ) + 1;
+                        obj_2.Cells[ "Prop.order_number" ].FormulaU = Convert.ToString( new_number );
                         }
 
                     break;
@@ -1331,7 +1355,7 @@ namespace Visio_project_designer
 
                 g_PAC.add_io_module( shape );
                 
-                shape.Cells[ "Prop.type" ].Formula = 
+                shape.Cells[ "Prop.type" ].FormulaU = 
                     modules_count_enter_form.modules_type;                                
 
                 for( int i = 0; i < duplicate_count; i++ )
@@ -1345,8 +1369,8 @@ namespace Visio_project_designer
                     string str_y = string.Format( "PNTY(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+-47 mm",
                         old_shape.Name );
 
-                    new_shape.Cells[ "PinX" ].Formula = str_x;
-                    new_shape.Cells[ "PinY" ].Formula = str_y;
+                    new_shape.Cells[ "PinX" ].FormulaU = str_x;
+                    new_shape.Cells[ "PinY" ].FormulaU = str_y;
 
                     shape = new_shape;
 
