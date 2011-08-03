@@ -631,9 +631,9 @@ u_char* wago_manager::get_DI_read_data( u_int node_n, u_int offset )
             return &nodes[ node_n ]->DI[ offset ];
             }
         }
+
 #ifdef DEBUG
-    Print( "get_DI_data() - error!\n" );
-    while( 1 ) ;
+    Print( "wago_manager::get_DI_data() - error!\n" );    
 #endif // DEBUG
 
     return 0;
@@ -649,8 +649,7 @@ u_char* wago_manager::get_DO_read_data( u_int node_n, u_int offset )
             }
         }
 #ifdef DEBUG
-    Print( "get_DO_data() - error!\n" );
-    while( 1 ) ;
+    Print( "wago_manager::get_DO_data() - error!\n" );    
 #endif // DEBUG
 
     return 0;
@@ -666,8 +665,7 @@ u_int* wago_manager::get_AI_read_data( u_int node_n, u_int offset )
             }
         }
 #ifdef DEBUG
-    Print( "get_AI_data() - error!\n" );
-    while( 1 ) ;
+    Print( "wago_manager::get_AI_data() - error!\n" );    
 #endif // DEBUG
 
     return 0;
@@ -683,8 +681,7 @@ u_int* wago_manager::get_AO_read_data( u_int node_n, u_int offset )
             }
         }
 #ifdef DEBUG
-    Print( "get_AO_data() - error!\n" );
-    while( 1 ) ;
+    Print( "wago_manager::get_AO_data() - error!\n" );
 #endif // DEBUG
 
     return 0;
@@ -700,8 +697,7 @@ u_char* wago_manager::get_DO_write_data( u_int node_n, u_int offset )
             }
         }
 #ifdef DEBUG
-    Print( "get_DO_write_data() - error!\n" );
-    while( 1 ) ;
+    Print( "wago_manager::get_DO_write_data() - error!\n" );
 #endif // DEBUG
 
     return 0;
@@ -717,8 +713,7 @@ u_int* wago_manager::get_AO_write_data( u_int node_n, u_int offset )
             }
         }
 #ifdef DEBUG
-    Print( "get_AO_write_data() - error!\n" );
-    while( 1 ) ;
+    Print( "wago_manager::get_AO_write_data() - error!\n" );    
 #endif // DEBUG
 
     return 0;
