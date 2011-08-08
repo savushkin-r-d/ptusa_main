@@ -4,7 +4,9 @@
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
-/// @c DEBUG   - компиляция c выводом отладочной информации в консоль.
+/// @c DEBUG      - компиляция c выводом отладочной информации в консоль.
+/// @c DEBUG_KBUS - компиляция c выводом отладочной информации работы KBUS в
+/// консоль.
 /// 
 /// @par Текущая версия:
 /// @$Rev$.\n
@@ -14,16 +16,16 @@
 #ifndef WAGO_750_H
 #define WAGO_750_H
 
-#include "wago.h"
+#include "l_wago.h"
 
 #include "kbusapi.h"
 //-----------------------------------------------------------------------------
 /// @brief Работа с модулями ввода/вывода Wago для PAC WAGO 750-860.
 ///
 ///
-class wago_manager_w750 : public wago_manager
+class wago_manager_w750 : public wago_manager_linux
     {
-    public:
+     public:
         wago_manager_w750();
 
         virtual ~wago_manager_w750();

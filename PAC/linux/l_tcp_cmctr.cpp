@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "tcp_cmctr_linux.h"
+#include "l_tcp_cmctr.h"
 #include "PAC_err.h"
 
 #ifdef DEBUG
@@ -41,7 +41,6 @@ void tcp_communicator_linux::killsockets()
         {
         if ( sst[ i ].active )
             {
-            sst[ i ].clID = -1;
             shutdown( i, SHUT_RDWR );
             close( i );
             }
@@ -335,8 +334,8 @@ int tcp_communicator_linux::evaluate()
     return 0;
     }
 //------------------------------------------------------------------------------
-int tcp_communicator_linux::recvtimeout( u_int s, u_char *buf,
-    int len, int timeout, int usec )
+int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
+    int len, int timeout, int usec, char* IP )
     {
     // Настраиваем  file descriptor set.
     fd_set fds;
@@ -350,11 +349,45 @@ int tcp_communicator_linux::recvtimeout( u_int s, u_char *buf,
 
     // Ждем таймаута или полученных данных.
     int n = select( s + 1, &fds, NULL, NULL, &rec_tv );
-    if ( 0 == n ) return -2;  // timeout!
-    if ( -1 == n ) return -1; // error
+    if ( 0 == n ) 
+        {
+#if DEBUG
+        print_time( "Socket %d->\"%s\" disconnected on read try - timeout.\n",
+            s, IP );
+#endif
+        
+        return -2;  // timeout!
+        }
+
+    if ( -1 == n ) 
+        {
+#if DEBUG
+        print_time( "Socket %d->\"%s\" disconnected on read try : %s\n",
+            s, IP, strerror( errno ) );
+#endif
+        return -1; // error
+        }
 
     // Данные должны быть здесь, поэтому делаем обычный recv().    
-    return recv( s, buf, len, MSG_NOSIGNAL );
+    int res = recv( s, buf, len, MSG_NOSIGNAL );
+    
+    if ( 0 == res )
+        {
+#if DEBUG
+        print_time( "Socket %d->\"%s\" was closed.\n",
+            s, IP );
+#endif
+        }
+
+    if ( res < 0 )
+        {
+#if DEBUG
+        print_time( "Socket %d->\"%s\" disconnected on read try (unknown) : %s\n",
+            s, IP, strerror( errno ) );
+#endif
+        }
+    
+    return res;
     }
 //------------------------------------------------------------------------------
 int tcp_communicator_linux::do_echo ( int skt )
@@ -376,35 +409,11 @@ int tcp_communicator_linux::do_echo ( int skt )
     memset( buf, 0, BUFSIZE );
     
     // Ожидаем данные с таймаутом 1 сек.
-    err = in_buffer_count = recvtimeout( skt, buf, BUFSIZE, 5, 0 );
+    err = in_buffer_count = recvtimeout( skt, buf, BUFSIZE, 5, 0,
+        inet_ntoa( sst[ skt ].sin.sin_addr ) );
 
     if ( err <= 0 )               /* read error */
         {
-#ifdef DEBUG
-        switch ( err )
-            {
-            case 0:
-                print_time( "Socket %d->\"%s\" was closed.\n",
-                        skt, inet_ntoa( sst[ skt ].sin.sin_addr ) );
-                break;
-
-            case -1:
-                print_time( "Socket %d->\"%s\" disconnected on read try : %s\n",
-                    skt, inet_ntoa( sst[ skt ].sin.sin_addr ), strerror( errno ) );
-                break;
-
-            case -2:
-                print_time( "Socket %d->\"%s\" disconnected on read try - timeout.\n",
-                    skt, inet_ntoa( sst[ skt ].sin.sin_addr ) );
-                break;
-
-            default:
-                print_time( "Socket %d->\"%s\" disconnected on read try : %s\n",
-                    skt, inet_ntoa( sst[ skt ].sin.sin_addr ), strerror( errno ) );
-                break;
-            }
-#endif // DEBUG
-
         shutdown( skt, 0 );
         close( skt );
         sst[ skt ].active = 0;

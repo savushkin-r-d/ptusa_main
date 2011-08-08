@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <string.h>
 
 #include "wago_w750.h"
 //-----------------------------------------------------------------------------
@@ -19,28 +20,28 @@ int wago_manager_w750::read_inputs()
 
     for ( u_int i = 0; i < nodes_count; i++ )
         {
-        if ( nodes[ i ]->type == 0 ) // KBus
+        if ( nodes[ i ]->type == wago_node::T_750_860 ) // KBus
             {
             KbusUpdate();
 
             // DI
             int start_pos = KbusGetBinaryInputOffset() / 8;
-#ifdef DEBUG
-//            Print( "start_pos=%d\n", start_pos );
-#endif // DEBUG
+#ifdef DEBUG_KBUS
+            Print( "start_pos=%d\n", start_pos );
+#endif // DEBUG_KBUS
             for ( u_int j = 0; j < nodes[ i ]->DI_cnt; j++ )
                 {
                 char tmp =  1 << ( j % 8 );
 
                 nodes[ i ]->DI[ j ] = ( ( tmp &
                     pstPabIN->uc.Pab[ start_pos + j / 8 ] ) > 0 );
-#ifdef DEBUG
-                //Print( "%d -> %d, ", j, nodes[ i ]->DI[ j ] );
-#endif // DEBUG
+#ifdef DEBUG_KBUS
+                Print( "%d -> %d, ", j, nodes[ i ]->DI[ j ] );
+#endif // DEBUG_KBUS
                 }
-#ifdef DEBUG
-            //Print( "\n" );
-#endif // DEBUG
+#ifdef DEBUG_KBUS
+            Print( "\n" );
+#endif // DEBUG_KBUS
 
             // AI
             for ( u_int j = 0; j < nodes[ i ]->AI_cnt; j++ )
@@ -62,12 +63,63 @@ int wago_manager_w750::read_inputs()
                         break;
                     }
                 nodes[ i ]->AI[ j ] = val;
-#ifdef DEBUG
-//                Print( "%d -> %u\n, ", j, nodes[ i ]->AI[ j ] );
-#endif // DEBUG
+#ifdef DEBUG_KBUS
+                Print( "%d -> %u\n, ", j, nodes[ i ]->AI[ j ] );
+#endif // DEBUG_KBUS
                 }
-            }
-        }                
+            }// if ( nodes[ i ]->type == wago_node::T_750_860 ) // KBus
+
+        if ( nodes[ i ]->type == wago_node::T_750_341 || // Ethernet Wago nodes.
+                nodes[ i ]->type == wago_node::T_750_841 )
+            {
+            if ( nodes[ i ]->DI_cnt > 0 )
+                {
+                /// @todo Модернизировать заполнение заголовка.
+                //snprintf( ( char* ) buff, sizeof( buff ), "ss%c", 0 );
+                
+                buff[ 0  ] = 's';
+                buff[ 1  ] = 's';
+                buff[ 2  ] = 0;
+                buff[ 3  ] = 0;
+                buff[ 4  ] = 0;
+                buff[ 5  ] = 6;
+                buff[ 6  ] = nodes[ i ]->number;
+                buff[ 7  ] = 0x02;
+                buff[ 8  ] = 0;
+                buff[ 9  ] = 0;
+                buff[ 10 ] = ( unsigned char ) nodes[ i ]->DI_cnt >> 8;
+                buff[ 11 ] = ( unsigned char ) nodes[ i ]->DI_cnt & 0xFF;
+                
+                u_int bytes_cnt = nodes[ i ]->DI_cnt / 8 +
+                    ( nodes[ i ]->DI_cnt % 8 > 0 ? 1 : 0 );
+
+                 if ( e_communicate( nodes[ i ], 12, bytes_cnt + 9 ) == 0 )
+                     {
+                     if ( buff[ 7 ] == 0x02 && buff[ 8 ] == bytes_cnt )
+                         {
+                         for ( u_int j = 0, idx = 0; j < bytes_cnt; j++ )
+                             {
+                             for ( int k = 0; k < 8; k++ )
+                                 {
+                                 if ( idx < nodes[ i ]->DI_cnt )
+                                     {
+                                     nodes[ i ]->DI[ idx ] =
+                                         ( buff[ j + 9 ] >> k ) & 1;
+                                     idx++;                                     
+                                     }
+                                 }
+                             }
+                         }
+                         else
+                         {
+#ifdef DEBUG
+                         Print("\nRead DI:Wago returned error...\n");
+#endif // DEBUG
+                         }
+                     }// if ( e_communicate( nodes[ i ], 12, bytes_cnt + 9 ) == 0 )
+                 }// if ( nodes[ i ]->DI_cnt > 0 )
+            }// if ( nodes[ i ]->type == wago_node::T_750_341 || ...
+        }// for ( u_int i = 0; i < nodes_count; i++ )
 
     return 0;
     }
@@ -78,13 +130,13 @@ int wago_manager_w750::write_outputs()
 
     for ( u_int i = 0; i < nodes_count; i++ )
         {
-        if ( nodes[ i ]->type == 0 ) // KBus
+        if ( nodes[ i ]->type == wago_node::T_750_860 ) // KBus
             {
             // DO
             int start_pos = KbusGetBinaryOutputOffset() / 8;
-#ifdef DEBUG
-            //Print( "start_pos = %d\n", start_pos );
-#endif // DEBUG
+#ifdef DEBUG_KBUS
+            Print( "start_pos = %d\n", start_pos );
+#endif // DEBUG_KBUS
             for ( u_int j = 0; j < nodes[ i ]->DO_cnt; j++ )
                 {
                     char tmp =  1 << ( j % 8 );
@@ -97,13 +149,13 @@ int wago_manager_w750::write_outputs()
                         pstPabOUT->uc.Pab[ start_pos + j / 8 ] &= ~tmp;
                         }
                     nodes[ i ]->DO[ j ] = nodes[ i ]->DO_[ j ];
-#ifdef DEBUG
-                //Print( "%d -> %d, ", j, nodes[ i ]->DO_[ j ] );
-#endif // DEBUG
+#ifdef DEBUG_KBUS
+                Print( "%d -> %d, ", j, nodes[ i ]->DO_[ j ] );
+#endif // DEBUG_KBUS
                 }
-#ifdef DEBUG
-            //Print( "\n" );
-#endif // DEBUG
+#ifdef DEBUG_KBUS
+            Print( "\n" );
+#endif // DEBUG_KBUS
 
             // AO
             for ( u_int j = 0; j < nodes[ i ]->AO_cnt; j++ )
@@ -115,14 +167,108 @@ int wago_manager_w750::write_outputs()
                 pstPabIN->uc.Pab[ offset + 1 ] = val >> 8;
 
                 nodes[ i ]->AO[ j ] = nodes[ i ]->AO_[ j ];
-#ifdef DEBUG
-                //Print( "%d -> %u\n, ", j, nodes[ i ]->AO_[ j ] );
-#endif // DEBUG
+#ifdef DEBUG_KBUS
+                Print( "%d -> %u\n, ", j, nodes[ i ]->AO_[ j ] );
+#endif // DEBUG_KBUS
                 }
 
             KbusUpdate();
-            }
-        }
+            }// if ( nodes[ i ]->type == wago_node::T_750_860 ) // KBus
+
+        if ( nodes[ i ]->type == wago_node::T_750_341 ||
+                nodes[ i ]->type == wago_node::T_750_841 )
+            {
+            if ( nodes[ i ]->DO_cnt > 0 )
+                {
+                /// @todo Модернизировать заполнение заголовка.
+
+                u_int bytes_cnt = nodes[ i ]->DO_cnt / 8 +
+                    ( nodes[ i ]->DO_cnt % 8 > 0 ? 1 : 0 );
+
+                buff[ 0  ] = 's';
+                buff[ 1  ] = 's';
+                buff[ 2  ] = 0;
+                buff[ 3  ] = 0;
+                buff[ 4  ] = 0;
+                buff[ 5  ] = 7 + bytes_cnt;
+                buff[ 6  ] = nodes[ i ]->number;
+                buff[ 7  ] = 0x0F;
+                buff[ 8  ] = 0;
+                buff[ 9  ] = 0;
+                buff[ 10 ] = ( unsigned char ) nodes[ i ]->DO_cnt >> 8;
+                buff[ 11 ] = ( unsigned char ) nodes[ i ]->DO_cnt & 0xFF;
+                buff[ 12 ] = bytes_cnt;
+
+                for ( u_int j = 0, idx = 0; j < bytes_cnt; j++ )
+                    {
+                    u_char b = 0;
+                    for ( u_int k = 0; k < 8; k++ )
+                        {
+                        if ( idx < nodes[ i ]->DO_cnt )
+                            {
+                            b = b | ( nodes[ i ]->DO_[ idx ] & 1 ) << k;
+                            idx++;
+                            }
+                        }
+                    buff[ j + 13 ] = b;
+                    }
+                buff[ 12 ] = bytes_cnt;
+
+                if ( e_communicate( nodes[ i ], bytes_cnt + 13, 12 ) == 0 )
+                    {
+                    if ( buff[ 7 ] == 0x0F )
+                        {
+                        memcpy( nodes[ i ]->DO, nodes[ i ]->DO_, nodes[ i ]->DO_cnt );
+                        }
+                     }// if ( e_communicate( nodes[ i ], bytes_cnt + 13, 12 ) > 0 )
+                 else
+                     {
+#ifdef DEBUG
+                     Print("\nWrite DO:Wago returned error...\n");
+#endif // DEBUG
+                     }
+                 }// if ( nodes[ i ]->DO_cnt > 0 )
+
+            if ( nodes[ i ]->AO_cnt > 0 )
+                {
+                u_int bytes_cnt = nodes[ i ]->AO_cnt / 2;
+
+                /// @todo Модернизировать заполнение заголовка.
+                /// @todo Необходимо тестирование.
+                buff[ 0  ] = 's';
+                buff[ 1  ] = 's';
+                buff[ 2  ] = 0;
+                buff[ 3  ] = 0;
+                buff[ 4  ] = 0;
+                buff[ 5  ] = 7 + bytes_cnt * 2;
+                buff[ 6  ] = nodes[ i ]->number;
+                buff[ 7  ] = 0x10;
+                buff[ 8  ] = 0;
+                buff[ 9  ] = 0;
+                buff[ 10 ] = bytes_cnt >> 8;
+                buff[ 11 ] = bytes_cnt & 0xFF;
+                buff[ 12 ] = bytes_cnt * 2;
+                memcpy( buff + 13, nodes[ i ]->AO_,
+                    nodes[ i ]->AO_cnt * sizeof( nodes[ i ]->AO_[ 0 ] ) );
+
+                if ( e_communicate( nodes[ i ], 2 * bytes_cnt + 13, 12 ) == 0 )
+                    {
+                    if ( buff[ 7 ] == 0x10 )
+                        {
+                        memcpy( nodes[ i ]->AO, nodes[ i ]->AO_,
+                            nodes[ i ]->AO_cnt * sizeof( nodes[ i ]->AO_[ 0 ] ) );
+                        }
+                     }// if ( e_communicate( nodes[ i ], 2 * bytes_cnt + 13, 12 ) == 0 )
+                 else
+                     {
+#ifdef DEBUG
+                     Print("\nWrite AO:Wago returned error...\n");
+#endif // DEBUG
+                     }                
+                }// if ( nodes[ i ]->AO_cnt > 0 )
+
+            }// if ( nodes[ i ]->type == wago_node::T_750_341 || ...
+        }// for ( u_int i = 0; i < nodes_count; i++ )
 
     return 0;
     }

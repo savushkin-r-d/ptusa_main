@@ -7,6 +7,8 @@
 #include "wago.h"
 #include "lua_manager.h"
 
+#include "dtime.h"
+
 #ifdef WIN_OS
 #include "wago_PC.h"
 #endif 
@@ -783,8 +785,8 @@ void wago_manager::print() const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-wago_manager::wago_node::wago_node() : state( 0 ),    
-    type( 0 ),
+wago_manager::wago_node::wago_node() : state( S_NO_CONNECT ),
+    type( T_750_860 ),
     number( 0 ),
     DO_cnt( 0 ),
     DO( 0 ),
@@ -801,7 +803,7 @@ wago_manager::wago_node::wago_node() : state( 0 ),
     AI_offsets( 0 ),
     AI_types( 0 )
     {
-    memset( ip_address, 0, 4 * sizeof( int ) );
+    memset( ip_address, 0, sizeof( ip_address ) );
     }
 //-----------------------------------------------------------------------------
 wago_manager::wago_node::~wago_node()
@@ -838,20 +840,20 @@ wago_manager::wago_node::~wago_node()
     }
 //-----------------------------------------------------------------------------
 wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
-    int DO_cnt, int DI_cnt, int AO_cnt, int AI_cnt ): state( 0 ),
-    type( type ), 
+    int DO_cnt, int DI_cnt, int AO_cnt, int AI_cnt ): state( S_NO_CONNECT ),
+    type( ( TYPES ) type ),
     number( number ),
+    last_poll_time( get_sec() ),
+    sock( 0 ),
+
     DO_cnt( DO_cnt ),
     AO_cnt( AO_cnt ),
     DI_cnt( DI_cnt ),
-    AI_cnt( AI_cnt )
+    AI_cnt( AI_cnt )        
     {
-    char tmp_dot;
     if ( str_ip_address )
         {
-        sscanf( str_ip_address, "%d%c%d%c%d%c%d",
-            &ip_address[ 0 ], &tmp_dot, &ip_address[ 1 ], &tmp_dot,
-            &ip_address[ 2 ],  &tmp_dot, &ip_address[ 3 ] );
+        strcpy( ip_address, str_ip_address );
         }
     else
         {
@@ -893,9 +895,8 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
 void wago_manager::wago_node::print()
     {
 #ifdef DEBUG
-    Print( "Node type %d, number %d, ip \'%d.%d.%d.%d\'. ",
-        type, number, ip_address[ 0 ], ip_address[ 1 ], 
-        ip_address[ 2 ], ip_address[ 3 ] );
+    Print( "Node type %d, number %d, ip \"%s\". ",
+        type, number, ip_address );
     Print( "DI %d, DO %d, AI %d, AO %d.\n",
         DI_cnt, DO_cnt, AI_cnt, AO_cnt );   
 

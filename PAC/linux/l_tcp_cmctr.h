@@ -1,4 +1,4 @@
-/// @file tcp_cmctr_linux.h
+/// @file l_tcp_cmctr.h
 /// @brief Содержит описания классов, которые предназначены для обмена данными
 /// PAC-сервер по протоколу TCP для OC Linux.
 ///
@@ -32,7 +32,6 @@ struct socket_state
     int init;        ///< Сокет только что был активирован.
     int is_listener; ///< Сокет является инициатором соединения ( = 0 )/сокет является слушателем ( != 0 ).
     int evaluated;   ///< В данном цикле уже произошел обмен информацией по данному сокету.
-    int clID;        ///< Идентификатор клиента для идентификации того, не занят ли уже сокет другим клиентом.
     sockaddr_in sin; ///< Адрес клиента.
     };
 //-----------------------------------------------------------------------------
@@ -78,6 +77,7 @@ class tcp_communicator_linux : public tcp_communicator
             /// @brief Закрытие сети.
             void net_terminate();
 
+        public:
             /// @brief Получение данных с таймаутом.
             ///
             /// @param s        - сокет.
@@ -89,8 +89,8 @@ class tcp_communicator_linux : public tcp_communicator
             /// @return -1   - ошибка работы с сокетом.
             /// @return -2   - ошибка таймаута.
             /// @return >= 0 - размер реально считанных данных.
-            int  recvtimeout( u_int s, u_char *buf, int len,
-                int timeout, int usec );
+            static int  recvtimeout( int s, u_char *buf, int len,
+                int timeout, int usec, char* IP );
 	};
 //-----------------------------------------------------------------------------
 #endif //TCP_CMCTR_LINUX

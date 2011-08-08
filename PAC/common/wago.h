@@ -255,10 +255,31 @@ class wago_manager
 
             void print();
 
-            int     state;          ///< Cостояние работы с узлом.
-            u_int   type;           ///< Тип.
+            enum CONST
+                {
+                C_MAX_WAIT_TIME = 6, ///< Время до установки ошибки связи с модулем, сек.
+                };
+
+            enum TYPES ///< Типы модулей.
+                {
+                T_750_860 = 0,
+                T_750_341 = 2,  ///< Ethernet 750-341.
+                T_750_841,      ///< Ethernet 750-841 programmable.
+                };
+
+            enum STATES         ///< Cостояния работы с узлом.
+                {
+                S_NO_CONNECT = 0,
+                S_OK,
+                };
+
+            STATES  state;          ///< Cостояние работы с узлом.
+            TYPES   type;           ///< Тип.
             u_int   number;         ///< Номер.
-            int     ip_address[ 4 ]; ///< IP-адрес.
+            char    ip_address[ 16 ];///< IP-адрес.
+
+            u_int_4 last_poll_time; ///< Время последнего опроса.
+            int     sock;           ///< Сокет соединения.
 
             // Digital outputs ( DO ).
             u_int  DO_cnt;      ///< Amount of DO.

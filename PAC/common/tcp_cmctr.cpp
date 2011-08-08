@@ -9,7 +9,7 @@
 #endif // WIN_OS
 
 #ifdef LINUX_OS
-#include "tcp_cmctr_linux.h"
+#include "l_tcp_cmctr.h"
 #endif
 
 #ifdef MINIOS7

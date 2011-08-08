@@ -81,8 +81,9 @@
         </logicalFolder>
         <itemPath>../../PAC/linux/l_console.h</itemPath>
         <itemPath>../../PAC/linux/l_mem.h</itemPath>
+        <itemPath>../../PAC/linux/l_tcp_cmctr.h</itemPath>
         <itemPath>../../PAC/linux/l_types.h</itemPath>
-        <itemPath>../../PAC/linux/tcp_cmctr_linux.h</itemPath>
+        <itemPath>../../PAC/linux/l_wago.h</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="f1" displayName="Lua source " projectFiles="true">
@@ -174,7 +175,8 @@
         <itemPath>../../PAC/linux/l_console.cpp</itemPath>
         <itemPath>../../PAC/linux/l_dtime.cpp</itemPath>
         <itemPath>../../PAC/linux/l_mem.cpp</itemPath>
-        <itemPath>../../PAC/linux/tcp_cmctr_linux.cpp</itemPath>
+        <itemPath>../../PAC/linux/l_tcp_cmctr.cpp</itemPath>
+        <itemPath>../../PAC/linux/l_wago.cpp</itemPath>
       </logicalFolder>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
@@ -216,6 +218,7 @@
             <pElem>../../common/lua</pElem>
             <pElem>../../common/tolua++</pElem>
           </incDir>
+          <commandLine>-lrt</commandLine>
           <preprocessorList>
             <Elem>LINUX_OS</Elem>
             <Elem>PAC_PC</Elem>
