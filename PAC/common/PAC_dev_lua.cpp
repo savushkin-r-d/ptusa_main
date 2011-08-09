@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 08/03/11 15:12:29.
+** Generated automatically by tolua++-1.0.92 on 08/09/11 08:25:47.
 */
 
 #ifndef __cplusplus
@@ -4179,6 +4179,60 @@ static int tolua_PAC_dev_PID_print00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* function: get_sec */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_get_sec00
+static int tolua_PAC_dev_get_sec00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isnoobj(tolua_S,1,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  {
+   unsigned long tolua_ret = (unsigned long)  get_sec();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_sec'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* function: get_millisec */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_get_millisec00
+static int tolua_PAC_dev_get_millisec00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isnoobj(tolua_S,1,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  {
+   unsigned long tolua_ret = (unsigned long)  get_millisec();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_millisec'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* function: get_delta_millisec */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_get_delta_millisec00
 static int tolua_PAC_dev_get_delta_millisec00(lua_State* tolua_S)
@@ -4203,6 +4257,34 @@ static int tolua_PAC_dev_get_delta_millisec00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'get_delta_millisec'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* function: sleep_ms */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_sleep_ms00
+static int tolua_PAC_dev_sleep_ms00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  unsigned long ms = ((unsigned long)  tolua_tonumber(tolua_S,1,0));
+  {
+   sleep_ms(ms);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'sleep_ms'.",&tolua_err);
  return 0;
 #endif
 }
@@ -4441,7 +4523,10 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"set_used_par",tolua_PAC_dev_PID_set_used_par00);
    tolua_function(tolua_S,"print",tolua_PAC_dev_PID_print00);
   tolua_endmodule(tolua_S);
+  tolua_function(tolua_S,"get_sec",tolua_PAC_dev_get_sec00);
+  tolua_function(tolua_S,"get_millisec",tolua_PAC_dev_get_millisec00);
   tolua_function(tolua_S,"get_delta_millisec",tolua_PAC_dev_get_delta_millisec00);
+  tolua_function(tolua_S,"sleep_ms",tolua_PAC_dev_sleep_ms00);
  tolua_endmodule(tolua_S);
  return 1;
 }
