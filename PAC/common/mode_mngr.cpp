@@ -95,6 +95,8 @@ void step_path::print() const
     {    
     if ( open_devices.size() )
         {
+        Print( "Steps:\n" );
+
         Print( "      On [ %u ]:\n", open_devices.size() );
         for ( u_int i = 0; i < open_devices.size(); i++ )
             {
@@ -115,16 +117,16 @@ void step_path::print() const
 
     if ( FB_group_devices.size() )
         {
-        Print( "      FB group [ %u ]:\n", FB_group_devices.size() );
+        Print( "      FB groups [ %u ]:\n", FB_group_devices.size() );
         for ( u_int i = 0; i < FB_group_devices.size(); i++ )
             {            
             Print( "\t" );
             FB_group_devices[ i ].fb->print();            
             for ( u_int j = 0; j < FB_group_devices[ i ].open_devices.size(); j++ )
-                {
-                Print( "\t\t" );
+                {  
+                Print( "\t" );
                 FB_group_devices[ i ].open_devices[ j ]->print();                
-                }                 
+                }
             } 
         }
     }
@@ -466,7 +468,7 @@ void mode_manager::print()
 
         if ( modes_on_FB.at( j ).size() )
             {
-            Print( "  Required FB: %d", modes_on_FB.at( j ).at( 0 )->get_n() );
+            Print( "      Required FB: %d", modes_on_FB.at( j ).at( 0 )->get_n() );
 
             for ( u_int i = 1; i < modes_on_FB.at( j ).size(); i++ )
                 {
