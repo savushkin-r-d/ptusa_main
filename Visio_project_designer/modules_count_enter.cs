@@ -1,4 +1,15 @@
-﻿using System;
+﻿/// @file modules_count_enter.cs
+/// @brief Форма с вводом параметров модулей ввода\вывода Wago.
+/// 
+/// @author  Иванюк Дмитрий Сергеевич.
+/// 
+/// @par Текущая версия:
+/// @$Rev: 269 $.\n
+/// @$Author: id $.\n
+/// @$Date:: 2011-04-15 16:25:19#$.
+///
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,7 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace Visio_project_designer
+namespace visio_project_designer
     {
     public partial class modules_count_enter : Form
         {

@@ -205,7 +205,9 @@
     can be found.
   -->
   <ItemGroup>
-    <Compile Include="edit_io.cs">
+    <Compile Include="doc\doxygen\main_doc.cs" />
+    <Compile Include="tech_device.cs" />
+    <Compile Include="edit_valve_type.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="modules_count_enter.cs">
@@ -217,8 +219,9 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <EmbeddedResource Include="edit_io.resx">
-      <DependentUpon>edit_io.cs</DependentUpon>
+    <Compile Include="wago.cs" />
+    <EmbeddedResource Include="edit_valve_type.resx">
+      <DependentUpon>edit_valve_type.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="modules_count_enter.resx">
       <DependentUpon>modules_count_enter.cs</DependentUpon>
@@ -236,7 +239,9 @@
     <EmbeddedResource Include="main_ribbon.resx">
       <DependentUpon>main_ribbon.cs</DependentUpon>
     </EmbeddedResource>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -251,14 +256,14 @@
     <Compile Include="main_ribbon.Designer.cs">
       <DependentUpon>main_ribbon.cs</DependentUpon>
     </Compile>
-    <Compile Include="ThisAddIn.cs">
+    <Compile Include="main.cs">
       <SubType>Code</SubType>
     </Compile>
-    <None Include="ThisAddIn.Designer.xml">
-      <DependentUpon>ThisAddIn.cs</DependentUpon>
+    <None Include="main.Designer.xml">
+      <DependentUpon>main.cs</DependentUpon>
     </None>
-    <Compile Include="ThisAddIn.Designer.cs">
-      <DependentUpon>ThisAddIn.Designer.xml</DependentUpon>
+    <Compile Include="main.Designer.cs">
+      <DependentUpon>main.Designer.xml</DependentUpon>
     </Compile>
     <AppDesigner Include="Properties\" />
     <Content Include="Visio docs\PTUSA project.vst" />
@@ -279,7 +284,7 @@
       <FlavorProperties GUID="{BAA0C2D2-18E2-41B9-852F-F413020CAA33}">
         <ProjectProperties HostName="Visio" HostPackage="{20A848B8-E01F-4801-962E-25DB0FF57389}" OfficeVersion="14.0" VstxVersion="4.0" ApplicationType="Visio" Language="cs" TemplatesPath="" DebugInfoExeName="#Software\Microsoft\Office\14.0\Visio\InstallRoot\Path#visio.exe" AddItemTemplatesGuid="{51063C3A-E220-4D12-8922-BDA915ACD783}" />
         <Host Name="Visio" GeneratedCodeNamespace="Visio_project_designer" PublishedHash="69C324AB27932AA2FBF2B7EA72250886FF164DE6" IconIndex="0">
-          <HostItem Name="ThisAddIn" Code="ThisAddIn.cs" CanonicalName="AddIn" PublishedHash="3D17B5D3612C3048C4CE6FB9FCF1BA04781823FD" CanActivate="false" IconIndex="1" Blueprint="ThisAddIn.Designer.xml" GeneratedCode="ThisAddIn.Designer.cs" />
+          <HostItem Name="ThisAddIn" Code="main.cs" CanonicalName="AddIn" PublishedHash="3D17B5D3612C3048C4CE6FB9FCF1BA04781823FD" CanActivate="false" IconIndex="1" Blueprint="main.Designer.xml" GeneratedCode="main.Designer.cs" />
         </Host>
       </FlavorProperties>
     </VisualStudio>

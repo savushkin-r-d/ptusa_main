@@ -1,4 +1,4 @@
-﻿namespace Visio_project_designer
+﻿namespace visio_project_designer
     {
     partial class modules_count_enter
         {

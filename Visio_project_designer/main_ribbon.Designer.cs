@@ -1,4 +1,4 @@
-﻿namespace Visio_project_designer
+﻿namespace visio_project_designer
     {
     partial class main_ribbon : Microsoft.Office.Tools.Ribbon.RibbonBase
         {
@@ -48,8 +48,8 @@
             {
             this.tab1 = this.Factory.CreateRibbonTab();
             this.group1 = this.Factory.CreateRibbonGroup();
-            this.group2 = this.Factory.CreateRibbonGroup();
             this.toggleButton_edit_mode = this.Factory.CreateRibbonToggleButton();
+            this.group2 = this.Factory.CreateRibbonGroup();
             this.button2 = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
@@ -69,22 +69,22 @@
             this.group1.Label = "Редактирование";
             this.group1.Name = "group1";
             // 
-            // group2
-            // 
-            this.group2.Items.Add( this.button2 );
-            this.group2.Label = "Редактор WAGO";
-            this.group2.Name = "group2";
-            // 
             // toggleButton_edit_mode
             // 
             this.toggleButton_edit_mode.Label = "Привязка";
             this.toggleButton_edit_mode.Name = "toggleButton_edit_mode";
             this.toggleButton_edit_mode.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.toggleButton_edit_mode_Click );
             // 
+            // group2
+            // 
+            this.group2.Items.Add( this.button2 );
+            this.group2.Label = "Редактор WAGO";
+            this.group2.Name = "group2";
+            // 
             // button2
             // 
             this.button2.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.button2.Image = global::Visio_project_designer.Properties.Resources.wago_linux;
+            this.button2.Image = global::visio_project_designer.Properties.Resources.wago_linux;
             this.button2.Label = "Сохранить описание";
             this.button2.Name = "button2";
             this.button2.ShowImage = true;

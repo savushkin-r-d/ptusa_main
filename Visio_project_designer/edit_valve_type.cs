@@ -1,13 +1,19 @@
-﻿// AnchorBarsUsage.cs
-// <copyright>Copyright (c) Microsoft Corporation. All rights reserved.
-// </copyright>
-// <summary>This class demonstrates creating an add-on created anchor bar with a
-// list view control and shows how to set its docking, positioning, and merge
-// behavior.</summary>
+﻿/// @file edit_valve_type.cs
+/// @brief Форма редактирования типа клапана ( 1 КУ, 2 КУ и т.д.).
+/// 
+/// @author  Иванюк Дмитрий Сергеевич.
+/// 
+/// @par Текущая версия:
+/// @$Rev: 269 $.\n
+/// @$Author: id $.\n
+/// @$Date:: 2011-04-15 16:25:19#$.
+///
 
 using System;
 
-namespace Visio_project_designer
+using tech_device;
+
+namespace visio_project_designer
     {
 
     /// <summary>This class contains the implementation for the form that will
@@ -226,32 +232,32 @@ namespace Visio_project_designer
         private void myListView_DoubleClick( object sender, EventArgs e )
             {
             // Выделяем все доступные клеммы.
-            ThisAddIn.g_PAC.mark_suitable( 
+            Globals.visio_addin.g_PAC.mark_suitable( 
                 myListView.SelectedItems[ 0 ].Text.Substring( 0, myListView.SelectedItems[ 0 ].Text.Length - 1 ) );
                         
 
             // Выделяем задействованные устройством клеммы.
-            Globals.ThisAddIn.current_selected_dev.select_channels();
+            Globals.visio_addin.current_selected_dev.select_channels();
 
 
-            Globals.ThisAddIn.is_selecting_clamp = true;
+            Globals.visio_addin.is_selecting_clamp = true;
 
 
-            visioApplication.Windows[ ( short ) ThisAddIn.VISIO_WNDOWS.MAIN ].MouseMove +=
+            visioApplication.Windows[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].MouseMove +=
                 new Microsoft.Office.Interop.Visio.EWindow_MouseMoveEventHandler(
-                Globals.ThisAddIn.visio_app_mouse_move );
+                Globals.visio_addin.visio_addin__mouse_move );
             }
 
         private void comboBox_type_SelectedIndexChanged( object sender, EventArgs e )
             {
-            if( Globals.ThisAddIn.current_selected_dev.get_sub_type() != comboBox_type.SelectedIndex )
+            if( Globals.visio_addin.current_selected_dev.get_sub_type() != comboBox_type.SelectedIndex )
                 {
-                Globals.ThisAddIn.current_selected_dev.change_sub_type(
-                    ( device.SUB_TYPES ) comboBox_type.SelectedIndex, ThisAddIn.g_PAC );
+                Globals.visio_addin.current_selected_dev.change_sub_type(
+                    ( device.SUB_TYPES ) comboBox_type.SelectedIndex, Globals.visio_addin.g_PAC );
 
-                Globals.ThisAddIn.current_selected_dev.refresh_edit_window(
+                Globals.visio_addin.current_selected_dev.refresh_edit_window(
                     comboBox_type, myListView, true );
-                Globals.ThisAddIn.current_selected_dev.select_channels();
+                Globals.visio_addin.current_selected_dev.select_channels();
                 }
 
             }
@@ -260,21 +266,21 @@ namespace Visio_project_designer
             {
             if( myListView.SelectedItems.Count > 0 )
                 {
-                Globals.ThisAddIn.current_selected_dev.set_active_channel(
+                Globals.visio_addin.current_selected_dev.set_active_channel(
                     myListView.SelectedItems[ 0 ].Text );                
                 }
             else
                 {
-                Globals.ThisAddIn.current_selected_dev.set_active_channel( "" );
+                Globals.visio_addin.current_selected_dev.set_active_channel( "" );
                 }
 
-            Globals.ThisAddIn.current_selected_dev.select_channels();
+            Globals.visio_addin.current_selected_dev.select_channels();
             }
 
         }
     }
 
-namespace Visio_project_designer
+namespace visio_project_designer
     {   
 
     /// <summary>This class demonstrates creating an add-on created anchor bar
