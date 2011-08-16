@@ -1,12 +1,12 @@
 ﻿/// @file main.cs
-/// @brief Системные классы, которые реализуют дополнение к Visio.
+/// @brief Системный класс, который реализует дополнение к Visio.
 /// 
 /// @author  Иванюк Дмитрий Сергеевич.
 /// 
 /// @par Текущая версия:
-/// @$Rev: 269 $.\n
-/// @$Author: id $.\n
-/// @$Date:: 2011-04-15 16:25:19#$.
+/// @$Rev$.\n
+/// @$Author$.\n
+/// @$Date::                     $.
 /// 
 using System;
 using System.Collections.Generic;
