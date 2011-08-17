@@ -299,6 +299,7 @@ void device_manager::print() const
         {
         Print( "    %3i. ", i + 1 );
         project_devices[ i ]->print();
+        Print( "\n" ); 
         }
     Print( "\n" );
     }
@@ -712,7 +713,7 @@ void counter::direct_set_state( int new_state )
 void counter::print() const
     {
     device::print();
-    wago_device::print();
+    //wago_device::print();
     }
 //-----------------------------------------------------------------------------
 void counter::pause()
@@ -791,7 +792,7 @@ void digital_wago_device::direct_set_state( int new_state )
 void digital_wago_device::print() const
     {
     device::print();
-    wago_device::print();
+    //wago_device::print();
     }
 //-----------------------------------------------------------------------------
 int digital_wago_device::get_state()
@@ -1214,7 +1215,7 @@ int analog_wago_device::get_state_now()
 void analog_wago_device::print() const
     {
     device::print();
-    wago_device::print();
+    //wago_device::print();
     }
 //-----------------------------------------------------------------------------
 void analog_wago_device::direct_on()
@@ -1339,8 +1340,6 @@ bool timer::is_time_up() const
 //-----------------------------------------------------------------------------
 u_long timer::get_work_time() const
     {
-    Print( " %lu\n", work_time + get_delta_millisec( last_time ) );
-
     return work_time + get_delta_millisec( last_time );
     }
 //-----------------------------------------------------------------------------
@@ -1387,11 +1386,13 @@ timer_manager::~timer_manager()
         }
     }
 //-----------------------------------------------------------------------------
-timer& timer_manager::operator[]( unsigned int index )
+timer* timer_manager::operator[]( unsigned int index )
     {
+    index -= 1;
+
     if ( index < timers_cnt )
         {
-        return timers[ index ];
+        return &timers[ index ];
         }
 #ifdef DEBUG
     else
@@ -1401,7 +1402,7 @@ timer& timer_manager::operator[]( unsigned int index )
         }
 #endif // DEBUG
 
-    return stub;
+    return &stub;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

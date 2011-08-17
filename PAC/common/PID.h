@@ -83,7 +83,10 @@ class PID
             WP_U,  ///< Выход ПИД.
             };
 
+
+        /// @param n - номер.
         PID( int n );
+
         ~PID(); 
                 
         /// @brief Включение ПИД.

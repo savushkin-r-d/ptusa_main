@@ -1233,7 +1233,7 @@ class timer_manager
         ///
         /// @return - таймер с нужным индексом, заглушка - в случае выхода за 
         /// диапазон.
-        timer& operator[] ( unsigned int index );
+        timer* operator[] ( unsigned int index );
 
     private:
         u_int   timers_cnt; ///< Количество таймеров.

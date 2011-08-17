@@ -248,6 +248,7 @@ void device_communicator::print() const
         print_str( tmp_str, 0 );
 
         dev[ i ]->print();
+        Print( "\n" );
         } 
     sprintf( tmp_str, "Done.\n" );
     print_str( tmp_str, 1 );

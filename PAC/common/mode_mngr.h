@@ -61,7 +61,7 @@ class step_path
 
         int init();
         int evaluate() const;
-        int final( );
+        int final();
 
         /// Получение времени начала шага.
         inline u_int_4 get_start_time() const;
@@ -97,7 +97,8 @@ class step_path
         
         u_int_4 start_time;                     ///< Время старта шага.
 
-        struct FB_group_dev                         ///< Время старта шага.
+        /// Группа устройств, управляемых по обратной связи.
+        struct FB_group_dev                         
             {
             device* fb;
 

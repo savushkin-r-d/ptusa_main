@@ -284,7 +284,7 @@ void wago_device::print() const
     DO_channels.print();    
     AI_channels.print();    
     AO_channels.print();
-    Print( "\n" );
+    //Print( "\n" );
     }
 //-----------------------------------------------------------------------------
 int wago_device::load_table_from_string( char *str, IO_channels &channels )
@@ -530,18 +530,18 @@ void wago_device::IO_channels::print() const
             break;
             }
 
-        Print( ":%d ", count );
-        if ( count )
-            {
-            Print( "[ " );
-            for ( u_int i = 0; i < count; i++ )
-                {
-                Print("%d:%2d", tables[ i ], offsets[ i ] );
-                if ( i < count - 1 ) Print( "; " );
-                }
-            Print( " ]" );
-            }
-        Print( "; " );
+        Print( ":%d; ", count );
+        //if ( count )
+        //    {
+        //    Print( "[ " );
+        //    for ( u_int i = 0; i < count; i++ )
+        //        {
+        //        Print("%d:%2d", tables[ i ], offsets[ i ] );
+        //        if ( i < count - 1 ) Print( "; " );
+        //        }
+        //    Print( " ]" );
+        //    }
+        //Print( "; " );
         }
     }
 //-----------------------------------------------------------------------------
@@ -785,7 +785,7 @@ void wago_manager::print() const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-wago_manager::wago_node::wago_node() : state( S_NO_CONNECT ),
+wago_manager::wago_node::wago_node() : state( ST_NO_CONNECT ),
     type( T_750_860 ),
     number( 0 ),
     DO_cnt( 0 ),
@@ -840,7 +840,7 @@ wago_manager::wago_node::~wago_node()
     }
 //-----------------------------------------------------------------------------
 wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
-    int DO_cnt, int DI_cnt, int AO_cnt, int AI_cnt ): state( S_NO_CONNECT ),
+    int DO_cnt, int DI_cnt, int AO_cnt, int AI_cnt ): state( ST_NO_CONNECT ),
     type( ( TYPES ) type ),
     number( number ),
     last_poll_time( get_sec() ),

@@ -101,7 +101,8 @@ void step_path::print() const
         for ( u_int i = 0; i < open_devices.size(); i++ )
             {
             Print( "\t" );
-            open_devices[ i ]->print();            
+            open_devices[ i ]->print();  
+            Print( "\n" );
             }        
         }
 
@@ -111,7 +112,8 @@ void step_path::print() const
         for ( u_int i = 0; i < close_devices.size(); i++ )
             {
             Print( "\t" );
-            close_devices[ i ]->print();            
+            close_devices[ i ]->print();  
+            Print( "\n" );
             }        
         }
 
@@ -121,11 +123,13 @@ void step_path::print() const
         for ( u_int i = 0; i < FB_group_devices.size(); i++ )
             {            
             Print( "\t" );
-            FB_group_devices[ i ].fb->print();            
+            FB_group_devices[ i ].fb->print();  
+            Print( ";" );
             for ( u_int j = 0; j < FB_group_devices[ i ].open_devices.size(); j++ )
                 {  
                 Print( "\t" );
-                FB_group_devices[ i ].open_devices[ j ]->print();                
+                FB_group_devices[ i ].open_devices[ j ]->print();    
+                Print( "\n" );
                 }
             } 
         }

@@ -255,7 +255,7 @@ class wago_manager
 
             void print();
 
-            enum CONST
+            enum W_CONST
                 {
                 C_MAX_WAIT_TIME = 6, ///< Время до установки ошибки связи с модулем, сек.
                 };
@@ -268,12 +268,12 @@ class wago_manager
                 };
 
             enum STATES         ///< Cостояния работы с узлом.
-                {
-                S_NO_CONNECT = 0,
-                S_OK,
+                {                
+                ST_NO_CONNECT = 0,
+                ST_OK,
                 };
 
-            STATES  state;          ///< Cостояние работы с узлом.
+            wago_node::STATES  state;          ///< Cостояние работы с узлом.
             TYPES   type;           ///< Тип.
             u_int   number;         ///< Номер.
             char    ip_address[ 16 ];///< IP-адрес.

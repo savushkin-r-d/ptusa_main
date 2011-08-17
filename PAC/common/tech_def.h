@@ -212,7 +212,7 @@ class tech_object: public i_Lua_save_device
 
         std::vector< u_int_4 >  state;  ///< Состояние объекта.
 
-        run_time_params_u_int_4 mode_time;          ///< Время режимов, сек.
+        run_time_params_u_int_4 modes_time;    ///< Время режимов, сек.
 
         enum CONSTANTS
             {
