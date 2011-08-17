@@ -266,14 +266,13 @@
       <DependentUpon>main.Designer.xml</DependentUpon>
     </Compile>
     <AppDesigner Include="Properties\" />
+    <None Include="Resources\wago_linux.jpg" />
     <Content Include="Visio docs\PTUSA project.vst" />
     <Content Include="Visio docs\Wago.vss" />
     <Content Include="Visio docs\Устройства.vss" />
     <None Include="Visio_project_designer_TemporaryKey.pfx" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Wago_linux.jpg" />
-  </ItemGroup>
+  <ItemGroup />
   <!-- Include the build rules for a C# project. -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- Include additional build rules for an Office application add-in. -->

@@ -9,7 +9,7 @@
 //------------------------------------------------------------------------------
 
 #pragma warning disable 414
-namespace visio_project_designer {
+namespace visio_prj_designer {
     
     
     /// 

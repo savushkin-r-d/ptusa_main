@@ -21,7 +21,7 @@ using System.IO;
 
 using System.Runtime.InteropServices; //
 
-namespace visio_project_designer
+namespace visio_prj_designer
     {
     public partial class main_ribbon
         {
@@ -85,7 +85,7 @@ namespace visio_project_designer
 
         private void toggleButton_edit_mode_Click( object sender, RibbonControlEventArgs e )
             {
-            Globals.visio_addin.is_device_edit_mode = this.toggleButton_edit_mode.Checked;
+            Globals.visio_addin.is_device_edit_mode = this.edit_mode_tbutton.Checked;
 
             Microsoft.Office.Interop.Visio.Windows visio_wnds = visio_app.Windows;
 
@@ -112,13 +112,13 @@ namespace visio_project_designer
 
                 visio_wnds[ ( short ) visio_addin.VISIO_WNDOWS.IO_EDIT ].Activate();
 
-                AnchorBarsUsage tmp = new AnchorBarsUsage();
-                tmp.DemoAnchorBar( visio_app, true );
+                edit_valve_type_form_usage tmp = new edit_valve_type_form_usage();
+                tmp.create_tool_form( visio_app, true );
                 Globals.visio_addin.edit_io_frm = tmp;
 
                 //visio_wnds[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].MouseMove -=
                 //    new Microsoft.Office.Interop.Visio.EWindow_MouseMoveEventHandler(
-                //    Globals.visio_addin.visio_addin__mouse_move );  
+                //    Globals.visio_addin.visio_addin__MouseMove );  
 
                 }
             else

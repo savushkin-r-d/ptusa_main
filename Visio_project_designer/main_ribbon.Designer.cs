@@ -1,16 +1,33 @@
-﻿namespace visio_project_designer
+﻿/// @file main_ribbon.Designer.cs
+/// @brief Визуальные компоненты ленты меню @ref visio_prj_designer::main_ribbon.
+/// 
+/// @author  Иванюк Дмитрий Сергеевич.
+/// 
+/// @par Текущая версия:
+/// @$Rev$.\n
+/// @$Author$.\n
+/// @$Date::                     $.
+///
+
+namespace visio_prj_designer
     {
     partial class main_ribbon : Microsoft.Office.Tools.Ribbon.RibbonBase
         {
+        /// <summary> Показать ленту меню. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
         public void show()
             {
-            tab1.Visible = true;
+            process_definition_tab.Visible = true;
             PerformLayout();
             }
 
+        /// <summary> Скрыть ленту меню. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
         public void hide()
             {
-            tab1.Visible = false;
+            process_definition_tab.Visible = false;
             PerformLayout();
             }
 
@@ -46,58 +63,58 @@
         /// </summary>
         private void InitializeComponent()
             {
-            this.tab1 = this.Factory.CreateRibbonTab();
+            this.process_definition_tab = this.Factory.CreateRibbonTab();
             this.group1 = this.Factory.CreateRibbonGroup();
-            this.toggleButton_edit_mode = this.Factory.CreateRibbonToggleButton();
+            this.edit_mode_tbutton = this.Factory.CreateRibbonToggleButton();
             this.group2 = this.Factory.CreateRibbonGroup();
-            this.button2 = this.Factory.CreateRibbonButton();
-            this.tab1.SuspendLayout();
+            this.save_as_lua_button = this.Factory.CreateRibbonButton();
+            this.process_definition_tab.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
             // 
-            // tab1
+            // process_definition_tab
             // 
-            this.tab1.Groups.Add( this.group1 );
-            this.tab1.Groups.Add( this.group2 );
-            this.tab1.Label = "Описание техпроцесса";
-            this.tab1.Name = "tab1";
-            this.tab1.Visible = false;
+            this.process_definition_tab.Groups.Add( this.group1 );
+            this.process_definition_tab.Groups.Add( this.group2 );
+            this.process_definition_tab.Label = "Описание техпроцесса";
+            this.process_definition_tab.Name = "process_definition_tab";
+            this.process_definition_tab.Visible = false;
             // 
             // group1
             // 
-            this.group1.Items.Add( this.toggleButton_edit_mode );
+            this.group1.Items.Add( this.edit_mode_tbutton );
             this.group1.Label = "Редактирование";
             this.group1.Name = "group1";
             // 
-            // toggleButton_edit_mode
+            // edit_mode_tbutton
             // 
-            this.toggleButton_edit_mode.Label = "Привязка";
-            this.toggleButton_edit_mode.Name = "toggleButton_edit_mode";
-            this.toggleButton_edit_mode.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.toggleButton_edit_mode_Click );
+            this.edit_mode_tbutton.Label = "Привязка";
+            this.edit_mode_tbutton.Name = "edit_mode_tbutton";
+            this.edit_mode_tbutton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.toggleButton_edit_mode_Click );
             // 
             // group2
             // 
-            this.group2.Items.Add( this.button2 );
+            this.group2.Items.Add( this.save_as_lua_button );
             this.group2.Label = "Редактор WAGO";
             this.group2.Name = "group2";
             // 
-            // button2
+            // save_as_lua_button
             // 
-            this.button2.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.button2.Image = global::visio_project_designer.Properties.Resources.wago_linux;
-            this.button2.Label = "Сохранить описание";
-            this.button2.Name = "button2";
-            this.button2.ShowImage = true;
-            this.button2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.button1_Click );
+            this.save_as_lua_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.save_as_lua_button.Image = global::Visio_project_designer.Properties.Resources.wago_linux;
+            this.save_as_lua_button.Label = "Сохранить описание";
+            this.save_as_lua_button.Name = "save_as_lua_button";
+            this.save_as_lua_button.ShowImage = true;
+            this.save_as_lua_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.button1_Click );
             // 
             // main_ribbon
             // 
             this.Name = "main_ribbon";
             this.RibbonType = "Microsoft.Visio.Drawing";
-            this.Tabs.Add( this.tab1 );
+            this.Tabs.Add( this.process_definition_tab );
             this.Load += new Microsoft.Office.Tools.Ribbon.RibbonUIEventHandler( this.Ribbon1_Load );
-            this.tab1.ResumeLayout( false );
-            this.tab1.PerformLayout();
+            this.process_definition_tab.ResumeLayout( false );
+            this.process_definition_tab.PerformLayout();
             this.group1.ResumeLayout( false );
             this.group1.PerformLayout();
             this.group2.ResumeLayout( false );
@@ -109,9 +126,9 @@
 
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group1;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group2;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton button2;
-        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton toggleButton_edit_mode;
-        internal Microsoft.Office.Tools.Ribbon.RibbonTab tab1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton save_as_lua_button;
+        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton edit_mode_tbutton;
+        internal Microsoft.Office.Tools.Ribbon.RibbonTab process_definition_tab;
         }
 
     partial class ThisRibbonCollection

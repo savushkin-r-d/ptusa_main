@@ -23,7 +23,7 @@ using wago;
 using tech_device;
 
 /// Пространство имен данного дополнения к Visio.
-namespace visio_project_designer
+namespace visio_prj_designer
     {
     /// <summary> Класс дополнения. </summary>
     ///
@@ -46,7 +46,7 @@ namespace visio_project_designer
         internal bool is_device_edit_mode = false; 
 
         /// <summary> Форма редактирования привязки к каналам. </summary>
-        internal AnchorBarsUsage edit_io_frm;
+        internal edit_valve_type_form_usage edit_io_frm;
 
         /// <summary> Константы для обращения к окнам Visio. </summary>
         public enum VISIO_WNDOWS : short
@@ -72,32 +72,32 @@ namespace visio_project_designer
             visio_app = this.Application;
             visio_app.DocumentCreated +=
                 new Microsoft.Office.Interop.Visio.EApplication_DocumentCreatedEventHandler(
-                    visio_addin__document_created );
+                    visio_addin__DocumentCreated );
 
             visio_app.ShapeAdded +=
                 new Microsoft.Office.Interop.Visio.EApplication_ShapeAddedEventHandler(
-                    visio_addin__shape_added );
+                    visio_addin__ShapeAdded );
 
             visio_app.BeforeShapeDelete +=
                 new Microsoft.Office.Interop.Visio.EApplication_BeforeShapeDeleteEventHandler(
-                    visio_addin__shape_deleted );
+                    visio_addin__BeforeShapeDelete );
 
             visio_app.ConnectionsAdded +=
                 new Microsoft.Office.Interop.Visio.EApplication_ConnectionsAddedEventHandler(
-                    visio_addin__connections_added );
+                    visio_addin__ConnectionsAdded );
 
             visio_app.FormulaChanged += new Microsoft.Office.Interop.Visio.EApplication_FormulaChangedEventHandler(
-                    visio_addin__formula_changed );
+                    visio_addin__FormulaChanged );
 
 
             visio_app.SelectionChanged += new Microsoft.Office.Interop.Visio.EApplication_SelectionChangedEventHandler(
-                    visio_addin__selection_changed );
+                    visio_addin__SelectionChanged );
 
             visio_app.DocumentOpened += new Microsoft.Office.Interop.Visio.EApplication_DocumentOpenedEventHandler(
-                 visio_addin__document_opened );
+                 visio_addin__DocumentOpened );
 
             visio_app.MouseDown +=new Visio.EApplication_MouseDownEventHandler(
-                 visio_addin__mouse_down );
+                 visio_addin___MouseDown );
 
             g_devices = new List< device > ();
             }
@@ -122,7 +122,7 @@ namespace visio_project_designer
         /// <param name="x">              The x coordinate. </param>
         /// <param name="y">              The y coordinate. </param>
         /// <param name="CancelDefault">  [in,out] The cancel default. </param>
-        private void visio_addin__mouse_down( int Button, int KeyButtonState, double x,
+        private void visio_addin___MouseDown( int Button, int KeyButtonState, double x,
             double y, ref bool CancelDefault )
             {
             if( is_selecting_clamp )
@@ -137,12 +137,12 @@ namespace visio_project_designer
                         current_selected_dev.set_channel( 
                             current_selected_dev.get_active_channel(), module, clamp );
 
-                        visio_addin__selection_changed( visio_app.Windows[ 
+                        visio_addin__SelectionChanged( visio_app.Windows[ 
                             ( short ) visio_addin.VISIO_WNDOWS.IO_EDIT ] );
 
                         visio_app.Windows[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].MouseMove -=
                             new Microsoft.Office.Interop.Visio.EWindow_MouseMoveEventHandler(
-                            Globals.visio_addin.visio_addin__mouse_move );
+                            Globals.visio_addin.visio_addin__MouseMove );
                         is_selecting_clamp = false;
 
                         CancelDefault = true;
@@ -152,12 +152,12 @@ namespace visio_project_designer
                     }
 
                 g_PAC.unmark();
-                visio_addin__selection_changed( visio_app.Windows[
+                visio_addin__SelectionChanged( visio_app.Windows[
                     ( short ) visio_addin.VISIO_WNDOWS.IO_EDIT ] );
 
                 visio_app.Windows[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].MouseMove -=
                     new Microsoft.Office.Interop.Visio.EWindow_MouseMoveEventHandler(
-                    Globals.visio_addin.visio_addin__mouse_move );
+                    Globals.visio_addin.visio_addin__MouseMove );
                 is_selecting_clamp = false;
                 }
             }
@@ -172,7 +172,7 @@ namespace visio_project_designer
         /// <param name="x">              The x coordinate. </param>
         /// <param name="y">              The y coordinate. </param>
         /// <param name="CancelDefault">  [in,out] The cancel default. </param>
-        internal void visio_addin__mouse_move( int Button,
+        internal void visio_addin__MouseMove( int Button,
             int KeyButtonState, double x, double y, ref bool CancelDefault )
             {
 
@@ -199,7 +199,7 @@ namespace visio_project_designer
         /// <remarks> Id, 16.08.2011. </remarks>
         ///
         /// <param name="target"> Target for the. </param>
-        private void visio_addin__document_opened( Visio.Document target )
+        private void visio_addin__DocumentOpened( Visio.Document target )
             {
             if( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
                 {
@@ -254,7 +254,7 @@ namespace visio_project_designer
         /// <remarks> Id, 16.08.2011. </remarks>
         ///
         /// <param name="window"> Активное окно. </param>
-        private void visio_addin__selection_changed( Microsoft.Office.Interop.Visio.Window window )
+        private void visio_addin__SelectionChanged( Microsoft.Office.Interop.Visio.Window window )
             {
 
             // Проверка на режим привязки устройств к каналам ввода\вывода.
@@ -306,8 +306,8 @@ namespace visio_project_designer
                                 edit_io_frm.listForm.enable_prop();
 
                                 current_selected_dev.refresh_edit_window(
-                                    edit_io_frm.listForm.comboBox_type,
-                                    edit_io_frm.listForm.myListView );                                                               
+                                    edit_io_frm.listForm.type_cbox,
+                                    edit_io_frm.listForm.type_lview );                                                               
                                 }
 
                                 previous_selected_dev = current_selected_dev;
@@ -337,7 +337,7 @@ namespace visio_project_designer
         /// <remarks> Id, 16.08.2011. </remarks>
         ///
         /// <param name="cell"> Ячейка, где произошло изменение. </param>
-        private void visio_addin__formula_changed( Microsoft.Office.Interop.Visio.Cell cell )
+        private void visio_addin__FormulaChanged( Microsoft.Office.Interop.Visio.Cell cell )
             {
             if( cell.Shape.Data1 == "750" )
                 {
@@ -479,7 +479,7 @@ namespace visio_project_designer
         /// <remarks> Id, 16.08.2011. </remarks>
         ///
         /// <param name="connect"> Объект "склейки". </param>
-        private void visio_addin__connections_added( Microsoft.Office.Interop.Visio.Connects connect )
+        private void visio_addin__ConnectionsAdded( Microsoft.Office.Interop.Visio.Connects connect )
             {
             Microsoft.Office.Interop.Visio.Shape obj_2 =
                 visio_app.ActivePage.Shapes[ connect.FromSheet.Name ];
@@ -509,7 +509,7 @@ namespace visio_project_designer
         /// <remarks> Id, 16.08.2011. </remarks>
         ///
         /// <param name="shape"> Удаляемая фигура. </param>
-        private void visio_addin__shape_deleted( Microsoft.Office.Interop.Visio.Shape shape )
+        private void visio_addin__BeforeShapeDelete( Microsoft.Office.Interop.Visio.Shape shape )
             {
             switch( shape.Data1 )
                 {
@@ -529,8 +529,8 @@ namespace visio_project_designer
                 }
             }
 
-        // Поля для реализации функциональности вставки сразу нескольких модулей
-        // Wago.
+        #region Поля для реализации функциональности вставки сразу нескольких модулей Wago.
+
         private bool is_duplicating = false;
         private int duplicate_count = 0;
 
@@ -538,6 +538,8 @@ namespace visio_project_designer
         private Microsoft.Office.Interop.Visio.Shape new_shape;
 
         private bool no_delete_g_pac_flag = false;
+        
+        #endregion
 
         /// <summary> Event handler. Обработка события добавления фигуры. Здесь
         /// реализована часть функциональности вставки сразу нескольких модулей 
@@ -546,7 +548,7 @@ namespace visio_project_designer
         /// <remarks> Id, 16.08.2011. </remarks>
         ///
         /// <param name="shape"> Добавляемая фигура. </param>
-        private void visio_addin__shape_added( Microsoft.Office.Interop.Visio.Shape shape )
+        private void visio_addin__ShapeAdded( Microsoft.Office.Interop.Visio.Shape shape )
             {
             //Проверяем, нужный ли нам объект мы добавляем на лист. Выводим окно
             //с запросом количества элементов. Помещаем на форму первый элемент,
@@ -613,7 +615,7 @@ namespace visio_project_designer
                     shape = new_shape;
 
                     g_PAC.add_io_module( shape );
-                    visio_addin__formula_changed( shape.Cells[ "Prop.type" ] );
+                    visio_addin__FormulaChanged( shape.Cells[ "Prop.type" ] );
                     }
                 }
 
@@ -629,7 +631,7 @@ namespace visio_project_designer
         /// <remarks> Id, 16.08.2011. </remarks>
         ///
         /// <param name="doc"> Created document. </param>
-        private void visio_addin__document_created( Microsoft.Office.Interop.Visio.Document doc )
+        private void visio_addin__DocumentCreated( Microsoft.Office.Interop.Visio.Document doc )
             {
             if( doc.Template.Contains( "PTUSA project" ) )
                 {

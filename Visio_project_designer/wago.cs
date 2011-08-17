@@ -13,16 +13,17 @@ using System.Collections.Generic;
 
 using Visio = Microsoft.Office.Interop.Visio;
 
+/// <summary> Устройства Wago проекта (модули, контроллеры...).</summary>
 namespace wago
     {
-
-    //-----------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     /// <summary> Модуль ввода/вывода WAGO. </summary>
     ///
     /// <remarks> Id, 01.08.2011. </remarks>
     public class io_module
         {
-        public enum KINDS ///< Виды модулей. 
+        /// <summary> Виды модулей. </summary>
+        public enum KINDS
             {
             SPECIAL,
             DO,
@@ -31,7 +32,8 @@ namespace wago
             AI
             };
 
-        public enum TYPES ///< Типы модулей. 
+        /// <summary> Типы модулей. </summary>
+        public enum TYPES 
             {
             T_UNKNOWN = 0,
             T_504 = 504,
@@ -39,23 +41,36 @@ namespace wago
             T_466 = 466
             };
 
-        public enum CLAMPS_COUNT ///< Количество клемм. 
+        /// <summary> Количество клемм. </summary>
+        public enum CLAMPS_COUNT
             {
             СLAMP_8 = 8,
             СLAMP_16 = 16
             };
 
-        internal KINDS kind;          ///< Вид модуля. 
-        internal TYPES type;          ///< Тип модуля. 
-        public CLAMPS_COUNT total_clamps;  ///< Общее количество клемм. 
+        /// <summary> Вид модуля. </summary>
+        internal KINDS kind;          
 
-        internal int order_number; ///< Порядковый номер в сборке.
-        internal int node_number;  ///< Номер узла.
+        /// <summary> Тип модуля. </summary>
+        internal TYPES type;          
 
-        public bool[] free_clamp_flags;      ///< Флаг свободности клеммы.
-        public bool[] available_clamp_flags; ///< Флаг доступности клеммы.
+        /// <summary> Общее количество клемм. </summary>
+        public CLAMPS_COUNT total_clamps;  
 
-        /// <summary> Constructor. На основе свойств фигуры создается объект.</summary>
+        /// <summary> Порядковый номер в сборке. </summary>
+        internal int order_number; 
+
+        /// <summary> Номер узла. </summary>
+        internal int node_number;  
+
+        /// <summary> Флаг свободности клеммы. </summary>
+        public bool[] free_clamp_flags; 
+
+        /// <summary> Флаг доступности клеммы. </summary>
+        public bool[] available_clamp_flags;
+
+        /// <summary> Constructor. На основе свойств фигуры создается объект.
+        /// </summary>
         ///
         /// <remarks> Id, 01.08.2011. </remarks>
         ///
@@ -132,12 +147,17 @@ namespace wago
             return "{ " + type + " }";
             }
 
-        Visio.Shape shape;           ///< Фигура Visio модуля.
-        List<string> clamp_names; ///< Имена клемм.
+        /// <summary> Фигура Visio модуля. </summary>
+        Visio.Shape shape;        
 
-        public bool[] suitable_clamp_flags;      ///< Флаг подходящих для привязки клемм.
+        /// <summary> Имена клемм. </summary>
+        List<string> clamp_names;
 
-        /// <summary> Пометка доступных клемм (для режима привязки устройств). </summary>
+        /// <summary> Флаг подходящих для привязки клемм. </summary>
+        public bool[] suitable_clamp_flags;    
+
+        /// <summary> Пометка доступных клемм (для режима привязки устройств).
+        /// </summary>
         ///
         /// <remarks> Id, 01.08.2011. </remarks>
         public void mark_suitable()
@@ -360,16 +380,20 @@ namespace wago
             }
         }
 
-    //-----------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
     /// <summary> Промышленный контроллер. </summary>
     ///
     /// <remarks> Id, 01.08.2011. </remarks>
     public class PAC
         {
-        public Visio.Shape shape; ///< Фигура Visio контроллера.
+        /// <summary> Фигура Visio контроллера. </summary>
+        public Visio.Shape shape; 
 
-        public string ip_addres;  ///< IP-адрес контроллера.  
-        public string PAC_name;   ///< Имя контроллера.  
+        /// <summary> IP-адрес контроллера. </summary>
+        public string ip_addres;  
+
+        /// <summary> Имя контроллера. </summary>
+        public string PAC_name; 
 
         private List<io_module> io_modules; ///< Модули ввода\вывода.  
 
@@ -479,25 +503,50 @@ namespace wago
             return res;
             }
 
+        /// <summary> Добавление i/o модуля. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <param name="shape"> Фигура Visio модуля. </param>
         public void add_io_module( Visio.Shape shape )
             {
             io_modules.Add( new io_module( shape ) );
             }
         }
 
+    //--------------------------------------------------------------------------
+    /// <summary> Канал ввода\вывода Wago. </summary>
+    ///
+    /// <remarks> Id, 17.08.2011. </remarks>
     public class wago_channel
         {
+
+        /// <summary> Вид канала. </summary>
         internal io_module.KINDS kind;
 
+        /// <summary> Модуль, к которому привязан канал. </summary>
         internal io_module module;
+
+        /// <summary> Клемма, к которой привязан канал. </summary>
         internal int clamp;
 
+        /// <summary> Constructor. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <param name="module"> The module. </param>
+        /// <param name="clamp">  The clamp. </param>
         public wago_channel( io_module module, int clamp )
             {
             this.module = module;
             this.clamp = clamp;
             }
 
+        /// <summary> Constructor. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <param name="kind"> The kind. </param>
         public wago_channel( io_module.KINDS kind )
             {
             this.module = null;
@@ -506,6 +555,13 @@ namespace wago
             this.kind = kind;
             }
 
+        /// <summary> Привязка к модулю. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <param name="pac">    The pac. </param>
+        /// <param name="module"> The module. </param>
+        /// <param name="clamp">  The clamp. </param>
         public void set( PAC pac, int module, int clamp )
             {
             if( module > 0 )
@@ -518,15 +574,30 @@ namespace wago
 
         }
 
+    //--------------------------------------------------------------------------
+    /// <summary> Устройство с каналами ввода\вывода Wago. </summary>
+    ///
+    /// <remarks> Id, 17.08.2011. </remarks>
     public class wago_device
         {
+
+        /// <summary> Каналы ввода\вывода. </summary>
         internal Dictionary<string, wago_channel> wago_channels;
 
+        /// <summary> Default constructor. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
         public wago_device()
             {
             wago_channels = new Dictionary<string, wago_channel>();
             }
 
+        /// <summary> Добавление ввода\вывода. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <param name="name"> Имя канала. </param>
+        /// <param name="kind"> Вид канала. </param>
         public void add_wago_channel( string name, io_module.KINDS kind )
             {
             wago_channels.Add( name, new wago_channel( kind ) );

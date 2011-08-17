@@ -20,43 +20,88 @@ using Visio = Microsoft.Office.Interop.Visio;
 
 using wago;
 
+/// <summary> Устройства проекта (клапан, насос, танк...).</summary>
 namespace tech_device
     {
+    /// <summary> Простое устройство (клапан, насос, ...). </summary>
+    ///
+    /// <remarks> Id, 17.08.2011. </remarks>
     public class device : wago_device
         {
-        int n;
 
+        /// <summary> Номер устройства.  </summary>
+        private int n;
+
+        /// <summary> Получение номера устройства. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <returns> Номер устройства. </returns>
         public int get_n()
             {
             return n;
             }
 
+        /// <summary> Типы устройств. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
         public enum TYPES
             {
-            T_V = 0,
+            /// <summary> Клапан.  </summary>
+            T_V = 0, 
             }
 
+        /// <summary> Подтип клапана. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
         public enum SUB_TYPES
             {
+            /// <summary> 1 канал управления.  </summary>
             V_1_CONTROL_CHANNEL = 0,
+
+            /// <summary> 2 канала управления.  </summary>
             V_2_CONTROL_CHANNEL,
 
+
+            /// <summary> 1 канал управления и 1 обратная связь.  </summary>
             V_1_CONTROL_CHANNEL_1_FB,
+
+            /// <summary> 1 канал управления и 2 обратных связи.  </summary>
             V_1_CONTROL_CHANNEL_2_FB,
+
+            /// <summary> 2 канала управления и 2 обратных связи.  </summary>
             V_2_CONTROL_CHANNEL_2_FB,
             }
-
+        
+        /// <summary> Тип устройства. </summary>
         TYPES type;
+
+        /// <summary> Подтип устройства. </summary>
         SUB_TYPES sub_type;
 
-        string active_channel_name = ""; ///< Выбранный канал устройства.
+        /// <summary> Активный (выбранный) в данный момент канал устройства (для визуальной
+        ///  работы с устройством). </summary>
+        private string active_channel_name = "";
 
+        /// <summary> Получение активного канала. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <returns> Активный канал. </returns>
         public string get_active_channel()
             {
             return active_channel_name;
             }
 
-        public void refresh_edit_window( ComboBox cbox, ListView lview, bool only_list_view = false )
+        /// <summary> Обновление окна со свойствами устройства. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <param name="cbox">           The cbox. </param>
+        /// <param name="lview">          The lview control. </param>
+        /// <param name="only_list_view"> (optional) the only list view. </param>
+        public void refresh_edit_window( ComboBox cbox, ListView lview, 
+            bool only_list_view = false )
             {
             if( only_list_view == false )
                 {
@@ -83,7 +128,13 @@ namespace tech_device
                 }
             }
 
-        public Dictionary<string, string> to_str()
+        /// <summary> Представление в виде списка строк, которые описывают каналы
+        /// устройства. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <returns> A string representation of this object. </returns>
+        private Dictionary<string, string> to_str()
             {
             Dictionary<string, string> res = new Dictionary<string, string>();
 
@@ -103,24 +154,37 @@ namespace tech_device
             return res;
             }
 
+        /// <summary> Получение типа устройства. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <returns> The type. </returns>
         public int get_type()
             {
             return ( int ) type;
             }
 
+        /// <summary> Получение подтипа устройства. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <returns> The sub type. </returns>
         public int get_sub_type()
             {
             return ( int ) sub_type;
             }
-
-        Visio.Shape shape;
-
-        string[] NAMES = 
+        
+        /// <summary> Фигура Visio устройства. </summary>
+        private Visio.Shape shape;
+        
+        /// <summary> Имена типов устройств.  </summary>
+        private string[] NAMES = 
         {
         "Клапан",
         };
-
-        string[] SUB_NAMES = 
+        
+        /// <summary> Имена подтипов устройств.  </summary>
+        private string[] SUB_NAMES = 
         {
         "1 КУ",
         "2 КУ",
@@ -129,7 +193,18 @@ namespace tech_device
         "2 КУ 2 ОС"
         };
 
-        public bool get_n_from_str( string str, out int node, out int module,
+        /// <summary> Получение параметров канала из строкового описания канала
+        /// (для записи\чтения из файла). </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <param name="str">    The string. </param>
+        /// <param name="node">   [out] The node. </param>
+        /// <param name="module"> [out] The module. </param>
+        /// <param name="clamp">  [out] The clamp. </param>
+        ///
+        /// <returns> true if it succeeds, false if it fails. </returns>
+        private bool get_n_from_str( string str, out int node, out int module,
             out int clamp )
             {
             //Значение привязки имеет следующий формат:
@@ -156,15 +231,27 @@ namespace tech_device
             return false;
             }
 
+        /// <summary> Изменение подтипа устройства. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <param name="sub_type"> Подтип устройства. </param>
+        /// <param name="pac">      Узел Wago. </param>
         public void change_sub_type( SUB_TYPES sub_type, PAC pac )
             {
             this.sub_type = sub_type;
             shape.Cells[ "Prop.sub_type" ].FormulaU = Convert.ToString( ( int ) sub_type );
 
-            switch_sub_type( sub_type, pac );
+            set_sub_type( sub_type, pac );
             }
 
-        void switch_sub_type( SUB_TYPES sub_type, PAC pac )
+        /// <summary> Установка подтипа устройства. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <param name="sub_type"> Подтип устройства. </param>
+        /// <param name="pac">      Узел Wago. </param>
+        private void set_sub_type( SUB_TYPES sub_type, PAC pac )
             {
             wago_channels.Clear();
 
@@ -254,6 +341,12 @@ namespace tech_device
 
             }
 
+        /// <summary> Constructor. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <param name="shape"> Фигура Visio. </param>
+        /// <param name="pac">   Узел Wago. </param>
         public device( Visio.Shape shape, PAC pac )
             {
             n = Convert.ToUInt16( shape.Cells[ "Prop.number" ].FormulaU );
@@ -262,9 +355,16 @@ namespace tech_device
 
             this.shape = shape;
 
-            switch_sub_type( sub_type, pac );
+            set_sub_type( sub_type, pac );
             }
 
+        /// <summary> Привязка канала к клемме. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <param name="channel_name"> Name of the channel. </param>
+        /// <param name="module">       module. </param>
+        /// <param name="clamp">        The clamp. </param>
         public void set_channel( string channel_name, io_module module, int clamp )
             {
             //Освобождаем при наличии ранее привязанную клемму.
@@ -288,11 +388,20 @@ namespace tech_device
             module.use( clamp );
             }
 
+        /// <summary> Установка активной ("подсвечиваемой") клеммы в данный 
+        /// момент времени. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <param name="channel_name"> Name of the channel. </param>
         public void set_active_channel( string channel_name )
             {
             active_channel_name = channel_name;
             }
 
+        /// <summary> Отмена "подсветки" клемм, занятых устройством. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
         public void unselect_channels()
             {
             foreach( KeyValuePair<string, wago_channel> channel in wago_channels )
@@ -304,6 +413,9 @@ namespace tech_device
                 }
             }
 
+        /// <summary> "Подсветка" клемм, занятых устройством. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
         public void select_channels()
             {
             foreach( KeyValuePair<string, wago_channel> channel in wago_channels )
