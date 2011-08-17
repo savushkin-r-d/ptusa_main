@@ -54,6 +54,7 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>../../../PAC/common;../../../PAC/common/sys;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;$(IncludePath)</IncludePath>
     <TargetExt>.exe</TargetExt>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Full debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -63,6 +64,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>../../../PAC/common;../../../PAC/common/sys;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;$(IncludePath)</IncludePath>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
