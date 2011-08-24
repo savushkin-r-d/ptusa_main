@@ -15,9 +15,10 @@ class PAC_info: public i_Lua_save_device
 
         enum PARAMETERS
             {
-            P_PARAMS_COUNT  = 1,  ///< Количество параметров.
+            P_PARAMS_COUNT  = 2,  ///< Количество параметров.
 
-            P_CTR_ERROR_TIME = 0, ///< Время ожидания ошибки счетчика, мсек.
+            P_CTR_ERROR_TIME = 0, ///< Время ожидания ошибки счетчика, мсек.                                    
+            P_MIX_FLIP_PERIOD = 1,///< Интервал промывки седел клапанов, сек. 
             };
 
         saved_params_u_int_4 *par;

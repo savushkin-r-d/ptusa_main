@@ -25,6 +25,7 @@
 #include "dtime.h"
 
 #include "PAC_dev.h"
+#include "PAC_info.h"
 #include "param_ex.h"
 
 class tech_object;
@@ -111,6 +112,107 @@ class step_path
         std::vector< FB_group_dev > FB_group_devices; ///< Открываемые устройства по ОС.    
     };
 //-----------------------------------------------------------------------------
+/// @brief Шаг мойки, при котором происходит флипование клапанами (mixproof).
+class wash_step
+    {
+    public:
+        wash_step();
+
+        /// @brief Отладочная печать объекта в консоль.
+        void print();
+
+        /// @brief Инициализация шага.
+        ///
+        void init();
+
+        /// @brief Выполнение шага.
+        ///
+        void eval();
+
+        /// @brief Завершение шага.
+        ///
+        void final();
+
+        /// @brief Добавление клапана, промывка седла.
+        ///
+        /// @param [in] group - группа.
+        /// @param [in] v     - клапан.
+        void add_valve( u_int group, device *v );
+
+        /// @brief Добавление группы клапанов.
+        ///
+        /// @param [in] state - команда, указывающая какое седло будем промывать.       
+        /// 
+        /// @return -1    - ошибка добавления. 
+        /// @return  0 >= - индекс добавленной группы. 
+        int add_valves_group( i_mix_proof::STATES state );
+
+        /// @brief Сохранение объекта в виде строки Lua.
+        ///
+        /// @param [in] buff - строка, куда сохраняем.       
+        /// 
+        /// @return - длина строки.         
+        int save( char *buff );
+
+         /// @brief Инициализация параметров (времена промывки групп седел) значениями
+         /// по умолчанию (1000 мсек).
+         /// 
+        void init_params();
+
+    private:
+        /// @brief Группа устройств, с которыми выполняется заданная команда.
+        /// 
+        /// В случае класса @ref wash_step открывается верхнее (нижнее) седло.
+        struct dev_group
+            {
+            std::vector< device* > devices;
+            i_mix_proof::STATES state;
+
+            /// @brief Отладочная печать объекта в консоль.
+            void print();
+
+            /// @brief Добавление устройства.
+            ///
+            /// @param [in] dev - устройство.
+            void add_dev( device* dev );
+            
+            /// @brief Завершение выполнения заданной команды.
+            ///
+            void final();
+
+            /// @brief Выполнение заданной команды.
+            ///
+            void eval();
+            };
+        
+        enum CONST
+            {
+            C_MAX_GROUP = 20,
+            };
+
+        enum PHASES
+            {
+            P_WAIT = 0,
+            P_OPEN,
+            };
+
+        PHASES phase; ///< Текущий этап.
+
+        u_int_4 wait_time;         ///< Время ожидания перед промыванием седел группы.
+                
+        u_int     active_group_n;             ///< Номер промываемой сейчас группы.        
+        smart_ptr < dev_group > active_group; ///< Промываемая сейчас группа.
+
+        u_int_4 wash_time;  ///< Время промывки седел текущей группы клапанов.
+
+        /// Верхние и нижние седла.   
+        std::vector< dev_group > wash_seat_devices; 
+        
+        u_int_4 start_cycle_time; ///< Время старта цикла (ожидания или промывки).
+
+        saved_params_u_int_4 par; ///< Времена мойки седел групп.
+    };
+//-----------------------------------------------------------------------------
 /// @brief Содержит информацию о всех шагах какого-либо объекта (танк, 
 /// гребенка).
 /// 
@@ -134,6 +236,33 @@ class mode_manager
         int init( u_int_2 mode, u_char start_step = 0 );
         int evaluate( u_int_2 mode );
         int final( u_int_2 mode );
+
+        int save( char *str )
+            {
+            int str_size = 0;
+
+            sprintf( str + str_size, "\tMODE = \n\t\t{ \n" );
+            str_size += strlen( str + str_size );
+
+            for ( u_int i = 0; i < modes_cnt; i++ )
+                {
+                if ( wash_seats[ i ] )
+                    {
+                    sprintf( str + str_size, "\t\t[ %d ] = {", i + 1 );
+                    str_size += strlen( str + str_size );
+
+                    str_size += wash_seats[ i ]->save( str + str_size );
+                    
+                    sprintf( str + str_size, " },\n" );
+                    str_size += strlen( str + str_size );
+                    }
+                }
+
+            sprintf( str + str_size, "\t\t},\n" );
+            str_size += strlen( str + str_size );
+
+            return str_size;
+            }
 
         /// @brief Переход к шагу.
         ///
@@ -236,6 +365,7 @@ class mode_manager
         /// @brief Добавление группы устройств, которые включается\открывается во 
         /// время выполнения шага по управляющему сигналу (обратной связи).
         ///
+        /// @param [in] mode           - режим.
         /// @param [in] control_FB_dev - указатель на управляющий сигнал.
         ///
         /// @return >= 0 - номер добавленной группы устройств (для дальнейшего 
@@ -245,12 +375,31 @@ class mode_manager
         /// @brief Добавление устройства, которое включается\открывается во 
         /// время выполнения шага по управляющему сигналу (обратной связи).
         ///
+        /// @param [in] mode  - режим.
         /// @param [in] pair_n   - номер группы устройств.
         /// @param [in] open_dev - указатель на добавляемое устройство.
         ///
         /// @return < 0 - ошибка.
         /// @return   0 - ок.
         int add_mode_pair_dev( int mode, u_int pair_n, device *open_dev );
+
+
+        /// @brief Добавление группы клапанов, промывка седел.
+        ///
+        /// @param [in] mode  - режим.
+        /// @param [in] state - команда (открытие верхнего\нижнего седла).
+        int add_wash_seats_valves_group( int mode, i_mix_proof::STATES state );
+
+        /// @brief Добавление клапана, промывка седла.
+        ///
+        /// @param [in] mode  - режим.
+        /// @param [in] group - группа.
+        /// @param [in] v     - клапан.
+        int add_wash_seat_valve( int mode, u_int group, device *v );
+
+        /// @brief Инициализация параметров значениями по умолчанию.
+        /// 
+        void init_params();
 
     private:
         /// @brief Технологический объект.
@@ -286,6 +435,8 @@ class mode_manager
         /// @return -1 - номер шага выходит за пределы.
         /// @return  0 - оk.
         int check_correct_step_n( u_int_2 mode, u_char step );
+
+        wash_step  **wash_seats; ///< Промывка седел клапанов.
     };
 //-----------------------------------------------------------------------------
 #endif // MODE_MNGR

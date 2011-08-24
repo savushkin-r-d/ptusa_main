@@ -33,11 +33,11 @@ int project_manager::proc_main_params( int argc, char *argv[] )
         if ( strcmp( argv[ i ], "rcrc" ) == 0 )
             {
 #ifdef DEBUG
-            Print( "Resetting CRC ...\n" );
+            Print( "Resetting CRC ... " );
 #endif
             params_manager::get_instance()->reset_CRC();
 #ifdef DEBUG
-            Print( "Resetting CRC completed.\n" );
+            Print( "completed.\n" );
 #endif
             }
         }
@@ -86,12 +86,12 @@ int project_manager::lua_load_configuration()
 #endif // DEBUG
 
     //-Editor editor_version.
-    const int CURRENT_EDITOR_VERSION = 12;
+    const int CURRENT_EDITOR_VERSION = 13;
     int editor_version =  
         lua_manager::get_instance()->int_no_param_exec_lua_method( "system",
         "get_editor_version", "lua_load_configuration" );
         
-    if ( editor_version < CURRENT_EDITOR_VERSION )
+    if ( editor_version != CURRENT_EDITOR_VERSION )
         {
 #ifdef DEBUG
         Print( "project_manager:load_configuration(...) - not correct editor editor_version - %d, must be %d!\n",
@@ -111,9 +111,6 @@ int project_manager::lua_load_configuration()
     //-Devices data.    
     lua_manager::get_instance()->void_exec_lua_method( "system", 
         "init_devices", "lua_load_configuration" );
-
-    //G_DEVICE_CMMCTR->add_device( 
-    //  device_manager::get_instance()->get_communication_device() );    
 
 #ifdef DEBUG
     Print( "Reading configuration completed.\n\n" );

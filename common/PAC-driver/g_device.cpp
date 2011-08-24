@@ -49,7 +49,7 @@ long device_communicator::write_devices_states_service( long len,
         {
         case CMD_GET_INFO_ON_CONNECT:            
             sprintf( ( char* ) outdata, 
-                "protocol_version = %d\n\r PAC_name = \"%s\"", 
+                "protocol_version = %d; PAC_name = \"%s\"\n", 
                 G_PROTOCOL_VERSION,
                 tcp_communicator::get_instance()->get_host_name() );
 

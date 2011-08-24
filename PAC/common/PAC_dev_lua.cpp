@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 08/12/11 10:31:41.
+** Generated automatically by tolua++-1.0.92 on 08/24/11 09:48:54.
 */
 
 #ifndef __cplusplus
@@ -50,22 +50,23 @@ static int tolua_collect_tech_object (lua_State* tolua_S)
 /* function to register type */
 static void tolua_reg_types (lua_State* tolua_S)
 {
- tolua_usertype(tolua_S,"wago_device");
+ tolua_usertype(tolua_S,"i_mix_proof");
  tolua_usertype(tolua_S,"device_manager");
  tolua_usertype(tolua_S,"PID");
  tolua_usertype(tolua_S,"wago_manager");
  tolua_usertype(tolua_S,"run_time_params_float");
+ tolua_usertype(tolua_S,"run_time_params_u_int_4");
  tolua_usertype(tolua_S,"i_DI_device");
  tolua_usertype(tolua_S,"saved_params_u_int_4");
  tolua_usertype(tolua_S,"saved_params_float");
  tolua_usertype(tolua_S,"device");
  tolua_usertype(tolua_S,"i_counter");
- tolua_usertype(tolua_S,"run_time_params_u_int_4");
+ tolua_usertype(tolua_S,"mode_manager");
  tolua_usertype(tolua_S,"i_AO_device");
  tolua_usertype(tolua_S,"timer_manager");
  tolua_usertype(tolua_S,"tech_object_manager");
  tolua_usertype(tolua_S,"i_AI_device");
- tolua_usertype(tolua_S,"mode_manager");
+ tolua_usertype(tolua_S,"wago_device");
  tolua_usertype(tolua_S,"timer");
  tolua_usertype(tolua_S,"i_DO_device");
  tolua_usertype(tolua_S,"tech_object");
@@ -2534,6 +2535,80 @@ static int tolua_PAC_dev_mode_manager_add_mode_pair_dev00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: add_wash_seats_valves_group of class  mode_manager */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_mode_manager_add_wash_seats_valves_group00
+static int tolua_PAC_dev_mode_manager_add_wash_seats_valves_group00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"mode_manager",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  mode_manager* self = (mode_manager*)  tolua_tousertype(tolua_S,1,0);
+  int mode = ((int)  tolua_tonumber(tolua_S,2,0));
+  i_mix_proof::STATES state = ((i_mix_proof::STATES) (int)  tolua_tonumber(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_wash_seats_valves_group'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->add_wash_seats_valves_group(mode,state);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'add_wash_seats_valves_group'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: add_wash_seat_valve of class  mode_manager */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_mode_manager_add_wash_seat_valve00
+static int tolua_PAC_dev_mode_manager_add_wash_seat_valve00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"mode_manager",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,4,"device",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  mode_manager* self = (mode_manager*)  tolua_tousertype(tolua_S,1,0);
+  int mode = ((int)  tolua_tonumber(tolua_S,2,0));
+  unsigned int group = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
+  device* v = ((device*)  tolua_tousertype(tolua_S,4,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_wash_seat_valve'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->add_wash_seat_valve(mode,group,v);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'add_wash_seat_valve'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* function: G_DEVICE_MANAGER */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_G_DEVICE_MANAGER00
 static int tolua_PAC_dev_G_DEVICE_MANAGER00(lua_State* tolua_S)
@@ -2834,11 +2909,7 @@ static int tolua_PAC_dev_timer_manager__geti00(lua_State* tolua_S)
 #endif
   {
    timer* tolua_ret = (timer*)  self->operator[](index);
-   {
-#ifdef __cplusplus    
-    tolua_pushusertype(tolua_S, ( void* ) tolua_ret,"timer");    
-#endif
-   }
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"timer");
   }
  }
  return 1;
@@ -4462,6 +4533,13 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"reset",tolua_PAC_dev_dev_stub_reset00);
    tolua_function(tolua_S,"get_quantity",tolua_PAC_dev_dev_stub_get_quantity00);
   tolua_endmodule(tolua_S);
+  tolua_cclass(tolua_S,"i_mix_proof","i_mix_proof","",NULL);
+  tolua_beginmodule(tolua_S,"i_mix_proof");
+   tolua_constant(tolua_S,"ST_CLOSE",i_mix_proof::ST_CLOSE);
+   tolua_constant(tolua_S,"ST_OPEN",i_mix_proof::ST_OPEN);
+   tolua_constant(tolua_S,"ST_UPPER_SEAT",i_mix_proof::ST_UPPER_SEAT);
+   tolua_constant(tolua_S,"ST_LOWER_SEAT",i_mix_proof::ST_LOWER_SEAT);
+  tolua_endmodule(tolua_S);
   #ifdef __cplusplus
   tolua_cclass(tolua_S,"tech_object","tech_object","",tolua_collect_tech_object);
   #else
@@ -4508,6 +4586,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"add_mode_on_FB",tolua_PAC_dev_mode_manager_add_mode_on_FB00);
    tolua_function(tolua_S,"add_mode_FB_group",tolua_PAC_dev_mode_manager_add_mode_FB_group00);
    tolua_function(tolua_S,"add_mode_pair_dev",tolua_PAC_dev_mode_manager_add_mode_pair_dev00);
+   tolua_function(tolua_S,"add_wash_seats_valves_group",tolua_PAC_dev_mode_manager_add_wash_seats_valves_group00);
+   tolua_function(tolua_S,"add_wash_seat_valve",tolua_PAC_dev_mode_manager_add_wash_seat_valve00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_DEVICE_MANAGER",tolua_PAC_dev_G_DEVICE_MANAGER00);
   tolua_function(tolua_S,"G_TECH_OBJECTS",tolua_PAC_dev_G_TECH_OBJECTS00);

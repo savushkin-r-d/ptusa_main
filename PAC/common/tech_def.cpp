@@ -54,6 +54,8 @@ int tech_object::init_params()
     par_float.reset_to_0();
     par_uint.reset_to_0();
 
+    modes_manager->init_params();
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -336,9 +338,7 @@ int tech_object::save_device( char *buff )
         }
     sprintf( buff + answer_size, "\n\t\t},\n" );
     answer_size += strlen( buff + answer_size );
-
-    //answer_size += modes_time.save_device( buff + answer_size, "\t" );
-
+        
     //Шаги.
     sprintf( buff + answer_size, "\tMODES_STEPS=\n\t\t{\n\t\t" );
     answer_size += strlen( buff + answer_size );
@@ -356,6 +356,9 @@ int tech_object::save_device( char *buff )
     answer_size += par_uint.save_device( buff + answer_size, "\t" );
     answer_size += rt_par_float.save_device( buff + answer_size, "\t" );
     answer_size += rt_par_uint.save_device( buff + answer_size, "\t" );
+
+    //Параметры промывки седел.    
+    answer_size += modes_manager->save( buff + answer_size );
 
     sprintf( buff + answer_size, "\t}\n" );
     answer_size += strlen( buff + answer_size );

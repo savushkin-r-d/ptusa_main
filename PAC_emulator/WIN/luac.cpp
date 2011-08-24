@@ -363,7 +363,7 @@ static int pmain (lua_State *L) {
     if (argv[0] && argv[0][0]) progname = argv[0];
     lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
     
-    // Выполнение системных скриптов sys.lua. 
+    //-Выполнение системных скриптов sys.lua. 
 #ifdef DEBUG
     const char *ADDITIONAL_PATH_CMD = 
         "package.path = package.path..\';../../system scripts/?.lua\'";        
@@ -379,44 +379,26 @@ static int pmain (lua_State *L) {
         }
 #endif // DEBUG
 
-    const char *lua_wago_script = "main.wago.plua";    
+    const char *LUA_WAGO_SCRIPT = "main.wago.plua";    
 
-    if ( luaL_dofile( L, lua_wago_script ) != 0 )
+    if ( luaL_dofile( L, LUA_WAGO_SCRIPT ) != 0 )
         {
 #ifdef DEBUG
         Print( "Load Lua Wago script \"%s\" error!\n", 
-            lua_wago_script );
+            LUA_WAGO_SCRIPT );
         Print( "\t%s\n", lua_tostring( L, -1 ) );
 #endif // DEBUG
         lua_pop( L, 1 );
 
         return 1;
         }
-
-    //NV_memory_manager::set_instance( new NV_memory_manager_PC() );
-   //project_manager::set_instance( new project_manager_win() );  
-
-    //device_manager::set_instance( new device_manager() );
-    //device_communicator::set_instance( new device_communicator() );
-
-    //wago_manager::set_instance( new wago_manager_PC() );
     
-    //tech_object_manager::set_instance( new tech_object_manager() );
-    //PAC_critical_errors_manager::set_instance( new PAC_critical_errors_manager() );
-
+    //-Экспортируем в Lua необходимые объекты.
     tolua_PAC_dev_open( L );
+
     lua_manager::get_instance()->init( L, 0 );
 
     G_PROJECT_MANAGER->lua_load_configuration();
-
-    const char *PAC_name = 
-        lua_manager::get_instance()->char_no_param_exec_lua_method( "system",
-        "get_PAC_name", "lua_manager::init" );
-
-    tcp_communicator::init_instance( PAC_name );
-    
-    G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
-        device_communicator::write_devices_states_service );
 
     lua_gc(L, LUA_GCRESTART, 0);
     s->status = handle_luainit(L);
@@ -473,10 +455,27 @@ int main (int argc, char **argv)
         {
         G_TECH_OBJECT_MNGR()->init_objects();
 
+        const char *PAC_NAME = 
+            lua_manager::get_instance()->char_no_param_exec_lua_method( "system",
+            "get_PAC_name", "main" );
+
+        tcp_communicator::init_instance( PAC_NAME );
+
+        G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
+            device_communicator::write_devices_states_service );
+
         //-Добавление системных тегов контроллера.
         G_DEVICE_CMMCTR->add_device( PAC_info::get_instance() );
-
+        
+        //-Обработка параметров командной строки.
         G_PROJECT_MANAGER->proc_main_params( argc, argv );
+
+        //-Загрузка параметров.
+        const int PAC_ID = 
+            lua_manager::get_instance()->int_no_param_exec_lua_method( "system",
+            "get_PAC_id", "main" );
+        params_manager::get_instance()->init( PAC_ID );        
+        params_manager::get_instance()->final_init();
 
 #ifdef DEBUG
         G_DEVICE_MANAGER()->print();

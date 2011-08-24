@@ -48,7 +48,8 @@ void PAC_info::eval()
 //-----------------------------------------------------------------------------
 void PAC_info::reset_params()
     {
-    par[ 0 ] [ P_CTR_ERROR_TIME ] = 10000;
+    par[ 0 ] [ P_CTR_ERROR_TIME ]  = 10000;
+    par[ 0 ] [ P_MIX_FLIP_PERIOD ] = 10;
     par->save_all();
     }
 //-----------------------------------------------------------------------------
@@ -76,7 +77,11 @@ int PAC_info::save_device( char *buff )
         up_time_str );
     answer_size += strlen( buff + answer_size );
 
-    answer_size += par->save_device( buff + answer_size, "\t" );
+
+    sprintf( buff + answer_size, "\tWASH_VALVE_SEAT_PERIOD=%d,\n", 
+        par[ 0 ][ P_MIX_FLIP_PERIOD ] );
+    answer_size += strlen( buff + answer_size );
+        
 
     sprintf( buff + answer_size, "\t}\n" );
     answer_size += strlen( buff );

@@ -321,24 +321,10 @@ device_manager::~device_manager()
         {
         delete project_devices[ i ];
         }
+
 #ifndef __BORLANDC__
-  project_devices.clear();
+    project_devices.clear();
 #endif  
-
-    //if ( devices )
-    //    {
-    //    for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
-    //        {
-    //        if ( devices->sub_dev[ i ] )
-    //            {
-    //            delete devices->sub_dev[ i ];
-    //            devices->sub_dev[ i ] = 0;
-    //            }
-    //        }
-
-    //    delete devices;
-        //devices = 0;
-        //}
     }
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_N( int number )
@@ -993,9 +979,9 @@ void valve_mix_proof::open_upper_seat()
     direct_set_state( ST_UPPER_SEAT );
     }
 //-----------------------------------------------------------------------------
-void valve_mix_proof::open_low_seat()
+void valve_mix_proof::open_lower_seat()
     {
-    direct_set_state( ST_LOW_SEAT );
+    direct_set_state( ST_LOWER_SEAT );
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
@@ -1011,7 +997,7 @@ int valve_mix_proof::get_state_now()
         {
         start_switch_time = get_sec();
         if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return ST_UPPER_SEAT;
-        if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return ST_LOW_SEAT;
+        if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return ST_LOWER_SEAT;
         return o;
         }
 
@@ -1068,7 +1054,7 @@ void valve_mix_proof::direct_set_state( int new_state )
         set_DO( DO_INDEX_U, 1 );
         break;
 
-    case ST_LOW_SEAT:
+    case ST_LOWER_SEAT:
         direct_off();
         set_DO( DO_INDEX_L, 1 );
         break;
@@ -1497,9 +1483,9 @@ void valve_AS_mix_proof::open_upper_seat()
     direct_set_state( ST_UPPER_SEAT );
     }
 //-----------------------------------------------------------------------------
-void valve_AS_mix_proof::open_low_seat()
+void valve_AS_mix_proof::open_lower_seat()
     {
-    direct_set_state( ST_LOW_SEAT );
+    direct_set_state( ST_LOWER_SEAT );
     }
 //-----------------------------------------------------------------------------
 int valve_AS_mix_proof::get_state_now()

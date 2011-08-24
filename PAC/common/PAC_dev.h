@@ -602,11 +602,11 @@ class i_mix_proof
             ST_CLOSE = 0,   ///< Закрыт.
             ST_OPEN,        ///< Открыт.
             ST_UPPER_SEAT,  ///< Открыть верхнее седло.
-            ST_LOW_SEAT,    ///< Открыть нижнее седло.
+            ST_LOWER_SEAT,  ///< Открыть нижнее седло.
             };
 
         virtual void open_upper_seat() = 0;
-        virtual void open_low_seat() = 0;
+        virtual void open_lower_seat() = 0;        
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан mixproof.
@@ -619,7 +619,7 @@ class valve_mix_proof : public digital_wago_device, public i_mix_proof
             }
 
         void open_upper_seat();
-        void open_low_seat();
+        void open_lower_seat();
 
 #ifndef DEBUG_NO_WAGO_MODULES
         int  get_state_now();
@@ -649,7 +649,7 @@ class valve_AS_mix_proof : public device, public i_mix_proof
         valve_AS_mix_proof( u_int number );
 
         void open_upper_seat();
-        void open_low_seat();
+        void open_lower_seat();
 
         float get_value();
 

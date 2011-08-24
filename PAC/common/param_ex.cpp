@@ -75,17 +75,17 @@ int params_manager::init( unsigned int project_id )
     int chk = check_CRC();
     if ( 0 == chk ) 
         {
-//#ifdef DEBUG
+#ifdef DEBUG
         Print( "PARAMS OK. PARAMS LOADED.\n" );
-//#endif
+#endif
         loaded = 1;
         } 
     else 
         {
-//#ifdef DEBUG
-        Print( "Project id = %u. PARAMS CRC CHECK FAILED: Trying to reinitialize...\n\r", 
+#ifdef DEBUG
+        Print( "Project id = %u. PARAMS CRC CHECK FAILED: Trying to reinitialize...\n", 
             project_id );
-//#endif
+#endif
         loaded = -1;
         }
     return chk;
@@ -145,21 +145,20 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
 
         save();
 
-//#ifdef DEBUG
         if ( check_CRC() == 0 )
             {
             Print( "PARAMS OK: PARAMS SUCCESFULLY REINITIALIZED.\n" );
             }
         else
             {
-            Print( "PARAMS: FATAL ERROR.\n\r" );
+            Print( "PARAMS: FATAL ERROR.\n" );
             }
 #ifdef KEY_CONFIRM
         Print( "Press any key to continue..." );
         get_char();
         Print( "\n" );
 #endif // KEY_CONFIRM
-//#endif // DEBUG
+
         }
     else
         {
@@ -170,7 +169,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
             }
         else
             {
-            Print( "PARAMS: FATAL ERROR.\n\r" );
+            Print( "PARAMS: FATAL ERROR.\n" );
             }
 #ifdef KEY_CONFIRM
         Print( "Press any key to continue..." );

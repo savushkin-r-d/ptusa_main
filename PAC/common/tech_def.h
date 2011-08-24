@@ -252,6 +252,7 @@ class tech_object_manager
         /// @brief Выполнение итерации технологического процесса.
         void evaluate();
 
+        /// @brief Инициализация объектов на основе скрипта описания Lua.
         int init_objects();
 
         ~tech_object_manager();
