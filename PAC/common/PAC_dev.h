@@ -405,7 +405,7 @@ class digital_wago_device : public device,
             C_SWITCH_TIME = 3, ///< Время переключения устройства, сек.
             };
 
-    private:
+    protected:
 #ifdef DEBUG_NO_WAGO_MODULES
         char state;  ///< Состояние устройства.
 #endif // DEBUG_NO_WAGO_MODULES
@@ -620,6 +620,10 @@ class valve_mix_proof : public digital_wago_device, public i_mix_proof
 
         void open_upper_seat();
         void open_lower_seat();
+
+#ifdef DEBUG_NO_WAGO_MODULES
+        void direct_set_state( int new_state );
+#endif // DEBUG_NO_WAGO_MODULES
 
 #ifndef DEBUG_NO_WAGO_MODULES
         int  get_state_now();

@@ -984,6 +984,38 @@ void valve_mix_proof::open_lower_seat()
     direct_set_state( ST_LOWER_SEAT );
     }
 //-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_WAGO_MODULES
+
+void valve_mix_proof::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+    case -1:
+        state = ( char ) -1;
+        break;
+
+    case ST_LOWER_SEAT:
+        state = ( char ) ST_LOWER_SEAT;
+        break;
+
+    case ST_UPPER_SEAT:
+        state = ST_UPPER_SEAT;
+        break;
+
+    case ST_CLOSE:
+        direct_off();
+        break;
+
+    case ST_OPEN:
+        direct_on();
+        break;
+
+    default:
+        direct_on();
+        }
+    }
+#endif //DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
 int valve_mix_proof::get_state_now()
