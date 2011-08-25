@@ -74,10 +74,10 @@ namespace tech_device
             }
         
         /// <summary> Тип устройства. </summary>
-        TYPES type;
+		public TYPES type;
 
         /// <summary> Подтип устройства. </summary>
-        SUB_TYPES sub_type;
+		public SUB_TYPES sub_type;
 
         /// <summary> Активный (выбранный) в данный момент канал устройства (для визуальной
         ///  работы с устройством). </summary>
@@ -166,7 +166,7 @@ namespace tech_device
 
         /// <summary> Получение подтипа устройства. </summary>
         ///
-        /// <remarks> Id, 17.08.2011. </remarks>
+        /// <remarks> ASV, 24.08.2011. </remarks>
         ///
         /// <returns> The sub type. </returns>
         public int get_sub_type()
@@ -176,7 +176,17 @@ namespace tech_device
         
         /// <summary> Фигура Visio устройства. </summary>
         private Visio.Shape shape;
-        
+
+		/// <summary> Получение подтипа устройства. </summary>
+		///
+		/// <remarks> Id, 17.08.2011. </remarks>
+		///
+		/// <returns> The sub type. </returns>
+		public Visio.Shape get_shape()
+			{
+			return ( Visio.Shape ) shape;
+			}
+
         /// <summary> Имена типов устройств.  </summary>
         private string[] NAMES = 
         {
@@ -240,7 +250,8 @@ namespace tech_device
         public void change_sub_type( SUB_TYPES sub_type, PAC pac )
             {
             this.sub_type = sub_type;
-            shape.Cells[ "Prop.sub_type" ].FormulaU = Convert.ToString( ( int ) sub_type );
+			    
+			shape.Cells["Prop.sub_type"].FormulaU = Convert.ToString((int)sub_type);
 
             set_sub_type( sub_type, pac );
             }

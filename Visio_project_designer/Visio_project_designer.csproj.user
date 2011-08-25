@@ -5,4 +5,12 @@
     <InstallUrlHistory />
     <SupportUrlHistory />
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <StartAction>Project</StartAction>
+    <StartWorkingDirectory>P:\_Ptusa_SRC\Visio_project_designer\Visio docs\</StartWorkingDirectory>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+    <RemoteDebugEnabled>false</RemoteDebugEnabled>
+    <StartArguments>
+    </StartArguments>
+  </PropertyGroup>
 </Project>

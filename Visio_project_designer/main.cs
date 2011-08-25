@@ -226,6 +226,8 @@ namespace visio_prj_designer
                             }
                         }
 
+					g_devices.Clear();
+
                     //Считывание устройств.
                     foreach( Visio.Shape shape in target.Pages[ "Устройства" ].Shapes )
                         {
@@ -256,7 +258,6 @@ namespace visio_prj_designer
         /// <param name="window"> Активное окно. </param>
         private void visio_addin__SelectionChanged( Microsoft.Office.Interop.Visio.Window window )
             {
-
             // Проверка на режим привязки устройств к каналам ввода\вывода.
             if( Globals.visio_addin.is_device_edit_mode ) 
                 {
@@ -268,9 +269,29 @@ namespace visio_prj_designer
                     if( window.Page.Name == "Устройства" )
                         {
 
-                        const int IO_PROP_WINDOW_INDEX = 8;
+						//const int IO_1 = 1;
+						//window.Windows[ IO_1 ].Caption = "q";
 
-                        window.Windows[ IO_PROP_WINDOW_INDEX ].Caption =
+						//const int IO_2 = 2;
+						//window.Windows[ IO_2 ].Caption = "q";
+
+						//const int IO_3 = 3;
+						//window.Windows[ IO_3 ].Caption = "q";
+
+						//const int IO_4 = 4;
+						//window.Windows[ IO_4 ].Caption = "q";
+
+						//const int IO_5 = 5;
+						//window.Windows[ IO_5 ].Caption = "q";
+
+						//const int IO_6 = 6;
+						//window.Windows[ IO_6 ].Caption = "q";
+
+						//const int IO_7 = 7;
+						//window.Windows[ IO_7 ].Caption = "q";
+
+						const int IO_PROP_WINDOW_INDEX = 8;
+						window.Windows[ IO_PROP_WINDOW_INDEX ].Caption =
                                 "Каналы";
 
                         if( window.Selection.Count > 0 )
@@ -285,18 +306,19 @@ namespace visio_prj_designer
                                 previous_selected_dev.unselect_channels();
                                 }
 
-                            Microsoft.Office.Interop.Visio.Shape selected_shape =
-                                window.Selection[ 1 ];
+							Microsoft.Office.Interop.Visio.Shape selected_shape =
+							    window.Selection[ 1 ];
 
-                            //Поиск по shape объекта device.
-                            int dev_n    = Convert.ToInt16( selected_shape.Cells[ "Prop.number" ].FormulaU );
-                            int dev_type = Convert.ToInt16( selected_shape.Cells[ "Prop.type" ].FormulaU );
+                            //	Поиск по shape объекта device.
+							//int dev_n    = Convert.ToInt16( selected_shape.Cells[ "Prop.number" ].FormulaU );
+							//int dev_type = Convert.ToInt16( selected_shape.Cells[ "Prop.type" ].FormulaU );
 
-                            current_selected_dev = g_devices.Find( delegate( device dev )
-                                {
-                                return dev.get_n() == dev_n && dev.get_type() == dev_type; 
-                                }
-                                );
+							current_selected_dev = g_devices.Find( delegate( device dev )
+							    {
+							    //return dev.get_n() == dev_n && dev.get_type() == dev_type; 
+								return dev.get_shape() == selected_shape;
+								}
+							    );
 
                             if( current_selected_dev != null )
                                 {
@@ -310,7 +332,7 @@ namespace visio_prj_designer
                                     edit_io_frm.listForm.type_lview );                                                               
                                 }
 
-                                previous_selected_dev = current_selected_dev;
+                            previous_selected_dev = current_selected_dev;
 
                             } //if( window.Selection.Count > 0 )
                         else
@@ -339,6 +361,7 @@ namespace visio_prj_designer
         /// <param name="cell"> Ячейка, где произошло изменение. </param>
         private void visio_addin__FormulaChanged( Microsoft.Office.Interop.Visio.Cell cell )
             {
+			//	Изменения свойств модуля
             if( cell.Shape.Data1 == "750" )
                 {
                 if( cell.Name == "Prop.order_number" )
@@ -390,32 +413,54 @@ namespace visio_prj_designer
                     }
                 }
 
+			//	Изменение свойств клапана
             if( cell.Shape.Data1 == "V" )
                 {
                 switch( cell.Name )
                     {
-                    //case "Prop.type":
-                    //    string type = cell.Shape.Cells[ "Prop.type" ].get_ResultStr( 0 );
+					//case "Prop.type":
+					//    string type = cell.Shape.Cells[ "Prop.type" ].get_ResultStr( 0 );
 
-                    //    switch( type )
-                    //        {
-                    //        case "1 КУ":
-                    //            //cell.Shape.AddSection( cell.Shape.get_CellsRowIndex );
-                    //            int idx = cell.Shape.get_CellsRowIndex( "Prop.type" );
+					//    switch ( type )
+					//        {
+					//        case "1 КУ":
+					//            //cell.Shape.AddSection( cell.Shape.get_CellsRowIndex );
+					//            int idx = cell.Shape.get_CellsRowIndex( "Prop.type" );
 
-                    //            cell.Shape.AddNamedRow(
-                    //                ( short ) Visio.VisSectionIndices.visSectionUser, "DO",
-                    //                ( short ) Visio.VisRowTags.visTagDefault );
+					//            cell.Shape.AddNamedRow(
+					//                ( short ) Visio.VisSectionIndices.visSectionUser, "DO",
+					//                ( short ) Visio.VisRowTags.visTagDefault );
 
-                    //            cell.Shape.AddNamedRow(
-                    //                ( short ) Visio.VisSectionIndices.visSectionProp, "hf",
-                    //                ( short ) 0 );
+					//            cell.Shape.AddNamedRow(
+					//                ( short ) Visio.VisSectionIndices.visSectionProp, "hf",
+					//                ( short ) 0 );
 
 
-                    //            break;
-                    //        }
+					//            break;
+					//        }
 
-                    //    break;
+					//    break;
+
+
+					case "Prop.sub_type":
+						int sub_type = Convert.ToInt16(cell.Shape.Cells["Prop.sub_type"].Formula);
+
+						//Поиск по shape объекта device.
+						current_selected_dev = g_devices.Find( delegate( device dev )
+						{
+							return dev.get_shape() == cell.Shape;
+						}
+						);
+
+						if ( current_selected_dev != null )
+							{
+							if ( current_selected_dev.get_sub_type() != sub_type )
+								{
+								edit_io_frm.listForm.type_cbox.SelectedIndex = sub_type;
+						        //current_selected_dev.change_sub_type((device.SUB_TYPES)sub_type, g_PAC);
+								}
+						    }
+						break;
 
                     case "Prop.name":
                         string str = cell.Shape.Cells[ "Prop.name" ].Formula;
@@ -431,14 +476,14 @@ namespace visio_prj_designer
                             string n_part_2 = mtc.Groups[ 2 ].ToString();
                             if( n_part_1 == "" ) n_part_1 = "0";
 
-                            int n = Convert.ToUInt16( n_part_1 ) * 100 +
-                                Convert.ToUInt16( n_part_2 );
+                            int n = Convert.ToUInt16( n_part_1 ) * 100 + 
+									Convert.ToUInt16( n_part_2 );
 
                             cell.Shape.Cells[ "Prop.number" ].FormulaU = n.ToString();
 
                             str = str.Replace( "\"", "" );
-                            cell.Shape.Name = str;
-                            cell.Shape.Shapes[ "name" ].Text = str;
+                            cell.Shape.Name = str.ToUpper();
+							cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
                             break;
                             }
 
@@ -449,19 +494,35 @@ namespace visio_prj_designer
                             {
                             Match mtc = rex2.Match( str );
 
-                            //Линия (A-W).
-                            int n = 100 * ( 200 +
-                                ( Convert.ToUInt16( mtc.Groups[ 1 ].ToString()[ 0 ] ) - 65 ) * 20 );
+							//	Принцип нумерации клапанов в зависимости от имени
+							//	( А - 200, В - 220, С - 240, ..., W - 640 )
+							//
+							//	B 3 V 17    ===> ( 220 * 100 ) + ( 3 * 100 ) + ( 17 )  ===>  V( 22317 )
+							//	| |	| |____	17 = ( 17 )				 от 0 до 99
+							//	| |	|______  V =  ---				 ---
+							//	| |________	 3 = ( 3   * 100 )		 от 0 до 19
+							//	|__________	 B = ( 220 * 100 )		 от А до W
+
+							//	Линия (A-W). Выделяем букву и переводим её в верхний регистр (А - 65 ..., а - 97 ...).
+							//	Получаем адрес буквы в таблице символов (А - 65 ...) 
+							char letter = mtc.Groups[ 1 ].ToString().ToUpper()[ 0 ];
+							int n = Convert.ToUInt16( letter );
+							
+							//	Преобразуем букву в номер в соответствии с принятым принципом нумерации
+							n = ( ( ( n - 65 ) * 20 ) + 200 ) * 100;	
+
                             //Номер линии (0-19).
                             n += 100 * Convert.ToUInt16( mtc.Groups[ 2 ].ToString() );
                             //Клапан.
                             n += Convert.ToUInt16( mtc.Groups[ 3 ].ToString() );
 
-                            cell.Shape.Cells[ "Prop.number" ].FormulaU = n.ToString();
+							cell.Shape.Cells[ "Prop.name" ].FormulaU = str.ToUpper();
+							cell.Shape.Cells[ "Prop.number" ].FormulaU = n.ToString();
 
-                            str = str.Replace( "\"", "" );
-                            cell.Shape.Name = str;                                                        
-                            cell.Shape.Shapes[ "name" ].Text = str;
+                            //	Именуем элемент на схеме
+							str = str.Replace( "\"", "" );			//	Удаляем лишние символы
+							cell.Shape.Name = str.ToUpper();		//	Переводим в верхний регистр
+							cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
                             break;
                             }
 
@@ -526,6 +587,23 @@ namespace visio_prj_designer
                             }
                         }
                     break;
+
+				case "V":
+
+                     //Поиск по shape объекта device.
+                     //int dev_n    = Convert.ToInt16( shape.Cells[ "Prop.number" ].FormulaU );
+                     //int dev_type = Convert.ToInt16( shape.Cells[ "Prop.type" ].FormulaU );
+				     
+					 current_selected_dev = g_devices.Find( delegate( device dev )
+                         {
+                         //return dev.get_n() == dev_n && dev.get_type() == dev_type; 
+						 return dev.get_shape() == shape;
+						 }
+						 );
+
+					g_devices.Remove( current_selected_dev );
+
+					break;
                 }
             }
 
@@ -624,6 +702,48 @@ namespace visio_prj_designer
                 g_devices.Add( new device( shape, g_PAC ) );
                 }
             }
+
+		/// <summary> Event handler.  </summary>
+		///
+		/// <remarks> ASV, 23.08.2011. </remarks>
+		///
+		/// <param name="shape"> Редактируемая фигура. </param>
+		private void visio_addin__ShapeChanged(Microsoft.Office.Interop.Visio.Shape shape)
+		{
+			switch (shape.Data1)
+			{
+				//case "750":
+				//    if (shape.Data2 == "860")
+				//    {
+				//        if (no_delete_g_pac_flag)
+				//        {
+				//            no_delete_g_pac_flag = false;
+				//        }
+				//        else
+				//        {
+				//            g_PAC = null;
+				//        }
+				//    }
+				//    break;
+
+				case "V":
+
+					//Поиск по shape объекта device.
+					//int dev_n = Convert.ToInt16(shape.Cells["Prop.number"].FormulaU);
+					//int dev_type = Convert.ToInt16(shape.Cells["Prop.type"].FormulaU);
+
+					current_selected_dev = g_devices.Find(delegate(device dev)
+						{
+						//return dev.get_n() == dev_n && dev.get_type() == dev_type;
+						return dev.get_shape() == shape;
+						}
+						);
+
+					//g_devices[ current_selected_dev ];
+
+					break;
+			}
+		}
 
         /// <summary> Event handler. При создании документа показываем полосу 
         /// работы с техпроцессом. </summary>

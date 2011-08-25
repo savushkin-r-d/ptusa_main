@@ -38,7 +38,8 @@ namespace wago
             T_UNKNOWN = 0,
             T_504 = 504,
             T_402 = 402,
-            T_466 = 466
+            T_466 = 466,
+			T_600 = 600
             };
 
         /// <summary> Количество клемм. </summary>
@@ -85,7 +86,7 @@ namespace wago
 
             type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].FormulaU );
             order_number = Convert.ToUInt16( shape.Cells[ "Prop.order_number" ].FormulaU );
-            node_number = Convert.ToUInt16( shape.Cells[ "Prop.node_number" ].FormulaU );
+            //node_number = Convert.ToUInt16( shape.Cells[ "Prop.node_number" ].FormulaU );
 
             //Определяем количество клемм.
             switch( type )
@@ -114,6 +115,9 @@ namespace wago
                     available_clamp_flags[ 8 - 1 ] = true;
                     break;
 
+				case TYPES.T_600:
+					break;
+
                 default:
                     Exception exc = new Exception(
                         "Неизвестный тип модуля - \"" + type + "\"!" );
@@ -134,6 +138,9 @@ namespace wago
                 case TYPES.T_504:
                     kind = KINDS.DO;
                     break;
+
+				case TYPES.T_600:
+					break;
                 }
             }
 
