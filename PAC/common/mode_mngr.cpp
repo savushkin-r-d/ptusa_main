@@ -1024,7 +1024,7 @@ int mode_manager::save( char *buff )
 
     for ( u_int i = 0; i < modes_cnt; i++ )
         {
-        sprintf( buff + str_size, "\t\t[%d] = { ", i );
+        sprintf( buff + str_size, "\t\t[%d] = { ", i + 1 );
         str_size += strlen( buff + str_size );
 
         str_size += modes_devices[ i ]->save( -1, buff + str_size );
@@ -1033,7 +1033,7 @@ int mode_manager::save( char *buff )
         str_size += strlen( buff + str_size );
         for ( u_int j = 0; j < steps_cnt[ i ]; j++ )
             {
-            str_size += steps[ i ][ j ].save( j, buff + str_size );            
+            str_size += steps[ i ][ j ].save( j + 1, buff + str_size );            
             }
         sprintf( buff + str_size, "}, " );
         str_size += strlen( buff + str_size );
