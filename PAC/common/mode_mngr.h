@@ -32,6 +32,8 @@ class tech_object;
 //-----------------------------------------------------------------------------
 class mode_manager;
 //-----------------------------------------------------------------------------
+class wash_step;
+//-----------------------------------------------------------------------------
 /// @brief Содержит информацию об устройствах, которые входят в шаг (открываются/
 /// закрываются).
 ///
@@ -92,6 +94,29 @@ class step_path
         /// @return   0 - ок.
         int add_pair_dev( u_int pair_n, device *open_dev );
 
+
+        /// @brief Добавление группы клапанов, промывка седел.
+        ///
+        /// @param [in] state - команда (открытие верхнего\нижнего седла).
+        int add_wash_seats_valves_group( i_mix_proof::STATES state );
+
+        /// @brief Добавление клапана, промывка седла.
+        ///
+        /// @param [in] group - группа.
+        /// @param [in] v     - клапан.
+        int add_wash_seat_valve( u_int group, device *v );
+
+        /// @brief Инициализация параметров значениями по умолчанию.
+        /// 
+        void init_params();
+
+        /// @brief Сохранение объекта в виде строки Lua.
+        ///
+        /// @param [in] buff - строка, куда сохраняем.       
+        /// 
+        /// @return - длина строки.         
+        int save( int n, char *buff );
+
     private: 
         std::vector< device* > close_devices;   ///< Закрываемые устройства.   
         std::vector< device* > open_devices;    ///< Открываемые устройства.    
@@ -110,6 +135,8 @@ class step_path
                 }
             };
         std::vector< FB_group_dev > FB_group_devices; ///< Открываемые устройства по ОС.    
+
+        auto_smart_ptr< wash_step > wash_seats; ///< Промывка седел клапанов.
     };
 //-----------------------------------------------------------------------------
 /// @brief Шаг мойки, при котором происходит флипование клапанами (mixproof).
@@ -137,7 +164,10 @@ class wash_step
         ///
         /// @param [in] group - группа.
         /// @param [in] v     - клапан.
-        void add_valve( u_int group, device *v );
+        /// 
+        /// @return -1 - ошибка добавления. 
+        /// @return  0 - ok. 
+        int add_valve( u_int group, device *v );
 
         /// @brief Добавление группы клапанов.
         ///
@@ -237,32 +267,7 @@ class mode_manager
         int evaluate( u_int_2 mode );
         int final( u_int_2 mode );
 
-        int save( char *str )
-            {
-            int str_size = 0;
-
-            sprintf( str + str_size, "\tMODE = \n\t\t{ \n" );
-            str_size += strlen( str + str_size );
-
-            for ( u_int i = 0; i < modes_cnt; i++ )
-                {
-                if ( wash_seats[ i ] )
-                    {
-                    sprintf( str + str_size, "\t\t[ %d ] = {", i + 1 );
-                    str_size += strlen( str + str_size );
-
-                    str_size += wash_seats[ i ]->save( str + str_size );
-                    
-                    sprintf( str + str_size, " },\n" );
-                    str_size += strlen( str + str_size );
-                    }
-                }
-
-            sprintf( str + str_size, "\t\t},\n" );
-            str_size += strlen( str + str_size );
-
-            return str_size;
-            }
+        int save( char *str );
 
         /// @brief Переход к шагу.
         ///
@@ -388,14 +393,16 @@ class mode_manager
         ///
         /// @param [in] mode  - режим.
         /// @param [in] state - команда (открытие верхнего\нижнего седла).
-        int add_wash_seats_valves_group( int mode, i_mix_proof::STATES state );
+        int add_wash_seats_valves_group( int mode, u_char step, 
+            i_mix_proof::STATES state );
 
         /// @brief Добавление клапана, промывка седла.
         ///
         /// @param [in] mode  - режим.
         /// @param [in] group - группа.
         /// @param [in] v     - клапан.
-        int add_wash_seat_valve( int mode, u_int group, device *v );
+        int add_wash_seat_valve( int mode, u_char step, u_int group, 
+            device *v );
 
         /// @brief Инициализация параметров значениями по умолчанию.
         /// 
@@ -434,9 +441,7 @@ class mode_manager
         /// @return -2 - номер режима выходит за пределы.
         /// @return -1 - номер шага выходит за пределы.
         /// @return  0 - оk.
-        int check_correct_step_n( u_int_2 mode, u_char step );
-
-        wash_step  **wash_seats; ///< Промывка седел клапанов.
+        int check_correct_step_n( u_int_2 mode, u_char step );    
     };
 //-----------------------------------------------------------------------------
 #endif // MODE_MNGR

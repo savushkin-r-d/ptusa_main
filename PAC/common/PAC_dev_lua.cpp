@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 08/24/11 09:48:54.
+** Generated automatically by tolua++-1.0.92 on 08/26/11 14:07:17.
 */
 
 #ifndef __cplusplus
@@ -2545,7 +2545,8 @@ static int tolua_PAC_dev_mode_manager_add_wash_seats_valves_group00(lua_State* t
      !tolua_isusertype(tolua_S,1,"mode_manager",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,4,&tolua_err)
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -2553,12 +2554,13 @@ static int tolua_PAC_dev_mode_manager_add_wash_seats_valves_group00(lua_State* t
  {
   mode_manager* self = (mode_manager*)  tolua_tousertype(tolua_S,1,0);
   int mode = ((int)  tolua_tonumber(tolua_S,2,0));
-  i_mix_proof::STATES state = ((i_mix_proof::STATES) (int)  tolua_tonumber(tolua_S,3,0));
+  unsigned char step = ((unsigned char)  tolua_tonumber(tolua_S,3,0));
+  i_mix_proof::STATES state = ((i_mix_proof::STATES) (int)  tolua_tonumber(tolua_S,4,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_wash_seats_valves_group'", NULL);
 #endif
   {
-   int tolua_ret = (int)  self->add_wash_seats_valves_group(mode,state);
+   int tolua_ret = (int)  self->add_wash_seats_valves_group(mode,step,state);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
@@ -2581,8 +2583,9 @@ static int tolua_PAC_dev_mode_manager_add_wash_seat_valve00(lua_State* tolua_S)
      !tolua_isusertype(tolua_S,1,"mode_manager",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
-     !tolua_isusertype(tolua_S,4,"device",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,5,&tolua_err)
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,5,"device",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,6,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -2590,13 +2593,14 @@ static int tolua_PAC_dev_mode_manager_add_wash_seat_valve00(lua_State* tolua_S)
  {
   mode_manager* self = (mode_manager*)  tolua_tousertype(tolua_S,1,0);
   int mode = ((int)  tolua_tonumber(tolua_S,2,0));
-  unsigned int group = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
-  device* v = ((device*)  tolua_tousertype(tolua_S,4,0));
+  unsigned char step = ((unsigned char)  tolua_tonumber(tolua_S,3,0));
+  unsigned int group = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
+  device* v = ((device*)  tolua_tousertype(tolua_S,5,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_wash_seat_valve'", NULL);
 #endif
   {
-   int tolua_ret = (int)  self->add_wash_seat_valve(mode,group,v);
+   int tolua_ret = (int)  self->add_wash_seat_valve(mode,step,group,v);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }

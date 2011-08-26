@@ -559,15 +559,19 @@ class mode_manager
         /// @brief Добавление группы клапанов, промывка седел.
         ///
         /// @param [in] mode  - режим.
+		/// @param [in] step  - шаг.
         /// @param [in] state - команда (открытие верхнего\нижнего седла).
-        int add_wash_seats_valves_group( int mode, i_mix_proof::STATES state );
+        int add_wash_seats_valves_group( int mode, unsigned char step, 
+			i_mix_proof::STATES state );
 
         /// @brief Добавление клапана, промывка седла.
         ///
         /// @param [in] mode  - режим.
+		/// @param [in] step  - шаг.
         /// @param [in] group - группа.
         /// @param [in] v     - клапан.
-        int add_wash_seat_valve( int mode, unsigned int group, device *v );
+        int add_wash_seat_valve( int mode, unsigned char step, 
+			unsigned int group, device *v );
     };
 //-----------------------------------------------------------------------------
 ///@brief Получение менеджера устройств.

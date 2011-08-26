@@ -540,8 +540,12 @@ void tech_object_manager::evaluate()
         {
         lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
             "eval" );
-        lua_call( lua_manager::get_instance()->get_Lua(), 0, 0 );
-        call_count = 0;
+
+        if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+            {
+            lua_call( lua_manager::get_instance()->get_Lua(), 0, 0 );
+            call_count = 0;
+            }
         }
     
     }
@@ -585,6 +589,15 @@ int tech_object_manager::init_objects()
         {
         Print( "Fatal error!\n" );
         exit( 1 );
+        }
+
+    //-Вызов пользовательской функции инициализации.
+    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
+        "init" );
+
+    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+        {
+        lua_call( lua_manager::get_instance()->get_Lua(), 0, 0 );        
         }
 
     return 0;

@@ -89,6 +89,11 @@ template < class type > class smart_ptr
             return pointer == NULL;
             }
 
+        inline bool is_null() const
+            {
+            return pointer == NULL;
+            }
+
     private:
         /// @brief Закрытый оператор индексирования - запрет использования.
         type* operator[] ( unsigned int index )
