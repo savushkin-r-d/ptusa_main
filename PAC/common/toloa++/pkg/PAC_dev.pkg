@@ -881,6 +881,15 @@ class PID
         void print();
     };
 //-----------------------------------------------------------------------------
+class PAC_info: public i_Lua_save_device
+    {
+    public:
+        int set_cmd( const char *prop, unsigned int idx, double val );
+	};
+
+
+PAC_info* G_PAC_INFO();
+//-----------------------------------------------------------------------------
 /// @brief Получение текущего времени в секундах.
 ///
 /// @return Текущее время.

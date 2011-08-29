@@ -1029,7 +1029,7 @@ int mode_manager::save( char *buff )
 
         str_size += modes_devices[ i ]->save( -1, buff + str_size );
 
-        sprintf( buff + str_size, "step = { " );
+        sprintf( buff + str_size, "STEP = { " );
         str_size += strlen( buff + str_size );
         for ( u_int j = 0; j < steps_cnt[ i ]; j++ )
             {

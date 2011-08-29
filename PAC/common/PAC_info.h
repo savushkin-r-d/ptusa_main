@@ -34,6 +34,8 @@ class PAC_info: public i_Lua_save_device
         /// @return - указатель на единственный объект класса @ref PAC_info.
         static PAC_info* get_instance();
 
+        int set_cmd( const char *prop, u_int idx, double val );
+
     private:   
         PAC_info();
 
@@ -57,4 +59,7 @@ class PAC_info: public i_Lua_save_device
 
         char up_time_str[ C_MAX_STR_LENGTH ];
     };
+//-----------------------------------------------------------------------------
+PAC_info* G_PAC_INFO();
+//-----------------------------------------------------------------------------
 #endif // PAC_INFO_H
