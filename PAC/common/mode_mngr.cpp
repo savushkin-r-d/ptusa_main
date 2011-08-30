@@ -99,12 +99,13 @@ int step_path::final()
             group.open_devices[ j ]->off();
             }
         }
-    return 0;
-
+    
     if ( !wash_seats.is_null() )
         {
         wash_seats->final();
         }
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 void step_path::print() const
