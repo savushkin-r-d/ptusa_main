@@ -82,6 +82,9 @@ int PAC_info::save_device( char *buff )
     sprintf( buff + answer_size, "\tWASH_VALVE_SEAT_PERIOD=%d,\n", 
         par[ 0 ][ P_MIX_FLIP_PERIOD ] );
     answer_size += strlen( buff + answer_size );
+    sprintf( buff + answer_size, "\tWASH_VALVE_SEAT_TIME=%d,\n", 
+        par[ 0 ][ P_MIX_FLIP_TIME ] );
+    answer_size += strlen( buff + answer_size );
         
 
     sprintf( buff + answer_size, "\t}\n" );

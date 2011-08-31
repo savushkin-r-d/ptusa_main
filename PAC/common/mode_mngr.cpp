@@ -299,7 +299,7 @@ void wash_step::final()
     {
     if ( 0 == wash_seat_devices.size() ) return;
 
-    if ( active_group == 0 )
+    if ( active_group.is_null() )
         {
         return;
         }
@@ -492,11 +492,14 @@ int mode_manager::init( u_int_2 mode, u_char start_step )
     // int tech_object::set_mode( u_int mode, int newm )).
 
     modes_devices.at( mode )->init();
+    modes_start_time.at( mode + 1 ) = get_millisec();
 
     if ( 0 == steps_cnt[ mode ] )
         {
+        //Если нет шагов, то выходим.
         return 0;
         }
+
     if ( check_correct_step_n( mode, start_step ) )
         {
         return -1;
@@ -513,8 +516,6 @@ int mode_manager::init( u_int_2 mode, u_char start_step )
         next_step_n[ mode ][ active_step[ mode ] ] );        
 #endif      
 
-    modes_start_time.at( mode + 1 ) = get_millisec();
-
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -524,11 +525,15 @@ int mode_manager::final( u_int_2 mode )
     // int tech_object::set_mode( u_int mode, int newm )).
 
     modes_devices.at( mode )->final();
-
+    modes_start_time.at( mode + 1 ) = get_millisec();
+    modes_start_time.at( 0 ) = get_millisec();
+    
     if ( 0 == steps_cnt[ mode ] )
         {
+        //Если нет шагов, то выходим.
         return 0;
         }
+
     if ( check_correct_step_n( mode, active_step[ mode ] ) )
         {
         return -1;
@@ -542,10 +547,7 @@ int mode_manager::final( u_int_2 mode )
     steps[ mode ][ active_step[ mode ] ].final();
 
     active_step[ mode ] = 0;
-
-    modes_start_time.at( mode + 1 ) = get_millisec();
-    modes_start_time.at( 0 ) = get_millisec();
-    
+  
     return 0;
     }
 //-----------------------------------------------------------------------------
