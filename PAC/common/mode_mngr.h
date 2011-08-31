@@ -106,17 +106,6 @@ class step_path
         /// @param [in] v     - клапан.
         int add_wash_seat_valve( u_int group, device *v );
 
-        /// @brief Инициализация параметров значениями по умолчанию.
-        /// 
-        void init_params();
-
-        /// @brief Сохранение объекта в виде строки Lua.
-        ///
-        /// @param [in] buff - строка, куда сохраняем.       
-        /// 
-        /// @return - длина строки.         
-        int save( int n, char *buff );
-
     private: 
         std::vector< device* > close_devices;   ///< Закрываемые устройства.   
         std::vector< device* > open_devices;    ///< Открываемые устройства.    
@@ -177,18 +166,6 @@ class wash_step
         /// @return  0 >= - индекс добавленной группы. 
         int add_valves_group( i_mix_proof::STATES state );
 
-        /// @brief Сохранение объекта в виде строки Lua.
-        ///
-        /// @param [in] buff - строка, куда сохраняем.       
-        /// 
-        /// @return - длина строки.         
-        int save( char *buff );
-
-         /// @brief Инициализация параметров (времена промывки групп седел) значениями
-         /// по умолчанию (1000 мсек).
-         /// 
-        void init_params();
-
     private:
         /// @brief Группа устройств, с которыми выполняется заданная команда.
         /// 
@@ -239,8 +216,6 @@ class wash_step
         std::vector< dev_group > wash_seat_devices; 
         
         u_int_4 start_cycle_time; ///< Время старта цикла (ожидания или промывки).
-
-        saved_params_u_int_4 par; ///< Времена мойки седел групп.
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию о всех шагах какого-либо объекта (танк, 
@@ -266,8 +241,6 @@ class mode_manager
         int init( u_int_2 mode, u_char start_step = 0 );
         int evaluate( u_int_2 mode );
         int final( u_int_2 mode );
-
-        int save( char *str );
 
         /// @brief Переход к шагу.
         ///
@@ -403,10 +376,6 @@ class mode_manager
         /// @param [in] v     - клапан.
         int add_wash_seat_valve( int mode, u_char step, u_int group, 
             device *v );
-
-        /// @brief Инициализация параметров значениями по умолчанию.
-        /// 
-        void init_params();
 
     private:
         /// @brief Технологический объект.

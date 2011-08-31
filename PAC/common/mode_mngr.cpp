@@ -223,45 +223,8 @@ int step_path::add_wash_seat_valve( u_int group, device *v )
     return wash_seats->add_valve( group, v );
     }
 //-----------------------------------------------------------------------------
-void step_path::init_params()
-    {
-    if ( !wash_seats.is_null() )
-        {
-        wash_seats->init_params();
-        }
-    }
 //-----------------------------------------------------------------------------
-int step_path::save( int n, char *buff )
-    {
-
-    int res = 0;
-
-    if ( !wash_seats.is_null() )
-        {
-        if ( n > -1 )
-            {
-            sprintf( buff + res, "[%d]={", n );
-            res = strlen( buff + res );
-            }
-       
-        res += wash_seats->save( buff + res );
-
-        if ( n > -1 )
-            {            
-            sprintf( buff + res, " }" );
-            res += strlen( buff + res );
-            }
-
-        sprintf( buff + res, "," );
-        res += strlen( buff + res );
-        }
-
-    return res;
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-wash_step::wash_step(): active_group_n( 0 ), active_group( 0 ),
-    par ( C_MAX_GROUP ),
+wash_step::wash_step(): active_group_n( 0 ), active_group( 0 ),   
     phase( P_WAIT ),
     start_cycle_time( 0 ),
     wait_time( 0 ),
@@ -279,6 +242,8 @@ void wash_step::init()
     wait_time = ( *( PAC_info::get_instance()->par ) )
         [ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;
 
+    wash_time = ( *( PAC_info::get_instance()->par ) ) 
+        [ PAC_info::P_MIX_FLIP_TIME ];
 
     if ( wash_seat_devices.size() > 1 )
         {
@@ -302,7 +267,6 @@ void wash_step::eval()
             phase            = P_OPEN;
             start_cycle_time = get_millisec();
             active_group     = &wash_seat_devices.at( active_group_n );
-            wash_time        = par[ active_group_n ];            
             } 
         break;
 
@@ -377,30 +341,6 @@ int wash_step::add_valves_group( i_mix_proof::STATES state )
     return -1;
     }
 //-----------------------------------------------------------------------------
-int wash_step::save( char *buff )
-    {
-    sprintf( buff, "%s", "WASH_SEAT_GROUP_TIME={" );
-
-    int answer_size = strlen( buff );
-
-    for ( u_int i = 0; i < wash_seat_devices.size(); i++ )
-        {
-        sprintf( buff + answer_size, "%d, ", par[ i ] );
-        answer_size += strlen( buff + answer_size );
-        }
-
-    //Убираем последнюю запятую.
-    if ( wash_seat_devices.size() )
-        {
-        answer_size -= 2;
-        }
-
-    sprintf( buff + answer_size, "}" );
-    answer_size += strlen( buff + answer_size );
-
-    return answer_size;
-    }
-//-----------------------------------------------------------------------------
 void wash_step::print()
     {
     Print( "\t\topen seat v = \n" );
@@ -413,14 +353,6 @@ void wash_step::print()
         Print( "\n" );
         }
     Print( "\t\t\t}\n" );
-    }
-//-----------------------------------------------------------------------------
-void wash_step::init_params()
-    {
-    for ( u_int i = 0; i < par.get_count(); i++ )
-        {
-        par[ i ] = 1000; //1000 мсек
-        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1001,53 +933,6 @@ int mode_manager::add_wash_seat_valve( int mode, u_char step, u_int group,
         }
 
     return 0;
-    }
-//-----------------------------------------------------------------------------
-void mode_manager::init_params()
-    {
-    for ( u_int i = 0; i < modes_cnt; i++ )
-        {
-        modes_devices[ i ]->init_params();
-
-        for ( u_int j = 0; j < steps_cnt[ i ]; j++ )
-            {
-            steps[ i ][ j ].init_params();
-            }
-        }
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::save( char *buff )
-    {
-    int str_size = 0;
-
-    sprintf( buff + str_size, "\tMODE = \n\t\t{ \n" );
-    str_size += strlen( buff + str_size );
-
-    for ( u_int i = 0; i < modes_cnt; i++ )
-        {
-        sprintf( buff + str_size, "\t\t[%d] = { ", i + 1 );
-        str_size += strlen( buff + str_size );
-
-        str_size += modes_devices[ i ]->save( -1, buff + str_size );
-
-        sprintf( buff + str_size, "STEP = { " );
-        str_size += strlen( buff + str_size );
-        for ( u_int j = 0; j < steps_cnt[ i ]; j++ )
-            {
-            str_size += steps[ i ][ j ].save( j + 1, buff + str_size );            
-            }
-        sprintf( buff + str_size, "}, " );
-        str_size += strlen( buff + str_size );
-
-
-        sprintf( buff + str_size, " },\n" );
-        str_size += strlen( buff + str_size );
-        }
-
-    sprintf( buff + str_size, "\t\t},\n" );
-    str_size += strlen( buff + str_size );
-
-    return str_size;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

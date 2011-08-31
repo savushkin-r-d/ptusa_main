@@ -49,7 +49,8 @@ void PAC_info::eval()
 void PAC_info::reset_params()
     {
     par[ 0 ] [ P_CTR_ERROR_TIME ]  = 10000;
-    par[ 0 ] [ P_MIX_FLIP_PERIOD ] = 10;
+    par[ 0 ] [ P_MIX_FLIP_PERIOD ] = 60;
+    par[ 0 ] [ P_MIX_FLIP_TIME ]   = 1000;
     par->save_all();
     }
 //-----------------------------------------------------------------------------
@@ -109,7 +110,17 @@ int PAC_info::set_cmd( const char *prop, u_int idx, double val )
     if ( strcmp( prop, "WASH_VALVE_SEAT_PERIOD" ) == 0 )
         {
         par[ 0 ][ P_MIX_FLIP_PERIOD ] = ( u_int_4 ) val;
+
+        return 0;
         }
+
+    if ( strcmp( prop, "WASH_VALVE_SEAT_TIME" ) == 0 )
+        {
+        par[ 0 ][ P_MIX_FLIP_TIME ] = ( u_int_4 ) val;
+
+        return 0;
+        }
+
 
     return 0;
     }
