@@ -1,5 +1,5 @@
 /// @file errors.h
-/// @brief Содержит описания классов и структур, которые используются в 
+/// @brief Содержит описания перечислений, которые используются в 
 ///  драйвере на сервере для организации информирования об ошибка.
 ///
 /// Класс @ref base_error, служащий для организации работы с ошибкой, содержит   
@@ -9,8 +9,8 @@
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
-/// @c PAC   - компиляция для контроллера.@n
-/// @c WIN32 - компиляция для Windows.
+/// @c PAC    - компиляция для контроллера.@n
+/// @c DRIVER - компиляция для драйвера (ОС Windows).
 /// 
 /// @par Текущая версия:
 /// @$Rev$.\n
@@ -30,14 +30,6 @@
 #define PAC
 #endif
 
-#ifdef DRIVER
-typedef unsigned char uchar;
-
-#include <vector>
-#include "SWMRG.h"
-
-#include "PAC_err.h"
-#endif // DRIVER
 //-----------------------------------------------------------------------------
 #if defined PAC || defined DRIVER
 enum ALARM_STATE
@@ -65,192 +57,37 @@ enum ALARM_TYPE
     AT_RATE_OF_CHANGE,
     AT_SPECIAL,
     };
+
+
+enum OBJECT_TYPE      ///< Тип объекта, для которого возникла тревога.
+    {
+    OT_UNKNOWN,
+    OT_PAC,           ///< PAC.
+    };
+
+enum ALARM_CLASS      ///< Класс тревоги.
+    {
+    AC_UNKNOWN,
+    AC_NO_CONNECTION, ///< Ошибка связи.
+
+    AC_COM_DRIVER,    ///< Ошибка работы с COM-портом.
+    AC_RUNTIME_ERROR, ///< Ошибки во время работы.
+    };
+
+enum ALARM_SUBCLASS         ///< Подкласс тревоги.
+    {
+    //AC_NO_CONNECTION,     ///< Ошибка связи.
+    AS_WAGO = 1,            ///< Ошибки модулей WAGO.
+    AS_PANEL,               ///< Ошибки панелей EasyView.
+    AS_MODBUS_DEVICE,       ///< Ошибки устройства, опрашиваемого по Modbus.
+
+    AS_EASYSERVER = 5,      ///< Ошибки EasyServer.
+
+    //AC_RUNTIME_ERROR,     ///< Ошибки во время работы.
+    AS_EMERGENCY_BUTTON = 1,///< Нажата аварийная кнопка.
+    };
 #endif // defined PAC || defined WIN32
 //-----------------------------------------------------------------------------
-#ifdef DRIVER
-
-//  Глобальный идентификатор тревоги.
-struct alarm_id
-    {
-    int object_type;
-    int object_number;
-    int object_alarm_number;
-    };
-
-#pragma pack( push, 8 ) //Выравнивание полей структур по 8 байт.
-//-----------------------------------------------------------------------------
-struct alarm_params 
-    {
-    double  param1;
-    double  param2;
-    double  param3;
-    double  param4;
-    double  param5;
-    double  param6;
-    double  param7;
-    double  param8;
-    double  param9;
-    double  param10;
-    };
-//-----------------------------------------------------------------------------
-struct alarm
-    {
-    alarm_params params;
-
-    //  Определяет тип тревоги:
-    //     atDiscrete      - дискретная ( true/false )
-    //     atValue         - контроля значения ( Lo/LoLo, Hi/HiHi )
-    //     atDeviation     - отклонения ( MinValue/MajValue )
-    //     atRateOfChange  - изменения скорости ( speed )
-    //     atSpecial       - специальная
-    ALARM_TYPE type;
-
-    //  Описание тревоги.
-    char *description;
-
-    //  Блокировка тревоги на этапе
-    //  проектирования.
-    uchar enable;
-
-    //  Определяет принадлежность тревоги
-    //  какой либо группе тревог.
-    char *group;
-
-    //  Блокировка тревоги во время работы.
-    uchar  inhibit;
-
-    //  Приоритет тревоги ( 0 - 999 )
-    //  Тип тревоги:
-    //     0       - системные
-    //     1-249   - критические
-    //     250-499 - важные
-    //     500-749 - маловажные
-    //     750-999 - информационные
-    int priority;
-
-    //  Состояние тревоги:
-    //     asNormal    - тревоги нет
-    //     asAlarm     - тревога есть
-    //     asReturn    - контролируемое значение
-    //                вернулось в нормальное
-    //                состояние
-    //     asAccept    - тревога подтверждена
-    ALARM_STATE state;
-
-    //  Подавление тревоги клиентами.
-    uchar  suppress;
-
-    //  Глобальный идентификатор тревоги:
-    alarm_id id;
-
-    // id драйвера.
-    uchar driver_id;
-
-    bool operator == ( const alarm &alarm2 )
-        {
-        return !strcmp( this->description, alarm2.description ); 
-        }
-
-    bool operator < ( const alarm &alarm2 ) const
-        {
-        return strcmp( this->description, alarm2.description ) < 0 ? 1 : 0;
-        }
-
-    alarm( alarm const& copy );
-
-    alarm & operator = ( const alarm & copy );
-
-    int load_from_stream_as_simple_error( char *stream );
-
-    alarm();
-
-    ~alarm();
-
-    void accept()
-        {
-        state = AS_ACCEPT;
-        }
-    };
-//-----------------------------------------------------------------------------
-struct all_alarm
-    {
-    int     cnt;
-    alarm   *alarms; 
-    int     id;
-    };
-//-----------------------------------------------------------------------------
-struct error_cmd
-    {
-    int cmd; 
-    int object_type;
-    int object_number;
-    int object_alarm_number;
-    };
-//-----------------------------------------------------------------------------
-#pragma pack( pop )
-//-----------------------------------------------------------------------------
-class alarm_manager
-    {
-    public:
-
-        enum AM_CONST
-            {
-            AM_MAX_COUNT = 256,
-            };
-
-        enum CRITICAL_ERRORS
-            {
-            CE_WAGO = 1,
-            CE_PANEL,
-            CE_EMERGENCY_BUTTON,
-            };
-
-        alarm_manager();
-        ~alarm_manager();
-
-        int add_no_PAC_connection_error( const char *description, 
-            uchar project_id );
-        int remove_no_PAC_connection_error( const char *description,
-            uchar driver_id );
-
-        int get_alarms( uchar driver_id, all_alarm &project_alarms );
-
-        int add_PAC_critical_errors( CRITICAL_ERRORS type, uchar project_id, 
-            const char* PAC_name, unsigned int param_number, u_int priority );
-
-        int clear_PAC_critical_errors( uchar driver_id );
-
-        int clear_PAC_simple_devices_errors( uchar driver_id );
-
-        int add_alarm( alarm &new_alarm );
-
-#ifndef MONITORING_DRIVER
-    private:
-#endif // MONITORING_DRIVER
-        //1 - код уникальности ошибок.
-        //2 - вектор ошибок проектов.   
-        //3 - массив ошибок для передачи серверу.
-        //4 - массив объектов синхронизации работы с ошибками.
-        //5 - имя группы ошибок связи с модулями WAGO.
-        unsigned int id[ AM_MAX_COUNT ];                        //1              
-        std::vector< alarm > alarms_vector[ AM_MAX_COUNT ];     //2
-        alarm   *all_projects_alarms_array[ AM_MAX_COUNT ];     //3
-        CSWMRG  synch_all_projects_alarms[ AM_MAX_COUNT ];      //4
-        
-        static const char *ERRORS_GROUP_WAGO_CONNECT;           //5
-        static const char *ERRORS_GROUP_SIMPLE_DEVICES;         //6
-        static const char *ERRORS_GROUP_PANEL_CONNECT;          //7
-        static const char *ERRORS_GROUP_EMERGENCY_BUTTONS;      //8
-
-        int remove_alarm( alarm &r_alarm );
-        int clear( uchar driver_id );
-
-        //Синхронизация ошибок, находящихся в векторе alarms_vector и массиве 
-        //all_projects_alarms_array.
-        int synch_project_alarms( uchar driver_id );
-    };
-#endif // DRIVER
-
 #ifdef PAC
 
 #include "errors.h"
