@@ -9,6 +9,7 @@
 /// @$Date::                     $.
 /// 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 using Visio = Microsoft.Office.Interop.Visio;
@@ -16,6 +17,62 @@ using Visio = Microsoft.Office.Interop.Visio;
 /// <summary> Устройства Wago проекта (модули, контроллеры...).</summary>
 namespace wago
     {
+
+	public class service_data
+		{
+								
+		internal Dictionary<io_module.TYPES, string> DI_modules;
+		internal Dictionary<io_module.TYPES, string> DO_modules;
+		internal Dictionary<io_module.TYPES, string> AI_modules;
+		internal Dictionary<io_module.TYPES, string> AO_modules;
+		internal Dictionary<io_module.TYPES, string> SYS_modules;
+		internal Dictionary<io_module.TYPES, string> Special_modules;
+
+        /// <summary> Default constructor. </summary>
+        ///
+        /// <remarks> ASV, 01.09.2011. </remarks>
+		public service_data()
+            {
+			DI_modules = new Dictionary<io_module.TYPES, string>();
+			DI_modules.Add( io_module.TYPES.T_402, "750-402 ( 4 DI )" );
+			DI_modules.Add( io_module.TYPES.T_430, "750-430 ( 8 DI )" );
+			DI_modules.Add( io_module.TYPES.T_1405, "750-1405 ( 16 DI 24 VDC )" );
+			DI_modules.Add( io_module.TYPES.T_1415, "750-1415 ( 8 DI 24 VDC )" );
+			DI_modules.Add( io_module.TYPES.T_1420, "750-1420 ( 4 DI 24 VDC )" );
+
+			DO_modules = new Dictionary<io_module.TYPES, string>();
+			DO_modules.Add( io_module.TYPES.T_504, "750-504 ( 4 DO )" );
+			DO_modules.Add( io_module.TYPES.T_512, "750-512 ( 2 DO )" );
+			DO_modules.Add( io_module.TYPES.T_530, "750-530 ( 8 DO )" );
+			DO_modules.Add( io_module.TYPES.T_1504, "750-1504 ( 16 DO 24 VDC )" );
+			DO_modules.Add( io_module.TYPES.T_1515, "750-1515 ( 8 DO 24 VDC )" );
+
+			AI_modules = new Dictionary<io_module.TYPES, string>();
+			AI_modules.Add( io_module.TYPES.T_455, "750-455 ( 4 AI 4-20 mA )" );
+			AI_modules.Add( io_module.TYPES.T_460, "750-460 ( 4 AI RTD )" );
+			AI_modules.Add( io_module.TYPES.T_461, "750-461 ( 2 AI RTD )" );
+			AI_modules.Add( io_module.TYPES.T_461_002, "750-461/002 ( 2 AI 10R-1k2 )" );
+			AI_modules.Add( io_module.TYPES.T_466, "750-466 ( 2 AI 4-20 mA )" );
+			AI_modules.Add( io_module.TYPES.T_493, "750-493 ( 3-Phase Power Measurement )" );
+
+			AO_modules = new Dictionary<io_module.TYPES, string>();
+			AO_modules.Add( io_module.TYPES.T_554, "750-554 ( 2 AO 4-20 mA )" );
+
+			SYS_modules = new Dictionary<io_module.TYPES, string>();
+			SYS_modules.Add( io_module.TYPES.T_600, "750-600 ( End Module )" );
+			SYS_modules.Add( io_module.TYPES.T_602, "750-602 ( Power Supply Module DC 24 V )" );
+			SYS_modules.Add( io_module.TYPES.T_612, "750-612 ( Power Supply Module AC/DC 230 V )" );
+			SYS_modules.Add( io_module.TYPES.T_613, "750-613 ( Bus Power Supply DC 24 V )" );
+			SYS_modules.Add( io_module.TYPES.T_627, "750-627 ( End Module )" );
+			SYS_modules.Add( io_module.TYPES.T_628, "750-628 ( Coupler Module )" );
+
+			Special_modules = new Dictionary<io_module.TYPES, string>();
+			Special_modules.Add( io_module.TYPES.T_638, "750-638 ( 2 CTR )" );
+			Special_modules.Add( io_module.TYPES.T_655, "750-655 ( AS-Interface Master Module )" );
+			}
+
+	}
+  
     //--------------------------------------------------------------------------
     /// <summary> Модуль ввода/вывода WAGO. </summary>
     ///
@@ -29,24 +86,59 @@ namespace wago
             DO,
             DI,
             AO,
-            AI
+            AI,
+			SYSTEM,
             };
 
         /// <summary> Типы модулей. </summary>
         public enum TYPES 
             {
             T_UNKNOWN = 0,
-            T_504 = 504,
-            T_402 = 402,
+
+			//	DI modules
+			T_402 = 402,
+			T_430 = 430,
+			T_1405 = 1405,
+			T_1415 = 1415,
+			T_1420 = 1420,
+			
+			//	DO modules
+			T_504 = 504,
+			T_512 = 512,
+			T_530 = 530,
+			T_1504 = 1504,
+			T_1515 = 1515,
+
+			//	AI modules
+            T_455 = 455,
+			T_460 = 460,
+			T_461 = 461,
+			T_461_002 = 4612,
             T_466 = 466,
-			T_600 = 600
-            };
+			T_638 = 638,
+
+			//	AO modules
+			T_554 = 554,
+
+			//	System modules
+			T_600 = 600,
+			T_602 = 602,
+			T_612 = 612,
+			T_613 = 613,
+			T_627 = 627,
+			T_628 = 628,
+
+			//	Special modules
+			T_493 = 493,	//	3-Phase	counter
+			T_655 = 655,	//	AS-interface
+			};
 
         /// <summary> Количество клемм. </summary>
         public enum CLAMPS_COUNT
             {
-            СLAMP_8 = 8,
-            СLAMP_16 = 16
+			CLAMP_0		=	0,
+            СLAMP_8		=	8,
+            СLAMP_16	=	16,
             };
 
         /// <summary> Вид модуля. </summary>
@@ -86,36 +178,48 @@ namespace wago
 
             type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].FormulaU );
             order_number = Convert.ToUInt16( shape.Cells[ "Prop.order_number" ].FormulaU );
-            //node_number = Convert.ToUInt16( shape.Cells[ "Prop.node_number" ].FormulaU );
+            node_number = Convert.ToUInt16( shape.Cells[ "Prop.node_number" ].FormulaU );
 
             //Определяем количество клемм.
             switch( type )
                 {
-                case TYPES.T_402:
-                case TYPES.T_466:
-                case TYPES.T_504:
-                    total_clamps = CLAMPS_COUNT.СLAMP_8;
-
-                    free_clamp_flags = new bool[ ( int ) total_clamps ];
-                    available_clamp_flags = new bool[ ( int ) total_clamps ];
-                    suitable_clamp_flags = new bool[ ( int ) total_clamps ];
-
-                    for( int i = 0; i < ( int ) total_clamps; i++ )
-                        {
-                        free_clamp_flags[ i ] = true;
-                        available_clamp_flags[ i ] = false;
-                        suitable_clamp_flags[ i ] = false;
-
-                        clamp_names.Add( "clamp_" + ( i + 1 ) );
-                        }
-
-                    available_clamp_flags[ 1 - 1 ] = true;
-                    available_clamp_flags[ 4 - 1 ] = true;
-                    available_clamp_flags[ 5 - 1 ] = true;
-                    available_clamp_flags[ 8 - 1 ] = true;
-                    break;
-
+				//	System modules
 				case TYPES.T_600:
+				case TYPES.T_602:
+				case TYPES.T_612:
+				case TYPES.T_613:
+				case TYPES.T_627:
+				case TYPES.T_628:
+					total_clamps = CLAMPS_COUNT.CLAMP_0;
+					break;
+
+				//	DI modules
+				case TYPES.T_402:
+				case TYPES.T_430:
+				//	DO modules
+				case TYPES.T_504:
+				case TYPES.T_512:
+				case TYPES.T_530:
+				//	AI modules
+				case TYPES.T_455:
+				case TYPES.T_460:
+				case TYPES.T_461:
+				case TYPES.T_461_002:
+				case TYPES.T_466:
+				case TYPES.T_638:
+				//	AO modules
+				case TYPES.T_554:
+                    total_clamps = CLAMPS_COUNT.СLAMP_8;
+                    break;
+			  
+				//	DI modules	
+				case TYPES.T_1405:
+				case TYPES.T_1415:
+				case TYPES.T_1420:
+				//	DO modules
+				case TYPES.T_1504:
+				case TYPES.T_1515:
+					total_clamps = CLAMPS_COUNT.СLAMP_16;
 					break;
 
                 default:
@@ -123,23 +227,136 @@ namespace wago
                         "Неизвестный тип модуля - \"" + type + "\"!" );
                     throw exc;
                 }
+		//---------------------------------------------------------------------
 
-            //Определяем вид.
+		//	Создаем заданное количество клемм
+		if ( total_clamps != CLAMPS_COUNT.CLAMP_0 )
+			{
+			free_clamp_flags = new bool[ ( int ) total_clamps ];
+			available_clamp_flags = new bool[ ( int ) total_clamps ];
+			suitable_clamp_flags = new bool[ ( int ) total_clamps ];
+
+			for ( int i = 0; i < ( int ) total_clamps; i++ )
+				{
+				free_clamp_flags[ i ] = true;
+				available_clamp_flags[ i ] = false;
+				suitable_clamp_flags[ i ] = false;
+
+				clamp_names.Add( "clamp_" + ( i + 1 ) );
+				}
+			}
+		//---------------------------------------------------------------------
+
+			//Определяем доступные клеммы
+			switch ( type )
+				{
+				//	Возможна отдельное определение по всем этим разделам
+				//		при другой нумерации клем (гориз или вертикальная)
+
+				//	С 2-мя доступными клеммами
+				case TYPES.T_461:
+				case TYPES.T_461_002:
+				case TYPES.T_466:
+				case TYPES.T_512:
+				case TYPES.T_554:
+				case TYPES.T_638:
+				    available_clamp_flags[ 1 - 1 ] = true;
+					available_clamp_flags[ 5 - 1 ] = true;
+					break;
+
+
+				//	С 4-мя доступными клеммами
+				case TYPES.T_402:
+				case TYPES.T_455:
+				case TYPES.T_460:
+				case TYPES.T_504:
+					available_clamp_flags[ 1 - 1 ] = true;
+					available_clamp_flags[ 4 - 1 ] = true;
+					available_clamp_flags[ 5 - 1 ] = true;
+					available_clamp_flags[ 8 - 1 ] = true;
+					break;
+
+				case TYPES.T_1420:
+					available_clamp_flags[ 1 - 1 ] = true;
+					available_clamp_flags[ 6 - 1 ] = true;
+					available_clamp_flags[ 9 - 1 ] = true;
+					available_clamp_flags[ 14 - 1 ] = true;
+					break;
+
+
+				//	С 8-ю доступными клеммами
+				case TYPES.T_430:
+				case TYPES.T_530:
+				case TYPES.T_1415:
+				case TYPES.T_1515:
+					for ( int i = 0; i < 8; i++ )
+						{
+						available_clamp_flags[ i ] = true;
+						}
+					break;
+
+
+				//	С 16-мя доступными клемами
+				case TYPES.T_1405:
+				case TYPES.T_1504:
+					for ( int  i = 0; i < 16; i++ )
+						{
+						available_clamp_flags[ i ] = true;
+						}
+					break;
+				}
+		//---------------------------------------------------------------------
+
+            //Определяем вид модуля
             switch( type )
                 {
-                case TYPES.T_402:
-                    kind = KINDS.DI;
-                    break;
+				//	DO modules
+				case TYPES.T_504:
+				case TYPES.T_512:
+				case TYPES.T_530:
+				case TYPES.T_1504:
+				case TYPES.T_1515:
+					kind = KINDS.DO;
+					break;
 
-                case TYPES.T_466:
-                    kind = KINDS.AI;
-                    break;
+				//	DI modules
+				case TYPES.T_402:
+				case TYPES.T_430:
+				case TYPES.T_1405:
+				case TYPES.T_1415:
+				case TYPES.T_1420:
+					kind = KINDS.DI;
+					break;
 
-                case TYPES.T_504:
-                    kind = KINDS.DO;
-                    break;
+				//	AO modules
+				case TYPES.T_554:
+					kind = KINDS.AO;
+					break;
 
+				//	AI modules
+				case TYPES.T_455:
+				case TYPES.T_460:
+				case TYPES.T_461:
+				case TYPES.T_461_002:
+				case TYPES.T_466:
+				case TYPES.T_638:
+					kind = KINDS.AI;
+					break;
+
+				//	Special modules
+				case TYPES.T_493:
+				case TYPES.T_655:
+					kind = KINDS.SPECIAL;
+					break;
+
+				//	System modules
+				case TYPES.T_602:
+				case TYPES.T_612:
+				case TYPES.T_613:
 				case TYPES.T_600:
+				case TYPES.T_627:
+				case TYPES.T_628:
+					kind = KINDS.SYSTEM;
 					break;
                 }
             }
@@ -518,6 +735,16 @@ namespace wago
         public void add_io_module( Visio.Shape shape )
             {
             io_modules.Add( new io_module( shape ) );
+            }
+
+		/// <summary> Вставка i/o модуля. </summary>
+		///
+		/// <remarks> ASV, 12.09.2011. </remarks>
+		///
+		/// <param name="shape"> Фигура Visio модуля. </param>
+		public void insert_io_module( int index, Visio.Shape shape )
+            {
+            io_modules.Insert( index, new io_module( shape ) );
             }
         }
 

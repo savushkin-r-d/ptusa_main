@@ -23,6 +23,43 @@ using wago;
 /// <summary> Устройства проекта (клапан, насос, танк...).</summary>
 namespace tech_device
     {
+
+	/// <summary> Сложный объект (Гребенка, Танк). </summary>
+	///
+	/// <remarks> ASV, 07.09.2011. </remarks>
+	public class T_Object
+		{
+		//	Режимы
+//		public Dictionary<int, string> mode_mas
+//		public string[][] mode_mas;
+//			mode_mas = new string[];	//	32 режима 	
+//			...
+//			n - количество state"ов
+
+
+		//	Параметры
+//		public enum ERROR_LIST
+//		public Dictionary<int, string> mode_mas
+//		public string[] mode_mas;
+//			mode_mas = new string[];	//	количество ошибок
+
+
+		/// <summary> Список ошибок </summary>
+		///
+		/// <remarks> ASV, 07.09.2011. </remarks>
+//		public enum ERROR_LIST
+//		public List<string> ERROR_LIST
+//		public Dictionary<int, string> ERROR_LIST
+
+
+		//	Список устройств объекта (Ссылки на элементы g_devices)
+		public List<device> list_object_device;
+		}
+//-----------------------------------------------------------------------------	   
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+
     /// <summary> Простое устройство (клапан, насос, ...). </summary>
     ///
     /// <remarks> Id, 17.08.2011. </remarks>
@@ -48,7 +85,29 @@ namespace tech_device
         public enum TYPES
             {
             /// <summary> Клапан.  </summary>
-            T_V = 0, 
+			T_V		= 0,	//	Клапан
+			T_N		= 1,	//	Насос
+			T_MIX	= 2,	//	Мешалка
+			T_CTR	= 3,	//	Расходомер
+			T_TE	= 4,	//	Температура
+			T_QE	= 5,	//	Концентратомер
+
+			T_LS	= 6,	//	Гарничный уровень
+			T_LE	= 7,	//	Текущий уровень
+
+			T_FS	= 8,	//	Расход (есть/нет)
+			T_FE	= 9,	//	Текущий расход	 
+						
+			T_FB	= 10,	//	Обратнся связь
+			T_UPR	= 11,	//	Управляющий сигнал
+
+			T_AI	= 12,	//	Аналоговый вход
+			T_AO	= 13,	//	Аналоговый выход
+			
+			T_FQT	= 14,	//	Расходомер и Концентратомер
+			T_WTE	= 15,	//	Температура и Влажность
+
+			T_TANK	= 100	//	Танк (сложный объект)
             }
 
         /// <summary> Подтип клапана. </summary>
@@ -359,7 +418,7 @@ namespace tech_device
         /// <param name="shape"> Фигура Visio. </param>
         /// <param name="pac">   Узел Wago. </param>
         public device( Visio.Shape shape, PAC pac )
-            {
+            {										  
             n = Convert.ToUInt16( shape.Cells[ "Prop.number" ].FormulaU );
             type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].FormulaU );
             sub_type = ( SUB_TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.sub_type" ].FormulaU );

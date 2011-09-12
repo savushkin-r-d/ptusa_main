@@ -36,8 +36,14 @@ namespace visio_prj_designer
         /// <summary> Лента дополнения. </summary>
         internal main_ribbon vis_main_ribbon;
 
-        /// <summary> Все устройства. </summary>
+		/// <summary> Список доступных модулей </summary>
+        internal service_data service_config;
+
+		/// <summary> Все устройства. </summary>
         internal List<device> g_devices;
+
+		/// <summary> Объекты проекта (гребенки и танки) </summary>
+		internal List<T_Object> g_objects;
 
         /// <summary> Объект контроллера. </summary>
         internal PAC g_PAC = null;       
@@ -201,12 +207,19 @@ namespace visio_prj_designer
         /// <param name="target"> Target for the. </param>
         private void visio_addin__DocumentOpened( Visio.Document target )
             {
-            if( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
+//            if( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
                 {
-                if( target.Template.Contains( "PTUSA project" ) )
+//                if( target.Template.Contains( "PTUSA project" ) )
                     {
                     vis_main_ribbon.show();
 
+					//	Создание списка доступных элементов
+					service_config = new service_data();
+					//for ( int i = 0; i < service_config.DI_modules.Count; i++ )
+					//    {
+					//    string ss = service_config.DI_modules[ 402 ];
+					//    }
+													 					
                     //Считывание устройств Wago.
                     foreach( Visio.Shape shape in target.Pages[ "Wago" ].Shapes )
                         {
@@ -231,16 +244,47 @@ namespace visio_prj_designer
                     //Считывание устройств.
                     foreach( Visio.Shape shape in target.Pages[ "Устройства" ].Shapes )
                         {
-                        if( shape.Data1 == "V" )
-                            {
-                            g_devices.Add( new device( shape, g_PAC ) );
-                            }
-                        }
+                        switch ( shape.Data1 )
+							{
+							case "V":
+							case "N":
+							case "MIX":
+							case "CTR":
+							case "TE":
+							case "QE":
+							case "LS":
+							case "LE":
+							case "FS":
+							case "FE":
+							case "FB":
+							case "UPR":
+							case "AI":
+							case "AO":
+							case "FQT":
+							case "WTE":							
+							    g_devices.Add( new device( shape, g_PAC ) );
+								break;
+                            }		//	switch ( shape.Data1 )	
+                        }		//	foreach
+
+					foreach ( Visio.Shape shape in target.Pages[ "Обмен сигналами" ].Shapes )
+						{
+						switch ( shape.Data1 )
+							{
+							case "FB":
+							case "UPR":
+							case "AI":
+							case "AO":
+								g_devices.Add( new device( shape, g_PAC ) );
+								break;
+							}		//	switch ( shape.Data1 )	
+						}		//	foreach
+
                     }
-                else
-                    {
-                    vis_main_ribbon.hide();
-                    }
+				//else
+				//    {
+				//    vis_main_ribbon.hide();
+				//    }
                 }
             }
 
@@ -361,178 +405,238 @@ namespace visio_prj_designer
         /// <param name="cell"> Ячейка, где произошло изменение. </param>
         private void visio_addin__FormulaChanged( Microsoft.Office.Interop.Visio.Cell cell )
             {
-			//	Изменения свойств модуля
-            if( cell.Shape.Data1 == "750" )
-                {
-                if( cell.Name == "Prop.order_number" )
-                    {
-                    cell.Shape.Shapes[ "type_skin" ].Shapes[ "module_number" ].Text =
-                        cell.Shape.Cells[ "Prop.order_number" ].Formula;
-                    return;
-                    }
+			switch ( cell.Shape.Data1 )
+				{
+				//	Изменения свойств модуля WAGO
+				case "750":
 
-                if( cell.Name == "Prop.type" )
-                    {
-                    int type = ( int ) Convert.ToDouble( cell.Shape.Cells[ "Prop.type" ].ResultStr[ "" ] );
-
-                    cell.Shape.Data2 = Convert.ToString( type );
-                    cell.Shape.Shapes[ "type_str" ].Text = Convert.ToString( type );
-
-                    string colour = "1";
-                    switch( type )
-                        {
-                        case 461:
-                        case 466:
-                            colour = "RGB( 180, 228, 180 )";
-                            break;
-
-                        case 504:
-                        case 512:
-                            colour = "RGB( 255, 128, 128 )";
-                            break;
-
-                        case 402:
-                            colour = "RGB( 255, 255, 128 )";
-                            break;
-
-                        case 602:
-                        case 612:
-                        case 638:
-                            colour = "14";
-                            break;
-
-                        case 600:
-                            colour = "15";
-                            break;
-                        }
-
-                    cell.Shape.Shapes[ "type_skin" ].Shapes[ "module_number" ].Cells[ 
-                        "FillForegnd" ].FormulaU = colour;
-                    cell.Shape.Shapes[ "type_skin" ].Shapes[ "3" ].Cells[
-                        "FillForegnd" ].FormulaU = colour;
-                    }
-                }
-
-			//	Изменение свойств клапана
-            if( cell.Shape.Data1 == "V" )
-                {
-                switch( cell.Name )
-                    {
-					//case "Prop.type":
-					//    string type = cell.Shape.Cells[ "Prop.type" ].get_ResultStr( 0 );
-
-					//    switch ( type )
-					//        {
-					//        case "1 КУ":
-					//            //cell.Shape.AddSection( cell.Shape.get_CellsRowIndex );
-					//            int idx = cell.Shape.get_CellsRowIndex( "Prop.type" );
-
-					//            cell.Shape.AddNamedRow(
-					//                ( short ) Visio.VisSectionIndices.visSectionUser, "DO",
-					//                ( short ) Visio.VisRowTags.visTagDefault );
-
-					//            cell.Shape.AddNamedRow(
-					//                ( short ) Visio.VisSectionIndices.visSectionProp, "hf",
-					//                ( short ) 0 );
-
-
-					//            break;
-					//        }
-
-					//    break;
-
-
-					case "Prop.sub_type":
-						int sub_type = Convert.ToInt16(cell.Shape.Cells["Prop.sub_type"].Formula);
-
-						//Поиск по shape объекта device.
-						current_selected_dev = g_devices.Find( delegate( device dev )
+					if ( cell.Name == "Prop.order_number" )
 						{
-							return dev.get_shape() == cell.Shape;
+						cell.Shape.Shapes[ "module_number" ].Text =
+							cell.Shape.Cells[ "Prop.order_number" ].Formula;
+						return;
 						}
-						);
 
-						if ( current_selected_dev != null )
+					if ( cell.Name == "Prop.type" )
+						{
+						int type = ( int ) Convert.ToDouble( cell.Shape.Cells[ "Prop.type" ].ResultStr[ "" ] );
+
+						cell.Shape.Data2 = Convert.ToString( type );
+						cell.Shape.Shapes[ "type_str" ].Text = Convert.ToString( type );
+
+						string colour = "1";
+						switch ( type )
 							{
-							if ( current_selected_dev.get_sub_type() != sub_type )
+							//	DO modules
+							case 504:
+							case 512:
+							case 530:
+							case 1504:
+							case 1515:
+								colour = "2";	//"RGB( 255, 128, 128 )";	//	red
+								break;
+
+							//	DI modules
+							case 402:
+							case 430:
+							case 1405:
+							case 1415:
+							case 1420:
+								colour = "5";	//"RGB( 255, 255, 128 )";	//	yellow
+								break;
+
+							//	AO modules
+							case 554:
+								colour = "7"; //"RGB( 180, 228, 180 )";		//	blue	
+								break;
+
+							//	AI modules
+							case 455:
+							case 460:
+							case 461:
+							case 4612:
+							case 466:
+							case 638:
+								colour = "3";	//"RGB( 180, 228, 180 )";	//	green
+								break;
+
+							//	Special modules
+							case 493:	//	3-Phase	counter
+							case 655:	//	AS-interface
+								colour = "6";
+								break;
+
+							//	System modules
+							case 602:
+							case 612:
+							case 613:
+							case 628:
+								colour = "14";
+								break;
+
+							case 600:
+							case 627:
+								colour = "15";
+								break;
+							}
+
+						cell.Shape.Shapes[ "module_number" ].Cells[
+							"FillForegnd" ].FormulaU = colour;
+						cell.Shape.Shapes[ "3" ].Cells[
+							"FillForegnd" ].FormulaU = colour;
+
+						}
+					break;
+
+				//	Изменение свойств простых устройств
+				case "N":
+				case "MIX":
+				case "CTR":
+				case "TE":
+				case "QE":
+				case "LS":
+				case "LE":
+				case "FS":
+				case "FE":
+				case "FB":
+				case "UPR":
+				case "AI":
+				case "AO":
+				case "FQT":
+				case "WTE":
+					switch ( cell.Name )
+						{
+						case "Prop.name":
+							string str = cell.Shape.Cells[ "Prop.name" ].Formula;
+							str = str.Replace( "\"", "" );
+							cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
+							break;
+						}
+					break;
+
+
+				case "V":
+
+					switch ( cell.Name )
+						{
+						case "Prop.number":	//	Получаем из имени устройства
+							break;
+
+						//case "Prop.type":
+						//    string type = cell.Shape.Cells[ "Prop.type" ].get_ResultStr( 0 );
+
+						//    switch ( type )
+						//        {
+						//        case "1 КУ":
+						//            //cell.Shape.AddSection( cell.Shape.get_CellsRowIndex );
+						//            int idx = cell.Shape.get_CellsRowIndex( "Prop.type" );
+
+						//            cell.Shape.AddNamedRow(
+						//                ( short ) Visio.VisSectionIndices.visSectionUser, "DO",
+						//                ( short ) Visio.VisRowTags.visTagDefault );
+
+						//            cell.Shape.AddNamedRow(
+						//                ( short ) Visio.VisSectionIndices.visSectionProp, "hf",
+						//                ( short ) 0 );
+						//            break;
+						//        }
+						//    break;
+
+
+						case "Prop.sub_type":
+							int sub_type = Convert.ToInt16( cell.Shape.Cells[ "Prop.sub_type" ].Formula );
+
+							//Поиск по shape объекта device.
+							current_selected_dev = g_devices.Find( delegate( device dev )
+							{
+								return dev.get_shape() == cell.Shape;
+							}
+							);
+
+							if ( current_selected_dev != null )
 								{
-								edit_io_frm.listForm.type_cbox.SelectedIndex = sub_type;
-						        //current_selected_dev.change_sub_type((device.SUB_TYPES)sub_type, g_PAC);
+								if ( current_selected_dev.get_sub_type() != sub_type )
+									{
+									edit_io_frm.listForm.type_cbox.SelectedIndex = sub_type;
+									//current_selected_dev.change_sub_type((device.SUB_TYPES)sub_type, g_PAC);
+									}
 								}
-						    }
-						break;
+							break;
 
-                    case "Prop.name":
-                        string str = cell.Shape.Cells[ "Prop.name" ].Formula;
+						case "Prop.name":
+							string str = cell.Shape.Cells[ "Prop.name" ].Formula;
 
-                        //Первый вариант маркировки клапана - 1V12.
-                        Regex rex = new Regex( @"\b([0-9]{0,4})V([0-9]{1,2})\b",
-                            RegexOptions.IgnoreCase );
-                        if( rex.IsMatch( str ) )
-                            {
-                            Match mtc = rex.Match( str );
+							//Первый вариант маркировки клапана - 1V12.
+							Regex rex = new Regex( @"\b([0-9]{0,4})V([0-9]{1,2})\b",
+								RegexOptions.IgnoreCase );
+							if ( rex.IsMatch( str ) )
+								{
+								Match mtc = rex.Match( str );
 
-                            string n_part_1 = mtc.Groups[ 1 ].ToString();
-                            string n_part_2 = mtc.Groups[ 2 ].ToString();
-                            if( n_part_1 == "" ) n_part_1 = "0";
+								string n_part_1 = mtc.Groups[ 1 ].ToString();
+								string n_part_2 = mtc.Groups[ 2 ].ToString();
+								if ( n_part_1 == "" )
+									n_part_1 = "0";
 
-                            int n = Convert.ToUInt16( n_part_1 ) * 100 + 
-									Convert.ToUInt16( n_part_2 );
+								int n = Convert.ToUInt16( n_part_1 ) * 100 +
+										Convert.ToUInt16( n_part_2 );
 
-                            cell.Shape.Cells[ "Prop.number" ].FormulaU = n.ToString();
+								cell.Shape.Cells[ "Prop.number" ].FormulaU = n.ToString();
 
-                            str = str.Replace( "\"", "" );
-                            cell.Shape.Name = str.ToUpper();
-							cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
-                            break;
-                            }
+								str = str.Replace( "\"", "" );
+								cell.Shape.Name = str.ToUpper();
+								cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
+								break;
+								}
 
-                        //Второй вариант маркировки клапана - S4V12.
-                        Regex rex2 = new Regex( @"\b([a-z]{1})([0-9]{1})V([0-9]{1,2})\b",
-                            RegexOptions.IgnoreCase );
-                        if( rex2.IsMatch( str ) )
-                            {
-                            Match mtc = rex2.Match( str );
+							//Второй вариант маркировки клапана - S4V12.
+							Regex rex2 = new Regex( @"\b([a-z]{1})([0-9]{1})V([0-9]{1,2})\b",
+								RegexOptions.IgnoreCase );
+							if ( rex2.IsMatch( str ) )
+								{
+								Match mtc = rex2.Match( str );
 
-							//	Принцип нумерации клапанов в зависимости от имени
-							//	( А - 200, В - 220, С - 240, ..., W - 640 )
-							//
-							//	B 3 V 17    ===> ( 220 * 100 ) + ( 3 * 100 ) + ( 17 )  ===>  V( 22317 )
-							//	| |	| |____	17 = ( 17 )				 от 0 до 99
-							//	| |	|______  V =  ---				 ---
-							//	| |________	 3 = ( 3   * 100 )		 от 0 до 19
-							//	|__________	 B = ( 220 * 100 )		 от А до W
+								//	Принцип нумерации клапанов в зависимости от имени
+								//	( А - 200, В - 220, С - 240, ..., W - 640 )
+								//
+								//	B 3 V 17    ===> ( 220 * 100 ) + ( 3 * 100 ) + ( 17 )  ===>  V( 22317 )
+								//	| |	| |____	17 = ( 17 )				 от 0 до 99
+								//	| |	|______  V =  ---				 ---
+								//	| |________	 3 = ( 3   * 100 )		 от 0 до 19
+								//	|__________	 B = ( 220 * 100 )		 от А до W
 
-							//	Линия (A-W). Выделяем букву и переводим её в верхний регистр (А - 65 ..., а - 97 ...).
-							//	Получаем адрес буквы в таблице символов (А - 65 ...) 
-							char letter = mtc.Groups[ 1 ].ToString().ToUpper()[ 0 ];
-							int n = Convert.ToUInt16( letter );
-							
-							//	Преобразуем букву в номер в соответствии с принятым принципом нумерации
-							n = ( ( ( n - 65 ) * 20 ) + 200 ) * 100;	
+								//	Линия (A-W). Выделяем букву и переводим её в верхний регистр (А - 65 ..., а - 97 ...).
+								//	Получаем адрес буквы в таблице символов (А - 65 ...) 
+								char letter = mtc.Groups[ 1 ].ToString().ToUpper()[ 0 ];
+								int n = Convert.ToUInt16( letter );
 
-                            //Номер линии (0-19).
-                            n += 100 * Convert.ToUInt16( mtc.Groups[ 2 ].ToString() );
-                            //Клапан.
-                            n += Convert.ToUInt16( mtc.Groups[ 3 ].ToString() );
+								//	Преобразуем букву в номер в соответствии с принятым принципом нумерации
+								n = ( ( ( n - 65 ) * 20 ) + 200 ) * 100;
 
-							cell.Shape.Cells[ "Prop.name" ].FormulaU = str.ToUpper();
-							cell.Shape.Cells[ "Prop.number" ].FormulaU = n.ToString();
+								//Номер линии (0-19).
+								n += 100 * Convert.ToUInt16( mtc.Groups[ 2 ].ToString() );
+								//Клапан.
+								n += Convert.ToUInt16( mtc.Groups[ 3 ].ToString() );
 
-                            //	Именуем элемент на схеме
-							str = str.Replace( "\"", "" );			//	Удаляем лишние символы
-							cell.Shape.Name = str.ToUpper();		//	Переводим в верхний регистр
-							cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
-                            break;
-                            }
+								cell.Shape.Cells[ "Prop.name" ].FormulaU = str.ToUpper();
+								cell.Shape.Cells[ "Prop.number" ].FormulaU = n.ToString();
 
-                        MessageBox.Show( "Неверная маркировка клапана - \"" +
-                            str + "\"!" );
-                        cell.Shape.Cells[ "Prop.name" ].FormulaU = "\"V19\"";
-                        break;
-                    }
-                }
-            }
+								//	Именуем элемент на схеме
+								str = str.Replace( "\"", "" );			//	Удаляем лишние символы
+								cell.Shape.Name = str.ToUpper();		//	Переводим в верхний регистр
+								cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
+								break;
+								}
+
+							MessageBox.Show( "Неверная маркировка клапана - \"" +
+								str + "\"!" );
+							cell.Shape.Cells[ "Prop.name" ].FormulaU = "\"V19\"";
+							break;
+						}	//	switch ( cell.Name )
+					break;
+				}	//	switch ( cell.Shape.Data1 )
+
+			}
 
         /// <summary> Event handler. Обработчик события "привязки" фигуры. Здесь
         /// заполняем порядковый номер модуля в наборе. </summary>
@@ -562,6 +666,17 @@ namespace visio_prj_designer
 
                     break;
                 }
+				
+			//	Необходимо реализовать авто нумерацию присоединенной пачки модулей
+									  
+			//Array V_S;
+
+			//V_S = obj_1.ConnectedShapes( 
+			//    Microsoft.Office.Interop.Visio.VisConnectedShapesFlags.visConnectedShapesAllNodes, "" );
+
+			//V_S = obj_2.ConnectedShapes( 
+			//    Microsoft.Office.Interop.Visio.VisConnectedShapesFlags.visConnectedShapesAllNodes, "" );
+
             }
 
         /// <summary> Event handler. Удаляем соответствующий объект при удалении
@@ -589,6 +704,21 @@ namespace visio_prj_designer
                     break;
 
 				case "V":
+				case "N":
+				case "MIX":
+				case "CTR":
+				case "TE":
+				case "QE":
+				case "LS":
+				case "LE":
+				case "FS":
+				case "FE":
+				case "FB":
+				case "UPR":
+				case "AI":
+				case "AO":
+				case "FQT":
+				case "WTE":	
 
                      //Поиск по shape объекта device.
                      //int dev_n    = Convert.ToInt16( shape.Cells[ "Prop.number" ].FormulaU );
@@ -645,62 +775,105 @@ namespace visio_prj_designer
                 return;
                 }
 
-            if( shape.Data1 == "750" && shape.Data2 == "860" )
-                {
-                if( g_PAC == null )
-                    {
-                    string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
-                    string name = shape.Cells[ "Prop.PAC_name" ].Formula;
+			switch ( shape.Data1 )
+				{
+				case "750":
+					if ( shape.Data2 == "860" )
+						{
+						if ( g_PAC == null )
+							{
+							string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
+							string name = shape.Cells[ "Prop.PAC_name" ].Formula;
 
-                    g_PAC = new PAC( name.Substring( 1, name.Length - 2 ),
-                        ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
-                    }
-                else
-                    {
-                    no_delete_g_pac_flag = true;
-                    MessageBox.Show( "Только один контроллер может быть в проекте!" );
-                    shape.DeleteEx( 0 );
-                    }
-                return;
-                }
+							g_PAC = new PAC( name.Substring( 1, name.Length - 2 ),
+								ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
+							}
+						else
+							{
+							no_delete_g_pac_flag = true;
+							MessageBox.Show( "Только один контроллер может быть в проекте!" );
+							shape.DeleteEx( 0 );
+							}
 
-            if( shape.Data1 == "750" && shape.Data2 != "860" )
-                {
-                modules_count_enter modules_count_enter_form = new modules_count_enter();
-                modules_count_enter_form.ShowDialog();
-                duplicate_count = modules_count_enter_form.modules_count - 1;
+						return;
+						}
+					else	 
+						{
+						//	if ( shape.Data2 != "860" )
+
+						modules_count_enter modules_count_enter_form = new modules_count_enter();
+						modules_count_enter_form.ShowDialog();
+						duplicate_count = modules_count_enter_form.modules_count - 1;
+
+						////////////////////////////
+
+						//	Нужно будет доработать
+						//	Проверка составленого списка модулей (LB_modules) 
+						//		с имеющимся списком объектов g_PAC.io_modules
+						//	g_PAC.insert_io_module( index, shape ); для недостоющих
+
+						////////////////////////////
 
 
-                g_PAC.add_io_module( shape );
-                
-                shape.Cells[ "Prop.type" ].FormulaU = 
-                    modules_count_enter_form.modules_type;                                
+						g_PAC.add_io_module( shape );
+						
+						shape.Cells[ "Prop.type" ].FormulaU	= modules_count_enter_form.modules_type;
+						shape.Shapes[ "type_str" ].Text		= modules_count_enter_form.modules_type;
 
-                for( int i = 0; i < duplicate_count; i++ )
-                    {
-                    is_duplicating = true;
-                    new_shape = shape.Duplicate();
-                    old_shape = shape;
-                                        
-                    string str_x = string.Format( "PNTX(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+6 mm",
-                        old_shape.Name );
-                    string str_y = string.Format( "PNTY(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+-47 mm",
-                        old_shape.Name );
 
-                    new_shape.Cells[ "PinX" ].Formula = str_x;
-                    new_shape.Cells[ "PinY" ].Formula = str_y;
+						for ( int i = 0; i < duplicate_count; i++ )
+							{
+							is_duplicating = true;
+							new_shape = shape.Duplicate();
+							old_shape = shape;
 
-                    shape = new_shape;
+							string str_x = string.Format( 
+								"PNTX(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+6 mm",
+							    old_shape.Name );
 
-                    g_PAC.add_io_module( shape );
-                    visio_addin__FormulaChanged( shape.Cells[ "Prop.type" ] );
-                    }
-                }
+							string str_y = string.Format( 
+								"PNTY(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+-47 mm",
+							    old_shape.Name );
 
-            if( shape.Data1 == "V" )
-                {
-                g_devices.Add( new device( shape, g_PAC ) );
-                }
+							new_shape.Cells[ "PinX" ].Formula = str_x;
+							new_shape.Cells[ "PinY" ].Formula = str_y;
+
+							shape = new_shape;
+
+							g_PAC.add_io_module( shape );
+
+							shape.Cells[ "Prop.type" ].FormulaU = modules_count_enter_form.modules_type;
+							shape.Shapes[ "type_str" ].Text		= modules_count_enter_form.modules_type;
+
+							visio_addin__FormulaChanged( shape.Cells[ "Prop.type" ] );
+							}
+						}
+					break;
+
+				case "V":
+				case "N":
+				case "MIX":
+				case "CTR":
+				case "TE":
+				case "QE":
+				case "LS":
+				case "LE":
+				case "FS":
+				case "FE":
+				case "FB":
+				case "UPR":
+				case "AI":
+				case "AO":
+				case "FQT":
+				case "WTE":
+					g_devices.Add( new device( shape, g_PAC ) );
+					break;
+
+				//case "TANK":
+				//    g_devices.Add( new T_Object( shape, g_PAC ) );
+				//    break;
+				}	//	switch ( shape.Data1 ) 
+
             }
 
 		/// <summary> Event handler.  </summary>
@@ -727,6 +900,21 @@ namespace visio_prj_designer
 				//    break;
 
 				case "V":
+				case "N":
+				case "MIX":
+				case "CTR":
+				case "TE":
+				case "QE":
+				case "LS":
+				case "LE":
+				case "FS":
+				case "FE":
+				case "FB":
+				case "UPR":
+				case "AI":
+				case "AO":
+				case "FQT":
+				case "WTE":	
 
 					//Поиск по shape объекта device.
 					//int dev_n = Convert.ToInt16(shape.Cells["Prop.number"].FormulaU);
