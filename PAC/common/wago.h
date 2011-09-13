@@ -258,6 +258,7 @@ class wago_manager
             enum W_CONST
                 {
                 C_MAX_WAIT_TIME = 6, ///< Время до установки ошибки связи с модулем, сек.
+                C_ANALOG_BUF_SIZE = 256,  ///< Размер буфера аналоговых модулей.
                 };
 
             enum TYPES ///< Типы модулей.
@@ -288,8 +289,8 @@ class wago_manager
 
             // Analog outputs ( AO ).
             u_int AO_cnt;       ///< Amount of AO.
-            u_int *AO;          ///< Current values.
-            u_int *AO_;         ///< To write.
+            u_int AO[ C_ANALOG_BUF_SIZE ];          ///< Current values.
+            u_int AO_[ C_ANALOG_BUF_SIZE ];         ///< To write.
             u_int *AO_offsets;  ///< Offsets in common data.
             u_int *AO_types;    ///< Channels type.
 
@@ -299,7 +300,7 @@ class wago_manager
 
             // Analog inputs ( AI ).
             u_int AI_cnt;       ///< Amount of AI.
-            u_int *AI;          ///< Current values.
+            u_int AI[ C_ANALOG_BUF_SIZE ];          ///< Current values.
             u_int *AI_offsets;  ///< Offsets in common data.
             u_int *AI_types;    ///< Channels type.
             };

@@ -66,8 +66,8 @@ void PAC_critical_errors_manager::show_errors()
         }
     }
 //-----------------------------------------------------------------------------
-void PAC_critical_errors_manager::set_global_error( ERRORS_CLASS eclass,
-    ERRORS_SUBCLASS p1, unsigned long p2 )
+void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
+    ALARM_SUBCLASS p1, unsigned long p2 )
     {
     int b = 0;
 
@@ -94,8 +94,8 @@ void PAC_critical_errors_manager::set_global_error( ERRORS_CLASS eclass,
         }
     }
 //-----------------------------------------------------------------------------
-void PAC_critical_errors_manager::reset_global_error( ERRORS_CLASS eclass, 
-    ERRORS_SUBCLASS p1, unsigned long p2 )
+void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass, 
+    ALARM_SUBCLASS p1, unsigned long p2 )
     {
     int idx = -1;
     for ( u_int i = 0; i < errors.size(); i++ )

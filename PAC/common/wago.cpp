@@ -792,14 +792,11 @@ wago_manager::wago_node::wago_node() : state( ST_NO_CONNECT ),
     DO( 0 ),
     DO_( 0 ),
     AO_cnt( 0 ),
-    AO( 0 ),
-    AO_( 0 ),
     AO_offsets( 0 ),
     AO_types( 0 ),
     DI_cnt( 0 ),
     DI( 0 ),
-    AI_cnt( 0 ),
-    AI( 0 ),
+    AI_cnt( 0 ),    
     AI_offsets( 0 ),
     AI_types( 0 )
     {
@@ -817,8 +814,6 @@ wago_manager::wago_node::~wago_node()
 
     if ( AO_cnt )
         {
-        delete [] AO;
-        delete [] AO_;
         delete [] AO_offsets;
         delete [] AO_types;
         AO_cnt = 0;
@@ -832,7 +827,6 @@ wago_manager::wago_node::~wago_node()
 
     if ( AI_cnt )
         {
-        delete [] AI;
         delete [] AI_offsets;
         delete [] AI_types;
         AI_cnt = 0;
@@ -874,7 +868,6 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
         }
     if ( AI_cnt )
         {
-        AI = new u_int [ AI_cnt ];
         AI_offsets = new u_int [ AI_cnt ];
         AI_types = new u_int [ AI_cnt ];
 
@@ -882,8 +875,6 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
         }
     if ( AO_cnt )
         {
-        AO = new u_int [ AO_cnt ];
-        AO_ = new u_int [ AO_cnt ];
         AO_types = new u_int [ AO_cnt ];
         AO_offsets = new u_int [ AO_cnt ];
 
