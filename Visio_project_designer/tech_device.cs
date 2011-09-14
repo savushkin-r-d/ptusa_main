@@ -291,9 +291,9 @@ namespace tech_device
                 {
                 Match mtc = rex.Match( str );
 
-                node = Convert.ToInt16( mtc.Groups[ 1 ].ToString() ) - 1;
-                module = Convert.ToInt16( mtc.Groups[ 2 ].ToString() ) - 1;
-                clamp = Convert.ToInt16( mtc.Groups[ 3 ].ToString() ) - 1;
+                node = Convert.ToInt16( mtc.Groups[ 1 ].ToString() );
+                module = Convert.ToInt16( mtc.Groups[ 2 ].ToString() );
+                clamp = Convert.ToInt16( mtc.Groups[ 3 ].ToString() );
                 return true;
                 }
 
@@ -323,20 +323,20 @@ namespace tech_device
         /// <param name="pac">      Узел Wago. </param>
         private void set_sub_type( SUB_TYPES sub_type, PAC pac )
             {
+			int node;
+			int module;
+			int clamp;
+
             wago_channels.Clear();
 
             switch( type )
                 {
                 case TYPES.T_V:
 
-                    string str_DO1 = shape.Cells[ "Prop.DO1" ].Formula;
-                    string str_DO2 = shape.Cells[ "Prop.DO2" ].Formula;
-                    string str_DI1 = shape.Cells[ "Prop.DI1" ].Formula;
-                    string str_DI2 = shape.Cells[ "Prop.DI2" ].Formula;
-
-                    int node;
-                    int module;
-                    int clamp;
+					string str_DO1 = shape.Cells[ "Prop.DO1" ].Formula;
+					string str_DO2 = shape.Cells[ "Prop.DO2" ].Formula;
+					string str_DI1 = shape.Cells[ "Prop.DI1" ].Formula;
+					string str_DI2 = shape.Cells[ "Prop.DI2" ].Formula;
 
                     switch( sub_type )
                         {
@@ -344,16 +344,14 @@ namespace tech_device
                             add_wago_channel( "DO1", io_module.KINDS.DO );
                             get_n_from_str( str_DO1, out node, out module, out clamp );
                             wago_channels[ "DO1" ].set( pac, module, clamp );
-
                             break;
 
                         case SUB_TYPES.V_2_CONTROL_CHANNEL:
                             add_wago_channel( "DO1", io_module.KINDS.DO );
-                            add_wago_channel( "DO2", io_module.KINDS.DO );
-
                             get_n_from_str( str_DO1, out node, out module, out clamp );
                             wago_channels[ "DO1" ].set( pac, module, clamp );
 
+                            add_wago_channel( "DO2", io_module.KINDS.DO );
                             get_n_from_str( str_DO2, out node, out module, out clamp );
                             wago_channels[ "DO2" ].set( pac, module, clamp );
 
@@ -361,11 +359,10 @@ namespace tech_device
 
                         case SUB_TYPES.V_1_CONTROL_CHANNEL_1_FB:
                             add_wago_channel( "DO1", io_module.KINDS.DO );
-                            add_wago_channel( "DI1", io_module.KINDS.DI );
-
                             get_n_from_str( str_DO1, out node, out module, out clamp );
                             wago_channels[ "DO1" ].set( pac, module, clamp );
 
+							add_wago_channel( "DI1", io_module.KINDS.DI );
                             get_n_from_str( str_DI1, out node, out module, out clamp );
                             wago_channels[ "DI1" ].set( pac, module, clamp );
                             break;
@@ -407,6 +404,45 @@ namespace tech_device
                             break;
                         }
                     break;
+
+				case TYPES.T_UPR:
+					str_DO1 = shape.Cells[ "Prop.DO1" ].Formula;
+
+					add_wago_channel( "DO1", io_module.KINDS.DO );
+					get_n_from_str( str_DO1, out node, out module, out clamp );
+					wago_channels[ "DO1" ].set( pac, module, clamp );
+					break;
+
+				case TYPES.T_FB:
+				case TYPES.T_LS:	// * есть еще настраиваемый (с параметром)
+				case TYPES.T_FS:
+					str_DI1 = shape.Cells[ "Prop.DI1" ].Formula;
+
+					add_wago_channel( "DI1", io_module.KINDS.DI );
+					get_n_from_str( str_DI1, out node, out module, out clamp );
+					wago_channels[ "DI1" ].set( pac, module, clamp );
+					break;
+
+				case TYPES.T_AO:
+					string str_AO1 = shape.Cells[ "Prop.AO1" ].Formula;
+
+					add_wago_channel( "AO1", io_module.KINDS.AO );
+                    get_n_from_str( str_AO1, out node, out module, out clamp );
+                    wago_channels[ "AO1" ].set( pac, module, clamp );
+					break;
+
+				case TYPES.T_AI:
+				case TYPES.T_LE:   // ** Несколько видов
+				case TYPES.T_TE:
+				case TYPES.T_FE:   // * два параметра max, min
+				case TYPES.T_QE:   // *	два параметра max, min
+				case TYPES.T_CTR:
+					string str_AI1 = shape.Cells[ "Prop.AI1" ].Formula;
+
+					add_wago_channel( "AI1", io_module.KINDS.AI );
+                    get_n_from_str( str_AI1, out node, out module, out clamp );
+                    wago_channels[ "AI1" ].set( pac, module, clamp );
+					break;
                 }
 
             }

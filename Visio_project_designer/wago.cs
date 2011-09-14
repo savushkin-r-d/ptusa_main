@@ -247,6 +247,42 @@ namespace wago
 			}
 		//---------------------------------------------------------------------
 
+			//Определяем расположение клемм на модуле
+			switch ( type )
+				{
+				//	Только для 16-и канальных модулей расположение клем отличается от заданного
+				case TYPES.T_1405:
+				case TYPES.T_1504:
+					for ( int i = 0; i < ( int ) total_clamps; i++ )
+						{
+						//	Создаем новое имя (чтобы не было конфликта имен)
+						shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ i ] ].Name = 
+							shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ i ] ].Name + "_";
+						}
+
+					for ( int i = 0; i < ( int ) total_clamps; i++ )
+						{	
+						//	Фиксируем новое имя (для наглядности)
+						string temp_name = clamp_names[ i ] +  "_";
+																									  
+						string new_name = "clamp_" + 
+							Convert.ToString( shape.Shapes[ "type_skin" ].Shapes[ temp_name ].Data1 );
+
+						//	Переименовываем клемы
+					    shape.Shapes[ "type_skin" ].Shapes[	temp_name ].Name = new_name;
+						}
+
+
+					//	Изменяем текст (номер клемы на фигуре)
+					for ( int i = 0; i < ( int ) total_clamps; i++ )
+						{
+						shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ i ] ].Text = Convert.ToString( i + 1 );
+						}
+
+					break;					
+				}	
+		//---------------------------------------------------------------------
+
 			//Определяем доступные клеммы
 			switch ( type )
 				{
@@ -372,7 +408,7 @@ namespace wago
             }
 
         /// <summary> Фигура Visio модуля. </summary>
-        Visio.Shape shape;        
+        internal Visio.Shape shape;        
 
         /// <summary> Имена клемм. </summary>
         List<string> clamp_names;
@@ -519,13 +555,14 @@ namespace wago
         /// <param name="clamp"> Номер клеммы ( >= 0 ). </param>
         public void magnify_clamp( int clamp )
             {
+			//	module_number	-	Просто образец размера
             shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ] ].Cells[
-                "Width" ].FormulaU = string.Format( "=Sheet.{0}!Width*0.66",
-                shape.Shapes[ "type_skin" ].ID );
+                "Width" ].FormulaU = string.Format( "=Sheet.{0}!Width",
+                shape.Shapes[ "module_number" ].ID );
 
             shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ] ].Cells[
-                "Height" ].FormulaU = string.Format( "=Sheet.{0}!Height*0.09",
-                shape.Shapes[ "type_skin" ].ID );
+                "Height" ].FormulaU = string.Format( "=Sheet.{0}!Height",
+                shape.Shapes[ "module_number" ].ID );
             }
 
         /// <summary> Вернуть нормальный размер клеммы. </summary>
@@ -535,13 +572,14 @@ namespace wago
         /// <param name="clamp"> Номер помечаемой клеммы ( >= 0 ). </param>
         void unmagnify_clamp( int clamp )
             {
+			//	module_number	-	Просто образец размера
             shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ]
-                ].Cells[ "Width" ].FormulaU = string.Format( "=Sheet.{0}!Width*0.33",
-                shape.Shapes[ "type_skin" ].ID );
+                ].Cells[ "Width" ].FormulaU = string.Format( "=Sheet.{0}!Width*0.5",
+                shape.Shapes[ "module_number" ].ID );
 
             shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ]
-                ].Cells[ "Height" ].FormulaU = string.Format( "=Sheet.{0}!Height*0.045",
-                shape.Shapes[ "type_skin" ].ID );
+                ].Cells[ "Height" ].FormulaU = string.Format( "=Sheet.{0}!Height*0.5",
+                shape.Shapes[ "module_number" ].ID );
             }
 
         /// <summary> "Подсветить" модуль и заданную клемму. При этом подсветка
@@ -600,7 +638,7 @@ namespace wago
                 unmagnify_clamp( i++ );
                 }
 
-            shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].FormulaU = "100%";
+			shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].FormulaU = "100%";
             }
         }
 
@@ -617,7 +655,10 @@ namespace wago
         public string ip_addres;  
 
         /// <summary> Имя контроллера. </summary>
-        public string PAC_name; 
+        public string PAC_name;
+
+		/// <summary> Выбранный в данный момент модуль </summary>
+		internal io_module current_module = null; 
 
         private List<io_module> io_modules; ///< Модули ввода\вывода.  
 
@@ -800,8 +841,14 @@ namespace wago
             {
             if( module > 0 )
                 {
-                this.module = pac.get_io_modules()[ module ];
-                this.clamp = clamp;
+				//Поиск по shape объекта device.
+				this.module = pac.get_io_modules().Find( delegate( io_module mod )
+				{
+					return mod.order_number == module;
+				}
+				);
+
+                this.clamp = clamp - 1;
                 this.module.use( clamp );
                 }
             }

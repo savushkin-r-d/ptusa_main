@@ -39,11 +39,6 @@ namespace visio_prj_designer
             modules_count = ( int ) ( sender as NumericUpDown ).Value;
             }
 
-        private void modules_type_cbox__TextChanged( object sender, EventArgs e )
-            {
-            modules_type = ( sender as ComboBox ).Text;
-            }
-
 		private void treeView1_DoubleClick( object sender, EventArgs e )
 			{
 			//	Добавление выбранного элемента в список модулей за текущим модулем

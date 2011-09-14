@@ -56,19 +56,19 @@ namespace visio_prj_designer
 			this.ok_button = new System.Windows.Forms.Button();
 			this.modules_count_label = new System.Windows.Forms.Label();
 			this.modules_count_nupdown = new System.Windows.Forms.NumericUpDown();
-			this.modules_type_label = new System.Windows.Forms.Label();
-			this.modules_type_cbox = new System.Windows.Forms.ComboBox();
 			this.TV_modules_list = new System.Windows.Forms.TreeView();
 			this.LB_modules = new System.Windows.Forms.ListBox();
+			this.modules_type_label = new System.Windows.Forms.Label();
+			this.label1 = new System.Windows.Forms.Label();
 			( ( System.ComponentModel.ISupportInitialize ) ( this.modules_count_nupdown ) ).BeginInit();
 			this.SuspendLayout();
 			// 
 			// ok_button
 			// 
 			this.ok_button.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.ok_button.Location = new System.Drawing.Point( 266, 468 );
+			this.ok_button.Location = new System.Drawing.Point( 212, 406 );
 			this.ok_button.Name = "ok_button";
-			this.ok_button.Size = new System.Drawing.Size( 152, 28 );
+			this.ok_button.Size = new System.Drawing.Size( 206, 28 );
 			this.ok_button.TabIndex = 3;
 			this.ok_button.Text = "Ок";
 			this.ok_button.UseVisualStyleBackColor = true;
@@ -76,7 +76,7 @@ namespace visio_prj_designer
 			// modules_count_label
 			// 
 			this.modules_count_label.AutoSize = true;
-			this.modules_count_label.Location = new System.Drawing.Point( 263, 434 );
+			this.modules_count_label.Location = new System.Drawing.Point( 8, 413 );
 			this.modules_count_label.Name = "modules_count_label";
 			this.modules_count_label.Size = new System.Drawing.Size( 85, 13 );
 			this.modules_count_label.TabIndex = 0;
@@ -84,7 +84,7 @@ namespace visio_prj_designer
 			// 
 			// modules_count_nupdown
 			// 
-			this.modules_count_nupdown.Location = new System.Drawing.Point( 354, 434 );
+			this.modules_count_nupdown.Location = new System.Drawing.Point( 110, 410 );
 			this.modules_count_nupdown.Maximum = new decimal( new int[] {
             50,
             0,
@@ -105,33 +105,9 @@ namespace visio_prj_designer
             0} );
 			this.modules_count_nupdown.ValueChanged += new System.EventHandler( this.modules_count_nupdown__ValueChanged );
 			// 
-			// modules_type_label
-			// 
-			this.modules_type_label.AutoSize = true;
-			this.modules_type_label.Location = new System.Drawing.Point( 263, 405 );
-			this.modules_type_label.Name = "modules_type_label";
-			this.modules_type_label.Size = new System.Drawing.Size( 26, 13 );
-			this.modules_type_label.TabIndex = 0;
-			this.modules_type_label.Text = "Тип";
-			// 
-			// modules_type_cbox
-			// 
-			this.modules_type_cbox.FormattingEnabled = true;
-			this.modules_type_cbox.Items.AddRange( new object[] {
-            "402",
-            "466",
-            "504"} );
-			this.modules_type_cbox.Location = new System.Drawing.Point( 354, 402 );
-			this.modules_type_cbox.Name = "modules_type_cbox";
-			this.modules_type_cbox.Size = new System.Drawing.Size( 64, 21 );
-			this.modules_type_cbox.Sorted = true;
-			this.modules_type_cbox.TabIndex = 2;
-			this.modules_type_cbox.Text = "504";
-			this.modules_type_cbox.TextChanged += new System.EventHandler( this.modules_type_cbox__TextChanged );
-			// 
 			// TV_modules_list
 			// 
-			this.TV_modules_list.Location = new System.Drawing.Point( 13, 13 );
+			this.TV_modules_list.Location = new System.Drawing.Point( 3, 24 );
 			this.TV_modules_list.Name = "TV_modules_list";
 			treeNode1.Name = "T_402";
 			treeNode1.Text = "T_402";
@@ -152,7 +128,7 @@ namespace visio_prj_designer
 			this.TV_modules_list.Nodes.AddRange( new System.Windows.Forms.TreeNode[] {
             treeNode4,
             treeNode8} );
-			this.TV_modules_list.Size = new System.Drawing.Size( 202, 434 );
+			this.TV_modules_list.Size = new System.Drawing.Size( 202, 381 );
 			this.TV_modules_list.TabIndex = 4;
 			this.TV_modules_list.AfterSelect += new System.Windows.Forms.TreeViewEventHandler( this.TV_modules_list_AfterSelect );
 			this.TV_modules_list.DoubleClick += new System.EventHandler( this.treeView1_DoubleClick );
@@ -160,20 +136,38 @@ namespace visio_prj_designer
 			// LB_modules
 			// 
 			this.LB_modules.FormattingEnabled = true;
-			this.LB_modules.Location = new System.Drawing.Point( 244, 13 );
+			this.LB_modules.Location = new System.Drawing.Point( 212, 24 );
 			this.LB_modules.Name = "LB_modules";
 			this.LB_modules.Size = new System.Drawing.Size( 206, 381 );
 			this.LB_modules.TabIndex = 5;
+			// 
+			// modules_type_label
+			// 
+			this.modules_type_label.AutoSize = true;
+			this.modules_type_label.Location = new System.Drawing.Point( 13, 6 );
+			this.modules_type_label.Name = "modules_type_label";
+			this.modules_type_label.Size = new System.Drawing.Size( 66, 13 );
+			this.modules_type_label.TabIndex = 0;
+			this.modules_type_label.Text = "Тип модуля";
+			// 
+			// label1
+			// 
+			this.label1.AutoSize = true;
+			this.label1.Location = new System.Drawing.Point( 222, 6 );
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size( 124, 13 );
+			this.label1.TabIndex = 6;
+			this.label1.Text = "Модули в составе узла";
 			// 
 			// modules_count_enter
 			// 
 			this.AcceptButton = this.ok_button;
 			this.AutoScaleDimensions = new System.Drawing.SizeF( 6F, 13F );
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size( 462, 523 );
+			this.ClientSize = new System.Drawing.Size( 423, 443 );
+			this.Controls.Add( this.label1 );
 			this.Controls.Add( this.LB_modules );
 			this.Controls.Add( this.TV_modules_list );
-			this.Controls.Add( this.modules_type_cbox );
 			this.Controls.Add( this.modules_count_nupdown );
 			this.Controls.Add( this.modules_type_label );
 			this.Controls.Add( this.modules_count_label );
@@ -181,7 +175,7 @@ namespace visio_prj_designer
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
 			this.Name = "modules_count_enter";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "Модули";
+			this.Text = "Добавление модуля";
 			this.Shown += new System.EventHandler( this.modules_count_enter_Shown );
 			( ( System.ComponentModel.ISupportInitialize ) ( this.modules_count_nupdown ) ).EndInit();
 			this.ResumeLayout( false );
@@ -193,10 +187,10 @@ namespace visio_prj_designer
 
         private System.Windows.Forms.Button ok_button;
         private System.Windows.Forms.Label modules_count_label;
-        private System.Windows.Forms.NumericUpDown modules_count_nupdown;
-        private System.Windows.Forms.Label modules_type_label;
-        private System.Windows.Forms.ComboBox modules_type_cbox;
+		private System.Windows.Forms.NumericUpDown modules_count_nupdown;
 		private System.Windows.Forms.TreeView TV_modules_list;
 		private System.Windows.Forms.ListBox LB_modules;
+		private System.Windows.Forms.Label modules_type_label;
+		private System.Windows.Forms.Label label1;
         }
     }

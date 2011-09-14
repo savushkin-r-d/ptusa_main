@@ -207,7 +207,7 @@ namespace visio_prj_designer
         /// <param name="target"> Target for the. </param>
         private void visio_addin__DocumentOpened( Visio.Document target )
             {
-//            if( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
+            if( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
                 {
 //                if( target.Template.Contains( "PTUSA project" ) )
                     {
@@ -219,7 +219,9 @@ namespace visio_prj_designer
 					//    {
 					//    string ss = service_config.DI_modules[ 402 ];
 					//    }
-													 					
+					
+try	
+	{												 					
                     //Считывание устройств Wago.
                     foreach( Visio.Shape shape in target.Pages[ "Wago" ].Shapes )
                         {
@@ -238,7 +240,16 @@ namespace visio_prj_designer
                             g_PAC.add_io_module( shape );
                             }
                         }
-
+	}
+catch ( Exception err )
+	{
+	MessageBox.Show( "Ошибка считывания модулей WAGO" );
+	throw;
+	}
+//-----------------------------------------------------------------------------
+					
+try
+	{
 					g_devices.Clear();
 
                     //Считывание устройств.
@@ -266,7 +277,17 @@ namespace visio_prj_designer
 								break;
                             }		//	switch ( shape.Data1 )	
                         }		//	foreach
+	}
+catch ( Exception err )
+	{
+	System.Diagnostics.Debug.WriteLine( err.Message );
+	MessageBox.Show( "Ошибка считывания устройств проекта" );
+	throw;
+	}
+//-----------------------------------------------------------------------------
 
+try
+	{
 					foreach ( Visio.Shape shape in target.Pages[ "Обмен сигналами" ].Shapes )
 						{
 						switch ( shape.Data1 )
@@ -279,6 +300,13 @@ namespace visio_prj_designer
 								break;
 							}		//	switch ( shape.Data1 )	
 						}		//	foreach
+	}
+catch ( Exception err )
+	{
+	System.Diagnostics.Debug.WriteLine( err.Message );
+	MessageBox.Show( "Ошибка считывания сигналов проекта" );
+	throw;
+	}
 
                     }
 				//else
@@ -381,13 +409,19 @@ namespace visio_prj_designer
                             } //if( window.Selection.Count > 0 )
                         else
                             {
-                            //Снятие ранее подсвеченных модулей Wago.
-                            if( previous_selected_dev != null )
-                                {
-                                previous_selected_dev.unselect_channels();
-                                previous_selected_dev = null;
-                                }
+                            //	Снятие ранее подсвеченных модулей Wago.
+							if( previous_selected_dev != null )
+							    {
+							    previous_selected_dev.unselect_channels();
+							    previous_selected_dev = null;
+							    }
 
+							//	Снятие подсветки с ранее выбранных модулей
+							foreach ( io_module mod in g_PAC.get_io_modules() )
+								{
+								mod.deactivate();
+								}
+							
                             edit_io_frm.listForm.disable_prop();
                             }
 
@@ -701,6 +735,18 @@ namespace visio_prj_designer
                             g_PAC = null;
                             }
                         }
+					else  //	( shape.Data2 != "860" )
+						{
+						//	Удаление выбранного модуля из списка модулей
+						g_PAC.current_module = g_PAC.get_io_modules().Find
+							( 
+							delegate( io_module module )
+								{
+								return module.shape == shape;
+								}
+							);
+							g_PAC.get_io_modules().Remove( g_PAC.current_module );
+						}
                     break;
 
 				case "V":
@@ -813,13 +859,11 @@ namespace visio_prj_designer
 						//	g_PAC.insert_io_module( index, shape ); для недостоющих
 
 						////////////////////////////
-
-
-						g_PAC.add_io_module( shape );
-						
+			
 						shape.Cells[ "Prop.type" ].FormulaU	= modules_count_enter_form.modules_type;
 						shape.Shapes[ "type_str" ].Text		= modules_count_enter_form.modules_type;
 
+						g_PAC.add_io_module( shape );
 
 						for ( int i = 0; i < duplicate_count; i++ )
 							{
