@@ -34,9 +34,9 @@ int wago_manager_linux::net_init( wago_node *node )
     socket_remote_server.sin_addr.s_addr = inet_addr( node->ip_address );
     socket_remote_server.sin_port        = htons ( PORT );
 
-    const int ON = 1;
+    const int C_ON = 1;
 
-    if ( setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &ON, sizeof( ON ) ) )
+    if ( setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &C_ON, sizeof( C_ON ) ) )
         {
         perror( "wago_manager_linux:net_init(...) - ошибка  вызова  setsockopt" );
         close( sock );
@@ -91,7 +91,7 @@ int wago_manager_linux::net_init( wago_node *node )
 #endif // DEBUG
 
     node->sock   = sock;
-    node->state  = wago_node::S_OK;
+    node->state  = wago_node::ST_OK;
 
     return 0;
     }
@@ -108,7 +108,7 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
             {
             is_set_err = true;
             PAC_critical_errors_manager::get_instance( )->set_global_error(
-                    EC_NO_CONNECTION, ES_WAGO, node->number );
+                    AC_NO_CONNECTION, AS_WAGO, node->number );
             }
         }
     else
@@ -117,16 +117,16 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
             {
             is_set_err = false;
             PAC_critical_errors_manager::get_instance( )->reset_global_error(
-                    EC_NO_CONNECTION, ES_WAGO, node->number );
+                    AC_NO_CONNECTION, AS_WAGO, node->number );
             }
         }
     // Проверка связи с узлом Wago.-!>
 
     // Инициализация сетевого соединения, при необходимости.
-    if( node->state != wago_node::S_OK )
+    if( node->state != wago_node::ST_OK )
         {
         net_init( node );
-        if( node->state != wago_node::S_OK ) return -100;
+        if( node->state != wago_node::ST_OK ) return -100;
         }
     // Инициализация сетевого соединения, при необходимости.-!>
 
@@ -171,14 +171,14 @@ void wago_manager_linux::disconnect( wago_node *node )
     close( node->sock );
     node->sock = 0;
 
-    node->state = wago_node::S_NO_CONNECT;
+    node->state = wago_node::ST_NO_CONNECT;
     }
 //-----------------------------------------------------------------------------
-wago_manager_linux::wago_manager_linux( )
+wago_manager_linux::wago_manager_linux()
     {
     }
 //-----------------------------------------------------------------------------
-wago_manager_linux::~wago_manager_linux( )
+wago_manager_linux::~wago_manager_linux()
     {
     }
 //-----------------------------------------------------------------------------

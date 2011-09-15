@@ -75,7 +75,8 @@ int wago_manager_w750::read_inputs()
             if ( nodes[ i ]->DI_cnt > 0 )
                 {
                 /// @todo Модернизировать заполнение заголовка.
-                //snprintf( ( char* ) buff, sizeof( buff ), "ss%c", 0 );
+//                snprintf( ( char* ) buff, sizeof( buff ), "ss%c%c%c%c",
+//                        0, 0, 0, 6 );
                 
                 buff[ 0  ] = 's';
                 buff[ 1  ] = 's';
@@ -118,6 +119,44 @@ int wago_manager_w750::read_inputs()
                          }
                      }// if ( e_communicate( nodes[ i ], 12, bytes_cnt + 9 ) == 0 )
                  }// if ( nodes[ i ]->DI_cnt > 0 )
+
+            if ( nodes[ i ]->AI_cnt > 0 )
+                {
+                /// @todo Модернизировать заполнение заголовка.
+                snprintf( ( char* ) buff, sizeof( buff ), "ss%c%c%c%c",
+                        0, 0, 0, 6 );
+
+//                buff[ 0  ] = 's';
+//                buff[ 1  ] = 's';
+//                buff[ 2  ] = 0;
+//                buff[ 3  ] = 0;
+//                buff[ 4  ] = 0;
+//                buff[ 5  ] = 6;
+                buff[ 6  ] = nodes[ i ]->number;
+                buff[ 7  ] = 0x04;
+                buff[ 8  ] = 0;
+                buff[ 9  ] = 0;                
+
+                u_int bytes_cnt = nodes[ i ]->AI_size;
+
+                buff[ 10 ] = ( unsigned char ) bytes_cnt / 2 >> 8;
+                buff[ 11 ] = ( unsigned char ) bytes_cnt / 2 & 0xFF;
+
+                if ( e_communicate( nodes[ i ], 12, bytes_cnt + 9 ) == 0 )
+                     {
+                     if ( buff[ 7 ] == 0x04 && buff[ 8 ] == bytes_cnt )
+                         {
+                         memcpy( nodes[ i ]->AI, buff, bytes_cnt );
+                         }
+                         else
+                         {
+#ifdef DEBUG
+                         Print("\nRead AI:Wago returned error...\n");
+#endif // DEBUG
+                         }
+                     }
+                 }// if ( nodes[ i ]->AI_cnt > 0 )
+
             }// if ( nodes[ i ]->type == wago_node::T_750_341 || ...
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
@@ -231,7 +270,7 @@ int wago_manager_w750::write_outputs()
 
             if ( nodes[ i ]->AO_cnt > 0 )
                 {
-                u_int bytes_cnt = nodes[ i ]->AO_cnt / 2;
+                u_int bytes_cnt = nodes[ i ]->AO_size;
 
                 /// @todo Модернизировать заполнение заголовка.
                 /// @todo Необходимо тестирование.
@@ -240,23 +279,22 @@ int wago_manager_w750::write_outputs()
                 buff[ 2  ] = 0;
                 buff[ 3  ] = 0;
                 buff[ 4  ] = 0;
-                buff[ 5  ] = 7 + bytes_cnt * 2;
+                buff[ 5  ] = 7 + bytes_cnt;
                 buff[ 6  ] = nodes[ i ]->number;
                 buff[ 7  ] = 0x10;
                 buff[ 8  ] = 0;
                 buff[ 9  ] = 0;
-                buff[ 10 ] = bytes_cnt >> 8;
-                buff[ 11 ] = bytes_cnt & 0xFF;
-                buff[ 12 ] = bytes_cnt * 2;
-                memcpy( buff + 13, nodes[ i ]->AO_,
-                    nodes[ i ]->AO_cnt * sizeof( nodes[ i ]->AO_[ 0 ] ) );
+                buff[ 10 ] = bytes_cnt / 2 >> 8;
+                buff[ 11 ] = bytes_cnt / 2 & 0xFF;
+                buff[ 12 ] = bytes_cnt;
+                memcpy( buff + 13, nodes[ i ]->AO_, nodes[ i ]->AO_size );
 
-                if ( e_communicate( nodes[ i ], 2 * bytes_cnt + 13, 12 ) == 0 )
+                if ( e_communicate( nodes[ i ], bytes_cnt + 13, 12 ) == 0 )
                     {
                     if ( buff[ 7 ] == 0x10 )
                         {
-                        memcpy( nodes[ i ]->AO, nodes[ i ]->AO_,
-                            nodes[ i ]->AO_cnt * sizeof( nodes[ i ]->AO_[ 0 ] ) );
+                        memcpy( nodes[ i ]->AO, nodes[ i ]->AO_, 
+                            nodes[ i ]->AO_size );
                         }
                      }// if ( e_communicate( nodes[ i ], 2 * bytes_cnt + 13, 12 ) == 0 )
                  else

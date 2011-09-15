@@ -224,11 +224,11 @@ int step_path::add_wash_seat_valve( u_int group, device *v )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-wash_step::wash_step(): active_group_n( 0 ), active_group( 0 ),   
-    phase( P_WAIT ),
-    start_cycle_time( 0 ),
+wash_step::wash_step(): phase( P_WAIT ), 
+    active_group_n( 0 ), active_group( 0 ),   
     wait_time( 0 ),
-    wash_time( 0 )
+    wash_time( 0 ),
+    start_cycle_time( 0 )
     {
     }
 //-----------------------------------------------------------------------------
@@ -388,6 +388,9 @@ void wash_step::dev_group::print()
     case i_mix_proof::ST_LOWER_SEAT:
         Print( "lower = ");
         break;
+
+    default:
+        Print( "custom = ");
         }
 
     Print( "{ " );

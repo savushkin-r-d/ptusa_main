@@ -51,11 +51,14 @@ int main( int argc, char *argv[] )
         return EXIT_FAILURE;
         }  
 
-    const char *PAC_name = 
+    G_TECH_OBJECT_MNGR()->init_objects();
+
+
+    const char *PAC_name =
         G_LUA_MANAGER->char_no_param_exec_lua_method( "system",
         "get_PAC_name", "lua_manager::init" );
     if ( 0 == PAC_name )
-        {        
+        {
         fprintf( stderr, "Lua init error - error reading PAC name!\n" );
         debug_break;
         return EXIT_FAILURE;
@@ -63,8 +66,6 @@ int main( int argc, char *argv[] )
     tcp_communicator::init_instance( PAC_name );
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
-
-    G_TECH_OBJECT_MNGR()->init_objects();
 
     //-ƒобавление системных тегов контроллера.
     G_DEVICE_CMMCTR->add_device( PAC_info::get_instance() );

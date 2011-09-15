@@ -327,11 +327,12 @@ int tech_object::save_device( char *buff )
                 }
             else
                 {
-                snprintf( up_time_str, 50, "\'      %02lu\', ", up_secs );   
+                snprintf( up_time_str, 50, "\'      %02lu\', ",
+                    ( long u_int ) up_secs );
                 }
             }
 
-        sprintf( buff + answer_size, up_time_str );
+        sprintf( buff + answer_size, "%s", up_time_str );
         answer_size += strlen( buff + answer_size );
         }
     sprintf( buff + answer_size, "\n\t\t},\n" );
