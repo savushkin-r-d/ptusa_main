@@ -130,6 +130,12 @@ namespace tech_device
 
             /// <summary> 2 канала управления и 2 обратных связи.  </summary>
             V_2_CONTROL_CHANNEL_2_FB,
+
+			/// <summary> MixProof 3 КУ и 2 ОС.  </summary>
+			V_MIX_PROOF_3_UPR_2_FB,
+
+			/// <summary> MixProof AS-Interface.  </summary>
+			V_MIX_PROOF_AS_INTERFACE,
             }
         
         /// <summary> Тип устройства. </summary>
@@ -402,48 +408,86 @@ namespace tech_device
                             wago_channels[ "DI2" ].set( pac, module, clamp );
 
                             break;
+
+						case SUB_TYPES.V_MIX_PROOF_3_UPR_2_FB:
+							add_wago_channel( "DO1", io_module.KINDS.DO );
+							add_wago_channel( "DOH", io_module.KINDS.DO );
+							add_wago_channel( "DOL", io_module.KINDS.DO );
+
+							add_wago_channel( "DI1", io_module.KINDS.DI );
+							add_wago_channel( "DI2", io_module.KINDS.DI );
+
+							get_n_from_str( str_DO1, out node, out module, out clamp );
+							wago_channels[ "DO1" ].set( pac, module, clamp );
+
+							get_n_from_str( str_DO2, out node, out module, out clamp );
+							wago_channels[ "DOH" ].set( pac, module, clamp );
+
+							get_n_from_str( str_DO2, out node, out module, out clamp );
+							wago_channels[ "DOL" ].set( pac, module, clamp );
+
+							get_n_from_str( str_DI1, out node, out module, out clamp );
+							wago_channels[ "DI1" ].set( pac, module, clamp );
+
+							get_n_from_str( str_DI2, out node, out module, out clamp );
+							wago_channels[ "DI2" ].set( pac, module, clamp );
+
+							break;
+
+						case SUB_TYPES.V_MIX_PROOF_AS_INTERFACE:
+							//	AS_adres
+							//	AS_gateway
+							break;
+
                         }
                     break;
+                }
 
-				case TYPES.T_UPR:
-					str_DO1 = shape.Cells[ "Prop.DO1" ].Formula;
+
+				if (	( type == TYPES.T_UPR )
+					||	( type == TYPES.T_MIX )	||	( type == TYPES.T_N )	)
+				 	{
+					string str_DO1 = shape.Cells[ "Prop.DO1" ].Formula;
 
 					add_wago_channel( "DO1", io_module.KINDS.DO );
 					get_n_from_str( str_DO1, out node, out module, out clamp );
 					wago_channels[ "DO1" ].set( pac, module, clamp );
-					break;
+					}
 
-				case TYPES.T_FB:
-				case TYPES.T_LS:	// * есть еще настраиваемый (с параметром)
-				case TYPES.T_FS:
-					str_DI1 = shape.Cells[ "Prop.DI1" ].Formula;
+				if  (	( type == TYPES.T_FB )
+					||	( type == TYPES.T_LS )
+					||	( type == TYPES.T_FS )
+					|| ( type == TYPES.T_MIX )	|| ( type == TYPES.T_N )	)
+					{
+					string str_DI1 = shape.Cells[ "Prop.DI1" ].Formula;
 
 					add_wago_channel( "DI1", io_module.KINDS.DI );
 					get_n_from_str( str_DI1, out node, out module, out clamp );
 					wago_channels[ "DI1" ].set( pac, module, clamp );
-					break;
+					}
 
-				case TYPES.T_AO:
+				if ( type == TYPES.T_AO )
+				 	{
 					string str_AO1 = shape.Cells[ "Prop.AO1" ].Formula;
 
 					add_wago_channel( "AO1", io_module.KINDS.AO );
-                    get_n_from_str( str_AO1, out node, out module, out clamp );
-                    wago_channels[ "AO1" ].set( pac, module, clamp );
-					break;
+					get_n_from_str( str_AO1, out node, out module, out clamp );
+					wago_channels[ "AO1" ].set( pac, module, clamp );
+					}
 
-				case TYPES.T_AI:
-				case TYPES.T_LE:   // ** Несколько видов
-				case TYPES.T_TE:
-				case TYPES.T_FE:   // * два параметра max, min
-				case TYPES.T_QE:   // *	два параметра max, min
-				case TYPES.T_CTR:
+				if (   ( type == TYPES.T_AI )
+					|| ( type == TYPES.T_LE )
+					|| ( type == TYPES.T_TE )
+					|| ( type == TYPES.T_FE )
+					|| ( type == TYPES.T_QE )
+					|| ( type == TYPES.T_CTR )	)
+				 	{
 					string str_AI1 = shape.Cells[ "Prop.AI1" ].Formula;
 
 					add_wago_channel( "AI1", io_module.KINDS.AI );
                     get_n_from_str( str_AI1, out node, out module, out clamp );
                     wago_channels[ "AI1" ].set( pac, module, clamp );
-					break;
-                }
+					}
 
             }
 

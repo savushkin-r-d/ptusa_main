@@ -106,97 +106,99 @@ namespace visio_prj_designer
         /// the contents of this method with the code editor.</summary>
         private void InitializeComponent()
             {
-            this.type_lview = new System.Windows.Forms.ListView();
-            this.channel = ( ( System.Windows.Forms.ColumnHeader ) ( new System.Windows.Forms.ColumnHeader() ) );
-            this.value = ( ( System.Windows.Forms.ColumnHeader ) ( new System.Windows.Forms.ColumnHeader() ) );
-            this.type_cbox = new System.Windows.Forms.ComboBox();
-            this.type_label = new System.Windows.Forms.Label();
-            this.no_channel_label = new System.Windows.Forms.Label();
-            this.SuspendLayout();
-            // 
-            // type_lview
-            // 
-            this.type_lview.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
-                        | System.Windows.Forms.AnchorStyles.Left )
-                        | System.Windows.Forms.AnchorStyles.Right ) ) );
-            this.type_lview.Columns.AddRange( new System.Windows.Forms.ColumnHeader[] {
+			this.type_lview = new System.Windows.Forms.ListView();
+			this.channel = ( ( System.Windows.Forms.ColumnHeader ) ( new System.Windows.Forms.ColumnHeader() ) );
+			this.value = ( ( System.Windows.Forms.ColumnHeader ) ( new System.Windows.Forms.ColumnHeader() ) );
+			this.type_cbox = new System.Windows.Forms.ComboBox();
+			this.type_label = new System.Windows.Forms.Label();
+			this.no_channel_label = new System.Windows.Forms.Label();
+			this.SuspendLayout();
+			// 
+			// type_lview
+			// 
+			this.type_lview.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
+						| System.Windows.Forms.AnchorStyles.Left )
+						| System.Windows.Forms.AnchorStyles.Right ) ) );
+			this.type_lview.Columns.AddRange( new System.Windows.Forms.ColumnHeader[] {
             this.channel,
             this.value} );
-            this.type_lview.GridLines = true;
-            this.type_lview.HideSelection = false;
-            this.type_lview.Location = new System.Drawing.Point( 1, 39 );
-            this.type_lview.MultiSelect = false;
-            this.type_lview.Name = "type_lview";
-            this.type_lview.Size = new System.Drawing.Size( 232, 108 );
-            this.type_lview.TabIndex = 0;
-            this.type_lview.UseCompatibleStateImageBehavior = false;
-            this.type_lview.View = System.Windows.Forms.View.Details;
-            this.type_lview.Visible = false;
-            this.type_lview.SelectedIndexChanged += new System.EventHandler( this.type_lview__SelectedIndexChanged );
-            this.type_lview.DoubleClick += new System.EventHandler( this.type_lview__DoubleClick );
-            // 
-            // channel
-            // 
-            this.channel.Text = "Канал";
-            // 
-            // value
-            // 
-            this.value.Text = "Привязка";
-            this.value.Width = 159;
-            // 
-            // type_cbox
-            // 
-            this.type_cbox.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left )
-                        | System.Windows.Forms.AnchorStyles.Right ) ) );
-            this.type_cbox.CausesValidation = false;
-            this.type_cbox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.type_cbox.Items.AddRange( new object[] {
+			this.type_lview.GridLines = true;
+			this.type_lview.HideSelection = false;
+			this.type_lview.Location = new System.Drawing.Point( 1, 39 );
+			this.type_lview.MultiSelect = false;
+			this.type_lview.Name = "type_lview";
+			this.type_lview.Size = new System.Drawing.Size( 232, 117 );
+			this.type_lview.TabIndex = 0;
+			this.type_lview.UseCompatibleStateImageBehavior = false;
+			this.type_lview.View = System.Windows.Forms.View.Details;
+			this.type_lview.Visible = false;
+			this.type_lview.SelectedIndexChanged += new System.EventHandler( this.type_lview__SelectedIndexChanged );
+			this.type_lview.DoubleClick += new System.EventHandler( this.type_lview__DoubleClick );
+			// 
+			// channel
+			// 
+			this.channel.Text = "Канал";
+			// 
+			// value
+			// 
+			this.value.Text = "Привязка";
+			this.value.Width = 159;
+			// 
+			// type_cbox
+			// 
+			this.type_cbox.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left )
+						| System.Windows.Forms.AnchorStyles.Right ) ) );
+			this.type_cbox.CausesValidation = false;
+			this.type_cbox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.type_cbox.Items.AddRange( new object[] {
             "1 КУ",
             "2 КУ",
             "1 КУ 1 ОС",
             "1 КУ 2 ОС",
-            "2 КУ 2 ОС"} );
-            this.type_cbox.Location = new System.Drawing.Point( 60, 12 );
-            this.type_cbox.Name = "type_cbox";
-            this.type_cbox.Size = new System.Drawing.Size( 173, 21 );
-            this.type_cbox.TabIndex = 1;
-            this.type_cbox.Visible = false;
-            this.type_cbox.SelectedIndexChanged += new System.EventHandler( this.type_cbox__SelectedIndexChanged );
-            // 
-            // type_label
-            // 
-            this.type_label.AutoSize = true;
-            this.type_label.Location = new System.Drawing.Point( 12, 15 );
-            this.type_label.Name = "type_label";
-            this.type_label.Size = new System.Drawing.Size( 26, 13 );
-            this.type_label.TabIndex = 2;
-            this.type_label.Text = "Тип";
-            this.type_label.Visible = false;
-            // 
-            // no_channel_label
-            // 
-            this.no_channel_label.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
-                        | System.Windows.Forms.AnchorStyles.Left )
-                        | System.Windows.Forms.AnchorStyles.Right ) ) );
-            this.no_channel_label.AutoSize = true;
-            this.no_channel_label.Location = new System.Drawing.Point( 76, 70 );
-            this.no_channel_label.Name = "no_channel_label";
-            this.no_channel_label.Size = new System.Drawing.Size( 70, 13 );
-            this.no_channel_label.TabIndex = 3;
-            this.no_channel_label.Text = "Каналов нет";
-            // 
-            // edit_valve_type_form
-            // 
-            this.AutoScaleBaseSize = new System.Drawing.Size( 5, 13 );
-            this.ClientSize = new System.Drawing.Size( 234, 152 );
-            this.Controls.Add( this.type_lview );
-            this.Controls.Add( this.type_label );
-            this.Controls.Add( this.type_cbox );
-            this.Controls.Add( this.no_channel_label );
-            this.Name = "edit_valve_type_form";
-            this.Text = "Каналы";
-            this.ResumeLayout( false );
-            this.PerformLayout();
+            "2 КУ 2 ОС",
+            "3 КУ 2 ОС",
+            "AS-Interface"} );
+			this.type_cbox.Location = new System.Drawing.Point( 60, 12 );
+			this.type_cbox.Name = "type_cbox";
+			this.type_cbox.Size = new System.Drawing.Size( 173, 21 );
+			this.type_cbox.TabIndex = 1;
+			this.type_cbox.Visible = false;
+			this.type_cbox.SelectedIndexChanged += new System.EventHandler( this.type_cbox__SelectedIndexChanged );
+			// 
+			// type_label
+			// 
+			this.type_label.AutoSize = true;
+			this.type_label.Location = new System.Drawing.Point( 12, 15 );
+			this.type_label.Name = "type_label";
+			this.type_label.Size = new System.Drawing.Size( 26, 13 );
+			this.type_label.TabIndex = 2;
+			this.type_label.Text = "Тип";
+			this.type_label.Visible = false;
+			// 
+			// no_channel_label
+			// 
+			this.no_channel_label.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
+						| System.Windows.Forms.AnchorStyles.Left )
+						| System.Windows.Forms.AnchorStyles.Right ) ) );
+			this.no_channel_label.AutoSize = true;
+			this.no_channel_label.Location = new System.Drawing.Point( 76, 70 );
+			this.no_channel_label.Name = "no_channel_label";
+			this.no_channel_label.Size = new System.Drawing.Size( 70, 13 );
+			this.no_channel_label.TabIndex = 3;
+			this.no_channel_label.Text = "Каналов нет";
+			// 
+			// edit_valve_type_form
+			// 
+			this.AutoScaleBaseSize = new System.Drawing.Size( 5, 13 );
+			this.ClientSize = new System.Drawing.Size( 234, 161 );
+			this.Controls.Add( this.type_lview );
+			this.Controls.Add( this.type_label );
+			this.Controls.Add( this.type_cbox );
+			this.Controls.Add( this.no_channel_label );
+			this.Name = "edit_valve_type_form";
+			this.Text = "Каналы";
+			this.ResumeLayout( false );
+			this.PerformLayout();
 
             }
         #endregion

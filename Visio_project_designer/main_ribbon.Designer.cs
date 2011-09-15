@@ -63,62 +63,80 @@ namespace visio_prj_designer
         /// </summary>
         private void InitializeComponent()
             {
-            this.process_definition_tab = this.Factory.CreateRibbonTab();
-            this.group1 = this.Factory.CreateRibbonGroup();
-            this.edit_mode_tbutton = this.Factory.CreateRibbonToggleButton();
-            this.group2 = this.Factory.CreateRibbonGroup();
-            this.save_as_lua_button = this.Factory.CreateRibbonButton();
-            this.process_definition_tab.SuspendLayout();
-            this.group1.SuspendLayout();
-            this.group2.SuspendLayout();
-            // 
-            // process_definition_tab
-            // 
-            this.process_definition_tab.Groups.Add( this.group1 );
-            this.process_definition_tab.Groups.Add( this.group2 );
-            this.process_definition_tab.Label = "Описание техпроцесса";
-            this.process_definition_tab.Name = "process_definition_tab";
-            this.process_definition_tab.Visible = false;
-            // 
-            // group1
-            // 
-            this.group1.Items.Add( this.edit_mode_tbutton );
-            this.group1.Label = "Редактирование";
-            this.group1.Name = "group1";
-            // 
-            // edit_mode_tbutton
-            // 
-            this.edit_mode_tbutton.Label = "Привязка";
-            this.edit_mode_tbutton.Name = "edit_mode_tbutton";
-            this.edit_mode_tbutton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.toggleButton_edit_mode_Click );
-            // 
-            // group2
-            // 
-            this.group2.Items.Add( this.save_as_lua_button );
-            this.group2.Label = "Редактор WAGO";
-            this.group2.Name = "group2";
-            // 
-            // save_as_lua_button
-            // 
-            this.save_as_lua_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.save_as_lua_button.Image = global::Visio_project_designer.Properties.Resources.wago_linux;
-            this.save_as_lua_button.Label = "Сохранить описание";
-            this.save_as_lua_button.Name = "save_as_lua_button";
-            this.save_as_lua_button.ShowImage = true;
-            this.save_as_lua_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.button1_Click );
-            // 
-            // main_ribbon
-            // 
-            this.Name = "main_ribbon";
-            this.RibbonType = "Microsoft.Visio.Drawing";
-            this.Tabs.Add( this.process_definition_tab );
-            this.Load += new Microsoft.Office.Tools.Ribbon.RibbonUIEventHandler( this.Ribbon1_Load );
-            this.process_definition_tab.ResumeLayout( false );
-            this.process_definition_tab.PerformLayout();
-            this.group1.ResumeLayout( false );
-            this.group1.PerformLayout();
-            this.group2.ResumeLayout( false );
-            this.group2.PerformLayout();
+			this.process_definition_tab = this.Factory.CreateRibbonTab();
+			this.group1 = this.Factory.CreateRibbonGroup();
+			this.group2 = this.Factory.CreateRibbonGroup();
+			this.group3 = this.Factory.CreateRibbonGroup();
+			this.edit_mode_tbutton = this.Factory.CreateRibbonToggleButton();
+			this.save_as_lua_button = this.Factory.CreateRibbonButton();
+			this.Btn_devices = this.Factory.CreateRibbonButton();
+			this.process_definition_tab.SuspendLayout();
+			this.group1.SuspendLayout();
+			this.group2.SuspendLayout();
+			this.group3.SuspendLayout();
+			// 
+			// process_definition_tab
+			// 
+			this.process_definition_tab.Groups.Add( this.group1 );
+			this.process_definition_tab.Groups.Add( this.group2 );
+			this.process_definition_tab.Groups.Add( this.group3 );
+			this.process_definition_tab.Label = "Описание техпроцесса";
+			this.process_definition_tab.Name = "process_definition_tab";
+			this.process_definition_tab.Visible = false;
+			// 
+			// group1
+			// 
+			this.group1.Items.Add( this.edit_mode_tbutton );
+			this.group1.Label = "Редактирование";
+			this.group1.Name = "group1";
+			// 
+			// group2
+			// 
+			this.group2.Items.Add( this.save_as_lua_button );
+			this.group2.Label = "Редактор WAGO";
+			this.group2.Name = "group2";
+			// 
+			// group3
+			// 
+			this.group3.Items.Add( this.Btn_devices );
+			this.group3.Label = "Объекты";
+			this.group3.Name = "group3";
+			// 
+			// edit_mode_tbutton
+			// 
+			this.edit_mode_tbutton.Label = "Привязка";
+			this.edit_mode_tbutton.Name = "edit_mode_tbutton";
+			this.edit_mode_tbutton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.toggleButton_edit_mode_Click );
+			// 
+			// save_as_lua_button
+			// 
+			this.save_as_lua_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+			this.save_as_lua_button.Image = global::Visio_project_designer.Properties.Resources.wago_linux;
+			this.save_as_lua_button.Label = "Сохранить описание";
+			this.save_as_lua_button.Name = "save_as_lua_button";
+			this.save_as_lua_button.ShowImage = true;
+			this.save_as_lua_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.button1_Click );
+			// 
+			// Btn_devices
+			// 
+			this.Btn_devices.Label = "Устройства";
+			this.Btn_devices.Name = "Btn_devices";
+			this.Btn_devices.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.Btn_devices_Click );
+			// 
+			// main_ribbon
+			// 
+			this.Name = "main_ribbon";
+			this.RibbonType = "Microsoft.Visio.Drawing";
+			this.Tabs.Add( this.process_definition_tab );
+			this.Load += new Microsoft.Office.Tools.Ribbon.RibbonUIEventHandler( this.Ribbon1_Load );
+			this.process_definition_tab.ResumeLayout( false );
+			this.process_definition_tab.PerformLayout();
+			this.group1.ResumeLayout( false );
+			this.group1.PerformLayout();
+			this.group2.ResumeLayout( false );
+			this.group2.PerformLayout();
+			this.group3.ResumeLayout( false );
+			this.group3.PerformLayout();
 
             }
 
@@ -129,6 +147,8 @@ namespace visio_prj_designer
         internal Microsoft.Office.Tools.Ribbon.RibbonButton save_as_lua_button;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton edit_mode_tbutton;
         internal Microsoft.Office.Tools.Ribbon.RibbonTab process_definition_tab;
+		internal Microsoft.Office.Tools.Ribbon.RibbonGroup group3;
+		internal Microsoft.Office.Tools.Ribbon.RibbonButton Btn_devices;
         }
 
     partial class ThisRibbonCollection

@@ -726,9 +726,6 @@ namespace wago
                     io_module_kind = io_module.KINDS.DO;
                     break;
 
-                case "SPECIAL":
-                    io_module_kind = io_module.KINDS.SPECIAL;
-                    break;
                 }
 
             foreach( io_module module in io_modules )
@@ -839,6 +836,7 @@ namespace wago
         /// <param name="clamp">  The clamp. </param>
         public void set( PAC pac, int module, int clamp )
             {
+			//	Привязка каналов устройства к модулю
             if( module > 0 )
                 {
 				//Поиск по shape объекта device.
@@ -851,6 +849,10 @@ namespace wago
                 this.clamp = clamp - 1;
                 this.module.use( clamp );
                 }
+			else
+				{	//	Задание параметра
+
+				}
             }
 
         }

@@ -243,7 +243,7 @@ try
 	}
 catch ( Exception err )
 	{
-	MessageBox.Show( "Ошибка считывания модулей WAGO" );
+	MessageBox.Show( "Ошибка считывания модулей WAGO" + err );
 	throw;
 	}
 //-----------------------------------------------------------------------------
@@ -665,6 +665,23 @@ catch ( Exception err )
 							MessageBox.Show( "Неверная маркировка клапана - \"" +
 								str + "\"!" );
 							cell.Shape.Cells[ "Prop.name" ].FormulaU = "\"V19\"";
+							break;
+
+						case "Prop.septum":
+							str = cell.Shape.Cells[ "Prop.septum" ].Formula;
+							str = str.Replace( "\"", "" );
+							str = str.ToUpper();
+
+							if ( str == "НО" )
+								{
+								cell.Shape.Shapes[ "septum" ].SendToBack();
+								//cell.Shape.Shapes[ "septum" ].SendBackward();
+								}
+							else  //	"НЗ"
+								{
+								cell.Shape.Shapes[ "septum" ].BringToFront();
+								//cell.Shape.Shapes[ "septum" ].BringForward();
+								}
 							break;
 						}	//	switch ( cell.Name )
 					break;

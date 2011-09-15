@@ -128,5 +128,11 @@ namespace visio_prj_designer
                 //1 КУ;2 КУ;1 КУ 1 ОС;1 КУ 2 ОС;2 КУ 2 ОС
                 }
             }
+
+		private void Btn_devices_Click( object sender, RibbonControlEventArgs e )
+			{
+			Visio_project_designer.Form_device Dev_List_Form = new Visio_project_designer.Form_device();
+			Dev_List_Form.Show();
+			}
         }
     }
