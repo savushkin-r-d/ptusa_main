@@ -746,12 +746,13 @@ wago_manager::wago_node * wago_manager::get_node( int node_n )
     }
 //-----------------------------------------------------------------------------
 void wago_manager::add_node( u_int index, int ntype, int address,
-    char* IP_address, int DO_cnt, int DI_cnt, int AO_cnt, int AI_cnt )
+    char* IP_address, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, 
+    int AI_cnt, int AI_size )
     {
     if ( index < nodes_count )
         {
         nodes[ index ] = new wago_node( ntype, address, IP_address, DO_cnt,
-            DI_cnt, AO_cnt, AI_cnt );     
+            DI_cnt, AO_cnt, AO_size, AI_cnt, AI_size );     
         }
     }
 //-----------------------------------------------------------------------------
@@ -785,24 +786,6 @@ void wago_manager::print() const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-wago_manager::wago_node::wago_node() : state( ST_NO_CONNECT ),
-    type( T_750_860 ),
-    number( 0 ),
-    DO_cnt( 0 ),
-    DO( 0 ),
-    DO_( 0 ),
-    AO_cnt( 0 ),
-    AO_offsets( 0 ),
-    AO_types( 0 ),
-    DI_cnt( 0 ),
-    DI( 0 ),
-    AI_cnt( 0 ),    
-    AI_offsets( 0 ),
-    AI_types( 0 )
-    {
-    memset( ip_address, 0, sizeof( ip_address ) );
-    }
-//-----------------------------------------------------------------------------
 wago_manager::wago_node::~wago_node()
     {
     if ( DO_cnt )
@@ -834,7 +817,8 @@ wago_manager::wago_node::~wago_node()
     }
 //-----------------------------------------------------------------------------
 wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
-    int DO_cnt, int DI_cnt, int AO_cnt, int AI_cnt ): state( ST_NO_CONNECT ),
+    int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, int AI_cnt, 
+    int AI_size ): state( ST_NO_CONNECT ),
     type( ( TYPES ) type ),
     number( number ),
     last_poll_time( get_sec() ),

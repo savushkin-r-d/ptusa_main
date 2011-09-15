@@ -246,10 +246,9 @@ class wago_manager
         ///
         struct wago_node
             {
-            wago_node();
-
             wago_node( int type, int number, char *str_ip_addres, 
-                int DO_cnt, int DI_cnt, int AO_cnt, int AI_cnt );
+                int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
+                int AI_cnt, int AI_size );
 
             ~wago_node();
 
@@ -293,6 +292,7 @@ class wago_manager
             u_int AO_[ C_ANALOG_BUF_SIZE ];         ///< To write.
             u_int *AO_offsets;  ///< Offsets in common data.
             u_int *AO_types;    ///< Channels type.
+            u_int AO_size;
 
             // Digital inputs ( DI ).
             u_int  DI_cnt;      ///< Amount of DI.
@@ -303,6 +303,7 @@ class wago_manager
             u_int AI[ C_ANALOG_BUF_SIZE ];          ///< Current values.
             u_int *AI_offsets;  ///< Offsets in common data.
             u_int *AI_types;    ///< Channels type.
+            u_int AI_size;
             };
         //---------------------------------------------------------------------
 
@@ -324,7 +325,8 @@ class wago_manager
         ///
         /// Вызывается из Lua.
         void add_node( u_int index, int ntype, int address, char* IP_address, 
-            int DO_cnt, int DI_cnt, int AO_cnt, int AI_cnt );
+            int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, 
+            int AI_cnt, int AI_size );
 
         /// @brief Инициализация параметров канала аналогового вывода.
         ///

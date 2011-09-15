@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 09/13/11 16:13:40.
+** Generated automatically by tolua++-1.0.92 on 09/15/11 12:53:14.
 */
 
 #ifndef __cplusplus
@@ -3815,7 +3815,9 @@ static int tolua_PAC_dev_wago_manager_add_node00(lua_State* tolua_S)
      !tolua_isnumber(tolua_S,7,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,8,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,9,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,10,&tolua_err)
+     !tolua_isnumber(tolua_S,10,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,11,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,12,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -3829,12 +3831,14 @@ static int tolua_PAC_dev_wago_manager_add_node00(lua_State* tolua_S)
   int DO_cnt = ((int)  tolua_tonumber(tolua_S,6,0));
   int DI_cnt = ((int)  tolua_tonumber(tolua_S,7,0));
   int AO_cnt = ((int)  tolua_tonumber(tolua_S,8,0));
-  int AI_cnt = ((int)  tolua_tonumber(tolua_S,9,0));
+  int AO_size = ((int)  tolua_tonumber(tolua_S,9,0));
+  int AI_cnt = ((int)  tolua_tonumber(tolua_S,10,0));
+  int AI_size = ((int)  tolua_tonumber(tolua_S,11,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_node'", NULL);
 #endif
   {
-   self->add_node(index,ntype,address,IP_address,DO_cnt,DI_cnt,AO_cnt,AI_cnt);
+   self->add_node(index,ntype,address,IP_address,DO_cnt,DI_cnt,AO_cnt,AO_size,AI_cnt,AI_size);
   }
  }
  return 0;
