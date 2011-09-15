@@ -3,7 +3,6 @@
 #include <stdio.h>
 
 #include "tech_def.h"
-//#include "sys.h"
 
 #include "lua_manager.h"
 //-----------------------------------------------------------------------------
@@ -328,7 +327,7 @@ int tech_object::save_device( char *buff )
             else
                 {
                 snprintf( up_time_str, 50, "\'      %02lu\', ",
-                    ( long u_int ) up_secs );
+                    ( u_long ) up_secs );
                 }
             }
 
