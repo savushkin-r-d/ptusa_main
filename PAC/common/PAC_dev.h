@@ -197,10 +197,29 @@ class device : public i_AO_device,
     public i_DO_device, public i_cmd_device
     {
     public:
-        int set_cmd( const char *prop, u_int idx, double val );
+        /// @brief Выполнение команды.
+        ///
+        /// Запись в свойство объекта дробного числа.
+        ///
+        /// @param prop - свойство объекта.
+        /// @param idx  - индекс свойства.
+        /// @param val  - значение.
+        virtual int set_cmd( const char *prop, u_int idx, double val );
 
-        int set_cmd( const char *prop, u_int idx, char *val );
+        /// @brief Выполнение команды.
+        ///
+        /// Запись в свойство объекта строки.
+        ///
+        /// @param prop - свойство объекта.
+        /// @param idx  - индекс свойства.
+        /// @param val  - значение.
+        virtual int set_cmd( const char *prop, u_int idx, char *val );
 
+        /// @brief Сохранение устройства в виде скрипта Lua.
+        ///
+        /// @param prefix - префикс перед строкой скрипта (обычно символ
+        /// табуляции - для визуального форматирования текста).
+        /// @param buff [out] - буфер записи строки.
         virtual int save_device( char *buff, const char *prefix );
 
         //-Ошибки.
@@ -309,6 +328,12 @@ class device : public i_AO_device,
         int get_sub_type() const
             {
             return sub_type;
+            }
+        
+        /// @brief Инициализация параметров устройства.
+        virtual int init_params()
+            {
+            return 0;
             }
 
     protected:
@@ -433,11 +458,9 @@ class analog_wago_device : public device, public wago_device
         void  direct_on();        
         void  direct_off();
 
-        int save_device( char *buff, const char *prefix );
-
 #ifdef DEBUG_NO_WAGO_MODULES
         float get_value();
-        void direct_set_value( float new_value );
+        void  direct_set_value( float new_value );
 
 #else  // DEBUG_NO_WAGO_MODULES
 
@@ -679,15 +702,37 @@ class valve_AS_mix_proof : public device, public i_mix_proof
 class AI_1 : public analog_wago_device
     {
     public:
-        AI_1( u_int number, 
-            device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): analog_wago_device( number, type, sub_type )
+        AI_1( u_int number, device::DEVICE_TYPE type, 
+            device::DEVICE_SUB_TYPE sub_type );
+
+        int init_params();
+
+        int set_cmd( const char *prop, u_int idx, double val );
+
+    protected:
+
+        enum PARAMS ///< Индексы параметров устройства.
             {
-            }
+            P_ZERO_ADJUST_COEFF = 0, ///< Сдвиг нуля.
+            };
+
+        enum CONSTANTS
+            {
+            C_PARAMS_COUNT = 1, ///< Количество параметров устройства.
+
+            C_AI_INDEX = 0,     ///< Индекс канала аналогового входа.
+            };
+
+        int save_device( char *buff, const char *prefix );
+
+#ifdef DEBUG_NO_WAGO_MODULES
+        float get_value();
+#endif // DEBUG_NO_WAGO_MODULES
+
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         float get_value();
-        void   direct_set_value( float new_value );
+        void  direct_set_value( float new_value );
 
         /// @brief Получение максимального значения выхода устройства.
         virtual float get_max_val() = 0;
@@ -695,12 +740,10 @@ class AI_1 : public analog_wago_device
         /// @brief Получение минимального значения выхода устройства.
         virtual float get_min_val() = 0;
 
-    protected:
-        enum CONSTANTS
-            {
-            AI_INDEX = 0,   ///< Индекс канала аналогового входа.
-            };
 #endif // DEBUG_NO_WAGO_MODULES
+
+    private:
+        saved_params_float par; ///< Сохраняемые параметры устройства.
     };
 //-----------------------------------------------------------------------------
 /// @brief Температура.
@@ -787,6 +830,23 @@ class AO_1 : public analog_wago_device
             device::DEVICE_TYPE type, 
             device::DEVICE_SUB_TYPE sub_type ): analog_wago_device( number, type, sub_type )
             {
+            }
+
+        int save_device( char *buff, const char *prefix )
+            {
+            sprintf( buff, "%s[%d]={V=", prefix, get_n() );
+
+            if ( get_value() == 0 )
+                {
+                sprintf( buff + strlen( buff ), "0" );
+                }
+            else
+                {
+                sprintf( buff + strlen( buff ), "%.2f", get_value() );
+                }
+            sprintf( buff + strlen( buff ), ", M=%d},\n", get_manual_mode() );
+
+            return strlen( buff );
             }
 
 #ifndef DEBUG_NO_WAGO_MODULES
@@ -1079,6 +1139,8 @@ class device_manager: public i_Lua_save_device
             {
             return &stub;
             }
+
+        int init_params();
 
 #ifdef __BORLANDC__
 #pragma option -w-inl

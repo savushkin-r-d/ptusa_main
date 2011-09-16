@@ -106,8 +106,8 @@ int device::save_device( char *buff, const char *prefix )
 int device::set_cmd( const char *prop, u_int idx, char *val )
     {
 #ifdef DEBUG
-        Print( "device::set_cmd() - prop = %s, idx = %d, val = %s\n",
-            prop, idx, val );
+    Print( "device::set_cmd() - prop = %s, idx = %d, val = %s\n",
+        prop, idx, val );
 #endif // DEBUG
 
     return 0;
@@ -116,8 +116,8 @@ int device::set_cmd( const char *prop, u_int idx, char *val )
 int device::set_cmd( const char *prop, u_int idx, double val )
     {
 #ifdef DEBUG
-        Print( "device::set_cmd() - prop = %s, idx = %d, val = %f\n",
-            prop, idx, val );
+    Print( "device::set_cmd() - prop = %s, idx = %d, val = %f\n",
+        prop, idx, val );
 #endif // DEBUG
 
     switch ( prop[ 0 ] )
@@ -543,14 +543,22 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
     return new_wago_device;
     }
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
+int device_manager::init_params()
+    {
+    for ( u_int i = 0; i < project_devices.size(); i++ )
+        {
+        project_devices[ i ]->init_params();
+        }
 
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void i_counter::restart()
     {
     reset();
     start();
     }
-
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 i_DI_device::i_DI_device() :last_check_time( get_millisec() ),
@@ -1118,17 +1126,76 @@ void DI_1::direct_off()
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+int AI_1::init_params()
+    {
+    par[ P_ZERO_ADJUST_COEFF ] = 0;
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+AI_1::AI_1( u_int number, device::DEVICE_TYPE type, 
+    device::DEVICE_SUB_TYPE sub_type ) : analog_wago_device( number, type, sub_type ),
+    par( C_PARAMS_COUNT )
+    {
+    }
+//-----------------------------------------------------------------------------
+int AI_1::save_device( char *buff, const char *prefix )
+    {
+    sprintf( buff, "%s[%d]={V=", prefix, get_n() );
+
+    if ( get_value() == 0 )
+        {
+        sprintf( buff + strlen( buff ), "0" );
+        }
+    else
+        {
+        sprintf( buff + strlen( buff ), "%.2f", get_value() );
+        }
+
+    sprintf( buff + strlen( buff ), ", C0=%.2f},\n", 
+        par[ P_ZERO_ADJUST_COEFF ] );
+
+    return strlen( buff );
+    }
+//-----------------------------------------------------------------------------
+int AI_1::set_cmd( const char *prop, u_int idx, double val )
+    {
+#ifdef DEBUG
+    Print( "AI_1::set_cmd() - prop = %s, idx = %d, val = %f\n",
+        prop, idx, val );
+#endif // DEBUG
+
+    switch ( prop[ 0 ] )
+        {
+    case 'C':
+        par[ P_ZERO_ADJUST_COEFF ] = ( float ) val;
+        break;
+
+    default:
+        device::set_cmd( prop, idx, val );                
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_WAGO_MODULES
+
+float AI_1::get_value()
+    {
+    return par[ P_ZERO_ADJUST_COEFF ] + analog_wago_device::get_value();
+    }
+
+#endif // DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
 float AI_1::get_value()
     {
-    return get_AI( AI_INDEX, get_min_val(), get_max_val() );
+    return par[ P_ZERO_ADJUST_COEFF ] + get_AI( C_AI_INDEX, get_min_val(), get_max_val() );
     }
 //-----------------------------------------------------------------------------
 void AI_1::direct_set_value( float new_value )
     {    
     }
-
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1257,23 +1324,6 @@ void analog_wago_device::direct_set_value( float new_value )
     value = new_value;    
     }
 #endif // DEBUG_NO_WAGO_MODULES
-//-----------------------------------------------------------------------------
-int analog_wago_device::save_device( char *buff, const char *prefix )
-    {
-    sprintf( buff, "%s[%d]={V=", prefix, get_n() );
-
-    if ( get_value() == 0 )
-        {
-        sprintf( buff + strlen( buff ), "0" );
-        }
-    else
-        {
-        sprintf( buff + strlen( buff ), "%.2f", get_value() );
-        }
-    sprintf( buff + strlen( buff ), ", M=%d},\n", get_manual_mode() );
-
-    return strlen( buff );
-    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float AO_0_100::get_max_val()
