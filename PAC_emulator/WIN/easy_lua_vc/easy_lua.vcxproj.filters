@@ -246,6 +246,9 @@
     <ClInclude Include="..\..\..\PAC\common\sys\s_types.h">
       <Filter>Header Files\PAC\common\sys</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\PAC\common\PAC_dev.cpp">
@@ -436,5 +439,10 @@
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys_wago.lua">
       <Filter>Lua Source\common</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="easy_lua.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

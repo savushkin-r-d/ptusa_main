@@ -190,6 +190,7 @@
     <ClInclude Include="..\..\..\PAC\win\w_mem.h" />
     <ClInclude Include="..\..\..\PAC\win\w_tcp_cmctr.h" />
     <ClInclude Include="..\..\..\PAC\win\w_types.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\common\lua\lapi.c" />
@@ -256,6 +257,9 @@
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys.lua" />
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys_wago.lua" />
     <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="easy_lua.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
