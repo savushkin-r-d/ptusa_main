@@ -439,6 +439,14 @@ catch ( Exception err )
         /// <param name="cell"> Ячейка, где произошло изменение. </param>
         private void visio_addin__FormulaChanged( Microsoft.Office.Interop.Visio.Cell cell )
             {
+			//Поиск по shape объекта device.
+			current_selected_dev = g_devices.Find( delegate( device dev )
+			{
+				return dev.get_shape() == cell.Shape;
+			}
+			);
+
+
 			switch ( cell.Shape.Data1 )
 				{
 				//	Изменения свойств модуля WAGO
@@ -540,62 +548,52 @@ catch ( Exception err )
 				case "WTE":
 					switch ( cell.Name )
 						{
+						case "Prop.number":
+							int number = Convert.ToInt16( cell.Shape.Cells[ "Prop.number" ].Formula );
+							current_selected_dev.n = number;
+							break;
+
 						case "Prop.name":
 							string str = cell.Shape.Cells[ "Prop.name" ].Formula;
 							str = str.Replace( "\"", "" );
 							cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
-							break;
-						}
-					break;
 
-
-				case "V":
-
-					switch ( cell.Name )
-						{
-						case "Prop.number":	//	Получаем из имени устройства
+							current_selected_dev.name = str.ToUpper();
 							break;
 
-						//case "Prop.type":
-						//    string type = cell.Shape.Cells[ "Prop.type" ].get_ResultStr( 0 );
+						case "Prop.description":
+							current_selected_dev.description = cell.Shape.Cells[ "Prop.description" ].Formula;
+							break;
 
-						//    switch ( type )
-						//        {
-						//        case "1 КУ":
-						//            //cell.Shape.AddSection( cell.Shape.get_CellsRowIndex );
-						//            int idx = cell.Shape.get_CellsRowIndex( "Prop.type" );
-
-						//            cell.Shape.AddNamedRow(
-						//                ( short ) Visio.VisSectionIndices.visSectionUser, "DO",
-						//                ( short ) Visio.VisRowTags.visTagDefault );
-
-						//            cell.Shape.AddNamedRow(
-						//                ( short ) Visio.VisSectionIndices.visSectionProp, "hf",
-						//                ( short ) 0 );
-						//            break;
-						//        }
-						//    break;
-
+						case "Prop.type":	//	Тип устройства менять нельзя
+							//int type = Convert.ToUInt16( cell.Shape.Cells[ "Prop.type" ].Formula );
+							//current_selected_dev.type = ( tech_device.device.TYPES ) type;
+							break;
 
 						case "Prop.sub_type":
 							int sub_type = Convert.ToInt16( cell.Shape.Cells[ "Prop.sub_type" ].Formula );
-
-							//Поиск по shape объекта device.
-							current_selected_dev = g_devices.Find( delegate( device dev )
-							{
-								return dev.get_shape() == cell.Shape;
-							}
-							);
 
 							if ( current_selected_dev != null )
 								{
 								if ( current_selected_dev.get_sub_type() != sub_type )
 									{
 									edit_io_frm.listForm.type_cbox.SelectedIndex = sub_type;
-									//current_selected_dev.change_sub_type((device.SUB_TYPES)sub_type, g_PAC);
+									current_selected_dev.change_sub_type((device.SUB_TYPES)sub_type, g_PAC);
 									}
 								}
+
+							//current_selected_dev.sub_type = cell.Shape.Cells[ "Prop.sub_type" ].Formula;
 							break;
+						}
+					break;
+
+
+				case "V":
+					switch ( cell.Name )
+						{
+						case "Prop.number":	//	Получаем из имени устройства
+							break;
+
 
 						case "Prop.name":
 							string str = cell.Shape.Cells[ "Prop.name" ].Formula;
@@ -622,7 +620,7 @@ catch ( Exception err )
 								cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
 								break;
 								}
-
+								
 							//Второй вариант маркировки клапана - S4V12.
 							Regex rex2 = new Regex( @"\b([a-z]{1})([0-9]{1})V([0-9]{1,2})\b",
 								RegexOptions.IgnoreCase );
@@ -659,6 +657,8 @@ catch ( Exception err )
 								str = str.Replace( "\"", "" );			//	Удаляем лишние символы
 								cell.Shape.Name = str.ToUpper();		//	Переводим в верхний регистр
 								cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
+
+								current_selected_dev.name = str.ToUpper();
 								break;
 								}
 
@@ -666,6 +666,50 @@ catch ( Exception err )
 								str + "\"!" );
 							cell.Shape.Cells[ "Prop.name" ].FormulaU = "\"V19\"";
 							break;
+
+						case "Prop.description":
+							current_selected_dev.description = cell.Shape.Cells[ "Prop.description" ].Formula;
+							break;
+
+						case "Prop.type":	//	Тип устройства менять нельзя
+							  //int type = Convert.ToInt16( cell.Shape.Cells[ "Prop.type" ].Formula );
+							  //current_selected_dev.type = ( tech_device.device.TYPES ) type;
+
+						//    string type = cell.Shape.Cells[ "Prop.type" ].get_ResultStr( 0 );
+
+						//    switch ( type )
+						//        {
+						//        case "1 КУ":
+						//            //cell.Shape.AddSection( cell.Shape.get_CellsRowIndex );
+						//            int idx = cell.Shape.get_CellsRowIndex( "Prop.type" );
+
+						//            cell.Shape.AddNamedRow(
+						//                ( short ) Visio.VisSectionIndices.visSectionUser, "DO",
+						//                ( short ) Visio.VisRowTags.visTagDefault );
+
+						//            cell.Shape.AddNamedRow(
+						//                ( short ) Visio.VisSectionIndices.visSectionProp, "hf",
+						//                ( short ) 0 );
+						//            break;
+						//        }
+						    break;
+
+
+						case "Prop.sub_type":
+							int sub_type = Convert.ToInt16( cell.Shape.Cells[ "Prop.sub_type" ].Formula );
+
+							if ( current_selected_dev != null )
+								{
+								if ( current_selected_dev.get_sub_type() != sub_type )
+									{
+									edit_io_frm.listForm.type_cbox.SelectedIndex = sub_type;
+									current_selected_dev.change_sub_type((device.SUB_TYPES)sub_type, g_PAC);
+									}
+								}
+
+							//current_selected_dev.sub_type = cell.Shape.Cells[ "Prop.sub_type" ].Formula;
+							break;
+
 
 						case "Prop.septum":
 							str = cell.Shape.Cells[ "Prop.septum" ].Formula;
@@ -675,12 +719,10 @@ catch ( Exception err )
 							if ( str == "НО" )
 								{
 								cell.Shape.Shapes[ "septum" ].SendToBack();
-								//cell.Shape.Shapes[ "septum" ].SendBackward();
 								}
 							else  //	"НЗ"
 								{
 								cell.Shape.Shapes[ "septum" ].BringToFront();
-								//cell.Shape.Shapes[ "septum" ].BringForward();
 								}
 							break;
 						}	//	switch ( cell.Name )

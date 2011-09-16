@@ -65,20 +65,6 @@ namespace tech_device
     /// <remarks> Id, 17.08.2011. </remarks>
     public class device : wago_device
         {
-
-        /// <summary> Номер устройства.  </summary>
-        private int n;
-
-        /// <summary> Получение номера устройства. </summary>
-        ///
-        /// <remarks> Id, 17.08.2011. </remarks>
-        ///
-        /// <returns> Номер устройства. </returns>
-        public int get_n()
-            {
-            return n;
-            }
-
         /// <summary> Типы устройств. </summary>
         ///
         /// <remarks> Id, 17.08.2011. </remarks>
@@ -137,14 +123,68 @@ namespace tech_device
 			/// <summary> MixProof AS-Interface.  </summary>
 			V_MIX_PROOF_AS_INTERFACE,
             }
-        
+
+		/// <summary> Имя устройства.  </summary>
+		public string name;
+
+		/// <summary> Получение номера устройства. </summary>
+		///
+		/// <remarks> Id, 17.08.2011. </remarks>
+		///
+		/// <returns> Номер устройства. </returns>
+		public string get_name()
+		    {
+		    return name;
+		    }
+
+
+		/// <summary> Номер устройства.  </summary>
+		public int n;
+
+		/// <summary> Получение номера устройства. </summary>
+		///
+		/// <remarks> Id, 17.08.2011. </remarks>
+		///
+		/// <returns> Номер устройства. </returns>
+		public int get_n()
+		    {
+		    return n;
+		    }
+
+
         /// <summary> Тип устройства. </summary>
 		public TYPES type;
 
-        /// <summary> Подтип устройства. </summary>
-		public SUB_TYPES sub_type;
+		/// <summary> Получение типа устройства. </summary>
+		///
+		/// <remarks> Id, 17.08.2011. </remarks>
+		///
+		/// <returns> The type. </returns>
+		public int get_type()
+			{
+			return ( int ) type;
+			}
 
-        /// <summary> Активный (выбранный) в данный момент канал устройства (для визуальной
+
+        /// <summary> Подтип устройства. </summary>
+		private SUB_TYPES sub_type;
+
+		/// <summary> Получение подтипа устройства. </summary>
+		///
+		/// <remarks> ASV, 24.08.2011. </remarks>
+		///
+		/// <returns> The sub type. </returns>
+		public int get_sub_type()
+			{
+			return ( int ) sub_type;
+			}
+
+
+		/// <summary> Подтип устройства. </summary>
+		public string description;
+
+
+		/// <summary> Активный (выбранный) в данный момент канал устройства (для визуальной
         ///  работы с устройством). </summary>
         private string active_channel_name = "";
 
@@ -219,26 +259,7 @@ namespace tech_device
             return res;
             }
 
-        /// <summary> Получение типа устройства. </summary>
-        ///
-        /// <remarks> Id, 17.08.2011. </remarks>
-        ///
-        /// <returns> The type. </returns>
-        public int get_type()
-            {
-            return ( int ) type;
-            }
 
-        /// <summary> Получение подтипа устройства. </summary>
-        ///
-        /// <remarks> ASV, 24.08.2011. </remarks>
-        ///
-        /// <returns> The sub type. </returns>
-        public int get_sub_type()
-            {
-            return ( int ) sub_type;
-            }
-        
         /// <summary> Фигура Visio устройства. </summary>
         private Visio.Shape shape;
 
@@ -500,9 +521,11 @@ namespace tech_device
         public device( Visio.Shape shape, PAC pac )
             {										  
             n = Convert.ToUInt16( shape.Cells[ "Prop.number" ].FormulaU );
-            type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].FormulaU );
+			name = shape.Cells[ "Prop.name" ].FormulaU;
+			description = shape.Cells[ "Prop.description" ].FormulaU;			
+			type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].FormulaU );
             sub_type = ( SUB_TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.sub_type" ].FormulaU );
-
+			 
             this.shape = shape;
 
             set_sub_type( sub_type, pac );
