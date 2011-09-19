@@ -85,6 +85,8 @@ class tcp_communicator_linux : public tcp_communicator
             /// @param len      - количество считываемых байт.
             /// @param timeout  - время ожидания, сек.
             /// @param usec     - время ожидания, мк сек.
+            /// @param usec     - время ожидания, мк сек.
+            /// @param IP       - IP-адрес источника.
             ///
             /// @return -1   - ошибка работы с сокетом.
             /// @return -2   - ошибка таймаута.

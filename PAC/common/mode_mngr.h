@@ -346,7 +346,7 @@ class mode_manager
         /// @param [in] control_FB_dev - указатель на управл€ющий сигнал.
         ///
         /// @return >= 0 - номер добавленной группы устройств (дл€ дальнейшего 
-        /// добавлени€ устройств используетс€ @ref add_pair_dev).
+        /// добавлени€ устройств используетс€ @ref add_mode_pair_dev).
         int add_mode_FB_group( int mode, device *control_FB_dev );
 
         /// @brief ƒобавление устройства, которое включаетс€\открываетс€ во 
@@ -364,6 +364,7 @@ class mode_manager
         /// @brief ƒобавление группы клапанов, промывка седел.
         ///
         /// @param [in] mode  - режим.
+        /// @param [in] step  - шаг.
         /// @param [in] state - команда (открытие верхнего\нижнего седла).
         int add_wash_seats_valves_group( int mode, u_char step, 
             i_mix_proof::STATES state );
@@ -371,6 +372,7 @@ class mode_manager
         /// @brief ƒобавление клапана, промывка седла.
         ///
         /// @param [in] mode  - режим.
+        /// @param [in] step  - шаг.
         /// @param [in] group - группа.
         /// @param [in] v     - клапан.
         int add_wash_seat_valve( int mode, u_char step, u_int group, 
