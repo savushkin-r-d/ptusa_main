@@ -29,6 +29,8 @@
 
 #include "param_ex.h"
 
+#include "smart_ptr.h"
+
 #define OFF     0
 #define ON      1
 
@@ -54,9 +56,7 @@ class i_counter
         /// @brief Получение значения счетчика.
         virtual u_int get_quantity() = 0;
 
-        virtual ~i_counter()
-            {
-            }
+        virtual ~i_counter();
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе дискретного входа.
@@ -280,19 +280,10 @@ class device : public i_AO_device,
             DST_V_AS_MIXPROOF,  ///< Клапан с двумя каналами управления и двумя обратными связями с AS интерфейсом (микспруф).
             };
 
-        device( int number, 
-            device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): err_par( 1 ),
-            number( number ),
-            type( type ),
-            sub_type( sub_type ),
-            is_manual_mode( false )
-            {
-            }
+        device( int number, device::DEVICE_TYPE type, 
+            device::DEVICE_SUB_TYPE sub_type );
 
-        virtual ~device()
-            {           
-            }
+        virtual ~device();
 
         const char *get_name() const;
 
@@ -302,7 +293,7 @@ class device : public i_AO_device,
         /// его деактивирование, то есть если он нормально закрытый - закрытие.
         virtual void direct_off() = 0;
 
-        ///// @brief Выключение устройства с учетом ручного режима.
+        /// @brief Выключение устройства с учетом ручного режима.
         void off();
 
         /// @brief Вывод объекта в консоль.
@@ -329,7 +320,7 @@ class device : public i_AO_device,
             {
             return sub_type;
             }
-        
+
         /// @brief Инициализация параметров устройства.
         virtual int init_params()
             {
@@ -380,6 +371,65 @@ class dev_stub : public device,
         u_int   get_quantity();
     };
 //-----------------------------------------------------------------------------
+/// @brief Устройство с обратной связью.
+///
+/// Базовый класс для различных дискретных устройств с обратной связью.
+class fb_device
+    {
+    public:
+        enum FB
+            {
+            FB_NO, ///< Нет обратной связи.
+            FB_IS  ///< Обратная связь есть.
+            };
+
+        enum STATE
+            {
+            S_FB_NO,         ///< Нет обратной связи.
+            S_FB_IS_AND_ON,  ///< Обратная связь есть и она включена.
+            S_FB_IS_AND_OFF  ///< Обратная связь есть, но она отключена.
+            };
+
+        enum CONSTANT
+            {
+            C_PARAMS_COUNT = 1,
+
+            C_FB_OFF = 0,
+            C_FB_ON  = 1,
+            };
+
+        enum PARAMS
+            {
+            P_FB_USE         ///< Включена или выключена ОС.
+            };
+
+        fb_device( FB fb1, FB fb2 );
+
+        ///@brief Инициализация параметров по умолчанию (ОС включена).
+        int init_params();
+
+        ///@brief Получение состояния ОС.
+        ///
+        /// @param fb_number - индекс ОС.
+        ///
+        /// @return - состояние ОС.
+        STATE get_fb_state( int fb_number );
+
+        ///@brief Сохранение устройства в виде скрипта Lua.
+        ///
+        /// @param buff - строка, куда сохраняем.
+        ///
+        /// @return - длина строки Lua.
+        int save_device( char *buff );
+
+        ///@brief Выполнение команды.
+        int set_cmd( const char *prop, u_int idx, double val );
+
+    protected:
+        saved_params_u_int_4 par;
+        FB  fb[ 2 ];    
+    };
+//-----------------------------------------------------------------------------
 /// @brief Устройство с дискретными входами/выходами.
 ///
 /// Базовый класс для различных дискретных устройств.
@@ -388,29 +438,21 @@ class digital_wago_device : public device,
     {
     public:
         digital_wago_device( int number, device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): device( number, type, sub_type )
-#ifdef DEBUG_NO_WAGO_MODULES
-            , state( 0 )
-#endif // DEBUG_NO_WAGO_MODULES
-            {
-            }
+            device::DEVICE_SUB_TYPE sub_type, 
+            bool use_fb = false, bool fb1 = false, bool fb2 = false );
 
-        virtual ~digital_wago_device()
-            {
-            }
+        virtual ~digital_wago_device();
 
         float   get_value();
         void    direct_set_value( float new_value );
         void    direct_set_state( int new_state );  
         void    print() const;
 
-        int save_device( char *buff, const char *prefix )
-            {	
-            sprintf( buff, "%s[%d]={ST=%d, M=%d},\n",
-                prefix, get_n(),  get_state(), get_manual_mode() );
+        int init_params();
 
-            return strlen( buff );
-            }
+        int set_cmd( const char *prop, u_int idx, double val );
+
+        int save_device( char *buff, const char *prefix );
 
 #ifdef DEBUG_NO_WAGO_MODULES
         /// @brief Получение мгновенного состояния объекта.        
@@ -429,6 +471,8 @@ class digital_wago_device : public device,
             {
             C_SWITCH_TIME = 3, ///< Время переключения устройства, сек.
             };
+
+        auto_smart_ptr< fb_device > fb;
 
     protected:
 #ifdef DEBUG_NO_WAGO_MODULES
@@ -453,7 +497,7 @@ class analog_wago_device : public device, public wago_device
 
         void  direct_set_state( int new_state );
         int   get_state_now();
-        
+
         void  print() const;
         void  direct_on();        
         void  direct_off();
@@ -482,8 +526,9 @@ class DO_1 : public digital_wago_device
     {
     public:
         DO_1( int number, device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): digital_wago_device( number, type,
-            sub_type )
+            device::DEVICE_SUB_TYPE sub_type, 
+            bool use_fb = false, bool fb1 = false, bool fb2 = false 
+            ): digital_wago_device( number, type, sub_type, use_fb, fb1, fb2 )
             {
             }
 
@@ -508,7 +553,8 @@ class DO_2 : public digital_wago_device
     {
     public:
         DO_2( int number, device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): digital_wago_device( number, type, sub_type )
+            device::DEVICE_SUB_TYPE sub_type 
+            ): digital_wago_device( number, type, sub_type, true, false, false )
             {
             }
 
@@ -534,7 +580,8 @@ class DO_1_DI_1 : public digital_wago_device
     {
     public:
         DO_1_DI_1( int number, device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): digital_wago_device( number, type, sub_type )
+            device::DEVICE_SUB_TYPE sub_type
+            ): digital_wago_device( number, type, sub_type, true, true, false )            
             {
             }
 
@@ -562,7 +609,8 @@ class DO_1_DI_2 : public digital_wago_device
     {
     public:
         DO_1_DI_2( int number, device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): digital_wago_device( number, type, sub_type )
+            device::DEVICE_SUB_TYPE sub_type 
+            ): digital_wago_device( number, type, sub_type, true, true, true )
             {
             }
 
@@ -592,7 +640,8 @@ class DO_2_DI_2 : public digital_wago_device
     {
     public:
         DO_2_DI_2( int number, device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): digital_wago_device( number, type, sub_type )
+            device::DEVICE_SUB_TYPE sub_type 
+            ): digital_wago_device( number, type, sub_type, true, true, true )            
             {
             }
 
@@ -636,8 +685,8 @@ class i_mix_proof
 class valve_mix_proof : public digital_wago_device, public i_mix_proof
     {
     public:
-        valve_mix_proof( u_int number ): digital_wago_device( number, DT_V,
-            DST_V_MIXPROOF )
+        valve_mix_proof( u_int number 
+            ): digital_wago_device( number, DT_V, DST_V_MIXPROOF, true, true, true )
             {
             }
 
@@ -921,7 +970,7 @@ class DI_1 : public digital_wago_device
 class valve_DO_1 : public DO_1
     {
     public:
-        valve_DO_1( u_int number ) : DO_1( number, DT_V, DST_V_DO_1 )
+        valve_DO_1( u_int number ) : DO_1( number, DT_V, DST_V_DO_1,true, false, false )
             {
             }
     };
@@ -1145,33 +1194,7 @@ class device_manager: public i_Lua_save_device
 #ifdef __BORLANDC__
 #pragma option -w-inl
 #endif // __BORLANDC__
-        int save_device( char *buff )
-            {
-            sprintf( buff, "t={}\n" );
-            int answer_size = strlen( buff );
-
-            for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++)
-                {
-                sprintf( buff + answer_size, "t.%s=\n\t{\n", device::DEV_NAMES[ i ] );
-                answer_size += strlen( buff + answer_size );
-
-                int l = dev_types_ranges[ i ].start_pos;
-                int u = dev_types_ranges[ i ].end_pos;
-
-                if ( -1 != l ) // Есть устройства.
-                    {
-                    for ( int j = l; j <= u; j++ )
-                        {
-                        answer_size += project_devices[ j ]->save_device( buff + answer_size, "\t");
-                        }
-                    }
-
-                sprintf( buff + answer_size, "\t}\n" );
-                answer_size += strlen( buff + answer_size );
-                }
-
-            return answer_size;
-            }
+        int save_device( char *buff );
 
 #ifdef __BORLANDC__
 #pragma option -w.inl
@@ -1188,7 +1211,7 @@ class device_manager: public i_Lua_save_device
 
         /// Диапазоны устройств всех типов.
         range dev_types_ranges[ device::C_DEVICE_TYPE_CNT ];
-        
+
         /// @brief Получение индекса устройства по его номеру.        
         int get_device_n( device::DEVICE_TYPE dev_type, u_int dev_number );
 

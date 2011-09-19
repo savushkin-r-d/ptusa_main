@@ -144,6 +144,18 @@ int device::set_cmd( const char *prop, u_int idx, double val )
     return 0;
     }
 //-----------------------------------------------------------------------------
+device::device( int number, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type ) : err_par( 1 ),
+    number( number ),
+    type( type ),
+    sub_type( sub_type ),
+    is_manual_mode( false )
+    {
+    }
+//-----------------------------------------------------------------------------
+device::~device()
+    {
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
@@ -553,11 +565,45 @@ int device_manager::init_params()
     return 0;
     }
 //-----------------------------------------------------------------------------
+int device_manager::save_device( char *buff )
+    {
+    sprintf( buff, "t={}\n" );
+    int answer_size = strlen( buff );
+
+    for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++)
+        {
+        sprintf( buff + answer_size, "t.%s=\n\t{\n", device::DEV_NAMES[ i ] );
+        answer_size += strlen( buff + answer_size );
+
+        int l = dev_types_ranges[ i ].start_pos;
+        int u = dev_types_ranges[ i ].end_pos;
+
+        if ( -1 != l ) // Есть устройства.
+            {
+            for ( int j = l; j <= u; j++ )
+                {
+                answer_size += project_devices[ j ]->save_device( buff + answer_size, "\t");
+                }
+            }
+
+        sprintf( buff + answer_size, "\t}\n" );
+        answer_size += strlen( buff + answer_size );
+        }
+
+    return answer_size;
+    }
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void i_counter::restart()
     {
     reset();
     start();
+    }
+//-----------------------------------------------------------------------------
+i_counter::~i_counter()
+    {
+
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -658,6 +704,56 @@ void dev_stub::reset()
 u_int dev_stub::get_quantity()
     {
     return 0;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+fb_device::fb_device( FB fb1, FB fb2 ) :  par( C_PARAMS_COUNT )
+    {
+    fb[ 0 ] = fb1;
+    fb[ 1 ] = fb2;
+    }
+//-----------------------------------------------------------------------------
+int fb_device::init_params()
+    {
+    par[ P_FB_USE ] = C_FB_ON;
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+fb_device::STATE fb_device::get_fb_state( int fb_number )
+    {
+    if ( fb_number > 1 )
+        {
+        fb_number = 1;
+        }
+
+    return fb[ fb_number ] ? 
+        ( par[ P_FB_USE ] ? S_FB_IS_AND_ON : S_FB_IS_AND_OFF ) : S_FB_NO;
+    }
+//-----------------------------------------------------------------------------
+int fb_device::save_device( char *buff )
+    {
+    sprintf( buff, "FB={%d, %d}", 
+        get_fb_state( 0 ), get_fb_state( 1 ) );
+
+    return strlen( buff );
+    }
+//-----------------------------------------------------------------------------
+int fb_device::set_cmd( const char *prop, u_int idx, double val )
+    {
+#ifdef DEBUG
+    Print( "fb_device::set_cmd() - prop = %s, idx = %d, val = %f\n",
+        prop, idx, val );
+#endif // DEBUG
+
+    switch ( prop[ 0 ] )
+        {
+    case 'F':
+        par[ P_FB_USE ] = val ? 1 : 0;
+        return 0;
+        }
+
+    return 1;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -810,6 +906,68 @@ void digital_wago_device::direct_off()
     {
     state = 0;
     }
+//-----------------------------------------------------------------------------
+digital_wago_device::digital_wago_device( int number, device::DEVICE_TYPE type, 
+    device::DEVICE_SUB_TYPE sub_type, 
+    bool use_fb /*= false*/, bool fb1 /*= false*/, bool fb2 /*= false */ 
+    ) : device( number, type, sub_type )
+#ifdef DEBUG_NO_WAGO_MODULES
+    , state( 0 )
+#endif // DEBUG_NO_WAGO_MODULES
+    {
+    if ( use_fb )
+        {
+        fb = fb1 ? ( fb2 ? new fb_device( fb_device::FB_IS, fb_device::FB_IS ) :
+            new fb_device( fb_device::FB_IS, fb_device::FB_NO ) ) : 
+    new fb_device( fb_device::FB_NO, fb_device::FB_NO );
+        }
+    }
+//-----------------------------------------------------------------------------
+digital_wago_device::~digital_wago_device()
+    {
+    }
+//-----------------------------------------------------------------------------
+int digital_wago_device::init_params()
+    {
+    if ( !fb.is_null() )
+        {
+        fb->init_params();
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int digital_wago_device::set_cmd( const char *prop, u_int idx, double val )
+    {
+    if ( !fb.is_null() )
+        {
+        int res = fb->set_cmd( prop, idx, val );
+        if ( 0 == res  )
+            {
+            return 0;
+            }
+        }
+
+    //Остальные команды.
+    device::set_cmd( prop, idx, val );
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int digital_wago_device::save_device( char *buff, const char *prefix )
+    {
+    sprintf( buff, "%s[%d]={ST=%d, M=%d,",
+        prefix, get_n(),  get_state(), get_manual_mode() );
+
+    if ( !fb.is_null() )
+        {
+        fb->save_device( buff + strlen( buff ) );
+        }
+
+    sprintf( buff + strlen( buff ), "},\n" );
+
+    return strlen( buff );
+    }
+
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -844,6 +1002,11 @@ int DO_1_DI_1::get_state_now()
     {
     int o = get_DO( DO_INDEX );
     int i = get_DI( DI_INDEX );
+
+    if ( fb->get_fb_state() == fb_device::S_FB_IS_AND_OFF )
+        {
+        return o;
+        }
 
     if ( o == i )
         {
@@ -891,6 +1054,11 @@ int DO_1_DI_2::get_state_now()
     int o = get_DO( DO_INDEX );
     int i0 = get_DI( DI_INDEX_1 );
     int i1 = get_DI( DI_INDEX_2 );
+
+    if ( fb->get_fb_state() == fb_device::S_FB_IS_AND_OFF )
+        {
+        return o;
+        }
 
     if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 ==0 ) )
@@ -940,6 +1108,11 @@ int DO_2_DI_2::get_state_now()
     int o1 = get_DO( DO_INDEX_2 );
     int i0 = get_DI( DI_INDEX_1 );
     int i1 = get_DI( DI_INDEX_2 );
+
+    if ( fb->get_fb_state() == fb_device::S_FB_IS_AND_OFF )
+        {
+        return o1;
+        }
 
     if ( ( o1 == i1 ) && ( o0 == i0 ) )
         {
@@ -1031,6 +1204,13 @@ int valve_mix_proof::get_state_now()
     int o = get_DO( DO_INDEX );            
     int i0 = get_DI( DI_INDEX_U );
     int i1 = get_DI( DI_INDEX_L );
+
+    if ( fb->get_fb_state() == fb_device::S_FB_IS_AND_OFF )
+        {
+        if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return ST_UPPER_SEAT;
+        if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return ST_LOWER_SEAT;
+        return o;
+        }
 
     if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
         ( o == 1 && i1 == 1 && i0 == 0 ) )
@@ -1151,8 +1331,8 @@ int AI_1::save_device( char *buff, const char *prefix )
         sprintf( buff + strlen( buff ), "%.2f", get_value() );
         }
 
-    sprintf( buff + strlen( buff ), ", C0=%.2f},\n", 
-        par[ P_ZERO_ADJUST_COEFF ] );
+    sprintf( buff + strlen( buff ), ", M=%d, C0=%.2f},\n", 
+        get_manual_mode(), par[ P_ZERO_ADJUST_COEFF ] );
 
     return strlen( buff );
     }
