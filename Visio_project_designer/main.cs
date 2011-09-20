@@ -972,9 +972,9 @@ catch ( Exception err )
 					g_devices.Add( new device( shape, g_PAC ) );
 					break;
 
-				//case "TANK":
-				//    g_devices.Add( new T_Object( shape, g_PAC ) );
-				//    break;
+				case "TANK":
+				    g_objects.Add( new T_Object( shape, g_PAC ) );
+				    break;
 				}	//	switch ( shape.Data1 ) 
 
             }

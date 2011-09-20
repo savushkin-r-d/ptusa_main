@@ -27,7 +27,7 @@ namespace tech_device
 	/// <summary> Сложный объект (Гребенка, Танк). </summary>
 	///
 	/// <remarks> ASV, 07.09.2011. </remarks>
-	public class T_Object
+	public class T_Object : device
 		{
 		//	Режимы
 //		public Dictionary<int, string> mode_mas
@@ -44,16 +44,40 @@ namespace tech_device
 //			mode_mas = new string[];	//	количество ошибок
 
 
-		/// <summary> Список ошибок </summary>
-		///
-		/// <remarks> ASV, 07.09.2011. </remarks>
+		//	Список ошибок
 //		public enum ERROR_LIST
 //		public List<string> ERROR_LIST
 //		public Dictionary<int, string> ERROR_LIST
 
 
+		
 		//	Список устройств объекта (Ссылки на элементы g_devices)
 		public List<device> list_object_device;
+
+
+        public T_Object()
+            {
+			}
+
+        /// <summary> Constructor. </summary>
+        ///
+        /// <remarks> asvovik, 16.09.2011. </remarks>
+        ///
+        /// <param name="shape"> Фигура Visio. </param>
+        /// <param name="pac">	Узел Wago. </param>
+        public T_Object( Visio.Shape shape, PAC pac )
+            {										  
+            n = Convert.ToUInt16( shape.Cells[ "Prop.number" ].FormulaU );
+			name = shape.Cells[ "Prop.name" ].FormulaU;
+			description = shape.Cells[ "Prop.description" ].FormulaU;			
+			type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].FormulaU );
+//            sub_type = ( SUB_TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.sub_type" ].FormulaU );
+			 
+            this.shape = shape;
+						
+//            set_sub_type( sub_type, pac );
+            }
+
 		}
 //-----------------------------------------------------------------------------	   
 //-----------------------------------------------------------------------------
@@ -93,7 +117,8 @@ namespace tech_device
 			T_FQT	= 14,	//	Расходомер и Концентратомер
 			T_WTE	= 15,	//	Температура и Влажность
 
-			T_TANK	= 100	//	Танк (сложный объект)
+			T_TANK	= 100,	//	Танк (сложный объект)
+			COMPLECT_TANK = 101,	//	Танк с обвязкой
             }
 
         /// <summary> Подтип клапана. </summary>
@@ -261,7 +286,7 @@ namespace tech_device
 
 
         /// <summary> Фигура Visio устройства. </summary>
-        private Visio.Shape shape;
+        public Visio.Shape shape;
 
 		/// <summary> Получение подтипа устройства. </summary>
 		///
