@@ -29,35 +29,51 @@ namespace tech_device
 	/// <remarks> ASV, 07.09.2011. </remarks>
 	public class T_Object : device
 		{
-		//	Режимы
-//		public Dictionary<int, string> mode_mas
-//		public string[][] mode_mas;
-//			mode_mas = new string[];	//	32 режима 	
-//			...
-//			n - количество state"ов
+		public struct mode
+			{
+			int no;				//	Номер режима (шага)
+			string name;		//	Название режима (шага)
+
+			List<device> on_dev;	//	Устройства для включения
+			List<device> off_dev;	//	Устройства для выключения
+									//	...
+
+									//	Устройства флипования
+
+									//	Сигналы без которых нельзя вкл. режим
+									//	Сигналы автоматического вкл/выкл режима
+									//	Сигналы UPR (когда режим включен)
+									//	Сигналы ОС управляющие устройствами
+									//		Списки устройств (на вкл. и на выкл.)
+									//	Пары сигналов (дублирование)
+									//	...
 
 
-		//	Параметры
-//		public enum ERROR_LIST
-//		public Dictionary<int, string> mode_mas
-//		public string[] mode_mas;
-//			mode_mas = new string[];	//	количество ошибок
+			mode[] step;		//	Шаги режима
+			}
+
+		//	Режимы объекта
+		public mode[] mode_mas;		//	Список режимов
 
 
-		//	Список ошибок
+		//	Параметры объекта
+		public string[,] param_list;	//	Список параметров param_list[ Название ][ Значение ]
+
+
+		//	Список ошибок 
 //		public enum ERROR_LIST
 //		public List<string> ERROR_LIST
 //		public Dictionary<int, string> ERROR_LIST
 
 
-		
+
 		//	Список устройств объекта (Ссылки на элементы g_devices)
 		public List<device> list_object_device;
 
 
-        public T_Object()
-            {
-			}
+		//public T_Object()
+		//    {
+		//    }
 
         /// <summary> Constructor. </summary>
         ///
@@ -65,17 +81,14 @@ namespace tech_device
         ///
         /// <param name="shape"> Фигура Visio. </param>
         /// <param name="pac">	Узел Wago. </param>
-        public T_Object( Visio.Shape shape, PAC pac )
-            {										  
-            n = Convert.ToUInt16( shape.Cells[ "Prop.number" ].FormulaU );
-			name = shape.Cells[ "Prop.name" ].FormulaU;
-			description = shape.Cells[ "Prop.description" ].FormulaU;			
-			type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].FormulaU );
-//            sub_type = ( SUB_TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.sub_type" ].FormulaU );
-			 
-            this.shape = shape;
-						
-//            set_sub_type( sub_type, pac );
+        public T_Object( Visio.Shape shape, PAC pac ):base( shape, pac )
+            {
+			//mode_mas = new mode[]();
+
+			//param_list = new string[,];
+			//param_list[ 0 ] = new string[];
+
+
             }
 
 		}
