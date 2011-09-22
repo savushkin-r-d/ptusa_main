@@ -354,7 +354,10 @@ int tech_object::save_device( char *buff )
     answer_size += par_uint.save_device( buff + answer_size, "\t" );
     answer_size += rt_par_float.save_device( buff + answer_size, "\t" );
     answer_size += rt_par_uint.save_device( buff + answer_size, "\t" );
-
+    
+    //Ошибки включения режимов.
+    answer_size += modes_manager->save_as_Lua_str( buff + answer_size );
+        
     sprintf( buff + answer_size, "\t}\n" );
     answer_size += strlen( buff + answer_size );
 

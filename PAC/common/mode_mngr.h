@@ -447,6 +447,12 @@ class mode_manager
         /// @return   0 - ок.
         int add_mode_FB_group_dev_ex( int mode, u_int group_n, device *on_dev );
 
+
+        int save_as_Lua_str( char *str, const char *prefix = "\t" )
+            {
+            sprintf( str, "%sMODES_ERR = {%d}\n", prefix, err_par[ 0 ] );
+            return strlen( str );
+            }
     private:
         /// @brief Технологический объект.
         tech_object *owner;
@@ -480,7 +486,10 @@ class mode_manager
         /// @return -2 - номер режима выходит за пределы.
         /// @return -1 - номер шага выходит за пределы.
         /// @return  0 - оk.
-        int check_correct_step_n( u_int_2 mode, u_char step );    
+        int check_correct_step_n( u_int_2 mode, u_char step );  
+
+        /// @brief Параметры, содержащие ошибки включения шагов, режимов.
+        run_time_params_float err_par;  
     };
 //-----------------------------------------------------------------------------
 #endif // MODE_MNGR

@@ -523,7 +523,8 @@ mode_manager::mode_manager( u_int_2 new_modes_cnt
                            modes_cnt( new_modes_cnt ),
                            steps_cnt( 0 ),                           
                            steps( 0 ),
-                           active_step( 0 )
+                           active_step( 0 ),
+                           err_par( 1 )
     {
     if ( 0 == new_modes_cnt )
         {
@@ -990,6 +991,8 @@ bool mode_manager::check_on_mode( u_int_2 mode )
 #ifdef DEBUG
                 Print( "No FB[ %d ]!\n",
                     modes_on_FB.at( mode ).at( i )->get_n() );
+
+                err_par[ 0 ] = - ( float ) modes_on_FB.at( mode ).at( i )->get_n();
 #endif // DEBUG
                 return false;
                 }
