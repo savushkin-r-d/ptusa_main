@@ -80,40 +80,46 @@ int step_path::evaluate() const
         {
         const FB_group_dev_ex &group = FB_group_devices_ex[ i ];
                 
-        group.control_s->on();
-
-        if ( group.fb->is_active() )
+        if ( group.control_s )
             {
-            bool is_no_fb = false; // Флаг наличия устройств без ОС.
-                        
-            for ( u_int j = 0; j < group.on_devices.size(); j++ )
-                {
-                group.on_devices[ j ]->on(); // Включаем устройства.
+            group.control_s->on();
+            }
 
-                if ( group.on_devices[ j ]->get_state() == -1 ) // Проверяем обратную связь.
-                    {
-                    is_no_fb = true;
-                    }
-                }
-            
-            if ( is_no_fb )
+        if ( group.fb )
+            {
+            if ( group.fb->is_active() )
                 {
-                group.control_s->off();
+                bool is_no_fb = false; // Флаг наличия устройств без ОС.
+
+                for ( u_int j = 0; j < group.on_devices.size(); j++ )
+                    {
+                    group.on_devices[ j ]->on(); // Включаем устройства.
+
+                    // Проверяем обратную связь.
+                    if ( group.on_devices[ j ]->get_state() == -1 ) 
+                        {
+                        is_no_fb = true;
+                        }
+                    }
+
+                if ( is_no_fb )
+                    {
+                    group.control_s->off();
+                    for ( u_int j = 0; j < group.on_devices.size(); j++ )
+                        {
+                        group.on_devices[ j ]->off(); // Выключаем устройства.
+                        }
+                    }
+                } // if ( group.fb->is_active() )
+            else
+                {
                 for ( u_int j = 0; j < group.on_devices.size(); j++ )
                     {
                     group.on_devices[ j ]->off(); // Выключаем устройства.
                     }
-                }
-            } // if ( group.fb->is_active() )
-        else
-            {
-            for ( u_int j = 0; j < group.on_devices.size(); j++ )
-                {
-                group.on_devices[ j ]->off(); // Выключаем устройства.
-                }
-            }        
-        
-        }
+                }        
+            } // if ( group.fb )        
+        } // for ( u_int i = 0; i < FB_group_devices_ex.size(); i++ )
 
     if ( !wash_seats.is_null() )
         {
@@ -147,7 +153,11 @@ int step_path::final()
         {
         const FB_group_dev_ex &group = FB_group_devices_ex[ i ];
         
-        group.control_s->off();
+        if ( group.control_s )
+            {
+            group.control_s->off();
+            }
+
         for ( u_int j = 0; j < group.on_devices.size(); j++ )
             {
             group.on_devices[ j ]->off();
@@ -207,6 +217,29 @@ void step_path::print() const
                 Print( "; " );
                 }
             Print( "\n" );
+            } 
+        }
+
+    if ( FB_group_devices_ex.size() )
+        {
+        Print( "\t\tdev groups (FB and UPR) =\n" );
+        for ( u_int i = 0; i < FB_group_devices_ex.size(); i++ )
+            {            
+            Print( "\t\t\t" );
+            if ( FB_group_devices_ex[ i ].fb )
+                {
+                FB_group_devices_ex[ i ].fb->print();  
+                }
+            
+            Print( " -> " );            
+            FB_group_devices_ex[ i ].control_s->print();  
+            Print( "\n" );
+            for ( u_int j = 0; j < FB_group_devices_ex[ i ].on_devices.size(); j++ )
+                {  
+                Print( "\t\t\t" );
+                FB_group_devices_ex[ i ].on_devices[ j ]->print();    
+                Print( "\n" );
+                }
             } 
         }
 
@@ -1018,6 +1051,20 @@ int mode_manager::add_wash_seat_valve( int mode, u_char step, u_int group,
         }
 
     return 0;
+    }
+//-----------------------------------------------------------------------------
+int mode_manager::add_mode_FB_group_ex( int mode, device *control_FB_dev, 
+    device *control_signal_dev )
+    {
+    return modes_devices.at( mode )->add_FB_group_ex( control_FB_dev, 
+        control_signal_dev );
+    }
+//-----------------------------------------------------------------------------
+int mode_manager::add_mode_FB_group_dev_ex( int mode, u_int group_n, 
+    device *on_dev )
+    {
+    return modes_devices.at( mode )->add_FB_group_dev_ex( group_n,
+        on_dev );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

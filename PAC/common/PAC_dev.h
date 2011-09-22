@@ -69,7 +69,7 @@ class i_DI_device
         i_DI_device();
 
         /// @brief ѕолучение текущего состо€ни€ устройства.
-        ///
+        ///par
         /// @return - текущее состо€ние устройства в виде целого числа.
         virtual int get_state_now() = 0;
 
@@ -326,6 +326,13 @@ class device : public i_AO_device,
             {
             return 0;
             }
+        
+
+        virtual int save_params_Lua( char* str )
+            {
+            str[ 0 ] = 0;
+            return 0;
+            }
 
     protected:
         u_int_4 number;             ///< Ќомер устройства.
@@ -424,9 +431,10 @@ class fb_device
 
         ///@brief ¬ыполнение команды.
         int set_cmd( const char *prop, u_int idx, double val );
+            
+        saved_params_u_int_4 par;
 
     protected:
-        saved_params_u_int_4 par;
         FB  fb[ 2 ];    
     };
 //-----------------------------------------------------------------------------
@@ -465,6 +473,27 @@ class digital_wago_device : public device,
 #endif // DEBUG_NO_WAGO_MODULES
 
         int get_state();
+
+
+        int save_params_Lua( char* str )
+            {
+            if ( fb.is_null() )
+                {
+                return 0;
+                }
+
+            //init_par{ 'V[1]', 1, --'rt_par_float'
+            sprintf( str, "\'%s[%d]\', 1, %s\n", 
+                get_name(), get_n(), "--fb_device params" );
+            sprintf( str + strlen( str ), "%s", "\t{\n" );
+            for ( u_int i = 0; i < fb->par.get_count();i++ )
+                {
+                sprintf( str + strlen( str ), "\t%d,\n", fb->par[ i ] );
+                }
+            sprintf( str + strlen( str ), "%s", "\t} }\n" );
+
+            return 0;
+            }
 
     protected:
         enum CONSTANTS
@@ -1199,6 +1228,17 @@ class device_manager: public i_Lua_save_device
 #ifdef __BORLANDC__
 #pragma option -w.inl
 #endif // __BORLANDC__
+
+
+        int save_params_Lua( char* str )
+            {
+            for ( u_int i = 0; i < project_devices.size(); i++ )
+                {
+                project_devices[ i ]->save_params_Lua( str + strlen( str ) );
+                }
+
+            return 0;
+            }
 
     protected:
         dev_stub stub;  ///< ”стройство-заглушка, фиктивное устройство.

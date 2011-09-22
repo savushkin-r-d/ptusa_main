@@ -106,6 +106,9 @@ class params_manager
 
         ~params_manager();
 
+
+        int save_params_Lua( char* str );
+
     private:
         /// @brief Закрытый конструктор. 
         /// 

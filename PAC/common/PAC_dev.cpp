@@ -84,7 +84,7 @@ void device::print() const
 //-----------------------------------------------------------------------------
 const char * device::get_name() const
     {
-    return "";
+    return device::DEV_NAMES[ type ];
     }
 //-----------------------------------------------------------------------------
 void device::off()
@@ -685,7 +685,7 @@ u_int_4 dev_stub::get_n() const
 void dev_stub::print() const
     {
 #ifdef DEBUG
-    Print( "virtual device\n" );
+    Print( "virtual device" );
 #endif // DEBUG
     }
 //-----------------------------------------------------------------------------

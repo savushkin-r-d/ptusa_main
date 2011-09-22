@@ -421,6 +421,32 @@ class mode_manager
         int add_wash_seat_valve( int mode, u_char step, u_int group, 
             device *v );
 
+
+        /// @brief Добавление группы устройств, которые включается\открывается во 
+        /// время выполнения шага по управляющему сигналу (обратной связи)  и 
+        /// сигнализируют о своем состоянии подачей управляющего сигнала.
+        ///
+        /// @param [in] mode           - режим.
+        /// @param [in] control_FB_dev - указатель на ОС.
+        /// @param [in] control_signal_dev - указатель на управляющий сигнал.
+        ///
+        /// @return >= 0 - номер добавленной группы устройств (для дальнейшего 
+        /// добавления устройств используется @ref add_mode_FB_group_dev_ex).
+        int add_mode_FB_group_ex( int mode, device *control_FB_dev, 
+            device *control_signal_dev );
+
+        /// @brief Добавление устройства, которое включается\открывается во 
+        /// время выполнения по управляющему сигналу (обратной связи) и 
+        /// сигнализирует о своем состоянии подачей управляющего сигнала.
+        ///
+        /// @param [in] mode    - режим.
+        /// @param [in] group_n - номер группы устройств.
+        /// @param [in] o_dev   - указатель на добавляемое устройство.
+        ///
+        /// @return < 0 - ошибка.
+        /// @return   0 - ок.
+        int add_mode_FB_group_dev_ex( int mode, u_int group_n, device *on_dev );
+
     private:
         /// @brief Технологический объект.
         tech_object *owner;
