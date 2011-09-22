@@ -74,6 +74,47 @@ int step_path::evaluate() const
             }
         }
 
+    // Работа с группой устройств, включаемых при наличии ОС, и сигнализирующих
+    // о своей работе управляющим сигналом.
+    for ( u_int i = 0; i < FB_group_devices_ex.size(); i++ )
+        {
+        const FB_group_dev_ex &group = FB_group_devices_ex[ i ];
+                
+        group.control_s->on();
+
+        if ( group.fb->is_active() )
+            {
+            bool is_no_fb = false; // Флаг наличия устройств без ОС.
+                        
+            for ( u_int j = 0; j < group.on_devices.size(); j++ )
+                {
+                group.on_devices[ j ]->on(); // Включаем устройства.
+
+                if ( group.on_devices[ j ]->get_state() == -1 ) // Проверяем обратную связь.
+                    {
+                    is_no_fb = true;
+                    }
+                }
+            
+            if ( is_no_fb )
+                {
+                group.control_s->off();
+                for ( u_int j = 0; j < group.on_devices.size(); j++ )
+                    {
+                    group.on_devices[ j ]->off(); // Выключаем устройства.
+                    }
+                }
+            } // if ( group.fb->is_active() )
+        else
+            {
+            for ( u_int j = 0; j < group.on_devices.size(); j++ )
+                {
+                group.on_devices[ j ]->off(); // Выключаем устройства.
+                }
+            }        
+        
+        }
+
     if ( !wash_seats.is_null() )
         {
         wash_seats->eval();
@@ -100,6 +141,19 @@ int step_path::final()
             }
         }
     
+    // Работа с группой устройств, включаемых при наличии ОС, и сигнализирующих
+    // о своей работе управляющим сигналом.
+    for ( u_int i = 0; i < FB_group_devices_ex.size(); i++ )
+        {
+        const FB_group_dev_ex &group = FB_group_devices_ex[ i ];
+        
+        group.control_s->off();
+        for ( u_int j = 0; j < group.on_devices.size(); j++ )
+            {
+            group.on_devices[ j ]->off();
+            }
+        }
+
     if ( !wash_seats.is_null() )
         {
         wash_seats->final();
@@ -218,9 +272,35 @@ int step_path::add_wash_seat_valve( u_int group, device *v )
 
         return -1;
         }
-
-    
+        
     return wash_seats->add_valve( group, v );
+    }
+//-----------------------------------------------------------------------------
+int step_path::add_FB_group_ex( device *control_FB_dev, device *control_signal_dev )
+    {
+    FB_group_dev_ex group( control_FB_dev, control_signal_dev );
+
+    FB_group_devices_ex.push_back( group );
+    return FB_group_devices_ex.size() - 1;
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int step_path::add_FB_group_dev_ex( u_int group_dev_ex_n, device *open_dev )
+    {
+    try 
+        {
+        FB_group_devices_ex.at( group_dev_ex_n ).on_devices.push_back( open_dev );
+        }
+    catch(...) 
+        {
+#ifdef DEBUG
+        Print( "Error add_FB_group_dev_ex - group_n = %d, dev = %s[%d]\n", 
+            group_dev_ex_n, open_dev->get_name(), open_dev->get_n() );
+#endif // DEBUG
+        }    
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

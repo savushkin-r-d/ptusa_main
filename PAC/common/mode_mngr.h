@@ -106,6 +106,29 @@ class step_path
         /// @param [in] v     - клапан.
         int add_wash_seat_valve( u_int group, device *v );
 
+
+        /// @brief Добавление группы устройств, которые включается\открывается во 
+        /// время выполнения шага по управляющему сигналу (обратной связи) и 
+        /// выдают при нормальной работе управляющий сигнал (при возникновении
+        /// ошибки обратной связи он снимается).
+        ///
+        /// @param [in] control_FB_dev - указатель на входной сигнал.
+        /// @param [in] control_FB_dev - указатель на выходной сигнал.
+        ///
+        /// @return >= 0 - номер добавленной группы устройств (для дальнейшего 
+        /// добавления устройств используется @ref add_pair_dev_ex).
+        int add_FB_group_ex( device *control_FB_dev, device *control_signal_dev );
+
+        /// @brief Добавление устройства, которое включается\открывается во 
+        /// время выполнения шага по управляющему сигналу (обратной связи).
+        ///
+        /// @param [in] pair_n   - номер группы устройств.
+        /// @param [in] open_dev - указатель на добавляемое устройство.
+        ///
+        /// @return < 0 - ошибка.
+        /// @return   0 - ок.
+        int add_FB_group_dev_ex( u_int group_dev_ex_n, device *open_dev );
+
     private: 
         std::vector< device* > close_devices;   ///< Закрываемые устройства.   
         std::vector< device* > open_devices;    ///< Открываемые устройства.    
@@ -126,6 +149,26 @@ class step_path
         std::vector< FB_group_dev > FB_group_devices; ///< Открываемые устройства по ОС.    
 
         auto_smart_ptr< wash_step > wash_seats; ///< Промывка седел клапанов.
+
+
+        /// @brief Группа устройств, управляемых по обратной связи расширенно. 
+        /// 
+        /// Если обратная связь устройств ок, то выдается соответствующий 
+        /// управляющий сигнал, иначе он снимается.
+        struct FB_group_dev_ex                         
+            {
+            device* fb;
+            device* control_s;
+
+            std::vector< device* > on_devices;
+
+            FB_group_dev_ex( device* fb, device* control_s ): fb( fb ),
+                control_s( control_s )
+                {
+                }
+            };
+        ///< Открываемые устройства по ОС с выдачей управляющего сигнала.
+        std::vector< FB_group_dev_ex > FB_group_devices_ex;     
     };
 //-----------------------------------------------------------------------------
 /// @brief Шаг мойки, при котором происходит флипование клапанами (mixproof).
