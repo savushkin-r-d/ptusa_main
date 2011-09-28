@@ -450,7 +450,7 @@ class mode_manager
 
         int save_as_Lua_str( char *str, const char *prefix = "\t" )
             {
-            sprintf( str, "%sMODES_ERR = {%d}\n", prefix, err_par[ 0 ] );
+            sprintf( str, "%sMODES_ERR = {%d}\n", prefix, ( int ) err_par[ 0 ] );
             return strlen( str );
             }
     private:

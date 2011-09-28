@@ -906,6 +906,7 @@ void digital_wago_device::direct_off()
     {
     state = 0;
     }
+#endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 digital_wago_device::digital_wago_device( int number, device::DEVICE_TYPE type, 
     device::DEVICE_SUB_TYPE sub_type, 
@@ -967,8 +968,6 @@ int digital_wago_device::save_device( char *buff, const char *prefix )
 
     return strlen( buff );
     }
-
-#endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
@@ -1003,7 +1002,7 @@ int DO_1_DI_1::get_state_now()
     int o = get_DO( DO_INDEX );
     int i = get_DI( DI_INDEX );
 
-    if ( fb->get_fb_state() == fb_device::S_FB_IS_AND_OFF )
+    if ( fb->get_fb_state( 1 ) == fb_device::S_FB_IS_AND_OFF )
         {
         return o;
         }
@@ -1055,7 +1054,7 @@ int DO_1_DI_2::get_state_now()
     int i0 = get_DI( DI_INDEX_1 );
     int i1 = get_DI( DI_INDEX_2 );
 
-    if ( fb->get_fb_state() == fb_device::S_FB_IS_AND_OFF )
+    if ( fb->get_fb_state( 1 ) == fb_device::S_FB_IS_AND_OFF )
         {
         return o;
         }
@@ -1109,7 +1108,7 @@ int DO_2_DI_2::get_state_now()
     int i0 = get_DI( DI_INDEX_1 );
     int i1 = get_DI( DI_INDEX_2 );
 
-    if ( fb->get_fb_state() == fb_device::S_FB_IS_AND_OFF )
+    if ( fb->get_fb_state( 1 ) == fb_device::S_FB_IS_AND_OFF )
         {
         return o1;
         }
@@ -1205,7 +1204,7 @@ int valve_mix_proof::get_state_now()
     int i0 = get_DI( DI_INDEX_U );
     int i1 = get_DI( DI_INDEX_L );
 
-    if ( fb->get_fb_state() == fb_device::S_FB_IS_AND_OFF )
+    if ( fb->get_fb_state( 1 ) == fb_device::S_FB_IS_AND_OFF )
         {
         if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return ST_UPPER_SEAT;
         if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return ST_LOWER_SEAT;
