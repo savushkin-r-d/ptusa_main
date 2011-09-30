@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using System.Xml;
+
 using Visio  = Microsoft.Office.Interop.Visio;
 using Office = Microsoft.Office.Core;
 
@@ -84,6 +86,10 @@ namespace visio_prj_designer
                 new Microsoft.Office.Interop.Visio.EApplication_ShapeAddedEventHandler(
                     visio_addin__ShapeAdded );
 
+            visio_app.ShapeExitedTextEdit +=
+                new Microsoft.Office.Interop.Visio.EApplication_ShapeExitedTextEditEventHandler(
+                    visio_addin__ShapeExitedTextEdit);
+
             visio_app.BeforeShapeDelete +=
                 new Microsoft.Office.Interop.Visio.EApplication_BeforeShapeDeleteEventHandler(
                     visio_addin__BeforeShapeDelete );
@@ -92,20 +98,32 @@ namespace visio_prj_designer
                 new Microsoft.Office.Interop.Visio.EApplication_ConnectionsAddedEventHandler(
                     visio_addin__ConnectionsAdded );
 
-            visio_app.FormulaChanged += new Microsoft.Office.Interop.Visio.EApplication_FormulaChangedEventHandler(
+            visio_app.FormulaChanged += 
+                new Microsoft.Office.Interop.Visio.EApplication_FormulaChangedEventHandler(
                     visio_addin__FormulaChanged );
 
-
-            visio_app.SelectionChanged += new Microsoft.Office.Interop.Visio.EApplication_SelectionChangedEventHandler(
+            visio_app.SelectionChanged += 
+                new Microsoft.Office.Interop.Visio.EApplication_SelectionChangedEventHandler(
                     visio_addin__SelectionChanged );
 
-            visio_app.DocumentOpened += new Microsoft.Office.Interop.Visio.EApplication_DocumentOpenedEventHandler(
+            visio_app.DocumentOpened += 
+                new Microsoft.Office.Interop.Visio.EApplication_DocumentOpenedEventHandler(
                  visio_addin__DocumentOpened );
 
-            visio_app.MouseDown +=new Visio.EApplication_MouseDownEventHandler(
+            visio_app.MouseDown +=new 
+                Visio.EApplication_MouseDownEventHandler(
                  visio_addin___MouseDown );
 
+            //visio_app.BeforeDocumentSave += 
+            //    new Microsoft.Office.Interop.Visio.EApplication_BeforeDocumentSaveEventHandler(
+            //    visio_addin__BeforeDocumentSave );
+
+            visio_app.DocumentSaved +=
+                new Microsoft.Office.Interop.Visio.EApplication_DocumentSavedEventHandler(
+                visio_addin__DocumentSaved );  
+
             g_devices = new List< device > ();
+            g_objects = new List< T_Object > ();
             }
 
         /// <summary> Event handler. Called by visio_addin for shutdown events. </summary>
@@ -117,6 +135,18 @@ namespace visio_prj_designer
         private void visio_addin__shutdown( object sender, System.EventArgs e )
             {
             }
+
+        //private void visio_addin__BeforeDocumentSave( Visio.Document target )
+        //    {
+        //    }
+
+        private void visio_addin__DocumentSaved( Visio.Document target )
+            {
+            if( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
+                {
+                Write_XML_description( target.Name );
+                }
+            }           
 
         /// <summary> Event handler. Реализована обработка клика мыши
         /// в режиме выбора клеммы для привязки. </summary>
@@ -244,7 +274,7 @@ try
 catch ( Exception err )
 	{
 	MessageBox.Show( "Ошибка считывания модулей WAGO" + err );
-	throw;
+	//throw;
 	}
 //-----------------------------------------------------------------------------
 					
@@ -275,6 +305,10 @@ try
 							case "WTE":							
 							    g_devices.Add( new device( shape, g_PAC ) );
 								break;
+
+                            case "TANK":
+                                g_objects.Add( new T_Object( shape, g_PAC ) );
+                                break;
                             }		//	switch ( shape.Data1 )	
                         }		//	foreach
 	}
@@ -282,7 +316,7 @@ catch ( Exception err )
 	{
 	System.Diagnostics.Debug.WriteLine( err.Message );
 	MessageBox.Show( "Ошибка считывания устройств проекта" );
-	throw;
+	//throw;
 	}
 //-----------------------------------------------------------------------------
 
@@ -305,8 +339,12 @@ catch ( Exception err )
 	{
 	System.Diagnostics.Debug.WriteLine( err.Message );
 	MessageBox.Show( "Ошибка считывания сигналов проекта" );
-	throw;
+	//throw;
 	}
+
+
+                    //  Открытие файла описания сложных объектов (гребенка, танк)
+                    Read_XML_description( 0 );
 
                     }
 				//else
@@ -318,9 +356,20 @@ catch ( Exception err )
 
         /// <summary> Предыдущее активное устройство (выделенное мышкой). </summary>
         private device previous_selected_dev = null;
-
+        
         /// <summary> Текущее активное устройство (выделенное мышкой). </summary>
         internal device current_selected_dev = null;
+
+
+        /// <summary> Текущий активный объект (Гребенка или Танк). </summary>
+        internal T_Object current_selected_object = null;
+
+        /// <summary> Текущий режим. </summary>
+        internal int cur_mode;
+        
+        /// <summary> Текущий шаг. </summary>
+        internal int cur_step;
+       
 
         /// <summary> Event handler. Обработка изменения активного устройства 
         /// (подсветка клемм устройства и т.д.). </summary>
@@ -340,28 +389,6 @@ catch ( Exception err )
                     // Проверка на активность страницы с устройствами (клапанами т.д.).
                     if( window.Page.Name == "Устройства" )
                         {
-
-						//const int IO_1 = 1;
-						//window.Windows[ IO_1 ].Caption = "q";
-
-						//const int IO_2 = 2;
-						//window.Windows[ IO_2 ].Caption = "q";
-
-						//const int IO_3 = 3;
-						//window.Windows[ IO_3 ].Caption = "q";
-
-						//const int IO_4 = 4;
-						//window.Windows[ IO_4 ].Caption = "q";
-
-						//const int IO_5 = 5;
-						//window.Windows[ IO_5 ].Caption = "q";
-
-						//const int IO_6 = 6;
-						//window.Windows[ IO_6 ].Caption = "q";
-
-						//const int IO_7 = 7;
-						//window.Windows[ IO_7 ].Caption = "q";
-
 						const int IO_PROP_WINDOW_INDEX = 8;
 						window.Windows[ IO_PROP_WINDOW_INDEX ].Caption =
                                 "Каналы";
@@ -381,13 +408,8 @@ catch ( Exception err )
 							Microsoft.Office.Interop.Visio.Shape selected_shape =
 							    window.Selection[ 1 ];
 
-                            //	Поиск по shape объекта device.
-							//int dev_n    = Convert.ToInt16( selected_shape.Cells[ "Prop.number" ].FormulaU );
-							//int dev_type = Convert.ToInt16( selected_shape.Cells[ "Prop.type" ].FormulaU );
-
 							current_selected_dev = g_devices.Find( delegate( device dev )
 							    {
-							    //return dev.get_n() == dev_n && dev.get_type() == dev_type; 
 								return dev.get_shape() == selected_shape;
 								}
 							    );
@@ -428,6 +450,29 @@ catch ( Exception err )
                         } //if( window.Page.Name == "Устройства" )
                     } //if( window.Index == ( short ) VISIO_WNDOWS.IO_EDIT )
                 } //if( visio_addin.is_device_edit_mode ) 
+            else
+                {
+                //  Обычный режим работы
+                current_selected_object = null;
+                
+                Microsoft.Office.Interop.Visio.Shape selected_shape =
+				        window.Selection[ 1 ];
+
+                if (    ( selected_shape != null ) 
+                    &&  (   ( Convert.ToInt32( selected_shape.Cells[ "Prop.type" ].Formula ) ==
+                                                Convert.ToInt32( device.TYPES.T_TANK ) )
+                        ||  ( Convert.ToInt32( selected_shape.Cells[ "Prop.type" ].Formula ) ==
+                                                Convert.ToInt32( device.TYPES.T_GREB ) )
+                        )
+                   )
+                    {
+                    current_selected_object = g_objects.Find( delegate( T_Object obj )
+                        {
+                        return obj.get_shape() == selected_shape;
+                        }
+                        );
+                    }
+                }
             }
 
         /// <summary> Event handler. Обработчик изменения формул (задание 
@@ -439,14 +484,6 @@ catch ( Exception err )
         /// <param name="cell"> Ячейка, где произошло изменение. </param>
         private void visio_addin__FormulaChanged( Microsoft.Office.Interop.Visio.Cell cell )
             {
-			//Поиск по shape объекта device.
-			current_selected_dev = g_devices.Find( delegate( device dev )
-			{
-				return dev.get_shape() == cell.Shape;
-			}
-			);
-
-
 			switch ( cell.Shape.Data1 )
 				{
 				//	Изменения свойств модуля WAGO
@@ -546,6 +583,13 @@ catch ( Exception err )
 				case "AO":
 				case "FQT":
 				case "WTE":
+                    //Поиск по shape объекта device.
+                    current_selected_dev = g_devices.Find( delegate( device dev )
+                    {
+                        return dev.get_shape() == cell.Shape;
+                    }
+                    );
+
 					switch ( cell.Name )
 						{
 						case "Prop.number":
@@ -556,9 +600,9 @@ catch ( Exception err )
 						case "Prop.name":
 							string str = cell.Shape.Cells[ "Prop.name" ].Formula;
 							str = str.Replace( "\"", "" );
-							cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
+                            cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
 
-							current_selected_dev.name = str.ToUpper();
+                            current_selected_dev.name = str.ToUpper();
 							break;
 
 						case "Prop.description":
@@ -588,7 +632,59 @@ catch ( Exception err )
 					break;
 
 
-				case "V":
+                case "TANK":
+                case "GREB":
+                    //Поиск по shape объекта
+                    current_selected_object = g_objects.Find( delegate( T_Object obj )
+                    {
+                        return obj.get_shape() == cell.Shape;
+                    }
+                    );
+
+					switch ( cell.Name )
+						{
+                        case "Prop.name":
+                        case "Prop.number":
+                        case "Prop.tonnage":
+                        case "Prop.description":
+							string str_name = cell.Shape.Cells[ "Prop.name" ].Formula;
+							str_name = str_name.Replace( "\"", "" );
+                            current_selected_object.name = str_name.ToUpper();
+
+                            string str_no = cell.Shape.Cells[ "Prop.number" ].Formula;
+                            current_selected_object.n = Convert.ToInt32( str_no );
+
+                            string str_discr = cell.Shape.Cells[ "Prop.description" ].Formula;
+                            str_discr = str_discr.Replace( "\"", "" );
+                            current_selected_object.description = str_discr;
+                            
+                            if ( cell.Shape.Data1 == "GREB" )
+                                {
+                                //  Формируем текст на гребенке
+                                cell.Shape.Shapes[ "name" ].Text = str_name + " " + str_no;
+                                }
+                            else    //  cell.Shape.Data1 = "TANK"
+                                {
+                                //  Считываем поле, характерное только для танка
+                                string str_t = cell.Shape.Cells[ "Prop.tonnage" ].Formula;
+                                //  Нет поля для храниния этого параметра (только в фигуре)
+
+                                //  Формируем текст на танке
+                                cell.Shape.Shapes[ "name" ].Text =  "№" + str_no + "\n" + str_name + "\n" + str_t + " т";
+                                }
+							break;
+                        }
+                    break;
+
+
+                case "V":
+                    //Поиск по shape объекта device.
+                    current_selected_dev = g_devices.Find( delegate( device dev )
+                    {
+                        return dev.get_shape() == cell.Shape;
+                    }
+                    );
+
 					switch ( cell.Name )
 						{
 						case "Prop.number":	//	Получаем из имени устройства
@@ -727,6 +823,7 @@ catch ( Exception err )
 							break;
 						}	//	switch ( cell.Name )
 					break;
+
 				}	//	switch ( cell.Shape.Data1 )
 
 			}
@@ -771,6 +868,16 @@ catch ( Exception err )
 			//    Microsoft.Office.Interop.Visio.VisConnectedShapesFlags.visConnectedShapesAllNodes, "" );
 
             }
+
+
+        private void visio_addin__ShapeExitedTextEdit( Microsoft.Office.Interop.Visio.Shape shape )
+            {
+            if ( shape.Text != shape.RootShape.Cells[ "Prop.name" ].Formula.Replace( "\"", "" ) )
+                {
+                shape.RootShape.Cells[ "Prop.name" ].FormulaU = "\"" + shape.Text + "\"";
+                }
+            }
+
 
         /// <summary> Event handler. Удаляем соответствующий объект при удалении
         /// связанной фигуры. </summary>
@@ -824,14 +931,8 @@ catch ( Exception err )
 				case "AO":
 				case "FQT":
 				case "WTE":	
-
-                     //Поиск по shape объекта device.
-                     //int dev_n    = Convert.ToInt16( shape.Cells[ "Prop.number" ].FormulaU );
-                     //int dev_type = Convert.ToInt16( shape.Cells[ "Prop.type" ].FormulaU );
-				     
 					 current_selected_dev = g_devices.Find( delegate( device dev )
                          {
-                         //return dev.get_n() == dev_n && dev.get_type() == dev_type; 
 						 return dev.get_shape() == shape;
 						 }
 						 );
@@ -839,6 +940,17 @@ catch ( Exception err )
 					g_devices.Remove( current_selected_dev );
 
 					break;
+
+                case "TANK":
+                case "GREB":
+					 current_selected_object = g_objects.Find( delegate( T_Object obj )
+                         {
+						 return obj.get_shape() == shape;
+						 }
+						 );
+
+					g_objects.Remove( current_selected_object );	
+                    break;
                 }
             }
 
@@ -973,6 +1085,7 @@ catch ( Exception err )
 					break;
 
 				case "TANK":
+                case "GREB":
 				    g_objects.Add( new T_Object( shape, g_PAC ) );
 				    break;
 				}	//	switch ( shape.Data1 ) 
@@ -1053,6 +1166,327 @@ catch ( Exception err )
                 vis_main_ribbon.hide();
                 }
             }
+
+
+        /// <summary> Загрузка данных класса из файла описания </summary>
+        /// <remarks> asvovik, 21.09.2011. </remarks>
+        ///
+        /// <param name="XML"> I don't now </param>
+        public void Read_XML_description( int XML )
+            {
+            string fileName="..\\Visio docs\\description_device.xml";
+            XmlTextReader tr = new XmlTextReader( fileName );
+
+            while (     !tr.EOF
+                    &&  tr.Read()    
+                  )
+                {
+
+                string temp_name;
+                int temp_no;
+
+                switch ( tr.Name )
+                    {
+                    case "object":
+                        temp_name = tr.GetAttribute( "object-name" );
+                        temp_no = Convert.ToInt32( tr.GetAttribute( "object-number" ) );
+
+                        //  Объекты уже были прочитаны, нужно только найти среди них текущий
+                        current_selected_object = g_objects.Find( delegate( T_Object obj )
+                            {
+                                return obj.get_n() == temp_no && obj.get_name() == temp_name; 
+                            }
+                            );
+                    	break;
+
+                    case "mode":
+                        temp_name = tr.GetAttribute( "mode-name" );
+                        temp_no = Convert.ToInt32( tr.GetAttribute( "mode-number" ) );
+                        
+                        if ( current_selected_object != null )
+                            {
+                            //  Создаем новый режим
+                            T_Object.mode temp_mode = new T_Object.mode();
+                            //  Устанавлеиваем его атрибуты
+                            temp_mode.set_attribute( temp_no, temp_name );
+
+                            //  Добавляем в список режимамов
+                            current_selected_object.mode_mas.Add( temp_mode );
+
+                            //  Фиксируем номер текущего режима для дальнейших обращений к нему
+                            cur_mode = temp_no;
+                            }
+                        break;
+
+                    case "step":
+                        temp_name = tr.GetAttribute( "step-name" );
+                        temp_no = Convert.ToInt32( tr.GetAttribute( "step-number" ) );
+
+                        if ( current_selected_object != null )
+                            {
+                            //  Создаем новый режим
+                            T_Object.mode temp_step = new T_Object.mode();
+                            //  Устанавлеиваем его атрибуты
+                            temp_step.set_attribute( temp_no, temp_name );
+
+                            //  Добавляем в список режимамов
+                            current_selected_object.mode_mas[ cur_mode ].step.Add( temp_step );
+
+                            //  Фиксируем номер текущего режима для дальнейших обращений к нему
+                            cur_step = temp_no;
+                            }
+                    	break;
+
+                    case "on_device":
+                        try
+                            {
+                            do
+                                {
+                                tr.Read();
+
+                                if (    tr.NodeType != XmlNodeType.EndElement
+                                    &&  tr.NodeType != XmlNodeType.Whitespace
+                                    &&  tr.NodeType != XmlNodeType.Text  )
+                                    {
+                                    //  Остается только список имен устройств
+                                    temp_name = tr.Name;
+
+                                    //  Ищем устройство с прочитанным именем
+                                    current_selected_dev = g_devices.Find( delegate( device dev )
+                                        {
+                                            return dev.get_name() == temp_name;
+                                        }
+                                        );
+
+                                    //  Если есть такое устройство, то добавляем указатель на него в соотв. список
+                                    if (    current_selected_object != null 
+                                        &&  current_selected_dev != null )
+                                        {
+                                        current_selected_object.mode_mas[ cur_mode ].on_device.Add( current_selected_dev );
+                                        }    
+                                    }
+                                }
+                            while ( tr.Name != "on_device" );   //  EndElement
+
+                            }
+                        catch ( Exception err )
+                            {
+                            MessageBox.Show( "Ошибка сохраниния описания режимов объектов \n" + err );
+                            }
+                        break;
+
+
+                    case "off_device":
+                        
+                        //tr.ReadElementContentAs();
+                        
+                        break;
+
+                    case "Parameters":
+                        if ( current_selected_object != null )
+                            {
+
+                            string[] temp_str = { "0", "0" };
+
+                            do {
+                                tr.Read();
+
+                                switch ( tr.NodeType )
+                                    {
+                                    case XmlNodeType.Element:
+                                        temp_str[ 0 ] = tr.Name;
+                                        break;
+
+                                    case XmlNodeType.Text:
+                                        temp_str[ 1 ] = tr.Value;
+                                        current_selected_object.param_list.Add( temp_str );
+
+                                        temp_str = new string[2];
+                                        temp_str[ 0 ] = "0";
+                                        temp_str[ 1 ] = "0";
+                                        break;
+                                    }
+
+                                }
+                            while ( tr.Name != "Parameters" );   //  EndElement
+                            }
+
+                        break;
+
+                    }   //  switch
+                }   //  while
+            }
+
+        /// <summary> Запись данных класса в файл описания </summary>
+        /// <remarks> asvovik, 21.09.2011. </remarks>
+        ///
+        /// <param name="XML"> I don't now </param>
+        public void Write_XML_description( string doc_name )
+            {
+            string fileName="..\\Visio docs\\Export.xml";
+
+            XmlTextWriter tw = new XmlTextWriter( fileName, null );
+
+            // задаём форматирование с отступом
+            tw.Formatting = Formatting.Indented;
+            tw.WriteStartDocument();
+try
+    {
+            //Начать создание элементов и атрибутов
+            tw.WriteStartElement( "application" );
+            tw.WriteAttributeString( "application-name", "wago description" );
+                tw.WriteStartElement( "project" );
+                tw.WriteAttributeString( "project-name", Application.ActiveDocument.Name );
+                    
+                for ( int i = 0; i < g_objects.Count; i++ )
+                    {
+                    tw.WriteStartElement( "object" );
+                    tw.WriteAttributeString( "object-name", g_objects[ i ].name );
+                    tw.WriteAttributeString( "object-number", Convert.ToString( g_objects[ i ].n ) );
+
+                    foreach ( T_Object.mode temp_mode in g_objects[ i ].mode_mas )
+                        {                                                
+                        tw.WriteStartElement( "mode" );
+                        tw.WriteAttributeString( "mode-name", temp_mode.name );
+                        tw.WriteAttributeString( "mode-number", Convert.ToString( temp_mode.no ) );
+
+                        write_device_list( tw, temp_mode );
+////  В отдельную функцию...
+                        
+//                            tw.WriteStartElement( "on_device" );
+//                            for ( int k = 1; k <= temp_mode.on_device.Count; k++ )
+//                                {
+//                                //  Проверяем есть ли это устройство еще на схеме
+//                                if ( g_devices.Contains( temp_mode.on_device[ k ] ) ) 
+//                                    {
+//                                    //  Если есть, то записываем данные в файл
+//                                    tw.WriteElementString( "V", temp_mode.on_device[ k ].get_name() );
+//                                    }
+//                                else 
+//                                    {
+//                                    //  Если устройства уже нет, то удаляем его из списка
+//                                    temp_mode.on_device.Remove( temp_mode.on_device[ k ] );
+//                                    }
+//                                }
+//                            tw.WriteEndElement();
+
+//                            tw.WriteStartElement( "off_device" );
+//                            for ( int k = 1; k <= temp_mode.off_device.Count; k++ )
+//                                {
+//                                //  Проверяем есть ли это устройство еще на схеме
+//                                if ( g_devices.Contains( temp_mode.off_device[ k ] ) )
+//                                    {
+//                                    //  Если есть, то записываем данные в файл
+//                                    tw.WriteElementString( "V", temp_mode.off_device[ k ].get_name() );
+//                                    }
+//                                else
+//                                    {
+//                                    //  Если устройства уже нет, то удаляем его из списка
+//                                    temp_mode.off_device.Remove( temp_mode.off_device[ k ] );
+//                                    }
+//                                }
+//                            tw.WriteEndElement();
+
+//                        //  Проходим по шагам
+//                        for ( int k = 0; k < temp_mode.step.Count; k++ )
+//                            {
+////                            if ( temp_mode.step[ k ] != null )
+//                                {
+//                                tw.WriteStartElement( "step" );
+//                                tw.WriteAttributeString( "step-name", temp_mode.step[ k ].name );
+//                                tw.WriteAttributeString( "step-number",Convert.ToString( temp_mode.step[ k ].no ) );
+                                
+//                                // Вызов отдельной функции для шага ()
+//                                //write_device_list( temp_mode.step[ k ] );
+
+//                                tw.WriteEndElement();
+//                                }
+//                            }
+////  ...В отдельную функцию
+                        
+                        tw.WriteEndElement();                   //  mode
+                        }                                   //  for j ...
+
+                    tw.WriteEndElement();                   //  object
+                    }
+                tw.WriteEndElement();                   //  project
+            tw.WriteEndElement();                   //  application
+            //-------------------------------------
+
+    }
+catch ( Exception err )
+    {
+    MessageBox.Show( "Ошибка сохраниния описания объектов \n" + err );
+    }
+
+            tw.WriteEndDocument();
+
+            // очистить
+            tw.Flush();
+            tw.Close();
+
+            }
+
+
+        /// <summary> Запись данных режима в файл описания XML </summary>
+        /// <remarks> asvovik, 29.09.2011. </remarks>
+        ///
+        /// <param name="XML">  </param>
+        public void write_device_list( XmlTextWriter tw, T_Object.mode temp_mode )
+            {
+            tw.WriteStartElement( "on_device" );
+            for ( int k = 1; k <= temp_mode.on_device.Count; k++ )
+                {
+                //  Проверяем есть ли это устройство еще на схеме
+                if ( g_devices.Contains( temp_mode.on_device[ k ] ) )
+                    {
+                    //  Если есть, то записываем данные в файл
+                    tw.WriteElementString( "V", temp_mode.on_device[ k ].get_name() );
+                    }
+                else
+                    {
+                    //  Если устройства уже нет, то удаляем его из списка
+                    temp_mode.on_device.Remove( temp_mode.on_device[ k ] );
+                    }
+                }
+            tw.WriteEndElement();
+
+            tw.WriteStartElement( "off_device" );
+            for ( int k = 1; k <= temp_mode.off_device.Count; k++ )
+                {
+                //  Проверяем есть ли это устройство еще на схеме
+                if ( g_devices.Contains( temp_mode.off_device[ k ] ) )
+                    {
+                    //  Если есть, то записываем данные в файл
+                    tw.WriteElementString( "V", temp_mode.off_device[ k ].get_name() );
+                    }
+                else
+                    {
+                    //  Если устройства уже нет, то удаляем его из списка
+                    temp_mode.off_device.Remove( temp_mode.off_device[ k ] );
+                    }
+                }
+            tw.WriteEndElement();
+
+            //  Проходим по шагам
+            if ( temp_mode.step != null )
+                {
+                for ( int k = 0; k < temp_mode.step.Count; k++ )
+                    {
+                    tw.WriteStartElement( "step" );
+                    tw.WriteAttributeString( "step-name", temp_mode.step[ k ].name );
+                    tw.WriteAttributeString( "step-number", Convert.ToString( temp_mode.step[ k ].no ) );
+
+                    // Вызов отдельной функции для шага ()
+                    write_device_list( tw, temp_mode.step[ k ] );
+
+                    tw.WriteEndElement();
+                    }
+                }
+
+            }
+
+
 
         #region VSTO generated code
 

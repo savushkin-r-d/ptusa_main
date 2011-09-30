@@ -29,69 +29,69 @@ namespace tech_device
 	/// <remarks> ASV, 07.09.2011. </remarks>
 	public class T_Object : device
 		{
-		public struct mode
-			{
-			int no;				//	Номер режима (шага)
-			string name;		//	Название режима (шага)
 
-			List<device> on_dev;	//	Устройства для включения
-			List<device> off_dev;	//	Устройства для выключения
-									//	...
+        public struct mode
+            {
+            public int no;				//	Номер режима (шага)
+            public string name;		//	Название режима (шага)
 
-									//	Устройства флипования
+            public List<device> on_device;	//	Устройства для включения
+            public List<device> off_device;	//	Устройства для выключения
+            //	...
 
-									//	Сигналы без которых нельзя вкл. режим
-									//	Сигналы автоматического вкл/выкл режима
-									//	Сигналы UPR (когда режим включен)
-									//	Сигналы ОС управляющие устройствами
-									//		Списки устройств (на вкл. и на выкл.)
-									//	Пары сигналов (дублирование)
-									//	...
+            //	Устройства флипования
+
+            //	Сигналы без которых нельзя вкл. режим
+            //	Сигналы автоматического вкл/выкл режима
+            //	Сигналы UPR (когда режим включен)
+            //	Сигналы ОС управляющие устройствами
+            //		Списки устройств (на вкл. и на выкл.)
+            //	Пары сигналов (дублирование)
+            //	...
 
 
-			mode[] step;		//	Шаги режима
-			}
+            public List<mode> step;		//	Шаги режима
 
-		//	Режимы объекта
-		public mode[] mode_mas;		//	Список режимов
+            public void set_attribute( int no_, string name_ )
+                {
+                no = no_;
+                name = name_;
+
+                on_device = new List<device>();
+                off_device = new List<device>();
+                }
+            }
+
+        //	Режимы объекта
+		public List<mode> mode_mas;		//	Список режимов
 
 
 		//	Параметры объекта
-		public string[,] param_list;	//	Список параметров param_list[ Название ][ Значение ]
-
+		public List<string[]> param_list;	//	Список параметров param_list< Название, Значение >
 
 		//	Список ошибок 
 //		public enum ERROR_LIST
 //		public List<string> ERROR_LIST
-//		public Dictionary<int, string> ERROR_LIST
-
+//		public Dictionary<int, string> ERROR_LIST 
 
 
 		//	Список устройств объекта (Ссылки на элементы g_devices)
 		public List<device> list_object_device;
 
-
-		//public T_Object()
-		//    {
-		//    }
-
         /// <summary> Constructor. </summary>
-        ///
         /// <remarks> asvovik, 16.09.2011. </remarks>
         ///
         /// <param name="shape"> Фигура Visio. </param>
         /// <param name="pac">	Узел Wago. </param>
         public T_Object( Visio.Shape shape, PAC pac ):base( shape, pac )
             {
-			//mode_mas = new mode[]();
-
-			//param_list = new string[,];
-			//param_list[ 0 ] = new string[];
-
-
+            mode_mas = new List<mode>();
+            param_list = new List<string[]>();
+//            param_list = new Dictionary<string, string>();
             }
 
 		}
+    
 //-----------------------------------------------------------------------------	   
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -131,7 +131,7 @@ namespace tech_device
 			T_WTE	= 15,	//	Температура и Влажность
 
 			T_TANK	= 100,	//	Танк (сложный объект)
-			COMPLECT_TANK = 101,	//	Танк с обвязкой
+			T_GREB  = 200,	//	Гребенка
             }
 
         /// <summary> Подтип клапана. </summary>
@@ -172,7 +172,7 @@ namespace tech_device
 		/// <returns> Номер устройства. </returns>
 		public string get_name()
 		    {
-		    return name;
+		    return name.Replace( "\"", "" );
 		    }
 
 
@@ -499,6 +499,11 @@ namespace tech_device
 							break;
 
                         }
+                    break;
+
+                case TYPES.T_TANK:
+                case TYPES.T_GREB:
+
                     break;
                 }
 

@@ -134,5 +134,20 @@ namespace visio_prj_designer
 			Visio_project_designer.Form_device Dev_List_Form = new Visio_project_designer.Form_device();
 			Dev_List_Form.Show();
 			}
+
+        private void button_modes_Click( object sender, RibbonControlEventArgs e )
+            {
+            if ( Globals.visio_addin.current_selected_object != null )
+                {
+                Visio_project_designer.Form_modes Mode_List_Form = new Visio_project_designer.Form_modes();
+                Mode_List_Form.Show();
+                }
+            else
+                {
+                //  Не выбран сложный объект
+                MessageBox.Show( "Объект не содержит режимов." );
+                }
+            }
+
         }
     }
