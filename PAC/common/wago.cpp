@@ -346,8 +346,6 @@ float wago_device::get_par( u_int index )
         index, params_count, ( int ) params );
 #endif // DEBUG
 
-    print();
-
     return 0;
     }
 //-----------------------------------------------------------------------------

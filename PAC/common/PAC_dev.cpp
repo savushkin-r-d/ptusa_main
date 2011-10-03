@@ -1007,11 +1007,24 @@ int DO_1_DI_1::get_state_now()
         return o;
         }
 
-    if ( o == i )
+    //Для клапана с контролем закрытого состояния.
+    if ( has_params() )
         {
-        start_switch_time = get_sec();
-        return i;
-        }   
+        if ( ( get_par( C_FB_CHECK_TYPE ) != 0 && o == i ) ||
+            ( get_par( C_FB_CHECK_TYPE ) == 0 && o != i )  )
+            {
+            start_switch_time = get_sec();
+            return i;
+            }
+        }
+    else
+        {
+        if ( o == i )
+            {
+            start_switch_time = get_sec();
+            return i;
+            }   
+        }
 
     if ( get_sec() - start_switch_time > C_SWITCH_TIME )
         {

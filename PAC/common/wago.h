@@ -101,6 +101,11 @@ class wago_device
 
         virtual void print() const;
 
+        bool has_params() const
+            {
+            return params != 0;
+            }
+
     private:
         /// @brief Группа каналов ввода/вывода устройства.
         struct IO_channels
