@@ -137,7 +137,7 @@ namespace visio_prj_designer
 
         private void button_modes_Click( object sender, RibbonControlEventArgs e )
             {
-            if ( Globals.visio_addin.current_selected_object != null )
+            if ( Globals.visio_addin.cur_sel_obj != null )
                 {
                 Visio_project_designer.Form_modes Mode_List_Form = new Visio_project_designer.Form_modes();
                 Mode_List_Form.Show();

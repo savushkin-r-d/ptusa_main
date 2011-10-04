@@ -28,17 +28,17 @@
         /// </summary>
         private void InitializeComponent()
             {
-            System.Windows.Forms.TreeNode treeNode25 = new System.Windows.Forms.TreeNode( "Node1" );
-            System.Windows.Forms.TreeNode treeNode26 = new System.Windows.Forms.TreeNode( "Node2" );
-            System.Windows.Forms.TreeNode treeNode27 = new System.Windows.Forms.TreeNode( "Node3" );
-            System.Windows.Forms.TreeNode treeNode28 = new System.Windows.Forms.TreeNode( "Node0", new System.Windows.Forms.TreeNode[] {
-            treeNode25,
-            treeNode26,
-            treeNode27} );
-            System.Windows.Forms.TreeNode treeNode29 = new System.Windows.Forms.TreeNode( "Node5" );
-            System.Windows.Forms.TreeNode treeNode30 = new System.Windows.Forms.TreeNode( "Node4", new System.Windows.Forms.TreeNode[] {
-            treeNode29} );
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode( "Node1" );
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode( "Node2" );
+            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode( "Node3" );
+            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode( "Node0", new System.Windows.Forms.TreeNode[] {
+            treeNode1,
+            treeNode2,
+            treeNode3} );
+            System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode( "Node5" );
+            System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode( "Node4", new System.Windows.Forms.TreeNode[] {
+            treeNode5} );
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.listBox_open = new System.Windows.Forms.ListBox();
             this.listBox_close = new System.Windows.Forms.ListBox();
             this.treeView_modes = new System.Windows.Forms.TreeView();
@@ -78,24 +78,24 @@
                         | System.Windows.Forms.AnchorStyles.Right ) ) );
             this.treeView_modes.Location = new System.Drawing.Point( 2, 0 );
             this.treeView_modes.Name = "treeView_modes";
-            treeNode25.Name = "Node1";
-            treeNode25.Text = "Node1";
-            treeNode26.Name = "Node2";
-            treeNode26.Text = "Node2";
-            treeNode27.Name = "Node3";
-            treeNode27.Text = "Node3";
-            treeNode28.Name = "Node0";
-            treeNode28.Text = "Node0";
-            treeNode29.Name = "Node5";
-            treeNode29.Text = "Node5";
-            treeNode30.Name = "Node4";
-            treeNode30.Text = "Node4";
+            treeNode1.Name = "Node1";
+            treeNode1.Text = "Node1";
+            treeNode2.Name = "Node2";
+            treeNode2.Text = "Node2";
+            treeNode3.Name = "Node3";
+            treeNode3.Text = "Node3";
+            treeNode4.Name = "Node0";
+            treeNode4.Text = "Node0";
+            treeNode5.Name = "Node5";
+            treeNode5.Text = "Node5";
+            treeNode6.Name = "Node4";
+            treeNode6.Text = "Node4";
             this.treeView_modes.Nodes.AddRange( new System.Windows.Forms.TreeNode[] {
-            treeNode28,
-            treeNode30} );
+            treeNode4,
+            treeNode6} );
             this.treeView_modes.Size = new System.Drawing.Size( 500, 287 );
             this.treeView_modes.TabIndex = 3;
-            this.treeView_modes.Click += new System.EventHandler( this.treeView_modes_Click );
+            this.treeView_modes.AfterSelect += new System.Windows.Forms.TreeViewEventHandler( this.treeView_modes_AfterSelect );
             // 
             // dataGridView1
             // 
@@ -112,9 +112,9 @@
             // 
             // number
             // 
-            dataGridViewCellStyle5.Format = "N0";
-            dataGridViewCellStyle5.NullValue = null;
-            this.number.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle1.Format = "N0";
+            dataGridViewCellStyle1.NullValue = null;
+            this.number.DefaultCellStyle = dataGridViewCellStyle1;
             this.number.HeaderText = "№";
             this.number.Name = "number";
             this.number.Width = 30;

@@ -32,6 +32,9 @@ namespace visio_prj_designer
     /// <remarks> Id, 16.08.2011. </remarks>
     public partial class visio_addin
         {
+        /// <summary> Приложение Visio. </summary>
+        private Visio.Application visio_app;
+
         /// <summary> Флаг режима привязки канала к клемме модуля. </summary>
         internal bool is_selecting_clamp = false;
 
@@ -63,8 +66,34 @@ namespace visio_prj_designer
             IO_EDIT = 2, ///< Дополнительное окно.
             };
 
-        /// <summary> Приложение Visio. </summary>
-        private Visio.Application visio_app;
+
+        #region Поля для реализации функциональности вставки сразу нескольких модулей Wago.
+
+        private bool is_duplicating = false;
+        private int duplicate_count = 0;
+
+        private Microsoft.Office.Interop.Visio.Shape old_shape;
+        private Microsoft.Office.Interop.Visio.Shape new_shape;
+
+        private bool no_delete_g_pac_flag = false;
+
+        #endregion
+
+        /// <summary> Предыдущее активное устройство (выделенное мышкой). </summary>
+        private device previous_selected_dev = null;
+
+        /// <summary> Текущее активное устройство (выделенное мышкой). </summary>
+        internal device cur_sel_dev = null;
+
+        /// <summary> Текущий активный объект (Гребенка или Танк). </summary>
+        internal T_Object cur_sel_obj = null;
+
+        /// <summary> Текущий режим. </summary>
+        internal int cur_mode;
+
+        /// <summary> Текущий шаг. </summary>
+        internal int cur_step;
+
 
         /// <summary> Event handler. Called by <c>visio_addin</c> for startup 
         /// events. Вызывается при загрузке дополнения. Здесь мы регистрируем 
@@ -110,13 +139,13 @@ namespace visio_prj_designer
                 new Microsoft.Office.Interop.Visio.EApplication_DocumentOpenedEventHandler(
                  visio_addin__DocumentOpened );
 
+            visio_app.BeforeDocumentClose += 
+                new Microsoft.Office.Interop.Visio.EApplication_BeforeDocumentCloseEventHandler(
+                 visio_addin__BeforeDocumentClose );
+
             visio_app.MouseDown +=new 
                 Visio.EApplication_MouseDownEventHandler(
                  visio_addin___MouseDown );
-
-            //visio_app.BeforeDocumentSave += 
-            //    new Microsoft.Office.Interop.Visio.EApplication_BeforeDocumentSaveEventHandler(
-            //    visio_addin__BeforeDocumentSave );
 
             visio_app.DocumentSaved +=
                 new Microsoft.Office.Interop.Visio.EApplication_DocumentSavedEventHandler(
@@ -136,9 +165,148 @@ namespace visio_prj_designer
             {
             }
 
-        //private void visio_addin__BeforeDocumentSave( Visio.Document target )
-        //    {
-        //    }
+        /// <summary> Event handler. При создании документа показываем полосу 
+        /// работы с техпроцессом. </summary>
+        ///
+        /// <remarks> Id, 16.08.2011. </remarks>
+        ///
+        /// <param name="doc"> Created document. </param>
+        private void visio_addin__DocumentCreated( Microsoft.Office.Interop.Visio.Document doc )
+            {
+            if ( doc.Template.Contains( "PTUSA project" ) )
+                {
+                vis_main_ribbon.show();
+                }
+            else
+                {
+                vis_main_ribbon.hide();
+                }
+            }
+
+        /// <summary> Event handler. Создание необходимых объектов при открытии
+        /// файла. </summary>
+        ///
+        /// <remarks> Id, 16.08.2011. </remarks>
+        ///
+        /// <param name="target"> Target for the. </param>
+        private void visio_addin__DocumentOpened( Visio.Document target )
+            {
+            if ( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
+                {
+                //                if( target.Template.Contains( "PTUSA project" ) )
+                    {
+                    vis_main_ribbon.show();
+
+                    //	Создание списка доступных элементов
+                    service_config = new service_data();
+                    //for ( int i = 0; i < service_config.DI_modules.Count; i++ )
+                    //    {
+                    //    string ss = service_config.DI_modules[ 402 ];
+                    //    }
+
+                    try
+                        {
+                        //Считывание устройств Wago.
+                        foreach ( Visio.Shape shape in target.Pages[ "Wago" ].Shapes )
+                            {
+                            if ( shape.Data1 == "750" && shape.Data2 == "860" )
+                                {
+                                string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
+                                string name = shape.Cells[ "Prop.PAC_name" ].Formula;
+
+                                g_PAC = new PAC( name.Substring( 1, name.Length - 2 ),
+                                    ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
+
+                                }
+
+                            if ( shape.Data1 == "750" && shape.Data2 != "860" )
+                                {
+                                g_PAC.add_io_module( shape );
+                                }
+                            }
+                        }
+                    catch ( Exception err )
+                        {
+                        MessageBox.Show( "Ошибка считывания модулей WAGO" + err );
+                        //throw;
+                        }
+                    //-----------------------------------------------------------------------------
+
+                    try
+                        {
+                        g_devices.Clear();
+
+                        //Считывание устройств.
+                        foreach ( Visio.Shape shape in target.Pages[ "Устройства" ].Shapes )
+                            {
+                            switch ( shape.Data1 )
+                                {
+                                case "V":
+                                case "N":
+                                case "MIX":
+                                case "CTR":
+                                case "TE":
+                                case "QE":
+                                case "LS":
+                                case "LE":
+                                case "FS":
+                                case "FE":
+                                case "FB":
+                                case "UPR":
+                                case "AI":
+                                case "AO":
+                                case "FQT":
+                                case "WTE":
+                                    g_devices.Add( new device( shape, g_PAC ) );
+                                    break;
+
+                                case "TANK":
+                                    g_objects.Add( new T_Object( shape, g_PAC ) );
+                                    break;
+                                }		//	switch ( shape.Data1 )	
+                            }		//	foreach
+                        }
+                    catch ( Exception err )
+                        {
+                        System.Diagnostics.Debug.WriteLine( err.Message );
+                        MessageBox.Show( "Ошибка считывания устройств проекта" );
+                        //throw;
+                        }
+                    //-----------------------------------------------------------------------------
+
+                    try
+                        {
+                        foreach ( Visio.Shape shape in target.Pages[ "Обмен сигналами" ].Shapes )
+                            {
+                            switch ( shape.Data1 )
+                                {
+                                case "FB":
+                                case "UPR":
+                                case "AI":
+                                case "AO":
+                                    g_devices.Add( new device( shape, g_PAC ) );
+                                    break;
+                                }		//	switch ( shape.Data1 )	
+                            }		//	foreach
+                        }
+                    catch ( Exception err )
+                        {
+                        System.Diagnostics.Debug.WriteLine( err.Message );
+                        MessageBox.Show( "Ошибка считывания сигналов проекта" );
+                        //throw;
+                        }
+
+
+                    //  Открытие файла описания сложных объектов (гребенка, танк)
+                    Read_XML_description( 0 );
+
+                    }
+                //else
+                //    {
+                //    vis_main_ribbon.hide();
+                //    }
+                }
+            }
 
         private void visio_addin__DocumentSaved( Visio.Document target )
             {
@@ -146,7 +314,287 @@ namespace visio_prj_designer
                 {
                 Write_XML_description( target.Name );
                 }
-            }           
+            }   
+       
+        private void visio_addin__BeforeDocumentClose( Visio.Document target )
+            {
+            if( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
+                {
+                g_objects.Clear();
+                g_devices.Clear();
+                is_selecting_clamp = false;
+                is_device_edit_mode = false;
+                }
+            } 
+               
+
+        /// <summary> Event handler. Обработка события добавления фигуры. Здесь
+        /// реализована часть функциональности вставки сразу нескольких модулей 
+        /// Wago. </summary>
+        ///
+        /// <remarks> Id, 16.08.2011. </remarks>
+        ///
+        /// <param name="shape"> Добавляемая фигура. </param>
+        private void visio_addin__ShapeAdded( Microsoft.Office.Interop.Visio.Shape shape )
+            {
+            //Проверяем, нужный ли нам объект мы добавляем на лист. Выводим окно
+            //с запросом количества элементов. Помещаем на форму первый элемент,
+            //остальные приклеиваем к нему путем дублирования вставляемого 
+            //элемента.
+
+            if ( is_duplicating )
+                {
+
+                duplicate_count--;
+                if ( duplicate_count <= 0 )
+                    {
+                    is_duplicating = false;
+                    }
+
+                return;
+                }
+
+            switch ( shape.Data1 )
+                {
+                case "750":
+                    if ( shape.Data2 == "860" )
+                        {
+                        if ( g_PAC == null )
+                            {
+                            string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
+                            string name = shape.Cells[ "Prop.PAC_name" ].Formula;
+
+                            g_PAC = new PAC( name.Substring( 1, name.Length - 2 ),
+                                ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
+                            }
+                        else
+                            {
+                            no_delete_g_pac_flag = true;
+                            MessageBox.Show( "Только один контроллер может быть в проекте!" );
+                            shape.DeleteEx( 0 );
+                            }
+
+                        return;
+                        }
+                    else
+                        {
+                        //	if ( shape.Data2 != "860" )
+
+                        modules_count_enter modules_count_enter_form = new modules_count_enter();
+                        modules_count_enter_form.ShowDialog();
+                        duplicate_count = modules_count_enter_form.modules_count - 1;
+
+                        ////////////////////////////
+
+                        //	Нужно будет доработать
+                        //	Проверка составленого списка модулей (LB_modules) 
+                        //		с имеющимся списком объектов g_PAC.io_modules
+                        //	g_PAC.insert_io_module( index, shape ); для недостоющих
+
+                        ////////////////////////////
+
+                        shape.Cells[ "Prop.type" ].FormulaU = modules_count_enter_form.modules_type;
+                        shape.Shapes[ "type_str" ].Text = modules_count_enter_form.modules_type;
+
+                        g_PAC.add_io_module( shape );
+
+                        for ( int i = 0; i < duplicate_count; i++ )
+                            {
+                            is_duplicating = true;
+                            new_shape = shape.Duplicate();
+                            old_shape = shape;
+
+                            string str_x = string.Format(
+                                "PNTX(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+6 mm",
+                                old_shape.Name );
+
+                            string str_y = string.Format(
+                                "PNTY(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+-47 mm",
+                                old_shape.Name );
+
+                            new_shape.Cells[ "PinX" ].Formula = str_x;
+                            new_shape.Cells[ "PinY" ].Formula = str_y;
+
+                            shape = new_shape;
+
+                            g_PAC.add_io_module( shape );
+
+                            shape.Cells[ "Prop.type" ].FormulaU = modules_count_enter_form.modules_type;
+                            shape.Shapes[ "type_str" ].Text = modules_count_enter_form.modules_type;
+
+                            visio_addin__FormulaChanged( shape.Cells[ "Prop.type" ] );
+                            }
+                        }
+                    break;
+
+                case "V":
+                case "N":
+                case "MIX":
+                case "CTR":
+                case "TE":
+                case "QE":
+                case "LS":
+                case "LE":
+                case "FS":
+                case "FE":
+                case "FB":
+                case "UPR":
+                case "AI":
+                case "AO":
+                case "FQT":
+                case "WTE":
+                    g_devices.Add( new device( shape, g_PAC ) );
+                    break;
+
+                case "TANK":
+                case "GREB":
+                    g_objects.Add( new T_Object( shape, g_PAC ) );
+                    break;
+                }	//	switch ( shape.Data1 ) 
+
+            }
+
+        /// <summary> Event handler.  </summary>
+        ///
+        /// <remarks> ASV, 23.08.2011. </remarks>
+        ///
+        /// <param name="shape"> Редактируемая фигура. </param>
+        private void visio_addin__ShapeChanged( Microsoft.Office.Interop.Visio.Shape shape )
+            {
+            switch ( shape.Data1 )
+                {
+                //case "750":
+                //    if (shape.Data2 == "860")
+                //    {
+                //        if (no_delete_g_pac_flag)
+                //        {
+                //            no_delete_g_pac_flag = false;
+                //        }
+                //        else
+                //        {
+                //            g_PAC = null;
+                //        }
+                //    }
+                //    break;
+
+                case "V":
+                case "N":
+                case "MIX":
+                case "CTR":
+                case "TE":
+                case "QE":
+                case "LS":
+                case "LE":
+                case "FS":
+                case "FE":
+                case "FB":
+                case "UPR":
+                case "AI":
+                case "AO":
+                case "FQT":
+                case "WTE":
+
+                    //Поиск по shape объекта device.
+                    //int dev_n = Convert.ToInt16(shape.Cells["Prop.number"].FormulaU);
+                    //int dev_type = Convert.ToInt16(shape.Cells["Prop.type"].FormulaU);
+
+                    cur_sel_dev = g_devices.Find( delegate( device dev )
+                        {
+                            //return dev.get_n() == dev_n && dev.get_type() == dev_type;
+                            return dev.get_shape() == shape;
+                        }
+                        );
+
+                    //g_devices[ current_selected_dev ];
+
+                    break;
+                }
+            }
+
+
+        private void visio_addin__ShapeExitedTextEdit( Microsoft.Office.Interop.Visio.Shape shape )
+            {
+            if ( shape.Text != shape.RootShape.Cells[ "Prop.name" ].Formula.Replace( "\"", "" ) )
+                {
+                shape.RootShape.Cells[ "Prop.name" ].FormulaU = "\"" + shape.Text + "\"";
+                }
+            }
+
+
+        /// <summary> Event handler. Удаляем соответствующий объект при удалении
+        /// связанной фигуры. </summary>
+        ///
+        /// <remarks> Id, 16.08.2011. </remarks>
+        ///
+        /// <param name="shape"> Удаляемая фигура. </param>
+        private void visio_addin__BeforeShapeDelete( Microsoft.Office.Interop.Visio.Shape shape )
+            {
+            switch ( shape.Data1 )
+                {
+                case "750":
+                    if ( shape.Data2 == "860" )
+                        {
+                        if ( no_delete_g_pac_flag )
+                            {
+                            no_delete_g_pac_flag = false;
+                            }
+                        else
+                            {
+                            g_PAC = null;
+                            }
+                        }
+                    else  //	( shape.Data2 != "860" )
+                        {
+                        //	Удаление выбранного модуля из списка модулей
+                        g_PAC.current_module = g_PAC.get_io_modules().Find
+                            (
+                            delegate( io_module module )
+                                {
+                                return module.shape == shape;
+                                }
+                            );
+                        g_PAC.get_io_modules().Remove( g_PAC.current_module );
+                        }
+                    break;
+
+                case "V":
+                case "N":
+                case "MIX":
+                case "CTR":
+                case "TE":
+                case "QE":
+                case "LS":
+                case "LE":
+                case "FS":
+                case "FE":
+                case "FB":
+                case "UPR":
+                case "AI":
+                case "AO":
+                case "FQT":
+                case "WTE":
+                    cur_sel_dev = g_devices.Find( delegate( device dev )
+                        {
+                            return dev.get_shape() == shape;
+                        }
+                        );
+
+                    g_devices.Remove( cur_sel_dev );
+
+                    break;
+
+                case "TANK":
+                case "GREB":
+                    cur_sel_obj = g_objects.Find( delegate( T_Object obj )
+                        {
+                            return obj.get_shape() == shape;
+                        }
+                        );
+
+                    g_objects.Remove( cur_sel_obj );
+                    break;
+                }
+            }
 
         /// <summary> Event handler. Реализована обработка клика мыши
         /// в режиме выбора клеммы для привязки. </summary>
@@ -161,19 +609,19 @@ namespace visio_prj_designer
         private void visio_addin___MouseDown( int Button, int KeyButtonState, double x,
             double y, ref bool CancelDefault )
             {
-            if( is_selecting_clamp )
+            if ( is_selecting_clamp )
                 {
-                foreach( io_module module in g_PAC.get_io_modules() )
+                foreach ( io_module module in g_PAC.get_io_modules() )
                     {
                     int clamp = module.get_mouse_selection();
-                    if( clamp > -1 )
+                    if ( clamp > -1 )
                         {
                         g_PAC.unmark();
 
-                        current_selected_dev.set_channel( 
-                            current_selected_dev.get_active_channel(), module, clamp );
+                        cur_sel_dev.set_channel(
+                            cur_sel_dev.get_active_channel(), module, clamp );
 
-                        visio_addin__SelectionChanged( visio_app.Windows[ 
+                        visio_addin__SelectionChanged( visio_app.Windows[
                             ( short ) visio_addin.VISIO_WNDOWS.IO_EDIT ] );
 
                         visio_app.Windows[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].MouseMove -=
@@ -214,162 +662,21 @@ namespace visio_prj_designer
 
             try
                 {
-                if( is_selecting_clamp )
+                if ( is_selecting_clamp )
                     {
-                    foreach( io_module module in g_PAC.get_io_modules() )
+                    foreach ( io_module module in g_PAC.get_io_modules() )
                         {
                         module.magnify_on_mouse_move( x, y );
                         }
                     }
 
                 }
-            catch( System.Exception ex )
+            catch ( System.Exception ex )
                 {
                 MessageBox.Show( ex.Message );
                 }
             }
 
-        /// <summary> Event handler. Создание необходимых объектов при открытии
-        /// файла. </summary>
-        ///
-        /// <remarks> Id, 16.08.2011. </remarks>
-        ///
-        /// <param name="target"> Target for the. </param>
-        private void visio_addin__DocumentOpened( Visio.Document target )
-            {
-            if( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
-                {
-//                if( target.Template.Contains( "PTUSA project" ) )
-                    {
-                    vis_main_ribbon.show();
-
-					//	Создание списка доступных элементов
-					service_config = new service_data();
-					//for ( int i = 0; i < service_config.DI_modules.Count; i++ )
-					//    {
-					//    string ss = service_config.DI_modules[ 402 ];
-					//    }
-					
-try	
-	{												 					
-                    //Считывание устройств Wago.
-                    foreach( Visio.Shape shape in target.Pages[ "Wago" ].Shapes )
-                        {
-                        if( shape.Data1 == "750" && shape.Data2 == "860" )
-                            {
-                            string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
-                            string name = shape.Cells[ "Prop.PAC_name" ].Formula;
-
-                            g_PAC = new PAC( name.Substring( 1, name.Length - 2 ),
-                                ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
-
-                            }
-
-                        if( shape.Data1 == "750" && shape.Data2 != "860" )
-                            {
-                            g_PAC.add_io_module( shape );
-                            }
-                        }
-	}
-catch ( Exception err )
-	{
-	MessageBox.Show( "Ошибка считывания модулей WAGO" + err );
-	//throw;
-	}
-//-----------------------------------------------------------------------------
-					
-try
-	{
-					g_devices.Clear();
-
-                    //Считывание устройств.
-                    foreach( Visio.Shape shape in target.Pages[ "Устройства" ].Shapes )
-                        {
-                        switch ( shape.Data1 )
-							{
-							case "V":
-							case "N":
-							case "MIX":
-							case "CTR":
-							case "TE":
-							case "QE":
-							case "LS":
-							case "LE":
-							case "FS":
-							case "FE":
-							case "FB":
-							case "UPR":
-							case "AI":
-							case "AO":
-							case "FQT":
-							case "WTE":							
-							    g_devices.Add( new device( shape, g_PAC ) );
-								break;
-
-                            case "TANK":
-                                g_objects.Add( new T_Object( shape, g_PAC ) );
-                                break;
-                            }		//	switch ( shape.Data1 )	
-                        }		//	foreach
-	}
-catch ( Exception err )
-	{
-	System.Diagnostics.Debug.WriteLine( err.Message );
-	MessageBox.Show( "Ошибка считывания устройств проекта" );
-	//throw;
-	}
-//-----------------------------------------------------------------------------
-
-try
-	{
-					foreach ( Visio.Shape shape in target.Pages[ "Обмен сигналами" ].Shapes )
-						{
-						switch ( shape.Data1 )
-							{
-							case "FB":
-							case "UPR":
-							case "AI":
-							case "AO":
-								g_devices.Add( new device( shape, g_PAC ) );
-								break;
-							}		//	switch ( shape.Data1 )	
-						}		//	foreach
-	}
-catch ( Exception err )
-	{
-	System.Diagnostics.Debug.WriteLine( err.Message );
-	MessageBox.Show( "Ошибка считывания сигналов проекта" );
-	//throw;
-	}
-
-
-                    //  Открытие файла описания сложных объектов (гребенка, танк)
-                    Read_XML_description( 0 );
-
-                    }
-				//else
-				//    {
-				//    vis_main_ribbon.hide();
-				//    }
-                }
-            }
-
-        /// <summary> Предыдущее активное устройство (выделенное мышкой). </summary>
-        private device previous_selected_dev = null;
-        
-        /// <summary> Текущее активное устройство (выделенное мышкой). </summary>
-        internal device current_selected_dev = null;
-
-
-        /// <summary> Текущий активный объект (Гребенка или Танк). </summary>
-        internal T_Object current_selected_object = null;
-
-        /// <summary> Текущий режим. </summary>
-        internal int cur_mode;
-        
-        /// <summary> Текущий шаг. </summary>
-        internal int cur_step;
-       
 
         /// <summary> Event handler. Обработка изменения активного устройства 
         /// (подсветка клемм устройства и т.д.). </summary>
@@ -408,25 +715,25 @@ catch ( Exception err )
 							Microsoft.Office.Interop.Visio.Shape selected_shape =
 							    window.Selection[ 1 ];
 
-							current_selected_dev = g_devices.Find( delegate( device dev )
+							cur_sel_dev = g_devices.Find( delegate( device dev )
 							    {
 								return dev.get_shape() == selected_shape;
 								}
 							    );
 
-                            if( current_selected_dev != null )
+                            if( cur_sel_dev != null )
                                 {
-                                current_selected_dev.select_channels();
+                                cur_sel_dev.select_channels();
 
                                 //Обновление окна со свойствами привязки.
                                 edit_io_frm.listForm.enable_prop();
 
-                                current_selected_dev.refresh_edit_window(
+                                cur_sel_dev.refresh_edit_window(
                                     edit_io_frm.listForm.type_cbox,
                                     edit_io_frm.listForm.type_lview );                                                               
                                 }
 
-                            previous_selected_dev = current_selected_dev;
+                            previous_selected_dev = cur_sel_dev;
 
                             } //if( window.Selection.Count > 0 )
                         else
@@ -453,7 +760,7 @@ catch ( Exception err )
             else
                 {
                 //  Обычный режим работы
-                current_selected_object = null;
+                cur_sel_obj = null;
                 
                 Microsoft.Office.Interop.Visio.Shape selected_shape =
 				        window.Selection[ 1 ];
@@ -466,7 +773,7 @@ catch ( Exception err )
                         )
                    )
                     {
-                    current_selected_object = g_objects.Find( delegate( T_Object obj )
+                    cur_sel_obj = g_objects.Find( delegate( T_Object obj )
                         {
                         return obj.get_shape() == selected_shape;
                         }
@@ -584,7 +891,7 @@ catch ( Exception err )
 				case "FQT":
 				case "WTE":
                     //Поиск по shape объекта device.
-                    current_selected_dev = g_devices.Find( delegate( device dev )
+                    cur_sel_dev = g_devices.Find( delegate( device dev )
                     {
                         return dev.get_shape() == cell.Shape;
                     }
@@ -594,7 +901,7 @@ catch ( Exception err )
 						{
 						case "Prop.number":
 							int number = Convert.ToInt16( cell.Shape.Cells[ "Prop.number" ].Formula );
-							current_selected_dev.n = number;
+							cur_sel_dev.n = number;
 							break;
 
 						case "Prop.name":
@@ -602,11 +909,11 @@ catch ( Exception err )
 							str = str.Replace( "\"", "" );
                             cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
 
-                            current_selected_dev.name = str.ToUpper();
+                            cur_sel_dev.name = str.ToUpper();
 							break;
 
 						case "Prop.description":
-							current_selected_dev.description = cell.Shape.Cells[ "Prop.description" ].Formula;
+							cur_sel_dev.description = cell.Shape.Cells[ "Prop.description" ].Formula;
 							break;
 
 						case "Prop.type":	//	Тип устройства менять нельзя
@@ -617,12 +924,12 @@ catch ( Exception err )
 						case "Prop.sub_type":
 							int sub_type = Convert.ToInt16( cell.Shape.Cells[ "Prop.sub_type" ].Formula );
 
-							if ( current_selected_dev != null )
+							if ( cur_sel_dev != null )
 								{
-								if ( current_selected_dev.get_sub_type() != sub_type )
+								if ( cur_sel_dev.get_sub_type() != sub_type )
 									{
 									edit_io_frm.listForm.type_cbox.SelectedIndex = sub_type;
-									current_selected_dev.change_sub_type((device.SUB_TYPES)sub_type, g_PAC);
+									cur_sel_dev.change_sub_type((device.SUB_TYPES)sub_type, g_PAC);
 									}
 								}
 
@@ -635,7 +942,7 @@ catch ( Exception err )
                 case "TANK":
                 case "GREB":
                     //Поиск по shape объекта
-                    current_selected_object = g_objects.Find( delegate( T_Object obj )
+                    cur_sel_obj = g_objects.Find( delegate( T_Object obj )
                     {
                         return obj.get_shape() == cell.Shape;
                     }
@@ -649,14 +956,14 @@ catch ( Exception err )
                         case "Prop.description":
 							string str_name = cell.Shape.Cells[ "Prop.name" ].Formula;
 							str_name = str_name.Replace( "\"", "" );
-                            current_selected_object.name = str_name.ToUpper();
+                            cur_sel_obj.name = str_name.ToUpper();
 
                             string str_no = cell.Shape.Cells[ "Prop.number" ].Formula;
-                            current_selected_object.n = Convert.ToInt32( str_no );
+                            cur_sel_obj.n = Convert.ToInt32( str_no );
 
                             string str_discr = cell.Shape.Cells[ "Prop.description" ].Formula;
                             str_discr = str_discr.Replace( "\"", "" );
-                            current_selected_object.description = str_discr;
+                            cur_sel_obj.description = str_discr;
                             
                             if ( cell.Shape.Data1 == "GREB" )
                                 {
@@ -679,7 +986,7 @@ catch ( Exception err )
 
                 case "V":
                     //Поиск по shape объекта device.
-                    current_selected_dev = g_devices.Find( delegate( device dev )
+                    cur_sel_dev = g_devices.Find( delegate( device dev )
                     {
                         return dev.get_shape() == cell.Shape;
                     }
@@ -754,7 +1061,7 @@ catch ( Exception err )
 								cell.Shape.Name = str.ToUpper();		//	Переводим в верхний регистр
 								cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
 
-								current_selected_dev.name = str.ToUpper();
+								cur_sel_dev.name = str.ToUpper();
 								break;
 								}
 
@@ -764,7 +1071,7 @@ catch ( Exception err )
 							break;
 
 						case "Prop.description":
-							current_selected_dev.description = cell.Shape.Cells[ "Prop.description" ].Formula;
+							cur_sel_dev.description = cell.Shape.Cells[ "Prop.description" ].Formula;
 							break;
 
 						case "Prop.type":	//	Тип устройства менять нельзя
@@ -794,12 +1101,12 @@ catch ( Exception err )
 						case "Prop.sub_type":
 							int sub_type = Convert.ToInt16( cell.Shape.Cells[ "Prop.sub_type" ].Formula );
 
-							if ( current_selected_dev != null )
+							if ( cur_sel_dev != null )
 								{
-								if ( current_selected_dev.get_sub_type() != sub_type )
+								if ( cur_sel_dev.get_sub_type() != sub_type )
 									{
 									edit_io_frm.listForm.type_cbox.SelectedIndex = sub_type;
-									current_selected_dev.change_sub_type((device.SUB_TYPES)sub_type, g_PAC);
+									cur_sel_dev.change_sub_type((device.SUB_TYPES)sub_type, g_PAC);
 									}
 								}
 
@@ -870,304 +1177,6 @@ catch ( Exception err )
             }
 
 
-        private void visio_addin__ShapeExitedTextEdit( Microsoft.Office.Interop.Visio.Shape shape )
-            {
-            if ( shape.Text != shape.RootShape.Cells[ "Prop.name" ].Formula.Replace( "\"", "" ) )
-                {
-                shape.RootShape.Cells[ "Prop.name" ].FormulaU = "\"" + shape.Text + "\"";
-                }
-            }
-
-
-        /// <summary> Event handler. Удаляем соответствующий объект при удалении
-        /// связанной фигуры. </summary>
-        ///
-        /// <remarks> Id, 16.08.2011. </remarks>
-        ///
-        /// <param name="shape"> Удаляемая фигура. </param>
-        private void visio_addin__BeforeShapeDelete( Microsoft.Office.Interop.Visio.Shape shape )
-            {
-            switch( shape.Data1 )
-                {
-                case "750":
-                    if( shape.Data2 == "860" )
-                        {
-                        if( no_delete_g_pac_flag )
-                            {
-                            no_delete_g_pac_flag = false;
-                            }
-                        else
-                            {
-                            g_PAC = null;
-                            }
-                        }
-					else  //	( shape.Data2 != "860" )
-						{
-						//	Удаление выбранного модуля из списка модулей
-						g_PAC.current_module = g_PAC.get_io_modules().Find
-							( 
-							delegate( io_module module )
-								{
-								return module.shape == shape;
-								}
-							);
-							g_PAC.get_io_modules().Remove( g_PAC.current_module );
-						}
-                    break;
-
-				case "V":
-				case "N":
-				case "MIX":
-				case "CTR":
-				case "TE":
-				case "QE":
-				case "LS":
-				case "LE":
-				case "FS":
-				case "FE":
-				case "FB":
-				case "UPR":
-				case "AI":
-				case "AO":
-				case "FQT":
-				case "WTE":	
-					 current_selected_dev = g_devices.Find( delegate( device dev )
-                         {
-						 return dev.get_shape() == shape;
-						 }
-						 );
-
-					g_devices.Remove( current_selected_dev );
-
-					break;
-
-                case "TANK":
-                case "GREB":
-					 current_selected_object = g_objects.Find( delegate( T_Object obj )
-                         {
-						 return obj.get_shape() == shape;
-						 }
-						 );
-
-					g_objects.Remove( current_selected_object );	
-                    break;
-                }
-            }
-
-        #region Поля для реализации функциональности вставки сразу нескольких модулей Wago.
-
-        private bool is_duplicating = false;
-        private int duplicate_count = 0;
-
-        private Microsoft.Office.Interop.Visio.Shape old_shape;
-        private Microsoft.Office.Interop.Visio.Shape new_shape;
-
-        private bool no_delete_g_pac_flag = false;
-        
-        #endregion
-
-        /// <summary> Event handler. Обработка события добавления фигуры. Здесь
-        /// реализована часть функциональности вставки сразу нескольких модулей 
-        /// Wago. </summary>
-        ///
-        /// <remarks> Id, 16.08.2011. </remarks>
-        ///
-        /// <param name="shape"> Добавляемая фигура. </param>
-        private void visio_addin__ShapeAdded( Microsoft.Office.Interop.Visio.Shape shape )
-            {
-            //Проверяем, нужный ли нам объект мы добавляем на лист. Выводим окно
-            //с запросом количества элементов. Помещаем на форму первый элемент,
-            //остальные приклеиваем к нему путем дублирования вставляемого 
-            //элемента.
-
-            if( is_duplicating )
-                {
-
-                duplicate_count--;
-                if( duplicate_count <= 0 )
-                    {
-                    is_duplicating = false;
-                    }
-
-                return;
-                }
-
-			switch ( shape.Data1 )
-				{
-				case "750":
-					if ( shape.Data2 == "860" )
-						{
-						if ( g_PAC == null )
-							{
-							string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
-							string name = shape.Cells[ "Prop.PAC_name" ].Formula;
-
-							g_PAC = new PAC( name.Substring( 1, name.Length - 2 ),
-								ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
-							}
-						else
-							{
-							no_delete_g_pac_flag = true;
-							MessageBox.Show( "Только один контроллер может быть в проекте!" );
-							shape.DeleteEx( 0 );
-							}
-
-						return;
-						}
-					else	 
-						{
-						//	if ( shape.Data2 != "860" )
-
-						modules_count_enter modules_count_enter_form = new modules_count_enter();
-						modules_count_enter_form.ShowDialog();
-						duplicate_count = modules_count_enter_form.modules_count - 1;
-
-						////////////////////////////
-
-						//	Нужно будет доработать
-						//	Проверка составленого списка модулей (LB_modules) 
-						//		с имеющимся списком объектов g_PAC.io_modules
-						//	g_PAC.insert_io_module( index, shape ); для недостоющих
-
-						////////////////////////////
-			
-						shape.Cells[ "Prop.type" ].FormulaU	= modules_count_enter_form.modules_type;
-						shape.Shapes[ "type_str" ].Text		= modules_count_enter_form.modules_type;
-
-						g_PAC.add_io_module( shape );
-
-						for ( int i = 0; i < duplicate_count; i++ )
-							{
-							is_duplicating = true;
-							new_shape = shape.Duplicate();
-							old_shape = shape;
-
-							string str_x = string.Format( 
-								"PNTX(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+6 mm",
-							    old_shape.Name );
-
-							string str_y = string.Format( 
-								"PNTY(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+-47 mm",
-							    old_shape.Name );
-
-							new_shape.Cells[ "PinX" ].Formula = str_x;
-							new_shape.Cells[ "PinY" ].Formula = str_y;
-
-							shape = new_shape;
-
-							g_PAC.add_io_module( shape );
-
-							shape.Cells[ "Prop.type" ].FormulaU = modules_count_enter_form.modules_type;
-							shape.Shapes[ "type_str" ].Text		= modules_count_enter_form.modules_type;
-
-							visio_addin__FormulaChanged( shape.Cells[ "Prop.type" ] );
-							}
-						}
-					break;
-
-				case "V":
-				case "N":
-				case "MIX":
-				case "CTR":
-				case "TE":
-				case "QE":
-				case "LS":
-				case "LE":
-				case "FS":
-				case "FE":
-				case "FB":
-				case "UPR":
-				case "AI":
-				case "AO":
-				case "FQT":
-				case "WTE":
-					g_devices.Add( new device( shape, g_PAC ) );
-					break;
-
-				case "TANK":
-                case "GREB":
-				    g_objects.Add( new T_Object( shape, g_PAC ) );
-				    break;
-				}	//	switch ( shape.Data1 ) 
-
-            }
-
-		/// <summary> Event handler.  </summary>
-		///
-		/// <remarks> ASV, 23.08.2011. </remarks>
-		///
-		/// <param name="shape"> Редактируемая фигура. </param>
-		private void visio_addin__ShapeChanged(Microsoft.Office.Interop.Visio.Shape shape)
-		{
-			switch (shape.Data1)
-			{
-				//case "750":
-				//    if (shape.Data2 == "860")
-				//    {
-				//        if (no_delete_g_pac_flag)
-				//        {
-				//            no_delete_g_pac_flag = false;
-				//        }
-				//        else
-				//        {
-				//            g_PAC = null;
-				//        }
-				//    }
-				//    break;
-
-				case "V":
-				case "N":
-				case "MIX":
-				case "CTR":
-				case "TE":
-				case "QE":
-				case "LS":
-				case "LE":
-				case "FS":
-				case "FE":
-				case "FB":
-				case "UPR":
-				case "AI":
-				case "AO":
-				case "FQT":
-				case "WTE":	
-
-					//Поиск по shape объекта device.
-					//int dev_n = Convert.ToInt16(shape.Cells["Prop.number"].FormulaU);
-					//int dev_type = Convert.ToInt16(shape.Cells["Prop.type"].FormulaU);
-
-					current_selected_dev = g_devices.Find(delegate(device dev)
-						{
-						//return dev.get_n() == dev_n && dev.get_type() == dev_type;
-						return dev.get_shape() == shape;
-						}
-						);
-
-					//g_devices[ current_selected_dev ];
-
-					break;
-			}
-		}
-
-        /// <summary> Event handler. При создании документа показываем полосу 
-        /// работы с техпроцессом. </summary>
-        ///
-        /// <remarks> Id, 16.08.2011. </remarks>
-        ///
-        /// <param name="doc"> Created document. </param>
-        private void visio_addin__DocumentCreated( Microsoft.Office.Interop.Visio.Document doc )
-            {
-            if( doc.Template.Contains( "PTUSA project" ) )
-                {
-                vis_main_ribbon.show();
-                }
-            else
-                {
-                vis_main_ribbon.hide();
-                }
-            }
-
-
         /// <summary> Загрузка данных класса из файла описания </summary>
         /// <remarks> asvovik, 21.09.2011. </remarks>
         ///
@@ -1178,142 +1187,199 @@ catch ( Exception err )
             XmlTextReader tr = new XmlTextReader( fileName );
 
             while (     !tr.EOF
-                    &&  tr.Read()    
+                    &&  tr.Read()
                   )
                 {
-
-                string temp_name;
-                int temp_no;
-
-                switch ( tr.Name )
+                if ( tr.NodeType != XmlNodeType.EndElement )
                     {
-                    case "object":
-                        temp_name = tr.GetAttribute( "object-name" );
-                        temp_no = Convert.ToInt32( tr.GetAttribute( "object-number" ) );
+                    string temp_name;
+                    int temp_no;
 
-                        //  Объекты уже были прочитаны, нужно только найти среди них текущий
-                        current_selected_object = g_objects.Find( delegate( T_Object obj )
-                            {
-                                return obj.get_n() == temp_no && obj.get_name() == temp_name; 
-                            }
-                            );
-                    	break;
+                    switch ( tr.Name )
+                        {
+                        case "object":
+                            temp_name = tr.GetAttribute( "object-name" ).Replace( "\"", "" );
+                            temp_no = Convert.ToInt32( tr.GetAttribute( "object-number" ) );
 
-                    case "mode":
-                        temp_name = tr.GetAttribute( "mode-name" );
-                        temp_no = Convert.ToInt32( tr.GetAttribute( "mode-number" ) );
-                        
-                        if ( current_selected_object != null )
-                            {
-                            //  Создаем новый режим
-                            T_Object.mode temp_mode = new T_Object.mode();
-                            //  Устанавлеиваем его атрибуты
-                            temp_mode.set_attribute( temp_no, temp_name );
-
-                            //  Добавляем в список режимамов
-                            current_selected_object.mode_mas.Add( temp_mode );
-
-                            //  Фиксируем номер текущего режима для дальнейших обращений к нему
-                            cur_mode = temp_no;
-                            }
-                        break;
-
-                    case "step":
-                        temp_name = tr.GetAttribute( "step-name" );
-                        temp_no = Convert.ToInt32( tr.GetAttribute( "step-number" ) );
-
-                        if ( current_selected_object != null )
-                            {
-                            //  Создаем новый режим
-                            T_Object.mode temp_step = new T_Object.mode();
-                            //  Устанавлеиваем его атрибуты
-                            temp_step.set_attribute( temp_no, temp_name );
-
-                            //  Добавляем в список режимамов
-                            current_selected_object.mode_mas[ cur_mode ].step.Add( temp_step );
-
-                            //  Фиксируем номер текущего режима для дальнейших обращений к нему
-                            cur_step = temp_no;
-                            }
-                    	break;
-
-                    case "on_device":
-                        try
-                            {
-                            do
+                            //  Объекты уже были прочитаны, нужно только найти среди них текущий
+                            cur_sel_obj = g_objects.Find( delegate( T_Object obj )
                                 {
-                                tr.Read();
+                                    return obj.get_n() == temp_no && obj.get_name() == temp_name;
+                                }
+                                );
+                            break;
 
-                                if (    tr.NodeType != XmlNodeType.EndElement
-                                    &&  tr.NodeType != XmlNodeType.Whitespace
-                                    &&  tr.NodeType != XmlNodeType.Text  )
+                        case "mode":
+                            temp_name = tr.GetAttribute( "mode-name" );
+                            temp_no = Convert.ToInt32( tr.GetAttribute( "mode-number" ) );
+
+                            if ( cur_sel_obj != null )
+                                {
+                                //  Создаем новый режим
+                                T_Object.mode temp_mode = new T_Object.mode();
+
+                                //  Устанавлеиваем его атрибуты
+                                temp_mode.set_attribute( temp_no, temp_name );
+
+                                //  Добавляем в список режимов
+                                cur_sel_obj.mode_mas.Add( temp_mode );
+
+                                //  Фиксируем номер текущего режима для дальнейших обращений к нему
+                                cur_mode = temp_no;
+                                cur_step = -1;
+                                }
+                            break;
+
+                        case "step":
+                            temp_name = tr.GetAttribute( "step-name" );
+                            temp_no = Convert.ToInt32( tr.GetAttribute( "step-number" ) );
+
+                            if ( cur_sel_obj != null )
+                                {
+                                //  Создаем новый шаг
+                                T_Object.mode temp_step = new T_Object.mode();
+
+                                //  Устанавлеиваем его атрибуты
+                                temp_step.set_attribute( temp_no, temp_name );
+
+                                //  Добавляем в список режимов
+                                cur_sel_obj.mode_mas[ cur_mode ].step.Add( temp_step );
+
+                                //  Фиксируем номер текущего режима для дальнейших обращений к нему
+                                cur_step = temp_no;
+                                }
+                            break;
+
+                        case "on_device":
+                            try
+                                {
+                                do
                                     {
-                                    //  Остается только список имен устройств
-                                    temp_name = tr.Name;
+                                    if ( tr.IsEmptyElement == true ) break;
 
-                                    //  Ищем устройство с прочитанным именем
-                                    current_selected_dev = g_devices.Find( delegate( device dev )
+                                    tr.Read();
+
+                                    if ( tr.NodeType == XmlNodeType.Text )
                                         {
-                                            return dev.get_name() == temp_name;
+                                        //  Остается только список имен устройств
+                                        temp_name = tr.Value;
+
+                                        //  Ищем устройство с прочитанным именем
+                                        cur_sel_dev = g_devices.Find( delegate( device dev )
+                                            {
+                                                return dev.get_name() == temp_name;
+                                            }
+                                            );
+
+                                        //  Если есть такое устройство, то добавляем указатель на него в соотв. список
+                                        if ( cur_sel_obj != null
+                                            && cur_sel_dev != null )
+                                            {
+                                            if ( cur_step >= 0 )
+                                                {
+                                                cur_sel_obj.mode_mas[ cur_mode ].step[ cur_step ].
+                                                    on_device.Add( cur_sel_dev );
+                                                }
+                                            else
+                                                {
+                                                cur_sel_obj.mode_mas[ cur_mode ].on_device.Add( cur_sel_dev );
+                                                }
+                                            }
                                         }
-                                        );
-
-                                    //  Если есть такое устройство, то добавляем указатель на него в соотв. список
-                                    if (    current_selected_object != null 
-                                        &&  current_selected_dev != null )
-                                        {
-                                        current_selected_object.mode_mas[ cur_mode ].on_device.Add( current_selected_dev );
-                                        }    
                                     }
+                                while ( tr.Name != "on_device" );   //  EndElement
+
                                 }
-                            while ( tr.Name != "on_device" );   //  EndElement
-
-                            }
-                        catch ( Exception err )
-                            {
-                            MessageBox.Show( "Ошибка сохраниния описания режимов объектов \n" + err );
-                            }
-                        break;
+                            catch ( Exception err )
+                                {
+                                MessageBox.Show( "Ошибка чтения описания (on_device) \n" + err );
+                                }
+                            break;
 
 
-                    case "off_device":
-                        
-                        //tr.ReadElementContentAs();
-                        
-                        break;
-
-                    case "Parameters":
-                        if ( current_selected_object != null )
-                            {
-
-                            string[] temp_str = { "0", "0" };
-
-                            do {
-                                tr.Read();
-
-                                switch ( tr.NodeType )
+                        case "off_device":
+                            try
+                                {
+                                do
                                     {
-                                    case XmlNodeType.Element:
-                                        temp_str[ 0 ] = tr.Name;
-                                        break;
+                                    if ( tr.IsEmptyElement == true ) break;
 
-                                    case XmlNodeType.Text:
-                                        temp_str[ 1 ] = tr.Value;
-                                        current_selected_object.param_list.Add( temp_str );
+                                    tr.Read();
 
-                                        temp_str = new string[2];
-                                        temp_str[ 0 ] = "0";
-                                        temp_str[ 1 ] = "0";
-                                        break;
+                                    if ( tr.NodeType == XmlNodeType.Text )
+                                        {
+                                        //  Остается только список имен устройств
+                                        temp_name = tr.Value;
+
+                                        //  Ищем устройство с прочитанным именем
+                                        cur_sel_dev = g_devices.Find( delegate( device dev )
+                                            {
+                                                return dev.get_name() == temp_name;
+                                            }
+                                            );
+
+                                        //  Если есть такое устройство, то добавляем указатель на него в соотв. список
+                                        if ( cur_sel_obj != null
+                                            && cur_sel_dev != null )
+                                            {
+                                            if ( cur_step >= 0 )
+                                                {
+                                                cur_sel_obj.mode_mas[ cur_mode ].step[ cur_step ].
+                                                    off_device.Add( cur_sel_dev );
+                                                }
+                                            else
+                                                {
+                                                cur_sel_obj.mode_mas[ cur_mode ].off_device.Add( cur_sel_dev );
+                                                }
+                                            }
+                                        }
                                     }
+                                while ( tr.Name != "off_device" );   //  EndElement
 
                                 }
-                            while ( tr.Name != "Parameters" );   //  EndElement
-                            }
+                            catch ( Exception err )
+                                {
+                                MessageBox.Show( "Ошибка чтения описания (off_device) \n" + err );
+                                }
+                            break;
 
-                        break;
+                        case "Parameters":
+                            if ( cur_sel_obj != null )
+                                {
 
-                    }   //  switch
+                                string[] temp_str = { "0", "0" };
+
+                                do
+                                    {
+                                    if ( tr.IsEmptyElement == true ) break;
+
+                                    tr.Read();
+
+                                    switch ( tr.NodeType )
+                                        {
+                                        case XmlNodeType.Element:
+                                            temp_str[ 0 ] = tr.Name;
+                                            //                                        string sss = tr.Name;
+                                            break;
+
+                                        case XmlNodeType.Text:
+                                            temp_str[ 1 ] = tr.Value;
+                                            cur_sel_obj.param_list.Add( temp_str );
+
+                                            temp_str = new string[ 2 ];
+                                            temp_str[ 0 ] = "0";
+                                            temp_str[ 1 ] = "0";
+                                            break;
+                                        }
+
+                                    }
+                                while ( tr.Name != "Parameters" );   //  EndElement
+                                }
+
+                            break;
+
+                        }   //  switch
+                    }   //  if
                 }   //  while
             }
 
@@ -1343,6 +1409,13 @@ try
                     tw.WriteStartElement( "object" );
                     tw.WriteAttributeString( "object-name", g_objects[ i ].name );
                     tw.WriteAttributeString( "object-number", Convert.ToString( g_objects[ i ].n ) );
+
+                    tw.WriteStartElement( "Parameters" );
+                    for ( int j = 0; j < g_objects[ i ].param_list.Count; j++ )
+                        {
+                        tw.WriteElementString( g_objects[ i ].param_list[ j ][ 0 ], g_objects[ i ].param_list[ j ][ 1 ] );
+                        }
+                    tw.WriteEndElement();   //  Parameters
 
                     foreach ( T_Object.mode temp_mode in g_objects[ i ].mode_mas )
                         {                                                
@@ -1435,7 +1508,7 @@ catch ( Exception err )
         public void write_device_list( XmlTextWriter tw, T_Object.mode temp_mode )
             {
             tw.WriteStartElement( "on_device" );
-            for ( int k = 1; k <= temp_mode.on_device.Count; k++ )
+            for ( int k = 0; k < temp_mode.on_device.Count; k++ )
                 {
                 //  Проверяем есть ли это устройство еще на схеме
                 if ( g_devices.Contains( temp_mode.on_device[ k ] ) )
@@ -1452,7 +1525,7 @@ catch ( Exception err )
             tw.WriteEndElement();
 
             tw.WriteStartElement( "off_device" );
-            for ( int k = 1; k <= temp_mode.off_device.Count; k++ )
+            for ( int k = 0; k < temp_mode.off_device.Count; k++ )
                 {
                 //  Проверяем есть ли это устройство еще на схеме
                 if ( g_devices.Contains( temp_mode.off_device[ k ] ) )
@@ -1485,7 +1558,6 @@ catch ( Exception err )
                 }
 
             }
-
 
 
         #region VSTO generated code

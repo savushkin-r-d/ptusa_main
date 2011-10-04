@@ -59,6 +59,8 @@ namespace tech_device
 
                 on_device = new List<device>();
                 off_device = new List<device>();
+
+                step = new List<mode>();
                 }
             }
 

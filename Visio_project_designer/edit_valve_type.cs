@@ -212,7 +212,7 @@ namespace visio_prj_designer
                         
 
             // Выделяем задействованные устройством клеммы.
-            Globals.visio_addin.current_selected_dev.select_channels();
+            Globals.visio_addin.cur_sel_dev.select_channels();
 
 
             Globals.visio_addin.is_selecting_clamp = true;
@@ -227,28 +227,28 @@ namespace visio_prj_designer
             {
             if( type_lview.SelectedItems.Count > 0 )
                 {
-                Globals.visio_addin.current_selected_dev.set_active_channel(
+                Globals.visio_addin.cur_sel_dev.set_active_channel(
                     type_lview.SelectedItems[ 0 ].Text );                
                 }
             else
                 {
-                Globals.visio_addin.current_selected_dev.set_active_channel( "" );
+                Globals.visio_addin.cur_sel_dev.set_active_channel( "" );
                 }
 
-            Globals.visio_addin.current_selected_dev.select_channels();
+            Globals.visio_addin.cur_sel_dev.select_channels();
             }
 
         private void type_cbox__SelectedIndexChanged( object sender, EventArgs e )
             {
-            if( Globals.visio_addin.current_selected_dev.get_sub_type() != 
+            if( Globals.visio_addin.cur_sel_dev.get_sub_type() != 
                 type_cbox.SelectedIndex )
                 {
-                Globals.visio_addin.current_selected_dev.change_sub_type(
+                Globals.visio_addin.cur_sel_dev.change_sub_type(
                     ( device.SUB_TYPES ) type_cbox.SelectedIndex, Globals.visio_addin.g_PAC );
 
-                Globals.visio_addin.current_selected_dev.refresh_edit_window(
+                Globals.visio_addin.cur_sel_dev.refresh_edit_window(
                     type_cbox, type_lview, true );
-                Globals.visio_addin.current_selected_dev.select_channels();
+                Globals.visio_addin.cur_sel_dev.select_channels();
                 }
 
             }
