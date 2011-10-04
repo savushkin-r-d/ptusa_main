@@ -1389,7 +1389,7 @@ namespace visio_prj_designer
         /// <param name="XML"> I don't now </param>
         public void Write_XML_description( string doc_name )
             {
-            string fileName="..\\Visio docs\\Export.xml";
+            string fileName="..\\Visio docs\\description_device.xml";
 
             XmlTextWriter tw = new XmlTextWriter( fileName, null );
 

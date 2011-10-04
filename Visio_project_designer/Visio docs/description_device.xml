@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<application application-name="wago description">
+  <project project-name="Документ1.vsd">
+    <object object-name="&quot;Сыворотка_аааа&quot;" object-number="2">
+      <Parameters>
+        <Пар_2>2</Пар_2>
+        <Пар_11>11</Пар_11>
+      </Parameters>
+      <mode mode-name="first" mode-number="0">
+        <on_device />
+        <off_device />
+        <step step-name="ffffffff" step-number="0">
+          <on_device />
+          <off_device />
+        </step>
+        <step step-name="ssssssss" step-number="1">
+          <on_device />
+          <off_device />
+        </step>
+      </mode>
+      <mode mode-name="second" mode-number="1">
+        <on_device />
+        <off_device />
+        <step step-name="" step-number="0">
+          <on_device />
+          <off_device />
+        </step>
+      </mode>
+    </object>
+    <object object-name="&quot;Grebenka&quot;" object-number="1">
+      <Parameters>
+        <Параметр_1>0</Параметр_1>
+        <Параметр_2>2</Параметр_2>
+      </Parameters>
+      <mode mode-name="first" mode-number="0">
+        <on_device>
+          <V>V1</V>
+        </on_device>
+        <off_device>
+          <V>V5</V>
+        </off_device>
+        <step step-name="ffffffff" step-number="0">
+          <on_device>
+            <V>M3V11</V>
+            <V>N12</V>
+          </on_device>
+          <off_device />
+        </step>
+        <step step-name="ssssssss" step-number="1">
+          <on_device />
+          <off_device />
+        </step>
+      </mode>
+      <mode mode-name="second" mode-number="1">
+        <on_device />
+        <off_device />
+        <step step-name="hello" step-number="0">
+          <on_device />
+          <off_device />
+        </step>
+      </mode>
+    </object>
+  </project>
+</application>
