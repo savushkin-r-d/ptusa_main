@@ -156,8 +156,6 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
         return -102;
         }
 
-    //Print( "Received - %d\n", res );
-
     node->last_poll_time = get_sec( );
 
     return 0;

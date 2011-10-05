@@ -1010,11 +1010,16 @@ int DO_1_DI_1::get_state_now()
     //Для клапана с контролем закрытого состояния.
     if ( has_params() )
         {
-        if ( ( get_par( C_FB_CHECK_TYPE ) != 0 && o == i ) ||
-            ( get_par( C_FB_CHECK_TYPE ) == 0 && o != i )  )
+        if ( get_par( C_FB_CHECK_TYPE ) != 0 && o == i )
             {
             start_switch_time = get_sec();
             return i;
+            }
+
+        if ( get_par( C_FB_CHECK_TYPE ) == 0 && o != i )
+            {
+            start_switch_time = get_sec();
+            return !i;
             }
         }
     else
@@ -1032,6 +1037,11 @@ int DO_1_DI_1::get_state_now()
         }
     else
         {
+         if ( has_params() && get_par( C_FB_CHECK_TYPE ) == 0 )
+            {            
+            return !i;
+            }
+
         return i;
         }
     }
