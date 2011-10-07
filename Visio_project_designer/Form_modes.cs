@@ -30,7 +30,7 @@ namespace Visio_project_designer
                  
         private void Form_modes_Shown( object sender, EventArgs e )
             {
-            //System.Windows.Forms.ListViewItem item;
+            this.Text = "Данные объекта " + addin.cur_sel_obj.get_name();
 
             //  Заполнение списка режимов и шагов для выбранного объекта
             treeView_modes.Nodes.Clear();
@@ -44,7 +44,6 @@ namespace Visio_project_designer
                 for ( int j = 0; j < addin.cur_sel_obj.mode_mas[ i ].step.Count; j++ )
                     {
                     temp_node.Nodes.Add(
-//                    treeView_modes.Nodes.Add( 
                         Convert.ToString( addin.cur_sel_obj.mode_mas[ i ].step[ j ].no ) + 
                         ". " + addin.cur_sel_obj.mode_mas[ i ].step[ j ].name );
                     }

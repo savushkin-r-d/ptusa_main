@@ -39,42 +39,68 @@
             System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode( "Node4", new System.Windows.Forms.TreeNode[] {
             treeNode5} );
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            this.listBox_open = new System.Windows.Forms.ListBox();
-            this.listBox_close = new System.Windows.Forms.ListBox();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.treeView_modes = new System.Windows.Forms.TreeView();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.number = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.par_name = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.val = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataSet1 = new System.Data.DataSet();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.tabControl2 = new System.Windows.Forms.TabControl();
+            this.Page_dev = new System.Windows.Forms.TabPage();
+            this.Page_sign = new System.Windows.Forms.TabPage();
+            this.listBox4 = new System.Windows.Forms.ListBox();
+            this.listBox2 = new System.Windows.Forms.ListBox();
+            this.listBox3 = new System.Windows.Forms.ListBox();
+            this.listBox1 = new System.Windows.Forms.ListBox();
+            this.listBox_open = new System.Windows.Forms.ListBox();
+            this.listBox_close = new System.Windows.Forms.ListBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
+            this.dataGridView2 = new System.Windows.Forms.DataGridView();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.listBox5 = new System.Windows.Forms.ListBox();
+            this.listBox6 = new System.Windows.Forms.ListBox();
+            this.listBox7 = new System.Windows.Forms.ListBox();
+            this.listBox8 = new System.Windows.Forms.ListBox();
+            this.listBox9 = new System.Windows.Forms.ListBox();
+            this.listBox10 = new System.Windows.Forms.ListBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
+            this.label14 = new System.Windows.Forms.Label();
+            this.listBox11 = new System.Windows.Forms.ListBox();
+            this.label15 = new System.Windows.Forms.Label();
             ( ( System.ComponentModel.ISupportInitialize ) ( this.dataGridView1 ) ).BeginInit();
-            ( ( System.ComponentModel.ISupportInitialize ) ( this.dataSet1 ) ).BeginInit();
             ( ( System.ComponentModel.ISupportInitialize ) ( this.numericUpDown1 ) ).BeginInit();
+            this.tabControl1.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
+            this.tabControl2.SuspendLayout();
+            this.Page_dev.SuspendLayout();
+            this.Page_sign.SuspendLayout();
+            ( ( System.ComponentModel.ISupportInitialize ) ( this.numericUpDown2 ) ).BeginInit();
+            ( ( System.ComponentModel.ISupportInitialize ) ( this.dataGridView2 ) ).BeginInit();
             this.SuspendLayout();
-            // 
-            // listBox_open
-            // 
-            this.listBox_open.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right ) ) );
-            this.listBox_open.FormattingEnabled = true;
-            this.listBox_open.Location = new System.Drawing.Point( 506, 0 );
-            this.listBox_open.Name = "listBox_open";
-            this.listBox_open.Size = new System.Drawing.Size( 253, 134 );
-            this.listBox_open.TabIndex = 0;
-            // 
-            // listBox_close
-            // 
-            this.listBox_close.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right ) ) );
-            this.listBox_close.FormattingEnabled = true;
-            this.listBox_close.Location = new System.Drawing.Point( 506, 140 );
-            this.listBox_close.Name = "listBox_close";
-            this.listBox_close.Size = new System.Drawing.Size( 253, 147 );
-            this.listBox_close.TabIndex = 1;
             // 
             // treeView_modes
             // 
-            this.treeView_modes.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left )
+            this.treeView_modes.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
+                        | System.Windows.Forms.AnchorStyles.Left )
                         | System.Windows.Forms.AnchorStyles.Right ) ) );
             this.treeView_modes.Location = new System.Drawing.Point( 2, 0 );
             this.treeView_modes.Name = "treeView_modes";
@@ -93,20 +119,24 @@
             this.treeView_modes.Nodes.AddRange( new System.Windows.Forms.TreeNode[] {
             treeNode4,
             treeNode6} );
-            this.treeView_modes.Size = new System.Drawing.Size( 500, 287 );
+            this.treeView_modes.Size = new System.Drawing.Size( 273, 581 );
             this.treeView_modes.TabIndex = 3;
             this.treeView_modes.AfterSelect += new System.Windows.Forms.TreeViewEventHandler( this.treeView_modes_AfterSelect );
             // 
             // dataGridView1
             // 
+            this.dataGridView1.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
+                        | System.Windows.Forms.AnchorStyles.Left )
+                        | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.dataGridView1.BackgroundColor = System.Drawing.SystemColors.ControlDark;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridView1.Columns.AddRange( new System.Windows.Forms.DataGridViewColumn[] {
             this.number,
             this.par_name,
             this.val} );
-            this.dataGridView1.Location = new System.Drawing.Point( 2, 293 );
+            this.dataGridView1.Location = new System.Drawing.Point( 1, 29 );
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size( 500, 286 );
+            this.dataGridView1.Size = new System.Drawing.Size( 492, 148 );
             this.dataGridView1.TabIndex = 5;
             this.dataGridView1.CellEnter += new System.Windows.Forms.DataGridViewCellEventHandler( this.dataGridView1_CellEnter );
             // 
@@ -130,13 +160,9 @@
             this.val.HeaderText = "Значение по умолчанию";
             this.val.Name = "val";
             // 
-            // dataSet1
-            // 
-            this.dataSet1.DataSetName = "NewDataSet";
-            // 
             // numericUpDown1
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point( 654, 294 );
+            this.numericUpDown1.Location = new System.Drawing.Point( 139, 6 );
             this.numericUpDown1.Name = "numericUpDown1";
             this.numericUpDown1.Size = new System.Drawing.Size( 49, 20 );
             this.numericUpDown1.TabIndex = 6;
@@ -145,46 +171,463 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point( 518, 296 );
+            this.label1.Location = new System.Drawing.Point( 3, 8 );
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size( 130, 13 );
             this.label1.TabIndex = 7;
             this.label1.Text = "Количество параметров";
             // 
+            // tabControl1
+            // 
+            this.tabControl1.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
+                        | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.tabControl1.Controls.Add( this.tabPage1 );
+            this.tabControl1.Controls.Add( this.tabPage2 );
+            this.tabControl1.Location = new System.Drawing.Point( 279, 372 );
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size( 504, 211 );
+            this.tabControl1.TabIndex = 9;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.BackColor = System.Drawing.Color.LightSkyBlue;
+            this.tabPage1.Controls.Add( this.label1 );
+            this.tabPage1.Controls.Add( this.numericUpDown1 );
+            this.tabPage1.Controls.Add( this.dataGridView1 );
+            this.tabPage1.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.tabPage1.Location = new System.Drawing.Point( 4, 22 );
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding( 3 );
+            this.tabPage1.Size = new System.Drawing.Size( 496, 185 );
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "Сбрасываемые параметры";
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.BackColor = System.Drawing.SystemColors.HighlightText;
+            this.tabPage2.Controls.Add( this.label2 );
+            this.tabPage2.Controls.Add( this.numericUpDown2 );
+            this.tabPage2.Controls.Add( this.dataGridView2 );
+            this.tabPage2.Location = new System.Drawing.Point( 4, 22 );
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding( 3 );
+            this.tabPage2.Size = new System.Drawing.Size( 496, 185 );
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "Сохраняемые параметры";
+            // 
+            // tabControl2
+            // 
+            this.tabControl2.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.tabControl2.Controls.Add( this.Page_dev );
+            this.tabControl2.Controls.Add( this.Page_sign );
+            this.tabControl2.Location = new System.Drawing.Point( 280, 0 );
+            this.tabControl2.Name = "tabControl2";
+            this.tabControl2.SelectedIndex = 0;
+            this.tabControl2.Size = new System.Drawing.Size( 503, 370 );
+            this.tabControl2.TabIndex = 3;
+            // 
+            // Page_dev
+            // 
+            this.Page_dev.Controls.Add( this.label8 );
+            this.Page_dev.Controls.Add( this.label7 );
+            this.Page_dev.Controls.Add( this.label6 );
+            this.Page_dev.Controls.Add( this.label5 );
+            this.Page_dev.Controls.Add( this.label4 );
+            this.Page_dev.Controls.Add( this.label3 );
+            this.Page_dev.Controls.Add( this.listBox4 );
+            this.Page_dev.Controls.Add( this.listBox2 );
+            this.Page_dev.Controls.Add( this.listBox3 );
+            this.Page_dev.Controls.Add( this.listBox1 );
+            this.Page_dev.Controls.Add( this.listBox_open );
+            this.Page_dev.Controls.Add( this.listBox_close );
+            this.Page_dev.Location = new System.Drawing.Point( 4, 22 );
+            this.Page_dev.Name = "Page_dev";
+            this.Page_dev.Padding = new System.Windows.Forms.Padding( 3 );
+            this.Page_dev.Size = new System.Drawing.Size( 495, 344 );
+            this.Page_dev.TabIndex = 0;
+            this.Page_dev.Text = "Устройства";
+            this.Page_dev.UseVisualStyleBackColor = true;
+            // 
+            // Page_sign
+            // 
+            this.Page_sign.Controls.Add( this.label9 );
+            this.Page_sign.Controls.Add( this.label10 );
+            this.Page_sign.Controls.Add( this.label11 );
+            this.Page_sign.Controls.Add( this.label15 );
+            this.Page_sign.Controls.Add( this.label12 );
+            this.Page_sign.Controls.Add( this.label13 );
+            this.Page_sign.Controls.Add( this.label14 );
+            this.Page_sign.Controls.Add( this.listBox5 );
+            this.Page_sign.Controls.Add( this.listBox6 );
+            this.Page_sign.Controls.Add( this.listBox7 );
+            this.Page_sign.Controls.Add( this.listBox8 );
+            this.Page_sign.Controls.Add( this.listBox9 );
+            this.Page_sign.Controls.Add( this.listBox11 );
+            this.Page_sign.Controls.Add( this.listBox10 );
+            this.Page_sign.Location = new System.Drawing.Point( 4, 22 );
+            this.Page_sign.Name = "Page_sign";
+            this.Page_sign.Padding = new System.Windows.Forms.Padding( 3 );
+            this.Page_sign.Size = new System.Drawing.Size( 495, 344 );
+            this.Page_sign.TabIndex = 1;
+            this.Page_sign.Text = "Сигналы";
+            this.Page_sign.UseVisualStyleBackColor = true;
+            // 
+            // listBox4
+            // 
+            this.listBox4.FormattingEnabled = true;
+            this.listBox4.Location = new System.Drawing.Point( 246, 244 );
+            this.listBox4.Name = "listBox4";
+            this.listBox4.Size = new System.Drawing.Size( 240, 95 );
+            this.listBox4.TabIndex = 5;
+            // 
+            // listBox2
+            // 
+            this.listBox2.FormattingEnabled = true;
+            this.listBox2.Location = new System.Drawing.Point( 246, 132 );
+            this.listBox2.Name = "listBox2";
+            this.listBox2.Size = new System.Drawing.Size( 240, 95 );
+            this.listBox2.TabIndex = 7;
+            // 
+            // listBox3
+            // 
+            this.listBox3.FormattingEnabled = true;
+            this.listBox3.Location = new System.Drawing.Point( 3, 244 );
+            this.listBox3.Name = "listBox3";
+            this.listBox3.Size = new System.Drawing.Size( 240, 95 );
+            this.listBox3.TabIndex = 8;
+            // 
+            // listBox1
+            // 
+            this.listBox1.FormattingEnabled = true;
+            this.listBox1.Location = new System.Drawing.Point( 3, 132 );
+            this.listBox1.Name = "listBox1";
+            this.listBox1.Size = new System.Drawing.Size( 240, 95 );
+            this.listBox1.TabIndex = 6;
+            // 
+            // listBox_open
+            // 
+            this.listBox_open.FormattingEnabled = true;
+            this.listBox_open.Location = new System.Drawing.Point( 3, 19 );
+            this.listBox_open.Name = "listBox_open";
+            this.listBox_open.Size = new System.Drawing.Size( 240, 95 );
+            this.listBox_open.TabIndex = 3;
+            // 
+            // listBox_close
+            // 
+            this.listBox_close.FormattingEnabled = true;
+            this.listBox_close.Location = new System.Drawing.Point( 246, 19 );
+            this.listBox_close.Name = "listBox_close";
+            this.listBox_close.Size = new System.Drawing.Size( 240, 95 );
+            this.listBox_close.TabIndex = 4;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point( 3, 8 );
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size( 130, 13 );
+            this.label2.TabIndex = 10;
+            this.label2.Text = "Количество параметров";
+            // 
+            // numericUpDown2
+            // 
+            this.numericUpDown2.Location = new System.Drawing.Point( 139, 6 );
+            this.numericUpDown2.Name = "numericUpDown2";
+            this.numericUpDown2.Size = new System.Drawing.Size( 49, 20 );
+            this.numericUpDown2.TabIndex = 9;
+            // 
+            // dataGridView2
+            // 
+            this.dataGridView2.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
+                        | System.Windows.Forms.AnchorStyles.Left )
+                        | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.dataGridView2.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView2.Columns.AddRange( new System.Windows.Forms.DataGridViewColumn[] {
+            this.dataGridViewTextBoxColumn1,
+            this.dataGridViewTextBoxColumn2,
+            this.dataGridViewTextBoxColumn3} );
+            this.dataGridView2.Location = new System.Drawing.Point( 1, 29 );
+            this.dataGridView2.Name = "dataGridView2";
+            this.dataGridView2.Size = new System.Drawing.Size( 492, 148 );
+            this.dataGridView2.TabIndex = 8;
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            dataGridViewCellStyle2.Format = "N0";
+            dataGridViewCellStyle2.NullValue = null;
+            this.dataGridViewTextBoxColumn1.DefaultCellStyle = dataGridViewCellStyle2;
+            this.dataGridViewTextBoxColumn1.HeaderText = "№";
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            this.dataGridViewTextBoxColumn1.Width = 30;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.HeaderText = "Название параметра";
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.Width = 300;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            this.dataGridViewTextBoxColumn3.HeaderText = "Значение по умолчанию";
+            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            // 
+            // listBox5
+            // 
+            this.listBox5.FormattingEnabled = true;
+            this.listBox5.Location = new System.Drawing.Point( 4, 21 );
+            this.listBox5.Name = "listBox5";
+            this.listBox5.Size = new System.Drawing.Size( 240, 43 );
+            this.listBox5.TabIndex = 11;
+            // 
+            // listBox6
+            // 
+            this.listBox6.FormattingEnabled = true;
+            this.listBox6.Location = new System.Drawing.Point( 4, 82 );
+            this.listBox6.Name = "listBox6";
+            this.listBox6.Size = new System.Drawing.Size( 240, 43 );
+            this.listBox6.TabIndex = 13;
+            // 
+            // listBox7
+            // 
+            this.listBox7.FormattingEnabled = true;
+            this.listBox7.Location = new System.Drawing.Point( 4, 145 );
+            this.listBox7.Name = "listBox7";
+            this.listBox7.Size = new System.Drawing.Size( 240, 56 );
+            this.listBox7.TabIndex = 14;
+            // 
+            // listBox8
+            // 
+            this.listBox8.FormattingEnabled = true;
+            this.listBox8.Location = new System.Drawing.Point( 247, 145 );
+            this.listBox8.Name = "listBox8";
+            this.listBox8.Size = new System.Drawing.Size( 240, 56 );
+            this.listBox8.TabIndex = 12;
+            // 
+            // listBox9
+            // 
+            this.listBox9.FormattingEnabled = true;
+            this.listBox9.Location = new System.Drawing.Point( 4, 220 );
+            this.listBox9.Name = "listBox9";
+            this.listBox9.Size = new System.Drawing.Size( 240, 69 );
+            this.listBox9.TabIndex = 9;
+            // 
+            // listBox10
+            // 
+            this.listBox10.FormattingEnabled = true;
+            this.listBox10.Location = new System.Drawing.Point( 247, 220 );
+            this.listBox10.Name = "listBox10";
+            this.listBox10.Size = new System.Drawing.Size( 240, 69 );
+            this.listBox10.TabIndex = 10;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point( 7, 4 );
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size( 133, 13 );
+            this.label3.TabIndex = 9;
+            this.label3.Text = "Включаемые устройства";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point( 255, 4 );
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size( 141, 13 );
+            this.label4.TabIndex = 9;
+            this.label4.Text = "Выключаемые устройства";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point( 7, 117 );
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size( 112, 13 );
+            this.label5.TabIndex = 9;
+            this.label5.Text = "Флип верхних сёдел";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point( 255, 117 );
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size( 109, 13 );
+            this.label6.TabIndex = 9;
+            this.label6.Text = "Флип нижних сёдел";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point( 7, 230 );
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size( 211, 13 );
+            this.label7.TabIndex = 9;
+            this.label7.Text = "Вкл. после выключения режима устр-ва";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point( 255, 230 );
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size( 58, 13 );
+            this.label8.TabIndex = 9;
+            this.label8.Text = "Запасные";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font( "Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ( ( byte ) ( 204 ) ) );
+            this.label9.Location = new System.Drawing.Point( 8, 128 );
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size( 231, 17 );
+            this.label9.TabIndex = 18;
+            this.label9.Text = "Сигналы включающие устройства";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font( "Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ( ( byte ) ( 204 ) ) );
+            this.label10.Location = new System.Drawing.Point( 256, 128 );
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size( 171, 17 );
+            this.label10.TabIndex = 19;
+            this.label10.Text = "Включаемые устройства";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Font = new System.Drawing.Font( "Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ( ( byte ) ( 204 ) ) );
+            this.label11.Location = new System.Drawing.Point( 8, 203 );
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size( 131, 17 );
+            this.label11.TabIndex = 20;
+            this.label11.Text = "Пары сигналов ОС";
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Font = new System.Drawing.Font( "Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ( ( byte ) ( 204 ) ) );
+            this.label12.Location = new System.Drawing.Point( 256, 203 );
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size( 139, 17 );
+            this.label12.TabIndex = 15;
+            this.label12.Text = "Пары сигналов УПР";
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Font = new System.Drawing.Font( "Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ( ( byte ) ( 204 ) ) );
+            this.label13.Location = new System.Drawing.Point( 8, 4 );
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size( 232, 17 );
+            this.label13.TabIndex = 16;
+            this.label13.Text = "Сигналы, необх. для ВКЛ. режима";
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Font = new System.Drawing.Font( "Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ( ( byte ) ( 204 ) ) );
+            this.label14.Location = new System.Drawing.Point( 8, 65 );
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size( 193, 17 );
+            this.label14.TabIndex = 17;
+            this.label14.Text = "Сигнал, включающий режим";
+            // 
+            // listBox11
+            // 
+            this.listBox11.FormattingEnabled = true;
+            this.listBox11.Location = new System.Drawing.Point( 245, 82 );
+            this.listBox11.Name = "listBox11";
+            this.listBox11.Size = new System.Drawing.Size( 240, 43 );
+            this.listBox11.TabIndex = 10;
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Font = new System.Drawing.Font( "Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ( ( byte ) ( 204 ) ) );
+            this.label15.Location = new System.Drawing.Point( 256, 65 );
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size( 201, 17 );
+            this.label15.TabIndex = 15;
+            this.label15.Text = "Сигналы, при работе режима";
+            // 
             // Form_modes
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF( 6F, 13F );
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size( 768, 583 );
-            this.Controls.Add( this.label1 );
-            this.Controls.Add( this.numericUpDown1 );
-            this.Controls.Add( this.dataGridView1 );
+            this.ClientSize = new System.Drawing.Size( 787, 588 );
+            this.Controls.Add( this.tabControl2 );
+            this.Controls.Add( this.tabControl1 );
             this.Controls.Add( this.treeView_modes );
-            this.Controls.Add( this.listBox_close );
-            this.Controls.Add( this.listBox_open );
             this.Name = "Form_modes";
             this.Text = "Режимы объекта";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler( this.Form_modes_FormClosing );
             this.Shown += new System.EventHandler( this.Form_modes_Shown );
             ( ( System.ComponentModel.ISupportInitialize ) ( this.dataGridView1 ) ).EndInit();
-            ( ( System.ComponentModel.ISupportInitialize ) ( this.dataSet1 ) ).EndInit();
             ( ( System.ComponentModel.ISupportInitialize ) ( this.numericUpDown1 ) ).EndInit();
+            this.tabControl1.ResumeLayout( false );
+            this.tabPage1.ResumeLayout( false );
+            this.tabPage1.PerformLayout();
+            this.tabPage2.ResumeLayout( false );
+            this.tabPage2.PerformLayout();
+            this.tabControl2.ResumeLayout( false );
+            this.Page_dev.ResumeLayout( false );
+            this.Page_dev.PerformLayout();
+            this.Page_sign.ResumeLayout( false );
+            this.Page_sign.PerformLayout();
+            ( ( System.ComponentModel.ISupportInitialize ) ( this.numericUpDown2 ) ).EndInit();
+            ( ( System.ComponentModel.ISupportInitialize ) ( this.dataGridView2 ) ).EndInit();
             this.ResumeLayout( false );
-            this.PerformLayout();
 
             }
 
         #endregion
 
-        private System.Windows.Forms.ListBox listBox_open;
-        private System.Windows.Forms.ListBox listBox_close;
         private System.Windows.Forms.TreeView treeView_modes;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.DataGridViewTextBoxColumn number;
         private System.Windows.Forms.DataGridViewTextBoxColumn par_name;
         private System.Windows.Forms.DataGridViewTextBoxColumn val;
-        private System.Data.DataSet dataSet1;
         private System.Windows.Forms.NumericUpDown numericUpDown1;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.TabControl tabControl2;
+        private System.Windows.Forms.TabPage Page_dev;
+        private System.Windows.Forms.ListBox listBox4;
+        private System.Windows.Forms.ListBox listBox2;
+        private System.Windows.Forms.ListBox listBox3;
+        private System.Windows.Forms.ListBox listBox1;
+        private System.Windows.Forms.ListBox listBox_open;
+        private System.Windows.Forms.ListBox listBox_close;
+        private System.Windows.Forms.TabPage Page_sign;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.NumericUpDown numericUpDown2;
+        private System.Windows.Forms.DataGridView dataGridView2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
+        private System.Windows.Forms.ListBox listBox5;
+        private System.Windows.Forms.ListBox listBox6;
+        private System.Windows.Forms.ListBox listBox7;
+        private System.Windows.Forms.ListBox listBox8;
+        private System.Windows.Forms.ListBox listBox9;
+        private System.Windows.Forms.ListBox listBox10;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.ListBox listBox11;
         }
     }

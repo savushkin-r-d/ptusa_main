@@ -43,22 +43,16 @@ namespace visio_prj_designer
 			{
 			//	Добавление выбранного элемента в список модулей за текущим модулем
 			//	Если модуль не выбран - добавляем в самое начало
-//			TreeNode sel_node = TV_modules_list.SelectedNode;
-						
-			if ( sel_node.Level == 1 )
-				{
-				//sel_node.Text;
-
-				}
+			
+            //TreeNode sel_node = TV_modules_list.SelectedNode;
 
 			//	string j;
 			//	wago.io_module.TYPES
 				//TV_modules_list.SelectedNode.Name = ;  
-				int i = Convert.ToInt32( TV_modules_list.SelectedNode.Name );
+				//int i = Convert.ToInt32( TV_modules_list.SelectedNode.Name );
 				
 				//g_PAC.add_io_module( shape );
 				//LB_modules.Items.Add( TV_modules_list.SelectedNode.Index );
-
 			}
 
 		private void modules_count_enter_Shown( object sender, EventArgs e )
@@ -108,7 +102,13 @@ namespace visio_prj_designer
 				TV_modules_list.Nodes[ 5 ].Nodes.Add( module_type.Value );
 				TV_modules_list.Nodes[ 5 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
 				}
-						
+
+            //  Раскрываем необходимые нам списки
+            TV_modules_list.Nodes[ 0 ].Expand();
+            TV_modules_list.Nodes[ 1 ].Expand();
+            TV_modules_list.Nodes[ 4 ].Expand();
+
+			//TV_modules_list.ExpandAll(); 
 			}
 
 		private void TV_modules_list_AfterSelect( object sender, TreeViewEventArgs e )

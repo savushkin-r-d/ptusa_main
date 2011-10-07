@@ -71,16 +71,22 @@ namespace visio_prj_designer
             this.group3 = this.Factory.CreateRibbonGroup();
             this.Btn_devices = this.Factory.CreateRibbonButton();
             this.button_modes = this.Factory.CreateRibbonButton();
+            this.button1 = this.Factory.CreateRibbonButton();
+            this.group4 = this.Factory.CreateRibbonGroup();
+            this.button2 = this.Factory.CreateRibbonButton();
+            this.button3 = this.Factory.CreateRibbonButton();
             this.process_definition_tab.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
             this.group3.SuspendLayout();
+            this.group4.SuspendLayout();
             // 
             // process_definition_tab
             // 
             this.process_definition_tab.Groups.Add( this.group1 );
             this.process_definition_tab.Groups.Add( this.group2 );
             this.process_definition_tab.Groups.Add( this.group3 );
+            this.process_definition_tab.Groups.Add( this.group4 );
             this.process_definition_tab.Label = "Описание техпроцесса";
             this.process_definition_tab.Name = "process_definition_tab";
             this.process_definition_tab.Visible = false;
@@ -131,6 +137,32 @@ namespace visio_prj_designer
             this.button_modes.Name = "button_modes";
             this.button_modes.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.button_modes_Click );
             // 
+            // button1
+            // 
+            this.button1.Label = "Отчет по режимам";
+            this.button1.Name = "button1";
+            this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.button_modes_Click );
+            // 
+            // group4
+            // 
+            this.group4.Items.Add( this.button2 );
+            this.group4.Items.Add( this.button1 );
+            this.group4.Items.Add( this.button3 );
+            this.group4.Label = "Отчеты";
+            this.group4.Name = "group4";
+            // 
+            // button2
+            // 
+            this.button2.Label = "Отчет по устройствам";
+            this.button2.Name = "button2";
+            this.button2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.button_modes_Click );
+            // 
+            // button3
+            // 
+            this.button3.Label = "Отчет по модулям";
+            this.button3.Name = "button3";
+            this.button3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.button_modes_Click );
+            // 
             // main_ribbon
             // 
             this.Name = "main_ribbon";
@@ -145,6 +177,8 @@ namespace visio_prj_designer
             this.group2.PerformLayout();
             this.group3.ResumeLayout( false );
             this.group3.PerformLayout();
+            this.group4.ResumeLayout( false );
+            this.group4.PerformLayout();
 
             }
 
@@ -158,6 +192,10 @@ namespace visio_prj_designer
 		internal Microsoft.Office.Tools.Ribbon.RibbonGroup group3;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton Btn_devices;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button_modes;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup group4;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton button2;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton button1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton button3;
         }
 
     partial class ThisRibbonCollection
