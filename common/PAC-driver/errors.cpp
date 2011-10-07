@@ -4,14 +4,49 @@
 #include <errors.h>
 #endif
 
+const char *ALARM_CLASS_STR[ 4 ] =
+    {
+    "Неизвестная ошибка",
+    "Нет соединения",
+    "Ошибка COM-порта",
+    "Внимание"
+    };
+
+const char *ALARM_SUBCLASS_STR[ 4 ][ 5 ] =        ///< Подкласс тревоги.
+    {
+        { 
+        "?"
+        },
+
+        {
+        "?",
+        "узел Wago №",
+        "панель EasyView №",
+        "устройство, опрашиваемое по Modbus, №",
+        "EasyServer"
+        },
+
+        { 
+        "?"
+        },
+        
+        {
+        "?",
+        "нажата аварийная кнопка №",
+        }
+    };
+
+const int ALARM_CLASS_PRIORITY[ 4 ] = // Приоритет тревог.
+    {
+    0,
+    100,  ///< Ошибка связи.
+    200,
+    300
+    };
+
 #ifdef DRIVER 
 
 #include "stdafx.h"
-
-const char* alarm_manager::ERRORS_GROUP_WAGO_CONNECT      = "узлы WAGO";
-const char* alarm_manager::ERRORS_GROUP_SIMPLE_DEVICES    = "устройства";
-const char* alarm_manager::ERRORS_GROUP_PANEL_CONNECT     = "операторская панель";
-const char* alarm_manager::ERRORS_GROUP_EMERGENCY_BUTTONS = "аварийная кнопка";
 
 //-----------------------------------------------------------------------------
 alarm::alarm( alarm const& copy )

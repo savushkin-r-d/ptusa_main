@@ -131,50 +131,34 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
 // [ 8  ] - параметр ошибки 2, unsigned char.
 // [ .. ]
 // [ x  ]
-int PAC_critical_errors_manager::save_to_stream( char *buff )
+int PAC_critical_errors_manager::save_to_stream_as_Lua( char *str )
     {
-    int answer_size = 0;
-
-    memcpy( buff, &errors_id, sizeof( errors_id ) );
-    buff += 2;
-    answer_size += 2;
-    unsigned char *erros_cnt = ( unsigned char* ) buff;
-    *erros_cnt = 0;
-    buff++;
-    answer_size++;
-
     for ( u_int i = 0; i < errors.size(); i++ )
         {
-        erros_cnt[ 0 ]++;
-        buff[ 0 ] = errors[ i ].err_class;
-        buff[ 1 ] = errors[ i ].err_sub_class;
-        buff[ 2 ] = errors[ i ].param;
-        buff += 3;
-        answer_size += 3;
+        sprintf( str + strlen( str ), "\t%s\n", "{" );
+
+        sprintf( str + strlen( str ), "\t%s%s%s%s%d%s\n",
+           "description = \"", ALARM_CLASS_STR[ errors[ i ].err_class ],
+            " - ", ALARM_SUBCLASS_STR[ errors[ i ].err_class ][ errors[ i ].err_sub_class ],
+            errors[ i ].param, "!\"," );
+
+        sprintf( str + strlen( str ), "\t%s\n",   "type        = AT_SPECIAL," );
+        sprintf( str + strlen( str ), "\t%s%s%s\n", "group       = '",
+            ALARM_CLASS_STR[ errors[ i ].err_class ], "'," );
+        sprintf( str + strlen( str ), "\t%s%d%s\n",   "priority    = ",
+            ALARM_CLASS_PRIORITY[ errors[ i ].err_class ], "," );
+        sprintf( str + strlen( str ), "\t%s\n",   "state    "
+                "   = AS_ALARM," );
+        sprintf( str + strlen( str ), "\t%s\n",   "suppress    = false," );
+
+        sprintf( str + strlen( str ), "\t%s\n", "}," );
         }
 
 #ifdef DEBUG_PAC_ERR   
-    Print( " erros_id = %u\n", errors_id );
-    Print( " erros_cnt = %d\n", erros_cnt[ 0 ] );
-    Print( " answer_size = %d\n", answer_size );
+    Print( "%s\n", str );
 #endif // DEBUG_PAC_ERR
 
-    return answer_size;
-    }
-//-----------------------------------------------------------------------------
-unsigned char PAC_critical_errors_manager::save_to_stream_2( char *buff )
-    {
-    unsigned char answer_size = 0;
-    for ( u_int i = 0; i < errors.size(); i++ )
-        {
-        buff[ 0 ] = errors[ i ].err_class;
-        buff[ 1 ] = errors[ i ].err_sub_class;
-        buff[ 2 ] = errors[ i ].param;
-        buff += 3;
-        answer_size += 3;
-        }
-
-    return answer_size; 
+    return 0;
     }
 //-----------------------------------------------------------------------------
 PAC_critical_errors_manager * PAC_critical_errors_manager::get_instance()

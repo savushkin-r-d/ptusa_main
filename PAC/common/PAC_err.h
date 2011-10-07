@@ -57,10 +57,14 @@ class PAC_critical_errors_manager
         void reset_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1, 
             unsigned long param );
 
-        int save_to_stream( char *buff );
-        unsigned char save_to_stream_2( char *buff );
+        int save_to_stream_as_Lua( char *str );
 
         static PAC_critical_errors_manager * get_instance();
+
+        u_int get_id() const
+            {
+            return errors_id;
+            }
 
     private:
         static auto_smart_ptr < PAC_critical_errors_manager > instance;
@@ -78,9 +82,7 @@ class PAC_critical_errors_manager
         std::vector< critical_error >  errors;
 
         u_int_2 errors_id;
-        int   global_ok;
-
-//        auto_smart_ptr< led > wago_led;
+        int     global_ok;
     };
 //-----------------------------------------------------------------------------
 #endif // PAC_ERRORS_H

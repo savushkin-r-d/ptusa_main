@@ -155,27 +155,37 @@ long device_communicator::write_devices_states_service( long len,
 #ifdef DEBUG_DEV_CMCTR
             Print( "CMD_GET_PAC_ERRORS\n" );
 #endif
+            static u_int_2 PAC_critical_errors_manager_id = 0;
+            static u_int_2 errors_id = get_millisec() % 100;
 
-//           answer_size = PAC_critical_errors_manager::get_instance()->save_to_stream( 
- //              ( char* ) outdata + answer_size );                
+            if ( PAC_critical_errors_manager_id !=
+                PAC_critical_errors_manager::get_instance()->get_id() )
+                {
+                PAC_critical_errors_manager_id =
+                    PAC_critical_errors_manager::get_instance()->get_id();
+                errors_id++;
+                }
+
+            char *str = ( char* ) outdata;
+
+            unsigned char project_descr_id = data[ 1 ];
+
+            sprintf( str, "%s %d %s\n", "alarms[", project_descr_id, "] = \n  {" );
+            sprintf( str + strlen( str ), "  %s %d,\n", "id =", errors_id );
+
+            PAC_critical_errors_manager::get_instance()->save_to_stream_as_Lua(
+                str + strlen( str ) );
+
+            sprintf( str + strlen( str ), "  %s\n", "}" );
 
 #ifdef DEBUG_DEV_CMCTR
-           int critical_errors_size = answer_size;
-            Print( "Critical errors count = %d, answer size = %d\n",
-                outdata[ 2 ], critical_errors_size );
+            Print( "Critical errors = \n%s", outdata );
 #endif // DEBUG_DEV_CMCTR
 
-  //          answer_size += G_DEV_ERRORS_MANAGER->save_to_stream( outdata + 
- //               answer_size );
+//          answer_size += G_DEV_ERRORS_MANAGER->save_to_stream( outdata + 
+//               answer_size );
 
-#ifdef DEBUG_DEV_CMCTR
-            u_int_2 cnt = 0;
-            memcpy( &cnt, outdata + critical_errors_size + 2, sizeof( u_int_2 ) );
-            Print( "Simple devices errors errors count = %d, answer size = %d\n", 
-                cnt, answer_size - critical_errors_size );
-#endif // DEBUG_DEV_CMCTR
-
-            return answer_size;
+            return strlen( str ) + 1;
             }
 
         case CMD_SET_PAC_ERROR_CMD:            
@@ -221,13 +231,6 @@ long device_communicator::write_devices_states_service( long len,
 int device_communicator::add_device( i_Lua_save_device *device )
     {
     dev.push_back( device );
-
-    int i = dev.size();
-    
-    if ( i == 43 )
-        {
-        i = 43;
-        }
 
     return 0;
     }

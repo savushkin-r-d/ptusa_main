@@ -102,7 +102,7 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
     // Проверка связи с узлом Wago.
     static bool is_set_err = false;
     
-    if( get_sec( ) - node->last_poll_time > wago_node::C_MAX_WAIT_TIME )
+    if( get_sec() - node->last_poll_time > wago_node::C_MAX_WAIT_TIME )
         {
         if( false == is_set_err )
             {

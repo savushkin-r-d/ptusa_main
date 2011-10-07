@@ -86,7 +86,13 @@ enum ALARM_SUBCLASS         ///< Подкласс тревоги.
     //AC_RUNTIME_ERROR,     ///< Ошибки во время работы.
     AS_EMERGENCY_BUTTON = 1,///< Нажата аварийная кнопка.
     };
+
 #endif // defined PAC || defined WIN32
+
+extern const char *ALARM_CLASS_STR[ 4 ];
+extern const char *ALARM_SUBCLASS_STR[ 4 ][ 5 ];
+extern const int ALARM_CLASS_PRIORITY[ 4 ];
+
 //-----------------------------------------------------------------------------
 #ifdef PAC
 

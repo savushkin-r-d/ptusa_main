@@ -1,6 +1,8 @@
 #include <unistd.h>
 
 #include "wago_PC.h"
+#include "PAC_err.h"
+
 //-----------------------------------------------------------------------------
 wago_manager_PC::wago_manager_PC()
     {
