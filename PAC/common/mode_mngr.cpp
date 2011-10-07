@@ -560,13 +560,13 @@ mode_manager::mode_manager( u_int_2 new_modes_cnt
     	{        
         modes_devices.push_back( new step_path() );
 
-        modes_start_time.push_back( 0 );
+        modes_start_time.push_back( get_millisec() );
 
         // Обратные связи для включения режима.
         std::vector < device* > fb;
         modes_on_FB.push_back( fb );
     	}
-    modes_start_time.push_back( 0 );
+    modes_start_time.push_back( get_millisec() );
     }
 //-----------------------------------------------------------------------------
  mode_manager::~mode_manager()
