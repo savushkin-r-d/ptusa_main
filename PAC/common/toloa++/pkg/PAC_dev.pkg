@@ -141,6 +141,8 @@ class device
         /// Для обработки команд, полученных от сервера.
         int set_cmd( const char *prop, unsigned int idx, double val );
 
+        int set_param( int par_id, int index, double value );
+
         /// @brief Типы физических устройств.
         ///
         /// Устройства, которые могут быть в проекте. При выполнении режимов,
@@ -402,6 +404,8 @@ class tech_object
         timer_manager           timers;		 ///< Таймеры объекта.
 
         mode_manager* get_modes_manager();
+		
+		int set_param( int par_id, int index, double value );		
     };
 //-----------------------------------------------------------------------------
 ///@brief Получение менеджера технологических объектов.

@@ -82,6 +82,8 @@ int SRAM::write( void *buff, u_int count, u_int start_pos )
                 file_name, strerror( errno )  );
             }
 #endif // DEBUG
+
+        fflush( file );
         }
 
     return res;

@@ -328,9 +328,14 @@ class device : public i_AO_device,
             }
         
 
-        virtual int save_params_Lua( char* str )
+        virtual int save_params_as_Lua_str( char* str )
             {
             str[ 0 ] = 0;
+            return 0;
+            }
+
+        virtual int set_param( int par_id, int index, double value )
+            {
             return 0;
             }
 
@@ -475,25 +480,9 @@ class digital_wago_device : public device,
         int get_state();
 
 
-        int save_params_Lua( char* str )
-            {
-            if ( fb.is_null() )
-                {
-                return 0;
-                }
+        int save_params_as_Lua_str( char* str );
 
-            //init_par{ 'V[1]', 1, --'rt_par_float'
-            sprintf( str, "\'%s[%d]\', 1, %s\n", 
-                get_name(), get_n(), "--fb_device params" );
-            sprintf( str + strlen( str ), "%s", "\t{\n" );
-            for ( u_int i = 0; i < fb->par.get_count();i++ )
-                {
-                sprintf( str + strlen( str ), "\t%d,\n", fb->par[ i ] );
-                }
-            sprintf( str + strlen( str ), "%s", "\t} }\n" );
-
-            return 0;
-            }
+        int set_param( int par_id, int index, double value );
 
     protected:
         enum CONSTANTS
@@ -806,6 +795,10 @@ class AI_1 : public analog_wago_device
             };
 
         int save_device( char *buff, const char *prefix );
+
+        int save_params_as_Lua_str( char* str );
+
+        int set_param( int par_id, int index, double value );
 
 #ifdef DEBUG_NO_WAGO_MODULES
         float get_value();
@@ -1233,12 +1226,13 @@ class device_manager: public i_Lua_save_device
 #pragma option -w.inl
 #endif // __BORLANDC__
 
-
-        int save_params_Lua( char* str )
+        int save_params_as_Lua_str( char* str )
             {
+            str[ 0 ] = 0;
+
             for ( u_int i = 0; i < project_devices.size(); i++ )
                 {
-                project_devices[ i ]->save_params_Lua( str + strlen( str ) );
+                project_devices[ i ]->save_params_as_Lua_str( str + strlen( str ) );
                 }
 
             return 0;

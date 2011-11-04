@@ -33,123 +33,6 @@
 #endif // __BORLANDC__
 
 //-----------------------------------------------------------------------------
-/// @brief Работа с параметрами. 
-/// 
-/// Служит для создания объектов для работы с параметрами. Проверяется 
-/// корректность данных путем подсчета контрольной суммы.
-class params_manager
-    {
-    public:
-        enum CONSTANTS
-            {
-            C_TOTAL_PARAMS_SIZE = 700 * 4, ///< Общий размер памяти параметров.
-            };
-
-        /// @brief Возвращает единственный экземпляр класса для работы с 
-        /// параметрами.
-        ///
-        /// @return - указатель на единственный объект класса @ref
-        /// params_manager.
-        static params_manager* get_instance();
-
-        /// @brief Инициализация значений параметров.
-        ///
-        /// Считывание параметров из EEPROM в массив параметров, проверка 
-        /// контрольной суммы. Контрольная сумма зависит от 
-        /// параметра @ref C_TOTAL_PARAMS_SIZE.
-        ///
-        /// @param project_id - номер проекта. Для привязки параметров к 
-        /// конкретной управляющей программе.
-        ///
-        /// @return 0 - ОК.
-        /// @return 1 - Ошибка контрольной суммы. 
-        int init( unsigned int project_id );
-
-        /// @brief Окончательная инициализация значений параметров.
-        ///
-        /// Если при считывании параметров из EEPROM произошла ошибка (метод 
-        /// @ref init), параметры инициализируются значениями по умолчанию 
-        /// путем вызова заданных функций.
-        ///
-        /// @param auto_init_params - вызывать ли функцию init_params классов
-        /// tank и comb.
-        /// @param auto_init_work_params - вызывать ли функцию init_work_params 
-        /// классов tank и comb.
-        /// @param custom_init_params_function - пользовательская функция
-        /// инициализации параметров.
-        void final_init( int auto_init_params = 1, 
-            int auto_init_work_params = 1,
-            void ( *custom_init_params_function )() = 0 );
-
-        /// @brief Запись параметров в EEPROM.
-        ///
-        /// Запись параметров из массива параметров в EEPROM.
-        ///
-        /// @param start_pos - номер индекса, с которого начать запись
-        /// параметров (для записи только одного параметра).
-        /// @param count - количество записываемых байт.
-        void save( int start_pos = 0, int count = 0 );
-
-        /// @brief Сброс контрольной суммы (для инициализации значениями по 
-        /// умолчанию).
-        void reset_CRC();
-
-        /// @brief Получение указателя на блок данных параметров.
-        ///
-        /// @param size      - размер блока данных в байтах.
-        /// @param [out] start_pos - стартовый индекс в глобальном массиве 
-        /// параметров. Необходим для дальнейшей записи параметров в память.
-        ///
-        /// @return 0 - ОК.
-        /// @return 1 - Ошибка контрольной суммы.
-        char* get_params_data( int size, int &start_pos );
-
-        ~params_manager();
-
-
-        int save_params_Lua( char* str );
-
-    private:
-        /// @brief Закрытый конструктор. 
-        /// 
-        /// Для вызова методов используется статический метод @ref get_instance.
-        params_manager();
-
-        /// Статический экземпляр класса для вызова методов.
-        static auto_smart_ptr< params_manager > instance;
-
-        /// Рабочий массив параметров.
-        char params[ C_TOTAL_PARAMS_SIZE ];  
-
-        /// Номер последнего выделенного параметра. Используется при создании
-        /// экземпляра класса @ref parameters.
-        u_int last_idx;
-
-        /// Признак корректной загрузки параметров (достоверность контрольной
-        /// суммы).
-        int loaded;
-
-        u_int project_id;   ///< Номер проекта (для уникальности параметров).
-
-        memory_range *params_mem; ///< Память параметров.
-        memory_range *CRC_mem;    ///< Память контрольной суммы.
-
-        // Высчитывание контрольной суммы.
-        u_int solve_CRC();
-
-        /// @brief Проверка контрольной суммы.
-        ///
-        /// Рассчет контрольной суммы и сравнение ее со значением, 
-        /// хранящемся в NVRAM (2 первых байта NVRAM).
-        ///
-        /// @return 0 - ОК.
-        /// @return 1 - Ошибка контрольной суммы. 
-        int check_CRC();
-
-        /// @brief Рассчет контрольной суммы и запись ее в NVRAM.
-        void make_CRC();
-    };
-//-----------------------------------------------------------------------------
 /// @brief Работа с массивом параметров.
 ///
 /// Служит для создания конкретных типов параметров. Реализованы операции
@@ -255,9 +138,45 @@ template < class type, bool is_float > class parameters
             printf( "param %d\n", count );
             }
 
+        int save_device_ex( char *buff, const char *prefix, const char *new_name )
+            {
+            sprintf( buff, "%s%s = \n", prefix, new_name );
+            save_dev( buff + strlen( buff ), prefix );
+
+            return 0;
+            }
+
         int save_device( char *buff, const char *prefix )
             {
-            sprintf( buff, "%s%s = \n%s\t{\n", prefix, name, prefix );
+            sprintf( buff, "%s%s = \n", prefix, name );            
+            save_dev( buff + strlen( buff ), prefix );
+
+            return strlen( buff );
+            }
+
+    protected:
+        char is_delete; ///< Признак удаления буфера при удалении объекта.
+
+        /// @brief Получение указателя на буфер для хранения значений
+        /// параметров.
+        ///
+        /// @return - указатель на буфер для хранения значений параметров.
+        type* get_values()
+            {
+            return values;
+            }
+
+        /// Заглушка для обращения через индекс с выходом за диапазон.
+        type         stub; 
+
+        unsigned int count;     ///< Количество элементов.
+        type         *values;   ///< Указатель на массив значений элементов.
+
+    private:
+
+        int save_dev( char *buff, const char *prefix )
+            {
+            sprintf( buff, "%s\t{\n", prefix );
             int answer_size = strlen( buff );
 
             sprintf( buff + answer_size, "%s\t", prefix );
@@ -268,8 +187,6 @@ template < class type, bool is_float > class parameters
                 if ( is_float )
                     {
                     float val  = ( float ) get_val( i );
-                    //sprintf( buff + answer_size, "%s\t[%d] = %.2f,\n",
-                    //   prefix, i + 1, get_val( i ) );
                     if ( 0. == val )
                         {
                         sprintf( buff + answer_size, "0, " );
@@ -300,23 +217,6 @@ template < class type, bool is_float > class parameters
             return answer_size;
             }
 
-    protected:
-        char is_delete; ///< Признак удаления буфера при удалении объекта.
-
-        /// @brief Получение указателя на буфер для хранения значений
-        /// параметров.
-        ///
-        /// @return - указатель на буфер для хранения значений параметров.
-        type* get_values()
-            {
-            return values;
-            }
-
-        /// Заглушка для обращения через индекс с выходом за диапазон.
-        type         stub; 
-
-        unsigned int count;     ///< Количество элементов.
-        type         *values;   ///< Указатель на массив значений элементов.
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с параметрами времени выполнения типа float.
@@ -389,21 +289,75 @@ public parameters < type, is_float >
             {
             }
 
+        //template < class type, bool is_float > class proxy_data
+        //    {
+        //    public:
+        //        proxy_data( type value, int idx, saved_params * par
+        //            ):value( value ), idx( idx ), par( par )
+        //            {
+        //            }
+
+        //        type &value;
+
+        //        int idx;
+
+        //        saved_params *par;
+
+
+        //    operator type ()
+        //        {
+        //        return value;
+        //        }
+
+        //    type operator =( type value )
+        //        {
+        //        if ( par )
+        //            {                    
+        //            par->save( idx, value );
+        //            }                
+
+        //        return value;
+        //        }
+        //    };
+
+////        /// @brief Получение элемента через операцию индексирования.
+////        ///
+////        /// @param index - индекс элемента.
+////        ///
+////        /// @return - значение элемента с заданным индексом. Если индекс
+////        /// выходит за диапазон, возвращается значение заглушки - поля @ref
+////        /// stub ( значение 0 ).
+////        proxy_data< type, is_float > operator[] ( unsigned int index )        
+////            {
+////            if ( index < count )
+////                {
+////                return proxy_data< type, is_float >( values[ index ], index, this );
+////                }
+////#ifdef DEBUG
+////            else
+////                {
+////                Print( "parameters[] - error: index[ %u ] > count [ %u ]\n",
+////                    index, count );
+////                }
+////#endif // DEBUG
+////
+////            stub = 0;
+////            return proxy_data< type, is_float >( stub, -1, 0 );
+////            }
+
         /// @brief Сохранение значения параметра в энергонезависимой памяти.
         ///
         /// Операция доступа через индекс сохраняет значение параметра только
         /// в буфере, так что для сохранения его в энергонезависимой памяти надо
         /// использовать данный метод.
-        int save( u_int idx, type value )
+        type save( u_int idx, type value )
             {
-            int res = 1;
             if ( idx < parameters< type, is_float >::get_count() )
                 {
                 parameters< type, is_float >::get_values()[ idx ] = value;
 
                 params_manager::get_instance()->save( 
                     start_pos + idx * sizeof( type ), sizeof( type ) );
-                res = 0;
                 }
 #ifdef DEBUG
             else
@@ -412,7 +366,7 @@ public parameters < type, is_float >
                     idx, parameters< type, is_float >::get_count() );
                 }
 #endif // DEBUG
-            return res;
+            return value;
             }
 
         /// @brief Сохранение значения всех параметров в энергонезависимой памяти.
@@ -507,6 +461,133 @@ class params_test
         /// @return 0 - Ок.
         /// @return 1 - Ошибка.
         static int make_test();
+    };
+//-----------------------------------------------------------------------------
+/// @brief Работа с параметрами. 
+/// 
+/// Служит для создания объектов для работы с параметрами. Проверяется 
+/// корректность данных путем подсчета контрольной суммы.
+class params_manager
+    {
+    public:        
+        enum CONSTANTS
+            {
+            C_TOTAL_PARAMS_SIZE = 700 * 4, ///< Общий размер памяти параметров.
+            };
+
+        /// @brief Возвращает единственный экземпляр класса для работы с 
+        /// параметрами.
+        ///
+        /// @return - указатель на единственный объект класса @ref
+        /// params_manager.
+        static params_manager* get_instance();
+
+        /// @brief Инициализация значений параметров.
+        ///
+        /// Считывание параметров из EEPROM в массив параметров, проверка 
+        /// контрольной суммы. Контрольная сумма зависит от 
+        /// параметра @ref C_TOTAL_PARAMS_SIZE.
+        ///
+        /// @param project_id - номер проекта. Для привязки параметров к 
+        /// конкретной управляющей программе.
+        ///
+        /// @return 0 - ОК.
+        /// @return 1 - Ошибка контрольной суммы. 
+        int init( unsigned int project_id );
+
+        /// @brief Окончательная инициализация значений параметров.
+        ///
+        /// Если при считывании параметров из EEPROM произошла ошибка (метод 
+        /// @ref init), параметры инициализируются значениями по умолчанию 
+        /// путем вызова заданных функций.
+        ///
+        /// @param auto_init_params - вызывать ли функцию init_params классов
+        /// tank и comb.
+        /// @param auto_init_work_params - вызывать ли функцию init_work_params 
+        /// классов tank и comb.
+        /// @param custom_init_params_function - пользовательская функция
+        /// инициализации параметров.
+        void final_init( int auto_init_params = 1, 
+            int auto_init_work_params = 1,
+            void ( *custom_init_params_function )() = 0 );
+
+        /// @brief Запись параметров в EEPROM.
+        ///
+        /// Запись параметров из массива параметров в EEPROM.
+        ///
+        /// @param start_pos - номер индекса, с которого начать запись
+        /// параметров (для записи только одного параметра).
+        /// @param count - количество записываемых байт.
+        void save( int start_pos = 0, int count = 0 );
+
+        /// @brief Сброс контрольной суммы (для инициализации значениями по 
+        /// умолчанию).
+        void reset_CRC();
+
+        /// @brief Получение указателя на блок данных параметров.
+        ///
+        /// @param size      - размер блока данных в байтах.
+        /// @param [out] start_pos - стартовый индекс в глобальном массиве 
+        /// параметров. Необходим для дальнейшей записи параметров в память.
+        ///
+        /// @return 0 - ОК.
+        /// @return 1 - Ошибка контрольной суммы.
+        char* get_params_data( int size, int &start_pos );
+
+        ~params_manager();
+
+        enum PARAMS
+            {
+            P_COUNT = 1,
+
+            P_IS_RESET_PARAMS = 0,
+            };
+
+        saved_params_u_int_4 *par;
+
+        int save_params_as_Lua_str( char* str );
+
+        int restore_params_from_server_backup( char *backup_str );
+
+        // Высчитывание контрольной суммы.
+        u_int solve_CRC();
+
+    private:
+        /// @brief Закрытый конструктор. 
+        /// 
+        /// Для вызова методов используется статический метод @ref get_instance.
+        params_manager();
+
+        /// Статический экземпляр класса для вызова методов.
+        static auto_smart_ptr< params_manager > instance;
+
+        /// Рабочий массив параметров.
+        char params[ C_TOTAL_PARAMS_SIZE ];  
+
+        /// Номер последнего выделенного параметра. Используется при создании
+        /// экземпляра класса @ref parameters.
+        u_int last_idx;
+
+        /// Признак корректной загрузки параметров (достоверность контрольной
+        /// суммы).
+        int loaded;
+
+        u_int project_id;   ///< Номер проекта (для уникальности параметров).
+
+        memory_range *params_mem; ///< Память параметров.
+        memory_range *CRC_mem;    ///< Память контрольной суммы.
+
+        /// @brief Проверка контрольной суммы.
+        ///
+        /// Рассчет контрольной суммы и сравнение ее со значением, 
+        /// хранящемся в NVRAM (2 первых байта NVRAM).
+        ///
+        /// @return 0 - ОК.
+        /// @return 1 - Ошибка контрольной суммы. 
+        int check_CRC();
+
+        /// @brief Рассчет контрольной суммы и запись ее в NVRAM.
+        void make_CRC();        
     };
 //-----------------------------------------------------------------------------
 #ifdef __BORLANDC__

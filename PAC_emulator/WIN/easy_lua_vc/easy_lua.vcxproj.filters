@@ -88,6 +88,9 @@
     <Filter Include="Header Files\PAC\common\sys">
       <UniqueIdentifier>{4261bb4f-b941-45f6-91a3-ac77e8f38af9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Other">
+      <UniqueIdentifier>{1bfbb52d-17ee-412f-a8af-8434f41b0748}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\PAC\common\PAC_dev.h">
@@ -438,6 +441,9 @@
     </None>
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys_wago.lua">
       <Filter>Lua Source\common</Filter>
+    </None>
+    <None Include="..\versions.txt">
+      <Filter>Other</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

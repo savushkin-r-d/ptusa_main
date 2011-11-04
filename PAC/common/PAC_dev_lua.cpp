@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 09/22/11 12:10:14.
+** Generated automatically by tolua++-1.0.92 on 10/12/11 09:31:42.
 */
 
 #ifndef __cplusplus
@@ -617,6 +617,44 @@ static int tolua_PAC_dev_device_set_cmd00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'set_cmd'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_param of class  device */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_set_param00
+static int tolua_PAC_dev_device_set_param00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"device",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  device* self = (device*)  tolua_tousertype(tolua_S,1,0);
+  int par_id = ((int)  tolua_tonumber(tolua_S,2,0));
+  int index = ((int)  tolua_tonumber(tolua_S,3,0));
+  double value = ((double)  tolua_tonumber(tolua_S,4,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_param'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->set_param(par_id,index,value);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_param'.",&tolua_err);
  return 0;
 #endif
 }
@@ -1873,6 +1911,44 @@ static int tolua_PAC_dev_tech_object_get_modes_manager00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'get_modes_manager'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_param of class  tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_tech_object_set_param00
+static int tolua_PAC_dev_tech_object_set_param00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"tech_object",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  tech_object* self = (tech_object*)  tolua_tousertype(tolua_S,1,0);
+  int par_id = ((int)  tolua_tonumber(tolua_S,2,0));
+  int index = ((int)  tolua_tonumber(tolua_S,3,0));
+  double value = ((double)  tolua_tonumber(tolua_S,4,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_param'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->set_param(par_id,index,value);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_param'.",&tolua_err);
  return 0;
 #endif
 }
@@ -4639,6 +4715,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_cclass(tolua_S,"device","device","",NULL);
   tolua_beginmodule(tolua_S,"device");
    tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_device_set_cmd00);
+   tolua_function(tolua_S,"set_param",tolua_PAC_dev_device_set_param00);
    tolua_constant(tolua_S,"DT_NONE",device::DT_NONE);
    tolua_constant(tolua_S,"DT_V",device::DT_V);
    tolua_constant(tolua_S,"DT_N",device::DT_N);
@@ -4712,6 +4789,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_variable(tolua_S,"rt_par_uint",tolua_get_tech_object_rt_par_uint,tolua_set_tech_object_rt_par_uint);
    tolua_variable(tolua_S,"timers",tolua_get_tech_object_timers,tolua_set_tech_object_timers);
    tolua_function(tolua_S,"get_modes_manager",tolua_PAC_dev_tech_object_get_modes_manager00);
+   tolua_function(tolua_S,"set_param",tolua_PAC_dev_tech_object_set_param00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_TECH_OBJECT_MNGR",tolua_PAC_dev_G_TECH_OBJECT_MNGR00);
   tolua_cclass(tolua_S,"tech_object_manager","tech_object_manager","",NULL);

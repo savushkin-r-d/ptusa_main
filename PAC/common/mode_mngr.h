@@ -266,6 +266,8 @@ class wash_step
 /// У объекта (танк, ...) может быть включено параллельно несколько режимов.
 class mode_manager
     {
+    friend class tech_object;
+
     public:
         mode_manager( u_int_2 new_modes_cnt );
 

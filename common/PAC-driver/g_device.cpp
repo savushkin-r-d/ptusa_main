@@ -9,10 +9,11 @@
 #include "errors.h"
 
 #include "lua_manager.h"
+#include "tech_def.h"
 
 auto_smart_ptr < device_communicator > device_communicator::instance;
 
-u_int_2 G_PROTOCOL_VERSION = 100;
+u_int_2 G_CURRENT_PROTOCOL_VERSION = 101;
 
 std::vector< i_Lua_save_device* > device_communicator::dev;
 
@@ -31,8 +32,7 @@ void print_str( char *err_str, char is_need_CR )
     }
 //-----------------------------------------------------------------------------
 long device_communicator::write_devices_states_service( long len, 
-                                                       u_char *data,
-                                                       u_char *outdata )
+    u_char *data, u_char *outdata )
     {
     if ( len < 1 ) return 0;
 
@@ -49,14 +49,17 @@ long device_communicator::write_devices_states_service( long len,
         {
         case CMD_GET_INFO_ON_CONNECT:            
             sprintf( ( char* ) outdata, 
-                "protocol_version = %d; PAC_name = \"%s\"\n", 
-                G_PROTOCOL_VERSION,
-                tcp_communicator::get_instance()->get_host_name() );
+                "protocol_version = %d; PAC_name = \"%s\"; is_reset_params = %d;"
+                "params_CRC=%d;\n", 
+                G_CURRENT_PROTOCOL_VERSION,
+                tcp_communicator::get_instance()->get_host_name(),
+                params_manager::get_instance()->par[ 0 ][ params_manager::P_IS_RESET_PARAMS ],                
+                params_manager::get_instance()->solve_CRC() );
 
             answer_size = strlen( ( char* ) outdata ) + 1;
 
 #ifdef DEBUG_DEV_CMCTR
-            Print( "G_PROTOCOL_VERSION = %u, host =[%s]\n", G_PROTOCOL_VERSION,
+            Print( "G_CURRENT_PROTOCOL_VERSION = %u, host =[%s]\n", G_CURRENT_PROTOCOL_VERSION,
                 tcp_communicator::get_instance()->get_host_name() );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
@@ -131,8 +134,10 @@ long device_communicator::write_devices_states_service( long len,
             Print( "\nEXEC_DEVICE_CMD\n" );
             Print( "cmd = %s\n",  data + 1 );
 #endif // DEBUG_DEV_CMCTR
-			
-			int res = lua_manager::get_instance()->exec_Lua_str( ( char* ) data + 1, 
+
+            Print( "cmd = %s\n",  data + 1 );
+
+            int res = lua_manager::get_instance()->exec_Lua_str( ( char* ) data + 1, 
                 "CMD_EXEC_DEVICE_COMMAND ");
                       
             outdata[ 0 ] = 0;
@@ -141,7 +146,7 @@ long device_communicator::write_devices_states_service( long len,
                 {
                 outdata[ 0 ] = 1;
                 }
-			
+            
 #ifdef DEBUG_DEV_CMCTR
             Print( "Operation time = %lu\n", get_delta_millisec( start_time ) );
 #endif // DEBUG_DEV_CMCTR
@@ -188,7 +193,8 @@ long device_communicator::write_devices_states_service( long len,
             return strlen( str ) + 1;
             }
 
-        case CMD_SET_PAC_ERROR_CMD:            
+        case CMD_SET_PAC_ERROR_CMD:  
+            {            
             u_int_2 count = 0;
 
             memcpy( &count, data + 1, sizeof( count ) );
@@ -223,6 +229,45 @@ long device_communicator::write_devices_states_service( long len,
             answer_size += 2;
 
             return answer_size;
+            }
+
+        case CMD_GET_PARAMS:
+            params_manager::get_instance()->save_params_as_Lua_str( 
+                ( char* ) outdata );            
+            
+            return strlen( ( char* ) outdata );
+        
+        case CMD_RESTORE_PARAMS:
+            {
+#ifdef DEBUG_DEV_CMCTR
+            Print( "\CMD_RESTORE_PARAMS\n" );
+            Print( "cmd = %s\n",  data + 1 );
+#endif // DEBUG_DEV_CMCTR
+
+            int res = params_manager::get_instance(
+                )->restore_params_from_server_backup( ( char*) data + 1 );
+
+            outdata[ 0 ] = 0;
+            outdata[ 1 ] = 0; //Возвращаем 0.
+            if ( res )
+                {
+                outdata[ 0 ] = 1;
+                }
+
+#ifdef DEBUG_DEV_CMCTR
+            Print( "Operation time = %lu\n", get_delta_millisec( start_time ) );
+#endif // DEBUG_DEV_CMCTR
+
+            answer_size = 2;
+            return answer_size;
+            }
+
+        case CMD_GET_PARAMS_CRC:
+            sprintf( ( char* ) outdata, "params_CRC=%d; request_id=%d\n", 
+                params_manager::get_instance()->solve_CRC(),
+                g_devices_request_id );
+
+            return strlen( ( char* ) outdata );
         }
 
     return answer_size;

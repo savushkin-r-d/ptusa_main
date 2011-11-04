@@ -205,6 +205,10 @@ class tech_object: public i_Lua_save_device
 
         int set_cmd( const char *prop, u_int idx, double val );
 
+        int save_params_as_Lua_str( char* str );
+
+        int set_param( int par_id, int index, double value );
+
     protected:
         u_int   number;         ///< Номер объекта.
         u_int_4 cmd;            ///< Хранение команды объекта.
@@ -223,6 +227,14 @@ class tech_object: public i_Lua_save_device
 
 
         smart_ptr< mode_manager > modes_manager; ///< Шаги режимов.
+
+        enum PARAMS_ID
+            {
+            ID_PAR_FLOAT = 1,
+            ID_RT_PAR_FLOAT,
+            ID_PAR_UINT,
+            ID_RT_PAR_UINT,            
+            };
     };
 //-----------------------------------------------------------------------------
 class tech_object_manager
@@ -259,6 +271,18 @@ class tech_object_manager
 
         /// @brief Добавление технологического объекта.
         void add_tech_object( tech_object* new_tech_object );
+
+        int save_params_as_Lua_str( char* str )
+            {
+            str[ 0 ] = 0;
+
+            for ( u_int i = 0; i < tech_objects.size(); i++ )
+                {
+                tech_objects[ i ]->save_params_as_Lua_str( str + strlen( str ) );
+                }
+
+            return 0;
+            }
 
 #ifdef __BORLANDC__
 #pragma option -w-inl

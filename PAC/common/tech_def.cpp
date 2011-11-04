@@ -429,7 +429,8 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
 
     if ( strcmp( prop, "S_PAR_F" ) == 0 )
         {
-        par_float[ idx - 1 ] = ( float ) val;
+        //par_float[ idx - 1 ] = ( float ) val;
+        par_float.save( idx - 1, ( float ) val );
         return 0;
         }
 
@@ -451,12 +452,71 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
         return 0;
         }
 
+    if ( strcmp( prop, "MODES_ERR" ) == 0 )
+        {
+        modes_manager->err_par[ idx - 1 ] = ( float ) val;
+        return 0;
+        }
+
 #ifdef DEBUG
         Print( "Eror tech_object::set_cmd(...), prop = \"%s\", idx = %u, val = %f\n",
             prop, idx, val );
 #endif // DEBUG
 
     return 1;
+    }
+//-----------------------------------------------------------------------------
+int tech_object::save_params_as_Lua_str( char* str )
+    {
+    sprintf( str, "params{ object = \'%s[%d]\', param_name = \'%s\', "
+        "par_id = %d,\n", 
+        get_object_name(), get_number(), "par_float", ID_PAR_FLOAT );
+    par_float.save_device_ex( str + strlen( str ), "", "values"  );
+    sprintf( str + strlen( str ) - 2, "%s", " }\n" );
+
+    sprintf( str + strlen( str ), "params{ object = \'%s[%d]\', param_name = \'%s\', "
+        "par_id = %d,\n", 
+        get_object_name(), get_number(), "rt_par_float", ID_RT_PAR_FLOAT );
+    rt_par_float.save_device_ex( str + strlen( str ), "", "values"  );
+    sprintf( str + strlen( str ) - 2, "%s", " }\n" );
+
+    sprintf( str + strlen( str ), "params{ object = \'%s[%d]\', param_name = \'%s\', "
+        "par_id = %d,\n", 
+        get_object_name(), get_number(), "par_uint", ID_PAR_UINT );
+    par_uint.save_device_ex( str + strlen( str ), "", "values"  );
+    sprintf( str + strlen( str ) - 2, "%s", " }\n" );
+
+    sprintf( str + strlen( str ), "params{ object = \'%s[%d]\', param_name = \'%s\', "
+        "par_id = %d,\n", 
+        get_object_name(), get_number(), "rt_par_uint", ID_RT_PAR_UINT );
+    rt_par_uint.save_device_ex( str + strlen( str ), "", "values"  );
+    sprintf( str + strlen( str ) - 2, "%s", " }\n" );
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int tech_object::set_param( int par_id, int index, double value )
+    {
+    switch ( par_id )
+        {
+    case ID_PAR_FLOAT:
+        par_float.save( index, ( float ) value );
+        break;
+
+    case ID_RT_PAR_FLOAT:
+        rt_par_float[ index ] = ( float ) value;
+        break;
+
+    case ID_PAR_UINT:
+        par_uint.save( index, ( u_int ) value );
+        break;
+
+    case ID_RT_PAR_UINT:
+        rt_par_uint[ index ] = ( u_int ) value;
+        break;
+        }
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

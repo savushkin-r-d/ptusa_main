@@ -1,4 +1,5 @@
 #include "param_ex.h"
+#include "lua_manager.h"
 
 auto_smart_ptr< params_manager > params_manager::instance = 0;
 
@@ -13,7 +14,7 @@ auto_smart_ptr< params_manager > params_manager::instance = 0;
 #include "PAC_info.h"
 #include "errors.h"
 //-----------------------------------------------------------------------------
-params_manager::params_manager()
+params_manager::params_manager(): par( 0 ) 
     {
     last_idx = 0;
     params_mem = NV_memory_manager::get_instance()->get_memory_block( 
@@ -145,11 +146,15 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
 
         PAC_info::get_instance()->reset_params();
 
+        par[ 0 ][ P_IS_RESET_PARAMS ] = 0;
+
         save();
 
         if ( check_CRC() == 0 )
             {
             Print( "PARAMS OK: PARAMS SUCCESFULLY REINITIALIZED.\n" );
+            par[ 0 ][ P_IS_RESET_PARAMS ] = 1;
+            par->save_all();
             }
         else
             {
@@ -234,7 +239,9 @@ params_manager* params_manager::get_instance()
     if ( 0 == is_init )
         {
         is_init = 1;
-        instance = new params_manager;
+        instance = new params_manager();
+
+        instance->par = new saved_params_u_int_4( P_COUNT );        
         }
     return instance;
     }
@@ -251,13 +258,53 @@ params_manager::~params_manager()
         delete CRC_mem;
         CRC_mem = 0;
         }
+
+    delete par;
+    par = 0;
     }
 //-----------------------------------------------------------------------------
-int params_manager::save_params_Lua( char* str )
+int params_manager::save_params_as_Lua_str( char* str )
     {
-    G_DEVICE_MANAGER()->save_params_Lua( str );
-
+    G_DEVICE_MANAGER()->save_params_as_Lua_str( str );
+    G_TECH_OBJECT_MNGR()->save_params_as_Lua_str( str + strlen( str ) );
+    
     return 0;
+    }
+//-----------------------------------------------------------------------------
+int params_manager::restore_params_from_server_backup( char *backup_str )
+    {
+    static bool is_init = false;
+    if ( false == is_init )
+        {
+        char *extra_cmd = "function params ( par_info )\n"
+            "\n"
+            "local cmd\n"
+            "--if par_info == nil then return\n"
+            "\n"
+            "for index, value in pairs( par_info.values ) do\n"
+            "    cmd = 'sys.'..par_info.object..':set_param('..par_info.par_id..','..\n"
+            "        ( index - 1 )..','..value..')'\n"
+            "    assert( loadstring( cmd ) )()\n"
+            "    end\n"
+            "end\n";
+
+        int res = lua_manager::get_instance()->exec_Lua_str( extra_cmd, 
+            "params_manager::restore_params_from_server_backup - init block");
+
+        is_init = true;
+        }
+
+
+    int res = lua_manager::get_instance()->exec_Lua_str( backup_str, 
+        "params_manager::restore_params_from_server_backup ");
+
+    if ( 0 == res )
+        {
+        par[ 0 ][ P_IS_RESET_PARAMS ] = 0;
+        par->save_all();
+        }
+
+    return res;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

@@ -257,6 +257,7 @@
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys.lua" />
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys_wago.lua" />
     <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg" />
+    <None Include="..\versions.txt" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="easy_lua.rc" />

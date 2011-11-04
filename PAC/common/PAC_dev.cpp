@@ -969,6 +969,42 @@ int digital_wago_device::save_device( char *buff, const char *prefix )
     return strlen( buff );
     }
 //-----------------------------------------------------------------------------
+int digital_wago_device::save_params_as_Lua_str( char* str )
+    {
+    if ( fb.is_null() )
+        {
+        return 0;
+        }
+
+    sprintf( str, "params{ object = \'%s[%d]\', param_name = \'%s\', "
+        "par_id = 1,\n", 
+        get_name(), get_n(), "fb_device_param" );
+
+    fb->par.save_device_ex( str + strlen( str ), "", "values" );
+
+    sprintf( str + strlen( str ) - 2, "%s", " }\n" );
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int digital_wago_device::set_param( int par_id, int index, double value )
+    {
+    switch ( par_id )
+        {
+    case 1:
+        fb->par.save( index, ( u_int_4 ) value );
+
+        break;
+
+    default:
+        device::set_param( par_id, index, value );
+        break;
+        }
+
+    return 0;
+    }
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
@@ -1399,6 +1435,35 @@ void AI_1::direct_set_value( float new_value )
     {    
     }
 #endif // DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
+int AI_1::save_params_as_Lua_str( char* str )
+    {
+    sprintf( str, "params{ object = \'%s[%d]\', param_name = \'%s\', "
+        "par_id = 1, ", get_name(), get_n(), "C0" );
+
+    par.save_device_ex( str + strlen( str ), "", "values" );
+
+    sprintf( str + strlen( str ) - 2, "%s", " }\n" );
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int AI_1::set_param( int par_id, int index, double value )
+    {
+    switch ( par_id )
+        {
+    case 1:
+        par.save( index, ( float ) value );
+
+        break;
+
+    default:
+        device::set_param( par_id, index, value );
+        break;
+        }
+
+    return 0;
+    }
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES

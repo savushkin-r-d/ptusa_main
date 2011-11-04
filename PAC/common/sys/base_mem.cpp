@@ -95,8 +95,8 @@ NV_memory_manager::NV_memory_manager() : PAC_NVRAM( 0 ),
     {
 #ifdef WIN_OS
     // FIXME Реализовать создание файла при его отсутствии.
-    PAC_NVRAM  = new SRAM( "./nvram.txt", 32768, 0, 30 );
-    PAC_EEPROM = new SRAM( "./nvram.txt", 32768, 31, 32767 ); 
+    PAC_NVRAM  = new SRAM( "./nvram.txt", 31, 0, 30 );
+    PAC_EEPROM = new SRAM( "./nvram.txt", 32737, 31, 32767 ); 
 #endif // WIN_OS
 
 #if defined LINUX_OS && defined PAC_PC
