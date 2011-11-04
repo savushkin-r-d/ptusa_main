@@ -993,8 +993,6 @@ bool mode_manager::check_on_mode( u_int_2 mode )
                     modes_on_FB.at( mode ).at( i )->get_n() );
 
                 err_par[ 0 ] = - ( float ) modes_on_FB.at( mode ).at( i )->get_n();
-
-                float tmp = err_par[ 0 ] ;
 #endif // DEBUG
                 return false;
                 }

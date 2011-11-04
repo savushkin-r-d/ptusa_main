@@ -276,7 +276,7 @@ int params_manager::restore_params_from_server_backup( char *backup_str )
     static bool is_init = false;
     if ( false == is_init )
         {
-        char *extra_cmd = "function params ( par_info )\n"
+        const char *extra_cmd = "function params ( par_info )\n"
             "\n"
             "local cmd\n"
             "--if par_info == nil then return\n"
@@ -288,7 +288,7 @@ int params_manager::restore_params_from_server_backup( char *backup_str )
             "    end\n"
             "end\n";
 
-        int res = lua_manager::get_instance()->exec_Lua_str( extra_cmd, 
+        lua_manager::get_instance()->exec_Lua_str( extra_cmd, 
             "params_manager::restore_params_from_server_backup - init block");
 
         is_init = true;
