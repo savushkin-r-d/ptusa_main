@@ -26,6 +26,7 @@ namespace visio_prj_designer
     public partial class main_ribbon
         {
         private Microsoft.Office.Interop.Visio.Application visio_app;
+        public Visio_project_designer.Form_modes Mode_List_Form;
 
         private void Ribbon1_Load( object sender, RibbonUIEventArgs e )
             {
@@ -139,7 +140,7 @@ namespace visio_prj_designer
             {
             if ( Globals.visio_addin.cur_sel_obj != null )
                 {
-                Visio_project_designer.Form_modes Mode_List_Form = new Visio_project_designer.Form_modes();
+                Mode_List_Form = new Visio_project_designer.Form_modes();
                 Mode_List_Form.Show();
                 }
             else

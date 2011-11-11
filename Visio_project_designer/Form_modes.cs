@@ -15,7 +15,12 @@ namespace Visio_project_designer
     {
     public partial class Form_modes : Form
         {
-        visio_addin addin = Globals.visio_addin;
+        public visio_addin addin = Globals.visio_addin;
+        public ListBox lbox;
+
+//        List<T_Object.mode> cur_oper;   //  Текущий (выбранный) режим или шаг
+
+
 
         public Form_modes()
             {
@@ -147,14 +152,15 @@ namespace Visio_project_designer
             {
             TreeNode cur_node = treeView_modes.SelectedNode;
 
-            addin.cur_mode = 0;
-            addin.cur_step = 0;
+            addin.cur_mode = -1;    //0
+            addin.cur_step = -1;    //0
 
             //  Определяем режим и шаг
             if ( cur_node.Level == 0 )
                 {
                 addin.cur_mode = cur_node.Index;
                 addin.cur_step = 0;
+                //cur_oper = addin.cur_sel_obj.mode_mas[ addin.cur_mode ];
 
                 //  Заполнение списков с устройствами
                 if ( addin.cur_mode < addin.cur_sel_obj.mode_mas.Count )
@@ -166,6 +172,7 @@ namespace Visio_project_designer
                 {
                 addin.cur_mode = cur_node.Parent.Index;
                 addin.cur_step = cur_node.Index;
+                //cur_oper = addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step[ addin.cur_step ];
 
                 //  Заполнение списков с устройствами
                 if ( ( addin.cur_mode < addin.cur_sel_obj.mode_mas.Count )
@@ -177,6 +184,58 @@ namespace Visio_project_designer
                 }
             }
 
+        private void listBox_open_DoubleClick( object sender, EventArgs e )
+            {
+            if ( listBox_open.SelectedIndex < 0 )
+                {
+                //  Запоминаем какой список выделен в данный момент
+                if ( sender is ListBox )
+                    {
+                    lbox = sender as ListBox;
+                    }
+                else
+                    {
+                    lbox = null;
+                    }
+
+                //  Показываем контекстное меню (указываем координаты)
+                contextMenuStrip1.Show( MousePosition.X, MousePosition.Y );
+                }
+            else
+                {
+                //  Определяем что за устройство выбрано (если выбрано)
+                if ( addin.cur_step >= 0 )
+                    {
+                    //cur_oper 
+                    }
+                //     listBox_open.SelectedIndex;
+
+
+                //  Переходим на схему
+
+                //  Выделяем устройство на схеме
+
+                }
+            }
+
+        private void listBox_open_Leave( object sender, EventArgs e )
+            {
+            //  Переход на другой элемент формы (снятие выделения)
+            
+            }
+
+        private void выбратьИзСпискаToolStripMenuItem_Click( object sender, EventArgs e )
+            {
+            //  Выбор устройств из общего списка устройств
+            Visio_project_designer.Form_device Dev_List_Form = new Visio_project_designer.Form_device();
+            Dev_List_Form.Show();
+            }
+
+        private void выбратьНаСхемеToolStripMenuItem_Click( object sender, EventArgs e )
+            {
+            //  Выбор (добавление) устройства путем выбора его на схеме
+
+            }
         //----------------------------------------------------------------------
 
         }

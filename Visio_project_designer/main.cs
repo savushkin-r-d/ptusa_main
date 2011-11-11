@@ -66,6 +66,7 @@ namespace visio_prj_designer
             IO_EDIT = 2, ///< Дополнительное окно.
             };
 
+        string xml_fileName;
 
         #region Поля для реализации функциональности вставки сразу нескольких модулей Wago.
 
@@ -176,6 +177,9 @@ namespace visio_prj_designer
             if ( doc.Template.Contains( "PTUSA project" ) )
                 {
                 vis_main_ribbon.show();
+
+                //  Считываем и преобразуем имя файла для сохранения данных объектов в одноименном XML
+                xml_fileName = doc.Path + doc.Name.Replace( ".vsd", ".xml" );
                 }
             else
                 {
@@ -193,6 +197,9 @@ namespace visio_prj_designer
             {
             if ( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
                 {
+                //  Считываем и преобразуем имя файла для сохранения данных объектов в одноименном XML
+                xml_fileName = target.Path + target.Name.Replace( ".vsd", ".xml" );
+
                 //                if( target.Template.Contains( "PTUSA project" ) )
                     {
                     vis_main_ribbon.show();
@@ -1183,9 +1190,10 @@ namespace visio_prj_designer
         /// <param name="XML"> I don't now </param>
         public void Read_XML_description( int XML )
             {
-            string fileName="..\\Visio docs\\description_device.xml";
-            XmlTextReader tr = new XmlTextReader( fileName );
-
+            //string fileName = "..\\Visio docs\\description_device.xml";
+            XmlTextReader tr = new XmlTextReader( xml_fileName );
+try
+{
             while (     !tr.EOF
                     &&  tr.Read()
                   )
@@ -1381,6 +1389,11 @@ namespace visio_prj_designer
                         }   //  switch
                     }   //  if
                 }   //  while
+    }
+catch ( Exception )
+    {
+    MessageBox.Show( "Ошибка чтения описания объектов (XML) : Узел " + tr.Name );
+    }
             }
 
         /// <summary> Запись данных класса в файл описания </summary>
@@ -1389,9 +1402,8 @@ namespace visio_prj_designer
         /// <param name="XML"> I don't now </param>
         public void Write_XML_description( string doc_name )
             {
-            string fileName="..\\Visio docs\\description_device.xml";
-
-            XmlTextWriter tw = new XmlTextWriter( fileName, null );
+            //string fileName="..\\Visio docs\\description_device.xml";
+            XmlTextWriter tw = new XmlTextWriter( xml_fileName, null );
 
             // задаём форматирование с отступом
             tw.Formatting = Formatting.Indented;
@@ -1424,58 +1436,6 @@ try
                         tw.WriteAttributeString( "mode-number", Convert.ToString( temp_mode.no ) );
 
                         write_device_list( tw, temp_mode );
-////  В отдельную функцию...
-                        
-//                            tw.WriteStartElement( "on_device" );
-//                            for ( int k = 1; k <= temp_mode.on_device.Count; k++ )
-//                                {
-//                                //  Проверяем есть ли это устройство еще на схеме
-//                                if ( g_devices.Contains( temp_mode.on_device[ k ] ) ) 
-//                                    {
-//                                    //  Если есть, то записываем данные в файл
-//                                    tw.WriteElementString( "V", temp_mode.on_device[ k ].get_name() );
-//                                    }
-//                                else 
-//                                    {
-//                                    //  Если устройства уже нет, то удаляем его из списка
-//                                    temp_mode.on_device.Remove( temp_mode.on_device[ k ] );
-//                                    }
-//                                }
-//                            tw.WriteEndElement();
-
-//                            tw.WriteStartElement( "off_device" );
-//                            for ( int k = 1; k <= temp_mode.off_device.Count; k++ )
-//                                {
-//                                //  Проверяем есть ли это устройство еще на схеме
-//                                if ( g_devices.Contains( temp_mode.off_device[ k ] ) )
-//                                    {
-//                                    //  Если есть, то записываем данные в файл
-//                                    tw.WriteElementString( "V", temp_mode.off_device[ k ].get_name() );
-//                                    }
-//                                else
-//                                    {
-//                                    //  Если устройства уже нет, то удаляем его из списка
-//                                    temp_mode.off_device.Remove( temp_mode.off_device[ k ] );
-//                                    }
-//                                }
-//                            tw.WriteEndElement();
-
-//                        //  Проходим по шагам
-//                        for ( int k = 0; k < temp_mode.step.Count; k++ )
-//                            {
-////                            if ( temp_mode.step[ k ] != null )
-//                                {
-//                                tw.WriteStartElement( "step" );
-//                                tw.WriteAttributeString( "step-name", temp_mode.step[ k ].name );
-//                                tw.WriteAttributeString( "step-number",Convert.ToString( temp_mode.step[ k ].no ) );
-                                
-//                                // Вызов отдельной функции для шага ()
-//                                //write_device_list( temp_mode.step[ k ] );
-
-//                                tw.WriteEndElement();
-//                                }
-//                            }
-////  ...В отдельную функцию
                         
                         tw.WriteEndElement();                   //  mode
                         }                                   //  for j ...
@@ -1487,9 +1447,9 @@ try
             //-------------------------------------
 
     }
-catch ( Exception err )
+catch ( Exception )
     {
-    MessageBox.Show( "Ошибка сохраниния описания объектов \n" + err );
+    MessageBox.Show( "Ошибка сохраниния описания объектов (XML)!" );
     }
 
             tw.WriteEndDocument();
