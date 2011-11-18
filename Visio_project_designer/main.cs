@@ -1259,6 +1259,19 @@ try
                             break;
 
                         case "on_device":
+                                                        
+                            //for ( int i = 0; i < mode_mas.Count; i++ )
+                            //    {
+                            //    mode_mas[ i ].TreeView_params = new TreeView();
+                            //    for ( int j = 0; j < mode_mas[ i ].step.Count; j++ )
+                            //        {
+                            //        mode_mas[ i ].step[ j ].TreeView_params = new TreeView();
+
+                            //        }
+                            //    }
+                            break;
+
+/*                        case "on_device":
                             try
                                 {
                                 do
@@ -1385,7 +1398,7 @@ try
                                 }
 
                             break;
-
+*/
                         }   //  switch
                     }   //  if
                 }   //  while

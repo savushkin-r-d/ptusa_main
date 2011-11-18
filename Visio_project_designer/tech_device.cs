@@ -29,11 +29,12 @@ namespace tech_device
 	/// <remarks> ASV, 07.09.2011. </remarks>
 	public class T_Object : device
 		{
-
         public struct mode
             {
             public int no;				//	Номер режима (шага)
             public string name;		//	Название режима (шага)
+
+            public TreeView TreeView_params;
 
             public List<device> on_device;	//	Устройства для включения
             public List<device> off_device;	//	Устройства для выключения
@@ -57,12 +58,13 @@ namespace tech_device
                 no = no_;
                 name = name_;
 
-                on_device = new List<device>();
-                off_device = new List<device>();
+                //on_device = new List<device>();
+                //off_device = new List<device>();
 
                 step = new List<mode>();
                 }
             }
+
 
         //	Режимы объекта
 		public List<mode> mode_mas;		//	Список режимов
@@ -90,7 +92,16 @@ namespace tech_device
             mode_mas = new List<mode>();
             param_list = new List<string[]>();
 //            param_list = new Dictionary<string, string>();
+
             }
+
+        //public add_mode(  )
+        //    {
+        //    mode new_mode = new mode();
+        //    new_mode.set_attribute( mode_mas.Count, "Новый режим" );
+
+        //    mode_mas.Add( new_mode );
+        //    }
 
 		}
     
