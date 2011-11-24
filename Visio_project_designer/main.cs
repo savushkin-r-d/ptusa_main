@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using System.Xml;
+using System.IO;
 
 using Visio  = Microsoft.Office.Interop.Visio;
 using Office = Microsoft.Office.Core;
@@ -37,6 +38,9 @@ namespace visio_prj_designer
 
         /// <summary> Флаг режима привязки канала к клемме модуля. </summary>
         internal bool is_selecting_clamp = false;
+
+        /// <summary> Флаг режима заполнения списков, путем выбора устройств на схеме. </summary>
+        internal bool is_selecting_dev = false;
 
         /// <summary> Лента дополнения. </summary>
         internal main_ribbon vis_main_ribbon;
@@ -147,6 +151,10 @@ namespace visio_prj_designer
             visio_app.MouseDown +=new 
                 Visio.EApplication_MouseDownEventHandler(
                  visio_addin___MouseDown );
+
+            visio_app.KeyDown += new
+                Visio.EApplication_KeyDownEventHandler(
+                 visio_addin___KeyDown );
 
             visio_app.DocumentSaved +=
                 new Microsoft.Office.Interop.Visio.EApplication_DocumentSavedEventHandler(
@@ -599,8 +607,60 @@ namespace visio_prj_designer
                         );
 
                     g_objects.Remove( cur_sel_obj );
+                    cur_sel_obj = null;
                     break;
                 }
+            }
+
+        /// <summary> Event handler. Реализована обработка нажатия клавиши </summary>
+        ///
+        /// <remarks> asv, 24.11.2011. </remarks>
+        ///
+        /// <param name="KeyCode">        The button code </param>
+        /// <param name="KeyButtonState"> State of the key button. </param>
+        /// <param name="CancelDefault">  [in,out] The cancel default. </param>
+        private void visio_addin___KeyDown( int KeyCode, int KeyButtonState, ref bool CancelDefault )
+            {
+            switch ( KeyCode )
+                {
+                case ( int ) Keys.Enter:
+                    //  Если это режим заполнения списков
+                    if ( is_selecting_dev == true )
+                        {
+                        try
+                            {
+                            Microsoft.Office.Interop.Visio.Shape selected_shape;
+
+                            for ( int i = 1; i <= visio_app.ActiveWindow.Selection.Count; i++ )
+                                {
+                                selected_shape = visio_app.ActiveWindow.Selection[ i ];
+
+                                if ( selected_shape != null )
+                                    {
+                                    cur_sel_dev = g_devices.Find( delegate( device dev )
+                                        {
+                                            return dev.get_shape() == selected_shape;
+                                        }
+                                        );
+
+                                    if  ( cur_sel_dev != null )
+                                        {
+                                        //  Добавляем выбранные устройства в список
+                                        vis_main_ribbon.Mode_List_Form.add_dev_in_tree( cur_sel_dev );
+                                        vis_main_ribbon.Mode_List_Form.Activate();
+                                        }
+                                    }
+                                }
+                            }
+                        catch ( Exception err )
+                            {
+                            MessageBox.Show( "X_X_X" + err );
+                            }
+                        //---------------------------------------------------------------------------
+                        }
+                    break;
+                }
+
             }
 
         /// <summary> Event handler. Реализована обработка клика мыши
@@ -767,7 +827,7 @@ namespace visio_prj_designer
             else
                 {
                 //  Обычный режим работы
-                cur_sel_obj = null;
+                //cur_sel_obj = null;
                 
                 Microsoft.Office.Interop.Visio.Shape selected_shape =
 				        window.Selection[ 1 ];
@@ -1183,6 +1243,30 @@ namespace visio_prj_designer
 
             }
 
+        public void Add_Node( XmlNode inXmlNode, TreeNode inTreeNode )
+        {
+            XmlNode xNode;
+            TreeNode tNode;
+            XmlNodeList nodeList;
+            
+            if ( inXmlNode.HasChildNodes )
+                {
+                nodeList = inXmlNode.ChildNodes;
+                for ( int i = 0; i <= nodeList.Count - 1; i++ )
+                    {
+                    xNode = inXmlNode.ChildNodes[ i ];
+                    inTreeNode.Nodes.Add( new TreeNode( xNode.Name ) );
+                    tNode = inTreeNode.Nodes[ i ];
+                    Add_Node( xNode, tNode );
+                    }
+                }
+            else
+                {
+                //inTreeNode.Nodes.Add( new TreeNode( inXmlNode.Name ) );
+                //inTreeNode.Text = ( inXmlNode.OuterXml ).Trim();
+                }
+        }
+
 
         /// <summary> Загрузка данных класса из файла описания </summary>
         /// <remarks> asvovik, 21.09.2011. </remarks>
@@ -1190,6 +1274,13 @@ namespace visio_prj_designer
         /// <param name="XML"> I don't now </param>
         public void Read_XML_description( int XML )
             {
+            XmlDocument dom = new XmlDocument();
+            dom.Load( xml_fileName );
+            XmlNodeList prop_list = dom.GetElementsByTagName( "Proporties" );
+            int i = -1;
+
+
+
             //string fileName = "..\\Visio docs\\description_device.xml";
             XmlTextReader tr = new XmlTextReader( xml_fileName );
 try
@@ -1228,6 +1319,7 @@ try
 
                                 //  Устанавлеиваем его атрибуты
                                 temp_mode.set_attribute( temp_no, temp_name );
+                                temp_mode.TreeView_params = new TreeView();
 
                                 //  Добавляем в список режимов
                                 cur_sel_obj.mode_mas.Add( temp_mode );
@@ -1249,6 +1341,7 @@ try
 
                                 //  Устанавлеиваем его атрибуты
                                 temp_step.set_attribute( temp_no, temp_name );
+                                temp_step.TreeView_params = new TreeView();
 
                                 //  Добавляем в список режимов
                                 cur_sel_obj.mode_mas[ cur_mode ].step.Add( temp_step );
@@ -1258,8 +1351,40 @@ try
                                 }
                             break;
 
-                        case "on_device":
-                                                        
+                        case "Proporties":
+//*************************************************** 
+            try
+            {
+            i++;
+            TreeView TV;
+
+            if ( cur_step >= 0 )
+                {
+                TV = cur_sel_obj.mode_mas[ cur_mode ].step[ cur_step ].TreeView_params;
+                }
+            else
+                {
+                TV = cur_sel_obj.mode_mas[ cur_mode ].TreeView_params;
+                }
+
+            TV.Nodes.Clear();
+            TV.Nodes.Add( "Proporties" );//new TreeNode( dom.DocumentElement.Name ) );
+            
+            TreeNode tNode = new TreeNode();
+            tNode = TV.Nodes[ 0 ];
+
+            //  Добавление узла с его подузлами
+            Add_Node( prop_list[ i ], tNode );
+
+            TV.ExpandAll();
+
+            }
+            catch (System.Exception ex)
+            {
+            MessageBox.Show( ex.Message );	
+            }
+//***************************************************                                  
+                       
                             //for ( int i = 0; i < mode_mas.Count; i++ )
                             //    {
                             //    mode_mas[ i ].TreeView_params = new TreeView();
@@ -1269,99 +1394,6 @@ try
 
                             //        }
                             //    }
-                            break;
-
-/*                        case "on_device":
-                            try
-                                {
-                                do
-                                    {
-                                    if ( tr.IsEmptyElement == true ) break;
-
-                                    tr.Read();
-
-                                    if ( tr.NodeType == XmlNodeType.Text )
-                                        {
-                                        //  Остается только список имен устройств
-                                        temp_name = tr.Value;
-
-                                        //  Ищем устройство с прочитанным именем
-                                        cur_sel_dev = g_devices.Find( delegate( device dev )
-                                            {
-                                                return dev.get_name() == temp_name;
-                                            }
-                                            );
-
-                                        //  Если есть такое устройство, то добавляем указатель на него в соотв. список
-                                        if ( cur_sel_obj != null
-                                            && cur_sel_dev != null )
-                                            {
-                                            if ( cur_step >= 0 )
-                                                {
-                                                cur_sel_obj.mode_mas[ cur_mode ].step[ cur_step ].
-                                                    on_device.Add( cur_sel_dev );
-                                                }
-                                            else
-                                                {
-                                                cur_sel_obj.mode_mas[ cur_mode ].on_device.Add( cur_sel_dev );
-                                                }
-                                            }
-                                        }
-                                    }
-                                while ( tr.Name != "on_device" );   //  EndElement
-
-                                }
-                            catch ( Exception err )
-                                {
-                                MessageBox.Show( "Ошибка чтения описания (on_device) \n" + err );
-                                }
-                            break;
-
-
-                        case "off_device":
-                            try
-                                {
-                                do
-                                    {
-                                    if ( tr.IsEmptyElement == true ) break;
-
-                                    tr.Read();
-
-                                    if ( tr.NodeType == XmlNodeType.Text )
-                                        {
-                                        //  Остается только список имен устройств
-                                        temp_name = tr.Value;
-
-                                        //  Ищем устройство с прочитанным именем
-                                        cur_sel_dev = g_devices.Find( delegate( device dev )
-                                            {
-                                                return dev.get_name() == temp_name;
-                                            }
-                                            );
-
-                                        //  Если есть такое устройство, то добавляем указатель на него в соотв. список
-                                        if ( cur_sel_obj != null
-                                            && cur_sel_dev != null )
-                                            {
-                                            if ( cur_step >= 0 )
-                                                {
-                                                cur_sel_obj.mode_mas[ cur_mode ].step[ cur_step ].
-                                                    off_device.Add( cur_sel_dev );
-                                                }
-                                            else
-                                                {
-                                                cur_sel_obj.mode_mas[ cur_mode ].off_device.Add( cur_sel_dev );
-                                                }
-                                            }
-                                        }
-                                    }
-                                while ( tr.Name != "off_device" );   //  EndElement
-
-                                }
-                            catch ( Exception err )
-                                {
-                                MessageBox.Show( "Ошибка чтения описания (off_device) \n" + err );
-                                }
                             break;
 
                         case "Parameters":
@@ -1398,7 +1430,8 @@ try
                                 }
 
                             break;
-*/
+
+
                         }   //  switch
                     }   //  if
                 }   //  while
@@ -1407,7 +1440,57 @@ catch ( Exception )
     {
     MessageBox.Show( "Ошибка чтения описания объектов (XML) : Узел " + tr.Name );
     }
+ 
+    tr.Close();
+
+//*************************************************** 
+/*            try
+            {
+
+            XmlDocument dom = new XmlDocument();
+            dom.Load( xml_fileName );
+
+            TreeView TV = g_objects[ 0 ].mode_mas[ 0 ].TreeView_params;
+            TV.Nodes.Clear();
+            TV.Nodes.Add( "Proporties" );//new TreeNode( dom.DocumentElement.Name ) );
+            
+            TreeNode tNode = new TreeNode();
+            tNode = TV.Nodes[ 0 ];
+
+            //  Добавление узла с его подузлами
+            Add_Node( dom.DocumentElement, tNode );
+
+            Add_Node_child(  )
+                    {
+                    XmlNodeList node_list = dom.SelectNodes( "//child" );
+                    XmlDocument cDom = new XmlDocument();
+                    cDom.LoadXml( "<children></children>" );
+                    
+                    foreach ( XmlNode node in node_list )
+                        {
+                        XmlNode newElem = cDom.CreateNode( XmlNodeType.Element, node.Name, node.NamespaceURI );
+                        newElem.InnerText = node.InnerText;
+                        cDom.DocumentElement.AppendChild( newElem );
+                        }
+
+                    TV.Nodes.Add( new TreeNode( cDom.DocumentElement.Name ) );
+                    tNode = TV.Nodes[ 1 ];
+                    Add_Node( cDom.DocumentElement, tNode );
+                    }
+  
+
+            TV.ExpandAll();
+
             }
+            catch (System.Exception ex)
+            {
+            MessageBox.Show( ex.Message );	
+            }
+ */ 
+//***************************************************
+            }
+        //---------------------------------------------------------------------
+
 
         /// <summary> Запись данных класса в файл описания </summary>
         /// <remarks> asvovik, 21.09.2011. </remarks>
@@ -1415,7 +1498,17 @@ catch ( Exception )
         /// <param name="XML"> I don't now </param>
         public void Write_XML_description( string doc_name )
             {
-            //string fileName="..\\Visio docs\\description_device.xml";
+//**********************************
+//            foreach ( TreeNode node in temp_mode.TreeView_params.Nodes )
+//                {
+//                StreamWriter sw = new StreamWriter( xml_fileName, false, System.Text.Encoding.UTF8 );
+//                sw.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
+//
+//                Parse_Node( sw, node );
+//                sw.Close();
+//                }
+//**********************************
+
             XmlTextWriter tw = new XmlTextWriter( xml_fileName, null );
 
             // задаём форматирование с отступом
@@ -1448,7 +1541,7 @@ try
                         tw.WriteAttributeString( "mode-name", temp_mode.name );
                         tw.WriteAttributeString( "mode-number", Convert.ToString( temp_mode.no ) );
 
-                        write_device_list( tw, temp_mode );
+                        write_prop_to_XML( tw, temp_mode );
                         
                         tw.WriteEndElement();                   //  mode
                         }                                   //  for j ...
@@ -1463,56 +1556,49 @@ try
 catch ( Exception )
     {
     MessageBox.Show( "Ошибка сохраниния описания объектов (XML)!" );
+    
+    tw.WriteEndDocument();
+    tw.Flush();
+    tw.Close();
     }
 
             tw.WriteEndDocument();
-
-            // очистить
-            tw.Flush();
-            tw.Close();
-
+            tw.Flush(); // очистить
+            tw.Close(); // закрыть
             }
+        //---------------------------------------------------------------------
 
 
         /// <summary> Запись данных режима в файл описания XML </summary>
         /// <remarks> asvovik, 29.09.2011. </remarks>
         ///
         /// <param name="XML">  </param>
-        public void write_device_list( XmlTextWriter tw, T_Object.mode temp_mode )
+        public void write_prop_to_XML( XmlTextWriter tw, T_Object.mode temp_mode )
             {
-            tw.WriteStartElement( "on_device" );
-            for ( int k = 0; k < temp_mode.on_device.Count; k++ )
-                {
-                //  Проверяем есть ли это устройство еще на схеме
-                if ( g_devices.Contains( temp_mode.on_device[ k ] ) )
-                    {
-                    //  Если есть, то записываем данные в файл
-                    tw.WriteElementString( "V", temp_mode.on_device[ k ].get_name() );
-                    }
-                else
-                    {
-                    //  Если устройства уже нет, то удаляем его из списка
-                    temp_mode.on_device.Remove( temp_mode.on_device[ k ] );
-                    }
-                }
-            tw.WriteEndElement();
+            TreeNode temp_node;
 
-            tw.WriteStartElement( "off_device" );
-            for ( int k = 0; k < temp_mode.off_device.Count; k++ )
+            tw.WriteStartElement( "Proporties" );
+
+            //  Проходим по типам характеристик
+            for ( int j = 0; j < temp_mode.TreeView_params.Nodes[ 0 ].Nodes.Count; j++ )
                 {
-                //  Проверяем есть ли это устройство еще на схеме
-                if ( g_devices.Contains( temp_mode.off_device[ k ] ) )
+                temp_node = temp_mode.TreeView_params.Nodes[ 0 ].Nodes[ j ];
+
+                tw.WriteStartElement( temp_node.Text );
+
+                //  Проходим по характеристикам
+                for ( int k = 0; k < temp_node.Nodes.Count; k++ )
                     {
-                    //  Если есть, то записываем данные в файл
-                    tw.WriteElementString( "V", temp_mode.off_device[ k ].get_name() );
-                    }
-                else
-                    {
-                    //  Если устройства уже нет, то удаляем его из списка
-                    temp_mode.off_device.Remove( temp_mode.off_device[ k ] );
-                    }
-                }
-            tw.WriteEndElement();
+                    tw.WriteStartElement( temp_node.Nodes[ k ].Text );
+
+                    write_device_to_XML( tw, temp_node.Nodes[ k ] );
+
+                    tw.WriteEndElement();   //  Характеристики
+                    }   //  for k
+                tw.WriteEndElement();   //  Типы характеристик
+                }   //  for j
+
+            tw.WriteEndElement();   //  Proporties
 
             //  Проходим по шагам
             if ( temp_mode.step != null )
@@ -1524,14 +1610,85 @@ catch ( Exception )
                     tw.WriteAttributeString( "step-number", Convert.ToString( temp_mode.step[ k ].no ) );
 
                     // Вызов отдельной функции для шага ()
-                    write_device_list( tw, temp_mode.step[ k ] );
+                    write_prop_to_XML( tw, temp_mode.step[ k ] );
 
-                    tw.WriteEndElement();
+                    tw.WriteEndElement();   //  step
+                    }
+                }
+            }
+
+
+        //---------------------------------------------------------------------
+/*
+        public void Parse_Node( StreamWriter sw, TreeNode tn )
+            {
+            //IEnumerator ie = tn.Nodes.GetEnumerator();
+
+            string parentnode = "";
+
+            parentnode = tn.Text;
+
+            //while ( ie.MoveNext() )
+            foreach ( TreeNode node in tn.Nodes )
+                {
+                if ( node.GetNodeCount( true ) == 0 )
+                    {
+                    sw.Write( node.Text );
+                    }
+                else
+                    {
+                    sw.Write( "<" + node.Text + ">" );
+                    }
+
+                if ( node.GetNodeCount( true ) > 0 )
+                    {
+                    Parse_Node( sw, node );
                     }
                 }
 
+            sw.Write( "</" + parentnode + ">" );
+            sw.Write( "" );
             }
+        //---------------------------------------------------------------------
+*/
 
+        public void write_device_to_XML( XmlTextWriter tw, TreeNode node )
+            {
+            //  Проходим по устройствам
+            for ( int l = 0; l < node.Nodes.Count; l++ )
+                {
+                tw.WriteStartElement( node.Nodes[ l ].Text );
+
+                //  Ищем заданное в данном списке устройство
+                device cur_dev = g_devices.Find( delegate( device dev )
+                    {
+                        return ( dev.get_name() ==
+                                 node.Nodes[ l ].Text );
+                    }
+                );
+
+                //  Проверяем есть ли это устройство еще на схеме
+                if ( cur_dev != null )
+                    {
+                    //  Если раскомментировать то устройства будут как папки в XML
+                    //tw.WriteElementString( cur_dev.get_name(), null );
+                    }
+                else
+                    {
+                    //  Если устройства уже нет, то удаляем его из списка
+                    node.Nodes[ l ].Remove();
+                    }
+
+                //  Проверяем есть ли дополнительные подустройства
+                if ( node.Nodes.Count > 0 )
+                    {
+                    write_device_to_XML( tw, node.Nodes[ l ] );
+                    }
+                
+                tw.WriteEndElement();   //  Устройства
+                }   //  for l
+            }
+        //---------------------------------------------------------------------
 
         #region VSTO generated code
 

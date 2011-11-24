@@ -242,6 +242,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Form_modes.resx">
       <DependentUpon>Form_modes.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="modules_count_enter.resx">
       <DependentUpon>modules_count_enter.cs</DependentUpon>

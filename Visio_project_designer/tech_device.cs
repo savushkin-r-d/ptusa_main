@@ -49,14 +49,13 @@ namespace tech_device
             //		Списки устройств (на вкл. и на выкл.)
             //	Пары сигналов (дублирование)
             //	...
-
-
+                            
             public List<mode> step;		//	Шаги режима
 
             public void set_attribute( int no_, string name_ )
                 {
                 no = no_;
-                name = name_;
+                if ( name_ != null ) name = name_;
 
                 //on_device = new List<device>();
                 //off_device = new List<device>();

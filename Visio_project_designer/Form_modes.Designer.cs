@@ -48,54 +48,60 @@
             treeNode9} );
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.TreeNode treeNode11 = new System.Windows.Forms.TreeNode( "Время работы режима" );
-            System.Windows.Forms.TreeNode treeNode12 = new System.Windows.Forms.TreeNode( "Номер следующего режима" );
+            System.Windows.Forms.TreeNode treeNode11 = new System.Windows.Forms.TreeNode( "Время_работы_режима" );
+            System.Windows.Forms.TreeNode treeNode12 = new System.Windows.Forms.TreeNode( "Номер_следующего_режима" );
             System.Windows.Forms.TreeNode treeNode13 = new System.Windows.Forms.TreeNode( "Параметры", new System.Windows.Forms.TreeNode[] {
             treeNode11,
             treeNode12} );
             System.Windows.Forms.TreeNode treeNode14 = new System.Windows.Forms.TreeNode( "Включать" );
             System.Windows.Forms.TreeNode treeNode15 = new System.Windows.Forms.TreeNode( "Выключать" );
-            System.Windows.Forms.TreeNode treeNode16 = new System.Windows.Forms.TreeNode( "Верхний флип" );
-            System.Windows.Forms.TreeNode treeNode17 = new System.Windows.Forms.TreeNode( "Нижний флип" );
-            System.Windows.Forms.TreeNode treeNode18 = new System.Windows.Forms.TreeNode( "Включать (зависит от типа)" );
-            System.Windows.Forms.TreeNode treeNode19 = new System.Windows.Forms.TreeNode( "Выключать (зависит от типа)" );
-            System.Windows.Forms.TreeNode treeNode20 = new System.Windows.Forms.TreeNode( "Включать по завершению" );
-            System.Windows.Forms.TreeNode treeNode21 = new System.Windows.Forms.TreeNode( "Устроойства", new System.Windows.Forms.TreeNode[] {
+            System.Windows.Forms.TreeNode treeNode16 = new System.Windows.Forms.TreeNode( "Верхний_флип" );
+            System.Windows.Forms.TreeNode treeNode17 = new System.Windows.Forms.TreeNode( "Нижний_флип" );
+            System.Windows.Forms.TreeNode treeNode18 = new System.Windows.Forms.TreeNode( "Включать_по_завершению" );
+            System.Windows.Forms.TreeNode treeNode19 = new System.Windows.Forms.TreeNode( "Устройства", new System.Windows.Forms.TreeNode[] {
             treeNode14,
             treeNode15,
             treeNode16,
             treeNode17,
-            treeNode18,
-            treeNode19,
-            treeNode20} );
-            System.Windows.Forms.TreeNode treeNode22 = new System.Windows.Forms.TreeNode( "Включающие режим" );
-            System.Windows.Forms.TreeNode treeNode23 = new System.Windows.Forms.TreeNode( "Выключающие режим" );
-            System.Windows.Forms.TreeNode treeNode24 = new System.Windows.Forms.TreeNode( "Необходимые для включения" );
-            System.Windows.Forms.TreeNode treeNode25 = new System.Windows.Forms.TreeNode( "Отправляемые при работе режима" );
-            System.Windows.Forms.TreeNode treeNode26 = new System.Windows.Forms.TreeNode( "Управляющие устройствами" );
-            System.Windows.Forms.TreeNode treeNode27 = new System.Windows.Forms.TreeNode( "Импульсные" );
-            System.Windows.Forms.TreeNode treeNode28 = new System.Windows.Forms.TreeNode( "Сигналы", new System.Windows.Forms.TreeNode[] {
+            treeNode18} );
+            System.Windows.Forms.TreeNode treeNode20 = new System.Windows.Forms.TreeNode( "Включающие_режим" );
+            System.Windows.Forms.TreeNode treeNode21 = new System.Windows.Forms.TreeNode( "Выключающие_режим" );
+            System.Windows.Forms.TreeNode treeNode22 = new System.Windows.Forms.TreeNode( "Необходимые_для_включения" );
+            System.Windows.Forms.TreeNode treeNode23 = new System.Windows.Forms.TreeNode( "Отправляемые_режимом" );
+            System.Windows.Forms.TreeNode treeNode24 = new System.Windows.Forms.TreeNode( "Управляющие_устройствами" );
+            System.Windows.Forms.TreeNode treeNode25 = new System.Windows.Forms.TreeNode( "Импульсные" );
+            System.Windows.Forms.TreeNode treeNode26 = new System.Windows.Forms.TreeNode( "Сигналы", new System.Windows.Forms.TreeNode[] {
+            treeNode20,
+            treeNode21,
             treeNode22,
             treeNode23,
             treeNode24,
-            treeNode25,
+            treeNode25} );
+            System.Windows.Forms.TreeNode treeNode27 = new System.Windows.Forms.TreeNode( "Блокирующие_режимы_гребенки" );
+            System.Windows.Forms.TreeNode treeNode28 = new System.Windows.Forms.TreeNode( "Блокирующие_режимы_танков" );
+            System.Windows.Forms.TreeNode treeNode29 = new System.Windows.Forms.TreeNode( "Блокирующие_устройства" );
+            System.Windows.Forms.TreeNode treeNode30 = new System.Windows.Forms.TreeNode( "Ограничения", new System.Windows.Forms.TreeNode[] {
+            treeNode27,
+            treeNode28,
+            treeNode29} );
+            System.Windows.Forms.TreeNode treeNode31 = new System.Windows.Forms.TreeNode( "Proporties", new System.Windows.Forms.TreeNode[] {
+            treeNode13,
+            treeNode19,
             treeNode26,
-            treeNode27} );
-            System.Windows.Forms.TreeNode treeNode29 = new System.Windows.Forms.TreeNode( "Блокирующие режимы гребенки" );
-            System.Windows.Forms.TreeNode treeNode30 = new System.Windows.Forms.TreeNode( "Блокирующие режимы танков" );
-            System.Windows.Forms.TreeNode treeNode31 = new System.Windows.Forms.TreeNode( "Блокирующие устройства" );
-            System.Windows.Forms.TreeNode treeNode32 = new System.Windows.Forms.TreeNode( "Ограничения", new System.Windows.Forms.TreeNode[] {
-            treeNode29,
-            treeNode30,
-            treeNode31} );
-            System.Windows.Forms.TreeNode treeNode33 = new System.Windows.Forms.TreeNode( "TreeView" );
+            treeNode30} );
+            System.Windows.Forms.TreeNode treeNode32 = new System.Windows.Forms.TreeNode( "TreeView" );
             this.contextMenuStrip2 = new System.Windows.Forms.ContextMenuStrip( this.components );
             this.add_prop = new System.Windows.Forms.ToolStripMenuItem();
             this.Devices = new System.Windows.Forms.ToolStripMenuItem();
             this.Signals = new System.Windows.Forms.ToolStripMenuItem();
             this.Conditions = new System.Windows.Forms.ToolStripMenuItem();
             this.Parameters = new System.Windows.Forms.ToolStripMenuItem();
+            this.set_def_prop = new System.Windows.Forms.ToolStripMenuItem();
             this.treeView_modes = new System.Windows.Forms.TreeView();
+            this.contextMenuStrip3 = new System.Windows.Forms.ContextMenuStrip( this.components );
+            this.ContextMenuStrip3_insert_mode = new System.Windows.Forms.ToolStripMenuItem();
+            this.ContextMenuStrip3_insert_step = new System.Windows.Forms.ToolStripMenuItem();
+            this.delete_mode = new System.Windows.Forms.ToolStripMenuItem();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.number = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.par_name = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -119,10 +125,10 @@
             this.treeView2 = new System.Windows.Forms.TreeView();
             this.label16 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
-            this.contextMenuStrip3 = new System.Windows.Forms.ContextMenuStrip( this.components );
-            this.insert_mode = new System.Windows.Forms.ToolStripMenuItem();
-            this.delete_mode = new System.Windows.Forms.ToolStripMenuItem();
+            this.contextMenuStrip4 = new System.Windows.Forms.ContextMenuStrip( this.components );
+            this.ContextMenuStrip4_select_on_map = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip2.SuspendLayout();
+            this.contextMenuStrip3.SuspendLayout();
             ( ( System.ComponentModel.ISupportInitialize ) ( this.dataGridView1 ) ).BeginInit();
             ( ( System.ComponentModel.ISupportInitialize ) ( this.numericUpDown1 ) ).BeginInit();
             this.tabControl1.SuspendLayout();
@@ -131,15 +137,16 @@
             ( ( System.ComponentModel.ISupportInitialize ) ( this.numericUpDown2 ) ).BeginInit();
             ( ( System.ComponentModel.ISupportInitialize ) ( this.dataGridView2 ) ).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
-            this.contextMenuStrip3.SuspendLayout();
+            this.contextMenuStrip4.SuspendLayout();
             this.SuspendLayout();
             // 
             // contextMenuStrip2
             // 
             this.contextMenuStrip2.Items.AddRange( new System.Windows.Forms.ToolStripItem[] {
-            this.add_prop} );
+            this.add_prop,
+            this.set_def_prop} );
             this.contextMenuStrip2.Name = "contextMenuStrip2";
-            this.contextMenuStrip2.Size = new System.Drawing.Size( 215, 26 );
+            this.contextMenuStrip2.Size = new System.Drawing.Size( 249, 48 );
             // 
             // add_prop
             // 
@@ -149,7 +156,7 @@
             this.Conditions,
             this.Parameters} );
             this.add_prop.Name = "add_prop";
-            this.add_prop.Size = new System.Drawing.Size( 214, 22 );
+            this.add_prop.Size = new System.Drawing.Size( 248, 22 );
             this.add_prop.Text = "Добавить характеристику";
             // 
             // Devices
@@ -192,11 +199,19 @@
             this.Parameters.Text = "Параметры";
             this.Parameters.CheckStateChanged += new System.EventHandler( this.ToolStripMenuItem_CheckStateChanged );
             // 
+            // set_def_prop
+            // 
+            this.set_def_prop.Name = "set_def_prop";
+            this.set_def_prop.Size = new System.Drawing.Size( 248, 22 );
+            this.set_def_prop.Text = "Характеристики по умолчанию";
+            this.set_def_prop.Click += new System.EventHandler( this.ContextMenuStrip2_set_def_prop_Click );
+            // 
             // treeView_modes
             // 
             this.treeView_modes.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
                         | System.Windows.Forms.AnchorStyles.Left )
                         | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.treeView_modes.ContextMenuStrip = this.contextMenuStrip3;
             this.treeView_modes.HideSelection = false;
             this.treeView_modes.Location = new System.Drawing.Point( 2, 21 );
             this.treeView_modes.Name = "treeView_modes";
@@ -229,6 +244,36 @@
             this.treeView_modes.BeforeSelect += new System.Windows.Forms.TreeViewCancelEventHandler( this.treeView_modes_BeforeSelect );
             this.treeView_modes.AfterSelect += new System.Windows.Forms.TreeViewEventHandler( this.treeView_modes_AfterSelect );
             this.treeView_modes.MouseClick += new System.Windows.Forms.MouseEventHandler( this.treeView_modes_MouseClick );
+            // 
+            // contextMenuStrip3
+            // 
+            this.contextMenuStrip3.Items.AddRange( new System.Windows.Forms.ToolStripItem[] {
+            this.ContextMenuStrip3_insert_mode,
+            this.ContextMenuStrip3_insert_step,
+            this.delete_mode} );
+            this.contextMenuStrip3.Name = "contextMenuStrip3";
+            this.contextMenuStrip3.Size = new System.Drawing.Size( 164, 92 );
+            // 
+            // ContextMenuStrip3_insert_mode
+            // 
+            this.ContextMenuStrip3_insert_mode.Name = "ContextMenuStrip3_insert_mode";
+            this.ContextMenuStrip3_insert_mode.Size = new System.Drawing.Size( 163, 22 );
+            this.ContextMenuStrip3_insert_mode.Text = "Вставить режим";
+            this.ContextMenuStrip3_insert_mode.Click += new System.EventHandler( this.ContextMenuStrip3_insert_mode_Click );
+            // 
+            // ContextMenuStrip3_insert_step
+            // 
+            this.ContextMenuStrip3_insert_step.Name = "ContextMenuStrip3_insert_step";
+            this.ContextMenuStrip3_insert_step.Size = new System.Drawing.Size( 163, 22 );
+            this.ContextMenuStrip3_insert_step.Text = "Вставить шаг";
+            this.ContextMenuStrip3_insert_step.Click += new System.EventHandler( this.ContextMenuStrip3_insert_step_Click );
+            // 
+            // delete_mode
+            // 
+            this.delete_mode.Name = "delete_mode";
+            this.delete_mode.Size = new System.Drawing.Size( 163, 22 );
+            this.delete_mode.Text = "Удалить режим";
+            this.delete_mode.Click += new System.EventHandler( this.ContextMenuStrip3_delete_mode_Click );
             // 
             // dataGridView1
             // 
@@ -386,24 +431,22 @@
             this.выбратьИзСпискаToolStripMenuItem.Name = "выбратьИзСпискаToolStripMenuItem";
             this.выбратьИзСпискаToolStripMenuItem.Size = new System.Drawing.Size( 177, 22 );
             this.выбратьИзСпискаToolStripMenuItem.Text = "Выбрать из списка";
-            this.выбратьИзСпискаToolStripMenuItem.Click += new System.EventHandler( this.выбратьИзСпискаToolStripMenuItem_Click );
             // 
             // выбратьНаСхемеToolStripMenuItem
             // 
             this.выбратьНаСхемеToolStripMenuItem.Name = "выбратьНаСхемеToolStripMenuItem";
             this.выбратьНаСхемеToolStripMenuItem.Size = new System.Drawing.Size( 177, 22 );
             this.выбратьНаСхемеToolStripMenuItem.Text = "Выбрать на схеме";
-            this.выбратьНаСхемеToolStripMenuItem.Click += new System.EventHandler( this.выбратьНаСхемеToolStripMenuItem_Click );
             // 
             // treeView_prop
             // 
+            this.treeView_prop.HideSelection = false;
             this.treeView_prop.Location = new System.Drawing.Point( 212, 21 );
             this.treeView_prop.Name = "treeView_prop";
             treeNode11.Name = "Node11";
-            treeNode11.Text = "Время работы режима";
+            treeNode11.Text = "Время_работы_режима";
             treeNode12.Name = "Node12";
-            treeNode12.Text = "Номер следующего режима";
-            treeNode13.ContextMenuStrip = this.contextMenuStrip2;
+            treeNode12.Text = "Номер_следующего_режима";
             treeNode13.Name = "Parameters";
             treeNode13.Text = "Параметры";
             treeNode14.Name = "Node13";
@@ -411,49 +454,43 @@
             treeNode15.Name = "Node14";
             treeNode15.Text = "Выключать";
             treeNode16.Name = "Node23";
-            treeNode16.Text = "Верхний флип";
+            treeNode16.Text = "Верхний_флип";
             treeNode17.Name = "Node24";
-            treeNode17.Text = "Нижний флип";
-            treeNode18.Name = "Node25";
-            treeNode18.Text = "Включать (зависит от типа)";
-            treeNode19.Name = "Node26";
-            treeNode19.Text = "Выключать (зависит от типа)";
-            treeNode20.Name = "Node27";
-            treeNode20.Text = "Включать по завершению";
-            treeNode21.ContextMenuStrip = this.contextMenuStrip2;
-            treeNode21.Name = "Devices";
-            treeNode21.Text = "Устроойства";
-            treeNode22.Name = "Node15";
-            treeNode22.Text = "Включающие режим";
-            treeNode23.Name = "Node16";
-            treeNode23.Text = "Выключающие режим";
-            treeNode24.Name = "Node29";
-            treeNode24.Text = "Необходимые для включения";
-            treeNode25.Name = "Node30";
-            treeNode25.Text = "Отправляемые при работе режима";
-            treeNode26.Name = "Node31";
-            treeNode26.Text = "Управляющие устройствами";
-            treeNode27.Name = "Node33";
-            treeNode27.Text = "Импульсные";
-            treeNode28.ContextMenuStrip = this.contextMenuStrip2;
-            treeNode28.Name = "Signals";
-            treeNode28.Text = "Сигналы";
-            treeNode29.Name = "Node17";
-            treeNode29.Text = "Блокирующие режимы гребенки";
-            treeNode30.Name = "Node18";
-            treeNode30.Text = "Блокирующие режимы танков";
-            treeNode31.Name = "Node34";
-            treeNode31.Text = "Блокирующие устройства";
-            treeNode32.ContextMenuStrip = this.contextMenuStrip2;
-            treeNode32.Name = "Conditions";
-            treeNode32.Text = "Ограничения";
+            treeNode17.Text = "Нижний_флип";
+            treeNode18.Name = "Node27";
+            treeNode18.Text = "Включать_по_завершению";
+            treeNode19.Name = "Devices";
+            treeNode19.Text = "Устройства";
+            treeNode20.Name = "Node15";
+            treeNode20.Text = "Включающие_режим";
+            treeNode21.Name = "Node16";
+            treeNode21.Text = "Выключающие_режим";
+            treeNode22.Name = "Node29";
+            treeNode22.Text = "Необходимые_для_включения";
+            treeNode23.Name = "Node30";
+            treeNode23.Text = "Отправляемые_режимом";
+            treeNode24.Name = "Node31";
+            treeNode24.Text = "Управляющие_устройствами";
+            treeNode25.Name = "Node33";
+            treeNode25.Text = "Импульсные";
+            treeNode26.Name = "Signals";
+            treeNode26.Text = "Сигналы";
+            treeNode27.Name = "Node17";
+            treeNode27.Text = "Блокирующие_режимы_гребенки";
+            treeNode28.Name = "Node18";
+            treeNode28.Text = "Блокирующие_режимы_танков";
+            treeNode29.Name = "Node34";
+            treeNode29.Text = "Блокирующие_устройства";
+            treeNode30.Name = "Conditions";
+            treeNode30.Text = "Ограничения";
+            treeNode31.Name = "Proporties";
+            treeNode31.Text = "Proporties";
             this.treeView_prop.Nodes.AddRange( new System.Windows.Forms.TreeNode[] {
-            treeNode13,
-            treeNode21,
-            treeNode28,
-            treeNode32} );
+            treeNode31} );
             this.treeView_prop.Size = new System.Drawing.Size( 264, 480 );
             this.treeView_prop.TabIndex = 10;
+            this.treeView_prop.AfterSelect += new System.Windows.Forms.TreeViewEventHandler( this.treeView_prop_AfterSelect );
+            this.treeView_prop.KeyDown += new System.Windows.Forms.KeyEventHandler( this.treeView_prop_KeyDown );
             this.treeView_prop.MouseClick += new System.Windows.Forms.MouseEventHandler( this.treeView_prop_MouseClick );
             // 
             // dev_list
@@ -471,12 +508,13 @@
             this.treeView2.CheckBoxes = true;
             this.treeView2.Location = new System.Drawing.Point( 491, 16 );
             this.treeView2.Name = "treeView2";
-            treeNode33.Name = "Node0";
-            treeNode33.Text = "TreeView";
+            treeNode32.Name = "Node0";
+            treeNode32.Text = "TreeView";
             this.treeView2.Nodes.AddRange( new System.Windows.Forms.TreeNode[] {
-            treeNode33} );
+            treeNode32} );
             this.treeView2.Size = new System.Drawing.Size( 183, 485 );
             this.treeView2.TabIndex = 15;
+            this.treeView2.Visible = false;
             // 
             // label16
             // 
@@ -496,26 +534,19 @@
             this.label17.TabIndex = 18;
             this.label17.Text = "Характеристики режима";
             // 
-            // contextMenuStrip3
+            // contextMenuStrip4
             // 
-            this.contextMenuStrip3.Items.AddRange( new System.Windows.Forms.ToolStripItem[] {
-            this.insert_mode,
-            this.delete_mode} );
-            this.contextMenuStrip3.Name = "contextMenuStrip3";
-            this.contextMenuStrip3.Size = new System.Drawing.Size( 164, 48 );
+            this.contextMenuStrip4.Items.AddRange( new System.Windows.Forms.ToolStripItem[] {
+            this.ContextMenuStrip4_select_on_map} );
+            this.contextMenuStrip4.Name = "contextMenuStrip4";
+            this.contextMenuStrip4.Size = new System.Drawing.Size( 173, 26 );
             // 
-            // insert_mode
+            // ContextMenuStrip4_select_on_map
             // 
-            this.insert_mode.Name = "insert_mode";
-            this.insert_mode.Size = new System.Drawing.Size( 163, 22 );
-            this.insert_mode.Text = "Вставить режим";
-            // 
-            // delete_mode
-            // 
-            this.delete_mode.Name = "delete_mode";
-            this.delete_mode.Size = new System.Drawing.Size( 163, 22 );
-            this.delete_mode.Text = "Удалить режим";
-            this.delete_mode.Click += new System.EventHandler( this.delete_mode_Click );
+            this.ContextMenuStrip4_select_on_map.Name = "ContextMenuStrip4_select_on_map";
+            this.ContextMenuStrip4_select_on_map.Size = new System.Drawing.Size( 172, 22 );
+            this.ContextMenuStrip4_select_on_map.Text = "Выбрать на схеме";
+            this.ContextMenuStrip4_select_on_map.Click += new System.EventHandler( this.ContextMenuStrip4_select_on_map_Click );
             // 
             // Form_modes
             // 
@@ -534,6 +565,7 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler( this.Form_modes_FormClosing );
             this.Shown += new System.EventHandler( this.Form_modes_Shown );
             this.contextMenuStrip2.ResumeLayout( false );
+            this.contextMenuStrip3.ResumeLayout( false );
             ( ( System.ComponentModel.ISupportInitialize ) ( this.dataGridView1 ) ).EndInit();
             ( ( System.ComponentModel.ISupportInitialize ) ( this.numericUpDown1 ) ).EndInit();
             this.tabControl1.ResumeLayout( false );
@@ -544,7 +576,7 @@
             ( ( System.ComponentModel.ISupportInitialize ) ( this.numericUpDown2 ) ).EndInit();
             ( ( System.ComponentModel.ISupportInitialize ) ( this.dataGridView2 ) ).EndInit();
             this.contextMenuStrip1.ResumeLayout( false );
-            this.contextMenuStrip3.ResumeLayout( false );
+            this.contextMenuStrip4.ResumeLayout( false );
             this.ResumeLayout( false );
             this.PerformLayout();
 
@@ -582,8 +614,12 @@
         private System.Windows.Forms.ToolStripMenuItem Conditions;
         private System.Windows.Forms.ToolStripMenuItem Parameters;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip3;
-        private System.Windows.Forms.ToolStripMenuItem insert_mode;
+        private System.Windows.Forms.ToolStripMenuItem ContextMenuStrip3_insert_mode;
         private System.Windows.Forms.ToolStripMenuItem delete_mode;
-        private System.Windows.Forms.TreeView treeView_prop;
+        public System.Windows.Forms.TreeView treeView_prop;
+        private System.Windows.Forms.ToolStripMenuItem ContextMenuStrip3_insert_step;
+        private System.Windows.Forms.ToolStripMenuItem set_def_prop;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip4;
+        private System.Windows.Forms.ToolStripMenuItem ContextMenuStrip4_select_on_map;
         }
     }

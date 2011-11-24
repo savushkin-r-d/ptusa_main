@@ -105,7 +105,6 @@ namespace visio_prj_designer
                 //visio_wnds[ ( short ) visio_addin.VISIO_WNDOWS.IO_EDIT ].Windows.ItemEx[ 
                 //    "Фигуры" ].Close();
 
-
                 visio_wnds[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].Page =
                     visio_app.ActiveDocument.Pages[ "Wago" ];
                 visio_wnds[ ( short ) visio_addin.VISIO_WNDOWS.IO_EDIT ].Page =
@@ -148,6 +147,17 @@ namespace visio_prj_designer
                 //  Не выбран сложный объект
                 MessageBox.Show( "Объект не содержит режимов." );
                 }
+            }
+
+        public void insert_dev_list()
+            {
+            Microsoft.Office.Interop.Visio.Windows visio_wnds = visio_app.Windows;
+
+            visio_wnds[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].Page =
+                        visio_app.ActiveDocument.Pages[ "Устройства" ];
+  
+            visio_wnds[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].Activate();
+            visio_wnds.Arrange();
             }
 
         }
