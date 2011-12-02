@@ -65,25 +65,25 @@ namespace Visio_project_designer
             //-----------------------------------------------------------------------
 
             //  Заполнение списка режимов и шагов для выбранного объекта
-            treeView_modes.Nodes.Clear();
+            Refresh_mode_tree();
+            //treeView_modes.Nodes.Clear();
 
-            for ( int i = 0; i < addin.cur_sel_obj.mode_mas.Count; i++ )
-                {
-                TreeNode temp_node = treeView_modes.Nodes.Add(
-                    Convert.ToString( addin.cur_sel_obj.mode_mas[ i ].no ) +
-                    ". " + addin.cur_sel_obj.mode_mas[ i ].name );
+            //for ( int i = 0; i < addin.cur_sel_obj.mode_mas.Count; i++ )
+            //    {
+            //    TreeNode temp_node = treeView_modes.Nodes.Add(
+            //        Convert.ToString( addin.cur_sel_obj.mode_mas[ i ].no ) +
+            //        ". " + addin.cur_sel_obj.mode_mas[ i ].name );
 
-                for ( int j = 0; j < addin.cur_sel_obj.mode_mas[ i ].step.Count; j++ )
-                    {
-                    temp_node.Nodes.Add(
-                        Convert.ToString( addin.cur_sel_obj.mode_mas[ i ].step[ j ].no ) +
-                        ". " + addin.cur_sel_obj.mode_mas[ i ].step[ j ].name );
-                    }
-                }
+            //    for ( int j = 0; j < addin.cur_sel_obj.mode_mas[ i ].step.Count; j++ )
+            //        {
+            //        temp_node.Nodes.Add(
+            //            Convert.ToString( addin.cur_sel_obj.mode_mas[ i ].step[ j ].no ) +
+            //            ". " + addin.cur_sel_obj.mode_mas[ i ].step[ j ].name );
+            //        }
+            //    }
 
             //  Заполнение таблицы с параметрами
             numericUpDown1.Value = addin.cur_sel_obj.param_list.Count;
-            //dataGridView1.RowCount = addin.cur_sel_obj.param_list.Count;
 
             for ( int i = 0; i < addin.cur_sel_obj.param_list.Count; i++ )
                 {
@@ -132,11 +132,20 @@ namespace Visio_project_designer
 */
                     //  Сохранение параметров
                     addin.cur_sel_obj.param_list.Clear();
-
+                    
                     for ( int i = 0; i < numericUpDown1.Value; i++ )
                         {
                         addin.cur_sel_obj.param_list.Add( new string[ 2 ] );
 
+                        if ( dataGridView1.Rows[ i ].Cells[ 1 ].Value == null )
+                            {
+                            dataGridView1.Rows[ i ].Cells[ 1 ].Value = "";
+                            }
+                        if ( dataGridView1.Rows[ i ].Cells[ 2 ].Value == null )
+                            {
+                            dataGridView1.Rows[ i ].Cells[ 2 ].Value = "";
+                            }   
+                        
                         addin.cur_sel_obj.param_list[ i ][ 0 ] =
                             dataGridView1.Rows[ i ].Cells[ 1 ].Value.ToString();
                         addin.cur_sel_obj.param_list[ i ][ 1 ] =
@@ -165,6 +174,7 @@ namespace Visio_project_designer
             switch ( key )
                 {
                 case MouseButtons.Left:
+                    
                     break;
 
                 case MouseButtons.Right:
@@ -190,12 +200,89 @@ namespace Visio_project_designer
                         addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step[ addin.cur_step ] );
                     }
                 }    
-            //=======================================================================
             }
+        //---------------------------------------------------------------------
+
+        private void treeView_modes_BeforeLabelEdit( object sender, NodeLabelEditEventArgs e )
+            {
+
+            //  Преобразовать надпись - оставить имя без номера
+            if ( ( ( TreeView ) sender ).SelectedNode.Level == 0 )
+                {   //  Режим
+                if ( e.Node.Text != addin.cur_sel_obj.mode_mas[ e.Node.Index ].name )
+                    {
+                    e.Node.EndEdit( false );
+                    e.Node.Text = addin.cur_sel_obj.mode_mas[ e.Node.Index ].name;
+                    }
+                }
+            else
+                {   //  Шаг
+                if ( e.Node.Text != 
+                        addin.cur_sel_obj.mode_mas[ e.Node.Parent.Index ].step[ e.Node.Index ].name )
+                    {
+                    e.Node.EndEdit( false );
+                    e.Node.Text = 
+                        addin.cur_sel_obj.mode_mas[ e.Node.Parent.Index ].step[ e.Node.Index ].name;
+                    }                
+                
+                }            
+            }
+        //---------------------------------------------------------------------
+
+        private void treeView_modes_AfterLabelEdit( object sender, NodeLabelEditEventArgs e )
+            {
+
+            if ( e.Label != null )
+                {
+                //e.Node.BeginEdit();
+
+                //  Переименовываем режим в структуре
+                if ( ( ( TreeView ) sender ).SelectedNode.Level == 0 )
+                    {   //  Режим
+                    addin.cur_sel_obj.
+                        mode_mas[ e.Node.Index ].
+                        set_attribute( e.Node.Index, e.Label );
+                    }
+                else
+                    {   //  Шаг
+                    addin.cur_sel_obj.
+                        mode_mas[ ( ( TreeView ) sender ).SelectedNode.Parent.Index ].
+                        step[ e.Node.Index ].
+                        set_attribute( e.Node.Index, e.Label );
+                    }
+
+                //e.Node.EndEdit( true );
+
+                //  Преобразовываем название режима в дереве
+                //Refresh_mode_tree();
+                e.Node.Text = e.Node.Index + ". " + e.Label;
+                e.Node.EndEdit( false );
+
+                //e.Node.Text.Substring( 5 );
+                //string.Format( {0, 3} - {1}, e.index, e.Node.Text );
+                }
+            }
+                                                                       
         //---------------------------------------------------------------------
 
         private void treeView_modes_AfterSelect( object sender, TreeViewEventArgs e )
             {
+
+            //e.Node.Text = cur_mode.name;
+
+            //  Преобразовать надпись - оставить имя без номера
+            //if ( ( ( TreeView ) sender ).SelectedNode.Level == 0 )
+            //    {   //  Режим
+            //    e.Node.Text = addin.cur_sel_obj.mode_mas[ e.Node.Index ].name;
+            //    }
+            //else
+            //    {   //  Шаг
+            //    e.Node.Text = addin.cur_sel_obj.
+            //        mode_mas[ ( ( TreeView ) sender ).SelectedNode.Parent.Index ].
+            //        step[ e.Node.Index ].name;
+            //    }
+            //-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+
             //  Работа с выбранным режимом
             cur_node = treeView_modes.SelectedNode;
 
@@ -238,44 +325,45 @@ namespace Visio_project_designer
             //  Выполнить проверку необходимости показывать все виды характеристик
             //      если ни одна хар-ка в группе не задана - снять галочку (в соотв. меню)
             //  *****
-/*            
-            bool flag_no_prop;      // флаг необходимости отображения данного типа хар-к 
-            //  Проходим по типам характеристик
-            for ( int i = 0; i < treeView_prop.Nodes.Count; i++ )
-                {
-                //  Выделяем текущий узел
-                treeView_prop.SelectedNode = treeView_prop.Nodes[ i ];
+            /*            
+                        bool flag_no_prop;      // флаг необходимости отображения данного типа хар-к 
+                        //  Проходим по типам характеристик
+                        for ( int i = 0; i < treeView_prop.Nodes.Count; i++ )
+                            {
+                            //  Выделяем текущий узел
+                            treeView_prop.SelectedNode = treeView_prop.Nodes[ i ];
                 
-                flag_no_prop = false;
+                            flag_no_prop = false;
                 
-                //  Проходим по характеристикам
-                for ( int j = 0; j < treeView_prop.Nodes[ i ].Nodes.Count; j++ )
-                    {
-                    //  Если в характеристике задан хотябы один элемент
-                    if ( treeView_prop.Nodes[ i ].Nodes[ j ].Nodes.Count > 0 )
-                        {
-                        flag_no_prop = true;    //  То устанавливаем флаг
-                        break;
-                        }
-                    }
+                            //  Проходим по характеристикам
+                            for ( int j = 0; j < treeView_prop.Nodes[ i ].Nodes.Count; j++ )
+                                {
+                                //  Если в характеристике задан хотябы один элемент
+                                if ( treeView_prop.Nodes[ i ].Nodes[ j ].Nodes.Count > 0 )
+                                    {
+                                    flag_no_prop = true;    //  То устанавливаем флаг
+                                    break;
+                                    }
+                                }
 
-                //  Находим соответствующий узлу дерева пункт меню  
-                ToolStripItem qwer = contextMenuStrip2.Items.Find( 
-                                                treeView_prop.Nodes[ i ].Name, true )[ 0 ];
+                            //  Находим соответствующий узлу дерева пункт меню  
+                            ToolStripItem qwer = contextMenuStrip2.Items.Find( 
+                                                            treeView_prop.Nodes[ i ].Name, true )[ 0 ];
                 
-                if ( flag_no_prop == true )
-                    {
-                    ((ToolStripMenuItem ) qwer).Checked = true;
-                    }
-                else
-                    {
-                    ((ToolStripMenuItem ) qwer).Checked = false;
-                    }
+                            if ( flag_no_prop == true )
+                                {
+                                ((ToolStripMenuItem ) qwer).Checked = true;
+                                }
+                            else
+                                {
+                                ((ToolStripMenuItem ) qwer).Checked = false;
+                                }
 
-                }
-*/
+                            }
+            */
 
             }
+        //---------------------------------------------------------------------
 
         private void treeView_prop_MouseClick( object sender, MouseEventArgs e )
             {
@@ -333,9 +421,25 @@ namespace Visio_project_designer
                 }
             }
 
+        //---------------------------------------------------------------------
+
+        private void dev_list_DoubleClick( object sender, EventArgs e )
+            {
+            device cur_dev = addin.g_devices.Find( delegate( device dev )
+                {
+                    return ( ( dev.get_name() + ": " + dev.description ) ==
+                             ( dev_list.SelectedItem.ToString() ) );
+                }
+            );
+
+            if ( cur_dev != null )
+                add_dev_in_tree( cur_dev );
+            }
+        //---------------------------------------------------------------------
+
         private void ContextMenuStrip2_set_def_prop_Click( object sender, EventArgs e )
             {
-            tech_device.T_Object.mode cur_mode;
+            tech_device.mode cur_mode = new tech_device.mode();
 
             if ( addin.cur_step >= 0 )
                 {
@@ -363,7 +467,7 @@ namespace Visio_project_designer
         private void ContextMenuStrip3_insert_mode_Click( object sender, EventArgs e )
             {
             //  Создаем режим
-            T_Object.mode new_mode = new T_Object.mode();
+            mode new_mode = new mode();
 
             //  НЕ создаем структуру характеристик режима, она будет создана
             //  автоматически при обновлении дерева характеристик если она == NULL
@@ -384,6 +488,8 @@ namespace Visio_project_designer
                                             treeView_modes.SelectedNode.Index + 1, new_mode );
                 }
 
+            new_mode = null;
+
             //  Обновляем дерево
             Refresh_mode_tree();
             }
@@ -392,7 +498,7 @@ namespace Visio_project_designer
         private void ContextMenuStrip3_insert_step_Click( object sender, EventArgs e )
             {
             //  Создаем режим
-            T_Object.mode new_mode = new T_Object.mode();
+            mode new_mode = new mode();
 
             //  Добавляем режим в структуру
             if ( treeView_modes.SelectedNode.Level == 0 )
@@ -412,6 +518,8 @@ namespace Visio_project_designer
                 addin.cur_sel_obj.mode_mas[ treeView_modes.SelectedNode.Parent.Index ].step.Insert(
                                             treeView_modes.SelectedNode.Index + 1, new_mode );
                 }
+
+            new_mode = null;
 
             //  Обновляем дерево
             Refresh_mode_tree();
@@ -434,15 +542,19 @@ namespace Visio_project_designer
             //treeView_modes.SelectedNode.Remove();
             Refresh_mode_tree();
             }
+        //---------------------------------------------------------------------
+
+        private void ContextMenuStrip3_update_Click( object sender, EventArgs e )
+            {
+            Refresh_mode_tree();
+            }
+        //---------------------------------------------------------------------
 
         private void ContextMenuStrip4_select_on_map_Click( object sender, EventArgs e )
             {
             //  Переход на схему и последующий выбор
             Globals.visio_addin.vis_main_ribbon.insert_dev_list();
             }
-
-        //---------------------------------------------------------------------
-
         //---------------------------------------------------------------------
 
         public void add_dev_in_tree( device dev )
@@ -457,32 +569,77 @@ namespace Visio_project_designer
             else
                 {
                 MessageBox.Show( "Не выбран список для заполнения устройствами!" );
+                //Globals.visio_addin.vis_main_ribbon.insert_dev_list();
+                //window.Selection[ 1 ] = cur_dev.get_shape();
                 }
             }
         //---------------------------------------------------------------------
 
-        private void dataGridView1_CellEnter( object sender, DataGridViewCellEventArgs e )
+        private void numericUpDown1_ValueChanged( object sender, EventArgs e )
             {
-            dataGridView1.Rows[ e.RowIndex ].Cells[ 0 ].Value = Convert.ToString( e.RowIndex );
-            }
-        //---------------------------------------------------------------------
+            dataGridView1.RowCount = Convert.ToInt32( numericUpDown1.Value ) + 1;
 
-        //---------------------------------------------------------------------
-
-        private void dev_list_DoubleClick( object sender, EventArgs e )
-            {
-            device cur_dev = addin.g_devices.Find( delegate( device dev )
+            for ( int i = 0; i < dataGridView1.RowCount; i++ )
                 {
-                    return ( ( dev.get_name() + ": " + dev.description ) ==
-                             ( dev_list.SelectedItem.ToString() ) );
+                dataGridView1.Rows[ i ].Cells[ 0 ].Value = Convert.ToString( i );
                 }
-            );
-
-            if ( cur_dev != null )
-                add_dev_in_tree( cur_dev );
             }
+        //---------------------------------------------------------------------
+
+        private void dataGridView1_RowsAdded( object sender, DataGridViewRowsAddedEventArgs e )
+            {
+            numericUpDown1.Value = dataGridView1.RowCount - 1;
+            }
+
+        private void dataGridView1_KeyDown( object sender, KeyEventArgs e )
+            {
+            switch ( e.KeyCode )
+                {
+                case Keys.Delete:
+                    //  Удаляет автоматически текущую строку
+                    break;
+
+                case Keys.Insert:
+                    if ( dataGridView1.CurrentRow != null )
+                        {
+                        //  Увеличиваем количество параметров
+                        numericUpDown1.Value = dataGridView1.RowCount;
+                        //  Вставляем новый параметр
+                        dataGridView1.Rows.Insert( dataGridView1.CurrentRow.Index, 1 );
+                        }
+                    break;
+                }
+            }
+
+        private void dataGridView2_RowsAdded( object sender, DataGridViewRowsAddedEventArgs e )
+            {
+            numericUpDown2.Value = dataGridView2.RowCount - 1;
+            }
+
+        private void dataGridView2_KeyDown( object sender, KeyEventArgs e )
+            {
+            switch ( e.KeyCode )
+                {
+                case Keys.Delete:
+                    //  Удаляет автоматически текущую строку
+                    break;
+
+                case Keys.Insert:
+                    if ( dataGridView2.CurrentRow != null )
+                        {
+                        //  Увеличиваем количество параметров
+                        numericUpDown2.Value = dataGridView2.RowCount;
+                        //  Вставляем новый параметр
+                        dataGridView2.Rows.Insert( dataGridView2.CurrentRow.Index, 1 );
+                        }
+                    break;
+                }
+            }
+
+        //---------------------------------------------------------------------
+
         //  Заполнение списков с устройствами
-        private void filling_dev_list( T_Object.mode cur_mode )
+        private void filling_dev_list( mode cur_mode )
             {
             //  Для работы с деревьями
 
@@ -521,21 +678,11 @@ namespace Visio_project_designer
             }
         //---------------------------------------------------------------------
 
-        private void numericUpDown1_ValueChanged( object sender, EventArgs e )
-            {
-            dataGridView1.RowCount = Convert.ToInt32( numericUpDown1.Value ) + 1;
-
-            for ( int i = 0; i < dataGridView1.RowCount; i++ )
-                {
-                dataGridView1.Rows[ i ].Cells[ 0 ].Value = Convert.ToString( i );
-                }
-            }
-        //---------------------------------------------------------------------
-
         private void Refresh_mode_tree()
             {
             TreeNode new_node;
 
+            treeView_modes.BeginUpdate();
             treeView_modes.Nodes.Clear();
 
             //  Добавляем режимы
@@ -543,25 +690,32 @@ namespace Visio_project_designer
                 {
                 addin.cur_sel_obj.mode_mas[ i ].set_attribute( i, null );
 
-                new_node = treeView_modes.Nodes.Add(
-                    addin.cur_sel_obj.mode_mas[ i ].no + ". " +
-                    addin.cur_sel_obj.mode_mas[ i ].name );
+                new_node = treeView_modes.Nodes.Add( string.Format( "{0,3} - {1}",
+                    addin.cur_sel_obj.mode_mas[ i ].no,
+                    addin.cur_sel_obj.mode_mas[ i ].name ) );
 
                 //  Добавляем шаги
                 for ( int j = 0; j < addin.cur_sel_obj.mode_mas[ i ].step.Count; j++ )
                     {
-                    addin.cur_sel_obj.mode_mas[ i ].step[ j ].set_attribute( i, null );
+                    addin.cur_sel_obj.mode_mas[ i ].step[ j ].set_attribute( j, null );
 
-                    new_node.Nodes.Add(
-                        addin.cur_sel_obj.mode_mas[ i ].step[ j ].no + ". " +
-                        addin.cur_sel_obj.mode_mas[ i ].step[ j ].name );
+                    new_node.Nodes.Add( string.Format( "{0,3} - {1}",
+                        addin.cur_sel_obj.mode_mas[ i ].step[ j ].no,
+                        addin.cur_sel_obj.mode_mas[ i ].step[ j ].name ) );
                     }
+                
+                treeView_modes.Nodes[ i ].Expand();
+                
+                new_node = null;
                 }
 
+            treeView_modes.EndUpdate();
+
+            //new_node = null;
             }
         //---------------------------------------------------------------------
 
-        private T_Object.mode Refresh_prop_tree( T_Object.mode cur_mode )
+        private mode Refresh_prop_tree( mode cur_mode )
             {
             treeView_prop.BeginUpdate();
             treeView_prop.Nodes.Clear();
@@ -596,7 +750,7 @@ namespace Visio_project_designer
             }
         //---------------------------------------------------------------------
 
-        private void Save_PropTree( T_Object.mode cur_mode )
+        private void Save_PropTree( mode cur_mode )
             {
             if ( cur_mode.TreeView_params != null )
                 {
@@ -635,52 +789,13 @@ namespace Visio_project_designer
 */
             }
         //---------------------------------------------------------------------
-
-        private void listBox_open_DoubleClick( object sender, EventArgs e )
-            {
-            /*            
-                        if ( listBox_open.SelectedIndex < 0 )
-                            {
-                            //  Запоминаем какой список выделен в данный момент
-                            if ( sender is ListBox )
-                                {
-                                lbox = sender as ListBox;
-                                }
-                            else
-                                {
-                                lbox = null;
-                                }
-
-                            //  Показываем контекстное меню (указываем координаты)
-                            contextMenuStrip1.Show( MousePosition.X, MousePosition.Y );
-                            }
-                        else
-                            {
-                            //  Определяем что за устройство выбрано (если выбрано)
-             // *****
-                            if ( addin.cur_step >= 0 )
-                                {
-                                //cur_oper 
-                                }
-                            //     listBox_open.SelectedIndex;
-
-
-                            //  Переходим на схему
-                            //  *****
- 
-                            //  Выделяем устройство на схеме
-                            //  *****
-
-                            }
-             */
-            }
-        //---------------------------------------------------------------------
-
+        
         private void listView_modes_SelectedIndexChanged( object sender, EventArgs e )
             {
             //  Заполнение списков устройств
 
             }
+
         //---------------------------------------------------------------------
 
         }

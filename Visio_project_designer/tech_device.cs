@@ -24,47 +24,53 @@ using wago;
 namespace tech_device
     {
 
+    public class mode
+        {
+        public int no;				//	Номер режима (шага)
+        public string name;		//	Название режима (шага)
+
+        public TreeView TreeView_params;
+
+        public List<device> on_device;	//	Устройства для включения
+        public List<device> off_device;	//	Устройства для выключения
+        //	...
+
+        //	Устройства флипования
+
+        //	Сигналы без которых нельзя вкл. режим
+        //	Сигналы автоматического вкл/выкл режима
+        //	Сигналы UPR (когда режим включен)
+        //	Сигналы ОС управляющие устройствами
+        //		Списки устройств (на вкл. и на выкл.)
+        //	Пары сигналов (дублирование)
+        //	...
+
+        public List<mode> step;		//	Шаги режима
+
+        public mode( int no_ = 0, string name_ = "New mode" )
+            {
+            TreeView_params = new TreeView();
+            step = new List<mode>();
+
+            set_attribute( no_, name_ );
+            }
+
+        public void set_attribute( int no_, string name_ )
+            {
+            no = no_;
+            if ( name_ != null )
+                name = name_;
+
+            if ( step == null )
+                step = new List<mode>();
+            }
+        }
+
 	/// <summary> Сложный объект (Гребенка, Танк). </summary>
 	///
 	/// <remarks> ASV, 07.09.2011. </remarks>
 	public class T_Object : device
 		{
-        public struct mode
-            {
-            public int no;				//	Номер режима (шага)
-            public string name;		//	Название режима (шага)
-
-            public TreeView TreeView_params;
-
-            public List<device> on_device;	//	Устройства для включения
-            public List<device> off_device;	//	Устройства для выключения
-            //	...
-
-            //	Устройства флипования
-
-            //	Сигналы без которых нельзя вкл. режим
-            //	Сигналы автоматического вкл/выкл режима
-            //	Сигналы UPR (когда режим включен)
-            //	Сигналы ОС управляющие устройствами
-            //		Списки устройств (на вкл. и на выкл.)
-            //	Пары сигналов (дублирование)
-            //	...
-                            
-            public List<mode> step;		//	Шаги режима
-
-            public void set_attribute( int no_, string name_ )
-                {
-                no = no_;
-                if ( name_ != null ) name = name_;
-
-                //on_device = new List<device>();
-                //off_device = new List<device>();
-
-                step = new List<mode>();
-                }
-            }
-
-
         //	Режимы объекта
 		public List<mode> mode_mas;		//	Список режимов
 

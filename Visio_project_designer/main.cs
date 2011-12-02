@@ -208,7 +208,7 @@ namespace visio_prj_designer
                 //  Считываем и преобразуем имя файла для сохранения данных объектов в одноименном XML
                 xml_fileName = target.Path + target.Name.Replace( ".vsd", ".xml" );
 
-                //                if( target.Template.Contains( "PTUSA project" ) )
+                    if( target.Template.Contains( "PTUSA project" ) )
                     {
                     vis_main_ribbon.show();
 
@@ -1088,6 +1088,9 @@ namespace visio_prj_designer
 								str = str.Replace( "\"", "" );
 								cell.Shape.Name = str.ToUpper();
 								cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
+
+                                cur_sel_dev.name = str.ToUpper();
+                                cur_sel_dev.n = n;
 								break;
 								}
 								
@@ -1129,12 +1132,13 @@ namespace visio_prj_designer
 								cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
 
 								cur_sel_dev.name = str.ToUpper();
+                                cur_sel_dev.n = n;
 								break;
 								}
 
 							MessageBox.Show( "Неверная маркировка клапана - \"" +
 								str + "\"!" );
-							cell.Shape.Cells[ "Prop.name" ].FormulaU = "\"V19\"";
+							cell.Shape.Cells[ "Prop.name" ].FormulaU = "\"V0\"";
 							break;
 
 						case "Prop.description":
@@ -1245,6 +1249,7 @@ namespace visio_prj_designer
 
         public void Add_Node( XmlNode inXmlNode, TreeNode inTreeNode )
         {
+            string temp;
             XmlNode xNode;
             TreeNode tNode;
             XmlNodeList nodeList;
@@ -1255,7 +1260,10 @@ namespace visio_prj_designer
                 for ( int i = 0; i <= nodeList.Count - 1; i++ )
                     {
                     xNode = inXmlNode.ChildNodes[ i ];
-                    inTreeNode.Nodes.Add( new TreeNode( xNode.Name ) );
+
+                    temp = xNode.Name.Replace( "__", "" );
+
+                    inTreeNode.Nodes.Add( new TreeNode( temp ) );
                     tNode = inTreeNode.Nodes[ i ];
                     Add_Node( xNode, tNode );
                     }
@@ -1315,11 +1323,11 @@ try
                             if ( cur_sel_obj != null )
                                 {
                                 //  Создаем новый режим
-                                T_Object.mode temp_mode = new T_Object.mode();
+                                mode temp_mode = new mode( temp_no, temp_name );
 
                                 //  Устанавлеиваем его атрибуты
-                                temp_mode.set_attribute( temp_no, temp_name );
-                                temp_mode.TreeView_params = new TreeView();
+                                //temp_mode.set_attribute( temp_no, temp_name );
+                                //temp_mode.TreeView_params = new TreeView();
 
                                 //  Добавляем в список режимов
                                 cur_sel_obj.mode_mas.Add( temp_mode );
@@ -1337,11 +1345,11 @@ try
                             if ( cur_sel_obj != null )
                                 {
                                 //  Создаем новый шаг
-                                T_Object.mode temp_step = new T_Object.mode();
+                                mode temp_step = new mode( temp_no, temp_name );
 
                                 //  Устанавлеиваем его атрибуты
-                                temp_step.set_attribute( temp_no, temp_name );
-                                temp_step.TreeView_params = new TreeView();
+                                //temp_step.set_attribute( temp_no, temp_name );
+                                //temp_step.TreeView_params = new TreeView();
 
                                 //  Добавляем в список режимов
                                 cur_sel_obj.mode_mas[ cur_mode ].step.Add( temp_step );
@@ -1535,7 +1543,7 @@ try
                         }
                     tw.WriteEndElement();   //  Parameters
 
-                    foreach ( T_Object.mode temp_mode in g_objects[ i ].mode_mas )
+                    foreach ( mode temp_mode in g_objects[ i ].mode_mas )
                         {                                                
                         tw.WriteStartElement( "mode" );
                         tw.WriteAttributeString( "mode-name", temp_mode.name );
@@ -1573,7 +1581,7 @@ catch ( Exception )
         /// <remarks> asvovik, 29.09.2011. </remarks>
         ///
         /// <param name="XML">  </param>
-        public void write_prop_to_XML( XmlTextWriter tw, T_Object.mode temp_mode )
+        public void write_prop_to_XML( XmlTextWriter tw, mode temp_mode )
             {
             TreeNode temp_node;
 
@@ -1657,7 +1665,7 @@ catch ( Exception )
             //  Проходим по устройствам
             for ( int l = 0; l < node.Nodes.Count; l++ )
                 {
-                tw.WriteStartElement( node.Nodes[ l ].Text );
+                tw.WriteStartElement( "__" + node.Nodes[ l ].Text + "__" );
 
                 //  Ищем заданное в данном списке устройство
                 device cur_dev = g_devices.Find( delegate( device dev )
