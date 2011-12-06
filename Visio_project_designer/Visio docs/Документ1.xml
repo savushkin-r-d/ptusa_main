@@ -2,10 +2,8 @@
 <application application-name="wago description">
   <project project-name="Документ1.vsd">
     <object object-name="&quot;Сыворотка_аааа&quot;" object-number="2">
-      <Parameters>
-        <Пар_2>2</Пар_2>
-        <Пар_11>11</Пар_11>
-      </Parameters>
+      <Parameters_temp />
+      <Parameters_save />
       <mode mode-name="first" mode-number="0">
         <Proporties>
           <on_device />
@@ -38,10 +36,14 @@
       </mode>
     </object>
     <object object-name="&quot;Grebenka&quot;" object-number="1">
-      <Parameters>
-        <Параметр_1>0</Параметр_1>
+      <Parameters_temp>
+        <Параметр_1>1</Параметр_1>
         <Параметр_2>2</Параметр_2>
-      </Parameters>
+      </Parameters_temp>
+      <Parameters_save>
+        <Параметр_4>qwer</Параметр_4>
+        <Параметр_5>2</Параметр_5>
+      </Parameters_save>
       <mode mode-name="first" mode-number="0">
         <Proporties>
           <Параметры>

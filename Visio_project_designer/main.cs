@@ -942,7 +942,6 @@ namespace visio_prj_designer
 					break;
 
 				//	Изменение свойств простых устройств
-				case "N":
 				case "MIX":
 				case "CTR":
 				case "TE":
@@ -1052,6 +1051,7 @@ namespace visio_prj_designer
 
 
                 case "V":
+                case "N":
                     //Поиск по shape объекта device.
                     cur_sel_dev = g_devices.Find( delegate( device dev )
                     {
@@ -1066,11 +1066,24 @@ namespace visio_prj_designer
 
 
 						case "Prop.name":
-							string str = cell.Shape.Cells[ "Prop.name" ].Formula;
-
+							Regex rex, rex2;
+                            
+                            string str = cell.Shape.Cells[ "Prop.name" ].Formula;
+                                      
 							//Первый вариант маркировки клапана - 1V12.
-							Regex rex = new Regex( @"\b([0-9]{0,4})V([0-9]{1,2})\b",
-								RegexOptions.IgnoreCase );
+                            if ( cell.Shape.Data1 == "V" )
+                                {
+                                rex = new Regex( 
+                                    @"\b([0-9]{0,4})V([0-9]{1,2})\b",
+                                    RegexOptions.IgnoreCase );
+                                } 
+                            else
+                                {
+                                //    Для насоса N  
+                                rex = new Regex( @"\b([0-9]{0,4})N([0-9]{1,2})\b",
+                                    RegexOptions.IgnoreCase );
+                                }
+                            
 							if ( rex.IsMatch( str ) )
 								{
 								Match mtc = rex.Match( str );
@@ -1095,8 +1108,20 @@ namespace visio_prj_designer
 								}
 								
 							//Второй вариант маркировки клапана - S4V12.
-							Regex rex2 = new Regex( @"\b([a-z]{1})([0-9]{1})V([0-9]{1,2})\b",
-								RegexOptions.IgnoreCase );
+                            if ( cell.Shape.Data1 == "V" )
+                                {
+                                rex2 = new Regex(
+                                    @"\b([a-z]{1})([0-9]{1})V([0-9]{1,2})\b",
+                                    RegexOptions.IgnoreCase );
+                                }
+                            else
+                                {
+                                //    Для насоса N  
+                                rex2 = new Regex(
+                                    @"\b([a-z]{1})([0-9]{1})N([0-9]{1,2})\b",
+                                    RegexOptions.IgnoreCase );
+                                }                            
+
 							if ( rex2.IsMatch( str ) )
 								{
 								Match mtc = rex2.Match( str );
@@ -1136,9 +1161,48 @@ namespace visio_prj_designer
 								break;
 								}
 
-							MessageBox.Show( "Неверная маркировка клапана - \"" +
-								str + "\"!" );
-							cell.Shape.Cells[ "Prop.name" ].FormulaU = "\"V0\"";
+                            //Третий вариант маркировки клапана - V12345.
+                            if ( cell.Shape.Data1 == "V" )
+                                {
+                                rex = new Regex(
+                                    @"\b(V([0-9]{1,2,3,4,5})\b",
+                                    RegexOptions.IgnoreCase );
+                                }
+                            else
+                                {
+                                //    Для насоса N  
+                                rex = new Regex( @"\b(N([0-9]{1,2,3,4,5})\b",
+                                    RegexOptions.IgnoreCase );
+                                }
+
+                            if ( rex.IsMatch( str ) )
+                                {
+                                Match mtc = rex.Match( str );
+
+                                string n_part_1 = mtc.Groups[ 1 ].ToString();
+                                //string n_part_2 = mtc.Groups[ 2 ].ToString();
+                                //if ( n_part_1 == "" )
+                                //    n_part_1 = "0";
+
+                                int n = Convert.ToUInt16( n_part_1 );
+
+                                cell.Shape.Cells[ "Prop.number" ].FormulaU = n.ToString();
+
+                                str = str.Replace( "\"", "" );
+                                cell.Shape.Name = str.ToUpper();
+                                cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
+
+                                cur_sel_dev.name = str.ToUpper();
+                                cur_sel_dev.n = n;
+                                break;
+                                }
+
+							MessageBox.Show( "Неверная маркировка клапана - \"" + str + "\"!" );
+
+                            if ( cell.Shape.Cells[ "Prop.name" ].FormulaU == "" )
+                                {
+                                cell.Shape.Cells[ "Prop.name" ].FormulaU = "\"" + cell.Shape.Data1 + "0\"";
+                                }
 							break;
 
 						case "Prop.description":
@@ -1404,7 +1468,7 @@ try
                             //    }
                             break;
 
-                        case "Parameters":
+                        case "Parameters_temp":
                             if ( cur_sel_obj != null )
                                 {
 
@@ -1425,7 +1489,7 @@ try
 
                                         case XmlNodeType.Text:
                                             temp_str[ 1 ] = tr.Value;
-                                            cur_sel_obj.param_list.Add( temp_str );
+                                            cur_sel_obj.param_list_temp.Add( temp_str );
 
                                             temp_str = new string[ 2 ];
                                             temp_str[ 0 ] = "0";
@@ -1434,9 +1498,43 @@ try
                                         }
 
                                     }
-                                while ( tr.Name != "Parameters" );   //  EndElement
+                                while ( tr.Name != "Parameters_temp" );   //  EndElement
                                 }
+                            break;
 
+                        case "Parameters_save":
+                            if ( cur_sel_obj != null )
+                                {
+
+                                string[] temp_str = { "0", "0" };
+
+                                do
+                                    {
+                                    if ( tr.IsEmptyElement == true )
+                                        break;
+
+                                    tr.Read();
+
+                                    switch ( tr.NodeType )
+                                        {
+                                        case XmlNodeType.Element:
+                                            temp_str[ 0 ] = tr.Name;
+                                            //                                        string sss = tr.Name;
+                                            break;
+
+                                        case XmlNodeType.Text:
+                                            temp_str[ 1 ] = tr.Value;
+                                            cur_sel_obj.param_list_save.Add( temp_str );
+
+                                            temp_str = new string[ 2 ];
+                                            temp_str[ 0 ] = "0";
+                                            temp_str[ 1 ] = "0";
+                                            break;
+                                        }
+
+                                    }
+                                while ( tr.Name != "Parameters_save" );   //  EndElement
+                                }
                             break;
 
 
@@ -1536,12 +1634,19 @@ try
                     tw.WriteAttributeString( "object-name", g_objects[ i ].name );
                     tw.WriteAttributeString( "object-number", Convert.ToString( g_objects[ i ].n ) );
 
-                    tw.WriteStartElement( "Parameters" );
-                    for ( int j = 0; j < g_objects[ i ].param_list.Count; j++ )
+                    tw.WriteStartElement( "Parameters_temp" );
+                    for ( int j = 0; j < g_objects[ i ].param_list_temp.Count; j++ )
                         {
-                        tw.WriteElementString( g_objects[ i ].param_list[ j ][ 0 ], g_objects[ i ].param_list[ j ][ 1 ] );
+                        tw.WriteElementString( g_objects[ i ].param_list_temp[ j ][ 0 ], g_objects[ i ].param_list_temp[ j ][ 1 ] );
                         }
-                    tw.WriteEndElement();   //  Parameters
+                    tw.WriteEndElement();   //  Parameters_temp
+
+                    tw.WriteStartElement( "Parameters_save" );
+                    for ( int j = 0; j < g_objects[ i ].param_list_save.Count; j++ )
+                        {
+                        tw.WriteElementString( g_objects[ i ].param_list_save[ j ][ 0 ], g_objects[ i ].param_list_save[ j ][ 1 ] );
+                        }
+                    tw.WriteEndElement();   //  Parameters_save
 
                     foreach ( mode temp_mode in g_objects[ i ].mode_mas )
                         {                                                

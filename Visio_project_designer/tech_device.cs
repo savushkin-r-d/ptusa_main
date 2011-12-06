@@ -76,9 +76,10 @@ namespace tech_device
 
 
 		//	Параметры объекта
-		public List<string[]> param_list;	//	Список параметров param_list< Название, Значение >
-
-		//	Список ошибок 
+		public List<string[]> param_list_temp;	//	Список параметров param_list< Название, Значение >
+        public List<string[]> param_list_save;	//	Список параметров param_list< Название, Значение >
+		
+        //	Список ошибок 
 //		public enum ERROR_LIST
 //		public List<string> ERROR_LIST
 //		public Dictionary<int, string> ERROR_LIST 
@@ -95,19 +96,42 @@ namespace tech_device
         public T_Object( Visio.Shape shape, PAC pac ):base( shape, pac )
             {
             mode_mas = new List<mode>();
-            param_list = new List<string[]>();
-//            param_list = new Dictionary<string, string>();
+            param_list_temp = new List<string[]>();
+            param_list_save = new List<string[]>();
 
             }
 
-        //public add_mode(  )
-        //    {
-        //    mode new_mode = new mode();
-        //    new_mode.set_attribute( mode_mas.Count, "Новый режим" );
+/*      //  Копирование объекта
+        public void copy_obj_config_to( ref T_Object obj_to )
+            {
+            this.name = obj_to.name;
 
-        //    mode_mas.Add( new_mode );
-        //    }
+            for ( int i = 0; i < mode_mas.Count; i++ )
+                {
+                mode temp = new mode();
 
+                temp.no = this.mode_mas[ i ].no;
+                temp.name = this.mode_mas[ i ].name;
+
+
+                obj_to.mode_mas[ i ].TreeView_params.Nodes.Clear();
+                for ( int j = 0; j < this.mode_mas[ i ].TreeView_params.Nodes.Count; j++ )
+                    {
+                    obj_to.mode_mas[ i ].TreeView_params.Nodes.Add(
+                        ( ( TreeNode ) cur_mode.TreeView_params.Nodes[ i ].Clone() ) );
+                        temp.TreeView_params.;
+                    }
+                                         
+                for (  )
+                    {
+                    temp.step;
+                    }
+                
+                obj_to.mode_mas.Add( temp );
+                }
+
+            }
+*/
 		}
     
 //-----------------------------------------------------------------------------	   

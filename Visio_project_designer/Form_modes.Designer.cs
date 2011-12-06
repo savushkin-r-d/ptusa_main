@@ -29,67 +29,67 @@
         private void InitializeComponent()
             {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.TreeNode treeNode55 = new System.Windows.Forms.TreeNode( "Подача в танк" );
-            System.Windows.Forms.TreeNode treeNode56 = new System.Windows.Forms.TreeNode( "Подача в байпас" );
-            System.Windows.Forms.TreeNode treeNode57 = new System.Windows.Forms.TreeNode( "Дренаж" );
-            System.Windows.Forms.TreeNode treeNode58 = new System.Windows.Forms.TreeNode( "Мойка", new System.Windows.Forms.TreeNode[] {
-            treeNode55,
-            treeNode56,
-            treeNode57} );
-            System.Windows.Forms.TreeNode treeNode59 = new System.Windows.Forms.TreeNode( "Подача в дренаж" );
-            System.Windows.Forms.TreeNode treeNode60 = new System.Windows.Forms.TreeNode( "Подача в Д+Т" );
-            System.Windows.Forms.TreeNode treeNode61 = new System.Windows.Forms.TreeNode( "Подача в танк" );
-            System.Windows.Forms.TreeNode treeNode62 = new System.Windows.Forms.TreeNode( "Наполнение", new System.Windows.Forms.TreeNode[] {
-            treeNode59,
-            treeNode60,
-            treeNode61} );
-            System.Windows.Forms.TreeNode treeNode63 = new System.Windows.Forms.TreeNode( "Выдача" );
-            System.Windows.Forms.TreeNode treeNode64 = new System.Windows.Forms.TreeNode( "Выдача", new System.Windows.Forms.TreeNode[] {
-            treeNode63} );
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.TreeNode treeNode33 = new System.Windows.Forms.TreeNode( "Время_работы_режима" );
-            System.Windows.Forms.TreeNode treeNode34 = new System.Windows.Forms.TreeNode( "Номер_следующего_режима" );
-            System.Windows.Forms.TreeNode treeNode35 = new System.Windows.Forms.TreeNode( "Параметры", new System.Windows.Forms.TreeNode[] {
-            treeNode33,
-            treeNode34} );
-            System.Windows.Forms.TreeNode treeNode36 = new System.Windows.Forms.TreeNode( "Включать" );
-            System.Windows.Forms.TreeNode treeNode37 = new System.Windows.Forms.TreeNode( "Выключать" );
-            System.Windows.Forms.TreeNode treeNode38 = new System.Windows.Forms.TreeNode( "Верхний_флип" );
-            System.Windows.Forms.TreeNode treeNode39 = new System.Windows.Forms.TreeNode( "Нижний_флип" );
-            System.Windows.Forms.TreeNode treeNode40 = new System.Windows.Forms.TreeNode( "Включать_по_завершению" );
-            System.Windows.Forms.TreeNode treeNode41 = new System.Windows.Forms.TreeNode( "Устройства", new System.Windows.Forms.TreeNode[] {
-            treeNode36,
-            treeNode37,
-            treeNode38,
-            treeNode39,
-            treeNode40} );
-            System.Windows.Forms.TreeNode treeNode42 = new System.Windows.Forms.TreeNode( "Включающие_режим" );
-            System.Windows.Forms.TreeNode treeNode65 = new System.Windows.Forms.TreeNode( "Выключающие_режим" );
-            System.Windows.Forms.TreeNode treeNode66 = new System.Windows.Forms.TreeNode( "Необходимые_для_включения" );
-            System.Windows.Forms.TreeNode treeNode67 = new System.Windows.Forms.TreeNode( "Отправляемые_режимом" );
-            System.Windows.Forms.TreeNode treeNode68 = new System.Windows.Forms.TreeNode( "Управляющие_устройствами" );
-            System.Windows.Forms.TreeNode treeNode69 = new System.Windows.Forms.TreeNode( "Импульсные" );
-            System.Windows.Forms.TreeNode treeNode70 = new System.Windows.Forms.TreeNode( "Сигналы", new System.Windows.Forms.TreeNode[] {
-            treeNode42,
-            treeNode65,
-            treeNode66,
-            treeNode67,
-            treeNode68,
-            treeNode69} );
-            System.Windows.Forms.TreeNode treeNode71 = new System.Windows.Forms.TreeNode( "Блокирующие_режимы_гребенки" );
-            System.Windows.Forms.TreeNode treeNode72 = new System.Windows.Forms.TreeNode( "Блокирующие_режимы_танков" );
-            System.Windows.Forms.TreeNode treeNode73 = new System.Windows.Forms.TreeNode( "Блокирующие_устройства" );
-            System.Windows.Forms.TreeNode treeNode74 = new System.Windows.Forms.TreeNode( "Ограничения", new System.Windows.Forms.TreeNode[] {
-            treeNode71,
-            treeNode72,
-            treeNode73} );
-            System.Windows.Forms.TreeNode treeNode75 = new System.Windows.Forms.TreeNode( "Proporties", new System.Windows.Forms.TreeNode[] {
-            treeNode35,
-            treeNode41,
-            treeNode70,
-            treeNode74} );
-            System.Windows.Forms.TreeNode treeNode76 = new System.Windows.Forms.TreeNode( "TreeView" );
+            System.Windows.Forms.TreeNode treeNode1 = new System.Windows.Forms.TreeNode( "Подача в танк" );
+            System.Windows.Forms.TreeNode treeNode2 = new System.Windows.Forms.TreeNode( "Подача в байпас" );
+            System.Windows.Forms.TreeNode treeNode3 = new System.Windows.Forms.TreeNode( "Дренаж" );
+            System.Windows.Forms.TreeNode treeNode4 = new System.Windows.Forms.TreeNode( "Мойка", new System.Windows.Forms.TreeNode[] {
+            treeNode1,
+            treeNode2,
+            treeNode3} );
+            System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode( "Подача в дренаж" );
+            System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode( "Подача в Д+Т" );
+            System.Windows.Forms.TreeNode treeNode7 = new System.Windows.Forms.TreeNode( "Подача в танк" );
+            System.Windows.Forms.TreeNode treeNode8 = new System.Windows.Forms.TreeNode( "Наполнение", new System.Windows.Forms.TreeNode[] {
+            treeNode5,
+            treeNode6,
+            treeNode7} );
+            System.Windows.Forms.TreeNode treeNode9 = new System.Windows.Forms.TreeNode( "Выдача" );
+            System.Windows.Forms.TreeNode treeNode10 = new System.Windows.Forms.TreeNode( "Выдача", new System.Windows.Forms.TreeNode[] {
+            treeNode9} );
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.TreeNode treeNode11 = new System.Windows.Forms.TreeNode( "Время_работы_режима" );
+            System.Windows.Forms.TreeNode treeNode12 = new System.Windows.Forms.TreeNode( "Номер_следующего_режима" );
+            System.Windows.Forms.TreeNode treeNode13 = new System.Windows.Forms.TreeNode( "Параметры", new System.Windows.Forms.TreeNode[] {
+            treeNode11,
+            treeNode12} );
+            System.Windows.Forms.TreeNode treeNode14 = new System.Windows.Forms.TreeNode( "Включать" );
+            System.Windows.Forms.TreeNode treeNode15 = new System.Windows.Forms.TreeNode( "Выключать" );
+            System.Windows.Forms.TreeNode treeNode16 = new System.Windows.Forms.TreeNode( "Верхний_флип" );
+            System.Windows.Forms.TreeNode treeNode17 = new System.Windows.Forms.TreeNode( "Нижний_флип" );
+            System.Windows.Forms.TreeNode treeNode18 = new System.Windows.Forms.TreeNode( "Включать_по_завершению" );
+            System.Windows.Forms.TreeNode treeNode19 = new System.Windows.Forms.TreeNode( "Устройства", new System.Windows.Forms.TreeNode[] {
+            treeNode14,
+            treeNode15,
+            treeNode16,
+            treeNode17,
+            treeNode18} );
+            System.Windows.Forms.TreeNode treeNode20 = new System.Windows.Forms.TreeNode( "Включающие_режим" );
+            System.Windows.Forms.TreeNode treeNode21 = new System.Windows.Forms.TreeNode( "Выключающие_режим" );
+            System.Windows.Forms.TreeNode treeNode22 = new System.Windows.Forms.TreeNode( "Необходимые_для_включения" );
+            System.Windows.Forms.TreeNode treeNode23 = new System.Windows.Forms.TreeNode( "Отправляемые_режимом" );
+            System.Windows.Forms.TreeNode treeNode24 = new System.Windows.Forms.TreeNode( "Управляющие_устройствами" );
+            System.Windows.Forms.TreeNode treeNode25 = new System.Windows.Forms.TreeNode( "Импульсные" );
+            System.Windows.Forms.TreeNode treeNode26 = new System.Windows.Forms.TreeNode( "Сигналы", new System.Windows.Forms.TreeNode[] {
+            treeNode20,
+            treeNode21,
+            treeNode22,
+            treeNode23,
+            treeNode24,
+            treeNode25} );
+            System.Windows.Forms.TreeNode treeNode27 = new System.Windows.Forms.TreeNode( "Блокирующие_режимы_гребенки" );
+            System.Windows.Forms.TreeNode treeNode28 = new System.Windows.Forms.TreeNode( "Блокирующие_режимы_танков" );
+            System.Windows.Forms.TreeNode treeNode29 = new System.Windows.Forms.TreeNode( "Блокирующие_устройства" );
+            System.Windows.Forms.TreeNode treeNode30 = new System.Windows.Forms.TreeNode( "Ограничения", new System.Windows.Forms.TreeNode[] {
+            treeNode27,
+            treeNode28,
+            treeNode29} );
+            System.Windows.Forms.TreeNode treeNode31 = new System.Windows.Forms.TreeNode( "Proporties", new System.Windows.Forms.TreeNode[] {
+            treeNode13,
+            treeNode19,
+            treeNode26,
+            treeNode30} );
+            System.Windows.Forms.TreeNode treeNode32 = new System.Windows.Forms.TreeNode( "TreeView" );
             this.contextMenuStrip2 = new System.Windows.Forms.ContextMenuStrip( this.components );
             this.add_prop = new System.Windows.Forms.ToolStripMenuItem();
             this.Devices = new System.Windows.Forms.ToolStripMenuItem();
@@ -219,30 +219,30 @@
             this.treeView_modes.LabelEdit = true;
             this.treeView_modes.Location = new System.Drawing.Point( 2, 21 );
             this.treeView_modes.Name = "treeView_modes";
-            treeNode55.Name = "Node1";
-            treeNode55.Text = "Подача в танк";
-            treeNode56.Name = "Node2";
-            treeNode56.Text = "Подача в байпас";
-            treeNode57.Name = "Node3";
-            treeNode57.Text = "Дренаж";
-            treeNode58.Name = "Node0";
-            treeNode58.Text = "Мойка";
-            treeNode59.Name = "Node5";
-            treeNode59.Text = "Подача в дренаж";
-            treeNode60.Name = "Node0";
-            treeNode60.Text = "Подача в Д+Т";
-            treeNode61.Name = "Node2";
-            treeNode61.Text = "Подача в танк";
-            treeNode62.Name = "Node4";
-            treeNode62.Text = "Наполнение";
-            treeNode63.Name = "Node3";
-            treeNode63.Text = "Выдача";
-            treeNode64.Name = "Node1";
-            treeNode64.Text = "Выдача";
+            treeNode1.Name = "Node1";
+            treeNode1.Text = "Подача в танк";
+            treeNode2.Name = "Node2";
+            treeNode2.Text = "Подача в байпас";
+            treeNode3.Name = "Node3";
+            treeNode3.Text = "Дренаж";
+            treeNode4.Name = "Node0";
+            treeNode4.Text = "Мойка";
+            treeNode5.Name = "Node5";
+            treeNode5.Text = "Подача в дренаж";
+            treeNode6.Name = "Node0";
+            treeNode6.Text = "Подача в Д+Т";
+            treeNode7.Name = "Node2";
+            treeNode7.Text = "Подача в танк";
+            treeNode8.Name = "Node4";
+            treeNode8.Text = "Наполнение";
+            treeNode9.Name = "Node3";
+            treeNode9.Text = "Выдача";
+            treeNode10.Name = "Node1";
+            treeNode10.Text = "Выдача";
             this.treeView_modes.Nodes.AddRange( new System.Windows.Forms.TreeNode[] {
-            treeNode58,
-            treeNode62,
-            treeNode64} );
+            treeNode4,
+            treeNode8,
+            treeNode10} );
             this.treeView_modes.Size = new System.Drawing.Size( 204, 430 );
             this.treeView_modes.TabIndex = 3;
             this.treeView_modes.BeforeLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler( this.treeView_modes_BeforeLabelEdit );
@@ -309,9 +309,9 @@
             // 
             // number
             // 
-            dataGridViewCellStyle5.Format = "N0";
-            dataGridViewCellStyle5.NullValue = null;
-            this.number.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle1.Format = "N0";
+            dataGridViewCellStyle1.NullValue = null;
+            this.number.DefaultCellStyle = dataGridViewCellStyle1;
             this.number.HeaderText = "№";
             this.number.Name = "number";
             this.number.Width = 30;
@@ -397,6 +397,7 @@
             this.numericUpDown2.Name = "numericUpDown2";
             this.numericUpDown2.Size = new System.Drawing.Size( 49, 20 );
             this.numericUpDown2.TabIndex = 9;
+            this.numericUpDown2.ValueChanged += new System.EventHandler( this.numericUpDown2_ValueChanged );
             // 
             // dataGridView2
             // 
@@ -417,9 +418,9 @@
             // 
             // dataGridViewTextBoxColumn1
             // 
-            dataGridViewCellStyle6.Format = "N0";
-            dataGridViewCellStyle6.NullValue = null;
-            this.dataGridViewTextBoxColumn1.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle2.Format = "N0";
+            dataGridViewCellStyle2.NullValue = null;
+            this.dataGridViewTextBoxColumn1.DefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridViewTextBoxColumn1.HeaderText = "№";
             this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
             this.dataGridViewTextBoxColumn1.Width = 30;
@@ -460,50 +461,50 @@
             this.treeView_prop.HideSelection = false;
             this.treeView_prop.Location = new System.Drawing.Point( 212, 21 );
             this.treeView_prop.Name = "treeView_prop";
-            treeNode33.Name = "Node11";
-            treeNode33.Text = "Время_работы_режима";
-            treeNode34.Name = "Node12";
-            treeNode34.Text = "Номер_следующего_режима";
-            treeNode35.Name = "Parameters";
-            treeNode35.Text = "Параметры";
-            treeNode36.Name = "Node13";
-            treeNode36.Text = "Включать";
-            treeNode37.Name = "Node14";
-            treeNode37.Text = "Выключать";
-            treeNode38.Name = "Node23";
-            treeNode38.Text = "Верхний_флип";
-            treeNode39.Name = "Node24";
-            treeNode39.Text = "Нижний_флип";
-            treeNode40.Name = "Node27";
-            treeNode40.Text = "Включать_по_завершению";
-            treeNode41.Name = "Devices";
-            treeNode41.Text = "Устройства";
-            treeNode42.Name = "Node15";
-            treeNode42.Text = "Включающие_режим";
-            treeNode65.Name = "Node16";
-            treeNode65.Text = "Выключающие_режим";
-            treeNode66.Name = "Node29";
-            treeNode66.Text = "Необходимые_для_включения";
-            treeNode67.Name = "Node30";
-            treeNode67.Text = "Отправляемые_режимом";
-            treeNode68.Name = "Node31";
-            treeNode68.Text = "Управляющие_устройствами";
-            treeNode69.Name = "Node33";
-            treeNode69.Text = "Импульсные";
-            treeNode70.Name = "Signals";
-            treeNode70.Text = "Сигналы";
-            treeNode71.Name = "Node17";
-            treeNode71.Text = "Блокирующие_режимы_гребенки";
-            treeNode72.Name = "Node18";
-            treeNode72.Text = "Блокирующие_режимы_танков";
-            treeNode73.Name = "Node34";
-            treeNode73.Text = "Блокирующие_устройства";
-            treeNode74.Name = "Conditions";
-            treeNode74.Text = "Ограничения";
-            treeNode75.Name = "Proporties";
-            treeNode75.Text = "Proporties";
+            treeNode11.Name = "Node11";
+            treeNode11.Text = "Время_работы_режима";
+            treeNode12.Name = "Node12";
+            treeNode12.Text = "Номер_следующего_режима";
+            treeNode13.Name = "Parameters";
+            treeNode13.Text = "Параметры";
+            treeNode14.Name = "Node13";
+            treeNode14.Text = "Включать";
+            treeNode15.Name = "Node14";
+            treeNode15.Text = "Выключать";
+            treeNode16.Name = "Node23";
+            treeNode16.Text = "Верхний_флип";
+            treeNode17.Name = "Node24";
+            treeNode17.Text = "Нижний_флип";
+            treeNode18.Name = "Node27";
+            treeNode18.Text = "Включать_по_завершению";
+            treeNode19.Name = "Devices";
+            treeNode19.Text = "Устройства";
+            treeNode20.Name = "Node15";
+            treeNode20.Text = "Включающие_режим";
+            treeNode21.Name = "Node16";
+            treeNode21.Text = "Выключающие_режим";
+            treeNode22.Name = "Node29";
+            treeNode22.Text = "Необходимые_для_включения";
+            treeNode23.Name = "Node30";
+            treeNode23.Text = "Отправляемые_режимом";
+            treeNode24.Name = "Node31";
+            treeNode24.Text = "Управляющие_устройствами";
+            treeNode25.Name = "Node33";
+            treeNode25.Text = "Импульсные";
+            treeNode26.Name = "Signals";
+            treeNode26.Text = "Сигналы";
+            treeNode27.Name = "Node17";
+            treeNode27.Text = "Блокирующие_режимы_гребенки";
+            treeNode28.Name = "Node18";
+            treeNode28.Text = "Блокирующие_режимы_танков";
+            treeNode29.Name = "Node34";
+            treeNode29.Text = "Блокирующие_устройства";
+            treeNode30.Name = "Conditions";
+            treeNode30.Text = "Ограничения";
+            treeNode31.Name = "Proporties";
+            treeNode31.Text = "Proporties";
             this.treeView_prop.Nodes.AddRange( new System.Windows.Forms.TreeNode[] {
-            treeNode75} );
+            treeNode31} );
             this.treeView_prop.Size = new System.Drawing.Size( 264, 430 );
             this.treeView_prop.TabIndex = 10;
             this.treeView_prop.AfterSelect += new System.Windows.Forms.TreeViewEventHandler( this.treeView_prop_AfterSelect );
@@ -525,10 +526,10 @@
             this.treeView2.CheckBoxes = true;
             this.treeView2.Location = new System.Drawing.Point( 490, 21 );
             this.treeView2.Name = "treeView2";
-            treeNode76.Name = "Node0";
-            treeNode76.Text = "TreeView";
+            treeNode32.Name = "Node0";
+            treeNode32.Text = "TreeView";
             this.treeView2.Nodes.AddRange( new System.Windows.Forms.TreeNode[] {
-            treeNode76} );
+            treeNode32} );
             this.treeView2.Size = new System.Drawing.Size( 183, 430 );
             this.treeView2.TabIndex = 15;
             this.treeView2.Visible = false;

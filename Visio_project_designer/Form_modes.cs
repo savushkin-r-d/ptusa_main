@@ -64,32 +64,35 @@ namespace Visio_project_designer
                 }
             //-----------------------------------------------------------------------
 
+            //  Создание временной структуры для хранения исходной конфигурации
+            //T_Object OLD_obj_config = new T_Object( addin.cur_sel_obj.shape, null );
+            
+            //addin.cur_sel_obj.copy_obj_config_to( ref OLD_obj_config );
+            
+            //addin.cur_sel_obj.mode_mas[ 0 ].name = "heeeeeeeeelen";
+            //addin.cur_sel_obj.mode_mas[ 1 ].name = "billibob";
+
+
             //  Заполнение списка режимов и шагов для выбранного объекта
             Refresh_mode_tree();
-            //treeView_modes.Nodes.Clear();
-
-            //for ( int i = 0; i < addin.cur_sel_obj.mode_mas.Count; i++ )
-            //    {
-            //    TreeNode temp_node = treeView_modes.Nodes.Add(
-            //        Convert.ToString( addin.cur_sel_obj.mode_mas[ i ].no ) +
-            //        ". " + addin.cur_sel_obj.mode_mas[ i ].name );
-
-            //    for ( int j = 0; j < addin.cur_sel_obj.mode_mas[ i ].step.Count; j++ )
-            //        {
-            //        temp_node.Nodes.Add(
-            //            Convert.ToString( addin.cur_sel_obj.mode_mas[ i ].step[ j ].no ) +
-            //            ". " + addin.cur_sel_obj.mode_mas[ i ].step[ j ].name );
-            //        }
-            //    }
 
             //  Заполнение таблицы с параметрами
-            numericUpDown1.Value = addin.cur_sel_obj.param_list.Count;
+            numericUpDown1.Value = addin.cur_sel_obj.param_list_temp.Count;
 
-            for ( int i = 0; i < addin.cur_sel_obj.param_list.Count; i++ )
+            for ( int i = 0; i < addin.cur_sel_obj.param_list_temp.Count; i++ )
                 {
                 dataGridView1.Rows[ i ].Cells[ 0 ].Value = Convert.ToString( i );
-                dataGridView1.Rows[ i ].Cells[ 1 ].Value = addin.cur_sel_obj.param_list[ i ][ 0 ];
-                dataGridView1.Rows[ i ].Cells[ 2 ].Value = addin.cur_sel_obj.param_list[ i ][ 1 ];
+                dataGridView1.Rows[ i ].Cells[ 1 ].Value = addin.cur_sel_obj.param_list_temp[ i ][ 0 ];
+                dataGridView1.Rows[ i ].Cells[ 2 ].Value = addin.cur_sel_obj.param_list_temp[ i ][ 1 ];
+                }
+
+            numericUpDown2.Value = addin.cur_sel_obj.param_list_save.Count;
+
+            for ( int i = 0; i < addin.cur_sel_obj.param_list_save.Count; i++ )
+                {
+                dataGridView2.Rows[ i ].Cells[ 0 ].Value = Convert.ToString( i );
+                dataGridView2.Rows[ i ].Cells[ 1 ].Value = addin.cur_sel_obj.param_list_save[ i ][ 0 ];
+                dataGridView2.Rows[ i ].Cells[ 2 ].Value = addin.cur_sel_obj.param_list_save[ i ][ 1 ];
                 }
             //-----------------------------------------------------------------------
 
@@ -130,12 +133,12 @@ namespace Visio_project_designer
 
                         }
 */
-                    //  Сохранение параметров
-                    addin.cur_sel_obj.param_list.Clear();
+                    //  Сохранение временных параметров
+                    addin.cur_sel_obj.param_list_temp.Clear();
                     
                     for ( int i = 0; i < numericUpDown1.Value; i++ )
                         {
-                        addin.cur_sel_obj.param_list.Add( new string[ 2 ] );
+                        addin.cur_sel_obj.param_list_temp.Add( new string[ 2 ] );
 
                         if ( dataGridView1.Rows[ i ].Cells[ 1 ].Value == null )
                             {
@@ -146,10 +149,32 @@ namespace Visio_project_designer
                             dataGridView1.Rows[ i ].Cells[ 2 ].Value = "";
                             }   
                         
-                        addin.cur_sel_obj.param_list[ i ][ 0 ] =
+                        addin.cur_sel_obj.param_list_temp[ i ][ 0 ] =
                             dataGridView1.Rows[ i ].Cells[ 1 ].Value.ToString();
-                        addin.cur_sel_obj.param_list[ i ][ 1 ] =
+                        addin.cur_sel_obj.param_list_temp[ i ][ 1 ] =
                             dataGridView1.Rows[ i ].Cells[ 2 ].Value.ToString();
+                        }
+
+                    //  Сохранение сохраняемых параметров
+                    addin.cur_sel_obj.param_list_save.Clear();
+                    
+                    for ( int i = 0; i < numericUpDown2.Value; i++ )
+                        {
+                        addin.cur_sel_obj.param_list_save.Add( new string[ 2 ] );
+
+                        if ( dataGridView2.Rows[ i ].Cells[ 1 ].Value == null )
+                            {
+                            dataGridView2.Rows[ i ].Cells[ 1 ].Value = "";
+                            }
+                        if ( dataGridView2.Rows[ i ].Cells[ 2 ].Value == null )
+                            {
+                            dataGridView2.Rows[ i ].Cells[ 2 ].Value = "";
+                            }   
+                        
+                        addin.cur_sel_obj.param_list_save[ i ][ 0 ] =
+                            dataGridView2.Rows[ i ].Cells[ 1 ].Value.ToString();
+                        addin.cur_sel_obj.param_list_save[ i ][ 1 ] =
+                            dataGridView2.Rows[ i ].Cells[ 2 ].Value.ToString();
                         }
 
                     addin.is_selecting_dev = false;
@@ -466,6 +491,8 @@ namespace Visio_project_designer
 
         private void ContextMenuStrip3_insert_mode_Click( object sender, EventArgs e )
             {
+            int index = 0;
+
             //  Создаем режим
             mode new_mode = new mode();
 
@@ -474,19 +501,24 @@ namespace Visio_project_designer
             //  new_mode.TreeView_params = new TreeView();
 
             //  Добавляем режим в структуру
-            if ( treeView_modes.SelectedNode.Level == 0 )
+            if (( treeView_modes.SelectedNode != null ) &&
+                ( treeView_modes.SelectedNode.Level == 0 ))
                 {
-                new_mode.set_attribute( treeView_modes.SelectedNode.Index + 1, "Новый режим" );
-                //  Добавляем в структуру
-                addin.cur_sel_obj.mode_mas.Insert( treeView_modes.SelectedNode.Index + 1, new_mode );
+                index = treeView_modes.SelectedNode.Index + 1;
                 }
-            else
-                {
-                new_mode.set_attribute( treeView_modes.SelectedNode.Index + 1, "Новый шаг" );
-                //  Добавляем в структуру
-                addin.cur_sel_obj.mode_mas[ treeView_modes.SelectedNode.Parent.Index ].step.Insert(
-                                            treeView_modes.SelectedNode.Index + 1, new_mode );
-                }
+
+            //  Задаем значения
+            new_mode.set_attribute( index, "Новый режим" );
+            //  Добавляем в структуру
+            addin.cur_sel_obj.mode_mas.Insert( index, new_mode );
+
+            //else
+            //    {
+            //    new_mode.set_attribute( treeView_modes.SelectedNode.Index + 1, "Новый шаг" );
+            //    //  Добавляем в структуру
+            //    addin.cur_sel_obj.mode_mas[ treeView_modes.SelectedNode.Parent.Index ].step.Insert(
+            //                                treeView_modes.SelectedNode.Index + 1, new_mode );
+            //    }
 
             new_mode = null;
 
@@ -584,6 +616,18 @@ namespace Visio_project_designer
                 dataGridView1.Rows[ i ].Cells[ 0 ].Value = Convert.ToString( i );
                 }
             }
+        //---------------------------------------------------------------------
+
+        private void numericUpDown2_ValueChanged( object sender, EventArgs e )
+            {
+            dataGridView2.RowCount = Convert.ToInt32( numericUpDown2.Value ) + 1;
+
+            for ( int i = 0; i < dataGridView2.RowCount; i++ )
+                {
+                dataGridView2.Rows[ i ].Cells[ 0 ].Value = Convert.ToString( i );
+                }
+            }
+
         //---------------------------------------------------------------------
 
         private void dataGridView1_RowsAdded( object sender, DataGridViewRowsAddedEventArgs e )
@@ -741,7 +785,12 @@ namespace Visio_project_designer
                 {
                 treeView_prop.Nodes.Add(
                     ( ( TreeNode ) cur_mode.TreeView_params.Nodes[ i ].Clone() ) );
-                treeView_prop.Nodes[ i ].Expand();
+                treeView_prop.Nodes[ i ].Expand();                    
+
+                for ( int j = 0; j < cur_mode.TreeView_params.Nodes[ i ].Nodes.Count; j++ )
+                    {
+                    treeView_prop.Nodes[ i ].Nodes[ j ].Expand();
+                    }                
                 }
 
             treeView_prop.EndUpdate();
