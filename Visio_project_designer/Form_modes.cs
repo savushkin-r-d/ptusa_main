@@ -501,24 +501,24 @@ namespace Visio_project_designer
             //  new_mode.TreeView_params = new TreeView();
 
             //  Добавляем режим в структуру
-            if (( treeView_modes.SelectedNode != null ) &&
-                ( treeView_modes.SelectedNode.Level == 0 ))
+            if ( treeView_modes.SelectedNode != null ) 
                 {
-                index = treeView_modes.SelectedNode.Index + 1;
+                if ( treeView_modes.SelectedNode.Level == 0 )
+                    {
+                    index = treeView_modes.SelectedNode.Index + 1;
+                    //  Задаем значения
+                    new_mode.set_attribute( index, "Новый режим" );
+                    //  Добавляем в структуру
+                    addin.cur_sel_obj.mode_mas.Insert( index, new_mode );
+                    }
                 }
-
-            //  Задаем значения
-            new_mode.set_attribute( index, "Новый режим" );
-            //  Добавляем в структуру
-            addin.cur_sel_obj.mode_mas.Insert( index, new_mode );
-
-            //else
-            //    {
-            //    new_mode.set_attribute( treeView_modes.SelectedNode.Index + 1, "Новый шаг" );
-            //    //  Добавляем в структуру
-            //    addin.cur_sel_obj.mode_mas[ treeView_modes.SelectedNode.Parent.Index ].step.Insert(
-            //                                treeView_modes.SelectedNode.Index + 1, new_mode );
-            //    }
+            else
+                {
+                //  Задаем значения
+                new_mode.set_attribute( index, "Новый режим" );
+                //  Добавляем в структуру
+                addin.cur_sel_obj.mode_mas.Insert( index, new_mode );
+                }
 
             new_mode = null;
 
@@ -533,23 +533,30 @@ namespace Visio_project_designer
             mode new_mode = new mode();
 
             //  Добавляем режим в структуру
-            if ( treeView_modes.SelectedNode.Level == 0 )
+            if ( treeView_modes.SelectedNode != null )
                 {
-                //  0-ой шаг, т.к. при обновлении будет присвоен нужный номер
-                new_mode.set_attribute( 0, "Новый шаг" );
+                if ( treeView_modes.SelectedNode.Level == 0 )
+                    {
+                    //  0-ой шаг, т.к. при обновлении будет присвоен нужный номер
+                    new_mode.set_attribute( 0, "Новый шаг" );
 
-                //  Добавляем в структуру
-                addin.cur_sel_obj.mode_mas[ treeView_modes.SelectedNode.Index ].step.Add( new_mode );
+                    //  Добавляем в структуру
+                    addin.cur_sel_obj.mode_mas[ treeView_modes.SelectedNode.Index ].step.Add( new_mode );
+                    }
+                else
+                    {
+                    //  0-ой шаг, т.к. при обновлении будет присвоен нужный номер
+                    new_mode.set_attribute( 0, "Новый шаг" );
+
+                    //  Добавляем в структуру
+                    addin.cur_sel_obj.mode_mas[ treeView_modes.SelectedNode.Parent.Index ].step.Insert(
+                                                treeView_modes.SelectedNode.Index + 1, new_mode );
+                    }
                 }
             else
                 {
-                //  0-ой шаг, т.к. при обновлении будет присвоен нужный номер
-                new_mode.set_attribute( 0, "Новый шаг" );
-
-                //  Добавляем в структуру
-                addin.cur_sel_obj.mode_mas[ treeView_modes.SelectedNode.Parent.Index ].step.Insert(
-                                            treeView_modes.SelectedNode.Index + 1, new_mode );
-                }
+                MessageBox.Show( "Выделенный объект не соответствует операции!" );
+                }    
 
             new_mode = null;
 
@@ -560,19 +567,25 @@ namespace Visio_project_designer
 
         private void ContextMenuStrip3_delete_mode_Click( object sender, EventArgs e )
             {
-            if ( treeView_modes.SelectedNode.Level == 0 )
+            if ( treeView_modes.SelectedNode != null )
                 {
-                addin.cur_sel_obj.mode_mas.Remove( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
+                if ( treeView_modes.SelectedNode.Level == 0 )
+                    {
+                    addin.cur_sel_obj.mode_mas.Remove( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
+                    }
+                else
+                    {
+                    addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step.Remove(
+                                    addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step[ addin.cur_step ] );
+                    }
+
+                //  Обновляем дерево
+                treeView_modes.SelectedNode.Remove();
                 }
             else
                 {
-                addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step.Remove(
-                                addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step[ addin.cur_step ] );
-                }
-
-            //  Обновляем дерево
-            //treeView_modes.SelectedNode.Remove();
-            Refresh_mode_tree();
+                MessageBox.Show( "Выделенный объект не соответствует операции!" );
+                }    
             }
         //---------------------------------------------------------------------
 
