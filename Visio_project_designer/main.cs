@@ -1693,6 +1693,7 @@ catch ( Exception )
             tw.WriteStartElement( "Proporties" );
 
             //  Проходим по типам характеристик
+            if ( temp_mode.TreeView_params.Nodes.Count > 0 )
             for ( int j = 0; j < temp_mode.TreeView_params.Nodes[ 0 ].Nodes.Count; j++ )
                 {
                 temp_node = temp_mode.TreeView_params.Nodes[ 0 ].Nodes[ j ];

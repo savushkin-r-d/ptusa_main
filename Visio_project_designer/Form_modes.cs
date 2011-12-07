@@ -496,10 +496,6 @@ namespace Visio_project_designer
             //  Создаем режим
             mode new_mode = new mode();
 
-            //  НЕ создаем структуру характеристик режима, она будет создана
-            //  автоматически при обновлении дерева характеристик если она == NULL
-            //  new_mode.TreeView_params = new TreeView();
-
             //  Добавляем режим в структуру
             if ( treeView_modes.SelectedNode != null ) 
                 {
@@ -777,7 +773,7 @@ namespace Visio_project_designer
             treeView_prop.BeginUpdate();
             treeView_prop.Nodes.Clear();
 
-            //  Перед заполнением дерева проверяем есть ли структура дерева в режиме
+            //  Перед заполнением дерева проверяем есть ли структура дерева характ-к в режиме
             //  Если нет, то задаем стандартную структуру
             if ( cur_mode.TreeView_params == null )
                 {

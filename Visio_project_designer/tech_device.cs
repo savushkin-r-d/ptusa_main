@@ -604,13 +604,20 @@ namespace tech_device
         /// <param name="shape"> Фигура Visio. </param>
         /// <param name="pac">   Узел Wago. </param>
         public device( Visio.Shape shape, PAC pac )
-            {										  
-            n = Convert.ToUInt16( shape.Cells[ "Prop.number" ].FormulaU );
-			name = shape.Cells[ "Prop.name" ].FormulaU;
-			description = shape.Cells[ "Prop.description" ].FormulaU;			
-			type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].FormulaU );
-            sub_type = ( SUB_TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.sub_type" ].FormulaU );
-			 
+            {
+            try
+                {
+                n = Convert.ToUInt16( shape.Cells[ "Prop.number" ].FormulaU );
+                name = shape.Cells[ "Prop.name" ].FormulaU;
+                description = shape.Cells[ "Prop.description" ].FormulaU;
+                type = ( TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.type" ].FormulaU );
+                sub_type = ( SUB_TYPES ) Convert.ToUInt16( shape.Cells[ "Prop.sub_type" ].FormulaU );
+                }
+            catch ( System.Exception )
+                {
+                MessageBox.Show( "Одно из свойств фигуры не задано в шаблоне!" );
+                }
+
             this.shape = shape;
 
             set_sub_type( sub_type, pac );
