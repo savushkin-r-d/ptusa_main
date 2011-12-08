@@ -55,60 +55,130 @@ namespace visio_prj_designer
 				//LB_modules.Items.Add( TV_modules_list.SelectedNode.Index );
 			}
 
-		private void modules_count_enter_Shown( object sender, EventArgs e )
-			{
-			//	Очищаем список узлов в дереве доступных модулей
-			TV_modules_list.Nodes.Clear();
+        private void modules_count_enter_Shown( object sender, EventArgs e )
+            {
+            //	Очищаем список узлов в дереве доступных модулей
+            TV_modules_list.Nodes.Clear();
 
-			//	Заполняем дерево доступных модулей элементами структуры
-			TV_modules_list.Nodes.Add( "DI modules" );	//	0-ой узел
-			foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.DI_modules )
-				{
-				TV_modules_list.Nodes[ 0 ].Nodes.Add( module_type.Value );
-				TV_modules_list.Nodes[ 0 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
-				}
+            switch ( Globals.visio_addin.old_shape.Data2 )
+                {
+                //  Для 8-ми канальных модулей
+                case "504":
+                    //	Заполняем дерево доступных модулей элементами структуры
+                    TV_modules_list.Nodes.Add( "DI modules" );	//	0-ой узел
+                    foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.DI_modules )
+                        {
+                        TV_modules_list.Nodes[ 0 ].Nodes.Add( module_type.Value );
+                        TV_modules_list.Nodes[ 0 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
+                        }
 
-			TV_modules_list.Nodes.Add( "DO modules" );	//	1-ой узел
-			foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.DO_modules )
-				{
-				TV_modules_list.Nodes[ 1 ].Nodes.Add( module_type.Value );
-				TV_modules_list.Nodes[ 1 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
-				}
+                    TV_modules_list.Nodes.Add( "DO modules" );	//	1-ой узел
+                    foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.DO_modules )
+                        {
+                        TV_modules_list.Nodes[ 1 ].Nodes.Add( module_type.Value );
+                        TV_modules_list.Nodes[ 1 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
+                        }
 
-			TV_modules_list.Nodes.Add( "AI modules" );	//	2-ой узел
-			foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.AI_modules )
-				{
-				TV_modules_list.Nodes[ 2 ].Nodes.Add( module_type.Value );
-				TV_modules_list.Nodes[ 2 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
-				}
+                    TV_modules_list.Nodes.Add( "AI modules" );	//	2-ой узел
+                    foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.AI_modules )
+                        {
+                        TV_modules_list.Nodes[ 2 ].Nodes.Add( module_type.Value );
+                        TV_modules_list.Nodes[ 2 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
+                        }
 
-			TV_modules_list.Nodes.Add( "AO modules" );	//	3-ой узел
-			foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.AO_modules )
-				{
-				TV_modules_list.Nodes[ 3 ].Nodes.Add( module_type.Value );
-				TV_modules_list.Nodes[ 3 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
-				}
+                    TV_modules_list.Nodes.Add( "AO modules" );	//	3-ой узел
+                    foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.AO_modules )
+                        {
+                        TV_modules_list.Nodes[ 3 ].Nodes.Add( module_type.Value );
+                        TV_modules_list.Nodes[ 3 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
+                        }
 
-			TV_modules_list.Nodes.Add( "SYS modules" );	//	4-ой узел
-			foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.SYS_modules )
-				{
-				TV_modules_list.Nodes[ 4 ].Nodes.Add( module_type.Value );
-				TV_modules_list.Nodes[ 4 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
-				}
+                    TV_modules_list.Nodes.Add( "SYS modules" );	//	4-ой узел
+                    foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.SYS_modules )
+                        {
+                        TV_modules_list.Nodes[ 4 ].Nodes.Add( module_type.Value );
+                        TV_modules_list.Nodes[ 4 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
+                        }
 
-			TV_modules_list.Nodes.Add( "Special modules" );	//	5-ой узел
-			foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.Special_modules )
-				{
-				TV_modules_list.Nodes[ 5 ].Nodes.Add( module_type.Value );
-				TV_modules_list.Nodes[ 5 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
-				}
+                    TV_modules_list.Nodes.Add( "Special modules" );	//	5-ой узел
+                    foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.Special_modules )
+                        {
+                        TV_modules_list.Nodes[ 5 ].Nodes.Add( module_type.Value );
+                        TV_modules_list.Nodes[ 5 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
+                        }
+                    break;
+
+
+                //  Для 16-и канальных модулей
+                case "1504":
+                    //	Заполняем дерево доступных модулей элементами структуры
+                    TV_modules_list.Nodes.Add( "DI modules" );	//	0-ой узел
+                    foreach ( KeyValuePair<io_module.TYPES, string> module_type
+                        in Globals.visio_addin.service_config.DI_16_modules )
+                        {
+                        TV_modules_list.Nodes[ 0 ].Nodes.Add( module_type.Value );
+                        TV_modules_list.Nodes[ 0 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
+                        }
+
+                    TV_modules_list.Nodes.Add( "DO modules" );	//	1-ой узел
+                    foreach ( KeyValuePair<io_module.TYPES, string> module_type
+                        in Globals.visio_addin.service_config.DO_16_modules )
+                        {
+                        TV_modules_list.Nodes[ 1 ].Nodes.Add( module_type.Value );
+                        TV_modules_list.Nodes[ 1 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
+                        }
+                    break;
+                }
+            
+            ////	Заполняем дерево доступных модулей элементами структуры
+            //TV_modules_list.Nodes.Add( "DI modules" );	//	0-ой узел
+            //foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.DI_modules )
+            //    {
+            //    TV_modules_list.Nodes[ 0 ].Nodes.Add( module_type.Value );
+            //    TV_modules_list.Nodes[ 0 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
+            //    }
+
+            //TV_modules_list.Nodes.Add( "DO modules" );	//	1-ой узел
+            //foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.DO_modules )
+            //    {
+            //    TV_modules_list.Nodes[ 1 ].Nodes.Add( module_type.Value );
+            //    TV_modules_list.Nodes[ 1 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
+            //    }
+
+            //TV_modules_list.Nodes.Add( "AI modules" );	//	2-ой узел
+            //foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.AI_modules )
+            //    {
+            //    TV_modules_list.Nodes[ 2 ].Nodes.Add( module_type.Value );
+            //    TV_modules_list.Nodes[ 2 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
+            //    }
+
+            //TV_modules_list.Nodes.Add( "AO modules" );	//	3-ой узел
+            //foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.AO_modules )
+            //    {
+            //    TV_modules_list.Nodes[ 3 ].Nodes.Add( module_type.Value );
+            //    TV_modules_list.Nodes[ 3 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
+            //    }
+
+            //TV_modules_list.Nodes.Add( "SYS modules" );	//	4-ой узел
+            //foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.SYS_modules )
+            //    {
+            //    TV_modules_list.Nodes[ 4 ].Nodes.Add( module_type.Value );
+            //    TV_modules_list.Nodes[ 4 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
+            //    }
+
+            //TV_modules_list.Nodes.Add( "Special modules" );	//	5-ой узел
+            //foreach ( KeyValuePair<io_module.TYPES, string> module_type in Globals.visio_addin.service_config.Special_modules )
+            //    {
+            //    TV_modules_list.Nodes[ 5 ].Nodes.Add( module_type.Value );
+            //    TV_modules_list.Nodes[ 5 ].LastNode.Tag = Convert.ToString( Convert.ToInt32( module_type.Key ) );
+            //    }
 
             //  Раскрываем необходимые нам списки
-            TV_modules_list.Nodes[ 0 ].Expand();
-            TV_modules_list.Nodes[ 1 ].Expand();
-            TV_modules_list.Nodes[ 4 ].Expand();
+            //TV_modules_list.Nodes[ 0 ].Expand();
+            //TV_modules_list.Nodes[ 1 ].Expand();
+            //TV_modules_list.Nodes[ 4 ].Expand();
 
-			//TV_modules_list.ExpandAll(); 
+			TV_modules_list.ExpandAll(); 
 			}
 
 		private void TV_modules_list_AfterSelect( object sender, TreeViewEventArgs e )

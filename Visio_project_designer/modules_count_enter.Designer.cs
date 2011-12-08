@@ -154,7 +154,7 @@ namespace visio_prj_designer
             // modules_type_label
             // 
             this.modules_type_label.AutoSize = true;
-            this.modules_type_label.Location = new System.Drawing.Point( 13, 6 );
+            this.modules_type_label.Location = new System.Drawing.Point( 13, 5 );
             this.modules_type_label.Name = "modules_type_label";
             this.modules_type_label.Size = new System.Drawing.Size( 66, 13 );
             this.modules_type_label.TabIndex = 0;
@@ -164,7 +164,7 @@ namespace visio_prj_designer
             // 
             this.label1.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right ) ) );
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point( 247, 6 );
+            this.label1.Location = new System.Drawing.Point( 247, 5 );
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size( 124, 13 );
             this.label1.TabIndex = 6;

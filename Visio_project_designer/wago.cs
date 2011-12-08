@@ -23,6 +23,8 @@ namespace wago
 								
 		internal Dictionary<io_module.TYPES, string> DI_modules;
 		internal Dictionary<io_module.TYPES, string> DO_modules;
+        internal Dictionary<io_module.TYPES, string> DI_16_modules;
+        internal Dictionary<io_module.TYPES, string> DO_16_modules;
 		internal Dictionary<io_module.TYPES, string> AI_modules;
 		internal Dictionary<io_module.TYPES, string> AO_modules;
 		internal Dictionary<io_module.TYPES, string> SYS_modules;
@@ -36,16 +38,20 @@ namespace wago
 			DI_modules = new Dictionary<io_module.TYPES, string>();
 			DI_modules.Add( io_module.TYPES.T_402, "750-402 ( 4 DI )" );
 			DI_modules.Add( io_module.TYPES.T_430, "750-430 ( 8 DI )" );
-			DI_modules.Add( io_module.TYPES.T_1405, "750-1405 ( 16 DI 24 VDC )" );
-			DI_modules.Add( io_module.TYPES.T_1415, "750-1415 ( 8 DI 24 VDC )" );
-			DI_modules.Add( io_module.TYPES.T_1420, "750-1420 ( 4 DI 24 VDC )" );
+			
+            DI_16_modules = new Dictionary<io_module.TYPES, string>();
+            DI_16_modules.Add( io_module.TYPES.T_1405, "750-1405 ( 16 DI 24 VDC )" );
+			DI_16_modules.Add( io_module.TYPES.T_1415, "750-1415 ( 8 DI 24 VDC )" );
+			DI_16_modules.Add( io_module.TYPES.T_1420, "750-1420 ( 4 DI 24 VDC )" );
 
 			DO_modules = new Dictionary<io_module.TYPES, string>();
 			DO_modules.Add( io_module.TYPES.T_504, "750-504 ( 4 DO )" );
 			DO_modules.Add( io_module.TYPES.T_512, "750-512 ( 2 DO )" );
 			DO_modules.Add( io_module.TYPES.T_530, "750-530 ( 8 DO )" );
-			DO_modules.Add( io_module.TYPES.T_1504, "750-1504 ( 16 DO 24 VDC )" );
-			DO_modules.Add( io_module.TYPES.T_1515, "750-1515 ( 8 DO 24 VDC )" );
+
+            DO_16_modules = new Dictionary<io_module.TYPES, string>();
+			DO_16_modules.Add( io_module.TYPES.T_1504, "750-1504 ( 16 DO 24 VDC )" );
+			DO_16_modules.Add( io_module.TYPES.T_1515, "750-1515 ( 8 DO 24 VDC )" );
 
 			AI_modules = new Dictionary<io_module.TYPES, string>();
 			AI_modules.Add( io_module.TYPES.T_455, "750-455 ( 4 AI 4-20 mA )" );

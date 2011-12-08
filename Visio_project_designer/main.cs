@@ -77,8 +77,8 @@ namespace visio_prj_designer
         private bool is_duplicating = false;
         private int duplicate_count = 0;
 
-        private Microsoft.Office.Interop.Visio.Shape old_shape;
-        private Microsoft.Office.Interop.Visio.Shape new_shape;
+        public Microsoft.Office.Interop.Visio.Shape old_shape;
+        public Microsoft.Office.Interop.Visio.Shape new_shape;
 
         private bool no_delete_g_pac_flag = false;
 
@@ -395,6 +395,9 @@ namespace visio_prj_designer
                         {
                         //	if ( shape.Data2 != "860" )
 
+                        //  Для процедуры выбора типа модуля определяем фигуру пораньше
+                        old_shape = shape; 
+
                         modules_count_enter modules_count_enter_form = new modules_count_enter();
                         modules_count_enter_form.ShowDialog();
                         duplicate_count = modules_count_enter_form.modules_count - 1;
@@ -419,13 +422,16 @@ namespace visio_prj_designer
                             new_shape = shape.Duplicate();
                             old_shape = shape;
 
-                            string str_x = string.Format(
-                                "PNTX(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+6 mm",
-                                old_shape.Name );
+                            //string str_x = string.Format(
+                            //    "PNTX(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+6 mm",
+                            //    old_shape.Name );
 
-                            string str_y = string.Format(
-                                "PNTY(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+-47 mm",
-                                old_shape.Name );
+                            //string str_y = string.Format(
+                            //    "PNTY(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+-47 mm",
+                            //    old_shape.Name );
+
+                            string str_x = old_shape.Cells[ "PinX" ].Formula + "+0.49";
+                            string str_y = old_shape.Cells[ "PinY" ].Formula;
 
                             new_shape.Cells[ "PinX" ].Formula = str_x;
                             new_shape.Cells[ "PinY" ].Formula = str_y;
@@ -1278,10 +1284,10 @@ namespace visio_prj_designer
         /// <param name="connect"> Объект "склейки". </param>
         private void visio_addin__ConnectionsAdded( Microsoft.Office.Interop.Visio.Connects connect )
             {
-            Microsoft.Office.Interop.Visio.Shape obj_2 =
-                visio_app.ActivePage.Shapes[ connect.FromSheet.Name ];
             Microsoft.Office.Interop.Visio.Shape obj_1 =
                 visio_app.ActivePage.Shapes[ connect.ToSheet.Name ];
+            Microsoft.Office.Interop.Visio.Shape obj_2 =
+                visio_app.ActivePage.Shapes[ connect.FromSheet.Name ];
 
             switch( obj_1.Data1 )
                 {
@@ -1292,8 +1298,30 @@ namespace visio_prj_designer
                         }
                     else
                         {
+                        //  Переименовываем первый модуль в группе
                         int new_number = Convert.ToInt32( obj_1.Cells[ "Prop.order_number" ].FormulaU ) + 1;
                         obj_2.Cells[ "Prop.order_number" ].FormulaU = Convert.ToString( new_number );
+
+                        //  Переименовываем остальные модули в группе
+                        for ( int i = 1; i <= visio_app.ActivePage.Shapes.Count; i++ )
+                            {                            
+                            if (  ( visio_app.ActivePage.Shapes[ i ].Data2 != "860" )
+                              &&  ( visio_app.ActivePage.Shapes[ i ].Connects.ToSheet != null )
+                              &&  ( visio_app.ActivePage.Shapes[ i ].Connects.ToSheet.Name == obj_2.Name )
+                               )
+                                {
+                                //  Высчитываем следующий номер
+                                new_number = Convert.ToInt32( obj_2.Cells[ "Prop.order_number" ].FormulaU ) + 1;
+                                
+                                //  Задаем его для найденного модуля
+                                visio_app.ActivePage.Shapes[ i ].Cells[ "Prop.order_number" ].FormulaU =
+                                    Convert.ToString( new_number );
+
+                                //  Меняем модуль относительно которого дальше идет переименование
+                                obj_2 = visio_app.ActivePage.Shapes[ i ];
+                                i = 0;
+                                }
+                            }
                         }
 
                     break;
