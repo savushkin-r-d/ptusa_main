@@ -200,7 +200,6 @@ namespace visio_prj_designer
                 //  В проекте обязательно есть один узел (контроллера)
                 g_PAC_nodes = new List<PAC>();
                 g_PAC_nodes.Add( null );
-                //g_PAC_nodes.Add( new PAC( "Controller", "0.0.0.0", null ) );
 
                 //  Считываем и преобразуем имя файла для сохранения данных объектов в одноименном XML
                 xml_fileName = doc.Path + doc.Name.Replace( ".vsd", ".xml" );
@@ -355,7 +354,6 @@ namespace visio_prj_designer
                         {
                         System.Diagnostics.Debug.WriteLine( err.Message );
                         MessageBox.Show( "Ошибка считывания сигналов проекта" );
-                        //throw;
                         }
 
 
@@ -436,18 +434,12 @@ namespace visio_prj_designer
                             {
                             g_PAC_nodes.Add( new PAC( name.Substring( 1, name.Length - 2 ),
                                 ip_addr.Substring( 1, ip_addr.Length - 2 ), shape ) );
-
-                            //no_delete_g_pac_flag = true;
-                            //MessageBox.Show( "Только один контроллер может быть в проекте!" );
-                            //shape.DeleteEx( 0 );
                             }
 
                         return;
                         }
                     else
                         {
-                        //	if ( shape.Data2 != "860" )
-
                         //  Для процедуры выбора типа модуля определяем фигуру пораньше
                         old_shape = shape; 
 
@@ -457,58 +449,29 @@ namespace visio_prj_designer
 
                         ////////////////////////////
 
-                        //	Нужно будет доработать
-                        //	Проверка составленого списка модулей (LB_modules) 
-                        //		с имеющимся списком объектов g_PAC.io_modules
-                        //	g_PAC.insert_io_module( index, shape ); для недостоющих
-
-                        ////////////////////////////
-
                         shape.Cells[ "Prop.type" ].FormulaU = modules_count_enter_form.modules_type;
                         shape.Shapes[ "type_str" ].Text = modules_count_enter_form.modules_type;
 
-                        //PAC temp_node;
-                        ////  Ищем узел которому принадлежит модуль
-                        //    temp_node = g_PAC_nodes.Find( delegate( PAC pp )
-                        //    {
-                        //        return 
-                        //            pp.shape.Cells[ "Prop.node_number" ].Formula ==
-                        //            shape.Cells[ "Prop.node_number" ].Formula;
-                        //    }
-                        //);
+                        for ( int i = 0; i < duplicate_count; i++ )
+                            {
+                            is_duplicating = true;
+                            new_shape = shape.Duplicate();
+                            old_shape = shape;
 
-                        ////  Если нашли такой узел то привязываем к нему модуль
-                        //if ( temp_node == null )
-                        //    {
-                        //    temp_node = g_PAC_nodes[ 0 ];
-                        //    }
+                            //string str_x = old_shape.Cells[ "PinX" ].Formula + "+0.49";
+                            string str_x = old_shape.Cells[ "PinX" ].Formula + "+" + old_shape.Cells[ "Width" ].Formula;
+                            string str_y = old_shape.Cells[ "PinY" ].Formula;
 
-                        //    //  Добавляем модуль к данному узлу
-                        //    temp_node.add_io_module( shape );
+                            new_shape.Cells[ "PinX" ].Formula = str_x;
+                            new_shape.Cells[ "PinY" ].Formula = str_y;
 
+                            shape = new_shape;
 
-                            for ( int i = 0; i < duplicate_count; i++ )
-                                {
-                                is_duplicating = true;
-                                new_shape = shape.Duplicate();
-                                old_shape = shape;
+                            shape.Cells[ "Prop.type" ].FormulaU = modules_count_enter_form.modules_type;
+                            shape.Shapes[ "type_str" ].Text = modules_count_enter_form.modules_type;
 
-                                string str_x = old_shape.Cells[ "PinX" ].Formula + "+0.49";
-                                string str_y = old_shape.Cells[ "PinY" ].Formula;
-
-                                new_shape.Cells[ "PinX" ].Formula = str_x;
-                                new_shape.Cells[ "PinY" ].Formula = str_y;
-
-                                shape = new_shape;
-
-//                                temp_node.add_io_module( shape );
-
-                                shape.Cells[ "Prop.type" ].FormulaU = modules_count_enter_form.modules_type;
-                                shape.Shapes[ "type_str" ].Text = modules_count_enter_form.modules_type;
-
-                                visio_addin__FormulaChanged( shape.Cells[ "Prop.type" ] );
-                                }
-
+                            visio_addin__FormulaChanged( shape.Cells[ "Prop.type" ] );
+                            }
                         }
                     break;
 
@@ -586,17 +549,11 @@ namespace visio_prj_designer
                 case "WTE":
 
                     //Поиск по shape объекта device.
-                    //int dev_n = Convert.ToInt16(shape.Cells["Prop.number"].FormulaU);
-                    //int dev_type = Convert.ToInt16(shape.Cells["Prop.type"].FormulaU);
-
                     cur_sel_dev = g_devices.Find( delegate( device dev )
                         {
-                            //return dev.get_n() == dev_n && dev.get_type() == dev_type;
-                            return dev.get_shape() == shape;
+                        return dev.get_shape() == shape;
                         }
                         );
-
-                    //g_devices[ current_selected_dev ];
 
                     break;
                 }
@@ -665,6 +622,7 @@ namespace visio_prj_designer
             switch ( obj_1.Data1 )
                 {
                 case "750":
+                    //  Работа с узлами
                     if ( obj_1.Data2 == "860" || PAC_Node_Type.Contains( obj_1.Data2 ) )
                         {
                         //  Находим узел соответствующий фигуре 1
@@ -678,16 +636,30 @@ namespace visio_prj_designer
                         //  Меняем номер модуля и "node_number" во всех присоединяемых модулях
                         obj_2.Cells[ "Prop.order_number" ].FormulaU = "1";
                         obj_2.Cells[ "Prop.node_number" ].FormulaU = obj_1.Cells[ "Prop.node_number" ].FormulaU;
-                        obj_1.Cells[ "Prop.node_number" ].FormulaU = obj_1.Cells[ "Prop.node_number" ].FormulaU;
                         Check_nodes_modules( obj_2 );
+                        obj_1 = obj_2;
                         }
                     else
                         {
-                        //  Переименовываем остальные модули в группе
+                        //  Находим узел соответствующий номеру узла в модуле
+                        cur_PAC_node = g_PAC_nodes.Find(
+                            delegate( PAC node )
+                                {
+                                return node.PAC_number == 
+                                    Convert.ToInt32( obj_1.Cells[ "Prop.node_number" ].FormulaU );
+                                }
+                            );
+                        }
+
+                    //  Работа с модулями
+                        //  Переименовываем модули в группе
                         for ( int i = 1; i <= visio_app.ActivePage.Shapes.Count; i++ )
                             {
                             if ( ( visio_app.ActivePage.Shapes[ i ].Data2 != "860" )
                               && ( !PAC_Node_Type.Contains( visio_app.ActivePage.Shapes[ i ].Data2 ) )
+
+                              && ( obj_1.Data2 != "860" && !PAC_Node_Type.Contains( obj_1.Data2 ) )
+
                               && ( visio_app.ActivePage.Shapes[ i ].Connects.ToSheet != null )
                               && ( visio_app.ActivePage.Shapes[ i ].Connects.ToSheet.Name == obj_1.Name )
                                )
@@ -710,7 +682,6 @@ namespace visio_prj_designer
                                 i = 0;
                                 }
                             }
-                        }
 
                     break;
                 }
@@ -1477,8 +1448,6 @@ namespace visio_prj_designer
 
                                 string n_part_1 = mtc.Groups[ 1 ].ToString();
                                 //string n_part_2 = mtc.Groups[ 2 ].ToString();
-                                //if ( n_part_1 == "" )
-                                //    n_part_1 = "0";
 
                                 int n = Convert.ToUInt16( n_part_1 );
 
@@ -1506,28 +1475,7 @@ namespace visio_prj_designer
 							break;
 
 						case "Prop.type":	//	Тип устройства менять нельзя
-							  //int type = Convert.ToInt16( cell.Shape.Cells[ "Prop.type" ].Formula );
-							  //current_selected_dev.type = ( tech_device.device.TYPES ) type;
-
-						//    string type = cell.Shape.Cells[ "Prop.type" ].get_ResultStr( 0 );
-
-						//    switch ( type )
-						//        {
-						//        case "1 КУ":
-						//            //cell.Shape.AddSection( cell.Shape.get_CellsRowIndex );
-						//            int idx = cell.Shape.get_CellsRowIndex( "Prop.type" );
-
-						//            cell.Shape.AddNamedRow(
-						//                ( short ) Visio.VisSectionIndices.visSectionUser, "DO",
-						//                ( short ) Visio.VisRowTags.visTagDefault );
-
-						//            cell.Shape.AddNamedRow(
-						//                ( short ) Visio.VisSectionIndices.visSectionProp, "hf",
-						//                ( short ) 0 );
-						//            break;
-						//        }
-						    break;
-
+                            break;
 
 						case "Prop.sub_type":
 							int sub_type = Convert.ToInt16( cell.Shape.Cells[ "Prop.sub_type" ].Formula );
@@ -1606,9 +1554,6 @@ namespace visio_prj_designer
             XmlNodeList prop_list = dom.GetElementsByTagName( "Proporties" );
             int i = -1;
 
-
-
-            //string fileName = "..\\Visio docs\\description_device.xml";
             XmlTextReader tr = new XmlTextReader( xml_fileName );
 try
 {
@@ -1679,48 +1624,38 @@ try
                             break;
 
                         case "Proporties":
-//*************************************************** 
-            try
-            {
-            i++;
-            TreeView TV;
+                            //*************************************************** 
+                            try
+                                {
+                                i++;
+                                TreeView TV;
 
-            if ( cur_step >= 0 )
-                {
-                TV = cur_sel_obj.mode_mas[ cur_mode ].step[ cur_step ].TreeView_params;
-                }
-            else
-                {
-                TV = cur_sel_obj.mode_mas[ cur_mode ].TreeView_params;
-                }
+                                if ( cur_step >= 0 )
+                                    {
+                                    TV = cur_sel_obj.mode_mas[ cur_mode ].step[ cur_step ].TreeView_params;
+                                    }
+                                else
+                                    {
+                                    TV = cur_sel_obj.mode_mas[ cur_mode ].TreeView_params;
+                                    }
 
-            TV.Nodes.Clear();
-            TV.Nodes.Add( "Proporties" );//new TreeNode( dom.DocumentElement.Name ) );
-            
-            TreeNode tNode = new TreeNode();
-            tNode = TV.Nodes[ 0 ];
+                                TV.Nodes.Clear();
+                                TV.Nodes.Add( "Proporties" );//new TreeNode( dom.DocumentElement.Name ) );
 
-            //  Добавление узла с его подузлами
-            Add_Node( prop_list[ i ], tNode );
+                                TreeNode tNode = new TreeNode();
+                                tNode = TV.Nodes[ 0 ];
 
-            TV.ExpandAll();
+                                //  Добавление узла с его подузлами
+                                Add_Node( prop_list[ i ], tNode );
 
-            }
-            catch (System.Exception ex)
-            {
-            MessageBox.Show( ex.Message );	
-            }
-//***************************************************                                  
-                       
-                            //for ( int i = 0; i < mode_mas.Count; i++ )
-                            //    {
-                            //    mode_mas[ i ].TreeView_params = new TreeView();
-                            //    for ( int j = 0; j < mode_mas[ i ].step.Count; j++ )
-                            //        {
-                            //        mode_mas[ i ].step[ j ].TreeView_params = new TreeView();
+                                TV.ExpandAll();
 
-                            //        }
-                            //    }
+                                }
+                            catch ( System.Exception ex )
+                                {
+                                MessageBox.Show( ex.Message );
+                                }
+                            //***************************************************                                  
                             break;
 
                         case "Parameters_temp":
@@ -1804,51 +1739,6 @@ catch ( Exception )
  
     tr.Close();
 
-//*************************************************** 
-/*            try
-            {
-
-            XmlDocument dom = new XmlDocument();
-            dom.Load( xml_fileName );
-
-            TreeView TV = g_objects[ 0 ].mode_mas[ 0 ].TreeView_params;
-            TV.Nodes.Clear();
-            TV.Nodes.Add( "Proporties" );//new TreeNode( dom.DocumentElement.Name ) );
-            
-            TreeNode tNode = new TreeNode();
-            tNode = TV.Nodes[ 0 ];
-
-            //  Добавление узла с его подузлами
-            Add_Node( dom.DocumentElement, tNode );
-
-            Add_Node_child(  )
-                    {
-                    XmlNodeList node_list = dom.SelectNodes( "//child" );
-                    XmlDocument cDom = new XmlDocument();
-                    cDom.LoadXml( "<children></children>" );
-                    
-                    foreach ( XmlNode node in node_list )
-                        {
-                        XmlNode newElem = cDom.CreateNode( XmlNodeType.Element, node.Name, node.NamespaceURI );
-                        newElem.InnerText = node.InnerText;
-                        cDom.DocumentElement.AppendChild( newElem );
-                        }
-
-                    TV.Nodes.Add( new TreeNode( cDom.DocumentElement.Name ) );
-                    tNode = TV.Nodes[ 1 ];
-                    Add_Node( cDom.DocumentElement, tNode );
-                    }
-  
-
-            TV.ExpandAll();
-
-            }
-            catch (System.Exception ex)
-            {
-            MessageBox.Show( ex.Message );	
-            }
- */ 
-//***************************************************
             }
         //---------------------------------------------------------------------
 
@@ -1859,17 +1749,6 @@ catch ( Exception )
         /// <param name="XML"> I don't now </param>
         public void Write_XML_description( string doc_name )
             {
-//**********************************
-//            foreach ( TreeNode node in temp_mode.TreeView_params.Nodes )
-//                {
-//                StreamWriter sw = new StreamWriter( xml_fileName, false, System.Text.Encoding.UTF8 );
-//                sw.WriteLine("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
-//
-//                Parse_Node( sw, node );
-//                sw.Close();
-//                }
-//**********************************
-
             XmlTextWriter tw = new XmlTextWriter( xml_fileName, null );
 
             // задаём форматирование с отступом
@@ -1985,41 +1864,7 @@ catch ( Exception )
                     }
                 }
             }
-
-
         //---------------------------------------------------------------------
-/*
-        public void Parse_Node( StreamWriter sw, TreeNode tn )
-            {
-            //IEnumerator ie = tn.Nodes.GetEnumerator();
-
-            string parentnode = "";
-
-            parentnode = tn.Text;
-
-            //while ( ie.MoveNext() )
-            foreach ( TreeNode node in tn.Nodes )
-                {
-                if ( node.GetNodeCount( true ) == 0 )
-                    {
-                    sw.Write( node.Text );
-                    }
-                else
-                    {
-                    sw.Write( "<" + node.Text + ">" );
-                    }
-
-                if ( node.GetNodeCount( true ) > 0 )
-                    {
-                    Parse_Node( sw, node );
-                    }
-                }
-
-            sw.Write( "</" + parentnode + ">" );
-            sw.Write( "" );
-            }
-        //---------------------------------------------------------------------
-*/
 
         public void write_device_to_XML( XmlTextWriter tw, TreeNode node )
             {
