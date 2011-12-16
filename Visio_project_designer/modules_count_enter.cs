@@ -51,7 +51,7 @@ namespace visio_prj_designer
 				//TV_modules_list.SelectedNode.Name = ;  
 				//int i = Convert.ToInt32( TV_modules_list.SelectedNode.Name );
 				
-				//g_PAC.add_io_module( shape );
+				//g_PAC_nodes[ 0 ].add_io_module( shape );
 				//LB_modules.Items.Add( TV_modules_list.SelectedNode.Index );
 			}
 

@@ -37,7 +37,7 @@ namespace visio_prj_designer
 
         private void button1_Click( object sender, RibbonControlEventArgs e )
             {
-            if( Globals.visio_addin.g_PAC != null )
+            if( Globals.visio_addin.g_PAC_nodes[ 0 ] != null )
                 {
                 try
                     {
@@ -59,13 +59,13 @@ namespace visio_prj_designer
                             config_f.WriteLine( "editor_version = 12" );
                             config_f.WriteLine( "file_version   = 21" );
                             config_f.WriteLine( "" );
-                            config_f.WriteLine( "PAC_name = \"" + Globals.visio_addin.g_PAC.PAC_name + "\"" );
+                            config_f.WriteLine( "PAC_name = \"" + Globals.visio_addin.g_PAC_nodes[ 0 ].PAC_name + "\"" );
                             config_f.WriteLine( "-- ----------------------------------------------------------------------------" );
                             config_f.WriteLine( "--Узлы WAGO" );
 
                             config_f.WriteLine( "nodes = " );
                             config_f.WriteLine( "\t{" );
-                            string lua_str = Globals.visio_addin.g_PAC.lua_save( "\t\t" );
+                            string lua_str = Globals.visio_addin.g_PAC_nodes[ 0 ].lua_save( "\t\t" );
                             config_f.WriteLine( lua_str );
                             config_f.WriteLine( "\t}" );
 

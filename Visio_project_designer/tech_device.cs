@@ -93,7 +93,7 @@ namespace tech_device
         ///
         /// <param name="shape"> Фигура Visio. </param>
         /// <param name="pac">	Узел Wago. </param>
-        public T_Object( Visio.Shape shape, PAC pac ):base( shape, pac )
+        public T_Object( Visio.Shape shape, List<PAC> pac ):base( shape, pac )
             {
             mode_mas = new List<mode>();
             param_list_temp = new List<string[]>();
@@ -398,7 +398,7 @@ namespace tech_device
                 {
                 Match mtc = rex.Match( str );
 
-                node = Convert.ToInt16( mtc.Groups[ 1 ].ToString() );
+                node = Convert.ToInt16( mtc.Groups[ 1 ].ToString() ) - 1;
                 module = Convert.ToInt16( mtc.Groups[ 2 ].ToString() );
                 clamp = Convert.ToInt16( mtc.Groups[ 3 ].ToString() );
                 return true;
@@ -413,7 +413,7 @@ namespace tech_device
         ///
         /// <param name="sub_type"> Подтип устройства. </param>
         /// <param name="pac">      Узел Wago. </param>
-        public void change_sub_type( SUB_TYPES sub_type, PAC pac )
+        public void change_sub_type( SUB_TYPES sub_type, List<PAC> pac )
             {
             this.sub_type = sub_type;
 			    
@@ -428,7 +428,7 @@ namespace tech_device
         ///
         /// <param name="sub_type"> Подтип устройства. </param>
         /// <param name="pac">      Узел Wago. </param>
-        private void set_sub_type( SUB_TYPES sub_type, PAC pac )
+        private void set_sub_type( SUB_TYPES sub_type, List<PAC> pac )
             {
 			int node;
 			int module;
@@ -450,28 +450,28 @@ namespace tech_device
                         case SUB_TYPES.V_1_CONTROL_CHANNEL:
                             add_wago_channel( "DO1", io_module.KINDS.DO );
                             get_n_from_str( str_DO1, out node, out module, out clamp );
-                            wago_channels[ "DO1" ].set( pac, module, clamp );
+                            wago_channels[ "DO1" ].set( pac[ node ], module, clamp );
                             break;
 
                         case SUB_TYPES.V_2_CONTROL_CHANNEL:
                             add_wago_channel( "DO1", io_module.KINDS.DO );
                             get_n_from_str( str_DO1, out node, out module, out clamp );
-                            wago_channels[ "DO1" ].set( pac, module, clamp );
+                            wago_channels[ "DO1" ].set( pac[ node ], module, clamp );
 
                             add_wago_channel( "DO2", io_module.KINDS.DO );
                             get_n_from_str( str_DO2, out node, out module, out clamp );
-                            wago_channels[ "DO2" ].set( pac, module, clamp );
+                            wago_channels[ "DO2" ].set( pac[ node ], module, clamp );
 
                             break;
 
                         case SUB_TYPES.V_1_CONTROL_CHANNEL_1_FB:
                             add_wago_channel( "DO1", io_module.KINDS.DO );
                             get_n_from_str( str_DO1, out node, out module, out clamp );
-                            wago_channels[ "DO1" ].set( pac, module, clamp );
+                            wago_channels[ "DO1" ].set( pac[ node ], module, clamp );
 
 							add_wago_channel( "DI1", io_module.KINDS.DI );
                             get_n_from_str( str_DI1, out node, out module, out clamp );
-                            wago_channels[ "DI1" ].set( pac, module, clamp );
+                            wago_channels[ "DI1" ].set( pac[ node ], module, clamp );
                             break;
 
                         case SUB_TYPES.V_1_CONTROL_CHANNEL_2_FB:
@@ -480,13 +480,13 @@ namespace tech_device
                             add_wago_channel( "DI2", io_module.KINDS.DI );
 
                             get_n_from_str( str_DO1, out node, out module, out clamp );
-                            wago_channels[ "DO1" ].set( pac, module, clamp );
+                            wago_channels[ "DO1" ].set( pac[ node ], module, clamp );
 
                             get_n_from_str( str_DI1, out node, out module, out clamp );
-                            wago_channels[ "DI1" ].set( pac, module, clamp );
+                            wago_channels[ "DI1" ].set( pac[ node ], module, clamp );
 
                             get_n_from_str( str_DI2, out node, out module, out clamp );
-                            wago_channels[ "DI2" ].set( pac, module, clamp );
+                            wago_channels[ "DI2" ].set( pac[ node ], module, clamp );
 
                             break;
 
@@ -497,16 +497,16 @@ namespace tech_device
                             add_wago_channel( "DI2", io_module.KINDS.DI );
 
                             get_n_from_str( str_DO1, out node, out module, out clamp );
-                            wago_channels[ "DO1" ].set( pac, module, clamp );
+                            wago_channels[ "DO1" ].set( pac[ node ], module, clamp );
 
                             get_n_from_str( str_DO2, out node, out module, out clamp );
-                            wago_channels[ "DO2" ].set( pac, module, clamp );
+                            wago_channels[ "DO2" ].set( pac[ node ], module, clamp );
 
                             get_n_from_str( str_DI1, out node, out module, out clamp );
-                            wago_channels[ "DI1" ].set( pac, module, clamp );
+                            wago_channels[ "DI1" ].set( pac[ node ], module, clamp );
 
                             get_n_from_str( str_DI2, out node, out module, out clamp );
-                            wago_channels[ "DI2" ].set( pac, module, clamp );
+                            wago_channels[ "DI2" ].set( pac[ node ], module, clamp );
 
                             break;
 
@@ -519,19 +519,19 @@ namespace tech_device
 							add_wago_channel( "DI2", io_module.KINDS.DI );
 
 							get_n_from_str( str_DO1, out node, out module, out clamp );
-							wago_channels[ "DO1" ].set( pac, module, clamp );
+							wago_channels[ "DO1" ].set( pac[ node ], module, clamp );
 
 							get_n_from_str( str_DO2, out node, out module, out clamp );
-							wago_channels[ "DOH" ].set( pac, module, clamp );
+							wago_channels[ "DOH" ].set( pac[ node ], module, clamp );
 
 							get_n_from_str( str_DO2, out node, out module, out clamp );
-							wago_channels[ "DOL" ].set( pac, module, clamp );
+							wago_channels[ "DOL" ].set( pac[ node ], module, clamp );
 
 							get_n_from_str( str_DI1, out node, out module, out clamp );
-							wago_channels[ "DI1" ].set( pac, module, clamp );
+							wago_channels[ "DI1" ].set( pac[ node ], module, clamp );
 
 							get_n_from_str( str_DI2, out node, out module, out clamp );
-							wago_channels[ "DI2" ].set( pac, module, clamp );
+							wago_channels[ "DI2" ].set( pac[ node ], module, clamp );
 
 							break;
 
@@ -557,7 +557,7 @@ namespace tech_device
 
 					add_wago_channel( "DO1", io_module.KINDS.DO );
 					get_n_from_str( str_DO1, out node, out module, out clamp );
-					wago_channels[ "DO1" ].set( pac, module, clamp );
+					wago_channels[ "DO1" ].set( pac[ node ], module, clamp );
 					}
 
 				if  (	( type == TYPES.T_FB )
@@ -569,7 +569,7 @@ namespace tech_device
 
 					add_wago_channel( "DI1", io_module.KINDS.DI );
 					get_n_from_str( str_DI1, out node, out module, out clamp );
-					wago_channels[ "DI1" ].set( pac, module, clamp );
+					wago_channels[ "DI1" ].set( pac[ node ], module, clamp );
 					}
 
 				if ( type == TYPES.T_AO )
@@ -578,7 +578,7 @@ namespace tech_device
 
 					add_wago_channel( "AO1", io_module.KINDS.AO );
 					get_n_from_str( str_AO1, out node, out module, out clamp );
-					wago_channels[ "AO1" ].set( pac, module, clamp );
+					wago_channels[ "AO1" ].set( pac[ node ], module, clamp );
 					}
 
 				if (   ( type == TYPES.T_AI )
@@ -592,7 +592,7 @@ namespace tech_device
 
 					add_wago_channel( "AI1", io_module.KINDS.AI );
                     get_n_from_str( str_AI1, out node, out module, out clamp );
-                    wago_channels[ "AI1" ].set( pac, module, clamp );
+                    wago_channels[ "AI1" ].set( pac[ node ], module, clamp );
 					}
 
             }
@@ -603,7 +603,7 @@ namespace tech_device
         ///
         /// <param name="shape"> Фигура Visio. </param>
         /// <param name="pac">   Узел Wago. </param>
-        public device( Visio.Shape shape, PAC pac )
+        public device( Visio.Shape shape, List<PAC> pac )
             {
             try
                 {

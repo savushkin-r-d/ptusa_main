@@ -206,10 +206,12 @@ namespace visio_prj_designer
         private void type_lview__DoubleClick( object sender, EventArgs e )
             {
             // Выделяем все доступные клеммы.
-            Globals.visio_addin.g_PAC.mark_suitable( 
-                type_lview.SelectedItems[ 0 ].Text.Substring( 0, 
-                type_lview.SelectedItems[ 0 ].Text.Length - 1 ) );
-                        
+            for ( int i = 0; i < Globals.visio_addin.g_PAC_nodes.Count; i++ )
+                {
+                Globals.visio_addin.g_PAC_nodes[ i ].mark_suitable(
+                    type_lview.SelectedItems[ 0 ].Text.Substring( 0,
+                    type_lview.SelectedItems[ 0 ].Text.Length - 1 ) );
+                }
 
             // Выделяем задействованные устройством клеммы.
             Globals.visio_addin.cur_sel_dev.select_channels();
@@ -244,7 +246,8 @@ namespace visio_prj_designer
                 type_cbox.SelectedIndex )
                 {
                 Globals.visio_addin.cur_sel_dev.change_sub_type(
-                    ( device.SUB_TYPES ) type_cbox.SelectedIndex, Globals.visio_addin.g_PAC );
+                                        ( device.SUB_TYPES ) type_cbox.SelectedIndex,
+                                        Globals.visio_addin.g_PAC_nodes );
 
                 Globals.visio_addin.cur_sel_dev.refresh_edit_window(
                     type_cbox, type_lview, true );

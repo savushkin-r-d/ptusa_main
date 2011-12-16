@@ -213,6 +213,7 @@ namespace wago
 				case TYPES.T_461_002:
 				case TYPES.T_466:
 				case TYPES.T_638:
+                case TYPES.T_655:
 				//	AO modules
 				case TYPES.T_554:
                     total_clamps = CLAMPS_COUNT.СLAMP_8;
@@ -663,6 +664,9 @@ namespace wago
         /// <summary> Имя контроллера. </summary>
         public string PAC_name;
 
+        /// <summary> Имя контроллера. </summary>
+        public int PAC_number;
+
 		/// <summary> Выбранный в данный момент модуль </summary>
 		internal io_module current_module = null; 
 
@@ -802,6 +806,9 @@ namespace wago
         /// <summary> Вид канала. </summary>
         internal io_module.KINDS kind;
 
+        /// <summary> Номер узла, к которому привязан канал. </summary>
+        internal int node;
+
         /// <summary> Модуль, к которому привязан канал. </summary>
         internal io_module module;
 
@@ -843,17 +850,20 @@ namespace wago
         public void set( PAC pac, int module, int clamp )
             {
 			//	Привязка каналов устройства к модулю
-            if( module > 0 )
+            if( pac != null && module > 0 )
                 {
-				//Поиск по shape объекта device.
-				this.module = pac.get_io_modules().Find( delegate( io_module mod )
-				{
-					return mod.order_number == module;
-				}
-				);
+                this.module = pac.get_io_modules().Find( delegate( io_module mod )
+                {
+                    return mod.order_number == module;
+                }
+                );
 
-                this.clamp = clamp - 1;
-                this.module.use( clamp );
+                if ( this.module != null )
+                    {
+                    this.clamp = clamp - 1;
+                    this.module.use( clamp );
+                    this.node = Convert.ToInt32( pac.shape.Cells[ "Prop.node_number" ].Formula );
+                    }
                 }
 			else
 				{	//	Задание параметра

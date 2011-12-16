@@ -54,8 +54,16 @@ namespace visio_prj_designer
 		/// <summary> Объекты проекта (гребенки и танки) </summary>
 		internal List<T_Object> g_objects;
 
+
         /// <summary> Объект контроллера. </summary>
-        internal PAC g_PAC = null;       
+        internal List<PAC> g_PAC_nodes;     //  Список узлов
+
+        /// <summary> Текущий выделенный узел </summary>
+        internal PAC cur_PAC_node;
+
+        //  Типы узлов
+        internal string[] PAC_Node_Type = { "315", "815", "341", "841" };
+
 
         /// <summary> Флаг режима привязки устройств к модулям. </summary>
         internal bool is_device_edit_mode = false; 
@@ -80,7 +88,7 @@ namespace visio_prj_designer
         public Microsoft.Office.Interop.Visio.Shape old_shape;
         public Microsoft.Office.Interop.Visio.Shape new_shape;
 
-        private bool no_delete_g_pac_flag = false;
+        //private bool no_delete_g_pac_flag = false;
 
         #endregion
 
@@ -186,6 +194,14 @@ namespace visio_prj_designer
                 {
                 vis_main_ribbon.show();
 
+                //	Создание списка доступных элементов
+                service_config = new service_data();
+
+                //  В проекте обязательно есть один узел (контроллера)
+                g_PAC_nodes = new List<PAC>();
+                g_PAC_nodes.Add( null );
+                //g_PAC_nodes.Add( new PAC( "Controller", "0.0.0.0", null ) );
+
                 //  Считываем и преобразуем имя файла для сохранения данных объектов в одноименном XML
                 xml_fileName = doc.Path + doc.Name.Replace( ".vsd", ".xml" );
                 }
@@ -214,29 +230,60 @@ namespace visio_prj_designer
 
                     //	Создание списка доступных элементов
                     service_config = new service_data();
-                    //for ( int i = 0; i < service_config.DI_modules.Count; i++ )
-                    //    {
-                    //    string ss = service_config.DI_modules[ 402 ];
-                    //    }
 
                     try
                         {
+                        g_PAC_nodes = new List<PAC>();
+                        g_PAC_nodes.Add( null );
+
                         //Считывание устройств Wago.
                         foreach ( Visio.Shape shape in target.Pages[ "Wago" ].Shapes )
                             {
-                            if ( shape.Data1 == "750" && shape.Data2 == "860" )
+                            if ( shape.Data1 == "750" )
                                 {
-                                string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
-                                string name = shape.Cells[ "Prop.PAC_name" ].Formula;
+                                //  Если этот узел является контроллером
+                                if (    shape.Data2 == "860" 
+                                    &&  g_PAC_nodes[ 0 ] == null )
+                                    {
+                                    string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
+                                    string name = shape.Cells[ "Prop.PAC_name" ].Formula;
 
-                                g_PAC = new PAC( name.Substring( 1, name.Length - 2 ),
-                                    ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
+                                    g_PAC_nodes[ 0 ] = 
+                                        new PAC( name.Substring( 1, name.Length - 2 ),
+                                            ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
+                                    }
 
+                                //  Если данный узел - это один из списка типов простых узлов 
+                                if ( PAC_Node_Type.Contains( shape.Data2 ) )
+                                    {
+                                    string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
+                                    string name = shape.Cells[ "Prop.PAC_name" ].Formula;
+
+                                    g_PAC_nodes.Add( new PAC( name.Substring( 1, name.Length - 2 ),
+                                        ip_addr.Substring( 1, ip_addr.Length - 2 ), shape ) );
+                                    }
                                 }
+                            }
 
-                            if ( shape.Data1 == "750" && shape.Data2 != "860" )
+                        foreach ( Visio.Shape shape in target.Pages[ "Wago" ].Shapes )
+                            {
+                            if (    shape.Data1 == "750" 
+                                &&  shape.Data2 != "860" 
+                                &&  !PAC_Node_Type.Contains( shape.Data2 ) )
                                 {
-                                g_PAC.add_io_module( shape );
+                                int qwer = Convert.ToInt32( g_PAC_nodes[ 0 ].shape.Cells[ "Prop.node_number" ].Formula );
+                                qwer = Convert.ToInt32( shape.Cells[ "Prop.node_number" ].Formula );
+                                
+                                //  Ищем узел, соответствующий номеру узла в модуле
+                                PAC temp_pac = g_PAC_nodes.Find( delegate( PAC pp )
+                                    {
+                                    return
+                                        pp.shape.Cells[ "Prop.node_number" ].Formula ==
+                                        shape.Cells[ "Prop.node_number" ].Formula;
+                                    }
+                                );
+                             
+                                if ( temp_pac != null )  temp_pac.add_io_module( shape );
                                 }
                             }
                         }
@@ -272,11 +319,11 @@ namespace visio_prj_designer
                                 case "AO":
                                 case "FQT":
                                 case "WTE":
-                                    g_devices.Add( new device( shape, g_PAC ) );
+                                    g_devices.Add( new device( shape, g_PAC_nodes ) );
                                     break;
 
                                 case "TANK":
-                                    g_objects.Add( new T_Object( shape, g_PAC ) );
+                                    g_objects.Add( new T_Object( shape, g_PAC_nodes ) );
                                     break;
                                 }		//	switch ( shape.Data1 )	
                             }		//	foreach
@@ -299,7 +346,7 @@ namespace visio_prj_designer
                                 case "UPR":
                                 case "AI":
                                 case "AO":
-                                    g_devices.Add( new device( shape, g_PAC ) );
+                                    g_devices.Add( new device( shape, g_PAC_nodes ) );
                                     break;
                                 }		//	switch ( shape.Data1 )	
                             }		//	foreach
@@ -372,21 +419,27 @@ namespace visio_prj_designer
             switch ( shape.Data1 )
                 {
                 case "750":
-                    if ( shape.Data2 == "860" )
+                    if (    shape.Data2 == "860"
+                        ||  PAC_Node_Type.Contains( shape.Data2 ) )
                         {
-                        if ( g_PAC == null )
-                            {
-                            string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
-                            string name = shape.Cells[ "Prop.PAC_name" ].Formula;
+                        string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
+                        string name = shape.Cells[ "Prop.PAC_name" ].Formula;
 
-                            g_PAC = new PAC( name.Substring( 1, name.Length - 2 ),
+                        if (    shape.Data2 == "860"
+                            &&  g_PAC_nodes[ 0 ] == null )
+                            {
+                            g_PAC_nodes[ 0 ] = 
+                                new PAC( name.Substring( 1, name.Length - 2 ),
                                 ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
                             }
-                        else
+                        else  //    315, 815, 341, 841
                             {
-                            no_delete_g_pac_flag = true;
-                            MessageBox.Show( "Только один контроллер может быть в проекте!" );
-                            shape.DeleteEx( 0 );
+                            g_PAC_nodes.Add( new PAC( name.Substring( 1, name.Length - 2 ),
+                                ip_addr.Substring( 1, ip_addr.Length - 2 ), shape ) );
+
+                            //no_delete_g_pac_flag = true;
+                            //MessageBox.Show( "Только один контроллер может быть в проекте!" );
+                            //shape.DeleteEx( 0 );
                             }
 
                         return;
@@ -414,37 +467,48 @@ namespace visio_prj_designer
                         shape.Cells[ "Prop.type" ].FormulaU = modules_count_enter_form.modules_type;
                         shape.Shapes[ "type_str" ].Text = modules_count_enter_form.modules_type;
 
-                        g_PAC.add_io_module( shape );
+                        //PAC temp_node;
+                        ////  Ищем узел которому принадлежит модуль
+                        //    temp_node = g_PAC_nodes.Find( delegate( PAC pp )
+                        //    {
+                        //        return 
+                        //            pp.shape.Cells[ "Prop.node_number" ].Formula ==
+                        //            shape.Cells[ "Prop.node_number" ].Formula;
+                        //    }
+                        //);
 
-                        for ( int i = 0; i < duplicate_count; i++ )
-                            {
-                            is_duplicating = true;
-                            new_shape = shape.Duplicate();
-                            old_shape = shape;
+                        ////  Если нашли такой узел то привязываем к нему модуль
+                        //if ( temp_node == null )
+                        //    {
+                        //    temp_node = g_PAC_nodes[ 0 ];
+                        //    }
 
-                            //string str_x = string.Format(
-                            //    "PNTX(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+6 mm",
-                            //    old_shape.Name );
+                        //    //  Добавляем модуль к данному узлу
+                        //    temp_node.add_io_module( shape );
 
-                            //string str_y = string.Format(
-                            //    "PNTY(LOCTOPAR(PNT('{0}'!Connections.X2,'{0}'!Connections.Y2),'{0}'!EventXFMod,EventXFMod))+-47 mm",
-                            //    old_shape.Name );
 
-                            string str_x = old_shape.Cells[ "PinX" ].Formula + "+0.49";
-                            string str_y = old_shape.Cells[ "PinY" ].Formula;
+                            for ( int i = 0; i < duplicate_count; i++ )
+                                {
+                                is_duplicating = true;
+                                new_shape = shape.Duplicate();
+                                old_shape = shape;
 
-                            new_shape.Cells[ "PinX" ].Formula = str_x;
-                            new_shape.Cells[ "PinY" ].Formula = str_y;
+                                string str_x = old_shape.Cells[ "PinX" ].Formula + "+0.49";
+                                string str_y = old_shape.Cells[ "PinY" ].Formula;
 
-                            shape = new_shape;
+                                new_shape.Cells[ "PinX" ].Formula = str_x;
+                                new_shape.Cells[ "PinY" ].Formula = str_y;
 
-                            g_PAC.add_io_module( shape );
+                                shape = new_shape;
 
-                            shape.Cells[ "Prop.type" ].FormulaU = modules_count_enter_form.modules_type;
-                            shape.Shapes[ "type_str" ].Text = modules_count_enter_form.modules_type;
+//                                temp_node.add_io_module( shape );
 
-                            visio_addin__FormulaChanged( shape.Cells[ "Prop.type" ] );
-                            }
+                                shape.Cells[ "Prop.type" ].FormulaU = modules_count_enter_form.modules_type;
+                                shape.Shapes[ "type_str" ].Text = modules_count_enter_form.modules_type;
+
+                                visio_addin__FormulaChanged( shape.Cells[ "Prop.type" ] );
+                                }
+
                         }
                     break;
 
@@ -464,12 +528,12 @@ namespace visio_prj_designer
                 case "AO":
                 case "FQT":
                 case "WTE":
-                    g_devices.Add( new device( shape, g_PAC ) );
+                    g_devices.Add( new device( shape, g_PAC_nodes ) );
                     break;
 
                 case "TANK":
                 case "GREB":
-                    g_objects.Add( new T_Object( shape, g_PAC ) );
+                    g_objects.Add( new T_Object( shape, g_PAC_nodes ) );
                     break;
                 }	//	switch ( shape.Data1 ) 
 
@@ -484,19 +548,25 @@ namespace visio_prj_designer
             {
             switch ( shape.Data1 )
                 {
-                //case "750":
-                //    if (shape.Data2 == "860")
-                //    {
-                //        if (no_delete_g_pac_flag)
-                //        {
-                //            no_delete_g_pac_flag = false;
-                //        }
-                //        else
-                //        {
-                //            g_PAC = null;
-                //        }
-                //    }
-                //    break;
+                case "750":
+                    //if (shape.Data2 == "860")
+                    //{
+                    //    cur_PAC_node = g_PAC_nodes.Find( delegate( PAC pp ) 
+                    //        {
+                    //        return pp.shape == shape;
+                    //        }
+                    //    );
+                
+                    //    if (no_delete_g_pac_flag)
+                    //    {
+                    //        no_delete_g_pac_flag = false;
+                    //    }
+                    //    else
+                    //    {
+                    //        g_PAC_nodes[ 0 ] = null;
+                    //    }
+                    //}
+                    break;
 
                 case "V":
                 case "N":
@@ -542,6 +612,110 @@ namespace visio_prj_designer
             }
 
 
+        private void Check_nodes_modules( Visio.Shape m_shape )
+            {
+            //  Определяем номер узла, к которому относится модуль
+            int node_n = Convert.ToInt32( m_shape.Cells[ "Prop.node_number" ].FormulaU );
+
+            //  Находим узел в который нужно переместить модуль
+            PAC temp_node =
+                g_PAC_nodes.Find( delegate( PAC pp )
+                    {
+                        return pp.PAC_number == node_n;
+                    }
+                );
+
+            //  Ищем в узлах модуль по фигуре. Если найдем, то удалим
+            for ( int j = 0; j < g_PAC_nodes.Count; j++ )
+                {
+                io_module temp_mod = g_PAC_nodes[ j ].get_io_modules().Find(
+                    delegate( io_module mod )
+                        {
+                        return mod.shape == m_shape;
+                        }
+                    );
+
+                if ( temp_mod != null )
+                    {
+                    g_PAC_nodes[ j ].get_io_modules().Remove( temp_mod );
+                    break;
+                    }
+                }
+
+            //  Переносим его в новый узел
+            temp_node.add_io_module( m_shape );
+            }
+
+
+        /// <summary> Event handler. Обработчик события "привязки" фигуры. Здесь
+        /// заполняем порядковый номер модуля в наборе. </summary>
+        ///
+        /// <remarks> Id, 16.08.2011. </remarks>
+        ///
+        /// <param name="connect"> Объект "склейки". </param>
+        private void visio_addin__ConnectionsAdded( Microsoft.Office.Interop.Visio.Connects connect )
+            {
+            Microsoft.Office.Interop.Visio.Shape obj_1 =
+                visio_app.ActivePage.Shapes[ connect.ToSheet.Name ];
+            Microsoft.Office.Interop.Visio.Shape obj_2 =
+                visio_app.ActivePage.Shapes[ connect.FromSheet.Name ];
+
+
+            //  Работа с фигурами (визуальными)
+            switch ( obj_1.Data1 )
+                {
+                case "750":
+                    if ( obj_1.Data2 == "860" || PAC_Node_Type.Contains( obj_1.Data2 ) )
+                        {
+                        //  Находим узел соответствующий фигуре 1
+                        cur_PAC_node = g_PAC_nodes.Find(
+                            delegate( PAC node )
+                                {
+                                return node.shape == obj_1;
+                                }
+                            );
+
+                        //  Меняем номер модуля и "node_number" во всех присоединяемых модулях
+                        obj_2.Cells[ "Prop.order_number" ].FormulaU = "1";
+                        obj_2.Cells[ "Prop.node_number" ].FormulaU = obj_1.Cells[ "Prop.node_number" ].FormulaU;
+                        obj_1.Cells[ "Prop.node_number" ].FormulaU = obj_1.Cells[ "Prop.node_number" ].FormulaU;
+                        Check_nodes_modules( obj_2 );
+                        }
+                    else
+                        {
+                        //  Переименовываем остальные модули в группе
+                        for ( int i = 1; i <= visio_app.ActivePage.Shapes.Count; i++ )
+                            {
+                            if ( ( visio_app.ActivePage.Shapes[ i ].Data2 != "860" )
+                              && ( !PAC_Node_Type.Contains( visio_app.ActivePage.Shapes[ i ].Data2 ) )
+                              && ( visio_app.ActivePage.Shapes[ i ].Connects.ToSheet != null )
+                              && ( visio_app.ActivePage.Shapes[ i ].Connects.ToSheet.Name == obj_1.Name )
+                               )
+                                {
+                                //  Высчитываем следующий номер
+                                int new_number = Convert.ToInt32( obj_1.Cells[ "Prop.order_number" ].FormulaU ) + 1;
+
+                                //  Задаем его для найденного модуля
+                                visio_app.ActivePage.Shapes[ i ].Cells[ "Prop.order_number" ].FormulaU =
+                                    Convert.ToString( new_number );
+
+                                //  Меняем номер узла, к которому принадлежит модуль
+                                visio_app.ActivePage.Shapes[ i ].Cells[ "Prop.node_number" ].FormulaU =
+                                    obj_1.Cells[ "Prop.node_number" ].FormulaU;
+
+                                Check_nodes_modules( visio_app.ActivePage.Shapes[ i ] );
+
+                                //  Меняем модуль относительно которого дальше идет переименование
+                                obj_1 = visio_app.ActivePage.Shapes[ i ];
+                                i = 0;
+                                }
+                            }
+                        }
+
+                    break;
+                }
+            }
+
         /// <summary> Event handler. Удаляем соответствующий объект при удалении
         /// связанной фигуры. </summary>
         ///
@@ -553,29 +727,64 @@ namespace visio_prj_designer
             switch ( shape.Data1 )
                 {
                 case "750":
-                    if ( shape.Data2 == "860" )
+                    //--------------------------------------------------
+
+                    //  Если этот один из узлов
+                    if ( shape.Data2 == "860"
+                        || PAC_Node_Type.Contains( shape.Data2 ) )
                         {
-                        if ( no_delete_g_pac_flag )
+                        //  Находим его средим узлов
+                        PAC temp_node = g_PAC_nodes.Find
+                            (
+                            delegate( PAC node )
+                                {
+                                return node.shape == shape;
+                                }
+                            );
+
+                        //  Если это контроллер, то не удаляем, а обнуляем 
+                        //  Если это просто узел, то удаляем из списка
+                        if (    shape.Data2 == "860" 
+                            &&  temp_node == g_PAC_nodes[ 0 ] )
                             {
-                            no_delete_g_pac_flag = false;
+                            temp_node = null;
                             }
                         else
                             {
-                            g_PAC = null;
+                            g_PAC_nodes.Remove( temp_node );
                             }
                         }
-                    else  //	( shape.Data2 != "860" )
-                        {
-                        //	Удаление выбранного модуля из списка модулей
-                        g_PAC.current_module = g_PAC.get_io_modules().Find
-                            (
-                            delegate( io_module module )
+
+                    //  Если это простой модуль
+                    if (    shape.Data2 != "860"
+                        &&  !PAC_Node_Type.Contains( shape.Data2 ) )      
+                        { 
+                        io_module temp_mod;
+
+                        //  Проходим по всем узлам
+                        for ( int i = 0; i < g_PAC_nodes.Count; i++ )
+                            {
+                            //  Ищем выбранный модуль
+                            temp_mod = 
+                                g_PAC_nodes[ i ].get_io_modules().Find
+                                (
+                                delegate( io_module module )
+                                    {
+                                    return module.shape == shape;
+                                    }
+                                );
+
+                            //  Если модуль найден, то удаляем его из списка модулей узла
+                            if ( temp_mod != null )
                                 {
-                                return module.shape == shape;
-                                }
-                            );
-                        g_PAC.get_io_modules().Remove( g_PAC.current_module );
+                                //	Удаление выбранного модуля
+                                g_PAC_nodes[ i ].get_io_modules().Remove( temp_mod );
+                                break;
+                                }         
+                   
+                            }   //  for i ...
                         }
+                    //--------------------------------------------------
                     break;
 
                 case "V":
@@ -684,31 +893,39 @@ namespace visio_prj_designer
             {
             if ( is_selecting_clamp )
                 {
-                foreach ( io_module module in g_PAC.get_io_modules() )
+                for ( int i = 0; i < g_PAC_nodes.Count; i++ )
                     {
-                    int clamp = module.get_mouse_selection();
-                    if ( clamp > -1 )
+                    foreach ( io_module module in g_PAC_nodes[ i ].get_io_modules() )
                         {
-                        g_PAC.unmark();
+                        int clamp = module.get_mouse_selection();
+                        if ( clamp > -1 )
+                            {
+                            g_PAC_nodes[ i ].unmark();
 
-                        cur_sel_dev.set_channel(
-                            cur_sel_dev.get_active_channel(), module, clamp );
+                            cur_sel_dev.set_channel(
+                                cur_sel_dev.get_active_channel(), module, clamp );
 
-                        visio_addin__SelectionChanged( visio_app.Windows[
-                            ( short ) visio_addin.VISIO_WNDOWS.IO_EDIT ] );
+                            visio_addin__SelectionChanged( visio_app.Windows[
+                                ( short ) visio_addin.VISIO_WNDOWS.IO_EDIT ] );
 
-                        visio_app.Windows[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].MouseMove -=
-                            new Microsoft.Office.Interop.Visio.EWindow_MouseMoveEventHandler(
-                            Globals.visio_addin.visio_addin__MouseMove );
-                        is_selecting_clamp = false;
+                            visio_app.Windows[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].MouseMove -=
+                                new Microsoft.Office.Interop.Visio.EWindow_MouseMoveEventHandler(
+                                Globals.visio_addin.visio_addin__MouseMove );
+                            is_selecting_clamp = false;
 
-                        CancelDefault = true;
+                            CancelDefault = true;
 
-                        return;
+                            return;
+                            }
                         }
-                    }
+                    }   //  for i ...
 
-                g_PAC.unmark();
+                //  Убираем подсветку со всех модулей
+                for ( int i = 0; i < g_PAC_nodes.Count; i++ )
+                    {
+                    g_PAC_nodes[ i ].unmark();
+                    }   //  for i ...
+                
                 visio_addin__SelectionChanged( visio_app.Windows[
                     ( short ) visio_addin.VISIO_WNDOWS.IO_EDIT ] );
 
@@ -737,10 +954,13 @@ namespace visio_prj_designer
                 {
                 if ( is_selecting_clamp )
                     {
-                    foreach ( io_module module in g_PAC.get_io_modules() )
+                    for ( int i = 0; i < g_PAC_nodes.Count; i++ )
                         {
-                        module.magnify_on_mouse_move( x, y );
-                        }
+                        foreach ( io_module module in g_PAC_nodes[ i ].get_io_modules() )
+                            {
+                            module.magnify_on_mouse_move( x, y );
+                            }
+                        }   //  for i ...
                     }
 
                 }
@@ -812,18 +1032,21 @@ namespace visio_prj_designer
                         else
                             {
                             //	Снятие ранее подсвеченных модулей Wago.
-							if( previous_selected_dev != null )
-							    {
-							    previous_selected_dev.unselect_channels();
-							    previous_selected_dev = null;
-							    }
+                            if ( previous_selected_dev != null )
+                                {
+                                previous_selected_dev.unselect_channels();
+                                previous_selected_dev = null;
+                                }
 
-							//	Снятие подсветки с ранее выбранных модулей
-							foreach ( io_module mod in g_PAC.get_io_modules() )
-								{
-								mod.deactivate();
-								}
-							
+                            //	Снятие подсветки с ранее выбранных модулей
+                            for ( int i = 0; i < g_PAC_nodes.Count; i++ )
+                                {
+                                foreach ( io_module mod in g_PAC_nodes[ i ].get_io_modules() )
+                                    {
+                                    mod.deactivate();
+                                    }
+                                }
+	
                             edit_io_frm.listForm.disable_prop();
                             }
 
@@ -834,23 +1057,39 @@ namespace visio_prj_designer
                 {
                 //  Обычный режим работы
                 //cur_sel_obj = null;
-                
-                Microsoft.Office.Interop.Visio.Shape selected_shape =
-				        window.Selection[ 1 ];
 
-                if (    ( selected_shape != null ) 
-                    &&  (   ( Convert.ToInt32( selected_shape.Cells[ "Prop.type" ].Formula ) ==
+                Microsoft.Office.Interop.Visio.Shape selected_shape =
+                        window.Selection[ 1 ];
+
+                if ( selected_shape != null )
+                    {
+                    //  Проверяем является ли выбранная фигура узлом WAGO
+                    if ( selected_shape.Data2 == "860"
+                        || PAC_Node_Type.Contains( selected_shape.Data2 ) )
+                        {
+                        cur_PAC_node = g_PAC_nodes.Find( delegate( PAC pp )
+                            {
+                                return pp.shape == selected_shape;
+                            }
+                        );
+                        }
+
+                    //  Проверяем является ли выбранная фигура сложным объектом (гребенка или танк)
+                    if ( ( Convert.ToInt32( selected_shape.Cells[ "Prop.type" ].Formula ) ==
                                                 Convert.ToInt32( device.TYPES.T_TANK ) )
-                        ||  ( Convert.ToInt32( selected_shape.Cells[ "Prop.type" ].Formula ) ==
+                    || ( Convert.ToInt32( selected_shape.Cells[ "Prop.type" ].Formula ) ==
                                                 Convert.ToInt32( device.TYPES.T_GREB ) )
                         )
-                   )
-                    {
-                    cur_sel_obj = g_objects.Find( delegate( T_Object obj )
                         {
-                        return obj.get_shape() == selected_shape;
+                        cur_sel_obj = g_objects.Find( delegate( T_Object obj )
+                            {
+                                return obj.get_shape() == selected_shape;
+                            }
+                            );
                         }
-                        );
+
+                    //  Сюда программа не дойдет Если это сложный объект -> мы нашли то, что искали.
+                    //  А если нет, то обработка события закончится на проверке этого условия.
                     }
                 }
             }
@@ -867,85 +1106,136 @@ namespace visio_prj_designer
 			switch ( cell.Shape.Data1 )
 				{
 				//	Изменения свойств модуля WAGO
-				case "750":
+                case "750":
+                    //  Если это узлы
+                    if (    cell.Shape.Data2 == "860"
+                        ||  PAC_Node_Type.Contains( cell.Shape.Data2 )
+                        ||  cell.Name == "Prop.node_type" )
+                        {
+                        if ( cell.Name == "Prop.PAC_name" )
+                            {
+                            string name = 
+                                cell.Shape.Cells[ "Prop.PAC_name" ].Formula;
 
-					if ( cell.Name == "Prop.order_number" )
-						{
-						cell.Shape.Shapes[ "module_number" ].Text =
-							cell.Shape.Cells[ "Prop.order_number" ].Formula;
-						return;
-						}
+                            int number =
+                                Convert.ToInt16( cell.Shape.Cells[ "Prop.node_number" ].Formula );
+                            
+                            cur_PAC_node.PAC_name = name;
+                            }
 
-					if ( cell.Name == "Prop.type" )
-						{
-						int type = ( int ) Convert.ToDouble( cell.Shape.Cells[ "Prop.type" ].ResultStr[ "" ] );
+                        if ( cell.Name == "Prop.ip_address" )
+                            {
+                            string ip = 
+                                cell.Shape.Cells[ "Prop.ip_address" ].Formula;
 
-						cell.Shape.Data2 = Convert.ToString( type );
-						cell.Shape.Shapes[ "type_str" ].Text = Convert.ToString( type );
+                            int number =
+                                Convert.ToInt16( cell.Shape.Cells[ "Prop.node_number" ].Formula );
 
-						string colour = "1";
-						switch ( type )
-							{
-							//	DO modules
-							case 504:
-							case 512:
-							case 530:
-							case 1504:
-							case 1515:
-								colour = "2";	//"RGB( 255, 128, 128 )";	//	red
-								break;
+                            cur_PAC_node.ip_addres = ip;
+                            }
 
-							//	DI modules
-							case 402:
-							case 430:
-							case 1405:
-							case 1415:
-							case 1420:
-								colour = "5";	//"RGB( 255, 255, 128 )";	//	yellow
-								break;
+                        if ( cell.Name == "Prop.node_type" )
+                            {
+                            cell.Shape.Data2 = cell.Shape.Cells[ "Prop.node_type" ].Formula;
+                            }
 
-							//	AO modules
-							case 554:
-								colour = "7"; //"RGB( 180, 228, 180 )";		//	blue	
-								break;
+                        if ( cell.Name == "Prop.node_number" )
+                            {
+                            //  Если меняется номер узла, то меняется он для всех его модулей
+                            int number = 
+                                Convert.ToInt16( cell.Shape.Cells[ "Prop.node_number" ].Formula );
 
-							//	AI modules
-							case 455:
-							case 460:
-							case 461:
-							case 4612:
-							case 466:
-							case 638:
-								colour = "3";	//"RGB( 180, 228, 180 )";	//	green
-								break;
+                            cur_PAC_node.PAC_number = number;
 
-							//	Special modules
-							case 493:	//	3-Phase	counter
-							case 655:	//	AS-interface
-								colour = "6";
-								break;
+                            for ( int i = 0; i < cur_PAC_node.get_io_modules().Count; i++ )
+                                {
+                                cur_PAC_node.get_io_modules()[ i ].
+                                    shape.Cells[ "Prop.node_number" ].FormulaU =
+                                        number.ToString();
+                                }
+                            }
+                        }
+                    else
+                        {
+                        //  Если это модули
+                        if ( cell.Name == "Prop.order_number" )
+                            {
+                            cell.Shape.Shapes[ "module_number" ].Text =
+                                cell.Shape.Cells[ "Prop.order_number" ].Formula;
+                            return;
+                            }
 
-							//	System modules
-							case 602:
-							case 612:
-							case 613:
-							case 628:
-								colour = "14";
-								break;
+                        if ( cell.Name == "Prop.type" )
+                            {
+                            int type = ( int ) Convert.ToDouble( cell.Shape.Cells[ "Prop.type" ].ResultStr[ "" ] );
 
-							case 600:
-							case 627:
-								colour = "15";
-								break;
-							}
+                            cell.Shape.Data2 = Convert.ToString( type );
+                            cell.Shape.Shapes[ "type_str" ].Text = Convert.ToString( type );
 
-						cell.Shape.Shapes[ "module_number" ].Cells[
-							"FillForegnd" ].FormulaU = colour;
-						cell.Shape.Shapes[ "3" ].Cells[
-							"FillForegnd" ].FormulaU = colour;
+                            string colour = "1";
+                            switch ( type )
+                                {
+                                //	DO modules
+                                case 504:
+                                case 512:
+                                case 530:
+                                case 1504:
+                                case 1515:
+                                    colour = "2";	//"RGB( 255, 128, 128 )";	//	red
+                                    break;
 
-						}
-					break;
+                                //	DI modules
+                                case 402:
+                                case 430:
+                                case 1405:
+                                case 1415:
+                                case 1420:
+                                    colour = "5";	//"RGB( 255, 255, 128 )";	//	yellow
+                                    break;
+
+                                //	AO modules
+                                case 554:
+                                    colour = "7"; //"RGB( 180, 228, 180 )";		//	blue	
+                                    break;
+
+                                //	AI modules
+                                case 455:
+                                case 460:
+                                case 461:
+                                case 4612:
+                                case 466:
+                                case 638:
+                                    colour = "3";	//"RGB( 180, 228, 180 )";	//	green
+                                    break;
+
+                                //	Special modules
+                                case 493:	//	3-Phase	counter
+                                case 655:	//	AS-interface
+                                    colour = "6";
+                                    break;
+
+                                //	System modules
+                                case 602:
+                                case 612:
+                                case 613:
+                                case 628:
+                                    colour = "14";
+                                    break;
+
+                                case 600:
+                                case 627:
+                                    colour = "15";
+                                    break;
+                                }
+
+                            cell.Shape.Shapes[ "module_number" ].Cells[
+                                "FillForegnd" ].FormulaU = colour;
+                            cell.Shape.Shapes[ "3" ].Cells[
+                                "FillForegnd" ].FormulaU = colour;
+
+                            }
+                        }
+                    break;
 
 				//	Изменение свойств простых устройств
 				case "MIX":
@@ -1001,7 +1291,7 @@ namespace visio_prj_designer
 								if ( cur_sel_dev.get_sub_type() != sub_type )
 									{
 									edit_io_frm.listForm.type_cbox.SelectedIndex = sub_type;
-									cur_sel_dev.change_sub_type((device.SUB_TYPES)sub_type, g_PAC);
+									cur_sel_dev.change_sub_type((device.SUB_TYPES)sub_type, g_PAC_nodes);
 									}
 								}
 
@@ -1247,7 +1537,7 @@ namespace visio_prj_designer
 								if ( cur_sel_dev.get_sub_type() != sub_type )
 									{
 									edit_io_frm.listForm.type_cbox.SelectedIndex = sub_type;
-									cur_sel_dev.change_sub_type((device.SUB_TYPES)sub_type, g_PAC);
+									cur_sel_dev.change_sub_type((device.SUB_TYPES)sub_type, g_PAC_nodes);
 									}
 								}
 
@@ -1275,69 +1565,6 @@ namespace visio_prj_designer
 				}	//	switch ( cell.Shape.Data1 )
 
 			}
-
-        /// <summary> Event handler. Обработчик события "привязки" фигуры. Здесь
-        /// заполняем порядковый номер модуля в наборе. </summary>
-        ///
-        /// <remarks> Id, 16.08.2011. </remarks>
-        ///
-        /// <param name="connect"> Объект "склейки". </param>
-        private void visio_addin__ConnectionsAdded( Microsoft.Office.Interop.Visio.Connects connect )
-            {
-            Microsoft.Office.Interop.Visio.Shape obj_1 =
-                visio_app.ActivePage.Shapes[ connect.ToSheet.Name ];
-            Microsoft.Office.Interop.Visio.Shape obj_2 =
-                visio_app.ActivePage.Shapes[ connect.FromSheet.Name ];
-
-            switch( obj_1.Data1 )
-                {
-                case "750":
-                    if( obj_1.Data2 == "860" )
-                        {
-                        obj_2.Cells[ "Prop.order_number" ].FormulaU = "1";
-                        }
-                    else
-                        {
-                        //  Переименовываем первый модуль в группе
-                        int new_number = Convert.ToInt32( obj_1.Cells[ "Prop.order_number" ].FormulaU ) + 1;
-                        obj_2.Cells[ "Prop.order_number" ].FormulaU = Convert.ToString( new_number );
-
-                        //  Переименовываем остальные модули в группе
-                        for ( int i = 1; i <= visio_app.ActivePage.Shapes.Count; i++ )
-                            {                            
-                            if (  ( visio_app.ActivePage.Shapes[ i ].Data2 != "860" )
-                              &&  ( visio_app.ActivePage.Shapes[ i ].Connects.ToSheet != null )
-                              &&  ( visio_app.ActivePage.Shapes[ i ].Connects.ToSheet.Name == obj_2.Name )
-                               )
-                                {
-                                //  Высчитываем следующий номер
-                                new_number = Convert.ToInt32( obj_2.Cells[ "Prop.order_number" ].FormulaU ) + 1;
-                                
-                                //  Задаем его для найденного модуля
-                                visio_app.ActivePage.Shapes[ i ].Cells[ "Prop.order_number" ].FormulaU =
-                                    Convert.ToString( new_number );
-
-                                //  Меняем модуль относительно которого дальше идет переименование
-                                obj_2 = visio_app.ActivePage.Shapes[ i ];
-                                i = 0;
-                                }
-                            }
-                        }
-
-                    break;
-                }
-				
-			//	Необходимо реализовать авто нумерацию присоединенной пачки модулей
-									  
-			//Array V_S;
-
-			//V_S = obj_1.ConnectedShapes( 
-			//    Microsoft.Office.Interop.Visio.VisConnectedShapesFlags.visConnectedShapesAllNodes, "" );
-
-			//V_S = obj_2.ConnectedShapes( 
-			//    Microsoft.Office.Interop.Visio.VisConnectedShapesFlags.visConnectedShapesAllNodes, "" );
-
-            }
 
         public void Add_Node( XmlNode inXmlNode, TreeNode inTreeNode )
         {
