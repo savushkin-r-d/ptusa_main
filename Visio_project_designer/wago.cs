@@ -88,12 +88,12 @@ namespace wago
         /// <summary> Виды модулей. </summary>
         public enum KINDS
             {
-            SPECIAL,
             DO,
             DI,
-            AO,
             AI,
-			SYSTEM,
+            AO,
+			SPECIAL,
+            SYSTEM,
             };
 
         /// <summary> Типы модулей. </summary>
@@ -431,7 +431,7 @@ namespace wago
             {
             for( int i = 0; i < ( int ) total_clamps; i++ )
                 {
-                if( available_clamp_flags[ i ] && free_clamp_flags[ i ] )
+                if( available_clamp_flags[ i ] )    //&& free_clamp_flags[ i ] )
                     {
                     shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ i ] ].Cells[
                         "FillForegnd" ].FormulaU = "RGB( 127, 127, 127 )";
@@ -693,6 +693,7 @@ namespace wago
             {
             this.PAC_name = PAC_name;
             this.ip_addres = ip_addres;
+            this.PAC_number = Convert.ToInt32( shape.Cells[ "Prop.node_number" ].Formula );
 
             io_modules = new List<io_module>();
 
@@ -847,12 +848,23 @@ namespace wago
         /// <param name="pac">    The pac. </param>
         /// <param name="module"> The module. </param>
         /// <param name="clamp">  The clamp. </param>
-        public void set( PAC pac, int module, int clamp )
+        public void set( List<PAC> pac, int node, int module, int clamp )
             {
+            //  Определяем индекс узла в списке
+            int index = visio_prj_designer.Globals.visio_addin.get_index_PAC( pac, node );
+//             for ( int i = 0; i < pac.Count; i++ )
+//                 {
+//                 if ( pac[ i ].PAC_number == node )
+//                     {
+//                     index = i;
+//                     break;
+//                     }
+//                 }
+
 			//	Привязка каналов устройства к модулю
-            if( pac != null && module > 0 )
+            if( pac[ index ] != null && module > 0 )
                 {
-                this.module = pac.get_io_modules().Find( delegate( io_module mod )
+                this.module = pac[ index ].get_io_modules().Find( delegate( io_module mod )
                 {
                     return mod.order_number == module;
                 }
@@ -862,7 +874,7 @@ namespace wago
                     {
                     this.clamp = clamp - 1;
                     this.module.use( clamp );
-                    this.node = Convert.ToInt32( pac.shape.Cells[ "Prop.node_number" ].Formula );
+                    this.node = Convert.ToInt32( pac[ index ].shape.Cells[ "Prop.node_number" ].Formula );
                     }
                 }
 			else

@@ -176,6 +176,40 @@ namespace tech_device
 			T_GREB  = 200,	//	Гребенка
             }
 
+    //  Структура перечисления допустимых типов устройств (для экспорта в PLC)
+    public enum TDevType
+        {
+        dtV         = 0,    //0 клапан без ОС
+        dtV2DO      = 1,    //1 клапан 2 КУ без ОС
+        dtV1DO1DI   = 2,    //2 клапан 1 КУ 1 ОС
+        dtV1DO2DI   = 3,    //3 клапан 1 КУ 2 ОС
+        dtV2DO2DI   = 4,    //4 клапан 2 КУ 2 ОС
+        dtN1DO1DI   = 5,    //5 насос
+        dtM1DO1DI   = 6,    //6 эл двигатель
+        dtLS        = 7,    //7 уровень (есть/нет)
+        dtTE        = 8,    //8 температура
+        dtFE        = 9,    //9 текущий расход
+        dtFS        = 10,   //10 расход (есть/нет)
+        dtCTR       = 11,   //11 счетчик
+        dtAO        = 12,   //12 AO
+        dtLE1       = 13,   //13 текущий уровень тип1 конус внутрь
+        dtLE2       = 14,   //14 текущий уровень тип2 конус вниз
+        dtLE3       = 15,   //15 текущий уровень тип3 усеченный цилиндр
+        dtLE4       = 16,   //16 текущий уровень тип4 без конуса
+        dtMix       = 17,   //17 mixprove
+        dtOS        = 18,   //18 feed back
+        dtUpr       = 19,   //19 upr
+        dtQE        = 20,   //20 концентрация
+        dtMF        = 21,   //21 memmory flag
+
+        dtV1DO3DI   = 22,   //22 клапан 1 КУ 3 ОС
+        dtV1DO2DI_S = 23,   //23 клапан 1 КУ 2 ОС  на одно из состояний
+        dtASMix     = 24,   //24 Клапан с AS интерфейсом
+        dtAI        = 25,   //25 AI
+
+        dtLS_ex     = 26,   //26 Настраиваемый уровень (есть/нет)
+        }
+
         /// <summary> Подтип клапана. </summary>
         ///
         /// <remarks> Id, 17.08.2011. </remarks>
@@ -247,7 +281,7 @@ namespace tech_device
 
 
         /// <summary> Подтип устройства. </summary>
-		private SUB_TYPES sub_type;
+		public SUB_TYPES sub_type;
 
 		/// <summary> Получение подтипа устройства. </summary>
 		///
@@ -398,9 +432,15 @@ namespace tech_device
                 {
                 Match mtc = rex.Match( str );
 
-                node = Convert.ToInt16( mtc.Groups[ 1 ].ToString() ) - 1;
-                module = Convert.ToInt16( mtc.Groups[ 2 ].ToString() );
-                clamp = Convert.ToInt16( mtc.Groups[ 3 ].ToString() );
+                if (  ( Convert.ToInt16( mtc.Groups[ 1 ].ToString() ) >= 0 )
+                  &&  ( Convert.ToInt16( mtc.Groups[ 2 ].ToString() ) >= 0 )
+                  &&  ( Convert.ToInt16( mtc.Groups[ 3 ].ToString() ) >= 0 ) )
+                    {
+                    node = Convert.ToInt16( mtc.Groups[ 1 ].ToString() );
+                    module = Convert.ToInt16( mtc.Groups[ 2 ].ToString() );
+                    clamp = Convert.ToInt16( mtc.Groups[ 3 ].ToString() );
+                    }
+                
                 return true;
                 }
 
@@ -450,28 +490,28 @@ namespace tech_device
                         case SUB_TYPES.V_1_CONTROL_CHANNEL:
                             add_wago_channel( "DO1", io_module.KINDS.DO );
                             get_n_from_str( str_DO1, out node, out module, out clamp );
-                            wago_channels[ "DO1" ].set( pac[ node ], module, clamp );
+                            wago_channels[ "DO1" ].set( pac, node, module, clamp );
                             break;
 
                         case SUB_TYPES.V_2_CONTROL_CHANNEL:
                             add_wago_channel( "DO1", io_module.KINDS.DO );
                             get_n_from_str( str_DO1, out node, out module, out clamp );
-                            wago_channels[ "DO1" ].set( pac[ node ], module, clamp );
+                            wago_channels[ "DO1" ].set( pac, node, module, clamp );
 
                             add_wago_channel( "DO2", io_module.KINDS.DO );
                             get_n_from_str( str_DO2, out node, out module, out clamp );
-                            wago_channels[ "DO2" ].set( pac[ node ], module, clamp );
+                            wago_channels[ "DO2" ].set( pac, node, module, clamp );
 
                             break;
 
                         case SUB_TYPES.V_1_CONTROL_CHANNEL_1_FB:
                             add_wago_channel( "DO1", io_module.KINDS.DO );
                             get_n_from_str( str_DO1, out node, out module, out clamp );
-                            wago_channels[ "DO1" ].set( pac[ node ], module, clamp );
+                            wago_channels[ "DO1" ].set( pac, node, module, clamp );
 
 							add_wago_channel( "DI1", io_module.KINDS.DI );
                             get_n_from_str( str_DI1, out node, out module, out clamp );
-                            wago_channels[ "DI1" ].set( pac[ node ], module, clamp );
+                            wago_channels[ "DI1" ].set( pac, node, module, clamp );
                             break;
 
                         case SUB_TYPES.V_1_CONTROL_CHANNEL_2_FB:
@@ -480,13 +520,13 @@ namespace tech_device
                             add_wago_channel( "DI2", io_module.KINDS.DI );
 
                             get_n_from_str( str_DO1, out node, out module, out clamp );
-                            wago_channels[ "DO1" ].set( pac[ node ], module, clamp );
+                            wago_channels[ "DO1" ].set( pac, node, module, clamp );
 
                             get_n_from_str( str_DI1, out node, out module, out clamp );
-                            wago_channels[ "DI1" ].set( pac[ node ], module, clamp );
+                            wago_channels[ "DI1" ].set( pac, node, module, clamp );
 
                             get_n_from_str( str_DI2, out node, out module, out clamp );
-                            wago_channels[ "DI2" ].set( pac[ node ], module, clamp );
+                            wago_channels[ "DI2" ].set( pac, node, module, clamp );
 
                             break;
 
@@ -497,16 +537,16 @@ namespace tech_device
                             add_wago_channel( "DI2", io_module.KINDS.DI );
 
                             get_n_from_str( str_DO1, out node, out module, out clamp );
-                            wago_channels[ "DO1" ].set( pac[ node ], module, clamp );
+                            wago_channels[ "DO1" ].set( pac, node, module, clamp );
 
                             get_n_from_str( str_DO2, out node, out module, out clamp );
-                            wago_channels[ "DO2" ].set( pac[ node ], module, clamp );
+                            wago_channels[ "DO2" ].set( pac, node, module, clamp );
 
                             get_n_from_str( str_DI1, out node, out module, out clamp );
-                            wago_channels[ "DI1" ].set( pac[ node ], module, clamp );
+                            wago_channels[ "DI1" ].set( pac, node, module, clamp );
 
                             get_n_from_str( str_DI2, out node, out module, out clamp );
-                            wago_channels[ "DI2" ].set( pac[ node ], module, clamp );
+                            wago_channels[ "DI2" ].set( pac, node, module, clamp );
 
                             break;
 
@@ -519,19 +559,19 @@ namespace tech_device
 							add_wago_channel( "DI2", io_module.KINDS.DI );
 
 							get_n_from_str( str_DO1, out node, out module, out clamp );
-							wago_channels[ "DO1" ].set( pac[ node ], module, clamp );
+							wago_channels[ "DO1" ].set( pac, node, module, clamp );
 
 							get_n_from_str( str_DO2, out node, out module, out clamp );
-							wago_channels[ "DOH" ].set( pac[ node ], module, clamp );
+							wago_channels[ "DOH" ].set( pac, node, module, clamp );
 
 							get_n_from_str( str_DO2, out node, out module, out clamp );
-							wago_channels[ "DOL" ].set( pac[ node ], module, clamp );
+							wago_channels[ "DOL" ].set( pac, node, module, clamp );
 
 							get_n_from_str( str_DI1, out node, out module, out clamp );
-							wago_channels[ "DI1" ].set( pac[ node ], module, clamp );
+							wago_channels[ "DI1" ].set( pac, node, module, clamp );
 
 							get_n_from_str( str_DI2, out node, out module, out clamp );
-							wago_channels[ "DI2" ].set( pac[ node ], module, clamp );
+							wago_channels[ "DI2" ].set( pac, node, module, clamp );
 
 							break;
 
@@ -557,7 +597,7 @@ namespace tech_device
 
 					add_wago_channel( "DO1", io_module.KINDS.DO );
 					get_n_from_str( str_DO1, out node, out module, out clamp );
-					wago_channels[ "DO1" ].set( pac[ node ], module, clamp );
+					wago_channels[ "DO1" ].set( pac, node, module, clamp );
 					}
 
 				if  (	( type == TYPES.T_FB )
@@ -569,7 +609,7 @@ namespace tech_device
 
 					add_wago_channel( "DI1", io_module.KINDS.DI );
 					get_n_from_str( str_DI1, out node, out module, out clamp );
-					wago_channels[ "DI1" ].set( pac[ node ], module, clamp );
+					wago_channels[ "DI1" ].set( pac, node, module, clamp );
 					}
 
 				if ( type == TYPES.T_AO )
@@ -578,7 +618,7 @@ namespace tech_device
 
 					add_wago_channel( "AO1", io_module.KINDS.AO );
 					get_n_from_str( str_AO1, out node, out module, out clamp );
-					wago_channels[ "AO1" ].set( pac[ node ], module, clamp );
+					wago_channels[ "AO1" ].set( pac, node, module, clamp );
 					}
 
 				if (   ( type == TYPES.T_AI )
@@ -592,7 +632,7 @@ namespace tech_device
 
 					add_wago_channel( "AI1", io_module.KINDS.AI );
                     get_n_from_str( str_AI1, out node, out module, out clamp );
-                    wago_channels[ "AI1" ].set( pac[ node ], module, clamp );
+                    wago_channels[ "AI1" ].set( pac, node, module, clamp );
 					}
 
             }
@@ -633,24 +673,34 @@ namespace tech_device
         public void set_channel( string channel_name, io_module module, int clamp )
             {
             //Освобождаем при наличии ранее привязанную клемму.
-
             if( wago_channels[ channel_name ].module != null )
                 {
                 wago_channels[ channel_name ].module.free(
                     wago_channels[ channel_name ].clamp );
                 }
+
+            //  Задаем новые модуль и клему
             wago_channels[ channel_name ].module = module;
             wago_channels[ channel_name ].clamp = clamp;
 
-            string prop = "Prop." + channel_name;
-            string value = string.Format(
-                "\"узел {0} модуль {1} клемма {2}\"",
-                module.node_number, module.order_number, clamp + 1 );
+            //  Если выбран модуль для привязки, то привязываем
+            //      иначе сбрасываем привязку
+            if ( module != null )
+                {
+                string prop = "Prop." + channel_name;
+                string value = string.Format(
+                    "\"узел {0} модуль {1} клемма {2}\"",
+                    module.node_number, module.order_number, clamp + 1 );
 
-            shape.Cells[ prop ].FormulaU = value;
-
-
-            module.use( clamp );
+                shape.Cells[ prop ].FormulaU = value;
+                                                     
+                module.use( clamp );
+                }
+            else
+                {
+                string prop = "Prop." + channel_name;
+                shape.Cells[ prop ].FormulaU = "\"none\"";
+                }
             }
 
         /// <summary> Установка активной ("подсвечиваемой") клеммы в данный 

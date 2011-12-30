@@ -378,10 +378,15 @@ namespace visio_prj_designer
        
         private void visio_addin__BeforeDocumentClose( Visio.Document target )
             {
-            if( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
+            if (    ( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
+                ||  ( target.Type == Visio.VisDocumentTypes.visTypeStencil )
+               )
                 {
                 g_objects.Clear();
                 g_devices.Clear();
+                g_PAC_nodes.Clear();
+                g_PAC_nodes = null;
+
                 is_selecting_clamp = false;
                 is_device_edit_mode = false;
                 }
@@ -569,6 +574,131 @@ namespace visio_prj_designer
             }
 
 
+        /// <summary> Event handler. Удаляем соответствующий объект при удалении
+        /// связанной фигуры. </summary>
+        ///
+        /// <remarks> Id, 16.08.2011. </remarks>
+        ///
+        /// <param name="shape"> Удаляемая фигура. </param>
+        private void visio_addin__BeforeShapeDelete( Microsoft.Office.Interop.Visio.Shape shape )
+            {
+            switch ( shape.Data1 )
+                {
+                case "750":
+                    //--------------------------------------------------
+
+                    //  Если этот один из узлов
+                    if ( shape.Data2 == "860"
+                        || PAC_Node_Type.Contains( shape.Data2 ) )
+                        {
+                        //  Находим его средим узлов
+                        PAC temp_node = g_PAC_nodes.Find
+                            (
+                            delegate( PAC node )
+                                {
+                                return node.shape == shape;
+                                }
+                            );
+
+                        //  Если это контроллер, то не удаляем, а обнуляем 
+                        //  Если это просто узел, то удаляем из списка
+                        if ( shape.Data2 == "860"
+                            && temp_node == g_PAC_nodes[ 0 ] )
+                            {
+                            temp_node = null;
+                            }
+                        else
+                            {
+                            g_PAC_nodes.Remove( temp_node );
+                            }
+                        }
+
+                    //  Если это простой модуль
+                    if ( shape.Data2 != "860"
+                        && !PAC_Node_Type.Contains( shape.Data2 ) )
+                        {
+                        io_module temp_mod;
+
+                        //  Проходим по всем узлам
+                        for ( int i = 0; i < g_PAC_nodes.Count; i++ )
+                            {
+                            //  Ищем выбранный модуль
+                            temp_mod =
+                                g_PAC_nodes[ i ].get_io_modules().Find
+                                (
+                                delegate( io_module module )
+                                    {
+                                    return module.shape == shape;
+                                    }
+                                );
+
+                            //  Перед тем как удалить модуль удаляем все привязанные к его клеммам устройства
+                            for ( int j = 0; j < g_devices.Count; j++ )
+                                {
+                                foreach ( KeyValuePair<string, wago_channel> chen in g_devices[ j ].wago_channels )
+                                    {
+                                    if (    ( chen.Value.node == temp_mod.node_number )
+                                        &&  ( chen.Value.module == temp_mod )
+                                       )
+                                        {
+                                        g_devices[ j ].set_channel( chen.Key, null, 0 );
+                                        }
+                                    }
+                                }
+
+                            //  Если модуль найден, то удаляем его из списка модулей узла
+                            if ( temp_mod != null )
+                                {
+                                //	Удаление выбранного модуля
+                                g_PAC_nodes[ i ].get_io_modules().Remove( temp_mod );
+                                break;
+                                }
+
+                            }   //  for i ...
+                        }
+                    //--------------------------------------------------
+                    break;
+
+                case "V":
+                case "N":
+                case "MIX":
+                case "CTR":
+                case "TE":
+                case "QE":
+                case "LS":
+                case "LE":
+                case "FS":
+                case "FE":
+                case "FB":
+                case "UPR":
+                case "AI":
+                case "AO":
+                case "FQT":
+                case "WTE":
+                    cur_sel_dev = g_devices.Find( delegate( device dev )
+                        {
+                            return dev.get_shape() == shape;
+                        }
+                        );
+
+                    g_devices.Remove( cur_sel_dev );
+
+                    break;
+
+                case "TANK":
+                case "GREB":
+                    cur_sel_obj = g_objects.Find( delegate( T_Object obj )
+                        {
+                            return obj.get_shape() == shape;
+                        }
+                        );
+
+                    g_objects.Remove( cur_sel_obj );
+                    cur_sel_obj = null;
+                    break;
+                }
+            }
+
         private void Check_nodes_modules( Visio.Shape m_shape )
             {
             //  Определяем номер узла, к которому относится модуль
@@ -687,117 +817,6 @@ namespace visio_prj_designer
                 }
             }
 
-        /// <summary> Event handler. Удаляем соответствующий объект при удалении
-        /// связанной фигуры. </summary>
-        ///
-        /// <remarks> Id, 16.08.2011. </remarks>
-        ///
-        /// <param name="shape"> Удаляемая фигура. </param>
-        private void visio_addin__BeforeShapeDelete( Microsoft.Office.Interop.Visio.Shape shape )
-            {
-            switch ( shape.Data1 )
-                {
-                case "750":
-                    //--------------------------------------------------
-
-                    //  Если этот один из узлов
-                    if ( shape.Data2 == "860"
-                        || PAC_Node_Type.Contains( shape.Data2 ) )
-                        {
-                        //  Находим его средим узлов
-                        PAC temp_node = g_PAC_nodes.Find
-                            (
-                            delegate( PAC node )
-                                {
-                                return node.shape == shape;
-                                }
-                            );
-
-                        //  Если это контроллер, то не удаляем, а обнуляем 
-                        //  Если это просто узел, то удаляем из списка
-                        if (    shape.Data2 == "860" 
-                            &&  temp_node == g_PAC_nodes[ 0 ] )
-                            {
-                            temp_node = null;
-                            }
-                        else
-                            {
-                            g_PAC_nodes.Remove( temp_node );
-                            }
-                        }
-
-                    //  Если это простой модуль
-                    if (    shape.Data2 != "860"
-                        &&  !PAC_Node_Type.Contains( shape.Data2 ) )      
-                        { 
-                        io_module temp_mod;
-
-                        //  Проходим по всем узлам
-                        for ( int i = 0; i < g_PAC_nodes.Count; i++ )
-                            {
-                            //  Ищем выбранный модуль
-                            temp_mod = 
-                                g_PAC_nodes[ i ].get_io_modules().Find
-                                (
-                                delegate( io_module module )
-                                    {
-                                    return module.shape == shape;
-                                    }
-                                );
-
-                            //  Если модуль найден, то удаляем его из списка модулей узла
-                            if ( temp_mod != null )
-                                {
-                                //	Удаление выбранного модуля
-                                g_PAC_nodes[ i ].get_io_modules().Remove( temp_mod );
-                                break;
-                                }         
-                   
-                            }   //  for i ...
-                        }
-                    //--------------------------------------------------
-                    break;
-
-                case "V":
-                case "N":
-                case "MIX":
-                case "CTR":
-                case "TE":
-                case "QE":
-                case "LS":
-                case "LE":
-                case "FS":
-                case "FE":
-                case "FB":
-                case "UPR":
-                case "AI":
-                case "AO":
-                case "FQT":
-                case "WTE":
-                    cur_sel_dev = g_devices.Find( delegate( device dev )
-                        {
-                            return dev.get_shape() == shape;
-                        }
-                        );
-
-                    g_devices.Remove( cur_sel_dev );
-
-                    break;
-
-                case "TANK":
-                case "GREB":
-                    cur_sel_obj = g_objects.Find( delegate( T_Object obj )
-                        {
-                            return obj.get_shape() == shape;
-                        }
-                        );
-
-                    g_objects.Remove( cur_sel_obj );
-                    cur_sel_obj = null;
-                    break;
-                }
-            }
-
         /// <summary> Event handler. Реализована обработка нажатия клавиши </summary>
         ///
         /// <remarks> asv, 24.11.2011. </remarks>
@@ -891,6 +910,10 @@ namespace visio_prj_designer
                         }
                     }   //  for i ...
 
+                //  Снимаем привязку (Если программа сюда дошла, значит клема не выбрана)
+                cur_sel_dev.set_channel(
+                    cur_sel_dev.get_active_channel(), null, 0 );
+
                 //  Убираем подсветку со всех модулей
                 for ( int i = 0; i < g_PAC_nodes.Count; i++ )
                     {
@@ -903,6 +926,7 @@ namespace visio_prj_designer
                 visio_app.Windows[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].MouseMove -=
                     new Microsoft.Office.Interop.Visio.EWindow_MouseMoveEventHandler(
                     Globals.visio_addin.visio_addin__MouseMove );
+                
                 is_selecting_clamp = false;
                 }
             }
@@ -950,6 +974,8 @@ namespace visio_prj_designer
         /// <param name="window"> Активное окно. </param>
         private void visio_addin__SelectionChanged( Microsoft.Office.Interop.Visio.Window window )
             {
+            Microsoft.Office.Interop.Visio.Shape selected_shape;
+
             // Проверка на режим привязки устройств к каналам ввода\вывода.
             if( Globals.visio_addin.is_device_edit_mode ) 
                 {
@@ -976,8 +1002,7 @@ namespace visio_prj_designer
                                 previous_selected_dev.unselect_channels();
                                 }
 
-							Microsoft.Office.Interop.Visio.Shape selected_shape =
-							    window.Selection[ 1 ];
+							selected_shape = window.Selection[ 1 ];
 
 							cur_sel_dev = g_devices.Find( delegate( device dev )
 							    {
@@ -1024,13 +1049,12 @@ namespace visio_prj_designer
                         } //if( window.Page.Name == "Устройства" )
                     } //if( window.Index == ( short ) VISIO_WNDOWS.IO_EDIT )
                 } //if( visio_addin.is_device_edit_mode ) 
-            else
-                {
-                //  Обычный режим работы
-                //cur_sel_obj = null;
+//            else
+//                {
 
-                Microsoft.Office.Interop.Visio.Shape selected_shape =
-                        window.Selection[ 1 ];
+
+                //  В любом режиме работы
+                selected_shape = window.Selection[ 1 ];
 
                 if ( selected_shape != null )
                     {
@@ -1059,10 +1083,10 @@ namespace visio_prj_designer
                             );
                         }
 
-                    //  Сюда программа не дойдет Если это сложный объект -> мы нашли то, что искали.
-                    //  А если нет, то обработка события закончится на проверке этого условия.
+                    //  На данном этапе: Если это сложный объект -> мы нашли то, что искали.
+                    //  А если нет, то обработка события вылетит на проверке этого условия.
                     }
-                }
+//                }
             }
 
         /// <summary> Event handler. Обработчик изменения формул (задание 
@@ -1083,6 +1107,11 @@ namespace visio_prj_designer
                         ||  PAC_Node_Type.Contains( cell.Shape.Data2 )
                         ||  cell.Name == "Prop.node_type" )
                         {
+
+                        //  Нужно определить с каким узлом мы работаем
+                        //  Но для того, чтобы изменить свойства узла нужно его выделить
+                        //      после чего он становиться текущим ( cur_PAC_node )
+                                                                       
                         if ( cell.Name == "Prop.PAC_name" )
                             {
                             string name = 
@@ -1112,25 +1141,58 @@ namespace visio_prj_designer
 
                         if ( cell.Name == "Prop.node_number" )
                             {
-                            //  Если меняется номер узла, то меняется он для всех его модулей
                             int number = 
                                 Convert.ToInt16( cell.Shape.Cells[ "Prop.node_number" ].Formula );
 
+                            int old_number = cur_PAC_node.PAC_number;
                             cur_PAC_node.PAC_number = number;
 
+                            //  Если меняется номер узла, то меняется он для всех его модулей
                             for ( int i = 0; i < cur_PAC_node.get_io_modules().Count; i++ )
                                 {
                                 cur_PAC_node.get_io_modules()[ i ].
                                     shape.Cells[ "Prop.node_number" ].FormulaU =
                                         number.ToString();
                                 }
-                            }
-                        }
+
+                            // Меняем привязку устройств, привязанных к модулям данного узла
+                            for ( int i = 0; i < g_devices.Count; i++ )
+                                {
+                                foreach ( KeyValuePair<string, wago_channel> chen
+                                                        in g_devices[ i ].wago_channels )
+                                    {
+                                    if ( chen.Value.node == old_number )
+                                        {
+                                        chen.Value.node = number;
+                                        }
+                                    }   //  for j ...
+                                }   //  for i ...
+                            }   //  "Prop.node_number"
+                        }   //  Если это узел
                     else
                         {
                         //  Если это модули
+                        //  Считываем номер узла, к которому принадлежит модуль
+                        int node = Convert.ToInt16( cell.Shape.Cells[ "Prop.node_number" ].Formula );
+
+                        //  Определяем индекс узла в списке узлов
+                        int index = get_index_PAC( g_PAC_nodes, node );
+
+                        //  Находим что за модуль
+                        io_module temp_mod = g_PAC_nodes[ index ].
+                                get_io_modules().Find( delegate( io_module mod )
+                            {
+                                return mod.shape == cell.Shape;
+                            }
+                            );
+
+                        //  Проверяем что за свойство изменилось
+
                         if ( cell.Name == "Prop.order_number" )
                             {
+                            temp_mod.order_number = Convert.ToInt16( cell.Shape.Cells[ "Prop.order_number" ].Formula );
+
+                            //  Устанавливаем номер на модуле
                             cell.Shape.Shapes[ "module_number" ].Text =
                                 cell.Shape.Cells[ "Prop.order_number" ].Formula;
                             return;
@@ -1204,6 +1266,14 @@ namespace visio_prj_designer
                             cell.Shape.Shapes[ "3" ].Cells[
                                 "FillForegnd" ].FormulaU = colour;
 
+                            }
+
+                        //  Доанное свойство меняется автоматически при присоединении к узлу
+                        if ( cell.Name == "Prop.node_number" )
+                            {
+                            //  Новый номер узла ( number ) мы определили в начале, 
+                            //      перед определением модуля, чтобы занть в каком узле его искать
+                            temp_mod.node_number = node;
                             }
                         }
                     break;
@@ -1901,6 +1971,20 @@ catch ( Exception )
                 
                 tw.WriteEndElement();   //  Устройства
                 }   //  for l
+            }
+        //---------------------------------------------------------------------
+
+        public int get_index_PAC( List<PAC> pac, int node )
+            {
+            //  Определяем индекс узла в списке
+            for ( int i = 0; i < pac.Count; i++ )
+                {
+                if ( pac[ i ].PAC_number == node )
+                    {
+                    return i;
+                    }
+                }
+            return 0;
             }
         //---------------------------------------------------------------------
 

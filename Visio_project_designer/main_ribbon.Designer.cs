@@ -71,10 +71,8 @@ namespace visio_prj_designer
             this.group3 = this.Factory.CreateRibbonGroup();
             this.Btn_devices = this.Factory.CreateRibbonButton();
             this.button_modes = this.Factory.CreateRibbonButton();
-            this.button1 = this.Factory.CreateRibbonButton();
             this.group4 = this.Factory.CreateRibbonGroup();
-            this.button2 = this.Factory.CreateRibbonButton();
-            this.button3 = this.Factory.CreateRibbonButton();
+            this.save_as_icpcon = this.Factory.CreateRibbonButton();
             this.process_definition_tab.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
@@ -137,31 +135,17 @@ namespace visio_prj_designer
             this.button_modes.Name = "button_modes";
             this.button_modes.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.button_modes_Click );
             // 
-            // button1
-            // 
-            this.button1.Label = "Отчет по режимам";
-            this.button1.Name = "button1";
-            this.button1.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.button_modes_Click );
-            // 
             // group4
             // 
-            this.group4.Items.Add( this.button2 );
-            this.group4.Items.Add( this.button1 );
-            this.group4.Items.Add( this.button3 );
+            this.group4.Items.Add( this.save_as_icpcon );
             this.group4.Label = "Отчеты";
             this.group4.Name = "group4";
             // 
-            // button2
+            // save_as_icpcon
             // 
-            this.button2.Label = "Отчет по устройствам";
-            this.button2.Name = "button2";
-            this.button2.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.button_modes_Click );
-            // 
-            // button3
-            // 
-            this.button3.Label = "Отчет по модулям";
-            this.button3.Name = "button3";
-            this.button3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.button_modes_Click );
+            this.save_as_icpcon.Label = "Экспорт для контроллера ICP CON";
+            this.save_as_icpcon.Name = "save_as_icpcon";
+            this.save_as_icpcon.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.save_as_icpcon_Click );
             // 
             // main_ribbon
             // 
@@ -193,9 +177,7 @@ namespace visio_prj_designer
         internal Microsoft.Office.Tools.Ribbon.RibbonButton Btn_devices;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button_modes;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group4;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton button2;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton button1;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton button3;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton save_as_icpcon;
         }
 
     partial class ThisRibbonCollection

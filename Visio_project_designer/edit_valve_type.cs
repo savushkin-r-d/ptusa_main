@@ -215,11 +215,9 @@ namespace visio_prj_designer
 
             // Выделяем задействованные устройством клеммы.
             Globals.visio_addin.cur_sel_dev.select_channels();
-
-
+            
             Globals.visio_addin.is_selecting_clamp = true;
-
-
+            
             visioApplication.Windows[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].MouseMove +=
                 new Microsoft.Office.Interop.Visio.EWindow_MouseMoveEventHandler(
                 Globals.visio_addin.visio_addin__MouseMove );
