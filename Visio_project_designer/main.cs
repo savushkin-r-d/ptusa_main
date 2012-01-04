@@ -166,7 +166,11 @@ namespace visio_prj_designer
 
             visio_app.DocumentSaved +=
                 new Microsoft.Office.Interop.Visio.EApplication_DocumentSavedEventHandler(
-                visio_addin__DocumentSaved );  
+                visio_addin__DocumentSaved );
+
+            visio_app.DocumentSavedAs +=
+                new Microsoft.Office.Interop.Visio.EApplication_DocumentSavedAsEventHandler(
+                visio_addin__DocumentSaved );
 
             g_devices = new List< device > ();
             g_objects = new List< T_Object > ();
@@ -293,8 +297,6 @@ namespace visio_prj_designer
                         }
                     //-----------------------------------------------------------------------------
 
-                    try
-                        {
                         g_devices.Clear();
 
                         //Считывание устройств.
@@ -318,21 +320,32 @@ namespace visio_prj_designer
                                 case "AO":
                                 case "FQT":
                                 case "WTE":
-                                    g_devices.Add( new device( shape, g_PAC_nodes ) );
+                                    try
+                                        {
+                                        g_devices.Add( new device( shape, g_PAC_nodes ) );
+                                        }
+                                    catch ( Exception err )
+                                        {
+                                        System.Diagnostics.Debug.WriteLine( err.Message );
+                                        MessageBox.Show( "Ошибка считывания устройства " + 
+                                            shape.Cells[ "Prop.name" ].FormulaU );
+                                        }
                                     break;
 
                                 case "TANK":
-                                    g_objects.Add( new T_Object( shape, g_PAC_nodes ) );
+                                    try
+                                        {
+                                        g_objects.Add( new T_Object( shape, g_PAC_nodes ) );
+                                        }
+                                    catch ( Exception err )
+                                        {
+                                        System.Diagnostics.Debug.WriteLine( err.Message );
+                                        MessageBox.Show( "Ошибка считывания объекта " + 
+                                            shape.Cells[ "Prop.name" ].FormulaU );
+                                        }
                                     break;
                                 }		//	switch ( shape.Data1 )	
                             }		//	foreach
-                        }
-                    catch ( Exception err )
-                        {
-                        System.Diagnostics.Debug.WriteLine( err.Message );
-                        MessageBox.Show( "Ошибка считывания устройств проекта" );
-                        //throw;
-                        }
                     //-----------------------------------------------------------------------------
 
                     try
@@ -372,15 +385,13 @@ namespace visio_prj_designer
             {
             if( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
                 {
-                Write_XML_description( target.Name );
+                Write_XML_description();
                 }
-            }   
-       
+            }
+
         private void visio_addin__BeforeDocumentClose( Visio.Document target )
             {
-            if (    ( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
-                ||  ( target.Type == Visio.VisDocumentTypes.visTypeStencil )
-               )
+            if ( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
                 {
                 g_objects.Clear();
                 g_devices.Clear();
@@ -1817,8 +1828,11 @@ catch ( Exception )
         /// <remarks> asvovik, 21.09.2011. </remarks>
         ///
         /// <param name="XML"> I don't now </param>
-        public void Write_XML_description( string doc_name )
+        public void Write_XML_description()
             {
+            xml_fileName = Application.ActiveDocument.Path + 
+                Application.ActiveDocument.Name.Replace( ".vsd", ".xml" );
+
             XmlTextWriter tw = new XmlTextWriter( xml_fileName, null );
 
             // задаём форматирование с отступом

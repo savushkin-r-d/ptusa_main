@@ -426,6 +426,15 @@ namespace visio_prj_designer
                 visio_wnds[ ( short ) visio_addin.VISIO_WNDOWS.IO_EDIT ].Close();
                 visio_wnds[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].Activate();
                 //1 КУ;2 КУ;1 КУ 1 ОС;1 КУ 2 ОС;2 КУ 2 ОС
+
+                //	Снятие подсветки с ранее выбранных модулей
+                for ( int i = 0; i < Globals.visio_addin.g_PAC_nodes.Count; i++ )
+                    {
+                    foreach ( io_module mod in Globals.visio_addin.g_PAC_nodes[ i ].get_io_modules() )
+                        {
+                        mod.deactivate();
+                        }
+                    }
                 }
             }
 

@@ -873,7 +873,7 @@ namespace wago
                 if ( this.module != null )
                     {
                     this.clamp = clamp - 1;
-                    this.module.use( clamp );
+                    this.module.use( this.clamp );
                     this.node = Convert.ToInt32( pac[ index ].shape.Cells[ "Prop.node_number" ].Formula );
                     }
                 }
