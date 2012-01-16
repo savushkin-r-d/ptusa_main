@@ -19,6 +19,7 @@ using System.Windows.Forms;
 using Visio = Microsoft.Office.Interop.Visio;
 
 using wago;
+using visio_prj_designer;
 
 /// <summary> Устройства проекта (клапан, насос, танк...).</summary>
 namespace tech_device
@@ -221,7 +222,6 @@ namespace tech_device
             /// <summary> 2 канала управления.  </summary>
             V_2_CONTROL_CHANNEL,
 
-
             /// <summary> 1 канал управления и 1 обратная связь.  </summary>
             V_1_CONTROL_CHANNEL_1_FB,
 
@@ -238,7 +238,26 @@ namespace tech_device
 			V_MIX_PROOF_AS_INTERFACE,
             }
 
-		/// <summary> Имя устройства.  </summary>
+        /// <summary> Имена типов устройств.  </summary>
+        private string[] NAMES = 
+        {
+        "Клапан",
+        };
+
+        /// <summary> Имена подтипов устройств.  </summary>
+//         private string[] SUB_NAMES = 
+//         {
+//         "1 КУ",
+//         "2 КУ",
+//         "1 КУ 1 ОС",
+//         "1 КУ 2 ОС",
+//         "2 КУ 2 ОС",
+//         "MixProof 3 КУ 2 ОС",
+//         "MixProof AS interface",
+//         };
+
+
+    	/// <summary> Имя устройства.  </summary>
 		public string name;
 
 		/// <summary> Получение номера устройства. </summary>
@@ -325,7 +344,12 @@ namespace tech_device
             if( only_list_view == false )
                 {
                 cbox.Items.Clear();
-                cbox.Items.AddRange( SUB_NAMES );
+
+                int cnt = Globals.visio_addin.DDTypes.Descr_Dev_Types[ type ].Count;
+                for ( int i = 0; i < cnt; i++ )
+                    {
+                    cbox.Items.Add( Globals.visio_addin.DDTypes.Descr_Dev_Types[ type ][ i ].name );
+                    }
 
                 cbox.SelectedIndex = ( int ) sub_type;
                 }
@@ -366,6 +390,11 @@ namespace tech_device
                         channel.Value.module.node_number,
                         channel.Value.module.order_number, channel.Value.clamp + 1 );
                     }
+                
+                if ( channel.Value.kind == io_module.KINDS.PARAM )
+                    {
+                    description = Convert.ToString( channel.Value.clamp );
+                    }
 
                 res.Add( channel.Key, description );
                 }
@@ -386,22 +415,6 @@ namespace tech_device
 			{
 			return ( Visio.Shape ) shape;
 			}
-
-        /// <summary> Имена типов устройств.  </summary>
-        private string[] NAMES = 
-        {
-        "Клапан",
-        };
-        
-        /// <summary> Имена подтипов устройств.  </summary>
-        private string[] SUB_NAMES = 
-        {
-        "1 КУ",
-        "2 КУ",
-        "1 КУ 1 ОС",
-        "1 КУ 2 ОС",
-        "2 КУ 2 ОС"
-        };
 
         /// <summary> Получение параметров канала из строкового описания канала
         /// (для записи\чтения из файла). </summary>
@@ -476,10 +489,42 @@ namespace tech_device
 
             wago_channels.Clear();
 
+            if (    ( ( int ) type < Globals.visio_addin.DDTypes.Descr_Dev_Types.Count )
+                &&  ( ( int ) sub_type < Globals.visio_addin.DDTypes.Descr_Dev_Types[ type ].Count ) 
+                )
+                {
+                DDT.Dev_Struct temp_dev = Globals.visio_addin.DDTypes.Descr_Dev_Types[ type ][ ( int ) sub_type ];
+                int cnt = temp_dev.chens.Count;
+
+                for ( int i = 0; i < cnt; i++ )
+                    {
+                    // string str_DO1 = shape.Cells[ "Prop.DO1" ].Formula;
+                    // add_wago_channel( "DO1", io_module.KINDS.DO );
+                    // get_n_from_str( str_DO1, out node, out module, out clamp );
+                    // wago_channels[ "DO1" ].set( pac, node, module, clamp );
+
+                    try
+                        {
+                        string str_chen = shape.Cells[ "Prop." + temp_dev.chens[ i ].name ].Formula;
+                        add_wago_channel( temp_dev.chens[ i ].name, temp_dev.chens[ i ].type );
+                        get_n_from_str( str_chen, out node, out module, out clamp );
+                        wago_channels[ temp_dev.chens[ i ].name ].set( pac, node, module, clamp );
+                        }
+                    catch ( System.Exception )
+                        {
+                        MessageBox.Show( "Ошибка при задании канала \"" + temp_dev.chens[ i ].name + 
+                            "\" устройства: " + temp_dev.name + " " + 
+                            shape.Cells[ "Prop.name" ].Formula );
+                        }
+
+                    }
+                }
+
+//*********************************************************************************************
+/*           
             switch( type )
                 {
                 case TYPES.T_V:
-
 					string str_DO1 = shape.Cells[ "Prop.DO1" ].Formula;
 					string str_DO2 = shape.Cells[ "Prop.DO2" ].Formula;
 					string str_DI1 = shape.Cells[ "Prop.DI1" ].Formula;
@@ -578,6 +623,12 @@ namespace tech_device
 						case SUB_TYPES.V_MIX_PROOF_AS_INTERFACE:
 							//	AS_adres
 							//	AS_gateway
+                            
+                            add_wago_channel( "AS_adres", io_module.KINDS.PARAM );
+                            //wago_channels[ "AS_adres" ].set_par( , "0" );
+
+                            add_wago_channel( "AS_gateway", io_module.KINDS.PARAM );
+                            //wago_channels[ "AS_gateway" ].set_par( , "0" );
 							break;
 
                         }
@@ -634,7 +685,8 @@ namespace tech_device
                     get_n_from_str( str_AI1, out node, out module, out clamp );
                     wago_channels[ "AI1" ].set( pac, node, module, clamp );
 					}
-
+*/
+//*********************************************************************************************
             }
 
         /// <summary> Constructor. </summary>
@@ -696,11 +748,11 @@ namespace tech_device
                                                      
                 module.use( clamp );
                 }
-            else
-                {
-                string prop = "Prop." + channel_name;
-                shape.Cells[ prop ].FormulaU = "\"none\"";
-                }
+//             else
+//                 {
+//                 string prop = "Prop." + channel_name;
+//                 shape.Cells[ prop ].FormulaU = "\"" + Convert.ToString( clamp ) + "\"";
+//                 }
             }
 
         /// <summary> Установка активной ("подсвечиваемой") клеммы в данный 
@@ -750,5 +802,314 @@ namespace tech_device
                 }
             }
 
+
+        /// <summary> Установка параметра устройства </summary>
+        ///
+        /// <remarks> ASV, 04.01.2012. </remarks>
+        ///
+        /// <param name="par_name"> Название параметра </param>
+        /// <param name="value">    Значение параметра </param>
+        public void set_par( string par_name, string value )
+            {
+            //  Если выбран модуль для привязки, то привязываем
+            //      иначе сбрасываем привязку
+            if ( par_name != "" )
+                {
+                string prop = "Prop." + par_name;
+                shape.Cells[ prop ].FormulaU = value;
+                }
+            }
+
         }
+
+
+
+    /// <summary> Описание типов устройств </summary>
+    ///
+    /// <remarks> ASV, 09.01.2012. </remarks>
+    class DDT
+        {
+        internal Dictionary<device.TYPES, List<Dev_Struct>> Descr_Dev_Types = 
+            new Dictionary<device.TYPES, List<Dev_Struct>>();
+
+        public struct Chen_Struct
+            {
+            public io_module.KINDS type;    //  Тип канала
+            public string name;             //  Название
+
+            public Chen_Struct( io_module.KINDS t, string n )
+                {
+                type = t;
+                name = n;
+                }
+
+            //            byte table_no;    //  Номер узла
+            //            byte offset;      //  Номер клеммы в общем списке рабочих клемм узла  
+            //            int value;        //  Значение параметра
+            }
+
+        public struct Dev_Struct
+            {
+            public device.TYPES type;            //  Тип устройства
+            public device.SUB_TYPES sub_type;        //  Подтип устройства
+            public string name;            //  Полное название устройства
+            public string sname;           //  Сокращенное имя устройства
+
+            public List<Chen_Struct> chens;   //  Список каналов устройства
+
+            public Dev_Struct( device.TYPES t, device.SUB_TYPES st, string n, string sn )
+                {
+                type = t;
+                sub_type = st;
+                name = n;
+                sname = sn;
+
+                chens = new List<Chen_Struct>();
+
+                //  Заполнение структуры каждого из устройств в зависимости от его типа и подтипа
+                switch ( type )
+                    {
+                    case device.TYPES.T_V:
+                        switch ( sub_type )
+                            {
+                            case device.SUB_TYPES.V_1_CONTROL_CHANNEL:
+                                chens.Add( new Chen_Struct( io_module.KINDS.DO, "DO1" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.PARAM, "septum" ) );
+                                break;
+
+                            case device.SUB_TYPES.V_2_CONTROL_CHANNEL:
+                                chens.Add( new Chen_Struct( io_module.KINDS.DO, "DO1" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.DO, "DO2" ) );
+                                break;
+
+                            case device.SUB_TYPES.V_1_CONTROL_CHANNEL_1_FB:
+                                chens.Add( new Chen_Struct( io_module.KINDS.DO, "DO1" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.DI, "DI1" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.PARAM, "septum" ) );
+                                break;
+
+                            case device.SUB_TYPES.V_1_CONTROL_CHANNEL_2_FB:
+                                chens.Add( new Chen_Struct( io_module.KINDS.DO, "DO1" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.DI, "DI1" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.DI, "DI2" ) );
+                                break;
+
+                            case device.SUB_TYPES.V_2_CONTROL_CHANNEL_2_FB:
+                                chens.Add( new Chen_Struct( io_module.KINDS.DO, "DO1" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.DO, "DO2" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.DI, "DI1" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.DI, "DI2" ) );
+                                break;
+
+                            case device.SUB_TYPES.V_MIX_PROOF_3_UPR_2_FB:
+                                chens.Add( new Chen_Struct( io_module.KINDS.DO, "DO1" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.DO, "DOH" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.DO, "DOL" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.DI, "DI1" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.DI, "DI2" ) );
+                                break;
+
+                            case device.SUB_TYPES.V_MIX_PROOF_AS_INTERFACE:
+                                chens.Add( new Chen_Struct( io_module.KINDS.PARAM, "AS_adres" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.PARAM, "AS_gateway" ) );
+                                break;
+
+                            }   //  sub_type
+                        break;
+
+
+                    case device.TYPES.T_N:
+                        chens.Add( new Chen_Struct( io_module.KINDS.DO, "DO1" ) );
+                        chens.Add( new Chen_Struct( io_module.KINDS.DI, "DI1" ) );
+                        break;
+
+                    case device.TYPES.T_MIX:
+                        chens.Add( new Chen_Struct( io_module.KINDS.DO, "DO1" ) );
+                        chens.Add( new Chen_Struct( io_module.KINDS.DI, "DI1" ) );
+                        break;
+
+                    case device.TYPES.T_LS:
+                        chens.Add( new Chen_Struct( io_module.KINDS.DI, "DI1" ) );
+                        chens.Add( new Chen_Struct( io_module.KINDS.PARAM, "scheme" ) );
+                        break;
+
+                    case device.TYPES.T_FS:
+                        chens.Add( new Chen_Struct( io_module.KINDS.DI, "DI1" ) );
+                        break;
+
+                    case device.TYPES.T_FB:
+                        chens.Add( new Chen_Struct( io_module.KINDS.DI, "DI1" ) );
+                        break;
+
+                    case device.TYPES.T_UPR:
+                        chens.Add( new Chen_Struct( io_module.KINDS.DO, "DO1" ) );
+                        break;
+
+                    case device.TYPES.T_TE:
+                        chens.Add( new Chen_Struct( io_module.KINDS.AI, "AI1" ) );
+                        break;
+
+                    case device.TYPES.T_FE:
+                        chens.Add( new Chen_Struct( io_module.KINDS.AI, "AI1" ) );
+                        chens.Add( new Chen_Struct( io_module.KINDS.PARAM, "min" ) );
+                        chens.Add( new Chen_Struct( io_module.KINDS.PARAM, "max" ) );
+                        break;
+
+                    case device.TYPES.T_LE:
+                        switch ( sub_type )
+                            {
+                            case device.SUB_TYPES.V_1_CONTROL_CHANNEL:         //  Конус внутрь
+                            case device.SUB_TYPES.V_2_CONTROL_CHANNEL:    //  Конус вниз
+                            case device.SUB_TYPES.V_1_CONTROL_CHANNEL_1_FB:    //  Конус усеченный целиндр
+                                chens.Add( new Chen_Struct( io_module.KINDS.AI, "AI1" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.PARAM, "radius" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.PARAM, "H1" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.PARAM, "H2" ) );
+                                break;
+
+                            case device.SUB_TYPES.V_1_CONTROL_CHANNEL_2_FB:         //  Без конуса
+                                chens.Add( new Chen_Struct( io_module.KINDS.AI, "AI1" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.PARAM, "radius" ) );
+                                chens.Add( new Chen_Struct( io_module.KINDS.PARAM, "H1" ) );
+                                break;
+
+//                             case device.SUB_TYPES.V_2_CONTROL_CHANNEL_2_FB:    //  Настраиваемый уровень
+//                                 chens.Add( new Chen_Struct( io_module.KINDS.AI, "AI1" ) );
+//                                 chens.Add( new Chen_Struct( io_module.KINDS.PARAM, "sheme" ) );
+//                                 break;
+                            }
+                        break;
+
+                    case device.TYPES.T_QE:
+                        chens.Add( new Chen_Struct( io_module.KINDS.AI, "AI1" ) );
+                        chens.Add( new Chen_Struct( io_module.KINDS.PARAM, "min" ) );
+                        chens.Add( new Chen_Struct( io_module.KINDS.PARAM, "max" ) );
+                        break;
+
+                    case device.TYPES.T_CTR:
+                        chens.Add( new Chen_Struct( io_module.KINDS.AI, "AI1" ) );
+                        break;
+
+
+
+                    case device.TYPES.T_AO:
+                        chens.Add( new Chen_Struct( io_module.KINDS.AO, "AO1" ) );
+                        break;
+
+                    case device.TYPES.T_AI:
+                        chens.Add( new Chen_Struct( io_module.KINDS.AI, "AI1" ) );
+                        break;
+
+                    }   //  type
+
+                }   //  public Dev_Struct
+
+            }
+
+        public DDT()
+            {
+            //  Заполняем список устройств
+            List<Dev_Struct> temp_list = new List<Dev_Struct>();
+
+            temp_list.Add( new Dev_Struct( device.TYPES.T_V, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Клапан 1КУ без ОС", "V" ) );
+            temp_list.Add( new Dev_Struct( device.TYPES.T_V, device.SUB_TYPES.V_2_CONTROL_CHANNEL, "Клапан 2КУ без ОС", "V" ) );
+            temp_list.Add( new Dev_Struct( device.TYPES.T_V, device.SUB_TYPES.V_1_CONTROL_CHANNEL_1_FB, "Клапан 1КУ 1ОС", "V" ) );
+            temp_list.Add( new Dev_Struct( device.TYPES.T_V, device.SUB_TYPES.V_1_CONTROL_CHANNEL_2_FB, "Клапан 1КУ 2ОС", "V" ) );
+            temp_list.Add( new Dev_Struct( device.TYPES.T_V, device.SUB_TYPES.V_2_CONTROL_CHANNEL_2_FB, "Клапан 2КУ 2ОС", "V" ) );
+            temp_list.Add( new Dev_Struct( device.TYPES.T_V, device.SUB_TYPES.V_MIX_PROOF_3_UPR_2_FB, "Клапан MixProof 3КУ 2ОС", "V" ) );
+            temp_list.Add( new Dev_Struct( device.TYPES.T_V, device.SUB_TYPES.V_MIX_PROOF_AS_INTERFACE, "Клапан MixProof ASinterface", "V" ) );
+            Descr_Dev_Types.Add( device.TYPES.T_V, temp_list );
+            
+            temp_list = new List<Dev_Struct>();
+            temp_list.Add( new Dev_Struct( device.TYPES.T_N, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Насос", "N" ) );
+            Descr_Dev_Types.Add( device.TYPES.T_N, temp_list );
+
+            temp_list = new List<Dev_Struct>();
+            temp_list.Add( new Dev_Struct( device.TYPES.T_MIX, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Электродвигатель", "M" ) );
+            Descr_Dev_Types.Add( device.TYPES.T_MIX, temp_list );
+
+            temp_list = new List<Dev_Struct>();
+            temp_list.Add( new Dev_Struct( device.TYPES.T_CTR, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Счетчик", "CTR" ) );
+            Descr_Dev_Types.Add( device.TYPES.T_CTR, temp_list );
+
+            temp_list = new List<Dev_Struct>();
+            temp_list.Add( new Dev_Struct( device.TYPES.T_TE, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Текущая температура", "TE" ) );
+            Descr_Dev_Types.Add( device.TYPES.T_TE, temp_list );
+
+            temp_list = new List<Dev_Struct>();
+            temp_list.Add( new Dev_Struct( device.TYPES.T_QE, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Текущая концентрация", "QE" ) );
+            Descr_Dev_Types.Add( device.TYPES.T_QE, temp_list );
+
+            temp_list = new List<Dev_Struct>();
+            temp_list.Add( new Dev_Struct( device.TYPES.T_LS, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Уровень", "LS" ) );
+            Descr_Dev_Types.Add( device.TYPES.T_LS, temp_list );
+
+            temp_list = new List<Dev_Struct>();
+            temp_list.Add( new Dev_Struct( device.TYPES.T_LE, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Текущий уровень (конус вниз)", "LE" ) );
+            temp_list.Add( new Dev_Struct( device.TYPES.T_LE, device.SUB_TYPES.V_1_CONTROL_CHANNEL_1_FB, "Текущий уровень (конус внутрь)", "LE" ) );
+            temp_list.Add( new Dev_Struct( device.TYPES.T_LE, device.SUB_TYPES.V_1_CONTROL_CHANNEL_2_FB, "Текущий уровень (Усеченный цилиндр)", "LE" ) );
+            temp_list.Add( new Dev_Struct( device.TYPES.T_LE, device.SUB_TYPES.V_2_CONTROL_CHANNEL, "Текущий уровень (без конуса)", "LE" ) );
+            temp_list.Add( new Dev_Struct( device.TYPES.T_LE, device.SUB_TYPES.V_2_CONTROL_CHANNEL_2_FB, "Текущий уровень (настраиваемый)", "LE" ) );
+            Descr_Dev_Types.Add( device.TYPES.T_LE, temp_list );
+
+            temp_list = new List<Dev_Struct>();
+            temp_list.Add( new Dev_Struct( device.TYPES.T_FS, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Расход (есть/нет)", "FS" ) );
+            Descr_Dev_Types.Add( device.TYPES.T_FS, temp_list );
+
+            temp_list = new List<Dev_Struct>();
+            temp_list.Add( new Dev_Struct( device.TYPES.T_FE, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Текущий расход", "FE" ) );
+            Descr_Dev_Types.Add( device.TYPES.T_FE, temp_list );
+
+            temp_list = new List<Dev_Struct>();
+            temp_list.Add( new Dev_Struct( device.TYPES.T_FB, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Обратная связь", "FB" ) );
+            Descr_Dev_Types.Add( device.TYPES.T_FB, temp_list );
+
+            temp_list = new List<Dev_Struct>();
+            temp_list.Add( new Dev_Struct( device.TYPES.T_UPR, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Управляющий сигнал", "UPR" ) );
+            Descr_Dev_Types.Add( device.TYPES.T_UPR, temp_list );
+
+            temp_list = new List<Dev_Struct>();
+            temp_list.Add( new Dev_Struct( device.TYPES.T_AI, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Аналоговый вход", "AI" ) );
+            Descr_Dev_Types.Add( device.TYPES.T_AI, temp_list );
+
+            temp_list = new List<Dev_Struct>();
+            temp_list.Add( new Dev_Struct( device.TYPES.T_AO, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Аналоговый выход", "AO" ) );
+            Descr_Dev_Types.Add( device.TYPES.T_AO, temp_list );
+
+
+/*
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_V, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Клапан без ОС", "V" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_V, device.SUB_TYPES.V_1_CONTROL_CHANNEL_1_FB, "Клапан 1 КУ - 1 ОС", "V" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_V, device.SUB_TYPES.V_1_CONTROL_CHANNEL_2_FB, "Клапан 1 КУ - 2 ОС", "V" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_V, device.SUB_TYPES.V_2_CONTROL_CHANNEL, "Клапан 2 КУ без ОС", "V" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_V, device.SUB_TYPES.V_2_CONTROL_CHANNEL_2_FB, "Клапан 2 КУ - 2 ОС", "V" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_V, device.SUB_TYPES.V_MIX_PROOF_3_UPR_2_FB, "Клапан 3 КУ - 2 ОС", "V" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_V, device.SUB_TYPES.V_MIX_PROOF_AS_INTERFACE, "Клапан ASinterface", "V" ) );
+
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_N, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Насос", "N" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_MIX, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Электродвигатель", "M" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_CTR, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Счетчик", "CTR" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_TE, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Текущая температура", "TE" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_QE, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Текущая концентрация", "QE" ) );
+
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_LS, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Уровень", "LS" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_LE, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Текущий уровень (конус вниз)", "LE" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_LE, device.SUB_TYPES.V_1_CONTROL_CHANNEL_1_FB, "Текущий уровень (конус внутрь)", "LE" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_LE, device.SUB_TYPES.V_1_CONTROL_CHANNEL_2_FB, "Текущий уровень (Усеченный цилиндр)", "LE" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_LE, device.SUB_TYPES.V_2_CONTROL_CHANNEL, "Текущий уровень (без конуса)", "LE" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_LE, device.SUB_TYPES.V_2_CONTROL_CHANNEL_2_FB, "Текущий уровень (настраиваемый)", "LE" ) );
+
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_FS, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Расход (есть/нет)", "FS" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_FE, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Текущий расход", "FE" ) );
+
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_FB, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Обратная связь", "FB" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_UPR, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Управляющий сигнал", "UPR" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_AI, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Аналоговый вход", "AI" ) );
+            Descr_Dev_Types.Add( new Dev_Struct( device.TYPES.T_AO, device.SUB_TYPES.V_1_CONTROL_CHANNEL, "Аналоговый выход", "AO" ) );
+      
+ */
+            }
+
+        }
+
     }

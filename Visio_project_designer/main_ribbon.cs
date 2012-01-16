@@ -88,6 +88,7 @@ namespace visio_prj_designer
                 }
             }
 
+
          private void save_as_icpcon_Click( object sender, RibbonControlEventArgs e )
              {
             BinaryWriter bw = new BinaryWriter( File.Create("wago.dsx") );
@@ -110,7 +111,7 @@ namespace visio_prj_designer
                 bw.Write( 0 );
                 bw.Write( 0 );
 
-                //  Записываем данные по устройствам пректа
+                //  Записываем данные по устройствам проекта
                 //****************************************************************************
                 byte b;
                 int temp_i;
@@ -314,17 +315,27 @@ namespace visio_prj_designer
                     //  Проходим по каналам
                     foreach ( KeyValuePair<string, wago.wago_channel> chen in
                                 Globals.visio_addin.g_devices[ i ].wago_channels )
+
+                    //  Можно использовать эту структуру при создании устройств...
+//                     int cnt = Globals.visio_addin.DDTypes.Descr_Dev_Types
+//                             [ Globals.visio_addin.g_devices[ i ].type ] 
+//                             [ (int) Globals.visio_addin.g_devices[ i ].sub_type ].chens.Count;
+                    
+//                    for ( int j = 0; j < cnt; j++ )
                         {
                         //  chennel type
-                        // Синхронизировать список типов со старой версией
+                        // Синхронизировать список типов со старой версией OK
                         bw.Write( ( byte ) chen.Value.kind );
                         
+                        //  tabel no (node no) - порядковый номер в списке == просто номер узла
+                        bw.Write( chen.Value.module.node_number );
+                                 
                         //  А вот отсюда начнется крутой пересчет адресов в таблице
 
-                        //  tabel no
-                        bw.Write( 1 );
-
                         //  offset
+                        
+                        
+                        
                         bw.Write( 1 );
 
                         //  value
@@ -416,17 +427,9 @@ namespace visio_prj_designer
                 tmp.create_tool_form( visio_app, true );
                 Globals.visio_addin.edit_io_frm = tmp;
 
-                //visio_wnds[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].MouseMove -=
-                //    new Microsoft.Office.Interop.Visio.EWindow_MouseMoveEventHandler(
-                //    Globals.visio_addin.visio_addin__MouseMove );  
-
                 }
             else
                 {
-                visio_wnds[ ( short ) visio_addin.VISIO_WNDOWS.IO_EDIT ].Close();
-                visio_wnds[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].Activate();
-                //1 КУ;2 КУ;1 КУ 1 ОС;1 КУ 2 ОС;2 КУ 2 ОС
-
                 //	Снятие подсветки с ранее выбранных модулей
                 for ( int i = 0; i < Globals.visio_addin.g_PAC_nodes.Count; i++ )
                     {
@@ -435,6 +438,14 @@ namespace visio_prj_designer
                         mod.deactivate();
                         }
                     }
+
+                //  Закрываем окно Устройства
+                visio_wnds[ ( short ) visio_addin.VISIO_WNDOWS.IO_EDIT ].Close();
+                //  Активизируем окно WAGO
+                visio_wnds[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].Activate();
+                //  Активизируем страничку с устройствами
+                visio_wnds[ ( short ) visio_addin.VISIO_WNDOWS.MAIN ].Page =
+                    visio_app.ActiveDocument.Pages[ "Устройства" ];
                 }
             }
 

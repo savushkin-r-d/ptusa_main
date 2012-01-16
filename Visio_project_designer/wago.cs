@@ -92,7 +92,8 @@ namespace wago
             DI,
             AI,
             AO,
-			SPECIAL,
+			PARAM,
+            SPECIAL,
             SYSTEM,
             };
 
@@ -811,9 +812,11 @@ namespace wago
         internal int node;
 
         /// <summary> Модуль, к которому привязан канал. </summary>
+        /// <summary> Если "module" == null, то этот канал - это параметр </summary>
         internal io_module module;
 
         /// <summary> Клемма, к которой привязан канал. </summary>
+        /// <summary> Если "module" == null, то значение параметра </summary>
         internal int clamp;
 
         /// <summary> Constructor. </summary>
@@ -852,14 +855,6 @@ namespace wago
             {
             //  Определяем индекс узла в списке
             int index = visio_prj_designer.Globals.visio_addin.get_index_PAC( pac, node );
-//             for ( int i = 0; i < pac.Count; i++ )
-//                 {
-//                 if ( pac[ i ].PAC_number == node )
-//                     {
-//                     index = i;
-//                     break;
-//                     }
-//                 }
 
 			//	Привязка каналов устройства к модулю
             if( pac[ index ] != null && module > 0 )
@@ -878,8 +873,10 @@ namespace wago
                     }
                 }
 			else
-				{	//	Задание параметра
-
+				{	//	Задание параметра ( если "module" = 0, "node" нужен для нахождения узла, значит используем "clamp" )
+                this.node = 0;
+                this.module = null;
+                this.clamp = clamp;
 				}
             }
 

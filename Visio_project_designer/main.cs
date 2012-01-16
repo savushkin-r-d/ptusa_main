@@ -49,12 +49,17 @@ namespace visio_prj_designer
         internal service_data service_config;
 
 		/// <summary> Все устройства. </summary>
-        internal List<device> g_devices;
+        internal List<device> g_devices = new List< device >();
 
 		/// <summary> Объекты проекта (гребенки и танки) </summary>
-		internal List<T_Object> g_objects;
+		internal List<T_Object> g_objects = new List< T_Object >();
 
+//      g_devices = new List< device > ();
+//      g_objects = new List< T_Object > ();
 
+        /// <summary> Описание типов устройств </summary>
+        internal DDT DDTypes = new DDT();
+        
         /// <summary> Объект контроллера. </summary>
         internal List<PAC> g_PAC_nodes;     //  Список узлов
 
@@ -171,9 +176,6 @@ namespace visio_prj_designer
             visio_app.DocumentSavedAs +=
                 new Microsoft.Office.Interop.Visio.EApplication_DocumentSavedAsEventHandler(
                 visio_addin__DocumentSaved );
-
-            g_devices = new List< device > ();
-            g_objects = new List< T_Object > ();
             }
 
         /// <summary> Event handler. Called by visio_addin for shutdown events. </summary>
@@ -333,6 +335,7 @@ namespace visio_prj_designer
                                     break;
 
                                 case "TANK":
+                                case "GREB":
                                     try
                                         {
                                         g_objects.Add( new T_Object( shape, g_PAC_nodes ) );
@@ -438,6 +441,17 @@ namespace visio_prj_designer
                         {
                         string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
                         string name = shape.Cells[ "Prop.PAC_name" ].Formula;
+
+
+                        if ( g_PAC_nodes[ 0 ] == null || shape.Data2 == "860" )
+                            {
+                            shape.Cells[ "Prop.node_number" ].Formula = "0";
+                            }
+                        else
+                            {
+                            shape.Cells[ "Prop.node_number" ].Formula = Convert.ToString( g_PAC_nodes.Count );
+                            }
+                        
 
                         if (    shape.Data2 == "860"
                             &&  g_PAC_nodes[ 0 ] == null )
@@ -1152,6 +1166,11 @@ namespace visio_prj_designer
 
                         if ( cell.Name == "Prop.node_number" )
                             {
+                            //  Меняем номер узла на его индекс в массиве узлов (т.е. поменять номер вручную нельзя)
+                            cell.Shape.Cells[ "Prop.node_number" ].Formula = 
+                                //Convert.ToString( get_index_PAC( g_PAC_nodes, cur_PAC_node.PAC_number ) );
+                                Convert.ToString( g_PAC_nodes.IndexOf( cur_PAC_node ) );
+
                             int number = 
                                 Convert.ToInt16( cell.Shape.Cells[ "Prop.node_number" ].Formula );
 
@@ -1304,6 +1323,8 @@ namespace visio_prj_designer
 				case "AO":
 				case "FQT":
 				case "WTE":
+                    string str;
+
                     //Поиск по shape объекта device.
                     cur_sel_dev = g_devices.Find( delegate( device dev )
                     {
@@ -1319,7 +1340,7 @@ namespace visio_prj_designer
 							break;
 
 						case "Prop.name":
-							string str = cell.Shape.Cells[ "Prop.name" ].Formula;
+							str = cell.Shape.Cells[ "Prop.name" ].Formula;
 							str = str.Replace( "\"", "" );
                             cell.Shape.Shapes[ "name" ].Text = str.ToUpper();
 
@@ -1349,6 +1370,35 @@ namespace visio_prj_designer
 
 							//current_selected_dev.sub_type = cell.Shape.Cells[ "Prop.sub_type" ].Formula;
 							break;
+
+                        //  Предполагается, что это значения "каналов", которые являются параметрами
+                        default:
+                            str = cell.Shape.Cells[ cell.Name ].Formula;
+							str = str.Replace( "\"", "" );
+							str = str.ToUpper();
+                            cell.Shape.Cells[ cell.Name ].Formula = "\"" + str + "\"";
+
+                            //  Делаем преобразование на случай нецифрового значения
+                            if ( ( str == "MIN" ) ||  ( str == "NZ" ) )
+                                {
+                                str = "0";
+                                }
+
+                            if ( ( str == "MAX" ) ||  ( str == "NO" ) )
+                                {
+                                str = "1";
+                                }
+
+                            //  Задаем значение канала
+                            string temp = cell.Name.Substring( 5, cell.Name.Length - 5 ); 
+                            cur_sel_dev.set_channel( temp, null, Convert.ToInt32( str ) );
+
+                            //  Обновляем значения в окне списка каналов
+                            cur_sel_dev.refresh_edit_window( 
+                                edit_io_frm.listForm.type_cbox,
+                                edit_io_frm.listForm.type_lview, 
+                                true );
+                            break;
 						}
 					break;
 
@@ -1416,7 +1466,7 @@ namespace visio_prj_designer
 						case "Prop.name":
 							Regex rex, rex2;
                             
-                            string str = cell.Shape.Cells[ "Prop.name" ].Formula;
+                            str = cell.Shape.Cells[ "Prop.name" ].Formula;
                                       
 							//Первый вариант маркировки клапана - 1V12.
                             if ( cell.Shape.Data1 == "V" )
@@ -1575,19 +1625,38 @@ namespace visio_prj_designer
 
 
 						case "Prop.septum":
-							str = cell.Shape.Cells[ "Prop.septum" ].Formula;
+                            str = cell.Shape.Cells[ "Prop.septum" ].Formula;
 							str = str.Replace( "\"", "" );
 							str = str.ToUpper();
+                            cell.Shape.Cells[ "Prop.septum" ].Formula = "\"" + str + "\"";
 
-							if ( str == "НО" )
+							if ( str == "NO" )
 								{
-								cell.Shape.Shapes[ "septum" ].SendToBack();
+								//  Убираем перегородку
+                                cell.Shape.Shapes[ "septum" ].SendToBack();
+
+                                //  Устанавливаем параметр (т.к. он int, то 1, а не NO)
+                                cur_sel_dev.set_channel( "septum", null, 1 );
 								}
-							else  //	"НЗ"
+							else  //	"NZ"
 								{
-								cell.Shape.Shapes[ "septum" ].BringToFront();
+								//  Ставим перегородку
+                                cell.Shape.Shapes[ "septum" ].BringToFront();
+
+                                //  Устанавливаем параметр (т.к. он int, то 0, а не NZ)
+                                cur_sel_dev.set_channel( "septum", null, 0 );
+
+                                //  Все что не NO, то NZ
+                                cell.Shape.Cells[ "Prop.septum" ].Formula = "\"NZ\"";
 								}
+
+                            //  Обновляем окно со списком каналов устройства
+                            cur_sel_dev.refresh_edit_window(
+                                edit_io_frm.listForm.type_cbox,
+                                edit_io_frm.listForm.type_lview,
+                                true );
 							break;
+
 						}	//	switch ( cell.Name )
 					break;
 
