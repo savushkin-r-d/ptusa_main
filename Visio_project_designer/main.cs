@@ -54,9 +54,6 @@ namespace visio_prj_designer
 		/// <summary> Объекты проекта (гребенки и танки) </summary>
 		internal List<T_Object> g_objects = new List< T_Object >();
 
-//      g_devices = new List< device > ();
-//      g_objects = new List< T_Object > ();
-
         /// <summary> Описание типов устройств </summary>
         internal DDT DDTypes = new DDT();
         
@@ -66,9 +63,12 @@ namespace visio_prj_designer
         /// <summary> Текущий выделенный узел </summary>
         internal PAC cur_PAC_node;
 
-        //  Типы узлов
-        internal string[] PAC_Node_Type = { "315", "815", "341", "841" };
+        //  Типы контроллеров
+        internal List<string> PAC_Types = new List<string>( new string[] { "860", "7186" } );
 
+        //  Типы узлов
+        internal List<string> Node_Types = new List<string>( new string[] { "315", "815", "341", "841" } );
+              
 
         /// <summary> Флаг режима привязки устройств к модулям. </summary>
         internal bool is_device_edit_mode = false; 
@@ -133,6 +133,10 @@ namespace visio_prj_designer
                 new Microsoft.Office.Interop.Visio.EApplication_ShapeAddedEventHandler(
                     visio_addin__ShapeAdded );
 
+             visio_app.ShapeChanged +=
+                 new Microsoft.Office.Interop.Visio.EApplication_ShapeChangedEventHandler(
+                     visio_addin__ShapeChanged );
+                                 
             visio_app.ShapeExitedTextEdit +=
                 new Microsoft.Office.Interop.Visio.EApplication_ShapeExitedTextEditEventHandler(
                     visio_addin__ShapeExitedTextEdit);
@@ -176,6 +180,11 @@ namespace visio_prj_designer
             visio_app.DocumentSavedAs +=
                 new Microsoft.Office.Interop.Visio.EApplication_DocumentSavedAsEventHandler(
                 visio_addin__DocumentSaved );
+
+//             Node_Types.Add( "315" );
+//             Node_Types.Add( "815" );
+//             Node_Types.Add( "341" );
+//             Node_Types.Add( "841" );
             }
 
         /// <summary> Event handler. Called by visio_addin for shutdown events. </summary>
@@ -247,8 +256,8 @@ namespace visio_prj_designer
                             if ( shape.Data1 == "750" )
                                 {
                                 //  Если этот узел является контроллером
-                                if (    shape.Data2 == "860" 
-                                    &&  g_PAC_nodes[ 0 ] == null )
+                                if (  PAC_Types.Contains( shape.Data2 ) 
+                                  &&  g_PAC_nodes[ 0 ] == null )
                                     {
                                     string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
                                     string name = shape.Cells[ "Prop.PAC_name" ].Formula;
@@ -259,7 +268,7 @@ namespace visio_prj_designer
                                     }
 
                                 //  Если данный узел - это один из списка типов простых узлов 
-                                if ( PAC_Node_Type.Contains( shape.Data2 ) )
+                                if ( Node_Types.Contains( shape.Data2 ) )
                                     {
                                     string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
                                     string name = shape.Cells[ "Prop.PAC_name" ].Formula;
@@ -273,8 +282,8 @@ namespace visio_prj_designer
                         foreach ( Visio.Shape shape in target.Pages[ "Wago" ].Shapes )
                             {
                             if (    shape.Data1 == "750" 
-                                &&  shape.Data2 != "860" 
-                                &&  !PAC_Node_Type.Contains( shape.Data2 ) )
+                                &&  !PAC_Types.Contains( shape.Data2 ) 
+                                &&  !Node_Types.Contains( shape.Data2 ) )
                                 {
                                 int qwer = Convert.ToInt32( g_PAC_nodes[ 0 ].shape.Cells[ "Prop.node_number" ].Formula );
                                 qwer = Convert.ToInt32( shape.Cells[ "Prop.node_number" ].Formula );
@@ -371,8 +380,7 @@ namespace visio_prj_designer
                         System.Diagnostics.Debug.WriteLine( err.Message );
                         MessageBox.Show( "Ошибка считывания сигналов проекта" );
                         }
-
-
+                               
                     //  Открытие файла описания сложных объектов (гребенка, танк)
                     Read_XML_description( 0 );
 
@@ -406,7 +414,6 @@ namespace visio_prj_designer
                 }
             } 
                
-
         /// <summary> Event handler. Обработка события добавления фигуры. Здесь
         /// реализована часть функциональности вставки сразу нескольких модулей 
         /// Wago. </summary>
@@ -436,14 +443,15 @@ namespace visio_prj_designer
             switch ( shape.Data1 )
                 {
                 case "750":
-                    if (    shape.Data2 == "860"
-                        ||  PAC_Node_Type.Contains( shape.Data2 ) )
+                    if (    PAC_Types.Contains( shape.Data2 )
+                        ||  Node_Types.Contains( shape.Data2 ) )
                         {
                         string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
                         string name = shape.Cells[ "Prop.PAC_name" ].Formula;
 
-
-                        if ( g_PAC_nodes[ 0 ] == null || shape.Data2 == "860" )
+                        //  Если это контроллер, то его номер 0
+                        //      а если просто узел, то следующий по порядку
+                        if ( PAC_Types.Contains( shape.Data2 ) )
                             {
                             shape.Cells[ "Prop.node_number" ].Formula = "0";
                             }
@@ -453,17 +461,33 @@ namespace visio_prj_designer
                             }
                         
 
-                        if (    shape.Data2 == "860"
-                            &&  g_PAC_nodes[ 0 ] == null )
+                        if ( PAC_Types.Contains( shape.Data2 ) )
                             {
-                            g_PAC_nodes[ 0 ] = 
-                                new PAC( name.Substring( 1, name.Length - 2 ),
-                                ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
+                            if ( g_PAC_nodes[ 0 ] == null )
+                                {
+                                //  Добавляем как управляющий контроллер
+                                g_PAC_nodes[ 0 ] = 
+                                    new PAC( name.Substring( 1, name.Length - 2 ),
+                                    ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
+
+                                cur_PAC_node = g_PAC_nodes[ 0 ];
+                                }
+                            else
+                                {
+                                MessageBox.Show( "В проекте уже есть управляющее устройство \"" + 
+                                    g_PAC_nodes[ 0 ].PAC_name + " - " + g_PAC_nodes[ 0 ].ip_addres + "\"" );
+
+                                shape.Delete();
+
+                                return;
+                                }
                             }
                         else  //    315, 815, 341, 841
                             {
                             g_PAC_nodes.Add( new PAC( name.Substring( 1, name.Length - 2 ),
                                 ip_addr.Substring( 1, ip_addr.Length - 2 ), shape ) );
+                            
+                            cur_PAC_node = g_PAC_nodes[ g_PAC_nodes.Count - 1 ];
                             }
 
                         return;
@@ -539,26 +563,78 @@ namespace visio_prj_designer
         /// <param name="shape"> Редактируемая фигура. </param>
         private void visio_addin__ShapeChanged( Microsoft.Office.Interop.Visio.Shape shape )
             {
+            //  Всех этих хитрый перемещений можно избежать если сделать узлы и контроллеры 
+            //      отдельными элементами в наборе или запретить редактировать "номер" и "тип узла".
+            //  В данной процедуре нужно только фиксацияя текущего объекта (узел или устройство)
+
             switch ( shape.Data1 )
                 {
                 case "750":
-                    //if (shape.Data2 == "860")
-                    //{
-                    //    cur_PAC_node = g_PAC_nodes.Find( delegate( PAC pp ) 
-                    //        {
-                    //        return pp.shape == shape;
-                    //        }
-                    //    );
-                
-                    //    if (no_delete_g_pac_flag)
-                    //    {
-                    //        no_delete_g_pac_flag = false;
-                    //    }
-                    //    else
-                    //    {
-                    //        g_PAC_nodes[ 0 ] = null;
-                    //    }
-                    //}
+                    //  Определяем данные узла
+                    string ip_addr = shape.Cells[ "Prop.ip_address" ].Formula;
+                    string name = shape.Cells[ "Prop.PAC_name" ].Formula;
+
+                    if (   PAC_Types.Contains( shape.Data2 ) 
+                        || Node_Types.Contains( shape.Data2 ) )
+                        {
+                        //  Фиксируем текущий узел
+                        cur_PAC_node = g_PAC_nodes.Find( delegate( PAC pp )
+                            {
+                            return (( pp != null ) && ( pp.shape == shape ));
+                            }
+                        );
+                        }
+                    //-------------------------------------------------------------------
+
+                    //  Если это контроллер
+                    if ( PAC_Types.Contains( shape.Data2 ) )
+                        {
+                        //  Если контроллера нет, то добавляем данный узел как контроллер
+                        if ( g_PAC_nodes[ 0 ] == null )
+                            {
+                            //  
+                            g_PAC_nodes.Remove( cur_PAC_node );
+
+                            g_PAC_nodes[ 0 ] = 
+                                    new PAC( name.Substring( 1, name.Length - 2 ),
+                                    ip_addr.Substring( 1, ip_addr.Length - 2 ), shape );
+
+                            cur_PAC_node = g_PAC_nodes[ 0 ];
+
+                            shape.Cells[ "Prop.node_number" ].Formula = "0";
+                            }
+                        else
+                            {
+                            //  Если контроллер уже задан, а кто-то хочет сделать еще один
+                            if ( cur_PAC_node != g_PAC_nodes[ 0 ] )
+                                {
+                                MessageBox.Show( "В проекте уже есть управляющее устройство \"" + 
+                                    g_PAC_nodes[ 0 ].PAC_name + " - " + g_PAC_nodes[ 0 ].ip_addres + "\"" );
+    
+                                shape.Cells[ "Prop.node_type" ].Formula = "315";
+
+                                return;
+                                }
+                            }
+                        }   //  if ( PAC_Types.Contains( shape.Data2 ) )
+                    //-------------------------------------------------------------------
+
+                    //  Если это простой узел
+                    if ( Node_Types.Contains( shape.Data2 ) )
+                        {
+                        //  Если он до этого был контроллером
+                        if ( cur_PAC_node == g_PAC_nodes[ 0 ] )
+                            {
+                            //  Освобождаем место контроллера
+                            g_PAC_nodes[ 0 ] = null;
+
+                            shape.Cells[ "Prop.node_number" ].Formula = Convert.ToString( g_PAC_nodes.Count );
+
+                            //  Добавляем объект как обычный узел
+                            g_PAC_nodes.Add( new PAC( name.Substring( 1, name.Length - 2 ),
+                                    ip_addr.Substring( 1, ip_addr.Length - 2 ), shape ) );
+                            }
+                        }
                     break;
 
                 case "V":
@@ -613,8 +689,8 @@ namespace visio_prj_designer
                     //--------------------------------------------------
 
                     //  Если этот один из узлов
-                    if ( shape.Data2 == "860"
-                        || PAC_Node_Type.Contains( shape.Data2 ) )
+                    if (  PAC_Types.Contains( shape.Data2 )
+                       || Node_Types.Contains( shape.Data2 ) )
                         {
                         //  Находим его средим узлов
                         PAC temp_node = g_PAC_nodes.Find
@@ -627,10 +703,9 @@ namespace visio_prj_designer
 
                         //  Если это контроллер, то не удаляем, а обнуляем 
                         //  Если это просто узел, то удаляем из списка
-                        if ( shape.Data2 == "860"
-                            && temp_node == g_PAC_nodes[ 0 ] )
+                        if ( temp_node == g_PAC_nodes[ 0 ] )
                             {
-                            temp_node = null;
+                            g_PAC_nodes[ 0 ] = null;
                             }
                         else
                             {
@@ -639,8 +714,8 @@ namespace visio_prj_designer
                         }
 
                     //  Если это простой модуль
-                    if ( shape.Data2 != "860"
-                        && !PAC_Node_Type.Contains( shape.Data2 ) )
+                    if (   !PAC_Types.Contains( shape.Data2 )
+                        && !Node_Types.Contains( shape.Data2 ) )
                         {
                         io_module temp_mod;
 
@@ -778,7 +853,8 @@ namespace visio_prj_designer
                 {
                 case "750":
                     //  Работа с узлами
-                    if ( obj_1.Data2 == "860" || PAC_Node_Type.Contains( obj_1.Data2 ) )
+                    if (   PAC_Types.Contains( obj_1.Data2 )
+                        || Node_Types.Contains( obj_1.Data2 ) )
                         {
                         //  Находим узел соответствующий фигуре 1
                         cur_PAC_node = g_PAC_nodes.Find(
@@ -809,11 +885,12 @@ namespace visio_prj_designer
                     //  Работа с модулями
                         //  Переименовываем модули в группе
                         for ( int i = 1; i <= visio_app.ActivePage.Shapes.Count; i++ )
-                            {
-                            if ( ( visio_app.ActivePage.Shapes[ i ].Data2 != "860" )
-                              && ( !PAC_Node_Type.Contains( visio_app.ActivePage.Shapes[ i ].Data2 ) )
+                            {      
+                            if ( ( !PAC_Types.Contains( visio_app.ActivePage.Shapes[ i ].Data2 ) )
+                              && ( !Node_Types.Contains( visio_app.ActivePage.Shapes[ i ].Data2 ) )
 
-                              && ( obj_1.Data2 != "860" && !PAC_Node_Type.Contains( obj_1.Data2 ) )
+                              && !PAC_Types.Contains( obj_1.Data2 ) 
+                              && !Node_Types.Contains( obj_1.Data2 )
 
                               && ( visio_app.ActivePage.Shapes[ i ].Connects.ToSheet != null )
                               && ( visio_app.ActivePage.Shapes[ i ].Connects.ToSheet.Name == obj_1.Name )
@@ -1084,8 +1161,8 @@ namespace visio_prj_designer
                 if ( selected_shape != null )
                     {
                     //  Проверяем является ли выбранная фигура узлом WAGO
-                    if ( selected_shape.Data2 == "860"
-                        || PAC_Node_Type.Contains( selected_shape.Data2 ) )
+                    if (    PAC_Types.Contains( selected_shape.Data2 )
+                        ||  Node_Types.Contains( selected_shape.Data2 ) )
                         {
                         cur_PAC_node = g_PAC_nodes.Find( delegate( PAC pp )
                             {
@@ -1128,8 +1205,8 @@ namespace visio_prj_designer
 				//	Изменения свойств модуля WAGO
                 case "750":
                     //  Если это узлы
-                    if (    cell.Shape.Data2 == "860"
-                        ||  PAC_Node_Type.Contains( cell.Shape.Data2 )
+                    if (    PAC_Types.Contains( cell.Shape.Data2 )
+                        ||  Node_Types.Contains( cell.Shape.Data2 )
                         ||  cell.Name == "Prop.node_type" )
                         {
 
@@ -1168,8 +1245,8 @@ namespace visio_prj_designer
                             {
                             //  Меняем номер узла на его индекс в массиве узлов (т.е. поменять номер вручную нельзя)
                             cell.Shape.Cells[ "Prop.node_number" ].Formula = 
-                                //Convert.ToString( get_index_PAC( g_PAC_nodes, cur_PAC_node.PAC_number ) );
-                                Convert.ToString( g_PAC_nodes.IndexOf( cur_PAC_node ) );
+                                Convert.ToString( get_index_PAC( g_PAC_nodes, cur_PAC_node.PAC_number ) );
+                                //Convert.ToString( g_PAC_nodes.IndexOf( cur_PAC_node ) );
 
                             int number = 
                                 Convert.ToInt16( cell.Shape.Cells[ "Prop.node_number" ].Formula );
@@ -1811,6 +1888,7 @@ try
                         case "Parameters_temp":
                             if ( cur_sel_obj != null )
                                 {
+                                cur_sel_obj.param_list_temp.Clear();
 
                                 string[] temp_str = { "0", "0" };
 
@@ -1845,6 +1923,7 @@ try
                         case "Parameters_save":
                             if ( cur_sel_obj != null )
                                 {
+                                cur_sel_obj.param_list_save.Clear();
 
                                 string[] temp_str = { "0", "0" };
 

@@ -75,11 +75,13 @@ namespace tech_device
         //	Режимы объекта
 		public List<mode> mode_mas;		//	Список режимов
 
-
 		//	Параметры объекта
 		public List<string[]> param_list_temp;	//	Список параметров param_list< Название, Значение >
         public List<string[]> param_list_save;	//	Список параметров param_list< Название, Значение >
 		
+        //  Количество таймеров объекта
+        public int timers = 0;
+
         //	Список ошибок 
 //		public enum ERROR_LIST
 //		public List<string> ERROR_LIST
@@ -97,8 +99,33 @@ namespace tech_device
         public T_Object( Visio.Shape shape, List<PAC> pac ):base( shape, pac )
             {
             mode_mas = new List<mode>();
-            param_list_temp = new List<string[]>();
-            param_list_save = new List<string[]>();
+
+            param_list_temp = new List<string[]>(
+                new string[][] 
+                { 
+                    new string[] { "Пар_0", "0" }, 
+                    new string[] { "Пар_1", "0" },
+                    new string[] { "Пар_2", "0" },
+                    new string[] { "Пар_3", "0" },
+                    new string[] { "Пар_4", "0" },
+                    new string[] { "Пар_5", "0" },
+                    new string[] { "Пар_6", "0" },
+                    new string[] { "Пар_7", "0" },
+                    new string[] { "Пар_8", "0" },
+                    new string[] { "Пар_9", "0" },
+                } );
+
+            param_list_save = new List<string[]>( 
+                new string[][] 
+                { 
+                    new string[] { "Пар_10", "0" }, 
+                    new string[] { "Пар_11", "0" },
+                    new string[] { "Пар_12", "0" },
+                    new string[] { "Пар_13", "0" },
+                    new string[] { "Пар_14", "0" },
+                    new string[] { "Пар_15", "0" },
+                    new string[] { "Пар_16", "0" },
+                } );
 
             }
 

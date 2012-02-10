@@ -130,6 +130,8 @@
             this.ContextMenuStrip4_select_on_map = new System.Windows.Forms.ToolStripMenuItem();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.NumUpDown_Timers = new System.Windows.Forms.NumericUpDown();
+            this.label5 = new System.Windows.Forms.Label();
             this.contextMenuStrip2.SuspendLayout();
             this.contextMenuStrip3.SuspendLayout();
             ( ( System.ComponentModel.ISupportInitialize ) ( this.dataGridView1 ) ).BeginInit();
@@ -141,6 +143,7 @@
             ( ( System.ComponentModel.ISupportInitialize ) ( this.dataGridView2 ) ).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
             this.contextMenuStrip4.SuspendLayout();
+            ( ( System.ComponentModel.ISupportInitialize ) ( this.NumUpDown_Timers ) ).BeginInit();
             this.SuspendLayout();
             // 
             // contextMenuStrip2
@@ -329,6 +332,7 @@
             // 
             // numericUpDown1
             // 
+            this.numericUpDown1.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
             this.numericUpDown1.Location = new System.Drawing.Point( 139, 6 );
             this.numericUpDown1.Name = "numericUpDown1";
             this.numericUpDown1.Size = new System.Drawing.Size( 49, 20 );
@@ -584,11 +588,30 @@
             this.label4.TabIndex = 18;
             this.label4.Text = "Устройства проекта";
             // 
+            // NumUpDown_Timers
+            // 
+            this.NumUpDown_Timers.Location = new System.Drawing.Point( 821, 479 );
+            this.NumUpDown_Timers.Name = "NumUpDown_Timers";
+            this.NumUpDown_Timers.Size = new System.Drawing.Size( 39, 20 );
+            this.NumUpDown_Timers.TabIndex = 19;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point( 637, 481 );
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size( 118, 13 );
+            this.label5.TabIndex = 20;
+            this.label5.Text = "Количество таймеров";
+            this.label5.Click += new System.EventHandler( this.label5_Click );
+            // 
             // Form_modes
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF( 6F, 13F );
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size( 872, 670 );
+            this.Controls.Add( this.label5 );
+            this.Controls.Add( this.NumUpDown_Timers );
             this.Controls.Add( this.label16 );
             this.Controls.Add( this.treeView_modes );
             this.Controls.Add( this.treeView2 );
@@ -615,6 +638,7 @@
             ( ( System.ComponentModel.ISupportInitialize ) ( this.dataGridView2 ) ).EndInit();
             this.contextMenuStrip1.ResumeLayout( false );
             this.contextMenuStrip4.ResumeLayout( false );
+            ( ( System.ComponentModel.ISupportInitialize ) ( this.NumUpDown_Timers ) ).EndInit();
             this.ResumeLayout( false );
             this.PerformLayout();
 
@@ -662,5 +686,7 @@
         private System.Windows.Forms.ToolStripMenuItem ContextMenuStrip3_update;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.NumericUpDown NumUpDown_Timers;
+        private System.Windows.Forms.Label label5;
         }
     }

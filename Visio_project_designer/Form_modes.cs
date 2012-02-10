@@ -133,6 +133,9 @@ namespace Visio_project_designer
 
                         }
 */
+                    //  Сохраняем количество таймеров объекта
+                    addin.cur_sel_obj.timers = (int) NumUpDown_Timers.Value;
+
                     //  Сохранение временных параметров
                     addin.cur_sel_obj.param_list_temp.Clear();
                     
@@ -851,6 +854,11 @@ namespace Visio_project_designer
         private void listView_modes_SelectedIndexChanged( object sender, EventArgs e )
             {
             //  Заполнение списков устройств
+
+            }
+
+        private void label5_Click( object sender, EventArgs e )
+            {
 
             }
 

@@ -155,7 +155,10 @@ namespace wago
         internal TYPES type;          
 
         /// <summary> Общее количество клемм. </summary>
-        public CLAMPS_COUNT total_clamps;  
+        public CLAMPS_COUNT total_clamps;
+
+        /// <summary> Количество рабочих клемм. </summary>
+        public byte work_clamps_cnt;
 
         /// <summary> Порядковый номер в сборке. </summary>
         internal int order_number; 
@@ -291,7 +294,7 @@ namespace wago
 				}	
 		//---------------------------------------------------------------------
 
-			//Определяем доступные клеммы
+			//Определяем доступные клеммы (Рабочие)
 			switch ( type )
 				{
 				//	Возможна отдельное определение по всем этим разделам
@@ -306,6 +309,8 @@ namespace wago
 				case TYPES.T_638:
 				    available_clamp_flags[ 1 - 1 ] = true;
 					available_clamp_flags[ 5 - 1 ] = true;
+
+                    work_clamps_cnt = 2;
 					break;
 
 
@@ -318,14 +323,18 @@ namespace wago
 					available_clamp_flags[ 4 - 1 ] = true;
 					available_clamp_flags[ 5 - 1 ] = true;
 					available_clamp_flags[ 8 - 1 ] = true;
-					break;
+					
+                    work_clamps_cnt = 4;
+                    break;
 
 				case TYPES.T_1420:
 					available_clamp_flags[ 1 - 1 ] = true;
 					available_clamp_flags[ 6 - 1 ] = true;
 					available_clamp_flags[ 9 - 1 ] = true;
 					available_clamp_flags[ 14 - 1 ] = true;
-					break;
+					
+                    work_clamps_cnt = 4;
+                    break;
 
 
 				//	С 8-ю доступными клеммами
@@ -337,7 +346,9 @@ namespace wago
 						{
 						available_clamp_flags[ i ] = true;
 						}
-					break;
+					
+                    work_clamps_cnt = 8;    
+                    break;
 
 
 				//	С 16-мя доступными клемами
@@ -347,6 +358,8 @@ namespace wago
 						{
 						available_clamp_flags[ i ] = true;
 						}
+
+                    work_clamps_cnt = 16;
 					break;
 				}
 		//---------------------------------------------------------------------
@@ -403,6 +416,7 @@ namespace wago
 					kind = KINDS.SYSTEM;
 					break;
                 }
+            //---------------------------------------------------------------------
             }
 
         /// <summary> Сохранение в виде скрипта Lua. </summary>
@@ -878,6 +892,35 @@ namespace wago
                 this.module = null;
                 this.clamp = clamp;
 				}
+            }
+
+        //  Функция которая высчитывает номер клеммы в общем списке рабочих клемм в узле
+        public byte get_clamp_offset( PAC pac )
+            {
+            int result = 0;
+
+            if ( module != null )
+                {
+                for ( int i = 0; i < pac.get_io_modules().Count; i++ )
+                    {
+                    if ( this.module != pac.get_io_modules()[ i ] )
+                        {
+                        result = result + pac.get_io_modules()[ i ].work_clamps_cnt;
+                        }
+                    else
+                        {
+                        result = result + this.clamp;
+                        break;
+                        }
+                    }
+                }
+//             else
+//                 {
+//                 //  Значит это параметр, а не канал устройства
+//                 result = -1;
+//                 }
+
+            return ( byte ) result;
             }
 
         }
