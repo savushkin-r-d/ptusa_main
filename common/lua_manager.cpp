@@ -106,7 +106,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             }
 
 #if defined DEBUG && defined MINIOS7
-        Print( "luaL_dofile( ..., "main.wago.plua" ) - memory free: %lu bytes. \n",
+        Print( "luaL_dofile( ..., \"main.wago.plua\" ) - memory free: %lu bytes. \n",
             ( unsigned long ) coreleft() );
 #endif
         G_PROJECT_MANAGER->lua_load_configuration();
