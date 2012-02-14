@@ -1,6 +1,7 @@
 #if !defined WIN_OS && !( defined LINUX_OS && defined PAC_PC ) && \
     !( defined LINUX_OS && defined PAC_WAGO_750_860 ) && \
-    !( defined MINIOS7 && defined UPAC_7186E )
+    !( defined MINIOS7 && defined UPAC_7186E ) && \
+    !( defined MINIOS7 && defined UPAC_5000 ) 
 #error You must define OS!
 #endif 
 

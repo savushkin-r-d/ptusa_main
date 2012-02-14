@@ -20,12 +20,14 @@
 #ifndef ERRORS_H
 #define ERRORS_H
 
-#if !( defined PAC_PC || defined PAC_WAGO_750_860 || defined UPAC_7186E ) && \
+#if !( defined PAC_PC || defined PAC_WAGO_750_860 || defined UPAC_7186E || \
+    defined UPAC_5000 ) && \
     !defined DRIVER
 #error You must define type!
 #endif
 
-#if ( defined PAC_PC || defined PAC_WAGO_750_860 || defined UPAC_7186E ) && \
+#if ( defined PAC_PC || defined PAC_WAGO_750_860 || defined UPAC_7186E || \
+    defined UPAC_5000 ) && \
     !defined PAC
 #define PAC
 #endif

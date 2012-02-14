@@ -1,5 +1,11 @@
 #include "mos7_mem.h"
+#ifdef UPAC_5000
+#include "5000\upac5000.h"
+#endif
+
+#ifdef UPAC_7186E
 #include "7186e.h"
+#endif
 //-----------------------------------------------------------------------------
 EEPROM_7186::EEPROM_7186():NV_memory( 16383, 8192, 16127 )
     {

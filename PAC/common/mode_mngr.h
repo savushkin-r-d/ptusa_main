@@ -142,7 +142,7 @@ class step_path
 
             std::vector< device* > open_devices;
 
-            FB_group_dev( device* fb ): fb( fb )
+            FB_group_dev( device* fb = 0 ): fb( fb )
                 {
                 }
             };
@@ -162,7 +162,7 @@ class step_path
 
             std::vector< device* > on_devices;
 
-            FB_group_dev_ex( device* fb, device* control_s ): fb( fb ),
+            FB_group_dev_ex( device* fb = 0, device* control_s = 0 ): fb( fb ),
                 control_s( control_s )
                 {
                 }
