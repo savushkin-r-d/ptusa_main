@@ -76,6 +76,9 @@ namespace Visio_project_designer
             //  Заполнение списка режимов и шагов для выбранного объекта
             Refresh_mode_tree();
 
+            //  Установка количества таймеров
+            NumUpDown_Timers.Value = addin.cur_sel_obj.timers;
+
             //  Заполнение таблицы с параметрами
             numericUpDown1.Value = addin.cur_sel_obj.param_list_temp.Count;
 

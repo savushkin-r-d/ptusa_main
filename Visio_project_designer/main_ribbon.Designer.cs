@@ -73,6 +73,7 @@ namespace visio_prj_designer
             this.button_modes = this.Factory.CreateRibbonButton();
             this.group4 = this.Factory.CreateRibbonGroup();
             this.save_as_icpcon = this.Factory.CreateRibbonButton();
+            this.export_to_excel = this.Factory.CreateRibbonButton();
             this.process_definition_tab.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
@@ -138,6 +139,7 @@ namespace visio_prj_designer
             // group4
             // 
             this.group4.Items.Add( this.save_as_icpcon );
+            this.group4.Items.Add( this.export_to_excel );
             this.group4.Label = "Отчеты";
             this.group4.Name = "group4";
             // 
@@ -146,6 +148,12 @@ namespace visio_prj_designer
             this.save_as_icpcon.Label = "Экспорт для контроллера ICP CON";
             this.save_as_icpcon.Name = "save_as_icpcon";
             this.save_as_icpcon.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.save_as_icpcon_Click );
+            // 
+            // export_to_excel
+            // 
+            this.export_to_excel.Label = "Экспорт модулей в Excel";
+            this.export_to_excel.Name = "export_to_excel";
+            this.export_to_excel.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.export_to_excel_Click );
             // 
             // main_ribbon
             // 
@@ -178,6 +186,7 @@ namespace visio_prj_designer
         internal Microsoft.Office.Tools.Ribbon.RibbonButton button_modes;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group4;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton save_as_icpcon;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton export_to_excel;
         }
 
     partial class ThisRibbonCollection

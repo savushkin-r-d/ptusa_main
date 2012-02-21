@@ -612,30 +612,7 @@ namespace wago
         /// <param name="clamp"> Номер подсвечиваемой клеммы ( >= 0 ). </param>
         public void activate( int clamp )
             {
-            string color = "0";
-
-            switch( kind )
-                {
-                case io_module.KINDS.AI:        //Зеленый.
-                    color = "3";
-                    break;
-
-                case io_module.KINDS.AO:        //Синий.
-                    color = "4";
-                    break;
-
-                case io_module.KINDS.DI:        //Желтый.
-                    color = "5";
-                    break;
-
-                case io_module.KINDS.DO:        //Красный.
-                    color = "2";
-                    break;
-
-                case io_module.KINDS.SPECIAL:   //Серый.
-                    color = "14";
-                    break;
-                }
+            string color = get_color();
 
             shape.Shapes[ "red_boder" ].Cells[ "LineColor" ].FormulaU = color;
             shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].FormulaU = "0%";
@@ -661,6 +638,38 @@ namespace wago
                 }
 
 			shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].FormulaU = "100%";
+            }
+
+        //  Получение цвета, соответствующего модулю
+        public string get_color()
+            {
+            string color = "0";
+
+            switch( kind )
+                {
+                case io_module.KINDS.AI:        //Зеленый.
+                    color = "3";
+                    break;
+
+                case io_module.KINDS.AO:        //Синий.
+                    color = "4";
+                    break;
+
+                case io_module.KINDS.DI:        //Желтый.
+                    color = "5";
+                    break;
+
+                case io_module.KINDS.DO:        //Красный.
+                    color = "2";
+                    break;
+
+                case io_module.KINDS.SPECIAL:   //Серый.
+                case io_module.KINDS.SYSTEM:
+                    color = "14";
+                    break;
+                }
+
+            return color;
             }
         }
 

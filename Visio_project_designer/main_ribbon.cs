@@ -22,6 +22,8 @@ using System.IO;
 
 using System.Runtime.InteropServices; //
 
+using Excel = Microsoft.Office.Interop.Excel;
+
 using wago;
 using tech_device;
 
@@ -29,6 +31,13 @@ namespace visio_prj_designer
     {
     public partial class main_ribbon
         {
+        //  Для работы с Excel
+        private Excel.Application excel_app;
+        //private Excel.Window excelWindow;
+        private Excel.Workbook excel_wb;
+        private Excel.Worksheet excel_ws;
+        private Excel.Range excel_cells;
+
         private Microsoft.Office.Interop.Visio.Application visio_app;
         public Visio_project_designer.Form_modes Mode_List_Form;
 
@@ -87,7 +96,68 @@ namespace visio_prj_designer
 
                 }
             }
+        //-------------------------------------------------------------------------------
 
+        private static int sort_devices( device dev1, device dev2 )
+            {
+            if ( ( dev1 != null ) && ( dev2 != null ) )
+                {
+                //  Сравнение по типам
+                if ( dev1.get_type() == dev2.get_type() )
+                    {
+                    //  Сравнение по номеру устройства
+                    if ( dev1.get_n() == dev2.get_n() )
+                        {
+                        return 0;   //  equal
+                        }
+                    else
+                        {
+                        if ( dev1.get_n() > dev2.get_n() )
+                            {
+                            return 1;   //  dev1 is greater
+                            }
+                        else
+                            {
+                            return -1;  //  dev2 is greater
+                            }
+                        }
+                    }
+                else
+                    {
+                    if ( dev1.get_type() > dev2.get_type() )
+                        {
+                        return 1;   //  dev1 is greater
+                        }
+                    else
+                        {
+                        return -1;  //  dev2 is greater
+                        }
+                    }
+                }
+                                
+            return 0;
+            }
+        //-------------------------------------------------------------------------------
+
+        public int sort_modules( io_module mod1, io_module mod2 )
+            {
+            if ( mod1.order_number == mod2.order_number )
+                {
+                return 0;   //  equal
+                }
+            else
+                {
+                if ( mod1.order_number > mod2.order_number )
+                    {
+                    return 1;   //  mod1 is greater
+                    }
+                else
+                    {
+                    return -1;   //  mod2 is greater
+                    }
+                }
+            }
+         //-------------------------------------------------------------------------------
 
          private void save_as_icpcon_Click( object sender, RibbonControlEventArgs e )
              {
@@ -178,6 +248,9 @@ namespace visio_prj_designer
                     b = Convert.ToByte( Globals.visio_addin.g_PAC_nodes[ i ].get_io_modules().Count );
                     bw.Write( b );
 
+                    //  Сортируем модули перед тем, как записывать данные о них
+                    Globals.visio_addin.g_PAC_nodes[ i ].get_io_modules().Sort( sort_modules );
+
                     //  3  Проходим по модулям
                     for ( int j = 0; j < Globals.visio_addin.g_PAC_nodes[ i ].get_io_modules().Count; j++ )
                         {
@@ -192,6 +265,8 @@ namespace visio_prj_designer
                 
                 //  Количество устройств
                 bw.Write( ( short ) Globals.visio_addin.g_devices.Count );
+
+                Globals.visio_addin.g_devices.Sort( sort_devices );
 
                 //  Проходим по устройствам
                 for ( int i = 0; i < Globals.visio_addin.g_devices.Count; i++ )
@@ -355,7 +430,7 @@ namespace visio_prj_designer
                                     }
                                 else
                                     {
-                                    bw.Write( ( byte ) chen.Value.module.node_number );  // 2  tabel no
+                                    bw.Write( ( byte )( chen.Value.module.node_number - 1 ) );  // 2  tabel no
 
                                     int index = Globals.visio_addin.get_index_PAC(
                                         Globals.visio_addin.g_PAC_nodes, chen.Value.module.node_number );
@@ -562,7 +637,10 @@ namespace visio_prj_designer
                 bw.Write( ( byte ) 0 ); //  Y
                 bw.Write( ( byte ) 0 ); //  X
 
+                bw.Write( ( byte ) 0 ); //  гребенок
+                bw.Write( ( byte ) 0 ); //  танков
 
+/*
                 //  Имена режимов Гребенки
                 //[ 0 ] - количество гребенок
                 //[ 1 ] - индекс гребенки
@@ -586,6 +664,10 @@ namespace visio_prj_designer
                                 bw.Write( j );
                                 bw.Write( ( short ) obj.mode_mas[ j ].name.Length );
                                 bw.Write( obj.mode_mas[ j ].name );
+                                //for ( int k = 0; k < obj.mode_mas[ j ].name.Length; k++ )
+                                //    {
+                                //    bw.Write( ( byte ) obj.mode_mas[ j ].name[ k ] );
+                                //    }
                                 }
                             }
                         }
@@ -617,8 +699,12 @@ namespace visio_prj_designer
                             for ( byte j = 0; j < obj.mode_mas.Count; j++ )
                                 {
                                 bw.Write( j );
-                                bw.Write( ( short ) obj.mode_mas[ j ].name.Length );
+                                bw.Write( ( short ) obj.mode_mas[ j ].name.Length * 2 );
                                 bw.Write( obj.mode_mas[ j ].name );
+                                //for ( int k = 0; k < obj.mode_mas[ j ].name.Length; k++ )
+                                //    {
+                                //    bw.Write( ( byte ) obj.mode_mas[ j ].name[ k ] );
+                                //    }
                                 }
                             }
                         }
@@ -626,7 +712,8 @@ namespace visio_prj_designer
                         {
                         MessageBox.Show( "Ошибка записи названия режимов объекта " + obj.name );
                         }
-                    }
+                     }
+*/
 //****************************************************************************
                 bw.Close();
 
@@ -638,8 +725,248 @@ namespace visio_prj_designer
                 }
 
              }
+         //-----------------------------------------------------------------------------------------
+
+         private string get_chen_string( io_module mod, int chen )
+             {
+             List<string> res = new List<string>();
+             string str = "";
+
+             // Проходим по устройствам
+             foreach ( device dev in Globals.visio_addin.g_devices )
+                 {
+                 // Проходим по каналам устройства и ищем привязанные на данную клемму
+                 foreach ( KeyValuePair<string, wago_channel> channel in dev.wago_channels )
+                     {
+                     // (1) Если тип модуля и тип канала устройства совпадают
+                     // (2) Если канал имеет привязку
+                     // (3) Если в привязке указан текущий узел
+                     // (4) Если в привязке указан текущий модуль
+                     // (5) Если в привязке указан текущая клемма
+                     if ( ( channel.Value.kind == mod.kind )
+                       && ( channel.Value.module != null )
+                       && ( channel.Value.module.node_number == mod.node_number )
+                       && ( channel.Value.module.order_number == mod.order_number )
+                       && ( channel.Value.clamp == chen ) )
+                         {
+                         res.Add( channel.Key + ": " + dev.get_name() + " (" +
+                                  Convert.ToString( dev.n ) + ") " + dev.get_descr() );
+                         }
+                     }      //  foreach channel
+                 }      //  foreach dev
+
+             // Записываем все полученные записи в одну строку
+             for ( int j = 0; j < res.Count; j++ )
+                 {
+                 str = str + res[ j ] + ( ( j != res.Count - 1 ) ? "\n" : "" );
+                 }
+
+             return str;
+             }
+         //-----------------------------------------------------------------------------------------
+
+         private int Drow_Module_Grid( io_module mod )
+             {
+             Excel.Range temp_cell = excel_cells;
+             int cur_row = excel_cells.Row;
+             int cur_col = excel_cells.Column;
+
+             // mod.node_number             // Номер узла
+             // mod.order_number            // Порядковый номер модуля
+             // mod.type                    // Номер модуля (тип)
+             // mod.work_clamps_cnt         // Количество рабочих клемм
+             // ( byte ) mod.total_clamps   // Количество клемм в модуле
+             int clamp_cnt = ( ( ( byte ) mod.total_clamps > 0 ) ? ( byte ) mod.total_clamps - 1 : 1 );
+
+             // Цвет модуля
+             int color = Convert.ToInt32( mod.get_color() ) + 1;
+
+             // Рисуем тонкую сетку на всю таблицу для модуля
+             temp_cell = excel_ws.get_Range(
+                 ( Excel.Range ) excel_ws.Cells[ cur_row, cur_col ],
+                 ( Excel.Range ) excel_ws.Cells[ cur_row + clamp_cnt, cur_col + 3 ]
+                 );
+             temp_cell.Borders.LineStyle = Excel.XlLineStyle.xlContinuous;
+             temp_cell.Borders[ Excel.XlBordersIndex.xlEdgeTop ].Weight = Excel.XlBorderWeight.xlMedium;
+             temp_cell.Borders[ Excel.XlBordersIndex.xlEdgeBottom ].Weight = Excel.XlBorderWeight.xlMedium;
+             temp_cell.Borders[ Excel.XlBordersIndex.xlEdgeLeft ].Weight = Excel.XlBorderWeight.xlMedium;
+             temp_cell.Borders[ Excel.XlBordersIndex.xlEdgeRight ].Weight = Excel.XlBorderWeight.xlMedium;
+
+             // Выводим порядковый номер модуля
+             temp_cell = excel_ws.get_Range(
+                 ( Excel.Range ) excel_ws.Cells[ cur_row, cur_col ],
+                 ( Excel.Range ) excel_ws.Cells[ cur_row + clamp_cnt, cur_col ]
+                 );
+             // Объединяем ячейки  и задаем их характеристики
+             temp_cell.Merge( Type.Missing );
+             temp_cell.Borders.Weight = Excel.XlBorderWeight.xlMedium;
+             // Задаем выравнивание по центру
+             temp_cell.HorizontalAlignment = Excel.Constants.xlCenter;
+             temp_cell.VerticalAlignment = Excel.Constants.xlCenter;
+             temp_cell.Value2 = mod.order_number;   // Выводим номер
+             temp_cell.ColumnWidth = 4;
+
+             // Выводим номер модуля
+             temp_cell = excel_ws.get_Range(
+                 ( Excel.Range ) excel_ws.Cells[ cur_row, cur_col + 1 ],
+                 ( Excel.Range ) excel_ws.Cells[ cur_row + clamp_cnt, cur_col + 1 ]
+                 );
+             // Объединяем ячейки  и задаем их характеристики
+             temp_cell.Merge( Type.Missing );
+             temp_cell.Borders.Weight = Excel.XlBorderWeight.xlMedium;
+             temp_cell.Interior.ColorIndex = color; //  Заливаем нужным цветом
+             // Задаем выравнивание по центру
+             temp_cell.HorizontalAlignment = Excel.Constants.xlCenter;
+             temp_cell.VerticalAlignment = Excel.Constants.xlCenter;
+             temp_cell.Value2 = ( int ) ( mod.type );   // Выводим номер
+             temp_cell.ColumnWidth = 4;
+
+             // Выводим таблицу даннх по модулю
+             for ( int i = 0; i <= clamp_cnt; i++ )
+                 {
+                 // Номер клеммы
+                 temp_cell = ( Excel.Range ) excel_ws.Cells[ cur_row + i, cur_col + 2 ];
+                 temp_cell.Value2 = i + 1;
+                 temp_cell.ColumnWidth = 4;
+
+                 // Данные о привязке клемм
+                 temp_cell.get_Offset( 0, 1 ).Value2 = get_chen_string( mod, i );
+
+                 // Если клемма не предназначена для привязки подсвечиваем ее серым цветом
+                 if ( mod.available_clamp_flags != null
+                   && mod.available_clamp_flags[ i ] == false )
+                     {
+                     temp_cell.get_Offset( 0, 1 ).Interior.ColorIndex = 15;
+                     }
+                 }
 
 
+             // Переходим на следующую строку (Изменяем текущую ячейку)
+             excel_cells =
+                ( Excel.Range ) excel_ws.Cells[ cur_row + clamp_cnt + 1, cur_col ];
+
+             return 0;
+             }
+         //-----------------------------------------------------------------------------------------
+
+         private void export_to_excel_Click( object sender, RibbonControlEventArgs e )
+             {
+             Dictionary<int, int> resume = new Dictionary<int, int>();   //  Для подсчета модулей
+
+             excel_app = new Excel.Application();           //  
+             excel_app.SheetsInNewWorkbook = 3;               //  Количество листов
+             excel_app.Workbooks.Add( Type.Missing );       //  Создаем рабочую книгу
+             excel_wb = excel_app.Workbooks[ 1 ];           //  Выбираем одну (если их несколько)
+             excel_ws = excel_wb.Worksheets.get_Item( 1 );  //  Выбираем страницу
+
+             // Выводим название проекта и дату формирования отчета
+             excel_cells = excel_ws.get_Range( "D1", "D1" );
+             excel_cells.Value2 = visio_app.ActiveDocument.Name + " " + Convert.ToString( DateTime.Now );
+             excel_cells = excel_ws.get_Range( "A2", "A2" );
+
+             try
+                 {
+                 //  Проходим по узлам проекта
+                 for ( int i = 0; i < Globals.visio_addin.g_PAC_nodes.Count; i++ )
+                     {
+                     // Создаем временную переменную для удобства
+                     PAC temp_node = Globals.visio_addin.g_PAC_nodes[ i ];
+
+                     excel_cells.Value2 = "Узел " + Convert.ToString( temp_node.PAC_number );
+                     excel_cells = excel_cells.get_Offset( 1, 0 );
+
+                     // Упорядочиваем модули
+                     temp_node.get_io_modules().Sort( sort_modules );
+
+                     // Проходим по всем модулям узла
+                     foreach ( io_module mod in temp_node.get_io_modules() )
+                         {
+                         // Заполнение данных по модулям
+                         Drow_Module_Grid( mod );
+
+                         //  Подсчет имеющихся модулей
+                         if ( resume.Keys.Contains( ( int ) mod.type ) )
+                             {
+                             resume[ ( int ) mod.type ]++;
+                             }
+                         else
+                             {
+                             resume.Add( ( int ) mod.type, 1 );
+                             }
+                         }   //  foreach mod
+                     }   //  for i
+
+                 excel_cells = excel_cells.get_Offset( 1, 0 );
+
+
+                 //  Вывод количества модулей
+                 foreach ( KeyValuePair<int, int> temp in resume )
+                     {
+                     excel_cells.Value2 = temp.Key;
+                     //excel_cells.Interior.ColorIndex = Convert.ToInt32( mod.get_color() );
+                     excel_cells.get_Offset( 0, 1 ).Value2 = temp.Value;
+                     excel_cells = excel_cells.get_Offset( 1, 0 );
+                     }
+
+                 excel_cells = excel_cells.get_Offset( 1, 0 );
+
+
+                 //  Вывод информации по устройствам с AS interface
+                 if ( Globals.visio_addin.g_PAC_nodes[ 0 ].shape.Data2 == "7186" )
+                     {
+                     int cnt = Convert.ToInt32( Globals.visio_addin.g_PAC_nodes[ 0 ].shape.Cells[ "Prop.lock_cnt" ].Formula );
+ 
+                     //  Проходим по шлюзам
+                     for ( int i = 1; i <= cnt; i++ )
+                         {
+                         excel_cells.get_Offset( 0, 3 ).Interior.ColorIndex = 15;
+                         excel_cells.get_Offset( 0, 3 ).Value2 =
+                             "AS шлюз №" + Convert.ToString( i ) + 
+                             " Адрес " + Convert.ToString( i );
+                         
+                         excel_cells = excel_cells.get_Offset( 1, 0 );
+
+                         //  Проверяем устройства на соотв. текущему значению адреса
+                         int adr;
+                         string str = "";
+                         List<string> res = new List<string>();
+                         
+                         foreach ( device dev in Globals.visio_addin.g_devices )
+                             {
+                             if ( ( dev.type == device.TYPES.T_V )
+                               && ( dev.sub_type == device.SUB_TYPES.V_MIX_PROOF_AS_INTERFACE )
+                               && ( dev.wago_channels[ "AS_gateway" ].clamp == i ) )
+                                 {
+                                 adr = dev.wago_channels[ "AS_adres" ].clamp;
+                                 str = dev.get_name() + " (" + Convert.ToString( dev.n ) + ") " + dev.get_descr();
+                                 
+                                 // Выводим в Excel
+                                 excel_cells.get_Offset( 0, 2 ).Value2 = adr;
+                                 excel_cells.get_Offset( 0, 3 ).Value2 = str;
+                                 excel_cells = excel_cells.get_Offset( 1, 0 );
+                                 }
+                             } 
+
+                         excel_cells = excel_cells.get_Offset( 1, 0 );
+                         }  //  for i
+                     }  //    if
+
+                 //  Автоподбор ширины столбца с описанием
+                 excel_cells = ( Excel.Range ) excel_ws.Columns[ "A:E", Type.Missing ];
+                 excel_cells.EntireColumn.AutoFit();
+                 excel_cells.EntireRow.AutoFit();
+
+                 }
+             catch ( System.Exception )
+                 {
+                 MessageBox.Show( "Ошибка при выводе данных по модулям!!!" );
+                 }
+
+
+             excel_app.Visible = true;
+             //excel_app.Quit();
+             }
+         //-----------------------------------------------------------------------------------------
 
          public void get_write_data( BinaryWriter bw, mode temp_mode, string part1, string part2 )
              {

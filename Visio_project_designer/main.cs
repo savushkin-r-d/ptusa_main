@@ -915,6 +915,9 @@ namespace visio_prj_designer
                                 }
                             }
 
+                    //  Сортируем модули узла по нашим правилам
+                    //cur_PAC_node.get_io_modules().Sort( sort_modules );
+
                     break;
                 }
             }
@@ -1456,12 +1459,12 @@ namespace visio_prj_designer
                             cell.Shape.Cells[ cell.Name ].Formula = "\"" + str + "\"";
 
                             //  Делаем преобразование на случай нецифрового значения
-                            if ( ( str == "MIN" ) ||  ( str == "NZ" ) )
+                            if ( ( str == "MIN" ) || ( str == "NC" ) )
                                 {
                                 str = "0";
                                 }
 
-                            if ( ( str == "MAX" ) ||  ( str == "NO" ) )
+                            if ( ( str == "MAX" ) || ( str == "NO" ) )
                                 {
                                 str = "1";
                                 }
@@ -1701,13 +1704,31 @@ namespace visio_prj_designer
 							break;
 
 
+                        //  Предполагается, что это значения "каналов", которые являются параметрами
+                        case "Prop.AS_adres":
+                        case "Prop.AS_gateway":
+                            str = cell.Shape.Cells[ cell.Name ].Formula;
+							str = str.Replace( "\"", "" );
+
+                            //  Задаем значение канала 
+                            string temp = cell.Name.Substring( 5, cell.Name.Length - 5 );   //  "Prop.AS_adres" --> "AS_adres"
+                            cur_sel_dev.set_channel( temp, null, Convert.ToInt32( str ) );
+
+                            //  Обновляем значения в окне списка каналов
+                            cur_sel_dev.refresh_edit_window( 
+                                edit_io_frm.listForm.type_cbox,
+                                edit_io_frm.listForm.type_lview, 
+                                true );
+                            break;
+
+
 						case "Prop.septum":
                             str = cell.Shape.Cells[ "Prop.septum" ].Formula;
 							str = str.Replace( "\"", "" );
 							str = str.ToUpper();
                             cell.Shape.Cells[ "Prop.septum" ].Formula = "\"" + str + "\"";
 
-							if ( str == "NO" )
+							if ( str == "NO" || str == "НО" )
 								{
 								//  Убираем перегородку
                                 cell.Shape.Shapes[ "septum" ].SendToBack();
@@ -1715,16 +1736,16 @@ namespace visio_prj_designer
                                 //  Устанавливаем параметр (т.к. он int, то 1, а не NO)
                                 cur_sel_dev.set_channel( "septum", null, 1 );
 								}
-							else  //	"NZ"
+							else  //	"NC" || "НЗ"
 								{
 								//  Ставим перегородку
                                 cell.Shape.Shapes[ "septum" ].BringToFront();
 
-                                //  Устанавливаем параметр (т.к. он int, то 0, а не NZ)
+                                //  Устанавливаем параметр (т.к. он int, то 0, а не NC)
                                 cur_sel_dev.set_channel( "septum", null, 0 );
 
-                                //  Все что не NO, то NZ
-                                cell.Shape.Cells[ "Prop.septum" ].Formula = "\"NZ\"";
+                                //  Все что не NO, то NC
+                                cell.Shape.Cells[ "Prop.septum" ].Formula = "\"NC\"";
 								}
 
                             //  Обновляем окно со списком каналов устройства
@@ -1798,13 +1819,15 @@ try
                         case "object":
                             temp_name = tr.GetAttribute( "object-name" ).Replace( "\"", "" );
                             temp_no = Convert.ToInt32( tr.GetAttribute( "object-number" ) );
-
+                            
                             //  Объекты уже были прочитаны, нужно только найти среди них текущий
                             cur_sel_obj = g_objects.Find( delegate( T_Object obj )
                                 {
                                     return obj.get_n() == temp_no && obj.get_name() == temp_name;
                                 }
                                 );
+
+                            cur_sel_obj.timers = Convert.ToInt32( tr.GetAttribute( "object-timers" ) );
                             break;
 
                         case "mode":
@@ -1999,6 +2022,7 @@ try
                     tw.WriteStartElement( "object" );
                     tw.WriteAttributeString( "object-name", g_objects[ i ].name );
                     tw.WriteAttributeString( "object-number", Convert.ToString( g_objects[ i ].n ) );
+                    tw.WriteAttributeString( "object-timers", Convert.ToString( g_objects[ i ].timers ) );
 
                     tw.WriteStartElement( "Parameters_temp" );
                     for ( int j = 0; j < g_objects[ i ].param_list_temp.Count; j++ )
@@ -2013,7 +2037,7 @@ try
                         tw.WriteElementString( g_objects[ i ].param_list_save[ j ][ 0 ], g_objects[ i ].param_list_save[ j ][ 1 ] );
                         }
                     tw.WriteEndElement();   //  Parameters_save
-
+                      
                     foreach ( mode temp_mode in g_objects[ i ].mode_mas )
                         {                                                
                         tw.WriteStartElement( "mode" );

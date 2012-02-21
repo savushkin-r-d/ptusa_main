@@ -287,11 +287,11 @@ namespace tech_device
     	/// <summary> Имя устройства.  </summary>
 		public string name;
 
-		/// <summary> Получение номера устройства. </summary>
+		/// <summary> Получение названия устройства. </summary>
 		///
 		/// <remarks> Id, 17.08.2011. </remarks>
 		///
-		/// <returns> Номер устройства. </returns>
+		/// <returns> Название устройства без кавычек. </returns>
 		public string get_name()
 		    {
 		    return name.Replace( "\"", "" );
@@ -342,7 +342,16 @@ namespace tech_device
 
 		/// <summary> Подтип устройства. </summary>
 		public string description;
-
+        
+        /// <summary> Получение описания устройства. </summary>
+        ///
+        /// <remarks> Id, 17.08.2011. </remarks>
+        ///
+        /// <returns> Описание устройства без кавычек. </returns>
+        public string get_descr()
+            {
+            return description.Replace( "\"", "" );
+            }
 
 		/// <summary> Активный (выбранный) в данный момент канал устройства (для визуальной
         ///  работы с устройством). </summary>
@@ -481,6 +490,30 @@ namespace tech_device
                     clamp = Convert.ToInt16( mtc.Groups[ 3 ].ToString() );
                     }
                 
+                return true;
+                }
+
+            //  Если мы здесь, значит это параметр -> нас интересует олько "clamp"
+            str = str.Replace( "\"", "" );
+            
+            if ( ( str == "MIN" ) || ( str == "NC" ) /*временно->*/ || ( str == "НЗ" ) )
+                {
+                clamp = 0;
+                return true;
+                }
+
+            if ( ( str == "MAX" ) || ( str == "NO" ) /*временно->*/ || ( str == "НО" ) )
+                {
+                clamp = 1;
+                return true;
+                }
+
+            //  "AS_adres", "AS_gateway"
+            int temp;
+            bool result = Int32.TryParse( str, out temp );
+            if ( result )
+                {
+                clamp = temp;
                 return true;
                 }
 

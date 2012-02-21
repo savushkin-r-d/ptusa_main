@@ -1,9 +1,28 @@
 <?xml version="1.0"?>
 <application application-name="wago description">
-  <project project-name="Sweet whey1.vsd">
-    <object object-name="&quot;Sweet whey&quot;" object-number="3">
-      <Parameters_temp />
-      <Parameters_save />
+  <project project-name="Sweet whey.vsd">
+    <object object-name="&quot;Sweet whey&quot;" object-number="3" object-timers="1">
+      <Parameters_temp>
+        <jn>0</jn>
+        <jn>0</jn>
+        <jn>0</jn>
+        <jn>0</jn>
+        <jn>0</jn>
+        <jn>0</jn>
+        <jn>0</jn>
+        <jn>0</jn>
+        <jn>0</jn>
+        <jn>0</jn>
+      </Parameters_temp>
+      <Parameters_save>
+        <jn>0</jn>
+        <jn>0</jn>
+        <jn>0</jn>
+        <jn>0</jn>
+        <jn>0</jn>
+        <jn>0</jn>
+        <jn>0</jn>
+      </Parameters_save>
       <mode mode-name="Мойка танка" mode-number="0">
         <Proporties>
           <Параметры>
@@ -762,9 +781,28 @@
         </Proporties>
       </mode>
     </object>
-    <object object-name="&quot;Sweet whey&quot;" object-number="2">
-      <Parameters_temp />
-      <Parameters_save />
+    <object object-name="&quot;Sweet whey&quot;" object-number="2" object-timers="1">
+      <Parameters_temp>
+        <oi>0</oi>
+        <oi>0</oi>
+        <oi>0</oi>
+        <oi>0</oi>
+        <oi>0</oi>
+        <oi>0</oi>
+        <oi>0</oi>
+        <oi>0</oi>
+        <oi>0</oi>
+        <oi>0</oi>
+      </Parameters_temp>
+      <Parameters_save>
+        <oi>0</oi>
+        <oi>0</oi>
+        <oi>0</oi>
+        <oi>0</oi>
+        <oi>0</oi>
+        <oi>0</oi>
+        <oi>0</oi>
+      </Parameters_save>
       <mode mode-name="Мойка танка" mode-number="0">
         <Proporties>
           <Параметры>
@@ -1518,9 +1556,28 @@
         </Proporties>
       </mode>
     </object>
-    <object object-name="&quot;Sweet whey&quot;" object-number="1">
-      <Parameters_temp />
-      <Parameters_save />
+    <object object-name="&quot;Sweet whey&quot;" object-number="1" object-timers="1">
+      <Parameters_temp>
+        <ff>0</ff>
+        <Пар_1>0</Пар_1>
+        <Пар_2>0</Пар_2>
+        <Пар_3>0</Пар_3>
+        <Пар_4>0</Пар_4>
+        <Пар_5>0</Пар_5>
+        <Пар_6>0</Пар_6>
+        <Пар_7>0</Пар_7>
+        <Пар_8>0</Пар_8>
+        <Пар_9>0</Пар_9>
+      </Parameters_temp>
+      <Parameters_save>
+        <Пар_10>0</Пар_10>
+        <Пар_11>0</Пар_11>
+        <Пар_12>0</Пар_12>
+        <Пар_13>0</Пар_13>
+        <Пар_14>0</Пар_14>
+        <Пар_15>0</Пар_15>
+        <Пар_16>0</Пар_16>
+      </Parameters_save>
       <mode mode-name="Мойка танка" mode-number="0">
         <Proporties>
           <Параметры>
@@ -2277,9 +2334,56 @@
         </Proporties>
       </mode>
     </object>
-    <object object-name="&quot;object&quot;" object-number="0">
-      <Parameters_temp />
-      <Parameters_save />
+    <object object-name="&quot;grebenka_Yo&quot;" object-number="0" object-timers="4">
+      <Parameters_temp>
+        <Пар_0>0</Пар_0>
+        <Пар_1>0</Пар_1>
+        <Пар_2>0</Пар_2>
+        <Пар_3>0</Пар_3>
+        <Пар_4>0</Пар_4>
+        <Пар_5>0</Пар_5>
+        <Пар_6>0</Пар_6>
+        <Пар_7>0</Пар_7>
+        <Пар_8>0</Пар_8>
+        <Пар_9>0</Пар_9>
+      </Parameters_temp>
+      <Parameters_save>
+        <Пар_10>0</Пар_10>
+        <Пар_11>0</Пар_11>
+        <Пар_12>0</Пар_12>
+        <Пар_13>0</Пар_13>
+        <Пар_14>0</Пар_14>
+        <Пар_15>0</Пар_15>
+        <Пар_16>0</Пар_16>
+      </Parameters_save>
+      <mode mode-name="Новый режим" mode-number="0">
+        <Proporties>
+          <Параметры>
+            <Время_работы_режима />
+            <Номер_следующего_режима />
+          </Параметры>
+          <Устройства>
+            <Включать />
+            <Выключать />
+            <Верхний_флип />
+            <Нижний_флип />
+            <Включать_по_завершению />
+          </Устройства>
+          <Сигналы>
+            <Включающие_режим />
+            <Выключающие_режим />
+            <Необходимые_для_включения />
+            <Отправляемые_режимом />
+            <Управляющие_устройствами />
+            <Импульсные />
+          </Сигналы>
+          <Ограничения>
+            <Блокирующие_режимы_гребенки />
+            <Блокирующие_режимы_танков />
+            <Блокирующие_устройства />
+          </Ограничения>
+        </Proporties>
+      </mode>
     </object>
   </project>
 </application>
