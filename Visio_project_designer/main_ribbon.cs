@@ -262,7 +262,6 @@ namespace visio_prj_designer
                     }   //  for i ... ( Проходим по узлам )
 
 
-                
                 //  Количество устройств
                 bw.Write( ( short ) Globals.visio_addin.g_devices.Count );
 
@@ -418,7 +417,7 @@ namespace visio_prj_designer
                                 {
                                 bw.Write( ( byte ) 0 );         // 2  table no (node no) - порядковый номер в списке == просто номер узла
                                 bw.Write( ( byte ) 0 );         // 3  offset
-                                bw.Write( chen.Value.clamp );   // 4  value (Значение параметра - на случай, если это параметр)
+                                bw.Write( ( float ) chen.Value.clamp );   // 4  value (Значение параметра - на случай, если это параметр)
                                 }
                             else
                                 {
@@ -439,7 +438,7 @@ namespace visio_prj_designer
                                     bw.Write( ( byte ) b );          // 3  offset
                                     }
 
-                                bw.Write( ( int ) 0 );     // 4  value
+                                bw.Write( ( float ) 0 );     // 4  value
                                 }
                             }
 
@@ -749,8 +748,8 @@ namespace visio_prj_designer
                        && ( channel.Value.module.order_number == mod.order_number )
                        && ( channel.Value.clamp == chen ) )
                          {
-                         res.Add( channel.Key + ": " + dev.get_name() + " (" +
-                                  Convert.ToString( dev.n ) + ") " + dev.get_descr() );
+                         res.Add( dev.get_name() + " (" + Convert.ToString( dev.n ) + ") " + 
+                             channel.Key + ": " + dev.get_descr() );
                          }
                      }      //  foreach channel
                  }      //  foreach dev

@@ -85,6 +85,22 @@ namespace wago
     /// <remarks> Id, 01.08.2011. </remarks>
     public class io_module
         {
+        //  Адресация для модулей с 2-мя или 4-мя рабочими клемами из 8-ми
+        public byte[] train8_2_4 = { 0, 0, 0, 2, 
+                                     1, 0, 0, 3 };
+        //  Адресация для модулей с 8-ю рабочими клемами из 8-ми
+        public byte[] train8_8 = { 0, 2, 4, 6, 
+                                   1, 3, 5, 7 };
+        //  Адресация для модулей с 4-мя рабочими клемами из 16-ти
+        public byte[] train16_4 = { 0, 0, 0, 0, 0, 1, 0, 0, 
+                                    2, 0, 0, 0, 0, 3, 0, 0 };
+        //  Адресация для модулей с 8-ю рабочими клемами из 16-ти
+        public byte[] train16_8 = { 0, 1, 2, 3, 4, 5, 6, 7,
+                                    0, 0, 0, 0, 0, 0, 0, 0 };
+        //  Адресация для модулей с 16-ю рабочими клемами из 16-ти
+        public byte[] train16_16 = { 0, 2, 4, 6, 8, 10, 12, 14,
+                                     1, 3, 5, 7, 9, 11, 13, 15 };
+
         /// <summary> Виды модулей. </summary>
         public enum KINDS
             {
@@ -172,6 +188,9 @@ namespace wago
         /// <summary> Флаг доступности клеммы. </summary>
         public bool[] available_clamp_flags;
 
+        /// <summary> Флаг доступности клеммы. </summary>
+        public byte[] adres_mas;
+
         /// <summary> Constructor. На основе свойств фигуры создается объект.
         /// </summary>
         ///
@@ -246,6 +265,7 @@ namespace wago
 			free_clamp_flags = new bool[ ( int ) total_clamps ];
 			available_clamp_flags = new bool[ ( int ) total_clamps ];
 			suitable_clamp_flags = new bool[ ( int ) total_clamps ];
+            adres_mas = new byte[ ( int ) total_clamps ];
 
 			for ( int i = 0; i < ( int ) total_clamps; i++ )
 				{
@@ -300,6 +320,18 @@ namespace wago
 				//	Возможна отдельное определение по всем этим разделам
 				//		при другой нумерации клем (гориз или вертикальная)
 
+                //	С 2-мя доступными клеммами
+                case TYPES.T_600:
+                case TYPES.T_602:
+                case TYPES.T_612:
+                case TYPES.T_613:
+                case TYPES.T_627:
+                case TYPES.T_628:
+                case TYPES.T_655:
+                case TYPES.T_493:
+                    work_clamps_cnt = 0;
+                    break;
+
 				//	С 2-мя доступными клеммами
 				case TYPES.T_461:
 				case TYPES.T_461_002:
@@ -351,7 +383,7 @@ namespace wago
                     break;
 
 
-				//	С 16-мя доступными клемами
+				//	С 16-ю доступными клемами
 				case TYPES.T_1405:
 				case TYPES.T_1504:
 					for ( int  i = 0; i < 16; i++ )
@@ -363,6 +395,81 @@ namespace wago
 					break;
 				}
 		//---------------------------------------------------------------------
+
+
+            //  Задаем адреса клемм относительно модуля (т.е. с нуля до кол-ва клемм)
+            switch ( type )
+                {
+                //2 из 8
+                case TYPES.T_461:
+                case TYPES.T_461_002:
+                case TYPES.T_466:
+                case TYPES.T_512:
+                case TYPES.T_554:
+                case TYPES.T_638:
+                //4 из 8
+                case TYPES.T_402:
+                case TYPES.T_455:
+                case TYPES.T_460:
+                case TYPES.T_504:
+                    for ( int i = 0; i < adres_mas.Length; i++ )
+                        {
+                        if ( available_clamp_flags[ i ] == true )
+                            {
+                            adres_mas[ i ] = train8_2_4[ i ];
+                            }
+                        }
+                    break;
+
+                //8 из 8
+                case TYPES.T_430:
+                case TYPES.T_530:
+                    for ( int i = 0; i < adres_mas.Length; i++ )
+                        {
+                        if ( available_clamp_flags[ i ] == true )
+                            {
+                            adres_mas[ i ] = train8_8[ i ];
+                            }
+                        }
+                    break;
+
+                //4 из 16
+                case TYPES.T_1420:
+                    for ( int i = 0; i < adres_mas.Length; i++ )
+                        {
+                        if ( available_clamp_flags[ i ] == true )
+                            {
+                            adres_mas[ i ] = train16_4[ i ];
+                            }
+                        }
+                    break;
+
+                //8 из 16
+                case TYPES.T_1415:
+                case TYPES.T_1515:
+                    for ( int i = 0; i < adres_mas.Length; i++ )
+                        {
+                        if ( available_clamp_flags[ i ] == true )
+                            {
+                            adres_mas[ i ] = train16_8[ i ];
+                            }
+                        }
+                    break;
+
+                //16 из 16
+                case TYPES.T_1405:
+                case TYPES.T_1504:
+                    for ( int i = 0; i < adres_mas.Length; i++ )
+                        {
+                        if ( available_clamp_flags[ i ] == true )
+                            {
+                            adres_mas[ i ] = train16_16[ i ];
+                            }
+                        }
+                    break;
+                }
+        //---------------------------------------------------------------------
+
 
             //Определяем вид модуля
             switch( type )
@@ -914,11 +1021,15 @@ namespace wago
                     {
                     if ( this.module != pac.get_io_modules()[ i ] )
                         {
-                        result = result + pac.get_io_modules()[ i ].work_clamps_cnt;
+                        if ( this.module.kind == pac.get_io_modules()[ i ].kind )
+                            {
+                            result = result + pac.get_io_modules()[ i ].work_clamps_cnt;
+                            }
                         }
                     else
                         {
-                        result = result + this.clamp;
+                        result = result + module.adres_mas[ this.clamp ];
+                        //result = result + this.clamp;
                         break;
                         }
                     }
