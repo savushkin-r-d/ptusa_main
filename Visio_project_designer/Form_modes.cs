@@ -36,20 +36,6 @@ namespace Visio_project_designer
                 Prop_struct[ i ] = treeView_prop.Nodes[ i ];
                 }
             //-----------------------------------------------------------------------
-
-            //   Заполнение дерева объектов и их режимов (для Ограничений)
-            treeView2.Nodes.Clear();
-
-            for ( int i = 0; i < addin.g_objects.Count; i++ )
-                {
-                treeView2.Nodes.Add( addin.g_objects[ i ].get_name() );
-
-                for ( int j = 0; j < addin.g_objects[ i ].mode_mas.Count; j++ )
-                    {
-                    treeView2.Nodes[ i ].Nodes.Add( addin.g_objects[ i ].mode_mas[ j ].name );
-                    }
-                }
-            //-----------------------------------------------------------------------
             }
 
         private void Form_modes_Shown( object sender, EventArgs e )
@@ -59,9 +45,14 @@ namespace Visio_project_designer
             //  Заполнение списка устройств
             dev_list.Items.Clear();
             foreach	( device dev in Globals.visio_addin.g_devices )
-			    {
+                {
                 dev_list.Items.Add( dev.get_name() + ": " + dev.description );
                 }
+            //for ( int i = 0; i < Globals.visio_addin.g_devices.Count; i++ )
+            //    {
+            //    device dev = Globals.visio_addin.g_devices[ i ];
+            //    dev_list.Items.Add( dev.get_name() + ": " + dev.description );
+            //    }
             //-----------------------------------------------------------------------
 
             //  Создание временной структуры для хранения исходной конфигурации
@@ -77,7 +68,7 @@ namespace Visio_project_designer
             Refresh_mode_tree();
 
             //  Установка количества таймеров
-            NumUpDown_Timers.Value = addin.cur_sel_obj.timers;
+            Num_timers.Value = addin.cur_sel_obj.timers;
 
             //  Заполнение таблицы с параметрами
             numericUpDown1.Value = addin.cur_sel_obj.param_list_temp.Count;
@@ -137,7 +128,7 @@ namespace Visio_project_designer
                         }
 */
                     //  Сохраняем количество таймеров объекта
-                    addin.cur_sel_obj.timers = (int) NumUpDown_Timers.Value;
+                    addin.cur_sel_obj.timers = (int) Num_timers.Value;
 
                     //  Сохранение временных параметров
                     addin.cur_sel_obj.param_list_temp.Clear();
@@ -416,20 +407,127 @@ namespace Visio_project_designer
                     break;
                 }
             }
+        //-----------------------------------------------------------------------------------------
 
         private void treeView_prop_AfterSelect( object sender, TreeViewEventArgs e )
             {
-            if ( ( ( ( TreeView ) sender ).SelectedNode.Level == first_lavel )
-              && ( ( ( TreeView ) sender ).SelectedNode.Parent.Text == "Ограничения" )
+            if ( ((TreeView)sender).SelectedNode.Level == first_lavel )
+                {
+                if ( //( ((TreeView)sender).SelectedNode.Parent.Text == "Параметры" )
+                    ( ((TreeView)sender).SelectedNode.Text == "Блокирующие_режимы_гребенок" )
+                ||  ( ((TreeView)sender).SelectedNode.Text == "Блокирующие_режимы_танков" )
+                ||  ( ((TreeView)sender).SelectedNode.Text == "Включить_режимы_танка" )
+                ||  ( ((TreeView)sender).SelectedNode.Text == "Выключить_режимы_танка" )   
+                    )
+                    {
+                    dev_list.Visible = false;
+                    panel_prop.Visible = false;
+                    treeView_block.Visible = true;
+
+                    //   Заполнение дерева объектов и их режимов (для Ограничений)
+                    treeView_block.Nodes.Clear();
+
+                    for ( int i = 0; i < addin.g_objects.Count; i++ )
+                        {
+                        TreeNode p_node = new TreeNode( addin.g_objects[ i ].get_name() );
+                        treeView_block.Nodes.Add( p_node );
+
+                        for ( int j = 0; j < addin.g_objects[ i ].mode_mas.Count; j++ )
+                            {
+                            TreeNode t_node = new TreeNode(
+                                Convert.ToString( addin.g_objects[ i ].mode_mas[ j ].no ) + "." +
+                                addin.g_objects[ i ].mode_mas[ j ].name );
+
+                            t_node.ImageIndex = addin.g_objects[ i ].get_n() * 1000 +
+                                addin.g_objects[ i ].mode_mas[ j ].no;
+                            
+                            //  Проставляем галочки в соответствии со списком режимов
+                            for ( int k = 0; k < ((TreeView)sender).SelectedNode.Nodes.Count; k++ )
+                                {
+                                if ( ((TreeView)sender).SelectedNode.Nodes[ k ].ImageIndex ==
+                                    t_node.ImageIndex )
+                                    {
+                                    t_node.Checked = true;
+                                    p_node.Expand();
+                                    break;
+                                    }
+                                }   //  for k
+                            //-----------------------------------------------------------------------
+
+                            treeView_block.Nodes[ i ].Nodes.Add( t_node );
+                            }   //  for j
+                        }   //  for i
+                    //-----------------------------------------------------------------------
+
+                    return;
+                    }
+                
+                if (    ( ((TreeView)sender).SelectedNode.Text == "Время_работы_режима" )
+                    ||  ( ((TreeView)sender).SelectedNode.Text == "Номер_следующего_режима" )
+                   )
+                    {
+                    dev_list.Visible = false;
+                    panel_prop.Visible = true;
+                    treeView_block.Visible = false;
+
+                    //  Заполнение полей на панели данными
+                    if ( ((TreeView)sender).SelectedNode.FirstNode != null )
+                        {
+                        Num_field.Value = Convert.ToInt32( ((TreeView)sender).SelectedNode.FirstNode.Text );
+                        }
+                    else
+                        {
+                        Num_field.Value = 0;
+                        }
+                                            
+                    return;
+                    }
+
+                dev_list.Visible = true;
+                panel_prop.Visible = false;
+                treeView_block.Visible = false;
+                return;
+                }
+            
+            //  Для списков, где каждое устройства содержит список зависящих от него устройств
+            //      например, клапана, включаемые по сигналу
+            if (   ((TreeView)sender).SelectedNode.Level == ( first_lavel + 1 )
+                && (    ((TreeView)sender).SelectedNode.Parent.Text == "Управляющие_устройствами_сигналы"
+                    ||  ((TreeView)sender).SelectedNode.Parent.Text == "Зависящие_от_устройств_сигналы" )
                )
                 {
-                treeView2.Visible = true;
+                dev_list.Visible = true;
+                panel_prop.Visible = false;
+                treeView_block.Visible = false;
+                return;
                 }
-            else
+
+            dev_list.Visible = false;
+            panel_prop.Visible = false;
+            treeView_block.Visible = false;
+            }
+        //-----------------------------------------------------------------------------------------
+        
+        private void Num_field_ValueChanged( object sender, EventArgs e )
+            {
+            if ( treeView_prop.SelectedNode.Level == first_lavel )
                 {
-                treeView2.Visible = false;
+                if (    ( treeView_prop.SelectedNode.Text == "Время_работы_режима" )
+                    ||  ( treeView_prop.SelectedNode.Text == "Номер_следующего_режима" )
+                   )
+                    {
+                    if ( treeView_prop.SelectedNode.FirstNode == null )
+                        {
+                        treeView_prop.SelectedNode.Nodes.Add( new TreeNode( Convert.ToString( Num_field.Value ) ) );
+                        }
+                    else
+                        {
+                        treeView_prop.SelectedNode.FirstNode.Text = Convert.ToString( Num_field.Value );
+                        }
+                    }
                 }
             }
+        //-----------------------------------------------------------------------------------------
 
         private void treeView_prop_KeyDown( object sender, KeyEventArgs e )
             {
@@ -581,7 +679,10 @@ namespace Visio_project_designer
                                     addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step[ addin.cur_step ] );
                     }
 
-                //  Обновляем дерево
+                //  Обновляем дерево свойств 
+                //      (если этого не сделать перед удаление шага, то унаследуются свойства удаляемого режима)
+                Refresh_prop_tree( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
+                
                 treeView_modes.SelectedNode.Remove();
                 }
             else
@@ -865,6 +966,49 @@ namespace Visio_project_designer
 
             }
 
+        private void treeView_block_AfterCheck( object sender, TreeViewEventArgs e )
+            {
+            if (    ( treeView_prop.SelectedNode.Level == first_lavel )
+                &&  (      ( treeView_prop.SelectedNode.Text == "Блокирующие_режимы_гребенок" )
+                        || ( treeView_prop.SelectedNode.Text == "Блокирующие_режимы_танков" )
+                        || ( treeView_prop.SelectedNode.Text == "Включить_режимы_танка" )
+                        || ( treeView_prop.SelectedNode.Text == "Выключить_режимы_танка" )
+                    )
+                )
+                {
+                if ( e.Node.Level == 0 )
+                    {
+                    //  Значит выбран объект
+                    }
+                else
+                    {
+                    //  Значит выбран режим
+                    if ( e.Node.Checked == true )
+                        {
+                        //  Если поставили галочку
+                        treeView_prop.SelectedNode.Nodes.Add( (TreeNode) e.Node.Clone() );
+                        }
+                    else
+                        {
+                        //  Если сняли галочку
+                        for( int i = 0; i < treeView_prop.SelectedNode.Nodes.Count; i++ )
+                            {
+                            if ( treeView_prop.SelectedNode.Nodes[ i ].ImageIndex == e.Node.ImageIndex )
+                                {
+                                treeView_prop.SelectedNode.Nodes[ i ].Remove();
+                                }
+                            }
+                        }
+
+                    }   //  -выбран режим
+                
+                }   //  Проверка на соответствие списка
+            }
+
+        private void contextMenuStrip2_Opening( object sender, CancelEventArgs e )
+            {
+
+            }
         //---------------------------------------------------------------------
 
         }

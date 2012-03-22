@@ -48,48 +48,54 @@
             treeNode9} );
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.TreeNode treeNode11 = new System.Windows.Forms.TreeNode( "Время_работы_режима" );
-            System.Windows.Forms.TreeNode treeNode12 = new System.Windows.Forms.TreeNode( "Номер_следующего_режима" );
-            System.Windows.Forms.TreeNode treeNode13 = new System.Windows.Forms.TreeNode( "Параметры", new System.Windows.Forms.TreeNode[] {
+            System.Windows.Forms.TreeNode treeNode11 = new System.Windows.Forms.TreeNode( "Необходимые_для_ВКЛ_сигналы" );
+            System.Windows.Forms.TreeNode treeNode12 = new System.Windows.Forms.TreeNode( "Включающие_режим_сигналы" );
+            System.Windows.Forms.TreeNode treeNode13 = new System.Windows.Forms.TreeNode( "Условия_включения_режима", new System.Windows.Forms.TreeNode[] {
             treeNode11,
             treeNode12} );
-            System.Windows.Forms.TreeNode treeNode14 = new System.Windows.Forms.TreeNode( "Включать" );
-            System.Windows.Forms.TreeNode treeNode15 = new System.Windows.Forms.TreeNode( "Выключать" );
+            System.Windows.Forms.TreeNode treeNode14 = new System.Windows.Forms.TreeNode( "Включать_устройства" );
+            System.Windows.Forms.TreeNode treeNode15 = new System.Windows.Forms.TreeNode( "Выключать_устройства" );
             System.Windows.Forms.TreeNode treeNode16 = new System.Windows.Forms.TreeNode( "Верхний_флип" );
             System.Windows.Forms.TreeNode treeNode17 = new System.Windows.Forms.TreeNode( "Нижний_флип" );
-            System.Windows.Forms.TreeNode treeNode18 = new System.Windows.Forms.TreeNode( "Включать_по_завершению" );
-            System.Windows.Forms.TreeNode treeNode19 = new System.Windows.Forms.TreeNode( "Устройства", new System.Windows.Forms.TreeNode[] {
+            System.Windows.Forms.TreeNode treeNode18 = new System.Windows.Forms.TreeNode( "Отправляемые_сигналы" );
+            System.Windows.Forms.TreeNode treeNode19 = new System.Windows.Forms.TreeNode( "Управляющие_устройствами_сигналы" );
+            System.Windows.Forms.TreeNode treeNode20 = new System.Windows.Forms.TreeNode( "Зависящие_от_устройств_сигналы" );
+            System.Windows.Forms.TreeNode treeNode21 = new System.Windows.Forms.TreeNode( "Использование_ключа" );
+            System.Windows.Forms.TreeNode treeNode22 = new System.Windows.Forms.TreeNode( "Условия_работы_режима", new System.Windows.Forms.TreeNode[] {
             treeNode14,
             treeNode15,
             treeNode16,
             treeNode17,
-            treeNode18} );
-            System.Windows.Forms.TreeNode treeNode20 = new System.Windows.Forms.TreeNode( "Включающие_режим" );
-            System.Windows.Forms.TreeNode treeNode21 = new System.Windows.Forms.TreeNode( "Выключающие_режим" );
-            System.Windows.Forms.TreeNode treeNode22 = new System.Windows.Forms.TreeNode( "Необходимые_для_включения" );
-            System.Windows.Forms.TreeNode treeNode23 = new System.Windows.Forms.TreeNode( "Отправляемые_режимом" );
-            System.Windows.Forms.TreeNode treeNode24 = new System.Windows.Forms.TreeNode( "Управляющие_устройствами" );
-            System.Windows.Forms.TreeNode treeNode25 = new System.Windows.Forms.TreeNode( "Импульсные" );
-            System.Windows.Forms.TreeNode treeNode26 = new System.Windows.Forms.TreeNode( "Сигналы", new System.Windows.Forms.TreeNode[] {
+            treeNode18,
+            treeNode19,
             treeNode20,
-            treeNode21,
-            treeNode22,
+            treeNode21} );
+            System.Windows.Forms.TreeNode treeNode23 = new System.Windows.Forms.TreeNode( "Выключающие_режим_сигналы" );
+            System.Windows.Forms.TreeNode treeNode24 = new System.Windows.Forms.TreeNode( "Устройства_ВКЛ_по_завершению" );
+            System.Windows.Forms.TreeNode treeNode25 = new System.Windows.Forms.TreeNode( "Условия_выключения_режима", new System.Windows.Forms.TreeNode[] {
             treeNode23,
-            treeNode24,
-            treeNode25} );
-            System.Windows.Forms.TreeNode treeNode27 = new System.Windows.Forms.TreeNode( "Блокирующие_режимы_гребенки" );
-            System.Windows.Forms.TreeNode treeNode28 = new System.Windows.Forms.TreeNode( "Блокирующие_режимы_танков" );
-            System.Windows.Forms.TreeNode treeNode29 = new System.Windows.Forms.TreeNode( "Блокирующие_устройства" );
-            System.Windows.Forms.TreeNode treeNode30 = new System.Windows.Forms.TreeNode( "Ограничения", new System.Windows.Forms.TreeNode[] {
+            treeNode24} );
+            System.Windows.Forms.TreeNode treeNode26 = new System.Windows.Forms.TreeNode( "Время_работы_режима" );
+            System.Windows.Forms.TreeNode treeNode27 = new System.Windows.Forms.TreeNode( "Номер_следующего_режима" );
+            System.Windows.Forms.TreeNode treeNode28 = new System.Windows.Forms.TreeNode( "Блокирующие_устройства" );
+            System.Windows.Forms.TreeNode treeNode29 = new System.Windows.Forms.TreeNode( "Блокирующие_режимы_гребенок" );
+            System.Windows.Forms.TreeNode treeNode30 = new System.Windows.Forms.TreeNode( "Блокирующие_режимы_танков" );
+            System.Windows.Forms.TreeNode treeNode31 = new System.Windows.Forms.TreeNode( "Включить_режимы_танка" );
+            System.Windows.Forms.TreeNode treeNode32 = new System.Windows.Forms.TreeNode( "Выключить_режимы_танка" );
+            System.Windows.Forms.TreeNode treeNode33 = new System.Windows.Forms.TreeNode( "Параметры", new System.Windows.Forms.TreeNode[] {
+            treeNode26,
             treeNode27,
             treeNode28,
-            treeNode29} );
-            System.Windows.Forms.TreeNode treeNode31 = new System.Windows.Forms.TreeNode( "Proporties", new System.Windows.Forms.TreeNode[] {
+            treeNode29,
+            treeNode30,
+            treeNode31,
+            treeNode32} );
+            System.Windows.Forms.TreeNode treeNode34 = new System.Windows.Forms.TreeNode( "Proporties", new System.Windows.Forms.TreeNode[] {
             treeNode13,
-            treeNode19,
-            treeNode26,
-            treeNode30} );
-            System.Windows.Forms.TreeNode treeNode32 = new System.Windows.Forms.TreeNode( "TreeView" );
+            treeNode22,
+            treeNode25,
+            treeNode33} );
+            System.Windows.Forms.TreeNode treeNode35 = new System.Windows.Forms.TreeNode( "TreeView" );
             this.contextMenuStrip2 = new System.Windows.Forms.ContextMenuStrip( this.components );
             this.add_prop = new System.Windows.Forms.ToolStripMenuItem();
             this.Devices = new System.Windows.Forms.ToolStripMenuItem();
@@ -123,15 +129,17 @@
             this.выбратьНаСхемеToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.treeView_prop = new System.Windows.Forms.TreeView();
             this.dev_list = new System.Windows.Forms.ListBox();
-            this.treeView2 = new System.Windows.Forms.TreeView();
+            this.treeView_block = new System.Windows.Forms.TreeView();
             this.label16 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
             this.contextMenuStrip4 = new System.Windows.Forms.ContextMenuStrip( this.components );
             this.ContextMenuStrip4_select_on_map = new System.Windows.Forms.ToolStripMenuItem();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
-            this.NumUpDown_Timers = new System.Windows.Forms.NumericUpDown();
-            this.label5 = new System.Windows.Forms.Label();
+            this.Num_field = new System.Windows.Forms.NumericUpDown();
+            this.panel_prop = new System.Windows.Forms.Panel();
+            this.Num_timers = new System.Windows.Forms.NumericUpDown();
+            this.Timers_cnt = new System.Windows.Forms.Label();
             this.contextMenuStrip2.SuspendLayout();
             this.contextMenuStrip3.SuspendLayout();
             ( ( System.ComponentModel.ISupportInitialize ) ( this.dataGridView1 ) ).BeginInit();
@@ -143,7 +151,9 @@
             ( ( System.ComponentModel.ISupportInitialize ) ( this.dataGridView2 ) ).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
             this.contextMenuStrip4.SuspendLayout();
-            ( ( System.ComponentModel.ISupportInitialize ) ( this.NumUpDown_Timers ) ).BeginInit();
+            ( ( System.ComponentModel.ISupportInitialize ) ( this.Num_field ) ).BeginInit();
+            this.panel_prop.SuspendLayout();
+            ( ( System.ComponentModel.ISupportInitialize ) ( this.Num_timers ) ).BeginInit();
             this.SuspendLayout();
             // 
             // contextMenuStrip2
@@ -153,6 +163,7 @@
             this.set_def_prop} );
             this.contextMenuStrip2.Name = "contextMenuStrip2";
             this.contextMenuStrip2.Size = new System.Drawing.Size( 249, 48 );
+            this.contextMenuStrip2.Opening += new System.ComponentModel.CancelEventHandler( this.contextMenuStrip2_Opening );
             // 
             // add_prop
             // 
@@ -214,10 +225,10 @@
             // 
             // treeView_modes
             // 
-            this.treeView_modes.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
-                        | System.Windows.Forms.AnchorStyles.Left )
-                        | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.treeView_modes.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
+                        | System.Windows.Forms.AnchorStyles.Left ) ) );
             this.treeView_modes.ContextMenuStrip = this.contextMenuStrip3;
+            this.treeView_modes.Font = new System.Drawing.Font( "Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ( ( byte ) ( 204 ) ) );
             this.treeView_modes.HideSelection = false;
             this.treeView_modes.LabelEdit = true;
             this.treeView_modes.Location = new System.Drawing.Point( 2, 21 );
@@ -246,7 +257,7 @@
             treeNode4,
             treeNode8,
             treeNode10} );
-            this.treeView_modes.Size = new System.Drawing.Size( 204, 430 );
+            this.treeView_modes.Size = new System.Drawing.Size( 204, 457 );
             this.treeView_modes.TabIndex = 3;
             this.treeView_modes.BeforeLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler( this.treeView_modes_BeforeLabelEdit );
             this.treeView_modes.AfterLabelEdit += new System.Windows.Forms.NodeLabelEditEventHandler( this.treeView_modes_AfterLabelEdit );
@@ -350,10 +361,10 @@
             // 
             // tabControl1
             // 
-            this.tabControl1.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.tabControl1.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left ) ) );
             this.tabControl1.Controls.Add( this.tabPage1 );
             this.tabControl1.Controls.Add( this.tabPage2 );
-            this.tabControl1.Location = new System.Drawing.Point( 2, 453 );
+            this.tabControl1.Location = new System.Drawing.Point( 2, 484 );
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size( 608, 215 );
@@ -462,54 +473,63 @@
             // 
             // treeView_prop
             // 
+            this.treeView_prop.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
+                        | System.Windows.Forms.AnchorStyles.Left ) ) );
+            this.treeView_prop.Font = new System.Drawing.Font( "Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ( ( byte ) ( 204 ) ) );
             this.treeView_prop.HideSelection = false;
-            this.treeView_prop.Location = new System.Drawing.Point( 212, 21 );
+            this.treeView_prop.Location = new System.Drawing.Point( 209, 21 );
             this.treeView_prop.Name = "treeView_prop";
-            treeNode11.Name = "Node11";
-            treeNode11.Text = "Время_работы_режима";
-            treeNode12.Name = "Node12";
-            treeNode12.Text = "Номер_следующего_режима";
-            treeNode13.Name = "Parameters";
-            treeNode13.Text = "Параметры";
+            treeNode11.Name = "NEED";
+            treeNode11.Text = "Необходимые_для_ВКЛ_сигналы";
+            treeNode12.Name = "Node15";
+            treeNode12.Text = "Включающие_режим_сигналы";
+            treeNode13.Name = "START";
+            treeNode13.Text = "Условия_включения_режима";
             treeNode14.Name = "Node13";
-            treeNode14.Text = "Включать";
+            treeNode14.Text = "Включать_устройства";
             treeNode15.Name = "Node14";
-            treeNode15.Text = "Выключать";
+            treeNode15.Text = "Выключать_устройства";
             treeNode16.Name = "Node23";
             treeNode16.Text = "Верхний_флип";
             treeNode17.Name = "Node24";
             treeNode17.Text = "Нижний_флип";
-            treeNode18.Name = "Node27";
-            treeNode18.Text = "Включать_по_завершению";
-            treeNode19.Name = "Devices";
-            treeNode19.Text = "Устройства";
-            treeNode20.Name = "Node15";
-            treeNode20.Text = "Включающие_режим";
-            treeNode21.Name = "Node16";
-            treeNode21.Text = "Выключающие_режим";
-            treeNode22.Name = "Node29";
-            treeNode22.Text = "Необходимые_для_включения";
-            treeNode23.Name = "Node30";
-            treeNode23.Text = "Отправляемые_режимом";
-            treeNode24.Name = "Node31";
-            treeNode24.Text = "Управляющие_устройствами";
-            treeNode25.Name = "Node33";
-            treeNode25.Text = "Импульсные";
-            treeNode26.Name = "Signals";
-            treeNode26.Text = "Сигналы";
-            treeNode27.Name = "Node17";
-            treeNode27.Text = "Блокирующие_режимы_гребенки";
-            treeNode28.Name = "Node18";
-            treeNode28.Text = "Блокирующие_режимы_танков";
-            treeNode29.Name = "Node34";
-            treeNode29.Text = "Блокирующие_устройства";
-            treeNode30.Name = "Conditions";
-            treeNode30.Text = "Ограничения";
-            treeNode31.Name = "Proporties";
-            treeNode31.Text = "Proporties";
+            treeNode18.Name = "Node30";
+            treeNode18.Text = "Отправляемые_сигналы";
+            treeNode19.Name = "Node3";
+            treeNode19.Text = "Управляющие_устройствами_сигналы";
+            treeNode20.Name = "Node0";
+            treeNode20.Text = "Зависящие_от_устройств_сигналы";
+            treeNode21.Name = "KEY";
+            treeNode21.Text = "Использование_ключа";
+            treeNode22.Name = "WORK";
+            treeNode22.Text = "Условия_работы_режима";
+            treeNode23.Name = "Node16";
+            treeNode23.Text = "Выключающие_режим_сигналы";
+            treeNode24.Name = "Node27";
+            treeNode24.Text = "Устройства_ВКЛ_по_завершению";
+            treeNode25.Name = "FINISH";
+            treeNode25.Text = "Условия_выключения_режима";
+            treeNode26.Name = "Node11";
+            treeNode26.Text = "Время_работы_режима";
+            treeNode27.Name = "Node12";
+            treeNode27.Text = "Номер_следующего_режима";
+            treeNode28.Name = "Node34";
+            treeNode28.Text = "Блокирующие_устройства";
+            treeNode29.Name = "Node17";
+            treeNode29.Text = "Блокирующие_режимы_гребенок";
+            treeNode30.Name = "Node18";
+            treeNode30.Text = "Блокирующие_режимы_танков";
+            treeNode31.Name = "Node7";
+            treeNode31.Text = "Включить_режимы_танка";
+            treeNode32.Name = "Node8";
+            treeNode32.Text = "Выключить_режимы_танка";
+            treeNode33.Name = "PARAM";
+            treeNode33.Text = "Параметры";
+            treeNode34.Name = "Proporties";
+            treeNode34.Text = "Proporties";
             this.treeView_prop.Nodes.AddRange( new System.Windows.Forms.TreeNode[] {
-            treeNode31} );
-            this.treeView_prop.Size = new System.Drawing.Size( 264, 430 );
+            treeNode34} );
+            this.treeView_prop.Size = new System.Drawing.Size( 268, 457 );
             this.treeView_prop.TabIndex = 10;
             this.treeView_prop.AfterSelect += new System.Windows.Forms.TreeViewEventHandler( this.treeView_prop_AfterSelect );
             this.treeView_prop.KeyDown += new System.Windows.Forms.KeyEventHandler( this.treeView_prop_KeyDown );
@@ -517,26 +537,35 @@
             // 
             // dev_list
             // 
+            this.dev_list.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
+                        | System.Windows.Forms.AnchorStyles.Left )
+                        | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.dev_list.Font = new System.Drawing.Font( "Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ( ( byte ) ( 204 ) ) );
             this.dev_list.FormattingEnabled = true;
-            this.dev_list.Location = new System.Drawing.Point( 680, 19 );
+            this.dev_list.ItemHeight = 15;
+            this.dev_list.Location = new System.Drawing.Point( 480, 22 );
             this.dev_list.Name = "dev_list";
-            this.dev_list.Size = new System.Drawing.Size( 185, 433 );
-            this.dev_list.Sorted = true;
+            this.dev_list.Size = new System.Drawing.Size( 225, 454 );
             this.dev_list.TabIndex = 11;
+            this.dev_list.Visible = false;
             this.dev_list.DoubleClick += new System.EventHandler( this.dev_list_DoubleClick );
             // 
-            // treeView2
+            // treeView_block
             // 
-            this.treeView2.CheckBoxes = true;
-            this.treeView2.Location = new System.Drawing.Point( 490, 21 );
-            this.treeView2.Name = "treeView2";
-            treeNode32.Name = "Node0";
-            treeNode32.Text = "TreeView";
-            this.treeView2.Nodes.AddRange( new System.Windows.Forms.TreeNode[] {
-            treeNode32} );
-            this.treeView2.Size = new System.Drawing.Size( 183, 430 );
-            this.treeView2.TabIndex = 15;
-            this.treeView2.Visible = false;
+            this.treeView_block.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
+                        | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.treeView_block.CheckBoxes = true;
+            this.treeView_block.Font = new System.Drawing.Font( "Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ( ( byte ) ( 204 ) ) );
+            this.treeView_block.Location = new System.Drawing.Point( 711, 23 );
+            this.treeView_block.Name = "treeView_block";
+            treeNode35.Name = "Node0";
+            treeNode35.Text = "TreeView";
+            this.treeView_block.Nodes.AddRange( new System.Windows.Forms.TreeNode[] {
+            treeNode35} );
+            this.treeView_block.Size = new System.Drawing.Size( 201, 455 );
+            this.treeView_block.TabIndex = 15;
+            this.treeView_block.Visible = false;
+            this.treeView_block.AfterCheck += new System.Windows.Forms.TreeViewEventHandler( this.treeView_block_AfterCheck );
             // 
             // label16
             // 
@@ -572,8 +601,9 @@
             // 
             // label3
             // 
+            this.label3.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right ) ) );
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point( 500, 4 );
+            this.label3.Location = new System.Drawing.Point( 746, 4 );
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size( 127, 13 );
             this.label3.TabIndex = 18;
@@ -582,45 +612,70 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point( 693, 3 );
+            this.label4.Location = new System.Drawing.Point( 492, 4 );
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size( 111, 13 );
             this.label4.TabIndex = 18;
             this.label4.Text = "Устройства проекта";
             // 
-            // NumUpDown_Timers
+            // Num_field
             // 
-            this.NumUpDown_Timers.Location = new System.Drawing.Point( 821, 479 );
-            this.NumUpDown_Timers.Name = "NumUpDown_Timers";
-            this.NumUpDown_Timers.Size = new System.Drawing.Size( 39, 20 );
-            this.NumUpDown_Timers.TabIndex = 19;
+            this.Num_field.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.Num_field.Location = new System.Drawing.Point( 12, 15 );
+            this.Num_field.Maximum = new decimal( new int[] {
+            600,
+            0,
+            0,
+            0} );
+            this.Num_field.Name = "Num_field";
+            this.Num_field.Size = new System.Drawing.Size( 51, 20 );
+            this.Num_field.TabIndex = 19;
+            this.Num_field.ValueChanged += new System.EventHandler( this.Num_field_ValueChanged );
             // 
-            // label5
+            // panel_prop
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point( 637, 481 );
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size( 118, 13 );
-            this.label5.TabIndex = 20;
-            this.label5.Text = "Количество таймеров";
-            this.label5.Click += new System.EventHandler( this.label5_Click );
+            this.panel_prop.Controls.Add( this.Num_field );
+            this.panel_prop.Location = new System.Drawing.Point( 483, 21 );
+            this.panel_prop.Name = "panel_prop";
+            this.panel_prop.Size = new System.Drawing.Size( 215, 176 );
+            this.panel_prop.TabIndex = 21;
+            this.panel_prop.Visible = false;
+            // 
+            // Num_timers
+            // 
+            this.Num_timers.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.Num_timers.Location = new System.Drawing.Point( 743, 504 );
+            this.Num_timers.Name = "Num_timers";
+            this.Num_timers.Size = new System.Drawing.Size( 51, 20 );
+            this.Num_timers.TabIndex = 19;
+            // 
+            // Timers_cnt
+            // 
+            this.Timers_cnt.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right ) ) );
+            this.Timers_cnt.AutoSize = true;
+            this.Timers_cnt.Location = new System.Drawing.Point( 619, 506 );
+            this.Timers_cnt.Name = "Timers_cnt";
+            this.Timers_cnt.Size = new System.Drawing.Size( 118, 13 );
+            this.Timers_cnt.TabIndex = 22;
+            this.Timers_cnt.Text = "Количество таймеров";
             // 
             // Form_modes
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF( 6F, 13F );
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size( 872, 670 );
-            this.Controls.Add( this.label5 );
-            this.Controls.Add( this.NumUpDown_Timers );
+            this.ClientSize = new System.Drawing.Size( 913, 701 );
+            this.Controls.Add( this.Timers_cnt );
+            this.Controls.Add( this.Num_timers );
+            this.Controls.Add( this.panel_prop );
             this.Controls.Add( this.label16 );
             this.Controls.Add( this.treeView_modes );
-            this.Controls.Add( this.treeView2 );
             this.Controls.Add( this.label17 );
             this.Controls.Add( this.tabControl1 );
-            this.Controls.Add( this.dev_list );
             this.Controls.Add( this.treeView_prop );
+            this.Controls.Add( this.dev_list );
             this.Controls.Add( this.label3 );
             this.Controls.Add( this.label4 );
+            this.Controls.Add( this.treeView_block );
             this.Name = "Form_modes";
             this.Text = "Заполнение режимов объекта";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler( this.Form_modes_FormClosing );
@@ -638,7 +693,9 @@
             ( ( System.ComponentModel.ISupportInitialize ) ( this.dataGridView2 ) ).EndInit();
             this.contextMenuStrip1.ResumeLayout( false );
             this.contextMenuStrip4.ResumeLayout( false );
-            ( ( System.ComponentModel.ISupportInitialize ) ( this.NumUpDown_Timers ) ).EndInit();
+            ( ( System.ComponentModel.ISupportInitialize ) ( this.Num_field ) ).EndInit();
+            this.panel_prop.ResumeLayout( false );
+            ( ( System.ComponentModel.ISupportInitialize ) ( this.Num_timers ) ).EndInit();
             this.ResumeLayout( false );
             this.PerformLayout();
 
@@ -663,7 +720,7 @@
         private System.Windows.Forms.ToolStripMenuItem выбратьНаСхемеToolStripMenuItem;
         private System.Windows.Forms.ListBox dev_list;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip2;
-        private System.Windows.Forms.TreeView treeView2;
+        private System.Windows.Forms.TreeView treeView_block;
         private System.Windows.Forms.Label label16;
         private System.Windows.Forms.Label label17;
         private System.Windows.Forms.DataGridViewTextBoxColumn number;
@@ -686,7 +743,9 @@
         private System.Windows.Forms.ToolStripMenuItem ContextMenuStrip3_update;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.NumericUpDown NumUpDown_Timers;
-        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.NumericUpDown Num_field;
+        private System.Windows.Forms.Panel panel_prop;
+        private System.Windows.Forms.NumericUpDown Num_timers;
+        private System.Windows.Forms.Label Timers_cnt;
         }
     }

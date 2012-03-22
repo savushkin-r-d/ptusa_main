@@ -98,7 +98,7 @@ namespace visio_prj_designer
             }
         //-------------------------------------------------------------------------------
 
-        private static int sort_devices( device dev1, device dev2 )
+        public static int sort_devices( device dev1, device dev2 )
             {
             if ( ( dev1 != null ) && ( dev2 != null ) )
                 {
@@ -178,7 +178,7 @@ namespace visio_prj_designer
                 Char[] kod = { 'W', 'G', ' ', '{', '4', 'B',
                     '7', '1', '4', 'C', '0', '8', '-', '9', '6', '0', '2', '-', '4', '1',
                     '3', '0', '-', '8', '5', '6', '3', '-', '4', 'B', '5', '1', 'E', '0',
-                    '8', 'B', 'B', '9', 'D', '7', '}' };
+                    '8', 'B', 'B', '9', 'D', '8', '}' };
 
                 //  Записываем наш мега-код
                 bw.Write( kod, 0, 41 );
@@ -272,113 +272,8 @@ namespace visio_prj_designer
                     {
                     try
                         {
-                        //  Type
-                        // Типы устройств не совпадают с типами в старом редакторе WAGO
-                        switch ( Globals.visio_addin.g_devices[ i ].get_type() )
-                            {
-                            case ( int ) tech_device.device.TYPES.T_V:	//	Клапан
-
-                                //if ( Globals.visio_addin.g_devices[ i ].sub_type == 
-                                //    tech_device.device.SUB_TYPES.V_1_CONTROL_CHANNEL ) 
-                                b = ( byte ) tech_device.device.TDevType.dtV;
-
-                                if ( Globals.visio_addin.g_devices[ i ].sub_type ==
-                                    tech_device.device.SUB_TYPES.V_1_CONTROL_CHANNEL_1_FB )
-                                    b = ( byte ) tech_device.device.TDevType.dtV1DO1DI;
-
-                                if ( Globals.visio_addin.g_devices[ i ].sub_type ==
-                                    tech_device.device.SUB_TYPES.V_1_CONTROL_CHANNEL_2_FB )
-                                    b = ( byte ) tech_device.device.TDevType.dtV1DO2DI;
-
-                                if ( Globals.visio_addin.g_devices[ i ].sub_type ==
-                                    tech_device.device.SUB_TYPES.V_2_CONTROL_CHANNEL )
-                                    b = ( byte ) tech_device.device.TDevType.dtV2DO;
-
-                                if ( Globals.visio_addin.g_devices[ i ].sub_type ==
-                                    tech_device.device.SUB_TYPES.V_2_CONTROL_CHANNEL_2_FB )
-                                    b = ( byte ) tech_device.device.TDevType.dtV2DO2DI;
-
-                                if ( Globals.visio_addin.g_devices[ i ].sub_type ==
-                                    tech_device.device.SUB_TYPES.V_MIX_PROOF_3_UPR_2_FB )
-                                    b = ( byte ) tech_device.device.TDevType.dtMix;
-
-                                if ( Globals.visio_addin.g_devices[ i ].sub_type ==
-                                    tech_device.device.SUB_TYPES.V_MIX_PROOF_AS_INTERFACE )
-                                    b = ( byte ) tech_device.device.TDevType.dtASMix;
-
-                                break;
-
-                            case ( int ) tech_device.device.TYPES.T_N:	//	Насос
-                                b = ( byte ) tech_device.device.TDevType.dtN1DO1DI;
-                                break;
-
-                            case ( int ) tech_device.device.TYPES.T_MIX:	//	Мешалка
-                                b = ( byte ) tech_device.device.TDevType.dtM1DO1DI;
-                                break;
-
-                            case ( int ) tech_device.device.TYPES.T_CTR:	//	Расходомер
-                                b = ( byte ) tech_device.device.TDevType.dtCTR;
-                                break;
-
-                            case ( int ) tech_device.device.TYPES.T_TE:	//	Температура
-                                b = ( byte ) tech_device.device.TDevType.dtTE;
-                                break;
-
-                            case ( int ) tech_device.device.TYPES.T_QE:	//	Концентратомер
-                                b = ( byte ) tech_device.device.TDevType.dtQE;
-                                break;
-
-                            case ( int ) tech_device.device.TYPES.T_LS:	//	Гарничный уровень
-                                b = ( byte ) tech_device.device.TDevType.dtLS_ex;
-                                break;
-
-                            case ( int ) tech_device.device.TYPES.T_LE:	//	Текущий уровень
-                                //  Уровни у нас 4-х типов
-                                b = ( byte )
-                                    (
-                                    ( ( byte ) tech_device.device.TDevType.dtLE1 ) +
-                                    ( ( byte ) Globals.visio_addin.g_devices[ i ].sub_type )
-                                    );
-                                break;
-
-                            case ( int ) tech_device.device.TYPES.T_FS:	//	Расход (есть/нет)
-                                b = ( byte ) tech_device.device.TDevType.dtFS;
-                                break;
-
-                            case ( int ) tech_device.device.TYPES.T_FE:  //	Текущий расход
-                                b = ( byte ) tech_device.device.TDevType.dtFE;
-                                break;
-
-                            case ( int ) tech_device.device.TYPES.T_FB:	//	Обратнся связь
-                                b = ( byte ) tech_device.device.TDevType.dtOS;
-                                break;
-
-                            case ( int ) tech_device.device.TYPES.T_UPR:	//	Управляющий сигнал
-                                b = ( byte ) tech_device.device.TDevType.dtUpr;
-                                break;
-
-                            case ( int ) tech_device.device.TYPES.T_AI:	//	Аналоговый вход
-                                b = ( byte ) tech_device.device.TDevType.dtAI;
-                                break;
-
-                            case ( int ) tech_device.device.TYPES.T_AO:	//	Аналоговый выход
-                                b = ( byte ) tech_device.device.TDevType.dtAO;
-                                break;
-
-                            //                        case ( int )tech_device.device.TYPES.T_FQT:	//	Расходомер и Концентратомер
-                            //                            b = ( byte ) tech_device.device.TDevType.dt;
-                            //                            break;
-
-                            //                       case ( int )tech_device.device.TYPES.T_WTE:	//	Температура и Влажность
-                            //                            b = ( byte ) tech_device.device.TDevType.dt;
-                            //                            break;  
-
-                            default:
-                                continue;   //  for i ...
-                            }
-
-                        //Проверить что записываем и сравнить с тем что записывает старый редактор
-
+                        //  Преобразовываем в старый тип
+                        b = Globals.visio_addin.g_devices[ i ].Get_old_type();
                         bw.Write( b );  //  type dev
 
                         //  length description
@@ -504,7 +399,7 @@ namespace visio_prj_designer
                         if ( obj.get_type() == ( int ) device.TYPES.T_GREB )
                             {
                             bw.Write( ( byte ) obj.sub_type );                      //  подтип гребенки
-                            bw.Write( ( byte ) ( obj.mode_mas.Count / 32 + 1 ) );   //  states
+                            bw.Write( ( byte ) ( obj.mode_mas.Count ) );            //  modes
 
                             bw.Write( ( short ) obj.n );                                      // Номер гребенки
                             bw.Write( ( short )
@@ -513,56 +408,39 @@ namespace visio_prj_designer
                             bw.Write( ( short ) obj.timers );                                 // Кол-во таймеров
 
                             //  Проходим по режимам
-                            for ( int i = 0; i < ( obj.mode_mas.Count / 32 + 1 )*32; i++ )
+                            for ( int i = 0; i < obj.mode_mas.Count; i++ )
                                 {
-                                /*
-                                "Параметры"
-                                "Устройства"
-                                    "Включать"
-                                    "Выключать"
-                                "Сигналы"
-                                "Ограничения"
-                                */
-                                if ( i < obj.mode_mas.Count )
-                                    {
-                                    get_write_data( bw, obj.mode_mas[ i ], "Устройства", "Включать" );
-                                    get_write_data( bw, obj.mode_mas[ i ], "Устройства", "Выключать" );
-                                    get_write_data( bw, obj.mode_mas[ i ], "Устройства", "Включать_по_завершению" );
-                                    get_write_data( bw, obj.mode_mas[ i ], "Устройства", "Верхний_флип" );
-                                    get_write_data( bw, obj.mode_mas[ i ], "Устройства", "Нижний_флип" );
+                                //  Условия_включения_режима
+                                get_write_data( bw, obj.mode_mas[ i ], "Необходимые_для_ВКЛ_сигналы" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Включающие_режим_сигналы" );
 
-                                    bw.Write( ( byte ) 0 ); //  FB
-                                    bw.Write( ( byte ) 0 ); //  N
-                                    bw.Write( ( byte ) 0 ); //  V
-                                    bw.Write( ( short ) 0 ); //  washFB
-                                    bw.Write( ( byte ) 0 ); //  washUPR
-                                    bw.Write( ( byte ) 0 ); //  in_FB
-                                    bw.Write( ( byte ) 0 ); //  out_UPR
+                                //  Условия_работы_режима
+                                get_write_data( bw, obj.mode_mas[ i ], "Включать_устройства" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Выключать_устройства" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Верхний_флип" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Нижний_флип" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Отправляемые_сигналы" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Управляющие_устройствами_сигналы" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Зависящие_от_устройств_сигналы" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Использование_ключа" );
 
-                                    bw.Write( ( byte ) 0 ); //  Маршрут
-                                    }
-                                else
-                                    {
-                                    bw.Write( ( byte ) 0 ); //  ON
-                                    bw.Write( ( byte ) 0 ); //  OFF
-                                    bw.Write( ( byte ) 0 ); //  OFF_after
-                                    bw.Write( ( byte ) 0 ); //  U_FLIP
-                                    bw.Write( ( byte ) 0 ); //  L_FLIP
+                                //  Условия_выключения_режима
+                                get_write_data( bw, obj.mode_mas[ i ], "Выключающие_режим_сигналы" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Устройства_ВКЛ_по_завершению" );
 
-                                    bw.Write( ( byte ) 0 ); //  FB
-                                    bw.Write( ( byte ) 0 ); //  N
-                                    bw.Write( ( byte ) 0 ); //  V
-                                    bw.Write( ( short ) 0 ); //  washFB
-                                    bw.Write( ( byte ) 0 ); //  washUPR
-                                    bw.Write( ( byte ) 0 ); //  in_FB
-                                    bw.Write( ( byte ) 0 ); //  out_UPR
+                                //  Параметры
 
-                                    bw.Write( ( byte ) 0 ); //  Маршрут
-                                    }
+                                get_write_data( bw, obj.mode_mas[ i ], "Время_работы_режима" );
+                               
+                                get_write_data( bw, obj.mode_mas[ i ], "Номер_следующего_режима" );
+                               
+                                get_write_data( bw, obj.mode_mas[ i ], "Блокирующие_устройства" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Блокирующие_режимы_гребенок" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Блокирующие_режимы_танков" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Включить_режимы_танка" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Выключить_режимы_танка" );
 
-                                //get_write_data( bw, obj.mode_mas[ i ], "Сигналы", "Включающие_режим" );
-                                //get_write_data( bw, obj.mode_mas[ i ], "Сигналы", "Включающие_режим" );
-                                //get_write_data( bw, obj.mode_mas[ i ], "Сигналы", "Включающие_режим" );
+                                //bw.Write( ( byte ) 0 ); //  Маршрут
                                 }
 
                             //  Определяем сколько Танков
@@ -587,9 +465,9 @@ namespace visio_prj_designer
                         {
                         if ( obj.get_type() == ( int ) device.TYPES.T_TANK )
                             {
-                            bw.Write( ( byte ) obj.sub_type );                      // Подтип танка
-                            bw.Write( ( byte ) 0 );                                // Номер гребенки для танка
-                            bw.Write( ( byte ) ( obj.mode_mas.Count / 32 + 1 ) );  // Количество режимов
+                            bw.Write( ( byte ) obj.sub_type );                  // Подтип танка
+                            bw.Write( ( byte ) 0 );                             // Номер гребенки для танка
+                            bw.Write( ( byte ) obj.mode_mas.Count );            // Количество режимов
 
                             bw.Write( ( short ) obj.n );                                      // Номер танка
                             bw.Write( ( short )
@@ -598,30 +476,55 @@ namespace visio_prj_designer
                             bw.Write( ( short ) obj.timers );                                 // Кол-во таймеров
 
                             //  Проходим по режимам
-                            for ( int i = 0; i < ( obj.mode_mas.Count / 32 + 1 ) * 32; i++ )
+                            for ( int i = 0; i < obj.mode_mas.Count; i++ )
                                 {
-                                if ( i < obj.mode_mas.Count )
+                                //  Условия_включения_режима
+                                get_write_data( bw, obj.mode_mas[ i ], "Необходимые_для_ВКЛ_сигналы" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Включающие_режим_сигналы" );
+
+                                //  Условия_работы_режима
+                                get_write_data( bw, obj.mode_mas[ i ], "Включать_устройства" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Выключать_устройства" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Верхний_флип" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Нижний_флип" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Отправляемые_сигналы" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Управляющие_устройствами_сигналы" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Зависящие_от_устройств_сигналы" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Использование_ключа" );
+
+                                //  Условия_выключения_режима
+                                get_write_data( bw, obj.mode_mas[ i ], "Выключающие_режим_сигналы" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Устройства_ВКЛ_по_завершению" );
+
+                                //  Параметры
+                                get_write_data( bw, obj.mode_mas[ i ], "Время_работы_режима" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Номер_следующего_режима" );
+
+                                get_write_data( bw, obj.mode_mas[ i ], "Блокирующие_устройства" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Блокирующие_режимы_гребенок" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Блокирующие_режимы_танков" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Включить_режимы_танка" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Выключить_режимы_танка" );
+
+                                //bw.Write( ( byte ) 0 ); //  Маршрут
+
+                                bw.Write( ( byte ) obj.mode_mas[ i ].step.Count ); //  Количество шагов
+
+                                for ( int j = 0; j < obj.mode_mas[ i ].step.Count; j++ )
                                     {
-                                    //  "Параметры"      "Сигналы"          "Ограничения"
-                                    bw.Write( ( byte ) obj.mode_mas[ i ].step.Count ); //  Количество шагов
-
-                                    for ( int j = 0; j < obj.mode_mas[ i ].step.Count; j++ )
-                                        {
-                                        //get_write_data( bw, obj.mode_mas[ i ], "Устройства", "Включать" );
-                                        //get_write_data( bw, obj.mode_mas[ i ], "Устройства", "Выключать" );
-
-                                        get_write_data( bw, obj.mode_mas[ i ].step[ j ], "Устройства", "Включать" );
-                                        get_write_data( bw, obj.mode_mas[ i ].step[ j ], "Устройства", "Выключать" );
-
-                                        bw.Write( ( byte ) 0 );    //Следующий шаг при завершении времени текущего шага
-                                        bw.Write( ( byte ) 0 );    //Номер параметра, содержащий время шага, мин.                    
-                                        bw.Write( ( byte ) 0 );    //  Маршрут
-                                        }   //  for j
-                                    }
-                                else
-                                    {
-                                    bw.Write( ( byte ) 0 ); //  Количество шагов
-                                    }
+                                    //  Условия_работы_режима
+                                    get_write_data( bw, obj.mode_mas[ i ], "Включать_устройства" );
+                                    get_write_data( bw, obj.mode_mas[ i ], "Выключать_устройства" );
+                                    
+                                    //  Параметры
+                                    get_write_data( bw, obj.mode_mas[ i ], "Время_работы_режима" );
+                                    get_write_data( bw, obj.mode_mas[ i ], "Номер_следующего_режима" );
+                                               
+                                                                                                              
+                                    //bw.Write( ( byte ) 0 );    //Следующий шаг при завершении времени текущего шага
+                                    //bw.Write( ( byte ) 0 );    //Номер параметра, содержащий время шага, мин.                    
+                                    //bw.Write( ( byte ) 0 );    //  Маршрут
+                                    }   //  for j
                                 }   //  for i
                             }   
 
@@ -967,13 +870,157 @@ namespace visio_prj_designer
              }
          //-----------------------------------------------------------------------------------------
 
-         public void get_write_data( BinaryWriter bw, mode temp_mode, string part1, string part2 )
+         public void get_write_data( BinaryWriter bw, mode temp_mode, string part2 )
              {
              byte b;
              TreeNode temp_node;
-             device temp_dev;
+             device temp_dev, child_dev;
 
              temp_node = FindNode( temp_mode.TreeView_params.Nodes[ 0 ], part2 );
+
+             if ( temp_node == null )
+                 {
+                 bw.Write( ( byte ) 0 );
+                 return;
+                 }
+
+             b = ( byte ) temp_node.Nodes.Count;
+             bw.Write( b );  //  count
+
+             for ( int j = 0; j < b; j++ )
+                 {
+                 switch ( part2 )
+                     {
+                     // Значения
+                     case "Время_работы_режима":
+                     case "Номер_следующего_режима":
+
+                         //bw.Write( ( byte ) 0 );  //  none
+                         bw.Write( ( ushort ) Convert.ToUInt16( temp_node.Nodes[ j ].Text ) );  //  value
+
+                         break;
+
+                     // Режимы
+                     case "Блокирующие_режимы_гребенок":
+                     case "Блокирующие_режимы_танков":
+                     case "Включить_режимы_танка":
+                     case "Выключить_режимы_танка":
+
+                         //bw.Write( ( byte ) 0 );     //  object
+                         bw.Write( ( ushort ) temp_node.Nodes[ j ].ImageIndex );   //  mode
+
+                         break;
+
+                     // Устройства
+                     case "Необходимые_для_ВКЛ_сигналы":
+                     case "Включающие_режим_сигналы":
+
+                     case "Включать_устройства":
+                     case "Выключать_устройства":
+                     case "Верхний_флип":
+                     case "Нижний_флип":
+                     case "Отправляемые_сигналы":
+                     //case "Управляющие_устройствами_сигналы":
+                     //case "Зависящие_от_устройств_сигналы":
+                     case "Использование_ключа":
+
+                     case "Выключающие_режим_сигналы":
+                     case "Устройства_ВКЛ_по_завершению":
+
+                     case "Блокирующие_устройства":
+
+                         //  Находим устройство по имени
+                         temp_dev = Globals.visio_addin.g_devices.Find( delegate( device dev )
+                             {
+                                 return dev.get_name() == temp_node.Nodes[ j ].Text;
+                             }
+                             );
+
+                         if ( temp_dev != null )
+                             {
+                             bw.Write( ( byte ) temp_dev.Get_old_type() );  //  type
+                             bw.Write( ( ushort ) temp_dev.n );  //  no
+                             }
+                         else
+                             {
+                             bw.Write( ( byte ) 0 );  //  type
+                             bw.Write( ( ushort ) 0 );  //  no
+
+                             MessageBox.Show( "Устройство \""
+                                 + temp_node.Nodes[ j ].Text + "\" не было найдено!"
+                                 + "( " + temp_mode.name + " )" );
+                             }
+
+                         break;
+
+                     case "Управляющие_устройствами_сигналы":
+                     case "Зависящие_от_устройств_сигналы":
+
+                         //  Находим устройство по имени
+                         temp_dev = Globals.visio_addin.g_devices.Find( delegate( device dev )
+                             {
+                                 return dev.get_name() == temp_node.Nodes[ j ].Text;
+                             }
+                             );
+                         
+                         // Сразу проверяем наличие дочернего элемента
+                         if ( ( temp_dev != null ) && ( temp_node.Nodes[ j ].FirstNode != null ) )
+                             {
+                             // Parent device
+                             bw.Write( ( byte ) temp_dev.Get_old_type() );  //  type
+                             bw.Write( ( ushort ) temp_dev.n );  //  no
+                             
+                             //  Находим устройство, зависящее от "temp_dev"
+                             child_dev = Globals.visio_addin.g_devices.Find( delegate( device dev )
+                                 {
+                                     return dev.get_name() == temp_node.Nodes[ j ].FirstNode.Text;
+                                 }
+                                 );
+                             
+                             if ( child_dev != null )
+                                 {
+                                 // Child device
+                                 bw.Write( ( byte ) child_dev.Get_old_type() );  //  type
+                                 bw.Write( ( ushort ) child_dev.n );  //  no
+                                 }
+                             else
+                                 {
+                                 // Child device
+                                 bw.Write( ( byte ) 0 );    //  type
+                                 bw.Write( ( ushort ) 0 );  //  no
+
+                                 MessageBox.Show( "Дочернее устройство \""
+                                    + temp_node.Nodes[ j ].FirstNode.Text + "\" не было найдено!"
+                                    + "( " + temp_mode.name + " )" );
+                                 }
+                             }
+                         else
+                             {
+                             // Parent device
+                             bw.Write( ( byte ) 0 );  //  type
+                             bw.Write( ( ushort ) 0 );  //  no
+
+                             // Child device
+                             bw.Write( ( byte ) 0 );  //  type
+                             bw.Write( ( ushort ) 0 );  //  no
+
+                             MessageBox.Show( "Устройство \""
+                                 + temp_node.Nodes[ j ].Text + "\" не было найдено!"
+                                 + "( " + temp_mode.name + " )" );
+                             }
+
+                         break;
+                     }
+                 }
+
+/*
+             temp_node = FindNode( temp_mode.TreeView_params.Nodes[ 0 ], part2 );
+
+             if ( temp_node == null )
+                 {
+                 bw.Write( ( byte ) 0 );
+                 return;
+                 }
 
              b = ( byte ) temp_node.Nodes.Count;
              bw.Write( b );  //  count
@@ -1000,6 +1047,7 @@ namespace visio_prj_designer
                          + "( " + temp_mode.name + " )" );
                      }
                  }
+ */ 
              }
 
 

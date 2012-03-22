@@ -394,7 +394,8 @@ namespace visio_prj_designer
 
         private void visio_addin__DocumentSaved( Visio.Document target )
             {
-            if( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
+            if ( ( target.Type == Visio.VisDocumentTypes.visTypeDrawing )
+              && ( target.Template.Contains( "PTUSA project") ) )
                 {
                 Write_XML_description();
                 }
@@ -2124,6 +2125,8 @@ catch ( Exception )
 
         public void write_device_to_XML( XmlTextWriter tw, TreeNode node )
             {
+            int res;
+
             //  Проходим по устройствам
             for ( int l = 0; l < node.Nodes.Count; l++ )
                 {
@@ -2138,7 +2141,8 @@ catch ( Exception )
                 );
 
                 //  Проверяем есть ли это устройство еще на схеме
-                if ( cur_dev != null )
+                if (    cur_dev != null
+                    ||  Int32.TryParse( node.Nodes[ l ].Text, out res ) )
                     {
                     //  Если раскомментировать то устройства будут как папки в XML
                     //tw.WriteElementString( cur_dev.get_name(), null );

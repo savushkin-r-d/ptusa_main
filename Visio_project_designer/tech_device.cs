@@ -32,20 +32,10 @@ namespace tech_device
 
         public TreeView TreeView_params;
 
-        public List<device> on_device;	//	Устройства для включения
-        public List<device> off_device;	//	Устройства для выключения
+        //public List<device> on_device;	//	Устройства для включения
+        //public List<device> off_device;	//	Устройства для выключения
         //	...
-
-        //	Устройства флипования
-
-        //	Сигналы без которых нельзя вкл. режим
-        //	Сигналы автоматического вкл/выкл режима
-        //	Сигналы UPR (когда режим включен)
-        //	Сигналы ОС управляющие устройствами
-        //		Списки устройств (на вкл. и на выкл.)
-        //	Пары сигналов (дублирование)
-        //	...
-
+        
         public List<mode> step;		//	Шаги режима
 
         public mode( int no_ = 0, string name_ = "New mode" )
@@ -324,6 +314,108 @@ namespace tech_device
 			{
 			return ( int ) type;
 			}
+
+        public byte Get_old_type()
+            {
+            byte b = 0;
+
+            // Типы устройств не совпадают с типами в старом редакторе WAGO
+            switch ( type )
+                {
+                case TYPES.T_V:	//	Клапан
+
+                    //if ( Globals.visio_addin.g_devices[ i ].sub_type == 
+                    //    tech_device.device.SUB_TYPES.V_1_CONTROL_CHANNEL ) 
+                    b = ( byte ) tech_device.device.TDevType.dtV;
+
+                    if ( sub_type == SUB_TYPES.V_1_CONTROL_CHANNEL_1_FB )
+                        b = ( byte ) tech_device.device.TDevType.dtV1DO1DI;
+
+                    if ( sub_type == SUB_TYPES.V_1_CONTROL_CHANNEL_2_FB )
+                        b = ( byte ) tech_device.device.TDevType.dtV1DO2DI;
+
+                    if ( sub_type == SUB_TYPES.V_2_CONTROL_CHANNEL )
+                        b = ( byte ) tech_device.device.TDevType.dtV2DO;
+
+                    if ( sub_type == SUB_TYPES.V_2_CONTROL_CHANNEL_2_FB )
+                        b = ( byte ) tech_device.device.TDevType.dtV2DO2DI;
+
+                    if ( sub_type == SUB_TYPES.V_MIX_PROOF_3_UPR_2_FB )
+                        b = ( byte ) tech_device.device.TDevType.dtMix;
+
+                    if ( sub_type == SUB_TYPES.V_MIX_PROOF_AS_INTERFACE )
+                        b = ( byte ) tech_device.device.TDevType.dtASMix;
+
+                    break;
+
+                case TYPES.T_N:	//	Насос
+                    b = ( byte ) tech_device.device.TDevType.dtN1DO1DI;
+                    break;
+
+                case TYPES.T_MIX:	//	Мешалка
+                    b = ( byte ) tech_device.device.TDevType.dtM1DO1DI;
+                    break;
+
+                case TYPES.T_CTR:	//	Расходомер
+                    b = ( byte ) tech_device.device.TDevType.dtCTR;
+                    break;
+
+                case TYPES.T_TE:	//	Температура
+                    b = ( byte ) tech_device.device.TDevType.dtTE;
+                    break;
+
+                case TYPES.T_QE:	//	Концентратомер
+                    b = ( byte ) tech_device.device.TDevType.dtQE;
+                    break;
+
+                case TYPES.T_LS:	//	Гарничный уровень
+                    b = ( byte ) tech_device.device.TDevType.dtLS_ex;
+                    break;
+
+                case TYPES.T_LE:	//	Текущий уровень
+                    //  Уровни у нас 4-х типов
+                    b = ( byte )
+                        (
+                        ( ( byte ) tech_device.device.TDevType.dtLE1 ) +
+                        ( ( byte ) sub_type )
+                        );
+                    break;
+
+                case TYPES.T_FS:	//	Расход (есть/нет)
+                    b = ( byte ) tech_device.device.TDevType.dtFS;
+                    break;
+
+                case TYPES.T_FE:  //	Текущий расход
+                    b = ( byte ) tech_device.device.TDevType.dtFE;
+                    break;
+
+                case TYPES.T_FB:	//	Обратнся связь
+                    b = ( byte ) tech_device.device.TDevType.dtOS;
+                    break;
+
+                case TYPES.T_UPR:	//	Управляющий сигнал
+                    b = ( byte ) tech_device.device.TDevType.dtUpr;
+                    break;
+
+                case TYPES.T_AI:	//	Аналоговый вход
+                    b = ( byte ) tech_device.device.TDevType.dtAI;
+                    break;
+
+                case TYPES.T_AO:	//	Аналоговый выход
+                    b = ( byte ) tech_device.device.TDevType.dtAO;
+                    break;
+
+                //                        case ( int )tech_device.device.TYPES.T_FQT:	//	Расходомер и Концентратомер
+                //                            b = ( byte ) tech_device.device.TDevType.dt;
+                //                            break;
+
+                //                       case ( int )tech_device.device.TYPES.T_WTE:	//	Температура и Влажность
+                //                            b = ( byte ) tech_device.device.TDevType.dt;
+                //                            break;  
+                }
+
+            return ( byte ) b;
+            }
 
 
         /// <summary> Подтип устройства. </summary>
