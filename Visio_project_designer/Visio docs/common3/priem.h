@@ -150,8 +150,8 @@ class TMyComb: public error_tech_device
         int				tmrCnt;
         TParams			*par;
         TTimer			**TMR;
-        int				UseatOn;
-        int				LseatOn;
+        //int				UseatOn;
+        //int				LseatOn;
         unsigned long	*state;
 
 		////	Переменная времени для выключения UPR при отсутствии обратной связи с насосом.
@@ -271,6 +271,7 @@ class TTank : public error_tech_device
         unsigned long   state;
         TTimer          **TMR;
         int             no;
+		int				mode_cnt;
         char            PodTip;     //  подтип танка
 
         //-Для передачи данных в сервер.
@@ -346,9 +347,11 @@ class TTank : public error_tech_device
         int         GetMode       ( int mode ); 
         int         GetModeEx     ( int mode, ... );
 
-        virtual int Evaluate  ();
-        virtual int FinalMode ( int mode );
         virtual int InitMode  ( int mode );
+		virtual int Evaluate  ();
+        virtual int FinalMode ( int mode );
+        
+		void Key_Work( int i );
 
         virtual int InitParams();  //Инициализирует параметры в памяти 0.
         virtual int InitWorkParams();

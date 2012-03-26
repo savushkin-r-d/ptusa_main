@@ -2393,14 +2393,9 @@ int TWagoDrv::LoadDescrB(char *fn)
 
 				for ( i = 0; i < l; i++ )
 					{
-					//skip description
-					//BlockRead(df, &b, 1);      
-					//df->pos += b;
-
 #ifdef DEBUG
 					Print( "MODE %d :::::\n", i );
 #endif
-
 					//--------------------------------------------------------------
  					Read_list_dev( df, i, &Comb1->paths[ i ].FB_need, Comb1->paths[ i ].FB_need_Cnt );
  					Read_list_dev( df, i, &Comb1->paths[ i ].FB_on_mode, Comb1->paths[ i ].FB_on_mode_Cnt );
@@ -2455,16 +2450,74 @@ int TWagoDrv::LoadDescrB(char *fn)
 
 #ifdef DEBUG
 					Print( "-------------------------------------------\n" );
-					Getch();
 #endif
 					//	Данные по маршрутам (отсутствуют)
 					Comb1->paths[ i ].in_x = 0;
 					Comb1->paths[ i ].in_y = 0;
 					Comb1->paths[ i ].out_x = 0;
 					Comb1->paths[ i ].out_y = 0; 
-
+					}
+				}
+			else
+				{
+				//	if ( strcmp( id, "WG {4B714C08-9602-4130-8563-4B51E08BB9D7}" ) == 0 )
 /*
-					//ov length                    
+				BlockRead(df, &b1, 1);	    //	Mode SubType
+				//Print( "Mode SubType = %d \n", b1 );
+
+				BlockRead(df, &b, 1);		//	Mode count / 32 
+				l = b*32;
+				//Print( "Mode count = %i \n", l );
+
+				int comb_n;
+				BlockRead( df, ( u_char* ) &comb_n, 2 );	//	Tank number
+				//Print( "Tank number = %i \n", comb_n );
+
+				int comb_par_cnt;
+				BlockRead( df, ( u_char* ) &comb_par_cnt, 2 );	
+				//Print( "comb_par_cnt = %i \n", comb_par_cnt );
+
+				int comb_work_par_cnt;
+				BlockRead( df, ( u_char* ) &comb_work_par_cnt, 2 );
+				//Print( "comb_work_par_cnt = %i \n", comb_work_par_cnt );
+
+				int comb_tmr_cnt;
+				BlockRead( df, ( u_char* ) &comb_tmr_cnt, 2 );
+				//Print( "comb_tmr_cnt = %i \n", comb_tmr_cnt );
+
+
+				Comb1 = init_comb( b1, comb_n, b, comb_par_cnt,
+					comb_work_par_cnt, comb_tmr_cnt );
+
+				Comb1->paths = new TPathRec[ l ];  
+
+				for ( i = 0; i < l; i++ ) 
+					{
+					Comb1->paths[ i ].OVCnt=0;
+					Comb1->paths[ i ].CVCnt=0;
+					Comb1->paths[ i ].FVCnt=0;
+					Comb1->paths[ i ].USCnt=0;
+					Comb1->paths[ i ].LSCnt=0;
+					Comb1->paths[ i ].FBCnt=0;
+
+					Comb1->paths[ i ].washN = 0;
+					Comb1->paths[ i ].washV = 0; 
+					Comb1->paths[ i ].washFB = 0;
+
+					Comb1->paths[ i ].washUPRCnt = 0;
+
+					Comb1->paths[ i ].in_FB_cnt = 0;
+					Comb1->paths[ i ].in_FB_val = 0;
+					Comb1->paths[ i ].out_UPR_cnt = 0;
+					Comb1->paths[ i ].out_UPR_val = 0;
+					}
+
+				for ( i = 0; i < l; i++ )
+					{
+					//skip description
+					//BlockRead(df, &b, 1);      
+					//df->pos += b;
+					//ov length             
 					BlockRead(df, &b, 1);
 					Comb1->paths[ i ].OVCnt=b;
 #ifdef DEBUG
@@ -2711,319 +2764,7 @@ int TWagoDrv::LoadDescrB(char *fn)
 					Print( "%d ::: in: %d - %d   out: %d - %d \n", i, Comb1->paths[ i ].in_x, Comb1->paths[ i ].in_y,
 						Comb1->paths[ i ].out_x, Comb1->paths[ i ].out_y );														
 #endif		
-*/
 					}
-				}
-			else
-				{
-/*
-            BlockRead(df, &b1, 1);	    //	Mode SubType
-	Print( "Mode SubType = %d \n", b1 );
-
-            BlockRead(df, &b, 1);		//	Mode count / 32 
-            l = b*32;
-	Print( "Mode count = %i \n", l );
-
-            int comb_n;
-            BlockRead( df, ( u_char* ) &comb_n, 2 );	//	Tank number
-	Print( "Tank number = %i \n", comb_n );
-
-            int comb_par_cnt;
-            BlockRead( df, ( u_char* ) &comb_par_cnt, 2 );	
-	Print( "comb_par_cnt = %i \n", comb_par_cnt );
-
-            int comb_work_par_cnt;
-            BlockRead( df, ( u_char* ) &comb_work_par_cnt, 2 );
-	Print( "comb_work_par_cnt = %i \n", comb_work_par_cnt );
-
-            int comb_tmr_cnt;
-            BlockRead( df, ( u_char* ) &comb_tmr_cnt, 2 );
-	Print( "comb_tmr_cnt = %i \n", comb_tmr_cnt );
-
-
-            Comb1 = init_comb( b1, comb_n, b, comb_par_cnt,
-                comb_work_par_cnt, comb_tmr_cnt );
-
-            Comb1->paths = new TPathRec[ l ];  
-
-            for ( i = 0; i < l; i++ ) 
-                {
-                Comb1->paths[ i ].OVCnt=0;
-                Comb1->paths[ i ].CVCnt=0;
-                Comb1->paths[ i ].FVCnt=0;
-                Comb1->paths[ i ].USCnt=0;
-                Comb1->paths[ i ].LSCnt=0;
-                Comb1->paths[ i ].FBCnt=0;
-
-                Comb1->paths[ i ].washN = 0;
-                Comb1->paths[ i ].washV = 0; 
-                Comb1->paths[ i ].washFB = 0;
-
-                Comb1->paths[ i ].washUPRCnt = 0;
-
-                Comb1->paths[ i ].in_FB_cnt = 0;
-                Comb1->paths[ i ].in_FB_val = 0;
-                Comb1->paths[ i ].out_UPR_cnt = 0;
-                Comb1->paths[ i ].out_UPR_val = 0;
-                }
-
-			for ( i = 0; i < l; i++ )
-				{
-				//skip description
-				//BlockRead(df, &b, 1);      
-				//df->pos += b;
-				//ov length222222222222222222                    
-				BlockRead(df, &b, 1);
-				Comb1->paths[ i ].OVCnt=b;
-#ifdef DEBUG
-				if ( Comb1->paths[ i ].OVCnt ) Print( "[%3d] O- ", i );	
-#endif	
-
-                //alloc memory
-                Comb1->paths[ i ].OV = (int *)malloc(Comb1->paths[ i ].OVCnt*sizeof(int));
-                if (Comb1->paths[ i ].OV == NULL && Comb1->paths[ i ].OVCnt > 0) 
-					{
-					__ErrDscr(EMEM); 
-#pragma warn -eff
-					while (1) ;
-#pragma warn .eff
-					}
-
-                for ( j = 0; j < Comb1->paths[ i ].OVCnt; j++ ) 
-                    {
-                    BlockRead(df, (unsigned char *)&w, 2);
-                    Comb1->paths[ i ].OV[ j ] = w;
-#ifdef DEBUG
-                    Print( "%u;\t", w );	
-#endif
-                    };
-#ifdef DEBUG
-                if ( j ) Print( "\n" );	
-#endif              
-                //cv length
-                BlockRead(df, &b, 1);
-                Comb1->paths[ i ].CVCnt=b;
-                //alloc memory
-                Comb1->paths[ i ].CV = (int *)malloc(Comb1->paths[ i ].CVCnt*sizeof(int));
-                if (Comb1->paths[ i ].CV == NULL && Comb1->paths[ i ].CVCnt>0) 
-					{
-					__ErrDscr(EMEM);
-#pragma warn -eff
-					while (1) ;
-#pragma warn .eff
-					}
-
-#ifdef DEBUG
-                if ( 0 == Comb1->paths[ i ].OVCnt && Comb1->paths[ i ].CVCnt ) Print( "[%3d] C- ", i );
-                if ( Comb1->paths[ i ].OVCnt && Comb1->paths[ i ].CVCnt ) Print( "      C- ", i );
-
-#endif	
-                for ( j = 0; j < Comb1->paths[ i ].CVCnt; j++ )
-                    {
-                    BlockRead(df, (unsigned char *)&w, 2);
-                    Comb1->paths[ i ].CV[j]=w;
-#ifdef DEBUG
-                    Print( "%u;\t", w );	
-#endif
-                    };
-#ifdef DEBUG
-                if ( j ) Print( "\n" );	
-#endif
-                //fv length
-                BlockRead(df, &b, 1);
-                Comb1->paths[ i ].FVCnt=b;
-                //alloc mem
-                Comb1->paths[ i ].FV = (int *)malloc(Comb1->paths[ i ].FVCnt*sizeof(int));
-                if (Comb1->paths[ i ].FV == NULL && Comb1->paths[ i ].FVCnt>0) 
-					{
-					__ErrDscr(EMEM); 
-#pragma warn -eff
-					while (1) ;
-#pragma warn .eff
-					}
-
-                for (j=0; j<Comb1->paths[ i ].FVCnt; j++) 
-                    {
-                    BlockRead(df, (unsigned char *)&w, 2);
-                    Comb1->paths[ i ].FV[j]=w;
-                    };
-
-//                 #ifdef DEBUG
-//                 Print("i = %d", i);
-//                 #endif
-
-                //us length
-                BlockRead(df, &b, 1);
-                Comb1->paths[ i ].USCnt=b;
-                //alloc mem
-                Comb1->paths[ i ].US=(int *)malloc(Comb1->paths[ i ].USCnt*sizeof(int));
-                if (Comb1->paths[ i ].US==NULL && Comb1->paths[ i ].USCnt>0) 
-					{
-					__ErrDscr(EMEM); 
-#pragma warn -eff
-					while (1) ;
-#pragma warn .eff
-					}
-
-                for (j=0; j<Comb1->paths[ i ].USCnt; j++) 
-                    {
-                    BlockRead(df, (unsigned char *)&w, 2);
-                    Comb1->paths[ i ].US[j]=w;
-                    };
-
-                //ls length
-                BlockRead(df, &b, 1);
-                Comb1->paths[ i ].LSCnt=b;
-                //alloc mem
-                Comb1->paths[ i ].LS=(int *)malloc(Comb1->paths[ i ].LSCnt*sizeof(int));
-                if (Comb1->paths[ i ].LS==NULL && Comb1->paths[ i ].LSCnt>0)
-					{
-					__ErrDscr(EMEM); 
-#pragma warn -eff
-					while (1) ;
-#pragma warn .eff
-					}
-
-                for (j=0; j<Comb1->paths[ i ].LSCnt; j++) 
-                    {
-                    BlockRead(df, (unsigned char *)&w, 2);
-                    Comb1->paths[ i ].LS[j]=w;
-                    };
-
-                //fb length
-                BlockRead(df, &b, 1);
-                Comb1->paths[ i ].FBCnt=b;      
-                //alloc mem
-                Comb1->paths[ i ].FB=(int *)malloc(Comb1->paths[ i ].FBCnt*sizeof(int));
-                if (Comb1->paths[ i ].FB==NULL && Comb1->paths[ i ].FBCnt>0)
-					{
-					__ErrDscr(EMEM); 
-#pragma warn -eff
-					while (1) ;
-#pragma warn .eff
-					}				
-
-                for (j=0; j<Comb1->paths[ i ].FBCnt; j++)
-                    {
-                    BlockRead(df, (unsigned char *)&w, 2);
-                    Comb1->paths[ i ].FB[j]=w;        
-                    }      
-
-                // N length
-                BlockRead(df, &b, 1);
-                Comb1->paths[ i ].washNCnt = b;
-
-                //alloc mem
-                Comb1->paths[ i ].washN =(int *)malloc( Comb1->paths[ i ].washNCnt * sizeof(int) );
-                if (Comb1->paths[ i ].washN == NULL && Comb1->paths[ i ].washNCnt > 0)
-					{
-					__ErrDscr(EMEM); 
-#pragma warn -eff
-					while (1) ;
-#pragma warn .eff
-					}
-
-                for ( j = 0; j < Comb1->paths[ i ].washNCnt; j++) 
-                    {
-                    BlockRead( df, (unsigned char *)&w, 2);
-                    Comb1->paths[ i ].washN[ j ] = w;
-
-#ifdef DEBUG
-                    Print( "Path[ %d ].N[ %d ] : %u \n", i, j, w );
-#endif        
-                    }
-
-                // V length
-                BlockRead(df, &b, 1);
-                Comb1->paths[ i ].washVCnt = b;
-
-                //alloc mem
-                Comb1->paths[ i ].washV =(int *)malloc( Comb1->paths[ i ].washVCnt * sizeof(int) );
-                if (Comb1->paths[ i ].washV == NULL && Comb1->paths[ i ].washVCnt > 0)
-					{
-					__ErrDscr(EMEM); 
-#pragma warn -eff
-					while (1) ;
-#pragma warn .eff
-					}				
-
-                for ( j = 0; j < Comb1->paths[ i ].washVCnt; j++) 
-                    {
-                    BlockRead( df, (unsigned char *)&w, 2);
-                    Comb1->paths[ i ].washV[ j ] = w;
-
-#ifdef DEBUG
-                    Print( "Path[ %d ].V[ %d ] : %u \n", i, j, w );
-#endif        
-                    }
-
-                BlockRead(df, (unsigned char *)&w, 2);
-                Comb1->paths[ i ].washFB = w;  
-
-                BlockRead(df, (unsigned char *)&b, 1);
-                Comb1->paths[ i ].washUPRCnt = b;  
-                Comb1->paths[ i ].washUPR = new int[ b ];
-                for ( j = 0; j < Comb1->paths[ i ].washUPRCnt; j++) 
-                    {
-                    BlockRead( df, (unsigned char *)&w, 2);
-                    Comb1->paths[ i ].washUPR[ j ] = w;
-
-#ifdef DEBUG
-                    Print( "Path[ %d ].UPR mode OK [ %d ] : %u \n", i, j, w );
-#endif        
-                    }
-
-                BlockRead(df, (unsigned char *)&b, 1);
-
-                Comb1->paths[ i ].in_FB_cnt = b;  
-                Comb1->paths[ i ].in_FB_val = new int[ b ];
-                for ( j = 0; j < Comb1->paths[ i ].in_FB_cnt; j++) 
-                    {
-                    BlockRead( df, (unsigned char *)&w, 2);
-                    Comb1->paths[ i ].in_FB_val[ j ] = w;
-#ifdef DEBUG
-                    Print( "Path[ %d ].in FB [ %d ] : %u \n", i, j, w );
-#endif        
-                    }
-
-                BlockRead(df, (unsigned char *)&b, 1);
-                Comb1->paths[ i ].out_UPR_cnt = b;  
-                Comb1->paths[ i ].out_UPR_val = new int[ b ];
-                for ( j = 0; j < Comb1->paths[ i ].out_UPR_cnt; j++) 
-                    {
-                    BlockRead( df, (unsigned char *)&w, 2);
-                    Comb1->paths[ i ].out_UPR_val[ j ] = w;
-#ifdef DEBUG
-                    Print( "Path[ %d ].out UPR [ %d ] : %u \n", i, j, w );
-#endif        
-                    }
-
-                // Cчитывание параметров режима, связанных с маршрутом гребенки.
-                BlockRead(df, &b1, 1);
-                if ( b1 == 1 )
-                    {
-                    BlockRead(df, &b, 1);
-                    Comb1->paths[ i ].in_x = b;
-                    BlockRead(df, &b, 1);
-                    Comb1->paths[ i ].in_y = b;
-                    BlockRead(df, &b, 1);
-                    Comb1->paths[ i ].out_x = b;
-                    BlockRead(df, &b, 1);
-                    Comb1->paths[ i ].out_y = b; 
-                    }
-                else
-                    {
-                    Comb1->paths[ i ].in_x = 0;
-                    Comb1->paths[ i ].in_y = 0;
-                    Comb1->paths[ i ].out_x = 0;
-                    Comb1->paths[ i ].out_y = 0; 
-                    }	
-#ifdef DEBUG
-                //  Выводим маршрут режима 
-                Print( "%d ::: in: %d - %d   out: %d - %d \n", i, Comb1->paths[ i ].in_x, Comb1->paths[ i ].in_y,
-                    Comb1->paths[ i ].out_x, Comb1->paths[ i ].out_y );														
-#endif		
-                }
 */
 				}
 
@@ -3050,15 +2791,6 @@ int TWagoDrv::LoadDescrB(char *fn)
             return 0;
             };																  
 
-// 		devpos = df->pos;
-// 		for ( j = 0; j < 13; j++ )
-// 			{
-// 			BlockRead( df, &b, 1 );
-// 			Print("%d ", b );
-// 			}
-// 		Getch();
-// 		df->pos=devpos;	
-
         //=====	Читаем данные по танкам	=====================================														  													
         //Tank paths	
         BlockRead( df, &b, 1 );	//	Tank count
@@ -3081,8 +2813,8 @@ int TWagoDrv::LoadDescrB(char *fn)
 
         g_tanks = new TTank* [ TTank::TankCnt ];
 
-        int open_device[ 256 ]; 
-        int close_device[ 256 ];
+        dev_elem open_device[ 256 ]; 
+        dev_elem close_device[ 256 ];
         for ( m = 0; m < TTank::TankCnt; m++ )
 			{	
 			if ( strcmp( id, "WG {4B714C08-9602-4130-8563-4B51E08BB9D8}" ) == 0 )
@@ -3118,10 +2850,11 @@ int TWagoDrv::LoadDescrB(char *fn)
 				Tank1->comb_n = tank_comb_type;
 				Tank1->PodTip = tank_sub_type;
 
+				Tank1->mode_cnt = tank_mode_cnt;
+
 #ifdef DEBUG
 				Print("[%d] tank N[%d], type[%d]\n", m, Tank1->no, tank_sub_type );
 				Print( "Memory free: %lu bytes.\n", ( unsigned long ) coreleft() );
-				//Getch();
 #endif
 
 				Tank1->paths = new TPathRec[ tank_mode_cnt ];  
@@ -3159,8 +2892,7 @@ int TWagoDrv::LoadDescrB(char *fn)
 					Tank1->paths[ i ].On_mode_Cnt		= 0;
 					Tank1->paths[ i ].Off_mode_Cnt		= 0;	
 					}
-
-
+				
 				int step_count;
 				for ( i = 0; i < tank_mode_cnt; i++ ) 
 					{ 
@@ -3207,11 +2939,14 @@ int TWagoDrv::LoadDescrB(char *fn)
 
 #ifdef DEBUG
 					Print( "-------------------------------------------\n" );
-					//Getch();
 #endif					
 					  
 					BlockRead( df, &b, 1 );	//	Step count
 					step_count = b;
+
+#ifdef DEBUG
+					Print( "step_count = %d \n", step_count );
+#endif	
 
 #if !defined NO_TANKS_MODE
 					if ( step_count ) Tank1->modes_manager->set_mode_config( i, step_count );
@@ -3227,8 +2962,10 @@ int TWagoDrv::LoadDescrB(char *fn)
 						for ( j = 0; j < open_dev_cnt; j++ ) 
 							{
 							BlockRead( df, &b, 1 );	//	dev type
+							open_device[ j ].type = ( devType ) b; 
+
 							BlockRead( df, ( u_char* )&w, 2 );
-							open_device[ j ] = w; 
+							open_device[ j ].no = w; 
 							}
 
 						BlockRead( df, &b, 1 );
@@ -3237,7 +2974,138 @@ int TWagoDrv::LoadDescrB(char *fn)
 						for ( j = 0; j < close_dev_cnt; j++ ) 
 							{
 							BlockRead( df, &b, 1 );	//	dev type
+							open_device[ j ].type = ( devType ) b; 
+							
 							BlockRead( df, ( u_char* )&w, 2 );
+							close_device[ j ].no = w; 
+							}
+
+						unsigned char	x1, y1, x2, y2; 
+						uint temp, temp1;
+
+						Read_Value( df, temp );		//	Время режима (номер параметра)
+						Read_Value( df, temp1 );	//	Номер следующего шага
+
+						b = ( byte ) temp;
+						b1 = ( byte ) temp1;
+											 
+						// Cчитывание параметров шага, связанных с маршрутом гребенки.
+						x1 = 0;
+						y1 = 0;
+						x2 = 0;
+						y2 = 0;
+              		   
+#if !defined NO_TANKS_MODE
+						Tank1->modes_manager->set_step_config( 
+							i,                          //Режим.
+							k,                          //Шаг.
+							close_dev_cnt,              //Количество закрываемых устройств.
+							open_dev_cnt,               //Количество открываемых устройств.
+							b1,                         //Следующий шаг при завершении времени текущего шага.
+							b,                          //Номер параметра, содержащий время шага, мин.
+							x1,                         //Координаты входа
+							y1,                         //
+							x2,                         //Координаты выхода
+							y2                          //
+							);
+
+						for ( j = 0; j < open_dev_cnt; j++ ) 
+							{
+							Tank1->modes_manager->add_opened_dev( i, k, (TVDO*) DEV( open_device[ j ] ) );
+							}   
+
+						for ( j = 0; j < close_dev_cnt; j++ ) 
+							{
+							Tank1->modes_manager->add_closed_dev( i, k, (TVDO*) DEV( close_device[ j ] ) );
+							}  
+#endif //NO_TANKS_MODE                
+
+						}   //  Проходим по шагам
+					}   //  Проходим по режимам
+				g_tanks[ m ] = Tank1;     
+				   
+// #ifdef DEBUG
+// 				Print( "===================== TANK %d \n", m );
+// 				Getch();
+// #endif // DEBUG
+					   
+
+#ifdef USE_SIMPLE_DEV_ERRORS
+				g_dev_errors_manager->add_error( new tech_dev_error( Tank1 ) );
+#endif // USE_SIMPLE_DEV_ERRORS
+
+				}
+			else
+				{
+				//	Для "WG {4B714C08-9602-4130-8563-4B51E08BB9D7}" 
+/*
+				char tank_sub_type;
+				BlockRead(df, &tank_sub_type, 1);	//	Tank SubType                
+				char tank_comb_type;
+				BlockRead(df, &tank_comb_type, 1);	//	Comb type for Tank                
+				char tank_mod_cnt;
+				BlockRead( df, &tank_mod_cnt, 1 );	//	Mode count                
+				if ( tank_mod_cnt < 32 ) 
+					{
+					tank_mod_cnt = tank_mod_cnt * 32; 
+#ifdef DEBUG
+					Print( "Tank mode count = %d \n", tank_mod_cnt  );
+#endif 
+					}                
+
+				int tank_n;
+				BlockRead( df, ( u_char* ) &tank_n, 2 );	//	Tank number
+				int tank_par_cnt;
+				BlockRead( df, ( u_char* ) &tank_par_cnt, 2 );	
+				int tank_work_par_cnt;
+				BlockRead( df, ( u_char* ) &tank_work_par_cnt, 2 );
+				int tank_tmr_cnt;
+				BlockRead( df, ( u_char* ) &tank_tmr_cnt, 2 );
+
+#ifdef DEBUG
+				Print( "Before init tank\n" );
+				Print( " %d %d %d %d %d\n", tank_sub_type, tank_n, tank_par_cnt,
+					tank_work_par_cnt, tank_tmr_cnt );
+				//Getch();
+#endif
+				Tank1 = init_tank( tank_sub_type, tank_n, tank_par_cnt,
+					tank_work_par_cnt, tank_tmr_cnt );
+				Tank1->comb_n = tank_comb_type;
+				Tank1->PodTip = tank_sub_type;
+
+#ifdef DEBUG
+				Print("[%d] tank N[%d], type[%d]\n", m, Tank1->no, tank_sub_type );
+				Print( "Memory free: %lu bytes.\n", ( unsigned long ) coreleft() );
+				//Getch();
+#endif
+
+				int step_count;
+				for ( i = 0; i < tank_mod_cnt; i++ ) 
+					{   
+					BlockRead( df, &b, 1 );	//	Step count
+					step_count = b;
+
+#if !defined NO_TANKS_MODE
+					if ( step_count ) Tank1->modes_manager->set_mode_config( i, step_count );
+#endif //NO_TANKS_MODE                
+
+					for ( int k = 0; k < step_count; k++ )
+						{		  
+						BlockRead( df, &b, 1 );
+						u_char open_dev_cnt = b;
+
+						for ( j = 0; j < open_dev_cnt; j++ ) 
+							{
+							BlockRead( df, ( unsigned char * )&w, 2 );
+							open_device[ j ] = w; 
+							}
+
+						BlockRead( df, &b, 1 );
+						u_char close_dev_cnt = b;
+
+						for ( j = 0; j < close_dev_cnt; j++ ) 
+							{
+							BlockRead( df, ( unsigned char * )&w, 2 );
 							close_device[ j ] = w; 
 							}
 						//#ifdef DEBUG
@@ -3251,28 +3119,25 @@ int TWagoDrv::LoadDescrB(char *fn)
 
 						unsigned char	x1, y1, x2, y2; 
 
-						Read_Value( df, Tank1->paths[ i ].work_time_par );
-						Read_Value( df, Tank1->paths[ i ].next_mode );
-
-						b = ( byte ) Tank1->paths[ i ].next_mode;
-						b1 = ( byte ) Tank1->paths[ i ].work_time_par;
+						BlockRead( df, &b, 1 );     //Следующий шаг при завершении времени текущего шага
+						BlockRead( df, &b1, 1 );    //Номер параметра, содержащий время шага, мин.                    
 
 						// Cчитывание параметров шага, связанных с маршрутом гребенки.
-// 						BlockRead(df, &b2, 1);
-// 						if ( b2 == 1 )
-// 							{
-// 							BlockRead( df, &x1, 1 );
-// 							BlockRead( df, &y1, 1 );
-// 							BlockRead( df, &x2, 1 );
-// 							BlockRead( df, &y2, 1 );
-// 							}
-// 						else
-// 							{
+						BlockRead(df, &b2, 1);
+						if ( b2 == 1 )
+							{
+							BlockRead( df, &x1, 1 );
+							BlockRead( df, &y1, 1 );
+							BlockRead( df, &x2, 1 );
+							BlockRead( df, &y2, 1 );
+							}
+						else
+							{
 							x1 = 0;
 							y1 = 0;
 							x2 = 0;
 							y2 = 0;
-//							}	                 
+							}	                 
 
 #if !defined NO_TANKS_MODE
 						Tank1->modes_manager->set_step_config( 
@@ -3306,7 +3171,7 @@ int TWagoDrv::LoadDescrB(char *fn)
 
 #ifdef DEBUG
 				Print( "===================== TANK %d \n", m );
-				//Getch();
+				Getch();
 #endif // DEBUG
 
 
@@ -3314,154 +3179,7 @@ int TWagoDrv::LoadDescrB(char *fn)
 #ifdef USE_SIMPLE_DEV_ERRORS
 				g_dev_errors_manager->add_error( new tech_dev_error( Tank1 ) );
 #endif // USE_SIMPLE_DEV_ERRORS
-
 				}
-			else
-				{
-//	Для "WG {4B714C08-9602-4130-8563-4B51E08BB9D7}" 
-/*
-char tank_sub_type;
-BlockRead(df, &tank_sub_type, 1);	//	Tank SubType                
-char tank_comb_type;
-BlockRead(df, &tank_comb_type, 1);	//	Comb type for Tank                
-char tank_mod_cnt;
-BlockRead( df, &tank_mod_cnt, 1 );	//	Mode count                
-if ( tank_mod_cnt < 32 ) 
-{
-tank_mod_cnt = tank_mod_cnt * 32; 
-#ifdef DEBUG
-Print( "Tank mode count = %d \n", tank_mod_cnt  );
-#endif 
-}                
-
-int tank_n;
-BlockRead( df, ( u_char* ) &tank_n, 2 );	//	Tank number
-int tank_par_cnt;
-BlockRead( df, ( u_char* ) &tank_par_cnt, 2 );	
-int tank_work_par_cnt;
-BlockRead( df, ( u_char* ) &tank_work_par_cnt, 2 );
-int tank_tmr_cnt;
-BlockRead( df, ( u_char* ) &tank_tmr_cnt, 2 );
-
-#ifdef DEBUG
-Print( "Before init tank\n" );
-Print( " %d %d %d %d %d\n", tank_sub_type, tank_n, tank_par_cnt,
-tank_work_par_cnt, tank_tmr_cnt );
-//Getch();
-#endif
-Tank1 = init_tank( tank_sub_type, tank_n, tank_par_cnt,
-tank_work_par_cnt, tank_tmr_cnt );
-Tank1->comb_n = tank_comb_type;
-Tank1->PodTip = tank_sub_type;
-
-#ifdef DEBUG
-Print("[%d] tank N[%d], type[%d]\n", m, Tank1->no, tank_sub_type );
-Print( "Memory free: %lu bytes.\n", ( unsigned long ) coreleft() );
-//Getch();
-#endif
-
-int step_count;
-for ( i = 0; i < tank_mod_cnt; i++ ) 
-{   
-BlockRead( df, &b, 1 );	//	Step count
-step_count = b;
-
-#if !defined NO_TANKS_MODE
-if ( step_count ) Tank1->modes_manager->set_mode_config( i, step_count );
-#endif //NO_TANKS_MODE                
-
-for ( int k = 0; k < step_count; k++ )
-{		  
-BlockRead( df, &b, 1 );
-u_char open_dev_cnt = b;
-
-for ( j = 0; j < open_dev_cnt; j++ ) 
-{
-BlockRead( df, ( unsigned char * )&w, 2 );
-open_device[ j ] = w; 
-}
-
-BlockRead( df, &b, 1 );
-u_char close_dev_cnt = b;
-
-for ( j = 0; j < close_dev_cnt; j++ ) 
-{
-BlockRead( df, ( unsigned char * )&w, 2 );
-close_device[ j ] = w; 
-}
-//#ifdef DEBUG
-//                    Print( "mode %d, step %d, cnt_close %d, cnt_open %d\n",
-//                        i,                         //Режим.
-//                        k,                         //Шаг.
-//                        close_dev_cnt,             //Количество закрываемых устройств.
-//                        open_dev_cnt               //Количество открываемых устройств.
-//                        );
-//#endif // DEBUG
-
-unsigned char	x1, y1, x2, y2; 
-
-BlockRead( df, &b, 1 );     //Следующий шаг при завершении времени текущего шага
-BlockRead( df, &b1, 1 );    //Номер параметра, содержащий время шага, мин.                    
-
-// Cчитывание параметров шага, связанных с маршрутом гребенки.
-BlockRead(df, &b2, 1);
-if ( b2 == 1 )
-{
-BlockRead( df, &x1, 1 );
-BlockRead( df, &y1, 1 );
-BlockRead( df, &x2, 1 );
-BlockRead( df, &y2, 1 );
-}
-else
-{
-x1 = 0;
-y1 = 0;
-x2 = 0;
-y2 = 0;
-}	                 
-
-#if !defined NO_TANKS_MODE
-Tank1->modes_manager->set_step_config( 
-i,                          //Режим.
-k,                          //Шаг.
-close_dev_cnt,              //Количество закрываемых устройств.
-open_dev_cnt,               //Количество открываемых устройств.
-b,                          //Следующий шаг при завершении времени текущего шага.
-b1,                         //Номер параметра, содержащий время шага, мин.
-x1,                         //Координаты входа
-y1,                         //
-x2,                         //Координаты выхода
-y2                          //
-);
-
-for ( j = 0; j < open_dev_cnt; j++ ) 
-{
-Tank1->modes_manager->add_opened_dev( i, k, V( open_device[ j ] ) );
-}   
-
-for ( j = 0; j < close_dev_cnt; j++ ) 
-{
-Tank1->modes_manager->add_closed_dev( i, k, V( close_device[ j ] ) );
-}  
-#endif //NO_TANKS_MODE                
-
-}   //  Проходим по шагам
-}   //  Проходим по режимам
-g_tanks[ m ] = Tank1;     
-
-
-#ifdef DEBUG
-Print( "===================== TANK %d \n", m );
-Getch();
-#endif // DEBUG
-
-
-
-#ifdef USE_SIMPLE_DEV_ERRORS
-g_dev_errors_manager->add_error( new tech_dev_error( Tank1 ) );
-#endif // USE_SIMPLE_DEV_ERRORS
-
-}
 */
 				}
 			}	//	for m = [0..TankCnt]
@@ -3541,15 +3259,6 @@ g_dev_errors_manager->add_error( new tech_dev_error( Tank1 ) );
 			fclose7188(df);
 			return 0;
 			}
-
-		//devpos = df->pos;
-		//for ( j = 0; j < 50; j++ )
-		//	{
-		//	BlockRead( df, &b, 1 );
-		//	Print("%d ", b );
-		//	}
-		//Getch();
-		//df->pos=devpos;	
 
         //Имена режимов гребенок.
         //[ 0 ] - количество гребенок
@@ -3702,7 +3411,7 @@ g_dev_errors_manager->add_error( new tech_dev_error( Tank1 ) );
 				}
 			}			
 #ifdef DEBUG
-			Print( "    value = %u \n", value );
+			//Print( "    value = %u \n", value );
 #endif  
 		
 		}
@@ -3747,33 +3456,6 @@ g_dev_errors_manager->add_error( new tech_dev_error( Tank1 ) );
 			}
 		}
 //-----------------------------------------------------------------------------
-//	dev_elem* TWagoDrv::Read_list_dev( FILE7188	*df, int mode, dev_elem *Dev_list, int &Dev_cnt )
-//		{
-//		unsigned char b;
-//		unsigned int w;
-//
-//		BlockRead(df, &b, 1);
-//		Dev_cnt = b; 
-//		Dev_list = new dev_elem[ Dev_cnt ];
-//
-//#ifdef DEBUG
-//		Print( "MODE[ %d ].Dev_cnt = %d \n", mode, Dev_cnt );
-//#endif
-//
-//		for ( int j = 0; j < Dev_cnt; j++) 
-//			{
-//			BlockRead(df, &b, 1);					//	device type
-//			Dev_list[ j ].type = devType( b );
-//
-//			BlockRead(df, (unsigned char *)&w, 2);	//	device number
-//			Dev_list[ j ].no = w;
-//#ifdef DEBUG
-//			Print( "    DEV[ %d ]( %d ): %u \n", j, b, w );
-//#endif        
-//			}
-//
-//		return Dev_list;
-//		}
 
 	void TWagoDrv::Read_list_dev( FILE7188 *df, int mode, dev_elem **Dev_list, int &Dev_cnt )
 		{
@@ -3800,7 +3482,6 @@ g_dev_errors_manager->add_error( new tech_dev_error( Tank1 ) );
 #endif        
 			}
 		}
-
 //-----------------------------------------------------------------------------
 
 	void TWagoDrv::Read_dual_list( 

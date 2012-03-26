@@ -20,7 +20,12 @@ extern comb         *g_greb;
 
 int TTank::TankCnt = 0;				
 int TMyComb::CombCnt = 0;
+
+int	UseatOn;
+int	LseatOn;
+
 //-----------------------------------------------------------------------------
+
 int IsAnyMode( int mode, int lastTankN ) 
     {    
     int res = -1;
@@ -413,22 +418,14 @@ int TTank::InitWorkParams( )
     return 0;
     }
 //-----------------------------------------------------------------------------
+
 int TTank::InitMode( int mode )
     {
+	int i;
+
 #ifdef DEBUG
-	Print( "MODE[ %d ] - Open Device: ", mode );
-
-	for ( int i = 0; i < paths[ mode ].OVCnt; i++ )
-		{	
-		Print( " %d, ", paths[ mode ].OV[ i ].no );
-		}
-
-	Print( "\nMODE[ %d ] - Close Device: ", mode );
-
-	for ( i = 0; i < paths[ mode ].CVCnt; i++ )
-		{	
-		Print( " %d, ", paths[ mode ].CV[ i ].no );
-		}
+	modes_manager->print();
+	//Getch();
 #endif
 
 
@@ -446,6 +443,13 @@ int TTank::InitMode( int mode )
 #endif // USE_SIMPLE_DEV_ERRORS
 
 			return ( -paths[ mode ].FB_need[ i ].no );
+			}
+
+		//	Если для этого режима задан ключ, то задаем началные параметры
+		if ( paths[ mode ].Key_signal_Cnt > 0 )
+			{
+			paths[ mode ].lamp_blink_start_time = MyGetMS();
+			paths[ mode ].DT_time = MyGetMS( );
 			}
 		}
 
@@ -466,10 +470,10 @@ int TTank::InitMode( int mode )
 
 int TTank::Evaluate( )
     {
-    int i;  
+    int i, j;  
 	
 	//	Выключаем флипование во всех устройствах (см. по таймеру)
-	for ( i = 0; i < statesCnt; i++ )
+	for ( i = 0; i < mode_cnt; i++ )
 		{
 		if ( GetMode( i ) && ( UseatOn == 0 ) && ( LseatOn == 0 ) )
 			{
@@ -478,7 +482,7 @@ int TTank::Evaluate( )
 			}
 		}	
 	  
-    for ( i = 0; i < 32; i++ ) 
+    for ( i = 0; i < mode_cnt; i++ ) 
         {
         if ( GetMode( i ) ) 
             {
@@ -636,14 +640,160 @@ int TTank::Evaluate( )
 
 int TTank::FinalMode( int mode )
 	{
+	int j;
+
 	//Инициализация времени  режима.
 	if ( 0 == state ) modeStartTime[ 32 ] = MyGetMS( );
 	isModeEvaluationTimeLeft[ mode ] = 0;    
+
+
+	//	Включаемые устройства
+	for ( j = 0; j < paths[ mode ].OVCnt; j++ )
+		{
+		DEV( paths[ mode ].OV[ j ] )->Off();
+		}
+
+	//	Флипование верхними седлами микспруфов
+	for ( j = 0; j < paths[ mode ].USCnt; j++ )
+		{
+		DEV( paths[ mode ].US[ j ] )->Off();
+		}
+
+	//	Флипование нижними седлами микспруфов
+	for ( j = 0; j < paths[ mode ].LSCnt; j++ )
+		{
+		DEV( paths[ mode ].LS[ j ] )->Off();
+		} 
+
+	//	Подаем управляющие сигналы
+	for ( j = 0; j < paths[ mode ].UPRCnt; j++)
+		{                    
+		DEV( paths[ mode ].UPR[ j ] )->Off();                    
+		}
+
+	//	Управляющие устройствами сигналы          
+	for ( j = 0; j < paths[ mode ].FB_control_Cnt; j++ )
+		{							
+		DEV( paths[ mode ].FB_control_dev[ j ] )->Off( );
+		}
+
+	//	Включаемые по завершению устройства
+	for ( j = 0; j < paths[ mode ].FVCnt; j++ ) 
+		{
+		DEV( paths[ mode ].FV[ j ])->On();
+		}
+
 
 #if !defined NO_TANKS_MODE
 	modes_manager->final( mode );
 #endif // NO_TANKS_MODE
 	return 0;
+	}
+//-----------------------------------------------------------------------------
+
+void TTank::Key_Work( int i )
+	{
+	key_btn_Drain	= DEV( paths[ i ].Key_signal[ 0 ] ); 
+	key_btn_Tank	= DEV( paths[ i ].Key_signal[ 1 ] );
+
+	if ( paths[ i ].Key_signal_Cnt > 2 )
+		{
+		key_lamp	= DEV( paths[ i ].Key_signal[ 2 ] );
+		}
+
+	//	Организуем переключения между шагами по ключу и работу светодиода (общий код для режимов)
+	switch ( modes_manager->get_active_step( i ) )
+		{
+	case 0:		//	Ожидание сигнала с ключа
+		if ( key_btn_Drain->State() == ON )
+			{
+			modes_manager->final( i );
+			modes_manager->init( i, 1, this );
+			Print( "00000000 -> 11111111111\n" );
+			}
+
+		if ( key_btn_Tank->State() == ON ) 
+			{
+			modes_manager->final( i );
+			modes_manager->init( i, 3, this );
+			Print( "00000000 -> 22222222222\n" );
+			}
+
+		//	Мигание лампочки
+		if ( MyGetMS( ) - paths[ i ].lamp_blink_start_time > 1000 )
+			{
+			key_lamp->Set( !key_lamp->State( ) );
+			paths[ i ].lamp_blink_start_time = MyGetMS( );
+			}
+		break;
+
+	case 1:	//	В линию вытеснения
+		//	Мигание лампочки
+		if ( MyGetMS( ) - paths[ i ].lamp_blink_start_time > 1000 )
+			{
+			key_lamp->Set( !key_lamp->State( ) );
+			paths[ i ].lamp_blink_start_time = MyGetMS( );
+			}
+
+		//	Если во время дренажа влкючается "В танк", то 
+		if ( key_btn_Tank->State() == ON ) 
+			{
+			//	Если при этом не горит верхний уровень на танке, то включаем переходной
+			if (( LH != NULL ) && ( LH->State( ) == LIS ))
+				{
+				//set_err_msg( "Горит верхний уровень", i, ERR_SIMPLE );
+				}
+			else
+				{
+				modes_manager->final( i );
+				modes_manager->init( i, 2, this );		//дренаж+танк
+				paths[ i ].next_step_filling = 3;		//с последующим включением "В танк"
+				paths[ i ].DT_time = MyGetMS( );
+				}
+			}
+		break;		
+
+	case 2:	//	В линию вытеснения + В танк
+		//	Мигание лампочки
+		if ( MyGetMS( ) - paths[ i ].lamp_blink_start_time > 1000 )
+			{
+			key_lamp->Set( !key_lamp->State( ) );
+			paths[ i ].lamp_blink_start_time = MyGetMS( );
+			}
+
+		//	Если вышло время переходного шага, то включаем наполнение в ...
+		if ( ( MyGetMS() - paths[ i ].DT_time ) > 3000 )
+			{
+			Print( "22222222 -> %d start\n", paths[ i ].next_step_filling );
+			//	Если это переходной после подачи в дренаж, то вкл. в танк
+			//	Если это переходной после подачи в танк, то вкл. в дренаж	
+			modes_manager->final( i );
+			modes_manager->init( i, paths[ i ].next_step_filling, this );
+
+			Print( "22222222 -> %d end\n", paths[ i ].next_step_filling );
+			}	
+		break;
+
+	case 3:	//	В танк
+		//	Включаем лампочку
+		key_lamp->On();
+
+		//	Если при подаче в танк влкючается "В дренаж", то включаем переходной
+		if ( key_btn_Drain->State() == ON )
+			{
+			modes_manager->final( i );
+			modes_manager->init( i, 2, this );		//дренаж+танк
+			paths[ i ].next_step_filling = 1;					//с последующим включением "В дренаж"
+			paths[ i ].DT_time = MyGetMS( );
+			}
+
+		//	Если идет наполнение в танк и сработал верхний уровень, то
+		if (( LH != NULL ) && ( LH->State( ) == LIS ))
+			{
+			//set_err_msg( "Горит верхний уровень", i, ERR_SIMPLE );
+			}
+		break;	
+		}	//	switch
 	}
 //-----------------------------------------------------------------------------
 
@@ -1007,23 +1157,6 @@ int TMyComb::InitMode( int mode )
     Print ( "TMyComb::InitMode mode(...), mode = %d.\n", mode );
 #endif
 
-//#ifdef DEBUG
-//	Print( "MODE[ %d ] - Open Device: ", mode );
-//
-//	for ( i = 0; i < paths[ mode ].OVCnt; i++ )
-//		{	
-//		Print( " %d, ", paths[ mode ].OV[ i ].no );
-//		}
-//
-//	Print( "\nMODE[ %d ] - Close Device: ", mode );
-//
-//	for ( i = 0; i < paths[ mode ].CVCnt; i++ )
-//		{	
-//		Print( " %u, ", paths[ mode ].CV[ i ].no );
-//		}
-//#endif
-
-  
     for ( i = 0; i < paths[ mode ].FB_need_Cnt; i++) 
         {	
 		if ( DEV( paths[ mode ].FB_need[ i ] )->State() == 0 )
@@ -1194,8 +1327,35 @@ int TMyComb::Evaluate(void)
 				{
 				//mode_manager
 				Key_Work( i );
+				//paths[ i ].Key_signal[ 0 ];
 				}
-			//paths[ i ].Key_signal[ 0 ];
+											 
+
+			//	Время работы режима	(Пока только для танков)
+// 			if ( paths[ i ].work_time_par > 0 )
+// 				{
+// 				if ( ( modeStartTime[ i ] - MyGetMS() ) > par->getParam( paths[ i ].work_time_par ) * 60 * 1000 )
+// 					{
+// 					SetMode( i, 0 );
+// 					}
+// 				}
+
+
+			//	Блокирующие устройства
+			for ( j = 0; j < paths[ i ].Block_dev_Cnt; j++ )
+				{
+				if( DEV( paths[ i ].Block_dev[ j ] )->State() == 1 )
+					{
+					//DEV( paths[ i ].Block_dev[ j ] )->Off();
+
+					char* str;
+					sprintf( str, "Попытка включения недопустимого устройства %d !", 
+						paths[ i ].Block_dev[ j ].no );
+
+					set_err_msg( str, 0, ERR_SIMPLE );
+					}
+				}
+
 			
 			} // if ( GetMode( i ) )   
 		else
@@ -1203,14 +1363,23 @@ int TMyComb::Evaluate(void)
 			//	Проверяем, чтобы не было сигналов выключающих режим
 			for ( j = 0; j < paths[ i ].Dev_off_Cnt; j++ )
 				{
-				if ( DEV( paths[ i ].Dev_off[ j ] )->State() == 1 ) 
+				if ( DEV( paths[ i ].Dev_off[ j ] )->State() == 1 )
+					{
+					break;
+					}
+				}
+
+			//	Проверяем, чтобы были все необходимые для включения сигналы
+			for ( k = 0; k < paths[ i ].FB_need_Cnt; k++ )
+				{
+				if ( DEV( paths[ i ].FB_need[ k ] )->State() == 0 )
 					{
 					break;
 					}
 				}
 
 			//	Если их нет, то проверяем "Вкл. режим сигналы"
-			if ( j == paths[ i ].Dev_off_Cnt )
+			if (( j == paths[ i ].Dev_off_Cnt ) && ( k == paths[ i ].FB_need_Cnt ))
 				{
 				//	Включающие режим устройства (сигналы)			
 				for ( j = 0; j < paths[ i ].FB_on_mode_Cnt; j++ )
@@ -1231,266 +1400,11 @@ int TMyComb::Evaluate(void)
 			}	// if ( !GetMode( i ) )
 				   
 		} // for ( i = 0; i < statesCnt; i++ )
- 
-/*
-    for ( i = 0; i < 32*statesCnt; i++ )
-        {
-        if ( GetMode( i ) && ( UseatOn == 0 ) && ( LseatOn == 0 ) )
-            {
-            for ( j = 0; j<paths[ i ].USCnt; j++) V(paths[ i ].US[ j ])->Off();
-            for ( j = 0; j<paths[ i ].LSCnt; j++) V(paths[ i ].LS[ j ])->Off();
-            }
-        }
 
-    for ( i = 0; i<32*statesCnt; i++)
-        {
-        if (GetMode(i))
-            {
-            for ( j = 0; j<paths[ i ].OVCnt; j++)
-                {
-                V(paths[ i ].OV[ j ])->On();
-                }
-
-            for ( j = 0; j<paths[ i ].CVCnt; j++)
-                {
-                V(paths[ i ].CV[ j ])->Off();
-                }
-
-			//	Флипование седлами микспруфов
-            for ( j = 0; j<paths[ i ].USCnt; j++)
-                {
-				if ( UseatOn == 1 ) V(paths[ i ].US[ j ])->Set(4);
-				}
-
-			for ( j = 0; j<paths[ i ].LSCnt; j++)
-				{
-				if ( LseatOn == 1 ) V(paths[ i ].LS[ j ])->Set(5);
-				} 
-
-			//	Подаем управляющие сигналы
-            if ( paths[ i ].washUPRCnt != 0 ) 
-                {
-                for ( j = 0; j < paths[ i ].washUPRCnt; j++)
-                    {                    
-                    UPR( paths[ i ].washUPR[ j ] )->On( );                    
-                    }
-                }
-
-            //	Работаем с насосами          
-            for ( j = 0; j<paths[ i ].washNCnt; j++)
-                {							
-                //	Включаем насосы
-                if ( paths[ i ].washN[ j ] != 0 )
-                    {
-                    N( paths[ i ].washN[ j ] )->On( );
-                    }
-
-                // В зависимости от сигнала обратной связи	выключаем насосы 
-                if ( paths[ i ].washFB != 0 )
-                    {
-                    if ( FB( paths[ i ].washFB )->State( ) == 0 && paths[ i ].washN[ j ] != 0 )
-                        {
-                        N( paths[ i ].washN[ j ] )->Off( );
-                        }	
-                    } 
-
-				// Чуть раньше подали управляющий сигнал. Сейчас, в зависимости от состояния насосов, снимаем его или оставляем 
-				if ( ( paths[ i ].washUPR != 0 ) && ( paths[ i ].washN[ j ] != 0 ) )
-					{  
-					if ( N( paths[ i ].washN[ j ] )->State( ) == -1 ) 
-						{
-						if ( MyGetMS( ) - time_for_off_UPR > 2000 )
-							{
-							//	Снимаем управляющие сигналы
-							if ( paths[ i ].washUPRCnt != 0 ) 
-								{
-								for ( j = 0; j < paths[ i ].washUPRCnt; j++)
-									{                    
-									UPR( paths[ i ].washUPR[ j ] )->Off( );
-									}
-								}
-							}	
-						}
-					else
-						{
-						time_for_off_UPR = MyGetMS( );
-						}
-					}		     
-				} //	for ( j = 0; j<paths[ i ].washNCnt; j++)		                   
-
-            //	Работаем с клапанами
-            for ( j = 0; j<paths[ i ].washVCnt; j++)
-                {							
-                //	открываем клапана 
-                if ( paths[ i ].washV[ j ] != 0 )
-                    {
-                    V( paths[ i ].washV[ j ] )->On( );
-                    }
-
-                //	В зависимости от сигнала обратной связи	закрываем клапана 
-                if ( paths[ i ].washFB != 0 )
-                    {
-                    if ( FB( paths[ i ].washFB )->State( ) == 0 && paths[ i ].washV[ j ] != 0 )
-                        {									
-                        V( paths[ i ].washV[ j ] )->Off( );
-                        }	
-                    } 
-
-                //	  В зависимости от состояния клапанов, снимаем или оставляем УВ
-                if ( ( paths[ i ].washUPR != 0 ) && ( paths[ i ].washV[ j ] != 0 ) )
-                    {  
-                    if ( V( paths[ i ].washV[ j ] )->State( ) == -1 ) 
-                        {
-                        //	Снимаем управляющие сигналы
-                        if ( paths[ i ].washUPRCnt != 0 ) 
-                            {
-                            for ( j = 0; j < paths[ i ].washUPRCnt; j++)
-                                {                    
-                                UPR( paths[ i ].washUPR[ j ] )->Off( );
-                                }
-                            }
-                        }
-                    }
-                } // for ( j = 0; j < paths[ i ].washVCnt; j++ )	              
-
-
-            if ( paths[ i ].in_FB_cnt != paths[ i ].out_UPR_cnt )
-                {
-#ifdef DEBUG
-                Print( "Comb mode%d in_FB_cnt != out_UPR_cnt (%d != %d)! \n", 
-                    i, paths[ i ].in_FB_cnt, paths[ i ].out_UPR_cnt );
-#endif // DEBUG
-                SetGlobalError( EC_COMB_MODE_DEFINITION, ES_WRONG_PAIR_FB_CONTROL, i );
-                while ( 1 )
-                    {
-                    ShowErrors();
-                    }
-                }
-            for ( j = 0; j < paths[ i ].in_FB_cnt; j++ )
-                {
-                if ( FB( paths[ i ].in_FB_val[ j ] )->State() )
-                    {
-                    UPR( paths[ i ].out_UPR_val[ j ] )->On();
-                    }
-                else
-                    {
-                    UPR( paths[ i ].out_UPR_val[ j ] )->Off();
-                    }
-                }
-
-            } // if ( GetMode( i ) )      
-        } // for ( i = 0; i < 32*statesCnt; i++ )
-
-		*/
     return 0;
     }
 //-----------------------------------------------------------------------------
 
-	void TMyComb::Key_Work( int i )
-		{
-/*		key_btn_Drain	= DEV( paths[ i ].Key_signal[ 0 ] ); 
-		key_btn_Tank	= DEV( paths[ i ].Key_signal[ 1 ] );
-
-		if ( paths[ i ].Key_signal_Cnt > 2 )
-			{
-			key_lamp	= DEV( paths[ i ].Key_signal[ 2 ] );
-			}
-
-		//	Организуем переключения между шагами по ключу и работу светодиода (общий код для режимов)
-		switch ( modes_manager->get_active_step( i ) )
-			{
-		case 0:		//	Ожидание сигнала с ключа
-			if ( key_btn_Drain->State() == ON )
-				{
-				modes_manager->final( i );
-				modes_manager->init( i, 0, this );
-				}
-																			 
-			if ( key_btn_Tank->State() == ON ) 
-				{
-				modes_manager->final( i );
-				modes_manager->init( i, 2, this );
-				}
-
-			//	Мигание лампочки
-			if ( MyGetMS( ) - lamp_blink_start_time > 1000 )
-				{
-				key_lamp->Set( !key_lamp->State( ) );
-				lamp_blink_start_time = MyGetMS( );
-				}
-			break;
-
-		case 1:	//	В линию вытеснения
-			//	Мигание лампочки
-			if ( MyGetMS( ) - lamp_blink_start_time > 1000 )
-				{
-				key_lamp->Set( !key_lamp->State( ) );
-				lamp_blink_start_time = MyGetMS( );
-				}
-
-			//	Если во время дренажа влкючается "В танк", то 
-			if ( key_btn_Tank->State() == ON ) 
-				{
-				//	Если при этом не горит верхний уровень на танке, то включаем переходной
-				if ( LH->State( ) == LNO )
-					{
-					modes_manager->final( i );
-					modes_manager->init( i, 1, this );		//дренаж+танк
-					//next_step_filling = 2;					//с последующим включением "В танк"
-					paths[ i ].  paths[ paths[ 1 ].next_mode ].next_mode = 2;
-					DT_time = MyGetMS( );
-					}
-				else
-					{
-					par->setParamM( TANK_ERRORS, TE_LH_STATE_ON );
-					}
-				}
-			break;		
-
-		case 2:	//	В линию вытеснения + В танк
-			//	Мигание лампочки
-			if ( MyGetMS( ) - lamp_blink_start_time > 1000 )
-				{
-				key_lamp->Set( !key_lamp->State( ) );
-				lamp_blink_start_time = MyGetMS( );
-				}
-
-			//	Если вышло время переходного шага, то включаем наполнение в ...
-			if ( ( MyGetMS() - DT_time ) > par->getParam( T_PEREHOD_TIME ) )
-				{
-				//	Если это переходной после подачи в дренаж, то вкл. в танк
-				//	Если это переходной после подачи в танк, то вкл. в дренаж	
-				modes_manager->final( i );
-				modes_manager->init( i, next_step_filling, this );
-				}	
-			break;
-
-		case 3:	//	В танк
-			//	Включаем лампочку
-			key_lamp->On();
-
-			//	Если при подаче в танк влкючается "В дренаж", то включаем переходной
-			if ( key_btn_Drain->State() == ON )
-				{
-				modes_manager->final( i );
-				modes_manager->init( i, 1, this );		//дренаж+танк
-				next_step_filling = 0;					//с последующим включением "В дренаж"
-				DT_time = MyGetMS( );
-				}
-
-			//	Если идет наполнение в танк и сработал верхний уровень, то
-			//	Включаем сирену
-			if ( LH->State( ) == LIS )
-				{
-				par->setParamM( TANK_ERRORS, TE_LH_STATE_ON );
-				}
-			break;	
-			}	//	switch
-*/
-		}
-
-
-//-----------------------------------------------------------------------------
 int TMyComb::FinalMode( int mode )
     {
     int i, j, k, tRes = 0;
@@ -1535,58 +1449,107 @@ int TMyComb::FinalMode( int mode )
 		DEV( paths[ mode ].FV[ j ])->On();
 		}
 
-    //if ( ( tRes = g_greb->check_path( paths[ mode ].in_x, paths[ mode ].in_y, 
-    //    paths[ mode ].out_x, paths[ mode ].out_y ) ) != 0 )
-    //    {
-    //    //return tRes;   //  Маршрут не закрылся
-    //    tRes = 0;
-    //    }
-/*
-    for ( j = 0; j<paths[mode].USCnt; j++)
-        {
-        V(paths[mode].US[ j ])->Off();
-        }
-    for ( j = 0; j<paths[mode].LSCnt; j++) 
-        {
-        V(paths[mode].LS[ j ])->Off();
-        }
-    for ( j = 0; j<paths[mode].OVCnt; j++) 
-        {
-        V(paths[mode].OV[ j ])->Off();
-        }
-    for ( j = 0; j<paths[mode].CVCnt; j++) 
-        {
-        V(paths[mode].CV[ j ])->Off();
-        }
-    for ( j = 0; j<paths[mode].FVCnt; j++) 
-        {
-        V(paths[mode].FV[ j ])->On();
-        }
-    for ( j = 0; j<paths[mode].washNCnt; j++) 
-        {		
-        N(paths[mode].washN[ j ])->Off();
-        }     
-    for ( j = 0; j<paths[mode].washVCnt; j++) 
-        {
-        V(paths[mode].washV[ j ])->Off();
-        }    
 
-    //	Снимаем управляющие сигналы
-    if ( paths[ mode ].washUPRCnt != 0 ) 
-        {
-        for ( j = 0; j < paths[ mode ].washUPRCnt; j++)
-            {                    
-            UPR( paths[ mode ].washUPR[ j ] )->Off( );
-            }
-        }
+	//	Номер следующего режима
+	if ( paths[ i ].next_mode > 0 )
+		{
+		if ( !GetMode( paths[ i ].next_mode ) )
+			{
+			SetMode( paths[ i ].next_mode, 1 );
+			}
+		}
 
-    for ( j = 0; j < paths[ mode ].out_UPR_cnt; j++ )
-        {
-        UPR( paths[ mode ].out_UPR_val[ j ] )->Off();
-        }
- */
     return tRes;
     }
+//-----------------------------------------------------------------------------
+
+	void TMyComb::Key_Work( int i )
+		{
+/*
+		key_btn_Drain	= DEV( paths[ i ].Key_signal[ 0 ] ); 
+		key_btn_Tank	= DEV( paths[ i ].Key_signal[ 1 ] );
+
+		if ( paths[ i ].Key_signal_Cnt > 2 )
+			{
+			key_lamp	= DEV( paths[ i ].Key_signal[ 2 ] );
+			}
+
+		//	Организуем переключения между шагами по ключу и работу светодиода (общий код для режимов)
+		switch ( modes_manager->get_active_step( i ) )
+			{
+		case 0:		//	Ожидание сигнала с ключа
+			if ( key_btn_Drain->State() == ON )
+				{
+				modes_manager->final( i );
+				modes_manager->init( i, 1, this );
+				}
+																			 
+			if ( key_btn_Tank->State() == ON ) 
+				{
+				modes_manager->final( i );
+				modes_manager->init( i, 3, this );
+				}
+
+			//	Мигание лампочки
+			if ( MyGetMS( ) - paths[ i ].lamp_blink_start_time > 1000 )
+				{
+				key_lamp->Set( !key_lamp->State( ) );
+				paths[ i ].lamp_blink_start_time = MyGetMS( );
+				}
+			break;
+
+		case 1:	//	В линию вытеснения
+			//	Мигание лампочки
+			if ( MyGetMS( ) - paths[ i ].lamp_blink_start_time > 1000 )
+				{
+				key_lamp->Set( !key_lamp->State( ) );
+				paths[ i ].lamp_blink_start_time = MyGetMS( );
+				}
+
+			//	Если во время дренажа влкючается "В танк", то 
+			if ( key_btn_Tank->State() == ON ) 
+				{
+				modes_manager->final( i );
+				modes_manager->init( i, 2, this );		//дренаж+танк
+				paths[ i ].next_step_filling = 3;					//с последующим включением "В танк"
+				paths[ i ].DT_time = MyGetMS( );
+				}
+			break;		
+
+		case 2:	//	В линию вытеснения + В танк
+			//	Мигание лампочки
+			if ( MyGetMS( ) - paths[ i ].lamp_blink_start_time > 1000 )
+				{
+				key_lamp->Set( !key_lamp->State( ) );
+				paths[ i ].lamp_blink_start_time = MyGetMS( );
+				}
+
+			//	Если вышло время переходного шага, то включаем наполнение в ...
+			if ( ( MyGetMS() - paths[ i ].DT_time ) > 3000 )
+				{
+				//	Если это переходной после подачи в дренаж, то вкл. в танк
+				//	Если это переходной после подачи в танк, то вкл. в дренаж	
+				modes_manager->final( i );
+				modes_manager->init( i, paths[ i ].next_step_filling, this );
+				}	
+			break;
+
+		case 3:	//	В танк
+			//	Включаем лампочку
+			key_lamp->On();
+
+			//	Если при подаче в танк влкючается "В дренаж", то включаем переходной
+			if ( key_btn_Drain->State() == ON )
+				{
+				modes_manager->final( i );
+				modes_manager->init( i, 2, this );		//дренаж+танк
+				paths[ i ].next_step_filling = 1;					//с последующим включением "В дренаж"
+				paths[ i ].DT_time = MyGetMS( );
+				}
+			break;	
+			}	//	switch
+*/
+		}
 //-----------------------------------------------------------------------------
 
 TMyComb::InitParams()

@@ -247,6 +247,8 @@ struct TPathRec
 	ulong		lamp_blink_start_time;
 	//	Начало отсчета переходного процесса
 	ulong		DT_time;
+	//	Хранит информацию о следующем шаге при работе с ключом;
+	char		next_step_filling;
 
 /*
     int OVCnt;
