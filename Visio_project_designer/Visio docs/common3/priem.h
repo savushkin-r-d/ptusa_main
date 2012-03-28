@@ -153,6 +153,7 @@ class TMyComb: public error_tech_device
         //int				UseatOn;
         //int				LseatOn;
         unsigned long	*state;
+		int             no;
 
 		////	Переменная времени для выключения UPR при отсутствии обратной связи с насосом.
 		//ulong			time_for_off_UPR;
@@ -225,7 +226,7 @@ class TMyComb: public error_tech_device
             }
         //-Ошибки режимов-!>.
 
-        TMyComb( int stCnt, int parCnt, int workParCnt, int tmrCnt );
+        TMyComb( int no, int stCnt, int parCnt, int workParCnt, int tmrCnt );
         ~TMyComb();
 
 		virtual void Key_Work( int i );

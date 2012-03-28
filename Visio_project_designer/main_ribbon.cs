@@ -513,17 +513,12 @@ namespace visio_prj_designer
                                 for ( int j = 0; j < obj.mode_mas[ i ].step.Count; j++ )
                                     {
                                     //  Условия_работы_режима
-                                    get_write_data( bw, obj.mode_mas[ i ], "Включать_устройства" );
-                                    get_write_data( bw, obj.mode_mas[ i ], "Выключать_устройства" );
-                                    
+                                    get_write_data( bw, obj.mode_mas[ i ].step[ j ], "Включать_устройства" );
+                                    get_write_data( bw, obj.mode_mas[ i ].step[ j ], "Выключать_устройства" );
+
                                     //  Параметры
-                                    get_write_data( bw, obj.mode_mas[ i ], "Время_работы_режима" );
-                                    get_write_data( bw, obj.mode_mas[ i ], "Номер_следующего_режима" );
-                                               
-                                                                                                              
-                                    //bw.Write( ( byte ) 0 );    //Следующий шаг при завершении времени текущего шага
-                                    //bw.Write( ( byte ) 0 );    //Номер параметра, содержащий время шага, мин.                    
-                                    //bw.Write( ( byte ) 0 );    //  Маршрут
+                                    get_write_data( bw, obj.mode_mas[ i ].step[ j ], "Время_работы_режима" );
+                                    get_write_data( bw, obj.mode_mas[ i ].step[ j ], "Номер_следующего_режима" );
                                     }   //  for j
                                 }   //  for i
                             }   
@@ -907,7 +902,7 @@ namespace visio_prj_designer
                      case "Выключить_режимы_танка":
 
                          //bw.Write( ( byte ) 0 );     //  object
-                         bw.Write( ( ushort ) temp_node.Nodes[ j ].ImageIndex );   //  mode
+                         bw.Write( ( ushort ) Convert.ToUInt16( temp_node.Nodes[ j ].Text ) );   //  mode
 
                          break;
 

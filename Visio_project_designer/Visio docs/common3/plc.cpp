@@ -2328,28 +2328,28 @@ int TWagoDrv::LoadDescrB(char *fn)
 				{
 				//procedure TWagoDrv::Read_obj_data( file7188* df, int m );
 				BlockRead(df, &b1, 1);	    //	Mode SubType
-				Print( "Mode SubType = %d \n", b1 );
+				//Print( "Mode SubType = %d \n", b1 );
 
 				BlockRead(df, &b, 1);		//	Mode count 
 				l = b;
 				Comb1->statesCnt = l;
-				Print( "Mode count = %i \n", l );
+				//Print( "Mode count = %i \n", l );
 
 				int comb_n;
-				BlockRead( df, ( u_char* ) &comb_n, 2 );	//	Tank number
-				Print( "Tank number = %i \n", comb_n );
+				BlockRead( df, ( u_char* ) &comb_n, 2 );	//	Comb number
+				//Print( "Tank number = %i \n", comb_n );
 
 				int comb_par_cnt;
 				BlockRead( df, ( u_char* ) &comb_par_cnt, 2 );	
-				Print( "comb_par_cnt = %i \n", comb_par_cnt );
+				//Print( "comb_par_cnt = %i \n", comb_par_cnt );
 
 				int comb_work_par_cnt;
 				BlockRead( df, ( u_char* ) &comb_work_par_cnt, 2 );
-				Print( "comb_work_par_cnt = %i \n", comb_work_par_cnt );
+				//Print( "comb_work_par_cnt = %i \n", comb_work_par_cnt );
 
 				int comb_tmr_cnt;
 				BlockRead( df, ( u_char* ) &comb_tmr_cnt, 2 );
-				Print( "comb_tmr_cnt = %i \n", comb_tmr_cnt );
+				//Print( "comb_tmr_cnt = %i \n", comb_tmr_cnt );
 
 
 				Comb1 = init_comb( b1, comb_n, b, comb_par_cnt,

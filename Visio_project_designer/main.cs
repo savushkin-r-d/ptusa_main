@@ -1778,8 +1778,8 @@ namespace visio_prj_designer
                     xNode = inXmlNode.ChildNodes[ i ];
 
                     temp = xNode.Name.Replace( "__", "" );
-
-                    inTreeNode.Nodes.Add( new TreeNode( temp ) );
+                                 
+                    inTreeNode.Nodes.Add( new TreeNode( temp, Convert.ToInt32( xNode.Value ), 0 ) );
                     tNode = inTreeNode.Nodes[ i ];
                     Add_Node( xNode, tNode );
                     }
@@ -2130,36 +2130,81 @@ catch ( Exception )
             //  Проходим по устройствам
             for ( int l = 0; l < node.Nodes.Count; l++ )
                 {
-                tw.WriteStartElement( "__" + node.Nodes[ l ].Text + "__" );
+                switch ( node.Text )
+                    {
+                    // Значения
+                    case "Время_работы_режима":
+                    case "Номер_следующего_режима":
 
-                //  Ищем заданное в данном списке устройство
-                device cur_dev = g_devices.Find( delegate( device dev )
-                    {
-                        return ( dev.get_name() ==
-                                 node.Nodes[ l ].Text );
-                    }
-                );
+                        tw.WriteStartElement( "__" + node.Nodes[ l ].Text + "__" );
+                        tw.WriteEndElement();
 
-                //  Проверяем есть ли это устройство еще на схеме
-                if (    cur_dev != null
-                    ||  Int32.TryParse( node.Nodes[ l ].Text, out res ) )
-                    {
-                    //  Если раскомментировать то устройства будут как папки в XML
-                    //tw.WriteElementString( cur_dev.get_name(), null );
-                    }
-                else
-                    {
-                    //  Если устройства уже нет, то удаляем его из списка
-                    node.Nodes[ l ].Remove();
-                    }
+                        break;
 
-                //  Проверяем есть ли дополнительные подустройства
-                if ( node.Nodes.Count > 0 )
-                    {
-                    write_device_to_XML( tw, node.Nodes[ l ] );
-                    }
-                
-                tw.WriteEndElement();   //  Устройства
+                    // Режимы
+                    case "Блокирующие_режимы_гребенок":
+                    case "Блокирующие_режимы_танков":
+                    case "Включить_режимы_танка":
+                    case "Выключить_режимы_танка":
+
+                        tw.WriteStartElement( "__" + Convert.ToString( node.Nodes[ l ].Text ) + "__" );
+                        tw.WriteEndElement();
+
+                        break;
+
+                    // Устройства
+                    case "Необходимые_для_ВКЛ_сигналы":
+                    case "Включающие_режим_сигналы":
+
+                    case "Включать_устройства":
+                    case "Выключать_устройства":
+                    case "Верхний_флип":
+                    case "Нижний_флип":
+                    case "Отправляемые_сигналы":
+                    case "Управляющие_устройствами_сигналы":
+                    case "Зависящие_от_устройств_сигналы":
+                    case "Использование_ключа":
+
+                    case "Выключающие_режим_сигналы":
+                    case "Устройства_ВКЛ_по_завершению":
+
+                    case "Блокирующие_устройства":
+                    default:
+                        tw.WriteStartElement( "__" + node.Nodes[ l ].Text + "__" );
+
+                        //  Ищем заданное в данном списке устройство
+                        device cur_dev = g_devices.Find( delegate( device dev )
+                            {
+                                return ( dev.get_name() ==
+                                         node.Nodes[ l ].Text );
+                            }
+                        );
+
+                        //  Проверяем есть ли это устройство еще на схеме
+                        if ( cur_dev != null
+                            || Int32.TryParse( node.Nodes[ l ].Text, out res ) )
+                            {
+                            //  Если раскомментировать то устройства будут как папки в XML
+                            //tw.WriteElementString( cur_dev.get_name(), null );
+                            }
+                        else
+                            {
+                            //  Если устройства уже нет, то удаляем его из списка
+                            node.Nodes[ l ].Remove();
+                            MessageBox.Show( "Устройство " + node.Nodes[ l ].Text
+                                + " отсутствуен на схеме и было удалено из режимов!\n"
+                                + "Повторите экспорт описания." );
+                            }
+
+                        //  Проверяем есть ли дополнительные подустройства
+                        if ( node.Nodes.Count > 0 )
+                            {
+                            write_device_to_XML( tw, node.Nodes[ l ] );
+                            }
+
+                        tw.WriteEndElement();   //  Устройства 
+                        break;
+                    }   //  switch
                 }   //  for l
             }
         //---------------------------------------------------------------------

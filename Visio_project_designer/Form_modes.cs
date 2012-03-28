@@ -416,8 +416,8 @@ namespace Visio_project_designer
                 if ( //( ((TreeView)sender).SelectedNode.Parent.Text == "Параметры" )
                     ( ((TreeView)sender).SelectedNode.Text == "Блокирующие_режимы_гребенок" )
                 ||  ( ((TreeView)sender).SelectedNode.Text == "Блокирующие_режимы_танков" )
-                ||  ( ((TreeView)sender).SelectedNode.Text == "Включить_режимы_танка" )
-                ||  ( ((TreeView)sender).SelectedNode.Text == "Выключить_режимы_танка" )   
+                ||  ( ( ( TreeView ) sender ).SelectedNode.Text == "Включить_режимы_танка" )
+                ||  ( ( ( TreeView ) sender ).SelectedNode.Text == "Выключить_режимы_танка" )
                     )
                     {
                     dev_list.Visible = false;
@@ -429,39 +429,97 @@ namespace Visio_project_designer
 
                     for ( int i = 0; i < addin.g_objects.Count; i++ )
                         {
-                        TreeNode p_node = new TreeNode( addin.g_objects[ i ].get_name() );
-                        treeView_block.Nodes.Add( p_node );
-
-                        for ( int j = 0; j < addin.g_objects[ i ].mode_mas.Count; j++ )
+                        if ( ( ( ( TreeView ) sender ).SelectedNode.Text == "Блокирующие_режимы_гребенок"
+                                && addin.g_objects[ i ].type == device.TYPES.T_GREB )
+                        ||
+                                ( ( ( ( TreeView ) sender ).SelectedNode.Text == "Блокирующие_режимы_танков"
+                                    || ( ( TreeView ) sender ).SelectedNode.Text == "Включить_режимы_танка"
+                                    || ( ( TreeView ) sender ).SelectedNode.Text == "Выключить_режимы_танка"
+                                   )
+                                && addin.g_objects[ i ].type == device.TYPES.T_TANK )
+                           )
                             {
-                            TreeNode t_node = new TreeNode(
-                                Convert.ToString( addin.g_objects[ i ].mode_mas[ j ].no ) + "." +
-                                addin.g_objects[ i ].mode_mas[ j ].name );
+                            //  Добавляем объект (Гребенка или Танк)
+                            TreeNode p_node = new TreeNode(
+                                Convert.ToString( addin.g_objects[ i ].n ) + "." +
+                                addin.g_objects[ i ].get_name() );
 
-                            t_node.ImageIndex = addin.g_objects[ i ].get_n() * 1000 +
-                                addin.g_objects[ i ].mode_mas[ j ].no;
-                            
-                            //  Проставляем галочки в соответствии со списком режимов
-                            for ( int k = 0; k < ((TreeView)sender).SelectedNode.Nodes.Count; k++ )
+                            treeView_block.Nodes.Add( p_node );
+
+                            //  Добавляем режимы объекта
+                            for ( int j = 0; j < addin.g_objects[ i ].mode_mas.Count; j++ )
                                 {
-                                if ( ((TreeView)sender).SelectedNode.Nodes[ k ].ImageIndex ==
-                                    t_node.ImageIndex )
-                                    {
-                                    t_node.Checked = true;
-                                    p_node.Expand();
-                                    break;
-                                    }
-                                }   //  for k
-                            //-----------------------------------------------------------------------
+                                TreeNode t_node = new TreeNode(
+                                    Convert.ToString( addin.g_objects[ i ].mode_mas[ j ].no ) + "." +
+                                    addin.g_objects[ i ].mode_mas[ j ].name );
 
-                            treeView_block.Nodes[ i ].Nodes.Add( t_node );
-                            }   //  for j
+                                t_node.ImageIndex = addin.g_objects[ i ].get_n() * 1000 +
+                                    addin.g_objects[ i ].mode_mas[ j ].no;
+
+                                //  Проставляем галочки в соответствии со списком режимов
+                                for ( int k = 0; k < ( ( TreeView ) sender ).SelectedNode.Nodes.Count; k++ )
+                                    {
+                                    if ( ( ( TreeView ) sender ).SelectedNode.Nodes[ k ].Text ==
+                                        Convert.ToString( t_node.ImageIndex ) )
+                                        {
+                                        t_node.Checked = true;
+                                        p_node.Expand();
+                                        break;
+                                        }
+                                    }   //  for k
+                                //-----------------------------------------------------------------------
+
+                                p_node.Nodes.Add( t_node );
+                                }   //  for j
+                            }
                         }   //  for i
                     //-----------------------------------------------------------------------
 
                     return;
                     }
-                
+/*                
+                if (    ( ((TreeView)sender).SelectedNode.Text == "Включить_режимы_танка" )
+                    ||  ( ((TreeView)sender).SelectedNode.Text == "Выключить_режимы_танка" )
+                    )
+                    {
+                    dev_list.Visible = false;
+                    panel_prop.Visible = false;
+                    treeView_block.Visible = true;
+
+                    //   Заполнение дерева объектов и их режимов (для Ограничений)
+                    treeView_block.Nodes.Clear();
+
+                    TreeNode p_node = new TreeNode( addin.cur_sel_obj.get_name() );
+                    treeView_block.Nodes.Add( p_node );
+
+                    for ( int j = 0; j < addin.cur_sel_obj.mode_mas.Count; j++ )
+                        {
+                        TreeNode t_node = new TreeNode(
+                            Convert.ToString( addin.cur_sel_obj.mode_mas[ j ].no ) + "." +
+                            addin.cur_sel_obj.mode_mas[ j ].name );
+
+                        t_node.ImageIndex = addin.cur_sel_obj.get_n() * 1000 +
+                            addin.cur_sel_obj.mode_mas[ j ].no;
+
+                        //  Проставляем галочки в соответствии со списком режимов
+                        for ( int k = 0; k < ( ( TreeView ) sender ).SelectedNode.Nodes.Count; k++ )
+                            {
+                            if ( ( ( TreeView ) sender ).SelectedNode.Nodes[ k ].Text ==
+                                Convert.ToString( t_node.ImageIndex ) )
+                                {
+                                t_node.Checked = true;
+                                p_node.Expand();
+                                break;
+                                }
+                            }   //  for k
+
+                        treeView_block.Nodes[ 0 ].Nodes.Add( t_node );
+                        }   //  for j
+
+                    return;
+                    }
+*/
+
                 if (    ( ((TreeView)sender).SelectedNode.Text == "Время_работы_режима" )
                     ||  ( ((TreeView)sender).SelectedNode.Text == "Номер_следующего_режима" )
                    )
@@ -985,15 +1043,18 @@ namespace Visio_project_designer
                     //  Значит выбран режим
                     if ( e.Node.Checked == true )
                         {
-                        //  Если поставили галочку
-                        treeView_prop.SelectedNode.Nodes.Add( (TreeNode) e.Node.Clone() );
+                        //  Если поставили галочку - добавляем узел
+                        //TreeNode temp = ( TreeNode ) e.Node.Clone(); 
+                        //temp.Text = Convert.ToString( temp.ImageIndex );
+                        treeView_prop.SelectedNode.Nodes.Add( Convert.ToString( e.Node.ImageIndex ) );
                         }
                     else
                         {
                         //  Если сняли галочку
                         for( int i = 0; i < treeView_prop.SelectedNode.Nodes.Count; i++ )
                             {
-                            if ( treeView_prop.SelectedNode.Nodes[ i ].ImageIndex == e.Node.ImageIndex )
+                            if ( treeView_prop.SelectedNode.Nodes[ i ].Text ==
+                                 Convert.ToString( e.Node.ImageIndex ) )
                                 {
                                 treeView_prop.SelectedNode.Nodes[ i ].Remove();
                                 }
