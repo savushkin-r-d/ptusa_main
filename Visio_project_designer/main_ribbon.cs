@@ -407,6 +407,17 @@ namespace visio_prj_designer
                             bw.Write( ( short ) obj.param_list_temp.Count );                  // Кол-во врем. пар-ов
                             bw.Write( ( short ) obj.timers );                                 // Кол-во таймеров
 
+                            //  Записываем значения параметров гребенки
+                            for ( int i = 0; i < obj.param_list_temp.Count; i++ )
+                                {
+                                bw.Write( Convert.ToInt16( obj.param_list_temp[ i ][ 1 ] ) );
+                                }
+
+                            for ( int i = 0; i < obj.param_list_save.Count; i++ )
+                                {
+                                bw.Write( Convert.ToInt16( obj.param_list_save[ i ][ 1 ] ) );
+                                }
+
                             //  Проходим по режимам
                             for ( int i = 0; i < obj.mode_mas.Count; i++ )
                                 {
@@ -474,6 +485,17 @@ namespace visio_prj_designer
                                 ( obj.param_list_save.Count + obj.param_list_temp.Count ) );  // Кол-во параметров
                             bw.Write( ( short ) obj.param_list_temp.Count );                  // Кол-во врем. пар-ов
                             bw.Write( ( short ) obj.timers );                                 // Кол-во таймеров
+
+                            //  Записываем значения параметров танка
+                            for ( int i = 0; i < obj.param_list_temp.Count; i++ )
+                                {
+                                bw.Write( Convert.ToInt16( obj.param_list_temp[ i ][ 1 ] ) );
+                                }
+
+                            for ( int i = 0; i < obj.param_list_save.Count; i++ )
+                                {
+                                bw.Write( Convert.ToInt16( obj.param_list_save[ i ][ 1 ] ) );
+                                }
 
                             //  Проходим по режимам
                             for ( int i = 0; i < obj.mode_mas.Count; i++ )
@@ -999,7 +1021,7 @@ namespace visio_prj_designer
                              bw.Write( ( byte ) 0 );  //  type
                              bw.Write( ( ushort ) 0 );  //  no
 
-                             MessageBox.Show( "Устройство \""
+                             MessageBox.Show( "Управляющее или дочернее устройство \""
                                  + temp_node.Nodes[ j ].Text + "\" не было найдено!"
                                  + "( " + temp_mode.name + " )" );
                              }

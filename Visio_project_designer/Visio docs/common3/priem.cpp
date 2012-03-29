@@ -446,23 +446,6 @@ int TTank::InitMode( int mode )
 			return ( -paths[ mode ].FB_need[ i ].no );
 			}
 		}
-		
-	//	Работа		--------------------------------------------------------------
-	//	Если для этого режима задан ключ, то задаем началные параметры
-	if ( paths[ mode ].Key_signal_Cnt > 0 )
-		{
-		paths[ mode ].lamp_blink_start_time = MyGetMS();
-		paths[ mode ].DT_time = MyGetMS( );
-		}
-
-	//	Параметры	--------------------------------------------------------------
-	//	Если задан параметр времени работы режима
-	if (	paths[ mode ].work_time_par < par->getParamCnt() 
-		&&	par->getParam( paths[ mode ].work_time_par ) > 0 )
-		{
-		SetModeTime( mode, par->getParam( paths[ mode ].work_time_par ) * 1000 * 60 );
-		}
-
 
 	//	Блокирующие режимы гребенок
 	for ( i = 0; i < paths[ mode ].Block_cm_cnt; i++ )
@@ -488,12 +471,12 @@ int TTank::InitMode( int mode )
 			&&	( mode_no < g_combs[ obj_idx ]->statesCnt )
 			&&	g_combs[ obj_idx ]->GetMode( mode_no ) )
 			{
-// 			sprintf( err_str, //sizeof( err_str ),
-// 				"Включен блокирующий режим %s танка %d",
-// 				g_combs[ obj_idx ]->get_mode_name( mode_no ),
-// 				g_combs[ obj_idx ]->no );
-// 
-// 			set_err_msg( err_str, mode, ERR_CANT_ON );
+			// 			sprintf( err_str, //sizeof( err_str ),
+			// 				"Включен блокирующий режим %s танка %d",
+			// 				g_combs[ obj_idx ]->get_mode_name( mode_no ),
+			// 				g_combs[ obj_idx ]->no );
+			// 
+			// 			set_err_msg( err_str, mode, ERR_CANT_ON );
 			return 1;
 			}
 		}
@@ -522,14 +505,44 @@ int TTank::InitMode( int mode )
 			&&	( mode_no < g_tanks[ obj_idx ]->mode_cnt )
 			&&	g_tanks[ obj_idx ]->GetMode( mode_no ) )
 			{
-// 			sprintf( err_str, //sizeof( err_str ),
-// 				"Включен блокирующий режим %s танка %d",
-// 				g_tanks[ obj_idx ]->get_mode_name( mode_no ),
-// 				g_tanks[ obj_idx ]->no );
-// 
-// 			set_err_msg( err_str, mode, ERR_CANT_ON );
+			// 			sprintf( err_str, //sizeof( err_str ),
+			// 				"Включен блокирующий режим %s танка %d",
+			// 				g_tanks[ obj_idx ]->get_mode_name( mode_no ),
+			// 				g_tanks[ obj_idx ]->no );
+			// 
+			// 			set_err_msg( err_str, mode, ERR_CANT_ON );
 			return 1;
 			}
+		}
+
+	//	Блокирующие устройства
+	for ( i = 0; i < paths[ mode ].Block_dev_Cnt; i++ )
+		{
+		if( DEV( paths[ mode ].Block_dev[ i ] )->State() == 1 )
+			{
+			char* str;
+			sprintf( str, "Включено блокирующее устройство %d !", 
+				paths[ mode ].Block_dev[ i ].no );
+			set_err_msg( str, 0, ERR_SIMPLE );
+
+			return 1;
+			}
+		}
+		
+	//	Работа		--------------------------------------------------------------
+	//	Если для этого режима задан ключ, то задаем началные параметры
+	if ( paths[ mode ].Key_signal_Cnt > 0 )
+		{
+		paths[ mode ].lamp_blink_start_time = MyGetMS();
+		paths[ mode ].DT_time = MyGetMS( );
+		}
+
+	//	Параметры	--------------------------------------------------------------
+	//	Если задан параметр времени работы режима
+	if (	paths[ mode ].work_time_par < par->getParamCnt() 
+		&&	par->getParam( paths[ mode ].work_time_par ) > 0 )
+		{
+		SetModeTime( mode, par->getParam( paths[ mode ].work_time_par ) * 1000 * 60 );
 		}
 
 	//	Проверяем какие режимы нужно ВКЛючить
@@ -781,7 +794,7 @@ int TTank::Evaluate( )
 
 int TTank::FinalMode( int mode )
 	{
-	int j;
+	int i, j;
 
 	//Инициализация времени  режима.
 	if ( 0 == state ) modeStartTime[ 32 ] = MyGetMS( );
@@ -833,6 +846,32 @@ int TTank::FinalMode( int mode )
 		SetMode( paths[ mode ].next_mode, 1 );
 		}
 
+	//	Проверяем какие режимы нужно было ВКЛючить - теперь мы их ВЫКЛючаем
+	for ( i = 0; i < paths[ mode ].On_mode_Cnt; i++ )
+		{
+		//	Преобразовываем код режима в номер объекта и номер режима
+		int obj_idx;
+		int obj_no = paths[ mode ].On_mode[ i ] / 1000;
+		int mode_no = paths[ mode ].On_mode[ i ] % 1000;
+
+		//	Ищем объект по его номеру
+		for ( int j = 0; j < TankCnt; j++ )
+			{
+			if ( g_tanks[ j ]->no == obj_no )
+				{
+				obj_idx = j;
+				break;
+				}
+			}
+
+		//	Выключаем режимы
+		if (	( obj_idx < TankCnt )
+			&&	( mode_no < g_tanks[ obj_idx ]->mode_cnt )
+			&&	g_tanks[ obj_idx ]->GetMode( mode_no ) )
+			{
+			g_tanks[ obj_idx ]->SetMode( mode_no, 0 );
+			}		  
+		}
 
 #if !defined NO_TANKS_MODE
 	modes_manager->final( mode );
@@ -1302,6 +1341,7 @@ int TMyComb::InitMode( int mode )
     Print ( "TMyComb::InitMode mode(...), mode = %d.\n", mode );
 #endif
 
+	//	Включение режима ------------------------------------------------------
     for ( i = 0; i < paths[ mode ].FB_need_Cnt; i++) 
         {	
 		if ( DEV( paths[ mode ].FB_need[ i ] )->State() == 0 )
@@ -1319,27 +1359,147 @@ int TMyComb::InitMode( int mode )
             }
         }  
 
+	//	Блокирующие устройства
+	for ( i = 0; i < paths[ mode ].Block_dev_Cnt; i++ )
+		{
+		if( DEV( paths[ mode ].Block_dev[ i ] )->State() == 1 )
+			{
+			char* str;
+			sprintf( str, "Включено блокирующее устройство %d !", 
+				paths[ mode ].Block_dev[ i ].no );
+			set_err_msg( str, 0, ERR_SIMPLE );
+
+			return 1;
+			}
+		}
+
+	//	Блокирующие режимы гребенок
+	for ( i = 0; i < paths[ mode ].Block_cm_cnt; i++ )
+		{
+		//	Преобразовываем код режима в номер объекта и номер режима
+		int obj_idx;
+		int obj_no = paths[ mode ].Block_cm[ i ] / 1000;
+		int mode_no = paths[ mode ].Block_cm[ i ] % 1000;
+
+		//	Ищем объект по его номеру
+		for ( int j = 0; j < CombCnt; j++ )
+			{
+			if ( g_combs[ j ]->no == obj_no )
+				{
+				obj_idx = j;
+				break;
+				}
+			}
+
+		//	Проверяем, если найденный режим найденного объекта включен,
+		//	то блокируем включение нашего режима и выдаем сообщение 
+		if (	( obj_idx < CombCnt )
+			&&	( mode_no < g_combs[ obj_idx ]->statesCnt )
+			&&	g_combs[ obj_idx ]->GetMode( mode_no ) )
+			{
+			// 			sprintf( err_str, //sizeof( err_str ),
+			// 				"Включен блокирующий режим %s танка %d",
+			// 				g_combs[ obj_idx ]->get_mode_name( mode_no ),
+			// 				g_combs[ obj_idx ]->no );
+			// 
+			// 			set_err_msg( err_str, mode, ERR_CANT_ON );
+			return 1;
+			}
+		}
+
+	//	Блокирующие режимы танков
+	for ( i = 0; i < paths[ mode ].Block_tm_cnt; i++ )
+		{
+		//	Преобразовываем код режима в номер объекта и номер режима
+		int obj_idx;
+		int obj_no = paths[ mode ].Block_tm[ i ] / 1000;
+		int mode_no = paths[ mode ].Block_tm[ i ] % 1000;
+
+		//	Ищем объект по его номеру
+		for ( int j = 0; j < TTank::TankCnt; j++ )
+			{
+			if ( g_tanks[ j ]->no == obj_no )
+				{
+				obj_idx = j;
+				break;
+				}
+			}
+
+		//	Проверяем, если найденный режим найденного объекта включен,
+		//	то блокируем включение нашего режима и выдаем сообщение 
+		if (	( obj_idx < TTank::TankCnt )
+			&&	( mode_no < g_tanks[ obj_idx ]->mode_cnt )
+			&&	g_tanks[ obj_idx ]->GetMode( mode_no ) )
+			{
+			// 			sprintf( err_str, //sizeof( err_str ),
+			// 				"Включен блокирующий режим %s танка %d",
+			// 				g_tanks[ obj_idx ]->get_mode_name( mode_no ),
+			// 				g_tanks[ obj_idx ]->no );
+			// 
+			// 			set_err_msg( err_str, mode, ERR_CANT_ON );
+			return 1;
+			}
+		}
+
 	//	Параметры	--------------------------------------------------------------
-	//	Фиксируем начало работы режима (для учета времени работы режима)
-	paths[ mode ].start_time = MyGetMS();
 
 	//	Проверяем какие режимы нужно ВКЛючить
 	for ( i = 0; i < paths[ mode ].On_mode_Cnt; i++ )
 		{
-		if ( !GetMode( paths[ mode ].On_mode[ i ] ) )
+		//	Преобразовываем код режима в номер объекта и номер режима
+		int obj_idx;
+		int obj_no = paths[ mode ].On_mode[ i ] / 1000;
+		int mode_no = paths[ mode ].On_mode[ i ] % 1000;
+
+		//	Ищем объект по его номеру
+		for ( int j = 0; j < TTank::TankCnt; j++ )
 			{
-			SetMode( paths[ mode ].On_mode[ i ], 1 );
+			if ( g_tanks[ j ]->no == obj_no )
+				{
+				obj_idx = j;
+				break;
+				}
+			}
+
+		//	Включаем режимы
+		if (	( obj_idx < TTank::TankCnt )
+			&&	( mode_no < g_tanks[ obj_idx ]->mode_cnt )
+			&&	!g_tanks[ obj_idx ]->GetMode( mode_no ) )
+			{
+			g_tanks[ obj_idx ]->SetMode( mode_no, 1 );
 			}		  
 		}
 
 	//	Проверяем какие режимы нужно ВЫКЛючить
 	for ( i = 0; i < paths[ mode ].Off_mode_Cnt; i++ )
 		{
-		if ( GetMode( paths[ mode ].Off_mode[ i ] ) )
+		//	Преобразовываем код режима в номер объекта и номер режима
+		int obj_idx;
+		int obj_no = paths[ mode ].Off_mode[ i ] / 1000;
+		int mode_no = paths[ mode ].Off_mode[ i ] % 1000;
+
+		//	Ищем объект по его номеру
+		for ( int j = 0; j < TTank::TankCnt; j++ )
 			{
-			SetMode( paths[ mode ].Off_mode[ i ], 0 );
+			if ( g_tanks[ j ]->no == obj_no )
+				{
+				obj_idx = j;
+				break;
+				}
+			}
+
+		//	Включаем режимы
+		if (	( obj_idx < TTank::TankCnt )
+			&&	( mode_no < g_tanks[ obj_idx ]->mode_cnt )
+			&&	g_tanks[ obj_idx ]->GetMode( mode_no ) )
+			{
+			g_tanks[ obj_idx ]->SetMode( mode_no, 0 );
 			}		  
 		}
+
+
+	//	Фиксируем начало работы режима (для учета времени работы режима)
+	paths[ mode ].start_time = MyGetMS();
 
 /*
     //Нет маршрута гребенки.
@@ -1506,22 +1666,6 @@ int TMyComb::Evaluate(void)
 					SetMode( i, 0 );
 					}
 				}		
-
-			//	Блокирующие устройства
-			for ( j = 0; j < paths[ i ].Block_dev_Cnt; j++ )
-				{
-				if( DEV( paths[ i ].Block_dev[ j ] )->State() == 1 )
-					{
-					//DEV( paths[ i ].Block_dev[ j ] )->Off();
-
-					char* str;
-					sprintf( str, "Попытка включения недопустимого устройства %d !", 
-						paths[ i ].Block_dev[ j ].no );
-
-					set_err_msg( str, 0, ERR_SIMPLE );
-					}
-				}
-						 			
 			} // if ( GetMode( i ) )   
 		else
 			{
@@ -1621,6 +1765,33 @@ int TMyComb::FinalMode( int mode )
 		)
 		{
 		SetMode( paths[ mode ].next_mode, 1 );
+		}
+
+	//	Проверяем какие режимы нужно было ВКЛючить - теперь мы их ВЫКЛючаем
+	for ( i = 0; i < paths[ mode ].On_mode_Cnt; i++ )
+		{
+		//	Преобразовываем код режима в номер объекта и номер режима
+		int obj_idx;
+		int obj_no = paths[ mode ].On_mode[ i ] / 1000;
+		int mode_no = paths[ mode ].On_mode[ i ] % 1000;
+
+		//	Ищем объект по его номеру
+		for ( int j = 0; j < TTank::TankCnt; j++ )
+			{
+			if ( g_tanks[ j ]->no == obj_no )
+				{
+				obj_idx = j;
+				break;
+				}
+			}
+
+		//	Выключаем режимы
+		if (	( obj_idx < TTank::TankCnt )
+			&&	( mode_no < g_tanks[ obj_idx ]->mode_cnt )
+			&&	g_tanks[ obj_idx ]->GetMode( mode_no ) )
+			{
+			g_tanks[ obj_idx ]->SetMode( mode_no, 0 );
+			}		  
 		}
 
     return tRes;

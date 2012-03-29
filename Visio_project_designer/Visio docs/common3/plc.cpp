@@ -2355,6 +2355,14 @@ int TWagoDrv::LoadDescrB(char *fn)
 				Comb1 = init_comb( b1, comb_n, b, comb_par_cnt,
 					comb_work_par_cnt, comb_tmr_cnt );
 
+				//	Счииываем значения параметров объекта
+				for ( i = 0; i < comb_par_cnt; i++ )
+					{
+					BlockRead( df, (unsigned char *)&w, 2 );
+					Comb1->par->setParam( i, w );
+					}
+				Comb1->par->Save();
+				
 				Comb1->paths = new TPathRec[ l ];  
 
 				for ( i = 0; i < l; i++ ) 
@@ -2856,6 +2864,14 @@ int TWagoDrv::LoadDescrB(char *fn)
 				Print("[%d] tank N[%d], type[%d]\n", m, Tank1->no, tank_sub_type );
 				Print( "Memory free: %lu bytes.\n", ( unsigned long ) coreleft() );
 #endif
+
+				//	Счииываем значения параметров объекта
+				for ( i = 0; i < tank_par_cnt; i++ )
+					{
+					BlockRead( df, (unsigned char *)&w, 2 );
+					Tank1->par->setParam( i, w );
+					}
+				Tank1->par->Save();
 
 				Tank1->paths = new TPathRec[ tank_mode_cnt ];  
 

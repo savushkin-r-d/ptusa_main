@@ -44,15 +44,13 @@ namespace Visio_project_designer
 
             //  Заполнение списка устройств
             dev_list.Items.Clear();
+
+            Globals.visio_addin.g_devices.Sort( main_ribbon.sort_devices );
+            
             foreach	( device dev in Globals.visio_addin.g_devices )
                 {
                 dev_list.Items.Add( dev.get_name() + ": " + dev.description );
                 }
-            //for ( int i = 0; i < Globals.visio_addin.g_devices.Count; i++ )
-            //    {
-            //    device dev = Globals.visio_addin.g_devices[ i ];
-            //    dev_list.Items.Add( dev.get_name() + ": " + dev.description );
-            //    }
             //-----------------------------------------------------------------------
 
             //  Создание временной структуры для хранения исходной конфигурации
@@ -953,6 +951,14 @@ namespace Visio_project_designer
                     cur_mode.TreeView_params.Nodes.Add( Prop_struct[ i ] );
                     }
                 }
+            //else
+            //    {
+            //    //  Синхронизация дерева характеристик
+            //    for ( int i = 0; i < Prop_struct.Length; i++ )
+            //        {
+            //        Synchronize_nodes( Prop_struct[ i ], cur_mode.TreeView_params.Nodes[ i ] );
+            //        }
+            //    }
 
             //  Заполнение дерева характеристик
             for ( int i = 0; i < cur_mode.TreeView_params.Nodes.Count; i++ )
@@ -972,7 +978,69 @@ namespace Visio_project_designer
             return cur_mode;
             }
         //---------------------------------------------------------------------
+/*
+        public void Synchronize_nodes( TreeNode pattern, TreeNode cur_node )
+            {
+            int j;
+            for ( j = 0; j < pattern.Nodes.Count; j++ )
+                {
+                TreeNode temp = Find_Node( cur_node.Nodes[ j ], pattern.Nodes[ j ].Text );
 
+                if ( temp != null
+//                    ( j >= cur_node.Nodes.Count )
+//                   ||   ( pattern.Nodes[ j ].Text != cur_node.Nodes[ j ].Text )
+                   )
+                    {
+                    string ss;
+                    ss = temp.Text;
+                    
+                    TreeNode ert = (TreeNode) temp.Clone();
+                    cur_node.Nodes.Remove( temp );
+                    cur_node.Nodes.Insert( j, ert );
+                    
+                    ss = temp.Text;             
+                    ss = ert.Text;
+
+                    }
+                else
+                    {
+                    cur_node.Nodes.Insert( j, pattern.Nodes[ j ].Text );
+                    }
+
+                Synchronize_nodes( pattern.Nodes[ j ], cur_node.Nodes[ j ] );
+                }
+
+            //  Если после добавления стандартных узлов остались еще какие-то, мы их удаляем
+            if ( cur_node.Level <= 1 )
+                {
+                for ( j = pattern.Nodes.Count; j < cur_node.Nodes.Count; j++ )
+                    {
+                    cur_node.Nodes[ j ].Remove();
+                    }
+                }
+            }
+        //---------------------------------------------------------------------
+
+        public TreeNode Find_Node( TreeNode n, string s )
+            {
+            TreeNode node;
+
+            for ( int i = 0; i < n.Nodes.Count; i++ )
+                {
+                if ( n.Nodes[ i ].Text == s )
+                    {
+                    return n.Nodes[ i ];
+                    }
+
+                if ( (node = Find_Node( n.Nodes[ i ], s )) != null )
+                    {
+                    return node;
+                    }
+                }
+
+            return null;
+            }
+*/
         private void Save_PropTree( mode cur_mode )
             {
             if ( cur_mode.TreeView_params != null )
