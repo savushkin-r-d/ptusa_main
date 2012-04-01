@@ -733,23 +733,23 @@ namespace visio_prj_designer
                                     }
                                 );
 
-                            //  Перед тем как удалить модуль удаляем все привязанные к его клеммам устройства
-                            for ( int j = 0; j < g_devices.Count; j++ )
-                                {
-                                foreach ( KeyValuePair<string, wago_channel> chen in g_devices[ j ].wago_channels )
-                                    {
-                                    if (    ( chen.Value.node == temp_mod.node_number )
-                                        &&  ( chen.Value.module == temp_mod )
-                                       )
-                                        {
-                                        g_devices[ j ].set_channel( chen.Key, null, 0 );
-                                        }
-                                    }
-                                }
-
                             //  Если модуль найден, то удаляем его из списка модулей узла
                             if ( temp_mod != null )
                                 {
+                                //  Перед тем как удалить модуль удаляем все привязанные к его клеммам устройства
+                                for ( int j = 0; j < g_devices.Count; j++ )
+                                    {
+                                    foreach ( KeyValuePair<string, wago_channel> chen in g_devices[ j ].wago_channels )
+                                        {
+                                        if ( ( chen.Value.node == temp_mod.node_number )
+                                            && ( chen.Value.module == temp_mod )
+                                           )
+                                            {
+                                            g_devices[ j ].set_channel( chen.Key, null, 0 );
+                                            }
+                                        }
+                                    }
+                                    
                                 //	Удаление выбранного модуля
                                 g_PAC_nodes[ i ].get_io_modules().Remove( temp_mod );
                                 break;
