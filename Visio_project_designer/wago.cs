@@ -721,13 +721,16 @@ namespace wago
             {
             string color = get_color();
 
-            shape.Shapes[ "red_boder" ].Cells[ "LineColor" ].FormulaU = color;
-            shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].FormulaU = "0%";
+            if ( shape.MasterShape != null )
+                {
+                shape.Shapes[ "red_boder" ].Cells[ "LineColor" ].FormulaU = color;
+                shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].FormulaU = "0%";
 
-            shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ] ].Cells[
-                "FillForegnd" ].FormulaU = color;
+                shape.Shapes[ "type_skin" ].Shapes[ clamp_names[ clamp ] ].Cells[
+                    "FillForegnd" ].FormulaU = color;
 
-            unmagnify_clamp( clamp );
+                unmagnify_clamp( clamp );
+                }
             }
 
         /// <summary> Убрать подсветку с модуля. </summary>
@@ -736,15 +739,18 @@ namespace wago
         public void deactivate()
             {
             int i = 0;
-            foreach( string clamp in clamp_names )
+            if ( shape.MasterShape != null )
                 {
-                shape.Shapes[ "type_skin" ].Shapes[ clamp ].Cells[
-                    "FillForegnd" ].FormulaU = "16";
+                foreach ( string clamp in clamp_names )
+                    {
+                    shape.Shapes[ "type_skin" ].Shapes[ clamp ].Cells[
+                        "FillForegnd" ].FormulaU = "16";
 
-                unmagnify_clamp( i++ );
+                    unmagnify_clamp( i++ );
+                    }
+
+                shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].FormulaU = "100%";
                 }
-
-			shape.Shapes[ "red_boder" ].Cells[ "LineColorTrans" ].FormulaU = "100%";
             }
 
         //  Получение цвета, соответствующего модулю

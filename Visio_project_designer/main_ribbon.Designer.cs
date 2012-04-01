@@ -65,14 +65,15 @@ namespace visio_prj_designer
             {
             this.process_definition_tab = this.Factory.CreateRibbonTab();
             this.group1 = this.Factory.CreateRibbonGroup();
-            this.edit_mode_tbutton = this.Factory.CreateRibbonToggleButton();
             this.group2 = this.Factory.CreateRibbonGroup();
-            this.save_as_lua_button = this.Factory.CreateRibbonButton();
             this.group3 = this.Factory.CreateRibbonGroup();
+            this.group4 = this.Factory.CreateRibbonGroup();
+            this.edit_mode_tbutton = this.Factory.CreateRibbonToggleButton();
+            this.save_as_lua_button = this.Factory.CreateRibbonButton();
             this.Btn_devices = this.Factory.CreateRibbonButton();
             this.button_modes = this.Factory.CreateRibbonButton();
-            this.group4 = this.Factory.CreateRibbonGroup();
             this.save_as_icpcon = this.Factory.CreateRibbonButton();
+            this.save_for_icpcpn_old = this.Factory.CreateRibbonButton();
             this.export_to_excel = this.Factory.CreateRibbonButton();
             this.process_definition_tab.SuspendLayout();
             this.group1.SuspendLayout();
@@ -96,17 +97,32 @@ namespace visio_prj_designer
             this.group1.Label = "Редактирование";
             this.group1.Name = "group1";
             // 
-            // edit_mode_tbutton
-            // 
-            this.edit_mode_tbutton.Label = "Привязка";
-            this.edit_mode_tbutton.Name = "edit_mode_tbutton";
-            this.edit_mode_tbutton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.toggleButton_edit_mode_Click );
-            // 
             // group2
             // 
             this.group2.Items.Add( this.save_as_lua_button );
             this.group2.Label = "Редактор WAGO";
             this.group2.Name = "group2";
+            // 
+            // group3
+            // 
+            this.group3.Items.Add( this.Btn_devices );
+            this.group3.Items.Add( this.button_modes );
+            this.group3.Label = "Объекты";
+            this.group3.Name = "group3";
+            // 
+            // group4
+            // 
+            this.group4.Items.Add( this.save_as_icpcon );
+            this.group4.Items.Add( this.save_for_icpcpn_old );
+            this.group4.Items.Add( this.export_to_excel );
+            this.group4.Label = "Отчеты";
+            this.group4.Name = "group4";
+            // 
+            // edit_mode_tbutton
+            // 
+            this.edit_mode_tbutton.Label = "Привязка";
+            this.edit_mode_tbutton.Name = "edit_mode_tbutton";
+            this.edit_mode_tbutton.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.toggleButton_edit_mode_Click );
             // 
             // save_as_lua_button
             // 
@@ -116,13 +132,6 @@ namespace visio_prj_designer
             this.save_as_lua_button.Name = "save_as_lua_button";
             this.save_as_lua_button.ShowImage = true;
             this.save_as_lua_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.button1_Click );
-            // 
-            // group3
-            // 
-            this.group3.Items.Add( this.Btn_devices );
-            this.group3.Items.Add( this.button_modes );
-            this.group3.Label = "Объекты";
-            this.group3.Name = "group3";
             // 
             // Btn_devices
             // 
@@ -136,18 +145,18 @@ namespace visio_prj_designer
             this.button_modes.Name = "button_modes";
             this.button_modes.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.button_modes_Click );
             // 
-            // group4
-            // 
-            this.group4.Items.Add( this.save_as_icpcon );
-            this.group4.Items.Add( this.export_to_excel );
-            this.group4.Label = "Отчеты";
-            this.group4.Name = "group4";
-            // 
             // save_as_icpcon
             // 
             this.save_as_icpcon.Label = "Экспорт для контроллера ICP CON";
             this.save_as_icpcon.Name = "save_as_icpcon";
+            this.save_as_icpcon.Visible = false;
             this.save_as_icpcon.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.save_as_icpcon_Click );
+            // 
+            // save_for_icpcpn_old
+            // 
+            this.save_for_icpcpn_old.Label = "Экспорт для ICP CON";
+            this.save_for_icpcpn_old.Name = "save_for_icpcpn_old";
+            this.save_for_icpcpn_old.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.save_for_icpcpn_old_Click );
             // 
             // export_to_excel
             // 
@@ -187,6 +196,7 @@ namespace visio_prj_designer
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group4;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton save_as_icpcon;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton export_to_excel;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton save_for_icpcpn_old;
         }
 
     partial class ThisRibbonCollection

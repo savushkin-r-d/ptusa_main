@@ -170,7 +170,8 @@ namespace visio_prj_designer
                  
 
             //  Открываем файл для записи описания
-            BinaryWriter bw = new BinaryWriter( File.Create("wago.dsx") );
+            BinaryWriter bw = new BinaryWriter( 
+                File.Create( visio_app.ActiveDocument.Path + "wago.dsx") );
 
             try
                 {
@@ -636,6 +637,7 @@ namespace visio_prj_designer
 //****************************************************************************
                 bw.Close();
 
+                MessageBox.Show( "Экспорт для контроллера ICP CON завершен." );
                 }
             catch ( System.Exception ex )
                 {
@@ -643,6 +645,489 @@ namespace visio_prj_designer
                 MessageBox.Show( ex.Message );
                 }
 
+             }
+         //-----------------------------------------------------------------------------------------
+
+         private void save_for_icpcpn_old_Click( object sender, RibbonControlEventArgs e )
+             {
+             // Проверяем есть ли в описании контроллер ICPCON
+             if ( Globals.visio_addin.g_PAC_nodes[ 0 ].shape.Data2 != "7186" )
+                 {
+                 MessageBox.Show( "В описании нет контроллера ICP CON !" );
+                 return;
+                 }
+                 
+
+            //  Открываем файл для записи описания
+            BinaryWriter bw = new BinaryWriter( 
+                File.Create( visio_app.ActiveDocument.Path + "wago.dsx") );
+
+            try
+                {
+
+                Char[] kod = { 'W', 'G', ' ', '{', '4', 'B',
+                    '7', '1', '4', 'C', '0', '8', '-', '9', '6', '0', '2', '-', '4', '1',
+                    '3', '0', '-', '8', '5', '6', '3', '-', '4', 'B', '5', '1', 'E', '0',
+                    '8', 'B', 'B', '9', 'D', '7', '}' };
+
+                //  Записываем наш мега-код
+                bw.Write( kod, 0, 41 );
+
+                //  Версия редактора
+                bw.Write( (byte) 11 );
+                bw.Write( (byte) 0 );
+                //  Версия файла
+                bw.Write( (byte) 0 );
+                bw.Write( (byte) 0 );
+
+                //  Записываем данные по устройствам проекта
+                //****************************************************************************
+                byte b, b1;
+                short sh;
+                int temp_i;
+
+                //1.Write Header
+                //port
+                b = Convert.ToByte( Globals.visio_addin.g_PAC_nodes[ 0 ].shape.Cells[ "Prop.port" ].Formula );
+                bw.Write( b );
+                
+                //node count
+                b1 = ( byte ) ( Globals.visio_addin.g_PAC_nodes.Count - 1 );
+                bw.Write( b1 );    
+
+                //  2   Проходим по узлам
+                for ( int i = 1; i < Globals.visio_addin.g_PAC_nodes.Count; i++ )
+                    {
+                    //Type
+                    b = ( byte ) ( Globals.visio_addin.Node_Types.IndexOf( 
+                                Globals.visio_addin.g_PAC_nodes[ i ].shape.Data2 ) );
+                    bw.Write( b );
+
+                    //IP-adress
+                    string str = Globals.visio_addin.g_PAC_nodes[ i ].ip_addres;
+                    Regex rex = new Regex( @"(\d+)\.(\d+)\.(\d+)\.(\d+)", RegexOptions.IgnoreCase );
+                    if (    rex.IsMatch( str ) 
+                        &&  Globals.visio_addin.g_PAC_nodes[ i ].shape.Data2 != Globals.visio_addin.Node_Types[ 0 ]
+                        &&  Globals.visio_addin.g_PAC_nodes[ i ].shape.Data2 != Globals.visio_addin.Node_Types[ 1 ] )
+                        {
+                        Match mtc = rex.Match( str );
+
+                        b = Convert.ToByte( mtc.Groups[ 1 ].ToString() );
+                        bw.Write( b );
+                        b = Convert.ToByte( mtc.Groups[ 2 ].ToString() );
+                        bw.Write( b );
+                        b = Convert.ToByte( mtc.Groups[ 3 ].ToString() );
+                        bw.Write( b );
+                        b = Convert.ToByte( mtc.Groups[ 4 ].ToString() );
+                        bw.Write( b );
+                        }
+//                     else
+//                         {
+//                         b = 0;
+//                         bw.Write( b );
+//                         bw.Write( b );
+//                         bw.Write( b );
+//                         bw.Write( b );
+//                         }
+
+                    //  adress (номер узла)
+                    b = Convert.ToByte( Globals.visio_addin.g_PAC_nodes[ i ].PAC_number );
+                    bw.Write( b );
+
+                    //  module count (количество модулей)
+                    b = Convert.ToByte( Globals.visio_addin.g_PAC_nodes[ i ].get_io_modules().Count );
+                    bw.Write( b );
+
+                    //  Сортируем модули перед тем, как записывать данные о них
+                    Globals.visio_addin.g_PAC_nodes[ i ].get_io_modules().Sort( sort_modules );
+
+                    //  3  Проходим по модулям
+                    for ( int j = 0; j < Globals.visio_addin.g_PAC_nodes[ i ].get_io_modules().Count; j++ )
+                        {
+                        //  Записываем номер модуля
+                        temp_i = Convert.ToInt32( Globals.visio_addin.g_PAC_nodes[ i ].get_io_modules()[ j ].type );
+                        bw.Write( ( short )temp_i );
+
+                        }   //  for j ... ( Проходим по модулям )
+                    }   //  for i ... ( Проходим по узлам )
+
+
+                //  Количество устройств
+                bw.Write( ( short ) Globals.visio_addin.g_devices.Count );
+
+                Globals.visio_addin.g_devices.Sort( sort_devices );
+
+                //  Проходим по устройствам
+                for ( int i = 0; i < Globals.visio_addin.g_devices.Count; i++ )
+                    {
+                    try
+                        {
+                        //  Преобразовываем в старый тип
+                        b = Globals.visio_addin.g_devices[ i ].Get_old_type();
+                        bw.Write( b );  //  type dev
+
+                        //  length description
+                        String temp_descr = Globals.visio_addin.g_devices[ i ].description;
+                        b = Convert.ToByte( temp_descr.Length );
+                        if ( b > 40 )
+                            {
+                            temp_descr = temp_descr.Remove( 37 ) + "...";
+                            b = Convert.ToByte( temp_descr.Length );
+                            }
+
+                        bw.Write( b );
+
+                        //  description
+                        for ( int j = 0; j < temp_descr.Length; j++ )
+                            {
+                            bw.Write( ( byte ) temp_descr[ j ] );
+                            }
+
+                        //  no
+                        sh = ( short ) Globals.visio_addin.g_devices[ i ].get_n();
+                        bw.Write( sh );
+
+                        //  chennel count
+                        bw.Write( Convert.ToByte(
+                            Globals.visio_addin.g_devices[ i ].wago_channels.Count ) );
+
+                        //  Проходим по каналам
+                        foreach ( KeyValuePair<string, wago.wago_channel> chen in
+                                    Globals.visio_addin.g_devices[ i ].wago_channels )
+                            {
+                            bw.Write( ( byte ) chen.Value.kind );   // 1  channel type
+
+                            //  Параметр это или канал устройства
+                            if ( chen.Value.kind == io_module.KINDS.PARAM )
+                                {
+                                bw.Write( ( byte ) 0 );         // 2  table no (node no) - порядковый номер в списке == просто номер узла
+                                bw.Write( ( byte ) 0 );         // 3  offset
+                                bw.Write( ( float ) chen.Value.clamp );   // 4  value (Значение параметра - на случай, если это параметр)
+                                }
+                            else
+                                {
+                                //  Если устройство не привязано
+                                if ( chen.Value.module == null )
+                                    {
+                                    bw.Write( ( byte ) 0 );     // 2  table no
+                                    bw.Write( ( byte ) 0 );     // 3  offset
+                                    }
+                                else
+                                    {
+                                    bw.Write( ( byte )( chen.Value.module.node_number - 1 ) );  // 2  tabel no
+
+                                    int index = Globals.visio_addin.get_index_PAC(
+                                        Globals.visio_addin.g_PAC_nodes, chen.Value.module.node_number );
+                                    b = chen.Value.get_clamp_offset( Globals.visio_addin.g_PAC_nodes[ index ] );
+
+                                    bw.Write( ( byte ) b );          // 3  offset
+                                    }
+
+                                bw.Write( ( float ) 0 );     // 4  value
+                                }
+                            }
+
+                        }
+                    catch ( System.Exception )
+                        {
+                        MessageBox.Show( "Ошибка записи данных устройства " + 
+                            Globals.visio_addin.g_devices[ i ].name );
+                        }
+                    }   //  for i...
+
+
+                try
+                    {
+                    //  4   Write AS info
+                    //  port контроллера
+                    b = Convert.ToByte( Globals.visio_addin.g_PAC_nodes[ 0 ].
+                                shape.Cells[ "Prop.port" ].Formula );
+                    bw.Write( b );
+
+                    //  gateways count
+                    b = Convert.ToByte( Globals.visio_addin.g_PAC_nodes[ 0 ].
+                                shape.Cells[ "Prop.lock_cnt" ].Formula );
+                    bw.Write( b );
+
+                    //  write gateways - номера шлюзов начиная с 1
+                    for ( byte i = 1; i <= b; i++ )
+                        {
+                        //addrs (просто перечисление адресов)
+                        bw.Write( ( byte ) i );
+                        }
+                    }
+                catch ( System.Exception )
+                    {
+                    MessageBox.Show( "Ошибка записи данных ASinterface!" );
+                    }
+
+
+//****************************************************************************
+                //  Объекты типа ГРЕБЕНКА
+                T_Object temp_obj = Globals.visio_addin.g_objects.Find(
+                    delegate( T_Object temp )
+                    {
+                    return temp.type == device.TYPES.T_GREB;
+                    }
+                    );
+
+                b1 = 0;
+                if ( temp_obj != null )
+                    {
+                    b1 = 1;
+                    }
+                    
+                bw.Write( b1 );     //  Количество гребенок
+
+                b1 = (byte) Globals.visio_addin.g_objects.Count;    //  Количество танков 
+
+                //  Проходим по сложным устройствам
+                foreach ( T_Object obj in Globals.visio_addin.g_objects )
+                    {
+                    try
+                        {
+                        if ( obj.get_type() == ( int ) device.TYPES.T_GREB )
+                            {
+                            bw.Write( ( byte ) obj.sub_type );                      //  подтип гребенки
+                            bw.Write( ( byte ) ( obj.mode_mas.Count / 32 + 1 ) );   //  states
+
+                            bw.Write( ( short ) obj.n );                                      // Номер гребенки
+                            bw.Write( ( short )
+                                ( obj.param_list_save.Count + obj.param_list_temp.Count ) );  // Кол-во параметров
+                            bw.Write( ( short ) obj.param_list_temp.Count );                  // Кол-во врем. пар-ов
+                            bw.Write( ( short ) obj.timers );                                 // Кол-во таймеров
+
+                            //  Проходим по режимам
+                            for ( int i = 0; i < ( obj.mode_mas.Count / 32 + 1 )*32; i++ )
+                                {
+                                if ( i < obj.mode_mas.Count )
+                                    {
+                                    get_write_data( bw, obj.mode_mas[ i ], "OLD", "Включать_устройства" );
+                                    get_write_data( bw, obj.mode_mas[ i ], "OLD", "Выключать_устройства" );
+                                    get_write_data( bw, obj.mode_mas[ i ], "OLD", "Устройства_ВКЛ_по_завершению" );
+                                    get_write_data( bw, obj.mode_mas[ i ], "OLD", "Верхний_флип" );
+                                    get_write_data( bw, obj.mode_mas[ i ], "OLD", "Нижний_флип" );
+                                                                        
+                                    get_write_data( bw, obj.mode_mas[ i ], "OLD", "Необходимые_для_ВКЛ_сигналы" ); //  FB
+                                    bw.Write( ( byte ) 0 ); //  N
+                                    bw.Write( ( byte ) 0 ); //  V
+                                    bw.Write( ( short ) 0 ); //  washFB // Управляющие_устройствами_сигналы
+                                    get_write_data( bw, obj.mode_mas[ i ], "OLD", "Отправляемые_сигналы" ); //  washUPR
+                                    bw.Write( ( byte ) 0 ); //  in_FB
+                                    bw.Write( ( byte ) 0 ); //  out_UPR
+
+                                    bw.Write( ( byte ) 0 ); //  Маршрут
+                                    }
+                                else
+                                    {
+                                    bw.Write( ( byte ) 0 ); //  ON
+                                    bw.Write( ( byte ) 0 ); //  OFF
+                                    bw.Write( ( byte ) 0 ); //  OFF_after
+                                    bw.Write( ( byte ) 0 ); //  U_FLIP
+                                    bw.Write( ( byte ) 0 ); //  L_FLIP
+
+                                    bw.Write( ( byte ) 0 ); //  FB
+                                    bw.Write( ( byte ) 0 ); //  N
+                                    bw.Write( ( byte ) 0 ); //  V
+                                    bw.Write( ( short ) 0 ); //  washFB
+                                    bw.Write( ( byte ) 0 ); //  washUPR
+                                    bw.Write( ( byte ) 0 ); //  in_FB
+                                    bw.Write( ( byte ) 0 ); //  out_UPR
+
+                                    bw.Write( ( byte ) 0 ); //  Маршрут
+                                    }
+
+                                }
+
+                            //  Определяем сколько Танков
+                            b1 = ( byte ) ( Globals.visio_addin.g_objects.Count - 1 );
+
+                            break;
+                            }
+                        }
+                    catch ( System.Exception )
+                        {
+                        MessageBox.Show( "Ошибка записи данных объекта " + obj.name );
+                        }
+                    }
+
+
+                //  Объекты типа ТАНК
+                bw.Write( b1 );
+
+                foreach ( T_Object obj in Globals.visio_addin.g_objects )
+                    {
+                    try
+                        {
+                        if ( obj.get_type() == ( int ) device.TYPES.T_TANK )
+                            {
+                            bw.Write( ( byte ) obj.sub_type );                      // Подтип танка
+                            bw.Write( ( byte ) 0 );                                // Номер гребенки для танка
+                            bw.Write( ( byte ) ( obj.mode_mas.Count / 32 + 1 ) );  // Количество режимов
+
+                            bw.Write( ( short ) obj.n );                                      // Номер танка
+                            bw.Write( ( short )
+                                ( obj.param_list_save.Count + obj.param_list_temp.Count ) );  // Кол-во параметров
+                            bw.Write( ( short ) obj.param_list_temp.Count );                  // Кол-во врем. пар-ов
+                            bw.Write( ( short ) obj.timers );                                 // Кол-во таймеров
+
+                            //  Проходим по режимам
+                            for ( int i = 0; i < ( obj.mode_mas.Count / 32 + 1 ) * 32; i++ )
+                                {
+                                if ( i < obj.mode_mas.Count )
+                                    {
+                                    //  "Параметры"      "Сигналы"          "Ограничения"
+                                    bw.Write( ( byte ) obj.mode_mas[ i ].step.Count ); //  Количество шагов
+
+                                    for ( int j = 0; j < obj.mode_mas[ i ].step.Count; j++ )
+                                        {
+                                        //  Для танка задаются только шаги
+                                        //get_write_data( bw, obj.mode_mas[ i ], "OLD", "Включать_устройства" );
+                                        //get_write_data( bw, obj.mode_mas[ i ], "OLD", "Выключать_устройства" );
+
+                                        get_write_data( bw, obj.mode_mas[ i ].step[ j ], "OLD", "Включать_устройства" );
+                                        get_write_data( bw, obj.mode_mas[ i ].step[ j ], "OLD", "Выключать_устройства" );
+
+                                        TreeNode node = FindNode( 
+                                            obj.mode_mas[ i ].step[ j ].TreeView_params.Nodes[ 0 ], 
+                                            "Номер_следующего_режима" );
+                                        
+                                        if ( node.FirstNode != null )
+                                            {
+                                            bw.Write( Convert.ToByte( node.FirstNode.Text ) );
+                                            }
+                                        else
+                                            {
+                                            bw.Write( ( byte ) 0 );
+                                            }
+
+
+                                        node = FindNode(
+                                            obj.mode_mas[ i ].step[ j ].TreeView_params.Nodes[ 0 ],
+                                            "Время_работы_режима" );
+
+                                        if ( node.FirstNode != null )
+                                            {
+                                            bw.Write( Convert.ToByte( node.FirstNode.Text ) );
+                                            }
+                                        else
+                                            {
+                                            bw.Write( ( byte ) 0 );
+                                            }
+
+
+                                        //bw.Write( ( byte ) 0 );    //   Следующий шаг при завершении времени текущего шага
+                                        //bw.Write( ( byte ) 0 );    //   Номер параметра, содержащий время шага, мин.                    
+                                        
+                                        bw.Write( ( byte ) 0 );    //   Маршрут
+                                        }   //  for j
+                                    }
+                                else
+                                    {
+                                    bw.Write( ( byte ) 0 ); //  Количество шагов
+                                    }
+                                }   //  for i
+                            }   
+
+                        }
+                    catch ( System.Exception )
+                        {
+                        MessageBox.Show( "Ошибка записи данных объекта " + obj.name );
+                        }
+                    }
+
+                //  Структура гребенки
+                bw.Write( ( byte ) 0 ); //  Y
+                bw.Write( ( byte ) 0 ); //  X
+
+                bw.Write( ( byte ) 0 ); //  гребенок
+                bw.Write( ( byte ) 0 ); //  танков
+
+/*
+                //  Имена режимов Гребенки
+                //[ 0 ] - количество гребенок
+                //[ 1 ] - индекс гребенки
+                //[ 2 ] - количество режимов гребенки
+                //[ 3 ] - номер режима
+                //[ 4 ] - длина названия
+                //[ 5 ] - название режима
+                bw.Write( ( byte ) 1 );
+
+                foreach ( T_Object obj in Globals.visio_addin.g_objects )
+                    {
+                    try
+                        {
+                        if ( obj.get_type() == ( int ) device.TYPES.T_GREB )
+                            {
+                            bw.Write( ( byte ) obj.n );
+                            bw.Write( ( byte ) obj.mode_mas.Count );
+
+                            for ( byte j = 0; j < obj.mode_mas.Count; j++ )
+                                {
+                                bw.Write( j );
+                                bw.Write( ( short ) obj.mode_mas[ j ].name.Length );
+                                bw.Write( obj.mode_mas[ j ].name );
+                                //for ( int k = 0; k < obj.mode_mas[ j ].name.Length; k++ )
+                                //    {
+                                //    bw.Write( ( byte ) obj.mode_mas[ j ].name[ k ] );
+                                //    }
+                                }
+                            }
+                        }
+                    catch ( System.Exception )
+                        {
+                        MessageBox.Show( "Ошибка записи названия режимов объекта " + obj.name );
+                        }
+                    }
+
+
+                //  Имена режимов Танка
+                //[ 0 ] - количество танков
+                //[ 1 ] - индекс танка
+                //[ 2 ] - количество режимов танка
+                //[ 3 ] - номер режима
+                //[ 4 ] - длина названия
+                //[ 5 ] - название режима
+                bw.Write( ( byte ) ( Globals.visio_addin.g_objects.Count - 1 ) );
+
+                foreach ( T_Object obj in Globals.visio_addin.g_objects )
+                    {
+                    try
+                        {
+                        if ( obj.get_type() == ( int ) device.TYPES.T_TANK )
+                            {
+                            bw.Write( ( byte ) obj.n );
+                            bw.Write( ( byte ) obj.mode_mas.Count );
+
+                            for ( byte j = 0; j < obj.mode_mas.Count; j++ )
+                                {
+                                bw.Write( j );
+                                bw.Write( ( short ) obj.mode_mas[ j ].name.Length * 2 );
+                                bw.Write( obj.mode_mas[ j ].name );
+                                //for ( int k = 0; k < obj.mode_mas[ j ].name.Length; k++ )
+                                //    {
+                                //    bw.Write( ( byte ) obj.mode_mas[ j ].name[ k ] );
+                                //    }
+                                }
+                            }
+                        }
+                    catch ( System.Exception )
+                        {
+                        MessageBox.Show( "Ошибка записи названия режимов объекта " + obj.name );
+                        }
+                     }
+*/
+//****************************************************************************
+                bw.Close();
+
+                MessageBox.Show( "Экспорт для контроллера ICP CON завершен." );
+
+                }
+            catch ( System.Exception ex )
+                {
+                bw.Close();
+                MessageBox.Show( ex.Message );
+                }
              }
          //-----------------------------------------------------------------------------------------
 
@@ -887,6 +1372,7 @@ namespace visio_prj_designer
              }
          //-----------------------------------------------------------------------------------------
 
+         // Для создания описания нового формата
          public void get_write_data( BinaryWriter bw, mode temp_mode, string part2 )
              {
              byte b;
@@ -1029,15 +1515,17 @@ namespace visio_prj_designer
                          break;
                      }
                  }
+             }
+         //------------------------------------------------------------------------------
 
-/*
+        //  Для создания описания старого формата 
+        public void get_write_data( BinaryWriter bw, mode temp_mode, string part1, string part2 )
+             {
+             byte b;
+             TreeNode temp_node;
+             device temp_dev;
+
              temp_node = FindNode( temp_mode.TreeView_params.Nodes[ 0 ], part2 );
-
-             if ( temp_node == null )
-                 {
-                 bw.Write( ( byte ) 0 );
-                 return;
-                 }
 
              b = ( byte ) temp_node.Nodes.Count;
              bw.Write( b );  //  count
@@ -1064,9 +1552,8 @@ namespace visio_prj_designer
                          + "( " + temp_mode.name + " )" );
                      }
                  }
- */ 
              }
-
+         //------------------------------------------------------------------------------
 
          // Поиск узла в дереве по названию.
          private TreeNode FindNode( TreeNode tn, string name )
