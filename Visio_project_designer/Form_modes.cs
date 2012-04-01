@@ -735,6 +735,8 @@ namespace Visio_project_designer
                                     addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step[ addin.cur_step ] );
                     }
 
+                addin.cur_mode = addin.cur_mode - 1;
+
                 //  Обновляем дерево свойств 
                 //      (если этого не сделать перед удаление шага, то унаследуются свойства удаляемого режима)
                 Refresh_prop_tree( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
