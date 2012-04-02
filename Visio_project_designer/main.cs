@@ -745,6 +745,7 @@ namespace visio_prj_designer
                                             && ( chen.Value.module == temp_mod )
                                            )
                                             {
+                                            //io_module mod_null = null;
                                             g_devices[ j ].set_channel( chen.Key, null, 0 );
                                             }
                                         }
@@ -802,6 +803,8 @@ namespace visio_prj_designer
 
         private void Check_nodes_modules( Visio.Shape m_shape )
             {
+            io_module last_module = new io_module( m_shape );
+
             //  Определяем номер узла, к которому относится модуль
             int node_n = Convert.ToInt32( m_shape.Cells[ "Prop.node_number" ].FormulaU );
 
@@ -816,22 +819,36 @@ namespace visio_prj_designer
             //  Ищем в узлах модуль по фигуре. Если найдем, то удалим
             for ( int j = 0; j < g_PAC_nodes.Count; j++ )
                 {
-                io_module temp_mod = g_PAC_nodes[ j ].get_io_modules().Find(
+                io_module old_module = g_PAC_nodes[ j ].get_io_modules().Find(
                     delegate( io_module mod )
                         {
                         return mod.shape == m_shape;
                         }
                     );
 
-                if ( temp_mod != null )
+                if ( old_module != null )
                     {
-                    g_PAC_nodes[ j ].get_io_modules().Remove( temp_mod );
+                    //  Проходим по всем устройствам, и для привязанных к данному модулю
+                    //      каналам меняем привязку
+                    for ( int k = 0; k < g_devices.Count; k++ )
+                        {
+                        foreach ( KeyValuePair<string, wago_channel> chen in g_devices[ k ].wago_channels )
+                            {
+                            if ( chen.Value.module == old_module )
+                                {
+                                g_devices[ k ].set_channel( chen.Key, last_module, chen.Value.clamp );
+                                }
+                            }
+                        }
+
+                    //  Удаляем старый модуль (он нам больше не нужен)
+                    g_PAC_nodes[ j ].get_io_modules().Remove( old_module );
                     break;
                     }
                 }
 
-            //  Переносим его в новый узел
-            temp_node.add_io_module( m_shape );
+            //  Добавляем новый модуль в список модулей
+            temp_node.get_io_modules().Add( last_module );
             }
 
 
@@ -908,6 +925,7 @@ namespace visio_prj_designer
                                 visio_app.ActivePage.Shapes[ i ].Cells[ "Prop.node_number" ].FormulaU =
                                     obj_1.Cells[ "Prop.node_number" ].FormulaU;
 
+                                //  Перенос модуля в новый узел
                                 Check_nodes_modules( visio_app.ActivePage.Shapes[ i ] );
 
                                 //  Меняем модуль относительно которого дальше идет переименование
@@ -987,6 +1005,8 @@ namespace visio_prj_designer
         private void visio_addin___MouseDown( int Button, int KeyButtonState, double x,
             double y, ref bool CancelDefault )
             {
+            //io_module mod_null = null;   //  Временный параметр для передачи параметра по ссылкеы
+
             if ( is_selecting_clamp )
                 {
                 for ( int i = 0; i < g_PAC_nodes.Count; i++ )
@@ -998,6 +1018,7 @@ namespace visio_prj_designer
                             {
                             g_PAC_nodes[ i ].unmark();
 
+                            //mod_null = module;
                             cur_sel_dev.set_channel(
                                 cur_sel_dev.get_active_channel(), module, clamp );
 
@@ -1017,6 +1038,7 @@ namespace visio_prj_designer
                     }   //  for i ...
 
                 //  Снимаем привязку (Если программа сюда дошла, значит клема не выбрана)
+                //mod_null = null;
                 cur_sel_dev.set_channel(
                     cur_sel_dev.get_active_channel(), null, 0 );
 
@@ -1204,6 +1226,8 @@ namespace visio_prj_designer
         /// <param name="cell"> Ячейка, где произошло изменение. </param>
         private void visio_addin__FormulaChanged( Microsoft.Office.Interop.Visio.Cell cell )
             {
+            //io_module mod_null = null;
+
 			switch ( cell.Shape.Data1 )
 				{
 				//	Изменения свойств модуля WAGO
@@ -1306,6 +1330,20 @@ namespace visio_prj_designer
                             //  Устанавливаем номер на модуле
                             cell.Shape.Shapes[ "module_number" ].Text =
                                 cell.Shape.Cells[ "Prop.order_number" ].Formula;
+
+//                             //  Проходим по всем устройствам, и для привязанных к данному модулю
+//                             //      каналам меняем привязку (номер модуля в првязке)
+//                             for ( int j = 0; j < g_devices.Count; j++ )
+//                                 {
+//                                 foreach ( KeyValuePair<string, wago_channel> chen in g_devices[ j ].wago_channels )
+//                                     {
+//                                     if ( chen.Value.module == temp_mod )
+//                                         {
+//                                         g_devices[ j ].set_channel( chen.Key, temp_mod, chen.Value.clamp );
+//                                         }
+//                                     }
+//                                 }
+
                             return;
                             }
 
