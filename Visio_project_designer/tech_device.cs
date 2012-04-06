@@ -28,16 +28,11 @@ namespace tech_device
     public class mode
         {
         public int no;				//	Номер режима (шага)
-        public string name;		//	Название режима (шага)
-
+        public string name;		    //	Название режима (шага)
         public TreeView TreeView_params;
-
-        //public List<device> on_device;	//	Устройства для включения
-        //public List<device> off_device;	//	Устройства для выключения
-        //	...
-        
         public List<mode> step;		//	Шаги режима
-
+                   
+     
         public mode( int no_ = 0, string name_ = "New mode" )
             {
             TreeView_params = new TreeView();
@@ -45,6 +40,7 @@ namespace tech_device
 
             set_attribute( no_, name_ );
             }
+        //-----------------------------------------------------------------------
 
         public void set_attribute( int no_, string name_ )
             {
@@ -55,6 +51,27 @@ namespace tech_device
             if ( step == null )
                 step = new List<mode>();
             }
+        //-----------------------------------------------------------------------
+
+        public mode Copy()
+            {
+            mode new_mode = new mode();
+
+            new_mode.set_attribute( this.no, this.name );
+
+            new_mode.TreeView_params.Nodes.Clear();
+
+            //  Проходим по характеристикам режима
+            for ( int j = 0; j < this.TreeView_params.Nodes.Count; j++ )
+                {
+                new_mode.TreeView_params.Nodes.Add(
+                    ( ( TreeNode ) this.TreeView_params.Nodes[ j ].Clone() ) );
+                }
+
+            return new_mode;
+            }
+        //-----------------------------------------------------------------------
+
         }
 
 	/// <summary> Сложный объект (Гребенка, Танк). </summary>
@@ -153,46 +170,14 @@ namespace tech_device
             {
             for ( int i = 0; i < from_modes.Count; i++ )
                 {
-                mode tmode = new mode();
-                tmode.set_attribute( from_modes[ i ].no, from_modes[ i ].name );
-
-                tmode.TreeView_params.Nodes.Clear();
-
-                //  Проходим по характеристикам режима
-                for ( int j = 0; j < from_modes[ i ].TreeView_params.Nodes.Count; j++ )
-                    {
-                    tmode.TreeView_params.Nodes.Add(
-                        ( ( TreeNode ) from_modes[ i ].TreeView_params.Nodes[ j ].Clone() ) );
-                    }
-
+                mode tmode = from_modes[ i ].Copy();
+            
                 //  Проходим по шагам режима         
                 copy_modes( from_modes[ i ].step, tmode.step );
 
                 to_modes.Add( tmode );
                 }
             }
-
-//         private void copy_mode( mode from_mode, mode to_mode )
-//             {
-//             to_mode.set_attribute( from_mode.no, from_mode.name );
-//             
-//             to_mode.TreeView_params.Nodes.Clear();
-// 
-//             //  Проходим по характеристикам режима
-//             for ( int j = 0; j < from_mode.TreeView_params.Nodes.Count; j++ )
-//                 {
-//                 to_mode.TreeView_params.Nodes.Add(
-//                     ( ( TreeNode ) from_mode.TreeView_params.Nodes[ j ].Clone() ) );
-//                 }
-// 
-//             //  Проходим по шагам режима         
-//             for ( int k = 0; k < from_mode.step.Count; k++ )
-//                 {
-//                 mode tstep = new mode();
-//                 copy_mode( from_mode.step[ k ], tstep );
-//                 to_mode.step.Add( tstep );
-//                 }
-//             }
 
 		}
     
