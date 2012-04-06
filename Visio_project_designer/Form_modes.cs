@@ -16,6 +16,7 @@ namespace Visio_project_designer
     public partial class Form_modes : Form
         {
         public visio_addin addin = Globals.visio_addin;
+        public T_Object OLD_obj;
         public ListBox lbox;                //  Удалить
         public TreeNode[] Prop_struct;      //  Стандартная структура характеристик режима
         public TreeNode cur_node;           //  Текущий узел дерева режимов
@@ -53,14 +54,10 @@ namespace Visio_project_designer
                 }
             //-----------------------------------------------------------------------
 
+                        
             //  Создание временной структуры для хранения исходной конфигурации
-            //T_Object OLD_obj_config = new T_Object( addin.cur_sel_obj.shape, null );
-            
-            //addin.cur_sel_obj.copy_obj_config_to( ref OLD_obj_config );
-            
-            //addin.cur_sel_obj.mode_mas[ 0 ].name = "heeeeeeeeelen";
-            //addin.cur_sel_obj.mode_mas[ 1 ].name = "billibob";
-
+            OLD_obj = new T_Object( addin.cur_sel_obj.shape, null );
+            addin.cur_sel_obj.copy_obj_config_to( ref OLD_obj );
 
             //  Заполнение списка режимов и шагов для выбранного объекта
             Refresh_mode_tree();
@@ -176,6 +173,11 @@ namespace Visio_project_designer
                     break;
 
                 case DialogResult.No:
+                    //  Удаляем измененный вариант объекта, меняем его на первоначальный вариант                    
+                    addin.g_objects.Insert( addin.g_objects.IndexOf( addin.cur_sel_obj ), OLD_obj );
+                    addin.g_objects.Remove( addin.cur_sel_obj );
+                    addin.cur_sel_obj = OLD_obj;
+
                     addin.is_selecting_dev = false;
                     break;
 

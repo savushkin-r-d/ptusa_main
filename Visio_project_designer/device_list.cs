@@ -28,7 +28,7 @@ namespace Visio_project_designer
 
 		private void Form_device_Shown( object sender, EventArgs e )
 			{
-			LV_devices.Items.Clear();
+			LB_devices.Items.Clear();
 
 			//	Заполняем таблицу данными
 			System.Windows.Forms.ListViewItem item;
@@ -38,20 +38,17 @@ namespace Visio_project_designer
 				//str[ 2 ] = "";	//	description
 				//str[ 3 ] = "";	//	sub_type
 
-//			Globals.visio_addin.g_devices.Sort();
+            Globals.visio_addin.g_devices.Sort( main_ribbon.sort_devices );
 
             foreach	( device dev in Globals.visio_addin.g_devices )
 			    {
-			    item = LV_devices.Items.Add( Convert.ToString( dev.get_type() ) );
+			    item = LB_devices.Items.Add( Convert.ToString( dev.get_type() ) );
 			    str[ 0 ] = Convert.ToString( dev.get_n() );			//	number
 			    str[ 1 ] = dev.get_name();							//	name
 			    str[ 2 ] = dev.description;							//	description
 			    str[ 3 ] = Convert.ToString( dev.get_sub_type() );	//	sub_type
 			    item.SubItems.AddRange( str );
 			    }
-
-			//LV_devices.Sort(); 
-
 			}
 
 		private void LV_devices_DoubleClick( object sender, EventArgs e )
@@ -70,7 +67,7 @@ namespace Visio_project_designer
             if ( lbox_temp != null )
                 {
                 //  Добавляем найденное устройсто в текущий список
-                device dev = Globals.visio_addin.g_devices[ LV_devices.SelectedItems[ 0 ].Index ];
+                device dev = Globals.visio_addin.g_devices[ LB_devices.SelectedItems[ 0 ].Index ];
                 lbox_temp.Items.Add( dev.get_name() + ": " + dev.description );
                 } 
             else

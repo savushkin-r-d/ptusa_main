@@ -28,7 +28,7 @@
 		/// </summary>
 		private void InitializeComponent()
 			{
-            this.LV_devices = new System.Windows.Forms.ListView();
+            this.LB_devices = new System.Windows.Forms.ListView();
             this.type = ( ( System.Windows.Forms.ColumnHeader ) ( new System.Windows.Forms.ColumnHeader() ) );
             this.number = ( ( System.Windows.Forms.ColumnHeader ) ( new System.Windows.Forms.ColumnHeader() ) );
             this.name = ( ( System.Windows.Forms.ColumnHeader ) ( new System.Windows.Forms.ColumnHeader() ) );
@@ -36,30 +36,30 @@
             this.sub_type = ( ( System.Windows.Forms.ColumnHeader ) ( new System.Windows.Forms.ColumnHeader() ) );
             this.SuspendLayout();
             // 
-            // LV_devices
+            // LB_devices
             // 
-            this.LV_devices.Activation = System.Windows.Forms.ItemActivation.OneClick;
-            this.LV_devices.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
+            this.LB_devices.Activation = System.Windows.Forms.ItemActivation.OneClick;
+            this.LB_devices.Anchor = ( ( System.Windows.Forms.AnchorStyles ) ( ( ( ( System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom )
                         | System.Windows.Forms.AnchorStyles.Left )
                         | System.Windows.Forms.AnchorStyles.Right ) ) );
-            this.LV_devices.Columns.AddRange( new System.Windows.Forms.ColumnHeader[] {
+            this.LB_devices.Columns.AddRange( new System.Windows.Forms.ColumnHeader[] {
             this.type,
             this.number,
             this.name,
             this.discription,
             this.sub_type} );
-            this.LV_devices.FullRowSelect = true;
-            this.LV_devices.GridLines = true;
-            this.LV_devices.HideSelection = false;
-            this.LV_devices.Location = new System.Drawing.Point( 0, 0 );
-            this.LV_devices.Name = "LV_devices";
-            this.LV_devices.Size = new System.Drawing.Size( 665, 490 );
-            this.LV_devices.Sorting = System.Windows.Forms.SortOrder.Ascending;
-            this.LV_devices.TabIndex = 0;
-            this.LV_devices.UseCompatibleStateImageBehavior = false;
-            this.LV_devices.View = System.Windows.Forms.View.Details;
-            this.LV_devices.SelectedIndexChanged += new System.EventHandler( this.LV_devices_SelectedIndexChanged );
-            this.LV_devices.DoubleClick += new System.EventHandler( this.LV_devices_DoubleClick );
+            this.LB_devices.FullRowSelect = true;
+            this.LB_devices.GridLines = true;
+            this.LB_devices.HideSelection = false;
+            this.LB_devices.Location = new System.Drawing.Point( 0, 1 );
+            this.LB_devices.Name = "LB_devices";
+            this.LB_devices.Size = new System.Drawing.Size( 639, 489 );
+            this.LB_devices.Sorting = System.Windows.Forms.SortOrder.Ascending;
+            this.LB_devices.TabIndex = 0;
+            this.LB_devices.UseCompatibleStateImageBehavior = false;
+            this.LB_devices.View = System.Windows.Forms.View.Details;
+            this.LB_devices.SelectedIndexChanged += new System.EventHandler( this.LV_devices_SelectedIndexChanged );
+            this.LB_devices.DoubleClick += new System.EventHandler( this.LV_devices_DoubleClick );
             // 
             // type
             // 
@@ -88,8 +88,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF( 6F, 13F );
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size( 668, 492 );
-            this.Controls.Add( this.LV_devices );
+            this.ClientSize = new System.Drawing.Size( 642, 492 );
+            this.Controls.Add( this.LB_devices );
             this.Name = "Form_device";
             this.Text = "Устройства проекта";
             this.Shown += new System.EventHandler( this.Form_device_Shown );
@@ -104,6 +104,6 @@
 		private System.Windows.Forms.ColumnHeader name;
 		private System.Windows.Forms.ColumnHeader discription;
 		private System.Windows.Forms.ColumnHeader sub_type;
-		public System.Windows.Forms.ListView LV_devices;
+        public System.Windows.Forms.ListView LB_devices;
 		}
 	}

@@ -118,38 +118,82 @@ namespace tech_device
                 } );
 
             }
+        //---------------------------------------------------------------------------
 
-/*      //  Копирование объекта
+        //  Копирование объекта
         public void copy_obj_config_to( ref T_Object obj_to )
             {
-            this.name = obj_to.name;
-
-            for ( int i = 0; i < mode_mas.Count; i++ )
+            //  Копируем общие характеристики
+            obj_to.n = this.n;
+            obj_to.name = this.name;
+            obj_to.timers = this.timers;
+            
+            //  Копируем параметры
+            obj_to.param_list_temp.Clear();
+            for ( int i = 0; i < param_list_temp.Count; i++ )
                 {
-                mode temp = new mode();
-
-                temp.no = this.mode_mas[ i ].no;
-                temp.name = this.mode_mas[ i ].name;
-
-
-                obj_to.mode_mas[ i ].TreeView_params.Nodes.Clear();
-                for ( int j = 0; j < this.mode_mas[ i ].TreeView_params.Nodes.Count; j++ )
-                    {
-                    obj_to.mode_mas[ i ].TreeView_params.Nodes.Add(
-                        ( ( TreeNode ) cur_mode.TreeView_params.Nodes[ i ].Clone() ) );
-                        temp.TreeView_params.;
-                    }
-                                         
-                for (  )
-                    {
-                    temp.step;
-                    }
-                
-                obj_to.mode_mas.Add( temp );
+                obj_to.param_list_temp.Add( new string[ 2 ] );
+                obj_to.param_list_temp[ i ][ 0 ] = param_list_temp[ i ][ 0 ];
+                obj_to.param_list_temp[ i ][ 1 ] = param_list_temp[ i ][ 1 ];
                 }
 
+            obj_to.param_list_save.Clear();
+            for ( int i = 0; i < param_list_save.Count; i++ )
+                {
+                obj_to.param_list_save.Add( new string[ 2 ] );
+                obj_to.param_list_save[ i ][ 0 ] = param_list_save[ i ][ 0 ];
+                obj_to.param_list_save[ i ][ 1 ] = param_list_save[ i ][ 1 ];
+                }
+
+            //  Проходим по режимам
+            copy_modes( mode_mas, obj_to.mode_mas );
             }
-*/
+
+        private void copy_modes( List<mode> from_modes, List<mode> to_modes )
+            {
+            for ( int i = 0; i < from_modes.Count; i++ )
+                {
+                mode tmode = new mode();
+                tmode.set_attribute( from_modes[ i ].no, from_modes[ i ].name );
+
+                tmode.TreeView_params.Nodes.Clear();
+
+                //  Проходим по характеристикам режима
+                for ( int j = 0; j < from_modes[ i ].TreeView_params.Nodes.Count; j++ )
+                    {
+                    tmode.TreeView_params.Nodes.Add(
+                        ( ( TreeNode ) from_modes[ i ].TreeView_params.Nodes[ j ].Clone() ) );
+                    }
+
+                //  Проходим по шагам режима         
+                copy_modes( from_modes[ i ].step, tmode.step );
+
+                to_modes.Add( tmode );
+                }
+            }
+
+//         private void copy_mode( mode from_mode, mode to_mode )
+//             {
+//             to_mode.set_attribute( from_mode.no, from_mode.name );
+//             
+//             to_mode.TreeView_params.Nodes.Clear();
+// 
+//             //  Проходим по характеристикам режима
+//             for ( int j = 0; j < from_mode.TreeView_params.Nodes.Count; j++ )
+//                 {
+//                 to_mode.TreeView_params.Nodes.Add(
+//                     ( ( TreeNode ) from_mode.TreeView_params.Nodes[ j ].Clone() ) );
+//                 }
+// 
+//             //  Проходим по шагам режима         
+//             for ( int k = 0; k < from_mode.step.Count; k++ )
+//                 {
+//                 mode tstep = new mode();
+//                 copy_mode( from_mode.step[ k ], tstep );
+//                 to_mode.step.Add( tstep );
+//                 }
+//             }
+
 		}
     
 //-----------------------------------------------------------------------------	   
