@@ -913,8 +913,8 @@ namespace visio_prj_designer
                                     bw.Write( ( byte ) 0 ); //  V
                                     bw.Write( ( short ) 0 ); //  washFB // Управляющие_устройствами_сигналы
                                     get_write_data( bw, obj.mode_mas[ i ], "OLD", "Отправляемые_сигналы" ); //  washUPR
-                                    bw.Write( ( byte ) 0 ); //  in_FB
-                                    bw.Write( ( byte ) 0 ); //  out_UPR
+                                    get_write_data( bw, obj.mode_mas[ i ], "OLD", "Управляющие_устройствами_сигналы" ); //  in_FB
+                                    get_write_data( bw, obj.mode_mas[ i ], "OLD", "Зависящие_от_устройств_сигналы" ); //  out_UPR
 
                                     bw.Write( ( byte ) 0 ); //  Маршрут
                                     }
@@ -1014,7 +1014,6 @@ namespace visio_prj_designer
                                             {
                                             bw.Write( ( byte ) 0 );
                                             }
-
 
                                         //bw.Write( ( byte ) 0 );    //   Следующий шаг при завершении времени текущего шага
                                         //bw.Write( ( byte ) 0 );    //   Номер параметра, содержащий время шага, мин.                    
@@ -1225,6 +1224,11 @@ namespace visio_prj_designer
              temp_cell.Value2 = ( int ) ( mod.type );   // Выводим номер
              temp_cell.ColumnWidth = 4;
 
+             int first = 0, last = 0;
+             Excel.Range range_gray;
+
+             //excel_app.Visible = true;
+
              // Выводим таблицу даннх по модулю
              for ( int i = 0; i <= clamp_cnt; i++ )
                  {
@@ -1237,14 +1241,40 @@ namespace visio_prj_designer
                  temp_cell.get_Offset( 0, 1 ).Value2 = get_chen_string( mod, i );
 
                  // Если клемма не предназначена для привязки подсвечиваем ее серым цветом
+                 // и выделяем для того, чтобы потом их сгруппировать
                  if ( mod.available_clamp_flags != null
                    && mod.available_clamp_flags[ i ] == false )
                      {
                      temp_cell.get_Offset( 0, 1 ).Interior.ColorIndex = 15;
+
+                     if ( first == 0 )
+                         {
+                         first = cur_row + i;
+                         }
+                     else
+                         {
+                         last = cur_row + i;
+                         }
+                     }
+
+                 // Встречаем активную клемму или последнюю клемму модуля
+                 if (   mod.available_clamp_flags != null
+                    &&  (   mod.available_clamp_flags[ i ] == true 
+                        ||  i == clamp_cnt ) )
+                     {
+                     if ( first != 0 )
+                         {
+                         range_gray = ( Excel.Range ) excel_ws.Rows[ 
+                             Convert.ToString( first ) + ":" + Convert.ToString( last ) ];
+                         range_gray.Activate();
+                         range_gray.Rows.Group();
+
+                         first = 0;
+                         last = 0;
+                         }
                      }
                  }
-
-
+                         
              // Переходим на следующую строку (Изменяем текущую ячейку)
              excel_cells =
                 ( Excel.Range ) excel_ws.Cells[ cur_row + clamp_cnt + 1, cur_col ];
