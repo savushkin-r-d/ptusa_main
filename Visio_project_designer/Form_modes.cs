@@ -306,7 +306,7 @@ namespace Visio_project_designer
                     {
                     //filling_dev_list( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
                     addin.cur_sel_obj.mode_mas[ addin.cur_mode ] =
-                    Refresh_prop_tree( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
+                        Refresh_prop_tree( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
                     }
                 }
             else
@@ -322,7 +322,7 @@ namespace Visio_project_designer
                     {
                     //filling_dev_list( addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step[ addin.cur_step ] );
                     addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step[ addin.cur_step ] =
-                    Refresh_prop_tree( addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step[ addin.cur_step ] );
+                        Refresh_prop_tree( addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step[ addin.cur_step ] );
                     }
                 }
 
@@ -940,22 +940,30 @@ namespace Visio_project_designer
                     cur_mode.TreeView_params.Nodes.Add( Prop_struct[ i ] );
                     }
                 }
-//             else
-//                 {
-//                 TreeView temp_tree = new TreeView();
-//                 TreeNode temp_node;
-// 
-//                 temp_tree.Nodes.Add( "Proporties" );
-// 
-//                 //  Синхронизация дерева характеристик
-//                 for ( int i = 0; i < Prop_struct.Length; i++ )
-//                     {
-//                     Synchronize_nodes( 
-//                         Prop_struct[ i ], cur_mode.TreeView_params.Nodes[ 0 ], out temp_node );
-//                     
-//                     temp_tree.Nodes[ 0 ].Nodes.Add( temp_node );
-//                     }
-//                 }
+            else
+                {
+                TreeView temp_tree = new TreeView();
+                TreeNode temp_node;
+
+                temp_tree.Nodes.Add( "Proporties" );
+
+                //  Синхронизация дерева характеристик
+                for ( int i = 0; i < Prop_struct[ 0 ].Nodes.Count; i++ )
+                    {
+                    Synchronize_nodes(
+                        Prop_struct[ 0 ].Nodes[ i ], cur_mode.TreeView_params.Nodes[ 0 ], out temp_node );
+
+                    //  Добавляем получившийся набор характеристик
+                    temp_tree.Nodes[ 0 ].Nodes.Add( temp_node );
+                    }
+
+                //  Задаем новое дерево характеристик для режима
+                cur_mode.TreeView_params.Nodes.Clear();
+                for ( int i = 0; i < temp_tree.Nodes.Count; i++ )
+                    {
+                    cur_mode.TreeView_params.Nodes.Add( (TreeNode) temp_tree.Nodes[ i ].Clone() );
+                    }
+                }
 
             //  Заполнение дерева характеристик
             for ( int i = 0; i < cur_mode.TreeView_params.Nodes.Count; i++ )
@@ -975,11 +983,13 @@ namespace Visio_project_designer
             return cur_mode;
             }
         //---------------------------------------------------------------------
-/*
+
         public void Synchronize_nodes( TreeNode pattern, TreeNode cur_node, out TreeNode res )
             {
-            int j, k;
+            int j;
             TreeNode temp = null;
+            
+            res = new TreeNode( pattern.Text );
 
             for ( j = 0; j < pattern.Nodes.Count; j++ )
                 {
@@ -991,20 +1001,10 @@ namespace Visio_project_designer
                     }
                 else
                     {
-                    res = new TreeNode( pattern.Nodes[ j ].Text );
-                    }
-
-                //Synchronize_nodes( pattern.Nodes[ j ], cur_node.Nodes[ j ] );
-                }
-
-            //  Если после добавления стандартных узлов остались еще какие-то, мы их удаляем
-            if ( cur_node.Level <= 1 )
-                {
-                for ( j = pattern.Nodes.Count; j < cur_node.Nodes.Count; j++ )
-                    {
-                    cur_node.Nodes[ j ].Remove();
+                    res.Nodes.Add( pattern.Nodes[ j ].Text );
                     }
                 }
+
             }
         //---------------------------------------------------------------------
 
@@ -1028,7 +1028,7 @@ namespace Visio_project_designer
             return null;
             }
         //---------------------------------------------------------------------
-*/
+
         private void Save_PropTree( mode cur_mode )
             {
             if ( cur_mode.TreeView_params != null )
