@@ -85,6 +85,12 @@ namespace Visio_project_designer
                 }
             //-----------------------------------------------------------------------
 
+
+            //  Работа с меню (создаем структуру меню на основе структуры характеристик)
+            //contextMenuStrip2.Items[ "add_prop" ]
+
+            //-----------------------------------------------------------------------
+            
             }
         //---------------------------------------------------------------------
 
@@ -95,33 +101,6 @@ namespace Visio_project_designer
             switch ( MessageBox.Show( "Сохранить изменения?", "", MessageBoxButtons.YesNoCancel ) )
                 {
                 case DialogResult.Yes:
-/*
-                //  Сохранение списка режимов и их характеристик
-                    for ( int i = 0; i < treeView_modes.Nodes.Count; i++ )
-                        {
-                        Save_ModeData( addin.cur_sel_obj.mode_mas[ i ] );
-
-                             
-                        //******************
-                        //public T_Object.mode Save_ModeData( T_Object.mode cur_mode )
-
-                        cur_mode.no = treeView_modes.Nodes[ i ].Index;
-                        cur_mode.name = treeView_modes.Nodes[ i ].Text;
-
-                        for ( int k = 0; k < cur_mode.Nodes.Count; k++ )
-                            {                        
-
-                            }
-                        
-                        for ( int j = 0; j < treeView_modes.Nodes[ i ].Nodes.Count; j++ )
-                            {
-
-                            }
-                        //******************
-
-
-                        }
-*/
                     //  Сохраняем количество таймеров объекта
                     addin.cur_sel_obj.timers = (int) Num_timers.Value;
 
@@ -132,19 +111,21 @@ namespace Visio_project_designer
                         {
                         addin.cur_sel_obj.param_list_temp.Add( new string[ 2 ] );
 
-                        if ( dataGridView1.Rows[ i ].Cells[ 1 ].Value == null )
+                        if (    dataGridView1.Rows[ i ].Cells[ 1 ].Value == null )
                             {
-                            dataGridView1.Rows[ i ].Cells[ 1 ].Value = "";
+                            dataGridView1.Rows[ i ].Cells[ 1 ].Value = 
+                                "Параметр_" + Convert.ToString( i );
                             }
-                        if ( dataGridView1.Rows[ i ].Cells[ 2 ].Value == null )
+
+                        if (    dataGridView1.Rows[ i ].Cells[ 2 ].Value == null )
                             {
-                            dataGridView1.Rows[ i ].Cells[ 2 ].Value = "";
+                            dataGridView1.Rows[ i ].Cells[ 2 ].Value = "0";
                             }   
                         
                         addin.cur_sel_obj.param_list_temp[ i ][ 0 ] =
-                            dataGridView1.Rows[ i ].Cells[ 1 ].Value.ToString();
+                            dataGridView1.Rows[ i ].Cells[ 1 ].Value.ToString().Replace( " ", "_" );
                         addin.cur_sel_obj.param_list_temp[ i ][ 1 ] =
-                            dataGridView1.Rows[ i ].Cells[ 2 ].Value.ToString();
+                            dataGridView1.Rows[ i ].Cells[ 2 ].Value.ToString().Replace( " ", "_" );
                         }
 
                     //  Сохранение сохраняемых параметров
@@ -154,19 +135,21 @@ namespace Visio_project_designer
                         {
                         addin.cur_sel_obj.param_list_save.Add( new string[ 2 ] );
 
-                        if ( dataGridView2.Rows[ i ].Cells[ 1 ].Value == null )
+                        if (    dataGridView2.Rows[ i ].Cells[ 1 ].Value == null )
                             {
-                            dataGridView2.Rows[ i ].Cells[ 1 ].Value = "";
+                            dataGridView2.Rows[ i ].Cells[ 1 ].Value =
+                                "Параметр_" + Convert.ToString( i );
                             }
-                        if ( dataGridView2.Rows[ i ].Cells[ 2 ].Value == null )
+
+                        if (    dataGridView2.Rows[ i ].Cells[ 2 ].Value == null )
                             {
-                            dataGridView2.Rows[ i ].Cells[ 2 ].Value = "";
-                            }   
+                            dataGridView2.Rows[ i ].Cells[ 2 ].Value = "0";
+                            }    
                         
                         addin.cur_sel_obj.param_list_save[ i ][ 0 ] =
-                            dataGridView2.Rows[ i ].Cells[ 1 ].Value.ToString();
+                            dataGridView2.Rows[ i ].Cells[ 1 ].Value.ToString().Replace( " ", "_" );
                         addin.cur_sel_obj.param_list_save[ i ][ 1 ] =
-                            dataGridView2.Rows[ i ].Cells[ 2 ].Value.ToString();
+                            dataGridView2.Rows[ i ].Cells[ 2 ].Value.ToString().Replace( " ", "_" );
                         }
 
                     addin.is_selecting_dev = false;
@@ -744,6 +727,8 @@ namespace Visio_project_designer
                 Refresh_prop_tree( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
                 
                 treeView_modes.SelectedNode.Remove();
+                
+                Refresh_mode_tree();
                 }
             else
                 {
@@ -955,14 +940,22 @@ namespace Visio_project_designer
                     cur_mode.TreeView_params.Nodes.Add( Prop_struct[ i ] );
                     }
                 }
-            //else
-            //    {
-            //    //  Синхронизация дерева характеристик
-            //    for ( int i = 0; i < Prop_struct.Length; i++ )
-            //        {
-            //        Synchronize_nodes( Prop_struct[ i ], cur_mode.TreeView_params.Nodes[ i ] );
-            //        }
-            //    }
+//             else
+//                 {
+//                 TreeView temp_tree = new TreeView();
+//                 TreeNode temp_node;
+// 
+//                 temp_tree.Nodes.Add( "Proporties" );
+// 
+//                 //  Синхронизация дерева характеристик
+//                 for ( int i = 0; i < Prop_struct.Length; i++ )
+//                     {
+//                     Synchronize_nodes( 
+//                         Prop_struct[ i ], cur_mode.TreeView_params.Nodes[ 0 ], out temp_node );
+//                     
+//                     temp_tree.Nodes[ 0 ].Nodes.Add( temp_node );
+//                     }
+//                 }
 
             //  Заполнение дерева характеристик
             for ( int i = 0; i < cur_mode.TreeView_params.Nodes.Count; i++ )
@@ -983,35 +976,25 @@ namespace Visio_project_designer
             }
         //---------------------------------------------------------------------
 /*
-        public void Synchronize_nodes( TreeNode pattern, TreeNode cur_node )
+        public void Synchronize_nodes( TreeNode pattern, TreeNode cur_node, out TreeNode res )
             {
-            int j;
+            int j, k;
+            TreeNode temp = null;
+
             for ( j = 0; j < pattern.Nodes.Count; j++ )
                 {
-                TreeNode temp = Find_Node( cur_node.Nodes[ j ], pattern.Nodes[ j ].Text );
-
-                if ( temp != null
-//                    ( j >= cur_node.Nodes.Count )
-//                   ||   ( pattern.Nodes[ j ].Text != cur_node.Nodes[ j ].Text )
-                   )
+                temp = Find_Node( cur_node, pattern.Nodes[ j ].Text );
+                
+                if ( temp != null )
                     {
-                    string ss;
-                    ss = temp.Text;
-                    
-                    TreeNode ert = (TreeNode) temp.Clone();
-                    cur_node.Nodes.Remove( temp );
-                    cur_node.Nodes.Insert( j, ert );
-                    
-                    ss = temp.Text;             
-                    ss = ert.Text;
-
+                    res.Nodes.Add( ( TreeNode ) temp.Clone() );
                     }
                 else
                     {
-                    cur_node.Nodes.Insert( j, pattern.Nodes[ j ].Text );
+                    res = new TreeNode( pattern.Nodes[ j ].Text );
                     }
 
-                Synchronize_nodes( pattern.Nodes[ j ], cur_node.Nodes[ j ] );
+                //Synchronize_nodes( pattern.Nodes[ j ], cur_node.Nodes[ j ] );
                 }
 
             //  Если после добавления стандартных узлов остались еще какие-то, мы их удаляем
@@ -1044,6 +1027,7 @@ namespace Visio_project_designer
 
             return null;
             }
+        //---------------------------------------------------------------------
 */
         private void Save_PropTree( mode cur_mode )
             {

@@ -268,6 +268,8 @@ namespace visio_prj_designer
 
                 Globals.visio_addin.g_devices.Sort( sort_devices );
 
+                List<string> no_associating = new List<string>();    //  список не привязанных устройств
+
                 //  Проходим по устройствам
                 for ( int i = 0; i < Globals.visio_addin.g_devices.Count; i++ )
                     {
@@ -322,6 +324,10 @@ namespace visio_prj_designer
                                     {
                                     bw.Write( ( byte ) 0 );     // 2  table no
                                     bw.Write( ( byte ) 0 );     // 3  offset
+
+                                    no_associating.Add( "Устройство " +
+                                        Globals.visio_addin.g_devices[ i ].get_name() +
+                                        " Клемма " + chen.Key );
                                     }
                                 else
                                     {
@@ -345,6 +351,17 @@ namespace visio_prj_designer
                             Globals.visio_addin.g_devices[ i ].name );
                         }
                     }   //  for i...
+
+                //  Выводим список не привязанных устройств
+                if ( no_associating.Count > 0 )
+                    {
+                    string s = "Непривязаны следующие устройства: \n";
+                    for ( int i = 0; i < no_associating.Count; i++ )
+                        {
+                        s = s + no_associating[ i ] + '\n';
+                        }
+                    MessageBox.Show( s );
+                    }
 
 
                 try
@@ -757,6 +774,8 @@ namespace visio_prj_designer
 
                 Globals.visio_addin.g_devices.Sort( sort_devices );
 
+                List<string> no_associating = new List<string>();    //  список не привязанных устройств
+
                 //  Проходим по устройствам
                 for ( int i = 0; i < Globals.visio_addin.g_devices.Count; i++ )
                     {
@@ -811,6 +830,10 @@ namespace visio_prj_designer
                                     {
                                     bw.Write( ( byte ) 0 );     // 2  table no
                                     bw.Write( ( byte ) 0 );     // 3  offset
+                                    
+                                    no_associating.Add( "Устройство " + 
+                                        Globals.visio_addin.g_devices[ i ].get_name() + 
+                                        " Клемма " + chen.Key );
                                     }
                                 else
                                     {
@@ -835,6 +858,16 @@ namespace visio_prj_designer
                         }
                     }   //  for i...
 
+                //  Выводим список не привязанных устройств
+                if ( no_associating.Count > 0 )
+                    {
+                    string s = "Непривязаны следующие устройства: \n";
+                    for ( int i = 0; i < no_associating.Count; i++ )
+                        {
+                        s = s + no_associating[ i ] + '\n';
+                        }
+                    MessageBox.Show( s );
+                    }
 
                 try
                     {
