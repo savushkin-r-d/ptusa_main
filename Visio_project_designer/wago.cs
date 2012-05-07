@@ -908,8 +908,7 @@ namespace wago
                 }
             res += prefix + "\t}\n";
             res += prefix + "}";
-
-
+              
             return res;
             }
 
@@ -1048,6 +1047,73 @@ namespace wago
 
             return ( byte ) result;
             }
+
+        /// <summary> Lua save. </summary>
+        ///
+        /// <remarks> ASV, 03.05.2012. </remarks>
+        ///
+        /// <param name="prefix"> (optional) the prefix. </param>
+        ///
+        /// <returns> . </returns>
+        public string lua_save_chen( string prefix = "" )
+            {
+            string res = "";
+
+            switch ( kind )
+                {
+                case io_module.KINDS.DO:
+                    res = prefix + "DO\t=\n";
+                    break;
+
+                case io_module.KINDS.DI:
+                    res = prefix + "DI\t=\n";
+                    break;
+
+                case io_module.KINDS.AO:
+                    res = prefix + "AO\t=\n";
+                    break;
+
+                case io_module.KINDS.AI:
+                    res = prefix + "AI\t=\n";
+                    break;
+
+                case io_module.KINDS.PARAM:
+                    res = prefix + "par = { " + Convert.ToString( clamp ) +" }\n";
+                    return res;
+                    //break;
+                }
+
+            //  Если это не параметр, то продолжаем описание
+            res += prefix + "\t" + "{\n";
+            res += prefix + "\t" + "\t" + "{\n";
+            
+            //  Номер узла
+            res += prefix + "\t" + "\t" + "node = " + Convert.ToString( node ) + ",\n";
+            
+            //  Адрес привязки (глобальный)
+            int index = visio_prj_designer.Globals.visio_addin.get_index_PAC(
+                        visio_prj_designer.Globals.visio_addin.g_PAC_nodes, module.node_number );
+            int offset = get_clamp_offset( 
+                visio_prj_designer.Globals.visio_addin.g_PAC_nodes[ index ] );
+            
+            res += prefix + "\t" + "\t" + "offset = " + Convert.ToString( offset ) + "\n";
+                        
+            /*
+            //  Номер узла
+            res += prefix + "\t" + "\t" + "node = " + Convert.ToString( node ) + ",\n";
+            //  Номер модуля
+            res += prefix + "\t" + "\t" + "module = " + Convert.ToString( 
+                module.shape.Cells[ "Prop.Order_number" ].FormulaU ) + ",\n";
+            //  Номер клеммы
+            res += prefix + "\t" + "\t" + "clamp = " + Convert.ToString( clamp ) + ",\n";             
+             */
+
+            res += prefix + "\t" + "\t" + "}\n";
+            res += prefix + "\t" + "},\n";
+
+            return res;
+            }
+        //---------------------------------------------------------------------
 
         }
 

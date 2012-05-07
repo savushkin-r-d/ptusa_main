@@ -35,7 +35,7 @@
     <PublishUrl>P:\_Ptusa_SRC\Visio_project_designer\publish\</PublishUrl>
     <InstallUrl />
     <TargetCulture>en</TargetCulture>
-    <ApplicationVersion>1.0.1.35</ApplicationVersion>
+    <ApplicationVersion>1.0.1.38</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -144,10 +144,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>Visio_project_designer_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>Visio_project_designer_1_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>C2066709E6525E8A45E616F7AEAD52E05E58158F</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>741A7CB19FAE62A25F4917DDA7FDB3AA9ABE9E67</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -287,6 +287,7 @@
     <Content Include="Visio docs\PTUSA project.vst" />
     <Content Include="Visio docs\Wago.vss" />
     <Content Include="Visio docs\Устройства.vss" />
+    <None Include="Visio_project_designer_1_TemporaryKey.pfx" />
     <None Include="Visio_project_designer_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>

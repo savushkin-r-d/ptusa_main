@@ -69,18 +69,48 @@ namespace visio_prj_designer
 
                             config_f.WriteLine( "require 'sys_wago' --Системные функции." );
                             config_f.WriteLine( "-- ----------------------------------------------------------------------------" );
+                            
                             config_f.WriteLine( "editor_version = 12" );
                             config_f.WriteLine( "file_version   = 21" );
                             config_f.WriteLine( "" );
                             config_f.WriteLine( "PAC_name = \"" + Globals.visio_addin.g_PAC_nodes[ 0 ].PAC_name + "\"" );
                             config_f.WriteLine( "-- ----------------------------------------------------------------------------" );
-                            config_f.WriteLine( "--Узлы WAGO" );
 
+                            config_f.WriteLine( "--Узлы WAGO" );
                             config_f.WriteLine( "nodes = " );
                             config_f.WriteLine( "\t{" );
                             string lua_str = Globals.visio_addin.g_PAC_nodes[ 0 ].lua_save( "\t\t" );
                             config_f.WriteLine( lua_str );
                             config_f.WriteLine( "\t}" );
+                            config_f.WriteLine( "-- ----------------------------------------------------------------------------" );
+
+                            config_f.WriteLine( "--Устройства" );
+                            config_f.WriteLine( "devices = " );
+                            config_f.WriteLine( "\t{" );
+                            //  Проходим по всем устройствам
+                            for ( int i = 0; i < Globals.visio_addin.g_devices.Count; i++ )
+                                {
+                                lua_str = Globals.visio_addin.g_devices[ i ].lua_save_dev( "\t\t" );
+                                config_f.WriteLine( lua_str );
+                                }                      
+                            config_f.WriteLine( "\t}" );
+                            config_f.WriteLine( "-- ----------------------------------------------------------------------------" );
+
+                            config_f.WriteLine( "init_tech_objects_modes = function()\n" );
+                            config_f.WriteLine( "\t" + "return" );
+	                        config_f.WriteLine( "\t" + "{" );
+                            //  Проходим по сложным объектам
+                            for ( int i = 0; i < Globals.visio_addin.g_objects.Count; i++ )
+                                {
+                                lua_str = Globals.visio_addin.g_objects[ i ].lua_save_obj( "\t\t" );
+                                config_f.WriteLine( lua_str );
+                                }             
+                            config_f.WriteLine( "\t" + "}" );
+                            config_f.WriteLine( "-- ----------------------------------------------------------------------------" );
+
+
+
+                            config_f.WriteLine( "-- ----------------------------------------------------------------------------" );
 
                             config_f.Flush();
                             config_f.Close();
@@ -799,7 +829,17 @@ namespace visio_prj_designer
                         //  description
                         for ( int j = 0; j < temp_descr.Length; j++ )
                             {
-                            bw.Write( ( byte ) temp_descr[ j ] );
+                            byte[] we = new byte[] {( byte ) ( temp_descr[ j ] )};
+                            
+                            //  Получение символа по коду
+                            //Encoding cp866 = Encoding.GetEncoding( 866 );
+                            //char[] encoded = cp866.GetChars( we );
+
+                            //  Получение кода по символу (в соотв. табл. кодов - 866)
+                            Encoding cp866 = Encoding.GetEncoding( 866 );
+                            byte[] encoded = cp866.GetBytes( new char[] {temp_descr[ j ]} );
+                                                        
+                            bw.Write( encoded );
                             }
 
                         //  no

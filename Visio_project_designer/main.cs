@@ -1773,8 +1773,12 @@ namespace visio_prj_designer
                                 cell.Shape.Shapes[ "septum" ].SendToBack();
 
                                 //  Устанавливаем параметр (т.к. он int, то 1, а не NO)
-                                cur_sel_dev.set_channel( "septum", null, 1 );
-								}
+
+                                //  Т.к. для PLC не важно НО или НЗ, нужно передавать 0 
+                                //cur_sel_dev.set_channel( "septum", null, 1 );
+                                cur_sel_dev.set_channel( "septum", null, 0 );
+								
+                                }
 							else  //	"NC" || "НЗ"
 								{
 								//  Ставим перегородку

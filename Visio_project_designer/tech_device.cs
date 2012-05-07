@@ -72,6 +72,46 @@ namespace tech_device
             }
         //-----------------------------------------------------------------------
 
+        /// <summary> Lua save. </summary>
+        ///
+        /// <remarks> ASV, 03.05.2012. </remarks>
+        ///
+        /// <param name="prefix"> (optional) the prefix. </param>
+        ///
+        /// <returns> . </returns>
+        public string lua_save_mode( string prefix = "" )
+            {
+            string res = "";
+            res += prefix + "[ " + Convert.ToString( no ) + " ] =\n";
+            
+            res += prefix + "\t" + "{\n";
+            res += prefix + "\t" + "name = \'" + name + "\',\n";
+            
+            res += prefix + "\t" + "opened_devices = \n";
+            res += prefix + "\t\t" + "{\n";
+            
+            //  Проходим по списку устройств
+            res += prefix + "\t\t" + "V = {";
+//             for (  )
+//                 {
+// 
+//                 }
+            res += " }\n";
+
+            res += prefix + "\t\t" + "},\n";
+                 
+            //  Проходим по шагам
+            //foreach ( mode temp_mode in step )
+            //    {
+            //    res += temp_mode.lua_save_mode( "\t\t" );
+            //    }
+            
+            res += prefix + "\t" + "},\n";
+
+            return res;
+            }
+        //---------------------------------------------------------------------
+
         }
 
 	/// <summary> Сложный объект (Гребенка, Танк). </summary>
@@ -165,6 +205,7 @@ namespace tech_device
             //  Проходим по режимам
             copy_modes( mode_mas, obj_to.mode_mas );
             }
+        //---------------------------------------------------------------------
 
         private void copy_modes( List<mode> from_modes, List<mode> to_modes )
             {
@@ -178,6 +219,35 @@ namespace tech_device
                 to_modes.Add( tmode );
                 }
             }
+        //---------------------------------------------------------------------
+
+        /// <summary> Lua save. </summary>
+        ///
+        /// <remarks> ASV, 03.05.2012. </remarks>
+        ///
+        /// <param name="prefix"> (optional) the prefix. </param>
+        ///
+        /// <returns> . </returns>
+        public string lua_save_obj( string prefix = "" )
+            {
+            string res = prefix + "{\n";
+            res += prefix + "n = " + Convert.ToString( get_n() ) + ",\n";
+            res += prefix + "name = \'" + get_name() + "\',\n";
+            res += prefix + "modes = \n";
+            res += prefix + "\t" + "{\n";
+
+            //  Проходим по режимам
+            foreach ( mode temp_mode in mode_mas )
+                {
+                res += temp_mode.lua_save_mode( "\t\t\t" );
+                }
+            
+            res += prefix + "\t" + "},\n";
+            res += prefix + "},\n";
+
+            return res;
+            }
+        //---------------------------------------------------------------------
 
 		}
     
@@ -1001,6 +1071,32 @@ namespace tech_device
                 }
             }
 
+
+        /// <summary> Lua save. </summary>
+        ///
+        /// <remarks> ASV, 03.05.2012. </remarks>
+        ///
+        /// <param name="prefix"> (optional) the prefix. </param>
+        ///
+        /// <returns> . </returns>
+        public string lua_save_dev( string prefix = "" )
+            {
+            string res = prefix + "{\n";
+            res += prefix + "descr    = " + description + ",\n";
+            res += prefix + "dtype = " + ( int )type + ",\n";
+            res += prefix + "subtype = " + ( int ) sub_type + ",\n";
+            res += prefix + "number = " + get_n() + ",\n";
+
+            //  Проходим по каналам
+            foreach ( KeyValuePair<string, wago.wago_channel> chen in wago_channels )
+                {
+                res += chen.Value.lua_save_chen("\t\t");
+                }
+            res += prefix + "}\n";
+               
+            return res;
+            }
+        //---------------------------------------------------------------------
         }
 
 
