@@ -832,12 +832,12 @@ namespace visio_prj_designer
                             byte[] we = new byte[] {( byte ) ( temp_descr[ j ] )};
                             
                             //  Получение символа по коду
-                            //Encoding cp866 = Encoding.GetEncoding( 866 );
+                            //Encoding cp1251 = Encoding.GetEncoding( 1251 );
                             //char[] encoded = cp866.GetChars( we );
 
                             //  Получение кода по символу (в соотв. табл. кодов - 866)
-                            Encoding cp866 = Encoding.GetEncoding( 866 );
-                            byte[] encoded = cp866.GetBytes( new char[] {temp_descr[ j ]} );
+                            Encoding cp1251 = Encoding.GetEncoding( 1251 );
+                            byte[] encoded = cp1251.GetBytes( new char[] {temp_descr[ j ]} );
                                                         
                             bw.Write( encoded );
                             }

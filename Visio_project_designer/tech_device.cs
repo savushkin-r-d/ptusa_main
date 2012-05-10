@@ -687,13 +687,15 @@ namespace tech_device
             //  Если мы здесь, значит это параметр -> нас интересует олько "clamp"
             str = str.Replace( "\"", "" );
             
-            if ( ( str == "MIN" ) || ( str == "NC" ) /*временно->*/ || ( str == "НЗ" ) )
+            if ( ( str == "MIN" )   || ( str == "NC" ) /*временно->*/ || ( str == "НЗ" )
+                                    || ( str == "NO" ) /*временно->*/ || ( str == "НО" )
+                )                                                   
                 {
                 clamp = 0;
                 return true;
                 }
 
-            if ( ( str == "MAX" ) || ( str == "NO" ) /*временно->*/ || ( str == "НО" ) )
+            if ( str == "MAX" ) //|| ( str == "NO" ) /*временно->*/ || ( str == "НО" ) )
                 {
                 clamp = 1;
                 return true;
