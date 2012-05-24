@@ -401,6 +401,7 @@ namespace Visio_project_designer
                 ||  ( ((TreeView)sender).SelectedNode.Text == "Блокирующие_режимы_танков" )
                 ||  ( ( ( TreeView ) sender ).SelectedNode.Text == "Включить_режимы_танка" )
                 ||  ( ( ( TreeView ) sender ).SelectedNode.Text == "Выключить_режимы_танка" )
+                ||  ( ( ( TreeView ) sender ).SelectedNode.Text == "Настройка_ожидания" )
                     )
                     {
                     dev_list.Visible = false;
@@ -418,6 +419,7 @@ namespace Visio_project_designer
                                 ( ( ( ( TreeView ) sender ).SelectedNode.Text == "Блокирующие_режимы_танков"
                                     || ( ( TreeView ) sender ).SelectedNode.Text == "Включить_режимы_танка"
                                     || ( ( TreeView ) sender ).SelectedNode.Text == "Выключить_режимы_танка"
+                                    || ( ( TreeView ) sender ).SelectedNode.Text == "Настройка_ожидания"
                                    )
                                 && addin.g_objects[ i ].type == device.TYPES.T_TANK )
                            )
@@ -1087,6 +1089,7 @@ namespace Visio_project_designer
                         || ( treeView_prop.SelectedNode.Text == "Блокирующие_режимы_танков" )
                         || ( treeView_prop.SelectedNode.Text == "Включить_режимы_танка" )
                         || ( treeView_prop.SelectedNode.Text == "Выключить_режимы_танка" )
+                        || ( treeView_prop.SelectedNode.Text == "Настройка_ожидания" )
                     )
                 )
                 {

@@ -252,6 +252,25 @@ class TMyComb: public error_tech_device
 //---------------------
 class TTank : public error_tech_device
     {
+	enum TankParams
+		{
+		//-Рабочие параметры.
+		TANK_ERRORS,			//	0	Канал ошибок и сообщений для танка
+		PROCESS_TIME,			//	1	Время текущего режима   
+		STEP_NUMBER,			//	2	Номер текущего шага
+		PRODUCT_TYPE,			//	3	Тип продукта
+		//	4	
+		CROS_PROC_TIME = 5,		//	5	Время переходного процесса, мсек (3000)
+
+		//-Рабочие параметры.-!> 
+		};
+
+	ulong start_cross_period;	//	Старт отсчета времени до завершения режима (используется в системе ожидания)
+	
+	char	Prev_LH;			//  Предыдущее состояние верхнего уровня
+	char	Prev_LL;			//  Предыдущее состояние нижнего уровня
+
+
     public:
         unsigned long   modeStartTime[33];
         unsigned long   modeEvaluationTime[32];

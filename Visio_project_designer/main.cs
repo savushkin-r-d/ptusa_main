@@ -495,6 +495,17 @@ namespace visio_prj_designer
                         }
                     else
                         {
+                        //  Проверяем задан ли узел
+                        if (    g_PAC_nodes == null 
+                            ||  g_PAC_nodes[ 0 ] == null 
+                            ||  ( g_PAC_nodes[ 0 ].shape.Data2 == "7186" && g_PAC_nodes.Count < 2 ) 
+                            )
+                            {
+                            MessageBox.Show( "Задайте контроллер и узвы проекта!" );
+                            shape.Delete();
+                            break;
+                            }
+                        
                         //  Для процедуры выбора типа модуля определяем фигуру пораньше
                         old_shape = shape; 
 
@@ -698,7 +709,7 @@ namespace visio_prj_designer
                             (
                             delegate( PAC node )
                                 {
-                                return node.shape == shape;
+                                return (( node != null ) && ( node.shape == shape ));
                                 }
                             );
 
@@ -1262,11 +1273,14 @@ namespace visio_prj_designer
                                 Convert.ToInt16( cell.Shape.Cells[ "Prop.node_number" ].Formula );
 
                             cur_PAC_node.ip_addres = ip;
+                            cell.Shape.Cells[ "Выноска-пузырь" ].Formula = ip;
+
                             }
 
                         if ( cell.Name == "Prop.node_type" )
                             {
                             cell.Shape.Data2 = cell.Shape.Cells[ "Prop.node_type" ].Formula;
+                            //cur_PAC_node.PAC_type = cell.Shape.Data2;
                             }
 
                         if ( cell.Name == "Prop.node_number" )
@@ -1498,12 +1512,12 @@ namespace visio_prj_designer
                             cell.Shape.Cells[ cell.Name ].Formula = "\"" + str + "\"";
 
                             //  Делаем преобразование на случай нецифрового значения
-                            if ( ( str == "MIN" ) || ( str == "NC" ) )
+                            if ( ( str == "MAX" ) || ( str == "NC" ) )
                                 {
                                 str = "0";
                                 }
 
-                            if ( ( str == "MAX" ) || ( str == "NO" ) )
+                            if ( ( str == "MIN" ) || ( str == "NO" ) )
                                 {
                                 str = "1";
                                 }
@@ -1539,7 +1553,7 @@ namespace visio_prj_designer
                         case "Prop.description":
 							string str_name = cell.Shape.Cells[ "Prop.name" ].Formula;
 							str_name = str_name.Replace( "\"", "" );
-                            cur_sel_obj.name = str_name.ToUpper();
+                            cur_sel_obj.name = str_name;
 
                             string str_no = cell.Shape.Cells[ "Prop.number" ].Formula;
                             cur_sel_obj.n = Convert.ToInt32( str_no );
@@ -1871,6 +1885,7 @@ try
                                 );
 
                             cur_sel_obj.timers = Convert.ToInt32( tr.GetAttribute( "object-timers" ) );
+                            
                             break;
 
                         case "mode":
@@ -2188,6 +2203,7 @@ catch ( Exception )
                     case "Блокирующие_режимы_танков":
                     case "Включить_режимы_танка":
                     case "Выключить_режимы_танка":
+                    case "Настройка_ожидания":
 
                         tw.WriteStartElement( "__" + Convert.ToString( node.Nodes[ l ].Text ) + "__" );
                         tw.WriteEndElement();
@@ -2256,6 +2272,17 @@ catch ( Exception )
             //  Определяем индекс узла в списке
             for ( int i = 0; i < pac.Count; i++ )
                 {
+//                 if ( pac == null )
+//                     {
+//                     return 0;
+//                     }
+
+                if ( pac[ i ] == null )
+                    {
+                    //MessageBox.Show( "Не задан контроллер проекта!!!" );
+                    continue;
+                    }
+
                 if ( pac[ i ].PAC_number == node )
                     {
                     return i;

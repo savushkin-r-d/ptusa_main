@@ -4,10 +4,6 @@
 #include "priem.h"
 #include "snprintf.h"
 
-#if defined I7186_E || defined I7188_E 
-#include "udpc.h"
-#endif
-
 extern unsigned long    MyGetMS();
 
 extern TMyComb      **g_combs;
@@ -203,13 +199,6 @@ int ProcMainParams( int argc, char *argv[] )
     {
     if ( argc > 1 )
         {
-#if defined I7186_E || defined I7188_E
-        if ( strcmp( argv[ 1 ], "ip" ) == 0 )
-        {
-            ServerIp = argv[ 2 ];
-        }
-#endif // defined I7186_E || defined I7188_E
-         
         if ( strcmp( argv[ 1 ], "rcrc" ) == 0 )
             {
 #ifdef DEBUG
@@ -610,6 +599,9 @@ int TTank::InitMode( int mode )
     else Print( "Error TTank::InitMode m = %d!\n", mode );
 #endif
 
+	Prev_LH = LH->State();
+	Prev_LL = LL->State();
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -721,13 +713,96 @@ int TTank::Evaluate( )
 					}
 				}
 
-			//	Работа с ключом
-			if ( paths[ i ].Key_signal_Cnt >= 2 )
-				{
-				//mode_manager
-				Key_Work( i );
-				}
+			//	Работа с ожиданием
 
+			//	Создаем флаг (можно переходить в режимы работы (0) или нет(>0) )
+			char go_work = 0;
+
+				//	Проверяем на включенность режимы, которые мы ждем
+				for ( int k = 0; k < paths[ i ].Wait_modes_Cnt; k++ )
+					{
+					//	Преобразовываем код режима в номер объекта и номер режима
+					int obj_idx;
+					int obj_no = paths[ i ].Wait_modes[ k ] / 1000;
+					int mode_no = paths[ i ].Wait_modes[ k ] % 1000;
+
+					//	Ищем объект по его номеру
+					for ( int j = 0; j < TankCnt; j++ )
+						{
+						if ( g_tanks[ j ]->no == obj_no )
+							{
+							obj_idx = j;
+							break;
+							}
+						}
+
+					//	Проверяем режимы
+					if (	( obj_idx < TankCnt )
+						&&	( mode_no < g_tanks[ obj_idx ]->mode_cnt )
+						&&	g_tanks[ obj_idx ]->GetMode( mode_no )								// режим включен
+						&&  g_tanks[ obj_idx ]->modes_manager->get_active_step( mode_no ) > 0 )	// шаг - не ожидание
+						{
+						go_work++;
+						}
+					}
+
+				////	Контролируем уровни (выключение по уровню)
+				//if ( Prev_LL == 1 && LL->is_active() == 0 )
+				//	{
+				//	//	Фиксируем время начала завершения режима
+				//	start_cross_period = MyGetMS();
+				//	set_err_msg( "Танк пуст!", i );
+				//	 
+				//	//	Если есть ожидание в др. танке, то переключаем его в работу
+				//	int res;
+				//	if ( ( res = IsAnyModeT( i, PodTip )) >= 0 )
+				//		{
+				//		g_tanks[ res ]->modes_manager->final( i );
+				//		g_tanks[ res ]->modes_manager->init( i, 1, this );
+				//		}
+
+				//	//	По истечению заданного времени выключаем режим
+				//	if ( MyGetMS() - start_cross_period > par->getParam( CROS_PROC_TIME ) )
+				//		{
+				//		
+				//		}
+				//	}
+
+// 				if ( Prev_LH == 0 && LH->is_active() == 1 )
+// 					{
+// 					//	Фиксируем время начала завершения режима
+// 					start_cross_period = MyGetMS();
+// 					set_err_msg( "Танк полон!", i ); 
+// 
+// 					//	По истечению заданного времени выключаем режим
+// 					if ( MyGetMS() - start_cross_period > par->getParam( CROS_PROC_TIME ) )
+// 						{
+// 						
+// 						}
+// 					}
+
+			if ( go_work == 0 )
+				{
+				//	Работа с ключом
+				if ( paths[ i ].Key_signal_Cnt >= 2 )
+					{
+					//mode_manager
+					Key_Work( i );
+					}
+				else
+					{
+					//	Если ключ не задан, то
+					//	Если заданы 2 шага (шаг 0 Ожидание и шаг 1 Работа), то переходим к работе
+					if (	modes_manager->steps_cnt[ i ] == 2
+						&&	modes_manager->get_active_step( i ) == 0   
+						)
+						{
+						modes_manager->final( i );
+						modes_manager->init( i, 1, this );
+						}
+					}
+				}
+			
 			//	Если задан параметр времени работы режима
 			if (	paths[ i ].work_time_par < par->getParamCnt() 
 				&&	par->getParam( paths[ i ].work_time_par ) > 0 )
@@ -737,6 +812,10 @@ int TTank::Evaluate( )
 					SetMode( i, 0 );
 					}
 				}
+
+			//	Фиксируем номер текущего шага
+			//	***
+
             } 
 		else
 			{
@@ -749,7 +828,7 @@ int TTank::Evaluate( )
 					}
 				}
 
-			//	Если их нет, то проверяем "Вкл. режим сигналы"
+			//	Если их нет, то проверяем "Включающие режим сигналы"
 			if ( j == paths[ i ].Dev_off_Cnt )
 				{
 				//	Включающие режим устройства (сигналы)			
@@ -768,9 +847,11 @@ int TTank::Evaluate( )
 						}	
 					}
 				}
-			}	       
-        }
 
+			}	//	if GetMode()	       
+        }	//	for i
+
+		
 	if ( LH && LL )
 		{
 		// Ошибка предельных уровней.   
@@ -787,6 +868,9 @@ int TTank::Evaluate( )
 			is_lvl_err = 0;
 			}
 		}		
+
+	Prev_LH = LH->State();
+	Prev_LL = LL->State();
 
     return 0;
     }
@@ -1015,30 +1099,31 @@ int TTank::set_err_msg( const char *err_msg, int mode, ERR_MSG_TYPES type )
         {
         case ERR_CANT_ON:
             snprintf( err_str, sizeof( err_str ), 
-                "НЕ включен режим %.1d танка %.1d \"%.40s\"- %.40s!", 
-                mode + 1, no, get_mode_name( mode ), err_msg );
+                "Не включен режим %.1d \"%.40s\" танка %.1d - %.40s.", 
+                mode + 1, get_mode_name( mode ), no, err_msg );
             break;
 
         case ERR_ON_WITH_ERRORS:
             snprintf( err_str, sizeof( err_str ), 
-                "Включен с ошибкой режим %.1d танка %.1d \"%.40s\"- %.40s!", 
-                mode + 1, no, get_mode_name( mode ), err_msg );
+                "Включен с ошибкой режим %.1d \"%.40s\" танка %.1d - %.40s.", 
+                mode + 1, get_mode_name( mode ), no, err_msg );
             break;
 
         case ERR_OFF:
             snprintf( err_str, sizeof( err_str ), 
-                "Отключен режим %.1d танка %.1d \"%.40s\"- %.40s!", 
-                mode + 1, no, get_mode_name( mode ), err_msg );
+                "Отключен режим %.1d \"%.40s\" танка %.1d - %.40s.", 
+                mode + 1, get_mode_name( mode ), no, err_msg );
             break;
 
         case ERR_DURING_WORK:
             snprintf( err_str, sizeof( err_str ), 
-                "Ошибка режима %.1d танка %.1d \"%.40s\"- %.40s!", 
-                mode + 1, no, get_mode_name( mode ), err_msg );
+                "Режим %.1d \"%.40s\" танка %.1d - %.40s.", 
+                mode + 1, get_mode_name( mode ), no, err_msg );
             break;
 
         case ERR_SIMPLE:
-            snprintf( err_str, sizeof( err_str ), "%.80s", err_msg );
+            snprintf( err_str, sizeof( err_str ), 
+                "Танк %.1d - %.60s.", no, err_msg );
             break;
 
         default:
@@ -1049,8 +1134,8 @@ int TTank::set_err_msg( const char *err_msg, int mode, ERR_MSG_TYPES type )
             Print( "\n" );
 #endif // DEBUG
             snprintf( err_str, sizeof( err_str ), 
-                "Режим %.1d танка %.1d \"%.40s\"- %.40s!", 
-                mode + 1, no, get_mode_name( mode ), err_msg );
+                "Режим %.1d \"%.40s\" танка %.1d - %.40s!", 
+                mode + 1, get_mode_name( mode ), no, err_msg );
             break;
         }
 

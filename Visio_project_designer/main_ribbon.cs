@@ -323,7 +323,16 @@ namespace visio_prj_designer
                         //  description
                         for ( int j = 0; j < temp_descr.Length; j++ )
                             {
-                            bw.Write( ( byte ) temp_descr[ j ] );
+                            byte[] we = new byte[] { ( byte ) ( temp_descr[ j ] ) };
+
+                            //  Получение кода по символу (в соотв. табл. кодов - 866)
+                            //Encoding cp1251 = Encoding.GetEncoding( 1251 );
+                            //byte[] encoded = cp1251.GetBytes( new char[] { temp_descr[ j ] } );
+
+                            Encoding cp866 = Encoding.GetEncoding( 866 );
+                            byte[] encoded_1 = cp866.GetBytes( new char[] { temp_descr[ j ] } );
+
+                            bw.Write( encoded_1[ 0 ] );
                             }
 
                         //  no
@@ -482,6 +491,7 @@ namespace visio_prj_designer
                                 get_write_data( bw, obj.mode_mas[ i ], "Управляющие_устройствами_сигналы" );
                                 get_write_data( bw, obj.mode_mas[ i ], "Зависящие_от_устройств_сигналы" );
                                 get_write_data( bw, obj.mode_mas[ i ], "Использование_ключа" );
+                                get_write_data( bw, obj.mode_mas[ i ], "Настройка_ожидания" );
 
                                 //  Условия_выключения_режима
                                 get_write_data( bw, obj.mode_mas[ i ], "Выключающие_режим_сигналы" );
@@ -561,7 +571,8 @@ namespace visio_prj_designer
                                 get_write_data( bw, obj.mode_mas[ i ], "Управляющие_устройствами_сигналы" );
                                 get_write_data( bw, obj.mode_mas[ i ], "Зависящие_от_устройств_сигналы" );
                                 get_write_data( bw, obj.mode_mas[ i ], "Использование_ключа" );
-
+                                get_write_data( bw, obj.mode_mas[ i ], "Настройка_ожидания" );
+                                
                                 //  Условия_выключения_режима
                                 get_write_data( bw, obj.mode_mas[ i ], "Выключающие_режим_сигналы" );
                                 get_write_data( bw, obj.mode_mas[ i ], "Устройства_ВКЛ_по_завершению" );
@@ -1511,6 +1522,7 @@ namespace visio_prj_designer
                      case "Блокирующие_режимы_танков":
                      case "Включить_режимы_танка":
                      case "Выключить_режимы_танка":
+                     case "Настройка_ожидания":
 
                          //bw.Write( ( byte ) 0 );     //  object
                          bw.Write( ( ushort ) Convert.ToUInt16( temp_node.Nodes[ j ].Text ) );   //  mode

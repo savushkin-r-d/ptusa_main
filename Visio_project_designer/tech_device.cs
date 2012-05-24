@@ -127,7 +127,7 @@ namespace tech_device
         public List<string[]> param_list_save;	//	Список параметров param_list< Название, Значение >
 		
         //  Количество таймеров объекта
-        public int timers = 0;
+        public int timers = 4;
 
         //	Список ошибок 
 //		public enum ERROR_LIST
@@ -687,7 +687,7 @@ namespace tech_device
             //  Если мы здесь, значит это параметр -> нас интересует олько "clamp"
             str = str.Replace( "\"", "" );
             
-            if ( ( str == "MIN" )   || ( str == "NC" ) /*временно->*/ || ( str == "НЗ" )
+            if ( ( str == "MAX" )   || ( str == "NC" ) /*временно->*/ || ( str == "НЗ" )
                                     || ( str == "NO" ) /*временно->*/ || ( str == "НО" )
                 )                                                   
                 {
@@ -695,7 +695,7 @@ namespace tech_device
                 return true;
                 }
 
-            if ( str == "MAX" ) //|| ( str == "NO" ) /*временно->*/ || ( str == "НО" ) )
+            if ( str == "MIN" ) //|| ( str == "NO" ) /*временно->*/ || ( str == "НО" ) )
                 {
                 clamp = 1;
                 return true;

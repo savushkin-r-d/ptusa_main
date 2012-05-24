@@ -11,6 +11,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 using Visio = Microsoft.Office.Interop.Visio;
 
@@ -236,9 +237,11 @@ namespace wago
 				case TYPES.T_461_002:
 				case TYPES.T_466:
 				case TYPES.T_638:
-                case TYPES.T_655:
 				//	AO modules
 				case TYPES.T_554:
+                //  Special modules
+                case TYPES.T_493:
+                case TYPES.T_655:
                     total_clamps = CLAMPS_COUNT.СLAMP_8;
                     break;
 			  
@@ -255,6 +258,8 @@ namespace wago
                 default:
                     Exception exc = new Exception(
                         "Неизвестный тип модуля - \"" + type + "\"!" );
+                    MessageBox.Show( exc.ToString() );
+
                     throw exc;
                 }
 		//---------------------------------------------------------------------
@@ -801,8 +806,11 @@ namespace wago
         /// <summary> Имя контроллера. </summary>
         public string PAC_name;
 
-        /// <summary> Имя контроллера. </summary>
+        /// <summary> Номер контроллера. </summary>
         public int PAC_number;
+
+        /// <summary> Тип контроллера. </summary>
+        //public int PAC_type;
 
 		/// <summary> Выбранный в данный момент модуль </summary>
 		internal io_module current_module = null; 
