@@ -725,12 +725,6 @@ int TWagoDrv::LoadDescrB(char *fn)
                             Nodes[j].Table->AIcnt+=ch;
                             Nodes[j].mAIcnt+=1;
                             Nodes[j].wAIcnt+=wc*ch;
-
-                            //Print( "\n   %d. %d  \n", i, w );
-                            //Print( "Table->AIcnt = %d \n", Nodes[j].Table->AIcnt );
-                            //Print( "mAIcnt = %d \n", Nodes[j].mAIcnt );
-                            //Print( "wAIcnt = %d \n", Nodes[j].wAIcnt );
-                            //Getch();
                             break;
 
                         case TYPE_DO: 
@@ -2382,6 +2376,7 @@ int TWagoDrv::LoadDescrB(char *fn)
 					Comb1->paths[ i ].UPR_control_Cnt	= 0;
 
 					Comb1->paths[ i ].Key_signal_Cnt		= 0;
+					Comb1->paths[ i ].Wait_modes_Cnt		= 0;
 
 					//	Для выключения режима
 					Comb1->paths[ i ].Dev_off_Cnt		= 0;
@@ -2436,6 +2431,7 @@ int TWagoDrv::LoadDescrB(char *fn)
 						&Comb1->paths[ i ].UPR_control_dev, &Comb1->paths[ i ].UPR_control, 
 						Comb1->paths[ i ].UPR_control_Cnt );
 					Read_list_dev( df, i, &Comb1->paths[ i ].Key_signal, Comb1->paths[ i ].Key_signal_Cnt );
+					Read_list_mode( df, i, &Comb1->paths[ i ].Wait_modes, Comb1->paths[ i ].Wait_modes_Cnt );
 
 					//--------------------------------------------------------------
 					Read_list_dev( df, i, &Comb1->paths[ i ].Dev_off, Comb1->paths[ i ].Dev_off_Cnt );
@@ -2933,6 +2929,7 @@ int TWagoDrv::LoadDescrB(char *fn)
 						&Tank1->paths[ i ].UPR_control_dev, &Tank1->paths[ i ].UPR_control, 
 						Tank1->paths[ i ].UPR_control_Cnt	 );
 					Read_list_dev( df, i, &Tank1->paths[ i ].Key_signal, Tank1->paths[ i ].Key_signal_Cnt );
+					Read_list_mode( df, i, &Tank1->paths[ i ].Wait_modes, Tank1->paths[ i ].Wait_modes_Cnt );
 
 					//--------------------------------------------------------------
 					Read_list_dev( df, i, &Tank1->paths[ i ].Dev_off, Tank1->paths[ i ].Dev_off_Cnt );
@@ -3037,6 +3034,8 @@ int TWagoDrv::LoadDescrB(char *fn)
 #endif //NO_TANKS_MODE                
 
 						}   //  Проходим по шагам
+// 					Print("mode -----\n");
+// 					Getch();
 					}   //  Проходим по режимам
 				g_tanks[ m ] = Tank1;     
 				   

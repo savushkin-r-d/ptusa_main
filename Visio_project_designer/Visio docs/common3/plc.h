@@ -195,6 +195,10 @@ struct TPathRec
 	//		Использовать ключ
 	int Key_signal_Cnt;
 	dev_elem *Key_signal;
+		
+	//		Режимы других танков, окончание которых мы ожидаем
+	int	Wait_modes_Cnt;
+	uint *Wait_modes;
 
 	//-----------------------------------------
 	
@@ -443,10 +447,10 @@ class TVDEV: public i_simple_device
 
         void set_name( char *new_name );
 
-        virtual int State()
-            {
-            return 1;
-            }
+// 		virtual int State()
+// 			{
+// 			return 1;
+// 			}
 
         const char * get_name() const
             {
