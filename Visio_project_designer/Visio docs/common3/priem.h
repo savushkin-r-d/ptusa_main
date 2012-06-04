@@ -260,9 +260,14 @@ class TTank : public error_tech_device
 		STEP_NUMBER,			//	2	Номер текущего шага
 		PRODUCT_TYPE,			//	3	Тип продукта
 		//	4	
-		CROS_PROC_TIME = 5,		//	5	Время переходного процесса, мсек (3000)
+		CROS_PROC_TIME = 15,		//	5	Время переходного процесса, мсек (3000)
 
 		//-Рабочие параметры.-!> 
+		};
+
+	enum TankTimers //Comb standard timers.
+		{
+		TMR_OFF_MODE = 0,		//	Таймер для выключения режима после срабатывания граничного уровня
 		};
 
 	ulong start_cross_period;	//	Старт отсчета времени до завершения режима (используется в системе ожидания)
@@ -371,6 +376,7 @@ class TTank : public error_tech_device
 		virtual int Evaluate  ();
         virtual int FinalMode ( int mode );
         
+		void from_wait_to_work( int i );	//	Переключение режима из Ожидания в Работу (учитывая ключи и т.д.)
 		void Key_Work( int i );
 
         virtual int InitParams();  //Инициализирует параметры в памяти 0.

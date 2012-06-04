@@ -970,13 +970,23 @@ namespace Visio_project_designer
             //  Заполнение дерева характеристик
             for ( int i = 0; i < cur_mode.TreeView_params.Nodes.Count; i++ )
                 {
+                //  Корневой элемент
                 treeView_prop.Nodes.Add(
                     ( ( TreeNode ) cur_mode.TreeView_params.Nodes[ i ].Clone() ) );
                 treeView_prop.Nodes[ i ].Expand();                    
 
-                for ( int j = 0; j < cur_mode.TreeView_params.Nodes[ i ].Nodes.Count; j++ )
+                //  Наборы списков устройств
+                //for ( int j = 0; j < cur_mode.TreeView_params.Nodes[ i ].Nodes.Count; j++ )
+                for ( int j = cur_mode.TreeView_params.Nodes[ i ].Nodes.Count - 1; j >= 0 ; j-- )
                     {
                     treeView_prop.Nodes[ i ].Nodes[ j ].Expand();
+                    
+                     //  Списки устройств
+                     //for ( int k = 0; k < cur_mode.TreeView_params.Nodes[ i ].Nodes[ j ].Nodes.Count; k++ )
+                     for ( int k = cur_mode.TreeView_params.Nodes[ i ].Nodes[ j ].Nodes.Count - 1; k >= 0; k-- )
+                         {
+                         treeView_prop.Nodes[ i ].Nodes[ j ].Nodes[ k ].Expand();
+                         } 
                     }                
                 }
 

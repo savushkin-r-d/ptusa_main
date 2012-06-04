@@ -3269,11 +3269,11 @@ int TWagoDrv::LoadDescrB(char *fn)
             };
 
 
-		if ( strcmp( id, "WG {4B714C08-9602-4130-8563-4B51E08BB9D8}" ) )
-			{
-			fclose7188(df);
-			return 0;
-			}
+		//if ( strcmp( id, "WG {4B714C08-9602-4130-8563-4B51E08BB9D8}" ) )
+		//	{
+		//	fclose7188(df);
+		//	return 0;
+		//	}
 
         //»мена режимов гребенок.
         //[ 0 ] - количество гребенок
@@ -3295,6 +3295,8 @@ int TWagoDrv::LoadDescrB(char *fn)
             char modes_cnt = 0;
             BlockRead( df, &modes_cnt, 1 );
 
+			//Print(" C %d --------------\n", comb_idx );
+
             for ( int j = 0; j < modes_cnt; j++ )
                 {
                 char mode_n =  0;
@@ -3307,6 +3309,8 @@ int TWagoDrv::LoadDescrB(char *fn)
 				BlockRead( df, str_name, str_len );
                 str_name[ str_len ] = 0;
                 g_combs[ comb_idx ]->set_mode_name( j, str_name );
+				
+				//Print("mode[ %d ] = %s \n", j, str_name );
                 }
             }
 
@@ -3331,6 +3335,8 @@ int TWagoDrv::LoadDescrB(char *fn)
             char modes_cnt = 0;
             BlockRead( df, &modes_cnt, 1 );
 
+			//Print(" T %d --------------\n", tank_idx );
+
             for ( int j = 0; j < modes_cnt; j++ )
                 {
                 char mode_n =  0;
@@ -3343,8 +3349,12 @@ int TWagoDrv::LoadDescrB(char *fn)
                 BlockRead( df, str_name, str_len );
                 str_name[ str_len ] = 0;
                 g_tanks[ tank_idx ]->set_mode_name( j, str_name );
+				
+				//Print("mode[ %d ] = %s \n", j, str_name );
 				}
             }
+
+			//Getch();
 
         fclose7188(df);
         return 0;

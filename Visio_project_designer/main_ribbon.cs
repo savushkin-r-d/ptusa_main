@@ -513,7 +513,7 @@ namespace visio_prj_designer
                                 }
 
                             //  Определяем сколько Танков
-                            b1 = ( byte ) ( Globals.visio_addin.g_objects.Count - 1 );
+                            b1--;
 
                             break;
                             }
@@ -615,10 +615,10 @@ namespace visio_prj_designer
                 bw.Write( ( byte ) 0 ); //  Y
                 bw.Write( ( byte ) 0 ); //  X
 
-                bw.Write( ( byte ) 0 ); //  гребенок
-                bw.Write( ( byte ) 0 ); //  танков
+//                bw.Write( ( byte ) 0 ); //  гребенок
+//                bw.Write( ( byte ) 0 ); //  танков
 
-/*
+// / *
                 //  Имена режимов Гребенки
                 //[ 0 ] - количество гребенок
                 //[ 1 ] - индекс гребенки
@@ -626,26 +626,36 @@ namespace visio_prj_designer
                 //[ 3 ] - номер режима
                 //[ 4 ] - длина названия
                 //[ 5 ] - название режима
-                bw.Write( ( byte ) 1 );
+                bw.Write( ( byte ) ( Globals.visio_addin.g_objects.Count - b1 ) );
 
-                foreach ( T_Object obj in Globals.visio_addin.g_objects )
+                byte col_comb = 0;
+                for ( int i = 0; i < Globals.visio_addin.g_objects.Count; i++ )
                     {
+                    T_Object obj = Globals.visio_addin.g_objects[ i ];
                     try
                         {
                         if ( obj.get_type() == ( int ) device.TYPES.T_GREB )
                             {
-                            bw.Write( ( byte ) obj.n );
+                            bw.Write( ( byte ) col_comb );
+                            col_comb++;
+
                             bw.Write( ( byte ) obj.mode_mas.Count );
 
                             for ( byte j = 0; j < obj.mode_mas.Count; j++ )
                                 {
                                 bw.Write( j );
                                 bw.Write( ( short ) obj.mode_mas[ j ].name.Length );
-                                bw.Write( obj.mode_mas[ j ].name );
-                                //for ( int k = 0; k < obj.mode_mas[ j ].name.Length; k++ )
-                                //    {
-                                //    bw.Write( ( byte ) obj.mode_mas[ j ].name[ k ] );
-                                //    }
+
+                                //  description
+                                 for ( int k = 0; k < obj.mode_mas[ j ].name.Length; k++ )
+                                     {
+                                     byte[] we = new byte[] { ( byte ) ( obj.mode_mas[ j ].name[ k ] ) };
+ 
+                                     Encoding cp866 = Encoding.GetEncoding( 866 );
+                                     byte[] encoded_1 = cp866.GetBytes( new char[] { obj.mode_mas[ j ].name[ k ] } );
+ 
+                                     bw.Write( encoded_1[ 0 ] );
+                                     }
                                 }
                             }
                         }
@@ -663,26 +673,37 @@ namespace visio_prj_designer
                 //[ 3 ] - номер режима
                 //[ 4 ] - длина названия
                 //[ 5 ] - название режима
-                bw.Write( ( byte ) ( Globals.visio_addin.g_objects.Count - 1 ) );
+                bw.Write( ( byte ) b1 );
 
-                foreach ( T_Object obj in Globals.visio_addin.g_objects )
+                byte col_tank = 0;
+                for ( int i = 0; i < Globals.visio_addin.g_objects.Count; i++ )
                     {
+                    T_Object obj = Globals.visio_addin.g_objects[ i ];
+
                     try
                         {
                         if ( obj.get_type() == ( int ) device.TYPES.T_TANK )
                             {
-                            bw.Write( ( byte ) obj.n );
+                            bw.Write( ( byte ) col_tank );
+                            col_tank++;
+
                             bw.Write( ( byte ) obj.mode_mas.Count );
 
                             for ( byte j = 0; j < obj.mode_mas.Count; j++ )
                                 {
                                 bw.Write( j );
-                                bw.Write( ( short ) obj.mode_mas[ j ].name.Length * 2 );
-                                bw.Write( obj.mode_mas[ j ].name );
-                                //for ( int k = 0; k < obj.mode_mas[ j ].name.Length; k++ )
-                                //    {
-                                //    bw.Write( ( byte ) obj.mode_mas[ j ].name[ k ] );
-                                //    }
+                                bw.Write( ( short ) obj.mode_mas[ j ].name.Length );
+
+                                //  description
+                                for ( int k = 0; k < obj.mode_mas[ j ].name.Length; k++ )
+                                    {
+                                    byte[] we = new byte[] { ( byte ) ( obj.mode_mas[ j ].name[ k ] ) };
+
+                                    Encoding cp866 = Encoding.GetEncoding( 866 );
+                                    byte[] encoded_1 = cp866.GetBytes( new char[] { obj.mode_mas[ j ].name[ k ] } );
+
+                                    bw.Write( encoded_1[ 0 ] );
+                                    }                                
                                 }
                             }
                         }
@@ -691,7 +712,7 @@ namespace visio_prj_designer
                         MessageBox.Show( "Ошибка записи названия режимов объекта " + obj.name );
                         }
                      }
-*/
+// * /
 //****************************************************************************
                 bw.Close();
 
@@ -1123,10 +1144,9 @@ namespace visio_prj_designer
                 bw.Write( ( byte ) 0 ); //  Y
                 bw.Write( ( byte ) 0 ); //  X
 
-                bw.Write( ( byte ) 0 ); //  гребенок
-                bw.Write( ( byte ) 0 ); //  танков
+//                bw.Write( ( byte ) 0 ); //  гребенок
+//                bw.Write( ( byte ) 0 ); //  танков
 
-/*
                 //  Имена режимов Гребенки
                 //[ 0 ] - количество гребенок
                 //[ 1 ] - индекс гребенки
@@ -1134,26 +1154,36 @@ namespace visio_prj_designer
                 //[ 3 ] - номер режима
                 //[ 4 ] - длина названия
                 //[ 5 ] - название режима
-                bw.Write( ( byte ) 1 );
+                bw.Write( ( byte ) ( Globals.visio_addin.g_objects.Count - b1 ) );
 
-                foreach ( T_Object obj in Globals.visio_addin.g_objects )
+                byte col_comb = 0;
+                for ( int i = 0; i < Globals.visio_addin.g_objects.Count; i++ )
                     {
+                    T_Object obj = Globals.visio_addin.g_objects[ i ];
                     try
                         {
                         if ( obj.get_type() == ( int ) device.TYPES.T_GREB )
                             {
-                            bw.Write( ( byte ) obj.n );
+                            bw.Write( ( byte ) col_comb );
+                            col_comb++;
+
                             bw.Write( ( byte ) obj.mode_mas.Count );
 
                             for ( byte j = 0; j < obj.mode_mas.Count; j++ )
                                 {
                                 bw.Write( j );
                                 bw.Write( ( short ) obj.mode_mas[ j ].name.Length );
-                                bw.Write( obj.mode_mas[ j ].name );
-                                //for ( int k = 0; k < obj.mode_mas[ j ].name.Length; k++ )
-                                //    {
-                                //    bw.Write( ( byte ) obj.mode_mas[ j ].name[ k ] );
-                                //    }
+
+                                //  description
+                                for ( int k = 0; k < obj.mode_mas[ j ].name.Length; k++ )
+                                    {
+                                    byte[] we = new byte[] { ( byte ) ( obj.mode_mas[ j ].name[ k ] ) };
+
+                                    Encoding cp866 = Encoding.GetEncoding( 866 );
+                                    byte[] encoded_1 = cp866.GetBytes( new char[] { obj.mode_mas[ j ].name[ k ] } );
+
+                                    bw.Write( encoded_1[ 0 ] );
+                                    }
                                 }
                             }
                         }
@@ -1171,26 +1201,37 @@ namespace visio_prj_designer
                 //[ 3 ] - номер режима
                 //[ 4 ] - длина названия
                 //[ 5 ] - название режима
-                bw.Write( ( byte ) ( Globals.visio_addin.g_objects.Count - 1 ) );
+                bw.Write( ( byte ) b1 );
 
-                foreach ( T_Object obj in Globals.visio_addin.g_objects )
+                byte col_tank = 0;
+                for ( int i = 0; i < Globals.visio_addin.g_objects.Count; i++ )
                     {
+                    T_Object obj = Globals.visio_addin.g_objects[ i ];
+
                     try
                         {
                         if ( obj.get_type() == ( int ) device.TYPES.T_TANK )
                             {
-                            bw.Write( ( byte ) obj.n );
+                            bw.Write( ( byte ) col_tank );
+                            col_tank++;
+
                             bw.Write( ( byte ) obj.mode_mas.Count );
 
                             for ( byte j = 0; j < obj.mode_mas.Count; j++ )
                                 {
                                 bw.Write( j );
-                                bw.Write( ( short ) obj.mode_mas[ j ].name.Length * 2 );
-                                bw.Write( obj.mode_mas[ j ].name );
-                                //for ( int k = 0; k < obj.mode_mas[ j ].name.Length; k++ )
-                                //    {
-                                //    bw.Write( ( byte ) obj.mode_mas[ j ].name[ k ] );
-                                //    }
+                                bw.Write( ( short ) obj.mode_mas[ j ].name.Length );
+
+                                //  description
+                                for ( int k = 0; k < obj.mode_mas[ j ].name.Length; k++ )
+                                    {
+                                    byte[] we = new byte[] { ( byte ) ( obj.mode_mas[ j ].name[ k ] ) };
+
+                                    Encoding cp866 = Encoding.GetEncoding( 866 );
+                                    byte[] encoded_1 = cp866.GetBytes( new char[] { obj.mode_mas[ j ].name[ k ] } );
+
+                                    bw.Write( encoded_1[ 0 ] );
+                                    }
                                 }
                             }
                         }
@@ -1198,8 +1239,7 @@ namespace visio_prj_designer
                         {
                         MessageBox.Show( "Ошибка записи названия режимов объекта " + obj.name );
                         }
-                     }
-*/
+                    }
 //****************************************************************************
                 bw.Close();
 

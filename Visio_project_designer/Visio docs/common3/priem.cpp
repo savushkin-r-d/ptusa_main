@@ -397,6 +397,12 @@ int TTank::InitParams( )
     { 
     for ( int j = par->WORK_PARAM_CNT; j < par->getParamCnt(); j++ ) 
         par->setParamM( j, 0 );
+
+	//--------------------------------------
+	par->setParamM( CROS_PROC_TIME, 5 );
+
+	//--------------------------------------
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -524,6 +530,12 @@ int TTank::InitMode( int mode )
 		{
 		paths[ mode ].lamp_blink_start_time = MyGetMS();
 		paths[ mode ].DT_time = MyGetMS( );
+		}
+
+	//	Если настроено ожидание, то сбрасываем переменную времени начала переключения
+	if ( paths[ mode ].Wait_modes_Cnt > 0 )
+		{
+		start_cross_period = 0;
 		}
 
 	//	Параметры	--------------------------------------------------------------
@@ -714,94 +726,74 @@ int TTank::Evaluate( )
 				}
 
 			//	Работа с ожиданием
-
+			//------------------------------------------
 			//	Создаем флаг (можно переходить в режимы работы (0) или нет(>0) )
 			char go_work = 0;
 
-				//	Проверяем на включенность режимы, которые мы ждем
-				for ( int k = 0; k < paths[ i ].Wait_modes_Cnt; k++ )
+			if ( paths[ i ].Wait_modes_Cnt > 0 )
+				{
+				switch ( modes_manager->get_active_step( i ) )
 					{
-					//	Преобразовываем код режима в номер объекта и номер режима
-					int obj_idx;
-					int obj_no = paths[ i ].Wait_modes[ k ] / 1000;
-					int mode_no = paths[ i ].Wait_modes[ k ] % 1000;
-
-					//	Ищем объект по его номеру
-					for ( int j = 0; j < TankCnt; j++ )
+				case 0:	//	Шаг ожидания
+					//	Проверяем на включенность режимы, которые мы ждем
+					for ( int k = 0; k < paths[ i ].Wait_modes_Cnt; k++ )
 						{
-						if ( g_tanks[ j ]->no == obj_no )
+						//	Преобразовываем код режима в номер объекта и номер режима
+						int obj_idx;
+						int obj_no = paths[ i ].Wait_modes[ k ] / 1000;
+						int mode_no = paths[ i ].Wait_modes[ k ] % 1000;
+
+						//	Ищем объект по его номеру
+						for ( int j = 0; j < TankCnt; j++ )
 							{
-							obj_idx = j;
-							break;
+							if ( g_tanks[ j ]->no == obj_no )
+								{
+								obj_idx = j;
+								break;
+								}
+							}
+
+						//	Проверяем режимы
+						//	1 - Номер объекта в допустимых пределах?
+						//	2 - Номер режима в допустимых пределах?
+						if (	( obj_idx < TankCnt )
+							&&	( mode_no < g_tanks[ obj_idx ]->mode_cnt ))
+							{
+							//	3 - Режим данного объекта включен?
+							//	4 - Включенный режим не в шаге 0-ожидание, а в шагах работы (>0)? 
+							if (	g_tanks[ obj_idx ]->GetMode( mode_no )
+								&&  g_tanks[ obj_idx ]->modes_manager->get_active_step( mode_no ) > 0 )
+								{
+								go_work++;
+
+								//	Если задан флаг-время выключения режимов по уровню, то разрешаем вкл. работу
+								if ( g_tanks[ obj_idx ]->start_cross_period > 0 )
+									{
+									go_work--;
+									}
+								}
 							}
 						}
+					break;
 
-					//	Проверяем режимы
-					if (	( obj_idx < TankCnt )
-						&&	( mode_no < g_tanks[ obj_idx ]->mode_cnt )
-						&&	g_tanks[ obj_idx ]->GetMode( mode_no )								// режим включен
-						&&  g_tanks[ obj_idx ]->modes_manager->get_active_step( mode_no ) > 0 )	// шаг - не ожидание
+				//case 1:	//	Шаги работы
+				default:	
+					if (	start_cross_period > 0
+						&&	 getDeltaT( start_cross_period ) > ( par->getParam( CROS_PROC_TIME ) * 1000 ) )
 						{
-						go_work++;
+						//	По флагу-времени выключаем режим
+						start_cross_period = 0;
+						SetMode( i, 0 );
 						}
+					break;
 					}
-
-				////	Контролируем уровни (выключение по уровню)
-				//if ( Prev_LL == 1 && LL->is_active() == 0 )
-				//	{
-				//	//	Фиксируем время начала завершения режима
-				//	start_cross_period = MyGetMS();
-				//	set_err_msg( "Танк пуст!", i );
-				//	 
-				//	//	Если есть ожидание в др. танке, то переключаем его в работу
-				//	int res;
-				//	if ( ( res = IsAnyModeT( i, PodTip )) >= 0 )
-				//		{
-				//		g_tanks[ res ]->modes_manager->final( i );
-				//		g_tanks[ res ]->modes_manager->init( i, 1, this );
-				//		}
-
-				//	//	По истечению заданного времени выключаем режим
-				//	if ( MyGetMS() - start_cross_period > par->getParam( CROS_PROC_TIME ) )
-				//		{
-				//		
-				//		}
-				//	}
-
-// 				if ( Prev_LH == 0 && LH->is_active() == 1 )
-// 					{
-// 					//	Фиксируем время начала завершения режима
-// 					start_cross_period = MyGetMS();
-// 					set_err_msg( "Танк полон!", i ); 
-// 
-// 					//	По истечению заданного времени выключаем режим
-// 					if ( MyGetMS() - start_cross_period > par->getParam( CROS_PROC_TIME ) )
-// 						{
-// 						
-// 						}
-// 					}
+				}
 
 			if ( go_work == 0 )
 				{
-				//	Работа с ключом
-				if ( paths[ i ].Key_signal_Cnt >= 2 )
-					{
-					//mode_manager
-					Key_Work( i );
-					}
-				else
-					{
-					//	Если ключ не задан, то
-					//	Если заданы 2 шага (шаг 0 Ожидание и шаг 1 Работа), то переходим к работе
-					if (	modes_manager->steps_cnt[ i ] == 2
-						&&	modes_manager->get_active_step( i ) == 0   
-						)
-						{
-						modes_manager->final( i );
-						modes_manager->init( i, 1, this );
-						}
-					}
+				from_wait_to_work( i );
 				}
+			//------------------------------------------
 			
 			//	Если задан параметр времени работы режима
 			if (	paths[ i ].work_time_par < par->getParamCnt() 
@@ -814,7 +806,7 @@ int TTank::Evaluate( )
 				}
 
 			//	Фиксируем номер текущего шага
-			//	***
+			//par->setParamM(  );
 
             } 
 		else
@@ -869,11 +861,49 @@ int TTank::Evaluate( )
 			}
 		}		
 
+	//	Контролируем уровни (выключение по уровню)
+	if (	( Prev_LL == 1 && LL->State() == 0 )
+		||	( Prev_LH == 1 && LH->State() == 0 )
+		)
+		{
+		//	Фиксируем флаг-время начала завершения режима
+		start_cross_period = MyGetMS();
+		set_err_msg( "Сработал предельный уровень!", -1, ERR_SIMPLE );
+		}
+
 	Prev_LH = LH->State();
 	Prev_LL = LL->State();
 
     return 0;
     }
+//-----------------------------------------------------------------------------
+
+void TTank::from_wait_to_work( int i )
+	{
+	//	Работа с ключом
+	if ( paths[ i ].Key_signal_Cnt >= 2 )
+		{
+		//mode_manager
+		Key_Work( i );
+		}
+	else
+		{
+		//	Если ключ не задан, то
+		//	Если в режиме настроено ожидание
+		//		и заданы 2 шага (шаг 0 Ожидание и шаг 1 Работа),
+		//		и текущий шаг 0-Ожидание,
+		// то переходим к шагу 1-Работа
+		if (	paths[ i ].Wait_modes_Cnt > 0
+			&&	modes_manager->steps_cnt[ i ] >= 2
+			&&	modes_manager->get_active_step( i ) == 0   
+			)
+			{
+			modes_manager->final( i );
+			modes_manager->init( i, 1, this );
+			start_cross_period = 0;
+			}
+		}
+	}
 //-----------------------------------------------------------------------------
 
 int TTank::FinalMode( int mode )

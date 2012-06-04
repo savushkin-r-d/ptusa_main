@@ -147,7 +147,7 @@ namespace visio_prj_designer
             // 
             // save_as_icpcon
             // 
-            this.save_as_icpcon.Label = "Экспорт для контроллера ICP CON";
+            this.save_as_icpcon.Label = "Экспорт для ICP CON new";
             this.save_as_icpcon.Name = "save_as_icpcon";
             this.save_as_icpcon.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler( this.save_as_icpcon_Click );
             // 
