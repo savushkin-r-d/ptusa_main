@@ -2,7 +2,10 @@
 #include <string.h>
 
 #include "priem.h"
+
+#ifdef USE_SIMPLE_DEV_ERRORS
 #include "snprintf.h"
+#endif // USE_SIMPLE_DEV_ERRORS
 
 extern unsigned long    MyGetMS();
 
@@ -339,10 +342,14 @@ int TTank::GetMode( int mode )
 TTank::TTank( TParams *tpar, int n, int tmrCnt ): tmrCnt( tmrCnt ), 
     no( n ),
     par( tpar ),
-    cmd( 0 ),
-    is_err( 0 ),
+    cmd( 0 )
+
+#ifdef USE_SIMPLE_DEV_ERRORS
+	,
+	is_err( 0 ),
 	is_lvl_err( 0 ),
-	LL( 0 ), LH ( 0 )
+    LL( 0 ), LH ( 0 )
+#endif // USE_SIMPLE_DEV_ERRORS
     {  
     int i;
     int j;
@@ -368,7 +375,9 @@ TTank::TTank( TParams *tpar, int n, int tmrCnt ): tmrCnt( tmrCnt ),
         single_state::T_TANK ); 
     com_dev->sub_dev[ 3 ] = new dev_param( "PARAM", n, par );
 
+#ifdef USE_SIMPLE_DEV_ERRORS
     memset( err_str, 0, sizeof( err_str ) );
+#endif // USE_SIMPLE_DEV_ERRORS
 	
     TMR = new TTimer*[ tmrCnt ];
     for ( i = 0; i < tmrCnt; i++) TMR[ i ] = new TTimer;
@@ -376,10 +385,12 @@ TTank::TTank( TParams *tpar, int n, int tmrCnt ): tmrCnt( tmrCnt ),
     state = 0;   
     modeStartTime[ 32 ] = MyGetMS( );
 
+#ifdef USE_SIMPLE_DEV_ERRORS
     for ( i = 0; i < 32; i++ )
         {
         mode_name[ i ] = 0;
-        }    
+        } 
+#endif // USE_SIMPLE_DEV_ERRORS  
     }
 //-----------------------------------------------------------------------------
 TTank::TTank()
@@ -478,7 +489,7 @@ int TTank::InitMode( int mode )
 
 	//	Блокирующие режимы танков
 	for ( i = 0; i < paths[ mode ].Block_tm_cnt; i++ )
-		{
+		{ 
 		//	Преобразовываем код режима в номер объекта и номер режима
 		int obj_idx;
 		int obj_no = paths[ mode ].Block_tm[ i ] / 1000;
@@ -515,10 +526,10 @@ int TTank::InitMode( int mode )
 		{
 		if( DEV( paths[ mode ].Block_dev[ i ] )->State() == 1 )
 			{
-			char* str;
-			sprintf( str, "Включено блокирующее устройство %d !", 
-				paths[ mode ].Block_dev[ i ].no );
-			set_err_msg( str, 0, ERR_SIMPLE );
+//			char* str;
+// 			sprintf( str, "Включено блокирующее устройство %d !", 
+// 				paths[ mode ].Block_dev[ i ].no );
+// 			set_err_msg( str, 0, ERR_SIMPLE );
 
 			return 1;
 			}
@@ -591,22 +602,28 @@ int TTank::InitMode( int mode )
 				}
 			}
 
-		//	Включаем режимы
+		//	Выключаем режимы
 		if (	( obj_idx < TankCnt )
 			&&	( mode_no < g_tanks[ obj_idx ]->mode_cnt )
 			&&	g_tanks[ obj_idx ]->GetMode( mode_no ) )
 			{
-			g_tanks[ obj_idx ]->SetMode( mode_no, 0 );
+			//	Выключаем не сразу, а задаем время для выключения
+			g_tanks[ obj_idx ]->modeEvaluationTime[ mode_no ] = 
+					( MyGetMS( ) - modeStartTime[ mode_no ] ) + 
+					g_tanks[ obj_idx ]->par->getParam( CROS_PROC_TIME ) * 1000;
+			//g_tanks[ obj_idx ]->SetMode( mode_no, 0 );
 			}		  
 		}
+			
 			 
+	//	Задаем начальные параметры времени для режима
+	if ( mode < 33 )
+		{
+		//Инициализация времени  режима.
+		modeStartTime[ mode ] = MyGetMS( );
+		isModeEvaluationTimeLeft[ mode ] = 0;
+		}
 
-    if ( mode < 33 )
-        {
-        //Инициализация времени  режима.
-        modeStartTime[ mode ] = MyGetMS( );
-        isModeEvaluationTimeLeft[ mode ] = 0;
-        }
 #ifdef DEBUG
     else Print( "Error TTank::InitMode m = %d!\n", mode );
 #endif
@@ -642,7 +659,12 @@ int TTank::Evaluate( )
             if ( modeEvaluationTime[ currentMode ] > 0 && 
                 MyGetMS( ) - modeStartTime[ currentMode ] >
                 modeEvaluationTime[ currentMode ] ) 
+				{
                 isModeEvaluationTimeLeft[ currentMode ] = 1;    
+				SetMode( currentMode, 0 );
+				continue;
+				}
+
 #if !defined NO_TANKS_MODE
             modes_manager->evaluate( i );
 #endif // NO_TANKS_MODE
@@ -806,8 +828,9 @@ int TTank::Evaluate( )
 				}
 
 			//	Фиксируем номер текущего шага
-			//par->setParamM(  );
+			par->setParamM( STEP_NUMBER, i * 1000 + modes_manager->get_active_step( i ) + 1 );
 
+			par->setParamM( PROCESS_TIME, ( MyGetMS() - modeStartTime[i] ) /1000 );
             } 
 		else
 			{
@@ -843,23 +866,32 @@ int TTank::Evaluate( )
 			}	//	if GetMode()	       
         }	//	for i
 
+	
+	//	Если нет включеных режимов, то значение текущего шага == -1
+		if ( state == 0 )
+			{
+			par->setParamM( STEP_NUMBER, 0 );
+			}
+	
 		
-	if ( LH && LL )
-		{
-		// Ошибка предельных уровней.   
-		if ( LH->State() == LIS && LL->State() == LNO )
-			{
-			if ( 0 == is_lvl_err )
-				{
-				set_err_msg( "ошибка предельных уровней", -1, ERR_SIMPLE );
-				is_lvl_err = 1;
-				}        
-			}
-		else
-			{
-			is_lvl_err = 0;
-			}
-		}		
+#ifdef USE_SIMPLE_DEV_ERRORS
+    if ( LH && LL )
+        {
+        // Ошибка предельных уровней.   
+        if ( LH->State() == LIS && LL->State() == LNO )
+            {
+            if ( 0 == is_lvl_err )
+                {
+                set_err_msg( "ошибка предельных уровней", -1, ERR_SIMPLE );
+                is_lvl_err = 1;
+                }        
+            }
+        else
+            {
+            is_lvl_err = 0;
+            }
+        }
+#endif // USE_SIMPLE_DEV_ERRORS
 
 	//	Контролируем уровни (выключение по уровню)
 	if (	( Prev_LL == 1 && LL->State() == 0 )
@@ -870,6 +902,9 @@ int TTank::Evaluate( )
 		start_cross_period = MyGetMS();
 		set_err_msg( "Сработал предельный уровень!", -1, ERR_SIMPLE );
 		}
+
+	//	Работа с временем режима
+	if ( state == 0 ) par->setParamM( PROCESS_TIME, ( MyGetMS() - modeStartTime[32] ) /1000 );
 
 	Prev_LH = LH->State();
 	Prev_LL = LL->State();
@@ -1111,6 +1146,8 @@ int TTank::get_saved_size()
     return 0;
     }
 //-----------------------------------------------------------------------------
+
+#ifdef USE_SIMPLE_DEV_ERRORS
 const char* TTank::get_mode_name( int mode ) const
     {
     if ( mode >= 0 && mode < 32 )
@@ -1210,6 +1247,8 @@ int TTank::set_mode_name( int mode, char* name )
     return 0;
     }
 //-----------------------------------------------------------------------------
+#endif // USE_SIMPLE_DEV_ERRORS
+
 #pragma  argsused
 int TTank::save_active_state( char *buff )
     {
@@ -1222,6 +1261,8 @@ int TTank::load_active_state( char *buff )
     return 0;
     }
 //-----------------------------------------------------------------------------
+
+#ifdef USE_SIMPLE_DEV_ERRORS
 #pragma  argsused
 int TTank::is_check_mode( int mode ) const
     {
@@ -1267,6 +1308,7 @@ void TTank::init_levels( TVDI* LL, TVDI* LH )
 	this->LL = LL;
 	this->LH = LH;
 	}
+#endif // USE_SIMPLE_DEV_ERRORS
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //Возвращаемые значения:
@@ -1479,10 +1521,11 @@ int TMyComb::InitMode( int mode )
 		{
 		if( DEV( paths[ mode ].Block_dev[ i ] )->State() == 1 )
 			{
-			char* str;
-			sprintf( str, "Включено блокирующее устройство %d !", 
-				paths[ mode ].Block_dev[ i ].no );
-			set_err_msg( str, 0, ERR_SIMPLE );
+//			Вывод сообщения работает не корректно - RESET
+// 			char* str;
+// 			sprintf( str, "Включено блокирующее устройство %d !", 
+// 				paths[ mode ].Block_dev[ i ].no );
+// 			set_err_msg( str, 0, ERR_SIMPLE );
 
 			return 1;
 			}
@@ -1616,24 +1659,6 @@ int TMyComb::InitMode( int mode )
 	//	Фиксируем начало работы режима (для учета времени работы режима)
 	paths[ mode ].start_time = MyGetMS();
 
-/*
-    //Нет маршрута гребенки.
-    if ( 0 == paths[ mode ].in_x && 0 == paths[ mode ].in_y && 
-        0 == paths[ mode ].out_x && 0 == paths[ mode ].out_y )
-        {
-        return 0;
-        }
-
-#ifndef USE_NO_COMB
-    //Есть маршрут гребенки.
-    if ( g_greb->check_path( paths[ mode ].in_x, paths[ mode ].in_y, 
-        paths[ mode ].out_x, paths[ mode ].out_y ) != 0 )
-        {
-        return 2;   //  Маршрут нельзя открыть.
-        }
-#endif // USE_NO_COMB
-            
-*/
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -1822,7 +1847,6 @@ int TMyComb::Evaluate(void)
 					}
 				}
 			}	// if ( !GetMode( i ) )
-				   
 		} // for ( i = 0; i < statesCnt; i++ )
 
     return 0;
@@ -2024,8 +2048,13 @@ TMyComb::TMyComb( int no, int stCnt, int parCnt, int workParCnt,
 	no( no ),
 	statesCnt(stCnt), 
     tmrCnt( tmrCnt ),
-    cmd( 0 ),
+    cmd( 0 )
+
+#ifdef USE_SIMPLE_DEV_ERRORS
+	,
     is_err( 0 )
+#endif // USE_SIMPLE_DEV_ERRORS
+
     {
 #if defined I7188_E || defined I7186_E
     active_dev = new active_device( this, active_device::AT_COMB );
@@ -2099,8 +2128,9 @@ TMyComb::TMyComb( int no, int stCnt, int parCnt, int workParCnt,
         mode_name[ i ] = 0;
         }
 
-
+#ifdef USE_SIMPLE_DEV_ERRORS
     err_str[ 0 ] = 0;
+#endif // USE_SIMPLE_DEV_ERRORS
     }
 //-----------------------------------------------------------------------------
 TMyComb::~TMyComb(void) 
@@ -2110,6 +2140,8 @@ TMyComb::~TMyComb(void)
     delete TMR;
     }
 //-----------------------------------------------------------------------------
+
+#ifdef USE_SIMPLE_DEV_ERRORS
 int TMyComb::reset_error()
     {
     is_err       = 0;
@@ -2226,4 +2258,5 @@ int TMyComb::is_any_mode() const
 	return 0;
 	}
 //-----------------------------------------------------------------------------
+#endif // USE_SIMPLE_DEV_ERRORS
 //-----------------------------------------------------------------------------

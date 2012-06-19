@@ -60,9 +60,7 @@ device_communicator *g_dev_cmmctr = new device_communicator();
 
 #ifdef USE_SIMPLE_DEV_ERRORS
 #include "errors.h"
-
 extern dev_errors_manager *g_dev_errors_manager; 
-
 #endif // USE_SIMPLE_DEV_ERRORS
 
 #ifdef USE_PAC_SYSTEM_INFO
@@ -3275,6 +3273,7 @@ int TWagoDrv::LoadDescrB(char *fn)
 		//	return 0;
 		//	}
 
+#ifdef USE_SIMPLE_DEV_ERRORS
         //Имена режимов гребенок.
         //[ 0 ] - количество гребенок
         //[ 1 ] - индекс гребенки
@@ -3353,8 +3352,7 @@ int TWagoDrv::LoadDescrB(char *fn)
 				//Print("mode[ %d ] = %s \n", j, str_name );
 				}
             }
-
-			//Getch();
+#endif	//	USE_SIMPLE_DEV_ERRORS
 
         fclose7188(df);
         return 0;

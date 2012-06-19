@@ -41,7 +41,8 @@ namespace Visio_project_designer
 
         private void Form_modes_Shown( object sender, EventArgs e )
             {
-            this.Text = "Данные объекта " + addin.cur_sel_obj.get_name();
+            this.Text = "Данные объекта " + addin.cur_sel_obj.get_name() 
+                        + " " + Convert.ToString( addin.cur_sel_obj.n );
 
             //  Заполнение списка устройств
             dev_list.Items.Clear();
@@ -520,7 +521,7 @@ namespace Visio_project_designer
                         }
                     else
                         {
-                        Num_field.Value = 0;
+                        //Num_field.Value = 0;
                         }
                                             
                     return;
@@ -657,6 +658,11 @@ namespace Visio_project_designer
                 }
             else
                 {
+                if ( addin.cur_mode == -1 )
+                    {
+                    addin.cur_mode = 0;
+                    }
+                    
                 //  Задаем значения
                 new_mode.set_attribute( index, "Новый режим" );
                 //  Добавляем в структуру
@@ -710,32 +716,91 @@ namespace Visio_project_designer
 
         private void ContextMenuStrip3_delete_mode_Click( object sender, EventArgs e )
             {
+/*
+             if ( treeView_modes.SelectedNode != null )
+                 {
+                 if ( treeView_modes.SelectedNode.Level == 0 )
+                     {
+                     addin.cur_sel_obj.mode_mas.Remove( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
+                     }
+                 else
+                     {
+                     addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step.Remove(
+                                     addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step[ addin.cur_step ] );
+                     }
+ 
+                 addin.cur_mode = addin.cur_mode - 1;
+ 
+                 //  Обновляем дерево свойств 
+                 //      (если этого не сделать перед удаление шага, то унаследуются свойства удаляемого режима)
+                 Refresh_prop_tree( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
+                 
+                 treeView_modes.SelectedNode.Remove();
+                 
+                 Refresh_mode_tree();
+                 }
+             else
+                 {
+                 MessageBox.Show( "Выделенный объект не соответствует операции!" );
+                 } 
+*/  
+
             if ( treeView_modes.SelectedNode != null )
                 {
                 if ( treeView_modes.SelectedNode.Level == 0 )
                     {
                     addin.cur_sel_obj.mode_mas.Remove( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
+                    addin.cur_mode = addin.cur_mode - 1;
+
+                    //  Если новый текущий режим существует
+                    if ( addin.cur_mode >= 0 )
+                        {
+                        Refresh_prop_tree( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
+                        }
+                    else
+                        {
+                        if ( addin.cur_sel_obj.mode_mas.Count > 0 )
+                            {
+                            addin.cur_mode = 0;
+                            Refresh_prop_tree( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
+                            }
+                        else
+                            {
+                            Refresh_mode_tree();
+                            return;
+                            }
+                        }
                     }
                 else
                     {
                     addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step.Remove(
                                     addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step[ addin.cur_step ] );
-                    }
+                    addin.cur_step = addin.cur_step - 1;
 
-                addin.cur_mode = addin.cur_mode - 1;
+                    //  Если новый текущий шаг существует
+                    if ( addin.cur_step >= 0 )
+                        {
+                        Refresh_prop_tree( addin.cur_sel_obj.mode_mas[ addin.cur_mode ].step[ addin.cur_step ] );
+                        }
+                    else
+                        {
+                        Refresh_prop_tree( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
+                        }
+                    }
+                           
 
                 //  Обновляем дерево свойств 
                 //      (если этого не сделать перед удаление шага, то унаследуются свойства удаляемого режима)
-                Refresh_prop_tree( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
-                
+                //Refresh_prop_tree( addin.cur_sel_obj.mode_mas[ addin.cur_mode ] );
+
                 treeView_modes.SelectedNode.Remove();
-                
+
                 Refresh_mode_tree();
                 }
             else
                 {
                 MessageBox.Show( "Выделенный объект не соответствует операции!" );
-                }    
+                } 
             }
         //---------------------------------------------------------------------
 
@@ -976,17 +1041,15 @@ namespace Visio_project_designer
                 treeView_prop.Nodes[ i ].Expand();                    
 
                 //  Наборы списков устройств
-                //for ( int j = 0; j < cur_mode.TreeView_params.Nodes[ i ].Nodes.Count; j++ )
                 for ( int j = cur_mode.TreeView_params.Nodes[ i ].Nodes.Count - 1; j >= 0 ; j-- )
                     {
                     treeView_prop.Nodes[ i ].Nodes[ j ].Expand();
                     
                      //  Списки устройств
-                     //for ( int k = 0; k < cur_mode.TreeView_params.Nodes[ i ].Nodes[ j ].Nodes.Count; k++ )
-                     for ( int k = cur_mode.TreeView_params.Nodes[ i ].Nodes[ j ].Nodes.Count - 1; k >= 0; k-- )
-                         {
-                         treeView_prop.Nodes[ i ].Nodes[ j ].Nodes[ k ].Expand();
-                         } 
+//                      for ( int k = cur_mode.TreeView_params.Nodes[ i ].Nodes[ j ].Nodes.Count - 1; k >= 0; k-- )
+//                          {
+//                          treeView_prop.Nodes[ i ].Nodes[ j ].Nodes[ k ].Expand();
+//                          } 
                     }                
                 }
 

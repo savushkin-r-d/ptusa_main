@@ -77,7 +77,8 @@ TVDEV *DEV( dev_elem dev );
 int ProcMainParams( int argc, char *argv[ ] );
 //------------------------------------------------------------------------------
 /// @brief Содержит информацию об ошибках сложного объекта (танк, гребенка).
-/// 
+
+#ifdef USE_SIMPLE_DEV_ERRORS
 class error_tech_device
     {
     public:
@@ -117,8 +118,12 @@ class error_tech_device
             P_ANSWER  = 750,
             };
     };
+#endif // USE_SIMPLE_DEV_ERRORS
 //------------------------------------------------------------------------------
-class TMyComb: public error_tech_device
+class TMyComb
+#ifdef USE_SIMPLE_DEV_ERRORS
+: public error_tech_device
+#endif // USE_SIMPLE_DEV_ERRORS
     {  
     enum combTimers //Comb standard timers.
         {
@@ -166,6 +171,7 @@ class TMyComb: public error_tech_device
         struct TPathRec	*paths;
         
         //-Ошибки режимов.
+#ifdef USE_SIMPLE_DEV_ERRORS
         char  err_str[ 150 ];
         uchar is_err;
         int   error_number;
@@ -224,6 +230,7 @@ class TMyComb: public error_tech_device
             mode_name[ mode ] = name;
             return 0;
             }
+#endif // USE_SIMPLE_DEV_ERRORS
         //-Ошибки режимов-!>.
 
         TMyComb( int no, int stCnt, int parCnt, int workParCnt, int tmrCnt );
@@ -237,8 +244,9 @@ class TMyComb: public error_tech_device
         virtual int FinalMode ( int mode );
         virtual int InitMode  ( int mode );  
 
+#ifdef USE_SIMPLE_DEV_ERRORS
         virtual int is_any_mode() const;
-
+#endif // USE_SIMPLE_DEV_ERRORS
 
         /// @brief Инициализация некоторых служебных параметров в памяти, 
         /// а остальные - 0.
@@ -250,7 +258,10 @@ class TMyComb: public error_tech_device
 		TVDEV* key_lamp;
     };
 //---------------------
-class TTank : public error_tech_device
+class TTank 
+#ifdef USE_SIMPLE_DEV_ERRORS
+: public error_tech_device
+#endif // USE_SIMPLE_DEV_ERRORS
     {
 	enum TankParams
 		{
@@ -260,7 +271,7 @@ class TTank : public error_tech_device
 		STEP_NUMBER,			//	2	Номер текущего шага
 		PRODUCT_TYPE,			//	3	Тип продукта
 		//	4	
-		CROS_PROC_TIME = 15,		//	5	Время переходного процесса, мсек (3000)
+		CROS_PROC_TIME = 5,		//	5	Время переходного процесса, мсек (3000)
 
 		//-Рабочие параметры.-!> 
 		};
@@ -310,6 +321,7 @@ class TTank : public error_tech_device
 		struct TPathRec	*paths;
 
 		//-Ошибки режимов.
+#ifdef USE_SIMPLE_DEV_ERRORS
 		char  err_str[ 200 ];
         uchar is_err;
         int   error_number;
@@ -360,6 +372,7 @@ class TTank : public error_tech_device
             ERR_MSG_TYPES type = ERR_CANT_ON );
 
         int set_mode_name( int mode, char* name );
+#endif // USE_SIMPLE_DEV_ERRORS
         //-Ошибки режимов-!>.
 
     public:
@@ -370,7 +383,17 @@ class TTank : public error_tech_device
         int         SetModeTime   ( int mode, unsigned long modeTime );
         virtual int SetMode       ( int mode, int newm );
         int         GetMode       ( int mode ); 
-        int         GetModeEx     ( int mode, ... );
+
+#ifdef USE_SIMPLE_DEV_ERRORS
+		int GetModeEx( int mode, ... );
+
+		void init_levels( TVDI*	LL, TVDI* LH );
+
+        virtual int is_any_mode() const
+            {
+            return state > 0 ? 1 : 0;
+            }
+#endif // USE_SIMPLE_DEV_ERRORS
 
         virtual int InitMode  ( int mode );
 		virtual int Evaluate  ();
@@ -382,18 +405,12 @@ class TTank : public error_tech_device
         virtual int InitParams();  //Инициализирует параметры в памяти 0.
         virtual int InitWorkParams();
 
-        virtual int is_any_mode() const
-            {
-            return state > 0 ? 1 : 0;
-            }
 
         //Для сохранения/загрузки устройства.
         virtual int save_active_state( char *buff ); 
         virtual int load_active_state( char *buff ); 
         virtual int set_default_state();
         virtual int get_saved_size (); 
-
-        void init_levels( TVDI*	LL, TVDI* LH );
 
         private:
             char is_lvl_err; //Признак ошибки уровней.
