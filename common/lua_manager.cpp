@@ -30,16 +30,92 @@ lua_manager* lua_manager::get_instance()
     return instance;
     }
 //-----------------------------------------------------------------------------
+int check_file( const char* file_name, char* err_str )
+    {
+    strcpy( err_str, "" );
+
+    FILE *f = fopen( file_name, "r");
+    if ( 0 == f )
+        {
+        sprintf( err_str, "File \"%s\" not found!", file_name );
+        return -1;
+        }
+
+    char str[ 100 ] = "";
+    fgets( str, sizeof( str ), f );   
+
+    int version = 0;
+    sscanf( str, "--version = %d", &version );
+
+    return version;
+    }
+//-----------------------------------------------------------------------------
+const int SYS_FILE_CNT = 2;
+const int FILE_CNT     = 5;
+//-----------------------------------------------------------------------------
+#ifdef PAC_PC
+const char* SYS_PATH = "..\\..\\system scripts\\";
+#endif // PAC_PC
+
+const char *FILES[ FILE_CNT ] = 
+    {    
+    "sys.wago.lua",
+    "sys.objects.lua",
+
+    "main.wago.lua",
+    "main.devices.lua",
+    "main.objects.lua"
+    };
+//-----------------------------------------------------------------------------
+const int FILES_VERSION[ FILE_CNT ] = 
+    {    
+    1, //"sys.wago.plua",
+    1, //"sys.tech_objects.plua",
+
+    1, //"main.wago.plua",
+    1, //"main.devices.plua",
+    1, //"main.objects.plua",
+    };
+//-----------------------------------------------------------------------------
+//I
+//Загружаем последовательно Lua-скрипты. Их структура такова, что все необходимые
+//действия реализованы в виде функций, которые потом в определенном порядке 
+//будут выполнятся.
+//Скрипты разделены на системные (общие
+//для всех проектов) и проекта (описание отдельного проекта). Системные скрипты
+//имеют префикс sys и хранятся в папке "system scripts" на PC. Список скриптов:
+// 1. sys.wago.plua - функции получения описания Wago и устройств с привязкой к 
+// каналам ввода\вывода. Они вызываются исполняющей программой (С++).
+// 2. sys.tech_objects.plua - функции получения описания технологических 
+// объектов (режимы, параметры и т.д.). Они вызываются исполняющей программой 
+// (С++).
+// 3. sys.plua - функции работы с технологическими объектами (режимы, параметры
+// и т.д.). Они вызываются пользовательским скриптом (Lua).
+//Пользовательские скрипты имеют префикс main и хранятся в папке конкретного
+//проекта. Список скриптов:
+// 1. main.wago.plua - описание Wago и устройств проекта с привязкой к каналам 
+// ввода\вывода. 
+// 2. main.devices.plua - буквенно-цифровое описание технологических устройств
+// (клапана, насосы и т.д.) проекта для более удобного использования (S1V52  
+// вместо V(1251)).
+// 2. main.tech_objects.plua - описание технологических объектов (режимы, 
+// параметры и т.д.) проекта.
+// 3. main.plua - пользовательская логика работы проекта.
+//Для каждого файла проверяется его наличие и версия (первая строка файла должна
+//быть такой: "--version = 1"). Если файла нет или он имеет не поддерживаемую
+//версию, то выдается соответствующее сообщение и работа приложения завершается.
+//II
+//Экспортируем в Lua классы и функции из C++.
+
 int lua_manager::init( lua_State* lua_state, char* script_name )
     {
+#if defined DEBUG
     Print( "Init Lua.\n" );
+#endif
 
-#if defined DEBUG && defined MINIOS7
-    Print( "Memory free: %lu bytes.\n", ( unsigned long ) coreleft() );
-#endif    
     if ( 0 == lua_state )
         {
-        //-Инициализация Lua.
+        //Инициализация Lua.
         L = lua_open();   // Create Lua context.
 
         if ( NULL == L )
@@ -49,76 +125,96 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             }
         is_free_lua = 1;
 
-#if defined DEBUG && defined MINIOS7
-        Print( "lua_open() - memory free: %lu bytes.\n",
-            ( unsigned long ) coreleft() );
-#endif
-
         luaL_openlibs( L );    // Open standard libraries.
 
-#if defined DEBUG && defined MINIOS7
-        Print( "luaL_openlibs(...) - memory free: %lu bytes.\n",
-            ( unsigned long ) coreleft() );
-#endif
+        }
+    else
+        {
+        L = lua_state;
+        is_free_lua = 0;
+        }
+        
+    //I
+    //Проверка наличия и версии скриптов.
+    char err_str[ 100 ] = "";
 
-        tolua_PAC_dev_open( L );
-
-        const char *ADDITIONAL_PATH_CMD =
+    for ( int i = 0; i < FILE_CNT; i++ )
+        {
 #ifdef PAC_PC
-            "package.path = package.path..\';../../system scripts/?.lua;\'";
+        char path[ 100 ];
+        if ( i < SYS_FILE_CNT )
+            {
+            snprintf( path, sizeof( path ), "%s%s", SYS_PATH, FILES[ i ] );
+            }
+        else
+            {
+            snprintf( path, sizeof( path ), "%s", FILES[ i ] );
+            }
+
+        int res = check_file( path, err_str );
 #else
-            "package.path = package.path..\';./?.lua;\'";
+        int res = check_file( FILES[ i ], err_str );
 #endif // PAC_PC
 
-        if( luaL_dostring( L, ADDITIONAL_PATH_CMD ) != 0 )
+        if ( res == -1 )
             {
-            Print( "Set additional search path error!\n" );
-            Print( "\t%s\n", lua_tostring( L, -1 ) );
-
-            lua_pop( L, 1 );
+            Print( err_str );
             return 1;
             }
 
-#if defined DEBUG && defined MINIOS7
-        Print( "tolua_PAC_dev_open(...) - memory free: %lu bytes.\n", 
-            ( unsigned long ) coreleft() );
-#endif
+        if ( FILES_VERSION[ i ] != res )
+            {
+            snprintf( err_str, sizeof( err_str ), "File \"%s\" has version %d, must be %d!\n",
+                FILES[ i ], res, FILES_VERSION[ i ] );
+            Print( err_str );
+            return 1;
+            }
+        }
 
-#ifdef MINIOS7
-        FILE_DATA far *wago_data_script = GetFileInfoByName(
-            "mwago.lua" );
+    //-Выполнение системных скриптов sys.lua. 
+    for ( int i = 0; i < FILE_CNT; i++ )
+        {
 
-        char *script_src = new char[ wago_data_script->size + 1 ];
-        memset( script_src, 0, wago_data_script->size + 1 );
-        memcpy( script_src, wago_data_script->addr, wago_data_script->size );
-
-        if( 0 == wago_data_script ||
-            luaL_loadstring( L, script_src ) != 0 )
+#ifdef PAC_PC
+        char path[ 100 ] = "";
+        if ( i < SYS_FILE_CNT )
+            {
+            snprintf( path, sizeof( path ), "%s%s", SYS_PATH, FILES[ i ] );
+            }
+        else
+            {
+            snprintf( path, sizeof( path ), "%s", FILES[ i ] );
+            }
+        
+        if ( luaL_dofile( L, path ) != 0 )
 #else
-        if( luaL_dofile( L, "main.wago.plua" ) != 0 )
-#endif
+        if ( luaL_dofile( L, FILES[ i ] ) != 0 )
+#endif // PAC_PC
             {
-            Print( "Load description Wago Lua script error!\n" );
+#ifdef DEBUG
+            Print( "Load Lua script \"%s\" error!\n", 
+                FILES[ i ] );
             Print( "\t%s\n", lua_tostring( L, -1 ) );
-
+#endif // DEBUG
             lua_pop( L, 1 );
+
             return 1;
             }
+        }
 
-#if defined DEBUG && defined MINIOS7
-        Print( "luaL_dofile( ..., \"main.wago.plua\" ) - memory free: %lu bytes. \n",
-            ( unsigned long ) coreleft() );
-#endif
-        G_PROJECT_MANAGER->lua_load_configuration();
+    //II
+    //Экспортируем в Lua необходимые объекты.
+    tolua_PAC_dev_open( L );
 
-#if defined DEBUG && defined MINIOS7
-        Print( "G_PROJECT_MANAGER->lua_load_configuration() - memory free: %lu bytes. \n",
-            ( unsigned long ) coreleft() );
-#endif
+    //III
+    //Выполняем процедуры инициализации.
+    G_PROJECT_MANAGER->lua_load_configuration();
 
+    if ( 0 == lua_state )      
+        {
         if( luaL_loadfile( L, script_name ) != 0 )
             {
-            Print( "Load Lua main script error!\n" );
+            Print( "Load Lua main script \"%s\" error!\n", script_name );
             Print( "\t%s\n", lua_tostring( L, -1 ) );
 
             lua_pop( L, 1 );
@@ -134,18 +230,8 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
 
             lua_pop( L, 1 );            
             return 1;
-            }        
-        }
-    else
-        {
-        L = lua_state;
-        is_free_lua = 0;
-        }
-
-#if defined DEBUG && defined MINIOS7
-        Print( "Load Lua main script - memory free: %lu bytes. \n",
-            ( unsigned long ) coreleft() );
-#endif
+            } 
+        }       
 
     return 0;
     }
@@ -191,6 +277,7 @@ int lua_manager::int_exec_lua_method( const char *object_name,
         }
     else
         {
+        res = 1;
 #ifdef DEBUG
         Print( "Error during C++ call - \"%s\"\n", c_function_name );
 #endif // DEBUG
@@ -232,11 +319,22 @@ int lua_manager::exec_lua_method( const char *object_name,
     lua_pushcclosure( lua_manager::L, error_trace, 0 );
     instance->err_func = lua_gettop( L );
 
-    lua_getfield( L, LUA_GLOBALSINDEX, object_name );
-    lua_getfield( L, -1, function_name );
-    lua_remove( L, -2 );
-    lua_getfield( L, LUA_GLOBALSINDEX, object_name );
-    int param_count = 1;
+    int param_count = 0;
+
+    if ( object_name && object_name != "" )
+        {
+        lua_getfield( L, LUA_GLOBALSINDEX, object_name );
+        lua_getfield( L, -1, function_name );
+        lua_remove( L, -2 );
+        lua_getfield( L, LUA_GLOBALSINDEX, object_name );
+
+        param_count++;
+        }
+    else
+        {
+        lua_getfield( L, LUA_GLOBALSINDEX, function_name );
+        }
+    
     if ( is_use_param )
         {
         lua_pushnumber( L, param );
@@ -245,7 +343,7 @@ int lua_manager::exec_lua_method( const char *object_name,
     int results_count = is_use_lua_return_value == 1 ? 1 : 0;
     int res = lua_pcall( L, param_count, results_count, err_func );
 
-    lua_remove( L, -2 );
+    lua_remove( L, -results_count - 1 ); //Удаляем функцию error_trace.
 
     //LARGE_INTEGER finish_time;
     //QueryPerformanceCounter( &finish_time );
@@ -268,7 +366,7 @@ int lua_manager::error_trace( lua_State * L )
     {
 #ifdef DEBUG
     Print( "\t%s\n", lua_tostring( L, -1 ) );
-    lua_remove( L, -1 );
+    lua_pop( L, 1 );
 
     Print( "\tstack traceback:\n" );
     lua_Debug ar;
@@ -283,6 +381,28 @@ int lua_manager::error_trace( lua_State * L )
         }
 #endif // DEBUG
 
+    //////stack: err
+    ////const char* err = lua_tostring(L, 1);
+
+    ////printf("Error: %s\n", err);
+
+    ////lua_getglobal(L, "debug"); // stack: err debug
+    ////lua_getfield(L, -1, "traceback"); // stack: err debug debug.traceback
+
+    ////// debug.traceback() возвращает 1 значение
+    ////if(lua_pcall(L, 0, 1, 0))
+    ////    {
+    ////    const char* err = lua_tostring(L, -1);
+
+    ////    printf("Error in debug.traceback() call: %s\n", err);
+    ////    }
+    ////else
+    ////    {
+    ////    const char* stackTrace = lua_tostring(L, -1);
+
+    ////    printf("C++ stack traceback: %s\n", stackTrace);
+    ////    }
+    
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -300,6 +420,7 @@ int lua_manager::int_no_param_exec_lua_method( const char *object_name,
 #ifdef DEBUG
         Print( "Error during C++ call - \"%s\"\n", c_function_name );
 #endif // DEBUG
+        res = 1;
         }
 
     return res;

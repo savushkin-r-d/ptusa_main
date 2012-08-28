@@ -20,7 +20,7 @@
 #include "PAC_dev.h"
 //#include "sys.h"
 
-class PID
+class PID: public i_Lua_save_device
     { 
     enum STATES 
         {
@@ -58,6 +58,8 @@ class PID
     float start_value;
 
     int number; ///< Номер ПИД.
+    
+    char name[ 50 ];
 
     public:
         enum PARAM 
@@ -118,5 +120,29 @@ class PID
 
         /// @brief Использование kN, TiN, TdN.     
         void set_used_par ( int par_n ); 
+
+
+        int save_device( char *buff )
+            {
+            int answer_size = 0;
+
+            sprintf( buff, "t.%s = \n\t{\n", name );
+            answer_size += strlen( buff );
+
+            //Параметры.
+            answer_size += par->save_device( buff + answer_size, "\t" );
+            answer_size += w_par->save_device( buff + answer_size, "\t" );
+
+            sprintf( buff + answer_size, "\t}\n" );
+            answer_size += strlen( buff + answer_size );
+
+            return answer_size;
+            }
+
+        /// @brief Отладочная печать объекта в консоль.
+        virtual const char* get_name() const
+            {
+            return name;
+            }
     };
 #endif

@@ -265,7 +265,7 @@ params_manager::~params_manager()
 //-----------------------------------------------------------------------------
 int params_manager::save_params_as_Lua_str( char* str )
     {
-    G_DEVICE_MANAGER()->save_params_as_Lua_str( str );
+    //G_DEVICE_MANAGER()->save_params_as_Lua_str( str );
     G_TECH_OBJECT_MNGR()->save_params_as_Lua_str( str + strlen( str ) );
     
     return 0;

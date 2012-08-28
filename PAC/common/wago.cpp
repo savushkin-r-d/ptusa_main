@@ -96,7 +96,7 @@ float wago_device::get_AO( u_int index, float min_value, float max_value )
         switch ( module_type )
             {
             // Выход модуля 554.
-            // Три наименне значащих бита не учитываются.
+            // Три наименее значащих бита не учитываются.
             //    -----------------------------------------------------------------------
             //    Output          Output          Binary value
             //    current 0-20	  current 4-20                            Hex.      Dec.
@@ -288,87 +288,19 @@ void wago_device::print() const
     //Print( "\n" );
     }
 //-----------------------------------------------------------------------------
-int wago_device::load_table_from_string( char *str, IO_channels &channels )
-    {
-    // Пример:
-    // 2 1 2 1 3 ...
-    // количество_DI номер_таблицы_DI_№1 смещение_в_пределах_таблицы_№1 номер_таблицы_DI_№2 ...
-    u_int cnt;
-    int pos = sscanf( str, "%d", &cnt );
-
-    if ( cnt > 0 )
-        {
-        channels.count = cnt;
-
-        channels.tables = new u_int[ cnt ];
-        channels.offsets = new u_int[ cnt ];
-
-        switch ( channels.type )
-            {
-        case IO_channels::CT_DI:
-            channels.char_read_values = new u_char*[ cnt ];
-            break;
-
-        case IO_channels::CT_DO:
-            channels.char_read_values  = new u_char*[ cnt ];
-            channels.char_write_values = new u_char*[ cnt ];
-            break;
-
-        case IO_channels::CT_AI:
-            channels.int_read_values = new u_int*[ cnt ];
-            break;
-
-        case IO_channels::CT_AO:
-            channels.int_read_values = new u_int*[ cnt ];
-            channels.int_write_values = new u_int*[ cnt ];
-            break;
-            }
-
-        for ( u_int i = 0; i < cnt; i++ )
-            {
-            pos += sscanf( str + pos, " %d %d", &channels.tables[ i ],
-                &channels.offsets[ i ] );
-            }
-        }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-float wago_device::get_par( u_int index )
-    {
-    if ( index < params_count && params )
-        {
-        return params[ index ];
-        }
-
-#ifdef DEBUG
-    Print( "wago_device->get_par(...) - error!\n" );
-    Print( "index=%d, params_count=%d, params=%d\n",
-        index, params_count, ( int ) params );
-#endif // DEBUG
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
 wago_device::wago_device() :DI_channels( IO_channels::CT_DI ), 
     DO_channels( IO_channels::CT_DO ),
     AI_channels( IO_channels::CT_AI ),
-    AO_channels( IO_channels::CT_AO ),
-    params( 0 )
+    AO_channels( IO_channels::CT_AO )   
     {
     }
 //-----------------------------------------------------------------------------
 wago_device::~wago_device()
     {
-    if ( params )
-        {
-        delete [] params;
-        params = 0;
-        }
     }
 //-----------------------------------------------------------------------------
 void wago_device::init( int DO_count, int DI_count, int AO_count,
-    int AI_count, int par_count )
+    int AI_count )
     {
     if ( DO_count > 0 )
         {      
@@ -385,13 +317,6 @@ void wago_device::init( int DO_count, int DI_count, int AO_count,
     if ( AI_count > 0 )
         {      
         AI_channels.init( AI_count );
-        }
-
-    // Параметры.
-    if ( par_count > 0 )
-        {      
-        params_count = par_count;
-        params = new float [ params_count ];
         }
     }
 //-----------------------------------------------------------------------------
@@ -415,22 +340,6 @@ void wago_device::init_channel( int type, int ch_index, int node, int offset )
         AO_channels.init_channel( ch_index, node, offset );
         break;
         }
-    }
-//-----------------------------------------------------------------------------
-void wago_device::init_par( u_int index, float value )
-    {
-    if ( index < params_count && params )
-        {
-        params[ index ] = value;
-        }
-#ifdef DEBUG
-    else
-        {                
-        Print( "wago_device->init_par(...) - error!" );
-        Print( " index=%d, params_count=%d, params=%d\n",
-            index, params_count, ( int ) params );
-        }
-#endif // DEBUG
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -777,7 +686,7 @@ void wago_manager::init_node_AI( u_int node_index, u_int AI_index,
 //-----------------------------------------------------------------------------
 void wago_manager::print() const
     {
-    Print( "Total Wago modules count %d.\n", nodes_count );
+    Print( "Wago manager [%d]:\n", nodes_count );
     for ( u_int i = 0; i < nodes_count; i++ )
         {
         nodes[ i ]->print();
@@ -869,7 +778,7 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
 void wago_manager::wago_node::print()
     {
 #ifdef DEBUG
-    Print( "Node type %d, number %d, ip \"%s\". ",
+    Print( "Node type %d, number %d, IP \"%s\". ",
         type, number, ip_address );
     Print( "DI %d, DO %d, AI %d, AO %d.\n",
         DI_cnt, DO_cnt, AI_cnt, AO_cnt );   

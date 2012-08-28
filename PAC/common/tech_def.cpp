@@ -9,7 +9,9 @@
 auto_smart_ptr < tech_object_manager > tech_object_manager::instance;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-tech_object::tech_object( const char* new_name, u_int number, u_int modes_count,
+tech_object::tech_object( const char* new_name, u_int number, 
+    const char *name_Lua, 
+    u_int modes_count,
     u_int timers_count,
     u_int par_float_count, u_int runtime_par_float_count,
     u_int par_uint_count,
@@ -34,9 +36,7 @@ tech_object::tech_object( const char* new_name, u_int number, u_int modes_count,
         }
     
     strncpy( name, new_name, C_MAX_NAME_LENGTH );
-    strncpy( object_name, new_name, C_MAX_NAME_LENGTH );
-    
-    snprintf( name + strlen( name ), C_MAX_NAME_LENGTH, "%d", number );
+    strncpy( this->name_Lua, name_Lua, C_MAX_NAME_LENGTH );
 
     modes_manager = new mode_manager( modes_count );    
     modes_manager->set_param( &par_uint );
@@ -73,7 +73,7 @@ int tech_object::set_mode( u_int mode, int newm )
     static u_char idx = 0;
 
     Print( "%sStart %s[ %2u ] set mode = %2u --> %s.\n",
-        white_spaces, get_object_name(), number, mode, 
+        white_spaces, name, number, mode, 
         newm == 0 ? "OFF" : " ON" );
 
     white_spaces[ idx++ ] = ' ';
@@ -122,7 +122,7 @@ int tech_object::set_mode( u_int mode, int newm )
     white_spaces[ idx ] = 0;
     
     Print( "%sEnd   %s[ %2u ] set mode = %2u --> %s, res = %d",
-        white_spaces, get_object_name(), number, mode,
+        white_spaces, name, number, mode,
         newm == 0 ? "OFF" : " ON", res );
 
     if ( 1 == res )
@@ -156,12 +156,12 @@ int tech_object::get_mode( u_int mode )
 //-----------------------------------------------------------------------------
 int tech_object::check_on_mode( u_int mode )
     {
-    return modes_manager->check_on_mode( mode ) ? 0 : 1;
+    return (*modes_manager)[ mode ]->check_on();
     }
 //-----------------------------------------------------------------------------
 void tech_object::init_mode( u_int mode )
     {
-    modes_manager->init( mode );
+    (*modes_manager)[ mode ]->init();
     }
 //-----------------------------------------------------------------------------
 int tech_object::evaluate()
@@ -170,11 +170,11 @@ int tech_object::evaluate()
 
     for ( u_int i = 0; i < modes_count; i++ )
         {
-        modes_time[ i + 1 ] = modes_manager->get_mode_evaluation_time( i ) / 1000;
+        modes_time[ i + 1 ] =(*modes_manager)[ i ]->evaluation_time() / 1000;
 
         if ( get_mode( i ) == 1 )
         	{
-            modes_manager->evaluate( i );
+            (*modes_manager)[ i ]->evaluate();
         	}
         }
     return 0;
@@ -189,7 +189,7 @@ int tech_object::final_mode( u_int mode )
     {
     if ( mode < modes_count )
         {
-        modes_manager->final( mode );
+        (*modes_manager)[ mode ]->final();
         }
 
     return 0;
@@ -199,7 +199,7 @@ int tech_object::lua_exec_cmd( u_int cmd )
     {
     tech_object::exec_cmd( cmd );
 
-    return lua_manager::get_instance()->int_exec_lua_method( name, "exec_cmd",
+    return lua_manager::get_instance()->int_exec_lua_method( name_Lua, "exec_cmd",
         cmd, "int tech_object::lua_exec_cmd( u_int cmd )" );
     }
 //-----------------------------------------------------------------------------
@@ -207,7 +207,7 @@ int tech_object::lua_check_on_mode( u_int mode )
     {
     if ( int res = tech_object::check_on_mode( mode ) ) return 1000 + res;
 
-    return lua_manager::get_instance()->int_exec_lua_method( name, 
+    return lua_manager::get_instance()->int_exec_lua_method( name_Lua, 
         "check_on_mode", mode, "int tech_object::lua_check_on_mode( u_int mode )" );
     }
 //-----------------------------------------------------------------------------
@@ -215,13 +215,13 @@ void tech_object::lua_init_mode( u_int mode )
     {
     tech_object::init_mode( mode );
 
-    lua_manager::get_instance()->int_exec_lua_method( name,
+    lua_manager::get_instance()->int_exec_lua_method( name_Lua,
         "init_mode", mode, "void tech_object::lua_init_mode( u_int mode )" );
     }
 //-----------------------------------------------------------------------------
 int tech_object::lua_evaluate()
     {
-    //return lua_manager::get_instance()->void_exec_lua_method( name,
+    //return lua_manager::get_instance()->void_exec_lua_method( name_Lua,
     //    "evaluate", "int tech_object::lua_evaluate()" );
 
     return 0;
@@ -231,7 +231,7 @@ int tech_object::lua_check_off_mode( u_int mode )
     {
     tech_object::check_off_mode( mode );
 
-    return lua_manager::get_instance()->int_exec_lua_method( name,
+    return lua_manager::get_instance()->int_exec_lua_method( name_Lua,
         "check_off_mode", mode, "int tech_object::lua_check_off_mode( u_int mode )" );    
     }
 //-----------------------------------------------------------------------------
@@ -239,7 +239,7 @@ int  tech_object::lua_final_mode( u_int mode )
     {
     tech_object::final_mode( mode );
 
-    lua_manager::get_instance()->int_exec_lua_method( name,
+    lua_manager::get_instance()->int_exec_lua_method( name_Lua,
         "final_mode", mode, "int tech_object::lua_final_mode( u_int mode )" );
     return 0;
     }
@@ -248,7 +248,7 @@ int tech_object::lua_init_params()
     {
     tech_object::init_params();
 
-    return lua_manager::get_instance()->int_exec_lua_method( name,
+    return lua_manager::get_instance()->int_exec_lua_method( name_Lua,
         "init_params", 0, "int tech_object::lua_init_params()" );
     }
 //-----------------------------------------------------------------------------
@@ -256,15 +256,15 @@ int tech_object::lua_init_runtime_params()
     {
     tech_object::init_runtime_params();
 
-    return lua_manager::get_instance()->int_exec_lua_method( name,
+    return lua_manager::get_instance()->int_exec_lua_method( name_Lua,
         "init_runtime_params", 0, "int tech_object::lua_init_runtime_params()" );
     }
 //-----------------------------------------------------------------------------
 int tech_object::save_device( char *buff )
     {
-    sprintf( buff, "t.%s = t.%s or {}\nt.%s[%d]=\n\t{\n",
-        get_object_name(), get_object_name(), 
-        get_object_name(), get_number() );
+    sprintf( buff, "t.%s = t.%s or {}\nt.%s=\n\t{\n",
+        name_Lua, name_Lua, 
+        name_Lua );
 
     int answer_size = strlen( buff );
 
@@ -343,7 +343,7 @@ int tech_object::save_device( char *buff )
     for ( u_int i = 0; i < modes_count; i++ )
         {
         sprintf( buff + answer_size, "%d, ",
-            modes_manager->get_active_step( i ) );
+            (*modes_manager)[ i ]->active_step());
         answer_size += strlen( buff + answer_size );
         }
     sprintf( buff + answer_size, "\n\t\t},\n" );
@@ -355,13 +355,9 @@ int tech_object::save_device( char *buff )
     answer_size += rt_par_float.save_device( buff + answer_size, "\t" );
     answer_size += rt_par_uint.save_device( buff + answer_size, "\t" );
     
-    //Ошибки включения режимов.
-    answer_size += modes_manager->save_as_Lua_str( buff + answer_size );
-        
+
     sprintf( buff + answer_size, "\t}\n" );
     answer_size += strlen( buff + answer_size );
-
-
     return answer_size;
     }
 //-----------------------------------------------------------------------------
@@ -429,7 +425,6 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
 
     if ( strcmp( prop, "S_PAR_F" ) == 0 )
         {
-        //par_float[ idx - 1 ] = ( float ) val;
         par_float.save( idx - 1, ( float ) val );
         return 0;
         }
@@ -441,8 +436,8 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
         }
 
     if ( strcmp( prop, "S_PAR_UI" ) == 0 )
-        {
-        par_uint[ idx - 1 ] = ( u_int_4 ) val;
+        {        
+        par_uint.save( idx - 1, ( u_int_4 ) val );
         return 0;
         }
 
@@ -452,11 +447,11 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
         return 0;
         }
 
-    if ( strcmp( prop, "MODES_ERR" ) == 0 )
-        {
-        modes_manager->err_par[ idx - 1 ] = ( float ) val;
-        return 0;
-        }
+    ////if ( strcmp( prop, "MODES_ERR" ) == 0 )
+    ////    {
+    ////    modes_manager->err_par[ idx - 1 ] = ( float ) val;
+    ////    return 0;
+    ////    }
 
 #ifdef DEBUG
         Print( "Eror tech_object::set_cmd(...), prop = \"%s\", idx = %u, val = %f\n",
@@ -468,27 +463,27 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 int tech_object::save_params_as_Lua_str( char* str )
     {
-    sprintf( str, "params{ object = \'%s[%d]\', param_name = \'%s\', "
+    sprintf( str, "params{ object = \'%s\', param_name = \'%s\', "
         "par_id = %d,\n", 
-        get_object_name(), get_number(), "par_float", ID_PAR_FLOAT );
+        name_Lua, "par_float", ID_PAR_FLOAT );
     par_float.save_device_ex( str + strlen( str ), "", "values"  );
     sprintf( str + strlen( str ) - 2, "%s", " }\n" );
 
-    sprintf( str + strlen( str ), "params{ object = \'%s[%d]\', param_name = \'%s\', "
+    sprintf( str + strlen( str ), "params{ object = \'%s\', param_name = \'%s\', "
         "par_id = %d,\n", 
-        get_object_name(), get_number(), "rt_par_float", ID_RT_PAR_FLOAT );
+        name_Lua, "rt_par_float", ID_RT_PAR_FLOAT );
     rt_par_float.save_device_ex( str + strlen( str ), "", "values"  );
     sprintf( str + strlen( str ) - 2, "%s", " }\n" );
 
-    sprintf( str + strlen( str ), "params{ object = \'%s[%d]\', param_name = \'%s\', "
+    sprintf( str + strlen( str ), "params{ object = \'%s\', param_name = \'%s\', "
         "par_id = %d,\n", 
-        get_object_name(), get_number(), "par_uint", ID_PAR_UINT );
+        name_Lua, "par_uint", ID_PAR_UINT );
     par_uint.save_device_ex( str + strlen( str ), "", "values"  );
     sprintf( str + strlen( str ) - 2, "%s", " }\n" );
 
-    sprintf( str + strlen( str ), "params{ object = \'%s[%d]\', param_name = \'%s\', "
+    sprintf( str + strlen( str ), "params{ object = \'%s\', param_name = \'%s\', "
         "par_id = %d,\n", 
-        get_object_name(), get_number(), "rt_par_uint", ID_RT_PAR_UINT );
+        name_Lua, "rt_par_uint", ID_RT_PAR_UINT );
     rt_par_uint.save_device_ex( str + strlen( str ), "", "values"  );
     sprintf( str + strlen( str ) - 2, "%s", " }\n" );
 
@@ -591,64 +586,33 @@ void tech_object_manager::evaluate()
         tech_objects.at( i )->evaluate();
         }
 
-    static int call_count = 0;
-    ++call_count;
-
-    if ( call_count > 2 )
+    static char has_Lua_eval = -1;
+    if ( has_Lua_eval == -1 )
         {
         lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
             "eval" );
 
         if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
             {
-            lua_call( lua_manager::get_instance()->get_Lua(), 0, 0 );
-            call_count = 0;
+            has_Lua_eval = 1;
             }
+        else
+            {
+            has_Lua_eval = 0;
+            }                       
         }
-    
+
+    if ( has_Lua_eval == 1 )
+        {
+        lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
+            "eval" );
+
+        lua_call( lua_manager::get_instance()->get_Lua(), 0, 0 );
+        }
     }
 //-----------------------------------------------------------------------------
 int tech_object_manager::init_objects()
-    {
-    int res = lua_manager::get_instance()->int_exec_lua_method( "object_manager",
-        "get_objects_count", 0, "int tech_object_manager::init_objects()" );
-    if ( res < 0 )
-        {
-        Print( "Fatal error!\n" );
-        exit( 1 );
-        }
-
-    int objects_count = res;
-    for ( int i = 1; i <= objects_count; i++ )
-        {
-        void * res_object = lua_manager::get_instance()->user_object_exec_lua_method(
-             "object_manager", "get_object", i,
-             "int tech_object_manager::init_objects()" );
-
-        if ( 0 == res_object )
-            {
-            Print( "Fatal error!\n" );
-            exit( 1 );
-            }
-
-        add_tech_object( ( tech_object * ) res_object );
-        }
-    
-    for ( u_int i = 0; i < get_count(); i++ )
-        {
-        G_TECH_OBJECTS( i )->lua_init_runtime_params();
-
-        G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS( i ) );        
-        }
-
-    res = lua_manager::get_instance()->int_exec_lua_method( "system",
-        "init_tech_dev_modes", 0, "int tech_object_manager::init_objects()" );
-    if ( res < 0 )
-        {
-        Print( "Fatal error!\n" );
-        exit( 1 );
-        }
-
+    {    
     //-Вызов пользовательской функции инициализации.
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
         "init" );
@@ -657,7 +621,7 @@ int tech_object_manager::init_objects()
         {
         lua_call( lua_manager::get_instance()->get_Lua(), 0, 0 );        
         }
-
+     
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -673,6 +637,18 @@ tech_object_manager::~tech_object_manager()
 void tech_object_manager::add_tech_object( tech_object* new_tech_object )
     {
     tech_objects.push_back( new_tech_object );
+    }
+//-----------------------------------------------------------------------------
+int tech_object_manager::save_params_as_Lua_str( char* str )
+    {
+    str[ 0 ] = 0;
+
+    for ( u_int i = 0; i < tech_objects.size(); i++ )
+        {
+        tech_objects[ i ]->save_params_as_Lua_str( str + strlen( str ) );
+        }
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

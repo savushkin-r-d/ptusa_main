@@ -30,6 +30,8 @@ tcp_communicator(),
     net_init();
 
 #ifdef DEBUG
+    printf( "PAC name - \"%s\".\n", name );
+
     char tmp_host_name[ TC_MAX_HOST_NAME ] = { 0 };
     gethostname( tmp_host_name, TC_MAX_HOST_NAME );
     printf ( "Host name - \"%s\".\n", tmp_host_name );    

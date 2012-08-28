@@ -131,7 +131,7 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
 // [ 8  ] - параметр ошибки 2, unsigned char.
 // [ .. ]
 // [ x  ]
-int PAC_critical_errors_manager::save_to_stream_as_Lua( char *str )
+int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
     {
     for ( u_int i = 0; i < errors.size(); i++ )
         {
@@ -153,6 +153,8 @@ int PAC_critical_errors_manager::save_to_stream_as_Lua( char *str )
 
         sprintf( str + strlen( str ), "\t%s\n", "}," );
         }
+
+   id = errors_id;
 
 #ifdef DEBUG_PAC_ERR   
     Print( "%s\n", str );

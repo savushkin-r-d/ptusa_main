@@ -14,8 +14,10 @@ PID::PID( int n ):
     used_par_n( 1 ),    
     start_value( 0 ),
     number( n )
-    {  
-    //G_DEVICE_CMMCTR->add_device( this ); 
+    {     
+    G_DEVICE_CMMCTR->add_device( this );
+
+    snprintf( name, sizeof( name ), "%s%d", "PID", n );
     }
 //-----------------------------------------------------------------------------
 PID::~PID() 

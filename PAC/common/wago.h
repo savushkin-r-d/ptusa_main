@@ -92,19 +92,7 @@ class wago_device
         /// @return - >0 - ошибка.
         float get_AI( u_int index, float min_value = 0, float max_value = 0 );
 
-        /// @brief Получение значения параметра.
-        ///
-        /// @param index - индекс параметра.
-        ///
-        /// @return - значение параметра.
-        float get_par( u_int index );
-
         virtual void print() const;
-
-        bool has_params() const
-            {
-            return params != 0;
-            }
 
     private:
         /// @brief Группа каналов ввода/вывода устройства.
@@ -145,26 +133,12 @@ class wago_device
         IO_channels AI_channels;    ///< Каналы аналогового входа.
         IO_channels AO_channels;    ///< Каналы аналогового выхода.
 
-        u_int   params_count;       ///< Количество параметров устройства.
-        float   *params;            ///< Параметры устройства.
-
-        /// @brief Загрузка информации о группе каналов ввода/вывода из 
-        /// строки описания.
-        /// 
-        /// @param str - строка для считывания устройства.
-        /// @param [out] channels - группа, в которая считывается.
-        ///
-        /// @return -  количество считанных байт.
-        int load_table_from_string( char *str, IO_channels &channels );
-
     public:
         // Lua.
         void init( int DO_count, int DI_count,
-            int AO_count, int AI_count, int par_count );
+            int AO_count, int AI_count );
 
-        void init_channel( int type, int ch_inex, int node, int offset );  
-
-        void init_par( u_int index, float value );
+        void init_channel( int type, int ch_inex, int node, int offset );
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с модулями ввода/вывода Wago.

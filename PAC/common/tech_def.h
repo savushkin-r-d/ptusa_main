@@ -55,24 +55,20 @@ extern "C" {
 class tech_object: public i_Lua_save_device
     {
     public:
-        /// @param name                     - название (tank, comb).
+        /// @param name                     - название ("Гребенка" ...).
         /// @param number                   - номер.
+        /// @param name_Lua                 - имя в Lua.
         /// @param states_count             - количество режимов.
         /// @param timers_count             - количество таймеров.
         /// @param par_float_count          - количество сохраняемых параметров типа float.
         /// @param runtime_par_float_count  - количество рабочих параметров типа float.
         /// @param par_uint_count           - количество сохраняемых параметров типа uint.
         /// @param runtime_par_uint_count   - количество рабочих параметров типа uint.
-        tech_object( const char* name = "tech_object", u_int number = 0,
-            u_int states_count = 1,
-            u_int timers_count = 3,
-            u_int par_float_count = 5, u_int runtime_par_float_count = 5,
-            u_int par_uint_count = 5, u_int runtime_par_uint_count = 5 );
-
-        const char* get_object_name()
-            {
-            return object_name;
-            }
+        tech_object( const char* name, u_int number, const char* name_Lua,
+            u_int states_count,
+            u_int timers_count,
+            u_int par_float_count, u_int runtime_par_float_count,
+            u_int par_uint_count, u_int runtime_par_uint_count );
 
         virtual ~tech_object();
 
@@ -155,7 +151,7 @@ class tech_object: public i_Lua_save_device
             {
 #ifdef DEBUG
             Print ( "Exec command %s[ %2d ] command = %2d\n",
-                get_object_name(), number, cmd );
+                name, number, cmd );
 #endif
             return 0;
             }
@@ -192,8 +188,16 @@ class tech_object: public i_Lua_save_device
         /// @brief Отладочная печать объекта.
         void print() const
             {
-            Print( "Object \"%s\"\n", name );
+            Print( "Object \"%s\" [%d]\n", name, number );
             modes_manager->print();
+            }
+
+        const char* get_name() const
+            {
+            static char tmp[ 100 ];
+            snprintf( tmp, sizeof( tmp ), "%s \"%s\" [%d]",
+                name_Lua, name, number );
+            return tmp;
             }
 
         mode_manager* get_modes_manager()
@@ -223,7 +227,7 @@ class tech_object: public i_Lua_save_device
             C_MAX_NAME_LENGTH = 30,
             };
         char name[ C_MAX_NAME_LENGTH ];        ///< Имя объекта + номер объекта.
-        char object_name[ C_MAX_NAME_LENGTH ]; ///< Имя объекта.
+        char name_Lua[ C_MAX_NAME_LENGTH ];    ///< Имя объекта в Lua.
 
 
         smart_ptr< mode_manager > modes_manager; ///< Шаги режимов.
@@ -272,17 +276,7 @@ class tech_object_manager
         /// @brief Добавление технологического объекта.
         void add_tech_object( tech_object* new_tech_object );
 
-        int save_params_as_Lua_str( char* str )
-            {
-            str[ 0 ] = 0;
-
-            for ( u_int i = 0; i < tech_objects.size(); i++ )
-                {
-                tech_objects[ i ]->save_params_as_Lua_str( str + strlen( str ) );
-                }
-
-            return 0;
-            }
+        int save_params_as_Lua_str( char* str );
 
 #ifdef __BORLANDC__
 #pragma option -w-inl
@@ -291,7 +285,9 @@ class tech_object_manager
         /// @brief Отладочная печать объекта.
         void print()
             {
-            Print( "Technological objects manager\n" );
+            Print( "Technological objects manager [%d]:\n",
+                tech_objects.size() );
+
             for ( u_int i = 0; i < tech_objects.size(); i++ )
                 {
                 tech_objects[ i ]->print();
@@ -303,7 +299,8 @@ class tech_object_manager
                 Print( "\n" );
 #endif // KEY_CONFIRM
                 }
-            }
+            }       
+
 #ifdef __BORLANDC__
 #pragma option -w.inl
 #endif // __BORLANDC__

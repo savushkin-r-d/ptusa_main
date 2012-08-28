@@ -12,6 +12,8 @@
 
 #include "lua_manager.h"
 
+#include "tech_def.h"
+
 #ifdef WIN_OS
 #include "w_mem.h"
 #endif
@@ -72,48 +74,89 @@ project_manager::~project_manager()
         }
     }
 //-----------------------------------------------------------------------------
+//Порядок загрузки:
+//1.Модули Wago.
+//2.Устройства Wago.
+//3.Переменные для доступа к устройства из Lua (совпадают с именем устройства).
 int project_manager::lua_load_configuration()
     {
 #ifdef DEBUG
-    Print( "\nproject_manager - read configuration...\n" );
+    Print( "\nProject manager - processing configuration...\n" );
 
     //-File editor_version.
-    int file_version = 
-        lua_manager::get_instance()->int_no_param_exec_lua_method( "system",
-        "get_file_version", "lua_load_configuration" );
+    const char* file_date = 
+        lua_manager::get_instance()->char_no_param_exec_lua_method( "system",
+        "get_file_date", "project_manager::lua_load_configuration()" );
 
-    Print( "file_version %d\n", file_version );
+    Print( "--Files date: \"%s\"\n", file_date );
 #endif // DEBUG
-
-    //-Editor editor_version.
-    const int CURRENT_EDITOR_VERSION = 13;
-    int editor_version =  
-        lua_manager::get_instance()->int_no_param_exec_lua_method( "system",
-        "get_editor_version", "lua_load_configuration" );
-        
-    if ( editor_version != CURRENT_EDITOR_VERSION )
-        {
-#ifdef DEBUG
-        Print( "project_manager:load_configuration(...) - not correct editor editor_version - %d, must be %d!\n",
-            editor_version, CURRENT_EDITOR_VERSION );
-#endif // DEBUG
-        exit( 1 );
-        }
-    
-    //-Wago data.
+   
+    //-Wago modules data.
     lua_manager::get_instance()->void_exec_lua_method( "system", 
-        "init_wago", "lua_load_configuration" );
+        "create_wago", "project_manager::lua_load_configuration()" );
 
 #ifdef DEBUG
     wago_manager::get_instance()->print();
 #endif // DEBUG
-    
+
     //-Devices data.    
     lua_manager::get_instance()->void_exec_lua_method( "system", 
-        "init_devices", "lua_load_configuration" );
+        "create_devices", "project_manager::lua_load_configuration()" );
+    
+    //-Name for devices.    
+    lua_manager::get_instance()->void_exec_lua_method( "system", 
+        "init_dev_names", "project_manager::lua_load_configuration()" ); 
+
+    //-Devices properties.    
+    lua_manager::get_instance()->void_exec_lua_method( "system", 
+        "init_devices_properties", "project_manager::lua_load_configuration()" );
+
+#ifdef DEBUG    
+    G_DEVICE_MANAGER()->print();        
+#endif // DEBUG
+
+    int res = lua_manager::get_instance()->int_exec_lua_method( "",
+        "init_tech_objects", 0, "project_manager::lua_load_configuration()" );
+    if ( res )
+        {
+        Print( "Fatal error!\n" );
+        exit( 1 );
+        }
+
+    res = lua_manager::get_instance()->int_exec_lua_method( "object_manager",
+        "get_objects_count", 0, "project_manager::lua_load_configuration()" );
+    if ( res < 0 )
+        {
+        Print( "Fatal error!\n" );
+        exit( 1 );
+        }
+
+    int objects_count = res;
+    for ( int i = 1; i <= objects_count; i++ )
+        {
+        void * res_object = lua_manager::get_instance()->user_object_exec_lua_method(
+            "object_manager", "get_object", i,
+            "project_manager::lua_load_configuration()" );
+
+        if ( 0 == res_object )
+            {
+            Print( "Fatal error!\n" );
+            exit( 1 );
+            }
+
+        G_TECH_OBJECT_MNGR()->add_tech_object( ( tech_object * ) res_object );
+        }
+
+    //-Добавление технологических объектов проекта.
+    for ( u_int i = 0; i < G_TECH_OBJECT_MNGR()->get_count(); i++ )
+        {
+        G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS( i ) );        
+        }
+    //-Добавление системных тегов контроллера.
+    G_DEVICE_CMMCTR->add_device( PAC_info::get_instance() );
 
 #ifdef DEBUG
-    Print( "Reading configuration completed.\n\n" );
+    Print( "Project manager - processing configuration completed.\n\n" );
 #endif // DEBUG
 
     return 0;

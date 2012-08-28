@@ -48,7 +48,7 @@ class i_Lua_save_device
         virtual int save_device( char *buff ) = 0; 
 
         /// @brief ќтладочна€ печать объекта в консоль.
-        virtual void print() const = 0;
+        virtual const char* get_name() const = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief »нтерфейс устройства, позвол€ющий получать команды от сервера.

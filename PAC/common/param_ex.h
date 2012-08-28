@@ -236,12 +236,12 @@ template < class type, bool is_float > class parameters
             {
             strncpy( this->name, name, sizeof( this->name ) );
 
-#ifdef DEBUG
-            if ( 0 == count )
-                {
-                Print( "parameters(...) - error: count = 0!\n" );
-                }
-#endif // DEBUG
+//#ifdef DEBUG
+//            if ( 0 == count )
+//                {
+//                Print( "parameters(...) - error: count = 0!\n" );
+//                }
+//#endif // DEBUG
             is_delete = 0;
             if ( count > 0 && 0 == values )
                 {
@@ -273,7 +273,7 @@ template < class type, bool is_float > class parameters
 
             return 0;
             }
-
+                
         int save_device( char *buff, const char *prefix )
             {
             sprintf( buff, "%s%s = \n", prefix, name );            
@@ -301,7 +301,6 @@ template < class type, bool is_float > class parameters
         type         *values;   ///< ”казатель на массив значений элементов.
 
     private:
-
         int save_dev( char *buff, const char *prefix )
             {
             sprintf( buff, "%s\t{\n", prefix );

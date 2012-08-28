@@ -547,9 +547,9 @@ void simple_error::reset_errors_params()
     simple_device->err_par[ 0 ] = 0;    
     }
 //-----------------------------------------------------------------------------
-int simple_error::save_to_stream( u_char *stream, char &is_new_state )
+int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
     {
-    is_new_state = 0;
+    str[ 0 ] = 0;
 
     // Проверка текущего состояния устройства.
     switch ( simple_device->get_state() ) 
@@ -595,73 +595,19 @@ int simple_error::save_to_stream( u_char *stream, char &is_new_state )
         }
     // Проверка текущего состояния устройства.-!>
 
-    if ( AS_ALARM == error_state || 
+    if ( AS_ALARM == error_state ||
         AS_RETURN == error_state ) // Есть ошибка.
         {    	
+        sprintf( str + strlen( str ), "\t%s\n", "{" );
 
-        //[ 0  ] - тип тревоги
-        //[ 1  ] - блокировка тревоги на этапе проектирования.
-        //[ 2  ] - блокировка тревоги во время работы.
-        //[ 3  ] - подавление тревоги клиентами.
-        //
-        //[ 4  ] - состояние тревоги
-        //[ 5  ] - 
-        //[ 6  ] - приоритет тревоги
-        //[ 7  ] - 
-        //[ 8  ] - номер устройства
-        //[ 9  ] - 
-        //[ 10 ] - номер ошибки устройства
-        //[ 11 ] - 
-        //[ 12 ] - тип устройства
-        //[ 13 ]
-        //[ .. ]
-        //[ 62 ] - описание ошибки
-        stream[ 0 ] = AT_DISCRETE;
-        unsigned char alarm_params = simple_device->err_par[ 0 ];
+        sprintf( str + strlen( str ), "\tdescription = \"%s\",\n",
+            simple_device->get_name() );
 
-        stream[ 1  ] = device::DE_IS_ENABLE == ( device::DE_IS_ENABLE & alarm_params );
-        stream[ 2  ] = device::DE_IS_INHIBIT == ( device::DE_IS_INHIBIT & alarm_params );            
-        stream[ 3  ] = device::DE_IS_SUPPRESS == ( device::DE_IS_SUPPRESS & alarm_params );            
-        stream[ 4  ] = error_state;
-        stream[ 5  ] = 0;
+        sprintf( str + strlen( str ), "priority    = %d%s", ALARM_CLASS_PRIORITY[ 3 ], "," );
+        sprintf( str + strlen( str ), "state       = %d,\n", error_state );
+        sprintf( str + strlen( str ), "suppress    = false,\n" );
 
-        u_int_2 prior = SE_PRIORITY;
-        memcpy( stream + 6, &prior, sizeof( u_int_2 ) );
-        u_int_2 dev_n = simple_device->get_n();
-        memcpy( stream + 8, &dev_n, sizeof( u_int_2 ) );
-
-        stream[ 10 ] = SE_ERROR_CODE;
-        stream[ 11 ] = 0;
-        stream[ 12 ] = simple_device->get_type();
-
-        char dev_type_str[ 20 ] = "";
-        switch ( simple_device->get_type() )
-            {
-            case device::DT_V:
-                strcpy( dev_type_str, "Клапан" );
-                break;
-
-            case device::DT_N:
-                strcpy( dev_type_str, "Насос" );
-                break;
-
-            case device::DT_M:
-                strcpy( dev_type_str, "Мешалка" );
-                break;
-            }
-
-        if ( strlen ( simple_device->get_name() ) > 0 )
-            {
-            sprintf( ( char* ) stream + 13, "%s", 
-                simple_device->get_name() );
-            }
-        else
-            {
-            sprintf( ( char* ) stream + 13, "%s \"%d\"", 
-                dev_type_str, simple_device->get_n() );
-            }
-
-        return 12 + 50;
+        sprintf( str + strlen( str ), "},\n" );
         }
 
     return 0;
@@ -676,12 +622,8 @@ void simple_error::print() const
             Print( "VALVE" );
             break;
 
-        case device::DT_N:
-            Print( "PUMP " );
-            break;
-
         case device::DT_M:
-            Print( "MIXER" );
+            Print( "MOTOR" );
             break;
         }
     Print( "[ %5u ]", simple_device->get_n() );
@@ -733,7 +675,14 @@ int simple_error::set_cmd( int cmd )
             if ( AS_ALARM == error_state ||
                 AS_RETURN == error_state )
                 {
-                error_state = AS_ACCEPT;
+                if ( AS_RETURN == error_state )
+                    {
+                    error_state = AS_NORMAL;
+                    }
+                else
+                    {
+                    error_state = AS_ACCEPT;
+                    }                
                 }
             else
                 {
@@ -759,67 +708,30 @@ int simple_error::set_cmd( int cmd )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-dev_errors_manager::dev_errors_manager(): errors_id( 1 ),
-                                       is_any_err( 0 )
+dev_errors_manager::dev_errors_manager(): errors_id( 0 )
     {      
     }
 //-----------------------------------------------------------------------------
-int dev_errors_manager::save_to_stream( u_char *stream )
+int dev_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
     {
-    //[ 0   ] - код текущих ошибок.
-    //[ 1   ] - 
-    //[ 2   ] - количество ошибок.
-    //[ 3   ] - 
-    //[ 4   ] - данные ошибок.
-    //[ ... ] -                                                
+    str[ 0 ] = 0;
 
-    is_any_err = 0;
-
-    u_char *answer_errors_id = stream;
-    u_char *answer_errors_cnt = stream + 2;
-
-#ifdef DEBUG_DEV_CMCTR
-    Print( "Got here! 1234\n" );
-#endif // DEBUG_DEV_CMCTR
-
-    int answer_size = 4;
-    stream += answer_size;
-
-    u_int_2 errors_cnt = 0;
+    bool is_new_error_state = false;
 
     for ( u_int i = 0; i < s_errors_vector.size(); i++ )
         {
-        char is_new_error_state;
-        int res = s_errors_vector[ i ]->save_to_stream( stream,
+        s_errors_vector[ i ]->save_as_Lua_str( str + strlen( str ),
             is_new_error_state );  
-
-        if ( is_new_error_state )
-            {
-            errors_id++;        // Ошибки изменились.
-            }
-
-        if ( res > 0 )
-            {
-            is_any_err = 1;
-
-            errors_cnt++;
-            answer_size += res;
-            stream += res;
-            if ( DEM_MAX_ERRORS_CNT <= errors_cnt )
-                {
-#ifdef DEBUG
-                Print( "dev_errors_manager::save_to_stream(...) - max\
-                       errors count[ %d ] reached!\n", DEM_MAX_ERRORS_CNT );
-#endif // DEBUG
-                break;
-                }
-            }
         }
 
-    memcpy( answer_errors_id, &errors_id, sizeof( errors_id ) );
-    memcpy( answer_errors_cnt, &errors_cnt, sizeof( errors_cnt ) );
+    if ( is_new_error_state )
+        {
+        errors_id++;        // Ошибки изменились.
+        }
 
-    return answer_size;
+    id = errors_id; //Через параметр возвращаем состояние ошибок.
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 int dev_errors_manager::add_error( base_error  *s_error )
@@ -899,11 +811,6 @@ dev_errors_manager::~dev_errors_manager()
         delete s_errors_vector.at( i );
         s_errors_vector.at( i ) = 0;
         }
-    }
-//-----------------------------------------------------------------------------
-int dev_errors_manager::is_any_error() const
-    {
-    return is_any_err;
     }
 //-----------------------------------------------------------------------------
 dev_errors_manager* dev_errors_manager::get_instance()

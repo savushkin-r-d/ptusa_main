@@ -4,7 +4,7 @@
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
-// @c USE_NO_COMB - компиляция без гребенки (объекта g_greb).@n
+/// @c USE_NO_COMB - компиляция без гребенки (объекта g_greb).@n
 /// @c DEBUG       - отладочная компиляцию с выводом дополнительной информации 
 /// в консоль.
 /// 
@@ -15,342 +15,230 @@
 
 #include "mode_mngr.h"
 //-----------------------------------------------------------------------------
-step_path::step_path(): start_time( 0 )
-    {   
+action::action( std::string name ) : name( name )
+    {
     }
 //-----------------------------------------------------------------------------
-int step_path::add_closed_dev( device *dev )
+void action::print( const char* prefix /*= "" */ ) const
     {
-    close_devices.push_back( dev );
-    
+    Print( "%s%s: ", prefix, name.c_str() );
+
+    for ( u_int i = 0; i < devices.size(); i++ )
+        {
+        devices[ i ]->print();
+        Print( " " );
+        }
+
+    Print( "\n" );
+    }
+//-----------------------------------------------------------------------------
+void action::final()
+    {
+    for ( u_int i = 0; i < devices.size(); i++ )
+        {
+        devices[ i ]->off();
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void on_action::evaluate()
+    {
+    for ( u_int i = 0; i < devices.size(); i++ )
+        {
+        devices[ i ]->on();
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void off_action::evaluate()
+    {
+    for ( u_int i = 0; i < devices.size(); i++ )
+        {
+        devices[ i ]->off();
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int required_DI_action::check() const
+    {
+    for ( u_int i = 0; i < devices.size(); i++ )
+        {
+        if ( !devices[ i ]->is_active() ) return 1;
+        }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
-int step_path::add_opened_dev( device *dev )
+//-----------------------------------------------------------------------------
+step::step( std::string name, bool is_mode /*= false */ ) : name( name ), 
+    is_mode( is_mode ), start_time( 0 )
     {
-    open_devices.push_back( dev );
+    actions.push_back( new on_action() );
+    actions.push_back( new off_action() );
+    actions.push_back( new open_seat_action() );
     
+    if ( is_mode )
+        {
+        actions.push_back( new required_DI_action() );
+        
+        actions.push_back( new on_action() );
+        actions.push_back( new on_action() );
+
+        actions.push_back( new DI_DO_action() );
+        }
+    }
+//-----------------------------------------------------------------------------
+step::~step()
+    {
+    for ( u_int i = 0; i < actions.size(); i++  )
+        {
+        delete actions[ i ];                
+        }
+    }
+//-----------------------------------------------------------------------------
+int step::check() const
+    {
+    if ( is_mode )
+        {      
+        return actions[ A_REQUIRED_FB ]->check();
+        }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
-int step_path::init()
+void step::init()
     {
     start_time = get_millisec();
 
-    if ( !wash_seats.is_null() )
+    for ( u_int i = 0; i < actions.size(); i++  )
         {
-        wash_seats->init();
+        actions[ i ]->init();
         }
-
-    return 0;
     }
 //-----------------------------------------------------------------------------
-int step_path::evaluate() const
-    {   
-    // Включение заданных вручную устройств (имеют приоритет перед маршрутом).
-    for ( u_int i = 0; i < open_devices.size(); i++ )
-        {
-        open_devices[ i ]->on();
-        }
-    for ( u_int i = 0; i < close_devices.size(); i++ )
-        {
-        close_devices[ i ]->off();
-        }
-
-    // Работа с группой устройств, включаемых при наличии ОС.
-    for ( u_int i = 0; i < FB_group_devices.size(); i++ )
-        {
-        const FB_group_dev &group = FB_group_devices[ i ];
-        for ( u_int j = 0; j < group.open_devices.size(); j++ )
-            {
-            if ( group.fb->is_active() )
-                {
-                group.open_devices[ j ]->on();
-                }
-            else
-                {
-                group.open_devices[ j ]->off();
-                }            
-            }
-        }
-
-    // Работа с группой устройств, включаемых при наличии ОС, и сигнализирующих
-    // о своей работе управляющим сигналом.
-    for ( u_int i = 0; i < FB_group_devices_ex.size(); i++ )
-        {
-        const FB_group_dev_ex &group = FB_group_devices_ex[ i ];
-                
-        if ( group.control_s )
-            {
-            group.control_s->on();
-            }
-
-        if ( group.fb )
-            {
-            if ( group.fb->is_active() )
-                {
-                bool is_no_fb = false; // Флаг наличия устройств без ОС.
-
-                for ( u_int j = 0; j < group.on_devices.size(); j++ )
-                    {
-                    group.on_devices[ j ]->on(); // Включаем устройства.
-
-                    // Проверяем обратную связь.
-                    if ( group.on_devices[ j ]->get_state() == -1 ) 
-                        {
-                        is_no_fb = true;
-                        }
-                    }
-
-                if ( is_no_fb )
-                    {
-                    group.control_s->off();
-                    for ( u_int j = 0; j < group.on_devices.size(); j++ )
-                        {
-                        group.on_devices[ j ]->off(); // Выключаем устройства.
-                        }
-                    }
-                } // if ( group.fb->is_active() )
-            else
-                {
-                for ( u_int j = 0; j < group.on_devices.size(); j++ )
-                    {
-                    group.on_devices[ j ]->off(); // Выключаем устройства.
-                    }
-                }        
-            } // if ( group.fb )        
-        } // for ( u_int i = 0; i < FB_group_devices_ex.size(); i++ )
-
-    if ( !wash_seats.is_null() )
-        {
-        wash_seats->eval();
-        }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int step_path::final()
+void step::evaluate() const
     {
-    for ( u_int i = 0; i < open_devices.size(); i++ )
+    for ( u_int i = 0; i < actions.size(); i++  )
         {
-        open_devices[ i ]->off();
-        }
-    start_time = 0;
-
-    // Работа с группой устройств, включаемых при наличии ОС.
-    for ( u_int i = 0; i < FB_group_devices.size(); i++ )
-        {
-        const FB_group_dev &group = FB_group_devices[ i ];
-        for ( u_int j = 0; j < group.open_devices.size(); j++ )
-            {
-            group.open_devices[ j ]->off();
-            }
-        }
-    
-    // Работа с группой устройств, включаемых при наличии ОС, и сигнализирующих
-    // о своей работе управляющим сигналом.
-    for ( u_int i = 0; i < FB_group_devices_ex.size(); i++ )
-        {
-        const FB_group_dev_ex &group = FB_group_devices_ex[ i ];
-        
-        if ( group.control_s )
-            {
-            group.control_s->off();
-            }
-
-        for ( u_int j = 0; j < group.on_devices.size(); j++ )
-            {
-            group.on_devices[ j ]->off();
-            }
-        }
-
-    if ( !wash_seats.is_null() )
-        {
-        wash_seats->final();
-        }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-void step_path::print() const
-    {    
-    if ( open_devices.size() )
-        {        
-        Print( "\t\ton =\n" );
-        Print( "\t\t\t{\n" );
-
-        for ( u_int i = 0; i < open_devices.size(); i++ )
-            {
-            Print( "\t\t\t" );
-            open_devices[ i ]->print();  
-            Print( "\n" );
-            }      
-        Print( "\t\t\t}\n" );
-        }
-
-    if ( close_devices.size() )
-        {
-        Print( "\t\toff =\n" );
-        Print( "\t\t\t{\n" );
-
-        for ( u_int i = 0; i < close_devices.size(); i++ )
-            {
-            Print( "\t\t\t" );
-            close_devices[ i ]->print();  
-            Print( "\n" );
-            }        
-        Print( "\t\t\t}\n" );
-        }
-
-    if ( FB_group_devices.size() )
-        {
-        Print( "\t\tFB groups =\n" );
-        for ( u_int i = 0; i < FB_group_devices.size(); i++ )
-            {            
-            Print( "\t\t\t" );
-            FB_group_devices[ i ].fb->print();  
-            Print( "->" );
-            for ( u_int j = 0; j < FB_group_devices[ i ].open_devices.size(); j++ )
-                {  
-                Print( " " );
-                FB_group_devices[ i ].open_devices[ j ]->print();    
-                Print( "; " );
-                }
-            Print( "\n" );
-            } 
-        }
-
-    if ( FB_group_devices_ex.size() )
-        {
-        Print( "\t\tdev groups (FB and UPR) =\n" );
-        for ( u_int i = 0; i < FB_group_devices_ex.size(); i++ )
-            {            
-            Print( "\t\t\t" );
-            if ( FB_group_devices_ex[ i ].fb )
-                {
-                FB_group_devices_ex[ i ].fb->print();  
-                }
-            
-            Print( " -> " );            
-            FB_group_devices_ex[ i ].control_s->print();  
-            Print( "\n" );
-            for ( u_int j = 0; j < FB_group_devices_ex[ i ].on_devices.size(); j++ )
-                {  
-                Print( "\t\t\t" );
-                FB_group_devices_ex[ i ].on_devices[ j ]->print();    
-                Print( "\n" );
-                }
-            } 
-        }
-
-    if ( !wash_seats.is_null() )
-        {
-        wash_seats->print();
+        actions[ i ]->evaluate();
         }
     }
 //-----------------------------------------------------------------------------
-u_int_4 step_path::get_start_time() const
+void step::final() const
+    {
+    for ( u_int i = 0; i < actions.size(); i++  )
+        {
+        actions[ i ]->final();
+        }
+    }
+//-----------------------------------------------------------------------------
+u_int_4 step::get_start_time() const
     {
     return start_time;
     }
 //-----------------------------------------------------------------------------
-void step_path::set_start_time( u_int_4 start_time ) 
+void step::set_start_time( u_int_4 start_time )
     {
     this->start_time = start_time;
     }
 //-----------------------------------------------------------------------------
-int step_path::add_FB_group( device *control_FB_dev )
+void step::print( const char* prefix /*= "" */ ) const
     {
-    FB_group_dev group( control_FB_dev );
+    Print( "%s%s \n", prefix, name.c_str() );
+    std::string new_prefix = prefix;
+    new_prefix += "  ";
 
-    FB_group_devices.push_back( group );
-    return FB_group_devices.size() - 1;
+    for ( u_int i = 0; i < actions.size(); i++  )
+        {
+        actions[ i ]->print( new_prefix.c_str() );
+        }
     }
 //-----------------------------------------------------------------------------
-int step_path::add_pair_dev( u_int pair_n, device *open_dev )
+action* step::operator[]( int idx )
     {
-    try 
+    if ( idx >= 0 && u_int( idx ) < actions.size() )
         {
-        FB_group_devices.at( pair_n ).open_devices.push_back( open_dev );
+        return actions[ idx ];
         }
-    catch(...) 
-        {
+
 #ifdef DEBUG
-        Print( "Error add_pair_dev - pair_n = %d, dev = %s[%d]\n", 
-            pair_n, open_dev->get_name(), open_dev->get_n() );
+    Print( "Error step::action* operator[] ( int idx ) - idx %d > count %d.\n",
+        idx, actions.size() );
 #endif // DEBUG
-        }    
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int step_path::add_wash_seats_valves_group( i_mix_proof::STATES state )
-    {
-    if ( wash_seats.is_null() )
-        {
-        wash_seats = new wash_step();
-        }
-
-    return wash_seats->add_valves_group( state );
-    }
-
-int step_path::add_wash_seat_valve( u_int group, device *v )
-    {
-    if ( wash_seats.is_null() )
-        {
-#ifdef DEBUG
-        Print( "error - step_path::add_wash_seat_valve(...) - no wash seats"
-            "group!\n" );
-#endif // DEBUG
-
-        return -1;
-        }
-        
-    return wash_seats->add_valve( group, v );
-    }
-//-----------------------------------------------------------------------------
-int step_path::add_FB_group_ex( device *control_FB_dev, device *control_signal_dev )
-    {
-    FB_group_dev_ex group( control_FB_dev, control_signal_dev );
-
-    FB_group_devices_ex.push_back( group );
-    return FB_group_devices_ex.size() - 1;
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int step_path::add_FB_group_dev_ex( u_int group_dev_ex_n, device *open_dev )
-    {
-    try 
-        {
-        FB_group_devices_ex.at( group_dev_ex_n ).on_devices.push_back( open_dev );
-        }
-    catch(...) 
-        {
-#ifdef DEBUG
-        Print( "Error add_FB_group_dev_ex - group_n = %d, dev = %s[%d]\n", 
-            group_dev_ex_n, open_dev->get_name(), open_dev->get_n() );
-#endif // DEBUG
-        }    
 
     return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-wash_step::wash_step(): phase( P_WAIT ), 
-    active_group_n( 0 ), active_group( 0 ),   
+int DI_DO_action::check() const
+    {
+    if ( devices.size() % 2 != 0 )
+        {
+#ifdef DEBUG
+        Print( "Error DI_DO_action: devices.size %d не кратен 2.",
+            devices.size() );
+#endif // DEBUG
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void DI_DO_action::evaluate()
+    {
+    for ( u_int i = 0; i < devices.size(); i += 2 )
+        {
+        if ( devices[ i ]->is_active() )
+            {
+            devices[ i + 1 ]->on();
+            }
+        else
+            {
+            devices[ i + 1 ]->off();
+            }                
+        }
+    }
+//-----------------------------------------------------------------------------
+void DI_DO_action::final()
+    {
+    for ( u_int i = 0; i < devices.size(); i += 2 )
+        {
+        devices[ i + 1 ]->off();
+        }
+    }
+//-----------------------------------------------------------------------------
+void DI_DO_action::print( const char* prefix /*= "" */ ) const
+    {
+    Print( "%sDI->DO: ", prefix );
+    for ( u_int i = 0; i < devices.size(); i += 2 )
+        {
+        devices[ i ]->print();
+        Print( "->" );
+        devices[ i + 1 ]->print();                
+        Print( " " );
+        }
+
+    Print( "\n" );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+open_seat_action::open_seat_action() : action( "Промывка седел" ), 
+    phase( P_WAIT ), 
+    active_group_n( 0 ),
     wait_time( 0 ),
     wash_time( 0 ),
     start_cycle_time( 0 )
     {
     }
 //-----------------------------------------------------------------------------
-void wash_step::init()
+void open_seat_action::init()
     {
-    if ( 0 == wash_seat_devices.size() ) return;
+    if ( 0 == wash_upper_seat_devices.size() &&
+        0 == wash_lower_seat_devices.size() ) return;
 
     start_cycle_time  = get_millisec();
     phase             = P_WAIT;
+    next_phase        = P_OPEN_UPPER;
+    active_group_n    = 0;
 
     wait_time = ( *( PAC_info::get_instance()->par ) )
         [ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;
@@ -358,716 +246,393 @@ void wash_step::init()
     wash_time = ( *( PAC_info::get_instance()->par ) ) 
         [ PAC_info::P_MIX_FLIP_TIME ];
 
-    if ( wash_seat_devices.size() > 1 )
-        {
-        wait_time /= wash_seat_devices.size();
-        }
+    wait_time /= wash_upper_seat_devices.size() + wash_lower_seat_devices.size();
 
-    active_group_n = 0;     
-    active_group   = 0;
+    active_group_n = 0;
     }
 //-----------------------------------------------------------------------------
-void wash_step::eval()
+void open_seat_action::evaluate()
     {
-    if ( 0 == wash_seat_devices.size() ) return;
+    if ( 0 == wash_lower_seat_devices.size() && 
+        0 == wash_upper_seat_devices.size() ) return;
 
     switch ( phase )
         {
     case P_WAIT:
-        // Пора промывать седла группы.
+        // Пора промывать седла.
         if ( get_delta_millisec( start_cycle_time ) > wait_time )
             {
-            phase            = P_OPEN;
+            phase            = next_phase;
             start_cycle_time = get_millisec();
-            active_group     = &wash_seat_devices.at( active_group_n );
             } 
         break;
 
-    case P_OPEN:
+    case P_OPEN_UPPER:
+        if ( 0 == wash_upper_seat_devices.size() ) 
+            {
+            phase      = P_OPEN_LOWER;
+            next_phase = P_OPEN_LOWER;
+            break;
+            }
+
         if ( get_delta_millisec( start_cycle_time ) < wash_time )
             {
-            active_group->eval();
+            for ( u_int j = 0; j < wash_upper_seat_devices[ active_group_n ].size(); j++ )
+                {
+                wash_upper_seat_devices[ active_group_n ][ j ]->set_state( 
+                    i_mix_proof::ST_UPPER_SEAT );
+                }
             }
         else //Время промывки седел вышло.
             {
-            active_group->final();
-            active_group = 0;
+            final();
 
             phase            = P_WAIT;
             start_cycle_time = get_millisec();
 
             //Переход к следующей группе.
             active_group_n++;
-            if ( active_group_n >= wash_seat_devices.size() )
+            if ( active_group_n >= wash_upper_seat_devices.size() )
                 {
+                //Переход к нижним седлам.
                 active_group_n = 0;
+                next_phase     = P_OPEN_LOWER;
                 }
             }
+        break;
 
+    case P_OPEN_LOWER:
+        if ( 0 == wash_lower_seat_devices.size() ) 
+            {
+            phase      = P_WAIT;
+            next_phase = P_OPEN_UPPER;
+            break;
+            }
+
+        if ( get_delta_millisec( start_cycle_time ) < wash_time )
+            {
+            for ( u_int j = 0; j < wash_lower_seat_devices[ active_group_n ].size(); j++ )
+                {
+                wash_lower_seat_devices[ active_group_n ][ j ]->set_state( 
+                    i_mix_proof::ST_LOWER_SEAT );
+                }
+            }
+        else //Время промывки седел вышло.
+            {
+            final();
+
+            phase            = P_WAIT;
+            start_cycle_time = get_millisec();
+
+            //Переход к следующей группе.
+            active_group_n++;
+            if ( active_group_n >= wash_lower_seat_devices.size() )
+                {
+                //Переход к ожиданию.
+                active_group_n = 0;
+                next_phase     = P_OPEN_UPPER;
+                }
+            }
         break;
         }
     }
 //-----------------------------------------------------------------------------
-void wash_step::final()
+void open_seat_action::final()
     {
-    if ( 0 == wash_seat_devices.size() ) return;
+    if ( 0 == wash_upper_seat_devices.size() &&
+        0 == wash_lower_seat_devices.size() ) return;
 
-    if ( active_group.is_null() )
+    switch ( phase )
         {
+    case P_OPEN_UPPER:
+        for ( u_int j = 0; j < wash_upper_seat_devices[ active_group_n ].size(); j++ )
+            {
+            wash_upper_seat_devices[ active_group_n ][ j ]->off();
+            }
+        break;
+
+    case P_OPEN_LOWER:
+        for ( u_int j = 0; j < wash_lower_seat_devices[ active_group_n ].size(); j++ )
+            {
+            wash_lower_seat_devices[ active_group_n ][ j ]->off();
+            }
+        break;
+        }
+    }
+//-----------------------------------------------------------------------------
+void open_seat_action::add_dev( device *dev, u_int group, u_int seat_type )
+    {
+    std::vector< std::vector< device* > > *seat_group;
+
+    switch ( seat_type )
+        {
+    case i_mix_proof::ST_UPPER_SEAT:
+        seat_group = &wash_upper_seat_devices;
+        break;
+
+    case i_mix_proof::ST_LOWER_SEAT:
+        seat_group = &wash_lower_seat_devices;
+        break;
+        }
+
+    if ( group >= seat_group[ 0 ].size() )
+        {
+        std::vector< device* > vector_dev;
+
+        seat_group[ 0 ].push_back( vector_dev );
+        }
+
+    if ( group >= seat_group[ 0 ].size() )
+        {
+#ifdef DEBUG
+        Print( "Error open_seat_action:add_dev: group %d > %d, seat_type %d.\n",
+            group, seat_group[ 0 ].size(), seat_type );
+#endif // DEBUG
         return;
         }
 
-    active_group->final();
-    active_group = 0;
+    seat_group[ 0 ][ group ].push_back( dev );
     }
 //-----------------------------------------------------------------------------
-int wash_step::add_valve( u_int group, device *v )
+void open_seat_action::print( const char* prefix /*= "" */ ) const
     {
-    if ( group < wash_seat_devices.size() )
+    Print( "%s%s: ", prefix, name.c_str() );
+    
+    if ( wash_upper_seat_devices.size() )
         {
-        wash_seat_devices.at( group ).add_dev( v );
+        Print( "%верхние -" );
+        for ( u_int i = 0; i < wash_upper_seat_devices.size(); i++ )
+            {   
+            Print( " {" );
+            for ( u_int j = 0; j < wash_upper_seat_devices[ i ].size(); j++ )
+                {
+                wash_upper_seat_devices[ i ][ j ]->print();
+                if ( j + 1 < wash_upper_seat_devices[ i ].size() ) Print( " " );
+                }   
+
+            Print( "}" );
+            }
+        }
+
+    if ( wash_lower_seat_devices.size() )
+        {
+        Print( "; нижние -" );
+        for ( u_int i = 0; i < wash_lower_seat_devices.size(); i++ )
+            {      
+            Print( " {" );
+            for ( u_int j = 0; j < wash_lower_seat_devices[ i ].size(); j++ )
+                {
+                wash_lower_seat_devices[ i ][ j ]->print();
+                if ( j + 1 < wash_lower_seat_devices[ i ].size() ) Print( " " );
+                }   
+
+            Print( "}" );
+            }
+        }
+
+    Print( "\n" );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+mode::mode( const char* name, mode_manager *owner ) : name( name ),
+    owner( owner ),
+    mode_step(  new step( "Шаг режима", true ) ),
+    active_step_n( 0 ),
+    start_time( get_millisec() ),
+    step_stub( "Шаг-заглушка" )
+    {
+    }
+//-----------------------------------------------------------------------------
+step* mode::add_step( const char* name, u_int next_step_n, 
+    u_int step_duration_par_n )
+    {
+    steps.push_back( new step( name ) );
+    next_step_ns.push_back( next_step_n );
+    step_duration_par_ns.push_back( step_duration_par_n );
+
+    return steps[ steps.size() - 1 ];
+    }
+//-----------------------------------------------------------------------------
+int mode::check_on() const
+    {
+    return mode_step->check();
+    }
+//-----------------------------------------------------------------------------
+void mode::init( u_int start_step /*= 0 */ )
+    {
+    start_time = get_millisec();
+
+    if ( 0 == steps.size() )
+        {
+        //Если нет шагов, то выходим.
+        return;
+        }
+
+    if ( start_step < steps.size() )
+        {
+        active_step_n = start_step;
+
+        steps[ start_step ]->init();
+        }
+
+#ifdef DEBUG
+    Print( " INIT STEP [ %d ]\n", active_step_n );
+    steps[ active_step_n ]->print();
+    Print( " NEXT STEP -> %d \n", 
+        next_step_ns[ active_step_n ] );        
+#endif 
+    }
+//-----------------------------------------------------------------------------
+void mode::evaluate()
+    {
+    mode_step->evaluate();            
+
+    if ( steps.size() )
+        {
+        steps[ active_step_n ]->evaluate();
+
+        // [ 1 ] Есть параметр длительности шагов.
+        // [ 2 ] Есть параметр длительности для этого шага.
+        if ( owner->get_param() != 0 &&                      // 1                                          
+            step_duration_par_ns[ active_step_n ] != 0 &&    // 2       
+            get_millisec() - steps[ active_step_n ]->get_start_time() > 
+            owner->get_param()[ 0 ][ step_duration_par_ns[ active_step_n ] ] * 1000L &&
+            next_step_ns[ active_step_n ] < 255 )
+            {
+            steps[ active_step_n ]->final();  
+
+            steps[ next_step_ns[ active_step_n ] ]->init();
+            steps[ next_step_ns[ active_step_n ] ]->evaluate();
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void mode::final()
+    {
+    mode_step->final();
+    start_time = get_millisec();
+
+    if ( steps.size() )
+        {
+        steps[ active_step_n ]->final();
+        active_step_n = 0;
+        }
+
+#ifdef DEBUG
+    Print( " FINAL ACTIVE STEP [ %d ] \n", active_step_n );
+#endif     
+    }
+//-----------------------------------------------------------------------------
+step* mode::operator[]( int idx )
+    {
+    if ( -1 == idx )
+        {
+        return mode_step;
+        }
+
+    if ( idx > 0 && u_int( idx ) <= steps.size() )
+        {
+        return steps[ idx - 1 ];
+        }
+
+#ifdef DEBUG
+    Print( "Error mode::step& operator[] ( int idx ) - idx %d > count %d.\n",
+        idx, steps.size() );
+#endif // DEBUG
+
+    return &step_stub;
+    }
+//-----------------------------------------------------------------------------
+void mode::to_step( u_int new_step )
+    {
+    if ( new_step < steps.size() )
+        {
+        steps[ active_step_n ]->final();
+        active_step_n = new_step;
+        steps[ active_step_n ]->evaluate();
         }
     else
         {
 #ifdef DEBUG
-        Print( "error - wash_step::add_valve(..) - no group %d!\n",
-            group );
+        Print( "Error mode::to_step step %d > steps size %d.\n",
+            new_step, steps.size() );
 #endif // DEBUG
-
-        return -1;
-        }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int wash_step::add_valves_group( i_mix_proof::STATES state )
-    {
-    if ( wash_seat_devices.size() < C_MAX_GROUP )
-        {
-        dev_group tmp;
-        tmp.state = state;
-
-        wash_seat_devices.push_back( tmp );
-        return wash_seat_devices.size() - 1;
-        }       
-
-    return -1;
-    }
-//-----------------------------------------------------------------------------
-void wash_step::print()
-    {
-    Print( "\t\topen seat v = \n" );
-    Print( "\t\t\t{\n" );    
-
-    for ( u_int i = 0; i < wash_seat_devices.size(); i++ )
-        {
-        Print( "\t\t\t" );
-        wash_seat_devices.at( i ).print();
-        Print( "\n" );
-        }
-    Print( "\t\t\t}\n" );
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-void wash_step::dev_group::add_dev( device* dev )
-    {
-    devices.push_back( dev );
-    }
-//-----------------------------------------------------------------------------
-void wash_step::dev_group::final()
-    {
-    for ( u_int j = 0; j < devices.size(); j++ )
-        {
-        devices.at( j )->off();
         }
     }
 //-----------------------------------------------------------------------------
-void wash_step::dev_group::eval()
+void mode::print( const char* prefix /*= "" */ ) const
     {
-    for ( u_int j = 0; j < devices.size(); j++ )
+    std::string new_prefix = prefix;
+    new_prefix += "  ";        
+
+    Print( "%s%s\n", prefix, name.c_str() );
+    mode_step->print( new_prefix.c_str() );
+
+    for ( u_int i = 0; i < steps.size(); i++ )
         {
-        devices.at( j )->set_state( state );
+        Print( "%s%d ", new_prefix.c_str(), i + 1 );
+        steps[ i ]->print( new_prefix.c_str() );
         }
     }
+
 //-----------------------------------------------------------------------------
-void wash_step::dev_group::print()
+//-----------------------------------------------------------------------------
+mode* mode_manager::add_mode( const char* name )
     {
-    switch ( this->state )
-        {
-    case i_mix_proof::ST_UPPER_SEAT:
-        Print( "upper = ");
-        break;
-
-    case i_mix_proof::ST_LOWER_SEAT:
-        Print( "lower = ");
-        break;
-
-    default:
-        Print( "custom = ");
-        }
-
-    Print( "{ " );
-
-    for ( u_int i = 0; i < devices.size(); i++ )
-        {
-        Print( "%d, ", devices.at( i )->get_n() );
-        }
-    Print( "}, " );
+    modes.push_back( new mode( name, this ) );
+    return modes[ modes.size() - 1 ];
     }
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-mode_manager::mode_manager( u_int_2 new_modes_cnt
-                           ): par( 0 ),                           
-                           step_duration_par_n( 0 ),
-                           next_step_n( 0 ),
-                           modes_cnt( new_modes_cnt ),
-                           steps_cnt( 0 ),                           
-                           steps( 0 ),
-                           active_step( 0 ),
-                           err_par( 1 )
-    {
-    if ( 0 == new_modes_cnt )
-        {
-#ifdef DEBUG
-        Print( "Error! mode_manager constructor - new_modes_cnt = 0!\n" );
-#endif // DEBUG
-        return;    
-        }
-    step_duration_par_n = new u_char*[ new_modes_cnt ];
-    next_step_n = new u_char*[ new_modes_cnt ];
-    for ( int i = 0; i < new_modes_cnt; i++ )
-    	{
-        step_duration_par_n[ i ] = 0;
-        next_step_n[ i ] = 0;
-    	}
-
-
-    steps_cnt = new u_char[ new_modes_cnt ];
-    active_step = new u_char[ new_modes_cnt ];
-    memset( steps_cnt, 0, new_modes_cnt );
-    memset( active_step, 0, new_modes_cnt );
-
-    steps = new step_path*[ new_modes_cnt ];
-    for ( int i = 0; i < new_modes_cnt; i++ )
-    	{
-        steps[ i ] = 0;
-    	}
-
-    is_active_mode = new u_char[ new_modes_cnt ];
-    memset( is_active_mode, 0, new_modes_cnt );
-
-    for ( int i = 0; i < new_modes_cnt; i++ )
-    	{        
-        modes_devices.push_back( new step_path() );
-
-        modes_start_time.push_back( get_millisec() );
-
-        // Обратные связи для включения режима.
-        std::vector < device* > fb;
-        modes_on_FB.push_back( fb );
-    	}
-    modes_start_time.push_back( get_millisec() );
-    }
-//-----------------------------------------------------------------------------
- mode_manager::~mode_manager()
-    {
-    for ( u_int i = 0; i < modes_devices.size(); i++ )
-        {
-        delete modes_devices.at( i );
-        }
-
-
-    for ( int i = 0; i < modes_cnt; i++ )
-        {
-        delete [] next_step_n[ i ];
-        next_step_n[ i ] = 0;
-
-        delete [] step_duration_par_n[ i ];
-        step_duration_par_n[ i ] = 0;
-
-        delete [] steps[ i ];
-        steps[ i ] = 0;
-        }
-    delete [] next_step_n;
-    next_step_n = 0;
-    delete [] step_duration_par_n;
-    step_duration_par_n = 0;
-    delete [] steps;
-    steps = 0;
-
-    delete [] steps_cnt;
-    steps_cnt = 0;
-    delete []  active_step;
-    active_step = 0;
-    delete []  is_active_mode;
-    is_active_mode = 0;
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::init( u_int_2 mode, u_char start_step )
-    {
-    // На корректность номер режима не проверяем ( это делается в 
-    // int tech_object::set_mode( u_int mode, int newm )).
-
-    modes_devices.at( mode )->init();
-    modes_start_time.at( mode + 1 ) = get_millisec();
-
-    if ( 0 == steps_cnt[ mode ] )
-        {
-        //Если нет шагов, то выходим.
-        return 0;
-        }
-
-    if ( check_correct_step_n( mode, start_step ) )
-        {
-        return -1;
-        }
-
-    active_step[ mode ] = start_step;  
-    is_active_mode[ mode ] = 1;
-    steps[ mode ][ active_step[ mode ] ].init(); 
-
-#ifdef DEBUG
-    Print( " INIT STEP [ %d ]\n", active_step[ mode ] );
-    steps[ mode ][ active_step[ mode ] ].print();
-    Print( " NEXT STEP -> %d \n", 
-        next_step_n[ mode ][ active_step[ mode ] ] );        
-#endif      
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::final( u_int_2 mode )
-    {
-    // На корректность номер режима не проверяем ( это делается в 
-    // int tech_object::set_mode( u_int mode, int newm )).
-
-    modes_devices.at( mode )->final();
-    modes_start_time.at( mode + 1 ) = get_millisec();
-    modes_start_time.at( 0 ) = get_millisec();
-    
-    if ( 0 == steps_cnt[ mode ] )
-        {
-        //Если нет шагов, то выходим.
-        return 0;
-        }
-
-    if ( check_correct_step_n( mode, active_step[ mode ] ) )
-        {
-        return -1;
-        }
-
-#ifdef DEBUG
-    Print( " FINAL ACTIVE STEP [ %d ] \n", active_step[ mode ] );
-#endif 
-
-    is_active_mode[ mode ] = 0;
-    steps[ mode ][ active_step[ mode ] ].final();
-
-    active_step[ mode ] = 0;
-  
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::evaluate( u_int_2 mode )
-    {
-    // На корректность номер режима не проверяем ( это делается в 
-    // int tech_object::set_mode( u_int mode, int newm )).
-
-    modes_devices.at( mode )->evaluate();
-   
-    if ( 0 == steps_cnt[ mode ] )
-        {
-        return 0;
-        }
-    if ( check_correct_step_n( mode, active_step[ mode ] ) ) 
-        {
-        return -1;
-        }
-    u_char step_n = active_step[ mode ];
-    steps[ mode ][ step_n ].evaluate();
-
-    // [ 1 ] Есть параметр длительности шагов.
-    // [ 2 ] Есть параметр длительности для этого шага.
-    if ( par != 0 &&                                    // 1                                          
-        step_duration_par_n[ mode ][ step_n ] != 0 &&   // 2       
-        get_millisec() - steps[ mode ][ step_n ].get_start_time() > 
-        par[ 0 ][ step_duration_par_n[ mode ][ step_n ] ] * 1000L &&
-        next_step_n[ mode ][ step_n ] < 255 )
-        {
-        final( mode );  
-        init( mode, next_step_n[ mode ][ step_n ] );
-
-        evaluate( mode );
-        }
-
-    return 0;
-    } 
-//-----------------------------------------------------------------------------
-int mode_manager::check_correct_step_n( u_int_2 mode, u_char step )
-    {
-    //Проверка на допустимый номер режима.
-    if ( mode >= modes_cnt )
-        {
-#ifdef DEBUG
-        Print( "Error! mode_manager:: mode number >= modes count - \
-               [%u] >= [%u]",
-               mode, modes_cnt );
-#endif // DEBUG
-        return -2;    
-        }
-
-    //Проверка на допустимый номер шага.
-    if ( step >= steps_cnt[ mode ] )
-        {
-#ifdef DEBUG
-        Print( "Error! mode_manager:: step number >= steps count - \
-               [%u] >= [%u]",
-               step, steps_cnt[ mode ] );
-#endif // DEBUG
-        return -1;    
-        }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::set_param( saved_params_u_int_4 *par )
+void mode_manager::set_param( saved_params_u_int_4 *par )
     {
     this->par = par;
-    return 0;
     }
 //-----------------------------------------------------------------------------
-int mode_manager::set_mode_config( u_int_2 mode, u_char new_steps_cnt )
+saved_params_u_int_4 * mode_manager::get_param() const
     {
-    if ( 0 == new_steps_cnt )
+    return par;
+    }
+//-----------------------------------------------------------------------------
+mode* mode_manager::operator[]( unsigned int idx )
+    {
+    if ( idx < modes.size() )
         {
+        return modes[ idx ];
+        }
+
 #ifdef DEBUG
-        Print( "ERROR! mode_manager::set_mode_config - new_steps_cnt[%d] = 0!", 
-            new_steps_cnt );
+    Print( "Error mode_manager::operator[] idx %d > modes count %d.\n",
+        idx, modes.size() );
 #endif // DEBUG
-        return -1;
-        }
 
-    // Проверка на допустимый номер режима.
-    if ( mode >= modes_cnt )
-        {
-#ifdef DEBUG
-        Print( "Error! mode_manager::set_mode_config mode number >= modes \
-               count - [%u] >= [%u]",
-               mode, modes_cnt );
-#endif // DEBUG
-        return -2;    
-        }
-
-    steps_cnt[ mode ] = new_steps_cnt;
-
-    steps[ mode ] = new step_path[ new_steps_cnt ];   
-    step_duration_par_n[ mode ] = new u_char[ new_steps_cnt ];    
-    next_step_n[ mode ] = new u_char[ new_steps_cnt ];
-
-    for ( int i = 0; i < new_steps_cnt; i++ )
-        {
-        step_duration_par_n[ mode ][ i ] = 0;
-        next_step_n[ mode ][ i ] = 0;
-        }
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::to_step( u_int_2 mode, u_char new_step )
-    {
-    if ( check_correct_step_n( mode, new_step - 1 ) ) return -1;
-
-    final( mode );
-    init( mode, new_step - 1 );
-    evaluate( mode );
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::add_closed_dev( u_int_2 mode, u_char step, device *dev )
-    {
-    if ( check_correct_step_n( mode, step ) ) 
-        {
-        return -1;
-        }
-    
-    return steps[ mode ][ step ].add_closed_dev( dev );
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::add_opened_dev( u_int_2 mode, u_char step, device *dev )
-    {
-    if ( check_correct_step_n( mode, step ) ) 
-        {
-        return -1;
-        }
-    return steps[ mode ][ step ].add_opened_dev( dev );
-    }
-//-----------------------------------------------------------------------------
-void mode_manager::print()
-    {
-    Print( "mode_manager[%u]\n", modes_cnt );
-    for ( int j = 0; j < modes_cnt; j++ )
-        {     
-        Print( "\t[ %d ] =\n", j );            
-
-        if ( modes_on_FB.at( j ).size() )
-            {
-            Print( "\t\trequired FB = { " );
-
-            for ( u_int i = 0; i < modes_on_FB.at( j ).size(); i++ )
-                {
-                Print( "%d, ",  modes_on_FB.at( j ).at( i )->get_n() );
-                }
-            Print( "}\n" ); 
-            }
-
-        modes_devices.at( j )->print();
-
-        if ( steps_cnt[ j ] > 0 )
-            {
-            Print( "     steps count - %u \n", steps_cnt[ j ] );
-            for ( int i = 0; i < steps_cnt[ j ]; i++ )
-                {
-                Print( "    [%2d], time step par[%d]; next step[%d]\n", 
-                    i + 1, step_duration_par_n[ j ][ i ], next_step_n[ j ][ i ] );                                                
-                steps[ j ][ i ].print();
-                }
-
-            Print( "\n" );
-            }
-        }             
-    }
-//-----------------------------------------------------------------------------
-u_int mode_manager::get_active_step( u_int mode )
-    {
-    return is_active_mode[ mode ] ? 1 + active_step[ mode ] : 0;
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::is_current_step_evaluation_time_left( u_int_2 mode )
-    {
-    if ( 0 == steps_cnt[ mode ] )
-        {
-        return 0;
-        }
-    if ( check_correct_step_n( mode, active_step[ mode ] ) ) 
-        {
-        return -1;
-        }
-    u_char step_n = active_step[ mode ];
-
-    // [ 1 ] Есть параметр длительности шагов.
-    // [ 2 ] Есть параметр длительности для этого шага.
-    if ( par != 0 &&                                    // 1                                     
-        step_duration_par_n[ mode ][ step_n ] != 0 &&   // 2  
-        get_millisec() - steps[ mode ][ step_n ].get_start_time() > 
-        par[ 0 ][ step_duration_par_n[ mode ][ step_n ] ] * 1000L )
-        {
-        return 1;
-        }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-unsigned long mode_manager::get_current_step_evaluation_time( u_int_2 mode )
-    {
-    if ( 0 == steps_cnt[ mode ] )
-        {
-        return 0;
-        }
-    if ( check_correct_step_n( mode, active_step[ mode ] ) ) 
-        {
-        return 0;
-        }
-    u_char step_n = active_step[ mode ];
-
-    return get_millisec() - steps[ mode ][ step_n ].get_start_time();
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::add_mode_closed_dev( u_int_2 mode, device *dev )
-    {
-    if ( mode >= modes_cnt )
-    	{
-#ifdef DEBUG
-        Print( "Error! mode_manager:: mode[ %u ] >= modes count[ %u ]!\n",
-               mode, modes_cnt );
-#endif // DEBUG
-        return 2;
-    	}   
-
-    try
-        {
-        modes_devices.at( mode)->add_closed_dev( dev );
-        }
-    catch (...)
-        {
-#ifdef PAC_PC
-        debug_break;
-#endif // PAC_PC
-        return 1;
-        }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::add_mode_opened_dev( u_int_2 mode, device *dev )
-    {
-    if ( mode >= modes_cnt )
-        {
-#ifdef DEBUG
-        Print( "Error! mode_manager:: mode[ %u ] >= modes count[ %u ]!\n",
-            mode, modes_cnt );
-#endif // DEBUG
-        return 2;
-        }
-
-    try
-    	{
-        modes_devices.at( mode)->add_opened_dev( dev );
-    	}
-    catch (...)
-    	{
-#ifdef PAC_PC
-        debug_break;
-#endif // PAC_PC
-    	return 1;
-    	}
-       
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-unsigned long mode_manager::get_mode_evaluation_time( u_int mode )
-    {
-    if ( mode >= 0 && mode < modes_cnt )
-        {
-        return get_millisec() - modes_start_time.at( mode + 1 );
-        }        
-
-    return 0;
+    return mode_stub;
     }
 //-----------------------------------------------------------------------------
 unsigned long mode_manager::get_idle_time()
     {
-    return get_millisec() - modes_start_time.at( 0 );
+    return get_delta_millisec( last_action_time );
     }
 //-----------------------------------------------------------------------------
-int mode_manager::add_mode_on_FB( u_int_2 mode, device *dev )
+void mode_manager::print()
     {
-    if ( mode >= modes_cnt )
-        {
-#ifdef DEBUG
-        Print( "Error! mode_manager::add_mode_on_FB(...) mode[ %u ] >= "
-            "modes count[ %u ]!\n",
-            mode, modes_cnt );
-#endif // DEBUG
-        return 2;
-        }
+    Print( "modes manager, %d\n", modes.size() );    
 
-    try
+    for ( u_int i = 0; i < modes.size(); i++ )
         {
-        modes_on_FB.at( mode).push_back( dev );
+        Print( "  %3d", i );
+        modes[ i ]->print( "  " );        
         }
-    catch (...)
-        {
-#ifdef PAC_PC
-        debug_break;
-#endif // PAC_PC
-        return 1;
-        }
-
-    return 0;
     }
 //-----------------------------------------------------------------------------
-bool mode_manager::check_on_mode( u_int_2 mode )
+mode_manager::mode_manager( u_int modes_cnt ): last_action_time( get_millisec() )
     {
-    // На корректность номер режима не проверяем ( это делается в 
-    // int tech_object::set_mode( u_int mode, int newm )).
-
-    u_int on_FB_cnt = modes_on_FB.at( mode ).size();
-    if ( on_FB_cnt )
-        {
-        for ( u_int i = 0; i < on_FB_cnt; i++ )
-            {
-            if ( modes_on_FB.at( mode ).at( i )->is_active() == false )
-                {
-#ifdef DEBUG
-                Print( "No FB[ %d ]!\n",
-                    modes_on_FB.at( mode ).at( i )->get_n() );
-
-                err_par[ 0 ] = - ( float ) modes_on_FB.at( mode ).at( i )->get_n();
-#endif // DEBUG
-                return false;
-                }
-            }
-        }
-
-    return true;
+    mode_stub = new mode( "Режим-заглушка", this );
     }
 //-----------------------------------------------------------------------------
-int mode_manager::add_mode_FB_group( int mode, device *control_FB_dev )
+mode_manager::~mode_manager()
     {
-    return modes_devices.at( mode )->add_FB_group( control_FB_dev );
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::add_mode_pair_dev( int mode, u_int pair_n, device *open_dev )
-    {
-    return modes_devices.at( mode )->add_pair_dev( pair_n, open_dev );
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::add_wash_seats_valves_group( int mode, u_char step, 
-    i_mix_proof::STATES state )
-    {
-
-    int group;
-    if ( 0 == step )
-        {
-        group = modes_devices[ mode ]->add_wash_seats_valves_group( state );
-        }
-    else
-        {
-        step --;
-        if ( check_correct_step_n( mode, step ) )
-            {
-            return -1;
-            }
-
-        group = steps[ mode ][ step ].add_wash_seats_valves_group( state );
-        }
-
-    return group;
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::add_wash_seat_valve( int mode, u_char step, u_int group, 
-    device *v )
-    {
-    if ( 0 == step )
-        {
-        modes_devices[ mode ]->add_wash_seat_valve( group, v );
-        }
-    else
-        {
-        step--;
-        if ( check_correct_step_n( mode, step ) )
-            {
-            return -1;
-            }
-
-        steps[ mode ][ step ].add_wash_seat_valve( group, v );
-        }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::add_mode_FB_group_ex( int mode, device *control_FB_dev, 
-    device *control_signal_dev )
-    {
-    return modes_devices.at( mode )->add_FB_group_ex( control_FB_dev, 
-        control_signal_dev );
-    }
-//-----------------------------------------------------------------------------
-int mode_manager::add_mode_FB_group_dev_ex( int mode, u_int group_n, 
-    device *on_dev )
-    {
-    return modes_devices.at( mode )->add_FB_group_dev_ex( group_n,
-        on_dev );
+    delete mode_stub;
+    mode_stub = 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

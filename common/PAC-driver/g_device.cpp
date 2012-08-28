@@ -18,7 +18,7 @@ u_int_2 G_CURRENT_PROTOCOL_VERSION = 101;
 std::vector< i_Lua_save_device* > device_communicator::dev;
 
 //-----------------------------------------------------------------------------
-void print_str( char *err_str, char is_need_CR )
+void print_str( const char *err_str, char is_need_CR )
     {    
 #ifdef DRIVER
     bug_log::add_msg( "System", "", err_str );
@@ -116,7 +116,7 @@ long device_communicator::write_devices_states_service( long len,
             answer_size++;
 
 #ifdef DEBUG
-            //Print( "%s", outdata + 2 );
+           // Print( "%s", outdata + 2 );
 #endif // DEBUG
 
 #ifdef DEBUG_DEV_CMCTR
@@ -159,36 +159,24 @@ long device_communicator::write_devices_states_service( long len,
             {
 #ifdef DEBUG_DEV_CMCTR
             Print( "CMD_GET_PAC_ERRORS\n" );
-#endif
-            static u_int_2 PAC_critical_errors_manager_id = 0;
+#endif            
             static u_int_2 errors_id = get_millisec() % 100;
 
-            if ( PAC_critical_errors_manager_id !=
-                PAC_critical_errors_manager::get_instance()->get_id() )
-                {
-                PAC_critical_errors_manager_id =
-                    PAC_critical_errors_manager::get_instance()->get_id();
-                errors_id++;
-                }
-
             char *str = ( char* ) outdata;
-
             unsigned char project_descr_id = data[ 1 ];
 
-            sprintf( str, "%s %d %s\n", "alarms[", project_descr_id, "] = \n  {" );
-            sprintf( str + strlen( str ), "  %s %d,\n", "id =", errors_id );
+            sprintf( str, "%s %d %s\n", "alarms[", project_descr_id, "] = \n  {" );            
 
-            PAC_critical_errors_manager::get_instance()->save_to_stream_as_Lua(
-                str + strlen( str ) );
-
-            sprintf( str + strlen( str ), "  %s\n", "}" );
+            PAC_critical_errors_manager::get_instance()->save_as_Lua_str(
+                str + strlen( str ), errors_id );
+           G_DEV_ERRORS_MANAGER->save_as_Lua_str( str + strlen( str ), errors_id );           
+           
+           sprintf( str + strlen( str ), "  %s %d,\n", "id =", errors_id );
+           sprintf( str + strlen( str ), "  %s\n", "}" );
 
 #ifdef DEBUG_DEV_CMCTR
-            Print( "Critical errors = \n%s", outdata );
+           Print( "Critical errors = \n%s", outdata );
 #endif // DEBUG_DEV_CMCTR
-
-//          answer_size += G_DEV_ERRORS_MANAGER->save_to_stream( outdata + 
-//               answer_size );
 
             return strlen( str ) + 1;
             }
@@ -285,7 +273,7 @@ void device_communicator::print() const
     char tmp_str[ 200 ];
 
     snprintf( tmp_str, sizeof( tmp_str ),
-            "\nDevice communicator. Dev count = %d.", ( int ) dev.size() );
+            "Device communicator. Dev count = %d.", ( int ) dev.size() );
     print_str( tmp_str, 1 );
 
     if ( !dev.size() ) return;
@@ -295,11 +283,8 @@ void device_communicator::print() const
         sprintf( tmp_str, "[ %3d ] ", i );
         print_str( tmp_str, 0 );
 
-        dev[ i ]->print();
-        Print( "\n" );
+        print_str( dev[ i ]->get_name(), 1 );
         } 
-    sprintf( tmp_str, "Done.\n" );
-    print_str( tmp_str, 1 );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

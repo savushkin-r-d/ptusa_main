@@ -57,7 +57,7 @@ class PAC_critical_errors_manager
         void reset_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1, 
             unsigned long param );
 
-        int save_to_stream_as_Lua( char *str );
+        int save_as_Lua_str( char *str, u_int_2 &id );
 
         static PAC_critical_errors_manager * get_instance();
 

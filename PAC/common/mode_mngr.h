@@ -2,13 +2,15 @@
 /// @brief Содержит описания классов, которые используются для организации шагов
 /// при выполнении режимов танка, гребенки.
 /// 
-/// Класс @ref step_path, служащий для организации работы с шагом, содержит всю  
+/// Класс @ref step, служащий для организации работы с шагом, содержит всю  
 /// необходимую информацию - список открываемых\закрываемых устройств,  
 /// параметры шага, связанный с ним маршрут гребенки. Шаг - представляет ход  
 /// протекания технологического процесса, включение\выключение которого  
 /// происходит автоматически, без непосредственного участия оператора. В 
 /// отличие от режима, который оператор включает\выключает сам. Для хранения 
 /// всех режимов объекта служит класс @ref mode_manager. 
+/// Класс @ref action содержит списки устройств и выполняет над ними 
+/// определенные действия. 
 /// 
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
@@ -28,470 +30,327 @@
 #include "PAC_info.h"
 #include "param_ex.h"
 
-class tech_object;
-//-----------------------------------------------------------------------------
 class mode_manager;
 //-----------------------------------------------------------------------------
-class wash_step;
+/// @brief Действие над устройствами (включение, выключение и т.д.).
+class action
+    {
+    public:
+        action( std::string name );
+
+        virtual void print( const char* prefix = "" ) const;
+
+        /// @brief Проверка действия.
+        virtual int check() const 
+            {
+            return 0; 
+            }
+
+        /// @brief Инициализация действия.
+        virtual void init() {}
+
+        /// @brief Выполнение действия.
+        ///
+        /// @return результат выполнения действия. Трактуется в зависимости от
+        /// действия.        
+        virtual void evaluate() {}
+
+        /// @brief Завершения действия.
+        virtual void final();
+
+        /// @brief Добавление устройства к действию.
+        ///
+        /// @param [in] dev Устройство.        
+        virtual void add_dev( device *dev )
+            {
+            devices.push_back( dev );
+            }
+
+        /// @brief Добавление устройства к действию.
+        ///
+        /// @param [in] dev Устройство.
+        /// @param [in] group Дополнительный параметр.
+        /// @param [in] subgroup Дополнительный параметр.
+        virtual void add_dev( device *dev, u_int group, u_int subgroup ) {}
+        
+
+    protected: 
+        std::vector< device* > devices; ///< Устройства.   
+        std::string name;               ///< Имя действия.
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
+/// Включение устройств.
+/// </summary>
+class on_action: public action
+    {
+    public:
+        on_action(): action( "Включать" )
+            {
+            }
+
+        void evaluate();
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
+/// Выключение устройств.
+/// </summary>
+class off_action: public action
+    {
+    public:
+        off_action(): action( "Выключать" )
+            {
+            }
+
+        void evaluate();
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
+/// Выключение устройств.
+/// </summary>
+class open_seat_action: public action
+    {
+    public:
+        open_seat_action();
+
+        void init();
+        void evaluate();
+        void final();
+
+        /// @brief Добавление устройства к действию.
+        ///
+        /// @param [in] dev Устройство.
+        /// @param [in] group Дополнительный параметр.
+        /// @param [in] seat_type Дополнительный параметр.
+        void add_dev( device *dev, u_int group, u_int seat_type );
+
+        void print( const char* prefix = "" ) const;
+
+    private:
+        enum PHASES
+            {
+            P_WAIT = 0,            
+            P_OPEN_UPPER,            
+            P_OPEN_LOWER,
+            };
+
+        PHASES phase;      ///< Текущий этап.
+        PHASES next_phase; ///< Следуюший этап.
+
+        u_int     active_group_n;  ///< Номер промываемой сейчас группы.
+
+        u_int_4 wait_time;      ///< Время ожидания перед промыванием седел.
+        u_int_4 wait_seat_time; ///< Время ожидания перед промыванием седел группы.
+        u_int_4 wash_time;      ///< Время промывки седел текущей группы клапанов.
+
+        /// Седла.
+        std::vector< std::vector< device* > > wash_upper_seat_devices;
+        std::vector< std::vector< device* > > wash_lower_seat_devices;
+
+        u_int_4 start_cycle_time; ///< Время старта цикла (ожидания или промывки).
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
+/// Пары DI->DO.
+/// </summary>
+class DI_DO_action: public action
+    {
+    public:
+        DI_DO_action( ):action( "Пары DI->DO" )
+            {
+            }
+
+        /// @brief Проверка действия.
+        int check() const;
+
+        void evaluate();
+
+        void final();
+                
+        void print( const char* prefix = "" ) const;
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
+/// Проверка дискретных входных сигналов.
+/// </summary>
+class required_DI_action: public action
+    {
+    public:
+        required_DI_action(): action( "Сигналы для включения" )
+            {
+            }
+
+        int check() const;
+    };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об устройствах, которые входят в шаг (открываются/
 /// закрываются).
 ///
 /// У режима может быть активным (выполняться) только один шаг.
-class step_path
-    {
-    friend class mode_manager;
+class step
+    {    
     public:
-        step_path();
-
-        /// @brief Добавление устройства, которое выключается\закрывается во
-        ///  время выполнения шага.
-        ///
-        /// @param [in] dev - указатель на добавляемое устройство.        
-        ///
-        /// @return < 0 - ошибка.
-        /// @return   0 - ок.
-        int add_closed_dev( device *dev );
-
-        /// @brief Добавление устройства, которое включается\открывается во 
-        /// время выполнения шага.
-        ///
-        /// @param [in] dev - указатель на добавляемое устройство.
-        ///
-        /// @return < 0 - ошибка.
-        /// @return   0 - ок.
-        int add_opened_dev( device *dev );
-
-        int init();
-        int evaluate() const;
-        int final();
-
-        /// Получение времени начала шага.
-        inline u_int_4 get_start_time() const;
-
-        /// Установление времени начала шага.
-        inline void set_start_time( u_int_4 start_time );
-
-        /// Выводит на консоль объект.
-        void print() const;
-
-        /// @brief Добавление группы устройств, которые включается\открывается во 
-        /// время выполнения шага по управляющему сигналу (обратной связи).
-        ///
-        /// @param [in] control_FB_dev - указатель на управляющий сигнал.
-        ///
-        /// @return >= 0 - номер добавленной группы устройств (для дальнейшего 
-        /// добавления устройств используется @ref add_pair_dev).
-        int add_FB_group( device *control_FB_dev );
-
-        /// @brief Добавление устройства, которое включается\открывается во 
-        /// время выполнения шага по управляющему сигналу (обратной связи).
-        ///
-        /// @param [in] pair_n   - номер группы устройств.
-        /// @param [in] open_dev - указатель на добавляемое устройство.
-        ///
-        /// @return < 0 - ошибка.
-        /// @return   0 - ок.
-        int add_pair_dev( u_int pair_n, device *open_dev );
-
-
-        /// @brief Добавление группы клапанов, промывка седел.
-        ///
-        /// @param [in] state - команда (открытие верхнего\нижнего седла).
-        int add_wash_seats_valves_group( i_mix_proof::STATES state );
-
-        /// @brief Добавление клапана, промывка седла.
-        ///
-        /// @param [in] group - группа.
-        /// @param [in] v     - клапан.
-        int add_wash_seat_valve( u_int group, device *v );
-
-
-        /// @brief Добавление группы устройств, которые включается\открывается во 
-        /// время выполнения шага по управляющему сигналу (обратной связи) и 
-        /// выдают при нормальной работе управляющий сигнал (при возникновении
-        /// ошибки обратной связи он снимается).
-        ///
-        /// @param [in] control_FB_dev - указатель на входной сигнал.
-        /// @param [in] control_FB_dev - указатель на выходной сигнал.
-        ///
-        /// @return >= 0 - номер добавленной группы устройств (для дальнейшего 
-        /// добавления устройств используется @ref add_pair_dev_ex).
-        int add_FB_group_ex( device *control_FB_dev, device *control_signal_dev );
-
-        /// @brief Добавление устройства, которое включается\открывается во 
-        /// время выполнения шага по управляющему сигналу (обратной связи).
-        ///
-        /// @param [in] pair_n   - номер группы устройств.
-        /// @param [in] open_dev - указатель на добавляемое устройство.
-        ///
-        /// @return < 0 - ошибка.
-        /// @return   0 - ок.
-        int add_FB_group_dev_ex( u_int group_dev_ex_n, device *open_dev );
-
-    private: 
-        std::vector< device* > close_devices;   ///< Закрываемые устройства.   
-        std::vector< device* > open_devices;    ///< Открываемые устройства.    
-        
-        u_int_4 start_time;                     ///< Время старта шага.
-
-        /// Группа устройств, управляемых по обратной связи.
-        struct FB_group_dev                         
+        enum ACTIONS
             {
-            device* fb;
+            A_ON = 0,
+            A_OFF,
+            A_UPPER_SEATS_ON,
+            A_LOWER_SEATS_ON = A_UPPER_SEATS_ON,
 
-            std::vector< device* > open_devices;
-
-            FB_group_dev( device* fb = 0 ): fb( fb )
-                {
-                }
+            A_REQUIRED_FB,
+            A_ON_AFTER_OFF,
+            A_WASH,
+            A_PAIR_DO_DI,
             };
-        std::vector< FB_group_dev > FB_group_devices; ///< Открываемые устройства по ОС.    
 
-        auto_smart_ptr< wash_step > wash_seats; ///< Промывка седел клапанов.
+        step( std::string name, bool is_mode = false );
 
+        ~step();
 
-        /// @brief Группа устройств, управляемых по обратной связи расширенно. 
-        /// 
-        /// Если обратная связь устройств ок, то выдается соответствующий 
-        /// управляющий сигнал, иначе он снимается.
-        struct FB_group_dev_ex                         
-            {
-            device* fb;
-            device* control_s;
-
-            std::vector< device* > on_devices;
-
-            FB_group_dev_ex( device* fb = 0, device* control_s = 0 ): fb( fb ),
-                control_s( control_s )
-                {
-                }
-            };
-        ///< Открываемые устройства по ОС с выдачей управляющего сигнала.
-        std::vector< FB_group_dev_ex > FB_group_devices_ex;     
-    };
-//-----------------------------------------------------------------------------
-/// @brief Шаг мойки, при котором происходит флипование клапанами (mixproof).
-class wash_step
-    {
-    public:
-        wash_step();
-
-        /// @brief Отладочная печать объекта в консоль.
-        void print();
-
-        /// @brief Инициализация шага.
+        /// @brief Получение действия через операцию индексирования.
         ///
+        /// @param idx - индекс действия.
+        ///
+        /// @return - значение действия с заданным индексом. Если индекс
+        /// выходит за диапазон, возвращается значение 0.
+        action* operator[] ( int idx );
+
+        /// @brief Проверка возможности выполнения шага.
+        ///
+        /// @return > 0 - нельзя выполнить.
+        /// @return   0 - ок.
+        int check() const;
+
         void init();
 
-        /// @brief Выполнение шага.
-        ///
-        void eval();
+        void evaluate() const;
 
-        /// @brief Завершение шага.
-        ///
-        void final();
+        void final() const;
 
-        /// @brief Добавление клапана, промывка седла.
-        ///
-        /// @param [in] group - группа.
-        /// @param [in] v     - клапан.
-        /// 
-        /// @return -1 - ошибка добавления. 
-        /// @return  0 - ok. 
-        int add_valve( u_int group, device *v );
+        /// Получение времени начала шага.
+        u_int_4 get_start_time() const;
 
-        /// @brief Добавление группы клапанов.
-        ///
-        /// @param [in] state - команда, указывающая какое седло будем промывать.       
-        /// 
-        /// @return -1    - ошибка добавления. 
-        /// @return  0 >= - индекс добавленной группы. 
-        int add_valves_group( i_mix_proof::STATES state );
+        /// Установление времени начала шага.
+        void set_start_time( u_int_4 start_time );
 
-    private:
-        /// @brief Группа устройств, с которыми выполняется заданная команда.
-        /// 
-        /// В случае класса @ref wash_step открывается верхнее (нижнее) седло.
-        struct dev_group
-            {
-            std::vector< device* > devices;
-            i_mix_proof::STATES state;
-
-            /// @brief Отладочная печать объекта в консоль.
-            void print();
-
-            /// @brief Добавление устройства.
-            ///
-            /// @param [in] dev - устройство.
-            void add_dev( device* dev );
+        /// Выводит на консоль объект.
+        void print( const char* prefix = "" ) const;
             
-            /// @brief Завершение выполнения заданной команды.
-            ///
-            void final();
+    private: 
+        std::vector< action* > actions; ///< Действия.           
+        u_int_4 start_time;             ///< Время старта шага.   
 
-            /// @brief Выполнение заданной команды.
-            ///
-            void eval();
-            };
-        
-        enum CONST
-            {
-            C_MAX_GROUP = 20,
-            };
-
-        enum PHASES
-            {
-            P_WAIT = 0,
-            P_OPEN,
-            };
-
-        PHASES phase; ///< Текущий этап.
-                
-        u_int     active_group_n;             ///< Номер промываемой сейчас группы.        
-        smart_ptr < dev_group > active_group; ///< Промываемая сейчас группа.
-
-        u_int_4 wait_time;  ///< Время ожидания перед промыванием седел группы.
-        u_int_4 wash_time;  ///< Время промывки седел текущей группы клапанов.
-
-        /// Верхние и нижние седла.   
-        std::vector< dev_group > wash_seat_devices; 
-        
-        u_int_4 start_cycle_time; ///< Время старта цикла (ожидания или промывки).
+        bool is_mode;     ///< Выполняется ли все время во время режима.
+        std::string name; ///< Имя.
     };
 //-----------------------------------------------------------------------------
-/// @brief Содержит информацию о всех шагах какого-либо объекта (танк, 
+/// @brief Содержит информацию о режиме, состоящем из шагов.
+/// 
+/// У объекта (танк, ...) может быть включено параллельно несколько режимов.
+class mode
+    {
+    public:
+        mode( const char* name, mode_manager *owner );
+
+        step* add_step( const char* name, u_int next_step_n,
+            u_int step_duration_par_n );
+
+        /// @brief Получение режима через операцию индексирования.
+        ///
+        /// @param idx - индекс режима.
+        ///
+        /// @return - значение режима с заданным индексом. Если индекс
+        /// выходит за диапазон, возвращается значение заглушки - поля @ref
+        /// mode::step_stub.
+        step* operator[] ( int idx );
+
+        int check_on() const;
+
+        void init( u_int start_step = 0 );
+
+        void evaluate();
+
+        void final();
+
+        void to_step( u_int new_step );
+
+        u_long evaluation_time()
+            {
+            return get_delta_millisec( start_time );
+            }
+
+        u_int active_step() const
+            {
+            return active_step_n + 1;
+            }
+
+        /// Выводит на консоль объект.
+        void print( const char* prefix = "" ) const;
+
+    private:
+        std::string name;
+        std::vector< step* > steps;
+
+        step* mode_step;
+        u_int active_step_n;
+        
+        /// @brief Номера параметров времени шага.
+        std::vector< u_int > step_duration_par_ns; 
+
+        /// @brief Следующий шаг.
+        std::vector< u_int > next_step_ns;
+
+        u_int_4 start_time; ///< Время начала режима.
+
+
+        step step_stub; ///< Шаг-заглушка.
+
+        mode_manager *owner;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Содержит информацию о всех режимах какого-либо объекта (танк, 
 /// гребенка).
 /// 
 /// У объекта (танк, ...) может быть включено параллельно несколько режимов.
 class mode_manager
-    {
-    friend class tech_object;
-
+    {    
     public:
-        mode_manager( u_int_2 new_modes_cnt );
+        mode_manager( u_int modes_cnt );
 
         ~mode_manager();
         
-        /// Добавление параметра с временами шагов.
-        int set_param( saved_params_u_int_4 *par );
+        mode* add_mode( const char* name );
 
-        /// @brief Устанавливает количество шагов для режима.
-        ///
-        /// @return < 0 - ошибка.
-        /// @return   0 - ок.
-        int set_mode_config( u_int_2 mode, u_char new_steps_cnt );
+        void set_param( saved_params_u_int_4 *par );
 
-        int init( u_int_2 mode, u_char start_step = 0 );
-        int evaluate( u_int_2 mode );
-        int final( u_int_2 mode );
+        saved_params_u_int_4 * get_param() const;
 
-        /// @brief Переход к шагу.
+        /// @brief Получение режима через операцию индексирования.
         ///
-        /// @param [in] mode     - режим.
-        /// @param [in] new_step - шаг, диапазон 0..255.
+        /// @param idx - индекс режима.
         ///
-        /// @return < 0 - ошибка.
-        /// @return   0 - ок.
-        int to_step( u_int_2 mode, u_char new_step );
-
-        /// @brief Добавление закрываемое устройство для шага.
-        ///
-        /// @param [in] mode - режим;
-        /// @param [in] step - шаг, диапазон 0..255.
-        /// @param [in] dev  - указатель на закрываемое устройство.
-        ///
-        /// @return < 0 - ошибка.
-        /// @return   0 - ок.
-        int add_closed_dev( u_int_2 mode, u_char step, device *dev );
-
-        /// @brief Добавление открываемое устройство для шага.
-        ///
-        /// @param [in] mode - режим.
-        /// @param [in] step - шаг, диапазон 0..255.
-        /// @param [in] dev  - указатель на открываемое устройство.       
-        ///
-        /// @return < 0 - ошибка.
-        /// @return   0 - ок.
-        int add_opened_dev( u_int_2 mode, u_char step, device *dev );
-
-        /// @brief Добавление закрываемое устройство для режима.
-        ///
-        /// @param [in] mode - режим;
-        /// @param [in] dev  - указатель на закрываемое устройство.
-        ///
-        /// @return < 0 - ошибка.
-        /// @return   0 - ок.
-        int add_mode_closed_dev( u_int_2 mode, device *dev );
-
-        /// @brief Добавление открываемое устройство для режима.
-        ///
-        /// @param [in] mode - режим.
-        /// @param [in] dev  - указатель на открываемое устройство.       
-        ///
-        /// @return < 0 - ошибка.
-        /// @return   0 - ок.
-        int add_mode_opened_dev( u_int_2 mode, device *dev );
-
-        /// @brief Проверка времени выполнения шага.
-        ///
-        /// @return  < 0 - ошибка.
-        /// @return    0 - время не вышло.
-        /// @return    1 - время вышло.
-        int is_current_step_evaluation_time_left( u_int_2 mode );
-
-        /// @brief Время выполнения шага.
-        ///
-        /// @return    1 - время выполнения шага.
-        unsigned long get_current_step_evaluation_time( u_int_2 mode );
-
-        /// @brief Время выполнения режима.
-        ///
-        /// @param [in] mode - режим.
-        ///
-        /// @return - время выполнения режима.
-        unsigned long get_mode_evaluation_time( unsigned int mode );
+        /// @return - значение режима с заданным индексом. Если индекс
+        /// выходит за диапазон, возвращается значение заглушки - поля @ref
+        /// mode_manager::mode_stub.
+        mode* operator[] ( unsigned int idx );
 
         /// @brief Время бездействия (нет включенных режимов).
         ///
         /// @return - время системы без активных режимов.
         unsigned long get_idle_time();
 
-        /// @brief Получение активного шага заданного режима.
-        ///
-        /// @return - активный шаг режима.
-        u_int get_active_step( u_int mode );
-
         /// @brief Отладочный вывод объекта в консоль.
-        void print();
+        void print();       
 
-
-        /// @brief Добавление проверяемой обратной связи при включении режима.
-        ///
-        /// @param [in] mode - режим;
-        /// @param [in] dev  - указатель на проверяемую обратную связь.
-        ///
-        /// @return < 0 - ошибка.
-        /// @return   0 - ок.
-        int add_mode_on_FB( u_int_2 mode, device *dev );
-
-        /// @brief Проверка на возможность включения режима.
-        ///
-        /// @param [in] mode - режим;
-        ///
-        /// @return false - ошибка.
-        /// @return true  - ок.
-        bool check_on_mode( u_int_2 mode );
-
-
-        /// @brief Добавление группы устройств, которые включается\открывается во 
-        /// время выполнения шага по управляющему сигналу (обратной связи).
-        ///
-        /// @param [in] mode           - режим.
-        /// @param [in] control_FB_dev - указатель на управляющий сигнал.
-        ///
-        /// @return >= 0 - номер добавленной группы устройств (для дальнейшего 
-        /// добавления устройств используется @ref add_mode_pair_dev).
-        int add_mode_FB_group( int mode, device *control_FB_dev );
-
-        /// @brief Добавление устройства, которое включается\открывается во 
-        /// время выполнения шага по управляющему сигналу (обратной связи).
-        ///
-        /// @param [in] mode  - режим.
-        /// @param [in] pair_n   - номер группы устройств.
-        /// @param [in] open_dev - указатель на добавляемое устройство.
-        ///
-        /// @return < 0 - ошибка.
-        /// @return   0 - ок.
-        int add_mode_pair_dev( int mode, u_int pair_n, device *open_dev );
-
-
-        /// @brief Добавление группы клапанов, промывка седел.
-        ///
-        /// @param [in] mode  - режим.
-        /// @param [in] step  - шаг.
-        /// @param [in] state - команда (открытие верхнего\нижнего седла).
-        int add_wash_seats_valves_group( int mode, u_char step, 
-            i_mix_proof::STATES state );
-
-        /// @brief Добавление клапана, промывка седла.
-        ///
-        /// @param [in] mode  - режим.
-        /// @param [in] step  - шаг.
-        /// @param [in] group - группа.
-        /// @param [in] v     - клапан.
-        int add_wash_seat_valve( int mode, u_char step, u_int group, 
-            device *v );
-
-
-        /// @brief Добавление группы устройств, которые включается\открывается во 
-        /// время выполнения шага по управляющему сигналу (обратной связи)  и 
-        /// сигнализируют о своем состоянии подачей управляющего сигнала.
-        ///
-        /// @param [in] mode           - режим.
-        /// @param [in] control_FB_dev - указатель на ОС.
-        /// @param [in] control_signal_dev - указатель на управляющий сигнал.
-        ///
-        /// @return >= 0 - номер добавленной группы устройств (для дальнейшего 
-        /// добавления устройств используется @ref add_mode_FB_group_dev_ex).
-        int add_mode_FB_group_ex( int mode, device *control_FB_dev, 
-            device *control_signal_dev );
-
-        /// @brief Добавление устройства, которое включается\открывается во 
-        /// время выполнения по управляющему сигналу (обратной связи) и 
-        /// сигнализирует о своем состоянии подачей управляющего сигнала.
-        ///
-        /// @param [in] mode    - режим.
-        /// @param [in] group_n - номер группы устройств.
-        /// @param [in] o_dev   - указатель на добавляемое устройство.
-        ///
-        /// @return < 0 - ошибка.
-        /// @return   0 - ок.
-        int add_mode_FB_group_dev_ex( int mode, u_int group_n, device *on_dev );
-
-
-        int save_as_Lua_str( char *str, const char *prefix = "\t" )
-            {
-            sprintf( str, "%sMODES_ERR = {%d}\n", prefix, ( int ) err_par[ 0 ] );
-            return strlen( str );
-            }
     private:
-        /// @brief Технологический объект.
-        tech_object *owner;
-
         /// @brief Параметры, содержащие продолжительность шагов, режимов.
-        saved_params_u_int_4 *par;      
+        saved_params_u_int_4 *par; 
 
-        u_char  **step_duration_par_n;  ///< Номера параметров времени шага.    
-        u_char  **next_step_n;          ///< Номера шагов, к которым перейти при  
-                                        ///< завершении времени шагов.
+        std::vector< mode* > modes; ///< Режимы.
 
-        u_int_2 modes_cnt;              ///< Количество режимов.
-        u_char  *steps_cnt;             ///< Количество шагов.
+        mode *mode_stub;            ///< Режим-заглушка.
 
-        std::vector < u_int_4 > modes_start_time; ///< Время начала режима.
-
-
-        step_path **steps;              ///< Шаги для каждого режима.
-
-        u_char  *active_step;           ///< Шаги, выполняемые в текущий момент.
-        u_char  *is_active_mode;        ///< Активен ли режим.
-
-        /// @brief Устройства режимов.
-        std::vector < step_path* > modes_devices; 
-
-        /// @brief Обратная связь для включения режима.
-        std::vector < std::vector < device* > > modes_on_FB; 
-
-        /// @brief Проверка, является ли номер режима и шага допустимым.
-        ///
-        /// @return -2 - номер режима выходит за пределы.
-        /// @return -1 - номер шага выходит за пределы.
-        /// @return  0 - оk.
-        int check_correct_step_n( u_int_2 mode, u_char step );  
-
-        /// @brief Параметры, содержащие ошибки включения шагов, режимов.
-        run_time_params_float err_par;  
+        u_int_4 last_action_time;   ///Время последнего вкл/выкл режима.
     };
 //-----------------------------------------------------------------------------
 #endif // MODE_MNGR

@@ -2,80 +2,172 @@
 #include "tech_def.h"
 
 #include "errors.h"
+#include "lua_manager.h"
 
 auto_smart_ptr < device_manager > device_manager::instance;
 
-const char device::DEV_NAMES[][ 5 ] = { "V", "N", "M", "LS", "TE", "FE", "FS",
-    "CTR", "AO", "LE", "FB", "UPR", "QE", "AI" };
+const char device::DEV_NAMES[][ 5 ] = 
+    {
+    "V",       ///< Клапан. 
+    "VC",      ///< Управляемый клапан. 
+    "M",       ///< Двигатель.
+    "LS",      ///< Уровень (есть/нет).
+    "TE",      ///< Температура.        
+    "FS",      ///< Расход (есть/нет).
+    "GS",      ///< Датчик положения. 
+    "FQT",     ///< Счетчик.        
+    "LT",      ///< Уровень (значение).        
+    "QT",      ///< Концентрация.
 
-const char device::DEV_TYPES[] =        { 1,    1,   1,   1,    4,    4,    1,
-    2,      4,    4,    1,    1,     4,    4 };
+    "HA",      ///< Аварийная звуковая сигнализация.
+    "HL",      ///< Аварийная световая сигнализация.
+    "SB",      ///< Кнопка.
+    "DI",      ///< Дискретный входной сигнал.
+    "DO",      ///< Дискретный выходной сигнал.
+    "AI",      ///< Аналоговый входной сигнал.
+    "AO",      ///< Аналоговый выходной сигнал.
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void par_device::save_device ( char *str )
+    {
+    str[ 0 ] = 0;
+
+    for ( u_int i = 0; i < par.get_count (); i++ )
+        {
+        if ( par_name[ i ] )
+            {
+            sprintf( str + strlen( str ), "%s=", par_name[ i ] );
+
+            float val =  par[ i ];
+            if ( 0. == val )
+                {
+                sprintf( str + strlen( str ), "0, " );
+                }
+            else
+                {
+                double tmp;
+                if ( modf( val, &tmp ) == 0 )
+                    {
+                    sprintf( str + strlen( str ), "%d, ", ( int ) val );
+                    }
+                else
+                    {
+                    sprintf( str + strlen( str ), "%.2f, ", val );
+                    }
+                }                    
+            }
+        }   
+    }
+//-----------------------------------------------------------------------------
+int par_device::set_cmd( const char *name, double val )
+    {
+    for ( u_int i = 0; i < par.get_count(); i++ )
+        {
+        if ( strcmp( par_name[ i ], name ) == 0 )
+            {
+            par[ i ] = ( float ) val;
+#ifdef DEBUG
+            Print( "par_device::set_cmd() - name = %s, val = %f.\n",
+                name, val );
+#endif // DEBUG
+            return 0;
+            }
+        }
+
+#ifdef DEBUG
+    Print( "par_device::set_cmd() - name = %s wasn't found.\n",
+        name );
+#endif // DEBUG            
+    return 1;
+    }
+//-----------------------------------------------------------------------------
+void par_device::set_par( u_int idx, u_int offset, float value )
+    {
+    par[ offset + idx ] = value;
+    }
+//-----------------------------------------------------------------------------
+par_device::par_device ( u_int par_cnt ) : par ( saved_params_float ( par_cnt ) ),
+    par_name ( 0 )
+    {
+    if ( par_cnt )
+        {
+        par_name = new char*[ par_cnt ];
+        for ( u_int i = 0; i < par_cnt; i++ )
+            {                    
+            par_name[ i ] = 0;
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+par_device::~par_device()
+    {
+    for (u_int i = 0; i < par.get_count(); i++)
+        {
+        delete par_name[ i ];
+        par_name[ i ] = 0;
+        }
+
+    delete par_name;
+    par_name = 0;
+    }
+//-----------------------------------------------------------------------------
+float par_device::get_par( u_int idx, u_int offset )
+    {
+    return par[ offset + idx ];
+    }
+//-----------------------------------------------------------------------------
+void par_device::set_par_name( u_int idx, u_int offset, const char* name )
+    {    
+    if ( offset + idx < par.get_count() )
+        {
+        if ( strlen( name ) > C_MAX_PAR_NAME_LENGTH )
+            {
+#ifdef DEBUG  
+            Print( "Error par_device::set_par_name( u_int idx, u_int offset, const char* name ) - "
+                "name length (%d) > param C_MAX_PAR_NAME_LENGTH (%d).",
+                strlen( name ), C_MAX_PAR_NAME_LENGTH );
+#endif // DEBUG
+
+            return;
+            }
+
+        if ( 0 == par_name[ offset + idx ] )
+            {
+            par_name[ offset + idx ] = new char[ strlen( name ) + 1 ];
+            strcpy( par_name[ offset + idx ], name );
+            }
+#ifdef DEBUG
+        else
+            {
+            Print( "Error par_device::set_par_name (u_int idx, u_int offset, const char* name) - "
+                "param (%d %d) already has name (%s).",
+                offset, idx, par_name[ offset + idx ] );
+            }
+#endif // DEBUG
+
+        }
+#ifdef DEBUG
+    else
+        {
+        Print( "Error par_device::set_par_name (u_int idx, u_int offset, const char* name) - "
+            "offset (%d) + idx (%d) > param count ( %d ).",
+            offset, idx, par.get_count() );
+        }
+#endif // DEBUG
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void device::print() const
     {
-#ifdef DEBUG    
-    switch ( type )
+#ifdef DEBUG   
+    if ( type <= C_DEVICE_TYPE_CNT )
         {
-    case DT_V:
-        Print( "V   " );
-        break;
-
-    case DT_N:
-        Print( "N   " );
-        break;
-
-    case DT_M:
-        Print( "M   " );
-        break;
-
-    case DT_LS:
-        Print( "LS  " );
-        break;
-
-    case DT_TE:
-        Print( "TE  " );
-        break;
-
-    case DT_FE:
-        Print( "FE  " );
-        break;
-
-    case DT_FS:
-        Print( "FS  " );
-        break;
-
-    case DT_CTR:
-        Print( "CTR " );
-        break;
-
-    case DT_AO:
-        Print( "AO  " );
-        break;
-
-    case DT_LE:
-        Print( "LE  " );
-        break;
-
-    case DT_FB:
-        Print( "FB  " );
-        break;
-
-    case DT_UPR:
-        Print( "UPR " );
-        break;
-
-    case DT_QE:
-        Print( "QE  " );
-        break;
-
-    case DT_AI:
-        Print( "AI  " );
-        break;
-
-    default:
+        Print( "%s", DEV_NAMES[ type ] );
+        }
+    else
+        {
         Print( "Unknown " );
-        break;
         }
     Print( "%5lu\t", ( u_long ) number );
 
@@ -84,7 +176,12 @@ void device::print() const
 //-----------------------------------------------------------------------------
 const char * device::get_name() const
     {
-    return device::DEV_NAMES[ type ];
+    if ( type <= C_DEVICE_TYPE_CNT ) 
+        {
+        return device::DEV_NAMES[ type ];
+        }
+
+    return "Unknown";
     }
 //-----------------------------------------------------------------------------
 void device::off()
@@ -97,9 +194,46 @@ void device::off()
 //-----------------------------------------------------------------------------
 int device::save_device( char *buff, const char *prefix )
     {
-    sprintf( buff, "%s[%d]={ST=%d, V=%.2f },\n",
-        prefix, get_n(),  get_state(), get_value() );
+    sprintf( buff, "%s%s%d={M=%d, ",
+        prefix,  get_name(), get_n(),  is_manual_mode );
+    
+    if ( type != DT_AO &&
+        type != DT_TE )
+        {
+        sprintf( buff + strlen( buff ), "ST=%d, ", get_state() );
+        }
 
+    if ( type != DT_V &&        
+        type != DT_M &&
+
+        type != DT_LS &&
+        type != DT_FS &&
+        type != DT_GS &&
+
+        type != DT_HA &&
+        type != DT_HL &&
+        type != DT_SB &&
+
+        type != DT_DI &&
+        type != DT_DO )
+        {
+        if ( get_value() == 0 )
+            {
+            sprintf( buff + strlen( buff ), "V=0, " );
+            }
+        else
+            {
+            sprintf( buff + strlen( buff ), "V=%.2f, ", get_value() );
+            }
+        }
+    
+    save_device_ex( buff + strlen( buff ) );
+    
+    par_device::save_device( buff + strlen( buff ) );
+    buff[ strlen( buff ) - 2 ] = 0; //Убираем лишнюю последнюю запятую и пробел.
+
+    sprintf( buff + strlen( buff ), "},\n" );
+    
     return strlen( buff );
     }
 //-----------------------------------------------------------------------------
@@ -134,6 +268,10 @@ int device::set_cmd( const char *prop, u_int idx, double val )
         is_manual_mode = val == 0. ? false : true;
         break;
 
+    case 'P': //Параметры.
+        par_device::set_cmd( prop, val );
+        break;
+
 #ifdef DEBUG
     default:
         Print( "Error device::set_cmd() - prop = %s, val = %f\n", 
@@ -144,11 +282,14 @@ int device::set_cmd( const char *prop, u_int idx, double val )
     return 0;
     }
 //-----------------------------------------------------------------------------
-device::device( int number, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type ) : err_par( 1 ),
+device::device( int number, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type, 
+    u_int par_cnt ) :    
+    par_device( par_cnt ),
+    err_par( 1 ),
     number( number ),
     type( type ),
     sub_type( sub_type ),
-    is_manual_mode( false )
+    is_manual_mode( false )    
     {
     }
 //-----------------------------------------------------------------------------
@@ -159,17 +300,17 @@ device::~device()
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-int DO_1::get_state_now()
+int DO1::get_state()
     {
     return get_DO( DO_INDEX );
     }
 //-----------------------------------------------------------------------------
-void DO_1::direct_on()
+void DO1::direct_on()
     {
     set_DO( DO_INDEX, 1 );
     }
 //-----------------------------------------------------------------------------
-void DO_1::direct_off()
+void DO1::direct_off()
     {
     set_DO( DO_INDEX, 0 );
     }
@@ -228,72 +369,25 @@ device* device_manager::get_device( device::DEVICE_TYPE dev_type,
 
     if ( dev_n >= 0 )
         {
-        return project_devices[ dev_n ];
+        try
+            {
+            return project_devices[ dev_n ];
+            }
+        catch (...)
+            {
+            }        
         }
     else
         {
 #ifdef DEBUG
-        switch ( dev_type )
+
+        if ( dev_type <= device::C_DEVICE_TYPE_CNT ) 
             {
-        case device::DT_V:
-            Print( "V   " );
-            break;
-
-        case device::DT_N:
-            Print( "N   " );
-            break;
-
-        case device::DT_M:
-            Print( "M   " );
-            break;
-
-        case device::DT_LS:
-            Print( "LS  " );
-            break;
-
-        case device::DT_TE:
-            Print( "TE  " );
-            break;
-
-        case device::DT_FE:
-            Print( "FE  " );
-            break;
-
-        case device::DT_FS:
-            Print( "FS  " );
-            break;
-
-        case device::DT_CTR:
-            Print( "CTR " );
-            break;
-
-        case device::DT_AO:
-            Print( "AO  " );
-            break;
-
-        case device::DT_LE:
-            Print( "LE  " );
-            break;
-
-        case device::DT_FB:
-            Print( "FB  " );
-            break;
-
-        case device::DT_UPR:
-            Print( "UPR " );
-            break;
-
-        case device::DT_QE:
-            Print( "QE  " );
-            break;
-
-        case device::DT_AI:
-            Print( "AI  " );
-            break;
-
-        default:
-            Print( "Unknown " );
-            break;
+            Print( "%s ", device::DEV_NAMES[ dev_type ] );
+            }
+        else
+            {
+            Print( "Unknown" );
             }
 
         Print( "%5lu\t", ( u_long ) dev_number );
@@ -306,14 +400,13 @@ device* device_manager::get_device( device::DEVICE_TYPE dev_type,
 //-----------------------------------------------------------------------------
 void device_manager::print() const
     {
-    Print( "\nProject devices:\n" );
+    Print( "Device manager [%d]:\n", project_devices.size() );
     for ( u_int i = 0; i < project_devices.size(); i++ )
         {
         Print( "    %3i. ", i + 1 );
         project_devices[ i ]->print();
         Print( "\n" ); 
         }
-    Print( "\n" );
     }
 //-----------------------------------------------------------------------------
 device_manager::device_manager(): project_devices( 0 )
@@ -339,12 +432,12 @@ device_manager::~device_manager()
 #endif  
     }
 //-----------------------------------------------------------------------------
-i_DO_device* device_manager::get_N( int number )
+i_AO_device* device_manager::get_VC( int number )
     {
-    return get_device( device::DT_N, number );
+    return get_device( device::DT_VC, number );
     }
 //-----------------------------------------------------------------------------
-i_DO_device* device_manager::get_M( int number )
+i_DO_AO_device* device_manager::get_M( int number )
     {
     return get_device( device::DT_M, number );
     }
@@ -359,6 +452,11 @@ i_DI_device* device_manager::get_FS( int number )
     return get_device( device::DT_FS, number );
     }
 //-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_GS( int number )
+    {
+    return get_device( device::DT_GS, number );
+    }
+//-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_AI( int number )
     {
     return get_device( device::DT_AI, number );
@@ -369,9 +467,9 @@ i_AO_device* device_manager::get_AO( int number )
     return get_device( device::DT_AO, number );
     }
 //-----------------------------------------------------------------------------
-i_counter* device_manager::get_CTR( int number )
+i_counter* device_manager::get_FQT( int number )
     {
-    int res = get_device_n( device::DT_CTR, number );
+    int res = get_device_n( device::DT_FQT, number );
 
     if ( res >= 0 ) return ( counter* ) project_devices.at( res );
 
@@ -383,29 +481,39 @@ i_AI_device* device_manager::get_TE( int number )
     return get_device( device::DT_TE, number );
     }
 //-----------------------------------------------------------------------------
-i_AI_device* device_manager::get_FE( int number )
+i_AI_device* device_manager::get_LT( int number )
     {
-    return get_device( device::DT_FE, number );
+    return get_device( device::DT_LT, number );
     }
 //-----------------------------------------------------------------------------
-i_AI_device* device_manager::get_LE( int number )
+i_DI_device* device_manager::get_DI( int number )
     {
-    return get_device( device::DT_LE, number );
+    return get_device( device::DT_DI, number );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* device_manager::get_FB( int number )
+i_DI_device* device_manager::get_SB( int number )
     {
-    return get_device( device::DT_FB, number );
+    return get_device( device::DT_SB, number );
     }
 //-----------------------------------------------------------------------------
-i_DO_device* device_manager::get_UPR( int number )
+i_DO_device* device_manager::get_DO( int number )
     {
-    return get_device( device::DT_UPR, number );
+    return get_device( device::DT_DO, number );
     }
 //-----------------------------------------------------------------------------
-i_AI_device* device_manager::get_QE( int number )
+i_DO_device* device_manager::get_HA( int number )
     {
-    return get_device( device::DT_QE, number );
+    return get_device( device::DT_HA, number );
+    }
+//-----------------------------------------------------------------------------
+i_DO_device* device_manager::get_HL( int number )
+    {
+    return get_device( device::DT_HL, number );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* device_manager::get_QT( int number )
+    {
+    return get_device( device::DT_QT, number );
     }
 //-----------------------------------------------------------------------------
 wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
@@ -422,29 +530,29 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
         {
         switch ( dev_sub_type )
             {
-        case device::DST_V_DO_1:
-            new_device      = new valve_DO_1( number );
-            new_wago_device = ( valve_DO_1* ) new_device;
+        case device::DST_V_DO1:
+            new_device      = new valve_DO1( number );
+            new_wago_device = ( valve_DO1_DI2* ) new_device;
             break;
 
-        case device::DST_V_DO_2:
-            new_device      = new valve_DO_2( number );
-            new_wago_device = ( valve_DO_2* ) new_device;
+        case device::DST_V_DO2:
+            new_device      = new valve_DO2( number );
+            new_wago_device = ( valve_DO2_DI2* ) new_device;
             break;
 
-        case device::DST_V_DO_1_DI_1:
-            new_device      = new valve_DO_1_DI_1( number );
-            new_wago_device = ( valve_DO_1_DI_1* ) new_device;
+        case device::DST_V_DO1_DI1_FB_OFF:
+            new_device      = new valve_DO1_DI1_off( number );
+            new_wago_device = ( valve_DO1_DI1_off* ) new_device;
             break;
 
-        case device::DST_V_DO_1_DI_2:
-            new_device      = new valve_DO_1_DI_2( number );
-            new_wago_device = ( valve_DO_1_DI_2* ) new_device;
+        case device::DST_V_DO1_DI2:
+            new_device      = new valve_DO1_DI2( number );
+            new_wago_device = ( valve_DO1_DI2* ) new_device;
             break;
 
-        case device::DST_V_DO_2_DI_2:
-            new_device      = new valve_DO_2_DI_2( number );
-            new_wago_device = ( valve_DO_2_DI_2* ) new_device;
+        case device::DST_V_DO2_DI2:
+            new_device      = new valve_DO2_DI2( number );
+            new_wago_device = ( valve_DO2_DI2* ) new_device;
             break;
 
         case device::DST_V_MIXPROOF:
@@ -463,18 +571,20 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
         break;
         }
 
-    case device::DT_N:
-        new_device      = new pump( number );
-        new_wago_device = ( pump* ) new_device;
+    case device::DT_VC:
+        new_device      = new analog_valve( number );
+        new_wago_device = ( analog_valve* ) new_device;
         break;
 
     case device::DT_M:
-        new_device      = new mixer( number );
-        new_wago_device = ( mixer* ) new_device;
+        new_device      = new motor( number,  
+            ( device::DEVICE_SUB_TYPE ) dev_sub_type );
+        new_wago_device = ( motor* ) new_device;
         break;
 
     case device::DT_LS:
-        new_device      = new level_s( number );
+        new_device      = new level_s( number,
+( device::DEVICE_SUB_TYPE ) dev_sub_type );
         new_wago_device = ( level_s* ) new_device;
         break;
 
@@ -483,49 +593,64 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
         new_wago_device = ( temperature_e* ) new_device;
         break;
 
-    case device::DT_FE:
-        new_device      = new flow_e( number );
-        new_wago_device = ( flow_e* ) new_device;
-        break;
-
     case device::DT_FS:                    
         new_device      = new flow_s( number );
         new_wago_device = ( flow_s* ) new_device;
         break;
 
-    case device::DT_CTR:
+    case device::DT_FQT:
         new_device      = new counter( number );
         new_wago_device = ( counter* ) new_device;
         break;
 
     case device::DT_AO:
-        new_device      = new AO_0_100( number );
-        new_wago_device = ( AO_0_100* ) new_device;
+        new_device      = new analog_output( number );
+        new_wago_device = ( analog_output* ) new_device;
         break;
 
-    case device::DT_LE:
+    case device::DT_LT:
         new_device      = new level_e( number );
         new_wago_device = ( level_e* ) new_device;
         break;
 
-    case device::DT_FB:
-        new_device      = new feedback( number );
-        new_wago_device = ( feedback* ) new_device;
+    case device::DT_DI:
+        new_device      = new DI_signal( number );
+        new_wago_device = ( DI_signal* ) new_device;
         break;
 
-    case device::DT_UPR:
-        new_device      = new control_s( number );
-        new_wago_device = ( control_s* ) new_device;
+    case device::DT_DO:
+        new_device      = new DO_signal( number );
+        new_wago_device = ( DO_signal* ) new_device;
         break;
 
-    case device::DT_QE:
+    case device::DT_QT:
         new_device      = new concentration_e( number );
         new_wago_device = ( concentration_e* ) new_device;
         break;
 
     case device::DT_AI:
-        new_device      = new analog_input_4_20( number );
-        new_wago_device = ( analog_input_4_20* ) new_device;
+        new_device      = new analog_input( number );
+        new_wago_device = ( analog_input* ) new_device;
+        break;
+
+    case device::DT_HA:
+        new_device      = new siren( number );
+        new_wago_device = ( siren* ) new_device;
+        break;
+
+    case device::DT_HL:
+        new_device      = new lamp( number );
+        new_wago_device = ( lamp* ) new_device;
+        break;
+
+    case device::DT_SB:
+        new_device      = new button( number );
+        new_wago_device = ( button* ) new_device;
+        break;
+
+    case device::DT_GS:
+        new_device      = new state_s( number );
+        new_wago_device = ( state_s* ) new_device;
         break;
 
     default:
@@ -557,42 +682,30 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
 //-----------------------------------------------------------------------------
 int device_manager::init_params()
     {
-    for ( u_int i = 0; i < project_devices.size(); i++ )
-        {
-        project_devices[ i ]->init_params();
-        }
+    lua_manager::get_instance()->void_exec_lua_method( "system", 
+        "init_devices_params", "device_manager::init_params()" );
 
     return 0;
     }
 //-----------------------------------------------------------------------------
 int device_manager::save_device( char *buff )
     {
-    sprintf( buff, "t={}\n" );
+    sprintf( buff, "t=\n" );
     int answer_size = strlen( buff );
+    sprintf( buff + answer_size, "\t{\n" );
+    answer_size += strlen( buff + answer_size );
 
-    for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++)
+    for ( u_int i = 0; i < project_devices.size(); i++)
         {
-        sprintf( buff + answer_size, "t.%s=\n\t{\n", device::DEV_NAMES[ i ] );
-        answer_size += strlen( buff + answer_size );
-
-        int l = dev_types_ranges[ i ].start_pos;
-        int u = dev_types_ranges[ i ].end_pos;
-
-        if ( -1 != l ) // Есть устройства.
-            {
-            for ( int j = l; j <= u; j++ )
-                {
-                answer_size += project_devices[ j ]->save_device( buff + answer_size, "\t");
-                }
-            }
-
-        sprintf( buff + answer_size, "\t}\n" );
+        project_devices[ i ]->save_device( buff + answer_size, "\t" );
         answer_size += strlen( buff + answer_size );
         }
+    
+    sprintf( buff + answer_size, "\t}\n" );
+    answer_size += strlen( buff + answer_size );
 
     return answer_size;
     }
-
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void i_counter::restart()
@@ -603,51 +716,39 @@ void i_counter::restart()
 //-----------------------------------------------------------------------------
 i_counter::~i_counter()
     {
-
     }
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-i_DI_device::i_DI_device() :last_check_time( get_millisec() ),
-    state( 0 ),
-    dt( 0 )
-    {
-    }
-//-----------------------------------------------------------------------------
-void i_DI_device::set_change_time( u_int time )
-    {
-    dt = time;
-    }
-//-----------------------------------------------------------------------------
-void i_DI_device::set_state( int new_state )
-    {
-    state = new_state;
-    last_check_time = get_millisec();
-    }
-//-----------------------------------------------------------------------------
-int i_DI_device::get_state()
-    {
-    if ( dt > 0 )
-        {
-        if ( state != get_state_now() )
-            {
-            if ( get_delta_millisec( last_check_time ) > dt  )
-                {
-                state = get_state_now();
-                }
-            }
-        else
-            {
-            last_check_time = get_millisec();
-            }
-        }
-    else state = get_state_now();
-
-    return state;
-    }
 //-----------------------------------------------------------------------------
 bool i_DI_device::is_active()
     {
     return get_state() == 0 ? 0 : 1;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void i_DO_device::on()
+    {
+    if ( !get_manual_mode() )
+        {
+        direct_on();
+        }
+    }
+//-----------------------------------------------------------------------------
+void i_DO_device::set_state( int new_state )
+    {
+    if ( !get_manual_mode() )
+        {
+        direct_set_state( new_state );
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+/// @brief Установка текущего состояния устройства с учетом ручного режима.
+void i_AO_device::set_value( float new_value )
+    {
+    if ( !get_manual_mode() )
+        {
+        direct_set_value( new_value );
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -660,7 +761,7 @@ void dev_stub::direct_set_value( float new_value )
     {    
     }
 //-----------------------------------------------------------------------------
-int dev_stub::get_state_now()
+int dev_stub::get_state()
     {
     return 0;
     }
@@ -706,55 +807,53 @@ u_int dev_stub::get_quantity()
     return 0;
     }
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-fb_device::fb_device( FB fb1, FB fb2 ) :  par( C_PARAMS_COUNT )
+float dev_stub::get_flow()
     {
-    fb[ 0 ] = fb1;
-    fb[ 1 ] = fb2;
+    return 0.;
     }
 //-----------------------------------------------------------------------------
-int fb_device::init_params()
-    {
-    par[ P_FB_USE ] = C_FB_ON;
-
-    return 0;
-    }
 //-----------------------------------------------------------------------------
-fb_device::STATE fb_device::get_fb_state( int fb_number )
-    {
-    if ( fb_number > 1 )
-        {
-        fb_number = 1;
-        }
-
-    return fb[ fb_number ] ? 
-        ( par[ P_FB_USE ] ? S_FB_IS_AND_ON : S_FB_IS_AND_OFF ) : S_FB_NO;
-    }
-//-----------------------------------------------------------------------------
-int fb_device::save_device( char *buff )
-    {
-    sprintf( buff, "FB={%d, %d}", 
-        get_fb_state( 0 ), get_fb_state( 1 ) );
-
-    return strlen( buff );
-    }
-//-----------------------------------------------------------------------------
-int fb_device::set_cmd( const char *prop, u_int idx, double val )
-    {
-#ifdef DEBUG
-    Print( "fb_device::set_cmd() - prop = %s, idx = %d, val = %f\n",
-        prop, idx, val );
-#endif // DEBUG
-
-    switch ( prop[ 0 ] )
-        {
-    case 'F':
-        par[ P_FB_USE ] = val ? 1 : 0;
-        return 0;
-        }
-
-    return 1;
-    }
+//fb_device::fb_device( FB fb1, FB fb2 ) :  par( C_PARAMS_COUNT )
+//    {
+//    fb[ 0 ] = fb1;
+//    fb[ 1 ] = fb2;
+//    }
+////-----------------------------------------------------------------------------
+//fb_device::STATE fb_device::get_fb_state( int fb_number )
+//    {
+//    if ( fb_number > 1 )
+//        {
+//        fb_number = 1;
+//        }
+//
+//    return fb[ fb_number ] ? 
+//        ( par[ P_FB_USE ] ? S_FB_IS_AND_ON : S_FB_IS_AND_OFF ) : S_FB_NO;
+//    }
+////-----------------------------------------------------------------------------
+//int fb_device::save_device( char *buff )
+//    {
+//    sprintf( buff, "DI={%d, %d}", 
+//        get_fb_state( 0 ), get_fb_state( 1 ) );
+//
+//    return strlen( buff );
+//    }
+////-----------------------------------------------------------------------------
+//int fb_device::set_cmd( const char *prop, u_int idx, double val )
+//    {
+//#ifdef DEBUG
+//    Print( "fb_device::set_cmd() - prop = %s, idx = %d, val = %f\n",
+//        prop, idx, val );
+//#endif // DEBUG
+//
+//    switch ( prop[ 0 ] )
+//        {
+//    case 'F':
+//        par[ P_FB_USE ] = val ? 1 : 0;
+//        return 0;
+//        }
+//
+//    return 1;
+//    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float counter::get_value()
@@ -767,8 +866,64 @@ void counter::direct_set_value( float new_value )
     value = ( u_int ) new_value;    
     }
 //-----------------------------------------------------------------------------
-int counter::get_state_now()
+int counter::get_state()
     {
+    if ( motors.size() > 0 )
+        {
+        char           is_pump_working         = 0;
+        static u_int_4 start_pump_working_time = 0; 
+        static u_int_4 counter_prev_value      = 0;
+
+        for ( u_int i = 0; i < motors.size(); i++ )
+            {                
+            if ( motors[ i ]->get_state() == 1 )
+                {
+                is_pump_working = 1;
+                if ( 0 == start_pump_working_time )
+                    {
+                    start_pump_working_time = get_millisec();
+                    counter_prev_value      = get_quantity();
+                    }
+                }
+            }
+
+        if ( 0 == is_pump_working )
+            {
+            // Насос не работает.
+            start_pump_working_time = 0;
+            if ( state != S_PAUSE )
+                {
+                state = S_STOP;
+                }            
+            }
+        else
+            {
+            // Насос работает.
+            if ( state == S_PAUSE )
+                {               
+                start_pump_working_time = get_millisec();
+                }
+            else          // Работа.
+                {
+                state = S_WORK; 
+
+                if ( get_delta_millisec( start_pump_working_time ) > get_par( P_DT, 0 ) )
+                    {
+                    // Проверяем счетчик на ошибку - он должен изменить свои показания.
+                    if ( get_quantity() == counter_prev_value )
+                        {
+                        state = S_ERROR;
+                        }
+                    else
+                        {                        
+                        start_pump_working_time = get_millisec();
+                        counter_prev_value      = get_quantity();                        
+                        }
+                    }
+                }
+            }
+        }// if ( motors.size() > 0 
+        
     return state;
     }
 //-----------------------------------------------------------------------------
@@ -823,7 +978,7 @@ void counter::start()
             }
 
         state = S_WORK;
-        last_read_value = ( u_int ) get_AI( AI_INDEX );
+        last_read_value = ( u_int ) get_AI( AI_Q_INDEX );
         }
     }
 //-----------------------------------------------------------------------------
@@ -838,7 +993,7 @@ u_int counter::get_quantity()
     if ( S_WORK == state )
         {
         u_int delta;
-        u_int current = ( u_int ) get_AI( AI_INDEX );
+        u_int current = ( u_int ) get_AI( AI_Q_INDEX );
 
         if ( current < last_read_value )
             {
@@ -858,10 +1013,32 @@ u_int counter::get_quantity()
     return value;
     }
 //-----------------------------------------------------------------------------
+float counter::get_flow()
+    {
+    return get_par( P_C0, 0 ) + 
+#ifdef DEBUG_NO_WAGO_MODULES
+        flow_value;
+#else
+        get_AI( AI_FLOW_INDEX, get_par( P_MIN_FLOW, 0 ), get_par( P_MAX_FLOW, 0 ) );        
+#endif // NO_WAGO_MODULES
+    }
+//-----------------------------------------------------------------------------
+void counter::set_property( const char* field, device* dev )
+    {
+    if ( field && field[ 0 ] == 'M' ) //Связанные насосы.
+        {
+        motors.push_back( dev );
+        }
+    else
+        {
+        device::set_property( field, dev );
+        }
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float digital_wago_device::get_value()
     {
-    return ( float ) get_state_now();
+    return ( float ) get_state();
     }
 //-----------------------------------------------------------------------------
 void digital_wago_device::direct_set_value( float new_value )
@@ -873,8 +1050,14 @@ void digital_wago_device::direct_set_state( int new_state )
     {
     if ( new_state )
         {
-        if ( -1 == new_state ) state = ( char ) -1;
-        else direct_on();
+#ifdef DEBUG_NO_WAGO_MODULES
+        if ( -1 == new_state ) 
+            {
+            state = ( char ) -1;
+            return;
+            }
+#endif //DEBUG_NO_WAGO_MODULES
+        direct_on();
         }
     else direct_off();
     }
@@ -885,14 +1068,8 @@ void digital_wago_device::print() const
     //wago_device::print();
     }
 //-----------------------------------------------------------------------------
-int digital_wago_device::get_state()
-    {
-    return i_DI_device::get_state();
-    }
-//-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_WAGO_MODULES
-
-int digital_wago_device::get_state_now()
+int digital_wago_device::get_state()
     {
     return state;
     }
@@ -909,106 +1086,22 @@ void digital_wago_device::direct_off()
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 digital_wago_device::digital_wago_device( int number, device::DEVICE_TYPE type, 
-    device::DEVICE_SUB_TYPE sub_type, 
-    bool use_fb /*= false*/, bool fb1 /*= false*/, bool fb2 /*= false */ 
-    ) : device( number, type, sub_type )
+    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) : 
+device( number, type, sub_type, par_cnt )
 #ifdef DEBUG_NO_WAGO_MODULES
     , state( 0 )
 #endif // DEBUG_NO_WAGO_MODULES
-    {
-    if ( use_fb )
-        {
-        fb = fb1 ? ( fb2 ? new fb_device( fb_device::FB_IS, fb_device::FB_IS ) :
-            new fb_device( fb_device::FB_IS, fb_device::FB_NO ) ) : 
-    new fb_device( fb_device::FB_NO, fb_device::FB_NO );
-        }
+    {       
     }
 //-----------------------------------------------------------------------------
 digital_wago_device::~digital_wago_device()
     {
     }
 //-----------------------------------------------------------------------------
-int digital_wago_device::init_params()
-    {
-    if ( !fb.is_null() )
-        {
-        fb->init_params();
-        }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int digital_wago_device::set_cmd( const char *prop, u_int idx, double val )
-    {
-    if ( !fb.is_null() )
-        {
-        int res = fb->set_cmd( prop, idx, val );
-        if ( 0 == res  )
-            {
-            return 0;
-            }
-        }
-
-    //Остальные команды.
-    device::set_cmd( prop, idx, val );
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int digital_wago_device::save_device( char *buff, const char *prefix )
-    {
-    sprintf( buff, "%s[%d]={ST=%d, M=%d,",
-        prefix, get_n(),  get_state(), get_manual_mode() );
-
-    if ( !fb.is_null() )
-        {
-        fb->save_device( buff + strlen( buff ) );
-        }
-
-    sprintf( buff + strlen( buff ), "},\n" );
-
-    return strlen( buff );
-    }
-//-----------------------------------------------------------------------------
-int digital_wago_device::save_params_as_Lua_str( char* str )
-    {
-    if ( fb.is_null() )
-        {
-        return 0;
-        }
-
-    sprintf( str, "params{ object = \'%s[%d]\', param_name = \'%s\', "
-        "par_id = 1,\n", 
-        get_name(), get_n(), "fb_device_param" );
-
-    fb->par.save_device_ex( str + strlen( str ), "", "values" );
-
-    sprintf( str + strlen( str ) - 2, "%s", " }\n" );
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int digital_wago_device::set_param( int par_id, int index, double value )
-    {
-    switch ( par_id )
-        {
-    case 1:
-        fb->par.save( index, ( u_int_4 ) value );
-
-        break;
-
-    default:
-        device::set_param( par_id, index, value );
-        break;
-        }
-
-    return 0;
-    }
-
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-int DO_2::get_state_now()
+int DO2::get_state()
     {
     int b1 = get_DO( DO_INDEX_1 );
     int b2 = get_DO( DO_INDEX_2 );
@@ -1016,13 +1109,13 @@ int DO_2::get_state_now()
     return b2;
     }
 //-----------------------------------------------------------------------------
-void DO_2::direct_on()
+void DO2::direct_on()
     {
     set_DO( DO_INDEX_1, 0 );
     set_DO( DO_INDEX_2, 1 );
     }
 //-----------------------------------------------------------------------------
-void DO_2::direct_off()
+void DO2::direct_off()
     {
     set_DO( DO_INDEX_1, 1 );
     set_DO( DO_INDEX_2, 0 );
@@ -1031,58 +1124,39 @@ void DO_2::direct_off()
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+valve_DO1_DI1_off::valve_DO1_DI1_off( int number ) : fb_device( false, true, 
+    number, DT_V, DST_V_DO1_DI1_FB_OFF )
+    {
+    }
+//-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
-
-int DO_1_DI_1::get_state_now()
+int valve_DO1_DI1_off::get_state()
     {
     int o = get_DO( DO_INDEX );
     int i = get_DI( DI_INDEX );
 
-    if ( fb->get_fb_state( 1 ) == fb_device::S_FB_IS_AND_OFF )
+    if ( get_par( fb_device::P_FB_OFF, 0 ) == fb_device::FB_IS_AND_OFF )
         {
         return o;
         }
 
-    //Для клапана с контролем закрытого состояния.
-    if ( has_params() )
+    if ( o != i )
         {
-        if ( get_par( C_FB_CHECK_TYPE ) != 0 && o == i )
-            {
-            start_switch_time = get_sec();
-            return i;
-            }
-
-        if ( get_par( C_FB_CHECK_TYPE ) == 0 && o != i )
-            {
-            start_switch_time = get_sec();
-            return !i;
-            }
-        }
-    else
-        {
-        if ( o == i )
-            {
-            start_switch_time = get_sec();
-            return i;
-            }   
+        start_switch_time = get_sec();
+        return !i;
         }
 
-    if ( get_sec() - start_switch_time > C_SWITCH_TIME )
+    if ( get_sec() - start_switch_time > get_par( fb_device::P_ON_TIME, 0 ) )
         {
         return -1;
         }
     else
-        {
-         if ( has_params() && get_par( C_FB_CHECK_TYPE ) == 0 )
-            {            
-            return !i;
-            }
-
-        return i;
-        }
+        {        
+        return !i;
+        }      
     }
 //-----------------------------------------------------------------------------
-void DO_1_DI_1::direct_on()
+void valve_DO1_DI1_off::direct_on()
     {
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
@@ -1092,7 +1166,57 @@ void DO_1_DI_1::direct_on()
         }
     }
 //-----------------------------------------------------------------------------
-void DO_1_DI_1::direct_off()
+void valve_DO1_DI1_off::direct_off()
+    {
+    int o = get_DO( DO_INDEX );
+    if ( o != 0 )
+        {
+        start_switch_time = get_sec();
+        set_DO( DO_INDEX, 0 );
+        }
+    }
+#endif // DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+
+int valve_DO1_DI1_on::get_state()
+    {
+    int o = get_DO( DO_INDEX );
+    int i = get_DI( DI_INDEX );
+
+    if ( get_par( fb_device::P_FB_ON, 0 ) == fb_device::FB_IS_AND_OFF )
+        {
+        return o;
+        }
+
+    if ( o == i )
+        {
+        start_switch_time = get_sec();
+        return i;
+        }
+
+    if ( get_sec() - start_switch_time > get_par( fb_device::P_ON_TIME, 0 ) )
+        {
+        return -1;
+        }
+    else
+        {        
+        return i;
+        }      
+    }
+//-----------------------------------------------------------------------------
+void valve_DO1_DI1_on::direct_on()
+    {
+    int o = get_DO( DO_INDEX );
+    if ( 0 == o )
+        {
+        start_switch_time = get_sec();
+        set_DO( DO_INDEX, 1 );
+        }
+    }
+//-----------------------------------------------------------------------------
+void valve_DO1_DI1_on::direct_off()
     {
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
@@ -1107,25 +1231,26 @@ void DO_1_DI_1::direct_off()
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-int DO_1_DI_2::get_state_now()
+int valve_DO1_DI2::get_state()
     {
     int o = get_DO( DO_INDEX );
     int i0 = get_DI( DI_INDEX_1 );
     int i1 = get_DI( DI_INDEX_2 );
 
-    if ( fb->get_fb_state( 1 ) == fb_device::S_FB_IS_AND_OFF )
+    if ( get_par( fb_device::P_FB_ON, 0 ) == fb_device::FB_IS_AND_OFF ||
+        get_par( fb_device::P_FB_OFF, 0 ) == fb_device::FB_IS_AND_OFF )
         {
         return o;
         }
 
     if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
-        ( o == 1 && i1 == 1 && i0 ==0 ) )
+        ( o == 1 && i1 == 1 && i0 == 0 ) )
         {
         start_switch_time = get_sec();
         return o;
         }
 
-    if ( get_sec() - start_switch_time > C_SWITCH_TIME )
+    if ( get_sec() - start_switch_time > get_par( fb_device::P_ON_TIME, 0 ) )
         {
         return -1;
         }
@@ -1135,7 +1260,7 @@ int DO_1_DI_2::get_state_now()
         }
     }
 //-----------------------------------------------------------------------------
-void DO_1_DI_2::direct_on()
+void valve_DO1_DI2::direct_on()
     {
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
@@ -1145,7 +1270,7 @@ void DO_1_DI_2::direct_on()
         }
     }
 //-----------------------------------------------------------------------------
-void DO_1_DI_2::direct_off()
+void valve_DO1_DI2::direct_off()
     {
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
@@ -1160,14 +1285,15 @@ void DO_1_DI_2::direct_off()
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-int DO_2_DI_2::get_state_now()
+int valve_DO2_DI2::get_state()
     {
     int o0 = get_DO( DO_INDEX_1 );
     int o1 = get_DO( DO_INDEX_2 );
     int i0 = get_DI( DI_INDEX_1 );
     int i1 = get_DI( DI_INDEX_2 );
 
-    if ( fb->get_fb_state( 1 ) == fb_device::S_FB_IS_AND_OFF )
+    if ( get_par( fb_device::P_FB_ON, 0 ) == fb_device::FB_IS_AND_OFF ||
+        get_par( fb_device::P_FB_OFF, 0 ) == fb_device::FB_IS_AND_OFF  )
         {
         return o1;
         }
@@ -1178,7 +1304,7 @@ int DO_2_DI_2::get_state_now()
         return o1;
         };
 
-    if ( get_sec() - start_switch_time > C_SWITCH_TIME )
+    if ( get_sec() - start_switch_time > get_par( fb_device::P_ON_TIME, 0 ) )
         {
         return -1;
         }
@@ -1188,7 +1314,7 @@ int DO_2_DI_2::get_state_now()
         }
     }
 //-----------------------------------------------------------------------------
-void DO_2_DI_2::direct_on()
+void valve_DO2_DI2::direct_on()
     {
     int o = get_DO( DO_INDEX_1 );
     if ( 0 == o )
@@ -1199,7 +1325,7 @@ void DO_2_DI_2::direct_on()
         }
     }
 //-----------------------------------------------------------------------------
-void DO_2_DI_2::direct_off()
+void valve_DO2_DI2::direct_off()
     {
     int o = get_DO( DO_INDEX_2 );
     if ( 0 == o )
@@ -1257,13 +1383,14 @@ void valve_mix_proof::direct_set_state( int new_state )
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-int valve_mix_proof::get_state_now()
+int valve_mix_proof::get_state()
     {
     int o = get_DO( DO_INDEX );            
     int i0 = get_DI( DI_INDEX_U );
     int i1 = get_DI( DI_INDEX_L );
 
-    if ( fb->get_fb_state( 1 ) == fb_device::S_FB_IS_AND_OFF )
+    if ( get_par( fb_device::P_FB_ON, 0 ) == fb_device::FB_IS_AND_OFF ||
+        get_par( fb_device::P_FB_OFF, 0 ) == fb_device::FB_IS_AND_OFF )
         {
         if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return ST_UPPER_SEAT;
         if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return ST_LOWER_SEAT;
@@ -1279,7 +1406,7 @@ int valve_mix_proof::get_state_now()
         return o;
         }
 
-    if ( get_sec() - start_switch_time > C_SWITCH_TIME )
+    if ( get_sec() - start_switch_time > get_par( fb_device::P_ON_TIME, 0 ) )
         {
         return -1;
         }
@@ -1348,136 +1475,63 @@ void valve_mix_proof::direct_set_state( int new_state )
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-int DI_1::get_state_now()
-    {
-    return get_DI( DI_INDEX );
-    }
-//-----------------------------------------------------------------------------
-void DI_1::direct_on()
+void DI1::direct_on()
     {
     }
 //-----------------------------------------------------------------------------
-void DI_1::direct_off()
+void DI1::direct_off()
     {
     }
 
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int AI_1::init_params()
+AI1::AI1( u_int number, device::DEVICE_TYPE type, 
+    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt,
+    u_int *start_par_idx ) : analog_wago_device( number, type, sub_type, 
+    par_cnt + ADDITIONAL_PARAM_COUNT )
     {
-    par[ P_ZERO_ADJUST_COEFF ] = 0;
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-AI_1::AI_1( u_int number, device::DEVICE_TYPE type, 
-    device::DEVICE_SUB_TYPE sub_type ) : analog_wago_device( number, type, sub_type ),
-    par( C_PARAMS_COUNT )
-    {
-    }
-//-----------------------------------------------------------------------------
-int AI_1::save_device( char *buff, const char *prefix )
-    {
-    sprintf( buff, "%s[%d]={V=", prefix, get_n() );
-
-    if ( get_value() == 0 )
+    if ( start_par_idx )
         {
-        sprintf( buff + strlen( buff ), "0" );
-        }
-    else
-        {
-        sprintf( buff + strlen( buff ), "%.2f", get_value() );
+        *start_par_idx = ADDITIONAL_PARAM_COUNT;
         }
 
-    sprintf( buff + strlen( buff ), ", M=%d, C0=%.2f},\n", 
-        get_manual_mode(), par[ P_ZERO_ADJUST_COEFF ] );
-
-    return strlen( buff );
-    }
-//-----------------------------------------------------------------------------
-int AI_1::set_cmd( const char *prop, u_int idx, double val )
-    {
-#ifdef DEBUG
-    Print( "AI_1::set_cmd() - prop = %s, idx = %d, val = %f\n",
-        prop, idx, val );
-#endif // DEBUG
-
-    switch ( prop[ 0 ] )
-        {
-    case 'C':
-        par[ P_ZERO_ADJUST_COEFF ] = ( float ) val;
-        break;
-
-    default:
-        device::set_cmd( prop, idx, val );                
-        }
-
-    return 0;
+    set_par_name( P_ZERO_ADJUST_COEFF,  0, "P_C0" );
     }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_WAGO_MODULES
 
-float AI_1::get_value()
+float AI1::get_value()
     {
-    return par[ P_ZERO_ADJUST_COEFF ] + analog_wago_device::get_value();
+    return get_par( P_ZERO_ADJUST_COEFF, 0 ) + analog_wago_device::get_value();
     }
 
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-float AI_1::get_value()
+float AI1::get_value()
     {
-    return par[ P_ZERO_ADJUST_COEFF ] + get_AI( C_AI_INDEX, get_min_val(), get_max_val() );
+    return get_par( P_ZERO_ADJUST_COEFF, 0 ) + get_AI( C_AI_INDEX, get_min_val(), get_max_val() );
     }
 //-----------------------------------------------------------------------------
-void AI_1::direct_set_value( float new_value )
+void AI1::direct_set_value( float new_value )
     {    
     }
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
-int AI_1::save_params_as_Lua_str( char* str )
-    {
-    sprintf( str, "params{ object = \'%s[%d]\', param_name = \'%s\', "
-        "par_id = 1, ", get_name(), get_n(), "C0" );
-
-    par.save_device_ex( str + strlen( str ), "", "values" );
-
-    sprintf( str + strlen( str ) - 2, "%s", " }\n" );
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int AI_1::set_param( int par_id, int index, double value )
-    {
-    switch ( par_id )
-        {
-    case 1:
-        par.save( index, ( float ) value );
-
-        break;
-
-    default:
-        device::set_param( par_id, index, value );
-        break;
-        }
-
-    return 0;
-    }
-
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-float AO_1::get_value()
+float AO1::get_value()
     {
-    return get_AO( AO_INDEX, get_min_val(), get_max_val() );
+    return get_AO( AO_INDEX, par[ P_MIN_VALUE ], par[ P_MAX_VALUE ] );
     }
 //-----------------------------------------------------------------------------
-void AO_1::direct_set_value( float new_value )
+void AO1::direct_set_value( float new_value )
     {
-    set_AO( AO_INDEX, new_value, get_min_val(), get_max_val() );
+    set_AO( AO_INDEX, new_value, par[ P_MIN_VALUE ], par[ P_MAX_VALUE ] );
     }
-
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1503,54 +1557,138 @@ float level_e::get_min_val()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-float flow_e::get_max_val()
+float motor::get_value()
     {
-    return get_par( C_MAX_PAR_NUMBER );
+#ifdef DEBUG_NO_WAGO_MODULES
+    return freq;
+#else
+    freq = get_AO( AO_INDEX, C_MIN_VALUE, C_MAX_VALUE );
+#endif // DEBUG_NO_WAGO_MODULES
     }
 //-----------------------------------------------------------------------------
-float flow_e::get_min_val()
+void motor::direct_set_value( float value )
     {
-    return get_par( C_MIN_PAR_NUMBER );
+#ifdef DEBUG_NO_WAGO_MODULES
+    freq = value;
+#else
+    set_AO( AO_INDEX, value, C_MIN_VALUE, C_MAX_VALUE );
+#endif // DEBUG_NO_WAGO_MODULES
     }
+//-----------------------------------------------------------------------------
+void motor::direct_set_state( int new_state )
+    {
+    if ( new_state )
+        {
+#ifdef DEBUG_NO_WAGO_MODULES
+        if ( -1 == new_state )
+            {
+            state = ( char ) -1;
+            return;
+            }
+#endif // DEBUG_NO_WAGO_MODULES
+        direct_on();
+        }
+    else direct_off();
+    }
+//-----------------------------------------------------------------------------
+int motor::get_state()
+    {
+#ifdef DEBUG_NO_WAGO_MODULES
+    return state;
+#else
+    int o = get_DO( DO_INDEX );
+    int i = get_DI( DI_INDEX );
+
+    if ( o == i )
+        {
+        start_switch_time = get_sec();
+        return i;
+        }   
+
+    if ( get_sec() - start_switch_time > C_SWITCH_TIME )
+        {
+        return -1;
+        }
+    else
+        {
+        return i;
+        }
+#endif // DEBUG_NO_WAGO_MODULES
+    }
+//-----------------------------------------------------------------------------
+void motor::direct_on()
+    {
+#ifdef DEBUG_NO_WAGO_MODULES
+    state = 1;
+#else
+    int o = get_DO( DO_INDEX );
+    if ( 0 == o )
+        {
+        start_switch_time = get_sec();
+        set_DO( DO_INDEX, 1 );
+        }
+#endif // DEBUG_NO_WAGO_MODULES
+    }
+//-----------------------------------------------------------------------------
+void motor::direct_off()
+    {
+#ifdef DEBUG_NO_WAGO_MODULES
+    state = 0;
+#else
+    int o = get_DO( DO_INDEX );
+    if ( o != 0 )
+        {
+        start_switch_time = get_sec();
+        set_DO( DO_INDEX, 0 );
+        }
+#endif // DEBUG_NO_WAGO_MODULES
+    }
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 bool level_s::is_active()
     {
-    if ( get_par( C_ACTIVE_STATE ) == 0 )
+    switch ( sub_type )
         {
+    case DST_LS_MIN:
         return get_state() == 0 ? 1 : 0;
-        }
-    else
-        {
+        break;
+
+    case DST_LS_MAX:
+        return get_state() == 0 ? 0 : 1;
+        break;
+
+    default:   
         return get_state() == 0 ? 0 : 1;
         }
     }
 //-----------------------------------------------------------------------------
-level_s::level_s( u_int number, u_int dt /*= 1000 */ ) : DI_1( number, DT_LS, DST_NONE )
-    {
-    set_change_time( dt );
+level_s::level_s( u_int number, device::DEVICE_SUB_TYPE sub_type ): 
+    DI1( number, DT_LS, sub_type, ADDITIONAL_PARAMS_COUNT )
+    {    
+    set_par_name( P_DT,  0, "P_DT" );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float concentration_e::get_max_val()
     {
-    return get_par( C_MAX_PAR_NUMBER );
+    return get_par( P_MAX_V, start_param_idx );
     }
 //-----------------------------------------------------------------------------
 float concentration_e::get_min_val()
     {
-    return get_par( C_MIN_PAR_NUMBER );
+    return get_par( P_MIN_V, start_param_idx );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-float analog_input_4_20::get_max_val()
+float analog_input::get_max_val()
     {
-    return 20;
+    return get_par( P_MAX_V, start_param_idx );
     }
 //-----------------------------------------------------------------------------
-float analog_input_4_20::get_min_val()
+float analog_input::get_min_val()
     {
-    return 4;
+    return get_par( P_MIN_V, start_param_idx );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1559,7 +1697,7 @@ void analog_wago_device::direct_set_state( int new_state )
     direct_set_value( ( float ) new_state );
     }
 //-----------------------------------------------------------------------------
-int analog_wago_device::get_state_now()
+int analog_wago_device::get_state()
     {
     return ( int ) get_value();
     }
@@ -1593,14 +1731,37 @@ void analog_wago_device::direct_set_value( float new_value )
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-float AO_0_100::get_max_val()
+fb_device::fb_device( bool is_on_fb, bool is_off_fb, int number, 
+    device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ) : is_on_fb( is_on_fb ),
+    is_off_fb( is_off_fb ),
+    digital_wago_device( number, type, sub_type, ADDITIONAL_PARAMS_COUNT )
     {
-    return C_AO_MIN_VALUE;
+    set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
+    set_par_name( P_FB_OFF,  0, "P_FB_OFF" );
+    set_par_name( P_FB_ON,   0, "P_FB_ON" );    
     }
 //-----------------------------------------------------------------------------
-float AO_0_100::get_min_val()
+int fb_device::get_on_fb() const
     {
-    return C_AO_MAX_VALUE;
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int fb_device::get_off_fb() const
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void fb_device::save_device_ex( char *buff )
+    {
+    if ( is_on_fb )
+        {
+        sprintf( buff, "FB_ON_ST=%d, ", get_on_fb() );
+        }
+
+    if ( is_off_fb )
+        {
+        sprintf( buff, "FB_OFF_ST=%d, ", get_off_fb() );
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1751,12 +1912,12 @@ i_DO_device* V( int number )
     return G_DEVICE_MANAGER()->get_V( number );
     }
 //-----------------------------------------------------------------------------
-i_DO_device* N( int number )
+i_AO_device* VC( int number )
     {
-    return G_DEVICE_MANAGER()->get_N( number );
+    return G_DEVICE_MANAGER()->get_VC( number );
     }
 //-----------------------------------------------------------------------------
-i_DO_device* M( int number )
+i_DO_AO_device* M( int number )
     {
     return G_DEVICE_MANAGER()->get_M( number );
     }
@@ -1781,9 +1942,9 @@ i_AO_device* AO( int number )
     return G_DEVICE_MANAGER()->get_AO( number );
     }
 //-----------------------------------------------------------------------------
-i_counter* CTR( int number )
+i_counter* FQT( int number )
     {
-    return G_DEVICE_MANAGER()->get_CTR( number );
+    return G_DEVICE_MANAGER()->get_FQT( number );
     }
 //-----------------------------------------------------------------------------
 i_AI_device* TE( int number )
@@ -1791,29 +1952,44 @@ i_AI_device* TE( int number )
     return G_DEVICE_MANAGER()->get_TE( number );
     }
 //-----------------------------------------------------------------------------
-i_AI_device* FE( int number )
+i_AI_device* LT( int number )
     {
-    return G_DEVICE_MANAGER()->get_FE( number );
+    return G_DEVICE_MANAGER()->get_LT( number );
     }
 //-----------------------------------------------------------------------------
-i_AI_device* LE( int number )
+i_DI_device* GS( int number )
     {
-    return G_DEVICE_MANAGER()->get_LE( number );
+    return G_DEVICE_MANAGER()->get_GS( number );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* FB( int number )
+i_DO_device* HA( int number )
     {
-    return G_DEVICE_MANAGER()->get_FB( number );
+    return G_DEVICE_MANAGER()->get_HA( number );
     }
 //-----------------------------------------------------------------------------
-i_DO_device* UPR( int number )
+i_DO_device* HL( int number )
     {
-    return G_DEVICE_MANAGER()->get_UPR( number );
+    return G_DEVICE_MANAGER()->get_HL( number );
     }
 //-----------------------------------------------------------------------------
-i_AI_device* QE( int number )
+i_DI_device* SB( int number )
     {
-    return G_DEVICE_MANAGER()->get_QE( number );
+    return G_DEVICE_MANAGER()->get_SB( number );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* DI( int number )
+    {
+    return G_DEVICE_MANAGER()->get_DI( number );
+    }
+//-----------------------------------------------------------------------------
+i_DO_device* DO( int number )
+    {
+    return G_DEVICE_MANAGER()->get_DO( number );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* QT( int number )
+    {
+    return G_DEVICE_MANAGER()->get_QT( number );
     }
 //-----------------------------------------------------------------------------
 dev_stub* STUB()
@@ -1821,9 +1997,14 @@ dev_stub* STUB()
     return G_DEVICE_MANAGER()->get_stub();
     }
 //-----------------------------------------------------------------------------
+device* DEVICE( device::DEVICE_TYPE type, int number )
+    {
+    return G_DEVICE_MANAGER()->get_device( type, number );
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_AS_mix_proof::valve_AS_mix_proof( u_int number ) : device( number,
-    DT_V, DST_V_AS_MIXPROOF )
+    DT_V, DST_V_AS_MIXPROOF, 0 )
     {
     }
 //-----------------------------------------------------------------------------
@@ -1837,7 +2018,7 @@ void valve_AS_mix_proof::open_lower_seat()
     direct_set_state( ST_LOWER_SEAT );
     }
 //-----------------------------------------------------------------------------
-int valve_AS_mix_proof::get_state_now()
+int valve_AS_mix_proof::get_state()
     {
 #ifdef DEBUG_NO_WAGO_MODULES
     return state;
