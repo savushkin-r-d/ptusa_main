@@ -26,6 +26,7 @@ extern "C" {
 #endif
 
 #include <conio.h>
+#include <clocale>
 
 #include "tolua++.h"
 
@@ -352,7 +353,6 @@ struct Smain {
     int status;
     };
 
-TOLUA_API int tolua_PAC_dev_open ( lua_State* tolua_S );
 
 static int pmain (lua_State *L) {
     struct Smain *s = (struct Smain *)lua_touserdata(L, 1);
@@ -363,42 +363,20 @@ static int pmain (lua_State *L) {
     if (argv[0] && argv[0][0]) progname = argv[0];
     lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
     
-    //-Выполнение системных скриптов sys.lua. 
-#ifdef DEBUG
-    const char *ADDITIONAL_PATH_CMD = 
-        "package.path = package.path..\';../../system scripts/?.lua\'";        
-
-    if( luaL_dostring( L, ADDITIONAL_PATH_CMD ) != 0 )
+    int res = lua_manager::get_instance()->init( L, "" );
+    if ( res )
         {
-        Print( "Set additional search path error!\n" );
-        Print( "\t%s\n", lua_tostring( L, -1 ) );
-
-        lua_pop( L, 1 );
-                
-        return 1;
+        return res;
         }
-#endif // DEBUG
 
-    const char *LUA_WAGO_SCRIPT = "main.wago.plua";    
+    const char *PAC_NAME = 
+        lua_manager::get_instance()->char_no_param_exec_lua_method( "system",
+        "get_PAC_name", "main" );
 
-    if ( luaL_dofile( L, LUA_WAGO_SCRIPT ) != 0 )
-        {
-#ifdef DEBUG
-        Print( "Load Lua Wago script \"%s\" error!\n", 
-            LUA_WAGO_SCRIPT );
-        Print( "\t%s\n", lua_tostring( L, -1 ) );
-#endif // DEBUG
-        lua_pop( L, 1 );
+    tcp_communicator::init_instance( PAC_NAME );
 
-        return 1;
-        }
-    
-    //-Экспортируем в Lua необходимые объекты.
-    tolua_PAC_dev_open( L );
-
-    lua_manager::get_instance()->init( L, 0 );
-
-    G_PROJECT_MANAGER->lua_load_configuration();
+    G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
+        device_communicator::write_devices_states_service );
 
     lua_gc(L, LUA_GCRESTART, 0);
     s->status = handle_luainit(L);
@@ -432,6 +410,15 @@ static int pmain (lua_State *L) {
 
 int main (int argc, char **argv) 
     {
+    //if ( argc >= 3 )
+    //    {
+    //    if ( strcmp( "debug", argv[ 2 ] ) == 0 )
+    //        {
+    //Для корректного отображения языка при отладке в VC.
+    setlocale( LC_CTYPE, "RUS" );
+    //        }
+    //    }    
+
     int status;
     struct Smain s;
     lua_State *L = lua_open();  /* create state */
@@ -453,20 +440,9 @@ int main (int argc, char **argv)
         }
     else
         {
+        //Инициализация объектов.
         G_TECH_OBJECT_MNGR()->init_objects();
 
-        const char *PAC_NAME = 
-            lua_manager::get_instance()->char_no_param_exec_lua_method( "system",
-            "get_PAC_name", "main" );
-
-        tcp_communicator::init_instance( PAC_NAME );
-
-        G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
-            device_communicator::write_devices_states_service );
-
-        //-Добавление системных тегов контроллера.
-        G_DEVICE_CMMCTR->add_device( PAC_info::get_instance() );
-        
         //-Обработка параметров командной строки.
         G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
@@ -477,10 +453,14 @@ int main (int argc, char **argv)
         params_manager::get_instance()->init( PAC_ID );        
         params_manager::get_instance()->final_init();
 
-#ifdef DEBUG
-        G_DEVICE_MANAGER()->print();
-        G_DEVICE_CMMCTR->print();
+        G_TECH_OBJECT_MNGR()->init_runtime_params();
 
+#ifdef DEBUG    
+        G_TECH_OBJECT_MNGR()->print();    
+        G_DEVICE_CMMCTR->print();
+#endif // DEBUG
+
+#ifdef DEBUG
         u_long st_time;
         u_long all_time = 0;
         u_long cycles_cnt = 0;

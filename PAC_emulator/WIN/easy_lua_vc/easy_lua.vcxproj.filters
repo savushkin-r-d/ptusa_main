@@ -436,14 +436,14 @@
     <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg">
       <Filter>Header Files\PAC\common\tolua++\pkg</Filter>
     </None>
-    <None Include="..\..\..\..\PTUSA projects\system scripts\sys.lua">
-      <Filter>Lua Source\common</Filter>
-    </None>
-    <None Include="..\..\..\..\PTUSA projects\system scripts\sys_wago.lua">
-      <Filter>Lua Source\common</Filter>
-    </None>
     <None Include="..\versions.txt">
       <Filter>Other</Filter>
+    </None>
+    <None Include="..\..\..\..\PTUSA projects\system scripts\sys.objects.lua">
+      <Filter>Lua Source\common</Filter>
+    </None>
+    <None Include="..\..\..\..\PTUSA projects\system scripts\sys.wago.lua">
+      <Filter>Lua Source\common</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

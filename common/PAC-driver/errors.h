@@ -122,7 +122,7 @@ class base_error
         ///                       (0 - нет, 1 - да).
         ///
         /// @return - количество записанных байт.        
-        virtual int save_to_stream( u_char *stream, char &is_new_state ) = 0;
+        virtual int save_as_Lua_str( char *str, bool &is_new_state ) = 0;        
 
         /// @brief Отладочный вывод содержимого класса в консоль.
         virtual void print() const = 0;
@@ -171,7 +171,7 @@ class simple_error: public base_error
         ///                       (0 - нет, 1 - да).
         ///
         /// @return - количество записанных байт.        
-        int save_to_stream( u_char *stream, char &is_new_state );
+        int save_as_Lua_str( char *str, bool &is_new_state );
 
         /// @brief Отладочный вывод содержимого класса в консоль.
         void print() const;
@@ -212,7 +212,7 @@ class dev_errors_manager
         ///
         /// @return < 0 - ошибка.
         /// @return   0 - ок.
-        int save_to_stream( u_char *stream );
+        int save_as_Lua_str( char *str, u_int_2 &id );
 
         /// @brief Добавление ошибки в массив ошибок.
         ///        
@@ -236,6 +236,7 @@ class dev_errors_manager
         static dev_errors_manager* get_instance();
 
     private:
+        u_int_2 errors_id; // Cостояние ошибок.
 
         /// Единственный экземпляр класса.
         static auto_smart_ptr < dev_errors_manager > instance;
@@ -248,11 +249,7 @@ class dev_errors_manager
             DEM_MAX_ERRORS_CNT = 29,
             };
 
-        u_int_2 errors_id;
-
         std::vector< base_error* > s_errors_vector;    ///< Массив ошибок.
-
-        u_char is_any_err;  //< Признак наличия ошибок простых устройств.
     };
 //-----------------------------------------------------------------------------
 #define G_DEV_ERRORS_MANAGER dev_errors_manager::get_instance()
