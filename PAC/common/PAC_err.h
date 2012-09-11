@@ -28,21 +28,48 @@
 #include "led.h"
 
 //-----------------------------------------------------------------------------
-
-
+//0, 1, n - нет связи с узлом Wago номер n.
 //0, 2, n - нет связи с панелью номер n.
 //0, 3, n - нет связи с Modbus устройством номер n.
-//0, 4, 4 - нет связи с контролирующим PAC.
+//0, 4, 4 - 
 //0, 5, 5 - нет связи с сервером.
 //
 //1, 1 - ошибка работы с COM-портом WAGO. 
 //      1 - CRC error
 //
 //13 - ошибки времени работы:
-//  1, n  - нажата аварийная кнопка с номером обратной связи n. 
+//  1, n  - нажата аварийная кнопка номер n. 
 //-----------------------------------------------------------------------------
 class PAC_critical_errors_manager
     {
+    public:
+        enum CONSTANTS
+            {
+            ALARM_CLASS_PRIORITY = 100,
+            };
+
+        enum ALARM_CLASS      ///< Класс тревоги.
+            {
+            AC_UNKNOWN,
+            AC_NO_CONNECTION, ///< Ошибка связи.
+
+            AC_COM_DRIVER,    ///< Ошибка работы с COM-портом.
+            AC_RUNTIME_ERROR, ///< Ошибки во время работы.
+            };
+
+        enum ALARM_SUBCLASS         ///< Подкласс тревоги.
+            {
+            //AC_NO_CONNECTION,     ///< Ошибка связи.
+            AS_WAGO = 1,            ///< Ошибки модулей WAGO.
+            AS_PANEL,               ///< Ошибки панелей EasyView.
+            AS_MODBUS_DEVICE,       ///< Ошибки устройства, опрашиваемого по Modbus.
+
+            AS_EASYSERVER = 5,      ///< Ошибки EasyServer.
+
+            //AC_RUNTIME_ERROR,     ///< Ошибки во время работы.
+            AS_EMERGENCY_BUTTON = 1,///< Нажата аварийная кнопка.
+            };
+
     public:
         enum GE_CONST
             {
@@ -67,6 +94,57 @@ class PAC_critical_errors_manager
             }
 
     private:
+        const char* get_alarm_group()
+            {            
+            return "Авария";
+            }
+
+        const char* get_alarm_descr( ALARM_CLASS err_class, ALARM_SUBCLASS err_sub_class, int par )
+            {    
+            static char tmp[ 100 ] = "";
+
+            switch( err_class )
+                {
+            case AC_UNKNOWN:
+                return "?";
+
+            case AC_NO_CONNECTION:
+                switch( err_sub_class )
+                    {
+                case AS_WAGO:                    
+                    snprintf( tmp, sizeof( tmp ), "узел Wago №%d", par );
+                    return tmp;
+
+                case AS_PANEL:                    
+                    snprintf( tmp, sizeof( tmp ), "панель EasyView №%d", par );
+                    return tmp;
+
+                case AS_MODBUS_DEVICE:                    
+                    snprintf( tmp, sizeof( tmp ), "устройство, опрашиваемое по Modbus, №%d", par );
+                    return tmp;                    
+
+                case AS_EASYSERVER:
+                    return "EasyServer";
+                    }//switch( err_sub_class )
+                break;
+
+            case AC_COM_DRIVER:
+                return "?";
+                break;
+
+            case AC_RUNTIME_ERROR:
+                switch( err_sub_class )
+                    {
+                case AS_EMERGENCY_BUTTON:                    
+                    snprintf( tmp, sizeof( tmp ), "нажата аварийная кнопка №%d", par );
+                    return tmp;      
+
+                    }// switch( err_sub_class )
+                }// switch( err_class )
+
+            return "?";
+            }
+    
         static auto_smart_ptr < PAC_critical_errors_manager > instance;
 
         struct critical_error

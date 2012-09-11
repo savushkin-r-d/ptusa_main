@@ -120,36 +120,23 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
         }
     }
 //-----------------------------------------------------------------------------
-// [ 0  ] - номер ошибок, unsigned, 2 байта. 
-// [ 1  ]  
-// [ 2  ] - количество ошибок, unsigned char.  
-// [ 3  ] - класс ошибки    1, unsigned char.
-// [ 4  ] - подклас ошибки  1, unsigned char.
-// [ 5  ] - параметр ошибки 1, unsigned char.
-// [ 6  ] - класс ошибки    2, unsigned char.
-// [ 7  ] - подклас ошибки  2, unsigned char.
-// [ 8  ] - параметр ошибки 2, unsigned char.
-// [ .. ]
-// [ x  ]
 int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
     {
     for ( u_int i = 0; i < errors.size(); i++ )
         {
         sprintf( str + strlen( str ), "\t%s\n", "{" );
 
-        sprintf( str + strlen( str ), "\t%s%s%s%s%d%s\n",
-           "description = \"", ALARM_CLASS_STR[ errors[ i ].err_class ],
-            " - ", ALARM_SUBCLASS_STR[ errors[ i ].err_class ][ errors[ i ].err_sub_class ],
-            errors[ i ].param, "!\"," );
+        sprintf( str + strlen( str ), "\t%s%s\n",
+           "description = \"", get_alarm_descr( 
+           ( ALARM_CLASS ) errors[ i ].err_class,
+           ( ALARM_SUBCLASS ) errors[ i ].err_sub_class, errors[ i ].param ) );
 
-        sprintf( str + strlen( str ), "\t%s\n",   "type        = AT_SPECIAL," );
-        sprintf( str + strlen( str ), "\t%s%s%s\n", "group       = '",
-            ALARM_CLASS_STR[ errors[ i ].err_class ], "'," );
-        sprintf( str + strlen( str ), "\t%s%d%s\n",   "priority    = ",
-            ALARM_CLASS_PRIORITY[ errors[ i ].err_class ], "," );
-        sprintf( str + strlen( str ), "\t%s\n",   "state    "
-                "   = AS_ALARM," );
-        sprintf( str + strlen( str ), "\t%s\n",   "suppress    = false," );
+        sprintf( str + strlen( str ), "\t%s\n", "type = AT_SPECIAL," );
+        sprintf( str + strlen( str ), "\t%s%s%s\n", "group = '",
+            get_alarm_group(), "'," );
+        sprintf( str + strlen( str ), "\t%s%d%s\n", "priority = ",
+            ALARM_CLASS_PRIORITY, "," );
+        sprintf( str + strlen( str ), "\t%s\n", "state = AS_ALARM," );
 
         sprintf( str + strlen( str ), "\t%s\n", "}," );
         }

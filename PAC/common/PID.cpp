@@ -18,6 +18,8 @@ PID::PID( int n ):
     G_DEVICE_CMMCTR->add_device( this );
 
     snprintf( name, sizeof( name ), "%s%d", "PID", n );
+
+    init_work_param( WP_U, 0 );
     }
 //-----------------------------------------------------------------------------
 PID::~PID() 

@@ -187,6 +187,8 @@ class device
 				
 		void set_property( const char* field, device* dev );
 
+		void set_name( const char *name, const char *description )
+
 		enum DEVICE_TYPE
             {
             DT_NONE = -1,///< Тип не определен.
@@ -336,7 +338,7 @@ i_AI_device* QT( int number );
 /// @return - виртуальное устройство.
 dev_stub* STUB();
 
-device* DEVICE( device::DEVICE_TYPE type, int number );
+device* DEVICE( int type, int number );
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство.
@@ -384,6 +386,19 @@ class dev_stub
         /// @return 0
         unsigned int get_quantity();
     };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+/// @brief Содержит информацию об всех ошибках простых устройств.
+class dev_errors_manager
+    {
+    public:
+	    /// @brief Получение единственного экземпляра класса.
+        static dev_errors_manager* get_instance();
+
+        /// @brief Изменение параметров ошибки.
+        void set_cmd( unsigned int cmd, unsigned int object_type, 
+            unsigned int object_number, unsigned int object_alarm_number );
+	}
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс mixproof.
@@ -611,7 +626,7 @@ class device_manager
             unsigned int number, char * descr );
 
         /// @brief Получение устройства по его номеру.
-        device* get_device( device::DEVICE_TYPE dev_type,
+        device* get_device( int dev_type,
             unsigned int dev_number );
     };
 //-----------------------------------------------------------------------------
@@ -834,7 +849,7 @@ class PID
         ///@brief Основные сохраняемые параметры.
         enum PARAM
         {
-        P_k = 0,               ///< Параметр k.
+        P_k,                   ///< Параметр k.
         P_Ti,                  ///< Параметр Ti.
         P_Td,                  ///< Параметр Td.
         P_dt,                  ///< Интервал расчёта

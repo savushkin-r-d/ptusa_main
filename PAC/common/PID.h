@@ -62,7 +62,7 @@ class PID: public i_Lua_save_device
     char name[ 50 ];
 
     public:
-        enum PARAM 
+        enum PARAM  
             {        
             P_k = 0,               ///< Параметр k.
             P_Ti,                  ///< Параметр Ti.
@@ -81,8 +81,8 @@ class PID: public i_Lua_save_device
 
         enum WORK_PARAM 
             {
-            WP_Z,  ///< Требуемое значение.
-            WP_U,  ///< Выход ПИД.
+            WP_Z = 0,  ///< Требуемооfое значение.
+            WP_U,      ///< Выход ПИД.
             };
 
 

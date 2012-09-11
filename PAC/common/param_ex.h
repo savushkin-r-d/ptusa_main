@@ -193,10 +193,32 @@ template < class type, bool is_float > class parameters
                 }
 #endif // DEBUG
 
-            stub = 0;
             return stub;
             }
 
+        /// @brief Получение элемента через операцию индексирования.
+        ///
+        /// @param index - индекс элемента.
+        ///
+        /// @return - значение элемента с заданным индексом. Если индекс
+        /// выходит за диапазон, возвращается значение заглушки - поля @ref
+        /// stub ( значение 0 ).
+        const type& operator[] ( unsigned int index ) const
+            {
+            if ( index < count )
+                {
+                return values[ index ];
+                }
+#ifdef DEBUG
+            else
+                {
+                Print( "parameters[] - error: index[ %u ] > count [ %u ]\n",
+                    index, count );
+                }
+#endif // DEBUG
+                        
+            return stub;
+            }
         /// @brief Получение элемента через индекс.
         ///
         /// @param idx - индекс элемента.
@@ -234,6 +256,8 @@ template < class type, bool is_float > class parameters
         parameters( int count, const char *name, type *value = 0 ): count( count ),
             values( value )
             {
+            stub = 0;
+
             strncpy( this->name, name, sizeof( this->name ) );
 
 //#ifdef DEBUG

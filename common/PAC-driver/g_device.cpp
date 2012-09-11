@@ -135,8 +135,6 @@ long device_communicator::write_devices_states_service( long len,
             Print( "cmd = %s\n",  data + 1 );
 #endif // DEBUG_DEV_CMCTR
 
-            Print( "cmd = %s\n",  data + 1 );
-
             int res = lua_manager::get_instance()->exec_Lua_str( ( char* ) data + 1, 
                 "CMD_EXEC_DEVICE_COMMAND ");
                       
@@ -182,40 +180,27 @@ long device_communicator::write_devices_states_service( long len,
             }
 
         case CMD_SET_PAC_ERROR_CMD:  
-            {            
-            u_int_2 count = 0;
-
-            memcpy( &count, data + 1, sizeof( count ) );
-
+            {     
 #ifdef DEBUG_DEV_CMCTR
-                Print( "SET_PAC_ERROR_CMD\t" );
-                Print( "Error count = %u\n", count );
+            Print( "\CMD_SET_PAC_ERROR_CMD\n" );
+            Print( "cmd = %s\n",  data + 1 );
 #endif // DEBUG_DEV_CMCTR
+           
+            int res = lua_manager::get_instance()->exec_Lua_str( ( char* ) data + 1, 
+                "CMD_EXEC_DEVICE_COMMAND ");
 
-            u_int_2 uint_cmd[ 1000 ];
-            memcpy( uint_cmd, data + 1 + 2, ( 2 * 4 ) * count );
-
-            for ( u_int i = 0; i < count; i++ )
+            outdata[ 0 ] = 0;
+            outdata[ 1 ] = 0; //Возвращаем 0.
+            if ( res )
                 {
-#ifdef DEBUG_DEV_CMCTR
-                u_int_2 object_type = uint_cmd[ 4 * i + 1 ];
-                u_int_2 object_number = uint_cmd[ 4 * i +  2 ];
-                u_int_2 object_alarm_number = uint_cmd[ 4 * i + 3 ];
-
-                Print( "CMD_SET_PAC_ERROR_CMD" );
-                Print( "cmd = %u, object_type = %u, object_number = %u, \
-                       object_alarm_number = %u\n", uint_cmd[ 4 * i ],
-                       object_type, object_number, object_alarm_number );
-#endif // DEBUG_DEV_CMCTR
-
-     //           G_DEV_ERRORS_MANAGER->set_cmd( uint_cmd[ 0 ], object_type,
-    //                object_number, object_alarm_number );
+                outdata[ 0 ] = 1;
                 }
 
-            const u_int_2 RES = 0;
-            memcpy( outdata, &RES, sizeof( RES ) ); // Возвращаем 0.
-            answer_size += 2;
+#ifdef DEBUG_DEV_CMCTR
+            Print( "Operation time = %lu\n", get_delta_millisec( start_time ) );
+#endif // DEBUG_DEV_CMCTR
 
+            answer_size = 2;
             return answer_size;
             }
 

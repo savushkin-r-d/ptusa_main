@@ -445,6 +445,9 @@
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys.wago.lua">
       <Filter>Lua Source\common</Filter>
     </None>
+    <None Include="..\..\..\..\PTUSA projects\system scripts\sys.devices.lua">
+      <Filter>Lua Source\common</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="easy_lua.rc">

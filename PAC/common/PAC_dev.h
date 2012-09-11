@@ -285,17 +285,6 @@ class device : public i_DO_AO_device, public par_device
         /// @param buff [out] - буфер записи строки.
         virtual int save_device( char *buff, const char *prefix );
 
-        //-Ошибки.
-        saved_params_u_int_4 err_par;
-
-        enum DEV_ERROR_PARAMS  ///< Параметры ошибки, определяют номера битов.
-            {
-            DE_IS_ENABLE = 1,  ///< Блокировка тревоги на этапе проектирования.    
-            DE_IS_INHIBIT = 2, ///< Блокировка тревоги во время работы.    
-            DE_IS_SUPPRESS = 4,///< Подавление тревоги клиентами.
-            };
-        //-Ошибки.!->
-
         enum CONSTANTS
             {
             C_DEVICE_TYPE_CNT = 17,     ///< Количество типов устройств.
@@ -357,7 +346,24 @@ class device : public i_DO_AO_device, public par_device
 
         virtual ~device();
 
-        const char *get_name() const;
+        const char *get_name() const            
+            {
+            return name;
+            }
+
+        const char *get_description() const            
+            {
+            return description;
+            }
+
+        void set_name( const char *name, const char *description )
+            {
+            this->name = new char[ strlen( name ) ];
+            strcpy( this->name, name );
+
+            this->description = new char[ strlen( description ) ];
+            strcpy( this->description, description );
+            }
 
         /// @brief Выключение устройства.
         ///
@@ -421,6 +427,10 @@ class device : public i_DO_AO_device, public par_device
 
     private:
         bool is_manual_mode;      ///< Признак ручного режима.
+
+        char *name;
+        char *description;
+
     }; 
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство.
@@ -1359,7 +1369,7 @@ class device_manager: public i_Lua_save_device
         virtual ~device_manager();
 
         /// @brief Получение устройства по его номеру.        
-        device* get_device( device::DEVICE_TYPE dev_type, u_int dev_number );
+        device* get_device( int dev_type, u_int dev_number );
 
         /// @brief Получение клапана по его номеру.
         i_DO_device* get_V( int number );
@@ -1717,6 +1727,6 @@ dev_stub* STUB();
 /// @param type   - тип устройства.
 /// @param number - номер устройства.
 /// @return - устройство.
-device* DEVICE( device::DEVICE_TYPE type, int number );
+device* DEVICE( int type, int number );
 //-----------------------------------------------------------------------------
 #endif // PAC_DEVICES_H

@@ -174,16 +174,6 @@ void device::print() const
 #endif // DEBUG
     }
 //-----------------------------------------------------------------------------
-const char * device::get_name() const
-    {
-    if ( type <= C_DEVICE_TYPE_CNT ) 
-        {
-        return device::DEV_NAMES[ type ];
-        }
-
-    return "Unknown";
-    }
-//-----------------------------------------------------------------------------
 void device::off()
     {
     if ( !get_manual_mode() )
@@ -194,8 +184,8 @@ void device::off()
 //-----------------------------------------------------------------------------
 int device::save_device( char *buff, const char *prefix )
     {
-    sprintf( buff, "%s%s%d={M=%d, ",
-        prefix,  get_name(), get_n(),  is_manual_mode );
+    sprintf( buff, "%s%s={M=%d, ",
+        prefix,  get_name(), is_manual_mode );
     
     if ( type != DT_AO &&
         type != DT_TE )
@@ -204,8 +194,7 @@ int device::save_device( char *buff, const char *prefix )
         }
 
     if ( type != DT_V &&        
-        type != DT_M &&
-
+        
         type != DT_LS &&
         type != DT_FS &&
         type != DT_GS &&
@@ -284,17 +273,23 @@ int device::set_cmd( const char *prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 device::device( int number, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type, 
     u_int par_cnt ) :    
-    par_device( par_cnt ),
-    err_par( 1 ),
+    par_device( par_cnt ),   
     number( number ),
     type( type ),
     sub_type( sub_type ),
-    is_manual_mode( false )    
+    is_manual_mode( false ),
+    name( 0 ),
+    description( 0 )
     {
     }
 //-----------------------------------------------------------------------------
 device::~device()
     {
+    delete[] name;
+    name = 0;
+
+    delete[] description;
+    description = 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -362,10 +357,10 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type,
     return -1;
     }
 //-----------------------------------------------------------------------------
-device* device_manager::get_device( device::DEVICE_TYPE dev_type,
+device* device_manager::get_device( int dev_type,
     u_int dev_number )
     {
-    int dev_n = get_device_n( dev_type, dev_number );
+    int dev_n = get_device_n( ( device::DEVICE_TYPE ) dev_type, dev_number );
 
     if ( dev_n >= 0 )
         {
@@ -811,49 +806,6 @@ float dev_stub::get_flow()
     {
     return 0.;
     }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-//fb_device::fb_device( FB fb1, FB fb2 ) :  par( C_PARAMS_COUNT )
-//    {
-//    fb[ 0 ] = fb1;
-//    fb[ 1 ] = fb2;
-//    }
-////-----------------------------------------------------------------------------
-//fb_device::STATE fb_device::get_fb_state( int fb_number )
-//    {
-//    if ( fb_number > 1 )
-//        {
-//        fb_number = 1;
-//        }
-//
-//    return fb[ fb_number ] ? 
-//        ( par[ P_FB_USE ] ? S_FB_IS_AND_ON : S_FB_IS_AND_OFF ) : S_FB_NO;
-//    }
-////-----------------------------------------------------------------------------
-//int fb_device::save_device( char *buff )
-//    {
-//    sprintf( buff, "DI={%d, %d}", 
-//        get_fb_state( 0 ), get_fb_state( 1 ) );
-//
-//    return strlen( buff );
-//    }
-////-----------------------------------------------------------------------------
-//int fb_device::set_cmd( const char *prop, u_int idx, double val )
-//    {
-//#ifdef DEBUG
-//    Print( "fb_device::set_cmd() - prop = %s, idx = %d, val = %f\n",
-//        prop, idx, val );
-//#endif // DEBUG
-//
-//    switch ( prop[ 0 ] )
-//        {
-//    case 'F':
-//        par[ P_FB_USE ] = val ? 1 : 0;
-//        return 0;
-//        }
-//
-//    return 1;
-//    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float counter::get_value()
@@ -1997,9 +1949,9 @@ dev_stub* STUB()
     return G_DEVICE_MANAGER()->get_stub();
     }
 //-----------------------------------------------------------------------------
-device* DEVICE( device::DEVICE_TYPE type, int number )
+device* DEVICE( int type, int number )
     {
-    return G_DEVICE_MANAGER()->get_device( type, number );
+    return G_DEVICE_MANAGER()->get_device( ( device::DEVICE_TYPE ) type, number );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
