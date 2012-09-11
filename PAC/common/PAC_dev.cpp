@@ -967,7 +967,7 @@ u_int counter::get_quantity()
 //-----------------------------------------------------------------------------
 float counter::get_flow()
     {
-    return get_par( P_C0, 0 ) + 
+    return get_par( P_CZ, 0 ) + 
 #ifdef DEBUG_NO_WAGO_MODULES
         flow_value;
 #else
@@ -1448,7 +1448,7 @@ AI1::AI1( u_int number, device::DEVICE_TYPE type,
         *start_par_idx = ADDITIONAL_PARAM_COUNT;
         }
 
-    set_par_name( P_ZERO_ADJUST_COEFF,  0, "P_C0" );
+    set_par_name( P_ZERO_ADJUST_COEFF,  0, "P_CZ" );
     }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_WAGO_MODULES

@@ -1277,7 +1277,7 @@ class counter : public device,
             {    
             set_par_name( P_MIN_FLOW,  0, "P_MIN_FLOW" );
             set_par_name( P_MAX_FLOW,  0, "P_MAX_FLOW" );
-            set_par_name( P_C0,        0, "P_C0" );
+            set_par_name( P_CZ,        0, "P_CZ" );
             set_par_name( P_DT,        0, "P_DT" );
             }
 
@@ -1339,7 +1339,7 @@ class counter : public device,
                         
             P_MIN_FLOW = 0,
             P_MAX_FLOW,   
-            P_C0,
+            P_CZ,
             P_DT,
 
             AI_FLOW_INDEX = 0,  ///< Индекс канала аналогового входа (поток).
