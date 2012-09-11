@@ -108,12 +108,9 @@ class device_communicator
             /// и их записи в этом случае в резервную копию.
             CMD_GET_PARAMS_CRC,
             // Резервное копирование параметров. -!>
-
             };
-#ifdef DRIVER
-    };
-#else // DRIVER
 
+#ifndef DRIVER
     private:
         /// Единственный экземпляр класса.
         static auto_smart_ptr < device_communicator > instance;
@@ -157,10 +154,11 @@ class device_communicator
         /// @brief Сервис для работы с device_communicator.
         static long write_devices_states_service( long len, u_char *data,
             u_char *outdata );
+#endif // !DRIVER
     };
 //-----------------------------------------------------------------------------
+#ifndef DRIVER
 #define G_DEVICE_CMMCTR device_communicator::get_instance()
-
-#endif // DRIVER
+#endif // !DRIVER
 
 #endif // DEVICES_H

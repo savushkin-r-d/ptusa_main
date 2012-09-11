@@ -60,40 +60,7 @@ enum ALARM_TYPE
     AT_SPECIAL,
     };
 
-
-enum OBJECT_TYPE      ///< Тип объекта, для которого возникла тревога.
-    {
-    OT_UNKNOWN,
-    OT_PAC,           ///< PAC.
-    };
-
-enum ALARM_CLASS      ///< Класс тревоги.
-    {
-    AC_UNKNOWN,
-    AC_NO_CONNECTION, ///< Ошибка связи.
-
-    AC_COM_DRIVER,    ///< Ошибка работы с COM-портом.
-    AC_RUNTIME_ERROR, ///< Ошибки во время работы.
-    };
-
-enum ALARM_SUBCLASS         ///< Подкласс тревоги.
-    {
-    //AC_NO_CONNECTION,     ///< Ошибка связи.
-    AS_WAGO = 1,            ///< Ошибки модулей WAGO.
-    AS_PANEL,               ///< Ошибки панелей EasyView.
-    AS_MODBUS_DEVICE,       ///< Ошибки устройства, опрашиваемого по Modbus.
-
-    AS_EASYSERVER = 5,      ///< Ошибки EasyServer.
-
-    //AC_RUNTIME_ERROR,     ///< Ошибки во время работы.
-    AS_EMERGENCY_BUTTON = 1,///< Нажата аварийная кнопка.
-    };
-
 #endif // defined PAC || defined WIN32
-
-extern const char *ALARM_CLASS_STR[ 4 ];
-extern const char *ALARM_SUBCLASS_STR[ 4 ][ 5 ];
-extern const int ALARM_CLASS_PRIORITY[ 4 ];
 
 //-----------------------------------------------------------------------------
 #ifdef PAC
@@ -111,9 +78,6 @@ class base_error
     {
     public:
         base_error();
-
-        /// @brief Сброс параметров ошибки в значение по умолчанию (0).
-        virtual void reset_errors_params() = 0;
 
         /// @brief Сохранение ошибки в поток для передачи на сервер.
         ///        
@@ -139,14 +103,32 @@ class base_error
         /// @brief Выполнение команды над ошибкой.
         virtual int set_cmd( int cmd ) = 0;
 
+        /// @brief Сброс параметров ошибки в значение по умолчанию (0).
+        void reset_errors_params()
+            {
+            err_par[ P_PARAM_N ] = 0;
+            }
+
     protected:
+        saved_params_u_int_4 err_par;
+
         unsigned char error_state;    ///< Cостояние ошибки.
 
-        enum BASE_ERRORS_CMD          ///< Константы.
-            {            
-            BE_CMD_ACCEPT   = 100,    ///< Подтвердить ошибку.
-            BE_CMD_SUPPRESS = 200,    ///< Подавить ошибку.
-            BE_CMD_UNSET_SUPPRESS,    ///< Убрать подавление ошибки.
+        enum PARAMS  ///< Параметры ошибки, определяют номера битов.
+            {
+            P_PARAM_N = 0,	  //Номер параметра.
+
+            P_IS_ENABLE = 1,  ///< Блокировка тревоги на этапе проектирования.    
+            P_IS_INHIBIT = 2, ///< Блокировка тревоги во время работы.    
+            P_IS_SUPPRESS = 4,///< Подавление тревоги клиентами.
+            };
+
+        enum COMMANDS                ///< Константы.
+            {     
+
+            C_CMD_ACCEPT   = 100,    ///< Подтвердить ошибку.
+            C_CMD_SUPPRESS = 200,    ///< Подавить ошибку.
+            C_CMD_UNSET_SUPPRESS,    ///< Убрать подавление ошибки.
             };
     };
 //-----------------------------------------------------------------------------
@@ -160,9 +142,6 @@ class simple_error: public base_error
     public:
         simple_error( device* simple_device = 0 );
         virtual ~simple_error();
-
-        /// @brief Сброс параметров ошибки в значение по умолчанию (0).
-        void reset_errors_params();
 
         /// @brief Сохранение ошибки в поток для передачи на сервер.
         ///        
@@ -193,7 +172,7 @@ class simple_error: public base_error
 
         enum SYMPLE_ERROR_CONST     ///< Константы.
             {
-            SE_ERROR_CODE = 1,      ///< Код ошибки - нет обратной связи.
+			SE_ERROR_CODE = 1,      ///< Код ошибки - нет обратной связи.
             SE_PRIORITY = 300,      ///< Приоритет ошибки простого устройства.
             };
     };
