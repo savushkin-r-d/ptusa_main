@@ -137,8 +137,10 @@ class PAC_critical_errors_manager
                     {
                 case AS_EMERGENCY_BUTTON:                    
                     snprintf( tmp, sizeof( tmp ), "нажата аварийная кнопка №%d", par );
-                    return tmp;      
-
+                    return tmp;   
+                    
+                default:
+                    return "?";
                     }// switch( err_sub_class )
                 }// switch( err_class )
 

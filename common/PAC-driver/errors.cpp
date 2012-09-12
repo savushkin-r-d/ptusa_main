@@ -18,7 +18,7 @@ const int ALARM_CLASS_PRIORITY[ 4 ] = // Приоритет тревог.
 auto_smart_ptr < dev_errors_manager > dev_errors_manager::instance;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-base_error::base_error(): error_state( AS_NORMAL ), err_par( 1 )
+base_error::base_error(): err_par( 1 ), error_state( AS_NORMAL )
     {
     }
 //-----------------------------------------------------------------------------
@@ -84,7 +84,8 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
     if ( AS_ALARM == error_state ||
         AS_RETURN == error_state ) // Есть ошибка.
         {    	
-        unsigned char alarm_params = err_par[ P_PARAM_N ];
+        //Добавить обработку отключенных ошибок.
+        //unsigned char alarm_params = err_par[ P_PARAM_N ];
 
         sprintf( str + strlen( str ), "\t%s\n", "{" );
 
