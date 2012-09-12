@@ -24,6 +24,8 @@
 #ifndef MODE_MNGR 
 #define MODE_MNGR 
 
+#include <string>
+
 #include "dtime.h"
 
 #include "PAC_dev.h"
@@ -37,6 +39,10 @@ class action
     {
     public:
         action( std::string name );
+        
+        virtual ~action()
+            {            
+            }
 
         virtual void print( const char* prefix = "" ) const;
 

@@ -195,7 +195,9 @@ int tcp_communicator_linux::evaluate()
             {
             glob_cmctr_ok = 0;
             PAC_critical_errors_manager::get_instance()->set_global_error(
-                AC_NO_CONNECTION, AS_EASYSERVER, AS_EASYSERVER );
+                PAC_critical_errors_manager::AC_NO_CONNECTION, 
+                PAC_critical_errors_manager::AS_EASYSERVER, 
+                PAC_critical_errors_manager::AS_EASYSERVER );
             }
         }
     else
@@ -204,7 +206,9 @@ int tcp_communicator_linux::evaluate()
             {
             glob_cmctr_ok = 1;
             PAC_critical_errors_manager::get_instance()->reset_global_error(
-                AC_NO_CONNECTION, AS_EASYSERVER, AS_EASYSERVER );
+                PAC_critical_errors_manager::AC_NO_CONNECTION, 
+                PAC_critical_errors_manager::AS_EASYSERVER, 
+                PAC_critical_errors_manager::AS_EASYSERVER );
             }
         }
     // Проверка связи с сервером.-!>

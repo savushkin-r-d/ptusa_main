@@ -125,7 +125,7 @@ int project_manager::lua_load_configuration()
         Print( "Fatal error!\n" );
         exit( 1 );
         }
-
+    
     res = lua_manager::get_instance()->int_exec_lua_method( "object_manager",
         "get_objects_count", 0, "project_manager::lua_load_configuration()" );
     if ( res < 0 )

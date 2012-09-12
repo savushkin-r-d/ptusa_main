@@ -108,7 +108,8 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
             {
             is_set_err = true;
             PAC_critical_errors_manager::get_instance( )->set_global_error(
-                    AC_NO_CONNECTION, AS_WAGO, node->number );
+                PAC_critical_errors_manager::AC_NO_CONNECTION, 
+                PAC_critical_errors_manager::AS_WAGO, node->number );
             }
         }
     else
@@ -117,7 +118,8 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
             {
             is_set_err = false;
             PAC_critical_errors_manager::get_instance( )->reset_global_error(
-                    AC_NO_CONNECTION, AS_WAGO, node->number );
+                PAC_critical_errors_manager::PAC_critical_errors_manager::AC_NO_CONNECTION, 
+                PAC_critical_errors_manager::AS_WAGO, node->number );
             }
         }
     // Проверка связи с узлом Wago.-!>

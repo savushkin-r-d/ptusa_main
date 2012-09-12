@@ -70,8 +70,9 @@ int required_DI_action::check() const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-step::step( std::string name, bool is_mode /*= false */ ) : name( name ), 
-    is_mode( is_mode ), start_time( 0 )
+step::step( std::string name, bool is_mode /*= false */ ) : start_time( 0 ),
+    is_mode( is_mode ),
+    name( name )
     {
     actions.push_back( new on_action() );
     actions.push_back( new off_action() );
@@ -344,6 +345,9 @@ void open_seat_action::final()
 
     switch ( phase )
         {
+        case P_WAIT:
+                break;
+            
     case P_OPEN_UPPER:
         for ( u_int j = 0; j < wash_upper_seat_devices[ active_group_n ].size(); j++ )
             {
@@ -362,7 +366,7 @@ void open_seat_action::final()
 //-----------------------------------------------------------------------------
 void open_seat_action::add_dev( device *dev, u_int group, u_int seat_type )
     {
-    std::vector< std::vector< device* > > *seat_group;
+    std::vector< std::vector< device* > > *seat_group = 0;
 
     switch ( seat_type )
         {
@@ -400,7 +404,7 @@ void open_seat_action::print( const char* prefix /*= "" */ ) const
     
     if ( wash_upper_seat_devices.size() )
         {
-        Print( "%верхние -" );
+        Print( "верхние -" );
         for ( u_int i = 0; i < wash_upper_seat_devices.size(); i++ )
             {   
             Print( " {" );
@@ -434,12 +438,12 @@ void open_seat_action::print( const char* prefix /*= "" */ ) const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-mode::mode( const char* name, mode_manager *owner ) : name( name ),
-    owner( owner ),
+mode::mode( const char* name, mode_manager *owner ) : name( name ),    
     mode_step(  new step( "Шаг режима", true ) ),
     active_step_n( 0 ),
     start_time( get_millisec() ),
-    step_stub( "Шаг-заглушка" )
+    step_stub( "Шаг-заглушка" ),
+    owner( owner )
     {
     }
 //-----------------------------------------------------------------------------

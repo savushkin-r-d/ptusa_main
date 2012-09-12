@@ -586,23 +586,23 @@ void tech_object_manager::evaluate()
         tech_objects.at( i )->evaluate();
         }
 
-    static char has_Lua_eval = -1;
-    if ( has_Lua_eval == -1 )
+    static char has_Lua_eval = 0;
+    if ( has_Lua_eval == 0 )
         {
         lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
             "eval" );
 
         if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
             {
-            has_Lua_eval = 1;
+            has_Lua_eval = 2;
             }
         else
             {
-            has_Lua_eval = 0;
+            has_Lua_eval = 1;
             }                       
         }
 
-    if ( has_Lua_eval == 1 )
+    if ( has_Lua_eval == 2 )
         {
         lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
             "eval" );

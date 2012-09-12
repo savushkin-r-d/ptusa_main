@@ -23,17 +23,41 @@
 #include "tech_def.h"
 #include "lua_manager.h"
 
+#include "fcntl.h"
+
 int main( int argc, char *argv[] )
     {
+//    char *str = "/sys/class/leds/wago:green:usr1/brightness";
+//    
+//    int fd = open( str, O_WRONLY );
+//    if ( fd < 0 )
+//        {
+//        perror( " Error! ");
+//        return -1;
+//        }
+//    
+//    char *cmd = "255";
+//    write( fd, cmd, strlen( cmd ) );
+//    if ( fd > 0 )
+//        {
+//        close( fd );
+//        }
+//    
+//    return 0; 
+    
 #ifdef MINIOS7
     EnableHighRam();
     InitLib();
 #endif
 
+    setlocale( LC_ALL, "Russian" );
+    fprintf( stdout, "Тест русского языка!\n" );  
+    getchar();
+    
     if ( argc < 2 )
         {
-        Print( "Usage: main script.plua\n" );
-        return EXIT_FAILURE;
+        fprintf( stdout, "Usage: main script.plua\n" );        
+        return EXIT_SUCCESS;
         }
 
     time_t t = time( 0 );
@@ -115,7 +139,7 @@ int main( int argc, char *argv[] )
         G_WAGO_MANAGER()->write_outputs();
 #endif // ifndef
 
-        PAC_critical_errors_manager::get_instance()->show_errors();
+        //PAC_critical_errors_manager::get_instance()->show_errors();
 
         PAC_info::get_instance()->eval();
 

@@ -86,7 +86,7 @@ class par_device
         /// @param name - имя параметра.
         void set_par_name( u_int idx, u_int offset, const char* name );
 
-    private:
+    protected:
         enum CONSTANTS
             {
             C_MAX_PAR_NAME_LENGTH = 20, ///< Максимальная длина имени параметра.
@@ -606,10 +606,10 @@ class fb_device: public digital_wago_device
             device::DEVICE_SUB_TYPE sub_type );
         
         /// @brief Получение значения обратной связи на включенное состояние.
-        virtual int get_on_fb() const;
+        virtual int get_on_fb();
 
         /// @brief Получение значения обратной связи на выключенное состояние.
-        virtual int get_off_fb() const;
+        virtual int get_off_fb();
 
         /// @brief Сохранение дополнительных данных.
         void save_device_ex( char *buff );
@@ -661,7 +661,7 @@ class valve_DO1_DI1_off : public fb_device
         void direct_off();
 
     private:
-        int get_off_fb() const
+        int get_off_fb() 
             {
             return get_DI( DI_INDEX );
             }
@@ -694,7 +694,7 @@ class valve_DO1_DI1_on : public fb_device
         void direct_off();
 
     private:
-        int get_on_fb() const
+        int get_on_fb() 
             {
             return get_DI( DI_INDEX );
             }
@@ -729,12 +729,12 @@ class valve_DO1_DI2 : public fb_device
         void direct_off();
 
     private:
-        int get_off_fb() const
+        int get_off_fb() 
             {
             return get_DI( DI_INDEX_1 );
             }
 
-        int get_on_fb() const
+        int get_on_fb() 
             {
             return get_DI( DI_INDEX_2 );
             }
@@ -770,12 +770,12 @@ class valve_DO2_DI2 : public fb_device
         void direct_off();
 
     private:
-        int get_off_fb() const
+        int get_off_fb() 
             {
             return get_DI( DI_INDEX_1 );
             }
 
-        int get_on_fb() const
+        int get_on_fb() 
             {
             return get_DI( DI_INDEX_2 );
             }
@@ -821,14 +821,14 @@ class valve_mix_proof : public i_mix_proof,  public fb_device
         void direct_set_state( int new_state );
 
     private:
-        int get_off_fb() const
+        int get_off_fb() 
             {
-            return get_DI( DI_INDEX_1 );
+            return get_DI( DI_INDEX_U );
             }
 
-        int get_on_fb() const
+        int get_on_fb() 
             {
-            return get_DI( DI_INDEX_2 );
+            return get_DI( DI_INDEX_L );
             }
 
         u_long start_switch_time;   ///< Время начала переключения клапана.
@@ -1079,6 +1079,11 @@ class DI1 : public digital_wago_device
     public:
         void direct_on();
         void direct_off();
+        
+        int get_state()
+            {
+            return get_DI( DI_INDEX );
+            }
 
     private:
         enum CONSTANTS
@@ -1117,9 +1122,12 @@ class valve_DO2 : public DO2
 class motor : public device, public wago_device    
     {
     public:
-        motor( u_int number, device::DEVICE_SUB_TYPE sub_type ): state( 0 ),
-            freq( 0 ),
-            device( number, DT_M, sub_type, ADDITIONAL_PARAM_COUNT )            
+        motor( u_int number, device::DEVICE_SUB_TYPE sub_type ):            
+            device( number, DT_M, sub_type, ADDITIONAL_PARAM_COUNT )
+#ifdef DEBUG_NO_WAGO_MODULES
+            ,state( 0 ),
+            freq( 0 )
+#endif // DEBUG_NO_WAGO_MODULES                
             {
             set_par_name( P_ON_TIME,  0, "P_ON_TIME" );
             }
@@ -1155,10 +1163,12 @@ class motor : public device, public wago_device
             AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
             };
 
+        u_long start_switch_time;
+            
 #ifdef DEBUG_NO_WAGO_MODULES
         char  state;  ///< Состояние устройства.
 
-        float freq; ///< Состояние устройства.
+        float freq;   ///< Состояние устройства (частота).
 #endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
@@ -1270,10 +1280,10 @@ class counter : public device,
     public:
         counter( u_int number ): device(
             number, DT_FQT, DST_NONE, ADDITIONAL_PARAMS_COUNT ), 
-            value( 0 ),
-            flow_value( 0 ),
+            value( 0 ),            
             last_read_value( 0 ),
-            state( S_STOP )
+            state( S_STOP ),
+            flow_value( 0 )            
             {    
             set_par_name( P_MIN_FLOW,  0, "P_MIN_FLOW" );
             set_par_name( P_MAX_FLOW,  0, "P_MAX_FLOW" );

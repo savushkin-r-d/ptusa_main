@@ -161,7 +161,7 @@ void par_device::set_par_name( u_int idx, u_int offset, const char* name )
 void device::print() const
     {
 #ifdef DEBUG   
-    if ( type <= C_DEVICE_TYPE_CNT )
+    if ( ( CONSTANTS ) type <= C_DEVICE_TYPE_CNT )
         {
         Print( "%s", DEV_NAMES[ type ] );
         }
@@ -1477,12 +1477,12 @@ void AI1::direct_set_value( float new_value )
 
 float AO1::get_value()
     {
-    return get_AO( AO_INDEX, par[ P_MIN_VALUE ], par[ P_MAX_VALUE ] );
+    return get_AO( AO_INDEX, get_min_value(), get_max_value() );
     }
 //-----------------------------------------------------------------------------
 void AO1::direct_set_value( float new_value )
     {
-    set_AO( AO_INDEX, new_value, par[ P_MIN_VALUE ], par[ P_MAX_VALUE ] );
+    set_AO( AO_INDEX, get_min_value(), get_max_value() );
     }
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
@@ -1514,7 +1514,7 @@ float motor::get_value()
 #ifdef DEBUG_NO_WAGO_MODULES
     return freq;
 #else
-    freq = get_AO( AO_INDEX, C_MIN_VALUE, C_MAX_VALUE );
+    return get_AO( AO_INDEX, C_MIN_VALUE, C_MAX_VALUE );
 #endif // DEBUG_NO_WAGO_MODULES
     }
 //-----------------------------------------------------------------------------
@@ -1557,7 +1557,7 @@ int motor::get_state()
         return i;
         }   
 
-    if ( get_sec() - start_switch_time > C_SWITCH_TIME )
+    if ( get_sec() - start_switch_time > P_ON_TIME )
         {
         return -1;
         }
@@ -1684,21 +1684,22 @@ void analog_wago_device::direct_set_value( float new_value )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 fb_device::fb_device( bool is_on_fb, bool is_off_fb, int number, 
-    device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ) : is_on_fb( is_on_fb ),
-    is_off_fb( is_off_fb ),
-    digital_wago_device( number, type, sub_type, ADDITIONAL_PARAMS_COUNT )
+    device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ) : 
+    digital_wago_device( number, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
+    is_on_fb( is_on_fb ),
+    is_off_fb( is_off_fb )
     {
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     set_par_name( P_FB_OFF,  0, "P_FB_OFF" );
     set_par_name( P_FB_ON,   0, "P_FB_ON" );    
     }
 //-----------------------------------------------------------------------------
-int fb_device::get_on_fb() const
+int fb_device::get_on_fb()
     {
     return 0;
     }
 //-----------------------------------------------------------------------------
-int fb_device::get_off_fb() const
+int fb_device::get_off_fb()
     {
     return 0;
     }

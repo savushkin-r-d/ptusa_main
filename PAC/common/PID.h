@@ -89,7 +89,7 @@ class PID: public i_Lua_save_device
         /// @param n - номер.
         PID( int n );
 
-        ~PID(); 
+        virtual ~PID(); 
                 
         /// @brief Включение ПИД.
         void  on( char is_down_to_inaccel_mode = 0 );

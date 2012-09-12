@@ -54,7 +54,11 @@ const int SYS_FILE_CNT = 3;
 const int FILE_CNT     = 6;
 //-----------------------------------------------------------------------------
 #ifdef PAC_PC
+#ifdef LINUX_OS
+const char* SYS_PATH = "../../system scripts/";
+#else
 const char* SYS_PATH = "..\\..\\system scripts\\";
+#endif
 #endif // PAC_PC
 
 const char *FILES[ FILE_CNT ] = 
@@ -160,8 +164,8 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
 #endif // PAC_PC
 
         if ( res == -1 )
-            {
-            Print( err_str );
+            {            
+            Print( "%s", err_str );            
             return 1;
             }
 
@@ -169,7 +173,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             {
             snprintf( err_str, sizeof( err_str ), "File \"%s\" has version %d, must be %d!\n",
                 FILES[ i ], res, FILES_VERSION[ i ] );
-            Print( err_str );
+            Print( "%s", err_str );
             return 1;
             }
         }
@@ -235,7 +239,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             return 1;
             } 
         }       
-
+   
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -324,7 +328,7 @@ int lua_manager::exec_lua_method( const char *object_name,
 
     int param_count = 0;
 
-    if ( object_name && object_name != "" )
+    if ( object_name && strcmp( object_name, "" ) != 0 )
         {
         lua_getfield( L, LUA_GLOBALSINDEX, object_name );
         lua_getfield( L, -1, function_name );

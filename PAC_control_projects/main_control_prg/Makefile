@@ -51,9 +51,9 @@ CCADMIN=CCadmin
 RANLIB=ranlib
 
 #my var
-out_dir     = "${HOME}/id_share/out/"
+out_dir     = ""${HOME}/id_share/out/""
 lua_sys_dir = ""${HOME}/PTUSA_projects/system scripts/""
-lua_prg_dir = ""${HOME}/PTUSA_projects/projects/whey_out/""
+lua_prg_dir = ""${HOME}/PTUSA_projects/projects/paster_device_2/""
 
 # build
 build: .build-post
@@ -68,15 +68,19 @@ build: .build-post
 		echo copying files...;\
 \
 		echo "${CND_ARTIFACT_PATH_${CONF}}main >>  ${out_dir}main";\
-		cp    ${CND_ARTIFACT_PATH_${CONF}} ${out_dir}main;\
+		cp    ${CND_ARTIFACT_PATH_${CONF}} "${out_dir}main";\
 \
-		echo "${lua_sys_dir}sys_wago.lua\t >> ${out_dir}sys_wago.lua";\
-		cp   "${lua_sys_dir}sys_wago.lua" ${out_dir};\
-		echo "${lua_sys_dir}sys.lua\t      >> ${out_dir}sys.lua";\
-		cp   "${lua_sys_dir}sys.lua" ${out_dir};\
+		echo "${lua_sys_dir}sys.wago.lua\t >> ${out_dir}sys.wago.lua";\
+		cp   "${lua_sys_dir}sys.wago.lua" ${out_dir};\
+		echo "${lua_sys_dir}sys.objects.lua\t      >> ${out_dir}sys.objects.lua";\
+		cp   "${lua_sys_dir}sys.objects.lua" ${out_dir};\
 \
-		echo "${lua_prg_dir}main.wago.plua    >> ${out_dir}";\
-		cp   "${lua_prg_dir}main.wago.plua" ${out_dir};\
+		echo "${lua_prg_dir}main.wago.lua    >> ${out_dir}";\
+		cp   "${lua_prg_dir}main.wago.lua" ${out_dir};\
+		echo "${lua_prg_dir}main.devices.lua    >> ${out_dir}";\
+		cp   "${lua_prg_dir}main.devices.lua" ${out_dir};\
+		echo "${lua_prg_dir}main.objects.lua    >> ${out_dir}";\
+		cp   "${lua_prg_dir}main.objects.lua" ${out_dir};\
 		echo "${lua_prg_dir}main.plua\t >> ${out_dir}";\
 		cp   "${lua_prg_dir}main.plua" ${out_dir};\
 \

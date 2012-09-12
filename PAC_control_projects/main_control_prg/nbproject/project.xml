@@ -12,11 +12,26 @@
             <make-dep-projects/>
             <sourceRootList/>
             <confList>
-                <confElem>release_PC</confElem>
-                <confElem>debug_PC</confElem>
-                <confElem>release_wago_750-860</confElem>
-                <confElem>debug_wago_750-860</confElem>
-                <confElem>no_wagoIO_debug_wago_750-860</confElem>
+                <confElem>
+                    <name>release_PC</name>
+                    <type>1</type>
+                </confElem>
+                <confElem>
+                    <name>debug_PC</name>
+                    <type>1</type>
+                </confElem>
+                <confElem>
+                    <name>release_wago_750-860</name>
+                    <type>1</type>
+                </confElem>
+                <confElem>
+                    <name>debug_wago_750-860</name>
+                    <type>1</type>
+                </confElem>
+                <confElem>
+                    <name>no_wagoIO_debug_wago_750-860</name>
+                    <type>1</type>
+                </confElem>
             </confList>
         </data>
     </configuration>

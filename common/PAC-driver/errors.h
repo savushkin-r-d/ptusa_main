@@ -78,6 +78,10 @@ class base_error
     {
     public:
         base_error();
+        
+        virtual ~base_error()
+            {                
+            }
 
         /// @brief Сохранение ошибки в поток для передачи на сервер.
         ///        
