@@ -12,7 +12,7 @@ extern "C" {
     };
 #endif
 
-#include    "tolua++.h"    
+#include    "tolua++.h"
 //-----------------------------------------------------------------------------
 TOLUA_API int tolua_PAC_dev_open ( lua_State* tolua_S );
 //-----------------------------------------------------------------------------
@@ -22,33 +22,36 @@ class lua_manager
         static lua_manager* get_instance();
 
         int init( lua_State* L, char* script_name );
-        
+
         ~lua_manager();
 
         int void_exec_lua_method( const char *object_name,
             const char *function_name, const char *c_function_name ) const;
 
         const char* char_no_param_exec_lua_method( const char *object_name,
-            const char *function_name, const char *c_function_name ) const;        
+            const char *function_name, const char *c_function_name ) const;
 
-        int int_exec_lua_method( const char *object_name, 
+        const char* char_exec_lua_method( const char *object_name,
+            const char *function_name, int param, const char *c_function_name ) const;
+
+        int int_exec_lua_method( const char *object_name,
             const char *function_name, int param,
             const char *c_function_name ) const;
 
-        int int_no_param_exec_lua_method( const char *object_name, 
+        int int_no_param_exec_lua_method( const char *object_name,
             const char *function_name, const char *c_function_name ) const;
 
         void* user_object_exec_lua_method( const char *object_name,
             const char *function_name, int param,
             const char *c_function_name ) const;
 
-        int exec_Lua_str( const char *Lua_str, const char *error_str, 
+        int exec_Lua_str( const char *Lua_str, const char *error_str,
             bool is_print_error_msg = true ) const;
 
         lua_State * get_Lua() const;
 
     private:
-        lua_manager() : is_free_lua( 0 ) 
+        lua_manager() : is_free_lua( 0 )
             {
             }
 

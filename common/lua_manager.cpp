@@ -42,7 +42,7 @@ int check_file( const char* file_name, char* err_str )
         }
 
     char str[ 100 ] = "";
-    fgets( str, sizeof( str ), f );   
+    fgets( str, sizeof( str ), f );
 
     int version = 0;
     sscanf( str, "--version = %d", &version );
@@ -61,8 +61,8 @@ const char* SYS_PATH = "..\\..\\system scripts\\";
 #endif
 #endif // PAC_PC
 
-const char *FILES[ FILE_CNT ] = 
-    {    
+const char *FILES[ FILE_CNT ] =
+    {
     "sys.wago.lua",
     "sys.devices.lua",
     "sys.objects.lua",
@@ -72,8 +72,8 @@ const char *FILES[ FILE_CNT ] =
     "main.objects.lua"
     };
 //-----------------------------------------------------------------------------
-const int FILES_VERSION[ FILE_CNT ] = 
-    {    
+const int FILES_VERSION[ FILE_CNT ] =
+    {
     1, //"sys.wago.plua",
     1, //"sys.devices.lua",
     1, //"sys.tech_objects.plua",
@@ -85,27 +85,27 @@ const int FILES_VERSION[ FILE_CNT ] =
 //-----------------------------------------------------------------------------
 //I
 //Загружаем последовательно Lua-скрипты. Их структура такова, что все необходимые
-//действия реализованы в виде функций, которые потом в определенном порядке 
+//действия реализованы в виде функций, которые потом в определенном порядке
 //будут выполнятся.
 //Скрипты разделены на системные (общие
 //для всех проектов) и проекта (описание отдельного проекта). Системные скрипты
 //имеют префикс sys и хранятся в папке "system scripts" на PC. Список скриптов:
-// 1. sys.wago.plua - функции получения описания Wago и устройств с привязкой к 
+// 1. sys.wago.plua - функции получения описания Wago и устройств с привязкой к
 // каналам ввода\вывода. Они вызываются исполняющей программой (С++).
 // 2. sys.devices.plua - функции получения описания технологических устройств
-// (клапана, насосы и т.д.). Они вызываются исполняющей программой 
+// (клапана, насосы и т.д.). Они вызываются исполняющей программой
 // (С++).
-// 3. sys.objects.plua - функции получения описания технологических 
-// объектов (режимы, параметры и т.д.). Они вызываются исполняющей программой 
+// 3. sys.objects.plua - функции получения описания технологических
+// объектов (режимы, параметры и т.д.). Они вызываются исполняющей программой
 // (С++).
 //Пользовательские скрипты имеют префикс main и хранятся в папке конкретного
 //проекта. Список скриптов:
-// 1. main.wago.plua - описание Wago и устройств проекта с привязкой к каналам 
-// ввода\вывода. 
+// 1. main.wago.plua - описание Wago и устройств проекта с привязкой к каналам
+// ввода\вывода.
 // 2. main.devices.plua - буквенно-цифровое описание технологических устройств
-// (клапана, насосы и т.д.) проекта для более удобного использования (S1V52  
+// (клапана, насосы и т.д.) проекта для более удобного использования (S1V52
 // вместо V(1251)).
-// 2. main.objects.plua - описание технологических объектов (режимы, 
+// 2. main.objects.plua - описание технологических объектов (режимы,
 // параметры и т.д.) проекта.
 // 3. main.plua - пользовательская логика работы проекта.
 //Для каждого файла проверяется его наличие и версия (первая строка файла должна
@@ -140,7 +140,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         L = lua_state;
         is_free_lua = 0;
         }
-        
+
     //I
     //Проверка наличия и версии скриптов.
     char err_str[ 100 ] = "";
@@ -164,8 +164,8 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
 #endif // PAC_PC
 
         if ( res == -1 )
-            {            
-            Print( "%s", err_str );            
+            {
+            Print( "%s", err_str );
             return 1;
             }
 
@@ -178,7 +178,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             }
         }
 
-    //-Выполнение системных скриптов sys.lua. 
+    //-Выполнение системных скриптов sys.lua.
     for ( int i = 0; i < FILE_CNT; i++ )
         {
 
@@ -192,14 +192,14 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             {
             snprintf( path, sizeof( path ), "%s", FILES[ i ] );
             }
-        
+
         if ( luaL_dofile( L, path ) != 0 )
 #else
         if ( luaL_dofile( L, FILES[ i ] ) != 0 )
 #endif // PAC_PC
             {
 #ifdef DEBUG
-            Print( "Load Lua script \"%s\" error!\n", 
+            Print( "Load Lua script \"%s\" error!\n",
                 FILES[ i ] );
             Print( "\t%s\n", lua_tostring( L, -1 ) );
 #endif // DEBUG
@@ -217,7 +217,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
     //Выполняем процедуры инициализации.
     G_PROJECT_MANAGER->lua_load_configuration();
 
-    if ( 0 == lua_state )      
+    if ( 0 == lua_state )
         {
         if( luaL_loadfile( L, script_name ) != 0 )
             {
@@ -235,11 +235,11 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             Print( "Evaluate Lua script error!\n" );
             Print( "\t%s\n", lua_tostring( L, -1 ) );
 
-            lua_pop( L, 1 );            
+            lua_pop( L, 1 );
             return 1;
-            } 
-        }       
-   
+            }
+        }
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -252,7 +252,7 @@ lua_manager::~lua_manager()
             lua_close( L );
             L = NULL;
             }
-        }    
+        }
     }
 //-----------------------------------------------------------------------------
 int lua_manager::void_exec_lua_method( const char *object_name,
@@ -315,7 +315,7 @@ void* lua_manager::user_object_exec_lua_method( const char *object_name,
 int lua_manager::exec_lua_method( const char *object_name,
     const char *function_name, int param, int is_use_param,
     int is_use_lua_return_value ) const
-    {   
+    {
     //-Вычисление времени выполнения функций Lua.
     //LARGE_INTEGER start_time;
     //QueryPerformanceCounter( &start_time );
@@ -341,7 +341,7 @@ int lua_manager::exec_lua_method( const char *object_name,
         {
         lua_getfield( L, LUA_GLOBALSINDEX, function_name );
         }
-    
+
     if ( is_use_param )
         {
         lua_pushnumber( L, param );
@@ -356,7 +356,7 @@ int lua_manager::exec_lua_method( const char *object_name,
     //QueryPerformanceCounter( &finish_time );
     //LARGE_INTEGER tick_per_sec;
     //QueryPerformanceFrequency( &tick_per_sec );
-    //LONGLONG call_time = finish_time.QuadPart - start_time.QuadPart;    
+    //LONGLONG call_time = finish_time.QuadPart - start_time.QuadPart;
     //int tiks_per_mcsec = tick_per_sec.QuadPart / ( 1000 * 1000 );
     //double dt = call_time / tiks_per_mcsec;
     //dt += 1;
@@ -409,11 +409,11 @@ int lua_manager::error_trace( lua_State * L )
 
     ////    printf("C++ stack traceback: %s\n", stackTrace);
     ////    }
-    
+
     return 0;
     }
 //-----------------------------------------------------------------------------
-int lua_manager::int_no_param_exec_lua_method( const char *object_name, 
+int lua_manager::int_no_param_exec_lua_method( const char *object_name,
     const char *function_name, const char *c_function_name ) const
     {
     int res = 0;
@@ -432,8 +432,27 @@ int lua_manager::int_no_param_exec_lua_method( const char *object_name,
 
     return res;
     }
+//-----------------------------------------------------------------------------
+const char* lua_manager::char_exec_lua_method( const char *object_name,
+            const char *function_name, int param, const char *c_function_name ) const
+     {
+         const char* res = 0;
+    if ( 0 == exec_lua_method( object_name, function_name, param, 1, 1 ) )
+        {
+        res = tolua_tostring( L, -1, 0 );
+        lua_remove( L, -1 );
+        }
+    else
+        {
+#ifdef DEBUG
+        Print( "Error during C++ call - \"%s\"\n", c_function_name );
+#endif // DEBUG
+        }
 
-const char* lua_manager::char_no_param_exec_lua_method( const char *object_name, 
+     return res;
+     }
+//-----------------------------------------------------------------------------
+const char* lua_manager::char_no_param_exec_lua_method( const char *object_name,
     const char *function_name, const char *c_function_name ) const
     {
     const char* res = 0;
@@ -461,7 +480,7 @@ int lua_manager::exec_Lua_str( const char *Lua_str, const char *error_str,
         {
         if ( is_print_error_msg )
             {
-            Print( "Error during C++ call - \"%s\" - %s\n", 
+            Print( "Error during C++ call - \"%s\" - %s\n",
                 error_str, lua_tostring( L, -1 ) );
             }
 
