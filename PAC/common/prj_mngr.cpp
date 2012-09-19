@@ -1,6 +1,6 @@
 #if !defined WIN_OS && !defined LINUX_OS && !defined MINIOS7
 #error You must define OS!
-#endif 
+#endif
 
 #include <string.h>
 #include <stdlib.h>
@@ -84,38 +84,38 @@ int project_manager::lua_load_configuration()
     Print( "\nProject manager - processing configuration...\n" );
 
     //-File editor_version.
-    const char* file_date = 
+    const char* file_date =
         lua_manager::get_instance()->char_no_param_exec_lua_method( "system",
         "get_file_date", "project_manager::lua_load_configuration()" );
 
     Print( "--Files date: \"%s\"\n", file_date );
 #endif // DEBUG
-   
+
     //-Wago modules data.
-    lua_manager::get_instance()->void_exec_lua_method( "system", 
+    lua_manager::get_instance()->void_exec_lua_method( "system",
         "create_wago", "project_manager::lua_load_configuration()" );
 
 #ifdef DEBUG
     wago_manager::get_instance()->print();
 #endif // DEBUG
 
-    //-Devices data.    
-    lua_manager::get_instance()->void_exec_lua_method( "system", 
+    //-Devices data.
+    lua_manager::get_instance()->void_exec_lua_method( "system",
         "create_devices", "project_manager::lua_load_configuration()" );
 
-    lua_manager::get_instance()->void_exec_lua_method( "system", 
-        "init_devices_names", "project_manager::lua_load_configuration()" );    
-    
-    //-Name for devices to access from Lua.    
-    lua_manager::get_instance()->void_exec_lua_method( "system", 
-        "init_dev_names", "project_manager::lua_load_configuration()" ); 
+    //-Получение описания устройств из Lua.
+    G_DEVICE_MANAGER()->init_devices_names();
 
-    //-Devices properties.    
-    lua_manager::get_instance()->void_exec_lua_method( "system", 
+    //-Name for devices to access from Lua.
+    lua_manager::get_instance()->void_exec_lua_method( "system",
+        "init_dev_names", "project_manager::lua_load_configuration()" );
+
+    //-Devices properties.
+    lua_manager::get_instance()->void_exec_lua_method( "system",
         "init_devices_properties", "project_manager::lua_load_configuration()" );
 
-#ifdef DEBUG    
-    G_DEVICE_MANAGER()->print();        
+#ifdef DEBUG
+    G_DEVICE_MANAGER()->print();
 #endif // DEBUG
 
     int res = lua_manager::get_instance()->int_exec_lua_method( "",
@@ -125,7 +125,7 @@ int project_manager::lua_load_configuration()
         Print( "Fatal error!\n" );
         exit( 1 );
         }
-    
+
     res = lua_manager::get_instance()->int_exec_lua_method( "object_manager",
         "get_objects_count", 0, "project_manager::lua_load_configuration()" );
     if ( res < 0 )
@@ -153,7 +153,7 @@ int project_manager::lua_load_configuration()
     //-Добавление технологических объектов проекта.
     for ( u_int i = 0; i < G_TECH_OBJECT_MNGR()->get_count(); i++ )
         {
-        G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS( i ) );        
+        G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS( i ) );
         }
     //-Добавление системных тегов контроллера.
     G_DEVICE_CMMCTR->add_device( PAC_info::get_instance() );

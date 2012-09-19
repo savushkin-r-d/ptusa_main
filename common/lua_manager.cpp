@@ -14,6 +14,7 @@
 
 #include "prj_mngr.h"
 #include "PAC_dev.h"
+#include "tech_def.h"
 
 //-----------------------------------------------------------------------------
 auto_smart_ptr< lua_manager > lua_manager::instance;
@@ -132,8 +133,8 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             }
         is_free_lua = 1;
 
+        lua_gc( L, LUA_GCSTOP, 0 );
         luaL_openlibs( L );    // Open standard libraries.
-
         }
     else
         {
@@ -217,6 +218,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
     //Выполняем процедуры инициализации.
     G_PROJECT_MANAGER->lua_load_configuration();
 
+    //IV Выполнение основного скрипта ('main.plua').
     if ( 0 == lua_state )
         {
         if( luaL_loadfile( L, script_name ) != 0 )
@@ -239,6 +241,32 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             return 1;
             }
         }
+
+    //Выполнение пользовательской функции инициализации.
+    G_TECH_OBJECT_MNGR()->init_objects();
+
+    const char *PAC_name =
+        G_LUA_MANAGER->char_no_param_exec_lua_method( "system",
+        "get_PAC_name", "lua_manager::init" );
+    if ( 0 == PAC_name )
+        {
+        fprintf( stderr, "Lua init error - error reading PAC name!\n" );
+        debug_break;
+        return 1;
+        }
+    tcp_communicator::init_instance( PAC_name );
+    G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
+        device_communicator::write_devices_states_service );
+
+    lua_gc( L, LUA_GCRESTART, 0 );
+    lua_gc( L, LUA_GCCOLLECT, 0 );
+
+    //-Загрузка параметров.
+    const int PAC_ID =
+        lua_manager::get_instance()->int_no_param_exec_lua_method( "system",
+        "get_PAC_id", "main" );
+    params_manager::get_instance()->init( PAC_ID );
+    params_manager::get_instance()->final_init();
 
     return 0;
     }

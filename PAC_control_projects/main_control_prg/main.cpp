@@ -27,36 +27,14 @@
 
 int main( int argc, char *argv[] )
     {
-//    char *str = "/sys/class/leds/wago:green:usr1/brightness";
-//    
-//    int fd = open( str, O_WRONLY );
-//    if ( fd < 0 )
-//        {
-//        perror( " Error! ");
-//        return -1;
-//        }
-//    
-//    char *cmd = "255";
-//    write( fd, cmd, strlen( cmd ) );
-//    if ( fd > 0 )
-//        {
-//        close( fd );
-//        }
-//    
-//    return 0; 
-    
 #ifdef MINIOS7
     EnableHighRam();
     InitLib();
 #endif
 
-    setlocale( LC_ALL, "Russian" );
-    fprintf( stdout, "Тест русского языка!\n" );  
-    getchar();
-    
     if ( argc < 2 )
         {
-        fprintf( stdout, "Usage: main script.plua\n" );        
+        Print( "Usage: main script.plua\n" );
         return EXIT_SUCCESS;
         }
 
@@ -66,36 +44,13 @@ int main( int argc, char *argv[] )
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
     int res = G_LUA_MANAGER->init( 0, argv[ 1 ] ); //-Инициализация Lua.
-    lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTOP, 0 );
 
     if ( res ) //-Ошибка инициализации.
         {
         fprintf( stderr, "Lua init error - %d!\n", res );
         debug_break;
         return EXIT_FAILURE;
-        }  
-
-    G_TECH_OBJECT_MNGR()->init_objects();
-
-
-    const char *PAC_name =
-        G_LUA_MANAGER->char_no_param_exec_lua_method( "system",
-        "get_PAC_name", "lua_manager::init" );
-    if ( 0 == PAC_name )
-        {
-        fprintf( stderr, "Lua init error - error reading PAC name!\n" );
-        debug_break;
-        return EXIT_FAILURE;
         }
-    tcp_communicator::init_instance( PAC_name );
-    G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
-        device_communicator::write_devices_states_service );
-
-    //-Добавление системных тегов контроллера.
-    G_DEVICE_CMMCTR->add_device( PAC_info::get_instance() );
-
-    params_manager::get_instance()->init( 10 );
-    params_manager::get_instance()->final_init();
 
 #ifdef DEBUG
     G_DEVICE_MANAGER()->print();
@@ -103,8 +58,6 @@ int main( int argc, char *argv[] )
     G_TECH_OBJECT_MNGR()->print();
 #endif // DEBUG
 
-    lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCRESTART, 0 );
-    lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOLLECT, 0 );
     fflush( stdout );
     fprintf( stderr, "Start main loop!\n" );
 
@@ -158,12 +111,12 @@ int main( int argc, char *argv[] )
 #ifdef WIN_OS
         const u_int MAX_ITERATION = 1000;
 #endif // WIN_OS
-        const u_int END_ITERATION = 1000;        
+        const u_int END_ITERATION = 1000;
 
         static u_int max_cycle_time = 0;
         u_int cycle_time = get_delta_millisec( st_time );
 
-        if ( max_cycle_time < cycle_time ) 
+        if ( max_cycle_time < cycle_time )
             {
             max_cycle_time = cycle_time;
             print_time( "  Main cycle avg time = %lu msec, max time = %4u, Lua mem = %d b\n",

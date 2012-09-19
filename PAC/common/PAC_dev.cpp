@@ -6,17 +6,17 @@
 
 auto_smart_ptr < device_manager > device_manager::instance;
 
-const char device::DEV_NAMES[][ 5 ] = 
+const char device::DEV_NAMES[][ 5 ] =
     {
-    "V",       ///< Клапан. 
-    "VC",      ///< Управляемый клапан. 
+    "V",       ///< Клапан.
+    "VC",      ///< Управляемый клапан.
     "M",       ///< Двигатель.
     "LS",      ///< Уровень (есть/нет).
-    "TE",      ///< Температура.        
+    "TE",      ///< Температура.
     "FS",      ///< Расход (есть/нет).
-    "GS",      ///< Датчик положения. 
-    "FQT",     ///< Счетчик.        
-    "LT",      ///< Уровень (значение).        
+    "GS",      ///< Датчик положения.
+    "FQT",     ///< Счетчик.
+    "LT",      ///< Уровень (значение).
     "QT",      ///< Концентрация.
 
     "HA",      ///< Аварийная звуковая сигнализация.
@@ -55,9 +55,9 @@ void par_device::save_device ( char *str )
                     {
                     sprintf( str + strlen( str ), "%.2f, ", val );
                     }
-                }                    
+                }
             }
-        }   
+        }
     }
 //-----------------------------------------------------------------------------
 int par_device::set_cmd( const char *name, double val )
@@ -78,7 +78,7 @@ int par_device::set_cmd( const char *name, double val )
 #ifdef DEBUG
     Print( "par_device::set_cmd() - name = %s wasn't found.\n",
         name );
-#endif // DEBUG            
+#endif // DEBUG
     return 1;
     }
 //-----------------------------------------------------------------------------
@@ -94,7 +94,7 @@ par_device::par_device ( u_int par_cnt ) : par ( saved_params_float ( par_cnt ) 
         {
         par_name = new char*[ par_cnt ];
         for ( u_int i = 0; i < par_cnt; i++ )
-            {                    
+            {
             par_name[ i ] = 0;
             }
         }
@@ -118,12 +118,12 @@ float par_device::get_par( u_int idx, u_int offset )
     }
 //-----------------------------------------------------------------------------
 void par_device::set_par_name( u_int idx, u_int offset, const char* name )
-    {    
+    {
     if ( offset + idx < par.get_count() )
         {
         if ( strlen( name ) > C_MAX_PAR_NAME_LENGTH )
             {
-#ifdef DEBUG  
+#ifdef DEBUG
             Print( "Error par_device::set_par_name( u_int idx, u_int offset, const char* name ) - "
                 "name length (%d) > param C_MAX_PAR_NAME_LENGTH (%d).",
                 strlen( name ), C_MAX_PAR_NAME_LENGTH );
@@ -158,9 +158,21 @@ void par_device::set_par_name( u_int idx, u_int offset, const char* name )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+void device::set_name( const char *new_name )
+    {
+    name = new char[ strlen( new_name ) ];
+    strcpy( name, new_name );
+    }
+//-----------------------------------------------------------------------------
+void device::set_description( const char *new_description )
+    {
+    description = new char[ strlen( new_description ) ];
+    strcpy( description, new_description );
+    }
+//-----------------------------------------------------------------------------
 void device::print() const
     {
-#ifdef DEBUG   
+#ifdef DEBUG
     if ( ( CONSTANTS ) type <= C_DEVICE_TYPE_CNT )
         {
         Print( "%s", DEV_NAMES[ type ] );
@@ -186,15 +198,15 @@ int device::save_device( char *buff, const char *prefix )
     {
     sprintf( buff, "%s%s={M=%d, ",
         prefix,  get_name(), is_manual_mode );
-    
+
     if ( type != DT_AO &&
         type != DT_TE )
         {
         sprintf( buff + strlen( buff ), "ST=%d, ", get_state() );
         }
 
-    if ( type != DT_V &&        
-        
+    if ( type != DT_V &&
+
         type != DT_LS &&
         type != DT_FS &&
         type != DT_GS &&
@@ -215,14 +227,14 @@ int device::save_device( char *buff, const char *prefix )
             sprintf( buff + strlen( buff ), "V=%.2f, ", get_value() );
             }
         }
-    
+
     save_device_ex( buff + strlen( buff ) );
-    
+
     par_device::save_device( buff + strlen( buff ) );
     buff[ strlen( buff ) - 2 ] = 0; //Убираем лишнюю последнюю запятую и пробел.
 
     sprintf( buff + strlen( buff ), "},\n" );
-    
+
     return strlen( buff );
     }
 //-----------------------------------------------------------------------------
@@ -263,7 +275,7 @@ int device::set_cmd( const char *prop, u_int idx, double val )
 
 #ifdef DEBUG
     default:
-        Print( "Error device::set_cmd() - prop = %s, val = %f\n", 
+        Print( "Error device::set_cmd() - prop = %s, val = %f\n",
             prop, val );
 #endif // DEBUG
         }
@@ -271,9 +283,9 @@ int device::set_cmd( const char *prop, u_int idx, double val )
     return 0;
     }
 //-----------------------------------------------------------------------------
-device::device( int number, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type, 
-    u_int par_cnt ) :    
-    par_device( par_cnt ),   
+device::device( int number, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type,
+    u_int par_cnt ) :
+    par_device( par_cnt ),
     number( number ),
     type( type ),
     sub_type( sub_type ),
@@ -327,7 +339,7 @@ device_manager* device_manager::get_instance()
     return instance;
     }
 //-----------------------------------------------------------------------------
-int device_manager::get_device_n( device::DEVICE_TYPE dev_type, 
+int device_manager::get_device_n( device::DEVICE_TYPE dev_type,
     u_int dev_number )
     {
     int l = dev_types_ranges[ dev_type ].start_pos;
@@ -335,11 +347,11 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type,
 
     if ( -1 == l ) return -1; // Нет устройств.
 
-    while ( l <= u ) 
+    while ( l <= u )
         {
         int i = ( l + u ) / 2;
 
-        if ( dev_number == project_devices[ i ]->get_n() ) 
+        if ( dev_number == project_devices[ i ]->get_n() )
             {
             return i;
             }
@@ -347,11 +359,11 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type,
         if ( dev_number > project_devices[ i ]->get_n() )
             {
             l = i + 1;
-            } 
-        else 
+            }
+        else
             {
             u = i - 1;
-            }        
+            }
         }
 
     return -1;
@@ -370,13 +382,13 @@ device* device_manager::get_device( int dev_type,
             }
         catch (...)
             {
-            }        
+            }
         }
     else
         {
 #ifdef DEBUG
 
-        if ( dev_type <= device::C_DEVICE_TYPE_CNT ) 
+        if ( dev_type <= device::C_DEVICE_TYPE_CNT )
             {
             Print( "%s ", device::DEV_NAMES[ dev_type ] );
             }
@@ -400,7 +412,7 @@ void device_manager::print() const
         {
         Print( "    %3i. ", i + 1 );
         project_devices[ i ]->print();
-        Print( "\n" ); 
+        Print( "\n" );
         }
     }
 //-----------------------------------------------------------------------------
@@ -424,7 +436,7 @@ device_manager::~device_manager()
 
 #ifndef __BORLANDC__
     project_devices.clear();
-#endif  
+#endif
     }
 //-----------------------------------------------------------------------------
 i_AO_device* device_manager::get_VC( int number )
@@ -520,7 +532,7 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
     wago_device* new_wago_device = 0;
 
     switch ( dev_type )
-        {                
+        {
     case device::DT_V:
         {
         switch ( dev_sub_type )
@@ -556,8 +568,8 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             break;
 
         default:
-#ifdef DEBUG                        
-            Print( "Unknown V device subtype %d!\n", dev_sub_type );                        
+#ifdef DEBUG
+            Print( "Unknown V device subtype %d!\n", dev_sub_type );
             get_char();
 #endif // DEBUG
             new_device      = new dev_stub();
@@ -572,7 +584,7 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
         break;
 
     case device::DT_M:
-        new_device      = new motor( number,  
+        new_device      = new motor( number,
             ( device::DEVICE_SUB_TYPE ) dev_sub_type );
         new_wago_device = ( motor* ) new_device;
         break;
@@ -588,7 +600,7 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
         new_wago_device = ( temperature_e* ) new_device;
         break;
 
-    case device::DT_FS:                    
+    case device::DT_FS:
         new_device      = new flow_s( number );
         new_wago_device = ( flow_s* ) new_device;
         break;
@@ -653,7 +665,7 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
         Print( "Unknown device type %d!\n", dev_type );
 #endif // DEBUG
         new_device = new dev_stub();
-        break;        
+        break;
         }
 
     // Ошибки.
@@ -670,17 +682,31 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             is_first_device[ dev_type ] = 1;
             }
         dev_types_ranges[ dev_type ].end_pos = new_dev_index;
-        }    
+        }
 
     return new_wago_device;
     }
 //-----------------------------------------------------------------------------
 int device_manager::init_params()
     {
-    lua_manager::get_instance()->void_exec_lua_method( "system", 
+    lua_manager::get_instance()->void_exec_lua_method( "system",
         "init_devices_params", "device_manager::init_params()" );
 
     return 0;
+    }
+//-----------------------------------------------------------------------------
+void device_manager::init_devices_names()
+    {
+    for ( unsigned i = 1; i <= project_devices.size(); i++ )
+        {
+        const char *tmp_name = lua_manager::get_instance()->char_exec_lua_method(
+            "", "get_dev_name", i, "project_manager::lua_load_configuration()" );
+        project_devices[ i - 1 ]->set_name( tmp_name );
+
+        tmp_name = lua_manager::get_instance()->char_exec_lua_method( "",
+            "get_dev_descr", i, "project_manager::lua_load_configuration()" );
+        project_devices[ i - 1 ]->set_description( tmp_name );
+        }
     }
 //-----------------------------------------------------------------------------
 int device_manager::save_device( char *buff )
@@ -695,7 +721,7 @@ int device_manager::save_device( char *buff )
         project_devices[ i ]->save_device( buff + answer_size, "\t" );
         answer_size += strlen( buff + answer_size );
         }
-    
+
     sprintf( buff + answer_size, "\t}\n" );
     answer_size += strlen( buff + answer_size );
 
@@ -753,7 +779,7 @@ float dev_stub::get_value()
     }
 //-----------------------------------------------------------------------------
 void dev_stub::direct_set_value( float new_value )
-    {    
+    {
     }
 //-----------------------------------------------------------------------------
 int dev_stub::get_state()
@@ -815,7 +841,7 @@ float counter::get_value()
 //-----------------------------------------------------------------------------
 void counter::direct_set_value( float new_value )
     {
-    value = ( u_int ) new_value;    
+    value = ( u_int ) new_value;
     }
 //-----------------------------------------------------------------------------
 int counter::get_state()
@@ -823,11 +849,11 @@ int counter::get_state()
     if ( motors.size() > 0 )
         {
         char           is_pump_working         = 0;
-        static u_int_4 start_pump_working_time = 0; 
+        static u_int_4 start_pump_working_time = 0;
         static u_int_4 counter_prev_value      = 0;
 
         for ( u_int i = 0; i < motors.size(); i++ )
-            {                
+            {
             if ( motors[ i ]->get_state() == 1 )
                 {
                 is_pump_working = 1;
@@ -846,18 +872,18 @@ int counter::get_state()
             if ( state != S_PAUSE )
                 {
                 state = S_STOP;
-                }            
+                }
             }
         else
             {
             // Насос работает.
             if ( state == S_PAUSE )
-                {               
+                {
                 start_pump_working_time = get_millisec();
                 }
             else          // Работа.
                 {
-                state = S_WORK; 
+                state = S_WORK;
 
                 if ( get_delta_millisec( start_pump_working_time ) > get_par( P_DT, 0 ) )
                     {
@@ -867,15 +893,15 @@ int counter::get_state()
                         state = S_ERROR;
                         }
                     else
-                        {                        
+                        {
                         start_pump_working_time = get_millisec();
-                        counter_prev_value      = get_quantity();                        
+                        counter_prev_value      = get_quantity();
                         }
                     }
                 }
             }
-        }// if ( motors.size() > 0 
-        
+        }// if ( motors.size() > 0
+
     return state;
     }
 //-----------------------------------------------------------------------------
@@ -967,11 +993,11 @@ u_int counter::get_quantity()
 //-----------------------------------------------------------------------------
 float counter::get_flow()
     {
-    return get_par( P_CZ, 0 ) + 
+    return get_par( P_CZ, 0 ) +
 #ifdef DEBUG_NO_WAGO_MODULES
         flow_value;
 #else
-        get_AI( AI_FLOW_INDEX, get_par( P_MIN_FLOW, 0 ), get_par( P_MAX_FLOW, 0 ) );        
+        get_AI( AI_FLOW_INDEX, get_par( P_MIN_FLOW, 0 ), get_par( P_MAX_FLOW, 0 ) );
 #endif // NO_WAGO_MODULES
     }
 //-----------------------------------------------------------------------------
@@ -1003,7 +1029,7 @@ void digital_wago_device::direct_set_state( int new_state )
     if ( new_state )
         {
 #ifdef DEBUG_NO_WAGO_MODULES
-        if ( -1 == new_state ) 
+        if ( -1 == new_state )
             {
             state = ( char ) -1;
             return;
@@ -1037,13 +1063,13 @@ void digital_wago_device::direct_off()
     }
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
-digital_wago_device::digital_wago_device( int number, device::DEVICE_TYPE type, 
-    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) : 
+digital_wago_device::digital_wago_device( int number, device::DEVICE_TYPE type,
+    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :
 device( number, type, sub_type, par_cnt )
 #ifdef DEBUG_NO_WAGO_MODULES
     , state( 0 )
 #endif // DEBUG_NO_WAGO_MODULES
-    {       
+    {
     }
 //-----------------------------------------------------------------------------
 digital_wago_device::~digital_wago_device()
@@ -1076,7 +1102,7 @@ void DO2::direct_off()
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-valve_DO1_DI1_off::valve_DO1_DI1_off( int number ) : fb_device( false, true, 
+valve_DO1_DI1_off::valve_DO1_DI1_off( int number ) : fb_device( false, true,
     number, DT_V, DST_V_DO1_DI1_FB_OFF )
     {
     }
@@ -1103,9 +1129,9 @@ int valve_DO1_DI1_off::get_state()
         return -1;
         }
     else
-        {        
+        {
         return !i;
-        }      
+        }
     }
 //-----------------------------------------------------------------------------
 void valve_DO1_DI1_off::direct_on()
@@ -1153,9 +1179,9 @@ int valve_DO1_DI1_on::get_state()
         return -1;
         }
     else
-        {        
+        {
         return i;
-        }      
+        }
     }
 //-----------------------------------------------------------------------------
 void valve_DO1_DI1_on::direct_on()
@@ -1337,7 +1363,7 @@ void valve_mix_proof::direct_set_state( int new_state )
 
 int valve_mix_proof::get_state()
     {
-    int o = get_DO( DO_INDEX );            
+    int o = get_DO( DO_INDEX );
     int i0 = get_DI( DI_INDEX_U );
     int i1 = get_DI( DI_INDEX_L );
 
@@ -1419,7 +1445,7 @@ void valve_mix_proof::direct_set_state( int new_state )
     default:
         direct_on();
         break;
-        }    
+        }
     }
 
 #endif // DEBUG_NO_WAGO_MODULES
@@ -1438,9 +1464,9 @@ void DI1::direct_off()
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-AI1::AI1( u_int number, device::DEVICE_TYPE type, 
+AI1::AI1( u_int number, device::DEVICE_TYPE type,
     device::DEVICE_SUB_TYPE sub_type, u_int par_cnt,
-    u_int *start_par_idx ) : analog_wago_device( number, type, sub_type, 
+    u_int *start_par_idx ) : analog_wago_device( number, type, sub_type,
     par_cnt + ADDITIONAL_PARAM_COUNT )
     {
     if ( start_par_idx )
@@ -1468,7 +1494,7 @@ float AI1::get_value()
     }
 //-----------------------------------------------------------------------------
 void AI1::direct_set_value( float new_value )
-    {    
+    {
     }
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
@@ -1555,7 +1581,7 @@ int motor::get_state()
         {
         start_switch_time = get_sec();
         return i;
-        }   
+        }
 
     if ( get_sec() - start_switch_time > P_ON_TIME )
         {
@@ -1610,14 +1636,14 @@ bool level_s::is_active()
         return get_state() == 0 ? 0 : 1;
         break;
 
-    default:   
+    default:
         return get_state() == 0 ? 0 : 1;
         }
     }
 //-----------------------------------------------------------------------------
-level_s::level_s( u_int number, device::DEVICE_SUB_TYPE sub_type ): 
+level_s::level_s( u_int number, device::DEVICE_SUB_TYPE sub_type ):
     DI1( number, DT_LS, sub_type, ADDITIONAL_PARAMS_COUNT )
-    {    
+    {
     set_par_name( P_DT,  0, "P_DT" );
     }
 //-----------------------------------------------------------------------------
@@ -1678,20 +1704,20 @@ float analog_wago_device::get_value()
 //-----------------------------------------------------------------------------
 void analog_wago_device::direct_set_value( float new_value )
     {
-    value = new_value;    
+    value = new_value;
     }
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-fb_device::fb_device( bool is_on_fb, bool is_off_fb, int number, 
-    device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ) : 
+fb_device::fb_device( bool is_on_fb, bool is_off_fb, int number,
+    device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ) :
     digital_wago_device( number, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
     is_on_fb( is_on_fb ),
     is_off_fb( is_off_fb )
     {
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     set_par_name( P_FB_OFF,  0, "P_FB_OFF" );
-    set_par_name( P_FB_ON,   0, "P_FB_ON" );    
+    set_par_name( P_FB_ON,   0, "P_FB_ON" );
     }
 //-----------------------------------------------------------------------------
 int fb_device::get_on_fb()
@@ -1743,7 +1769,7 @@ timer::timer(): last_time( 0 ),
 void timer::start()
     {
     if ( S_STOP == state )
-        {        
+        {
         work_time = 0;
         }
 

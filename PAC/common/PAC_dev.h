@@ -1,16 +1,16 @@
 /// @file PAC_dev.h
-/// @brief Классы, которые реализуют функции передачи 
-/// состояния устройств PAC на сервер. Также реализованы классы для работы с 
-/// устройствами ( клапана, насосы,... ). Классы используются ТОЛЬКО в 
+/// @brief Классы, которые реализуют функции передачи
+/// состояния устройств PAC на сервер. Также реализованы классы для работы с
+/// устройствами ( клапана, насосы,... ). Классы используются ТОЛЬКО в
 /// контроллере ( PAC ).
-/// 
+///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
 /// @c DEBUG - компиляция c выводом отладочной информации в консоль.
 /// @c DEBUG_NO_WAGO_MODULES - простые устройства работают без модулей
 /// wago (состояния хранят в себе).
-/// 
+///
 /// @par Текущая версия:
 /// @$Rev$.\n
 /// @$Author$.\n
@@ -32,12 +32,12 @@
 #include "smart_ptr.h"
 
 //-----------------------------------------------------------------------------
-/// @brief Устройство c параметрами. 
+/// @brief Устройство c параметрами.
 ///
 /// Параметры хранятся в энергонезависимой памяти (сохраняют значение после
-/// перезагрузки PAC). Доступ к параметрам производится на основе номера и 
+/// перезагрузки PAC). Доступ к параметрам производится на основе номера и
 /// смещения (итоговый индекс равен их сумме). Каждый параметр имеет имя.
-class par_device    
+class par_device
     {
     friend class device;
 
@@ -75,7 +75,7 @@ class par_device
         ///
         /// @param idx - индекс параметра.
         /// @param offset - смещение индекса.
-        /// 
+        ///
         /// @return значение параметра.
         float get_par( u_int idx, u_int offset );
 
@@ -107,7 +107,7 @@ class i_counter
         virtual void start() = 0;
 
         /// @brief Сброс счетчика и остановка счета.
-        /// 
+        ///
         /// После сброса для продолжения работы необходимо вызвать @ref start().
         virtual void reset() = 0;
 
@@ -124,7 +124,7 @@ class i_counter
     };
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс противосмешивающего клапана (mixproof).
-class i_mix_proof 
+class i_mix_proof
     {
     public:
         enum STATES
@@ -139,7 +139,7 @@ class i_mix_proof
         virtual void open_upper_seat() = 0;
 
         /// @brief Открыть нижнее седло.
-        virtual void open_lower_seat() = 0;        
+        virtual void open_lower_seat() = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе дискретного входа.
@@ -178,8 +178,8 @@ class i_DO_device: public i_DI_device
         virtual void off() = 0;
 
         /// @brief Установка нового состояния устройства с учетом ручного режима.
-        /// 
-        /// @param new_state - новое состояние устройства. 
+        ///
+        /// @param new_state - новое состояние устройства.
         virtual void set_state( int new_state );
 
     protected:
@@ -196,7 +196,7 @@ class i_DO_device: public i_DI_device
 
         /// @brief Включен ли ручной режим.
         ///
-        /// В ручном режиме устройство управляется по командам от сервера 
+        /// В ручном режиме устройство управляется по командам от сервера
         /// (управляющая программа не влияет на устройство).
         ///
         /// @return true - ручной режим включен.
@@ -236,7 +236,7 @@ class i_AO_device: public i_AI_device
 
         /// @brief Включен ли ручной режим.
         ///
-        /// В ручном режиме устройство управляется по командам от сервера 
+        /// В ручном режиме устройство управляется по командам от сервера
         /// (управляющая программа не влияет на устройство).
         ///
         /// @return true - ручной режим включен.
@@ -247,7 +247,7 @@ class i_AO_device: public i_AI_device
 /// @brief Интерфейс устройства как с аналоговыми, так и дискретными каналами.
 class i_DO_AO_device: public i_AO_device, public i_DO_device
     {
-    public:       
+    public:
         /// @brief Выключение устройства.
         ///
         /// Установка устройства в пассивное состояние. Для клапана это означает
@@ -255,7 +255,7 @@ class i_DO_AO_device: public i_AO_device, public i_DO_device
         virtual void off() = 0;
     };
 //-----------------------------------------------------------------------------
-/// @brief Класс универсального простого устройства, который используется в 
+/// @brief Класс универсального простого устройства, который используется в
 /// режимах.
 class device : public i_DO_AO_device, public par_device
     {
@@ -297,15 +297,15 @@ class device : public i_DO_AO_device, public par_device
             {
             DT_NONE = -1,      ///< Тип не определен.
 
-            DT_V = 0,   ///< Клапан. 
-            DT_VC,      ///< Управляемый клапан. 
+            DT_V = 0,   ///< Клапан.
+            DT_VC,      ///< Управляемый клапан.
             DT_M,       ///< Двигатель.
             DT_LS,      ///< Уровень (есть/нет).
-            DT_TE,      ///< Температура.        
+            DT_TE,      ///< Температура.
             DT_FS,      ///< Расход (есть/нет).
-            DT_GS,      ///< Датчик положения. 
-            DT_FQT,     ///< Счетчик.        
-            DT_LT,      ///< Уровень (значение).        
+            DT_GS,      ///< Датчик положения.
+            DT_FQT,     ///< Счетчик.
+            DT_LT,      ///< Уровень (значение).
             DT_QT,      ///< Концентрация.
 
             DT_HA,      ///< Аварийная звуковая сигнализация.
@@ -336,34 +336,28 @@ class device : public i_DO_AO_device, public par_device
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
             DST_LS_MAX,         ///< Подключение по схеме максимум.
 
-            //M,       
+            //M,
             DST_M_IS_FREQ,      ///< Есть частота вращения.
             DST_M_NO_FREQ,      ///< Нет частота вращения.
             };
 
-        device( int number, device::DEVICE_TYPE type, 
+        device( int number, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt );
 
         virtual ~device();
 
-        const char *get_name() const            
+        const char *get_name() const
             {
             return name;
             }
 
-        const char *get_description() const            
+        const char *get_description() const
             {
             return description;
             }
 
-        void set_name( const char *name, const char *description )
-            {
-            this->name = new char[ strlen( name ) ];
-            strcpy( this->name, name );
-
-            this->description = new char[ strlen( description ) ];
-            strcpy( this->description, description );
-            }
+        void set_name( const char *new_name );
+        void set_description( const char *new_description );
 
         /// @brief Выключение устройства.
         ///
@@ -374,7 +368,7 @@ class device : public i_DO_AO_device, public par_device
         /// @brief Выключение устройства с учетом ручного режима.
         void off();
 
-        /// @brief Вывод объекта в консоль.
+        /// @brief Вывод объекта в коlнсоль.
         ///
         /// Для использования в отладочных целях.
         void print() const;
@@ -399,9 +393,9 @@ class device : public i_DO_AO_device, public par_device
             return sub_type;
             }
 
-        /// @brief Установка дополнительных свойств, значения которых - 
+        /// @brief Установка дополнительных свойств, значения которых -
         /// устройства.
-        /// 
+        ///
         /// Для использования в Lua.
         virtual void set_property( const char* field, device* dev )
             {
@@ -412,7 +406,7 @@ class device : public i_DO_AO_device, public par_device
         ///
         /// @param buff [out] - буфер записи строки.
         virtual void save_device_ex( char *buff )
-            {            
+            {
             }
 
         u_int_4 number;              ///< Номер устройства.
@@ -431,12 +425,12 @@ class device : public i_DO_AO_device, public par_device
         char *name;
         char *description;
 
-    }; 
+    };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство.
 ///
 /// Необходимо для возвращения результата поиска устройства с несуществующим
-/// номером. Методы данного класса ничего не делают. 
+/// номером. Методы данного класса ничего не делают.
 class dev_stub : public device,
     public i_counter
     {
@@ -445,49 +439,49 @@ class dev_stub : public device,
             {
             }
 
-        u_int_4 get_n() const;                
-        void    print() const;                
+        u_int_4 get_n() const;
+        void    print() const;
 
         float   get_value();
         void    direct_set_value( float new_value );
 
-        void    direct_on();                
-        void    direct_off();                
+        void    direct_on();
+        void    direct_off();
         void    direct_set_state( int new_state );
         int     get_state();
 
         void    pause();
         void    start();
-        void    reset();        
-        u_int   get_quantity();        
+        void    reset();
+        u_int   get_quantity();
         float   get_flow();
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретными входами/выходами.
 ///
 /// Базовый класс для различных дискретных устройств.
-class digital_wago_device : public device,  
+class digital_wago_device : public device,
     public wago_device
     {
     public:
-        digital_wago_device( int number, device::DEVICE_TYPE type, 
+        digital_wago_device( int number, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt );
 
         virtual ~digital_wago_device();
 
         float   get_value();
         void    direct_set_value( float new_value );
-        void    direct_set_state( int new_state );          
+        void    direct_set_state( int new_state );
 
 #ifdef DEBUG_NO_WAGO_MODULES
-        /// @brief Получение состояния объекта.        
-        ///        
+        /// @brief Получение состояния объекта.
+        ///
         /// @return - состояние объекта.
         int  get_state();
 
         void direct_on();
         void direct_off();
-#endif // DEBUG_NO_WAGO_MODULES      
+#endif // DEBUG_NO_WAGO_MODULES
 
         void    print() const;
 
@@ -500,13 +494,13 @@ class digital_wago_device : public device,
 /// @brief Устройство с аналоговыми входами/выходами.
 ///
 /// Базовый класс для различных аналоговых устройств.
-class analog_wago_device : public device, public wago_device      
+class analog_wago_device : public device, public wago_device
     {
     public:
-        analog_wago_device( int number, 
-            device::DEVICE_TYPE type, 
+        analog_wago_device( int number,
+            device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type,
-            u_int par_cnt ): 
+            u_int par_cnt ):
         device( number, type, sub_type, par_cnt )
 #ifdef DEBUG_NO_WAGO_MODULES
             ,value( 0 )
@@ -518,7 +512,7 @@ class analog_wago_device : public device, public wago_device
         int   get_state();
 
         void  print() const;
-        void  direct_on();        
+        void  direct_on();
         void  direct_off();
 
 #ifdef DEBUG_NO_WAGO_MODULES
@@ -544,8 +538,8 @@ class analog_wago_device : public device, public wago_device
 class DO1 : public digital_wago_device
     {
     public:
-        DO1( int number, device::DEVICE_TYPE type, 
-            device::DEVICE_SUB_TYPE sub_type ): 
+        DO1( int number, device::DEVICE_TYPE type,
+            device::DEVICE_SUB_TYPE sub_type ):
         digital_wago_device( number, type, sub_type, 0 )
             {
             }
@@ -570,7 +564,7 @@ class DO1 : public digital_wago_device
 class DO2 : public digital_wago_device
     {
     public:
-        DO2( int number, device::DEVICE_TYPE type, 
+        DO2( int number, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ):
         digital_wago_device( number, type, sub_type, par_cnt )
             {
@@ -580,7 +574,7 @@ class DO2 : public digital_wago_device
     public:
         int  get_state();
         void direct_on();
-        void direct_off();        
+        void direct_off();
 
     private:
         enum CONSTANTS
@@ -601,10 +595,10 @@ class fb_device: public digital_wago_device
         /// @param number - номер устройства.
         /// @param type - тип устройства.
         /// @param sub_type - подтип устройства.
-        fb_device( bool is_on_fb, bool is_off_fb, 
-            int number, device::DEVICE_TYPE type, 
+        fb_device( bool is_on_fb, bool is_off_fb,
+            int number, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type );
-        
+
         /// @brief Получение значения обратной связи на включенное состояние.
         virtual int get_on_fb();
 
@@ -629,7 +623,7 @@ class fb_device: public digital_wago_device
 
             P_ON_TIME = 0,
             P_FB_OFF,
-            P_FB_ON,            
+            P_FB_ON,
             };
 
     private:
@@ -661,7 +655,7 @@ class valve_DO1_DI1_off : public fb_device
         void direct_off();
 
     private:
-        int get_off_fb() 
+        int get_off_fb()
             {
             return get_DI( DI_INDEX );
             }
@@ -675,7 +669,7 @@ class valve_DO1_DI1_off : public fb_device
 class valve_DO1_DI1_on : public fb_device
     {
     public:
-        valve_DO1_DI1_on( int number ): fb_device( true, false, 
+        valve_DO1_DI1_on( int number ): fb_device( true, false,
             number, DT_V, DST_V_DO1_DI1_FB_ON )
             {
             }
@@ -694,7 +688,7 @@ class valve_DO1_DI1_on : public fb_device
         void direct_off();
 
     private:
-        int get_on_fb() 
+        int get_on_fb()
             {
             return get_DI( DI_INDEX );
             }
@@ -709,7 +703,7 @@ class valve_DO1_DI2 : public fb_device
     {
     public:
         valve_DO1_DI2( int number ):
-          fb_device( true, true, number, DT_V, DST_V_DO1_DI2 )           
+          fb_device( true, true, number, DT_V, DST_V_DO1_DI2 )
             {
             }
 
@@ -729,12 +723,12 @@ class valve_DO1_DI2 : public fb_device
         void direct_off();
 
     private:
-        int get_off_fb() 
+        int get_off_fb()
             {
             return get_DI( DI_INDEX_1 );
             }
 
-        int get_on_fb() 
+        int get_on_fb()
             {
             return get_DI( DI_INDEX_2 );
             }
@@ -749,7 +743,7 @@ class valve_DO2_DI2 : public fb_device
     {
     public:
         valve_DO2_DI2( int number ):
-        fb_device( true, true, number, DT_V, DST_V_DO2_DI2 )        
+        fb_device( true, true, number, DT_V, DST_V_DO2_DI2 )
             {
             }
 
@@ -770,12 +764,12 @@ class valve_DO2_DI2 : public fb_device
         void direct_off();
 
     private:
-        int get_off_fb() 
+        int get_off_fb()
             {
             return get_DI( DI_INDEX_1 );
             }
 
-        int get_on_fb() 
+        int get_on_fb()
             {
             return get_DI( DI_INDEX_2 );
             }
@@ -788,8 +782,8 @@ class valve_DO2_DI2 : public fb_device
 class valve_mix_proof : public i_mix_proof,  public fb_device
     {
     public:
-        valve_mix_proof( u_int number 
-            ): fb_device( true, true, number, DT_V, DST_V_MIXPROOF )             
+        valve_mix_proof( u_int number
+            ): fb_device( true, true, number, DT_V, DST_V_MIXPROOF )
             {
             }
 
@@ -821,12 +815,12 @@ class valve_mix_proof : public i_mix_proof,  public fb_device
         void direct_set_state( int new_state );
 
     private:
-        int get_off_fb() 
+        int get_off_fb()
             {
             return get_DI( DI_INDEX_U );
             }
 
-        int get_on_fb() 
+        int get_on_fb()
             {
             return get_DI( DI_INDEX_L );
             }
@@ -868,7 +862,7 @@ class valve_AS_mix_proof : public device, public i_mix_proof
 class AI1 : public analog_wago_device
     {
     public:
-        AI1( u_int number, device::DEVICE_TYPE type, 
+        AI1( u_int number, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, u_int *start_par_idx );
 
     protected:
@@ -928,11 +922,11 @@ class level_e : public AI1
 class concentration_e : public AI1
     {
     public:
-        concentration_e( u_int number ): AI1( number, DT_QT, DST_NONE, 
+        concentration_e( u_int number ): AI1( number, DT_QT, DST_NONE,
             ADDITIONAL_PARAM_COUNT, &start_param_idx )
             {
             set_par_name( P_MIN_V,  0, "P_MIN_V" );
-            set_par_name( P_MAX_V,  0, "P_MAX_V" ); 
+            set_par_name( P_MAX_V,  0, "P_MAX_V" );
             }
 
         float get_max_val();
@@ -945,7 +939,7 @@ class concentration_e : public AI1
 
             P_MIN_V = 0,   ///< Индекс параметра минимального значения.
             P_MAX_V,       ///< Индекс параметра максимального значения.
-            };     
+            };
 
         u_int start_param_idx;
     };
@@ -954,11 +948,11 @@ class concentration_e : public AI1
 class analog_input : public AI1
     {
     public:
-        analog_input( u_int number ): AI1( number, DT_AI, DST_NONE, 
+        analog_input( u_int number ): AI1( number, DT_AI, DST_NONE,
             ADDITIONAL_PARAM_COUNT, &start_param_idx )
             {
             set_par_name( P_MIN_V,  0, "P_MIN_V" );
-            set_par_name( P_MAX_V,  0, "P_MAX_V" );            
+            set_par_name( P_MAX_V,  0, "P_MAX_V" );
             }
 
         float get_max_val();
@@ -971,7 +965,7 @@ class analog_input : public AI1
 
             P_MIN_V = 0,   ///< Индекс параметра минимального значения.
             P_MAX_V,       ///< Индекс параметра максимального значения.
-            }; 
+            };
 
         u_int start_param_idx;
     };
@@ -982,12 +976,12 @@ class analog_input : public AI1
 class AO1 : public analog_wago_device
     {
     public:
-        AO1( u_int number, 
-            device::DEVICE_TYPE type, 
+        AO1( u_int number,
+            device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type,
-            u_int par_cnt ): 
+            u_int par_cnt ):
         analog_wago_device( number, type, sub_type, par_cnt )
-            {            
+            {
             }
 
         virtual float get_min_value() = 0;
@@ -1002,7 +996,7 @@ class AO1 : public analog_wago_device
         enum CONSTANTS
             {
             AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
-            }; 
+            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым входом.
@@ -1011,7 +1005,7 @@ class AO1 : public analog_wago_device
 class analog_output : public AO1
     {
     public:
-        analog_output( u_int number ) : 
+        analog_output( u_int number ) :
           AO1( number, DT_AO, DST_NONE, ADDITIONAL_PARAM_COUNT )
               {
               }
@@ -1033,15 +1027,15 @@ class analog_output : public AO1
 
             P_MIN_VALUE = 0,   ///< Индекс параметра минимального значения.
             P_MAX_VALUE,       ///< Индекс параметра максимального значения.
-            };         
+            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Управляемый клапан.
 class analog_valve : public AO1
     {
     public:
-        analog_valve( u_int number ): AO1( number, DT_VC, DST_NONE, 0 )            
-            {   
+        analog_valve( u_int number ): AO1( number, DT_VC, DST_NONE, 0 )
+            {
             }
 
         float get_min_value()
@@ -1059,7 +1053,7 @@ class analog_valve : public AO1
             {
             C_MIN = 0,   ///< Минимальное значение.
             C_MAX = 100, ///< Максимальное значение.
-            };                      
+            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным входом.
@@ -1068,18 +1062,18 @@ class analog_valve : public AO1
 class DI1 : public digital_wago_device
     {
     public:
-        DI1( u_int number, 
-            device::DEVICE_TYPE type, 
+        DI1( u_int number,
+            device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ):
         digital_wago_device( number, type, sub_type, par_cnt )
-            {            
+            {
             }
 
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         void direct_on();
         void direct_off();
-        
+
         int get_state()
             {
             return get_DI( DI_INDEX );
@@ -1119,15 +1113,15 @@ class valve_DO2 : public DO2
     };
 //-----------------------------------------------------------------------------
 /// @brief Электродвигатель (мешалка, насос).
-class motor : public device, public wago_device    
+class motor : public device, public wago_device
     {
     public:
-        motor( u_int number, device::DEVICE_SUB_TYPE sub_type ):            
+        motor( u_int number, device::DEVICE_SUB_TYPE sub_type ):
             device( number, DT_M, sub_type, ADDITIONAL_PARAM_COUNT )
 #ifdef DEBUG_NO_WAGO_MODULES
             ,state( 0 ),
             freq( 0 )
-#endif // DEBUG_NO_WAGO_MODULES                
+#endif // DEBUG_NO_WAGO_MODULES
             {
             set_par_name( P_ON_TIME,  0, "P_ON_TIME" );
             }
@@ -1153,7 +1147,7 @@ class motor : public device, public wago_device
 
             C_MIN_VALUE = 0,
             C_MAX_VALUE = 100,
-            
+
             P_ON_TIME = 0,
 
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
@@ -1164,7 +1158,7 @@ class motor : public device, public wago_device
             };
 
         u_long start_switch_time;
-            
+
 #ifdef DEBUG_NO_WAGO_MODULES
         char  state;  ///< Состояние устройства.
 
@@ -1183,7 +1177,7 @@ class level_s : public DI1
     private:
         enum CONSTANTS
             {
-            ADDITIONAL_PARAMS_COUNT = 1, 
+            ADDITIONAL_PARAMS_COUNT = 1,
 
             P_DT = 0,
             };
@@ -1193,16 +1187,16 @@ class level_s : public DI1
 class flow_s : public DI1
     {
     public:
-        flow_s( u_int number ): DI1( number, DT_FS, DST_NONE, 
+        flow_s( u_int number ): DI1( number, DT_FS, DST_NONE,
             ADDITIONAL_PARAMS_COUNT )
-            {    
+            {
             set_par_name( P_DT,  0, "P_DT" );
             }
 
     private:
         enum CONSTANTS
             {
-            ADDITIONAL_PARAMS_COUNT = 1, 
+            ADDITIONAL_PARAMS_COUNT = 1,
 
             P_DT = 0,
             };
@@ -1212,16 +1206,16 @@ class flow_s : public DI1
 class state_s : public DI1
     {
     public:
-        state_s( u_int number ): DI1( number, DT_GS, DST_NONE, 
+        state_s( u_int number ): DI1( number, DT_GS, DST_NONE,
             ADDITIONAL_PARAMS_COUNT )
-            {     
+            {
             set_par_name( P_DT,  0, "P_DT" );
             }
 
     private:
         enum CONSTANTS
             {
-            ADDITIONAL_PARAMS_COUNT = 1, 
+            ADDITIONAL_PARAMS_COUNT = 1,
 
             P_DT = 0,
             };
@@ -1232,7 +1226,7 @@ class DI_signal : public DI1
     {
     public:
         DI_signal( u_int number ): DI1( number, DT_DI, DST_NONE, 0 )
-            {            
+            {
             }
     };
 //-----------------------------------------------------------------------------
@@ -1241,7 +1235,7 @@ class button : public DI1
     {
     public:
         button( u_int number ): DI1( number, DT_SB, DST_NONE, 0 )
-            {            
+            {
             }
     };
 //-----------------------------------------------------------------------------
@@ -1250,7 +1244,7 @@ class DO_signal : public DO1
     {
     public:
         DO_signal( u_int number ): DO1( number, DT_DO, DST_NONE )
-            {            
+            {
             }
     };
 //-----------------------------------------------------------------------------
@@ -1259,7 +1253,7 @@ class siren : public DO1
     {
     public:
         siren( u_int number ): DO1( number, DT_HA, DST_NONE )
-            {            
+            {
             }
     };
 //-----------------------------------------------------------------------------
@@ -1268,23 +1262,23 @@ class lamp : public DO1
     {
     public:
         lamp( u_int number ): DO1( number, DT_HL, DST_NONE )
-            {            
+            {
             }
     };
 //-----------------------------------------------------------------------------
 /// @brief Счетчик.
 class counter : public device,
-    public i_counter,   
+    public i_counter,
     public wago_device
     {
     public:
         counter( u_int number ): device(
-            number, DT_FQT, DST_NONE, ADDITIONAL_PARAMS_COUNT ), 
-            value( 0 ),            
+            number, DT_FQT, DST_NONE, ADDITIONAL_PARAMS_COUNT ),
+            value( 0 ),
             last_read_value( 0 ),
             state( S_STOP ),
-            flow_value( 0 )            
-            {    
+            flow_value( 0 )
+            {
             set_par_name( P_MIN_FLOW,  0, "P_MIN_FLOW" );
             set_par_name( P_MAX_FLOW,  0, "P_MAX_FLOW" );
             set_par_name( P_CZ,        0, "P_CZ" );
@@ -1292,7 +1286,7 @@ class counter : public device,
             }
 
         virtual ~counter()
-            {            
+            {
             }
 
         float get_value();
@@ -1306,12 +1300,12 @@ class counter : public device,
         void  pause();
         void  start();
         void  reset();
-        u_int get_quantity();        
+        u_int get_quantity();
         float get_flow();
 
         void set_property( const char* field, device* dev );
 
-        
+
         int set_cmd( const char *prop, u_int idx, double val )
             {
             switch ( prop[ 0 ] )
@@ -1345,15 +1339,15 @@ class counter : public device,
 
         enum CONSTANTS
             {
-            ADDITIONAL_PARAMS_COUNT = 4, 
-                        
+            ADDITIONAL_PARAMS_COUNT = 4,
+
             P_MIN_FLOW = 0,
-            P_MAX_FLOW,   
+            P_MAX_FLOW,
             P_CZ,
             P_DT,
 
             AI_FLOW_INDEX = 0,  ///< Индекс канала аналогового входа (поток).
-            AI_Q_INDEX    = 1,  ///< Индекс канала аналогового входа (объем).            
+            AI_Q_INDEX    = 1,  ///< Индекс канала аналогового входа (объем).
 
             MAX_VAL = 65535L,   ///< Максимальное значение счетчика.
             };
@@ -1361,7 +1355,7 @@ class counter : public device,
         u_int value;
         u_int last_read_value;
 
-        STATES state;    
+        STATES state;
 
         float flow_value;
 
@@ -1378,7 +1372,7 @@ class device_manager: public i_Lua_save_device
 
         virtual ~device_manager();
 
-        /// @brief Получение устройства по его номеру.        
+        /// @brief Получение устройства по его номеру.
         device* get_device( int dev_type, u_int dev_number );
 
         /// @brief Получение клапана по его номеру.
@@ -1451,6 +1445,8 @@ class device_manager: public i_Lua_save_device
 
         int init_params();
 
+        void init_devices_names();
+
 #ifdef __BORLANDC__
 #pragma option -w-inl
 #endif // __BORLANDC__
@@ -1484,7 +1480,7 @@ class device_manager: public i_Lua_save_device
         /// Диапазоны устройств всех типов.
         range dev_types_ranges[ device::C_DEVICE_TYPE_CNT ];
 
-        /// @brief Получение индекса устройства по его номеру.        
+        /// @brief Получение индекса устройства по его номеру.
         int get_device_n( device::DEVICE_TYPE dev_type, u_int dev_number );
 
         std::vector< device* > project_devices; ///< Все устройства.
@@ -1496,8 +1492,8 @@ class device_manager: public i_Lua_save_device
         // @brief Установка числа устройств.
         //
         // Вызывается из Lua.
-        wago_device* add_wago_device( int dev_type, int dev_sub_type, 
-            u_int number, char * descr );  
+        wago_device* add_wago_device( int dev_type, int dev_sub_type,
+            u_int number, char * descr );
     };
 //-----------------------------------------------------------------------------
 /// @brief таймер.
@@ -1516,14 +1512,14 @@ class timer
         /// @brief Сохранение состояния устройства в буфер.
         ///
         /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
-        ///        
+        ///
         /// @return >= 0 - количество записанных байт.
         int save( char *buff );
 
         /// @brief Считывание состояния устройства из буфера.
         ///
         /// @param buff [ out ] - адрес буфера, откуда будут считываться данные.
-        ///        
+        ///
         /// @return >= 0 - количество считанных байт.
         int load( char *buff );
 
@@ -1592,7 +1588,7 @@ class timer_manager
         ///
         /// @param index - индекс таймера.
         ///
-        /// @return - таймер с нужным индексом, заглушка - в случае выхода за 
+        /// @return - таймер с нужным индексом, заглушка - в случае выхода за
         /// диапазон.
         timer* operator[] ( unsigned int index );
 

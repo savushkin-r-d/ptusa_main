@@ -36,15 +36,18 @@ SRAM::SRAM( const char *file_name,
 
         if ( 0 == file )
             {
-            if( ( file = open( file_name, O_RDWR ) ) < 0 )
+            if( ( file = open( file_name, O_RDWR | O_CREAT,
+                S_IRUSR | S_IWUSR ) ) < 0 )
                 {
+
 #ifdef DEBUG
-                printf( "SRAM() - ERROR: Can't open device (%s) : %s.\n",
-                   file_name, strerror( errno ) );
+                    printf( "SRAM() - ERROR: Can't open device (%s) : %s.\n",
+                        file_name, strerror( errno ) );
 #endif // DEBUG
-                file = 0;
+                    file = 0;
                 }
             }
+
         }
     }
 //-----------------------------------------------------------------------------
@@ -67,7 +70,7 @@ int SRAM::read( void *buff, u_int count, u_int start_pos )
         res = read_file( file, buff, count );
 
 #ifdef DEBUG
-        if ( res <= 0 )
+        if ( res < 0 )
             {
             printf( "Error reading device (%s) : %s.\n",
                 file_name, strerror( errno )  );
@@ -89,7 +92,7 @@ int SRAM::write( void *buff, u_int count, u_int start_pos )
         res = write_file( file, buff, count );
 
 #ifdef DEBUG
-        if ( res <= 0 )
+        if ( res < 0 )
             {
             printf( "Error writing device (%s) : %s.\n",
                 file_name, strerror( errno )  );
