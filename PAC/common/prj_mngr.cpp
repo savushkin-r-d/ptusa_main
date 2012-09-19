@@ -103,9 +103,10 @@ int project_manager::lua_load_configuration()
     lua_manager::get_instance()->void_exec_lua_method( "system",
         "create_devices", "project_manager::lua_load_configuration()" );
 
-    //-Получение описания устройств из Lua.
-    G_DEVICE_MANAGER()->init_devices_names();
-
+    //Получение имен и комментария к устройствам из Lua.
+    lua_manager::get_instance()->void_exec_lua_method( "system",
+        "init_devices_names", "project_manager::lua_load_configuration()" );
+    
     //-Name for devices to access from Lua.
     lua_manager::get_instance()->void_exec_lua_method( "system",
         "init_dev_names", "project_manager::lua_load_configuration()" );

@@ -158,20 +158,10 @@ void par_device::set_par_name( u_int idx, u_int offset, const char* name )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void device::set_name( const char *new_name )
+void device::set_name( const char *new_name, const char *new_description )
     {
-    if ( strlen( new_name ) )
-        {        
-        name = new_name;
-        }
-    }
-//-----------------------------------------------------------------------------
-void device::set_description( const char *new_description )
-    {
-    if ( strlen( new_description ) ) 
-        {
-        description = new_description;        
-        }
+    name = new_name;
+    description = new_description;
     }
 //-----------------------------------------------------------------------------
 void device::print() const
@@ -693,20 +683,6 @@ int device_manager::init_params()
     return 0;
     }
 //-----------------------------------------------------------------------------
-void device_manager::init_devices_names()
-    {
-    for ( unsigned i = 1; i <= project_devices.size(); i++ )
-        {
-        const char *tmp_name = lua_manager::get_instance()->char_exec_lua_method(
-            "system", "get_dev_name", i, "project_manager::lua_load_configuration()" );
-        project_devices[ i - 1 ]->set_name( tmp_name );
-
-        tmp_name = lua_manager::get_instance()->char_exec_lua_method( "system",
-            "get_dev_descr", i, "project_manager::lua_load_configuration()" );
-        project_devices[ i - 1 ]->set_description( tmp_name );
-        }
-    }
-//-----------------------------------------------------------------------------
 int device_manager::save_device( char *buff )
     {
     sprintf( buff, "t=\n" );
@@ -1024,18 +1000,15 @@ void digital_wago_device::direct_set_value( float new_value )
 //-----------------------------------------------------------------------------
 void digital_wago_device::direct_set_state( int new_state )
     {
+#ifdef DEBUG_NO_WAGO_MODULES
+    state = ( char ) new_state;    
+#else
     if ( new_state )
         {
-#ifdef DEBUG_NO_WAGO_MODULES
-        if ( -1 == new_state )
-            {
-            state = ( char ) -1;
-            return;
-            }
-#endif //DEBUG_NO_WAGO_MODULES
         direct_on();
         }
     else direct_off();
+#endif //DEBUG_NO_WAGO_MODULES
     }
 //-----------------------------------------------------------------------------
 void digital_wago_device::print() const
@@ -1329,31 +1302,7 @@ void valve_mix_proof::open_lower_seat()
 
 void valve_mix_proof::direct_set_state( int new_state )
     {
-    switch ( new_state )
-        {
-    case -1:
-        state = ( char ) -1;
-        break;
-
-    case ST_LOWER_SEAT:
-        state = ( char ) ST_LOWER_SEAT;
-        break;
-
-    case ST_UPPER_SEAT:
-        state = ST_UPPER_SEAT;
-        break;
-
-    case ST_CLOSE:
-        direct_off();
-        break;
-
-    case ST_OPEN:
-        direct_on();
-        break;
-
-    default:
-        direct_on();
-        }
+    state = ( char ) new_state;   
     }
 #endif //DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------

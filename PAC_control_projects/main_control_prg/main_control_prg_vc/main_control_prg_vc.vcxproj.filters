@@ -195,9 +195,6 @@
     <ClInclude Include="..\..\..\common\tolua++\tolua_event.h">
       <Filter>Header Files\common\sys\tolua++</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\common\tolua++\tolua++.h">
-      <Filter>Header Files\common\sys\tolua++</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\mode_mngr.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
@@ -242,6 +239,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\sys\base_mem.h">
       <Filter>Header Files\PAC\common\sys</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\common\tolua++\tolua++.h">
+      <Filter>Header Files\common\sys\tolua++</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

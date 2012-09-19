@@ -357,8 +357,7 @@ class device : public i_DO_AO_device, public par_device
             return description.c_str();
             }
 
-        void set_name( const char *new_name );
-        void set_description( const char *new_description );
+        void set_name( const char *new_name, const char *new_description );
 
         /// @brief Выключение устройства.
         ///
@@ -1445,8 +1444,6 @@ class device_manager: public i_Lua_save_device
             }
 
         int init_params();
-
-        void init_devices_names();
 
 #ifdef __BORLANDC__
 #pragma option -w-inl

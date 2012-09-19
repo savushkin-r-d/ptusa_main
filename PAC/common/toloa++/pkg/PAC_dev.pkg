@@ -187,7 +187,7 @@ class device
 				
 		void set_property( const char* field, device* dev );
 
-		void set_name( const char *name, const char *description )
+		void set_name( const char *name, const char *description );
 
 		enum DEVICE_TYPE
             {

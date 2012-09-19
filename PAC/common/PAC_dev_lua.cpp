@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 09/11/12 12:11:58.
+** Generated automatically by tolua++-1.0.92 on 09/19/12 15:23:53.
 */
 
 #ifndef __cplusplus
@@ -905,7 +905,8 @@ static int tolua_PAC_dev_device_set_name00(lua_State* tolua_S)
  if (
      !tolua_isusertype(tolua_S,1,"device",0,&tolua_err) ||
      !tolua_isstring(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
+     !tolua_isstring(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -913,11 +914,12 @@ static int tolua_PAC_dev_device_set_name00(lua_State* tolua_S)
  {
   device* self = (device*)  tolua_tousertype(tolua_S,1,0);
   const char* name = ((const char*)  tolua_tostring(tolua_S,2,0));
+  const char* description = ((const char*)  tolua_tostring(tolua_S,3,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_name'", NULL);
 #endif
   {
-   self->set_name(name);
+   self->set_name(name,description);
   }
  }
  return 0;
@@ -4764,6 +4766,24 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"set_par",tolua_PAC_dev_device_set_par00);
    tolua_function(tolua_S,"set_property",tolua_PAC_dev_device_set_property00);
    tolua_function(tolua_S,"set_name",tolua_PAC_dev_device_set_name00);
+   tolua_constant(tolua_S,"DT_NONE",device::DT_NONE);
+   tolua_constant(tolua_S,"DT_V",device::DT_V);
+   tolua_constant(tolua_S,"DT_VC",device::DT_VC);
+   tolua_constant(tolua_S,"DT_M",device::DT_M);
+   tolua_constant(tolua_S,"DT_LS",device::DT_LS);
+   tolua_constant(tolua_S,"DT_TE",device::DT_TE);
+   tolua_constant(tolua_S,"DT_FS",device::DT_FS);
+   tolua_constant(tolua_S,"DT_GS",device::DT_GS);
+   tolua_constant(tolua_S,"DT_FQT",device::DT_FQT);
+   tolua_constant(tolua_S,"DT_LT",device::DT_LT);
+   tolua_constant(tolua_S,"DT_QT",device::DT_QT);
+   tolua_constant(tolua_S,"DT_HA",device::DT_HA);
+   tolua_constant(tolua_S,"DT_HL",device::DT_HL);
+   tolua_constant(tolua_S,"DT_SB",device::DT_SB);
+   tolua_constant(tolua_S,"DT_DI",device::DT_DI);
+   tolua_constant(tolua_S,"DT_DO",device::DT_DO);
+   tolua_constant(tolua_S,"DT_AI",device::DT_AI);
+   tolua_constant(tolua_S,"DT_AO",device::DT_AO);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"V",tolua_PAC_dev_V00);
   tolua_function(tolua_S,"VC",tolua_PAC_dev_VC00);
