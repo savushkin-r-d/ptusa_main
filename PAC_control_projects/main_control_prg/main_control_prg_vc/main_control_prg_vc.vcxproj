@@ -191,6 +191,7 @@
     <ClCompile Include="..\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\PTUSA projects\system scripts\sys.devices.lua" />
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys.objects.lua" />
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys.wago.lua" />
     <None Include="..\..\..\PAC\common\toloa++\pkg\make.cmd" />

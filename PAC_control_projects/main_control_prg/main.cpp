@@ -32,6 +32,8 @@ int main( int argc, char *argv[] )
     InitLib();
 #endif
 
+    setlocale( LC_ALL, "" );
+
     if ( argc < 2 )
         {
         Print( "Usage: main script.plua\n" );
@@ -52,14 +54,8 @@ int main( int argc, char *argv[] )
         return EXIT_FAILURE;
         }
 
-#ifdef DEBUG
-    G_DEVICE_MANAGER()->print();
-    G_DEVICE_CMMCTR->print();
-    G_TECH_OBJECT_MNGR()->print();
-#endif // DEBUG
-
     fflush( stdout );
-    fprintf( stderr, "Start main loop!\n" );
+    fprintf( stderr, "Starting main loop!\n" );
 
 #ifdef DEBUG
     while ( !kb_hit() )

@@ -348,12 +348,12 @@ class device : public i_DO_AO_device, public par_device
 
         const char *get_name() const
             {
-            return name;
+            return name.c_str();
             }
 
         const char *get_description() const
             {
-            return description;
+            return description.c_str();
             }
 
         void set_name( const char *new_name );
@@ -422,8 +422,8 @@ class device : public i_DO_AO_device, public par_device
     private:
         bool is_manual_mode;      ///< Признак ручного режима.
 
-        char *name;
-        char *description;
+        std::string name;
+        std::string description;
 
     };
 //-----------------------------------------------------------------------------

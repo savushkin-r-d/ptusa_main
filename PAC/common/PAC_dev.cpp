@@ -160,14 +160,18 @@ void par_device::set_par_name( u_int idx, u_int offset, const char* name )
 //-----------------------------------------------------------------------------
 void device::set_name( const char *new_name )
     {
-    name = new char[ strlen( new_name ) ];
-    strcpy( name, new_name );
+    if ( strlen( new_name ) )
+        {        
+        name = new_name;
+        }
     }
 //-----------------------------------------------------------------------------
 void device::set_description( const char *new_description )
     {
-    description = new char[ strlen( new_description ) ];
-    strcpy( description, new_description );
+    if ( strlen( new_description ) ) 
+        {
+        description = new_description;        
+        }
     }
 //-----------------------------------------------------------------------------
 void device::print() const
@@ -289,19 +293,12 @@ device::device( int number, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type,
     number( number ),
     type( type ),
     sub_type( sub_type ),
-    is_manual_mode( false ),
-    name( 0 ),
-    description( 0 )
+    is_manual_mode( false )
     {
     }
 //-----------------------------------------------------------------------------
 device::~device()
     {
-    delete[] name;
-    name = 0;
-
-    delete[] description;
-    description = 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -410,8 +407,9 @@ void device_manager::print() const
     Print( "Device manager [%d]:\n", project_devices.size() );
     for ( u_int i = 0; i < project_devices.size(); i++ )
         {
-        Print( "    %3i. ", i + 1 );
-        project_devices[ i ]->print();
+        Print( "    %3i. ", i + 1 );        
+        Print( "%s\t%s", 
+            project_devices[ i ]->get_name(), project_devices[ i ]->get_description() );
         Print( "\n" );
         }
     }
@@ -700,10 +698,10 @@ void device_manager::init_devices_names()
     for ( unsigned i = 1; i <= project_devices.size(); i++ )
         {
         const char *tmp_name = lua_manager::get_instance()->char_exec_lua_method(
-            "", "get_dev_name", i, "project_manager::lua_load_configuration()" );
+            "system", "get_dev_name", i, "project_manager::lua_load_configuration()" );
         project_devices[ i - 1 ]->set_name( tmp_name );
 
-        tmp_name = lua_manager::get_instance()->char_exec_lua_method( "",
+        tmp_name = lua_manager::get_instance()->char_exec_lua_method( "system",
             "get_dev_descr", i, "project_manager::lua_load_configuration()" );
         project_devices[ i - 1 ]->set_description( tmp_name );
         }
