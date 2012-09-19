@@ -41,12 +41,14 @@ int check_file( const char* file_name, char* err_str )
         sprintf( err_str, "File \"%s\" not found!", file_name );
         return -1;
         }
+    int version = 0;
 
     char str[ 100 ] = "";
-    fgets( str, sizeof( str ), f );
-
-    int version = 0;
-    sscanf( str, "--version = %d", &version );
+    char* res = fgets( str, sizeof( str ), f );
+    if ( res != 0 )
+        {
+        sscanf( str, "--version = %d", &version );
+        }
 
     return version;
     }

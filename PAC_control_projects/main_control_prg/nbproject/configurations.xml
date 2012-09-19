@@ -218,7 +218,7 @@
             <pElem>../../common/lua</pElem>
             <pElem>../../common/tolua++</pElem>
           </incDir>
-          <commandLine>-lrt</commandLine>
+          <commandLine>-Wl,--no-as-needed -lrt</commandLine>
           <preprocessorList>
             <Elem>LINUX_OS</Elem>
             <Elem>PAC_PC</Elem>

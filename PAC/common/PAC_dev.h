@@ -23,6 +23,7 @@
 #include <stdio.h>
 
 #include <vector>
+#include <string>
 
 #include "wago.h"
 #include "g_device.h"
