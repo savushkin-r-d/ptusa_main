@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <errno.h>
+#include <sys/stat.h>
 
 #include "l_mem.h"
 
