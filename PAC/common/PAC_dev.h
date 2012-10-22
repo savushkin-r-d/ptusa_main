@@ -660,7 +660,7 @@ class valve: public digital_wago_device
         /// @brief ѕолучение расширенного состо€ни€ клапана (учет обратной
         /// св€зи, ручного режима, ...).
         int get_state()
-#ifdef VC2012
+#if _MSC_VER >= 1700
         final;
 #else
         ;
