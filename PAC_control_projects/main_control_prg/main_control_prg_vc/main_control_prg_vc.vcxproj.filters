@@ -67,12 +67,6 @@
     <Filter Include="Lua Source\common">
       <UniqueIdentifier>{a55f18b0-87a0-4af9-a1ef-b45afb0fc00d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\PAC\common\tolua++">
-      <UniqueIdentifier>{87096adf-252f-4fd7-a4c2-5bf1d14de6c2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\PAC\common\tolua++\pkg">
-      <UniqueIdentifier>{8bf1182a-7a70-4917-9e52-f374f455835d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\common\sys">
       <UniqueIdentifier>{3dc256aa-d4bd-489b-ad49-510d28e5cfe2}</UniqueIdentifier>
     </Filter>
@@ -87,6 +81,9 @@
     </Filter>
     <Filter Include="Source Files\PAC\common\sys">
       <UniqueIdentifier>{a19ceb2a-6bf9-4148-805f-2d7ef079ef95}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pkg">
+      <UniqueIdentifier>{d2442374-e7c6-470f-97fc-ca5f36ccd8e0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -421,12 +418,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\PAC\common\toloa++\pkg\make.cmd">
-      <Filter>Header Files\PAC\common\tolua++\pkg</Filter>
-    </None>
-    <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg">
-      <Filter>Header Files\PAC\common\tolua++\pkg</Filter>
-    </None>
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys.objects.lua">
       <Filter>Lua Source\common</Filter>
     </None>
@@ -435,6 +426,12 @@
     </None>
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys.devices.lua">
       <Filter>Lua Source\common</Filter>
+    </None>
+    <None Include="..\..\..\PAC\common\toloa++\pkg\make.cmd">
+      <Filter>pkg</Filter>
+    </None>
+    <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg">
+      <Filter>pkg</Filter>
     </None>
   </ItemGroup>
 </Project>

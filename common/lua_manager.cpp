@@ -162,44 +162,53 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             }
 
         int res = check_file( path, err_str );
+
+        if ( -1 == res )                             // ../system scripts
+            {
+            res = check_file( FILES[ i ], err_str ); // .
+            if ( -1 == res )
+                {
+                Print( "%s", err_str );
+                return 1;
+                }
+            }
 #else
-        int res = check_file( FILES[ i ], err_str );
+        res = check_file( FILES[ i ], err_str );     // .
+        if ( -1 == res )
+            {
+            Print( "%s", err_str );
+            return 1;
+            }
+        }        
 #endif // PAC_PC
 
-        if ( res == -1 )
-            {
-            Print( "%s", err_str );
-            return 1;
-            }
-
-        if ( FILES_VERSION[ i ] != res )
-            {
-            snprintf( err_str, sizeof( err_str ), "File \"%s\" has version %d, must be %d!\n",
-                FILES[ i ], res, FILES_VERSION[ i ] );
-            Print( "%s", err_str );
-            return 1;
-            }
-        }
-
-    //-Выполнение системных скриптов sys.lua.
-    for ( int i = 0; i < FILE_CNT; i++ )
+    if ( FILES_VERSION[ i ] != res )
         {
+        snprintf( err_str, sizeof( err_str ), "File \"%s\" has version %d, must be %d!\n",
+            FILES[ i ], res, FILES_VERSION[ i ] );
+        Print( "%s", err_str );
+        return 1;
+        }
+    }
+
+//-Выполнение системных скриптов sys.lua.
+for ( int i = 0; i < FILE_CNT; i++ )
+    {
 
 #ifdef PAC_PC
-        char path[ 100 ] = "";
-        if ( i < SYS_FILE_CNT )
-            {
-            snprintf( path, sizeof( path ), "%s%s", SYS_PATH, FILES[ i ] );
-            }
-        else
-            {
-            snprintf( path, sizeof( path ), "%s", FILES[ i ] );
-            }
+    char path[ 100 ] = "";
+    if ( i < SYS_FILE_CNT )
+        {
+        snprintf( path, sizeof( path ), "%s%s", SYS_PATH, FILES[ i ] );
+        }
+    else
+        {
+        snprintf( path, sizeof( path ), "%s", FILES[ i ] );
+        }
 
-        if ( luaL_dofile( L, path ) != 0 )
-#else
-        if ( luaL_dofile( L, FILES[ i ] ) != 0 )
-#endif // PAC_PC
+    if ( luaL_dofile( L, path ) != 0 )           // ../system scripts
+        {
+        if ( luaL_dofile( L, FILES[ i ] ) != 0 ) // .
             {
 #ifdef DEBUG
             Print( "Load Lua script \"%s\" error!\n",
@@ -209,321 +218,336 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             lua_pop( L, 1 );
 
             return 1;
-            }
-        }
+            }       
+        }    
 
-    //II
-    //Экспортируем в Lua необходимые объекты.
-    tolua_PAC_dev_open( L );
-
-    //III
-    //Выполняем процедуры инициализации.
-    G_PROJECT_MANAGER->lua_load_configuration();
-
-    //IV Выполнение основного скрипта ('main.plua').
-    if ( 0 == lua_state )
+#else
+    if ( luaL_dofile( L, FILES[ i ] ) != 0 )
         {
-        if( luaL_loadfile( L, script_name ) != 0 )
-            {
-            Print( "Load Lua main script \"%s\" error!\n", script_name );
-            Print( "\t%s\n", lua_tostring( L, -1 ) );
+#ifdef DEBUG
+        Print( "Load Lua script \"%s\" error!\n",
+            FILES[ i ] );
+        Print( "\t%s\n", lua_tostring( L, -1 ) );
+#endif // DEBUG
+        lua_pop( L, 1 );
 
-            lua_pop( L, 1 );
-            return 1;
-            }
-        //-Инициализация Lua.--!>
-
-        int i_line = lua_pcall( L, 0, LUA_MULTRET, 0 );
-        if ( i_line != 0 )
-            {
-            Print( "Evaluate Lua script error!\n" );
-            Print( "\t%s\n", lua_tostring( L, -1 ) );
-
-            lua_pop( L, 1 );
-            return 1;
-            }
-        }
-
-    //Выполнение пользовательской функции инициализации.
-    G_TECH_OBJECT_MNGR()->init_objects();
-
-    const char *PAC_name =
-        G_LUA_MANAGER->char_no_param_exec_lua_method( "system",
-        "get_PAC_name", "lua_manager::init" );
-    if ( 0 == PAC_name )
-        {
-        fprintf( stderr, "Lua init error - error reading PAC name!\n" );
-        debug_break;
         return 1;
         }
-    tcp_communicator::init_instance( PAC_name );
-    G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
-        device_communicator::write_devices_states_service );
-
-    lua_gc( L, LUA_GCRESTART, 0 );
-    lua_gc( L, LUA_GCCOLLECT, 0 );
-
-    //-Загрузка параметров.
-    const int PAC_ID =
-        lua_manager::get_instance()->int_no_param_exec_lua_method( "system",
-        "get_PAC_id", "main" );
-    params_manager::get_instance()->init( PAC_ID );
-    params_manager::get_instance()->final_init();
-
-    return 0;
+#endif // PAC_PC
     }
-//-----------------------------------------------------------------------------
-lua_manager::~lua_manager()
+
+//II
+//Экспортируем в Lua необходимые объекты.
+tolua_PAC_dev_open( L );
+
+//III
+//Выполняем процедуры инициализации.
+G_PROJECT_MANAGER->lua_load_configuration();
+
+//IV Выполнение основного скрипта ('main.plua').
+if ( 0 == lua_state )
     {
-    if ( 1 == is_free_lua )
+    if( luaL_loadfile( L, script_name ) != 0 )
         {
-        if ( L )
-            {
-            lua_close( L );
-            L = NULL;
-            }
-        }
-    }
-//-----------------------------------------------------------------------------
-int lua_manager::void_exec_lua_method( const char *object_name,
-    const char *function_name, const char *c_function_name ) const
-    {
-    int res = 0;
-    if ( 0 == exec_lua_method( object_name, function_name, 0, 0, 0 ) )
-        {
-        }
-    else
-        {
-        res = 1;
-#ifdef DEBUG
-        Print( "Error during C++ call - \"%s\"\n", c_function_name );
-#endif // DEBUG
-        }
-
-    return res;
-    }
-//-----------------------------------------------------------------------------
-int lua_manager::int_exec_lua_method( const char *object_name,
-    const char *function_name, int param, const char *c_function_name ) const
-    {
-    int res = 0;
-    if ( 0 == exec_lua_method( object_name, function_name, param ) )
-        {
-        res = ( int ) tolua_tonumber( L, -1, 0 );
-        lua_remove( L, -1 );
-        }
-    else
-        {
-        res = 1;
-#ifdef DEBUG
-        Print( "Error during C++ call - \"%s\"\n", c_function_name );
-#endif // DEBUG
-        }
-
-    return res;
-    }
-//-----------------------------------------------------------------------------
-void* lua_manager::user_object_exec_lua_method( const char *object_name,
-    const char *function_name, int param, const char *c_function_name ) const
-    {
-    void* res = NULL;
-    if ( 0 == exec_lua_method( object_name, function_name, param ) )
-        {
-        res = tolua_tousertype( L, -1, NULL );
-        lua_remove( L, -1 );
-        }
-    else
-        {
-#ifdef DEBUG
-        Print( "Error during C++ call - \"%s\"\n", c_function_name );
-#endif // DEBUG
-        }
-
-    return res;
-    }
-//-----------------------------------------------------------------------------
-int lua_manager::exec_lua_method( const char *object_name,
-    const char *function_name, int param, int is_use_param,
-    int is_use_lua_return_value ) const
-    {
-    //-Вычисление времени выполнения функций Lua.
-    //LARGE_INTEGER start_time;
-    //QueryPerformanceCounter( &start_time );
-
-    //    u_long start_time;
-    //    start_time = get_millisec();
-
-    lua_pushcclosure( lua_manager::L, error_trace, 0 );
-    instance->err_func = lua_gettop( L );
-
-    int param_count = 0;
-
-    if ( object_name && strcmp( object_name, "" ) != 0 )
-        {
-        lua_getfield( L, LUA_GLOBALSINDEX, object_name );
-        lua_getfield( L, -1, function_name );
-        lua_remove( L, -2 );
-        lua_getfield( L, LUA_GLOBALSINDEX, object_name );
-
-        param_count++;
-        }
-    else
-        {
-        lua_getfield( L, LUA_GLOBALSINDEX, function_name );
-        }
-
-    if ( is_use_param )
-        {
-        lua_pushnumber( L, param );
-        param_count++;
-        }
-    int results_count = is_use_lua_return_value == 1 ? 1 : 0;
-    int res = lua_pcall( L, param_count, results_count, err_func );
-
-    lua_remove( L, -results_count - 1 ); //Удаляем функцию error_trace.
-
-    //LARGE_INTEGER finish_time;
-    //QueryPerformanceCounter( &finish_time );
-    //LARGE_INTEGER tick_per_sec;
-    //QueryPerformanceFrequency( &tick_per_sec );
-    //LONGLONG call_time = finish_time.QuadPart - start_time.QuadPart;
-    //int tiks_per_mcsec = tick_per_sec.QuadPart / ( 1000 * 1000 );
-    //double dt = call_time / tiks_per_mcsec;
-    //dt += 1;
-
-    //    u_long finish_time;
-    //    finish_time = get_millisec();
-    //    u_long call_time = finish_time - start_time;
-    //    Print( "Lua call time - %lums\n", call_time );
-
-    return res;
-    }
-//-----------------------------------------------------------------------------
-int lua_manager::error_trace( lua_State * L )
-    {
-#ifdef DEBUG
-    Print( "\t%s\n", lua_tostring( L, -1 ) );
-    lua_pop( L, 1 );
-
-    Print( "\tstack traceback:\n" );
-    lua_Debug ar;
-    int level = 1;
-
-    while( lua_getstack( L, level, &ar ) )
-        {
-        lua_getinfo( L, "Sln", &ar );
-        Print( "\t\t%s:%d: in function '%s'\n",
-            ar.source, ar.linedefined, ar.name );
-        level++;
-        }
-#endif // DEBUG
-
-    //////stack: err
-    ////const char* err = lua_tostring(L, 1);
-
-    ////printf("Error: %s\n", err);
-
-    ////lua_getglobal(L, "debug"); // stack: err debug
-    ////lua_getfield(L, -1, "traceback"); // stack: err debug debug.traceback
-
-    ////// debug.traceback() возвращает 1 значение
-    ////if(lua_pcall(L, 0, 1, 0))
-    ////    {
-    ////    const char* err = lua_tostring(L, -1);
-
-    ////    printf("Error in debug.traceback() call: %s\n", err);
-    ////    }
-    ////else
-    ////    {
-    ////    const char* stackTrace = lua_tostring(L, -1);
-
-    ////    printf("C++ stack traceback: %s\n", stackTrace);
-    ////    }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int lua_manager::int_no_param_exec_lua_method( const char *object_name,
-    const char *function_name, const char *c_function_name ) const
-    {
-    int res = 0;
-    if ( 0 == exec_lua_method( object_name, function_name, 0, 0, 1 ) )
-        {
-        res = ( int ) tolua_tonumber( L, -1, 0 );
-        lua_remove( L, -1 );
-        }
-    else
-        {
-#ifdef DEBUG
-        Print( "Error during C++ call - \"%s\"\n", c_function_name );
-#endif // DEBUG
-        res = 1;
-        }
-
-    return res;
-    }
-//-----------------------------------------------------------------------------
-const char* lua_manager::char_exec_lua_method( const char *object_name,
-            const char *function_name, int param, const char *c_function_name ) const
-     {
-         const char* res = 0;
-    if ( 0 == exec_lua_method( object_name, function_name, param, 1, 1 ) )
-        {
-        res = tolua_tostring( L, -1, 0 );
-        lua_remove( L, -1 );
-        }
-    else
-        {
-#ifdef DEBUG
-        Print( "Error during C++ call - \"%s\"\n", c_function_name );
-#endif // DEBUG
-        }
-
-     return res;
-     }
-//-----------------------------------------------------------------------------
-const char* lua_manager::char_no_param_exec_lua_method( const char *object_name,
-    const char *function_name, const char *c_function_name ) const
-    {
-    const char* res = 0;
-    if ( 0 == exec_lua_method( object_name, function_name, 0, 0, 1 ) )
-        {
-        res = tolua_tostring( L, -1, 0 );
-        lua_remove( L, -1 );
-        }
-    else
-        {
-#ifdef DEBUG
-        Print( "Error during C++ call - \"%s\"\n", c_function_name );
-#endif // DEBUG
-        }
-
-    return res;
-    }
-//-----------------------------------------------------------------------------
-int lua_manager::exec_Lua_str( const char *Lua_str, const char *error_str,
-    bool is_print_error_msg /*= true */ ) const
-    {
-    int res = luaL_dostring( L, Lua_str );
-
-    if( res != 0  )
-        {
-        if ( is_print_error_msg )
-            {
-            Print( "Error during C++ call - \"%s\" - %s\n",
-                error_str, lua_tostring( L, -1 ) );
-            }
+        Print( "Load Lua main script \"%s\" error!\n", script_name );
+        Print( "\t%s\n", lua_tostring( L, -1 ) );
 
         lua_pop( L, 1 );
         return 1;
         }
+    //-Инициализация Lua.--!>
 
-    return 0;
+    int i_line = lua_pcall( L, 0, LUA_MULTRET, 0 );
+    if ( i_line != 0 )
+        {
+        Print( "Evaluate Lua script error!\n" );
+        Print( "\t%s\n", lua_tostring( L, -1 ) );
+
+        lua_pop( L, 1 );
+        return 1;
+        }
     }
-//-----------------------------------------------------------------------------
-lua_State * lua_manager::get_Lua() const
+
+//Выполнение пользовательской функции инициализации.
+G_TECH_OBJECT_MNGR()->init_objects();
+
+const char *PAC_name =
+    G_LUA_MANAGER->char_no_param_exec_lua_method( "system",
+    "get_PAC_name", "lua_manager::init" );
+if ( 0 == PAC_name )
     {
-    return L;
+    fprintf( stderr, "Lua init error - error reading PAC name!\n" );
+    debug_break;
+    return 1;
     }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
+tcp_communicator::init_instance( PAC_name );
+G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
+                      device_communicator::write_devices_states_service );
+
+lua_gc( L, LUA_GCRESTART, 0 );
+lua_gc( L, LUA_GCCOLLECT, 0 );
+
+//-Загрузка параметров.
+const int PAC_ID =
+    lua_manager::get_instance()->int_no_param_exec_lua_method( "system",
+    "get_PAC_id", "main" );
+params_manager::get_instance()->init( PAC_ID );
+params_manager::get_instance()->final_init();
+
+return 0;
+    }
+    //-----------------------------------------------------------------------------
+    lua_manager::~lua_manager()
+        {
+        if ( 1 == is_free_lua )
+            {
+            if ( L )
+                {
+                lua_close( L );
+                L = NULL;
+                }
+            }
+        }
+    //-----------------------------------------------------------------------------
+    int lua_manager::void_exec_lua_method( const char *object_name,
+        const char *function_name, const char *c_function_name ) const
+        {
+        int res = 0;
+        if ( 0 == exec_lua_method( object_name, function_name, 0, 0, 0 ) )
+            {
+            }
+        else
+            {
+            res = 1;
+#ifdef DEBUG
+            Print( "Error during C++ call - \"%s\"\n", c_function_name );
+#endif // DEBUG
+            }
+
+        return res;
+        }
+    //-----------------------------------------------------------------------------
+    int lua_manager::int_exec_lua_method( const char *object_name,
+        const char *function_name, int param, const char *c_function_name ) const
+        {
+        int res = 0;
+        if ( 0 == exec_lua_method( object_name, function_name, param ) )
+            {
+            res = ( int ) tolua_tonumber( L, -1, 0 );
+            lua_remove( L, -1 );
+            }
+        else
+            {
+            res = 1;
+#ifdef DEBUG
+            Print( "Error during C++ call - \"%s\"\n", c_function_name );
+#endif // DEBUG
+            }
+
+        return res;
+        }
+    //-----------------------------------------------------------------------------
+    void* lua_manager::user_object_exec_lua_method( const char *object_name,
+        const char *function_name, int param, const char *c_function_name ) const
+        {
+        void* res = NULL;
+        if ( 0 == exec_lua_method( object_name, function_name, param ) )
+            {
+            res = tolua_tousertype( L, -1, NULL );
+            lua_remove( L, -1 );
+            }
+        else
+            {
+#ifdef DEBUG
+            Print( "Error during C++ call - \"%s\"\n", c_function_name );
+#endif // DEBUG
+            }
+
+        return res;
+        }
+    //-----------------------------------------------------------------------------
+    int lua_manager::exec_lua_method( const char *object_name,
+        const char *function_name, int param, int is_use_param,
+        int is_use_lua_return_value ) const
+        {
+        //-Вычисление времени выполнения функций Lua.
+        //LARGE_INTEGER start_time;
+        //QueryPerformanceCounter( &start_time );
+
+        //    u_long start_time;
+        //    start_time = get_millisec();
+
+        lua_pushcclosure( lua_manager::L, error_trace, 0 );
+        instance->err_func = lua_gettop( L );
+
+        int param_count = 0;
+
+        if ( object_name && strcmp( object_name, "" ) != 0 )
+            {
+            lua_getfield( L, LUA_GLOBALSINDEX, object_name );
+            lua_getfield( L, -1, function_name );
+            lua_remove( L, -2 );
+            lua_getfield( L, LUA_GLOBALSINDEX, object_name );
+
+            param_count++;
+            }
+        else
+            {
+            lua_getfield( L, LUA_GLOBALSINDEX, function_name );
+            }
+
+        if ( is_use_param )
+            {
+            lua_pushnumber( L, param );
+            param_count++;
+            }
+        int results_count = is_use_lua_return_value == 1 ? 1 : 0;
+        int res = lua_pcall( L, param_count, results_count, err_func );
+
+        lua_remove( L, -results_count - 1 ); //Удаляем функцию error_trace.
+
+        //LARGE_INTEGER finish_time;
+        //QueryPerformanceCounter( &finish_time );
+        //LARGE_INTEGER tick_per_sec;
+        //QueryPerformanceFrequency( &tick_per_sec );
+        //LONGLONG call_time = finish_time.QuadPart - start_time.QuadPart;
+        //int tiks_per_mcsec = tick_per_sec.QuadPart / ( 1000 * 1000 );
+        //double dt = call_time / tiks_per_mcsec;
+        //dt += 1;
+
+        //    u_long finish_time;
+        //    finish_time = get_millisec();
+        //    u_long call_time = finish_time - start_time;
+        //    Print( "Lua call time - %lums\n", call_time );
+
+        return res;
+        }
+    //-----------------------------------------------------------------------------
+    int lua_manager::error_trace( lua_State * L )
+        {
+#ifdef DEBUG
+        Print( "\t%s\n", lua_tostring( L, -1 ) );
+        lua_pop( L, 1 );
+
+        Print( "\tstack traceback:\n" );
+        lua_Debug ar;
+        int level = 1;
+
+        while( lua_getstack( L, level, &ar ) )
+            {
+            lua_getinfo( L, "Sln", &ar );
+            Print( "\t\t%s:%d: in function '%s'\n",
+                ar.source, ar.linedefined, ar.name );
+            level++;
+            }
+#endif // DEBUG
+
+        //////stack: err
+        ////const char* err = lua_tostring(L, 1);
+
+        ////printf("Error: %s\n", err);
+
+        ////lua_getglobal(L, "debug"); // stack: err debug
+        ////lua_getfield(L, -1, "traceback"); // stack: err debug debug.traceback
+
+        ////// debug.traceback() возвращает 1 значение
+        ////if(lua_pcall(L, 0, 1, 0))
+        ////    {
+        ////    const char* err = lua_tostring(L, -1);
+
+        ////    printf("Error in debug.traceback() call: %s\n", err);
+        ////    }
+        ////else
+        ////    {
+        ////    const char* stackTrace = lua_tostring(L, -1);
+
+        ////    printf("C++ stack traceback: %s\n", stackTrace);
+        ////    }
+
+        return 0;
+        }
+    //-----------------------------------------------------------------------------
+    int lua_manager::int_no_param_exec_lua_method( const char *object_name,
+        const char *function_name, const char *c_function_name ) const
+        {
+        int res = 0;
+        if ( 0 == exec_lua_method( object_name, function_name, 0, 0, 1 ) )
+            {
+            res = ( int ) tolua_tonumber( L, -1, 0 );
+            lua_remove( L, -1 );
+            }
+        else
+            {
+#ifdef DEBUG
+            Print( "Error during C++ call - \"%s\"\n", c_function_name );
+#endif // DEBUG
+            res = 1;
+            }
+
+        return res;
+        }
+    //-----------------------------------------------------------------------------
+    const char* lua_manager::char_exec_lua_method( const char *object_name,
+        const char *function_name, int param, const char *c_function_name ) const
+        {
+        const char* res = 0;
+        if ( 0 == exec_lua_method( object_name, function_name, param, 1, 1 ) )
+            {
+            res = tolua_tostring( L, -1, 0 );
+            lua_remove( L, -1 );
+            }
+        else
+            {
+#ifdef DEBUG
+            Print( "Error during C++ call - \"%s\"\n", c_function_name );
+#endif // DEBUG
+            }
+
+        return res;
+        }
+    //-----------------------------------------------------------------------------
+    const char* lua_manager::char_no_param_exec_lua_method( const char *object_name,
+        const char *function_name, const char *c_function_name ) const
+        {
+        const char* res = 0;
+        if ( 0 == exec_lua_method( object_name, function_name, 0, 0, 1 ) )
+            {
+            res = tolua_tostring( L, -1, 0 );
+            lua_remove( L, -1 );
+            }
+        else
+            {
+#ifdef DEBUG
+            Print( "Error during C++ call - \"%s\"\n", c_function_name );
+#endif // DEBUG
+            }
+
+        return res;
+        }
+    //-----------------------------------------------------------------------------
+    int lua_manager::exec_Lua_str( const char *Lua_str, const char *error_str,
+        bool is_print_error_msg /*= true */ ) const
+        {
+        int res = luaL_dostring( L, Lua_str );
+
+        if( res != 0  )
+            {
+            if ( is_print_error_msg )
+                {
+                Print( "Error during C++ call - \"%s\" - %s\n",
+                    error_str, lua_tostring( L, -1 ) );
+                }
+
+            lua_pop( L, 1 );
+            return 1;
+            }
+
+        return 0;
+        }
+    //-----------------------------------------------------------------------------
+    lua_State * lua_manager::get_Lua() const
+        {
+        return L;
+        }
+    //-----------------------------------------------------------------------------
+    //-----------------------------------------------------------------------------

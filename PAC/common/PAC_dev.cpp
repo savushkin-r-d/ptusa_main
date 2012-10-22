@@ -251,26 +251,26 @@ int device::set_cmd( const char *prop, u_int idx, double val )
 
     switch ( prop[ 0 ] )
         {
-    case 'S':
-        direct_set_state( ( int ) val );
-        break;
+        case 'S':
+            direct_set_state( ( int ) val );
+            break;
 
-    case 'V':
-        direct_set_value( ( float ) val );
-        break;
+        case 'V':
+            direct_set_value( ( float ) val );
+            break;
 
-    case 'M':
-        is_manual_mode = val == 0. ? false : true;
-        break;
+        case 'M':
+            is_manual_mode = val == 0. ? false : true;
+            break;
 
-    case 'P': //Параметры.
-        par_device::set_cmd( prop, val );
-        break;
+        case 'P': //Параметры.
+            par_device::set_cmd( prop, val );
+            break;
 
 #ifdef DEBUG
-    default:
-        Print( "Error device::set_cmd() - prop = %s, val = %f\n",
-            prop, val );
+        default:
+            Print( "Error device::set_cmd() - prop = %s, val = %f\n",
+                prop, val );
 #endif // DEBUG
         }
 
@@ -278,8 +278,8 @@ int device::set_cmd( const char *prop, u_int idx, double val )
     }
 //-----------------------------------------------------------------------------
 device::device( int number, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type,
-    u_int par_cnt ) :
-    par_device( par_cnt ),
+               u_int par_cnt ) :
+par_device( par_cnt ),
     number( number ),
     type( type ),
     sub_type( sub_type ),
@@ -327,7 +327,7 @@ device_manager* device_manager::get_instance()
     }
 //-----------------------------------------------------------------------------
 int device_manager::get_device_n( device::DEVICE_TYPE dev_type,
-    u_int dev_number )
+                                 u_int dev_number )
     {
     int l = dev_types_ranges[ dev_type ].start_pos;
     int u = dev_types_ranges[ dev_type ].end_pos;
@@ -357,7 +357,7 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type,
     }
 //-----------------------------------------------------------------------------
 device* device_manager::get_device( int dev_type,
-    u_int dev_number )
+                                   u_int dev_number )
     {
     int dev_n = get_device_n( ( device::DEVICE_TYPE ) dev_type, dev_number );
 
@@ -512,7 +512,7 @@ i_AI_device* device_manager::get_QT( int number )
     }
 //-----------------------------------------------------------------------------
 wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
-    u_int number, char * descr )
+                                             u_int number, char * descr )
     {
     static char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
 
@@ -521,139 +521,144 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
 
     switch ( dev_type )
         {
-    case device::DT_V:
-        {
-        switch ( dev_sub_type )
+        case device::DT_V:
             {
-        case device::DST_V_DO1:
-            new_device      = new valve_DO1( number );
-            new_wago_device = ( valve_DO1_DI2* ) new_device;
+            switch ( dev_sub_type )
+                {
+                case device::DST_V_DO1:
+                    new_device      = new valve_DO1( number );
+                    new_wago_device = ( valve_DO1* ) new_device;
+                    break;
+
+                case device::DST_V_DO2:
+                    new_device      = new valve_DO2( number );
+                    new_wago_device = ( valve_DO2* ) new_device;
+                    break;
+
+                case device::DST_V_DO1_DI1_FB_OFF:
+                    new_device      = new valve_DO1_DI1_off( number );
+                    new_wago_device = ( valve_DO1_DI1_off* ) new_device;
+                    break;
+
+                case device::DST_V_DO1_DI1_FB_ON:
+                    new_device      = new valve_DO1_DI1_on( number );
+                    new_wago_device = ( valve_DO1_DI1_on* ) new_device;
+                    break;
+
+                case device::DST_V_DO1_DI2:
+                    new_device      = new valve_DO1_DI2( number );
+                    new_wago_device = ( valve_DO1_DI2* ) new_device;
+                    break;
+
+                case device::DST_V_DO2_DI2:
+                    new_device      = new valve_DO2_DI2( number );
+                    new_wago_device = ( valve_DO2_DI2* ) new_device;
+                    break;
+
+                case device::DST_V_MIXPROOF:
+                    new_device      = new valve_mix_proof( number );
+                    new_wago_device = ( valve_mix_proof* ) new_device;
+                    break;
+
+                default:
+#ifdef DEBUG
+                    Print( "Unknown V device subtype %d!\n", dev_sub_type );
+                    get_char();
+#endif // DEBUG
+                    new_device      = new dev_stub();
+                    break;
+                }
+            break;
+            }
+
+        case device::DT_VC:
+            new_device      = new analog_valve( number );
+            new_wago_device = ( analog_valve* ) new_device;
             break;
 
-        case device::DST_V_DO2:
-            new_device      = new valve_DO2( number );
-            new_wago_device = ( valve_DO2_DI2* ) new_device;
+        case device::DT_M:
+            new_device      = new motor( number,
+                ( device::DEVICE_SUB_TYPE ) dev_sub_type );
+            new_wago_device = ( motor* ) new_device;
             break;
 
-        case device::DST_V_DO1_DI1_FB_OFF:
-            new_device      = new valve_DO1_DI1_off( number );
-            new_wago_device = ( valve_DO1_DI1_off* ) new_device;
+        case device::DT_LS:
+            new_device      = new level_s( number,
+                ( device::DEVICE_SUB_TYPE ) dev_sub_type );
+            new_wago_device = ( level_s* ) new_device;
             break;
 
-        case device::DST_V_DO1_DI2:
-            new_device      = new valve_DO1_DI2( number );
-            new_wago_device = ( valve_DO1_DI2* ) new_device;
+        case device::DT_TE:
+            new_device      = new temperature_e( number );
+            new_wago_device = ( temperature_e* ) new_device;
             break;
 
-        case device::DST_V_DO2_DI2:
-            new_device      = new valve_DO2_DI2( number );
-            new_wago_device = ( valve_DO2_DI2* ) new_device;
+        case device::DT_FS:
+            new_device      = new flow_s( number );
+            new_wago_device = ( flow_s* ) new_device;
             break;
 
-        case device::DST_V_MIXPROOF:
-            new_device      = new valve_mix_proof( number );
-            new_wago_device = ( valve_mix_proof* ) new_device;
+        case device::DT_FQT:
+            new_device      = new counter( number );
+            new_wago_device = ( counter* ) new_device;
+            break;
+
+        case device::DT_AO:
+            new_device      = new analog_output( number );
+            new_wago_device = ( analog_output* ) new_device;
+            break;
+
+        case device::DT_LT:
+            new_device      = new level_e( number );
+            new_wago_device = ( level_e* ) new_device;
+            break;
+
+        case device::DT_DI:
+            new_device      = new DI_signal( number );
+            new_wago_device = ( DI_signal* ) new_device;
+            break;
+
+        case device::DT_DO:
+            new_device      = new DO_signal( number );
+            new_wago_device = ( DO_signal* ) new_device;
+            break;
+
+        case device::DT_QT:
+            new_device      = new concentration_e( number );
+            new_wago_device = ( concentration_e* ) new_device;
+            break;
+
+        case device::DT_AI:
+            new_device      = new analog_input( number );
+            new_wago_device = ( analog_input* ) new_device;
+            break;
+
+        case device::DT_HA:
+            new_device      = new siren( number );
+            new_wago_device = ( siren* ) new_device;
+            break;
+
+        case device::DT_HL:
+            new_device      = new lamp( number );
+            new_wago_device = ( lamp* ) new_device;
+            break;
+
+        case device::DT_SB:
+            new_device      = new button( number );
+            new_wago_device = ( button* ) new_device;
+            break;
+
+        case device::DT_GS:
+            new_device      = new state_s( number );
+            new_wago_device = ( state_s* ) new_device;
             break;
 
         default:
 #ifdef DEBUG
-            Print( "Unknown V device subtype %d!\n", dev_sub_type );
-            get_char();
+            Print( "Unknown device type %d!\n", dev_type );
 #endif // DEBUG
-            new_device      = new dev_stub();
+            new_device = new dev_stub();
             break;
-            }
-        break;
-        }
-
-    case device::DT_VC:
-        new_device      = new analog_valve( number );
-        new_wago_device = ( analog_valve* ) new_device;
-        break;
-
-    case device::DT_M:
-        new_device      = new motor( number,
-            ( device::DEVICE_SUB_TYPE ) dev_sub_type );
-        new_wago_device = ( motor* ) new_device;
-        break;
-
-    case device::DT_LS:
-        new_device      = new level_s( number,
-( device::DEVICE_SUB_TYPE ) dev_sub_type );
-        new_wago_device = ( level_s* ) new_device;
-        break;
-
-    case device::DT_TE:
-        new_device      = new temperature_e( number );
-        new_wago_device = ( temperature_e* ) new_device;
-        break;
-
-    case device::DT_FS:
-        new_device      = new flow_s( number );
-        new_wago_device = ( flow_s* ) new_device;
-        break;
-
-    case device::DT_FQT:
-        new_device      = new counter( number );
-        new_wago_device = ( counter* ) new_device;
-        break;
-
-    case device::DT_AO:
-        new_device      = new analog_output( number );
-        new_wago_device = ( analog_output* ) new_device;
-        break;
-
-    case device::DT_LT:
-        new_device      = new level_e( number );
-        new_wago_device = ( level_e* ) new_device;
-        break;
-
-    case device::DT_DI:
-        new_device      = new DI_signal( number );
-        new_wago_device = ( DI_signal* ) new_device;
-        break;
-
-    case device::DT_DO:
-        new_device      = new DO_signal( number );
-        new_wago_device = ( DO_signal* ) new_device;
-        break;
-
-    case device::DT_QT:
-        new_device      = new concentration_e( number );
-        new_wago_device = ( concentration_e* ) new_device;
-        break;
-
-    case device::DT_AI:
-        new_device      = new analog_input( number );
-        new_wago_device = ( analog_input* ) new_device;
-        break;
-
-    case device::DT_HA:
-        new_device      = new siren( number );
-        new_wago_device = ( siren* ) new_device;
-        break;
-
-    case device::DT_HL:
-        new_device      = new lamp( number );
-        new_wago_device = ( lamp* ) new_device;
-        break;
-
-    case device::DT_SB:
-        new_device      = new button( number );
-        new_wago_device = ( button* ) new_device;
-        break;
-
-    case device::DT_GS:
-        new_device      = new state_s( number );
-        new_wago_device = ( state_s* ) new_device;
-        break;
-
-    default:
-#ifdef DEBUG
-        Print( "Unknown device type %d!\n", dev_type );
-#endif // DEBUG
-        new_device = new dev_stub();
-        break;
         }
 
     // Ошибки.
@@ -893,17 +898,17 @@ void counter::direct_set_state( int new_state )
     {
     switch ( new_state )
         {
-    case S_STOP:
-        reset();
-        break;
+        case S_STOP:
+            reset();
+            break;
 
-    case S_WORK:
-        start();
-        break;
+        case S_WORK:
+            start();
+            break;
 
-    case S_PAUSE:
-        pause();
-        break;
+        case S_PAUSE:
+            pause();
+            break;
         }
     }
 //-----------------------------------------------------------------------------
@@ -1035,7 +1040,7 @@ void digital_wago_device::direct_off()
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 digital_wago_device::digital_wago_device( int number, device::DEVICE_TYPE type,
-    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :
+                                         device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :
 device( number, type, sub_type, par_cnt )
 #ifdef DEBUG_NO_WAGO_MODULES
     , state( 0 )
@@ -1073,38 +1078,174 @@ void DO2::direct_off()
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-valve_DO1_DI1_off::valve_DO1_DI1_off( int number ) : fb_device( false, true,
-    number, DT_V, DST_V_DO1_DI1_FB_OFF )
+valve::valve( bool is_on_fb, bool is_off_fb, int number,
+             device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ) :
+digital_wago_device( number, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
+    is_on_fb( is_on_fb ),
+    is_off_fb( is_off_fb ),
+    on_fb( true ),
+    off_fb( true )
+    {
+    set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
+    set_par_name( P_FB,  0, "P_FB" );    
+    }
+//-----------------------------------------------------------------------------
+void valve::save_device_ex( char *buff )
+    {
+    if ( is_on_fb )
+        {
+        sprintf( buff, "FB_ON_ST=%d, ", get_on_fb_value() );
+        }
+
+    if ( is_off_fb )
+        {
+        sprintf( buff, "FB_OFF_ST=%d, ", get_off_fb_value() );
+        }
+    }
+//-----------------------------------------------------------------------------
+int valve::get_state()
+    {
+    switch ( get_valve_state() )
+        {
+        case V_LOWER_SEAT:
+            if ( get_manual_mode() )
+                {
+                return VX_LOWER_SEAT_MANUAL;
+                }
+            return VX_LOWER_SEAT;
+
+        case V_UPPER_SEAT:
+            if ( get_manual_mode() )
+                {
+                return VX_UPPER_SEAT_MANUAL;
+                }
+            return VX_UPPER_SEAT;
+
+        case V_ON:
+            if ( is_off_fb || is_off_fb )
+                {
+                //Обратная связь отключена.
+                if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+                    {
+                    if ( get_manual_mode() )
+                        {
+                        return VX_ON_FB_OFF_MANUAL;
+                        }
+                    else
+                        {
+                        return VX_ON_FB_OFF;
+                        }
+                    }
+                }
+
+            //Обратная связь не отключена.
+            if ( get_manual_mode() )
+                {
+                if ( get_fb_state() == true )
+                    {
+                    return VX_ON_FB_OK_MANUAL;
+                    }
+                else
+                    {
+                    return VX_ON_FB_ERR_MANUAL;
+                    }
+                }// if ( get_manual_mode() )
+            else
+                {
+                if ( get_fb_state() == true )
+                    {
+                    return VX_ON_FB_OK;
+                    }
+                else
+                    {
+                    return VX_ON_FB_ERR;
+                    }
+                }
+            break;
+
+        case V_OFF:
+            if ( is_off_fb || is_off_fb )
+                {
+                //Обратная связь отключена.
+                if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+                    {
+                    if ( get_manual_mode() )
+                        {
+                        return VX_OFF_FB_OFF_MANUAL;
+                        }
+                    else
+                        {
+                        return VX_OFF_FB_OFF;
+                        }
+                    }
+                }
+
+            //Обратная связь не отключена.
+            if ( get_manual_mode() )
+                {
+                if ( get_fb_state() )
+                    {
+                    return VX_OFF_FB_OK_MANUAL;
+                    }
+                else
+                    {
+                    return VX_OFF_FB_ERR_MANUAL;
+                    }
+                }// if ( get_manual_mode() )
+            else
+                {
+                if ( get_fb_state() == true )
+                    {
+                    return VX_OFF_FB_OK;
+                    }
+                else
+                    {
+                    return VX_OFF_FB_ERR;
+                    }
+                }
+            break;
+        }
+
+    return VX_UNKNOWN;
+    }
+//-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_WAGO_MODULES
+int valve::set_cmd( const char *prop, u_int idx, double val )
+    {
+#ifdef DEBUG
+    Print( "valve::set_cmd() - prop = %s, idx = %d, val = %f\n",
+        prop, idx, val );
+#endif // DEBUG
+
+    switch ( prop[ 0 ] )
+        {
+        case 'F':
+            if ( strcmp( prop, "FB_ON_ST" ) == 0 )
+                {
+                on_fb = val == .0;
+                }
+            else
+                {
+                off_fb = val == .0;
+                }
+            break;
+
+        default:
+            device::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    }
+#endif // DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_DO1_DI1_off::valve_DO1_DI1_off( int number ) : valve( false, true,
+                                                           number, DT_V, DST_V_DO1_DI1_FB_OFF ),
+                                                           start_switch_time( 0 )
     {
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
-int valve_DO1_DI1_off::get_state()
-    {
-    int o = get_DO( DO_INDEX );
-    int i = get_DI( DI_INDEX );
-
-    if ( get_par( fb_device::P_FB_OFF, 0 ) == fb_device::FB_IS_AND_OFF )
-        {
-        return o;
-        }
-
-    if ( o != i )
-        {
-        start_switch_time = get_sec();
-        return !i;
-        }
-
-    if ( get_sec() - start_switch_time > get_par( fb_device::P_ON_TIME, 0 ) )
-        {
-        return -1;
-        }
-    else
-        {
-        return !i;
-        }
-    }
-//-----------------------------------------------------------------------------
 void valve_DO1_DI1_off::direct_on()
     {
     int o = get_DO( DO_INDEX );
@@ -1128,33 +1269,6 @@ void valve_DO1_DI1_off::direct_off()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
-
-int valve_DO1_DI1_on::get_state()
-    {
-    int o = get_DO( DO_INDEX );
-    int i = get_DI( DI_INDEX );
-
-    if ( get_par( fb_device::P_FB_ON, 0 ) == fb_device::FB_IS_AND_OFF )
-        {
-        return o;
-        }
-
-    if ( o == i )
-        {
-        start_switch_time = get_sec();
-        return i;
-        }
-
-    if ( get_sec() - start_switch_time > get_par( fb_device::P_ON_TIME, 0 ) )
-        {
-        return -1;
-        }
-    else
-        {
-        return i;
-        }
-    }
-//-----------------------------------------------------------------------------
 void valve_DO1_DI1_on::direct_on()
     {
     int o = get_DO( DO_INDEX );
@@ -1180,35 +1294,6 @@ void valve_DO1_DI1_on::direct_off()
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-int valve_DO1_DI2::get_state()
-    {
-    int o = get_DO( DO_INDEX );
-    int i0 = get_DI( DI_INDEX_1 );
-    int i1 = get_DI( DI_INDEX_2 );
-
-    if ( get_par( fb_device::P_FB_ON, 0 ) == fb_device::FB_IS_AND_OFF ||
-        get_par( fb_device::P_FB_OFF, 0 ) == fb_device::FB_IS_AND_OFF )
-        {
-        return o;
-        }
-
-    if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
-        ( o == 1 && i1 == 1 && i0 == 0 ) )
-        {
-        start_switch_time = get_sec();
-        return o;
-        }
-
-    if ( get_sec() - start_switch_time > get_par( fb_device::P_ON_TIME, 0 ) )
-        {
-        return -1;
-        }
-    else
-        {
-        return o;
-        }
-    }
-//-----------------------------------------------------------------------------
 void valve_DO1_DI2::direct_on()
     {
     int o = get_DO( DO_INDEX );
@@ -1234,35 +1319,6 @@ void valve_DO1_DI2::direct_off()
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-int valve_DO2_DI2::get_state()
-    {
-    int o0 = get_DO( DO_INDEX_1 );
-    int o1 = get_DO( DO_INDEX_2 );
-    int i0 = get_DI( DI_INDEX_1 );
-    int i1 = get_DI( DI_INDEX_2 );
-
-    if ( get_par( fb_device::P_FB_ON, 0 ) == fb_device::FB_IS_AND_OFF ||
-        get_par( fb_device::P_FB_OFF, 0 ) == fb_device::FB_IS_AND_OFF  )
-        {
-        return o1;
-        }
-
-    if ( ( o1 == i1 ) && ( o0 == i0 ) )
-        {
-        start_switch_time = get_sec();
-        return o1;
-        };
-
-    if ( get_sec() - start_switch_time > get_par( fb_device::P_ON_TIME, 0 ) )
-        {
-        return -1;
-        }
-    else
-        {
-        return o1;
-        }
-    }
-//-----------------------------------------------------------------------------
 void valve_DO2_DI2::direct_on()
     {
     int o = get_DO( DO_INDEX_1 );
@@ -1290,57 +1346,48 @@ void valve_DO2_DI2::direct_off()
 //-----------------------------------------------------------------------------
 void valve_mix_proof::open_upper_seat()
     {
-    direct_set_state( ST_UPPER_SEAT );
+    direct_set_state( i_mix_proof::ST_UPPER_SEAT );
     }
 //-----------------------------------------------------------------------------
 void valve_mix_proof::open_lower_seat()
     {
-    direct_set_state( ST_LOWER_SEAT );
+    direct_set_state( i_mix_proof::ST_LOWER_SEAT );
     }
 //-----------------------------------------------------------------------------
-#ifdef DEBUG_NO_WAGO_MODULES
-
 void valve_mix_proof::direct_set_state( int new_state )
     {
-    state = ( char ) new_state;   
-    }
+#ifdef DEBUG_NO_WAGO_MODULES
+    state = ( char ) new_state;  
+#else
+    switch ( new_state )
+        {
+        case ST_CLOSE:
+            direct_off();
+            break;
+
+        case ST_OPEN:
+            direct_on();
+            break;
+
+        case ST_UPPER_SEAT:
+            direct_off();
+            set_DO( DO_INDEX_U, 1 );
+            break;
+
+        case ST_LOWER_SEAT:
+            direct_off();
+            set_DO( DO_INDEX_L, 1 );
+            break;
+
+        default:
+            direct_on();
+            break;
+        }
 #endif //DEBUG_NO_WAGO_MODULES
+    }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
-int valve_mix_proof::get_state()
-    {
-    int o = get_DO( DO_INDEX );
-    int i0 = get_DI( DI_INDEX_U );
-    int i1 = get_DI( DI_INDEX_L );
-
-    if ( get_par( fb_device::P_FB_ON, 0 ) == fb_device::FB_IS_AND_OFF ||
-        get_par( fb_device::P_FB_OFF, 0 ) == fb_device::FB_IS_AND_OFF )
-        {
-        if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return ST_UPPER_SEAT;
-        if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return ST_LOWER_SEAT;
-        return o;
-        }
-
-    if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
-        ( o == 1 && i1 == 1 && i0 == 0 ) )
-        {
-        start_switch_time = get_sec();
-        if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return ST_UPPER_SEAT;
-        if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return ST_LOWER_SEAT;
-        return o;
-        }
-
-    if ( get_sec() - start_switch_time > get_par( fb_device::P_ON_TIME, 0 ) )
-        {
-        return -1;
-        }
-    else
-        {
-        return o;
-        }
-    }
-//-----------------------------------------------------------------------------
 void valve_mix_proof::direct_on()
     {
     set_DO( DO_INDEX_U, 0 );
@@ -1366,35 +1413,6 @@ void valve_mix_proof::direct_off()
         set_DO( DO_INDEX, 0 );
         }
     }
-//-----------------------------------------------------------------------------
-void valve_mix_proof::direct_set_state( int new_state )
-    {
-    switch ( new_state )
-        {
-    case ST_CLOSE:
-        direct_off();
-        break;
-
-    case ST_OPEN:
-        direct_on();
-        break;
-
-    case ST_UPPER_SEAT:
-        direct_off();
-        set_DO( DO_INDEX_U, 1 );
-        break;
-
-    case ST_LOWER_SEAT:
-        direct_off();
-        set_DO( DO_INDEX_L, 1 );
-        break;
-
-    default:
-        direct_on();
-        break;
-        }
-    }
-
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1412,9 +1430,9 @@ void DI1::direct_off()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 AI1::AI1( u_int number, device::DEVICE_TYPE type,
-    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt,
-    u_int *start_par_idx ) : analog_wago_device( number, type, sub_type,
-    par_cnt + ADDITIONAL_PARAM_COUNT )
+         device::DEVICE_SUB_TYPE sub_type, u_int par_cnt,
+         u_int *start_par_idx ) : analog_wago_device( number, type, sub_type,
+         par_cnt + ADDITIONAL_PARAM_COUNT )
     {
     if ( start_par_idx )
         {
@@ -1480,6 +1498,21 @@ float level_e::get_min_val()
     {
     return 0;
     }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+
+void valve_DO1::direct_on()
+    {
+    set_DO( DO_INDEX, 1 );
+    }
+//-----------------------------------------------------------------------------
+void valve_DO1::direct_off()
+    {
+    set_DO( DO_INDEX, 0 );
+    }
+
+#endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float motor::get_value()
@@ -1575,16 +1608,16 @@ bool level_s::is_active()
     {
     switch ( sub_type )
         {
-    case DST_LS_MIN:
-        return get_state() == 0 ? 1 : 0;
-        break;
+        case DST_LS_MIN:
+            return get_state() == 0 ? 1 : 0;
+            break;
 
-    case DST_LS_MAX:
-        return get_state() == 0 ? 0 : 1;
-        break;
+        case DST_LS_MAX:
+            return get_state() == 0 ? 0 : 1;
+            break;
 
-    default:
-        return get_state() == 0 ? 0 : 1;
+        default:
+            return get_state() == 0 ? 0 : 1;
         }
     }
 //-----------------------------------------------------------------------------
@@ -1654,41 +1687,6 @@ void analog_wago_device::direct_set_value( float new_value )
     value = new_value;
     }
 #endif // DEBUG_NO_WAGO_MODULES
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-fb_device::fb_device( bool is_on_fb, bool is_off_fb, int number,
-    device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ) :
-    digital_wago_device( number, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
-    is_on_fb( is_on_fb ),
-    is_off_fb( is_off_fb )
-    {
-    set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
-    set_par_name( P_FB_OFF,  0, "P_FB_OFF" );
-    set_par_name( P_FB_ON,   0, "P_FB_ON" );
-    }
-//-----------------------------------------------------------------------------
-int fb_device::get_on_fb()
-    {
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int fb_device::get_off_fb()
-    {
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-void fb_device::save_device_ex( char *buff )
-    {
-    if ( is_on_fb )
-        {
-        sprintf( buff, "FB_ON_ST=%d, ", get_on_fb() );
-        }
-
-    if ( is_off_fb )
-        {
-        sprintf( buff, "FB_OFF_ST=%d, ", get_off_fb() );
-        }
-    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int timer::save( char *buff )
@@ -1930,7 +1928,7 @@ device* DEVICE( int type, int number )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_AS_mix_proof::valve_AS_mix_proof( u_int number ) : device( number,
-    DT_V, DST_V_AS_MIXPROOF, 0 )
+                                                                DT_V, DST_V_AS_MIXPROOF, 0 )
     {
     }
 //-----------------------------------------------------------------------------

@@ -116,7 +116,7 @@ long device_communicator::write_devices_states_service( long len,
             answer_size++;
 
 #ifdef DEBUG
-           // Print( "%s", outdata + 2 );
+         //  Print( "%s", outdata + 2 );
 #endif // DEBUG
 
 #ifdef DEBUG_DEV_CMCTR

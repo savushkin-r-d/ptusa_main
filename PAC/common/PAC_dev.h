@@ -9,7 +9,7 @@
 /// @par Описание директив препроцессора:
 /// @c DEBUG - компиляция c выводом отладочной информации в консоль.
 /// @c DEBUG_NO_WAGO_MODULES - простые устройства работают без модулей
-/// wago (состояния хранят в себе).
+/// Wago (состояния хранят в себе).
 ///
 /// @par Текущая версия:
 /// @$Rev$.\n
@@ -25,6 +25,7 @@
 #include <vector>
 #include <string>
 
+#include "dtime.h"
 #include "wago.h"
 #include "g_device.h"
 
@@ -330,8 +331,8 @@ class device : public i_DO_AO_device, public par_device
             DST_V_DO1_DI1_FB_ON,   ///< Клапан с одним каналом управления и одной обратной связью на открытое состояние.
             DST_V_DO1_DI2,      ///< Клапан с одним каналом управления и двумя обратными связями.
             DST_V_DO2_DI2,      ///< Клапан с двумя каналами управления и двумя обратными связями.
-            DST_V_MIXPROOF,     ///< Клапан микспруф.
-            DST_V_AS_MIXPROOF,  ///< Клапан с двумя каналами управления и двумя обратными связями с AS интерфейсом (микспруф).
+            DST_V_MIXPROOF,     ///< Клапан противосмешивающий.
+            DST_V_AS_MIXPROOF,  ///< Клапан с двумя каналами управления и двумя обратными связями с AS интерфейсом (противосмешивающий).
 
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
@@ -339,7 +340,7 @@ class device : public i_DO_AO_device, public par_device
 
             //M,
             DST_M_IS_FREQ,      ///< Есть частота вращения.
-            DST_M_NO_FREQ,      ///< Нет частота вращения.
+            DST_M_NO_FREQ,      ///< Нет частоты вращения.
             };
 
         device( int number, device::DEVICE_TYPE type,
@@ -368,7 +369,7 @@ class device : public i_DO_AO_device, public par_device
         /// @brief Выключение устройства с учетом ручного режима.
         void off();
 
-        /// @brief Вывод объекта в коlнсоль.
+        /// @brief Вывод объекта в консоль.
         ///
         /// Для использования в отладочных целях.
         void print() const;
@@ -587,7 +588,7 @@ class DO2 : public digital_wago_device
 //-----------------------------------------------------------------------------
 /// @brief Устройство с обратными связями.
 ///
-class fb_device: public digital_wago_device
+class valve: public digital_wago_device
     {
     public:
         /// @param is_on_fb - использовать обратную связь на включенное состояние.
@@ -595,35 +596,111 @@ class fb_device: public digital_wago_device
         /// @param number - номер устройства.
         /// @param type - тип устройства.
         /// @param sub_type - подтип устройства.
-        fb_device( bool is_on_fb, bool is_off_fb,
+        valve( bool is_on_fb, bool is_off_fb,
             int number, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type );
 
+        /// @param number - номер устройства.
+        /// @param type - тип устройства.
+        /// @param sub_type - подтип устройства.
+        valve( int number, device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ):
+            digital_wago_device( number, type, sub_type, 0 ),
+            is_on_fb( 0 ),
+            is_off_fb( 0 )
+            { 
+            }
+
         /// @brief Получение значения обратной связи на включенное состояние.
-        virtual int get_on_fb();
+        virtual int get_on_fb_value() 
+            {
+            return on_fb;
+            }
 
         /// @brief Получение значения обратной связи на выключенное состояние.
-        virtual int get_off_fb();
+        virtual int get_off_fb_value()
+            {
+            return off_fb;
+            }
 
         /// @brief Сохранение дополнительных данных.
         void save_device_ex( char *buff );
+                
+        //Состояния клапана (расширенное).
+        enum VALVE_STATE_EX            
+            {
+            VX_ON_FB_OFF  = 11,  ///< Включен, ОС отключена.
+            VX_OFF_FB_OFF = 10,  ///< Выключен, ОС отключена.
+
+            VX_LOWER_SEAT = 3,   ///< Открыто нижнее седло.
+            VX_UPPER_SEAT = 2,   ///< Открыто верхнее седло.            
+           
+            VX_ON_FB_OK  = 1,    ///< Включен, ОС ок.
+            VX_OFF_FB_OK = 0,    ///< Выключен, ОС ок.
+                        
+            VX_ON_FB_ERR  = -2,  ///< Включен, ошибка ОС.
+            VX_OFF_FB_ERR = -3,  ///< Выключен, ошибка ОС.
+
+            //Учет ручного режима.
+            VX_ON_FB_OFF_MANUAL  = 31,   ///< Включен вручную, ОС отключена.
+            VX_OFF_FB_OFF_MANUAL = 30,   ///< Выключен вручную, ОС отключена.
+
+            VX_LOWER_SEAT_MANUAL = 23,   ///< Открыто вручную нижнее седло.
+            VX_UPPER_SEAT_MANUAL = 22,   ///< Открыто вручную верхнее седло.            
+
+            VX_ON_FB_OK_MANUAL  = 21,    ///< Включен вручную, ОС ок.
+            VX_OFF_FB_OK_MANUAL = 20,    ///< Выключен вручную, ОС ок.
+
+            VX_ON_FB_ERR_MANUAL  = -12,  ///< Включен вручную, ошибка ОС.
+            VX_OFF_FB_ERR_MANUAL = -13,  ///< Выключен вручную, ошибка ОС.
+
+
+            VX_UNKNOWN = 100,            ///< Неизвестное состояние.
+            };
+
+        /// @brief Получение расширенного состояния клапана (учет обратной
+        /// связи, ручного режима, ...).
+        int get_state() final;
+
+#ifdef DEBUG_NO_WAGO_MODULES
+        int set_cmd( const char *prop, u_int idx, double val );
+#endif // DEBUG_NO_WAGO_MODULES
+
+        //Интерфейс для реализации получения расширенного состояния с учетом
+        // всех вариантов (ручной режим, обратная связь, ...).
+    protected:   
+
+        ///Состояние клапана без учета обратной связи.
+        enum VALVE_STATE
+            {
+            V_LOWER_SEAT = 3, ///< Открыто нижнее седло.
+            V_UPPER_SEAT = 2, ///< Открыто верхнее седло.            
+
+            V_ON  = 1,        ///< Включен.
+            V_OFF = 0,        ///< Выключен.
+            };
+
+        /// @brief Получение состояния клапана без учета обратной связи.
+        virtual VALVE_STATE get_valve_state() = 0;
+
+        /// @brief Получение состояния обратной связи.
+        virtual bool get_fb_state()
+            {
+            return true;
+            }
 
     protected:
-        enum FB_STATES
+        enum FB_STATE
             {
-            FB_NO = -1,        ///< Нет обратной связи.
-
             FB_IS_AND_OFF = 0, ///< Обратная связь отключена.
             FB_IS_AND_ON,      ///< Обратная связь включена.
             };
 
         enum CONSTANTS
             {
-            ADDITIONAL_PARAMS_COUNT = 3,  ///Количество дополнительных параметров.
+            ADDITIONAL_PARAMS_COUNT = 2,  ///Количество дополнительных параметров.
 
             P_ON_TIME = 0,
-            P_FB_OFF,
-            P_FB_ON,
+            P_FB           
             };
 
     private:
@@ -632,11 +709,14 @@ class fb_device: public digital_wago_device
 
         /// @brief Есть обратная связь на выключенное состояние.
         bool is_off_fb;
+
+        bool on_fb;
+        bool off_fb;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним дискретным выходом и одним дискретным входом.
 ///
-class valve_DO1_DI1_off : public fb_device
+class valve_DO1_DI1_off : public valve
     {
     public:
         valve_DO1_DI1_off( int number );
@@ -647,30 +727,73 @@ class valve_DO1_DI1_off : public fb_device
             DO_INDEX = 0,           ///< Индекс канала дискретного выхода.
             DI_INDEX = 0,           ///< Индекс канала дискретного входа.
             };
+         
+        u_long start_switch_time;  ///< Время начала переключения клапана.
 
 #ifndef DEBUG_NO_WAGO_MODULES
-    public:
-        int  get_state();
+    public:        
         void direct_on();
         void direct_off();
 
-    private:
-        int get_off_fb()
+#endif // DEBUG_NO_WAGO_MODULES
+
+        // Интерфейс valve для реализации получения расширенного состояния с 
+        // учетом всех вариантов (ручной режим, обратная связь, ...).        
+    protected:
+        VALVE_STATE get_valve_state()
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return ( VALVE_STATE ) digital_wago_device::get_state();
+#else
+            int o = get_DO( DO_INDEX );
+
+            return ( VALVE_STATE ) o;
+#endif // DEBUG_NO_WAGO_MODULES
+            }
+
+        bool get_fb_state()
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return valve::get_fb_state();
+#else
+            int o = get_DO( DO_INDEX );
+            int i = get_DI( DI_INDEX );
+
+            if ( o == i )
+                {               
+                return true;
+                }
+
+            if ( get_sec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
+                {
+                return true;
+                }
+
+            return false;
+#endif // DEBUG_NO_WAGO_MODULES
+            }
+
+#ifndef DEBUG_NO_WAGO_MODULES
+        int get_off_fb_value()
             {
             return get_DI( DI_INDEX );
             }
 
-        u_long start_switch_time;  ///< Время начала переключения клапана.
+        int get_on_fb_value()
+            {
+            return false;
+            }
 #endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним дискретным выходом и одним дискретным входом.
 ///
-class valve_DO1_DI1_on : public fb_device
+class valve_DO1_DI1_on : public valve
     {
     public:
-        valve_DO1_DI1_on( int number ): fb_device( true, false,
-            number, DT_V, DST_V_DO1_DI1_FB_ON )
+        valve_DO1_DI1_on( int number ): valve( true, false,
+            number, DT_V, DST_V_DO1_DI1_FB_ON ),
+            start_switch_time( 0 )
             {
             }
 
@@ -681,29 +804,67 @@ class valve_DO1_DI1_on : public fb_device
             DI_INDEX = 0,           ///< Индекс канала дискретного входа.
             };
 
+         u_long start_switch_time;  ///< Время начала переключения клапана.
+
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
-        int  get_state();
         void direct_on();
         void direct_off();
+#endif // DEBUG_NO_WAGO_MODULES
 
-    private:
-        int get_on_fb()
+        //Интерфейс для реализации получения расширенного состояния с учетом
+        // всех вариантов (ручной режим, обратная связь, ...).
+    protected:
+        VALVE_STATE get_valve_state()
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return ( VALVE_STATE ) digital_wago_device::get_state();
+#else
+            int o = get_DO( DO_INDEX );
+
+            return ( VALVE_STATE ) !o;
+#endif // DEBUG_NO_WAGO_MODULES
+            }
+
+        bool get_fb_state()
+            {
+            int o = get_DO( DO_INDEX );
+            int i = get_DI( DI_INDEX );
+
+            if ( o != i )
+                {               
+                return true;
+                }
+
+            if ( get_sec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
+                {
+                return true;
+                }
+
+            return false;
+            }
+
+#ifndef DEBUG_NO_WAGO_MODULES
+        int get_on_fb_value()
             {
             return get_DI( DI_INDEX );
             }
 
-        u_long start_switch_time;  ///< Время начала переключения клапана.
+        int get_off_fb_value()
+            {
+            return false;
+            }
 #endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним каналом управления и двумя обратными связями.
 ///
-class valve_DO1_DI2 : public fb_device
+class valve_DO1_DI2 : public valve
     {
     public:
         valve_DO1_DI2( int number ):
-          fb_device( true, true, number, DT_V, DST_V_DO1_DI2 )
+          valve( true, true, number, DT_V, DST_V_DO1_DI2 ),
+          start_switch_time( 0 )
             {
             }
 
@@ -716,34 +877,69 @@ class valve_DO1_DI2 : public fb_device
             DI_INDEX_2,             ///< Индекс №2 канала дискретного входа.
             };
 
+        u_long start_switch_time;  ///< Время начала переключения клапана.
+
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
-        int  get_state();
         void direct_on();
         void direct_off();
+#endif // DEBUG_NO_WAGO_MODULES
 
-    private:
-        int get_off_fb()
+        //Интерфейс для реализации получения расширенного состояния с учетом
+        // всех вариантов (ручной режим, обратная связь, ...).
+    protected:
+        VALVE_STATE get_valve_state()
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return ( VALVE_STATE ) digital_wago_device::get_state();
+#else
+            int o = get_DO( DO_INDEX );
+         
+            return ( VALVE_STATE ) o;
+#endif // DEBUG_NO_WAGO_MODULES
+            }
+
+        bool get_fb_state()
+            {
+            int o = get_DO( DO_INDEX );
+            int i0 = get_DI( DI_INDEX_1 );
+            int i1 = get_DI( DI_INDEX_2 );
+
+            if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+                ( o == 1 && i1 == 1 && i0 == 0 ) )
+                {               
+                return true;
+                }
+
+            if ( get_sec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
+                {
+                return true;
+                }
+
+            return false;
+            }
+
+#ifndef DEBUG_NO_WAGO_MODULES
+        int get_off_fb_value()
             {
             return get_DI( DI_INDEX_1 );
             }
 
-        int get_on_fb()
+        int get_on_fb_value()
             {
             return get_DI( DI_INDEX_2 );
             }
-
-        u_long start_switch_time;   ///< Время начала переключения клапана.
 #endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с двумя каналами управления и двумя обратными связями.
 ///
-class valve_DO2_DI2 : public fb_device
+class valve_DO2_DI2 : public valve
     {
     public:
         valve_DO2_DI2( int number ):
-        fb_device( true, true, number, DT_V, DST_V_DO2_DI2 )
+        valve( true, true, number, DT_V, DST_V_DO2_DI2 ),
+        start_switch_time( 0 )
             {
             }
 
@@ -757,33 +953,69 @@ class valve_DO2_DI2 : public fb_device
             DI_INDEX_2,             ///< Индекс №2 канала дискретного входа.
             };
 
+        u_long start_switch_time;   ///< Время начала переключения клапана.
+
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
-        int  get_state();
         void direct_on();
         void direct_off();
+           
+#endif // DEBUG_NO_WAGO_MODULES
 
-    private:
-        int get_off_fb()
+        //Интерфейс для реализации получения расширенного состояния с учетом
+        // всех вариантов (ручной режим, обратная связь, ...).
+    protected:
+        VALVE_STATE get_valve_state()
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return ( VALVE_STATE ) digital_wago_device::get_state();
+#else
+            int o1 = get_DO( DO_INDEX_2 );
+
+            return ( VALVE_STATE ) o1;
+#endif // DEBUG_NO_WAGO_MODULES
+            }
+
+        bool get_fb_state()
+            {
+            int o0 = get_DO( DO_INDEX_1 );
+            int o1 = get_DO( DO_INDEX_2 );
+            int i0 = get_DI( DI_INDEX_1 );
+            int i1 = get_DI( DI_INDEX_2 );
+
+            if ( o1 == i1 && o0 == i0 )
+                {
+                return true;
+                }
+
+            if ( get_sec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
+                {
+                return true;
+                }
+         
+            return false;
+            }
+
+#ifndef DEBUG_NO_WAGO_MODULES
+        int get_off_fb_value()
             {
             return get_DI( DI_INDEX_1 );
             }
 
-        int get_on_fb()
+        int get_on_fb_value()
             {
             return get_DI( DI_INDEX_2 );
-            }
-
-        u_long start_switch_time;   ///< Время начала переключения клапана.
+            }   
 #endif // DEBUG_NO_WAGO_MODULES
+  
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан mixproof.
-class valve_mix_proof : public i_mix_proof,  public fb_device
+class valve_mix_proof : public i_mix_proof,  public valve
     {
     public:
         valve_mix_proof( u_int number
-            ): fb_device( true, true, number, DT_V, DST_V_MIXPROOF )
+            ): valve( true, true, number, DT_V, DST_V_MIXPROOF )
             {
             }
 
@@ -804,29 +1036,67 @@ class valve_mix_proof : public i_mix_proof,  public fb_device
             DI_INDEX_L,     ///< Индекс канала дискретного входа нижнего седла.
             };
 
-#ifdef DEBUG_NO_WAGO_MODULES
-        void direct_set_state( int new_state );
-#endif // DEBUG_NO_WAGO_MODULES
+         u_long start_switch_time;   ///< Время начала переключения клапана.
+
+         void direct_set_state( int new_state );
 
 #ifndef DEBUG_NO_WAGO_MODULES
-        int  get_state();
         void direct_on();
-        void direct_off();
-        void direct_set_state( int new_state );
+        void direct_off();            
+#endif // DEBUG_NO_WAGO_MODULES
 
-    private:
-        int get_off_fb()
+        //Интерфейс для реализации получения расширенного состояния с учетом
+        // всех вариантов (ручной режим, обратная связь, ...).
+    protected:
+        VALVE_STATE get_valve_state()
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return ( VALVE_STATE ) digital_wago_device::get_state();
+#else
+            int o = get_DO( DO_INDEX );
+            int i0 = get_DI( DI_INDEX_U );
+            int i1 = get_DI( DI_INDEX_L );
+
+
+            if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return V_UPPER_SEAT;
+            if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return V_LOWER_SEAT;
+            
+            return ( VALVE_STATE ) o;
+#endif // DEBUG_NO_WAGO_MODULES
+            }
+
+        bool get_fb_state()
+            {
+            int o = get_DO( DO_INDEX );
+            int i0 = get_DI( DI_INDEX_U );
+            int i1 = get_DI( DI_INDEX_L );
+
+            if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+                ( o == 1 && i1 == 1 && i0 == 0 ) )
+                {                
+                return true;
+                }
+
+            if ( get_sec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
+                {
+                return true;
+                }
+          
+            return false;
+            }
+
+#ifndef DEBUG_NO_WAGO_MODULES
+        int get_off_fb_value()
             {
             return get_DI( DI_INDEX_U );
             }
 
-        int get_on_fb()
+        int get_on_fb_value()
             {
             return get_DI( DI_INDEX_L );
-            }
-
-        u_long start_switch_time;   ///< Время начала переключения клапана.
+            } 
 #endif // DEBUG_NO_WAGO_MODULES
+  
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан AS-mixproof.
@@ -1088,11 +1358,41 @@ class DI1 : public digital_wago_device
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним каналом управления.
-class valve_DO1 : public DO1
+class valve_DO1 : public valve
     {
     public:
-        valve_DO1( u_int number ) : DO1( number, DT_V, DST_V_DO1 )
+        valve_DO1( u_int number ) : valve( number, DT_V, DST_V_DO1 )
             {
+            }
+
+    private:
+        enum CONSTANTS
+            {
+            DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
+            };
+
+#ifndef DEBUG_NO_WAGO_MODULES
+    public:
+        void direct_on();
+        void direct_off();
+
+#endif // DEBUG_NO_WAGO_MODULES
+
+    protected:
+        /// @brief Получение состояния клапана без учета обратной связи.
+        VALVE_STATE get_valve_state() 
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return ( VALVE_STATE ) digital_wago_device::get_state();
+#else
+            return ( VALVE_STATE ) get_DO( DO_INDEX );
+#endif // DEBUG_NO_WAGO_MODULES
+            };
+
+        /// @brief Получение состояния обратной связи.
+        bool get_fb_state()
+            {
+            return true;
             }
     };
 //-----------------------------------------------------------------------------
@@ -1102,13 +1402,6 @@ class valve_DO2 : public DO2
     public:
         valve_DO2( u_int number ): DO2( number, DT_V, DST_V_DO2, 0 )
             {
-            }
-
-    protected:
-        //Lua.
-        void save_device_ex( char *buff )
-            {
-            sprintf( buff, "P_FB_ON=0, P_FB_OFF=0, " );
             }
     };
 //-----------------------------------------------------------------------------

@@ -63,6 +63,8 @@ int main( int argc, char *argv[] )
     while ( 1 )
 #endif // DEBUG
         {
+        fflush( stdout );
+
         lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, 200 );
         sleep_ms( 1 );
 
@@ -118,8 +120,7 @@ int main( int argc, char *argv[] )
             print_time( "  Main cycle avg time = %lu msec, max time = %4u, Lua mem = %d b\n",
                 all_time / cycles_cnt, max_cycle_time,
                 lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
-                lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
-            fflush( stdout );
+                lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );            
             }
 
         static u_int print_cycle_time_count = 0;
