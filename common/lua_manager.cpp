@@ -148,8 +148,10 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
     //Проверка наличия и версии скриптов.
     char err_str[ 100 ] = "";
 
+    int res = 0;
     for ( int i = 0; i < FILE_CNT; i++ )
         {
+
 #ifdef PAC_PC
         char path[ 100 ];
         if ( i < SYS_FILE_CNT )
@@ -161,7 +163,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             snprintf( path, sizeof( path ), "%s", FILES[ i ] );
             }
 
-        int res = check_file( path, err_str );
+        res = check_file( path, err_str );
 
         if ( -1 == res )                             // ../system scripts
             {
@@ -179,7 +181,6 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             Print( "%s", err_str );
             return 1;
             }
-        }        
 #endif // PAC_PC
 
     if ( FILES_VERSION[ i ] != res )
@@ -218,8 +219,8 @@ for ( int i = 0; i < FILE_CNT; i++ )
             lua_pop( L, 1 );
 
             return 1;
-            }       
-        }    
+            }
+        }
 
 #else
     if ( luaL_dofile( L, FILES[ i ] ) != 0 )

@@ -607,11 +607,11 @@ class valve: public digital_wago_device
             digital_wago_device( number, type, sub_type, 0 ),
             is_on_fb( 0 ),
             is_off_fb( 0 )
-            { 
+            {
             }
 
         /// @brief Получение значения обратной связи на включенное состояние.
-        virtual int get_on_fb_value() 
+        virtual int get_on_fb_value()
             {
             return on_fb;
             }
@@ -624,19 +624,19 @@ class valve: public digital_wago_device
 
         /// @brief Сохранение дополнительных данных.
         void save_device_ex( char *buff );
-                
+
         //Состояния клапана (расширенное).
-        enum VALVE_STATE_EX            
+        enum VALVE_STATE_EX
             {
             VX_ON_FB_OFF  = 11,  ///< Включен, ОС отключена.
             VX_OFF_FB_OFF = 10,  ///< Выключен, ОС отключена.
 
             VX_LOWER_SEAT = 3,   ///< Открыто нижнее седло.
-            VX_UPPER_SEAT = 2,   ///< Открыто верхнее седло.            
-           
+            VX_UPPER_SEAT = 2,   ///< Открыто верхнее седло.
+
             VX_ON_FB_OK  = 1,    ///< Включен, ОС ок.
             VX_OFF_FB_OK = 0,    ///< Выключен, ОС ок.
-                        
+
             VX_ON_FB_ERR  = -2,  ///< Включен, ошибка ОС.
             VX_OFF_FB_ERR = -3,  ///< Выключен, ошибка ОС.
 
@@ -645,7 +645,7 @@ class valve: public digital_wago_device
             VX_OFF_FB_OFF_MANUAL = 30,   ///< Выключен вручную, ОС отключена.
 
             VX_LOWER_SEAT_MANUAL = 23,   ///< Открыто вручную нижнее седло.
-            VX_UPPER_SEAT_MANUAL = 22,   ///< Открыто вручную верхнее седло.            
+            VX_UPPER_SEAT_MANUAL = 22,   ///< Открыто вручную верхнее седло.
 
             VX_ON_FB_OK_MANUAL  = 21,    ///< Включен вручную, ОС ок.
             VX_OFF_FB_OK_MANUAL = 20,    ///< Выключен вручную, ОС ок.
@@ -659,7 +659,12 @@ class valve: public digital_wago_device
 
         /// @brief Получение расширенного состояния клапана (учет обратной
         /// связи, ручного режима, ...).
-        int get_state() final;
+        int get_state()
+#ifdef VC2012
+        final;
+#else
+        ;
+#endif
 
 #ifdef DEBUG_NO_WAGO_MODULES
         int set_cmd( const char *prop, u_int idx, double val );
@@ -667,13 +672,13 @@ class valve: public digital_wago_device
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
-    protected:   
+    protected:
 
         ///Состояние клапана без учета обратной связи.
         enum VALVE_STATE
             {
             V_LOWER_SEAT = 3, ///< Открыто нижнее седло.
-            V_UPPER_SEAT = 2, ///< Открыто верхнее седло.            
+            V_UPPER_SEAT = 2, ///< Открыто верхнее седло.
 
             V_ON  = 1,        ///< Включен.
             V_OFF = 0,        ///< Выключен.
@@ -700,7 +705,7 @@ class valve: public digital_wago_device
             ADDITIONAL_PARAMS_COUNT = 2,  ///Количество дополнительных параметров.
 
             P_ON_TIME = 0,
-            P_FB           
+            P_FB
             };
 
     private:
@@ -727,18 +732,18 @@ class valve_DO1_DI1_off : public valve
             DO_INDEX = 0,           ///< Индекс канала дискретного выхода.
             DI_INDEX = 0,           ///< Индекс канала дискретного входа.
             };
-         
+
         u_long start_switch_time;  ///< Время начала переключения клапана.
 
 #ifndef DEBUG_NO_WAGO_MODULES
-    public:        
+    public:
         void direct_on();
         void direct_off();
 
 #endif // DEBUG_NO_WAGO_MODULES
 
-        // Интерфейс valve для реализации получения расширенного состояния с 
-        // учетом всех вариантов (ручной режим, обратная связь, ...).        
+        // Интерфейс valve для реализации получения расширенного состояния с
+        // учетом всех вариантов (ручной режим, обратная связь, ...).
     protected:
         VALVE_STATE get_valve_state()
             {
@@ -760,7 +765,7 @@ class valve_DO1_DI1_off : public valve
             int i = get_DI( DI_INDEX );
 
             if ( o == i )
-                {               
+                {
                 return true;
                 }
 
@@ -832,7 +837,7 @@ class valve_DO1_DI1_on : public valve
             int i = get_DI( DI_INDEX );
 
             if ( o != i )
-                {               
+                {
                 return true;
                 }
 
@@ -894,7 +899,7 @@ class valve_DO1_DI2 : public valve
             return ( VALVE_STATE ) digital_wago_device::get_state();
 #else
             int o = get_DO( DO_INDEX );
-         
+
             return ( VALVE_STATE ) o;
 #endif // DEBUG_NO_WAGO_MODULES
             }
@@ -907,7 +912,7 @@ class valve_DO1_DI2 : public valve
 
             if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
                 ( o == 1 && i1 == 1 && i0 == 0 ) )
-                {               
+                {
                 return true;
                 }
 
@@ -959,7 +964,7 @@ class valve_DO2_DI2 : public valve
     public:
         void direct_on();
         void direct_off();
-           
+
 #endif // DEBUG_NO_WAGO_MODULES
 
         //Интерфейс для реализации получения расширенного состояния с учетом
@@ -992,7 +997,7 @@ class valve_DO2_DI2 : public valve
                 {
                 return true;
                 }
-         
+
             return false;
             }
 
@@ -1005,9 +1010,9 @@ class valve_DO2_DI2 : public valve
         int get_on_fb_value()
             {
             return get_DI( DI_INDEX_2 );
-            }   
+            }
 #endif // DEBUG_NO_WAGO_MODULES
-  
+
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан mixproof.
@@ -1042,7 +1047,7 @@ class valve_mix_proof : public i_mix_proof,  public valve
 
 #ifndef DEBUG_NO_WAGO_MODULES
         void direct_on();
-        void direct_off();            
+        void direct_off();
 #endif // DEBUG_NO_WAGO_MODULES
 
         //Интерфейс для реализации получения расширенного состояния с учетом
@@ -1054,13 +1059,10 @@ class valve_mix_proof : public i_mix_proof,  public valve
             return ( VALVE_STATE ) digital_wago_device::get_state();
 #else
             int o = get_DO( DO_INDEX );
-            int i0 = get_DI( DI_INDEX_U );
-            int i1 = get_DI( DI_INDEX_L );
-
 
             if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return V_UPPER_SEAT;
             if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return V_LOWER_SEAT;
-            
+
             return ( VALVE_STATE ) o;
 #endif // DEBUG_NO_WAGO_MODULES
             }
@@ -1073,7 +1075,7 @@ class valve_mix_proof : public i_mix_proof,  public valve
 
             if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
                 ( o == 1 && i1 == 1 && i0 == 0 ) )
-                {                
+                {
                 return true;
                 }
 
@@ -1081,7 +1083,7 @@ class valve_mix_proof : public i_mix_proof,  public valve
                 {
                 return true;
                 }
-          
+
             return false;
             }
 
@@ -1094,9 +1096,9 @@ class valve_mix_proof : public i_mix_proof,  public valve
         int get_on_fb_value()
             {
             return get_DI( DI_INDEX_L );
-            } 
+            }
 #endif // DEBUG_NO_WAGO_MODULES
-  
+
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан AS-mixproof.
@@ -1380,7 +1382,7 @@ class valve_DO1 : public valve
 
     protected:
         /// @brief Получение состояния клапана без учета обратной связи.
-        VALVE_STATE get_valve_state() 
+        VALVE_STATE get_valve_state()
             {
 #ifdef DEBUG_NO_WAGO_MODULES
             return ( VALVE_STATE ) digital_wago_device::get_state();
