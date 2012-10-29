@@ -28,7 +28,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v100</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug local|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -165,6 +165,7 @@
     <ClInclude Include="..\..\..\common\lua\lvm.h" />
     <ClInclude Include="..\..\..\common\lua\lzio.h" />
     <ClInclude Include="..\..\..\common\lua_manager.h" />
+    <ClInclude Include="..\..\..\common\PAC-driver\errors.h" />
     <ClInclude Include="..\..\..\common\PAC-driver\g_device.h" />
     <ClInclude Include="..\..\..\common\tolua++\tolua++.h" />
     <ClInclude Include="..\..\..\common\tolua++\tolua_base.h" />

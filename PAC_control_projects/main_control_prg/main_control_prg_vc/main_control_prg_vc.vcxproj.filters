@@ -240,6 +240,9 @@
     <ClInclude Include="..\..\..\common\tolua++\tolua++.h">
       <Filter>Header Files\common\sys\tolua++</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\common\PAC-driver\errors.h">
+      <Filter>Header Files\common\PAC-driver</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">

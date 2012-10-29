@@ -64,12 +64,12 @@ enum ALARM_TYPE
 
 //-----------------------------------------------------------------------------
 #ifdef PAC
-
 #include "errors.h"
 #include "param_ex.h"
-//#include "sys.h"
 #include "smart_ptr.h"
 #include "PAC_dev.h"
+
+#include "tech_def.h"
 
 //-----------------------------------------------------------------------------
 /// @brief Базовый класс с информацией об ошибке устройства.
@@ -96,16 +96,13 @@ class base_error
         virtual void print() const = 0;
 
         /// @brief Получение типа объекта.
-        virtual unsigned char get_type() const = 0;
+        virtual unsigned char get_object_type() const = 0;
 
         /// @brief Получение номера объекта.
-        virtual unsigned int get_n() const = 0;
-
-        /// @brief Получение номера ошибки объекта.
-        virtual unsigned int get_object_alarm_n() const = 0;
+        virtual unsigned int get_object_n() const = 0;
 
         /// @brief Выполнение команды над ошибкой.
-        virtual int set_cmd( int cmd ) = 0;
+        virtual int set_cmd( int cmd, int object_alarm_number ) = 0;
 
         /// @brief Сброс параметров ошибки в значение по умолчанию (0).
         void reset_errors_params()
@@ -160,16 +157,13 @@ class simple_error: public base_error
         void print() const;
 
         /// @brief Получение типа объекта.
-        unsigned char get_type() const;
+        unsigned char get_object_type() const;
 
         /// @brief Получение номера объекта.
-        unsigned int get_n() const;
-
-        /// @brief Получение номера ошибки объекта.
-        unsigned int get_object_alarm_n() const;
+        unsigned int get_object_n() const;
 
         /// @brief Выполнение команды над ошибкой.
-        int set_cmd( int cmd );
+        int set_cmd( int cmd, int object_alarm_number );
 
     private:
         device          *simple_device; ///< Простое устройство.
@@ -179,6 +173,44 @@ class simple_error: public base_error
 			SE_ERROR_CODE = 1,      ///< Код ошибки - нет обратной связи.
             SE_PRIORITY = 300,      ///< Приоритет ошибки простого устройства.
             };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Содержит информацию об ошибке сложного устройства (танк,
+/// гребенка...).
+///
+/// У простого устройства может быть только одна ошибка (ошибка обратной
+/// связи).
+class tech_dev_error: public base_error
+    {
+    public:
+        // Интерфейс base_error.
+        tech_dev_error( tech_object* tech_dev );
+     
+        int save_as_Lua_str( char *str, bool &is_new_state ) = 0;        
+                
+        void print() const = 0;
+                
+        unsigned char get_object_type() const
+            {
+            return TE_TYPE;
+            }
+                
+        unsigned int get_object_n() const
+            {
+            return tech_dev->get_number();
+            }
+                
+        int set_cmd( int cmd, int object_alarm_number ) = 0;
+
+
+    private:
+        tech_object* tech_dev; ///< Сложное устройство.
+        char is_err;
+
+        enum TECH_DEV_ERROR_CONST   ///< Константы.
+            {
+            TE_TYPE = 100,          ///< Тип ошибки.
+            };        
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об всех ошибках простых устройств.

@@ -140,7 +140,7 @@ class PID: public i_Lua_save_device
             }
 
         /// @brief Отладочная печать объекта в консоль.
-        virtual const char* get_name() const
+        virtual const char* get_name_in_Lua() const
             {
             return name;
             }

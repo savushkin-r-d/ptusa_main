@@ -115,22 +115,17 @@ void simple_error::print() const
 #endif // DEBUG
     }
 //-----------------------------------------------------------------------------
-unsigned char simple_error::get_type() const
+unsigned char simple_error::get_object_type() const
     {
     return simple_device->get_type();
     }
 //-----------------------------------------------------------------------------
-unsigned int simple_error::get_n() const
+unsigned int simple_error::get_object_n() const
     {
     return simple_device->get_n();
     }
 //-----------------------------------------------------------------------------
-unsigned int simple_error::get_object_alarm_n() const
-    {
-    return SE_ERROR_CODE;
-    }
-//-----------------------------------------------------------------------------
-int simple_error::set_cmd( int cmd )
+int simple_error::set_cmd( int cmd, int object_alarm_number )
     {
     int res = 0;
 	int current_state = err_par[ P_PARAM_N ];
@@ -252,8 +247,8 @@ void dev_errors_manager::set_cmd( unsigned int cmd, unsigned int object_type,
     // Поиск нужного устройства.
     for ( u_int i = 0; i < s_errors_vector.size(); i++ )
         {
-        if ( s_errors_vector[ i ]->get_type() == object_type &&
-            s_errors_vector[ i ]->get_n() == object_number )
+        if ( s_errors_vector[ i ]->get_object_type() == object_type &&
+            s_errors_vector[ i ]->get_object_n() == object_number )
             {
             res = s_errors_vector[ i ];
             break;
@@ -263,7 +258,7 @@ void dev_errors_manager::set_cmd( unsigned int cmd, unsigned int object_type,
     // Выполнение команды.
     if ( res )
         {
-        int result = res->set_cmd( cmd );
+        int result = res->set_cmd( cmd, object_alarm_number );
         if ( 0 == result )
         	{
             errors_id++; // Cостояние ошибок изменилось.

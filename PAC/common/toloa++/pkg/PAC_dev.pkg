@@ -14,6 +14,7 @@ $#include "wago.h"
 $#include "tolua_base.h"
 $#include "PID.h"
 $#include "g_device.h"
+$#include "errors.h"
 
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе дискретного входа.

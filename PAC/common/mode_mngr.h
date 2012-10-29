@@ -293,6 +293,11 @@ class mode
         /// Выводит на консоль объект.
         void print( const char* prefix = "" ) const;
 
+        const std::string* get_name() const
+            {
+            return &name;
+            }
+
     private:
         std::string name;
         std::vector< step* > steps;
@@ -325,6 +330,11 @@ class mode_manager
 
         ~mode_manager();
         
+        const char* get_mode_name( int n ) const
+            {
+            return modes[ n ]->get_name()->c_str();
+            }
+
         mode* add_mode( const char* name );
 
         void set_param( saved_params_u_int_4 *par );

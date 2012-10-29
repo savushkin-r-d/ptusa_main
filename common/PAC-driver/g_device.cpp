@@ -268,7 +268,7 @@ void device_communicator::print() const
         sprintf( tmp_str, "[ %3d ] ", i );
         print_str( tmp_str, 0 );
 
-        print_str( dev[ i ]->get_name(), 1 );
+        print_str( dev[ i ]->get_name_in_Lua(), 1 );
         } 
     }
 //-----------------------------------------------------------------------------

@@ -37,7 +37,7 @@ class PAC_info: public i_Lua_save_device
 
         int set_cmd( const char *prop, u_int idx, double val );
 
-        const char* get_name() const
+        const char* get_name_in_Lua() const
             {
             return "SYSTEM";
             }

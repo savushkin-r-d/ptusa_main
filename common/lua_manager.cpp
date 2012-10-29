@@ -339,7 +339,7 @@ return 0;
             }
         else
             {
-            res = 1;
+            res = -1;
 #ifdef DEBUG
             Print( "Error during C++ call - \"%s\"\n", c_function_name );
 #endif // DEBUG

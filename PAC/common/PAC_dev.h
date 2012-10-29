@@ -1727,7 +1727,7 @@ class device_manager: public i_Lua_save_device
         /// @brief Отладочная печать объекта в консоль.
         void print() const;
 
-        const char* get_name() const
+        const char* get_name_in_Lua() const
             {
             return "Device manager";
             }

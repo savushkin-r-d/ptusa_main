@@ -219,14 +219,6 @@ void tech_object::lua_init_mode( u_int mode )
         "init_mode", mode, "void tech_object::lua_init_mode( u_int mode )" );
     }
 //-----------------------------------------------------------------------------
-int tech_object::lua_evaluate()
-    {
-    //return lua_manager::get_instance()->void_exec_lua_method( name_Lua,
-    //    "evaluate", "int tech_object::lua_evaluate()" );
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
 int tech_object::lua_check_off_mode( u_int mode )
     {
     tech_object::check_off_mode( mode );
@@ -509,6 +501,19 @@ int tech_object::set_param( int par_id, int index, double value )
     case ID_RT_PAR_UINT:
         rt_par_uint[ index ] = ( u_int ) value;
         break;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int tech_object::is_check_mode( int mode ) const
+    {
+    int res = lua_manager::get_instance()->int_exec_lua_method( name_Lua,
+        "is_check_mode", mode, "int tech_object::is_check_mode( u_int mode )" );   
+
+    if ( res >= 0 )
+        {
+        return res;
         }
 
     return 0;

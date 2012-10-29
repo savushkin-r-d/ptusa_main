@@ -27,7 +27,6 @@ extern int snprintf(char *, size_t, const char *, /*args*/ ...);
 
 #include "g_device.h"
 #include "PAC_dev.h"
-#include "PAC_err.h"
 
 #include "tcp_cmctr.h"
 #include "param_ex.h"
@@ -52,6 +51,9 @@ extern "C" {
 ///
 /// Базовый класс для технологического объекта (танка, гребенки). Содержит
 /// основные методы работы - работа с режимами и т.д.
+/// Для информировании сервера (события, аварии, ...) используется следующий 
+/// подход: имеется вектор из сообщений и методы работы с ним.
+///
 class tech_object: public i_Lua_save_device
     {
     public:
@@ -90,6 +92,8 @@ class tech_object: public i_Lua_save_device
         /// @return 0 - режим не включен.
         int get_mode( u_int mode );
 
+        int  evaluate();
+
         /// @brief Проверка возможности включения режима.
         ///
         /// Если данный метод возвращает 1, то тогда режим не включается.
@@ -107,14 +111,6 @@ class tech_object: public i_Lua_save_device
         ///
         /// @param mode - режим.
         void init_mode( u_int mode );
-
-        /// @brief Выполнение включенных режимов.
-        ///
-        /// При активном режиме выполнение нужных действий -
-        /// обновление маршрута, включение/выключение клапанов и т.д.
-        ///
-        /// @return 0 - ок.
-        int evaluate();
 
         /// @brief Проверка возможности выключения режима.
         ///
@@ -173,17 +169,114 @@ class tech_object: public i_Lua_save_device
 
         timer_manager           timers;         ///< Таймеры объекта.
 
-        //--Lua implemented methods.
+        // Lua implemented methods.
         int lua_exec_cmd( u_int cmd );
 
         int  lua_check_on_mode( u_int mode );
-        void lua_init_mode( u_int mode );
-        int  lua_evaluate();
+        void lua_init_mode( u_int mode );       
         int  lua_check_off_mode( u_int mode );
         int  lua_final_mode( u_int mode );
         int  lua_init_params();
         int  lua_init_runtime_params();
-        //--Lua implemented methods.--!>
+        // Lua implemented methods.
+
+        // Работа с ошибками.
+
+        /// @brief Проверка необходимости проверки устройств на ошибку обратной
+        /// связи перед включением режима.
+        ///
+        /// @return 0 - не надо проверять.
+        /// @return 1 - надо проверять.
+        virtual int is_check_mode( int mode ) const;
+
+        enum ERR_MSG_TYPES
+            {
+            ERR_CANT_ON,
+            ERR_ON_WITH_ERRORS,
+            ERR_OFF,
+            ERR_DURING_WORK,
+            ERR_SIMPLE,
+            };
+
+        struct  err_info
+            {
+            enum CONSTATS
+                {
+                MAX_STR_LENGTH = 120,
+                };
+
+            char          msg[ MAX_STR_LENGTH ];
+            int           n;
+            ERR_MSG_TYPES type;
+            };
+
+        int set_err_msg( const char *err_msg, int mode, 
+            ERR_MSG_TYPES type = ERR_CANT_ON )
+            {        
+            err_info *new_err = new err_info;
+            static int error_number = 0;
+
+            error_number++;
+            new_err->n = error_number;
+            new_err->type = type;
+
+            switch ( type )
+                {
+                case ERR_CANT_ON:
+                    snprintf( new_err->msg, sizeof( new_err->msg ), 
+                        "Не включен режим %.1d \"%.40s\" %.40s %.1d - %.40s.", 
+                        mode + 1, modes_manager->get_mode_name( mode ), name, 
+                        number, err_msg );
+                    break;
+
+                case ERR_ON_WITH_ERRORS:
+                    snprintf( new_err->msg, sizeof( new_err->msg ), 
+                        "Включен с ошибкой режим %.1d \"%.40s\" %.40s %.1d - %.40s.", 
+                        mode + 1, modes_manager->get_mode_name( mode ), name, 
+                        number, err_msg );                    
+                    break;
+
+                case ERR_OFF:
+                    snprintf( new_err->msg, sizeof( new_err->msg ), 
+                        "Отключен режим %.1d \"%.40s\" %.40s %.1d - %.40s.", 
+                        mode + 1, modes_manager->get_mode_name( mode ), name,
+                        number, err_msg );
+                    break;
+
+                case ERR_DURING_WORK:
+                    snprintf( new_err->msg, sizeof( new_err->msg ), 
+                        "Режим %.1d \"%.40s\" %.40s %.1d - %.40s.", 
+                        mode + 1, modes_manager->get_mode_name( mode ), name,
+                        number, err_msg );
+                    break;
+
+                case ERR_SIMPLE:
+                    snprintf( new_err->msg, sizeof( new_err->msg ), 
+                        "%.40s %.1d - %.60s.", name, number, err_msg );
+
+                    new_err->msg[ 0 ] = toupper( new_err->msg[ 0 ] );
+                    break;
+
+                default:
+#ifdef DEBUG
+                    Print( "Error tech_object::set_err_msg(...) - unknown error type!\n" );                    
+                    debug_break;                    
+#endif // DEBUG
+                    snprintf( new_err->msg, sizeof( new_err->msg ), 
+                        "Режим %.1d \"%.40s\" %.40s %.1d - %.40s.", 
+                        mode + 1, modes_manager->get_mode_name( mode ), name,
+                        number, err_msg );
+                    break;
+                }
+
+#ifdef DEBUG
+            Print( "err_msg -> %s\n", err_msg );
+            Print( "err_str -> %s\n", new_err->msg );
+#endif // DEBUG
+
+            return 0;
+            }
+        // Работа с ошибками.
 
         /// @brief Отладочная печать объекта.
         void print() const
@@ -192,7 +285,7 @@ class tech_object: public i_Lua_save_device
             modes_manager->print();
             }
 
-        const char* get_name() const
+        const char* get_name_in_Lua() const
             {
             static char tmp[ 100 ];
             snprintf( tmp, sizeof( tmp ), "%s \"%s\" [%d]",
@@ -226,7 +319,7 @@ class tech_object: public i_Lua_save_device
             {
             C_MAX_NAME_LENGTH = 30,
             };
-        char name[ C_MAX_NAME_LENGTH ];        ///< Имя объекта + номер объекта.
+        char name[ C_MAX_NAME_LENGTH ];        ///< Имя объекта.
         char name_Lua[ C_MAX_NAME_LENGTH ];    ///< Имя объекта в Lua.
 
 
@@ -239,6 +332,10 @@ class tech_object: public i_Lua_save_device
             ID_PAR_UINT,
             ID_RT_PAR_UINT,            
             };
+
+        // Работа с ошибками.
+        std::vector< err_info* > errors;
+        // Работа с ошибками.
     };
 //-----------------------------------------------------------------------------
 class tech_object_manager
