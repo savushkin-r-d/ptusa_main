@@ -4,16 +4,6 @@
 #include <errors.h>
 #endif
 
-
-
-const int ALARM_CLASS_PRIORITY[ 4 ] = // Приоритет тревог.
-    {
-    0,
-    100,  ///< Ошибка связи.
-    200,
-    300
-    };
-
 #ifdef PAC
 auto_smart_ptr < dev_errors_manager > dev_errors_manager::instance;
 //-----------------------------------------------------------------------------
@@ -35,7 +25,8 @@ simple_error::~simple_error()
 //-----------------------------------------------------------------------------
 int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
     {
-    str[ 0 ] = 0;
+    str[ 0 ]     = 0;
+    is_new_state = 0;
 
     // Проверка текущего состояния устройства.
     switch ( simple_device->get_state() ) 
@@ -92,7 +83,7 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
         sprintf( str + strlen( str ), "\tdescription=\"%s - %s\",\n",
             simple_device->get_name(), simple_device->get_description() );
 
-        sprintf( str + strlen( str ), "priority=%d%s", ALARM_CLASS_PRIORITY[ 3 ], "," );
+        sprintf( str + strlen( str ), "priority=%d%s", P_ALARM, "," );
         sprintf( str + strlen( str ), "state=%d,\n", error_state );        
         sprintf( str + strlen( str ), "type=%d,\n", AT_SPECIAL );
 
@@ -207,6 +198,13 @@ int dev_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
         }
 
     id = errors_id; //Через параметр возвращаем состояние ошибок.
+
+#ifdef DEBUG
+    if ( strlen( str ) > 0 )
+        {
+        int k = 0;
+        }
+#endif // DEBUG
 
     return 0;
     }

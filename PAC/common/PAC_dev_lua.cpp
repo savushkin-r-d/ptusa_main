@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 10/29/12 13:53:14.
+** Generated automatically by tolua++-1.0.92 on 11/01/12 17:25:41.
 */
 
 #ifndef __cplusplus
@@ -2340,6 +2340,44 @@ static int tolua_PAC_dev_tech_object_get_modes_manager00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'get_modes_manager'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_err_msg of class  tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_tech_object_set_err_msg00
+static int tolua_PAC_dev_tech_object_set_err_msg00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"tech_object",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  tech_object* self = (tech_object*)  tolua_tousertype(tolua_S,1,0);
+  const char* err_msg = ((const char*)  tolua_tostring(tolua_S,2,0));
+  int mode = ((int)  tolua_tonumber(tolua_S,3,0));
+  tech_object::ERR_MSG_TYPES type = ((tech_object::ERR_MSG_TYPES) (int)  tolua_tonumber(tolua_S,4,tech_object::ERR_CANT_ON));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_err_msg'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->set_err_msg(err_msg,mode,type);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_err_msg'.",&tolua_err);
  return 0;
 #endif
 }
@@ -4851,6 +4889,12 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_variable(tolua_S,"rt_par_uint",tolua_get_tech_object_rt_par_uint,tolua_set_tech_object_rt_par_uint);
    tolua_variable(tolua_S,"timers",tolua_get_tech_object_timers,tolua_set_tech_object_timers);
    tolua_function(tolua_S,"get_modes_manager",tolua_PAC_dev_tech_object_get_modes_manager00);
+   tolua_constant(tolua_S,"ERR_CANT_ON",tech_object::ERR_CANT_ON);
+   tolua_constant(tolua_S,"ERR_ON_WITH_ERRORS",tech_object::ERR_ON_WITH_ERRORS);
+   tolua_constant(tolua_S,"ERR_OFF",tech_object::ERR_OFF);
+   tolua_constant(tolua_S,"ERR_DURING_WORK",tech_object::ERR_DURING_WORK);
+   tolua_constant(tolua_S,"ERR_SIMPLE",tech_object::ERR_SIMPLE);
+   tolua_function(tolua_S,"set_err_msg",tolua_PAC_dev_tech_object_set_err_msg00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_TECH_OBJECT_MNGR",tolua_PAC_dev_G_TECH_OBJECT_MNGR00);
   tolua_cclass(tolua_S,"tech_object_manager","tech_object_manager","",NULL);
@@ -4881,9 +4925,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"A_UPPER_SEATS_ON",step::A_UPPER_SEATS_ON);
    tolua_constant(tolua_S,"A_LOWER_SEATS_ON",step::A_LOWER_SEATS_ON);
    tolua_constant(tolua_S,"A_REQUIRED_FB",step::A_REQUIRED_FB);
-   tolua_constant(tolua_S,"A_ON_AFTER_OFF",step::A_ON_AFTER_OFF);
-   tolua_constant(tolua_S,"A_WASH",step::A_WASH);
    tolua_constant(tolua_S,"A_PAIR_DO_DI",step::A_PAIR_DO_DI);
+   tolua_constant(tolua_S,"A_WASH",step::A_WASH);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"action","action","",NULL);
   tolua_beginmodule(tolua_S,"action");

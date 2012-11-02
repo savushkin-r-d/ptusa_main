@@ -42,15 +42,6 @@ enum ALARM_STATE
     AS_ACCEPT, 
     };
 
-enum PRIORITY_TYPE
-    {
-    PT_SYSTEM,
-    PT_CRITICAL,
-    PT_IMPOTENT,
-    PT_UNIMPOTENT,
-    P_INFORMATIONAL,    
-    };
-
 enum ALARM_TYPE
     {
     AT_DISCRETE,
@@ -60,11 +51,20 @@ enum ALARM_TYPE
     AT_SPECIAL,
     };
 
+enum ALARM_CLASS_PRIORITY
+    {
+    P_FATAL         = 0,
+    P_ERR_CONNECTION = 100,
+    P_ALARM          = 250,
+    P_MESSAGE        = 500,
+    P_ANSWER         = 750,
+    P_REMIND         = 1000,
+    };
+
 #endif // defined PAC || defined WIN32
 
 //-----------------------------------------------------------------------------
 #ifdef PAC
-#include "errors.h"
 #include "param_ex.h"
 #include "smart_ptr.h"
 #include "PAC_dev.h"
@@ -78,7 +78,7 @@ class base_error
     {
     public:
         base_error();
-        
+
         virtual ~base_error()
             {                
             }
@@ -167,50 +167,146 @@ class simple_error: public base_error
 
     private:
         device          *simple_device; ///< Простое устройство.
-
-        enum SYMPLE_ERROR_CONST     ///< Константы.
-            {
-			SE_ERROR_CODE = 1,      ///< Код ошибки - нет обратной связи.
-            SE_PRIORITY = 300,      ///< Приоритет ошибки простого устройства.
-            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об ошибке сложного устройства (танк,
 /// гребенка...).
 ///
-/// У простого устройства может быть только одна ошибка (ошибка обратной
-/// связи).
+/// У сложного устройства может быть несколько ошибок (сообщение, ответ, ...).
 class tech_dev_error: public base_error
     {
     public:
         // Интерфейс base_error.
-        tech_dev_error( tech_object* tech_dev );
-     
-        int save_as_Lua_str( char *str, bool &is_new_state ) = 0;        
-                
-        void print() const = 0;
-                
+        tech_dev_error( tech_object* tech_dev ): tech_dev( tech_dev ), 
+            was_set_cmd( false )
+            {
+            }
+
+        int save_as_Lua_str( char *str, bool &is_new_state )
+            {
+            str[ 0 ]     = 0;
+            is_new_state = false;
+                        
+            static int prev_size = 0;
+                        
+            if ( tech_dev->get_errors().size() != prev_size || was_set_cmd )
+                {
+                prev_size   = tech_dev->get_errors().size();
+                was_set_cmd = false;
+
+                is_new_state = true;                
+                }
+
+            for ( u_int i = 0; i < tech_dev->get_errors().size(); i++ )
+                {
+
+                sprintf( str + strlen( str ), "\t%s\n", "{" );
+
+                sprintf( str + strlen( str ), "\tdescription=\"%s\",\n",
+                    tech_dev->get_errors()[ i ]->msg );
+                sprintf( str + strlen( str ), "\tgroup=\"%s\",\n",
+                    get_group( tech_dev->get_errors()[ i ]->type ) );                
+
+                sprintf( str + strlen( str ), "priority=%d%s",
+                    get_priority( tech_dev->get_errors()[ i ]->type ), "," );
+
+                sprintf( str + strlen( str ), "state=%d,\n", AS_ALARM );        
+                sprintf( str + strlen( str ), "type=%d,\n", AT_SPECIAL );
+
+                sprintf( str + strlen( str ), "id_n=%d,\n", 
+                    tech_dev->get_number() );
+                sprintf( str + strlen( str ), "id_object_alarm_number=%d,\n", 
+                    tech_dev->get_errors()[ i ]->n );
+                sprintf( str + strlen( str ), "id_type=%d,\n", get_object_type() );
+
+                sprintf( str + strlen( str ), "suppress=false\n" );
+
+                sprintf( str + strlen( str ), "},\n" );
+                }
+
+            return 0;
+            }
+
+        void print() const
+            {
+#ifdef DEBUG
+            Print( "%s\n",
+                tech_dev->get_name_in_Lua() );
+#endif // DEBUG
+            }
+
         unsigned char get_object_type() const
             {
             return TE_TYPE;
             }
-                
+
         unsigned int get_object_n() const
             {
             return tech_dev->get_number();
             }
-                
-        int set_cmd( int cmd, int object_alarm_number ) = 0;
 
+        static const char* get_group( tech_object::ERR_MSG_TYPES err_type )
+            {
+            switch ( err_type )
+                {
+                case tech_object::ERR_CANT_ON:
+                case tech_object::ERR_ON_WITH_ERRORS:
+                    return "ответ";
+
+                case tech_object::ERR_OFF:    
+                case tech_object::ERR_DURING_WORK:
+                case tech_object::ERR_SIMPLE:
+                    return "сообщение";
+                }
+
+            return "?";
+            }
+
+        static int get_priority( tech_object::ERR_MSG_TYPES err_type )
+            {
+            switch ( err_type )
+                {
+                case tech_object::ERR_CANT_ON:
+                case tech_object::ERR_ON_WITH_ERRORS:
+                    return P_ANSWER;
+
+                case tech_object::ERR_OFF:    
+                case tech_object::ERR_DURING_WORK:
+                case tech_object::ERR_SIMPLE:
+                    return P_MESSAGE;
+                }
+
+            return P_ALARM;
+            }
+        
+        // Реализована следующая обработка любой команды - удаление сообщения из
+        // вектора, для которого адресована команда.
+        int set_cmd( int cmd, int object_alarm_number )
+            {
+            for ( u_int i = 0; i < tech_dev->get_errors().size(); i++ )
+                {                
+                if( tech_dev->get_errors()[ i ]->n == object_alarm_number )
+                    {                    
+                    tech_dev->get_errors().erase( 
+                        tech_dev->get_errors().begin() + i );
+
+                    was_set_cmd = true;
+                    return 0;
+                    }
+                }
+
+            return 1;
+            }
 
     private:
         tech_object* tech_dev; ///< Сложное устройство.
-        char is_err;
 
         enum TECH_DEV_ERROR_CONST   ///< Константы.
             {
             TE_TYPE = 100,          ///< Тип ошибки.
-            };        
+            };  
+
+        bool was_set_cmd;
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об всех ошибках простых устройств.
@@ -218,9 +314,9 @@ class dev_errors_manager
     {
     public:
         ~dev_errors_manager();
-        
+
         int is_any_error() const;
-            
+
         /// @brief Сохранение всех ошибок в поток для передачи на сервер.
         ///        
         /// @param stream - поток байт.

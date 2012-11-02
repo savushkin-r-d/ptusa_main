@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <vector>
+#include <locale>
 
 #ifdef __BORLANDC__
 extern "C" {
@@ -146,8 +147,8 @@ class tech_object: public i_Lua_save_device
         int exec_cmd( u_int cmd )
             {
 #ifdef DEBUG
-            Print ( "Exec command %s[ %2d ] command = %2d\n",
-                name, number, cmd );
+            Print ( "\'%.40s\' - exec command command = %2d\n",
+                name, cmd );
 #endif
             return 0;
             }
@@ -180,6 +181,7 @@ class tech_object: public i_Lua_save_device
         int  lua_init_runtime_params();
         // Lua implemented methods.
 
+        
         // Работа с ошибками.
 
         /// @brief Проверка необходимости проверки устройств на ошибку обратной
@@ -211,85 +213,29 @@ class tech_object: public i_Lua_save_device
             };
 
         int set_err_msg( const char *err_msg, int mode, 
-            ERR_MSG_TYPES type = ERR_CANT_ON )
-            {        
-            err_info *new_err = new err_info;
-            static int error_number = 0;
+            ERR_MSG_TYPES type = ERR_CANT_ON );
 
-            error_number++;
-            new_err->n = error_number;
-            new_err->type = type;
+        static const char* get_type( ERR_MSG_TYPES err_type );
+        static int get_priority( ERR_MSG_TYPES err_type );
 
-            switch ( type )
-                {
-                case ERR_CANT_ON:
-                    snprintf( new_err->msg, sizeof( new_err->msg ), 
-                        "Не включен режим %.1d \"%.40s\" %.40s %.1d - %.40s.", 
-                        mode + 1, modes_manager->get_mode_name( mode ), name, 
-                        number, err_msg );
-                    break;
-
-                case ERR_ON_WITH_ERRORS:
-                    snprintf( new_err->msg, sizeof( new_err->msg ), 
-                        "Включен с ошибкой режим %.1d \"%.40s\" %.40s %.1d - %.40s.", 
-                        mode + 1, modes_manager->get_mode_name( mode ), name, 
-                        number, err_msg );                    
-                    break;
-
-                case ERR_OFF:
-                    snprintf( new_err->msg, sizeof( new_err->msg ), 
-                        "Отключен режим %.1d \"%.40s\" %.40s %.1d - %.40s.", 
-                        mode + 1, modes_manager->get_mode_name( mode ), name,
-                        number, err_msg );
-                    break;
-
-                case ERR_DURING_WORK:
-                    snprintf( new_err->msg, sizeof( new_err->msg ), 
-                        "Режим %.1d \"%.40s\" %.40s %.1d - %.40s.", 
-                        mode + 1, modes_manager->get_mode_name( mode ), name,
-                        number, err_msg );
-                    break;
-
-                case ERR_SIMPLE:
-                    snprintf( new_err->msg, sizeof( new_err->msg ), 
-                        "%.40s %.1d - %.60s.", name, number, err_msg );
-
-                    new_err->msg[ 0 ] = toupper( new_err->msg[ 0 ] );
-                    break;
-
-                default:
-#ifdef DEBUG
-                    Print( "Error tech_object::set_err_msg(...) - unknown error type!\n" );                    
-                    debug_break;                    
-#endif // DEBUG
-                    snprintf( new_err->msg, sizeof( new_err->msg ), 
-                        "Режим %.1d \"%.40s\" %.40s %.1d - %.40s.", 
-                        mode + 1, modes_manager->get_mode_name( mode ), name,
-                        number, err_msg );
-                    break;
-                }
-
-#ifdef DEBUG
-            Print( "err_msg -> %s\n", err_msg );
-            Print( "err_str -> %s\n", new_err->msg );
-#endif // DEBUG
-
-            return 0;
-            }
+         std::vector< err_info* >& get_errors()
+             {
+             return errors;
+             }
         // Работа с ошибками.
 
         /// @brief Отладочная печать объекта.
         void print() const
             {
-            Print( "Object \"%s\" [%d]\n", name, number );
+            Print( "Object \'%.40s\' [%d]\n", name, number );
             modes_manager->print();
             }
 
         const char* get_name_in_Lua() const
             {
             static char tmp[ 100 ];
-            snprintf( tmp, sizeof( tmp ), "%s \"%s\" [%d]",
-                name_Lua, name, number );
+            snprintf( tmp, sizeof( tmp ), "%.40s",
+                name_Lua );
             return tmp;
             }
 

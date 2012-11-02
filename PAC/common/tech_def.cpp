@@ -5,6 +5,8 @@
 #include "tech_def.h"
 
 #include "lua_manager.h"
+
+#include "errors.h"
 //-----------------------------------------------------------------------------
 auto_smart_ptr < tech_object_manager > tech_object_manager::instance;
 //-----------------------------------------------------------------------------
@@ -44,8 +46,11 @@ tech_object::tech_object( const char* new_name, u_int number,
 //-----------------------------------------------------------------------------
 tech_object::~tech_object()
     {
-    //delete modes_manager;
-    //modes_manager = 0;
+    for ( u_int i = 0; i < errors.size(); i++ )
+        {
+        delete errors[ i ];
+        errors[ i ] = 0;
+        }
     }
 //-----------------------------------------------------------------------------
 int tech_object::init_params()
@@ -72,7 +77,7 @@ int tech_object::set_mode( u_int mode, int newm )
     static char   white_spaces[ 256 ] = "";
     static u_char idx = 0;
 
-    Print( "%sStart %s[ %2u ] set mode = %2u --> %s.\n",
+    Print( "%sStart \'%.40s\' [%2u] set mode = %2u --> %s.\n",
         white_spaces, name, number, mode, 
         newm == 0 ? "OFF" : " ON" );
 
@@ -121,7 +126,7 @@ int tech_object::set_mode( u_int mode, int newm )
     idx -= 4;
     white_spaces[ idx ] = 0;
     
-    Print( "%sEnd   %s[ %2u ] set mode = %2u --> %s, res = %d",
+    Print( "%sEnd \'%.40s\' [%2u] set mode = %2u --> %s, res = %d",
         white_spaces, name, number, mode,
         newm == 0 ? "OFF" : " ON", res );
 
@@ -519,6 +524,67 @@ int tech_object::is_check_mode( int mode ) const
     return 0;
     }
 //-----------------------------------------------------------------------------
+int tech_object::set_err_msg( const char *err_msg, int mode, 
+                             ERR_MSG_TYPES type /*= ERR_CANT_ON */ )
+    {
+    err_info *new_err = new err_info;
+    static int error_number = 0;
+
+    error_number++;
+    new_err->n = error_number;
+    new_err->type = type;
+
+    switch ( type )
+        {
+        case ERR_CANT_ON:
+            snprintf( new_err->msg, sizeof( new_err->msg ), 
+                "\'%.40s\' - не включен режим %.1d \'%.40s\' - %.40s.", 
+                name, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
+            break;
+
+        case ERR_ON_WITH_ERRORS:
+            snprintf( new_err->msg, sizeof( new_err->msg ), 
+                "\'%.40s\' - включен с ошибкой режим %.1d \'%.40s\' - %.40s.", 
+                name, mode + 1, modes_manager->get_mode_name( mode ), err_msg );                    
+            break;
+
+        case ERR_OFF:
+            snprintf( new_err->msg, sizeof( new_err->msg ), 
+                "\'%.40s\' - отключен режим %.1d \'%.40s\' - %.40s.", 
+                name, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
+            break;
+
+        case ERR_DURING_WORK:
+            snprintf( new_err->msg, sizeof( new_err->msg ), 
+                "\'%.40s\' - режим %.1d \'%.40s\' %.40s %.1d - %.40s.", 
+                name, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
+            break;
+
+        case ERR_SIMPLE:
+            snprintf( new_err->msg, sizeof( new_err->msg ), 
+                "\'%.40s\' - %.60s.", name, err_msg );
+            break;
+
+        default:
+#ifdef DEBUG
+            Print( "Error tech_object::set_err_msg(...) - unknown error type!\n" );                    
+            debug_break;                    
+#endif // DEBUG
+            snprintf( new_err->msg, sizeof( new_err->msg ), 
+                "\'%.40s\' - режим %.1d \'%.40s\' - %.40s.", 
+                name, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
+            break;
+        }
+
+#ifdef DEBUG
+    Print( "err_msg -> %s\n", err_msg );
+    Print( "err_str -> %s\n", new_err->msg );
+#endif // DEBUG
+
+    errors.push_back( new_err );
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int tech_object_manager::init_params()
     {
@@ -642,6 +708,8 @@ tech_object_manager::~tech_object_manager()
 void tech_object_manager::add_tech_object( tech_object* new_tech_object )
     {
     tech_objects.push_back( new_tech_object );
+
+    G_DEV_ERRORS_MANAGER->add_error( new tech_dev_error( new_tech_object ) );
     }
 //-----------------------------------------------------------------------------
 int tech_object_manager::save_params_as_Lua_str( char* str )

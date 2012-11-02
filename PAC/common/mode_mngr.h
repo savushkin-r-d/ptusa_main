@@ -112,7 +112,7 @@ class off_action: public action
     };
 //-----------------------------------------------------------------------------
 /// <summary>
-/// Выключение устройств.
+/// Промывка седел.
 /// </summary>
 class open_seat_action: public action
     {
@@ -203,10 +203,9 @@ class step
             A_UPPER_SEATS_ON,
             A_LOWER_SEATS_ON = A_UPPER_SEATS_ON,
 
-            A_REQUIRED_FB,
-            A_ON_AFTER_OFF,
-            A_WASH,
+            A_REQUIRED_FB,                        
             A_PAIR_DO_DI,
+            A_WASH,
             };
 
         step( std::string name, bool is_mode = false );

@@ -482,6 +482,18 @@ class tech_object
         timer_manager           timers;		 ///< Таймеры объекта.
 
         mode_manager* get_modes_manager();
+
+        enum ERR_MSG_TYPES
+            {
+            ERR_CANT_ON,
+            ERR_ON_WITH_ERRORS,
+            ERR_OFF,
+            ERR_DURING_WORK,
+            ERR_SIMPLE,
+            };
+
+        int set_err_msg( const char *err_msg, int mode, 
+            ERR_MSG_TYPES type = ERR_CANT_ON );
     };
 //-----------------------------------------------------------------------------
 ///@brief Получение менеджера технологических объектов.
@@ -577,10 +589,9 @@ class step
             A_UPPER_SEATS_ON,
             A_LOWER_SEATS_ON = A_UPPER_SEATS_ON,
 
-            A_REQUIRED_FB,
-            A_ON_AFTER_OFF,
-            A_WASH,
+            A_REQUIRED_FB,            
             A_PAIR_DO_DI,
+            A_WASH,
             };
     };
 //-----------------------------------------------------------------------------

@@ -25,8 +25,7 @@ void action::print( const char* prefix /*= "" */ ) const
 
     for ( u_int i = 0; i < devices.size(); i++ )
         {
-        devices[ i ]->print();
-        Print( " " );
+        Print( "%s ", devices[ i ]->get_name() );
         }
 
     Print( "\n" );
@@ -81,9 +80,6 @@ step::step( std::string name, bool is_mode /*= false */ ) : start_time( 0 ),
     if ( is_mode )
         {
         actions.push_back( new required_DI_action() );
-        
-        actions.push_back( new on_action() );
-        actions.push_back( new on_action() );
 
         actions.push_back( new DI_DO_action() );
         }
@@ -212,9 +208,9 @@ void DI_DO_action::print( const char* prefix /*= "" */ ) const
     Print( "%sDI->DO: ", prefix );
     for ( u_int i = 0; i < devices.size(); i += 2 )
         {
-        devices[ i ]->print();
+        Print( "%s", devices[ i ]->get_name() );
         Print( "->" );
-        devices[ i + 1 ]->print();                
+        Print( "%s", devices[ i + 1 ]->get_name() );             
         Print( " " );
         }
 
@@ -410,7 +406,7 @@ void open_seat_action::print( const char* prefix /*= "" */ ) const
             Print( " {" );
             for ( u_int j = 0; j < wash_upper_seat_devices[ i ].size(); j++ )
                 {
-                wash_upper_seat_devices[ i ][ j ]->print();
+                Print( "%s",  wash_upper_seat_devices[ i ][ j ]->get_name() );               
                 if ( j + 1 < wash_upper_seat_devices[ i ].size() ) Print( " " );
                 }   
 
@@ -426,7 +422,7 @@ void open_seat_action::print( const char* prefix /*= "" */ ) const
             Print( " {" );
             for ( u_int j = 0; j < wash_lower_seat_devices[ i ].size(); j++ )
                 {
-                wash_lower_seat_devices[ i ][ j ]->print();
+                Print( "%s ", wash_lower_seat_devices[ i ][ j ]->get_name() );                
                 if ( j + 1 < wash_lower_seat_devices[ i ].size() ) Print( " " );
                 }   
 
@@ -623,7 +619,7 @@ void mode_manager::print()
 
     for ( u_int i = 0; i < modes.size(); i++ )
         {
-        Print( "  %3d", i );
+        Print( "  %3d", i + 1 );
         modes[ i ]->print( "  " );        
         }
     }

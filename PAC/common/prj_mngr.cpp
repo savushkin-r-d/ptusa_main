@@ -151,6 +151,10 @@ int project_manager::lua_load_configuration()
         G_TECH_OBJECT_MNGR()->add_tech_object( ( tech_object * ) res_object );
         }
 
+#ifdef DEBUG
+    G_TECH_OBJECT_MNGR()->print();
+#endif // DEBUG
+
     //-Добавление технологических объектов проекта.
     for ( u_int i = 0; i < G_TECH_OBJECT_MNGR()->get_count(); i++ )
         {
