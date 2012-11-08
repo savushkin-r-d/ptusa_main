@@ -58,11 +58,16 @@ void off_action::evaluate()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int required_DI_action::check() const
+int required_DI_action::check( char* reason ) const
     {
     for ( u_int i = 0; i < devices.size(); i++ )
         {
-        if ( !devices[ i ]->is_active() ) return 1;
+        if ( !devices[ i ]->is_active() ) 
+            {
+            sprintf( reason, "нет сигнала \'%.25s (%.50s)\'",
+                devices[ i ]->get_name(), devices[ i ]->get_description() );
+            return 1;
+            }
         }
 
     return 0;
@@ -93,11 +98,11 @@ step::~step()
         }
     }
 //-----------------------------------------------------------------------------
-int step::check() const
+int step::check( char* reason ) const
     {
     if ( is_mode )
         {      
-        return actions[ A_REQUIRED_FB ]->check();
+        return actions[ A_REQUIRED_FB ]->check( reason );
         }
 
     return 0;
@@ -167,7 +172,7 @@ action* step::operator[]( int idx )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int DI_DO_action::check() const
+int DI_DO_action::check( char* reason ) const
     {
     if ( devices.size() % 2 != 0 )
         {
@@ -453,9 +458,9 @@ step* mode::add_step( const char* name, u_int next_step_n,
     return steps[ steps.size() - 1 ];
     }
 //-----------------------------------------------------------------------------
-int mode::check_on() const
+int mode::check_on( char* reason ) const
     {
-    return mode_step->check();
+    return mode_step->check( reason );
     }
 //-----------------------------------------------------------------------------
 void mode::init( u_int start_step /*= 0 */ )
@@ -545,10 +550,14 @@ step* mode::operator[]( int idx )
 //-----------------------------------------------------------------------------
 void mode::to_step( u_int new_step )
     {
-    if ( new_step < steps.size() )
+    if ( new_step <= steps.size() && new_step > 0 )
         {
+        new_step--;
+
         steps[ active_step_n ]->final();
         active_step_n = new_step;
+
+        steps[ active_step_n ]->init();
         steps[ active_step_n ]->evaluate();
         }
     else

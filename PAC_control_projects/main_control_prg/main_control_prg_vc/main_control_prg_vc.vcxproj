@@ -111,7 +111,7 @@
       <AdditionalDependencies>ws2_32.lib;User32.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>tolua++ -n PAC_dev -o "..\..\..\PAC\common\PAC_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg"</Command>
+      <Command>tolua++ -n PAC_dev -o "..\..\..\PAC\common\PAC_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>tolua++</Message>
@@ -259,7 +259,9 @@
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys.objects.lua" />
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys.wago.lua" />
     <None Include="..\..\..\PAC\common\toloa++\pkg\make.cmd" />
-    <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg" />
+    <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug local|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

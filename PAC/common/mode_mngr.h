@@ -47,7 +47,9 @@ class action
         virtual void print( const char* prefix = "" ) const;
 
         /// @brief Проверка действия.
-        virtual int check() const 
+        /// 
+        /// @param [out] reason Пояснение, почему нельзя выполнить действие.
+        virtual int check( char* reason ) const 
             {
             return 0; 
             }
@@ -167,7 +169,7 @@ class DI_DO_action: public action
             }
 
         /// @brief Проверка действия.
-        int check() const;
+        int check( char* reason ) const;
 
         void evaluate();
 
@@ -186,7 +188,11 @@ class required_DI_action: public action
             {
             }
 
-        int check() const;
+        int check( char* reason ) const;
+
+        void final()
+            {            
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об устройствах, которые входят в шаг (открываются/
@@ -224,7 +230,7 @@ class step
         ///
         /// @return > 0 - нельзя выполнить.
         /// @return   0 - ок.
-        int check() const;
+        int check( char* reason ) const;
 
         void init();
 
@@ -269,7 +275,7 @@ class mode
         /// mode::step_stub.
         step* operator[] ( int idx );
 
-        int check_on() const;
+        int check_on( char* reason ) const;
 
         void init( u_int start_step = 0 );
 
@@ -282,6 +288,16 @@ class mode
         u_long evaluation_time()
             {
             return get_delta_millisec( start_time );
+            }
+        
+        u_long active_step_evaluation_time() const
+            {
+            if ( active_step_n >= 0 )
+                {
+                return get_delta_millisec( steps[ active_step_n ]->get_start_time() );
+                }
+
+            return 0;            
             }
 
         u_int active_step() const

@@ -159,9 +159,9 @@ int tech_object::get_mode( u_int mode )
     return ( int )( ( u_int_4 ) ( state.at( mode / 32 ) >> mode % 32 ) & 1 );
     }
 //-----------------------------------------------------------------------------
-int tech_object::check_on_mode( u_int mode )
+int tech_object::check_on_mode( u_int mode, char* reason )
     {
-    return (*modes_manager)[ mode ]->check_on();
+    return (*modes_manager)[ mode ]->check_on( reason );
     }
 //-----------------------------------------------------------------------------
 void tech_object::init_mode( u_int mode )
@@ -210,7 +210,14 @@ int tech_object::lua_exec_cmd( u_int cmd )
 //-----------------------------------------------------------------------------
 int tech_object::lua_check_on_mode( u_int mode )
     {
-    if ( int res = tech_object::check_on_mode( mode ) ) return 1000 + res;
+    char err_msg[ 200 ] = "";
+
+    if ( int res = tech_object::check_on_mode( mode, err_msg ) )
+        {
+        set_err_msg( err_msg, mode );
+
+        return 1000 + res;
+        }
 
     return lua_manager::get_instance()->int_exec_lua_method( name_Lua, 
         "check_on_mode", mode, "int tech_object::lua_check_on_mode( u_int mode )" );
@@ -524,7 +531,7 @@ int tech_object::is_check_mode( int mode ) const
     return 0;
     }
 //-----------------------------------------------------------------------------
-int tech_object::set_err_msg( const char *err_msg, int mode, 
+int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode, 
                              ERR_MSG_TYPES type /*= ERR_CANT_ON */ )
     {
     err_info *new_err = new err_info;
@@ -538,25 +545,32 @@ int tech_object::set_err_msg( const char *err_msg, int mode,
         {
         case ERR_CANT_ON:
             snprintf( new_err->msg, sizeof( new_err->msg ), 
-                "\'%.40s\' - не включен режим %.1d \'%.40s\' - %.40s.", 
+                "\'%.40s\' - не включен режим %.1d \'%.40s\' - %.60s.", 
                 name, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
             break;
 
         case ERR_ON_WITH_ERRORS:
             snprintf( new_err->msg, sizeof( new_err->msg ), 
-                "\'%.40s\' - включен с ошибкой режим %.1d \'%.40s\' - %.40s.", 
+                "\'%.40s\' - включен с ошибкой режим %.1d \'%.40s\' - %.50s.", 
                 name, mode + 1, modes_manager->get_mode_name( mode ), err_msg );                    
             break;
 
         case ERR_OFF:
             snprintf( new_err->msg, sizeof( new_err->msg ), 
-                "\'%.40s\' - отключен режим %.1d \'%.40s\' - %.40s.", 
+                "\'%.40s\' - отключен режим %.1d \'%.40s\' - %.50s.", 
                 name, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
             break;
 
+        case ERR_OFF_AND_ON:
+            snprintf( new_err->msg, sizeof( new_err->msg ), 
+                "\'%.40s\' - переход от %.1d \'%.40s\' к %.1d \'%.40s\' - %.50s.", 
+                name, mode + 1, modes_manager->get_mode_name( mode ),
+                new_mode + 1, modes_manager->get_mode_name( new_mode ), err_msg );
+            break;
+            
         case ERR_DURING_WORK:
             snprintf( new_err->msg, sizeof( new_err->msg ), 
-                "\'%.40s\' - режим %.1d \'%.40s\' %.40s %.1d - %.40s.", 
+                "\'%.40s\' - режим %.1d \'%.40s\' - %.50s.", 
                 name, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
             break;
 
@@ -571,7 +585,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode,
             debug_break;                    
 #endif // DEBUG
             snprintf( new_err->msg, sizeof( new_err->msg ), 
-                "\'%.40s\' - режим %.1d \'%.40s\' - %.40s.", 
+                "\'%.40s\' - режим %.1d \'%.40s\' - %.50s.", 
                 name, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
             break;
         }

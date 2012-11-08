@@ -243,6 +243,9 @@
     <ClInclude Include="..\..\..\common\PAC-driver\errors.h">
       <Filter>Header Files\common\PAC-driver</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh">
+      <Filter>pkg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -431,9 +434,6 @@
       <Filter>Lua Source\common</Filter>
     </None>
     <None Include="..\..\..\PAC\common\toloa++\pkg\make.cmd">
-      <Filter>pkg</Filter>
-    </None>
-    <None Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg">
       <Filter>pkg</Filter>
     </None>
   </ItemGroup>

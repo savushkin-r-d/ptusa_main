@@ -25,8 +25,7 @@ simple_error::~simple_error()
 //-----------------------------------------------------------------------------
 int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
     {
-    str[ 0 ]     = 0;
-    is_new_state = 0;
+    str[ 0 ] = 0;
 
     // ѕроверка текущего состо€ни€ устройства.
     switch ( simple_device->get_state() ) 
@@ -43,7 +42,7 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
                 case AS_NORMAL:
                 case AS_RETURN:
                     error_state = AS_ALARM;
-                    is_new_state = 1;
+                    is_new_state = true;
                     break;
                 }            
             break;
@@ -60,12 +59,12 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
 
                 case AS_ACCEPT:
                     error_state = AS_NORMAL;
-                    is_new_state = 1;
+                    is_new_state = true;
                     break;
 
                 case AS_ALARM:
                     error_state = AS_RETURN;
-                    is_new_state = 1;
+                    is_new_state = true;
                     break;
                 }
             break;

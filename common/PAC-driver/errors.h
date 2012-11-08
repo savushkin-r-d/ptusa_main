@@ -183,10 +183,8 @@ class tech_dev_error: public base_error
             }
 
         int save_as_Lua_str( char *str, bool &is_new_state )
-            {
-            str[ 0 ]     = 0;
-            is_new_state = false;
-                        
+            {               
+            str[ 0 ] = 0;
             static int prev_size = 0;
                         
             if ( tech_dev->get_errors().size() != prev_size || was_set_cmd )
@@ -253,7 +251,8 @@ class tech_dev_error: public base_error
                 case tech_object::ERR_ON_WITH_ERRORS:
                     return "ответ";
 
-                case tech_object::ERR_OFF:    
+                case tech_object::ERR_OFF:
+                case tech_object::ERR_OFF_AND_ON:
                 case tech_object::ERR_DURING_WORK:
                 case tech_object::ERR_SIMPLE:
                     return "сообщение";
@@ -270,7 +269,8 @@ class tech_dev_error: public base_error
                 case tech_object::ERR_ON_WITH_ERRORS:
                     return P_ANSWER;
 
-                case tech_object::ERR_OFF:    
+                case tech_object::ERR_OFF:  
+                case tech_object::ERR_OFF_AND_ON:
                 case tech_object::ERR_DURING_WORK:
                 case tech_object::ERR_SIMPLE:
                     return P_MESSAGE;
@@ -315,7 +315,7 @@ class dev_errors_manager
     public:
         ~dev_errors_manager();
 
-        int is_any_error() const;
+        //int is_any_error() const;
 
         /// @brief Сохранение всех ошибок в поток для передачи на сервер.
         ///        

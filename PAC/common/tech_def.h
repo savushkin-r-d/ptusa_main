@@ -103,7 +103,7 @@ class tech_object: public i_Lua_save_device
         ///
         /// @return 1 - режим нельзя включить.
         /// @return 0 - режим можно включить.
-        int check_on_mode( u_int mode );
+        int check_on_mode( u_int mode, char* reason );
 
         /// @brief Инициализация режима.
         ///
@@ -196,6 +196,7 @@ class tech_object: public i_Lua_save_device
             ERR_CANT_ON,
             ERR_ON_WITH_ERRORS,
             ERR_OFF,
+            ERR_OFF_AND_ON,
             ERR_DURING_WORK,
             ERR_SIMPLE,
             };
@@ -204,7 +205,7 @@ class tech_object: public i_Lua_save_device
             {
             enum CONSTATS
                 {
-                MAX_STR_LENGTH = 120,
+                MAX_STR_LENGTH = 150,
                 };
 
             char          msg[ MAX_STR_LENGTH ];
@@ -212,7 +213,7 @@ class tech_object: public i_Lua_save_device
             ERR_MSG_TYPES type;
             };
 
-        int set_err_msg( const char *err_msg, int mode, 
+        int set_err_msg( const char *err_msg, int mode, int new_mode = 0, 
             ERR_MSG_TYPES type = ERR_CANT_ON );
 
         static const char* get_type( ERR_MSG_TYPES err_type );

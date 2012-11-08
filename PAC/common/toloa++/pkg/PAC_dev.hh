@@ -1,4 +1,4 @@
-/// @file PAC_dev.pkg
+/// @file PAC_dev.hh 
 /// @brief Классы и функции, доступные в Lua.
 ///
 /// @par Текущая версия:
@@ -171,6 +171,9 @@ class i_counter
 
 		/// @brief Получение значения счетчика (поток).
 		float get_flow();
+
+        /// @brief Получение состояния работы счетчика.
+        virtual int get_state() = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Простое физическое устройство.
@@ -488,11 +491,12 @@ class tech_object
             ERR_CANT_ON,
             ERR_ON_WITH_ERRORS,
             ERR_OFF,
+            ERR_OFF_AND_ON,
             ERR_DURING_WORK,
             ERR_SIMPLE,
             };
 
-        int set_err_msg( const char *err_msg, int mode, 
+        int set_err_msg( const char *err_msg, int mode, int new_mode = 0, 
             ERR_MSG_TYPES type = ERR_CANT_ON );
     };
 //-----------------------------------------------------------------------------
@@ -551,6 +555,8 @@ class mode
             unsigned int step_duration_par_n );
 
 		unsigned int active_step() const;
+
+        unsigned long active_step_evaluation_time() const;
 
         /// @brief Получение режима через операцию индексирования.
         ///

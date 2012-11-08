@@ -165,12 +165,27 @@ long device_communicator::write_devices_states_service( long len,
 
             sprintf( str, "%s %d %s\n", "alarms[", project_descr_id, "] = \n  {" );            
 
+            u_int_2         err_id = 0;
+            static u_int_2  prev_PAC_err_id = 0;
+            static u_int_2  prev_dev_err_id = 0;
+
             PAC_critical_errors_manager::get_instance()->save_as_Lua_str(
-                str + strlen( str ), errors_id );
-           G_DEV_ERRORS_MANAGER->save_as_Lua_str( str + strlen( str ), errors_id );           
-           
-           sprintf( str + strlen( str ), "  %s %d,\n", "id =", errors_id );
-           sprintf( str + strlen( str ), "  %s\n", "}" );
+                str + strlen( str ), prev_PAC_err_id );
+            if ( err_id != prev_PAC_err_id )
+                {
+                prev_PAC_err_id = err_id;
+                errors_id++;
+                }
+
+            G_DEV_ERRORS_MANAGER->save_as_Lua_str( str + strlen( str ), err_id ); 
+            if ( err_id != prev_dev_err_id )
+                {
+                prev_dev_err_id = err_id;
+                errors_id++;
+                }
+
+            sprintf( str + strlen( str ), "  %s %d,\n", "id =", errors_id );
+            sprintf( str + strlen( str ), "  %s\n", "}" );
 
 #ifdef DEBUG_DEV_CMCTR
            Print( "Critical errors = \n%s", outdata );
