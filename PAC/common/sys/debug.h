@@ -18,7 +18,7 @@
 /// ничего не происходит.
 #define debug_break 
 //-----------------------------------------------------------------------------
-#ifdef DEBUG
+#ifdef DEBUG_IDE
 
 #if defined LINUX_OS && !defined PAC_WAGO_750_860
 #undef debug_break

@@ -608,7 +608,7 @@ class action
         /// @brief Добавление устройства к действию.
         ///
         /// @param [in] device Устройство.        
-        virtual void add_dev( device *dev );
+        virtual void add_dev( device *dev, unsigned int group );
 
         /// @brief Добавление устройства к действию.
         ///

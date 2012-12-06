@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 11/08/12 16:23:26.
+** Generated automatically by tolua++-1.0.92 on 12/06/12 12:08:39.
 */
 
 #ifndef __cplusplus
@@ -2891,7 +2891,8 @@ static int tolua_PAC_dev_action_add_dev00(lua_State* tolua_S)
  if (
      !tolua_isusertype(tolua_S,1,"action",0,&tolua_err) ||
      !tolua_isusertype(tolua_S,2,"device",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -2899,11 +2900,12 @@ static int tolua_PAC_dev_action_add_dev00(lua_State* tolua_S)
  {
   action* self = (action*)  tolua_tousertype(tolua_S,1,0);
   device* dev = ((device*)  tolua_tousertype(tolua_S,2,0));
+  unsigned int group = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_dev'", NULL);
 #endif
   {
-   self->add_dev(dev);
+   self->add_dev(dev,group);
   }
  }
  return 0;

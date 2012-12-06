@@ -479,6 +479,15 @@ int tcp_communicator_win::do_echo( int idx )
         }
 #endif // DEBUG
 
+    //Структура полученных данных.
+    //buff[0] = 's';
+    //buff[1] = Service_ID;        // C_SERVICE_N = 1
+    //buff[2] = 1;                 // FRAME_SINGLE.
+    //buff[3] = ++pidx;            // Идентификатор пакета.
+    //buff[4] = ( char ) ( length >> 8 );
+    //buff[5] = length & 0xFF;
+    //memcpy(buff+6,data,length);
+
     net_id = buf[ 0 ];
     pidx = buf[ 3 ];
     if ( net_id != 's' )

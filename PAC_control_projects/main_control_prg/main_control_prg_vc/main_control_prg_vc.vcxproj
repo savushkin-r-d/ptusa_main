@@ -28,7 +28,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v100</PlatformToolset>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug local|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -86,7 +86,7 @@
       <AdditionalDependencies>ws2_32.lib;User32.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>tolua++ -n PAC_dev -o "..\..\..\PAC\common\PAC_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\PAC_dev.pkg"</Command>
+      <Command>tolua++ -n PAC_dev -o "..\..\..\PAC\common\PAC_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>tolua++</Message>
@@ -103,7 +103,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG;TEST_SPEED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG;DEBUG_IDE;TEST_SPEED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -111,7 +111,8 @@
       <AdditionalDependencies>ws2_32.lib;User32.lib</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>tolua++ -n PAC_dev -o "..\..\..\PAC\common\PAC_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh"</Command>
+      <Command>tolua++ -n PAC_dev -o "..\..\..\PAC\common\PAC_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh"
+copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>tolua++</Message>
@@ -262,6 +263,9 @@
     <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug local|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="main_control_prg_vc1.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

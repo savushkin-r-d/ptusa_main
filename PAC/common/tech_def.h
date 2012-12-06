@@ -335,7 +335,6 @@ class tech_object_manager
             for ( u_int i = 0; i < tech_objects.size(); i++ )
                 {
                 tech_objects[ i ]->print();
-                Print( "\n" );
 
 #ifdef KEY_CONFIRM
                 Print( "Press any key to continue..." );

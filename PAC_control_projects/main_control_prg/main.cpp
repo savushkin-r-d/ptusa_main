@@ -107,9 +107,9 @@ int main( int argc, char *argv[] )
 #endif // defined LINUX_OS
 
 #ifdef WIN_OS
-        const u_int MAX_ITERATION = 1000;
+        const u_int MAX_ITERATION = 10000;
 #endif // WIN_OS
-        const u_int END_ITERATION = 1000;
+        const u_int END_ITERATION = 5;
 
         static u_int max_cycle_time = 0;
         u_int cycle_time = get_delta_millisec( st_time );
@@ -117,7 +117,7 @@ int main( int argc, char *argv[] )
         if ( max_cycle_time < cycle_time )
             {
             max_cycle_time = cycle_time;
-            print_time( "  Main cycle avg time = %lu msec, max time = %4u, Lua mem = %d b\n",
+            print_time( " Main cycle avg time = %lu ms, max time = %4u, Lua mem = %d b\n",
                 all_time / cycles_cnt, max_cycle_time,
                 lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
                 lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );            
@@ -128,7 +128,7 @@ int main( int argc, char *argv[] )
             {
             if ( print_cycle_time_count < END_ITERATION )
                 {
-                print_time( "\tMain cycle avg time = %lu msec, max time = %4u, Lua mem = %d b\n",
+                print_time( " Main cycle avg time = %lu ms, max time = %4u, Lua mem = %d b\n",
                     all_time / cycles_cnt, max_cycle_time,
                     lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
                     lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );

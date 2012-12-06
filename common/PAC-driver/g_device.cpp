@@ -85,7 +85,14 @@ long device_communicator::write_devices_states_service( long len,
             answer_size++;
 
 #ifdef DEBUG
-            Print( "%s", outdata + 2 );
+            std::string source = ( char* ) outdata + 2;
+            std::string replace = "  ";
+
+            for ( std::string::size_type i = source.find('\t', 0);
+                i != std::string::npos; i = source.find('\t', i + replace.size()))
+                source.replace(i, 1, replace);
+
+            Print( "%s", source.c_str() );
 #endif // DEBUG
 
 #ifdef DEBUG_DEV_CMCTR

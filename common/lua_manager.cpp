@@ -243,7 +243,11 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
 
     //III
     //Выполняем процедуры инициализации.
-    G_PROJECT_MANAGER->lua_load_configuration();
+    res = G_PROJECT_MANAGER->lua_load_configuration();
+    if ( res )
+        {
+        return res;
+        }
 
     //IV Выполнение основного скрипта ('main.plua').
     if ( 0 == lua_state )
@@ -270,7 +274,11 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         }
 
     //Выполнение пользовательской функции инициализации.
-    G_TECH_OBJECT_MNGR()->init_objects();
+    res = G_TECH_OBJECT_MNGR()->init_objects();
+    if ( res )
+        {
+        return res;
+        }
 
     const char *PAC_name =
         G_LUA_MANAGER->char_no_param_exec_lua_method( "system",
@@ -278,7 +286,6 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
     if ( 0 == PAC_name )
         {
         fprintf( stderr, "Lua init error - error reading PAC name!\n" );
-        debug_break;
         return 1;
         }
     tcp_communicator::init_instance( PAC_name );

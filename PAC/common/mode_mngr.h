@@ -38,11 +38,17 @@ class mode_manager;
 class action
     {
     public:
-        action( std::string name );
+        action( std::string name, u_int group_cnt = 1 );
         
         virtual ~action()
             {            
             }
+
+        /// @brief Проверка на отсутствие устройств.
+        /// 
+        /// @return true  Есть устройства, над которыми что-то делается.
+        /// @return false Нет устройств, над которыми что-то делается.
+        virtual bool is_empty() const;
 
         virtual void print( const char* prefix = "" ) const;
 
@@ -68,10 +74,20 @@ class action
 
         /// @brief Добавление устройства к действию.
         ///
-        /// @param [in] dev Устройство.        
-        virtual void add_dev( device *dev )
+        /// @param [in] dev Устройство. 
+        /// @param [in] group Группа устройства.
+        virtual void add_dev( device *dev, u_int group = 0 )
             {
-            devices.push_back( dev );
+            if ( devices.size() < group )
+                {
+#ifdef DEBUG
+                Print( "Error device:add_dev(...) - group (%d) > group count (%d).",
+                    group, devices.size() );
+#endif // DEBUG
+                return;
+                }
+
+            devices[ group ].push_back( dev );
             }
 
         /// @brief Добавление устройства к действию.
@@ -83,7 +99,7 @@ class action
         
 
     protected: 
-        std::vector< device* > devices; ///< Устройства.   
+        std::vector< std::vector< device* > > devices; ///< Устройства.   
         std::string name;               ///< Имя действия.
     };
 //-----------------------------------------------------------------------------
@@ -134,6 +150,7 @@ class open_seat_action: public action
 
         void print( const char* prefix = "" ) const;
 
+        bool is_empty() const;
     private:
         enum PHASES
             {
@@ -168,13 +185,8 @@ class DI_DO_action: public action
             {
             }
 
-        /// @brief Проверка действия.
-        int check( char* reason ) const;
-
         void evaluate();
 
-        void final();
-                
         void print( const char* prefix = "" ) const;
     };
 //-----------------------------------------------------------------------------
@@ -193,6 +205,27 @@ class required_DI_action: public action
         void final()
             {            
             }
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
+/// Мойка линии.
+/// </summary>
+class wash_action: public action
+    {
+    public:
+        wash_action(): action( "Мойка", 3 )
+            {
+            }
+
+        void evaluate();
+
+    private:
+        enum GROUPS
+            {
+            G_DI = 0, //Входные сигналы запроса включения устройств.
+            G_DO,     //Выходные сигналы "Мойка ОК".
+            G_DEV,    //Устройства, включаемые по запросу.
+            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об устройствах, которые входят в шаг (открываются/
@@ -246,7 +279,13 @@ class step
 
         /// Выводит на консоль объект.
         void print( const char* prefix = "" ) const;
-            
+
+        /// @brief Проверка на отсутствие устройств.
+        /// 
+        /// @return true  Есть устройства, над которыми что-то делается.
+        /// @return false Нет устройств, над которыми что-то делается.
+        bool is_empty() const;
+
     private: 
         std::vector< action* > actions; ///< Действия.           
         u_int_4 start_time;             ///< Время старта шага.   

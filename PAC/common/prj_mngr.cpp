@@ -97,6 +97,7 @@ int project_manager::lua_load_configuration()
 
 #ifdef DEBUG
     wago_manager::get_instance()->print();
+    Print( "\n" );
 #endif // DEBUG
 
     //-Devices data.
@@ -117,6 +118,7 @@ int project_manager::lua_load_configuration()
 
 #ifdef DEBUG
     G_DEVICE_MANAGER()->print();
+    Print( "\n" );
 #endif // DEBUG
 
     int res = lua_manager::get_instance()->int_exec_lua_method( "",
@@ -124,7 +126,7 @@ int project_manager::lua_load_configuration()
     if ( res )
         {
         Print( "Fatal error!\n" );
-        exit( 1 );
+        return 1;
         }
 
     res = lua_manager::get_instance()->int_exec_lua_method( "object_manager",
@@ -132,7 +134,7 @@ int project_manager::lua_load_configuration()
     if ( res < 0 )
         {
         Print( "Fatal error!\n" );
-        exit( 1 );
+        return 1;
         }
 
     int objects_count = res;
@@ -145,7 +147,7 @@ int project_manager::lua_load_configuration()
         if ( 0 == res_object )
             {
             Print( "Fatal error!\n" );
-            exit( 1 );
+            return 1;
             }
 
         G_TECH_OBJECT_MNGR()->add_tech_object( ( tech_object * ) res_object );
@@ -153,6 +155,7 @@ int project_manager::lua_load_configuration()
 
 #ifdef DEBUG
     G_TECH_OBJECT_MNGR()->print();
+    Print( "\n" );
 #endif // DEBUG
 
     //-Добавление технологических объектов проекта.
@@ -164,7 +167,8 @@ int project_manager::lua_load_configuration()
     G_DEVICE_CMMCTR->add_device( PAC_info::get_instance() );
 
 #ifdef DEBUG
-    Print( "Project manager - processing configuration completed.\n\n" );
+    Print( "Project manager - processing configuration completed.\n" );
+    Print( "\n" );
 #endif // DEBUG
 
     return 0;

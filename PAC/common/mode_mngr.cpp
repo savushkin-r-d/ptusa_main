@@ -15,19 +15,46 @@
 
 #include "mode_mngr.h"
 //-----------------------------------------------------------------------------
-action::action( std::string name ) : name( name )
+action::action( std::string name, u_int group_cnt ) : name( name )
     {
+    for ( u_int i = 0; i < group_cnt; i++ )
+        {
+        std::vector< device* > tmp;
+
+        devices.push_back( tmp );
+        }
     }
 //-----------------------------------------------------------------------------
 void action::print( const char* prefix /*= "" */ ) const
     {
-    Print( "%s%s: ", prefix, name.c_str() );
-
-    for ( u_int i = 0; i < devices.size(); i++ )
+    if ( devices.size() == 0  )
         {
-        Print( "%s ", devices[ i ]->get_name() );
+        return;
         }
 
+    if ( devices[ 0 ].size() == 0 )
+        {
+        return;
+        }
+
+    Print( "%s%s: ", prefix, name.c_str() );
+        
+    for ( u_int i = 0; i < devices.size(); i++ )
+        {
+        if ( devices[ i ].size() == 0  )
+            {
+            continue;
+            }
+
+        Print( "{" );
+        for ( u_int j = 0; j < devices[ i ].size(); j++ )
+            {
+            Print( "%s", devices[ i ][ j ]->get_name() );
+            if ( j + 1 < devices[ i ].size() ) Print( " " );
+            }
+        Print( "} " );        
+        }
+        
     Print( "\n" );
     }
 //-----------------------------------------------------------------------------
@@ -35,37 +62,74 @@ void action::final()
     {
     for ( u_int i = 0; i < devices.size(); i++ )
         {
-        devices[ i ]->off();
+        for ( u_int j = 0; j < devices[ i ].size(); j++ )
+            {
+            devices[ i ][ j ]->off();
+            }        
         }
+    }
+//-----------------------------------------------------------------------------
+bool action::is_empty() const
+    {
+    if ( devices.size() == 0  )
+        {
+        return true;
+        }
+
+    if ( devices[ 0 ].size() == 0 )
+        {
+        return true;
+        }
+
+    return false;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void on_action::evaluate()
     {
-    for ( u_int i = 0; i < devices.size(); i++ )
+    if ( devices.size() == 0  )
         {
-        devices[ i ]->on();
+        return;
+        }
+
+    const u_int IDX = 0;
+    for ( u_int i = 0; i < devices[ IDX ].size(); i++ )
+        {
+        devices[ IDX ][ i ]->on();
         }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void off_action::evaluate()
     {
-    for ( u_int i = 0; i < devices.size(); i++ )
+    if ( devices.size() == 0  )
         {
-        devices[ i ]->off();
+        return;
+        }
+
+    const u_int IDX = 0;
+
+    for ( u_int i = 0; i < devices[ IDX ].size(); i++ )
+        {
+        devices[ IDX ][ i ]->off();
         }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int required_DI_action::check( char* reason ) const
     {
-    for ( u_int i = 0; i < devices.size(); i++ )
+    if ( devices.size() == 0  )
         {
-        if ( !devices[ i ]->is_active() ) 
+        return 0;
+        }
+
+    const u_int IDX = 0;
+    for ( u_int i = 0; i < devices[ IDX ].size(); i++ )
+        {
+        if ( !devices[ IDX ][ i ]->is_active() ) 
             {
             sprintf( reason, "нет сигнала \'%.25s (%.50s)\'",
-                devices[ i ]->get_name(), devices[ i ]->get_description() );
+                devices[ IDX ][ i ]->get_name(), devices[ IDX ][ i ]->get_description() );
             return 1;
             }
         }
@@ -85,8 +149,8 @@ step::step( std::string name, bool is_mode /*= false */ ) : start_time( 0 ),
     if ( is_mode )
         {
         actions.push_back( new required_DI_action() );
-
         actions.push_back( new DI_DO_action() );
+        actions.push_back( new wash_action() );
         }
     }
 //-----------------------------------------------------------------------------
@@ -146,7 +210,7 @@ void step::set_start_time( u_int_4 start_time )
 //-----------------------------------------------------------------------------
 void step::print( const char* prefix /*= "" */ ) const
     {
-    Print( "%s%s \n", prefix, name.c_str() );
+    Print( "%s \n", name.c_str() );
     std::string new_prefix = prefix;
     new_prefix += "  ";
 
@@ -171,52 +235,77 @@ action* step::operator[]( int idx )
     return 0;
     }
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-int DI_DO_action::check( char* reason ) const
+bool step::is_empty() const
     {
-    if ( devices.size() % 2 != 0 )
+    for ( u_int i = 0; i < actions.size(); i++ )
         {
-#ifdef DEBUG
-        Print( "Error DI_DO_action: devices.size %d не кратен 2.",
-            devices.size() );
-#endif // DEBUG
+        if ( !actions[ i ]->is_empty() )
+            {
+            return false;
+            }
         }
-
-    return 0;
+    return true;
     }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void DI_DO_action::evaluate()
     {
-    for ( u_int i = 0; i < devices.size(); i += 2 )
+    if ( devices.size() == 0  )
         {
-        if ( devices[ i ]->is_active() )
+        return;
+        }
+        
+    for ( u_int i = 0; i < devices.size(); i++ )
+        {
+        if ( devices[ i ].size() == 0  )
             {
-            devices[ i + 1 ]->on();
+            continue;;
+            }
+
+        if ( devices[ i ][ 0 ]->is_active() )
+            {
+            for ( u_int j = 1; j < devices[ i ].size(); j++ )
+                {
+                devices[ i ][ j ]->on();
+                }
             }
         else
             {
-            devices[ i + 1 ]->off();
-            }                
-        }
-    }
-//-----------------------------------------------------------------------------
-void DI_DO_action::final()
-    {
-    for ( u_int i = 0; i < devices.size(); i += 2 )
-        {
-        devices[ i + 1 ]->off();
+            for ( u_int j = 1; j < devices[ i ].size(); j++ )
+                {
+                devices[ i ][ j ]->off();
+                }
+            }
         }
     }
 //-----------------------------------------------------------------------------
 void DI_DO_action::print( const char* prefix /*= "" */ ) const
     {
-    Print( "%sDI->DO: ", prefix );
-    for ( u_int i = 0; i < devices.size(); i += 2 )
+    if ( devices.size() == 0  )
         {
-        Print( "%s", devices[ i ]->get_name() );
+        return;
+        }
+    if ( devices[ 0 ].size() == 0 )
+        {
+        return;
+        }
+
+    Print( "%s%s: ", prefix, name.c_str() );
+    for ( u_int i = 0; i < devices.size(); i++ )
+        {
+        if ( devices[ i ].size() == 0  )
+            {
+            continue;
+            }
+
+        Print( "{%s", devices[ i ][ 0 ]->get_name() );
         Print( "->" );
-        Print( "%s", devices[ i + 1 ]->get_name() );             
-        Print( " " );
+        for ( u_int j = 1; j < devices[ i ].size(); j++ )
+            {
+            Print( "%s", devices[ i ][ j ]->get_name() );             
+            if ( j + 1 < devices[ i ].size() ) Print( " " );
+            }
+        Print( "} " );
         }
 
     Print( "\n" );
@@ -401,11 +490,16 @@ void open_seat_action::add_dev( device *dev, u_int group, u_int seat_type )
 //-----------------------------------------------------------------------------
 void open_seat_action::print( const char* prefix /*= "" */ ) const
     {
+    if ( devices[ 0 ].size() == 0 )
+        {
+        return;
+        }
+
     Print( "%s%s: ", prefix, name.c_str() );
     
     if ( wash_upper_seat_devices.size() )
         {
-        Print( "верхние -" );
+        Print( "верхние " );
         for ( u_int i = 0; i < wash_upper_seat_devices.size(); i++ )
             {   
             Print( " {" );
@@ -421,7 +515,7 @@ void open_seat_action::print( const char* prefix /*= "" */ ) const
 
     if ( wash_lower_seat_devices.size() )
         {
-        Print( "; нижние -" );
+        Print( "; нижние " );
         for ( u_int i = 0; i < wash_lower_seat_devices.size(); i++ )
             {      
             Print( " {" );
@@ -436,6 +530,76 @@ void open_seat_action::print( const char* prefix /*= "" */ ) const
         }
 
     Print( "\n" );
+    }
+//-----------------------------------------------------------------------------
+bool open_seat_action::is_empty() const
+    {
+    if ( wash_upper_seat_devices.size() == 0 &&
+        wash_lower_seat_devices.size() == 0 )
+        {
+        return true;
+        }
+
+    if ( wash_upper_seat_devices[ 0 ].size() == 0 && 
+        wash_lower_seat_devices[ 0 ].size() == 0 )
+        {
+        return true;
+        }
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void wash_action::evaluate()
+    {
+    //Подаем сигналы "Мойка ОК".
+    for ( u_int i = 0; i < devices[ G_DO ].size(); i++ )
+        {
+        devices[ G_DO ][ i ]->on();
+        }
+
+    //Включаем устройства.
+    for ( u_int i = 0; i < devices[ G_DEV ].size(); i++ )
+        {
+        devices[ G_DEV ][ i ]->on();
+        } 
+
+    // В зависимости от сигнала запроса включения устройств выключаем устройства.
+    for ( u_int i = 0; i < devices[ G_DI ].size(); i++ )
+        {
+        if ( !devices[ G_DI ][ i ]->is_active() )
+            {
+            for ( u_int j = 0; j < devices[ G_DEV ].size(); j++ )
+                {
+                devices[ G_DEV ][ j ]->off();
+                }
+            }
+        }
+
+    bool is_dev_error = false;
+    // Чуть раньше подали управляющий сигнал. Сейчас проверяем 
+    // состояния устройств (насосов, клапанов).
+    for ( u_int i = 0; i < devices[ G_DEV ].size(); i++ )
+        {
+        if ( devices[ G_DEV ][ i ]->get_state() == -1 )
+            {
+            is_dev_error = true;  
+            break;
+            }
+        } 
+    // Если есть ошибки устройств, отключаем все устройства, снимаем 
+    // сигналы "Мойка ОК".
+    if ( is_dev_error )
+        {
+        for ( u_int i = 0; i < devices[ G_DEV ].size(); i++ )
+            {
+            devices[ G_DEV ][ i ]->off();
+            }
+        for ( u_int i = 0; i < devices[ G_DO ].size(); i++ )
+            {
+            devices[ G_DO ][ i ]->off();
+            }
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -572,10 +736,15 @@ void mode::to_step( u_int new_step )
 void mode::print( const char* prefix /*= "" */ ) const
     {
     std::string new_prefix = prefix;
-    new_prefix += "  ";        
+    new_prefix += "    ";
 
-    Print( "%s%s\n", prefix, name.c_str() );
-    mode_step->print( new_prefix.c_str() );
+    Print( "%s\n", name.c_str() );
+
+    if ( !mode_step->is_empty() )
+        {
+        Print( "%s0 ", new_prefix.c_str() );
+        mode_step->print( new_prefix.c_str() );
+        }
 
     for ( u_int i = 0; i < steps.size(); i++ )
         {
@@ -628,7 +797,7 @@ void mode_manager::print()
 
     for ( u_int i = 0; i < modes.size(); i++ )
         {
-        Print( "  %3d", i + 1 );
+        Print( "  %3d ", i + 1 );
         modes[ i ]->print( "  " );        
         }
     }

@@ -734,7 +734,6 @@ int tech_object_manager::save_params_as_Lua_str( char* str )
         {
         tech_objects[ i ]->save_params_as_Lua_str( str + strlen( str ) );
         }
-
     return 0;
     }
 //-----------------------------------------------------------------------------
