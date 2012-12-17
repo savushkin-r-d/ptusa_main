@@ -229,6 +229,11 @@ class tech_object: public i_Lua_save_device
         void print() const
             {
             Print( "Object \'%.40s\' [%d]\n", name, number );
+            Print( "par_float[%d] par_uint[%d] rt_par_float[%d] rt_par_uint[%d]\n", 
+                par_float.get_count(), par_uint.get_count(),
+                rt_par_float.get_count(), rt_par_uint.get_count() );
+            Print( "timers[%d]\n", timers.get_count() );
+
             modes_manager->print();
             }
 

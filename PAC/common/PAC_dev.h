@@ -1888,6 +1888,12 @@ class timer_manager
         /// диапазон.
         timer* operator[] ( unsigned int index );
 
+        /// @brief Количество таймеров.
+        int get_count() const
+            {
+            return timers_cnt;
+            }
+
     private:
         u_int   timers_cnt; ///< Количество таймеров.
         timer   *timers;    ///< Таймеры.

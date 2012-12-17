@@ -429,33 +429,27 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
 
     if ( strcmp( prop, "S_PAR_F" ) == 0 )
         {
-        par_float.save( idx - 1, ( float ) val );
+        par_float.save( idx, ( float ) val );
         return 0;
         }
 
     if ( strcmp( prop, "RT_PAR_F" ) == 0 )
         {
-        rt_par_float[ idx - 1 ] = ( float ) val;
+        rt_par_float[ idx ] = ( float ) val;
         return 0;
         }
 
     if ( strcmp( prop, "S_PAR_UI" ) == 0 )
         {        
-        par_uint.save( idx - 1, ( u_int_4 ) val );
+        par_uint.save( idx, ( u_int_4 ) val );
         return 0;
         }
 
     if ( strcmp( prop, "RT_PAR_UI" ) == 0 )
         {
-        rt_par_uint[ idx - 1 ] = ( u_int_4 ) val;
+        rt_par_uint[ idx ] = ( u_int_4 ) val;
         return 0;
         }
-
-    ////if ( strcmp( prop, "MODES_ERR" ) == 0 )
-    ////    {
-    ////    modes_manager->err_par[ idx - 1 ] = ( float ) val;
-    ////    return 0;
-    ////    }
 
 #ifdef DEBUG
         Print( "Eror tech_object::set_cmd(...), prop = \"%s\", idx = %u, val = %f\n",

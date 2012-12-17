@@ -118,10 +118,12 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
       <Message>tolua++</Message>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>copy "$(TargetDir)$(TargetFileName)" "p:\PTUSA projects\editor\bin_lua\lua.exe"</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
     <PostBuildEvent>
-      <Message>Копирование интерпретатора Lua.</Message>
+      <Message>
+      </Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

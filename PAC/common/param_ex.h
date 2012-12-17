@@ -181,7 +181,7 @@ template < class type, bool is_float > class parameters
         /// stub ( значение 0 ).
         type& operator[] ( unsigned int index )
             {
-            if ( index < count )
+            if ( index <= count )
                 {
                 return values[ index ];
                 }
@@ -243,7 +243,7 @@ template < class type, bool is_float > class parameters
         /// @brief Получение количества параметров.
         ///
         /// @return - количество параметров.
-        u_int get_count()
+        u_int get_count() const
             {
             return count;
             }
@@ -260,12 +260,13 @@ template < class type, bool is_float > class parameters
 
             strncpy( this->name, name, sizeof( this->name ) );
 
-//#ifdef DEBUG
-//            if ( 0 == count )
-//                {
-//                Print( "parameters(...) - error: count = 0!\n" );
-//                }
-//#endif // DEBUG
+#ifdef DEBUG_IDE
+            if ( 0 == count )
+                {
+                Print( "parameters(...) - error: count = 0!\n" );
+                }
+            //debug_break;
+#endif // DEBUG_IDE
             is_delete = 0;
             if ( count > 0 && 0 == values )
                 {
