@@ -26,7 +26,7 @@ tech_object::tech_object( const char* new_name, u_int number,
         number( number ),
         cmd( 0 ),
         modes_count( modes_count ),        
-        modes_time( run_time_params_u_int_4( modes_count + 1, "MODES_TIME" ) ),
+        modes_time( run_time_params_u_int_4( modes_count, "MODES_TIME" ) ),
 
         modes_manager( 0 )
     {
@@ -171,8 +171,6 @@ void tech_object::init_mode( u_int mode )
 //-----------------------------------------------------------------------------
 int tech_object::evaluate()
     {
-    modes_time[ 0 ] = modes_manager->get_idle_time() / 1000;
-
     for ( u_int i = 0; i < modes_count; i++ )
         {
         modes_time[ i + 1 ] =(*modes_manager)[ i ]->evaluation_time() / 1000;
@@ -299,14 +297,26 @@ int tech_object::save_device( char *buff )
     sprintf( buff + answer_size, "\n\t\t},\n" );
     answer_size += strlen( buff + answer_size );
         
-    //Время режимов.
-    sprintf( buff + answer_size, "\tMODES_TIME=\n\t\t{\n\t\t" );
-    answer_size += strlen( buff + answer_size );
-
+    //Время простоя.
     char up_time_str [ 50 ];
     u_int_4 up_hours;
     u_int_4 up_mins;
     u_int_4 up_secs;
+
+    up_secs = modes_manager->get_idle_time() / 1000;
+
+    up_hours = up_secs / ( 60 * 60 );
+    up_mins = up_secs / 60 % 60 ;
+    up_secs %= 60;
+
+    snprintf( up_time_str, 50, "\tIDLE_TIME = \'%02lu:%02lu:%02lu\',\n",
+        ( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
+    sprintf( buff + answer_size, "%s", up_time_str );
+    answer_size += strlen( buff + answer_size );
+
+    //Время режимов.
+    sprintf( buff + answer_size, "\tMODES_TIME=\n\t\t{\n\t\t" );
+    answer_size += strlen( buff + answer_size );
 
     for ( u_int i = 1; i < modes_time.get_count(); i++ )
         {

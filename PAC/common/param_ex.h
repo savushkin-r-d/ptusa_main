@@ -111,7 +111,7 @@ class params_manager
             {
             P_COUNT = 1,
 
-            P_IS_RESET_PARAMS = 0,
+            P_IS_RESET_PARAMS = 1,
             };
 
         saved_params_u_int_4 *par;
@@ -181,9 +181,9 @@ template < class type, bool is_float > class parameters
         /// stub ( значение 0 ).
         type& operator[] ( unsigned int index )
             {
-            if ( index <= count )
+            if ( index <= count && index > 0 )
                 {
-                return values[ index ];
+                return values[ index - 1 ];
                 }
 #ifdef DEBUG
             else
@@ -205,9 +205,9 @@ template < class type, bool is_float > class parameters
         /// stub ( значение 0 ).
         const type& operator[] ( unsigned int index ) const
             {
-            if ( index < count )
+            if ( index <= count && index > 0 )
                 {
-                return values[ index ];
+                return values[ index - 1 ];
                 }
 #ifdef DEBUG
             else
@@ -234,7 +234,7 @@ template < class type, bool is_float > class parameters
         /// @brief Установка всех параметров в нулевое значение.
         virtual void reset_to_0()
             {
-            for ( u_int i = 0; i < count; i++ )
+            for ( u_int i = 1; i <= count; i++ )
                 {
                 values[ i ] = 0;
                 }
@@ -334,7 +334,7 @@ template < class type, bool is_float > class parameters
             sprintf( buff + answer_size, "%s\t", prefix );
             answer_size += strlen( buff + answer_size );
 
-            for ( u_int i = 0; i < count; i++ )
+            for ( u_int i = 1; i <= count; i++ )
                 {
                 if ( is_float )
                     {

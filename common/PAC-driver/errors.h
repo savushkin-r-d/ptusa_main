@@ -113,11 +113,11 @@ class base_error
     protected:
         saved_params_u_int_4 err_par;
 
-        unsigned char error_state;    ///< Cостояние ошибки.
+        unsigned char error_state;    ///< Состояние ошибки.
 
         enum PARAMS  ///< Параметры ошибки, определяют номера битов.
             {
-            P_PARAM_N = 0,	  //Номер параметра.
+            P_PARAM_N = 1,	  //Номер параметра.
 
             P_IS_ENABLE = 1,  ///< Блокировка тревоги на этапе проектирования.    
             P_IS_INHIBIT = 2, ///< Блокировка тревоги во время работы.    

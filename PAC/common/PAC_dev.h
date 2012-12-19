@@ -633,9 +633,12 @@ class valve: public digital_wago_device
             {
             VX_ON_FB_OFF  = 11,  ///< Включен, ОС отключена.
             VX_OFF_FB_OFF = 10,  ///< Выключен, ОС отключена.
+                        
+            VX_UPPER_SEAT_FB_OFF = 32, ///< Открыто верхнее седло, ОС отключена.
+            VX_LOWER_SEAT_FB_OFF = 33, ///< Открыто нижнее седло, ОС отключена.
 
-            VX_LOWER_SEAT = 3,   ///< Открыто нижнее седло.
             VX_UPPER_SEAT = 2,   ///< Открыто верхнее седло.
+            VX_LOWER_SEAT = 3,   ///< Открыто нижнее седло.
 
             VX_ON_FB_OK  = 1,    ///< Включен, ОС ок.
             VX_OFF_FB_OK = 0,    ///< Выключен, ОС ок.
@@ -707,7 +710,7 @@ class valve: public digital_wago_device
             {
             ADDITIONAL_PARAMS_COUNT = 2,  ///Количество дополнительных параметров.
 
-            P_ON_TIME = 0,
+            P_ON_TIME = 1,
             P_FB
             };
 
@@ -1144,11 +1147,11 @@ class AI1 : public analog_wago_device
 
         enum CONSTANTS
             {
-            P_ZERO_ADJUST_COEFF = 0,    ///< Сдвиг нуля.
+            P_ZERO_ADJUST_COEFF = 1,    ///< Сдвиг нуля.
 
             ADDITIONAL_PARAM_COUNT = 1, ///< Количество параметров.
 
-            C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
+            C_AI_INDEX = 1,             ///< Индекс канала аналогового входа.
             };
 
         /// @brief Получение максимального значения выхода устройства.
@@ -1212,7 +1215,7 @@ class concentration_e : public AI1
             {
             ADDITIONAL_PARAM_COUNT = 2,
 
-            P_MIN_V = 0,   ///< Индекс параметра минимального значения.
+            P_MIN_V = 1,   ///< Индекс параметра минимального значения.
             P_MAX_V,       ///< Индекс параметра максимального значения.
             };
 
@@ -1238,7 +1241,7 @@ class analog_input : public AI1
             {
             ADDITIONAL_PARAM_COUNT = 2,
 
-            P_MIN_V = 0,   ///< Индекс параметра минимального значения.
+            P_MIN_V = 1,   ///< Индекс параметра минимального значения.
             P_MAX_V,       ///< Индекс параметра максимального значения.
             };
 
@@ -1300,7 +1303,7 @@ class analog_output : public AO1
             {
             ADDITIONAL_PARAM_COUNT = 2,
 
-            P_MIN_VALUE = 0,   ///< Индекс параметра минимального значения.
+            P_MIN_VALUE = 1,   ///< Индекс параметра минимального значения.
             P_MAX_VALUE,       ///< Индекс параметра максимального значения.
             };
     };
@@ -1446,7 +1449,7 @@ class motor : public device, public wago_device
             C_MIN_VALUE = 0,
             C_MAX_VALUE = 100,
 
-            P_ON_TIME = 0,
+            P_ON_TIME = 1,
 
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
 
@@ -1477,7 +1480,7 @@ class level_s : public DI1
             {
             ADDITIONAL_PARAMS_COUNT = 1,
 
-            P_DT = 0,
+            P_DT = 1,
             };
     };
 //-----------------------------------------------------------------------------
@@ -1496,7 +1499,7 @@ class flow_s : public DI1
             {
             ADDITIONAL_PARAMS_COUNT = 1,
 
-            P_DT = 0,
+            P_DT = 1,
             };
     };
 //-----------------------------------------------------------------------------
@@ -1515,7 +1518,7 @@ class state_s : public DI1
             {
             ADDITIONAL_PARAMS_COUNT = 1,
 
-            P_DT = 0,
+            P_DT = 1,
             };
     };
 //-----------------------------------------------------------------------------
@@ -1639,7 +1642,7 @@ class counter : public device,
             {
             ADDITIONAL_PARAMS_COUNT = 4,
 
-            P_MIN_FLOW = 0,
+            P_MIN_FLOW = 1,
             P_MAX_FLOW,
             P_CZ,
             P_DT,

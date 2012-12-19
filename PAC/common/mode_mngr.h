@@ -181,7 +181,7 @@ class open_seat_action: public action
 class DI_DO_action: public action
     {
     public:
-        DI_DO_action( ):action( "Пары DI->DO" )
+        DI_DO_action( ):action( "Группы DI->DO DO ..." )
             {
             }
 
@@ -243,7 +243,7 @@ class step
             A_LOWER_SEATS_ON = A_UPPER_SEATS_ON,
 
             A_REQUIRED_FB,                        
-            A_PAIR_DO_DI,
+            A_DO_DI,
             A_WASH,
             };
 

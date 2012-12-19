@@ -17,7 +17,7 @@ class PAC_info: public i_Lua_save_device
             {
             P_PARAMS_COUNT  = 3,   ///< Количество параметров.
 
-            P_CTR_ERROR_TIME  = 0, ///< Время ожидания ошибки счетчика, мсек.                                    
+            P_CTR_ERROR_TIME  = 1, ///< Время ожидания ошибки счетчика, мсек.                                    
             P_MIX_FLIP_PERIOD,     ///< Интервал промывки седел клапанов, сек. 
             P_MIX_FLIP_TIME,       ///< Время промывки седел клапанов, мсек. 
             };

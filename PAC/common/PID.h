@@ -64,7 +64,7 @@ class PID: public i_Lua_save_device
     public:
         enum PARAM  
             {        
-            P_k = 0,               ///< Параметр k.
+            P_k = 1,               ///< Параметр k.
             P_Ti,                  ///< Параметр Ti.
             P_Td,                  ///< Параметр Td.
             P_dt,                  ///< Интервал расчёта
@@ -81,7 +81,7 @@ class PID: public i_Lua_save_device
 
         enum WORK_PARAM 
             {
-            WP_Z = 0,  ///< Требуемооfое значение.
+            WP_Z = 1,  ///< Требуемооfое значение.
             WP_U,      ///< Выход ПИД.
             };
 

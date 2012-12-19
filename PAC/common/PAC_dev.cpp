@@ -33,11 +33,11 @@ void par_device::save_device ( char *str )
     {
     str[ 0 ] = 0;
 
-    for ( u_int i = 0; i < par.get_count (); i++ )
+    for ( u_int i = 1; i <= par.get_count(); i++ )
         {
-        if ( par_name[ i ] )
+        if ( par_name[ i - 1 ] )
             {
-            sprintf( str + strlen( str ), "%s=", par_name[ i ] );
+            sprintf( str + strlen( str ), "%s=", par_name[ i - 1 ] );
 
             float val =  par[ i ];
             if ( 0. == val )
@@ -119,7 +119,7 @@ float par_device::get_par( u_int idx, u_int offset )
 //-----------------------------------------------------------------------------
 void par_device::set_par_name( u_int idx, u_int offset, const char* name )
     {
-    if ( offset + idx < par.get_count() )
+    if ( offset + idx <= par.get_count() && ( offset + idx > 0 ) )
         {
         if ( strlen( name ) > C_MAX_PAR_NAME_LENGTH )
             {
@@ -132,17 +132,17 @@ void par_device::set_par_name( u_int idx, u_int offset, const char* name )
             return;
             }
 
-        if ( 0 == par_name[ offset + idx ] )
+        if ( 0 == par_name[ offset + idx - 1 ] )
             {
-            par_name[ offset + idx ] = new char[ strlen( name ) + 1 ];
-            strcpy( par_name[ offset + idx ], name );
+            par_name[ offset + idx - 1 ] = new char[ strlen( name ) + 1 ];
+            strcpy( par_name[ offset + idx - 1 ], name );
             }
 #ifdef DEBUG
         else
             {
             Print( "Error par_device::set_par_name (u_int idx, u_int offset, const char* name) - "
                 "param (%d %d) already has name (%s).",
-                offset, idx, par_name[ offset + idx ] );
+                offset, idx, par_name[ offset + idx - 1 ] );
             }
 #endif // DEBUG
 
@@ -1112,6 +1112,13 @@ int valve::get_state()
                 {
                 return VX_LOWER_SEAT_MANUAL;
                 }
+
+            //Обратная связь отключена.
+            if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+                {
+                return VX_LOWER_SEAT_FB_OFF;
+                }
+
             return VX_LOWER_SEAT;
 
         case V_UPPER_SEAT:
@@ -1119,10 +1126,17 @@ int valve::get_state()
                 {
                 return VX_UPPER_SEAT_MANUAL;
                 }
+
+            //Обратная связь отключена.
+            if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+                {
+                return VX_UPPER_SEAT_FB_OFF;
+                }
+
             return VX_UPPER_SEAT;
 
         case V_ON:
-            if ( is_off_fb || is_off_fb )
+            if ( is_off_fb || is_on_fb )
                 {
                 //Обратная связь отключена.
                 if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
@@ -1164,7 +1178,7 @@ int valve::get_state()
             break;
 
         case V_OFF:
-            if ( is_off_fb || is_off_fb )
+            if ( is_off_fb || is_on_fb )
                 {
                 //Обратная связь отключена.
                 if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )

@@ -274,7 +274,6 @@ class tech_object: public i_Lua_save_device
         char name[ C_MAX_NAME_LENGTH ];        ///< Имя объекта.
         char name_Lua[ C_MAX_NAME_LENGTH ];    ///< Имя объекта в Lua.
 
-
         smart_ptr< mode_manager > modes_manager; ///< Шаги режимов.
 
         enum PARAMS_ID

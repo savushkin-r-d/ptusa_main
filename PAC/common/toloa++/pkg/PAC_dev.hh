@@ -596,7 +596,7 @@ class step
             A_LOWER_SEATS_ON = A_UPPER_SEATS_ON,
 
             A_REQUIRED_FB,            
-            A_PAIR_DO_DI,
+            A_DO_DI,
             A_WASH,
             };
     };
@@ -867,7 +867,7 @@ class PID
         ///@brief Основные сохраняемые параметры.
         enum PARAM
         {
-        P_k,                   ///< Параметр k.
+        P_k = 1,               ///< Параметр k.
         P_Ti,                  ///< Параметр Ti.
         P_Td,                  ///< Параметр Td.
         P_dt,                  ///< Интервал расчёта
@@ -885,8 +885,8 @@ class PID
         ///@brief Рабочие параметры.
         enum WORK_PARAM
         {
-        WP_Z,  ///< Требуемое значение.
-        WP_U,  ///< Выход ПИД.
+        WP_Z = 1,  ///< Требуемое значение.
+        WP_U,      ///< Выход ПИД.
         };
 
         /// @param n - номер.
