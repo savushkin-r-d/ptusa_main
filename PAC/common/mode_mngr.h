@@ -300,7 +300,7 @@ class step
 class mode
     {
     public:
-        mode( const char* name, mode_manager *owner );
+        mode( const char* name, mode_manager *owner, int n );
 
         step* add_step( const char* name, u_int next_step_n,
             u_int step_duration_par_n );
@@ -316,7 +316,7 @@ class mode
 
         int check_on( char* reason ) const;
 
-        void init( u_int start_step = 0 );
+        void init( u_int start_step = 1 );
 
         void evaluate();
 
@@ -357,12 +357,15 @@ class mode
         std::vector< step* > steps;
 
         step* mode_step;
-        u_int active_step_n;
         
-        /// @brief Номера параметров времени шага.
+        int   active_step_n;           ///< Активный шаг.
+        u_int active_step_time;        ///< Время активного шага.
+        u_int active_step_next_step_n; ///< Следующий шаг.
+        
+        /// @brief Номера параметров времен шагов.
         std::vector< u_int > step_duration_par_ns; 
 
-        /// @brief Следующий шаг.
+        /// @brief Следующие шаги.
         std::vector< u_int > next_step_ns;
 
         u_int_4 start_time; ///< Время начала режима.
@@ -371,6 +374,7 @@ class mode
         step step_stub; ///< Шаг-заглушка.
 
         mode_manager *owner;
+        int n;          ///< Номер.
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию о всех режимах какого-либо объекта (танк, 
@@ -391,9 +395,9 @@ class mode_manager
 
         mode* add_mode( const char* name );
 
-        void set_param( saved_params_u_int_4 *par );
+        void set_param( saved_params_float *par );
 
-        saved_params_u_int_4 * get_param() const;
+        saved_params_float* get_param() const;
 
         /// @brief Получение режима через операцию индексирования.
         ///
@@ -414,7 +418,7 @@ class mode_manager
 
     private:
         /// @brief Параметры, содержащие продолжительность шагов, режимов.
-        saved_params_u_int_4 *par; 
+        saved_params_float *par; 
 
         std::vector< mode* > modes; ///< Режимы.
 

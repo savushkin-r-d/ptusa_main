@@ -603,12 +603,13 @@ void wash_action::evaluate()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-mode::mode( const char* name, mode_manager *owner ) : name( name ),    
+mode::mode( const char* name, mode_manager *owner, int n ) : name( name ),    
     mode_step(  new step( "Шаг режима", true ) ),
     active_step_n( 0 ),
     start_time( get_millisec() ),
     step_stub( "Шаг-заглушка" ),
-    owner( owner )
+    owner( owner ),
+    n( n )
     {
     }
 //-----------------------------------------------------------------------------
@@ -627,9 +628,12 @@ int mode::check_on( char* reason ) const
     return mode_step->check( reason );
     }
 //-----------------------------------------------------------------------------
-void mode::init( u_int start_step /*= 0 */ )
-    {
+void mode::init( u_int start_step /*= 1 */ )
+    {    
+    mode_step->init();
     start_time = get_millisec();
+    
+    active_step_n = -1;
 
     if ( 0 == steps.size() )
         {
@@ -637,18 +641,14 @@ void mode::init( u_int start_step /*= 0 */ )
         return;
         }
 
-    if ( start_step < steps.size() )
-        {
-        active_step_n = start_step;
-
-        steps[ start_step ]->init();
-        }
+    to_step( start_step );
 
 #ifdef DEBUG
-    Print( " INIT STEP [ %d ]\n", active_step_n );
-    steps[ active_step_n ]->print();
-    Print( " NEXT STEP -> %d \n", 
-        next_step_ns[ active_step_n ] );        
+    Print( " INIT STEP [ %d ]\n", active_step_n + 1 );    
+    steps[ active_step_n ]->print( " " );
+    Print( " TIME %d ms, NEXT STEP -> %d \n",         
+        active_step_time,
+        active_step_next_step_n );        
 #endif 
     }
 //-----------------------------------------------------------------------------
@@ -656,22 +656,14 @@ void mode::evaluate()
     {
     mode_step->evaluate();            
 
-    if ( steps.size() )
+    if ( active_step_n >= 0 )
         {
         steps[ active_step_n ]->evaluate();
 
-        // [ 1 ] Есть параметр длительности шагов.
-        // [ 2 ] Есть параметр длительности для этого шага.
-        if ( owner->get_param() != 0 &&                      // 1                                          
-            step_duration_par_ns[ active_step_n ] != 0 &&    // 2       
-            get_millisec() - steps[ active_step_n ]->get_start_time() > 
-            owner->get_param()[ 0 ][ step_duration_par_ns[ active_step_n ] ] * 1000L &&
-            next_step_ns[ active_step_n ] < 255 )
+        if ( active_step_time != 0 &&            
+            get_millisec() - steps[ active_step_n ]->get_start_time() > active_step_time )
             {
-            steps[ active_step_n ]->final();  
-
-            steps[ next_step_ns[ active_step_n ] ]->init();
-            steps[ next_step_ns[ active_step_n ] ]->evaluate();
+            to_step( active_step_next_step_n );
             }
         }
     }
@@ -681,15 +673,14 @@ void mode::final()
     mode_step->final();
     start_time = get_millisec();
 
-    if ( steps.size() )
+    if ( active_step_n >= 0 )
         {
         steps[ active_step_n ]->final();
-        active_step_n = 0;
-        }
-
 #ifdef DEBUG
-    Print( " FINAL ACTIVE STEP [ %d ] \n", active_step_n );
-#endif     
+        Print( " FINAL ACTIVE STEP [ %d ] \n", active_step_n );
+#endif  
+        active_step_n = -1;
+        }
     }
 //-----------------------------------------------------------------------------
 step* mode::operator[]( int idx )
@@ -716,21 +707,35 @@ void mode::to_step( u_int new_step )
     {
     if ( new_step <= steps.size() && new_step > 0 )
         {
-        new_step--;
-
-        steps[ active_step_n ]->final();
-        active_step_n = new_step;
+        if ( active_step_n >= 0 )
+            {
+            steps[ active_step_n ]->final();            
+            }
+        active_step_n = new_step - 1;
 
         steps[ active_step_n ]->init();
         steps[ active_step_n ]->evaluate();
+
+        active_step_time        = 0;
+        active_step_next_step_n = 0;
+
+        if ( owner->get_param() != 0 &&                   
+            step_duration_par_ns[ active_step_n ] != 0 )  
+            {
+            active_step_time = u_int( owner->get_param()[ 0 ][ step_duration_par_ns[ active_step_n ] ] * 1000L );
+            active_step_next_step_n = next_step_ns[ active_step_n ];
+            }
         }
+#ifdef DEBUG
     else
         {
-#ifdef DEBUG
         Print( "Error mode::to_step step %d > steps size %d.\n",
             new_step, steps.size() );
-#endif // DEBUG
         }
+
+    Print( "mode %d. \"%s\" to_step() -> %d.\n", 
+        n, name.c_str(), new_step );
+#endif // DEBUG
     }
 //-----------------------------------------------------------------------------
 void mode::print( const char* prefix /*= "" */ ) const
@@ -757,16 +762,16 @@ void mode::print( const char* prefix /*= "" */ ) const
 //-----------------------------------------------------------------------------
 mode* mode_manager::add_mode( const char* name )
     {
-    modes.push_back( new mode( name, this ) );
+    modes.push_back( new mode( name, this, modes.size() ) );
     return modes[ modes.size() - 1 ];
     }
 //-----------------------------------------------------------------------------
-void mode_manager::set_param( saved_params_u_int_4 *par )
+void mode_manager::set_param( saved_params_float *par )
     {
     this->par = par;
     }
 //-----------------------------------------------------------------------------
-saved_params_u_int_4 * mode_manager::get_param() const
+saved_params_float * mode_manager::get_param() const
     {
     return par;
     }
@@ -804,7 +809,7 @@ void mode_manager::print()
 //-----------------------------------------------------------------------------
 mode_manager::mode_manager( u_int modes_cnt ): last_action_time( get_millisec() )
     {
-    mode_stub = new mode( "Режим-заглушка", this );
+    mode_stub = new mode( "Режим-заглушка", this, -1 );
     }
 //-----------------------------------------------------------------------------
 mode_manager::~mode_manager()

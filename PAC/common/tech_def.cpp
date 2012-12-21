@@ -41,7 +41,7 @@ tech_object::tech_object( const char* new_name, u_int number,
     strncpy( this->name_Lua, name_Lua, C_MAX_NAME_LENGTH );
 
     modes_manager = new mode_manager( modes_count );    
-    modes_manager->set_param( &par_uint );
+    modes_manager->set_param( &par_float );
     }
 //-----------------------------------------------------------------------------
 tech_object::~tech_object()
