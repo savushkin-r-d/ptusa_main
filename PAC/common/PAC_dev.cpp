@@ -1534,7 +1534,12 @@ float motor::get_value()
 #ifdef DEBUG_NO_WAGO_MODULES
     return freq;
 #else
-    return get_AO( AO_INDEX, C_MIN_VALUE, C_MAX_VALUE );
+    if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ )
+        {
+        return get_AO( AO_INDEX, C_MIN_VALUE, C_MAX_VALUE );
+        }
+
+    return 0;    
 #endif // DEBUG_NO_WAGO_MODULES
     }
 //-----------------------------------------------------------------------------
@@ -1543,7 +1548,10 @@ void motor::direct_set_value( float value )
 #ifdef DEBUG_NO_WAGO_MODULES
     freq = value;
 #else
-    set_AO( AO_INDEX, value, C_MIN_VALUE, C_MAX_VALUE );
+    if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ )
+        {
+        set_AO( AO_INDEX, value, C_MIN_VALUE, C_MAX_VALUE );
+        }    
 #endif // DEBUG_NO_WAGO_MODULES
     }
 //-----------------------------------------------------------------------------
@@ -1558,9 +1566,41 @@ void motor::direct_set_state( int new_state )
             return;
             }
 #endif // DEBUG_NO_WAGO_MODULES
+
+        if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
+            {
+            if ( new_state == 2 )
+                {
+#ifdef DEBUG_NO_WAGO_MODULES
+                state = 2;
+#else
+                // Отключение прямого пуска.
+                int o = get_DO( DO_INDEX );
+                if ( 1 == o )
+                    {
+                    start_switch_time = get_sec();
+                    set_DO( DO_INDEX, 0 );
+                    }
+
+                // Включение реверса.
+                o = get_DO( DO_INDEX_REVERSE );
+                if ( 0 == o )
+                    {
+                    start_switch_time = get_sec();
+                    set_DO( DO_INDEX_REVERSE, 1 );
+                    }
+#endif // DEBUG_NO_WAGO_MODULES
+
+                return;
+                }
+            }
+
         direct_on();
         }
-    else direct_off();
+    else
+        {
+        direct_off();
+        }
     }
 //-----------------------------------------------------------------------------
 int motor::get_state()
@@ -1613,7 +1653,20 @@ void motor::direct_off()
         start_switch_time = get_sec();
         set_DO( DO_INDEX, 0 );
         }
+
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
+        {
+        // Отключение реверса.
+        o = get_DO( DO_INDEX_REVERSE );
+        if ( o != 0 )
+            {
+            start_switch_time = get_sec();
+            set_DO( DO_INDEX_REVERSE, 0 );
+            }
+        }    
 #endif // DEBUG_NO_WAGO_MODULES
+
+    direct_set_value( 0 );
     }
 
 //-----------------------------------------------------------------------------

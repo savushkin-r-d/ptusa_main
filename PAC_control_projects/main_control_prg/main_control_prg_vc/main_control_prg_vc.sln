@@ -5,13 +5,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "main_control_prg_vc", "main
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug IDE|Win32 = Debug IDE|Win32
+		Debug_IDE|Win32 = Debug_IDE|Win32
 		Debug|Win32 = Debug|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.Debug IDE|Win32.ActiveCfg = Debug local|Win32
-		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.Debug IDE|Win32.Build.0 = Debug local|Win32
+		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.Debug_IDE|Win32.ActiveCfg = Debug_IDE|Win32
+		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.Debug_IDE|Win32.Build.0 = Debug_IDE|Win32
 		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.Debug|Win32.ActiveCfg = Debug|Win32
 		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.Debug|Win32.Build.0 = Debug|Win32
 		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.Release|Win32.ActiveCfg = Release|Win32

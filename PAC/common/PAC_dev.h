@@ -342,8 +342,10 @@ class device : public i_DO_AO_device, public par_device
             DST_LS_MAX,         ///< Подключение по схеме максимум.
 
             //M,
-            DST_M_IS_FREQ,      ///< Есть частота вращения.
-            DST_M_NO_FREQ,      ///< Нет частоты вращения.
+            DST_M = 1,          ///< Мотор без управления частотой вращения.
+            DST_M_FREQ,         ///< Мотор с управлением частотой вращения.
+            DST_M_REV, 	        ///< Мотор с реверсом с управлением частотой вращения.
+            DST_M_REV_FREQ,     ///< Мотор с реверсом без управления частотой вращения.
             };
 
         device( int number, device::DEVICE_TYPE type,
@@ -1451,7 +1453,8 @@ class motor : public device, public wago_device
 
             P_ON_TIME = 1,
 
-            DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
+            DO_INDEX = 0,     ///< Индекс канала дискретного выхода.
+            DO_INDEX_REVERSE, ///< Индекс канала дискретного выхода реверса.
 
             DI_INDEX = 0,   ///< Индекс канала дискретного входа.
 
