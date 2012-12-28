@@ -1099,7 +1099,7 @@ void valve::save_device_ex( char *buff )
 
     if ( is_off_fb )
         {
-        sprintf( buff, "FB_OFF_ST=%d, ", get_off_fb_value() );
+        sprintf( buff + strlen( buff ), "FB_OFF_ST=%d, ", get_off_fb_value() );
         }
     }
 //-----------------------------------------------------------------------------
@@ -1578,7 +1578,7 @@ void motor::direct_set_state( int new_state )
                 int o = get_DO( DO_INDEX );
                 if ( 1 == o )
                     {
-                    start_switch_time = get_sec();
+                    start_switch_time = get_millisec();
                     set_DO( DO_INDEX, 0 );
                     }
 
@@ -1586,7 +1586,7 @@ void motor::direct_set_state( int new_state )
                 o = get_DO( DO_INDEX_REVERSE );
                 if ( 0 == o )
                     {
-                    start_switch_time = get_sec();
+                    start_switch_time = get_millisec();
                     set_DO( DO_INDEX_REVERSE, 1 );
                     }
 #endif // DEBUG_NO_WAGO_MODULES
@@ -1613,11 +1613,11 @@ int motor::get_state()
 
     if ( o == i )
         {
-        start_switch_time = get_sec();
+        start_switch_time = get_millisec();
         return i;
         }
 
-    if ( get_sec() - start_switch_time > P_ON_TIME )
+    if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 )
         {
         return -1;
         }
@@ -1636,7 +1636,7 @@ void motor::direct_on()
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
         {
-        start_switch_time = get_sec();
+        start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );
         }
 #endif // DEBUG_NO_WAGO_MODULES
@@ -1650,7 +1650,7 @@ void motor::direct_off()
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
         {
-        start_switch_time = get_sec();
+        start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
         }
 
@@ -1660,7 +1660,7 @@ void motor::direct_off()
         o = get_DO( DO_INDEX_REVERSE );
         if ( o != 0 )
             {
-            start_switch_time = get_sec();
+            start_switch_time = get_millisec();
             set_DO( DO_INDEX_REVERSE, 0 );
             }
         }    
