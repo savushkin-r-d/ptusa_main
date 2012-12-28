@@ -52,7 +52,7 @@ int wago_manager_w750::read_inputs()
                 switch ( nodes[ i ]->AI_types[ j ] )
                     {
                     case 466:
-                    case 461:                    
+                    case 461:
                         val = pstPabIN->uc.Pab[ offset ] +
                             256 * pstPabIN->uc.Pab[ offset + 1 ];
                         break;
@@ -77,7 +77,7 @@ int wago_manager_w750::read_inputs()
                 /// @todo ћодернизировать заполнение заголовка.
 //                snprintf( ( char* ) buff, sizeof( buff ), "ss%c%c%c%c",
 //                        0, 0, 0, 6 );
-                
+
                 buff[ 0  ] = 's';
                 buff[ 1  ] = 's';
                 buff[ 2  ] = 0;
@@ -90,7 +90,7 @@ int wago_manager_w750::read_inputs()
                 buff[ 9  ] = 0;
                 buff[ 10 ] = ( unsigned char ) nodes[ i ]->DI_cnt >> 8;
                 buff[ 11 ] = ( unsigned char ) nodes[ i ]->DI_cnt & 0xFF;
-                
+
                 u_int bytes_cnt = nodes[ i ]->DI_cnt / 8 +
                     ( nodes[ i ]->DI_cnt % 8 > 0 ? 1 : 0 );
 
@@ -106,7 +106,7 @@ int wago_manager_w750::read_inputs()
                                      {
                                      nodes[ i ]->DI[ idx ] =
                                          ( buff[ j + 9 ] >> k ) & 1;
-                                     idx++;                                     
+                                     idx++;
                                      }
                                  }
                              }
@@ -135,7 +135,7 @@ int wago_manager_w750::read_inputs()
                 buff[ 6  ] = nodes[ i ]->number;
                 buff[ 7  ] = 0x04;
                 buff[ 8  ] = 0;
-                buff[ 9  ] = 0;                
+                buff[ 9  ] = 0;
 
                 u_int bytes_cnt = nodes[ i ]->AI_size;
 
@@ -263,7 +263,7 @@ int wago_manager_w750::write_outputs()
                  else
                      {
 #ifdef DEBUG
-                     Print("\nWrite DO:Wago returned error...\n");
+                     //Print("\nWrite DO:Wago returned error...\n");
 #endif // DEBUG
                      }
                  }// if ( nodes[ i ]->DO_cnt > 0 )
@@ -293,16 +293,16 @@ int wago_manager_w750::write_outputs()
                     {
                     if ( buff[ 7 ] == 0x10 )
                         {
-                        memcpy( nodes[ i ]->AO, nodes[ i ]->AO_, 
+                        memcpy( nodes[ i ]->AO, nodes[ i ]->AO_,
                             nodes[ i ]->AO_size );
                         }
                      }// if ( e_communicate( nodes[ i ], 2 * bytes_cnt + 13, 12 ) == 0 )
                  else
                      {
 #ifdef DEBUG
-                     Print("\nWrite AO:Wago returned error...\n");
+                     //Print("\nWrite AO:Wago returned error...\n");
 #endif // DEBUG
-                     }                
+                     }
                 }// if ( nodes[ i ]->AO_cnt > 0 )
 
             }// if ( nodes[ i ]->type == wago_node::T_750_341 || ...

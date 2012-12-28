@@ -15,12 +15,12 @@ base_error::base_error(): err_par( 1 ), error_state( AS_NORMAL )
 //-----------------------------------------------------------------------------
 simple_error::simple_error( device* simple_device
                            ): base_error(),
-                           simple_device( simple_device )                           
-    {     
+                           simple_device( simple_device )
+    {
     }
 //-----------------------------------------------------------------------------
 simple_error::~simple_error()
-    { 
+    {
     }
 //-----------------------------------------------------------------------------
 int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
@@ -28,12 +28,12 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
     str[ 0 ] = 0;
 
     // Проверка текущего состояния устройства.
-    switch ( simple_device->get_state() ) 
+    switch ( simple_device->get_state() )
         {
         case -1:        // Есть ошибка.
-            switch ( error_state ) 
+            switch ( error_state )
                 {
-                case AS_ACCEPT:                    
+                case AS_ACCEPT:
                     break;
 
                 case AS_ALARM:
@@ -44,12 +44,12 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
                     error_state = AS_ALARM;
                     is_new_state = true;
                     break;
-                }            
+                }
             break;
 
         case 0:         // Нет ошибки.
         case 1:
-            switch ( error_state ) 
+            switch ( error_state )
                 {
                 case AS_NORMAL:
                     break;
@@ -73,7 +73,7 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
 
     if ( AS_ALARM == error_state ||
         AS_RETURN == error_state ) // Есть ошибка.
-        {    	
+        {
         //Добавить обработку отключенных ошибок.
         //unsigned char alarm_params = err_par[ P_PARAM_N ];
 
@@ -83,7 +83,7 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
             simple_device->get_name(), simple_device->get_description() );
 
         sprintf( str + strlen( str ), "priority=%d%s", P_ALARM, "," );
-        sprintf( str + strlen( str ), "state=%d,\n", error_state );        
+        sprintf( str + strlen( str ), "state=%d,\n", error_state );
         sprintf( str + strlen( str ), "type=%d,\n", AT_SPECIAL );
 
         sprintf( str + strlen( str ), "id_n=%d,\n", simple_device->get_n() );
@@ -123,16 +123,16 @@ int simple_error::set_cmd( int cmd, int object_alarm_number )
     switch ( cmd )
         {
         case C_CMD_SUPPRESS:
-            {            
-            current_state |= P_IS_SUPPRESS; 
+            {
+            current_state |= P_IS_SUPPRESS;
             err_par[ P_PARAM_N ] = current_state;
             break;
             }
 
          case C_CMD_UNSET_SUPPRESS:
              {
-             current_state |= P_IS_SUPPRESS; 
-             current_state ^= P_IS_SUPPRESS; 
+             current_state |= P_IS_SUPPRESS;
+             current_state ^= P_IS_SUPPRESS;
 
              err_par[ P_PARAM_N ] = current_state;
              break;
@@ -149,7 +149,7 @@ int simple_error::set_cmd( int cmd, int object_alarm_number )
                 else
                     {
                     error_state = AS_ACCEPT;
-                    }                
+                    }
                 }
             else
                 {
@@ -176,7 +176,7 @@ int simple_error::set_cmd( int cmd, int object_alarm_number )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 dev_errors_manager::dev_errors_manager(): errors_id( 0 )
-    {      
+    {
     }
 //-----------------------------------------------------------------------------
 int dev_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
@@ -188,7 +188,7 @@ int dev_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
     for ( u_int i = 0; i < s_errors_vector.size(); i++ )
         {
         s_errors_vector[ i ]->save_as_Lua_str( str + strlen( str ),
-            is_new_error_state );  
+            is_new_error_state );
         }
 
     if ( is_new_error_state )
@@ -199,10 +199,6 @@ int dev_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
     id = errors_id; //Через параметр возвращаем состояние ошибок.
 
 #ifdef DEBUG
-    if ( strlen( str ) > 0 )
-        {
-        int k = 0;
-        }
 #endif // DEBUG
 
     return 0;
@@ -235,10 +231,10 @@ void dev_errors_manager::reset_errors_params()
         }
     }
 //-----------------------------------------------------------------------------
-void dev_errors_manager::set_cmd( unsigned int cmd, unsigned int object_type, 
-                                 unsigned int object_number, 
+void dev_errors_manager::set_cmd( unsigned int cmd, unsigned int object_type,
+                                 unsigned int object_number,
                                  unsigned int object_alarm_number )
-    { 
+    {
     base_error *res = 0;
 
     // Поиск нужного устройства.
@@ -272,7 +268,7 @@ void dev_errors_manager::set_cmd( unsigned int cmd, unsigned int object_type,
         }
 
 #ifdef DEBUG
-    //print();    
+    //print();
 #endif // DEBUG
 
     }

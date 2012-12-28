@@ -56,9 +56,8 @@ class led_W750 : public led
             WAGO_FBK_LED_ALL
             };
 
-        FILE *fd;
-
-        void set_cmd( int cmd, int led, int led_color );
+        int green_status_fd;
+        int red_status_fd;
     };
 //-----------------------------------------------------------------------------
 #endif // LED_W750_H

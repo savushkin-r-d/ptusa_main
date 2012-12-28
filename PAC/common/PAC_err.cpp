@@ -6,7 +6,7 @@ auto_smart_ptr < PAC_critical_errors_manager > PAC_critical_errors_manager::inst
 //-----------------------------------------------------------------------------
 PAC_critical_errors_manager::PAC_critical_errors_manager(
     ): errors_id( 0 ),
-    global_ok( 0 )    
+    global_ok( 0 )
     {
 #ifndef __BORLANDC__
     errors.clear();
@@ -58,7 +58,7 @@ void PAC_critical_errors_manager::show_errors()
             if ( get_delta_millisec( start_time ) > 500 )
                 {
                 show_step = 0;
-                get_led()->off( led::L_STATUS );                
+                get_led()->off( led::L_STATUS );
                 start_time = get_millisec();
                 }
             break;
@@ -75,7 +75,7 @@ void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
     for ( u_int i = 0; i < errors.size(); i++ )
         {
         if ( errors[ i ].err_class == eclass &&
-            ( unsigned int ) p1 == errors[ i ].err_sub_class && 
+            ( unsigned int ) p1 == errors[ i ].err_sub_class &&
             ( unsigned int ) p2 == errors[ i ].param )
             {
             b = 1;
@@ -94,7 +94,7 @@ void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
         }
     }
 //-----------------------------------------------------------------------------
-void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass, 
+void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
     ALARM_SUBCLASS p1, unsigned long p2 )
     {
     int idx = -1;
@@ -127,7 +127,7 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
         sprintf( str + strlen( str ), "\t%s\n", "{" );
 
         sprintf( str + strlen( str ), "\t%s%s\n",
-           "description = \"", get_alarm_descr( 
+           "description = \"", get_alarm_descr(
            ( ALARM_CLASS ) errors[ i ].err_class,
            ( ALARM_SUBCLASS ) errors[ i ].err_sub_class, errors[ i ].param ) );
 
@@ -143,7 +143,7 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
 
    id = errors_id;
 
-#ifdef DEBUG_PAC_ERR   
+#ifdef DEBUG_PAC_ERR
     Print( "%s\n", str );
 #endif // DEBUG_PAC_ERR
 

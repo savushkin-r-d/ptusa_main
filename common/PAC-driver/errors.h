@@ -1,17 +1,17 @@
 /// @file errors.h
-/// @brief Содержит описания перечислений, которые используются в 
+/// @brief Содержит описания перечислений, которые используются в
 ///  драйвере на сервере для организации информирования об ошибка.
 ///
-/// Класс @ref base_error, служащий для организации работы с ошибкой, содержит   
+/// Класс @ref base_error, служащий для организации работы с ошибкой, содержит
 /// всю необходимую информацию. Для хранения всех ошибок служит класс
-/// @ref dev_errors_manager. 
-/// 
+/// @ref dev_errors_manager.
+///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
 /// @c PAC    - компиляция для контроллера.@n
 /// @c DRIVER - компиляция для драйвера (ОС Windows).
-/// 
+///
 /// @par Текущая версия:
 /// @$Rev$.\n
 /// @$Author$.\n
@@ -38,8 +38,8 @@ enum ALARM_STATE
     {
     AS_NORMAL,
     AS_ALARM,
-    AS_RETURN, 
-    AS_ACCEPT, 
+    AS_RETURN,
+    AS_ACCEPT,
     };
 
 enum ALARM_TYPE
@@ -80,17 +80,17 @@ class base_error
         base_error();
 
         virtual ~base_error()
-            {                
+            {
             }
 
         /// @brief Сохранение ошибки в поток для передачи на сервер.
-        ///        
+        ///
         /// @param stream       - поток байт.
-        /// @param is_new_state - изменилось ли состояние ошибки 
+        /// @param is_new_state - изменилось ли состояние ошибки
         ///                       (0 - нет, 1 - да).
         ///
-        /// @return - количество записанных байт.        
-        virtual int save_as_Lua_str( char *str, bool &is_new_state ) = 0;        
+        /// @return - количество записанных байт.
+        virtual int save_as_Lua_str( char *str, bool &is_new_state ) = 0;
 
         /// @brief Отладочный вывод содержимого класса в консоль.
         virtual void print() const = 0;
@@ -119,13 +119,13 @@ class base_error
             {
             P_PARAM_N = 1,	  //Номер параметра.
 
-            P_IS_ENABLE = 1,  ///< Блокировка тревоги на этапе проектирования.    
-            P_IS_INHIBIT = 2, ///< Блокировка тревоги во время работы.    
+            P_IS_ENABLE = 1,  ///< Блокировка тревоги на этапе проектирования.
+            P_IS_INHIBIT = 2, ///< Блокировка тревоги во время работы.
             P_IS_SUPPRESS = 4,///< Подавление тревоги клиентами.
             };
 
         enum COMMANDS                ///< Константы.
-            {     
+            {
 
             C_CMD_ACCEPT   = 100,    ///< Подтвердить ошибку.
             C_CMD_SUPPRESS = 200,    ///< Подавить ошибку.
@@ -145,12 +145,12 @@ class simple_error: public base_error
         virtual ~simple_error();
 
         /// @brief Сохранение ошибки в поток для передачи на сервер.
-        ///        
+        ///
         /// @param stream       - поток байт.
-        /// @param is_new_state - изменилось ли состояние ошибки 
+        /// @param is_new_state - изменилось ли состояние ошибки
         ///                       (0 - нет, 1 - да).
         ///
-        /// @return - количество записанных байт.        
+        /// @return - количество записанных байт.
         int save_as_Lua_str( char *str, bool &is_new_state );
 
         /// @brief Отладочный вывод содержимого класса в консоль.
@@ -177,22 +177,22 @@ class tech_dev_error: public base_error
     {
     public:
         // Интерфейс base_error.
-        tech_dev_error( tech_object* tech_dev ): tech_dev( tech_dev ), 
+        tech_dev_error( tech_object* tech_dev ): tech_dev( tech_dev ),
             was_set_cmd( false )
             {
             }
 
         int save_as_Lua_str( char *str, bool &is_new_state )
-            {               
+            {
             str[ 0 ] = 0;
-            static int prev_size = 0;
-                        
+            static u_int prev_size = 0;
+
             if ( tech_dev->get_errors().size() != prev_size || was_set_cmd )
                 {
                 prev_size   = tech_dev->get_errors().size();
                 was_set_cmd = false;
 
-                is_new_state = true;                
+                is_new_state = true;
                 }
 
             for ( u_int i = 0; i < tech_dev->get_errors().size(); i++ )
@@ -203,17 +203,17 @@ class tech_dev_error: public base_error
                 sprintf( str + strlen( str ), "\tdescription=\"%s\",\n",
                     tech_dev->get_errors()[ i ]->msg );
                 sprintf( str + strlen( str ), "\tgroup=\"%s\",\n",
-                    get_group( tech_dev->get_errors()[ i ]->type ) );                
+                    get_group( tech_dev->get_errors()[ i ]->type ) );
 
                 sprintf( str + strlen( str ), "priority=%d%s",
                     get_priority( tech_dev->get_errors()[ i ]->type ), "," );
 
-                sprintf( str + strlen( str ), "state=%d,\n", AS_ALARM );        
+                sprintf( str + strlen( str ), "state=%d,\n", AS_ALARM );
                 sprintf( str + strlen( str ), "type=%d,\n", AT_SPECIAL );
 
-                sprintf( str + strlen( str ), "id_n=%d,\n", 
+                sprintf( str + strlen( str ), "id_n=%d,\n",
                     tech_dev->get_number() );
-                sprintf( str + strlen( str ), "id_object_alarm_number=%d,\n", 
+                sprintf( str + strlen( str ), "id_object_alarm_number=%d,\n",
                     tech_dev->get_errors()[ i ]->n );
                 sprintf( str + strlen( str ), "id_type=%d,\n", get_object_type() );
 
@@ -269,7 +269,7 @@ class tech_dev_error: public base_error
                 case tech_object::ERR_ON_WITH_ERRORS:
                     return P_ANSWER;
 
-                case tech_object::ERR_OFF:  
+                case tech_object::ERR_OFF:
                 case tech_object::ERR_OFF_AND_ON:
                 case tech_object::ERR_DURING_WORK:
                 case tech_object::ERR_SIMPLE:
@@ -278,16 +278,16 @@ class tech_dev_error: public base_error
 
             return P_ALARM;
             }
-        
+
         // Реализована следующая обработка любой команды - удаление сообщения из
         // вектора, для которого адресована команда.
         int set_cmd( int cmd, int object_alarm_number )
             {
             for ( u_int i = 0; i < tech_dev->get_errors().size(); i++ )
-                {                
+                {
                 if( tech_dev->get_errors()[ i ]->n == object_alarm_number )
-                    {                    
-                    tech_dev->get_errors().erase( 
+                    {
+                    tech_dev->get_errors().erase(
                         tech_dev->get_errors().begin() + i );
 
                     was_set_cmd = true;
@@ -304,7 +304,7 @@ class tech_dev_error: public base_error
         enum TECH_DEV_ERROR_CONST   ///< Константы.
             {
             TE_TYPE = 100,          ///< Тип ошибки.
-            };  
+            };
 
         bool was_set_cmd;
     };
@@ -318,7 +318,7 @@ class dev_errors_manager
         //int is_any_error() const;
 
         /// @brief Сохранение всех ошибок в поток для передачи на сервер.
-        ///        
+        ///
         /// @param stream - поток байт.
         ///
         /// @return < 0 - ошибка.
@@ -326,7 +326,7 @@ class dev_errors_manager
         int save_as_Lua_str( char *str, u_int_2 &id );
 
         /// @brief Добавление ошибки в массив ошибок.
-        ///        
+        ///
         /// @param s_error - добавляемая ошибка.
         ///
         /// @return < 0 - ошибка.
@@ -340,7 +340,7 @@ class dev_errors_manager
         void print();
 
         /// @brief Изменение параметров ошибки.
-        void set_cmd( unsigned int cmd, unsigned int object_type, 
+        void set_cmd( unsigned int cmd, unsigned int object_type,
             unsigned int object_number, unsigned int object_alarm_number );
 
         /// @brief Получение единственного экземпляра класса.
@@ -365,6 +365,6 @@ class dev_errors_manager
 //-----------------------------------------------------------------------------
 #define G_DEV_ERRORS_MANAGER dev_errors_manager::get_instance()
 //-----------------------------------------------------------------------------
-#endif // PAC 
+#endif // PAC
 
 #endif //ERRORS_H

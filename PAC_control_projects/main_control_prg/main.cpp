@@ -22,6 +22,7 @@
 #include "PAC_info.h"
 #include "tech_def.h"
 #include "lua_manager.h"
+#include "PAC_err.h"
 
 #include "fcntl.h"
 
@@ -32,7 +33,7 @@ int main( int argc, char *argv[] )
     InitLib();
 #endif
 
-    setlocale( LC_ALL, "" );
+	setlocale( LC_ALL, "" );
 
     if ( argc < 2 )
         {
@@ -90,9 +91,8 @@ int main( int argc, char *argv[] )
         G_WAGO_MANAGER()->write_outputs();
 #endif // ifndef
 
-        //PAC_critical_errors_manager::get_instance()->show_errors();
-
         PAC_info::get_instance()->eval();
+        PAC_critical_errors_manager::get_instance()->show_errors();
 
 #ifdef TEST_SPEED
         //-Информация о времени выполнения цикла программы.!->
@@ -120,7 +120,7 @@ int main( int argc, char *argv[] )
             print_time( " Main cycle avg time = %lu ms, max time = %4u, Lua mem = %d b\n",
                 all_time / cycles_cnt, max_cycle_time,
                 lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
-                lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );            
+                lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
             }
 
         static u_int print_cycle_time_count = 0;
@@ -145,3 +145,5 @@ int main( int argc, char *argv[] )
 
     return( EXIT_SUCCESS );
     }
+
+
