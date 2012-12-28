@@ -772,7 +772,7 @@ class valve_DO1_DI1_off : public valve
             int o = get_DO( DO_INDEX );
             int i = get_DI( DI_INDEX );
 
-            if ( o == i )
+            if ( o != i )
                 {
                 return true;
                 }
@@ -844,7 +844,7 @@ class valve_DO1_DI1_on : public valve
             int o = get_DO( DO_INDEX );
             int i = get_DI( DI_INDEX );
 
-            if ( o != i )
+            if ( o == i )
                 {
                 return true;
                 }
