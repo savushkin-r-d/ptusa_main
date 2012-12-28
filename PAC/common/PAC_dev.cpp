@@ -397,8 +397,8 @@ void device_manager::print() const
     Print( "Device manager [%d]:\n", project_devices.size() );
     for ( u_int i = 0; i < project_devices.size(); i++ )
         {
-        Print( "    %3i. ", i + 1 );        
-        Print( "%s\t%s", 
+        Print( "    %3i. ", i + 1 );
+        Print( "%s\t%s",
             project_devices[ i ]->get_name(), project_devices[ i ]->get_description() );
         Print( "\n" );
         }
@@ -1006,7 +1006,7 @@ void digital_wago_device::direct_set_value( float new_value )
 void digital_wago_device::direct_set_state( int new_state )
     {
 #ifdef DEBUG_NO_WAGO_MODULES
-    state = ( char ) new_state;    
+    state = ( char ) new_state;
 #else
     if ( new_state )
         {
@@ -1087,7 +1087,7 @@ digital_wago_device( number, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
     off_fb( true )
     {
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
-    set_par_name( P_FB,  0, "P_FB" );    
+    set_par_name( P_FB,  0, "P_FB" );
     }
 //-----------------------------------------------------------------------------
 void valve::save_device_ex( char *buff )
@@ -1371,7 +1371,7 @@ void valve_mix_proof::open_lower_seat()
 void valve_mix_proof::direct_set_state( int new_state )
     {
 #ifdef DEBUG_NO_WAGO_MODULES
-    state = ( char ) new_state;  
+    state = ( char ) new_state;
 #else
     switch ( new_state )
         {
@@ -1539,7 +1539,7 @@ float motor::get_value()
         return get_AO( AO_INDEX, C_MIN_VALUE, C_MAX_VALUE );
         }
 
-    return 0;    
+    return 0;
 #endif // DEBUG_NO_WAGO_MODULES
     }
 //-----------------------------------------------------------------------------
@@ -1551,7 +1551,7 @@ void motor::direct_set_value( float value )
     if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ )
         {
         set_AO( AO_INDEX, value, C_MIN_VALUE, C_MAX_VALUE );
-        }    
+        }
 #endif // DEBUG_NO_WAGO_MODULES
     }
 //-----------------------------------------------------------------------------
@@ -1617,7 +1617,7 @@ int motor::get_state()
         return i;
         }
 
-    if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 )
+    if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 ) )
         {
         return -1;
         }
@@ -1663,7 +1663,7 @@ void motor::direct_off()
             start_switch_time = get_millisec();
             set_DO( DO_INDEX_REVERSE, 0 );
             }
-        }    
+        }
 #endif // DEBUG_NO_WAGO_MODULES
 
     direct_set_value( 0 );

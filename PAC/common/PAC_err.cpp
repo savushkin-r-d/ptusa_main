@@ -126,10 +126,11 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
         {
         sprintf( str + strlen( str ), "\t%s\n", "{" );
 
-        sprintf( str + strlen( str ), "\t%s%s\n",
-           "description = \"", get_alarm_descr(
-           ( ALARM_CLASS ) errors[ i ].err_class,
-           ( ALARM_SUBCLASS ) errors[ i ].err_sub_class, errors[ i ].param ) );
+        sprintf( str + strlen( str ), "\t%s%s%s\n",
+           "description = \"",
+                get_alarm_descr( ( ALARM_CLASS ) errors[ i ].err_class,
+                ( ALARM_SUBCLASS ) errors[ i ].err_sub_class, errors[ i ].param ),
+            "\",\n" );
 
         sprintf( str + strlen( str ), "\t%s\n", "type = AT_SPECIAL," );
         sprintf( str + strlen( str ), "\t%s%s%s\n", "group = '",
