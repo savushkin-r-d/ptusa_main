@@ -608,10 +608,11 @@ class valve: public digital_wago_device
         /// @param number - номер устройства.
         /// @param type - тип устройства.
         /// @param sub_type - подтип устройства.
-        valve( int number, device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ):
+        valve( int number, device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ):            
             digital_wago_device( number, type, sub_type, 0 ),
-            is_on_fb( 0 ),
-            is_off_fb( 0 )
+            is_on_fb( false ),
+            is_off_fb( false ),
+            start_switch_time( 0 )
             {
             }
 
@@ -725,6 +726,9 @@ class valve: public digital_wago_device
 
         bool on_fb;
         bool off_fb;
+
+    protected:
+        u_long start_switch_time;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним дискретным выходом и одним дискретным входом.
@@ -740,8 +744,6 @@ class valve_DO1_DI1_off : public valve
             DO_INDEX = 0,           ///< Индекс канала дискретного выхода.
             DI_INDEX = 0,           ///< Индекс канала дискретного входа.
             };
-
-        u_long start_switch_time;  ///< Время начала переключения клапана.
 
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
@@ -805,8 +807,7 @@ class valve_DO1_DI1_on : public valve
     {
     public:
         valve_DO1_DI1_on( int number ): valve( true, false,
-            number, DT_V, DST_V_DO1_DI1_FB_ON ),
-            start_switch_time( 0 )
+            number, DT_V, DST_V_DO1_DI1_FB_ON )            
             {
             }
 
@@ -816,8 +817,6 @@ class valve_DO1_DI1_on : public valve
             DO_INDEX = 0,           ///< Индекс канала дискретного выхода.
             DI_INDEX = 0,           ///< Индекс канала дискретного входа.
             };
-
-         u_long start_switch_time;  ///< Время начала переключения клапана.
 
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
@@ -876,8 +875,7 @@ class valve_DO1_DI2 : public valve
     {
     public:
         valve_DO1_DI2( int number ):
-          valve( true, true, number, DT_V, DST_V_DO1_DI2 ),
-          start_switch_time( 0 )
+          valve( true, true, number, DT_V, DST_V_DO1_DI2 )
             {
             }
 
@@ -889,8 +887,6 @@ class valve_DO1_DI2 : public valve
             DI_INDEX_1 = 0,         ///< Индекс №1 канала дискретного входа.
             DI_INDEX_2,             ///< Индекс №2 канала дискретного входа.
             };
-
-        u_long start_switch_time;  ///< Время начала переключения клапана.
 
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
@@ -951,8 +947,7 @@ class valve_DO2_DI2 : public valve
     {
     public:
         valve_DO2_DI2( int number ):
-        valve( true, true, number, DT_V, DST_V_DO2_DI2 ),
-        start_switch_time( 0 )
+        valve( true, true, number, DT_V, DST_V_DO2_DI2 )
             {
             }
 
@@ -965,8 +960,6 @@ class valve_DO2_DI2 : public valve
             DI_INDEX_1 = 0,         ///< Индекс №1 канала дискретного входа.
             DI_INDEX_2,             ///< Индекс №2 канала дискретного входа.
             };
-
-        u_long start_switch_time;   ///< Время начала переключения клапана.
 
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
@@ -1048,8 +1041,6 @@ class valve_mix_proof : public i_mix_proof,  public valve
             DI_INDEX_U = 0, ///< Индекс канала дискретного входа верхнего седла.
             DI_INDEX_L,     ///< Индекс канала дискретного входа нижнего седла.
             };
-
-         u_long start_switch_time;   ///< Время начала переключения клапана.
 
          void direct_set_state( int new_state );
 
