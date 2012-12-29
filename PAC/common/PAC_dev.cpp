@@ -1084,7 +1084,8 @@ digital_wago_device( number, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
     is_on_fb( is_on_fb ),
     is_off_fb( is_off_fb ),
     on_fb( true ),
-    off_fb( true )
+    off_fb( true ),
+    start_switch_time( 0 )
     {
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     set_par_name( P_FB,  0, "P_FB" );
@@ -1136,11 +1137,12 @@ int valve::get_state()
             return VX_UPPER_SEAT;
 
         case V_ON:
-            if ( is_off_fb || is_on_fb )
-                {
-                //Обратная связь отключена.
-                if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+            if ( is_off_fb || is_on_fb ) //Обратная связь есть.
+                {                
+                if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF ) //Обратная связь отключена.
                     {
+                    start_switch_time = get_millisec();
+
                     if ( get_manual_mode() )
                         {
                         return VX_ON_FB_OFF_MANUAL;
@@ -1149,40 +1151,71 @@ int valve::get_state()
                         {
                         return VX_ON_FB_OFF;
                         }
-                    }
-                }
+                    }                
+                else //Обратная связь включена.
+                    {                    
+                     if ( get_manual_mode() ) //Ручной режим включен.
+                         {
+                         if ( get_fb_state() == true )
+                             {
+                             start_switch_time = get_millisec();
 
-            //Обратная связь не отключена.
-            if ( get_manual_mode() )
-                {
-                if ( get_fb_state() == true )
+                             return VX_ON_FB_OK_MANUAL;
+                             }
+                         else
+                             {
+                             if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 ) )
+                                 {
+                                 return VX_ON_FB_ERR_MANUAL;
+                                 }
+                             else
+                                 {
+                                 return VX_ON_FB_OK_MANUAL;
+                                 }
+                             }
+                         } // if ( get_manual_mode() )                     
+                     else  //Ручной режим отключен.
+                         {
+                         if ( get_fb_state() == true )
+                             {
+                             start_switch_time = get_millisec();
+
+                             return VX_ON_FB_OK;
+                             }
+                         else
+                             {
+                             if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 ) )
+                                 {
+                                 return VX_ON_FB_ERR;
+                                 }
+                             else
+                                 {
+                                 return VX_ON_FB_OK;
+                                 }
+                             }
+                         }
+                    }
+                }//if ( is_off_fb || is_on_fb ) //Обратная связь есть.
+            else //Обратной связи нет.
+                {                
+                if ( get_manual_mode() )
                     {
                     return VX_ON_FB_OK_MANUAL;
                     }
                 else
                     {
-                    return VX_ON_FB_ERR_MANUAL;
-                    }
-                }// if ( get_manual_mode() )
-            else
-                {
-                if ( get_fb_state() == true )
-                    {
                     return VX_ON_FB_OK;
-                    }
-                else
-                    {
-                    return VX_ON_FB_ERR;
                     }
                 }
             break;
 
         case V_OFF:
-            if ( is_off_fb || is_on_fb )
-                {
-                //Обратная связь отключена.
-                if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+            if ( is_off_fb || is_on_fb ) //Обратная связь есть.
+                {                
+                if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF ) //Обратная связь отключена.
                     {
+                    start_switch_time = get_millisec();
+
                     if ( get_manual_mode() )
                         {
                         return VX_OFF_FB_OFF_MANUAL;
@@ -1191,30 +1224,60 @@ int valve::get_state()
                         {
                         return VX_OFF_FB_OFF;
                         }
-                    }
-                }
+                    }                
+                else //Обратная связь включена.
+                    {                    
+                    if ( get_manual_mode() ) //Ручной режим включен.
+                        {
+                        if ( get_fb_state() == true )
+                            {
+                            start_switch_time = get_millisec();
 
-            //Обратная связь не отключена.
-            if ( get_manual_mode() )
-                {
-                if ( get_fb_state() )
+                            return VX_OFF_FB_OK_MANUAL;
+                            }
+                        else
+                            {
+                            if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 ) )
+                                {
+                                return VX_OFF_FB_ERR_MANUAL;
+                                }
+                            else
+                                {
+                                return VX_OFF_FB_OK_MANUAL;
+                                }
+                            }
+                        } // if ( get_manual_mode() )                     
+                    else  //Ручной режим отключен.
+                        {
+                        if ( get_fb_state() == true )
+                            {
+                            start_switch_time = get_millisec();
+
+                            return VX_OFF_FB_OK;
+                            }
+                        else
+                            {
+                            if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 ) )
+                                {
+                                return VX_OFF_FB_ERR;
+                                }
+                            else
+                                {
+                                return VX_OFF_FB_OK;
+                                }
+                            }
+                        }
+                    }
+                }//if ( is_off_fb || is_on_fb ) //Обратная связь есть.
+            else //Обратной связи нет.
+                {                
+                if ( get_manual_mode() )
                     {
                     return VX_OFF_FB_OK_MANUAL;
                     }
                 else
                     {
-                    return VX_OFF_FB_ERR_MANUAL;
-                    }
-                }// if ( get_manual_mode() )
-            else
-                {
-                if ( get_fb_state() == true )
-                    {
                     return VX_OFF_FB_OK;
-                    }
-                else
-                    {
-                    return VX_OFF_FB_ERR;
                     }
                 }
             break;
@@ -1254,8 +1317,7 @@ int valve::set_cmd( const char *prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_DO1_DI1_off::valve_DO1_DI1_off( int number ) : valve( false, true,
-                                                           number, DT_V, DST_V_DO1_DI1_FB_OFF ),
-                                                           start_switch_time( 0 )
+                                                           number, DT_V, DST_V_DO1_DI1_FB_OFF )
     {
     }
 //-----------------------------------------------------------------------------
@@ -1265,7 +1327,7 @@ void valve_DO1_DI1_off::direct_on()
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
         {
-        start_switch_time = get_sec();
+        start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );
         }
     }
@@ -1275,7 +1337,7 @@ void valve_DO1_DI1_off::direct_off()
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
         {
-        start_switch_time = get_sec();
+        start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
         }
     }
@@ -1288,7 +1350,7 @@ void valve_DO1_DI1_on::direct_on()
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
         {
-        start_switch_time = get_sec();
+        start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );
         }
     }
@@ -1298,7 +1360,7 @@ void valve_DO1_DI1_on::direct_off()
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
         {
-        start_switch_time = get_sec();
+        start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
         }
     }
@@ -1313,7 +1375,7 @@ void valve_DO1_DI2::direct_on()
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
         {
-        start_switch_time = get_sec();
+        start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );
         }
     }
@@ -1323,7 +1385,7 @@ void valve_DO1_DI2::direct_off()
     int o = get_DO( DO_INDEX );
     if ( o != 0 )
         {
-        start_switch_time = get_sec();
+        start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
         }
     }
@@ -1338,7 +1400,7 @@ void valve_DO2_DI2::direct_on()
     int o = get_DO( DO_INDEX_1 );
     if ( 0 == o )
         {
-        start_switch_time = get_sec();
+        start_switch_time = get_millisec();
         set_DO( DO_INDEX_1, 1 );
         set_DO( DO_INDEX_2, 0 );
         }
@@ -1349,7 +1411,7 @@ void valve_DO2_DI2::direct_off()
     int o = get_DO( DO_INDEX_2 );
     if ( 0 == o )
         {
-        start_switch_time = get_sec();
+        start_switch_time = get_millisec();
         set_DO( DO_INDEX_1, 0 );
         set_DO( DO_INDEX_2, 1 );
         }
@@ -1410,7 +1472,7 @@ void valve_mix_proof::direct_on()
 
     if ( 0 == o )
         {
-        start_switch_time = get_sec();
+        start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );
         }
     }
@@ -1423,7 +1485,7 @@ void valve_mix_proof::direct_off()
 
     if ( o != 0 )
         {
-        start_switch_time = get_sec();
+        start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
         }
     }
