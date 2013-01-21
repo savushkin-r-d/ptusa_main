@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "wago_w750.h"
+
 //-----------------------------------------------------------------------------
 wago_manager_w750::wago_manager_w750()
     {
@@ -25,23 +26,25 @@ int wago_manager_w750::read_inputs()
             KbusUpdate();
 
             // DI
-            int start_pos = KbusGetBinaryInputOffset() / 8;
-#ifdef DEBUG_KBUS
-            Print( "start_pos=%d\n", start_pos );
-#endif // DEBUG_KBUS
+            int start_pos = KbusGetBinaryInputOffset();
+//#ifdef DEBUG_KBUS
+            //printf( "start_pos=%d\n", start_pos );
+//#endif // DEBUG_KBUS
+            start_pos = start_pos / 8;
+
             for ( u_int j = 0; j < nodes[ i ]->DI_cnt; j++ )
                 {
                 char tmp =  1 << ( j % 8 );
 
                 nodes[ i ]->DI[ j ] = ( ( tmp &
                     pstPabIN->uc.Pab[ start_pos + j / 8 ] ) > 0 );
-#ifdef DEBUG_KBUS
-                Print( "%d -> %d, ", j, nodes[ i ]->DI[ j ] );
-#endif // DEBUG_KBUS
+//#ifdef DEBUG_KBUS
+                //printf( "%d -> %d, ", j, nodes[ i ]->DI[ j ] );
+//#endif // DEBUG_KBUS
                 }
-#ifdef DEBUG_KBUS
-            Print( "\n" );
-#endif // DEBUG_KBUS
+//#ifdef DEBUG_KBUS
+            //printf( "\n" );
+//#endif // DEBUG_KBUS
 
             // AI
             for ( u_int j = 0; j < nodes[ i ]->AI_cnt; j++ )
@@ -84,7 +87,7 @@ int wago_manager_w750::read_inputs()
                 buff[ 3  ] = 0;
                 buff[ 4  ] = 0;
                 buff[ 5  ] = 6;
-                buff[ 6  ] = nodes[ i ]->number;
+                buff[ 6  ] = 1; //nodes[ i ]->number;
                 buff[ 7  ] = 0x02;
                 buff[ 8  ] = 0;
                 buff[ 9  ] = 0;
@@ -100,6 +103,11 @@ int wago_manager_w750::read_inputs()
                          {
                          for ( u_int j = 0, idx = 0; j < bytes_cnt; j++ )
                              {
+                             //if ( nodes[ i ]->number == 2 )
+                             //    {
+                             //    printf( "%d ", buff[ 9 + j ] );
+                             //    }
+
                              for ( int k = 0; k < 8; k++ )
                                  {
                                  if ( idx < nodes[ i ]->DI_cnt )
@@ -107,9 +115,17 @@ int wago_manager_w750::read_inputs()
                                      nodes[ i ]->DI[ idx ] =
                                          ( buff[ j + 9 ] >> k ) & 1;
                                      idx++;
+
+                                     if ( nodes[ i ]->number == 2 )
+                                         {
+                                         printf( "%d->%d\n",
+                                            idx, ( buff[ j + 9 ] >> k ) & 1 );
+                                         }
                                      }
                                  }
                              }
+
+                         printf( "\n" );
                          }
                          else
                          {
@@ -123,15 +139,15 @@ int wago_manager_w750::read_inputs()
             if ( nodes[ i ]->AI_cnt > 0 )
                 {
                 /// @todo ћодернизировать заполнение заголовка.
-                snprintf( ( char* ) buff, sizeof( buff ), "ss%c%c%c%c",
-                        0, 0, 0, 6 );
+//                snprintf( ( char* ) buff, sizeof( buff ), "ss%c%c%c%c",
+//                        0, 0, 0, 6 );
 
-//                buff[ 0  ] = 's';
-//                buff[ 1  ] = 's';
-//                buff[ 2  ] = 0;
-//                buff[ 3  ] = 0;
-//                buff[ 4  ] = 0;
-//                buff[ 5  ] = 6;
+                buff[ 0  ] = 's';
+                buff[ 1  ] = 's';
+                buff[ 2  ] = 0;
+                buff[ 3  ] = 0;
+                buff[ 4  ] = 0;
+                buff[ 5  ] = 6;
                 buff[ 6  ] = nodes[ i ]->number;
                 buff[ 7  ] = 0x04;
                 buff[ 8  ] = 0;
@@ -146,12 +162,22 @@ int wago_manager_w750::read_inputs()
                      {
                      if ( buff[ 7 ] == 0x04 && buff[ 8 ] == bytes_cnt )
                          {
-                         memcpy( nodes[ i ]->AI, buff, bytes_cnt );
+                         memcpy( nodes[ i ]->AI, buff + 9, bytes_cnt );
+
+                         int idx = 0;
+                         for ( unsigned int l = 0; l < bytes_cnt; l += 2 )
+                             {
+                             nodes[ i ]->AI[ idx ] = 256 * buff[ 9 + l ] + buff[ 9 + l + 1 ];
+                             idx++;
+                             }
                          }
-                         else
+                     else
                          {
 #ifdef DEBUG
-                         Print("\nRead AI:Wago returned error...\n");
+                         Print("\nRead AI:Wago returned error. Node %d.\n",
+                               nodes[ i ]->number );
+                         Print( "bytes_cnt = %d, %d %d \n",
+                               ( int ) buff[ 7 ], ( int ) buff[ 8 ], bytes_cnt );
 #endif // DEBUG
                          }
                      }

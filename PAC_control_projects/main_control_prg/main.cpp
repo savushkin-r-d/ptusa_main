@@ -33,7 +33,7 @@ int main( int argc, char *argv[] )
     InitLib();
 #endif
 
-	setlocale( LC_ALL, "" );
+	//setlocale( LC_ALL, "" );
 
     if ( argc < 2 )
         {

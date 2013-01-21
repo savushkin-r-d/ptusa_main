@@ -608,7 +608,7 @@ class valve: public digital_wago_device
         /// @param number - номер устройства.
         /// @param type - тип устройства.
         /// @param sub_type - подтип устройства.
-        valve( int number, device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ):            
+        valve( int number, device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ):
             digital_wago_device( number, type, sub_type, 0 ),
             is_on_fb( false ),
             is_off_fb( false ),
@@ -636,7 +636,7 @@ class valve: public digital_wago_device
             {
             VX_ON_FB_OFF  = 11,  ///< Включен, ОС отключена.
             VX_OFF_FB_OFF = 10,  ///< Выключен, ОС отключена.
-                        
+
             VX_UPPER_SEAT_FB_OFF = 32, ///< Открыто верхнее седло, ОС отключена.
             VX_LOWER_SEAT_FB_OFF = 33, ///< Открыто нижнее седло, ОС отключена.
 
@@ -774,8 +774,14 @@ class valve_DO1_DI1_off : public valve
             int o = get_DO( DO_INDEX );
             int i = get_DI( DI_INDEX );
 
+           if ( number == 1801 )
+               {
+               printf( "V1801 o = %d, i = %d\n", o, i );
+               }
+
             if ( o != i )
                 {
+                start_switch_time = get_millisec();
                 return true;
                 }
 
@@ -807,7 +813,7 @@ class valve_DO1_DI1_on : public valve
     {
     public:
         valve_DO1_DI1_on( int number ): valve( true, false,
-            number, DT_V, DST_V_DO1_DI1_FB_ON )            
+            number, DT_V, DST_V_DO1_DI1_FB_ON )
             {
             }
 
@@ -845,6 +851,7 @@ class valve_DO1_DI1_on : public valve
 
             if ( o == i )
                 {
+                start_switch_time = get_millisec();
                 return true;
                 }
 
@@ -1144,7 +1151,7 @@ class AI1 : public analog_wago_device
 
             ADDITIONAL_PARAM_COUNT = 1, ///< Количество параметров.
 
-            C_AI_INDEX = 1,             ///< Индекс канала аналогового входа.
+            C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
             };
 
         /// @brief Получение максимального значения выхода устройства.
@@ -1444,8 +1451,8 @@ class motor : public device, public wago_device
 
             P_ON_TIME = 1,    ///< Индекс параметра времени включения (мсек).
 
-            DO_INDEX = 0,     ///< Индекс канала дискретного выхода.
-            DO_INDEX_REVERSE, ///< Индекс канала дискретного выхода реверса.
+            DO_INDEX = 0,         ///< Индекс канала дискретного выхода.
+            DO_INDEX_REVERSE = 1, ///< Индекс канала дискретного выхода реверса.
 
             DI_INDEX = 0,     ///< Индекс канала дискретного входа.
 

@@ -151,7 +151,7 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
         }
 
     // Получение данных.
-    res = tcp_communicator_linux::recvtimeout( node->sock, &buff[ 0 ],
+    res = tcp_communicator_linux::recvtimeout( node->sock, buff,
         bytes_to_receive, 1, 0, node->ip_address );
 
     if( res <= 0 ) /* read error */

@@ -1,6 +1,6 @@
 /// @file kbusapi.h
 /// @brief Setting the configuration of the Fieldbus-Controller in the Flash.
-/// The Flash is reading from the Bootloader if it start the Linux-Kernel. 
+/// The Flash is reading from the Bootloader if it start the Linux-Kernel.
 ///
 /// @version    0.02
 /// @date       18-MAY-2006
@@ -57,5 +57,6 @@ extern int KbusUpdate(void);
 extern int KbusClose(void);
 extern int KbusGetBinaryInputOffset(void);
 extern int KbusGetBinaryOutputOffset(void);
+
 
 #endif // KBUS_API_H

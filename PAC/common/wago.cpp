@@ -1,9 +1,9 @@
 #if !defined WIN_OS && !( defined LINUX_OS && defined PAC_PC ) && \
     !( defined LINUX_OS && defined PAC_WAGO_750_860 ) && \
     !( defined MINIOS7 && defined UPAC_7186E ) && \
-    !( defined MINIOS7 && defined UPAC_5000 ) 
+    !( defined MINIOS7 && defined UPAC_5000 )
 #error You must define OS!
-#endif 
+#endif
 
 #include "wago.h"
 #include "lua_manager.h"
@@ -12,15 +12,15 @@
 
 #ifdef WIN_OS
 #include "wago_PC.h"
-#endif 
+#endif
 
 #if defined LINUX_OS && defined PAC_PC
 #include "wago_PC.h"
-#endif 
+#endif
 
 #if defined LINUX_OS && defined PAC_WAGO_750_860
 #include "wago_w750.h"
-#endif 
+#endif
 
 #if defined MINIOS7 && defined UPAC_7186E
 #include "mos7_wago.h"
@@ -47,7 +47,7 @@ int wago_device::get_DO( u_int index )
 //-----------------------------------------------------------------------------
 int wago_device::set_DO( u_int index, char value )
     {
-    if ( index < DO_channels.count && 
+    if ( index < DO_channels.count &&
         DO_channels.char_write_values &&
         DO_channels.char_write_values[ index ] )
         {
@@ -157,9 +157,9 @@ int wago_device::set_AO( u_int index, float value, float min_value,
         AO_channels.int_write_values &&
         AO_channels.int_write_values[ index ] )
         {
-        u_int table_n = AI_channels.tables[ index ];
-        u_int offset = AI_channels.offsets[ index ];
-        u_int module_type = G_WAGO_MANAGER()->get_node( table_n )->AI_types[ offset ];
+        u_int table_n = AO_channels.tables[ index ];
+        u_int offset = AO_channels.offsets[ index ];
+        u_int module_type = G_WAGO_MANAGER()->get_node( table_n )->AO_types[ offset ];
 
         switch ( module_type )
             {
@@ -170,7 +170,7 @@ int wago_device::set_AO( u_int index, float value, float min_value,
                 }
             if ( value < 4 ) value = 4;
             if ( value > 20 ) value = 20;
-            value = 2047.5f * ( value - 4 );                   
+            value = 2047.5f * ( value - 4 );
             }
 
         *AO_channels.int_write_values[ index ] = ( u_int ) value;
@@ -237,7 +237,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
             //    0               4               0000 0000 0000 0111     00 07         7
             //    0               4               0000 0000 0000 0000     00 00         0
             //
-        case 466:                
+        case 466:
             if ( 0 == min_value && 0 == max_value )
                 {
                 if ( val < 7 )
@@ -272,8 +272,8 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
 #ifdef DEBUG
     Print( "wago_device->get_AI(...) - error!\n" );
     Print( "index=%d, AI_channels.count=%d, AI_channels.char_read_values=%d, AI_channels.char_read_values[ index ]=%d\n",
-        index, AI_channels.count, ( int ) AI_channels.char_read_values,
-        ( int ) AI_channels.char_read_values[ index ] );
+        index, AI_channels.count, ( int ) AI_channels.int_read_values,
+        ( int ) AI_channels.int_read_values[ index ] );
 #endif // DEBUG
 
     return 0;
@@ -281,17 +281,17 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
 //-----------------------------------------------------------------------------
 void wago_device::print() const
     {
-    DI_channels.print();        
-    DO_channels.print();    
-    AI_channels.print();    
+    DI_channels.print();
+    DO_channels.print();
+    AI_channels.print();
     AO_channels.print();
     //Print( "\n" );
     }
 //-----------------------------------------------------------------------------
-wago_device::wago_device() :DI_channels( IO_channels::CT_DI ), 
+wago_device::wago_device() :DI_channels( IO_channels::CT_DI ),
     DO_channels( IO_channels::CT_DO ),
     AI_channels( IO_channels::CT_AI ),
-    AO_channels( IO_channels::CT_AO )   
+    AO_channels( IO_channels::CT_AO )
     {
     }
 //-----------------------------------------------------------------------------
@@ -303,19 +303,19 @@ void wago_device::init( int DO_count, int DI_count, int AO_count,
     int AI_count )
     {
     if ( DO_count > 0 )
-        {      
+        {
         DO_channels.init( DO_count );
         }
     if ( DI_count > 0 )
-        {      
+        {
         DI_channels.init( DI_count );
         }
     if ( AO_count > 0 )
-        {      
+        {
         AO_channels.init( AO_count );
         }
     if ( AI_count > 0 )
-        {      
+        {
         AI_channels.init( AI_count );
         }
     }
@@ -343,7 +343,7 @@ void wago_device::init_channel( int type, int ch_index, int node, int offset )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-wago_device::IO_channels::IO_channels( CHANNEL_TYPE type ) : count( 0 ), 
+wago_device::IO_channels::IO_channels( CHANNEL_TYPE type ) : count( 0 ),
     tables( 0 ),
     offsets( 0 ),
     int_read_values( 0 ), int_write_values( 0 ),
@@ -372,7 +372,7 @@ wago_device::IO_channels::~IO_channels()
         }
     if ( char_read_values )
         {
-        delete [] char_read_values;  
+        delete [] char_read_values;
         char_read_values = 0;
         }
 
@@ -484,7 +484,7 @@ void wago_device::IO_channels::init_channel( u_int ch_index, int node, int offse
             int_write_values[ ch_index ] = wago_manager::get_instance()->
                 get_AO_write_data( tables[ ch_index ], offsets[ ch_index ] );
             break;
-            }        
+            }
         }
 
 
@@ -493,7 +493,7 @@ void wago_device::IO_channels::init_channel( u_int ch_index, int node, int offse
 #ifdef DEBUG
         Print( "Error wago_device::IO_channels::init_channel - index out of bound!\n" );
 #endif // DEBUG
-        }   
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -543,7 +543,7 @@ u_char* wago_manager::get_DI_read_data( u_int node_n, u_int offset )
         }
 
 #ifdef DEBUG
-    Print( "wago_manager::get_DI_data() - error!\n" );    
+    Print( "wago_manager::get_DI_data() - error!\n" );
 #endif // DEBUG
 
     return 0;
@@ -559,7 +559,7 @@ u_char* wago_manager::get_DO_read_data( u_int node_n, u_int offset )
             }
         }
 #ifdef DEBUG
-    Print( "wago_manager::get_DO_data() - error!\n" );    
+    Print( "wago_manager::get_DO_data() - error!\n" );
 #endif // DEBUG
 
     return 0;
@@ -575,7 +575,7 @@ u_int* wago_manager::get_AI_read_data( u_int node_n, u_int offset )
             }
         }
 #ifdef DEBUG
-    Print( "wago_manager::get_AI_data() - error!\n" );    
+    Print( "wago_manager::get_AI_data() - error!\n" );
 #endif // DEBUG
 
     return 0;
@@ -623,7 +623,7 @@ u_int* wago_manager::get_AO_write_data( u_int node_n, u_int offset )
             }
         }
 #ifdef DEBUG
-    Print( "wago_manager::get_AO_write_data() - error!\n" );    
+    Print( "wago_manager::get_AO_write_data() - error!\n" );
 #endif // DEBUG
 
     return 0;
@@ -654,13 +654,13 @@ wago_manager::wago_node * wago_manager::get_node( int node_n )
     }
 //-----------------------------------------------------------------------------
 void wago_manager::add_node( u_int index, int ntype, int address,
-    char* IP_address, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, 
+    char* IP_address, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
     int AI_cnt, int AI_size )
     {
     if ( index < nodes_count )
         {
         nodes[ index ] = new wago_node( ntype, address, IP_address, DO_cnt,
-            DI_cnt, AO_cnt, AO_size, AI_cnt, AI_size );     
+            DI_cnt, AO_cnt, AO_size, AI_cnt, AI_size );
         }
     }
 //-----------------------------------------------------------------------------
@@ -725,7 +725,7 @@ wago_manager::wago_node::~wago_node()
     }
 //-----------------------------------------------------------------------------
 wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
-    int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, int AI_cnt, 
+    int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, int AI_cnt,
     int AI_size ): state( ST_NO_CONNECT ),
     type( ( TYPES ) type ),
     number( number ),
@@ -734,8 +734,10 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
 
     DO_cnt( DO_cnt ),
     AO_cnt( AO_cnt ),
+    AO_size( AO_size ),
     DI_cnt( DI_cnt ),
-    AI_cnt( AI_cnt )        
+    AI_cnt( AI_cnt ),
+    AI_size( AI_size )
     {
     if ( str_ip_address )
         {
@@ -763,15 +765,15 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
         AI_offsets = new u_int [ AI_cnt ];
         AI_types = new u_int [ AI_cnt ];
 
-        memset( AI, 0, AI_cnt * sizeof( u_int ) );
+        memset( AI, 0, sizeof( AI ) );
         }
     if ( AO_cnt )
         {
         AO_types = new u_int [ AO_cnt ];
         AO_offsets = new u_int [ AO_cnt ];
 
-        memset( AO, 0, AO_cnt * sizeof( u_int ) );
-        memset( AO_, 0, AO_cnt * sizeof( u_int ) );
+        memset( AO, 0, sizeof( AO ) );
+        memset( AO_, 0, sizeof( AO ) );
         }
     }
 //-----------------------------------------------------------------------------
@@ -780,8 +782,8 @@ void wago_manager::wago_node::print()
 #ifdef DEBUG
     Print( "Node type %d, number %d, IP \"%s\". ",
         type, number, ip_address );
-    Print( "DI %d, DO %d, AI %d, AO %d.\n",
-        DI_cnt, DO_cnt, AI_cnt, AO_cnt );   
+    Print( "DI %d, DO %d, AI %d [%d], AO %d [%d].\n",
+        DI_cnt, DO_cnt, AI_cnt, AI_size, AO_cnt, AO_size );
 
     for ( u_int i = 0; i < AI_cnt; i++ )
         {
@@ -789,12 +791,12 @@ void wago_manager::wago_node::print()
             {
             Print( "\tAI\n");
             }
-        Print( "\t%2.d %u %2.u\n", i + 1, AI_types[ i ], AI_offsets[ i ] );        
+        Print( "\t%2.d %u %2.u\n", i + 1, AI_types[ i ], AI_offsets[ i ] );
         }
 
     for ( u_int i = 0; i < AO_cnt; i++ )
         {
-        if ( 0 == i ) 
+        if ( 0 == i )
             {
             Print( "\tAO\n");
             }

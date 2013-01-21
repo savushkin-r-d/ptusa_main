@@ -1138,7 +1138,7 @@ int valve::get_state()
 
         case V_ON:
             if ( is_off_fb || is_on_fb ) //Обратная связь есть.
-                {                
+                {
                 if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF ) //Обратная связь отключена.
                     {
                     start_switch_time = get_millisec();
@@ -1151,9 +1151,9 @@ int valve::get_state()
                         {
                         return VX_ON_FB_OFF;
                         }
-                    }                
+                    }
                 else //Обратная связь включена.
-                    {                    
+                    {
                      if ( get_manual_mode() ) //Ручной режим включен.
                          {
                          if ( get_fb_state() == true )
@@ -1173,7 +1173,7 @@ int valve::get_state()
                                  return VX_ON_FB_OK_MANUAL;
                                  }
                              }
-                         } // if ( get_manual_mode() )                     
+                         } // if ( get_manual_mode() )
                      else  //Ручной режим отключен.
                          {
                          if ( get_fb_state() == true )
@@ -1197,7 +1197,7 @@ int valve::get_state()
                     }
                 }//if ( is_off_fb || is_on_fb ) //Обратная связь есть.
             else //Обратной связи нет.
-                {                
+                {
                 if ( get_manual_mode() )
                     {
                     return VX_ON_FB_OK_MANUAL;
@@ -1211,7 +1211,7 @@ int valve::get_state()
 
         case V_OFF:
             if ( is_off_fb || is_on_fb ) //Обратная связь есть.
-                {                
+                {
                 if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF ) //Обратная связь отключена.
                     {
                     start_switch_time = get_millisec();
@@ -1224,9 +1224,9 @@ int valve::get_state()
                         {
                         return VX_OFF_FB_OFF;
                         }
-                    }                
+                    }
                 else //Обратная связь включена.
-                    {                    
+                    {
                     if ( get_manual_mode() ) //Ручной режим включен.
                         {
                         if ( get_fb_state() == true )
@@ -1246,7 +1246,7 @@ int valve::get_state()
                                 return VX_OFF_FB_OK_MANUAL;
                                 }
                             }
-                        } // if ( get_manual_mode() )                     
+                        } // if ( get_manual_mode() )
                     else  //Ручной режим отключен.
                         {
                         if ( get_fb_state() == true )
@@ -1270,7 +1270,7 @@ int valve::get_state()
                     }
                 }//if ( is_off_fb || is_on_fb ) //Обратная связь есть.
             else //Обратной связи нет.
-                {                
+                {
                 if ( get_manual_mode() )
                     {
                     return VX_OFF_FB_OK_MANUAL;
@@ -1673,6 +1673,12 @@ int motor::get_state()
     int o = get_DO( DO_INDEX );
     int i = get_DI( DI_INDEX );
 
+    if ( number == 1601 )
+        {
+        printf( "M1601 o = %d, i = %d\n", o, i );
+        }
+
+
     if ( o == i )
         {
         start_switch_time = get_millisec();
@@ -1727,6 +1733,9 @@ void motor::direct_off()
             }
         }
 #endif // DEBUG_NO_WAGO_MODULES
+
+    //printf( "direct_set_value( 0 )" );
+    //getchar();
 
     direct_set_value( 0 );
     }
