@@ -122,15 +122,16 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
 //-----------------------------------------------------------------------------
 int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
     {
+    bool is_any_error = errors.size() > 0;
+
     for ( u_int i = 0; i < errors.size(); i++ )
         {
         sprintf( str + strlen( str ), "\t%s\n", "{" );
 
-        sprintf( str + strlen( str ), "\t%s%s%s\n",
-           "description = \"",
-                get_alarm_descr( ( ALARM_CLASS ) errors[ i ].err_class,
-                ( ALARM_SUBCLASS ) errors[ i ].err_sub_class, errors[ i ].param ),
-            "\",\n" );
+        sprintf( str + strlen( str ), "\tdescription = \"%s \'%s\'\",\n",
+            get_alarm_descr( ( ALARM_CLASS ) errors[ i ].err_class,
+            ( ALARM_SUBCLASS ) errors[ i ].err_sub_class, errors[ i ].param ),
+                G_WAGO_MANAGER()->get_node( errors[ i ].param - 1 )->name );
 
         sprintf( str + strlen( str ), "\t%s\n", "type = AT_SPECIAL," );
         sprintf( str + strlen( str ), "\t%s%s%s\n", "group = '",
@@ -138,6 +139,11 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
         sprintf( str + strlen( str ), "\t%s%d%s\n", "priority = ",
             ALARM_CLASS_PRIORITY, "," );
         sprintf( str + strlen( str ), "\t%s\n", "state = AS_ALARM," );
+
+        //Для идентификации ошибок.
+        sprintf( str + strlen( str ),
+            "\tid_n = %d,\n",
+            errors[ i ].param );
 
         sprintf( str + strlen( str ), "\t%s\n", "}," );
         }
@@ -148,7 +154,7 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
     Print( "%s\n", str );
 #endif // DEBUG_PAC_ERR
 
-    return 0;
+    return is_any_error;
     }
 //-----------------------------------------------------------------------------
 PAC_critical_errors_manager * PAC_critical_errors_manager::get_instance()

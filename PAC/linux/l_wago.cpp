@@ -1,6 +1,9 @@
 #include <bits/errno.h>
+#include <bits/errno_values.h>
 
 #include "l_wago.h"
+
+extern int errno;
 //-----------------------------------------------------------------------------
 int wago_manager_linux::net_init( wago_node *node )
     {
@@ -45,7 +48,7 @@ int wago_manager_linux::net_init( wago_node *node )
         return -5;
         }
 
-    // Привязка сокета.
+    // Привязка сокета. Сразу возвращает управление в неблокирующем режиме.
     err = connect( sock, ( struct sockaddr * ) &socket_remote_server,
         sizeof( socket_remote_server ) );
 
@@ -57,15 +60,12 @@ int wago_manager_linux::net_init( wago_node *node )
     tv.tv_sec  = 0;
     tv.tv_usec = 200000;
 
-#ifdef DEBUG
-    static bool is_print_err = false;
-#endif // DEBUG
-
     err = select( sock + 1, 0, &rdevents, 0, &tv );
+
     if ( err <= 0 )
         {
 #ifdef DEBUG
-        if ( is_print_err == false )
+        if ( node->is_set_err == false )
             {
             if ( err < 0 )
                 {
@@ -77,8 +77,6 @@ int wago_manager_linux::net_init( wago_node *node )
                 printf( "wago_manager_linux:net_init(...) - can't connect to \"%s\":%d : timeout\n",
                     node->ip_address, PORT );
                 }
-
-            is_print_err = true;
             }
 #endif // DEBUG
 
@@ -86,9 +84,27 @@ int wago_manager_linux::net_init( wago_node *node )
         return -5;
         }
 
-#ifdef DEBUG
-    is_print_err = false;
+    if( FD_ISSET( sock, &rdevents ) )
+        {
+        socklen_t err_len;
+        int error;
 
+        err_len = sizeof( error );
+        if( getsockopt( sock, SOL_SOCKET, SO_ERROR, &error, &err_len ) < 0 || error != 0 )
+            {
+#ifdef DEBUG
+            if ( node->is_set_err == false )
+                {
+                perror( "wago_manager::net_init(...) select error" );
+                }
+#endif // DEBUG
+
+            close( sock );
+            return -6;
+            }
+        }
+
+#ifdef DEBUG
     Print( "Socket %d is successfully connected to \"%s\":%d\n",
         sock, node->ip_address, PORT );
 #endif // DEBUG
@@ -103,13 +119,11 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
     int bytes_to_receive )
     {
     // Проверка связи с узлом Wago.
-    static bool is_set_err = false;
-
     if( get_sec() - node->last_poll_time > wago_node::C_MAX_WAIT_TIME )
         {
-        if( false == is_set_err )
+        if( false == node->is_set_err )
             {
-            is_set_err = true;
+            node->is_set_err = true;
             PAC_critical_errors_manager::get_instance( )->set_global_error(
                 PAC_critical_errors_manager::AC_NO_CONNECTION,
                 PAC_critical_errors_manager::AS_WAGO, node->number );
@@ -117,9 +131,9 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
         }
     else
         {
-        if( is_set_err )
+        if( node->is_set_err )
             {
-            is_set_err = false;
+            node->is_set_err = false;
             PAC_critical_errors_manager::get_instance( )->reset_global_error(
                 PAC_critical_errors_manager::PAC_critical_errors_manager::AC_NO_CONNECTION,
                 PAC_critical_errors_manager::AS_WAGO, node->number );
@@ -140,7 +154,7 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
     if( res < 0 )
         {
 #ifdef DEBUG
-        if ( is_set_err == false )
+        if ( node->is_set_err == false )
             {
             perror( "wago_manager::e_communicate(...) send error" );
             }
@@ -157,7 +171,10 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
     if( res <= 0 ) /* read error */
         {
 #ifdef DEBUG
-        perror( "wago_manager::e_communicate(...) recvtimeout error\n" );
+        if ( node->is_set_err == false )
+            {
+            perror( "wago_manager::e_communicate(...) recvtimeout error\n" );
+            }
 #endif
         disconnect( node );
 

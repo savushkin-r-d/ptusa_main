@@ -115,17 +115,9 @@ int wago_manager_w750::read_inputs()
                                      nodes[ i ]->DI[ idx ] =
                                          ( buff[ j + 9 ] >> k ) & 1;
                                      idx++;
-
-                                     if ( nodes[ i ]->number == 2 )
-                                         {
-                                         printf( "%d->%d\n",
-                                            idx, ( buff[ j + 9 ] >> k ) & 1 );
-                                         }
                                      }
                                  }
                              }
-
-                         printf( "\n" );
                          }
                          else
                          {

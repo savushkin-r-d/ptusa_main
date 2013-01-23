@@ -1,12 +1,12 @@
 /// @file wago.h
 /// @brief Работа с Wago - устройства на основе данных с модулей Wago, узлы
 /// Wago.
-/// 
+///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
 /// @c DEBUG   - компиляция c выводом отладочной информации в консоль.
-/// 
+///
 /// @par Текущая версия:
 /// @$Rev$.\n
 /// @$Author$.\n
@@ -17,8 +17,8 @@
 
 #include "smart_ptr.h"
 //-----------------------------------------------------------------------------
-/// @brief Устройство на основе модулей ввода/вывода WAGO. 
-/// 
+/// @brief Устройство на основе модулей ввода/вывода WAGO.
+///
 /// В общем случае у устройства может быть один или несколько каналов
 /// ввода/вывода (дискретных или аналоговых).
 class wago_device
@@ -31,7 +31,7 @@ class wago_device
     protected:
         /// @brief Получение состояния канала дискретного выхода.
         ///
-        /// @param index - индекс канала в таблице дискретных выходных каналов 
+        /// @param index - индекс канала в таблице дискретных выходных каналов
         /// устройства.
         ///
         /// @return -  0 - Ок.
@@ -40,7 +40,7 @@ class wago_device
 
         /// @brief Установка состояния канала дискретного выхода.
         ///
-        /// @param index - индекс канала в таблице дискретных выходных каналов 
+        /// @param index - индекс канала в таблице дискретных выходных каналов
         /// устройства.
         /// @param value - новое состояние канала.
         ///
@@ -50,7 +50,7 @@ class wago_device
 
         /// @brief Получение состояния канала дискретного входа.
         ///
-        /// @param index - индекс канала в таблице дискретных входных каналов 
+        /// @param index - индекс канала в таблице дискретных входных каналов
         /// устройства.
         ///
         /// @return -  0 - Ок.
@@ -59,7 +59,7 @@ class wago_device
 
         /// @brief Получение состояния канала аналогового выхода.
         ///
-        /// @param index - индекс канала в таблице аналоговых выходных каналов 
+        /// @param index - индекс канала в таблице аналоговых выходных каналов
         /// устройства.
         /// @param min_value - минимальное значение канала.
         /// @param max_value - максимальное значение канала.
@@ -70,7 +70,7 @@ class wago_device
 
         /// @brief Установка состояния канала аналогового выхода.
         ///
-        /// @param index - индекс канала в таблице аналоговых выходных каналов 
+        /// @param index - индекс канала в таблице аналоговых выходных каналов
         /// устройства.
         /// @param value - новое состояние канала.
         /// @param min_value - минимальное значение канала.
@@ -83,7 +83,7 @@ class wago_device
 
         /// @brief Получение состояния канала аналогового входа.
         ///
-        /// @param index - индекс канала в таблице аналоговых входных каналов 
+        /// @param index - индекс канала в таблице аналоговых входных каналов
         /// устройства.
         /// @param min_value - минимальное значение канала.
         /// @param max_value - максимальное значение канала.
@@ -146,7 +146,7 @@ class wago_device
 /// Реализация чтения и записи состояний модулей ввода/вывода Wago.
 class wago_manager
     {
-    public:       
+    public:
         virtual ~wago_manager();
 
         void print() const;
@@ -225,7 +225,7 @@ class wago_manager
         ///
         struct wago_node
             {
-            wago_node( int type, int number, char *str_ip_addres, 
+            wago_node( int type, int number, char *str_ip_addres, char *name,
                 int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
                 int AI_cnt, int AI_size );
 
@@ -247,17 +247,19 @@ class wago_manager
                 };
 
             enum STATES         ///< Cостояния работы с узлом.
-                {                
+                {
                 ST_NO_CONNECT = 0,
                 ST_OK,
                 };
 
             wago_node::STATES  state;          ///< Cостояние работы с узлом.
-            TYPES   type;           ///< Тип.
-            u_int   number;         ///< Номер.
+            TYPES   type;            ///< Тип.
+            u_int   number;          ///< Номер.
             char    ip_address[ 16 ];///< IP-адрес.
+            char    name[ 20 ];      ///< Имя.
 
             u_int_4 last_poll_time; ///< Время последнего опроса.
+            bool    is_set_err;     ///< Установлена ли ошибка связи.
             int     sock;           ///< Сокет соединения.
 
             // Digital outputs ( DO ).
@@ -303,25 +305,25 @@ class wago_manager
         /// @brief Инициализация модуля Wago.
         ///
         /// Вызывается из Lua.
-        void add_node( u_int index, int ntype, int address, char* IP_address, 
-            int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, 
+        void add_node( u_int index, int ntype, int address, char* IP_address,
+        char *name, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
             int AI_cnt, int AI_size );
 
         /// @brief Инициализация параметров канала аналогового вывода.
         ///
         /// Вызывается из Lua.
-        void init_node_AO( u_int node_index, u_int AO_index, 
+        void init_node_AO( u_int node_index, u_int AO_index,
             u_int type, u_int offset );
 
         /// @brief Инициализация параметров канала аналогового ввода.
         ///
         /// Вызывается из Lua.
-        void init_node_AI( u_int node_index, u_int AI_index, 
+        void init_node_AI( u_int node_index, u_int AI_index,
             u_int type, u_int offset );
 
     };
 //-----------------------------------------------------------------------------
 wago_manager* G_WAGO_MANAGER();
 //-----------------------------------------------------------------------------
-#endif // WAGO_H 
+#endif // WAGO_H
 

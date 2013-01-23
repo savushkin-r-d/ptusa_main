@@ -1673,12 +1673,6 @@ int motor::get_state()
     int o = get_DO( DO_INDEX );
     int i = get_DI( DI_INDEX );
 
-    if ( number == 1601 )
-        {
-        printf( "M1601 o = %d, i = %d\n", o, i );
-        }
-
-
     if ( o == i )
         {
         start_switch_time = get_millisec();
@@ -1733,9 +1727,6 @@ void motor::direct_off()
             }
         }
 #endif // DEBUG_NO_WAGO_MODULES
-
-    //printf( "direct_set_value( 0 )" );
-    //getchar();
 
     direct_set_value( 0 );
     }

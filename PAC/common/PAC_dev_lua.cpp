@@ -4108,13 +4108,14 @@ static int tolua_PAC_dev_wago_manager_add_node00(lua_State* tolua_S)
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
      !tolua_isstring(tolua_S,5,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,6,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,6,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,7,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,8,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,9,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,10,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,11,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,12,&tolua_err)
+     !tolua_isnumber(tolua_S,12,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,13,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -4125,17 +4126,18 @@ static int tolua_PAC_dev_wago_manager_add_node00(lua_State* tolua_S)
   int ntype = ((int)  tolua_tonumber(tolua_S,3,0));
   int address = ((int)  tolua_tonumber(tolua_S,4,0));
   char* IP_address = ((char*)  tolua_tostring(tolua_S,5,0));
-  int DO_cnt = ((int)  tolua_tonumber(tolua_S,6,0));
-  int DI_cnt = ((int)  tolua_tonumber(tolua_S,7,0));
-  int AO_cnt = ((int)  tolua_tonumber(tolua_S,8,0));
-  int AO_size = ((int)  tolua_tonumber(tolua_S,9,0));
-  int AI_cnt = ((int)  tolua_tonumber(tolua_S,10,0));
-  int AI_size = ((int)  tolua_tonumber(tolua_S,11,0));
+  char* name = ((char*)  tolua_tostring(tolua_S,6,0));
+  int DO_cnt = ((int)  tolua_tonumber(tolua_S,7,0));
+  int DI_cnt = ((int)  tolua_tonumber(tolua_S,8,0));
+  int AO_cnt = ((int)  tolua_tonumber(tolua_S,9,0));
+  int AO_size = ((int)  tolua_tonumber(tolua_S,10,0));
+  int AI_cnt = ((int)  tolua_tonumber(tolua_S,11,0));
+  int AI_size = ((int)  tolua_tonumber(tolua_S,12,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_node'", NULL);
 #endif
   {
-   self->add_node(index,ntype,address,IP_address,DO_cnt,DI_cnt,AO_cnt,AO_size,AI_cnt,AI_size);
+   self->add_node(index,ntype,address,IP_address, name, DO_cnt,DI_cnt,AO_cnt,AO_size,AI_cnt,AI_size);
   }
  }
  return 0;

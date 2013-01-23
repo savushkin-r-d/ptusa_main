@@ -654,12 +654,12 @@ wago_manager::wago_node * wago_manager::get_node( int node_n )
     }
 //-----------------------------------------------------------------------------
 void wago_manager::add_node( u_int index, int ntype, int address,
-    char* IP_address, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
+    char* IP_address, char *name, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
     int AI_cnt, int AI_size )
     {
     if ( index < nodes_count )
         {
-        nodes[ index ] = new wago_node( ntype, address, IP_address, DO_cnt,
+        nodes[ index ] = new wago_node( ntype, address, IP_address, name, DO_cnt,
             DI_cnt, AO_cnt, AO_size, AI_cnt, AI_size );
         }
     }
@@ -725,11 +725,13 @@ wago_manager::wago_node::~wago_node()
     }
 //-----------------------------------------------------------------------------
 wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
+    char *name,
     int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, int AI_cnt,
     int AI_size ): state( ST_NO_CONNECT ),
     type( ( TYPES ) type ),
     number( number ),
     last_poll_time( get_sec() ),
+    is_set_err( 0 ),
     sock( 0 ),
 
     DO_cnt( DO_cnt ),
@@ -741,11 +743,20 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
     {
     if ( str_ip_address )
         {
-        strcpy( ip_address, str_ip_address );
+        strncpy( ip_address, str_ip_address, sizeof( ip_address ) );
         }
     else
         {
         memset( ip_address, 0, sizeof( ip_address ) );
+        }
+
+    if ( name )
+        {
+        strncpy( this->name, name, sizeof( this->name ) );
+        }
+    else
+        {
+        memset( this->name, 0, sizeof( this->name ) );
         }
 
     if ( DI_cnt )
