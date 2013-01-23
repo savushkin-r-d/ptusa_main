@@ -26,11 +26,9 @@ int wago_manager_w750::read_inputs()
             KbusUpdate();
 
             // DI
-            int start_pos = KbusGetBinaryInputOffset();
-//#ifdef DEBUG_KBUS
-            //printf( "start_pos=%d\n", start_pos );
-//#endif // DEBUG_KBUS
-            start_pos = start_pos / 8;
+            //int start_pos = KbusGetBinaryInputOffset();
+            //start_pos = start_pos / 8;
+            int start_pos = 0;
 
             for ( u_int j = 0; j < nodes[ i ]->DI_cnt; j++ )
                 {
@@ -38,13 +36,13 @@ int wago_manager_w750::read_inputs()
 
                 nodes[ i ]->DI[ j ] = ( ( tmp &
                     pstPabIN->uc.Pab[ start_pos + j / 8 ] ) > 0 );
-//#ifdef DEBUG_KBUS
-                //printf( "%d -> %d, ", j, nodes[ i ]->DI[ j ] );
-//#endif // DEBUG_KBUS
+#ifdef DEBUG_KBUS
+                printf( "%d -> %d, ", j, nodes[ i ]->DI[ j ] );
+#endif // DEBUG_KBUS
                 }
-//#ifdef DEBUG_KBUS
-            //printf( "\n" );
-//#endif // DEBUG_KBUS
+#ifdef DEBUG_KBUS
+            printf( "\n" );
+#endif // DEBUG_KBUS
 
             // AI
             for ( u_int j = 0; j < nodes[ i ]->AI_cnt; j++ )
@@ -103,11 +101,6 @@ int wago_manager_w750::read_inputs()
                          {
                          for ( u_int j = 0, idx = 0; j < bytes_cnt; j++ )
                              {
-                             //if ( nodes[ i ]->number == 2 )
-                             //    {
-                             //    printf( "%d ", buff[ 9 + j ] );
-                             //    }
-
                              for ( int k = 0; k < 8; k++ )
                                  {
                                  if ( idx < nodes[ i ]->DI_cnt )
@@ -190,7 +183,8 @@ int wago_manager_w750::write_outputs()
         if ( nodes[ i ]->type == wago_node::T_750_860 ) // KBus
             {
             // DO
-            int start_pos = KbusGetBinaryOutputOffset() / 8;
+            //int start_pos = KbusGetBinaryOutputOffset() / 8;
+            int start_pos = 0;
 #ifdef DEBUG_KBUS
             Print( "start_pos = %d\n", start_pos );
 #endif // DEBUG_KBUS
