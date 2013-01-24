@@ -3,6 +3,7 @@
 
 #include "wago_w750.h"
 
+
 //-----------------------------------------------------------------------------
 wago_manager_w750::wago_manager_w750()
     {
@@ -26,9 +27,10 @@ int wago_manager_w750::read_inputs()
             KbusUpdate();
 
             // DI
-            //int start_pos = KbusGetBinaryInputOffset();
-            //start_pos = start_pos / 8;
-            int start_pos = 0;
+            int start_pos = KbusGetBinaryInputOffset();
+            start_pos = start_pos / 8;
+
+            //Print( "read_inputs() start_pos = %d\n", start_pos );
 
             for ( u_int j = 0; j < nodes[ i ]->DI_cnt; j++ )
                 {
@@ -183,10 +185,10 @@ int wago_manager_w750::write_outputs()
         if ( nodes[ i ]->type == wago_node::T_750_860 ) // KBus
             {
             // DO
-            //int start_pos = KbusGetBinaryOutputOffset() / 8;
-            int start_pos = 0;
+            int start_pos = KbusGetBinaryOutputOffset() / 8;
+
 #ifdef DEBUG_KBUS
-            Print( "start_pos = %d\n", start_pos );
+            Print( "write_outputs() start_pos = %d\n", start_pos );
 #endif // DEBUG_KBUS
             for ( u_int j = 0; j < nodes[ i ]->DO_cnt; j++ )
                 {
