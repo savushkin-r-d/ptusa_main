@@ -834,8 +834,8 @@ class wago_manager
         /// @brief Инициализация модуля Wago.
         ///
         /// Вызывается из Lua.
-        void add_node( unsigned int index, int ntype, int address, char* IP_address, 
-            int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, 
+        void add_node(  unsigned int index, int ntype, int address,
+            char* IP_address, char *name, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
             int AI_cnt, int AI_size );
 
         /// @brief Инициализация параметров канала аналогового вывода.
