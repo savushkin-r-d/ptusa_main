@@ -236,7 +236,7 @@ template < class type, bool is_float > class parameters
             {
             for ( u_int i = 1; i <= count; i++ )
                 {
-                values[ i ] = 0;
+                values[ i - 1 ] = 0;
                 }
             }
 
