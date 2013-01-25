@@ -18,7 +18,7 @@ void PAC_critical_errors_manager::show_errors()
     static u_char show_step = 0;
     static u_long start_time = get_millisec();
 
-    if ( errors.size() > 0 )    // Есть ошибки.
+    if ( !errors.empty() )    // Есть ошибки.
         {
         switch ( show_step )
             {

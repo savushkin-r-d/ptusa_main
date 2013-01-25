@@ -825,7 +825,7 @@ void counter::direct_set_value( float new_value )
 //-----------------------------------------------------------------------------
 int counter::get_state()
     {
-    if ( motors.size() > 0 )
+    if ( !motors.empty() )
         {
         char           is_pump_working         = 0;
         static u_int_4 start_pump_working_time = 0;

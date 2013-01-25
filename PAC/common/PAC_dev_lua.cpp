@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 12/21/12 15:21:49.
+** Generated automatically by tolua++-1.0.92 on 01/25/13 13:25:02.
 */
 
 #ifndef __cplusplus
@@ -4137,7 +4137,7 @@ static int tolua_PAC_dev_wago_manager_add_node00(lua_State* tolua_S)
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_node'", NULL);
 #endif
   {
-   self->add_node(index,ntype,address,IP_address, name, DO_cnt,DI_cnt,AO_cnt,AO_size,AI_cnt,AI_size);
+   self->add_node(index,ntype,address,IP_address,name,DO_cnt,DI_cnt,AO_cnt,AO_size,AI_cnt,AI_size);
   }
  }
  return 0;

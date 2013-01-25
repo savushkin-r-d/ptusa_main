@@ -27,7 +27,7 @@ action::action( std::string name, u_int group_cnt ) : name( name )
 //-----------------------------------------------------------------------------
 void action::print( const char* prefix /*= "" */ ) const
     {
-    if ( devices.size() == 0  )
+    if ( !devices.empty()  )
         {
         return;
         }
@@ -71,12 +71,12 @@ void action::final()
 //-----------------------------------------------------------------------------
 bool action::is_empty() const
     {
-    if ( devices.size() == 0  )
+    if ( devices.empty() )
         {
         return true;
         }
 
-    if ( devices[ 0 ].size() == 0 )
+    if ( devices[ 0 ].empty() )
         {
         return true;
         }
@@ -323,8 +323,7 @@ open_seat_action::open_seat_action() : action( "Промывка седел" ),
 //-----------------------------------------------------------------------------
 void open_seat_action::init()
     {
-    if ( 0 == wash_upper_seat_devices.size() &&
-        0 == wash_lower_seat_devices.size() ) return;
+    if ( wash_upper_seat_devices.empty() && wash_lower_seat_devices.empty() ) return;
 
     start_cycle_time  = get_millisec();
     phase             = P_WAIT;
@@ -344,8 +343,7 @@ void open_seat_action::init()
 //-----------------------------------------------------------------------------
 void open_seat_action::evaluate()
     {
-    if ( 0 == wash_lower_seat_devices.size() && 
-        0 == wash_upper_seat_devices.size() ) return;
+    if ( wash_lower_seat_devices.empty() && wash_upper_seat_devices.empty() ) return;
 
     switch ( phase )
         {
@@ -359,7 +357,7 @@ void open_seat_action::evaluate()
         break;
 
     case P_OPEN_UPPER:
-        if ( 0 == wash_upper_seat_devices.size() ) 
+        if ( wash_upper_seat_devices.empty() ) 
             {
             phase      = P_OPEN_LOWER;
             next_phase = P_OPEN_LOWER;
@@ -393,7 +391,7 @@ void open_seat_action::evaluate()
         break;
 
     case P_OPEN_LOWER:
-        if ( 0 == wash_lower_seat_devices.size() ) 
+        if ( wash_lower_seat_devices.empty() ) 
             {
             phase      = P_WAIT;
             next_phase = P_OPEN_UPPER;
@@ -430,27 +428,26 @@ void open_seat_action::evaluate()
 //-----------------------------------------------------------------------------
 void open_seat_action::final()
     {
-    if ( 0 == wash_upper_seat_devices.size() &&
-        0 == wash_lower_seat_devices.size() ) return;
+    if ( wash_upper_seat_devices.empty() && wash_lower_seat_devices.empty() ) return;
 
     switch ( phase )
         {
         case P_WAIT:
-                break;
-            
-    case P_OPEN_UPPER:
-        for ( u_int j = 0; j < wash_upper_seat_devices[ active_group_n ].size(); j++ )
-            {
-            wash_upper_seat_devices[ active_group_n ][ j ]->off();
-            }
-        break;
+            break;
 
-    case P_OPEN_LOWER:
-        for ( u_int j = 0; j < wash_lower_seat_devices[ active_group_n ].size(); j++ )
-            {
-            wash_lower_seat_devices[ active_group_n ][ j ]->off();
-            }
-        break;
+        case P_OPEN_UPPER:
+            for ( u_int j = 0; j < wash_upper_seat_devices[ active_group_n ].size(); j++ )
+                {
+                wash_upper_seat_devices[ active_group_n ][ j ]->off();
+                }
+            break;
+
+        case P_OPEN_LOWER:
+            for ( u_int j = 0; j < wash_lower_seat_devices[ active_group_n ].size(); j++ )
+                {
+                wash_lower_seat_devices[ active_group_n ][ j ]->off();
+                }
+            break;
         }
     }
 //-----------------------------------------------------------------------------
@@ -497,7 +494,7 @@ void open_seat_action::print( const char* prefix /*= "" */ ) const
 
     Print( "%s%s: ", prefix, name.c_str() );
     
-    if ( wash_upper_seat_devices.size() )
+    if ( !wash_upper_seat_devices.empty() )
         {
         Print( "верхние " );
         for ( u_int i = 0; i < wash_upper_seat_devices.size(); i++ )
@@ -513,7 +510,7 @@ void open_seat_action::print( const char* prefix /*= "" */ ) const
             }
         }
 
-    if ( wash_lower_seat_devices.size() )
+    if ( !wash_lower_seat_devices.empty() )
         {
         Print( "; нижние " );
         for ( u_int i = 0; i < wash_lower_seat_devices.size(); i++ )
@@ -534,14 +531,14 @@ void open_seat_action::print( const char* prefix /*= "" */ ) const
 //-----------------------------------------------------------------------------
 bool open_seat_action::is_empty() const
     {
-    if ( wash_upper_seat_devices.size() == 0 &&
-        wash_lower_seat_devices.size() == 0 )
+    if ( wash_upper_seat_devices.empty() &&
+        wash_lower_seat_devices.empty() )
         {
         return true;
         }
 
-    if ( wash_upper_seat_devices[ 0 ].size() == 0 && 
-        wash_lower_seat_devices[ 0 ].size() == 0 )
+    if ( wash_upper_seat_devices[ 0 ].empty() && 
+        wash_lower_seat_devices[ 0 ].empty() )
         {
         return true;
         }
@@ -635,7 +632,7 @@ void mode::init( u_int start_step /*= 1 */ )
     
     active_step_n = -1;
 
-    if ( 0 == steps.size() )
+    if ( steps.empty() )
         {
         //Если нет шагов, то выходим.
         return;

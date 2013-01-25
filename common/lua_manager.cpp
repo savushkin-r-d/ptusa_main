@@ -50,6 +50,9 @@ int check_file( const char* file_name, char* err_str )
         sscanf( str, "--version = %d", &version );
         }
 
+    fclose( f );
+    f = 0;
+
     return version;
     }
 //-----------------------------------------------------------------------------

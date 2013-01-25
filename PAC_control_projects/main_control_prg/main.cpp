@@ -33,7 +33,9 @@ int main( int argc, char *argv[] )
     InitLib();
 #endif
 
-	//setlocale( LC_ALL, "" );
+#ifdef WIN_OS
+	setlocale( LC_ALL, "" );
+#endif
 
     if ( argc < 2 )
         {
@@ -145,5 +147,3 @@ int main( int argc, char *argv[] )
 
     return( EXIT_SUCCESS );
     }
-
-

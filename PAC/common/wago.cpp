@@ -791,8 +791,8 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
 void wago_manager::wago_node::print()
     {
 #ifdef DEBUG
-    Print( "Node type %d, number %d, IP \"%s\". ",
-        type, number, ip_address );
+    Print( "\"%s\" - type %d, number %d, IP \"%s\". ",
+        name, type, number, ip_address );
     Print( "DI %d, DO %d, AI %d [%d], AO %d [%d].\n",
         DI_cnt, DO_cnt, AI_cnt, AI_size, AO_cnt, AO_size );
 
