@@ -3,6 +3,8 @@
 
 #include "wago_w750.h"
 
+static volatile T_PabVarUnion * pstPabIN =(volatile T_PabVarUnion*) 0xFFE060;
+static volatile T_PabVarUnion * pstPabOUT = (volatile T_PabVarUnion*)(0xFFE060+sizeof(T_PabVarUnion));
 
 //-----------------------------------------------------------------------------
 wago_manager_w750::wago_manager_w750()

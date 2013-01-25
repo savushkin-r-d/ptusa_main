@@ -1,5 +1,4 @@
 #include <bits/errno.h>
-#include <bits/errno_values.h>
 
 #include "l_wago.h"
 

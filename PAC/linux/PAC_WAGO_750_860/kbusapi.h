@@ -36,6 +36,3 @@ extern int KbusUpdate(void);
 extern int KbusClose(void);
 extern int KbusGetBinaryInputOffset(void);
 extern int KbusGetBinaryOutputOffset(void);
-
-static volatile T_PabVarUnion * pstPabIN =(volatile T_PabVarUnion*) 0xFFE060;
-static volatile T_PabVarUnion * pstPabOUT = (volatile T_PabVarUnion*)(0xFFE060+sizeof(T_PabVarUnion));
