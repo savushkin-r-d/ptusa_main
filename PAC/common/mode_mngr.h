@@ -78,11 +78,19 @@ class action
         /// @param [in] group Группа устройства.
         virtual void add_dev( device *dev, u_int group = 0 )
             {
-            if ( devices.size() < group )
+            if ( group >= devices.size() )
+                {
+                std::vector< device* > vector_dev;
+
+                devices.push_back( vector_dev );
+                }
+
+            if (  group >= devices.size() )
                 {
 #ifdef DEBUG
-                Print( "Error device:add_dev(...) - group (%d) > group count (%d).",
-                    group, devices.size() );
+                Print( "Error device:add_dev(...) - group (%d) >= group count (%d), device \"%s\""
+                    " action \"%s\".\n",
+                    group, devices.size(), dev->get_name(), name.c_str() );
 #endif // DEBUG
                 return;
                 }
