@@ -358,6 +358,11 @@ class device : public i_DO_AO_device, public par_device
             return name.c_str();
             }
 
+        const char *get_Lua_name() const
+            {
+            return Lua_name.c_str();
+            }
+
         const char *get_description() const
             {
             return description.c_str();
@@ -431,6 +436,7 @@ class device : public i_DO_AO_device, public par_device
         std::string name;
         std::string description;
 
+        std::string Lua_name;     ///Имя устройства в Lua (клапан 1V1 в Lua будет _1V1).
     };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство.
