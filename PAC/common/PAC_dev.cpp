@@ -159,9 +159,15 @@ void par_device::set_par_name( u_int idx, u_int offset, const char* name )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void device::set_name( const char *new_name, const char *new_description )
-    {
-    name = new_name;
+    {    
+    name        = new_name;
+    Lua_name    = new_name; 
     description = new_description;
+
+    if ( isdigit( new_name[ 0 ] ) )
+        {        
+        Lua_name = "_" + Lua_name; //1V1 -> _1V1
+        }
     }
 //-----------------------------------------------------------------------------
 void device::print() const
@@ -191,7 +197,7 @@ void device::off()
 int device::save_device( char *buff, const char *prefix )
     {
     sprintf( buff, "%s%s={M=%d, ",
-        prefix,  get_name(), is_manual_mode );
+        prefix,  Lua_name.c_str(), is_manual_mode );
 
     if ( type != DT_AO &&
         type != DT_TE )
@@ -1154,46 +1160,46 @@ int valve::get_state()
                     }
                 else //Обратная связь включена.
                     {
-                     if ( get_manual_mode() ) //Ручной режим включен.
-                         {
-                         if ( get_fb_state() == true )
-                             {
-                             start_switch_time = get_millisec();
+                    if ( get_manual_mode() ) //Ручной режим включен.
+                        {
+                        if ( get_fb_state() == true )
+                            {
+                            start_switch_time = get_millisec();
 
-                             return VX_ON_FB_OK_MANUAL;
-                             }
-                         else
-                             {
-                             if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 ) )
-                                 {
-                                 return VX_ON_FB_ERR_MANUAL;
-                                 }
-                             else
-                                 {
-                                 return VX_ON_FB_OK_MANUAL;
-                                 }
-                             }
-                         } // if ( get_manual_mode() )
-                     else  //Ручной режим отключен.
-                         {
-                         if ( get_fb_state() == true )
-                             {
-                             start_switch_time = get_millisec();
+                            return VX_ON_FB_OK_MANUAL;
+                            }
+                        else
+                            {
+                            if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 ) )
+                                {
+                                return VX_ON_FB_ERR_MANUAL;
+                                }
+                            else
+                                {
+                                return VX_ON_FB_OK_MANUAL;
+                                }
+                            }
+                        } // if ( get_manual_mode() )
+                    else  //Ручной режим отключен.
+                        {
+                        if ( get_fb_state() == true )
+                            {
+                            start_switch_time = get_millisec();
 
-                             return VX_ON_FB_OK;
-                             }
-                         else
-                             {
-                             if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 ) )
-                                 {
-                                 return VX_ON_FB_ERR;
-                                 }
-                             else
-                                 {
-                                 return VX_ON_FB_OK;
-                                 }
-                             }
-                         }
+                            return VX_ON_FB_OK;
+                            }
+                        else
+                            {
+                            if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 ) )
+                                {
+                                return VX_ON_FB_ERR;
+                                }
+                            else
+                                {
+                                return VX_ON_FB_OK;
+                                }
+                            }
+                        }
                     }
                 }//if ( is_off_fb || is_on_fb ) //Обратная связь есть.
             else //Обратной связи нет.
