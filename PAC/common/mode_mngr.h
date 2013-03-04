@@ -227,6 +227,8 @@ class wash_action: public action
 
         void evaluate();
 
+        void print( const char* prefix /*= "" */ ) const;
+
     private:
         enum GROUPS
             {

@@ -27,7 +27,7 @@ action::action( std::string name, u_int group_cnt ) : name( name )
 //-----------------------------------------------------------------------------
 void action::print( const char* prefix /*= "" */ ) const
     {
-    if ( !devices.empty()  )
+    if ( devices.empty()  )
         {
         return;
         }
@@ -597,6 +597,60 @@ void wash_action::evaluate()
             devices[ G_DO ][ i ]->off();
             }
         }
+    }
+//-----------------------------------------------------------------------------
+void wash_action::print( const char* prefix /*= "" */ ) const
+    {
+    if ( devices[ G_DI ].size() == 0 && devices[ G_DO ].size() == 0 && 
+        devices[ G_DEV ].size() == 0 )
+        {
+        return;
+        }
+
+    Print( "%s%s: ", prefix, name.c_str() );
+
+    if ( !devices[ G_DI ].empty() )
+        {
+        Print( "FB " );
+        Print( "{" );
+        for ( u_int j = 0; j < devices[ G_DI ].size(); j++ )
+            {
+            Print( "%s",  devices[ G_DI ][ j ]->get_name() );               
+            if ( j + 1 < devices[ G_DI ].size() ) Print( " " );
+            }   
+
+        Print( "}" );
+        }
+
+    if ( !devices[ G_DO ].empty() )
+        {
+        Print( "; DO " );
+
+        Print( "{" );
+        for ( u_int j = 0; j < devices[ G_DO ].size(); j++ )
+            {
+            Print( "%s", devices[ G_DO ][ j ]->get_name() );                
+            if ( j + 1 < devices[ G_DO ].size() ) Print( " " );
+            }   
+
+        Print( "}" );
+        }
+
+    if ( !devices[ G_DEV ].empty() )
+        {
+        Print( "; DEV " );
+
+        Print( "{" );
+        for ( u_int j = 0; j < devices[ G_DEV ].size(); j++ )
+            {
+            Print( "%s", devices[ G_DEV ][ j ]->get_name() );                
+            if ( j + 1 < devices[ G_DEV ].size() ) Print( " " );
+            }   
+
+        Print( "}" );
+        }
+
+    Print( "\n" );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
