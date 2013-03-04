@@ -85,14 +85,16 @@ long device_communicator::write_devices_states_service( long len,
             answer_size++;
 
 #ifdef DEBUG
-//            std::string source = ( char* ) outdata + 2;
-//            std::string replace = "  ";
-//
-//            for ( std::string::size_type i = source.find('\t', 0);
-//                i != std::string::npos; i = source.find('\t', i + replace.size()))
-//                source.replace(i, 1, replace);
-//
-//            Print( "%s", source.c_str() );
+            std::string source = ( char* ) outdata + 2;            
+            for ( u_int i = 0; i < source.length(); i++ )
+                {
+                if ( source[ i ] == '\t' )
+                    {
+                    source[ i ] = ' ';
+                    }
+                }
+
+            Print( "%s", source.c_str() );
 #endif // DEBUG
 
 #ifdef DEBUG_DEV_CMCTR
@@ -209,7 +211,7 @@ long device_communicator::write_devices_states_service( long len,
         case CMD_SET_PAC_ERROR_CMD:  
             {     
 #ifdef DEBUG_DEV_CMCTR
-            Print( "\CMD_SET_PAC_ERROR_CMD\n" );
+            Print( "CMD_SET_PAC_ERROR_CMD\n" );
             Print( "cmd = %s\n",  data + 1 );
 #endif // DEBUG_DEV_CMCTR
            

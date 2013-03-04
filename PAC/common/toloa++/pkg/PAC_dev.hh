@@ -428,8 +428,9 @@ class tech_object
     public:
         int set_cmd( const char *prop, unsigned int idx, double val );
 
-        /// @param name                     - название ("Гребенка" ...).
+        /// @param name                     - название ("Гребенка", ...).
         /// @param number                   - номер.
+        /// @param type                     - тип.
         /// @param name_Lua                 - имя в Lua.
         /// @param states_count             - количество режимов.
         /// @param timers_count             - количество таймеров.
@@ -437,15 +438,12 @@ class tech_object
         /// @param runtime_par_float_count  - количество рабочих параметров типа float.
         /// @param par_uint_count           - количество сохраняемых параметров типа uint.
         /// @param runtime_par_uint_count   - количество рабочих параметров типа uint.
-        tech_object( const char* name, 
-			unsigned int number, 
-			const char* name_Lua,
-            unsigned int states_count,
-            unsigned int timers_count,
-            unsigned int par_float_count, 
-			unsigned int runtime_par_float_count,
-            unsigned int par_uint_count, 
-			unsigned int runtime_par_uint_count );
+        tech_object( const char* name, unsigned int number, unsigned int type,
+            const char* name_Lua,
+            unsigned int  states_count,
+            unsigned int  timers_count,
+            unsigned int  par_float_count, unsigned int  runtime_par_float_count,
+            unsigned int  par_uint_count, unsigned int runtime_par_uint_count );
 
         ~tech_object();
 

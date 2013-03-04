@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 01/25/13 13:25:02.
+** Generated automatically by tolua++-1.0.92 on 03/01/13 15:45:32.
 */
 
 #ifndef __cplusplus
@@ -1947,14 +1947,15 @@ static int tolua_PAC_dev_tech_object_new00(lua_State* tolua_S)
      !tolua_isusertable(tolua_S,1,"tech_object",0,&tolua_err) ||
      !tolua_isstring(tolua_S,2,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
-     !tolua_isstring(tolua_S,4,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,5,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,5,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,6,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,7,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,8,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,9,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,10,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,11,&tolua_err)
+     !tolua_isnumber(tolua_S,11,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,12,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -1962,15 +1963,16 @@ static int tolua_PAC_dev_tech_object_new00(lua_State* tolua_S)
  {
   const char* name = ((const char*)  tolua_tostring(tolua_S,2,0));
   unsigned int number = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
-  const char* name_Lua = ((const char*)  tolua_tostring(tolua_S,4,0));
-  unsigned int states_count = ((unsigned int)  tolua_tonumber(tolua_S,5,0));
-  unsigned int timers_count = ((unsigned int)  tolua_tonumber(tolua_S,6,0));
-  unsigned int par_float_count = ((unsigned int)  tolua_tonumber(tolua_S,7,0));
-  unsigned int runtime_par_float_count = ((unsigned int)  tolua_tonumber(tolua_S,8,0));
-  unsigned int par_uint_count = ((unsigned int)  tolua_tonumber(tolua_S,9,0));
-  unsigned int runtime_par_uint_count = ((unsigned int)  tolua_tonumber(tolua_S,10,0));
+  unsigned int type = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
+  const char* name_Lua = ((const char*)  tolua_tostring(tolua_S,5,0));
+  unsigned int states_count = ((unsigned int)  tolua_tonumber(tolua_S,6,0));
+  unsigned int timers_count = ((unsigned int)  tolua_tonumber(tolua_S,7,0));
+  unsigned int par_float_count = ((unsigned int)  tolua_tonumber(tolua_S,8,0));
+  unsigned int runtime_par_float_count = ((unsigned int)  tolua_tonumber(tolua_S,9,0));
+  unsigned int par_uint_count = ((unsigned int)  tolua_tonumber(tolua_S,10,0));
+  unsigned int runtime_par_uint_count = ((unsigned int)  tolua_tonumber(tolua_S,11,0));
   {
-   tech_object* tolua_ret = (tech_object*)  Mtolua_new((tech_object)(name,number,name_Lua,states_count,timers_count,par_float_count,runtime_par_float_count,par_uint_count,runtime_par_uint_count));
+   tech_object* tolua_ret = (tech_object*)  Mtolua_new((tech_object)(name,number,type,name_Lua,states_count,timers_count,par_float_count,runtime_par_float_count,par_uint_count,runtime_par_uint_count));
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"tech_object");
   }
  }
@@ -1993,14 +1995,15 @@ static int tolua_PAC_dev_tech_object_new00_local(lua_State* tolua_S)
      !tolua_isusertable(tolua_S,1,"tech_object",0,&tolua_err) ||
      !tolua_isstring(tolua_S,2,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
-     !tolua_isstring(tolua_S,4,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,5,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,5,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,6,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,7,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,8,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,9,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,10,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,11,&tolua_err)
+     !tolua_isnumber(tolua_S,11,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,12,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -2008,15 +2011,16 @@ static int tolua_PAC_dev_tech_object_new00_local(lua_State* tolua_S)
  {
   const char* name = ((const char*)  tolua_tostring(tolua_S,2,0));
   unsigned int number = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
-  const char* name_Lua = ((const char*)  tolua_tostring(tolua_S,4,0));
-  unsigned int states_count = ((unsigned int)  tolua_tonumber(tolua_S,5,0));
-  unsigned int timers_count = ((unsigned int)  tolua_tonumber(tolua_S,6,0));
-  unsigned int par_float_count = ((unsigned int)  tolua_tonumber(tolua_S,7,0));
-  unsigned int runtime_par_float_count = ((unsigned int)  tolua_tonumber(tolua_S,8,0));
-  unsigned int par_uint_count = ((unsigned int)  tolua_tonumber(tolua_S,9,0));
-  unsigned int runtime_par_uint_count = ((unsigned int)  tolua_tonumber(tolua_S,10,0));
+  unsigned int type = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
+  const char* name_Lua = ((const char*)  tolua_tostring(tolua_S,5,0));
+  unsigned int states_count = ((unsigned int)  tolua_tonumber(tolua_S,6,0));
+  unsigned int timers_count = ((unsigned int)  tolua_tonumber(tolua_S,7,0));
+  unsigned int par_float_count = ((unsigned int)  tolua_tonumber(tolua_S,8,0));
+  unsigned int runtime_par_float_count = ((unsigned int)  tolua_tonumber(tolua_S,9,0));
+  unsigned int par_uint_count = ((unsigned int)  tolua_tonumber(tolua_S,10,0));
+  unsigned int runtime_par_uint_count = ((unsigned int)  tolua_tonumber(tolua_S,11,0));
   {
-   tech_object* tolua_ret = (tech_object*)  Mtolua_new((tech_object)(name,number,name_Lua,states_count,timers_count,par_float_count,runtime_par_float_count,par_uint_count,runtime_par_uint_count));
+   tech_object* tolua_ret = (tech_object*)  Mtolua_new((tech_object)(name,number,type,name_Lua,states_count,timers_count,par_float_count,runtime_par_float_count,par_uint_count,runtime_par_uint_count));
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"tech_object");
     tolua_register_gc(tolua_S,lua_gettop(tolua_S));
   }

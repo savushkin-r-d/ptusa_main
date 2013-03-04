@@ -11,7 +11,7 @@
 auto_smart_ptr < tech_object_manager > tech_object_manager::instance;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-tech_object::tech_object( const char* new_name, u_int number, 
+tech_object::tech_object( const char* new_name, u_int number, u_int type,  
     const char *name_Lua, 
     u_int modes_count,
     u_int timers_count,
@@ -24,6 +24,7 @@ tech_object::tech_object( const char* new_name, u_int number,
         rt_par_uint( run_time_params_u_int_4( runtime_par_uint_count ) ),
         timers( timers_count ),
         number( number ),
+        type( type ),
         cmd( 0 ),
         modes_count( modes_count ),        
         modes_time( run_time_params_u_int_4( modes_count, "MODES_TIME" ) ),
@@ -318,7 +319,7 @@ int tech_object::save_device( char *buff )
     sprintf( buff + answer_size, "\tMODES_TIME=\n\t\t{\n\t\t" );
     answer_size += strlen( buff + answer_size );
 
-    for ( u_int i = 1; i < modes_time.get_count(); i++ )
+    for ( u_int i = 1; i <= modes_time.get_count(); i++ )
         {
         up_secs = modes_time[ i ];
 
@@ -549,38 +550,38 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
         {
         case ERR_CANT_ON:
             snprintf( new_err->msg, sizeof( new_err->msg ), 
-                "\'%.40s\' - не включен режим %.1d \'%.40s\' - %.60s.", 
-                name, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
+                "\'%.40s %d\' - не включен режим %.1d \'%.40s\' - %.60s.", 
+                name, number, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
             break;
 
         case ERR_ON_WITH_ERRORS:
             snprintf( new_err->msg, sizeof( new_err->msg ), 
-                "\'%.40s\' - включен с ошибкой режим %.1d \'%.40s\' - %.50s.", 
-                name, mode + 1, modes_manager->get_mode_name( mode ), err_msg );                    
+                "\'%.40s %d\' - включен с ошибкой режим %.1d \'%.40s\' - %.50s.", 
+                name, number, mode + 1, modes_manager->get_mode_name( mode ), err_msg );                    
             break;
 
         case ERR_OFF:
             snprintf( new_err->msg, sizeof( new_err->msg ), 
-                "\'%.40s\' - отключен режим %.1d \'%.40s\' - %.50s.", 
-                name, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
+                "\'%.40s %d\' - отключен режим %.1d \'%.40s\' - %.50s.", 
+                name, number, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
             break;
 
         case ERR_OFF_AND_ON:
             snprintf( new_err->msg, sizeof( new_err->msg ), 
-                "\'%.40s\' - переход от %.1d \'%.40s\' к %.1d \'%.40s\' - %.50s.", 
-                name, mode + 1, modes_manager->get_mode_name( mode ),
+                "\'%.40s %d\' - переход от %.1d \'%.40s\' к %.1d \'%.40s\' - %.50s.", 
+                name, number, mode + 1, modes_manager->get_mode_name( mode ),
                 new_mode + 1, modes_manager->get_mode_name( new_mode ), err_msg );
             break;
             
         case ERR_DURING_WORK:
             snprintf( new_err->msg, sizeof( new_err->msg ), 
-                "\'%.40s\' - режим %.1d \'%.40s\' - %.50s.", 
-                name, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
+                "\'%.40s %d\' - режим %.1d \'%.40s\' - %.50s.", 
+                name, number, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
             break;
 
         case ERR_SIMPLE:
             snprintf( new_err->msg, sizeof( new_err->msg ), 
-                "\'%.40s\' - %.60s.", name, err_msg );
+                "\'%.40s %d\' - %.60s.", name, number, err_msg );
             break;
 
         default:

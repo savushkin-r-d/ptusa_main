@@ -58,8 +58,9 @@ extern "C" {
 class tech_object: public i_Lua_save_device
     {
     public:
-        /// @param name                     - название ("Гребенка" ...).
+        /// @param name                     - название ("Гребенка", ...).
         /// @param number                   - номер.
+        /// @param type                     - тип.
         /// @param name_Lua                 - имя в Lua.
         /// @param states_count             - количество режимов.
         /// @param timers_count             - количество таймеров.
@@ -67,7 +68,7 @@ class tech_object: public i_Lua_save_device
         /// @param runtime_par_float_count  - количество рабочих параметров типа float.
         /// @param par_uint_count           - количество сохраняемых параметров типа uint.
         /// @param runtime_par_uint_count   - количество рабочих параметров типа uint.
-        tech_object( const char* name, u_int number, const char* name_Lua,
+        tech_object( const char* name, u_int number, u_int type, const char* name_Lua,
             u_int states_count,
             u_int timers_count,
             u_int par_float_count, u_int runtime_par_float_count,
@@ -223,12 +224,17 @@ class tech_object: public i_Lua_save_device
              {
              return errors;
              }
+
+         int get_object_type()
+             {
+             return type;
+             }
         // Работа с ошибками.
 
         /// @brief Отладочная печать объекта.
         void print() const
             {
-            Print( "Object \'%.40s\' [%d]\n", name, number );
+            Print( "Object \'%.40s\' [%d], type %d\n", name, number, type );
             Print( "par_float[%d] par_uint[%d] rt_par_float[%d] rt_par_uint[%d]\n", 
                 par_float.get_count(), par_uint.get_count(),
                 rt_par_float.get_count(), rt_par_uint.get_count() );
@@ -260,6 +266,7 @@ class tech_object: public i_Lua_save_device
 
     protected:
         u_int   number;         ///< Номер объекта.
+        u_int   type;           ///< Тип объекта (для ошибок).
         u_int_4 cmd;            ///< Хранение команды объекта.
         u_int   modes_count;    ///< Количество режимов.
 

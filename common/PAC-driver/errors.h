@@ -235,7 +235,7 @@ class tech_dev_error: public base_error
 
         unsigned char get_object_type() const
             {
-            return TE_TYPE;
+            return TE_TYPE + tech_dev->get_object_type();
             }
 
         unsigned int get_object_n() const
@@ -294,6 +294,9 @@ class tech_dev_error: public base_error
                     return 0;
                     }
                 }
+#ifdef DEBUG
+            Print( "Object %d not found!\n", object_alarm_number );
+#endif // DEBUG
 
             return 1;
             }
