@@ -107,6 +107,10 @@ int tech_object::set_mode( u_int mode, int newm )
                     paths[ mode ].out_x, paths[ mode ].out_y );
 #endif // USE_COMB
                     }
+                else 
+                    {
+                    res += 100;
+                    }
                 }
             else
                 {
@@ -120,6 +124,10 @@ int tech_object::set_mode( u_int mode, int newm )
                         this, mode );
 #endif // USE_COMB
                     }
+                else 
+                    {
+                    res += 100;
+                    }
                 }
             }
         }
@@ -131,13 +139,21 @@ int tech_object::set_mode( u_int mode, int newm )
         white_spaces, name, number, mode,
         newm == 0 ? "OFF" : " ON", res );
 
-    if ( 1 == res )
-    	{
-        Print( "( is already %s).\n", newm == 0 ? "OFF" : " ON" );
-    	}
-    else
+    switch ( res )
         {
-        Print( ".\n" );
+        case 1:
+            Print( " (is already %s).\n", newm == 0 ? "OFF" : " ON" );
+            break;
+
+         default:
+             if ( res > 100 )
+                {
+                Print( " (can't on).\n" );
+                break;
+                }
+
+            Print( ".\n" );
+            break;
         }
 
     for ( u_int i = 0; i < state.size(); i++ )
@@ -568,9 +584,16 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
 
         case ERR_OFF_AND_ON:
             snprintf( new_err->msg, sizeof( new_err->msg ), 
-                "\'%.40s %d\' - переход от %.1d \'%.40s\' к %.1d \'%.40s\' - %.50s.", 
+                "\'%.40s %d\' - переход от %.1d \'%.40s\' к %.1d \'%.40s\'.", 
                 name, number, mode + 1, modes_manager->get_mode_name( mode ),
-                new_mode + 1, modes_manager->get_mode_name( new_mode ), err_msg );
+                new_mode + 1, modes_manager->get_mode_name( new_mode ) );
+
+            if ( strcmp( err_msg, "" ) != 0 )
+                {
+                snprintf( new_err->msg + strlen( new_err->msg ) - 1, 
+                    sizeof( new_err->msg ) - strlen( new_err->msg ) - 1, 
+                    " - %.50s.", err_msg );
+                }
             break;
             
         case ERR_DURING_WORK:
@@ -610,7 +633,18 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
     Print( "err_str -> %s\n", new_err->msg );
 #endif // DEBUG
 
-    errors.push_back( new_err );
+    if ( errors.size() < E_MAX_ERRORS_SIZE )
+        {
+        errors.push_back( new_err );
+        }
+#ifdef DEBUG
+    else
+        {
+        Print( "Error: max errors count (%d) is reached.",
+            E_MAX_ERRORS_SIZE );
+        }
+#endif // DEBUG
+    
     return 0;
     }
 //-----------------------------------------------------------------------------

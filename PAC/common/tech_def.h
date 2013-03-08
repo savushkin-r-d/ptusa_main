@@ -292,6 +292,11 @@ class tech_object: public i_Lua_save_device
             };
 
         // Работа с ошибками.
+        enum ERRORS_CONSTANTS
+            {
+            E_MAX_ERRORS_SIZE = 10,
+            };
+
         std::vector< err_info* > errors;
         // Работа с ошибками.
     };
