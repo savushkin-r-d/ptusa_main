@@ -574,9 +574,19 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
             break;
             
         case ERR_DURING_WORK:
-            snprintf( new_err->msg, sizeof( new_err->msg ), 
-                "\'%.40s %d\' - режим %.1d \'%.40s\' - %.50s.", 
-                name, number, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
+            if ( mode >= 0 )
+                {
+                snprintf( new_err->msg, sizeof( new_err->msg ), 
+                    "\'%.40s %d\' - режим %.1d \'%.40s\' - %.50s.", 
+                    name, number, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
+                }
+            else
+                {
+                snprintf( new_err->msg, sizeof( new_err->msg ), 
+                    "\'%.40s %d\' - %.50s.", 
+                    name, number, err_msg );
+                }
+            
             break;
 
         case ERR_SIMPLE:
