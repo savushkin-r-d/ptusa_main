@@ -88,7 +88,8 @@ class action
             if (  group >= devices.size() )
                 {
 #ifdef DEBUG
-                Print( "Error device:add_dev(...) - group (%d) >= group count (%d), device \"%s\""
+                Print( "Error device:add_dev(...) - group (%d) >= group count"
+                    "(%d), device \"%s\""
                     " action \"%s\".\n",
                     group, devices.size(), dev->get_name(), name.c_str() );
 #endif // DEBUG
@@ -368,15 +369,15 @@ class mode
 
         step* mode_step;
         
-        int   active_step_n;           ///< Активный шаг.
-        u_int active_step_time;        ///< Время активного шага.
-        u_int active_step_next_step_n; ///< Следующий шаг.
+        int active_step_n;           ///< Активный шаг.
+        int active_step_time;        ///< Время активного шага.
+        int active_step_next_step_n; ///< Следующий шаг.
         
         /// @brief Номера параметров времен шагов.
-        std::vector< u_int > step_duration_par_ns; 
+        std::vector< int > step_duration_par_ns; 
 
         /// @brief Следующие шаги.
-        std::vector< u_int > next_step_ns;
+        std::vector< int > next_step_ns;
 
         u_int_4 start_time; ///< Время начала режима.
 
@@ -400,7 +401,12 @@ class mode_manager
         
         const char* get_mode_name( int n ) const
             {
-            return modes[ n ]->get_name()->c_str();
+            if ( n > 0 && ( u_int ) n < modes.size() )
+                {
+                return modes[ n ]->get_name()->c_str();
+                }            
+
+            return UNKN_MODE_NAME;
             }
 
         mode* add_mode( const char* name );
@@ -435,6 +441,8 @@ class mode_manager
         mode *mode_stub;            ///< Режим-заглушка.
 
         u_int_4 last_action_time;   ///Время последнего вкл/выкл режима.
+
+        static const char* UNKN_MODE_NAME; //Имя для "неизвестного" режима.
     };
 //-----------------------------------------------------------------------------
 #endif // MODE_MNGR

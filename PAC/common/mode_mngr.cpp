@@ -14,6 +14,8 @@
 /// @$Date::                     $.
 
 #include "mode_mngr.h"
+
+const char* mode_manager::UNKN_MODE_NAME = "??";
 //-----------------------------------------------------------------------------
 action::action( std::string name, u_int group_cnt ) : name( name )
     {
@@ -712,7 +714,7 @@ void mode::evaluate()
         steps[ active_step_n ]->evaluate();
 
         if ( active_step_time != 0 &&            
-            get_millisec() - steps[ active_step_n ]->get_start_time() > active_step_time )
+            get_millisec() - steps[ active_step_n ]->get_start_time() > ( u_int ) active_step_time )
             {
             to_step( active_step_next_step_n );
             }
@@ -771,7 +773,7 @@ void mode::to_step( u_int new_step )
         active_step_next_step_n = 0;
 
         if ( owner->get_param() != 0 &&                   
-            step_duration_par_ns[ active_step_n ] != 0 )  
+            step_duration_par_ns[ active_step_n ] > 0 )  
             {
             active_step_time = u_int( owner->get_param()[ 0 ][ step_duration_par_ns[ active_step_n ] ] * 1000L );
             active_step_next_step_n = next_step_ns[ active_step_n ];
