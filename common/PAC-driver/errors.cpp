@@ -71,12 +71,11 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
         }
     // Проверка текущего состояния устройства.-!>
 
-    if ( AS_ALARM == error_state ||
+    if ( AS_ALARM == error_state || AS_ACCEPT == error_state ||
         AS_RETURN == error_state ) // Есть ошибка.
-        {
-        //Добавить обработку отключенных ошибок.
-        //unsigned char alarm_params = err_par[ P_PARAM_N ];
-
+        {        
+        unsigned char alarm_params = err_par[ P_PARAM_N ];
+ 
         sprintf( str + strlen( str ), "\t%s\n", "{" );
 
         sprintf( str + strlen( str ), "\tdescription=\"%s - %s\",\n",
@@ -85,11 +84,13 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
         sprintf( str + strlen( str ), "priority=%d%s", P_ALARM, "," );
         sprintf( str + strlen( str ), "state=%d,\n", error_state );
         sprintf( str + strlen( str ), "type=%d,\n", AT_SPECIAL );
+        sprintf( str + strlen( str ), "group=\"%s\",\n", "Тревога" );
 
         sprintf( str + strlen( str ), "id_n=%d,\n", simple_device->get_n() );
         sprintf( str + strlen( str ), "id_type=%d,\n", simple_device->get_type() );
-
-        sprintf( str + strlen( str ), "suppress=false\n" );
+        
+        sprintf( str + strlen( str ), "suppress=%s\n", 
+            alarm_params && P_IS_SUPPRESS ? "true" : "false" );
 
         sprintf( str + strlen( str ), "},\n" );
         }
