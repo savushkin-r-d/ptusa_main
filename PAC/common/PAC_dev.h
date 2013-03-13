@@ -1081,6 +1081,9 @@ class valve_mix_proof : public i_mix_proof,  public valve
 
         bool get_fb_state()
             {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return true;
+#else
             int o = get_DO( DO_INDEX );
             int i0 = get_DI( DI_INDEX_U );
             int i1 = get_DI( DI_INDEX_L );
@@ -1097,6 +1100,7 @@ class valve_mix_proof : public i_mix_proof,  public valve
                 }
 
             return false;
+#endif // DEBUG_NO_WAGO_MODULES
             }
 
 #ifndef DEBUG_NO_WAGO_MODULES

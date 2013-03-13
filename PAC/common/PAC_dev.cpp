@@ -1112,6 +1112,10 @@ void valve::save_device_ex( char *buff )
 //-----------------------------------------------------------------------------
 int valve::get_state()
     {
+#ifdef DEBUG_NO_WAGO_MODULES
+    return digital_wago_device::get_state();
+#else
+
     switch ( get_valve_state() )
         {
         case V_LOWER_SEAT:
@@ -1290,6 +1294,8 @@ int valve::get_state()
         }
 
     return VX_UNKNOWN;
+
+#endif // DEBUG_NO_WAGO_MODULES
     }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_WAGO_MODULES
