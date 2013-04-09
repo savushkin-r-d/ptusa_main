@@ -199,7 +199,7 @@ class tech_object: public i_Lua_save_device
             ERR_OFF,
             ERR_OFF_AND_ON,
             ERR_DURING_WORK,
-            ERR_SIMPLE,
+            ERR_ALARM,
             };
 
         struct  err_info

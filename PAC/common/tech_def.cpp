@@ -612,7 +612,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
             
             break;
 
-        case ERR_SIMPLE:
+        case ERR_ALARM:
             snprintf( new_err->msg, sizeof( new_err->msg ), 
                 "\'%.40s %d\' - %.60s.", name, number, err_msg );
             break;

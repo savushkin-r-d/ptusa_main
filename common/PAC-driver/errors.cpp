@@ -84,7 +84,7 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
         sprintf( str + strlen( str ), "priority=%d%s", P_ALARM, "," );
         sprintf( str + strlen( str ), "state=%d,\n", error_state );
         sprintf( str + strlen( str ), "type=%d,\n", AT_SPECIAL );
-        sprintf( str + strlen( str ), "group=\"%s\",\n", "Тревога" );
+        sprintf( str + strlen( str ), "group=\"%s\",\n", "тревога" );
 
         sprintf( str + strlen( str ), "id_n=%d,\n", simple_device->get_n() );
         sprintf( str + strlen( str ), "id_type=%d,\n", simple_device->get_type() );

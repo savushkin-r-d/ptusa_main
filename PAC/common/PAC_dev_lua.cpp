@@ -4969,7 +4969,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"ERR_OFF",tech_object::ERR_OFF);
    tolua_constant(tolua_S,"ERR_OFF_AND_ON",tech_object::ERR_OFF_AND_ON);
    tolua_constant(tolua_S,"ERR_DURING_WORK",tech_object::ERR_DURING_WORK);
-   tolua_constant(tolua_S,"ERR_SIMPLE",tech_object::ERR_SIMPLE);
+   tolua_constant(tolua_S,"ERR_SIMPLE",tech_object::ERR_ALARM);
    tolua_function(tolua_S,"set_err_msg",tolua_PAC_dev_tech_object_set_err_msg00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_TECH_OBJECT_MNGR",tolua_PAC_dev_G_TECH_OBJECT_MNGR00);

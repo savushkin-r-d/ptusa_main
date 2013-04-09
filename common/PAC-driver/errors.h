@@ -253,9 +253,11 @@ class tech_dev_error: public base_error
 
                 case tech_object::ERR_OFF:
                 case tech_object::ERR_OFF_AND_ON:
-                case tech_object::ERR_DURING_WORK:
-                case tech_object::ERR_SIMPLE:
+                case tech_object::ERR_DURING_WORK:                
                     return "сообщение";
+
+                case tech_object::ERR_ALARM:
+                    return "тревога";
                 }
 
             return "?";
@@ -272,8 +274,10 @@ class tech_dev_error: public base_error
                 case tech_object::ERR_OFF:
                 case tech_object::ERR_OFF_AND_ON:
                 case tech_object::ERR_DURING_WORK:
-                case tech_object::ERR_SIMPLE:
                     return P_MESSAGE;
+
+                case tech_object::ERR_ALARM:
+                    return P_ALARM;
                 }
 
             return P_ALARM;

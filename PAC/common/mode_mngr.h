@@ -299,6 +299,7 @@ class step
 
     private: 
         std::vector< action* > actions; ///< Действия.           
+        action action_stub;             ///< Фиктивное действие.
         u_int_4 start_time;             ///< Время старта шага.   
 
         bool is_mode;     ///< Выполняется ли все время во время режима.

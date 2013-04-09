@@ -142,7 +142,8 @@ int required_DI_action::check( char* reason ) const
 //-----------------------------------------------------------------------------
 step::step( std::string name, bool is_mode /*= false */ ) : start_time( 0 ),
     is_mode( is_mode ),
-    name( name )
+    name( name ),
+    action_stub( "Заглушка" )
     {
     actions.push_back( new on_action() );
     actions.push_back( new off_action() );
@@ -234,7 +235,7 @@ action* step::operator[]( int idx )
         idx, actions.size() );
 #endif // DEBUG
 
-    return 0;
+    return &action_stub;
     }
 //-----------------------------------------------------------------------------
 bool step::is_empty() const

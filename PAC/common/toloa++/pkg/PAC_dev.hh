@@ -491,7 +491,7 @@ class tech_object
             ERR_OFF,
             ERR_OFF_AND_ON,
             ERR_DURING_WORK,
-            ERR_SIMPLE,
+            ERR_ALARM,
             };
 
         int set_err_msg( const char *err_msg, int mode, int new_mode = 0, 
