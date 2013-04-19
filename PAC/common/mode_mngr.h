@@ -1,28 +1,28 @@
 /// @file mode_mngr.h
 /// @brief Содержит описания классов, которые используются для организации шагов
 /// при выполнении режимов танка, гребенки.
-/// 
-/// Класс @ref step, служащий для организации работы с шагом, содержит всю  
-/// необходимую информацию - список открываемых\закрываемых устройств,  
-/// параметры шага, связанный с ним маршрут гребенки. Шаг - представляет ход  
-/// протекания технологического процесса, включение\выключение которого  
-/// происходит автоматически, без непосредственного участия оператора. В 
-/// отличие от режима, который оператор включает\выключает сам. Для хранения 
-/// всех режимов объекта служит класс @ref mode_manager. 
-/// Класс @ref action содержит списки устройств и выполняет над ними 
-/// определенные действия. 
-/// 
+///
+/// Класс @ref step, служащий для организации работы с шагом, содержит всю
+/// необходимую информацию - список открываемых\закрываемых устройств,
+/// параметры шага, связанный с ним маршрут гребенки. Шаг - представляет ход
+/// протекания технологического процесса, включение\выключение которого
+/// происходит автоматически, без непосредственного участия оператора. В
+/// отличие от режима, который оператор включает\выключает сам. Для хранения
+/// всех режимов объекта служит класс @ref mode_manager.
+/// Класс @ref action содержит списки устройств и выполняет над ними
+/// определенные действия.
+///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
-/// 
+///
 /// @par Текущая версия:
 /// @$Rev$.\n
 /// @$Author$.\n
 /// @$Date::                     $.
 
-#ifndef MODE_MNGR 
-#define MODE_MNGR 
+#ifndef MODE_MNGR
+#define MODE_MNGR
 
 #include <string>
 
@@ -39,13 +39,13 @@ class action
     {
     public:
         action( std::string name, u_int group_cnt = 1 );
-        
+
         virtual ~action()
-            {            
+            {
             }
 
         /// @brief Проверка на отсутствие устройств.
-        /// 
+        ///
         /// @return true  Есть устройства, над которыми что-то делается.
         /// @return false Нет устройств, над которыми что-то делается.
         virtual bool is_empty() const;
@@ -53,11 +53,11 @@ class action
         virtual void print( const char* prefix = "" ) const;
 
         /// @brief Проверка действия.
-        /// 
+        ///
         /// @param [out] reason Пояснение, почему нельзя выполнить действие.
-        virtual int check( char* reason ) const 
+        virtual int check( char* reason ) const
             {
-            return 0; 
+            return 0;
             }
 
         /// @brief Инициализация действия.
@@ -66,7 +66,7 @@ class action
         /// @brief Выполнение действия.
         ///
         /// @return результат выполнения действия. Трактуется в зависимости от
-        /// действия.        
+        /// действия.
         virtual void evaluate() {}
 
         /// @brief Завершения действия.
@@ -74,7 +74,7 @@ class action
 
         /// @brief Добавление устройства к действию.
         ///
-        /// @param [in] dev Устройство. 
+        /// @param [in] dev Устройство.
         /// @param [in] group Группа устройства.
         virtual void add_dev( device *dev, u_int group = 0 )
             {
@@ -105,10 +105,10 @@ class action
         /// @param [in] group Дополнительный параметр.
         /// @param [in] subgroup Дополнительный параметр.
         virtual void add_dev( device *dev, u_int group, u_int subgroup ) {}
-        
 
-    protected: 
-        std::vector< std::vector< device* > > devices; ///< Устройства.   
+
+    protected:
+        std::vector< std::vector< device* > > devices; ///< Устройства.
         std::string name;               ///< Имя действия.
     };
 //-----------------------------------------------------------------------------
@@ -163,8 +163,8 @@ class open_seat_action: public action
     private:
         enum PHASES
             {
-            P_WAIT = 0,            
-            P_OPEN_UPPER,            
+            P_WAIT = 0,
+            P_OPEN_UPPER,
             P_OPEN_LOWER,
             };
 
@@ -212,7 +212,7 @@ class required_DI_action: public action
         int check( char* reason ) const;
 
         void final()
-            {            
+            {
             }
     };
 //-----------------------------------------------------------------------------
@@ -244,7 +244,7 @@ class wash_action: public action
 ///
 /// У режима может быть активным (выполняться) только один шаг.
 class step
-    {    
+    {
     public:
         enum ACTIONS
             {
@@ -253,7 +253,7 @@ class step
             A_UPPER_SEATS_ON,
             A_LOWER_SEATS_ON = A_UPPER_SEATS_ON,
 
-            A_REQUIRED_FB,                        
+            A_REQUIRED_FB,
             A_DO_DI,
             A_WASH,
             };
@@ -292,22 +292,22 @@ class step
         void print( const char* prefix = "" ) const;
 
         /// @brief Проверка на отсутствие устройств.
-        /// 
+        ///
         /// @return true  Есть устройства, над которыми что-то делается.
         /// @return false Нет устройств, над которыми что-то делается.
         bool is_empty() const;
 
-    private: 
-        std::vector< action* > actions; ///< Действия.           
+    private:
+        std::vector< action* > actions; ///< Действия.
         action action_stub;             ///< Фиктивное действие.
-        u_int_4 start_time;             ///< Время старта шага.   
+        u_int_4 start_time;             ///< Время старта шага.
 
         bool is_mode;     ///< Выполняется ли все время во время режима.
         std::string name; ///< Имя.
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию о режиме, состоящем из шагов.
-/// 
+///
 /// У объекта (танк, ...) может быть включено параллельно несколько режимов.
 class mode
     {
@@ -340,7 +340,7 @@ class mode
             {
             return get_delta_millisec( start_time );
             }
-        
+
         u_long active_step_evaluation_time() const
             {
             if ( active_step_n >= 0 )
@@ -348,7 +348,7 @@ class mode
                 return get_delta_millisec( steps[ active_step_n ]->get_start_time() );
                 }
 
-            return 0;            
+            return 0;
             }
 
         u_int active_step() const
@@ -369,13 +369,13 @@ class mode
         std::vector< step* > steps;
 
         step* mode_step;
-        
+
         int active_step_n;           ///< Активный шаг.
         int active_step_time;        ///< Время активного шага.
         int active_step_next_step_n; ///< Следующий шаг.
-        
+
         /// @brief Номера параметров времен шагов.
-        std::vector< int > step_duration_par_ns; 
+        std::vector< int > step_duration_par_ns;
 
         /// @brief Следующие шаги.
         std::vector< int > next_step_ns;
@@ -389,23 +389,23 @@ class mode
         int n;          ///< Номер.
     };
 //-----------------------------------------------------------------------------
-/// @brief Содержит информацию о всех режимах какого-либо объекта (танк, 
+/// @brief Содержит информацию о всех режимах какого-либо объекта (танк,
 /// гребенка).
-/// 
+///
 /// У объекта (танк, ...) может быть включено параллельно несколько режимов.
 class mode_manager
-    {    
+    {
     public:
         mode_manager( u_int modes_cnt );
 
         ~mode_manager();
-        
+
         const char* get_mode_name( int n ) const
             {
-            if ( n > 0 && ( u_int ) n < modes.size() )
+            if ( n >= 0 && ( u_int ) n < modes.size() )
                 {
                 return modes[ n ]->get_name()->c_str();
-                }            
+                }
 
             return UNKN_MODE_NAME;
             }
@@ -431,11 +431,11 @@ class mode_manager
         unsigned long get_idle_time();
 
         /// @brief Отладочный вывод объекта в консоль.
-        void print();       
+        void print();
 
     private:
         /// @brief Параметры, содержащие продолжительность шагов, режимов.
-        saved_params_float *par; 
+        saved_params_float *par;
 
         std::vector< mode* > modes; ///< Режимы.
 

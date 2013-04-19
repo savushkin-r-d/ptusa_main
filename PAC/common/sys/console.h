@@ -1,12 +1,12 @@
 /// @file console.h
-/// @brief Работа с консолью вне зависимости от аппаратной реализации. Также 
+/// @brief Работа с консолью вне зависимости от аппаратной реализации. Также
 /// некоторые безопасные функции работы со строками.
-/// 
+///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
 /// @c DEBUG    - компиляция c выводом отладочной информации в консоль.@n@n
-/// 
+///
 /// @par Текущая версия:
 /// @$Rev: 220 $.\n
 /// @$Author: id $.\n
@@ -17,15 +17,19 @@
 
 #if !defined WIN_OS && !defined LINUX_OS && !defined MINIOS7
 #error You must define OS!
-#endif 
+#endif
 
 #include <string.h>
 #include <stdio.h>
 
 #include "s_types.h"
 //-----------------------------------------------------------------------------
+#if defined PAC_PC
+#define strlcpy strncpy
+#endif
+
 /// @brief Печать в консоль.
-#ifndef MINIOS7 
+#ifndef MINIOS7
 #define Print( ... )
 #endif // MINIOS7
 

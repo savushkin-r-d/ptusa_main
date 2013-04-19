@@ -33,13 +33,13 @@ void par_device::save_device ( char *str )
     {
     str[ 0 ] = 0;
 
-    for ( u_int i = 1; i <= par.get_count(); i++ )
+    for ( u_int i = 0; i < par.get_count(); i++ )
         {
-        if ( par_name[ i - 1 ] )
+        if ( par_name[ i ] )
             {
-            sprintf( str + strlen( str ), "%s=", par_name[ i - 1 ] );
+            sprintf( str + strlen( str ), "%s=", par_name[ i ] );
 
-            float val =  par[ i ];
+            float val =  par[ i + 1 ];
             if ( 0. == val )
                 {
                 sprintf( str + strlen( str ), "0, " );
@@ -66,7 +66,7 @@ int par_device::set_cmd( const char *name, double val )
         {
         if ( strcmp( par_name[ i ], name ) == 0 )
             {
-            par[ i ] = ( float ) val;
+            par.save( i + 1, ( float ) val );
 #ifdef DEBUG
             Print( "par_device::set_cmd() - name = %s, val = %f.\n",
                 name, val );
@@ -159,14 +159,18 @@ void par_device::set_par_name( u_int idx, u_int offset, const char* name )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void device::set_name( const char *new_name, const char *new_description )
-    {    
-    name        = new_name;
-    Lua_name    = new_name; 
-    description = new_description;
+    {
+    strlcpy( name, new_name, sizeof( name ) );
+    strlcpy( Lua_name, new_name, sizeof( Lua_name ) );
+
+    //Копирование с учетом нуль-символа.
+    description = new char[ strlen( new_description ) + 1 ];
+    strlcpy( description, new_description, strlen( new_description ) + 1 );
 
     if ( isdigit( new_name[ 0 ] ) )
-        {        
-        Lua_name = "_" + Lua_name; //1V1 -> _1V1
+        {
+        Lua_name[ 0 ] = '_'; //1V1 -> _1V1
+        strlcpy( Lua_name + 1, new_name, sizeof( Lua_name ) - 1 );
         }
     }
 //-----------------------------------------------------------------------------
@@ -197,7 +201,7 @@ void device::off()
 int device::save_device( char *buff, const char *prefix )
     {
     sprintf( buff, "%s%s={M=%d, ",
-        prefix,  Lua_name.c_str(), is_manual_mode );
+        prefix,  Lua_name, is_manual_mode );
 
     if ( type != DT_AO &&
         type != DT_TE )
@@ -404,7 +408,7 @@ void device_manager::print() const
     for ( u_int i = 0; i < project_devices.size(); i++ )
         {
         Print( "    %3i. ", i + 1 );
-        Print( "%s\t%s",
+        Print( "%-8s %s",
             project_devices[ i ]->get_name(), project_devices[ i ]->get_description() );
         Print( "\n" );
         }

@@ -36,7 +36,7 @@ struct socket_state
     };
 //-----------------------------------------------------------------------------
 /// @brief Коммуникатор для Linux - обмен данными PAC<->сервер.
-class tcp_communicator_linux : public tcp_communicator 
+class tcp_communicator_linux : public tcp_communicator
     {
         public:
             tcp_communicator_linux( const char *name );
@@ -60,7 +60,7 @@ class tcp_communicator_linux : public tcp_communicator
             ///
             /// @param skt - сокет.
             int do_echo( int skt );
-            
+
             u_long glob_last_transfer_time;  ///< Время последней успешной передачи данных.
 
             timeval tv;                      ///< Задержка ожидания функции опроса состояний сокетов, 0 по умолчанию.
@@ -92,7 +92,7 @@ class tcp_communicator_linux : public tcp_communicator
             /// @return -2   - ошибка таймаута.
             /// @return >= 0 - размер реально считанных данных.
             static int  recvtimeout( int s, u_char *buf, int len,
-                int timeout, int usec, char* IP );
+                int sec, int usec, char* IP );
 	};
 //-----------------------------------------------------------------------------
 #endif //TCP_CMCTR_LINUX

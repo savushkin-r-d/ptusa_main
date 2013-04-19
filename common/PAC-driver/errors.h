@@ -253,7 +253,7 @@ class tech_dev_error: public base_error
 
                 case tech_object::ERR_OFF:
                 case tech_object::ERR_OFF_AND_ON:
-                case tech_object::ERR_DURING_WORK:                
+                case tech_object::ERR_DURING_WORK:
                     return "сообщение";
 
                 case tech_object::ERR_ALARM:
@@ -294,6 +294,10 @@ class tech_dev_error: public base_error
                     tech_dev->get_errors().erase(
                         tech_dev->get_errors().begin() + i );
 
+#ifdef DEBUG
+            Print( "Object %d set cmd %d [%d]!\n",
+                object_alarm_number, cmd, object_alarm_number );
+#endif // DEBUG
                     was_set_cmd = true;
                     return 0;
                     }

@@ -39,7 +39,7 @@ int main( int argc, char *argv[] )
 
     if ( argc < 2 )
         {
-        Print( "Usage: main script.plua\n" );
+        fprintf( stderr, "Usage: main script.plua\n" );
         return EXIT_SUCCESS;
         }
 

@@ -57,7 +57,7 @@ int wago_manager_linux::net_init( wago_node *node )
     FD_SET( sock, &rdevents );
 
     tv.tv_sec  = 0;
-    tv.tv_usec = 200000;
+    tv.tv_usec = 100000;
 
     err = select( sock + 1, 0, &rdevents, 0, &tv );
 

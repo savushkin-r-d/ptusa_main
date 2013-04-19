@@ -17,9 +17,9 @@ class PAC_info: public i_Lua_save_device
             {
             P_PARAMS_COUNT  = 3,   ///< Количество параметров.
 
-            P_CTR_ERROR_TIME  = 1, ///< Время ожидания ошибки счетчика, мсек.                                    
-            P_MIX_FLIP_PERIOD,     ///< Интервал промывки седел клапанов, сек. 
-            P_MIX_FLIP_TIME,       ///< Время промывки седел клапанов, мсек. 
+            P_CTR_ERROR_TIME  = 1, ///< Время ожидания ошибки счетчика, мсек.
+            P_MIX_FLIP_PERIOD,     ///< Интервал промывки седел клапанов, сек.
+            P_MIX_FLIP_TIME,       ///< Время промывки седел клапанов, мсек.
             };
 
         saved_params_u_int_4 *par;
@@ -42,12 +42,12 @@ class PAC_info: public i_Lua_save_device
             return "SYSTEM";
             }
 
-    private:   
+    private:
         PAC_info();
 
         static auto_smart_ptr < PAC_info > instance;///< Экземпляр класса.
 
-        static const u_int_4 MSEC_IN_DAY; 
+        static const u_int_4 MSEC_IN_DAY;
         enum CONSTANTS
             {
             C_MAX_STR_LENGTH = 50,

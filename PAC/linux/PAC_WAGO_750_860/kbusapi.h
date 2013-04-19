@@ -1,6 +1,6 @@
 #include <asm/types.h>
 
-#define IOCTL_KBUSUPDATE           _IOWR(253 ,1, void *)
+#define IOCTL_KBUSUPDATE           _IOWR(253, 1, void *)
 #define IOCTL_GETBININPUTOFFSET    _IOWR(253, 2, void *)
 #define IOCTL_GETBINOUTPUTOFFSET   _IOWR(253, 3, void *)
 #define IOCTL_CHANGE_UPDATE_SPEED  _IOWR(253, 4, void *)

@@ -104,17 +104,35 @@ int project_manager::lua_load_configuration()
     lua_manager::get_instance()->void_exec_lua_method( "system",
         "create_devices", "project_manager::lua_load_configuration()" );
 
+#ifdef DEBUG
+    printf( "Получение имен и комментария к устройствам из Lua...\n");
+#endif // DEBUG
     //Получение имен и комментария к устройствам из Lua.
     lua_manager::get_instance()->void_exec_lua_method( "system",
         "init_devices_names", "project_manager::lua_load_configuration()" );
-    
+#ifdef DEBUG
+    printf( "Oк.\n");
+#endif // DEBUG
+
+#ifdef DEBUG
+    printf( "Name for devices to access from Lua...\n");
+#endif // DEBUG
     //-Name for devices to access from Lua.
     lua_manager::get_instance()->void_exec_lua_method( "system",
         "init_dev_names", "project_manager::lua_load_configuration()" );
+#ifdef DEBUG
+    printf( "Oк.\n");
+#endif // DEBUG
 
+#ifdef DEBUG
+    printf( "Devices properties...\n");
+#endif // DEBUG
     //-Devices properties.
     lua_manager::get_instance()->void_exec_lua_method( "system",
         "init_devices_properties", "project_manager::lua_load_configuration()" );
+#ifdef DEBUG
+    printf( "Oк.\n");
+#endif // DEBUG
 
 #ifdef DEBUG
     G_DEVICE_MANAGER()->print();

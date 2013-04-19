@@ -355,17 +355,17 @@ class device : public i_DO_AO_device, public par_device
 
         const char *get_name() const
             {
-            return name.c_str();
+            return name;
             }
 
         const char *get_Lua_name() const
             {
-            return Lua_name.c_str();
+            return Lua_name;
             }
 
         const char *get_description() const
             {
-            return description.c_str();
+            return description;
             }
 
         void set_name( const char *new_name, const char *new_description );
@@ -433,10 +433,10 @@ class device : public i_DO_AO_device, public par_device
     private:
         bool is_manual_mode;      ///< Признак ручного режима.
 
-        std::string name;
-        std::string description;
+        char name[ 10 ];
+        char *description;
 
-        std::string Lua_name;     ///Имя устройства в Lua (клапан 1V1 в Lua будет _1V1).
+        char Lua_name[ 10 ];     ///Имя устройства в Lua (клапан 1V1 в Lua будет _1V1).
     };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство.

@@ -23,7 +23,7 @@ netOK( 0 )
 
     sin_len = sizeof( ssin );
     strcpy( host_name, name );
-    
+
 #ifdef DEBUG
     printf ( "PAC name \"%s\".\n", host_name );
 #endif // DEBUG
@@ -195,8 +195,8 @@ int tcp_communicator_linux::evaluate()
             {
             glob_cmctr_ok = 0;
             PAC_critical_errors_manager::get_instance()->set_global_error(
-                PAC_critical_errors_manager::AC_NO_CONNECTION, 
-                PAC_critical_errors_manager::AS_EASYSERVER, 
+                PAC_critical_errors_manager::AC_NO_CONNECTION,
+                PAC_critical_errors_manager::AS_EASYSERVER,
                 PAC_critical_errors_manager::AS_EASYSERVER );
             }
         }
@@ -206,8 +206,8 @@ int tcp_communicator_linux::evaluate()
             {
             glob_cmctr_ok = 1;
             PAC_critical_errors_manager::get_instance()->reset_global_error(
-                PAC_critical_errors_manager::AC_NO_CONNECTION, 
-                PAC_critical_errors_manager::AS_EASYSERVER, 
+                PAC_critical_errors_manager::AC_NO_CONNECTION,
+                PAC_critical_errors_manager::AS_EASYSERVER,
                 PAC_critical_errors_manager::AS_EASYSERVER );
             }
         }
@@ -230,7 +230,7 @@ int tcp_communicator_linux::evaluate()
         FD_ZERO( &rfds );
         for ( int i = 0; i < MAX_SOCKETS; i++ )
             {
-            if ( sst[ i ].active && 
+            if ( sst[ i ].active &&
                 sst[ i ].is_listener &&
                 !sst[ i ].evaluated )
                 {
@@ -246,7 +246,7 @@ int tcp_communicator_linux::evaluate()
 
         if ( rc < 0 )
             {
-#ifdef DEBUG            
+#ifdef DEBUG
             perror( "selectsocket() error" );
 #endif
             continue;
@@ -265,15 +265,15 @@ int tcp_communicator_linux::evaluate()
                      {
                     /* master socket */
                     memset( &ssin, 0, sizeof ( ssin ) );
-                    slave_socket = accept ( i, 
+                    slave_socket = accept ( i,
                         ( struct sockaddr * ) &ssin, &sin_len );
 
                     if ( slave_socket <= 0 )    // Ошибка.
                         {
 #ifdef DEBUG
                         perror( "accept() error" );
-#endif                        
-                        continue;   
+#endif
+                        continue;
                         }
 
 #ifdef MODBUS
@@ -286,7 +286,7 @@ int tcp_communicator_linux::evaluate()
                         }
 #endif
                     // Установка сокета в неблокирующий режим.
-                    if ( fcntl( slave_socket, F_SETFL, O_NONBLOCK ) < 0 ) 
+                    if ( fcntl( slave_socket, F_SETFL, O_NONBLOCK ) < 0 )
                         {
                         // Ошибка, разрушаем сокет.
                         shutdown( slave_socket, 0 );
@@ -339,7 +339,7 @@ int tcp_communicator_linux::evaluate()
     }
 //------------------------------------------------------------------------------
 int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
-    int len, int timeout, int usec, char* IP )
+    int len, int sec, int usec, char* IP )
     {
     // Настраиваем  file descriptor set.
     fd_set fds;
@@ -348,22 +348,22 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
 
     // Настраиваем время на таймаут.
     timeval rec_tv;
-    rec_tv.tv_sec = timeout;
+    rec_tv.tv_sec = sec;
     rec_tv.tv_usec = usec;
 
     // Ждем таймаута или полученных данных.
     int n = select( s + 1, &fds, NULL, NULL, &rec_tv );
-    if ( 0 == n ) 
+    if ( 0 == n )
         {
 #if DEBUG
         print_time( "Socket %d->\"%s\" disconnected on read try - timeout.\n",
             s, IP );
 #endif
-        
+
         return -2;  // timeout!
         }
 
-    if ( -1 == n ) 
+    if ( -1 == n )
         {
 #if DEBUG
         print_time( "Socket %d->\"%s\" disconnected on read try : %s\n",
@@ -372,9 +372,9 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
         return -1; // error
         }
 
-    // Данные должны быть здесь, поэтому делаем обычный recv().    
+    // Данные должны быть здесь, поэтому делаем обычный recv().
     int res = recv( s, buf, len, MSG_NOSIGNAL );
-    
+
     if ( 0 == res )
         {
 #if DEBUG
@@ -390,16 +390,16 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
             s, IP, strerror( errno ) );
 #endif
         }
-    
+
     return res;
     }
 //------------------------------------------------------------------------------
 int tcp_communicator_linux::do_echo ( int skt )
     {
     FD_CLR( skt, &rfds );
-    
+
     int err = 0, res;
-    
+
     if ( sst[ skt ].init )         /* socket is just initiated */
         {
         sst[ skt ].init = 0;
@@ -411,7 +411,7 @@ int tcp_communicator_linux::do_echo ( int skt )
 
     sst[ skt ].evaluated = 1;
     memset( buf, 0, BUFSIZE );
-    
+
     // Ожидаем данные с таймаутом 1 сек.
     err = in_buffer_count = recvtimeout( skt, buf, BUFSIZE, 5, 0,
         inet_ntoa( sst[ skt ].sin.sin_addr ) );

@@ -1,7 +1,7 @@
 #
-#  There exist several targets which are by default empty and which can be 
-#  used for execution of your targets. These targets are usually executed 
-#  before and after some main targets. They are: 
+#  There exist several targets which are by default empty and which can be
+#  used for execution of your targets. These targets are usually executed
+#  before and after some main targets. They are:
 #
 #     .build-pre:              called before 'build' target
 #     .build-post:             called after 'build' target
@@ -17,13 +17,13 @@
 #  Targets beginning with '.' are not intended to be called on their own.
 #
 #  Main targets can be executed directly, and they are:
-#  
+#
 #     build                    build a specific configuration
 #     clean                    remove built files from a configuration
 #     clobber                  remove all built files
 #     all                      build all configurations
 #     help                     print help mesage
-#  
+#
 #  Targets .build-impl, .clean-impl, .clobber-impl, .all-impl, and
 #  .help-impl are implemented in nbproject/makefile-impl.mk.
 #
@@ -44,7 +44,7 @@
 # NOCDDL
 
 
-# Environment 
+# Environment
 MKDIR=mkdir
 CP=cp
 CCADMIN=CCadmin
@@ -53,7 +53,7 @@ RANLIB=ranlib
 #my var
 out_dir     = ""${HOME}/id_share/out/""
 lua_sys_dir = ""${HOME}/PTUSA_projects/system scripts/""
-lua_prg_dir = ""${HOME}/PTUSA_projects/projects/paster_device_2/""
+lua_prg_dir = ""${HOME}/PTUSA_projects/projects/whey/""
 
 # build
 build: .build-post
@@ -67,25 +67,27 @@ build: .build-post
 		echo ;\
 		echo copying files...;\
 \
-		echo "${CND_ARTIFACT_PATH_${CONF}}main >>  ${out_dir}main";\
+		echo "${CND_ARTIFACT_PATH_${CONF}}main >> ${out_dir}main";\
 		cp    ${CND_ARTIFACT_PATH_${CONF}} "${out_dir}main";\
-\
-		echo "${lua_sys_dir}sys.wago.lua\t >> ${out_dir}sys.wago.lua";\
+		echo "";\
+		echo "${lua_sys_dir}sys.wago.lua    >> ${out_dir}sys.wago.lua";\
 		cp   "${lua_sys_dir}sys.wago.lua" ${out_dir};\
-		echo "${lua_sys_dir}sys.objects.lua\t      >> ${out_dir}sys.objects.lua";\
+		echo "${lua_sys_dir}sys.devices.lua >> ${out_dir}sys.odevices.lua";\
+		cp   "${lua_sys_dir}sys.devices.lua" ${out_dir};\
+		echo "${lua_sys_dir}sys.objects.lua >> ${out_dir}sys.objects.lua";\
 		cp   "${lua_sys_dir}sys.objects.lua" ${out_dir};\
-\
+		echo "";\
 		echo "${lua_prg_dir}main.wago.lua    >> ${out_dir}";\
 		cp   "${lua_prg_dir}main.wago.lua" ${out_dir};\
-		echo "${lua_prg_dir}main.devices.lua    >> ${out_dir}";\
+		echo "${lua_prg_dir}main.devices.lua >> ${out_dir}";\
 		cp   "${lua_prg_dir}main.devices.lua" ${out_dir};\
-		echo "${lua_prg_dir}main.objects.lua    >> ${out_dir}";\
+		echo "${lua_prg_dir}main.objects.lua >> ${out_dir}";\
 		cp   "${lua_prg_dir}main.objects.lua" ${out_dir};\
-		echo "${lua_prg_dir}main.plua\t >> ${out_dir}";\
+		echo "${lua_prg_dir}main.plua        >> ${out_dir}";\
 		cp   "${lua_prg_dir}main.plua" ${out_dir};\
 \
 		echo done;\
-	fi 	
+	fi
 
 # clean
 clean: .clean-post

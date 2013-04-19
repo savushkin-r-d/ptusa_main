@@ -10,6 +10,7 @@ static volatile T_PabVarUnion * pstPabOUT = (volatile T_PabVarUnion*)(0xFFE060+s
 wago_manager_w750::wago_manager_w750()
     {
     KbusOpen();
+    KbusUpdate();
     }
 //-----------------------------------------------------------------------------
 wago_manager_w750::~wago_manager_w750()
@@ -24,15 +25,17 @@ int wago_manager_w750::read_inputs()
 
     for ( u_int i = 0; i < nodes_count; i++ )
         {
-        if ( nodes[ i ]->type == wago_node::T_750_860 ) // KBus
+        if ( nodes[ i ]->type == wago_node::T_750_860 ||
+                nodes[ i ]->type == wago_node::T_750_863 ) // KBus
             {
             KbusUpdate();
 
             // DI
-            int start_pos = KbusGetBinaryInputOffset();
-            start_pos = start_pos / 8;
+            int start_pos = nodes[ i ]->AI_size;//KbusGetBinaryInputOffset();
 
-            //Print( "read_inputs() start_pos = %d\n", start_pos );
+#ifdef DEBUG_KBUS
+            Print( "read_inputs() start_pos = %d\n", start_pos );
+#endif // DEBUG_KBUS
 
             for ( u_int j = 0; j < nodes[ i ]->DI_cnt; j++ )
                 {
@@ -69,9 +72,13 @@ int wago_manager_w750::read_inputs()
                     }
                 nodes[ i ]->AI[ j ] = val;
 #ifdef DEBUG_KBUS
-                Print( "%d -> %u\n, ", j, nodes[ i ]->AI[ j ] );
+                Print( "%d -> %u, ", j, nodes[ i ]->AI[ j ] );
 #endif // DEBUG_KBUS
                 }
+#ifdef DEBUG_KBUS
+            printf( "\n" );
+#endif // DEBUG_KBUS
+
             }// if ( nodes[ i ]->type == wago_node::T_750_860 ) // KBus
 
         if ( nodes[ i ]->type == wago_node::T_750_341 || // Ethernet Wago nodes.
@@ -111,10 +118,16 @@ int wago_manager_w750::read_inputs()
                                      {
                                      nodes[ i ]->DI[ idx ] =
                                          ( buff[ j + 9 ] >> k ) & 1;
+#ifdef DEBUG_KBUS
+                printf( "%d -> %d, ", idx, nodes[ i ]->DI[ idx ] );
+#endif // DEBUG_KBUS
                                      idx++;
                                      }
                                  }
                              }
+#ifdef DEBUG_KBUS
+            printf( "\n" );
+#endif // DEBUG_KBUS
                          }
                          else
                          {
@@ -184,10 +197,11 @@ int wago_manager_w750::write_outputs()
 
     for ( u_int i = 0; i < nodes_count; i++ )
         {
-        if ( nodes[ i ]->type == wago_node::T_750_860 ) // KBus
+        if ( nodes[ i ]->type == wago_node::T_750_860 ||
+                nodes[ i ]->type == wago_node::T_750_863 ) // KBus
             {
             // DO
-            int start_pos = KbusGetBinaryOutputOffset() / 8;
+            int start_pos = nodes[ i ]->AO_size;//KbusGetBinaryOutputOffset();
 
 #ifdef DEBUG_KBUS
             Print( "write_outputs() start_pos = %d\n", start_pos );

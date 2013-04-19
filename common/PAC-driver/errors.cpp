@@ -73,9 +73,9 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
 
     if ( AS_ALARM == error_state || AS_ACCEPT == error_state ||
         AS_RETURN == error_state ) // Есть ошибка.
-        {        
+        {
         unsigned char alarm_params = err_par[ P_PARAM_N ];
- 
+
         sprintf( str + strlen( str ), "\t%s\n", "{" );
 
         sprintf( str + strlen( str ), "\tdescription=\"%s - %s\",\n",
@@ -88,8 +88,8 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
 
         sprintf( str + strlen( str ), "id_n=%d,\n", simple_device->get_n() );
         sprintf( str + strlen( str ), "id_type=%d,\n", simple_device->get_type() );
-        
-        sprintf( str + strlen( str ), "suppress=%s\n", 
+
+        sprintf( str + strlen( str ), "suppress=%s\n",
             alarm_params && P_IS_SUPPRESS ? "true" : "false" );
 
         sprintf( str + strlen( str ), "},\n" );

@@ -1,16 +1,16 @@
 /// @file PAC_err.h
-/// @brief Содержит описания классов, которые используются для организации 
+/// @brief Содержит описания классов, которые используются для организации
 /// работы с критическими ошибками PAC.
-/// 
-/// Класс @ref PAC_critical_errors_manager, служащий для организации работы с 
-/// ошибками простых устройств, содержит всю необходимую информацию. Для сбора 
-/// всех ошибок служит структура @ref PAC_critical_errors_manager::critical_error. 
-/// 
+///
+/// Класс @ref PAC_critical_errors_manager, служащий для организации работы с
+/// ошибками простых устройств, содержит всю необходимую информацию. Для сбора
+/// всех ошибок служит структура @ref PAC_critical_errors_manager::critical_error.
+///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
 /// @c PAC_ERRORS_H - включение данного файла в компиляцию только один раз.@n
-/// 
+///
 /// @par Текущая версия:
 /// @$Rev$.\n
 /// @$Author$.\n
@@ -31,14 +31,14 @@
 //0, 1, n - нет связи с узлом Wago номер n.
 //0, 2, n - нет связи с панелью номер n.
 //0, 3, n - нет связи с Modbus устройством номер n.
-//0, 4, 4 - 
+//0, 4, 4 -
 //0, 5, 5 - нет связи с сервером.
 //
-//1, 1 - ошибка работы с COM-портом WAGO. 
+//1, 1 - ошибка работы с COM-портом WAGO.
 //      1 - CRC error
 //
 //13 - ошибки времени работы:
-//  1, n  - нажата аварийная кнопка номер n. 
+//  1, n  - нажата аварийная кнопка номер n.
 //-----------------------------------------------------------------------------
 class PAC_critical_errors_manager
     {
@@ -76,12 +76,12 @@ class PAC_critical_errors_manager
             GE_ERROR_SIZE = 3,      ///< Размер одной ошибки, байт.
             };
 
-        PAC_critical_errors_manager();        
+        PAC_critical_errors_manager();
 
         void show_errors();
-        void set_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1, 
+        void set_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1,
             unsigned long param );
-        void reset_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1, 
+        void reset_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1,
             unsigned long param );
 
         int save_as_Lua_str( char *str, u_int_2 &id );
@@ -95,12 +95,12 @@ class PAC_critical_errors_manager
 
     private:
         const char* get_alarm_group()
-            {            
+            {
             return "Авария";
             }
 
         const char* get_alarm_descr( ALARM_CLASS err_class, ALARM_SUBCLASS err_sub_class, int par )
-            {    
+            {
             static char tmp[ 100 ] = "";
 
             switch( err_class )
@@ -111,17 +111,17 @@ class PAC_critical_errors_manager
             case AC_NO_CONNECTION:
                 switch( err_sub_class )
                     {
-                case AS_WAGO:                    
-                    snprintf( tmp, sizeof( tmp ), "узел Wago №%d", par );
+                case AS_WAGO:
+                    snprintf( tmp, sizeof( tmp ), "Нет связи с узлом Wago №%d", par );
                     return tmp;
 
-                case AS_PANEL:                    
-                    snprintf( tmp, sizeof( tmp ), "панель EasyView №%d", par );
+                case AS_PANEL:
+                    snprintf( tmp, sizeof( tmp ), "Нет связи с панелью EasyView №%d", par );
                     return tmp;
 
-                case AS_MODBUS_DEVICE:                    
-                    snprintf( tmp, sizeof( tmp ), "устройство, опрашиваемое по Modbus, №%d", par );
-                    return tmp;                    
+                case AS_MODBUS_DEVICE:
+                    snprintf( tmp, sizeof( tmp ), "Нет связи с устройством, опрашиваемое по Modbus, №%d", par );
+                    return tmp;
 
                 case AS_EASYSERVER:
                     return "EasyServer";
@@ -135,10 +135,10 @@ class PAC_critical_errors_manager
             case AC_RUNTIME_ERROR:
                 switch( err_sub_class )
                     {
-                case AS_EMERGENCY_BUTTON:                    
+                case AS_EMERGENCY_BUTTON:
                     snprintf( tmp, sizeof( tmp ), "нажата аварийная кнопка №%d", par );
-                    return tmp;   
-                    
+                    return tmp;
+
                 default:
                     return "?";
                     }// switch( err_sub_class )
@@ -146,7 +146,7 @@ class PAC_critical_errors_manager
 
             return "?";
             }
-    
+
         static auto_smart_ptr < PAC_critical_errors_manager > instance;
 
         struct critical_error

@@ -26,7 +26,7 @@ int KbusOpen()
 
   if(iFD < 0)
     {
-    printf("KBUSAPI: Failed opening fifo for writing: %s ", strerror(errno));
+    fprintf( stderr, "KBUSAPI: Failed opening fifo for writing: %s.\n", strerror(errno));
     return errno;
     }
 

@@ -1,6 +1,6 @@
 /// @file param_ex.h
 /// @brief Содержит описания классов, которые реализуют работу с параметрами.
-/// 
+///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
@@ -8,10 +8,10 @@
 /// @c KEY_CONFIRM - переход к следующему отладочному сообщению по нажатии
 /// клавиши.@n@n
 /// @c USE_SIMPLE_DEV_ERRORS   - компиляция с модулем ошибок устройств.@n
-/// @c USE_NO_TANK_COMB_DEVICE - компиляция без объектов Танк и Гребенка. Для 
+/// @c USE_NO_TANK_COMB_DEVICE - компиляция без объектов Танк и Гребенка. Для
 /// уменьшения размера программы при отсутствии таковых технологических
 /// объектов.
-/// 
+///
 /// @par Текущая версия:
 /// @$Rev$.\n
 /// @$Author$.\n
@@ -188,8 +188,16 @@ template < class type, bool is_float > class parameters
 #ifdef DEBUG
             else
                 {
-                Print( "parameters[] - error: index[ %u ] > count [ %u ]\n",
-                    index, count );
+                if ( 0 == index )
+                    {
+                    Print( "parameters[] - error: index = %u\n",
+                        index );
+                    }
+                else
+                    {
+                    Print( "parameters[] - error: index[ %u ] > count [ %u ]\n",
+                        index, count );
+                    }
                 }
 #endif // DEBUG
 
@@ -216,7 +224,7 @@ template < class type, bool is_float > class parameters
                     index, count );
                 }
 #endif // DEBUG
-                        
+
             return stub;
             }
         /// @brief Получение элемента через индекс.
@@ -258,7 +266,7 @@ template < class type, bool is_float > class parameters
             {
             stub = 0;
 
-            strncpy( this->name, name, sizeof( this->name ) );
+            strlcpy( this->name, name, sizeof( this->name ) );
 
 #ifdef DEBUG_IDE
             if ( 0 == count )
@@ -298,10 +306,10 @@ template < class type, bool is_float > class parameters
 
             return 0;
             }
-                
+
         int save_device( char *buff, const char *prefix )
             {
-            sprintf( buff, "%s%s = \n", prefix, name );            
+            sprintf( buff, "%s%s = \n", prefix, name );
             save_dev( buff + strlen( buff ), prefix );
 
             return strlen( buff );
@@ -320,7 +328,7 @@ template < class type, bool is_float > class parameters
             }
 
         /// Заглушка для обращения через индекс с выходом за диапазон.
-        type         stub; 
+        type         stub;
 
         unsigned int count;     ///< Количество элементов.
         type         *values;   ///< Указатель на массив значений элементов.
@@ -385,7 +393,7 @@ class run_time_params_float: public parameters < float, true >
             }
 
     protected:
-        
+
         float get_val( int idx )
             {
             return parameters< float, true >::get_val( idx );
@@ -403,7 +411,7 @@ class run_time_params_u_int_4: public parameters < u_int_4, false >
         /// @param count - количество параметров.
         /// @param name  - имя параметров.
         run_time_params_u_int_4( int count,
-            const char *name = "RT_PARAM_UI" ) : parameters < u_int_4, false >( count, name )           
+            const char *name = "RT_PARAM_UI" ) : parameters < u_int_4, false >( count, name )
             {
             }
 
@@ -411,7 +419,7 @@ class run_time_params_u_int_4: public parameters < u_int_4, false >
             {
             }
 
-    protected:        
+    protected:
         u_int_4 get_val( int idx )
             {
             return parameters< u_int_4, false >::get_val( idx );
@@ -432,7 +440,7 @@ public parameters < type, is_float >
         /// @param name  - имя объекта.
         saved_params( int count, const char *name ) : parameters < type, is_float >(
             count, name,
-            ( type* ) params_manager::get_instance()->get_params_data( 
+            ( type* ) params_manager::get_instance()->get_params_data(
             count * sizeof( type ), start_pos ) )
             {
             }
@@ -464,9 +472,9 @@ public parameters < type, is_float >
         //    type operator =( type value )
         //        {
         //        if ( par )
-        //            {                    
+        //            {
         //            par->save( idx, value );
-        //            }                
+        //            }
 
         //        return value;
         //        }
@@ -479,7 +487,7 @@ public parameters < type, is_float >
 ////        /// @return - значение элемента с заданным индексом. Если индекс
 ////        /// выходит за диапазон, возвращается значение заглушки - поля @ref
 ////        /// stub ( значение 0 ).
-////        proxy_data< type, is_float > operator[] ( unsigned int index )        
+////        proxy_data< type, is_float > operator[] ( unsigned int index )
 ////            {
 ////            if ( index < count )
 ////                {
@@ -504,18 +512,27 @@ public parameters < type, is_float >
         /// использовать данный метод.
         type save( u_int idx, type value )
             {
-            if ( idx < parameters< type, is_float >::get_count() )
+            if ( idx > 0 && idx <= parameters< type, is_float >::get_count() )
                 {
+                idx--;
                 parameters< type, is_float >::get_values()[ idx ] = value;
 
-                params_manager::get_instance()->save( 
+                params_manager::get_instance()->save(
                     start_pos + idx * sizeof( type ), sizeof( type ) );
                 }
 #ifdef DEBUG
             else
                 {
-                Print( "parameters:save - index[ %u ] > count [ %u ]\n",
-                    idx, parameters< type, is_float >::get_count() );
+                if ( 0 == idx )
+                    {
+                    Print( "parameters:save - index = %u\n",
+                        idx );
+                    }
+                else
+                    {
+                    Print( "parameters:save - index[ %u ] > count [ %u ]\n",
+                        idx, parameters< type, is_float >::get_count() );
+                    }
                 }
 #endif // DEBUG
             return value;
@@ -574,7 +591,7 @@ class saved_params_u_int_4: public saved_params < u_int_4, false >
               {
               }
 
-    protected:        
+    protected:
         u_int_4 get_val( int idx )
             {
             return saved_params< u_int_4, false >::get_val( idx );
@@ -582,7 +599,7 @@ class saved_params_u_int_4: public saved_params < u_int_4, false >
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с сохраняемыми параметрами типа float.
-class saved_params_float: public saved_params < float, true >     
+class saved_params_float: public saved_params < float, true >
     {
     public:
         /// @brief Конструктор.
@@ -597,7 +614,7 @@ class saved_params_float: public saved_params < float, true >
               {
               }
 
-    protected:        
+    protected:
         float get_val( int idx )
             {
             return saved_params< float, true >::get_val( idx );

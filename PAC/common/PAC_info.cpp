@@ -11,11 +11,11 @@ PAC_info::PAC_info() :
     up_hours( 0 ),
     up_mins( 0 ),
     up_secs( 0 ),
-    up_msec( 0 ),    
+    up_msec( 0 ),
     last_check_time( get_millisec() ),
-    reset_type( 1 ) //+ IsResetByWatchDogTimer()    
-    {  
-    strncpy( up_time_str, "0 дн. 0:0:0", sizeof( up_time_str ) );
+    reset_type( 1 ) //+ IsResetByWatchDogTimer()
+    {
+    strlcpy( up_time_str, "0 дн. 0:0:0", sizeof( up_time_str ) );
     }
 //-----------------------------------------------------------------------------
 PAC_info::~PAC_info()
@@ -32,7 +32,7 @@ void PAC_info::eval()
         if ( up_msec >= MSEC_IN_DAY )
             {
             up_days++;
-            up_msec %= MSEC_IN_DAY;            
+            up_msec %= MSEC_IN_DAY;
             }
         last_check_time = get_millisec();
 
@@ -74,18 +74,18 @@ int PAC_info::save_device( char *buff )
     sprintf( buff + answer_size, "\tUP_SECS=%d,\n", up_secs );
     answer_size += strlen( buff + answer_size );
 
-    sprintf( buff + answer_size, "\tUP_TIME=\"%s\",\n", 
+    sprintf( buff + answer_size, "\tUP_TIME=\"%s\",\n",
         up_time_str );
     answer_size += strlen( buff + answer_size );
 
 
-    sprintf( buff + answer_size, "\tWASH_VALVE_SEAT_PERIOD=%d,\n", 
+    sprintf( buff + answer_size, "\tWASH_VALVE_SEAT_PERIOD=%d,\n",
         par[ 0 ][ P_MIX_FLIP_PERIOD ] );
     answer_size += strlen( buff + answer_size );
-    sprintf( buff + answer_size, "\tWASH_VALVE_SEAT_TIME=%d,\n", 
+    sprintf( buff + answer_size, "\tWASH_VALVE_SEAT_TIME=%d,\n",
         par[ 0 ][ P_MIX_FLIP_TIME ] );
     answer_size += strlen( buff + answer_size );
-        
+
 
     sprintf( buff + answer_size, "\t}\n" );
     answer_size += strlen( buff + answer_size );

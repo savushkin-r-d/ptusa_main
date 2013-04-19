@@ -743,7 +743,7 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
     {
     if ( str_ip_address )
         {
-        strncpy( ip_address, str_ip_address, sizeof( ip_address ) );
+        strlcpy( ip_address, str_ip_address, sizeof( ip_address ) );
         }
     else
         {
@@ -752,7 +752,7 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
 
     if ( name )
         {
-        strncpy( this->name, name, sizeof( this->name ) );
+        strlcpy( this->name, name, sizeof( this->name ) );
         }
     else
         {

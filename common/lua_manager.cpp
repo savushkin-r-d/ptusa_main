@@ -123,7 +123,7 @@ const int FILES_VERSION[ FILE_CNT ] =
 int lua_manager::init( lua_State* lua_state, char* script_name )
     {
 #if defined DEBUG
-    Print( "Init Lua.\n" );
+    Print( "Init Lua...\n" );
 #endif
 
     if ( 0 == lua_state )
@@ -305,6 +305,9 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
     params_manager::get_instance()->init( PAC_ID );
     params_manager::get_instance()->final_init();
 
+#if defined DEBUG
+    Print( "Init Lua Ok.\n" );
+#endif
     return 0;
     }
 //-----------------------------------------------------------------------------

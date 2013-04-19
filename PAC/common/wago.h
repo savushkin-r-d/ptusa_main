@@ -242,6 +242,8 @@ class wago_manager
             enum TYPES ///< Типы модулей.
                 {
                 T_750_860 = 0,
+                T_750_863,
+                
                 T_750_341 = 2,  ///< Ethernet 750-341.
                 T_750_841,      ///< Ethernet 750-841 programmable.
                 };
