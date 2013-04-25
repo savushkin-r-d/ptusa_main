@@ -44,7 +44,7 @@ int main( int argc, char *argv[] )
         }
 
     time_t t = time( 0 );
-    fprintf( stderr, "Program started - %s\n", asctime( localtime( &t ) ) );
+    fprintf( stderr, "\nProgram started - %s\n", asctime( localtime( &t ) ) );
 
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
