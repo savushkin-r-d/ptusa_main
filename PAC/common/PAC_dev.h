@@ -780,11 +780,6 @@ class valve_DO1_DI1_off : public valve
             int o = get_DO( DO_INDEX );
             int i = get_DI( DI_INDEX );
 
-           if ( number == 1801 )
-               {
-               printf( "V1801 o = %d, i = %d\n", o, i );
-               }
-
             if ( o != i )
                 {
                 start_switch_time = get_millisec();
@@ -1051,8 +1046,8 @@ class valve_mix_proof : public i_mix_proof,  public valve
             DO_INDEX_U,     ///< Индекс канала дискретного выхода верхнего седла.
             DO_INDEX_L,     ///< Индекс канала дискретного выхода нижнего седла.
 
-            DI_INDEX_U = 0, ///< Индекс канала дискретного входа верхнего седла.
-            DI_INDEX_L,     ///< Индекс канала дискретного входа нижнего седла.
+            DI_INDEX_OPEN = 0, ///< Индекс канала дискретного входа Открыт.
+            DI_INDEX_CLOSE,     ///< Индекс канала дискретного входа Закрыт.
             };
 
          void direct_set_state( int new_state );
@@ -1085,14 +1080,17 @@ class valve_mix_proof : public i_mix_proof,  public valve
             return true;
 #else
             int o = get_DO( DO_INDEX );
-            int i0 = get_DI( DI_INDEX_U );
-            int i1 = get_DI( DI_INDEX_L );
+            int i0 = get_DI( DI_INDEX_CLOSE );
+            int i1 = get_DI( DI_INDEX_OPEN );
 
             if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
                 ( o == 1 && i1 == 1 && i0 == 0 ) )
                 {
                 return true;
                 }
+
+            if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return true;
+            if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return true;
 
             if ( get_sec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
                 {
@@ -1106,12 +1104,12 @@ class valve_mix_proof : public i_mix_proof,  public valve
 #ifndef DEBUG_NO_WAGO_MODULES
         int get_off_fb_value()
             {
-            return get_DI( DI_INDEX_U );
+            return get_DI( DI_INDEX_CLOSE );
             }
 
         int get_on_fb_value()
             {
-            return get_DI( DI_INDEX_L );
+            return get_DI( DI_INDEX_OPEN );
             }
 #endif // DEBUG_NO_WAGO_MODULES
 
