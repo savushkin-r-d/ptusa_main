@@ -23,7 +23,8 @@
 #endif // DEBUG
 //-----------------------------------------------------------------------------
 extern time_t t_;
-#define print_time t_ = time( 0 ); printf( "%02d:%02d:%02d ", localtime( &t_ )->tm_hour,\
-     localtime( &t_ )->tm_min,  localtime( &t_ )->tm_sec ); printf
+#define print_time t_ = time( 0 ); printf( "%02d.%02d.%02d %02d:%02d:%02d ",\
+     localtime( &t_ )->tm_mday, localtime( &t_ )->tm_mon, localtime( &t_ )->tm_year,\
+     localtime( &t_ )->tm_hour, localtime( &t_ )->tm_min, localtime( &t_ )->tm_sec ); printf
 //-----------------------------------------------------------------------------
 #endif // L_CONSOLE_H
