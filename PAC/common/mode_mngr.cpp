@@ -490,7 +490,7 @@ void open_seat_action::add_dev( device *dev, u_int group, u_int seat_type )
 //-----------------------------------------------------------------------------
 void open_seat_action::print( const char* prefix /*= "" */ ) const
     {
-    if ( devices[ 0 ].size() == 0 )
+    if ( wash_upper_seat_devices.empty() && wash_lower_seat_devices.empty() )
         {
         return;
         }
