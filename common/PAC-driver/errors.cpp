@@ -31,6 +31,11 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
     switch ( simple_device->get_state() )
         {
         case -1:        // Есть ошибка.
+        case -2:
+        case -3:
+        case -12:
+        case -13:
+
             switch ( error_state )
                 {
                 case AS_ACCEPT:
@@ -47,8 +52,7 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
                 }
             break;
 
-        case 0:         // Нет ошибки.
-        case 1:
+        default:         // Нет ошибки - все остальные состояния.
             switch ( error_state )
                 {
                 case AS_NORMAL:
