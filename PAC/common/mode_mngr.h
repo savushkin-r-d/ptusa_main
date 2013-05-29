@@ -106,10 +106,11 @@ class action
         /// @param [in] subgroup Дополнительный параметр.
         virtual void add_dev( device *dev, u_int group, u_int subgroup ) {}
 
+        int check_devices( char* err_dev_name, int max_to_write ) const;
 
     protected:
-        std::vector< std::vector< device* > > devices; ///< Устройства.
-        std::string name;               ///< Имя действия.
+        std::vector< std::vector< device* > > devices;  ///< Устройства.
+        std::string name;                               ///< Имя действия.
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -297,6 +298,21 @@ class step
         /// @return false Нет устройств, над которыми что-то делается.
         bool is_empty() const;
 
+        int check_devices( char* err_dev_name, int str_len )
+            {    
+            for ( u_int i = 0; i < actions.size(); i++ )
+                {
+                int res = actions[ i ]->check_devices( err_dev_name + 
+                    strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
+
+                if ( res )
+                    {
+                    return 1;
+                    }
+                }
+
+            return 0;
+            }
     private:
         std::vector< action* > actions; ///< Действия.
         action action_stub;             ///< Фиктивное действие.
@@ -364,6 +380,21 @@ class mode
             return &name;
             }
 
+        int check_devices( char* err_dev_name, int str_len )
+            {    
+            for ( u_int i = 0; i < steps.size(); i++ )
+                {
+                int res = steps[ i ]->check_devices( err_dev_name + 
+                    strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
+
+                if ( res )
+                    {
+                    return 1;
+                    }
+                }
+
+            return 0;
+            }
     private:
         std::string name;
         std::vector< step* > steps;

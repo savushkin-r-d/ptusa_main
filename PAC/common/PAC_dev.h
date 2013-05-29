@@ -88,7 +88,22 @@ class par_device
         /// @param name - имя параметра.
         void set_par_name( u_int idx, u_int offset, const char* name );
 
+        /// @brief Получение параметров для хранения настроек ошибок устройства.
+        saved_params_u_int_4* get_err_par() const
+            {
+            return err_par;
+            }
+
+        /// @brief Установка параметров для хранения настроек ошибок устройства.
+        void set_err_par( saved_params_u_int_4* err_par )
+            {
+            this->err_par = err_par;
+            }
+
     protected:
+        /// @brief Ошибки устройства.
+        saved_params_u_int_4 *err_par; 
+
         enum CONSTANTS
             {
             C_MAX_PAR_NAME_LENGTH = 20, ///< Максимальная длина имени параметра.
@@ -786,7 +801,7 @@ class valve_DO1_DI1_off : public valve
                 return true;
                 }
 
-            if ( get_sec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
+            if ( get_millisec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
                 {
                 return true;
                 }
@@ -856,7 +871,7 @@ class valve_DO1_DI1_on : public valve
                 return true;
                 }
 
-            if ( get_sec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
+            if ( get_millisec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
                 {
                 return true;
                 }
@@ -918,6 +933,9 @@ class valve_DO1_DI2 : public valve
 
         bool get_fb_state()
             {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return valve::get_fb_state();
+#else
             int o = get_DO( DO_INDEX );
             int i0 = get_DI( DI_INDEX_1 );
             int i1 = get_DI( DI_INDEX_2 );
@@ -928,12 +946,13 @@ class valve_DO1_DI2 : public valve
                 return true;
                 }
 
-            if ( get_sec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
+            if ( get_millisec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
                 {
                 return true;
                 }
 
             return false;
+#endif // DEBUG_NO_WAGO_MODULES
             }
 
 #ifndef DEBUG_NO_WAGO_MODULES
@@ -992,6 +1011,9 @@ class valve_DO2_DI2 : public valve
 
         bool get_fb_state()
             {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return true;
+#else
             int o0 = get_DO( DO_INDEX_1 );
             int o1 = get_DO( DO_INDEX_2 );
             int i0 = get_DI( DI_INDEX_1 );
@@ -1002,12 +1024,13 @@ class valve_DO2_DI2 : public valve
                 return true;
                 }
 
-            if ( get_sec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
+            if ( get_millisec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
                 {
                 return true;
                 }
 
             return false;
+#endif // DEBUG_NO_WAGO_MODULES
             }
 
 #ifndef DEBUG_NO_WAGO_MODULES
@@ -1092,7 +1115,7 @@ class valve_mix_proof : public i_mix_proof,  public valve
             if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return true;
             if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return true;
 
-            if ( get_sec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
+            if ( get_millisec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
                 {
                 return true;
                 }

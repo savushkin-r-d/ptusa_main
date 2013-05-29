@@ -114,19 +114,42 @@ int tech_object::set_mode( u_int mode, int newm )
                 }
             else
                 {
-                if ( ( res = lua_check_on_mode( mode ) ) == 0 ) // Check if possible.
+                //Проверка режима на проверку ОС устройств.
+                const int ERR_STR_SIZE = 41;
+                char res_str[ ERR_STR_SIZE ] = "обр. связь ";
+
+                int res = ( *modes_manager )[ mode ]->check_devices( res_str + 
+                    strlen( res_str ), ERR_STR_SIZE - strlen( res_str ) );
+                if ( res && is_check_mode( mode ) == 1 )
                     {
-                    lua_init_mode( mode );
-                    state[ mode / 32 ] = state[ mode / 32 ] | 1UL << mode % 32;
-#ifdef USE_COMB
-                    g_greb->open_path( paths[ mode ].in_x, paths[ mode ].in_y,
-                        paths[ mode ].out_x, paths[ mode ].out_y, comb_path::OT_COMB,
-                        this, mode );
-#endif // USE_COMB
+                    set_err_msg( res_str, mode );
+                    res = mode + 1000;
                     }
                 else
-                    {
-                    res += 100;
+                    {   
+                    bool is_dev_err = res ? true : false;
+                    //Проверка режима на проверку ОС устройств.
+
+                    if ( ( res = lua_check_on_mode( mode ) ) == 0 ) // Check if possible.
+                        {
+                        lua_init_mode( mode );
+                        state[ mode / 32 ] = state[ mode / 32 ] | 1UL << mode % 32;
+#ifdef USE_COMB
+                        g_greb->open_path( paths[ mode ].in_x, paths[ mode ].in_y,
+                            paths[ mode ].out_x, paths[ mode ].out_y, comb_path::OT_COMB,
+                            this, mode );
+#endif // USE_COMB
+                        //Проверка режима на проверку ОС устройств.
+                        if ( is_dev_err )
+                            {
+                            set_err_msg( res_str, mode, 0, ERR_ON_WITH_ERRORS ); 
+                            }           
+                        //Проверка режима на проверку ОС устройств.
+                        }
+                    else
+                        {
+                        res += 100;
+                        }
                     }
                 }
             }

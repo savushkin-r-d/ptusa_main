@@ -109,12 +109,7 @@ class base_error
             {
             err_par[ P_PARAM_N ] = 0;
             }
-
-    protected:
-        saved_params_u_int_4 err_par;
-
-        unsigned char error_state;    ///< Состояние ошибки.
-
+            
         enum PARAMS  ///< Параметры ошибки, определяют номера битов.
             {
             P_PARAM_N = 1,	  //Номер параметра.
@@ -131,6 +126,11 @@ class base_error
             C_CMD_SUPPRESS = 200,    ///< Подавить ошибку.
             C_CMD_UNSET_SUPPRESS,    ///< Убрать подавление ошибки.
             };
+
+    protected:
+        saved_params_u_int_4 err_par;
+
+        unsigned char error_state;    ///< Состояние ошибки.    
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об ошибке простого устройства (клапан,
@@ -182,48 +182,7 @@ class tech_dev_error: public base_error
             {
             }
 
-        int save_as_Lua_str( char *str, bool &is_new_state )
-            {
-            str[ 0 ] = 0;
-            static u_int prev_size = 0;
-
-            if ( tech_dev->get_errors().size() != prev_size || was_set_cmd )
-                {
-                prev_size   = tech_dev->get_errors().size();
-                was_set_cmd = false;
-
-                is_new_state = true;
-                }
-
-            for ( u_int i = 0; i < tech_dev->get_errors().size(); i++ )
-                {
-
-                sprintf( str + strlen( str ), "\t%s\n", "{" );
-
-                sprintf( str + strlen( str ), "\tdescription=\"%s\",\n",
-                    tech_dev->get_errors()[ i ]->msg );
-                sprintf( str + strlen( str ), "\tgroup=\"%s\",\n",
-                    get_group( tech_dev->get_errors()[ i ]->type ) );
-
-                sprintf( str + strlen( str ), "priority=%d%s",
-                    get_priority( tech_dev->get_errors()[ i ]->type ), "," );
-
-                sprintf( str + strlen( str ), "state=%d,\n", AS_ALARM );
-                sprintf( str + strlen( str ), "type=%d,\n", AT_SPECIAL );
-
-                sprintf( str + strlen( str ), "id_n=%d,\n",
-                    tech_dev->get_number() );
-                sprintf( str + strlen( str ), "id_object_alarm_number=%d,\n",
-                    tech_dev->get_errors()[ i ]->n );
-                sprintf( str + strlen( str ), "id_type=%d,\n", get_object_type() );
-
-                sprintf( str + strlen( str ), "suppress=false\n" );
-
-                sprintf( str + strlen( str ), "},\n" );
-                }
-
-            return 0;
-            }
+        int save_as_Lua_str( char *str, bool &is_new_state );
 
         void print() const
             {
@@ -243,71 +202,13 @@ class tech_dev_error: public base_error
             return tech_dev->get_number();
             }
 
-        static const char* get_group( tech_object::ERR_MSG_TYPES err_type )
-            {
-            switch ( err_type )
-                {
-                case tech_object::ERR_CANT_ON:
-                case tech_object::ERR_ON_WITH_ERRORS:
-                    return "ответ";
+        static const char* get_group( tech_object::ERR_MSG_TYPES err_type );
 
-                case tech_object::ERR_OFF:
-                case tech_object::ERR_OFF_AND_ON:
-                case tech_object::ERR_DURING_WORK:
-                    return "сообщение";
-
-                case tech_object::ERR_ALARM:
-                    return "тревога";
-                }
-
-            return "?";
-            }
-
-        static int get_priority( tech_object::ERR_MSG_TYPES err_type )
-            {
-            switch ( err_type )
-                {
-                case tech_object::ERR_CANT_ON:
-                case tech_object::ERR_ON_WITH_ERRORS:
-                    return P_ANSWER;
-
-                case tech_object::ERR_OFF:
-                case tech_object::ERR_OFF_AND_ON:
-                case tech_object::ERR_DURING_WORK:
-                    return P_MESSAGE;
-
-                case tech_object::ERR_ALARM:
-                    return P_ALARM;
-                }
-
-            return P_ALARM;
-            }
+        static int get_priority( tech_object::ERR_MSG_TYPES err_type );
 
         // Реализована следующая обработка любой команды - удаление сообщения из
         // вектора, для которого адресована команда.
-        int set_cmd( int cmd, int object_alarm_number )
-            {
-            for ( u_int i = 0; i < tech_dev->get_errors().size(); i++ )
-                {
-                if( tech_dev->get_errors()[ i ]->n == object_alarm_number )
-                    {
-                    tech_dev->get_errors().erase(
-                        tech_dev->get_errors().begin() + i );
-
-#ifdef DEBUG
-            Print( "Object %d set cmd %d [%d]!\n",
-                object_alarm_number, cmd, object_alarm_number );
-#endif // DEBUG
-                    was_set_cmd = true;
-                    return 0;
-                    }
-                }
-#ifdef DEBUG
-            Print( "Object %d not found!\n", object_alarm_number );
-#endif // DEBUG
-
-            return 1;
-            }
+        int set_cmd( int cmd, int object_alarm_number );
 
     private:
         tech_object* tech_dev; ///< Сложное устройство.

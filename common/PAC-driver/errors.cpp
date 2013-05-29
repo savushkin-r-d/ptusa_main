@@ -17,6 +17,7 @@ simple_error::simple_error( device* simple_device
                            ): base_error(),
                            simple_device( simple_device )
     {
+    simple_device->set_err_par( &err_par );
     }
 //-----------------------------------------------------------------------------
 simple_error::~simple_error()
@@ -178,6 +179,115 @@ int simple_error::set_cmd( int cmd, int object_alarm_number )
 
     return res;
     }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int tech_dev_error::save_as_Lua_str( char *str, bool &is_new_state )
+    {
+    str[ 0 ] = 0;
+    static u_int prev_size = 0;
+
+    if ( tech_dev->get_errors().size() != prev_size || was_set_cmd )
+        {
+        prev_size   = tech_dev->get_errors().size();
+        was_set_cmd = false;
+
+        is_new_state = true;
+        }
+
+    for ( u_int i = 0; i < tech_dev->get_errors().size(); i++ )
+        {
+
+        sprintf( str + strlen( str ), "\t%s\n", "{" );
+
+        sprintf( str + strlen( str ), "\tdescription=\"%s\",\n",
+            tech_dev->get_errors()[ i ]->msg );
+        sprintf( str + strlen( str ), "\tgroup=\"%s\",\n",
+            get_group( tech_dev->get_errors()[ i ]->type ) );
+
+        sprintf( str + strlen( str ), "priority=%d%s",
+            get_priority( tech_dev->get_errors()[ i ]->type ), "," );
+
+        sprintf( str + strlen( str ), "state=%d,\n", AS_ALARM );
+        sprintf( str + strlen( str ), "type=%d,\n", AT_SPECIAL );
+
+        sprintf( str + strlen( str ), "id_n=%d,\n",
+            tech_dev->get_number() );
+        sprintf( str + strlen( str ), "id_object_alarm_number=%d,\n",
+            tech_dev->get_errors()[ i ]->n );
+        sprintf( str + strlen( str ), "id_type=%d,\n", get_object_type() );
+
+        sprintf( str + strlen( str ), "suppress=false\n" );
+
+        sprintf( str + strlen( str ), "},\n" );
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int tech_dev_error::set_cmd( int cmd, int object_alarm_number )
+    {
+    for ( u_int i = 0; i < tech_dev->get_errors().size(); i++ )
+        {
+        if( tech_dev->get_errors()[ i ]->n == object_alarm_number )
+            {
+            tech_dev->get_errors().erase(
+                tech_dev->get_errors().begin() + i );
+
+#ifdef DEBUG
+            Print( "Object %d set cmd %d [%d]!\n",
+                object_alarm_number, cmd, object_alarm_number );
+#endif // DEBUG
+            was_set_cmd = true;
+            return 0;
+            }
+        }
+#ifdef DEBUG
+    Print( "Object %d not found!\n", object_alarm_number );
+#endif // DEBUG
+
+    return 1;
+    }
+//-----------------------------------------------------------------------------
+int tech_dev_error::get_priority( tech_object::ERR_MSG_TYPES err_type ) 
+    {
+    switch ( err_type )
+        {
+        case tech_object::ERR_CANT_ON:
+        case tech_object::ERR_ON_WITH_ERRORS:
+            return P_ANSWER;
+
+        case tech_object::ERR_OFF:
+        case tech_object::ERR_OFF_AND_ON:
+        case tech_object::ERR_DURING_WORK:
+            return P_MESSAGE;
+
+        case tech_object::ERR_ALARM:
+            return P_ALARM;
+        }
+
+    return P_ALARM;
+    }
+//-----------------------------------------------------------------------------
+const char* tech_dev_error::get_group( tech_object::ERR_MSG_TYPES err_type ) 
+    {
+    switch ( err_type )
+        {
+        case tech_object::ERR_CANT_ON:
+        case tech_object::ERR_ON_WITH_ERRORS:
+            return "ответ";
+
+        case tech_object::ERR_OFF:
+        case tech_object::ERR_OFF_AND_ON:
+        case tech_object::ERR_DURING_WORK:
+            return "сообщение";
+
+        case tech_object::ERR_ALARM:
+            return "тревога";
+        }
+
+    return "?";
+    }
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 dev_errors_manager::dev_errors_manager(): errors_id( 0 )

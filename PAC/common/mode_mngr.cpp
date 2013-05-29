@@ -14,6 +14,7 @@
 /// @$Date::                     $.
 
 #include "mode_mngr.h"
+#include "errors.h"
 
 const char* mode_manager::UNKN_MODE_NAME = "??";
 //-----------------------------------------------------------------------------
@@ -29,12 +30,12 @@ action::action( std::string name, u_int group_cnt ) : name( name )
 //-----------------------------------------------------------------------------
 void action::print( const char* prefix /*= "" */ ) const
     {
-    if ( devices.empty()  )
+    if ( devices.empty() )
         {
         return;
         }
 
-    if ( devices[ 0 ].size() == 0 )
+    if ( devices[ 0 ].empty() )
         {
         return;
         }
@@ -43,7 +44,7 @@ void action::print( const char* prefix /*= "" */ ) const
 
     for ( u_int i = 0; i < devices.size(); i++ )
         {
-        if ( devices[ i ].size() == 0  )
+        if ( devices[ i ].empty() )
             {
             continue;
             }
@@ -84,6 +85,53 @@ bool action::is_empty() const
         }
 
     return false;
+    }
+//-----------------------------------------------------------------------------
+int action::check_devices( char* err_dev_name, int max_to_write ) const
+    {
+    for ( u_int i = 0; i < devices.size(); i++ )
+        {              
+        for ( u_int j = 0; j < devices[ i ].size(); j++ )
+            {
+            if ( devices[ i ][ j ]->get_state() < 0 )
+                {
+                int par = int ( ( *devices[ i ][ j ]->get_err_par() )[ 1 ] );
+
+                if ( ( par & base_error::P_IS_SUPPRESS ) == 0 ) 
+                    {
+                    max_to_write -= snprintf( err_dev_name + strlen( err_dev_name ), 
+                        max_to_write, "%s, ", 
+                        devices[ i ][ j ]->get_name() ); 
+
+                    if ( max_to_write < 0 )
+                        {
+                        break;
+                        }
+                    }
+                }            
+            }
+        }
+
+    if ( err_dev_name[ 0 ] ) //Есть ошибки.
+        {
+        int length = strlen( err_dev_name );
+        if ( max_to_write < 0 )
+            {
+            err_dev_name[ length - 1 ] = '.';
+            err_dev_name[ length - 2 ] = '.';
+            err_dev_name[ length - 3 ] = '.';
+            }
+        else
+            {
+            //Убираем последние символы - ", ".
+            err_dev_name[ length - 1 ] = 0; 
+            err_dev_name[ length - 2 ] = 0;
+            }
+
+        return 1;
+        }
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
