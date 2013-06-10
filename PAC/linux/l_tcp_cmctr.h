@@ -78,6 +78,23 @@ class tcp_communicator_linux : public tcp_communicator
             void net_terminate();
 
         public:
+            int sendall (int sockfd, unsigned char *buf, int len, long fsize)
+                {
+                int n = 1;
+                unsigned char *p = buf;
+
+                for ( int i = len; i > 0; )
+                    {
+                    if ( ( n = send( sockfd, p, i, 0 ) ) < 0 )
+                        break;
+
+                    i -= n;
+                    p += n;
+                    }
+
+                return n;
+                }
+
             /// @brief Получение данных с таймаутом.
             ///
             /// @param s        - сокет.

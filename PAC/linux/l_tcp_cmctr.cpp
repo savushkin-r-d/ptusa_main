@@ -504,7 +504,7 @@ int tcp_communicator_linux::do_echo ( int skt )
             }
         }
 
-    err = send( skt, buf, in_buffer_count, MSG_NOSIGNAL );
+    err = sendall( skt, buf, in_buffer_count, MSG_NOSIGNAL );
     if ( is_going_to_reboot )
         {
         killsockets();
@@ -513,10 +513,10 @@ int tcp_communicator_linux::do_echo ( int skt )
 
     if ( err <= 0 )               /* write error */
         {
-#ifdef DEBUG
-        printf( "Socket %d->\"%s\" disconnected on write try : %s\n",
+//#ifdef DEBUG
+        fprintf( stderr, "Socket %d->\"%s\" disconnected on write try : %s\n",
             skt, inet_ntoa( sst[ skt ].sin.sin_addr ), strerror( errno ) );
-#endif // DEBUG
+//#endif // DEBUG
 
         shutdown( skt, 0 );
         close( skt );
