@@ -53,7 +53,7 @@ RANLIB=ranlib
 #my var
 out_dir     = ""${HOME}/id_share/out/""
 lua_sys_dir = ""${HOME}/PTUSA_projects/system scripts/""
-lua_prg_dir = ""${HOME}/PTUSA_projects/projects/whey/""
+lua_prg_dir = ""${HOME}/PTUSA_projects/projects/Ñûגמנמעךא (ÑÎÌ)/""
 
 # build
 build: .build-post
@@ -72,7 +72,7 @@ build: .build-post
 		echo "";\
 		echo "${lua_sys_dir}sys.wago.lua    >> ${out_dir}sys.wago.lua";\
 		cp   "${lua_sys_dir}sys.wago.lua" ${out_dir};\
-		echo "${lua_sys_dir}sys.devices.lua >> ${out_dir}sys.odevices.lua";\
+		echo "${lua_sys_dir}sys.devices.lua >> ${out_dir}sys.devices.lua";\
 		cp   "${lua_sys_dir}sys.devices.lua" ${out_dir};\
 		echo "${lua_sys_dir}sys.objects.lua >> ${out_dir}sys.objects.lua";\
 		cp   "${lua_sys_dir}sys.objects.lua" ${out_dir};\
