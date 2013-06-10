@@ -90,25 +90,25 @@ bool action::is_empty() const
 int action::check_devices( char* err_dev_name, int max_to_write ) const
     {
     for ( u_int i = 0; i < devices.size(); i++ )
-        {              
+        {
         for ( u_int j = 0; j < devices[ i ].size(); j++ )
             {
             if ( devices[ i ][ j ]->get_state() < 0 )
                 {
                 int par = int ( ( *devices[ i ][ j ]->get_err_par() )[ 1 ] );
 
-                if ( ( par & base_error::P_IS_SUPPRESS ) == 0 ) 
+                if ( ( par & base_error::P_IS_SUPPRESS ) == 0 )
                     {
-                    max_to_write -= snprintf( err_dev_name + strlen( err_dev_name ), 
-                        max_to_write, "%s, ", 
-                        devices[ i ][ j ]->get_name() ); 
+                    max_to_write -= snprintf( err_dev_name + strlen( err_dev_name ),
+                        max_to_write, "%s, ",
+                        devices[ i ][ j ]->get_name() );
 
                     if ( max_to_write < 0 )
                         {
                         break;
                         }
                     }
-                }            
+                }
             }
         }
 
@@ -124,7 +124,7 @@ int action::check_devices( char* err_dev_name, int max_to_write ) const
         else
             {
             //Убираем последние символы - ", ".
-            err_dev_name[ length - 1 ] = 0; 
+            err_dev_name[ length - 1 ] = 0;
             err_dev_name[ length - 2 ] = 0;
             }
 
@@ -763,7 +763,8 @@ void mode::evaluate()
         steps[ active_step_n ]->evaluate();
 
         if ( active_step_time != 0 &&
-            get_millisec() - steps[ active_step_n ]->get_start_time() > ( u_int ) active_step_time )
+            get_delta_millisec( steps[ active_step_n ]->get_start_time() ) >
+            ( u_int ) active_step_time )
             {
             to_step( active_step_next_step_n );
             }

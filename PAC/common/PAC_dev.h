@@ -102,7 +102,7 @@ class par_device
 
     protected:
         /// @brief Ошибки устройства.
-        saved_params_u_int_4 *err_par; 
+        saved_params_u_int_4 *err_par;
 
         enum CONSTANTS
             {
@@ -801,7 +801,7 @@ class valve_DO1_DI1_off : public valve
                 return true;
                 }
 
-            if ( get_millisec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
+            if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
                 {
                 return true;
                 }
@@ -871,7 +871,7 @@ class valve_DO1_DI1_on : public valve
                 return true;
                 }
 
-            if ( get_millisec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
+            if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
                 {
                 return true;
                 }
@@ -946,7 +946,7 @@ class valve_DO1_DI2 : public valve
                 return true;
                 }
 
-            if ( get_millisec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
+            if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
                 {
                 return true;
                 }
@@ -1024,7 +1024,7 @@ class valve_DO2_DI2 : public valve
                 return true;
                 }
 
-            if ( get_millisec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
+            if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
                 {
                 return true;
                 }
@@ -1115,7 +1115,7 @@ class valve_mix_proof : public i_mix_proof,  public valve
             if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return true;
             if ( o == 0 && get_DO( DO_INDEX_U ) == 1 ) return true;
 
-            if ( get_millisec() - start_switch_time < get_par( valve::P_ON_TIME, 0 ) )
+            if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
                 {
                 return true;
                 }

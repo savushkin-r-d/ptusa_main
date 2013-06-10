@@ -1155,7 +1155,7 @@ int valve::get_state()
                 {
                 if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF ) //Обратная связь отключена.
                     {
-                    start_switch_time = get_millisec();
+                    //start_switch_time = get_millisec();
 
                     if ( get_manual_mode() )
                         {
@@ -1172,13 +1172,13 @@ int valve::get_state()
                         {
                         if ( get_fb_state() == true )
                             {
-                            start_switch_time = get_millisec();
+                            //start_switch_time = get_millisec();
 
                             return VX_ON_FB_OK_MANUAL;
                             }
                         else
                             {
-                            if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 ) )
+                            if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
                                 {
                                 return VX_ON_FB_ERR_MANUAL;
                                 }
@@ -1192,13 +1192,13 @@ int valve::get_state()
                         {
                         if ( get_fb_state() == true )
                             {
-                            start_switch_time = get_millisec();
+                            //start_switch_time = get_millisec();
 
                             return VX_ON_FB_OK;
                             }
                         else
                             {
-                            if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 ) )
+                            if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
                                 {
                                 return VX_ON_FB_ERR;
                                 }
@@ -1228,7 +1228,7 @@ int valve::get_state()
                 {
                 if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF ) //Обратная связь отключена.
                     {
-                    start_switch_time = get_millisec();
+                    //start_switch_time = get_millisec();
 
                     if ( get_manual_mode() )
                         {
@@ -1245,13 +1245,13 @@ int valve::get_state()
                         {
                         if ( get_fb_state() == true )
                             {
-                            start_switch_time = get_millisec();
+                            //start_switch_time = get_millisec();
 
                             return VX_OFF_FB_OK_MANUAL;
                             }
                         else
                             {
-                            if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 ) )
+                            if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
                                 {
                                 return VX_OFF_FB_ERR_MANUAL;
                                 }
@@ -1265,13 +1265,13 @@ int valve::get_state()
                         {
                         if ( get_fb_state() == true )
                             {
-                            start_switch_time = get_millisec();
+                            //start_switch_time = get_millisec();
 
                             return VX_OFF_FB_OK;
                             }
                         else
                             {
-                            if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 ) )
+                            if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
                                 {
                                 return VX_OFF_FB_ERR;
                                 }
@@ -1463,12 +1463,25 @@ void valve_mix_proof::direct_set_state( int new_state )
 
         case ST_UPPER_SEAT:
             direct_off();
-            set_DO( DO_INDEX_U, 1 );
+
+            int u = get_DO( DO_INDEX_U );
+            if( 0 == u )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX_U, 1 );
+                }
+
             break;
 
         case ST_LOWER_SEAT:
             direct_off();
-            set_DO( DO_INDEX_L, 1 );
+
+            int l = get_DO( DO_INDEX_L );
+            if ( 0 == l )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX_L, 1 );
+                }
             break;
 
         default:
@@ -1695,7 +1708,7 @@ int motor::get_state()
         return i;
         }
 
-    if ( get_millisec() - start_switch_time > get_par( P_ON_TIME, 0 ) )
+    if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
         {
         return -1;
         }

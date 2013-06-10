@@ -98,7 +98,7 @@ int main( int argc, char *argv[] )
 
 #ifdef TEST_SPEED
         //-Информация о времени выполнения цикла программы.!->
-        all_time += get_millisec() - st_time;
+        all_time += get_delta_millisec( st_time );
 #if defined LINUX_OS
 #ifdef PAC_PC
         const u_int MAX_ITERATION = 1000;
