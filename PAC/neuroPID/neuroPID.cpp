@@ -6,35 +6,57 @@
 
 #include "vector"
 
-void DrawSeries( HDC hdc, int x0, int y0, int x1, int y1, 
+void DrawSeries( HDC hdc, int x0, int y0, int x1, int y1, int scale,
                 std::vector<double> *data_x,  std::vector<double> *data_y )
     {    
     //Считаем очищенной заданную область.
     //RECT rect;
     //SetRect( &rect, x0, y0, x1, y1 );    
     //FillRect (hdc, &rect, (HBRUSH)(COLOR_WINDOW+1));
-
-   
-
+           
     //Рисуем оси.
-    const int D = 5;
-    MoveToEx( hdc, x0 + D, y0 + D, NULL );
-    LineTo( hdc, x0 + D, y1 - D );
+    const int D        = 5;
+    const int ARROW_SIZE = 15;
+    const int CENTER_X = ( x1 - x0 ) / 2;
+    const int CENTER_Y = ( y1 - y0 ) / 2;
 
+    //y
+    MoveToEx( hdc, CENTER_X, y1 - D, NULL );
+    LineTo( hdc, CENTER_X, y0 + D + ARROW_SIZE );
+    //Arrow.
+    MoveToEx( hdc, CENTER_X, y0 + D, NULL );   
+    LineTo( hdc, CENTER_X + ARROW_SIZE / 3, y0 + D + ARROW_SIZE );
+    LineTo( hdc, CENTER_X - ARROW_SIZE / 3, y0 + D + ARROW_SIZE );
+    LineTo( hdc, CENTER_X, y0 + D );     
+
+    //x
     MoveToEx( hdc, x0 + D, y1 - D, NULL );
-    LineTo( hdc, x1 - D, y1 - D );    
+    LineTo( hdc, x1 - D - ARROW_SIZE, y1 - D );    
+    //Arrow.
+    MoveToEx( hdc, x1 - D, y1 - D, NULL );   
+    LineTo( hdc, x1 - ARROW_SIZE - D, y1 - D - ARROW_SIZE / 3 );
+    LineTo( hdc, x1 - ARROW_SIZE - D, y1 - D + ARROW_SIZE / 3 );
+    LineTo( hdc, x1 - D, y1 - D );
 
     //Строим график.
-    const int center_x = ( x1 - x0 ) / 2;
-    const int center_y = ( y1 - y0 ) / 2;
+    LOGBRUSH lb;    
+    lb.lbStyle = BS_SOLID; 
+    lb.lbColor = RGB(0, 0, 0); 
+    lb.lbHatch = 0; 
 
-    MoveToEx( hdc, x0 + D, center_y, NULL );
+    HGDIOBJ hPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID, 2, &lb, 0, NULL);    
+    HGDIOBJ hPenOld = SelectObject(hdc, hPen); 
+
+    //MoveToEx( hdc, CENTER_X, CENTER_Y, NULL );
 
     //Строим график.
+    MoveToEx( hdc, CENTER_X + ( int ) data_x[ 0 ][ 0 ], 
+        CENTER_Y - ( int ) data_y[ 0 ][ 0 ], NULL );
+
     for ( unsigned int i = 0; i < data_x->size(), i < data_y->size(); i++ )
         {
-         LineTo( hdc, D + ( int ) data_x[ 0 ][ i ], 
-             center_y - ( int ) data_y[ 0 ][ i ] );
+         LineTo( hdc, CENTER_X + ( int ) data_x[ 0 ][ i ], 
+             CENTER_Y - ( int ) data_y[ 0 ][ i ] );
         }
     }
 
@@ -248,7 +270,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             //Рисуем график ПИД.
             DrawSeries(hdc, rect.left, rect.top, rect.right, rect.bottom / 2,
-                time_data, PID_data );
+              10, time_data, PID_data );
 
             ReleaseDC( hWnd, hdc );
 
