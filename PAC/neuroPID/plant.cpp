@@ -11,9 +11,9 @@ plant::plant():prev_obj_value( 0 ),
     {
     }
 //---------------------------------------------------------------------------------------
-double plant::get_new_out( double control_value )
+float plant::get_new_out( float control_value )
     {
-    double res = k * current_obj_value - 0.002 * prev_obj_value * prev_obj_value +
+    float res = k * current_obj_value - 0.002 * prev_obj_value * prev_obj_value +
         0.9 * control_value + 0.1 * sin( prev_control_value );
     if ( res < 0 )
         {
@@ -31,7 +31,7 @@ double plant::get_new_out( double control_value )
     return res;
     }
 //---------------------------------------------------------------------------------------
-double plant::get_current_out() const
+float plant::get_current_out() const
     {
     return current_obj_value;
     }

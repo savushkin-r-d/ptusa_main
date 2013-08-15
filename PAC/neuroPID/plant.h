@@ -4,24 +4,24 @@ class plant
         plant();
 
         //Получение нового выхода объекта на основе поданного управляющего воздействия.
-        double get_new_out( double control_value );
+        float get_new_out( float control_value );
 
-        double get_current_out() const;
+        float get_current_out() const;
 
-        void set_k( double new_k )
+        void set_k( float new_k )
             {
             k = new_k;
             }
 
-        double get_k() const
+        float get_k() const
             {
             return k;
             }
 
     private:
-        double k;
+        float k;
 
-        double prev_obj_value;      //Предыдущее значение выхода объекта управления.
-        double current_obj_value;   //Текущее значение выхода объекта управления.
-        double prev_control_value;  //Предыдущее значение управляющего воздействия.
+        float prev_obj_value;      //Предыдущее значение выхода объекта управления.
+        float current_obj_value;   //Текущее значение выхода объекта управления.
+        float prev_control_value;  //Предыдущее значение управляющего воздействия.
     };

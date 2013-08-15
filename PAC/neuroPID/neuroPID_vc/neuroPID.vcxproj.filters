@@ -30,10 +30,13 @@
     <ClInclude Include="neuroPID.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PID.h">
+    <ClInclude Include="..\plant.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="plant.h">
+    <ClInclude Include="..\PID.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\mlp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -44,10 +47,13 @@
     <ClCompile Include="neuroPID.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PID.cpp">
+    <ClCompile Include="..\plant.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="plant.cpp">
+    <ClCompile Include="..\PID.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\mlp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

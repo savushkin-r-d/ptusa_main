@@ -9,14 +9,14 @@ class PID
         STATE_ON,  
         };
 
-    double uk_1;
-    double ek_1;
-    double ek_2;
-    double q0;
-    double q1;
-    double q2;
-    double Uk;
-    double dUk;
+    float uk_1;
+    float ek_1;
+    float ek_2;
+    float q0;
+    float q1;
+    float q2;
+    float Uk;
+    float dUk;
     unsigned long startTime;
     unsigned long lastTime;
 
@@ -25,7 +25,7 @@ class PID
     char isDownToInAccelMode;  //Надо ли при старте регулятора уменьшать, а не увеличивать выходную величину.
 
     public:
-        double par[ 20 ];
+        float par[ 20 ];
         int state;
 
         int startParamIndex;  
@@ -56,9 +56,9 @@ class PID
 
         void  On( char isDownToInAccelMode = 0 );
         void  Off();
-        double Eval( double currentValue, int deltaSign = 1 );
+        float Eval( float currentValue, int deltaSign = 1 );
         void  Reset();
-        void  Reset( double new_uk_1 );
-        void  SetZ ( double newZ );        //Установить новое задание ПИД.
+        void  Reset( float new_uk_1 );
+        void  SetZ ( float newZ );        //Установить новое задание ПИД.
     };
 #endif

@@ -45,16 +45,16 @@ void PID::Off()
         }
     }
 //---------------------------------------------------------------------------------------
-double PID::Eval( double currentValue, int deltaSign ) 
+float PID::Eval( float currentValue, int deltaSign ) 
     {
     if ( state == STATE_OFF ) return 0;
 
-    double K = par[ startParamIndex + PAR_k ];
-    double TI = par[ startParamIndex + PAR_Ti ];
-    double TD = par[ startParamIndex + PAR_Td ];
-    double dt = par[ startParamIndex + PAR_dt ];
-    double dmax = par[ startParamIndex + PAR_dmax ];
-    double dmin = par[ startParamIndex + PAR_dmin ];
+    float K = par[ startParamIndex + PAR_k ];
+    float TI = par[ startParamIndex + PAR_Ti ];
+    float TD = par[ startParamIndex + PAR_Td ];
+    float dt = par[ startParamIndex + PAR_dt ];
+    float dmax = par[ startParamIndex + PAR_dmax ];
+    float dmin = par[ startParamIndex + PAR_dmin ];
 
     if ( dmax == dmin ) 
         {
@@ -66,7 +66,7 @@ double PID::Eval( double currentValue, int deltaSign )
 #endif
         } 
 
-    double ek = deltaSign * 100 * ( par[ startParamIndex + PAR_Z ] - currentValue ) / 
+    float ek = deltaSign * 100 * ( par[ startParamIndex + PAR_Z ] - currentValue ) / 
         ( dmax - dmin );
 
     //if ( MyGetMS() - lastTime > dt ) 
@@ -86,8 +86,8 @@ double PID::Eval( double currentValue, int deltaSign )
         //-Зона разгона.
         if ( MyGetMS() - startTime < par[ startParamIndex + PAR_AccelTime ] ) 
             {
-            double deltaTime = ( MyGetMS() - startTime );
-            double res = 100 * deltaTime / par[ startParamIndex + PAR_AccelTime ];
+            float deltaTime = ( MyGetMS() - startTime );
+            float res = 100 * deltaTime / par[ startParamIndex + PAR_AccelTime ];
             if ( isDownToInAccelMode ) 
                 { 
                 res = 100 - res;
@@ -105,7 +105,7 @@ double PID::Eval( double currentValue, int deltaSign )
     par[ startParamIndex + PAR_Uk ] = Uk;
     par[ startWorkParamsIndex + WPAR_Uk ] = Uk;
 
-    return ( double ) Uk;
+    return ( float ) Uk;
     }
 //---------------------------------------------------------------------------------------
 void PID::Reset() 
@@ -117,12 +117,12 @@ void PID::Reset()
     par[ startWorkParamsIndex + WPAR_Uk ] = 0;
     }
 //---------------------------------------------------------------------------------------
-void PID::Reset( double new_uk_1 ) 
+void PID::Reset( float new_uk_1 ) 
     {
     uk_1 = new_uk_1;  
     }
 //---------------------------------------------------------------------------------------
-void  PID::SetZ ( double newZ )
+void  PID::SetZ ( float newZ )
     {
     par[ startParamIndex + PAR_Z ] = newZ;
     par[ startWorkParamsIndex + WPAR_Z ] = newZ;
