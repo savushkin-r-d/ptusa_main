@@ -82,18 +82,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\mlp.h" />
+    <ClInclude Include="..\nn_manager.h" />
     <ClInclude Include="..\PID.h" />
     <ClInclude Include="..\plant.h" />
-    <ClInclude Include="neuroPID.h" />
+    <ClInclude Include="..\sample.h" />
+    <ClInclude Include="main.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\mlp.cpp" />
+    <ClCompile Include="..\nn_manager.cpp" />
     <ClCompile Include="..\PID.cpp" />
     <ClCompile Include="..\plant.cpp" />
-    <ClCompile Include="neuroPID.cpp" />
+    <ClCompile Include="..\sample.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

@@ -1,3 +1,6 @@
+#ifndef PLANT
+#define PLANT
+
 class plant
     {
     public:
@@ -25,3 +28,4 @@ class plant
         float current_obj_value;   //Текущее значение выхода объекта управления.
         float prev_control_value;  //Предыдущее значение управляющего воздействия.
     };
+#endif // PLANT
