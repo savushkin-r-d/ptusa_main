@@ -21,5 +21,8 @@ int _tmain(int argc, _TCHAR* argv[])
     //emulator->static_learn( 0.00005f, s_data, 100000 );
     //emulator->save_to_file( "..\\emul_q.data" );
     //return 0;
+
+    throw std::exception ( "Test!" );
+    return 0;
     }
 

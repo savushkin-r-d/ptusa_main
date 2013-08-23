@@ -1,6 +1,10 @@
 #ifndef SAMPLE_H
 #define SAMPLE_H
 
+#include <windows.h>
+
+#include <string>
+#include <wchar.h>
 //------------------------------------------------------------------------------
 /// @brief Интерфейс обучающей выборки.
 class i_learn_samples
@@ -29,14 +33,14 @@ class i_learn_samples
         /// </summary>
         /// <param name="index">Номер образа.</param>
         /// <returns> > 0 - образ, 0 - ошибка. </returns>
-        virtual float* get_sample_x( int index ) = 0;
+        virtual float* get_sample_x( int index ) const = 0;
 
         /// <summary>
         /// Получение эталонного значения с заданным номером.
         /// </summary>
         /// <param name="index">Номер эталонного значения.</param>
         /// <returns> > 0 - эталонные значения входов, 0 - ошибка.  </returns>
-        virtual float* get_sample_y( int index ) = 0;
+        virtual float* get_sample_y( int index ) const = 0;
 
         /// <summary>
         /// Получение количество входных переменных выборки.
@@ -91,15 +95,49 @@ class rt_sample: public i_learn_samples
         /// Создание выборки.
         /// </summary>
         /// <param name="samples_cnt"></param>
-        /// <param name="in_sample_size">Размер окна (общий для всех переменных)</param>
-        /// <param name="in_variables_count">Количество переменных.</param>
-        /// <param name="outputs_cnt"></param>
+        /// <param name="in_size">Количество входов.</param>
+        /// <param name="in_var_count">Количество входных переменных.</param>
+        /// <param name="out_size">Количество выходов.</param>
+        /// <param name="out_var_count">Количество выходных переменных.</param>
         /// <param name="max_var_value">Максимальное значение переменных, для масштабирования значения в интервале [0; 1].</param>
         /// <returns></returns>
-        rt_sample( int samples_cnt, int in_sample_size, int in_variables_count,
-            int outputs_cnt, int max_var_value ):
-            i_learn_samples( samples_cnt, inputs_cnt, outputs_cnt )
-            {            
+        rt_sample( int samples_cnt, int in_size, int in_var_count,
+            int out_size, int out_var_count, int max_var_value ) throw (...) :
+            i_learn_samples( samples_cnt, in_size, out_size ),
+            max_var_value ( max_var_value )
+            {     
+            if ( in_size % in_var_count )
+            	{
+                char msg[ 200 ];
+                _snprintf( msg, sizeof( msg ),
+                    "rt_sample::rt_sample() - ошибка: число входов (%d) должно быть кратно числу переменных (%d).",
+                    in_size, in_var_count );
+
+                throw msg;
+            	}
+            if ( out_size % out_var_count )
+                {
+                char msg[ 200 ];
+                _snprintf( msg, sizeof( msg ),
+                    "rt_sample::rt_sample() - ошибка: число выходов (%d) должно быть кратно числу переменных (%d).",
+                    out_size, out_var_count );
+
+                throw msg;
+                }
+
+            x = new float*[ samples_cnt ];
+            for ( int i = 0; i < samples_cnt; i++ )
+                {
+                x[ i ] = new float[ in_size ];
+                }
+
+            y = new float*[ samples_cnt ];
+            for ( int i = 0; i < samples_cnt; i++ )
+                {
+                y[ i ] = new float[ out_size ];
+                }
+
+            fake_image = new float[ out_size > in_size ? out_size : in_size ];
             }
 
         //Возвращает максимальное значение переменных.
@@ -108,20 +146,54 @@ class rt_sample: public i_learn_samples
             return max_var_value;
             }
 
-        //Возвращает выборку с заданным номером.
-        //ПАРАМЕТРЫ.
-        //   index   - номер обучающей выборки;
-        //   samle_x - эталонные значения входов.
-        //   samle_y - эталонные значения выходов.
-        //ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ.
-        // > 0 - указатель на данные выборки;
-        //   0 - ошибка.        
+        /// <summary>
+        /// Получение входного образа с заданным номером.
+        /// </summary>
+        /// <param name="index">Номер образа (с нуля).</param>
+        /// <returns>Образ с заданным номером или заглушку при ошибке.</returns>
         float* get_sample_x( int index ) const
             {
+            if ( index < samples_cnt && index >= 0 )
+            	{
+                return x[ index ];
+            	}
+            else
+                {
+                char msg[ 200 ];
+                _snprintf( msg, sizeof( msg ),
+                    "rt_sample::get_sample_x(...) - ошибка: индекс (%d) должен"
+                    " быть меньше числа образов (%d).",
+                    index, samples_cnt );
+
+                //throw msg;
+                }
+
+            return fake_image;
             }
 
+        /// <summary>
+        /// Получение выходного образа с заданным номером.
+        /// </summary>
+        /// <param name="index">Номер образа (с нуля).</param>
+        /// <returns>Образ с заданным номером или заглушку при ошибке.</returns>
         float* get_sample_y( int index ) const
             {
+            if ( index < samples_cnt && index >= 0 )
+                {
+                return y[ index ];
+                }
+            else
+                {
+                char msg[ 200 ];
+                _snprintf( msg, sizeof( msg ),
+                    "rt_sample::get_sample_x(...) - ошибка: индекс (%d) должен "
+                    "быть меньше числа образов (%d).",
+                    index, samples_cnt );
+
+                //throw msg;
+                }
+
+            return fake_image;
             }
 
         void print()
@@ -130,12 +202,14 @@ class rt_sample: public i_learn_samples
 
     private:     
 
-        int column_cnt;
-        int row_cnt;
-        int max_var_value;
+        int in_var_count;
+        int out_var_count;
 
-        float **data;   ///Считанные значения
+        int max_var_value;
+                
         float **x;      ///Эталонные входы.
         float **y;      ///Эталонные выходы.  
+
+        float *fake_image;
     };
 #endif // SAMPLE_H

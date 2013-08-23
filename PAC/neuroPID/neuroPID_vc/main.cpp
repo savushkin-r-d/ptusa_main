@@ -12,6 +12,10 @@
 #include "mlp.h"
 #include "nn_manager.h"
 
+#include <fcntl.h>
+#include <io.h>
+
+
 plant   p_object;
 PID     pid1;
 
@@ -183,6 +187,18 @@ void DrawSeries( HDC hdc, int x0, int y0, int x1, int y1, int scale,
 //-----------------------------------------------------------------------------
 void init( HWND hWnd )
     {
+    if (AllocConsole())
+        {
+        int hCrt = _open_osfhandle((long)GetStdHandle(STD_OUTPUT_HANDLE), 4);
+        *stdout = *(::_fdopen(hCrt, "w"));
+        ::setvbuf(stdout, NULL, _IONBF, 0);
+        *stderr = *(::_fdopen(hCrt, "w"));
+        ::setvbuf(stderr, NULL, _IONBF, 0);
+        std::ios::sync_with_stdio();
+        }  
+    SetConsoleCP (1251);
+    SetConsoleOutputCP (1251); 
+   
     pid1.par[ PID::PAR_k ] = 1;             //1 Параметр k.
     pid1.par[ PID::PAR_Ti ] = 2;            //2 Параметр Ti.
     pid1.par[ PID::PAR_Td ] = 0.01f;         //3 Параметр Td.
@@ -215,6 +231,17 @@ void init( HWND hWnd )
 
 //    fprintf_s( emulator_learning_data_stream, "%f\n%f\n%f\n", 2., 1000., 200. );
 #endif // SAVE_DATA_FOR_EMULATOR_LEARNING
+
+    try
+        {
+        rt_sample *rt = new rt_sample( 10, 20, 10, 1, 1, 1 );
+        rt->get_sample_y( 100 );
+
+        }    
+    catch ( char *ex )
+        {
+        printf( "%s\n", ex );
+        }     
     }
 
 void final()
@@ -224,6 +251,7 @@ void final()
 #ifdef SAVE_DATA_FOR_EMULATOR_LEARNING
 //    fclose( emulator_learning_data_stream );
 #endif // SAVE_DATA_FOR_EMULATOR_LEARNING
+       
     }
 //----------------------------------------------------------------------------
 void eval()
@@ -359,6 +387,8 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
         return FALSE;
         }
 
+    init( 0 ); 
+
     hAccelTable = LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_NEUROPID));
 
     // Main message loop:
@@ -370,6 +400,7 @@ int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
             DispatchMessage(&msg);
             }
         }
+     
 
     return (int) msg.wParam;
     }
@@ -510,10 +541,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
         case WM_CREATE:
             {
-                SetTimer( hWnd, idTimer = 1, 100, NULL); 
-
-                init( hWnd ); 
-                break;
+            SetTimer( hWnd, idTimer = 1, 100, NULL); 
+            break;
             }
 
         case WM_COMMAND:
