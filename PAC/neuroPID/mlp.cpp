@@ -110,7 +110,7 @@ void mlp::init_weights()
 //------------------------------------------------------------------------------
 void mlp::print()
     {
-#ifdef DEBUG
+#ifdef _DEBUG
     printf_( " MLP %dx%dx%d\n", inputs_cnt, hidden_cnt, outputs_cnt );
     printf_( " w:\n" );
     int i;
@@ -144,7 +144,7 @@ void mlp::print()
         printf_( "% .3f ", T[ L_HIDDEN ][ j ] );        
         }  
     printf_( "\n" );
-#endif // DEBUG
+#endif //_DEBUG
     }
 //------------------------------------------------------------------------------
 void mlp::learn_iteration( float *sample_x, float *sample_y_or_error, char type, 
@@ -186,9 +186,9 @@ void mlp::learn_iteration( float *sample_x, float *sample_y_or_error, char type,
         {
         if ( type == T_SAMPLE_Y )
             {
-            err[ L_OUTPUT ][ k ] = y[ k ] - sample_y_or_error[ k ];
+            err[ L_OUTPUT ][ k ] = y[ k ] - sample_y_or_error[ k ] / q;
             }
-        else err[ L_OUTPUT ][ k ] = sample_y_or_error[ k ];
+        else err[ L_OUTPUT ][ k ] = sample_y_or_error[ k ] / q;
         }
 
 #ifdef USE_DIGIT_LED_DEBUG
@@ -285,18 +285,10 @@ void mlp::learn_iteration( float *sample_x, float *sample_y_or_error, char type,
             alpha_j * err[ L_HIDDEN ][ j ] *y_hidden[ j ]*( 1 - y_hidden[ j ] );
         check_range( T[ L_INPUT ][ j ], VR_MIN, VR_MAX ); 
         }
-
-#ifdef USE_DIGIT_LED_DEBUG
-#ifdef DEBUG
-    Delay( 200 );
-#endif // DEBUG
-
-    Show5DigitLedWithDot( 4, 16 );
-    Show5DigitLed( 5, 16 );
-#endif // USE_DIGIT_LED_DEBUG
     }
 //------------------------------------------------------------------------------
-int mlp::static_learn( float e, i_learn_samples *sample, int max_iteration_cnt )
+int mlp::static_learn( float e, i_learn_samples *sample, int max_iteration_cnt,
+                      bool is_err )
     {
     //ѕроверка на соответствие структуры персептрона и обучающей выборки.
     if ( sample->get_inputs_cnt() != inputs_cnt )
@@ -347,7 +339,14 @@ int mlp::static_learn( float e, i_learn_samples *sample, int max_iteration_cnt )
             sample_x = sample->get_sample_x( idx );
             sample_y = sample->get_sample_y( idx );
 
-            learn_iteration( sample_x, sample_y, T_SAMPLE_Y, E_k, err, 1 );
+            if ( is_err )
+            	{
+                learn_iteration( sample_x, sample_y, T_ERROR, E_k, err, 1 );
+            	}
+            else
+                {
+                learn_iteration( sample_x, sample_y, T_SAMPLE_Y, E_k, err, 1 );
+                }
             }
         iteration_n++;
         if ( iteration_n > max_iteration_cnt )
@@ -359,18 +358,20 @@ int mlp::static_learn( float e, i_learn_samples *sample, int max_iteration_cnt )
             return -3;
             }
 
-        //#ifdef _DEBUG
+#ifdef _DEBUG
         if ( 0 == iteration_n % 500 )
             {           
             printf( "%6d % f - %.3f sec\n", iteration_n, E_k, 
                 0.001 * ( GetTickCount() - start_time ) );
             start_time = GetTickCount();
             }
-        //#endif // _DEBUG
+#endif // _DEBUG
         }
 
+#ifdef _DEBUG
     printf( "\nTotal %6d % .9f - %.3f sec\n", iteration_n, E_k, 
         0.001 * ( GetTickCount() - total_start_time ) );
+#endif // _DEBUG
 
     return 0;
     }

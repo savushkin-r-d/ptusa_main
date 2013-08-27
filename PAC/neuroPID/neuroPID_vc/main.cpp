@@ -234,8 +234,9 @@ void init( HWND hWnd )
 
     try
         {
-        rt_sample *rt = new rt_sample( 10, 20, 10, 1, 1, 1 );
-        rt->get_sample_y( 100 );
+        rt_sample *rt = new rt_sample( 10, 20, 2, 1, 1, 120 );
+        
+        rt->print();
 
         }    
     catch ( char *ex )
@@ -431,7 +432,8 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     return RegisterClassEx(&wcex);
     }
 //----------------------------------------------------------------------------
-WNDPROC DefEditProc;
+WNDPROC DefEditProc1;
+WNDPROC DefEditProc2;
 
 //---------------------------------------------------------------------------
 LRESULT CALLBACK NewEditProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -445,14 +447,31 @@ LRESULT CALLBACK NewEditProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
                
                 GetWindowText( hwnd, str, 255 );
                 float new_val = ( float ) _wtof( str );
-                p_object.set_k( new_val );
-
-                return(0);
+                nn_emul_manager->get_plant()->set_k( new_val );
+                
+                return( 0 );
                 }
         }
-    return((LRESULT)CallWindowProc((WNDPROC)DefEditProc,hwnd,message,wParam,lParam));
+    return((LRESULT)CallWindowProc((WNDPROC)DefEditProc1,hwnd,message,wParam,lParam));
     }
+//---------------------------------------------------------------------------
+LRESULT CALLBACK NewEditProc2(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+    {
+    switch(message)
+        {
+        case WM_CHAR:
+            if( wParam == VK_RETURN )
+                {
+                WCHAR str[255];   
 
+                GetWindowText( hwnd, str, 255 );
+                float new_val = ( float ) _wtof( str );
+                nn_emul_manager->get_PID()->SetZ( new_val );
+                return( 0 );
+                }
+        }
+    return((LRESULT)CallWindowProc((WNDPROC)DefEditProc2,hwnd,message,wParam,lParam));
+    }
 //
 //   FUNCTION: InitInstance(HINSTANCE, int)
 //
@@ -496,10 +515,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
         return FALSE;
         }
 
-    DefEditProc = (WNDPROC)GetWindowLongPtr(hwnd_k1_edit,GWLP_WNDPROC);
+    DefEditProc1 = (WNDPROC)GetWindowLongPtr(hwnd_k1_edit,GWLP_WNDPROC);
     SetWindowLongPtr(hwnd_k1_edit,GWLP_WNDPROC,(LPARAM)NewEditProc);
 
-    //k1
+    //k1 label.
     HWND hwnd_k1_label = CreateWindow(        
         L"Static",        // Predefined class; Unicode assumed 
         L"k1",         // Button text 
@@ -513,6 +532,71 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
         (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), 
         NULL);          // Pointer not needed.
 
+    //Use learning label.
+    HWND hwnd_MLP_learn_label = CreateWindow(        
+        L"Static",        // Predefined class; Unicode assumed 
+        L"Online learning", // Button text 
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | ES_LEFT | WS_BORDER,  // Styles 
+        200,            // x position 
+        500,            // y position 
+        120,            // Button width
+        20,             // Button height
+        hWnd,           // Parent window
+        (HMENU)0,       // No menu.
+        (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), 
+        NULL);          // Pointer not needed.
+
+    //Use learning checkbox.
+    HWND hwnd_MLP_learn_check_box = CreateWindow(        
+        L"BUTTON",      // Predefined class; Unicode assumed 
+        L"NN2 emulator learn",         // Button text 
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX | BST_CHECKED,  // Styles 
+        330,             // x position 
+        500,            // y position 
+        15,             // Button width
+        20,             // Button height
+        hWnd,           // Parent window
+        (HMENU)10001,   // ID.
+        (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), 
+        NULL);          // Pointer not needed.
+
+    Button_SetCheck( hwnd_MLP_learn_check_box, BST_CHECKED );
+
+    //z
+    HWND hwnd_z_edit = CreateWindow(        
+        L"Edit",        // Predefined class; Unicode assumed 
+        L"90",         // Button text 
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | ES_RIGHT | WS_BORDER,  // Styles 
+        30,             // x position 
+        530,            // y position 
+        100,            // Button width
+        20,             // Button height
+        hWnd,           // Parent window
+        (HMENU)10010,   // No menu.
+        (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), 
+        NULL);          // Pointer not needed.
+
+    if (!hwnd_k1_edit)
+        {
+        return FALSE;
+        }
+
+    DefEditProc2 = (WNDPROC)GetWindowLongPtr(hwnd_z_edit,GWLP_WNDPROC);
+    SetWindowLongPtr(hwnd_z_edit,GWLP_WNDPROC,(LPARAM)NewEditProc2);
+
+    //z label.
+    HWND hwnd_z_label = CreateWindow(        
+        L"Static",        // Predefined class; Unicode assumed 
+        L"z",         // Button text 
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | ES_RIGHT | WS_BORDER,  // Styles 
+        5,              // x position 
+        530,            // y position 
+        20,             // Button width
+        20,             // Button height
+        hWnd,           // Parent window
+        (HMENU)10011,   // No menu.
+        (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), 
+        NULL);          // Pointer not needed.
 
     ShowWindow(hWnd, nCmdShow);
     UpdateWindow(hWnd);
@@ -558,7 +642,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     DestroyWindow(hWnd);
                     break;
 
-                //case 10000:
+                case 10001: //Checkbox
+                    {
+                    // Получаем HWND нашего chechbox'а.
+                    HWND hwndCheck = GetDlgItem(hWnd, 10001);
+                    // Выясняем текущее состояние chechbox'а.
+                    LRESULT res = SendMessage (hwndCheck, BM_GETCHECK, 0, 0);
+                    // Если галочка стоит.
+                    if(res == BST_CHECKED)
+                        {
+                        nn_emul_manager->set_learning( true );
+
+                        //SetWindowText( hWnd, L"Checked" );
+                        }
+                    // Если галочка не стоит.
+                    if(res == BST_UNCHECKED)
+                        {
+                        //SetWindowText( hWnd, L"Unchecked" );
+
+                        nn_emul_manager->set_learning( false );
+                        }
+                    break;
+                    }
 
 
                 //    if( EN_CHANGE == wmEvent)

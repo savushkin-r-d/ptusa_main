@@ -14,7 +14,8 @@ class nn_manager
             int inputs_count_per_parameter ): time_interval( time_interval ),
             p_plant( new plant() ),
             p_pid( new PID() ),
-            nn2( new mlp( 21, 10, 1, 120 ) )
+            nn2( new mlp( 21, 10, 1, 120 ) ),
+            use_learning( true )
             {
             //Создание необходимых массивов и выделение памяти [1]. Запись
             //данных инициализации [2]. Запись указателей для выборки обучения [3].
@@ -77,7 +78,33 @@ class nn_manager
 
             nn2->init_weights();
             nn2->load_from_file( "..\\emul_q.data" );
+
+            try
+                {
+                sample = new rt_sample( 50, 20, 2, 1, 1, 120 );
+
+                sample->print();
+                }    
+            catch ( char *ex )
+                {
+                printf( "%s\n", ex );
+                }  
             }
+
+        plant* get_plant() const
+            {
+            return p_plant;
+            }
+
+        PID* get_PID() const
+            {
+            return p_pid;
+            }
+
+        void set_learning( bool use_learning )
+            {
+            this->use_learning = use_learning;
+            } 
 
         void eval()
             {
@@ -100,11 +127,39 @@ class nn_manager
             p_plant_data[ 0 ][ 0 ] = new_plant_val;                         //6   
             PID_data[ 0 ][ 0 ] = new_control_val;
 
+            sample->shift_images();
+            sample->add_new_val_to_in_image( 0, current_plant_val );
+            sample->add_new_val_to_in_image( 1, new_control_val );
+            sample->add_new_val_to_out_image( 0, new_plant_val );
+            //sample->print();
+
             //Вычисляем выход эмулятора.
-            float *new_emulator_output = nn2->solve_out( nn2_in->data() ); 
+            float *new_emulator_output = nn2->solve_out( sample->get_last_sample_x() ); 
+            
             nn2_out[ 0 ][ 0 ] = new_emulator_output[ 0 ] * nn2->get_q();
 
-            //nn2->static_learn( 0.001f,  nn2_in->data(), 10 );
+            static unsigned int time = 0;
+            time++;
+            
+            static unsigned int errors_cnt = 0;
+
+            if ( use_learning && time > 20 )
+            	{
+                if ( abs( new_plant_val - nn2_out[ 0 ][ 0 ] ) > 2 )
+                	{
+                    errors_cnt++;                    
+                	}            
+                else
+                    {
+                    errors_cnt = 0;
+                    }
+
+                if ( errors_cnt > 10 )
+                	{
+                    nn2->static_learn( 0.001f,  sample, 100 );
+                    errors_cnt = 0;
+                	}
+            	}            
             }
 
         std::vector<float> *get_plant_data()
@@ -137,5 +192,7 @@ class nn_manager
         FILE *data_stream;
 
         rt_sample *sample;
+
+        bool use_learning;
     };
 #endif //NN_MANAGER

@@ -52,7 +52,8 @@ class mlp
         //ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ.
         //   0 - OK;
         // < 0 - ошибка.        
-        int static_learn( float e, i_learn_samples *sample, int max_iteration_cnt );
+        int static_learn( float e, i_learn_samples *sample, int max_iteration_cnt,
+            bool is_err = false );
 
         //Прогнозирует значение функции.
         //ПАРАМЕТРЫ.

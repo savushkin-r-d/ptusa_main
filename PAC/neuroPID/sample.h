@@ -62,6 +62,80 @@ class i_learn_samples
     };
 //------------------------------------------------------------------------------
 /// <summary>
+///  Обучающая выборка, которая работает с данными из файла.
+/// </summary>
+/// <remarks>
+/// Файл имеет следующую структуру:
+///   число переменных (столбцов данных);
+///   число данных (строк данных);
+///   макс. значение, на него будут делиться числа, чтобы получить значения < 1;
+///   далее идут данные в столбцах.
+/// Пример, sample.txt:
+/// 3
+/// 5
+/// 200
+/// 122 134 234 
+/// 102 134  34 
+/// 122 134   9 
+/// 102 234  34 
+/// </remarks>
+class stored_sample: public i_learn_samples
+    {
+    public:
+
+        //Возвращает коэффициент масштабирования значений выборки.
+        int get_factor_k() const;
+
+        //Возвращает размер окна для отдельного столбца.
+        int get_column_window_size() const;
+
+        //Конструктор.
+        stored_sample();
+
+        //Возвращает обучающую выборку. Далее на ее основе можно прогнозировать
+        //значения.
+        float** get_sample_x();
+
+        //Возвращает выборку с заданным номером.
+        //ПАРАМЕТРЫ.
+        //   index   - номер обучающей выборки;
+        //   samle_x - эталонные значения входов.
+        //   samle_y - эталонные значения выходов.
+        //ВОЗВРАЩАЕМОЕ ЗНАЧЕНИЕ.
+        // > 0 - указатель на данные выборки;
+        //   0 - ошибка.        
+        float* get_sample_x( int index ) const;
+        float* get_sample_y( int index ) const;
+
+        /// <summary>
+        /// Создание обучающей выборки.
+        /// </summary>
+        /// <param name="window_size">Размер окна.</param>
+        /// <param name="learn_samples_count">Количество образов.</param>
+        /// <param name="exclude_every_i">Использовать каждую i-ю строку для формирования обучающих данных. Если равен 1, использовать все строки.</param>
+        /// <param name="etalon_column_number"></param>
+        /// <returns></returns>
+        int create_learn_sample( int window_size, int learn_samples_count = -1, 
+            int exclude_every_i = 1, int etalon_column_number = 0, 
+            int etalon_columns_cnt = 1 );
+
+        void print();
+
+        int load_from_file( char *file_name );
+        int load_from_file( char *file_name, char is_ignore_first_column );
+        int save_to_file( char *file_name );
+
+    private:        
+        int column_cnt;
+        int row_cnt;
+        int factor_k;
+
+        float **data;   //Считанные значения
+        float **x;      //Эталонные входы.
+        float **y;      //Эталонные выходы.  
+    };
+//------------------------------------------------------------------------------
+/// <summary>
 ///  Обучающая выборка, которая работает с данными в оперативной памяти.
 /// </summary>
 /// <remarks>
@@ -99,27 +173,30 @@ class rt_sample: public i_learn_samples
         /// <param name="in_var_count">Количество входных переменных.</param>
         /// <param name="out_size">Количество выходов.</param>
         /// <param name="out_var_count">Количество выходных переменных.</param>
-        /// <param name="max_var_value">Максимальное значение переменных, для масштабирования значения в интервале [0; 1].</param>
-        /// <returns></returns>
+        /// <param name="max_var_value">Максимальное значение переменных, для масштабирования значения в интервале [0; 1].</param>        
         rt_sample( int samples_cnt, int in_size, int in_var_count,
             int out_size, int out_var_count, int max_var_value ) throw (...) :
-            i_learn_samples( samples_cnt, in_size, out_size ),
-            max_var_value ( max_var_value )
+        i_learn_samples( samples_cnt, in_size, out_size ),
+            max_var_value ( max_var_value ),
+            in_var_count( in_var_count ),
+            out_var_count( out_var_count )
             {     
             if ( in_size % in_var_count )
-            	{
+                {
                 char msg[ 200 ];
                 _snprintf( msg, sizeof( msg ),
-                    "rt_sample::rt_sample() - ошибка: число входов (%d) должно быть кратно числу переменных (%d).",
+                    "rt_sample::rt_sample() - ошибка: число входов (%d) должно "
+                    "быть кратно числу переменных (%d).",
                     in_size, in_var_count );
 
                 throw msg;
-            	}
+                }
             if ( out_size % out_var_count )
                 {
                 char msg[ 200 ];
                 _snprintf( msg, sizeof( msg ),
-                    "rt_sample::rt_sample() - ошибка: число выходов (%d) должно быть кратно числу переменных (%d).",
+                    "rt_sample::rt_sample() - ошибка: число выходов (%d) должно "
+                    "быть кратно числу переменных (%d).",
                     out_size, out_var_count );
 
                 throw msg;
@@ -137,13 +214,89 @@ class rt_sample: public i_learn_samples
                 y[ i ] = new float[ out_size ];
                 }
 
+            for ( int i = 0; i < samples_cnt; i++ )
+                {
+                for ( int j = 0; j < inputs_cnt; j++ )
+                    {
+                    x[ i ][ j ] = 0;
+                    }                
+                }
+
+            for ( int i = 0; i < samples_cnt; i++ )
+                {
+                for ( int j = 0; j < outputs_cnt; j++ )
+                    {
+                    y[ i ][ j ] = 0;
+                    }                
+                }
+
             fake_image = new float[ out_size > in_size ? out_size : in_size ];
             }
 
-        //Возвращает максимальное значение переменных.
+        /// <summary>
+        /// Получение максимального значения переменных.
+        /// </summary>
         int get_max_var_value() const
             {
             return max_var_value;
+            }
+
+        /// <summary>
+        /// Сдвиг перед добавлением нового образа.
+        /// </summary>
+        void shift_images()
+            {
+            for ( int i = 0; i < samples_cnt - 1; i++ )
+                {
+                for ( int j = 0; j < inputs_cnt; j++ )
+                	{
+                    x[ i ][ j ] = x[ i + 1 ][ j ];
+                	}                
+                }
+
+            for ( int i = 0; i < samples_cnt - 1; i++ )
+                {
+                for ( int j = 0; j < outputs_cnt; j++ )
+                    {
+                    y[ i ][ j ] = y[ i + 1 ][ j ];
+                    }                
+                }
+            }
+
+        /// <summary>
+        /// Добавление нового значения входной переменной.
+        /// </summary>
+        void add_new_val_to_in_image( int var_n, float val )
+            {
+            static int var_total_size = inputs_cnt / in_var_count;
+
+            int start_idx = var_n * var_total_size;
+            int finish_idx = start_idx + var_total_size - 1;
+
+            for ( int i = start_idx; i < finish_idx; i++ )
+            	{
+                x[ samples_cnt - 1 ][ i ] = x[ samples_cnt - 1 ][ i + 1 ];
+            	}
+            
+            x[ samples_cnt - 1 ][ finish_idx ] = val /*/ max_var_value*/;
+            }
+
+        /// <summary>
+        /// Добавление нового значения выходной переменной.
+        /// </summary>
+        void add_new_val_to_out_image( int var_n, float val )
+            {
+            static int var_total_size = outputs_cnt / out_var_count;
+
+            int start_idx = var_n * var_total_size;
+            int finish_idx = start_idx + var_total_size - 1;
+
+            for ( int i = start_idx; i < finish_idx; i++ )
+                {
+                y[ samples_cnt - 1 ][ i ] = y[ samples_cnt - 1 ][ i + 1 ];
+                }
+
+            y[ samples_cnt - 1 ][ finish_idx ] = val/* / max_var_value*/;
             }
 
         /// <summary>
@@ -154,9 +307,9 @@ class rt_sample: public i_learn_samples
         float* get_sample_x( int index ) const
             {
             if ( index < samples_cnt && index >= 0 )
-            	{
+                {
                 return x[ index ];
-            	}
+                }
             else
                 {
                 char msg[ 200 ];
@@ -169,6 +322,15 @@ class rt_sample: public i_learn_samples
                 }
 
             return fake_image;
+            }
+
+        /// <summary>
+        /// Получение последнего входного образа.
+        /// </summary>
+        /// <returns>Последний образ.</returns>
+        float* get_last_sample_x() const
+            {
+            return x[ samples_cnt - 1 ];
             }
 
         /// <summary>
@@ -198,15 +360,30 @@ class rt_sample: public i_learn_samples
 
         void print()
             {
+            for ( int i = 0; i < samples_cnt; i++ )
+                {
+                printf( "%3d: [", i );
+                for ( int j = 0; j < inputs_cnt; j++ )
+                    {
+                    printf( "%.2f ", x[ i ][ j ] );
+                    }
+                printf( "] -> [" );
+
+                for ( int j = 0; j < outputs_cnt; j++ )
+                    {
+                    printf( "%.2f ", y[ i ][ j ] );
+                    }     
+                printf( "]\n" );
+                }   
+            printf( "\n");
             }
 
     private:     
-
         int in_var_count;
         int out_var_count;
 
         int max_var_value;
-                
+
         float **x;      ///Эталонные входы.
         float **y;      ///Эталонные выходы.  
 
