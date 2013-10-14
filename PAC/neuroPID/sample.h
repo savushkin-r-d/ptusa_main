@@ -115,9 +115,7 @@ class stored_sample: public i_learn_samples
         /// <param name="exclude_every_i">»спользовать каждую i-ю строку дл€ формировани€ обучающих данных. ≈сли равен 1, использовать все строки.</param>
         /// <param name="etalon_column_number"></param>
         /// <returns></returns>
-        int create_learn_sample( int window_size, int learn_samples_count = -1, 
-            int exclude_every_i = 1, int etalon_column_number = 0, 
-            int etalon_columns_cnt = 1 );
+        int create_learn_sample( int window_size, int learn_samples_count = -1, int exclude_every_i = 1, int etalon_column_number = 0, int etalon_columns_cnt = 1, bool exclude_etalons = false );
 
         void print();
 
@@ -273,6 +271,15 @@ class rt_sample: public i_learn_samples
             int start_idx = var_n * var_total_size;
             int finish_idx = start_idx + var_total_size - 1;
 
+            if ( start_idx >= inputs_cnt )
+            	{
+#ifdef _DEBUG
+                printf( "rt_sample::add_new_val_to_in_image(...) - "
+                    "ошибка: выход за диапазон (%d).",
+                    var_n );
+#endif // _DEBUG
+            	}
+
             for ( int i = start_idx; i < finish_idx; i++ )
             	{
                 x[ samples_cnt - 1 ][ i ] = x[ samples_cnt - 1 ][ i + 1 ];
@@ -291,6 +298,15 @@ class rt_sample: public i_learn_samples
             int start_idx = var_n * var_total_size;
             int finish_idx = start_idx + var_total_size - 1;
 
+            if ( start_idx >= inputs_cnt )
+                {
+#ifdef _DEBUG
+                printf( "rt_sample::add_new_val_to_in_image(...) - "
+                    "ошибка: выход за диапазон (%d).",
+                    var_n );
+#endif // _DEBUG
+                }
+            
             for ( int i = start_idx; i < finish_idx; i++ )
                 {
                 y[ samples_cnt - 1 ][ i ] = y[ samples_cnt - 1 ][ i + 1 ];

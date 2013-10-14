@@ -60,5 +60,40 @@ class PID
         void  Reset();
         void  Reset( float new_uk_1 );
         void  SetZ ( float newZ );        //Установить новое задание ПИД.
+
+        float get_z() const
+            {
+            return par[ startParamIndex + PAR_Z ];
+            }
+
+        float get_p() const
+            {
+            return par[ startParamIndex + PAR_k ];
+            }
+
+        float get_i() const
+            {
+            return par[ startParamIndex + PAR_Ti ];
+            }
+
+        float get_d() const
+            {
+            return par[ startParamIndex + PAR_Td ];
+            }
+
+        void set_p( float p ) 
+            {
+            par[ startParamIndex + PAR_k ] = p;
+            }
+        
+        void set_i( float i ) 
+            {
+            par[ startParamIndex + PAR_Ti ] = i;
+            }
+
+        void set_d( float d ) 
+            {
+            par[ startParamIndex + PAR_Td ] = d;
+            }
     };
 #endif

@@ -130,25 +130,37 @@ int stored_sample::save_to_file( char *file_name )
     return 0;
     }
 //------------------------------------------------------------------------------
-int stored_sample::create_learn_sample( int window_size, int learn_samples_count /*= -1*/, 
-                                       int exclude_every_i /*= 1*/, 
-                                       int etalon_column_number /*= 0 */,
-                                       int etalon_columns_cnt )
+int stored_sample::create_learn_sample( 
+    int inputs_cnt, int learn_samples_count /*= -1*/, 
+    int exclude_every_i /*= 1*/, int etalon_column_number /*= 0*/,
+    int etalon_columns_cnt /*= 1*/, bool exclude_etalons /*= false */ )
     {
     //#define _DEBUG_SS
 
-    this->inputs_cnt = window_size;
+    this->inputs_cnt = inputs_cnt;
     this->outputs_cnt = etalon_columns_cnt;
 
-    if ( inputs_cnt % column_cnt )
+    if ( exclude_etalons == false && inputs_cnt % column_cnt )
         {
-#ifdef DEBUG
+#ifdef _DEBUG
         printf( "Windows size [%d] must be multiple of columns count [%d]!\n",
             inputs_cnt, column_cnt );
 #endif // DEBUG
         return -1;
         }
-    int window_column_size = inputs_cnt / column_cnt;
+
+    if ( exclude_etalons && inputs_cnt % ( column_cnt - etalon_columns_cnt ) ) 
+        {
+#ifdef _DEBUG
+        printf( "Windows size [%d] must be multiple of columns count [%d]!\n",
+            inputs_cnt, column_cnt );
+#endif // DEBUG
+        return -1;
+        }
+
+    int window_column_size = exclude_etalons ?
+        inputs_cnt / ( column_cnt - etalon_columns_cnt ) : 
+        inputs_cnt / column_cnt;
 
     float **data_tmp;
     samples_cnt = row_cnt / exclude_every_i;
@@ -189,12 +201,18 @@ int stored_sample::create_learn_sample( int window_size, int learn_samples_count
     for ( int i = 0; i < samples_cnt; i++ )
         {
 
-        x[ i ] = new float[ window_column_size * column_cnt ];
+        x[ i ] = new float[ inputs_cnt ];
 #ifdef _DEBUG_SS        
         printf( "%2d: [ ", i );
 #endif // _DEBUG_SS     
 
-        for ( int k = 0; k < column_cnt; k++ )
+        int finish_column = column_cnt;
+        if ( exclude_etalons )
+        	{
+            finish_column -= etalon_columns_cnt;
+        	}
+
+        for ( int k = 0; k < finish_column; k++ )
             {
             for ( int j = 0; j < window_column_size; j++ )
                 {                                    
@@ -212,7 +230,14 @@ int stored_sample::create_learn_sample( int window_size, int learn_samples_count
         y[ i ] = new float[ etalon_columns_cnt ];
         for ( int j = 0; j < etalon_columns_cnt; j++ )
         	{
-            y[ i ][ j ] = data_tmp[ i + window_column_size ][ etalon_column_number + j ] / factor_k;
+            if ( exclude_etalons )
+            	{
+                y[ i ][ j ] = data_tmp[ i ][ etalon_column_number + j ] / factor_k;
+            	}
+            else
+                {
+                y[ i ][ j ] = data_tmp[ i + window_column_size ][ etalon_column_number + j ] / factor_k;
+                }            
 
 #ifdef _DEBUG_SS        
             printf( "] -> %5.2f \n", y[ i ][ j ] );

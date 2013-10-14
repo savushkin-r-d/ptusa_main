@@ -57,13 +57,12 @@ mlp::mlp( int inputs_cnt, int in_cnt, int outputs_cnt, int q  ):inputs_cnt( inpu
 
     w[ L_INPUT ] = new float*[ inputs_cnt ];
     w[ L_HIDDEN ] = new float*[ in_cnt ];
-
-    int i;
-    for ( i = 0; i < inputs_cnt; i++ )
+        
+    for ( int i = 0; i < inputs_cnt; i++ )
         {
         w[ L_INPUT ][ i ] = new float[ in_cnt ];
         }
-    for ( i = 0; i < in_cnt; i++ )
+    for ( int i = 0; i < in_cnt; i++ )
         {
         w[ L_HIDDEN ][ i ] = new float[ outputs_cnt ];
         }
@@ -287,9 +286,10 @@ void mlp::learn_iteration( float *sample_x, float *sample_y_or_error, char type,
         }
     }
 //------------------------------------------------------------------------------
-int mlp::static_learn( float e, i_learn_samples *sample, int max_iteration_cnt,
-                      bool is_err )
-    {
+    int mlp::static_learn( 
+        float e, i_learn_samples *sample, int max_iteration_cnt, 
+        bool is_err /*= false*/, bool print_res /*= true */ )
+        {
     //ѕроверка на соответствие структуры персептрона и обучающей выборки.
     if ( sample->get_inputs_cnt() != inputs_cnt )
         {
@@ -309,7 +309,10 @@ int mlp::static_learn( float e, i_learn_samples *sample, int max_iteration_cnt,
         }
 
 #ifdef _DEBUG
-    printf( "Start learning[%d]:\n", sample->get_samples_cnt() );
+    if ( print_res )
+    	{
+        printf( "Start learning[%d]:\n", sample->get_samples_cnt() );
+    	}    
 #endif // _DEBUG
 
     float *sample_x = 0;
@@ -352,16 +355,19 @@ int mlp::static_learn( float e, i_learn_samples *sample, int max_iteration_cnt,
         if ( iteration_n > max_iteration_cnt )
             {
 #ifdef _DEBUG
-            printf( "Max iteration count has been reached - %d! Learning has stopped.\n",
-                max_iteration_cnt );
+            if ( print_res )
+            	{
+                printf( "Max iteration count has been reached - %d! Learning has stopped.\n",
+                    max_iteration_cnt );
+            	}
 #endif // _DEBUG
             return -3;
             }
 
 #ifdef _DEBUG
-        if ( 0 == iteration_n % 500 )
+        if ( 0 == iteration_n % 500 && print_res )
             {           
-            printf( "%6d % f - %.3f sec\n", iteration_n, E_k, 
+            printf( "%6d %.10f - %.3f sec\n", iteration_n, E_k, 
                 0.001 * ( GetTickCount() - start_time ) );
             start_time = GetTickCount();
             }
@@ -369,8 +375,12 @@ int mlp::static_learn( float e, i_learn_samples *sample, int max_iteration_cnt,
         }
 
 #ifdef _DEBUG
-    printf( "\nTotal %6d % .9f - %.3f sec\n", iteration_n, E_k, 
-        0.001 * ( GetTickCount() - total_start_time ) );
+    if ( print_res )
+    	{
+        printf( "\nTotal %6d % .9f - %.3f sec\n", iteration_n, E_k, 
+            0.001 * ( GetTickCount() - total_start_time ) );
+    	}
+
 #endif // _DEBUG
 
     return 0;
@@ -708,6 +718,35 @@ int mlp::load_from_stream( char *stream )
     stream = to_next_line( stream );
     stream = to_next_line( stream );
 
+    if ( inputs_cnt != inputs_cnt_tmp )
+    	{
+#ifdef _DEBUG
+        printf( " оличество считанных входов (%d) отличаетс€ от заданного (%d).",
+            inputs_cnt_tmp, inputs_cnt );
+#endif // _DEBUG
+
+        return -1;
+    	}
+    if ( hidden_cnt != hidden_cnt_tmp )
+        {
+#ifdef _DEBUG
+        printf( " оличество считанных внутренних нейронов (%d) отличаетс€ от заданного (%d).",
+            hidden_cnt_tmp, hidden_cnt );
+#endif // _DEBUG
+
+        return -1;
+        }
+    if ( outputs_cnt != outputs_cnt_tmp )
+        {
+#ifdef _DEBUG
+        printf( " оличество считанных выходов (%d) отличаетс€ от заданного (%d).",
+            outputs_cnt_tmp, outputs_cnt );
+#endif // _DEBUG
+
+        return -1;
+        }
+
+
     if ( inputs_cnt && outputs_cnt && hidden_cnt )
         {    	
         int i;
@@ -832,7 +871,7 @@ int mlp::load_from_file( char *file_name )
 float* mlp::solve_out( float *x_in )
     {
     solve_layer_out( x_in, L_INPUT, F_SYGMOID );
-    solve_layer_out( y_hidden, L_HIDDEN, F_LINEAR );
+    solve_layer_out( y_hidden, L_HIDDEN, F_SYGMOID );
        
     return y;
     }

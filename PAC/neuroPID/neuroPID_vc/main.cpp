@@ -230,19 +230,7 @@ void init( HWND hWnd )
 //    fopen_s( &emulator_learning_data_stream, "..\\emul_learning.data", "w" );
 
 //    fprintf_s( emulator_learning_data_stream, "%f\n%f\n%f\n", 2., 1000., 200. );
-#endif // SAVE_DATA_FOR_EMULATOR_LEARNING
-
-    try
-        {
-        rt_sample *rt = new rt_sample( 10, 20, 2, 1, 1, 120 );
-        
-        rt->print();
-
-        }    
-    catch ( char *ex )
-        {
-        printf( "%s\n", ex );
-        }     
+#endif // SAVE_DATA_FOR_EMULATOR_LEARNING  
     }
 
 void final()

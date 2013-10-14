@@ -11,6 +11,7 @@
 // Windows Header Files:
 #include <windows.h>
 #include <Windowsx.h>
+#include <CommCtrl.h>
 
 // C RunTime Header Files
 #include <stdlib.h>
