@@ -86,7 +86,7 @@ void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
     if ( b == 0 )
         {
 #ifdef DEBUG
-        Print( "Set Error: class: %d, p1: %d, p2: %lu.\n\r", eclass, p1, p2 );
+        Print( "Set Error: class: %d, p1: %d, p2: %lu.\n", eclass, p1, p2 );
 #endif // DEBUG
         errors.push_back( critical_error( eclass, p1, p2 ) );
 
@@ -113,7 +113,7 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
         {
         errors.erase( errors.begin() + idx );
 #ifdef DEBUG
-        Print( "Reset Error: class: %d, p1: %d, p2: %lu \n\r", eclass, p1, p2 );
+        Print( "Reset Error: class: %d, p1: %d, p2: %lu \n", eclass, p1, p2 );
 #endif // DEBUG
 
         errors_id++;

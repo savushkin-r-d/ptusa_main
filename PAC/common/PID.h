@@ -139,6 +139,13 @@ class PID: public i_Lua_save_device
             return answer_size;
             }
 
+#ifdef RM_PAC
+        int rm_save_device_state( char *buff )
+            {
+            return 0;
+            }
+#endif // RM_PAC
+
         /// @brief Отладочная печать объекта в консоль.
         virtual const char* get_name_in_Lua() const
             {

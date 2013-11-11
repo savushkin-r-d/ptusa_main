@@ -16,6 +16,8 @@ $#include "PID.h"
 $#include "g_device.h"
 $#include "errors.h"
 
+$#include "rm_manager.h"
+
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе дискретного входа.
 ///
@@ -30,7 +32,7 @@ class i_DI_device
         /// в данном состоянии больше заданного интервала времени (Задание
         /// интервала - смотри @ref set_change_time).
         ///
-        /// @return - cостояние устройства в виде целого числа.
+        /// @return - состояние устройства в виде целого числа.
         int get_state();
 
         /// @brief Получение логического активного состояния устройства.
@@ -101,7 +103,7 @@ class i_DO_AO_device: public i_DO_device, public i_AO_device
         /// в данном состоянии больше заданного интервала времени (Задание
         /// интервала - смотри @ref set_change_time).
         ///
-        /// @return - cостояние устройства в виде целого числа.
+        /// @return - состояние устройства в виде целого числа.
         int get_state();
 
         /// @brief Установка состояния.
@@ -956,3 +958,19 @@ unsigned long get_delta_millisec( unsigned long time1 );
 ///
 /// @param ms - время ожидания, мс.
 void sleep_ms( unsigned long ms );
+//---------------------------------------------------------------------------
+rm_manager* G_RM_MANAGER();
+//---------------------------------------------------------------------------
+class rm_manager
+    {
+    public:      
+        /// <summary>
+        /// Добавление удаленного PAC для управления.
+        /// </summary>
+        /// <param name="name">Имя удаленного PAC.</param>
+        /// <param name="IP_address">IP-адрес удаленного PAC.</param>
+        /// <returns></returns>
+        void add_rm_cmmctr( char* name, char* IP_address, 
+            int remote_PAC_id );
+    };   
+//---------------------------------------------------------------------------

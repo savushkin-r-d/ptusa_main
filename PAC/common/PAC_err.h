@@ -65,6 +65,7 @@ class PAC_critical_errors_manager
             AS_MODBUS_DEVICE,       ///< Ошибки устройства, опрашиваемого по Modbus.
 
             AS_EASYSERVER = 5,      ///< Ошибки EasyServer.
+            AS_REMOTE_PAC,          ///< Ошибки связи с удаленным PAC.
 
             //AC_RUNTIME_ERROR,     ///< Ошибки во время работы.
             AS_EMERGENCY_BUTTON = 1,///< Нажата аварийная кнопка.

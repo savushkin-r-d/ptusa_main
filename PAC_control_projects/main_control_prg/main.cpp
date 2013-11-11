@@ -9,6 +9,7 @@
 /// @c DEBUG - компил€ци€ c выводом отладочной информации в консоль.@n@n
 
 #include <stdlib.h>
+#include "fcntl.h"
 
 #ifdef __BORLANDC__
 #include <sys\types.h>
@@ -24,7 +25,7 @@
 #include "lua_manager.h"
 #include "PAC_err.h"
 
-#include "fcntl.h"
+#include "rm_manager.h"
 
 int main( int argc, char *argv[] )
     {
@@ -59,7 +60,6 @@ int main( int argc, char *argv[] )
 
     fflush( stdout );
     fprintf( stderr, "Starting main loop!\n" );
-
 #ifdef DEBUG
     while ( !kb_hit() )
 #else
@@ -95,6 +95,11 @@ int main( int argc, char *argv[] )
 
         PAC_info::get_instance()->eval();
         PAC_critical_errors_manager::get_instance()->show_errors();
+
+#ifdef RM_PAC
+        // —в€зь с удаленными PAC.
+        G_RM_MANAGER()->evaluate();
+#endif // RM_PAC
 
 #ifdef TEST_SPEED
         //-»нформаци€ о времени выполнени€ цикла программы.!->

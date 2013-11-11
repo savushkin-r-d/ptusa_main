@@ -264,6 +264,13 @@ class tech_object: public i_Lua_save_device
 
         int set_param( int par_id, int index, double value );
 
+#ifdef RM_PAC
+        int rm_save_device_state( char *buff )
+            {
+            return 0;
+            }
+#endif // RM_PAC
+
     protected:
         u_int   number;         ///< Номер объекта.
         u_int   type;           ///< Тип объекта (для ошибок).

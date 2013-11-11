@@ -25,7 +25,7 @@ tcp_communicator::tcp_communicator()
     glob_cmctr_ok       = 1;
     for ( int i = 0; i < TC_MAX_SERVICE_NUMBER; i++ ) services[ i ] = NULL;
     
-    memset( host_name, 0, TC_MAX_HOST_NAME );
+    memset( host_name_rus, 0, TC_MAX_HOST_NAME );
     }
 //------------------------------------------------------------------------------
 tcp_communicator::srv_ptr tcp_communicator::reg_service( u_char srv_id,
@@ -78,27 +78,32 @@ tcp_communicator* tcp_communicator::get_instance()
     return instance;
     }
 //------------------------------------------------------------------------------
-char* tcp_communicator::get_host_name()
+char* tcp_communicator::get_host_name_rus()
     {
-    return host_name;
+    return host_name_rus;
+    }
+//------------------------------------------------------------------------------
+char* tcp_communicator::get_host_name_eng()
+    {
+    return host_name_eng;
     }
 //------------------------------------------------------------------------------
 tcp_communicator::~tcp_communicator()
     {
     }
 //------------------------------------------------------------------------------
-void tcp_communicator::init_instance( const char *name )
+void tcp_communicator::init_instance( const char *name_rus, const char *name_eng )
     {
 #ifdef WIN_OS
-    instance = new tcp_communicator_win( name );
+    instance = new tcp_communicator_win( name_rus, name_eng );
 #endif // WIN_OS
 
 #ifdef LINUX_OS
-    instance = new tcp_communicator_linux( name );
+    instance = new tcp_communicator_linux( name_rus, name_eng );
 #endif
 
 #ifdef MINIOS7
-    instance = new tcp_communicator_mos7( name );
+    instance = new tcp_communicator_mos7( name_rus );
 #endif
     }
 //------------------------------------------------------------------------------

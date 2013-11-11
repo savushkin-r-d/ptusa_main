@@ -242,6 +242,43 @@ int device::save_device( char *buff, const char *prefix )
     return strlen( buff );
     }
 //-----------------------------------------------------------------------------
+#ifdef RM_PAC
+int device::rm_save_device_state( char *buff, const char *prefix )
+    {
+    if ( type != DT_AO &&
+        type != DT_TE )
+        {
+        sprintf( buff, "%s.%s.ST=%d\n", prefix,  Lua_name, get_state() );
+        }
+
+    if ( type != DT_V &&
+
+        type != DT_LS &&
+        type != DT_FS &&
+        type != DT_GS &&
+
+        type != DT_HA &&
+        type != DT_HL &&
+        type != DT_SB &&
+
+        type != DT_DI &&
+        type != DT_DO )
+        {
+        if ( get_value() == 0 )
+            {
+            sprintf( buff + strlen( buff ), "%s.%s.V=0\n",
+                prefix, Lua_name );
+            }
+        else
+            {
+            sprintf( buff + strlen( buff ), "%s.%s.V=%.2f\n", get_value() );
+            }
+        }
+    
+    return strlen( buff );
+    }
+#endif // RM_PAC
+//-----------------------------------------------------------------------------
 int device::set_cmd( const char *prop, u_int idx, char *val )
     {
 #ifdef DEBUG
@@ -716,6 +753,47 @@ int device_manager::save_device( char *buff )
 
     return answer_size;
     }
+//-----------------------------------------------------------------------------
+#ifdef RM_PAC
+int device_manager::rm_save_device_state( char *buff )
+    {
+    char cmd[ 200 ] = { 0 };
+    snprintf( cmd, sizeof( cmd ), 
+        "assert( loadstring( \"%s=%s or{}\"))()\n t=%s\n", 
+        G_CMMCTR->get_host_name_eng(), G_CMMCTR->get_host_name_eng(),
+        G_CMMCTR->get_host_name_eng() );
+    sprintf( buff, cmd );
+    
+    int answer_size = strlen( buff );
+
+    for ( u_int i = 0; i < project_devices.size(); i++)
+        {
+        answer_size += 
+            project_devices[ i ]->rm_save_device_state( buff + answer_size, "t" );       
+        }
+
+    return answer_size;
+    }
+//-----------------------------------------------------------------------------
+int device_manager::rm_save_device( char *buff )
+    {
+    sprintf( buff, "%s=\n",  G_CMMCTR->get_host_name_eng() );
+    int answer_size = strlen( buff );
+    sprintf( buff + answer_size, "\t{\n" );
+    answer_size += strlen( buff + answer_size );
+
+    for ( u_int i = 0; i < project_devices.size(); i++)
+        {
+        project_devices[ i ]->save_device( buff + answer_size, "\t" );
+        answer_size += strlen( buff + answer_size );
+        }
+
+    sprintf( buff + answer_size, "\t}\n" );
+    answer_size += strlen( buff + answer_size );
+
+    return answer_size;
+    }
+#endif // RM_PAC
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void i_counter::restart()

@@ -53,26 +53,26 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;$(IncludePath)</IncludePath>
+    <IncludePath>../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(IncludePath)</IncludePath>
     <TargetName>main</TargetName>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;$(IncludePath)</IncludePath>
+    <IncludePath>../../../PAC/common;../../../common/util;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(IncludePath)</IncludePath>
     <TargetName>main</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>ptusa</TargetName>
-    <IncludePath>../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;;../../../PAC/common/sys;$(IncludePath)</IncludePath>
+    <IncludePath>../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG;TEST_SPEED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG;TEST_SPEED;RM_PAC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -97,7 +97,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG;DEBUG_IDE;TEST_SPEED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG;DEBUG_IDE;TEST_SPEED;RM_PAC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -172,6 +172,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
     <ClInclude Include="..\..\..\common\tolua++\tolua_base.h" />
     <ClInclude Include="..\..\..\common\tolua++\tolua_event.h" />
     <ClInclude Include="..\..\..\common\util\smart_ptr.h" />
+    <ClInclude Include="..\..\..\common\win_util\WSA_err_decode.h" />
     <ClInclude Include="..\..\..\PAC\common\mode_mngr.h" />
     <ClInclude Include="..\..\..\PAC\common\PAC_dev.h" />
     <ClInclude Include="..\..\..\PAC\common\PAC_err.h" />
@@ -179,6 +180,8 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
     <ClInclude Include="..\..\..\PAC\common\param_ex.h" />
     <ClInclude Include="..\..\..\PAC\common\PID.h" />
     <ClInclude Include="..\..\..\PAC\common\prj_mngr.h" />
+    <ClInclude Include="..\..\..\PAC\common\rm_manager.h" />
+    <ClInclude Include="..\..\..\PAC\common\rm_tech_def.h" />
     <ClInclude Include="..\..\..\PAC\common\sys\debug.h" />
     <ClInclude Include="..\..\..\PAC\common\sys\led.h" />
     <ClInclude Include="..\..\..\PAC\common\sys\console.h" />
@@ -189,6 +192,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
     <ClInclude Include="..\..\..\PAC\common\tech_def.h" />
     <ClInclude Include="..\..\..\PAC\common\wago.h" />
     <ClInclude Include="..\..\..\PAC\win\PAC_PC\wago_PC.h" />
+    <ClInclude Include="..\..\..\PAC\win\w_rm_tech_def.h" />
     <ClInclude Include="..\..\..\PAC\win\w_tcp_cmctr.h" />
     <ClInclude Include="..\..\..\pac\win\w_console.h" />
     <ClInclude Include="..\..\..\PAC\win\w_led.h" />
@@ -234,6 +238,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
     <ClCompile Include="..\..\..\common\tolua++\tolua_map.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_push.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_to.c" />
+    <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp" />
     <ClCompile Include="..\..\..\PAC\common\mode_mngr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_dev.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_dev_lua.cpp" />
@@ -242,6 +247,8 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
     <ClCompile Include="..\..\..\PAC\common\param_ex.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PID.cpp" />
     <ClCompile Include="..\..\..\PAC\common\prj_mngr.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\rm_manager.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\rm_tech_def.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys\io.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys\led.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys\base_mem.cpp" />
@@ -249,6 +256,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
     <ClCompile Include="..\..\..\PAC\common\tech_def.cpp" />
     <ClCompile Include="..\..\..\PAC\common\wago.cpp" />
     <ClCompile Include="..\..\..\PAC\win\PAC_PC\wago_PC.cpp" />
+    <ClCompile Include="..\..\..\PAC\win\w_rm_tech_def.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_tcp_cmctr.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_dtime.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_console.cpp" />
@@ -258,6 +266,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
   <ItemGroup>
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys.devices.lua" />
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys.objects.lua" />
+    <None Include="..\..\..\..\PTUSA projects\system scripts\sys.rm_PACs.lua" />
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys.wago.lua" />
     <None Include="..\..\..\PAC\common\toloa++\pkg\make.cmd" />
     <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh">

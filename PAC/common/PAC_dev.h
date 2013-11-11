@@ -305,6 +305,15 @@ class device : public i_DO_AO_device, public par_device
         /// @param buff [out] - буфер записи строки.
         virtual int save_device( char *buff, const char *prefix );
 
+#ifdef RM_PAC
+        /// @brief Сохранение состояния устройства в виде скрипта Lua.
+        ///
+        /// @param prefix - префикс перед строкой скрипта (обычно название
+        /// таблицы).
+        /// @param buff [out] - буфер записи строки.
+        virtual int rm_save_device_state( char *buff, const char *prefix );
+#endif // RM_PAC
+
         enum CONSTANTS
             {
             C_DEVICE_TYPE_CNT = 17,     ///< Количество типов устройств.
@@ -1782,6 +1791,12 @@ class device_manager: public i_Lua_save_device
 #pragma option -w-inl
 #endif // __BORLANDC__
         int save_device( char *buff );
+
+#ifdef RM_PAC
+        int rm_save_device( char *buff );
+
+        int rm_save_device_state( char *buff );
+#endif // RM_PAC
 
 #ifdef __BORLANDC__
 #pragma option -w.inl

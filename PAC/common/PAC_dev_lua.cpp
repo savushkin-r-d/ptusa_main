@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 05/27/13 15:10:27.
+** Generated automatically by tolua++-1.0.92 on 11/11/13 08:51:00.
 */
 
 #ifndef __cplusplus
@@ -21,6 +21,7 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 #include "PID.h"
 #include "g_device.h"
 #include "errors.h"
+#include "rm_manager.h"
 
 /* function to release collected object via destructor */
 #ifdef __cplusplus
@@ -53,6 +54,7 @@ static void tolua_reg_types (lua_State* tolua_S)
 {
  tolua_usertype(tolua_S,"i_DO_AO_device");
  tolua_usertype(tolua_S,"action");
+ tolua_usertype(tolua_S,"rm_manager");
  tolua_usertype(tolua_S,"step");
  tolua_usertype(tolua_S,"i_Lua_save_device");
  tolua_usertype(tolua_S,"dev_errors_manager");
@@ -4825,6 +4827,70 @@ static int tolua_PAC_dev_sleep_ms00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* function: G_RM_MANAGER */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_G_RM_MANAGER00
+static int tolua_PAC_dev_G_RM_MANAGER00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isnoobj(tolua_S,1,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  {
+   rm_manager* tolua_ret = (rm_manager*)  G_RM_MANAGER();
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"rm_manager");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'G_RM_MANAGER'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: add_rm_cmmctr of class  rm_manager */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_rm_manager_add_rm_cmmctr00
+static int tolua_PAC_dev_rm_manager_add_rm_cmmctr00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"rm_manager",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  rm_manager* self = (rm_manager*)  tolua_tousertype(tolua_S,1,0);
+  char* name = ((char*)  tolua_tostring(tolua_S,2,0));
+  char* IP_address = ((char*)  tolua_tostring(tolua_S,3,0));
+  double remote_PAC_id = ((double)  tolua_tonumber(tolua_S,4,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_rm_cmmctr'", NULL);
+#endif
+  {
+   self->add_rm_cmmctr(name,IP_address,remote_PAC_id);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'add_rm_cmmctr'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* Open function */
 TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
 {
@@ -5127,6 +5193,11 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_function(tolua_S,"get_millisec",tolua_PAC_dev_get_millisec00);
   tolua_function(tolua_S,"get_delta_millisec",tolua_PAC_dev_get_delta_millisec00);
   tolua_function(tolua_S,"sleep_ms",tolua_PAC_dev_sleep_ms00);
+  tolua_function(tolua_S,"G_RM_MANAGER",tolua_PAC_dev_G_RM_MANAGER00);
+  tolua_cclass(tolua_S,"rm_manager","rm_manager","",NULL);
+  tolua_beginmodule(tolua_S,"rm_manager");
+   tolua_function(tolua_S,"add_rm_cmmctr",tolua_PAC_dev_rm_manager_add_rm_cmmctr00);
+  tolua_endmodule(tolua_S);
  tolua_endmodule(tolua_S);
  return 1;
 }

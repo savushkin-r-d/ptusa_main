@@ -246,6 +246,18 @@
     <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh">
       <Filter>pkg</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\rm_tech_def.h">
+      <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\win\w_rm_tech_def.h">
+      <Filter>Header Files\PAC\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\rm_manager.h">
+      <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\common\win_util\WSA_err_decode.h">
+      <Filter>Header Files\PAC\win</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -422,6 +434,18 @@
     <ClCompile Include="..\..\..\PAC\common\sys\base_mem.cpp">
       <Filter>Source Files\PAC\common\sys</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\rm_tech_def.cpp">
+      <Filter>Source Files\PAC\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\win\w_rm_tech_def.cpp">
+      <Filter>Source Files\PAC\win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\rm_manager.cpp">
+      <Filter>Source Files\PAC\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp">
+      <Filter>Source Files\PAC\win</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys.objects.lua">
@@ -435,6 +459,9 @@
     </None>
     <None Include="..\..\..\PAC\common\toloa++\pkg\make.cmd">
       <Filter>pkg</Filter>
+    </None>
+    <None Include="..\..\..\..\PTUSA projects\system scripts\sys.rm_PACs.lua">
+      <Filter>Lua Source\common</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

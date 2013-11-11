@@ -14,6 +14,8 @@
 
 #include "tech_def.h"
 
+#include "rm_manager.h"
+
 #ifdef WIN_OS
 #include "w_mem.h"
 #endif
@@ -183,6 +185,27 @@ int project_manager::lua_load_configuration()
         }
     //-Добавление системных тегов контроллера.
     G_DEVICE_CMMCTR->add_device( PAC_info::get_instance() );
+
+#ifdef RM_PAC
+    // Добавление удаленных PAC.
+#ifdef DEBUG
+    printf( "Remote PAC's...\n");
+#endif // DEBUG
+
+    res = lua_manager::get_instance()->int_exec_lua_method( "system",
+        "init_rm_PACs", 0, "project_manager::lua_load_configuration()" );
+    if ( res < 0 )
+        {
+        Print( "Fatal error!\n" );
+        return 1;
+        }
+
+#ifdef DEBUG
+    G_RM_MANAGER()->print();
+    Print( "\n" );
+#endif // DEBUG
+
+#endif // RM_PAC
 
 #ifdef DEBUG
     Print( "Project manager - processing configuration completed.\n" );

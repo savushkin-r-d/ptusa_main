@@ -52,7 +52,7 @@ long device_communicator::write_devices_states_service( long len,
                 "protocol_version = %d; PAC_name = \"%s\"; is_reset_params = %d;"
                 "params_CRC=%d;\n", 
                 G_CURRENT_PROTOCOL_VERSION,
-                tcp_communicator::get_instance()->get_host_name(),
+                tcp_communicator::get_instance()->get_host_name_rus(),
                 params_manager::get_instance()->par[ 0 ][ params_manager::P_IS_RESET_PARAMS ],                
                 params_manager::get_instance()->solve_CRC() );
 
@@ -60,7 +60,7 @@ long device_communicator::write_devices_states_service( long len,
 
 #ifdef DEBUG_DEV_CMCTR
             Print( "G_CURRENT_PROTOCOL_VERSION = %u, host =[%s]\n", G_CURRENT_PROTOCOL_VERSION,
-                tcp_communicator::get_instance()->get_host_name() );
+                tcp_communicator::get_instance()->get_host_name_rus() );
 #endif // DEBUG_DEV_CMCTR
             return answer_size;
 
@@ -270,6 +270,75 @@ long device_communicator::write_devices_states_service( long len,
                 g_devices_request_id );
 
             return strlen( ( char* ) outdata );
+
+#ifdef RM_PAC
+        case CMD_RM_GET_DEVICES:
+            {
+            param_size = sizeof( g_devices_request_id );
+            memcpy( outdata, &g_devices_request_id, param_size );
+            answer_size += param_size;
+
+            for ( u_int i = 0; i < dev.size(); i++ )
+                {
+                answer_size += dev[ i ]->rm_save_device( ( char* ) outdata + 
+                    answer_size );
+                }      
+
+            *( ( char* ) outdata + answer_size ) = 0;
+            answer_size++;
+
+#ifdef DEBUG
+            std::string source = ( char* ) outdata + 2;               
+            for ( u_int i = 0; i < source.length(); i++ )
+                {
+                if ( source[ i ] == '\t' )
+                    {
+                    source[ i ] = ' ';
+                    }
+                }
+
+            Print( "%s", source.c_str() );
+#endif // DEBUG
+
+            return answer_size;
+            }
+
+        case CMD_RM_GET_DEVICES_STATES:
+            {
+            param_size = sizeof( g_devices_request_id );
+            memcpy( outdata, &g_devices_request_id, param_size );
+            answer_size += param_size;
+
+            for ( u_int i = 0; i < dev.size(); i++ )
+                {
+                answer_size += dev[ i ]->rm_save_device_state( ( char* ) outdata + 
+                    answer_size );
+                }      
+
+            *( ( char* ) outdata + answer_size ) = 0;
+            answer_size++;
+
+#ifdef DEBUG
+            static bool is_print = false;
+            if ( is_print == false )
+                {
+                std::string source = ( char* ) outdata + 2;               
+                for ( u_int i = 0; i < source.length(); i++ )
+                    {
+                    if ( source[ i ] == '\t' )
+                        {
+                        source[ i ] = ' ';
+                        }
+                    }
+
+                Print( "%s", source.c_str() );
+                is_print = true;
+                }            
+#endif // DEBUG
+
+            return answer_size;
+            }
+#endif // RM_PAC
         }
 
     return answer_size;

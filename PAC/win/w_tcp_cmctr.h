@@ -35,7 +35,7 @@ struct socket_state
 class tcp_communicator_win : public tcp_communicator 
     {
         public:
-            tcp_communicator_win( const char *name );
+            tcp_communicator_win( const char *name_rus, const char *name_eng );
             virtual ~tcp_communicator_win();
 
             /// @brief Итерация обмена данными с сервером.

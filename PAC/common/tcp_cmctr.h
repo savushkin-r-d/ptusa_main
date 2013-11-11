@@ -34,7 +34,7 @@ class tcp_communicator
         /// tcp_communicator.
         static tcp_communicator* get_instance();
 
-        static void init_instance( const char *name );
+        static void init_instance( const char *name_rus, const char *name_eng );
 
         /// @brief Итерация обмена данными с сервером.
         virtual int evaluate() = 0;
@@ -48,8 +48,13 @@ class tcp_communicator
 
         /// @brief Получение сетевого имени PAC.
         ///
-        /// @return - сетевое имя PAC.
-        char* get_host_name();
+        /// @return - сетевое имя PAC на русском языке.
+        char* get_host_name_rus();
+
+        /// @brief Получение сетевого имени PAC.
+        ///
+        /// @return - сетевое имя PAC на английском языке.
+        char* get_host_name_eng();
 
         virtual ~tcp_communicator();
 
@@ -96,7 +101,8 @@ class tcp_communicator
         static auto_smart_ptr < tcp_communicator > instance;///< Экземпляр класса.
 
         srv_ptr services[ TC_MAX_SERVICE_NUMBER ];  ///< Массив сервисов.
-        char    host_name[ TC_MAX_HOST_NAME ];      ///< Сетевое имя PAC.
+        char    host_name_rus[ TC_MAX_HOST_NAME ];      ///< Сетевое имя PAC.
+        char    host_name_eng[ TC_MAX_HOST_NAME ];      ///< Сетевое имя PAC.
 
         int max_cycles;         ///< Максимальное количество циклов обработки состояний сокетов за 1 проход.
         int is_going_to_reboot; ///< Флаг перезагрузки PAC.

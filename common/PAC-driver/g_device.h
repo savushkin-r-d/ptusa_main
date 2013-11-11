@@ -47,6 +47,26 @@ class i_Lua_save_device
         /// @return >= 0 - количество записанных байт.
         virtual int save_device( char *buff ) = 0; 
 
+#ifdef RM_PAC
+        /// @brief —охранение самого устройства в буфер дл€ удаленного доступа.
+        ///
+        /// @param buff [ out ] - адрес буфера, куда будут записыватьс€ данные.
+        ///
+        /// @return >= 0 - количество записанных байт.
+        virtual int rm_save_device( char *buff )
+            {
+            buff[ 0 ] = 0;
+            return 0;
+            }
+
+        /// @brief —охранение самого устройства в буфер дл€ удаленного доступа.
+        ///
+        /// @param buff [ out ] - адрес буфера, куда будут записыватьс€ данные.
+        ///
+        /// @return >= 0 - количество записанных байт.
+        virtual int rm_save_device_state( char *buff ) = 0; 
+#endif // RM_PAC
+
         /// @brief ќтладочна€ печать объекта в консоль.
         virtual const char* get_name_in_Lua() const = 0;
     };
@@ -108,6 +128,9 @@ class device_communicator
             /// и их записи в этом случае в резервную копию.
             CMD_GET_PARAMS_CRC,
             // –езервное копирование параметров. -!>
+
+            CMD_RM_GET_DEVICES = 200,   ///< «апрос устройств PAC от PAC-мастера.
+            CMD_RM_GET_DEVICES_STATES,  ///< «апрос состо€ни€ устройств PAC от PAC-мастера.
             };
 
 #ifndef DRIVER

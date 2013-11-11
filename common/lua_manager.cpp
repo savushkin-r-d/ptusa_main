@@ -56,8 +56,13 @@ int check_file( const char* file_name, char* err_str )
     return version;
     }
 //-----------------------------------------------------------------------------
+#if !defined RM_PAC
 const int SYS_FILE_CNT = 3;
 const int FILE_CNT     = 6;
+#else
+const int SYS_FILE_CNT = 4;
+const int FILE_CNT     = 8;
+#endif // RM_PAC
 //-----------------------------------------------------------------------------
 #ifdef PAC_PC
 #ifdef LINUX_OS
@@ -72,10 +77,16 @@ const char *FILES[ FILE_CNT ] =
     "sys.wago.lua",
     "sys.devices.lua",
     "sys.objects.lua",
+#if defined RM_PAC
+    "sys.rm_PACS.lua",
+#endif // defined RM_PAC
 
     "main.wago.lua",
     "main.devices.lua",
-    "main.objects.lua"
+    "main.objects.lua",
+#if defined RM_PAC
+    "main.rm_PACS.lua"
+#endif // defined RM_PAC
     };
 //-----------------------------------------------------------------------------
 const int FILES_VERSION[ FILE_CNT ] =
@@ -83,10 +94,16 @@ const int FILES_VERSION[ FILE_CNT ] =
     1, //"sys.wago.plua",
     1, //"sys.devices.lua",
     1, //"sys.tech_objects.plua",
+#if defined RM_PAC
+    1, //"sys.rm_PACS.lua",
+#endif // defined RM_PAC 
 
     1, //"main.wago.plua",
     1, //"main.devices.plua",
     1, //"main.objects.plua",
+#if defined RM_PAC 
+    1, //"main.rm_PACS.lua"
+#endif // defined RM_PAC
     };
 //-----------------------------------------------------------------------------
 //I
@@ -283,15 +300,23 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         return res;
         }
 
-    const char *PAC_name =
+    const char *PAC_name_rus =
         G_LUA_MANAGER->char_no_param_exec_lua_method( "system",
-        "get_PAC_name", "lua_manager::init" );
-    if ( 0 == PAC_name )
+        "get_PAC_name_rus", "lua_manager::init" );
+    if ( 0 == PAC_name_rus )
         {
         fprintf( stderr, "Lua init error - error reading PAC name!\n" );
         return 1;
         }
-    tcp_communicator::init_instance( PAC_name );
+    const char *PAC_name_eng =
+        G_LUA_MANAGER->char_no_param_exec_lua_method( "system",
+        "get_PAC_name_eng", "lua_manager::init" );
+    if ( 0 == PAC_name_rus )
+        {
+        fprintf( stderr, "Lua init error - error reading PAC name!\n" );
+        return 1;
+        }
+    tcp_communicator::init_instance( PAC_name_rus, PAC_name_eng );
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
 
