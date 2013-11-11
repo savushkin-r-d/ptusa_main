@@ -54,12 +54,13 @@ int main( int argc, char *argv[] )
     if ( res ) //-Ошибка инициализации.
         {
         fprintf( stderr, "Lua init error - %d!\n", res );
-        debug_break;
+         debug_break;
         return EXIT_FAILURE;
         }
 
     fflush( stdout );
     fprintf( stderr, "Starting main loop!\n" );
+
 #ifdef DEBUG
     while ( !kb_hit() )
 #else

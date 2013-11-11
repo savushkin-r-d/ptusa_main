@@ -20,7 +20,7 @@
 #include "PAC_dev.h"
 //#include "sys.h"
 
-class PID: public i_Lua_save_device
+class PID: public i_Lua_save_device, i_cmd_device
     { 
     enum STATES 
         {
@@ -151,5 +151,10 @@ class PID: public i_Lua_save_device
             {
             return name;
             }
-    };
+
+		virtual int set_cmd( const char *prop, u_int idx, double val );
+
+		virtual int set_cmd( const char *prop, u_int idx, char *val );
+
+	};
 #endif

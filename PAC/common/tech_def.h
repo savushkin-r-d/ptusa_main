@@ -94,7 +94,7 @@ class tech_object: public i_Lua_save_device
         /// @return 0 - режим не включен.
         int get_mode( u_int mode );
 
-        int  evaluate();
+        virtual int  evaluate();
 
         /// @brief Проверка возможности включения режима.
         ///

@@ -10,6 +10,7 @@ $#include <stdlib.h>
 
 $#include "PAC_dev.h"
 $#include "tech_def.h"
+$#include "cip_tech_def.h"
 $#include "wago.h"
 $#include "tolua_base.h"
 $#include "PID.h"
@@ -922,6 +923,8 @@ class PID
 
         /// @brief Отладочная печать объекта в консоль.
         void print();
+
+		int set_cmd( const char *prop, unsigned int idx, double val );
     };
 //-----------------------------------------------------------------------------
 class PAC_info: public i_Lua_save_device
@@ -958,6 +961,21 @@ unsigned long get_delta_millisec( unsigned long time1 );
 ///
 /// @param ms - время ожидания, мс.
 void sleep_ms( unsigned long ms );
+
+/// @brief Класс для модуля моечной станции
+class cipline_tech_object: public tech_object
+	{
+	public:
+		cipline_tech_object( const char* name, unsigned int number, unsigned int type, const char* name_Lua,
+			unsigned int states_count,
+			unsigned int timers_count,
+			unsigned int par_float_count, unsigned int runtime_par_float_count,
+			unsigned int par_uint_count, unsigned int runtime_par_uint_count );
+		PID* PIDF;
+		PID* PIDP;
+		void initline();
+		int evaluate();
+	};
 //---------------------------------------------------------------------------
 rm_manager* G_RM_MANAGER();
 //---------------------------------------------------------------------------

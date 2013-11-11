@@ -37,6 +37,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -106,7 +107,7 @@
     </Link>
     <PreBuildEvent>
       <Command>tolua++ -n PAC_dev -o "..\..\..\PAC\common\PAC_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh"
-copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
+copy "p:\ptusa\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>tolua++</Message>
@@ -138,7 +139,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
       <AdditionalDependencies>ws2_32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetDir)$(TargetFileName)" "p:\PTUSA projects\editor\bin_lua\lua.exe"</Command>
+      <Command>copy "$(TargetDir)$(TargetFileName)" "p:\ptusa\PTUSA projects\editor\bin_lua\lua.exe"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -172,6 +173,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
     <ClInclude Include="..\..\..\common\tolua++\tolua_base.h" />
     <ClInclude Include="..\..\..\common\tolua++\tolua_event.h" />
     <ClInclude Include="..\..\..\common\util\smart_ptr.h" />
+    <ClInclude Include="..\..\..\PAC\common\cip_tech_def.h" />
     <ClInclude Include="..\..\..\common\win_util\WSA_err_decode.h" />
     <ClInclude Include="..\..\..\PAC\common\mode_mngr.h" />
     <ClInclude Include="..\..\..\PAC\common\PAC_dev.h" />
@@ -238,6 +240,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
     <ClCompile Include="..\..\..\common\tolua++\tolua_map.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_push.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_to.c" />
+    <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp" />
     <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp" />
     <ClCompile Include="..\..\..\PAC\common\mode_mngr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_dev.cpp" />
@@ -279,4 +282,9 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="main_control_prg_vc1.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

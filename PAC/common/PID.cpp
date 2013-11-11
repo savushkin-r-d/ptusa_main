@@ -1,4 +1,5 @@
 #include "PID.h"
+#include "string.h"
 //-----------------------------------------------------------------------------
 PID::PID( int n ):
     uk_1( 0 ),
@@ -261,4 +262,31 @@ void PID::acceleration( float accel_time )
         if ( Uk > res ) Uk = res + start_value;
         }
     }
+
+int PID::set_cmd( const char *prop, u_int idx, double val )
+	{
+	if (0 == strcmp(prop, "RT_PAR_F"))
+		{
+		if (idx <= w_par->get_count())
+			{
+			w_par[0][idx] = (float) val;
+			return 0;
+			}
+		}
+	if (0 == strcmp(prop, "S_PAR_F"))
+		{
+		if (idx > 0 && idx <= par->get_count())
+			{
+			par->save(idx, (float)val);
+			return 0;
+			}
+		}
+	return 0;
+	}
+
+int PID::set_cmd( const char *prop, u_int idx, char *val )
+	{
+	throw std::exception("The method or operation is not implemented.");
+	}
+
 //-----------------------------------------------------------------------------
