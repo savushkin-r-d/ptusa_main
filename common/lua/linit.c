@@ -26,7 +26,6 @@ static const luaL_Reg lualibs[] = {
   {LUA_MATHLIBNAME, luaopen_math},
   {LUA_DBLIBNAME, luaopen_debug},
 #endif // defined DRIVER || defined PAC_PC
-
   {NULL, NULL}
 };
 

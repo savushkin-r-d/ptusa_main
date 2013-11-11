@@ -8,13 +8,6 @@
 #pragma warning(disable:4996) //strncat to strncat_s and others...
 #endif // WIN32
 
-#ifdef MINIOS7
-int mkstemp( char* s)
-{
-return 0;
-}
-#endif
-
 #include <errno.h>
 #include <locale.h>
 #include <stdlib.h>

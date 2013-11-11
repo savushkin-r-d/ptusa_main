@@ -7,7 +7,6 @@
 #ifdef WIN32
 #pragma warning(disable:4996) //strncat to strncat_s and others...
 #endif // WIN32
-
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>

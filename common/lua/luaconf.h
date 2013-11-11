@@ -88,22 +88,20 @@
 #define LUA_LDIR	"!\\lua\\"
 #define LUA_CDIR	"!\\"
 #define LUA_PATH_DEFAULT  \
-".\\?.lua;"  LUA_LDIR"?.lua;" \
-LUA_CDIR"?.lua;"
-
+		".\\?.lua;"  LUA_LDIR"?.lua;"  LUA_LDIR"?\\init.lua;" \
+		             LUA_CDIR"?.lua;"  LUA_CDIR"?\\init.lua"
 #define LUA_CPATH_DEFAULT \
-    ".\\?.dll;"  LUA_CDIR"?.dll;" LUA_CDIR"loadall.dll"
+	".\\?.dll;"  LUA_CDIR"?.dll;" LUA_CDIR"loadall.dll"
 
 #else
 #define LUA_ROOT	"/usr/local/"
 #define LUA_LDIR	LUA_ROOT "share/lua/5.1/"
 #define LUA_CDIR	LUA_ROOT "lib/lua/5.1/"
 #define LUA_PATH_DEFAULT  \
-".\\?.lua;"  LUA_LDIR"?.lua;" \
-LUA_CDIR"?.lua;"
-
+		"./?.lua;"  LUA_LDIR"?.lua;"  LUA_LDIR"?/init.lua;" \
+		            LUA_CDIR"?.lua;"  LUA_CDIR"?/init.lua"
 #define LUA_CPATH_DEFAULT \
-    "./?.so;"  LUA_CDIR"?.so;" LUA_CDIR"loadall.so"
+	"./?.so;"  LUA_CDIR"?.so;" LUA_CDIR"loadall.so"
 #endif
 
 
@@ -278,13 +276,13 @@ LUA_CDIR"?.lua;"
 #include <readline/history.h>
 #define lua_readline(L,b,p)	((void)L, ((b)=readline(p)) != NULL)
 #define lua_saveline(L,idx) \
-    if (lua_strlen(L,idx) > 0)  /* non-empty line? */ \
-      add_history(lua_tostring(L, idx));  /* add it to history */
+	if (lua_strlen(L,idx) > 0)  /* non-empty line? */ \
+	  add_history(lua_tostring(L, idx));  /* add it to history */
 #define lua_freeline(L,b)	((void)L, free(b))
 #else
 #define lua_readline(L,b,p)	\
-    ((void)L, fputs(p, stdout), fflush(stdout),  /* show prompt */ \
-    fgets(b, LUA_MAXINPUT, stdin) != NULL)  /* get line */
+	((void)L, fputs(p, stdout), fflush(stdout),  /* show prompt */ \
+	fgets(b, LUA_MAXINPUT, stdin) != NULL)  /* get line */
 #define lua_saveline(L,idx)	{ (void)L; (void)idx; }
 #define lua_freeline(L,b)	{ (void)L; (void)b; }
 #endif
@@ -609,7 +607,7 @@ union luai_Cast { double l_d; long l_l; };
 /* C++ exceptions */
 #define LUAI_THROW(L,c)	throw(c)
 #define LUAI_TRY(L,c,a)	try { a } catch(...) \
-    { if ((c)->status == 0) (c)->status = -1; }
+	{ if ((c)->status == 0) (c)->status = -1; }
 #define luai_jmpbuf	int  /* dummy variable */
 
 #elif defined(LUA_USE_ULONGJMP)
@@ -667,14 +665,14 @@ int mkstemp(char *tmpl)
 #include <unistd.h>
 #define LUA_TMPNAMBUFSIZE	32
 #define lua_tmpnam(b,e)	{ \
-    strcpy(b, "/tmp/lua_XXXXXX"); \
-    e = mkstemp(b); \
-    if (e != -1) close(e); \
-    e = (e == -1); }
+	strcpy(b, "/tmp/lua_XXXXXX"); \
+	e = mkstemp(b); \
+	if (e != -1) close(e); \
+	e = (e == -1); }
 
 #else
 #define LUA_TMPNAMBUFSIZE	L_tmpnam
-#define lua_tmpnam(b,e)		{ e = (mkstemp(b) == 0 ); }
+#define lua_tmpnam(b,e)		{ e = (tmpnam(b) == NULL); }
 #endif
 
 #endif
@@ -698,7 +696,7 @@ int mkstemp(char *tmpl)
 #else
 
 #define lua_popen(L,c,m)	((void)((void)c, m),  \
-        luaL_error(L, LUA_QL("popen") " not supported"), (FILE*)0)
+		luaL_error(L, LUA_QL("popen") " not supported"), (FILE*)0)
 #define lua_pclose(L,file)		((void)((void)L, file), 0)
 
 #endif
