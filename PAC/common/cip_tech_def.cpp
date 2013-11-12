@@ -10,6 +10,10 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	Print("\n\r Create cip tech_object\n\r");
 	PIDP = new PID(nextpidnumber());
 	PIDF = new PID(nextpidnumber());
+	if (0 == parpar)
+		{
+		parpar = new saved_params<float, true>(30, "PAR_MAIN");
+		}
 	}
 
 int cipline_tech_object::nextpidnumber()
@@ -67,6 +71,10 @@ int cipline_tech_object::save_device( char *buff )
 	answer_size += par_uint.save_device( buff + answer_size, "\t" );
 	answer_size += rt_par_float.save_device( buff + answer_size, "\t" );
 	answer_size += rt_par_uint.save_device( buff + answer_size, "\t" );
+	if (1 == number)
+		{
+		answer_size += parpar->save_device(buff + answer_size, "\t");
+		}
 
 
 	sprintf( buff + answer_size, "\t}\n" );
@@ -117,6 +125,127 @@ int cipline_tech_object::isLine()
 int cipline_tech_object::getValvesConflict()
 	{
 	return 0;
+	}
+
+cipline_tech_object::~cipline_tech_object()
+	{
+	if (parpar != 0)
+		{
+		delete(parpar);
+		parpar = 0;
+		}
+	tech_object::~tech_object();
+	}
+
+int cipline_tech_object::set_cmd( const char *prop, u_int idx, double val )
+	{
+	if ( strcmp( prop, "CMD" ) == 0 )
+		{
+#ifdef DEBUG
+		Print( "cip_tech_object::set_cmd() - prop = \"%s\", val = %f\n",
+			prop, val );
+#endif // DEBUG
+
+		if ( 0. == val )
+			{
+			cmd = 0;
+			return 0;
+			}
+
+		u_int mode     = ( int ) val;
+		char new_state = 0;
+
+		if ( mode >= 1000 && mode < 2000 )      // On mode.
+			{
+			mode = mode - 1000;
+			new_state = 1;
+			}
+		else
+			{
+			if ( mode >= 2000 && mode < 3000 )  // Off mode.
+				{
+				mode = mode - 2000;
+				new_state = 0;
+				}
+			else
+				{
+#ifdef DEBUG
+				Print( "Error complex_state::parse_cmd - new_mode = %lu\n",
+					( unsigned long int ) mode );
+#endif // DEBUG
+				return 1;
+				}
+			}
+
+		if ( mode > get_modes_count() )
+			{
+			// Command.
+			cmd = lua_exec_cmd( mode );
+			}
+		else
+			{
+			// On/off mode.
+			int res = set_mode( mode, new_state );
+			if ( 0 == res )
+				{
+				cmd = ( int ) val;  // Ok.
+				}
+			else
+				{
+				cmd = res;          // Îøèáêà.
+				}
+			}
+
+		return 0;
+		}
+
+	if ( strcmp( prop, "S_PAR_F" ) == 0 )
+		{
+		par_float.save( idx, ( float ) val );
+		return 0;
+		}
+
+	if ( strcmp( prop, "RT_PAR_F" ) == 0 )
+		{
+		rt_par_float[ idx ] = ( float ) val;
+		return 0;
+		}
+
+	if ( strcmp( prop, "PAR_MAIN" ) == 0 )
+		{
+		parpar->save( idx, ( float ) val );
+		return 0;
+		}
+
+	if ( strcmp( prop, "S_PAR_UI" ) == 0 )
+		{
+		par_uint.save( idx, ( u_int_4 ) val );
+		return 0;
+		}
+
+	if ( strcmp( prop, "RT_PAR_UI" ) == 0 )
+		{
+		rt_par_uint[ idx ] = ( u_int_4 ) val;
+		return 0;
+		}
+
+#ifdef DEBUG
+	Print( "Eror tech_object::set_cmd(...), prop = \"%s\", idx = %u, val = %f\n",
+		prop, idx, val );
+#endif // DEBUG
+
+	return 1;
+	}
+
+void cipline_tech_object::set_station_par( int parno, float newval )
+	{
+	Print("");
+	parpar->save(parno, newval); 
+	}
+
+float cipline_tech_object::get_station_par( int parno )
+	{
+	return parpar[0][parno];
 	}
 
 saved_params<float, true>* cipline_tech_object::parpar = 0;

@@ -121,6 +121,8 @@ protected:
 	//Управление подающим насосом
 	int pump_control;
 	//TPumpController* NPC;
+
+
     public:
     cipline_tech_object( const char* name, u_int number, u_int type, const char* name_Lua,
             u_int states_count,
@@ -129,7 +131,12 @@ protected:
             u_int par_uint_count, u_int runtime_par_uint_count );
     i_DO_device* V1;
 
+	~cipline_tech_object();
+
+	//работа с параметрами
 	static saved_params<float, true>* parpar;
+	float get_station_par(int parno);
+	void set_station_par(int parno, float newval);
 
 	PID* PIDF;
 	PID* PIDP;
@@ -140,6 +147,7 @@ protected:
 
 	//overriden members
 	int save_device( char *buff );
+	int set_cmd( const char *prop, u_int idx, double val );
 	int evaluate();
 };
 

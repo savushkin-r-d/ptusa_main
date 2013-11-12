@@ -256,9 +256,9 @@ class tech_object: public i_Lua_save_device
             return modes_manager;
             }
 
-        int save_device( char *buff );
+        virtual int save_device( char *buff );
 
-        int set_cmd( const char *prop, u_int idx, double val );
+        virtual int set_cmd( const char *prop, u_int idx, double val );
 
         int save_params_as_Lua_str( char* str );
 

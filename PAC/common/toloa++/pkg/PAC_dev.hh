@@ -971,6 +971,12 @@ class cipline_tech_object: public tech_object
 			unsigned int timers_count,
 			unsigned int par_float_count, unsigned int runtime_par_float_count,
 			unsigned int par_uint_count, unsigned int runtime_par_uint_count );
+
+		saved_params_float      par_float;   ///< Сохраняемые пар-ры, тип float.
+		run_time_params_float   rt_par_float;///< Рабочие параметры, тип float.
+		float get_station_par(int parno);
+		void set_station_par(int parno, float newval);
+
 		PID* PIDF;
 		PID* PIDP;
 		void initline();
