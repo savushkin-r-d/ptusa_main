@@ -20,6 +20,10 @@
 #ifndef PARAMS_EX_H
 #define PARAMS_EX_H
 
+#ifdef WIN_OS
+#include <locale.h>
+#endif //WIN_OS
+
 #include <math.h>
 #include <string.h>
 
@@ -341,6 +345,10 @@ template < class type, bool is_float > class parameters
 
             sprintf( buff + answer_size, "%s\t", prefix );
             answer_size += strlen( buff + answer_size );
+
+#ifdef WIN_OS
+			setlocale(LC_NUMERIC, "C");
+#endif
 
             for ( u_int i = 1; i <= count; i++ )
                 {
