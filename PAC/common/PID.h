@@ -52,7 +52,6 @@ class PID: public i_Lua_save_device, i_cmd_device
 
     int   used_par_n;
 
-    void reset();
     void acceleration( float accel_time );
 
     float start_value;
@@ -96,6 +95,9 @@ class PID: public i_Lua_save_device, i_cmd_device
 
         /// @brief Выключение ПИД.
         void  off();
+		
+		/// @brief Сброс ПИД
+		void reset();
 
         /// @brief Работа ПИД.
         float eval( float current_value, int delta_sign = 1 );
@@ -151,6 +153,9 @@ class PID: public i_Lua_save_device, i_cmd_device
             {
             return name;
             }
+
+		/// @brief Состояние регулятора
+		u_int_4 get_state();
 
 		virtual int set_cmd( const char *prop, u_int idx, double val );
 

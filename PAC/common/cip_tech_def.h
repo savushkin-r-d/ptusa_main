@@ -5,6 +5,8 @@
 #include "g_device.h"
 #include "PID.h"
 
+#define TMR_CNT    10
+#define SAV_CNT    1
 
 enum workParameters 
 	{
@@ -91,6 +93,37 @@ enum workParameters
 		P_TM_NO_CONC,	//время появления ошибки "нет концентрации в возвратной трубе"
 		};
 
+	class MSAPIDInterface
+		{
+		private:
+			i_AO_device* output;
+			i_AI_device* input;
+			unsigned long lastEvalInOnState;
+			run_time_params_float*   lineparams;
+		public:
+			PID* pidr;
+			int HI;
+			int rp;
+			MSAPIDInterface( PID* pid, run_time_params_float* par, int taskpar, i_AO_device* ao = 0, i_AI_device* ai = 0 );
+			void Eval();
+			void Reset();
+			void On( int accel = 0 );
+			void Off();
+		};
+
+	class TSav 
+		{
+	private:
+		float cn;
+		unsigned long n;
+		unsigned long integrator;
+	public:
+		TSav(void);
+		~TSav(void);
+		void Add(float val, unsigned long inegr);
+		void R(void);
+		float Q(void);
+		};
 
 class cipline_tech_object: public tech_object
 {
@@ -129,7 +162,7 @@ protected:
             u_int timers_count,
             u_int par_float_count, u_int runtime_par_float_count,
             u_int par_uint_count, u_int runtime_par_uint_count );
-    i_DO_device* V1;
+ 
 
 	~cipline_tech_object();
 
@@ -138,8 +171,63 @@ protected:
 	float get_station_par(int parno);
 	void set_station_par(int parno, float newval);
 
-	PID* PIDF;
-	PID* PIDP;
+
+
+#ifdef SELFCLEAN
+	i_DO_device* VSMG;
+	i_DO_device* VSDREN;
+	i_DO_device* VKMG;
+	i_DO_device* VKDREN;
+	i_DO_device* VWMG;
+	i_DO_device* VWDREN;
+	static int scline;
+	static TParams* scparams;
+	virtual int SCInitPumping(int what, int from, int where, int whatdrainage, int step, int f);
+	virtual int SCPumping(int what, int from, int where, int whatdrainage);
+	int timeIsOut();
+	int volumePassed();
+#endif //SELFCLEAN
+	i_DO_device* V00;
+	i_DO_device* V01;
+	i_DO_device* V03;
+	i_DO_device* V02;
+	i_DO_device* V04;
+	i_DO_device* V05;
+	i_DO_device* V06;
+	i_DO_device* V07;
+	i_DO_device* V08;
+	i_DO_device* V09;
+	i_DO_device* V10;
+	i_DO_device* V11;
+	i_DO_device* V12;
+	i_DO_device* V13;
+
+	i_DO_AO_device* NP;
+	i_DO_AO_device* NK;
+	i_DO_AO_device* NS;
+	i_DI_device* LL;
+	i_DI_device* LM;
+	i_DI_device* LH;
+	i_DI_device* LWL;
+	i_DI_device* LWH;
+	i_DI_device* LSL;
+	i_DI_device* LSH;
+	i_DI_device* LKL;
+	i_DI_device* LKH;
+	i_AI_device* TP;
+	i_AI_device* TR;
+	i_AI_device* Q;
+	i_AI_device* ao;
+	i_DI_device*FL;
+	timer* T[TMR_CNT];
+	TSav *SAV[SAV_CNT];
+	i_counter *cnt;
+	//-------------------
+
+	PID* PIDFlow;
+	PID* PIDPump;
+	MSAPIDInterface* PIDF;
+	MSAPIDInterface* PIDP;
 	void initline();
 
 	static int nextpidnumber();
@@ -150,5 +238,7 @@ protected:
 	int set_cmd( const char *prop, u_int idx, double val );
 	int evaluate();
 };
+
+
 
 #endif //CIP_TECH_DEF

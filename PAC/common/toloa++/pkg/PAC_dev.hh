@@ -977,8 +977,8 @@ class cipline_tech_object: public tech_object
 		float get_station_par(int parno);
 		void set_station_par(int parno, float newval);
 
-		PID* PIDF;
-		PID* PIDP;
+		PID* PIDFlow;
+		PID* PIDPump;
 		void initline();
 		int evaluate();
 	};

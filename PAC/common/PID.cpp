@@ -158,8 +158,6 @@ void PID::off()
     if ( state != STATE_OFF )
         {
         state = STATE_OFF;
-
-        reset(); //—брасываем все переменные.
         }
     }
 //-----------------------------------------------------------------------------
@@ -287,6 +285,11 @@ int PID::set_cmd( const char *prop, u_int idx, double val )
 int PID::set_cmd( const char *prop, u_int idx, char *val )
 	{
 	throw std::exception("The method or operation is not implemented.");
+	}
+
+u_int_4 PID::get_state()
+	{
+	return state;
 	}
 
 //-----------------------------------------------------------------------------
