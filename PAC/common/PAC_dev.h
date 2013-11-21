@@ -1246,8 +1246,8 @@ class concentration_e : public AI1
         concentration_e( const char *dev_name ): AI1( dev_name, DT_QT, DST_NONE,
             ADDITIONAL_PARAM_COUNT, &start_param_idx )
             {
-            set_par_name( P_MIN_V,  0, "P_MIN_V" );
-            set_par_name( P_MAX_V,  0, "P_MAX_V" );
+            set_par_name( P_MIN_V,  start_param_idx, "P_MIN_V" );
+            set_par_name( P_MAX_V,  start_param_idx, "P_MAX_V" );
             }
 
         float get_max_val();
@@ -1272,8 +1272,8 @@ class analog_input : public AI1
         analog_input( const char *dev_name ): AI1( dev_name, DT_AI, DST_NONE,
             ADDITIONAL_PARAM_COUNT, &start_param_idx )
             {
-            set_par_name( P_MIN_V,  0, "P_MIN_V" );
-            set_par_name( P_MAX_V,  0, "P_MAX_V" );
+            set_par_name( P_MIN_V,  start_param_idx, "P_MIN_V" );
+            set_par_name( P_MAX_V,  start_param_idx, "P_MAX_V" );
             }
 
         float get_max_val();
