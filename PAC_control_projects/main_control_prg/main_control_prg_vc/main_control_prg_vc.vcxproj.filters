@@ -261,6 +261,9 @@
     <ClInclude Include="..\..\..\common\win_util\WSA_err_decode.h">
       <Filter>Header Files\PAC\win</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\mcaRec.h">
+      <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -451,6 +454,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp">
       <Filter>Source Files\PAC\win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\mcaRec.cpp">
+      <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -976,6 +976,9 @@ class cipline_tech_object: public tech_object
 		run_time_params_float   rt_par_float;///< Рабочие параметры, тип float.
 		float get_station_par(int parno);
 		void set_station_par(int parno, float newval);
+		
+		int set_cmd( const char *prop, unsigned int idx, const char* val );
+		int set_cmd( const char *prop, unsigned int idx, double val );
 
 		PID* PIDFlow;
 		PID* PIDPump;

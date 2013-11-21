@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 11/15/13 09:12:46.
+** Generated automatically by tolua++-1.0.92 on 11/21/13 16:50:04.
 */
 
 #ifndef __cplusplus
@@ -5096,6 +5096,77 @@ static int tolua_PAC_dev_cipline_tech_object_set_station_par00(lua_State* tolua_
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: set_cmd of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object_set_cmd00
+static int tolua_PAC_dev_cipline_tech_object_set_cmd00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+  const char* prop = ((const char*)  tolua_tostring(tolua_S,2,0));
+  unsigned int idx = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
+  const char* val = ((const char*)  tolua_tostring(tolua_S,4,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_cmd'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->set_cmd(prop,idx,val);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_cmd'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_cmd of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object_set_cmd01
+static int tolua_PAC_dev_cipline_tech_object_set_cmd01(lua_State* tolua_S)
+{
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+ {
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+  const char* prop = ((const char*)  tolua_tostring(tolua_S,2,0));
+  unsigned int idx = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
+  double val = ((double)  tolua_tonumber(tolua_S,4,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_cmd'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->set_cmd(prop,idx,val);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+tolua_lerror:
+ return tolua_PAC_dev_cipline_tech_object_set_cmd00(tolua_S);
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* get function: PIDFlow of class  cipline_tech_object */
 #ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_PIDFlow_ptr
 static int tolua_get_cipline_tech_object_PIDFlow_ptr(lua_State* tolua_S)
@@ -5599,6 +5670,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_variable(tolua_S,"rt_par_float",tolua_get_cipline_tech_object_rt_par_float,tolua_set_cipline_tech_object_rt_par_float);
    tolua_function(tolua_S,"get_station_par",tolua_PAC_dev_cipline_tech_object_get_station_par00);
    tolua_function(tolua_S,"set_station_par",tolua_PAC_dev_cipline_tech_object_set_station_par00);
+   tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_cipline_tech_object_set_cmd00);
+   tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_cipline_tech_object_set_cmd01);
    tolua_variable(tolua_S,"PIDFlow",tolua_get_cipline_tech_object_PIDFlow_ptr,tolua_set_cipline_tech_object_PIDFlow_ptr);
    tolua_variable(tolua_S,"PIDPump",tolua_get_cipline_tech_object_PIDPump_ptr,tolua_set_cipline_tech_object_PIDPump_ptr);
    tolua_function(tolua_S,"initline",tolua_PAC_dev_cipline_tech_object_initline00);

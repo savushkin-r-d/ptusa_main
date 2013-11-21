@@ -176,6 +176,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClInclude Include="..\..\..\common\util\smart_ptr.h" />
     <ClInclude Include="..\..\..\PAC\common\cip_tech_def.h" />
     <ClInclude Include="..\..\..\common\win_util\WSA_err_decode.h" />
+    <ClInclude Include="..\..\..\PAC\common\mcaRec.h" />
     <ClInclude Include="..\..\..\PAC\common\mode_mngr.h" />
     <ClInclude Include="..\..\..\PAC\common\PAC_dev.h" />
     <ClInclude Include="..\..\..\PAC\common\PAC_err.h" />
@@ -243,6 +244,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClCompile Include="..\..\..\common\tolua++\tolua_to.c" />
     <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp" />
     <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\mcaRec.cpp" />
     <ClCompile Include="..\..\..\PAC\common\mode_mngr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_dev.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_dev_lua.cpp" />

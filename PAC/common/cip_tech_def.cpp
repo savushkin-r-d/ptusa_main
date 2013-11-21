@@ -27,6 +27,42 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 		{
 		SAV[i]=new TSav;
 		}
+	no_neutro = 0;
+	ret_overrride = 0;
+	concentration_ok = 0;
+	return_ok = 0;
+	tank_is_empty = 0;
+	enddelayTimer = 0;
+	blocked = 0;
+	disable_tank_heating = 0;
+	default_programlist = 0x3FF;
+	pump_control = 0;
+	NPC = 0;
+	bachok_lvl_err_delay = get_millisec();
+	sort_delay = get_millisec();
+	steam_valve_delay = get_millisec();
+	loadedRecName = new char[TRecipeManager::recipeNameLength];
+	programList = new char[PROGRAM_LIST_MAX_LEN];
+	strcpy(programList, "");
+	currentProgramName = new char[PROGRAM_MAX_LEN];
+	strcpy(currentProgramName, "");
+
+	lineRecipes = new TRecipeManager(number - 1);
+	opcip=0;
+	curstep=0;
+	ncmd=0;
+	state=0;
+	loadedRecipe = -1;
+	curprg=-1;
+	cip_in_error = 0;
+
+	resetProgramName();
+	resetRecipeName();
+	resetProgramList();
+	ResetStat();
+	rt_par_float[P_CUR_REC] =  lineRecipes->getCurrentRecipe() + 1;
+	rt_par_float[P_SELECT_REC] = 0;
+	rt_par_float[P_SELECT_PRG] = 0;
 	}
 
 cipline_tech_object::~cipline_tech_object()
@@ -50,6 +86,10 @@ cipline_tech_object::~cipline_tech_object()
 		}
 	for (i = 0; i < TMR_CNT; i++) {
 		delete T[i];
+		}
+	if (lineRecipes)
+		{
+		delete lineRecipes;
 		}
 	tech_object::~tech_object();
 	}
@@ -98,6 +138,15 @@ void cipline_tech_object::initline()
 	ao = AO(number * 10 + 14);
 
 #ifdef DEBUG
+	LSL->set_cmd("ST", 0, ((device*)LSL)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
+	LSH->set_cmd("ST", 0, ((device*)LSH)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
+	LKL->set_cmd("ST", 0, ((device*)LKL)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
+	LKH->set_cmd("ST", 0, ((device*)LKH)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
+	LWL->set_cmd("ST", 0, ((device*)LWL)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
+	LWH->set_cmd("ST", 0, ((device*)LWH)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
+	LL->set_cmd("ST", 0, ((device*)LL)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
+	LM->set_cmd("ST", 0, ((device*)LM)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
+	LH->set_cmd("ST", 0, ((device*)LH)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
 	Print("Init Line %d\n\r", number);
 #endif //DEBUG
 	}
@@ -116,9 +165,36 @@ int cipline_tech_object::save_device( char *buff )
 
 	int answer_size = strlen( buff );
 
-	//Состояние и команда.
-	sprintf( buff + answer_size, "\tCMD=%lu,\n",
-		( u_long ) cmd );
+	//Команда
+	sprintf( buff + answer_size, "\tCMD=%lu,\n", ( u_long ) ncmd );
+	answer_size += strlen( buff + answer_size );
+
+	//Состояние
+	sprintf( buff + answer_size, "\tSTATE=%lu,\n", ( u_long ) state );
+	answer_size += strlen( buff + answer_size );
+
+	//Текущая операция
+	sprintf( buff + answer_size, "\tOPER=%lu,\n", ( u_long ) curstep );
+	answer_size += strlen( buff + answer_size );
+
+	//Загруженный рецепт
+	sprintf(buff + answer_size, "\tLOADED_REC='%s',\n", loadedRecName);
+	answer_size += strlen( buff + answer_size );
+
+	//Имя рецепта для редактирования
+	sprintf(buff + answer_size, "\tCUR_REC='%s',\n", lineRecipes->currentRecipeName);
+	answer_size += strlen( buff + answer_size );
+
+	//Выбранная программа мойки
+	sprintf(buff + answer_size, "\tCUR_PRG='%s',\n", currentProgramName);
+	answer_size += strlen( buff + answer_size );
+	 
+	//Список доступных программ мойки
+	sprintf(buff + answer_size, "\tPRG_LIST='%s',\n", programList);
+	answer_size += strlen( buff + answer_size );
+
+	//Список доступных объектов мойки
+	sprintf(buff + answer_size, "\tREC_LIST='%s',\n", lineRecipes->recipeList);
 	answer_size += strlen( buff + answer_size );
 
 	//Время простоя.
@@ -140,7 +216,7 @@ int cipline_tech_object::save_device( char *buff )
 
 	//Параметры.
 	answer_size += par_float.save_device( buff + answer_size, "\t" );
-	answer_size += par_uint.save_device( buff + answer_size, "\t" );
+	answer_size += par_uint.save_device( buff + answer_size, "\t" ); 
 	answer_size += rt_par_float.save_device( buff + answer_size, "\t" );
 	answer_size += rt_par_uint.save_device( buff + answer_size, "\t" );
 	if (1 == number)
@@ -156,17 +232,57 @@ int cipline_tech_object::save_device( char *buff )
 
 void cipline_tech_object::resetProgramName()
 	{
-
+	sprintf(currentProgramName, "%c%c %c%c%c%c%c%c%c",205,229,226,251,225,240,224,237,0);
 	}
 
-void cipline_tech_object::resetRecipeName()
+void cipline_tech_object::resetRecipeName() 
 	{
-
+	sprintf(loadedRecName, "%c%c %c%c%c%c%c%c%c",205,229,226,251,225,240,224,237,0);
 	}
 
 void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*/ )
 	{
-
+	char tmp_str[32];
+#ifdef MSAPANEL
+	prgListLen = 0;
+	ModbusServ::UpdateLinePrograms(nmr);
+#endif
+	strcpy(programList,"");
+	if ((SPROG_ACID_PREPARATION & programmask) == SPROG_ACID_PREPARATION) 
+		{
+		sprintf(tmp_str, "%d##Наведение кислоты||", SPROG_ACID_PREPARATION);
+#ifdef MSAPANEL
+		sprintf(prgArray[prgListLen], "Наведение кислоты");
+		prgNumber[prgListLen] = SPROG_ACID_PREPARATION;
+		prgListLen++;
+#endif
+		strcat(programList,tmp_str);
+		}
+	if ((SPROG_CAUSTIC_PREPARATION & programmask) == SPROG_CAUSTIC_PREPARATION) 
+		{
+		sprintf(tmp_str, "%d##Наведение щелочи||", SPROG_CAUSTIC_PREPARATION);
+#ifdef MSAPANEL
+		sprintf(prgArray[prgListLen], "Наведение щелочи");
+		prgNumber[prgListLen] = SPROG_CAUSTIC_PREPARATION;
+		prgListLen++;
+#endif
+		strcat(programList,tmp_str);
+		}
+#ifdef SELFCLEAN
+	if (scline == nmr)
+		{
+		if ((SPROG_SELF_CLEAN & programmask) == SPROG_SELF_CLEAN) 
+			{
+			sprintf(tmp_str, "%d##Очистка танков||", SPROG_SELF_CLEAN);
+#ifdef MSAPANEL
+			sprintf(prgArray[prgListLen], "Очистка танков");
+			prgNumber[prgListLen] = SPROG_SELF_CLEAN;
+			prgListLen++;
+#endif
+			strcat(programList,tmp_str);
+			}
+		}
+#endif //SELFCLEAN
 	}
 
 void cipline_tech_object::formProgramList( unsigned long programmask )
@@ -186,12 +302,26 @@ void cipline_tech_object::closeLineValves()
 
 int cipline_tech_object::isTank()
 	{
-	return 0;
+	if ((((int)rt_par_float[P_OBJ_TYPE]) & 0xFF) == 1 || (((int)rt_par_float[P_OBJ_TYPE]) & 0xFF) == 3)
+		{
+		return 1;
+		} 
+	else
+		{
+		return 0;
+		}
 	}
 
 int cipline_tech_object::isLine()
 	{
-	return 0;
+	if ((((int)rt_par_float[P_OBJ_TYPE]) & 0xFF) == 2 || (((int)rt_par_float[P_OBJ_TYPE]) & 0xFF) == 4)
+		{
+		return 1;
+		} 
+	else
+		{
+		return 0;
+		}
 	}
 
 int cipline_tech_object::getValvesConflict()
@@ -201,66 +331,6 @@ int cipline_tech_object::getValvesConflict()
 
 int cipline_tech_object::set_cmd( const char *prop, u_int idx, double val )
 	{
-	if ( strcmp( prop, "CMD" ) == 0 )
-		{
-#ifdef DEBUG
-		Print( "cip_tech_object::set_cmd() - prop = \"%s\", val = %f\n",
-			prop, val );
-#endif // DEBUG
-
-		if ( 0. == val )
-			{
-			cmd = 0;
-			return 0;
-			}
-
-		u_int mode     = ( int ) val;
-		char new_state = 0;
-
-		if ( mode >= 1000 && mode < 2000 )      // On mode.
-			{
-			mode = mode - 1000;
-			new_state = 1;
-			}
-		else
-			{
-			if ( mode >= 2000 && mode < 3000 )  // Off mode.
-				{
-				mode = mode - 2000;
-				new_state = 0;
-				}
-			else
-				{
-#ifdef DEBUG
-				Print( "Error complex_state::parse_cmd - new_mode = %lu\n",
-					( unsigned long int ) mode );
-#endif // DEBUG
-				return 1;
-				}
-			}
-
-		if ( mode > get_modes_count() )
-			{
-			// Command.
-			cmd = lua_exec_cmd( mode );
-			}
-		else
-			{
-			// On/off mode.
-			int res = set_mode( mode, new_state );
-			if ( 0 == res )
-				{
-				cmd = ( int ) val;  // Ok.
-				}
-			else
-				{
-				cmd = res;          // Ошибка.
-				}
-			}
-
-		return 0;
-		}
-
 	if ( strcmp( prop, "S_PAR_F" ) == 0 )
 		{
 		par_float.save( idx, ( float ) val );
@@ -299,9 +369,22 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, double val )
 	return 1;
 	}
 
+int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
+	{
+	if (0 == strcmp(prop, "CUR_REC"))
+		{
+		 strcpy(lineRecipes->currentRecipeName, val);
+		 return 0;
+		}
+#ifdef DEBUG
+	Print( "Eror tech_object::set_cmd(...), prop = \"%s\", idx = %u, val = %s\n",
+		prop, idx, val );
+#endif // DEBUG
+	return 1;
+	}
+
 void cipline_tech_object::set_station_par( int parno, float newval )
 	{
-	Print("");
 	parpar->save(parno, newval); 
 	}
 
@@ -309,6 +392,38 @@ float cipline_tech_object::get_station_par( int parno )
 	{
 	return parpar[0][parno];
 	}
+
+void cipline_tech_object::ResetStat( void )
+	{
+	for ( int i = STP_QAVS; i <= STP_ERRCOUNT; i++ )
+		{
+		rt_par_float[i] = 0;
+		}
+	}
+
+void cipline_tech_object::EnablePumpController()
+	{
+	if (0 == NPC)
+		{
+		InitPumpController();
+		}
+	pump_control = 1;
+	}
+
+void cipline_tech_object::DisablePumpController()
+	{
+	pump_control = 0;
+	}
+
+void cipline_tech_object::InitPumpController()
+	{
+	if (0 == NPC)
+		{
+		NPC = new TPumpController(NP);
+		}
+	}
+
+int cipline_tech_object::blockAlarm = 0;
 
 saved_params<float, true>* cipline_tech_object::parpar = 0;
 
@@ -388,3 +503,66 @@ void TSav::R(void) {
 float TSav::Q(void) {
 	return cn;
 	};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+TPumpController::TPumpController( i_DO_AO_device* pump )
+	{
+	control_pump = pump;
+	actual_state = -1;
+	last_manual_state = -1;
+	manual_state = -1;
+	}
+
+TPumpController::~TPumpController()
+	{
+	control_pump = 0;
+	}
+
+void TPumpController::mDisable()
+	{
+	manual_state = -1;
+	last_manual_state = -1;
+	}
+
+void TPumpController::On()
+	{
+	actual_state = ON;
+	}
+
+void TPumpController::Off()
+	{
+	actual_state = OFF;
+	}
+
+void TPumpController::mOn()
+	{
+	last_manual_state = manual_state;
+	manual_state = ON;
+	}
+
+void TPumpController::mOff()
+	{
+	last_manual_state = manual_state;
+	manual_state = OFF;
+	}
+
+void TPumpController::Eval()
+	{
+	if (manual_state >=0)
+		{
+		if (last_manual_state != manual_state)
+			{
+			control_pump->set_state(manual_state);
+			last_manual_state = manual_state;
+			}
+		}
+	else
+		{
+		if (actual_state >= 0)
+			{
+			control_pump->set_state(actual_state);
+			actual_state = -1;
+			}
+		}
+	}
