@@ -133,6 +133,30 @@ int action::check_devices( char* err_dev_name, int max_to_write ) const
 
     return 0;
     }
+//----------------------------------------------------------------------------
+void action::add_dev( device *dev, u_int group /*= 0 */ )
+    {
+    if ( group >= devices.size() )
+        {
+        std::vector< device* > vector_dev;
+
+        devices.push_back( vector_dev );
+        }
+
+    if (  group >= devices.size() )
+        {
+#ifdef DEBUG
+        Print( "Error device:add_dev(...) - group (%d) >= group count"
+            "(%d), device \"%s\""
+            " action \"%s\".\n",
+            group, devices.size(), dev->get_name(), name.c_str() );
+#endif // DEBUG
+        return;
+        }
+
+    devices[ group ].push_back( dev );
+    }
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void on_action::evaluate()
@@ -296,6 +320,22 @@ bool step::is_empty() const
             }
         }
     return true;
+    }
+//----------------------------------------------------------------------------
+int step::check_devices( char* err_dev_name, int str_len )
+    {
+    for ( u_int i = 0; i < actions.size(); i++ )
+        {
+        int res = actions[ i ]->check_devices( err_dev_name + 
+            strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
+
+        if ( res )
+            {
+            return 1;
+            }
+        }
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -860,7 +900,22 @@ void mode::print( const char* prefix /*= "" */ ) const
         steps[ i ]->print( new_prefix.c_str() );
         }
     }
+//----------------------------------------------------------------------------
+int mode::check_devices( char* err_dev_name, int str_len )
+    {
+    for ( u_int i = 0; i < steps.size(); i++ )
+        {
+        int res = steps[ i ]->check_devices( err_dev_name + 
+            strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
 
+        if ( res )
+            {
+            return 1;
+            }
+        }
+
+    return 0;
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 mode* mode_manager::add_mode( const char* name )

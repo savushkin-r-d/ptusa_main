@@ -91,7 +91,7 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
         sprintf( str + strlen( str ), "type=%d,\n", AT_SPECIAL );
         sprintf( str + strlen( str ), "group=\"%s\",\n", "тревога" );
 
-        sprintf( str + strlen( str ), "id_n=%d,\n", simple_device->get_n() );
+        sprintf( str + strlen( str ), "id_n=%d,\n", simple_device->get_serial_n() );
         sprintf( str + strlen( str ), "id_type=%d,\n", simple_device->get_type() );
 
         sprintf( str + strlen( str ), "suppress=%s\n",
@@ -118,7 +118,7 @@ unsigned char simple_error::get_object_type() const
 //-----------------------------------------------------------------------------
 unsigned int simple_error::get_object_n() const
     {
-    return simple_device->get_n();
+    return simple_device->get_serial_n();
     }
 //-----------------------------------------------------------------------------
 int simple_error::set_cmd( int cmd, int object_alarm_number )

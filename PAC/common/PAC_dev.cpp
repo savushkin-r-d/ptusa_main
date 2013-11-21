@@ -33,13 +33,18 @@ void par_device::save_device ( char *str )
     {
     str[ 0 ] = 0;
 
-    for ( u_int i = 0; i < par.get_count(); i++ )
+    if ( par == 0 )
+    	{
+        return;
+    	}
+
+    for ( u_int i = 0; i < par->get_count(); i++ )
         {
         if ( par_name[ i ] )
             {
             sprintf( str + strlen( str ), "%s=", par_name[ i ] );
 
-            float val =  par[ i + 1 ];
+            float val =  par[ 0 ][ i + 1 ];
             if ( 0. == val )
                 {
                 sprintf( str + strlen( str ), "0, " );
@@ -62,16 +67,19 @@ void par_device::save_device ( char *str )
 //-----------------------------------------------------------------------------
 int par_device::set_cmd( const char *name, double val )
     {
-    for ( u_int i = 0; i < par.get_count(); i++ )
+    if ( par )
         {
-        if ( strcmp( par_name[ i ], name ) == 0 )
+        for ( u_int i = 0; i < par->get_count(); i++ )
             {
-            par.save( i + 1, ( float ) val );
+            if ( strcmp( par_name[ i ], name ) == 0 )
+                {
+                par->save( i + 1, ( float ) val );
 #ifdef DEBUG
-            Print( "par_device::set_cmd() - name = %s, val = %f.\n",
-                name, val );
+                Print( "par_device::set_cmd() - name = %s, val = %f.\n",
+                    name, val );
 #endif // DEBUG
-            return 0;
+                return 0;
+                }
             }
         }
 
@@ -84,10 +92,13 @@ int par_device::set_cmd( const char *name, double val )
 //-----------------------------------------------------------------------------
 void par_device::set_par( u_int idx, u_int offset, float value )
     {
-    par[ offset + idx ] = value;
+    if ( par )
+        {
+        par[ 0 ][ offset + idx ] = value;
+        }
     }
 //-----------------------------------------------------------------------------
-par_device::par_device ( u_int par_cnt ) : par ( saved_params_float ( par_cnt ) ),
+par_device::par_device ( u_int par_cnt ) : par ( 0 ),
     par_name ( 0 )
     {
     if ( par_cnt )
@@ -97,96 +108,94 @@ par_device::par_device ( u_int par_cnt ) : par ( saved_params_float ( par_cnt ) 
             {
             par_name[ i ] = 0;
             }
+
+        par = new saved_params_float ( par_cnt );
         }
     }
 //-----------------------------------------------------------------------------
 par_device::~par_device()
     {
-    for (u_int i = 0; i < par.get_count(); i++)
+    if ( par )
         {
-        delete par_name[ i ];
-        par_name[ i ] = 0;
-        }
+        for ( u_int i = 0; i < par->get_count(); i++ )
+            {
+            delete par_name[ i ];
+            par_name[ i ] = 0;
+            }
 
-    delete par_name;
-    par_name = 0;
+        delete par_name;
+        par_name = 0;
+
+        delete par;
+        par = 0;
+        }
     }
 //-----------------------------------------------------------------------------
 float par_device::get_par( u_int idx, u_int offset )
     {
-    return par[ offset + idx ];
+    if ( par )
+    	{
+        return par[ 0 ][ offset + idx ];
+    	}
+
+    return 0;    
     }
 //-----------------------------------------------------------------------------
 void par_device::set_par_name( u_int idx, u_int offset, const char* name )
     {
-    if ( offset + idx <= par.get_count() && ( offset + idx > 0 ) )
+    if ( par )
         {
-        if ( strlen( name ) > C_MAX_PAR_NAME_LENGTH )
+        if ( offset + idx <= par->get_count() && ( offset + idx > 0 ) )
             {
+            if ( strlen( name ) > C_MAX_PAR_NAME_LENGTH )
+                {
 #ifdef DEBUG
-            Print( "Error par_device::set_par_name( u_int idx, u_int offset, const char* name ) - "
-                "name length (%d) > param C_MAX_PAR_NAME_LENGTH (%d).",
-                strlen( name ), C_MAX_PAR_NAME_LENGTH );
+                Print( "Error par_device::set_par_name( u_int idx, u_int offset, const char* name ) - "
+                    "name length (%d) > param C_MAX_PAR_NAME_LENGTH (%d).",
+                    strlen( name ), C_MAX_PAR_NAME_LENGTH );
 #endif // DEBUG
 
-            return;
-            }
+                return;
+                }
 
-        if ( 0 == par_name[ offset + idx - 1 ] )
-            {
-            par_name[ offset + idx - 1 ] = new char[ strlen( name ) + 1 ];
-            strcpy( par_name[ offset + idx - 1 ], name );
+            if ( 0 == par_name[ offset + idx - 1 ] )
+                {
+                par_name[ offset + idx - 1 ] = new char[ strlen( name ) + 1 ];
+                strcpy( par_name[ offset + idx - 1 ], name );
+                }
+#ifdef DEBUG
+            else
+                {
+                Print( "Error par_device::set_par_name (u_int idx, u_int offset, const char* name) - "
+                    "param (%d %d) already has name (%s).",
+                    offset, idx, par_name[ offset + idx - 1 ] );
+                }
+#endif // DEBUG
+
             }
 #ifdef DEBUG
         else
             {
             Print( "Error par_device::set_par_name (u_int idx, u_int offset, const char* name) - "
-                "param (%d %d) already has name (%s).",
-                offset, idx, par_name[ offset + idx - 1 ] );
+                "offset (%d) + idx (%d) > param count ( %d ).",
+                offset, idx, par->get_count() );
             }
 #endif // DEBUG
-
         }
-#ifdef DEBUG
-    else
-        {
-        Print( "Error par_device::set_par_name (u_int idx, u_int offset, const char* name) - "
-            "offset (%d) + idx (%d) > param count ( %d ).",
-            offset, idx, par.get_count() );
-        }
-#endif // DEBUG
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void device::set_name( const char *new_name, const char *new_description )
+void device::set_descr( const char *new_description )
     {
-    strlcpy( name, new_name, sizeof( name ) );
-    strlcpy( Lua_name, new_name, sizeof( Lua_name ) );
-
     //Копирование с учетом нуль-символа.
     description = new char[ strlen( new_description ) + 1 ];
-    strlcpy( description, new_description, strlen( new_description ) + 1 );
-
-    if ( isdigit( new_name[ 0 ] ) )
-        {
-        Lua_name[ 0 ] = '_'; //1V1 -> _1V1
-        strlcpy( Lua_name + 1, new_name, sizeof( Lua_name ) - 1 );
-        }
+    strlcpy( description, new_description, strlen( new_description ) + 1 );    
     }
 //-----------------------------------------------------------------------------
 void device::print() const
     {
 #ifdef DEBUG
-    if ( ( CONSTANTS ) type <= C_DEVICE_TYPE_CNT )
-        {
-        Print( "%s", DEV_NAMES[ type ] );
-        }
-    else
-        {
-        Print( "Unknown " );
-        }
-    Print( "%5lu\t", ( u_long ) number );
-
+    Print( "%s\t", name );
 #endif // DEBUG
     }
 //-----------------------------------------------------------------------------
@@ -201,7 +210,7 @@ void device::off()
 int device::save_device( char *buff, const char *prefix )
     {
     sprintf( buff, "%s%s={M=%d, ",
-        prefix,  Lua_name, is_manual_mode );
+        prefix,  name, is_manual_mode );
 
     if ( type != DT_AO &&
         type != DT_TE )
@@ -248,7 +257,7 @@ int device::rm_save_device_state( char *buff, const char *prefix )
     if ( type != DT_AO &&
         type != DT_TE )
         {
-        sprintf( buff, "%s.%s.ST=%d\n", prefix,  Lua_name, get_state() );
+        sprintf( buff, "%s.%s.ST=%d\n", prefix,  name, get_state() );
         }
 
     if ( type != DT_V &&
@@ -267,7 +276,7 @@ int device::rm_save_device_state( char *buff, const char *prefix )
         if ( get_value() == 0 )
             {
             sprintf( buff + strlen( buff ), "%s.%s.V=0\n",
-                prefix, Lua_name );
+                prefix, name );
             }
         else
             {
@@ -324,14 +333,18 @@ int device::set_cmd( const char *prop, u_int idx, double val )
     return 0;
     }
 //-----------------------------------------------------------------------------
-device::device( int number, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type,
+device::device( const char *dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type,
                u_int par_cnt ) :
-par_device( par_cnt ),
-    number( number ),
+par_device( par_cnt ),    
     type( type ),
     sub_type( sub_type ),
     is_manual_mode( false )
     {
+    if ( dev_name )
+    	{
+        strlcpy( this->name, dev_name, sizeof( this->name ) );
+    	}
+    
     }
 //-----------------------------------------------------------------------------
 device::~device()
@@ -359,9 +372,9 @@ void DO1::direct_off()
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-i_DO_device* device_manager::get_V( int number )
+i_DO_device* device_manager::get_V( const char *dev_name )
     {
-    return get_device( device::DT_V, number );
+    return get_device( device::DT_V, dev_name );
     }
 //-----------------------------------------------------------------------------
 device_manager* device_manager::get_instance()
@@ -373,40 +386,10 @@ device_manager* device_manager::get_instance()
     return instance;
     }
 //-----------------------------------------------------------------------------
-int device_manager::get_device_n( device::DEVICE_TYPE dev_type,
-                                 u_int dev_number )
-    {
-    int l = dev_types_ranges[ dev_type ].start_pos;
-    int u = dev_types_ranges[ dev_type ].end_pos;
-
-    if ( -1 == l ) return -1; // Нет устройств.
-
-    while ( l <= u )
-        {
-        int i = ( l + u ) / 2;
-
-        if ( dev_number == project_devices[ i ]->get_n() )
-            {
-            return i;
-            }
-
-        if ( dev_number > project_devices[ i ]->get_n() )
-            {
-            l = i + 1;
-            }
-        else
-            {
-            u = i - 1;
-            }
-        }
-
-    return -1;
-    }
-//-----------------------------------------------------------------------------
 device* device_manager::get_device( int dev_type,
-                                   u_int dev_number )
+                                   const char *dev_name )
     {
-    int dev_n = get_device_n( ( device::DEVICE_TYPE ) dev_type, dev_number );
+    int dev_n = get_device_n( ( device::DEVICE_TYPE ) dev_type, dev_name );
 
     if ( dev_n >= 0 )
         {
@@ -421,18 +404,16 @@ device* device_manager::get_device( int dev_type,
     else
         {
 #ifdef DEBUG
-
         if ( dev_type <= device::C_DEVICE_TYPE_CNT )
             {
-            Print( "%s ", device::DEV_NAMES[ dev_type ] );
+            Print( "%3s ", device::DEV_NAMES[ dev_type ] );
             }
         else
             {
-            Print( "Unknown" );
+            Print( "Unknown " );
             }
 
-        Print( "%5lu\t", ( u_long ) dev_number );
-        Print( "not found!\n" );
+        Print( "\"%s\" not found!\n", dev_name );
 #endif // DEBUG
         }
 
@@ -474,92 +455,92 @@ device_manager::~device_manager()
 #endif
     }
 //-----------------------------------------------------------------------------
-i_AO_device* device_manager::get_VC( int number )
+i_AO_device* device_manager::get_VC( const char *dev_name )
     {
-    return get_device( device::DT_VC, number );
+    return get_device( device::DT_VC, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DO_AO_device* device_manager::get_M( int number )
+i_DO_AO_device* device_manager::get_M( const char *dev_name )
     {
-    return get_device( device::DT_M, number );
+    return get_device( device::DT_M, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* device_manager::get_LS( int number )
+i_DI_device* device_manager::get_LS( const char *dev_name )
     {
-    return get_device( device::DT_LS, number );
+    return get_device( device::DT_LS, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* device_manager::get_FS( int number )
+i_DI_device* device_manager::get_FS( const char *dev_name )
     {
-    return get_device( device::DT_FS, number );
+    return get_device( device::DT_FS, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* device_manager::get_GS( int number )
+i_DI_device* device_manager::get_GS( const char *dev_name )
     {
-    return get_device( device::DT_GS, number );
+    return get_device( device::DT_GS, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_AI_device* device_manager::get_AI( int number )
+i_AI_device* device_manager::get_AI( const char *dev_name )
     {
-    return get_device( device::DT_AI, number );
+    return get_device( device::DT_AI, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_AO_device* device_manager::get_AO( int number )
+i_AO_device* device_manager::get_AO( const char *dev_name )
     {
-    return get_device( device::DT_AO, number );
+    return get_device( device::DT_AO, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_counter* device_manager::get_FQT( int number )
+i_counter* device_manager::get_FQT( const char *dev_name )
     {
-    int res = get_device_n( device::DT_FQT, number );
+    int res = get_device_n( device::DT_FQT, dev_name );
 
     if ( res >= 0 ) return ( counter* ) project_devices.at( res );
 
     return &stub;
     }
 //-----------------------------------------------------------------------------
-i_AI_device* device_manager::get_TE( int number )
+i_AI_device* device_manager::get_TE( const char *dev_name )
     {
-    return get_device( device::DT_TE, number );
+    return get_device( device::DT_TE, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_AI_device* device_manager::get_LT( int number )
+i_AI_device* device_manager::get_LT( const char *dev_name )
     {
-    return get_device( device::DT_LT, number );
+    return get_device( device::DT_LT, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* device_manager::get_DI( int number )
+i_DI_device* device_manager::get_DI( const char *dev_name )
     {
-    return get_device( device::DT_DI, number );
+    return get_device( device::DT_DI, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* device_manager::get_SB( int number )
+i_DI_device* device_manager::get_SB( const char *dev_name )
     {
-    return get_device( device::DT_SB, number );
+    return get_device( device::DT_SB, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DO_device* device_manager::get_DO( int number )
+i_DO_device* device_manager::get_DO( const char *dev_name )
     {
-    return get_device( device::DT_DO, number );
+    return get_device( device::DT_DO, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DO_device* device_manager::get_HA( int number )
+i_DO_device* device_manager::get_HA( const char *dev_name )
     {
-    return get_device( device::DT_HA, number );
+    return get_device( device::DT_HA, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DO_device* device_manager::get_HL( int number )
+i_DO_device* device_manager::get_HL( const char *dev_name )
     {
-    return get_device( device::DT_HL, number );
+    return get_device( device::DT_HL, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_AI_device* device_manager::get_QT( int number )
+i_AI_device* device_manager::get_QT( const char *dev_name )
     {
-    return get_device( device::DT_QT, number );
+    return get_device( device::DT_QT, dev_name );
     }
 //-----------------------------------------------------------------------------
 wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
-                                             u_int number, char * descr )
+                                             const char* dev_name, char * descr )
     {
     static char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
 
@@ -573,37 +554,37 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             switch ( dev_sub_type )
                 {
                 case device::DST_V_DO1:
-                    new_device      = new valve_DO1( number );
+                    new_device      = new valve_DO1( dev_name );
                     new_wago_device = ( valve_DO1* ) new_device;
                     break;
 
                 case device::DST_V_DO2:
-                    new_device      = new valve_DO2( number );
+                    new_device      = new valve_DO2( dev_name );
                     new_wago_device = ( valve_DO2* ) new_device;
                     break;
 
                 case device::DST_V_DO1_DI1_FB_OFF:
-                    new_device      = new valve_DO1_DI1_off( number );
+                    new_device      = new valve_DO1_DI1_off( dev_name );
                     new_wago_device = ( valve_DO1_DI1_off* ) new_device;
                     break;
 
                 case device::DST_V_DO1_DI1_FB_ON:
-                    new_device      = new valve_DO1_DI1_on( number );
+                    new_device      = new valve_DO1_DI1_on( dev_name );
                     new_wago_device = ( valve_DO1_DI1_on* ) new_device;
                     break;
 
                 case device::DST_V_DO1_DI2:
-                    new_device      = new valve_DO1_DI2( number );
+                    new_device      = new valve_DO1_DI2( dev_name );
                     new_wago_device = ( valve_DO1_DI2* ) new_device;
                     break;
 
                 case device::DST_V_DO2_DI2:
-                    new_device      = new valve_DO2_DI2( number );
+                    new_device      = new valve_DO2_DI2( dev_name );
                     new_wago_device = ( valve_DO2_DI2* ) new_device;
                     break;
 
                 case device::DST_V_MIXPROOF:
-                    new_device      = new valve_mix_proof( number );
+                    new_device      = new valve_mix_proof( dev_name );
                     new_wago_device = ( valve_mix_proof* ) new_device;
                     break;
 
@@ -619,84 +600,84 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             }
 
         case device::DT_VC:
-            new_device      = new analog_valve( number );
+            new_device      = new analog_valve( dev_name );
             new_wago_device = ( analog_valve* ) new_device;
             break;
 
         case device::DT_M:
-            new_device      = new motor( number,
+            new_device      = new motor( dev_name,
                 ( device::DEVICE_SUB_TYPE ) dev_sub_type );
             new_wago_device = ( motor* ) new_device;
             break;
 
         case device::DT_LS:
-            new_device      = new level_s( number,
+            new_device      = new level_s( dev_name,
                 ( device::DEVICE_SUB_TYPE ) dev_sub_type );
             new_wago_device = ( level_s* ) new_device;
             break;
 
         case device::DT_TE:
-            new_device      = new temperature_e( number );
+            new_device      = new temperature_e( dev_name );
             new_wago_device = ( temperature_e* ) new_device;
             break;
 
         case device::DT_FS:
-            new_device      = new flow_s( number );
+            new_device      = new flow_s( dev_name );
             new_wago_device = ( flow_s* ) new_device;
             break;
 
         case device::DT_FQT:
-            new_device      = new counter( number );
+            new_device      = new counter( dev_name );
             new_wago_device = ( counter* ) new_device;
             break;
 
         case device::DT_AO:
-            new_device      = new analog_output( number );
+            new_device      = new analog_output( dev_name );
             new_wago_device = ( analog_output* ) new_device;
             break;
 
         case device::DT_LT:
-            new_device      = new level_e( number );
+            new_device      = new level_e( dev_name );
             new_wago_device = ( level_e* ) new_device;
             break;
 
         case device::DT_DI:
-            new_device      = new DI_signal( number );
+            new_device      = new DI_signal( dev_name );
             new_wago_device = ( DI_signal* ) new_device;
             break;
 
         case device::DT_DO:
-            new_device      = new DO_signal( number );
+            new_device      = new DO_signal( dev_name );
             new_wago_device = ( DO_signal* ) new_device;
             break;
 
         case device::DT_QT:
-            new_device      = new concentration_e( number );
+            new_device      = new concentration_e( dev_name );
             new_wago_device = ( concentration_e* ) new_device;
             break;
 
         case device::DT_AI:
-            new_device      = new analog_input( number );
+            new_device      = new analog_input( dev_name );
             new_wago_device = ( analog_input* ) new_device;
             break;
 
         case device::DT_HA:
-            new_device      = new siren( number );
+            new_device      = new siren( dev_name );
             new_wago_device = ( siren* ) new_device;
             break;
 
         case device::DT_HL:
-            new_device      = new lamp( number );
+            new_device      = new lamp( dev_name );
             new_wago_device = ( lamp* ) new_device;
             break;
 
         case device::DT_SB:
-            new_device      = new button( number );
+            new_device      = new button( dev_name );
             new_wago_device = ( button* ) new_device;
             break;
 
         case device::DT_GS:
-            new_device      = new state_s( number );
+            new_device      = new state_s( dev_name );
             new_wago_device = ( state_s* ) new_device;
             break;
 
@@ -713,6 +694,7 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
 
     u_int new_dev_index = project_devices.size();
     project_devices.push_back( new_device );
+    new_device->set_serial_n( new_dev_index );
 
     if ( dev_type < device::C_DEVICE_TYPE_CNT )
         {
@@ -793,6 +775,36 @@ int device_manager::rm_save_device( char *buff )
 
     return answer_size;
     }
+//-----------------------------------------------------------------------------
+int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char *dev_name )
+    {
+    int l = dev_types_ranges[ dev_type ].start_pos;
+    int u = dev_types_ranges[ dev_type ].end_pos;
+
+    if ( -1 == l ) return -1; // Нет устройств.
+
+    while ( l <= u )
+        {
+        int i = ( l + u ) / 2;
+
+        if ( strcmp( dev_name, project_devices[ i ]->get_name() ) == 0 )
+            {
+            return i;
+            }
+
+        if ( strcmp( dev_name, project_devices[ i ]->get_name() ) > 0 )
+            {
+            l = i + 1;
+            }
+        else
+            {
+            u = i - 1;
+            }
+        }
+
+    return -1;
+    }
+
 #endif // RM_PAC
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1127,9 +1139,9 @@ void digital_wago_device::direct_off()
     }
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
-digital_wago_device::digital_wago_device( int number, device::DEVICE_TYPE type,
+digital_wago_device::digital_wago_device( const char *dev_name, device::DEVICE_TYPE type,
                                          device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :
-device( number, type, sub_type, par_cnt )
+device( dev_name, type, sub_type, par_cnt )
 #ifdef DEBUG_NO_WAGO_MODULES
     , state( 0 )
 #endif // DEBUG_NO_WAGO_MODULES
@@ -1166,9 +1178,9 @@ void DO2::direct_off()
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-valve::valve( bool is_on_fb, bool is_off_fb, int number,
+valve::valve( bool is_on_fb, bool is_off_fb, const char *dev_name,
              device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ) :
-digital_wago_device( number, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
+digital_wago_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
     is_on_fb( is_on_fb ),
     is_off_fb( is_off_fb ),
     on_fb( true ),
@@ -1410,8 +1422,8 @@ int valve::set_cmd( const char *prop, u_int idx, double val )
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-valve_DO1_DI1_off::valve_DO1_DI1_off( int number ) : valve( false, true,
-                                                           number, DT_V, DST_V_DO1_DI1_FB_OFF )
+valve_DO1_DI1_off::valve_DO1_DI1_off( const char *dev_name ) :
+    valve( false, true, dev_name, DT_V, DST_V_DO1_DI1_FB_OFF )
     {
     }
 //-----------------------------------------------------------------------------
@@ -1612,9 +1624,9 @@ void DI1::direct_off()
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-AI1::AI1( u_int number, device::DEVICE_TYPE type,
+AI1::AI1( const char *dev_name, device::DEVICE_TYPE type,
          device::DEVICE_SUB_TYPE sub_type, u_int par_cnt,
-         u_int *start_par_idx ) : analog_wago_device( number, type, sub_type,
+         u_int *start_par_idx ) : analog_wago_device( dev_name, type, sub_type,
          par_cnt + ADDITIONAL_PARAM_COUNT )
     {
     if ( start_par_idx )
@@ -1857,8 +1869,8 @@ bool level_s::is_active()
         }
     }
 //-----------------------------------------------------------------------------
-level_s::level_s( u_int number, device::DEVICE_SUB_TYPE sub_type ):
-    DI1( number, DT_LS, sub_type, ADDITIONAL_PARAMS_COUNT )
+level_s::level_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
+    DI1( dev_name, DT_LS, sub_type, ADDITIONAL_PARAMS_COUNT )
     {
     set_par_name( P_DT,  0, "P_DT" );
     }
@@ -2067,89 +2079,153 @@ device_manager* G_DEVICE_MANAGER()
     return device_manager::get_instance();
     }
 //-----------------------------------------------------------------------------
-i_DO_device* V( int number )
+i_DO_device* V( u_int dev_n )
     {
-    return G_DEVICE_MANAGER()->get_V( number );
+    static char name[ 10 ] = { 0 }; 
+    snprintf( name, sizeof( name ), "V%d", dev_n );
+    
+    return G_DEVICE_MANAGER()->get_V( name );
+    }
+
+i_DO_device* V( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_V( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_AO_device* VC( int number )
+i_AO_device* VC( const char *dev_name )
     {
-    return G_DEVICE_MANAGER()->get_VC( number );
+    return G_DEVICE_MANAGER()->get_VC( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DO_AO_device* M( int number )
+i_DO_AO_device* M( u_int dev_n )
     {
-    return G_DEVICE_MANAGER()->get_M( number );
+    static char name[ 10 ] = { 0 }; 
+    snprintf( name, sizeof( name ), "M%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_M( name );
+    }
+
+i_DO_AO_device* M( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_M( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* LS( int number )
+i_DI_device* LS( u_int dev_n )
     {
-    return G_DEVICE_MANAGER()->get_LS( number );
+    static char name[ 10 ] = { 0 }; 
+    snprintf( name, sizeof( name ), "LS%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_LS( name );
+    }
+
+i_DI_device* LS( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_LS( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* FS( int number )
+i_DI_device* FS( u_int dev_n )
     {
-    return G_DEVICE_MANAGER()->get_FS( number );
+    static char name[ 10 ] = { 0 }; 
+    snprintf( name, sizeof( name ), "FS%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_FS( name );
+    }
+
+i_DI_device* FS( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_FS( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_AI_device* AI( int number )
+i_AI_device* AI( const char *dev_name )
     {
-    return G_DEVICE_MANAGER()->get_AI( number );
+    return G_DEVICE_MANAGER()->get_AI( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_AO_device* AO( int number )
+i_AO_device* AO( u_int dev_n )
     {
-    return G_DEVICE_MANAGER()->get_AO( number );
+    static char name[ 10 ] = { 0 }; 
+    snprintf( name, sizeof( name ), "AO%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_AO( name );
+    }
+
+i_AO_device* AO( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_AO( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_counter* FQT( int number )
+i_counter* FQT( u_int dev_n )
     {
-    return G_DEVICE_MANAGER()->get_FQT( number );
+    static char name[ 10 ] = { 0 }; 
+    snprintf( name, sizeof( name ), "FQT%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_FQT( name );
+    }
+
+i_counter* FQT( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_FQT( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_AI_device* TE( int number )
+i_AI_device* TE( u_int dev_n )
     {
-    return G_DEVICE_MANAGER()->get_TE( number );
+    static char name[ 10 ] = { 0 }; 
+    snprintf( name, sizeof( name ), "TE%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_TE( name );
+    }
+
+i_AI_device* TE( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_TE( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_AI_device* LT( int number )
+i_AI_device* LT( const char *dev_name )
     {
-    return G_DEVICE_MANAGER()->get_LT( number );
+    return G_DEVICE_MANAGER()->get_LT( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* GS( int number )
+i_DI_device* GS( const char *dev_name )
     {
-    return G_DEVICE_MANAGER()->get_GS( number );
+    return G_DEVICE_MANAGER()->get_GS( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DO_device* HA( int number )
+i_DO_device* HA( const char *dev_name )
     {
-    return G_DEVICE_MANAGER()->get_HA( number );
+    return G_DEVICE_MANAGER()->get_HA( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DO_device* HL( int number )
+i_DO_device* HL( const char *dev_name )
     {
-    return G_DEVICE_MANAGER()->get_HL( number );
+    return G_DEVICE_MANAGER()->get_HL( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* SB( int number )
+i_DI_device* SB( const char *dev_name )
     {
-    return G_DEVICE_MANAGER()->get_SB( number );
+    return G_DEVICE_MANAGER()->get_SB( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* DI( int number )
+i_DI_device* DI( const char *dev_name )
     {
-    return G_DEVICE_MANAGER()->get_DI( number );
+    return G_DEVICE_MANAGER()->get_DI( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DO_device* DO( int number )
+i_DO_device* DO( const char *dev_name )
     {
-    return G_DEVICE_MANAGER()->get_DO( number );
+    return G_DEVICE_MANAGER()->get_DO( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_AI_device* QT( int number )
+i_AI_device* QT( u_int dev_n )
     {
-    return G_DEVICE_MANAGER()->get_QT( number );
+    static char name[ 10 ] = { 0 }; 
+    snprintf( name, sizeof( name ), "QT%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_QT( name );
+    }
+
+i_AI_device* QT( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_QT( dev_name );
     }
 //-----------------------------------------------------------------------------
 dev_stub* STUB()
@@ -2157,14 +2233,14 @@ dev_stub* STUB()
     return G_DEVICE_MANAGER()->get_stub();
     }
 //-----------------------------------------------------------------------------
-device* DEVICE( int type, int number )
+device* DEVICE( int s_number )
     {
-    return G_DEVICE_MANAGER()->get_device( ( device::DEVICE_TYPE ) type, number );
+    return G_DEVICE_MANAGER()->get_device( s_number );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-valve_AS_mix_proof::valve_AS_mix_proof( u_int number ) : device( number,
-                                                                DT_V, DST_V_AS_MIXPROOF, 0 )
+valve_AS_mix_proof::valve_AS_mix_proof( const char *dev_name ): 
+    device( dev_name,  DT_V, DST_V_AS_MIXPROOF, 0 )
     {
     }
 //-----------------------------------------------------------------------------

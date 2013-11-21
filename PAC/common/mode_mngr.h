@@ -57,6 +57,7 @@ class action
         /// @param [out] reason Пояснение, почему нельзя выполнить действие.
         virtual int check( char* reason ) const
             {
+            reason[ 0 ] = 0;
             return 0;
             }
 
@@ -76,28 +77,7 @@ class action
         ///
         /// @param [in] dev Устройство.
         /// @param [in] group Группа устройства.
-        virtual void add_dev( device *dev, u_int group = 0 )
-            {
-            if ( group >= devices.size() )
-                {
-                std::vector< device* > vector_dev;
-
-                devices.push_back( vector_dev );
-                }
-
-            if (  group >= devices.size() )
-                {
-#ifdef DEBUG
-                Print( "Error device:add_dev(...) - group (%d) >= group count"
-                    "(%d), device \"%s\""
-                    " action \"%s\".\n",
-                    group, devices.size(), dev->get_name(), name.c_str() );
-#endif // DEBUG
-                return;
-                }
-
-            devices[ group ].push_back( dev );
-            }
+        virtual void add_dev( device *dev, u_int group = 0 );
 
         /// @brief Добавление устройства к действию.
         ///
@@ -106,6 +86,11 @@ class action
         /// @param [in] subgroup Дополнительный параметр.
         virtual void add_dev( device *dev, u_int group, u_int subgroup ) {}
 
+        /// @brief Поиск устройства с какой-либо ошибкой.
+        ///
+        /// @param [out] err_dev_name Устройство.
+        /// @param [in] max_to_write Дополнительный параметр.
+        /// @return 0 - нет ошибок, 1 - есть ошибки.
         int check_devices( char* err_dev_name, int max_to_write ) const;
 
     protected:
@@ -170,7 +155,7 @@ class open_seat_action: public action
             };
 
         PHASES phase;      ///< Текущий этап.
-        PHASES next_phase; ///< Следуюший этап.
+        PHASES next_phase; ///< Следующий этап.
 
         u_int     active_group_n;  ///< Номер промываемой сейчас группы.
 
@@ -298,21 +283,8 @@ class step
         /// @return false Нет устройств, над которыми что-то делается.
         bool is_empty() const;
 
-        int check_devices( char* err_dev_name, int str_len )
-            {    
-            for ( u_int i = 0; i < actions.size(); i++ )
-                {
-                int res = actions[ i ]->check_devices( err_dev_name + 
-                    strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
+        int check_devices( char* err_dev_name, int str_len );
 
-                if ( res )
-                    {
-                    return 1;
-                    }
-                }
-
-            return 0;
-            }
     private:
         std::vector< action* > actions; ///< Действия.
         action action_stub;             ///< Фиктивное действие.
@@ -380,21 +352,7 @@ class mode
             return &name;
             }
 
-        int check_devices( char* err_dev_name, int str_len )
-            {    
-            for ( u_int i = 0; i < steps.size(); i++ )
-                {
-                int res = steps[ i ]->check_devices( err_dev_name + 
-                    strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
-
-                if ( res )
-                    {
-                    return 1;
-                    }
-                }
-
-            return 0;
-            }
+        int check_devices( char* err_dev_name, int str_len );
     private:
         std::string name;
         std::vector< step* > steps;
@@ -412,9 +370,7 @@ class mode
         std::vector< int > next_step_ns;
 
         u_int_4 start_time; ///< Время начала режима.
-
-
-        step step_stub; ///< Шаг-заглушка.
+        step step_stub;     ///< Шаг-заглушка.
 
         mode_manager *owner;
         int n;          ///< Номер.

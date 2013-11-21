@@ -107,7 +107,8 @@
     </Link>
     <PreBuildEvent>
       <Command>tolua++ -n PAC_dev -o "..\..\..\PAC\common\PAC_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh"
-copy "p:\ptusa\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"</Command>
+copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
+</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>tolua++</Message>

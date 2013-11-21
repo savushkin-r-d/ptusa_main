@@ -940,36 +940,34 @@ static int tolua_PAC_dev_device_set_property00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: set_name of class  device */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_set_name00
-static int tolua_PAC_dev_device_set_name00(lua_State* tolua_S)
+/* method: set_descr of class  device */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_set_descr00
+static int tolua_PAC_dev_device_set_descr00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
      !tolua_isusertype(tolua_S,1,"device",0,&tolua_err) ||
      !tolua_isstring(tolua_S,2,0,&tolua_err) ||
-     !tolua_isstring(tolua_S,3,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,4,&tolua_err)
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
   device* self = (device*)  tolua_tousertype(tolua_S,1,0);
-  const char* name = ((const char*)  tolua_tostring(tolua_S,2,0));
-  const char* description = ((const char*)  tolua_tostring(tolua_S,3,0));
+  const char* description = ((const char*)  tolua_tostring(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_name'", NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_descr'", NULL);
 #endif
   {
-   self->set_name(name,description);
+   self->set_descr(description);
   }
  }
  return 0;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'set_name'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'set_descr'.",&tolua_err);
  return 0;
 #endif
 }
@@ -982,16 +980,16 @@ static int tolua_PAC_dev_V00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_DO_device* tolua_ret = (i_DO_device*)  V(number);
+   i_DO_device* tolua_ret = (i_DO_device*)  V(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DO_device");
   }
  }
@@ -1011,16 +1009,16 @@ static int tolua_PAC_dev_VC00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_AO_device* tolua_ret = (i_AO_device*)  VC(number);
+   i_AO_device* tolua_ret = (i_AO_device*)  VC(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_AO_device");
   }
  }
@@ -1040,16 +1038,16 @@ static int tolua_PAC_dev_M00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_DO_AO_device* tolua_ret = (i_DO_AO_device*)  M(number);
+   i_DO_AO_device* tolua_ret = (i_DO_AO_device*)  M(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DO_AO_device");
   }
  }
@@ -1069,16 +1067,16 @@ static int tolua_PAC_dev_LS00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_DI_device* tolua_ret = (i_DI_device*)  LS(number);
+   i_DI_device* tolua_ret = (i_DI_device*)  LS(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DI_device");
   }
  }
@@ -1098,16 +1096,16 @@ static int tolua_PAC_dev_FS00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_DI_device* tolua_ret = (i_DI_device*)  FS(number);
+   i_DI_device* tolua_ret = (i_DI_device*)  FS(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DI_device");
   }
  }
@@ -1127,16 +1125,16 @@ static int tolua_PAC_dev_AI00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_AI_device* tolua_ret = (i_AI_device*)  AI(number);
+   i_AI_device* tolua_ret = (i_AI_device*)  AI(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_AI_device");
   }
  }
@@ -1156,16 +1154,16 @@ static int tolua_PAC_dev_AO00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_AO_device* tolua_ret = (i_AO_device*)  AO(number);
+   i_AO_device* tolua_ret = (i_AO_device*)  AO(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_AO_device");
   }
  }
@@ -1185,16 +1183,16 @@ static int tolua_PAC_dev_FQT00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_counter* tolua_ret = (i_counter*)  FQT(number);
+   i_counter* tolua_ret = (i_counter*)  FQT(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_counter");
   }
  }
@@ -1214,16 +1212,16 @@ static int tolua_PAC_dev_TE00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_AI_device* tolua_ret = (i_AI_device*)  TE(number);
+   i_AI_device* tolua_ret = (i_AI_device*)  TE(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_AI_device");
   }
  }
@@ -1243,16 +1241,16 @@ static int tolua_PAC_dev_LT00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_AI_device* tolua_ret = (i_AI_device*)  LT(number);
+   i_AI_device* tolua_ret = (i_AI_device*)  LT(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_AI_device");
   }
  }
@@ -1272,16 +1270,16 @@ static int tolua_PAC_dev_GS00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_DI_device* tolua_ret = (i_DI_device*)  GS(number);
+   i_DI_device* tolua_ret = (i_DI_device*)  GS(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DI_device");
   }
  }
@@ -1301,16 +1299,16 @@ static int tolua_PAC_dev_HA00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_DO_device* tolua_ret = (i_DO_device*)  HA(number);
+   i_DO_device* tolua_ret = (i_DO_device*)  HA(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DO_device");
   }
  }
@@ -1330,16 +1328,16 @@ static int tolua_PAC_dev_HL00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_DO_device* tolua_ret = (i_DO_device*)  HL(number);
+   i_DO_device* tolua_ret = (i_DO_device*)  HL(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DO_device");
   }
  }
@@ -1359,16 +1357,16 @@ static int tolua_PAC_dev_SB00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_DI_device* tolua_ret = (i_DI_device*)  SB(number);
+   i_DI_device* tolua_ret = (i_DI_device*)  SB(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DI_device");
   }
  }
@@ -1388,16 +1386,16 @@ static int tolua_PAC_dev_DI00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_DI_device* tolua_ret = (i_DI_device*)  DI(number);
+   i_DI_device* tolua_ret = (i_DI_device*)  DI(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DI_device");
   }
  }
@@ -1417,16 +1415,16 @@ static int tolua_PAC_dev_DO00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_DO_device* tolua_ret = (i_DO_device*)  DO(number);
+   i_DO_device* tolua_ret = (i_DO_device*)  DO(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DO_device");
   }
  }
@@ -1446,16 +1444,16 @@ static int tolua_PAC_dev_QT00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int number = ((int)  tolua_tonumber(tolua_S,1,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_AI_device* tolua_ret = (i_AI_device*)  QT(number);
+   i_AI_device* tolua_ret = (i_AI_device*)  QT(dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_AI_device");
   }
  }
@@ -1503,17 +1501,15 @@ static int tolua_PAC_dev_DEVICE00(lua_State* tolua_S)
  tolua_Error tolua_err;
  if (
      !tolua_isnumber(tolua_S,1,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  int type = ((int)  tolua_tonumber(tolua_S,1,0));
-  int number = ((int)  tolua_tonumber(tolua_S,2,0));
+  int s_number = ((int)  tolua_tonumber(tolua_S,1,0));
   {
-   device* tolua_ret = (device*)  DEVICE(type,number);
+   device* tolua_ret = (device*)  DEVICE(s_number);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"device");
   }
  }
@@ -3061,7 +3057,7 @@ static int tolua_PAC_dev_device_manager_add_wago_device00(lua_State* tolua_S)
      !tolua_isusertype(tolua_S,1,"device_manager",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,4,0,&tolua_err) ||
      !tolua_isstring(tolua_S,5,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,6,&tolua_err)
  )
@@ -3072,13 +3068,13 @@ static int tolua_PAC_dev_device_manager_add_wago_device00(lua_State* tolua_S)
   device_manager* self = (device_manager*)  tolua_tousertype(tolua_S,1,0);
   int dev_type = ((int)  tolua_tonumber(tolua_S,2,0));
   int dev_sub_type = ((int)  tolua_tonumber(tolua_S,3,0));
-  unsigned int number = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,4,0));
   char* descr = ((char*)  tolua_tostring(tolua_S,5,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_wago_device'", NULL);
 #endif
   {
-   wago_device* tolua_ret = (wago_device*)  self->add_wago_device(dev_type,dev_sub_type,number,descr);
+   wago_device* tolua_ret = (wago_device*)  self->add_wago_device(dev_type,dev_sub_type,dev_name,descr);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"wago_device");
   }
  }
@@ -3100,7 +3096,7 @@ static int tolua_PAC_dev_device_manager_get_device00(lua_State* tolua_S)
  if (
      !tolua_isusertype(tolua_S,1,"device_manager",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,3,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,4,&tolua_err)
  )
   goto tolua_lerror;
@@ -3109,12 +3105,12 @@ static int tolua_PAC_dev_device_manager_get_device00(lua_State* tolua_S)
  {
   device_manager* self = (device_manager*)  tolua_tousertype(tolua_S,1,0);
   int dev_type = ((int)  tolua_tonumber(tolua_S,2,0));
-  unsigned int dev_number = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,3,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_device'", NULL);
 #endif
   {
-   device* tolua_ret = (device*)  self->get_device(dev_type,dev_number);
+   device* tolua_ret = (device*)  self->get_device(dev_type,dev_name);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"device");
   }
  }
@@ -5341,7 +5337,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_device_set_cmd00);
    tolua_function(tolua_S,"set_par",tolua_PAC_dev_device_set_par00);
    tolua_function(tolua_S,"set_property",tolua_PAC_dev_device_set_property00);
-   tolua_function(tolua_S,"set_name",tolua_PAC_dev_device_set_name00);
+   tolua_function(tolua_S,"set_descr",tolua_PAC_dev_device_set_descr00);
    tolua_constant(tolua_S,"DT_NONE",device::DT_NONE);
    tolua_constant(tolua_S,"DT_V",device::DT_V);
    tolua_constant(tolua_S,"DT_VC",device::DT_VC);

@@ -109,8 +109,8 @@ class par_device
             C_MAX_PAR_NAME_LENGTH = 20, ///< Максимальная длина имени параметра.
             };
 
-        saved_params_float par; ///< Параметры.
-        char **par_name;        ///< Названия параметров.
+        saved_params_float *par; ///< Параметры.
+        char **par_name;         ///< Названия параметров.
     };
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс счетчика.
@@ -317,6 +317,8 @@ class device : public i_DO_AO_device, public par_device
         enum CONSTANTS
             {
             C_DEVICE_TYPE_CNT = 17,     ///< Количество типов устройств.
+            
+            C_MAX_NAME = 10
             };
 
         static const char DEV_NAMES[][ 5 ];
@@ -372,7 +374,7 @@ class device : public i_DO_AO_device, public par_device
             DST_M_REV_FREQ,     ///< Мотор с реверсом без управления частотой вращения.
             };
 
-        device( int number, device::DEVICE_TYPE type,
+        device( const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt );
 
         virtual ~device();
@@ -382,17 +384,12 @@ class device : public i_DO_AO_device, public par_device
             return name;
             }
 
-        const char *get_Lua_name() const
-            {
-            return Lua_name;
-            }
-
         const char *get_description() const
             {
             return description;
             }
 
-        void set_name( const char *new_name, const char *new_description );
+        void set_descr( const char *new_description );
 
         /// @brief Выключение устройства.
         ///
@@ -408,12 +405,20 @@ class device : public i_DO_AO_device, public par_device
         /// Для использования в отладочных целях.
         void print() const;
 
-        /// @brief Получение номера устройства.
+        /// @brief Получение порядкового номера устройства.
         ///
         /// @return - номер устройства.
-        u_int_4 get_n() const
+        u_int_4 get_serial_n() const
             {
-            return number;
+            return s_number;
+            }
+
+        /// @brief Установка порядкового номера устройства.
+        ///
+        /// @return - номер устройства.
+        void set_serial_n( u_int_4 s_n )
+            {
+            s_number = s_n;
             }
 
         /// @brief Получение типа устройства.
@@ -444,7 +449,7 @@ class device : public i_DO_AO_device, public par_device
             {
             }
 
-        u_int_4 number;              ///< Номер устройства.
+        u_int_4 s_number;            ///< Последовательный номер устройства.
 
         DEVICE_TYPE     type;        ///< Тип устройства.
         DEVICE_SUB_TYPE sub_type;    ///< Подтип устройства.
@@ -457,10 +462,8 @@ class device : public i_DO_AO_device, public par_device
     private:
         bool is_manual_mode;      ///< Признак ручного режима.
 
-        char name[ 10 ];
+        char name[ C_MAX_NAME ];
         char *description;
-
-        char Lua_name[ 10 ];     ///Имя устройства в Lua (клапан 1V1 в Lua будет _1V1).
     };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство.
@@ -500,7 +503,7 @@ class digital_wago_device : public device,
     public wago_device
     {
     public:
-        digital_wago_device( int number, device::DEVICE_TYPE type,
+        digital_wago_device( const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt );
 
         virtual ~digital_wago_device();
@@ -533,11 +536,11 @@ class digital_wago_device : public device,
 class analog_wago_device : public device, public wago_device
     {
     public:
-        analog_wago_device( int number,
+        analog_wago_device( const char *dev_name,
             device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type,
             u_int par_cnt ):
-        device( number, type, sub_type, par_cnt )
+        device( dev_name, type, sub_type, par_cnt )
 #ifdef DEBUG_NO_WAGO_MODULES
             ,value( 0 )
 #endif  // DEBUG_NO_WAGO_MODULES
@@ -574,9 +577,9 @@ class analog_wago_device : public device, public wago_device
 class DO1 : public digital_wago_device
     {
     public:
-        DO1( int number, device::DEVICE_TYPE type,
+        DO1( const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type ):
-        digital_wago_device( number, type, sub_type, 0 )
+        digital_wago_device( dev_name, type, sub_type, 0 )
             {
             }
 
@@ -600,9 +603,9 @@ class DO1 : public digital_wago_device
 class DO2 : public digital_wago_device
     {
     public:
-        DO2( int number, device::DEVICE_TYPE type,
+        DO2( const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ):
-        digital_wago_device( number, type, sub_type, par_cnt )
+        digital_wago_device( dev_name, type, sub_type, par_cnt )
             {
             }
 
@@ -632,14 +635,14 @@ class valve: public digital_wago_device
         /// @param type - тип устройства.
         /// @param sub_type - подтип устройства.
         valve( bool is_on_fb, bool is_off_fb,
-            int number, device::DEVICE_TYPE type,
+            const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type );
 
         /// @param number - номер устройства.
         /// @param type - тип устройства.
         /// @param sub_type - подтип устройства.
-        valve( int number, device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ):
-            digital_wago_device( number, type, sub_type, 0 ),
+        valve( const char *dev_name, device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ):
+            digital_wago_device( dev_name, type, sub_type, 0 ),
             is_on_fb( false ),
             is_off_fb( false ),
             start_switch_time( 0 )
@@ -766,7 +769,7 @@ class valve: public digital_wago_device
 class valve_DO1_DI1_off : public valve
     {
     public:
-        valve_DO1_DI1_off( int number );
+        valve_DO1_DI1_off( const char *dev_name );
 
     private:
         enum CONSTANTS
@@ -837,8 +840,8 @@ class valve_DO1_DI1_off : public valve
 class valve_DO1_DI1_on : public valve
     {
     public:
-        valve_DO1_DI1_on( int number ): valve( true, false,
-            number, DT_V, DST_V_DO1_DI1_FB_ON )
+        valve_DO1_DI1_on( const char *dev_name ): valve( true, false,
+            dev_name, DT_V, DST_V_DO1_DI1_FB_ON )
             {
             }
 
@@ -906,8 +909,8 @@ class valve_DO1_DI1_on : public valve
 class valve_DO1_DI2 : public valve
     {
     public:
-        valve_DO1_DI2( int number ):
-          valve( true, true, number, DT_V, DST_V_DO1_DI2 )
+        valve_DO1_DI2( const char *dev_name ):
+          valve( true, true, dev_name, DT_V, DST_V_DO1_DI2 )
             {
             }
 
@@ -982,8 +985,8 @@ class valve_DO1_DI2 : public valve
 class valve_DO2_DI2 : public valve
     {
     public:
-        valve_DO2_DI2( int number ):
-        valve( true, true, number, DT_V, DST_V_DO2_DI2 )
+        valve_DO2_DI2( const char *dev_name ):
+            valve( true, true, dev_name, DT_V, DST_V_DO2_DI2 )
             {
             }
 
@@ -1060,8 +1063,8 @@ class valve_DO2_DI2 : public valve
 class valve_mix_proof : public i_mix_proof,  public valve
     {
     public:
-        valve_mix_proof( u_int number
-            ): valve( true, true, number, DT_V, DST_V_MIXPROOF )
+        valve_mix_proof( const char *dev_name
+            ): valve( true, true, dev_name, DT_V, DST_V_MIXPROOF )
             {
             }
 
@@ -1151,7 +1154,7 @@ class valve_mix_proof : public i_mix_proof,  public valve
 class valve_AS_mix_proof : public device, public i_mix_proof
     {
     public:
-        valve_AS_mix_proof( u_int number );
+        valve_AS_mix_proof( const char *dev_name );
 
         void open_upper_seat();
         void open_lower_seat();
@@ -1180,7 +1183,7 @@ class valve_AS_mix_proof : public device, public i_mix_proof
 class AI1 : public analog_wago_device
     {
     public:
-        AI1( u_int number, device::DEVICE_TYPE type,
+        AI1( const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, u_int *start_par_idx );
 
     protected:
@@ -1216,7 +1219,7 @@ class AI1 : public analog_wago_device
 class temperature_e : public AI1
     {
     public:
-        temperature_e( u_int number ): AI1( number, DT_TE, DST_NONE, 0, 0 )
+        temperature_e( const char *dev_name ): AI1( dev_name, DT_TE, DST_NONE, 0, 0 )
             {
             }
 
@@ -1228,7 +1231,7 @@ class temperature_e : public AI1
 class level_e : public AI1
     {
     public:
-        level_e( u_int number ): AI1( number, DT_TE, DST_NONE, 0, 0 )
+        level_e( const char *dev_name ): AI1( dev_name, DT_TE, DST_NONE, 0, 0 )
             {
             }
 
@@ -1240,7 +1243,7 @@ class level_e : public AI1
 class concentration_e : public AI1
     {
     public:
-        concentration_e( u_int number ): AI1( number, DT_QT, DST_NONE,
+        concentration_e( const char *dev_name ): AI1( dev_name, DT_QT, DST_NONE,
             ADDITIONAL_PARAM_COUNT, &start_param_idx )
             {
             set_par_name( P_MIN_V,  0, "P_MIN_V" );
@@ -1266,7 +1269,7 @@ class concentration_e : public AI1
 class analog_input : public AI1
     {
     public:
-        analog_input( u_int number ): AI1( number, DT_AI, DST_NONE,
+        analog_input( const char *dev_name ): AI1( dev_name, DT_AI, DST_NONE,
             ADDITIONAL_PARAM_COUNT, &start_param_idx )
             {
             set_par_name( P_MIN_V,  0, "P_MIN_V" );
@@ -1294,11 +1297,11 @@ class analog_input : public AI1
 class AO1 : public analog_wago_device
     {
     public:
-        AO1( u_int number,
+        AO1( const char *dev_name,
             device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type,
             u_int par_cnt ):
-        analog_wago_device( number, type, sub_type, par_cnt )
+        analog_wago_device( dev_name, type, sub_type, par_cnt )
             {
             }
 
@@ -1323,8 +1326,8 @@ class AO1 : public analog_wago_device
 class analog_output : public AO1
     {
     public:
-        analog_output( u_int number ) :
-          AO1( number, DT_AO, DST_NONE, ADDITIONAL_PARAM_COUNT )
+        analog_output( const char *dev_name ) :
+            AO1( dev_name, DT_AO, DST_NONE, ADDITIONAL_PARAM_COUNT )
               {
               }
 
@@ -1352,7 +1355,7 @@ class analog_output : public AO1
 class analog_valve : public AO1
     {
     public:
-        analog_valve( u_int number ): AO1( number, DT_VC, DST_NONE, 0 )
+        analog_valve( const char *dev_name ): AO1( dev_name, DT_VC, DST_NONE, 0 )
             {
             }
 
@@ -1380,10 +1383,10 @@ class analog_valve : public AO1
 class DI1 : public digital_wago_device
     {
     public:
-        DI1( u_int number,
+        DI1( const char *dev_name,
             device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ):
-        digital_wago_device( number, type, sub_type, par_cnt )
+        digital_wago_device( dev_name, type, sub_type, par_cnt )
             {
             }
 
@@ -1409,7 +1412,7 @@ class DI1 : public digital_wago_device
 class valve_DO1 : public valve
     {
     public:
-        valve_DO1( u_int number ) : valve( number, DT_V, DST_V_DO1 )
+        valve_DO1( const char *dev_name ) : valve( dev_name, DT_V, DST_V_DO1 )
             {
             }
 
@@ -1448,7 +1451,7 @@ class valve_DO1 : public valve
 class valve_DO2 : public DO2
     {
     public:
-        valve_DO2( u_int number ): DO2( number, DT_V, DST_V_DO2, 0 )
+        valve_DO2( const char *dev_name ): DO2( dev_name, DT_V, DST_V_DO2, 0 )
             {
             }
     };
@@ -1457,8 +1460,8 @@ class valve_DO2 : public DO2
 class motor : public device, public wago_device
     {
     public:
-        motor( u_int number, device::DEVICE_SUB_TYPE sub_type ):
-            device( number, DT_M, sub_type, ADDITIONAL_PARAM_COUNT )
+        motor( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
+            device( dev_name, DT_M, sub_type, ADDITIONAL_PARAM_COUNT )
 #ifdef DEBUG_NO_WAGO_MODULES
             ,state( 0 ),
             freq( 0 )
@@ -1512,7 +1515,7 @@ class motor : public device, public wago_device
 class level_s : public DI1
     {
     public:
-        level_s( u_int number, device::DEVICE_SUB_TYPE sub_type );
+        level_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type );
 
         bool is_active();
 
@@ -1529,7 +1532,7 @@ class level_s : public DI1
 class flow_s : public DI1
     {
     public:
-        flow_s( u_int number ): DI1( number, DT_FS, DST_NONE,
+        flow_s( const char *dev_name ): DI1( dev_name, DT_FS, DST_NONE,
             ADDITIONAL_PARAMS_COUNT )
             {
             set_par_name( P_DT,  0, "P_DT" );
@@ -1548,7 +1551,7 @@ class flow_s : public DI1
 class state_s : public DI1
     {
     public:
-        state_s( u_int number ): DI1( number, DT_GS, DST_NONE,
+        state_s( const char *dev_name ): DI1( dev_name, DT_GS, DST_NONE,
             ADDITIONAL_PARAMS_COUNT )
             {
             set_par_name( P_DT,  0, "P_DT" );
@@ -1567,7 +1570,7 @@ class state_s : public DI1
 class DI_signal : public DI1
     {
     public:
-        DI_signal( u_int number ): DI1( number, DT_DI, DST_NONE, 0 )
+        DI_signal( const char *dev_name ): DI1( dev_name, DT_DI, DST_NONE, 0 )
             {
             }
     };
@@ -1576,7 +1579,7 @@ class DI_signal : public DI1
 class button : public DI1
     {
     public:
-        button( u_int number ): DI1( number, DT_SB, DST_NONE, 0 )
+        button( const char *dev_name ): DI1( dev_name, DT_SB, DST_NONE, 0 )
             {
             }
     };
@@ -1585,7 +1588,7 @@ class button : public DI1
 class DO_signal : public DO1
     {
     public:
-        DO_signal( u_int number ): DO1( number, DT_DO, DST_NONE )
+        DO_signal( const char *dev_name ): DO1( dev_name, DT_DO, DST_NONE )
             {
             }
     };
@@ -1594,7 +1597,7 @@ class DO_signal : public DO1
 class siren : public DO1
     {
     public:
-        siren( u_int number ): DO1( number, DT_HA, DST_NONE )
+        siren( const char *dev_name ): DO1( dev_name, DT_HA, DST_NONE )
             {
             }
     };
@@ -1603,7 +1606,7 @@ class siren : public DO1
 class lamp : public DO1
     {
     public:
-        lamp( u_int number ): DO1( number, DT_HL, DST_NONE )
+        lamp( const char *dev_name ): DO1( dev_name, DT_HL, DST_NONE )
             {
             }
     };
@@ -1614,8 +1617,8 @@ class counter : public device,
     public wago_device
     {
     public:
-        counter( u_int number ): device(
-            number, DT_FQT, DST_NONE, ADDITIONAL_PARAMS_COUNT ),
+        counter( const char *dev_name ): device(
+            dev_name, DT_FQT, DST_NONE, ADDITIONAL_PARAMS_COUNT ),
             value( 0 ),
             last_read_value( 0 ),
             state( S_STOP ),
@@ -1714,59 +1717,70 @@ class device_manager: public i_Lua_save_device
 
         virtual ~device_manager();
 
-        /// @brief Получение устройства по его номеру.
-        device* get_device( int dev_type, u_int dev_number );
+        /// @brief Получение устройства.
+        device* get_device( int dev_type, const char *dev_name );
+
+        /// @brief Получение устройства.
+        device* get_device( u_int serial_dev_n )
+            {
+            if ( serial_dev_n < project_devices.size() )
+            	{
+                return project_devices[ serial_dev_n ];
+            	}
+
+            return &stub;
+            }
 
         /// @brief Получение клапана по его номеру.
-        i_DO_device* get_V( int number );
+        i_DO_device* get_V( const char *dev_name );
 
         /// @brief Получение управляемого клапана по номеру.
-        i_AO_device* get_VC( int number );
+        i_AO_device* get_VC( const char *dev_name );
 
         /// @brief Получение двигателя по номеру.
-        i_DO_AO_device* get_M( int number );
+        i_DO_AO_device* get_M( const char *dev_name );
 
         /// @brief Получение уровня по номеру.
-        i_DI_device* get_LS( int number );
+        i_DI_device* get_LS( const char *dev_name );
 
         /// @brief Получение расхода по номеру.
-        i_DI_device* get_FS( int number );
+        i_DI_device* get_FS( const char *dev_name );
 
         /// @brief Получение датчика положения по номеру.
-        i_DI_device* get_GS( int number );
+        i_DI_device* get_GS( const char *dev_name );
 
         /// @brief Получение аналогового входа по номеру.
-        i_AI_device* get_AI( int number );
+        i_AI_device* get_AI( const char *dev_name );
 
         /// @brief Получение аналогового выхода по номеру.
-        i_AO_device* get_AO( int number );
+        i_AO_device* get_AO( const char *dev_name );
 
         /// @brief Получение счетчика по номеру.
-        i_counter* get_FQT( int number );
+        i_counter* get_FQT( const char *dev_name );
 
         /// @brief Получение температуры по номеру.
-        i_AI_device* get_TE( int number );
+        i_AI_device* get_TE( const char *dev_name );
 
         /// @brief Получение текущего уровня по номеру.
-        i_AI_device* get_LT( int number );
+        i_AI_device* get_LT( const char *dev_name );
 
         /// @brief Получение обратной связи по номеру.
-        i_DI_device* get_DI( int number );
+        i_DI_device* get_DI( const char *dev_name );
 
         /// @brief Получение кнопки по номеру.
-        i_DI_device* get_SB( int number );
+        i_DI_device* get_SB( const char *dev_name );
 
         /// @brief Получение управляющего канала по номеру.
-        i_DO_device* get_DO( int number );
+        i_DO_device* get_DO( const char *dev_name );
 
         /// @brief Получение звуковой сигнализации.
-        i_DO_device* get_HA( int number );
+        i_DO_device* get_HA( const char *dev_name );
 
         /// @brief Получение световой сигнализации.
-        i_DO_device* get_HL( int number );
+        i_DO_device* get_HL( const char *dev_name );
 
         /// @brief Получение текущей концентрации по номеру.
-        i_AI_device* get_QT( int number );
+        i_AI_device* get_QT( const char *dev_name );
 
         /// @brief Получение единственного экземпляра класса.
         static device_manager* get_instance();
@@ -1826,8 +1840,8 @@ class device_manager: public i_Lua_save_device
         /// Диапазоны устройств всех типов.
         range dev_types_ranges[ device::C_DEVICE_TYPE_CNT ];
 
-        /// @brief Получение индекса устройства по его номеру.
-        int get_device_n( device::DEVICE_TYPE dev_type, u_int dev_number );
+        int get_device_n( device::DEVICE_TYPE dev_type,
+            const char *dev_name );
 
         std::vector< device* > project_devices; ///< Все устройства.
 
@@ -1835,11 +1849,11 @@ class device_manager: public i_Lua_save_device
         static auto_smart_ptr < device_manager > instance;
 
     public:
-        // @brief Установка числа устройств.
+        // @brief Добавление устройства.
         //
         // Вызывается из Lua.
         wago_device* add_wago_device( int dev_type, int dev_sub_type,
-            u_int number, char * descr );
+            const char *dev_name, char * descr );
     };
 //-----------------------------------------------------------------------------
 /// @brief таймер.
@@ -1961,119 +1975,127 @@ device_manager* G_DEVICE_MANAGER();
 /// @param number - номер клапана.
 /// @return - клапан с заданным номером. Если нет такого клапана, возвращается
 /// заглушка (@ref dev_stub).
-i_DO_device* V( int number );
+i_DO_device* V( u_int dev_n );
+i_DO_device* V( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение управляемого клапана по номеру.
 ///
 /// @param number - номер клапана.
 /// @return - клапан с заданным номером. Если нет такого клапана, возвращается
 /// заглушка (@ref dev_stub).
-i_AO_device* VC( int number );
+i_AO_device* VC( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение двигателя по номеру.
 ///
 /// @param number - номер двигателя.
 /// @return - двигатель с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_DO_AO_device* M( int number );
+i_DO_AO_device* M( u_int dev_n );
+i_DO_AO_device* M( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение сигнального уровня по номеру.
 ///
 /// @param number - номер сигнального уровня.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_DI_device* LS( int number );
+i_DI_device* LS( u_int dev_n );
+i_DI_device* LS( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение сигнального расхода по номеру.
 ///
 /// @param number - номер сигнального расхода.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_DI_device* FS( int number );
+i_DI_device* FS( u_int dev_n );
+i_DI_device* FS( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение аналогового входа по номеру.
 ///
 /// @param number - номер аналогового входа.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_AI_device* AI( int number );
+i_AI_device* AI( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение аналогового выхода по номеру.
 ///
 /// @param number - номер аналогового выхода.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_AO_device* AO( int number );
+i_AO_device* AO( u_int dev_n );
+i_AO_device* AO( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение счетчика по номеру.
 ///
 /// @param number - номер счетчика.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_counter* FQT( int number );
+i_counter* FQT( u_int dev_n );
+i_counter* FQT( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение температуры по номеру.
 ///
 /// @param number - номер температуры.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_AI_device* TE( int number );
+i_AI_device* TE( u_int dev_n );
+i_AI_device* TE( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение текущего уровня по номеру.
 ///
 /// @param number - номер текущего уровня.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_AI_device* LT( int number );
+i_AI_device* LT( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение датчика положения по номеру.
 ///
 /// @param number - номер датчика положения.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_DI_device* GS( int number );
+i_DI_device* GS( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение звуковой сигнализации по номеру.
 ///
 /// @param number - номер.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_DO_device* HA( int number );
+i_DO_device* HA( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение световой сигнализации по номеру.
 ///
 /// @param number - номер.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_DO_device* HL( int number );
+i_DO_device* HL( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение кнопки по номеру.
 ///
 /// @param number - номер.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_DI_device* SB( int number );
+i_DI_device* SB( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение обратной связи по номеру.
 ///
 /// @param number - номер обратной связи.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_DI_device* DI( int number );
+i_DI_device* DI( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение канала управления по номеру.
 ///
 /// @param number - номер канала управления.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_DO_device* DO( int number );
+i_DO_device* DO( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение текущей концентрации по номеру.
 ///
 /// @param number - номер текущей концентрации.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_AI_device* QT( int number );
+i_AI_device* QT( u_int dev_n );
+i_AI_device* QT( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///
@@ -2083,8 +2105,8 @@ dev_stub* STUB();
 /// @brief Получение устройства по номеру и типу.
 ///
 /// @param type   - тип устройства.
-/// @param number - номер устройства.
+/// @param s_number - порядковый номер устройства.
 /// @return - устройство.
-device* DEVICE( int type, int number );
+device* DEVICE( int s_number );
 //-----------------------------------------------------------------------------
 #endif // PAC_DEVICES_H
