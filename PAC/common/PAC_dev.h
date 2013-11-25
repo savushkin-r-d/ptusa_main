@@ -408,7 +408,7 @@ class device : public i_DO_AO_device, public par_device
         /// @brief Получение порядкового номера устройства.
         ///
         /// @return - номер устройства.
-        u_int_4 get_serial_n() const
+        virtual u_int_4 get_serial_n() const
             {
             return s_number;
             }
@@ -478,7 +478,7 @@ class dev_stub : public device,
             {
             }
 
-        u_int_4 get_n() const;
+        u_int_4 get_serial_n() const;
         void    print() const;
 
         float   get_value();
@@ -2087,6 +2087,7 @@ i_DI_device* DI( const char *dev_name );
 /// @param number - номер канала управления.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
+i_DO_device* DO( u_int dev_n);
 i_DO_device* DO( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение текущей концентрации по номеру.

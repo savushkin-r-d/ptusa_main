@@ -16,7 +16,7 @@
 ///@brief Минимальная задержка переключения при сортировке растворов
 #define SORT_SWITCH_DELAY 2000
 ///@brief Минимальное время соблюдения условий для включения запорного клапана пара
-#define STEAM_VALVE_MIN_DELAY 1200
+#define STEAM_VALVE_MIN_DELAY 1200L
 
 #define TMR_CNT    10
 #define SAV_CNT    1
@@ -429,6 +429,8 @@ class cipline_tech_object: public tech_object
 		int disable_tank_heating; //отключение подогрева при начале подачи растворов в танк(для МСА со старыми регулирующими клапанами)
 
 		static int blockAlarm;
+		static cipline_tech_object* Mdls[10];
+		static int MdlsCNT;
 
 #ifdef SELFCLEAN
 		i_DO_device* VSMG;
@@ -489,6 +491,7 @@ class cipline_tech_object: public tech_object
 
 		static int nextpidnumber();
 		static int pidnumber;
+		static int msa_number;
 
 		//overriden members
 		int save_device( char *buff );
@@ -497,20 +500,19 @@ class cipline_tech_object: public tech_object
 		int evaluate();
 
 		////-------------------
-		//virtual void RHI(void);
-		//virtual void RT(void);
-		//virtual void PT(void);
-		//virtual void StopDev(void);
+		virtual void RHI(void);
+		virtual void RT(void);
+		virtual void PT(void);
+		virtual void StopDev(void);
 		//virtual void ResetLinesDevicesBeforeReset(void);
 		//virtual int SetCommand(int command);
-		//virtual int Evaluate(void);
 		//virtual int DoStep(int step);
-		//virtual int GoToStep(int cur, int param);
-		//virtual int InitStep(int step, int f);
+		virtual int GoToStep(int cur, int param);
+		virtual int InitStep(int step, int f);
 		//virtual int LoadProgram(void);
 		//virtual void ResetWP(void);
-		//virtual void Stop(int step);
-		//virtual int SetRet(int val);
+		virtual void Stop(int step);
+		virtual int SetRet(int val);
 		//virtual int GetRetState();
 		//virtual int HasRet();
 		virtual void ResetStat(void);
@@ -546,11 +548,11 @@ class cipline_tech_object: public tech_object
 		//virtual int InitDoseRR(int what, int step, int f);
 		//virtual int DoseRR(int what);
 		////-------------------
-		//virtual int EvalBlock();
+		virtual int EvalBlock();
 		////-------------------
-		//virtual int EvalPIDS();
-		//virtual int EvalCommands();
-		//virtual int EvalRecipes();
+		virtual int EvalPIDS();
+		virtual int EvalCommands();
+		virtual int EvalRecipes();
 		//virtual int EvalCipInProgress();
 		//virtual int EvalCipInError();
 	};

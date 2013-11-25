@@ -878,7 +878,7 @@ void dev_stub::direct_set_state( int new_state )
     {
     }
 //-----------------------------------------------------------------------------
-u_int_4 dev_stub::get_n() const
+u_int_4 dev_stub::get_serial_n() const
     {
     return 0;
     }
@@ -2214,6 +2214,14 @@ i_DO_device* DO( const char *dev_name )
     {
     return G_DEVICE_MANAGER()->get_DO( dev_name );
     }
+
+i_DO_device* DO( u_int dev_n )
+	{
+	static char name[ 10 ] = { 0 }; 
+	snprintf( name, sizeof( name ), "DO%d", dev_n );
+	return G_DEVICE_MANAGER()->get_DO( name );
+	}
+
 //-----------------------------------------------------------------------------
 i_AI_device* QT( u_int dev_n )
     {
