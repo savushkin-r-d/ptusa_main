@@ -2209,6 +2209,14 @@ i_DI_device* DI( const char *dev_name )
     {
     return G_DEVICE_MANAGER()->get_DI( dev_name );
     }
+
+i_DI_device* DI( u_int dev_n )
+	{
+	static char name[ 10 ] = { 0 }; 
+	snprintf( name, sizeof( name ), "DI%d", dev_n );
+	return G_DEVICE_MANAGER()->get_DI( name );
+	}
+
 //-----------------------------------------------------------------------------
 i_DO_device* DO( const char *dev_name )
     {

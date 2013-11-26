@@ -304,10 +304,10 @@ class MSAPIDInterface
 		int HI;
 		int rp;
 		MSAPIDInterface( PID* pid, run_time_params_float* par, int taskpar, i_AO_device* ao = 0, i_AI_device* ai = 0 );
-		void Eval();
-		void Reset();
-		void On( int accel = 0 );
-		void Off();
+		void eval();
+		void reset();
+		void on( int accel = 0 );
+		void off();
 	};
 
 class TSav 
@@ -334,7 +334,7 @@ class TPumpController
 	public:
 		TPumpController(i_DO_AO_device* pump);
 		~TPumpController();
-		virtual void On();
+		virtual void on();
 		virtual void Off();
 		virtual void mOn();
 		virtual void mOff();
@@ -347,6 +347,8 @@ class cipline_tech_object: public tech_object
 	protected:
 		int ncmd;
 
+		int ret_circ_flag; //флаг управлени€ возвратным насосом при циркул€ции
+		unsigned long ret_circ_delay; //задержка обратного включени€ возвратного насоса
 		int ret_overrride; //флаг принудительного включени€/выключени€ возвратного насооса
 		int concentration_ok; //есть концентраци€ на возврате
 		int return_ok; //есть расход на возврате
@@ -504,32 +506,32 @@ class cipline_tech_object: public tech_object
 		virtual void RT(void);
 		virtual void PT(void);
 		virtual void StopDev(void);
-		//virtual void ResetLinesDevicesBeforeReset(void);
-		//virtual int SetCommand(int command);
-		//virtual int DoStep(int step);
+		virtual void ResetLinesDevicesBeforeReset(void);
+		virtual int SetCommand(int command);
+		virtual int DoStep(int step);
 		virtual int GoToStep(int cur, int param);
 		virtual int InitStep(int step, int f);
-		//virtual int LoadProgram(void);
-		//virtual void ResetWP(void);
+		virtual int LoadProgram(void);
+		virtual void ResetWP(void);
 		virtual void Stop(int step);
 		virtual int SetRet(int val);
-		//virtual int GetRetState();
-		//virtual int HasRet();
+		virtual int GetRetState();
+		virtual int HasRet();
 		virtual void ResetStat(void);
 		////-----error service-------
-		//virtual void ResetErr(void);
-		//virtual int CheckErr(void);
+		virtual void ResetErr(void);
+		virtual int CheckErr(void);
 		////-----for main station----
-		//virtual void SortRR(int where);
-		//virtual float GetConc(int what);
-		//virtual int InitFilRR(int where);
-		//virtual int InitCircRR(int where);
-		//virtual int InitCheckConc(int where);
-		//virtual int InitAddRR(int where);
-		//virtual int InitOpolRR(int where);
-		//virtual int FilRR(int where);
-		//virtual int CircRR(int where);
-		//virtual int CheckConc(int where);
+		virtual void SortRR(int where);
+		virtual float GetConc(int what);
+		virtual int InitFilRR(int where);
+		virtual int InitCircRR(int where);
+		virtual int InitCheckConc(int where);
+		virtual int InitAddRR(int where);
+		virtual int InitOpolRR(int where);
+		virtual int FilRR(int where);
+		virtual int CircRR(int where);
+		virtual int CheckConc(int where);
 		//virtual int AddRR(int where);
 		//virtual int OpolRR(int where);
 		////-------------------------
@@ -553,8 +555,8 @@ class cipline_tech_object: public tech_object
 		virtual int EvalPIDS();
 		virtual int EvalCommands();
 		virtual int EvalRecipes();
-		//virtual int EvalCipInProgress();
-		//virtual int EvalCipInError();
+		virtual int EvalCipInProgress();
+		virtual int EvalCipInError();
 	};
 
 
