@@ -158,7 +158,7 @@ int cipline_tech_object::save_device( char *buff )
 	//Выбранная программа мойки
 	sprintf(buff + answer_size, "\tCUR_PRG='%s',\n", currentProgramName);
 	answer_size += strlen( buff + answer_size );
-	 
+
 	//Список доступных программ мойки
 	sprintf(buff + answer_size, "\tPRG_LIST='%s',\n", programList);
 	answer_size += strlen( buff + answer_size );
@@ -266,8 +266,8 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 	{
 	if (0 == strcmp(prop, "CUR_REC"))
 		{
-		 strncpy_s(lineRecipes->currentRecipeName, lineRecipes->recipeNameLength, val, _TRUNCATE);
-		 return 0;
+		strncpy_s(lineRecipes->currentRecipeName, lineRecipes->recipeNameLength, val, _TRUNCATE);
+		return 0;
 		}
 #ifdef DEBUG
 	Print( "Eror tech_object::set_cmd(...), prop = \"%s\", idx = %u, val = %s\n",
@@ -820,7 +820,7 @@ void cipline_tech_object::StopDev( void )
 	V11->off();
 	V12->off();
 	V00->off();
-	if (pump_control) {NPC->Off();} else {NP->off();}
+	if (pump_control) {NPC->off();} else {NP->off();}
 	if (PIDP->HI==0) PIDP->off();
 	if (PIDF->HI==0) PIDF->off();
 	ret_overrride = 0;
@@ -896,9 +896,9 @@ int cipline_tech_object::SetRet( int val )
 		}
 	device* n_ret = (device*)(M((u_int)(rt_par_float[P_N_RET])));
 	if (0 == n_ret->get_serial_n())
-	{
+		{
 		device* n_ret = (device*)(DO((u_int)(rt_par_float[P_N_UPR])));
-	}
+		}
 	if (n_ret->get_serial_n() > 0)
 		{
 		if (val)
@@ -1345,553 +1345,1767 @@ int cipline_tech_object::CheckErr( void )
 	return 0;
 	}
 
-	void cipline_tech_object::SortRR( int where )
+void cipline_tech_object::SortRR( int where )
+	{
+	if (get_delta_millisec(sort_delay) < SORT_SWITCH_DELAY)
 		{
-		if (get_delta_millisec(sort_delay) < SORT_SWITCH_DELAY)
-			{
-			return;
-			}
-		else
-			{
-			sort_delay = get_millisec();
-			}
-		float c;
-		int d;
-		d=0;
-		V07->off();
-		switch (where) 
-			{
-			case TANK_S:
-				V08->off();
-				c=GetConc(SHCH);
-				if (c>=parpar[0][P_CMIN_S]) 
+		return;
+		}
+	else
+		{
+		sort_delay = get_millisec();
+		}
+	float c;
+	int d;
+	d=0;
+	V07->off();
+	switch (where) 
+		{
+		case TANK_S:
+			V08->off();
+			c=GetConc(SHCH);
+			if (c>=parpar[0][P_CMIN_S]) 
+				{
+				d=2;
+				} 
+			else 
+				{
+				if (c>=parpar[0][P_CKANAL_S]) 
 					{
-					d=2;
+					d=1;
 					} 
 				else 
 					{
-					if (c>=parpar[0][P_CKANAL_S]) 
-						{
-						d=1;
-						} 
-					else 
-						{
-						d=0;
-						}
+					d=0;
 					}
-				switch (d) 
+				}
+			switch (d) 
+				{
+				case 0: //kanal
+					V09->off();
+					V10->off();
+					V11->on();
+					V12->off();
+					break;
+				case 1: //neutro
+					V09->off();
+					V10->off();
+					V11->off();
+					if (no_neutro) {V11->on();} else {V12->on();}
+					break;
+				case 2: //tank
+					V09->on();
+					V10->off();
+					V11->off();
+					V12->off();
+					break;
+				}
+			break;
+		case TANK_K: 
+			V09->off();
+			c=GetConc(KISL);
+			if (c>=parpar[0][P_CMIN_K]) 
+				{
+				d=2;
+				} 
+			else 
+				{
+				if (c>=parpar[0][P_CKANAL_K]) 
 					{
-					case 0: //kanal
-						V09->off();
-						V10->off();
-						V11->on();
-						V12->off();
-						break;
-					case 1: //neutro
-						V09->off();
-						V10->off();
-						V11->off();
-						if (no_neutro) {V11->on();} else {V12->on();}
-						break;
-					case 2: //tank
-						V09->on();
-						V10->off();
-						V11->off();
-						V12->off();
-						break;
-					}
-				break;
-			case TANK_K: 
-				V09->off();
-				c=GetConc(KISL);
-				if (c>=parpar[0][P_CMIN_K]) 
-					{
-					d=2;
+					d=1;
 					} 
 				else 
 					{
-					if (c>=parpar[0][P_CKANAL_K]) 
-						{
-						d=1;
-						} 
-					else 
-						{
-						d=0;
-						}
+					d=0;
 					}
-				switch (d) 
-					{
-					case 0: //kanal
-						V08->off();
-						V10->off();
-						V11->on();
-						V12->off();
-						break;
-					case 1: //neutro
-						V08->off();
-						V10->off();
-						V11->off();
-						if (no_neutro) {V11->on();} else {V12->on();}
-						break;
-					case 2: //tank
-						V08->on();
-						V10->off();
-						V11->off();
-						V12->off();
-						break;
-					}
-				break;
-			}
+				}
+			switch (d) 
+				{
+				case 0: //kanal
+					V08->off();
+					V10->off();
+					V11->on();
+					V12->off();
+					break;
+				case 1: //neutro
+					V08->off();
+					V10->off();
+					V11->off();
+					if (no_neutro) {V11->on();} else {V12->on();}
+					break;
+				case 2: //tank
+					V08->on();
+					V10->off();
+					V11->off();
+					V12->off();
+					break;
+				}
+			break;
+		}
+	}
+
+float cipline_tech_object::GetConc( int what )
+	{
+	float x25, a, ms25, c25, c, divider;
+	c=0;
+	switch (what) 
+		{
+		case SHCH: 
+			a=parpar[0][P_ALFS]/100;
+			ms25=parpar[0][P_MS25S];
+			c25=parpar[0][P_CONC25S];
+			divider = 1+a*(TR->get_value()-25);
+			if (0 == divider)
+				{
+				divider = 1;
+				}
+			x25 = Q->get_value() /divider;
+			divider = parpar[0][P_MS25W]-ms25;
+			if (0 == divider)
+				{
+				divider = 1;
+				}
+			c = c25 * (ms25-x25) / divider + c25;
+			break;
+		case KISL: 
+			a=parpar[0][P_ALFK]/100;
+			ms25=parpar[0][P_MS25K];
+			c25=parpar[0][P_CONC25K];
+			divider = 1+a*(TR->get_value()-25);
+			if (0 == divider)
+				{
+				divider = 1;
+				}
+			x25=Q->get_value() / divider;
+			divider = parpar[0][P_MS25W]-ms25;
+			if (0 == divider)
+				{
+				divider = 1;
+				}
+			c = c25 * (ms25-x25) / divider + c25;
+			break;
+		}
+	if (c<0) 
+		{
+		return 0;
+		} 
+	else 
+		{
+		return c;
+		}
+	}
+
+int cipline_tech_object::InitFilRR( int where )
+	{
+	float v, pd, kk, kz, ro;
+	V05->off();
+	V06->on();
+	V00->on();
+	V01->on();
+	V02->off();
+	V03->off();
+	V04->off();
+	switch (where) 
+		{
+		case TANK_K:
+			V07->off();
+			V08->on();
+			V09->off();
+			V10->off();
+			V11->off();
+			V12->off();
+			//       NK->on();
+			pd=parpar[0][P_PDNK];
+			kk=parpar[0][P_K_K]/100;
+			kz=parpar[0][P_CZAD_K]/100;
+			ro=parpar[0][P_RO_K];
+			break;
+		case TANK_S:
+			V07->off();
+			V08->off();
+			V09->on();
+			V10->off();
+			V11->off();
+			V12->off();
+			//       NS->on();
+			pd=parpar[0][P_PDNS];
+			kk=parpar[0][P_K_S]/100;
+			kz=parpar[0][P_CZAD_S]/100;
+			ro=parpar[0][P_RO_S];
+			break;
 		}
 
-	float cipline_tech_object::GetConc( int what )
+	if (pump_control) {NPC->on();} else {NP->on();}
+	rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
+	PIDP->on();
+	V13->on();
+
+	//calculate flow
+	float divider = 1 - kz;
+	if (0 == divider)
 		{
-		float x25, a, ms25, c25, c, divider;
-		c=0;
-		switch (what) 
-			{
-			case SHCH: 
-				a=parpar[0][P_ALFS]/100;
-				ms25=parpar[0][P_MS25S];
-				c25=parpar[0][P_CONC25S];
-				divider = 1+a*(TR->get_value()-25);
-				if (0 == divider)
-					{
-					divider = 1;
-					}
-				x25 = Q->get_value() /divider;
-				divider = parpar[0][P_MS25W]-ms25;
-				if (0 == divider)
-					{
-					divider = 1;
-					}
-				c = c25 * (ms25-x25) / divider + c25;
-				break;
-			case KISL: 
-				a=parpar[0][P_ALFK]/100;
-				ms25=parpar[0][P_MS25K];
-				c25=parpar[0][P_CONC25K];
-				divider = 1+a*(TR->get_value()-25);
-				if (0 == divider)
-					{
-					divider = 1;
-					}
-				x25=Q->get_value() / divider;
-				divider = parpar[0][P_MS25W]-ms25;
-				if (0 == divider)
-					{
-					divider = 1;
-					}
-				c = c25 * (ms25-x25) / divider + c25;
-				break;
-			}
-		if (c<0) 
-			{
-			return 0;
-			} 
-		else 
-			{
-			return c;
-			}
+		divider = 1;
+		}
+	v=kz*1000/((divider)*kk*ro);
+	//   printf("\n\rfillRR v1M3: %f,pd: %f, kk: %f, kz: %f, ro: %f", v, pd, kk, kz, ro);
+	//   par->setParamM(P_ZAD_FLOW, pd/v);
+	rt_par_float[P_ZAD_FLOW] = parpar[0][P_FLOW_RR];
+	PIDF->on();
+
+	rt_par_float[P_VRAB] = 0;
+	rt_par_float[P_ZAD_CONC] = kz*100;
+	rt_par_float[P_CONC] = 0;
+	rt_par_float[P_CONC_RATE] = 0;  //  Расход концентрата при наведении
+	rt_par_float[P_OP_TIME_LEFT] = 0;
+	divider = pd;
+	if (0 == divider)
+		{
+		divider = 1;
+		}
+	rt_par_float[P_MAX_OPER_TM] = (v/divider)*MAX_OP_TIME*3600;
+	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000L);
+	T[TMR_OP_TIME]->start();
+	rt_par_float[P_SUM_OP] = 0;
+	cnt->start();
+	return 0;
+	}
+
+int cipline_tech_object::InitCircRR( int where )
+	{
+	float z=0;
+	V05->off();
+	V06->on();
+	V00->off();
+	V01->off();
+	V04->off();
+	V07->off();
+
+	V10->off();
+	V11->off();
+	V12->off();
+	switch (where) 
+		{
+		case TANK_K:
+			V02->on();
+			V03->off();
+			V08->on();
+			V09->off();
+			NK->off();
+			z=parpar[0][P_CZAD_K];
+			break;
+		case TANK_S:
+			V02->off();
+			V03->on();
+			V08->off();
+			V09->on();
+			NS->off();
+			z=parpar[0][P_CZAD_S];
+			break;
 		}
 
-	int cipline_tech_object::InitFilRR( int where )
+	if (pump_control) {NPC->on();} else {NP->on();}
+	rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
+	PIDP->on();
+	V13->on();
+
+	rt_par_float[P_ZAD_FLOW] = parpar[0][P_FLOW_RR];
+	PIDF->on();
+
+	rt_par_float[P_VRAB] = 0;
+	rt_par_float[P_ZAD_CONC] = z;
+	rt_par_float[P_CONC] = 0;
+
+	rt_par_float[P_OP_TIME_LEFT] = 0;
+	rt_par_float[P_MAX_OPER_TM] = parpar[0][P_TM_CIRC_RR];
+	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM]*1000L);
+	T[TMR_OP_TIME]->start();
+	rt_par_float[P_SUM_OP] = 0;
+	cnt->start();
+	return 0;
+	}
+
+int cipline_tech_object::InitCheckConc( int where )
+	{
+	InitCircRR(where);
+	rt_par_float[P_MAX_OPER_TM] = parpar[0][P_TM_CHKC];
+	T[TMR_OP_TIME]->reset();
+	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000L);
+	T[TMR_OP_TIME]->start();
+	return 0;
+	}
+
+int cipline_tech_object::InitAddRR( int where )
+	{
+	float v, pd, kk, kz, ro, vt, kt;
+	V05->off();
+	V06->on();
+	V00->off();
+	V01->off();
+	V04->off();
+	V07->off();
+	V10->off();
+	V11->off();
+	V12->off();
+	switch (where) 
 		{
-		float v, pd, kk, kz, ro;
-		V05->off();
-		V06->on();
-		V00->on();
-		V01->on();
-		V02->off();
-		V03->off();
-		V04->off();
+		case TANK_K:
+			V02->on();
+			V03->off();
+			V08->on();
+			V09->off();
+			NK->on();
+			pd=parpar[0][P_PDNK];
+			kk=parpar[0][P_K_K]/100;
+			kz=parpar[0][P_CZAD_K]/100;
+			ro=parpar[0][P_RO_K];
+			vt=parpar[0][P_VTANKK];
+			break;
+		case TANK_S:
+			V02->off();
+			V03->on();
+			V08->off();
+			V09->on();
+			NS->on();
+			pd=parpar[0][P_PDNS];
+			kk=parpar[0][P_K_S]/100;
+			kz=parpar[0][P_CZAD_S]/100;
+			ro=parpar[0][P_RO_S];
+			vt=parpar[0][P_VTANKS];
+			break;
+		}
+	kt=rt_par_float[P_CONC] / 100;
+
+	float divider = (1-kz)*kk*ro;
+	if (0 == divider)
+		{
+		divider = 1;
+		}
+	v=(kz-kt)*vt/(divider);
+
+	if (v<1) v=1;
+
+	if (pump_control) {NPC->on();} else {NP->on();}
+	rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
+	PIDP->on();
+	V13->on();
+
+	rt_par_float[P_ZAD_FLOW] = parpar[0][P_FLOW_RR];
+	PIDF->on();
+	rt_par_float[P_ZAD_CONC] = kz*100;
+	rt_par_float[P_CONC] = 0;
+
+	rt_par_float[P_VRAB] = 0;
+
+	rt_par_float[P_OP_TIME_LEFT] = 0;
+	divider = pd;
+	if (0 == divider)
+		{
+		divider = 1;
+		}
+	rt_par_float[P_MAX_OPER_TM] = (v/divider)*3600;
+	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000L);
+	T[TMR_OP_TIME]->start();
+	rt_par_float[P_SUM_OP] = 0;
+	cnt->start();
+	return 0;
+	}
+
+int cipline_tech_object::InitOpolRR( int where )
+	{
+	float z=0;
+	V05->off();
+	V06->on();
+	V00->on();
+	V01->on();
+	V02->off();
+	V03->off();
+	V04->off();
+	switch (where) 
+		{
+		case TANK_K:
+			V07->off();
+			V08->on();
+			V09->off();
+			V10->off();
+			V11->off();
+			V12->off();
+			NK->off();
+			z=parpar[0][P_CZAD_K];
+			break;
+		case TANK_S:
+			V07->off();
+			V08->off();
+			V09->on();
+			V10->off();
+			V11->off();
+			V12->off();
+			NS->off();
+			z=parpar[0][P_CZAD_S];
+			break;
+		}
+	if (pump_control) {NPC->on();} else {NP->on();}
+	rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
+	PIDP->on();
+	V13->on();
+
+	rt_par_float[P_ZAD_FLOW] = parpar[0][P_FLOW_RR];
+	PIDF->on();
+
+	rt_par_float[P_VRAB] = 0;
+
+	rt_par_float[P_OP_TIME_LEFT] = 0;
+	rt_par_float[P_MAX_OPER_TM] = 300;
+	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000L);
+	T[TMR_OP_TIME]->start();
+	T[TMR_CHK_CONC]->set_countdown_time(rt_par_float[P_TM_NO_CONC] * 1000L);
+	rt_par_float[P_SUM_OP] = 0;
+
+	rt_par_float[P_ZAD_CONC] = z;
+	rt_par_float[P_CONC] = 0;
+
+	cnt->start();
+	return 0;
+	}
+
+int cipline_tech_object::FilRR( int where )
+	{
+	unsigned long tmp;
+	rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
+	rt_par_float[P_SUM_OP] = cnt->get_quantity();
+	tmp=cnt->get_quantity();
+
+
+	rt_par_float[STP_WC] = tmp - rt_par_float[STP_LV];
+	rt_par_float[STP_LV] = tmp;
+	switch (where) 
+		{
+		case TANK_K: 
+			if (LKH->is_active())
+				{
+				return 1;
+				}
+			break;
+		case TANK_S:
+			if (LSH->is_active()) 
+				{
+				return 1;
+				}
+			break;
+		}
+	if (!LM->is_active()) V00->on();
+	if (LH->is_active()) V00->off();
+	return 0;
+	}
+
+int cipline_tech_object::CircRR( int where )
+	{
+	float c;
+	switch (where) 
+		{
+		case TANK_S:
+			c = rt_par_float[P_CONC_RATE] + parpar[0][P_PDNS] * 
+				( (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000) - rt_par_float[P_OP_TIME_LEFT ])/3600;
+			rt_par_float[P_CONC_RATE] = c; 
+
+			c=GetConc(SHCH);
+			break;
+		case TANK_K:
+			c = rt_par_float[P_CONC_RATE] + parpar[0][P_PDNK] * 
+				( (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000) - rt_par_float[P_OP_TIME_LEFT])/3600;
+			rt_par_float[P_CONC_RATE] = c; 
+
+			c=GetConc(KISL);
+			break;
+		}
+
+	rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000L);
+	rt_par_float[P_SUM_OP] = cnt->get_quantity();   
+	rt_par_float[P_CONC] = c;
+	if (T[TMR_OP_TIME]->is_time_up()) 
+		{
+		return 1;
+		}
+	return 0;
+	}
+
+int cipline_tech_object::CheckConc( int where )
+	{
+	float c, z;
+	rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
+	rt_par_float[P_SUM_OP] = cnt->get_quantity();
+	switch (where) 
+		{
+		case TANK_K:
+			c=GetConc(KISL);
+			z=parpar[0][P_CZAD_K];
+			break;
+		case TANK_S:
+			c=GetConc(SHCH);
+			z=parpar[0][P_CZAD_S];
+			break;
+		}
+	SAV[SAV_CONC]->Add(c, cnt->get_quantity());
+	rt_par_float[P_CONC] = SAV[SAV_CONC]->Q();
+	if (T[TMR_OP_TIME]->is_time_up()) 
+		{
 		switch (where) 
 			{
 			case TANK_K:
-				V07->off();
-				V08->on();
-				V09->off();
-				V10->off();
-				V11->off();
-				V12->off();
-				//       NK->on();
-				pd=parpar[0][P_PDNK];
-				kk=parpar[0][P_K_K]/100;
-				kz=parpar[0][P_CZAD_K]/100;
-				ro=parpar[0][P_RO_K];
-				break;
-			case TANK_S:
-				V07->off();
-				V08->off();
-				V09->on();
-				V10->off();
-				V11->off();
-				V12->off();
-				//       NS->on();
-				pd=parpar[0][P_PDNS];
-				kk=parpar[0][P_K_S]/100;
-				kz=parpar[0][P_CZAD_S]/100;
-				ro=parpar[0][P_RO_S];
-				break;
-			}
-
-		if (pump_control) {NPC->on();} else {NP->on();}
-		rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
-		PIDP->on();
-		V13->on();
-
-		//calculate flow
-		float divider = 1 - kz;
-		if (0 == divider)
-			{
-			divider = 1;
-			}
-		v=kz*1000/((divider)*kk*ro);
-		//   printf("\n\rfillRR v1M3: %f,pd: %f, kk: %f, kz: %f, ro: %f", v, pd, kk, kz, ro);
-		//   par->setParamM(P_ZAD_FLOW, pd/v);
-		rt_par_float[P_ZAD_FLOW] = parpar[0][P_FLOW_RR];
-		PIDF->on();
-
-		rt_par_float[P_VRAB] = 0;
-		rt_par_float[P_ZAD_CONC] = kz*100;
-		rt_par_float[P_CONC] = 0;
-		rt_par_float[P_CONC_RATE] = 0;  //  Расход концентрата при наведении
-		rt_par_float[P_OP_TIME_LEFT] = 0;
-		divider = pd;
-		if (0 == divider)
-			{
-			divider = 1;
-			}
-		rt_par_float[P_MAX_OPER_TM] = (v/divider)*MAX_OP_TIME*3600;
-		T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000L);
-		T[TMR_OP_TIME]->start();
-		rt_par_float[P_SUM_OP] = 0;
-		cnt->start();
-		return 0;
-		}
-
-	int cipline_tech_object::InitCircRR( int where )
-		{
-		float z=0;
-		V05->off();
-		V06->on();
-		V00->off();
-		V01->off();
-		V04->off();
-		V07->off();
-
-		V10->off();
-		V11->off();
-		V12->off();
-		switch (where) 
-			{
-			case TANK_K:
-				V02->on();
-				V03->off();
-				V08->on();
-				V09->off();
-				NK->off();
-				z=parpar[0][P_CZAD_K];
-				break;
-			case TANK_S:
-				V02->off();
-				V03->on();
-				V08->off();
-				V09->on();
-				NS->off();
-				z=parpar[0][P_CZAD_S];
-				break;
-			}
-
-		if (pump_control) {NPC->on();} else {NP->on();}
-		rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
-		PIDP->on();
-		V13->on();
-
-		rt_par_float[P_ZAD_FLOW] = parpar[0][P_FLOW_RR];
-		PIDF->on();
-
-		rt_par_float[P_VRAB] = 0;
-		rt_par_float[P_ZAD_CONC] = z;
-		rt_par_float[P_CONC] = 0;
-
-		rt_par_float[P_OP_TIME_LEFT] = 0;
-		rt_par_float[P_MAX_OPER_TM] = parpar[0][P_TM_CIRC_RR];
-		T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM]*1000L);
-		T[TMR_OP_TIME]->start();
-		rt_par_float[P_SUM_OP] = 0;
-		cnt->start();
-		return 0;
-		}
-
-	int cipline_tech_object::InitCheckConc( int where )
-		{
-		InitCircRR(where);
-		rt_par_float[P_MAX_OPER_TM] = parpar[0][P_TM_CHKC];
-		T[TMR_OP_TIME]->reset();
-		T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000L);
-		T[TMR_OP_TIME]->start();
-		return 0;
-		}
-
-	int cipline_tech_object::InitAddRR( int where )
-		{
-		float v, pd, kk, kz, ro, vt, kt;
-		V05->off();
-		V06->on();
-		V00->off();
-		V01->off();
-		V04->off();
-		V07->off();
-		V10->off();
-		V11->off();
-		V12->off();
-		switch (where) 
-			{
-			case TANK_K:
-				V02->on();
-				V03->off();
-				V08->on();
-				V09->off();
-				NK->on();
-				pd=parpar[0][P_PDNK];
-				kk=parpar[0][P_K_K]/100;
-				kz=parpar[0][P_CZAD_K]/100;
-				ro=parpar[0][P_RO_K];
-				vt=parpar[0][P_VTANKK];
-				break;
-			case TANK_S:
-				V02->off();
-				V03->on();
-				V08->off();
-				V09->on();
-				NS->on();
-				pd=parpar[0][P_PDNS];
-				kk=parpar[0][P_K_S]/100;
-				kz=parpar[0][P_CZAD_S]/100;
-				ro=parpar[0][P_RO_S];
-				vt=parpar[0][P_VTANKS];
-				break;
-			}
-		kt=rt_par_float[P_CONC] / 100;
-
-		float divider = (1-kz)*kk*ro;
-		if (0 == divider)
-			{
-			divider = 1;
-			}
-		v=(kz-kt)*vt/(divider);
-
-		if (v<1) v=1;
-
-		if (pump_control) {NPC->on();} else {NP->on();}
-		rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
-		PIDP->on();
-		V13->on();
-
-		rt_par_float[P_ZAD_FLOW] = parpar[0][P_FLOW_RR];
-		PIDF->on();
-		rt_par_float[P_ZAD_CONC] = kz*100;
-		rt_par_float[P_CONC] = 0;
-
-		rt_par_float[P_VRAB] = 0;
-
-		rt_par_float[P_OP_TIME_LEFT] = 0;
-		divider = pd;
-		if (0 == divider)
-			{
-			divider = 1;
-			}
-		rt_par_float[P_MAX_OPER_TM] = (v/divider)*3600;
-		T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000L);
-		T[TMR_OP_TIME]->start();
-		rt_par_float[P_SUM_OP] = 0;
-		cnt->start();
-		return 0;
-		}
-
-	int cipline_tech_object::InitOpolRR( int where )
-		{
-		float z=0;
-		V05->off();
-		V06->on();
-		V00->on();
-		V01->on();
-		V02->off();
-		V03->off();
-		V04->off();
-		switch (where) 
-			{
-			case TANK_K:
-				V07->off();
-				V08->on();
-				V09->off();
-				V10->off();
-				V11->off();
-				V12->off();
-				NK->off();
-				z=parpar[0][P_CZAD_K];
-				break;
-			case TANK_S:
-				V07->off();
-				V08->off();
-				V09->on();
-				V10->off();
-				V11->off();
-				V12->off();
-				NS->off();
-				z=parpar[0][P_CZAD_S];
-				break;
-			}
-		if (pump_control) {NPC->on();} else {NP->on();}
-		rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
-		PIDP->on();
-		V13->on();
-
-		rt_par_float[P_ZAD_FLOW] = parpar[0][P_FLOW_RR];
-		PIDF->on();
-
-		rt_par_float[P_VRAB] = 0;
-
-		rt_par_float[P_OP_TIME_LEFT] = 0;
-		rt_par_float[P_MAX_OPER_TM] = 300;
-		T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000L);
-		T[TMR_OP_TIME]->start();
-		T[TMR_CHK_CONC]->set_countdown_time(rt_par_float[P_TM_NO_CONC] * 1000L);
-		rt_par_float[P_SUM_OP] = 0;
-
-		rt_par_float[P_ZAD_CONC] = z;
-		rt_par_float[P_CONC] = 0;
-
-		cnt->start();
-		return 0;
-		}
-
-	int cipline_tech_object::FilRR( int where )
-		{
-		unsigned long tmp;
-		rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
-		rt_par_float[P_SUM_OP] = cnt->get_quantity();
-		tmp=cnt->get_quantity();
-
-
-		rt_par_float[STP_WC] = tmp - rt_par_float[STP_LV];
-		rt_par_float[STP_LV] = tmp;
-		switch (where) 
-			{
-			case TANK_K: 
-				if (LKH->is_active())
-					{
-					return 1;
+				if ( 0 == rt_par_float[STP_QAVK] )  
+					{            
+					rt_par_float[STP_QAVK] = c;     
 					}
 				break;
 			case TANK_S:
-				if (LSH->is_active()) 
+				if ( 0 == rt_par_float[STP_QAVS] ) 
 					{
-					return 1;
+					rt_par_float[STP_QAVS] = c; 
 					}
 				break;
 			}
-		if (!LM->is_active()) V00->on();
-		if (LH->is_active()) V00->off();
-		return 0;
-		}
 
-	int cipline_tech_object::CircRR( int where )
-		{
-		float c;
-		switch (where) 
+		if (c>=z)
 			{
-			case TANK_S:
-				c = rt_par_float[P_CONC_RATE] + parpar[0][P_PDNS] * 
-					( (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000) - rt_par_float[P_OP_TIME_LEFT ])/3600;
-				rt_par_float[P_CONC_RATE] = c; 
-
-				c=GetConc(SHCH);
-				break;
-			case TANK_K:
-				c = rt_par_float[P_CONC_RATE] + parpar[0][P_PDNK] * 
-					( (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000) - rt_par_float[P_OP_TIME_LEFT])/3600;
-				rt_par_float[P_CONC_RATE] = c; 
-
-				c=GetConc(KISL);
-				break;
-			}
-
-		rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000L);
-		rt_par_float[P_SUM_OP] = cnt->get_quantity();   
-		rt_par_float[P_CONC] = c;
-		if (T[TMR_OP_TIME]->is_time_up()) 
-			{
-			return 1;
-			}
-		return 0;
-		}
-
-	int cipline_tech_object::CheckConc( int where )
-		{
-		float c, z;
-		rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
-		rt_par_float[P_SUM_OP] = cnt->get_quantity();
-		switch (where) 
-			{
-			case TANK_K:
-				c=GetConc(KISL);
-				z=parpar[0][P_CZAD_K];
-				break;
-			case TANK_S:
-				c=GetConc(SHCH);
-				z=parpar[0][P_CZAD_S];
-				break;
-			}
-		SAV[SAV_CONC]->Add(c, cnt->get_quantity());
-		rt_par_float[P_CONC] = SAV[SAV_CONC]->Q();
-		if (T[TMR_OP_TIME]->is_time_up()) 
-			{
+			float divider;
 			switch (where) 
 				{
 				case TANK_K:
-					if ( 0 == rt_par_float[STP_QAVK] )  
-						{            
-						rt_par_float[STP_QAVK] = c;     
+					divider = ( 100 - c ) * parpar[0][P_RO_K] * parpar[0][P_K_K] / 100;
+					if (0 == divider)
+						{
+						divider = 1;
 						}
+					rt_par_float[STP_QAVK] = (c - rt_par_float[STP_QAVK]) * parpar[0][P_VTANKK] / divider;
 					break;
 				case TANK_S:
-					if ( 0 == rt_par_float[STP_QAVS] ) 
+					divider =  ( 100 - c ) * parpar[0][P_RO_S] * parpar[0][P_K_S ] / 100;
+					if (0 == divider)
 						{
-						rt_par_float[STP_QAVS] = c; 
+						divider = 1;
 						}
+					rt_par_float[STP_QAVS] = (c - rt_par_float[STP_QAVS]) * parpar[0][P_VTANKS] / divider ;
 					break;
 				}
+			return 1;
+			} 
+		else return 2;
+		}
+	return 0;
+	}
 
-			if (c>=z)
+int cipline_tech_object::AddRR( int where )
+	{
+	float c;
+	switch (where) 
+		{
+		case TANK_S:
+			c = rt_par_float[P_CONC_RATE] + parpar[0][P_PDNS] * 
+				( (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000) - rt_par_float[P_OP_TIME_LEFT])/3600;
+			rt_par_float[P_CONC_RATE] = c; 
+
+			c=GetConc(SHCH);
+			break;
+		case TANK_K:
+			c = rt_par_float[P_CONC_RATE] + parpar[0][P_PDNK] * 
+				( (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000) - rt_par_float[P_OP_TIME_LEFT])/3600;
+			rt_par_float[P_CONC_RATE] = c; 
+
+			c=GetConc(KISL);
+			break;
+		}
+
+	rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
+	rt_par_float[P_SUM_OP] = cnt->get_quantity();   
+	rt_par_float[P_CONC] = c;
+	if (T[TMR_OP_TIME]->is_time_up()) 
+		{
+		return 1;
+		}
+	return 0;
+	}
+
+int cipline_tech_object::OpolRR( int where )
+	{
+	float c;
+	rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
+	rt_par_float[P_SUM_OP] = cnt->get_quantity();
+	switch (where) 
+		{
+		case TANK_K:
+			c=GetConc(KISL);
+			break;
+		case TANK_S:
+			c=GetConc(SHCH);
+			break;
+		}
+	rt_par_float[P_CONC] = c;
+	SortRR(where);
+	if (c>=NOCONC) 
+		{
+		T[TMR_CHK_CONC]->reset();
+		} 
+	else 
+		{
+		T[TMR_CHK_CONC]->start();
+		if (T[TMR_CHK_CONC]->is_time_up()) return 1;
+		}
+	if (!LM->is_active()) V00->on();
+	if (LH->is_active()) V00->off();
+	return 0;
+	}
+
+int cipline_tech_object::InitToObject( int from, int where, int step, int f )
+	{
+	float v=1, p=1, z=0;
+	int ot;
+	V05->on();
+	V06->off();
+
+	if (step == 5 || step == 22 || step == 42 || step == 62 || step == 72 || (step == 83 && rt_par_float[P_PROGRAM] == SPROG_HOTWATER))
+		{
+		tank_is_empty = 1;
+		}
+	else
+		{
+		tank_is_empty = 0;
+		}
+
+	switch (from) 
+		{
+		case WATER:
+		case SANITIZER:
+			V00->on();
+			V01->on();
+			V02->off();
+			V03->off();
+			V04->off();
+			break;
+		case TANK_W:
+			V00->off();
+			V01->off();
+			V02->off();
+			V03->off();
+			V04->on();
+			break;
+		case TANK_K:
+			V00->off();
+			V01->off();
+			V02->on();
+			V03->off();
+			V04->off();
+			break;
+		case TANK_S:
+			V00->off();
+			V01->off();
+			V02->off();
+			V03->on();
+			V04->off();
+			break;
+		}
+	switch (where) 
+		{
+		case KANAL:
+			V07->off();
+			V08->off();
+			V09->off();
+			V10->off();
+			V11->on();
+			V12->off();
+			break;
+		case TANK_W:
+			if (LWH->is_active()) 
 				{
-				float divider;
+				V08->off();
+				V09->off();
+				V10->off();
+				V11->on();
+				V12->off();
+				V07->off();
+				} 
+			else 
+				{
+				V08->off();
+				V09->off();
+				V10->off();
+				V11->off();
+				V12->off();
+				V07->on();
+				}
+			break;
+		case TANK_K:
+			V07->off();
+			V08->on();
+			V09->off();
+			V10->off();
+			V11->off();
+			V12->off();
+			z=parpar[0][P_CZAD_K];
+			break;
+		case TANK_S:
+			V07->off();
+			V08->off();
+			V09->on();
+			V10->off();
+			V11->off();
+			V12->off();
+			z=parpar[0][P_CZAD_S];
+			break;
+		}
+
+	if (pump_control) {NPC->on();} else {NP->on();}
+	SetRet(ON);
+
+	switch (step) 
+		{
+		case 5:
+		case 8:
+			v=rt_par_float[P_T_WP];
+			break;
+		case 14:
+			v=rt_par_float[P_T_WP];
+			break;
+		case 22:
+			v=rt_par_float[P_T_S];
+			break;
+		case 33:
+		case 37:
+			v=rt_par_float[P_T_WSP];
+			break;
+		case 53:
+		case 57:
+			v=rt_par_float[P_T_WKP];
+			break;
+		case 42:
+			v=rt_par_float[P_T_K];
+			break;
+		case 62:
+			v=rt_par_float[P_T_D];
+			break;
+		case 72:
+			v=rt_par_float[P_T_SANITIZER];
+			break;
+		case 83:
+		case 86:
+			if (rt_par_float[P_PROGRAM] == SPROG_RINSING_CLEAN)
+				{
+				v=rt_par_float[P_T_CLEAN_RINSING];
+				} 
+			else
+				{
+				v=rt_par_float[P_T_WOP];
+				}
+			break;
+		}
+	switch (step) 
+		{
+		case 5:
+		case 22:
+		case 33:
+		case 42:
+		case 53:
+		case 62:
+		case 72:
+		case 83: 
+			p = rt_par_float[PV1];
+			break;
+		case 8:
+			p = rt_par_float[P_DOP_V_PR_OP];
+			break;
+		case 37:
+			p = rt_par_float[P_DOP_V_AFTER_S];
+			break;
+		case 57: 
+			p = rt_par_float[P_DOP_V_AFTER_K];
+			break;
+		case 86:
+			if (rt_par_float[P_PROGRAM] == SPROG_RINSING_CLEAN)
+				{
+				p = rt_par_float[P_V_CLEAN_RINSING];
+				} 
+			else
+				{
+				p = rt_par_float[P_DOP_V_OK_OP];
+				}
+			break;
+		}
+	rt_par_float[P_ZAD_PODOGR] = v;
+	if (disable_tank_heating && isTank() && (22 == step || 42 == step || 62 == step))
+		{
+		rt_par_float[P_ZAD_PODOGR] = 0;
+		PIDP->off();
+		} 
+	else
+		{
+		PIDP->on();
+		}
+	V13->on();
+	rt_par_float[P_ZAD_FLOW] = rt_par_float[P_FLOW];
+	PIDF->on();
+	rt_par_float[P_VRAB] = p;
+	rt_par_float[P_OP_TIME_LEFT] = 0;
+	float divider = rt_par_float[P_ZAD_FLOW];
+	if (0 == divider)
+		{
+		divider = 1;
+		}
+	rt_par_float[P_MAX_OPER_TM] = 3.6 * MAX_OP_TIME * p / divider;
+	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000);
+	T[TMR_OP_TIME]->start();
+
+	rt_par_float[P_ZAD_CONC] = z;
+	rt_par_float[P_CONC] = 0;
+
+	cnt->start();
+	return 0;
+	}
+
+int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
+	{
+	float v, p, z=0;
+	int ot;
+	if (0 == f)
+		{
+		return_ok = 0;
+		concentration_ok = 0;
+		}
+	V05->on();
+	V06->off();
+	switch (what) 
+		{
+		case WATER:
+		case SANITIZER:
+			V00->on();
+			V01->on();
+			V02->off();
+			V03->off();
+			V04->off();
+			break;
+		case TANK_W:
+			V00->off();
+			V01->off();
+			V02->off();
+			V03->off();
+			V04->on();
+			break;
+		case TANK_K:
+			V00->off();
+			V01->off();
+			V02->on();
+			V03->off();
+			V04->off();
+			z=parpar[0][P_CZAD_K];
+			break;
+		case TANK_S:
+			V00->off();
+			V01->off();
+			V02->off();
+			V03->on();
+			V04->off();
+			z=parpar[0][P_CZAD_S];
+			break;
+		}
+	switch (where) 
+		{
+		case KANAL:
+			V07->off();
+			V08->off();
+			V09->off();
+			V10->off();
+			V11->on();
+			V12->off();
+			break;
+		case TANK_W:
+			V07->on();
+			V08->off();
+			V09->off();
+			V10->off();
+			V11->off();
+			V12->off();
+			break;
+		case TANK_K:
+			V07->off();
+			V08->on();
+			V09->off();
+			V10->off();
+			V11->off();
+			V12->off();
+			z=parpar[0][P_CZAD_K];
+			break;
+		case TANK_S:
+			V07->off();
+			V08->off();
+			V09->on();
+			V10->off();
+			V11->off();
+			V12->off();
+			z=parpar[0][P_CZAD_S];
+			break;
+		}
+
+	if (pump_control) {NPC->on();} else {NP->on();}
+
+	SetRet(OFF);
+
+	switch (step) 
+		{
+		case 7:
+			v=rt_par_float[P_T_WP];
+			break;
+		case 24:
+			v=rt_par_float[P_T_S];
+			break;
+		case 35:
+			v=rt_par_float[P_T_WSP];
+			break;
+		case 55:
+			v=rt_par_float[P_T_WKP];
+			break;
+		case 44:
+			v=rt_par_float[P_T_K];
+			break;
+		case 64:
+			v=rt_par_float[P_T_D];
+			break;
+		case 74:
+			v=rt_par_float[P_T_SANITIZER];
+			break;
+		case 85:
+			if (rt_par_float[P_PROGRAM] == SPROG_RINSING_CLEAN)
+				{
+				v=rt_par_float[P_T_CLEAN_RINSING];
+				} 
+			else
+				{
+				v=rt_par_float[P_T_WOP];
+				}
+			break;
+		}
+	p=rt_par_float[PV2];
+	rt_par_float[P_ZAD_PODOGR] = v;
+	if (isTank() && (24 == step || 44 == step || 64 == step))
+		{
+		rt_par_float[P_ZAD_PODOGR] = 0;
+		PIDP->off();
+		} 
+	else
+		{
+		PIDP->on();
+		}
+	V13->on();
+	rt_par_float[P_ZAD_FLOW] = rt_par_float[P_FLOW];
+	PIDF->on();
+	rt_par_float[P_VRAB] = p;
+	rt_par_float[P_OP_TIME_LEFT] = 0;
+	float divider = rt_par_float[P_ZAD_FLOW];
+	if (0 == divider)
+		{
+		divider = 1;
+		}
+	rt_par_float[P_MAX_OPER_TM] = 3.6 * MAX_OP_TIME * p / divider;
+	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000);
+	T[TMR_OP_TIME]->start();
+	T[TMR_RETURN]->set_countdown_time(rt_par_float[P_TM_NO_FLOW_R] * 1000);
+	T[TMR_RETURN]->reset();
+	T[TMR_CHK_CONC]->reset();
+	T[TMR_CHK_CONC]->set_countdown_time(rt_par_float[P_TM_NO_CONC] * 1000);
+	rt_par_float[P_SUM_OP] = 0;
+
+	rt_par_float[P_ZAD_CONC] = z;
+	rt_par_float[P_CONC] = 0;
+
+	cnt->start();
+	return 0;
+	}
+
+int cipline_tech_object::InitOporCIP( int where, int step, int f )
+	{
+	float z=0;
+	opcip=0;
+	if (isLine()) return 0;
+#ifdef MEDIUM_CHANGE
+	DO(msa_number * 1000L + 3 + nmr * 100)->on();
+#endif
+	V05->on();
+	V06->off();
+	V00->off();
+	V01->off();
+	V03->off();
+	V02->off();
+	V04->off();
+	switch (where) 
+		{
+		case KANAL:
+			V07->off();
+			V08->off();
+			V09->off();
+			V10->off();
+			V11->on();
+			V12->off();
+			break;
+		case TANK_W:
+			V07->on();
+			V08->off();
+			V09->off();
+			V10->off();
+			V11->off();
+			V12->off();
+			break;
+		case TANK_K:
+			V07->off();
+			V08->on();
+			V09->off();
+			V10->off();
+			V11->off();
+			V12->off();
+			z=parpar[0][P_CZAD_K];
+			break;
+		case TANK_S:
+			V07->off();
+			V08->off();
+			V09->on();
+			V10->off();
+			V11->off();
+			V12->off();
+			z=parpar[0][P_CZAD_S];
+			break;
+		}
+
+	if (pump_control) {NPC->off();} else {NP->off();}
+	SetRet(ON);
+	rt_par_float[P_ZAD_PODOGR] = 0;
+	PIDP->off();
+	V13->off();
+	rt_par_float[P_ZAD_FLOW] = 0;
+	PIDF->off();
+	rt_par_float[P_VRAB] = 0;
+	rt_par_float[P_OP_TIME_LEFT] = 0;
+	rt_par_float[P_MAX_OPER_TM] = 600;
+	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM]*1000);
+	T[TMR_OP_TIME]->start();
+	T[TMR_RETURN]->set_countdown_time(rt_par_float[P_TM_RET_IS_EMPTY]*1000);
+	T[TMR_RETURN]->reset();
+	rt_par_float[P_SUM_OP] = 0;
+
+	rt_par_float[P_ZAD_CONC] = z;
+	rt_par_float[P_CONC] = 0;
+	cnt->start();
+	return 0;
+	}
+
+int cipline_tech_object::InitFilCirc( int with_what, int step, int f )
+	{
+	V01->on();
+	V11->off();
+	V12->off();
+	switch (with_what) 
+		{
+		case WITH_WATER:
+		case SANITIZER:
+			V00->on();
+			V10->off();
+			if (pump_control) {NPC->off();} else {NP->off();}
+			SetRet(OFF);
+			PIDP->off();
+			PIDF->off();
+			break;
+		case WITH_RETURN:
+			V00->off();
+			V10->on();
+			V07->off();
+			V08->off();
+			V09->off();
+			V05->on();
+			V06->off();
+			if (pump_control) {NPC->on();} else {NP->on();}
+			SetRet(ON);
+			if (isTank() && (26 == step || 46 == step || 65 == step))
+				{
+				PIDP->off();
+				} 
+			else
+				{
+				PIDP->on();
+				}
+			PIDF->on();
+			break;
+		}
+	switch (step) 
+		{
+		case 26:
+			V03->on();
+			break;
+		case 46:
+			V02->on();
+			break;
+		}
+
+	//   cnt->start();
+	rt_par_float[P_SUM_OP] = 0;
+	rt_par_float[P_VRAB] = rt_par_float[P_V_RAB_ML];
+	rt_par_float[P_OP_TIME_LEFT] = 0;
+	rt_par_float[P_MAX_OPER_TM] = 300;
+	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM]*1000);
+	T[TMR_OP_TIME]->start();
+	return 0;
+	}
+
+int cipline_tech_object::InitOporCirc( int where, int step, int f )
+	{
+	V11->off();
+	V00->off();
+	V01->on();
+	V03->off();
+	V02->off();
+	V04->off();
+	if (pump_control) {NPC->on();} else {NP->on();}
+	SetRet(ON);
+	V05->on();
+	V06->off();
+	switch (where) 
+		{
+		case KANAL:
+			V07->off();
+			V08->off();
+			V09->off();
+			V10->off();
+			V11->on();
+			V12->off();
+			break;
+		case TANK_W:
+			V07->on();
+			V08->off();
+			V09->off();
+			V10->off();
+			V11->off();
+			V12->off();
+			break;
+		case TANK_S:
+			V07->off();
+			V08->off();
+			V09->on();
+			V10->off();
+			V11->off();
+			V12->off();
+			break;
+		case TANK_K:
+			V07->off();
+			V08->on();
+			V09->off();
+			V10->off();
+			V11->off();
+			V12->off();
+			break;
+		}
+	PIDF->on();
+	if (isTank() && (29 == step || 49 == step))
+		{
+		PIDP->off();
+		} 
+	else
+		{
+		PIDP->on();
+		}	
+	//   cnt->start();
+	rt_par_float[P_ZAD_FLOW] = rt_par_float[P_FLOW];
+	rt_par_float[P_SUM_OP] = 0;
+	rt_par_float[P_VRAB] = rt_par_float[P_V_LL_BOT];
+	rt_par_float[P_OP_TIME_LEFT] = 0;
+	rt_par_float[P_MAX_OPER_TM] = 300;
+	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM]*1000);
+	T[TMR_OP_TIME]->start();
+	return 0;
+	}
+
+int cipline_tech_object::InitCirc( int what, int step, int f )
+	{
+	float t=600, z=0;
+	unsigned long tm;
+	ret_circ_flag = 0;
+	if (rt_par_float[P_PODP_CIRC] != 100)
+		{
+		V01->on();
+		V10->on();
+		}
+	else
+		{
+		V01->off();
+		V10->off();
+		}
+	V00->off();
+	V03->off();
+	V04->off();
+	V02->off();
+	V05->on();
+	V06->off();
+	V07->off();
+	V08->off();
+	V09->off();
+	V11->off();
+	V12->off();
+	switch (what) 
+		{
+		case WATER:
+			if (100 == rt_par_float[P_PODP_CIRC])
+				{
+				V01->on();
+				V10->on();
+				}
+			t=rt_par_float[P_T_WP];
+			tm=rt_par_float[PTM_OP]*1000;
+			break;
+		case SANITIZER:
+			t=rt_par_float[P_T_SANITIZER];
+			tm=rt_par_float[PTM_SANITIZER]*1000;
+			break;
+		case HOT_WATER:
+			if (100 == rt_par_float[P_PODP_CIRC])
+				{
+				V01->on();
+				V10->on();
+				}
+			t=rt_par_float[P_T_D];
+			tm=rt_par_float[PTM_D]*1000;
+			break;
+		case SHCH:
+			if (100 == rt_par_float[P_PODP_CIRC])
+				{
+				V03->on();
+				V09->on();
+				}
+			t=rt_par_float[P_T_S];
+			if (((int)rt_par_float[P_PROGRAM] & ((1 << PRG_K) + (1 << PRG_S))) == ((1 << PRG_K) + (1 << PRG_S)))
+				{
+				tm = rt_par_float[PTM_S_SK] * 1000L;
+				}
+			else
+				{
+				tm=rt_par_float[PTM_S]*1000;
+				}
+			z=parpar[0][P_CZAD_S];
+			break;
+		case KISL:
+			if (100 == rt_par_float[P_PODP_CIRC])
+				{
+				V02->on();
+				V08->on();
+				}
+			z=parpar[0][P_CZAD_K];
+			t=rt_par_float[P_T_K];
+			if (((int)rt_par_float[P_PROGRAM] & ((1 << PRG_K) + (1 << PRG_S))) == ((1 << PRG_K) + (1 << PRG_S)))
+				{
+				tm = rt_par_float[PTM_K_SK] * 1000L;
+				}
+			else
+				{
+				tm=rt_par_float[PTM_K]*1000;
+				}
+			break;
+		}
+
+	rt_par_float[P_ZAD_PODOGR] = t;
+	PIDP->on();
+	if (pump_control) {NPC->on();} else {NP->on();}
+	SetRet(ON);
+	V13->on();
+	rt_par_float[P_ZAD_FLOW] = rt_par_float[P_FLOW];
+	PIDF->on();
+	rt_par_float[P_VRAB] = 0;
+
+	rt_par_float[P_ZAD_CONC] = z;
+	rt_par_float[P_CONC] = 0;
+
+	rt_par_float[P_OP_TIME_LEFT] = 0;
+	rt_par_float[P_MAX_OPER_TM] = tm/1000;
+
+	T[TMR_OP_TIME]->set_countdown_time(tm);
+	rt_par_float[P_SUM_OP] = 0;
+
+	cnt->start();
+	return 0;
+	}
+
+	int cipline_tech_object::ToObject( int from, int where )
+		{
+		float c=0;
+		unsigned long tmp;
+		rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
+		rt_par_float[P_SUM_OP] = cnt->get_quantity();
+
+
+		if (tank_is_empty)
+			{
+			if ((cnt->get_quantity() >= rt_par_float[P_VRAB]-rt_par_float[P_RET_STOP]) || (cnt->get_quantity() <= rt_par_float[P_RET_STOP])) 
+				{
+				SetRet(OFF);
+				}
+			else
+				{
+				SetRet(ON);
+				}
+			}
+
+
+		switch (from) 
+			{
+			case WATER:
+			case SANITIZER:
+				if (!LM->is_active()) V00->on();
+				if (LH->is_active()) V00->off();
+				tmp=cnt->get_quantity();
+				rt_par_float[STP_WC] = rt_par_float[STP_WC] + tmp - rt_par_float[STP_LV];
+				rt_par_float[STP_LV] = tmp; 
+				break;
+			case TANK_W:
+				if (!LWL->is_active()) 
+					{
+					tmp=cnt->get_quantity();
+					rt_par_float[STP_WC] = rt_par_float[STP_WC] + tmp - rt_par_float[STP_LV];
+					rt_par_float[STP_WC_INST_WS] = rt_par_float[STP_WC_INST_WS] + tmp - rt_par_float[STP_LV];
+					rt_par_float[STP_LV] = tmp;
+					V04->off();
+					V01->on();
+					if (!LM->is_active()) V00->on();
+					if (LH->is_active()) V00->off();
+
+					} 
+				else 
+					{
+					tmp=cnt->get_quantity();
+					rt_par_float[STP_WS] = rt_par_float[STP_WS] + tmp - rt_par_float[STP_LV];
+					rt_par_float[STP_LV] = tmp;     
+					V04->on();
+					V00->off();
+					V01->off();
+					}
+				break;
+			case TANK_K:
+				c=GetConc(KISL);
+				if (!LKL->is_active()) 
+					{
+					return NO_ACID;
+					}
+				break;
+			case TANK_S: 		
+				c=GetConc(SHCH);
+				if (!LSL->is_active()) 
+					{
+					return NO_ALKALINE;
+					}
+				break;
+			}
+
+		if (cnt->get_quantity() >= rt_par_float[P_VRAB]) 
+			{
+			return 1;
+			}
+
+		if (curstep==86 && TR->get_value()<5 && rt_par_float[P_PROGRAM] != SPROG_RINSING_CLEAN) 
+			{
+			return 1;
+			}
+
+		switch (where) 
+			{
+			case TANK_W:
+				if ((LWH->is_active()) || (from == TANK_W)) 
+					{
+					V08->off();
+					V09->off();
+					V10->off();
+					V11->on();
+					V12->off();
+					V07->off();
+					} 
+				else 
+					{
+					V08->off();
+					V09->off();
+					V10->off();
+					V11->off();
+					V12->off();
+					V07->on();
+					}
+				break;
+			case TANK_K:
+				c=GetConc(KISL);
+				if (LKH->is_active()) 
+					{
+					V08->off();
+					V09->off();
+					V10->off();
+					V11->off();
+					if (no_neutro) {V11->on();} else {V12->on();}
+					V07->off();
+					} 
+				else 
+					{
+					V08->on();
+					V09->off();
+					V10->off();
+					V11->off();
+					V12->off();
+					V07->off();
+					}
+				break;
+			case TANK_S:
+				c=GetConc(SHCH);
+				if (LSH->is_active()) 
+					{
+					V08->off();
+					V09->off();
+					V10->off();
+					V11->off();
+					if (no_neutro) {V11->on();} else {V12->on();}
+					V07->off();
+					} 
+				else 
+					{
+					V08->off();
+					V09->on();
+					V10->off();
+					V11->off();
+					V12->off();
+					V07->off();
+					}
+				break;
+			}
+		rt_par_float[P_CONC] = c;
+
+		return 0;
+		}
+
+		int cipline_tech_object::FromObject( int what, int where )
+			{
+			float c;
+			int dst;
+			unsigned long tmp;
+			rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
+			rt_par_float[P_SUM_OP] = cnt->get_quantity();
+			if (cnt->get_quantity()>=rt_par_float[PV_RET_DEL]) 
+				{
+				SetRet(ON);
+				}
+			if (cnt->get_quantity()>=rt_par_float[P_VRAB]) 
+				{
+				if (!return_ok)
+					{
+					if (FL->get_state()==FLIS) {
+						return_ok = 1;
+						} 
+					else 
+						{
+						T[TMR_RETURN]->start();
+						if (T[TMR_RETURN]->is_time_up()==1) 
+							{
+							return NO_RETURN;
+							}
+						}
+					}
+				dst=0;
+				switch (what) 
+					{
+					case TANK_K:
+						dst=1;
+						c=GetConc(KISL);
+						break;
+					case TANK_S:
+						dst=1;
+						c=GetConc(SHCH);
+						break;
+					}
 				switch (where) 
 					{
 					case TANK_K:
-						divider = ( 100 - c ) * parpar[0][P_RO_K] * parpar[0][P_K_K] / 100;
-						if (0 == divider)
-							{
-							divider = 1;
-							}
-						rt_par_float[STP_QAVK] = (c - rt_par_float[STP_QAVK]) * parpar[0][P_VTANKK] / divider;
+						dst=2;
+						c=GetConc(KISL);
 						break;
 					case TANK_S:
-						divider =  ( 100 - c ) * parpar[0][P_RO_S] * parpar[0][P_K_S ] / 100;
-						if (0 == divider)
-							{
-							divider = 1;
-							}
-						rt_par_float[STP_QAVS] = (c - rt_par_float[STP_QAVS]) * parpar[0][P_VTANKS] / divider ;
+						dst=2;
+						c=GetConc(SHCH);
 						break;
 					}
-				return 1;
-				} 
-			else return 2;
+				switch (dst) 
+					{
+					case 0:
+						concentration_ok = 1;
+						break;
+					case 1:  //must BE
+						if (c>=NOCONC) 
+							{
+							concentration_ok = 1;
+							//	   T[TMR_CHK_CONC]->R();
+							} 
+						else 
+							{
+							T[TMR_CHK_CONC]->start();
+							if (T[TMR_CHK_CONC]->is_time_up()) 
+								{
+								T[TMR_CHK_CONC]->reset();
+								return ERR_NO_CONC;
+								}
+							concentration_ok = 0;
+							}
+						break;
+					case 2: //must not BE
+						if ( ((c<= parpar[0][P_CKANAL_S]) && (where == TANK_S)) ||
+							((c<= parpar[0][P_CKANAL_K]) && (where == TANK_K))) 
+							{
+							concentration_ok = 1;
+							//	   T[TMR_CHK_CONC]->R();
+							} 
+						else 
+							{
+							T[TMR_CHK_CONC]->start();
+							if (T[TMR_CHK_CONC]->is_time_up()) 
+								{
+								T[TMR_CHK_CONC]->reset();
+								return ERR_IS_CONC;
+								}
+							concentration_ok = 0;
+							}
+						break;
+					}
+
+				if (return_ok == 1 && concentration_ok == 1) return 1;
+				}
+
+			c=0;
+			switch (what) 
+				{
+				case WATER:
+				case SANITIZER:
+					if (!LM->is_active()) V00->on();
+					if (LH->is_active()) V00->off();
+					tmp=cnt->get_quantity();
+					rt_par_float[STP_WC] = rt_par_float[STP_WC] + tmp - rt_par_float[STP_LV] ;
+					rt_par_float[STP_LV] = tmp ;
+					break;
+				case TANK_W:
+					if (!LWL->is_active()) 
+						{
+						tmp=cnt->get_quantity();
+						rt_par_float[STP_WC] = rt_par_float[STP_WC] + tmp - rt_par_float[STP_LV] ;
+						rt_par_float[STP_WC_INST_WS] = rt_par_float[STP_WC_INST_WS] + tmp - rt_par_float[STP_LV] ;
+						rt_par_float[STP_LV] = tmp ;
+						V04->off();
+						V01->on();
+						if (!LM->is_active()) V00->on();
+						if (LH->is_active()) V00->off();
+						} 
+					else 
+						{
+						tmp=cnt->get_quantity();
+						rt_par_float[STP_WS] = rt_par_float[STP_WS] + tmp - rt_par_float[STP_LV] ;
+						rt_par_float[STP_LV] = tmp ;
+						V04->on();
+						V00->off();
+						V01->off();
+						}
+					break;
+				case TANK_K:
+					c=GetConc(KISL);
+					if (!LKL->is_active()) 
+						{
+						return NO_ACID;
+						}
+					SortRR(TANK_K);
+					break;
+				case TANK_S:
+					c=GetConc(SHCH);
+					if (!LSL->is_active()) 
+						{
+						return NO_ALKALINE;
+						}
+					SortRR(TANK_S);
+					break;
+				}
+
+			switch (where) 
+				{
+				case TANK_W:
+					if (LWH->is_active()) 
+						{
+						V08->off();
+						V09->off();
+						V10->off();
+						V11->on();
+						V12->off();
+						V07->off();
+						} 
+					else 
+						{
+						V08->off();
+						V09->off();
+						V10->off();
+						V11->off();
+						V12->off();
+						V07->on();
+						}
+					break;
+				case TANK_K:
+					c=GetConc(KISL);
+					if (LKH->is_active()) 
+						{
+						V08->off();
+						V09->off();
+						V10->off();
+						V11->off();
+						if (no_neutro) {V11->on();} else {V12->on();}
+						V07->off();
+						} 
+					else 
+						{
+						SortRR(TANK_K);
+						}
+					break;
+				case TANK_S:
+					c=GetConc(SHCH);
+					if (LSH->is_active()) 
+						{
+						V08->off();
+						V09->off();
+						V10->off();
+						V11->off();
+						if (no_neutro) {V11->on();} else {V12->on();}
+						V07->off();
+						} 
+					else 
+						{
+						SortRR(TANK_S);
+						}
+					break;
+				}
+			rt_par_float[P_CONC] = c;
+			return 0;
 			}
-		return 0;
-		}
+
+			int cipline_tech_object::OporCIP( int where )
+				{
+				int ot;
+				float c;
+				device* OSdev;
+				if (isLine()) return 1;
+				rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
+				rt_par_float[P_SUM_OP] = cnt->get_quantity();
+
+				unsigned int object_empty = (unsigned int)(rt_par_float[P_OBJ_EMPTY]);
+				if (object_empty > 0)
+					{
+					OSdev = (device*)(DI(object_empty));
+					if (OSdev->get_serial_n() > 0)
+						{
+						if (ON == OSdev->get_state())
+							{
+							return 1;
+							}
+						}
+					else
+						{
+						return ERR_WRONG_OS_OR_RECIPE_ERROR;
+						}
+					}
+
+				if (FL->get_state() == FLIS) 
+					{
+					opcip=1;
+					T[TMR_RETURN]->reset();
+					} 
+				else 
+					{
+					if (opcip==1) 
+						{
+						T[TMR_RETURN]->start();
+						if (T[TMR_RETURN]->is_time_up()) 
+							{
+							return 1;                                             
+							}
+						}
+					}
+
+				if (rt_par_float[P_MAX_OPER_TM]*500 < T[TMR_OP_TIME]->get_work_time()) 
+					{
+					if ((curstep==6) || (opcip == 0)) return 1;
+					}
+
+				if (T[TMR_OP_TIME]->is_time_up())
+					{
+					return 1;
+					}
+
+				c=0;
+				switch (where) 
+					{
+					case TANK_W:
+						if (LWH->is_active()) 
+							{
+							V08->off();
+							V09->off();
+							V10->off();
+							V11->on();
+							V12->off();
+							V07->off();
+							} 
+						else 
+							{
+							V08->off();
+							V09->off();
+							V10->off();
+							V11->off();
+							V12->off();
+							V07->on();
+							}
+						break;
+					case TANK_K:
+						c=GetConc(KISL);
+						if (LKH->is_active()) 
+							{
+							V08->off();
+							V09->off();
+							V10->off();
+							V11->off();
+							if (no_neutro) {V11->on();} else {V12->on();}
+							V07->off();
+							} 
+						else 
+							{
+							SortRR(TANK_K);
+							}
+						break;
+					case TANK_S:
+						c=GetConc(SHCH);
+						if (LSH->is_active()) 
+							{
+							V08->off();
+							V09->off();
+							V10->off();
+							V11->off();
+							if (no_neutro) {V11->on();} else {V12->on();}
+							V07->off();
+							} 
+						else 
+							{
+							SortRR(TANK_S);
+							}
+						break;
+					}
+				rt_par_float[P_CONC] = c;
+				return 0;
+				}
+
+			int cipline_tech_object::FilCirc( int with_what )
+				{
+				rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
+				rt_par_float[P_SUM_OP] = cnt->get_quantity();
+				if (LM->is_active()) cnt->start();
+				if (cnt->get_quantity() >= rt_par_float[P_V_RAB_ML]) return 1;
+				if (LH->is_active()) return 1;
+				return 0;
+				}
+
+			int cipline_tech_object::Circ( int what )
+				{
+				return 0;
+				}
 
 cipline_tech_object* cipline_tech_object::Mdls[10];
 
@@ -1916,7 +3130,7 @@ MSAPIDInterface::MSAPIDInterface( PID* pid, run_time_params_float* par, int task
 	lineparams(par),
 	lastEvalInOnState(get_millisec())
 	{
-	
+
 	}
 
 void MSAPIDInterface::eval()
@@ -2006,7 +3220,7 @@ void TPumpController::on()
 	actual_state = ON;
 	}
 
-void TPumpController::Off()
+void TPumpController::off()
 	{
 	actual_state = OFF;
 	}
