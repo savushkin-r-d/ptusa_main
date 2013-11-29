@@ -47,7 +47,7 @@ class params_manager
     public:
         enum CONSTANTS
             {
-            C_TOTAL_PARAMS_SIZE = 700 * 4, ///< Общий размер памяти параметров.
+            C_TOTAL_PARAMS_SIZE = 1024 * 30, ///< Общий размер памяти параметров.
             };
 
         /// @brief Возвращает единственный экземпляр класса для работы с

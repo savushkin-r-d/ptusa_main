@@ -1,25 +1,28 @@
+#ifdef WIN_OS
 #pragma warning(push)
 #pragma warning(disable: 4244)
+#endif // WIN_OS
+
 #include "cip_tech_def.h"
 
-int getNexpPrg(int cur, unsigned long prg) 
+int getNexpPrg(int cur, unsigned long prg)
 	{
 	int i;
 	int tmp;
 
-	if (cur<0) 
+	if (cur<0)
 		{
 		tmp=15;
-		} 
-	else 
+		}
+	else
 		{
 		tmp=cur-1;
 		}
-	if (tmp>=0 && tmp<16) 
+	if (tmp>=0 && tmp<16)
 		{
-		for (i=tmp; i>=0; i--) 
+		for (i=tmp; i>=0; i--)
 			{
-			if (((prg>>i) & 1) == 1) 
+			if (((prg>>i) & 1) == 1)
 				{
 				return i;
 				}
@@ -29,9 +32,9 @@ int getNexpPrg(int cur, unsigned long prg)
 	return -1;
 	}
 
-cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int type, 
-										 const char* name_Lua, u_int states_count, u_int timers_count, 
-										 u_int par_float_count, u_int runtime_par_float_count, u_int par_uint_count, 
+cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int type,
+										 const char* name_Lua, u_int states_count, u_int timers_count,
+										 u_int par_float_count, u_int runtime_par_float_count, u_int par_uint_count,
 										 u_int runtime_par_uint_count ) : tech_object(name, number, type,
 										 name_Lua, states_count, timers_count, par_float_count, runtime_par_float_count,
 										 par_uint_count, runtime_par_uint_count)
@@ -49,11 +52,11 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 		{
 		parpar = new saved_params<float, true>(30, "PAR_MAIN");
 		}
-	for (i = 0; i < TMR_CNT; i++) 
+	for (i = 0; i < TMR_CNT; i++)
 		{
 		T[i]=new timer;
 		}
-	for (i = 0; i < SAV_CNT; i++) 
+	for (i = 0; i < SAV_CNT; i++)
 		{
 		SAV[i]=new TSav;
 		}
@@ -123,7 +126,6 @@ cipline_tech_object::~cipline_tech_object()
 		{
 		delete lineRecipes;
 		}
-	tech_object::~tech_object();
 	}
 
 int cipline_tech_object::save_device( char *buff )
@@ -186,7 +188,7 @@ int cipline_tech_object::save_device( char *buff )
 
 	//Параметры.
 	answer_size += par_float.save_device( buff + answer_size, "\t" );
-	answer_size += par_uint.save_device( buff + answer_size, "\t" ); 
+	answer_size += par_uint.save_device( buff + answer_size, "\t" );
 	answer_size += rt_par_float.save_device( buff + answer_size, "\t" );
 	answer_size += rt_par_uint.save_device( buff + answer_size, "\t" );
 	//Параметры станции
@@ -266,7 +268,12 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 	{
 	if (0 == strcmp(prop, "CUR_REC"))
 		{
-		strncpy_s(lineRecipes->currentRecipeName, lineRecipes->recipeNameLength, val, _TRUNCATE);
+#ifdef WIN_OS
+		strncpy_s(lineRecipes->currentRecipeName, lineRecipes->recipeNameLength,
+            val, _TRUNCATE);
+#else
+        strncpy( lineRecipes->currentRecipeName, val, lineRecipes->recipeNameLength );
+#endif
 		return 0;
 		}
 #ifdef DEBUG
@@ -345,14 +352,14 @@ int cipline_tech_object::evaluate()
 
 	EvalRecipes();
 
-	if (ncmd!=0) 
+	if (ncmd!=0)
 		{
 		EvalCommands();
 		ncmd=0;
-		} 
-	else 
+		}
+	else
 		{
-		if (state>0) 
+		if (state>0)
 			{
 			EvalPIDS();
 			res = EvalCipInProgress();
@@ -384,7 +391,7 @@ void cipline_tech_object::resetProgramName()
 	sprintf(currentProgramName, "%c%c %c%c%c%c%c%c%c",205,229,226,251,225,240,224,237,0);
 	}
 
-void cipline_tech_object::resetRecipeName() 
+void cipline_tech_object::resetRecipeName()
 	{
 	sprintf(loadedRecName, "%c%c %c%c%c%c%c%c%c",205,229,226,251,225,240,224,237,0);
 	}
@@ -397,7 +404,7 @@ void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*
 	ModbusServ::UpdateLinePrograms(nmr);
 #endif
 	strcpy(programList,"");
-	if ((SPROG_ACID_PREPARATION & programmask) == SPROG_ACID_PREPARATION) 
+	if ((SPROG_ACID_PREPARATION & programmask) == SPROG_ACID_PREPARATION)
 		{
 		sprintf(tmp_str, "%d##Наведение кислоты||", SPROG_ACID_PREPARATION);
 #ifdef MSAPANEL
@@ -407,7 +414,7 @@ void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*
 #endif
 		strcat(programList,tmp_str);
 		}
-	if ((SPROG_CAUSTIC_PREPARATION & programmask) == SPROG_CAUSTIC_PREPARATION) 
+	if ((SPROG_CAUSTIC_PREPARATION & programmask) == SPROG_CAUSTIC_PREPARATION)
 		{
 		sprintf(tmp_str, "%d##Наведение щелочи||", SPROG_CAUSTIC_PREPARATION);
 #ifdef MSAPANEL
@@ -420,7 +427,7 @@ void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*
 #ifdef SELFCLEAN
 	if (scline == nmr)
 		{
-		if ((SPROG_SELF_CLEAN & programmask) == SPROG_SELF_CLEAN) 
+		if ((SPROG_SELF_CLEAN & programmask) == SPROG_SELF_CLEAN)
 			{
 			sprintf(tmp_str, "%d##Очистка танков||", SPROG_SELF_CLEAN);
 #ifdef MSAPANEL
@@ -446,7 +453,7 @@ void cipline_tech_object::formProgramList( unsigned long programmask )
 		programmask = default_programlist;
 		}
 	strcpy(programList,"");
-	if ((programmask >> 0) & 1) 
+	if ((programmask >> 0) & 1)
 		{
 		sprintf(tmp_str, "%d##Дезинф||", SPROG_HOTWATER);
 		strcat(programList,tmp_str);
@@ -456,7 +463,7 @@ void cipline_tech_object::formProgramList( unsigned long programmask )
 		prgListLen++;
 #endif
 		}
-	if ((programmask >> 1) & 1) 
+	if ((programmask >> 1) & 1)
 		{
 		sprintf(tmp_str, "%d##Ополаск||", SPROG_RINSING);
 		strcat(programList,tmp_str);
@@ -466,7 +473,7 @@ void cipline_tech_object::formProgramList( unsigned long programmask )
 		prgListLen++;
 #endif
 		}
-	if ((programmask >> 2) & 1) 
+	if ((programmask >> 2) & 1)
 		{
 		sprintf(tmp_str, "%d##Опол+Дез||", SPROG_RINSING_HOTWATER);
 		strcat(programList,tmp_str);
@@ -578,44 +585,44 @@ void cipline_tech_object::loadProgramFromList( int selectedPrg )
 			sprintf(currentProgramName, "Ополаскивание");
 			rt_par_float[P_PROGRAM] =  SPROG_RINSING;
 			break;
-		case SPROG_RINSING_HOTWATER: 
+		case SPROG_RINSING_HOTWATER:
 			sprintf(currentProgramName, "Опол+Дезинф");
 			rt_par_float[P_PROGRAM] =  SPROG_RINSING_HOTWATER;
 			break;
-		case SPROG_ACID: 
+		case SPROG_ACID:
 			sprintf(currentProgramName, "Кислота");
 			rt_par_float[P_PROGRAM] =  SPROG_ACID;
 			break;
-		case SPROG_ACID_HOTWATER: 
+		case SPROG_ACID_HOTWATER:
 			sprintf(currentProgramName, "Кислота+Дез");
 			rt_par_float[P_PROGRAM] =  SPROG_ACID_HOTWATER;
 			break;
-		case SPROG_CAUSTIC: 
+		case SPROG_CAUSTIC:
 			sprintf(currentProgramName, "Щелочь");
 			rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC;
 			break;
-		case SPROG_CAUSTIC_HOTWATER: 
+		case SPROG_CAUSTIC_HOTWATER:
 			sprintf(currentProgramName, "Щел+Дезинф");
 			rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_HOTWATER;
 			break;
-		case SPROG_CAUSTIC_ACID: 
+		case SPROG_CAUSTIC_ACID:
 			sprintf(currentProgramName, "Щел+Кислота");
 			rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_ACID;
 			break;
-		case SPROG_CAUSTIC_ACID_HOTWATER: 
+		case SPROG_CAUSTIC_ACID_HOTWATER:
 			sprintf(currentProgramName, "Щел+Кисл+Дез");
 			rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_ACID_HOTWATER;
 			break;
-		case SPROG_ACID_PREPARATION: 
+		case SPROG_ACID_PREPARATION:
 			sprintf(currentProgramName, "Нав. кислоты");
 			rt_par_float[P_PROGRAM] =  SPROG_ACID_PREPARATION;
 			break;
-		case SPROG_CAUSTIC_PREPARATION: 
+		case SPROG_CAUSTIC_PREPARATION:
 			sprintf(currentProgramName, "Нав. щелочи");
 			rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_PREPARATION;
 			break;
 #ifdef SELFCLEAN
-		case SPROG_SELF_CLEAN: 
+		case SPROG_SELF_CLEAN:
 			sprintf(currentProgramName, "Очистка танков");
 			rt_par_float[P_PROGRAM] =  SPROG_SELF_CLEAN;
 			break;
@@ -645,7 +652,7 @@ int cipline_tech_object::isTank()
 	if ((((int)rt_par_float[P_OBJ_TYPE]) & 0xFF) == 1 || (((int)rt_par_float[P_OBJ_TYPE]) & 0xFF) == 3)
 		{
 		return 1;
-		} 
+		}
 	else
 		{
 		return 0;
@@ -657,7 +664,7 @@ int cipline_tech_object::isLine()
 	if ((((int)rt_par_float[P_OBJ_TYPE]) & 0xFF) == 2 || (((int)rt_par_float[P_OBJ_TYPE]) & 0xFF) == 4)
 		{
 		return 1;
-		} 
+		}
 	else
 		{
 		return 0;
@@ -681,20 +688,20 @@ int cipline_tech_object::getValvesConflict()
 							{
 							if (lineRecipes->getRecipeValue(loadedRecipe, i) == Mdls[j]->lineRecipes->getRecipeValue(Mdls[j]->loadedRecipe, k))
 								{
-#ifdef DEBUG 
+#ifdef DEBUG
 								Print("Opened valve %d on line %d conflicts with valve on line %d", (int)lineRecipes->getRecipeValue(loadedRecipe, i), nmr, Mdls[j]->nmr);
 #endif
 								return 1;
 								}
 							}
-						} 
+						}
 					else
 						{
 						for (k = TRecipeManager::RV_FIRSTVALVEON; k <= TRecipeManager::RV_LASTVALVEON; k++)
 							{
 							if (lineRecipes->getRecipeValue(loadedRecipe, i) == Mdls[j]->lineRecipes->getRecipeValue(Mdls[j]->loadedRecipe, k))
 								{
-#ifdef DEBUG 
+#ifdef DEBUG
 								Print("Closed valve %d on line %d conflicts with opened valve on line %d",(int)lineRecipes->getRecipeValue(loadedRecipe, i), nmr, Mdls[j]->nmr);
 #endif
 								return 1;
@@ -710,7 +717,7 @@ int cipline_tech_object::getValvesConflict()
 
 void cipline_tech_object::set_station_par( int parno, float newval )
 	{
-	parpar->save(parno, newval); 
+	parpar->save(parno, newval);
 	}
 
 float cipline_tech_object::get_station_par( int parno )
@@ -761,7 +768,7 @@ int cipline_tech_object::EvalBlock()
 		if (curstep>0)
 			{
 			state = -1;
-			} 
+			}
 		else
 			{
 			state = 0;
@@ -772,7 +779,7 @@ int cipline_tech_object::EvalBlock()
 		{
 		return 0;
 		}
-	if (state>0) 
+	if (state>0)
 		{
 		Stop(curstep);
 		}
@@ -786,7 +793,7 @@ int cipline_tech_object::EvalBlock()
 
 void cipline_tech_object::Stop( int step )
 	{
-	switch (step) 
+	switch (step)
 		{
 		case 105:
 		case 109:
@@ -867,22 +874,24 @@ int cipline_tech_object::EvalRecipes()
 	//переход к рецепту
 	if (rt_par_float[P_CUR_REC] != lineRecipes->getCurrentRecipe() + 1)
 		{
-		lineRecipes->ToRecipe(rt_par_float[P_CUR_REC] - 1);
+		lineRecipes->ToRecipe( ( int ) rt_par_float[P_CUR_REC] - 1);
 		rt_par_float[P_CUR_REC] = lineRecipes->getCurrentRecipe() + 1;
 		}
 	//выбор рецепта
 	if (rt_par_float[P_SELECT_REC] > 0)
 		{
-		lineRecipes->LoadRecipeToParams(rt_par_float[P_SELECT_REC] - 1, 2, 16, 39, &rt_par_float);
-		lineRecipes->getRecipeName(rt_par_float[P_SELECT_REC] - 1, loadedRecName);
-		loadedRecipe = rt_par_float[P_SELECT_REC] - 1;
+		lineRecipes->LoadRecipeToParams( ( int ) rt_par_float[P_SELECT_REC] - 1,
+            2, 16, 39, &rt_par_float);
+		lineRecipes->getRecipeName( ( int ) rt_par_float[P_SELECT_REC] - 1,
+            loadedRecName);
+		loadedRecipe = ( int ) rt_par_float[P_SELECT_REC] - 1;
 		rt_par_float[P_SELECT_REC] = 0;
 		formProgramList((unsigned int)(rt_par_float[P_PROGRAM_MASK]));
 		}
 	//выбор программы
 	if (rt_par_float[P_SELECT_PRG] > 0)
 		{
-		loadProgramFromList(rt_par_float[P_SELECT_PRG]);
+		loadProgramFromList( ( int ) rt_par_float[P_SELECT_PRG]);
 		rt_par_float[P_SELECT_PRG] = 0;
 		}
 	return 0;
@@ -897,8 +906,9 @@ int cipline_tech_object::SetRet( int val )
 	device* n_ret = (device*)(M((u_int)(rt_par_float[P_N_RET])));
 	if (0 == n_ret->get_serial_n())
 		{
-		device* n_ret = (device*)(DO((u_int)(rt_par_float[P_N_UPR])));
+		n_ret = (device*)(DO((u_int)(rt_par_float[P_N_UPR])));
 		}
+
 	if (n_ret->get_serial_n() > 0)
 		{
 		if (val)
@@ -917,9 +927,9 @@ int cipline_tech_object::SetRet( int val )
 
 int cipline_tech_object::EvalCommands()
 	{
-	switch (ncmd) 
+	switch (ncmd)
 		{
-		case MCMD_NEXT: 
+		case MCMD_NEXT:
 			if (state !=0 && curstep != 555)
 				{
 				rt_par_float[STP_STEPS_OVER] = rt_par_float[STP_STEPS_OVER] + 1; //количество пропущенных операций
@@ -929,7 +939,7 @@ int cipline_tech_object::EvalCommands()
 				}
 			break;
 		case MCMD_PAUSE:
-			if (state>0 && curstep != 555) 
+			if (state>0 && curstep != 555)
 				{
 				Stop(curstep);
 				ncmd=0;
@@ -945,7 +955,7 @@ int cipline_tech_object::EvalCommands()
 				curstep = 555;
 				InitStep(curstep, 0);
 				state = 1;
-				} 
+				}
 			else
 				{
 				resetProgramName();
@@ -955,8 +965,8 @@ int cipline_tech_object::EvalCommands()
 				rt_par_float[P_PROGRAM] = 0;
 				}
 			break;
-		case MCMD_EVALUATE: 
-			if (state<0) 
+		case MCMD_EVALUATE:
+			if (state<0)
 				{
 				if (!valvesAreInConflict)
 					{
@@ -964,14 +974,14 @@ int cipline_tech_object::EvalCommands()
 					InitStep(curstep, 1);
 					}
 				}
-			if (state == 0 && (loadedRecipe >= 0 || rt_par_float[P_PROGRAM] >= SPROG_ACID_PREPARATION) && rt_par_float[P_PROGRAM] > 0  ) 
+			if (state == 0 && (loadedRecipe >= 0 || rt_par_float[P_PROGRAM] >= SPROG_ACID_PREPARATION) && rt_par_float[P_PROGRAM] > 0  )
 				{
 				state=1;
 				valvesAreInConflict = getValvesConflict();
 				if (valvesAreInConflict)
 					{
 					state = ERR_VALVES_ARE_IN_CONFLICT;
-					} 
+					}
 				else
 					{
 					closeLineValves();
@@ -1027,14 +1037,14 @@ int cipline_tech_object::EvalPIDS()
 	PIDF->eval();
 
 	//Клапан пара
-	if (ao->get_value()>1 && PIDP->pidr->get_state() == ON && NP->get_value() > rt_par_float[P_R_NO_FLOW] && NP->get_state() == ON) 
+	if (ao->get_value()>1 && PIDP->pidr->get_state() == ON && NP->get_value() > rt_par_float[P_R_NO_FLOW] && NP->get_state() == ON)
 		{
 		if (get_delta_millisec(steam_valve_delay) > STEAM_VALVE_MIN_DELAY)
 			{
 			V13->on();
 			}
-		} 
-	else 
+		}
+	else
 		{
 		V13->off();
 		steam_valve_delay = get_millisec();
@@ -1048,20 +1058,20 @@ int cipline_tech_object::EvalCipInProgress()
 
 	res=DoStep(curstep);
 
-	if (res>0 && curstep != 555) 
+	if (res>0 && curstep != 555)
 		{ //All Ok step is over
 		curstep=GoToStep(curstep, res);
 		InitStep(curstep, 0);
-		} 
-	else 
+		}
+	else
 		{
-		if (res<0) 
+		if (res<0)
 			{//was error, time it stopped
 			Stop(curstep);
 			state=res;
 			return res;
-			} 
-		else 
+			}
+		else
 			{
 			if (isLine()) SetRet(ON);
 			}
@@ -1085,7 +1095,7 @@ void cipline_tech_object::ResetLinesDevicesBeforeReset( void )
 	if (valvesAreInConflict)
 		{
 		valvesAreInConflict = 0;
-		} 
+		}
 	else
 		{
 		lineRecipes->OffRecipeDevices(loadedRecipe);
@@ -1100,7 +1110,7 @@ void cipline_tech_object::ResetLinesDevicesBeforeReset( void )
 int cipline_tech_object::SetCommand( int command )
 	{
 	int l;
-	if (ncmd==0) 
+	if (ncmd==0)
 		{
 		ncmd=command;
 		return 0;
@@ -1112,16 +1122,16 @@ int cipline_tech_object::SetCommand( int command )
 
 int cipline_tech_object::LoadProgram( void )
 	{
-	curprg=getNexpPrg(curprg, rt_par_float[P_PROGRAM]);
-	switch (curprg) 
+	curprg=getNexpPrg(curprg, ( int ) rt_par_float[P_PROGRAM]);
+	switch (curprg)
 		{
 		case PRG_PRO:
 			return 5;
 		case PRG_CIRC:
 			return 10;
-		case PRG_S: 
+		case PRG_S:
 			return 22;
-		case PRG_K: 
+		case PRG_K:
 			return 42;
 		case PRG_S1:
 			return 22;
@@ -1133,22 +1143,22 @@ int cipline_tech_object::LoadProgram( void )
 			if (rt_par_float[P_PROGRAM] == SPROG_RINSING_CLEAN)
 				{
 				return 83;
-				} 
+				}
 			else
 				{
 				return 81;
 				}
-		case PRG_NAVS: 
+		case PRG_NAVS:
 			return 105;
-		case PRG_NAVK: 
+		case PRG_NAVK:
 			return 115;
 #ifdef SELFCLEAN
 		case PRG_SELFCLEAN:
 			return 151;
 #endif //SELFCLEAN
-		case -1: 
+		case -1:
 			return 555;
-		default: 
+		default:
 			return 555;
 		};
 	}
@@ -1156,7 +1166,7 @@ int cipline_tech_object::LoadProgram( void )
 void cipline_tech_object::ResetWP( void )
 	{
 	int i;
-	for (i = 0; i < P_RESERV_START; i++) 
+	for (i = 0; i < P_RESERV_START; i++)
 		{
 		if (i != P_CONC_RATE)
 			{
@@ -1180,8 +1190,8 @@ int cipline_tech_object::GetRetState()
 		}
 	int n, u;
 	device* dev;
-	n = rt_par_float[P_N_RET];
-	u = rt_par_float[P_N_UPR];
+	n = ( int ) rt_par_float[P_N_RET];
+	u = ( int ) rt_par_float[P_N_UPR];
 	if (n > 0)
 		{
 		dev = (device*)(M(n));
@@ -1242,7 +1252,7 @@ int cipline_tech_object::CheckErr( void )
 #ifndef DEBUG
 	//обратная связь возвратного насоса
 	i = rt_par_float[P_N_RET];
-	if (i > 0) 
+	if (i > 0)
 		{
 		dev = (device*)(M(i));
 		if (dev->get_serial_n() > 0)
@@ -1257,7 +1267,7 @@ int cipline_tech_object::CheckErr( void )
 #endif
 	//Проверка обратной связи объекта
 	os = (int)rt_par_float[P_OS];
-	if (os > 0) 
+	if (os > 0)
 		{
 		dev = (device*)(DI(os));
 		if (dev->get_serial_n() > 0)
@@ -1319,25 +1329,25 @@ int cipline_tech_object::CheckErr( void )
 			}
 		}
 
-	// Нет расхода на подаче 
-	if (T[TMR_NO_FLOW]->get_countdown_time() != (par_float[P_TM_R_NO_FLOW] * 1000L)) 
+	// Нет расхода на подаче
+	if (T[TMR_NO_FLOW]->get_countdown_time() != (par_float[P_TM_R_NO_FLOW] * 1000L))
 		{
 		T[TMR_NO_FLOW]->set_countdown_time(par_float[P_TM_R_NO_FLOW] * 1000L);
 		}
-	if (NP->get_state() == ON) 
+	if (NP->get_state() == ON)
 		{
 		delta = par_float[P_R_NO_FLOW];
-		if (NP->get_value() <= delta) 
+		if (NP->get_value() <= delta)
 			{
 			T[TMR_NO_FLOW]->start();
-			if (T[TMR_NO_FLOW]->is_time_up()) 
+			if (T[TMR_NO_FLOW]->is_time_up())
 				{
 #ifndef DEBUG
 				return ERR_NO_FLOW;
 #endif // !DEBUG
 				}
-			} 
-		else 
+			}
+		else
 			{
 			T[TMR_NO_FLOW]->reset();
 			}
@@ -1359,27 +1369,27 @@ void cipline_tech_object::SortRR( int where )
 	int d;
 	d=0;
 	V07->off();
-	switch (where) 
+	switch (where)
 		{
 		case TANK_S:
 			V08->off();
 			c=GetConc(SHCH);
-			if (c>=parpar[0][P_CMIN_S]) 
+			if (c>=parpar[0][P_CMIN_S])
 				{
 				d=2;
-				} 
-			else 
+				}
+			else
 				{
-				if (c>=parpar[0][P_CKANAL_S]) 
+				if (c>=parpar[0][P_CKANAL_S])
 					{
 					d=1;
-					} 
-				else 
+					}
+				else
 					{
 					d=0;
 					}
 				}
-			switch (d) 
+			switch (d)
 				{
 				case 0: //kanal
 					V09->off();
@@ -1401,25 +1411,25 @@ void cipline_tech_object::SortRR( int where )
 					break;
 				}
 			break;
-		case TANK_K: 
+		case TANK_K:
 			V09->off();
 			c=GetConc(KISL);
-			if (c>=parpar[0][P_CMIN_K]) 
+			if (c>=parpar[0][P_CMIN_K])
 				{
 				d=2;
-				} 
-			else 
+				}
+			else
 				{
-				if (c>=parpar[0][P_CKANAL_K]) 
+				if (c>=parpar[0][P_CKANAL_K])
 					{
 					d=1;
-					} 
-				else 
+					}
+				else
 					{
 					d=0;
 					}
 				}
-			switch (d) 
+			switch (d)
 				{
 				case 0: //kanal
 					V08->off();
@@ -1448,9 +1458,9 @@ float cipline_tech_object::GetConc( int what )
 	{
 	float x25, a, ms25, c25, c, divider;
 	c=0;
-	switch (what) 
+	switch (what)
 		{
-		case SHCH: 
+		case SHCH:
 			a=parpar[0][P_ALFS]/100;
 			ms25=parpar[0][P_MS25S];
 			c25=parpar[0][P_CONC25S];
@@ -1467,7 +1477,7 @@ float cipline_tech_object::GetConc( int what )
 				}
 			c = c25 * (ms25-x25) / divider + c25;
 			break;
-		case KISL: 
+		case KISL:
 			a=parpar[0][P_ALFK]/100;
 			ms25=parpar[0][P_MS25K];
 			c25=parpar[0][P_CONC25K];
@@ -1485,11 +1495,11 @@ float cipline_tech_object::GetConc( int what )
 			c = c25 * (ms25-x25) / divider + c25;
 			break;
 		}
-	if (c<0) 
+	if (c<0)
 		{
 		return 0;
-		} 
-	else 
+		}
+	else
 		{
 		return c;
 		}
@@ -1505,7 +1515,7 @@ int cipline_tech_object::InitFilRR( int where )
 	V02->off();
 	V03->off();
 	V04->off();
-	switch (where) 
+	switch (where)
 		{
 		case TANK_K:
 			V07->off();
@@ -1583,7 +1593,7 @@ int cipline_tech_object::InitCircRR( int where )
 	V10->off();
 	V11->off();
 	V12->off();
-	switch (where) 
+	switch (where)
 		{
 		case TANK_K:
 			V02->on();
@@ -1646,7 +1656,7 @@ int cipline_tech_object::InitAddRR( int where )
 	V10->off();
 	V11->off();
 	V12->off();
-	switch (where) 
+	switch (where)
 		{
 		case TANK_K:
 			V02->on();
@@ -1720,7 +1730,7 @@ int cipline_tech_object::InitOpolRR( int where )
 	V02->off();
 	V03->off();
 	V04->off();
-	switch (where) 
+	switch (where)
 		{
 		case TANK_K:
 			V07->off();
@@ -1777,16 +1787,16 @@ int cipline_tech_object::FilRR( int where )
 
 	rt_par_float[STP_WC] = tmp - rt_par_float[STP_LV];
 	rt_par_float[STP_LV] = tmp;
-	switch (where) 
+	switch (where)
 		{
-		case TANK_K: 
+		case TANK_K:
 			if (LKH->is_active())
 				{
 				return 1;
 				}
 			break;
 		case TANK_S:
-			if (LSH->is_active()) 
+			if (LSH->is_active())
 				{
 				return 1;
 				}
@@ -1800,28 +1810,28 @@ int cipline_tech_object::FilRR( int where )
 int cipline_tech_object::CircRR( int where )
 	{
 	float c;
-	switch (where) 
+	switch (where)
 		{
 		case TANK_S:
-			c = rt_par_float[P_CONC_RATE] + parpar[0][P_PDNS] * 
+			c = rt_par_float[P_CONC_RATE] + parpar[0][P_PDNS] *
 				( (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000) - rt_par_float[P_OP_TIME_LEFT ])/3600;
-			rt_par_float[P_CONC_RATE] = c; 
+			rt_par_float[P_CONC_RATE] = c;
 
 			c=GetConc(SHCH);
 			break;
 		case TANK_K:
-			c = rt_par_float[P_CONC_RATE] + parpar[0][P_PDNK] * 
+			c = rt_par_float[P_CONC_RATE] + parpar[0][P_PDNK] *
 				( (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000) - rt_par_float[P_OP_TIME_LEFT])/3600;
-			rt_par_float[P_CONC_RATE] = c; 
+			rt_par_float[P_CONC_RATE] = c;
 
 			c=GetConc(KISL);
 			break;
 		}
 
 	rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000L);
-	rt_par_float[P_SUM_OP] = cnt->get_quantity();   
+	rt_par_float[P_SUM_OP] = cnt->get_quantity();
 	rt_par_float[P_CONC] = c;
-	if (T[TMR_OP_TIME]->is_time_up()) 
+	if (T[TMR_OP_TIME]->is_time_up())
 		{
 		return 1;
 		}
@@ -1833,7 +1843,7 @@ int cipline_tech_object::CheckConc( int where )
 	float c, z;
 	rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
 	rt_par_float[P_SUM_OP] = cnt->get_quantity();
-	switch (where) 
+	switch (where)
 		{
 		case TANK_K:
 			c=GetConc(KISL);
@@ -1846,20 +1856,20 @@ int cipline_tech_object::CheckConc( int where )
 		}
 	SAV[SAV_CONC]->Add(c, cnt->get_quantity());
 	rt_par_float[P_CONC] = SAV[SAV_CONC]->Q();
-	if (T[TMR_OP_TIME]->is_time_up()) 
+	if (T[TMR_OP_TIME]->is_time_up())
 		{
-		switch (where) 
+		switch (where)
 			{
 			case TANK_K:
-				if ( 0 == rt_par_float[STP_QAVK] )  
-					{            
-					rt_par_float[STP_QAVK] = c;     
+				if ( 0 == rt_par_float[STP_QAVK] )
+					{
+					rt_par_float[STP_QAVK] = c;
 					}
 				break;
 			case TANK_S:
-				if ( 0 == rt_par_float[STP_QAVS] ) 
+				if ( 0 == rt_par_float[STP_QAVS] )
 					{
-					rt_par_float[STP_QAVS] = c; 
+					rt_par_float[STP_QAVS] = c;
 					}
 				break;
 			}
@@ -1867,7 +1877,7 @@ int cipline_tech_object::CheckConc( int where )
 		if (c>=z)
 			{
 			float divider;
-			switch (where) 
+			switch (where)
 				{
 				case TANK_K:
 					divider = ( 100 - c ) * parpar[0][P_RO_K] * parpar[0][P_K_K] / 100;
@@ -1887,7 +1897,7 @@ int cipline_tech_object::CheckConc( int where )
 					break;
 				}
 			return 1;
-			} 
+			}
 		else return 2;
 		}
 	return 0;
@@ -1896,28 +1906,28 @@ int cipline_tech_object::CheckConc( int where )
 int cipline_tech_object::AddRR( int where )
 	{
 	float c;
-	switch (where) 
+	switch (where)
 		{
 		case TANK_S:
-			c = rt_par_float[P_CONC_RATE] + parpar[0][P_PDNS] * 
+			c = rt_par_float[P_CONC_RATE] + parpar[0][P_PDNS] *
 				( (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000) - rt_par_float[P_OP_TIME_LEFT])/3600;
-			rt_par_float[P_CONC_RATE] = c; 
+			rt_par_float[P_CONC_RATE] = c;
 
 			c=GetConc(SHCH);
 			break;
 		case TANK_K:
-			c = rt_par_float[P_CONC_RATE] + parpar[0][P_PDNK] * 
+			c = rt_par_float[P_CONC_RATE] + parpar[0][P_PDNK] *
 				( (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000) - rt_par_float[P_OP_TIME_LEFT])/3600;
-			rt_par_float[P_CONC_RATE] = c; 
+			rt_par_float[P_CONC_RATE] = c;
 
 			c=GetConc(KISL);
 			break;
 		}
 
 	rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
-	rt_par_float[P_SUM_OP] = cnt->get_quantity();   
+	rt_par_float[P_SUM_OP] = cnt->get_quantity();
 	rt_par_float[P_CONC] = c;
-	if (T[TMR_OP_TIME]->is_time_up()) 
+	if (T[TMR_OP_TIME]->is_time_up())
 		{
 		return 1;
 		}
@@ -1929,7 +1939,7 @@ int cipline_tech_object::OpolRR( int where )
 	float c;
 	rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
 	rt_par_float[P_SUM_OP] = cnt->get_quantity();
-	switch (where) 
+	switch (where)
 		{
 		case TANK_K:
 			c=GetConc(KISL);
@@ -1940,11 +1950,11 @@ int cipline_tech_object::OpolRR( int where )
 		}
 	rt_par_float[P_CONC] = c;
 	SortRR(where);
-	if (c>=NOCONC) 
+	if (c>=NOCONC)
 		{
 		T[TMR_CHK_CONC]->reset();
-		} 
-	else 
+		}
+	else
 		{
 		T[TMR_CHK_CONC]->start();
 		if (T[TMR_CHK_CONC]->is_time_up()) return 1;
@@ -1970,7 +1980,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 		tank_is_empty = 0;
 		}
 
-	switch (from) 
+	switch (from)
 		{
 		case WATER:
 		case SANITIZER:
@@ -2002,7 +2012,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 			V04->off();
 			break;
 		}
-	switch (where) 
+	switch (where)
 		{
 		case KANAL:
 			V07->off();
@@ -2013,7 +2023,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 			V12->off();
 			break;
 		case TANK_W:
-			if (LWH->is_active()) 
+			if (LWH->is_active())
 				{
 				V08->off();
 				V09->off();
@@ -2021,8 +2031,8 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 				V11->on();
 				V12->off();
 				V07->off();
-				} 
-			else 
+				}
+			else
 				{
 				V08->off();
 				V09->off();
@@ -2055,7 +2065,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 	if (pump_control) {NPC->on();} else {NP->on();}
 	SetRet(ON);
 
-	switch (step) 
+	switch (step)
 		{
 		case 5:
 		case 8:
@@ -2089,14 +2099,14 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 			if (rt_par_float[P_PROGRAM] == SPROG_RINSING_CLEAN)
 				{
 				v=rt_par_float[P_T_CLEAN_RINSING];
-				} 
+				}
 			else
 				{
 				v=rt_par_float[P_T_WOP];
 				}
 			break;
 		}
-	switch (step) 
+	switch (step)
 		{
 		case 5:
 		case 22:
@@ -2105,7 +2115,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 		case 53:
 		case 62:
 		case 72:
-		case 83: 
+		case 83:
 			p = rt_par_float[PV1];
 			break;
 		case 8:
@@ -2114,14 +2124,14 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 		case 37:
 			p = rt_par_float[P_DOP_V_AFTER_S];
 			break;
-		case 57: 
+		case 57:
 			p = rt_par_float[P_DOP_V_AFTER_K];
 			break;
 		case 86:
 			if (rt_par_float[P_PROGRAM] == SPROG_RINSING_CLEAN)
 				{
 				p = rt_par_float[P_V_CLEAN_RINSING];
-				} 
+				}
 			else
 				{
 				p = rt_par_float[P_DOP_V_OK_OP];
@@ -2133,7 +2143,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 		{
 		rt_par_float[P_ZAD_PODOGR] = 0;
 		PIDP->off();
-		} 
+		}
 	else
 		{
 		PIDP->on();
@@ -2170,7 +2180,7 @@ int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
 		}
 	V05->on();
 	V06->off();
-	switch (what) 
+	switch (what)
 		{
 		case WATER:
 		case SANITIZER:
@@ -2204,7 +2214,7 @@ int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
 			z=parpar[0][P_CZAD_S];
 			break;
 		}
-	switch (where) 
+	switch (where)
 		{
 		case KANAL:
 			V07->off();
@@ -2246,7 +2256,7 @@ int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
 
 	SetRet(OFF);
 
-	switch (step) 
+	switch (step)
 		{
 		case 7:
 			v=rt_par_float[P_T_WP];
@@ -2273,7 +2283,7 @@ int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
 			if (rt_par_float[P_PROGRAM] == SPROG_RINSING_CLEAN)
 				{
 				v=rt_par_float[P_T_CLEAN_RINSING];
-				} 
+				}
 			else
 				{
 				v=rt_par_float[P_T_WOP];
@@ -2286,7 +2296,7 @@ int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
 		{
 		rt_par_float[P_ZAD_PODOGR] = 0;
 		PIDP->off();
-		} 
+		}
 	else
 		{
 		PIDP->on();
@@ -2332,7 +2342,7 @@ int cipline_tech_object::InitOporCIP( int where, int step, int f )
 	V03->off();
 	V02->off();
 	V04->off();
-	switch (where) 
+	switch (where)
 		{
 		case KANAL:
 			V07->off();
@@ -2397,7 +2407,7 @@ int cipline_tech_object::InitFilCirc( int with_what, int step, int f )
 	V01->on();
 	V11->off();
 	V12->off();
-	switch (with_what) 
+	switch (with_what)
 		{
 		case WITH_WATER:
 		case SANITIZER:
@@ -2421,7 +2431,7 @@ int cipline_tech_object::InitFilCirc( int with_what, int step, int f )
 			if (isTank() && (26 == step || 46 == step || 65 == step))
 				{
 				PIDP->off();
-				} 
+				}
 			else
 				{
 				PIDP->on();
@@ -2429,7 +2439,7 @@ int cipline_tech_object::InitFilCirc( int with_what, int step, int f )
 			PIDF->on();
 			break;
 		}
-	switch (step) 
+	switch (step)
 		{
 		case 26:
 			V03->on();
@@ -2461,7 +2471,7 @@ int cipline_tech_object::InitOporCirc( int where, int step, int f )
 	SetRet(ON);
 	V05->on();
 	V06->off();
-	switch (where) 
+	switch (where)
 		{
 		case KANAL:
 			V07->off();
@@ -2500,11 +2510,11 @@ int cipline_tech_object::InitOporCirc( int where, int step, int f )
 	if (isTank() && (29 == step || 49 == step))
 		{
 		PIDP->off();
-		} 
+		}
 	else
 		{
 		PIDP->on();
-		}	
+		}
 	//   cnt->start();
 	rt_par_float[P_ZAD_FLOW] = rt_par_float[P_FLOW];
 	rt_par_float[P_SUM_OP] = 0;
@@ -2542,7 +2552,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 	V09->off();
 	V11->off();
 	V12->off();
-	switch (what) 
+	switch (what)
 		{
 		case WATER:
 			if (100 == rt_par_float[P_PODP_CIRC])
@@ -2634,7 +2644,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 
 		if (tank_is_empty)
 			{
-			if ((cnt->get_quantity() >= rt_par_float[P_VRAB]-rt_par_float[P_RET_STOP]) || (cnt->get_quantity() <= rt_par_float[P_RET_STOP])) 
+			if ((cnt->get_quantity() >= rt_par_float[P_VRAB]-rt_par_float[P_RET_STOP]) || (cnt->get_quantity() <= rt_par_float[P_RET_STOP]))
 				{
 				SetRet(OFF);
 				}
@@ -2645,7 +2655,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 			}
 
 
-		switch (from) 
+		switch (from)
 			{
 			case WATER:
 			case SANITIZER:
@@ -2653,10 +2663,10 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 				if (LH->is_active()) V00->off();
 				tmp=cnt->get_quantity();
 				rt_par_float[STP_WC] = rt_par_float[STP_WC] + tmp - rt_par_float[STP_LV];
-				rt_par_float[STP_LV] = tmp; 
+				rt_par_float[STP_LV] = tmp;
 				break;
 			case TANK_W:
-				if (!LWL->is_active()) 
+				if (!LWL->is_active())
 					{
 					tmp=cnt->get_quantity();
 					rt_par_float[STP_WC] = rt_par_float[STP_WC] + tmp - rt_par_float[STP_LV];
@@ -2667,12 +2677,12 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 					if (!LM->is_active()) V00->on();
 					if (LH->is_active()) V00->off();
 
-					} 
-				else 
+					}
+				else
 					{
 					tmp=cnt->get_quantity();
 					rt_par_float[STP_WS] = rt_par_float[STP_WS] + tmp - rt_par_float[STP_LV];
-					rt_par_float[STP_LV] = tmp;     
+					rt_par_float[STP_LV] = tmp;
 					V04->on();
 					V00->off();
 					V01->off();
@@ -2680,34 +2690,34 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 				break;
 			case TANK_K:
 				c=GetConc(KISL);
-				if (!LKL->is_active()) 
+				if (!LKL->is_active())
 					{
 					return NO_ACID;
 					}
 				break;
-			case TANK_S: 		
+			case TANK_S:
 				c=GetConc(SHCH);
-				if (!LSL->is_active()) 
+				if (!LSL->is_active())
 					{
 					return NO_ALKALINE;
 					}
 				break;
 			}
 
-		if (cnt->get_quantity() >= rt_par_float[P_VRAB]) 
+		if (cnt->get_quantity() >= rt_par_float[P_VRAB])
 			{
 			return 1;
 			}
 
-		if (curstep==86 && TR->get_value()<5 && rt_par_float[P_PROGRAM] != SPROG_RINSING_CLEAN) 
+		if (curstep==86 && TR->get_value()<5 && rt_par_float[P_PROGRAM] != SPROG_RINSING_CLEAN)
 			{
 			return 1;
 			}
 
-		switch (where) 
+		switch (where)
 			{
 			case TANK_W:
-				if ((LWH->is_active()) || (from == TANK_W)) 
+				if ((LWH->is_active()) || (from == TANK_W))
 					{
 					V08->off();
 					V09->off();
@@ -2715,8 +2725,8 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 					V11->on();
 					V12->off();
 					V07->off();
-					} 
-				else 
+					}
+				else
 					{
 					V08->off();
 					V09->off();
@@ -2728,7 +2738,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 				break;
 			case TANK_K:
 				c=GetConc(KISL);
-				if (LKH->is_active()) 
+				if (LKH->is_active())
 					{
 					V08->off();
 					V09->off();
@@ -2736,8 +2746,8 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 					V11->off();
 					if (no_neutro) {V11->on();} else {V12->on();}
 					V07->off();
-					} 
-				else 
+					}
+				else
 					{
 					V08->on();
 					V09->off();
@@ -2749,7 +2759,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 				break;
 			case TANK_S:
 				c=GetConc(SHCH);
-				if (LSH->is_active()) 
+				if (LSH->is_active())
 					{
 					V08->off();
 					V09->off();
@@ -2757,8 +2767,8 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 					V11->off();
 					if (no_neutro) {V11->on();} else {V12->on();}
 					V07->off();
-					} 
-				else 
+					}
+				else
 					{
 					V08->off();
 					V09->on();
@@ -2781,28 +2791,28 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 			unsigned long tmp;
 			rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
 			rt_par_float[P_SUM_OP] = cnt->get_quantity();
-			if (cnt->get_quantity()>=rt_par_float[PV_RET_DEL]) 
+			if (cnt->get_quantity()>=rt_par_float[PV_RET_DEL])
 				{
 				SetRet(ON);
 				}
-			if (cnt->get_quantity()>=rt_par_float[P_VRAB]) 
+			if (cnt->get_quantity()>=rt_par_float[P_VRAB])
 				{
 				if (!return_ok)
 					{
 					if (FL->get_state()==FLIS) {
 						return_ok = 1;
-						} 
-					else 
+						}
+					else
 						{
 						T[TMR_RETURN]->start();
-						if (T[TMR_RETURN]->is_time_up()==1) 
+						if (T[TMR_RETURN]->is_time_up()==1)
 							{
 							return NO_RETURN;
 							}
 						}
 					}
 				dst=0;
-				switch (what) 
+				switch (what)
 					{
 					case TANK_K:
 						dst=1;
@@ -2813,7 +2823,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 						c=GetConc(SHCH);
 						break;
 					}
-				switch (where) 
+				switch (where)
 					{
 					case TANK_K:
 						dst=2;
@@ -2824,21 +2834,21 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 						c=GetConc(SHCH);
 						break;
 					}
-				switch (dst) 
+				switch (dst)
 					{
 					case 0:
 						concentration_ok = 1;
 						break;
 					case 1:  //must BE
-						if (c>=NOCONC) 
+						if (c>=NOCONC)
 							{
 							concentration_ok = 1;
 							//	   T[TMR_CHK_CONC]->R();
-							} 
-						else 
+							}
+						else
 							{
 							T[TMR_CHK_CONC]->start();
-							if (T[TMR_CHK_CONC]->is_time_up()) 
+							if (T[TMR_CHK_CONC]->is_time_up())
 								{
 								T[TMR_CHK_CONC]->reset();
 								return ERR_NO_CONC;
@@ -2848,15 +2858,15 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 						break;
 					case 2: //must not BE
 						if ( ((c<= parpar[0][P_CKANAL_S]) && (where == TANK_S)) ||
-							((c<= parpar[0][P_CKANAL_K]) && (where == TANK_K))) 
+							((c<= parpar[0][P_CKANAL_K]) && (where == TANK_K)))
 							{
 							concentration_ok = 1;
 							//	   T[TMR_CHK_CONC]->R();
-							} 
-						else 
+							}
+						else
 							{
 							T[TMR_CHK_CONC]->start();
-							if (T[TMR_CHK_CONC]->is_time_up()) 
+							if (T[TMR_CHK_CONC]->is_time_up())
 								{
 								T[TMR_CHK_CONC]->reset();
 								return ERR_IS_CONC;
@@ -2870,7 +2880,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 				}
 
 			c=0;
-			switch (what) 
+			switch (what)
 				{
 				case WATER:
 				case SANITIZER:
@@ -2881,7 +2891,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 					rt_par_float[STP_LV] = tmp ;
 					break;
 				case TANK_W:
-					if (!LWL->is_active()) 
+					if (!LWL->is_active())
 						{
 						tmp=cnt->get_quantity();
 						rt_par_float[STP_WC] = rt_par_float[STP_WC] + tmp - rt_par_float[STP_LV] ;
@@ -2891,8 +2901,8 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 						V01->on();
 						if (!LM->is_active()) V00->on();
 						if (LH->is_active()) V00->off();
-						} 
-					else 
+						}
+					else
 						{
 						tmp=cnt->get_quantity();
 						rt_par_float[STP_WS] = rt_par_float[STP_WS] + tmp - rt_par_float[STP_LV] ;
@@ -2904,7 +2914,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 					break;
 				case TANK_K:
 					c=GetConc(KISL);
-					if (!LKL->is_active()) 
+					if (!LKL->is_active())
 						{
 						return NO_ACID;
 						}
@@ -2912,7 +2922,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 					break;
 				case TANK_S:
 					c=GetConc(SHCH);
-					if (!LSL->is_active()) 
+					if (!LSL->is_active())
 						{
 						return NO_ALKALINE;
 						}
@@ -2920,10 +2930,10 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 					break;
 				}
 
-			switch (where) 
+			switch (where)
 				{
 				case TANK_W:
-					if (LWH->is_active()) 
+					if (LWH->is_active())
 						{
 						V08->off();
 						V09->off();
@@ -2931,8 +2941,8 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 						V11->on();
 						V12->off();
 						V07->off();
-						} 
-					else 
+						}
+					else
 						{
 						V08->off();
 						V09->off();
@@ -2944,7 +2954,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 					break;
 				case TANK_K:
 					c=GetConc(KISL);
-					if (LKH->is_active()) 
+					if (LKH->is_active())
 						{
 						V08->off();
 						V09->off();
@@ -2952,15 +2962,15 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 						V11->off();
 						if (no_neutro) {V11->on();} else {V12->on();}
 						V07->off();
-						} 
-					else 
+						}
+					else
 						{
 						SortRR(TANK_K);
 						}
 					break;
 				case TANK_S:
 					c=GetConc(SHCH);
-					if (LSH->is_active()) 
+					if (LSH->is_active())
 						{
 						V08->off();
 						V09->off();
@@ -2968,8 +2978,8 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 						V11->off();
 						if (no_neutro) {V11->on();} else {V12->on();}
 						V07->off();
-						} 
-					else 
+						}
+					else
 						{
 						SortRR(TANK_S);
 						}
@@ -3005,24 +3015,24 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 						}
 					}
 
-				if (FL->get_state() == FLIS) 
+				if (FL->get_state() == FLIS)
 					{
 					opcip=1;
 					T[TMR_RETURN]->reset();
-					} 
-				else 
+					}
+				else
 					{
-					if (opcip==1) 
+					if (opcip==1)
 						{
 						T[TMR_RETURN]->start();
-						if (T[TMR_RETURN]->is_time_up()) 
+						if (T[TMR_RETURN]->is_time_up())
 							{
-							return 1;                                             
+							return 1;
 							}
 						}
 					}
 
-				if (rt_par_float[P_MAX_OPER_TM]*500 < T[TMR_OP_TIME]->get_work_time()) 
+				if (rt_par_float[P_MAX_OPER_TM]*500 < T[TMR_OP_TIME]->get_work_time())
 					{
 					if ((curstep==6) || (opcip == 0)) return 1;
 					}
@@ -3033,10 +3043,10 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 					}
 
 				c=0;
-				switch (where) 
+				switch (where)
 					{
 					case TANK_W:
-						if (LWH->is_active()) 
+						if (LWH->is_active())
 							{
 							V08->off();
 							V09->off();
@@ -3044,8 +3054,8 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 							V11->on();
 							V12->off();
 							V07->off();
-							} 
-						else 
+							}
+						else
 							{
 							V08->off();
 							V09->off();
@@ -3057,7 +3067,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 						break;
 					case TANK_K:
 						c=GetConc(KISL);
-						if (LKH->is_active()) 
+						if (LKH->is_active())
 							{
 							V08->off();
 							V09->off();
@@ -3065,15 +3075,15 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 							V11->off();
 							if (no_neutro) {V11->on();} else {V12->on();}
 							V07->off();
-							} 
-						else 
+							}
+						else
 							{
 							SortRR(TANK_K);
 							}
 						break;
 					case TANK_S:
 						c=GetConc(SHCH);
-						if (LSH->is_active()) 
+						if (LSH->is_active())
 							{
 							V08->off();
 							V09->off();
@@ -3081,8 +3091,8 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 							V11->off();
 							if (no_neutro) {V11->on();} else {V12->on();}
 							V07->off();
-							} 
-						else 
+							}
+						else
 							{
 							SortRR(TANK_S);
 							}

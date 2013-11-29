@@ -39,7 +39,8 @@ struct socket_state
 class tcp_communicator_linux : public tcp_communicator
     {
         public:
-            tcp_communicator_linux( const char *name );
+            tcp_communicator_linux( const char *name_rus,
+                const char *name_eng );
             virtual ~tcp_communicator_linux();
 
             /// @brief Итерация обмена данными с сервером.
@@ -80,16 +81,34 @@ class tcp_communicator_linux : public tcp_communicator
         public:
             int sendall (int sockfd, unsigned char *buf, int len, long fsize)
                 {
+                int total_size = 0;
                 int n = 1;
                 unsigned char *p = buf;
 
                 for ( int i = len; i > 0; )
                     {
+                    static int err_cnt = 0;
                     if ( ( n = send( sockfd, p, i, 0 ) ) < 0 )
-                        break;
+                        {
+                        err_cnt++;
+                        usleep( 100000 );
+                        if ( err_cnt > 3 )
+                            {
+#ifdef DEBUG
+                            Print( "tcp_communicator_linux::send_all(): "
+                                "send %i byte of %d.\n", total_size, len );
+#endif
+                            break;
+                            }
 
+                        continue;
+                        }
+
+                    err_cnt = 0;
                     i -= n;
                     p += n;
+
+                    total_size += n;
                     }
 
                 return n;

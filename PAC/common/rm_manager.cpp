@@ -8,15 +8,15 @@ rm_manager* rm_manager::instance = new rm_manager();
 //-----------------------------------------------------------------------------
 void rm_manager::add_rm_cmmctr( char* name, char* IP_address, int remote_PAC_id )
     {
-    i_rm_cmmctr* cmmctr = nullptr;
+    i_rm_cmmctr* cmmctr = 0;
 
 #ifdef WIN_OS
     cmmctr = new win_rm_cmmctr( name, IP_address, remote_PAC_id );
 #endif // WIN_OS
 
-    if ( cmmctr ) 
+    if ( cmmctr )
         {
-        cmmctrs.push_back( cmmctr );          
+        cmmctrs.push_back( cmmctr );
         }
     }
 //-----------------------------------------------------------------------------
@@ -36,7 +36,7 @@ void rm_manager::print() const
     for ( u_int  i = 0; i < cmmctrs.size(); i++ )
         {
         Print( "  %d. ", i + 1 );
-        cmmctrs[ i ]->print();                
+        cmmctrs[ i ]->print();
         }
     }
 //-----------------------------------------------------------------------------

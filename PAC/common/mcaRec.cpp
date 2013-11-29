@@ -18,7 +18,7 @@ int TRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
 
 unsigned char* TRecipeManager::recipeCopyBuffer = NULL;
 
-TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo), 
+TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
 	currentRecipe(0),
 	lastEvalTime(get_millisec()),
 	curRecipeStartBlock(0),
@@ -58,7 +58,10 @@ TRecipeManager::~TRecipeManager()
 		}
 #endif //WIN_OS
 	delete recipeMemory;
+
+#ifdef WIN_OS
 	delete memFileName;
+#endif
 	}
 
 int TRecipeManager::NextRecipe()
@@ -107,7 +110,7 @@ void TRecipeManager::EvalRecipe()
 			{
 		case 1:
 			ResetRecipeToDefaults(currentRecipe);
-#ifdef DEBUG 
+#ifdef DEBUG
 			Print("Reset recipe %d to defaults",currentRecipe);
 #endif
 			break;
@@ -193,15 +196,15 @@ int TRecipeManager::LoadRecipeToParams( int recipeNo, int recipeStartPos, int pa
 		for (int i = 0; i < parQuantity; i++)
 			{
 			par[0][paramsStartPos + i] = getRecipeValue(recipeNo, recipeStartPos + i);
-			#ifdef DEBUG 
+			#ifdef DEBUG
  Print("\n\rsetparamm %d %f\n\r", paramsStartPos + i, par[0][paramsStartPos + i]);
  #endif
 			}
-		#ifdef DEBUG 
+		#ifdef DEBUG
  Print("\n\rLoaded recipe %d\n\r",recipeNo);
  #endif
 		return 1;
-		} 
+		}
 	else
 		{
 		return 0;
@@ -221,7 +224,7 @@ int TRecipeManager::setCurrentRecipe( int recipeNo )
 		curRecipeStartBlock += blocksPerRecipe * (recipeNo - currentRecipe);
 		currentRecipe = recipeNo;
 		return 1;
-		} 
+		}
 	else
 		{
 		return 0;
@@ -271,7 +274,7 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
 		setRecipeValue(recipeNo, RV_T_RINSING_CLEAN, 5);
 		setRecipeValue(recipeNo, RV_V_RINSING_CLEAN, 600);
 		return 1;
-		} 
+		}
 	else
 		{
 		return 0;
@@ -343,10 +346,10 @@ int TRecipeManager::OnRecipeDevices( int recipeNo )
 					if (dev->get_serial_n() > 0)
 						{
 						dev->on();
-						} 
+						}
 					else
 						{
-#ifdef DEBUG 
+#ifdef DEBUG
 						Print("\n\rOn recipe devices. Valve %d from param %d not found in device list\n\r", devNo, i);
 #endif
 						errflag = 1;
@@ -360,10 +363,10 @@ int TRecipeManager::OnRecipeDevices( int recipeNo )
 					if (dev->get_serial_n() > 0)
 						{
 						dev->on();
-						} 
+						}
 					else
 						{
-#ifdef DEBUG 
+#ifdef DEBUG
 						Print("\n\rOn recipe devices. URP %d from param %d not found in device list\n\r", devNo, i);
 #endif
 						errflag = 1;
@@ -385,10 +388,10 @@ int TRecipeManager::OnRecipeDevices( int recipeNo )
 					if (dev->get_serial_n() > 0)
 						{
 						dev->off();
-						} 
+						}
 					else
 						{
-#ifdef DEBUG 
+#ifdef DEBUG
 						Print("\n\rOff recipe devices. Valve %d from param %d not found in device list\n\r", devNo, i);
 #endif
 						errflag = 1;
@@ -402,10 +405,10 @@ int TRecipeManager::OnRecipeDevices( int recipeNo )
 					if (dev->get_serial_n() > 0)
 						{
 						dev->off();
-						} 
+						}
 					else
 						{
-#ifdef DEBUG 
+#ifdef DEBUG
 						Print("\n\rOff recipe devices. URP %d from param %d not found in device list\n\r", devNo, i);
 #endif
 						errflag = 1;
@@ -437,10 +440,10 @@ int TRecipeManager::OffRecipeDevices( int recipeNo )
 					if (dev->get_serial_n() > 0)
 						{
 						dev->off();
-						} 
+						}
 					else
 						{
-#ifdef DEBUG 
+#ifdef DEBUG
 						Print("\n\rOff recipe devices. Valve %d from param %d not found in device list\n\r", devNo, i);
 #endif
 						errflag = 1;
@@ -454,10 +457,10 @@ int TRecipeManager::OffRecipeDevices( int recipeNo )
 					if (dev->get_serial_n() > 0)
 						{
 						dev->off();
-						} 
+						}
 					else
 						{
-#ifdef DEBUG 
+#ifdef DEBUG
 						Print("\n\rOff recipe devices. URP %d from param %d not found in device list\n\r", devNo, i);
 #endif
 						errflag = 1;

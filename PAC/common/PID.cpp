@@ -284,7 +284,11 @@ int PID::set_cmd( const char *prop, u_int idx, double val )
 
 int PID::set_cmd( const char *prop, u_int idx, char *val )
 	{
+#ifdef WIN_OS
 	throw std::exception("The method or operation is not implemented.");
+#endif
+    
+    return 0;
 	}
 
 u_int_4 PID::get_state()

@@ -138,7 +138,7 @@ float par_device::get_par( u_int idx, u_int offset )
         return par[ 0 ][ offset + idx ];
     	}
 
-    return 0;    
+    return 0;
     }
 //-----------------------------------------------------------------------------
 void par_device::set_par_name( u_int idx, u_int offset, const char* name )
@@ -189,7 +189,7 @@ void device::set_descr( const char *new_description )
     {
     //Копирование с учетом нуль-символа.
     description = new char[ strlen( new_description ) + 1 ];
-    strlcpy( description, new_description, strlen( new_description ) + 1 );    
+    strlcpy( description, new_description, strlen( new_description ) + 1 );
     }
 //-----------------------------------------------------------------------------
 void device::print() const
@@ -283,7 +283,7 @@ int device::rm_save_device_state( char *buff, const char *prefix )
             sprintf( buff + strlen( buff ), "%s.%s.V=%.2f\n", get_value() );
             }
         }
-    
+
     return strlen( buff );
     }
 #endif // RM_PAC
@@ -335,7 +335,7 @@ int device::set_cmd( const char *prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 device::device( const char *dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type,
                u_int par_cnt ) :
-par_device( par_cnt ),    
+par_device( par_cnt ),
     type( type ),
     sub_type( sub_type ),
     is_manual_mode( false )
@@ -344,7 +344,7 @@ par_device( par_cnt ),
     	{
         strlcpy( this->name, dev_name, sizeof( this->name ) );
     	}
-    
+
     }
 //-----------------------------------------------------------------------------
 device::~device()
@@ -740,18 +740,18 @@ int device_manager::save_device( char *buff )
 int device_manager::rm_save_device_state( char *buff )
     {
     char cmd[ 200 ] = { 0 };
-    snprintf( cmd, sizeof( cmd ), 
-        "assert( loadstring( \"%s=%s or{}\"))()\n t=%s\n", 
+    snprintf( cmd, sizeof( cmd ),
+        "assert( loadstring( \"%s=%s or{}\"))()\n t=%s\n",
         G_CMMCTR->get_host_name_eng(), G_CMMCTR->get_host_name_eng(),
         G_CMMCTR->get_host_name_eng() );
     sprintf( buff, cmd );
-    
+
     int answer_size = strlen( buff );
 
     for ( u_int i = 0; i < project_devices.size(); i++)
         {
-        answer_size += 
-            project_devices[ i ]->rm_save_device_state( buff + answer_size, "t" );       
+        answer_size +=
+            project_devices[ i ]->rm_save_device_state( buff + answer_size, "t" );
         }
 
     return answer_size;
@@ -775,6 +775,8 @@ int device_manager::rm_save_device( char *buff )
 
     return answer_size;
     }
+
+#endif // RM_PAC
 //-----------------------------------------------------------------------------
 int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char *dev_name )
     {
@@ -804,8 +806,6 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char *dev_
 
     return -1;
     }
-
-#endif // RM_PAC
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void i_counter::restart()
@@ -2081,9 +2081,9 @@ device_manager* G_DEVICE_MANAGER()
 //-----------------------------------------------------------------------------
 i_DO_device* V( u_int dev_n )
     {
-    static char name[ 10 ] = { 0 }; 
+    static char name[ 10 ] = { 0 };
     snprintf( name, sizeof( name ), "V%d", dev_n );
-    
+
     return G_DEVICE_MANAGER()->get_V( name );
     }
 
@@ -2099,7 +2099,7 @@ i_AO_device* VC( const char *dev_name )
 //-----------------------------------------------------------------------------
 i_DO_AO_device* M( u_int dev_n )
     {
-    static char name[ 10 ] = { 0 }; 
+    static char name[ 10 ] = { 0 };
     snprintf( name, sizeof( name ), "M%d", dev_n );
 
     return G_DEVICE_MANAGER()->get_M( name );
@@ -2112,7 +2112,7 @@ i_DO_AO_device* M( const char *dev_name )
 //-----------------------------------------------------------------------------
 i_DI_device* LS( u_int dev_n )
     {
-    static char name[ 10 ] = { 0 }; 
+    static char name[ 10 ] = { 0 };
     snprintf( name, sizeof( name ), "LS%d", dev_n );
 
     return G_DEVICE_MANAGER()->get_LS( name );
@@ -2125,7 +2125,7 @@ i_DI_device* LS( const char *dev_name )
 //-----------------------------------------------------------------------------
 i_DI_device* FS( u_int dev_n )
     {
-    static char name[ 10 ] = { 0 }; 
+    static char name[ 10 ] = { 0 };
     snprintf( name, sizeof( name ), "FS%d", dev_n );
 
     return G_DEVICE_MANAGER()->get_FS( name );
@@ -2143,7 +2143,7 @@ i_AI_device* AI( const char *dev_name )
 //-----------------------------------------------------------------------------
 i_AO_device* AO( u_int dev_n )
     {
-    static char name[ 10 ] = { 0 }; 
+    static char name[ 10 ] = { 0 };
     snprintf( name, sizeof( name ), "AO%d", dev_n );
 
     return G_DEVICE_MANAGER()->get_AO( name );
@@ -2156,7 +2156,7 @@ i_AO_device* AO( const char *dev_name )
 //-----------------------------------------------------------------------------
 i_counter* FQT( u_int dev_n )
     {
-    static char name[ 10 ] = { 0 }; 
+    static char name[ 10 ] = { 0 };
     snprintf( name, sizeof( name ), "FQT%d", dev_n );
 
     return G_DEVICE_MANAGER()->get_FQT( name );
@@ -2169,7 +2169,7 @@ i_counter* FQT( const char *dev_name )
 //-----------------------------------------------------------------------------
 i_AI_device* TE( u_int dev_n )
     {
-    static char name[ 10 ] = { 0 }; 
+    static char name[ 10 ] = { 0 };
     snprintf( name, sizeof( name ), "TE%d", dev_n );
 
     return G_DEVICE_MANAGER()->get_TE( name );
@@ -2212,7 +2212,7 @@ i_DI_device* DI( const char *dev_name )
 
 i_DI_device* DI( u_int dev_n )
 	{
-	static char name[ 10 ] = { 0 }; 
+	static char name[ 10 ] = { 0 };
 	snprintf( name, sizeof( name ), "DI%d", dev_n );
 	return G_DEVICE_MANAGER()->get_DI( name );
 	}
@@ -2225,7 +2225,7 @@ i_DO_device* DO( const char *dev_name )
 
 i_DO_device* DO( u_int dev_n )
 	{
-	static char name[ 10 ] = { 0 }; 
+	static char name[ 10 ] = { 0 };
 	snprintf( name, sizeof( name ), "DO%d", dev_n );
 	return G_DEVICE_MANAGER()->get_DO( name );
 	}
@@ -2233,7 +2233,7 @@ i_DO_device* DO( u_int dev_n )
 //-----------------------------------------------------------------------------
 i_AI_device* QT( u_int dev_n )
     {
-    static char name[ 10 ] = { 0 }; 
+    static char name[ 10 ] = { 0 };
     snprintf( name, sizeof( name ), "QT%d", dev_n );
 
     return G_DEVICE_MANAGER()->get_QT( name );
@@ -2255,7 +2255,7 @@ device* DEVICE( int s_number )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-valve_AS_mix_proof::valve_AS_mix_proof( const char *dev_name ): 
+valve_AS_mix_proof::valve_AS_mix_proof( const char *dev_name ):
     device( dev_name,  DT_V, DST_V_AS_MIXPROOF, 0 )
     {
     }

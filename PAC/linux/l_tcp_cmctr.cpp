@@ -14,18 +14,20 @@ unsigned int max_buffer_use = 0;
 #endif
 
 //------------------------------------------------------------------------------
-tcp_communicator_linux::tcp_communicator_linux( const char *name ):tcp_communicator(),
-netOK( 0 )
+tcp_communicator_linux::tcp_communicator_linux( const char *name_rus,
+    const char *name_eng ):tcp_communicator(),
+    netOK( 0 )
     {
     // Задаем таймаут.
     tv.tv_sec  = 0;
     tv.tv_usec = 2500; // 0.0025 сек.
 
     sin_len = sizeof( ssin );
-    strcpy( host_name, name );
+    strcpy( host_name_rus, name_rus );
+    strcpy( host_name_eng, name_eng );
 
 #ifdef DEBUG
-    printf ( "PAC name \"%s\".\n", host_name );
+    printf ( "PAC name \"%s\" (\"%s\").\n", host_name_rus, host_name_eng );
 #endif // DEBUG
 
     //net_init();
