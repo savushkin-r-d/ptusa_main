@@ -291,8 +291,8 @@ int device::rm_save_device_state( char *buff, const char *prefix )
 int device::set_cmd( const char *prop, u_int idx, char *val )
     {
 #ifdef DEBUG
-    Print( "device::set_cmd() - prop = %s, idx = %d, val = %s\n",
-        prop, idx, val );
+    Print( "%s\t device::set_cmd() - prop = %s, idx = %d, val = %s\n",
+        name, prop, idx, val );
 #endif // DEBUG
 
     return 0;
@@ -301,8 +301,8 @@ int device::set_cmd( const char *prop, u_int idx, char *val )
 int device::set_cmd( const char *prop, u_int idx, double val )
     {
 #ifdef DEBUG
-    Print( "device::set_cmd() - prop = %s, idx = %d, val = %f\n",
-        prop, idx, val );
+    Print( "%s\t device::set_cmd() - prop = %s, idx = %d, val = %f\n",
+        name, prop, idx, val );
 #endif // DEBUG
 
     switch ( prop[ 0 ] )
