@@ -241,14 +241,18 @@ class wago_manager
 
             enum TYPES ///< Типы модулей.
                 {
+                T_EMPTY = -1,   ///< Не задан.
+
                 T_750_860 = 0,
                 T_750_863,
-                
-                T_750_341 = 2,  ///< Ethernet 750-341.
-                T_750_841,      ///< Ethernet 750-841 programmable.
+
+                T_750_341 = 100,  ///< Ethernet 750-341.
+                T_750_841,        ///< Ethernet 750-841 programmable.
+
+                T_750_352,        ///< Ethernet 750-352.
                 };
 
-            enum STATES         ///< Cостояния работы с узлом.
+            enum STATES           ///< Cостояния работы с узлом.
                 {
                 ST_NO_CONNECT = 0,
                 ST_OK,
@@ -259,6 +263,8 @@ class wago_manager
             u_int   number;          ///< Номер.
             char    ip_address[ 16 ];///< IP-адрес.
             char    name[ 20 ];      ///< Имя.
+
+            bool is_active;          ///< Признак работающего узла.
 
             u_int_4 last_poll_time; ///< Время последнего опроса.
             bool    is_set_err;     ///< Установлена ли ошибка связи.

@@ -84,6 +84,12 @@ int wago_manager_w750::read_inputs()
         if ( nodes[ i ]->type == wago_node::T_750_341 || // Ethernet Wago nodes.
                 nodes[ i ]->type == wago_node::T_750_841 )
             {
+
+            if ( !nodes[ i ]->is_active )
+                {
+                continue;
+                }
+
             if ( nodes[ i ]->DI_cnt > 0 )
                 {
                 /// @todo ћодернизировать заполнение заголовка.
@@ -247,6 +253,11 @@ int wago_manager_w750::write_outputs()
         if ( nodes[ i ]->type == wago_node::T_750_341 ||
                 nodes[ i ]->type == wago_node::T_750_841 )
             {
+            if ( !nodes[ i ]->is_active )
+                {
+                continue;
+                }
+
             if ( nodes[ i ]->DO_cnt > 0 )
                 {
                 /// @todo ћодернизировать заполнение заголовка.

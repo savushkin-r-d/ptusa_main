@@ -730,6 +730,9 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
     int AI_size ): state( ST_NO_CONNECT ),
     type( ( TYPES ) type ),
     number( number ),
+
+    is_active( true ),
+
     last_poll_time( get_sec() ),
     is_set_err( 0 ),
     sock( 0 ),
@@ -748,6 +751,24 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
     else
         {
         memset( ip_address, 0, sizeof( ip_address ) );
+        }
+
+    if ( strlen( ip_address ) == 0 && type >= T_750_341 )
+        {
+        is_active = false;
+#ifdef DEBUG
+        Print( "Узел Wago \"%s\" отключен, так как не задан его IP адрес.\n",
+            name );
+#endif
+        }
+
+    if ( type == T_EMPTY )
+        {
+        is_active = false;
+#ifdef DEBUG
+        Print( "Узел Wago \"%s\" отключен, так как не задан его тип.\n",
+            name );
+#endif
         }
 
     if ( name )
