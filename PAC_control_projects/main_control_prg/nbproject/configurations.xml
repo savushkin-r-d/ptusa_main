@@ -108,9 +108,13 @@
           <itemPath>../../PAC/common/PAC_err.cpp</itemPath>
           <itemPath>../../PAC/common/PAC_info.cpp</itemPath>
           <itemPath>../../PAC/common/PID.cpp</itemPath>
+          <itemPath>../../PAC/common/cip_tech_def.cpp</itemPath>
+          <itemPath>../../PAC/common/mcaRec.cpp</itemPath>
           <itemPath>../../PAC/common/mode_mngr.cpp</itemPath>
           <itemPath>../../PAC/common/param_ex.cpp</itemPath>
           <itemPath>../../PAC/common/prj_mngr.cpp</itemPath>
+          <itemPath>../../PAC/common/rm_manager.cpp</itemPath>
+          <itemPath>../../PAC/common/rm_tech_def.cpp</itemPath>
           <itemPath>../../PAC/common/tcp_cmctr.cpp</itemPath>
           <itemPath>../../PAC/common/tech_def.cpp</itemPath>
           <itemPath>../../PAC/common/wago.cpp</itemPath>
