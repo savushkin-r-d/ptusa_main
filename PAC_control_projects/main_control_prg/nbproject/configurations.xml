@@ -18,9 +18,13 @@
           <itemPath>../../PAC/common/PAC_err.h</itemPath>
           <itemPath>../../PAC/common/PAC_info.h</itemPath>
           <itemPath>../../PAC/common/PID.h</itemPath>
+          <itemPath>../../PAC/common/cip_tech_def.h</itemPath>
+          <itemPath>../../PAC/common/mcaRec.h</itemPath>
           <itemPath>../../PAC/common/mode_mngr.h</itemPath>
           <itemPath>../../PAC/common/param_ex.h</itemPath>
           <itemPath>../../PAC/common/prj_mngr.h</itemPath>
+          <itemPath>../../PAC/common/rm_manager.h</itemPath>
+          <itemPath>../../PAC/common/rm_tech_def.h</itemPath>
           <itemPath>../../PAC/common/tcp_cmctr.h</itemPath>
           <itemPath>../../PAC/common/tech_def.h</itemPath>
           <itemPath>../../PAC/common/wago.h</itemPath>
