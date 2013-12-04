@@ -1470,6 +1470,8 @@ class motor : public device, public wago_device
             set_par_name( P_ON_TIME,  0, "P_ON_TIME" );
             }
 
+        void save_device_ex( char *buff );
+
         float get_value();
 
         void direct_set_value( float value );

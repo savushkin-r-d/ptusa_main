@@ -1789,13 +1789,31 @@ int motor::get_state()
 #ifdef DEBUG_NO_WAGO_MODULES
     return state;
 #else
-    int o = get_DO( DO_INDEX );
-    int i = get_DI( DI_INDEX );
+    int o  = get_DO( DO_INDEX );
+    int ro = get_DO( DO_INDEX_REVERSE );
+    int i  = get_DI( DI_INDEX );
 
-    if ( o == i )
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
         {
-        start_switch_time = get_millisec();
-        return i;
+        if ( 0 == ro && 0 == o && 0 == i )
+            {
+            start_switch_time = get_millisec();
+            return 0;
+            }
+
+        if ( 1 == ro && 1 == o &&  1 == i )
+            {
+            start_switch_time = get_millisec();
+            return 2;
+            }
+        }
+    else
+        {
+        if ( o == i )
+            {
+            start_switch_time = get_millisec();
+            return i;
+            }
         }
 
     if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
@@ -1849,7 +1867,14 @@ void motor::direct_off()
 
     direct_set_value( 0 );
     }
-
+//-----------------------------------------------------------------------------
+void motor::save_device_ex( char *buff )
+    {
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
+        {
+        sprintf( buff, "R=%d,", get_DO( DO_INDEX_REVERSE ) );
+        }
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 bool level_s::is_active()
