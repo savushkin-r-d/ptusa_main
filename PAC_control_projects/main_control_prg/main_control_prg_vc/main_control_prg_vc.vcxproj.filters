@@ -264,7 +264,7 @@
     <ClInclude Include="..\..\..\PAC\common\mcaRec.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
-    <ClInclude Include="modbus_serv.h">
+    <ClInclude Include="..\..\..\PAC\common\modbus_serv.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
   </ItemGroup>
@@ -461,7 +461,7 @@
     <ClCompile Include="..\..\..\PAC\common\mcaRec.cpp">
       <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
-    <ClCompile Include="modbus_serv.cpp">
+    <ClCompile Include="..\..\..\PAC\common\modbus_serv.cpp">
       <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
   </ItemGroup>
