@@ -1507,7 +1507,7 @@ float cipline_tech_object::GetConc( int what )
 
 int cipline_tech_object::InitFilRR( int where )
 	{
-	float v, pd, kk, kz, ro;
+	float v = 0, pd = 0, kk = 0, kz = 0, ro = 0;
 	V05->off();
 	V06->on();
 	V00->on();
@@ -1809,7 +1809,7 @@ int cipline_tech_object::FilRR( int where )
 
 int cipline_tech_object::CircRR( int where )
 	{
-	float c;
+	float c = 0;
 	switch (where)
 		{
 		case TANK_S:
@@ -1840,7 +1840,7 @@ int cipline_tech_object::CircRR( int where )
 
 int cipline_tech_object::CheckConc( int where )
 	{
-	float c, z;
+	float c = 0, z = 0;
 	rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
 	rt_par_float[P_SUM_OP] = cnt->get_quantity();
 	switch (where)
@@ -1905,7 +1905,7 @@ int cipline_tech_object::CheckConc( int where )
 
 int cipline_tech_object::AddRR( int where )
 	{
-	float c;
+	float c = 0;
 	switch (where)
 		{
 		case TANK_S:
@@ -1936,7 +1936,7 @@ int cipline_tech_object::AddRR( int where )
 
 int cipline_tech_object::OpolRR( int where )
 	{
-	float c;
+	float c = 0;
 	rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
 	rt_par_float[P_SUM_OP] = cnt->get_quantity();
 	switch (where)
@@ -1967,7 +1967,7 @@ int cipline_tech_object::OpolRR( int where )
 int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 	{
 	float v=1, p=1, z=0;
-	int ot;
+//	int ot;
 	V05->on();
 	V06->off();
 
@@ -2171,8 +2171,8 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 
 int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
 	{
-	float v, p, z=0;
-	int ot;
+	float v = 0, p = 0, z=0;
+//	int ot;
 	if (0 == f)
 		{
 		return_ok = 0;
@@ -2991,7 +2991,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 
 			int cipline_tech_object::OporCIP( int where )
 				{
-				int ot;
+//				int ot;
 				float c;
 				device* OSdev;
 				if (isLine()) return 1;

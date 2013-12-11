@@ -188,6 +188,7 @@ int tcp_communicator_win::net_init()
     modbus_socket_state.sin.sin_family 	    = AF_INET;
     modbus_socket_state.sin.sin_addr.s_addr = 0;
     modbus_socket_state.sin.sin_port 		= htons ( 502 ); // Порт.
+	modbus_socket_state.socket = modbus_socket;
 
     modbus_socket_state.active      = 1;
     modbus_socket_state.is_listener = 1;
@@ -353,7 +354,7 @@ int tcp_communicator_win::evaluate()
 #endif // DEBUG
 
 #ifdef MODBUS
-                    if ( i != modbus_socket )
+                    if ( sst[ i ].socket != modbus_socket )
                         {
 #endif
                         char Message1[] = "PAC accept";
@@ -489,16 +490,8 @@ int tcp_communicator_win::do_echo( int idx )
 
     net_id = buf[ 0 ];
     pidx = buf[ 3 ];
-    if ( net_id != 's' )
-        {
-#ifdef DEBUG
-        printf( "Incorrect input data at socket %d->\"%s\"\n",
-            sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ) );
-#endif // DEBUG
-        return ERR_RETRIVE;
-        }
 
-    if ( buf[ 1 ] < TC_MAX_SERVICE_NUMBER && services[ buf[ 1 ] ] != NULL &&
+    if ( net_id != 's' && buf[ 1 ] < TC_MAX_SERVICE_NUMBER && services[ buf[ 1 ] ] != NULL &&
         ( buf[ 2 ] + buf[ 3 ] != 0 ) )
         {
         switch ( buf[ 2 ] )

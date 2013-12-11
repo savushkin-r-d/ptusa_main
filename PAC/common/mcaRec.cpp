@@ -191,7 +191,7 @@ void TRecipeManager::SaveRecipeName()
 
 int TRecipeManager::LoadRecipeToParams( int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, run_time_params_float* par )
 	{
-	if (recipeNo < recipePerLine && recipeStartPos + parQuantity < GetParamsCount() && paramsStartPos + parQuantity < par->get_count())
+	if (recipeNo < recipePerLine && recipeStartPos + parQuantity < GetParamsCount() && (unsigned int)paramsStartPos + (unsigned int)parQuantity < par->get_count())
 		{
 		for (int i = 0; i < parQuantity; i++)
 			{

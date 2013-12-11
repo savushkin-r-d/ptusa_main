@@ -15,6 +15,7 @@
 #include "prj_mngr.h"
 #include "PAC_dev.h"
 #include "tech_def.h"
+#include "modbus_serv.h"
 
 //-----------------------------------------------------------------------------
 auto_smart_ptr< lua_manager > lua_manager::instance;
@@ -319,6 +320,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
     tcp_communicator::init_instance( PAC_name_rus, PAC_name_eng );
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
+	G_CMMCTR->reg_service(15, ModbusServ::ModbusService);
 
     lua_gc( L, LUA_GCRESTART, 0 );
     lua_gc( L, LUA_GCCOLLECT, 0 );

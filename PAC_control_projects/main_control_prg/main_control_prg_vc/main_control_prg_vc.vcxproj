@@ -98,7 +98,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG;DEBUG_IDE;TEST_SPEED;RM_PAC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG;DEBUG_IDE;TEST_SPEED;RM_PAC;MODBUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -202,6 +202,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClInclude Include="..\..\..\PAC\win\w_led.h" />
     <ClInclude Include="..\..\..\PAC\win\w_mem.h" />
     <ClInclude Include="..\..\..\PAC\win\w_types.h" />
+    <ClInclude Include="modbus_serv.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\common\lua\lapi.c" />
@@ -268,6 +269,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClCompile Include="..\..\..\PAC\win\w_console.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_mem.cpp" />
     <ClCompile Include="..\main.cpp" />
+    <ClCompile Include="modbus_serv.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\PTUSA projects\system scripts\sys.devices.lua" />
