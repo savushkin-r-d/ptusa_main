@@ -22,8 +22,12 @@ class ModbusServ
 		static int CP1251toUnicode(char* Input, unsigned char* Buf, int inputlen);
 		static int UnicodetoCP1251(char* Output, unsigned char* Buf, int inputlen);
 		static unsigned char UTable[128][2];
-		ModbusServ();
-		virtual ~ModbusServ(void);
+
+        static void init();
+
+#ifdef KHUTOR
+        static i_DO_device *KOAG1HL1;
+#endif //KHUTOR
 	};
 
 #endif // modbus_serv_h__

@@ -337,6 +337,7 @@ int tcp_communicator_win::evaluate()
                         continue;
                         }
 #ifdef DEBUG
+#ifndef MODBUS
                     // ќпределение имени клиента.
                     hostent *client = gethostbyaddr( ( char* ) &ssin.sin_addr, 4, AF_INET );
 
@@ -345,12 +346,17 @@ int tcp_communicator_win::evaluate()
                         printf( "Accepted connection on %d socket from %s [ %s ].\n",
                             slave_socket, inet_ntoa( ssin.sin_addr ), client->h_name  );
                         }
+
                     else
                         {
                         printf( "Error getting client name. " );
                         printf( "Accepted connection on %d socket from %s.\n",
                             slave_socket, inet_ntoa( ssin.sin_addr ) );
                         }
+#else
+                    printf( "Accepted connection on %d socket from %s.\n",
+                        slave_socket, inet_ntoa( ssin.sin_addr ) );
+#endif //  MODBUS
 #endif // DEBUG
 
 #ifdef MODBUS
@@ -434,7 +440,7 @@ int tcp_communicator_win::do_echo( int idx )
     memset( buf, 0, BUFSIZE );
 
     // ќжидаем данные с таймаутом 1 сек.
-    err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 1, 0 );
+    err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 1, 0 ); 
 
     if ( err <= 0 )               /* read error */
         {
@@ -491,7 +497,7 @@ int tcp_communicator_win::do_echo( int idx )
     net_id = buf[ 0 ];
     pidx = buf[ 3 ];
 
-    if ( net_id != 's' && buf[ 1 ] < TC_MAX_SERVICE_NUMBER && services[ buf[ 1 ] ] != NULL &&
+    if ( net_id == 's' && buf[ 1 ] < TC_MAX_SERVICE_NUMBER && services[ buf[ 1 ] ] != NULL &&
         ( buf[ 2 ] + buf[ 3 ] != 0 ) )
         {
         switch ( buf[ 2 ] )
