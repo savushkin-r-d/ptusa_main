@@ -114,6 +114,7 @@
           <itemPath>../../PAC/common/PID.cpp</itemPath>
           <itemPath>../../PAC/common/cip_tech_def.cpp</itemPath>
           <itemPath>../../PAC/common/mcaRec.cpp</itemPath>
+          <itemPath>../../PAC/common/modbus_serv.cpp</itemPath>
           <itemPath>../../PAC/common/mode_mngr.cpp</itemPath>
           <itemPath>../../PAC/common/param_ex.cpp</itemPath>
           <itemPath>../../PAC/common/prj_mngr.cpp</itemPath>
@@ -432,6 +433,99 @@
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -Wl,-elf2flt -L/usr/local/arm-uclinux-tools/arm-uclinux-elf/lib/crt0.o -L/home/id/uClinux-dist/lib/uClibc/lib/crti.o -L/home/id/uClinux-dist/lib/uClibc/lib/crtn.o -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
         </linkerTool>
       </compileType>
+    </conf>
+    <conf name="release_wago_750-860_khutor" type="1">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>arm-uclinux-elf|GNU</compilerSet>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>6</developmentMode>
+          <commandlineTool>gcc</commandlineTool>
+          <incDir>
+            <pElem>../../common/lua</pElem>
+          </incDir>
+          <commandLine>-O3 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
+        </cTool>
+        <ccTool>
+          <developmentMode>6</developmentMode>
+          <incDir>
+            <pElem>../../PAC/common</pElem>
+            <pElem>../../PAC/common/sys</pElem>
+            <pElem>../../PAC/linux</pElem>
+            <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
+            <pElem>../../common</pElem>
+            <pElem>../../common/PAC-driver</pElem>
+            <pElem>../../common/util</pElem>
+            <pElem>../../common/lua</pElem>
+            <pElem>../../common/tolua++</pElem>
+          </incDir>
+          <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
+          <preprocessorList>
+            <Elem>LINUX_OS</Elem>
+            <Elem>PAC_WAGO_750_860</Elem>
+            <Elem>TEST_SPEED</Elem>
+            <Elem>TOLUA_RELEASE</Elem>
+          </preprocessorList>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>6</developmentMode>
+        </asmTool>
+        <linkerTool>
+          <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -Wl,-elf2flt /usr/local/arm-uclinux-tools/arm-uclinux-elf/lib/crt0.o /home/id/uClinux-dist/uClibc/lib/crti.o /home/id/uClinux-dist/uClibc/lib/crtn.o -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
+        </linkerTool>
+      </compileType>
+    </conf>
+    <conf name="debug_wago_750-860_khutor" type="1">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>arm-uclinux-elf|GNU</compilerSet>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <commandlineTool>gcc</commandlineTool>
+          <incDir>
+            <pElem>../../common/lua</pElem>
+          </incDir>
+          <commandLine>-O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
+        </cTool>
+        <ccTool>
+          <commandlineTool>g++</commandlineTool>
+          <incDir>
+            <pElem>../../PAC/common</pElem>
+            <pElem>../../PAC/common/sys</pElem>
+            <pElem>../../PAC/linux</pElem>
+            <pElem>../../PAC/linux/PAC_WAGO_750_860</pElem>
+            <pElem>../../common</pElem>
+            <pElem>../../common/PAC-driver</pElem>
+            <pElem>../../common/util</pElem>
+            <pElem>../../common/lua</pElem>
+            <pElem>../../common/tolua++</pElem>
+          </incDir>
+          <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
+          <preprocessorList>
+            <Elem>DEBUG</Elem>
+            <Elem>KHUTOR</Elem>
+            <Elem>LINUX_OS</Elem>
+            <Elem>MODBUS</Elem>
+            <Elem>PAC</Elem>
+            <Elem>PAC_WAGO_750_860</Elem>
+            <Elem>TEST_SPEED</Elem>
+          </preprocessorList>
+        </ccTool>
+        <linkerTool>
+          <output>/home/id/id_share/out/main</output>
+          <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -Wl,-elf2flt /usr/local/arm-uclinux-tools/arm-uclinux-elf/lib/crt0.o /home/id/uClinux-dist/uClibc/lib/crti.o /home/id/uClinux-dist/uClibc/lib/crtn.o -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
+        </linkerTool>
+      </compileType>
+      <item path="../../PAC/linux/PAC_PC/wago_PC.cpp" ex="true" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/wago_PC.h" ex="true" tool="3" flavor2="0">
+      </item>
     </conf>
   </confs>
 </configurationDescriptor>
