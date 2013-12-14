@@ -125,7 +125,7 @@ class params_manager
         int restore_params_from_server_backup( char *backup_str );
 
         // Высчитывание контрольной суммы.
-        u_int solve_CRC();
+        u_int_2 solve_CRC();
 
     private:
         /// @brief Закрытый конструктор.

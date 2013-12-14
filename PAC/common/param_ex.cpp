@@ -26,12 +26,12 @@ params_manager::params_manager(): par( 0 )
     memset( params, 0, C_TOTAL_PARAMS_SIZE );
     }
 //-----------------------------------------------------------------------------
-unsigned int params_manager::solve_CRC()
+u_int_2 params_manager::solve_CRC()
     {
     int     idx;
     char    Flag;
 
-    unsigned int CRC = 65535;
+    u_int_2 CRC = 65535;
     unsigned int datlen = C_TOTAL_PARAMS_SIZE;
     int bufidx = 0;
 
@@ -97,7 +97,7 @@ int params_manager::check_CRC()
     unsigned char buff[ 2 ] = { 0 };
     CRC_mem->read( ( char* ) buff, 2, 0 );
 
-    u_int read_CRC = 256 * buff[ 1 ] + buff[ 0 ];
+    u_int_2 read_CRC = 256 * buff[ 1 ] + buff[ 0 ];
 
     if ( solve_CRC() == read_CRC )
         {
