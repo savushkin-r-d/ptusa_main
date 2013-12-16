@@ -1,11 +1,11 @@
 /// @file tcp_cmctr.h
 /// @brief Содержит описания классов, которые предназначены для обмена данными
 /// PAC-сервер по протоколу TCP.
-/// 
+///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
-/// 
+///
 /// @par Текущая версия:
 /// @$Rev$.\n
 /// @$Author$.\n
@@ -27,7 +27,7 @@ class tcp_communicator
         typedef long int srv_proc( long int, u_char *, u_char * );
         typedef srv_proc *srv_ptr;
 
-        /// @brief Получение единственного экземпляра класса для работы с 
+        /// @brief Получение единственного экземпляра класса для работы с
         /// коммуникатором.
         ///
         /// @return - указатель на единственный объект класса @ref
@@ -39,11 +39,11 @@ class tcp_communicator
         /// @brief Итерация обмена данными с сервером.
         virtual int evaluate() = 0;
 
-        /// @brief Добавление пользовательской функции по обмену данными - 
+        /// @brief Добавление пользовательской функции по обмену данными -
         /// сервиса.
         ///
         /// @param srv_id - номер, за которым будет закреплен сервис.
-        /// @param fk     - указатель на объект выделенного блока памяти.        
+        /// @param fk     - указатель на объект выделенного блока памяти.
         srv_ptr reg_service( u_char srv_id, srv_ptr fk );
 
         /// @brief Получение сетевого имени PAC.
@@ -70,8 +70,8 @@ class tcp_communicator
             ERR_WRONG_CMD     = 5,
             };
 
-        //COMMANDS DEFINITION  
-        enum COMMANDS 
+        //COMMANDS DEFINITION
+        enum COMMANDS
             {
             FRAME_SINGLE = 1,
             AKN_ERR      = 7,
@@ -81,7 +81,7 @@ class tcp_communicator
 
         enum CONSTANTS
             {
-            BUFSIZE     = 32000,           ///< Размер буфера.
+            BUFSIZE     = 40000,           ///< Размер буфера.
             PORT 	    = 10000,           ///< Порт.
 #ifdef LINUX_OS
             MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.

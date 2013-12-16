@@ -129,7 +129,7 @@ int tcp_communicator_linux::net_init()
         return -4;
         }
     // Адресация modbus_socket сокета.
-    memset( &sst[ modbus_socket ].simodbus_socket 0, sizeof ( sst[ modbus_socket ].sin ) );
+    memset( &sst[ modbus_socket ].sin, 0, sizeof ( sst[ modbus_socket ].sin ) );
     sst[ modbus_socket ].sin.sin_family 	  = AF_INET;
     sst[ modbus_socket ].sin.sin_addr.s_addr = 0;
     sst[ modbus_socket ].sin.sin_port 		  = htons ( 502 ); // Порт.
@@ -301,6 +301,7 @@ int tcp_communicator_linux::evaluate()
                         }
 
 #ifdef DEBUG
+#ifndef MODBUS
                     // Определение имени клиента.
                     hostent *client = gethostbyaddr( &ssin.sin_addr, 4, AF_INET );
                     if ( client )
@@ -314,6 +315,10 @@ int tcp_communicator_linux::evaluate()
                         Print( "Accepted connection on %d socket from %s.\n",
                             slave_socket, inet_ntoa( ssin.sin_addr ) );
                         }
+#else
+                    Print( "Accepted connection on %d socket from %s.\n",
+                        slave_socket, inet_ntoa( ssin.sin_addr ) );
+#endif // MODBUS
 #endif // DEBUG
 
                     FD_SET( slave_socket, &rfds );
@@ -435,18 +440,10 @@ int tcp_communicator_linux::do_echo ( int skt )
 #endif // DEBUG
 
     net_id = buf[ 0 ];
-    pidx = buf[ 3 ];
-    if ( net_id != 's' )
-        {
-#ifdef DEBUG
-        printf( "Incorrect input data at socket %d->\"%s\"\n",
-            skt, inet_ntoa( sst[ skt ].sin.sin_addr ) );
-#endif // DEBUG
-        return ERR_RETRIVE;
-        }
+    pidx   = buf[ 3 ];
 
-    if ( buf[ 1 ] < TC_MAX_SERVICE_NUMBER && services[ buf[ 1 ] ] != NULL &&
-        ( buf[ 2 ] + buf[ 3 ] != 0 ) )
+    if ( net_id == 's' && buf[ 1 ] < TC_MAX_SERVICE_NUMBER && services[ buf[ 1 ] ] != NULL &&
+        buf[ 2 ] + buf[ 3 ] != 0 )
         {
         switch ( buf[ 2 ] )
             {
@@ -483,7 +480,7 @@ int tcp_communicator_linux::do_echo ( int skt )
         }
     else
         {
-        if ( ( services[ 15 ] != NULL ) && ( 0 == buf[ 2 ] + buf[ 3 ] ) ) //MODBUS
+        if ( services[ 15 ] != NULL && 0 == buf[ 2 ] + buf[ 3 ] ) //MODBUS
             {
             res = services[ 15 ] ( ( u_int ) ( buf[ 4 ] * 256 + buf[ 5 ] ),
                 buf + 6,
