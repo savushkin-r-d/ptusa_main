@@ -24,7 +24,9 @@
 class wago_device
     {
     public:
-        wago_device();
+        const char* name;
+
+        wago_device( const char* name );
 
         virtual ~wago_device();
 

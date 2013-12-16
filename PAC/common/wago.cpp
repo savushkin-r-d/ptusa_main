@@ -39,7 +39,8 @@ int wago_device::get_DO( u_int index )
         }
 
 #ifdef DEBUG
-    Print( "wago_device->get_DO(...) - error!\n" );
+    Print( "Error: \"%s\" wago_device->get_DO(...) - index=%d, DO_channels_count=%d\n",
+        name, index, DO_channels.count );
 #endif // DEBUG
 
     return 0;
@@ -56,6 +57,7 @@ int wago_device::set_DO( u_int index, char value )
         }
 
 #ifdef DEBUG
+    print();
     Print( "wago_device->set_DO(...) - error! %d, %d, %d, %d\n",
             index, DO_channels.count, ( int ) DO_channels.char_write_values,
             ( int ) DO_channels.char_write_values[ index ] );
@@ -75,6 +77,7 @@ int wago_device::get_DI( u_int index )
         }
 
 #ifdef DEBUG
+    print();
     Print( "wago_device->get_DI(...) - error!\n" );
 #endif // DEBUG
 
@@ -174,6 +177,8 @@ int wago_device::set_AO( u_int index, float value, float min_value,
             }
 
         *AO_channels.int_write_values[ index ] = ( u_int ) value;
+
+        printf( "value=%d\n", ( u_int ) value );
 
         return 0;
         }
@@ -281,6 +286,8 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
 //-----------------------------------------------------------------------------
 void wago_device::print() const
     {
+    Print( " " );
+
     DI_channels.print();
     DO_channels.print();
     AI_channels.print();
@@ -288,7 +295,8 @@ void wago_device::print() const
     //Print( "\n" );
     }
 //-----------------------------------------------------------------------------
-wago_device::wago_device() :DI_channels( IO_channels::CT_DI ),
+wago_device::wago_device( const char* name ) : name( name ),
+    DI_channels( IO_channels::CT_DI ),
     DO_channels( IO_channels::CT_DO ),
     AI_channels( IO_channels::CT_AI ),
     AO_channels( IO_channels::CT_AO )

@@ -317,7 +317,7 @@ class device : public i_DO_AO_device, public par_device
         enum CONSTANTS
             {
             C_DEVICE_TYPE_CNT = 17,     ///< Количество типов устройств.
-            
+
             C_MAX_NAME = 10
             };
 
@@ -403,7 +403,7 @@ class device : public i_DO_AO_device, public par_device
         /// @brief Вывод объекта в консоль.
         ///
         /// Для использования в отладочных целях.
-        void print() const;
+        virtual void print() const;
 
         /// @brief Получение порядкового номера устройства.
         ///
@@ -540,7 +540,8 @@ class analog_wago_device : public device, public wago_device
             device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type,
             u_int par_cnt ):
-        device( dev_name, type, sub_type, par_cnt )
+        device( dev_name, type, sub_type, par_cnt ),
+        wago_device( dev_name )
 #ifdef DEBUG_NO_WAGO_MODULES
             ,value( 0 )
 #endif  // DEBUG_NO_WAGO_MODULES
@@ -1461,7 +1462,8 @@ class motor : public device, public wago_device
     {
     public:
         motor( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
-            device( dev_name, DT_M, sub_type, ADDITIONAL_PARAM_COUNT )
+            device( dev_name, DT_M, sub_type, ADDITIONAL_PARAM_COUNT ),
+            wago_device( dev_name )
 #ifdef DEBUG_NO_WAGO_MODULES
             ,state( 0 ),
             freq( 0 )
@@ -1621,6 +1623,7 @@ class counter : public device,
     public:
         counter( const char *dev_name ): device(
             dev_name, DT_FQT, DST_NONE, ADDITIONAL_PARAMS_COUNT ),
+            wago_device( dev_name ),
             value( 0 ),
             last_read_value( 0 ),
             state( S_STOP ),

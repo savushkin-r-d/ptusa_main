@@ -1141,7 +1141,8 @@ void digital_wago_device::direct_off()
 //-----------------------------------------------------------------------------
 digital_wago_device::digital_wago_device( const char *dev_name, device::DEVICE_TYPE type,
                                          device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :
-device( dev_name, type, sub_type, par_cnt )
+    device( dev_name, type, sub_type, par_cnt ),
+    wago_device( dev_name )
 #ifdef DEBUG_NO_WAGO_MODULES
     , state( 0 )
 #endif // DEBUG_NO_WAGO_MODULES
@@ -1790,11 +1791,12 @@ int motor::get_state()
     return state;
 #else
     int o  = get_DO( DO_INDEX );
-    int ro = get_DO( DO_INDEX_REVERSE );
     int i  = get_DI( DI_INDEX );
 
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
         {
+        int ro = get_DO( DO_INDEX_REVERSE );
+        
         if ( 0 == ro && 0 == o && 0 == i )
             {
             start_switch_time = get_millisec();
