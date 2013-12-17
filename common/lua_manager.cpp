@@ -262,6 +262,12 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
     //Экспортируем в Lua необходимые объекты.
     tolua_PAC_dev_open( L );
 
+    //-Загрузка параметров.
+    const int PAC_ID =
+        lua_manager::get_instance()->int_no_param_exec_lua_method( "system",
+        "get_PAC_id", "main" );
+    params_manager::get_instance()->init( PAC_ID );
+
     //III
     //Выполняем процедуры инициализации.
     res = G_PROJECT_MANAGER->lua_load_configuration();
@@ -327,11 +333,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
     lua_gc( L, LUA_GCRESTART, 0 );
     lua_gc( L, LUA_GCCOLLECT, 0 );
 
-    //-Загрузка параметров.
-    const int PAC_ID =
-        lua_manager::get_instance()->int_no_param_exec_lua_method( "system",
-        "get_PAC_id", "main" );
-    params_manager::get_instance()->init( PAC_ID );
+    //Инициализация параметров при необходимости.
     params_manager::get_instance()->final_init();
 
 #if defined DEBUG
