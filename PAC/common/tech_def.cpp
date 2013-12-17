@@ -42,7 +42,7 @@ tech_object::tech_object( const char* new_name, u_int number, u_int type,
     strlcpy( this->name_Lua, name_Lua, C_MAX_NAME_LENGTH );
 
     modes_manager = new mode_manager( modes_count );
-    modes_manager->set_param( &par_float );
+    modes_manager->set_param( &par_uint );
     }
 //-----------------------------------------------------------------------------
 tech_object::~tech_object()
@@ -290,8 +290,37 @@ int tech_object::lua_init_params()
     {
     tech_object::init_params();
 
-    return lua_manager::get_instance()->int_exec_lua_method( name_Lua,
-        "init_params", 0, "int tech_object::lua_init_params()" );
+    //Проверка на наличии функции инициализации параметров uint.
+    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
+        name_Lua );
+    lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "init_params_uint" );
+    lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
+
+    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+        {
+        lua_manager::get_instance()->int_exec_lua_method( name_Lua,
+            "init_params_uint", 0, "int tech_object::lua_init_params()" );
+        }
+
+    //Удаляем "init_params_uint" со стека.
+    lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
+
+    //Проверка на наличии функции инициализации параметров float.
+    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
+        name_Lua );
+    lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "init_params_float" );
+    lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
+
+    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+        {
+        lua_manager::get_instance()->int_exec_lua_method( name_Lua,
+            "init_params_float", 0, "int tech_object::lua_init_params()" );
+        }
+
+    //Удаляем "init_params_float" со стека.
+    lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 int tech_object::lua_init_runtime_params()

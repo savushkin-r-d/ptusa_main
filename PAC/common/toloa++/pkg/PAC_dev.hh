@@ -553,6 +553,9 @@ class mode
         step* add_step( const char* name, unsigned int next_step_n,
             unsigned int step_duration_par_n );
 
+        /// @brief Установка номера параметра со временем переходного переключения шагов.
+        void set_step_cooperate_time_par_n( int step_cooperate_time_par_n );
+
 		unsigned int active_step() const;
 
         unsigned long active_step_evaluation_time() const;

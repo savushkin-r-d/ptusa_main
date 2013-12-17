@@ -239,6 +239,11 @@ class tech_object: public i_Lua_save_device
                 par_float.get_count(), par_uint.get_count(),
                 rt_par_float.get_count(), rt_par_uint.get_count() );
             Print( "timers[%d]\n", timers.get_count() );
+            
+            par_float.print();         
+            par_uint.print();         
+            rt_par_float.print();           
+            rt_par_uint.print();
 
             modes_manager->print();
             }

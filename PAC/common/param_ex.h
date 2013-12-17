@@ -194,13 +194,13 @@ template < class type, bool is_float > class parameters
                 {
                 if ( 0 == index )
                     {
-                    Print( "parameters[] - error: index = %u\n",
-                        index );
+                    Print( "\"%s\" parameters[] - error: index = %u\n",
+                        name, index );
                     }
                 else
                     {
-                    Print( "parameters[] - error: index[ %u ] > count [ %u ]\n",
-                        index, count );
+                    Print( "\"%s\" parameters[] - error: index[ %u ] > count [ %u ]\n",
+                        name, index, count );
                     }
                 }
 #endif // DEBUG
@@ -269,6 +269,7 @@ template < class type, bool is_float > class parameters
             values( value )
             {
             stub = 0;
+            this->name[ 0 ] = 0;
 
             strlcpy( this->name, name, sizeof( this->name ) );
 
@@ -298,9 +299,22 @@ template < class type, bool is_float > class parameters
                 }
             }
 
-        void print() const
-            {
-            printf( "param %d\n", count );
+        virtual void print() const
+            {   
+            Print( "\"%s\"\t - ", name );
+            for ( u_int i = 1; i <= count; i++ )
+                {
+                Print( "[%d]=", i );
+                if ( is_float )
+                	{
+                    Print( "%.2f,", values[ i - 1 ] );
+                	}
+                else
+                    {
+                    Print( "%d,", values[ i - 1 ] );
+                    }
+                }
+            Print( "\n" );
             }
 
         int save_device_ex( char *buff, const char *prefix, const char *new_name )
@@ -457,62 +471,6 @@ public parameters < type, is_float >
             {
             }
 
-        //template < class type, bool is_float > class proxy_data
-        //    {
-        //    public:
-        //        proxy_data( type value, int idx, saved_params * par
-        //            ):value( value ), idx( idx ), par( par )
-        //            {
-        //            }
-
-        //        type &value;
-
-        //        int idx;
-
-        //        saved_params *par;
-
-
-        //    operator type ()
-        //        {
-        //        return value;
-        //        }
-
-        //    type operator =( type value )
-        //        {
-        //        if ( par )
-        //            {
-        //            par->save( idx, value );
-        //            }
-
-        //        return value;
-        //        }
-        //    };
-
-////        /// @brief ѕолучение элемента через операцию индексировани€.
-////        ///
-////        /// @param index - индекс элемента.
-////        ///
-////        /// @return - значение элемента с заданным индексом. ≈сли индекс
-////        /// выходит за диапазон, возвращаетс€ значение заглушки - пол€ @ref
-////        /// stub ( значение 0 ).
-////        proxy_data< type, is_float > operator[] ( unsigned int index )
-////            {
-////            if ( index < count )
-////                {
-////                return proxy_data< type, is_float >( values[ index ], index, this );
-////                }
-////#ifdef DEBUG
-////            else
-////                {
-////                Print( "parameters[] - error: index[ %u ] > count [ %u ]\n",
-////                    index, count );
-////                }
-////#endif // DEBUG
-////
-////            stub = 0;
-////            return proxy_data< type, is_float >( stub, -1, 0 );
-////            }
-
         /// @brief —охранение значени€ параметра в энергонезависимой пам€ти.
         ///
         /// ќпераци€ доступа через индекс сохран€ет значение параметра только
@@ -570,11 +528,6 @@ public parameters < type, is_float >
 
             params_manager::get_instance()->save(
                 start_pos, sizeof( type ) * parameters< type, is_float >::get_count() );
-            }
-
-        void print() const
-            {
-            //printf( "saved param %d\n", count );
             }
 
     private:

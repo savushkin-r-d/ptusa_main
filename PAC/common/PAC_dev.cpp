@@ -1731,7 +1731,7 @@ void motor::direct_set_value( float value )
     freq = value;
 #else
     if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ )
-        {
+        {       
         set_AO( AO_INDEX, value, C_MIN_VALUE, C_MAX_VALUE );
         }
 #endif // DEBUG_NO_WAGO_MODULES

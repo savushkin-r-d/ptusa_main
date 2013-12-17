@@ -748,6 +748,8 @@ void wash_action::print( const char* prefix /*= "" */ ) const
 mode::mode( const char* name, mode_manager *owner, int n ) : name( name ),
     mode_step(  new step( "Шаг режима", true ) ),
     active_step_n( 0 ),
+    active_step_second_n( -1 ),
+    step_cooperate_time_par_n( -1 ),
     start_time( get_millisec() ),
     step_stub( "Шаг-заглушка" ),
     owner( owner ),
@@ -776,6 +778,7 @@ void mode::init( u_int start_step /*= 1 */ )
     start_time = get_millisec();
 
     active_step_n = -1;
+    active_step_second_n = -1;
 
     if ( steps.empty() )
         {
@@ -794,21 +797,59 @@ void mode::init( u_int start_step /*= 1 */ )
 #endif
     }
 //-----------------------------------------------------------------------------
+// Если есть активный шаг проверяем на наличие параллельного 
+// нового шага (1). Если он есть, то раздельно выключаем 
+// и включаем устройства двух активных шагов (2).
+// Потом проверяем время переходного режима. Если оно вышло,
+// отключаем  активный шаг, в качестве активного шага
+// переназначаем параллельный новый шаг.
 void mode::evaluate()
     {
     mode_step->evaluate();
 
-    if ( active_step_n >= 0 )
+    if ( active_step_n < 0 ) return;
+
+    if ( active_step_second_n >= 0 )                   //1
+        {
+        steps[ active_step_n ]->evaluate_off();         //2
+        steps[ active_step_second_n ]->evaluate_off();
+
+        steps[ active_step_n ]->evaluate_on();
+        steps[ active_step_second_n ]->evaluate_on();
+
+        if ( get_delta_millisec( active_step_second_start_time ) > 
+            step_cooperate_time )
+            {
+            steps[ active_step_n ]->final();
+
+            active_step_n = active_step_second_n;
+            active_step_second_n = -1;
+
+            steps[ active_step_n ]->evaluate();
+#ifdef DEBUG
+            Print( "  cooperate off\n" );
+#endif
+            }
+        }
+    else
         {
         steps[ active_step_n ]->evaluate();
 
         if ( active_step_time != 0 &&
             get_delta_millisec( steps[ active_step_n ]->get_start_time() ) >
             ( u_int ) active_step_time )
-            {
-            to_step( active_step_next_step_n );
+            {            
+            u_long step_switch_time = 0; 
+            if ( owner->get_param() != 0 && step_cooperate_time_par_n > -1 )
+                {
+                step_switch_time = ( u_long ) 
+                    owner->get_param()[ 0 ][ step_cooperate_time_par_n ];
+                step_switch_time *= 1000L;                
+                }
+            
+            to_step( active_step_next_step_n, step_switch_time );
             }
-        }
+        }      
     }
 //-----------------------------------------------------------------------------
 void mode::final()
@@ -823,6 +864,14 @@ void mode::final()
         Print( " FINAL ACTIVE STEP [ %d ] \n", active_step_n );
 #endif
         active_step_n = -1;
+        }
+    if ( active_step_second_n >= 0 )
+        {
+        steps[ active_step_second_n ]->final();
+#ifdef DEBUG
+        Print( " FINAL ACTIVE STEP SECOND [ %d ] \n", active_step_second_n );
+#endif
+        active_step_second_n = -1;
         }
     }
 //-----------------------------------------------------------------------------
@@ -846,38 +895,67 @@ step* mode::operator[]( int idx )
     return &step_stub;
     }
 //-----------------------------------------------------------------------------
-void mode::to_step( u_int new_step )
+void mode::to_step( u_int new_step, u_long cooperative_time )
     {
-    if ( new_step <= steps.size() && new_step > 0 )
+    if ( new_step > steps.size() || new_step <= 0 )
+        {
+#ifdef DEBUG     
+        Print( "Error mode::to_step step %d > steps size %d.\n",
+            new_step, steps.size() );      
+#endif // DEBUG
+
+        return;
+        }
+
+    step_cooperate_time = cooperative_time;
+
+    active_step_time        = 0;
+    active_step_next_step_n = 0;
+
+    // Если есть текущий шаг и время переключения больше нуля, 
+    // то включаем совместный шаг.
+    if ( active_step_n >= 0 && cooperative_time > 0 )
+        {
+        active_step_second_n = new_step - 1;
+        active_step_second_start_time = get_millisec();  
+
+        int par_n = step_duration_par_ns[ active_step_second_n ];
+
+        if ( owner->get_param() != 0 && par_n > 0 )
+            {            
+            active_step_time = u_int( owner->get_param()[ 0 ][ par_n ] * 1000L );
+            active_step_next_step_n = next_step_ns[ active_step_second_n ];
+
+            steps[ active_step_second_n ]->init();
+            }
+        }     
+    else
+        //Нет совместного шага.
         {
         if ( active_step_n >= 0 )
             {
             steps[ active_step_n ]->final();
-            }
-        active_step_n = new_step - 1;
+            }            
 
-        steps[ active_step_n ]->init();
-        steps[ active_step_n ]->evaluate();
+        active_step_n = new_step - 1;
 
         active_step_time        = 0;
         active_step_next_step_n = 0;
 
-        if ( owner->get_param() != 0 &&
-            step_duration_par_ns[ active_step_n ] > 0 )
-            {
-            active_step_time = u_int( owner->get_param()[ 0 ][ step_duration_par_ns[ active_step_n ] ] * 1000L );
+        steps[ active_step_n ]->init();
+        steps[ active_step_n ]->evaluate();
+
+        int par_n = step_duration_par_ns[ active_step_n ];
+        if ( owner->get_param() != 0 && par_n > 0 )
+            {           
+            active_step_time = u_int( owner->get_param()[ 0 ][ par_n ] * 1000L );
             active_step_next_step_n = next_step_ns[ active_step_n ];
             }
         }
-#ifdef DEBUG
-    else
-        {
-        Print( "Error mode::to_step step %d > steps size %d.\n",
-            new_step, steps.size() );
-        }
 
-    Print( "mode %d. \"%s\" to_step() -> %d.\n",
-        n, name.c_str(), new_step );
+#ifdef DEBUG
+    Print( "mode %d. \"%s\" to_step() -> %d, step time %d ms, coop time %d ms.\n",
+        n, name.c_str(), new_step, active_step_time, cooperative_time );
 #endif // DEBUG
     }
 //-----------------------------------------------------------------------------
@@ -924,12 +1002,12 @@ mode* mode_manager::add_mode( const char* name )
     return modes[ modes.size() - 1 ];
     }
 //-----------------------------------------------------------------------------
-void mode_manager::set_param( saved_params_float *par )
+void mode_manager::set_param( saved_params_u_int_4 *par )
     {
     this->par = par;
     }
 //-----------------------------------------------------------------------------
-saved_params_float * mode_manager::get_param() const
+saved_params_u_int_4 * mode_manager::get_param() const
     {
     return par;
     }

@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 11/26/13 17:12:17.
+** Generated automatically by tolua++-1.0.92 on 12/17/13 16:09:16.
 */
 
 #ifndef __cplusplus
@@ -2728,6 +2728,39 @@ static int tolua_PAC_dev_mode_add_step00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: set_step_cooperate_time_par_n of class  mode */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_mode_set_step_cooperate_time_par_n00
+static int tolua_PAC_dev_mode_set_step_cooperate_time_par_n00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"mode",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  mode* self = (mode*)  tolua_tousertype(tolua_S,1,0);
+  int step_cooperate_time_par_n = ((int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_step_cooperate_time_par_n'", NULL);
+#endif
+  {
+   self->set_step_cooperate_time_par_n(step_cooperate_time_par_n);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_step_cooperate_time_par_n'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: active_step of class  mode */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_mode_active_step00
 static int tolua_PAC_dev_mode_active_step00(lua_State* tolua_S)
@@ -2856,6 +2889,36 @@ static int tolua_PAC_dev_mode_to_step00(lua_State* tolua_S)
  tolua_error(tolua_S,"#ferror in function 'to_step'.",&tolua_err);
  return 0;
 #endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: to_step of class  mode */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_mode_to_step01
+static int tolua_PAC_dev_mode_to_step01(lua_State* tolua_S)
+{
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"mode",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+ {
+  mode* self = (mode*)  tolua_tousertype(tolua_S,1,0);
+  unsigned int new_step = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
+  unsigned int cooper_time = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'to_step'", NULL);
+#endif
+  {
+   self->to_step(new_step,cooper_time);
+  }
+ }
+ return 0;
+tolua_lerror:
+ return tolua_PAC_dev_mode_to_step00(tolua_S);
 }
 #endif //#ifndef TOLUA_DISABLE
 
@@ -5548,10 +5611,12 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_beginmodule(tolua_S,"mode");
    tolua_function(tolua_S,"evaluation_time",tolua_PAC_dev_mode_evaluation_time00);
    tolua_function(tolua_S,"add_step",tolua_PAC_dev_mode_add_step00);
+   tolua_function(tolua_S,"set_step_cooperate_time_par_n",tolua_PAC_dev_mode_set_step_cooperate_time_par_n00);
    tolua_function(tolua_S,"active_step",tolua_PAC_dev_mode_active_step00);
    tolua_function(tolua_S,"active_step_evaluation_time",tolua_PAC_dev_mode_active_step_evaluation_time00);
    tolua_function(tolua_S,".geti",tolua_PAC_dev_mode__geti00);
    tolua_function(tolua_S,"to_step",tolua_PAC_dev_mode_to_step00);
+   tolua_function(tolua_S,"to_step",tolua_PAC_dev_mode_to_step01);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"step","step","",NULL);
   tolua_beginmodule(tolua_S,"step");

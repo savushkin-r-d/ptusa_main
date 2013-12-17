@@ -266,6 +266,17 @@ class step
 
         void evaluate() const;
 
+        void evaluate_on() const 
+            {
+            actions[ A_ON ]->evaluate();
+            actions[ A_LOWER_SEATS_ON /*A_UPPER_SEATS_ON*/ ]->evaluate();
+            };
+
+        void evaluate_off() const 
+            {
+            actions[ A_OFF ]->evaluate();            
+            };
+
         void final() const;
 
         /// Получение времени начала шага.
@@ -305,6 +316,12 @@ class mode
         step* add_step( const char* name, u_int next_step_n,
             u_int step_duration_par_n );
 
+        /// @brief Установка номера параметра со временем переходного переключения шагов.
+        void set_step_cooperate_time_par_n( int step_cooperate_time_par_n )
+            {
+            this->step_cooperate_time_par_n = step_cooperate_time_par_n;
+            }
+
         /// @brief Получение режима через операцию индексирования.
         ///
         /// @param idx - индекс режима.
@@ -322,7 +339,7 @@ class mode
 
         void final();
 
-        void to_step( u_int new_step );
+        void to_step( u_int new_step, u_long cooperative_time = 0 );
 
         u_long evaluation_time()
             {
@@ -363,6 +380,15 @@ class mode
         int active_step_time;        ///< Время активного шага.
         int active_step_next_step_n; ///< Следующий шаг.
 
+        int active_step_second_n;             ///< Параллельный активный шаг.
+        int active_step_second_start_time;    ///< Параллельный активный шаг.
+        
+        /// @brief Время переходного времени шагов.
+        u_int step_cooperate_time;
+
+        /// @brief Номер параметра со временем переходного времени шагов.
+        int step_cooperate_time_par_n;
+
         /// @brief Номера параметров времен шагов.
         std::vector< int > step_duration_par_ns;
 
@@ -399,9 +425,9 @@ class mode_manager
 
         mode* add_mode( const char* name );
 
-        void set_param( saved_params_float *par );
+        void set_param( saved_params_u_int_4 *par );
 
-        saved_params_float* get_param() const;
+        saved_params_u_int_4* get_param() const;
 
         /// @brief Получение режима через операцию индексирования.
         ///
@@ -422,7 +448,7 @@ class mode_manager
 
     private:
         /// @brief Параметры, содержащие продолжительность шагов, режимов.
-        saved_params_float *par;
+        saved_params_u_int_4 *par;
 
         std::vector< mode* > modes; ///< Режимы.
 
