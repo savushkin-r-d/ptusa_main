@@ -1212,8 +1212,8 @@ int cipline_tech_object::HasRet()
 		return 0;
 		}
 	int n, u;
-	n = rt_par_float[P_N_RET];
-	u = rt_par_float[P_N_UPR];
+	n = (int)rt_par_float[P_N_RET];
+	u = (int)rt_par_float[P_N_UPR];
 	if (n > 0 || u > 0)
 		{
 		return 1;
@@ -1332,7 +1332,7 @@ int cipline_tech_object::CheckErr( void )
 	// Нет расхода на подаче
 	if (T[TMR_NO_FLOW]->get_countdown_time() != (par_float[P_TM_R_NO_FLOW] * 1000L))
 		{
-		T[TMR_NO_FLOW]->set_countdown_time(par_float[P_TM_R_NO_FLOW] * 1000L);
+		T[TMR_NO_FLOW]->set_countdown_time((unsigned long)par_float[P_TM_R_NO_FLOW] * 1000L);
 		}
 	if (NP->get_state() == ON)
 		{
@@ -1573,7 +1573,7 @@ int cipline_tech_object::InitFilRR( int where )
 		divider = 1;
 		}
 	rt_par_float[P_MAX_OPER_TM] = (v/divider)*MAX_OP_TIME*3600;
-	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000L);
+	T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000L);
 	T[TMR_OP_TIME]->start();
 	rt_par_float[P_SUM_OP] = 0;
 	cnt->start();
@@ -1627,7 +1627,7 @@ int cipline_tech_object::InitCircRR( int where )
 
 	rt_par_float[P_OP_TIME_LEFT] = 0;
 	rt_par_float[P_MAX_OPER_TM] = parpar[0][P_TM_CIRC_RR];
-	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM]*1000L);
+	T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM]*1000L);
 	T[TMR_OP_TIME]->start();
 	rt_par_float[P_SUM_OP] = 0;
 	cnt->start();
@@ -1639,14 +1639,14 @@ int cipline_tech_object::InitCheckConc( int where )
 	InitCircRR(where);
 	rt_par_float[P_MAX_OPER_TM] = parpar[0][P_TM_CHKC];
 	T[TMR_OP_TIME]->reset();
-	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000L);
+	T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000L);
 	T[TMR_OP_TIME]->start();
 	return 0;
 	}
 
 int cipline_tech_object::InitAddRR( int where )
 	{
-	float v, pd, kk, kz, ro, vt, kt;
+	float v, pd = 0, kk = 0, kz = 0, ro = 0, vt = 0, kt;
 	V05->off();
 	V06->on();
 	V00->off();
@@ -1713,7 +1713,7 @@ int cipline_tech_object::InitAddRR( int where )
 		divider = 1;
 		}
 	rt_par_float[P_MAX_OPER_TM] = (v/divider)*3600;
-	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000L);
+	T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000L);
 	T[TMR_OP_TIME]->start();
 	rt_par_float[P_SUM_OP] = 0;
 	cnt->start();
@@ -1765,9 +1765,9 @@ int cipline_tech_object::InitOpolRR( int where )
 
 	rt_par_float[P_OP_TIME_LEFT] = 0;
 	rt_par_float[P_MAX_OPER_TM] = 300;
-	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000L);
+	T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000L);
 	T[TMR_OP_TIME]->start();
-	T[TMR_CHK_CONC]->set_countdown_time(rt_par_float[P_TM_NO_CONC] * 1000L);
+	T[TMR_CHK_CONC]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_CONC] * 1000L);
 	rt_par_float[P_SUM_OP] = 0;
 
 	rt_par_float[P_ZAD_CONC] = z;
@@ -2159,7 +2159,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 		divider = 1;
 		}
 	rt_par_float[P_MAX_OPER_TM] = 3.6 * MAX_OP_TIME * p / divider;
-	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000);
+	T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000);
 	T[TMR_OP_TIME]->start();
 
 	rt_par_float[P_ZAD_CONC] = z;
@@ -2312,12 +2312,12 @@ int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
 		divider = 1;
 		}
 	rt_par_float[P_MAX_OPER_TM] = 3.6 * MAX_OP_TIME * p / divider;
-	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000);
+	T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000);
 	T[TMR_OP_TIME]->start();
-	T[TMR_RETURN]->set_countdown_time(rt_par_float[P_TM_NO_FLOW_R] * 1000);
+	T[TMR_RETURN]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_FLOW_R] * 1000);
 	T[TMR_RETURN]->reset();
 	T[TMR_CHK_CONC]->reset();
-	T[TMR_CHK_CONC]->set_countdown_time(rt_par_float[P_TM_NO_CONC] * 1000);
+	T[TMR_CHK_CONC]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_CONC] * 1000);
 	rt_par_float[P_SUM_OP] = 0;
 
 	rt_par_float[P_ZAD_CONC] = z;
@@ -2390,9 +2390,9 @@ int cipline_tech_object::InitOporCIP( int where, int step, int f )
 	rt_par_float[P_VRAB] = 0;
 	rt_par_float[P_OP_TIME_LEFT] = 0;
 	rt_par_float[P_MAX_OPER_TM] = 600;
-	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM]*1000);
+	T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM]*1000);
 	T[TMR_OP_TIME]->start();
-	T[TMR_RETURN]->set_countdown_time(rt_par_float[P_TM_RET_IS_EMPTY]*1000);
+	T[TMR_RETURN]->set_countdown_time((unsigned long)rt_par_float[P_TM_RET_IS_EMPTY]*1000);
 	T[TMR_RETURN]->reset();
 	rt_par_float[P_SUM_OP] = 0;
 
@@ -2454,7 +2454,7 @@ int cipline_tech_object::InitFilCirc( int with_what, int step, int f )
 	rt_par_float[P_VRAB] = rt_par_float[P_V_RAB_ML];
 	rt_par_float[P_OP_TIME_LEFT] = 0;
 	rt_par_float[P_MAX_OPER_TM] = 300;
-	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM]*1000);
+	T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM]*1000);
 	T[TMR_OP_TIME]->start();
 	return 0;
 	}
@@ -2521,7 +2521,7 @@ int cipline_tech_object::InitOporCirc( int where, int step, int f )
 	rt_par_float[P_VRAB] = rt_par_float[P_V_LL_BOT];
 	rt_par_float[P_OP_TIME_LEFT] = 0;
 	rt_par_float[P_MAX_OPER_TM] = 300;
-	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM]*1000);
+	T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM]*1000);
 	T[TMR_OP_TIME]->start();
 	return 0;
 	}
@@ -2529,7 +2529,7 @@ int cipline_tech_object::InitOporCirc( int where, int step, int f )
 int cipline_tech_object::InitCirc( int what, int step, int f )
 	{
 	float t=600, z=0;
-	unsigned long tm;
+	unsigned long tm = 0;
 	ret_circ_flag = 0;
 	if (rt_par_float[P_PODP_CIRC] != 100)
 		{
@@ -2561,11 +2561,11 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 				V10->on();
 				}
 			t=rt_par_float[P_T_WP];
-			tm=rt_par_float[PTM_OP]*1000;
+			tm=(unsigned long)rt_par_float[PTM_OP]*1000;
 			break;
 		case SANITIZER:
 			t=rt_par_float[P_T_SANITIZER];
-			tm=rt_par_float[PTM_SANITIZER]*1000;
+			tm=(unsigned long)rt_par_float[PTM_SANITIZER]*1000;
 			break;
 		case HOT_WATER:
 			if (100 == rt_par_float[P_PODP_CIRC])
@@ -2574,7 +2574,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 				V10->on();
 				}
 			t=rt_par_float[P_T_D];
-			tm=rt_par_float[PTM_D]*1000;
+			tm=(unsigned long)rt_par_float[PTM_D]*1000;
 			break;
 		case SHCH:
 			if (100 == rt_par_float[P_PODP_CIRC])
@@ -2585,11 +2585,11 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 			t=rt_par_float[P_T_S];
 			if (((int)rt_par_float[P_PROGRAM] & ((1 << PRG_K) + (1 << PRG_S))) == ((1 << PRG_K) + (1 << PRG_S)))
 				{
-				tm = rt_par_float[PTM_S_SK] * 1000L;
+				tm = (unsigned long)rt_par_float[PTM_S_SK] * 1000L;
 				}
 			else
 				{
-				tm=rt_par_float[PTM_S]*1000;
+				tm=(unsigned long)rt_par_float[PTM_S]*1000;
 				}
 			z=parpar[0][P_CZAD_S];
 			break;
@@ -2603,11 +2603,11 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 			t=rt_par_float[P_T_K];
 			if (((int)rt_par_float[P_PROGRAM] & ((1 << PRG_K) + (1 << PRG_S))) == ((1 << PRG_K) + (1 << PRG_S)))
 				{
-				tm = rt_par_float[PTM_K_SK] * 1000L;
+				tm = (unsigned long)rt_par_float[PTM_K_SK] * 1000L;
 				}
 			else
 				{
-				tm=rt_par_float[PTM_K]*1000;
+				tm=(unsigned long)rt_par_float[PTM_K]*1000;
 				}
 			break;
 		}
@@ -2786,7 +2786,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 
 		int cipline_tech_object::FromObject( int what, int where )
 			{
-			float c;
+			float c = 0;
 			int dst;
 			unsigned long tmp;
 			rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
@@ -3131,16 +3131,14 @@ int cipline_tech_object::pidnumber = 1;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-MSAPIDInterface::MSAPIDInterface( PID* pid, run_time_params_float* par, int taskpar, i_AO_device* ao /*= 0*/, i_AI_device* ai /*= 0 */ ) :
-	pidr(pid),
-	input(ai),
-	output(ao),
-	HI(0),
-	rp(taskpar),
-	lineparams(par),
-	lastEvalInOnState(get_millisec())
+MSAPIDInterface::MSAPIDInterface( PID* pid, run_time_params_float* par, int taskpar, i_AO_device* ao /*= 0*/, i_AI_device* ai /*= 0 */ )
 	{
-
+    pidr = pid;
+    input = ai;
+    rp = taskpar;
+    lineparams = par;
+    lastEvalInOnState = get_millisec();
+    HI = 0;
 	}
 
 void MSAPIDInterface::eval()
@@ -3266,5 +3264,6 @@ void TPumpController::Eval()
 			}
 		}
 	}
-
+#ifdef WIN_OS
 #pragma warning(pop)
+#endif //WIN_OS
