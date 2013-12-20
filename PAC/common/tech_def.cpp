@@ -122,10 +122,8 @@ int tech_object::set_mode( u_int mode, int newm )
                 //Проверка режима на проверку ОС устройств.
                 const int ERR_STR_SIZE = 41;
                 char res_str[ ERR_STR_SIZE ] = "обр. связь ";
-
-                int idx = mode - 1;
-
-                int res = ( *modes_manager )[ idx ]->check_devices(
+                                
+                int res = ( *modes_manager )[ mode ]->check_devices(
                     res_str + strlen( res_str ), ERR_STR_SIZE - strlen( res_str ) );
                 if ( res && is_check_mode( mode ) == 1 )
                     {
@@ -215,17 +213,15 @@ int tech_object::get_mode( u_int mode )
 int tech_object::check_on_mode( u_int mode, char* reason )
     {
     if ( mode > modes_count || 0 == mode ) return 0;
-
-    int idx = mode - 1;
-    return (*modes_manager)[ idx ]->check_on( reason );
+        
+    return (*modes_manager)[ mode ]->check_on( reason );
     }
 //-----------------------------------------------------------------------------
 void tech_object::init_mode( u_int mode )
     {
     if ( mode > modes_count || 0 == mode ) return;
 
-    int idx = mode - 1;
-    (*modes_manager)[ idx ]->init();
+    (*modes_manager)[ mode ]->init();
     }
 //-----------------------------------------------------------------------------
 int tech_object::evaluate()
@@ -251,9 +247,8 @@ int tech_object::check_off_mode( u_int mode )
 int tech_object::final_mode( u_int mode )
     {
     if ( mode > modes_count || 0 == mode ) return 1;
-
-    int idx = mode - 1;
-    ( *modes_manager )[ idx ]->final();
+        
+    ( *modes_manager )[ mode ]->final();
 
     return 0;
     }
