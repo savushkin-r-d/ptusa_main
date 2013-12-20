@@ -433,7 +433,7 @@ class run_time_params_u_int_4: public parameters < u_int_4, false >
         /// @param count - количество параметров.
         /// @param name  - имя параметров.
         run_time_params_u_int_4( int count,
-            const char *name = "RT_PARAM_UI" ) : parameters < u_int_4, false >( count, name )
+            const char *name = "RT_PAR_UI" ) : parameters < u_int_4, false >( count, name )
             {
             }
 
