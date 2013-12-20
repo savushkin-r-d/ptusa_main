@@ -16,7 +16,6 @@
 #include "mode_mngr.h"
 #include "errors.h"
 
-const char* mode_manager::UNKN_MODE_NAME = "??";
 //-----------------------------------------------------------------------------
 action::action( std::string name, u_int group_cnt ) : name( name )
     {
@@ -1014,9 +1013,9 @@ saved_params_u_int_4 * mode_manager::get_param() const
 //-----------------------------------------------------------------------------
 mode* mode_manager::operator[]( unsigned int idx )
     {
-    if ( idx < modes.size() )
+    if ( idx > 0 && idx <= modes.size() )
         {
-        return modes[ idx ];
+        return modes[ idx - 1 ];
         }
 
 #ifdef DEBUG

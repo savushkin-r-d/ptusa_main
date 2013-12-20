@@ -89,8 +89,16 @@ int tech_object::set_mode( u_int mode, int newm )
 #endif
 
     if ( newm != 0 ) newm = 1;
-    if ( mode > modes_count - 1 ) res = 3;
-    else
+    if ( mode > modes_count ) 
+        {
+        res = 3;
+        }
+    if ( 0 == mode ) 
+        {
+        res = 4;
+        }
+
+    if ( 0 == res )
         {
         if ( get_mode( mode ) == newm ) res = 1;
         else
@@ -100,12 +108,9 @@ int tech_object::set_mode( u_int mode, int newm )
 
                 if ( ( res = lua_check_off_mode( mode ) ) == 0 ) // Check if possible.
                     {
-                    state[ mode / 32 ] = state[ mode / 32 ] & ~( 1UL << mode % 32 );
+                    int idx = mode - 1;
+                    state[ idx / 32 ] = state[ idx / 32 ] & ~( 1UL << idx % 32 );
                     lua_final_mode( mode );
-#ifdef USE_COMB
-                g_greb->close_path( paths[ mode ].in_x, paths[ mode ].in_y,
-                    paths[ mode ].out_x, paths[ mode ].out_y );
-#endif // USE_COMB
                     }
                 else
                     {
@@ -118,8 +123,10 @@ int tech_object::set_mode( u_int mode, int newm )
                 const int ERR_STR_SIZE = 41;
                 char res_str[ ERR_STR_SIZE ] = "обр. связь ";
 
-                int res = ( *modes_manager )[ mode ]->check_devices( res_str +
-                    strlen( res_str ), ERR_STR_SIZE - strlen( res_str ) );
+                int idx = mode - 1;
+
+                int res = ( *modes_manager )[ idx ]->check_devices(
+                    res_str + strlen( res_str ), ERR_STR_SIZE - strlen( res_str ) );
                 if ( res && is_check_mode( mode ) == 1 )
                     {
                     set_err_msg( res_str, mode );
@@ -133,12 +140,9 @@ int tech_object::set_mode( u_int mode, int newm )
                     if ( ( res = lua_check_on_mode( mode ) ) == 0 ) // Check if possible.
                         {
                         lua_init_mode( mode );
-                        state[ mode / 32 ] = state[ mode / 32 ] | 1UL << mode % 32;
-#ifdef USE_COMB
-                        g_greb->open_path( paths[ mode ].in_x, paths[ mode ].in_y,
-                            paths[ mode ].out_x, paths[ mode ].out_y, comb_path::OT_COMB,
-                            this, mode );
-#endif // USE_COMB
+                        int idx = mode - 1;
+                        state[ idx / 32 ] = state[ idx / 32 ] | 1UL << idx % 32;
+
                         //Проверка режима на проверку ОС устройств.
                         if ( is_dev_err )
                             {
@@ -168,6 +172,14 @@ int tech_object::set_mode( u_int mode, int newm )
             Print( " (is already %s).\n", newm == 0 ? "OFF" : " ON" );
             break;
 
+        case 3:
+            Print( " (mode %d > modes count %d).\n",  mode, modes_count );
+            break;
+
+        case 4:
+            Print( " (no zero (0) mode).\n" );
+            break;
+
          default:
              if ( res > 100 )
                 {
@@ -194,30 +206,38 @@ int tech_object::set_mode( u_int mode, int newm )
 //-----------------------------------------------------------------------------
 int tech_object::get_mode( u_int mode )
     {
-    if ( mode >= modes_count ) return 0;
+    if ( mode > modes_count || 0 == mode ) return 0;
 
-    return ( int )( ( u_int_4 ) ( state.at( mode / 32 ) >> mode % 32 ) & 1 );
+    int idx = mode - 1;
+    return ( int )( ( u_int_4 ) ( state.at( idx / 32 ) >> idx % 32 ) & 1 );
     }
 //-----------------------------------------------------------------------------
 int tech_object::check_on_mode( u_int mode, char* reason )
     {
-    return (*modes_manager)[ mode ]->check_on( reason );
+    if ( mode > modes_count || 0 == mode ) return 0;
+
+    int idx = mode - 1;
+    return (*modes_manager)[ idx ]->check_on( reason );
     }
 //-----------------------------------------------------------------------------
 void tech_object::init_mode( u_int mode )
     {
-    (*modes_manager)[ mode ]->init();
+    if ( mode > modes_count || 0 == mode ) return;
+
+    int idx = mode - 1;
+    (*modes_manager)[ idx ]->init();
     }
 //-----------------------------------------------------------------------------
 int tech_object::evaluate()
     {
     for ( u_int i = 0; i < modes_count; i++ )
         {
-        modes_time[ i + 1 ] =(*modes_manager)[ i ]->evaluation_time() / 1000;
+        int idx = i + 1;
+        modes_time[ idx ] =( *modes_manager )[ idx ]->evaluation_time() / 1000;
 
-        if ( get_mode( i ) == 1 )
+        if ( get_mode( idx ) == 1 )
         	{
-            (*modes_manager)[ i ]->evaluate();
+            ( *modes_manager )[ idx ]->evaluate();
         	}
         }
     return 0;
@@ -230,10 +250,10 @@ int tech_object::check_off_mode( u_int mode )
 //-----------------------------------------------------------------------------
 int tech_object::final_mode( u_int mode )
     {
-    if ( mode < modes_count )
-        {
-        (*modes_manager)[ mode ]->final();
-        }
+    if ( mode > modes_count || 0 == mode ) return 1;
+
+    int idx = mode - 1;
+    ( *modes_manager )[ idx ]->final();
 
     return 0;
     }
@@ -249,7 +269,7 @@ int tech_object::lua_exec_cmd( u_int cmd )
 int tech_object::lua_check_on_mode( u_int mode )
     {
     char err_msg[ 200 ] = "";
-
+        
     if ( int res = tech_object::check_on_mode( mode, err_msg ) )
         {
         set_err_msg( err_msg, mode );
@@ -426,7 +446,7 @@ int tech_object::save_device( char *buff )
     for ( u_int i = 0; i < modes_count; i++ )
         {
         sprintf( buff + answer_size, "%d, ",
-            (*modes_manager)[ i ]->active_step());
+            (*modes_manager)[ i + 1 ]->active_step());
         answer_size += strlen( buff + answer_size );
         }
     sprintf( buff + answer_size, "\n\t\t},\n" );
@@ -613,32 +633,32 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
     error_number++;
     new_err->n = error_number;
     new_err->type = type;
-
+    
     switch ( type )
         {
         case ERR_CANT_ON:
             snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - не включен режим %.1d \'%.40s\' - %.60s.",
-                name, number, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
+                name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
             break;
 
         case ERR_ON_WITH_ERRORS:
             snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - включен с ошибкой режим %.1d \'%.40s\' - %.50s.",
-                name, number, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
+                name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
             break;
 
         case ERR_OFF:
             snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - отключен режим %.1d \'%.40s\' - %.50s.",
-                name, number, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
+                name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
             break;
 
         case ERR_OFF_AND_ON:
             snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - переход от %.1d \'%.40s\' к %.1d \'%.40s\'.",
-                name, number, mode + 1, modes_manager->get_mode_name( mode ),
-                new_mode + 1, modes_manager->get_mode_name( new_mode ) );
+                name, number, mode, ( *modes_manager )[ mode ]->get_name(),
+                new_mode, ( *modes_manager )[ new_mode ]->get_name() );
 
             if ( strcmp( err_msg, "" ) != 0 )
                 {
@@ -649,11 +669,11 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
             break;
 
         case ERR_DURING_WORK:
-            if ( mode >= 0 )
+            if ( mode > 0 )
                 {
                 snprintf( new_err->msg, sizeof( new_err->msg ),
                     "\'%.40s %d\' - режим %.1d \'%.40s\' - %.50s.",
-                    name, number, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
+                    name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
                 }
             else
                 {
@@ -676,7 +696,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
 #endif // DEBUG
             snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s\' - режим %.1d \'%.40s\' - %.50s.",
-                name, mode + 1, modes_manager->get_mode_name( mode ), err_msg );
+                name, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
             break;
         }
 

@@ -364,9 +364,9 @@ class mode
         /// Выводит на консоль объект.
         void print( const char* prefix = "" ) const;
 
-        const std::string* get_name() const
+        const char* get_name() const
             {
-            return &name;
+            return name.c_str();
             }
 
         int check_devices( char* err_dev_name, int str_len );
@@ -412,16 +412,6 @@ class mode_manager
         mode_manager( u_int modes_cnt );
 
         ~mode_manager();
-
-        const char* get_mode_name( int n ) const
-            {
-            if ( n >= 0 && ( u_int ) n < modes.size() )
-                {
-                return modes[ n ]->get_name()->c_str();
-                }
-
-            return UNKN_MODE_NAME;
-            }
 
         mode* add_mode( const char* name );
 
