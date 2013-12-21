@@ -950,8 +950,8 @@ class valve_DO1_DI2 : public valve
             return valve::get_fb_state();
 #else
             int o = get_DO( DO_INDEX );
-            int i0 = get_DI( DI_INDEX_1 );
-            int i1 = get_DI( DI_INDEX_2 );
+            int i1 = get_DI( DI_INDEX_1 );
+            int i0 = get_DI( DI_INDEX_2 );
 
             if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
                 ( o == 1 && i1 == 1 && i0 == 0 ) )
