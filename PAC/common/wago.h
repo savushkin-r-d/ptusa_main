@@ -112,8 +112,8 @@ class wago_device
             u_int* tables;  ///< ћассив таблиц.
             u_int* offsets; ///< ћассив смещений в пределах таблиц.
 
-            u_int  **int_read_values;    ///< ћассив значений дл€ чтени€.
-            u_int  **int_write_values;   ///< ћассив значений дл€ записи.
+            int  **int_read_values;      ///< ћассив значений дл€ чтени€.
+            int  **int_write_values;     ///< ћассив значений дл€ записи.
             u_char **char_read_values;   ///< ћассив значений дл€ чтени€.
             u_char **char_write_values;  ///< ћассив значений дл€ записи.
 
@@ -198,7 +198,7 @@ class wago_manager
         /// @param offset - смещение в пределах узла.
         ///
         /// @return - указатель на данные канала.
-        u_int* get_AI_read_data( u_int node_n, u_int offset );
+        int* get_AI_read_data( u_int node_n, u_int offset );
 
         /// @brief ѕолучение области чтени€ данных заданного канала
         /// аналогового выхода.
@@ -207,7 +207,7 @@ class wago_manager
         /// @param offset - смещение в пределах узла.
         ///
         /// @return - указатель на данные канала.
-        u_int* get_AO_read_data( u_int node_n, u_int offset );
+        int* get_AO_read_data( u_int node_n, u_int offset );
 
         /// @brief ѕолучение области записи данных заданного канала
         /// аналогового выхода.
@@ -216,7 +216,7 @@ class wago_manager
         /// @param offset - смещение в пределах узла.
         ///
         /// @return - указатель на данные канала.
-        u_int* get_AO_write_data( u_int node_n, u_int offset );
+        int* get_AO_write_data( u_int node_n, u_int offset );
 
     protected:
         wago_manager();
@@ -279,8 +279,8 @@ class wago_manager
 
             // Analog outputs ( AO ).
             u_int AO_cnt;       ///< Amount of AO.
-            u_int AO[ C_ANALOG_BUF_SIZE ];          ///< Current values.
-            u_int AO_[ C_ANALOG_BUF_SIZE ];         ///< To write.
+            int AO[ C_ANALOG_BUF_SIZE ];          ///< Current values.
+            int AO_[ C_ANALOG_BUF_SIZE ];         ///< To write.
             u_int *AO_offsets;  ///< Offsets in common data.
             u_int *AO_types;    ///< Channels type.
             u_int AO_size;
@@ -291,7 +291,7 @@ class wago_manager
 
             // Analog inputs ( AI ).
             u_int AI_cnt;       ///< Amount of AI.
-            u_int AI[ C_ANALOG_BUF_SIZE ];          ///< Current values.
+            int AI[ C_ANALOG_BUF_SIZE ];          ///< Current values.
             u_int *AI_offsets;  ///< Offsets in common data.
             u_int *AI_types;    ///< Channels type.
             u_int AI_size;
