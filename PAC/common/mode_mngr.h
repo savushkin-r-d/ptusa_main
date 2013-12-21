@@ -33,6 +33,7 @@
 #include "param_ex.h"
 
 class mode_manager;
+class step;
 //-----------------------------------------------------------------------------
 /// @brief Действие над устройствами (включение, выключение и т.д.).
 class action
@@ -130,11 +131,14 @@ class off_action: public action
 class open_seat_action: public action
     {
     public:
-        open_seat_action();
+        open_seat_action( bool is_mode, step *owner );
 
         void init();
         void evaluate();
         void final();
+
+
+        void set_wait_time( int wait_time );
 
         /// @brief Добавление устройства к действию.
         ///
@@ -168,6 +172,9 @@ class open_seat_action: public action
         std::vector< std::vector< device* > > wash_lower_seat_devices;
 
         u_int_4 start_cycle_time; ///< Время старта цикла (ожидания или промывки).
+
+        bool is_mode;             ///< Является ли шагом режима.
+        step* owner;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -287,6 +294,15 @@ class step
         /// Установление времени начала шага.
         void set_start_time( u_int_4 start_time );
 
+        /// Установление времени шага.
+        void set_step_time( u_int_4 step_time );
+
+        /// Получение времени шага.
+        u_int_4 get_step_time() const
+            {
+            return step_time;
+            }
+
         /// Выводит на консоль объект.
         void print( const char* prefix = "" ) const;
 
@@ -302,6 +318,8 @@ class step
         std::vector< action* > actions; ///< Действия.
         action action_stub;             ///< Фиктивное действие.
         u_int_4 start_time;             ///< Время старта шага.
+
+        u_int_4 step_time;              ///< Время  шага.
 
         bool is_mode;     ///< Выполняется ли все время во время режима.
         std::string name; ///< Имя.

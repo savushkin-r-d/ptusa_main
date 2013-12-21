@@ -218,7 +218,7 @@ step::step( std::string name, bool is_mode /*= false */ ) : action_stub( "Заглуш
     {
     actions.push_back( new on_action() );
     actions.push_back( new off_action() );
-    actions.push_back( new open_seat_action() );
+    actions.push_back( new open_seat_action( is_mode, this ) );
 
     if ( is_mode )
         {
@@ -280,6 +280,11 @@ u_int_4 step::get_start_time() const
 void step::set_start_time( u_int_4 start_time )
     {
     this->start_time = start_time;
+    }
+//----------------------------------------------------------------------------
+void step::set_step_time( u_int_4 step_time )
+    {
+    this->step_time = step_time;
     }
 //-----------------------------------------------------------------------------
 void step::print( const char* prefix /*= "" */ ) const
@@ -402,31 +407,50 @@ void DI_DO_action::print( const char* prefix /*= "" */ ) const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-open_seat_action::open_seat_action() : action( "Промывка седел" ),
+open_seat_action::open_seat_action( bool is_mode, step *owner ) : 
+    action( "Промывка седел" ),
     phase( P_WAIT ),
     active_group_n( 0 ),
-    wait_time( 0 ),
-    wash_time( 0 ),
-    start_cycle_time( 0 )
+    wait_time( 60000 ),
+    wash_time( 1000 ),
+    start_cycle_time( 0 ),
+    is_mode( is_mode ),
+    owner( owner )
     {
     }
 //-----------------------------------------------------------------------------
+void open_seat_action::set_wait_time( int wait_time )
+    {
+    this->wait_time = wait_time;
+    }
+//----------------------------------------------------------------------------
 void open_seat_action::init()
     {
-    if ( wash_upper_seat_devices.empty() && wash_lower_seat_devices.empty() ) return;
+    if ( wash_upper_seat_devices.empty() && wash_lower_seat_devices.empty() )
+        {
+        return;
+        }
 
     start_cycle_time  = get_millisec();
     phase             = P_WAIT;
     next_phase        = P_OPEN_UPPER;
     active_group_n    = 0;
 
-    wait_time = ( *( PAC_info::get_instance()->par ) )
-        [ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;
+    if ( is_mode )
+    	{
+        wait_time = ( *( PAC_info::get_instance()->par ) )
+            [ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;        
+       
+        wait_time /= 
+            wash_upper_seat_devices.size() + wash_lower_seat_devices.size();
+    	}
+    else
+        {
+        wait_time = owner->get_step_time() / 2;
+        }
 
     wash_time = ( *( PAC_info::get_instance()->par ) )
-        [ PAC_info::P_MIX_FLIP_TIME ];
-
-    wait_time /= wash_upper_seat_devices.size() + wash_lower_seat_devices.size();
+        [ PAC_info::P_MIX_FLIP_TIME ];    
 
     active_group_n = 0;
     }
@@ -761,7 +785,7 @@ void wash_action::print( const char* prefix /*= "" */ ) const
 //-----------------------------------------------------------------------------
 mode::mode( const char* name, mode_manager *owner, int n ) : name( name ),
     mode_step(  new step( "Шаг режима", true ) ),
-    active_step_n( 0 ),
+    active_step_n( -1 ),
     active_step_second_n( -1 ),
     step_cooperate_time_par_n( -1 ),
     start_time( get_millisec() ),
@@ -940,6 +964,7 @@ void mode::to_step( u_int new_step, u_long cooperative_time )
             active_step_time = u_int( owner->get_param()[ 0 ][ par_n ] * 1000L );
             active_step_next_step_n = next_step_ns[ active_step_second_n ];
 
+            steps[ active_step_second_n ]->set_step_time( active_step_time );
             steps[ active_step_second_n ]->init();
             }
         }     
@@ -956,15 +981,17 @@ void mode::to_step( u_int new_step, u_long cooperative_time )
         active_step_time        = 0;
         active_step_next_step_n = 0;
 
-        steps[ active_step_n ]->init();
-        steps[ active_step_n ]->evaluate();
-
+        //Время шага
         int par_n = step_duration_par_ns[ active_step_n ];
         if ( owner->get_param() != 0 && par_n > 0 )
             {           
             active_step_time = u_int( owner->get_param()[ 0 ][ par_n ] * 1000L );
             active_step_next_step_n = next_step_ns[ active_step_n ];
             }
+
+        steps[ active_step_n ]->set_step_time( active_step_time );
+        steps[ active_step_n ]->init();
+        steps[ active_step_n ]->evaluate();
         }
 
 #ifdef DEBUG
