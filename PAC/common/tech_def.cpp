@@ -527,7 +527,7 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
                 }
             }
 
-        if ( mode > get_modes_count() )
+        if ( mode > get_modes_count() + 1 )
             {
             // Command.
             cmd = lua_exec_cmd( mode );
