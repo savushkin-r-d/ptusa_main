@@ -222,7 +222,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
             //
         case 461:
             val *= 0.1f;
-            val = val >= -50 && val <= 150 ? val : -1000;
+            val = val >= -50 && val <= 200 ? val : -1000;
             return val;
 
             // Выход модуля 446.
