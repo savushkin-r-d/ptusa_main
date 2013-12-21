@@ -971,12 +971,12 @@ class valve_DO1_DI2 : public valve
 #ifndef DEBUG_NO_WAGO_MODULES
         int get_off_fb_value()
             {
-            return get_DI( DI_INDEX_1 );
+            return get_DI( DI_INDEX_2 );
             }
 
         int get_on_fb_value()
             {
-            return get_DI( DI_INDEX_2 );
+            return get_DI( DI_INDEX_1 );
             }
 #endif // DEBUG_NO_WAGO_MODULES
     };
