@@ -1199,13 +1199,13 @@ class AI1 : public analog_wago_device
             };
 
         /// @brief Получение максимального значения выхода устройства.
-        virtual float get_max_val() 
+        virtual float get_max_val()
             {
             return 0;
             }
 
         /// @brief Получение минимального значения выхода устройства.
-        virtual float get_min_val() 
+        virtual float get_min_val()
             {
             return 0;
             }
@@ -1238,7 +1238,7 @@ class temperature_e : public AI1
 #else
             float v = get_AI( C_AI_INDEX, 0, 0 );
             return -1000 == v ? -1000 :
-                get_par( P_ZERO_ADJUST_COEFF, 0 ) + v );
+                get_par( P_ZERO_ADJUST_COEFF, 0 ) + v;
 #endif
             }
     };
