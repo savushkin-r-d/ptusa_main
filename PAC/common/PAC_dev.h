@@ -1226,6 +1226,12 @@ class temperature_e : public AI1
 
         float get_max_val();
         float get_min_val();
+
+        float get_value()
+            {
+            float v = analog_wago_device::get_value();
+            return -1000 == v ? -1000 : AI1::get_value();            
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Текущий уровень.
