@@ -212,6 +212,8 @@ class wash_action: public action
             {
             }
 
+        void final();
+
         void evaluate();
 
         void print( const char* prefix /*= "" */ ) const;
