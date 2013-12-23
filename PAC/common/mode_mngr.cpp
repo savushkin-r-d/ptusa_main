@@ -345,16 +345,16 @@ int step::check_devices( char* err_dev_name, int str_len )
 //-----------------------------------------------------------------------------
 void DI_DO_action::evaluate()
     {
-    if ( devices.size() == 0  )
+    if ( devices.empty() )
         {
         return;
         }
 
     for ( u_int i = 0; i < devices.size(); i++ )
         {
-        if ( devices[ i ].size() == 0  )
+        if ( devices[ i ].empty() )
             {
-            continue;;
+            continue;
             }
 
         if ( devices[ i ][ 0 ]->is_active() )
@@ -376,11 +376,11 @@ void DI_DO_action::evaluate()
 //-----------------------------------------------------------------------------
 void DI_DO_action::print( const char* prefix /*= "" */ ) const
     {
-    if ( devices.size() == 0  )
+    if ( devices.empty() )
         {
         return;
         }
-    if ( devices[ 0 ].size() == 0 )
+    if ( devices[ 0 ].empty() )
         {
         return;
         }
@@ -388,7 +388,7 @@ void DI_DO_action::print( const char* prefix /*= "" */ ) const
     Print( "%s%s: ", prefix, name.c_str() );
     for ( u_int i = 0; i < devices.size(); i++ )
         {
-        if ( devices[ i ].size() == 0  )
+        if ( devices[ i ].empty() )
             {
             continue;
             }
