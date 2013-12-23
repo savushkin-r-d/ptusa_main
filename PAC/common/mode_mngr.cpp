@@ -885,7 +885,15 @@ void mode::evaluate()
                 step_switch_time *= 1000L;                
                 }
             
-            to_step( active_step_next_step_n, step_switch_time );
+            if ( -1 == active_step_next_step_n )
+            	{       
+                steps[ active_step_n ]->final();
+                active_step_n = -1;
+            	}
+            else
+                {
+                to_step( active_step_next_step_n, step_switch_time );
+                }            
             }
         }      
     }
@@ -1084,7 +1092,8 @@ void mode_manager::print()
         }
     }
 //-----------------------------------------------------------------------------
-mode_manager::mode_manager( u_int modes_cnt ): last_action_time( get_millisec() )
+mode_manager::mode_manager( u_int modes_cnt ):
+    last_action_time( get_millisec() )
     {
     mode_stub = new mode( "Режим-заглушка", this, -1 );
     }
