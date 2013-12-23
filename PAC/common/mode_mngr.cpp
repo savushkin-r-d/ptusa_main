@@ -666,13 +666,13 @@ void wash_action::final()
     //Снимаем сигналы "Мойка ОК".
     for ( u_int i = 0; i < devices[ G_DO ].size(); i++ )
         {
-        devices[ G_DO ][ i ]->on();
+        devices[ G_DO ][ i ]->off();
         }
 
     //Выключаем устройства.
     for ( u_int i = 0; i < devices[ G_DEV ].size(); i++ )
         {
-        devices[ G_DEV ][ i ]->on();
+        devices[ G_DEV ][ i ]->off();
         }
     }
 //---------------------------------------------------------------------------
