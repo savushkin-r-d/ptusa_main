@@ -5,7 +5,8 @@
 #endif //KHUTOR
 
 #ifdef KHUTOR
-i_DO_device* ModbusServ::KOAG1HL1;
+i_DO_device* ModbusServ::KOAG_HL1[ ModbusServ::KOAG_CNT ];
+i_AI_device* ModbusServ::KOAG_TE[ KOAG_CNT ][ 2 ];
 #endif //KHUTOR
 
 unsigned char ModbusServ::UTable[128][2] = 
@@ -162,21 +163,28 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
                 objnumber = i+startingAddress;
                 coilgroup = data[0];
 #ifdef KHUTOR
-                switch ( coilgroup )
-                	{
-                    case 1:
-                        switch ( objnumber )
-                            {
-                            case 0:
-                                ForceBit( i, &outdata[ 3 ], KOAG1HL1->get_state() );
-                                break;
-                            }
-                        break;
-                	}
-#endif //KHUTOR
+                if ( coilgroup >= 1 && coilgroup <= 16 )
+                    {
+                    int coag_idx = ( coilgroup - 1 ) * 2 + 1;
+                    if( objnumber >= 100 ) coag_idx++;
 
+                    if ( 0 == objnumber || 100 == objnumber )
+                        {
+                        ForceBit( i, &outdata[ 3 ], 
+                            KOAG_HL1[ coag_idx - 1 ]->get_state() );
+                        }                          
+
+                    if ( ( objnumber >= 1 && objnumber <= 16 ) ||
+                        ( objnumber >= 101 && objnumber <= 116 ) )
+                        {
+                        ForceBit( i, &outdata[ 3 ], 
+                            G_TECH_OBJECTS( coag_idx )->get_mode( objnumber ) );
+                        }
+                    }
+#endif //KHUTOR
                 }
             return 3+numberofBytes;
+
         case 0x03: //Read Holding Registers
             startingAddress = data[2] * 256 + data[3];
             numberofElements = data[4] * 256 + data[5];
@@ -186,49 +194,130 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
                 coilgroup = data[0];
                 objnumber = i+startingAddress;
 
-                if (objnumber == 0)
-                    {
-                    i += PackTime(get_millisec(),&outdata[3+i*2],0 );
+#ifdef KHUTOR
+                if ( coilgroup >= 1 && coilgroup <= 16 )
+                    {         
+                    int coag_idx = ( coilgroup - 1 ) * 2 + 1;
+                    if( objnumber >= 100 ) coag_idx++;
+
+                    if ( 0 == objnumber || 100 == objnumber )
+                        {
+                        int value = G_TECH_OBJECTS( coag_idx )->get_number();   
+                        PackInt16( value, &outdata[ 3 + i * 2 ] );
+                        }    
+
+                    if ( 1 == objnumber || 101 == objnumber )
+                        {
+                        float value = KOAG_TE[ coag_idx ][ 0 ]->get_value();
+                        PackFloat( value, &outdata[ 3 + i * 2 ] );
+                        }                          
+                    if ( 3 == objnumber || 103 == objnumber )
+                        {
+                        float value = KOAG_TE[ coag_idx ][ 1 ]->get_value();
+                        PackFloat( value, &outdata[ 3 + i * 2 ] );
+                        }  
+                    if ( 5 == objnumber || 105 == objnumber )
+                        {
+                        int value = G_TECH_OBJECTS( coag_idx )->get_active_mode();   
+
+                        PackInt16( value, &outdata[ 3 + i * 2 ] );
+                        }   
+
+                    if ( 6 == objnumber || 106 == objnumber )
+                        {
+                        int_2 value = ( int_2 ) G_TECH_OBJECTS( coag_idx )->par_float[ 1 ];
+                        PackInt16( value, &outdata[ 3 + i * 2 ] );
+                        }
+
+                    if ( 7 == objnumber || 107 == objnumber )
+                        { 
+                        int value = G_TECH_OBJECTS( coag_idx )->get_active_mode();
+
+                        u_long t = 0;
+                        if ( 0 == value )
+                            {
+                            t = G_TECH_OBJECTS( coag_idx )->get_modes_manager()->get_idle_time();
+                            }
+                        else
+                            {
+                            t = ( *G_TECH_OBJECTS( coag_idx
+                                )->get_modes_manager() )[ value ]->evaluation_time();
+                            }
+
+                        PackTime( t, &outdata[ 3 + i * 2 ] );                                              
+                        }  
+
+                    if ( 11 == objnumber || 111 == objnumber )
+                        {    
+                        int mode_idx = G_TECH_OBJECTS( coag_idx )->get_active_mode();
+
+                        static const char* no_step = ""; 
+                        const char* step_name = no_step;
+
+                        if ( mode_idx > 0 )
+                        	{
+                            int step_idx = G_TECH_OBJECTS( coag_idx
+                                )->get_modes_manager()[ 0 ][ mode_idx ]->active_step();
+                            if ( step_idx )
+                                {
+                                step_name = G_TECH_OBJECTS( coag_idx
+                                    )->get_modes_manager()[ 0 ][ mode_idx ][ 0 ][ step_idx ]->get_name();
+                                }
+                            }
+
+                        CP1251toUnicode( step_name, &outdata[ 3 + i * 2 ] );                        
+                        } 
                     }
-                //				switch (coilgroup)
-                //					{
-                //					default:
-                //#ifdef DEBUG 
-                //						Print("\n\rRead Unsigned register");
-                //						PackInt(0, &outdata[3+i*2]);
-                //#endif
-                //						break;
-                //					} 
+#endif // KHUTOR
                 }
             return 3+numberofElements*2;
         case 0x05: //Write Single Coil
             startingAddress = data[2] * 256 + data[3];
             objnumber = startingAddress;
             coilgroup = data[0];
-            //switch (coilgroup)
-            //	{
-            //	default:
-            //		//data[4] ? ON : OFF
-            //		break;
-            //	}
+#ifdef KHUTOR
+            if ( coilgroup >= 1 && coilgroup <= 16 )
+                {
+                int coag_idx = ( coilgroup - 1 ) * 2 + 1;
+                if( objnumber >= 100 ) coag_idx++;
+
+                if ( 0 == objnumber || 100 == objnumber )
+                    {
+                    KOAG_HL1[ coag_idx - 1 ]->set_state( data[ 4 ] > 0 ? 1 : 0 );
+                    }                          
+
+                if ( ( objnumber >= 1 && objnumber <= 16 ) ||
+                    ( objnumber >= 101 && objnumber <= 116 ) )
+                    {
+                    G_TECH_OBJECTS( coag_idx )->set_mode( objnumber, data[ 4 ] );
+                    }
+                }
+#endif //KHUTOR
             return 6;
+
         case 0x10: //Force Multiply Registers
             startingAddress = data[2] * 256 + data[3];
             numberofElements = data[4] * 256 + data[5];
             //numberofBytes = data[6];
             for (i = 0; i < numberofElements; i++)
                 {
-                objnumber = i+startingAddress;
-                coilgroup = data[0];
-                //				switch (coilgroup)
-                //					{
-                //					//UnpackInt(&data[7+i*2])
-                //					default:
-                //#ifdef DEBUG 
-                //						Print("\n\rWrite Unsigned register");
-                //#endif
-                //						break;
-                //					}
+                objnumber = i + startingAddress;
+                coilgroup = data[ 0 ];
+
+#ifdef KHUTOR
+                if ( coilgroup >= 1 && coilgroup <= 16 )
+                    {         
+                    int coag_idx = ( coilgroup - 1 ) * 2 + 1;
+                    if( objnumber >= 100 ) coag_idx++;
+
+                    if ( 6 == objnumber || 106 == objnumber )
+                        {                        
+                        int_2 value = UnpackInt16( &outdata[ 7 + i * 2 ] );
+                        G_TECH_OBJECTS( coag_idx )->par_float[ 1 ] = ( float ) value;
+                        }    
+                    }
+#endif // KHUTOR
+
                 }
             return 7;
         }
@@ -346,26 +435,28 @@ unsigned long ModbusServ::UnpackLong( unsigned char* Buf )
     return result;
     }
 
-int ModbusServ::PackInt( int wvalue,unsigned char* Buf )
+int_2 ModbusServ::PackInt16( int_2 wvalue,unsigned char* Buf )
     {
     Buf[0] = ((char*)&wvalue)[1];
     Buf[1] = ((char*)&wvalue)[0];
     return 0;
     }
 
-int ModbusServ::UnpackInt( unsigned char* Buf )
+int_2 ModbusServ::UnpackInt16( unsigned char* Buf )
     {
-    int result;
+    int_2 result;    
     ((char*)&result)[0] = Buf[1];
     ((char*)&result)[1] = Buf[0];
     return result;
     }
 
-int ModbusServ::CP1251toUnicode( char* Input, unsigned char* Buf, int inputlen )
+int ModbusServ::CP1251toUnicode( const char* Input, unsigned char* Buf )
     {
+    int inputlen = strnlen( Input, 100 );
+
     char input_end = 0;
     int i;
-    for (i = 0; i < inputlen / 2; i++)
+    for (i = 0; i < inputlen; i++)
         {
         unsigned char mychar = Input[i];
         if (0 == mychar)
@@ -442,6 +533,17 @@ int ModbusServ::UnicodetoCP1251( char* Output, unsigned char* Buf, int inputlen 
 void ModbusServ::init()
     {
 #ifdef KHUTOR
-    KOAG1HL1 = HL( "KOAG1HL1" );
+    char dev [ 10 ] = ""; 
+    for ( int i = 1; i <= KOAG_CNT; i++ )
+    	{
+        snprintf( dev, sizeof( dev ), "KOAG%dHL1", i );
+        KOAG_HL1[ i - 1 ] = HL( dev );
+
+        snprintf( dev, sizeof( dev ), "KOAG%dTE1", i );
+        KOAG_TE[ i - 1 ][ 0 ] = TE( dev );
+
+        snprintf( dev, sizeof( dev ), "KOAG%dTE2", i );
+        KOAG_TE[ i - 1 ][ 1 ] = TE( dev );
+    	}   
 #endif //KHUTOR
     }

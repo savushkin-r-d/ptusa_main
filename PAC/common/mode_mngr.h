@@ -314,6 +314,11 @@ class step
 
         int check_devices( char* err_dev_name, int str_len );
 
+        const char* get_name() const
+            {
+            return name.c_str();
+            }
+
     private:
         std::vector< action* > actions; ///< Действия.
         action action_stub;             ///< Фиктивное действие.

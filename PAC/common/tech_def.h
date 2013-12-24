@@ -276,6 +276,19 @@ class tech_object: public i_Lua_save_device
             }
 #endif // RM_PAC
 
+#ifdef KHUTOR
+        int active_mode;
+        enum KHUTOR_CONST
+            {
+            MAX_MODE_IDX = 16,
+            };
+
+        int get_active_mode()
+            {
+            return active_mode;
+            }
+#endif // KHUTOR
+
     protected:
         u_int   number;         ///< Номер объекта.
         u_int   type;           ///< Тип объекта (для ошибок).
