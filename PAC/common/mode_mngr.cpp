@@ -982,10 +982,15 @@ void mode::to_step( u_int new_step, u_long cooperative_time )
         if ( active_step_n >= 0 )
             {
             steps[ active_step_n ]->final();
-            }            
-
+            }     
         active_step_n = new_step - 1;
 
+        if ( active_step_second_n >= 0 )
+            {
+            steps[ active_step_second_n ]->final();
+            }  
+        active_step_second_n = -1;
+        
         active_step_time        = 0;
         active_step_next_step_n = 0;
 

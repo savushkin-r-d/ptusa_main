@@ -761,7 +761,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
 //-----------------------------------------------------------------------------
 bool tech_object::is_idle() const
     {
-    for ( int i = 0; i < modes_count; i++ )
+    for ( u_int i = 0; i < modes_count; i++ )
         {
         if ( state[ i ] > 0 )
             {
