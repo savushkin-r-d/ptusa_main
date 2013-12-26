@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 12/24/13 11:41:33.
+** Generated automatically by tolua++-1.0.92 on 12/26/13 09:49:14.
 */
 
 #ifndef __cplusplus
@@ -2383,6 +2383,38 @@ static int tolua_PAC_dev_tech_object_get_modes_manager00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'get_modes_manager'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: is_idle of class  tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_tech_object_is_idle00
+static int tolua_PAC_dev_tech_object_is_idle00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const tech_object",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const tech_object* self = (const tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'is_idle'", NULL);
+#endif
+  {
+   bool tolua_ret = (bool)  self->is_idle();
+   tolua_pushboolean(tolua_S,(bool)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'is_idle'.",&tolua_err);
  return 0;
 #endif
 }
@@ -5586,6 +5618,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_variable(tolua_S,"rt_par_uint",tolua_get_tech_object_rt_par_uint,tolua_set_tech_object_rt_par_uint);
    tolua_variable(tolua_S,"timers",tolua_get_tech_object_timers,tolua_set_tech_object_timers);
    tolua_function(tolua_S,"get_modes_manager",tolua_PAC_dev_tech_object_get_modes_manager00);
+   tolua_function(tolua_S,"is_idle",tolua_PAC_dev_tech_object_is_idle00);
    tolua_constant(tolua_S,"ERR_CANT_ON",tech_object::ERR_CANT_ON);
    tolua_constant(tolua_S,"ERR_ON_WITH_ERRORS",tech_object::ERR_ON_WITH_ERRORS);
    tolua_constant(tolua_S,"ERR_OFF",tech_object::ERR_OFF);

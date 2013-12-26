@@ -759,6 +759,19 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
     return 0;
     }
 //-----------------------------------------------------------------------------
+bool tech_object::is_idle() const
+    {
+    for ( int i = 0; i < modes_count; i++ )
+        {
+        if ( state[ i ] > 0 )
+            {
+            return false;
+            }
+        }
+
+    return true;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int tech_object_manager::init_params()
     {

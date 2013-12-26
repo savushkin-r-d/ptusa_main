@@ -154,6 +154,10 @@ class tech_object: public i_Lua_save_device
             return 0;
             }
 
+        /// @brief Запрос отсутствия выполняющихся режимов.
+        ///
+        bool is_idle() const;
+
         int get_number() const
             {
             return number;

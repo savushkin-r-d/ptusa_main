@@ -485,6 +485,10 @@ class tech_object
 
         mode_manager* get_modes_manager();
 
+        /// @brief Запрос отсутствия выполняющихся режимов.
+        ///
+        bool is_idle() const;
+
         enum ERR_MSG_TYPES
             {
             ERR_CANT_ON,
