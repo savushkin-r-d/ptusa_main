@@ -835,21 +835,20 @@ void mode::init( u_int start_step /*= 1 */ )
 #endif
     }
 //-----------------------------------------------------------------------------
-// ≈сли есть активный шаг провер€ем на наличие параллельного 
-// нового шага (1). ≈сли он есть, то раздельно выключаем 
-// и включаем устройства двух активных шагов (2).
-// ѕотом провер€ем врем€ переходного режима. ≈сли оно вышло,
-// отключаем  активный шаг, в качестве активного шага
-// переназначаем параллельный новый шаг.
+// ≈сли есть активный шаг, провер€ем на наличие параллельного нового шага (1). 
+// ≈сли он есть, то раздельно выключаем и включаем устройства двух активных
+// шагов (2). ѕотом провер€ем врем€ переходного режима. ≈сли оно вышло,
+// отключаем активный шаг, в качестве активного шага переназначаем параллельный
+// новый шаг.
 void mode::evaluate()
     {
     mode_step->evaluate();
 
     if ( active_step_n < 0 ) return;
 
-    if ( active_step_second_n >= 0 )                   //1
+    if ( active_step_second_n >= 0 )                                       //1
         {
-        steps[ active_step_n ]->evaluate_off();         //2
+        steps[ active_step_n ]->evaluate_off();                            //2
         steps[ active_step_second_n ]->evaluate_off();
 
         steps[ active_step_n ]->evaluate_on();
@@ -970,6 +969,7 @@ void mode::to_step( u_int new_step, u_long cooperative_time )
         if ( owner->get_param() != 0 && par_n > 0 )
             {            
             active_step_time = u_int( owner->get_param()[ 0 ][ par_n ] * 1000L );
+            active_step_time += step_cooperate_time;
             active_step_next_step_n = next_step_ns[ active_step_second_n ];
 
             steps[ active_step_second_n ]->set_step_time( active_step_time );
