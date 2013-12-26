@@ -886,8 +886,14 @@ void mode::evaluate()
             
             if ( -1 == active_step_next_step_n )
             	{       
-                steps[ active_step_n ]->final();
-                active_step_n = -1;
+                if ( n > 0 )
+                	{
+                    owner->off_mode( n );
+                	}
+                else
+                    {
+                    final(); //Для режима-заглушки.
+                    }
             	}
             else
                 {
@@ -1052,7 +1058,8 @@ int mode::check_devices( char* err_dev_name, int str_len )
 //-----------------------------------------------------------------------------
 mode* mode_manager::add_mode( const char* name )
     {
-    modes.push_back( new mode( name, this, modes.size() ) );
+    modes.push_back( new mode( name, this, modes.size() + 1 ) );
+    
     return modes[ modes.size() - 1 ];
     }
 //-----------------------------------------------------------------------------
@@ -1097,8 +1104,9 @@ void mode_manager::print()
         }
     }
 //-----------------------------------------------------------------------------
-mode_manager::mode_manager( u_int modes_cnt ):
-    last_action_time( get_millisec() )
+mode_manager::mode_manager( u_int modes_cnt, i_tech_object *owner ):
+    last_action_time( get_millisec() ),
+    owner( owner )
     {
     mode_stub = new mode( "Режим-заглушка", this, -1 );
     }

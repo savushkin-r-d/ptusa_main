@@ -267,6 +267,9 @@
     <ClInclude Include="..\..\..\PAC\common\modbus_serv.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\i_tech_def.h">
+      <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">

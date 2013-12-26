@@ -32,6 +32,8 @@
 #include "PAC_info.h"
 #include "param_ex.h"
 
+#include "i_tech_def.h"
+
 class mode_manager;
 class step;
 //-----------------------------------------------------------------------------
@@ -424,7 +426,7 @@ class mode
         step step_stub;     ///< Шаг-заглушка.
 
         mode_manager *owner;
-        int n;          ///< Номер.
+        int n;          /// Номер.
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию о всех режимах какого-либо объекта (танк,
@@ -434,7 +436,11 @@ class mode
 class mode_manager
     {
     public:
-        mode_manager( u_int modes_cnt );
+        /// @brief Конструктор с параметрами.
+        ///
+        /// @param modes_cnt - количество режимов.
+        /// @param i_tech_object - техобъект-владелец.
+        mode_manager( u_int modes_cnt, i_tech_object *owner );
 
         ~mode_manager();
 
@@ -461,6 +467,10 @@ class mode_manager
         /// @brief Отладочный вывод объекта в консоль.
         void print();
 
+        void off_mode( int mode ) const 
+            {
+            owner->set_mode( mode, 0 );
+            }
     private:
         /// @brief Параметры, содержащие продолжительность шагов, режимов.
         saved_params_u_int_4 *par;
@@ -471,7 +481,9 @@ class mode_manager
 
         u_int_4 last_action_time;   ///Время последнего вкл/выкл режима.
 
-        static const char* UNKN_MODE_NAME; //Имя для "неизвестного" режима.
+        static const char* UNKN_MODE_NAME; ///Имя для "неизвестного" режима.
+
+        i_tech_object *owner;              ///Техобъект-владелец.
     };
 //-----------------------------------------------------------------------------
 #endif // MODE_MNGR

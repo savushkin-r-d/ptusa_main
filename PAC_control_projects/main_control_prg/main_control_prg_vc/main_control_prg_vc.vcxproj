@@ -263,6 +263,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClInclude Include="..\..\..\common\util\smart_ptr.h" />
     <ClInclude Include="..\..\..\PAC\common\cip_tech_def.h" />
     <ClInclude Include="..\..\..\common\win_util\WSA_err_decode.h" />
+    <ClInclude Include="..\..\..\PAC\common\i_tech_def.h" />
     <ClInclude Include="..\..\..\PAC\common\mcaRec.h" />
     <ClInclude Include="..\..\..\PAC\common\modbus_serv.h" />
     <ClInclude Include="..\..\..\PAC\common\mode_mngr.h" />

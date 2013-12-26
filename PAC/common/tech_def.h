@@ -26,6 +26,8 @@ extern int snprintf(char *, size_t, const char *, /*args*/ ...);
     };
 #endif // __BORLANDC__
 
+#include "i_tech_def.h"
+
 #include "g_device.h"
 #include "PAC_dev.h"
 
@@ -55,7 +57,7 @@ extern "C" {
 /// Для информировании сервера (события, аварии, ...) используется следующий 
 /// подход: имеется вектор из сообщений и методы работы с ним.
 ///
-class tech_object: public i_Lua_save_device
+class tech_object: public i_tech_object, public i_Lua_save_device
     {
     public:
         /// @param name                     - название ("Гребенка", ...).
