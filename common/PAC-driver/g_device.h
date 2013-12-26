@@ -30,11 +30,12 @@ extern "C" {
     };
 #endif // __BORLANDC__
 
+#include <vector>
+
 #include "smart_ptr.h"
 
 #include "tcp_cmctr.h"
-#include <vector>
-
+#include "quicklz.h"
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс устройства, позволяющий сохранить его в потоке байтов.
 class i_Lua_save_device    
@@ -138,6 +139,9 @@ class device_communicator
         /// Единственный экземпляр класса.
         static auto_smart_ptr < device_communicator > instance;
 
+        static qlz_state_compress *state_compress;
+        static char * buff;
+
     public:
         /// @brief Получение единственного экземпляра класса.
         static device_communicator* get_instance()
@@ -158,14 +162,19 @@ class device_communicator
         /// @brief Устройства, информация о них и их состоянии передается на
         /// сервер (PC).
         static std::vector< i_Lua_save_device* > dev;
-
+        
     public:
         device_communicator()
-            {            
+            {         
+            state_compress =
+                ( qlz_state_compress *) malloc( sizeof( qlz_state_compress ) );
+            buff = new char[ 4000 + 400 ];
             }
 
         ~device_communicator()
             {
+            delete[] buff;
+            buff = 0;
             }
 
         /// @brief Вывод на консоль устройств группы.

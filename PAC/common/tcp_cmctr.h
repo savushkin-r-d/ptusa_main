@@ -58,6 +58,11 @@ class tcp_communicator
 
         virtual ~tcp_communicator();
 
+        int get_buffer_size() const
+            {
+            return BUFSIZE;
+            }
+
     protected:
         tcp_communicator();
 

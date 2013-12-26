@@ -328,7 +328,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         device_communicator::write_devices_states_service );
 
     ModbusServ::init();
-	G_CMMCTR->reg_service(15, ModbusServ::ModbusService);
+	G_CMMCTR->reg_service( 15, ModbusServ::ModbusService );
 
     lua_gc( L, LUA_GCRESTART, 0 );
     lua_gc( L, LUA_GCCOLLECT, 0 );

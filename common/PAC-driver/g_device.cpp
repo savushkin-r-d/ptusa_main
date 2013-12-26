@@ -13,6 +13,9 @@
 
 auto_smart_ptr < device_communicator > device_communicator::instance;
 
+qlz_state_compress *device_communicator::state_compress;
+char * device_communicator::buff;
+
 u_int_2 G_CURRENT_PROTOCOL_VERSION = 101;
 
 std::vector< i_Lua_save_device* > device_communicator::dev;
@@ -32,12 +35,12 @@ void print_str( const char *err_str, char is_need_CR )
     }
 //-----------------------------------------------------------------------------
 long device_communicator::write_devices_states_service( long len, 
-    u_char *data, u_char *outdata )
+                                                       u_char *data, u_char *outdata )
     {
     if ( len < 1 ) return 0;
 
     u_int answer_size = 0;
-    
+
 #ifdef DEBUG_DEV_CMCTR
     u_long start_time = get_millisec();
 #endif // DEBUG_DEV_CMCTR             
@@ -62,7 +65,7 @@ long device_communicator::write_devices_states_service( long len,
             Print( "G_CURRENT_PROTOCOL_VERSION = %u, host =[%s]\n", G_CURRENT_PROTOCOL_VERSION,
                 tcp_communicator::get_instance()->get_host_name_rus() );
 #endif // DEBUG_DEV_CMCTR
-            return answer_size;
+            break;
 
         case CMD_GET_DEVICES:
             {
@@ -80,7 +83,7 @@ long device_communicator::write_devices_states_service( long len,
                 answer_size += dev[ i ]->save_device( ( char* ) outdata + 
                     answer_size );
                 }      
-                        
+
             *( ( char* ) outdata + answer_size ) = 0;
             answer_size++;
 
@@ -106,7 +109,7 @@ long device_communicator::write_devices_states_service( long len,
 
             Print( "Operation time = %lu\n", get_delta_millisec( start_time ) );
 #endif // DEBUG_DEV_CMCTR
-            return answer_size;
+            break;
             }
 
         case CMD_GET_DEVICES_STATES:
@@ -125,7 +128,7 @@ long device_communicator::write_devices_states_service( long len,
             answer_size++;
 
 #ifdef DEBUG
-         //  Print( "%s", outdata + 2 );
+            //  Print( "%s", outdata + 2 );
 #endif // DEBUG
 
 #ifdef DEBUG_DEV_CMCTR
@@ -134,10 +137,10 @@ long device_communicator::write_devices_states_service( long len,
 
             Print( "Operation time = %lu\n", get_delta_millisec( start_time ) );
 #endif // DEBUG_DEV_CMCTR
-            return answer_size;
+            break;
             }
 
-     case CMD_EXEC_DEVICE_COMMAND:
+        case CMD_EXEC_DEVICE_COMMAND:
             {            
 #ifdef DEBUG_DEV_CMCTR
             Print( "\nEXEC_DEVICE_CMD\n" );
@@ -146,20 +149,20 @@ long device_communicator::write_devices_states_service( long len,
 
             int res = lua_manager::get_instance()->exec_Lua_str( ( char* ) data + 1, 
                 "CMD_EXEC_DEVICE_COMMAND ");
-                      
+
             outdata[ 0 ] = 0;
             outdata[ 1 ] = 0; //Возвращаем 0.
             if ( res )
                 {
                 outdata[ 0 ] = 1;
                 }
-            
+
 #ifdef DEBUG_DEV_CMCTR
             Print( "Operation time = %lu\n", get_delta_millisec( start_time ) );
 #endif // DEBUG_DEV_CMCTR
 
             answer_size = 2;
-            return answer_size;
+            break;
             }
 
         case CMD_GET_PAC_ERRORS:
@@ -190,22 +193,23 @@ long device_communicator::write_devices_states_service( long len,
 
             if ( !is_any_error ) //Нет критических ошибок.
                 {
-            G_DEV_ERRORS_MANAGER->save_as_Lua_str( str + strlen( str ), err_id ); 
-            if ( err_id != prev_dev_err_id )
-                {
-                prev_dev_err_id = err_id;
-                errors_id++;
-                }
+                G_DEV_ERRORS_MANAGER->save_as_Lua_str( str + strlen( str ), err_id ); 
+                if ( err_id != prev_dev_err_id )
+                    {
+                    prev_dev_err_id = err_id;
+                    errors_id++;
+                    }
                 }
 
             sprintf( str + strlen( str ), "  %s %d,\n", "id =", errors_id );
             sprintf( str + strlen( str ), "  %s\n", "}" );
 
 #ifdef DEBUG_DEV_CMCTR
-           Print( "Critical errors = \n%s", outdata );
+            Print( "Critical errors = \n%s", outdata );
 #endif // DEBUG_DEV_CMCTR
 
-            return strlen( str ) + 1;
+            answer_size = strlen( str ) + 1;
+            break;
             }
 
         case CMD_SET_PAC_ERROR_CMD:  
@@ -214,7 +218,7 @@ long device_communicator::write_devices_states_service( long len,
             Print( "CMD_SET_PAC_ERROR_CMD\n" );
             Print( "cmd = %s\n",  data + 1 );
 #endif // DEBUG_DEV_CMCTR
-           
+
             int res = lua_manager::get_instance()->exec_Lua_str( ( char* ) data + 1, 
                 "CMD_EXEC_DEVICE_COMMAND ");
 
@@ -230,15 +234,15 @@ long device_communicator::write_devices_states_service( long len,
 #endif // DEBUG_DEV_CMCTR
 
             answer_size = 2;
-            return answer_size;
+            break;
             }
 
         case CMD_GET_PARAMS:
             params_manager::get_instance()->save_params_as_Lua_str( 
                 ( char* ) outdata );            
-            
+
             return strlen( ( char* ) outdata );
-        
+
         case CMD_RESTORE_PARAMS:
             {
 #ifdef DEBUG_DEV_CMCTR
@@ -261,7 +265,7 @@ long device_communicator::write_devices_states_service( long len,
 #endif // DEBUG_DEV_CMCTR
 
             answer_size = 2;
-            return answer_size;
+            break;
             }
 
         case CMD_GET_PARAMS_CRC:
@@ -300,7 +304,7 @@ long device_communicator::write_devices_states_service( long len,
             Print( "%s", source.c_str() );
 #endif // DEBUG
 
-            return answer_size;
+            break;
             }
 
         case CMD_RM_GET_DEVICES_STATES:
@@ -336,9 +340,17 @@ long device_communicator::write_devices_states_service( long len,
                 }            
 #endif // DEBUG
 
-            return answer_size;
+            break;
             }
 #endif // RM_PAC
+        }
+
+    if ( answer_size > 0 )
+        {
+        int r = qlz_compress( outdata, buff, answer_size, state_compress );
+
+        printf( "Compressed %d bytes into %d bytes.\n", answer_size, r );
+        memcpy( outdata, buff, r );
         }
 
     return answer_size;
@@ -356,7 +368,7 @@ void device_communicator::print() const
     char tmp_str[ 200 ];
 
     snprintf( tmp_str, sizeof( tmp_str ),
-            "Device communicator. Dev count = %d.", ( int ) dev.size() );
+        "Device communicator. Dev count = %d.", ( int ) dev.size() );
     print_str( tmp_str, 1 );
 
     if ( !dev.size() ) return;

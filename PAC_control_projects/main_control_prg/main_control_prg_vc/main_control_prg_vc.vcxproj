@@ -87,7 +87,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../../../PAC/common;../../../common/util;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(IncludePath)</IncludePath>
+    <IncludePath>../../../PAC/common;../../../common/util;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(IncludePath)</IncludePath>
     <TargetName>main</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug IDE khutor|Win32'">
@@ -98,7 +98,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>ptusa</TargetName>
-    <IncludePath>../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(IncludePath)</IncludePath>
+    <IncludePath>../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release khutor|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -257,6 +257,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClInclude Include="..\..\..\common\lua_manager.h" />
     <ClInclude Include="..\..\..\common\PAC-driver\errors.h" />
     <ClInclude Include="..\..\..\common\PAC-driver\g_device.h" />
+    <ClInclude Include="..\..\..\common\QuickLZ\quicklz.h" />
     <ClInclude Include="..\..\..\common\tolua++\tolua++.h" />
     <ClInclude Include="..\..\..\common\tolua++\tolua_base.h" />
     <ClInclude Include="..\..\..\common\tolua++\tolua_event.h" />
@@ -326,6 +327,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClCompile Include="..\..\..\common\lua_manager.cpp" />
     <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp" />
     <ClCompile Include="..\..\..\common\PAC-driver\g_device.cpp" />
+    <ClCompile Include="..\..\..\common\QuickLZ\quicklz.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_event.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_is.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_map.c" />

@@ -85,6 +85,12 @@
     <Filter Include="pkg">
       <UniqueIdentifier>{d2442374-e7c6-470f-97fc-ca5f36ccd8e0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\common\QuickLZ">
+      <UniqueIdentifier>{4b8a87c7-dc56-452c-b69a-a182b0bbdf57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\common\QuickLZ">
+      <UniqueIdentifier>{381898a8-2025-474c-892f-c3f50269d0fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\PAC\common\PAC_dev.h">
@@ -269,6 +275,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\i_tech_def.h">
       <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\common\QuickLZ\quicklz.h">
+      <Filter>Header Files\common\QuickLZ</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -466,6 +475,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\modbus_serv.cpp">
       <Filter>Source Files\PAC\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\QuickLZ\quicklz.c">
+      <Filter>Source Files\common\QuickLZ</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
