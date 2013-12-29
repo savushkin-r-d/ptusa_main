@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="84">
+<configurationDescriptor version="90">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
@@ -32,6 +32,9 @@
         <logicalFolder name="f2" displayName="PAC-driver" projectFiles="true">
           <itemPath>../../common/PAC-driver/errors.h</itemPath>
           <itemPath>../../common/PAC-driver/g_device.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f5" displayName="QuickLZ" projectFiles="true">
+          <itemPath>../../common/QuickLZ/quicklz.h</itemPath>
         </logicalFolder>
         <logicalFolder name="f3" displayName="sys" projectFiles="true">
           <logicalFolder name="f1" displayName="lua" projectFiles="true">
@@ -128,6 +131,9 @@
           <itemPath>../../common/PAC-driver/errors.cpp</itemPath>
           <itemPath>../../common/PAC-driver/g_device.cpp</itemPath>
         </logicalFolder>
+        <logicalFolder name="f5" displayName="QuickLZ" projectFiles="true">
+          <itemPath>../../common/QuickLZ/quicklz.c</itemPath>
+        </logicalFolder>
         <logicalFolder name="f3" displayName="sys" projectFiles="true">
           <logicalFolder name="f1" displayName="lua" projectFiles="true">
             <itemPath>../../common/lua/lapi.c</itemPath>
@@ -200,14 +206,16 @@
   <confs>
     <conf name="release_PC" type="1">
       <toolsSet>
-        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
         <compilerSet>GNU|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
         <cTool>
           <developmentMode>5</developmentMode>
           <incDir>
             <pElem>../../common/lua</pElem>
+            <pElem>../../common/QuickLZ</pElem>
           </incDir>
           <preprocessorList>
             <Elem>PAC_PC</Elem>
@@ -225,6 +233,7 @@
             <pElem>../../common/PAC-driver</pElem>
             <pElem>../../common/util</pElem>
             <pElem>../../common/lua</pElem>
+            <pElem>../../common/QuickLZ</pElem>
             <pElem>../../common/tolua++</pElem>
           </incDir>
           <commandLine>-Wl,--no-as-needed -lrt</commandLine>
@@ -240,11 +249,311 @@
           <commandLine>-pg</commandLine>
         </linkerTool>
       </compileType>
+      <item path="../../../PTUSA_projects/system scripts/sys.devices.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../PTUSA_projects/system scripts/sys.objects.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../PTUSA_projects/system scripts/sys.wago.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev_lua.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_err.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_err.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_info.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_info.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PID.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PID.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/cip_tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/cip_tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mcaRec.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mcaRec.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/modbus_serv.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mode_mngr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mode_mngr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/param_ex.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/param_ex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/prj_mngr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/prj_mngr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_manager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_manager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/base_mem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/base_mem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/console.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/debug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/dtime.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/io.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/led.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/led.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/s_types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tcp_cmctr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tcp_cmctr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/wago.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/wago.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/led_PC.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/wago_PC.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/wago_PC.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_console.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_console.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_dtime.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_mem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_mem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_tcp_cmctr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_tcp_cmctr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_wago.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_wago.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/errors.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/errors.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/g_device.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/g_device.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/QuickLZ/quicklz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/QuickLZ/quicklz.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lapi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lapi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lauxlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lauxlib.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lbaselib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lcode.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lcode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldblib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldebug.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldebug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lfunc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lfunc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lgc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lgc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/linit.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/liolib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/llex.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/llex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/llimits.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmathlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmem.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/loadlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lobject.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lobject.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lopcodes.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lopcodes.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/loslib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lparser.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lparser.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstate.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstate.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstring.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstring.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstrlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltable.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltable.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltablib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lua.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/luaconf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lualib.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lundump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lundump.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lvm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lvm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lzio.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lzio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/print.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua_manager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../common/lua_manager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/pkg/PAC_dev.pkg"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua++.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_base.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_event.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_event.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_is.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_map.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_push.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_to.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/util/smart_ptr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
     </conf>
     <conf name="debug_PC" type="1">
       <toolsSet>
-        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
         <compilerSet>GNU|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
         <cTool>
@@ -288,26 +597,296 @@
           <commandLine>-pg</commandLine>
         </linkerTool>
       </compileType>
-      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.h"
-            ex="true"
+      <item path="../../../PTUSA_projects/system scripts/sys.devices.lua"
+            ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.cpp"
-            ex="true"
+      <item path="../../../PTUSA_projects/system scripts/sys.objects.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../PTUSA_projects/system scripts/sys.wago.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev_lua.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_err.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_err.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_info.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_info.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PID.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PID.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/cip_tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/cip_tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mcaRec.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mcaRec.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/modbus_serv.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mode_mngr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mode_mngr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/param_ex.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/param_ex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/prj_mngr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/prj_mngr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_manager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_manager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/base_mem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/base_mem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/console.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/debug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/dtime.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/io.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/led.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/led.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/s_types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tcp_cmctr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tcp_cmctr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/wago.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/wago.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/led_PC.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/wago_PC.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/wago_PC.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.cpp"
+            ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.h"
-            ex="true"
+      <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.h"
+            ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_console.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_console.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_dtime.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_mem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_mem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_tcp_cmctr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_tcp_cmctr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_wago.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_wago.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/errors.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/errors.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/g_device.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/g_device.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/QuickLZ/quicklz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/QuickLZ/quicklz.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lapi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lapi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lauxlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lauxlib.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lbaselib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lcode.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lcode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldblib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldebug.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldebug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lfunc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lfunc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lgc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lgc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/linit.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/liolib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/llex.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/llex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/llimits.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmathlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmem.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/loadlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lobject.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lobject.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lopcodes.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lopcodes.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/loslib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lparser.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lparser.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstate.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstate.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstring.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstring.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstrlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltable.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltable.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltablib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lua.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/luaconf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lualib.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lundump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lundump.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lvm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lvm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lzio.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lzio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/print.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua_manager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../common/lua_manager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/pkg/PAC_dev.pkg"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua++.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_base.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_event.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_event.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_is.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_map.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_push.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_to.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/util/smart_ptr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
     <conf name="release_wago_750-860" type="1">
       <toolsSet>
-        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
         <compilerSet>arm-uclinux-elf|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
         <cTool>
@@ -329,6 +908,7 @@
             <pElem>../../common/PAC-driver</pElem>
             <pElem>../../common/util</pElem>
             <pElem>../../common/lua</pElem>
+            <pElem>../../common/QuickLZ</pElem>
             <pElem>../../common/tolua++</pElem>
           </incDir>
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
@@ -349,11 +929,311 @@
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -Wl,-elf2flt /usr/local/arm-uclinux-tools/arm-uclinux-elf/lib/crt0.o /home/id/uClinux-dist/uClibc/lib/crti.o /home/id/uClinux-dist/uClibc/lib/crtn.o -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
         </linkerTool>
       </compileType>
+      <item path="../../../PTUSA_projects/system scripts/sys.devices.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../PTUSA_projects/system scripts/sys.objects.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../PTUSA_projects/system scripts/sys.wago.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev_lua.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_err.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_err.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_info.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_info.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PID.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PID.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/cip_tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/cip_tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mcaRec.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mcaRec.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/modbus_serv.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mode_mngr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mode_mngr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/param_ex.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/param_ex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/prj_mngr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/prj_mngr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_manager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_manager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/base_mem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/base_mem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/console.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/debug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/dtime.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/io.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/led.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/led.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/s_types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tcp_cmctr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tcp_cmctr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/wago.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/wago.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/led_PC.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/wago_PC.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/wago_PC.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_console.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_console.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_dtime.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_mem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_mem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_tcp_cmctr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_tcp_cmctr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_wago.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_wago.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/errors.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/errors.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/g_device.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/g_device.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/QuickLZ/quicklz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/QuickLZ/quicklz.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lapi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lapi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lauxlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lauxlib.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lbaselib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lcode.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lcode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldblib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldebug.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldebug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lfunc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lfunc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lgc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lgc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/linit.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/liolib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/llex.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/llex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/llimits.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmathlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmem.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/loadlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lobject.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lobject.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lopcodes.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lopcodes.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/loslib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lparser.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lparser.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstate.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstate.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstring.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstring.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstrlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltable.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltable.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltablib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lua.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/luaconf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lualib.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lundump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lundump.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lvm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lvm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lzio.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lzio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/print.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua_manager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../common/lua_manager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/pkg/PAC_dev.pkg"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua++.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_base.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_event.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_event.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_is.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_map.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_push.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_to.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/util/smart_ptr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
     </conf>
     <conf name="debug_wago_750-860" type="1">
       <toolsSet>
-        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
         <compilerSet>arm-uclinux-elf|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
         <cTool>
@@ -374,6 +1254,7 @@
             <pElem>../../common/PAC-driver</pElem>
             <pElem>../../common/util</pElem>
             <pElem>../../common/lua</pElem>
+            <pElem>../../common/QuickLZ</pElem>
             <pElem>../../common/tolua++</pElem>
           </incDir>
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
@@ -390,15 +1271,307 @@
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -Wl,-elf2flt /usr/local/arm-uclinux-tools/arm-uclinux-elf/lib/crt0.o /home/id/uClinux-dist/uClibc/lib/crti.o /home/id/uClinux-dist/uClibc/lib/crtn.o -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
         </linkerTool>
       </compileType>
-      <item path="../../PAC/linux/PAC_PC/wago_PC.cpp" ex="true" tool="1" flavor2="0">
+      <item path="../../../PTUSA_projects/system scripts/sys.devices.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
-      <item path="../../PAC/linux/PAC_PC/wago_PC.h" ex="true" tool="3" flavor2="0">
+      <item path="../../../PTUSA_projects/system scripts/sys.objects.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../PTUSA_projects/system scripts/sys.wago.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev_lua.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_err.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_err.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_info.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_info.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PID.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PID.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/cip_tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/cip_tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mcaRec.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mcaRec.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/modbus_serv.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mode_mngr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mode_mngr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/param_ex.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/param_ex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/prj_mngr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/prj_mngr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_manager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_manager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/base_mem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/base_mem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/console.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/debug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/dtime.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/io.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/led.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/led.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/s_types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tcp_cmctr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tcp_cmctr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/wago.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/wago.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/led_PC.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_console.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_console.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_dtime.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_mem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_mem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_tcp_cmctr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_tcp_cmctr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_wago.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_wago.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/errors.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/errors.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/g_device.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/g_device.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/QuickLZ/quicklz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/QuickLZ/quicklz.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lapi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lapi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lauxlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lauxlib.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lbaselib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lcode.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lcode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldblib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldebug.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldebug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lfunc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lfunc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lgc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lgc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/linit.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/liolib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/llex.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/llex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/llimits.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmathlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmem.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/loadlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lobject.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lobject.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lopcodes.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lopcodes.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/loslib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lparser.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lparser.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstate.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstate.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstring.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstring.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstrlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltable.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltable.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltablib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lua.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/luaconf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lualib.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lundump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lundump.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lvm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lvm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lzio.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lzio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/print.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua_manager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../common/lua_manager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/pkg/PAC_dev.pkg"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua++.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_base.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_event.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_event.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_is.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_map.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_push.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_to.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/util/smart_ptr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
     <conf name="no_wagoIO_debug_wago_750-860" type="1">
       <toolsSet>
-        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
         <compilerSet>arm-uclinux-elf|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
         <cTool>
@@ -433,11 +1606,311 @@
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -Wl,-elf2flt -L/usr/local/arm-uclinux-tools/arm-uclinux-elf/lib/crt0.o -L/home/id/uClinux-dist/lib/uClibc/lib/crti.o -L/home/id/uClinux-dist/lib/uClibc/lib/crtn.o -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
         </linkerTool>
       </compileType>
+      <item path="../../../PTUSA_projects/system scripts/sys.devices.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../PTUSA_projects/system scripts/sys.objects.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../PTUSA_projects/system scripts/sys.wago.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev_lua.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_err.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_err.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_info.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_info.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PID.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PID.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/cip_tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/cip_tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mcaRec.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mcaRec.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/modbus_serv.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mode_mngr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mode_mngr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/param_ex.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/param_ex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/prj_mngr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/prj_mngr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_manager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_manager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/base_mem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/base_mem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/console.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/debug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/dtime.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/io.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/led.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/led.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/s_types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tcp_cmctr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tcp_cmctr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/wago.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/wago.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/led_PC.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/wago_PC.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/wago_PC.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_console.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_console.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_dtime.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_mem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_mem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_tcp_cmctr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_tcp_cmctr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_wago.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_wago.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/errors.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/errors.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/g_device.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/g_device.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/QuickLZ/quicklz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/QuickLZ/quicklz.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lapi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lapi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lauxlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lauxlib.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lbaselib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lcode.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lcode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldblib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldebug.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldebug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lfunc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lfunc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lgc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lgc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/linit.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/liolib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/llex.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/llex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/llimits.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmathlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmem.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/loadlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lobject.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lobject.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lopcodes.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lopcodes.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/loslib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lparser.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lparser.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstate.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstate.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstring.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstring.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstrlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltable.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltable.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltablib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lua.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/luaconf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lualib.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lundump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lundump.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lvm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lvm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lzio.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lzio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/print.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua_manager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../common/lua_manager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/pkg/PAC_dev.pkg"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua++.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_base.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_event.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_event.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_is.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_map.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_push.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_to.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/util/smart_ptr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
     </conf>
     <conf name="release_wago_750-860_khutor" type="1">
       <toolsSet>
-        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
         <compilerSet>arm-uclinux-elf|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
         <cTool>
@@ -445,6 +1918,7 @@
           <commandlineTool>gcc</commandlineTool>
           <incDir>
             <pElem>../../common/lua</pElem>
+            <pElem>../../common/QuickLZ</pElem>
           </incDir>
           <commandLine>-O3 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
         </cTool>
@@ -458,12 +1932,16 @@
             <pElem>../../common</pElem>
             <pElem>../../common/PAC-driver</pElem>
             <pElem>../../common/util</pElem>
-            <pElem>../../common/lua</pElem>
             <pElem>../../common/tolua++</pElem>
+            <pElem>../../common/lua</pElem>
+            <pElem>../../common/QuickLZ</pElem>
           </incDir>
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
           <preprocessorList>
+            <Elem>KHUTOR</Elem>
             <Elem>LINUX_OS</Elem>
+            <Elem>MODBUS</Elem>
+            <Elem>PAC</Elem>
             <Elem>PAC_WAGO_750_860</Elem>
             <Elem>TEST_SPEED</Elem>
             <Elem>TOLUA_RELEASE</Elem>
@@ -479,16 +1957,317 @@
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -Wl,-elf2flt /usr/local/arm-uclinux-tools/arm-uclinux-elf/lib/crt0.o /home/id/uClinux-dist/uClibc/lib/crti.o /home/id/uClinux-dist/uClibc/lib/crtn.o -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
         </linkerTool>
       </compileType>
+      <item path="../../../PTUSA_projects/system scripts/sys.devices.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../PTUSA_projects/system scripts/sys.objects.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../PTUSA_projects/system scripts/sys.wago.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev_lua.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_err.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_err.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_info.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_info.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PID.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PID.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/cip_tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/cip_tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mcaRec.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mcaRec.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/modbus_serv.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mode_mngr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mode_mngr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/param_ex.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/param_ex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/prj_mngr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/prj_mngr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_manager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_manager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/base_mem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/base_mem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/console.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/debug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/dtime.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/io.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/led.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/led.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/s_types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tcp_cmctr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tcp_cmctr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/wago.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/wago.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/led_PC.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/wago_PC.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/wago_PC.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_console.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_console.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_dtime.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_mem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_mem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_tcp_cmctr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_tcp_cmctr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_wago.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_wago.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/errors.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/errors.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/g_device.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/g_device.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/QuickLZ/quicklz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/QuickLZ/quicklz.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lapi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lapi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lauxlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lauxlib.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lbaselib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lcode.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lcode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldblib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldebug.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldebug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lfunc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lfunc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lgc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lgc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/linit.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/liolib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/llex.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/llex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/llimits.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmathlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmem.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/loadlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lobject.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lobject.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lopcodes.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lopcodes.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/loslib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lparser.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lparser.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstate.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstate.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstring.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstring.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstrlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltable.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltable.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltablib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lua.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/luaconf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lualib.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lundump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lundump.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lvm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lvm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lzio.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lzio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/print.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua_manager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../common/lua_manager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/pkg/PAC_dev.pkg"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua++.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_base.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_event.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_event.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_is.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_map.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_push.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_to.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/util/smart_ptr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
     </conf>
     <conf name="debug_wago_750-860_khutor" type="1">
       <toolsSet>
-        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
         <compilerSet>arm-uclinux-elf|GNU</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
       </toolsSet>
       <compileType>
         <cTool>
           <commandlineTool>gcc</commandlineTool>
           <incDir>
+            <pElem>../../common/QuickLZ</pElem>
             <pElem>../../common/lua</pElem>
           </incDir>
           <commandLine>-O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
@@ -505,6 +2284,7 @@
             <pElem>../../common/util</pElem>
             <pElem>../../common/lua</pElem>
             <pElem>../../common/tolua++</pElem>
+            <pElem>../../common/QuickLZ</pElem>
           </incDir>
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include</commandLine>
           <preprocessorList>
@@ -522,9 +2302,300 @@
           <commandLine>-Wall -O2 -fomit-frame-pointer -Dlinux -D__linux__ -Dunix -D__uClinux__ -DEMBED -I/home/id/uclinux-dist/lib/uClibc/include -I/home/id/uclinux-dist/lib/libm -I/home/id/uclinux-dist/lib/libcrypt_old -I/home/id/uclinux-dist -fno-builtin -nostartfiles -I/home/id/uclinux-dist/linux-2.6.x/include -Wl,-elf2flt /usr/local/arm-uclinux-tools/arm-uclinux-elf/lib/crt0.o /home/id/uClinux-dist/uClibc/lib/crti.o /home/id/uClinux-dist/uClibc/lib/crtn.o -L/home/id/uclinux-dist/lib/uClibc/. -L/home/id/uclinux-dist/lib/uClibc/lib -L/home/id/uclinux-dist/lib/libm -L/home/id/uclinux-dist/lib/libnet -L/home/id/uclinux-dist/lib/libdes -L/home/id/uclinux-dist/lib/libaes -L/home/id/uclinux-dist/lib/libpcap -L/home/id/uclinux-dist/lib/libcrypt_old -L/home/id/uclinux-dist/lib/libssl -L/home/id/uclinux-dist/lib/zlib</commandLine>
         </linkerTool>
       </compileType>
-      <item path="../../PAC/linux/PAC_PC/wago_PC.cpp" ex="true" tool="1" flavor2="0">
+      <item path="../../../PTUSA_projects/system scripts/sys.devices.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
-      <item path="../../PAC/linux/PAC_PC/wago_PC.h" ex="true" tool="3" flavor2="0">
+      <item path="../../../PTUSA_projects/system scripts/sys.objects.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../../PTUSA_projects/system scripts/sys.wago.lua"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_dev_lua.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_err.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_err.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_info.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PAC_info.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PID.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/PID.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/cip_tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/cip_tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mcaRec.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mcaRec.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/modbus_serv.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mode_mngr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/mode_mngr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/param_ex.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/param_ex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/prj_mngr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/prj_mngr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_manager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_manager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/rm_tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/base_mem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/base_mem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/console.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/debug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/dtime.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/io.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/led.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/led.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/sys/s_types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tcp_cmctr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tcp_cmctr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tech_def.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/tech_def.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/common/wago.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/common/wago.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PC/led_PC.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.c"
+            ex="false"
+            tool="0"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_console.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_console.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_dtime.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_mem.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_mem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_tcp_cmctr.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_tcp_cmctr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_types.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_wago.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../PAC/linux/l_wago.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/errors.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/errors.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/g_device.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../common/PAC-driver/g_device.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/QuickLZ/quicklz.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/QuickLZ/quicklz.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lapi.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lapi.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lauxlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lauxlib.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lbaselib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lcode.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lcode.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldblib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldebug.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldebug.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldo.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldo.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ldump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lfunc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lfunc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lgc.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lgc.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/linit.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/liolib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/llex.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/llex.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/llimits.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmathlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmem.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lmem.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/loadlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lobject.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lobject.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lopcodes.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lopcodes.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/loslib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lparser.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lparser.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstate.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstate.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstring.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstring.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lstrlib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltable.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltable.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltablib.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/ltm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lua.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/luaconf.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lualib.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lundump.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lundump.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lvm.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lvm.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/lzio.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua/lzio.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/lua/print.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/lua_manager.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../../common/lua_manager.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/pkg/PAC_dev.pkg"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua++.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_base.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_event.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_event.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_is.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_map.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_push.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/tolua++/tolua_to.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="../../common/util/smart_ptr.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
   </confs>

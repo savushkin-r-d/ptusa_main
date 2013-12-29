@@ -63,7 +63,7 @@ build: .build-post
 
 .build-post: .build-impl
 # Add your post 'build' code here...
-	@if [ ${CONF} = "release_wago_750-860" ]; then \
+	@if [ ${CONF} = "release_wago_750-860_khutor" ] || [ ${CONF} = "release_wago_750-860" ]; then \
 		echo ;\
 		echo copying files...;\
 \
