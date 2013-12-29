@@ -126,6 +126,9 @@ class PAC_critical_errors_manager
 
                 case AS_EASYSERVER:
                     return "EasyServer";
+
+                case AS_REMOTE_PAC:
+                    return "Remote PAC";
                     }//switch( err_sub_class )
                 break;
 
