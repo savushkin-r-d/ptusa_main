@@ -58,7 +58,10 @@ int main( int argc, char *argv[] )
         return EXIT_FAILURE;
         }
 
+#ifdef DEBUG
     fflush( stdout );
+#endif // DEBUG
+
     fprintf( stderr, "Starting main loop!\n" );
 
 #ifdef DEBUG
@@ -67,11 +70,6 @@ int main( int argc, char *argv[] )
     while ( 1 )
 #endif // DEBUG
         {
-        fflush( stdout );
-
-        lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, 200 );
-        sleep_ms( 1 );
-
 #ifdef TEST_SPEED
         static u_long st_time;
         static u_long all_time   = 0;
@@ -81,18 +79,32 @@ int main( int argc, char *argv[] )
         cycles_cnt++;
 #endif // TEST_SPEED
 
+#ifdef DEBUG
+        fflush( stdout );
+#endif // DEBUG
+
+        lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, 200 );
+        sleep_ms( 1 );
+
+        static u_long start_time = get_millisec();
+
+        if ( get_delta_millisec( start_time ) > 200 )
+            {
+            start_time = get_millisec();
 
 #ifndef DEBUG_NO_WAGO_MODULES
-        G_WAGO_MANAGER()->read_inputs();
+            G_WAGO_MANAGER()->read_inputs();
 #endif // DEBUG_NO_WAGO_MODULES
+            sleep_ms( 1 );
 
-        G_TECH_OBJECT_MNGR()->evaluate();
+            G_TECH_OBJECT_MNGR()->evaluate();
+
+#ifndef DEBUG_NO_WAGO_MODULES
+            G_WAGO_MANAGER()->write_outputs();
+#endif // ifndef
+            }
 
         G_CMMCTR->evaluate();
-
-#ifndef DEBUG_NO_WAGO_MODULES
-        G_WAGO_MANAGER()->write_outputs();
-#endif // ifndef
 
         PAC_info::get_instance()->eval();
         PAC_critical_errors_manager::get_instance()->show_errors();
@@ -129,6 +141,7 @@ int main( int argc, char *argv[] )
                 all_time / cycles_cnt, max_cycle_time,
                 lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
                 lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
+            fflush( stdout );
             }
 
         static u_int print_cycle_time_count = 0;
