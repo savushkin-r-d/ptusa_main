@@ -28,7 +28,7 @@ class ModbusServ
 #ifdef KHUTOR
         enum CONSTS
             {
-            KOAG_CNT = 16,
+            KOAG_CNT = 12,
             };
 
         static i_DO_device* KOAG_HL1[ KOAG_CNT ];

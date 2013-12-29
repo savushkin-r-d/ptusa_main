@@ -9,7 +9,7 @@ i_DO_device* ModbusServ::KOAG_HL1[ ModbusServ::KOAG_CNT ];
 i_AI_device* ModbusServ::KOAG_TE[ KOAG_CNT ][ 2 ];
 #endif //KHUTOR
 
-unsigned char ModbusServ::UTable[128][2] = 
+unsigned char ModbusServ::UTable[128][2] =
     {
     {0x4,0x2},
     {0x4,0x3},
@@ -170,14 +170,14 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 
                     if ( 0 == objnumber || 100 == objnumber )
                         {
-                        ForceBit( i, &outdata[ 3 ], 
+                        ForceBit( i, &outdata[ 3 ],
                             KOAG_HL1[ coag_idx - 1 ]->get_state() );
-                        }                          
+                        }
 
                     if ( ( objnumber >= 1 && objnumber <= 16 ) ||
                         ( objnumber >= 101 && objnumber <= 116 ) )
                         {
-                        ForceBit( i, &outdata[ 3 ], 
+                        ForceBit( i, &outdata[ 3 ],
                             G_TECH_OBJECTS( coag_idx )->get_mode( objnumber ) );
                         }
                     }
@@ -188,7 +188,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
         case 0x03: //Read Holding Registers
             startingAddress = data[2] * 256 + data[3];
             numberofElements = data[4] * 256 + data[5];
-            outdata[2] = (numberofElements * 2) & 0xFF; 
+            outdata[2] = (numberofElements * 2) & 0xFF;
             for (i = 0; i < numberofElements; i++)
                 {
                 coilgroup = data[0];
@@ -196,32 +196,32 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 
 #ifdef KHUTOR
                 if ( coilgroup >= 1 && coilgroup <= 16 )
-                    {         
+                    {
                     int coag_idx = ( coilgroup - 1 ) * 2 + 1;
                     if( objnumber >= 100 ) coag_idx++;
 
                     if ( 0 == objnumber || 100 == objnumber )
                         {
-                        int value = G_TECH_OBJECTS( coag_idx )->get_number();   
+                        int value = G_TECH_OBJECTS( coag_idx )->get_number();
                         PackInt16( value, &outdata[ 3 + i * 2 ] );
-                        }    
+                        }
 
                     if ( 1 == objnumber || 101 == objnumber )
                         {
                         float value = KOAG_TE[ coag_idx ][ 0 ]->get_value();
                         PackFloat( value, &outdata[ 3 + i * 2 ] );
-                        }                          
+                        }
                     if ( 3 == objnumber || 103 == objnumber )
                         {
                         float value = KOAG_TE[ coag_idx ][ 1 ]->get_value();
                         PackFloat( value, &outdata[ 3 + i * 2 ] );
-                        }  
+                        }
                     if ( 5 == objnumber || 105 == objnumber )
                         {
-                        int value = G_TECH_OBJECTS( coag_idx )->get_active_mode();   
+                        int value = G_TECH_OBJECTS( coag_idx )->get_active_mode();
 
                         PackInt16( value, &outdata[ 3 + i * 2 ] );
-                        }   
+                        }
 
                     if ( 6 == objnumber || 106 == objnumber )
                         {
@@ -230,7 +230,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
                         }
 
                     if ( 7 == objnumber || 107 == objnumber )
-                        { 
+                        {
                         int value = G_TECH_OBJECTS( coag_idx )->get_active_mode();
 
                         u_long t = 0;
@@ -244,14 +244,14 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
                                 )->get_modes_manager() )[ value ]->evaluation_time();
                             }
 
-                        PackTime( t, &outdata[ 3 + i * 2 ] );                                              
-                        }  
+                        PackTime( t, &outdata[ 3 + i * 2 ] );
+                        }
 
                     if ( 11 == objnumber || 111 == objnumber )
-                        {    
+                        {
                         int mode_idx = G_TECH_OBJECTS( coag_idx )->get_active_mode();
 
-                        static const char* no_step = ""; 
+                        static const char* no_step = "";
                         const char* step_name = no_step;
 
                         if ( mode_idx > 0 )
@@ -265,8 +265,8 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
                                 }
                             }
 
-                        CP1251toUnicode( step_name, &outdata[ 3 + i * 2 ] );                        
-                        } 
+                        CP1251toUnicode( step_name, &outdata[ 3 + i * 2 ] );
+                        }
                     }
 #endif // KHUTOR
                 }
@@ -284,7 +284,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
                 if ( 0 == objnumber || 100 == objnumber )
                     {
                     KOAG_HL1[ coag_idx - 1 ]->set_state( data[ 4 ] > 0 ? 1 : 0 );
-                    }                          
+                    }
 
                 if ( ( objnumber >= 1 && objnumber <= 16 ) ||
                     ( objnumber >= 101 && objnumber <= 116 ) )
@@ -306,15 +306,15 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 
 #ifdef KHUTOR
                 if ( coilgroup >= 1 && coilgroup <= 16 )
-                    {         
+                    {
                     int coag_idx = ( coilgroup - 1 ) * 2 + 1;
                     if( objnumber >= 100 ) coag_idx++;
 
                     if ( 6 == objnumber || 106 == objnumber )
-                        {                        
+                        {
                         int_2 value = UnpackInt16( &outdata[ 7 + i * 2 ] );
                         G_TECH_OBJECTS( coag_idx )->par_float[ 1 ] = ( float ) value;
-                        }    
+                        }
                     }
 #endif // KHUTOR
 
@@ -348,7 +348,7 @@ int ModbusServ::PackString( char* String, unsigned char* Buf )
         if (i % 2)
             {
             Buf[i-1] = String[i];
-            } 
+            }
         else
             {
             Buf[i+1] = String[i];
@@ -370,7 +370,7 @@ int ModbusServ::PackTime( unsigned long timevar, unsigned char* Buf, int units /
     if (units)
         {
         temptime = timevar;
-        } 
+        }
     else
         {
         temptime = timevar / 1000;
@@ -444,7 +444,7 @@ int_2 ModbusServ::PackInt16( int_2 wvalue,unsigned char* Buf )
 
 int_2 ModbusServ::UnpackInt16( unsigned char* Buf )
     {
-    int_2 result;    
+    int_2 result;
     ((char*)&result)[0] = Buf[1];
     ((char*)&result)[1] = Buf[0];
     return result;
@@ -452,7 +452,7 @@ int_2 ModbusServ::UnpackInt16( unsigned char* Buf )
 
 int ModbusServ::CP1251toUnicode( const char* Input, unsigned char* Buf )
     {
-    int inputlen = strnlen( Input, 100 );
+    int inputlen = strlen( Input );
 
     char input_end = 0;
     int i;
@@ -512,7 +512,7 @@ int ModbusServ::UnicodetoCP1251( char* Output, unsigned char* Buf, int inputlen 
             if (0 == upperbyte && lowerbyte < 128)
                 {
                 Output[i] = lowerbyte;
-                } 
+                }
             else
                 {
                 for (int j = 0; j<128; j++)
@@ -533,7 +533,7 @@ int ModbusServ::UnicodetoCP1251( char* Output, unsigned char* Buf, int inputlen 
 void ModbusServ::init()
     {
 #ifdef KHUTOR
-    char dev [ 10 ] = ""; 
+    char dev [ 10 ] = "";
     for ( int i = 1; i <= KOAG_CNT; i++ )
     	{
         snprintf( dev, sizeof( dev ), "KOAG%dHL1", i );
@@ -544,6 +544,6 @@ void ModbusServ::init()
 
         snprintf( dev, sizeof( dev ), "KOAG%dTE2", i );
         KOAG_TE[ i - 1 ][ 1 ] = TE( dev );
-    	}   
+    	}
 #endif //KHUTOR
     }
