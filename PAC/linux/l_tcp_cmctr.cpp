@@ -20,7 +20,7 @@ tcp_communicator_linux::tcp_communicator_linux( const char *name_rus,
     {
     // Задаем таймаут.
     tv.tv_sec  = 0;
-    tv.tv_usec = 2500; // 0.0025 сек.
+    tv.tv_usec = 5000; // 0.005 сек.
 
     sin_len = sizeof( ssin );
     strcpy( host_name_rus, name_rus );
