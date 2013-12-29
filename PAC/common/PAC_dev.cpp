@@ -1553,6 +1553,7 @@ void valve_mix_proof::direct_set_state( int new_state )
             break;
 
         case ST_UPPER_SEAT:
+            {
             direct_off();
 
             int u = get_DO( DO_INDEX_U );
@@ -1563,8 +1564,10 @@ void valve_mix_proof::direct_set_state( int new_state )
                 }
 
             break;
+            }
 
         case ST_LOWER_SEAT:
+            {
             direct_off();
 
             int l = get_DO( DO_INDEX_L );
@@ -1574,6 +1577,7 @@ void valve_mix_proof::direct_set_state( int new_state )
                 set_DO( DO_INDEX_L, 1 );
                 }
             break;
+            }
 
         default:
             direct_on();
@@ -1720,7 +1724,7 @@ void motor::direct_set_value( float value )
     freq = value;
 #else
     if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ )
-        {       
+        {
         set_AO( AO_INDEX, value, C_MIN_VALUE, C_MAX_VALUE );
         }
 #endif // DEBUG_NO_WAGO_MODULES
@@ -1785,7 +1789,7 @@ int motor::get_state()
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
         {
         int ro = get_DO( DO_INDEX_REVERSE );
-        
+
         if ( 0 == ro && 0 == o && 0 == i )
             {
             start_switch_time = get_millisec();

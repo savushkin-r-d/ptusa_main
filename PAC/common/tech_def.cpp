@@ -23,14 +23,14 @@ tech_object::tech_object( const char* new_name, u_int number, u_int type,
         par_uint( saved_params_u_int_4( par_uint_count ) ),
         rt_par_uint( run_time_params_u_int_4( runtime_par_uint_count ) ),
         timers( timers_count ),
+#ifdef KHUTOR
+        active_mode( 0 ),
+#endif // KHUTOR
         number( number ),
         type( type ),
         cmd( 0 ),
         modes_count( modes_count ),
         modes_time( run_time_params_u_int_4( modes_count, "MODES_TIME" ) ),
-#ifdef KHUTOR
-        active_mode( 0 ),
-#endif // KHUTOR
         modes_manager( 0 )
     {
     u_int state_size_in_int4 = modes_count / 32; // Размер состояния в double word.
@@ -91,11 +91,11 @@ int tech_object::set_mode( u_int mode, int newm )
 #endif
 
     if ( newm != 0 ) newm = 1;
-    if ( mode > modes_count ) 
+    if ( mode > modes_count )
         {
         res = 3;
         }
-    if ( 0 == mode ) 
+    if ( 0 == mode )
         {
         res = 4;
         }
@@ -116,7 +116,7 @@ int tech_object::set_mode( u_int mode, int newm )
 
 #ifdef KHUTOR
                     if( mode <= MAX_MODE_IDX )
-                        {    
+                        {
                         active_mode = 0;
                         }
 #endif // KHUTOR
@@ -131,7 +131,7 @@ int tech_object::set_mode( u_int mode, int newm )
                 //Проверка режима на проверку ОС устройств.
                 const int ERR_STR_SIZE = 41;
                 char res_str[ ERR_STR_SIZE ] = "обр. связь ";
-                                
+
                 int res = ( *modes_manager )[ mode ]->check_devices(
                     res_str + strlen( res_str ), ERR_STR_SIZE - strlen( res_str ) );
                 if ( res && is_check_mode( mode ) == 1 )
@@ -159,7 +159,7 @@ int tech_object::set_mode( u_int mode, int newm )
 
 #ifdef KHUTOR
                         if( mode <= MAX_MODE_IDX )
-                            {    
+                            {
                             active_mode = mode;
                             }
 #endif // KHUTOR
@@ -229,7 +229,7 @@ int tech_object::get_mode( u_int mode )
 int tech_object::check_on_mode( u_int mode, char* reason )
     {
     if ( mode > modes_count || 0 == mode ) return 0;
-        
+
     return (*modes_manager)[ mode ]->check_on( reason );
     }
 //-----------------------------------------------------------------------------
@@ -263,7 +263,7 @@ int tech_object::check_off_mode( u_int mode )
 int tech_object::final_mode( u_int mode )
     {
     if ( mode > modes_count || 0 == mode ) return 1;
-        
+
     ( *modes_manager )[ mode ]->final();
 
     return 0;
@@ -280,7 +280,7 @@ int tech_object::lua_exec_cmd( u_int cmd )
 int tech_object::lua_check_on_mode( u_int mode )
     {
     char err_msg[ 200 ] = "";
-        
+
     if ( int res = tech_object::check_on_mode( mode, err_msg ) )
         {
         set_err_msg( err_msg, mode );
@@ -352,7 +352,7 @@ int tech_object::lua_init_params()
     //Проверка на наличии функции инициализации рабочих параметров uint.
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
         name_Lua );
-    lua_getfield( lua_manager::get_instance()->get_Lua(), -1, 
+    lua_getfield( lua_manager::get_instance()->get_Lua(), -1,
         "init_rt_params_uint" );
     lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
 
@@ -367,7 +367,7 @@ int tech_object::lua_init_params()
     //Проверка на наличии функции инициализации рабочих параметров float.
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
         name_Lua );
-    lua_getfield( lua_manager::get_instance()->get_Lua(), -1, 
+    lua_getfield( lua_manager::get_instance()->get_Lua(), -1,
         "init_rt_params_float" );
     lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
 
@@ -672,7 +672,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
     error_number++;
     new_err->n = error_number;
     new_err->type = type;
-    
+
     switch ( type )
         {
         case ERR_CANT_ON:
