@@ -180,6 +180,37 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
                         ForceBit( i, &outdata[ 3 ],
                             G_TECH_OBJECTS( coag_idx )->get_mode( objnumber ) );
                         }
+                    //Откачка сыворотки из верхней части.
+                    if ( 17 == objnumber || 117 == objnumber )
+                        {
+                        ForceBit( i, &outdata[ 3 ],
+                            G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 1 ] );
+                        }
+                    //Откачка сыворотки из средней части.
+                    if ( 18 == objnumber || 118 == objnumber )
+                        {
+                        ForceBit( i, &outdata[ 3 ],
+                            G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 2 ] );
+                        }
+                    //Откачка сыворотки из нижней части.
+                    if ( 19 == objnumber || 119 == objnumber )
+                        {
+                        ForceBit( i, &outdata[ 3 ],
+                            G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 3 ] );
+                        }
+
+                    //Подача основы в дренаж.
+                    if ( 20 == objnumber || 120 == objnumber )
+                        {
+                        ForceBit( i, &outdata[ 3 ],
+                            G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 5 ] );
+                        }
+                    //Подача основы в танк.
+                    if ( 21 == objnumber || 121 == objnumber )
+                        {
+                        ForceBit( i, &outdata[ 3 ],
+                            G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 4 ] );
+                        }
                     }
 #endif //KHUTOR
                 }
@@ -271,6 +302,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 #endif // KHUTOR
                 }
             return 3+numberofElements*2;
+
         case 0x05: //Write Single Coil
             startingAddress = data[2] * 256 + data[3];
             objnumber = startingAddress;
@@ -281,16 +313,45 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
                 int coag_idx = ( coilgroup - 1 ) * 2 + 1;
                 if( objnumber >= 100 ) coag_idx++;
 
+                int value = data[ 4 ] > 0 ? 1 : 0;
+
                 if ( 0 == objnumber || 100 == objnumber )
                     {
-                    KOAG_HL1[ coag_idx - 1 ]->set_state( data[ 4 ] > 0 ? 1 : 0 );
+                    KOAG_HL1[ coag_idx - 1 ]->set_state( value );
                     }
 
                 if ( ( objnumber >= 1 && objnumber <= 16 ) ||
                     ( objnumber >= 101 && objnumber <= 116 ) )
                     {
-                    G_TECH_OBJECTS( coag_idx )->set_mode( objnumber, data[ 4 ] );
+                    G_TECH_OBJECTS( coag_idx )->set_mode( objnumber, value );
                     }
+
+                    //Откачка сыворотки из верхней части.
+                    if ( 17 == objnumber || 117 == objnumber )
+                        {
+                        G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 1 ] = value;
+                        }
+                    //Откачка сыворотки из средней части.
+                    if ( 18 == objnumber || 118 == objnumber )
+                        {
+                        G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 2 ] = value;
+                        }
+                    //Откачка сыворотки из нижней части.
+                    if ( 19 == objnumber || 119 == objnumber )
+                        {
+                        G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 3 ] = value;
+                        }
+
+                    //Подача основы в дренаж.
+                    if ( 20 == objnumber || 120 == objnumber )
+                        {
+                        G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 5 ] = value;
+                        }
+                    //Подача основы в танк.
+                    if ( 21 == objnumber || 121 == objnumber )
+                        {
+                        G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 4 ] = value;
+                        }
                 }
 #endif //KHUTOR
             return 6;
