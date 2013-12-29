@@ -30,6 +30,7 @@ extern "C" {
     };
 #endif // __BORLANDC__
 
+#include <stdlib.h>
 #include <vector>
 
 #include "smart_ptr.h"
@@ -38,15 +39,15 @@ extern "C" {
 #include "quicklz.h"
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс устройства, позволяющий сохранить его в потоке байтов.
-class i_Lua_save_device    
-    {    
+class i_Lua_save_device
+    {
     public:
         /// @brief Сохранение самого устройства в буфер.
         ///
         /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
         ///
         /// @return >= 0 - количество записанных байт.
-        virtual int save_device( char *buff ) = 0; 
+        virtual int save_device( char *buff ) = 0;
 
 #ifdef RM_PAC
         /// @brief Сохранение самого устройства в буфер для удаленного доступа.
@@ -65,7 +66,7 @@ class i_Lua_save_device
         /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
         ///
         /// @return >= 0 - количество записанных байт.
-        virtual int rm_save_device_state( char *buff ) = 0; 
+        virtual int rm_save_device_state( char *buff ) = 0;
 #endif // RM_PAC
 
         /// @brief Отладочная печать объекта в консоль.
@@ -73,8 +74,8 @@ class i_Lua_save_device
     };
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс устройства, позволяющий получать команды от сервера.
-class i_cmd_device    
-    {      
+class i_cmd_device
+    {
     public:
         /// @brief Выполнение числовой команды.
         ///
@@ -101,8 +102,8 @@ class i_cmd_device
 //-----------------------------------------------------------------------------
 /// @brief Коммуникатор устройств - содержит все устройства одного PAC. Служит
 /// для передачи информации о них и их состоянии на сервер (PC).
-class device_communicator             
-    {   
+class device_communicator
+    {
     public:
         enum CMD
             {
@@ -117,12 +118,12 @@ class device_communicator
 
             // Резервное копирование параметров.
             ///@brief Получение параметров устройств.
-            /// 
+            ///
             /// Они используются для создания резервной копии на стороне сервера.
-            CMD_GET_PARAMS,     
+            CMD_GET_PARAMS,
 
             ///@brief Восстановление параметров устройств из скрипта Lua.
-            CMD_RESTORE_PARAMS, 
+            CMD_RESTORE_PARAMS,
             ///@brief Получение контрольной суммы параметров.
             ///
             /// Эта сумма используется для отслеживания изменения параметров PAC
@@ -139,8 +140,8 @@ class device_communicator
         /// Единственный экземпляр класса.
         static auto_smart_ptr < device_communicator > instance;
 
-        static qlz_state_compress *state_compress;
-        static char * buff;
+        static qlz_state_compress state_compress;
+        static char *buff;
 
     public:
         /// @brief Получение единственного экземпляра класса.
@@ -156,18 +157,16 @@ class device_communicator
 
         enum CONSTANTS
             {
-            C_SERVICE_N = 1, ///< Номер сервиса коммуникатора.            
+            C_SERVICE_N = 1, ///< Номер сервиса коммуникатора.
             };
 
         /// @brief Устройства, информация о них и их состоянии передается на
         /// сервер (PC).
         static std::vector< i_Lua_save_device* > dev;
-        
+
     public:
         device_communicator()
-            {         
-            state_compress =
-                ( qlz_state_compress *) malloc( sizeof( qlz_state_compress ) );
+            {
             buff = new char[ 4000 + 400 ];
             }
 
