@@ -32,10 +32,10 @@ auto_smart_ptr < wago_manager > wago_manager::instance;
 int wago_device::get_DO( u_int index )
     {
     if ( index < DO_channels.count &&
-        DO_channels.char_read_values &&
-        DO_channels.char_read_values[ index ] )
+        DO_channels.char_write_values &&
+        DO_channels.char_write_values[ index ] )
         {
-        return *DO_channels.char_read_values[ index ];
+        return *DO_channels.char_write_values[ index ];
         }
 
 #ifdef DEBUG
@@ -87,10 +87,10 @@ int wago_device::get_DI( u_int index )
 float wago_device::get_AO( u_int index, float min_value, float max_value )
     {
     if ( index < AO_channels.count &&
-        AO_channels.int_read_values &&
-        AO_channels.int_read_values[ index ] )
+        AO_channels.int_write_values &&
+        AO_channels.int_write_values[ index ] )
         {
-        float val = ( float ) *AO_channels.int_read_values[ index ];
+        float val = ( float ) *AO_channels.int_write_values[ index ];
 
         u_int table_n = AO_channels.tables[ index ];
         u_int offset = AO_channels.offsets[ index ];
