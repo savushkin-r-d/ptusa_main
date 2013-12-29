@@ -1,6 +1,6 @@
 #if !defined WIN_OS && !defined LINUX_OS && !defined MINIOS7
 #error You must define OS!
-#endif 
+#endif
 
 #include "tcp_cmctr.h"
 
@@ -21,10 +21,10 @@ auto_smart_ptr < tcp_communicator > tcp_communicator::instance = 0;
 tcp_communicator::tcp_communicator()
     {
     is_going_to_reboot  = 0;
-    max_cycles          = 4;
+    max_cycles          = 20;
     glob_cmctr_ok       = 1;
     for ( int i = 0; i < TC_MAX_SERVICE_NUMBER; i++ ) services[ i ] = NULL;
-    
+
     memset( host_name_rus, 0, TC_MAX_HOST_NAME );
     }
 //------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ void tcp_communicator::_AknOK()
     }
 //------------------------------------------------------------------------------
 tcp_communicator* tcp_communicator::get_instance()
-    {   
+    {
     return instance;
     }
 //------------------------------------------------------------------------------
