@@ -330,7 +330,7 @@ int step::check_devices( char* err_dev_name, int str_len )
     {
     for ( u_int i = 0; i < actions.size(); i++ )
         {
-        int res = actions[ i ]->check_devices( err_dev_name + 
+        int res = actions[ i ]->check_devices( err_dev_name +
             strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
 
         if ( res )
@@ -407,7 +407,7 @@ void DI_DO_action::print( const char* prefix /*= "" */ ) const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-open_seat_action::open_seat_action( bool is_mode, step *owner ) : 
+open_seat_action::open_seat_action( bool is_mode, step *owner ) :
     action( "Промывка седел" ),
     phase( P_WAIT ),
     active_group_n( 0 ),
@@ -439,9 +439,9 @@ void open_seat_action::init()
     if ( is_mode )
     	{
         wait_time = ( *( PAC_info::get_instance()->par ) )
-            [ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;        
-       
-        wait_time /= 
+            [ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;
+
+        wait_time /=
             wash_upper_seat_devices.size() + wash_lower_seat_devices.size();
     	}
     else
@@ -450,7 +450,7 @@ void open_seat_action::init()
         }
 
     wash_time = ( *( PAC_info::get_instance()->par ) )
-        [ PAC_info::P_MIX_FLIP_TIME ];    
+        [ PAC_info::P_MIX_FLIP_TIME ];
 
     active_group_n = 0;
     }
@@ -684,22 +684,22 @@ void wash_action::evaluate()
         devices[ G_DO ][ i ]->on();
         }
 
-    //Включаем устройства.
-    for ( u_int i = 0; i < devices[ G_DEV ].size(); i++ )
-        {
-        devices[ G_DEV ][ i ]->on();
-        }
-
     // В зависимости от сигнала запроса включения устройств выключаем устройства.
+    int new_state = 0;
+
     for ( u_int i = 0; i < devices[ G_DI ].size(); i++ )
         {
-        if ( !devices[ G_DI ][ i ]->is_active() )
+        if ( devices[ G_DI ][ i ]->is_active() )
             {
-            for ( u_int j = 0; j < devices[ G_DEV ].size(); j++ )
-                {
-                devices[ G_DEV ][ j ]->off();
-                }
+            new_state = 1;
+            break;
             }
+        }
+
+    //Включаем или выключаем устройства.
+    for ( u_int i = 0; i < devices[ G_DEV ].size(); i++ )
+        {
+        devices[ G_DEV ][ i ]->set_state( new_state );
         }
 
     bool is_dev_error = false;
@@ -835,7 +835,7 @@ void mode::init( u_int start_step /*= 1 */ )
 #endif
     }
 //-----------------------------------------------------------------------------
-// Если есть активный шаг, проверяем на наличие параллельного нового шага (1). 
+// Если есть активный шаг, проверяем на наличие параллельного нового шага (1).
 // Если он есть, то раздельно выключаем и включаем устройства двух активных
 // шагов (2). Потом проверяем время переходного режима. Если оно вышло,
 // отключаем активный шаг, в качестве активного шага переназначаем параллельный
@@ -854,7 +854,7 @@ void mode::evaluate()
         steps[ active_step_n ]->evaluate_on();
         steps[ active_step_second_n ]->evaluate_on();
 
-        if ( get_delta_millisec( active_step_second_start_time ) > 
+        if ( get_delta_millisec( active_step_second_start_time ) >
             step_cooperate_time )
             {
             steps[ active_step_n ]->final();
@@ -875,17 +875,17 @@ void mode::evaluate()
         if ( active_step_time != 0 &&
             get_delta_millisec( steps[ active_step_n ]->get_start_time() ) >
             ( u_int ) active_step_time )
-            {            
-            u_long step_switch_time = 0; 
+            {
+            u_long step_switch_time = 0;
             if ( owner->get_param() != 0 && step_cooperate_time_par_n > -1 )
                 {
-                step_switch_time = ( u_long ) 
+                step_switch_time = ( u_long )
                     owner->get_param()[ 0 ][ step_cooperate_time_par_n ];
-                step_switch_time *= 1000L;                
+                step_switch_time *= 1000L;
                 }
-            
+
             if ( -1 == active_step_next_step_n )
-            	{       
+            	{
                 if ( n > 0 )
                 	{
                     owner->off_mode( n );
@@ -898,9 +898,9 @@ void mode::evaluate()
             else
                 {
                 to_step( active_step_next_step_n, step_switch_time );
-                }            
+                }
             }
-        }      
+        }
     }
 //-----------------------------------------------------------------------------
 void mode::final()
@@ -950,9 +950,9 @@ void mode::to_step( u_int new_step, u_long cooperative_time )
     {
     if ( new_step > steps.size() || new_step <= 0 )
         {
-#ifdef DEBUG     
+#ifdef DEBUG
         Print( "Error mode::to_step step %d > steps size %d.\n",
-            new_step, steps.size() );      
+            new_step, steps.size() );
 #endif // DEBUG
 
         return;
@@ -963,17 +963,17 @@ void mode::to_step( u_int new_step, u_long cooperative_time )
     active_step_time        = 0;
     active_step_next_step_n = 0;
 
-    // Если есть текущий шаг и время переключения больше нуля, 
+    // Если есть текущий шаг и время переключения больше нуля,
     // то включаем совместный шаг.
     if ( active_step_n >= 0 && cooperative_time > 0 )
         {
         active_step_second_n = new_step - 1;
-        active_step_second_start_time = get_millisec();  
+        active_step_second_start_time = get_millisec();
 
         int par_n = step_duration_par_ns[ active_step_second_n ];
 
         if ( owner->get_param() != 0 && par_n > 0 )
-            {            
+            {
             active_step_time = u_int( owner->get_param()[ 0 ][ par_n ] * 1000L );
             active_step_time += step_cooperate_time;
             active_step_next_step_n = next_step_ns[ active_step_second_n ];
@@ -981,29 +981,29 @@ void mode::to_step( u_int new_step, u_long cooperative_time )
             steps[ active_step_second_n ]->set_step_time( active_step_time );
             steps[ active_step_second_n ]->init();
             }
-        }     
+        }
     else
         //Нет совместного шага.
         {
         if ( active_step_n >= 0 )
             {
             steps[ active_step_n ]->final();
-            }     
+            }
         active_step_n = new_step - 1;
 
         if ( active_step_second_n >= 0 )
             {
             steps[ active_step_second_n ]->final();
-            }  
+            }
         active_step_second_n = -1;
-        
+
         active_step_time        = 0;
         active_step_next_step_n = 0;
 
         //Время шага
         int par_n = step_duration_par_ns[ active_step_n ];
         if ( owner->get_param() != 0 && par_n > 0 )
-            {           
+            {
             active_step_time = u_int( owner->get_param()[ 0 ][ par_n ] * 1000L );
             active_step_next_step_n = next_step_ns[ active_step_n ];
             }
@@ -1043,7 +1043,7 @@ int mode::check_devices( char* err_dev_name, int str_len )
     {
     for ( u_int i = 0; i < steps.size(); i++ )
         {
-        int res = steps[ i ]->check_devices( err_dev_name + 
+        int res = steps[ i ]->check_devices( err_dev_name +
             strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
 
         if ( res )
@@ -1059,7 +1059,7 @@ int mode::check_devices( char* err_dev_name, int str_len )
 mode* mode_manager::add_mode( const char* name )
     {
     modes.push_back( new mode( name, this, modes.size() + 1 ) );
-    
+
     return modes[ modes.size() - 1 ];
     }
 //-----------------------------------------------------------------------------
