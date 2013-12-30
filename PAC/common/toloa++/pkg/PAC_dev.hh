@@ -18,6 +18,7 @@ $#include "g_device.h"
 $#include "errors.h"
 
 $#include "rm_manager.h"
+$#include "modbus_client.h"
 
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе дискретного входа.
@@ -1018,3 +1019,29 @@ class rm_manager
             int remote_PAC_id );
     };   
 //---------------------------------------------------------------------------
+
+class modbus_client 
+	{
+	protected:
+
+	public:
+		modbus_client(unsigned int id, char* ip, unsigned int port, unsigned long exchangetimeout);
+		//реализация функций протокола modbus
+		int read_discrete_inputs(unsigned int start_address, unsigned int quantity);
+		int read_coils(unsigned int start_address, unsigned int quantity);
+		int read_holding_registers(unsigned int address, unsigned int quantity);
+		int read_input_registers(unsigned int address, unsigned int quantity);
+		int write_coil(unsigned int address, unsigned char value);
+		int force_multiply_coils(unsigned int address, unsigned int quantity);
+		int write_multiply_registers(unsigned int address, unsigned int quantity);
+		//функции для работы с буфером из Lua
+		void zero_output_buff();
+		void set_int2(unsigned int address, short value);
+		short get_int2(unsigned int address);
+		void set_int4(unsigned int address, int value);
+		int get_int4(unsigned int address);
+		void set_float(unsigned int address, float value);
+		float get_float(unsigned int address);
+		void set_bit(unsigned int address, int value);
+		int get_bit(unsigned int address);
+	};

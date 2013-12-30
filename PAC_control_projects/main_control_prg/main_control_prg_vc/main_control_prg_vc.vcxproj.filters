@@ -273,6 +273,15 @@
     <ClInclude Include="..\..\..\PAC\common\modbus_serv.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\tcp_client.h">
+      <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\win\w_tcp_client.h">
+      <Filter>Source Files\PAC\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\modbus_client.h">
+      <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\i_tech_def.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
@@ -474,6 +483,15 @@
       <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\modbus_serv.cpp">
+      <Filter>Source Files\PAC\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\tcp_client.cpp">
+      <Filter>Source Files\PAC\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\win\w_tcp_client.cpp">
+      <Filter>Source Files\PAC\win</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\modbus_client.cpp">
       <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\QuickLZ\quicklz.c">

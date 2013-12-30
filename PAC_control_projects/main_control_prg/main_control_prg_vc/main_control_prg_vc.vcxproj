@@ -266,6 +266,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClInclude Include="..\..\..\common\win_util\WSA_err_decode.h" />
     <ClInclude Include="..\..\..\PAC\common\i_tech_def.h" />
     <ClInclude Include="..\..\..\PAC\common\mcaRec.h" />
+    <ClInclude Include="..\..\..\PAC\common\modbus_client.h" />
     <ClInclude Include="..\..\..\PAC\common\modbus_serv.h" />
     <ClInclude Include="..\..\..\PAC\common\mode_mngr.h" />
     <ClInclude Include="..\..\..\PAC\common\PAC_dev.h" />
@@ -282,11 +283,13 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClInclude Include="..\..\..\PAC\common\sys\base_mem.h" />
     <ClInclude Include="..\..\..\PAC\common\sys\dtime.h" />
     <ClInclude Include="..\..\..\PAC\common\sys\s_types.h" />
+    <ClInclude Include="..\..\..\PAC\common\tcp_client.h" />
     <ClInclude Include="..\..\..\PAC\common\tcp_cmctr.h" />
     <ClInclude Include="..\..\..\PAC\common\tech_def.h" />
     <ClInclude Include="..\..\..\PAC\common\wago.h" />
     <ClInclude Include="..\..\..\PAC\win\PAC_PC\wago_PC.h" />
     <ClInclude Include="..\..\..\PAC\win\w_rm_tech_def.h" />
+    <ClInclude Include="..\..\..\PAC\win\w_tcp_client.h" />
     <ClInclude Include="..\..\..\PAC\win\w_tcp_cmctr.h" />
     <ClInclude Include="..\..\..\pac\win\w_console.h" />
     <ClInclude Include="..\..\..\PAC\win\w_led.h" />
@@ -336,6 +339,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp" />
     <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp" />
     <ClCompile Include="..\..\..\PAC\common\mcaRec.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\modbus_client.cpp" />
     <ClCompile Include="..\..\..\PAC\common\modbus_serv.cpp" />
     <ClCompile Include="..\..\..\PAC\common\mode_mngr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PAC_dev.cpp" />
@@ -350,11 +354,13 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClCompile Include="..\..\..\PAC\common\sys\io.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys\led.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys\base_mem.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\tcp_client.cpp" />
     <ClCompile Include="..\..\..\PAC\common\tcp_cmctr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\tech_def.cpp" />
     <ClCompile Include="..\..\..\PAC\common\wago.cpp" />
     <ClCompile Include="..\..\..\PAC\win\PAC_PC\wago_PC.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_rm_tech_def.cpp" />
+    <ClCompile Include="..\..\..\PAC\win\w_tcp_client.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_tcp_cmctr.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_dtime.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_console.cpp" />
