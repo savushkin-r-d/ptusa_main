@@ -20,7 +20,6 @@ unsigned char* TRecipeManager::recipeCopyBuffer = NULL;
 
 TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
 	currentRecipe(0),
-	lastEvalTime(get_millisec()),
 	curRecipeStartBlock(0),
 	recipeStartAddr(0L)
 	{
@@ -37,6 +36,7 @@ TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
 	}
 	fread(recipeMemory, 1, recipeMemorySize, memFile);
 #endif // WIN_OS
+    lastEvalTime = get_millisec();
 	currentRecipeName = new char[recipeNameLength];
 	recipeList = new char[(recipeNameLength + 6) * recipePerLine];
 	strcpy(recipeList,"");

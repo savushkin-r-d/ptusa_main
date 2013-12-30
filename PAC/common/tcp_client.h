@@ -10,7 +10,7 @@ class tcp_client
 		unsigned int port;
 		unsigned long last_connect_try;
 		unsigned int connect_tries;
-		unsigned int socket_number;
+		int socket_number;
 		unsigned long timeout;
 		unsigned long connectTimeout;
 		char connectedstate;
@@ -18,7 +18,7 @@ class tcp_client
 		unsigned char subclass;
 		unsigned char is_initialized;
 	public:
-		static tcp_client* Create(char* ip, unsigned int port, unsigned int id, unsigned char alarm_subclass, 
+		static tcp_client* Create(char* ip, unsigned int port, unsigned int id, unsigned char alarm_subclass,
 			unsigned int exchange_buf_size = 256, unsigned long send_receive_timeout = 100);
 		virtual int Communicate(unsigned int bytestosend);
 		unsigned int buff_size;

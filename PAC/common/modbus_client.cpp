@@ -30,7 +30,7 @@ int modbus_client::read_discrete_inputs( unsigned int start_address, unsigned in
 	tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
 	tcpclient->buff[10] = ((int_2)quantity) >> 8;;
 	tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
-	int res = tcpclient->Communicate(12);
+	unsigned int res = tcpclient->Communicate(12);
 	if (res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
 		{
 #ifdef DEBUG
@@ -55,7 +55,7 @@ int modbus_client::read_coils( unsigned int start_address, unsigned int quantity
 	tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
 	tcpclient->buff[10] = ((int_2)quantity) >> 8;;
 	tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
-	int res = tcpclient->Communicate(12);
+	unsigned int res = tcpclient->Communicate(12);
 	if (res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
 		{
 #ifdef DEBUG
@@ -80,7 +80,7 @@ int modbus_client::read_holding_registers( unsigned int address, unsigned int qu
 	tcpclient->buff[9] = ((int_2)address) & 0xFF;
 	tcpclient->buff[10] = ((int_2)quantity) >> 8;;
 	tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
-	int res = tcpclient->Communicate(12);
+	unsigned int res = tcpclient->Communicate(12);
 	if (res != 9 + quantity * 2)
 		{
 #ifdef DEBUG
@@ -105,7 +105,7 @@ int modbus_client::read_input_registers( unsigned int address, unsigned int quan
 	tcpclient->buff[9] = ((int_2)address) & 0xFF;
 	tcpclient->buff[10] = ((int_2)quantity) >> 8;;
 	tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
-	int res = tcpclient->Communicate(12);
+	unsigned int res = tcpclient->Communicate(12);
 	if (res != 9 + quantity * 2)
 		{
 #ifdef DEBUG
@@ -210,14 +210,14 @@ void modbus_client::set_int2( unsigned int address, int_2 value )
 		return;
 		}
 	tcpclient->buff[13+address * 2] = ((char*)&value)[1];
-	tcpclient->buff[14+address * 2] = ((char*)&value)[0]; 
+	tcpclient->buff[14+address * 2] = ((char*)&value)[0];
 	}
 
 int_2 modbus_client::get_int2( unsigned int address )
 	{
 	if (address * 2 > tcpclient->buff_size - 15)
 		{
-		return 0;  
+		return 0;
 		}
 	int_2 result;
 	((char*)&result)[0] = tcpclient->buff[10 + address * 2];
@@ -234,14 +234,14 @@ void modbus_client::set_int4( unsigned int address, int_4 value )
 	tcpclient->buff[13+address * 2] = ((char*)&value)[1];
 	tcpclient->buff[14+address * 2] = ((char*)&value)[0];
 	tcpclient->buff[15+address * 2] = ((char*)&value)[3];
-	tcpclient->buff[16+address * 2] = ((char*)&value)[2]; 
+	tcpclient->buff[16+address * 2] = ((char*)&value)[2];
 	}
 
 int_4 modbus_client::get_int4( unsigned int address )
 	{
 	if (address * 2 > tcpclient->buff_size - 17)
 		{
-		return 0;  
+		return 0;
 		}
 	int_4 result;
 	((char*)&result)[0] = tcpclient->buff[10 + address * 2];
@@ -260,14 +260,14 @@ void modbus_client::set_float( unsigned int address, float value )
 	tcpclient->buff[13+address * 2] = ((char*)&value)[1];
 	tcpclient->buff[14+address * 2] = ((char*)&value)[0];
 	tcpclient->buff[15+address * 2] = ((char*)&value)[3];
-	tcpclient->buff[16+address * 2] = ((char*)&value)[2]; 
+	tcpclient->buff[16+address * 2] = ((char*)&value)[2];
 	}
 
 float modbus_client::get_float( unsigned int address )
 	{
 	if (address * 2 > tcpclient->buff_size - 17)
 		{
-		return 0;  
+		return 0;
 		}
 	float result;
 	((char*)&result)[0] = tcpclient->buff[10 + address * 2];

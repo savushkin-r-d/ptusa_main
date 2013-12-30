@@ -4,6 +4,10 @@
 #include "w_tcp_client.h"
 #endif //WIN_OS
 
+#ifdef LINUX_OS
+#include "l_tcp_client.h"
+#endif
+
 tcp_client::tcp_client( const char* client_ip, unsigned int client_port, unsigned int client_id, unsigned char alarm_subclass, unsigned int exchange_buf_size /*= 256*/, unsigned long send_receive_timeout /*= 100*/ )
 	{
 	ip = new char[16];
@@ -30,6 +34,9 @@ tcp_client* tcp_client::Create( char* ip, unsigned int port, unsigned int id, un
 #ifdef WIN_OS
 	return new win_tcp_client(ip, port, id, alarm_subclass, exchange_buf_size, send_receive_timeout);
 #endif // WIN_OS
+#ifdef LINUX_OS
+    return new linux_tcp_client(ip, port, id, alarm_subclass, exchange_buf_size, send_receive_timeout);
+#endif
 	return 0;
 	}
 
