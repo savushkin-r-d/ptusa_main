@@ -178,15 +178,15 @@ int modbus_client::write_multiply_registers( unsigned int address, unsigned int 
 	tcpclient->buff[2] = 0;
 	tcpclient->buff[3] = 0;
 	tcpclient->buff[4] = ((int_2)(7 + bytecount)) >> 8;
-	tcpclient->buff[5] = ((int_2)(7 + bytecount)) && 0xFF;
+	tcpclient->buff[5] = ((int_2)(7 + bytecount)) & 0xFF;
 	tcpclient->buff[6] = 1;
 	tcpclient->buff[7] = 0x10;
 	tcpclient->buff[8] = ((int_2)address) >> 8;
 	tcpclient->buff[9] = ((int_2)address) & 0xFF;
-	tcpclient->buff[10] = ((int_2)quantity) >> 8;;
+	tcpclient->buff[10] = ((int_2)quantity) >> 8;
 	tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
 	tcpclient->buff[12] = bytecount;
-	int res = tcpclient->Communicate(13 + bytecount);
+ 	int res = tcpclient->Communicate(13 + bytecount);
 	zero_output_buff();
 	if (res != 12)
 		{
