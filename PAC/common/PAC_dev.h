@@ -55,7 +55,7 @@ class par_device
         /// им€_параметра = 'значение'.
         ///
         /// @param str - строка, куда сохран€ем.
-        void save_device( char *str );
+        int save_device( char *str );
 
         /// @brief ¬ыполнение команда (установка значени€ параметра).
         ///
@@ -445,8 +445,9 @@ class device : public i_DO_AO_device, public par_device
         /// @brief —охранение дополнительных данных устройства в виде скрипта Lua.
         ///
         /// @param buff [out] - буфер записи строки.
-        virtual void save_device_ex( char *buff )
+        virtual int save_device_ex( char *buff )
             {
+            return 0;
             }
 
         u_int_4 s_number;            ///< ѕоследовательный номер устройства.
@@ -663,7 +664,7 @@ class valve: public digital_wago_device
             }
 
         /// @brief —охранение дополнительных данных.
-        void save_device_ex( char *buff );
+        int save_device_ex( char *buff );
 
         //—осто€ни€ клапана (расширенное).
         enum VALVE_STATE_EX
@@ -1487,7 +1488,7 @@ class motor : public device, public wago_device
             set_par_name( P_ON_TIME,  0, "P_ON_TIME" );
             }
 
-        void save_device_ex( char *buff );
+        int save_device_ex( char *buff );
 
         float get_value();
 
@@ -1687,9 +1688,9 @@ class counter : public device,
             }
 
         //Lua.
-        void save_device_ex( char *buff )
+        int save_device_ex( char *buff )
             {
-            sprintf( buff, "F=%.2f, ", get_flow() );
+            return sprintf( buff, "F=%.2f, ", get_flow() );
             }
 
     private:

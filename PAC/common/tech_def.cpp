@@ -599,31 +599,31 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 int tech_object::save_params_as_Lua_str( char* str )
     {
-    sprintf( str, "params{ object = \'%s\', param_name = \'%s\', "
+    int res = sprintf( str, "params{ object = \'%s\', param_name = \'%s\', "
         "par_id = %d,\n",
         name_Lua, "par_float", ID_PAR_FLOAT );
-    par_float.save_device_ex( str + strlen( str ), "", "values"  );
-    sprintf( str + strlen( str ) - 2, "%s", " }\n" );
+    res += par_float.save_device_ex( str + res, "", "values"  ) - 2;
+    res += sprintf( str + res, "%s", " }\n" );
 
-    sprintf( str + strlen( str ), "params{ object = \'%s\', param_name = \'%s\', "
+    res += sprintf( str + res, "params{ object = \'%s\', param_name = \'%s\', "
         "par_id = %d,\n",
         name_Lua, "rt_par_float", ID_RT_PAR_FLOAT );
-    rt_par_float.save_device_ex( str + strlen( str ), "", "values"  );
-    sprintf( str + strlen( str ) - 2, "%s", " }\n" );
+    res += rt_par_float.save_device_ex( str + res, "", "values"  ) - 2;
+    res += sprintf( str + res, "%s", " }\n" );
 
-    sprintf( str + strlen( str ), "params{ object = \'%s\', param_name = \'%s\', "
+    res += sprintf( str + res, "params{ object = \'%s\', param_name = \'%s\', "
         "par_id = %d,\n",
         name_Lua, "par_uint", ID_PAR_UINT );
-    par_uint.save_device_ex( str + strlen( str ), "", "values"  );
-    sprintf( str + strlen( str ) - 2, "%s", " }\n" );
+    res += par_uint.save_device_ex( str + res, "", "values"  ) - 2;
+    res += sprintf( str + res, "%s", " }\n" );
 
-    sprintf( str + strlen( str ), "params{ object = \'%s\', param_name = \'%s\', "
+    res += sprintf( str + res, "params{ object = \'%s\', param_name = \'%s\', "
         "par_id = %d,\n",
         name_Lua, "rt_par_uint", ID_RT_PAR_UINT );
-    rt_par_uint.save_device_ex( str + strlen( str ), "", "values"  );
-    sprintf( str + strlen( str ) - 2, "%s", " }\n" );
+    res += rt_par_uint.save_device_ex( str + res, "", "values"  ) - 2;
+    res += sprintf( str + res, "%s", " }\n" );
 
-    return 0;
+    return res;
     }
 //-----------------------------------------------------------------------------
 int tech_object::set_param( int par_id, int index, double value )

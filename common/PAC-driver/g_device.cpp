@@ -167,49 +167,55 @@ long device_communicator::write_devices_states_service( long len,
 
         case CMD_GET_PAC_ERRORS:
             {
-#ifdef DEBUG_DEV_CMCTR
-            Print( "CMD_GET_PAC_ERRORS\n" );
-#endif
-            static u_int_2 errors_id = get_millisec() % 100;
+            outdata[ 0 ] = 0;
+            outdata[ 1 ] = 0; //Возвращаем 0.
 
-            unsigned char project_descr_id = data[ 1 ];
-            char *str = ( char* ) outdata;
-            str[ 0 ] = 0;
-
-            sprintf( str, "alarms[ %d ] = \n  {}", project_descr_id );
-            sprintf( str + strlen( str ), "alarms[ %d ] = \n  {", project_descr_id );
-
-            u_int_2         err_id = 0;
-            static u_int_2  prev_PAC_err_id = 0;
-            static u_int_2  prev_dev_err_id = 0;
-
-            int is_any_error = PAC_critical_errors_manager::get_instance()->save_as_Lua_str(
-                str + strlen( str ), err_id );
-            if ( err_id != prev_PAC_err_id )
-                {
-                prev_PAC_err_id = err_id;
-                errors_id++;
-                }
-
-            if ( !is_any_error ) //Нет критических ошибок.
-                {
-                G_DEV_ERRORS_MANAGER->save_as_Lua_str( str + strlen( str ), err_id );
-                if ( err_id != prev_dev_err_id )
-                    {
-                    prev_dev_err_id = err_id;
-                    errors_id++;
-                    }
-                }
-
-            sprintf( str + strlen( str ), "  %s %d,\n", "id =", errors_id );
-            sprintf( str + strlen( str ), "  %s\n", "}" );
-
-#ifdef DEBUG_DEV_CMCTR
-            Print( "Critical errors = \n%s", outdata );
-#endif // DEBUG_DEV_CMCTR
-
-            answer_size = strlen( str ) + 1;
+            answer_size = 2;
             break;
+
+//#ifdef DEBUG_DEV_CMCTR
+//            Print( "CMD_GET_PAC_ERRORS\n" );
+//#endif
+//            static u_int_2 errors_id = get_millisec() % 100;
+//
+//            unsigned char project_descr_id = data[ 1 ];
+//            char *str = ( char* ) outdata;
+//            str[ 0 ] = 0;
+//
+//            sprintf( str, "alarms[ %d ] = \n  {}", project_descr_id );
+//            sprintf( str + strlen( str ), "alarms[ %d ] = \n  {", project_descr_id );
+//
+//            u_int_2         err_id = 0;
+//            static u_int_2  prev_PAC_err_id = 0;
+//            static u_int_2  prev_dev_err_id = 0;
+//
+//            int is_any_error = PAC_critical_errors_manager::get_instance()->save_as_Lua_str(
+//                str + strlen( str ), err_id );
+//            if ( err_id != prev_PAC_err_id )
+//                {
+//                prev_PAC_err_id = err_id;
+//                errors_id++;
+//                }
+//
+//            if ( !is_any_error ) //Нет критических ошибок.
+//                {
+//                G_DEV_ERRORS_MANAGER->save_as_Lua_str( str + strlen( str ), err_id );
+//                if ( err_id != prev_dev_err_id )
+//                    {
+//                    prev_dev_err_id = err_id;
+//                    errors_id++;
+//                    }
+//                }
+//
+//            sprintf( str + strlen( str ), "  %s %d,\n", "id =", errors_id );
+//            sprintf( str + strlen( str ), "  %s\n", "}" );
+//
+//#ifdef DEBUG_DEV_CMCTR
+//            Print( "Critical errors = \n%s", outdata );
+//#endif // DEBUG_DEV_CMCTR
+//
+//            answer_size = strlen( str ) + 1;
+//            break;
             }
 
         case CMD_SET_PAC_ERROR_CMD:

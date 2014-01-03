@@ -21,7 +21,7 @@ auto_smart_ptr < tcp_communicator > tcp_communicator::instance = 0;
 tcp_communicator::tcp_communicator()
     {
     is_going_to_reboot  = 0;
-    max_cycles          = 20;
+    max_cycles          = 10;
     glob_cmctr_ok       = 1;
     for ( int i = 0; i < TC_MAX_SERVICE_NUMBER; i++ ) services[ i ] = NULL;
 

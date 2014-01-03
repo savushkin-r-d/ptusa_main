@@ -300,7 +300,7 @@ template < class type, bool is_float > class parameters
             }
 
         virtual void print() const
-            {   
+            {
             Print( "\"%s\"\t - ", name );
             for ( u_int i = 1; i <= count; i++ )
                 {
@@ -319,18 +319,18 @@ template < class type, bool is_float > class parameters
 
         int save_device_ex( char *buff, const char *prefix, const char *new_name )
             {
-            sprintf( buff, "%s%s = \n", prefix, new_name );
-            save_dev( buff + strlen( buff ), prefix );
+            int res = sprintf( buff, "%s%s = \n", prefix, new_name );
+            res += save_dev( buff + res, prefix );
 
-            return 0;
+            return res;
             }
 
         int save_device( char *buff, const char *prefix )
             {
-            sprintf( buff, "%s%s = \n", prefix, name );
-            save_dev( buff + strlen( buff ), prefix );
+            int res = sprintf( buff, "%s%s = \n", prefix, name );
+            res += save_dev( buff + res, prefix );
 
-            return strlen( buff );
+            return res;
             }
 
     protected:

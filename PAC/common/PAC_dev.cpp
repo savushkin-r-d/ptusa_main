@@ -29,40 +29,43 @@ const char device::DEV_NAMES[][ 5 ] =
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void par_device::save_device ( char *str )
+int par_device::save_device ( char *str )
     {
     str[ 0 ] = 0;
 
     if ( par == 0 )
     	{
-        return;
+        return 0;
     	}
 
+    int res = 0;
     for ( u_int i = 0; i < par->get_count(); i++ )
         {
         if ( par_name[ i ] )
             {
-            sprintf( str + strlen( str ), "%s=", par_name[ i ] );
+            res += sprintf( str + res, "%s=", par_name[ i ] );
 
             float val =  par[ 0 ][ i + 1 ];
             if ( 0. == val )
                 {
-                sprintf( str + strlen( str ), "0, " );
+                res += sprintf( str + res, "0, " );
                 }
             else
                 {
                 double tmp;
                 if ( modf( val, &tmp ) == 0 )
                     {
-                    sprintf( str + strlen( str ), "%d, ", ( int ) val );
+                    res += sprintf( str + res, "%d, ", ( int ) val );
                     }
                 else
                     {
-                    sprintf( str + strlen( str ), "%.2f, ", val );
+                    res += sprintf( str + res, "%.2f, ", val );
                     }
                 }
             }
         }
+
+    return res;
     }
 //-----------------------------------------------------------------------------
 int par_device::set_cmd( const char *name, double val )
@@ -209,13 +212,13 @@ void device::off()
 //-----------------------------------------------------------------------------
 int device::save_device( char *buff, const char *prefix )
     {
-    sprintf( buff, "%s%s={M=%d, ",
+    int res = sprintf( buff, "%s%s={M=%d, ",
         prefix,  name, is_manual_mode );
 
     if ( type != DT_AO &&
         type != DT_TE )
         {
-        sprintf( buff + strlen( buff ), "ST=%d, ", get_state() );
+        res += sprintf( buff + res, "ST=%d, ", get_state() );
         }
 
     if ( type != DT_V &&
@@ -233,22 +236,23 @@ int device::save_device( char *buff, const char *prefix )
         {
         if ( get_value() == 0 )
             {
-            sprintf( buff + strlen( buff ), "V=0, " );
+            res += sprintf( buff + res, "V=0, " );
             }
         else
             {
-            sprintf( buff + strlen( buff ), "V=%.2f, ", get_value() );
+            res += sprintf( buff + res, "V=%.2f, ", get_value() );
             }
         }
 
-    save_device_ex( buff + strlen( buff ) );
+    res += save_device_ex( buff + res );
+    res += par_device::save_device( buff + res );
 
-    par_device::save_device( buff + strlen( buff ) );
-    buff[ strlen( buff ) - 2 ] = 0; //Убираем лишнюю последнюю запятую и пробел.
+    res -= 2;
+    buff[ res ] = 0; //Убираем лишнюю последнюю запятую и пробел.//
 
-    sprintf( buff + strlen( buff ), "},\n" );
+    res += sprintf( buff + res, "},\n" );
 
-    return strlen( buff );
+    return res;
     }
 //-----------------------------------------------------------------------------
 #ifdef RM_PAC
@@ -719,21 +723,17 @@ int device_manager::init_params()
 //-----------------------------------------------------------------------------
 int device_manager::save_device( char *buff )
     {
-    sprintf( buff, "t=\n" );
-    int answer_size = strlen( buff );
-    sprintf( buff + answer_size, "\t{\n" );
-    answer_size += strlen( buff + answer_size );
+    int res = sprintf( buff, "t=\n" );
+
+    res += sprintf( buff + res, "\t{\n" );
 
     for ( u_int i = 0; i < project_devices.size(); i++)
         {
-        project_devices[ i ]->save_device( buff + answer_size, "\t" );
-        answer_size += strlen( buff + answer_size );
+        res += project_devices[ i ]->save_device( buff + res, "\t" );
         }
 
-    sprintf( buff + answer_size, "\t}\n" );
-    answer_size += strlen( buff + answer_size );
-
-    return answer_size;
+    res += sprintf( buff + res, "\t}\n" );
+    return res;
     }
 //-----------------------------------------------------------------------------
 #ifdef RM_PAC
@@ -1192,17 +1192,19 @@ digital_wago_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
     set_par_name( P_FB,  0, "P_FB" );
     }
 //-----------------------------------------------------------------------------
-void valve::save_device_ex( char *buff )
+int valve::save_device_ex( char *buff )
     {
+    int res = 0;
     if ( is_on_fb )
         {
-        sprintf( buff, "FB_ON_ST=%d, ", get_on_fb_value() );
+        res += sprintf( buff, "FB_ON_ST=%d, ", get_on_fb_value() );
         }
 
     if ( is_off_fb )
         {
-        sprintf( buff + strlen( buff ), "FB_OFF_ST=%d, ", get_off_fb_value() );
+        res += sprintf( buff + res, "FB_OFF_ST=%d, ", get_off_fb_value() );
         }
+    return res;
     }
 //-----------------------------------------------------------------------------
 int valve::get_state()
@@ -1863,12 +1865,14 @@ void motor::direct_off()
     direct_set_value( 0 );
     }
 //-----------------------------------------------------------------------------
-void motor::save_device_ex( char *buff )
+int motor::save_device_ex( char *buff )
     {
+    int res = 0;
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
         {
-        sprintf( buff, "R=%d,", get_DO( DO_INDEX_REVERSE ) );
+        res = sprintf( buff, "R=%d,", get_DO( DO_INDEX_REVERSE ) );
         }
+    return res;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
