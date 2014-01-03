@@ -113,15 +113,15 @@ class PAC_critical_errors_manager
                 switch( err_sub_class )
                     {
                 case AS_WAGO:
-                    snprintf( tmp, sizeof( tmp ), "Нет связи с узлом Wago №%d", par );
+                    SNPRINTF( tmp, sizeof( tmp ), "Нет связи с узлом Wago №%d", par );
                     return tmp;
 
                 case AS_PANEL:
-                    snprintf( tmp, sizeof( tmp ), "Нет связи с панелью EasyView №%d", par );
+                    SNPRINTF( tmp, sizeof( tmp ), "Нет связи с панелью EasyView №%d", par );
                     return tmp;
 
                 case AS_MODBUS_DEVICE:
-                    snprintf( tmp, sizeof( tmp ), "Нет связи с устройством, опрашиваемое по Modbus, №%d", par );
+                    SNPRINTF( tmp, sizeof( tmp ), "Нет связи с устройством, опрашиваемое по Modbus, №%d", par );
                     return tmp;
 
                 case AS_EASYSERVER:
@@ -140,7 +140,7 @@ class PAC_critical_errors_manager
                 switch( err_sub_class )
                     {
                 case AS_EMERGENCY_BUTTON:
-                    snprintf( tmp, sizeof( tmp ), "нажата аварийная кнопка №%d", par );
+                    SNPRINTF( tmp, sizeof( tmp ), "нажата аварийная кнопка №%d", par );
                     return tmp;
 
                 default:

@@ -20,12 +20,6 @@
 #include <vector>
 #include <locale>
 
-#ifdef __BORLANDC__
-extern "C" {
-extern int snprintf(char *, size_t, const char *, /*args*/ ...);
-    };
-#endif // __BORLANDC__
-
 #include "i_tech_def.h"
 
 #include "g_device.h"
@@ -257,7 +251,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         const char* get_name_in_Lua() const
             {
             static char tmp[ 100 ];
-            snprintf( tmp, sizeof( tmp ), "%.40s",
+            SNPRINTF( tmp, sizeof( tmp ), "%.40s",
                 name_Lua );
             return tmp;
             }

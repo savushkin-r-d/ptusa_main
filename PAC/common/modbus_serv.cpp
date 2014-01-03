@@ -597,13 +597,13 @@ void ModbusServ::init()
     char dev [ 10 ] = "";
     for ( int i = 1; i <= KOAG_CNT; i++ )
     	{
-        snprintf( dev, sizeof( dev ), "KOAG%dHL1", i );
+        SNPRINTF( dev, sizeof( dev ), "KOAG%dHL1", i );
         KOAG_HL1[ i - 1 ] = HL( dev );
 
-        snprintf( dev, sizeof( dev ), "KOAG%dTE1", i );
+        SNPRINTF( dev, sizeof( dev ), "KOAG%dTE1", i );
         KOAG_TE[ i - 1 ][ 0 ] = TE( dev );
 
-        snprintf( dev, sizeof( dev ), "KOAG%dTE2", i );
+        SNPRINTF( dev, sizeof( dev ), "KOAG%dTE2", i );
         KOAG_TE[ i - 1 ][ 1 ] = TE( dev );
     	}
 #endif //KHUTOR

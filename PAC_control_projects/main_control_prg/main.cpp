@@ -11,11 +11,6 @@
 #include <stdlib.h>
 #include "fcntl.h"
 
-#ifdef __BORLANDC__
-#include <sys\types.h>
-#include <time.h>
-#endif // __BORLANDC__
-
 #include "dtime.h"
 
 #include "prj_mngr.h"

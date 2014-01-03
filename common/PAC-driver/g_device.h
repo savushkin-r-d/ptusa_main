@@ -24,12 +24,6 @@
 
 #ifndef DRIVER
 
-#ifdef __BORLANDC__
-extern "C" {
-#include "snprintf.h"
-    };
-#endif // __BORLANDC__
-
 #include <stdlib.h>
 #include <vector>
 

@@ -377,7 +377,7 @@ void device_communicator::print() const
     {
     char tmp_str[ 200 ];
 
-    snprintf( tmp_str, sizeof( tmp_str ),
+    SNPRINTF( tmp_str, sizeof( tmp_str ),
         "Device communicator. Dev count = %d.", ( int ) dev.size() );
     print_str( tmp_str, 1 );
 

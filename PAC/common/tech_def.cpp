@@ -437,7 +437,7 @@ int tech_object::save_device( char *buff )
     up_mins = up_secs / 60 % 60 ;
     up_secs %= 60;
 
-    snprintf( up_time_str, 50, "\tIDLE_TIME = \'%02lu:%02lu:%02lu\',\n",
+    SNPRINTF( up_time_str, 50, "\tIDLE_TIME = \'%02lu:%02lu:%02lu\',\n",
         ( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
     sprintf( buff + answer_size, "%s", up_time_str );
     answer_size += strlen( buff + answer_size );
@@ -456,19 +456,19 @@ int tech_object::save_device( char *buff )
 
         if ( up_hours )
             {
-            snprintf( up_time_str, 50, "\'%02lu:%02lu:%02lu\', ",
+            SNPRINTF( up_time_str, 50, "\'%02lu:%02lu:%02lu\', ",
                 ( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
             }
         else
             {
             if ( up_mins )
                 {
-                snprintf( up_time_str, 50, "\'   %02lu:%02lu\', ",
+                SNPRINTF( up_time_str, 50, "\'   %02lu:%02lu\', ",
                     ( u_long ) up_mins, ( u_long ) up_secs );
                 }
             else
                 {
-                snprintf( up_time_str, 50, "\'      %02lu\', ",
+                SNPRINTF( up_time_str, 50, "\'      %02lu\', ",
                     ( u_long ) up_secs );
                 }
             }
@@ -676,32 +676,32 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
     switch ( type )
         {
         case ERR_CANT_ON:
-            snprintf( new_err->msg, sizeof( new_err->msg ),
+            SNPRINTF( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - не включен режим %.1d \'%.40s\' - %.60s.",
                 name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
             break;
 
         case ERR_ON_WITH_ERRORS:
-            snprintf( new_err->msg, sizeof( new_err->msg ),
+            SNPRINTF( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - включен с ошибкой режим %.1d \'%.40s\' - %.50s.",
                 name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
             break;
 
         case ERR_OFF:
-            snprintf( new_err->msg, sizeof( new_err->msg ),
+            SNPRINTF( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - отключен режим %.1d \'%.40s\' - %.50s.",
                 name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
             break;
 
         case ERR_OFF_AND_ON:
-            snprintf( new_err->msg, sizeof( new_err->msg ),
+            SNPRINTF( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - переход от %.1d \'%.40s\' к %.1d \'%.40s\'.",
                 name, number, mode, ( *modes_manager )[ mode ]->get_name(),
                 new_mode, ( *modes_manager )[ new_mode ]->get_name() );
 
             if ( strcmp( err_msg, "" ) != 0 )
                 {
-                snprintf( new_err->msg + strlen( new_err->msg ) - 1,
+                SNPRINTF( new_err->msg + strlen( new_err->msg ) - 1,
                     sizeof( new_err->msg ) - strlen( new_err->msg ) - 1,
                     " - %.50s.", err_msg );
                 }
@@ -710,13 +710,13 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
         case ERR_DURING_WORK:
             if ( mode > 0 )
                 {
-                snprintf( new_err->msg, sizeof( new_err->msg ),
+                SNPRINTF( new_err->msg, sizeof( new_err->msg ),
                     "\'%.40s %d\' - режим %.1d \'%.40s\' - %.50s.",
                     name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
                 }
             else
                 {
-                snprintf( new_err->msg, sizeof( new_err->msg ),
+                SNPRINTF( new_err->msg, sizeof( new_err->msg ),
                     "\'%.40s %d\' - %.50s.",
                     name, number, err_msg );
                 }
@@ -724,7 +724,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
             break;
 
         case ERR_ALARM:
-            snprintf( new_err->msg, sizeof( new_err->msg ),
+            SNPRINTF( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - %.60s.", name, number, err_msg );
             break;
 
@@ -733,7 +733,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
             Print( "Error tech_object::set_err_msg(...) - unknown error type!\n" );
             debug_break;
 #endif // DEBUG
-            snprintf( new_err->msg, sizeof( new_err->msg ),
+            SNPRINTF( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s\' - режим %.1d \'%.40s\' - %.50s.",
                 name, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
             break;
