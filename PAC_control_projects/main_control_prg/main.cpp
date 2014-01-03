@@ -35,7 +35,7 @@ int main( int argc, char *argv[] )
 #endif
 
 #ifdef WIN_OS
-	setlocale( LC_ALL, "" );
+    setlocale( LC_ALL, "" );
 #endif
 
     if ( argc < 2 )
@@ -54,7 +54,7 @@ int main( int argc, char *argv[] )
     if ( res ) //-Ошибка инициализации.
         {
         fprintf( stderr, "Lua init error - %d!\n", res );
-         debug_break;
+        debug_break;
         return EXIT_FAILURE;
         }
 
@@ -86,23 +86,16 @@ int main( int argc, char *argv[] )
         lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, 200 );
         sleep_ms( 1 );
 
-        static u_long start_time = get_millisec();
+#ifndef DEBUG_NO_WAGO_MODULES
+        G_WAGO_MANAGER()->read_inputs();
+        sleep_ms( 1 );
+#endif // DEBUG_NO_WAGO_MODULES       
 
-        if ( get_delta_millisec( start_time ) > 200 )
-            {
-            start_time = get_millisec();
+        G_TECH_OBJECT_MNGR()->evaluate();
 
 #ifndef DEBUG_NO_WAGO_MODULES
-            G_WAGO_MANAGER()->read_inputs();
-#endif // DEBUG_NO_WAGO_MODULES
-            sleep_ms( 1 );
-
-            G_TECH_OBJECT_MNGR()->evaluate();
-
-#ifndef DEBUG_NO_WAGO_MODULES
-            G_WAGO_MANAGER()->write_outputs();
+        G_WAGO_MANAGER()->write_outputs();
 #endif // ifndef
-            }
 
         G_CMMCTR->evaluate();
 
