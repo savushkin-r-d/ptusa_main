@@ -775,9 +775,21 @@ bool tech_object::is_idle() const
 //-----------------------------------------------------------------------------
 int tech_object_manager::init_params()
     {
-    for( u_int i = 0; i < tech_objects.size( ); i++ )
+    for( u_int i = 0; i < tech_objects.size(); i++ )
         {
-        tech_objects[ i ]->lua_init_params( );
+        tech_objects[ i ]->lua_init_params();
+        }
+    
+    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
+        "init_params" );
+
+    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+        {
+        lua_call( lua_manager::get_instance()->get_Lua(), 0, 0 );
+        }
+    else
+        {
+        lua_remove( lua_manager::get_instance()->get_Lua(), -1 ); // stack: init_params
         }
 
     return 0;
@@ -858,6 +870,8 @@ void tech_object_manager::evaluate()
             {
             has_Lua_eval = 1;
             }
+
+        lua_remove( lua_manager::get_instance()->get_Lua(), -1 ); // stack: eval
         }
 
     if ( has_Lua_eval == 2 )
