@@ -63,12 +63,25 @@ build: .build-post
 
 .build-post: .build-impl
 # Add your post 'build' code here...
-	@if [ ${CONF} = "release_wago_750-860_khutor" ] || [ ${CONF} = "release_wago_750-860" ]; then \
-		echo ;\
-		echo copying files...;\
+
+	@if [ ${CONF} = "release_wago_750-860" ]; then \
+	    echo ;\
+	    echo copying files...;\
 \
-		echo "${CND_ARTIFACT_PATH_${CONF}}main >> ${out_dir}main";\
-		cp    ${CND_ARTIFACT_PATH_${CONF}} "${out_dir}main";\
+	    echo "${CND_ARTIFACT_PATH_${CONF}}main >> ${out_dir}main";\
+	    cp    ${CND_ARTIFACT_PATH_${CONF}} "${out_dir}main";\
+	fi
+
+	@if [ ${CONF} = "release_wago_750-860_khutor" ]; then \
+	    echo ;\
+	    echo copying files...;\
+\
+	    echo "${CND_ARTIFACT_PATH_${CONF}}main >> ${out_dir}main_khutor";\
+	    cp    ${CND_ARTIFACT_PATH_${CONF}} "${out_dir}main_khutor";\
+	fi
+
+	@if [ ${CONF} = "release_wago_750-860_khutor" ] || [ ${CONF} = "release_wago_750-860" ]; then \
+\
 		echo "";\
 		echo "${lua_sys_dir}sys.wago.lua    >> ${out_dir}sys.wago.lua";\
 		cp   "${lua_sys_dir}sys.wago.lua" ${out_dir};\
