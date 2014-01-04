@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 12/30/13 13:33:18.
+** Generated automatically by tolua++-1.0.92 on 01/04/14 11:07:07.
 */
 
 #ifndef __cplusplus
@@ -6120,6 +6120,38 @@ static int tolua_PAC_dev_modbus_client_get_bit00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: get_id of class  modbus_client */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_get_id00
+static int tolua_PAC_dev_modbus_client_get_id00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"modbus_client",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  modbus_client* self = (modbus_client*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_id'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->get_id();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_id'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* Open function */
 TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
 {
@@ -6477,6 +6509,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"get_float",tolua_PAC_dev_modbus_client_get_float00);
    tolua_function(tolua_S,"set_bit",tolua_PAC_dev_modbus_client_set_bit00);
    tolua_function(tolua_S,"get_bit",tolua_PAC_dev_modbus_client_get_bit00);
+   tolua_function(tolua_S,"get_id",tolua_PAC_dev_modbus_client_get_id00);
   tolua_endmodule(tolua_S);
  tolua_endmodule(tolua_S);
  return 1;

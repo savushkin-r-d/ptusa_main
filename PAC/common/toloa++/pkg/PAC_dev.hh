@@ -1044,4 +1044,5 @@ class modbus_client
 		float get_float(unsigned int address);
 		void set_bit(unsigned int address, int value);
 		int get_bit(unsigned int address);
+		int get_id();
 	};

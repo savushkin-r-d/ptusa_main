@@ -8,6 +8,7 @@ class modbus_client
 		tcp_client* tcpclient;
 	public:
 		modbus_client(unsigned int id, char* ip, unsigned int port = 502, unsigned long exchangetimeout = 50);
+		int get_id();
 		//реализация функций протокола modbus
 		int read_discrete_inputs(unsigned int start_address, unsigned int quantity);
 		int read_coils(unsigned int start_address, unsigned int quantity);

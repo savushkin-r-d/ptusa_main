@@ -295,3 +295,8 @@ int modbus_client::get_bit( unsigned int address )
 		return 0;
 		}
 	}
+
+int modbus_client::get_id()
+	{
+	return tcpclient->get_id();
+	}
