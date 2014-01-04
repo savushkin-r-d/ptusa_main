@@ -181,7 +181,7 @@ int cipline_tech_object::save_device( char *buff )
 	up_mins = up_secs / 60 % 60 ;
 	up_secs %= 60;
 
-	SNPRINTF( up_time_str, 50, "\tIDLE_TIME = \'%02lu:%02lu:%02lu\',\n",
+	sprintf( up_time_str, "\tIDLE_TIME = \'%02lu:%02lu:%02lu\',\n",
 		( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
 	sprintf( buff + answer_size, "%s", up_time_str );
 	answer_size += strlen( buff + answer_size );

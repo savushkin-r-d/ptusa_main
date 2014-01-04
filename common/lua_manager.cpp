@@ -177,11 +177,11 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         char path[ 100 ];
         if ( i < SYS_FILE_CNT )
             {
-            SNPRINTF( path, sizeof( path ), "%s%s", SYS_PATH, FILES[ i ] );
+            sprintf( path, "%s%s", SYS_PATH, FILES[ i ] );
             }
         else
             {
-            SNPRINTF( path, sizeof( path ), "%s", FILES[ i ] );
+            sprintf( path, "%s", FILES[ i ] );
             }
 
         res = check_file( path, err_str );
@@ -206,7 +206,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
 
         if ( FILES_VERSION[ i ] != res )
             {
-            SNPRINTF( err_str, sizeof( err_str ), "File \"%s\" has version %d, must be %d!\n",
+            sprintf( err_str, "File \"%s\" has version %d, must be %d!\n",
                 FILES[ i ], res, FILES_VERSION[ i ] );
             Print( "%s", err_str );
             return 1;
@@ -221,11 +221,11 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         char path[ 100 ] = "";
         if ( i < SYS_FILE_CNT )
             {
-            SNPRINTF( path, sizeof( path ), "%s%s", SYS_PATH, FILES[ i ] );
+            sprintf( path, "%s%s", SYS_PATH, FILES[ i ] );
             }
         else
             {
-            SNPRINTF( path, sizeof( path ), "%s", FILES[ i ] );
+            sprintf( path, "%s", FILES[ i ] );
             }
 
         if ( luaL_dofile( L, path ) != 0 )           // ../system scripts

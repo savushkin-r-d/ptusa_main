@@ -20,22 +20,9 @@
 #error You must define OS!
 #endif 
 
-#ifdef USE_SNPRINTF
-
-#ifdef WIN_OS
-#define SNPRINTF( fmt, size, ... ) _snprintf( fmt, size, __VA_ARGS__ );
-#endif // WIN_OS
-
-#ifdef LINUX_OS
-#define SNPRINTF( fmt, size, ... ) snprintf( fmt, size, __VA_ARGS__ );
-#endif // LINUX_OS
-
-#else // USE_SNPRINTF
-#define SNPRINTF( fmt, size, ... ) sprintf( fmt, __VA_ARGS__ );
-#endif // USE_SNPRINTF
-
 #ifdef WIN_OS
 #include "w_types.h"
+#define snprintf _snprintf
 #endif // WIN_OS
 
 #ifdef LINUX_OS

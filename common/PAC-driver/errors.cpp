@@ -26,6 +26,7 @@ simple_error::~simple_error()
 //-----------------------------------------------------------------------------
 int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
     {
+    int res = 0;
     str[ 0 ] = 0;
 
     // Проверка текущего состояния устройства.
@@ -81,26 +82,26 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
         {
         unsigned char alarm_params = err_par[ P_PARAM_N ];
 
-        sprintf( str + strlen( str ), "\t%s\n", "{" );
+        res += sprintf( str + res, "\t%s\n", "{" );
 
-        sprintf( str + strlen( str ), "\tdescription=\"%s - %s\",\n",
+        res += sprintf( str + res, "\tdescription=\"%s - %s\",\n",
             simple_device->get_name(), simple_device->get_description() );
 
-        sprintf( str + strlen( str ), "priority=%d%s", P_ALARM, "," );
-        sprintf( str + strlen( str ), "state=%d,\n", error_state );
-        sprintf( str + strlen( str ), "type=%d,\n", AT_SPECIAL );
-        sprintf( str + strlen( str ), "group=\"%s\",\n", "тревога" );
+        res += sprintf( str + res, "priority=%d%s", P_ALARM, "," );
+        res += sprintf( str + res, "state=%d,\n", error_state );
+        res += sprintf( str + res, "type=%d,\n", AT_SPECIAL );
+        res += sprintf( str + res, "group=\"%s\",\n", "тревога" );
 
-        sprintf( str + strlen( str ), "id_n=%d,\n", simple_device->get_serial_n() );
-        sprintf( str + strlen( str ), "id_type=%d,\n", simple_device->get_type() );
+        res += sprintf( str + res, "id_n=%d,\n", simple_device->get_serial_n() );
+        res += sprintf( str + res, "id_type=%d,\n", simple_device->get_type() );
 
-        sprintf( str + strlen( str ), "suppress=%s\n",
+        res += sprintf( str + res, "suppress=%s\n",
             alarm_params && P_IS_SUPPRESS ? "true" : "false" );
 
-        sprintf( str + strlen( str ), "},\n" );
+        res += sprintf( str + res, "},\n" );
         }
 
-    return 0;
+    return res;
     }
 //-----------------------------------------------------------------------------
 void simple_error::print() const
@@ -183,6 +184,7 @@ int simple_error::set_cmd( int cmd, int object_alarm_number )
 //-----------------------------------------------------------------------------
 int tech_dev_error::save_as_Lua_str( char *str, bool &is_new_state )
     {
+    int res = 0;
     str[ 0 ] = 0;
     static u_int prev_size = 0;
 
@@ -196,32 +198,31 @@ int tech_dev_error::save_as_Lua_str( char *str, bool &is_new_state )
 
     for ( u_int i = 0; i < tech_dev->get_errors().size(); i++ )
         {
+        res += sprintf( str + res, "\t%s\n", "{" );
 
-        sprintf( str + strlen( str ), "\t%s\n", "{" );
-
-        sprintf( str + strlen( str ), "\tdescription=\"%s\",\n",
+        res += sprintf( str + res, "\tdescription=\"%s\",\n",
             tech_dev->get_errors()[ i ]->msg );
-        sprintf( str + strlen( str ), "\tgroup=\"%s\",\n",
+        res += sprintf( str + res, "\tgroup=\"%s\",\n",
             get_group( tech_dev->get_errors()[ i ]->type ) );
 
-        sprintf( str + strlen( str ), "priority=%d%s",
+        res += sprintf( str + res, "priority=%d%s",
             get_priority( tech_dev->get_errors()[ i ]->type ), "," );
 
-        sprintf( str + strlen( str ), "state=%d,\n", AS_ALARM );
-        sprintf( str + strlen( str ), "type=%d,\n", AT_SPECIAL );
+        res += sprintf( str + res, "state=%d,\n", AS_ALARM );
+        res += sprintf( str + res, "type=%d,\n", AT_SPECIAL );
 
-        sprintf( str + strlen( str ), "id_n=%d,\n",
+        res += sprintf( str + res, "id_n=%d,\n",
             tech_dev->get_number() );
-        sprintf( str + strlen( str ), "id_object_alarm_number=%d,\n",
+        res += sprintf( str + res, "id_object_alarm_number=%d,\n",
             tech_dev->get_errors()[ i ]->n );
-        sprintf( str + strlen( str ), "id_type=%d,\n", get_object_type() );
+        res += sprintf( str + res, "id_type=%d,\n", get_object_type() );
 
-        sprintf( str + strlen( str ), "suppress=false\n" );
+        res += sprintf( str + res, "suppress=false\n" );
 
-        sprintf( str + strlen( str ), "},\n" );
+        res += sprintf( str + res, "},\n" );
         }
 
-    return 0;
+    return res;
     }
 //-----------------------------------------------------------------------------
 int tech_dev_error::set_cmd( int cmd, int object_alarm_number )
@@ -296,13 +297,14 @@ dev_errors_manager::dev_errors_manager(): errors_id( 0 )
 //-----------------------------------------------------------------------------
 int dev_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
     {
+    int res = 0;
     str[ 0 ] = 0;
 
     bool is_new_error_state = false;
 
     for ( u_int i = 0; i < s_errors_vector.size(); i++ )
         {
-        s_errors_vector[ i ]->save_as_Lua_str( str + strlen( str ),
+        res += s_errors_vector[ i ]->save_as_Lua_str( str + res,
             is_new_error_state );
         }
 
@@ -316,7 +318,7 @@ int dev_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
 #ifdef DEBUG
 #endif // DEBUG
 
-    return 0;
+    return res;
     }
 //-----------------------------------------------------------------------------
 int dev_errors_manager::add_error( base_error  *s_error )

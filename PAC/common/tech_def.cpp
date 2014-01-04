@@ -392,41 +392,30 @@ int tech_object::lua_init_runtime_params()
 //-----------------------------------------------------------------------------
 int tech_object::save_device( char *buff )
     {
-    sprintf( buff, "t.%s = t.%s or {}\nt.%s=\n\t{\n",
-        name_Lua, name_Lua,
+    int res = 
+        sprintf( buff, "t.%s = t.%s or {}\nt.%s=\n\t{\n", name_Lua, name_Lua,
         name_Lua );
-
-    int answer_size = strlen( buff );
-
+    
     //Состояние и команда.
-    sprintf( buff + answer_size, "\tCMD=%lu,\n",
-        ( u_long ) cmd );
-    answer_size += strlen( buff + answer_size );
-
-    sprintf( buff + answer_size, "\tST=\n\t\t{\n\t\t" );
-    answer_size += strlen( buff + answer_size );
+    res += sprintf( buff + res, "\tCMD=%lu,\n", ( u_long ) cmd );    
+    res += sprintf( buff + res, "\tST=\n\t\t{\n\t\t" );
+    
     for ( u_int i = 0; i < state.size(); i++ )
         {
-        sprintf( buff + answer_size, "%lu, ", ( long int ) state[ i ] );
-        answer_size += strlen( buff + answer_size );
+        res += sprintf( buff + res, "%lu, ", ( long int ) state[ i ] );        
         }
-    sprintf( buff + answer_size, "\n\t\t},\n" );
-    answer_size += strlen( buff + answer_size );
-
+    res += sprintf( buff + res, "\n\t\t},\n" );
+    
     //Режимы.
-    sprintf( buff + answer_size, "\tMODES=\n\t\t{\n\t\t" );
-    answer_size += strlen( buff + answer_size );
+    res += sprintf( buff + res, "\tMODES=\n\t\t{\n\t\t" );    
     for ( u_int i = 0; i < modes_count; i++ )
         {
-        sprintf( buff + answer_size, "%d, ",
-            get_mode( i ) ? 1 : 0 );
-        answer_size += strlen( buff + answer_size );
+        res += sprintf( buff + res, "%d, ", get_mode( i ) ? 1 : 0 );
         }
-    sprintf( buff + answer_size, "\n\t\t},\n" );
-    answer_size += strlen( buff + answer_size );
-
+    res += sprintf( buff + res, "\n\t\t},\n" );
+    
     //Время простоя.
-    char up_time_str [ 50 ];
+    static char up_time_str [ 50 ] = { 0 };
     u_int_4 up_hours;
     u_int_4 up_mins;
     u_int_4 up_secs;
@@ -437,14 +426,12 @@ int tech_object::save_device( char *buff )
     up_mins = up_secs / 60 % 60 ;
     up_secs %= 60;
 
-    SNPRINTF( up_time_str, 50, "\tIDLE_TIME = \'%02lu:%02lu:%02lu\',\n",
+    sprintf( up_time_str, "\tIDLE_TIME = \'%02lu:%02lu:%02lu\',\n",
         ( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
-    sprintf( buff + answer_size, "%s", up_time_str );
-    answer_size += strlen( buff + answer_size );
-
+    res += sprintf( buff + res, "%s", up_time_str );
+    
     //Время режимов.
-    sprintf( buff + answer_size, "\tMODES_TIME=\n\t\t{\n\t\t" );
-    answer_size += strlen( buff + answer_size );
+    res += sprintf( buff + res, "\tMODES_TIME=\n\t\t{\n\t\t" );
 
     for ( u_int i = 1; i <= modes_time.get_count(); i++ )
         {
@@ -456,51 +443,45 @@ int tech_object::save_device( char *buff )
 
         if ( up_hours )
             {
-            SNPRINTF( up_time_str, 50, "\'%02lu:%02lu:%02lu\', ",
+            sprintf( up_time_str, "\'%02lu:%02lu:%02lu\', ",
                 ( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
             }
         else
             {
             if ( up_mins )
                 {
-                SNPRINTF( up_time_str, 50, "\'   %02lu:%02lu\', ",
+                sprintf( up_time_str, "\'   %02lu:%02lu\', ",
                     ( u_long ) up_mins, ( u_long ) up_secs );
                 }
             else
                 {
-                SNPRINTF( up_time_str, 50, "\'      %02lu\', ",
+                sprintf( up_time_str, "\'      %02lu\', ",
                     ( u_long ) up_secs );
                 }
             }
 
-        sprintf( buff + answer_size, "%s", up_time_str );
-        answer_size += strlen( buff + answer_size );
+        res += sprintf( buff + res, "%s", up_time_str );        
         }
-    sprintf( buff + answer_size, "\n\t\t},\n" );
-    answer_size += strlen( buff + answer_size );
-
+    res += sprintf( buff + res, "\n\t\t},\n" );
+   
     //Шаги.
-    sprintf( buff + answer_size, "\tMODES_STEPS=\n\t\t{\n\t\t" );
-    answer_size += strlen( buff + answer_size );
+    res += sprintf( buff + res, "\tMODES_STEPS=\n\t\t{\n\t\t" );  
     for ( u_int i = 0; i < modes_count; i++ )
         {
-        sprintf( buff + answer_size, "%d, ",
-            (*modes_manager)[ i + 1 ]->active_step());
-        answer_size += strlen( buff + answer_size );
+        res += sprintf( buff + res, "%d, ", 
+            (*modes_manager)[ i + 1 ]->active_step());        
         }
-    sprintf( buff + answer_size, "\n\t\t},\n" );
-    answer_size += strlen( buff + answer_size );
-
+    res += sprintf( buff + res, "\n\t\t},\n" );
+   
     //Параметры.
-    answer_size += par_float.save_device( buff + answer_size, "\t" );
-    answer_size += par_uint.save_device( buff + answer_size, "\t" );
-    answer_size += rt_par_float.save_device( buff + answer_size, "\t" );
-    answer_size += rt_par_uint.save_device( buff + answer_size, "\t" );
+    res += par_float.save_device( buff + res, "\t" );
+    res += par_uint.save_device( buff + res, "\t" );
+    res += rt_par_float.save_device( buff + res, "\t" );
+    res += rt_par_uint.save_device( buff + res, "\t" );
 
 
-    sprintf( buff + answer_size, "\t}\n" );
-    answer_size += strlen( buff + answer_size );
-    return answer_size;
+    res += sprintf( buff + res, "\t}\n" );   
+    return res;
     }
 //-----------------------------------------------------------------------------
 int tech_object::set_cmd( const char *prop, u_int idx, double val )
@@ -676,32 +657,32 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
     switch ( type )
         {
         case ERR_CANT_ON:
-            SNPRINTF( new_err->msg, sizeof( new_err->msg ),
+            snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - не включен режим %.1d \'%.40s\' - %.60s.",
                 name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
             break;
 
         case ERR_ON_WITH_ERRORS:
-            SNPRINTF( new_err->msg, sizeof( new_err->msg ),
+            snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - включен с ошибкой режим %.1d \'%.40s\' - %.50s.",
                 name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
             break;
 
         case ERR_OFF:
-            SNPRINTF( new_err->msg, sizeof( new_err->msg ),
+            snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - отключен режим %.1d \'%.40s\' - %.50s.",
                 name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
             break;
 
         case ERR_OFF_AND_ON:
-            SNPRINTF( new_err->msg, sizeof( new_err->msg ),
+            snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - переход от %.1d \'%.40s\' к %.1d \'%.40s\'.",
                 name, number, mode, ( *modes_manager )[ mode ]->get_name(),
                 new_mode, ( *modes_manager )[ new_mode ]->get_name() );
 
             if ( strcmp( err_msg, "" ) != 0 )
                 {
-                SNPRINTF( new_err->msg + strlen( new_err->msg ) - 1,
+                snprintf( new_err->msg + strlen( new_err->msg ) - 1,
                     sizeof( new_err->msg ) - strlen( new_err->msg ) - 1,
                     " - %.50s.", err_msg );
                 }
@@ -710,13 +691,13 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
         case ERR_DURING_WORK:
             if ( mode > 0 )
                 {
-                SNPRINTF( new_err->msg, sizeof( new_err->msg ),
+                snprintf( new_err->msg, sizeof( new_err->msg ),
                     "\'%.40s %d\' - режим %.1d \'%.40s\' - %.50s.",
                     name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
                 }
             else
                 {
-                SNPRINTF( new_err->msg, sizeof( new_err->msg ),
+                snprintf( new_err->msg, sizeof( new_err->msg ),
                     "\'%.40s %d\' - %.50s.",
                     name, number, err_msg );
                 }
@@ -724,7 +705,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
             break;
 
         case ERR_ALARM:
-            SNPRINTF( new_err->msg, sizeof( new_err->msg ),
+            snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - %.60s.", name, number, err_msg );
             break;
 
@@ -733,7 +714,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
             Print( "Error tech_object::set_err_msg(...) - unknown error type!\n" );
             debug_break;
 #endif // DEBUG
-            SNPRINTF( new_err->msg, sizeof( new_err->msg ),
+            snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s\' - режим %.1d \'%.40s\' - %.50s.",
                 name, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
             break;

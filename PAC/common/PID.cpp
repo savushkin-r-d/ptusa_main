@@ -18,7 +18,7 @@ PID::PID( int n ):
     {
     G_DEVICE_CMMCTR->add_device( this );
 
-    SNPRINTF( name, sizeof( name ), "%s%d", "PID", n );
+    sprintf( name, "%s%d", "PID", n );
 
     init_work_param( WP_U, 0 );
     }

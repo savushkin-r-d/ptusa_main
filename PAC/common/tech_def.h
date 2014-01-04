@@ -251,8 +251,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         const char* get_name_in_Lua() const
             {
             static char tmp[ 100 ];
-            SNPRINTF( tmp, sizeof( tmp ), "%.40s",
-                name_Lua );
+            sprintf( tmp, "%.40s", name_Lua );
             return tmp;
             }
 

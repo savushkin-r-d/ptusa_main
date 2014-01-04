@@ -18,7 +18,6 @@
 
 #include "param_ex.h"
 #include "PAC_dev.h"
-//#include "sys.h"
 
 class PID: public i_Lua_save_device, i_cmd_device
     { 

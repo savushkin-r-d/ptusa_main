@@ -98,7 +98,7 @@ int action::check_devices( char* err_dev_name, int max_to_write ) const
 
                 if ( ( par & base_error::P_IS_SUPPRESS ) == 0 )
                     {
-                    max_to_write -= SNPRINTF( err_dev_name + strlen( err_dev_name ),
+                    max_to_write -= snprintf( err_dev_name + strlen( err_dev_name ),
                         max_to_write, "%s, ",
                         devices[ i ][ j ]->get_name() );
 
