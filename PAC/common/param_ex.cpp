@@ -17,11 +17,11 @@ auto_smart_ptr< params_manager > params_manager::instance = 0;
 params_manager::params_manager(): par( 0 ) 
     {
     last_idx = 0;
-    params_mem = NV_memory_manager::get_instance()->get_memory_block( 
-        NV_memory_manager::MT_EEPROM, C_TOTAL_PARAMS_SIZE );
-
     CRC_mem = NV_memory_manager::get_instance()->get_memory_block(
         NV_memory_manager::MT_NVRAM, 2 );
+
+    params_mem = NV_memory_manager::get_instance()->get_memory_block( 
+        NV_memory_manager::MT_EEPROM, C_TOTAL_PARAMS_SIZE );
 
     memset( params, 0, C_TOTAL_PARAMS_SIZE );
     }
