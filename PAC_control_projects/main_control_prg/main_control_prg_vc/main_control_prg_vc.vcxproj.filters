@@ -276,9 +276,6 @@
     <ClInclude Include="..\..\..\PAC\common\tcp_client.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\PAC\win\w_tcp_client.h">
-      <Filter>Source Files\PAC\win</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\modbus_client.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
@@ -287,6 +284,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\common\QuickLZ\quicklz.h">
       <Filter>Header Files\common\QuickLZ</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\win\w_tcp_client.h">
+      <Filter>Header Files\PAC\win</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -5,6 +5,9 @@
 
 class win_tcp_client: public tcp_client
 	{
+	private:
+		timeval tv;
+		fd_set rfds;
 	public:
 		int InitLib();
 		void DeinitLib();

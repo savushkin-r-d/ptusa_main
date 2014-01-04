@@ -333,7 +333,7 @@ class TPumpController
 		int last_manual_state;
 	public:
 		TPumpController(i_DO_AO_device* pump);
-		~TPumpController();
+		virtual ~TPumpController();
 		virtual void on();
 		virtual void off();
 		virtual void mOn();

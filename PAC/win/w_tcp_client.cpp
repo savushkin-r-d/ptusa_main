@@ -2,6 +2,7 @@
 
 int win_tcp_client::Communicate( unsigned int bytestosend )
 	{
+	int res;
 	if(!is_initialized)
 		{
 		if (!InitLib())
@@ -26,7 +27,20 @@ int win_tcp_client::Communicate( unsigned int bytestosend )
 		return 0;
 		}
 
-	int res = recv(socket_number, buff, buff_size, 0);
+	FD_ZERO(&rfds);
+	FD_SET(socket_number, &rfds);
+	res = select(0, &rfds, 0, 0, &tv);
+
+	if (res <= 0)
+		{
+#ifdef DEBUG
+		Print("tcp_client_%d Ошибка получения ответа\n", id);
+#endif //DEBUG
+		Disconnect();
+		return 0;
+		}
+
+	res = recv(socket_number, buff, buff_size, 0);
 
 	if (0 == res)
 	{
@@ -63,7 +77,8 @@ win_tcp_client::win_tcp_client( const char* client_ip, unsigned int client_port,
 							   unsigned long send_receive_timeout /*= 100*/ ):	tcp_client(
 							   client_ip, client_port, client_id, alarm_subclass, exchange_buf_size, send_receive_timeout)
 	{
-
+	tv.tv_sec = timeout / 1000;
+	tv.tv_usec = (timeout % 1000) * 1000;
 	}
 
 int win_tcp_client::InitLib()
@@ -112,7 +127,7 @@ int win_tcp_client::Connect()
 	int vlen = sizeof( timeout );
 
 	if ( setsockopt(socket_number, SOL_SOCKET, SO_SNDTIMEO, ( char* )&timeout, vlen) == SOCKET_ERROR ||
-		setsockopt(socket_number, SOL_SOCKET, SO_RCVTIMEO, ( char* )&timeout, vlen) == SOCKET_ERROR )
+		setsockopt(socket_number, SOL_SOCKET, SO_RCVTIMEO, ( char* )&timeout, vlen) == SOCKET_ERROR)
 		{
 #ifdef DEBUG
 		Print("tcp_client_%d: Ошибка установления параметров сокета %d!\n", id, WSAGetLastError());        
@@ -121,7 +136,7 @@ int win_tcp_client::Connect()
 		}
 
 	//Переводим сокет в неблокирующий режим.
-	u_long mode = 0;
+	u_long mode = 1;
 	res = ioctlsocket( socket_number, FIONBIO, &mode );
 	if ( res == SOCKET_ERROR )
 		{
@@ -141,16 +156,46 @@ int win_tcp_client::Connect()
 	sock_address.sin_port = htons( ( u_short ) port);
 	sock_address.sin_addr.s_addr = inet_addr(ip);
 
-	res = connect( socket_number, ( SOCKADDR* ) &sock_address, sizeof( sockaddr_in ) );
+	connect( socket_number, ( SOCKADDR* ) &sock_address, sizeof( sockaddr_in ) );
 
-	if (res)
+	FD_ZERO(&rfds);
+	FD_SET(socket_number, &rfds);
+	res = select(0, 0, &rfds, 0, &tv);
+
+	if (res <= 0)
 		{
+		if (0 == res)
+			{
 #ifdef DEBUG
-		Print("tcp_client_%d: Ошибка соединения %d!\n", id, WSAGetLastError());
+			Print("tcp_client_%d: Ошибка соединения. Таймаут\n", id);
 #endif // DEBUG
+			}
+		else
+			{
+#ifdef DEBUG
+			Print("tcp_client_%d: Ошибка соединения %d!\n", id, WSAGetLastError());
+#endif // DEBUG
+			}
 		closesocket( socket_number);
 		socket_number = 0;
 		return 0;
+		}
+
+	int sock_error;
+	int sock_err_len = sizeof(sock_error);
+
+	if (FD_ISSET(socket_number, &rfds))
+		{
+		res = getsockopt(socket_number, SOL_SOCKET, SO_ERROR, (char*)&sock_error, &sock_err_len);
+		if (res < 0 || sock_error != 0)
+			{
+#ifdef DEBUG
+			Print("tcp_client_%d: Ошибка соединения(select) %d!\n", id, sock_error);
+#endif // DEBUG
+			closesocket( socket_number);
+			socket_number = 0;
+			return 0;
+			}
 		}
 
 	
