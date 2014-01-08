@@ -239,12 +239,12 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 
                     if ( 1 == objnumber || 101 == objnumber )
                         {
-                        float value = KOAG_TE[ coag_idx ][ 0 ]->get_value();
+                        float value = KOAG_TE[ coag_idx - 1 ][ 0 ]->get_value();
                         PackFloat( value, &outdata[ 3 + i * 2 ] );
                         }
                     if ( 3 == objnumber || 103 == objnumber )
                         {
-                        float value = KOAG_TE[ coag_idx ][ 1 ]->get_value();
+                        float value = KOAG_TE[ coag_idx - 1 ][ 1 ]->get_value();
                         PackFloat( value, &outdata[ 3 + i * 2 ] );
                         }
                     if ( 5 == objnumber || 105 == objnumber )
