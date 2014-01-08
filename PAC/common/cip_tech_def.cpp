@@ -1251,7 +1251,7 @@ int cipline_tech_object::CheckErr( void )
 
 #ifndef DEBUG
 	//обратная связь возвратного насоса
-	i = rt_par_float[P_N_RET];
+	i = ( int ) rt_par_float[P_N_RET];
 	if (i > 0)
 		{
 		dev = (device*)(M(i));
