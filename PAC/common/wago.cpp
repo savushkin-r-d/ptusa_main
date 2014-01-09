@@ -750,7 +750,9 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
     AO_size( AO_size ),
     DI_cnt( DI_cnt ),
     AI_cnt( AI_cnt ),
-    AI_size( AI_size )
+    AI_size( AI_size ),
+    last_init_time( get_millisec() ),
+    delay_time( 0 )
     {
     if ( str_ip_address )
         {

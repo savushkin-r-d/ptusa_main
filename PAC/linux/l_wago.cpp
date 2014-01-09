@@ -57,7 +57,7 @@ int wago_manager_linux::net_init( wago_node *node )
     FD_SET( sock, &rdevents );
 
     tv.tv_sec  = 0;
-    tv.tv_usec = 100000;
+    tv.tv_usec = wago_node::C_TIMEOUT_US;
 
     err = select( sock + 1, 0, &rdevents, 0, &tv );
 
@@ -104,7 +104,7 @@ int wago_manager_linux::net_init( wago_node *node )
         }
 
 #ifdef DEBUG
-    Print( "Socket %d is successfully connected to \"%s\":%d\n",
+    printf( "Socket %d is successfully connected to \"%s\":%d\n",
         sock, node->ip_address, PORT );
 #endif // DEBUG
 
@@ -143,10 +143,26 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
     // Инициализация сетевого соединения, при необходимости.
     if( node->state != wago_node::ST_OK )
         {
+        if ( get_delta_millisec( node->last_init_time ) < node->delay_time )
+            {
+            return 1;
+            }
+
         net_init( node );
-        if( node->state != wago_node::ST_OK ) return -100;
+        if( node->state != wago_node::ST_OK )
+            {
+            node->last_init_time = get_millisec();
+            if ( node->delay_time < wago_node::C_MAX_DELAY )
+                {
+                node->delay_time += 10000 + node->number * 200;
+                }
+
+            return -100;
+            }
         }
     // Инициализация сетевого соединения, при необходимости.-!>
+
+    node->delay_time = 0;
 
     // Посылка данных.
     int res = send( node->sock, buff, bytes_to_send, 0 );
@@ -165,7 +181,7 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
 
     // Получение данных.
     res = tcp_communicator_linux::recvtimeout( node->sock, buff,
-        bytes_to_receive, 1, 0, node->ip_address );
+        bytes_to_receive, 0, wago_node::C_TIMEOUT_US, node->ip_address );
 
     if( res <= 0 ) /* read error */
         {
@@ -180,7 +196,7 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
         return -102;
         }
 
-    node->last_poll_time = get_sec( );
+    node->last_poll_time = get_sec();
 
     return 0;
     }
