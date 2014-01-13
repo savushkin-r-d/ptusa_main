@@ -996,7 +996,7 @@ class cipline_tech_object: public tech_object
 		int set_cmd( const char *prop, unsigned int idx, double val );
 
 		PID* PIDFlow;
-		PID* PIDPump;
+		PID* PIDHeat;
 		void initline();
 		int evaluate();
 	};

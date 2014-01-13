@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 01/04/14 15:27:10.
+** Generated automatically by tolua++-1.0.92 on 01/13/14 14:25:31.
 */
 
 #ifndef __cplusplus
@@ -5331,31 +5331,31 @@ static int tolua_set_cipline_tech_object_PIDFlow_ptr(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* get function: PIDPump of class  cipline_tech_object */
-#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_PIDPump_ptr
-static int tolua_get_cipline_tech_object_PIDPump_ptr(lua_State* tolua_S)
+/* get function: PIDHeat of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_PIDHeat_ptr
+static int tolua_get_cipline_tech_object_PIDHeat_ptr(lua_State* tolua_S)
 {
   cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'PIDPump'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'PIDHeat'",NULL);
 #endif
-   tolua_pushusertype(tolua_S,(void*)self->PIDPump,"PID");
+   tolua_pushusertype(tolua_S,(void*)self->PIDHeat,"PID");
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* set function: PIDPump of class  cipline_tech_object */
-#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_PIDPump_ptr
-static int tolua_set_cipline_tech_object_PIDPump_ptr(lua_State* tolua_S)
+/* set function: PIDHeat of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_PIDHeat_ptr
+static int tolua_set_cipline_tech_object_PIDHeat_ptr(lua_State* tolua_S)
 {
   cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
-  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'PIDPump'",NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'PIDHeat'",NULL);
   if (!tolua_isusertype(tolua_S,2,"PID",0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->PIDPump = ((PID*)  tolua_tousertype(tolua_S,2,0))
+  self->PIDHeat = ((PID*)  tolua_tousertype(tolua_S,2,0))
 ;
  return 0;
 }
@@ -6475,7 +6475,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_cipline_tech_object_set_cmd00);
    tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_cipline_tech_object_set_cmd01);
    tolua_variable(tolua_S,"PIDFlow",tolua_get_cipline_tech_object_PIDFlow_ptr,tolua_set_cipline_tech_object_PIDFlow_ptr);
-   tolua_variable(tolua_S,"PIDPump",tolua_get_cipline_tech_object_PIDPump_ptr,tolua_set_cipline_tech_object_PIDPump_ptr);
+   tolua_variable(tolua_S,"PIDHeat",tolua_get_cipline_tech_object_PIDHeat_ptr,tolua_set_cipline_tech_object_PIDHeat_ptr);
    tolua_function(tolua_S,"initline",tolua_PAC_dev_cipline_tech_object_initline00);
    tolua_function(tolua_S,"evaluate",tolua_PAC_dev_cipline_tech_object_evaluate00);
   tolua_endmodule(tolua_S);

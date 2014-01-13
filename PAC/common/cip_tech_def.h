@@ -292,7 +292,25 @@ enum storedParameters
 	P_TM_NO_CONC,	//время появления ошибки "нет концентрации в возвратной трубе"
 	};
 
-class MSAPIDInterface
+class MSAPIDFLOWInterface
+	{
+	private:
+		i_AO_device* output;
+		i_counter* input;
+		unsigned long lastEvalInOnState;
+		run_time_params_float*   lineparams;
+	public:
+		PID* pidr;
+		int HI;
+		int rp;
+		MSAPIDFLOWInterface(PID* pid, run_time_params_float* par, int taskpar, i_AO_device* ao = 0, i_counter* ai = 0 );
+		void eval();
+		void reset();
+		void on( int accel = 0 );
+		void off();
+	};
+
+class MSAPIDHEATInterface
 	{
 	private:
 		i_AO_device* output;
@@ -303,7 +321,7 @@ class MSAPIDInterface
 		PID* pidr;
 		int HI;
 		int rp;
-		MSAPIDInterface( PID* pid, run_time_params_float* par, int taskpar, i_AO_device* ao = 0, i_AI_device* ai = 0 );
+		MSAPIDHEATInterface(PID* pid, run_time_params_float* par, int taskpar, i_AO_device* ao = 0, i_AI_device* ai = 0 );
 		void eval();
 		void reset();
 		void on( int accel = 0 );
@@ -478,7 +496,8 @@ class cipline_tech_object: public tech_object
 		i_AI_device* TP;
 		i_AI_device* TR;
 		i_AI_device* Q;
-		i_AI_device* ao;
+		i_AO_device* ao;
+		i_AO_device* PUMPFREQ;
 		i_DI_device*FL;
 		timer* T[TMR_CNT];
 		TSav *SAV[SAV_CNT];
@@ -486,9 +505,9 @@ class cipline_tech_object: public tech_object
 		//-------------------
 
 		PID* PIDFlow;
-		PID* PIDPump;
-		MSAPIDInterface* PIDF;
-		MSAPIDInterface* PIDP;
+		PID* PIDHeat;
+		MSAPIDFLOWInterface* PIDF;
+		MSAPIDHEATInterface* PIDP;
 		void initline();
 
 		static int nextpidnumber();
@@ -546,9 +565,9 @@ class cipline_tech_object: public tech_object
 		virtual int OporCIP(int where);
 		virtual int FilCirc(int with_what);
 		virtual int Circ(int what);
-		//virtual int OporCirc(int where);
-		//virtual int InitDoseRR(int what, int step, int f);
-		//virtual int DoseRR(int what);
+		virtual int OporCirc(int where);
+		virtual int InitDoseRR(int what, int step, int f);
+		virtual int DoseRR(int what);
 		////-------------------
 		virtual int EvalBlock();
 		////-------------------

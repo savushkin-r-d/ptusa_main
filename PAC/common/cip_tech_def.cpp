@@ -44,7 +44,7 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 #endif //DEBUG
 	int i;
 	nmr = number;
-	PIDPump = new PID(nextpidnumber());
+	PIDHeat = new PID(nextpidnumber());
 	PIDFlow = new PID(nextpidnumber());
 	PIDF = 0;
 	PIDP = 0;
@@ -131,43 +131,33 @@ cipline_tech_object::~cipline_tech_object()
 int cipline_tech_object::save_device( char *buff )
 	{
 	int i;
-	sprintf( buff, "t.%s = t.%s or {}\nt.%s=\n\t{\n",
+	int answer_size = sprintf( buff, "t.%s = t.%s or {}\nt.%s=\n\t{\n",
 		name_Lua, name_Lua,
 		name_Lua );
 
-	int answer_size = strlen( buff );
-
 	//Команда
-	sprintf( buff + answer_size, "\tCMD=%lu,\n", ( u_long ) ncmd );
-	answer_size += strlen( buff + answer_size );
+	answer_size += sprintf( buff + answer_size, "\tCMD=%d,\n", ncmd );
 
 	//Состояние
-	sprintf( buff + answer_size, "\tSTATE=%lu,\n", ( u_long ) state );
-	answer_size += strlen( buff + answer_size );
+	answer_size += sprintf( buff + answer_size, "\tSTATE=%d,\n", state );
 
 	//Текущая операция
-	sprintf( buff + answer_size, "\tOPER=%lu,\n", ( u_long ) curstep );
-	answer_size += strlen( buff + answer_size );
+	answer_size += sprintf( buff + answer_size, "\tOPER=%d,\n", curstep );
 
 	//Загруженный рецепт
-	sprintf(buff + answer_size, "\tLOADED_REC='%s',\n", loadedRecName);
-	answer_size += strlen( buff + answer_size );
+	answer_size += sprintf(buff + answer_size, "\tLOADED_REC='%s',\n", loadedRecName);
 
 	//Имя рецепта для редактирования
-	sprintf(buff + answer_size, "\tCUR_REC='%s',\n", lineRecipes->currentRecipeName);
-	answer_size += strlen( buff + answer_size );
+	answer_size += sprintf(buff + answer_size, "\tCUR_REC='%s',\n", lineRecipes->currentRecipeName);
 
 	//Выбранная программа мойки
-	sprintf(buff + answer_size, "\tCUR_PRG='%s',\n", currentProgramName);
-	answer_size += strlen( buff + answer_size );
+	answer_size += sprintf(buff + answer_size, "\tCUR_PRG='%s',\n", currentProgramName);
 
 	//Список доступных программ мойки
-	sprintf(buff + answer_size, "\tPRG_LIST='%s',\n", programList);
-	answer_size += strlen( buff + answer_size );
+	answer_size += sprintf(buff + answer_size, "\tPRG_LIST='%s',\n", programList);
 
 	//Список доступных объектов мойки
-	sprintf(buff + answer_size, "\tREC_LIST='%s',\n", lineRecipes->recipeList);
-	answer_size += strlen( buff + answer_size );
+	answer_size += sprintf(buff + answer_size, "\tREC_LIST='%s',\n", lineRecipes->recipeList);
 
 	//Время простоя.
 	char up_time_str [ 50 ];
@@ -183,8 +173,7 @@ int cipline_tech_object::save_device( char *buff )
 
 	sprintf( up_time_str, "\tIDLE_TIME = \'%02lu:%02lu:%02lu\',\n",
 		( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
-	sprintf( buff + answer_size, "%s", up_time_str );
-	answer_size += strlen( buff + answer_size );
+	answer_size += sprintf( buff + answer_size, "%s", up_time_str );
 
 	//Параметры.
 	answer_size += par_float.save_device( buff + answer_size, "\t" );
@@ -197,18 +186,14 @@ int cipline_tech_object::save_device( char *buff )
 		answer_size += parpar->save_device(buff + answer_size, "\t");
 		}
 	//Параметры текущего рецепта
-	sprintf(buff + answer_size, "\tREC_PAR = \n\t{\n\t\t");
-	answer_size += strlen( buff + answer_size );
+	answer_size += sprintf(buff + answer_size, "\tREC_PAR = \n\t{\n\t\t");
 	for (i = 1; i <= lineRecipes->GetParamsCount(); i++)
 		{
-		sprintf(buff + answer_size, "%.2f, ", lineRecipes->getValue(i-1));
-		answer_size += strlen( buff + answer_size );
+		answer_size += sprintf(buff + answer_size, "%.2f, ", lineRecipes->getValue(i-1));
 		}
-	sprintf(buff + answer_size, "\n\t}\n");
-	answer_size += strlen( buff + answer_size );
+	answer_size += sprintf(buff + answer_size, "\n\t}\n");
 
-	sprintf( buff + answer_size, "\t}\n" );
-	answer_size += strlen( buff + answer_size );
+	answer_size += sprintf( buff + answer_size, "\t}\n" );
 	return answer_size;
 	}
 
@@ -324,7 +309,11 @@ void cipline_tech_object::initline()
 	cnt = FQT(number * 100 + 1);
 	Q = QT(number * 100 + 1);
 	FL = FS(101);
-	ao = AO(number * 10 + 14);
+	PUMPFREQ = AO(number * 100 + 1);
+	ao = AO(number * 100 + 14);
+
+	PIDF = new MSAPIDFLOWInterface(PIDFlow, &rt_par_float, P_ZAD_FLOW, PUMPFREQ, cnt );
+	PIDP = new MSAPIDHEATInterface(PIDHeat, &rt_par_float, P_ZAD_PODOGR, ao, TP);
 
 #ifdef DEBUG
 	LSL->set_cmd("ST", 0, ((device*)LSL)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
@@ -903,23 +892,34 @@ int cipline_tech_object::SetRet( int val )
 		{
 		return 0;
 		}
-	device* n_ret = (device*)(M((u_int)(rt_par_float[P_N_RET])));
-	if (0 == n_ret->get_serial_n())
+
+	device* n_ret = 0;
+
+	if (rt_par_float[P_N_RET] > 0)
+		{
+		n_ret = (device*)(M((u_int)(rt_par_float[P_N_RET])));
+		}
+
+
+	if (rt_par_float[P_N_UPR] > 0)
 		{
 		n_ret = (device*)(DO((u_int)(rt_par_float[P_N_UPR])));
 		}
 
-	if (n_ret->get_serial_n() > 0)
+	if (n_ret)
 		{
-		if (val)
+		if (n_ret->get_serial_n() > 0)
 			{
-			n_ret->on();
-			rt_par_float[P_RET_STATE] = ON;
-			}
-		else
-			{
-			n_ret->off();
-			rt_par_float[P_RET_STATE] = OFF;
+			if (val)
+				{
+				n_ret->on();
+				rt_par_float[P_RET_STATE] = ON;
+				}
+			else
+				{
+				n_ret->off();
+				rt_par_float[P_RET_STATE] = OFF;
+				}
 			}
 		}
 	return 0;
@@ -1023,13 +1023,373 @@ int cipline_tech_object::EvalCommands()
 
 int cipline_tech_object::GoToStep( int cur, int param )
 	{
-	return 0;
+	switch(cur) 
+		{
+		case 0:	return LoadProgram();
+		case 5: return 7;
+		case 6:
+		case 7: return cur+1;
+		case 8: return 16;
+		case 9:	return LoadProgram();
+		case 10:
+		case 11:
+		case 12:
+		case 13:
+		case 14: return cur+1;
+		case 15: return LoadProgram();
+		case 16:
+			if (rt_par_float[P_PROGRAM] != SPROG_RINSING)
+				{
+				return LoadProgram();
+				} 
+			else
+				{
+				return 9;
+				}
+		case 22:
+		case 23: return cur+1;
+		case 24:
+			if (100 == rt_par_float[P_PODP_CIRC])
+				{
+				return 28;
+				} 
+			else
+				{
+				return 26;
+				}
+		case 26: return 28;
+		case 28: return 29;
+		case 29: return 31;
+		case 31: return 33;
+		case 33: return 34;
+		case 34: return 35;
+		case 35: return 37;
+		case 37: return 39;
+		case 39: return 40;
+		case 40: return LoadProgram();
+		case 42:
+		case 43: return cur+1;
+		case 44:
+			if (100 == rt_par_float[P_PODP_CIRC])
+				{
+				return 48;
+				} 
+			else
+				{
+				return 46;
+				}
+		case 46: return 48;
+		case 48: return 49;
+		case 49: return 53;
+		case 53: return 54;
+		case 54: return 55;
+		case 55: return 57;
+		case 57: return 59;
+		case 59: return 60;
+		case 60: return LoadProgram();
+		case 61:
+			if ((int)(rt_par_float[P_PROGRAM]) & KS_MASK) return 66;
+			return 62;
+		case 62:
+		case 63: return cur+1;
+		case 64:
+		case 65:
+		case 66: return cur+1;
+		case 67: return LoadProgram();
+
+		case 71:
+		case 72:
+		case 73:
+		case 74:
+		case 75:
+		case 76:
+		case 77:
+		case 78: return cur+1;
+		case 79: return LoadProgram();
+
+		case 81: return 83;
+		case 83:
+		case 84:
+		case 85: return cur+1;
+		case 86: return 91;
+		case 91: return LoadProgram();
+		case 105: return 106;
+		case 106: return 108;
+		case 108:
+			if (param==1) 
+				{
+				return 111;
+				} 
+			else 
+				{
+				return 109;
+				}
+		case 109: return 106;
+		case 111: return LoadProgram();
+		case 115: return 116;
+		case 116: return 118;
+		case 118: 
+			if (param==1) 
+				{
+				return 121;
+				} 
+			else 
+				{
+				return 119;
+				}
+		case 119: return 116;
+		case 121: return LoadProgram();
+
+#ifdef SELFCLEAN
+		case 151:
+		case 152:
+		case 153:
+		case 154:
+		case 155:
+		case 156:
+		case 158:
+		case 159:
+		case 160:
+		case 161:
+		case 162:
+		case 163:
+		case 165:
+		case 166:
+		case 167:
+		case 168:
+		case 169:
+		case 171:
+		case 172:
+		case 173:
+		case 174:
+		case 175:
+		case 177:
+		case 178:
+		case 179:
+		case 180:
+		case 181:
+		case 182:
+		case 183:
+		case 184:
+		case 185:
+		case 186:
+		case 187:
+			return cur + 1;
+		case 157:
+			if (scparams->getParam(SCP_V_PROM_TS) > 0)
+				{
+				return 160;
+				}
+			else
+				{
+				return 161;
+				}
+		case 164:
+			if (scparams->getParam(SCP_V_PROM_TK) > 0)
+				{
+				return 167;
+				}
+			else
+				{
+				return 168;
+				}
+		case 170:
+			if (scparams->getParam(SCP_V_PROM_TW) > 0)
+				{
+				return 173;
+				}
+			else
+				{
+				return 174;
+				}
+		case 176:
+			if (scparams->getParam(SCP_V_PROM_TS) > 0)
+				{
+				return 179;
+				}
+			else
+				{
+				return 180;
+				}
+		case 188:
+			return LoadProgram();
+
+#endif //SELFCLEAN
+		}
+	return SERR_UNKNOWN_STEP;
 	}
 
-int cipline_tech_object::InitStep( int step, int f )
-	{
-	return 0;
-	}
+	int cipline_tech_object::InitStep( int step, int f )
+		{
+		int i, pr_media;
+		sort_delay = get_millisec();
+		if (sort_delay > SORT_SWITCH_DELAY + 1)
+			{
+			sort_delay -= SORT_SWITCH_DELAY + 1;
+			}
+
+		ret_overrride = 0;
+#ifdef MEDIUM_CHANGE
+		UPR(MSA_NUMBER * 1000L + 3 +nmr*100)->Off();
+#endif
+		PIDP->reset();
+		PIDF->reset();
+		ResetErr();
+		if (f==0) 
+			{
+			RT();
+			cnt->reset();
+			rt_par_float[ STP_LV] = 0 ; //stat._lv=0;
+			for (i=0; i<SAV_CNT; i++) 
+				{
+				SAV[i]->R();
+				}
+			}
+
+		pr_media=WATER;
+		if (step>30 && step<42) 
+			{
+			if (((int)rt_par_float[P_PROGRAM]>>PRG_K) & 1) 
+				{
+				pr_media=TANK_W;
+				}
+			}
+
+		switch (step) 
+			{
+			case 0: //INIT fill circ tank
+				RHI();
+				StopDev();
+				if (!LM->is_active()) 
+					{
+					V00->on();
+					}
+				return 0;
+			case 5:  return InitToObject(TANK_W, KANAL, step, f);
+			case 6:  return InitOporCIP(KANAL, step, f);
+			case 7:  return InitFromObject(TANK_W, KANAL, step, f);
+			case 8:  return InitToObject(TANK_W, KANAL, step, f);
+			case 9:  return InitOporCIP(KANAL, step, f);
+			case 10: return InitFilCirc(WITH_RETURN, step, f);
+			case 11: return InitCirc(WATER, step, f);
+			case 12: return InitOporCirc(KANAL, step, f);
+			case 13: return InitFilCirc(WITH_RETURN, step, f);
+			case 14: return InitToObject(TANK_W, KANAL, step, f);
+			case 15: return InitOporCirc(KANAL, step, f);
+			case 16: return InitOporCirc(KANAL, step, f);
+			case 22: return InitToObject(TANK_S, KANAL, step, f);
+			case 23: return InitOporCIP(KANAL, step, f);
+			case 24: return InitFromObject(TANK_S, KANAL, step, f);
+			case 26: return InitFilCirc(WITH_RETURN, step, f);
+			case 28: return InitCirc(SHCH, step, f);
+			case 29: return InitOporCirc(TANK_S, step, f);
+
+			case 31: return InitFilCirc(WITH_WATER, step, f);
+			case 33: return InitToObject(pr_media, TANK_S, step, f);
+			case 34: return InitOporCIP(TANK_S, step, f);
+			case 35: return InitFromObject(pr_media, TANK_S, step, f);
+			case 37: return InitToObject(pr_media, TANK_W, step, f);
+			case 39: return InitOporCirc(TANK_W, step, f);
+			case 40: return InitOporCIP(TANK_W, step, f);
+
+			case 42: return InitToObject(TANK_K, KANAL, step, f);
+			case 43: return InitOporCIP(KANAL, step, f);
+			case 44: return InitFromObject(TANK_K, KANAL, step, f);
+			case 46: return InitFilCirc(WITH_RETURN, step, f);
+			case 48: return InitCirc(KISL, step, f);
+			case 49: return InitOporCirc(TANK_K, step, f);
+			case 53: return InitToObject(WATER, TANK_K, step, f);
+			case 54: return InitOporCIP(TANK_K, step, f);
+			case 55: return InitFromObject(WATER, TANK_K, step, f);
+			case 57: return InitToObject(WATER, TANK_W, step, f);
+			case 59: return InitOporCirc(TANK_W, step, f);
+			case 60: return InitOporCIP(TANK_W, step, f);
+			case 61: return InitFilCirc(WITH_WATER, step, f);
+			case 62: return InitToObject(WATER, TANK_W, step, f);
+			case 63: return InitOporCIP(TANK_W, step, f);
+			case 64: return InitFromObject(WATER, TANK_W, step, f);
+			case 65: return InitFilCirc(WITH_WATER, step, f);
+			case 66: return InitCirc(HOT_WATER, step, f);
+			case 67: return InitOporCirc(TANK_W, step, f);
+
+			case 71: return InitFilCirc(SANITIZER, step, f);
+			case 72: return InitToObject(SANITIZER, TANK_W, step, f);
+			case 73: return InitOporCIP(TANK_W, step, f);
+			case 74: return InitFromObject(SANITIZER, TANK_W, step, f);
+			case 75: return InitFilCirc(SANITIZER, step, f);
+			case 76: return InitDoseRR(SANITIZER, step, f);
+			case 77: return InitCirc(SANITIZER, step, f);
+			case 78: return InitOporCirc(KANAL, step, f);
+			case 79: return InitOporCIP(KANAL, step, f);
+
+			case 81: return InitFilCirc(WITH_WATER, step, f);
+			case 83: return InitToObject(WATER, TANK_W, step, f);
+			case 84: return InitOporCIP(TANK_W, step, f);
+			case 85: return InitFromObject(WATER, TANK_W, step, f);
+			case 86: return InitToObject(WATER, TANK_W, step, f);
+			case 91: return InitOporCIP(TANK_W, step, f);
+			case 105: return InitFilRR(TANK_S);
+			case 106: return InitCircRR(TANK_S);
+			case 108: return InitCheckConc(TANK_S);
+			case 109: return InitAddRR(TANK_S);
+			case 111: return InitOpolRR(TANK_S);
+			case 115: return InitFilRR(TANK_K);
+			case 116: return InitCircRR(TANK_K);
+			case 118: return InitCheckConc(TANK_K);
+			case 119: return InitAddRR(TANK_K);
+			case 121: return InitOpolRR(TANK_K);
+
+#ifdef SELFCLEAN
+			case 151: return SCInitPumping(WATER, TANK_W, KANAL, -1, step, f);
+			case 152: return SCInitPumping(WATER, TANK_W, KANAL, -1, step, f);
+			case 153: return SCInitPumping(WATER, WATER, TANK_W_MG, -1, step, f);
+			case 154: return SCInitPumping(WATER, -1, -1, TANK_W_DREN, step, f);
+			case 155: return SCInitPumping(SHCH, TANK_S, TANK_S, -1, step, f);
+			case 156: return SCInitPumping(SHCH, TANK_S, TANK_W_MG, -1, step, f);
+			case 157: return SCInitPumping(SHCH, TANK_S, TANK_W_MG, -1, step, f);
+				//	case 158: return SCInitPumping(SHCH, TANK_S, TANK_W_MG, -1, step, f);
+				//	case 159: return SCInitPumping(SHCH, TANK_S, NEUTRO, -1, step, f);
+			case 160: return SCInitPumping(SHCH, WATER, TANK_S, -1, step, f);
+			case 161: return SCInitPumping(SHCH, TANK_W, TANK_W_MG, TANK_S_DREN, step, f);
+			case 162: return SCInitPumping(KISL, TANK_K, TANK_K, -1, step, f);
+			case 163: return SCInitPumping(KISL, TANK_K, TANK_S_MG, -1, step, f);
+			case 164: return SCInitPumping(KISL, TANK_K, TANK_S_MG, -1, step, f);
+				//	case 165: return SCInitPumping(KISL, TANK_K, TANK_S_MG, -1, step, f);
+				//	case 166: return SCInitPumping(KISL, TANK_K, NEUTRO, -1, step, f);
+			case 167: return SCInitPumping(KISL, WATER,TANK_K_MG, -1, step, f);
+			case 168: return SCInitPumping(KISL, TANK_S, TANK_S_MG, TANK_K_DREN, step, f);
+			case 169: return SCInitPumping(SHCH, TANK_W, TANK_K_MG, -1, step, f);
+			case 170: return SCInitPumping(SHCH, TANK_W, TANK_K_MG, -1, step, f);
+				//	case 171: return SCInitPumping(SHCH, TANK_W, TANK_K_MG, -1, step, f);
+				//	case 172: return SCInitPumping(SHCH, TANK_W, NEUTRO, -1, step, f);
+			case 173: return SCInitPumping(SHCH, WATER, TANK_W, -1, step, f);
+			case 174: return SCInitPumping(SHCH, TANK_K,TANK_K_MG, TANK_W_DREN, step, f);
+			case 175: return SCInitPumping(KISL, TANK_S, TANK_W_MG, -1, step, f);
+			case 176: return SCInitPumping(KISL, TANK_S, NEUTRO, -1, step, f);
+			case 177: return SCInitPumping(KISL, TANK_S, TANK_W_MG, -1, step, f);
+			case 178: return SCInitPumping(KISL, TANK_S, NEUTRO, -1, step, f);
+			case 179: return SCInitPumping(KISL, WATER, TANK_S_MG, -1, step, f);
+			case 180: return SCInitPumping(KISL, TANK_W, TANK_W_MG, TANK_S_DREN, step, f);
+			case 181: return SCInitPumping(SHCH, TANK_K, NEUTRO, -1, step, f);
+			case 182: return SCInitPumping(SHCH, TANK_K, NEUTRO, -1, step, f);
+			case 183: return SCInitPumping(KISL, TANK_W, NEUTRO, TANK_K_DREN, step, f);
+			case 184: return SCInitPumping(KISL, TANK_W, NEUTRO, TANK_K_DREN, step, f);
+			case 185: return SCInitPumping(WATER, WATER, TANK_S_MG, TANK_KW_DREN, step, f);
+			case 186: return SCInitPumping(WATER, WATER, TANK_K_MG, TANK_SW_DREN, step, f);
+			case 187: return SCInitPumping(WATER, WATER, TANK_W_MG, TANK_SK_DREN, step, f);
+			case 188: return SCInitPumping(-1, -1, -1, TANK_SKW_DREN, step, f);
+#endif //SELFCLEAN
+
+			case 555:
+				RHI();
+				PT();
+				cnt->pause();
+				StopDev();
+				enddelayTimer = get_millisec();
+				return 0;
+			}
+		return SERR_UNKNOWN_STEP;
+		}
 
 int cipline_tech_object::EvalPIDS()
 	{
@@ -1081,7 +1441,159 @@ int cipline_tech_object::EvalCipInProgress()
 
 int cipline_tech_object::DoStep( int step )
 	{
-	return 0;
+	int res, pr_media;
+
+	res=CheckErr();
+	if (res!=0) 
+		{
+		blockAlarm = 0;
+		return res;
+		}
+
+	pr_media=WATER;
+	if (step>30 && step<42) 
+		{
+		if ((((int)rt_par_float[P_PROGRAM]) >> PRG_K) & 1) 
+			{
+			pr_media=TANK_W;
+			}
+		}
+
+	switch (step) 
+		{
+		case 0: 
+			if (LM->is_active()) return 1;
+			return 0;
+		case 5:  return ToObject(TANK_W, KANAL);
+		case 6:  return OporCIP(KANAL);
+		case 7:  return FromObject(TANK_W, KANAL);
+		case 8:  return ToObject(TANK_W, KANAL);
+		case 9:  return OporCIP(KANAL);
+		case 10: return FilCirc(WITH_RETURN);
+		case 11: return Circ(WATER);
+		case 12: return OporCirc(KANAL);
+		case 13: return FilCirc(WITH_RETURN);
+		case 14: return ToObject(TANK_W, KANAL);
+		case 15: return OporCirc(KANAL);
+		case 16: return OporCirc(KANAL);
+		case 22: return ToObject(TANK_S, KANAL);
+		case 23: return OporCIP(KANAL);
+		case 24: return FromObject(TANK_S, KANAL);
+		case 26: return FilCirc(WITH_RETURN);
+		case 28: return Circ(SHCH);
+		case 29: return OporCirc(TANK_S);
+
+		case 31: return FilCirc(WITH_WATER);
+		case 33: return ToObject(pr_media, TANK_S);
+		case 34: return OporCIP(TANK_S);
+		case 35: return FromObject(pr_media, TANK_S);
+		case 37: return ToObject(pr_media, TANK_W);
+		case 39: return OporCirc(TANK_W);
+		case 40: return OporCIP(TANK_W);
+
+		case 42: return ToObject(TANK_K, KANAL);
+		case 43: return OporCIP(KANAL);
+		case 44: return FromObject(TANK_K, KANAL);
+		case 46: return FilCirc(WITH_RETURN);
+		case 48: return Circ(KISL);
+		case 49: return OporCirc(TANK_K);
+		case 53: return ToObject(WATER, TANK_K);
+		case 54: return OporCIP(TANK_K);
+		case 55: return FromObject(WATER, TANK_K);
+		case 57: return ToObject(WATER, TANK_W);
+		case 59: return OporCirc(TANK_W);
+		case 60: return OporCIP(TANK_W);
+		case 61: return FilCirc(WITH_WATER);
+		case 62: return ToObject(WATER, TANK_W);
+		case 63: return OporCIP(TANK_W);
+		case 64: return FromObject(WATER, TANK_W);
+		case 65: return FilCirc(WITH_WATER);
+		case 66: return Circ(HOT_WATER);
+		case 67: return OporCirc(TANK_W);
+
+		case 71: return FilCirc(SANITIZER);
+		case 72: return ToObject(SANITIZER, TANK_W);
+		case 73: return OporCIP(TANK_W);
+		case 74: return FromObject(SANITIZER,TANK_W);
+		case 75: return FilCirc(SANITIZER);
+		case 76: return DoseRR(SANITIZER);
+		case 77: return Circ(SANITIZER);
+		case 78: return OporCirc(KANAL);
+		case 79: return OporCIP(KANAL);
+
+		case 81: return FilCirc(WITH_WATER);
+		case 83: return ToObject(WATER, TANK_W);
+		case 84: return OporCIP(TANK_W);
+		case 85: return FromObject(WATER, TANK_W);
+		case 86: return ToObject(WATER, TANK_W);
+		case 91: return OporCIP(TANK_W);
+		case 105: return FilRR(TANK_S);
+		case 106: return CircRR(TANK_S);
+		case 108: return CheckConc(TANK_S);
+		case 109: return AddRR(TANK_S);
+		case 111: return OpolRR(TANK_S);
+		case 115: return FilRR(TANK_K);
+		case 116: return CircRR(TANK_K);
+		case 118: return CheckConc(TANK_K);
+		case 119: return AddRR(TANK_K);
+		case 121: return OpolRR(TANK_K);
+
+#ifdef SELFCLEAN
+		case 151: return SCPumping(WATER, TANK_W, KANAL, -1);
+		case 152: return SCPumping(WATER, TANK_W, KANAL, -1);
+		case 153: return SCPumping(WATER, WATER, TANK_W_MG, -1);
+		case 154: return SCPumping(WATER, -1, -1, TANK_W_DREN);
+		case 155: return SCPumping(SHCH, TANK_S, TANK_S, -1);
+		case 156: return SCPumping(SHCH, TANK_S, TANK_W_MG, -1);
+		case 157: return SCPumping(SHCH, TANK_S, TANK_W_MG, -1);
+			//	case 158: return SCPumping(SHCH, TANK_S, TANK_W_MG, -1);
+			//	case 159: return SCPumping(SHCH, TANK_S, NEUTRO, -1);
+		case 160: return SCPumping(SHCH, WATER, TANK_S, -1);
+		case 161: return SCPumping(SHCH, TANK_W, TANK_W_MG, TANK_S_DREN);
+		case 162: return SCPumping(KISL, TANK_K, TANK_K, -1);
+		case 163: return SCPumping(KISL, TANK_K, TANK_S_MG, -1);
+		case 164: return SCPumping(KISL, TANK_K, TANK_S_MG, -1);
+			//	case 165: return SCPumping(KISL, TANK_K, TANK_S_MG, -1);
+			//	case 166: return SCPumping(KISL, TANK_K, NEUTRO, -1);
+		case 167: return SCPumping(KISL, WATER,TANK_K_MG, -1);
+		case 168: return SCPumping(KISL, TANK_S, TANK_S_MG, TANK_K_DREN);
+		case 169: return SCPumping(SHCH, TANK_W, TANK_K_MG, -1);
+		case 170: return SCPumping(SHCH, TANK_W, TANK_K_MG, -1);
+			//	case 171: return SCPumping(SHCH, TANK_W, TANK_K_MG, -1);
+			//	case 172: return SCPumping(SHCH, TANK_W, NEUTRO, -1);
+		case 173: return SCPumping(SHCH, WATER, TANK_W, -1);
+		case 174: return SCPumping(SHCH, TANK_K,TANK_K_MG, TANK_W_DREN);
+		case 175: return SCPumping(KISL, TANK_S, TANK_W_MG, -1);
+		case 176: return SCPumping(KISL, TANK_S, TANK_W_MG, -1);
+			//	case 177: return SCPumping(KISL, TANK_S, TANK_W_MG, -1);
+			//	case 178: return SCPumping(KISL, TANK_S, NEUTRO, -1);
+		case 179: return SCPumping(KISL, WATER, TANK_S_MG, -1);
+		case 180: return SCPumping(KISL, TANK_W, TANK_W_MG, TANK_S_DREN);
+		case 181: return SCPumping(SHCH, TANK_K, NEUTRO, -1);
+		case 182: return SCPumping(SHCH, TANK_K, NEUTRO, -1);
+		case 183: return SCPumping(KISL, TANK_W, NEUTRO, TANK_K_DREN);
+		case 184: return SCPumping(KISL, TANK_W, NEUTRO, TANK_K_DREN);
+		case 185: return SCPumping(WATER, WATER, TANK_S_MG, TANK_KW_DREN);
+		case 186: return SCPumping(WATER, WATER, TANK_K_MG, TANK_SW_DREN);
+		case 187: return SCPumping(WATER, WATER, TANK_W_MG, TANK_SK_DREN);
+		case 188: return SCPumping(-1, -1, -1, TANK_SKW_DREN);
+#endif //SELFCLEAN
+
+		case 555:
+			if (get_delta_millisec(enddelayTimer) > WASH_END_DELAY)
+				{
+				Stop(curstep);
+				curstep=0;
+				ResetLinesDevicesBeforeReset();
+				ResetWP();
+				return 0;
+				}
+			else
+				{
+				return 0;
+				}
+		}
+	return SERR_UNKNOWN_STEP;
 	}
 
 int cipline_tech_object::EvalCipInError()
@@ -3114,6 +3626,190 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 
 			int cipline_tech_object::Circ( int what )
 				{
+				float c;
+				V06->off();
+#ifdef RETALWAYSON
+				SetRet(ON);
+#else
+
+				if ((!LH->is_active() && 0 == ret_circ_flag) || 100 == rt_par_float[P_PODP_CIRC]) 
+					{
+					SetRet(ON);
+					}
+
+				if (LH->is_active() && V10->get_state() && 101 != rt_par_float[P_PODP_CIRC]) 
+					{
+					SetRet(OFF);
+					ret_circ_flag = 1;
+					}
+
+				if (0 == ret_circ_flag)
+					{
+					ret_circ_delay = get_millisec();
+					}
+
+				if (!LM->is_active() || get_delta_millisec(ret_circ_delay) > 5000L)
+					{
+					ret_circ_flag = 0;
+					}
+#endif
+
+				if (TR->get_value()>=rt_par_float[P_ZAD_PODOGR]-rt_par_float[P_DELTA_TR] && cnt->get_flow() > rt_par_float[P_R_NO_FLOW]) 
+					{
+					T[TMR_OP_TIME]->start();
+					} 
+				else 
+					{
+					T[TMR_OP_TIME]->pause();
+					}
+				if (T[TMR_OP_TIME]->is_time_up()==1) 
+					{
+					return 1;
+					}
+				c=GetConc(what);
+				if (FL->get_state()==FLIS) SAV[SAV_CONC]->Add(c, cnt->get_quantity());
+				SAV[SAV_CONC]->Add(c, cnt->get_quantity());
+				rt_par_float[P_CONC] = SAV[SAV_CONC]->Q();
+				switch (what) 
+					{
+					case KISL:
+						rt_par_float[ STP_QAVK] = SAV[SAV_CONC]->Q();
+						if (1 == rt_par_float[P_PODP_CIRC])
+							{
+							if (!LM->is_active() && !LL->is_active() && !LH->is_active())
+								{
+								V02->on();
+								}
+							if (LM->is_active() || LH->is_active())
+								{
+								V02->off();
+								}
+							}
+						break;
+					case SHCH: 
+						rt_par_float[ STP_QAVS] = SAV[SAV_CONC]->Q();
+						if (1 == rt_par_float[P_PODP_CIRC])
+							{
+							if (!LM->is_active() && !LL->is_active() && !LH->is_active())
+								{
+								V03->on();
+								}
+							if (LM->is_active() || LH->is_active())
+								{
+								V03->off();
+								}
+							}
+						break;
+					case WATER:
+					case HOT_WATER:
+					case SANITIZER:
+						if (1 == rt_par_float[P_PODP_CIRC] || 100 == rt_par_float[P_PODP_CIRC])
+							{
+							if (!LM->is_active() && !LL->is_active() && !LH->is_active())
+								{
+								V00->on();
+								}
+							if (LM->is_active() || LH->is_active())
+								{
+								V00->off();
+								}
+							}
+						break;
+					}
+				rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
+				rt_par_float[P_SUM_OP] = cnt->get_quantity();
+				return 0;
+				}
+
+			int cipline_tech_object::OporCirc( int where )
+				{
+				switch (where) 
+					{
+					case KANAL:
+						break;
+					case TANK_W:
+						if (LWH->is_active())
+							{	
+							V07->off();
+							V11->on();
+							}
+						else 
+							{
+							V07->on();
+							V11->off();
+							}
+						break;
+					case TANK_S:
+						break;
+					case TANK_K:
+						break;
+					}
+
+				rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
+				rt_par_float[P_SUM_OP] = cnt->get_quantity();
+				if (!LL->is_active()) cnt->start();
+				if (cnt->get_quantity() >= rt_par_float[P_V_LL_BOT]) return 1;
+				return 0;
+				}
+
+			int cipline_tech_object::InitDoseRR( int what, int step, int f )
+				{
+				switch (what)
+					{
+					case SANITIZER:
+						RHI();
+						StopDev();
+						V01->on();
+						V10->on();
+						V00->off();
+						V03->off();
+						V04->off();
+						V02->off();
+						V05->on();
+						V06->off();
+						V07->off();
+						V08->off();
+						V09->off();
+						V11->off();
+						V12->off();
+						break;
+					}
+				rt_par_float[P_MAX_OPER_TM] = rt_par_float[PTM_SANITIZER_INJECT];
+				T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM]*1000L);
+				T[TMR_OP_TIME]->start();
+				rt_par_float[P_SUM_OP] = 0;
+				if (pump_control) {NPC->on();} else {NP->on();}
+				SetRet(ON);
+				rt_par_float[P_ZAD_PODOGR] = rt_par_float[P_T_SANITIZER];
+				rt_par_float[P_ZAD_FLOW] = rt_par_float[P_FLOW];
+				PIDF->on();
+				rt_par_float[P_VRAB] = 0;
+				cnt->start();
+				return 0;
+				}
+
+			int cipline_tech_object::DoseRR( int what )
+				{
+				if (!LH->is_active()) 
+					{
+					SetRet(ON);
+					}
+				else
+					{
+					SetRet(OFF);
+					}
+
+				switch (what)
+					{
+					case SANITIZER:
+						break;
+					}
+				rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
+				rt_par_float[P_SUM_OP] = cnt->get_quantity();
+				if (T[TMR_OP_TIME]->is_time_up()) 
+					{
+					return 1;
+					};
 				return 0;
 				}
 
@@ -3131,17 +3827,60 @@ int cipline_tech_object::pidnumber = 1;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-MSAPIDInterface::MSAPIDInterface( PID* pid, run_time_params_float* par, int taskpar, i_AO_device* ao /*= 0*/, i_AI_device* ai /*= 0 */ )
+MSAPIDFLOWInterface::MSAPIDFLOWInterface(PID* pid, run_time_params_float* par, int taskpar, i_AO_device* ao /*= 0*/, i_counter* ai /*= 0 */ )
 	{
     pidr = pid;
     input = ai;
+	output = ao;
     rp = taskpar;
     lineparams = par;
     lastEvalInOnState = get_millisec();
     HI = 0;
 	}
 
-void MSAPIDInterface::eval()
+void MSAPIDFLOWInterface::eval()
+	{
+	if ( 1 == pidr->get_state() )
+		{
+		lastEvalInOnState = get_millisec();
+		pidr->set( lineparams[0][rp] );
+		output->set_value( pidr->eval(input->get_flow()));
+		}
+	}
+
+void MSAPIDFLOWInterface::reset()
+	{
+	if (get_delta_millisec(lastEvalInOnState) > 3000L)
+		{
+		pidr->reset();
+		}
+	}
+
+void MSAPIDFLOWInterface::on( int accel /*= 0 */ )
+	{
+	pidr->on(accel);
+	}
+
+void MSAPIDFLOWInterface::off()
+	{
+	pidr->off();
+	output->set_value(0);
+	}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+MSAPIDHEATInterface::MSAPIDHEATInterface(PID* pid, run_time_params_float* par, int taskpar, i_AO_device* ao /*= 0*/, i_AI_device* ai /*= 0 */ )
+	{
+	pidr = pid;
+	input = ai;
+	output = ao;
+	rp = taskpar;
+	lineparams = par;
+	lastEvalInOnState = get_millisec();
+	HI = 0;
+	}
+
+void MSAPIDHEATInterface::eval()
 	{
 	if ( 1 == pidr->get_state() )
 		{
@@ -3151,7 +3890,7 @@ void MSAPIDInterface::eval()
 		}
 	}
 
-void MSAPIDInterface::reset()
+void MSAPIDHEATInterface::reset()
 	{
 	if (get_delta_millisec(lastEvalInOnState) > 3000L)
 		{
@@ -3159,12 +3898,12 @@ void MSAPIDInterface::reset()
 		}
 	}
 
-void MSAPIDInterface::on( int accel /*= 0 */ )
+void MSAPIDHEATInterface::on( int accel /*= 0 */ )
 	{
 	pidr->on(accel);
 	}
 
-void MSAPIDInterface::off()
+void MSAPIDHEATInterface::off()
 	{
 	pidr->off();
 	output->set_value(0);
