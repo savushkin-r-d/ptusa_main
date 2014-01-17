@@ -763,7 +763,7 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
         memset( ip_address, 0, sizeof( ip_address ) );
         }
 
-    if ( strlen( ip_address ) == 0 && type >= T_750_341 )
+    if ( ip_address[ 0 ] == 0 && type >= T_750_341 )
         {
         is_active = false;
 #ifdef DEBUG

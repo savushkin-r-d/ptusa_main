@@ -132,8 +132,9 @@ int tech_object::set_mode( u_int mode, int newm )
                 const int ERR_STR_SIZE = 41;
                 char res_str[ ERR_STR_SIZE ] = "обр. связь ";
 
+                int len = strlen( res_str );
                 int res = ( *modes_manager )[ mode ]->check_devices(
-                    res_str + strlen( res_str ), ERR_STR_SIZE - strlen( res_str ) );
+                    res_str + len, ERR_STR_SIZE - len );
                 if ( res && is_check_mode( mode ) == 1 )
                     {
                     set_err_msg( res_str, mode );
@@ -659,19 +660,22 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
         case ERR_CANT_ON:
             snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - не включен режим %.1d \'%.40s\' - %.60s.",
-                name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
+                name, number, mode, ( *modes_manager )[ mode ]->get_name(), 
+                err_msg );
             break;
 
         case ERR_ON_WITH_ERRORS:
             snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - включен с ошибкой режим %.1d \'%.40s\' - %.50s.",
-                name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
+                name, number, mode, ( *modes_manager )[ mode ]->get_name(), 
+                err_msg );
             break;
 
         case ERR_OFF:
             snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%.40s %d\' - отключен режим %.1d \'%.40s\' - %.50s.",
-                name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
+                name, number, mode, ( *modes_manager )[ mode ]->get_name(), 
+                err_msg );
             break;
 
         case ERR_OFF_AND_ON:
@@ -693,7 +697,8 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
                 {
                 snprintf( new_err->msg, sizeof( new_err->msg ),
                     "\'%.40s %d\' - режим %.1d \'%.40s\' - %.50s.",
-                    name, number, mode, ( *modes_manager )[ mode ]->get_name(), err_msg );
+                    name, number, mode, ( *modes_manager )[ mode ]->get_name(), 
+                    err_msg );
                 }
             else
                 {
@@ -896,13 +901,14 @@ void tech_object_manager::add_tech_object( tech_object* new_tech_object )
 //-----------------------------------------------------------------------------
 int tech_object_manager::save_params_as_Lua_str( char* str )
     {
+    int res = 0;
     str[ 0 ] = 0;
 
     for ( u_int i = 0; i < tech_objects.size(); i++ )
         {
-        tech_objects[ i ]->save_params_as_Lua_str( str + strlen( str ) );
+        res += tech_objects[ i ]->save_params_as_Lua_str( str + res );
         }
-    return 0;
+    return res;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

@@ -191,8 +191,9 @@ void par_device::set_par_name( u_int idx, u_int offset, const char* name )
 void device::set_descr( const char *new_description )
     {
     //Копирование с учетом нуль-символа.
-    description = new char[ strlen( new_description ) + 1 ];
-    strlcpy( description, new_description, strlen( new_description ) + 1 );
+    int len = strlen( new_description ) + 1;
+    description = new char[ len ];
+    strlcpy( description, new_description, len );
     }
 //-----------------------------------------------------------------------------
 void device::print() const
@@ -258,10 +259,12 @@ int device::save_device( char *buff, const char *prefix )
 #ifdef RM_PAC
 int device::rm_save_device_state( char *buff, const char *prefix )
     {
+    int res = 0;
+
     if ( type != DT_AO &&
         type != DT_TE )
         {
-        sprintf( buff, "%s.%s.ST=%d\n", prefix,  name, get_state() );
+        res += sprintf( buff, "%s.%s.ST=%d\n", prefix,  name, get_state() );
         }
 
     if ( type != DT_V &&
@@ -279,16 +282,15 @@ int device::rm_save_device_state( char *buff, const char *prefix )
         {
         if ( get_value() == 0 )
             {
-            sprintf( buff + strlen( buff ), "%s.%s.V=0\n",
-                prefix, name );
+            res += sprintf( buff + res, "%s.%s.V=0\n", prefix, name );
             }
         else
             {
-            sprintf( buff + strlen( buff ), "%s.%s.V=%.2f\n", get_value() );
+            res += sprintf( buff + res, "%s.%s.V=%.2f\n", get_value() );
             }
         }
 
-    return strlen( buff );
+    return res;
     }
 #endif // RM_PAC
 //-----------------------------------------------------------------------------
@@ -755,20 +757,17 @@ int device_manager::rm_save_device_state( char *buff )
 //-----------------------------------------------------------------------------
 int device_manager::rm_save_device( char *buff )
     {
-    sprintf( buff, "%s=\n",  G_CMMCTR->get_host_name_eng() );
-    int answer_size = strlen( buff );
-    sprintf( buff + answer_size, "\t{\n" );
-    answer_size += strlen( buff + answer_size );
-
+    int answer_size = sprintf( buff, "%s=\n",  G_CMMCTR->get_host_name_eng() );
+   
+    answer_size += sprintf( buff + answer_size, "\t{\n" );
+    
     for ( u_int i = 0; i < project_devices.size(); i++)
         {
-        project_devices[ i ]->save_device( buff + answer_size, "\t" );
-        answer_size += strlen( buff + answer_size );
+        answer_size += project_devices[ i ]->save_device( buff + answer_size, "\t" );        
         }
 
-    sprintf( buff + answer_size, "\t}\n" );
-    answer_size += strlen( buff + answer_size );
-
+    answer_size += sprintf( buff + answer_size, "\t}\n" );
+    
     return answer_size;
     }
 

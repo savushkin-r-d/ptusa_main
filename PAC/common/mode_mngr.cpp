@@ -330,8 +330,8 @@ int step::check_devices( char* err_dev_name, int str_len )
     {
     for ( u_int i = 0; i < actions.size(); i++ )
         {
-        int res = actions[ i ]->check_devices( err_dev_name +
-            strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
+        int len = strlen( err_dev_name );
+        int res = actions[ i ]->check_devices( err_dev_name + len, str_len - len );
 
         if ( res )
             {

@@ -1837,18 +1837,6 @@ class device_manager: public i_Lua_save_device
 #pragma option -w.inl
 #endif // __BORLANDC__
 
-        //int save_params_as_Lua_str( char* str )
-        //    {
-        //    str[ 0 ] = 0;
-
-        //    for ( u_int i = 0; i < project_devices.size(); i++ )
-        //        {
-        //        project_devices[ i ]->save_params_as_Lua_str( str + strlen( str ) );
-        //        }
-
-        //    return 0;
-        //    }
-
     protected:
         dev_stub stub;  ///< ”стройство-заглушка, фиктивное устройство.
 

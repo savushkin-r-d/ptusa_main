@@ -295,5 +295,15 @@ u_int_4 PID::get_state()
 	{
 	return state;
 	}
+//-----------------------------------------------------------------------------
+int PID::save_device( char *buff )
+    {
+    int answer_size = sprintf( buff, "t.%s = \n\t{\n", name );
 
+    //Параметры.
+    answer_size += par->save_device( buff + answer_size, "\t" );
+    answer_size += w_par->save_device( buff + answer_size, "\t" );
+
+    return answer_size += sprintf( buff + answer_size, "\t}\n" );
+    }
 //-----------------------------------------------------------------------------

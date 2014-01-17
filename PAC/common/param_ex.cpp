@@ -265,10 +265,11 @@ params_manager::~params_manager()
 //-----------------------------------------------------------------------------
 int params_manager::save_params_as_Lua_str( char* str )
     {
-    //G_DEVICE_MANAGER()->save_params_as_Lua_str( str );
-    G_TECH_OBJECT_MNGR()->save_params_as_Lua_str( str + strlen( str ) );
+    int res = 0;
+    //res += G_DEVICE_MANAGER()->save_params_as_Lua_str( str );
+    res += G_TECH_OBJECT_MNGR()->save_params_as_Lua_str( str + res );
     
-    return 0;
+    return res;
     }
 //-----------------------------------------------------------------------------
 int params_manager::restore_params_from_server_backup( char *backup_str )

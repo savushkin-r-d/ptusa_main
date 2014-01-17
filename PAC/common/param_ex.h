@@ -354,11 +354,8 @@ template < class type, bool is_float > class parameters
     private:
         int save_dev( char *buff, const char *prefix )
             {
-            sprintf( buff, "%s\t{\n", prefix );
-            int answer_size = strlen( buff );
-
-            sprintf( buff + answer_size, "%s\t", prefix );
-            answer_size += strlen( buff + answer_size );
+            int answer_size = sprintf( buff, "%s\t{\n%s\t",
+                prefix, prefix );
 
 #ifdef WIN_OS
 			setlocale(LC_NUMERIC, "C");
@@ -371,31 +368,31 @@ template < class type, bool is_float > class parameters
                     float val  = ( float ) get_val( i );
                     if ( 0. == val )
                         {
-                        sprintf( buff + answer_size, "0, " );
+                        answer_size += sprintf( buff + answer_size, "0, " );
                         }
                     else
                         {
                         double tmp;
                         if ( modf( val, &tmp ) == 0 )
                             {
-                            sprintf( buff + answer_size, "%d, ", ( int ) val );
+                            answer_size += sprintf( buff + answer_size, "%d, ", 
+                                ( int ) val );
                             }
                         else
                             {
-                            sprintf( buff + answer_size, "%.2f, ", val );
+                            answer_size += sprintf( buff + answer_size, "%.2f, ",
+                                val );
                             }
                         }
                     }
                 else
                     {
-                    sprintf( buff + answer_size, "%u, ", ( u_int ) get_val( i ) );
-                    }
-
-                answer_size += strlen( buff + answer_size );
+                    answer_size += sprintf( buff + answer_size, "%u, ",
+                        ( u_int ) get_val( i ) );
+                    }                
                 }
 
-            sprintf( buff + answer_size, "\n%s\t},\n", prefix );
-            answer_size += strlen( buff + answer_size );
+            answer_size += sprintf( buff + answer_size, "\n%s\t},\n", prefix );            
             return answer_size;
             }
 
