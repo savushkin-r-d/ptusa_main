@@ -58,10 +58,24 @@ class tcp_communicator
 
         virtual ~tcp_communicator();
 
-        int get_buffer_size() const
+        enum CONSTANTS
             {
-            return BUFSIZE;
-            }
+            BUFSIZE     = 40000,           ///< Размер буфера.
+            PORT 	    = 10000,           ///< Порт.
+#ifdef LINUX_OS
+            MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
+#endif // LINUX_OS
+#ifdef WIN_OS
+            MAX_SOCKETS = 32,            ///< Максимальное количество сокетов.
+#endif // WIN_OS
+#ifdef MINIOS7
+            MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
+#endif // MINIOS7
+            QLEN        = MAX_SOCKETS - 1, ///< Максимальное количество соединений.
+
+            TC_MAX_HOST_NAME      = 20,
+            TC_MAX_SERVICE_NUMBER = 16,
+            };
 
     protected:
         tcp_communicator();
@@ -82,25 +96,6 @@ class tcp_communicator
             AKN_ERR      = 7,
             AKN_DATA     = 8,
             AKN_OK       = 12,
-            };
-
-        enum CONSTANTS
-            {
-            BUFSIZE     = 40000,           ///< Размер буфера.
-            PORT 	    = 10000,           ///< Порт.
-#ifdef LINUX_OS
-            MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
-#endif // LINUX_OS
-#ifdef WIN_OS
-            MAX_SOCKETS = 32,            ///< Максимальное количество сокетов.
-#endif // WIN_OS
-#ifdef MINIOS7
-            MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
-#endif // MINIOS7
-            QLEN        = MAX_SOCKETS - 1, ///< Максимальное количество соединений.
-
-            TC_MAX_HOST_NAME      = 20,
-            TC_MAX_SERVICE_NUMBER = 16,
             };
 
         static auto_smart_ptr < tcp_communicator > instance;///< Экземпляр класса.

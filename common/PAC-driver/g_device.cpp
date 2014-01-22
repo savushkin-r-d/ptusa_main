@@ -34,10 +34,10 @@ void print_str( const char *err_str, char is_need_CR )
 #endif // DRIVER
     }
 //-----------------------------------------------------------------------------
-long device_communicator::write_devices_states_service( 
+long device_communicator::write_devices_states_service(
     long len, u_char *data, u_char *outdata )
     {
-    if ( len < 1 ) 
+    if ( len < 1 )
         {
         return 0;
         }
@@ -60,7 +60,7 @@ long device_communicator::write_devices_states_service(
                 G_CURRENT_PROTOCOL_VERSION,
                 tcp_communicator::get_instance()->get_host_name_rus(),
                 params_manager::get_instance()->par[ 0 ][ params_manager::P_IS_RESET_PARAMS ],
-                params_manager::get_instance()->solve_CRC() );                       
+                params_manager::get_instance()->solve_CRC() );
 
 #ifdef DEBUG_DEV_CMCTR
             Print( "G_CURRENT_PROTOCOL_VERSION = %u, host =[%s]\n", G_CURRENT_PROTOCOL_VERSION,
@@ -84,7 +84,7 @@ long device_communicator::write_devices_states_service(
                 {
                 answer_size += dev[ i ]->save_device( ( char* ) outdata +
                     answer_size );
-                }            
+                }
             answer_size++; // Учитываем завершающий \0.
 
 #ifdef DEBUG
@@ -97,7 +97,7 @@ long device_communicator::write_devices_states_service(
                     }
                 }
 
-            Print( "%s", source.c_str() );
+            printf( "%s", source.c_str() );
 #endif // DEBUG
 
 #ifdef DEBUG_DEV_CMCTR
@@ -122,7 +122,7 @@ long device_communicator::write_devices_states_service(
                 {
                 answer_size += dev[ i ]->save_device( ( char* ) outdata +
                     answer_size );
-                }                        
+                }
             answer_size++; // Учитываем завершающий \0.
 
 #ifdef DEBUG
@@ -164,7 +164,7 @@ long device_communicator::write_devices_states_service(
             }
 
         case CMD_GET_PAC_ERRORS:
-            {   
+            {
 #ifdef DEBUG_DEV_CMCTR
             Print( "CMD_GET_PAC_ERRORS\n" );
 #endif
@@ -183,7 +183,7 @@ long device_communicator::write_devices_states_service(
             static u_int_2  prev_PAC_err_id = 0;
             static u_int_2  prev_dev_err_id = 0;
 
-            int err_size = 
+            int err_size =
                 PAC_critical_errors_manager::get_instance()->save_as_Lua_str(
                 str + answer_size, err_id );
             if ( err_id != prev_PAC_err_id )
@@ -195,7 +195,7 @@ long device_communicator::write_devices_states_service(
             answer_size += err_size;
             if ( err_size == 0 ) //Нет критических ошибок.
                 {
-                answer_size += 
+                answer_size +=
                     G_DEV_ERRORS_MANAGER->save_as_Lua_str( str + answer_size, err_id );
                 if ( err_id != prev_dev_err_id )
                     {
@@ -231,7 +231,7 @@ long device_communicator::write_devices_states_service(
                 {
                 outdata[ 0 ] = 1;
                 }
-            
+
 #ifdef DEBUG_DEV_CMCTR
             Print( "Operation time = %lu\n", get_delta_millisec( start_time ) );
 #endif // DEBUG_DEV_CMCTR
@@ -380,7 +380,7 @@ void device_communicator::print() const
     {
     char tmp_str[ 200 ];
 
-    sprintf( tmp_str, 
+    sprintf( tmp_str,
         "Device communicator. Dev count = %d.", ( int ) dev.size() );
     print_str( tmp_str, 1 );
 

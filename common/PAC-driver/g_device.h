@@ -161,7 +161,7 @@ class device_communicator
     public:
         device_communicator()
             {
-            buff = new char[ 4000 + 400 ];
+            buff = new char[ tcp_communicator::BUFSIZE + 400 ];
             }
 
         ~device_communicator()

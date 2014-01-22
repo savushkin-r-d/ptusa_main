@@ -9,9 +9,9 @@
 #include "l_tcp_cmctr.h"
 #include "PAC_err.h"
 
-#ifdef DEBUG
+//#ifdef DEBUG
 unsigned int max_buffer_use = 0;
-#endif
+//#endif
 
 //------------------------------------------------------------------------------
 tcp_communicator_linux::tcp_communicator_linux( const char *name_rus,
@@ -431,13 +431,13 @@ int tcp_communicator_linux::do_echo ( int skt )
         return err;
         }
 
-#ifdef DEBUG
+//#ifdef DEBUG
     if ( in_buffer_count > max_buffer_use )
         {
         max_buffer_use = in_buffer_count;
         printf( "Max buffer use %u\n", max_buffer_use );
         }
-#endif // DEBUG
+//#endif // DEBUG
 
     net_id = buf[ 0 ];
     pidx   = buf[ 3 ];
@@ -459,13 +459,13 @@ int tcp_communicator_linux::do_echo ( int skt )
                 else
                     {
                     _AknData( res );
-#ifdef DEBUG
+//#ifdef DEBUG
                     if ( ( unsigned int ) res > max_buffer_use )
                         {
                         max_buffer_use = res;
                         printf( "Max buffer use %u\n", res );
                         }
-#endif
+//#endif
                     }
                 break;
 
@@ -512,10 +512,10 @@ int tcp_communicator_linux::do_echo ( int skt )
 
     if ( err <= 0 )               /* write error */
         {
-//#ifdef DEBUG
+#ifdef DEBUG
         fprintf( stderr, "Socket %d->\"%s\" disconnected on write try : %s\n",
             skt, inet_ntoa( sst[ skt ].sin.sin_addr ), strerror( errno ) );
-//#endif // DEBUG
+#endif // DEBUG
 
         shutdown( skt, 0 );
         close( skt );
