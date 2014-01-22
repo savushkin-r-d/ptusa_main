@@ -1023,7 +1023,7 @@ int cipline_tech_object::EvalCommands()
 
 int cipline_tech_object::GoToStep( int cur, int param )
 	{
-	switch(cur) 
+	switch(cur)
 		{
 		case 0:	return LoadProgram();
 		case 5: return 7;
@@ -1041,7 +1041,7 @@ int cipline_tech_object::GoToStep( int cur, int param )
 			if (rt_par_float[P_PROGRAM] != SPROG_RINSING)
 				{
 				return LoadProgram();
-				} 
+				}
 			else
 				{
 				return 9;
@@ -1052,7 +1052,7 @@ int cipline_tech_object::GoToStep( int cur, int param )
 			if (100 == rt_par_float[P_PODP_CIRC])
 				{
 				return 28;
-				} 
+				}
 			else
 				{
 				return 26;
@@ -1073,7 +1073,7 @@ int cipline_tech_object::GoToStep( int cur, int param )
 			if (100 == rt_par_float[P_PODP_CIRC])
 				{
 				return 48;
-				} 
+				}
 			else
 				{
 				return 46;
@@ -1116,11 +1116,11 @@ int cipline_tech_object::GoToStep( int cur, int param )
 		case 105: return 106;
 		case 106: return 108;
 		case 108:
-			if (param==1) 
+			if (param==1)
 				{
 				return 111;
-				} 
-			else 
+				}
+			else
 				{
 				return 109;
 				}
@@ -1128,12 +1128,12 @@ int cipline_tech_object::GoToStep( int cur, int param )
 		case 111: return LoadProgram();
 		case 115: return 116;
 		case 116: return 118;
-		case 118: 
-			if (param==1) 
+		case 118:
+			if (param==1)
 				{
 				return 121;
-				} 
-			else 
+				}
+			else
 				{
 				return 119;
 				}
@@ -1235,32 +1235,32 @@ int cipline_tech_object::GoToStep( int cur, int param )
 		PIDP->reset();
 		PIDF->reset();
 		ResetErr();
-		if (f==0) 
+		if (f==0)
 			{
 			RT();
 			cnt->reset();
 			rt_par_float[ STP_LV] = 0 ; //stat._lv=0;
-			for (i=0; i<SAV_CNT; i++) 
+			for (i=0; i<SAV_CNT; i++)
 				{
 				SAV[i]->R();
 				}
 			}
 
 		pr_media=WATER;
-		if (step>30 && step<42) 
+		if (step>30 && step<42)
 			{
-			if (((int)rt_par_float[P_PROGRAM]>>PRG_K) & 1) 
+			if (((int)rt_par_float[P_PROGRAM]>>PRG_K) & 1)
 				{
 				pr_media=TANK_W;
 				}
 			}
 
-		switch (step) 
+		switch (step)
 			{
 			case 0: //INIT fill circ tank
 				RHI();
 				StopDev();
-				if (!LM->is_active()) 
+				if (!LM->is_active())
 					{
 					V00->on();
 					}
@@ -1444,24 +1444,24 @@ int cipline_tech_object::DoStep( int step )
 	int res, pr_media;
 
 	res=CheckErr();
-	if (res!=0) 
+	if (res!=0)
 		{
 		blockAlarm = 0;
 		return res;
 		}
 
 	pr_media=WATER;
-	if (step>30 && step<42) 
+	if (step>30 && step<42)
 		{
-		if ((((int)rt_par_float[P_PROGRAM]) >> PRG_K) & 1) 
+		if ((((int)rt_par_float[P_PROGRAM]) >> PRG_K) & 1)
 			{
 			pr_media=TANK_W;
 			}
 		}
 
-	switch (step) 
+	switch (step)
 		{
-		case 0: 
+		case 0:
 			if (LM->is_active()) return 1;
 			return 0;
 		case 5:  return ToObject(TANK_W, KANAL);
@@ -3632,12 +3632,12 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 				SetRet(ON);
 #else
 
-				if ((!LH->is_active() && 0 == ret_circ_flag) || 100 == rt_par_float[P_PODP_CIRC]) 
+				if ((!LH->is_active() && 0 == ret_circ_flag) || 100 == rt_par_float[P_PODP_CIRC])
 					{
 					SetRet(ON);
 					}
 
-				if (LH->is_active() && V10->get_state() && 101 != rt_par_float[P_PODP_CIRC]) 
+				if (LH->is_active() && V10->get_state() && 101 != rt_par_float[P_PODP_CIRC])
 					{
 					SetRet(OFF);
 					ret_circ_flag = 1;
@@ -3654,15 +3654,15 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 					}
 #endif
 
-				if (TR->get_value()>=rt_par_float[P_ZAD_PODOGR]-rt_par_float[P_DELTA_TR] && cnt->get_flow() > rt_par_float[P_R_NO_FLOW]) 
+				if (TR->get_value()>=rt_par_float[P_ZAD_PODOGR]-rt_par_float[P_DELTA_TR] && cnt->get_flow() > rt_par_float[P_R_NO_FLOW])
 					{
 					T[TMR_OP_TIME]->start();
-					} 
-				else 
+					}
+				else
 					{
 					T[TMR_OP_TIME]->pause();
 					}
-				if (T[TMR_OP_TIME]->is_time_up()==1) 
+				if (T[TMR_OP_TIME]->is_time_up()==1)
 					{
 					return 1;
 					}
@@ -3670,7 +3670,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 				if (FL->get_state()==FLIS) SAV[SAV_CONC]->Add(c, cnt->get_quantity());
 				SAV[SAV_CONC]->Add(c, cnt->get_quantity());
 				rt_par_float[P_CONC] = SAV[SAV_CONC]->Q();
-				switch (what) 
+				switch (what)
 					{
 					case KISL:
 						rt_par_float[ STP_QAVK] = SAV[SAV_CONC]->Q();
@@ -3686,7 +3686,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 								}
 							}
 						break;
-					case SHCH: 
+					case SHCH:
 						rt_par_float[ STP_QAVS] = SAV[SAV_CONC]->Q();
 						if (1 == rt_par_float[P_PODP_CIRC])
 							{
@@ -3723,17 +3723,17 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 
 			int cipline_tech_object::OporCirc( int where )
 				{
-				switch (where) 
+				switch (where)
 					{
 					case KANAL:
 						break;
 					case TANK_W:
 						if (LWH->is_active())
-							{	
+							{
 							V07->off();
 							V11->on();
 							}
-						else 
+						else
 							{
 							V07->on();
 							V11->off();
@@ -3775,7 +3775,8 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 						break;
 					}
 				rt_par_float[P_MAX_OPER_TM] = rt_par_float[PTM_SANITIZER_INJECT];
-				T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM]*1000L);
+				T[TMR_OP_TIME]->set_countdown_time( ( u_long )
+                    rt_par_float[P_MAX_OPER_TM]*1000L);
 				T[TMR_OP_TIME]->start();
 				rt_par_float[P_SUM_OP] = 0;
 				if (pump_control) {NPC->on();} else {NP->on();}
@@ -3790,7 +3791,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 
 			int cipline_tech_object::DoseRR( int what )
 				{
-				if (!LH->is_active()) 
+				if (!LH->is_active())
 					{
 					SetRet(ON);
 					}
@@ -3806,7 +3807,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 					}
 				rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
 				rt_par_float[P_SUM_OP] = cnt->get_quantity();
-				if (T[TMR_OP_TIME]->is_time_up()) 
+				if (T[TMR_OP_TIME]->is_time_up())
 					{
 					return 1;
 					};
