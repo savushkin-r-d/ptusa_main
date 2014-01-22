@@ -221,9 +221,19 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
             //                <18                     1000 0000 0000 0000     8000   -32767
             //
         case 461:
-            val *= 0.1f;
-            val = val >= -50 && val <= 200 ? val : -1000;
-            return val;
+            if ( val >= 0xF830 && val <= 0xFFFF ) // -0,1..-200 °C
+                {
+                val -= 0x10000; //65536
+                val *= 0.1;
+                return val;
+                }
+            if ( val >= 0 && val <= 8500 ) // 0..850 °C
+                {
+                val *= 0.1;
+                return val;
+                }
+
+            return -1000;
 
             // Выход модуля 446.
             // Три наименне значащих бита не учитываются.
