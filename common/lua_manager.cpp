@@ -6,10 +6,6 @@
 #include <Windows.h>
 #endif // OS_WIN
 
-#if defined MINIOS7
-#include <alloc.h>
-#endif
-
 #include "lua_manager.h"
 
 #include "prj_mngr.h"
@@ -97,12 +93,12 @@ const int FILES_VERSION[ FILE_CNT ] =
     1, //"sys.tech_objects.plua",
 #if defined RM_PAC
     1, //"sys.rm_PACS.lua",
-#endif // defined RM_PAC 
+#endif // defined RM_PAC
 
     1, //"main.wago.plua",
     1, //"main.devices.plua",
     1, //"main.objects.plua",
-#if defined RM_PAC 
+#if defined RM_PAC
     1, //"main.rm_PACS.lua"
 #endif // defined RM_PAC
     };
@@ -167,6 +163,9 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
 
     //I
     //Проверка наличия и версии скриптов.
+#ifdef DEBUG
+    printf( "Проверка наличия и версии скриптов.\n" );
+#endif
     char err_str[ 100 ] = "";
 
     int res = 0;
@@ -214,6 +213,9 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         }
 
     //-Выполнение системных скриптов sys.lua.
+#ifdef DEBUG
+    printf( "Выполнение системных скриптов sys.lua.\n" );
+#endif
     for ( int i = 0; i < FILE_CNT; i++ )
         {
 
@@ -259,17 +261,26 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         }
 
     //II
-    //Экспортируем в Lua необходимые объекты.
+    //Экспорт в Lua необходимых объектов.
+#ifdef DEBUG
+    printf( "Экспорт в Lua необходимых объектов.\n" );
+#endif
     tolua_PAC_dev_open( L );
 
     //-Загрузка параметров.
+#ifdef DEBUG
+    printf( "Загрузка параметров.\n" );
+#endif
     const int PAC_ID =
         lua_manager::get_instance()->int_no_param_exec_lua_method( "system",
         "get_PAC_id", "main" );
     params_manager::get_instance()->init( PAC_ID );
 
     //III
-    //Выполняем процедуры инициализации.
+    //Выполнение процедуры инициализации.
+#ifdef DEBUG
+    printf( "Выполнение процедуры инициализации.\n" );
+#endif
     res = G_PROJECT_MANAGER->lua_load_configuration();
     if ( res )
         {

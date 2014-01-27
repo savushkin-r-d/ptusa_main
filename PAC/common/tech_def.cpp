@@ -40,8 +40,8 @@ tech_object::tech_object( const char* new_name, u_int number, u_int type,
         state.push_back( 0 );
         }
 
-    strlcpy( name, new_name, C_MAX_NAME_LENGTH );
-    strlcpy( this->name_Lua, name_Lua, C_MAX_NAME_LENGTH );
+    strcpy( name, new_name );
+    strcpy( this->name_Lua, name_Lua );
 
     modes_manager = new mode_manager( modes_count, this );
     modes_manager->set_param( &par_uint );

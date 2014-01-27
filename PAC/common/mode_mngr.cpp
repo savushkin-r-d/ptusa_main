@@ -1014,7 +1014,7 @@ void mode::to_step( u_int new_step, u_long cooperative_time )
         }
 
 #ifdef DEBUG
-    Print( "mode %d. \"%s\" to_step() -> %d, step time %d ms, coop time %d ms.\n",
+    Print( "mode %d. \"%s\" to_step() -> %d, step time %d ms, coop time %lu ms.\n",
         n, name.c_str(), new_step, active_step_time, cooperative_time );
 #endif // DEBUG
     }

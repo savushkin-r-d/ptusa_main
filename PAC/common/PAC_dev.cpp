@@ -193,7 +193,7 @@ void device::set_descr( const char *new_description )
     //Копирование с учетом нуль-символа.
     int len = strlen( new_description ) + 1;
     description = new char[ len ];
-    strlcpy( description, new_description, len );
+    strcpy( description, new_description );
     }
 //-----------------------------------------------------------------------------
 void device::print() const
@@ -348,9 +348,8 @@ par_device( par_cnt ),
     {
     if ( dev_name )
     	{
-        strlcpy( this->name, dev_name, sizeof( this->name ) );
+        strcpy( this->name, dev_name );
     	}
-
     }
 //-----------------------------------------------------------------------------
 device::~device()
@@ -741,11 +740,11 @@ int device_manager::save_device( char *buff )
 #ifdef RM_PAC
 int device_manager::rm_save_device_state( char *buff )
     {
-    int res = 
+    int res =
         sprintf( buff, "assert( loadstring( \"%s=%s or{}\"))()\n t=%s\n",
         G_CMMCTR->get_host_name_eng(), G_CMMCTR->get_host_name_eng(),
         G_CMMCTR->get_host_name_eng() );
-       
+
     for ( u_int i = 0; i < project_devices.size(); i++)
         {
         res +=
@@ -758,16 +757,16 @@ int device_manager::rm_save_device_state( char *buff )
 int device_manager::rm_save_device( char *buff )
     {
     int answer_size = sprintf( buff, "%s=\n",  G_CMMCTR->get_host_name_eng() );
-   
+
     answer_size += sprintf( buff + answer_size, "\t{\n" );
-    
+
     for ( u_int i = 0; i < project_devices.size(); i++)
         {
-        answer_size += project_devices[ i ]->save_device( buff + answer_size, "\t" );        
+        answer_size += project_devices[ i ]->save_device( buff + answer_size, "\t" );
         }
 
     answer_size += sprintf( buff + answer_size, "\t}\n" );
-    
+
     return answer_size;
     }
 

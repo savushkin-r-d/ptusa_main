@@ -79,6 +79,14 @@ build: .build-post
 	    echo "${CND_ARTIFACT_PATH_${CONF}}main >> ${out_dir}main_khutor";\
 	    cp    ${CND_ARTIFACT_PATH_${CONF}} "${out_dir}main_khutor";\
 	fi
+	
+	@if [ ${CONF} = "debug_PFC200" ]; then \
+	    echo ;\
+	    echo copying files...;\
+\
+	    echo "${CND_ARTIFACT_PATH_${CONF}}main >> ${out_dir}main_PFC200";\
+	    cp    ${CND_ARTIFACT_PATH_${CONF}} "${out_dir}main_PFC200";\
+	fi	
 
 	@if [ ${CONF} = "release_wago_750-860_khutor" ] || [ ${CONF} = "release_wago_750-860" ]; then \
 \

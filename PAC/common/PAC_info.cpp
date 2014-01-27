@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "PAC_info.h"
 
 auto_smart_ptr < PAC_info > PAC_info::instance;///< Ёкземпл€р класса.
@@ -15,7 +17,7 @@ PAC_info::PAC_info() :
     last_check_time( get_millisec() ),
     reset_type( 1 ) //+ IsResetByWatchDogTimer()
     {
-    strlcpy( up_time_str, "0 дн. 0:0:0", sizeof( up_time_str ) );
+    strcpy( up_time_str, "0 дн. 0:0:0" );
     }
 //-----------------------------------------------------------------------------
 PAC_info::~PAC_info()

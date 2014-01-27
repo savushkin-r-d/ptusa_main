@@ -15,7 +15,7 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-#if !defined WIN_OS && !defined LINUX_OS && !defined MINIOS7
+#if !defined WIN_OS && !defined LINUX_OS
 #error You must define OS!
 #endif
 
@@ -24,25 +24,13 @@
 
 #include "s_types.h"
 //-----------------------------------------------------------------------------
-#if defined PAC_PC
-#define strlcpy strncpy
-#endif
-
 /// @brief Печать в консоль.
-#ifndef MINIOS7
-#define Print( ... )
-#endif // MINIOS7
-
 #ifdef WIN_OS
 #include "w_console.h"
 #endif // WIN_OS
 
 #ifdef LINUX_OS
 #include "l_console.h"
-#endif // LINUX_OS
-
-#ifdef MINIOS7
-#include "mos7_console.h"
 #endif // LINUX_OS
 //-----------------------------------------------------------------------------
 /// @brief Проверка нажатия клавиши.

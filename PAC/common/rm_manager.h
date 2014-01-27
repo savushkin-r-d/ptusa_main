@@ -15,7 +15,7 @@
 #ifndef RM_MANAGER_H
 #define RM_MANAGER_H
 
-#if !defined WIN_OS && !defined LINUX_OS && !defined MINIOS7
+#if !defined WIN_OS && !defined LINUX_OS
 #error You must define OS!
 #endif
 

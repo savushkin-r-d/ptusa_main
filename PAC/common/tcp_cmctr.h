@@ -68,9 +68,6 @@ class tcp_communicator
 #ifdef WIN_OS
             MAX_SOCKETS = 32,            ///< Максимальное количество сокетов.
 #endif // WIN_OS
-#ifdef MINIOS7
-            MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
-#endif // MINIOS7
             QLEN        = MAX_SOCKETS - 1, ///< Максимальное количество соединений.
 
             TC_MAX_HOST_NAME      = 20,

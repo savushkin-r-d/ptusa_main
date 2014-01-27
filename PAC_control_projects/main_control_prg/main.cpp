@@ -24,11 +24,6 @@
 
 int main( int argc, char *argv[] )
     {
-#ifdef MINIOS7
-    EnableHighRam();
-    InitLib();
-#endif
-
 #ifdef WIN_OS
     setlocale( LC_ALL, "" );
 #endif
@@ -84,7 +79,7 @@ int main( int argc, char *argv[] )
 #ifndef DEBUG_NO_WAGO_MODULES
         G_WAGO_MANAGER()->read_inputs();
         sleep_ms( 1 );
-#endif // DEBUG_NO_WAGO_MODULES       
+#endif // DEBUG_NO_WAGO_MODULES
 
         G_TECH_OBJECT_MNGR()->evaluate();
 
@@ -106,7 +101,7 @@ int main( int argc, char *argv[] )
         //-Информация о времени выполнения цикла программы.!->
         all_time += get_delta_millisec( st_time );
 #if defined LINUX_OS
-#ifdef PAC_PC
+#if defined PAC_PC || defined PAC_WAGO_PFC200
         const u_int MAX_ITERATION = 1000;
 #endif // PAC_PC
 #ifdef PAC_WAGO_750_860

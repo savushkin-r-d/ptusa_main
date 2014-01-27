@@ -1,7 +1,7 @@
-#if !defined WIN_OS && !( defined LINUX_OS && defined PAC_PC ) && \
+#if !defined WIN_OS && \
+    !( defined LINUX_OS && defined PAC_PC ) && \
     !( defined LINUX_OS && defined PAC_WAGO_750_860 ) && \
-    !( defined MINIOS7 && defined UPAC_7186E ) && \
-    !( defined MINIOS7 && defined UPAC_5000 )
+    !( defined LINUX_OS && defined PAC_WAGO_PFC200 )
 #error You must define OS!
 #endif
 
@@ -15,15 +15,16 @@
 #endif
 
 #if defined LINUX_OS && defined PAC_PC
-#include "wago_PC.h"
+#include "l_wago.h"
 #endif
 
 #if defined LINUX_OS && defined PAC_WAGO_750_860
 #include "wago_w750.h"
 #endif
 
-#if defined MINIOS7 && defined UPAC_7186E
-#include "mos7_wago.h"
+#if defined LINUX_OS && defined PAC_WAGO_PFC200
+#include "l_wago.h"
+#include "wago_PFC200.h"
 #endif
 
 auto_smart_ptr < wago_manager > wago_manager::instance;
@@ -539,11 +540,15 @@ wago_manager* wago_manager::get_instance()
 #endif // WIN_OS
 
 #if defined LINUX_OS && defined PAC_PC
-        instance = new wago_manager_PC();
+        instance = new wago_manager_linux();
 #endif // defined LINUX_OS && defined PAC_PC
 
 #if defined LINUX_OS && defined PAC_WAGO_750_860
         instance = new wago_manager_w750();
+#endif // defined LINUX_OS && defined PAC_WAGO_750_860
+
+#if defined LINUX_OS && defined PAC_WAGO_PFC200
+        instance = new wago_manager_PFC200();
 #endif // defined LINUX_OS && defined PAC_WAGO_750_860
         }
 
@@ -766,7 +771,7 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
     {
     if ( str_ip_address )
         {
-        strlcpy( ip_address, str_ip_address, sizeof( ip_address ) );
+        strcpy( ip_address, str_ip_address );
         }
     else
         {
@@ -793,7 +798,7 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
 
     if ( name )
         {
-        strlcpy( this->name, name, sizeof( this->name ) );
+        strcpy( this->name, name );
         }
     else
         {

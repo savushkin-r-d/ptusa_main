@@ -147,10 +147,17 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
     unsigned int startingAddress;
     unsigned char numberofBytes;
     unsigned int i;
+
+#ifdef LINUX_OS
+    __attribute__((__unused__))
+#endif
     unsigned int objnumber;
+#ifdef LINUX_OS
+    __attribute__((__unused__))
+#endif
     unsigned int coilgroup;
 
-    switch (data[1]) //Modbus command
+    switch ( data[1] ) //Modbus command
         {
         case 0x01: //Read Coils
             startingAddress = data[2] * 256 + data[3];
@@ -439,7 +446,8 @@ int ModbusServ::PackTime( unsigned long timevar, unsigned char* Buf, int units /
     seconds = temptime % 60;
     minites = (temptime / 60) % 60;
     hours = (temptime / 3600) % 100;
-    sprintf((char*)Buf,"%0.1hd%0.1hd%0.1hd::%0.1hd%0.1hd%0.1hd",hours % 10,hours / 10,minites / 10,minites % 10,seconds % 10,seconds / 10);
+    sprintf((char*)Buf,"%.1hd%.1hd%.1hd::%.1hd%.1hd%.1hd",
+        hours % 10, hours / 10, minites / 10, minites % 10, seconds % 10, seconds / 10);
     return 3;
     }
 

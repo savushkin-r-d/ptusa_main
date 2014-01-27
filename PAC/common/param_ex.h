@@ -270,8 +270,7 @@ template < class type, bool is_float > class parameters
             {
             stub = 0;
             this->name[ 0 ] = 0;
-
-            strlcpy( this->name, name, sizeof( this->name ) );
+            strcpy( this->name, name );
 
 #ifdef DEBUG_IDE
             if ( 0 == count )
@@ -307,11 +306,13 @@ template < class type, bool is_float > class parameters
                 Print( "[%d]=", i );
                 if ( is_float )
                 	{
-                    Print( "%.2f,", values[ i - 1 ] );
+                        const char *format = "%.2f,";
+                        Print( format, values[ i - 1 ] );
                 	}
                 else
                     {
-                    Print( "%d,", values[ i - 1 ] );
+                    const char *format = "%d,";
+                    Print( format, values[ i - 1 ] );
                     }
                 }
             Print( "\n" );

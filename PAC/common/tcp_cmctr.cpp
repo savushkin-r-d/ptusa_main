@@ -1,4 +1,4 @@
-#if !defined WIN_OS && !defined LINUX_OS && !defined MINIOS7
+#if !defined WIN_OS && !defined LINUX_OS
 #error You must define OS!
 #endif
 
@@ -10,10 +10,6 @@
 
 #ifdef LINUX_OS
 #include "l_tcp_cmctr.h"
-#endif
-
-#ifdef MINIOS7
-#include "mos7_tcp_cmctr.h"
 #endif
 
 auto_smart_ptr < tcp_communicator > tcp_communicator::instance = 0;
@@ -100,10 +96,6 @@ void tcp_communicator::init_instance( const char *name_rus, const char *name_eng
 
 #ifdef LINUX_OS
     instance = new tcp_communicator_linux( name_rus, name_eng );
-#endif
-
-#ifdef MINIOS7
-    instance = new tcp_communicator_mos7( name_rus );
 #endif
     }
 //------------------------------------------------------------------------------
