@@ -314,7 +314,7 @@ int wago_manager_linux::read_inputs()
         if ( 0 == nodes_count ) return 0;
 
         for ( u_int i = 0; i < nodes_count; i++ )
-            {  
+            {
 
             if ( nodes[ i ]->type == wago_node::T_750_341 || // Ethernet Wago nodes.
                 nodes[ i ]->type == wago_node::T_750_841 )

@@ -548,7 +548,7 @@ wago_manager* wago_manager::get_instance()
 #endif // defined LINUX_OS && defined PAC_WAGO_750_860
 
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
-        instance = new wago_manager_PFC200();
+        instance = new wago_manager_linux();
 #endif // defined LINUX_OS && defined PAC_WAGO_750_860
         }
 

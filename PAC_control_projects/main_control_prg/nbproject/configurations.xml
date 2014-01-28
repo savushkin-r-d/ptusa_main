@@ -85,6 +85,7 @@
         </logicalFolder>
         <logicalFolder name="f3" displayName="PAC_PFC200" projectFiles="true">
           <itemPath>../../PAC/linux/PAC_PFC200/led_PFC200.h</itemPath>
+          <itemPath>../../PAC/linux/PAC_PFC200/mem_PFC200.h</itemPath>
           <itemPath>../../PAC/linux/PAC_PFC200/wago_PFC200.h</itemPath>
         </logicalFolder>
         <logicalFolder name="f1" displayName="PAC_wago_750-860" projectFiles="true">
@@ -194,6 +195,7 @@
         </logicalFolder>
         <logicalFolder name="f3" displayName="PAC_PFC200" projectFiles="true">
           <itemPath>../../PAC/linux/PAC_PFC200/led_PFC200.cpp</itemPath>
+          <itemPath>../../PAC/linux/PAC_PFC200/mem_PFC200.cpp</itemPath>
           <itemPath>../../PAC/linux/PAC_PFC200/sys_PFC200.cpp</itemPath>
           <itemPath>../../PAC/linux/PAC_PFC200/wago_PFC200.cpp</itemPath>
         </logicalFolder>
@@ -377,6 +379,16 @@
             flavor2="0">
       </item>
       <item path="../../PAC/linux/PAC_PFC200/led_PFC200.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -767,6 +779,16 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../PAC/linux/PAC_PFC200/sys_PFC200.cpp"
             ex="false"
             tool="1"
@@ -1151,6 +1173,16 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../PAC/linux/PAC_PFC200/sys_PFC200.cpp"
             ex="false"
             tool="1"
@@ -1530,6 +1562,16 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../PAC/linux/PAC_PFC200/sys_PFC200.cpp"
             ex="false"
             tool="1"
@@ -1902,6 +1944,16 @@
             flavor2="0">
       </item>
       <item path="../../PAC/linux/PAC_PFC200/led_PFC200.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -2294,6 +2346,16 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../PAC/linux/PAC_PFC200/sys_PFC200.cpp"
             ex="false"
             tool="1"
@@ -2676,6 +2738,16 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../../PAC/linux/PAC_PFC200/sys_PFC200.cpp"
             ex="false"
             tool="1"
@@ -2928,6 +3000,7 @@
             <pElem>../../common/lua</pElem>
             <pElem>../../common/tolua++</pElem>
             <pElem>../../common/QuickLZ</pElem>
+            <pElem>../../../pfc/ipc-dist/platform-wago-pfc200/sysroot-target/usr/include</pElem>
           </incDir>
           <commandLine>-march=armv7-a -mtune=cortex-a8 -mfpu=neon -ftree-vectorize -mfloat-abi=softfp -isystem /home/id/pfc/ipc-dist/platform-wago-pfc200/sysroot-target/include -isystem /home/id/pfc/ipc-dist/platform-wago-pfc200/sysroot-target/usr/include</commandLine>
           <preprocessorList>
@@ -2942,7 +3015,7 @@
         </ccTool>
         <linkerTool>
           <output>/home/id/id_share/out/main</output>
-          <commandLine>-lrt -L/home/id/pfc/ipc-dist/platform-wago-pfc200/sysroot-target/lib -L/home/id/pfc/ipc-dist/platform-wago-pfc200/sysroot-target/usr/lib -Wl,-rpath-link -Wl,/home/id/pfc/ipc-dist/platform-wago-pfc200/sysroot-target/lib -Wl,-rpath-link -Wl,/home/id/pfc/ipc-dist/platform-wago-pfc200/sysroot-target/usr/lib -ldal -lglib-2.0 -ldbus-glib-1 -lffi -llibloader -lgthread-2.0 -ldl -ldbuskbuscommon</commandLine>
+          <commandLine>-lrt -L/home/id/pfc/ipc-dist/platform-wago-pfc200/sysroot-target/lib -L/home/id/pfc/ipc-dist/platform-wago-pfc200/sysroot-target/usr/lib -Wl,-rpath-link -Wl,/home/id/pfc/ipc-dist/platform-wago-pfc200/sysroot-target/lib -Wl,-rpath-link -Wl,/home/id/pfc/ipc-dist/platform-wago-pfc200/sysroot-target/usr/lib -ldal -lglib-2.0 -ldbus-glib-1 -lffi -llibloader -lgthread-2.0 -ldl -ldbuskbuscommon -lnvram -luio</commandLine>
         </linkerTool>
       </compileType>
       <item path="../../../PTUSA_projects/system scripts/sys.devices.lua"
@@ -3052,6 +3125,16 @@
             flavor2="0">
       </item>
       <item path="../../PAC/linux/PAC_PFC200/led_PFC200.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -3401,6 +3484,16 @@
             flavor2="0">
       </item>
       <item path="../../PAC/linux/PAC_PFC200/led_PFC200.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.h"
             ex="false"
             tool="3"
             flavor2="0">
