@@ -225,12 +225,12 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
             if ( val >= 0xF830 && val <= 0xFFFF ) // -0,1..-200 °C
                 {
                 val -= 0x10000; //65536
-                val *= 0.1;
+                val *= 0.1f;
                 return val;
                 }
             if ( val >= 0 && val <= 8500 ) // 0..850 °C
                 {
-                val *= 0.1;
+                val *= 0.1f;
                 return val;
                 }
 
