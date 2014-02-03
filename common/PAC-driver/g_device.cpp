@@ -192,8 +192,10 @@ long device_communicator::write_devices_states_service(
                 errors_id++;
                 }
 
+            static u_long start_time = get_millisec();
             answer_size += err_size;
-            if ( err_size == 0 ) //Нет критических ошибок.
+            if ( err_size == 0 &&                   //Нет критических ошибок.
+                get_delta_millisec( start_time ) > 5000 )
                 {
                 answer_size +=
                     G_DEV_ERRORS_MANAGER->save_as_Lua_str( str + answer_size, err_id );
