@@ -23,7 +23,6 @@
 #endif
 
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
-#include "l_wago.h"
 #include "wago_PFC200.h"
 #endif
 
@@ -228,7 +227,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
                 val *= 0.1f;
                 return val;
                 }
-            if ( val >= 0 && val <= 8500 ) // 0..850 °C
+            if ( val >= 0 && val < 8500 ) // 0..850 °C
                 {
                 val *= 0.1f;
                 return val;
@@ -548,7 +547,7 @@ wago_manager* wago_manager::get_instance()
 #endif // defined LINUX_OS && defined PAC_WAGO_750_860
 
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
-        instance = new wago_manager_linux();
+        instance = new wago_manager_PFC200();
 #endif // defined LINUX_OS && defined PAC_WAGO_750_860
         }
 

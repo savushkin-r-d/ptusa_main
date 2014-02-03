@@ -40,6 +40,8 @@ int eeprom_PFC200::read( void *buff, u_int count, u_int start_pos )
 
     memcpy( buff, NV_ram_data + get_available_start_pos() + start_pos,
         count );
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 int eeprom_PFC200::write( void *buff, u_int count, u_int start_pos )
@@ -48,6 +50,8 @@ int eeprom_PFC200::write( void *buff, u_int count, u_int start_pos )
 
     memcpy( NV_ram_data + get_available_start_pos() + start_pos,
         buff, count );
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

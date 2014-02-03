@@ -24,8 +24,9 @@ int wago_manager_w750::read_inputs()
 
     for ( u_int i = 0; i < nodes_count; i++ )
         {
-        if ( nodes[ i ]->type == wago_node::T_750_860 ||
-            nodes[ i ]->type == wago_node::T_750_863 ) // KBus
+        wago_node *nd = nodes[ i ];
+        if ( nd->type == wago_node::T_750_860 ||
+            nd->type == wago_node::T_750_863 ) // KBus
             {
             static u_long start_time = get_millisec();
             if ( get_delta_millisec( start_time ) > 200 )
@@ -33,20 +34,20 @@ int wago_manager_w750::read_inputs()
                 start_time = get_millisec();
 
                 // DI
-                int start_pos = nodes[ i ]->AI_size;//KbusGetBinaryInputOffset();
+                int start_pos = nd->AI_size;//KbusGetBinaryInputOffset();
 
 #ifdef DEBUG_KBUS
                 Print( "read_inputs() start_pos = %d\n", start_pos );
 #endif // DEBUG_KBUS
 
-                for ( u_int j = 0; j < nodes[ i ]->DI_cnt; j++ )
+                for ( u_int j = 0; j < nd->DI_cnt; j++ )
                     {
                     char tmp =  1 << ( j % 8 );
 
-                    nodes[ i ]->DI[ j ] = ( ( tmp &
+                    nd->DI[ j ] = ( ( tmp &
                         pstPabIN->uc.Pab[ start_pos + j / 8 ] ) > 0 );
 #ifdef DEBUG_KBUS
-                    printf( "%2d -> %d, ", j, nodes[ i ]->DI[ j ] );
+                    printf( "%2d -> %d, ", j, nd->DI[ j ] );
                     if ( ( j + 1 ) % 8 == 0 )
                         {
                         Print( "\n" );
@@ -61,26 +62,24 @@ int wago_manager_w750::read_inputs()
                 for ( u_int j = 0; j < 250; j++ )
                     {
                     char tmp =  1 << ( j % 8 );
+                    int v = ( ( tmp & pstPabIN->uc.Pab[ j / 8 ] ) > 0 );
 
-                    nodes[ i ]->DI[ j ] = ( ( tmp & pstPabIN->uc.Pab[ j / 8 ] ) > 0 );
-
-                    printf( "%2d -> %d, ", j, nodes[ i ]->DI[ j ] );
+                    printf( "%2d -> %d, ", j, v );
                     if ( ( j + 1 ) % 8 == 0 )
                         {
-                        Print( "\n" );
+                        printf( "\n" );
                         }
                     }
-
                 printf( "\n" );
 #endif // DEBUG_KBUS
 
                 // AI
-                for ( u_int j = 0; j < nodes[ i ]->AI_cnt; j++ )
+                for ( u_int j = 0; j < nd->AI_cnt; j++ )
                     {
                     u_int val = 0;
-                    u_int offset = nodes[ i ]->AI_offsets[ j ];
+                    u_int offset = nd->AI_offsets[ j ];
 
-                    switch ( nodes[ i ]->AI_types[ j ] )
+                    switch ( nd->AI_types[ j ] )
                         {
                     case 466:
                     case 461:
@@ -93,16 +92,16 @@ int wago_manager_w750::read_inputs()
                             256 * pstPabIN->uc.Pab[ offset + 3 ];
                         break;
                         }
-                    nodes[ i ]->AI[ j ] = val;
+                    nd->AI[ j ] = val;
 #ifdef DEBUG_KBUS
-                    printf( "%d -> %u, ", j, nodes[ i ]->AI[ j ] );
+                    printf( "%d -> %u, ", j, nd->AI[ j ] );
 #endif // DEBUG_KBUS
                     }
 #ifdef DEBUG_KBUS
                 printf( "\n" );
 #endif // DEBUG_KBUS
                 }
-            }// if ( nodes[ i ]->type == wago_node::T_750_860 ) // KBus 
+            }// if ( nd->type == wago_node::T_750_860 ) // KBus
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
     return wago_manager_linux::read_inputs();
@@ -114,8 +113,9 @@ int wago_manager_w750::write_outputs()
 
     for ( u_int i = 0; i < nodes_count; i++ )
         {
-        if ( nodes[ i ]->type == wago_node::T_750_860 ||
-            nodes[ i ]->type == wago_node::T_750_863 ) // KBus
+        wago_node *nd = nodes[ i ];
+        if ( nd->type == wago_node::T_750_860 ||
+            nd->type == wago_node::T_750_863 ) // KBus
             {
             static u_long start_time = get_millisec();
             if ( get_delta_millisec( start_time ) > 200 )
@@ -123,15 +123,15 @@ int wago_manager_w750::write_outputs()
                 start_time = get_millisec();
 
                 // DO
-                int start_pos = nodes[ i ]->AO_size;//KbusGetBinaryOutputOffset();
+                int start_pos = nd->AO_size;//KbusGetBinaryOutputOffset();
 
 #ifdef DEBUG_KBUS
                 Print( "write_outputs() start_pos = %d\n", start_pos );
 #endif // DEBUG_KBUS
-                for ( u_int j = 0; j < nodes[ i ]->DO_cnt; j++ )
+                for ( u_int j = 0; j < nd->DO_cnt; j++ )
                     {
                     char tmp =  1 << ( j % 8 );
-                    if ( nodes[ i ]->DO_[ j ] )
+                    if ( nd->DO_[ j ] )
                         {
                         pstPabOUT->uc.Pab[ start_pos + j / 8 ] |= tmp;
                         }
@@ -139,9 +139,9 @@ int wago_manager_w750::write_outputs()
                         {
                         pstPabOUT->uc.Pab[ start_pos + j / 8 ] &= ~tmp;
                         }
-                    nodes[ i ]->DO[ j ] = nodes[ i ]->DO_[ j ];
+                    nd->DO[ j ] = nd->DO_[ j ];
 #ifdef DEBUG_KBUS
-                    Print( "%d -> %d, ", j, nodes[ i ]->DO_[ j ] );
+                    Print( "%d -> %d, ", j, nd->DO_[ j ] );
 #endif // DEBUG_KBUS
                     }
 #ifdef DEBUG_KBUS
@@ -149,17 +149,17 @@ int wago_manager_w750::write_outputs()
 #endif // DEBUG_KBUS
 
                 // AO
-                for ( u_int j = 0; j < nodes[ i ]->AO_cnt; j++ )
+                for ( u_int j = 0; j < nd->AO_cnt; j++ )
                     {
-                    int val = nodes[ i ]->AO_[ j ];
-                    u_int offset = nodes[ i ]->AO_offsets[ j ];
+                    int val = nd->AO_[ j ];
+                    u_int offset = nd->AO_offsets[ j ];
 
                     pstPabOUT->uc.Pab[ offset ] = val & 0xFF;
                     pstPabOUT->uc.Pab[ offset + 1 ] = val >> 8;
 
-                    nodes[ i ]->AO[ j ] = nodes[ i ]->AO_[ j ];
-#ifdef DEBUG_KBUSl
-                    printf( "%d -> %u, ", j, nodes[ i ]->AO_[ j ] );
+                    nd->AO[ j ] = nodes[ i ]->AO_[ j ];
+#ifdef DEBUG_KBUS
+                    printf( "%d -> %u, ", j, nd->AO_[ j ] );
 #endif // DEBUG_KBUS
                     }
 
@@ -169,11 +169,10 @@ int wago_manager_w750::write_outputs()
 
                 KbusUpdate();
                 }
-            }// if ( nodes[ i ]->type == wago_node::T_750_860 ) // KBus
-    
+            }// if ( nd->type == wago_node::T_750_860... ) // KBus
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
-    return wago_manager_linux::write_outputs();    
+    return wago_manager_linux::write_outputs();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
