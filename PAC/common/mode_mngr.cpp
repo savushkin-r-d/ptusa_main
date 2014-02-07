@@ -436,10 +436,11 @@ void open_seat_action::init()
     next_phase        = P_OPEN_UPPER;
     active_group_n    = 0;
 
+    saved_params_u_int_4 par = *PAC_info::get_instance()->par;
+
     if ( is_mode )
     	{
-        wait_time = ( *( PAC_info::get_instance()->par ) )
-            [ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;
+        wait_time = par[ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;
 
         wait_time /=
             wash_upper_seat_devices.size() + wash_lower_seat_devices.size();
@@ -449,8 +450,7 @@ void open_seat_action::init()
         wait_time = owner->get_step_time() / 2;
         }
 
-    wash_time = ( *( PAC_info::get_instance()->par ) )
-        [ PAC_info::P_MIX_FLIP_TIME ];
+    wash_time = par[ PAC_info::P_MIX_FLIP_TIME ];
 
     active_group_n = 0;
     }
@@ -550,6 +550,8 @@ void open_seat_action::final()
             break;
 
         case P_OPEN_UPPER:
+            if ( wash_upper_seat_devices.empty() ) break;
+
             for ( u_int j = 0; j < wash_upper_seat_devices[ active_group_n ].size(); j++ )
                 {
                 wash_upper_seat_devices[ active_group_n ][ j ]->off();
@@ -557,6 +559,8 @@ void open_seat_action::final()
             break;
 
         case P_OPEN_LOWER:
+            if ( wash_lower_seat_devices.empty() ) break;
+
             for ( u_int j = 0; j < wash_lower_seat_devices[ active_group_n ].size(); j++ )
                 {
                 wash_lower_seat_devices[ active_group_n ][ j ]->off();
