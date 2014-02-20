@@ -1,0 +1,19 @@
+#
+# /etc/inittab
+#
+
+# devkit-ti-am3517-pac200
+
+console::sysinit:/etc/init.d/rcS
+#console::respawn:/sbin/getty -L 115200 ttyO0 xterm
+
+console::respawn:/sbin/getty -L 115200 ttyO2 xterm
+
+#::ctrlaltdel:/sbin/reboot
+#::shutdown:/bin/umount -a -r
+::shutdown:/etc/init.d/shutdown
+
+
+#main programm
+::once:/home/codesys/main/start.sh
+
