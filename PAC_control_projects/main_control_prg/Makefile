@@ -80,7 +80,7 @@ build: .build-post
 	    cp    ${CND_ARTIFACT_PATH_${CONF}} "${out_dir}main_khutor";\
 	fi
 	
-	@if [ ${CONF} = "debug_PFC200" ]; then \
+	@if [ ${CONF} = "debug_PFC200_khutor" ]; then \
 	    echo ;\
 	    echo copying files...;\
 \

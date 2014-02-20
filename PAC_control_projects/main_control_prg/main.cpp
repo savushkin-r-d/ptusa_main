@@ -24,7 +24,7 @@
 
 int main( int argc, char *argv[] )
     {
-#ifdef WIN_OS
+#if defined WIN_OS
     setlocale( LC_ALL, "" );
 #endif
 
@@ -35,6 +35,9 @@ int main( int argc, char *argv[] )
         }
 
     time_t t = time( 0 );
+#ifdef PAC_WAGO_PFC200
+    t += 3 * 60 * 60; // UTC+3
+#endif    
     fprintf( stderr, "\nProgram started - %s\n", asctime( localtime( &t ) ) );
 
     G_PROJECT_MANAGER->proc_main_params( argc, argv );

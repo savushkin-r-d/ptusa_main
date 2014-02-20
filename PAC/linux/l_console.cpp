@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 time_t t_;
+struct tm *timeInfo_;
 
 #include "l_console.h"
 //-----------------------------------------------------------------------------

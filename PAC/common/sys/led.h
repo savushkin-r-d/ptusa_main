@@ -43,12 +43,6 @@ class led
 
         /// @brief Выключение диодного индикатора.
         virtual void off( LEDS_NAMES led ) = 0;
-
-        /// @brief Включение мигания диодного индикатора.
-        ///
-        /// @param led       - диод.
-        /// @param led_color - цвет.
-        virtual void blink( LEDS_NAMES led, COLOUR led_color ) = 0;
     };
 //-----------------------------------------------------------------------------
 led* get_led();

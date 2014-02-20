@@ -65,11 +65,8 @@ void led_W750::on( LEDS_NAMES led, COLOUR led_color )
                     if ( red_status_fd > 0 )
                         {
                         write( red_status_fd, cmd, strlen( cmd ) );
-                        }
-                    break;                    if ( red_status_fd > 0 )
-                        {
-                        write( red_status_fd, cmd, strlen( cmd ) );
-                        }
+                        }                    
+                    break;
 
                 case C_RED:
                     if ( red_status_fd > 0 )

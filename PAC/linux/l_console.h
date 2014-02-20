@@ -20,11 +20,22 @@
 #ifdef DEBUG
 #undef Print
 #define Print    printf
+#else
+#define Print    
 #endif // DEBUG
 //-----------------------------------------------------------------------------
 extern time_t t_;
-#define print_time t_ = time( 0 ); printf( "%02d.%02d.%02d %02d:%02d:%02d ",\
-     localtime( &t_ )->tm_mday, localtime( &t_ )->tm_mon + 1, localtime( &t_ )->tm_year,\
-     localtime( &t_ )->tm_hour, localtime( &t_ )->tm_min, localtime( &t_ )->tm_sec ); printf
+extern struct tm *timeInfo_;
+#ifdef PAC_WAGO_PFC200
+#define print_time t_ = time( 0 ) + 3 * 60 * 60; timeInfo_ = gmtime( &t_ );\
+     printf( "%02d.%02d.%02d %02d:%02d:%02d ",\
+     timeInfo_->tm_mday, timeInfo_->tm_mon + 1, timeInfo_->tm_year,\
+     timeInfo_->tm_hour, timeInfo_->tm_min, timeInfo_->tm_sec ); printf 
+#else
+#define print_time t_ = time( 0 ); timeInfo_ = localtime( &t_ );\
+     printf( "%02d.%02d.%02d %02d:%02d:%02d ",\
+     timeInfo_->tm_mday, timeInfo_->tm_mon + 1, timeInfo_->tm_year,\
+     timeInfo_->tm_hour, timeInfo_->tm_min, timeInfo_->tm_sec ); printf
+#endif         
 //-----------------------------------------------------------------------------
 #endif // L_CONSOLE_H

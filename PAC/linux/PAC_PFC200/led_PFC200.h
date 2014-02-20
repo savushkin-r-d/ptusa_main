@@ -22,26 +22,13 @@ class led_PFC200 : public led
     {
 public:
 
-    led_PFC200( )
-        {
-        }
+    led_PFC200();
 
-    virtual ~led_PFC200( )
-        {
-        }
+    virtual ~led_PFC200();
 
-    void on( LEDS_NAMES led, COLOUR led_color )
-        {
-        }
+    void on( LEDS_NAMES led, COLOUR led_color );
 
-    void off( LEDS_NAMES led )
-        {
-        }
-
-    void blink( LEDS_NAMES led, COLOUR led_color )
-        {
-        }
-
+    void off( LEDS_NAMES led );
     };
 //-----------------------------------------------------------------------------
 #endif // LED_PFC200_H
