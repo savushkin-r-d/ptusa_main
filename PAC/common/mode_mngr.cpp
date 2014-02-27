@@ -655,8 +655,8 @@ bool open_seat_action::is_empty() const
         return true;
         }
 
-    if ( wash_upper_seat_devices[ 0 ].empty() &&
-        wash_lower_seat_devices[ 0 ].empty() )
+    if ( wash_upper_seat_devices.size() > 0 && wash_upper_seat_devices[ 0 ].empty() &&
+        wash_lower_seat_devices.size() > 0 && wash_lower_seat_devices[ 0 ].empty() )
         {
         return true;
         }
