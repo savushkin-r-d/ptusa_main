@@ -593,6 +593,11 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                     new_wago_device = ( valve_mix_proof* ) new_device;
                     break;
 
+                case device::DST_V_AS_MIXPROOF:
+                    new_device      = new valve_AS_mix_proof( dev_name );
+                    new_wago_device = ( valve_AS_mix_proof* ) new_device;
+                    break;
+
                 default:
 #ifdef DEBUG
                     Print( "Unknown V device subtype %d!\n", dev_sub_type );
@@ -2273,64 +2278,8 @@ device* DEVICE( int s_number )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-valve_AS_mix_proof::valve_AS_mix_proof( const char *dev_name ):
-    device( dev_name,  DT_V, DST_V_AS_MIXPROOF, 0 )
-    {
-    }
-//-----------------------------------------------------------------------------
-void valve_AS_mix_proof::open_upper_seat()
-    {
-    direct_set_state( ST_UPPER_SEAT );
-    }
-//-----------------------------------------------------------------------------
-void valve_AS_mix_proof::open_lower_seat()
-    {
-    direct_set_state( ST_LOWER_SEAT );
-    }
-//-----------------------------------------------------------------------------
-int valve_AS_mix_proof::get_state()
-    {
-#ifdef DEBUG_NO_WAGO_MODULES
-    return state;
-#else
-    return 0;
-#endif // DEBUG_NO_WAGO_MODULES
-    }
-//-----------------------------------------------------------------------------
-void valve_AS_mix_proof::direct_on()
-    {
-#ifdef DEBUG_NO_WAGO_MODULES
-    state = ST_OPEN;
-#else
-#endif // DEBUG_NO_WAGO_MODULES
-    }
-//-----------------------------------------------------------------------------
-void valve_AS_mix_proof::direct_off()
-    {
-#ifdef DEBUG_NO_WAGO_MODULES
-    state = ST_CLOSE;
-#else
-#endif // DEBUG_NO_WAGO_MODULES
-    }
-//-----------------------------------------------------------------------------
-void valve_AS_mix_proof::direct_set_state( int new_state )
-    {
-#ifdef DEBUG_NO_WAGO_MODULES
-    state = ( STATES ) new_state;
-#else
-#endif // DEBUG_NO_WAGO_MODULES
-    }
-//-----------------------------------------------------------------------------
-float valve_AS_mix_proof::get_value()
-    {
-#ifdef DEBUG_NO_WAGO_MODULES
-    return ( float ) state;
-#else
-    return 0;
-#endif // DEBUG_NO_WAGO_MODULES
-    }
-//-----------------------------------------------------------------------------
-void valve_AS_mix_proof::direct_set_value( float new_value )
+valve_AS_mix_proof::valve_AS_mix_proof( const char *dev_name
+    ): valve( true, true, dev_name, DT_V, DST_V_AS_MIXPROOF )
     {
     }
 //-----------------------------------------------------------------------------

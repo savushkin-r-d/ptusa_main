@@ -1153,30 +1153,28 @@ class valve_mix_proof : public i_mix_proof,  public valve
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан AS-mixproof.
-class valve_AS_mix_proof : public device, public i_mix_proof
+class valve_AS_mix_proof : public i_mix_proof,  public valve
     {
     public:
         valve_AS_mix_proof( const char *dev_name );
 
-        void open_upper_seat();
-        void open_lower_seat();
+        void open_upper_seat()
+            {
+            direct_set_state( i_mix_proof::ST_UPPER_SEAT );
+            }
 
-        float get_value();
+        void open_lower_seat()
+            {
+            direct_set_state( i_mix_proof::ST_LOWER_SEAT );
+            }
 
-        void direct_set_state( int new_state );
-
-        void direct_set_value( float new_value );
-
-        void direct_off();
-
-        void direct_on();
-
-        int get_state();
-
-    private:
+        VALVE_STATE get_valve_state()
+            {
 #ifdef DEBUG_NO_WAGO_MODULES
-        STATES state;  ///< Состояние устройства.
+            return ( VALVE_STATE ) digital_wago_device::get_state();
+#else
 #endif // DEBUG_NO_WAGO_MODULES
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым входом.
