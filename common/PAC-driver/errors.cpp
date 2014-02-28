@@ -235,21 +235,27 @@ int tech_dev_error::set_cmd( int cmd, int object_alarm_number )
                 tech_dev->get_errors().begin() + i );
 
 #ifdef DEBUG
-            Print( "Object %d set cmd %d [%d]!\n",
-                object_alarm_number, cmd, object_alarm_number );
+            Print( "Object \"%s\" (%s %d) set error cmd %d to error %d!\n",
+                tech_dev->get_name_in_Lua(),
+                tech_dev->get_name(), tech_dev->get_number(),
+                cmd, object_alarm_number );
 #endif // DEBUG
             was_set_cmd = true;
             return 0;
             }
         }
 #ifdef DEBUG
-    Print( "Object %d not found!\n", object_alarm_number );
+    Print( "Error! Object \"%s\" (%s %d) set error cmd - alarm number"
+        " %d not found!\n",
+        tech_dev->get_name_in_Lua(),
+        tech_dev->get_name(), tech_dev->get_number(),
+        object_alarm_number );
 #endif // DEBUG
 
     return 1;
     }
 //-----------------------------------------------------------------------------
-int tech_dev_error::get_priority( tech_object::ERR_MSG_TYPES err_type ) 
+int tech_dev_error::get_priority( tech_object::ERR_MSG_TYPES err_type )
     {
     switch ( err_type )
         {
@@ -269,7 +275,7 @@ int tech_dev_error::get_priority( tech_object::ERR_MSG_TYPES err_type )
     return P_ALARM;
     }
 //-----------------------------------------------------------------------------
-const char* tech_dev_error::get_group( tech_object::ERR_MSG_TYPES err_type ) 
+const char* tech_dev_error::get_group( tech_object::ERR_MSG_TYPES err_type )
     {
     switch ( err_type )
         {

@@ -48,7 +48,7 @@ extern "C" {
 ///
 /// Базовый класс для технологического объекта (танка, гребенки). Содержит
 /// основные методы работы - работа с режимами и т.д.
-/// Для информировании сервера (события, аварии, ...) используется следующий 
+/// Для информировании сервера (события, аварии, ...) используется следующий
 /// подход: имеется вектор из сообщений и методы работы с ним.
 ///
 class tech_object: public i_tech_object, public i_Lua_save_device
@@ -175,14 +175,14 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         int lua_exec_cmd( u_int cmd );
 
         int  lua_check_on_mode( u_int mode );
-        void lua_init_mode( u_int mode );       
+        void lua_init_mode( u_int mode );
         int  lua_check_off_mode( u_int mode );
         int  lua_final_mode( u_int mode );
         int  lua_init_params();
         int  lua_init_runtime_params();
         // Lua implemented methods.
 
-        
+
         // Работа с ошибками.
 
         /// @brief Проверка необходимости проверки устройств на ошибку обратной
@@ -214,7 +214,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
             ERR_MSG_TYPES type;
             };
 
-        int set_err_msg( const char *err_msg, int mode, int new_mode = 0, 
+        int set_err_msg( const char *err_msg, int mode, int new_mode = 0,
             ERR_MSG_TYPES type = ERR_CANT_ON );
 
         static const char* get_type( ERR_MSG_TYPES err_type );
@@ -235,14 +235,14 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         void print() const
             {
             Print( "Object \'%.40s\' [%d], type %d\n", name, number, type );
-            Print( "par_float[%d] par_uint[%d] rt_par_float[%d] rt_par_uint[%d]\n", 
+            Print( "par_float[%d] par_uint[%d] rt_par_float[%d] rt_par_uint[%d]\n",
                 par_float.get_count(), par_uint.get_count(),
                 rt_par_float.get_count(), rt_par_uint.get_count() );
             Print( "timers[%d]\n", timers.get_count() );
-            
-            par_float.print();         
-            par_uint.print();         
-            rt_par_float.print();           
+
+            par_float.print();
+            par_uint.print();
+            rt_par_float.print();
             rt_par_uint.print();
 
             modes_manager->print();
@@ -253,6 +253,11 @@ class tech_object: public i_tech_object, public i_Lua_save_device
             static char tmp[ 100 ];
             sprintf( tmp, "%.40s", name_Lua );
             return tmp;
+            }
+
+        const char* get_name() const
+            {
+            return name;
             }
 
         mode_manager* get_modes_manager()
@@ -312,7 +317,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
             ID_PAR_FLOAT = 1,
             ID_RT_PAR_FLOAT,
             ID_PAR_UINT,
-            ID_RT_PAR_UINT,            
+            ID_RT_PAR_UINT,
             };
 
         // Работа с ошибками.
@@ -382,7 +387,7 @@ class tech_object_manager
                 Print( "\n" );
 #endif // KEY_CONFIRM
                 }
-            }       
+            }
 
 #ifdef __BORLANDC__
 #pragma option -w.inl
