@@ -242,10 +242,52 @@ enum workParameters
 	P_PROGRAM_MASK, //маска режимов мойки
 	P_T_CLEAN_RINSING, //Температура ополаскивания чистой водой
 	P_V_CLEAN_RINSING, //объем ополаскивания чистой водой
+	
+	P_T_SANITIZER_RINSING,	//Температура ополаскивания после мойки дезинфецирующим средством
+	P_V_SANITIZER_RINSING,	//Объем ополаскивания после мойки дезинфицирующим средством
+	P_TM_MAX_TIME_OPORBACHOK,	//Максимальное время от пропадания нижнего уровня в бачке до завершении операции опорожнения бачка
+
+	P_TM_RET_IS_EMPTY,	//время отсутствия протока на возврате для окончания опорожнения объекта
+	P_V_LL_BOT ,		//количество литров от пропадания нижнего уровня в бачке до завершения операции "опорожнение бачка"
+	P_R_NO_FLOW,		//минимальный расход при котором считать, что его нет
+	P_TM_R_NO_FLOW,		//время возникновения ошибки "нет расхода на подаче"
+
+	P_TM_NO_FLOW_R,		//время появления ошибки "нет расхода на возврате"	
+	P_TM_NO_CONC,		//время появления ошибки "нет концентрации в возвратной трубе"
+
+
+	//end of parameters
+	//-PID1
+	PIDP_Z,                 //Требуемое значение.
+	PIDP_k,                 //Параметр k.
+	PIDP_Ti,                //Параметр Ti.
+	PIDP_Td,                //Параметр Td.
+	PIDP_dt,                //Интервал расчёта
+	PIDP_dmax,              //Мax значение входной величины.
+	PIDP_dmin,              //Мin значение входной величины.
+	PIDP_AccelTime,         //Время выхода на режим регулирования.
+	PIDP_IsManualMode,      //Ручной режим.
+	PIDP_UManual,           //Заданное ручное значение выходного сигнала.
+	PIDP_Uk,                //Выход ПИД.      
+	//-PID1-!>
+	//-PID2
+	PIDF_Z,                 //Требуемое значение.
+	PIDF_k,                 //Параметр k.
+	PIDF_Ti,                //Параметр Ti.
+	PIDF_Td,                //Параметр Td.
+	PIDF_dt,                //Интервал расчёта
+	PIDF_dmax,              //Мax значение входной величины.
+	PIDF_dmin,              //Мin значение входной величины.
+	PIDF_AccelTime,         //Время выхода на режим регулирования.
+	PIDF_IsManualMode,      //Ручной режим.
+	PIDF_UManual,           //Заданное ручное значение выходного сигнала.
+	PIDF_Uk,                //Выход ПИД.      
+	//-PID2-!>
+	P_TM_MAX_TIME_OPORCIP,	//Максимальное время операции "Опорожнение объекта CIP"
 	P_RESERV_START,
 
 
-	STP_QAVS,		//средняя концентрация щелочи
+	STP_QAVS = 119,		//средняя концентрация щелочи
 	STP_QAVK,		//средняя концентрация кислоты
 	STP_WC,			//чистая вода
 	STP_WS,			//вторичная вода
@@ -284,48 +326,100 @@ enum SELFCLEAN_PARAMS
 
 enum storedParameters
 	{
-	P_TM_RET_IS_EMPTY = 1, //время отсутствия протока на возврате для окончания опорожнения объекта
-	P_V_LL_BOT,	//количество литров от пропадания нижнего уровня в бачке до завершения операции "опорожнение бачка"
-	P_R_NO_FLOW,	//минимальный расход при котором считать, что его нет
-	P_TM_R_NO_FLOW,	//время возникновения ошибки "нет расхода на подаче"
-	P_TM_NO_FLOW_R,	//время появления ошибки "нет расхода на возврате"	
-	P_TM_NO_CONC,	//время появления ошибки "нет концентрации в возвратной трубе"
+	//P_TM_RET_IS_EMPTY = 1, //время отсутствия протока на возврате для окончания опорожнения объекта
+	//P_V_LL_BOT,	//количество литров от пропадания нижнего уровня в бачке до завершения операции "опорожнение бачка"
+	//P_R_NO_FLOW,	//минимальный расход при котором считать, что его нет
+	//P_TM_R_NO_FLOW,	//время возникновения ошибки "нет расхода на подаче"
+	//P_TM_NO_FLOW_R,	//время появления ошибки "нет расхода на возврате"	
+	//P_TM_NO_CONC,	//время появления ошибки "нет концентрации в возвратной трубе"
 	};
 
-class MSAPIDFLOWInterface
-	{
-	private:
-		i_AO_device* output;
-		i_counter* input;
-		unsigned long lastEvalInOnState;
-		run_time_params_float*   lineparams;
-	public:
-		PID* pidr;
-		int HI;
-		int rp;
-		MSAPIDFLOWInterface(PID* pid, run_time_params_float* par, int taskpar, i_AO_device* ao = 0, i_counter* ai = 0 );
-		void eval();
-		void reset();
-		void on( int accel = 0 );
-		void off();
-	};
-
-class MSAPIDHEATInterface
+class MSAPID
 	{
 	private:
 		i_AO_device* output;
 		i_AI_device* input;
+		i_counter* input2;
 		unsigned long lastEvalInOnState;
-		run_time_params_float*   lineparams;
 	public:
-		PID* pidr;
 		int HI;
-		int rp;
-		MSAPIDHEATInterface(PID* pid, run_time_params_float* par, int taskpar, i_AO_device* ao = 0, i_AI_device* ai = 0 );
+		int task_par_offset;
+		int pid_par_offset;
+		MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_device* ao = 0, i_AI_device* ai = 0, i_counter* ai2 = 0 );
 		void eval();
 		void reset();
 		void on( int accel = 0 );
 		void off();
+
+
+	private:
+		enum STATES 
+			{
+			STATE_OFF,
+			STATE_ON,  
+			};
+
+		float uk_1;
+		float ek_1;
+		float ek_2;
+		float q0;
+		float q1;
+		float q2;
+		float Uk;
+		float dUk;
+		unsigned long start_time;
+		unsigned long last_time;
+
+		char prev_manual_mode;
+
+		/// @brief Надо ли при старте регулятора уменьшать, а не увеличивать
+		/// выходную величину.
+		char is_down_to_inaccel_mode;  
+
+		run_time_params_float *par;
+
+		u_int_4 state;
+
+		void acceleration( float accel_time );
+
+		float start_value;
+
+	public:
+		enum PARAM  
+			{
+			P_Z = 0,			   ///< Требуемооfое значение.
+			P_k,		           ///< Параметр k.
+			P_Ti,                  ///< Параметр Ti.
+			P_Td,                  ///< Параметр Td.
+			P_dt,                  ///< Интервал расчёта
+			P_max,                 ///< Мax значение входной величины.
+			P_min,                 ///< Мin значение входной величины.
+			P_acceleration_time,   ///< Время выхода на режим регулирования.
+			P_is_manual_mode,      ///< Ручной режим.
+			P_U_manual,            ///< Заданное ручное значение выходного сигнала.
+			P_U,			       ///< Выход ПИД.
+			}; 
+
+		/// @brief Включение ПИД.
+		void  pid_on( char is_down_to_inaccel_mode = 0 );
+
+		/// @brief Выключение ПИД.
+		void  pid_off();
+
+		/// @brief Сброс ПИД
+		void pid_reset();
+
+		/// @brief Работа ПИД.
+		float pid_eval( float current_value, int delta_sign = 1 );
+
+		/// @brief Установка нового задания ПИД.
+		void set( float new_z );    
+
+		/// @brief Получение задания ПИД.
+		float get_assignment();
+
+		/// @brief Состояние регулятора
+		u_int_4 get_state();
 	};
 
 class TSav 
@@ -504,10 +598,8 @@ class cipline_tech_object: public tech_object
 		i_counter *cnt;
 		//-------------------
 
-		PID* PIDFlow;
-		PID* PIDHeat;
-		MSAPIDFLOWInterface* PIDF;
-		MSAPIDHEATInterface* PIDP;
+		MSAPID* PIDF;
+		MSAPID* PIDP;
 		void initline();
 
 		static int nextpidnumber();

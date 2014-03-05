@@ -10,7 +10,7 @@ int TRecipeManager::startRecipeBlock = 0;
 
 int TRecipeManager::recipePerLine = 20;
 
-int TRecipeManager::blocksPerRecipe = 2;
+int TRecipeManager::blocksPerRecipe = 4;
 
 int TRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 8;
 
@@ -42,6 +42,7 @@ TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
 	strcpy(recipeList,"");
 	ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName);
 	FormRecipeList();
+	recipechanged = 0;
 	}
 
 TRecipeManager::~TRecipeManager()
@@ -49,19 +50,12 @@ TRecipeManager::~TRecipeManager()
 	SaveRecipeName();
 	delete currentRecipeName;
 	delete recipeList;
-#ifdef WIN_OS
-	if (memFile)
-		{
-		fseek(memFile, 0, SEEK_SET);
-		fwrite(recipeMemory, 1, recipeMemorySize, memFile);
-		fclose(memFile);
-		}
-#endif //WIN_OS
+	SaveToFile();
 	delete recipeMemory;
-
-#ifdef WIN_OS
-	delete memFileName;
-#endif
+	if (recipeCopyBuffer != NULL)
+		{
+		delete[] recipeCopyBuffer;
+		}
 	}
 
 int TRecipeManager::NextRecipe()
@@ -273,6 +267,46 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
 		setRecipeValue(recipeNo, RV_PROGRAM_MASK, 0);
 		setRecipeValue(recipeNo, RV_T_RINSING_CLEAN, 5);
 		setRecipeValue(recipeNo, RV_V_RINSING_CLEAN, 600);
+
+		setRecipeValue(recipeNo, RV_T_SANITIZER_RINSING, 30);
+		setRecipeValue(recipeNo, RV_V_SANITIZER_RINSING, 500);
+		setRecipeValue(recipeNo, RV_TM_MAX_TIME_OPORBACHOK, 30);
+
+		setRecipeValue(recipeNo, RV_TM_RET_IS_EMPTY, 8);
+		setRecipeValue(recipeNo, RV_V_LL_BOT, 15);
+		setRecipeValue(recipeNo, RV_R_NO_FLOW, 2);
+		setRecipeValue(recipeNo, RV_TM_R_NO_FLOW, 20);
+
+		setRecipeValue(recipeNo, RV_TM_NO_FLOW_R, 20);
+		setRecipeValue(recipeNo, RV_TM_NO_CONC, 20);
+
+		//-PID1
+		setRecipeValue(recipeNo, RV_PIDP_Z, 95);
+		setRecipeValue(recipeNo, RV_PIDP_k, 2);
+		setRecipeValue(recipeNo, RV_PIDP_Ti, 30);
+		setRecipeValue(recipeNo, RV_PIDP_Td, (float)0.2);
+		setRecipeValue(recipeNo, RV_PIDP_dt, 500);
+		setRecipeValue(recipeNo, RV_PIDP_dmax, 130);
+		setRecipeValue(recipeNo, RV_PIDP_dmin, 0);
+		setRecipeValue(recipeNo, RV_PIDP_AccelTime, 30);
+		setRecipeValue(recipeNo, RV_PIDP_IsManualMode, 0);
+		setRecipeValue(recipeNo, RV_PIDP_UManual, 30);
+		setRecipeValue(recipeNo, RV_PIDP_Uk, 0);
+		//-PID1-!>
+		//-PID2
+		setRecipeValue(recipeNo, RV_PIDF_Z, 15);
+		setRecipeValue(recipeNo, RV_PIDF_k, 0.5);
+		setRecipeValue(recipeNo, RV_PIDF_Ti, 10);
+		setRecipeValue(recipeNo, RV_PIDF_Td, (float)0.1);
+		setRecipeValue(recipeNo, RV_PIDF_dt, 1000);
+		setRecipeValue(recipeNo, RV_PIDF_dmax, 40);
+		setRecipeValue(recipeNo, RV_PIDF_dmin, 0);
+		setRecipeValue(recipeNo, RV_PIDF_AccelTime, 2);
+		setRecipeValue(recipeNo, RV_PIDF_IsManualMode, 0);
+		setRecipeValue(recipeNo, RV_PIDF_UManual, 15);
+		setRecipeValue(recipeNo, RV_PIDF_Uk, 0);
+		//-PID2-!>
+		setRecipeValue(recipeNo, P_TM_MAX_TIME_OPORCIP, 300);
 		return 1;
 		}
 	else
@@ -476,7 +510,7 @@ void TRecipeManager::CopyRecipe()
 	{
 	if (recipeCopyBuffer != NULL)
 		{
-		delete recipeCopyBuffer;
+		delete[] recipeCopyBuffer;
 		}
 	recipeCopyBuffer = new unsigned char[BLOCK_SIZE * blocksPerRecipe];
 	ReadMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
@@ -509,5 +543,18 @@ int TRecipeManager::ReadMem( unsigned long startaddr, unsigned long length, unsi
 int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length, unsigned char* buf )
 	{
 	memcpy(recipeMemory + startaddr, buf, length);
+	return 0;
+	}
+
+int TRecipeManager::SaveToFile()
+	{
+#ifdef WIN_OS
+	if (memFile)
+		{
+		fseek(memFile, 0, SEEK_SET);
+		fwrite(recipeMemory, 1, recipeMemorySize, memFile);
+		fclose(memFile);
+		}
+#endif //WIN_OS
 	return 0;
 	}

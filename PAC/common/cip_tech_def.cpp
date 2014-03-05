@@ -44,10 +44,6 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 #endif //DEBUG
 	int i;
 	nmr = number;
-	PIDHeat = new PID(nextpidnumber());
-	PIDFlow = new PID(nextpidnumber());
-	PIDF = 0;
-	PIDP = 0;
 	if (0 == parpar)
 		{
 		parpar = new saved_params<float, true>(30, "PAR_MAIN");
@@ -312,8 +308,8 @@ void cipline_tech_object::initline()
 	PUMPFREQ = AO(number * 100 + 1);
 	ao = AO(number * 100 + 14);
 
-	PIDF = new MSAPIDFLOWInterface(PIDFlow, &rt_par_float, P_ZAD_FLOW, PUMPFREQ, cnt );
-	PIDP = new MSAPIDHEATInterface(PIDHeat, &rt_par_float, P_ZAD_PODOGR, ao, TP);
+	PIDF = new MSAPID(&rt_par_float, 60, P_ZAD_FLOW, PUMPFREQ, 0, cnt );
+	PIDP = new MSAPID(&rt_par_float, 70, P_ZAD_PODOGR, ao, TP, 0);
 
 #ifdef DEBUG
 	LSL->set_cmd("ST", 0, ((device*)LSL)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
@@ -870,7 +866,7 @@ int cipline_tech_object::EvalRecipes()
 	if (rt_par_float[P_SELECT_REC] > 0)
 		{
 		lineRecipes->LoadRecipeToParams( ( int ) rt_par_float[P_SELECT_REC] - 1,
-            2, 16, 39, &rt_par_float);
+            2, 16, 103, &rt_par_float);
 		lineRecipes->getRecipeName( ( int ) rt_par_float[P_SELECT_REC] - 1,
             loadedRecName);
 		loadedRecipe = ( int ) rt_par_float[P_SELECT_REC] - 1;
@@ -1397,7 +1393,7 @@ int cipline_tech_object::EvalPIDS()
 	PIDF->eval();
 
 	//Клапан пара
-	if (ao->get_value()>1 && PIDP->pidr->get_state() == ON && NP->get_value() > rt_par_float[P_R_NO_FLOW] && NP->get_state() == ON)
+	if (ao->get_value()>1 && PIDP->get_state() == ON && NP->get_value() > rt_par_float[P_R_NO_FLOW] && NP->get_state() == ON)
 		{
 		if (get_delta_millisec(steam_valve_delay) > STEAM_VALVE_MIN_DELAY)
 			{
@@ -1842,13 +1838,13 @@ int cipline_tech_object::CheckErr( void )
 		}
 
 	// Нет расхода на подаче
-	if (T[TMR_NO_FLOW]->get_countdown_time() != (par_float[P_TM_R_NO_FLOW] * 1000L))
+	if (T[TMR_NO_FLOW]->get_countdown_time() != (rt_par_float[P_TM_R_NO_FLOW] * 1000L))
 		{
-		T[TMR_NO_FLOW]->set_countdown_time((unsigned long)par_float[P_TM_R_NO_FLOW] * 1000L);
+		T[TMR_NO_FLOW]->set_countdown_time((unsigned long)rt_par_float[P_TM_R_NO_FLOW] * 1000L);
 		}
 	if (NP->get_state() == ON)
 		{
-		delta = par_float[P_R_NO_FLOW];
+		delta = rt_par_float[P_R_NO_FLOW];
 		if (NP->get_value() <= delta)
 			{
 			T[TMR_NO_FLOW]->start();
@@ -3828,87 +3824,229 @@ int cipline_tech_object::pidnumber = 1;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-MSAPIDFLOWInterface::MSAPIDFLOWInterface(PID* pid, run_time_params_float* par, int taskpar, i_AO_device* ao /*= 0*/, i_counter* ai /*= 0 */ )
+MSAPID::MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_device* ao /*= 0*/, i_AI_device* ai /*= 0*/,  i_counter* ai2 /*= 0 */ ):
+	uk_1( 0 ),
+	ek_1( 0 ),
+	ek_2( 0 ),
+	start_time( get_millisec() ),
+	last_time( get_millisec() ),
+	prev_manual_mode( 0 ),
+	is_down_to_inaccel_mode( 0 ),
+	par( par ),
+	state( STATE_OFF ),
+	start_value( 0 )
 	{
-    pidr = pid;
     input = ai;
 	output = ao;
-    rp = taskpar;
-    lineparams = par;
+    task_par_offset = taskpar;
+	pid_par_offset = startpar;
     lastEvalInOnState = get_millisec();
     HI = 0;
 	}
 
-void MSAPIDFLOWInterface::eval()
+void MSAPID::eval()
 	{
-	if ( 1 == pidr->get_state() )
+	if ( 1 == get_state() )
 		{
 		lastEvalInOnState = get_millisec();
-		pidr->set( lineparams[0][rp] );
-		output->set_value( pidr->eval(input->get_flow()));
+		set( par[0][task_par_offset] );
+		output->set_value( pid_eval(input2->get_flow()));
 		}
 	}
 
-void MSAPIDFLOWInterface::reset()
+void MSAPID::reset()
 	{
 	if (get_delta_millisec(lastEvalInOnState) > 3000L)
 		{
-		pidr->reset();
+		pid_reset();
 		}
 	}
 
-void MSAPIDFLOWInterface::on( int accel /*= 0 */ )
+void MSAPID::on( int accel /*= 0 */ )
 	{
-	pidr->on(accel);
+	pid_on(accel);
 	}
 
-void MSAPIDFLOWInterface::off()
+void MSAPID::off()
 	{
-	pidr->off();
+	pid_off();
 	output->set_value(0);
 	}
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-MSAPIDHEATInterface::MSAPIDHEATInterface(PID* pid, run_time_params_float* par, int taskpar, i_AO_device* ao /*= 0*/, i_AI_device* ai /*= 0 */ )
+void MSAPID::pid_on( char is_down_to_inaccel_mode /*= 0 */ )
 	{
-	pidr = pid;
-	input = ai;
-	output = ao;
-	rp = taskpar;
-	lineparams = par;
-	lastEvalInOnState = get_millisec();
-	HI = 0;
-	}
-
-void MSAPIDHEATInterface::eval()
-	{
-	if ( 1 == pidr->get_state() )
+	if ( state != STATE_ON )
 		{
-		lastEvalInOnState = get_millisec();
-		pidr->set( lineparams[0][rp] );
-		output->set_value( pidr->eval(input->get_value()));
+		state = STATE_ON;
+
+		start_time = get_millisec(); // Для разгона регулятора.
+		last_time  = get_millisec(); // Интервал пересчета значений.
+
+		this->is_down_to_inaccel_mode = is_down_to_inaccel_mode;
+
+		pid_reset(); //Сбрасываем все переменные.
+		start_value = 0;
 		}
 	}
 
-void MSAPIDHEATInterface::reset()
+void MSAPID::pid_off()
 	{
-	if (get_delta_millisec(lastEvalInOnState) > 3000L)
+	if ( state != STATE_OFF )
 		{
-		pidr->reset();
+		state = STATE_OFF;
 		}
 	}
 
-void MSAPIDHEATInterface::on( int accel /*= 0 */ )
+void MSAPID::pid_reset()
 	{
-	pidr->on(accel);
+	uk_1 = 0;
+	ek_1 = 0;
+	ek_2 = 0;
+
+	Uk = 0;
+	if ( is_down_to_inaccel_mode )
+		{
+		Uk = 100;
+		}
+
+	par[ 0 ][ pid_par_offset + P_U ] = 0;
+	par[ 0 ][ pid_par_offset + P_is_manual_mode ] = 0;
+
+	start_time = get_millisec(); //Для разгона регулятора.
 	}
 
-void MSAPIDHEATInterface::off()
+float MSAPID::pid_eval( float current_value, int delta_sign /*= 1 */ )
 	{
-	pidr->off();
-	output->set_value(0);
+	if ( STATE_OFF == state )
+		{
+		if ( this->is_down_to_inaccel_mode ) return 100;
+		else return 0;
+		}
+
+	float K = par[ 0 ][ pid_par_offset + P_k ];
+	float TI = par[ 0 ][ pid_par_offset + P_Ti ];
+	float TD = par[ 0 ][ pid_par_offset + P_Td ];
+
+	float dt = par[ 0 ][ pid_par_offset + P_dt ] / 1000;
+	float dmax = par[ 0 ][ pid_par_offset + P_max ];
+	float dmin = par[ 0 ][ pid_par_offset + P_min ];
+
+	if ( dmax == dmin )
+		{
+		dmax = dmin + 1;
+#ifdef DEBUG
+		Print( "Error! PID::eval dmax == dmin!\n" );
+		Print( "Press any key!" );
+		get_char();
+#endif
+		}
+
+	float ek = delta_sign * 100 * ( par[ 0 ][ pid_par_offset + P_Z ] - current_value ) /
+		( dmax - dmin );
+
+#ifdef DEBUG
+	if ( dt == 0 )
+		{
+		Print( "Error! PID::eval dt = 0!\n" );
+		Print( "Press any key!" );
+		get_char();
+		}
+	if ( TI == 0 )
+		{
+		Print( "Error! PID::eval TI = 0!\n" );
+		Print( "Press any key!" );
+		get_char();
+		}
+#endif
+
+	if ( dt == 0 ) dt = 1;
+	if ( TI == 0 ) TI = 0.0001f;
+
+	if ( get_delta_millisec( last_time ) > dt*1000L )
+		{
+		q0 = K * ( 1 + TD / dt );
+		q1 = K * ( -1 - 2 * TD / dt + 2 * dt / TI );
+		q2 = K * TD / dt;
+
+		dUk = q0 * ek + q1 * ek_1 + q2 * ek_2;
+		Uk = uk_1 + dUk;
+		if ( Uk > 100 ) Uk = 100;
+		if ( Uk < 0 ) Uk = 0;
+
+		uk_1 = Uk;
+		ek_2 = ek_1;
+		ek_1 = ek;
+
+		//-Зона разгона.
+		if ( get_delta_millisec( start_time ) <
+			par[ 0 ][ pid_par_offset + P_acceleration_time ] * 1000 )
+			{
+			acceleration( par[ 0 ][ pid_par_offset + P_acceleration_time ] );
+			}
+		//-Зона разгона.-!>
+
+		last_time = get_millisec();
+		} // if ( get_millisec() - last_time > dt*1000L )
+
+	//-Мягкий пуск.
+	// Включили ручной режим.
+	if ( par[ 0 ][ pid_par_offset + P_is_manual_mode ] && 0 == prev_manual_mode )
+		{
+		prev_manual_mode = 1;
+		par[ 0 ][ pid_par_offset + P_U_manual ] = par[ 0 ][ pid_par_offset + P_U ];
+		}
+
+	// Выключили ручной режим.
+	if ( par[ 0 ][ pid_par_offset + P_is_manual_mode ] == 0 && 1 == prev_manual_mode )
+		{
+		prev_manual_mode = 0;
+		reset();
+
+		// Начинаем заново разгон регулятора.
+		start_time = get_millisec();
+
+		// Устанавливаем начальное значение для разгона регулятора.
+		start_value = par[ 0 ][ pid_par_offset + P_U_manual ];
+
+		return par[ 0 ][ pid_par_offset + P_U_manual ];
+		}
+	//-Мягкий пуск.-!>
+
+	par[ 0 ][ pid_par_offset + P_U ] = Uk;
+
+	if ( 1 == par[ 0 ][ pid_par_offset + P_is_manual_mode ] )
+		{
+		return par[ 0 ][ pid_par_offset + P_U_manual ];
+		}
+
+	return Uk;
 	}
+
+	void MSAPID::acceleration( float accel_time )
+		{
+		float deltaTime = ( float ) get_delta_millisec( start_time ) / 1000;
+		float res = 100 * deltaTime / accel_time;
+
+		if ( is_down_to_inaccel_mode )
+			{
+			res = 100 - res + start_value;
+			if ( Uk < res ) Uk = res;
+			}
+		else
+			{
+			if ( Uk > res ) Uk = res + start_value;
+			}
+		}
+
+	void MSAPID::set( float new_z )
+		{
+		 par[ 0 ][ pid_par_offset + P_Z ] = new_z;
+		}
+
+	u_int_4 MSAPID::get_state()
+		{
+		return state;
+		}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
