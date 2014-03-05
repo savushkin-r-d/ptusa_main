@@ -385,6 +385,11 @@ class mode
 
         u_int active_step() const
             {
+            if ( active_step_second_n > -1 )
+            	{
+                return active_step_second_n + 1;
+            	}
+
             return active_step_n + 1;
             }
 
