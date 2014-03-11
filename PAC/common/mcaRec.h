@@ -19,6 +19,8 @@
 #define MAX_REC_NAME_LENGTH 32L
 ///@brief Размер блока памяти в байтах
 #define BLOCK_SIZE 128L
+///@brief Интервал проверки изменений в рецепте
+#define RECIPE_SAVE_INTERVAL 300000L
 
 ///@class TRecipeManager mcaRec.h
 ///@brief Класс для хранения и работы с рецептами в энергонезависимой памяти контроллера для МСА 
@@ -114,12 +116,10 @@ class TRecipeManager
 		RV_LASTVALVEOFF = 119,
 		};
 	private:
-#ifdef WIN_OS
-		FILE* memFile;
-		char* memFileName;
-#endif // WIN_OS
+		char* defaultfilename;
 		///@brief Флаг, сигнализирующий об изменении параметров рецепта
 		int recipechanged;
+		unsigned long recipechangechecktime;
 		int lineNo;
 		int currentRecipe;
 		int curRecipeStartBlock;
@@ -250,11 +250,11 @@ class TRecipeManager
 		/// @fn int TRecipeManager::SaveToFile()
 		/// @brief Сохранение рецептов модуля в файл
 		/// @return Возвращает 0 в случае успешного завершения
-		int SaveToFile();
+		int SaveToFile(const char* filename);
 		/// @fn int TRecipeManager::LoadFromFile()
 		/// @brief Загрузка рецептов из сохраненного файла
 		/// @return Возвращает 0 в случае успешного завершения
-		int LoadFromFile();
+		int LoadFromFile(const char* filename);
 		/// @fn  void TRecipeManager::NullifyRecipe()
 		/// @brief Обнуляет текущий рецепт
 		/// @return   void

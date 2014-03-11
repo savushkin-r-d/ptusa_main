@@ -23,19 +23,11 @@ TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
 	curRecipeStartBlock(0),
 	recipeStartAddr(0L)
 	{
+	defaultfilename = new char[20];
+	sprintf(defaultfilename, "line%drec.bin", lineNo);
 	recipeMemorySize = blocksPerRecipe * BLOCK_SIZE * recipePerLine;
 	recipeMemory = new unsigned char[recipeMemorySize];
-#ifdef WIN_OS
-	memset(recipeMemory, 0, recipeMemorySize);
-	memFileName = new char[20];
-	sprintf(memFileName, "line%drec.bin", lineNo);
-	memFile = fopen(memFileName, "r+");
-	if (NULL == memFile)
-	{
-	memFile = fopen(memFileName, "w+");
-	}
-	fread(recipeMemory, 1, recipeMemorySize, memFile);
-#endif // WIN_OS
+	LoadFromFile(defaultfilename);
     lastEvalTime = get_millisec();
 	currentRecipeName = new char[recipeNameLength];
 	recipeList = new char[(recipeNameLength + 6) * recipePerLine];
@@ -43,6 +35,7 @@ TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
 	ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName);
 	FormRecipeList();
 	recipechanged = 0;
+	recipechangechecktime = get_millisec();
 	}
 
 TRecipeManager::~TRecipeManager()
@@ -50,12 +43,13 @@ TRecipeManager::~TRecipeManager()
 	SaveRecipeName();
 	delete currentRecipeName;
 	delete recipeList;
-	SaveToFile();
+	SaveToFile(defaultfilename);
 	delete recipeMemory;
 	if (recipeCopyBuffer != NULL)
 		{
 		delete[] recipeCopyBuffer;
 		}
+	delete[] defaultfilename;
 	}
 
 int TRecipeManager::NextRecipe()
@@ -97,6 +91,15 @@ void TRecipeManager::EvalRecipe()
 		lastEvalTime = get_millisec();
 		SaveRecipeName();
 		FormRecipeList();
+		}
+	if (get_delta_millisec(recipechangechecktime) > RECIPE_SAVE_INTERVAL)
+		{
+		if (recipechanged)
+			{
+			recipechanged = 0;
+			SaveToFile(defaultfilename);
+			}
+		recipechangechecktime = get_millisec();
 		}
 	if (getValue(RV_TO_DEFAULTS != 0))
 		{
@@ -148,6 +151,8 @@ float TRecipeManager::getRecipeValue( int recNo, int valueNo )
 
 int TRecipeManager::setRecipeValue( int recNo, int valueNo, float newValue )
 	{
+	recipechanged = 1;
+	recipechangechecktime = get_millisec();
 	WriteMem(startAddr(recNo) + startRecipeParamsOffset + 4 * valueNo, 4, (unsigned char*)&newValue);
 	return 0;
 	}
@@ -307,6 +312,10 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
 		setRecipeValue(recipeNo, RV_PIDF_Uk, 0);
 		//-PID2-!>
 		setRecipeValue(recipeNo, P_TM_MAX_TIME_OPORCIP, 300);
+		for (int i = RV_RESERV_START; i <= RV_LASTVALVEOFF; i++)
+			{
+			setRecipeValue(recipeNo, i, 0);
+			}
 		return 1;
 		}
 	else
@@ -546,9 +555,18 @@ int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length, uns
 	return 0;
 	}
 
-int TRecipeManager::SaveToFile()
+int TRecipeManager::SaveToFile(const char* filename)
 	{
+#ifdef DEBUG
+	Print("Saving recipes to file %s\n", filename);
+#endif // DEBUG
 #ifdef WIN_OS
+	FILE* memFile = NULL;
+	memFile = fopen(filename, "r+");
+	if (NULL == memFile)
+		{
+		memFile = fopen(filename, "w+");
+		}
 	if (memFile)
 		{
 		fseek(memFile, 0, SEEK_SET);
@@ -556,5 +574,20 @@ int TRecipeManager::SaveToFile()
 		fclose(memFile);
 		}
 #endif //WIN_OS
+	return 0;
+	}
+
+int TRecipeManager::LoadFromFile( const char* filename )
+	{
+#ifdef WIN_OS
+	FILE* memFile = NULL;
+	memset(recipeMemory, 0, recipeMemorySize);
+	memFile = fopen(filename, "r+");
+	if (memFile)
+		{
+		fread(recipeMemory, 1, recipeMemorySize, memFile);
+		fclose(memFile);
+		}
+#endif // WIN_OS
 	return 0;
 	}

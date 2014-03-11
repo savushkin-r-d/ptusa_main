@@ -602,6 +602,21 @@ class cipline_tech_object: public tech_object
 		MSAPID* PIDP;
 		void initline();
 
+
+		//Устройства для непосредственного объекта мойки
+		device* dev_upr_ret;	//Сигнал управления возвратным насосом
+		device* dev_m_ret;		//Возвратный насос на моечной станции
+		device* dev_os_object;	//Обратная связь объекта мойки
+		device* dev_os_object_empty;	//Сигнал "объект опорожнен"
+		device* dev_upr_medium_change;	//Сигнал "смена среды"
+		device* dev_upr_caustic;		//Сигнал "щелочь"
+		device* dev_upr_acid;			//Сигнал "кислота"
+		device* dev_upr_desinfection;	//Сигнал "дезинфекция"
+		device* dev_upr_cip_ready;		//Сигнал "готовность к мойке"
+		device* dev_upr_cip_finished;	//Сигнал "мойка окончена"
+		int init_object_devices();		//Функция для инициализации устройств объекта мойки
+		//----------------------------------------------
+
 		static int nextpidnumber();
 		static int pidnumber;
 		static int msa_number;
