@@ -1173,8 +1173,20 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
 #ifdef DEBUG_NO_WAGO_MODULES
             return ( VALVE_STATE ) digital_wago_device::get_state();
 #else
+            return V_OFF; //Temp.
 #endif // DEBUG_NO_WAGO_MODULES
             }
+
+#ifndef DEBUG_NO_WAGO_MODULES
+        //Temp.
+        void direct_off()
+            {
+            }
+
+        void direct_on()
+            {
+            }
+#endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым входом.
