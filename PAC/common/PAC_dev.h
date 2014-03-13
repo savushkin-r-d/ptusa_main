@@ -318,7 +318,7 @@ class device : public i_DO_AO_device, public par_device
             {
             C_DEVICE_TYPE_CNT = 17,     ///< Количество типов устройств.
 
-            C_MAX_NAME = 10
+            C_MAX_NAME = 20
             };
 
         static const char DEV_NAMES[][ 5 ];
