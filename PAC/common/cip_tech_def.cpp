@@ -324,19 +324,41 @@ void cipline_tech_object::initline()
 	PIDP = new MSAPID(&rt_par_float, 72, P_ZAD_PODOGR, ao, TP, 0);
 
 #ifdef DEBUG
-	LSL->set_cmd("ST", 0, ((device*)LSL)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
-	LSH->set_cmd("ST", 0, ((device*)LSH)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
-	LKL->set_cmd("ST", 0, ((device*)LKL)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
-	LKH->set_cmd("ST", 0, ((device*)LKH)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
-	LWL->set_cmd("ST", 0, ((device*)LWL)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
-	LWH->set_cmd("ST", 0, ((device*)LWH)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
-	LL->set_cmd("ST", 0, ((device*)LL)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
-	LM->set_cmd("ST", 0, ((device*)LM)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
-	LH->set_cmd("ST", 0, ((device*)LH)->get_sub_type() == device::DST_LS_MIN ? OFF:ON);
+	LSL->set_cmd("ST", 0, 1);
+	LSH->set_cmd("ST", 0, 1);
+	LKL->set_cmd("ST", 0, 1);
+	LKH->set_cmd("ST", 0, 1);
+	LWL->set_cmd("ST", 0, 1);
+	LWH->set_cmd("ST", 0, 1);
+	LL->set_cmd("ST", 0, 1);
+	LM->set_cmd("ST", 0, 1);
+	LH->set_cmd("ST", 0, 1);
 	Print("Init Line %d\n\r", number);
 #endif //DEBUG
 	Mdls[nmr - 1] = this;
 	MdlsCNT++;
+	rt_par_float[PIDP_Z] = 95;
+	rt_par_float[PIDP_k] = 2;
+	rt_par_float[PIDP_Ti] = 30;
+	rt_par_float[PIDP_Td] = (float)0.2;
+	rt_par_float[PIDP_dt] = 500;
+	rt_par_float[PIDP_dmax] = 130;
+	rt_par_float[PIDP_dmin] = 0;
+	rt_par_float[PIDP_AccelTime] = 30;
+	rt_par_float[PIDP_IsManualMode] = 0;
+	rt_par_float[PIDP_UManual] = 30;
+	rt_par_float[PIDP_Uk] = 0;
+	rt_par_float[PIDF_Z] = 15;
+	rt_par_float[PIDF_k] = (float)0.5;
+	rt_par_float[PIDF_Ti] = 10;
+	rt_par_float[PIDF_Td] = (float)0.1;
+	rt_par_float[PIDF_dt] = 1000;
+	rt_par_float[PIDF_dmax] = 40;
+	rt_par_float[PIDF_dmin] = 0;
+	rt_par_float[PIDF_AccelTime] = 2;
+	rt_par_float[PIDF_IsManualMode] = 0;
+	rt_par_float[PIDF_UManual] = 15;
+	rt_par_float[PIDF_Uk] = 0;
 	}
 
 int cipline_tech_object::evaluate()
@@ -1404,7 +1426,21 @@ int cipline_tech_object::InitStep( int step, int f )
 			RHI();
 			PT();
 			cnt->pause();
-			StopDev();
+			if (pump_control) 
+				{
+				NPC->off();
+				} 
+			else 
+				{
+				NP->off();
+				}
+			if (PIDP->HI==0) PIDP->off();
+			if (PIDF->HI==0) PIDF->off();
+			ret_overrride = 0;
+			SetRet(OFF);
+#ifdef MEDIUM_CHANGE
+			UPR(MSA_NUMBER * 1000L + 3 +nmr*100)->Off();
+#endif
 			enddelayTimer = get_millisec();
 			return 0;
 		}
@@ -2618,7 +2654,14 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 				}
 			else
 				{
-				v=rt_par_float[P_T_WOP];
+				if (rt_par_float[P_PROGRAM] == SPROG_SANITIZER)
+					{
+					v = rt_par_float[P_T_SANITIZER_RINSING];
+					} 
+				else
+					{
+					v=rt_par_float[P_T_WOP];
+					}
 				}
 			break;
 		}
@@ -2650,7 +2693,14 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 				}
 			else
 				{
-				p = rt_par_float[P_DOP_V_OK_OP];
+				if (rt_par_float[P_PROGRAM] == SPROG_SANITIZER)
+					{
+					p = rt_par_float[P_V_SANITIZER_RINSING];
+					} 
+				else
+					{
+					p = rt_par_float[P_DOP_V_OK_OP];
+					}
 				}
 			break;
 		}
@@ -2802,7 +2852,14 @@ int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
 				}
 			else
 				{
-				v=rt_par_float[P_T_WOP];
+				if (rt_par_float[P_PROGRAM] == SPROG_SANITIZER)
+					{
+					v = rt_par_float[P_T_SANITIZER_RINSING];
+					} 
+				else
+					{
+					v=rt_par_float[P_T_WOP];
+					}
 				}
 			break;
 		}
@@ -2905,7 +2962,7 @@ int cipline_tech_object::InitOporCIP( int where, int step, int f )
 	PIDF->off();
 	rt_par_float[P_VRAB] = 0;
 	rt_par_float[P_OP_TIME_LEFT] = 0;
-	rt_par_float[P_MAX_OPER_TM] = 600;
+	rt_par_float[P_MAX_OPER_TM] = rt_par_float[P_TM_MAX_TIME_OPORCIP];
 	T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM]*1000);
 	T[TMR_OP_TIME]->start();
 	T[TMR_RETURN]->set_countdown_time((unsigned long)rt_par_float[P_TM_RET_IS_EMPTY]*1000);
@@ -2969,9 +3026,10 @@ int cipline_tech_object::InitFilCirc( int with_what, int step, int f )
 	rt_par_float[P_SUM_OP] = 0;
 	rt_par_float[P_VRAB] = rt_par_float[P_V_RAB_ML];
 	rt_par_float[P_OP_TIME_LEFT] = 0;
-	rt_par_float[P_MAX_OPER_TM] = 300;
+	rt_par_float[P_MAX_OPER_TM] = rt_par_float[P_TM_MAX_TIME_OPORBACHOK];
 	T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM]*1000);
 	T[TMR_OP_TIME]->start();
+	T[TMR_OP_TIME]->pause();
 	return 0;
 	}
 
@@ -3022,15 +3080,26 @@ int cipline_tech_object::InitOporCirc( int where, int step, int f )
 			V12->off();
 			break;
 		}
+	switch (step)
+		{
+		case 29:
+			rt_par_float[P_ZAD_PODOGR] = rt_par_float[P_T_WSP];
+			break;
+		case 49:
+			rt_par_float[P_ZAD_PODOGR] = rt_par_float[P_T_WKP];
+			break;
+		case 67:
+			rt_par_float[P_ZAD_PODOGR] = rt_par_float[P_T_WOP];
+			break;
+		case 78:
+			rt_par_float[P_ZAD_PODOGR] = rt_par_float[P_T_SANITIZER_RINSING];
+			break;
+		default:
+			rt_par_float[P_ZAD_PODOGR] = 0;
+			break;
+		}
 	PIDF->on();
-	if (isTank() && (29 == step || 49 == step))
-		{
-		PIDP->off();
-		}
-	else
-		{
-		PIDP->on();
-		}
+	PIDP->on();
 	//   cnt->start();
 	rt_par_float[P_ZAD_FLOW] = rt_par_float[P_FLOW];
 	rt_par_float[P_SUM_OP] = 0;
@@ -3751,8 +3820,12 @@ int cipline_tech_object::OporCirc( int where )
 
 	rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
 	rt_par_float[P_SUM_OP] = cnt->get_quantity();
-	if (!LL->is_active()) cnt->start();
-	if (cnt->get_quantity() >= rt_par_float[P_V_LL_BOT]) return 1;
+	if (!LL->is_active()) 
+		{
+		cnt->start();
+		T[TMR_OP_TIME]->start();
+		}
+	if (cnt->get_quantity() >= rt_par_float[P_V_LL_BOT] || T[TMR_OP_TIME]->is_time_up()) return 1;
 	return 0;
 	}
 
@@ -3826,7 +3899,7 @@ int cipline_tech_object::init_object_devices()
 	Print("init_object_devices\n\r");
 #endif //DEBUG
 	//Обратная связь
-	dev_no = (int)rt_par_float[P_OS];
+	dev_no = (u_int)rt_par_float[P_OS];
 	if (dev_no > 0)
 		{
 		dev = (device*)(DI(dev_no));
@@ -3845,7 +3918,7 @@ int cipline_tech_object::init_object_devices()
 		dev_os_object = 0;
 		}
 	//Возвратный насос
-	dev_no = rt_par_float[P_N_RET];
+	dev_no = (u_int)rt_par_float[P_N_RET];
 	if (dev_no > 0)
 		{
 		dev = (device*)(M(dev_no));
@@ -3864,7 +3937,7 @@ int cipline_tech_object::init_object_devices()
 		dev_m_ret = 0;
 		}
 	//Сигнал управления возвратным насосом
-	dev_no = rt_par_float[P_N_UPR];
+	dev_no = (u_int)rt_par_float[P_N_UPR];
 	if (dev_no > 0)
 		{
 		dev = (device*)(DO(dev_no));

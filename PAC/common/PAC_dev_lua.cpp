@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 03/05/14 17:02:56.
+** Generated automatically by tolua++-1.0.92 on 03/13/14 16:24:57.
 */
 
 #ifndef __cplusplus
@@ -5071,6 +5071,1236 @@ static int tolua_PAC_dev_cipline_tech_object_new00_local(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* get function: blocked of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_blocked
+static int tolua_get_cipline_tech_object_blocked(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'blocked'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->blocked);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: blocked of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_blocked
+static int tolua_set_cipline_tech_object_blocked(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'blocked'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->blocked = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: opcip of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_opcip
+static int tolua_get_cipline_tech_object_opcip(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'opcip'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->opcip);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: opcip of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_opcip
+static int tolua_set_cipline_tech_object_opcip(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'opcip'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->opcip = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: curstep of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_curstep
+static int tolua_get_cipline_tech_object_curstep(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'curstep'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->curstep);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: curstep of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_curstep
+static int tolua_set_cipline_tech_object_curstep(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'curstep'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->curstep = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: state of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_state
+static int tolua_get_cipline_tech_object_state(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'state'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->state);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: state of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_state
+static int tolua_set_cipline_tech_object_state(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'state'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->state = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: curprg of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_curprg
+static int tolua_get_cipline_tech_object_curprg(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'curprg'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->curprg);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: curprg of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_curprg
+static int tolua_set_cipline_tech_object_curprg(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'curprg'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->curprg = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: nmr of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_nmr
+static int tolua_get_cipline_tech_object_nmr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'nmr'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->nmr);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: nmr of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_nmr
+static int tolua_set_cipline_tech_object_nmr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'nmr'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->nmr = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: cip_in_error of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_cip_in_error
+static int tolua_get_cipline_tech_object_cip_in_error(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'cip_in_error'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->cip_in_error);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: cip_in_error of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_cip_in_error
+static int tolua_set_cipline_tech_object_cip_in_error(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'cip_in_error'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->cip_in_error = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: disable_tank_heating of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_disable_tank_heating
+static int tolua_get_cipline_tech_object_disable_tank_heating(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'disable_tank_heating'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->disable_tank_heating);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: disable_tank_heating of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_disable_tank_heating
+static int tolua_set_cipline_tech_object_disable_tank_heating(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'disable_tank_heating'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->disable_tank_heating = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: V00 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V00_ptr
+static int tolua_get_cipline_tech_object_V00_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V00'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->V00,"i_DO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: V00 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_V00_ptr
+static int tolua_set_cipline_tech_object_V00_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V00'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->V00 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: V01 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V01_ptr
+static int tolua_get_cipline_tech_object_V01_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V01'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->V01,"i_DO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: V01 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_V01_ptr
+static int tolua_set_cipline_tech_object_V01_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V01'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->V01 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: V03 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V03_ptr
+static int tolua_get_cipline_tech_object_V03_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V03'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->V03,"i_DO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: V03 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_V03_ptr
+static int tolua_set_cipline_tech_object_V03_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V03'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->V03 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: V02 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V02_ptr
+static int tolua_get_cipline_tech_object_V02_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V02'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->V02,"i_DO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: V02 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_V02_ptr
+static int tolua_set_cipline_tech_object_V02_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V02'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->V02 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: V04 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V04_ptr
+static int tolua_get_cipline_tech_object_V04_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V04'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->V04,"i_DO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: V04 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_V04_ptr
+static int tolua_set_cipline_tech_object_V04_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V04'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->V04 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: V05 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V05_ptr
+static int tolua_get_cipline_tech_object_V05_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V05'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->V05,"i_DO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: V05 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_V05_ptr
+static int tolua_set_cipline_tech_object_V05_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V05'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->V05 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: V06 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V06_ptr
+static int tolua_get_cipline_tech_object_V06_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V06'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->V06,"i_DO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: V06 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_V06_ptr
+static int tolua_set_cipline_tech_object_V06_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V06'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->V06 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: V07 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V07_ptr
+static int tolua_get_cipline_tech_object_V07_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V07'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->V07,"i_DO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: V07 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_V07_ptr
+static int tolua_set_cipline_tech_object_V07_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V07'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->V07 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: V08 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V08_ptr
+static int tolua_get_cipline_tech_object_V08_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V08'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->V08,"i_DO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: V08 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_V08_ptr
+static int tolua_set_cipline_tech_object_V08_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V08'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->V08 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: V09 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V09_ptr
+static int tolua_get_cipline_tech_object_V09_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V09'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->V09,"i_DO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: V09 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_V09_ptr
+static int tolua_set_cipline_tech_object_V09_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V09'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->V09 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: V10 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V10_ptr
+static int tolua_get_cipline_tech_object_V10_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V10'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->V10,"i_DO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: V10 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_V10_ptr
+static int tolua_set_cipline_tech_object_V10_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V10'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->V10 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: V11 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V11_ptr
+static int tolua_get_cipline_tech_object_V11_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V11'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->V11,"i_DO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: V11 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_V11_ptr
+static int tolua_set_cipline_tech_object_V11_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V11'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->V11 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: V12 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V12_ptr
+static int tolua_get_cipline_tech_object_V12_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V12'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->V12,"i_DO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: V12 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_V12_ptr
+static int tolua_set_cipline_tech_object_V12_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V12'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->V12 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: V13 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V13_ptr
+static int tolua_get_cipline_tech_object_V13_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V13'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->V13,"i_DO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: V13 of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_V13_ptr
+static int tolua_set_cipline_tech_object_V13_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V13'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->V13 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: NP of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_NP_ptr
+static int tolua_get_cipline_tech_object_NP_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'NP'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->NP,"i_DO_AO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: NP of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_NP_ptr
+static int tolua_set_cipline_tech_object_NP_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'NP'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_AO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->NP = ((i_DO_AO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: NK of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_NK_ptr
+static int tolua_get_cipline_tech_object_NK_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'NK'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->NK,"i_DO_AO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: NK of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_NK_ptr
+static int tolua_set_cipline_tech_object_NK_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'NK'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_AO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->NK = ((i_DO_AO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: NS of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_NS_ptr
+static int tolua_get_cipline_tech_object_NS_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'NS'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->NS,"i_DO_AO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: NS of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_NS_ptr
+static int tolua_set_cipline_tech_object_NS_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'NS'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DO_AO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->NS = ((i_DO_AO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: LL of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_LL_ptr
+static int tolua_get_cipline_tech_object_LL_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LL'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->LL,"i_DI_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: LL of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_LL_ptr
+static int tolua_set_cipline_tech_object_LL_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LL'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DI_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->LL = ((i_DI_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: LM of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_LM_ptr
+static int tolua_get_cipline_tech_object_LM_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LM'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->LM,"i_DI_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: LM of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_LM_ptr
+static int tolua_set_cipline_tech_object_LM_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LM'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DI_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->LM = ((i_DI_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: LH of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_LH_ptr
+static int tolua_get_cipline_tech_object_LH_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LH'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->LH,"i_DI_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: LH of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_LH_ptr
+static int tolua_set_cipline_tech_object_LH_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LH'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DI_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->LH = ((i_DI_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: LWL of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_LWL_ptr
+static int tolua_get_cipline_tech_object_LWL_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LWL'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->LWL,"i_DI_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: LWL of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_LWL_ptr
+static int tolua_set_cipline_tech_object_LWL_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LWL'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DI_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->LWL = ((i_DI_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: LWH of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_LWH_ptr
+static int tolua_get_cipline_tech_object_LWH_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LWH'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->LWH,"i_DI_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: LWH of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_LWH_ptr
+static int tolua_set_cipline_tech_object_LWH_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LWH'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DI_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->LWH = ((i_DI_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: LSL of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_LSL_ptr
+static int tolua_get_cipline_tech_object_LSL_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LSL'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->LSL,"i_DI_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: LSL of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_LSL_ptr
+static int tolua_set_cipline_tech_object_LSL_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LSL'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DI_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->LSL = ((i_DI_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: LSH of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_LSH_ptr
+static int tolua_get_cipline_tech_object_LSH_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LSH'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->LSH,"i_DI_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: LSH of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_LSH_ptr
+static int tolua_set_cipline_tech_object_LSH_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LSH'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DI_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->LSH = ((i_DI_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: LKL of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_LKL_ptr
+static int tolua_get_cipline_tech_object_LKL_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LKL'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->LKL,"i_DI_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: LKL of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_LKL_ptr
+static int tolua_set_cipline_tech_object_LKL_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LKL'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DI_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->LKL = ((i_DI_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: LKH of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_LKH_ptr
+static int tolua_get_cipline_tech_object_LKH_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LKH'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->LKH,"i_DI_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: LKH of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_LKH_ptr
+static int tolua_set_cipline_tech_object_LKH_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'LKH'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DI_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->LKH = ((i_DI_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: TP of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_TP_ptr
+static int tolua_get_cipline_tech_object_TP_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'TP'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->TP,"i_AI_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: TP of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_TP_ptr
+static int tolua_set_cipline_tech_object_TP_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'TP'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_AI_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->TP = ((i_AI_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: TR of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_TR_ptr
+static int tolua_get_cipline_tech_object_TR_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'TR'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->TR,"i_AI_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: TR of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_TR_ptr
+static int tolua_set_cipline_tech_object_TR_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'TR'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_AI_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->TR = ((i_AI_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: Q of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_Q_ptr
+static int tolua_get_cipline_tech_object_Q_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'Q'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->Q,"i_AI_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: Q of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_Q_ptr
+static int tolua_set_cipline_tech_object_Q_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'Q'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_AI_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->Q = ((i_AI_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: ao of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_ao_ptr
+static int tolua_get_cipline_tech_object_ao_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'ao'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->ao,"i_AO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: ao of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_ao_ptr
+static int tolua_set_cipline_tech_object_ao_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'ao'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_AO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->ao = ((i_AO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: PUMPFREQ of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_PUMPFREQ_ptr
+static int tolua_get_cipline_tech_object_PUMPFREQ_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'PUMPFREQ'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->PUMPFREQ,"i_AO_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: PUMPFREQ of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_PUMPFREQ_ptr
+static int tolua_set_cipline_tech_object_PUMPFREQ_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'PUMPFREQ'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_AO_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->PUMPFREQ = ((i_AO_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: FL of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_FL_ptr
+static int tolua_get_cipline_tech_object_FL_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'FL'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->FL,"i_DI_device");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: FL of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_FL_ptr
+static int tolua_set_cipline_tech_object_FL_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'FL'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_DI_device",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->FL = ((i_DI_device*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: cnt of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_cnt_ptr
+static int tolua_get_cipline_tech_object_cnt_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'cnt'",NULL);
+#endif
+   tolua_pushusertype(tolua_S,(void*)self->cnt,"i_counter");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: cnt of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_cnt_ptr
+static int tolua_set_cipline_tech_object_cnt_ptr(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'cnt'",NULL);
+  if (!tolua_isusertype(tolua_S,2,"i_counter",0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->cnt = ((i_counter*)  tolua_tousertype(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* get function: msa_number of class  cipline_tech_object */
 #ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_msa_number
 static int tolua_get_cipline_tech_object_msa_number(lua_State* tolua_S)
@@ -6407,6 +7637,47 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"new",tolua_PAC_dev_cipline_tech_object_new00);
    tolua_function(tolua_S,"new_local",tolua_PAC_dev_cipline_tech_object_new00_local);
    tolua_function(tolua_S,".call",tolua_PAC_dev_cipline_tech_object_new00_local);
+   tolua_variable(tolua_S,"blocked",tolua_get_cipline_tech_object_blocked,tolua_set_cipline_tech_object_blocked);
+   tolua_variable(tolua_S,"opcip",tolua_get_cipline_tech_object_opcip,tolua_set_cipline_tech_object_opcip);
+   tolua_variable(tolua_S,"curstep",tolua_get_cipline_tech_object_curstep,tolua_set_cipline_tech_object_curstep);
+   tolua_variable(tolua_S,"state",tolua_get_cipline_tech_object_state,tolua_set_cipline_tech_object_state);
+   tolua_variable(tolua_S,"curprg",tolua_get_cipline_tech_object_curprg,tolua_set_cipline_tech_object_curprg);
+   tolua_variable(tolua_S,"nmr",tolua_get_cipline_tech_object_nmr,tolua_set_cipline_tech_object_nmr);
+   tolua_variable(tolua_S,"cip_in_error",tolua_get_cipline_tech_object_cip_in_error,tolua_set_cipline_tech_object_cip_in_error);
+   tolua_variable(tolua_S,"disable_tank_heating",tolua_get_cipline_tech_object_disable_tank_heating,tolua_set_cipline_tech_object_disable_tank_heating);
+   tolua_variable(tolua_S,"V00",tolua_get_cipline_tech_object_V00_ptr,tolua_set_cipline_tech_object_V00_ptr);
+   tolua_variable(tolua_S,"V01",tolua_get_cipline_tech_object_V01_ptr,tolua_set_cipline_tech_object_V01_ptr);
+   tolua_variable(tolua_S,"V03",tolua_get_cipline_tech_object_V03_ptr,tolua_set_cipline_tech_object_V03_ptr);
+   tolua_variable(tolua_S,"V02",tolua_get_cipline_tech_object_V02_ptr,tolua_set_cipline_tech_object_V02_ptr);
+   tolua_variable(tolua_S,"V04",tolua_get_cipline_tech_object_V04_ptr,tolua_set_cipline_tech_object_V04_ptr);
+   tolua_variable(tolua_S,"V05",tolua_get_cipline_tech_object_V05_ptr,tolua_set_cipline_tech_object_V05_ptr);
+   tolua_variable(tolua_S,"V06",tolua_get_cipline_tech_object_V06_ptr,tolua_set_cipline_tech_object_V06_ptr);
+   tolua_variable(tolua_S,"V07",tolua_get_cipline_tech_object_V07_ptr,tolua_set_cipline_tech_object_V07_ptr);
+   tolua_variable(tolua_S,"V08",tolua_get_cipline_tech_object_V08_ptr,tolua_set_cipline_tech_object_V08_ptr);
+   tolua_variable(tolua_S,"V09",tolua_get_cipline_tech_object_V09_ptr,tolua_set_cipline_tech_object_V09_ptr);
+   tolua_variable(tolua_S,"V10",tolua_get_cipline_tech_object_V10_ptr,tolua_set_cipline_tech_object_V10_ptr);
+   tolua_variable(tolua_S,"V11",tolua_get_cipline_tech_object_V11_ptr,tolua_set_cipline_tech_object_V11_ptr);
+   tolua_variable(tolua_S,"V12",tolua_get_cipline_tech_object_V12_ptr,tolua_set_cipline_tech_object_V12_ptr);
+   tolua_variable(tolua_S,"V13",tolua_get_cipline_tech_object_V13_ptr,tolua_set_cipline_tech_object_V13_ptr);
+   tolua_variable(tolua_S,"NP",tolua_get_cipline_tech_object_NP_ptr,tolua_set_cipline_tech_object_NP_ptr);
+   tolua_variable(tolua_S,"NK",tolua_get_cipline_tech_object_NK_ptr,tolua_set_cipline_tech_object_NK_ptr);
+   tolua_variable(tolua_S,"NS",tolua_get_cipline_tech_object_NS_ptr,tolua_set_cipline_tech_object_NS_ptr);
+   tolua_variable(tolua_S,"LL",tolua_get_cipline_tech_object_LL_ptr,tolua_set_cipline_tech_object_LL_ptr);
+   tolua_variable(tolua_S,"LM",tolua_get_cipline_tech_object_LM_ptr,tolua_set_cipline_tech_object_LM_ptr);
+   tolua_variable(tolua_S,"LH",tolua_get_cipline_tech_object_LH_ptr,tolua_set_cipline_tech_object_LH_ptr);
+   tolua_variable(tolua_S,"LWL",tolua_get_cipline_tech_object_LWL_ptr,tolua_set_cipline_tech_object_LWL_ptr);
+   tolua_variable(tolua_S,"LWH",tolua_get_cipline_tech_object_LWH_ptr,tolua_set_cipline_tech_object_LWH_ptr);
+   tolua_variable(tolua_S,"LSL",tolua_get_cipline_tech_object_LSL_ptr,tolua_set_cipline_tech_object_LSL_ptr);
+   tolua_variable(tolua_S,"LSH",tolua_get_cipline_tech_object_LSH_ptr,tolua_set_cipline_tech_object_LSH_ptr);
+   tolua_variable(tolua_S,"LKL",tolua_get_cipline_tech_object_LKL_ptr,tolua_set_cipline_tech_object_LKL_ptr);
+   tolua_variable(tolua_S,"LKH",tolua_get_cipline_tech_object_LKH_ptr,tolua_set_cipline_tech_object_LKH_ptr);
+   tolua_variable(tolua_S,"TP",tolua_get_cipline_tech_object_TP_ptr,tolua_set_cipline_tech_object_TP_ptr);
+   tolua_variable(tolua_S,"TR",tolua_get_cipline_tech_object_TR_ptr,tolua_set_cipline_tech_object_TR_ptr);
+   tolua_variable(tolua_S,"Q",tolua_get_cipline_tech_object_Q_ptr,tolua_set_cipline_tech_object_Q_ptr);
+   tolua_variable(tolua_S,"ao",tolua_get_cipline_tech_object_ao_ptr,tolua_set_cipline_tech_object_ao_ptr);
+   tolua_variable(tolua_S,"PUMPFREQ",tolua_get_cipline_tech_object_PUMPFREQ_ptr,tolua_set_cipline_tech_object_PUMPFREQ_ptr);
+   tolua_variable(tolua_S,"FL",tolua_get_cipline_tech_object_FL_ptr,tolua_set_cipline_tech_object_FL_ptr);
+   tolua_variable(tolua_S,"cnt",tolua_get_cipline_tech_object_cnt_ptr,tolua_set_cipline_tech_object_cnt_ptr);
    tolua_variable(tolua_S,"msa_number",tolua_get_cipline_tech_object_msa_number,tolua_set_cipline_tech_object_msa_number);
    tolua_variable(tolua_S,"par_float",tolua_get_cipline_tech_object_par_float,tolua_set_cipline_tech_object_par_float);
    tolua_variable(tolua_S,"rt_par_float",tolua_get_cipline_tech_object_rt_par_float,tolua_set_cipline_tech_object_rt_par_float);

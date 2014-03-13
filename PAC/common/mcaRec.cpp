@@ -560,7 +560,6 @@ int TRecipeManager::SaveToFile(const char* filename)
 #ifdef DEBUG
 	Print("Saving recipes to file %s\n", filename);
 #endif // DEBUG
-#ifdef WIN_OS
 	FILE* memFile = NULL;
 	memFile = fopen(filename, "r+");
 	if (NULL == memFile)
@@ -573,13 +572,11 @@ int TRecipeManager::SaveToFile(const char* filename)
 		fwrite(recipeMemory, 1, recipeMemorySize, memFile);
 		fclose(memFile);
 		}
-#endif //WIN_OS
 	return 0;
 	}
 
 int TRecipeManager::LoadFromFile( const char* filename )
 	{
-#ifdef WIN_OS
 	FILE* memFile = NULL;
 	memset(recipeMemory, 0, recipeMemorySize);
 	memFile = fopen(filename, "r+");
@@ -588,6 +585,5 @@ int TRecipeManager::LoadFromFile( const char* filename )
 		fread(recipeMemory, 1, recipeMemorySize, memFile);
 		fclose(memFile);
 		}
-#endif // WIN_OS
 	return 0;
 	}

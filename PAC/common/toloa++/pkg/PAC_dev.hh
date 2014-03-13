@@ -986,6 +986,50 @@ class cipline_tech_object: public tech_object
 			unsigned int par_float_count, unsigned int runtime_par_float_count,
 			unsigned int par_uint_count, unsigned int runtime_par_uint_count );
 
+		int blocked;
+		int opcip;
+		int curstep;
+		int state;
+		int curprg;
+		int nmr;
+		int cip_in_error;
+		int disable_tank_heating; //отключение подогрева при начале подачи растворов в танк(для МСА со старыми регулирующими клапанами)
+
+		i_DO_device* V00;
+		i_DO_device* V01;
+		i_DO_device* V03;
+		i_DO_device* V02;
+		i_DO_device* V04;
+		i_DO_device* V05;
+		i_DO_device* V06;
+		i_DO_device* V07;
+		i_DO_device* V08;
+		i_DO_device* V09;
+		i_DO_device* V10;
+		i_DO_device* V11;
+		i_DO_device* V12;
+		i_DO_device* V13;
+
+		i_DO_AO_device* NP;
+		i_DO_AO_device* NK;
+		i_DO_AO_device* NS;
+		i_DI_device* LL;
+		i_DI_device* LM;
+		i_DI_device* LH;
+		i_DI_device* LWL;
+		i_DI_device* LWH;
+		i_DI_device* LSL;
+		i_DI_device* LSH;
+		i_DI_device* LKL;
+		i_DI_device* LKH;
+		i_AI_device* TP;
+		i_AI_device* TR;
+		i_AI_device* Q;
+		i_AO_device* ao;
+		i_AO_device* PUMPFREQ;
+		i_DI_device*FL;
+		i_counter *cnt;
+
 		int msa_number; //Номер станции
 		saved_params_float      par_float;   ///< Сохраняемые пар-ры, тип float.
 		run_time_params_float   rt_par_float;///< Рабочие параметры, тип float.
