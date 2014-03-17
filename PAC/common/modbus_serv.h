@@ -22,18 +22,11 @@ class ModbusServ
 		static int CP1251toUnicode( const char* Input, unsigned char* Buf );
 		static int UnicodetoCP1251(char* Output, unsigned char* Buf, int inputlen);
 		static unsigned char UTable[128][2];
-
-        static void init();
-
-#ifdef KHUTOR
-        enum CONSTS
+                
+        static int_2 UnpackInt16( unsigned char* Buf, int offset )
             {
-            KOAG_CNT = 12,
-            };
-
-        static i_DO_device* KOAG_HL1[ KOAG_CNT ];
-        static i_AI_device* KOAG_TE[ KOAG_CNT ][ 2 ];
-#endif //KHUTOR
+            return UnpackInt16( Buf + offset );
+            }
 	};
 
 #endif // modbus_serv_h__

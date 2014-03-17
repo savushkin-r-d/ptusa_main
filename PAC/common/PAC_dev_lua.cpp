@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 03/13/14 16:24:57.
+** Generated automatically by tolua++-1.0.92 on 03/17/14 15:06:44.
 */
 
 #ifndef __cplusplus
@@ -24,6 +24,7 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 #include "errors.h"
 #include "rm_manager.h"
 #include "modbus_client.h"
+#include "modbus_serv.h"
 
 /* function to release collected object via destructor */
 #ifdef __cplusplus
@@ -68,6 +69,7 @@ static int tolua_collect_tech_object (lua_State* tolua_S)
 /* function to register type */
 static void tolua_reg_types (lua_State* tolua_S)
 {
+ tolua_usertype(tolua_S,"ModbusServ");
  tolua_usertype(tolua_S,"i_DO_AO_device");
  tolua_usertype(tolua_S,"action");
  tolua_usertype(tolua_S,"modbus_client");
@@ -2429,6 +2431,38 @@ static int tolua_PAC_dev_tech_object_is_idle00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: get_number of class  tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_tech_object_get_number00
+static int tolua_PAC_dev_tech_object_get_number00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const tech_object",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const tech_object* self = (const tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_number'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->get_number();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_number'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: set_err_msg of class  tech_object */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_tech_object_set_err_msg00
 static int tolua_PAC_dev_tech_object_set_err_msg00(lua_State* tolua_S)
@@ -2992,6 +3026,38 @@ static int tolua_PAC_dev_step__geti00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function '.geti'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_name of class  step */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_step_get_name00
+static int tolua_PAC_dev_step_get_name00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const step",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const step* self = (const step*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_name'", NULL);
+#endif
+  {
+   const char* tolua_ret = (const char*)  self->get_name();
+   tolua_pushstring(tolua_S,(const char*)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_name'.",&tolua_err);
  return 0;
 #endif
 }
@@ -7322,6 +7388,38 @@ static int tolua_PAC_dev_modbus_client_get_id00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: UnpackInt16 of class  ModbusServ */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_ModbusServ_UnpackInt1600
+static int tolua_PAC_dev_ModbusServ_UnpackInt1600(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertable(tolua_S,1,"ModbusServ",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  unsigned char* buf = ((unsigned char*)  tolua_tostring(tolua_S,2,0));
+  int offset = ((int)  tolua_tonumber(tolua_S,3,0));
+  {
+   short int tolua_ret = (short int)  ModbusServ::UnpackInt16(buf,offset);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'UnpackInt16'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* Open function */
 TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
 {
@@ -7462,6 +7560,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_variable(tolua_S,"timers",tolua_get_tech_object_timers,tolua_set_tech_object_timers);
    tolua_function(tolua_S,"get_modes_manager",tolua_PAC_dev_tech_object_get_modes_manager00);
    tolua_function(tolua_S,"is_idle",tolua_PAC_dev_tech_object_is_idle00);
+   tolua_function(tolua_S,"get_number",tolua_PAC_dev_tech_object_get_number00);
    tolua_constant(tolua_S,"ERR_CANT_ON",tech_object::ERR_CANT_ON);
    tolua_constant(tolua_S,"ERR_ON_WITH_ERRORS",tech_object::ERR_ON_WITH_ERRORS);
    tolua_constant(tolua_S,"ERR_OFF",tech_object::ERR_OFF);
@@ -7497,6 +7596,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_cclass(tolua_S,"step","step","",NULL);
   tolua_beginmodule(tolua_S,"step");
    tolua_function(tolua_S,".geti",tolua_PAC_dev_step__geti00);
+   tolua_function(tolua_S,"get_name",tolua_PAC_dev_step_get_name00);
    tolua_constant(tolua_S,"A_ON",step::A_ON);
    tolua_constant(tolua_S,"A_OFF",step::A_OFF);
    tolua_constant(tolua_S,"A_UPPER_SEATS_ON",step::A_UPPER_SEATS_ON);
@@ -7719,6 +7819,10 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"set_bit",tolua_PAC_dev_modbus_client_set_bit00);
    tolua_function(tolua_S,"get_bit",tolua_PAC_dev_modbus_client_get_bit00);
    tolua_function(tolua_S,"get_id",tolua_PAC_dev_modbus_client_get_id00);
+  tolua_endmodule(tolua_S);
+  tolua_cclass(tolua_S,"ModbusServ","ModbusServ","",NULL);
+  tolua_beginmodule(tolua_S,"ModbusServ");
+   tolua_function(tolua_S,"UnpackInt16",tolua_PAC_dev_ModbusServ_UnpackInt1600);
   tolua_endmodule(tolua_S);
  tolua_endmodule(tolua_S);
  return 1;

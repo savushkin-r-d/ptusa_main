@@ -55,10 +55,10 @@ int check_file( const char* file_name, char* err_str )
 //-----------------------------------------------------------------------------
 #if !defined RM_PAC
 const int SYS_FILE_CNT = 3;
-const int FILE_CNT     = 6;
+const int FILE_CNT     = 7;
 #else
 const int SYS_FILE_CNT = 4;
-const int FILE_CNT     = 8;
+const int FILE_CNT     = 9;
 #endif // RM_PAC
 //-----------------------------------------------------------------------------
 #ifdef PAC_PC
@@ -81,6 +81,7 @@ const char *FILES[ FILE_CNT ] =
     "main.wago.lua",
     "main.devices.lua",
     "main.objects.lua",
+    "main.modbus_srv.lua",
 #if defined RM_PAC
     "main.rm_PACS.lua"
 #endif // defined RM_PAC
@@ -98,6 +99,7 @@ const int FILES_VERSION[ FILE_CNT ] =
     1, //"main.wago.plua",
     1, //"main.devices.plua",
     1, //"main.objects.plua",
+    1, //"main.modbus_srv.lua",
 #if defined RM_PAC
     1, //"main.rm_PACS.lua"
 #endif // defined RM_PAC
@@ -232,6 +234,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
 
         if ( luaL_dofile( L, path ) != 0 )           // ../system scripts
             {
+            lua_pop( L, 1 ); // Удаляем ошибку о ненайденном файле.
             if ( luaL_dofile( L, FILES[ i ] ) != 0 ) // .
                 {
 #ifdef DEBUG
@@ -245,7 +248,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
                 }
             }
 
-#else
+#else // PAC_PC
         if ( luaL_dofile( L, FILES[ i ] ) != 0 )
             {
 #ifdef DEBUG
@@ -337,8 +340,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
     tcp_communicator::init_instance( PAC_name_rus, PAC_name_eng );
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
-
-    ModbusServ::init();
+        
 	G_CMMCTR->reg_service( 15, ModbusServ::ModbusService );
 
     lua_gc( L, LUA_GCRESTART, 0 );

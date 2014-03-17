@@ -20,6 +20,7 @@ $#include "errors.h"
 $#include "rm_manager.h"
 $#include "modbus_client.h"
 
+$#include "modbus_serv.h"
 //-----------------------------------------------------------------------------
 /// @brief ”стройство на основе дискретного входа.
 ///
@@ -490,6 +491,8 @@ class tech_object
         ///
         bool is_idle() const;
 
+        int get_number() const;
+
         enum ERR_MSG_TYPES
             {
             ERR_CANT_ON,
@@ -600,6 +603,8 @@ class step
         /// @return - значение действи€ с заданным индексом. ≈сли индекс
         /// выходит за диапазон, возвращаетс€ значение 0.
         action* operator[] ( int idx );
+
+        const char* get_name() const;
 
         enum ACTIONS
             {
@@ -1060,8 +1065,7 @@ class rm_manager
         void add_rm_cmmctr( char* name, char* IP_address, 
             int remote_PAC_id );
     };   
-//---------------------------------------------------------------------------
-
+//--------------------------------------------------------------------------
 class modbus_client 
 	{
 	protected:
@@ -1088,3 +1092,10 @@ class modbus_client
 		int get_bit(unsigned int address);
 		int get_id();
 	};
+//-------------------------------------------------------------------------
+class ModbusServ
+    {
+    public:
+        static short int UnpackInt16( unsigned char* buf, int offset );
+    }
+//-------------------------------------------------------------------------

@@ -469,6 +469,11 @@ class mode_manager
         /// @return - время системы без активных режимов.
         unsigned long get_idle_time();
 
+        void reset_idle_time()
+            {
+            last_action_time = get_millisec();
+            }
+
         /// @brief Отладочный вывод объекта в консоль.
         void print();
 

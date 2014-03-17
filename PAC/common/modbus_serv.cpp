@@ -1,13 +1,6 @@
 #include "modbus_serv.h"
 
-#ifdef KHUTOR
-#include "PAC_dev.h"
-#endif //KHUTOR
-
-#ifdef KHUTOR
-i_DO_device* ModbusServ::KOAG_HL1[ ModbusServ::KOAG_CNT ];
-i_AI_device* ModbusServ::KOAG_TE[ KOAG_CNT ][ 2 ];
-#endif //KHUTOR
+#include "lua_manager.h"
 
 unsigned char ModbusServ::UTable[128][2] =
     {
@@ -143,252 +136,272 @@ unsigned char ModbusServ::UTable[128][2] =
 
 long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *outdata )
     {
-    unsigned int numberofElements;
-    unsigned int startingAddress;
-    unsigned char numberofBytes;
-    unsigned int i;
-
-#ifdef LINUX_OS
-    __attribute__((__unused__))
-#endif
-    unsigned int objnumber;
-#ifdef LINUX_OS
-    __attribute__((__unused__))
-#endif
-    unsigned int coilgroup;
-
+    lua_State* L = lua_manager::get_instance()->get_Lua();
+       
     switch ( data[1] ) //Modbus command
         {
+
         case 0x01: //Read Coils
-            startingAddress = data[2] * 256 + data[3];
-            numberofElements = data[4] * 256 + data[5];
-            numberofBytes = numberofElements / 8;
-            if (numberofElements % 8) numberofBytes++;
-            outdata[2] = numberofBytes;
-            for (i = 0; i < numberofElements; i++)
+            {            
+            unsigned int startingAddress  = data[2] * 256 + data[3];
+            unsigned int numberofElements = data[4] * 256 + data[5];
+            unsigned char numberofBytes   = numberofElements / 8;
+            if ( numberofElements % 8 ) numberofBytes++;
+            outdata[ 2 ] = numberofBytes;
+                        
+            unsigned int coilgroup = data[0];
+
+            static char has_Lua_read_coils = 0;
+            if ( has_Lua_read_coils == 0 )
                 {
-                objnumber = i+startingAddress;
-                coilgroup = data[0];
-#ifdef KHUTOR
-                if ( coilgroup >= 1 && coilgroup <= 16 )
+                lua_getfield( L, LUA_GLOBALSINDEX, "read_coils" );
+
+                if ( lua_isfunction( L, -1 ) )
                     {
-                    int coag_idx = ( coilgroup - 1 ) * 2 + 1;
-                    if( objnumber >= 100 ) coag_idx++;
-
-                    if ( 0 == objnumber || 100 == objnumber )
-                        {
-                        ForceBit( i, &outdata[ 3 ],
-                            KOAG_HL1[ coag_idx - 1 ]->get_state() );
-                        }
-
-                    if ( ( objnumber >= 1 && objnumber <= 16 ) ||
-                        ( objnumber >= 101 && objnumber <= 116 ) )
-                        {
-                        ForceBit( i, &outdata[ 3 ],
-                            G_TECH_OBJECTS( coag_idx )->get_mode( objnumber ) );
-                        }
-                    //Откачка сыворотки из верхней части.
-                    if ( 17 == objnumber || 117 == objnumber )
-                        {
-                        ForceBit( i, &outdata[ 3 ],
-                            G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 1 ] );
-                        }
-                    //Откачка сыворотки из средней части.
-                    if ( 18 == objnumber || 118 == objnumber )
-                        {
-                        ForceBit( i, &outdata[ 3 ],
-                            G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 2 ] );
-                        }
-                    //Откачка сыворотки из нижней части.
-                    if ( 19 == objnumber || 119 == objnumber )
-                        {
-                        ForceBit( i, &outdata[ 3 ],
-                            G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 3 ] );
-                        }
-
-                    //Подача основы в дренаж.
-                    if ( 20 == objnumber || 120 == objnumber )
-                        {
-                        ForceBit( i, &outdata[ 3 ],
-                            G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 5 ] );
-                        }
-                    //Подача основы в танк.
-                    if ( 21 == objnumber || 121 == objnumber )
-                        {
-                        ForceBit( i, &outdata[ 3 ],
-                            G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 4 ] );
-                        }
+                    has_Lua_read_coils = 2;
                     }
-#endif //KHUTOR
+                else
+                    {
+                    has_Lua_read_coils = 1;
+                    }
+
+                lua_remove( L, -1 );  // Stack: remove function "read_coils".
                 }
+
+            int i = 0;
+            if ( has_Lua_read_coils == 2 )
+                {
+                lua_getfield( L, LUA_GLOBALSINDEX, "read_coils" );
+                lua_pushnumber( L, coilgroup );
+                lua_pushnumber( L, startingAddress );
+                lua_pushnumber( L, numberofElements );
+                
+                int i_line = lua_pcall( L, 3, 1, 0 );
+
+                if ( i_line != 0 )
+                    {
+                    Print( "Evaluate Modbus service error: %s\n",
+                        lua_tostring( L, -1 ) );
+
+                    lua_pop( L, 1 );  
+                    return 0;
+                    }
+                
+                if ( lua_istable( L, -1 ) )
+                	{
+                    lua_pushnil( L );
+                    while( lua_next( L, -2 ) )
+                        {
+                        int bit_res = ( int ) lua_tonumber( L, -1 );
+                        lua_pop( L, 1 );
+                        ForceBit( i, &outdata[ 3 ], bit_res );
+                        i++;
+                        }                                 
+                	}      
+                lua_pop( L, 1 );  
+                }
+
             return 3+numberofBytes;
+            }
 
         case 0x03: //Read Holding Registers
-            startingAddress = data[2] * 256 + data[3];
-            numberofElements = data[4] * 256 + data[5];
-            outdata[2] = (numberofElements * 2) & 0xFF;
-            for (i = 0; i < numberofElements; i++)
+            {            
+            unsigned int startingAddress = data[2] * 256 + data[3];
+            unsigned int numberofElements = data[4] * 256 + data[5];
+            outdata[ 2 ] = (numberofElements * 2) & 0xFF;           
+            unsigned int coilgroup = data[0];
+
+            int idx = 0;
+            static char has_Lua_read_holding_registers = 0;
+            if ( has_Lua_read_holding_registers == 0 )
                 {
-                coilgroup = data[0];
-                objnumber = i+startingAddress;
+                lua_getfield( L, LUA_GLOBALSINDEX, "read_holding_registers" );
 
-#ifdef KHUTOR
-                if ( coilgroup >= 1 && coilgroup <= 16 )
+                if ( lua_isfunction( L, -1 ) )
                     {
-                    int coag_idx = ( coilgroup - 1 ) * 2 + 1;
-                    if( objnumber >= 100 ) coag_idx++;
-
-                    if ( 0 == objnumber || 100 == objnumber )
-                        {
-                        int value = G_TECH_OBJECTS( coag_idx )->get_number();
-                        PackInt16( value, &outdata[ 3 + i * 2 ] );
-                        }
-
-                    if ( 1 == objnumber || 101 == objnumber )
-                        {
-                        float value = KOAG_TE[ coag_idx - 1 ][ 0 ]->get_value();
-                        PackFloat( value, &outdata[ 3 + i * 2 ] );
-                        }
-                    if ( 3 == objnumber || 103 == objnumber )
-                        {
-                        float value = KOAG_TE[ coag_idx - 1 ][ 1 ]->get_value();
-                        PackFloat( value, &outdata[ 3 + i * 2 ] );
-                        }
-                    if ( 5 == objnumber || 105 == objnumber )
-                        {
-                        int value = G_TECH_OBJECTS( coag_idx )->get_active_mode();
-
-                        PackInt16( value, &outdata[ 3 + i * 2 ] );
-                        }
-
-                    if ( 6 == objnumber || 106 == objnumber )
-                        {
-                        int_2 value = ( int_2 ) G_TECH_OBJECTS( coag_idx )->par_float[ 1 ];
-                        PackInt16( value, &outdata[ 3 + i * 2 ] );
-                        }
-
-                    if ( 7 == objnumber || 107 == objnumber )
-                        {
-                        int value = G_TECH_OBJECTS( coag_idx )->get_active_mode();
-
-                        u_long t = 0;
-                        if ( 0 == value )
-                            {
-                            t = G_TECH_OBJECTS( coag_idx )->get_modes_manager()->get_idle_time();
-                            }
-                        else
-                            {
-                            t = ( *G_TECH_OBJECTS( coag_idx
-                                )->get_modes_manager() )[ value ]->evaluation_time();
-                            }
-
-                        PackTime( t, &outdata[ 3 + i * 2 ] );
-                        }
-
-                    if ( 11 == objnumber || 111 == objnumber )
-                        {
-                        int mode_idx = G_TECH_OBJECTS( coag_idx )->get_active_mode();
-
-                        static const char* no_step = "";
-                        const char* step_name = no_step;
-
-                        if ( mode_idx > 0 )
-                        	{
-                            int step_idx = G_TECH_OBJECTS( coag_idx
-                                )->get_modes_manager()[ 0 ][ mode_idx ]->active_step();
-                            if ( step_idx )
-                                {
-                                step_name = G_TECH_OBJECTS( coag_idx
-                                    )->get_modes_manager()[ 0 ][ mode_idx ][ 0 ][ step_idx ]->get_name();
-                                }
-                            }
-
-                        CP1251toUnicode( step_name, &outdata[ 3 + i * 2 ] );
-                        }
+                    has_Lua_read_holding_registers = 2;
                     }
-#endif // KHUTOR
+                else
+                    {
+                    has_Lua_read_holding_registers = 1;
+                    }
+
+                lua_remove( L, -1 );  // Stack: remove function "read_holding_registers".
                 }
+                        
+            if ( has_Lua_read_holding_registers == 2 )
+                {
+                lua_getfield( L, LUA_GLOBALSINDEX, "read_holding_registers" );
+                lua_pushnumber( L, coilgroup );
+                lua_pushnumber( L, startingAddress );
+                lua_pushnumber( L, numberofElements );
+
+                int i_line = lua_pcall( L, 3, 1, 0 );
+
+                if ( i_line != 0 )
+                    {
+                    Print( "Evaluate Modbus service error: %s\n",
+                        lua_tostring( L, -1 ) );
+
+                    lua_pop( L, 1 );  
+                    return 0;
+                    }
+
+                if ( lua_istable( L, -1 ) )
+                    {
+                    lua_pushnil( L );
+                    while( lua_next( L, -2 ) )
+                        {
+                        int t = ( int ) lua_tonumber( L, -1 );
+                        lua_pop( L, 1 );
+
+                        if ( lua_next( L, -2 ) )
+                            {
+                            switch ( t )
+                                {
+                                case 1: // int16
+                                    {
+                                    int val = ( int ) lua_tonumber( L, -1 );
+                                    PackInt16( val, &outdata[ 3 + idx * 2 ] );
+                                    break;
+                                    }
+                                
+                                case 2: // float                                    
+                                    {
+                                    float val = ( float ) lua_tonumber( L, -1 );
+                                    PackFloat( val, &outdata[ 3 + idx * 2 ] );
+                                    break;
+                                    }
+
+                                case 3: // time                                    
+                                    {
+                                    u_long val = ( u_long ) lua_tonumber( L, -1 );
+                                    PackTime( val, &outdata[ 3 + idx * 2 ] );                                    
+                                    break;
+                                    }
+
+                                case 4: // String                                    
+                                    {
+                                    const char *val = lua_tostring( L, -1 );
+                                    CP1251toUnicode( val, &outdata[ 3 + idx * 2 ] );                       
+                                    break;
+                                    }
+                                }   
+
+                            lua_pop( L, 1 );
+                            }
+                        idx++;
+                        }     
+
+                    lua_pop( L, 1 );
+                    }  
+                else
+                    {
+                    Print( "Evaluate Modbus service error: %s\n",
+                        lua_tostring( L, -1 ) );
+
+                    lua_pop( L, 1 );  
+                    return 0; 
+                    }                
+                }           
+
             return 3+numberofElements*2;
+            }
 
         case 0x05: //Write Single Coil
-            startingAddress = data[2] * 256 + data[3];
-            objnumber = startingAddress;
-            coilgroup = data[0];
-#ifdef KHUTOR
-            if ( coilgroup >= 1 && coilgroup <= 16 )
+            {
+            unsigned int startingAddress = data[ 2 ] * 256 + data[ 3 ];            
+            unsigned int coilgroup       = data[ 0 ];
+            int value                    = data[ 4 ] > 0 ? 1 : 0;
+
+            static char has_Lua_write_coils = 0;
+            if ( has_Lua_write_coils == 0 )
                 {
-                int coag_idx = ( coilgroup - 1 ) * 2 + 1;
-                if( objnumber >= 100 ) coag_idx++;
+                lua_getfield( L, LUA_GLOBALSINDEX, "write_coils" );
 
-                int value = data[ 4 ] > 0 ? 1 : 0;
-
-                if ( 0 == objnumber || 100 == objnumber )
+                if ( lua_isfunction( L, -1 ) )
                     {
-                    KOAG_HL1[ coag_idx - 1 ]->set_state( value );
+                    has_Lua_write_coils = 2;
+                    }
+                else
+                    {
+                    has_Lua_write_coils = 1;
                     }
 
-                if ( ( objnumber >= 1 && objnumber <= 16 ) ||
-                    ( objnumber >= 101 && objnumber <= 116 ) )
-                    {
-                    G_TECH_OBJECTS( coag_idx )->set_mode( objnumber, value );
-                    }
-
-                    //Откачка сыворотки из верхней части.
-                    if ( 17 == objnumber || 117 == objnumber )
-                        {
-                        G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 1 ] = value;
-                        }
-                    //Откачка сыворотки из средней части.
-                    if ( 18 == objnumber || 118 == objnumber )
-                        {
-                        G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 2 ] = value;
-                        }
-                    //Откачка сыворотки из нижней части.
-                    if ( 19 == objnumber || 119 == objnumber )
-                        {
-                        G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 3 ] = value;
-                        }
-
-                    //Подача основы в дренаж.
-                    if ( 20 == objnumber || 120 == objnumber )
-                        {
-                        G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 5 ] = value;
-                        }
-                    //Подача основы в танк.
-                    if ( 21 == objnumber || 121 == objnumber )
-                        {
-                        G_TECH_OBJECTS( coag_idx )->rt_par_uint[ 4 ] = value;
-                        }
+                lua_remove( L, -1 );  // Stack: remove function "write_coils".
                 }
-#endif //KHUTOR
+
+            int i = 0;
+            if ( has_Lua_write_coils == 2 )
+                {
+                lua_getfield( L, LUA_GLOBALSINDEX, "write_coils" );
+                lua_pushnumber( L, coilgroup );
+                lua_pushnumber( L, startingAddress );
+                lua_pushnumber( L, value );
+
+                int i_line = lua_pcall( L, 3, 0, 0 );
+
+                if ( i_line != 0 )
+                    {
+                    Print( "Evaluate Modbus service error: %s\n",
+                        lua_tostring( L, -1 ) );
+
+                    lua_pop( L, 1 );  
+                    return 0;
+                    }                
+                }
+
             return 6;
+            }
 
         case 0x10: //Force Multiply Registers
-            startingAddress = data[2] * 256 + data[3];
-            numberofElements = data[4] * 256 + data[5];
-            //numberofBytes = data[6];
-            for (i = 0; i < numberofElements; i++)
+            {
+            unsigned int startingAddress  = data[2] * 256 + data[3];
+            unsigned int numberofElements = data[4] * 256 + data[5];            
+            unsigned int coilgroup        = data[ 0 ];
+
+            static char has_Lua_write_coils = 0;
+            if ( has_Lua_write_coils == 0 )
                 {
-                objnumber = i + startingAddress;
-                coilgroup = data[ 0 ];
+                lua_getfield( L, LUA_GLOBALSINDEX, "write_holding_registers" );
 
-#ifdef KHUTOR
-                if ( coilgroup >= 1 && coilgroup <= 16 )
+                if ( lua_isfunction( L, -1 ) )
                     {
-                    int coag_idx = ( coilgroup - 1 ) * 2 + 1;
-                    if( objnumber >= 100 ) coag_idx++;
-
-                    if ( 6 == objnumber || 106 == objnumber )
-                        {
-                        int_2 value = UnpackInt16( &outdata[ 7 + i * 2 ] );
-                        G_TECH_OBJECTS( coag_idx )->par_float[ 1 ] = ( float ) value;
-                        }
+                    has_Lua_write_coils = 2;
                     }
-#endif // KHUTOR
+                else
+                    {
+                    has_Lua_write_coils = 1;
+                    }
 
+                lua_remove( L, -1 );  // Stack: remove function "write_holding_registers".
                 }
+
+            int i = 0;
+            if ( has_Lua_write_coils == 2 )
+                {
+                lua_getfield( L, LUA_GLOBALSINDEX, "write_holding_registers" );
+                lua_pushnumber( L, coilgroup );
+                lua_pushnumber( L, startingAddress );
+                lua_pushnumber( L, numberofElements );
+                lua_pushlstring( L, ( const char* ) outdata + 7, 2 * numberofElements );
+
+                int i_line = lua_pcall( L, 4, 0, 0 );
+
+                if ( i_line != 0 )
+                    {
+                    Print( "Evaluate Modbus service error: %s\n",
+                        lua_tostring( L, -1 ) );
+
+                    lua_pop( L, 1 );  
+                    return 0;
+                    }                
+                }
+
             return 7;
+            }
         }
+
     return 0;
     }
 
@@ -597,22 +610,4 @@ int ModbusServ::UnicodetoCP1251( char* Output, unsigned char* Buf, int inputlen 
             }
         }
     return i/2 - 1;
-    }
-
-void ModbusServ::init()
-    {
-#ifdef KHUTOR
-    char dev [ 10 ] = "";
-    for ( int i = 1; i <= KOAG_CNT; i++ )
-    	{
-        sprintf( dev, "KOAG%dHL1", i );
-        KOAG_HL1[ i - 1 ] = HL( dev );
-
-        sprintf( dev, "KOAG%dTE1", i );
-        KOAG_TE[ i - 1 ][ 0 ] = TE( dev );
-
-        sprintf( dev, "KOAG%dTE2", i );
-        KOAG_TE[ i - 1 ][ 1 ] = TE( dev );
-    	}
-#endif //KHUTOR
     }

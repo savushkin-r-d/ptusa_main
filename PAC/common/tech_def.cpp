@@ -23,9 +23,6 @@ tech_object::tech_object( const char* new_name, u_int number, u_int type,
         par_uint( saved_params_u_int_4( par_uint_count ) ),
         rt_par_uint( run_time_params_u_int_4( runtime_par_uint_count ) ),
         timers( timers_count ),
-#ifdef KHUTOR
-        active_mode( 0 ),
-#endif // KHUTOR
         number( number ),
         type( type ),
         cmd( 0 ),
@@ -113,13 +110,6 @@ int tech_object::set_mode( u_int mode, int newm )
                     int idx = mode - 1;
                     state[ idx / 32 ] = state[ idx / 32 ] & ~( 1UL << idx % 32 );
                     lua_final_mode( mode );
-
-#ifdef KHUTOR
-                    if( mode <= MAX_MODE_IDX )
-                        {
-                        active_mode = 0;
-                        }
-#endif // KHUTOR
                     }
                 else
                     {
@@ -157,13 +147,6 @@ int tech_object::set_mode( u_int mode, int newm )
                             set_err_msg( res_str, mode, 0, ERR_ON_WITH_ERRORS );
                             }
                         //Проверка режима на проверку ОС устройств.
-
-#ifdef KHUTOR
-                        if( mode <= MAX_MODE_IDX )
-                            {
-                            active_mode = mode;
-                            }
-#endif // KHUTOR
                         }
                     else
                         {
@@ -266,7 +249,8 @@ int tech_object::final_mode( u_int mode )
     if ( mode > modes_count || 0 == mode ) return 1;
 
     ( *modes_manager )[ mode ]->final();
-
+    modes_manager->reset_idle_time();
+        
     return 0;
     }
 //-----------------------------------------------------------------------------
