@@ -276,49 +276,110 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 	return 1;
 	}
 
-int cipline_tech_object::nextpidnumber()
-	{
-	int curpid = pidnumber;
-	pidnumber++;
-	return curpid;
-	}
-
 void cipline_tech_object::initline()
 	{
-	V00 = V(number * 100);
-	V01 = V(number * 100 + 1);
-	V02 = V(number * 100 + 2);
-	V03 = V(number * 100 + 3);
-	V04 = V(number * 100 + 4);
-	V05 = V(number * 100 + 5);
-	V06 = V(number * 100 + 6);
-	V07 = V(number * 100 + 7);
-	V08 = V(number * 100 + 8);
-	V09 = V(number * 100 + 9);
-	V10 = V(number * 100 + 10);
-	V11 = V(number * 100 + 11);
-	V12 = V(number * 100 + 12);
-	V13 = V(number * 100 + 13);
+	int useline = 1;
+	if (!useline)
+		{
+		V00 = V(number * 100);
+		V01 = V(number * 100 + 1);
+		V02 = V(number * 100 + 2);
+		V03 = V(number * 100 + 3);
+		V04 = V(number * 100 + 4);
+		V05 = V(number * 100 + 5);
+		V06 = V(number * 100 + 6);
+		V07 = V(number * 100 + 7);
+		V08 = V(number * 100 + 8);
+		V09 = V(number * 100 + 9);
+		V10 = V(number * 100 + 10);
+		V11 = V(number * 100 + 11);
+		V12 = V(number * 100 + 12);
+		V13 = V(number * 100 + 13);
 
-	NP = M(number * 100 + 3);
-	NK = M(2);
-	NS = M(1);
-	LL = LS(number * 100 + 3);
-	LM = LS(number * 100 + 2);
-	LH = LS(number * 100 + 1);
-	LWH = LS(8);
-	LWL = LS(9);
-	LSH= LS(4);
-	LSL = LS(5);
-	LKH = LS(6);
-	LKL = LS(7);
-	TP = TE(number * 100 + 1);
-	TR = TE(number * 100 + 2);
-	cnt = FQT(number * 100 + 1);
-	Q = QT(number * 100 + 1);
-	FL = FS(101);
-	PUMPFREQ = AO(number * 100 + 1);
-	ao = AO(number * 100 + 14);
+		NP = M(number * 100 + 3);
+		NK = M(2);
+		NS = M(1);
+		LL = LS(number * 100 + 3);
+		LM = LS(number * 100 + 2);
+		LH = LS(number * 100 + 1);
+		LWH = LS(8);
+		LWL = LS(9);
+		LSH= LS(4);
+		LSL = LS(5);
+		LKH = LS(6);
+		LKL = LS(7);
+		TP = TE(number * 100 + 1);
+		TR = TE(number * 100 + 2);
+		cnt = FQT(number * 100 + 1);
+		Q = QT(number * 100 + 1);
+		FL = FS(101);
+		PUMPFREQ = AO(number * 100 + 1);
+		ao = AO(number * 100 + 14);
+		}
+	else
+		{
+		char devname[20] = {0};
+		sprintf(devname, "LINE%dV%d", number, number * 100);
+		V00 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 1);
+		V01 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 2);
+		V02 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 3);
+		V03 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 4);
+		V04 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 5);
+		V05 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 6);
+		V06 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 7);
+		V07 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 8);
+		V08 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 9);
+		V09 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 10);
+		V10 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 11);
+		V11 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 12);
+		V12 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 13);
+		V13 = V(devname);
+
+		sprintf(devname, "LINE%dM%d", number, number * 100 + 3);
+		NP = M(devname);
+		NK = M(2);
+		NS = M(1);
+		sprintf(devname, "LINE%dLS%d", number, number * 100 + 3);
+		LL = LS(devname);
+		sprintf(devname, "LINE%dLS%d", number, number * 100 + 2);
+		LM = LS(devname);
+		sprintf(devname, "LINE%dLS%d", number, number * 100 + 1);
+		LH = LS(devname);
+		LWH = LS(8);
+		LWL = LS(9);
+		LSH= LS(4);
+		LSL = LS(5);
+		LKH = LS(6);
+		LKL = LS(7);
+
+		sprintf(devname, "LINE%dTE%d", number, number * 100 + 1);
+		TP = TE(devname);
+		sprintf(devname, "LINE%dTE%d", number, number * 100 + 2);
+		TR = TE(devname);
+
+		sprintf(devname, "LINE%dFQT%d", number, number * 100 + 1);
+		cnt = FQT(devname);
+		sprintf(devname, "LINE%dQT%d", number, number * 100 + 1);
+		Q = QT(devname);
+		sprintf(devname, "LINE%dFS%d", number, number * 100 + 1);
+		FL = FS(devname);
+		PUMPFREQ = NP;
+		sprintf(devname, "LINE%dVC%d", number, number * 100 + 14);
+		ao = VC(devname);
+		}
 
 	PIDF = new MSAPID(&rt_par_float, 61, P_ZAD_FLOW, PUMPFREQ, 0, cnt );
 	PIDP = new MSAPID(&rt_par_float, 72, P_ZAD_PODOGR, ao, TP, 0);
@@ -420,7 +481,7 @@ void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*
 	char tmp_str[32];
 #ifdef MSAPANEL
 	prgListLen = 0;
-	ModbusServ::UpdateLinePrograms(nmr);
+	MsaPanel::UpdateLinePrograms(nmr);
 #endif
 	strcpy(programList,"");
 	if ((SPROG_ACID_PREPARATION & programmask) == SPROG_ACID_PREPARATION)
@@ -465,7 +526,7 @@ void cipline_tech_object::formProgramList( unsigned long programmask )
 	char tmp_str[32];
 #ifdef MSAPANEL
 	prgListLen = 0;
-	ModbusServ::UpdateLinePrograms(nmr);
+	MsaPanel::UpdateLinePrograms(nmr);
 #endif
 	if (programmask == 0)
 		{
@@ -3967,8 +4028,6 @@ int cipline_tech_object::msa_number = 0;
 int cipline_tech_object::blockAlarm = 0;
 
 saved_params<float, true>* cipline_tech_object::parpar = 0;
-
-int cipline_tech_object::pidnumber = 1;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

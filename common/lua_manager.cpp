@@ -11,7 +11,12 @@
 #include "prj_mngr.h"
 #include "PAC_dev.h"
 #include "tech_def.h"
+#ifdef MSAPANEL
+#include "msapanel.h"
+#else
 #include "modbus_serv.h"
+#endif // MSAPANEL
+
 
 //-----------------------------------------------------------------------------
 auto_smart_ptr< lua_manager > lua_manager::instance;
@@ -340,8 +345,12 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
     tcp_communicator::init_instance( PAC_name_rus, PAC_name_eng );
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
-        
+#ifdef MSAPANEL
+	G_CMMCTR->reg_service( 15, MsaPanel::ModbusService );
+#else
 	G_CMMCTR->reg_service( 15, ModbusServ::ModbusService );
+#endif // MSAPANEL
+
 
     lua_gc( L, LUA_GCRESTART, 0 );
     lua_gc( L, LUA_GCCOLLECT, 0 );

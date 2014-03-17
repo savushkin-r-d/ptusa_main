@@ -8,7 +8,7 @@
 
 int TRecipeManager::startRecipeBlock = 0;
 
-int TRecipeManager::recipePerLine = 20;
+int TRecipeManager::recipePerLine = 25;
 
 int TRecipeManager::blocksPerRecipe = 4;
 
@@ -173,7 +173,7 @@ int TRecipeManager::setValue( int valueNo, float newValue )
 #ifdef MSAPANEL
 	if (valueNo == RV_IS_USED)
 		{
-		ModbusServ::UpdateRecipes();
+		MsaPanel::UpdateRecipes();
 		}
 #endif // MSAPANEL
 	return setRecipeValue(currentRecipe, valueNo, newValue);
@@ -182,7 +182,7 @@ int TRecipeManager::setValue( int valueNo, float newValue )
 void TRecipeManager::SaveRecipeName()
 	{
 #ifdef MSAPANEL
-	ModbusServ::UpdateRecipes();
+	MsaPanel::UpdateRecipes();
 #endif // MSAPANEL
 	WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName);
 	}

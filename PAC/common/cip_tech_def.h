@@ -4,6 +4,10 @@
 #include "tech_def.h"
 #include "g_device.h"
 #include "PID.h"
+#ifdef MSAPANEL
+#include "msapanel.h"
+#endif // MSAPANEL
+
 
 #define NOCONC       0.1
 
@@ -617,8 +621,6 @@ class cipline_tech_object: public tech_object
 		int init_object_devices();		//Функция для инициализации устройств объекта мойки
 		//----------------------------------------------
 
-		static int nextpidnumber();
-		static int pidnumber;
 		static int msa_number;
 
 		//overriden members
