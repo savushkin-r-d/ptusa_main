@@ -197,8 +197,18 @@ int wago_manager_linux::write_outputs()
                 int l = 0;
                 for ( unsigned int idx = 0; idx < nd->AO_cnt; idx++ )
                     {
-                    buff[ 13 + l ] = ( nd->AO_[ idx ] >> 8 ) && 0xFF;
-                    buff[ 13 + l + 1 ] = nd->AO_[ idx ] && 0xFF;
+                    
+                    buff[ 13 + l + 1] = (unsigned char)(( nd->AO_[ idx ] >> 8 ) & 0xFF);
+                    buff[ 13 + l] = (unsigned char)(nd->AO_[ idx ] & 0xFF);
+                    
+                    if ( nd->AI_types[ idx ] == 638 )
+                        {
+                        buff[ 13 + l + 2 ] = 0;
+                        buff[ 13 + l + 3 ] = 0;
+                        l += 2;                        
+                        }
+                    Print("Bytecnt = %d\n Buf[%d] %d %d", bytes_cnt, idx, buff[ 13 + l],buff[ 13 + l + 1]);
+                    
                     l += 2;
                     }
 
@@ -212,7 +222,7 @@ int wago_manager_linux::write_outputs()
                 else
                     {
 #ifdef DEBUG
-                    //Print("\nWrite AO:Wago returned error...\n");
+                    Print("\nWrite AO:Wago returned error...\n");
 #endif // DEBUG
                     }
                 }// if ( nd->AO_cnt > 0 )
