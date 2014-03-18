@@ -177,9 +177,9 @@ int wago_device::set_AO( u_int index, float value, float min_value,
             }
 
         *AO_channels.int_write_values[ index ] = ( u_int ) value;
-
-        printf( "value=%d\n", ( u_int ) value );
-
+#ifdef DEBUG
+        Print("set_AO value=%d\n", ( u_int ) value );
+#endif //DEBUG
         return 0;
         }
 

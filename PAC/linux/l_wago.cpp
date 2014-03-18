@@ -197,8 +197,8 @@ int wago_manager_linux::write_outputs()
                 int l = 0;
                 for ( unsigned int idx = 0; idx < nd->AO_cnt; idx++ )
                     {
-                    buff[ 13 + l ] = ( nd->AO[ idx ] >> 8 ) && 0xFF;
-                    buff[ 13 + l + 1 ] = nd->AO[ idx ] && 0xFF;
+                    buff[ 13 + l ] = ( nd->AO_[ idx ] >> 8 ) && 0xFF;
+                    buff[ 13 + l + 1 ] = nd->AO_[ idx ] && 0xFF;
                     l += 2;
                     }
 
