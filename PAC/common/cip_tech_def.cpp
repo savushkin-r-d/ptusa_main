@@ -1807,7 +1807,7 @@ void cipline_tech_object::ResetWP( void )
 	int i;
 	for (i = 1; i < P_RESERV_START; i++)
 		{
-		if (i != P_CONC_RATE)
+		if (i != P_CONC_RATE && (i < PIDP_Z || i > PIDF_Uk ))
 			{
 			rt_par_float[i] = 0;
 			}
