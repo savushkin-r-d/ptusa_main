@@ -1674,7 +1674,7 @@ float AO1::get_value()
 //-----------------------------------------------------------------------------
 void AO1::direct_set_value( float new_value )
     {
-    set_AO( AO_INDEX, get_min_value(), get_max_value() );
+    set_AO( AO_INDEX, new_value, get_min_value(), get_max_value() );
     }
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
