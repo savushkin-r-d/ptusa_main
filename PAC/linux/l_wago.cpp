@@ -410,13 +410,13 @@ int wago_manager_linux::read_inputs()
                                 switch( nd->AI_types[ l ] )
                                     {
                                     case 638:
-                                        nd->AI[ i ] = 256 * buff[ 9 + idx + 2 ] + 
+                                        nd->AI[ l ] = 256 * buff[ 9 + idx + 2 ] + 
                                             buff[ 9 + idx + 3 ];
                                         idx += 4;
                                         break;
                                         
                                     default:
-                                        nd->AI[ i ] = 256 * buff[ 9 + idx ] + 
+                                        nd->AI[ l ] = 256 * buff[ 9 + idx ] + 
                                             buff[ 9 + idx + 1 ];
                                         idx += 2;
                                         break;
