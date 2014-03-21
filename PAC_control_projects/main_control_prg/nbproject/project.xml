@@ -33,19 +33,11 @@
                     <type>1</type>
                 </confElem>
                 <confElem>
-                    <name>release_wago_750-860_khutor</name>
+                    <name>debug_PFC200</name>
                     <type>1</type>
                 </confElem>
                 <confElem>
-                    <name>debug_wago_750-860_khutor</name>
-                    <type>1</type>
-                </confElem>
-                <confElem>
-                    <name>debug_PFC200_khutor</name>
-                    <type>1</type>
-                </confElem>
-                <confElem>
-                    <name>release_PFC200_khutor</name>
+                    <name>release_PFC200</name>
                     <type>1</type>
                 </confElem>
             </confList>
