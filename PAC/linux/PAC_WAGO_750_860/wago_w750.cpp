@@ -157,6 +157,14 @@ int wago_manager_w750::write_outputs()
                     pstPabOUT->uc.Pab[ offset ] = val & 0xFF;
                     pstPabOUT->uc.Pab[ offset + 1 ] = val >> 8;
 
+                    if ( nd->AO_types[ j ] == 638 )
+                        {
+                        pstPabOUT->uc.Pab[ offset     ] = 0;                        
+                        pstPabOUT->uc.Pab[ offset + 1 ] = 0;
+                        pstPabOUT->uc.Pab[ offset + 2 ] = 0;
+                        pstPabOUT->uc.Pab[ offset + 3 ] = 0;
+                        }
+                    
                     nd->AO[ j ] = nodes[ i ]->AO_[ j ];
 #ifdef DEBUG_KBUS
                     printf( "%d -> %u, ", j, nd->AO_[ j ] );

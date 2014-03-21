@@ -222,7 +222,15 @@ int wago_manager_PFC200::write_outputs()
 
                 pd_out[ offset ] = val & 0xFF;
                 pd_out[ offset + 1 ] = val >> 8;
-
+                
+                if ( nd->AO_types[ j ] == 638 )
+                    {
+                    pd_out[ offset     ] = 0;
+                    pd_out[ offset + 1 ] = 0;
+                    pd_out[ offset + 2 ] = 0;
+                    pd_out[ offset + 3 ] = 0;
+                    }
+                
                 nd->AO[ j ] = nd->AO_[ j ];
 #ifdef DEBUG_KBUS
                 printf( "%d -> %u, ", j, nd->AO_[ j ] );
