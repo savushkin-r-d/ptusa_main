@@ -330,8 +330,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 
                 lua_remove( L, -1 );  // Stack: remove function "write_coils".
                 }
-
-            int i = 0;
+           
             if ( has_Lua_write_coils == 2 )
                 {
                 lua_getfield( L, LUA_GLOBALSINDEX, "write_coils" );
@@ -377,7 +376,6 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
                 lua_remove( L, -1 );  // Stack: remove function "write_holding_registers".
                 }
 
-            int i = 0;
             if ( has_Lua_write_coils == 2 )
                 {
                 lua_getfield( L, LUA_GLOBALSINDEX, "write_holding_registers" );

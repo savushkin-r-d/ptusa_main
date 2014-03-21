@@ -1656,7 +1656,8 @@ float AI1::get_value()
 
 float AI1::get_value()
     {
-    return get_par( P_ZERO_ADJUST_COEFF, 0 ) + get_AI( C_AI_INDEX, get_min_val(), get_max_val() );
+    return get_par( P_ZERO_ADJUST_COEFF, 0 ) + 
+        get_AI( C_AI_INDEX, get_min_val(), get_max_val() );
     }
 //-----------------------------------------------------------------------------
 void AI1::direct_set_value( float new_value )
