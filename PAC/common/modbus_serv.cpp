@@ -2,6 +2,13 @@
 
 #include "lua_manager.h"
 
+int ModbusServ::confirmRecUpdateCtr[11] = {0};
+char ModbusServ::updateRecFlag[11] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+int ModbusServ::confirmPrgUpdateCtr[11] = {0};
+char ModbusServ::updatePrgFlag[11] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+
+extern int isMsa;
+
 unsigned char ModbusServ::UTable[128][2] =
     {
     {0x4,0x2},
@@ -151,55 +158,61 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
                         
             unsigned int coilgroup = data[0];
 
-            static char has_Lua_read_coils = 0;
-            if ( has_Lua_read_coils == 0 )
-                {
-                lua_getfield( L, LUA_GLOBALSINDEX, "read_coils" );
+			if (isMsa)
+				{
+				} 
+			else
+				{
+				static char has_Lua_read_coils = 0;
+				if ( has_Lua_read_coils == 0 )
+					{
+					lua_getfield( L, LUA_GLOBALSINDEX, "read_coils" );
 
-                if ( lua_isfunction( L, -1 ) )
-                    {
-                    has_Lua_read_coils = 2;
-                    }
-                else
-                    {
-                    has_Lua_read_coils = 1;
-                    }
+					if ( lua_isfunction( L, -1 ) )
+						{
+						has_Lua_read_coils = 2;
+						}
+					else
+						{
+						has_Lua_read_coils = 1;
+						}
 
-                lua_remove( L, -1 );  // Stack: remove function "read_coils".
-                }
+					lua_remove( L, -1 );  // Stack: remove function "read_coils".
+					}
 
-            int i = 0;
-            if ( has_Lua_read_coils == 2 )
-                {
-                lua_getfield( L, LUA_GLOBALSINDEX, "read_coils" );
-                lua_pushnumber( L, coilgroup );
-                lua_pushnumber( L, startingAddress );
-                lua_pushnumber( L, numberofElements );
-                
-                int i_line = lua_pcall( L, 3, 1, 0 );
+				int i = 0;
+				if ( has_Lua_read_coils == 2 )
+					{
+					lua_getfield( L, LUA_GLOBALSINDEX, "read_coils" );
+					lua_pushnumber( L, coilgroup );
+					lua_pushnumber( L, startingAddress );
+					lua_pushnumber( L, numberofElements );
 
-                if ( i_line != 0 )
-                    {
-                    Print( "Evaluate Modbus service error: %s\n",
-                        lua_tostring( L, -1 ) );
+					int i_line = lua_pcall( L, 3, 1, 0 );
 
-                    lua_pop( L, 1 );  
-                    return 0;
-                    }
-                
-                if ( lua_istable( L, -1 ) )
-                	{
-                    lua_pushnil( L );
-                    while( lua_next( L, -2 ) )
-                        {
-                        int bit_res = ( int ) lua_tonumber( L, -1 );
-                        lua_pop( L, 1 );
-                        ForceBit( i, &outdata[ 3 ], bit_res );
-                        i++;
-                        }                                 
-                	}      
-                lua_pop( L, 1 );  
-                }
+					if ( i_line != 0 )
+						{
+						Print( "Evaluate Modbus service error: %s\n",
+							lua_tostring( L, -1 ) );
+
+						lua_pop( L, 1 );  
+						return 0;
+						}
+
+					if ( lua_istable( L, -1 ) )
+						{
+						lua_pushnil( L );
+						while( lua_next( L, -2 ) )
+							{
+							int bit_res = ( int ) lua_tonumber( L, -1 );
+							lua_pop( L, 1 );
+							ForceBit( i, &outdata[ 3 ], bit_res );
+							i++;
+							}                                 
+						}      
+					lua_pop( L, 1 );  
+					}
+				}
 
             return 3+numberofBytes;
             }
@@ -211,99 +224,222 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
             outdata[ 2 ] = (numberofElements * 2) & 0xFF;           
             unsigned int coilgroup = data[0];
 
-            int idx = 0;
-            static char has_Lua_read_holding_registers = 0;
-            if ( has_Lua_read_holding_registers == 0 )
-                {
-                lua_getfield( L, LUA_GLOBALSINDEX, "read_holding_registers" );
+			if (isMsa)
+				{
+				unsigned int i,j,k;
+				unsigned int objnumber, line;
+				for (i = 0; i < numberofElements; i++)
+					{
+					objnumber = i + startingAddress;
+					switch (coilgroup)
+						{
+						case C_MSA_RECIPES:
 
-                if ( lua_isfunction( L, -1 ) )
-                    {
-                    has_Lua_read_holding_registers = 2;
-                    }
-                else
-                    {
-                    has_Lua_read_holding_registers = 1;
-                    }
+							line = (i + startingAddress) / 3000 + 1;
+							if (line > u_int(cipline_tech_object::MdlsCNT))
+								{
+								continue;
+								}
+							objnumber = (i+startingAddress) - (line - 1) * 3000;
+							switch (objnumber)
+								{
+								case RC_RECIPE_CONTROL:
+									PackInt16(0,&outdata[3+i*2]);
+									break;
+								case RC_RECIPE_CONTROL_NO:
+									PackInt16(int_2(cipline_tech_object::Mdls[line - 1]->rt_par_float[P_CUR_REC]),&outdata[3+i*2]);
+									break;
+								case RC_SELECTED_REC:
+									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->loadedRecName, &outdata[3+i*2]);
+									i+=TRecipeManager::recipeNameLength - 1;
+									break;
+								case RC_SELECTED_PRG:
+									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->currentProgramName, &outdata[3+i*2]);
+									i+= PROGRAM_MAX_LEN - 1;
+									break;
+								case RC_EDITED_REC:
+									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->lineRecipes->currentRecipeName, &outdata[3+i*2]);
+									i+=TRecipeManager::recipeNameLength - 1;
+									break;
+								case RC_SELECT_REC:
+									PackInt16(0,&outdata[3+i*2]);
+									break;
+								case RC_LIST_UPDATE:
+									PackInt16(updateRecFlag[line],&outdata[3+i*2]);
+									break;
+								case RC_LIST_LENGTH:
+									k = 0;
+									for (j = 0; j < u_int(cipline_tech_object::Mdls[line - 1]->lineRecipes->recipePerLine); j++)
+										{
+										if (1 == cipline_tech_object::Mdls[line - 1]->lineRecipes->getRecipeValue(j, TRecipeManager::RV_IS_USED))
+											{
+											k++;
+											}
+										}
+									PackInt16(k,&outdata[3+i*2]);
+									break;
+								case RC_PRG_SELECT:
+									PackInt16(0,&outdata[3+i*2]);
+									break;
+								case RC_PRG_UPDATE:
+									PackInt16(updatePrgFlag[line],&outdata[3+i*2]);
+									break;
+								case RC_PRG_LENGTH:
+									PackInt16(cipline_tech_object::Mdls[line-1]->prgListLen,&outdata[3+i*2]);
+									break;
+								default:
+									if (objnumber >= RC_LIST_START && objnumber < RC_PRG_SELECT)
+										{
+										int recipeno = (objnumber - RC_LIST_START) / TRecipeManager::recipeNameLength;
+										//								Print("\n\rRecipeNo = %d", recipeno);
+										k = -1;
+										for (j = 0; j < u_int(cipline_tech_object::Mdls[line - 1]->lineRecipes->recipePerLine); j++)
+											{
+											if (1 == cipline_tech_object::Mdls[line - 1]->lineRecipes->getRecipeValue(j, TRecipeManager::RV_IS_USED))
+												{
+												k++;
+												}
+											if (k == recipeno)
+												{
+												char myrec[MAX_REC_NAME_LENGTH];
+												cipline_tech_object::Mdls[line - 1]->lineRecipes->getRecipeName(j, myrec);
+												CP1251toUnicode(myrec, &outdata[3+i*2]);
+												break;
+												}
+											}
+										i+= TRecipeManager::recipeNameLength - 1;
+										}
+									else
+										{
+										if (objnumber >= RC_PRG_START && objnumber < RC_RECIPE_PAR_START)
+											{
+											int prgno = (objnumber - RC_PRG_START) / PROGRAM_MAX_LEN;
+											CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->prgArray[prgno], &outdata[3+i*2]);
+											i+= PROGRAM_MAX_LEN - 1;
+											} 
+										else
+											{
+											if (objnumber >= RC_RECIPE_PAR_START)
+												{
+												k = (objnumber - RC_RECIPE_PAR_START) / 2;
+												if (k < u_int(cipline_tech_object::Mdls[line - 1]->lineRecipes->GetParamsCount()))
+													{
+													PackFloat(cipline_tech_object::Mdls[line - 1]->lineRecipes->getValue(k - 1), &outdata[3+i*2]);
+													i++;
+													}
+												} 
+											else
+												{
+#ifdef DEBUG 
+												Print("\n\rRead Unsigned register");
+#endif
+												}
+											}
+										}
+									break;
+								} 
+							break;
+						default:
+							break;
+						}
+					}
+				}
+			else
+				{
+				int idx = 0;
+				static char has_Lua_read_holding_registers = 0;
+				if ( has_Lua_read_holding_registers == 0 )
+					{
+					lua_getfield( L, LUA_GLOBALSINDEX, "read_holding_registers" );
 
-                lua_remove( L, -1 );  // Stack: remove function "read_holding_registers".
-                }
-                        
-            if ( has_Lua_read_holding_registers == 2 )
-                {
-                lua_getfield( L, LUA_GLOBALSINDEX, "read_holding_registers" );
-                lua_pushnumber( L, coilgroup );
-                lua_pushnumber( L, startingAddress );
-                lua_pushnumber( L, numberofElements );
+					if ( lua_isfunction( L, -1 ) )
+						{
+						has_Lua_read_holding_registers = 2;
+						}
+					else
+						{
+						has_Lua_read_holding_registers = 1;
+						}
 
-                int i_line = lua_pcall( L, 3, 1, 0 );
+					lua_remove( L, -1 );  // Stack: remove function "read_holding_registers".
+					}
 
-                if ( i_line != 0 )
-                    {
-                    Print( "Evaluate Modbus service error: %s\n",
-                        lua_tostring( L, -1 ) );
+				if ( has_Lua_read_holding_registers == 2 )
+					{
+					lua_getfield( L, LUA_GLOBALSINDEX, "read_holding_registers" );
+					lua_pushnumber( L, coilgroup );
+					lua_pushnumber( L, startingAddress );
+					lua_pushnumber( L, numberofElements );
 
-                    lua_pop( L, 1 );  
-                    return 0;
-                    }
+					int i_line = lua_pcall( L, 3, 1, 0 );
 
-                if ( lua_istable( L, -1 ) )
-                    {
-                    lua_pushnil( L );
-                    while( lua_next( L, -2 ) )
-                        {
-                        int t = ( int ) lua_tonumber( L, -1 );
-                        lua_pop( L, 1 );
+					if ( i_line != 0 )
+						{
+						Print( "Evaluate Modbus service error: %s\n",
+							lua_tostring( L, -1 ) );
 
-                        if ( lua_next( L, -2 ) )
-                            {
-                            switch ( t )
-                                {
-                                case 1: // int16
-                                    {
-                                    int val = ( int ) lua_tonumber( L, -1 );
-                                    PackInt16( val, &outdata[ 3 + idx * 2 ] );
-                                    break;
-                                    }
-                                
-                                case 2: // float                                    
-                                    {
-                                    float val = ( float ) lua_tonumber( L, -1 );
-                                    PackFloat( val, &outdata[ 3 + idx * 2 ] );
-                                    break;
-                                    }
+						lua_pop( L, 1 );  
+						return 0;
+						}
 
-                                case 3: // time                                    
-                                    {
-                                    u_long val = ( u_long ) lua_tonumber( L, -1 );
-                                    PackTime( val, &outdata[ 3 + idx * 2 ] );                                    
-                                    break;
-                                    }
+					if ( lua_istable( L, -1 ) )
+						{
+						lua_pushnil( L );
+						while( lua_next( L, -2 ) )
+							{
+							int t = ( int ) lua_tonumber( L, -1 );
+							lua_pop( L, 1 );
 
-                                case 4: // String                                    
-                                    {
-                                    const char *val = lua_tostring( L, -1 );
-                                    CP1251toUnicode( val, &outdata[ 3 + idx * 2 ] );                       
-                                    break;
-                                    }
-                                }   
+							if ( lua_next( L, -2 ) )
+								{
+								switch ( t )
+									{
+									case 1: // int16
+										{
+										int val = ( int ) lua_tonumber( L, -1 );
+										PackInt16( val, &outdata[ 3 + idx * 2 ] );
+										break;
+										}
 
-                            lua_pop( L, 1 );
-                            }
-                        idx++;
-                        }     
+									case 2: // float                                    
+										{
+										float val = ( float ) lua_tonumber( L, -1 );
+										PackFloat( val, &outdata[ 3 + idx * 2 ] );
+										break;
+										}
 
-                    lua_pop( L, 1 );
-                    }  
-                else
-                    {
-                    Print( "Evaluate Modbus service error: %s\n",
-                        lua_tostring( L, -1 ) );
+									case 3: // time                                    
+										{
+										u_long val = ( u_long ) lua_tonumber( L, -1 );
+										PackTime( val, &outdata[ 3 + idx * 2 ] );                                    
+										break;
+										}
 
-                    lua_pop( L, 1 );  
-                    return 0; 
-                    }                
-                }           
+									case 4: // String                                    
+										{
+										const char *val = lua_tostring( L, -1 );
+										CP1251toUnicode( val, &outdata[ 3 + idx * 2 ] );                       
+										break;
+										}
+									}   
+
+								lua_pop( L, 1 );
+								}
+							idx++;
+							}     
+
+						lua_pop( L, 1 );
+						}  
+					else
+						{
+						Print( "Evaluate Modbus service error: %s\n",
+							lua_tostring( L, -1 ) );
+
+						lua_pop( L, 1 );  
+						return 0; 
+						}                
+					}    
+				}
 
             return 3+numberofElements*2;
             }
@@ -314,41 +450,47 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
             unsigned int coilgroup       = data[ 0 ];
             int value                    = data[ 4 ] > 0 ? 1 : 0;
 
-            static char has_Lua_write_coils = 0;
-            if ( has_Lua_write_coils == 0 )
-                {
-                lua_getfield( L, LUA_GLOBALSINDEX, "write_coils" );
+			if (isMsa)
+				{
+				}
+			else
+				{
+				static char has_Lua_write_coils = 0;
+				if ( has_Lua_write_coils == 0 )
+					{
+					lua_getfield( L, LUA_GLOBALSINDEX, "write_coils" );
 
-                if ( lua_isfunction( L, -1 ) )
-                    {
-                    has_Lua_write_coils = 2;
-                    }
-                else
-                    {
-                    has_Lua_write_coils = 1;
-                    }
+					if ( lua_isfunction( L, -1 ) )
+						{
+						has_Lua_write_coils = 2;
+						}
+					else
+						{
+						has_Lua_write_coils = 1;
+						}
 
-                lua_remove( L, -1 );  // Stack: remove function "write_coils".
-                }
-           
-            if ( has_Lua_write_coils == 2 )
-                {
-                lua_getfield( L, LUA_GLOBALSINDEX, "write_coils" );
-                lua_pushnumber( L, coilgroup );
-                lua_pushnumber( L, startingAddress );
-                lua_pushnumber( L, value );
+					lua_remove( L, -1 );  // Stack: remove function "write_coils".
+					}
 
-                int i_line = lua_pcall( L, 3, 0, 0 );
+				if ( has_Lua_write_coils == 2 )
+					{
+					lua_getfield( L, LUA_GLOBALSINDEX, "write_coils" );
+					lua_pushnumber( L, coilgroup );
+					lua_pushnumber( L, startingAddress );
+					lua_pushnumber( L, value );
 
-                if ( i_line != 0 )
-                    {
-                    Print( "Evaluate Modbus service error: %s\n",
-                        lua_tostring( L, -1 ) );
+					int i_line = lua_pcall( L, 3, 0, 0 );
 
-                    lua_pop( L, 1 );  
-                    return 0;
-                    }                
-                }
+					if ( i_line != 0 )
+						{
+						Print( "Evaluate Modbus service error: %s\n",
+							lua_tostring( L, -1 ) );
+
+						lua_pop( L, 1 );  
+						return 0;
+						}                
+					}
+				}
 
             return 6;
             }
@@ -359,42 +501,48 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
             unsigned int numberofElements = data[4] * 256 + data[5];            
             unsigned int coilgroup        = data[ 0 ];
 
-            static char has_Lua_write_coils = 0;
-            if ( has_Lua_write_coils == 0 )
-                {
-                lua_getfield( L, LUA_GLOBALSINDEX, "write_holding_registers" );
+			if (isMsa)
+				{
+				}
+			else
+				{
+				static char has_Lua_write_coils = 0;
+				if ( has_Lua_write_coils == 0 )
+					{
+					lua_getfield( L, LUA_GLOBALSINDEX, "write_holding_registers" );
 
-                if ( lua_isfunction( L, -1 ) )
-                    {
-                    has_Lua_write_coils = 2;
-                    }
-                else
-                    {
-                    has_Lua_write_coils = 1;
-                    }
+					if ( lua_isfunction( L, -1 ) )
+						{
+						has_Lua_write_coils = 2;
+						}
+					else
+						{
+						has_Lua_write_coils = 1;
+						}
 
-                lua_remove( L, -1 );  // Stack: remove function "write_holding_registers".
-                }
+					lua_remove( L, -1 );  // Stack: remove function "write_holding_registers".
+					}
 
-            if ( has_Lua_write_coils == 2 )
-                {
-                lua_getfield( L, LUA_GLOBALSINDEX, "write_holding_registers" );
-                lua_pushnumber( L, coilgroup );
-                lua_pushnumber( L, startingAddress );
-                lua_pushnumber( L, numberofElements );
-                lua_pushlstring( L, ( const char* ) outdata + 7, 2 * numberofElements );
+				if ( has_Lua_write_coils == 2 )
+					{
+					lua_getfield( L, LUA_GLOBALSINDEX, "write_holding_registers" );
+					lua_pushnumber( L, coilgroup );
+					lua_pushnumber( L, startingAddress );
+					lua_pushnumber( L, numberofElements );
+					lua_pushlstring( L, ( const char* ) outdata + 7, 2 * numberofElements );
 
-                int i_line = lua_pcall( L, 4, 0, 0 );
+					int i_line = lua_pcall( L, 4, 0, 0 );
 
-                if ( i_line != 0 )
-                    {
-                    Print( "Evaluate Modbus service error: %s\n",
-                        lua_tostring( L, -1 ) );
+					if ( i_line != 0 )
+						{
+						Print( "Evaluate Modbus service error: %s\n",
+							lua_tostring( L, -1 ) );
 
-                    lua_pop( L, 1 );  
-                    return 0;
-                    }                
-                }
+						lua_pop( L, 1 );  
+						return 0;
+						}                
+					}
+				}
 
             return 7;
             }
@@ -530,16 +678,17 @@ int_2 ModbusServ::UnpackInt16( unsigned char* Buf )
     return result;
     }
 
-int ModbusServ::CP1251toUnicode( const char* Input, unsigned char* Buf )
+int ModbusServ::CP1251toUnicode( const char* Input, unsigned char* Buf)
     {
-    int inputlen = strlen( Input );
+	int inputlen;
+	inputlen = strlen( Input );
 
     char input_end = 0;
     int i;
-    for (i = 0; i < inputlen; i++)
+    for (i = 0; i <= inputlen; i++)
         {
-        unsigned char mychar = Input[i];
-        if (0 == mychar)
+        unsigned char mychar = (unsigned char)Input[i];
+        if (i == inputlen)
             {
             input_end = 1;
             }
@@ -552,13 +701,13 @@ int ModbusServ::CP1251toUnicode( const char* Input, unsigned char* Buf )
             {
             if (mychar < 128)
                 {
-                Buf[i*2] = 0;
-                Buf[i*2 + 1] = mychar;
+                ((unsigned char*)Buf)[i*2] = 0;
+                ((unsigned char*)Buf)[i*2 + 1] = mychar;
                 }
             else
                 {
-                Buf[i*2] = UTable[mychar - 128][0];
-                Buf[i*2 + 1] = UTable[mychar - 128][1];
+                ((unsigned char*)Buf)[i*2] = UTable[mychar - 128][0];
+                ((unsigned char*)Buf)[i*2 + 1] = UTable[mychar - 128][1];
                 }
 
             }
@@ -568,6 +717,43 @@ int ModbusServ::CP1251toUnicode( const char* Input, unsigned char* Buf )
         }
     return 0;
     }
+
+void ModbusServ::UpdateRecipes()
+	{
+	for (int i = 0; i < 11; i++)
+		{
+		confirmRecUpdateCtr[i] = 0;
+		updateRecFlag[i] = 1;
+		}
+	}
+
+void ModbusServ::UpdatePrograms()
+	{
+	for (int i = 0; i < 11; i++)
+		{
+		confirmPrgUpdateCtr[i] = 0;
+		updatePrgFlag[i] = 1;
+		}
+	}
+
+void ModbusServ::UpdateLineRecipes( int line )
+	{
+	if (line > 0 && line < 11)
+		{
+		confirmRecUpdateCtr[line] = 0;
+		updateRecFlag[line] = 1;
+		}
+	}
+
+void ModbusServ::UpdateLinePrograms( int line )
+	{
+	if (line > 0 && line < 11)
+		{
+		confirmPrgUpdateCtr[line] = 0;
+		updatePrgFlag[line] = 1;
+		}
+	}
+
 
 int ModbusServ::UnicodetoCP1251( char* Output, unsigned char* Buf, int inputlen )
     {

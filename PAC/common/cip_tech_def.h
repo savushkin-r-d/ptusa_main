@@ -4,9 +4,7 @@
 #include "tech_def.h"
 #include "g_device.h"
 #include "PID.h"
-#ifdef MSAPANEL
-#include "msapanel.h"
-#endif // MSAPANEL
+#include "modbus_serv.h"
 
 
 #define NOCONC       0.1
@@ -523,14 +521,12 @@ class cipline_tech_object: public tech_object
 		char* programList;
 		char* currentProgramName;
 
-#ifdef MSAPANEL
 		//Список программ для панели
 #define PANEL_MAX_PROGRAMS 16
 #define PANEL_PROGRAM_LENGTH 24
 		char prgArray[PANEL_MAX_PROGRAMS][PANEL_PROGRAM_LENGTH];
 		int prgNumber[PANEL_MAX_PROGRAMS];
 		char prgListLen;
-#endif // MSAPANEL
 
 
 		int blocked;

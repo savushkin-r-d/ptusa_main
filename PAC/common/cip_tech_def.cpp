@@ -5,6 +5,8 @@
 
 #include "cip_tech_def.h"
 
+int isMsa = 0;
+
 int getNexpPrg(int cur, unsigned long prg)
 	{
 	int i;
@@ -278,108 +280,67 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 
 void cipline_tech_object::initline()
 	{
-	int useline = 1;
-	if (!useline)
-		{
-		V00 = V(number * 100);
-		V01 = V(number * 100 + 1);
-		V02 = V(number * 100 + 2);
-		V03 = V(number * 100 + 3);
-		V04 = V(number * 100 + 4);
-		V05 = V(number * 100 + 5);
-		V06 = V(number * 100 + 6);
-		V07 = V(number * 100 + 7);
-		V08 = V(number * 100 + 8);
-		V09 = V(number * 100 + 9);
-		V10 = V(number * 100 + 10);
-		V11 = V(number * 100 + 11);
-		V12 = V(number * 100 + 12);
-		V13 = V(number * 100 + 13);
+	char devname[20] = {0};
+	sprintf(devname, "LINE%dV%d", number, number * 100);
+	V00 = V(devname);
+	sprintf(devname, "LINE%dV%d", number, number * 100 + 1);
+	V01 = V(devname);
+	sprintf(devname, "LINE%dV%d", number, number * 100 + 2);
+	V02 = V(devname);
+	sprintf(devname, "LINE%dV%d", number, number * 100 + 3);
+	V03 = V(devname);
+	sprintf(devname, "LINE%dV%d", number, number * 100 + 4);
+	V04 = V(devname);
+	sprintf(devname, "LINE%dV%d", number, number * 100 + 5);
+	V05 = V(devname);
+	sprintf(devname, "LINE%dV%d", number, number * 100 + 6);
+	V06 = V(devname);
+	sprintf(devname, "LINE%dV%d", number, number * 100 + 7);
+	V07 = V(devname);
+	sprintf(devname, "LINE%dV%d", number, number * 100 + 8);
+	V08 = V(devname);
+	sprintf(devname, "LINE%dV%d", number, number * 100 + 9);
+	V09 = V(devname);
+	sprintf(devname, "LINE%dV%d", number, number * 100 + 10);
+	V10 = V(devname);
+	sprintf(devname, "LINE%dV%d", number, number * 100 + 11);
+	V11 = V(devname);
+	sprintf(devname, "LINE%dV%d", number, number * 100 + 12);
+	V12 = V(devname);
+	sprintf(devname, "LINE%dV%d", number, number * 100 + 13);
+	V13 = V(devname);
 
-		NP = M(number * 100 + 3);
-		NK = M(2);
-		NS = M(1);
-		LL = LS(number * 100 + 3);
-		LM = LS(number * 100 + 2);
-		LH = LS(number * 100 + 1);
-		LWH = LS(8);
-		LWL = LS(9);
-		LSH= LS(4);
-		LSL = LS(5);
-		LKH = LS(6);
-		LKL = LS(7);
-		TP = TE(number * 100 + 1);
-		TR = TE(number * 100 + 2);
-		cnt = FQT(number * 100 + 1);
-		Q = QT(number * 100 + 1);
-		FL = FS(101);
-		PUMPFREQ = AO(number * 100 + 1);
-		ao = AO(number * 100 + 14);
-		}
-	else
-		{
-		char devname[20] = {0};
-		sprintf(devname, "LINE%dV%d", number, number * 100);
-		V00 = V(devname);
-		sprintf(devname, "LINE%dV%d", number, number * 100 + 1);
-		V01 = V(devname);
-		sprintf(devname, "LINE%dV%d", number, number * 100 + 2);
-		V02 = V(devname);
-		sprintf(devname, "LINE%dV%d", number, number * 100 + 3);
-		V03 = V(devname);
-		sprintf(devname, "LINE%dV%d", number, number * 100 + 4);
-		V04 = V(devname);
-		sprintf(devname, "LINE%dV%d", number, number * 100 + 5);
-		V05 = V(devname);
-		sprintf(devname, "LINE%dV%d", number, number * 100 + 6);
-		V06 = V(devname);
-		sprintf(devname, "LINE%dV%d", number, number * 100 + 7);
-		V07 = V(devname);
-		sprintf(devname, "LINE%dV%d", number, number * 100 + 8);
-		V08 = V(devname);
-		sprintf(devname, "LINE%dV%d", number, number * 100 + 9);
-		V09 = V(devname);
-		sprintf(devname, "LINE%dV%d", number, number * 100 + 10);
-		V10 = V(devname);
-		sprintf(devname, "LINE%dV%d", number, number * 100 + 11);
-		V11 = V(devname);
-		sprintf(devname, "LINE%dV%d", number, number * 100 + 12);
-		V12 = V(devname);
-		sprintf(devname, "LINE%dV%d", number, number * 100 + 13);
-		V13 = V(devname);
+	sprintf(devname, "LINE%dM%d", number, number * 100 + 3);
+	NP = M(devname);
+	NK = M(2);
+	NS = M(1);
+	sprintf(devname, "LINE%dLS%d", number, number * 100 + 3);
+	LL = LS(devname);
+	sprintf(devname, "LINE%dLS%d", number, number * 100 + 2);
+	LM = LS(devname);
+	sprintf(devname, "LINE%dLS%d", number, number * 100 + 1);
+	LH = LS(devname);
+	LWH = LS(8);
+	LWL = LS(9);
+	LSH= LS(4);
+	LSL = LS(5);
+	LKH = LS(6);
+	LKL = LS(7);
 
-		sprintf(devname, "LINE%dM%d", number, number * 100 + 3);
-		NP = M(devname);
-		NK = M(2);
-		NS = M(1);
-		sprintf(devname, "LINE%dLS%d", number, number * 100 + 3);
-		LL = LS(devname);
-		sprintf(devname, "LINE%dLS%d", number, number * 100 + 2);
-		LM = LS(devname);
-		sprintf(devname, "LINE%dLS%d", number, number * 100 + 1);
-		LH = LS(devname);
-		LWH = LS(8);
-		LWL = LS(9);
-		LSH= LS(4);
-		LSL = LS(5);
-		LKH = LS(6);
-		LKL = LS(7);
+	sprintf(devname, "LINE%dTE%d", number, number * 100 + 1);
+	TP = TE(devname);
+	sprintf(devname, "LINE%dTE%d", number, number * 100 + 2);
+	TR = TE(devname);
 
-		sprintf(devname, "LINE%dTE%d", number, number * 100 + 1);
-		TP = TE(devname);
-		sprintf(devname, "LINE%dTE%d", number, number * 100 + 2);
-		TR = TE(devname);
-
-		sprintf(devname, "LINE%dFQT%d", number, number * 100 + 1);
-		cnt = FQT(devname);
-		sprintf(devname, "LINE%dQT%d", number, number * 100 + 1);
-		Q = QT(devname);
-		sprintf(devname, "LINE%dFS%d", number, number * 100 + 1);
-		FL = FS(devname);
-		PUMPFREQ = NP;
-		sprintf(devname, "LINE%dVC%d", number, number * 100 + 14);
-		ao = VC(devname);
-		}
+	sprintf(devname, "LINE%dFQT%d", number, number * 100 + 1);
+	cnt = FQT(devname);
+	sprintf(devname, "LINE%dQT%d", number, number * 100 + 1);
+	Q = QT(devname);
+	sprintf(devname, "LINE%dFS%d", number, number * 100 + 1);
+	FL = FS(devname);
+	PUMPFREQ = NP;
+	sprintf(devname, "LINE%dVC%d", number, number * 100 + 14);
+	ao = VC(devname);
 
 	PIDF = new MSAPID(&rt_par_float, 61, P_ZAD_FLOW, PUMPFREQ, 0, cnt );
 	PIDP = new MSAPID(&rt_par_float, 72, P_ZAD_PODOGR, ao, TP, 0);
@@ -398,6 +359,10 @@ void cipline_tech_object::initline()
 #endif //DEBUG
 	Mdls[nmr - 1] = this;
 	MdlsCNT++;
+	rt_par_float[P_R_NO_FLOW] = 20;
+	rt_par_float[P_TM_R_NO_FLOW] = 20;
+	rt_par_float[P_TM_NO_FLOW_R] = 20;
+	rt_par_float[P_TM_NO_CONC] = 20;
 	rt_par_float[PIDP_Z] = 95;
 	rt_par_float[PIDP_k] = 2;
 	rt_par_float[PIDP_Ti] = 30;
@@ -420,6 +385,8 @@ void cipline_tech_object::initline()
 	rt_par_float[PIDF_IsManualMode] = 0;
 	rt_par_float[PIDF_UManual] = 15;
 	rt_par_float[PIDF_Uk] = 0;
+
+	isMsa = 1;
 	}
 
 int cipline_tech_object::evaluate()
@@ -479,29 +446,23 @@ void cipline_tech_object::resetRecipeName()
 void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*/ )
 	{
 	char tmp_str[32];
-#ifdef MSAPANEL
 	prgListLen = 0;
-	MsaPanel::UpdateLinePrograms(nmr);
-#endif
+	ModbusServ::UpdateLinePrograms(nmr);
 	strcpy(programList,"");
 	if ((SPROG_ACID_PREPARATION & programmask) == SPROG_ACID_PREPARATION)
 		{
 		sprintf(tmp_str, "%d##Наведение кислоты||", SPROG_ACID_PREPARATION);
-#ifdef MSAPANEL
 		sprintf(prgArray[prgListLen], "Наведение кислоты");
 		prgNumber[prgListLen] = SPROG_ACID_PREPARATION;
 		prgListLen++;
-#endif
 		strcat(programList,tmp_str);
 		}
 	if ((SPROG_CAUSTIC_PREPARATION & programmask) == SPROG_CAUSTIC_PREPARATION)
 		{
 		sprintf(tmp_str, "%d##Наведение щелочи||", SPROG_CAUSTIC_PREPARATION);
-#ifdef MSAPANEL
 		sprintf(prgArray[prgListLen], "Наведение щелочи");
 		prgNumber[prgListLen] = SPROG_CAUSTIC_PREPARATION;
 		prgListLen++;
-#endif
 		strcat(programList,tmp_str);
 		}
 #ifdef SELFCLEAN
@@ -510,11 +471,9 @@ void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*
 		if ((SPROG_SELF_CLEAN & programmask) == SPROG_SELF_CLEAN)
 			{
 			sprintf(tmp_str, "%d##Очистка танков||", SPROG_SELF_CLEAN);
-#ifdef MSAPANEL
 			sprintf(prgArray[prgListLen], "Очистка танков");
 			prgNumber[prgListLen] = SPROG_SELF_CLEAN;
 			prgListLen++;
-#endif
 			strcat(programList,tmp_str);
 			}
 		}
@@ -524,10 +483,8 @@ void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*
 void cipline_tech_object::formProgramList( unsigned long programmask )
 	{
 	char tmp_str[32];
-#ifdef MSAPANEL
 	prgListLen = 0;
-	MsaPanel::UpdateLinePrograms(nmr);
-#endif
+	ModbusServ::UpdateLinePrograms(nmr);
 	if (programmask == 0)
 		{
 		programmask = default_programlist;
@@ -537,111 +494,89 @@ void cipline_tech_object::formProgramList( unsigned long programmask )
 		{
 		sprintf(tmp_str, "%d##Дезинф||", SPROG_HOTWATER);
 		strcat(programList,tmp_str);
-#ifdef MSAPANEL
 		sprintf(prgArray[prgListLen], "Дезинфeкция");
 		prgNumber[prgListLen] = SPROG_HOTWATER;
 		prgListLen++;
-#endif
 		}
 	if ((programmask >> 1) & 1)
 		{
 		sprintf(tmp_str, "%d##Ополаск||", SPROG_RINSING);
 		strcat(programList,tmp_str);
-#ifdef MSAPANEL
 		sprintf(prgArray[prgListLen], "Ополаскивание");
 		prgNumber[prgListLen] = SPROG_RINSING;
 		prgListLen++;
-#endif
 		}
 	if ((programmask >> 2) & 1)
 		{
 		sprintf(tmp_str, "%d##Опол+Дез||", SPROG_RINSING_HOTWATER);
 		strcat(programList,tmp_str);
-#ifdef MSAPANEL
 		sprintf(prgArray[prgListLen], "Опол+Дезинф");
 		prgNumber[prgListLen] = SPROG_RINSING_HOTWATER;
 		prgListLen++;
-#endif
 		}
 	if ((programmask >> 3) & 1)
 		{
 		sprintf(tmp_str, "%d##Кислота||", SPROG_ACID);
 		strcat(programList,tmp_str);
-#ifdef MSAPANEL
 		sprintf(prgArray[prgListLen], "Кислота");
 		prgNumber[prgListLen] = SPROG_ACID;
 		prgListLen++;
-#endif
 		}
 	if ((programmask >> 4) & 1)
 		{
 		sprintf(tmp_str, "%d##Кисл+Дез||", SPROG_ACID_HOTWATER);
 		strcat(programList,tmp_str);
-#ifdef MSAPANEL
 		sprintf(prgArray[prgListLen], "Кисл+Дезинф");
 		prgNumber[prgListLen] = SPROG_ACID_HOTWATER;
 		prgListLen++;
-#endif
 		}
 	if ((programmask >> 5) & 1)
 		{
 		sprintf(tmp_str, "%d##Щелочь||", SPROG_CAUSTIC);
 		strcat(programList,tmp_str);
-#ifdef MSAPANEL
 		sprintf(prgArray[prgListLen], "Щелочь");
 		prgNumber[prgListLen] = SPROG_CAUSTIC;
 		prgListLen++;
-#endif
 		}
 	if ((programmask >> 6) & 1)
 		{
 		sprintf(tmp_str, "%d##Щел+Дез||", SPROG_CAUSTIC_HOTWATER);
 		strcat(programList,tmp_str);
-#ifdef MSAPANEL
 		sprintf(prgArray[prgListLen], "Щелочь+Дезинф");
 		prgNumber[prgListLen] = SPROG_CAUSTIC_HOTWATER;
 		prgListLen++;
-#endif
 		}
 	if ((programmask >> 7) & 1)
 		{
 		sprintf(tmp_str, "%d##Щел+Кисл+Дез||", SPROG_CAUSTIC_ACID_HOTWATER);
 		strcat(programList,tmp_str);
-#ifdef MSAPANEL
 		sprintf(prgArray[prgListLen], "Щел+Кисл+Дезинф");
 		prgNumber[prgListLen] = SPROG_CAUSTIC_ACID_HOTWATER;
 		prgListLen++;
-#endif
 		}
 	if ((programmask >> 8) & 1)
 		{
 		sprintf(tmp_str, "%d##Щел+Кисл||", SPROG_CAUSTIC_ACID);
 		strcat(programList,tmp_str);
-#ifdef MSAPANEL
 		sprintf(prgArray[prgListLen], "Щел+Кислота");
 		prgNumber[prgListLen] = SPROG_CAUSTIC_ACID;
 		prgListLen++;
-#endif
 		}
 	if ((programmask >> 9) & 1)
 		{
 		sprintf(tmp_str, "%d##Опол.чист.водой||", SPROG_RINSING_CLEAN);
 		strcat(programList,tmp_str);
-#ifdef MSAPANEL
 		sprintf(prgArray[prgListLen], "Опол.чист водой");
 		prgNumber[prgListLen] = SPROG_RINSING_CLEAN;
 		prgListLen++;
-#endif
 		}
 	if ((programmask >> 10) & 1)
 		{
 		sprintf(tmp_str, "%d##ДезСР||", SPROG_SANITIZER);
 		strcat(programList,tmp_str);
-#ifdef MSAPANEL
 		sprintf(prgArray[prgListLen], "Дезраствор");
 		prgNumber[prgListLen] = SPROG_SANITIZER;
 		prgListLen++;
-#endif
 		}
 	}
 
@@ -1807,7 +1742,7 @@ void cipline_tech_object::ResetWP( void )
 	int i;
 	for (i = 1; i < P_RESERV_START; i++)
 		{
-		if (i != P_CONC_RATE && (i < PIDP_Z || i > PIDF_Uk ))
+		if (i != P_CONC_RATE && (i < P_R_NO_FLOW || i > PIDF_Uk ))
 			{
 			rt_par_float[i] = 0;
 			}
