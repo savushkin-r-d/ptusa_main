@@ -1798,6 +1798,12 @@ int motor::get_state()
             return 0;
             }
 
+        if ( 0 == ro && 1 == o && 1 == i )
+            {
+            start_switch_time = get_millisec();
+            return 1;
+            }
+
         if ( 1 == ro && 1 == o &&  1 == i )
             {
             start_switch_time = get_millisec();
