@@ -169,6 +169,11 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 					coilgroup = data[0];
 					switch (coilgroup)
 						{
+						case C_V:
+						case C_M:
+						case C_N:
+							ForceBit(i, &outdata[3], get_device(coilgroup, objnumber)->get_state());
+							break;
 						case C_MSA_STATIONPARAMS:
 							ForceBit(i,&outdata[3],cipline_tech_object::Mdls[0]->get_station_par(objnumber) != 0 ? 1 : 0);
 							break;
@@ -1085,4 +1090,41 @@ int ModbusServ::UnicodetoCP1251( char* Output, unsigned char* Buf, int inputlen 
 			}
 		}
 	return i/2 - 1;
+	}
+
+device* ModbusServ::get_device( unsigned int group, unsigned int number )
+	{
+	unsigned int line;
+	device* ret = G_DEVICE_MANAGER()->get_stub();
+	line = number / 100;
+	char devname[20] = {0};
+	switch (group)
+		{
+		case C_V:
+			if (line > 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT && number % 100 < 14)
+			{
+			sprintf(devname, "LINE%dV%d", line, number);
+			ret = (device*)V(devname);
+			}
+			break;
+		case C_M:
+		case C_N:
+			switch (number % 100)
+				{
+				case 1:
+					ret = (device*)cipline_tech_object::Mdls[0]->NS;
+					break;
+				case 2:
+					ret = (device*)cipline_tech_object::Mdls[0]->NK;
+					break;
+				case 3:
+					if (line > 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT)
+						{
+						ret = (device*)cipline_tech_object::Mdls[line - 1]->NP;
+						}
+					break;
+				}
+			break;
+		}
+	return ret;
 	}

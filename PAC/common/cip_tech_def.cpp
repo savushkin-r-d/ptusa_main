@@ -3890,6 +3890,8 @@ int cipline_tech_object::DoseRR( int what )
 int cipline_tech_object::init_object_devices()
 	{
 	u_int dev_no;
+	u_int devline;
+	char devname[20] = {0};
 	device* dev;
 #ifdef DEBUG
 	Print("init_object_devices\n\r");
@@ -3905,8 +3907,26 @@ int cipline_tech_object::init_object_devices()
 			}
 		else
 			{
-			dev_os_object = 0;
-			return -1;
+			if (dev_no / 1000 == msa_number)
+				{
+				devline = (dev_no - msa_number * 1000) / 100;
+				sprintf(devname, "LINE%dDI%d", devline, dev_no);
+				dev = (device*)DI(devname);
+				if (dev->get_serial_n() > 0)
+					{
+					dev_os_object = dev;
+					}
+				else
+					{
+					dev_os_object = 0;
+					return -1;
+					}
+				}
+			else
+				{
+				dev_os_object = 0;
+				return -1;
+				}
 			}
 		}
 	else
@@ -3943,8 +3963,26 @@ int cipline_tech_object::init_object_devices()
 			}
 		else
 			{
-			dev_upr_ret = 0;
-			return -1;
+			if (dev_no / 1000 == msa_number)
+				{
+				devline = (dev_no - msa_number * 1000) / 100;
+				sprintf(devname, "LINE%dDO%d", devline, dev_no);
+				dev = (device*)DO(devname);
+				if (dev->get_serial_n() > 0)
+					{
+					dev_upr_ret = dev;
+					}
+				else
+					{
+					dev_upr_ret = 0;
+					return -1;
+					}
+				}
+			else
+				{
+				dev_upr_ret = 0;
+				return -1;
+				}
 			}
 		}
 	else
