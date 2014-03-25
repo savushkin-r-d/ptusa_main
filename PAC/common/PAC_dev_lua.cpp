@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 03/23/14 14:42:32.
+** Generated automatically by tolua++-1.0.92 on 03/25/14 12:10:31.
 */
 
 #ifndef __cplusplus
@@ -98,7 +98,7 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"i_AI_device");
  tolua_usertype(tolua_S,"device_manager");
  tolua_usertype(tolua_S,"timer");
- tolua_usertype(tolua_S,"i_mix_proof");
+ tolua_usertype(tolua_S,"valve");
  tolua_usertype(tolua_S,"tech_object");
  tolua_usertype(tolua_S,"dev_stub");
 }
@@ -7531,12 +7531,12 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"get_instance",tolua_PAC_dev_dev_errors_manager_get_instance00);
    tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_dev_errors_manager_set_cmd00);
   tolua_endmodule(tolua_S);
-  tolua_cclass(tolua_S,"i_mix_proof","i_mix_proof","",NULL);
-  tolua_beginmodule(tolua_S,"i_mix_proof");
-   tolua_constant(tolua_S,"ST_CLOSE",i_mix_proof::ST_CLOSE);
-   tolua_constant(tolua_S,"ST_OPEN",i_mix_proof::ST_OPEN);
-   tolua_constant(tolua_S,"ST_UPPER_SEAT",i_mix_proof::ST_UPPER_SEAT);
-   tolua_constant(tolua_S,"ST_LOWER_SEAT",i_mix_proof::ST_LOWER_SEAT);
+  tolua_cclass(tolua_S,"valve","valve","",NULL);
+  tolua_beginmodule(tolua_S,"valve");
+   tolua_constant(tolua_S,"V_LOWER_SEAT",valve::V_LOWER_SEAT);
+   tolua_constant(tolua_S,"V_UPPER_SEAT",valve::V_UPPER_SEAT);
+   tolua_constant(tolua_S,"V_ON",valve::V_ON);
+   tolua_constant(tolua_S,"V_OFF",valve::V_OFF);
   tolua_endmodule(tolua_S);
   #ifdef __cplusplus
   tolua_cclass(tolua_S,"tech_object","tech_object","",tolua_collect_tech_object);
