@@ -273,7 +273,8 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 
 			if (isMsa)
 				{
-				unsigned int i,j,k;
+				unsigned int i,j;
+                                int k;
 				unsigned int objnumber, line;
 				int modstate;
 				for (i = 0; i < numberofElements; i++)
@@ -370,7 +371,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 											if (objnumber >= RC_RECIPE_PAR_START)
 												{
 												k = (objnumber - RC_RECIPE_PAR_START) / 2;
-												if (k < u_int(cipline_tech_object::Mdls[line - 1]->lineRecipes->GetParamsCount()))
+												if (k < cipline_tech_object::Mdls[line - 1]->lineRecipes->GetParamsCount())
 													{
 													PackFloat(cipline_tech_object::Mdls[line - 1]->lineRecipes->getValue(k - 1), &outdata[3+i*2]);
 													i++;
@@ -639,7 +640,8 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 			unsigned int startingAddress  = data[2] * 256 + data[3];
 			unsigned int numberofElements = data[4] * 256 + data[5];            
 			unsigned int coilgroup        = data[ 0 ];
-			unsigned int i,j,k;
+			unsigned int i,j;
+                        int k;
 			int recipe_to_load;
 			int line;
 
@@ -741,7 +743,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 									if (objnumber >= RC_RECIPE_PAR_START)
 										{
 										k = (objnumber - RC_RECIPE_PAR_START) / 2;
-										if (k <= (unsigned int)(cipline_tech_object::Mdls[line - 1]->lineRecipes->GetParamsCount()))
+										if (k <= cipline_tech_object::Mdls[line - 1]->lineRecipes->GetParamsCount())
 											{
 											cipline_tech_object::Mdls[line - 1]->lineRecipes->setValue(k - 1, UnpackFloat(&data[7+i*2]));
 											i++;

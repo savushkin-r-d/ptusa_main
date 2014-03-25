@@ -268,6 +268,6 @@ class TRecipeManager
 	};
 
 
-#endif // mcaRecipes_h__	
-		
-	
+#endif // mcaRecipes_h__
+
+        
