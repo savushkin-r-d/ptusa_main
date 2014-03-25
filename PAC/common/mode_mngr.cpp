@@ -483,7 +483,7 @@ void open_seat_action::evaluate()
             for ( u_int j = 0; j < wash_upper_seat_devices[ active_group_n ].size(); j++ )
                 {
                 wash_upper_seat_devices[ active_group_n ][ j ]->set_state(
-                    i_mix_proof::ST_UPPER_SEAT );
+                    valve::V_UPPER_SEAT );
                 }
             }
         else //Время промывки седел вышло.
@@ -517,7 +517,7 @@ void open_seat_action::evaluate()
             for ( u_int j = 0; j < wash_lower_seat_devices[ active_group_n ].size(); j++ )
                 {
                 wash_lower_seat_devices[ active_group_n ][ j ]->set_state(
-                    i_mix_proof::ST_LOWER_SEAT );
+                    valve::V_LOWER_SEAT );
                 }
             }
         else //Время промывки седел вышло.
@@ -575,11 +575,11 @@ void open_seat_action::add_dev( device *dev, u_int group, u_int seat_type )
 
     switch ( seat_type )
         {
-    case i_mix_proof::ST_UPPER_SEAT:
+    case valve::V_UPPER_SEAT:
         seat_group = &wash_upper_seat_devices;
         break;
 
-    case i_mix_proof::ST_LOWER_SEAT:
+    case valve::V_LOWER_SEAT:
         seat_group = &wash_lower_seat_devices;
         break;
         }

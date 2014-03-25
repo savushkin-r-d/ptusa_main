@@ -1530,12 +1530,12 @@ void valve_DO2_DI2::direct_off()
 //-----------------------------------------------------------------------------
 void valve_mix_proof::open_upper_seat()
     {
-    direct_set_state( i_mix_proof::ST_UPPER_SEAT );
+    direct_set_state( V_UPPER_SEAT );
     }
 //-----------------------------------------------------------------------------
 void valve_mix_proof::open_lower_seat()
     {
-    direct_set_state( i_mix_proof::ST_LOWER_SEAT );
+    direct_set_state( V_LOWER_SEAT );
     }
 //-----------------------------------------------------------------------------
 void valve_mix_proof::direct_set_state( int new_state )
@@ -1545,15 +1545,15 @@ void valve_mix_proof::direct_set_state( int new_state )
 #else
     switch ( new_state )
         {
-        case ST_CLOSE:
+        case V_OFF:
             direct_off();
             break;
 
-        case ST_OPEN:
+        case V_ON:
             direct_on();
             break;
 
-        case ST_UPPER_SEAT:
+        case V_UPPER_SEAT:
             {
             direct_off();
 
@@ -1567,7 +1567,7 @@ void valve_mix_proof::direct_set_state( int new_state )
             break;
             }
 
-        case ST_LOWER_SEAT:
+        case V_LOWER_SEAT:
             {
             direct_off();
 
@@ -1604,7 +1604,8 @@ void valve_mix_proof::direct_on()
 //-----------------------------------------------------------------------------
 void valve_mix_proof::direct_off()
     {
-    bool was_seat = state == ST_LOWER_SEAT || state == ST_UPPER_SEAT;
+    VALVE_STATE st = get_valve_state();
+    bool was_seat = st == V_LOWER_SEAT || st == V_UPPER_SEAT;
 
     set_DO( DO_INDEX_U, 0 );
     set_DO( DO_INDEX_L, 0 );

@@ -147,13 +147,6 @@ class i_counter
 class i_mix_proof
     {
     public:
-        enum STATES
-            {
-            ST_CLOSE = 0,   ///< Закрыть.
-            ST_OPEN,        ///< Открыть.
-            ST_UPPER_SEAT,  ///< Открыть верхнее седло.
-            ST_LOWER_SEAT,  ///< Открыть нижнее седло.
-            };
 
         /// @brief Открыть верхнее седло.
         virtual void open_upper_seat() = 0;
@@ -714,10 +707,6 @@ class valve: public digital_wago_device
         int set_cmd( const char *prop, u_int idx, double val );
 #endif // DEBUG_NO_WAGO_MODULES
 
-        //Интерфейс для реализации получения расширенного состояния с учетом
-        // всех вариантов (ручной режим, обратная связь, ...).
-    protected:
-
         ///Состояние клапана без учета обратной связи.
         enum VALVE_STATE
             {
@@ -727,6 +716,10 @@ class valve: public digital_wago_device
             V_ON  = 1,        ///< Включен.
             V_OFF = 0,        ///< Выключен.
             };
+            
+        //Интерфейс для реализации получения расширенного состояния с учетом
+        // всех вариантов (ручной режим, обратная связь, ...).
+    protected:
 
         /// @brief Получение состояния клапана без учета обратной связи.
         virtual VALVE_STATE get_valve_state() = 0;
@@ -1160,12 +1153,12 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
 
         void open_upper_seat()
             {
-            direct_set_state( i_mix_proof::ST_UPPER_SEAT );
+            direct_set_state( V_UPPER_SEAT );
             }
 
         void open_lower_seat()
             {
-            direct_set_state( i_mix_proof::ST_LOWER_SEAT );
+            direct_set_state( V_LOWER_SEAT );
             }
 
         VALVE_STATE get_valve_state()
