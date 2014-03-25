@@ -1604,11 +1604,13 @@ void valve_mix_proof::direct_on()
 //-----------------------------------------------------------------------------
 void valve_mix_proof::direct_off()
     {
+    bool was_seat = state == ST_LOWER_SEAT || state == ST_UPPER_SEAT;
+
     set_DO( DO_INDEX_U, 0 );
     set_DO( DO_INDEX_L, 0 );
     int o = get_DO( DO_INDEX );
 
-    if ( o != 0 )
+    if ( o != 0 || was_seat ) 
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
