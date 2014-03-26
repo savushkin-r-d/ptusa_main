@@ -2018,12 +2018,12 @@ void timer::pause()
         {
         work_time += get_delta_millisec( last_time );
         }
-    state = S_STOP;
+    state = S_PAUSE;
     }
 //-----------------------------------------------------------------------------
 bool timer::is_time_up() const
     {
-    if ( state != S_STOP )
+    if ( S_WORK == state )
         {
         u_int time = work_time + get_delta_millisec( last_time );
         if (  time <= countdown_time )
@@ -2035,14 +2035,20 @@ bool timer::is_time_up() const
             return 1;
             }
         }
-
     return 0;
     }
 //-----------------------------------------------------------------------------
 u_long timer::get_work_time() const
-    {
-    return work_time + get_delta_millisec( last_time );
-    }
+	{
+	if (S_WORK == state)
+		{
+		return work_time + get_delta_millisec( last_time );
+		}
+	else
+		{
+		return work_time;
+		}
+	}
 //-----------------------------------------------------------------------------
 void timer::set_countdown_time( u_long new_countdown_time )
     {

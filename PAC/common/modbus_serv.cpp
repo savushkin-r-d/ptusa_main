@@ -174,6 +174,9 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 						case C_N:
 							ForceBit(i, &outdata[3], get_device(coilgroup, objnumber)->get_state());
 							break;
+						case C_LS:
+							ForceBit(i, &outdata[3], get_device(coilgroup, objnumber)->is_active());
+							break;
 						case C_MSA_STATIONPARAMS:
 							ForceBit(i,&outdata[3],cipline_tech_object::Mdls[0]->get_station_par(objnumber) != 0 ? 1 : 0);
 							break;
@@ -274,7 +277,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 			if (isMsa)
 				{
 				unsigned int i,j;
-                                int k;
+                int k;
 				unsigned int objnumber, line;
 				int modstate;
 				for (i = 0; i < numberofElements; i++)
@@ -282,8 +285,11 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 					objnumber = i + startingAddress;
 					switch (coilgroup)
 						{
+						case C_AO:
+							PackFloat(get_device(coilgroup, objnumber)->get_value(),&outdata[3+i*2]);
+							i++;
+							break;
 						case C_MSA_RECIPES:
-
 							line = (i + startingAddress) / 3000 + 1;
 							if (line > u_int(cipline_tech_object::MdlsCNT))
 								{
@@ -1125,6 +1131,62 @@ device* ModbusServ::get_device( unsigned int group, unsigned int number )
 						ret = (device*)cipline_tech_object::Mdls[line - 1]->NP;
 						}
 					break;
+				}
+			break;
+		case C_LS:
+			switch (number)
+				{
+				case 4:
+					ret = (device*)cipline_tech_object::Mdls[0]->LSH;
+					break;
+				case 5:
+					ret = (device*)cipline_tech_object::Mdls[0]->LSL;
+					break;
+				case 6:
+					ret = (device*)cipline_tech_object::Mdls[0]->LKH;
+					break;
+				case 7:
+					ret = (device*)cipline_tech_object::Mdls[0]->LKL;
+					break;
+				case 8:
+					ret = (device*)cipline_tech_object::Mdls[0]->LWH;
+					break;
+				case 9:
+					ret = (device*)cipline_tech_object::Mdls[0]->LWL;
+					break;
+				default:
+					if (line > 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT)
+						{
+						switch (number % 100)
+							{
+							case 1:
+								ret = (device*)cipline_tech_object::Mdls[line]->LH;
+								break;
+							case 2:
+								ret = (device*)cipline_tech_object::Mdls[line]->LM;
+								break;
+							case 3:
+								ret = (device*)cipline_tech_object::Mdls[line]->LL;
+								break;
+							}
+						}
+					break;
+				}
+
+			break;
+		case C_AO:
+			line = line / 2;
+			if (line > 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT)
+				{
+				switch (number % 100)
+					{
+					case 4:
+						ret = (device*)cipline_tech_object::Mdls[line]->NP;
+						break;
+					case 28:
+						ret = (device*)cipline_tech_object::Mdls[line]->ao;
+						break;
+					}
 				}
 			break;
 		}

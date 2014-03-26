@@ -342,8 +342,8 @@ void cipline_tech_object::initline()
 	sprintf(devname, "LINE%dVC%d", number, number * 100 + 14);
 	ao = VC(devname);
 
-	PIDF = new MSAPID(&rt_par_float, 61, P_ZAD_FLOW, PUMPFREQ, 0, cnt );
-	PIDP = new MSAPID(&rt_par_float, 72, P_ZAD_PODOGR, ao, TP, 0);
+	PIDF = new MSAPID(&rt_par_float, 72, P_ZAD_FLOW, PUMPFREQ, 0, cnt );
+	PIDP = new MSAPID(&rt_par_float, 61, P_ZAD_PODOGR, ao, TP, 0);
 
 #ifdef DEBUG
 	LSL->set_cmd("ST", 0, 1);
@@ -3723,7 +3723,7 @@ int cipline_tech_object::Circ( int what )
 		}
 #endif
 
-	if (TR->get_value()>=rt_par_float[P_ZAD_PODOGR]-rt_par_float[P_DELTA_TR] && cnt->get_flow() > rt_par_float[P_R_NO_FLOW])
+	if (TR->get_value() >= rt_par_float[P_ZAD_PODOGR]-rt_par_float[P_DELTA_TR] && cnt->get_flow() > rt_par_float[P_R_NO_FLOW])
 		{
 		T[TMR_OP_TIME]->start();
 		}
