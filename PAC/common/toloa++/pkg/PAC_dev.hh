@@ -587,9 +587,9 @@ class mode
 
         /// @brief Переход к заданному шагу.
         ///
-        /// @param new_step - шаг, к которому надо перейти.
-        /// @param cooper_time - время переключения шагов.
-        void to_step( unsigned int new_step, unsigned int cooper_time );
+        /// @param new_step - номер шага (с единицы).
+        /// @param cooperative_time - время совместной работы (сек).
+        void to_step( unsigned int new_step, unsigned long cooperative_time = 0 );
 		}
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об устройствах, которые входят в шаг (открываются/

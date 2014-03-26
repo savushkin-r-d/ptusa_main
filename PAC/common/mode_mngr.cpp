@@ -885,7 +885,6 @@ void mode::evaluate()
                 {
                 step_switch_time = ( u_long )
                     owner->get_param()[ 0 ][ step_cooperate_time_par_n ];
-                step_switch_time *= 1000L;
                 }
 
             if ( -1 == active_step_next_step_n )
@@ -962,14 +961,14 @@ void mode::to_step( u_int new_step, u_long cooperative_time )
         return;
         }
 
-    step_cooperate_time = cooperative_time;
+    step_cooperate_time = 1000 * cooperative_time;
 
     active_step_time        = 0;
     active_step_next_step_n = 0;
 
     // Если есть текущий шаг и время переключения больше нуля,
     // то включаем совместный шаг.
-    if ( active_step_n >= 0 && cooperative_time > 0 )
+    if ( active_step_n >= 0 && step_cooperate_time > 0 )
         {
         active_step_second_n = new_step - 1;
         active_step_second_start_time = get_millisec();
@@ -1019,7 +1018,7 @@ void mode::to_step( u_int new_step, u_long cooperative_time )
 
 #ifdef DEBUG
     Print( "mode %d. \"%s\" to_step() -> %d, step time %d ms, coop time %lu ms.\n",
-        n, name.c_str(), new_step, active_step_time, cooperative_time );
+        n, name.c_str(), new_step, active_step_time, step_cooperate_time );
 #endif // DEBUG
     }
 //-----------------------------------------------------------------------------

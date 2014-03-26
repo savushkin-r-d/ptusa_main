@@ -366,6 +366,10 @@ class mode
 
         void final();
 
+        /// @brief Переход к заданному шагу.
+        ///
+        /// @param new_step - номер шага (с единицы).
+        /// @param cooperative_time - время совместной работы (сек).
         void to_step( u_int new_step, u_long cooperative_time = 0 );
 
         u_long evaluation_time()
