@@ -493,7 +493,7 @@ int lua_manager::exec_lua_method( const char *object_name,
 int lua_manager::error_trace( lua_State * L )
     {
 #ifdef DEBUG
-    Print( "\t%s\n", lua_tostring( L, -1 ) );
+    Print( "Error -\t%s\n", lua_tostring( L, -1 ) );
     lua_pop( L, 1 );
 
     Print( "\tstack traceback:\n" );
@@ -504,32 +504,11 @@ int lua_manager::error_trace( lua_State * L )
         {
         lua_getinfo( L, "Sln", &ar );
         Print( "\t\t%s:%d: in function '%s'\n",
-            ar.source, ar.linedefined, ar.name );
+            ar.source, ar.currentline, ar.name );
+
         level++;
         }
 #endif // DEBUG
-
-    //////stack: err
-    ////const char* err = lua_tostring(L, 1);
-
-    ////printf("Error: %s\n", err);
-
-    ////lua_getglobal(L, "debug"); // stack: err debug
-    ////lua_getfield(L, -1, "traceback"); // stack: err debug debug.traceback
-
-    ////// debug.traceback() возвращает 1 значение
-    ////if(lua_pcall(L, 0, 1, 0))
-    ////    {
-    ////    const char* err = lua_tostring(L, -1);
-
-    ////    printf("Error in debug.traceback() call: %s\n", err);
-    ////    }
-    ////else
-    ////    {
-    ////    const char* stackTrace = lua_tostring(L, -1);
-
-    ////    printf("C++ stack traceback: %s\n", stackTrace);
-    ////    }
 
     return 0;
     }
