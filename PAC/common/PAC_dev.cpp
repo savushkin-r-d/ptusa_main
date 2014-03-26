@@ -1890,11 +1890,11 @@ bool level_s::is_active()
     switch ( sub_type )
         {
         case DST_LS_MIN:
-            return get_state() == 0 ? 1 : 0;
+            return get_state() == 0 ? 0 : 1;
             break;
 
         case DST_LS_MAX:
-            return get_state() == 0 ? 0 : 1;
+            return get_state() == 0 ? 1 : 0;
             break;
 
         default:
