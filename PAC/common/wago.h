@@ -248,14 +248,11 @@ class wago_manager
                 {
                 T_EMPTY = -1,   ///< Не задан.
 
-                T_750_860 = 0,
-                T_750_863,
-                T_750_820x,
+                T_750_86x = 0,  ///< Wago 750-863.
+                
+                T_750_820x = 2, ///< Wago PFC200.
 
-                T_750_341 = 100,  ///< Ethernet 750-341.
-                T_750_841,        ///< Ethernet 750-841 programmable.
-
-                T_750_352,        ///< Ethernet 750-352.
+                T_750_XXX_ETHERNET = 100,///< Ethernet 750-341 и т.д.
                 };
 
             enum STATES           ///< Cостояния работы с узлом.

@@ -25,8 +25,7 @@ int wago_manager_w750::read_inputs()
     for ( u_int i = 0; i < nodes_count; i++ )
         {
         wago_node *nd = nodes[ i ];
-        if ( nd->type == wago_node::T_750_860 ||
-            nd->type == wago_node::T_750_863 ) // KBus
+        if ( nd->type == wago_node::T_750_86x ) // KBus
             {
             static u_long start_time = get_millisec();
             if ( get_delta_millisec( start_time ) > 200 )
@@ -101,7 +100,7 @@ int wago_manager_w750::read_inputs()
                 printf( "\n" );
 #endif // DEBUG_KBUS
                 }
-            }// if ( nd->type == wago_node::T_750_860 ) // KBus
+            }// if ( nd->type == wago_node::T_750_86x ) // KBus
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
     return wago_manager_linux::read_inputs();
@@ -114,8 +113,7 @@ int wago_manager_w750::write_outputs()
     for ( u_int i = 0; i < nodes_count; i++ )
         {
         wago_node *nd = nodes[ i ];
-        if ( nd->type == wago_node::T_750_860 ||
-            nd->type == wago_node::T_750_863 ) // KBus
+        if ( nd->type == wago_node::T_750_86x ) // KBus
             {
             static u_long start_time = get_millisec();
             if ( get_delta_millisec( start_time ) > 200 )
@@ -177,7 +175,7 @@ int wago_manager_w750::write_outputs()
 
                 KbusUpdate();
                 }
-            }// if ( nd->type == wago_node::T_750_860... ) // KBus
+            }// if ( nd->type == wago_node::T_750_86x... ) // KBus
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
     return wago_manager_linux::write_outputs();

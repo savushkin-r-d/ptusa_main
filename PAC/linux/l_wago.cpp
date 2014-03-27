@@ -121,8 +121,7 @@ int wago_manager_linux::write_outputs()
     for ( u_int i = 0; i < nodes_count; i++ )
         {
         wago_node *nd = nodes[ i ];
-        if ( nd->type == wago_node::T_750_341 ||
-            nd->type == wago_node::T_750_841 )
+        if ( nd->type == wago_node::T_750_XXX_ETHERNET )
             {
             if ( !nd->is_active )
                 {
@@ -326,8 +325,7 @@ int wago_manager_linux::read_inputs()
             {
             wago_node *nd = nodes[ i ];
 
-            if ( nd->type == wago_node::T_750_341 || // Ethernet Wago nodes.
-                nd->type == wago_node::T_750_841 )
+            if ( nd->type == wago_node::T_750_XXX_ETHERNET ) // Ethernet Wago nodes.                
                 {
                 if ( !nd->is_active )
                     {
