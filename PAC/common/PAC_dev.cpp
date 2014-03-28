@@ -2295,7 +2295,8 @@ device* DEVICE( int s_number )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_AS_mix_proof::valve_AS_mix_proof( const char *dev_name
-    ): valve( true, true, dev_name, DT_V, DST_V_AS_MIXPROOF )
+    ): valve( true, true, dev_name, DT_V, DST_V_AS_MIXPROOF ),
+    AS_gateway( 0 ), AS_number( 0 )
     {
     }
 //-----------------------------------------------------------------------------

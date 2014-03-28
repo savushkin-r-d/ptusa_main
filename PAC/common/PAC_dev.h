@@ -71,7 +71,7 @@ class par_device
         /// @param idx - индекс параметра.
         /// @param offset - смещение индекса.
         /// @param value - новое значение.
-        void set_par( u_int idx, u_int offset, float value );
+        virtual void set_par( u_int idx, u_int offset, float value );
 
         /// @brief Получение значения параметра.
         ///
@@ -1161,17 +1161,80 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
             direct_set_state( V_LOWER_SEAT );
             }
 
+        void print() const
+            {
+#ifdef DEBUG
+            Print( "%s [%d:%d]\t", get_name(), AS_gateway, AS_number );
+#endif // DEBUG
+            }
+
+        void set_par( u_int idx, u_int offset, float value )
+            {
+            switch ( idx )
+                {
+                case 1:
+                    AS_gateway = ( u_int ) value;
+                    break;
+
+                case 2:
+                    AS_number = ( u_int ) value;
+                    break;
+
+                default:
+                    par_device::set_par( idx, offset, value );
+                    break;
+                }           
+            }
+
         VALVE_STATE get_valve_state()
             {
 #ifdef DEBUG_NO_WAGO_MODULES
             return ( VALVE_STATE ) digital_wago_device::get_state();
 #else
-            return V_OFF; //Temp.
+            int* data = get_AO_read_data( AO_INDEX );
+            const int MAILBOX_OFFSET = 8;
+            int state = data[ MAILBOX_OFFSET + AS_number / 2 ];
+
+            if ( AS_number % 2 ) //Нечетный номер - старшие четыре бита.
+            	{
+                state >>= 4;
+            	}
+
+            const int S_OPEN       = 0x02;
+            const int S_LOWER_SEAT = 0x04;
+            const int S_UPPER_SEAT = 0x08;
+
+            int o = state & S_OPEN;
+            int l = state & S_LOWER_SEAT;
+            int u = state & S_UPPER_SEAT;            
+
+            if ( o == 0 && u == 1 ) return V_UPPER_SEAT;
+            if ( o == 0 && l == 1 ) return V_LOWER_SEAT;
+
+            return ( VALVE_STATE ) o;
+#endif // DEBUG_NO_WAGO_MODULES
+            }
+
+        bool get_fb_state()
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return true;
+#else
+            return true;
 #endif // DEBUG_NO_WAGO_MODULES
             }
 
 #ifndef DEBUG_NO_WAGO_MODULES
-        //Temp.
+        int get_off_fb_value()
+            {
+            return 0;
+            }
+
+        int get_on_fb_value()
+            {
+            return 1;
+            }
+                
         void direct_off()
             {
             }
@@ -1180,6 +1243,17 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
             {
             }
 #endif // DEBUG_NO_WAGO_MODULES
+
+    private:
+
+        u_int AS_gateway;   ///< AS-шлюз.
+        u_int AS_number;    ///< AS-номер устройства.
+
+        enum CONSTANTS
+            {
+            AI_INDEX = 0,   ///< Индекс канала аналогового входа.
+            AO_INDEX = 0,   ///< Индекс канала аналогового выхода.            
+            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым входом.

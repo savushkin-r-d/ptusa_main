@@ -59,8 +59,8 @@ int wago_device::set_DO( u_int index, char value )
 #ifdef DEBUG
     print();
     Print( "wago_device->set_DO(...) - error! %d, %d, %d, %d\n",
-            index, DO_channels.count, ( int ) DO_channels.char_write_values,
-            ( int ) DO_channels.char_write_values[ index ] );
+        index, DO_channels.count, ( int ) DO_channels.char_write_values,
+        ( int ) DO_channels.char_write_values[ index ] );
     print();
 #endif // DEBUG
 
@@ -114,35 +114,35 @@ float wago_device::get_AO( u_int index, float min_value, float max_value )
             //    0               4               0000 0000 0000 0111     00 07         7
             //    0               4               0000 0000 0000 0000     00 00         0
             //
-        case 554:
-            if ( 0 == min_value && 0 == max_value )
-                {
-                if ( val < 7 )
+            case 554:
+                if ( 0 == min_value && 0 == max_value )
                     {
-                    val = 0;
+                    if ( val < 7 )
+                        {
+                        val = 0;
+                        }
+                    else
+                        {
+                        val = 4 + val / 2047.5f;
+                        }
                     }
                 else
                     {
-                    val = 4 + val / 2047.5f;
+                    if ( val < 7 )
+                        {
+                        val = 4;
+                        }
+                    else
+                        {
+                        val = 4 + val / 2047.5f;
+                        }
+                    val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
                     }
-                }
-            else
-                {
-                if ( val < 7 )
-                    {
-                    val = 4;
-                    }
-                else
-                    {
-                    val = 4 + val / 2047.5f;
-                    }
-                val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
-                }
 
-            return val;
+                return val;
 
-        default:
-            return val;
+            default:
+                return val;
             }
         }
 
@@ -154,7 +154,7 @@ float wago_device::get_AO( u_int index, float min_value, float max_value )
     }
 //-----------------------------------------------------------------------------
 int wago_device::set_AO( u_int index, float value, float min_value,
-    float max_value )
+                        float max_value )
     {
     if ( index < AO_channels.count &&
         AO_channels.int_write_values &&
@@ -166,14 +166,14 @@ int wago_device::set_AO( u_int index, float value, float min_value,
 
         switch ( module_type )
             {
-        case 554:
-            if ( 0 != min_value || 0 != max_value )
-                {
-                value = 4 + 16 * ( value - min_value ) / ( max_value - min_value );
-                }
-            if ( value < 4 ) value = 4;
-            if ( value > 20 ) value = 20;
-            value = 2047.5f * ( value - 4 );
+            case 554:
+                if ( 0 != min_value || 0 != max_value )
+                    {
+                    value = 4 + 16 * ( value - min_value ) / ( max_value - min_value );
+                    }
+                if ( value < 4 ) value = 4;
+                if ( value > 20 ) value = 20;
+                value = 2047.5f * ( value - 4 );
             }
 
         *AO_channels.int_write_values[ index ] = ( u_int ) value;
@@ -220,67 +220,67 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
             //  -200          18.192                  1111 1000 0011 0000     F830    -2000
             //                <18                     1000 0000 0000 0000     8000   -32767
             //
-        case 461:
-            if ( val >= 0xF830 && val <= 0xFFFF ) // -0,1..-200 °C
-                {
-                val -= 0x10000; //65536
-                val *= 0.1f;
-                return val;
-                }
-            if ( val >= 0 && val < 8500 ) // 0..850 °C
-                {
-                val *= 0.1f;
-                return val;
-                }
-
-            return -1000;
-
-            // Выход модуля 446.
-            // Три наименне значащих бита не учитываются.
-            //    -----------------------------------------------------------------------
-            //    Input           Input           Binary value
-            //    current 0-20	  current 4-20                            Hex.      Dec.
-            //    -----------------------------------------------------------------------
-            //   >20.5           >20.5            0111 1111 1111 1111     7F FF     32767
-            //    20              20              0111 1111 1111 1111     7F FF     32767
-            //    10              12              0100 0000 0000 0xxx     40 00     16384
-            //    5               8               0010 0000 0000 0xxx     20 00      8192
-            //    2.5             6               0001 0000 0000 0xxx     10 00      4096
-            //    0.156           4.125           0000 0001 0000 0xxx     01 00       256
-            //    0.01            4.0078          0000 0000 0001 0xxx     00 10        16
-            //    0.005           4.0039          0000 0000 0000 1xxx     00 08         8
-            //    0               4               0000 0000 0000 0111     00 07         7
-            //    0               4               0000 0000 0000 0000     00 00         0
-            //
-        case 466:
-            if ( 0 == min_value && 0 == max_value )
-                {
-                if ( val < 7 )
+            case 461:
+                if ( val >= 0xF830 && val <= 0xFFFF ) // -0,1..-200 °C
                     {
-                    val = 0;
+                    val -= 0x10000; //65536
+                    val *= 0.1f;
+                    return val;
+                    }
+                if ( val >= 0 && val < 8500 ) // 0..850 °C
+                    {
+                    val *= 0.1f;
+                    return val;
+                    }
+
+                return -1000;
+
+                // Выход модуля 446.
+                // Три наименне значащих бита не учитываются.
+                //    -----------------------------------------------------------------------
+                //    Input           Input           Binary value
+                //    current 0-20	  current 4-20                            Hex.      Dec.
+                //    -----------------------------------------------------------------------
+                //   >20.5           >20.5            0111 1111 1111 1111     7F FF     32767
+                //    20              20              0111 1111 1111 1111     7F FF     32767
+                //    10              12              0100 0000 0000 0xxx     40 00     16384
+                //    5               8               0010 0000 0000 0xxx     20 00      8192
+                //    2.5             6               0001 0000 0000 0xxx     10 00      4096
+                //    0.156           4.125           0000 0001 0000 0xxx     01 00       256
+                //    0.01            4.0078          0000 0000 0001 0xxx     00 10        16
+                //    0.005           4.0039          0000 0000 0000 1xxx     00 08         8
+                //    0               4               0000 0000 0000 0111     00 07         7
+                //    0               4               0000 0000 0000 0000     00 00         0
+                //
+            case 466:
+                if ( 0 == min_value && 0 == max_value )
+                    {
+                    if ( val < 7 )
+                        {
+                        val = 0;
+                        }
+                    else
+                        {
+                        val = 4 + val / 2047.5f;
+                        }
                     }
                 else
                     {
-                    val = 4 + val / 2047.5f;
+                    if ( val < 7 )
+                        {
+                        val = 4;
+                        }
+                    else
+                        {
+                        val = 4 + val / 2047.5f;
+                        }
+                    val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
                     }
-                }
-            else
-                {
-                if ( val < 7 )
-                    {
-                    val = 4;
-                    }
-                else
-                    {
-                    val = 4 + val / 2047.5f;
-                    }
-                val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
-                }
 
-            return val;
+                return val;
 
-        default:
-            return val;
+            default:
+                return val;
             }
         }
 
@@ -291,6 +291,58 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
         ( int ) AI_channels.int_read_values[ index ] );
 #endif // DEBUG
 
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int* wago_device::get_AI_data( u_int index )
+    {
+    if ( index < AI_channels.count && AI_channels.int_read_values )
+        {
+        return AI_channels.int_read_values[ index ];
+        }
+
+#ifdef DEBUG
+    Print( "wago_device->get_AI_data(...) - error!\n" );
+    Print( "index=%d, AI_channels.count=%d, AI_channels.int_read_values=%d, "
+        "AI_channels.int_read_values[ index ]=%d\n",
+        index, AI_channels.count, ( int ) AI_channels.int_read_values,
+        ( int ) AI_channels.int_read_values[ index ] );
+#endif // DEBUG
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int* wago_device::get_AO_write_data( u_int index )
+    {
+    if ( index < AO_channels.count && AO_channels.int_write_values )
+        {
+        return AO_channels.int_write_values[ index ];
+        }
+
+#ifdef DEBUG
+    Print( "wago_device->get_AO_data(...) - error!\n" );
+    Print( "index=%d, AO_channels.count=%d, AO_channels.int_write_values=%d, "
+        "AO_channels.int_write_values[ index ]=%d\n",
+        index, AO_channels.count, ( int ) AO_channels.int_write_values,
+        ( int ) AO_channels.int_write_values[ index ] );
+#endif // DEBUG
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int* wago_device::get_AO_read_data( u_int index )
+    {
+    if ( index < AO_channels.count && AO_channels.int_read_values )
+        {
+        return AO_channels.int_read_values[ index ];
+        }
+
+#ifdef DEBUG
+    Print( "wago_device->get_AO_data(...) - error!\n" );
+    Print( "index=%d, AO_channels.count=%d, AO_channels.int_read_values=%d, "
+        "AO_channels.int_read_values[ index ]=%d\n",
+        index, AO_channels.count, ( int ) AO_channels.int_read_values,
+        ( int ) AO_channels.int_read_values[ index ] );
+#endif // DEBUG
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -318,7 +370,7 @@ wago_device::~wago_device()
     }
 //-----------------------------------------------------------------------------
 void wago_device::init( int DO_count, int DI_count, int AO_count,
-    int AI_count )
+                       int AI_count )
     {
     if ( DO_count > 0 )
         {
@@ -342,21 +394,21 @@ void wago_device::init_channel( int type, int ch_index, int node, int offset )
     {
     switch ( type )
         {
-    case IO_channels::CT_DI:
-        DI_channels.init_channel( ch_index, node, offset );
-        break;
+        case IO_channels::CT_DI:
+            DI_channels.init_channel( ch_index, node, offset );
+            break;
 
-    case IO_channels::CT_DO:
-        DO_channels.init_channel( ch_index, node, offset );
-        break;
+        case IO_channels::CT_DO:
+            DO_channels.init_channel( ch_index, node, offset );
+            break;
 
-    case IO_channels::CT_AI:
-        AI_channels.init_channel( ch_index, node, offset );
-        break;
+        case IO_channels::CT_AI:
+            AI_channels.init_channel( ch_index, node, offset );
+            break;
 
-    case IO_channels::CT_AO:
-        AO_channels.init_channel( ch_index, node, offset );
-        break;
+        case IO_channels::CT_AO:
+            AO_channels.init_channel( ch_index, node, offset );
+            break;
         }
     }
 //-----------------------------------------------------------------------------
@@ -412,23 +464,23 @@ void wago_device::IO_channels::init( int ch_count )
 
         switch ( type )
             {
-        case IO_channels::CT_DI:
-            char_read_values = new u_char*[ count ];
-            break;
+            case IO_channels::CT_DI:
+                char_read_values = new u_char*[ count ];
+                break;
 
-        case IO_channels::CT_DO:
-            char_read_values  = new u_char*[ count ];
-            char_write_values = new u_char*[ count ];
-            break;
+            case IO_channels::CT_DO:
+                char_read_values  = new u_char*[ count ];
+                char_write_values = new u_char*[ count ];
+                break;
 
-        case IO_channels::CT_AI:
-            int_read_values = new int*[ count ];
-            break;
+            case IO_channels::CT_AI:
+                int_read_values = new int*[ count ];
+                break;
 
-        case IO_channels::CT_AO:
-            int_read_values  = new int*[ count ];
-            int_write_values = new int*[ count ];
-            break;
+            case IO_channels::CT_AO:
+                int_read_values  = new int*[ count ];
+                int_write_values = new int*[ count ];
+                break;
             }
         }
     }
@@ -439,21 +491,21 @@ void wago_device::IO_channels::print() const
         {
         switch ( type )
             {
-        case CT_DI:
-            Print( "DI" );
-            break;
+            case CT_DI:
+                Print( "DI" );
+                break;
 
-        case CT_DO:
-            Print( "DO" );
-            break;
+            case CT_DO:
+                Print( "DO" );
+                break;
 
-        case CT_AI:
-            Print( "AI" );
-            break;
+            case CT_AI:
+                Print( "AI" );
+                break;
 
-        case CT_AO:
-            Print( "AO" );
-            break;
+            case CT_AO:
+                Print( "AO" );
+                break;
             }
 
         Print( ":%d; ", count );
@@ -479,29 +531,29 @@ void wago_device::IO_channels::init_channel( u_int ch_index, int node, int offse
         offsets[ ch_index ] = offset;
         switch ( type )
             {
-        case CT_DI:
-            char_read_values[ ch_index ] = wago_manager::get_instance()->
-                get_DI_read_data( tables[ ch_index ], offsets[ ch_index ] );
-            break;
+            case CT_DI:
+                char_read_values[ ch_index ] = wago_manager::get_instance()->
+                    get_DI_read_data( tables[ ch_index ], offsets[ ch_index ] );
+                break;
 
-        case CT_DO:
-            char_read_values[ ch_index ] = wago_manager::get_instance()->
-                get_DO_read_data( tables[ ch_index ], offsets[ ch_index ] );
-            char_write_values[ ch_index ] = wago_manager::get_instance()->
-                get_DO_write_data( tables[ ch_index ], offsets[ ch_index ] );
-            break;
+            case CT_DO:
+                char_read_values[ ch_index ] = wago_manager::get_instance()->
+                    get_DO_read_data( tables[ ch_index ], offsets[ ch_index ] );
+                char_write_values[ ch_index ] = wago_manager::get_instance()->
+                    get_DO_write_data( tables[ ch_index ], offsets[ ch_index ] );
+                break;
 
-        case CT_AI:
-            int_read_values[ ch_index ] = wago_manager::get_instance()->
-                get_AI_read_data( tables[ ch_index ], offsets[ ch_index ] );
-            break;
+            case CT_AI:
+                int_read_values[ ch_index ] = wago_manager::get_instance()->
+                    get_AI_read_data( tables[ ch_index ], offsets[ ch_index ] );
+                break;
 
-        case CT_AO:
-            int_read_values[ ch_index ] = wago_manager::get_instance()->
-                get_AO_read_data( tables[ ch_index ], offsets[ ch_index ] );
-            int_write_values[ ch_index ] = wago_manager::get_instance()->
-                get_AO_write_data( tables[ ch_index ], offsets[ ch_index ] );
-            break;
+            case CT_AO:
+                int_read_values[ ch_index ] = wago_manager::get_instance()->
+                    get_AO_read_data( tables[ ch_index ], offsets[ ch_index ] );
+                int_write_values[ ch_index ] = wago_manager::get_instance()->
+                    get_AO_write_data( tables[ ch_index ], offsets[ ch_index ] );
+                break;
             }
         }
 
@@ -676,8 +728,8 @@ wago_manager::wago_node * wago_manager::get_node( int node_n )
     }
 //-----------------------------------------------------------------------------
 void wago_manager::add_node( u_int index, int ntype, int address,
-    char* IP_address, char *name, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
-    int AI_cnt, int AI_size )
+                            char* IP_address, char *name, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
+                            int AI_cnt, int AI_size )
     {
     if ( index < nodes_count )
         {
@@ -687,7 +739,7 @@ void wago_manager::add_node( u_int index, int ntype, int address,
     }
 //-----------------------------------------------------------------------------
 void wago_manager::init_node_AO( u_int node_index, u_int AO_index,
-    u_int type, u_int offset )
+                                u_int type, u_int offset )
     {
     if ( node_index < nodes_count && AO_index < nodes[ node_index ]->AO_cnt )
         {
@@ -697,7 +749,7 @@ void wago_manager::init_node_AO( u_int node_index, u_int AO_index,
     }
 //-----------------------------------------------------------------------------
 void wago_manager::init_node_AI( u_int node_index, u_int AI_index,
-    u_int type, u_int offset )
+                                u_int type, u_int offset )
     {
     if ( node_index < nodes_count && AI_index < nodes[ node_index ]->AI_cnt )
         {
@@ -747,26 +799,26 @@ wago_manager::wago_node::~wago_node()
     }
 //-----------------------------------------------------------------------------
 wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
-    char *name,
-    int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, int AI_cnt,
-    int AI_size ): state( ST_NO_CONNECT ),
-    type( ( TYPES ) type ),
-    number( number ),
+                                   char *name,
+                                   int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, int AI_cnt,
+                                   int AI_size ): state( ST_NO_CONNECT ),
+                                   type( ( TYPES ) type ),
+                                   number( number ),
 
-    is_active( true ),
+                                   is_active( true ),
 
-    last_poll_time( get_sec() ),
-    is_set_err( 0 ),
-    sock( 0 ),
+                                   last_poll_time( get_sec() ),
+                                   is_set_err( 0 ),
+                                   sock( 0 ),
 
-    DO_cnt( DO_cnt ),
-    AO_cnt( AO_cnt ),
-    AO_size( AO_size ),
-    DI_cnt( DI_cnt ),
-    AI_cnt( AI_cnt ),
-    AI_size( AI_size ),
-    last_init_time( get_millisec() ),
-    delay_time( 0 )
+                                   DO_cnt( DO_cnt ),
+                                   AO_cnt( AO_cnt ),
+                                   AO_size( AO_size ),
+                                   DI_cnt( DI_cnt ),
+                                   AI_cnt( AI_cnt ),
+                                   AI_size( AI_size ),
+                                   last_init_time( get_millisec() ),
+                                   delay_time( 0 )
     {
     if ( str_ip_address )
         {
