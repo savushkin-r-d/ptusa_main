@@ -76,6 +76,7 @@ int tcp_communicator_linux::net_init()
     sst[ master_socket ].sin.sin_family 	 = AF_INET;
     sst[ master_socket ].sin.sin_addr.s_addr = INADDR_ANY;
     sst[ master_socket ].sin.sin_port 		 = htons ( PORT );
+    sst[ master_socket ].ismodbus = 0;
 
     const int on = 1;
 
@@ -111,7 +112,6 @@ int tcp_communicator_linux::net_init()
 
     int val = 1;
     setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, &val, sizeof( val ) );
-#ifdef MODBUS
     // Создание серверного сокета modbus_socket.
     err = modbus_socket = socket ( PF_INET, type, protocol );
 
@@ -132,7 +132,8 @@ int tcp_communicator_linux::net_init()
     memset( &sst[ modbus_socket ].sin, 0, sizeof ( sst[ modbus_socket ].sin ) );
     sst[ modbus_socket ].sin.sin_family 	  = AF_INET;
     sst[ modbus_socket ].sin.sin_addr.s_addr = 0;
-    sst[ modbus_socket ].sin.sin_port 		  = htons ( 502 ); // Порт.
+    sst[ modbus_socket ].sin.sin_port 		  = htons ( 10502 ); // Порт.
+    sst[ modbus_socket ].ismodbus = 1;
     err = bind( modbus_socket, ( struct sockaddr * ) & sst[ modbus_socket ].sin,
         sizeof ( sst[ modbus_socket ].sin ) );	   // Привязка сокета.
     if ( err < 0 )
@@ -154,7 +155,6 @@ int tcp_communicator_linux::net_init()
 #endif // DEBUG
         return -6;
         }
-#endif //MODBUS
 
     FD_ZERO ( &rfds );
     for ( int i = 0; i < MAX_SOCKETS; i++ )
@@ -167,11 +167,9 @@ int tcp_communicator_linux::net_init()
     sst[ master_socket ].is_listener = 1; // сокет является слушателем.
     sst[ master_socket ].evaluated   = 0;
 
-#ifdef MODBUS
     sst[ modbus_socket ].active      = 1;
     sst[ modbus_socket ].is_listener = 1;
     sst[ modbus_socket ].evaluated   = 0;
-#endif // MODBUS
 
     netOK = 1;
     return 0;
@@ -228,6 +226,7 @@ int tcp_communicator_linux::evaluate()
         {
         /* service loop */
         count_cycles++;
+        sleep_ms(1);
 
         FD_ZERO( &rfds );
         for ( int i = 0; i < MAX_SOCKETS; i++ )
@@ -259,11 +258,7 @@ int tcp_communicator_linux::evaluate()
             // Поступил новый запрос на соединение.
             if ( FD_ISSET ( i, &rfds ) )
                 {
-#ifndef MODBUS
-                if ( i == master_socket )
-#else
                 if ( i == master_socket || i == modbus_socket )
-#endif
                      {
                     /* master socket */
                     memset( &ssin, 0, sizeof ( ssin ) );
@@ -278,15 +273,11 @@ int tcp_communicator_linux::evaluate()
                         continue;
                         }
 
-#ifdef MODBUS
                     if ( i != modbus_socket )
                         {
-#endif
                         char Message1[] = "PAC accept";
                         send( slave_socket, Message1, strlen ( Message1 ), MSG_NOSIGNAL );
-#ifdef MODBUS
                         }
-#endif
                     // Установка сокета в неблокирующий режим.
                     if ( fcntl( slave_socket, F_SETFL, O_NONBLOCK ) < 0 )
                         {
@@ -301,7 +292,8 @@ int tcp_communicator_linux::evaluate()
                         }
 
 #ifdef DEBUG
-#ifndef MODBUS
+                    if (i != modbus_socket)
+                    {
                     // Определение имени клиента.
                     hostent *client = gethostbyaddr( &ssin.sin_addr, 4, AF_INET );
                     if ( client )
@@ -315,10 +307,12 @@ int tcp_communicator_linux::evaluate()
                         Print( "Accepted connection on %d socket from %s.\n",
                             slave_socket, inet_ntoa( ssin.sin_addr ) );
                         }
-#else
+                    }
+                    else
+                    {
                     Print( "Accepted connection on %d socket from %s.\n",
                         slave_socket, inet_ntoa( ssin.sin_addr ) );
-#endif // MODBUS
+                    }
 #endif // DEBUG
 
                     FD_SET( slave_socket, &rfds );
@@ -410,10 +404,6 @@ int tcp_communicator_linux::do_echo ( int skt )
     if ( sst[ skt ].init )         /* socket is just initiated */
         {
         sst[ skt ].init = 0;
-
-#ifdef  MODBUS
-        return err;
-#endif // MODBUS
         }
 
     sst[ skt ].evaluated = 1;

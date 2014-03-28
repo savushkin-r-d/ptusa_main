@@ -32,6 +32,7 @@ struct socket_state
     int init;        ///< Сокет только что был активирован.
     int is_listener; ///< Сокет является инициатором соединения ( = 0 )/сокет является слушателем ( != 0 ).
     int evaluated;   ///< В данном цикле уже произошел обмен информацией по данному сокету.
+    int ismodbus;
     sockaddr_in sin; ///< Адрес клиента.
     };
 //-----------------------------------------------------------------------------
@@ -51,9 +52,7 @@ class tcp_communicator_linux : public tcp_communicator
             u_int       sin_len;    	///< Длина адреса.
             int         master_socket;	///< Мастер-сокет для прослушивания.
 
-#ifdef MODBUS
             int modbus_socket;          ///< Модбас сокет.
-#endif
             int slave_socket; ///< Слейв-сокет, получаемый при подключении клиента.
             int rc; ///< Код возврата select.
 
