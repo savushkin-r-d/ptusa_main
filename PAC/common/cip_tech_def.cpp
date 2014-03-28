@@ -3022,10 +3022,9 @@ int cipline_tech_object::InitFilCirc( int with_what, int step, int f )
 	rt_par_float[P_SUM_OP] = 0;
 	rt_par_float[P_VRAB] = rt_par_float[P_V_RAB_ML];
 	rt_par_float[P_OP_TIME_LEFT] = 0;
-	rt_par_float[P_MAX_OPER_TM] = rt_par_float[P_TM_MAX_TIME_OPORBACHOK];
+	rt_par_float[P_MAX_OPER_TM] = 300;
 	T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM]*1000);
 	T[TMR_OP_TIME]->start();
-	T[TMR_OP_TIME]->pause();
 	return 0;
 	}
 
@@ -3101,9 +3100,10 @@ int cipline_tech_object::InitOporCirc( int where, int step, int f )
 	rt_par_float[P_SUM_OP] = 0;
 	rt_par_float[P_VRAB] = rt_par_float[P_V_LL_BOT];
 	rt_par_float[P_OP_TIME_LEFT] = 0;
-	rt_par_float[P_MAX_OPER_TM] = 300;
+	rt_par_float[P_MAX_OPER_TM] = rt_par_float[P_TM_MAX_TIME_OPORBACHOK];
 	T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM]*1000);
 	T[TMR_OP_TIME]->start();
+	T[TMR_OP_TIME]->pause();
 	return 0;
 	}
 
