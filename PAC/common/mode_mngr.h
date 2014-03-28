@@ -340,7 +340,7 @@ class mode
     public:
         mode( const char* name, mode_manager *owner, int n );
 
-        step* add_step( const char* name, u_int next_step_n,
+        step* add_step( const char* name, int next_step_n,
             u_int step_duration_par_n );
 
         /// @brief Установка номера параметра со временем переходного переключения шагов.

@@ -561,7 +561,7 @@ class mode
 	public:
 		unsigned long evaluation_time();
 
-        step* add_step( const char* name, unsigned int next_step_n,
+        step* add_step( const char* name, int next_step_n,
             unsigned int step_duration_par_n );
 
         /// @brief Установка номера параметра со временем переходного переключения шагов.
@@ -920,6 +920,9 @@ class PID
 
         ///@brief Выключение регулятора.
         void  off();
+
+        /// @brief Сброс ПИД
+        void reset();
 
         ///@brief Получение следующего значения выхода на основе текущего
         /// значения входа.

@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 03/25/14 12:10:31.
+** Generated automatically by tolua++-1.0.92 on 03/28/14 08:53:48.
 */
 
 #ifndef __cplusplus
@@ -2784,7 +2784,7 @@ static int tolua_PAC_dev_mode_add_step00(lua_State* tolua_S)
  {
   mode* self = (mode*)  tolua_tousertype(tolua_S,1,0);
   const char* name = ((const char*)  tolua_tostring(tolua_S,2,0));
-  unsigned int next_step_n = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
+  int next_step_n = ((int)  tolua_tonumber(tolua_S,3,0));
   unsigned int step_duration_par_n = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_step'", NULL);
@@ -2975,7 +2975,7 @@ static int tolua_PAC_dev_mode_to_step01(lua_State* tolua_S)
  if (
      !tolua_isusertype(tolua_S,1,"mode",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,1,&tolua_err) ||
      !tolua_isnoobj(tolua_S,4,&tolua_err)
  )
   goto tolua_lerror;
@@ -2983,12 +2983,12 @@ static int tolua_PAC_dev_mode_to_step01(lua_State* tolua_S)
  {
   mode* self = (mode*)  tolua_tousertype(tolua_S,1,0);
   unsigned int new_step = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
-  unsigned int cooper_time = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
+  unsigned long cooperative_time = ((unsigned long)  tolua_tonumber(tolua_S,3,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'to_step'", NULL);
 #endif
   {
-   self->to_step(new_step,cooper_time);
+   self->to_step(new_step,cooperative_time);
   }
  }
  return 0;
@@ -4555,6 +4555,37 @@ static int tolua_PAC_dev_PID_off00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'off'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: reset of class  PID */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_PID_reset00
+static int tolua_PAC_dev_PID_reset00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"PID",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  PID* self = (PID*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'reset'", NULL);
+#endif
+  {
+   self->reset();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'reset'.",&tolua_err);
  return 0;
 #endif
 }
@@ -7709,6 +7740,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,".call",tolua_PAC_dev_PID_new00_local);
    tolua_function(tolua_S,"on",tolua_PAC_dev_PID_on00);
    tolua_function(tolua_S,"off",tolua_PAC_dev_PID_off00);
+   tolua_function(tolua_S,"reset",tolua_PAC_dev_PID_reset00);
    tolua_function(tolua_S,"eval",tolua_PAC_dev_PID_eval00);
    tolua_function(tolua_S,"set",tolua_PAC_dev_PID_set00);
    tolua_function(tolua_S,"get_assignment",tolua_PAC_dev_PID_get_assignment00);

@@ -799,7 +799,7 @@ mode::mode( const char* name, mode_manager *owner, int n ) : name( name ),
     {
     }
 //-----------------------------------------------------------------------------
-step* mode::add_step( const char* name, u_int next_step_n,
+step* mode::add_step( const char* name, int next_step_n,
     u_int step_duration_par_n )
     {
     steps.push_back( new step( name ) );
