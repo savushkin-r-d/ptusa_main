@@ -1309,7 +1309,7 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
 
             int o = ( read_state & C_OPEN ) > 0 ? 1 : 0;
 
-            if ( 0 == o )
+            if ( 1 == o )
                 {
                 start_switch_time = get_millisec();
                 }
@@ -2113,7 +2113,7 @@ class device_manager: public i_Lua_save_device
             }
 
         int init_params();
-       
+
         int init_rt_params();
 
 #ifdef __BORLANDC__
