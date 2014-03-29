@@ -73,6 +73,7 @@ int wago_manager_w750::read_inputs()
 #endif // DEBUG_KBUS
 
                 // AI
+                u_int idx = 0;
                 for ( u_int j = 0; j < nd->AI_cnt; j++ )
                     {
                     u_int val = 0;
@@ -84,16 +85,40 @@ int wago_manager_w750::read_inputs()
                     case 461:
                         val = pstPabIN->uc.Pab[ offset ] +
                             256 * pstPabIN->uc.Pab[ offset + 1 ];
+                        nd->AI[ idx++ ] = val;
                         break;
 
                     case 638:
                         val = pstPabIN->uc.Pab[ offset + 2 ] +
                             256 * pstPabIN->uc.Pab[ offset + 3 ];
+                        nd->AI[ idx++ ] = val;
+                        break;
+
+                    case 655:
+                        char* data = ( char* ) ( nd->AI + idx );
+#ifdef DEBUG_ASI
+                        printf( "750-655 AI, idx = %d\n", idx );
+#endif // DEBUG_ASI
+                        for ( int l = 0; l < 40; l++ )
+                            {
+                            data[ l ] = pstPabIN->uc.Pab[ offset + l ];
+#ifdef DEBUG_ASI
+                            printf( "%d -> %d, ", l, data[ l ] );
+#endif // DEBUG_ASI
+                            }
+#ifdef DEBUG_ASI
+                            printf( "\n" );
+#endif // DEBUG_ASI
+                        idx += 20;
+                        break;
+
+                    default:
+                        nd->AI[ idx++ ] = val;
                         break;
                         }
-                    nd->AI[ j ] = val;
+
 #ifdef DEBUG_KBUS
-                    printf( "%d -> %u, ", j, nd->AI[ j ] );
+                    printf( "%d -> %u, ", idx, nd->AI[ idx ] );
 #endif // DEBUG_KBUS
                     }
 #ifdef DEBUG_KBUS
@@ -147,27 +172,60 @@ int wago_manager_w750::write_outputs()
 #endif // DEBUG_KBUS
 
                 // AO
+                int in_idx  = 0;
                 for ( u_int j = 0; j < nd->AO_cnt; j++ )
                     {
-                    int val = nd->AO_[ j ];
                     u_int offset = nd->AO_offsets[ j ];
 
-                    pstPabOUT->uc.Pab[ offset ] = val & 0xFF;
-                    pstPabOUT->uc.Pab[ offset + 1 ] = val >> 8;
-
-                    if ( nd->AO_types[ j ] == 638 )
+                    switch ( nd->AO_types[ j ] )
                         {
-                        pstPabOUT->uc.Pab[ offset     ] = 0;                        
-                        pstPabOUT->uc.Pab[ offset + 1 ] = 0;
-                        pstPabOUT->uc.Pab[ offset + 2 ] = 0;
-                        pstPabOUT->uc.Pab[ offset + 3 ] = 0;
+                        case 638:
+                            pstPabOUT->uc.Pab[ offset     ] = 0;
+                            pstPabOUT->uc.Pab[ offset + 1 ] = 0;
+                            pstPabOUT->uc.Pab[ offset + 2 ] = 0;
+                            pstPabOUT->uc.Pab[ offset + 3 ] = 0;
+
+                            in_idx++;
+                            break;
+
+                        case 655:
+                            {
+                            char* data = ( char* ) ( nd->AO_ + in_idx );
+#ifdef DEBUG_ASI
+                            printf( "750-655, idx = %d\n", in_idx );
+#endif // DEBUG_ASI
+                            for ( int l = 0; l < 40; l++ )
+                                {
+                                pstPabOUT->uc.Pab[ offset + l ] = data[ l ];
+#ifdef DEBUG_ASI
+                                printf( "%d -> %d, ", l, data[ l ] );
+#endif // DEBUG_ASI
+                                }
+#ifdef DEBUG_ASI
+                            printf( "\n" );
+#endif // DEBUG_ASI
+                            in_idx += 20;
+                            break;
+                            }
+
+                        default:
+                            {
+                            int val = nd->AO_[ in_idx ];
+
+                            pstPabOUT->uc.Pab[ offset     ] = val & 0xFF;
+                            pstPabOUT->uc.Pab[ offset + 1 ] = val >> 8;
+
+                            in_idx++;
+                            break;
+                            }
                         }
-                    
-                    nd->AO[ j ] = nodes[ i ]->AO_[ j ];
+
 #ifdef DEBUG_KBUS
                     printf( "%d -> %u, ", j, nd->AO_[ j ] );
 #endif // DEBUG_KBUS
                     }
+
+                memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
 
 #ifdef DEBUG_KBUS
                 printf( "\n" );

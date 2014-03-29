@@ -47,7 +47,7 @@ class par_device
         /// @param par_cnt - количество параметров.
         par_device( u_int par_cnt );
 
-        ~par_device();
+        virtual ~par_device();
 
         /// @brief Сохранение в виде скрипта Lua.
         ///
@@ -68,7 +68,7 @@ class par_device
 
         /// @brief Установка значения параметра.
         ///
-        /// @param idx - индекс параметра.
+        /// @param idx - индекс параметра (с единицы).
         /// @param offset - смещение индекса.
         /// @param value - новое значение.
         virtual void set_par( u_int idx, u_int offset, float value );
@@ -716,7 +716,7 @@ class valve: public digital_wago_device
             V_ON  = 1,        ///< Включен.
             V_OFF = 0,        ///< Выключен.
             };
-            
+
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
     protected:
@@ -1172,18 +1172,18 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
             {
             switch ( idx )
                 {
-                case 1:
+                case 3:
                     AS_gateway = ( u_int ) value;
                     break;
 
-                case 2:
+                case 4:
                     AS_number = ( u_int ) value;
                     break;
 
                 default:
-                    par_device::set_par( idx, offset, value );
+                    valve::set_par( idx, offset, value );
                     break;
-                }           
+                }
             }
 
         VALVE_STATE get_valve_state()
@@ -1191,22 +1191,17 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
 #ifdef DEBUG_NO_WAGO_MODULES
             return ( VALVE_STATE ) digital_wago_device::get_state();
 #else
-            int* data = get_AO_read_data( AO_INDEX );
-            const int MAILBOX_OFFSET = 8;
-            int state = data[ MAILBOX_OFFSET + AS_number / 2 ];
+            char* data = ( char* ) get_AO_read_data( AO_INDEX );
+            char state = data[ MAILBOX_OFFSET + AS_number / 2 ];
 
-            if ( AS_number % 2 ) //Нечетный номер - старшие четыре бита.
+            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
             	{
                 state >>= 4;
             	}
 
-            const int S_OPEN       = 0x02;
-            const int S_LOWER_SEAT = 0x04;
-            const int S_UPPER_SEAT = 0x08;
-
-            int o = state & S_OPEN;
-            int l = state & S_LOWER_SEAT;
-            int u = state & S_UPPER_SEAT;            
+            int o = ( state & C_OPEN ) > 0 ? 1 : 0;
+            int l = ( state & C_LOWER_SEAT ) > 0 ? 1 : 0;
+            int u = ( state & C_UPPER_SEAT ) > 0 ? 1 : 0;
 
             if ( o == 0 && u == 1 ) return V_UPPER_SEAT;
             if ( o == 0 && l == 1 ) return V_LOWER_SEAT;
@@ -1220,29 +1215,232 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
 #ifdef DEBUG_NO_WAGO_MODULES
             return true;
 #else
-            return true;
+            char* AO_data = ( char* ) get_AO_read_data( AO_INDEX );
+            char AO_state = AO_data[ MAILBOX_OFFSET + AS_number / 2 ];
+
+            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
+            	{
+                AO_state >>= 4;
+            	}
+
+            int o = ( AO_state & C_OPEN ) > 0 ? 1 : 0;
+            int l = ( AO_state & C_LOWER_SEAT ) > 0 ? 1 : 0;
+            int u = ( AO_state & C_UPPER_SEAT ) > 0 ? 1 : 0;
+
+            char* AI_data = ( char* ) get_AI_data( AI_INDEX );
+            char AI_state = AI_data[ MAILBOX_OFFSET + AS_number / 2 ];
+
+            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
+            	{
+                AI_state >>= 4;
+            	}
+
+            int i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0;
+            int i1 = ( AI_state & S_OPENED ) > 0 ? 1 : 0;
+
+            if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+                ( o == 1 && i1 == 1 && i0 == 0 ) )
+                {
+                return true;
+                }
+
+            if ( o == 0 && l == 1 ) return true;
+            if ( o == 0 && u == 1 ) return true;
+
+            if ( get_delta_millisec( start_switch_time ) <
+                 get_par( valve::P_ON_TIME, 0 ) )
+                {
+                return true;
+                }
+
+            return false;
 #endif // DEBUG_NO_WAGO_MODULES
             }
 
 #ifndef DEBUG_NO_WAGO_MODULES
         int get_off_fb_value()
             {
-            return 0;
+            char* AI_data = ( char* ) get_AI_data( AI_INDEX );
+            char AI_state = AI_data[ MAILBOX_OFFSET + AS_number / 2 ];
+
+            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
+            	{
+                AI_state >>= 4;
+            	}
+
+            int i0 = AI_state & S_CLOSED;
+
+            return i0 > 0 ? 1 : 0;
             }
 
         int get_on_fb_value()
             {
-            return 1;
+            char* AI_data = ( char* ) get_AI_data( AI_INDEX );
+            char AI_state = AI_data[ MAILBOX_OFFSET + AS_number / 2 ];
+
+            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
+            	{
+                AI_state >>= 4;
+            	}
+
+            int i1 = AI_state & S_OPENED;
+
+            return i1 > 0 ? 1 : 0;
             }
-                
+
         void direct_off()
             {
+            char* data = ( char* ) get_AO_write_data( AO_INDEX );
+            char* write_state = data + MAILBOX_OFFSET + AS_number / 2;
+            char read_state = *write_state;
+
+            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
+            	{
+                read_state >>= 4;
+            	}
+
+            int o = ( read_state & C_OPEN ) > 0 ? 1 : 0;
+
+            if ( 0 == o )
+                {
+                start_switch_time = get_millisec();
+                }
+            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
+                {
+                //Сбрасываем в ноль все четыре нужные бита.
+                *write_state &= 0x0F;
+                }
+            else
+                {
+                //Сбрасываем в ноль все четыре нужные бита.
+                *write_state &= 0xF0;
+                }
             }
 
         void direct_on()
             {
+            char* data = ( char* ) get_AO_write_data( AO_INDEX );
+            char* write_state = data + MAILBOX_OFFSET + AS_number / 2;
+            char read_state = *write_state;
+
+            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
+            	{
+                read_state >>= 4;
+            	}
+
+            int o = ( read_state & C_OPEN ) > 0 ? 1 : 0;
+
+            if ( 0 == o )
+                {
+                start_switch_time = get_millisec();
+                }
+            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
+                {
+                *write_state |= C_OPEN << 4;
+                *write_state &= ~( C_UPPER_SEAT << 4 );
+                *write_state &= ~( C_LOWER_SEAT << 4 );
+                }
+            else
+                {
+                *write_state |= C_OPEN;
+                *write_state &= ~C_UPPER_SEAT;
+                *write_state &= ~C_LOWER_SEAT;
+                }
+
+//            if ( strcmp( get_name(), "H1V1" ) == 0 )
+//                {
+//                Print( "AO_INDEX = %d\n", AO_INDEX );
+//                Print( "AS_number = %d\n", AS_number);
+//
+//                Print( "*write_state = %d\n", ( int ) *write_state );
+//                }
             }
 #endif // DEBUG_NO_WAGO_MODULES
+
+        void direct_set_state( int new_state )
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            state = ( char ) new_state;
+#else
+            switch ( new_state )
+                {
+                case V_OFF:
+                    direct_off();
+                    break;
+
+                case V_ON:
+                    direct_on();
+                    break;
+
+                case V_UPPER_SEAT:
+                    {
+                    direct_off();
+
+                    char* data = ( char* ) get_AO_write_data( AO_INDEX );
+                    char* write_state = data + MAILBOX_OFFSET + AS_number / 2;
+                    char read_state = *write_state;
+
+                    if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
+                        {
+                        read_state >>= 4;
+                        }
+
+                    int u = ( read_state & C_UPPER_SEAT ) > 0 ? 1 : 0;
+
+                    if ( 0 == u )
+                        {
+                        start_switch_time = get_millisec();
+                        }
+
+                    if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
+                        {
+                        *write_state |= C_UPPER_SEAT << 4;
+                        }
+                    else
+                        {
+                        *write_state |= C_UPPER_SEAT;
+                        }
+
+                    break;
+                    }
+
+                case V_LOWER_SEAT:
+                    {
+                    direct_off();
+
+                    char* data = ( char* ) get_AO_write_data( AO_INDEX );
+                    char* write_state = data + MAILBOX_OFFSET + AS_number / 2;
+                    char read_state = *write_state;
+
+                    if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
+                        {
+                        read_state >>= 4;
+                        }
+
+                    int l = ( read_state & C_LOWER_SEAT ) > 0 ? 1 : 0;
+
+                    if ( 0 == l )
+                        {
+                        start_switch_time = get_millisec();
+                        }
+
+                    if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
+                        {
+                        *write_state |= C_LOWER_SEAT << 4;
+                        }
+                    else
+                        {
+                        *write_state |= C_LOWER_SEAT;
+                        }
+                    break;
+                    }
+
+                default:
+                    direct_on();
+                    break;
+                }
+#endif //DEBUG_NO_WAGO_MODULES
+            }
 
     private:
 
@@ -1252,7 +1450,16 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
         enum CONSTANTS
             {
             AI_INDEX = 0,   ///< Индекс канала аналогового входа.
-            AO_INDEX = 0,   ///< Индекс канала аналогового выхода.            
+            AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
+
+            C_OPEN = 0x2,       ///< Открыть.
+            C_LOWER_SEAT = 0x4, ///< Открыть нижнее седло.
+            C_UPPER_SEAT = 0x8, ///< Открыть верхнее седло.
+
+            S_CLOSED = 0x1,     ///< Клапан закрыт.
+            S_OPENED = 0x2,     ///< Клапан открыт.
+
+            MAILBOX_OFFSET = 8
             };
     };
 //-----------------------------------------------------------------------------
