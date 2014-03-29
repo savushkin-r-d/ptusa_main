@@ -1,7 +1,7 @@
 /// @file mcaRec.h
 /// @brief Реализация класса @ref TRecipeManager для хранения рецептов автоматической моющей станции
 /// в энергонезависимой памяти контроллера.
-/// 
+///
 /// @author  Рудницкий Артем Иванович
 ///
 /// @par Информация о версии файла
@@ -23,7 +23,7 @@
 #define RECIPE_SAVE_INTERVAL 300000L
 
 ///@class TRecipeManager mcaRec.h
-///@brief Класс для хранения и работы с рецептами в энергонезависимой памяти контроллера для МСА 
+///@brief Класс для хранения и работы с рецептами в энергонезависимой памяти контроллера для МСА
 class TRecipeManager
 	{
 	public:
@@ -35,7 +35,7 @@ class TRecipeManager
 		RV_V2,			//объем V2 (от объекта до модуля)
 		RV_OBJ_TYPE,		//тип объекта (танк, линия и пр.)
 		RV_FLOW,			//расход
-		RV_PODP_CIRC,	//подпитывать ли бачок во время циркуляции  
+		RV_PODP_CIRC,	//подпитывать ли бачок во время циркуляции
 		RV_DELTA_TR,		//разница температур на подаче и возврате (если меньше заданной, то начинается отсчет времени циркуляции)
 		RV_T_WP,	//температура предварительного ополаскивания
 		RV_T_WSP,	//температура промежуточной промывки после щелочи
@@ -77,7 +77,7 @@ class TRecipeManager
 		RV_R_NO_FLOW,		//минимальный расход при котором считать, что его нет
 		RV_TM_R_NO_FLOW,	//время возникновения ошибки "нет расхода на подаче"
 
-		RV_TM_NO_FLOW_R,	//время появления ошибки "нет расхода на возврате"	
+		RV_TM_NO_FLOW_R,	//время появления ошибки "нет расхода на возврате"
 		RV_TM_NO_CONC,		//время появления ошибки "нет концентрации в возвратной трубе"
 
 		//-PID1
@@ -91,7 +91,7 @@ class TRecipeManager
 		RV_PIDP_AccelTime,         //Время выхода на режим регулирования.
 		RV_PIDP_IsManualMode,      //Ручной режим.
 		RV_PIDP_UManual,           //Заданное ручное значение выходного сигнала.
-		RV_PIDP_Uk,                //Выход ПИД.      
+		RV_PIDP_Uk,                //Выход ПИД.
 		//-PID1-!>
 		//-PID2
 		RV_PIDF_Z,                 //Требуемое значение.
@@ -104,7 +104,7 @@ class TRecipeManager
 		RV_PIDF_AccelTime,         //Время выхода на режим регулирования.
 		RV_PIDF_IsManualMode,      //Ручной режим.
 		RV_PIDF_UManual,           //Заданное ручное значение выходного сигнала.
-		RV_PIDF_Uk,                //Выход ПИД.      
+		RV_PIDF_Uk,                //Выход ПИД.
 		//-PID2-!>
 		P_TM_MAX_TIME_OPORCIP,	//Максимальное время операции "Опорожнение объекта CIP"
 		RV_RESERV_START, //начало резервных параметров
@@ -126,7 +126,7 @@ class TRecipeManager
 		unsigned long lastEvalTime;
 		unsigned long recipeStartAddr;
 		void SaveRecipeName();
-		
+
 		void FormRecipeList();
 		unsigned long startAddr();
 		unsigned long startAddr(int recNo);
@@ -137,19 +137,19 @@ class TRecipeManager
 	public:
 		///@brief Начальный блок для всех экземляров рецептов
 		static int startRecipeBlock;
-		///@brief Количество рецептов на линию 
+		///@brief Количество рецептов на линию
 		static int recipePerLine;
-		///@brief Длина рецепта в блоках 
+		///@brief Длина рецепта в блоках
 		static int blocksPerRecipe;
-		///@brief Длина имени рецепта 
+		///@brief Длина имени рецепта
 		static int recipeNameLength;
-		///@brief Относительный адрес начала параметров (от начального адреса рецепта) 
+		///@brief Относительный адрес начала параметров (от начального адреса рецепта)
 		static int startRecipeParamsOffset;
 		///@brief Буфер для копирования рецептов
 		static unsigned char* recipeCopyBuffer;
-		///@brief Имя текущего рецепта 
+		///@brief Имя текущего рецепта
 		char* currentRecipeName;
-		///@brief Список рецептов для сервера 
+		///@brief Список рецептов для сервера
 		char* recipeList;
 		/// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
 		/// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры
@@ -262,12 +262,11 @@ class TRecipeManager
 		/// @fn   TRecipeManager::TRecipeManager(int lineNo)
 		/// @brief Конструктор класса
 		/// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти
-		/// @return   
+		/// @return
 		TRecipeManager(int lineNo);
 		~TRecipeManager();
 	};
 
 
 #endif // mcaRecipes_h__
-
-        
+    

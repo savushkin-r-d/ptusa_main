@@ -9,9 +9,9 @@
 
 #define NOCONC       0.1
 
-///@brief Максимальная длина списка рецептов  
+///@brief Максимальная длина списка рецептов
 #define PROGRAM_LIST_MAX_LEN 600
-///@brief Максимальная длина названия программы мойки 
+///@brief Максимальная длина названия программы мойки
 #define PROGRAM_MAX_LEN 24
 ///@brief Задержка при окончании, сбросе мойки (для протоколирования)
 #define WASH_END_DELAY 2500
@@ -44,7 +44,7 @@
 
 //parameters for main station
 #define  P_CZAD_S       1	//концентрация рабочего раствора щелочи
-#define  P_CMIN_S       2	//минимальная концентрация рабочего раствора щелочи	
+#define  P_CMIN_S       2	//минимальная концентрация рабочего раствора щелочи
 #define  P_CKANAL_S     3	//максимальная концентрация раствора щелочи для канализации
 #define  P_CZAD_K       4	//концентрация рабочего раствора кислоты
 #define  P_CMIN_K       5	//минимальная концентрация рабочего раствора кислоты
@@ -105,12 +105,12 @@ enum selectablePrograms
 
 #define KS_MASK             56
 
-///@brief Команды модуля 
+///@brief Команды модуля
 enum MODULE_COMMANDS
 	{
-	MCMD_NEXT = 1,     
+	MCMD_NEXT = 1,
 	MCMD_PAUSE,
-	MCMD_EVALUATE, 
+	MCMD_EVALUATE,
 	MCMD_RESET,
 	MCMD_RESET_ALARM,
 	MCMD_LOCK_MODULE = 10,
@@ -184,7 +184,7 @@ enum BLOCK_ERRORS
 	};
 
 
-enum workParameters 
+enum workParameters
 	{
 	P_CONC_RATE = 1,	//расход концентрата при наведении
 	P_ZAD_PODOGR,	//текущее задание подогрева
@@ -208,7 +208,7 @@ enum workParameters
 	PV2,			//объем V2 (от объекта до модуля)
 	P_OBJ_TYPE,		//тип объекта (танк, линия и пр.)
 	P_FLOW,			//расход
-	P_PODP_CIRC,	//подпитывать ли бачок во время циркуляции  
+	P_PODP_CIRC,	//подпитывать ли бачок во время циркуляции
 	P_DELTA_TR,		//разница температур на подаче и возврате (если меньше заданной, то начинается отсчет времени циркуляции)
 
 	P_T_WP,	//температура предварительного ополаскивания
@@ -244,7 +244,7 @@ enum workParameters
 	P_PROGRAM_MASK, //маска режимов мойки
 	P_T_CLEAN_RINSING, //Температура ополаскивания чистой водой
 	P_V_CLEAN_RINSING, //объем ополаскивания чистой водой
-	
+
 	P_T_SANITIZER_RINSING,	//Температура ополаскивания после мойки дезинфецирующим средством
 	P_V_SANITIZER_RINSING,	//Объем ополаскивания после мойки дезинфицирующим средством
 	P_TM_MAX_TIME_OPORBACHOK,	//Максимальное время от пропадания нижнего уровня в бачке до завершении операции опорожнения бачка
@@ -254,7 +254,7 @@ enum workParameters
 	P_R_NO_FLOW,		//минимальный расход при котором считать, что его нет
 	P_TM_R_NO_FLOW,		//время возникновения ошибки "нет расхода на подаче"
 
-	P_TM_NO_FLOW_R,		//время появления ошибки "нет расхода на возврате"	
+	P_TM_NO_FLOW_R,		//время появления ошибки "нет расхода на возврате"
 	P_TM_NO_CONC,		//время появления ошибки "нет концентрации в возвратной трубе"
 
 
@@ -270,7 +270,7 @@ enum workParameters
 	PIDP_AccelTime,         //Время выхода на режим регулирования.
 	PIDP_IsManualMode,      //Ручной режим.
 	PIDP_UManual,           //Заданное ручное значение выходного сигнала.
-	PIDP_Uk,                //Выход ПИД.      
+	PIDP_Uk,                //Выход ПИД.
 	//-PID1-!>
 	//-PID2
 	PIDF_Z,                 //Требуемое значение.
@@ -283,7 +283,7 @@ enum workParameters
 	PIDF_AccelTime,         //Время выхода на режим регулирования.
 	PIDF_IsManualMode,      //Ручной режим.
 	PIDF_UManual,           //Заданное ручное значение выходного сигнала.
-	PIDF_Uk,                //Выход ПИД.      
+	PIDF_Uk,                //Выход ПИД.
 	//-PID2-!>
 	P_TM_MAX_TIME_OPORCIP,	//Максимальное время операции "Опорожнение объекта CIP"
 	P_RESERV_START,
@@ -310,13 +310,13 @@ enum SELFCLEAN_PARAMS
 	SCP_T_TK_DRAIN,			//Время опорожнения танка кислоты (самотеком)
 	SCP_T_TW_DRAIN,			//Время опорожнения танка воды (самотеком)
 	SCP_T_SCH_CIRC_PREDV,	//Время предварительной циркуляции щелочи в танке щелочи
-	SCP_T_K_CIRC_PREDV,		//Время предварительной циркуляции кислоты в ТК 
-	SCP_T_TS_CIRC,			//Время циркуляции раствора в ТЩ через моющую головку 
-	SCP_T_TK_CIRC,			//Время циркуляции раствора в ТК через моющую головку 
-	SCP_T_TW_CIRC,			//Время циркуляции раствора в ТВ через моющую головку 
-	SCP_LITERS_AFTER_LL_TS,	//Кол-во л для откачивания после исчезновения НУ в ТЩ   
-	SCP_LITERS_AFTER_LL_TK,	//Кол-во л для откачивания после исчезновения НУ в ТК 
-	SCP_LITERS_AFTER_LL_TW,	//Кол-во л для откачивания после исчезновения НУ в ТВ 
+	SCP_T_K_CIRC_PREDV,		//Время предварительной циркуляции кислоты в ТК
+	SCP_T_TS_CIRC,			//Время циркуляции раствора в ТЩ через моющую головку
+	SCP_T_TK_CIRC,			//Время циркуляции раствора в ТК через моющую головку
+	SCP_T_TW_CIRC,			//Время циркуляции раствора в ТВ через моющую головку
+	SCP_LITERS_AFTER_LL_TS,	//Кол-во л для откачивания после исчезновения НУ в ТЩ
+	SCP_LITERS_AFTER_LL_TK,	//Кол-во л для откачивания после исчезновения НУ в ТК
+	SCP_LITERS_AFTER_LL_TW,	//Кол-во л для откачивания после исчезновения НУ в ТВ
 	SCP_V_CLEAN_TS,			//Объем окончательного ополаскивания ТЩ чистой водой
 	SCP_V_CLEAN_TK,			//Объем окончательного ополаскивания ТК чистой водой
 	SCP_V_CLEAN_TW,			//Объем окончательного ополаскивания ТВ чистой водой
@@ -332,7 +332,7 @@ enum storedParameters
 	//P_V_LL_BOT,	//количество литров от пропадания нижнего уровня в бачке до завершения операции "опорожнение бачка"
 	//P_R_NO_FLOW,	//минимальный расход при котором считать, что его нет
 	//P_TM_R_NO_FLOW,	//время возникновения ошибки "нет расхода на подаче"
-	//P_TM_NO_FLOW_R,	//время появления ошибки "нет расхода на возврате"	
+	//P_TM_NO_FLOW_R,	//время появления ошибки "нет расхода на возврате"
 	//P_TM_NO_CONC,	//время появления ошибки "нет концентрации в возвратной трубе"
 	};
 
@@ -355,10 +355,10 @@ class MSAPID
 
 
 	private:
-		enum STATES 
+		enum STATES
 			{
 			STATE_OFF,
-			STATE_ON,  
+			STATE_ON,
 			};
 
 		float uk_1;
@@ -376,7 +376,7 @@ class MSAPID
 
 		/// @brief Надо ли при старте регулятора уменьшать, а не увеличивать
 		/// выходную величину.
-		char is_down_to_inaccel_mode;  
+		char is_down_to_inaccel_mode;
 
 		run_time_params_float *par;
 
@@ -387,7 +387,7 @@ class MSAPID
 		float start_value;
 
 	public:
-		enum PARAM  
+		enum PARAM
 			{
 			P_Z = 0,			   ///< Требуемооfое значение.
 			P_k,		           ///< Параметр k.
@@ -400,7 +400,7 @@ class MSAPID
 			P_is_manual_mode,      ///< Ручной режим.
 			P_U_manual,            ///< Заданное ручное значение выходного сигнала.
 			P_U,			       ///< Выход ПИД.
-			}; 
+			};
 
 		/// @brief Включение ПИД.
 		void  pid_on( char is_down_to_inaccel_mode = 0 );
@@ -415,7 +415,7 @@ class MSAPID
 		float pid_eval( float current_value, int delta_sign = 1 );
 
 		/// @brief Установка нового задания ПИД.
-		void set( float new_z );    
+		void set( float new_z );
 
 		/// @brief Получение задания ПИД.
 		float get_assignment();
@@ -424,7 +424,7 @@ class MSAPID
 		u_int_4 get_state();
 	};
 
-class TSav 
+class TSav
 	{
 	private:
 		float cn;
@@ -526,7 +526,7 @@ class cipline_tech_object: public tech_object
 #define PANEL_PROGRAM_LENGTH 24
 		char prgArray[PANEL_MAX_PROGRAMS][PANEL_PROGRAM_LENGTH];
 		int prgNumber[PANEL_MAX_PROGRAMS];
-		char prgListLen;
+		int prgListLen;
 
 
 		int blocked;

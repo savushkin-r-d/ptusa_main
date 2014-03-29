@@ -1422,11 +1422,11 @@ int cipline_tech_object::InitStep( int step, int f )
 			RHI();
 			PT();
 			cnt->pause();
-			if (pump_control) 
+			if (pump_control)
 				{
 				NPC->off();
-				} 
-			else 
+				}
+			else
 				{
 				NP->off();
 				}
@@ -2653,7 +2653,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 				if (rt_par_float[P_PROGRAM] == SPROG_SANITIZER)
 					{
 					v = rt_par_float[P_T_SANITIZER_RINSING];
-					} 
+					}
 				else
 					{
 					v=rt_par_float[P_T_WOP];
@@ -2692,7 +2692,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 				if (rt_par_float[P_PROGRAM] == SPROG_SANITIZER)
 					{
 					p = rt_par_float[P_V_SANITIZER_RINSING];
-					} 
+					}
 				else
 					{
 					p = rt_par_float[P_DOP_V_OK_OP];
@@ -2851,7 +2851,7 @@ int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
 				if (rt_par_float[P_PROGRAM] == SPROG_SANITIZER)
 					{
 					v = rt_par_float[P_T_SANITIZER_RINSING];
-					} 
+					}
 				else
 					{
 					v=rt_par_float[P_T_WOP];
@@ -3816,7 +3816,7 @@ int cipline_tech_object::OporCirc( int where )
 
 	rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
 	rt_par_float[P_SUM_OP] = cnt->get_quantity();
-	if (!LL->is_active()) 
+	if (!LL->is_active())
 		{
 		cnt->start();
 		T[TMR_OP_TIME]->start();
@@ -3907,7 +3907,7 @@ int cipline_tech_object::init_object_devices()
 			}
 		else
 			{
-			if (dev_no / 1000 == msa_number)
+			if (dev_no / 1000 == ( u_int ) msa_number)
 				{
 				devline = (dev_no - msa_number * 1000) / 100;
 				sprintf(devname, "LINE%dDI%d", devline, dev_no);
@@ -3963,7 +3963,7 @@ int cipline_tech_object::init_object_devices()
 			}
 		else
 			{
-			if (dev_no / 1000 == msa_number)
+			if (dev_no / 1000 == ( u_int ) msa_number)
 				{
 				devline = (dev_no - msa_number * 1000) / 100;
 				sprintf(devname, "LINE%dDO%d", devline, dev_no);
