@@ -101,16 +101,8 @@ void par_device::set_par( u_int idx, u_int offset, float value )
         }
     }
 //-----------------------------------------------------------------------------
-void par_device::set_rt_par( u_int idx, float value )
-    {
-    if ( rt_par )
-        {
-        rt_par[ 0 ][ idx ] = value;
-        }
-    }
-//-----------------------------------------------------------------------------
-par_device::par_device ( u_int par_cnt,  u_int rt_par_cnt ) : par ( 0 ),
-    par_name ( 0 ), rt_par( 0 )
+par_device::par_device ( u_int par_cnt ) : par ( 0 ),
+    par_name ( 0 )
     {
     if ( par_cnt )
         {
@@ -121,12 +113,7 @@ par_device::par_device ( u_int par_cnt,  u_int rt_par_cnt ) : par ( 0 ),
             }
 
         par = new saved_params_float ( par_cnt );
-        }
-
-    if ( rt_par_cnt )
-        {
-        rt_par = new saved_params_float ( rt_par_cnt );
-        }
+        }    
     }
 //-----------------------------------------------------------------------------
 par_device::~par_device()
@@ -153,16 +140,6 @@ float par_device::get_par( u_int idx, u_int offset )
     	{
         return par[ 0 ][ offset + idx ];
     	}
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-float par_device::get_rt_par( u_int idx )
-    {
-    if ( rt_par )
-        {
-        return rt_par[ 0 ][ idx ];
-        }
 
     return 0;
     }
@@ -363,8 +340,8 @@ int device::set_cmd( const char *prop, u_int idx, double val )
     }
 //-----------------------------------------------------------------------------
 device::device( const char *dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type,
-               u_int par_cnt, u_int rt_par_cnt ) :
-par_device( par_cnt, rt_par_cnt ),
+               u_int par_cnt ) :
+par_device( par_cnt ),
     type( type ),
     sub_type( sub_type ),
     is_manual_mode( false )
@@ -1170,9 +1147,8 @@ void digital_wago_device::direct_off()
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 digital_wago_device::digital_wago_device( const char *dev_name, device::DEVICE_TYPE type,
-                                         device::DEVICE_SUB_TYPE sub_type, u_int par_cnt,
-                                         u_int rt_par_cnt ) :
-    device( dev_name, type, sub_type, par_cnt, rt_par_cnt ),
+                                         device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :
+    device( dev_name, type, sub_type, par_cnt ),
     wago_device( dev_name )
 #ifdef DEBUG_NO_WAGO_MODULES
     , state( 0 )
@@ -1211,9 +1187,8 @@ void DO2::direct_off()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve::valve( bool is_on_fb, bool is_off_fb, const char *dev_name,
-             device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type, 
-             u_int rt_par_cnt ) :
-digital_wago_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT, rt_par_cnt ),
+             device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ) :
+digital_wago_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
     is_on_fb( is_on_fb ),
     is_off_fb( is_off_fb ),
     on_fb( true ),
@@ -1458,7 +1433,7 @@ int valve::set_cmd( const char *prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_DO1_DI1_off::valve_DO1_DI1_off( const char *dev_name ) :
-    valve( false, true, dev_name, DT_V, DST_V_DO1_DI1_FB_OFF, 0 )
+    valve( false, true, dev_name, DT_V, DST_V_DO1_DI1_FB_OFF )
     {
     }
 //-----------------------------------------------------------------------------
@@ -2328,7 +2303,7 @@ device* DEVICE( int s_number )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_AS_mix_proof::valve_AS_mix_proof( const char *dev_name
-    ): valve( true, true, dev_name, DT_V, DST_V_AS_MIXPROOF, 1 ),
+    ): valve( true, true, dev_name, DT_V, DST_V_AS_MIXPROOF ),
     AS_gateway( 0 ), AS_number( 0 )
     {
     }
