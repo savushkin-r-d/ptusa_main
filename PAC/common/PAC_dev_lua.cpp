@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 03/28/14 08:53:48.
+** Generated automatically by tolua++-1.0.92 on 03/29/14 14:48:23.
 */
 
 #ifndef __cplusplus
@@ -911,6 +911,41 @@ static int tolua_PAC_dev_device_set_par00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'set_par'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_rt_par of class  device */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_set_rt_par00
+static int tolua_PAC_dev_device_set_rt_par00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"device",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  device* self = (device*)  tolua_tousertype(tolua_S,1,0);
+  unsigned int idx = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
+  float value = ((float)  tolua_tonumber(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_rt_par'", NULL);
+#endif
+  {
+   self->set_rt_par(idx,value);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_rt_par'.",&tolua_err);
  return 0;
 #endif
 }
@@ -7504,6 +7539,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_beginmodule(tolua_S,"device");
    tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_device_set_cmd00);
    tolua_function(tolua_S,"set_par",tolua_PAC_dev_device_set_par00);
+   tolua_function(tolua_S,"set_rt_par",tolua_PAC_dev_device_set_rt_par00);
    tolua_function(tolua_S,"set_property",tolua_PAC_dev_device_set_property00);
    tolua_function(tolua_S,"set_descr",tolua_PAC_dev_device_set_descr00);
    tolua_constant(tolua_S,"DT_NONE",device::DT_NONE);

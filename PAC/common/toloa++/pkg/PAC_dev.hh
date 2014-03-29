@@ -191,7 +191,13 @@ class device
         int set_cmd( const char *prop, unsigned int idx, double val );
 
 		void set_par( unsigned int idx, unsigned int offset, float value );
-				
+
+        /// @brief Установка значения рабочего параметра.
+        ///
+        /// @param idx - индекс рабочего параметра (с единицы).
+        /// @param value - новое значение.
+        virtual void set_rt_par( unsigned int idx, float value );
+
 		void set_property( const char* field, device* dev );
 
 		void set_descr( const char *description );

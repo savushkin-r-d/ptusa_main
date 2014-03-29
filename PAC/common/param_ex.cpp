@@ -117,6 +117,8 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
         100. * last_idx / C_TOTAL_PARAMS_SIZE, '%' );
 //#endif // DEBUG
 
+    G_DEVICE_MANAGER()->init_rt_params();
+
     if ( -1 == loaded )
         {
         memset( params, 0, C_TOTAL_PARAMS_SIZE );
@@ -140,8 +142,8 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
         if ( auto_init_work_params ) 
             {
 #ifndef USE_NO_TANK_COMB_DEVICE
-            tech_object_manager::get_instance()->init_runtime_params();
-#endif // USE_NO_TANK_COMB_DEVICE 
+            tech_object_manager::get_instance()->init_runtime_params();            
+#endif // USE_NO_TANK_COMB_DEVICE            
             }
 
         PAC_info::get_instance()->reset_params();

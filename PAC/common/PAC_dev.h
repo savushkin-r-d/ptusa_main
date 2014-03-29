@@ -45,7 +45,7 @@ class par_device
 
     public:
         /// @param par_cnt - количество параметров.
-        par_device( u_int par_cnt );
+        par_device( u_int par_cnt, u_int rt_par_cnt );
 
         virtual ~par_device();
 
@@ -73,6 +73,12 @@ class par_device
         /// @param value - новое значение.
         virtual void set_par( u_int idx, u_int offset, float value );
 
+        /// @brief ”становка значени€ рабочего параметра.
+        ///
+        /// @param idx - индекс рабочего параметра (с единицы).
+        /// @param value - новое значение.
+        virtual void set_rt_par( u_int idx, float value );
+
         /// @brief ѕолучение значени€ параметра.
         ///
         /// @param idx - индекс параметра.
@@ -80,6 +86,13 @@ class par_device
         ///
         /// @return значение параметра.
         float get_par( u_int idx, u_int offset );
+
+        /// @brief ѕолучение значени€ рабочего параметра.
+        ///
+        /// @param idx - индекс рабочего параметра.        
+        ///
+        /// @return значение параметра.
+        float get_rt_par( u_int idx );
 
         /// @brief «адание имени параметра.
         ///
@@ -111,6 +124,8 @@ class par_device
 
         saved_params_float *par; ///< ѕараметры.
         char **par_name;         ///< Ќазвани€ параметров.
+
+        saved_params_float *rt_par; ///< –абочие параметры.       
     };
 //-----------------------------------------------------------------------------
 /// @brief »нтерфейс счетчика.
@@ -368,7 +383,7 @@ class device : public i_DO_AO_device, public par_device
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
-            device::DEVICE_SUB_TYPE sub_type, u_int par_cnt );
+            device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, u_int rt_par_cnt );
 
         virtual ~device();
 
@@ -468,7 +483,7 @@ class dev_stub : public device,
     public i_counter
     {
     public:
-        dev_stub(): device( 0, DT_NONE, DST_NONE, 1 )
+        dev_stub(): device( 0, DT_NONE, DST_NONE, 1, 0 )
             {
             }
 
@@ -498,7 +513,7 @@ class digital_wago_device : public device,
     {
     public:
         digital_wago_device( const char *dev_name, device::DEVICE_TYPE type,
-            device::DEVICE_SUB_TYPE sub_type, u_int par_cnt );
+            device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, u_int rt_par_cnt );
 
         virtual ~digital_wago_device();
 
@@ -534,7 +549,7 @@ class analog_wago_device : public device, public wago_device
             device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type,
             u_int par_cnt ):
-        device( dev_name, type, sub_type, par_cnt ),
+        device( dev_name, type, sub_type, par_cnt, 0 ),
         wago_device( dev_name )
 #ifdef DEBUG_NO_WAGO_MODULES
             ,value( 0 )
@@ -574,7 +589,7 @@ class DO1 : public digital_wago_device
     public:
         DO1( const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type ):
-        digital_wago_device( dev_name, type, sub_type, 0 )
+        digital_wago_device( dev_name, type, sub_type, 0, 0 )
             {
             }
 
@@ -600,7 +615,7 @@ class DO2 : public digital_wago_device
     public:
         DO2( const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ):
-        digital_wago_device( dev_name, type, sub_type, par_cnt )
+        digital_wago_device( dev_name, type, sub_type, par_cnt, 0 )
             {
             }
 
@@ -631,13 +646,13 @@ class valve: public digital_wago_device
         /// @param sub_type - подтип устройства.
         valve( bool is_on_fb, bool is_off_fb,
             const char *dev_name, device::DEVICE_TYPE type,
-            device::DEVICE_SUB_TYPE sub_type );
+            device::DEVICE_SUB_TYPE sub_type, u_int rt_par_cnt );
 
         /// @param number - номер устройства.
         /// @param type - тип устройства.
         /// @param sub_type - подтип устройства.
         valve( const char *dev_name, device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ):
-            digital_wago_device( dev_name, type, sub_type, 0 ),
+            digital_wago_device( dev_name, type, sub_type, 0, 0 ),
             is_on_fb( false ),
             is_off_fb( false ),
             start_switch_time( 0 )
@@ -836,7 +851,7 @@ class valve_DO1_DI1_on : public valve
     {
     public:
         valve_DO1_DI1_on( const char *dev_name ): valve( true, false,
-            dev_name, DT_V, DST_V_DO1_DI1_FB_ON )
+            dev_name, DT_V, DST_V_DO1_DI1_FB_ON, 0 )
             {
             }
 
@@ -905,7 +920,7 @@ class valve_DO1_DI2 : public valve
     {
     public:
         valve_DO1_DI2( const char *dev_name ):
-          valve( true, true, dev_name, DT_V, DST_V_DO1_DI2 )
+          valve( true, true, dev_name, DT_V, DST_V_DO1_DI2, 0 )
             {
             }
 
@@ -981,7 +996,7 @@ class valve_DO2_DI2 : public valve
     {
     public:
         valve_DO2_DI2( const char *dev_name ):
-            valve( true, true, dev_name, DT_V, DST_V_DO2_DI2 )
+            valve( true, true, dev_name, DT_V, DST_V_DO2_DI2, 0 )
             {
             }
 
@@ -1059,7 +1074,7 @@ class valve_mix_proof : public i_mix_proof,  public valve
     {
     public:
         valve_mix_proof( const char *dev_name
-            ): valve( true, true, dev_name, DT_V, DST_V_MIXPROOF )
+            ): valve( true, true, dev_name, DT_V, DST_V_MIXPROOF, 0 )
             {
             }
 
@@ -1168,20 +1183,20 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
 #endif // DEBUG
             }
 
-        void set_par( u_int idx, u_int offset, float value )
+        void set_rt_par( u_int idx, float value )
             {
             switch ( idx )
                 {
-                case 3:
+                case 1:
                     AS_gateway = ( u_int ) value;
                     break;
 
-                case 4:
+                case 2:
                     AS_number = ( u_int ) value;
                     break;
 
                 default:
-                    valve::set_par( idx, offset, value );
+                    valve::set_rt_par( idx, value );
                     break;
                 }
             }
@@ -1687,7 +1702,7 @@ class DI1 : public digital_wago_device
         DI1( const char *dev_name,
             device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ):
-        digital_wago_device( dev_name, type, sub_type, par_cnt )
+        digital_wago_device( dev_name, type, sub_type, par_cnt, 0 )
             {
             }
 
@@ -1762,7 +1777,7 @@ class motor : public device, public wago_device
     {
     public:
         motor( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
-            device( dev_name, DT_M, sub_type, ADDITIONAL_PARAM_COUNT ),
+            device( dev_name, DT_M, sub_type, ADDITIONAL_PARAM_COUNT, 0 ),
             wago_device( dev_name )
 #ifdef DEBUG_NO_WAGO_MODULES
             ,state( 0 ),
@@ -1922,7 +1937,7 @@ class counter : public device,
     {
     public:
         counter( const char *dev_name ): device(
-            dev_name, DT_FQT, DST_NONE, ADDITIONAL_PARAMS_COUNT ),
+            dev_name, DT_FQT, DST_NONE, ADDITIONAL_PARAMS_COUNT, 0 ),
             wago_device( dev_name ),
             value( 0 ),
             last_read_value( 0 ),
@@ -2105,6 +2120,8 @@ class device_manager: public i_Lua_save_device
             }
 
         int init_params();
+       
+        int init_rt_params();
 
 #ifdef __BORLANDC__
 #pragma option -w-inl
