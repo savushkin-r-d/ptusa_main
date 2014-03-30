@@ -3145,6 +3145,11 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 			tm=(unsigned long)rt_par_float[PTM_OP]*1000;
 			break;
 		case SANITIZER:
+			if (100 == rt_par_float[P_PODP_CIRC])
+				{
+				V01->on();
+				V10->on();
+				}
 			t=rt_par_float[P_T_SANITIZER];
 			tm=(unsigned long)rt_par_float[PTM_SANITIZER]*1000;
 			break;

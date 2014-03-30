@@ -183,17 +183,19 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 						case C_MSA_CONTROL:
 							line = objnumber / 100;
 							objnumber -= 100 * line;
-							switch (objnumber)
+							if (line >= 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT)
 								{
-								case RETPUMP_STATE:
-									ForceBit(i,&outdata[3],cipline_tech_object::Mdls[line-1]->GetRetState());
-									break;
-								case RETPUMP_ISUSED:
-									ForceBit(i,&outdata[3],cipline_tech_object::Mdls[line-1]->HasRet());
-									break;
+								switch (objnumber)
+									{
+									case RETPUMP_STATE:
+										ForceBit(i,&outdata[3],cipline_tech_object::Mdls[line-1]->GetRetState());
+										break;
+									case RETPUMP_ISUSED:
+										ForceBit(i,&outdata[3],cipline_tech_object::Mdls[line-1]->HasRet());
+										break;
+									}
 								}
 							break;
-
 						case C_MSA_LINE1PARAMS:
 						case C_MSA_LINE2PARAMS:
 						case C_MSA_LINE3PARAMS:
@@ -286,6 +288,24 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 					switch (coilgroup)
 						{
 						case C_AO:
+							PackFloat(get_device(coilgroup, objnumber)->get_value(),&outdata[3+i*2]);
+							i++;
+							break;
+						case C_FE:
+							if (objnumber >= 0 && objnumber / 2 < (unsigned int)cipline_tech_object::MdlsCNT)
+								{
+								PackFloat(((i_counter*)get_device(coilgroup, objnumber))->get_flow(),&outdata[3+i*2]);
+								}
+							i++;
+							break;
+						case C_CTR:
+							if (objnumber >= 0 && objnumber / 2 < (unsigned int)cipline_tech_object::MdlsCNT)
+								{
+								PackFloat((float)((i_counter*)get_device(coilgroup, objnumber))->get_quantity(),&outdata[3+i*2]);
+								}
+							i++;
+							break;
+						case C_TE:
 							PackFloat(get_device(coilgroup, objnumber)->get_value(),&outdata[3+i*2]);
 							i++;
 							break;
@@ -403,42 +423,45 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 						case C_MSA_CONTROL:
 							line = objnumber / 100;
 							objnumber -= 100 * line;
-							switch (objnumber)
+							if (line < (unsigned int)cipline_tech_object::MdlsCNT)
 								{
-								case MSACTRL_OPERATION:
-									PackInt16(cipline_tech_object::Mdls[line]->curstep, &outdata[3+i*2]);
-									break;
-								case MSACTRL_STATE:
-									modstate = cipline_tech_object::Mdls[line]->state;
-									if (modstate < 0)
-										{
-										if (modstate == -2)
+								switch (objnumber)
+									{
+									case MSACTRL_OPERATION:
+										PackInt16(cipline_tech_object::Mdls[line]->curstep, &outdata[3+i*2]);
+										break;
+									case MSACTRL_STATE:
+										modstate = cipline_tech_object::Mdls[line]->state;
+										if (modstate < 0)
 											{
-											modstate = 80;
-											}
-										else
-											{
-											if (modstate == -1000)
+											if (modstate == -2)
 												{
-												modstate = 90;
+												modstate = 80;
 												}
 											else
 												{
-												if (modstate == -1)
+												if (modstate == -1000)
 													{
-													modstate = 50;
+													modstate = 90;
 													}
 												else
 													{
-													modstate = -modstate;
+													if (modstate == -1)
+														{
+														modstate = 50;
+														}
+													else
+														{
+														modstate = -modstate;
+														}
 													}
 												}
 											}
-										}
-									PackInt16(modstate, &outdata[3+i*2]);
-									break;
-								default:
-									break;
+										PackInt16(modstate, &outdata[3+i*2]);
+										break;
+									default:
+										break;
+									}
 								}
 							break;
 
@@ -573,7 +596,11 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 				{
 				switch (coilgroup)
 					{
-
+					case C_V:
+					case C_M:
+					case C_N:
+						get_device(coilgroup, objnumber)->set_state(data[4] ? ON : OFF);
+						break;
 					case C_MSA_STATIONPARAMS:
 						if (objnumber < cipline_tech_object::Mdls[0]->parpar->get_count())
 							{
@@ -658,6 +685,10 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 					unsigned int objnumber = i+startingAddress;
 					switch (coilgroup)
 						{
+						case C_AO:
+							get_device(coilgroup, objnumber)->set_value(UnpackFloat(&data[7+i*2]));
+							i++;
+							break;
 						case C_MSA_RECIPES:
 							line = (i + startingAddress) / 3000 + 1;
 							if (line > cipline_tech_object::MdlsCNT)
@@ -1160,13 +1191,13 @@ device* ModbusServ::get_device( unsigned int group, unsigned int number )
 						switch (number % 100)
 							{
 							case 1:
-								ret = (device*)cipline_tech_object::Mdls[line]->LH;
+								ret = (device*)cipline_tech_object::Mdls[line-1]->LH;
 								break;
 							case 2:
-								ret = (device*)cipline_tech_object::Mdls[line]->LM;
+								ret = (device*)cipline_tech_object::Mdls[line-1]->LM;
 								break;
 							case 3:
-								ret = (device*)cipline_tech_object::Mdls[line]->LL;
+								ret = (device*)cipline_tech_object::Mdls[line-1]->LL;
 								break;
 							}
 						}
@@ -1176,15 +1207,38 @@ device* ModbusServ::get_device( unsigned int group, unsigned int number )
 			break;
 		case C_AO:
 			line = line / 2;
-			if (line > 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT)
+			if (line >= 0 && line < (unsigned int)cipline_tech_object::MdlsCNT)
 				{
 				switch (number % 100)
 					{
-					case 4:
-						ret = (device*)cipline_tech_object::Mdls[line]->NP;
+					case 2:
+						ret = (device*)cipline_tech_object::Mdls[line-1]->NP;
 						break;
 					case 28:
-						ret = (device*)cipline_tech_object::Mdls[line]->ao;
+						ret = (device*)cipline_tech_object::Mdls[line-1]->ao;
+						break;
+					}
+				}
+			break;
+		case C_FE:
+		case C_CTR:
+			line = line / 2;
+			if (line >= 0 && line < (unsigned int)cipline_tech_object::MdlsCNT)
+				{
+				ret = (device*)cipline_tech_object::Mdls[line-1]->cnt;
+				}
+			break;
+		case C_TE:
+			line = line / 2;
+			if (line >= 0 && line < (unsigned int)cipline_tech_object::MdlsCNT)
+				{
+				switch (number % 100)
+					{
+					case 2:
+						ret = (device*)cipline_tech_object::Mdls[line-1]->TP;
+						break;
+					case 4:
+						ret = (device*)cipline_tech_object::Mdls[line-1]->TR;
 						break;
 					}
 				}
