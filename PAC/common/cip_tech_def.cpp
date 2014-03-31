@@ -69,8 +69,6 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	blocked = 0;
 	disable_tank_heating = 0;
 	default_programlist = 0x3FF;
-	pump_control = 0;
-	NPC = 0;
 	bachok_lvl_err_delay = get_millisec();
 	sort_delay = get_millisec();
 	steam_valve_delay = get_millisec();
@@ -108,6 +106,8 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	dev_upr_cip_ready = 0;
 	dev_upr_cip_finished = 0;
 
+	pumpflag = 0;
+	pumptimer = get_millisec();
 	}
 
 cipline_tech_object::~cipline_tech_object()
@@ -410,10 +410,6 @@ int cipline_tech_object::evaluate()
 			{
 			EvalPIDS();
 			res = EvalCipInProgress();
-			if (pump_control)
-				{
-				NPC->Eval();
-				}
 			if (res < 0)
 				{
 				return res;
@@ -748,28 +744,6 @@ void cipline_tech_object::ResetStat( void )
 		}
 	}
 
-void cipline_tech_object::EnablePumpController()
-	{
-	if (0 == NPC)
-		{
-		InitPumpController();
-		}
-	pump_control = 1;
-	}
-
-void cipline_tech_object::DisablePumpController()
-	{
-	pump_control = 0;
-	}
-
-void cipline_tech_object::InitPumpController()
-	{
-	if (0 == NPC)
-		{
-		NPC = new TPumpController(NP);
-		}
-	}
-
 int cipline_tech_object::EvalBlock()
 	{
 	if (ncmd == MCMD_LOCK_MODULE)
@@ -842,7 +816,7 @@ void cipline_tech_object::StopDev( void )
 	V11->off();
 	V12->off();
 	V00->off();
-	if (pump_control) {NPC->off();} else {NP->off();}
+	NP->off();
 	if (PIDP->HI==0) PIDP->off();
 	if (PIDF->HI==0) PIDF->off();
 	ret_overrride = 0;
@@ -1422,14 +1396,7 @@ int cipline_tech_object::InitStep( int step, int f )
 			RHI();
 			PT();
 			cnt->pause();
-			if (pump_control)
-				{
-				NPC->off();
-				}
-			else
-				{
-				NP->off();
-				}
+			NP->off();
 			if (PIDP->HI==0) PIDP->off();
 			if (PIDF->HI==0) PIDF->off();
 			ret_overrride = 0;
@@ -1808,7 +1775,22 @@ int cipline_tech_object::CheckErr( void )
 		}
 
 #ifndef DEBUG
-	if (NP->get_state() == -1) return ERR_PUMP;
+	if (NP->get_state() == -1)
+		{
+		if (!pumpflag)
+			{
+			pumpflag = 1;
+			pumptimer = get_millisec();
+			}
+		if (get_delta_millisec(pumptimer) > 1500)
+			{
+			return ERR_PUMP;
+			}
+		}
+	else
+		{
+		pumpflag = 0;
+		}
 #endif
 
 
@@ -2093,7 +2075,7 @@ int cipline_tech_object::InitFilRR( int where )
 			break;
 		}
 
-	if (pump_control) {NPC->on();} else {NP->on();}
+	NP->on();
 	rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
 	PIDP->on();
 	V13->on();
@@ -2161,7 +2143,7 @@ int cipline_tech_object::InitCircRR( int where )
 			break;
 		}
 
-	if (pump_control) {NPC->on();} else {NP->on();}
+	NP->on();
 	rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
 	PIDP->on();
 	V13->on();
@@ -2242,7 +2224,7 @@ int cipline_tech_object::InitAddRR( int where )
 
 	if (v<1) v=1;
 
-	if (pump_control) {NPC->on();} else {NP->on();}
+	NP->on();
 	rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
 	PIDP->on();
 	V13->on();
@@ -2301,7 +2283,7 @@ int cipline_tech_object::InitOpolRR( int where )
 			z=parpar[0][P_CZAD_S];
 			break;
 		}
-	if (pump_control) {NPC->on();} else {NP->on();}
+	NP->on();
 	rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
 	PIDP->on();
 	V13->on();
@@ -2610,7 +2592,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 			break;
 		}
 
-	if (pump_control) {NPC->on();} else {NP->on();}
+	NP->on();
 	SetRet(ON);
 
 	switch (step)
@@ -2814,7 +2796,7 @@ int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
 			break;
 		}
 
-	if (pump_control) {NPC->on();} else {NP->on();}
+	NP->on();
 
 	SetRet(OFF);
 
@@ -2949,7 +2931,7 @@ int cipline_tech_object::InitOporCIP( int where, int step, int f )
 			break;
 		}
 
-	if (pump_control) {NPC->off();} else {NP->off();}
+	NP->off();
 	SetRet(ON);
 	rt_par_float[P_ZAD_PODOGR] = 0;
 	PIDP->off();
@@ -2982,7 +2964,7 @@ int cipline_tech_object::InitFilCirc( int with_what, int step, int f )
 		case SANITIZER:
 			V00->on();
 			V10->off();
-			if (pump_control) {NPC->off();} else {NP->off();}
+			NP->off();
 			SetRet(OFF);
 			PIDP->off();
 			PIDF->off();
@@ -2995,7 +2977,7 @@ int cipline_tech_object::InitFilCirc( int with_what, int step, int f )
 			V09->off();
 			V05->on();
 			V06->off();
-			if (pump_control) {NPC->on();} else {NP->on();}
+			NP->on();
 			SetRet(ON);
 			if (isTank() && (26 == step || 46 == step || 65 == step))
 				{
@@ -3036,7 +3018,7 @@ int cipline_tech_object::InitOporCirc( int where, int step, int f )
 	V03->off();
 	V02->off();
 	V04->off();
-	if (pump_control) {NPC->on();} else {NP->on();}
+	NP->on();
 	SetRet(ON);
 	V05->on();
 	V06->off();
@@ -3200,7 +3182,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 
 	rt_par_float[P_ZAD_PODOGR] = t;
 	PIDP->on();
-	if (pump_control) {NPC->on();} else {NP->on();}
+	NP->on();
 	SetRet(ON);
 	V13->on();
 	rt_par_float[P_ZAD_FLOW] = rt_par_float[P_FLOW];
@@ -3857,7 +3839,7 @@ int cipline_tech_object::InitDoseRR( int what, int step, int f )
 		rt_par_float[P_MAX_OPER_TM]*1000L);
 	T[TMR_OP_TIME]->start();
 	rt_par_float[P_SUM_OP] = 0;
-	if (pump_control) {NPC->on();} else {NP->on();}
+	NP->on();
 	SetRet(ON);
 	rt_par_float[P_ZAD_PODOGR] = rt_par_float[P_T_SANITIZER];
 	rt_par_float[P_ZAD_FLOW] = rt_par_float[P_FLOW];
@@ -4071,14 +4053,9 @@ void MSAPID::pid_on( char is_down_to_inaccel_mode /*= 0 */ )
 	if ( state != STATE_ON )
 		{
 		state = STATE_ON;
-
 		start_time = get_millisec(); // Для разгона регулятора.
 		last_time  = get_millisec(); // Интервал пересчета значений.
-
 		this->is_down_to_inaccel_mode = is_down_to_inaccel_mode;
-
-		pid_reset(); //Сбрасываем все переменные.
-		start_value = 0;
 		}
 	}
 
@@ -4273,68 +4250,7 @@ float TSav::Q(void) {
 	return cn;
 	};
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TPumpController::TPumpController( i_DO_AO_device* pump )
-	{
-	control_pump = pump;
-	actual_state = -1;
-	last_manual_state = -1;
-	manual_state = -1;
-	}
-
-TPumpController::~TPumpController()
-	{
-	control_pump = 0;
-	}
-
-void TPumpController::mDisable()
-	{
-	manual_state = -1;
-	last_manual_state = -1;
-	}
-
-void TPumpController::on()
-	{
-	actual_state = ON;
-	}
-
-void TPumpController::off()
-	{
-	actual_state = OFF;
-	}
-
-void TPumpController::mOn()
-	{
-	last_manual_state = manual_state;
-	manual_state = ON;
-	}
-
-void TPumpController::mOff()
-	{
-	last_manual_state = manual_state;
-	manual_state = OFF;
-	}
-
-void TPumpController::Eval()
-	{
-	if (manual_state >=0)
-		{
-		if (last_manual_state != manual_state)
-			{
-			control_pump->set_state(manual_state);
-			last_manual_state = manual_state;
-			}
-		}
-	else
-		{
-		if (actual_state >= 0)
-			{
-			control_pump->set_state(actual_state);
-			actual_state = -1;
-			}
-		}
-	}
 #ifdef WIN_OS
 #pragma warning(pop)
 #endif //WIN_OS

@@ -438,24 +438,6 @@ class TSav
 		float Q(void);
 	};
 
-class TPumpController
-	{
-	private:
-		i_DO_AO_device* control_pump;
-		int actual_state;
-		int manual_state;
-		int last_manual_state;
-	public:
-		TPumpController(i_DO_AO_device* pump);
-		virtual ~TPumpController();
-		virtual void on();
-		virtual void off();
-		virtual void mOn();
-		virtual void mOff();
-		virtual void mDisable();
-		virtual void Eval();
-	};
-
 class cipline_tech_object: public tech_object
 	{
 	protected:
@@ -471,6 +453,8 @@ class cipline_tech_object: public tech_object
 		unsigned long steam_valve_delay; //таймер задержки включения отсечного клапана пара (чтобы не включался/выключался на граничных значениях температуры)
 		unsigned long bachok_lvl_err_delay; //задержка для появления ошибки уровня бачка
 
+		int pumpflag; //флаг ошибки подающего насоса
+		unsigned long pumptimer; //таймер ошибки подающего насоса
 
 		unsigned long enddelayTimer;
 		int valvesAreInConflict;
@@ -483,13 +467,6 @@ class cipline_tech_object: public tech_object
 		int isTank();
 		int isLine();
 		int getValvesConflict();
-
-		//Управление подающим насосом
-		int pump_control;
-		TPumpController* NPC;
-
-
-
 
 	public:
 		cipline_tech_object( const char* name, u_int number, u_int type, const char* name_Lua,
@@ -505,11 +482,6 @@ class cipline_tech_object: public tech_object
 		static saved_params<float, true>* parpar;
 		float get_station_par(int parno);
 		void set_station_par(int parno, float newval);
-
-		//Управление подающим насосом
-		virtual void EnablePumpController();
-		virtual void DisablePumpController();
-		virtual void InitPumpController();
 
 		///Флаг отсутствия нейтрализации
 		char no_neutro;
