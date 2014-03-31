@@ -80,13 +80,6 @@ int project_manager::lua_load_configuration()
     {
 #ifdef DEBUG
     Print( "\nProject manager - processing configuration...\n" );
-
-    //-File editor_version.
-    const char* file_date =
-        lua_manager::get_instance()->char_no_param_exec_lua_method( "system",
-        "get_file_date", "project_manager::lua_load_configuration()" );
-
-    Print( "--Files date: \"%s\"\n", file_date );
 #endif // DEBUG
 
     //-Wago modules data.
