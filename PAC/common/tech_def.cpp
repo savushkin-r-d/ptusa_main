@@ -393,7 +393,7 @@ int tech_object::save_device( char *buff )
     
     //Режимы.
     res += sprintf( buff + res, "\tMODES=\n\t\t{\n\t\t" );    
-    for ( u_int i = 0; i < modes_count; i++ )
+    for ( u_int i = 1; i <= modes_count; i++ )
         {
         res += sprintf( buff + res, "%d, ", get_mode( i ) ? 1 : 0 );
         }
