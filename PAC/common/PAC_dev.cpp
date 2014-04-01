@@ -1762,12 +1762,12 @@ void motor::direct_set_state( int new_state )
 #ifdef DEBUG_NO_WAGO_MODULES
                 state = 2;
 #else
-                // Отключение прямого пуска.
+                // Включение прямого пуска.
                 int o = get_DO( DO_INDEX );
-                if ( 1 == o )
+                if ( 0 == o )
                     {
                     start_switch_time = get_millisec();
-                    set_DO( DO_INDEX, 0 );
+                    set_DO( DO_INDEX, 1 );
                     }
 
                 // Включение реверса.
