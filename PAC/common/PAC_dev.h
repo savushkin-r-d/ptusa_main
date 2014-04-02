@@ -1934,7 +1934,7 @@ class counter : public device,
             wago_device( dev_name ),
             value( 0 ),
             last_read_value( 0 ),
-            state( S_STOP ),
+            state( S_WORK ),
             flow_value( 0 )
             {
             set_par_name( P_MIN_FLOW,  0, "P_MIN_FLOW" );
@@ -1962,7 +1962,6 @@ class counter : public device,
         float get_flow();
 
         void set_property( const char* field, device* dev );
-
 
         int set_cmd( const char *prop, u_int idx, double val )
             {
