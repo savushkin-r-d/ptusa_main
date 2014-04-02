@@ -172,6 +172,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 						case C_V:
 						case C_M:
 						case C_N:
+						case C_FS:
 							ForceBit(i, &outdata[3], get_device(coilgroup, objnumber)->get_state());
 							break;
 						case C_LS:
@@ -306,6 +307,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							i++;
 							break;
 						case C_TE:
+						case C_QE:
 							PackFloat(get_device(coilgroup, objnumber)->get_value(),&outdata[3+i*2]);
 							i++;
 							break;
@@ -1205,6 +1207,12 @@ device* ModbusServ::get_device( unsigned int group, unsigned int number )
 				}
 
 			break;
+		case C_FS:
+			if (line > 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT)
+				{
+				ret = (device*)cipline_tech_object::Mdls[line-1]->FL;
+				}
+			break;
 		case C_AO:
 			line = line / 2;
 			if (line >= 0 && line < (unsigned int)cipline_tech_object::MdlsCNT)
@@ -1241,6 +1249,13 @@ device* ModbusServ::get_device( unsigned int group, unsigned int number )
 						ret = (device*)cipline_tech_object::Mdls[line-1]->TR;
 						break;
 					}
+				}
+			break;
+		case C_QE:
+			line = line / 2;
+			if (line >= 0 && line < (unsigned int)cipline_tech_object::MdlsCNT)
+				{
+				ret = (device*)cipline_tech_object::Mdls[line-1]->Q;
 				}
 			break;
 		}

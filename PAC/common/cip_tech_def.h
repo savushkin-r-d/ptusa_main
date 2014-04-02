@@ -5,6 +5,7 @@
 #include "g_device.h"
 #include "PID.h"
 #include "modbus_serv.h"
+#include "PAC_dev.h"
 
 
 #define NOCONC       0.1
@@ -286,6 +287,12 @@ enum workParameters
 	PIDF_Uk,                //Выход ПИД.
 	//-PID2-!>
 	P_TM_MAX_TIME_OPORCIP,	//Максимальное время операции "Опорожнение объекта CIP"
+	P_SIGNAL_MEDIUM_CHANGE,	//Сигнал out "Смена среды"
+	P_SIGNAL_CAUSTIC,		//Сигнал out"Щелочь в трубе"
+	P_SIGNAL_ACID,			//Сигнал out"Кислота в трубе"
+	P_SIGNAL_CIPREADY,		//Сигнал out"Мойка готова"
+	P_SIGNAL_CIPEND,		//Сигнал out"Мойка окончена"
+	P_SIGNAL_SANITIZER_PUMP,//Сигнал out управления дозатором дезинфицирующего средства
 	P_RESERV_START,
 
 

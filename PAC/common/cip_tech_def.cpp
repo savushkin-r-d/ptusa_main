@@ -821,9 +821,11 @@ void cipline_tech_object::StopDev( void )
 	if (PIDF->HI==0) PIDF->off();
 	ret_overrride = 0;
 	SetRet(OFF);
-#ifdef MEDIUM_CHANGE
-	UPR(MSA_NUMBER * 1000L + 3 +nmr*100)->off();
-#endif
+	//Смена среды
+	if (dev_upr_medium_change)
+		{
+		dev_upr_medium_change->off();
+		}
 #ifdef SELFCLEAN
 	if (scline == nmr)
 		{
@@ -1241,9 +1243,12 @@ int cipline_tech_object::InitStep( int step, int f )
 		}
 
 	ret_overrride = 0;
-#ifdef MEDIUM_CHANGE
-	UPR(MSA_NUMBER * 1000L + 3 +nmr*100)->Off();
-#endif
+	//Смена среды
+	if (dev_upr_medium_change)
+	{
+	dev_upr_medium_change->off();
+	}
+
 	PIDP->reset();
 	PIDF->reset();
 	ResetErr();
@@ -1401,9 +1406,11 @@ int cipline_tech_object::InitStep( int step, int f )
 			if (PIDF->HI==0) PIDF->off();
 			ret_overrride = 0;
 			SetRet(OFF);
-#ifdef MEDIUM_CHANGE
-			UPR(MSA_NUMBER * 1000L + 3 +nmr*100)->Off();
-#endif
+			//Смена среды
+			if (dev_upr_medium_change)
+				{
+				dev_upr_medium_change->off();
+				}
 			enddelayTimer = get_millisec();
 			return 0;
 		}
@@ -2883,9 +2890,11 @@ int cipline_tech_object::InitOporCIP( int where, int step, int f )
 	float z=0;
 	opcip=0;
 	if (isLine()) return 0;
-#ifdef MEDIUM_CHANGE
-	DO(msa_number * 1000L + 3 + nmr * 100)->on();
-#endif
+	//Смена среды
+	if (dev_upr_medium_change)
+		{
+		dev_upr_medium_change->on();
+		}
 	V05->on();
 	V06->off();
 	V00->off();
@@ -3561,54 +3570,9 @@ int cipline_tech_object::OporCIP( int where )
 	{
 	//				int ot;
 	float c;
-	device* OSdev;
 	if (isLine()) return 1;
 	rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
 	rt_par_float[P_SUM_OP] = cnt->get_quantity();
-
-	unsigned int object_empty = (unsigned int)(rt_par_float[P_OBJ_EMPTY]);
-	if (object_empty > 0)
-		{
-		OSdev = (device*)(DI(object_empty));
-		if (OSdev->get_serial_n() > 0)
-			{
-			if (ON == OSdev->get_state())
-				{
-				return 1;
-				}
-			}
-		else
-			{
-			return ERR_WRONG_OS_OR_RECIPE_ERROR;
-			}
-		}
-
-	if (FL->get_state() == FLIS)
-		{
-		opcip=1;
-		T[TMR_RETURN]->reset();
-		}
-	else
-		{
-		if (opcip==1)
-			{
-			T[TMR_RETURN]->start();
-			if (T[TMR_RETURN]->is_time_up())
-				{
-				return 1;
-				}
-			}
-		}
-
-	if (rt_par_float[P_MAX_OPER_TM]*500 < T[TMR_OP_TIME]->get_work_time())
-		{
-		if ((curstep==6) || (opcip == 0)) return 1;
-		}
-
-	if (T[TMR_OP_TIME]->is_time_up())
-		{
-		return 1;
-		}
 
 	c=0;
 	switch (where)
@@ -3667,6 +3631,46 @@ int cipline_tech_object::OporCIP( int where )
 			break;
 		}
 	rt_par_float[P_CONC] = c;
+
+	if (dev_os_object_empty)
+		{
+		if (ON == dev_os_object_empty->get_state())
+			{
+			return 1;
+			}
+		else
+			{
+			return 0;
+			}
+		}
+
+	if (FL->get_state() == FLIS)
+		{
+		opcip=1;
+		T[TMR_RETURN]->reset();
+		}
+	else
+		{
+		if (opcip==1)
+			{
+			T[TMR_RETURN]->start();
+			if (T[TMR_RETURN]->is_time_up())
+				{
+				return 1;
+				}
+			}
+		}
+
+	if (rt_par_float[P_MAX_OPER_TM]*500 < T[TMR_OP_TIME]->get_work_time())
+		{
+		if ((curstep==6) || (opcip == 0)) return 1;
+		}
+
+	if (T[TMR_OP_TIME]->is_time_up())
+		{
+		return 1;
+		}
+
 	return 0;
 	}
 
@@ -3911,8 +3915,16 @@ int cipline_tech_object::init_object_devices()
 				}
 			else
 				{
-				dev_os_object = 0;
-				return -1;
+				dev = DEVICE(dev_no);
+				if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DI)
+					{
+					dev_os_object = dev;
+					}
+				else
+					{
+					dev_os_object = 0;
+					return -1;
+					}
 				}
 			}
 		}
@@ -3931,8 +3943,16 @@ int cipline_tech_object::init_object_devices()
 			}
 		else
 			{
-			dev_m_ret = 0;
-			return -1;
+			dev = DEVICE(dev_no);
+			if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_M)
+				{
+				dev_m_ret = dev;
+				}
+			else
+				{
+				dev_m_ret = 0;
+				return -1;
+				}
 			}
 		}
 	else
@@ -3967,14 +3987,112 @@ int cipline_tech_object::init_object_devices()
 				}
 			else
 				{
-				dev_upr_ret = 0;
-				return -1;
+				dev = DEVICE(dev_no);
+				if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DO)
+					{
+					dev_upr_ret = dev;
+					}
+				else
+					{
+					dev_upr_ret = 0;
+					return -1;
+					}
 				}
 			}
 		}
 	else
 		{
 		dev_upr_ret = 0;
+		}
+	//Смена среды
+	dev_no = (u_int)rt_par_float[P_SIGNAL_MEDIUM_CHANGE];
+	if (dev_no > 0)
+		{
+		dev = (device*)(DO(dev_no));
+		if (dev->get_serial_n() > 0)
+			{
+			dev_upr_medium_change = dev;
+			}
+		else
+			{
+			if (dev_no / 1000 == ( u_int ) msa_number)
+				{
+				devline = (dev_no - msa_number * 1000) / 100;
+				sprintf(devname, "LINE%dDO%d", devline, dev_no);
+				dev = (device*)DO(devname);
+				if (dev->get_serial_n() > 0)
+					{
+					dev_upr_medium_change = dev;
+					}
+				else
+					{
+					dev_upr_medium_change = 0;
+					return -1;
+					}
+				}
+			else
+				{
+				dev = DEVICE(dev_no);
+				if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DO)
+					{
+					dev_upr_medium_change = dev;
+					}
+				else
+					{
+					dev_upr_medium_change = 0;
+					return -1;
+					}
+				}
+			}
+		}
+	else
+		{
+		dev_upr_medium_change = 0;
+		}
+	//Объект опорожнен
+	dev_no = (u_int)rt_par_float[P_OBJ_EMPTY];
+	if (dev_no > 0)
+		{
+		dev = (device*)(DI(dev_no));
+		if (dev->get_serial_n() > 0)
+			{
+			dev_os_object_empty = dev;
+			}
+		else
+			{
+			if (dev_no / 1000 == ( u_int ) msa_number)
+				{
+				devline = (dev_no - msa_number * 1000) / 100;
+				sprintf(devname, "LINE%dDI%d", devline, dev_no);
+				dev = (device*)DI(devname);
+				if (dev->get_serial_n() > 0)
+					{
+					dev_os_object_empty = dev;
+					}
+				else
+					{
+					dev_os_object_empty = 0;
+					return -1;
+					}
+				}
+			else
+				{
+				dev = DEVICE(dev_no);
+				if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DI)
+					{
+					dev_os_object_empty = dev;
+					}
+				else
+					{
+					dev_os_object_empty = 0;
+					return -1;
+					}
+				}
+			}
+		}
+	else
+		{
+		dev_os_object_empty = 0;
 		}
 	return 0;
 	}
