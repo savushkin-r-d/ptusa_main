@@ -1054,6 +1054,7 @@ void counter::reset()
 //-----------------------------------------------------------------------------
 u_int counter::get_quantity()
     {
+    
     if ( S_WORK == state )
         {
         u_int delta;
@@ -1068,9 +1069,20 @@ u_int counter::get_quantity()
             delta = current - last_read_value;
             }
         if ( delta > 0 )
-            {
-            value += delta;
+            {       
             last_read_value = current;
+            
+            //При первом вызове данного метода игнорируем значение, считанное
+            //из модуля.
+            static bool is_first = true;
+            if ( !is_first ) 
+                {
+                value += delta;                
+                }  
+            else
+                {
+                is_first = false;
+                }
             }
         }
 
@@ -1745,44 +1757,44 @@ void motor::direct_set_value( float value )
 //-----------------------------------------------------------------------------
 void motor::direct_set_state( int new_state )
     {
-    if ( new_state )
-        {
 #ifdef DEBUG_NO_WAGO_MODULES
-        if ( -1 == new_state )
+    if ( -1 == new_state )
+        {
+        state = ( char ) -1;
+        return;
+        }
+#endif // DEBUG_NO_WAGO_MODULES
+        
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
+        {
+        if ( new_state == 2 )
             {
-            state = ( char ) -1;
+#ifdef DEBUG_NO_WAGO_MODULES
+            state = 2;
+#else
+            // Включение прямого пуска.
+            int o = get_DO( DO_INDEX );
+            if ( 0 == o )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX, 1 );
+                }
+
+            // Включение реверса.
+            o = get_DO( DO_INDEX_REVERSE );
+            if ( 0 == o )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX_REVERSE, 1 );
+                }
+#endif // DEBUG_NO_WAGO_MODULES
+
             return;
             }
-#endif // DEBUG_NO_WAGO_MODULES
-
-        if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
-            {
-            if ( new_state == 2 )
-                {
-#ifdef DEBUG_NO_WAGO_MODULES
-                state = 2;
-#else
-                // Включение прямого пуска.
-                int o = get_DO( DO_INDEX );
-                if ( 0 == o )
-                    {
-                    start_switch_time = get_millisec();
-                    set_DO( DO_INDEX, 1 );
-                    }
-
-                // Включение реверса.
-                o = get_DO( DO_INDEX_REVERSE );
-                if ( 0 == o )
-                    {
-                    start_switch_time = get_millisec();
-                    set_DO( DO_INDEX_REVERSE, 1 );
-                    }
-#endif // DEBUG_NO_WAGO_MODULES
-
-                return;
-                }
-            }
-
+        }
+        
+    if ( new_state )
+        {
         direct_on();
         }
     else
@@ -1846,6 +1858,17 @@ void motor::direct_on()
 #ifdef DEBUG_NO_WAGO_MODULES
     state = 1;
 #else
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
+        {
+        // Выключение реверса.
+        int o = get_DO( DO_INDEX_REVERSE );
+        if ( 0 != o )
+            {
+            start_switch_time = get_millisec();
+            set_DO( DO_INDEX_REVERSE, 0 );
+            }
+        }    
+
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
         {
