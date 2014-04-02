@@ -769,19 +769,9 @@
       </item>
       <item path="../../PAC/linux/PAC_PC/wago_PC.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../PAC/linux/PAC_PFC200/led_PFC200.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
       <item path="../../PAC/linux/PAC_PFC200/led_PFC200.h"
             ex="false"
             tool="3"
-            flavor2="0">
-      </item>
-      <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.cpp"
-            ex="false"
-            tool="1"
             flavor2="0">
       </item>
       <item path="../../PAC/linux/PAC_PFC200/mem_PFC200.h"
@@ -789,24 +779,9 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../PAC/linux/PAC_PFC200/sys_PFC200.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="../../PAC/linux/PAC_PFC200/wago_PFC200.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
       <item path="../../PAC/linux/PAC_PFC200/wago_PFC200.h"
             ex="false"
             tool="3"
-            flavor2="0">
-      </item>
-      <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.c"
-            ex="false"
-            tool="0"
             flavor2="0">
       </item>
       <item path="../../PAC/linux/PAC_WAGO_750_860/kbusapi.h"
@@ -814,19 +789,9 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
       <item path="../../PAC/linux/PAC_WAGO_750_860/led_w750.h"
             ex="false"
             tool="3"
-            flavor2="0">
-      </item>
-      <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.cpp"
-            ex="false"
-            tool="1"
             flavor2="0">
       </item>
       <item path="../../PAC/linux/PAC_WAGO_750_860/wago_w750.h"
