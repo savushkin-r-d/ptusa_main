@@ -1215,7 +1215,7 @@ device* ModbusServ::get_device( unsigned int group, unsigned int number )
 			break;
 		case C_AO:
 			line = line / 2;
-			if (line >= 0 && line < (unsigned int)cipline_tech_object::MdlsCNT)
+			if (line > 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT)
 				{
 				switch (number % 100)
 					{
@@ -1231,14 +1231,14 @@ device* ModbusServ::get_device( unsigned int group, unsigned int number )
 		case C_FE:
 		case C_CTR:
 			line = line / 2;
-			if (line >= 0 && line < (unsigned int)cipline_tech_object::MdlsCNT)
+			if (line > 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT)
 				{
 				ret = (device*)cipline_tech_object::Mdls[line-1]->cnt;
 				}
 			break;
 		case C_TE:
 			line = line / 2;
-			if (line >= 0 && line < (unsigned int)cipline_tech_object::MdlsCNT)
+			if (line > 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT)
 				{
 				switch (number % 100)
 					{
@@ -1253,7 +1253,7 @@ device* ModbusServ::get_device( unsigned int group, unsigned int number )
 			break;
 		case C_QE:
 			line = line / 2;
-			if (line >= 0 && line < (unsigned int)cipline_tech_object::MdlsCNT)
+			if (line > 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT)
 				{
 				ret = (device*)cipline_tech_object::Mdls[line-1]->Q;
 				}
