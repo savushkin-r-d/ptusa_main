@@ -20,7 +20,7 @@ tcp_communicator_linux::tcp_communicator_linux( const char *name_rus,
     {
     // Задаем таймаут.
     tv.tv_sec  = 0;
-    tv.tv_usec = 5000; // 0.005 сек.
+    tv.tv_usec = 1000; // 0.005 сек.
 
     sin_len = sizeof( ssin );
     strcpy( host_name_rus, name_rus );
@@ -32,7 +32,7 @@ tcp_communicator_linux::tcp_communicator_linux( const char *name_rus,
 
     //net_init();
 
-    glob_last_transfer_time = get_sec();
+    glob_last_transfer_time = get_millisec();
     }
 //------------------------------------------------------------------------------
 void tcp_communicator_linux::killsockets()
@@ -189,7 +189,7 @@ tcp_communicator_linux::~tcp_communicator_linux()
 int tcp_communicator_linux::evaluate()
     {
     // Проверка связи с сервером.
-    if ( get_sec() - glob_last_transfer_time > 5 )
+    if ( get_delta_millisec(glob_last_transfer_time) > 5000L )
         {
         if ( glob_cmctr_ok )
             {
@@ -325,7 +325,7 @@ int tcp_communicator_linux::evaluate()
                 else         /* slave socket */
                     {
                     do_echo( i );
-                    glob_last_transfer_time = get_sec();
+                    glob_last_transfer_time = get_millisec();
                     }
                 }
             }

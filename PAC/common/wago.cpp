@@ -807,7 +807,7 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
 
                                    is_active( true ),
 
-                                   last_poll_time( get_sec() ),
+                                   last_poll_time( get_millisec() ),
                                    is_set_err( 0 ),
                                    sock( 0 ),
 

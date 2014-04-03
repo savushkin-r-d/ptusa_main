@@ -20,8 +20,8 @@ unsigned long get_sec()
     {
     timespec start_tv;
     clock_gettime( 0, &start_tv );
-
-    return start_tv.tv_sec;
+    unsigned long now = start_tv.tv_sec + start_tv.tv_nsec / 1000000000L;
+    return now;
     }
 //-----------------------------------------------------------------------------
 unsigned long get_delta_millisec( unsigned long time1 )
