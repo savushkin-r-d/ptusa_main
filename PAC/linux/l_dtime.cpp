@@ -11,14 +11,18 @@ unsigned long get_millisec()
     timespec start_tv;
     clock_gettime( 0, &start_tv );
     unsigned long now = 1000UL * start_tv.tv_sec + start_tv.tv_nsec / 1000000UL;
+#ifdef PAC_WAGO_750_860
+    return now - now % 10;
+#else
     return now;
+#endif
     }
 //-----------------------------------------------------------------------------
 unsigned long get_sec()
     {
     timespec start_tv;
     clock_gettime( 0, &start_tv );
-    unsigned long now = start_tv.tv_sec + start_tv.tv_nsec / 1000000000L;
+    unsigned long now = start_tv.tv_sec + (start_tv.tv_nsec - start_tv.tv_nsec % 100000000L) / 1000000000UL;
     return now;
     }
 //-----------------------------------------------------------------------------
