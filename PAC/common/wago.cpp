@@ -643,7 +643,7 @@ int* wago_manager::get_AI_read_data( u_int node_n, u_int offset )
     {
     if ( node_n < nodes_count && nodes )
         {
-        if ( nodes[ node_n ] && offset < nodes[ node_n ]->AI_cnt )
+        if ( nodes[ node_n ] && offset < wago_node::C_ANALOG_BUF_SIZE )
             {
             return &( nodes[ node_n ]->AI[ offset ] );
             }
@@ -659,7 +659,7 @@ int* wago_manager::get_AO_read_data( u_int node_n, u_int offset )
     {
     if ( node_n < nodes_count && nodes )
         {
-        if ( nodes[ node_n ] && offset < nodes[ node_n ]->AO_cnt )
+        if ( nodes[ node_n ] && offset < wago_node::C_ANALOG_BUF_SIZE )
             {
             return &nodes[ node_n ]->AO[ offset ];
             }
@@ -691,7 +691,7 @@ int* wago_manager::get_AO_write_data( u_int node_n, u_int offset )
     {
     if ( node_n < nodes_count && nodes )
         {
-        if ( nodes[ node_n ] && offset < nodes[ node_n ]->AO_cnt )
+        if ( nodes[ node_n ] && offset < wago_node::C_ANALOG_BUF_SIZE )
             {
             return &nodes[ node_n ]->AO_[ offset ];
             }
