@@ -1874,7 +1874,7 @@ int cipline_tech_object::CheckErr( void )
 	if (NP->get_state() == ON)
 		{
 		delta = rt_par_float[P_R_NO_FLOW];
-		if (NP->get_value() <= delta)
+		if (cnt->get_flow() <= delta)
 			{
 			T[TMR_NO_FLOW]->start();
 			if (T[TMR_NO_FLOW]->is_time_up())
@@ -4093,6 +4093,51 @@ int cipline_tech_object::init_object_devices()
 	else
 		{
 		dev_os_object_empty = 0;
+		}
+	//ўелочь
+	dev_no = (u_int)rt_par_float[P_SIGNAL_CAUSTIC];
+	if (dev_no > 0)
+		{
+		dev = (device*)(DO(dev_no));
+		if (dev->get_serial_n() > 0)
+			{
+			dev_upr_caustic = dev;
+			}
+		else
+			{
+			if (dev_no / 1000 == ( u_int ) msa_number)
+				{
+				devline = (dev_no - msa_number * 1000) / 100;
+				sprintf(devname, "LINE%dDO%d", devline, dev_no);
+				dev = (device*)DO(devname);
+				if (dev->get_serial_n() > 0)
+					{
+					dev_upr_caustic = dev;
+					}
+				else
+					{
+					dev_upr_caustic = 0;
+					return -1;
+					}
+				}
+			else
+				{
+				dev = DEVICE(dev_no);
+				if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DO)
+					{
+					dev_upr_caustic = dev;
+					}
+				else
+					{
+					dev_upr_caustic = 0;
+					return -1;
+					}
+				}
+			}
+		}
+	else
+		{
+		dev_upr_caustic = 0;
 		}
 	return 0;
 	}
