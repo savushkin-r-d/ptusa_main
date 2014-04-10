@@ -15,7 +15,7 @@
 ///@brief Максимальная длина названия программы мойки
 #define PROGRAM_MAX_LEN 24
 ///@brief Задержка при окончании, сбросе мойки (для протоколирования)
-#define WASH_END_DELAY 2500
+#define WASH_END_DELAY 3000
 ///@brief Минимальная задержка переключения при сортировке растворов
 #define SORT_SWITCH_DELAY 2000
 ///@brief Минимальное время соблюдения условий для включения запорного клапана пара
@@ -286,15 +286,18 @@ enum workParameters
 	PIDF_UManual,           //Заданное ручное значение выходного сигнала.
 	PIDF_Uk,                //Выход ПИД.
 	//-PID2-!>
-	P_TM_MAX_TIME_OPORCIP,	//Максимальное время операции "Опорожнение объекта CIP"
-	P_SIGNAL_MEDIUM_CHANGE,	//Сигнал out "Смена среды"
-	P_SIGNAL_CAUSTIC,		//Сигнал out"Щелочь в трубе"
-	P_SIGNAL_ACID,			//Сигнал out"Кислота в трубе"
-	P_SIGNAL_CIPREADY,		//Сигнал out"Мойка готова"
-	P_SIGNAL_CIPEND,		//Сигнал out"Мойка окончена"
-	P_SIGNAL_SANITIZER_PUMP,//Сигнал out управления дозатором дезинфицирующего средства
+	P_TM_MAX_TIME_OPORCIP,		//Максимальное время операции "Опорожнение объекта CIP"
+	P_SIGNAL_MEDIUM_CHANGE,		//Сигнал out "Смена среды"
+	P_SIGNAL_CAUSTIC,			//Сигнал out"Щелочь в трубе"
+	P_SIGNAL_ACID,				//Сигнал out"Кислота в трубе"
+	P_SIGNAL_CIP_IN_PROGRESS,	//Сигнал out"Мойка идет"
+	P_SIGNAL_CIPEND,			//Сигнал out"Мойка окончена"
+	P_SIGNAL_CIP_READY,			//Сигнал out "Мойка готова"
+	P_SIGNAL_OBJECT_READY,		//Сигнал in "Готовность объекта к мойке"
+	P_RESUME_CIP_ON_SIGNAL,		//Автоматическое возобновление мойки при пропадании ошибки объекта CIP
+	P_SIGNAL_SANITIZER_PUMP,	//Сигнал out управления дозатором дезинфицирующего средства
 	P_RESERV_START,
-
+	
 
 	STP_QAVS = 119,		//средняя концентрация щелочи
 	STP_QAVK,		//средняя концентрация кислоты
@@ -496,6 +499,7 @@ class cipline_tech_object: public tech_object
 		//Рецепты
 		TRecipeManager* lineRecipes;
 		int loadedRecipe;
+		int lastloadedRecipe;
 		char* loadedRecName;
 		char* programList;
 		char* currentProgramName;
@@ -583,17 +587,18 @@ class cipline_tech_object: public tech_object
 
 
 		//Устройства для непосредственного объекта мойки
-		device* dev_upr_ret;	//Сигнал управления возвратным насосом
-		device* dev_m_ret;		//Возвратный насос на моечной станции
-		device* dev_os_object;	//Обратная связь объекта мойки
-		device* dev_os_object_empty;	//Сигнал "объект опорожнен"
-		device* dev_upr_medium_change;	//Сигнал "смена среды"
-		device* dev_upr_caustic;		//Сигнал "щелочь"
-		device* dev_upr_acid;			//Сигнал "кислота"
-		device* dev_upr_desinfection;	//Сигнал "дезинфекция"
-		device* dev_upr_cip_ready;		//Сигнал "готовность к мойке"
-		device* dev_upr_cip_finished;	//Сигнал "мойка окончена"
-		int init_object_devices();		//Функция для инициализации устройств объекта мойки
+		device* dev_upr_ret;				//Сигнал управления возвратным насосом
+		device* dev_m_ret;					//Возвратный насос на моечной станции
+		device* dev_os_object;				//Обратная связь объекта мойки
+		device* dev_os_object_empty;		//Сигнал "объект опорожнен"
+		device* dev_upr_medium_change;		//Сигнал "смена среды"
+		device* dev_upr_caustic;			//Сигнал "щелочь"
+		device* dev_upr_acid;				//Сигнал "кислота"
+		device* dev_upr_desinfection;		//Сигнал "дезинфекция"
+		device* dev_upr_cip_ready;			//Сигнал "готовность к мойке"
+		device* dev_upr_cip_in_progress;	//Сигнал "готовность к мойке"
+		device* dev_upr_cip_finished;		//Сигнал "мойка окончена"
+		int init_object_devices();			//Функция для инициализации устройств объекта мойки
 		//----------------------------------------------
 
 		static int msa_number;
@@ -660,6 +665,7 @@ class cipline_tech_object: public tech_object
 		virtual int EvalRecipes();
 		virtual int EvalCipInProgress();
 		virtual int EvalCipInError();
+		virtual int EvalCipReadySignal();
 	};
 
 

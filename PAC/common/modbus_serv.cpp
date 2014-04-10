@@ -293,14 +293,14 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							i++;
 							break;
 						case C_FE:
-							if (objnumber >= 0 && objnumber / 2 < (unsigned int)cipline_tech_object::MdlsCNT)
+							if (objnumber > 0 && objnumber / 2 <= (unsigned int)cipline_tech_object::MdlsCNT)
 								{
 								PackFloat(((i_counter*)get_device(coilgroup, objnumber))->get_flow(),&outdata[3+i*2]);
 								}
 							i++;
 							break;
 						case C_CTR:
-							if (objnumber >= 0 && objnumber / 2 < (unsigned int)cipline_tech_object::MdlsCNT)
+							if (objnumber > 0 && objnumber / 2 <= (unsigned int)cipline_tech_object::MdlsCNT)
 								{
 								PackFloat((float)((i_counter*)get_device(coilgroup, objnumber))->get_quantity(),&outdata[3+i*2]);
 								}
