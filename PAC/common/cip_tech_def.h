@@ -294,8 +294,8 @@ enum workParameters
 	P_SIGNAL_CIPEND,			//Сигнал out"Мойка окончена"
 	P_SIGNAL_CIP_READY,			//Сигнал out "Мойка готова"
 	P_SIGNAL_OBJECT_READY,		//Сигнал in "Готовность объекта к мойке"
-	P_RESUME_CIP_ON_SIGNAL,		//Автоматическое возобновление мойки при пропадании ошибки объекта CIP
 	P_SIGNAL_SANITIZER_PUMP,	//Сигнал out управления дозатором дезинфицирующего средства
+	P_RESUME_CIP_ON_SIGNAL,		//Автоматическое возобновление мойки при пропадании ошибки объекта CIP
 	P_RESERV_START,
 	
 
