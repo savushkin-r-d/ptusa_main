@@ -436,18 +436,18 @@ void open_seat_action::init()
     next_phase        = P_OPEN_UPPER;
     active_group_n    = 0;
 
-    saved_params_u_int_4 par = *PAC_info::get_instance()->par;
+    saved_params_u_int_4 &par = PAC_info::get_instance()->par;
 
-    if ( is_mode )
-    	{
-        wait_time = par[ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;
+    wait_time = par[ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;
+    wait_time /= wash_upper_seat_devices.size() + wash_lower_seat_devices.size();
 
-        wait_time /=
-            wash_upper_seat_devices.size() + wash_lower_seat_devices.size();
-    	}
-    else
+    if ( !is_mode ) // Для шага - середина продолжительности шага.
         {
-        wait_time = owner->get_step_time() / 2;
+        u_int_4 wait_time = owner->get_step_time() / 2;
+        if ( wait_time > 0 )
+        	{
+            this->wait_time = wait_time;
+        	}
         }
 
     wash_time = par[ PAC_info::P_MIX_FLIP_TIME ];
