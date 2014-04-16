@@ -128,6 +128,8 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
             ( *custom_init_params_function )();
             }
 
+            PAC_info::get_instance()->reset_params();
+
         if ( auto_init_params ) 
             {
 #ifndef USE_NO_TANK_COMB_DEVICE
@@ -145,8 +147,6 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
             tech_object_manager::get_instance()->init_runtime_params();            
 #endif // USE_NO_TANK_COMB_DEVICE            
             }
-
-        PAC_info::get_instance()->reset_params();
 
         par[ 0 ][ P_IS_RESET_PARAMS ] = 0;
 
