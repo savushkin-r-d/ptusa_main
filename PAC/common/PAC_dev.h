@@ -1944,10 +1944,11 @@ class counter : public device,
             dev_name, DT_FQT, DST_NONE, ADDITIONAL_PARAMS_COUNT ),
             wago_device( dev_name ),
             value( 0 ),
-            last_read_value( 0 ),
+            last_read_value( 0 ),                        
+            abs_value( 0 ),
+            abs_last_read_value( 0 ),
             state( S_WORK ),
-            flow_value( 0 ),
-            abs_value( 0 )
+            flow_value( 0 )
             {
             set_par_name( P_MIN_FLOW,  0, "P_MIN_FLOW" );
             set_par_name( P_MAX_FLOW,  0, "P_MAX_FLOW" );
