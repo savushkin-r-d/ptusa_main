@@ -919,6 +919,15 @@ float dev_stub::get_flow()
     return 0.;
     }
 //-----------------------------------------------------------------------------
+void dev_stub::abs_reset()
+    {
+    }
+//-----------------------------------------------------------------------------
+u_int dev_stub::get_abs_quantity()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float counter::get_value()
     {
@@ -1050,6 +1059,44 @@ void counter::reset()
     {
     state = S_STOP;
     value = 0;
+    }
+//-----------------------------------------------------------------------------
+void counter::abs_reset()
+    {    
+    abs_value = 0;
+    }
+//-----------------------------------------------------------------------------
+u_int counter::get_abs_quantity()
+    {
+    u_int delta;
+    u_int current = ( u_int ) get_AI( AI_Q_INDEX );
+
+    if ( current < abs_last_read_value )
+        {
+        delta = MAX_VAL - abs_last_read_value + current;
+        }
+    else
+        {
+        delta = current - abs_last_read_value;
+        }
+    if ( delta > 0 )
+        {       
+        abs_last_read_value = current;
+
+        //ѕри первом вызове данного метода игнорируем значение, считанное
+        //из модул€.
+        static bool is_first = true;
+        if ( !is_first ) 
+            {
+            abs_value += delta;                
+            }  
+        else
+            {
+            is_first = false;
+            }
+        }
+
+    return abs_value;
     }
 //-----------------------------------------------------------------------------
 u_int counter::get_quantity()

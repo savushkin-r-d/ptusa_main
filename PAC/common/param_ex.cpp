@@ -18,7 +18,7 @@ params_manager::params_manager(): par( 0 )
     {
     last_idx = 0;
     CRC_mem = NV_memory_manager::get_instance()->get_memory_block(
-        NV_memory_manager::MT_NVRAM, 2 );
+        NV_memory_manager::MT_NVRAM, C_SYS_MEM_SIZE );
 
     params_mem = NV_memory_manager::get_instance()->get_memory_block( 
         NV_memory_manager::MT_EEPROM, C_TOTAL_PARAMS_SIZE );
@@ -83,10 +83,8 @@ int params_manager::init( unsigned int project_id )
         } 
     else 
         {
-#ifdef DEBUG
-        Print( "Project id = %u. PARAMS CRC CHECK FAILED: Trying to reinitialize...\n", 
+        printf( "Project id = %u. PARAMS CRC CHECK FAILED: Trying to reinitialize...\n", 
             project_id );
-#endif
         loaded = -1;
         }
     return chk;
@@ -95,7 +93,7 @@ int params_manager::init( unsigned int project_id )
 int params_manager::check_CRC()
     {
     unsigned char buff[ 2 ] = { 0 };
-    CRC_mem->read( ( char* ) buff, 2, 0 );
+    CRC_mem->read( ( char* ) buff, 2, C_CRC_OFFSET );
 
     u_int_2 read_CRC = 256 * buff[ 1 ] + buff[ 0 ];
 
@@ -111,13 +109,26 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
                                 int auto_init_work_params /*= 1*/, 
                                 void ( *custom_init_params_function )() /*= 0 */ )
     {
-//#ifdef DEBUG
     Print( "Total memory used: %u of %u bytes[ %.2f%c ]. \n",
         last_idx, C_TOTAL_PARAMS_SIZE, 
         100. * last_idx / C_TOTAL_PARAMS_SIZE, '%' );
-//#endif // DEBUG
 
     G_DEVICE_MANAGER()->init_rt_params();
+    
+    //ѕроверка на изменение количества параметров.
+    unsigned char buff[ 4 ] = { 0 };
+    CRC_mem->read( ( char* ) buff, 4, C_LAST_IDX_OFFSET );
+    u_int* last_idx_ = ( u_int* ) buff;
+    if ( *last_idx_ != last_idx )
+        {
+        printf( "Total params size has changed ( %d != %d ). Trying to reinitialize...\n", 
+            last_idx, *last_idx_ );
+
+        char *buff = ( char* ) &last_idx;   //«апись количества параметров.
+        CRC_mem->write( buff, 4, C_LAST_IDX_OFFSET );
+
+        loaded = -1;
+        }
 
     if ( -1 == loaded )
         {
@@ -151,16 +162,15 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
         par[ 0 ][ P_IS_RESET_PARAMS ] = 0;
 
         save();
-
         if ( check_CRC() == 0 )
             {
-            Print( "PARAMS OK: PARAMS SUCCESFULLY REINITIALIZED.\n" );
+            printf( "%s", "PARAMS OK: PARAMS SUCCESFULLY REINITIALIZED.\n" );
             par[ 0 ][ P_IS_RESET_PARAMS ] = 1;
             par->save_all();
             }
         else
             {
-            Print( "PARAMS: FATAL ERROR.\n" );
+            printf( "%s", "PARAMS: FATAL ERROR.\n" );
             }
 #ifdef KEY_CONFIRM
         Print( "Press any key to continue..." );
@@ -191,10 +201,10 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
 //-----------------------------------------------------------------------------
 void params_manager::make_CRC()
     {
-    unsigned int CRC = solve_CRC();
+    u_int_2 CRC = solve_CRC();
     char *buff = ( char* ) &CRC;
 
-    CRC_mem->write( buff, 2, 0 );
+    CRC_mem->write( buff, 2, C_CRC_OFFSET );
     }
 //-----------------------------------------------------------------------------
 void params_manager::save( int start_pos, int count )

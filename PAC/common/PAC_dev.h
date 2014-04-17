@@ -148,6 +148,14 @@ class i_counter
         /// @brief Получение состояния работы счетчика.
         virtual int get_state() = 0;
 
+
+        /// @brief Получение абсолютного значения счетчика (без учета 
+        /// состояния паузы).
+        virtual u_int get_abs_quantity() = 0;
+
+        /// @brief Сброс абсолютного значения счетчика.
+        virtual void  abs_reset() = 0;
+
         virtual ~i_counter();
     };
 //-----------------------------------------------------------------------------
@@ -496,6 +504,9 @@ class dev_stub : public device,
         void    reset();
         u_int   get_quantity();
         float   get_flow();
+
+        u_int get_abs_quantity();        
+        void  abs_reset();
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с дискретными входами/выходами.
@@ -1935,7 +1946,8 @@ class counter : public device,
             value( 0 ),
             last_read_value( 0 ),
             state( S_WORK ),
-            flow_value( 0 )
+            flow_value( 0 ),
+            abs_value( 0 )
             {
             set_par_name( P_MIN_FLOW,  0, "P_MIN_FLOW" );
             set_par_name( P_MAX_FLOW,  0, "P_MAX_FLOW" );
@@ -1961,6 +1973,13 @@ class counter : public device,
         u_int get_quantity();
         float get_flow();
 
+        /// @brief Получение абсолютного значения счетчика (без учета 
+        /// состояния паузы).
+        u_int get_abs_quantity();
+
+        /// @brief Сброс абсолютного значения счетчика.
+        void  abs_reset();
+
         void set_property( const char* field, device* dev );
 
         int set_cmd( const char *prop, u_int idx, double val )
@@ -1969,6 +1988,10 @@ class counter : public device,
                 {
             case 'F':
                 flow_value = ( float ) val;
+                break;
+
+            case 'A': //ABS_V
+                abs_value = ( u_int ) val;
                 break;
 
             default:
@@ -1981,7 +2004,8 @@ class counter : public device,
         //Lua.
         int save_device_ex( char *buff )
             {
-            return sprintf( buff, "F=%.2f, ", get_flow() );
+            return sprintf( buff, "F=%.2f, ABS_V=%u, ", 
+                get_flow(), get_abs_quantity() );
             }
 
     private:
@@ -2009,8 +2033,11 @@ class counter : public device,
             MAX_VAL = 65535L,   ///< Максимальное значение счетчика.
             };
 
-        u_int value;
+        u_int value;        
         u_int last_read_value;
+
+        u_int abs_value;       ///< Абсолютное значение (не становится на паузу).
+        u_int abs_last_read_value;
 
         STATES state;
 

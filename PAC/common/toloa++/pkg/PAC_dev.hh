@@ -170,13 +170,20 @@ class i_counter
         void restart();
 
         /// @brief Получение значения счетчика (объем).
-        unsigned long get_quantity();
+        unsigned int get_quantity();
 
 		/// @brief Получение значения счетчика (поток).
 		float get_flow();
 
         /// @brief Получение состояния работы счетчика.
-        virtual int get_state() = 0;
+        virtual int get_state();
+
+        /// @brief Получение абсолютного значения счетчика (без учета 
+        /// состояния паузы).
+        unsigned int get_abs_quantity();
+
+        /// @brief Сброс абсолютного значения счетчика.
+        void abs_reset();
     };
 //-----------------------------------------------------------------------------
 /// @brief Простое физическое устройство.
@@ -961,6 +968,16 @@ class PID
 class PAC_info: public i_Lua_save_device
     {
     public:
+        enum PARAMETERS
+            {
+            P_PARAMS_COUNT  = 2,   ///< Количество параметров.
+            
+            P_MIX_FLIP_PERIOD = 1, ///< Интервал промывки седел клапанов, сек.
+            P_MIX_FLIP_TIME,       ///< Время промывки седел клапанов, мсек.
+            };
+
+        saved_params_u_int_4 par;
+
         int set_cmd( const char *prop, unsigned int idx, double val );
 	};
 
