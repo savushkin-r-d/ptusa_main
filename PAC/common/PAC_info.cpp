@@ -8,7 +8,7 @@ const u_int_4 PAC_info::MSEC_IN_DAY = 24UL * 60UL * 60UL * 1000UL;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 PAC_info::PAC_info() :
-    par( new saved_params_u_int_4( P_PARAMS_COUNT ) ),
+    par( saved_params_u_int_4( P_PARAMS_COUNT ) ),
     up_days( 0 ),
     up_hours( 0 ),
     up_mins( 0 ),
@@ -21,9 +21,7 @@ PAC_info::PAC_info() :
     }
 //-----------------------------------------------------------------------------
 PAC_info::~PAC_info()
-    {
-    delete par;
-    par = 0;
+    {   
     }
 //-----------------------------------------------------------------------------
 void PAC_info::eval()
@@ -49,11 +47,10 @@ void PAC_info::eval()
     }
 //-----------------------------------------------------------------------------
 void PAC_info::reset_params()
-    {
-    par[ 0 ] [ P_CTR_ERROR_TIME ]  = 10000;
-    par[ 0 ] [ P_MIX_FLIP_PERIOD ] = 60;
-    par[ 0 ] [ P_MIX_FLIP_TIME ]   = 1000;
-    par->save_all();
+    {   
+    par[ P_MIX_FLIP_PERIOD ] = 60;
+    par[ P_MIX_FLIP_TIME ]   = 1000;
+    par.save_all();
     }
 //-----------------------------------------------------------------------------
 int PAC_info::save_device( char *buff )
@@ -69,9 +66,9 @@ int PAC_info::save_device( char *buff )
         up_time_str );
 
     answer_size += sprintf( buff + answer_size, "\tWASH_VALVE_SEAT_PERIOD=%d,\n",
-        par[ 0 ][ P_MIX_FLIP_PERIOD ] );    
+        par[ P_MIX_FLIP_PERIOD ] );    
     answer_size += sprintf( buff + answer_size, "\tWASH_VALVE_SEAT_TIME=%d,\n",
-        par[ 0 ][ P_MIX_FLIP_TIME ] );
+        par[ P_MIX_FLIP_TIME ] );
     
     answer_size += sprintf( buff + answer_size, "\t}\n" );
     
@@ -96,15 +93,15 @@ void PAC_info::print() const
 int PAC_info::set_cmd( const char *prop, u_int idx, double val )
     {
     if ( strcmp( prop, "WASH_VALVE_SEAT_PERIOD" ) == 0 )
-        {
-        par[ 0 ][ P_MIX_FLIP_PERIOD ] = ( u_int_4 ) val;
+        {        
+        par.save( P_MIX_FLIP_PERIOD, ( u_int_4 ) val );
 
         return 0;
         }
 
     if ( strcmp( prop, "WASH_VALVE_SEAT_TIME" ) == 0 )
         {
-        par[ 0 ][ P_MIX_FLIP_TIME ] = ( u_int_4 ) val;
+        par.save( P_MIX_FLIP_TIME, ( u_int_4 ) val );
 
         return 0;
         }
