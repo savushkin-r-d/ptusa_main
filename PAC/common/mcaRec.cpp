@@ -369,147 +369,105 @@ int TRecipeManager::getRecipeName( int recNO, char* recName )
 	return ReadMem(startAddr(recNO), recipeNameLength, (unsigned char*)recName);
 	}
 
-int TRecipeManager::OnRecipeDevices( int recipeNo )
-	{
-	unsigned char devType;
+int TRecipeManager::OnRecipeDevices( int recipeNo, int msaline /*= 1*/ )
+{
 	unsigned int devNo;
+	char devName[25];
 	device* dev;
 	int i;
 	int errflag = 0;
 	for (i = RV_FIRSTVALVEON; i<= RV_LASTVALVEON; i++)
 		{
-		devType = (((unsigned long)getRecipeValue(recipeNo, i)) >> 16) & 0xFF;
-		devNo = ((unsigned long)getRecipeValue(recipeNo, i)) & 0xFFFF;
-		switch (devType)
+		devNo = (unsigned long)getRecipeValue(recipeNo, i);
+		if (devNo > 0)
 			{
-			case 0:
-				if (devNo > 0)
+			sprintf(devName,"LINE%dV%d", msaline, devNo);
+			dev = (device*)(V(devName));
+			if (dev->get_serial_n() > 0)
+				{
+				dev->on();
+				}
+			else
+				{
+				dev = DEVICE(devNo);
+				if (dev->get_serial_n() > 0)
 					{
-					dev = (device*)(V(devNo));
-					if (dev->get_serial_n() > 0)
-						{
-						dev->on();
-						}
-					else
-						{
-#ifdef DEBUG
-						Print("\n\rOn recipe devices. Valve %d from param %d not found in device list\n\r", devNo, i);
-#endif
-						errflag = 1;
-						}
+					dev->on();
 					}
-				break;
-			case 1:
-				if (devNo > 0)
+				else
 					{
-					dev = (device*)(DO(devNo));
-					if (dev->get_serial_n() > 0)
-						{
-						dev->on();
-						}
-					else
-						{
 #ifdef DEBUG
-						Print("\n\rOn recipe devices. URP %d from param %d not found in device list\n\r", devNo, i);
+					Print("\n\rOn recipe devices. Valve %d from param %d not found in device list\n\r", devNo, i);
 #endif
-						errflag = 1;
-						}
+					errflag = 1;
 					}
-				break;
+				}
 			}
 		}
 	for (i = RV_FIRSTVALVEOFF; i<= RV_LASTVALVEOFF; i++)
 		{
-		devType = (((unsigned long)getRecipeValue(recipeNo, i)) >> 16) & 0xFF;
-		devNo = ((unsigned long)getRecipeValue(recipeNo, i)) & 0xFFFF;
-		switch (devType)
+		devNo = (unsigned long)getRecipeValue(recipeNo, i);
+		if (devNo > 0)
 			{
-			case 0:
-				if (devNo > 0)
+			sprintf(devName,"LINE%dV%d", msaline, devNo);
+			dev = (device*)(V(devName));
+			if (dev->get_serial_n() > 0)
+				{
+				dev->off();
+				}
+			else
+				{
+				dev = DEVICE(devNo);
+				if (dev->get_serial_n() > 0)
 					{
-					dev = (device*)(V(devNo));
-					if (dev->get_serial_n() > 0)
-						{
-						dev->off();
-						}
-					else
-						{
-#ifdef DEBUG
-						Print("\n\rOff recipe devices. Valve %d from param %d not found in device list\n\r", devNo, i);
-#endif
-						errflag = 1;
-						}
+					dev->off();
 					}
-				break;
-			case 1:
-				if (devNo > 0)
+				else
 					{
-					dev = (device*)(DO(devNo));
-					if (dev->get_serial_n() > 0)
-						{
-						dev->off();
-						}
-					else
-						{
 #ifdef DEBUG
-						Print("\n\rOff recipe devices. URP %d from param %d not found in device list\n\r", devNo, i);
+					Print("\n\rOff recipe devices. Valve %d from param %d not found in device list\n\r", devNo, i);
 #endif
-						errflag = 1;
-						}
+					errflag = 1;
 					}
-				break;
+				}
 			}
 		}
 	return errflag;
 	}
 
-int TRecipeManager::OffRecipeDevices( int recipeNo )
+int TRecipeManager::OffRecipeDevices( int recipeNo, int msaline /*= 1*/ )
 	{
-	unsigned char devType;
 	unsigned int devNo;
+	char devName[25];
 	device* dev;
 	int i;
 	int errflag = 0;
 	for (i = RV_FIRSTVALVEON; i<= RV_LASTVALVEON; i++)
 		{
-		devType = (((unsigned long)getRecipeValue(recipeNo, i)) >> 16) & 0xFF;
-		devNo = ((unsigned long)getRecipeValue(recipeNo, i)) & 0xFFFF;
-		switch (devType)
+		devNo = (unsigned long)getRecipeValue(recipeNo, i);
+		if (devNo > 0)
 			{
-			case 0:
-				dev = (device*)(V(devNo));
-				if (devNo > 0)
+			sprintf(devName,"LINE%dV%d", msaline, devNo);
+			dev = (device*)(V(devName));
+			if (dev->get_serial_n() > 0)
+				{
+				dev->off();
+				}
+			else
+				{
+				dev = DEVICE(devNo);
+				if (dev->get_serial_n() > 0)
 					{
-					if (dev->get_serial_n() > 0)
-						{
-						dev->off();
-						}
-					else
-						{
-#ifdef DEBUG
-						Print("\n\rOff recipe devices. Valve %d from param %d not found in device list\n\r", devNo, i);
-#endif
-						errflag = 1;
-						}
+					dev->off();
 					}
-				break;
-			case 1:
-				dev = (device*)(DO(devNo));
-				if (devNo > 0)
+				else
 					{
-					if (dev->get_serial_n() > 0)
-						{
-						dev->off();
-						}
-					else
-						{
 #ifdef DEBUG
-						Print("\n\rOff recipe devices. URP %d from param %d not found in device list\n\r", devNo, i);
+					Print("\n\rOff recipe devices. Valve %d from param %d not found in device list\n\r", devNo, i);
 #endif
-						errflag = 1;
-						}
+					errflag = 1;
 					}
-				break;
+				}
 			}
 		}
 	return errflag;

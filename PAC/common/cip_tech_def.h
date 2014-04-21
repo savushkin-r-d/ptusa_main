@@ -17,7 +17,7 @@
 ///@brief Задержка при окончании, сбросе мойки (для протоколирования)
 #define WASH_END_DELAY 3000
 ///@brief Минимальная задержка переключения при сортировке растворов
-#define SORT_SWITCH_DELAY 2000
+#define SORT_SWITCH_DELAY 3000
 ///@brief Минимальное время соблюдения условий для включения запорного клапана пара
 #define STEAM_VALVE_MIN_DELAY 1200L
 
@@ -296,6 +296,7 @@ enum workParameters
 	P_SIGNAL_OBJECT_READY,		//Сигнал in "Готовность объекта к мойке"
 	P_SIGNAL_SANITIZER_PUMP,	//Сигнал out управления дозатором дезинфицирующего средства
 	P_RESUME_CIP_ON_SIGNAL,		//Автоматическое возобновление мойки при пропадании ошибки объекта CIP
+	P_SIGNAL_PUMP_CONTROL,		//Сигнал in analog "Управление производительностью подающего насоса"
 	P_RESERV_START,
 	
 
@@ -459,12 +460,19 @@ class cipline_tech_object: public tech_object
 		int concentration_ok; //есть концентрация на возврате
 		int return_ok; //есть расход на возврате
 		int tank_is_empty; //используется для того, чтобы определить, нужно ли отключать возвратный насос
-		unsigned long sort_delay; //таймер задержки при сортировке растворов (чтобы не переключалось хаотически)
+
 		unsigned long steam_valve_delay; //таймер задержки включения отсечного клапана пара (чтобы не включался/выключался на граничных значениях температуры)
 		unsigned long bachok_lvl_err_delay; //задержка для появления ошибки уровня бачка
 
 		int pumpflag; //флаг ошибки подающего насоса
 		unsigned long pumptimer; //таймер ошибки подающего насоса
+
+		int sort_last_destination; //куда последний раз направлялось при сортировке
+		unsigned long sort_delay; //таймер задержки при сортировке растворов (чтобы не переключалось хаотически)
+		int tankempty;					//флаг пустого танка для задержек переключений
+		unsigned long tankemptytimer;	//пауза между переключениями при пустом танке
+		int tankfull;					//флаг полного танка для задержек переключений
+		unsigned long tankfulltimer;	//пауза между переключениями при полном танке
 
 		unsigned long enddelayTimer;
 		int valvesAreInConflict;

@@ -216,12 +216,12 @@ class TRecipeManager
 		/// @brief Включает устройства рецепта
 		/// @param recipeNo Номер рецепта
 		/// @return   int 0 - ошибка !0 - ОК
-		int OnRecipeDevices(int recipeNo);
+		int OnRecipeDevices(int recipeNo, int msaline = 1);
 		/// @fn  int TRecipeManager::OffRecipeDevices(int recipeNo)
 		/// @brief Выключает устройства рецепта
 		/// @param recipeNo Номер рецепта
 		/// @return   int 0 - ошибка !0 - ОК
-		int OffRecipeDevices(int recipeNo);
+		int OffRecipeDevices(int recipeNo, int msaline = 1);
 		/// @fn  int TRecipeManager::GetParamsCount()
 		/// @brief Возвращает количество параметров для рецепта
 		/// @return   int Количество параметров рецепта

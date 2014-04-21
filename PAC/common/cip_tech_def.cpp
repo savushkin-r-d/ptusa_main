@@ -70,7 +70,6 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	disable_tank_heating = 0;
 	default_programlist = 0x3FF;
 	bachok_lvl_err_delay = get_millisec();
-	sort_delay = get_millisec();
 	steam_valve_delay = get_millisec();
 	loadedRecName = new char[TRecipeManager::recipeNameLength];
 	programList = new char[PROGRAM_LIST_MAX_LEN];
@@ -110,6 +109,13 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 
 	pumpflag = 0;
 	pumptimer = get_millisec();
+
+	tankempty = 0;
+	tankemptytimer = get_millisec();
+	tankfull = 0;
+	tankfulltimer = get_millisec();
+	sort_last_destination = -1;
+	sort_delay = get_millisec();
 	}
 
 cipline_tech_object::~cipline_tech_object()
@@ -666,14 +672,16 @@ void cipline_tech_object::loadProgramFromList( int selectedPrg )
 void cipline_tech_object::closeLineValves()
 	{
 	unsigned int i;
-	unsigned int vstart = msa_number * 1000L + nmr * 100;
-	unsigned int vend = vstart + 99;
+	unsigned int vstart = 1001;
+	unsigned int vend = 1099;
+	char devname[25];
 #ifdef DEBUG
 	Print("\n\rClosing line valves from %d to %d...", vstart, vend);
 #endif // DEBUG
 	for (i = vstart; i <= vend; i++)
 		{
-		V(i)->off();
+		sprintf(devname, "LINE%dV%d", nmr, i);
+		V(devname)->off();
 		}
 #ifdef DEBUG
 	Print("\n\rDone closing valves\n\r");
@@ -719,7 +727,7 @@ int cipline_tech_object::getValvesConflict()
 						{
 						for (k = TRecipeManager::RV_FIRSTVALVEON; k <= TRecipeManager::RV_LASTVALVEOFF; k++)
 							{
-							if (lineRecipes->getRecipeValue(loadedRecipe, i) == Mdls[j]->lineRecipes->getRecipeValue(Mdls[j]->loadedRecipe, k))
+							if (lineRecipes->getRecipeValue(loadedRecipe, i) == Mdls[j]->lineRecipes->getRecipeValue(Mdls[j]->loadedRecipe, k) && lineRecipes->getRecipeValue(loadedRecipe, i) < 1000)
 								{
 #ifdef DEBUG
 								Print("Opened valve %d on line %d conflicts with valve on line %d", (int)lineRecipes->getRecipeValue(loadedRecipe, i), nmr, Mdls[j]->nmr);
@@ -732,7 +740,7 @@ int cipline_tech_object::getValvesConflict()
 						{
 						for (k = TRecipeManager::RV_FIRSTVALVEON; k <= TRecipeManager::RV_LASTVALVEON; k++)
 							{
-							if (lineRecipes->getRecipeValue(loadedRecipe, i) == Mdls[j]->lineRecipes->getRecipeValue(Mdls[j]->loadedRecipe, k))
+							if (lineRecipes->getRecipeValue(loadedRecipe, i) == Mdls[j]->lineRecipes->getRecipeValue(Mdls[j]->loadedRecipe, k) && lineRecipes->getRecipeValue(loadedRecipe, i) < 1000)
 								{
 #ifdef DEBUG
 								Print("Closed valve %d on line %d conflicts with opened valve on line %d",(int)lineRecipes->getRecipeValue(loadedRecipe, i), nmr, Mdls[j]->nmr);
@@ -1028,7 +1036,7 @@ int cipline_tech_object::EvalCommands()
 					else
 						{
 						closeLineValves();
-						lineRecipes->OnRecipeDevices(loadedRecipe);
+						lineRecipes->OnRecipeDevices(loadedRecipe, nmr);
 						InitStep(curstep, 0);
 						}
 					}
@@ -1278,6 +1286,12 @@ int cipline_tech_object::InitStep( int step, int f )
 	{
 	dev_upr_medium_change->off();
 	}
+	tankempty = 0;
+	tankemptytimer = get_millisec();
+	tankfull = 0;
+	tankfulltimer = get_millisec();
+	sort_last_destination = -1;
+	sort_delay = get_millisec();
 
 	PIDP->reset();
 	PIDF->reset();
@@ -1691,7 +1705,7 @@ void cipline_tech_object::ResetLinesDevicesBeforeReset( void )
 		}
 	else
 		{
-		lineRecipes->OffRecipeDevices(loadedRecipe);
+		lineRecipes->OffRecipeDevices(loadedRecipe, nmr);
 		closeLineValves();
 		}
 	loadedRecipe = -1;
@@ -3953,7 +3967,6 @@ int cipline_tech_object::DoseRR( int what )
 int cipline_tech_object::init_object_devices()
 	{
 	u_int dev_no;
-	u_int devline;
 	char devname[20] = {0};
 	device* dev;
 #ifdef DEBUG
@@ -3962,28 +3975,19 @@ int cipline_tech_object::init_object_devices()
 	//Обратная связь
 	dev_no = (u_int)rt_par_float[P_OS];
 	if (dev_no > 0)
-		{
-		dev = (device*)(DI(dev_no));
+		{			
+		sprintf(devname, "LINE%dDI%d", nmr, dev_no);
+		dev = (device*)DI(devname);
 		if (dev->get_serial_n() > 0)
 			{
 			dev_os_object = dev;
 			}
 		else
 			{
-			if (dev_no / 1000 == ( u_int ) msa_number)
+			dev = (device*)(DI(dev_no));
+			if (dev->get_serial_n() > 0)
 				{
-				devline = (dev_no - msa_number * 1000) / 100;
-				sprintf(devname, "LINE%dDI%d", devline, dev_no);
-				dev = (device*)DI(devname);
-				if (dev->get_serial_n() > 0)
-					{
-					dev_os_object = dev;
-					}
-				else
-					{
-					dev_os_object = 0;
-					return -1;
-					}
+				dev_os_object = dev;
 				}
 			else
 				{
@@ -4007,23 +4011,32 @@ int cipline_tech_object::init_object_devices()
 	//Возвратный насос
 	dev_no = (u_int)rt_par_float[P_N_RET];
 	if (dev_no > 0)
-		{
-		dev = (device*)(M(dev_no));
+		{			
+		sprintf(devname, "LINE%dM%d", nmr, dev_no);
+		dev = (device*)M(devname);
 		if (dev->get_serial_n() > 0)
 			{
 			dev_m_ret = dev;
 			}
 		else
 			{
-			dev = DEVICE(dev_no);
-			if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_M)
+			dev = (device*)(M(dev_no));
+			if (dev->get_serial_n() > 0)
 				{
 				dev_m_ret = dev;
 				}
 			else
 				{
-				dev_m_ret = 0;
-				return -1;
+				dev = DEVICE(dev_no);
+				if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_M)
+					{
+					dev_m_ret = dev;
+					}
+				else
+					{
+					dev_m_ret = 0;
+					return -1;
+					}
 				}
 			}
 		}
@@ -4034,28 +4047,19 @@ int cipline_tech_object::init_object_devices()
 	//Сигнал управления возвратным насосом
 	dev_no = (u_int)rt_par_float[P_N_UPR];
 	if (dev_no > 0)
-		{
-		dev = (device*)(DO(dev_no));
+		{			
+		sprintf(devname, "LINE%dDO%d", nmr, dev_no);
+		dev = (device*)DO(devname);
 		if (dev->get_serial_n() > 0)
 			{
 			dev_upr_ret = dev;
 			}
 		else
 			{
-			if (dev_no / 1000 == ( u_int ) msa_number)
+			dev = (device*)(DO(dev_no));
+			if (dev->get_serial_n() > 0)
 				{
-				devline = (dev_no - msa_number * 1000) / 100;
-				sprintf(devname, "LINE%dDO%d", devline, dev_no);
-				dev = (device*)DO(devname);
-				if (dev->get_serial_n() > 0)
-					{
-					dev_upr_ret = dev;
-					}
-				else
-					{
-					dev_upr_ret = 0;
-					return -1;
-					}
+				dev_upr_ret = dev;
 				}
 			else
 				{
@@ -4079,28 +4083,19 @@ int cipline_tech_object::init_object_devices()
 	//Смена среды
 	dev_no = (u_int)rt_par_float[P_SIGNAL_MEDIUM_CHANGE];
 	if (dev_no > 0)
-		{
-		dev = (device*)(DO(dev_no));
+		{			
+		sprintf(devname, "LINE%dDO%d", nmr, dev_no);
+		dev = (device*)DO(devname);
 		if (dev->get_serial_n() > 0)
 			{
 			dev_upr_medium_change = dev;
 			}
 		else
 			{
-			if (dev_no / 1000 == ( u_int ) msa_number)
+			dev = (device*)(DO(dev_no));
+			if (dev->get_serial_n() > 0)
 				{
-				devline = (dev_no - msa_number * 1000) / 100;
-				sprintf(devname, "LINE%dDO%d", devline, dev_no);
-				dev = (device*)DO(devname);
-				if (dev->get_serial_n() > 0)
-					{
-					dev_upr_medium_change = dev;
-					}
-				else
-					{
-					dev_upr_medium_change = 0;
-					return -1;
-					}
+				dev_upr_medium_change = dev;
 				}
 			else
 				{
@@ -4124,28 +4119,19 @@ int cipline_tech_object::init_object_devices()
 	//Объект опорожнен
 	dev_no = (u_int)rt_par_float[P_OBJ_EMPTY];
 	if (dev_no > 0)
-		{
-		dev = (device*)(DI(dev_no));
+		{			
+		sprintf(devname, "LINE%dDI%d", nmr, dev_no);
+		dev = (device*)DI(devname);
 		if (dev->get_serial_n() > 0)
 			{
 			dev_os_object_empty = dev;
 			}
 		else
 			{
-			if (dev_no / 1000 == ( u_int ) msa_number)
+			dev = (device*)(DI(dev_no));
+			if (dev->get_serial_n() > 0)
 				{
-				devline = (dev_no - msa_number * 1000) / 100;
-				sprintf(devname, "LINE%dDI%d", devline, dev_no);
-				dev = (device*)DI(devname);
-				if (dev->get_serial_n() > 0)
-					{
-					dev_os_object_empty = dev;
-					}
-				else
-					{
-					dev_os_object_empty = 0;
-					return -1;
-					}
+				dev_os_object_empty = dev;
 				}
 			else
 				{
@@ -4169,28 +4155,19 @@ int cipline_tech_object::init_object_devices()
 	//Щелочь
 	dev_no = (u_int)rt_par_float[P_SIGNAL_CAUSTIC];
 	if (dev_no > 0)
-		{
-		dev = (device*)(DO(dev_no));
+		{			
+		sprintf(devname, "LINE%dDO%d", nmr, dev_no);
+		dev = (device*)DO(devname);
 		if (dev->get_serial_n() > 0)
 			{
 			dev_upr_caustic = dev;
 			}
 		else
 			{
-			if (dev_no / 1000 == ( u_int ) msa_number)
+			dev = (device*)(DO(dev_no));
+			if (dev->get_serial_n() > 0)
 				{
-				devline = (dev_no - msa_number * 1000) / 100;
-				sprintf(devname, "LINE%dDO%d", devline, dev_no);
-				dev = (device*)DO(devname);
-				if (dev->get_serial_n() > 0)
-					{
-					dev_upr_caustic = dev;
-					}
-				else
-					{
-					dev_upr_caustic = 0;
-					return -1;
-					}
+				dev_upr_caustic = dev;
 				}
 			else
 				{
@@ -4214,28 +4191,19 @@ int cipline_tech_object::init_object_devices()
 	//Кислота
 	dev_no = (u_int)rt_par_float[P_SIGNAL_ACID];
 	if (dev_no > 0)
-		{
-		dev = (device*)(DO(dev_no));
+		{			
+		sprintf(devname, "LINE%dDO%d", nmr, dev_no);
+		dev = (device*)DO(devname);
 		if (dev->get_serial_n() > 0)
 			{
 			dev_upr_acid = dev;
 			}
 		else
 			{
-			if (dev_no / 1000 == ( u_int ) msa_number)
+			dev = (device*)(DO(dev_no));
+			if (dev->get_serial_n() > 0)
 				{
-				devline = (dev_no - msa_number * 1000) / 100;
-				sprintf(devname, "LINE%dDO%d", devline, dev_no);
-				dev = (device*)DO(devname);
-				if (dev->get_serial_n() > 0)
-					{
-					dev_upr_acid = dev;
-					}
-				else
-					{
-					dev_upr_acid = 0;
-					return -1;
-					}
+				dev_upr_acid = dev;
 				}
 			else
 				{
@@ -4259,28 +4227,19 @@ int cipline_tech_object::init_object_devices()
 	//Мойка окончена
 	dev_no = (u_int)rt_par_float[P_SIGNAL_CIPEND];
 	if (dev_no > 0)
-		{
-		dev = (device*)(DO(dev_no));
+		{			
+		sprintf(devname, "LINE%dDO%d", nmr, dev_no);
+		dev = (device*)DO(devname);
 		if (dev->get_serial_n() > 0)
 			{
 			dev_upr_cip_finished = dev;
 			}
 		else
 			{
-			if (dev_no / 1000 == ( u_int ) msa_number)
+			dev = (device*)(DO(dev_no));
+			if (dev->get_serial_n() > 0)
 				{
-				devline = (dev_no - msa_number * 1000) / 100;
-				sprintf(devname, "LINE%dDO%d", devline, dev_no);
-				dev = (device*)DO(devname);
-				if (dev->get_serial_n() > 0)
-					{
-					dev_upr_cip_finished = dev;
-					}
-				else
-					{
-					dev_upr_cip_finished = 0;
-					return -1;
-					}
+				dev_upr_cip_finished = dev;
 				}
 			else
 				{
@@ -4302,41 +4261,32 @@ int cipline_tech_object::init_object_devices()
 		dev_upr_cip_finished = 0;
 		}
 	//Мойка идет
-	dev_no = (u_int)rt_par_float[P_SIGNAL_CIPEND];
+	dev_no = (u_int)rt_par_float[P_SIGNAL_CIP_IN_PROGRESS];
 	if (dev_no > 0)
-		{
-		dev = (device*)(DO(dev_no));
+		{			
+		sprintf(devname, "LINE%dDO%d", nmr, dev_no);
+		dev = (device*)DO(devname);
 		if (dev->get_serial_n() > 0)
 			{
-			dev_upr_cip_finished = dev;
+			dev_upr_cip_in_progress = dev;
 			}
 		else
 			{
-			if (dev_no / 1000 == ( u_int ) msa_number)
+			dev = (device*)(DO(dev_no));
+			if (dev->get_serial_n() > 0)
 				{
-				devline = (dev_no - msa_number * 1000) / 100;
-				sprintf(devname, "LINE%dDO%d", devline, dev_no);
-				dev = (device*)DO(devname);
-				if (dev->get_serial_n() > 0)
-					{
-					dev_upr_cip_finished = dev;
-					}
-				else
-					{
-					dev_upr_cip_finished = 0;
-					return -1;
-					}
+				dev_upr_cip_in_progress = dev;
 				}
 			else
 				{
 				dev = DEVICE(dev_no);
 				if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DO)
 					{
-					dev_upr_cip_finished = dev;
+					dev_upr_cip_in_progress = dev;
 					}
 				else
 					{
-					dev_upr_cip_finished = 0;
+					dev_upr_cip_in_progress = 0;
 					return -1;
 					}
 				}
@@ -4344,7 +4294,7 @@ int cipline_tech_object::init_object_devices()
 		}
 	else
 		{
-		dev_upr_cip_finished = 0;
+		dev_upr_cip_in_progress = 0;
 		}
 	return 0;
 	}
@@ -4364,32 +4314,23 @@ int cipline_tech_object::EvalCipReadySignal()
 		if (loadedRecipe >= 0)
 			{
 			u_int dev_no;
-			u_int devline;
 			char devname[20] = {0};
 			device* dev;
 			dev_no = (u_int)rt_par_float[P_SIGNAL_CIP_READY];
 			if (dev_no > 0)
-				{
-				dev = (device*)(DO(dev_no));
+				{			
+				sprintf(devname, "LINE%dDO%d", nmr, dev_no);
+				dev = (device*)DO(devname);
 				if (dev->get_serial_n() > 0)
 					{
 					dev_upr_cip_ready = dev;
 					}
 				else
 					{
-					if (dev_no / 1000 == ( u_int ) msa_number)
+					dev = (device*)(DO(dev_no));
+					if (dev->get_serial_n() > 0)
 						{
-						devline = (dev_no - msa_number * 1000) / 100;
-						sprintf(devname, "LINE%dDO%d", devline, dev_no);
-						dev = (device*)DO(devname);
-						if (dev->get_serial_n() > 0)
-							{
-							dev_upr_cip_ready = dev;
-							}
-						else
-							{
-							dev_upr_cip_ready = 0;
-							}
+						dev_upr_cip_ready = dev;
 						}
 					else
 						{
@@ -4401,6 +4342,7 @@ int cipline_tech_object::EvalCipReadySignal()
 						else
 							{
 							dev_upr_cip_ready = 0;
+							return -1;
 							}
 						}
 					}
