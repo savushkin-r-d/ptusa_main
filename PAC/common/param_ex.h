@@ -311,13 +311,11 @@ template < class type, bool is_float > class parameters
                 Print( "[%d]=", i );
                 if ( is_float )
                 	{
-                        const char *format = "%.2f,";
-                        Print( format, values[ i - 1 ] );
+                    Print( "%.2f,", values[ i - 1 ] );
                 	}
                 else
                     {
-                    const char *format = "%d,";
-                    Print( format, values[ i - 1 ] );
+                    Print( "%d,", values[ i - 1 ] );
                     }
                 }
             Print( "\n" );
@@ -381,7 +379,7 @@ template < class type, bool is_float > class parameters
                         double tmp;
                         if ( modf( val, &tmp ) == 0 )
                             {
-                            answer_size += sprintf( buff + answer_size, "%d, ", 
+                            answer_size += sprintf( buff + answer_size, "%d, ",
                                 ( int ) val );
                             }
                         else
@@ -395,10 +393,10 @@ template < class type, bool is_float > class parameters
                     {
                     answer_size += sprintf( buff + answer_size, "%u, ",
                         ( u_int ) get_val( i ) );
-                    }                
+                    }
                 }
 
-            answer_size += sprintf( buff + answer_size, "\n%s\t},\n", prefix );            
+            answer_size += sprintf( buff + answer_size, "\n%s\t},\n", prefix );
             return answer_size;
             }
 

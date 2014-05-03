@@ -417,7 +417,7 @@ int cipline_tech_object::evaluate()
 		if (state > 0)
 			{
 			dev_upr_cip_in_progress->on();
-			} 
+			}
 		else
 			{
 			dev_upr_cip_in_progress->off();
@@ -1856,9 +1856,6 @@ void cipline_tech_object::ResetErr( void )
 
 int cipline_tech_object::CheckErr( void )
 	{
-#ifndef DEBUG
-	int i;
-#endif // DEBUG
 	float delta=0;
 	unsigned long block_flags = (unsigned long)parpar[0][P_BLOCK_ERRORS];
 
@@ -3975,7 +3972,7 @@ int cipline_tech_object::init_object_devices()
 	//Обратная связь
 	dev_no = (u_int)rt_par_float[P_OS];
 	if (dev_no > 0)
-		{			
+		{
 		sprintf(devname, "LINE%dDI%d", nmr, dev_no);
 		dev = (device*)DI(devname);
 		if (dev->get_serial_n() > 0)
@@ -4011,7 +4008,7 @@ int cipline_tech_object::init_object_devices()
 	//Возвратный насос
 	dev_no = (u_int)rt_par_float[P_N_RET];
 	if (dev_no > 0)
-		{			
+		{
 		sprintf(devname, "LINE%dM%d", nmr, dev_no);
 		dev = (device*)M(devname);
 		if (dev->get_serial_n() > 0)
@@ -4047,7 +4044,7 @@ int cipline_tech_object::init_object_devices()
 	//Сигнал управления возвратным насосом
 	dev_no = (u_int)rt_par_float[P_N_UPR];
 	if (dev_no > 0)
-		{			
+		{
 		sprintf(devname, "LINE%dDO%d", nmr, dev_no);
 		dev = (device*)DO(devname);
 		if (dev->get_serial_n() > 0)
@@ -4083,7 +4080,7 @@ int cipline_tech_object::init_object_devices()
 	//Смена среды
 	dev_no = (u_int)rt_par_float[P_SIGNAL_MEDIUM_CHANGE];
 	if (dev_no > 0)
-		{			
+		{
 		sprintf(devname, "LINE%dDO%d", nmr, dev_no);
 		dev = (device*)DO(devname);
 		if (dev->get_serial_n() > 0)
@@ -4119,7 +4116,7 @@ int cipline_tech_object::init_object_devices()
 	//Объект опорожнен
 	dev_no = (u_int)rt_par_float[P_OBJ_EMPTY];
 	if (dev_no > 0)
-		{			
+		{
 		sprintf(devname, "LINE%dDI%d", nmr, dev_no);
 		dev = (device*)DI(devname);
 		if (dev->get_serial_n() > 0)
@@ -4155,7 +4152,7 @@ int cipline_tech_object::init_object_devices()
 	//Щелочь
 	dev_no = (u_int)rt_par_float[P_SIGNAL_CAUSTIC];
 	if (dev_no > 0)
-		{			
+		{
 		sprintf(devname, "LINE%dDO%d", nmr, dev_no);
 		dev = (device*)DO(devname);
 		if (dev->get_serial_n() > 0)
@@ -4191,7 +4188,7 @@ int cipline_tech_object::init_object_devices()
 	//Кислота
 	dev_no = (u_int)rt_par_float[P_SIGNAL_ACID];
 	if (dev_no > 0)
-		{			
+		{
 		sprintf(devname, "LINE%dDO%d", nmr, dev_no);
 		dev = (device*)DO(devname);
 		if (dev->get_serial_n() > 0)
@@ -4227,7 +4224,7 @@ int cipline_tech_object::init_object_devices()
 	//Мойка окончена
 	dev_no = (u_int)rt_par_float[P_SIGNAL_CIPEND];
 	if (dev_no > 0)
-		{			
+		{
 		sprintf(devname, "LINE%dDO%d", nmr, dev_no);
 		dev = (device*)DO(devname);
 		if (dev->get_serial_n() > 0)
@@ -4263,7 +4260,7 @@ int cipline_tech_object::init_object_devices()
 	//Мойка идет
 	dev_no = (u_int)rt_par_float[P_SIGNAL_CIP_IN_PROGRESS];
 	if (dev_no > 0)
-		{			
+		{
 		sprintf(devname, "LINE%dDO%d", nmr, dev_no);
 		dev = (device*)DO(devname);
 		if (dev->get_serial_n() > 0)
@@ -4318,7 +4315,7 @@ int cipline_tech_object::EvalCipReadySignal()
 			device* dev;
 			dev_no = (u_int)rt_par_float[P_SIGNAL_CIP_READY];
 			if (dev_no > 0)
-				{			
+				{
 				sprintf(devname, "LINE%dDO%d", nmr, dev_no);
 				dev = (device*)DO(devname);
 				if (dev->get_serial_n() > 0)

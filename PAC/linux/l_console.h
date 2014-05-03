@@ -21,7 +21,7 @@
 #undef Print
 #define Print    printf
 #else
-#define Print    
+#define Print(...)
 #endif // DEBUG
 //-----------------------------------------------------------------------------
 extern time_t t_;
@@ -30,12 +30,12 @@ extern struct tm *timeInfo_;
 #define print_time t_ = time( 0 ) + 3 * 60 * 60; timeInfo_ = gmtime( &t_ );\
      printf( "%02d.%02d.%02d %02d:%02d:%02d ",\
      timeInfo_->tm_mday, timeInfo_->tm_mon + 1, timeInfo_->tm_year,\
-     timeInfo_->tm_hour, timeInfo_->tm_min, timeInfo_->tm_sec ); printf 
+     timeInfo_->tm_hour, timeInfo_->tm_min, timeInfo_->tm_sec ); printf
 #else
 #define print_time t_ = time( 0 ); timeInfo_ = localtime( &t_ );\
      printf( "%02d.%02d.%02d %02d:%02d:%02d ",\
      timeInfo_->tm_mday, timeInfo_->tm_mon + 1, timeInfo_->tm_year,\
      timeInfo_->tm_hour, timeInfo_->tm_min, timeInfo_->tm_sec ); printf
-#endif         
+#endif
 //-----------------------------------------------------------------------------
 #endif // L_CONSOLE_H
