@@ -64,21 +64,37 @@ build: .build-post
 .build-post: .build-impl
 # Add your post 'build' code here...
 
-	@if [ ${CONF} = "debug_wago_750-860" ] || [ ${CONF} = "release_wago_750-860" ]; then \
+	@if [ ${CONF} = "debug_wago_750-860" ]; then \
+	    echo ;\
+	    echo copying files...;\
+\
+	    echo "${CND_ARTIFACT_PATH_${CONF}}main >> ${out_dir}main_d";\
+	    cp    ${CND_ARTIFACT_PATH_${CONF}} "${out_dir}main_d";\
+	fi
+
+	@if [ ${CONF} = "release_wago_750-860" ]; then \
 	    echo ;\
 	    echo copying files...;\
 \
 	    echo "${CND_ARTIFACT_PATH_${CONF}}main >> ${out_dir}main";\
 	    cp    ${CND_ARTIFACT_PATH_${CONF}} "${out_dir}main";\
 	fi
-		
-	@if [ ${CONF} = "debug_PFC200" ] || [ ${CONF} = "release_PFC200" ]; then \
+
+	@if [ ${CONF} = "release_PFC200" ]; then \
 	    echo ;\
 	    echo copying files...;\
 \
 	    echo "${CND_ARTIFACT_PATH_${CONF}}main >> ${out_dir}main_PFC200";\
 	    cp    ${CND_ARTIFACT_PATH_${CONF}} "${out_dir}main_PFC200";\
-	fi	
+	fi
+
+	@if [ ${CONF} = "debug_PFC200" ]; then \
+	    echo ;\
+	    echo copying files...;\
+\
+	    echo "${CND_ARTIFACT_PATH_${CONF}}main >> ${out_dir}main_d_PFC200";\
+	    cp    ${CND_ARTIFACT_PATH_${CONF}} "${out_dir}main_d_PFC200";\
+	fi
 
 	@if [ ${CONF} = "release_wago_750-860" ]; then \
 \
@@ -89,6 +105,8 @@ build: .build-post
 		cp   "${lua_sys_dir}sys.devices.lua" ${out_dir};\
 		echo "${lua_sys_dir}sys.objects.lua >> ${out_dir}sys.objects.lua";\
 		cp   "${lua_sys_dir}sys.objects.lua" ${out_dir};\
+		echo "${lua_sys_dir}sys.rm_PACs.lua >> ${out_dir}sys.rm_PACs.lua";\
+		cp   "${lua_sys_dir}sys.rm_PACs.lua" ${out_dir};\
 		echo "";\
 		echo "${lua_prg_dir}main.wago.lua    >> ${out_dir}";\
 		cp   "${lua_prg_dir}main.wago.lua" ${out_dir};\
