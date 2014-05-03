@@ -742,6 +742,50 @@ bool tech_object::is_idle() const
     return true;
     }
 //-----------------------------------------------------------------------------
+bool tech_object::is_any_important_mode()
+    {
+    static char has_Lua_impl = 0;
+    if ( has_Lua_impl == 0 )
+        {
+        //Проверка на наличии Lua-функции is_any_important_mode().
+        lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
+            name_Lua );
+        lua_getfield( lua_manager::get_instance()->get_Lua(), -1, 
+            "is_any_important_mode" );
+        lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
+  
+        if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+            {
+            has_Lua_impl = 2;
+            }
+        else
+            {
+            has_Lua_impl = 1;
+            }
+        //Удаляем "is_any_important_mode" со стека.
+        lua_remove( lua_manager::get_instance()->get_Lua(), -1 );        
+        }
+
+    if ( has_Lua_impl == 2 )
+        {
+        int res = lua_manager::get_instance()->int_no_param_exec_lua_method( name_Lua,
+            "is_any_important_mode", 
+            "void tech_object::is_any_important_mode()" );
+
+        return res > 0;        
+        }
+
+    for ( u_int i = 0; i < modes_count; i++ )
+        {
+        if ( state[ i ] > 0 )
+            {
+            return true;
+            }
+        }
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 int tech_object_manager::init_params()
     {
@@ -880,7 +924,7 @@ void tech_object_manager::add_tech_object( tech_object* new_tech_object )
     {
     tech_objects.push_back( new_tech_object );
 
-    G_DEV_ERRORS_MANAGER->add_error( new tech_dev_error( new_tech_object ) );
+    G_DEV_ERRORS_MANAGER->add_error( new tech_obj_error( new_tech_object ) );
     }
 //-----------------------------------------------------------------------------
 int tech_object_manager::save_params_as_Lua_str( char* str )

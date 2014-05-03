@@ -1,11 +1,19 @@
 #ifdef DRIVER
 #include "stdafx.h"
 #else
-#include <errors.h>
+#include "errors.h"
+#include "PAC_err.h"
 #endif
 
 #ifdef PAC
 auto_smart_ptr < dev_errors_manager > dev_errors_manager::instance;
+
+bool tech_dev_error::is_any_error = false;
+bool tech_dev_error::is_new_error = false;
+
+bool tech_obj_error::is_any_message = false;
+
+siren_lights_manager* siren_lights_manager::instance = NULL;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 base_error::base_error(): err_par( 1 ), error_state( AS_NORMAL )
@@ -13,18 +21,18 @@ base_error::base_error(): err_par( 1 ), error_state( AS_NORMAL )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-simple_error::simple_error( device* simple_device
+tech_dev_error::tech_dev_error( device* simple_device
                            ): base_error(),
                            simple_device( simple_device )
     {
     simple_device->set_err_par( &err_par );
     }
 //-----------------------------------------------------------------------------
-simple_error::~simple_error()
+tech_dev_error::~tech_dev_error()
     {
     }
 //-----------------------------------------------------------------------------
-int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
+int tech_dev_error::save_as_Lua_str( char *str, bool &is_new_state )
     {
     int res = 0;
     str[ 0 ] = 0;
@@ -52,6 +60,7 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
                     is_new_state = true;
                     break;
                 }
+            is_any_error = true;
             break;
 
         default:         // Нет ошибки - все остальные состояния.
@@ -76,6 +85,8 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
             break;
         }
     // Проверка текущего состояния устройства.-!>
+
+    is_new_error = is_new_state; //Появилась новая ошибка.
 
     if ( AS_ALARM == error_state || AS_ACCEPT == error_state ||
         AS_RETURN == error_state ) // Есть ошибка.
@@ -104,7 +115,7 @@ int simple_error::save_as_Lua_str( char *str, bool &is_new_state )
     return res;
     }
 //-----------------------------------------------------------------------------
-void simple_error::print() const
+void tech_dev_error::print() const
     {
 #ifdef DEBUG
     Print( "%s - state[ %3d ], par[ %d ]\n",
@@ -112,17 +123,17 @@ void simple_error::print() const
 #endif // DEBUG
     }
 //-----------------------------------------------------------------------------
-unsigned char simple_error::get_object_type() const
+unsigned char tech_dev_error::get_object_type() const
     {
     return simple_device->get_type();
     }
 //-----------------------------------------------------------------------------
-unsigned int simple_error::get_object_n() const
+unsigned int tech_dev_error::get_object_n() const
     {
     return simple_device->get_serial_n();
     }
 //-----------------------------------------------------------------------------
-int simple_error::set_cmd( int cmd, int object_alarm_number )
+int tech_dev_error::set_cmd( int cmd, int object_alarm_number )
     {
     int res = 0;
 	int current_state = err_par[ P_PARAM_N ];
@@ -182,7 +193,7 @@ int simple_error::set_cmd( int cmd, int object_alarm_number )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int tech_dev_error::save_as_Lua_str( char *str, bool &is_new_state )
+int tech_obj_error::save_as_Lua_str( char *str, bool &is_new_state )
     {
     int res = 0;
     str[ 0 ] = 0;
@@ -195,7 +206,12 @@ int tech_dev_error::save_as_Lua_str( char *str, bool &is_new_state )
 
         is_new_state = true;
         }
-
+    
+    if ( !tech_dev->get_errors().empty() )
+    	{
+        is_any_message = true;
+    	}
+        
     for ( u_int i = 0; i < tech_dev->get_errors().size(); i++ )
         {
         res += sprintf( str + res, "\t%s\n", "{" );
@@ -225,7 +241,7 @@ int tech_dev_error::save_as_Lua_str( char *str, bool &is_new_state )
     return res;
     }
 //-----------------------------------------------------------------------------
-int tech_dev_error::set_cmd( int cmd, int object_alarm_number )
+int tech_obj_error::set_cmd( int cmd, int object_alarm_number )
     {
     for ( u_int i = 0; i < tech_dev->get_errors().size(); i++ )
         {
@@ -255,7 +271,7 @@ int tech_dev_error::set_cmd( int cmd, int object_alarm_number )
     return 1;
     }
 //-----------------------------------------------------------------------------
-int tech_dev_error::get_priority( tech_object::ERR_MSG_TYPES err_type )
+int tech_obj_error::get_priority( tech_object::ERR_MSG_TYPES err_type )
     {
     switch ( err_type )
         {
@@ -275,7 +291,7 @@ int tech_dev_error::get_priority( tech_object::ERR_MSG_TYPES err_type )
     return P_ALARM;
     }
 //-----------------------------------------------------------------------------
-const char* tech_dev_error::get_group( tech_object::ERR_MSG_TYPES err_type )
+const char* tech_obj_error::get_group( tech_object::ERR_MSG_TYPES err_type )
     {
     switch ( err_type )
         {
@@ -307,6 +323,10 @@ int dev_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
     str[ 0 ] = 0;
 
     bool is_new_error_state = false;
+
+    tech_dev_error::is_any_error = false;
+    tech_dev_error::is_new_error = false;
+    tech_obj_error::is_any_message = false;
 
     for ( u_int i = 0; i < s_errors_vector.size(); i++ )
         {
@@ -415,6 +435,138 @@ dev_errors_manager* dev_errors_manager::get_instance()
         }
 
     return instance;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void siren_lights_manager::eval()
+    {    
+    if ( green == NULL || red == NULL || yellow == NULL || srn == NULL )
+        {
+        return;
+        }
+
+    if ( get_delta_millisec( st_time ) < 5000 )
+        {
+        return; //Задержка при включении контроллера.
+        }
+
+    if ( par[ P_MANUAL_MODE ] != 0 )
+        {
+        return; //Ручной режим для сирены и лампочек.
+        }
+
+    //Красный свет - аварии и тревоги.
+    red->off();
+    if ( PAC_critical_errors_manager::get_instance()->is_any_error() || 
+        tech_dev_error::is_any_error )
+        {
+        static int step = 0;
+        static unsigned long start_blink_time = 0;
+        static unsigned long start_wait_time = 0;
+
+        switch ( step )
+            {
+            case 0:
+                red->on();
+                if ( get_delta_millisec( start_blink_time ) > 250 )
+                    {
+                    start_wait_time = get_millisec();
+                    step = 1; 
+                    }
+                break;
+
+            case 1:    
+                //red->off();
+                if ( get_delta_millisec( start_wait_time ) > 250 )
+                    {
+                    start_blink_time = get_millisec();
+                    step = 0;               
+                    }
+                break;
+            }        
+        }
+
+    //Дополнительное включение сирены при появлении аварии (узлы Wago, ...).
+    if ( PAC_critical_errors_manager::get_instance()->get_id() != critical_error_n )
+        {
+        critical_error_n = PAC_critical_errors_manager::get_instance()->get_id();
+        srn->on();
+
+#ifdef DEBUG
+        Print( "PAC_critical_errors_manager::get_error_n() != critical_error_n\n" );
+#endif // DEBUG
+        }
+
+    //Дополнительное включение сирены при появлении тревоги (ошибки устройств).
+    if ( tech_dev_error::is_new_error )
+        {            
+        srn->on();
+
+#ifdef DEBUG
+        Print( "base_error::is_new_active_alarm\n" );
+#endif // DEBUG
+        }
+
+    //Желтый свет - сообщения (технологические объекты).
+    yellow->off();
+    if ( tech_obj_error::is_any_message )
+        {
+        static int step = 0;
+        static unsigned long start_blink_time = 0;
+        static unsigned long start_wait_time = 0;
+
+        switch ( step )
+            {
+            case 0:
+                yellow->on();
+                if ( get_delta_millisec( start_blink_time ) > 1000 )
+                    {
+                    start_wait_time = get_millisec();
+                    step = 1; 
+                    }
+                break;
+
+            case 1:
+                //yellow->Off();
+                if ( get_delta_millisec( start_wait_time ) > 1000 )
+                    {
+                    start_blink_time = get_millisec();
+                    step = 0;               
+                    }
+                break;
+            }        
+        }
+
+    //Отключаем сирену, если нет аварий.
+    if ( PAC_critical_errors_manager::get_instance()->is_any_error() == false &&
+        false == tech_dev_error::is_any_error )
+        {
+        srn->off();
+        }
+
+    //Зеленая лампочка.
+    green->off();
+    if ( G_TECH_OBJECT_MNGR()->is_any_important_mode() )
+        {
+        green->on();
+        }
+    }
+//-----------------------------------------------------------------------------
+int siren_lights_manager::init( device *red, device *yellow, device *green,
+                               device *srn )
+    {
+    this->green = green;
+    this->red = red; 
+    this->yellow = yellow;
+    this->srn = srn;
+   
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+siren_lights_manager* G_SIREN_LIGHTS_MANAGER()
+    {
+    return siren_lights_manager::get_instance();
     }
 //-----------------------------------------------------------------------------
 #endif // PAC

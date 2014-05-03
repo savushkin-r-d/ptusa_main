@@ -136,11 +136,14 @@ class base_error
 ///
 /// У простого устройства может быть только одна ошибка (ошибка обратной
 /// связи).
-class simple_error: public base_error
+class tech_dev_error: public base_error
     {
+    friend class siren_lights_manager;
+    friend class dev_errors_manager;
+
     public:
-        simple_error( device* simple_device = 0 );
-        virtual ~simple_error();
+        tech_dev_error( device* simple_device = 0 );
+        virtual ~tech_dev_error();
 
         /// @brief Сохранение ошибки в поток для передачи на сервер.
         ///
@@ -161,21 +164,28 @@ class simple_error: public base_error
         unsigned int get_object_n() const;
 
         /// @brief Выполнение команды над ошибкой.
-        int set_cmd( int cmd, int object_alarm_number );
+        int set_cmd( int cmd, int object_alarm_number );       
 
+    protected:
+        bool static is_any_error;
+        bool static is_new_error;
+ 
     private:
-        device          *simple_device; ///< Простое устройство.
+        device*     simple_device; ///< Простое устройство.
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об ошибке сложного устройства (танк,
 /// гребенка...).
 ///
 /// У сложного устройства может быть несколько ошибок (сообщение, ответ, ...).
-class tech_dev_error: public base_error
+class tech_obj_error: public base_error
     {
+    friend class dev_errors_manager;
+    friend class siren_lights_manager;
+
     public:
         // Интерфейс base_error.
-        tech_dev_error( tech_object* tech_dev ): tech_dev( tech_dev ),
+        tech_obj_error( tech_object* tech_dev ): tech_dev( tech_dev ),
             was_set_cmd( false )
             {
             }
@@ -217,15 +227,16 @@ class tech_dev_error: public base_error
             };
 
         bool was_set_cmd;
+
+        static bool is_any_message;
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об всех ошибках простых устройств.
 class dev_errors_manager
     {
+
     public:
         ~dev_errors_manager();
-
-        //int is_any_error() const;
 
         /// @brief Сохранение всех ошибок в поток для передачи на сервер.
         ///
@@ -274,6 +285,56 @@ class dev_errors_manager
     };
 //-----------------------------------------------------------------------------
 #define G_DEV_ERRORS_MANAGER dev_errors_manager::get_instance()
+//-----------------------------------------------------------------------------
+class siren_lights_manager
+    {
+    public:
+        static siren_lights_manager* get_instance()
+            {
+            if ( NULL == instance )
+            	{
+                instance = new siren_lights_manager();
+            	}
+
+            return instance;
+            }
+
+        int init( device *red, device *yellow, device *green, device *srn );
+
+        void eval();
+
+        enum PARAMS
+            {
+            P_MANUAL_MODE = 0,
+            };
+
+    private:
+        siren_lights_manager(): green( 0 ), red( 0 ),  yellow( 0 ), srn( 0 ),
+            par( run_time_params_u_int_4( 1 ) ), critical_error_n( 0 ),
+            start_time( 0 )
+            {            
+            par[ P_MANUAL_MODE ] = 0;
+
+            st_time = get_millisec();
+            }
+
+        run_time_params_u_int_4 par;
+
+        device *green;
+        device *red;
+        device *yellow;
+
+        device *srn;
+
+        unsigned int  critical_error_n; // Номер текущей критической ошибки.
+        unsigned long st_time;
+
+        unsigned long start_time;      
+
+        static siren_lights_manager *instance;
+    };
+//-----------------------------------------------------------------------------
+siren_lights_manager* G_SIREN_LIGHTS_MANAGER();
 //-----------------------------------------------------------------------------
 #endif // PAC
 

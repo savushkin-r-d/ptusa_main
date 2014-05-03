@@ -980,8 +980,15 @@ class PAC_info: public i_Lua_save_device
 
         int set_cmd( const char *prop, unsigned int idx, double val );
 	};
-
-
+//----------------------------------------------------------------------------
+class siren_lights_manager
+    {
+    public:
+        int init( device *red, device *yellow, device *green, device *srn );
+    };
+//-----------------------------------------------------------------------------
+siren_lights_manager* G_SIREN_LIGHTS_MANAGER();
+//----------------------------------------------------------------------------
 PAC_info* G_PAC_INFO();
 //-----------------------------------------------------------------------------
 /// @brief ѕолучение текущего времени в секундах.

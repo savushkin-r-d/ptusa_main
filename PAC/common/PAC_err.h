@@ -94,6 +94,11 @@ class PAC_critical_errors_manager
             return errors_id;
             }
 
+        bool is_any_error() const
+            {
+            return !errors.empty();
+            }
+
     private:
         const char* get_alarm_group()
             {
@@ -165,8 +170,7 @@ class PAC_critical_errors_manager
 
         std::vector< critical_error >  errors;
 
-        u_int_2 errors_id;
-        int     global_ok;
+        u_int_2 errors_id;       
     };
 //-----------------------------------------------------------------------------
 #endif // PAC_ERRORS_H

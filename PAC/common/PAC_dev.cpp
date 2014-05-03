@@ -404,18 +404,20 @@ device* device_manager::get_device( int dev_type,
             }
         catch (...)
             {
+            return &stub;
             }
         }
     else
         {
 #ifdef DEBUG
+        Print( "Error - " );
         if ( dev_type <= device::C_DEVICE_TYPE_CNT )
             {
             Print( "%3s ", device::DEV_NAMES[ dev_type ] );
             }
         else
             {
-            Print( "Unknown " );
+            Print( "unknown " );
             }
 
         Print( "\"%s\" not found!\n", dev_name );
@@ -496,10 +498,14 @@ i_AO_device* device_manager::get_AO( const char *dev_name )
     }
 //-----------------------------------------------------------------------------
 i_counter* device_manager::get_FQT( const char *dev_name )
-    {
+    {   
     int res = get_device_n( device::DT_FQT, dev_name );
 
     if ( res >= 0 ) return ( counter* ) project_devices.at( res );
+
+#ifdef DEBUG
+    Print( "Error - \"%s\" not found!\n", dev_name );
+#endif // DEBUG
 
     return &stub;
     }
@@ -700,7 +706,7 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
         }
 
     // Îøèáêè.
-    G_DEV_ERRORS_MANAGER->add_error( new simple_error( new_device ) );
+    G_DEV_ERRORS_MANAGER->add_error( new tech_dev_error( new_device ) );
 
     u_int new_dev_index = project_devices.size();
     project_devices.push_back( new_device );

@@ -154,6 +154,9 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         ///
         bool is_idle() const;
 
+        /// @brief ¬ключен ли хот€ бы один важный режим технологического объекта.
+        bool is_any_important_mode();
+
         int get_number() const
             {
             return number;
@@ -353,6 +356,20 @@ class tech_object_manager
         void add_tech_object( tech_object* new_tech_object );
 
         int save_params_as_Lua_str( char* str );
+
+        /// @brief ¬ключен ли хот€ бы один важный режим технологического объекта.
+        bool is_any_important_mode()
+            {
+            for ( u_int i = 0; i < tech_objects.size(); i++ )
+                {
+                if ( tech_objects[ i ]->is_any_important_mode() )
+                	{
+                    return true;
+                	}
+                }
+
+            return false;
+            }
 
 #ifdef __BORLANDC__
 #pragma option -w-inl

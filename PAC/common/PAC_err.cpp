@@ -5,8 +5,7 @@
 auto_smart_ptr < PAC_critical_errors_manager > PAC_critical_errors_manager::instance;
 //-----------------------------------------------------------------------------
 PAC_critical_errors_manager::PAC_critical_errors_manager(
-    ): errors_id( 0 ),
-    global_ok( 0 )
+    ): errors_id( 0 )    
     {
 #ifndef __BORLANDC__
     errors.clear();
