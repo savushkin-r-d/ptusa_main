@@ -107,7 +107,7 @@ class base_error
             {
             err_par[ P_PARAM_N ] = 0;
             }
-            
+
         enum PARAMS  ///< Параметры ошибки, определяют номера битов.
             {
             P_PARAM_N = 1,	  //Номер параметра.
@@ -128,7 +128,7 @@ class base_error
     protected:
         saved_params_u_int_4 err_par;
 
-        unsigned char error_state;    ///< Состояние ошибки.    
+        unsigned char error_state;    ///< Состояние ошибки.
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об ошибке простого устройства (клапан,
@@ -164,12 +164,12 @@ class tech_dev_error: public base_error
         unsigned int get_object_n() const;
 
         /// @brief Выполнение команды над ошибкой.
-        int set_cmd( int cmd, int object_alarm_number );       
+        int set_cmd( int cmd, int object_alarm_number );
 
     protected:
         bool static is_any_error;
         bool static is_new_error;
- 
+
     private:
         device*     simple_device; ///< Простое устройство.
     };
@@ -309,10 +309,10 @@ class siren_lights_manager
             };
 
     private:
-        siren_lights_manager(): green( 0 ), red( 0 ),  yellow( 0 ), srn( 0 ),
-            par( run_time_params_u_int_4( 1 ) ), critical_error_n( 0 ),
-            start_time( 0 )
-            {            
+        siren_lights_manager(): par( run_time_params_u_int_4( 1 ) ),
+            green( 0 ), red( 0 ),  yellow( 0 ), srn( 0 ),
+            critical_error_n( 0 ), start_time( 0 )
+            {
             par[ P_MANUAL_MODE ] = 0;
 
             st_time = get_millisec();
@@ -329,7 +329,7 @@ class siren_lights_manager
         unsigned int  critical_error_n; // Номер текущей критической ошибки.
         unsigned long st_time;
 
-        unsigned long start_time;      
+        unsigned long start_time;
 
         static siren_lights_manager *instance;
     };
