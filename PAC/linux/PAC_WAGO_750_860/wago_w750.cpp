@@ -74,10 +74,20 @@ int wago_manager_w750::read_inputs()
 
                 // AI
                 u_int idx = 0;
+                bool is_first_655 = true;
+
                 for ( u_int j = 0; j < nd->AI_cnt; j++ )
                     {
-                    u_int val = 0;
                     u_int offset = nd->AI_offsets[ j ];
+                    u_int val = pstPabIN->uc.Pab[ offset ] +
+                        256 * pstPabIN->uc.Pab[ offset + 1 ];
+
+                    if ( nd->AI_types[ j ] != 655 )
+                        {
+                        // ѕо€вилс€ другой модуль, значит следующий 655 будет
+                        // первым.
+                        is_first_655 = true;
+                        }
 
                     switch ( nd->AI_types[ j ] )
                         {
@@ -95,6 +105,11 @@ int wago_manager_w750::read_inputs()
                         break;
 
                     case 655:
+                        if ( !is_first_655 ) //„итаем по первому каналу все 20 слов!
+                            {
+                            break;
+                            }
+
                         char* data = ( char* ) ( nd->AI + idx );
 #ifdef DEBUG_ASI
                         printf( "750-655 AI, idx = %d\n", idx );
@@ -109,6 +124,7 @@ int wago_manager_w750::read_inputs()
 #ifdef DEBUG_ASI
                             printf( "\n" );
 #endif // DEBUG_ASI
+                        is_first_655 = false;
                         idx += 20;
                         break;
 
@@ -173,9 +189,18 @@ int wago_manager_w750::write_outputs()
 
                 // AO
                 int in_idx  = 0;
+                bool is_first_655 = true;
+
                 for ( u_int j = 0; j < nd->AO_cnt; j++ )
                     {
                     u_int offset = nd->AO_offsets[ j ];
+
+                    if ( nd->AO_types[ j ] != 655 )
+                        {
+                        // ѕо€вилс€ другой модуль, значит следующий 655 будет
+                        // первым.
+                        is_first_655 = true;
+                        }
 
                     switch ( nd->AO_types[ j ] )
                         {
@@ -190,6 +215,11 @@ int wago_manager_w750::write_outputs()
 
                         case 655:
                             {
+                            if ( !is_first_655 ) //ѕишем по первому каналу все 20 слов!
+                                {
+                                break;
+                                }
+
                             char* data = ( char* ) ( nd->AO_ + in_idx );
 #ifdef DEBUG_ASI
                             printf( "750-655, idx = %d\n", in_idx );
@@ -205,6 +235,7 @@ int wago_manager_w750::write_outputs()
                             printf( "\n" );
 #endif // DEBUG_ASI
                             in_idx += 20;
+                            is_first_655 = false;
                             break;
                             }
 
@@ -214,7 +245,6 @@ int wago_manager_w750::write_outputs()
 
                             pstPabOUT->uc.Pab[ offset     ] = val & 0xFF;
                             pstPabOUT->uc.Pab[ offset + 1 ] = val >> 8;
-
                             in_idx++;
                             break;
                             }
