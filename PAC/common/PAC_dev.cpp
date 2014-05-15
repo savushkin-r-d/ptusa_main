@@ -113,7 +113,7 @@ par_device::par_device ( u_int par_cnt ) : par ( 0 ),
             }
 
         par = new saved_params_float ( par_cnt );
-        }    
+        }
     }
 //-----------------------------------------------------------------------------
 par_device::~par_device()
@@ -498,7 +498,7 @@ i_AO_device* device_manager::get_AO( const char *dev_name )
     }
 //-----------------------------------------------------------------------------
 i_counter* device_manager::get_FQT( const char *dev_name )
-    {   
+    {
     int res = get_device_n( device::DT_FQT, dev_name );
 
     if ( res >= 0 ) return ( counter* ) project_devices.at( res );
@@ -970,10 +970,6 @@ int counter::get_state()
             {
             // Насос не работает.
             start_pump_working_time = 0;
-            if ( state != S_PAUSE )
-                {
-                state = S_STOP;
-                }
             }
         else
             {
@@ -1068,7 +1064,7 @@ void counter::reset()
     }
 //-----------------------------------------------------------------------------
 void counter::abs_reset()
-    {    
+    {
     abs_value = 0;
     }
 //-----------------------------------------------------------------------------
@@ -1086,16 +1082,16 @@ u_int counter::get_abs_quantity()
         delta = current - abs_last_read_value;
         }
     if ( delta > 0 )
-        {       
+        {
         abs_last_read_value = current;
 
         //При первом вызове данного метода игнорируем значение, считанное
         //из модуля.
         static bool is_first = true;
-        if ( !is_first ) 
+        if ( !is_first )
             {
-            abs_value += delta;                
-            }  
+            abs_value += delta;
+            }
         else
             {
             is_first = false;
@@ -1107,7 +1103,7 @@ u_int counter::get_abs_quantity()
 //-----------------------------------------------------------------------------
 u_int counter::get_quantity()
     {
-    
+
     if ( S_WORK == state )
         {
         u_int delta;
@@ -1122,16 +1118,16 @@ u_int counter::get_quantity()
             delta = current - last_read_value;
             }
         if ( delta > 0 )
-            {       
+            {
             last_read_value = current;
-            
+
             //При первом вызове данного метода игнорируем значение, считанное
             //из модуля.
             static bool is_first = true;
-            if ( !is_first ) 
+            if ( !is_first )
                 {
-                value += delta;                
-                }  
+                value += delta;
+                }
             else
                 {
                 is_first = false;
@@ -1684,7 +1680,7 @@ void valve_mix_proof::direct_off()
     set_DO( DO_INDEX_L, 0 );
     int o = get_DO( DO_INDEX );
 
-    if ( o != 0 || was_seat ) 
+    if ( o != 0 || was_seat )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
@@ -1732,7 +1728,7 @@ float AI1::get_value()
 
 float AI1::get_value()
     {
-    return get_par( P_ZERO_ADJUST_COEFF, 0 ) + 
+    return get_par( P_ZERO_ADJUST_COEFF, 0 ) +
         get_AI( C_AI_INDEX, get_min_val(), get_max_val() );
     }
 //-----------------------------------------------------------------------------
@@ -1817,7 +1813,7 @@ void motor::direct_set_state( int new_state )
         return;
         }
 #endif // DEBUG_NO_WAGO_MODULES
-        
+
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
         {
         if ( new_state == 2 )
@@ -1845,7 +1841,7 @@ void motor::direct_set_state( int new_state )
             return;
             }
         }
-        
+
     if ( new_state )
         {
         direct_on();
@@ -1920,7 +1916,7 @@ void motor::direct_on()
             start_switch_time = get_millisec();
             set_DO( DO_INDEX_REVERSE, 0 );
             }
-        }    
+        }
 
     int o = get_DO( DO_INDEX );
     if ( 0 == o )
