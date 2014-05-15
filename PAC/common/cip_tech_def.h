@@ -50,6 +50,7 @@
 #define  P_CZAD_K       4	//концентрация рабочего раствора кислоты
 #define  P_CMIN_K       5	//минимальная концентрация рабочего раствора кислоты
 #define  P_CKANAL_K     6	//максимальная концентрация раствора кислоты для канализации
+#define P_MAX_BULK_FOR_CAUSTIC 7 //максимальный аналоговый уровень при наполнении танка щелочи при наведении
 
 #define  P_BLOCK_ERRORS 10   //Набор флагов для блокировки ошибок модулей мойки
 #define  P_ALFK         11	//коеффициент температурной зависимости кислоты
@@ -565,6 +566,11 @@ class cipline_tech_object: public tech_object
 		i_DO_device* V11;
 		i_DO_device* V12;
 		i_DO_device* V13;
+
+		i_AI_device* LTK;
+		i_AI_device* LTS;
+		i_AI_device* LTW;
+
 
 		i_DO_AO_device* NP;
 		i_DO_AO_device* NK;

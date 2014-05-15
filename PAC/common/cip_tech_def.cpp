@@ -342,6 +342,11 @@ void cipline_tech_object::initline()
 	LKH = LS(6);
 	LKL = LS(7);
 
+	LTS = LT("LT1");
+	LTK = LT("LT2");
+	LTW = LT("LT3");
+
+
 	sprintf(devname, "LINE%dTE%d", number, number * 100 + 1);
 	TP = TE(devname);
 	sprintf(devname, "LINE%dTE%d", number, number * 100 + 2);
@@ -1728,6 +1733,10 @@ void cipline_tech_object::ResetLinesDevicesBeforeReset( void )
 		{
 		dev_upr_cip_in_progress->off();
 		}
+	if (dev_upr_cip_ready)
+		{
+		dev_upr_cip_ready->off();
+		}
 	dev_upr_cip_in_progress = 0;
 	dev_upr_ret = 0;
 	dev_m_ret = 0;
@@ -2416,6 +2425,13 @@ int cipline_tech_object::FilRR( int where )
 				}
 			break;
 		case TANK_S:
+			if (parpar[0][P_MAX_BULK_FOR_CAUSTIC] > 1)
+				{
+				if (LTS->get_value() > parpar[0][P_MAX_BULK_FOR_CAUSTIC])
+					{
+					return 1;
+					}
+				}
 			if (LSH->is_active())
 				{
 				return 1;
@@ -2773,7 +2789,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 			break;
 		}
 	rt_par_float[P_ZAD_PODOGR] = v;
-	if (disable_tank_heating && isTank() && (22 == step || 42 == step || 62 == step))
+	if (/*disable_tank_heating && */isTank() && (22 == step || 42 == step || 62 == step))
 		{
 		rt_par_float[P_ZAD_PODOGR] = 0;
 		PIDP->off();
@@ -2933,7 +2949,7 @@ int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
 		}
 	p=rt_par_float[PV2];
 	rt_par_float[P_ZAD_PODOGR] = v;
-	if (isTank() && (24 == step || 44 == step || 64 == step))
+	if (disable_tank_heating && isTank() && (24 == step || 44 == step || 64 == step))
 		{
 		rt_par_float[P_ZAD_PODOGR] = 0;
 		PIDP->off();
@@ -3780,7 +3796,7 @@ int cipline_tech_object::Circ( int what )
 		SetRet(ON);
 		}
 
-	if (LH->is_active() && V10->get_state() && 101 != rt_par_float[P_PODP_CIRC])
+	if (LH->is_active() && V10->get_state() && 101 != rt_par_float[P_PODP_CIRC] && curstep != 66)
 		{
 		SetRet(OFF);
 		ret_circ_flag = 1;
