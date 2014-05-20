@@ -21,11 +21,30 @@ class plant
             return k;
             }
 
+        void set_T( float new_T )
+            {
+            T = new_T;
+            }
+
+        float get_T() const
+            {
+            return T;
+            }
+
     private:
         float k;
+        float T;
 
-        float prev_obj_value;      //Предыдущее значение выхода объекта управления.
-        float current_obj_value;   //Текущее значение выхода объекта управления.
-        float prev_control_value;  //Предыдущее значение управляющего воздействия.
+        float h;
+
+        float prev_obj_v1;          //Предыдущее значение выхода объекта управления.
+
+        float current_obj_value;    //Текущее значение выхода объекта управления.
+        
+        float prev_control_v1;      //t-1  значение управляющего воздействия.
+        float prev_control_v2;      //t-2 значение управляющего воздействия.
+        float prev_control_v3;      //t-3 значение управляющего воздействия.
+        float prev_control_v4;      //t-4 значение управляющего воздействия.
+        float prev_control_v5;      //t-5 значение управляющего воздействия.
     };
 #endif // PLANT
