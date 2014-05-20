@@ -29,6 +29,7 @@ FILE *work_data_stream;
 //FILE *emulator_learning_data_stream;  
 #endif // SAVE_DATA_FOR_EMULATOR_LEARNING
 
+bool g_is_start = false;
 //Эмулятор.
 const int INPUTS_COUNT = 10;
 mlp *emulator = new mlp( 2 * INPUTS_COUNT, 10, 1 );
@@ -423,7 +424,23 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 WNDPROC DefEditProc1;
 WNDPROC DefEditProc2;
 
+WNDPROC DefStartProc;
 //---------------------------------------------------------------------------
+LRESULT CALLBACK NewStartProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+    {
+    switch(message)
+        {
+    case WM_COMMAND:
+        if( wParam == VK_RETURN )
+            {
+
+            return( 0 );
+            }
+        }
+    return((LRESULT)CallWindowProc((WNDPROC)DefStartProc,hwnd,message,wParam,lParam));
+    }
+//---------------------------------------------------------------------------
+
 LRESULT CALLBACK NewEditProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     switch(message)
@@ -483,6 +500,29 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
         {
         return FALSE;
         }
+
+    //Start
+    HWND hwnd_start = CreateWindow(        
+        L"Button",        // Predefined class; Unicode assumed 
+        L"Start",         // Button text 
+        WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON ,  // Styles 
+        530,             // x position 
+        500,            // y position 
+        100,            // Button width
+        20,             // Button height
+        hWnd,           // Parent window
+        (HMENU)10100,   // No menu.
+        (HINSTANCE)GetWindowLong(hWnd, GWL_HINSTANCE), 
+        NULL);          // Pointer not needed.
+
+    if (!hwnd_start)
+        {
+        return FALSE;
+        }
+
+    DefStartProc = (WNDPROC)GetWindowLongPtr(hwnd_start,GWLP_WNDPROC);
+    SetWindowLongPtr( hwnd_start,GWLP_WNDPROC,(LPARAM)NewStartProc);
+
 
     //k1
     HWND hwnd_k1_edit = CreateWindow(        
@@ -652,6 +692,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         }
                     break;
                     }
+                case 10100:
+                    g_is_start = ! g_is_start;
+                    break;
 
 
                 //    if( EN_CHANGE == wmEvent)
@@ -682,25 +725,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case WM_TIMER:
             {
-            //Очищаем окно.
-            hdc = GetDC( hWnd );
+            if ( g_is_start )
+                {
+                //Очищаем окно.
+                hdc = GetDC( hWnd );
 
-            //Здесь рисуем в hdc
-            RECT rect;
-            GetClientRect (hWnd, &rect);
-            rect.bottom /= 2;
-            FillRect ( hdc, &rect, (HBRUSH)(COLOR_WINDOW+1));
+                //Здесь рисуем в hdc
+                RECT rect;
+                GetClientRect (hWnd, &rect);
+                rect.bottom /= 2;
+                FillRect ( hdc, &rect, (HBRUSH)(COLOR_WINDOW+1));
 
-            //Рисуем график ПИД.
-            DrawSeries( hdc, rect.left, rect.top, rect.right, rect.bottom,
-                10, nn_emul_manager->get_plant_data(),
-                nn_emul_manager->get_PID_data(), 
-                //emulator_output );
-                nn_emul_manager->get_nn2_emul_data() );
+                //Рисуем график ПИД.
+                DrawSeries( hdc, rect.left, rect.top, rect.right, rect.bottom,
+                    10, nn_emul_manager->get_plant_data(),
+                    nn_emul_manager->get_PID_data(), 
+                    //emulator_output );
+                    nn_emul_manager->get_nn2_emul_data() );
 
-            ReleaseDC( hWnd, hdc );
-                       
-            eval();
+                ReleaseDC( hWnd, hdc );
+
+                eval();
+                }
 
             break;
             }
