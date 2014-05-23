@@ -1081,10 +1081,10 @@ u_int counter::get_abs_quantity()
         {
         delta = current - abs_last_read_value;
         }
+
+    abs_last_read_value = current;
     if ( delta > 0 )
         {
-        abs_last_read_value = current;
-
         //ѕри первом вызове данного метода игнорируем значение, считанное
         //из модул€.
         static bool is_first = true;
@@ -1117,10 +1117,10 @@ u_int counter::get_quantity()
             {
             delta = current - last_read_value;
             }
+
+        last_read_value = current;
         if ( delta > 0 )
             {
-            last_read_value = current;
-
             //ѕри первом вызове данного метода игнорируем значение, считанное
             //из модул€.
             static bool is_first = true;
