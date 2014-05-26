@@ -348,6 +348,45 @@ enum storedParameters
 	//P_TM_NO_CONC,	//время появления ошибки "нет концентрации в возвратной трубе"
 	};
 
+
+class TControlledValve
+	{
+	public:
+		TControlledValve(i_DO_device* valve_to_control, unsigned long delay = 2000L);
+		~TControlledValve();
+		void Evaluate();
+		void on();
+		void off();
+		void InstantOff();
+		int HI;
+		int get_state();
+		unsigned long switch_delay;
+
+	private:
+		i_DO_device* controlled_valve;
+		char state_previous;
+		char state_current;
+		char delayed_switch;
+		unsigned long state_change_time;
+
+	};
+
+class TValveController
+	{
+	public:
+		TValveController();
+		~TValveController();
+		TControlledValve* AddValve(i_DO_device* valve_to_add, unsigned long valve_delay = 2000L);
+		void Evaluate();
+		void ForceOffAll();
+
+	private:
+		TControlledValve** valves;
+		int valves_count;
+
+	};
+
+
 class MSAPID
 	{
 	private:
@@ -553,18 +592,19 @@ class cipline_tech_object: public tech_object
 		int volumePassed();
 #endif //SELFCLEAN
 		i_DO_device* V00;
-		i_DO_device* V01;
-		i_DO_device* V03;
-		i_DO_device* V02;
-		i_DO_device* V04;
-		i_DO_device* V05;
-		i_DO_device* V06;
-		i_DO_device* V07;
-		i_DO_device* V08;
-		i_DO_device* V09;
-		i_DO_device* V10;
-		i_DO_device* V11;
-		i_DO_device* V12;
+		TControlledValve* V01;
+		TControlledValve* V02;
+		TControlledValve* V03;
+		TControlledValve* V04;
+		TControlledValve* V05;
+		TControlledValve* V06;
+		TControlledValve* V07;
+		TControlledValve* V08;
+		TControlledValve* V09;
+		TControlledValve* V10;
+		TControlledValve* V11;
+		TControlledValve* V12;
+		TValveController* ValveController;
 		i_DO_device* V13;
 
 		i_AI_device* LTK;
