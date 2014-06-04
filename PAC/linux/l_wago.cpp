@@ -196,17 +196,22 @@ int wago_manager_linux::write_outputs()
                 int l = 0;
                 for ( unsigned int idx = 0; idx < nd->AO_cnt; idx++ )
                     {
-                    
-                    buff[ 13 + l] = (unsigned char)(( nd->AO_[ idx ] >> 8 ) & 0xFF);
-                    buff[ 13 + l + 1] = (unsigned char)(nd->AO_[ idx ] & 0xFF);
-                    
-                    if ( nd->AI_types[ idx ] == 638 )
+                    switch( nd->AI_types[ idx ] )
                         {
-                        buff[ 13 + l + 2 ] = 0;
-                        buff[ 13 + l + 3 ] = 0;
-                        l += 2;                        
+                        case 638:
+                            buff[ 13 + l     ] = 0;
+                            buff[ 13 + l + 1 ] = 0;
+                            buff[ 13 + l + 2 ] = 0;
+                            buff[ 13 + l + 3 ] = 0;
+                            l += 4;
+                            break;
+
+                        default:
+                            buff[ 13 + l ] = ( u_char )(( nd->AO_[ idx ] >> 8 ) & 0xFF);
+                            buff[ 13 + l + 1 ] = ( u_char )(nd->AO_[ idx ] & 0xFF);
+                            l += 2;
+                            break;
                         }
-                    l += 2;
                     }
 
                 if ( e_communicate( nd, bytes_cnt + 13, 12 ) == 0 )
@@ -321,7 +326,7 @@ int wago_manager_linux::read_inputs()
             {
             wago_node *nd = nodes[ i ];
 
-            if ( nd->type == wago_node::T_750_XXX_ETHERNET ) // Ethernet Wago nodes.                
+            if ( nd->type == wago_node::T_750_XXX_ETHERNET ) // Ethernet Wago nodes.
                 {
                 if ( !nd->is_active )
                     {
@@ -404,17 +409,17 @@ int wago_manager_linux::read_inputs()
                                 switch( nd->AI_types[ l ] )
                                     {
                                     case 638:
-                                        nd->AI[ l ] = 256 * buff[ 9 + idx + 2 ] + 
+                                        nd->AI[ l ] = 256 * buff[ 9 + idx + 2 ] +
                                             buff[ 9 + idx + 3 ];
                                         idx += 4;
                                         break;
-                                        
+
                                     default:
-                                        nd->AI[ l ] = 256 * buff[ 9 + idx ] + 
+                                        nd->AI[ l ] = 256 * buff[ 9 + idx ] +
                                             buff[ 9 + idx + 1 ];
                                         idx += 2;
                                         break;
-                                    }                                
+                                    }
                                 }
                             }
                         else
