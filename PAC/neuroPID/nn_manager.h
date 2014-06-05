@@ -17,7 +17,7 @@ class nn_manager
 
         nn_manager( int time_interval, 
             int inputs_count_per_parameter ): time_interval( time_interval ),
-            p_plant( new plant() ),
+            p_plant( new plant( 1, 4, 0.5 ) ),
             p_pid( new PID() ),
             nn2_emulator( new mlp( 20, 10, 1, 120 ) ),
             use_learning( true ),
@@ -66,13 +66,13 @@ class nn_manager
                     }
                 }            
             
-            p_pid->par[ PID::PAR_k ] = 1;             //1 Параметр k.
-            p_pid->par[ PID::PAR_Ti ] = 2;            //2 Параметр Ti.
+            p_pid->par[ PID::PAR_k ] = 0.5;           //1 Параметр k.
+            p_pid->par[ PID::PAR_Ti ] = 5;            //2 Параметр Ti.
             p_pid->par[ PID::PAR_Td ] = 0.01f;        //3 Параметр Td.
             p_pid->par[ PID::PAR_dt ] = 1;            //4 Интервал расчёта
             p_pid->par[ PID::PAR_dmax ] = 200;        //5 Мax значение входной величины.
-            p_pid->par[ PID::PAR_dmin ] = 0;          //6 Мin значение входной величины.
-            p_pid->par[ PID::PAR_AccelTime ] = 0;     //7 Время выхода на режим регулирования.
+            p_pid->par[ PID::PAR_dmin ] = -100;       //6 Мin значение входной величины.
+            p_pid->par[ PID::PAR_AccelTime ] = 1000;  //7 Время выхода на режим регулирования.
             p_pid->par[ PID::PAR_IsManualMode ] = 0;  //8 Ручной режим.
             p_pid->par[ PID::PAR_UManual ] = 0;       //9 Заданное ручное значение выходного сигнала.
 
@@ -172,7 +172,7 @@ class nn_manager
                     errors_cnt = 0;
                     }
 
-                if ( errors_cnt > 10 )
+                if ( errors_cnt > 20 )
                 	{
                     nn2_emulator->static_learn( 0.001f,  emul_sample, 100 );
                     errors_cnt = 0;
@@ -191,6 +191,7 @@ class nn_manager
             tuner_future_sample->add_new_val_to_in_image( 0, current_plant_val );
             tuner_future_sample->add_new_val_to_in_image( 1, new_control_val );   
             
+#ifdef USE_LEARNING
             static unsigned int errors_tuner_cnt = 0;
             if ( time > 40 )
                 {
@@ -199,7 +200,7 @@ class nn_manager
                     errors_tuner_cnt++;
                     }
 
-                if ( errors_tuner_cnt > 10 )
+                if ( errors_tuner_cnt > 2 )
                     {
                     //float tuner_future_err = ( p_pid->get_z() - new_plant_val ) / nn1_tuner->get_q();
                     //tuner_future_sample->add_new_val_to_out_image( 0, tuner_future_err );
@@ -224,6 +225,7 @@ class nn_manager
                     errors_tuner_cnt = 0;
                     } 
                 }            
+#endif // USE_LEARNING
             }
 
         std::vector<float> *get_plant_data()

@@ -16,28 +16,14 @@
 #include <io.h>
 
 
-plant   p_object;
-PID     pid1;
-
-std::vector<float> *plant_data = new std::vector<float>();
-std::vector<float> *PID_data = new std::vector<float>();
-
-//Данные работы храним в файлах.
-FILE *work_data_stream;   
-
-#ifdef SAVE_DATA_FOR_EMULATOR_LEARNING
-//FILE *emulator_learning_data_stream;  
-#endif // SAVE_DATA_FOR_EMULATOR_LEARNING
-
 bool g_is_start = false;
+
 //Эмулятор.
-const int INPUTS_COUNT = 10;
-mlp *emulator = new mlp( 2 * INPUTS_COUNT, 10, 1 );
-std::vector<float> *emulator_output = new std::vector<float>();
-std::vector<float> *emulator_input = new std::vector<float>();
-
-
 nn_manager* nn_emul_manager = new nn_manager( 100, 10 );
+
+#ifdef SAVE_DATA_FOR_LEARNING
+FILE *emulator_learning_data_stream;
+#endif 
 //----------------------------------------------------------------------------
 void DrawSeries( HDC hdc, int x0, int y0, int x1, int y1, int scale,
                 std::vector<float> *data_y, std::vector<float> *data_y2,
@@ -197,148 +183,37 @@ void init( HWND hWnd )
         ::setvbuf(stderr, NULL, _IONBF, 0);
         std::ios::sync_with_stdio();
         }  
-    SetConsoleCP (1251);
-    SetConsoleOutputCP (1251); 
-   
-    pid1.par[ PID::PAR_k ] = 1;             //1 Параметр k.
-    pid1.par[ PID::PAR_Ti ] = 2;            //2 Параметр Ti.
-    pid1.par[ PID::PAR_Td ] = 0.01f;         //3 Параметр Td.
-    pid1.par[ PID::PAR_dt ] = 1;            //4 Интервал расчёта
-    pid1.par[ PID::PAR_dmax ] = 200;        //5 Мax значение входной величины.
-    pid1.par[ PID::PAR_dmin ] = 0;          //6 Мin значение входной величины.
-    pid1.par[ PID::PAR_AccelTime ] = 0;     //7 Время выхода на режим регулирования.
-    pid1.par[ PID::PAR_IsManualMode ] = 0;  //8 Ручной режим.
-    pid1.par[ PID::PAR_UManual ] = 0;       //9 Заданное ручное значение выходного сигнала.
+    SetConsoleCP ( 1251 );
+    SetConsoleOutputCP ( 1251 );   
 
-    pid1.Reset( 0 );
-    pid1.SetZ( 90 );
-    pid1.On();
+#ifdef SAVE_DATA_FOR_LEARNING
+    fopen_s( &emulator_learning_data_stream, "..\\PID_tuner_learning.data", "w+" );
 
-    plant_data->push_back( 0 );   
-    PID_data->push_back( 0 );
-
-    fopen_s( &work_data_stream, "..\\simul_system_data.prn", "w" );
-
-    emulator->init_weights();
-    emulator->load_from_file( "..\\emul_k.data" );
-    for ( int i = 0; i < 2 * INPUTS_COUNT; i++ )
-        {
-        emulator_input->push_back( 0 );
-        }   
-    emulator_output->push_back( 0 );
-
-#ifdef SAVE_DATA_FOR_EMULATOR_LEARNING
-//    fopen_s( &emulator_learning_data_stream, "..\\emul_learning.data", "w" );
-
-//    fprintf_s( emulator_learning_data_stream, "%f\n%f\n%f\n", 2., 1000., 200. );
-#endif // SAVE_DATA_FOR_EMULATOR_LEARNING  
+    fprintf_s( emulator_learning_data_stream, "%d\n%d\n%d\n", 5, 1000, 120 );
+#endif 
     }
-
+//----------------------------------------------------------------------------
 void final()
-    {
-    fclose( work_data_stream );
-
-#ifdef SAVE_DATA_FOR_EMULATOR_LEARNING
-//    fclose( emulator_learning_data_stream );
-#endif // SAVE_DATA_FOR_EMULATOR_LEARNING
-       
+    {  
+#ifdef SAVE_DATA_FOR_LEARNING
+    fclose( emulator_learning_data_stream );
+    emulator_learning_data_stream = 0;
+#endif 
     }
 //----------------------------------------------------------------------------
 void eval()
     {
     nn_emul_manager->eval();
 
+#ifdef SAVE_DATA_FOR_LEARNING
+    fprintf_s( emulator_learning_data_stream, "%f\t%f\t%f\t%f\t%f\n", 
+        nn_emul_manager->get_plant()->get_current_out(),
+        nn_emul_manager->get_plant()->get_current_control_v(),
+        nn_emul_manager->get_PID()->get_p(), nn_emul_manager->get_PID()->get_i(),
+        nn_emul_manager->get_PID()->get_d() );
+#endif
 
-    static float err[1];     
-
-    static int dt = 0;
-    dt += 1;
-
-    float new_control_val = pid1.Eval( p_object.get_current_out() );
-    float new_val = p_object.get_new_out( new_control_val );
-
-    //Обучение эмулятора в процессе работы при необходимости.
-
-
-    float Ek = 0;
-
-    //if ( dt > 2 )
-    //    {
-    //    err[ 0 ] = new_val - emulator_output[ 0 ][ 0 ];
-    //    if ( abs( err[ 0 ] ) > 2 )
-    //        {
-    //        err[ 0 ] /= 120;
-
-    //        for ( int k = 0; k < 3; k++ )
-    //            {
-    //            emulator->learn_iteration(
-    //                emulator_input->data(), err, mlp::T_SAMPLE_Y, Ek, err_, 1 );
-    //            }
-    //        }
-    //    }
-
-    //Добавляем в вектор новую точку при необходимости и сдвигаем данные.
-    const int MAX_VECTOR_SIZE = 1000;
-    if ( plant_data->size() < MAX_VECTOR_SIZE )
-        {
-        plant_data->push_back( 0 );       
-        }
-    for ( int i = plant_data->size() - 1; i > 0; i-- )
-        {
-        plant_data[ 0 ][ i ] = plant_data[ 0 ][ i - 1 ];
-        }
-
-    if ( PID_data->size() < MAX_VECTOR_SIZE )
-        {
-        PID_data->push_back( 0 );       
-        }
-    for ( int i = PID_data->size() - 1; i > 0; i-- )
-        {
-        PID_data[ 0 ][ i ] = PID_data[ 0 ][ i - 1 ];
-        }
-
-    //Добавляем новую точку.
-    //double new_val = 0.99 * PID_data[ 0 ][ 0 ];// + 0.001 * PID_data[ 0 ][ 0 ] * PID_data[ 0 ][ 0 ];
-    //PID_data[ 0 ][ 0 ] = new_val;
-    //+ 0.001 * PID_data[ 0 ][ i - 1 ] * PID_data[ 0 ][ i - 1 ] + sin( 10 );
-
-
-    plant_data[ 0 ][ 0 ] = new_val; 
-    PID_data[ 0 ][ 0 ] = new_control_val;    
-
-    //Работа эмулятора.
-    //Сдвигаем данные входной выборки.
-    for ( int i = 0; i < 2 * INPUTS_COUNT - 1; i++ )
-        {
-         emulator_input[ 0 ][ i ] = emulator_input[ 0 ][ i + 1 ];
-        }
-    
-    const int MAX_VALUE = 120;
-
-    //Добавляем новые данные.
-    emulator_input[ 0 ][ INPUTS_COUNT - 1 ] = new_val / MAX_VALUE;
-    emulator_input[ 0 ][ 2 * INPUTS_COUNT - 1 ] = new_control_val / MAX_VALUE;
-
-    //Вычисляем выход эмулятора.
-    float *new_emulator_output = emulator->solve_out( emulator_input->data() );
-
-    //Добавляем в вектор новую точку при необходимости и сдвигаем данные.   
-    if ( emulator_output->size() < MAX_VECTOR_SIZE )
-        {
-        emulator_output->push_back( 0 );       
-        }
-    for ( int i = emulator_output->size() - 1; i > 0; i-- )
-        {
-        emulator_output[ 0 ][ i ] = emulator_output[ 0 ][ i - 1 ];
-        }
-    emulator_output[ 0 ][ 0 ] = *new_emulator_output * MAX_VALUE;    
-
-    //Сохраняем данные работы в файл.
-    fprintf_s( work_data_stream, "%f\t%f\t%f\n", 
-        new_val, new_control_val, new_emulator_output );
-
-#ifdef SAVE_DATA_FOR_EMULATOR_LEARNING
-#endif //SAVE_DATA_FOR_EMULATOR_LEARNING
+    nn_emul_manager->get_PID()->get_p();
     }
 //----------------------------------------------------------------------------
 #define MAX_LOADSTRING 100
@@ -452,7 +327,7 @@ LRESULT CALLBACK NewEditProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPar
                
                 GetWindowText( hwnd, str, 255 );
                 float new_val = ( float ) _wtof( str );
-                nn_emul_manager->get_plant()->set_k( new_val );
+                nn_emul_manager->get_plant()->set_k1( new_val );
                 
                 return( 0 );
                 }
@@ -525,9 +400,13 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 
     //k1
+    int k = nn_emul_manager->get_plant()->get_k1();
+    wchar_t str[ 10 ];        
+    _itow( k, str, 10 );
+    
     HWND hwnd_k1_edit = CreateWindow(        
         L"Edit",        // Predefined class; Unicode assumed 
-        L"0.9",         // Button text 
+        str,         // Button text 
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | ES_RIGHT | WS_BORDER,  // Styles 
         30,             // x position 
         500,            // y position 

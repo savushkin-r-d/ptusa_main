@@ -1,24 +1,27 @@
 #ifndef PLANT
 #define PLANT
 
+#include "vector"
+
 class plant
     {
     public:
-        plant();
+        plant( float h, int z, float U );
 
         //Получение нового выхода объекта на основе поданного управляющего воздействия.
         float get_new_out( float control_value );
 
         float get_current_out() const;
+        float get_current_control_v() const;
 
-        void set_k( float new_k )
+        void set_k1( float new_k1 )
             {
-            k = new_k;
+            k1 = new_k1;
             }
 
-        float get_k() const
+        float get_k1() const
             {
-            return k;
+            return k1;
             }
 
         void set_T( float new_T )
@@ -32,19 +35,22 @@ class plant
             }
 
     private:
-        float k;
+        enum CONSTANTS
+            {
+            Z = 3,
+            };
+
+        float k1;
+        float K;
         float T;
 
+        float U;                //Максимальное значение управляющего воздействия.
         float h;
+        int z;                  //Задержка.
 
-        float prev_obj_v1;          //Предыдущее значение выхода объекта управления.
-
-        float current_obj_value;    //Текущее значение выхода объекта управления.
+        float previous_obj_v1;  //Предыдущее значение выхода объекта управления.
+        float current_obj_v;    //Текущее значение выхода объекта управления.
         
-        float prev_control_v1;      //t-1  значение управляющего воздействия.
-        float prev_control_v2;      //t-2 значение управляющего воздействия.
-        float prev_control_v3;      //t-3 значение управляющего воздействия.
-        float prev_control_v4;      //t-4 значение управляющего воздействия.
-        float prev_control_v5;      //t-5 значение управляющего воздействия.
+        std::vector< float > prev_control; //t-1  значение управляющего воздействия.   
     };
 #endif // PLANT
