@@ -300,6 +300,8 @@ int PID::save_device( char *buff )
     {
     int answer_size = sprintf( buff, "t.%s = \n\t{\n", name );
 
+    answer_size += sprintf( buff + answer_size, "\tST=%d,\n", state );
+
     //Параметры.
     answer_size += par->save_device( buff + answer_size, "\t" );
     answer_size += w_par->save_device( buff + answer_size, "\t" );
