@@ -286,7 +286,7 @@ class dev_errors_manager
 //-----------------------------------------------------------------------------
 #define G_DEV_ERRORS_MANAGER dev_errors_manager::get_instance()
 //-----------------------------------------------------------------------------
-class siren_lights_manager
+class siren_lights_manager: public i_Lua_save_device
     {
     public:
         static siren_lights_manager* get_instance()
@@ -305,18 +305,31 @@ class siren_lights_manager
 
         enum PARAMS
             {
-            P_MANUAL_MODE = 0,
+            P_MANUAL_MODE = 1,
             };
 
-    private:
-        siren_lights_manager(): par( run_time_params_u_int_4( 1 ) ),
-            green( 0 ), red( 0 ),  yellow( 0 ), srn( 0 ),
-            critical_error_n( 0 ), start_time( 0 )
-            {
-            par[ P_MANUAL_MODE ] = 0;
+        int save_device( char *buff );
 
-            st_time = get_millisec();
+        int set_cmd( const char *prop, u_int idx, double val );
+
+        /// @brief Отладочная печать объекта в консоль.
+        virtual const char* get_name_in_Lua() const
+            {
+            return "G_SIREN_LIGHTS_MANAGER";
             }
+
+        int set_cmd( const char *prop, u_int idx, char *val );
+
+#ifdef RM_PAC
+        int rm_save_device_state( char *buff ) 
+            {
+            buff[ 0 ] = 0;
+            return 0;
+            }
+#endif // RM_PAC
+
+    private:
+        siren_lights_manager();
 
         run_time_params_u_int_4 par;
 

@@ -174,6 +174,8 @@ int project_manager::lua_load_configuration()
         }
     //-Добавление системных тегов контроллера.
     G_DEVICE_CMMCTR->add_device( PAC_info::get_instance() );
+   
+    G_DEVICE_CMMCTR->add_device( siren_lights_manager::get_instance() );
 
 #ifdef RM_PAC
     // Добавление удаленных PAC.

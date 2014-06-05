@@ -563,6 +563,46 @@ int siren_lights_manager::init( device *red, device *yellow, device *green,
     return 0;
     }
 //-----------------------------------------------------------------------------
+int siren_lights_manager::save_device( char *buff )
+    {
+    int answer_size = sprintf( buff, 
+        "t.%s = \n"
+        "\t{\n"
+        "\tMANUAL_MODE=%d,\n"
+        "\t}\n", 
+        "G_SIREN_MNGR", par[ P_MANUAL_MODE ] );
+
+    return answer_size;
+    }
+//-----------------------------------------------------------------------------
+int siren_lights_manager::set_cmd( const char *prop, u_int idx, double val )
+    {
+    if ( 0 == strcmp( prop, "MANUAL_MODE" ) )
+        {
+        par[ P_MANUAL_MODE ] = val > 0 ? 1 : 0;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int siren_lights_manager::set_cmd( const char *prop, u_int idx, char *val )
+    {
+#ifdef WIN_OS
+    throw std::exception("The method or operation is not implemented.");
+#endif
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+siren_lights_manager::siren_lights_manager() : par( run_time_params_u_int_4( 1 ) ),
+    green( 0 ), red( 0 ),  yellow( 0 ), srn( 0 ),
+    critical_error_n( 0 ), start_time( 0 )
+    {
+    par[ P_MANUAL_MODE ] = 0;
+
+    st_time = get_millisec();
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 siren_lights_manager* G_SIREN_LIGHTS_MANAGER()
     {
