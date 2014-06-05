@@ -311,11 +311,11 @@ template < class type, bool is_float > class parameters
                 Print( "[%d]=", i );
                 if ( is_float )
                 	{
-                    Print( "%.2f,", values[ i - 1 ] );
+                    Print( "%.2f,", ( float ) values[ i - 1 ] );
                 	}
                 else
                     {
-                    Print( "%d,", values[ i - 1 ] );
+                    Print( "%d,", ( int ) values[ i - 1 ] );
                     }
                 }
             Print( "\n" );
