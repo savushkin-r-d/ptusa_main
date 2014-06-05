@@ -149,7 +149,7 @@ class i_counter
         virtual int get_state() = 0;
 
 
-        /// @brief Получение абсолютного значения счетчика (без учета 
+        /// @brief Получение абсолютного значения счетчика (без учета
         /// состояния паузы).
         virtual u_int get_abs_quantity() = 0;
 
@@ -505,7 +505,7 @@ class dev_stub : public device,
         u_int   get_quantity();
         float   get_flow();
 
-        u_int get_abs_quantity();        
+        u_int get_abs_quantity();
         void  abs_reset();
     };
 //-----------------------------------------------------------------------------
@@ -539,7 +539,7 @@ class digital_wago_device : public device,
 
 #ifdef DEBUG_NO_WAGO_MODULES
     protected:
-        char state;  ///< Состояние устройства.
+        int state;  ///< Состояние устройства.
 #endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
@@ -1944,7 +1944,7 @@ class counter : public device,
             dev_name, DT_FQT, DST_NONE, ADDITIONAL_PARAMS_COUNT ),
             wago_device( dev_name ),
             value( 0 ),
-            last_read_value( 0 ),                        
+            last_read_value( 0 ),
             abs_value( 0 ),
             abs_last_read_value( 0 ),
             state( S_WORK ),
@@ -1974,7 +1974,7 @@ class counter : public device,
         u_int get_quantity();
         float get_flow();
 
-        /// @brief Получение абсолютного значения счетчика (без учета 
+        /// @brief Получение абсолютного значения счетчика (без учета
         /// состояния паузы).
         u_int get_abs_quantity();
 
@@ -2005,7 +2005,7 @@ class counter : public device,
         //Lua.
         int save_device_ex( char *buff )
             {
-            return sprintf( buff, "F=%.2f, ABS_V=%u, ", 
+            return sprintf( buff, "F=%.2f, ABS_V=%u, ",
                 get_flow(), get_abs_quantity() );
             }
 
@@ -2034,7 +2034,7 @@ class counter : public device,
             MAX_VAL = 65535L,   ///< Максимальное значение счетчика.
             };
 
-        u_int value;        
+        u_int value;
         u_int last_read_value;
 
         u_int abs_value;       ///< Абсолютное значение (не становится на паузу).

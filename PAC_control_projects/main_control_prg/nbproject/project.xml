@@ -29,7 +29,7 @@
                     <type>1</type>
                 </confElem>
                 <confElem>
-                    <name>no_wagoIO_debug_wago_750-860</name>
+                    <name>debug_no_io_wago_750-860</name>
                     <type>1</type>
                 </confElem>
                 <confElem>

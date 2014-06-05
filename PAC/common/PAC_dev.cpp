@@ -1174,7 +1174,7 @@ void digital_wago_device::direct_set_value( float new_value )
 void digital_wago_device::direct_set_state( int new_state )
     {
 #ifdef DEBUG_NO_WAGO_MODULES
-    state = ( char ) new_state;
+    state = new_state;
 #else
     if ( new_state )
         {
