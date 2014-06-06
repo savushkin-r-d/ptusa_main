@@ -13,7 +13,7 @@ bool tech_dev_error::is_new_error = false;
 
 bool tech_obj_error::is_any_message = false;
 
-siren_lights_manager* siren_lights_manager::instance = NULL;
+auto_smart_ptr < siren_lights_manager > siren_lights_manager::instance;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 base_error::base_error(): err_par( 1 ), error_state( AS_NORMAL )

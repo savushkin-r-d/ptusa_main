@@ -328,12 +328,12 @@ class siren_lights_manager: public i_Lua_save_device
             }
 #endif // RM_PAC
 
-    private:
-        siren_lights_manager();
-
         virtual ~siren_lights_manager()
             {
             }
+
+    private:
+        siren_lights_manager();
 
         run_time_params_u_int_4 par;
 
@@ -348,7 +348,8 @@ class siren_lights_manager: public i_Lua_save_device
 
         unsigned long start_time;
 
-        static siren_lights_manager *instance;
+        /// ≈динственный экземпл€р класса.
+        static auto_smart_ptr< siren_lights_manager > instance;
     };
 //-----------------------------------------------------------------------------
 siren_lights_manager* G_SIREN_LIGHTS_MANAGER();
