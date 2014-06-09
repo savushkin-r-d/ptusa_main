@@ -1506,8 +1506,8 @@ void valve::evaluate()
     for( std::vector< valve* >::iterator v = to_switch_off.begin();
         v != to_switch_off.end(); v++ )
         {
-        if ( ( *v )->is_switching_off && 
-            get_delta_millisec( ( *v )->start_off_time ) > delay ) 
+        if ( ( *v )->is_switching_off &&
+            get_delta_millisec( ( *v )->start_off_time ) > delay )
             {
             if ( !( *v )->get_manual_mode() )
                 {
@@ -1518,8 +1518,8 @@ void valve::evaluate()
             }
         }
 
-    to_switch_off.erase( 
-        std::remove_if( to_switch_off.begin(), to_switch_off.end(), 
+    to_switch_off.erase(
+        std::remove_if( to_switch_off.begin(), to_switch_off.end(),
         is_switching_off_finished ), to_switch_off.end() );
     }
 //-----------------------------------------------------------------------------
@@ -1528,7 +1528,7 @@ void valve::off()
     if ( get_valve_state() == V_UPPER_SEAT ||
         get_valve_state() == V_LOWER_SEAT )
     	{
-        digital_wago_device::direct_off();
+        device::off();
         return;
     	}
 
@@ -1537,7 +1537,7 @@ void valve::off()
         is_switching_off = true;
         start_off_time = get_millisec();
 
-        to_switch_off.push_back( this );                
+        to_switch_off.push_back( this );
         }
     }
 //-----------------------------------------------------------------------------
