@@ -84,6 +84,7 @@ int main( int argc, char *argv[] )
         sleep_ms( 1 );
 #endif // DEBUG_NO_WAGO_MODULES
 
+        valve::evaluate();
         G_TECH_OBJECT_MNGR()->evaluate();
 
 #ifndef DEBUG_NO_WAGO_MODULES

@@ -48,8 +48,9 @@ void PAC_info::eval()
 //-----------------------------------------------------------------------------
 void PAC_info::reset_params()
     {   
-    par[ P_MIX_FLIP_PERIOD ] = 60;
-    par[ P_MIX_FLIP_TIME ]   = 1000;
+    par[ P_MIX_FLIP_PERIOD ]  = 60;
+    par[ P_MIX_FLIP_TIME ]    = 1000;
+    par[ P_V_OFF_DELAY_TIME ] = 1000;    
     par.save_all();
     }
 //-----------------------------------------------------------------------------
@@ -69,6 +70,10 @@ int PAC_info::save_device( char *buff )
         par[ P_MIX_FLIP_PERIOD ] );    
     answer_size += sprintf( buff + answer_size, "\tWASH_VALVE_SEAT_TIME=%d,\n",
         par[ P_MIX_FLIP_TIME ] );
+
+    answer_size += sprintf( buff + answer_size, "\tP_V_OFF_DELAY_TIME=%d,\n",
+        par[ P_V_OFF_DELAY_TIME ] );
+    
     
     answer_size += sprintf( buff + answer_size, "\t}\n" );
     
@@ -95,17 +100,20 @@ int PAC_info::set_cmd( const char *prop, u_int idx, double val )
     if ( strcmp( prop, "WASH_VALVE_SEAT_PERIOD" ) == 0 )
         {        
         par.save( P_MIX_FLIP_PERIOD, ( u_int_4 ) val );
-
         return 0;
         }
 
     if ( strcmp( prop, "WASH_VALVE_SEAT_TIME" ) == 0 )
         {
         par.save( P_MIX_FLIP_TIME, ( u_int_4 ) val );
-
         return 0;
         }
 
+    if ( strcmp( prop, "P_V_OFF_DELAY_TIME" ) == 0 )
+        {
+        par.save( P_V_OFF_DELAY_TIME, ( u_int_4 ) val );
+        return 0;
+        }
 
     return 0;
     }

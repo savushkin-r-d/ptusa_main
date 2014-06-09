@@ -24,6 +24,9 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
+
+#include "smart_ptr.h"
 
 #include "dtime.h"
 #include "wago.h"
@@ -31,7 +34,7 @@
 
 #include "param_ex.h"
 
-#include "smart_ptr.h"
+#include "PAC_info.h"
 
 //-----------------------------------------------------------------------------
 /// @brief Устройство c параметрами.
@@ -663,6 +666,15 @@ class valve: public digital_wago_device
             {
             }
 
+#pragma region Отключение клапана с задержкой. 
+        void off();
+
+        void on();        
+
+        /// @brief Выключение клапанов с задержкой.
+        static void evaluate();
+#pragma endregion Отключение клапана с задержкой.
+
         /// @brief Получение значения обратной связи на включенное состояние.
         virtual int get_on_fb_value()
             {
@@ -749,7 +761,6 @@ class valve: public digital_wago_device
             return true;
             }
 
-    protected:
         enum FB_STATE
             {
             FB_IS_AND_OFF = 0, ///< Обратная связь отключена.
@@ -774,6 +785,20 @@ class valve: public digital_wago_device
         bool on_fb;
         bool off_fb;
 
+#pragma region Отключение клапана с задержкой.     
+        /// @brief Вектор клапанов, ожидающих отключение.
+        static std::vector< valve* > to_switch_off;
+
+        /// @brief Определение завершения отключения клапана с задержкой.
+        static bool is_switching_off_finished( valve *v )
+            {
+            return !v->is_switching_off;
+            };
+
+        bool is_switching_off; ///Выключается ли клапан с задержкой.
+        u_long start_off_time; ///Время начала выключения клапана с задержкой.
+#pragma endregion Отключение клапана с задержкой.
+        
     protected:
         u_long start_switch_time;
     };

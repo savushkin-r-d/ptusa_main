@@ -6,6 +6,8 @@
 
 auto_smart_ptr < device_manager > device_manager::instance;
 
+std::vector<valve*> valve::to_switch_off;
+
 const char device::DEV_NAMES[][ 5 ] =
     {
     "V",       ///< Клапан.
@@ -1491,6 +1493,59 @@ int valve::set_cmd( const char *prop, u_int idx, double val )
     return 0;
     }
 #endif // DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
+void valve::evaluate()
+    {
+    if ( to_switch_off.empty() )
+        {
+        return;
+        }
+
+    u_int delay = G_PAC_INFO()->par[ PAC_info::P_V_OFF_DELAY_TIME ];
+
+    for( std::vector< valve* >::iterator v = to_switch_off.begin();
+        v != to_switch_off.end(); v++ )
+        {
+        if ( ( *v )->is_switching_off && 
+            get_delta_millisec( ( *v )->start_off_time ) > delay ) 
+            {
+            if ( !( *v )->get_manual_mode() )
+                {
+                ( *v )->direct_off();
+                }
+
+            ( *v )->is_switching_off = false;
+            }
+        }
+
+    to_switch_off.erase( 
+        std::remove_if( to_switch_off.begin(), to_switch_off.end(), 
+        is_switching_off_finished ), to_switch_off.end() );
+    }
+//-----------------------------------------------------------------------------
+void valve::off()
+    {
+    if ( get_valve_state() == V_UPPER_SEAT ||
+        get_valve_state() == V_LOWER_SEAT )
+    	{
+        digital_wago_device::direct_off();
+        return;
+    	}
+
+    if ( false == is_switching_off )
+        {
+        is_switching_off = true;
+        start_off_time = get_millisec();
+
+        to_switch_off.push_back( this );                
+        }
+    }
+//-----------------------------------------------------------------------------
+void valve::on()
+    {
+    is_switching_off = false;
+    digital_wago_device::on();
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_DO1_DI1_off::valve_DO1_DI1_off( const char *dev_name ) :
