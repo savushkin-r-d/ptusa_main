@@ -801,6 +801,7 @@ class valve: public digital_wago_device
 
         bool is_switching_off; ///Выключается ли клапан с задержкой.
         u_long start_off_time; ///Время начала выключения клапана с задержкой.
+        bool was_on_auto;      ///Признак включения клапана управляющей программой.
 #ifdef _MSC_VER
 #pragma endregion Отключение клапана с задержкой.
 #endif

@@ -1256,7 +1256,8 @@ digital_wago_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
     is_off_fb( is_off_fb ),
     on_fb( true ),
     off_fb( true ),
-    start_switch_time( 0 )
+    start_switch_time( 0 ),
+    was_on_auto( false )
     {
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     set_par_name( P_FB,  0, "P_FB" );
@@ -1515,6 +1516,7 @@ void valve::evaluate()
                 }
 
             ( *v )->is_switching_off = false;
+            ( *v )->was_on_auto = false;
             }
         }
 
@@ -1525,7 +1527,8 @@ void valve::evaluate()
 //-----------------------------------------------------------------------------
 void valve::off()
     {
-    if ( get_valve_state() == V_UPPER_SEAT ||
+    if ( false == was_on_auto ||                //Если был включен вручную.
+        get_valve_state() == V_UPPER_SEAT ||
         get_valve_state() == V_LOWER_SEAT )
     	{
         device::off();
@@ -1533,7 +1536,7 @@ void valve::off()
     	}
 
     if ( false == is_switching_off )
-        {
+        {        
         is_switching_off = true;
         start_off_time = get_millisec();
 
@@ -1543,6 +1546,7 @@ void valve::off()
 //-----------------------------------------------------------------------------
 void valve::on()
     {
+    was_on_auto = true;
     is_switching_off = false;
     digital_wago_device::on();
     }
