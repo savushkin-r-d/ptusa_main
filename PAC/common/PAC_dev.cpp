@@ -1256,8 +1256,8 @@ digital_wago_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
     is_off_fb( is_off_fb ),
     on_fb( true ),
     off_fb( true ),
-    start_switch_time( 0 ),
-    was_on_auto( false )
+    was_on_auto( false ),
+    start_switch_time( 0 )
     {
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     set_par_name( P_FB,  0, "P_FB" );
@@ -1536,7 +1536,7 @@ void valve::off()
     	}
 
     if ( false == is_switching_off )
-        {        
+        {
         is_switching_off = true;
         start_off_time = get_millisec();
 
