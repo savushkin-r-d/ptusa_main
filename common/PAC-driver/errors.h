@@ -291,7 +291,7 @@ class siren_lights_manager: public i_Lua_save_device
     public:
         static siren_lights_manager* get_instance()
             {
-            if ( NULL == instance )
+            if ( instance.is_null() )
             	{
                 instance = new siren_lights_manager();
             	}
