@@ -665,15 +665,18 @@ class valve: public digital_wago_device
             start_switch_time( 0 )
             {
             }
-
-#pragma region Отключение клапана с задержкой. 
+#ifdef _MSC_VER
+#pragma region Отключение клапана с задержкой.
+#endif
         void off();
 
-        void on();        
+        void on();
 
         /// @brief Выключение клапанов с задержкой.
         static void evaluate();
+#ifdef _MSC_VER
 #pragma endregion Отключение клапана с задержкой.
+#endif
 
         /// @brief Получение значения обратной связи на включенное состояние.
         virtual int get_on_fb_value()
@@ -784,8 +787,9 @@ class valve: public digital_wago_device
 
         bool on_fb;
         bool off_fb;
-
-#pragma region Отключение клапана с задержкой.     
+#ifdef _MSC_VER
+#pragma region Отключение клапана с задержкой.
+#endif
         /// @brief Вектор клапанов, ожидающих отключение.
         static std::vector< valve* > to_switch_off;
 
@@ -797,8 +801,10 @@ class valve: public digital_wago_device
 
         bool is_switching_off; ///Выключается ли клапан с задержкой.
         u_long start_off_time; ///Время начала выключения клапана с задержкой.
+#ifdef _MSC_VER
 #pragma endregion Отключение клапана с задержкой.
-        
+#endif
+
     protected:
         u_long start_switch_time;
     };
