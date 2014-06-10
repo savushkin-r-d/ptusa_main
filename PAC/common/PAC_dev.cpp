@@ -1531,7 +1531,11 @@ void valve::off()
         get_valve_state() == V_UPPER_SEAT ||
         get_valve_state() == V_LOWER_SEAT )
     	{
-        device::off();
+        if ( !get_manual_mode() )
+            {
+            direct_off();
+            }
+
         return;
     	}
 
