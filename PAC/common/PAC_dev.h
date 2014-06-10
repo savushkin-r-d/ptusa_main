@@ -655,16 +655,13 @@ class valve: public digital_wago_device
             const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type );
 
+        /// @brief Конструктор для клапана без обратных связей.
         /// @param number - номер устройства.
         /// @param type - тип устройства.
         /// @param sub_type - подтип устройства.
-        valve( const char *dev_name, device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type ):
-            digital_wago_device( dev_name, type, sub_type, 0 ),
-            is_on_fb( false ),
-            is_off_fb( false ),
-            start_switch_time( 0 )
-            {
-            }
+        valve( const char *dev_name, device::DEVICE_TYPE type, 
+            device::DEVICE_SUB_TYPE sub_type );
+
 #ifdef _MSC_VER
 #pragma region Отключение клапана с задержкой.
 #endif

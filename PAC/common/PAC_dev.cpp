@@ -1263,6 +1263,16 @@ digital_wago_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
     set_par_name( P_FB,  0, "P_FB" );
     }
 //-----------------------------------------------------------------------------
+valve::valve( const char *dev_name, device::DEVICE_TYPE type, 
+    device::DEVICE_SUB_TYPE sub_type ) :
+    digital_wago_device( dev_name, type, sub_type, 0 ),
+    is_on_fb( false ),
+    is_off_fb( false ),
+    was_on_auto( false ),
+    start_switch_time( 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
 int valve::save_device_ex( char *buff )
     {
     int res = 0;
