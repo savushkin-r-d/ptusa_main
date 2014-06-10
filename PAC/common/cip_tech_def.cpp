@@ -34,117 +34,7 @@ int getNexpPrg(int cur, unsigned long prg)
 	return -1;
 	}
 
-TValveController::TValveController()
-	{
-	valves_count = 0;
-	valves = (TControlledValve**)malloc(valves_count * sizeof(TControlledValve*));
-	}
 
-TValveController::~TValveController()
-	{
-	if (valves_count > 0)
-		{
-		for (int i = 0; i < valves_count; i++)
-			{
-			delete valves[i];
-			}
-		}
-	free(valves);
-	}
-
-TControlledValve* TValveController::AddValve( i_DO_device* valve_to_add, unsigned long valve_delay /*= 2000L*/ )
-	{
-	valves_count++;
-	valves = (TControlledValve**)realloc(valves, valves_count * sizeof(TControlledValve*));
-	valves[valves_count - 1] = new TControlledValve(valve_to_add, valve_delay);
-	return valves[valves_count - 1];
-	}
-
-void TValveController::Evaluate()
-	{
-	for (int i = 0; i < valves_count; i++)
-		{
-		valves[i]->Evaluate();
-		}
-	}
-
-void TValveController::ForceOffAll()
-	{
-	for (int i = 0; i < valves_count; i++)
-		{
-		valves[i]->InstantOff();
-		}
-	}
-
-TControlledValve::TControlledValve( i_DO_device* valve_to_control, unsigned long delay /*= 2000L*/ )
-	{
-	controlled_valve = valve_to_control;
-	state_current = controlled_valve->get_state();
-	state_previous = state_current;
-	delayed_switch = 0;
-	switch_delay = delay;
-	state_change_time = get_millisec();
-	}
-
-TControlledValve::~TControlledValve()
-	{
-
-	}
-
-void TControlledValve::off()
-	{
-	state_current = OFF;
-	if (get_delta_millisec(state_change_time) > switch_delay + 300L)
-		{
-		state_previous = controlled_valve->get_state();
-		}
-	}
-
-void TControlledValve::on()
-	{
-	state_current = ON;
-	state_previous = controlled_valve->get_state();
-	delayed_switch = 0;
-	}
-
-void TControlledValve::Evaluate()
-	{
-	if (state_current != state_previous)
-		{
-		if (state_current == OFF)
-			{
-			delayed_switch = 1;
-			state_change_time = get_millisec();
-			}
-		if (state_current == ON)
-			{
-			controlled_valve->on();
-			delayed_switch = 0;
-			}
-		state_previous = state_current;
-		}
-	if (delayed_switch == 1)
-		{
-		if (get_delta_millisec(state_change_time) >= switch_delay)
-			{
-			controlled_valve->off();
-			delayed_switch = 0;
-			}
-		}
-	}
-
-void TControlledValve::InstantOff()
-	{
-	state_current = OFF;
-	state_previous = OFF;
-	delayed_switch = 0;
-	controlled_valve->off();
-	}
-
-int TControlledValve::get_state()
-	{
-	return controlled_valve->get_state();
-	}
 
 
 cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int type,
@@ -229,8 +119,6 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	tankfulltimer = get_millisec();
 	sort_last_destination = -1;
 	sort_delay = get_millisec();
-
-	ValveController = new TValveController();
 	}
 
 cipline_tech_object::~cipline_tech_object()
@@ -259,7 +147,6 @@ cipline_tech_object::~cipline_tech_object()
 		{
 		delete lineRecipes;
 		}
-	delete ValveController;
 	}
 
 int cipline_tech_object::save_device( char *buff )
@@ -415,29 +302,29 @@ void cipline_tech_object::initline()
 	sprintf(devname, "LINE%dV%d", number, number * 100);
 	V00 = V(devname);
 	sprintf(devname, "LINE%dV%d", number, number * 100 + 1);
-	V01 = ValveController->AddValve(V(devname));
+	V01 = V(devname);
 	sprintf(devname, "LINE%dV%d", number, number * 100 + 2);
-	V02 = ValveController->AddValve(V(devname));
+	V02 = V(devname);
 	sprintf(devname, "LINE%dV%d", number, number * 100 + 3);
-	V03 = ValveController->AddValve(V(devname));
+	V03 = V(devname);
 	sprintf(devname, "LINE%dV%d", number, number * 100 + 4);
-	V04 = ValveController->AddValve(V(devname));
+	V04 = V(devname);
 	sprintf(devname, "LINE%dV%d", number, number * 100 + 5);
-	V05 = ValveController->AddValve(V(devname));
+	V05 = V(devname);
 	sprintf(devname, "LINE%dV%d", number, number * 100 + 6);
-	V06 = ValveController->AddValve(V(devname));
+	V06 = V(devname);
 	sprintf(devname, "LINE%dV%d", number, number * 100 + 7);
-	V07 = ValveController->AddValve(V(devname));
+	V07 = V(devname);
 	sprintf(devname, "LINE%dV%d", number, number * 100 + 8);
-	V08 = ValveController->AddValve(V(devname));
+	V08 = V(devname);
 	sprintf(devname, "LINE%dV%d", number, number * 100 + 9);
-	V09 = ValveController->AddValve(V(devname));
+	V09 = V(devname);
 	sprintf(devname, "LINE%dV%d", number, number * 100 + 10);
-	V10 = ValveController->AddValve(V(devname));
+	V10 = V(devname);
 	sprintf(devname, "LINE%dV%d", number, number * 100 + 11);
-	V11 = ValveController->AddValve(V(devname));
+	V11 = V(devname);
 	sprintf(devname, "LINE%dV%d", number, number * 100 + 12);
-	V12 = ValveController->AddValve(V(devname));
+	V12 = V(devname);
 	sprintf(devname, "LINE%dV%d", number, number * 100 + 13);
 	V13 = V(devname);
 
@@ -528,7 +415,6 @@ void cipline_tech_object::initline()
 int cipline_tech_object::evaluate()
 	{
 	int res;
-	ValveController->Evaluate();
 	if (EvalBlock())
 		{
 		return -1;
@@ -1593,7 +1479,7 @@ int cipline_tech_object::EvalPIDS()
 	PIDF->eval();
 
 	//Клапан пара
-	if (ao->get_value()>1 && PIDP->get_state() == ON && NP->get_value() > rt_par_float[P_R_NO_FLOW] && NP->get_state() == ON)
+	if (ao->get_value()>1 && PIDP->get_state() == ON && cnt->get_flow() > rt_par_float[P_R_NO_FLOW] && NP->get_state() == ON)
 		{
 		if (get_delta_millisec(steam_valve_delay) > STEAM_VALVE_MIN_DELAY)
 			{
@@ -1830,7 +1716,6 @@ void cipline_tech_object::ResetLinesDevicesBeforeReset( void )
 		lineRecipes->OffRecipeDevices(loadedRecipe, nmr);
 		closeLineValves();
 		}
-	ValveController->ForceOffAll();
 	loadedRecipe = -1;
 	ResetStat();
 	rt_par_float[P_PROGRAM] = 0;

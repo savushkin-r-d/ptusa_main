@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 05/26/14 12:11:24.
+** Generated automatically by tolua++-1.0.92 on 06/10/14 16:47:23.
 */
 
 #ifndef __cplusplus
@@ -32,13 +32,6 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 static int tolua_collect_PID (lua_State* tolua_S)
 {
  PID* self = (PID*) tolua_tousertype(tolua_S,1,0);
-	Mtolua_delete(self);
-	return 0;
-}
-
-static int tolua_collect_TControlledValve (lua_State* tolua_S)
-{
- TControlledValve* self = (TControlledValve*) tolua_tousertype(tolua_S,1,0);
 	Mtolua_delete(self);
 	return 0;
 }
@@ -90,11 +83,10 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"dev_errors_manager");
  tolua_usertype(tolua_S,"device_manager");
  tolua_usertype(tolua_S,"ModbusServ");
- tolua_usertype(tolua_S,"modbus_client");
  tolua_usertype(tolua_S,"mode");
+ tolua_usertype(tolua_S,"modbus_client");
  tolua_usertype(tolua_S,"rm_manager");
  tolua_usertype(tolua_S,"cipline_tech_object");
- tolua_usertype(tolua_S,"TControlledValve");
  tolua_usertype(tolua_S,"i_DI_device");
  tolua_usertype(tolua_S,"saved_params_u_int_4");
  tolua_usertype(tolua_S,"mode_manager");
@@ -5275,287 +5267,6 @@ static int tolua_PAC_dev_sleep_ms00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: new of class  TControlledValve */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_TControlledValve_new00
-static int tolua_PAC_dev_TControlledValve_new00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertable(tolua_S,1,"TControlledValve",0,&tolua_err) ||
-     !tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,3,1,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,4,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  i_DO_device* valve_to_control = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0));
-  unsigned long delay = ((unsigned long)  tolua_tonumber(tolua_S,3,2000L));
-  {
-   TControlledValve* tolua_ret = (TControlledValve*)  Mtolua_new((TControlledValve)(valve_to_control,delay));
-    tolua_pushusertype(tolua_S,(void*)tolua_ret,"TControlledValve");
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'new'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: new_local of class  TControlledValve */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_TControlledValve_new00_local
-static int tolua_PAC_dev_TControlledValve_new00_local(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertable(tolua_S,1,"TControlledValve",0,&tolua_err) ||
-     !tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,3,1,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,4,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  i_DO_device* valve_to_control = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0));
-  unsigned long delay = ((unsigned long)  tolua_tonumber(tolua_S,3,2000L));
-  {
-   TControlledValve* tolua_ret = (TControlledValve*)  Mtolua_new((TControlledValve)(valve_to_control,delay));
-    tolua_pushusertype(tolua_S,(void*)tolua_ret,"TControlledValve");
-    tolua_register_gc(tolua_S,lua_gettop(tolua_S));
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'new'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: Evaluate of class  TControlledValve */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_TControlledValve_Evaluate00
-static int tolua_PAC_dev_TControlledValve_Evaluate00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"TControlledValve",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  TControlledValve* self = (TControlledValve*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'Evaluate'", NULL);
-#endif
-  {
-   self->Evaluate();
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'Evaluate'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: on of class  TControlledValve */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_TControlledValve_on00
-static int tolua_PAC_dev_TControlledValve_on00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"TControlledValve",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  TControlledValve* self = (TControlledValve*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'on'", NULL);
-#endif
-  {
-   self->on();
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'on'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: off of class  TControlledValve */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_TControlledValve_off00
-static int tolua_PAC_dev_TControlledValve_off00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"TControlledValve",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  TControlledValve* self = (TControlledValve*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'off'", NULL);
-#endif
-  {
-   self->off();
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'off'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: InstantOff of class  TControlledValve */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_TControlledValve_InstantOff00
-static int tolua_PAC_dev_TControlledValve_InstantOff00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"TControlledValve",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  TControlledValve* self = (TControlledValve*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'InstantOff'", NULL);
-#endif
-  {
-   self->InstantOff();
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'InstantOff'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* get function: HI of class  TControlledValve */
-#ifndef TOLUA_DISABLE_tolua_get_TControlledValve_HI
-static int tolua_get_TControlledValve_HI(lua_State* tolua_S)
-{
-  TControlledValve* self = (TControlledValve*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'HI'",NULL);
-#endif
-  tolua_pushnumber(tolua_S,(lua_Number)self->HI);
- return 1;
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* set function: HI of class  TControlledValve */
-#ifndef TOLUA_DISABLE_tolua_set_TControlledValve_HI
-static int tolua_set_TControlledValve_HI(lua_State* tolua_S)
-{
-  TControlledValve* self = (TControlledValve*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  tolua_Error tolua_err;
-  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'HI'",NULL);
-  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
-   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
-#endif
-  self->HI = ((int)  tolua_tonumber(tolua_S,2,0))
-;
- return 0;
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: get_state of class  TControlledValve */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_TControlledValve_get_state00
-static int tolua_PAC_dev_TControlledValve_get_state00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"TControlledValve",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  TControlledValve* self = (TControlledValve*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_state'", NULL);
-#endif
-  {
-   int tolua_ret = (int)  self->get_state();
-   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'get_state'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* get function: switch_delay of class  TControlledValve */
-#ifndef TOLUA_DISABLE_tolua_get_TControlledValve_unsigned_switch_delay
-static int tolua_get_TControlledValve_unsigned_switch_delay(lua_State* tolua_S)
-{
-  TControlledValve* self = (TControlledValve*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'switch_delay'",NULL);
-#endif
-  tolua_pushnumber(tolua_S,(lua_Number)self->switch_delay);
- return 1;
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* set function: switch_delay of class  TControlledValve */
-#ifndef TOLUA_DISABLE_tolua_set_TControlledValve_unsigned_switch_delay
-static int tolua_set_TControlledValve_unsigned_switch_delay(lua_State* tolua_S)
-{
-  TControlledValve* self = (TControlledValve*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  tolua_Error tolua_err;
-  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'switch_delay'",NULL);
-  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
-   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
-#endif
-  self->switch_delay = ((unsigned long)  tolua_tonumber(tolua_S,2,0))
-;
- return 0;
-}
-#endif //#ifndef TOLUA_DISABLE
-
 /* method: new of class  cipline_tech_object */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object_new00
 static int tolua_PAC_dev_cipline_tech_object_new00(lua_State* tolua_S)
@@ -5931,7 +5642,7 @@ static int tolua_get_cipline_tech_object_V01_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V01'",NULL);
 #endif
-   tolua_pushusertype(tolua_S,(void*)self->V01,"TControlledValve");
+   tolua_pushusertype(tolua_S,(void*)self->V01,"i_DO_device");
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
@@ -5944,10 +5655,10 @@ static int tolua_set_cipline_tech_object_V01_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V01'",NULL);
-  if (!tolua_isusertype(tolua_S,2,"TControlledValve",0,&tolua_err))
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->V01 = ((TControlledValve*)  tolua_tousertype(tolua_S,2,0))
+  self->V01 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
 ;
  return 0;
 }
@@ -5961,7 +5672,7 @@ static int tolua_get_cipline_tech_object_V02_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V02'",NULL);
 #endif
-   tolua_pushusertype(tolua_S,(void*)self->V02,"TControlledValve");
+   tolua_pushusertype(tolua_S,(void*)self->V02,"i_DO_device");
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
@@ -5974,10 +5685,10 @@ static int tolua_set_cipline_tech_object_V02_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V02'",NULL);
-  if (!tolua_isusertype(tolua_S,2,"TControlledValve",0,&tolua_err))
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->V02 = ((TControlledValve*)  tolua_tousertype(tolua_S,2,0))
+  self->V02 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
 ;
  return 0;
 }
@@ -5991,7 +5702,7 @@ static int tolua_get_cipline_tech_object_V03_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V03'",NULL);
 #endif
-   tolua_pushusertype(tolua_S,(void*)self->V03,"TControlledValve");
+   tolua_pushusertype(tolua_S,(void*)self->V03,"i_DO_device");
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
@@ -6004,10 +5715,10 @@ static int tolua_set_cipline_tech_object_V03_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V03'",NULL);
-  if (!tolua_isusertype(tolua_S,2,"TControlledValve",0,&tolua_err))
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->V03 = ((TControlledValve*)  tolua_tousertype(tolua_S,2,0))
+  self->V03 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
 ;
  return 0;
 }
@@ -6021,7 +5732,7 @@ static int tolua_get_cipline_tech_object_V04_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V04'",NULL);
 #endif
-   tolua_pushusertype(tolua_S,(void*)self->V04,"TControlledValve");
+   tolua_pushusertype(tolua_S,(void*)self->V04,"i_DO_device");
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
@@ -6034,10 +5745,10 @@ static int tolua_set_cipline_tech_object_V04_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V04'",NULL);
-  if (!tolua_isusertype(tolua_S,2,"TControlledValve",0,&tolua_err))
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->V04 = ((TControlledValve*)  tolua_tousertype(tolua_S,2,0))
+  self->V04 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
 ;
  return 0;
 }
@@ -6051,7 +5762,7 @@ static int tolua_get_cipline_tech_object_V05_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V05'",NULL);
 #endif
-   tolua_pushusertype(tolua_S,(void*)self->V05,"TControlledValve");
+   tolua_pushusertype(tolua_S,(void*)self->V05,"i_DO_device");
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
@@ -6064,10 +5775,10 @@ static int tolua_set_cipline_tech_object_V05_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V05'",NULL);
-  if (!tolua_isusertype(tolua_S,2,"TControlledValve",0,&tolua_err))
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->V05 = ((TControlledValve*)  tolua_tousertype(tolua_S,2,0))
+  self->V05 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
 ;
  return 0;
 }
@@ -6081,7 +5792,7 @@ static int tolua_get_cipline_tech_object_V06_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V06'",NULL);
 #endif
-   tolua_pushusertype(tolua_S,(void*)self->V06,"TControlledValve");
+   tolua_pushusertype(tolua_S,(void*)self->V06,"i_DO_device");
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
@@ -6094,10 +5805,10 @@ static int tolua_set_cipline_tech_object_V06_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V06'",NULL);
-  if (!tolua_isusertype(tolua_S,2,"TControlledValve",0,&tolua_err))
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->V06 = ((TControlledValve*)  tolua_tousertype(tolua_S,2,0))
+  self->V06 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
 ;
  return 0;
 }
@@ -6111,7 +5822,7 @@ static int tolua_get_cipline_tech_object_V07_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V07'",NULL);
 #endif
-   tolua_pushusertype(tolua_S,(void*)self->V07,"TControlledValve");
+   tolua_pushusertype(tolua_S,(void*)self->V07,"i_DO_device");
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
@@ -6124,10 +5835,10 @@ static int tolua_set_cipline_tech_object_V07_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V07'",NULL);
-  if (!tolua_isusertype(tolua_S,2,"TControlledValve",0,&tolua_err))
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->V07 = ((TControlledValve*)  tolua_tousertype(tolua_S,2,0))
+  self->V07 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
 ;
  return 0;
 }
@@ -6141,7 +5852,7 @@ static int tolua_get_cipline_tech_object_V08_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V08'",NULL);
 #endif
-   tolua_pushusertype(tolua_S,(void*)self->V08,"TControlledValve");
+   tolua_pushusertype(tolua_S,(void*)self->V08,"i_DO_device");
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
@@ -6154,10 +5865,10 @@ static int tolua_set_cipline_tech_object_V08_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V08'",NULL);
-  if (!tolua_isusertype(tolua_S,2,"TControlledValve",0,&tolua_err))
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->V08 = ((TControlledValve*)  tolua_tousertype(tolua_S,2,0))
+  self->V08 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
 ;
  return 0;
 }
@@ -6171,7 +5882,7 @@ static int tolua_get_cipline_tech_object_V09_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V09'",NULL);
 #endif
-   tolua_pushusertype(tolua_S,(void*)self->V09,"TControlledValve");
+   tolua_pushusertype(tolua_S,(void*)self->V09,"i_DO_device");
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
@@ -6184,10 +5895,10 @@ static int tolua_set_cipline_tech_object_V09_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V09'",NULL);
-  if (!tolua_isusertype(tolua_S,2,"TControlledValve",0,&tolua_err))
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->V09 = ((TControlledValve*)  tolua_tousertype(tolua_S,2,0))
+  self->V09 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
 ;
  return 0;
 }
@@ -6201,7 +5912,7 @@ static int tolua_get_cipline_tech_object_V10_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V10'",NULL);
 #endif
-   tolua_pushusertype(tolua_S,(void*)self->V10,"TControlledValve");
+   tolua_pushusertype(tolua_S,(void*)self->V10,"i_DO_device");
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
@@ -6214,10 +5925,10 @@ static int tolua_set_cipline_tech_object_V10_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V10'",NULL);
-  if (!tolua_isusertype(tolua_S,2,"TControlledValve",0,&tolua_err))
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->V10 = ((TControlledValve*)  tolua_tousertype(tolua_S,2,0))
+  self->V10 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
 ;
  return 0;
 }
@@ -6231,7 +5942,7 @@ static int tolua_get_cipline_tech_object_V11_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V11'",NULL);
 #endif
-   tolua_pushusertype(tolua_S,(void*)self->V11,"TControlledValve");
+   tolua_pushusertype(tolua_S,(void*)self->V11,"i_DO_device");
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
@@ -6244,10 +5955,10 @@ static int tolua_set_cipline_tech_object_V11_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V11'",NULL);
-  if (!tolua_isusertype(tolua_S,2,"TControlledValve",0,&tolua_err))
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->V11 = ((TControlledValve*)  tolua_tousertype(tolua_S,2,0))
+  self->V11 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
 ;
  return 0;
 }
@@ -6261,7 +5972,7 @@ static int tolua_get_cipline_tech_object_V12_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V12'",NULL);
 #endif
-   tolua_pushusertype(tolua_S,(void*)self->V12,"TControlledValve");
+   tolua_pushusertype(tolua_S,(void*)self->V12,"i_DO_device");
  return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
@@ -6274,10 +5985,10 @@ static int tolua_set_cipline_tech_object_V12_ptr(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
   tolua_Error tolua_err;
   if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'V12'",NULL);
-  if (!tolua_isusertype(tolua_S,2,"TControlledValve",0,&tolua_err))
+  if (!tolua_isusertype(tolua_S,2,"i_DO_device",0,&tolua_err))
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
-  self->V12 = ((TControlledValve*)  tolua_tousertype(tolua_S,2,0))
+  self->V12 = ((i_DO_device*)  tolua_tousertype(tolua_S,2,0))
 ;
  return 0;
 }
@@ -8257,23 +7968,6 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_function(tolua_S,"get_millisec",tolua_PAC_dev_get_millisec00);
   tolua_function(tolua_S,"get_delta_millisec",tolua_PAC_dev_get_delta_millisec00);
   tolua_function(tolua_S,"sleep_ms",tolua_PAC_dev_sleep_ms00);
-  #ifdef __cplusplus
-  tolua_cclass(tolua_S,"TControlledValve","TControlledValve","",tolua_collect_TControlledValve);
-  #else
-  tolua_cclass(tolua_S,"TControlledValve","TControlledValve","",NULL);
-  #endif
-  tolua_beginmodule(tolua_S,"TControlledValve");
-   tolua_function(tolua_S,"new",tolua_PAC_dev_TControlledValve_new00);
-   tolua_function(tolua_S,"new_local",tolua_PAC_dev_TControlledValve_new00_local);
-   tolua_function(tolua_S,".call",tolua_PAC_dev_TControlledValve_new00_local);
-   tolua_function(tolua_S,"Evaluate",tolua_PAC_dev_TControlledValve_Evaluate00);
-   tolua_function(tolua_S,"on",tolua_PAC_dev_TControlledValve_on00);
-   tolua_function(tolua_S,"off",tolua_PAC_dev_TControlledValve_off00);
-   tolua_function(tolua_S,"InstantOff",tolua_PAC_dev_TControlledValve_InstantOff00);
-   tolua_variable(tolua_S,"HI",tolua_get_TControlledValve_HI,tolua_set_TControlledValve_HI);
-   tolua_function(tolua_S,"get_state",tolua_PAC_dev_TControlledValve_get_state00);
-   tolua_variable(tolua_S,"switch_delay",tolua_get_TControlledValve_unsigned_switch_delay,tolua_set_TControlledValve_unsigned_switch_delay);
-  tolua_endmodule(tolua_S);
   #ifdef __cplusplus
   tolua_cclass(tolua_S,"cipline_tech_object","cipline_tech_object","tech_object",tolua_collect_cipline_tech_object);
   #else

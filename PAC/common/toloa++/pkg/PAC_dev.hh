@@ -1018,19 +1018,6 @@ unsigned long get_delta_millisec( unsigned long time1 );
 void sleep_ms( unsigned long ms );
 
 
-class TControlledValve
-	{
-	public:
-		TControlledValve(i_DO_device* valve_to_control, unsigned long delay = 2000L);
-		void Evaluate();
-		void on();
-		void off();
-		void InstantOff();
-		int HI;
-		int get_state();
-		unsigned long switch_delay;
-	};
-
 /// @brief Класс для модуля моечной станции
 class cipline_tech_object: public tech_object
 	{
@@ -1051,18 +1038,18 @@ class cipline_tech_object: public tech_object
 		int disable_tank_heating; //отключение подогрева при начале подачи растворов в танк(для МСА со старыми регулирующими клапанами)
 
 		i_DO_device* V00;
-		TControlledValve* V01;
-		TControlledValve* V02;
-		TControlledValve* V03;
-		TControlledValve* V04;
-		TControlledValve* V05;
-		TControlledValve* V06;
-		TControlledValve* V07;
-		TControlledValve* V08;
-		TControlledValve* V09;
-		TControlledValve* V10;
-		TControlledValve* V11;
-		TControlledValve* V12;
+		i_DO_device* V01;
+		i_DO_device* V02;
+		i_DO_device* V03;
+		i_DO_device* V04;
+		i_DO_device* V05;
+		i_DO_device* V06;
+		i_DO_device* V07;
+		i_DO_device* V08;
+		i_DO_device* V09;
+		i_DO_device* V10;
+		i_DO_device* V11;
+		i_DO_device* V12;
 		i_DO_device* V13;
 
 		i_DO_AO_device* NP;
