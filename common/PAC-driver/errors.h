@@ -315,7 +315,7 @@ class siren_lights_manager: public i_Lua_save_device
         /// @brief Отладочная печать объекта в консоль.
         virtual const char* get_name_in_Lua() const
             {
-            return "G_SIREN_LIGHTS_MANAGER";
+            return "G_SIREN_MNGR";
             }
 
         int set_cmd( const char *prop, u_int idx, char *val );
