@@ -924,7 +924,7 @@ void tech_object_manager::add_tech_object( tech_object* new_tech_object )
     {
     tech_objects.push_back( new_tech_object );
 
-    G_DEV_ERRORS_MANAGER->add_error( new tech_obj_error( new_tech_object ) );
+    G_ERRORS_MANAGER->add_error( new tech_obj_error( new_tech_object ) );
     }
 //-----------------------------------------------------------------------------
 int tech_object_manager::save_params_as_Lua_str( char* str )

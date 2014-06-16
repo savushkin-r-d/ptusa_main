@@ -708,7 +708,7 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
         }
 
     // Îøèáêè.
-    G_DEV_ERRORS_MANAGER->add_error( new tech_dev_error( new_device ) );
+    G_ERRORS_MANAGER->add_error( new tech_dev_error( new_device ) );
 
     u_int new_dev_index = project_devices.size();
     project_devices.push_back( new_device );

@@ -198,7 +198,7 @@ long device_communicator::write_devices_states_service(
                 get_delta_millisec( start_time ) > 5000 )
                 {
                 answer_size +=
-                    G_DEV_ERRORS_MANAGER->save_as_Lua_str( str + answer_size, err_id );
+                    G_ERRORS_MANAGER->save_as_Lua_str( str + answer_size, err_id );
                 if ( err_id != prev_dev_err_id )
                     {
                     prev_dev_err_id = err_id;

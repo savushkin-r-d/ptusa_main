@@ -409,11 +409,11 @@ class dev_stub
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об всех ошибках простых устройств.
-class dev_errors_manager
+class errors_manager
     {
     public:
 	    /// @brief Получение единственного экземпляра класса.
-        static dev_errors_manager* get_instance();
+        static errors_manager* get_instance();
 
         /// @brief Изменение параметров ошибки.
         void set_cmd( unsigned int cmd, unsigned int object_type, 

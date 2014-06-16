@@ -147,7 +147,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
             tech_object_manager::get_instance()->init_params();
 #endif // USE_NO_TANK_COMB_DEVICE
 
-            G_DEV_ERRORS_MANAGER->reset_errors_params();
+            G_ERRORS_MANAGER->reset_errors_params();
 
             G_DEVICE_MANAGER()->init_params();
             }

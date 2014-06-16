@@ -4,7 +4,7 @@
 ///
 /// Класс @ref base_error, служащий для организации работы с ошибкой, содержит
 /// всю необходимую информацию. Для хранения всех ошибок служит класс
-/// @ref dev_errors_manager.
+/// @ref errors_manager.
 ///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
@@ -88,7 +88,12 @@ class base_error
         ///                       (0 - нет, 1 - да).
         ///
         /// @return - количество записанных байт.
-        virtual int save_as_Lua_str( char *str, bool &is_new_state ) = 0;
+        virtual int save_as_Lua_str( char *str ) = 0;
+
+        /// @brief Обновление состояния ошибок.
+        /// @param is_new_state - изменилось ли состояние ошибки
+        ///                       (0 - нет, 1 - да).
+        virtual void evaluate( bool &is_new_state ) = 0;
 
         /// @brief Отладочный вывод содержимого класса в консоль.
         virtual void print() const = 0;
@@ -139,20 +144,16 @@ class base_error
 class tech_dev_error: public base_error
     {
     friend class siren_lights_manager;
-    friend class dev_errors_manager;
+    friend class errors_manager;
 
     public:
         tech_dev_error( device* simple_device = 0 );
         virtual ~tech_dev_error();
 
-        /// @brief Сохранение ошибки в поток для передачи на сервер.
-        ///
-        /// @param stream       - поток байт.
-        /// @param is_new_state - изменилось ли состояние ошибки
-        ///                       (0 - нет, 1 - да).
-        ///
-        /// @return - количество записанных байт.
-        int save_as_Lua_str( char *str, bool &is_new_state );
+
+        int save_as_Lua_str( char *str );
+
+        void evaluate( bool &is_new_state );
 
         /// @brief Отладочный вывод содержимого класса в консоль.
         void print() const;
@@ -167,8 +168,9 @@ class tech_dev_error: public base_error
         int set_cmd( int cmd, int object_alarm_number );
 
     protected:
-        bool static is_any_error;
-        bool static is_new_error;
+        bool static is_any_error;        ///< Наличие тревоги.
+        bool static is_any_no_ack_error; ///< Наличие неподтвержденной тревоги.
+        bool static is_new_error;        ///< Наличие новой тревоги.
 
     private:
         device*     simple_device; ///< Простое устройство.
@@ -180,7 +182,7 @@ class tech_dev_error: public base_error
 /// У сложного устройства может быть несколько ошибок (сообщение, ответ, ...).
 class tech_obj_error: public base_error
     {
-    friend class dev_errors_manager;
+    friend class errors_manager;
     friend class siren_lights_manager;
 
     public:
@@ -190,7 +192,9 @@ class tech_obj_error: public base_error
             {
             }
 
-        int save_as_Lua_str( char *str, bool &is_new_state );
+        int save_as_Lua_str( char *str );
+
+        void evaluate( bool &is_new_state );
 
         void print() const
             {
@@ -231,12 +235,13 @@ class tech_obj_error: public base_error
         static bool is_any_message;
     };
 //-----------------------------------------------------------------------------
-/// @brief Содержит информацию об всех ошибках простых устройств.
-class dev_errors_manager
+/// @brief Содержит информацию об всех ошибках технологических устройств, 
+/// объектов.
+class errors_manager
     {
 
     public:
-        ~dev_errors_manager();
+        ~errors_manager();
 
         /// @brief Сохранение всех ошибок в поток для передачи на сервер.
         ///
@@ -245,6 +250,9 @@ class dev_errors_manager
         /// @return < 0 - ошибка.
         /// @return   0 - ок.
         int save_as_Lua_str( char *str, u_int_2 &id );
+
+        /// @brief Обновление состояния ошибок.
+        void evaluate();
 
         /// @brief Добавление ошибки в массив ошибок.
         ///
@@ -265,16 +273,16 @@ class dev_errors_manager
             unsigned int object_number, unsigned int object_alarm_number );
 
         /// @brief Получение единственного экземпляра класса.
-        static dev_errors_manager* get_instance();
+        static errors_manager* get_instance();
 
     private:
         u_int_2 errors_id; // Cостояние ошибок.
 
         /// Единственный экземпляр класса.
-        static auto_smart_ptr < dev_errors_manager > instance;
+        static auto_smart_ptr < errors_manager > instance;
 
         /// @param s_errors_cnt - количество ошибок.
-        dev_errors_manager();
+        errors_manager();
 
         enum DEM_CONST
             {
@@ -284,7 +292,7 @@ class dev_errors_manager
         std::vector< base_error* > s_errors_vector;    ///< Массив ошибок.
     };
 //-----------------------------------------------------------------------------
-#define G_DEV_ERRORS_MANAGER dev_errors_manager::get_instance()
+#define G_ERRORS_MANAGER errors_manager::get_instance()
 //-----------------------------------------------------------------------------
 class siren_lights_manager: public i_Lua_save_device
     {

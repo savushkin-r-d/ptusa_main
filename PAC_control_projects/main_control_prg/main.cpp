@@ -95,6 +95,7 @@ int main( int argc, char *argv[] )
 
         PAC_info::get_instance()->eval();
         PAC_critical_errors_manager::get_instance()->show_errors();
+        G_ERRORS_MANAGER->evaluate();
         G_SIREN_LIGHTS_MANAGER()->eval();
 
 #ifdef RM_PAC
