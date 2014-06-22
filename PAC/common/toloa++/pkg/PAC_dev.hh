@@ -419,6 +419,18 @@ class errors_manager
         void set_cmd( unsigned int cmd, unsigned int object_type, 
             unsigned int object_number, unsigned int object_alarm_number );
 	};
+
+//Совместимость с предыдущей версией драйвера EasyDrv. FIXME.
+class dev_errors_manager
+    {
+    public:
+        /// @brief Получение единственного экземпляра класса.
+        static errors_manager* get_instance();
+
+        /// @brief Изменение параметров ошибки.
+        void set_cmd( unsigned int cmd, unsigned int object_type, 
+            unsigned int object_number, unsigned int object_alarm_number );
+    };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс valve.

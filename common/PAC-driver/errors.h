@@ -291,6 +291,9 @@ class errors_manager
 
         std::vector< base_error* > s_errors_vector;    ///< Массив ошибок.
     };
+
+//Совместимость с предыдущей версией драйвера EasyDrv. FIXME.
+#define dev_errors_manager errors_manager 
 //-----------------------------------------------------------------------------
 #define G_ERRORS_MANAGER errors_manager::get_instance()
 //-----------------------------------------------------------------------------
