@@ -174,7 +174,7 @@ int wago_manager_linux::write_outputs()
 #endif // DEBUG
                     }
                 }// if ( nd->DO_cnt > 0 )
-
+           
             if ( nd->AO_cnt > 0 )
                 {
                 u_int bytes_cnt = nd->AO_size;
@@ -196,7 +196,7 @@ int wago_manager_linux::write_outputs()
                 int l = 0;
                 for ( unsigned int idx = 0; idx < nd->AO_cnt; idx++ )
                     {
-                    switch( nd->AI_types[ idx ] )
+                    switch( nd->AO_types[ idx ] )
                         {
                         case 638:
                             buff[ 13 + l     ] = 0;
