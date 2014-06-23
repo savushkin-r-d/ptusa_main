@@ -4,6 +4,7 @@
 #endif // WIN_OS
 
 #include "cip_tech_def.h"
+#include "lua_manager.h"
 
 int isMsa = 0;
 
@@ -119,6 +120,8 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	tankfulltimer = get_millisec();
 	sort_last_destination = -1;
 	sort_delay = get_millisec();
+
+	is_in_evaluate_func = 0;
 	}
 
 cipline_tech_object::~cipline_tech_object()
@@ -442,6 +445,25 @@ int cipline_tech_object::evaluate()
 		}
 	else
 		{
+
+		if ( is_in_evaluate_func == 0 )
+			{
+			lua_State* L = lua_manager::get_instance()->get_Lua();
+			lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+			lua_getfield( L, -1, "in_evaluate" );
+			lua_remove( L, -2 );  // Stack: remove function "in_evaluate".
+
+			if ( lua_isfunction( L, -1 ) )
+				{
+				is_in_evaluate_func = 2;
+				}
+			else
+				{
+				is_in_evaluate_func = 1;
+				}
+			}
+
+
 		if (state>0)
 			{
 			EvalPIDS();
@@ -1476,7 +1498,14 @@ int cipline_tech_object::InitStep( int step, int f )
 int cipline_tech_object::EvalPIDS()
 	{
 	PIDP->eval();
-	PIDF->eval();
+	if (dev_ai_pump_frequency)
+		{
+		NP->set_value(dev_ai_pump_frequency->get_value());
+		}
+	else
+		{
+		PIDF->eval();
+		}
 
 	//Клапан пара
 	if (ao->get_value()>1 && PIDP->get_state() == ON && cnt->get_flow() > rt_par_float[P_R_NO_FLOW] && NP->get_state() == ON)
@@ -1966,7 +1995,7 @@ int cipline_tech_object::CheckErr( void )
 		{
 		T[TMR_NO_FLOW]->set_countdown_time((unsigned long)rt_par_float[P_TM_R_NO_FLOW] * 1000L);
 		}
-	if (NP->get_state() == ON)
+	if (NP->get_state() == ON && 0 == dev_ai_pump_frequency)
 		{
 		delta = rt_par_float[P_R_NO_FLOW];
 		if (cnt->get_flow() <= delta)
@@ -4311,6 +4340,34 @@ int cipline_tech_object::init_object_devices()
 	else
 		{
 		dev_upr_cip_in_progress = 0;
+		}
+	//Сигнал управления производительностью подающего насоса
+	dev_no = (u_int)rt_par_float[P_SIGNAL_PUMP_CONTROL];
+	if (dev_no > 0)
+		{
+		sprintf(devname, "LINE%dAI%d", nmr, dev_no);
+		dev = (device*)DO(devname);
+		if (dev->get_serial_n() > 0)
+			{
+			dev_ai_pump_frequency = dev;
+			}
+		else
+			{
+			dev = DEVICE(dev_no);
+			if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_AI)
+				{
+				dev_ai_pump_frequency = dev;
+				}
+			else
+				{
+				dev_ai_pump_frequency = 0;
+				return -1;
+				}
+			}
+		}
+	else
+		{
+		dev_ai_pump_frequency = 0;
 		}
 	return 0;
 	}

@@ -488,6 +488,9 @@ class cipline_tech_object: public tech_object
 		int isLine();
 		int getValvesConflict();
 
+		//Обработчики LUA
+		int is_in_evaluate_func;
+
 	public:
 		cipline_tech_object( const char* name, u_int number, u_int type, const char* name_Lua,
 			u_int states_count,
@@ -613,6 +616,7 @@ class cipline_tech_object: public tech_object
 		device* dev_upr_cip_ready;			//Сигнал "готовность к мойке"
 		device* dev_upr_cip_in_progress;	//Сигнал "готовность к мойке"
 		device* dev_upr_cip_finished;		//Сигнал "мойка окончена"
+		device* dev_ai_pump_frequency;		//Задание частоты подающего насоса
 		int init_object_devices();			//Функция для инициализации устройств объекта мойки
 		//----------------------------------------------
 
