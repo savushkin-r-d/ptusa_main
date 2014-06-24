@@ -4346,7 +4346,7 @@ int cipline_tech_object::init_object_devices()
 	if (dev_no > 0)
 		{
 		sprintf(devname, "LINE%dAI%d", nmr, dev_no);
-		dev = (device*)DO(devname);
+		dev = (device*)AI(devname);
 		if (dev->get_serial_n() > 0)
 			{
 			dev_ai_pump_frequency = dev;
