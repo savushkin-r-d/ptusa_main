@@ -39,8 +39,17 @@ int wago_device::get_DO( u_int index )
         }
 
 #ifdef DEBUG
-    Print( "Error: \"%s\" wago_device->get_DO(...) - index=%d, DO_channels_count=%d\n",
-        name, index, DO_channels.count );
+    print();
+    Print( "wago_device->get_DO(...) - error! " );
+    Print( "index = %d, DO_channels.count = %d, "
+        "DO_channels.char_write_values = %d",
+        index, DO_channels.count, ( int ) DO_channels.char_write_values );
+    if ( DI_channels.char_write_values )
+        {
+        Print( ", DO_channels.char_write_values[ index ]=%d",       
+            ( int ) DO_channels.char_write_values[ index ] );
+        }
+    Print( "\n" );
 #endif // DEBUG
 
     return 0;
@@ -78,7 +87,16 @@ int wago_device::get_DI( u_int index )
 
 #ifdef DEBUG
     print();
-    Print( "wago_device->get_DI(...) - error!\n" );
+    Print( "wago_device->get_DI(...) - error! " );
+    Print( "index = %d, DI_channels.count = %d, "
+        "DI_channels.char_read_values = %d",
+        index, DI_channels.count, ( int ) DI_channels.char_read_values );
+    if ( DI_channels.char_read_values )
+        {
+        Print( ", DI_channels.char_read_values[ index ]=%d",       
+            ( int ) DI_channels.char_read_values[ index ] );
+        }
+    Print( "\n" );
 #endif // DEBUG
 
     return 0;
@@ -147,7 +165,17 @@ float wago_device::get_AO( u_int index, float min_value, float max_value )
         }
 
 #ifdef DEBUG
-    Print( "wago_device->get_AO(...) - error!\n" );
+    print();
+    Print( "wago_device->get_AO(...) - error! " );
+    Print( "index = %d, AO_channels.count = %d, "
+        "AO_channels.int_write_values = %d",
+        index, AO_channels.count, ( int ) AO_channels.int_write_values );
+    if ( AO_channels.int_write_values )
+        {
+        Print( ", AO_channels.int_write_values[ index ]=%d",       
+            ( int ) AO_channels.int_write_values[ index ] );
+        }
+    Print( "\n" );
 #endif // DEBUG
 
     return 0;
@@ -285,10 +313,17 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
         }
 
 #ifdef DEBUG
-    Print( "wago_device->get_AI(...) - error!\n" );
-    Print( "index=%d, AI_channels.count=%d, AI_channels.char_read_values=%d, AI_channels.char_read_values[ index ]=%d\n",
-        index, AI_channels.count, ( int ) AI_channels.int_read_values,
-        ( int ) AI_channels.int_read_values[ index ] );
+    print();
+    Print( "wago_device->get_AI(...) - error! " );
+    Print( "index = %d, AI_channels.count = %d, "
+        "AI_channels.int_read_values = %d",
+        index, AI_channels.count, ( int ) AI_channels.int_read_values );
+    if ( AI_channels.int_read_values )
+        {
+        Print( ", AI_channels.int_read_values[ index ]=%d",       
+            ( int ) AI_channels.int_read_values[ index ] );
+        }
+    Print( "\n" );    
 #endif // DEBUG
 
     return 0;
@@ -302,11 +337,17 @@ int* wago_device::get_AI_data( u_int index )
         }
 
 #ifdef DEBUG
-    Print( "wago_device->get_AI_data(...) - error!\n" );
-    Print( "index=%d, AI_channels.count=%d, AI_channels.int_read_values=%d, "
-        "AI_channels.int_read_values[ index ]=%d\n",
-        index, AI_channels.count, ( int ) AI_channels.int_read_values,
-        ( int ) AI_channels.int_read_values[ index ] );
+    print();
+    Print( "wago_device->get_AI_data(...) - error! " );
+    Print( "index = %d, AI_channels.count = %d, "
+        "AI_channels.int_read_values = %d",
+        index, AI_channels.count, ( int ) AI_channels.int_read_values );
+    if ( AI_channels.int_read_values )
+        {
+        Print( ", AI_channels.int_read_values[ index ]=%d",       
+            ( int ) AI_channels.int_read_values[ index ] );
+        }
+    Print( "\n" ); 
 #endif // DEBUG
 
     return 0;
@@ -320,11 +361,17 @@ int* wago_device::get_AO_write_data( u_int index )
         }
 
 #ifdef DEBUG
-    Print( "wago_device->get_AO_data(...) - error!\n" );
-    Print( "index=%d, AO_channels.count=%d, AO_channels.int_write_values=%d, "
-        "AO_channels.int_write_values[ index ]=%d\n",
-        index, AO_channels.count, ( int ) AO_channels.int_write_values,
-        ( int ) AO_channels.int_write_values[ index ] );
+    print();
+    Print( "wago_device->get_AO_write_data(...) - error! " );
+    Print( "index = %d, AO_channels.count = %d, "
+        "AO_channels.int_write_values = %d",
+        index, AO_channels.count, ( int ) AO_channels.int_write_values );
+    if ( AO_channels.int_write_values )
+        {
+        Print( ", AO_channels.int_write_values[ index ]=%d",       
+            ( int ) AO_channels.int_write_values[ index ] );
+        }
+    Print( "\n" );
 #endif // DEBUG
     return 0;
     }
@@ -337,11 +384,17 @@ int* wago_device::get_AO_read_data( u_int index )
         }
 
 #ifdef DEBUG
-    Print( "wago_device->get_AO_data(...) - error!\n" );
-    Print( "index=%d, AO_channels.count=%d, AO_channels.int_read_values=%d, "
-        "AO_channels.int_read_values[ index ]=%d\n",
-        index, AO_channels.count, ( int ) AO_channels.int_read_values,
-        ( int ) AO_channels.int_read_values[ index ] );
+    print();
+    Print( "wago_device->get_AO_read_data(...) - error! " );
+    Print( "index = %d, AO_channels.count = %d, "
+        "AO_channels.int_read_values = %d",
+        index, AO_channels.count, ( int ) AO_channels.int_read_values );
+    if ( AO_channels.int_read_values )
+        {
+        Print( ", AO_channels.int_read_values[ index ]=%d",       
+            ( int ) AO_channels.int_read_values[ index ] );
+        }
+    Print( "\n" );
 #endif // DEBUG
     return 0;
     }
