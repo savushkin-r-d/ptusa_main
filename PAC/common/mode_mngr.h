@@ -192,6 +192,28 @@ class DI_DO_action: public action
         void evaluate();
 
         void print( const char* prefix = "" ) const;
+
+        void final()
+            {
+            if ( devices.empty() )
+                {
+                return;
+                }
+
+            for ( u_int i = 0; i < devices.size(); i++ )
+                {
+                if ( devices[ i ].empty() )
+                    {
+                    continue;
+                    }
+
+                //Отключаем выходные сигналы.
+                for ( u_int j = 1; j < devices[ i ].size(); j++ )
+                    {
+                    devices[ i ][ j ]->off();
+                    }
+                }
+            }
     };
 //-----------------------------------------------------------------------------
 /// <summary>
