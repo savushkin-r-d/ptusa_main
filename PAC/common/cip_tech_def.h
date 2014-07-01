@@ -461,7 +461,7 @@ class cipline_tech_object: public tech_object
 		int ret_overrride; //флаг принудительного включения/выключения возвратного насооса
 		int concentration_ok; //есть концентрация на возврате
 		int return_ok; //есть расход на возврате
-		int tank_is_empty; //используется для того, чтобы определить, нужно ли отключать возвратный насос
+		int enable_ret_pump; //используется для того, чтобы определить, нужно ли отключать возвратный насос
 
 		unsigned long steam_valve_delay; //таймер задержки включения отсечного клапана пара (чтобы не включался/выключался на граничных значениях температуры)
 		unsigned long bachok_lvl_err_delay; //задержка для появления ошибки уровня бачка
@@ -475,6 +475,8 @@ class cipline_tech_object: public tech_object
 		unsigned long tankemptytimer;	//пауза между переключениями при пустом танке
 		int tankfull;					//флаг полного танка для задержек переключений
 		unsigned long tankfulltimer;	//пауза между переключениями при полном танке
+
+		int forcesortrr; //флаг принудительной сортировки растворов без учета таймаута переключений
 
 		unsigned long enddelayTimer;
 		int valvesAreInConflict;
@@ -608,6 +610,7 @@ class cipline_tech_object: public tech_object
 		device* dev_upr_ret;				//Сигнал управления возвратным насосом
 		device* dev_m_ret;					//Возвратный насос на моечной станции
 		device* dev_os_object;				//Обратная связь объекта мойки
+		device* dev_os_object_ready;		//Обратная связь объекта мойки 2
 		device* dev_os_object_empty;		//Сигнал "объект опорожнен"
 		device* dev_upr_medium_change;		//Сигнал "смена среды"
 		device* dev_upr_caustic;			//Сигнал "щелочь"
@@ -649,7 +652,7 @@ class cipline_tech_object: public tech_object
 		virtual void ResetErr(void);
 		virtual int CheckErr(void);
 		////-----for main station----
-		virtual void SortRR(int where);
+		virtual void SortRR(int where, int forcetotank = 0);
 		virtual float GetConc(int what);
 		virtual int InitFilRR(int where);
 		virtual int InitCircRR(int where);

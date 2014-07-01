@@ -68,7 +68,7 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	ret_overrride = 0;
 	concentration_ok = 0;
 	return_ok = 0;
-	tank_is_empty = 0;
+	enable_ret_pump = 0;
 	enddelayTimer = 0;
 	blocked = 0;
 	disable_tank_heating = 0;
@@ -102,6 +102,7 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	dev_upr_ret = 0;
 	dev_m_ret = 0;
 	dev_os_object = 0;
+	dev_os_object_ready = 0;
 	dev_os_object_empty = 0;
 	dev_upr_medium_change = 0;
 	dev_upr_caustic = 0;
@@ -120,6 +121,8 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	tankfulltimer = get_millisec();
 	sort_last_destination = -1;
 	sort_delay = get_millisec();
+
+	forcesortrr = 0;
 
 	is_in_evaluate_func = 0;
 	}
@@ -1322,6 +1325,7 @@ int cipline_tech_object::InitStep( int step, int f )
 	tankfulltimer = get_millisec();
 	sort_last_destination = -1;
 	sort_delay = get_millisec();
+	forcesortrr = 1;
 
 	PIDP->reset();
 	PIDF->reset();
@@ -1720,14 +1724,33 @@ int cipline_tech_object::DoStep( int step )
 		{
 		if (rt_par_float[P_RESUME_CIP_ON_SIGNAL] != 0)
 			{
+			int objready = 0;
 			if (dev_os_object)
 				{
-				int objready = 1;
-				if (dev_os_object->get_state() != OFF && objready && state == ERR_CIP_OBJECT)
+				if (dev_os_object->get_state() != OFF)
 					{
-					state = 1;
-					InitStep(curstep, 1);
+					objready = 1;
 					}
+				else
+					{
+					objready = 0;
+					}
+				}
+			if (dev_os_object_ready)
+				{
+				if (dev_os_object_ready->get_state() != OFF)
+					{
+					objready = 1;
+					}
+				else
+					{
+					objready = 0;
+					}
+				}
+			if (objready && state == ERR_CIP_OBJECT)
+				{
+				state = 1;
+				InitStep(curstep, 1);
 				}
 			}
 		return 0;
@@ -1773,6 +1796,7 @@ void cipline_tech_object::ResetLinesDevicesBeforeReset( void )
 	dev_upr_ret = 0;
 	dev_m_ret = 0;
 	dev_os_object = 0;
+	dev_os_object_ready = 0;
 	dev_os_object_empty = 0;
 	dev_upr_medium_change = 0;
 	dev_upr_caustic = 0;
@@ -1934,12 +1958,19 @@ int cipline_tech_object::CheckErr( void )
 #endif
 	//Проверка обратной связи объекта
 	if (dev_os_object)
-	{
-	if (!dev_os_object->get_state())
 		{
-		return ERR_OS;
+		if (!dev_os_object->get_state())
+			{
+			return ERR_OS;
+			}
 		}
-	}
+	if (dev_os_object_ready)
+		{
+		if (!dev_os_object_ready->get_state())
+			{
+			return ERR_OS;
+			}
+		}
 
 	//проверка уровней в бачке
 	if ((!LL->is_active() && (LM->is_active() || LH->is_active())) || (!LM->is_active() && LH->is_active()))
@@ -2016,15 +2047,16 @@ int cipline_tech_object::CheckErr( void )
 	return 0;
 	}
 
-void cipline_tech_object::SortRR( int where )
-	{
-	if (get_delta_millisec(sort_delay) < SORT_SWITCH_DELAY)
+void cipline_tech_object::SortRR( int where, int forcetotank /*= 0*/ )
+{
+	if (get_delta_millisec(sort_delay) < SORT_SWITCH_DELAY && !forcesortrr)
 		{
 		return;
 		}
 	else
 		{
 		sort_delay = get_millisec();
+		forcesortrr = 0;
 		}
 	float c;
 	int d;
@@ -2035,7 +2067,22 @@ void cipline_tech_object::SortRR( int where )
 		case TANK_S:
 			V08->off();
 			c=GetConc(SHCH);
-			if (c>=parpar[0][P_CMIN_S])
+
+			if (LSH->is_active() && !forcetotank)
+				{
+				tankfull = 1;
+				tankfulltimer = get_millisec();
+				} 
+
+			if (tankfull)
+				{
+				if (get_delta_millisec(tankfulltimer) > 20000L)
+					{
+					tankfull = 0;
+					}
+				}
+
+			if (c>=parpar[0][P_CMIN_S] && !tankfull)
 				{
 				d=2;
 				}
@@ -2075,7 +2122,22 @@ void cipline_tech_object::SortRR( int where )
 		case TANK_K:
 			V09->off();
 			c=GetConc(KISL);
-			if (c>=parpar[0][P_CMIN_K])
+
+			if (LKH->is_active() && !forcetotank)
+				{
+				tankfull = 1;
+				tankfulltimer = get_millisec();
+				} 
+
+			if (tankfull)
+				{
+				if (get_delta_millisec(tankfulltimer) > 20000L)
+					{
+					tankfull = 0;
+					}
+				}
+
+			if (c>=parpar[0][P_CMIN_K] && !tankfull)
 				{
 				d=2;
 				}
@@ -2617,7 +2679,7 @@ int cipline_tech_object::OpolRR( int where )
 			break;
 		}
 	rt_par_float[P_CONC] = c;
-	SortRR(where);
+	SortRR(where, 1);
 	if (c>=NOCONC)
 		{
 		T[TMR_CHK_CONC]->reset();
@@ -2641,11 +2703,11 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 
 	if (step == 5 || step == 22 || step == 42 || step == 62 || step == 72 || (step == 83 && rt_par_float[P_PROGRAM] == SPROG_HOTWATER))
 		{
-		tank_is_empty = 1;
+		enable_ret_pump = 1;
 		}
 	else
 		{
-		tank_is_empty = 0;
+		enable_ret_pump = 0;
 		}
 
 	switch (from)
@@ -3350,7 +3412,7 @@ int cipline_tech_object::ToObject( int from, int where )
 	rt_par_float[P_SUM_OP] = cnt->get_quantity();
 
 
-	if (tank_is_empty)
+	if (enable_ret_pump)
 		{
 		if ((cnt->get_quantity() >= rt_par_float[P_VRAB]-rt_par_float[P_RET_STOP]) || (cnt->get_quantity() <= rt_par_float[P_RET_STOP]))
 			{
@@ -3376,6 +3438,19 @@ int cipline_tech_object::ToObject( int from, int where )
 		case TANK_W:
 			if (!LWL->is_active())
 				{
+				tankempty = 1;
+				tankemptytimer = get_millisec();
+				}
+			if (tankempty)
+				{
+				if (get_delta_millisec(tankemptytimer) > 60000L)
+					{
+					tankempty = 0;
+					}
+				}
+
+			if (tankempty)
+				{
 				tmp=cnt->get_quantity();
 				rt_par_float[STP_WC] = rt_par_float[STP_WC] + tmp - rt_par_float[STP_LV];
 				rt_par_float[STP_WC_INST_WS] = rt_par_float[STP_WC_INST_WS] + tmp - rt_par_float[STP_LV];
@@ -3384,7 +3459,6 @@ int cipline_tech_object::ToObject( int from, int where )
 				V01->on();
 				if (!LM->is_active()) V00->on();
 				if (LH->is_active()) V00->off();
-
 				}
 			else
 				{
@@ -3422,10 +3496,26 @@ int cipline_tech_object::ToObject( int from, int where )
 		return 1;
 		}
 
+
 	switch (where)
 		{
 		case TANK_W:
-			if ((LWH->is_active()) || (from == TANK_W))
+			if (LWH->is_active())
+				{
+				tankfull = 1;
+				tankfulltimer = get_millisec();
+				} 
+
+			if (tankfull)
+				{
+				if (get_delta_millisec(tankfulltimer) > 60000L)
+					{
+					tankfull = 0;
+					}
+				}
+
+
+			if (tankfull || (from == TANK_W))
 				{
 				V08->off();
 				V09->off();
@@ -3445,8 +3535,22 @@ int cipline_tech_object::ToObject( int from, int where )
 				}
 			break;
 		case TANK_K:
-			c=GetConc(KISL);
 			if (LKH->is_active())
+				{
+				tankfull = 1;
+				tankfulltimer = get_millisec();
+				} 
+
+			if (tankfull)
+				{
+				if (get_delta_millisec(tankfulltimer) > 60000L)
+					{
+					tankfull = 0;
+					}
+				}
+
+			c=GetConc(KISL);
+			if (tankfull)
 				{
 				V08->off();
 				V09->off();
@@ -3466,8 +3570,22 @@ int cipline_tech_object::ToObject( int from, int where )
 				}
 			break;
 		case TANK_S:
-			c=GetConc(SHCH);
 			if (LSH->is_active())
+				{
+				tankfull = 1;
+				tankfulltimer = get_millisec();
+				} 
+
+			if (tankfull)
+				{
+				if (get_delta_millisec(tankfulltimer) > 60000L)
+					{
+					tankfull = 0;
+					}
+				}
+
+			c=GetConc(SHCH);
+			if (tankfull)
 				{
 				V08->off();
 				V09->off();
@@ -3601,6 +3719,19 @@ int cipline_tech_object::FromObject( int what, int where )
 		case TANK_W:
 			if (!LWL->is_active())
 				{
+				tankempty = 1;
+				tankemptytimer = get_millisec();
+				}
+			if (tankempty)
+				{
+				if (get_delta_millisec(tankemptytimer) > 60000L)
+					{
+					tankempty = 0;
+					}
+				}
+
+			if (tankempty)
+				{
 				tmp=cnt->get_quantity();
 				rt_par_float[STP_WC] = rt_par_float[STP_WC] + tmp - rt_par_float[STP_LV] ;
 				rt_par_float[STP_WC_INST_WS] = rt_par_float[STP_WC_INST_WS] + tmp - rt_par_float[STP_LV] ;
@@ -3626,7 +3757,6 @@ int cipline_tech_object::FromObject( int what, int where )
 				{
 				return NO_ACID;
 				}
-			SortRR(TANK_K);
 			break;
 		case TANK_S:
 			c=GetConc(SHCH);
@@ -3634,7 +3764,6 @@ int cipline_tech_object::FromObject( int what, int where )
 				{
 				return NO_ALKALINE;
 				}
-			SortRR(TANK_S);
 			break;
 		}
 
@@ -3642,6 +3771,21 @@ int cipline_tech_object::FromObject( int what, int where )
 		{
 		case TANK_W:
 			if (LWH->is_active())
+				{
+				tankfull = 1;
+				tankfulltimer = get_millisec();
+				} 
+
+			if (tankfull)
+				{
+				if (get_delta_millisec(tankfulltimer) > 60000L)
+					{
+					tankfull = 0;
+					}
+				}
+
+
+			if (tankfull)
 				{
 				V08->off();
 				V09->off();
@@ -3662,35 +3806,11 @@ int cipline_tech_object::FromObject( int what, int where )
 			break;
 		case TANK_K:
 			c=GetConc(KISL);
-			if (LKH->is_active())
-				{
-				V08->off();
-				V09->off();
-				V10->off();
-				V11->off();
-				if (no_neutro) {V11->on();} else {V12->on();}
-				V07->off();
-				}
-			else
-				{
-				SortRR(TANK_K);
-				}
+			SortRR(TANK_K);
 			break;
 		case TANK_S:
 			c=GetConc(SHCH);
-			if (LSH->is_active())
-				{
-				V08->off();
-				V09->off();
-				V10->off();
-				V11->off();
-				if (no_neutro) {V11->on();} else {V12->on();}
-				V07->off();
-				}
-			else
-				{
-				SortRR(TANK_S);
-				}
+			SortRR(TANK_S);
 			break;
 		}
 	rt_par_float[P_CONC] = c;
@@ -3730,35 +3850,11 @@ int cipline_tech_object::OporCIP( int where )
 			break;
 		case TANK_K:
 			c=GetConc(KISL);
-			if (LKH->is_active())
-				{
-				V08->off();
-				V09->off();
-				V10->off();
-				V11->off();
-				if (no_neutro) {V11->on();} else {V12->on();}
-				V07->off();
-				}
-			else
-				{
-				SortRR(TANK_K);
-				}
+			SortRR(TANK_K);
 			break;
 		case TANK_S:
 			c=GetConc(SHCH);
-			if (LSH->is_active())
-				{
-				V08->off();
-				V09->off();
-				V10->off();
-				V11->off();
-				if (no_neutro) {V11->on();} else {V12->on();}
-				V07->off();
-				}
-			else
-				{
-				SortRR(TANK_S);
-				}
+			SortRR(TANK_S);
 			break;
 		}
 	rt_par_float[P_CONC] = c;
@@ -4052,6 +4148,42 @@ int cipline_tech_object::init_object_devices()
 	else
 		{
 		dev_os_object = 0;
+		}
+	//Обратная связь №2(готовность объекта к мойке)
+	dev_no = (u_int)rt_par_float[P_SIGNAL_OBJECT_READY];
+	if (dev_no > 0)
+		{
+		sprintf(devname, "LINE%dDI%d", nmr, dev_no);
+		dev = (device*)DI(devname);
+		if (dev->get_serial_n() > 0)
+			{
+			dev_os_object_ready = dev;
+			}
+		else
+			{
+			dev = (device*)(DI(dev_no));
+			if (dev->get_serial_n() > 0)
+				{
+				dev_os_object_ready = dev;
+				}
+			else
+				{
+				dev = DEVICE(dev_no);
+				if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DI)
+					{
+					dev_os_object_ready = dev;
+					}
+				else
+					{
+					dev_os_object_ready = 0;
+					return -1;
+					}
+				}
+			}
+		}
+	else
+		{
+		dev_os_object_ready = 0;
 		}
 	//Возвратный насос
 	dev_no = (u_int)rt_par_float[P_N_RET];
