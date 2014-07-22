@@ -304,72 +304,149 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 
 void cipline_tech_object::initline()
 	{
+	char is_old_definition = 1;
 	char devname[20] = {0};
 	sprintf(devname, "LINE%dV%d", number, number * 100);
-	V00 = V(devname);
-	sprintf(devname, "LINE%dV%d", number, number * 100 + 1);
-	V01 = V(devname);
-	sprintf(devname, "LINE%dV%d", number, number * 100 + 2);
-	V02 = V(devname);
-	sprintf(devname, "LINE%dV%d", number, number * 100 + 3);
-	V03 = V(devname);
-	sprintf(devname, "LINE%dV%d", number, number * 100 + 4);
-	V04 = V(devname);
-	sprintf(devname, "LINE%dV%d", number, number * 100 + 5);
-	V05 = V(devname);
-	sprintf(devname, "LINE%dV%d", number, number * 100 + 6);
-	V06 = V(devname);
-	sprintf(devname, "LINE%dV%d", number, number * 100 + 7);
-	V07 = V(devname);
-	sprintf(devname, "LINE%dV%d", number, number * 100 + 8);
-	V08 = V(devname);
-	sprintf(devname, "LINE%dV%d", number, number * 100 + 9);
-	V09 = V(devname);
-	sprintf(devname, "LINE%dV%d", number, number * 100 + 10);
-	V10 = V(devname);
-	sprintf(devname, "LINE%dV%d", number, number * 100 + 11);
-	V11 = V(devname);
-	sprintf(devname, "LINE%dV%d", number, number * 100 + 12);
-	V12 = V(devname);
-	sprintf(devname, "LINE%dV%d", number, number * 100 + 13);
-	V13 = V(devname);
+	if (((device*)V(devname))->get_type() == device::DT_NONE)
+		{
+		is_old_definition = 0;
+		}
+	if (is_old_definition)
+		{
+		sprintf(devname, "LINE%dV%d", number, number * 100);
+		V00 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 1);
+		V01 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 2);
+		V02 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 3);
+		V03 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 4);
+		V04 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 5);
+		V05 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 6);
+		V06 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 7);
+		V07 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 8);
+		V08 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 9);
+		V09 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 10);
+		V10 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 11);
+		V11 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 12);
+		V12 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, number * 100 + 13);
+		V13 = V(devname);
 
-	sprintf(devname, "LINE%dM%d", number, number * 100 + 3);
-	NP = M(devname);
-	NK = M(2);
-	NS = M(1);
-	sprintf(devname, "LINE%dLS%d", number, number * 100 + 3);
-	LL = LS(devname);
-	sprintf(devname, "LINE%dLS%d", number, number * 100 + 2);
-	LM = LS(devname);
-	sprintf(devname, "LINE%dLS%d", number, number * 100 + 1);
-	LH = LS(devname);
-	LWH = LS(8);
-	LWL = LS(9);
-	LSH= LS(4);
-	LSL = LS(5);
-	LKH = LS(6);
-	LKL = LS(7);
+		sprintf(devname, "LINE%dM%d", number, number * 100 + 3);
+		NP = M(devname);
+		NK = M(2);
+		NS = M(1);
+		sprintf(devname, "LINE%dLS%d", number, number * 100 + 3);
+		LL = LS(devname);
+		sprintf(devname, "LINE%dLS%d", number, number * 100 + 2);
+		LM = LS(devname);
+		sprintf(devname, "LINE%dLS%d", number, number * 100 + 1);
+		LH = LS(devname);
+		LWH = LS(8);
+		LWL = LS(9);
+		LSH= LS(4);
+		LSL = LS(5);
+		LKH = LS(6);
+		LKL = LS(7);
 
-	LTS = LT("LT1");
-	LTK = LT("LT2");
-	LTW = LT("LT3");
+		LTS = LT("LT1");
+		LTK = LT("LT2");
+		LTW = LT("LT3");
 
 
-	sprintf(devname, "LINE%dTE%d", number, number * 100 + 1);
-	TP = TE(devname);
-	sprintf(devname, "LINE%dTE%d", number, number * 100 + 2);
-	TR = TE(devname);
+		sprintf(devname, "LINE%dTE%d", number, number * 100 + 1);
+		TP = TE(devname);
+		sprintf(devname, "LINE%dTE%d", number, number * 100 + 2);
+		TR = TE(devname);
 
-	sprintf(devname, "LINE%dFQT%d", number, number * 100 + 1);
-	cnt = FQT(devname);
-	sprintf(devname, "LINE%dQT%d", number, number * 100 + 1);
-	Q = QT(devname);
-	sprintf(devname, "LINE%dFS%d", number, number * 100 + 1);
-	FL = FS(devname);
-	PUMPFREQ = NP;
-	sprintf(devname, "LINE%dVC%d", number, number * 100 + 14);
-	ao = VC(devname);
+		sprintf(devname, "LINE%dFQT%d", number, number * 100 + 1);
+		cnt = FQT(devname);
+		sprintf(devname, "LINE%dQT%d", number, number * 100 + 1);
+		Q = QT(devname);
+		sprintf(devname, "LINE%dFS%d", number, number * 100 + 1);
+		FL = FS(devname);
+		PUMPFREQ = NP;
+		sprintf(devname, "LINE%dVC%d", number, number * 100 + 14);
+		ao = VC(devname);
+		} 
+	else
+		{
+		sprintf(devname, "LINE%dV%d", number, 0);
+		V00 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, 1);
+		V01 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, 2);
+		V02 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, 3);
+		V03 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, 4);
+		V04 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, 5);
+		V05 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, 6);
+		V06 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, 7);
+		V07 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, 8);
+		V08 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, 9);
+		V09 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, 10);
+		V10 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, 11);
+		V11 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, 12);
+		V12 = V(devname);
+		sprintf(devname, "LINE%dV%d", number, 13);
+		V13 = V(devname);
+
+		sprintf(devname, "LINE%dM%d", number, 1);
+		NP = M(devname);
+		NK = M(2);
+		NS = M(1);
+		sprintf(devname, "LINE%dLS%d", number, 3);
+		LL = LS(devname);
+		sprintf(devname, "LINE%dLS%d", number, 2);
+		LM = LS(devname);
+		sprintf(devname, "LINE%dLS%d", number, 1);
+		LH = LS(devname);
+		LWH = LS(8);
+		LWL = LS(9);
+		LSH= LS(4);
+		LSL = LS(5);
+		LKH = LS(6);
+		LKL = LS(7);
+
+		LTS = LT("LT1");
+		LTK = LT("LT2");
+		LTW = LT("LT3");
+
+
+		sprintf(devname, "LINE%dTE%d", number, 1);
+		TP = TE(devname);
+		sprintf(devname, "LINE%dTE%d", number, 2);
+		TR = TE(devname);
+
+		sprintf(devname, "LINE%dFQT%d", number, 1);
+		cnt = FQT(devname);
+		sprintf(devname, "LINE%dQT%d", number, 1);
+		Q = QT(devname);
+		sprintf(devname, "LINE%dFS%d", number, 1);
+		FL = FS(devname);
+		PUMPFREQ = NP;
+		sprintf(devname, "LINE%dVC%d", number, 14);
+		ao = VC(devname);
+		}
 
 	PIDF = new MSAPID(&rt_par_float, 72, P_ZAD_FLOW, PUMPFREQ, 0, cnt );
 	PIDP = new MSAPID(&rt_par_float, 61, P_ZAD_PODOGR, ao, TP, 0);
