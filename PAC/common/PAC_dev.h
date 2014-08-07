@@ -1558,8 +1558,10 @@ class AI1 : public analog_wago_device
 class temperature_e : public AI1
     {
     public:
-        temperature_e( const char *dev_name ): AI1( dev_name, DT_TE, DST_NONE, 0, 0 )
+        temperature_e( const char *dev_name ): AI1( dev_name, DT_TE, DST_NONE, 
+            ADDITIONAL_PARAM_COUNT, &start_param_idx )
             {
+            set_par_name( P_ERR_T,  start_param_idx, "P_ERR_T" );
             }
 
         float get_value()
@@ -1567,13 +1569,23 @@ class temperature_e : public AI1
 #ifdef DEBUG_NO_WAGO_MODULES
             float v = analog_wago_device::get_value();
 
-            return -1000 == v ? -1000 : AI1::get_value();
+            return -1000 == v ? get_par( P_ERR_T, start_param_idx ) : 
+                AI1::get_value();
 #else
             float v = get_AI( C_AI_INDEX, 0, 0 );
-            return -1000 == v ? -1000 :
+            return -1000 == v ? get_par( P_ERR_T, start_param_idx ) :
                 get_par( P_ZERO_ADJUST_COEFF, 0 ) + v;
 #endif
             }
+
+    private:
+        u_int start_param_idx;
+        enum CONSTANTS
+            {
+            P_ERR_T = 1,                ///< Аварийное значение температуры.
+
+            ADDITIONAL_PARAM_COUNT = 1, ///< Количество параметров.
+            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Текущий уровень.
