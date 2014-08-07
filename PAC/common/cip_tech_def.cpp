@@ -3850,6 +3850,7 @@ int cipline_tech_object::FromObject( int what, int where )
 				{
 				return NO_ACID;
 				}
+			SortRR(TANK_K);
 			break;
 		case TANK_S:
 			c=GetConc(SHCH);
@@ -3857,6 +3858,7 @@ int cipline_tech_object::FromObject( int what, int where )
 				{
 				return NO_ALKALINE;
 				}
+			SortRR(TANK_S);
 			break;
 		}
 
