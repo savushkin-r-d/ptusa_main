@@ -87,6 +87,14 @@
 #define PRG_SANITIZER         1
 #define PRG_OKO             0
 
+#define CIRC_DEFAULT_FEED_COUNT 3
+#define CIRC_STOP_PUMP_HOTWATER 256L
+#define CIRC_TANK_S 64L
+#define CIRC_TANK_K 32L
+#define CIRC_PODP_SCHC 4L
+#define CIRC_PODP_KISL 2L
+#define CIRC_PODP_HOTWATER 1L
+
 enum selectablePrograms
 	{
 	SPROG_RINSING_CLEAN = 1,
@@ -503,6 +511,9 @@ class cipline_tech_object: public tech_object
 
 		~cipline_tech_object();
 
+		//Флаг формата описания устройств
+		char is_old_definition;
+
 		//работа с параметрами
 		static saved_params<float, true>* parpar;
 		float get_station_par(int parno);
@@ -510,6 +521,18 @@ class cipline_tech_object: public tech_object
 
 		///Флаг отсутствия нейтрализации
 		char no_neutro;
+
+		//Переменные для циркуляции
+		char circ_tank_s; //Циркулировать ли через танк со щелочью
+		char circ_tank_k; //Циркулировать ли через танк с кислотой
+		char circ_podp_water; //Подпитывать ли бачок на воде
+		char circ_podp_s;	//Подпитывать ли бачок на щелочи
+		char circ_podp_k;	//Подпитывать ли бачок на кислоте
+		char circ_podp_count; //текущее количество подпиток на операции
+		char circ_podp_max_count;	//максимальное количество подпиток на операции
+		char circ_water_no_pump_stop; //не останавливать насос при поялении верхнего уровня в бачке
+		char circ_was_feed; //флаг факта подпитки
+		unsigned long circ_max_timer; //таймер подпитки
 
 		//Рецепты
 		TRecipeManager* lineRecipes;

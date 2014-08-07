@@ -124,6 +124,17 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 
 	forcesortrr = 0;
 
+	//ѕеременные дл€ циркул€ции
+	circ_tank_s = 0;
+	circ_tank_k = 0;
+	circ_podp_water = 0;
+	circ_podp_s = 0;
+	circ_podp_k = 0;
+	circ_podp_count = 0;
+	circ_podp_max_count = 0;
+	circ_water_no_pump_stop = 0;
+	circ_max_timer = get_millisec();
+
 	is_in_evaluate_func = 0;
 	}
 
@@ -304,7 +315,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 
 void cipline_tech_object::initline()
 	{
-	char is_old_definition = 1;
+	is_old_definition = 1;
 	char devname[20] = {0};
 	sprintf(devname, "LINE%dV%d", number, number * 100);
 	if (((device*)V(devname))->get_type() == device::DT_NONE)
@@ -1211,7 +1222,7 @@ int cipline_tech_object::GoToStep( int cur, int param )
 		case 22:
 		case 23: return cur+1;
 		case 24:
-			if (100 == rt_par_float[P_PODP_CIRC])
+			if (circ_tank_s)
 				{
 				return 28;
 				}
@@ -1232,7 +1243,7 @@ int cipline_tech_object::GoToStep( int cur, int param )
 		case 42:
 		case 43: return cur+1;
 		case 44:
-			if (100 == rt_par_float[P_PODP_CIRC])
+			if (circ_tank_k)
 				{
 				return 48;
 				}
@@ -1881,6 +1892,15 @@ void cipline_tech_object::ResetLinesDevicesBeforeReset( void )
 	dev_upr_desinfection = 0;
 	dev_upr_cip_ready = 0;
 	dev_upr_cip_finished = 0;
+	//ѕеременные дл€ циркул€ции
+	circ_tank_s = 0;
+	circ_tank_k = 0;
+	circ_podp_water = 0;
+	circ_podp_s = 0;
+	circ_podp_k = 0;
+	circ_podp_count = 0;
+	circ_podp_max_count = 0;
+	circ_water_no_pump_stop = 0;
 	}
 
 int cipline_tech_object::SetCommand( int command )
@@ -3370,18 +3390,29 @@ int cipline_tech_object::InitOporCirc( int where, int step, int f )
 
 int cipline_tech_object::InitCirc( int what, int step, int f )
 	{
+	if (0 == f)
+		{
+		circ_podp_count = 0;
+		circ_was_feed = 0;
+		}
+	if (circ_was_feed)
+		{
+		circ_podp_count++;
+		circ_was_feed = 0;
+		}
+
 	float t=600, z=0;
 	unsigned long tm = 0;
 	ret_circ_flag = 0;
-	if (rt_par_float[P_PODP_CIRC] != 100)
-		{
-		V01->on();
-		V10->on();
-		}
-	else
+	if ((circ_tank_s && 28 == step) || (circ_tank_k && 48 == step))
 		{
 		V01->off();
 		V10->off();
+		}
+	else
+		{
+		V01->on();
+		V10->on();
 		}
 	V00->off();
 	V03->off();
@@ -3397,34 +3428,19 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 	switch (what)
 		{
 		case WATER:
-			if (100 == rt_par_float[P_PODP_CIRC])
-				{
-				V01->on();
-				V10->on();
-				}
 			t=rt_par_float[P_T_WP];
 			tm=(unsigned long)rt_par_float[PTM_OP]*1000;
 			break;
 		case SANITIZER:
-			if (100 == rt_par_float[P_PODP_CIRC])
-				{
-				V01->on();
-				V10->on();
-				}
 			t=rt_par_float[P_T_SANITIZER];
 			tm=(unsigned long)rt_par_float[PTM_SANITIZER]*1000;
 			break;
 		case HOT_WATER:
-			if (100 == rt_par_float[P_PODP_CIRC])
-				{
-				V01->on();
-				V10->on();
-				}
 			t=rt_par_float[P_T_D];
 			tm=(unsigned long)rt_par_float[PTM_D]*1000;
 			break;
 		case SHCH:
-			if (100 == rt_par_float[P_PODP_CIRC])
+			if (circ_tank_s)
 				{
 				V03->on();
 				V09->on();
@@ -3441,7 +3457,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 			z=parpar[0][P_CZAD_S];
 			break;
 		case KISL:
-			if (100 == rt_par_float[P_PODP_CIRC])
+			if (circ_tank_k)
 				{
 				V02->on();
 				V08->on();
@@ -3996,12 +4012,19 @@ int cipline_tech_object::Circ( int what )
 	SetRet(ON);
 #else
 
-	if ((!LH->is_active() && 0 == ret_circ_flag) || 100 == rt_par_float[P_PODP_CIRC])
+	if ((!LH->is_active() && 0 == ret_circ_flag) || circ_tank_s || circ_tank_k)
 		{
 		SetRet(ON);
 		}
 
-	if (LH->is_active() && V10->get_state() && 101 != rt_par_float[P_PODP_CIRC] && curstep != 66)
+	char dont_stop_pump = 0;
+
+	if (curstep == 66 && circ_water_no_pump_stop)
+		{
+		dont_stop_pump = 1;
+		}
+
+	if (LH->is_active() && V10->get_state() && !dont_stop_pump)
 		{
 		SetRet(OFF);
 		ret_circ_flag = 1;
@@ -4038,44 +4061,74 @@ int cipline_tech_object::Circ( int what )
 		{
 		case KISL:
 			rt_par_float[ STP_QAVK] = SAV[SAV_CONC]->Q();
-			if (1 == rt_par_float[P_PODP_CIRC])
+			if (circ_podp_k)
 				{
-				if (!LM->is_active() && !LL->is_active() && !LH->is_active())
+				if (!LM->is_active() && !LL->is_active() && !LH->is_active() && circ_podp_count < circ_podp_max_count)
 					{
 					V02->on();
+					if (0 == circ_was_feed)
+						{
+						circ_max_timer = get_millisec();
+						}
+					circ_was_feed = 1;
 					}
-				if (LM->is_active() || LH->is_active())
+				if (LM->is_active() || LH->is_active() || (circ_was_feed && get_delta_millisec(circ_max_timer) > 60000L))
 					{
 					V02->off();
+					if (1 == circ_was_feed)
+						{
+						circ_podp_count++;
+						}
+					circ_was_feed = 0;
 					}
 				}
 			break;
 		case SHCH:
 			rt_par_float[ STP_QAVS] = SAV[SAV_CONC]->Q();
-			if (1 == rt_par_float[P_PODP_CIRC])
+			if (circ_podp_s)
 				{
-				if (!LM->is_active() && !LL->is_active() && !LH->is_active())
+				if (!LM->is_active() && !LL->is_active() && !LH->is_active() && circ_podp_count < circ_podp_max_count)
 					{
 					V03->on();
+					if (0 == circ_was_feed)
+						{
+						circ_max_timer = get_millisec();
+						}
+					circ_was_feed = 1;
 					}
-				if (LM->is_active() || LH->is_active())
+				if (LM->is_active() || LH->is_active() || (circ_was_feed && get_delta_millisec(circ_max_timer) > 60000L))
 					{
 					V03->off();
+					if (1 == circ_was_feed)
+						{
+						circ_podp_count++;
+						}
+					circ_was_feed = 0;
 					}
 				}
 			break;
 		case WATER:
 		case HOT_WATER:
 		case SANITIZER:
-			if (1 == rt_par_float[P_PODP_CIRC] || 100 == rt_par_float[P_PODP_CIRC])
+			if (circ_podp_water)
 				{
-				if (!LM->is_active() && !LL->is_active() && !LH->is_active())
+				if (!LM->is_active() && !LL->is_active() && !LH->is_active() && circ_podp_count < circ_podp_max_count)
 					{
 					V00->on();
+					if (0 == circ_was_feed)
+						{
+						circ_max_timer = get_millisec();
+						}
+					circ_was_feed = 1;
 					}
-				if (LM->is_active() || LH->is_active())
+				if (LM->is_active() || LH->is_active() || (circ_was_feed && get_delta_millisec(circ_max_timer) > 60000L))
 					{
 					V00->off();
+					if (1 == circ_was_feed)
+						{
+						circ_podp_count++;
+						}
+					circ_was_feed = 0;
 					}
 				}
 			break;
@@ -4187,6 +4240,29 @@ int cipline_tech_object::init_object_devices()
 	u_int dev_no;
 	char devname[20] = {0};
 	device* dev;
+
+	unsigned long circflag = (unsigned long)(rt_par_float[P_PODP_CIRC]);
+	circ_tank_s = circflag & CIRC_TANK_S ? 1:0;
+	circ_tank_k = circflag & CIRC_TANK_K ? 1:0;
+	circ_podp_water = circflag & CIRC_PODP_HOTWATER ? 1:0;
+	circ_podp_s = circflag & CIRC_PODP_SCHC ? 1:0;
+	circ_podp_k = circflag & CIRC_PODP_KISL ? 1:0;
+	circ_podp_max_count = (circflag >> 12) & 0xFF;
+	if (0 == circ_podp_max_count)
+		{
+		circ_podp_max_count = CIRC_DEFAULT_FEED_COUNT;
+		}
+	circ_water_no_pump_stop = circflag & CIRC_STOP_PUMP_HOTWATER ? 1:0;
+
+	if ((circ_tank_s && circ_podp_s) || (circ_tank_k && circ_podp_k))
+		{
+		return ERR_WRONG_OS_OR_RECIPE_ERROR;
+		}
+#ifdef DEBUG
+	Print("Circ options:FW=%d,FS=%d,FK=%d,CS=%d,CK=%d,SP=%d,count=%d\n\r",
+		circ_podp_water, circ_podp_s, circ_podp_k, circ_tank_s, circ_tank_k, circ_water_no_pump_stop, circ_podp_max_count);
+#endif
+
 #ifdef DEBUG
 	Print("init_object_devices\n\r");
 #endif //DEBUG
