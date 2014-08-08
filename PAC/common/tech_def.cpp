@@ -799,12 +799,10 @@ int tech_object_manager::init_params()
 
     if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
         {
-        lua_call( lua_manager::get_instance()->get_Lua(), 0, 0 );
+        lua_manager::get_instance()->void_exec_lua_method( "", "init_params",
+            "int tech_object_manager::init_params()" );
         }
-    else
-        {
-        lua_remove( lua_manager::get_instance()->get_Lua(), -1 ); // stack: init_params
-        }
+    lua_remove( lua_manager::get_instance()->get_Lua(), -1 ); // stack: init_params
 
     return 0;
     }
@@ -890,10 +888,8 @@ void tech_object_manager::evaluate()
 
     if ( has_Lua_eval == 2 )
         {
-        lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
-            "eval" );
-
-        lua_call( lua_manager::get_instance()->get_Lua(), 0, 0 );
+        lua_manager::get_instance()->void_exec_lua_method( "", "eval",
+            "void tech_object_manager::evaluate()" );       
         }
     }
 //-----------------------------------------------------------------------------
@@ -905,9 +901,11 @@ int tech_object_manager::init_objects()
 
     if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
         {
-        lua_call( lua_manager::get_instance()->get_Lua(), 0, 0 );
+        lua_manager::get_instance()->void_exec_lua_method( "", "init",
+            "int tech_object_manager::init_objects()" );       
         }
-
+    lua_remove( lua_manager::get_instance()->get_Lua(), -1 ); // stack: init
+    
     return 0;
     }
 //-----------------------------------------------------------------------------
