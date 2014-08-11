@@ -1144,7 +1144,14 @@ device* ModbusServ::get_device( unsigned int group, unsigned int number )
 		case C_V:
 			if (line > 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT && number % 100 < 14)
 			{
-			sprintf(devname, "LINE%dV%d", line, number);
+			if (cipline_tech_object::Mdls[line - 1]->is_old_definition)
+				{
+				sprintf(devname, "LINE%dV%d", line, number);
+				}
+			else
+				{
+				sprintf(devname, "LINE%dV%d", line, number % 100);
+				}
 			ret = (device*)V(devname);
 			}
 			break;
