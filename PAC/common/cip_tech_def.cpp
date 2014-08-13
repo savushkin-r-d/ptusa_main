@@ -476,7 +476,7 @@ void cipline_tech_object::initline()
 #endif //DEBUG
 	Mdls[nmr - 1] = this;
 	MdlsCNT++;
-	rt_par_float[P_R_NO_FLOW] = 20;
+	rt_par_float[P_R_NO_FLOW] = 2;
 	rt_par_float[P_TM_R_NO_FLOW] = 20;
 	rt_par_float[P_TM_NO_FLOW_R] = 20;
 	rt_par_float[P_TM_NO_CONC] = 20;
