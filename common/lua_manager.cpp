@@ -498,13 +498,13 @@ int lua_manager::error_trace( lua_State * L )
 
     Print( "\tstack traceback:\n" );
     lua_Debug ar;
-    int level = 1;
+    int level = 0;
 
     while( lua_getstack( L, level, &ar ) )
         {
         lua_getinfo( L, "Sln", &ar );
-        Print( "\t\t%s:%d: in function '%s'\n",
-            ar.source, ar.currentline, ar.name );
+        Print( "\t\t%s:%d: in function '%s' ('%s')\n",
+            ar.source, ar.currentline, ar.name, ar.namewhat );
 
         level++;
         }
