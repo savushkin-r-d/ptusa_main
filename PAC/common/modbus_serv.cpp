@@ -293,14 +293,14 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							i++;
 							break;
 						case C_FE:
-							if (objnumber > 0 && objnumber / 2 <= (unsigned int)cipline_tech_object::MdlsCNT)
+							if (objnumber > 0)
 								{
 								PackFloat(((i_counter*)get_device(coilgroup, objnumber))->get_flow(),&outdata[3+i*2]);
 								}
 							i++;
 							break;
 						case C_CTR:
-							if (objnumber > 0 && objnumber / 2 <= (unsigned int)cipline_tech_object::MdlsCNT)
+							if (objnumber > 0)
 								{
 								PackFloat((float)((i_counter*)get_device(coilgroup, objnumber))->get_quantity(),&outdata[3+i*2]);
 								}
@@ -460,6 +460,13 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 												}
 											}
 										PackInt16(modstate, &outdata[3+i*2]);
+										break;
+									case MSACTRL_RETTEMP:
+										PackFloat(cipline_tech_object::Mdls[line]->rt_par_float[P_ZAD_PODOGR] - cipline_tech_object::Mdls[line]->rt_par_float[P_DELTA_TR], &outdata[3+i*2]);
+										i++;
+										break;
+									case MSACTRL_MSANUMBER:
+										PackInt16(cipline_tech_object::msa_number, &outdata[3+i*2]);
 										break;
 									default:
 										break;
