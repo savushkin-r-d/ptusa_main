@@ -498,7 +498,7 @@ int lua_manager::error_trace( lua_State * L )
 
     Print( "\tstack traceback:\n" );
     lua_Debug ar;
-    int level = 0;
+    int level = 1;
 
     while( lua_getstack( L, level, &ar ) )
         {
