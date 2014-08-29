@@ -81,7 +81,10 @@ class nn_manager
             p_pid->On();
 
             fopen_s( &data_stream, "..\\simul_system_data_.prn", "w" );
-            fprintf( data_stream, "new_control_val\tnew_plant_val\tnew_emulator_output_value\n" );
+            fprintf( data_stream,
+                "new_control_val\tnew_plant_val\t"
+                "z\t"
+                "p\ti\td\n" );
 
             nn2_emulator->init_weights();
             nn2_emulator->load_from_file( "..\\emul_q.data" );
@@ -152,8 +155,10 @@ class nn_manager
             float new_emulator_output_value = new_emulator_output[ 0 ] * nn2_emulator->get_q();
             nn2_out[ 0 ][ 0 ] = new_emulator_output_value;
            
-            fprintf( data_stream, "%f\t%f\t%f\n", 
-                new_control_val, new_plant_val, new_emulator_output_value );
+            fprintf( data_stream, "%f\t%f\t%f\t%f\t%f\t%f\t\n", 
+                new_control_val, new_plant_val, 
+                p_pid->get_z(),
+                10 * p_pid->get_p(), 10 * p_pid->get_i(), 100 * p_pid->get_d() );
 
             //Обучение эмулятора.
             static unsigned int time = 0;
@@ -193,7 +198,7 @@ class nn_manager
             
 #ifdef USE_LEARNING
             static unsigned int errors_tuner_cnt = 0;
-            if ( time > 40 )
+            if ( time > 10 )
                 {
                 if ( abs( tuner_err ) > 2.f / nn1_tuner->get_q() )
                     {
@@ -202,10 +207,10 @@ class nn_manager
 
                 if ( errors_tuner_cnt > 2 )
                     {
-                    //float tuner_future_err = ( p_pid->get_z() - new_plant_val ) / nn1_tuner->get_q();
-                    //tuner_future_sample->add_new_val_to_out_image( 0, tuner_future_err );
-                    //tuner_future_sample->add_new_val_to_out_image( 1, tuner_future_err );
-                    //tuner_future_sample->add_new_val_to_out_image( 2, tuner_future_err );
+                    float tuner_future_err = ( p_pid->get_z() - new_plant_val ) / nn1_tuner->get_q();
+                    tuner_future_sample->add_new_val_to_out_image( 0, tuner_future_err );
+                    tuner_future_sample->add_new_val_to_out_image( 1, tuner_future_err );
+                    tuner_future_sample->add_new_val_to_out_image( 2, tuner_future_err );
                     
                     //Вычисляем выход тюнера ПИД.            
                     float *new_PID_q = nn1_tuner->solve_out( tuner_sample->get_last_sample_x() ); 
