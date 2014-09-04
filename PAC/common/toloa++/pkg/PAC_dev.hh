@@ -1146,5 +1146,6 @@ class ModbusServ
     {
     public:
         static short int UnpackInt16( unsigned char* buf, int offset );
+        static float UnpackFloat( unsigned char* Buf, int offset  );
     }
 //-------------------------------------------------------------------------
