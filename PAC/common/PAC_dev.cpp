@@ -552,6 +552,11 @@ i_AI_device* device_manager::get_QT( const char *dev_name )
     return get_device( device::DT_QT, dev_name );
     }
 //-----------------------------------------------------------------------------
+wages* device_manager::get_WT( const char *dev_name )
+	{
+	return (wages*)get_device( device::DT_WT, dev_name );
+	}
+//-----------------------------------------------------------------------------
 wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                                              const char* dev_name, char * descr )
     {
@@ -698,6 +703,11 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             new_device      = new state_s( dev_name );
             new_wago_device = ( state_s* ) new_device;
             break;
+
+		case device::DT_WT:
+			new_device      = new wages( dev_name );
+			new_wago_device = ( wages* ) new_device;
+			break;
 
         default:
 #ifdef DEBUG
@@ -1811,6 +1821,46 @@ void AI1::direct_set_value( float new_value )
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+wages::wages( const char *dev_name) : analog_wago_device( dev_name, DT_WT, DST_NONE, ADDITIONAL_PARAM_COUNT )
+	{
+	set_par_name( P_NOMINAL_W,  0, "P_NOMINAL_W" );
+
+	}
+//-----------------------------------------------------------------------------
+void wages::tare()
+	{
+	Print("%f\t%f\t%f  %f\n",get_par(1,0), get_par(2,0), get_AI(0), get_AI(1));
+	return;
+	}
+//-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_WAGO_MODULES
+
+float wages::get_value()
+	{
+	return analog_wago_device::get_value();
+	}
+
+float wages::get_weight()
+	{
+	return 0;
+	}
+
+#endif // DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+
+float wages::get_value()
+	{
+	return get_AI( C_AI_INDEX, get_min_val(), get_max_val() );
+	}
+//-----------------------------------------------------------------------------
+void wages::direct_set_value( float new_value )
+	{
+	}
+
+#endif // DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
 float AO1::get_value()
@@ -2435,6 +2485,19 @@ i_AI_device* QT( const char *dev_name )
     {
     return G_DEVICE_MANAGER()->get_QT( dev_name );
     }
+//-----------------------------------------------------------------------------
+wages* WT( u_int dev_n )
+	{
+	static char name[ 20 ] = { 0 };
+	snprintf( name, sizeof( name ), "WT%d", dev_n );
+
+	return G_DEVICE_MANAGER()->get_WT( name );
+	}
+
+wages* WT( const char *dev_name )
+	{
+	return G_DEVICE_MANAGER()->get_WT( dev_name );
+	}
 //-----------------------------------------------------------------------------
 dev_stub* STUB()
     {

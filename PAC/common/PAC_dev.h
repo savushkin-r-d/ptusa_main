@@ -174,6 +174,16 @@ class i_mix_proof
         virtual void open_lower_seat() = 0;
     };
 //-----------------------------------------------------------------------------
+/// @brief Интерфейс весов.
+class i_wages
+	{
+	public:
+		/// @brief Тарировка.
+		virtual void tare() = 0;
+		///@brief Возвращает вес в килограммах
+		virtual float get_weight() = 0;
+	};
+//-----------------------------------------------------------------------------
 /// @brief Устройство на основе дискретного входа.
 ///
 /// Обратная связь, предельный уровень и т.д. являются примерами таких
@@ -328,7 +338,7 @@ class device : public i_DO_AO_device, public par_device
 
         enum CONSTANTS
             {
-            C_DEVICE_TYPE_CNT = 17,     ///< Количество типов устройств.
+            C_DEVICE_TYPE_CNT = 18,     ///< Количество типов устройств.
 
             C_MAX_NAME = 20
             };
@@ -358,6 +368,7 @@ class device : public i_DO_AO_device, public par_device
             DT_DO,      ///< Дискретный выходной сигнал.
             DT_AI,      ///< Аналоговый входной сигнал.
             DT_AO,      ///< Аналоговый выходной сигнал.
+			DT_WT,		///< Тензорезистор
             };
 
         /// Подтипы устройств.
@@ -1652,6 +1663,52 @@ class analog_input : public AI1
         u_int start_param_idx;
     };
 //-----------------------------------------------------------------------------
+/// @brief Датчик веса
+class wages : public analog_wago_device, public i_wages
+	{
+	public:
+		wages( const char *dev_name);
+
+		void tare();
+		float get_weight();
+
+	protected:
+
+		enum CONSTANTS
+			{
+			P_NOMINAL_W = 1,    ///< Номинальная нагрузка.
+			P_RKP = 2,			///< Рабочий коэффициент передачи
+			P_C0 = 3,
+			P_DT = 4,
+
+			ADDITIONAL_PARAM_COUNT = 4, ///< Количество параметров.
+
+			C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
+			};
+
+		/// @brief Получение максимального значения выхода устройства.
+		virtual float get_max_val()
+			{
+			return 0;
+			}
+
+		/// @brief Получение минимального значения выхода устройства.
+		virtual float get_min_val()
+			{
+			return 0;
+			}
+#ifdef DEBUG_NO_WAGO_MODULES
+		float get_value();
+#endif // DEBUG_NO_WAGO_MODULES
+
+#ifndef DEBUG_NO_WAGO_MODULES
+	public:
+		float get_value();
+		void  direct_set_value( float new_value );
+
+#endif // DEBUG_NO_WAGO_MODULES
+	};
+//-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым выходом.
 ///
 /// Это может быть управляемый клапан...
@@ -2163,6 +2220,9 @@ class device_manager: public i_Lua_save_device
         /// @brief Получение текущей концентрации по номеру.
         i_AI_device* get_QT( const char *dev_name );
 
+		/// @brief Получение весов по номеру.
+		wages* get_WT( const char *dev_name );
+
         /// @brief Получение единственного экземпляра класса.
         static device_manager* get_instance();
 
@@ -2469,6 +2529,14 @@ i_DO_device* DO( const char *dev_name );
 /// возвращается заглушка (@ref dev_stub).
 i_AI_device* QT( u_int dev_n );
 i_AI_device* QT( const char *dev_name );
+//-----------------------------------------------------------------------------
+/// @brief Получение весов по номеру.
+///
+/// @param number - номер весов.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+wages* WT( u_int dev_n );
+wages* WT( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///

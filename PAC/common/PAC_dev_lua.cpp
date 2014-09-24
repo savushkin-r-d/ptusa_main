@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 09/04/14 08:48:26.
+** Generated automatically by tolua++-1.0.92 on 09/23/14 17:00:09.
 */
 
 #ifndef __cplusplus
@@ -84,24 +84,25 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"device_manager");
  tolua_usertype(tolua_S,"ModbusServ");
  tolua_usertype(tolua_S,"modbus_client");
- tolua_usertype(tolua_S,"mode");
  tolua_usertype(tolua_S,"rm_manager");
+ tolua_usertype(tolua_S,"mode");
  tolua_usertype(tolua_S,"cipline_tech_object");
- tolua_usertype(tolua_S,"PID");
+ tolua_usertype(tolua_S,"mode_manager");
+ tolua_usertype(tolua_S,"i_Lua_save_device");
  tolua_usertype(tolua_S,"i_DI_device");
  tolua_usertype(tolua_S,"saved_params_u_int_4");
- tolua_usertype(tolua_S,"i_Lua_save_device");
  tolua_usertype(tolua_S,"PAC_info");
- tolua_usertype(tolua_S,"mode_manager");
+ tolua_usertype(tolua_S,"PID");
+ tolua_usertype(tolua_S,"i_counter");
  tolua_usertype(tolua_S,"i_DO_device");
  tolua_usertype(tolua_S,"i_AO_device");
- tolua_usertype(tolua_S,"timer_manager");
+ tolua_usertype(tolua_S,"i_wages");
  tolua_usertype(tolua_S,"valve");
  tolua_usertype(tolua_S,"i_AI_device");
  tolua_usertype(tolua_S,"wago_manager");
  tolua_usertype(tolua_S,"run_time_params_float");
  tolua_usertype(tolua_S,"run_time_params_u_int_4");
- tolua_usertype(tolua_S,"i_counter");
+ tolua_usertype(tolua_S,"timer_manager");
  tolua_usertype(tolua_S,"tech_object");
 }
 
@@ -1084,6 +1085,69 @@ static int tolua_PAC_dev_device_set_descr00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: tare of class  i_wages */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_wages_tare00
+static int tolua_PAC_dev_i_wages_tare00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"i_wages",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  i_wages* self = (i_wages*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'tare'", NULL);
+#endif
+  {
+   self->tare();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'tare'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_weight of class  i_wages */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_wages_get_weight00
+static int tolua_PAC_dev_i_wages_get_weight00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"i_wages",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  i_wages* self = (i_wages*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_weight'", NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->get_weight();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_weight'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* function: V */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_V00
 static int tolua_PAC_dev_V00(lua_State* tolua_S)
@@ -1572,6 +1636,35 @@ static int tolua_PAC_dev_QT00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'QT'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* function: WT */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_WT00
+static int tolua_PAC_dev_WT00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
+  {
+   i_wages* tolua_ret = (i_wages*)  WT(dev_name);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_wages");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'WT'.",&tolua_err);
  return 0;
 #endif
 }
@@ -7824,6 +7917,11 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"DT_AI",device::DT_AI);
    tolua_constant(tolua_S,"DT_AO",device::DT_AO);
   tolua_endmodule(tolua_S);
+  tolua_cclass(tolua_S,"i_wages","i_wages","",NULL);
+  tolua_beginmodule(tolua_S,"i_wages");
+   tolua_function(tolua_S,"tare",tolua_PAC_dev_i_wages_tare00);
+   tolua_function(tolua_S,"get_weight",tolua_PAC_dev_i_wages_get_weight00);
+  tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"V",tolua_PAC_dev_V00);
   tolua_function(tolua_S,"VC",tolua_PAC_dev_VC00);
   tolua_function(tolua_S,"M",tolua_PAC_dev_M00);
@@ -7841,6 +7939,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_function(tolua_S,"DI",tolua_PAC_dev_DI00);
   tolua_function(tolua_S,"DO",tolua_PAC_dev_DO00);
   tolua_function(tolua_S,"QT",tolua_PAC_dev_QT00);
+  tolua_function(tolua_S,"WT",tolua_PAC_dev_WT00);
   tolua_function(tolua_S,"STUB",tolua_PAC_dev_STUB00);
   tolua_function(tolua_S,"DEVICE",tolua_PAC_dev_DEVICE00);
   tolua_cclass(tolua_S,"dev_stub","dev_stub","",NULL);
