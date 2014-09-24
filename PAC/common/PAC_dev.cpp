@@ -1832,17 +1832,17 @@ void wages::tare()
 	Print("%f\t%f\t%f  %f\n",get_par(1,0), get_par(2,0), get_AI(0), get_AI(1));
 	return;
 	}
+
+float wages::get_weight()
+	{
+	return 0;
+	}
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_WAGO_MODULES
 
 float wages::get_value()
 	{
 	return analog_wago_device::get_value();
-	}
-
-float wages::get_weight()
-	{
-	return 0;
 	}
 
 #endif // DEBUG_NO_WAGO_MODULES
