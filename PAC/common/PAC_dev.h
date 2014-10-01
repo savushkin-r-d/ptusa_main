@@ -1673,7 +1673,7 @@ class wages : public analog_wago_device, public i_wages
 		float get_weight();
 
 	protected:
-                
+
 		enum CONSTANTS
 			{
 			P_NOMINAL_W = 1,    ///< Номинальная нагрузка.
@@ -1684,17 +1684,17 @@ class wages : public analog_wago_device, public i_wages
 			ADDITIONAL_PARAM_COUNT = 4, ///< Количество параметров.
 
 			C_AI_Ud = 0,             ///< Индекс канала Ud(милливольты).
-                        C_AI_Uref = 1,           ///< Индекс канала Uref(вольты).
+			C_AI_Uref = 1,           ///< Индекс канала Uref(вольты).
 			};
-                        
-                        enum WAGES_STATES
-                        {
-                            S_NONE = 0,
-                            S_TARE = 1,
-                        };
-                        
-                float weight;
-                unsigned long filter_time;
+
+		enum WAGES_STATES
+			{
+			S_NONE = 0,
+			S_TARE = 1,
+			};
+
+		float weight;
+		unsigned long filter_time;
 
 #ifdef DEBUG_NO_WAGO_MODULES
 		float get_value();
@@ -1704,30 +1704,19 @@ class wages : public analog_wago_device, public i_wages
 	public:
 		float get_value();
 		void  direct_set_value( float new_value );
-                void direct_set_state( int new_state );
+		void direct_set_state( int new_state );
 
 #endif // DEBUG_NO_WAGO_MODULES
-        public:
-            int set_cmd( const char *prop, u_int idx, double val )
-                {
-                switch ( prop[ 0 ] )
-                    {
-                    default:
-                        return device::set_cmd( prop, idx, val );
-                    }
+	public:
+		int get_state()
+			{
+			return 0;
+			}
 
-                return 0;
-                }
-            
-            int get_state()
-                {
-                return 0;
-                }
-            
-            int save_device_ex( char *buff )
-                {
-                return sprintf( buff, "W=%.3f, ", get_weight() );
-                }
+		int save_device_ex( char *buff )
+			{
+			return sprintf( buff, "W=%.3f, ", get_value() );
+			}
 	};
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым выходом.
