@@ -1673,30 +1673,29 @@ class wages : public analog_wago_device, public i_wages
 		float get_weight();
 
 	protected:
-
+                
 		enum CONSTANTS
 			{
 			P_NOMINAL_W = 1,    ///< Номинальная нагрузка.
-			P_RKP = 2,			///< Рабочий коэффициент передачи
-			P_C0 = 3,
-			P_DT = 4,
+			P_RKP = 2,          ///< Рабочий коэффициент передачи
+			P_C0 = 3,           ///< Коррекция нуля
+			P_DT = 4,           ///< Коэффициент фильтра
 
 			ADDITIONAL_PARAM_COUNT = 4, ///< Количество параметров.
 
-			C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
+			C_AI_Ud = 0,             ///< Индекс канала Ud(милливольты).
+                        C_AI_Uref = 1,           ///< Индекс канала Uref(вольты).
 			};
+                        
+                        enum WAGES_STATES
+                        {
+                            S_NONE = 0,
+                            S_TARE = 1,
+                        };
+                        
+                float weight;
+                unsigned long filter_time;
 
-		/// @brief Получение максимального значения выхода устройства.
-		virtual float get_max_val()
-			{
-			return 0;
-			}
-
-		/// @brief Получение минимального значения выхода устройства.
-		virtual float get_min_val()
-			{
-			return 0;
-			}
 #ifdef DEBUG_NO_WAGO_MODULES
 		float get_value();
 #endif // DEBUG_NO_WAGO_MODULES
@@ -1705,8 +1704,30 @@ class wages : public analog_wago_device, public i_wages
 	public:
 		float get_value();
 		void  direct_set_value( float new_value );
+                void direct_set_state( int new_state );
 
 #endif // DEBUG_NO_WAGO_MODULES
+        public:
+            int set_cmd( const char *prop, u_int idx, double val )
+                {
+                switch ( prop[ 0 ] )
+                    {
+                    default:
+                        return device::set_cmd( prop, idx, val );
+                    }
+
+                return 0;
+                }
+            
+            int get_state()
+                {
+                return 0;
+                }
+            
+            int save_device_ex( char *buff )
+                {
+                return sprintf( buff, "W=%.3f, ", get_weight() );
+                }
 	};
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым выходом.
@@ -2220,8 +2241,8 @@ class device_manager: public i_Lua_save_device
         /// @brief Получение текущей концентрации по номеру.
         i_AI_device* get_QT( const char *dev_name );
 
-		/// @brief Получение весов по номеру.
-		wages* get_WT( const char *dev_name );
+        /// @brief Получение весов по номеру.
+        wages* get_WT( const char *dev_name );
 
         /// @brief Получение единственного экземпляра класса.
         static device_manager* get_instance();

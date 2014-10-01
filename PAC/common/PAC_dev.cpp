@@ -1824,25 +1824,43 @@ void AI1::direct_set_value( float new_value )
 wages::wages( const char *dev_name) : analog_wago_device( dev_name, DT_WT, DST_NONE, ADDITIONAL_PARAM_COUNT )
 	{
 	set_par_name( P_NOMINAL_W,  0, "P_NOMINAL_W" );
-
+        set_par_name( P_RKP, 0, "P_RKP");
+        set_par_name( P_C0, 0, "P_CZ" );
+        set_par_name( P_DT, 0, "P_DT");
+        weight = 0;
+        filter_time = get_millisec();
 	}
 //-----------------------------------------------------------------------------
 void wages::tare()
 	{
-	Print("%f\t%f\t%f  %f\n",get_par(1,0), get_par(2,0), get_AI(0), get_AI(1));
+        set_par(P_C0, 0, -weight);
 	return;
 	}
 
 float wages::get_weight()
 	{
-	return 0;
+        if (get_delta_millisec(filter_time) > 500)
+        {
+            filter_time = get_millisec();
+            float rkp = get_par(P_RKP, 0);
+            if (0 == rkp) return -1001;
+            float uref = get_AI(C_AI_Uref);
+            if (0 == uref) return -1002;
+            float filterval = get_par(P_DT, 0);
+            float now_weight = get_AI(C_AI_Ud) / rkp / uref * get_par(P_NOMINAL_W, 0);
+            if (fabs(now_weight - weight) > filterval)
+            {
+                weight = now_weight;
+            }
+        }
+        return weight + get_par(P_C0, 0);
 	}
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_WAGO_MODULES
 
 float wages::get_value()
 	{
-	return analog_wago_device::get_value();
+	return weight;
 	}
 
 #endif // DEBUG_NO_WAGO_MODULES
@@ -1851,12 +1869,23 @@ float wages::get_value()
 
 float wages::get_value()
 	{
-	return get_AI( C_AI_INDEX, get_min_val(), get_max_val() );
+	return get_weight();
 	}
 //-----------------------------------------------------------------------------
 void wages::direct_set_value( float new_value )
 	{
+        weight = new_value;
 	}
+
+void wages::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case S_TARE:
+            tare();
+            break;
+        }
+    }
 
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
