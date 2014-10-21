@@ -176,13 +176,13 @@ class i_mix_proof
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс весов.
 class i_wages
-	{
-	public:
-		/// @brief Тарировка.
-		virtual void tare() = 0;
-		///@brief Возвращает вес в килограммах
-		virtual float get_weight() = 0;
-	};
+    {
+    public:
+        /// @brief Тарировка.
+        virtual void tare() = 0;
+        ///@brief Возвращает вес в килограммах
+        virtual float get_weight() = 0;
+    };
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе дискретного входа.
 ///
@@ -368,7 +368,8 @@ class device : public i_DO_AO_device, public par_device
             DT_DO,      ///< Дискретный выходной сигнал.
             DT_AI,      ///< Аналоговый входной сигнал.
             DT_AO,      ///< Аналоговый выходной сигнал.
-			DT_WT,		///< Тензорезистор
+            DT_WT,      ///< Тензорезистор.
+            DT_PT,      ///< Давление (значение).
             };
 
         /// Подтипы устройств.
@@ -392,9 +393,12 @@ class device : public i_DO_AO_device, public par_device
 
             //M,
             DST_M = 1,          ///< Мотор без управления частотой вращения.
-            DST_M_FREQ,         ///< Мотор с управлением частотой вращения.
-            DST_M_REV, 	        ///< Мотор с реверсом с управлением частотой вращения.
-            DST_M_REV_FREQ,     ///< Мотор с реверсом без управления частотой вращения.
+            DST_M_FREQ,         ///< Мотор с управлением частотой вращения.           
+
+            DST_M_REV,          ///< Мотор с реверсом с управлением частотой вращения. Реверс включается совместно.
+            DST_M_REV_FREQ,     ///< Мотор с реверсом без управления частотой вращения. Реверс включается совместно.
+            DST_M_REV_2,        ///< Мотор с реверсом с управлением частотой вращения. Реверс включается отдельно.
+            DST_M_REV_FREQ_2,   ///< Мотор с реверсом без управления частотой вращения. Реверс включается отдельно. 
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -568,7 +572,7 @@ class analog_wago_device : public device, public wago_device
             device::DEVICE_SUB_TYPE sub_type,
             u_int par_cnt ):
         device( dev_name, type, sub_type, par_cnt ),
-        wago_device( dev_name )
+            wago_device( dev_name )
 #ifdef DEBUG_NO_WAGO_MODULES
             ,value( 0 )
 #endif  // DEBUG_NO_WAGO_MODULES
@@ -740,9 +744,9 @@ class valve: public digital_wago_device
         /// связи, ручного режима, ...).
         int get_state()
 #if _MSC_VER >= 1700
-        final;
+            final;
 #else
-        ;
+            ;
 #endif
 
 #ifdef DEBUG_NO_WAGO_MODULES
@@ -964,7 +968,7 @@ class valve_DO1_DI2 : public valve
     {
     public:
         valve_DO1_DI2( const char *dev_name ):
-          valve( true, true, dev_name, DT_V, DST_V_DO1_DI2 )
+            valve( true, true, dev_name, DT_V, DST_V_DO1_DI2 )
             {
             }
 
@@ -1139,7 +1143,7 @@ class valve_mix_proof : public i_mix_proof,  public valve
             DI_INDEX_CLOSE,     ///< Индекс канала дискретного входа Закрыт.
             };
 
-         void direct_set_state( int new_state );
+        void direct_set_state( int new_state );
 
 #ifndef DEBUG_NO_WAGO_MODULES
         void direct_on();
@@ -1254,9 +1258,9 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
             char state = data[ MAILBOX_OFFSET + AS_number / 2 ];
 
             if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-            	{
+                {
                 state >>= 4;
-            	}
+                }
 
             int o = ( state & C_OPEN ) > 0 ? 1 : 0;
             int l = ( state & C_LOWER_SEAT ) > 0 ? 1 : 0;
@@ -1278,9 +1282,9 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
             char AO_state = AO_data[ MAILBOX_OFFSET + AS_number / 2 ];
 
             if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-            	{
+                {
                 AO_state >>= 4;
-            	}
+                }
 
             int o = ( AO_state & C_OPEN ) > 0 ? 1 : 0;
             int l = ( AO_state & C_LOWER_SEAT ) > 0 ? 1 : 0;
@@ -1290,9 +1294,9 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
             char AI_state = AI_data[ MAILBOX_OFFSET + AS_number / 2 ];
 
             if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-            	{
+                {
                 AI_state >>= 4;
-            	}
+                }
 
             int i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0;
             int i1 = ( AI_state & S_OPENED ) > 0 ? 1 : 0;
@@ -1307,7 +1311,7 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
             if ( o == 0 && u == 1 ) return true;
 
             if ( get_delta_millisec( start_switch_time ) <
-                 get_par( valve::P_ON_TIME, 0 ) )
+                get_par( valve::P_ON_TIME, 0 ) )
                 {
                 return true;
                 }
@@ -1323,9 +1327,9 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
             char AI_state = AI_data[ MAILBOX_OFFSET + AS_number / 2 ];
 
             if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-            	{
+                {
                 AI_state >>= 4;
-            	}
+                }
 
             int i0 = AI_state & S_CLOSED;
 
@@ -1338,9 +1342,9 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
             char AI_state = AI_data[ MAILBOX_OFFSET + AS_number / 2 ];
 
             if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-            	{
+                {
                 AI_state >>= 4;
-            	}
+                }
 
             int i1 = AI_state & S_OPENED;
 
@@ -1354,9 +1358,9 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
             char read_state = *write_state;
 
             if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-            	{
+                {
                 read_state >>= 4;
-            	}
+                }
 
             int o = ( read_state & C_OPEN ) > 0 ? 1 : 0;
 
@@ -1383,9 +1387,9 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
             char read_state = *write_state;
 
             if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-            	{
+                {
                 read_state >>= 4;
-            	}
+                }
 
             int o = ( read_state & C_OPEN ) > 0 ? 1 : 0;
 
@@ -1406,13 +1410,13 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
                 *write_state &= ~C_LOWER_SEAT;
                 }
 
-//            if ( strcmp( get_name(), "H1V1" ) == 0 )
-//                {
-//                Print( "AO_INDEX = %d\n", AO_INDEX );
-//                Print( "AS_number = %d\n", AS_number);
-//
-//                Print( "*write_state = %d\n", ( int ) *write_state );
-//                }
+            //            if ( strcmp( get_name(), "H1V1" ) == 0 )
+            //                {
+            //                Print( "AO_INDEX = %d\n", AO_INDEX );
+            //                Print( "AS_number = %d\n", AS_number);
+            //
+            //                Print( "*write_state = %d\n", ( int ) *write_state );
+            //                }
             }
 #endif // DEBUG_NO_WAGO_MODULES
 
@@ -1603,12 +1607,38 @@ class temperature_e : public AI1
 class level_e : public AI1
     {
     public:
-        level_e( const char *dev_name ): AI1( dev_name, DT_TE, DST_NONE, 0, 0 )
+        level_e( const char *dev_name ): AI1( dev_name, DT_LT, DST_NONE, 0, 0 )
             {
             }
 
         float get_max_val();
         float get_min_val();
+    };
+//-----------------------------------------------------------------------------
+/// @brief Текущее давление.
+class pressure_e : public AI1
+    {
+    public:
+        pressure_e( const char *dev_name ): AI1( dev_name, DT_PT, DST_NONE,
+            ADDITIONAL_PARAM_COUNT, &start_param_idx )
+            {
+            set_par_name( P_MIN_V,  start_param_idx, "P_MIN_V" );
+            set_par_name( P_MAX_V,  start_param_idx, "P_MAX_V" );
+            }
+
+        float get_max_val();
+        float get_min_val();
+
+    private:
+        enum CONSTANTS
+            {
+            ADDITIONAL_PARAM_COUNT = 2,
+
+            P_MIN_V = 1,   ///< Индекс параметра минимального значения.
+            P_MAX_V,       ///< Индекс параметра максимального значения.
+            };
+
+        u_int start_param_idx;
     };
 //-----------------------------------------------------------------------------
 /// @brief Концентрация.
@@ -1665,59 +1695,59 @@ class analog_input : public AI1
 //-----------------------------------------------------------------------------
 /// @brief Датчик веса
 class wages : public analog_wago_device, public i_wages
-	{
-	public:
-		wages( const char *dev_name);
+    {
+    public:
+        wages( const char *dev_name);
 
-		void tare();
-		float get_weight();
+        void tare();
+        float get_weight();
 
-	protected:
+    protected:
 
-		enum CONSTANTS
-			{
-			P_NOMINAL_W = 1,    ///< Номинальная нагрузка.
-			P_RKP = 2,          ///< Рабочий коэффициент передачи
-			P_C0 = 3,           ///< Коррекция нуля
-			P_DT = 4,           ///< Коэффициент фильтра
+        enum CONSTANTS
+            {
+            P_NOMINAL_W = 1,    ///< Номинальная нагрузка.
+            P_RKP = 2,          ///< Рабочий коэффициент передачи
+            P_C0 = 3,           ///< Коррекция нуля
+            P_DT = 4,           ///< Коэффициент фильтра
 
-			ADDITIONAL_PARAM_COUNT = 4, ///< Количество параметров.
+            ADDITIONAL_PARAM_COUNT = 4, ///< Количество параметров.
 
-			C_AI_Ud = 0,             ///< Индекс канала Ud(милливольты).
-			C_AI_Uref = 1,           ///< Индекс канала Uref(вольты).
-			};
+            C_AI_Ud = 0,             ///< Индекс канала Ud(милливольты).
+            C_AI_Uref = 1,           ///< Индекс канала Uref(вольты).
+            };
 
-		enum WAGES_STATES
-			{
-			S_NONE = 0,
-			S_TARE = 1,
-			};
+        enum WAGES_STATES
+            {
+            S_NONE = 0,
+            S_TARE = 1,
+            };
 
-		float weight;
-		unsigned long filter_time;
+        float weight;
+        unsigned long filter_time;
 
 #ifdef DEBUG_NO_WAGO_MODULES
-		float get_value();
+        float get_value();
 #endif // DEBUG_NO_WAGO_MODULES
 
 #ifndef DEBUG_NO_WAGO_MODULES
-	public:
-		float get_value();
-		void  direct_set_value( float new_value );
-		void direct_set_state( int new_state );
+    public:
+        float get_value();
+        void  direct_set_value( float new_value );
+        void direct_set_state( int new_state );
 
 #endif // DEBUG_NO_WAGO_MODULES
-	public:
-		int get_state()
-			{
-			return 0;
-			}
+    public:
+        int get_state()
+            {
+            return 0;
+            }
 
-		int save_device_ex( char *buff )
-			{
-			return sprintf( buff, "W=%.3f, ", get_value() );
-			}
-	};
+        int save_device_ex( char *buff )
+            {
+            return sprintf( buff, "W=%.3f, ", get_value() );
+            }
+    };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым выходом.
 ///
@@ -1756,18 +1786,18 @@ class analog_output : public AO1
     public:
         analog_output( const char *dev_name ) :
             AO1( dev_name, DT_AO, DST_NONE, ADDITIONAL_PARAM_COUNT )
-              {
-              }
+            {
+            }
 
-          float get_min_value()
-              {
-              return get_par( P_MIN_VALUE, 0 );
-              }
+        float get_min_value()
+            {
+            return get_par( P_MIN_VALUE, 0 );
+            }
 
-          float get_max_value()
-              {
-              return get_par( P_MAX_VALUE, 0 );
-              }
+        float get_max_value()
+            {
+            return get_par( P_MAX_VALUE, 0 );
+            }
 
     private:
         enum CONSTANTS
@@ -2095,16 +2125,16 @@ class counter : public device,
             {
             switch ( prop[ 0 ] )
                 {
-            case 'F':
-                flow_value = ( float ) val;
-                break;
+                case 'F':
+                    flow_value = ( float ) val;
+                    break;
 
-            case 'A': //ABS_V
-                abs_value = ( u_int ) val;
-                break;
+                case 'A': //ABS_V
+                    abs_value = ( u_int ) val;
+                    break;
 
-            default:
-                return device::set_cmd( prop, idx, val );
+                default:
+                    return device::set_cmd( prop, idx, val );
                 }
 
             return 0;
@@ -2172,9 +2202,9 @@ class device_manager: public i_Lua_save_device
         device* get_device( u_int serial_dev_n )
             {
             if ( serial_dev_n < project_devices.size() )
-            	{
+                {
                 return project_devices[ serial_dev_n ];
-            	}
+                }
 
             return &stub;
             }
@@ -2226,6 +2256,9 @@ class device_manager: public i_Lua_save_device
 
         /// @brief Получение световой сигнализации.
         i_DO_device* get_HL( const char *dev_name );
+
+        /// @brief Получение текущего давления по номеру.
+        i_AI_device* get_PT( const char *dev_name );
 
         /// @brief Получение текущей концентрации по номеру.
         i_AI_device* get_QT( const char *dev_name );
@@ -2531,6 +2564,14 @@ i_DI_device* DI( const char *dev_name );
 /// возвращается заглушка (@ref dev_stub).
 i_DO_device* DO( u_int dev_n);
 i_DO_device* DO( const char *dev_name );
+//-----------------------------------------------------------------------------
+/// @brief Получение текущего давления по номеру.
+///
+/// @param number - номер текущего давления.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+i_AI_device* PT( u_int dev_n );
+i_AI_device* PT( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение текущей концентрации по номеру.
 ///

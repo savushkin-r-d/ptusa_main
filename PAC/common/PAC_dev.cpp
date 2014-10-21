@@ -547,6 +547,11 @@ i_DO_device* device_manager::get_HL( const char *dev_name )
     return get_device( device::DT_HL, dev_name );
     }
 //-----------------------------------------------------------------------------
+i_AI_device* device_manager::get_PT( const char *dev_name )
+    {
+    return get_device( device::DT_PT, dev_name );
+    }
+//-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_QT( const char *dev_name )
     {
     return get_device( device::DT_QT, dev_name );
@@ -672,6 +677,11 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
         case device::DT_DO:
             new_device      = new DO_signal( dev_name );
             new_wago_device = ( DO_signal* ) new_device;
+            break;
+
+        case device::DT_PT:
+            new_device      = new pressure_e( dev_name );
+            new_wago_device = ( pressure_e* ) new_device;
             break;
 
         case device::DT_QT:
@@ -1821,7 +1831,8 @@ void AI1::direct_set_value( float new_value )
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-wages::wages( const char *dev_name) : analog_wago_device( dev_name, DT_WT, DST_NONE, ADDITIONAL_PARAM_COUNT )
+wages::wages( const char *dev_name ) : analog_wago_device( 
+    dev_name, DT_WT, DST_NONE, ADDITIONAL_PARAM_COUNT )
 	{
 	set_par_name( P_NOMINAL_W,  0, "P_NOMINAL_W" );
 	set_par_name( P_RKP, 0, "P_RKP");
@@ -1994,6 +2005,34 @@ void motor::direct_set_state( int new_state )
             }
         }
 
+    if ( sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
+        {
+        if ( new_state == 2 )
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            state = 2;
+#else
+            // Выключение прямого пуска.
+            int o = get_DO( DO_INDEX );
+            if ( 1 == o )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX, 0 );
+                }
+
+            // Включение реверса.
+            o = get_DO( DO_INDEX_REVERSE );
+            if ( 0 == o )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX_REVERSE, 1 );
+                }
+#endif // DEBUG_NO_WAGO_MODULES
+
+            return;
+            }
+        }
+
     if ( new_state )
         {
         direct_on();
@@ -2012,7 +2051,8 @@ int motor::get_state()
     int o  = get_DO( DO_INDEX );
     int i  = get_DI( DI_INDEX );
 
-    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
+        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
         {
         int ro = get_DO( DO_INDEX_REVERSE );
 
@@ -2028,10 +2068,22 @@ int motor::get_state()
             return 1;
             }
 
-        if ( 1 == ro && 1 == o &&  1 == i )
+        if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
             {
-            start_switch_time = get_millisec();
-            return 2;
+            if ( 1 == ro && 1 == o && 1 == i )
+                {
+                start_switch_time = get_millisec();
+                return 2;
+                }
+            }
+
+        if ( sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
+            {
+            if ( 1 == ro && 0 == o && 1 == i )
+                {
+                start_switch_time = get_millisec();
+                return 2;
+                }
             }
         }
     else
@@ -2059,7 +2111,8 @@ void motor::direct_on()
 #ifdef DEBUG_NO_WAGO_MODULES
     state = 1;
 #else
-    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
+        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
         {
         // Выключение реверса.
         int o = get_DO( DO_INDEX_REVERSE );
@@ -2091,7 +2144,8 @@ void motor::direct_off()
         set_DO( DO_INDEX, 0 );
         }
 
-    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
+        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
         {
         // Отключение реверса.
         o = get_DO( DO_INDEX_REVERSE );
@@ -2109,7 +2163,8 @@ void motor::direct_off()
 int motor::save_device_ex( char *buff )
     {
     int res = 0;
-    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ )
+    if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
+        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
         {
         res = sprintf( buff, "R=%d,", get_DO( DO_INDEX_REVERSE ) );
         }
@@ -2138,6 +2193,17 @@ level_s::level_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
     DI1( dev_name, DT_LS, sub_type, ADDITIONAL_PARAMS_COUNT )
     {
     set_par_name( P_DT,  0, "P_DT" );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float pressure_e::get_max_val()
+    {
+    return get_par( P_MAX_V, start_param_idx );
+    }
+//-----------------------------------------------------------------------------
+float pressure_e::get_min_val()
+    {
+    return get_par( P_MIN_V, start_param_idx );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2500,7 +2566,6 @@ i_DO_device* DO( u_int dev_n )
 	snprintf( name, sizeof( name ), "DO%d", dev_n );
 	return G_DEVICE_MANAGER()->get_DO( name );
 	}
-
 //-----------------------------------------------------------------------------
 i_AI_device* QT( u_int dev_n )
     {
@@ -2513,6 +2578,19 @@ i_AI_device* QT( u_int dev_n )
 i_AI_device* QT( const char *dev_name )
     {
     return G_DEVICE_MANAGER()->get_QT( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_AI_device* PT( u_int dev_n )
+    {
+    static char name[ 20 ] = { 0 };
+    snprintf( name, sizeof( name ), "PT%d", dev_n );
+
+    return G_DEVICE_MANAGER()->get_PT( name );
+    }
+
+i_AI_device* PT( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_PT( dev_name );
     }
 //-----------------------------------------------------------------------------
 wages* WT( u_int dev_n )
