@@ -244,10 +244,10 @@ class i_wages
 		///
 		/// @return - none.
 		void tare();
-		/// @brief Получить вес.
+		/// @brief Получение текущего состояния устройства.
 		///
 		/// @return - Вес в кг.
-		float get_weight();
+		float get_value();
 	};
 //-----------------------------------------------------------------------------
 /// @brief Получение клапана по имени.
@@ -1119,6 +1119,8 @@ class cipline_tech_object: public tech_object
 		run_time_params_float   rt_par_float;///< Рабочие параметры, тип float.
 		float get_station_par(int parno);
 		void set_station_par(int parno, float newval);
+		float get_selfclean_par(int parno);
+		void set_selfclean_par(int parno, float newval);
 		
 		int set_cmd( const char *prop, unsigned int idx, const char* val );
 		int set_cmd( const char *prop, unsigned int idx, double val );

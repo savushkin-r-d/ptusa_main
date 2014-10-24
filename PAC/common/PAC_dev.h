@@ -181,7 +181,7 @@ class i_wages
         /// @brief Тарировка.
         virtual void tare() = 0;
         ///@brief Возвращает вес в килограммах
-        virtual float get_weight() = 0;
+        virtual float get_value() = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе дискретного входа.
@@ -1728,12 +1728,12 @@ class wages : public analog_wago_device, public i_wages
 
 #ifdef DEBUG_NO_WAGO_MODULES
         float get_value();
+		void  direct_set_value( float new_value );
 #endif // DEBUG_NO_WAGO_MODULES
 
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         float get_value();
-        void  direct_set_value( float new_value );
         void direct_set_state( int new_state );
 
 #endif // DEBUG_NO_WAGO_MODULES

@@ -20,6 +20,10 @@
 #define SORT_SWITCH_DELAY 3000
 ///@brief Минимальное время соблюдения условий для включения запорного клапана пара
 #define STEAM_VALVE_MIN_DELAY 1200L
+///@brief Количество параметров станции
+#define STATION_PAR_COUNT 40
+///@brief Количество параметров для программы самоочистки
+#define SELFCLEAN_PAR_COUNT 20
 
 #define TMR_CNT    10
 #define SAV_CNT    1
@@ -50,9 +54,8 @@
 #define  P_CZAD_K       4			//концентрация рабочего раствора кислоты
 #define  P_CMIN_K       5			//минимальная концентрация рабочего раствора кислоты
 #define  P_CKANAL_K     6			//максимальная концентрация раствора кислоты для канализации
-#define  P_MAX_BULK_FOR_CAUSTIC 7	//максимальный аналоговый уровень при наполнении танка щелочи при наведении
-#define	 P_NAV_OVERREGULATE 8		//Перерегулирование концентрации при наведении растворов
-#define	 P_NAV_TOLERANCE	9		//Допуск концентрации растворов при наведении
+#define	 P_NAV_OVERREGULATE 7		//Перерегулирование концентрации при наведении растворов
+#define	 P_NAV_TOLERANCE	8		//Допуск концентрации растворов при наведении
 
 #define  P_BLOCK_ERRORS 10   //Набор флагов для блокировки ошибок модулей мойки
 #define  P_ALFK         11	//коеффициент температурной зависимости кислоты
@@ -75,6 +78,9 @@
 #define  P_PDNK         28	//производительность дозатора кислоты
 #define  P_PDNS         29	//производительность дозатора щелочи
 #define  P_FLOW_RR      30	//производительность при перемешивании растворов
+
+#define  P_MAX_BULK_FOR_CAUSTIC	31	//максимальный аналоговый уровень при наполнении танка щелочи при наведении
+#define  P_MAX_BULK_FOR_ACID	32	//максимальный аналоговый уровень при наполнении танка кислоты при наведении
 
 //programms of moika
 #define PRG_SELFCLEAN		11
@@ -148,7 +154,7 @@ enum MODULE_CONSTANTS
 	KISL,
 	HOT_WATER,
 	SANITIZER,
-#ifdef SELFCLEAN
+	//+++для самоочистки+++
 	NEUTRO,
 	TANK_W_MG,
 	TANK_W_DREN,
@@ -160,7 +166,7 @@ enum MODULE_CONSTANTS
 	TANK_SW_DREN,
 	TANK_SK_DREN,
 	TANK_SKW_DREN,
-#endif //SELFCLEAN
+	//---для самоочистки---
 	};
 
 
@@ -323,7 +329,7 @@ enum workParameters
 	STP_ERRCOUNT,	//количество ошибок
 	};
 
-#ifdef SELFCLEAN
+//+++Параметры для самоочистки+++
 enum SELFCLEAN_PARAMS
 	{
 	SCP_FLOW = 0,			//Заданный расход мойки танков
@@ -346,18 +352,7 @@ enum SELFCLEAN_PARAMS
 	SCP_V_PROM_TK,			//Объем промежуточного ополаскивания ТК водой
 	SCP_V_PROM_TW,			//Объем промежуточного ополаскивания ТВ водой
 	};
-#endif // SELFCLEAN
-
-enum storedParameters
-	{
-	//P_TM_RET_IS_EMPTY = 1, //время отсутствия протока на возврате для окончания опорожнения объекта
-	//P_V_LL_BOT,	//количество литров от пропадания нижнего уровня в бачке до завершения операции "опорожнение бачка"
-	//P_R_NO_FLOW,	//минимальный расход при котором считать, что его нет
-	//P_TM_R_NO_FLOW,	//время возникновения ошибки "нет расхода на подаче"
-	//P_TM_NO_FLOW_R,	//время появления ошибки "нет расхода на возврате"
-	//P_TM_NO_CONC,	//время появления ошибки "нет концентрации в возвратной трубе"
-	};
-
+//---Параметры для самоочистки---
 
 class MSAPID
 	{
@@ -569,7 +564,7 @@ class cipline_tech_object: public tech_object
 		static cipline_tech_object* Mdls[10];
 		static int MdlsCNT;
 
-#ifdef SELFCLEAN
+		//+++функции самоочистки+++
 		i_DO_device* VSMG;
 		i_DO_device* VSDREN;
 		i_DO_device* VKMG;
@@ -577,12 +572,15 @@ class cipline_tech_object: public tech_object
 		i_DO_device* VWMG;
 		i_DO_device* VWDREN;
 		static int scline;
-		static TParams* scparams;
+		static int scenabled;
+		static saved_params<float, true>* scparams;
+		float get_selfclean_par(int parno);
+		void set_selfclean_par(int parno, float newval);
 		virtual int SCInitPumping(int what, int from, int where, int whatdrainage, int step, int f);
 		virtual int SCPumping(int what, int from, int where, int whatdrainage);
 		int timeIsOut();
 		int volumePassed();
-#endif //SELFCLEAN
+		//---функции самоочистки---
 		i_DO_device* V00;
 		i_DO_device* V01;
 		i_DO_device* V02;

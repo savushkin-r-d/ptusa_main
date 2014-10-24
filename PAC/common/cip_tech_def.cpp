@@ -52,7 +52,7 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	nmr = number;
 	if (0 == parpar)
 		{
-		parpar = new saved_params<float, true>(30, "PAR_MAIN");
+		parpar = new saved_params<float, true>(STATION_PAR_COUNT, "PAR_MAIN");
 		}
 	for (i = 0; i < TMR_CNT; i++)
 		{
@@ -136,6 +136,24 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	circ_max_timer = get_millisec();
 
 	is_in_evaluate_func = 0;
+
+	if (type == 112)
+		{
+		scenabled = 1;
+		scline = 0;
+		resetProgramList();
+		VSDREN = V(1);
+		VKDREN = V(2);
+		VWDREN = V(3);
+		if (0 == scparams)
+			{
+			scparams = new saved_params<float, true>(STATION_PAR_COUNT, "PAR_SELFCLEAN");
+			}
+		}
+	else
+		{
+		scparams = parpar;
+		}
 	}
 
 cipline_tech_object::~cipline_tech_object()
@@ -462,6 +480,8 @@ void cipline_tech_object::initline()
 	PIDF = new MSAPID(&rt_par_float, 72, P_ZAD_FLOW, PUMPFREQ, 0, cnt );
 	PIDP = new MSAPID(&rt_par_float, 61, P_ZAD_PODOGR, ao, TP, 0);
 
+
+
 #ifdef DEBUG
 	LSL->set_cmd("ST", 0, 1);
 	LSH->set_cmd("ST", 0, 1);
@@ -610,8 +630,7 @@ void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*
 		prgListLen++;
 		strcat(programList,tmp_str);
 		}
-#ifdef SELFCLEAN
-	if (scline == nmr)
+	if (scenabled && scline == 0)
 		{
 		if ((SPROG_SELF_CLEAN & programmask) == SPROG_SELF_CLEAN)
 			{
@@ -622,7 +641,6 @@ void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*
 			strcat(programList,tmp_str);
 			}
 		}
-#endif //SELFCLEAN
 	}
 
 void cipline_tech_object::formProgramList( unsigned long programmask )
@@ -781,12 +799,10 @@ void cipline_tech_object::loadProgramFromList( int selectedPrg )
 			sprintf(currentProgramName, "Нав. щелочи");
 			rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_PREPARATION;
 			break;
-#ifdef SELFCLEAN
 		case SPROG_SELF_CLEAN:
 			sprintf(currentProgramName, "Очистка танков");
 			rt_par_float[P_PROGRAM] =  SPROG_SELF_CLEAN;
 			break;
-#endif //SELFCLEAN
 		}
 	}
 
@@ -965,17 +981,15 @@ void cipline_tech_object::StopDev( void )
 		{
 		dev_upr_caustic->off();
 		}
-#ifdef SELFCLEAN
-	if (scline == nmr)
+	if (scenabled && scline == nmr)
 		{
-		if (0 == VSMG->HI) VSMG->off();
-		if (0 == VSDREN->HI) VSDREN->off();
-		if (0 == VKMG->HI) VKMG->off();
-		if (0 == VKDREN->HI) VKDREN->off();
-		if (0 == VWMG->HI) VWMG->off();
-		if (0 == VWDREN->HI) VWDREN->off();
+		VSMG->off();
+		VSDREN->off();
+		VKMG->off();
+		VKDREN->off();
+		VWMG->off();
+		VWDREN->off();
 		}
-#endif //SELFCLEAN
 	RHI();
 	}
 
@@ -1313,7 +1327,6 @@ int cipline_tech_object::GoToStep( int cur, int param )
 		case 119: return 116;
 		case 121: return LoadProgram();
 
-#ifdef SELFCLEAN
 		case 151:
 		case 152:
 		case 153:
@@ -1349,7 +1362,7 @@ int cipline_tech_object::GoToStep( int cur, int param )
 		case 187:
 			return cur + 1;
 		case 157:
-			if (scparams->getParam(SCP_V_PROM_TS) > 0)
+			if (scparams[0][SCP_V_PROM_TS] > 0)
 				{
 				return 160;
 				}
@@ -1358,7 +1371,7 @@ int cipline_tech_object::GoToStep( int cur, int param )
 				return 161;
 				}
 		case 164:
-			if (scparams->getParam(SCP_V_PROM_TK) > 0)
+			if (scparams[0][SCP_V_PROM_TK] > 0)
 				{
 				return 167;
 				}
@@ -1367,7 +1380,7 @@ int cipline_tech_object::GoToStep( int cur, int param )
 				return 168;
 				}
 		case 170:
-			if (scparams->getParam(SCP_V_PROM_TW) > 0)
+			if (scparams[0][SCP_V_PROM_TW] > 0)
 				{
 				return 173;
 				}
@@ -1376,7 +1389,7 @@ int cipline_tech_object::GoToStep( int cur, int param )
 				return 174;
 				}
 		case 176:
-			if (scparams->getParam(SCP_V_PROM_TS) > 0)
+			if (scparams[0][SCP_V_PROM_TS] > 0)
 				{
 				return 179;
 				}
@@ -1387,7 +1400,6 @@ int cipline_tech_object::GoToStep( int cur, int param )
 		case 188:
 			return LoadProgram();
 
-#endif //SELFCLEAN
 		}
 	return SERR_UNKNOWN_STEP;
 	}
@@ -1522,7 +1534,6 @@ int cipline_tech_object::InitStep( int step, int f )
 		case 119: return InitAddRR(TANK_K);
 		case 121: return InitOpolRR(TANK_K);
 
-#ifdef SELFCLEAN
 		case 151: return SCInitPumping(WATER, TANK_W, KANAL, -1, step, f);
 		case 152: return SCInitPumping(WATER, TANK_W, KANAL, -1, step, f);
 		case 153: return SCInitPumping(WATER, WATER, TANK_W_MG, -1, step, f);
@@ -1561,7 +1572,6 @@ int cipline_tech_object::InitStep( int step, int f )
 		case 186: return SCInitPumping(WATER, WATER, TANK_K_MG, TANK_SW_DREN, step, f);
 		case 187: return SCInitPumping(WATER, WATER, TANK_W_MG, TANK_SK_DREN, step, f);
 		case 188: return SCInitPumping(-1, -1, -1, TANK_SKW_DREN, step, f);
-#endif //SELFCLEAN
 
 		case 555:
 			RHI();
@@ -1750,7 +1760,6 @@ int cipline_tech_object::DoStep( int step )
 		case 119: return AddRR(TANK_K);
 		case 121: return OpolRR(TANK_K);
 
-#ifdef SELFCLEAN
 		case 151: return SCPumping(WATER, TANK_W, KANAL, -1);
 		case 152: return SCPumping(WATER, TANK_W, KANAL, -1);
 		case 153: return SCPumping(WATER, WATER, TANK_W_MG, -1);
@@ -1789,7 +1798,6 @@ int cipline_tech_object::DoStep( int step )
 		case 186: return SCPumping(WATER, WATER, TANK_K_MG, TANK_SW_DREN);
 		case 187: return SCPumping(WATER, WATER, TANK_W_MG, TANK_SK_DREN);
 		case 188: return SCPumping(-1, -1, -1, TANK_SKW_DREN);
-#endif //SELFCLEAN
 
 		case 555:
 			if (get_delta_millisec(enddelayTimer) > WASH_END_DELAY)
@@ -1948,10 +1956,8 @@ int cipline_tech_object::LoadProgram( void )
 			return 105;
 		case PRG_NAVK:
 			return 115;
-#ifdef SELFCLEAN
 		case PRG_SELFCLEAN:
 			return 151;
-#endif //SELFCLEAN
 		case -1:
 			return 555;
 		default:
@@ -2610,6 +2616,13 @@ int cipline_tech_object::FilRR( int where )
 	switch (where)
 		{
 		case TANK_K:
+			if (parpar[0][P_MAX_BULK_FOR_ACID] > 1)
+				{
+				if (LTK->get_value() > parpar[0][P_MAX_BULK_FOR_ACID])
+					{
+					return 1;
+					}
+				}
 			if (LKH->is_active())
 				{
 				return 1;
@@ -2701,7 +2714,7 @@ int cipline_tech_object::CheckConc( int where )
 				break;
 			}
 
-		if (c>=z)
+		if (c>= z * (1 - parpar[0][P_NAV_TOLERANCE] / 100))
 			{
 			float divider;
 			switch (where)
@@ -2741,6 +2754,10 @@ int cipline_tech_object::AddRR( int where )
 			rt_par_float[P_CONC_RATE] = c;
 
 			c=GetConc(SHCH);
+			if (c > parpar[0][P_CZAD_S] * (1 + parpar[0][P_NAV_OVERREGULATE]/100))
+				{
+				return 1;
+				}
 			break;
 		case TANK_K:
 			c = rt_par_float[P_CONC_RATE] + parpar[0][P_PDNK] *
@@ -2748,6 +2765,10 @@ int cipline_tech_object::AddRR( int where )
 			rt_par_float[P_CONC_RATE] = c;
 
 			c=GetConc(KISL);
+			if (c > parpar[0][P_CZAD_K] * (1 + parpar[0][P_NAV_OVERREGULATE]/100))
+				{
+				return 1;
+				}
 			break;
 		}
 
@@ -4719,6 +4740,574 @@ int cipline_tech_object::EvalCipReadySignal()
 		}
 	return 0;
 	}
+
+int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatdrainage, int step, int f )
+	{
+
+	V05->off();
+
+	switch (from)
+		{
+		case WATER:
+			V01->on();
+			V02->off();
+			V03->off();
+			V04->off();
+			break;
+		case TANK_S:
+			V01->off();
+			V02->off();
+			V03->on();
+			V04->off();
+			break;
+		case TANK_K:
+			V01->off();
+			V02->on();
+			V03->off();
+			V04->off();
+			break;
+		case TANK_W:
+			V01->off();
+			V02->off();
+			V03->off();
+			V04->on();
+			break;
+		default:
+			V01->off();
+			V02->off();
+			V03->off();
+			V04->off();
+			break;
+		}
+
+	switch (where)
+		{
+		case KANAL:
+			V06->on();
+			V07->off();
+			V08->off();
+			V09->off();
+			V10->off();
+			V11->on();
+			V12->off();
+			VWMG->off();
+			VKMG->off();
+			VSMG->off();
+			break;
+		case NEUTRO:
+			V06->on();
+			V07->off();
+			V08->off();
+			V09->off();
+			V10->off();
+			V11->off();
+			if (no_neutro) {V11->on();} else {V12->on();}
+			VWMG->off();
+			VKMG->off();
+			VSMG->off();
+			break;
+		case TANK_W:
+			V06->on();
+			V07->on();
+			V08->off();
+			V09->off();
+			V10->off();
+			V11->off();
+			V12->off();
+			VWMG->off();
+			VKMG->off();
+			VSMG->off();
+			break;
+		case TANK_W_MG:
+			V06->on();
+			V07->off();
+			V08->off();
+			V09->off();
+			V10->off();
+			V11->off();
+			V12->off();
+			VWMG->on();
+			VKMG->off();
+			VSMG->off();
+			break;
+		case TANK_K:
+			V06->on();
+			V07->off();
+			V08->on();
+			V09->off();
+			V10->off();
+			V11->off();
+			V12->off();
+			VWMG->off();
+			VKMG->off();
+			VSMG->off();
+			break;
+		case TANK_K_MG:
+			V06->on();
+			V07->off();
+			V08->off();
+			V09->off();
+			V10->off();
+			V11->off();
+			V12->off();
+			VWMG->off();
+			VKMG->on();
+			VSMG->off();
+			break;
+		case TANK_S:
+			V06->on();
+			V07->off();
+			V08->off();
+			V09->on();
+			V10->off();
+			V11->off();
+			V12->off();
+			VWMG->off();
+			VKMG->off();
+			VSMG->off();
+			break;
+		case TANK_S_MG:
+			V06->on();
+			V07->off();
+			V08->off();
+			V09->off();
+			V10->off();
+			V11->off();
+			V12->off();
+			VWMG->off();
+			VKMG->off();
+			VSMG->on();
+			break;
+		default:
+			V06->off();
+			V07->off();
+			V08->off();
+			V09->off();
+			V10->off();
+			V11->off();
+			V12->off();
+			VWMG->off();
+			VKMG->off();
+			VSMG->off();
+			break;
+		}
+
+	VSDREN->off();
+	VKDREN->off();
+	VWDREN->off();
+	switch (whatdrainage)
+		{
+		case TANK_W_DREN:
+			VWDREN->on();
+			break;
+		case TANK_S_DREN:
+			VSDREN->on();
+			break;
+		case TANK_K_DREN:
+			VKDREN->on();
+			break;
+		case TANK_SK_DREN:
+			VSDREN->on();
+			VKDREN->on();
+			break;
+		case TANK_SW_DREN:
+			VSDREN->on();
+			VWDREN->on();
+			break;
+		case TANK_SKW_DREN:
+			VSDREN->on();
+			VKDREN->on();
+			VWDREN->on();
+			break;
+		case TANK_KW_DREN:
+			VKDREN->on();
+			VWDREN->on();
+			break;
+		default:
+			VSDREN->off();
+			VKDREN->off();
+			VWDREN->off();
+			break;
+		}
+
+	float operV = 0, operT = 0, operFlow;
+	operFlow = scparams[0][SCP_FLOW];
+	if (0 == operFlow)
+		{
+		operFlow = 10;
+		}
+
+
+	switch (step)
+		{
+		case 151:
+			operT = parpar[0][P_VTANKW] / operFlow * 5;
+			break;
+		case 152:
+			operV = scparams[0][SCP_LITERS_AFTER_LL_TW];
+			break;
+		case 153:
+			operV = scparams[0][SCP_V_TW_PREDV];
+			break;
+		case 154:
+			operT = scparams[0][SCP_T_TW_DRAIN];
+			break;
+		case 155:
+			operT = scparams[0][SCP_T_SCH_CIRC_PREDV];
+			break;
+		case 156:
+			operT = parpar[0][P_VTANKS] / operFlow * 5;
+			break;
+		case 157:
+			operV = scparams[0][SCP_LITERS_AFTER_LL_TS];
+			operT = operV / operFlow * 3.6 * 1.2;
+			break;
+		case 160:
+			operV = scparams[0][SCP_V_PROM_TS];
+			break;
+		case 161:
+			operT = scparams[0][SCP_T_TW_CIRC];
+			break;
+		case 162:
+			operT= scparams[0][SCP_T_K_CIRC_PREDV];
+			break;
+		case 163:
+			operT = parpar[0][P_VTANKK] / operFlow * 5;
+			break;
+		case 164:
+			operV = scparams[0][SCP_LITERS_AFTER_LL_TK];
+			operT = operV / operFlow * 3.6 * 1.2;
+			break;
+		case 167:
+			operV = scparams[0][SCP_V_PROM_TK];
+			break;
+		case 168:
+			operT = scparams[0][SCP_T_TS_CIRC];
+			break;
+		case 169:
+			operT = parpar[0][P_VTANKW] / operFlow * 5;
+			break;
+		case 170:
+			operV = scparams[0][SCP_LITERS_AFTER_LL_TW];
+			operT = operV / operFlow * 3.6 * 1.2;
+			break;
+		case 173:
+			operV = scparams[0][SCP_V_PROM_TW];
+			break;
+		case 174:
+			operT = scparams[0][SCP_T_TK_CIRC];
+			break;
+		case 175:
+			operT = parpar[0][P_VTANKK] / operFlow * 5;
+			break;
+		case 176:
+			operV = scparams[0][SCP_LITERS_AFTER_LL_TK];
+			operT = operV / operFlow * 3.6 * 1.2;
+			break;
+		case 179:
+			operV = scparams[0][SCP_V_PROM_TS];
+			break;
+		case 180:
+			operT = scparams[0][SCP_T_TW_CIRC];
+			break;
+		case 181:
+			operT = parpar[0][P_VTANKK] / operFlow * 5;
+			break;
+		case 182:
+			operV = scparams[0][SCP_LITERS_AFTER_LL_TK];
+			break;
+		case 183:
+			operT = parpar[0][P_VTANKW] / operFlow * 5;
+			break;
+		case 184:
+			operV = scparams[0][SCP_LITERS_AFTER_LL_TW];
+			break;
+		case 185:
+			operV = scparams[0][SCP_V_CLEAN_TS];
+			break;
+		case 186:
+			operV = scparams[0][SCP_V_CLEAN_TK];
+			break;
+		case 187:
+			operV = scparams[0][SCP_V_CLEAN_TW];
+			break;
+		case 188:
+			operT = scparams[0][SCP_T_TW_DRAIN];
+			break;
+		default:
+			break;
+		}
+
+	if (from >= 0)
+		{
+		NP->on();
+		PIDF->on();
+		}
+	else
+		{
+		PIDF->off();
+		NP->off();
+		operFlow = -1;
+		}
+
+	rt_par_float[P_ZAD_FLOW] = operFlow;
+	rt_par_float[P_VRAB] = operV;
+	rt_par_float[P_OP_TIME_LEFT] = 0;
+	if (0 == operT)
+		{
+		float divider = rt_par_float[P_ZAD_FLOW];
+		if (0 == divider)
+			{
+			divider = 1;
+			}
+		rt_par_float[P_MAX_OPER_TM] = 5 * operV / operFlow;
+		}
+	else
+		{
+		rt_par_float[P_MAX_OPER_TM] = operT;
+		}
+	T[TMR_OP_TIME]->set_countdown_time(rt_par_float[P_MAX_OPER_TM] * 1000);
+	T[TMR_OP_TIME]->start();
+
+	rt_par_float[P_CONC] = 0;
+
+	cnt->start();
+	return 0;
+	}
+
+int cipline_tech_object::SCPumping( int what, int from, int where, int whatdrainage )
+	{
+
+	switch (what)
+		{
+		case SHCH:
+			rt_par_float[P_CONC] = GetConc(SHCH);
+			break;
+		case KISL:
+			rt_par_float[P_CONC] = GetConc(SHCH);
+			break;
+		default:
+			//par->setParamM(P_CONC, 0);
+			break;
+		}
+
+	switch (from)
+		{
+		case WATER:
+			if (!LL->is_active())
+				{
+				V00->on();
+				}
+			if (LM->is_active() || LH->is_active())
+				{
+				V00->off();
+				}
+			break;
+		default:
+			break;
+		}
+
+
+	switch (where)
+		{
+		case TANK_W:
+			if (LWH->is_active() && from != TANK_W)
+				{
+				V07->off();
+				VWMG->off();
+				V11->off();
+				if (no_neutro) {V11->on();} else {V12->on();}
+				} 
+			else
+				{			
+				V07->on();
+				VWMG->off();
+				V11->off();
+				V12->off();
+				}
+			break;
+		case TANK_W_MG:
+			if (LWH->is_active() && from != TANK_W)
+				{
+				V07->off();
+				VWMG->off();
+				V11->off();
+				if (no_neutro) {V11->on();} else {V12->on();}
+				} 
+			else
+				{			
+				V07->off();
+				VWMG->on();
+				V11->off();
+				V12->off();
+				}
+			break;
+		case TANK_K:
+			if (LKH->is_active() && from != TANK_K)
+				{
+				V08->off();
+				VKMG->off();
+				V11->off();
+				if (no_neutro) {V11->on();} else {V12->on();}
+				} 
+			else
+				{			
+				V08->on();
+				VKMG->off();
+				V11->off();
+				V12->off();
+				}
+			break;
+		case TANK_K_MG:
+			if (LKH->is_active() && from != TANK_K)
+				{
+				V08->off();
+				VKMG->off();
+				V11->off();
+				if (no_neutro) {V11->on();} else {V12->on();}
+				} 
+			else
+				{			
+				V08->off();
+				VKMG->on();
+				V11->off();
+				V12->off();
+				}
+			break;
+		case TANK_S:
+			if (LSH->is_active() && from != TANK_S)
+				{
+				V09->off();
+				VSMG->off();
+				V11->off();
+				if (no_neutro) {V11->on();} else {V12->on();}
+				} 
+			else
+				{			
+				V09->on();
+				VSMG->off();
+				V11->off();
+				V12->off();
+				}
+			break;
+		case TANK_S_MG:
+			if (LSH->is_active() && from != TANK_S)
+				{
+				V09->off();
+				VSMG->off();
+				V11->off();
+				if (no_neutro) {V11->on();} else {V12->on();}
+				} 
+			else
+				{			
+				V09->off();
+				VSMG->on();
+				V11->off();
+				V12->off();
+				}
+			break;
+		default:
+			break;
+		}
+
+	switch (curstep)
+		{
+		case 151:
+		case 169:
+		case 183:
+			if (!LWL->is_active()) return 1;
+			break;
+		case 152:
+		case 157:
+		case 164:
+		case 170:
+		case 176:
+		case 182:
+		case 184:
+			if (volumePassed() || timeIsOut()) return 1;
+			break;
+		case 153:
+		case 160:
+		case 167:
+		case 173:
+		case 179:
+		case 185:
+		case 186:
+		case 187:
+			if (volumePassed()) return 1;
+			break;
+		case 154:
+		case 155:
+		case 161:
+		case 162:
+		case 168:
+		case 174:
+		case 180:
+		case 188:
+			if (timeIsOut()) return 1;
+			break;
+		case 156:
+		case 175:
+			if (!LSL->is_active()) return 1;
+			break;
+		case 163:
+		case 181:
+			if (!LKL->is_active()) return 1;
+			break;
+
+		default:
+			break;
+		}
+
+	rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
+	rt_par_float[P_SUM_OP] = cnt->get_quantity();
+
+	return 0;
+	}
+
+int cipline_tech_object::timeIsOut()
+	{
+	if (T[TMR_OP_TIME]->get_work_time() >= rt_par_float[P_MAX_OPER_TM] * 1000L && rt_par_float[P_MAX_OPER_TM] > 0)
+		{
+		return 1;
+		}
+	return 0;
+	}
+
+int cipline_tech_object::volumePassed()
+	{
+	if (rt_par_float[P_VRAB] > 0 && cnt->get_quantity() >= rt_par_float[P_VRAB])
+		{
+		return 1;
+		}
+	return 0;
+	}
+
+float cipline_tech_object::get_selfclean_par( int parno )
+	{
+	if (scparams)
+		{
+		return scparams[0][parno];
+		}
+	else
+		{
+		return 0;
+		}
+	}
+
+void cipline_tech_object::set_selfclean_par( int parno, float newval )
+	{
+	if (scparams)
+		{
+		scparams->save(parno, newval);
+		}
+	}
+
+int cipline_tech_object::scenabled = 0;
+
+saved_params<float, true>* cipline_tech_object::scparams = 0;
+
+int cipline_tech_object::scline = 0;
 
 int cipline_tech_object::MdlsCNT = 0;
 

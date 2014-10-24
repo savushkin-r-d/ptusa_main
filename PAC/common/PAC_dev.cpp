@@ -1873,7 +1873,11 @@ float wages::get_value()
 	{
 	return weight;
 	}
-
+//-----------------------------------------------------------------------------
+void wages::direct_set_value( float new_value )
+	{
+	weight = new_value;
+	}
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
@@ -1881,11 +1885,6 @@ float wages::get_value()
 float wages::get_value()
 	{
 	return get_weight();
-	}
-//-----------------------------------------------------------------------------
-void wages::direct_set_value( float new_value )
-	{
-	weight = new_value;
 	}
 
 void wages::direct_set_state( int new_state )
