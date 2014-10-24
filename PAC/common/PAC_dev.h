@@ -1735,6 +1735,10 @@ class wages : public analog_wago_device, public i_wages
     public:
         float get_value();
         void direct_set_state( int new_state );
+        void  direct_set_value( float new_value )
+        {
+            return;
+        }
 
 #endif // DEBUG_NO_WAGO_MODULES
     public:
