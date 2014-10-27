@@ -332,7 +332,7 @@ enum workParameters
 //+++Параметры для самоочистки+++
 enum SELFCLEAN_PARAMS
 	{
-	SCP_FLOW = 0,			//Заданный расход мойки танков
+	SCP_FLOW = 1,			//Заданный расход мойки танков
 	SCP_V_TW_PREDV,			//Объем предварительного ополаскивания танка воды
 	SCP_T_TS_DRAIN,			//Время опорожнения танка щелочи (самотеком)
 	SCP_T_TK_DRAIN,			//Время опорожнения танка кислоты (самотеком)
@@ -565,12 +565,12 @@ class cipline_tech_object: public tech_object
 		static int MdlsCNT;
 
 		//+++функции самоочистки+++
-		i_DO_device* VSMG;
-		i_DO_device* VSDREN;
-		i_DO_device* VKMG;
-		i_DO_device* VKDREN;
-		i_DO_device* VWMG;
-		i_DO_device* VWDREN;
+		static i_DO_device* VSMG;
+		static i_DO_device* VSDREN;
+		static i_DO_device* VKMG;
+		static i_DO_device* VKDREN;
+		static i_DO_device* VWMG;
+		static i_DO_device* VWDREN;
 		static int scline;
 		static int scenabled;
 		static saved_params<float, true>* scparams;

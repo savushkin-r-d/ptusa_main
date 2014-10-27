@@ -111,6 +111,7 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	dev_upr_cip_ready = 0;
 	dev_upr_cip_finished = 0;
 	dev_upr_cip_in_progress = 0;
+	dev_ai_pump_frequency = 0;
 
 	pumpflag = 0;
 	pumptimer = get_millisec();
@@ -145,9 +146,12 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 		VSDREN = V(1);
 		VKDREN = V(2);
 		VWDREN = V(3);
+		VSMG = V(11);
+		VKMG = V(12);
+		VWMG = V(13);
 		if (0 == scparams)
 			{
-			scparams = new saved_params<float, true>(STATION_PAR_COUNT, "PAR_SELFCLEAN");
+			scparams = new saved_params<float, true>(SELFCLEAN_PAR_COUNT, "PAR_SELFCLEAN");
 			}
 		}
 	else
@@ -240,6 +244,10 @@ int cipline_tech_object::save_device( char *buff )
 	if (1 == number)
 		{
 		answer_size += parpar->save_device(buff + answer_size, "\t");
+		if (scenabled)
+			{
+			answer_size += scparams->save_device(buff + answer_size, "\t");
+			}
 		}
 	//Параметры текущего рецепта
 	answer_size += sprintf(buff + answer_size, "\tREC_PAR = \n\t{\n\t\t");
@@ -277,6 +285,12 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, double val )
 	if ( strcmp( prop, "PAR_MAIN" ) == 0 )
 		{
 		parpar->save( idx, ( float ) val );
+		return 0;
+		}
+
+	if ( strcmp( prop, "PAR_SELFCLEAN" ) == 0 )
+		{
+		scparams->save( idx, ( float ) val );
 		return 0;
 		}
 
@@ -1156,6 +1170,30 @@ int cipline_tech_object::EvalCommands()
 				}
 			if (state == 0 && (loadedRecipe >= 0 || rt_par_float[P_PROGRAM] >= SPROG_ACID_PREPARATION) && rt_par_float[P_PROGRAM] > 0  )
 				{
+				if (scenabled)
+					{
+					if (scline > 0 && scline != nmr) //если идет самоочистка танков, то нельзя включить мойку на других линиях.
+						{
+						return 0;
+						}
+					if (0 == scline && SPROG_SELF_CLEAN == rt_par_float[P_PROGRAM]) //нельзя включить самоочистку, если на других линиях идет мойка
+						{
+						for (int tmpline = 0; tmpline < MdlsCNT; tmpline++)
+							{
+							if (Mdls[tmpline]->state && Mdls[tmpline]->nmr != nmr)
+								{
+								return 0;
+								}
+							}
+						}
+
+					scline = nmr;
+					for (int tmpline = 0; tmpline < MdlsCNT; tmpline++)
+						{
+						if (Mdls[tmpline]->nmr != nmr)
+							Mdls[tmpline]->resetProgramList();
+						}
+					}
 				state=1;
 				valvesAreInConflict = getValvesConflict();
 				if (valvesAreInConflict)
@@ -1909,6 +1947,15 @@ void cipline_tech_object::ResetLinesDevicesBeforeReset( void )
 	circ_podp_count = 0;
 	circ_podp_max_count = 0;
 	circ_water_no_pump_stop = 0;
+	if (scenabled && scline == nmr)
+		{
+		scline = 0;
+		for (int tmpline = 0; tmpline < MdlsCNT; tmpline++)
+			{
+			if (Mdls[tmpline]->nmr != nmr)
+				Mdls[tmpline]->resetProgramList();
+			}
+		}
 	}
 
 int cipline_tech_object::SetCommand( int command )
@@ -4820,7 +4867,7 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
 			break;
 		case TANK_W_MG:
 			V06->on();
-			V07->off();
+			V07->on();
 			V08->off();
 			V09->off();
 			V10->off();
@@ -4845,7 +4892,7 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
 		case TANK_K_MG:
 			V06->on();
 			V07->off();
-			V08->off();
+			V08->on();
 			V09->off();
 			V10->off();
 			V11->off();
@@ -4870,7 +4917,7 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
 			V06->on();
 			V07->off();
 			V08->off();
-			V09->off();
+			V09->on();
 			V10->off();
 			V11->off();
 			V12->off();
@@ -5136,7 +5183,7 @@ int cipline_tech_object::SCPumping( int what, int from, int where, int whatdrain
 				} 
 			else
 				{			
-				V07->off();
+				V07->on();
 				VWMG->on();
 				V11->off();
 				V12->off();
@@ -5168,7 +5215,7 @@ int cipline_tech_object::SCPumping( int what, int from, int where, int whatdrain
 				} 
 			else
 				{			
-				V08->off();
+				V08->on();
 				VKMG->on();
 				V11->off();
 				V12->off();
@@ -5200,7 +5247,7 @@ int cipline_tech_object::SCPumping( int what, int from, int where, int whatdrain
 				} 
 			else
 				{			
-				V09->off();
+				V09->on();
 				VSMG->on();
 				V11->off();
 				V12->off();
@@ -5302,6 +5349,18 @@ void cipline_tech_object::set_selfclean_par( int parno, float newval )
 		scparams->save(parno, newval);
 		}
 	}
+
+i_DO_device* cipline_tech_object::VWDREN = 0;
+
+i_DO_device* cipline_tech_object::VWMG = 0;
+
+i_DO_device* cipline_tech_object::VKDREN = 0;
+
+i_DO_device* cipline_tech_object::VKMG = 0;
+
+i_DO_device* cipline_tech_object::VSDREN = 0;
+
+i_DO_device* cipline_tech_object::VSMG = 0;
 
 int cipline_tech_object::scenabled = 0;
 
