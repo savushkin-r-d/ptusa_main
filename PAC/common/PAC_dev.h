@@ -338,7 +338,7 @@ class device : public i_DO_AO_device, public par_device
 
         enum CONSTANTS
             {
-            C_DEVICE_TYPE_CNT = 18,     ///< Количество типов устройств.
+            C_DEVICE_TYPE_CNT = 19,     ///< Количество типов устройств.
 
             C_MAX_NAME = 20
             };

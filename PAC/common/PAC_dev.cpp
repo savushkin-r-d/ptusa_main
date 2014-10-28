@@ -807,8 +807,14 @@ int device_manager::rm_save_device( char *buff )
 //-----------------------------------------------------------------------------
 int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char *dev_name )
     {
-    int l = dev_types_ranges[ dev_type ].start_pos;
-    int u = dev_types_ranges[ dev_type ].end_pos;
+    int l = -1;
+    int u = -1;
+
+    if ( dev_type < device::C_DEVICE_TYPE_CNT )
+    	{
+        l = dev_types_ranges[ dev_type ].start_pos;
+        u = dev_types_ranges[ dev_type ].end_pos;
+    	}    
 
     if ( -1 == l ) return -1; // Нет устройств.
 
