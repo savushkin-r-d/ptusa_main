@@ -1187,11 +1187,14 @@ int cipline_tech_object::EvalCommands()
 							}
 						}
 
-					scline = nmr;
-					for (int tmpline = 0; tmpline < MdlsCNT; tmpline++)
+					if (SPROG_SELF_CLEAN == rt_par_float[P_PROGRAM])
 						{
-						if (Mdls[tmpline]->nmr != nmr)
-							Mdls[tmpline]->resetProgramList();
+						scline = nmr;
+						for (int tmpline = 0; tmpline < MdlsCNT; tmpline++)
+							{
+							if (Mdls[tmpline]->nmr != nmr)
+								Mdls[tmpline]->resetProgramList();
+							}
 						}
 					}
 				state=1;
