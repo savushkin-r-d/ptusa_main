@@ -1951,7 +1951,8 @@ float motor::get_value()
 #ifdef DEBUG_NO_WAGO_MODULES
     return freq;
 #else
-    if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ )
+    if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ || 
+        sub_type == device::DST_M_REV_FREQ_2 )
         {
         return get_AO( AO_INDEX, C_MIN_VALUE, C_MAX_VALUE );
         }
@@ -1965,7 +1966,8 @@ void motor::direct_set_value( float value )
 #ifdef DEBUG_NO_WAGO_MODULES
     freq = value;
 #else
-    if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ )
+    if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ || 
+        sub_type == device::DST_M_REV_FREQ_2 )
         {
         set_AO( AO_INDEX, value, C_MIN_VALUE, C_MAX_VALUE );
         }
