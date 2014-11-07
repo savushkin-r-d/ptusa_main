@@ -1869,6 +1869,10 @@ float wages::get_weight()
 			{
 			weight = now_weight;
 			}
+		if (filterval >= 1)
+			{
+			weight = ceilf(weight);
+			}
 		}
 	return weight + get_par(P_C0, 0);
 	}
