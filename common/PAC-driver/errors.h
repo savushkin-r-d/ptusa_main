@@ -188,7 +188,7 @@ class tech_obj_error: public base_error
     public:
         // Интерфейс base_error.
         tech_obj_error( tech_object* tech_dev ): tech_dev( tech_dev ),
-            was_set_cmd( false )
+            prev_size( 0 ), was_set_cmd( false )
             {
             }
 
@@ -230,6 +230,7 @@ class tech_obj_error: public base_error
             TE_TYPE = 100,          ///< Тип ошибки.
             };
 
+        u_int prev_size;
         bool was_set_cmd;
 
         static bool is_any_message;

@@ -244,8 +244,6 @@ int tech_obj_error::save_as_Lua_str( char *str )
 //-----------------------------------------------------------------------------
 void tech_obj_error::evaluate( bool &is_new_state )
     {
-    static u_int prev_size = 0;
-
     if ( tech_dev->get_errors().size() != prev_size || was_set_cmd )
         {
         prev_size   = tech_dev->get_errors().size();

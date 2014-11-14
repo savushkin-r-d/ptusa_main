@@ -493,7 +493,7 @@ int lua_manager::exec_lua_method( const char *object_name,
 int lua_manager::error_trace( lua_State * L )
     {
 #ifdef DEBUG
-    Print( "Error -\t%s\n", lua_tostring( L, -1 ) );
+    Print( "%s\n", lua_tostring( L, -1 ) );
     lua_pop( L, 1 );
 
     Print( "\tstack traceback:\n" );
