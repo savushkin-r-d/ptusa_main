@@ -2016,7 +2016,9 @@ void motor::direct_set_state( int new_state )
             }
         }
 
-    if ( sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
+    if ( sub_type == device::DST_M_REV_2 || 
+        sub_type == device::DST_M_REV_FREQ_2 || 
+        sub_type == device::M_REV_2_FB )
         {
         if ( new_state == 2 )
             {
@@ -2061,6 +2063,31 @@ int motor::get_state()
 #else
     int o  = get_DO( DO_INDEX );
     int i  = get_DI( DI_INDEX );
+
+    if ( sub_type == device::M_REV_2_FB )
+        {
+        int ro = get_DO( DO_INDEX_REVERSE ); 
+
+        if ( 1 == i )
+            {
+            start_switch_time = get_millisec();
+            return -1;
+            }
+           
+        if ( 1 == ro )
+            {
+            start_switch_time = get_millisec();
+            return 2;
+            }
+
+        if ( 1 == o )
+            {
+            start_switch_time = get_millisec();
+            return 1;
+            }
+
+        return 0;
+        }
 
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
@@ -2123,7 +2150,8 @@ void motor::direct_on()
     state = 1;
 #else
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
-        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
+        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 V||
+        sub_type == device::M_REV_2_FB )
         {
         // Выключение реверса.
         int o = get_DO( DO_INDEX_REVERSE );
@@ -2156,7 +2184,8 @@ void motor::direct_off()
         }
 
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
-        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
+        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
+        sub_type == device::M_REV_2_FB )
         {
         // Отключение реверса.
         o = get_DO( DO_INDEX_REVERSE );
@@ -2175,7 +2204,8 @@ int motor::save_device_ex( char *buff )
     {
     int res = 0;
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
-        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
+        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
+        sub_type == device::M_REV_2_FB )
         {
         res = sprintf( buff, "R=%d,", get_DO( DO_INDEX_REVERSE ) );
         }
