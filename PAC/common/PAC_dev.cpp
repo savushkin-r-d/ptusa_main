@@ -1881,7 +1881,7 @@ float wages::get_weight()
 
 float wages::get_value()
 	{
-	return weight;
+	return weight + get_par(P_C0, 0);
 	}
 //-----------------------------------------------------------------------------
 void wages::direct_set_value( float new_value )
