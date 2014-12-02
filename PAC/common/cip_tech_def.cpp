@@ -4103,12 +4103,12 @@ int cipline_tech_object::Circ( int what )
 		ret_circ_flag = 1;
 		}
 
-	if (0 == ret_circ_flag)
+	if (0 == ret_circ_flag || LH->is_active())
 		{
 		ret_circ_delay = get_millisec();
 		}
 
-	if (!LM->is_active() || get_delta_millisec(ret_circ_delay) > 5000L)
+	if (!LM->is_active() || get_delta_millisec(ret_circ_delay) > 10000L)
 		{
 		ret_circ_flag = 0;
 		}
