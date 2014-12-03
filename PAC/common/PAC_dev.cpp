@@ -2068,21 +2068,24 @@ int motor::get_state()
         {
         int ro = get_DO( DO_INDEX_REVERSE ); 
 
-        if ( 1 == i )
-            {
-            start_switch_time = get_millisec();
+        if ( 1 == i && 
+            get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
+            {            
             return -1;
             }
-           
-        if ( 1 == ro )
+        
+        if ( 1 != i ) 
             {
             start_switch_time = get_millisec();
+            }
+
+        if ( 1 == ro )
+            {
             return 2;
             }
 
         if ( 1 == o )
-            {
-            start_switch_time = get_millisec();
+            {            
             return 1;
             }
 
