@@ -84,6 +84,7 @@
 
 //programms of moika
 #define PRG_SELFCLEAN		11
+#define PRG_ASO				10
 #define PRG_NAVS            9
 #define PRG_NAVK            8
 #define PRG_PRO             7
@@ -118,6 +119,7 @@ enum selectablePrograms
 	SPROG_CAUSTIC_ACID_HOTWATER = 181,
 	SPROG_ACID_PREPARATION = 256,
 	SPROG_CAUSTIC_PREPARATION = 512,
+	SPROG_REMOTE = 1024,
 	SPROG_SELF_CLEAN = 2048,
 	};
 
@@ -497,6 +499,8 @@ class cipline_tech_object: public tech_object
 
 		//Обработчики LUA
 		int is_in_evaluate_func;
+		int is_InitCustomStep_func;
+		int is_DoCustomStep_func;
 
 	public:
 		cipline_tech_object( const char* name, u_int number, u_int type, const char* name_Lua,
@@ -711,6 +715,9 @@ class cipline_tech_object: public tech_object
 		virtual int EvalCipInProgress();
 		virtual int EvalCipInError();
 		virtual int EvalCipReadySignal();
+		////------------------------------
+		virtual int InitCustomStep(int what, int from, int where, int how, int step, int f);
+		virtual int EvalCustomStep(int what, int from, int where, int how);
 	};
 
 

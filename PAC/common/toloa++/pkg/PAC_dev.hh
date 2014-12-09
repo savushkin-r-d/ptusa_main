@@ -1059,6 +1059,17 @@ unsigned long get_delta_millisec( unsigned long time1 );
 /// @param ms - время ожидания, мс.
 void sleep_ms( unsigned long ms );
 
+/// @brief Класс регулятора для моечной станции
+class MSAPID
+	{
+	public:
+		void eval();
+		void reset();
+		void on( int accel = 0 );
+		void off();
+		void set( float new_z );
+		int get_state();
+	};
 
 /// @brief Класс для модуля моечной станции
 class cipline_tech_object: public tech_object
@@ -1111,8 +1122,11 @@ class cipline_tech_object: public tech_object
 		i_AI_device* Q;
 		i_AO_device* ao;
 		i_AO_device* PUMPFREQ;
-		i_DI_device*FL;
+		i_DI_device* FL;
 		i_counter *cnt;
+
+		MSAPID* PIDP;
+		MSAPID* PIDF;
 
 		int msa_number; //Номер станции
 		saved_params_float      par_float;   ///< Сохраняемые пар-ры, тип float.
@@ -1127,6 +1141,9 @@ class cipline_tech_object: public tech_object
 
 		void initline();
 		int evaluate();
+
+		float GetConc( int what );
+		void SortRR( int where, int forcetotank);
 	};
 //---------------------------------------------------------------------------
 rm_manager* G_RM_MANAGER();

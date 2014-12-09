@@ -137,6 +137,8 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	circ_max_timer = get_millisec();
 
 	is_in_evaluate_func = 0;
+	is_InitCustomStep_func = 0;
+	is_DoCustomStep_func = 0;
 
 	if (type == 112)
 		{
@@ -538,6 +540,42 @@ void cipline_tech_object::initline()
 	rt_par_float[PIDF_Uk] = 0;
 
 	isMsa = 1;
+
+	if ( is_InitCustomStep_func == 0 )
+		{
+		lua_State* L = lua_manager::get_instance()->get_Lua();
+		lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+		lua_getfield( L, -1, "init_custom_step" );
+		lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+		if ( lua_isfunction( L, -1 ) )
+			{
+			is_InitCustomStep_func = 2;
+			}
+		else
+			{
+			is_InitCustomStep_func = 1;
+			}
+		lua_remove(L, -1); // Stack: remove function "init_custom_step".
+		}
+
+	if ( is_DoCustomStep_func == 0 )
+		{
+		lua_State* L = lua_manager::get_instance()->get_Lua();
+		lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+		lua_getfield( L, -1, "do_custom_step" );
+		lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+		if ( lua_isfunction( L, -1 ) )
+			{
+			is_DoCustomStep_func = 2;
+			}
+		else
+			{
+			is_DoCustomStep_func = 1;
+			}
+		lua_remove(L, -1); // Stack: remove function "do_custom_step".
+		}
 	}
 
 int cipline_tech_object::evaluate()
@@ -576,7 +614,7 @@ int cipline_tech_object::evaluate()
 			lua_State* L = lua_manager::get_instance()->get_Lua();
 			lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
 			lua_getfield( L, -1, "in_evaluate" );
-			lua_remove( L, -2 );  // Stack: remove function "in_evaluate".
+			lua_remove( L, -2 );  // Stack: remove OBJECT.
 
 			if ( lua_isfunction( L, -1 ) )
 				{
@@ -586,6 +624,7 @@ int cipline_tech_object::evaluate()
 				{
 				is_in_evaluate_func = 1;
 				}
+			lua_remove(L, -1); // Stack: remove function "in_evaluate".
 			}
 
 
@@ -755,6 +794,14 @@ void cipline_tech_object::formProgramList( unsigned long programmask )
 		prgNumber[prgListLen] = SPROG_SANITIZER;
 		prgListLen++;
 		}
+	if ((programmask >> 11) & 1)
+		{
+		sprintf(tmp_str, "%d##Управляемая||", SPROG_REMOTE);
+		strcat(programList,tmp_str);
+		sprintf(prgArray[prgListLen], "Управляемая");
+		prgNumber[prgListLen] = SPROG_REMOTE;
+		prgListLen++;
+		}
 	}
 
 void cipline_tech_object::loadProgramFromList( int selectedPrg )
@@ -816,6 +863,10 @@ void cipline_tech_object::loadProgramFromList( int selectedPrg )
 		case SPROG_SELF_CLEAN:
 			sprintf(currentProgramName, "Очистка танков");
 			rt_par_float[P_PROGRAM] =  SPROG_SELF_CLEAN;
+			break;
+		case SPROG_REMOTE:
+			sprintf(currentProgramName, "Управляемая мойка");
+			rt_par_float[P_PROGRAM] = SPROG_REMOTE;
 			break;
 		}
 	}
@@ -1440,6 +1491,8 @@ int cipline_tech_object::GoToStep( int cur, int param )
 				}
 		case 188:
 			return LoadProgram();
+		case 300:
+			return LoadProgram();
 
 		}
 	return SERR_UNKNOWN_STEP;
@@ -1613,6 +1666,8 @@ int cipline_tech_object::InitStep( int step, int f )
 		case 186: return SCInitPumping(WATER, WATER, TANK_K_MG, TANK_SW_DREN, step, f);
 		case 187: return SCInitPumping(WATER, WATER, TANK_W_MG, TANK_SK_DREN, step, f);
 		case 188: return SCInitPumping(-1, -1, -1, TANK_SKW_DREN, step, f);
+
+		case 300: return InitCustomStep(WATER, WATER, KANAL, 0, step, f);
 
 		case 555:
 			RHI();
@@ -1840,6 +1895,8 @@ int cipline_tech_object::DoStep( int step )
 		case 187: return SCPumping(WATER, WATER, TANK_W_MG, TANK_SK_DREN);
 		case 188: return SCPumping(-1, -1, -1, TANK_SKW_DREN);
 
+		case 300: return EvalCustomStep(WATER, WATER, KANAL, 0);
+
 		case 555:
 			if (get_delta_millisec(enddelayTimer) > WASH_END_DELAY)
 				{
@@ -1884,7 +1941,7 @@ int cipline_tech_object::DoStep( int step )
 					objready = 0;
 					}
 				}
-			if (objready && state == ERR_CIP_OBJECT)
+			if (objready && (state == ERR_CIP_OBJECT || state == ERR_OS))
 				{
 				state = 1;
 				InitStep(curstep, 1);
@@ -2008,6 +2065,8 @@ int cipline_tech_object::LoadProgram( void )
 			return 115;
 		case PRG_SELFCLEAN:
 			return 151;
+		case PRG_ASO:
+			return 300;
 		case -1:
 			return 555;
 		default:
@@ -5351,6 +5410,62 @@ void cipline_tech_object::set_selfclean_par( int parno, float newval )
 		{
 		scparams->save(parno, newval);
 		}
+	}
+
+int cipline_tech_object::InitCustomStep( int what, int from, int where, int how, int step, int f )
+	{
+	int luares = 0;
+
+
+	if (2 == is_InitCustomStep_func)
+		{
+		lua_State* L = lua_manager::get_instance()->get_Lua();
+		lua_getglobal( L, name_Lua );
+		lua_getfield( L, -1, "init_custom_step" );
+		lua_remove( L, -2 );  // Stack: remove OBJECT.
+		lua_getglobal( L, name_Lua );
+		lua_pushinteger(L, step);
+		lua_pushinteger(L, f);
+		if (0 == lua_pcall(L, 3, 1, 0))
+			{
+			luares = lua_tointeger(L, -1);
+			lua_pop(L, 1);
+			}
+		else
+			{
+			Print("Error in calling init_custom_step: %s\n", lua_tostring(L, -1));
+			lua_pop(L, 1);
+			}
+		}
+
+	return luares;
+	}
+
+int cipline_tech_object::EvalCustomStep( int what, int from, int where, int how )
+	{
+	int luares = 0;
+
+	if (2 == is_DoCustomStep_func)
+		{
+		lua_State* L = lua_manager::get_instance()->get_Lua();
+		lua_getglobal( L, name_Lua );
+		lua_getfield( L, -1, "do_custom_step" );
+		lua_remove( L, -2 );  // Stack: remove OBJECT.
+		lua_getglobal( L, name_Lua );
+		lua_pushinteger(L, curstep);
+		if (0 == lua_pcall(L, 2, 1, 0))
+			{
+			luares = lua_tointeger(L, -1);
+			lua_pop(L, 1);
+			}
+		else
+			{
+			Print("Error in calling do_custom_step: %s\n", lua_tostring(L, -1));
+			lua_pop(L, 1);
+			}
+		}
+
+	return luares;
 	}
 
 i_DO_device* cipline_tech_object::VWDREN = 0;
