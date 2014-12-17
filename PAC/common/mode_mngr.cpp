@@ -507,7 +507,7 @@ void open_seat_action::evaluate()
     case P_OPEN_LOWER:
         if ( wash_lower_seat_devices.empty() )
             {
-            phase      = P_WAIT;
+            phase      = P_OPEN_UPPER;
             next_phase = P_OPEN_UPPER;
             break;
             }
