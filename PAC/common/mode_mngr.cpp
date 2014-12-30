@@ -412,7 +412,8 @@ open_seat_action::open_seat_action( bool is_mode, step *owner ) :
     phase( P_WAIT ),
     active_group_n( 0 ),
     wait_time( 60000 ),
-    wash_time( 1000 ),
+    wash_time_upper( 1000 ),
+	wash_time_lower( 1000 ),
     start_cycle_time( 0 ),
     is_mode( is_mode ),
     owner( owner )
@@ -450,7 +451,8 @@ void open_seat_action::init()
         	}
         }
 
-    wash_time = par[ PAC_info::P_MIX_FLIP_TIME ];
+    wash_time_upper = par[ PAC_info::P_MIX_FLIP_UPPER_TIME ];
+	wash_time_lower = par[ PAC_info::P_MIX_FLIP_LOWER_TIME ];
 
     active_group_n = 0;
     }
@@ -478,7 +480,7 @@ void open_seat_action::evaluate()
             break;
             }
 
-        if ( get_delta_millisec( start_cycle_time ) < wash_time )
+        if ( get_delta_millisec( start_cycle_time ) < wash_time_upper )
             {
             for ( u_int j = 0; j < wash_upper_seat_devices[ active_group_n ].size(); j++ )
                 {
@@ -512,7 +514,7 @@ void open_seat_action::evaluate()
             break;
             }
 
-        if ( get_delta_millisec( start_cycle_time ) < wash_time )
+        if ( get_delta_millisec( start_cycle_time ) < wash_time_lower )
             {
             for ( u_int j = 0; j < wash_lower_seat_devices[ active_group_n ].size(); j++ )
                 {

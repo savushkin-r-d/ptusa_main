@@ -167,7 +167,8 @@ class open_seat_action: public action
 
         u_int_4 wait_time;      ///< Время ожидания перед промыванием седел.
         u_int_4 wait_seat_time; ///< Время ожидания перед промыванием седел группы.
-        u_int_4 wash_time;      ///< Время промывки седел текущей группы клапанов.
+        u_int_4 wash_time_upper;      ///< Время промывки верхних седел текущей группы клапанов.
+		u_int_4 wash_time_lower;      ///< Время промывки нижних седел текущей группы клапанов.
 
         /// Седла.
         std::vector< std::vector< device* > > wash_upper_seat_devices;

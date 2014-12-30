@@ -15,10 +15,11 @@ class PAC_info: public i_Lua_save_device
 
         enum PARAMETERS
             {
-            P_PARAMS_COUNT  = 3,   ///< Количество параметров.
+            P_PARAMS_COUNT  = 4,   ///< Количество параметров.
             
             P_MIX_FLIP_PERIOD = 1, ///< Интервал промывки седел клапанов, сек.
-            P_MIX_FLIP_TIME,       ///< Время промывки седел клапанов, мсек.
+            P_MIX_FLIP_UPPER_TIME,       ///< Время промывки верхних седел клапанов, мсек.
+			P_MIX_FLIP_LOWER_TIME, ///< Время промывки нижних седел клапанов, мсек
 
             P_V_OFF_DELAY_TIME,    ///< Время задержки закрытия клапанов, мсек.
             };

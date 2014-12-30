@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 12/08/14 10:32:44.
+** Generated automatically by tolua++-1.0.92 on 12/30/14 11:43:35.
 */
 
 #ifndef __cplusplus
@@ -8580,7 +8580,9 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_beginmodule(tolua_S,"PAC_info");
    tolua_constant(tolua_S,"P_PARAMS_COUNT",PAC_info::P_PARAMS_COUNT);
    tolua_constant(tolua_S,"P_MIX_FLIP_PERIOD",PAC_info::P_MIX_FLIP_PERIOD);
-   tolua_constant(tolua_S,"P_MIX_FLIP_TIME",PAC_info::P_MIX_FLIP_TIME);
+   tolua_constant(tolua_S,"P_MIX_FLIP_UPPER_TIME",PAC_info::P_MIX_FLIP_UPPER_TIME);
+   tolua_constant(tolua_S,"P_MIX_FLIP_LOWER_TIME",PAC_info::P_MIX_FLIP_LOWER_TIME);
+   tolua_constant(tolua_S,"P_V_OFF_DELAY_TIME",PAC_info::P_V_OFF_DELAY_TIME);
    tolua_variable(tolua_S,"par",tolua_get_PAC_info_par,tolua_set_PAC_info_par);
    tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_PAC_info_set_cmd00);
   tolua_endmodule(tolua_S);
