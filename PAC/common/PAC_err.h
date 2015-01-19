@@ -105,7 +105,8 @@ class PAC_critical_errors_manager
             return "Авария";
             }
 
-        const char* get_alarm_descr( ALARM_CLASS err_class, ALARM_SUBCLASS err_sub_class, int par )
+        const char* get_alarm_descr( ALARM_CLASS err_class,
+            ALARM_SUBCLASS err_sub_class, int par )
             {
             static char tmp[ 100 ] = "";
 
@@ -118,7 +119,10 @@ class PAC_critical_errors_manager
                 switch( err_sub_class )
                     {
                 case AS_WAGO:
-                    sprintf( tmp, "Нет связи с узлом Wago №%d", par );
+                    sprintf( tmp, "Нет связи с узлом Wago %s \"%s\" для \"%s\"",
+                        G_WAGO_MANAGER()->get_node( par )->name,
+                        G_WAGO_MANAGER()->get_node( par )->ip_address,
+                        G_CMMCTR->get_host_name_rus() );
                     return tmp;
 
                 case AS_PANEL:
@@ -126,7 +130,7 @@ class PAC_critical_errors_manager
                     return tmp;
 
                 case AS_MODBUS_DEVICE:
-                    sprintf( tmp, "Нет связи с устройством, опрашиваемое по Modbus, №%d", par );
+                    sprintf( tmp, "Нет связи с Modbus-устройством №%d", par );
                     return tmp;
 
                 case AS_EASYSERVER:
