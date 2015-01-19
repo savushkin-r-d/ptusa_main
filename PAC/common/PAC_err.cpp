@@ -127,10 +127,9 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
         {
         res += sprintf( str + res, "\t%s\n", "{" );
 
-        res += sprintf( str + res, "\tdescription = \"%s \'%s\'\",\n",
+        res += sprintf( str + res, "\tdescription = \"%s\",\n",
             get_alarm_descr( ( ALARM_CLASS ) errors[ i ].err_class,
-            ( ALARM_SUBCLASS ) errors[ i ].err_sub_class, errors[ i ].param ),
-                G_WAGO_MANAGER()->get_node( errors[ i ].param - 1 )->name );
+            ( ALARM_SUBCLASS ) errors[ i ].err_sub_class, errors[ i ].param ) );
 
         res += sprintf( str + res, "\t%s\n", "type = AT_SPECIAL," );
         res += sprintf( str + res, "\t%s%s%s\n", "group = '",

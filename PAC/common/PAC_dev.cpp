@@ -810,7 +810,7 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char *dev_
     int l = -1;
     int u = -1;
 
-    if ( dev_type < device::C_DEVICE_TYPE_CNT )
+    if ( ( int ) dev_type < ( int ) device::C_DEVICE_TYPE_CNT )
     	{
         l = dev_types_ranges[ dev_type ].start_pos;
         u = dev_types_ranges[ dev_type ].end_pos;
@@ -2153,7 +2153,7 @@ void motor::direct_on()
     state = 1;
 #else
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
-        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 V||
+        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::M_REV_2_ERROR )
         {
         // Выключение реверса.
