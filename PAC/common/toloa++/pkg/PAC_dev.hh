@@ -1147,6 +1147,9 @@ class cipline_tech_object: public tech_object
 
 		float GetConc( int what );
 		void SortRR( int where, int forcetotank);
+		int SetRet(int val);
+		int GetRetState();
+		int HasRet();
 	};
 //---------------------------------------------------------------------------
 rm_manager* G_RM_MANAGER();
