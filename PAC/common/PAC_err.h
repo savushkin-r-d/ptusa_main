@@ -121,8 +121,8 @@ class PAC_critical_errors_manager
                 case AS_WAGO:
                     sprintf( tmp, 
                         "Нет связи с узлом Wago '%s' ('%s', '%s')",
-                        G_WAGO_MANAGER()->get_node( par )->name,
-                        G_WAGO_MANAGER()->get_node( par )->ip_address,
+                        G_WAGO_MANAGER()->get_node( par - 1 )->name,
+                        G_WAGO_MANAGER()->get_node( par - 1 )->ip_address,
                         G_CMMCTR->get_host_name_rus() );
                     return tmp;
 
