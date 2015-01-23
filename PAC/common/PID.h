@@ -60,6 +60,8 @@ class PID: public i_Lua_save_device, i_cmd_device
     char name[ 50 ];
 
     public:
+        static const int PARAM_CNT = 14;
+
         enum PARAM  
             {        
             P_k = 1,               ///< Параметр k.
@@ -75,11 +77,14 @@ class PID: public i_Lua_save_device, i_cmd_device
             P_k2,                  ///< Параметр k2.
             P_Ti2,                 ///< Параметр Ti2.
             P_Td2,                 ///< Параметр Td2. 
+
+            P_out_max,             ///< Мax значение выходной величины.
+            P_out_min,             ///< Мin значение выходной величины.
             }; 
 
         enum WORK_PARAM 
             {
-            WP_Z = 1,  ///< Требуемооfое значение.
+            WP_Z = 1,  ///< Требуемое значение.
             WP_U,      ///< Выход ПИД.
             };
 
