@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 01/19/15 17:08:32.
+** Generated automatically by tolua++-1.0.92 on 01/26/15 16:29:52.
 */
 
 #ifndef __cplusplus
@@ -8656,6 +8656,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"P_k2",PID::P_k2);
    tolua_constant(tolua_S,"P_Ti2",PID::P_Ti2);
    tolua_constant(tolua_S,"P_Td2",PID::P_Td2);
+   tolua_constant(tolua_S,"P_out_max",PID::P_out_max);
+   tolua_constant(tolua_S,"P_out_min",PID::P_out_min);
    tolua_constant(tolua_S,"WP_Z",PID::WP_Z);
    tolua_constant(tolua_S,"WP_U",PID::WP_U);
    tolua_function(tolua_S,"new",tolua_PAC_dev_PID_new00);
