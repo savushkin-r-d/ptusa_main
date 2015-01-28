@@ -213,11 +213,11 @@ void PID::init_param( PARAM par_n, float val )
     if ( par_n > 0 && ( u_int ) par_n <= par->get_count() )
         {
         //ѕроверка выхода за диапазон допустимых значений.
-        if ( par_n == PARAM::P_out_min && val < 0 )
+        if ( par_n == P_out_min && val < 0 )
             {                
             val = 0;
             }
-        if ( par_n == PARAM::P_out_max && val > 100 )
+        if ( par_n == P_out_max && val > 100 )
             {                
             val = 100;
             }    
@@ -304,16 +304,16 @@ int PID::set_cmd( const char *prop, u_int idx, double val )
 		if ( idx > 0 && idx <= par->get_count() )
 			{
             //ѕроверка выхода за диапазон допустимых значений.
-            if ( idx == PARAM::P_out_min && val < 0 )
+            if ( idx == P_out_min && val < 0 )
                 {                
                 val = 0;
                 }
-            if ( idx == PARAM::P_out_max && val > 100 )
+            if ( idx == P_out_max && val > 100 )
                 {                
                 val = 100;
                 }              
-            if ( ( idx == PARAM::P_out_min && val > par[ 0 ][ P_out_max ] ) ||
-                ( idx == PARAM::P_out_max && val < par[ 0 ][ P_out_min ] ) )
+            if ( ( idx == P_out_min && val > par[ 0 ][ P_out_max ] ) ||
+                ( idx == P_out_max && val < par[ 0 ][ P_out_min ] ) )
                 {                
                 return 0;
                 }
