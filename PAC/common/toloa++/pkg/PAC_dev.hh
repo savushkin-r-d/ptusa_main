@@ -1033,6 +1033,11 @@ class siren_lights_manager
     {
     public:
         int init( device *red, device *yellow, device *green, device *srn );
+
+        /// @brief Задание типа мигания для красной лампочки.
+        ///
+        /// @param type - 0 - реализуем сами, 1 - встроенный в сирену.
+        void set_red_blink( int type );
     };
 //-----------------------------------------------------------------------------
 siren_lights_manager* G_SIREN_LIGHTS_MANAGER();

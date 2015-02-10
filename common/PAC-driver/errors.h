@@ -304,11 +304,19 @@ class siren_lights_manager: public i_Lua_save_device
         static siren_lights_manager* get_instance()
             {
             if ( instance.is_null() )
-            	{
+                {
                 instance = new siren_lights_manager();
-            	}
+                }
 
             return instance;
+            }
+
+        /// @brief Задание типа мигания для красной лампочки.
+        ///
+        /// @param type - 0 - реализуем сами, 1 - встроенный в сирену.
+        void set_red_blink( int type )
+            {
+            is_red_built_in_blink = type;
             }
 
         int init( device *red, device *yellow, device *green, device *srn );
@@ -354,6 +362,9 @@ class siren_lights_manager: public i_Lua_save_device
         device *yellow;
 
         device *srn;
+
+        ///Тип мигания (0 - реализуем сами, 0< - встроенный в сирену).
+        int is_red_built_in_blink;	
 
         unsigned int  critical_error_n; // Номер текущей критической ошибки.
         unsigned long st_time;
