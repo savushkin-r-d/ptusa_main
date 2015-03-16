@@ -55,6 +55,14 @@ int main( int argc, char *argv[] )
     fflush( stdout );
 #endif // DEBUG
 
+    int sleep_time_ms = 2;
+    if ( argc >= 3 )
+        {
+        char *stopstring;
+        sleep_time_ms = strtol( argv[ 2 ], &stopstring, 10 );
+        }
+    fprintf( stderr, "Sleep time is %li ms.\n", sleep_time_ms );
+
     fprintf( stderr, "Starting main loop!\n" );
 
 #ifdef DEBUG
@@ -77,7 +85,7 @@ int main( int argc, char *argv[] )
 #endif // DEBUG
 
         lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, 200 );
-        sleep_ms( 1 );
+        sleep_ms( sleep_time_ms );
 
 #ifndef DEBUG_NO_WAGO_MODULES
         G_WAGO_MANAGER()->read_inputs();
