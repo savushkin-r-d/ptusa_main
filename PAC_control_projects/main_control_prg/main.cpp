@@ -55,7 +55,7 @@ int main( int argc, char *argv[] )
     fflush( stdout );
 #endif // DEBUG
 
-    int sleep_time_ms = 2;
+    long int sleep_time_ms = 2;
     if ( argc >= 3 )
         {
         char *stopstring;
