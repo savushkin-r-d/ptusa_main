@@ -2219,7 +2219,7 @@ int motor::save_device_ex( char *buff )
         if ( sub_type == device::M_REV_2_ERROR || 
             sub_type == device::DST_M_REV_FREQ_2_ERROR )
             {
-            res = sprintf( buff, "R=%d, ERR=%d", 
+            res = sprintf( buff, "R=%d, ERR=%d, ", 
                 get_DO( DO_INDEX_REVERSE ), get_DI( DI_INDEX_ERROR ) );
             }
         else
