@@ -1956,7 +1956,8 @@ float motor::get_value()
     return freq;
 #else
     if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ || 
-        sub_type == device::DST_M_REV_FREQ_2 )
+        sub_type == device::DST_M_REV_FREQ_2 || 
+        sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
         return get_AO( AO_INDEX, C_MIN_VALUE, C_MAX_VALUE );
         }
@@ -1971,7 +1972,8 @@ void motor::direct_set_value( float value )
     freq = value;
 #else
     if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ || 
-        sub_type == device::DST_M_REV_FREQ_2 )
+        sub_type == device::DST_M_REV_FREQ_2 || 
+        sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
         set_AO( AO_INDEX, value, C_MIN_VALUE, C_MAX_VALUE );
         }
