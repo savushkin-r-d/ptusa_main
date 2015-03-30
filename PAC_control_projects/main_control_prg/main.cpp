@@ -89,22 +89,26 @@ int main( int argc, char *argv[] )
 
 #ifndef DEBUG_NO_WAGO_MODULES
         G_WAGO_MANAGER()->read_inputs();
-        sleep_ms( 1 );
+        sleep_ms( sleep_time_ms );
 #endif // DEBUG_NO_WAGO_MODULES
 
         valve::evaluate();
         G_TECH_OBJECT_MNGR()->evaluate();
+        sleep_ms( sleep_time_ms );
 
 #ifndef DEBUG_NO_WAGO_MODULES
         G_WAGO_MANAGER()->write_outputs();
+        sleep_ms( sleep_time_ms );
 #endif // ifndef
 
         G_CMMCTR->evaluate();
+        sleep_ms( sleep_time_ms );
 
         PAC_info::get_instance()->eval();
         PAC_critical_errors_manager::get_instance()->show_errors();
         G_ERRORS_MANAGER->evaluate();
         G_SIREN_LIGHTS_MANAGER()->eval();
+        sleep_ms( sleep_time_ms );
 
 #ifdef RM_PAC
         // Связь с удаленными PAC.
