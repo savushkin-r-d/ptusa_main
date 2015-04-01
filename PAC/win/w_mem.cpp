@@ -23,7 +23,7 @@ SRAM::SRAM( const char *file_name,
 
         if ( 0 == file )
             {
-            if( ( file = fopen( file_name, "r+" ) ) <= 0 )
+            if( ( file = fopen( file_name, "r+b" ) ) <= 0 )
                 {
 #ifdef DEBUG
                 printf( "SRAM() - ERROR: Can't open device (%s) : %s.\n",
