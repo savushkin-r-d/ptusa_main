@@ -519,10 +519,10 @@ int TRecipeManager::SaveToFile(const char* filename)
 	Print("Saving recipes to file %s\n", filename);
 #endif // DEBUG
 	FILE* memFile = NULL;
-	memFile = fopen(filename, "r+");
+	memFile = fopen(filename, "r+b");
 	if (NULL == memFile)
 		{
-		memFile = fopen(filename, "w+");
+		memFile = fopen(filename, "w+b");
 		}
 	if (memFile)
 		{
@@ -537,7 +537,7 @@ int TRecipeManager::LoadFromFile( const char* filename )
 	{
 	FILE* memFile = NULL;
 	memset(recipeMemory, 0, recipeMemorySize);
-	memFile = fopen(filename, "r+");
+	memFile = fopen(filename, "r+b");
 	if (memFile)
 		{
 		fread(recipeMemory, 1, recipeMemorySize, memFile);
