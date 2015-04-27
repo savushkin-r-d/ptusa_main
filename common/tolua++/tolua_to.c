@@ -126,6 +126,7 @@ TOLUA_API int tolua_tofieldvalue (lua_State* L, int lo, int index, int def)
 
 TOLUA_API int tolua_getfieldboolean (lua_State* L, int lo, int index, int def)
 {
+ ( void ) def;	// disable [-Werror=unused-variable]
  int v;
  lua_pushnumber(L,index);
  lua_gettable(L,lo);

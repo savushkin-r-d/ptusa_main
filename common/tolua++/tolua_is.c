@@ -324,6 +324,7 @@ TOLUA_API int tolua_isusertype (lua_State* L, int lo, const char* type, int def,
 TOLUA_API int tolua_isvaluearray
  (lua_State* L, int lo, int dim, int def, tolua_Error* err)
 {
+	( void ) dim;			// disable [-Werror=unused-variable]
 	if (!tolua_istable(L,lo,def,err))
 		return 0;
 	else
