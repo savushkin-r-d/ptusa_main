@@ -27,7 +27,7 @@
 extern time_t t_;
 extern struct tm *timeInfo_;
 #ifdef PAC_WAGO_PFC200
-#define print_time t_ = time( 0 ) + 3 * 60 * 60; timeInfo_ = gmtime( &t_ );\
+#define print_time t_ = time( 0 ); timeInfo_ = gmtime( &t_ );\
      printf( "%02d.%02d.%02d %02d:%02d:%02d ",\
      timeInfo_->tm_mday, timeInfo_->tm_mon + 1, timeInfo_->tm_year,\
      timeInfo_->tm_hour, timeInfo_->tm_min, timeInfo_->tm_sec ); printf
