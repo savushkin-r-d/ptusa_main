@@ -100,24 +100,24 @@ NV_memory_manager::NV_memory_manager() : PAC_NVRAM( 0 ),
     {
 #ifdef WIN_OS
     // FIXME Реализовать создание файла при его отсутствии.
-    PAC_NVRAM  = new SRAM( "./nvram.txt", 32768, 0, 30 );
-    PAC_EEPROM = new SRAM( "./nvram.txt", 32768, 31, 32767 );
+    PAC_NVRAM  = new SRAM( "./nvram.txt", 32768, 0, 31 );
+    PAC_EEPROM = new SRAM( "./nvram.txt", 32768, 32, 32767 );
 #endif // WIN_OS
 
 #if defined LINUX_OS && defined PAC_PC
     // FIXME Реализовать создание файла при его отсутствии.
-    PAC_NVRAM  = new SRAM( "./nvram.txt", 32768, 0, 30 );
-    PAC_EEPROM = new SRAM( "./nvram.txt", 32768, 31, 32767 );
+    PAC_NVRAM  = new SRAM( "./nvram.txt", 32768, 0, 31 );
+    PAC_EEPROM = new SRAM( "./nvram.txt", 32768, 32, 32767 );
 #endif
 
 #if defined LINUX_OS && defined PAC_WAGO_750_860
-    PAC_NVRAM  = new SRAM( "/dev/nvram", 32768, 0, 30 );
-    PAC_EEPROM = new SRAM( "/dev/nvram", 32768, 31, 32767 );
+    PAC_NVRAM  = new SRAM( "/dev/nvram", 32768, 0, 31 );
+    PAC_EEPROM = new SRAM( "/dev/nvram", 32768, 32, 32767 );
 #endif
 
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
-    PAC_NVRAM  = new eeprom_PFC200( 32768, 0, 30 );
-    PAC_EEPROM = new eeprom_PFC200( 32768, 31, 32767 );
+    PAC_NVRAM  = new eeprom_PFC200( 32768, 0, 31 );
+    PAC_EEPROM = new eeprom_PFC200( 32768, 32, 32767 );
 #endif
 
     last_NVRAM_pos  = PAC_NVRAM->get_available_start_pos();
