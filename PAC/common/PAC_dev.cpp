@@ -1540,19 +1540,21 @@ void valve::evaluate()
 
     u_int delay = G_PAC_INFO()->par[ PAC_info::P_V_OFF_DELAY_TIME ];
 
-    for( std::vector< valve* >::iterator v = to_switch_off.begin();
-        v != to_switch_off.end(); v++ )
+    for( std::vector< valve* >::iterator iter = to_switch_off.begin();
+    		iter != to_switch_off.end(); iter++ )
         {
-        if ( ( *v )->is_switching_off &&
-            get_delta_millisec( ( *v )->start_off_time ) > delay )
+    	valve* v = *iter;
+
+        if ( v->is_switching_off &&
+            get_delta_millisec( v->start_off_time ) > delay )
             {
-            if ( !( *v )->get_manual_mode() )
+            if ( !v->get_manual_mode() )
                 {
-                ( *v )->direct_off();
+                v->direct_off();
                 }
 
-            ( *v )->is_switching_off = false;
-            ( *v )->was_on_auto = false;
+            v->is_switching_off = false;
+            v->was_on_auto = false;
             }
         }
 

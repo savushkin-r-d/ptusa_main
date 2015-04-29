@@ -19,9 +19,8 @@ eeprom_PFC200::eeprom_PFC200(int total_size, int available_start_pos,
         exit( EXIT_FAILURE );
         }
 
-    int nvram_size = nvram_get_size();
-
 #ifdef DEBUG
+    int nvram_size = nvram_get_size();
     printf( "Total EEPROM size %d, mem size %d\n",
         nvram_size, total_size );
 #endif

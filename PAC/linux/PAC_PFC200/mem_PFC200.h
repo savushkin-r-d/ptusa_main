@@ -24,11 +24,12 @@ class eeprom_PFC200: public NV_memory
     {
     friend class NV_memory_manager;
 
-    private:
+	public:
+    	virtual ~eeprom_PFC200();
+
+	private:
         eeprom_PFC200( int total_size, int available_start_pos,
             int available_end_pos );
-        
-        virtual ~eeprom_PFC200();
         
         /// @brief Метод интерфейса @ref i_memory.
         int read( void *buff, u_int count, u_int start_pos );

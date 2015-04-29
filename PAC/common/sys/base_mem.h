@@ -1,12 +1,12 @@
 /// @file base_mem.h
-/// @brief Содержит описания классов, которые реализуют аппаратную часть PAC - 
+/// @brief Содержит описания классов, которые реализуют аппаратную часть PAC -
 /// различную память - на абстрактном уровне.
-/// 
+///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
 /// @c DEBUG    - компиляция c выводом отладочной информации в консоль.@n@n
-/// 
+///
 /// @par Текущая версия:
 /// @$Rev: 220 $.\n
 /// @$Author: id $.\n
@@ -24,8 +24,12 @@
 class i_memory
     {
     public:
+        virtual ~i_memory()
+            {
+            }
+
         /// @brief Чтение массива байт.
-        ///        
+        ///
         /// @param buf       - адрес буфера, куда будут считываться данные.
         /// @param count     - количество считываемых байт.
         /// @param start_pos - стартовый адрес.
@@ -35,7 +39,7 @@ class i_memory
         virtual int read( void *buf, u_int count, u_int start_pos ) = 0;
 
         /// @brief Запись массива байт.
-        ///        
+        ///
         /// @param buf       - адрес буфера, куда будут записываться данные.
         /// @param count     - количество считываемых байт.
         /// @param start_pos - стартовый адрес.
@@ -45,7 +49,7 @@ class i_memory
         virtual int write( void *buf, u_int count, u_int start_pos ) = 0;
 
         /// @brief Получение размера памяти в байтах.
-        ///        
+        ///
         /// @return - размер памяти в байтах.
         virtual u_int get_size() const = 0;
     };
@@ -56,13 +60,13 @@ class i_memory
 ///\endif
 
 class NV_memory : public i_memory
-    {  
+    {
 
     public:
         /// @param total_size           - общий размер памяти.
         /// @param available_start_pos  - начальный доступный адрес.
         /// @param available_end_pos    - конечный доступный адрес.
-        NV_memory( u_int total_size, u_int available_start_pos, 
+        NV_memory( u_int total_size, u_int available_start_pos,
             u_int available_end_pos );
 
         /// @brief Метод интерфейса @ref i_memory.
@@ -72,7 +76,7 @@ class NV_memory : public i_memory
             }
 
         /// @brief Получение начального доступного для работы адреса памяти.
-        ///        
+        ///
         /// @return - начальный доступный для работы адрес памяти.
         u_int get_available_start_pos() const
             {
@@ -80,11 +84,15 @@ class NV_memory : public i_memory
             }
 
         /// @brief Получение конечного доступного для работы адреса памяти.
-        ///        
+        ///
         /// @return - конечный доступный для работы адрес памяти.
         u_int get_available_end_pos() const
             {
             return available_end_pos;
+            }
+
+        virtual ~NV_memory()
+            {
             }
 
     private:
@@ -93,11 +101,11 @@ class NV_memory : public i_memory
 
         /// @brief Начальный доступный адрес.
         /// @details Для пропуска зарезервированной системной области.
-        u_int available_start_pos;      
+        u_int available_start_pos;
 
         /// @brief Конечный доступный адрес.
         /// @details Для пропуска зарезервированной системной области.
-        u_int available_end_pos;        
+        u_int available_end_pos;
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с блоком памяти.
@@ -110,6 +118,10 @@ class memory_range: public i_memory
         u_int get_size() const
             {
             return size;
+            }
+
+        virtual ~memory_range()
+            {
             }
 
         /// @brief Метод интерфейса @ref i_memory.
@@ -137,42 +149,46 @@ class memory_range: public i_memory
         int check_params( u_int count, u_int start_pos );
     };
 //-----------------------------------------------------------------------------
-/// @brief Работа с объектом файловой системы. Представляет абстракцию от 
+/// @brief Работа с объектом файловой системы. Представляет абстракцию от
 /// физической реализации таковой.
 class file
     {
     public:
+        virtual ~file()
+            {
+            }
+
         /// @brief Открытие файла.
         ///
-        /// @param file_name - имя файла. 
+        /// @param file_name - имя файла.
         ///
-        /// @return - результат 
+        /// @return - результат
         ///    0   - Ок.
         ///    0 < - Ошибка.
         virtual int file_open( const char *file_name ) = 0;
 
         /// @brief Чтение из файла блока данных.
         ///
-        /// @param buffer - буфер, куда поместить результат. 
-        /// @param count - количество считываемых байт. 
+        /// @param buffer - буфер, куда поместить результат.
+        /// @param count - количество считываемых байт.
         ///
-        /// @return - количество считанных байт. 
+        /// @return - количество считанных байт.
         virtual int file_read( void *buffer, int count ) = 0;
 
         /// @brief Чтение из файла строки.
         ///
-        /// @return - указатель на начало строки. 
+        /// @return - указатель на начало строки.
         virtual char* fget_line() = 0;
 
-        /// @brief Чтение из файла строки без изменения позиции указателя в 
+        /// @brief Чтение из файла строки без изменения позиции указателя в
         /// файле.
         ///
-        /// @return - указатель на начало строки. 
+        /// @return - указатель на начало строки.
         virtual char* pfget_line() = 0;
 
         /// @brief Закрытие файла.
         ///
-        /// @return - результат 
+        /// @return - результат
         ///    0   - Ок.
         ///    0 < - Ошибка.
         virtual void file_close() = 0;
@@ -182,7 +198,7 @@ class file
 /// распределения памяти.
 class NV_memory_manager
     {
-    public:        
+    public:
         enum MEMORY_TYPE ///< Типы энергонезависимой памяти.
             {
             MT_NVRAM,
@@ -190,7 +206,7 @@ class NV_memory_manager
             };
 
         /// @brief Получение объекта для работы с блоком памяти.
-        ///        
+        ///
         /// @param m_type - тип памяти, откуда будет выделятся память.
         /// @param count  - размер в байтах.
         ///
@@ -199,7 +215,7 @@ class NV_memory_manager
         virtual memory_range* get_memory_block( MEMORY_TYPE m_type,
             u_int count );
 
-        /// @brief Получение единственного экземпляра класса для работы с 
+        /// @brief Получение единственного экземпляра класса для работы с
         /// параметрами.
         ///
         /// @return - указатель на единственный объект класса @ref
@@ -214,14 +230,14 @@ class NV_memory_manager
 
         NV_memory_manager();
 
-        /// @brief Работа с энергонезависимой ОЗУ (non-volatile random access 
+        /// @brief Работа с энергонезависимой ОЗУ (non-volatile random access
         /// memory).
         ///
-        /// Данная память питается от батарейки, не имеет ограничений на  
+        /// Данная память питается от батарейки, не имеет ограничений на
         /// количество циклов записи/чтения.
         NV_memory *PAC_NVRAM;
 
-        /// @brief Работа с энергонезависимой ОЗУ (Electrically Erasable 
+        /// @brief Работа с энергонезависимой ОЗУ (Electrically Erasable
         /// Programmable Read-Only Memory).
         ///
         /// Имеет ограничения на количество циклов записи/чтения - 1 миллион.
