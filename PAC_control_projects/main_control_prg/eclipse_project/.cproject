@@ -72,6 +72,7 @@
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1967536305" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="PAC_WAGO_PFC200"/>
 									<listOptionValue builtIn="false" value="DEBUG"/>
+									<listOptionValue builtIn="false" value="TEST_SPEED"/>
 									<listOptionValue builtIn="false" value="LINUX_OS"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1895796942" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
@@ -169,7 +170,6 @@
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1175507440" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="LINUX_OS"/>
 									<listOptionValue builtIn="false" value="PAC_WAGO_PFC200"/>
-									<listOptionValue builtIn="false" value="TEST_SPEED"/>
 									<listOptionValue builtIn="false" value="LUA_USE_LINUX"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.2136439186" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
@@ -199,6 +199,7 @@
 								<option id="gnu.cpp.compiler.option.dialect.std.97218326" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.2071690987" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="PAC_WAGO_PFC200"/>
+									<listOptionValue builtIn="false" value="TEST_SPEED"/>
 									<listOptionValue builtIn="false" value="LINUX_OS"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1300546995" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
