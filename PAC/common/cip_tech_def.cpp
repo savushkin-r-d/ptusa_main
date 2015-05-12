@@ -1918,25 +1918,17 @@ int cipline_tech_object::DoStep( int step )
 		{
 		if (rt_par_float[P_RESUME_CIP_ON_SIGNAL] != 0)
 			{
-			int objready = 0;
+			int objready = 1;
 			if (dev_os_object)
 				{
-				if (dev_os_object->get_state() != OFF)
-					{
-					objready = 1;
-					}
-				else
+				if (dev_os_object->get_state() == OFF)
 					{
 					objready = 0;
 					}
 				}
 			if (dev_os_object_ready)
 				{
-				if (dev_os_object_ready->get_state() != OFF)
-					{
-					objready = 1;
-					}
-				else
+				if (dev_os_object_ready->get_state() == OFF)
 					{
 					objready = 0;
 					}
@@ -2551,7 +2543,6 @@ int cipline_tech_object::InitCircRR( int where )
 	NP->on();
 	rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
 	PIDP->on();
-	V13->on();
 
 	rt_par_float[P_ZAD_FLOW] = parpar[0][P_FLOW_RR];
 	PIDF->on();
@@ -2632,7 +2623,6 @@ int cipline_tech_object::InitAddRR( int where )
 	NP->on();
 	rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
 	PIDP->on();
-	V13->on();
 
 	rt_par_float[P_ZAD_FLOW] = parpar[0][P_FLOW_RR];
 	PIDF->on();
@@ -2691,7 +2681,6 @@ int cipline_tech_object::InitOpolRR( int where )
 	NP->on();
 	rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
 	PIDP->on();
-	V13->on();
 
 	rt_par_float[P_ZAD_FLOW] = parpar[0][P_FLOW_RR];
 	PIDF->on();
@@ -3119,7 +3108,6 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
 		{
 		PIDP->on();
 		}
-	V13->on();
 	rt_par_float[P_ZAD_FLOW] = rt_par_float[P_FLOW];
 	PIDF->on();
 	rt_par_float[P_VRAB] = p;
@@ -3279,7 +3267,6 @@ int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
 		{
 		PIDP->on();
 		}
-	V13->on();
 	rt_par_float[P_ZAD_FLOW] = rt_par_float[P_FLOW];
 	PIDF->on();
 	rt_par_float[P_VRAB] = p;
@@ -3609,7 +3596,6 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
 	PIDP->on();
 	NP->on();
 	SetRet(ON);
-	V13->on();
 	rt_par_float[P_ZAD_FLOW] = rt_par_float[P_FLOW];
 	PIDF->on();
 	rt_par_float[P_VRAB] = 0;
