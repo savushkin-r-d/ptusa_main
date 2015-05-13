@@ -25,8 +25,10 @@ tcp_client::tcp_client( const char* client_ip, unsigned int client_port, unsigne
 
 tcp_client::~tcp_client()
 	{
-	delete ip;
-	delete buff;
+	delete [] ip;
+    ip = 0;
+	delete [] buff;
+    buff = 0;
 	}
 
 tcp_client* tcp_client::Create( char* ip, unsigned int port, unsigned int id, unsigned char alarm_subclass, unsigned int exchange_buf_size /*= 256*/, unsigned long send_receive_timeout /*= 100*/ )

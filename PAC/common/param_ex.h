@@ -308,7 +308,7 @@ template < class type, bool is_float > class parameters
             Print( "\"%s\"\t - ", name );
             for ( u_int i = 1; i <= count; i++ )
                 {
-                Print( "[%d]=", i );
+                Print( "[%u]=", i );
                 if ( is_float )
                 	{
                     Print( "%.2f,", ( float ) values[ i - 1 ] );

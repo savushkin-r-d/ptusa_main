@@ -443,12 +443,6 @@ void device_manager::print() const
 //-----------------------------------------------------------------------------
 device_manager::device_manager(): project_devices( 0 )
     {
-    for ( int i = 0; i < device::C_DEVICE_TYPE_CNT; i++ )
-        {
-        dev_types_ranges[ i ].start_pos = -1;
-        dev_types_ranges[ i ].end_pos = -1;
-        }
-
     G_DEVICE_CMMCTR->add_device( this );
     }
 //-----------------------------------------------------------------------------

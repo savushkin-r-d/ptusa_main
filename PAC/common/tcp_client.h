@@ -8,11 +8,8 @@ class tcp_client
 	protected:
 		char* ip;
 		unsigned int port;
-		unsigned long last_connect_try;
-		unsigned int connect_tries;
 		int socket_number;
 		unsigned long timeout;
-		unsigned long connectTimeout;
 		char connectedstate;
 		int id;
 		unsigned char subclass;

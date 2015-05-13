@@ -50,6 +50,11 @@ class data_file : public file
     public:
         data_file();
 
+        virtual ~data_file()
+            {
+            file_close();
+            }
+
         int file_open( const char* file_name );
 
         int file_read( void *buffer, int count );

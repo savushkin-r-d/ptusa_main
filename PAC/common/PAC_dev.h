@@ -1236,7 +1236,7 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
         void print() const
             {
 #ifdef DEBUG
-            Print( "%s [%d:%d]\t", get_name(), AS_gateway, AS_number );
+            Print( "%s [%u:%u]\t", get_name(), AS_gateway, AS_number );
 #endif // DEBUG
             }
 
@@ -1333,7 +1333,7 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
         int get_off_fb_value()
             {
             char* AI_data = ( char* ) get_AI_data( AI_INDEX );
-            char AI_state = AI_data[ MAILBOX_OFFSET + AS_number / 2 ];
+            int AI_state = AI_data[ MAILBOX_OFFSET + AS_number / 2 ];
 
             if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
                 {
@@ -1348,7 +1348,7 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
         int get_on_fb_value()
             {
             char* AI_data = ( char* ) get_AI_data( AI_INDEX );
-            char AI_state = AI_data[ MAILBOX_OFFSET + AS_number / 2 ];
+            int AI_state = AI_data[ MAILBOX_OFFSET + AS_number / 2 ];
 
             if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
                 {
@@ -1933,7 +1933,8 @@ class motor : public device, public wago_device
     public:
         motor( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
             device( dev_name, DT_M, sub_type, ADDITIONAL_PARAM_COUNT ),
-            wago_device( dev_name )
+            wago_device( dev_name ),
+            start_switch_time( 0 )
 #ifdef DEBUG_NO_WAGO_MODULES
             ,state( 0 ),
             freq( 0 )
@@ -1957,8 +1958,6 @@ class motor : public device, public wago_device
         void direct_off();
 
     private:
-        u_int start_param_idx;
-
         enum CONSTANTS
             {
             ADDITIONAL_PARAM_COUNT = 1,
@@ -2323,6 +2322,10 @@ class device_manager: public i_Lua_save_device
             {
             int start_pos;
             int end_pos;
+
+            range(): start_pos( -1 ), end_pos( -1 )
+                {
+                }
             };
 
         /// Диапазоны устройств всех типов.

@@ -92,10 +92,13 @@ int SRAM::write( void *buff, u_int count, u_int start_pos )
 //-----------------------------------------------------------------------------
 data_file::data_file() : f( 0 )
     {
+    memset( buf, 0, C_MAX_BUFFER_SIZE );
     }
 //-----------------------------------------------------------------------------
 int data_file::file_open( const char* file_name )
     {
+    file_close();
+
     f = fopen( file_name, "r" );
     if ( 0 == f )
         {

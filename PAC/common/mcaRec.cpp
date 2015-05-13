@@ -381,7 +381,7 @@ int TRecipeManager::OnRecipeDevices( int recipeNo, int msaline /*= 1*/ )
 		devNo = (unsigned long)getRecipeValue(recipeNo, i);
 		if (devNo > 0)
 			{
-			sprintf(devName,"LINE%dV%d", msaline, devNo);
+			sprintf(devName,"LINE%dV%u", msaline, devNo);
 			dev = (device*)(V(devName));
 			if (dev->get_serial_n() > 0)
 				{
@@ -397,7 +397,7 @@ int TRecipeManager::OnRecipeDevices( int recipeNo, int msaline /*= 1*/ )
 				else
 					{
 #ifdef DEBUG
-					Print("\n\rOn recipe devices. Valve %d from param %d not found in device list\n\r", devNo, i);
+					Print("\n\rOn recipe devices. Valve %u from param %d not found in device list\n\r", devNo, i);
 #endif
 					errflag = 1;
 					}
@@ -409,7 +409,7 @@ int TRecipeManager::OnRecipeDevices( int recipeNo, int msaline /*= 1*/ )
 		devNo = (unsigned long)getRecipeValue(recipeNo, i);
 		if (devNo > 0)
 			{
-			sprintf(devName,"LINE%dV%d", msaline, devNo);
+			sprintf(devName,"LINE%dV%u", msaline, devNo);
 			dev = (device*)(V(devName));
 			if (dev->get_serial_n() > 0)
 				{
@@ -425,7 +425,7 @@ int TRecipeManager::OnRecipeDevices( int recipeNo, int msaline /*= 1*/ )
 				else
 					{
 #ifdef DEBUG
-					Print("\n\rOff recipe devices. Valve %d from param %d not found in device list\n\r", devNo, i);
+					Print("\n\rOff recipe devices. Valve %u from param %d not found in device list\n\r", devNo, i);
 #endif
 					errflag = 1;
 					}
@@ -447,7 +447,7 @@ int TRecipeManager::OffRecipeDevices( int recipeNo, int msaline /*= 1*/ )
 		devNo = (unsigned long)getRecipeValue(recipeNo, i);
 		if (devNo > 0)
 			{
-			sprintf(devName,"LINE%dV%d", msaline, devNo);
+			sprintf(devName,"LINE%dV%u", msaline, devNo);
 			dev = (device*)(V(devName));
 			if (dev->get_serial_n() > 0)
 				{
@@ -463,7 +463,7 @@ int TRecipeManager::OffRecipeDevices( int recipeNo, int msaline /*= 1*/ )
 				else
 					{
 #ifdef DEBUG
-					Print("\n\rOff recipe devices. Valve %d from param %d not found in device list\n\r", devNo, i);
+					Print("\n\rOff recipe devices. Valve %u from param %d not found in device list\n\r", devNo, i);
 #endif
 					errflag = 1;
 					}
@@ -497,7 +497,8 @@ void TRecipeManager::NullifyRecipe()
 	unsigned char* tempbuff = new unsigned char[BLOCK_SIZE * blocksPerRecipe];
 	memset(tempbuff, 0, BLOCK_SIZE * blocksPerRecipe);
 	WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, tempbuff);
-	delete tempbuff;
+	delete [] tempbuff;
+    tempbuff = 0;
 	LoadRecipeName();
 	}
 

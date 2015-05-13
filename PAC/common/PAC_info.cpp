@@ -59,11 +59,11 @@ int PAC_info::save_device( char *buff )
     {
     int answer_size = sprintf( buff, "t.SYSTEM = \n\t{\n" );
     
-    answer_size += sprintf( buff + answer_size, "\tRESET_BY=%d,\n", reset_type );    
-    answer_size += sprintf( buff + answer_size, "\tUP_DAYS=%d,\n", up_days );  
-    answer_size += sprintf( buff + answer_size, "\tUP_HOURS=%d,\n", up_hours );   
-    answer_size += sprintf( buff + answer_size, "\tUP_MINS=%d,\n", up_mins );
-    answer_size += sprintf( buff + answer_size, "\tUP_SECS=%d,\n", up_secs );
+    answer_size += sprintf( buff + answer_size, "\tRESET_BY=%u,\n", reset_type );    
+    answer_size += sprintf( buff + answer_size, "\tUP_DAYS=%u,\n", up_days );  
+    answer_size += sprintf( buff + answer_size, "\tUP_HOURS=%u,\n", up_hours );   
+    answer_size += sprintf( buff + answer_size, "\tUP_MINS=%u,\n", up_mins );
+    answer_size += sprintf( buff + answer_size, "\tUP_SECS=%u,\n", up_secs );
     answer_size += sprintf( buff + answer_size, "\tUP_TIME=\"%s\",\n",
         up_time_str );
 
