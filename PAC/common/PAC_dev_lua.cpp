@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 02/10/15 10:35:54.
+** Generated automatically by tolua++-1.0.92 on 05/19/15 16:32:07.
 */
 
 #ifndef __cplusplus
@@ -7099,6 +7099,36 @@ static int tolua_set_cipline_tech_object_msa_number(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* get function: ncar of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_ncar
+static int tolua_get_cipline_tech_object_ncar(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'ncar'",NULL);
+#endif
+  tolua_pushstring(tolua_S,(const char*)self->ncar);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: ncar of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_ncar
+static int tolua_set_cipline_tech_object_ncar(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'ncar'",NULL);
+  if (!tolua_isstring(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->ncar = ((char*)  tolua_tostring(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* get function: par_float of class  cipline_tech_object */
 #ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_par_float
 static int tolua_get_cipline_tech_object_par_float(lua_State* tolua_S)
@@ -8792,6 +8822,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_variable(tolua_S,"PIDP",tolua_get_cipline_tech_object_PIDP_ptr,tolua_set_cipline_tech_object_PIDP_ptr);
    tolua_variable(tolua_S,"PIDF",tolua_get_cipline_tech_object_PIDF_ptr,tolua_set_cipline_tech_object_PIDF_ptr);
    tolua_variable(tolua_S,"msa_number",tolua_get_cipline_tech_object_msa_number,tolua_set_cipline_tech_object_msa_number);
+   tolua_variable(tolua_S,"ncar",tolua_get_cipline_tech_object_ncar,tolua_set_cipline_tech_object_ncar);
    tolua_variable(tolua_S,"par_float",tolua_get_cipline_tech_object_par_float,tolua_set_cipline_tech_object_par_float);
    tolua_variable(tolua_S,"rt_par_float",tolua_get_cipline_tech_object_rt_par_float,tolua_set_cipline_tech_object_rt_par_float);
    tolua_function(tolua_S,"get_station_par",tolua_PAC_dev_cipline_tech_object_get_station_par00);

@@ -27,7 +27,7 @@ enum CoilGroups
 
 	C_COMBPARAMS = 30,
 
-
+	C_OTHER = 99,
 	C_MSA_RECIPES = 100,
 	C_MSA_STATIONPARAMS,
 	C_MSA_CONTROL,
@@ -40,6 +40,11 @@ enum CoilGroups
 	C_MSA_LINE7PARAMS,
 	C_MSA_LINE8PARAMS,
 	C_MSA_LINE9PARAMS,
+	};
+
+enum OtherEnum
+	{
+	OTHER_CARNO = 0,
 	};
 
 enum ControlEnum

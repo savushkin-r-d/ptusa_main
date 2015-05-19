@@ -50,6 +50,7 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 #endif //DEBUG
 	int i;
 	nmr = number;
+	tech_type = type;
 	if (0 == parpar)
 		{
 		parpar = new saved_params<float, true>(STATION_PAR_COUNT, "PAR_MAIN");
@@ -80,6 +81,8 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	strcpy(programList, "");
 	currentProgramName = new char[PROGRAM_MAX_LEN];
 	strcpy(currentProgramName, "");
+	ncar = new char[CAR_NAME_MAX_LENGTH];
+	strcpy(ncar, "");
 
 	lineRecipes = new TRecipeManager(number - 1);
 	opcip=0;
@@ -140,7 +143,7 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	is_InitCustomStep_func = 0;
 	is_DoCustomStep_func = 0;
 
-	if (type == 112)
+	if (tech_type == 112)
 		{
 		scenabled = 1;
 		scline = 0;
@@ -188,6 +191,9 @@ cipline_tech_object::~cipline_tech_object()
 		{
 		delete lineRecipes;
 		}
+	delete[] loadedRecName;
+	delete[] programList;
+	delete[] currentProgramName;
 	}
 
 int cipline_tech_object::save_device( char *buff )
@@ -220,6 +226,9 @@ int cipline_tech_object::save_device( char *buff )
 
 	//Список доступных объектов мойки
 	answer_size += sprintf(buff + answer_size, "\tREC_LIST='%s',\n", lineRecipes->recipeList);
+
+	//Номер машины
+	answer_size += sprintf(buff + answer_size, "\tNCAR='%s',\n", ncar);
 
 	//Время простоя.
 	char up_time_str [ 50 ];
@@ -320,6 +329,12 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, double val )
 		return 0;
 		}
 
+	if (0 == strcmp(prop, "NCAR"))
+		{
+		sprintf(ncar, "%f", val);
+		return 0;
+		}
+
 #ifdef DEBUG
 	Print( "Eror tech_object::set_cmd(...), prop = \"%s\", idx = %u, val = %f\n",
 		prop, idx, val );
@@ -337,6 +352,15 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 			val, _TRUNCATE);
 #else
 		strncpy( lineRecipes->currentRecipeName, val, lineRecipes->recipeNameLength );
+#endif
+		return 0;
+		}
+if (0 == strcmp(prop, "NCAR"))
+		{
+#ifdef WIN_OS
+		strncpy_s(ncar, CAR_NAME_MAX_LENGTH, val, _TRUNCATE);
+#else
+		strncpy( ncar, val, CAR_NAME_MAX_LENGTH );
 #endif
 		return 0;
 		}

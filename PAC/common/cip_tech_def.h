@@ -24,6 +24,8 @@
 #define STATION_PAR_COUNT 40
 ///@brief Количество параметров для программы самоочистки
 #define SELFCLEAN_PAR_COUNT 20
+///@brief Максимальная длина номера машины
+#define CAR_NAME_MAX_LENGTH 15
 
 #define TMR_CNT    10
 #define SAV_CNT    1
@@ -463,6 +465,7 @@ class cipline_tech_object: public tech_object
 	protected:
 		int ncmd;
 
+		unsigned int tech_type; //подтип объекта
 		int ret_circ_flag; //флаг управления возвратным насосом при циркуляции
 		unsigned long ret_circ_delay; //задержка обратного включения возвратного насоса
 		int ret_overrride; //флаг принудительного включения/выключения возвратного насооса
@@ -542,6 +545,9 @@ class cipline_tech_object: public tech_object
 		char* loadedRecName;
 		char* programList;
 		char* currentProgramName;
+
+		//Номер машины(или что-нибудь другое)
+		char* ncar;
 
 		//Список программ для панели
 #define PANEL_MAX_PROGRAMS 16

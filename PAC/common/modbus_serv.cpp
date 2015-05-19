@@ -311,6 +311,23 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							PackFloat(get_device(coilgroup, objnumber)->get_value(),&outdata[3+i*2]);
 							i++;
 							break;
+						case C_OTHER:
+							line = (i + startingAddress) / 1000 + 1;
+							if (line > u_int(cipline_tech_object::MdlsCNT))
+								{
+								continue;
+								}
+							objnumber = (i+startingAddress) - (line - 1) * 1000;
+							switch (objnumber)
+								{
+								case OTHER_CARNO:
+									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->ncar, &outdata[3+i*2]);
+									i+= CAR_NAME_MAX_LENGTH;
+									break;
+								default:
+									break;
+								}
+							break;
 						case C_MSA_RECIPES:
 							line = (i + startingAddress) / 3000 + 1;
 							if (line > u_int(cipline_tech_object::MdlsCNT))
