@@ -173,10 +173,37 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 						case C_M:
 						case C_N:
 						case C_FS:
+						case C_PUMPS:
+						case C_LINE1VALVES:
+						case C_LINE2VALVES:
+						case C_LINE3VALVES:
+						case C_LINE4VALVES:
+						case C_LINE5VALVES:
+						case C_LINE6VALVES:
+						case C_LINE7VALVES:
+						case C_LINE8VALVES:
+						case C_LINE9VALVES:
 							ForceBit(i, &outdata[3], get_device(coilgroup, objnumber)->get_state());
 							break;
 						case C_LS:
 							ForceBit(i, &outdata[3], get_device(coilgroup, objnumber)->is_active());
+							break;
+						case C_OTHER:
+							line = (i + startingAddress) / 1000;
+							if (line > u_int(cipline_tech_object::MdlsCNT))
+								{
+								continue;
+								}
+							objnumber = (i+startingAddress) - line * 1000;
+							switch (objnumber)
+								{
+								case OTHER_SWITCH1:
+								case OTHER_SWITCH2:
+								case OTHER_SWITCH3:
+								case OTHER_SWITCH4:
+									ForceBit(i, &outdata[3], cipline_tech_object::Mdls[line-1]->getSwitch(objnumber + 1 - OTHER_SWITCH1) ? ON : OFF);
+									break;
+								}
 							break;
 						case C_MSA_STATIONPARAMS:
 							ForceBit(i,&outdata[3],cipline_tech_object::Mdls[0]->get_station_par(objnumber) != 0 ? 1 : 0);
@@ -317,11 +344,23 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 								{
 								continue;
 								}
-							objnumber = (i+startingAddress) - (line - 1) * 1000;
+							objnumber = (i+startingAddress) - line * 1000;
 							switch (objnumber)
 								{
-								case OTHER_CARNO:
-									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->ncar, &outdata[3+i*2]);
+								case OTHER_CARNO1:
+									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->ncar1, &outdata[3+i*2]);
+									i+= CAR_NAME_MAX_LENGTH;
+									break;
+								case OTHER_CARNO2:
+									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->ncar2, &outdata[3+i*2]);
+									i+= CAR_NAME_MAX_LENGTH;
+									break;
+								case OTHER_CARNO3:
+									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->ncar3, &outdata[3+i*2]);
+									i+= CAR_NAME_MAX_LENGTH;
+									break;
+								case OTHER_CARNO4:
+									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->ncar4, &outdata[3+i*2]);
 									i+= CAR_NAME_MAX_LENGTH;
 									break;
 								default:
@@ -616,6 +655,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 			unsigned int startingAddress = data[ 2 ] * 256 + data[ 3 ];            
 			unsigned int coilgroup       = data[ 0 ];
 			int value                    = data[ 4 ] > 0 ? 1 : 0;
+			int line = 0;
 			unsigned int objnumber = startingAddress;
 
 			if (isMsa)
@@ -625,7 +665,34 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 					case C_V:
 					case C_M:
 					case C_N:
+					case C_PUMPS:
+					case C_LINE1VALVES:
+					case C_LINE2VALVES:
+					case C_LINE3VALVES:
+					case C_LINE4VALVES:
+					case C_LINE5VALVES:
+					case C_LINE6VALVES:
+					case C_LINE7VALVES:
+					case C_LINE8VALVES:
+					case C_LINE9VALVES:
 						get_device(coilgroup, objnumber)->set_state(data[4] ? ON : OFF);
+						break;
+					case C_OTHER:
+						line = (startingAddress) / 1000;
+						if (line > cipline_tech_object::MdlsCNT)
+							{
+							break;
+							}
+						objnumber = (startingAddress) - (line) * 1000;
+						switch (objnumber)
+							{
+							case OTHER_SWITCH1:
+							case OTHER_SWITCH2:
+							case OTHER_SWITCH3:
+							case OTHER_SWITCH4:
+								cipline_tech_object::Mdls[line - 1]->setSwitch(objnumber + 1 - OTHER_SWITCH1, data[4]);
+								break;
+							}
 						break;
 					case C_MSA_STATIONPARAMS:
 						if (objnumber < cipline_tech_object::Mdls[0]->parpar->get_count())
@@ -714,6 +781,35 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 						case C_AO:
 							get_device(coilgroup, objnumber)->set_value(UnpackFloat(&data[7+i*2]));
 							i++;
+							break;
+						case C_OTHER:
+							line = (i + startingAddress) / 1000 + 1;
+							if (line > cipline_tech_object::MdlsCNT)
+								{
+								continue;
+								}
+							objnumber = (i+startingAddress) - line * 1000;
+							switch (objnumber)
+								{
+								case OTHER_CARNO1:
+									UnicodetoCP1251(cipline_tech_object::Mdls[line - 1]->ncar1,  &data[7+i*2], 15);
+									i+= CAR_NAME_MAX_LENGTH;
+									break;
+								case OTHER_CARNO2:
+									UnicodetoCP1251(cipline_tech_object::Mdls[line - 1]->ncar2,  &data[7+i*2], 15);
+									i+= CAR_NAME_MAX_LENGTH;
+									break;
+								case OTHER_CARNO3:
+									UnicodetoCP1251(cipline_tech_object::Mdls[line - 1]->ncar3,  &data[7+i*2], 15);
+									i+= CAR_NAME_MAX_LENGTH;
+									break;
+								case OTHER_CARNO4:
+									UnicodetoCP1251(cipline_tech_object::Mdls[line - 1]->ncar4,  &data[7+i*2], 15);
+									i+= CAR_NAME_MAX_LENGTH;
+									break;
+								default:
+									break;
+								}
 							break;
 						case C_MSA_RECIPES:
 							line = (i + startingAddress) / 3000 + 1;
@@ -1289,6 +1385,31 @@ device* ModbusServ::get_device( unsigned int group, unsigned int number )
 				ret = (device*)cipline_tech_object::Mdls[line-1]->Q;
 				}
 			break;
+		case C_PUMPS:
+			line = number / 1000;
+			if (line > 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT && (number % 1000 == 1))
+				{
+				sprintf(devname, "LINE%dM%d", line, number % 1000 + 1000);
+				ret = (device*)M(devname);
+				}
+			break;
+		case C_LINE1VALVES:
+		case C_LINE2VALVES:
+		case C_LINE3VALVES:
+		case C_LINE4VALVES:
+		case C_LINE5VALVES:
+		case C_LINE6VALVES:
+		case C_LINE7VALVES:
+		case C_LINE8VALVES:
+		case C_LINE9VALVES:
+			line = group - C_LINE1VALVES + 1;
+			if (line > 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT && (number == 1001 || number == 1002 || 1004 == number || 1006 == number ||
+				(number / 1000 == 1 && (number - 1000) % 10 <= 2 && (number - 1000) / 10 <= 4 )))
+				{
+				sprintf(devname, "LINE%dV%d", line, number);
+				ret = (device*)V(devname);
+				}
+			break;
 		}
-	return ret;
+		return ret;
 	}

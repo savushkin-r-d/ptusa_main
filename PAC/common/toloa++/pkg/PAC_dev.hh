@@ -1140,7 +1140,14 @@ class cipline_tech_object: public tech_object
 		MSAPID* PIDF;
 
 		int msa_number; //Номер станции
-		char* ncar; //Номер машины
+		char* ncar1; //номер машины
+		char* ncar2; //номер машины
+		char* ncar3; //номер машины
+		char* ncar4; //номер машины
+		int switch1;
+		int switch2;
+		int switch3;
+		int switch4;
 		saved_params_float      par_float;   ///< Сохраняемые пар-ры, тип float.
 		run_time_params_float   rt_par_float;///< Рабочие параметры, тип float.
 		float get_station_par(int parno);

@@ -500,6 +500,8 @@ class cipline_tech_object: public tech_object
 		int isLine();
 		int getValvesConflict();
 
+		virtual void resetCarNumber();
+
 		//Обработчики LUA
 		int is_in_evaluate_func;
 		int is_InitCustomStep_func;
@@ -547,7 +549,17 @@ class cipline_tech_object: public tech_object
 		char* currentProgramName;
 
 		//Номер машины(или что-нибудь другое)
-		char* ncar;
+		char* ncar1;
+		char* ncar2;
+		char* ncar3;
+		char* ncar4;
+		int switch1;
+		int switch2;
+		int switch3;
+		int switch4;
+		int getSwitch(int switchNO);
+		void setSwitch(int switchNO, int value);
+
 
 		//Список программ для панели
 #define PANEL_MAX_PROGRAMS 16

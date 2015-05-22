@@ -81,8 +81,18 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
 	strcpy(programList, "");
 	currentProgramName = new char[PROGRAM_MAX_LEN];
 	strcpy(currentProgramName, "");
-	ncar = new char[CAR_NAME_MAX_LENGTH];
-	strcpy(ncar, "");
+	ncar1 = new char[CAR_NAME_MAX_LENGTH];
+	strcpy(ncar1, "");
+	ncar2 = new char[CAR_NAME_MAX_LENGTH];
+	strcpy(ncar2, "");
+	ncar3 = new char[CAR_NAME_MAX_LENGTH];
+	strcpy(ncar3, "");
+	ncar4 = new char[CAR_NAME_MAX_LENGTH];
+	strcpy(ncar4, "");
+	switch1 = 0;
+	switch2 = 0;
+	switch3 = 0;
+	switch4 = 0;
 
 	lineRecipes = new TRecipeManager(number - 1);
 	opcip=0;
@@ -228,7 +238,15 @@ int cipline_tech_object::save_device( char *buff )
 	answer_size += sprintf(buff + answer_size, "\tREC_LIST='%s',\n", lineRecipes->recipeList);
 
 	//Номер машины
-	answer_size += sprintf(buff + answer_size, "\tNCAR='%s',\n", ncar);
+	answer_size += sprintf(buff + answer_size, "\tNCAR='%s',\n", ncar1);
+	answer_size += sprintf(buff + answer_size, "\tNCAR1='%s',\n", ncar1);
+	answer_size += sprintf(buff + answer_size, "\tNCAR2='%s',\n", ncar2);
+	answer_size += sprintf(buff + answer_size, "\tNCAR3='%s',\n", ncar3);
+	answer_size += sprintf(buff + answer_size, "\tNCAR4='%s',\n", ncar4);
+	answer_size += sprintf(buff + answer_size, "\tSWITCH1='%d',\n", switch1);
+	answer_size += sprintf(buff + answer_size, "\tSWITCH2='%d',\n", switch2);
+	answer_size += sprintf(buff + answer_size, "\tSWITCH3='%d',\n", switch3);
+	answer_size += sprintf(buff + answer_size, "\tSWITCH4='%d',\n", switch4);
 
 	//Время простоя.
 	char up_time_str [ 50 ];
@@ -329,9 +347,51 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, double val )
 		return 0;
 		}
 
-	if (0 == strcmp(prop, "NCAR"))
+	if (0 == strcmp(prop, "NCAR1") || 0 == strcmp(prop, "NCAR"))
 		{
-		sprintf(ncar, "%f", val);
+		sprintf(ncar1, "%d", val);
+		return 0;
+		}
+
+	if (0 == strcmp(prop, "NCAR2"))
+		{
+		sprintf(ncar2, "%d", val);
+		return 0;
+		}
+
+	if (0 == strcmp(prop, "NCAR3"))
+		{
+		sprintf(ncar3, "%d", val);
+		return 0;
+		}
+
+	if (0 == strcmp(prop, "NCAR4"))
+		{
+		sprintf(ncar4, "%d", val);
+		return 0;
+		}
+
+	if ( strcmp( prop, "SWITCH1" ) == 0 )
+		{
+		switch1 = ( int ) val;
+		return 0;
+		}
+
+	if ( strcmp( prop, "SWITCH2" ) == 0 )
+		{
+		switch2 = ( int ) val;
+		return 0;
+		}
+
+	if ( strcmp( prop, "SWITCH3" ) == 0 )
+		{
+		switch3 = ( int ) val;
+		return 0;
+		}
+
+	if ( strcmp( prop, "SWITCH4" ) == 0 )
+		{
+		switch4 = ( int ) val;
 		return 0;
 		}
 
@@ -355,12 +415,39 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 #endif
 		return 0;
 		}
-if (0 == strcmp(prop, "NCAR"))
+	if (0 == strcmp(prop, "NCAR1") || 0 == strcmp(prop, "NCAR"))
 		{
 #ifdef WIN_OS
-		strncpy_s(ncar, CAR_NAME_MAX_LENGTH, val, _TRUNCATE);
+		strncpy_s(ncar1, CAR_NAME_MAX_LENGTH, val, _TRUNCATE);
 #else
-		strncpy( ncar, val, CAR_NAME_MAX_LENGTH );
+		strncpy( ncar1, val, CAR_NAME_MAX_LENGTH );
+#endif
+		return 0;
+		}
+	if (0 == strcmp(prop, "NCAR2"))
+		{
+#ifdef WIN_OS
+		strncpy_s(ncar1, CAR_NAME_MAX_LENGTH, val, _TRUNCATE);
+#else
+		strncpy( ncar2, val, CAR_NAME_MAX_LENGTH );
+#endif
+		return 0;
+		}
+	if (0 == strcmp(prop, "NCAR3"))
+		{
+#ifdef WIN_OS
+		strncpy_s(ncar1, CAR_NAME_MAX_LENGTH, val, _TRUNCATE);
+#else
+		strncpy( ncar3, val, CAR_NAME_MAX_LENGTH );
+#endif
+		return 0;
+		}
+	if (0 == strcmp(prop, "NCAR4"))
+		{
+#ifdef WIN_OS
+		strncpy_s(ncar1, CAR_NAME_MAX_LENGTH, val, _TRUNCATE);
+#else
+		strncpy( ncar4, val, CAR_NAME_MAX_LENGTH );
 #endif
 		return 0;
 		}
@@ -1223,6 +1310,7 @@ int cipline_tech_object::EvalCommands()
 				resetProgramName();
 				resetRecipeName();
 				resetProgramList();
+				resetCarNumber();
 				loadedRecipe = -1;
 				rt_par_float[P_PROGRAM] = 0;
 				}
@@ -1287,6 +1375,58 @@ int cipline_tech_object::EvalCommands()
 					else
 						{
 						closeLineValves();
+						if (113 == tech_type)
+							{
+							char vname[15];
+							if (switch1)
+								{
+								sprintf(vname, "LINE%dV%d", nmr, 1011);
+								V(vname)->on();
+								sprintf(vname, "LINE%dV%d", nmr, 1012);
+								V(vname)->on();
+								sprintf(vname, "LINE%dV%d", nmr, 1006);
+								V(vname)->on();
+								sprintf(vname, "LINE%dV%d", nmr, 1002);
+								V(vname)->on();
+								}
+							if (switch2)
+								{
+								sprintf(vname, "LINE%dV%d", nmr, 1021);
+								V(vname)->on();
+								sprintf(vname, "LINE%dV%d", nmr, 1022);
+								V(vname)->on();
+								sprintf(vname, "LINE%dV%d", nmr, 1006);
+								V(vname)->on();
+								sprintf(vname, "LINE%dV%d", nmr, 1002);
+								V(vname)->on();
+								}
+							if (switch3)
+								{
+								sprintf(vname, "LINE%dV%d", nmr, 1031);
+								V(vname)->on();
+								sprintf(vname, "LINE%dV%d", nmr, 1032);
+								V(vname)->on();
+								sprintf(vname, "LINE%dV%d", nmr, 1006);
+								V(vname)->on();
+								sprintf(vname, "LINE%dV%d", nmr, 1001);
+								V(vname)->on();
+								sprintf(vname, "LINE%dV%d", nmr, 1004);
+								V(vname)->on();
+								}
+							if (switch4)
+								{
+								sprintf(vname, "LINE%dV%d", nmr, 1041);
+								V(vname)->on();
+								sprintf(vname, "LINE%dV%d", nmr, 1042);
+								V(vname)->on();
+								sprintf(vname, "LINE%dV%d", nmr, 1006);
+								V(vname)->on();
+								sprintf(vname, "LINE%dV%d", nmr, 1001);
+								V(vname)->on();
+								sprintf(vname, "LINE%dV%d", nmr, 1004);
+								V(vname)->on();
+								}
+							}
 						lineRecipes->OnRecipeDevices(loadedRecipe, nmr);
 						InitStep(curstep, 0);
 						}
@@ -2107,6 +2247,11 @@ void cipline_tech_object::ResetWP( void )
 	resetProgramName();
 	resetRecipeName();
 	resetProgramList();
+	resetCarNumber();
+	switch1 = 0;
+	switch2 = 0;
+	switch3 = 0;
+	switch4 = 0;
 	}
 
 int cipline_tech_object::GetRetState()
@@ -5476,6 +5621,46 @@ int cipline_tech_object::EvalCustomStep( int what, int from, int where, int how 
 		}
 
 	return luares;
+	}
+
+void cipline_tech_object::resetCarNumber()
+	{
+	sprintf(ncar1, "");
+	sprintf(ncar2, "");
+	sprintf(ncar3, "");
+	sprintf(ncar4, "");
+	}
+
+int cipline_tech_object::getSwitch( int switchNO )
+	{
+	switch (switchNO)
+		{
+		case 1:
+			return switch1;
+		case 2:
+			return switch2;
+		case 3:
+			return switch3;
+		case 4:
+			return switch4;
+		}
+	return 0;
+	}
+
+void cipline_tech_object::setSwitch( int switchNO, int value )
+	{
+	if (state) return;
+	switch (switchNO)
+		{
+		case 1:
+			switch1 = value;
+		case 2:
+			switch2 = value;
+		case 3:
+			switch3 = value;
+		case 4:
+			switch4 = value;
+		}
 	}
 
 i_DO_device* cipline_tech_object::VWDREN = 0;
