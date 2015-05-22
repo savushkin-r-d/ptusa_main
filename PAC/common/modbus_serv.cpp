@@ -339,7 +339,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							i++;
 							break;
 						case C_OTHER:
-							line = (i + startingAddress) / 1000 + 1;
+							line = (i + startingAddress) / 1000;
 							if (line > u_int(cipline_tech_object::MdlsCNT))
 								{
 								continue;
@@ -783,7 +783,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							i++;
 							break;
 						case C_OTHER:
-							line = (i + startingAddress) / 1000 + 1;
+							line = (i + startingAddress) / 1000;
 							if (line > cipline_tech_object::MdlsCNT)
 								{
 								continue;
