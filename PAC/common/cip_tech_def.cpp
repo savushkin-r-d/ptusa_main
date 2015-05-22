@@ -349,25 +349,25 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, double val )
 
 	if (0 == strcmp(prop, "NCAR1") || 0 == strcmp(prop, "NCAR"))
 		{
-		sprintf(ncar1, "%d", val);
+		sprintf(ncar1, "%d", (int)val);
 		return 0;
 		}
 
 	if (0 == strcmp(prop, "NCAR2"))
 		{
-		sprintf(ncar2, "%d", val);
+		sprintf(ncar2, "%d", (int)val);
 		return 0;
 		}
 
 	if (0 == strcmp(prop, "NCAR3"))
 		{
-		sprintf(ncar3, "%d", val);
+		sprintf(ncar3, "%d", (int)val);
 		return 0;
 		}
 
 	if (0 == strcmp(prop, "NCAR4"))
 		{
-		sprintf(ncar4, "%d", val);
+		sprintf(ncar4, "%d", (int)val);
 		return 0;
 		}
 
