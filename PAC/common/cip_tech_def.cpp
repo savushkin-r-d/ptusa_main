@@ -1906,7 +1906,7 @@ int cipline_tech_object::EvalCipInProgress()
 			}
 		else
 			{
-			if (isLine()) SetRet(ON);
+			if (isLine() && curstep != 0 && curstep != 555) SetRet(ON);
 			}
 		}
 	return 0;
