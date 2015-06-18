@@ -335,6 +335,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							break;
 						case C_TE:
 						case C_QE:
+						case C_AI:
 							PackFloat(get_device(coilgroup, objnumber)->get_value(),&outdata[3+i*2]);
 							i++;
 							break;
@@ -474,7 +475,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							break;
 
 						case C_MSA_STATIONPARAMS:
-							PackFloat(cipline_tech_object::Mdls[0]->get_station_par(objnumber/2 - 1), &outdata[3+i*2]);
+							PackFloat(cipline_tech_object::Mdls[0]->get_station_par(objnumber/2), &outdata[3+i*2]);
 							i++;
 							break;
 
@@ -697,7 +698,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 					case C_MSA_STATIONPARAMS:
 						if (objnumber < cipline_tech_object::Mdls[0]->parpar->get_count())
 							{
-							cipline_tech_object::Mdls[0]->set_station_par(objnumber - 1, (float)(data[4] ? 1 : 0));
+							cipline_tech_object::Mdls[0]->set_station_par(objnumber, (float)(data[4] ? 1 : 0));
 							}
 						break;
 					case C_MSA_LINE1PARAMS:
@@ -918,7 +919,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 #ifdef DEBUG 
 								Print("\n\rWrite Station param %d = %f", objnumber / 2, UnpackFloat(&data[7+i*2]));
 #endif
-								cipline_tech_object::Mdls[0]->set_station_par(objnumber / 2 - 1, UnpackFloat(&data[7+i*2]));
+								cipline_tech_object::Mdls[0]->set_station_par(objnumber / 2, UnpackFloat(&data[7+i*2]));
 								}
 							i++;
 							break;
@@ -1383,6 +1384,23 @@ device* ModbusServ::get_device( unsigned int group, unsigned int number )
 			if (line > 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT)
 				{
 				ret = (device*)cipline_tech_object::Mdls[line-1]->Q;
+				}
+			break;
+		case C_LE:
+			if (line > 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT)
+				{
+				switch (number % 100)
+					{
+					case 0:
+						ret = (device*)cipline_tech_object::Mdls[line-1]->LTS;
+						break;
+					case 2:
+						ret = (device*)cipline_tech_object::Mdls[line-1]->LTK;
+						break;
+					case 4:
+						ret = (device*)cipline_tech_object::Mdls[line-1]->LTW;
+						break;
+					}
 				}
 			break;
 		case C_PUMPS:
