@@ -13,7 +13,7 @@
 #include "tech_def.h"
 #include "modbus_serv.h"
 
-
+#include "log.h"
 //-----------------------------------------------------------------------------
 auto_smart_ptr< lua_manager > lua_manager::instance;
 //-----------------------------------------------------------------------------
@@ -327,7 +327,9 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         "get_PAC_name_rus", "lua_manager::init" );
     if ( 0 == PAC_name_rus )
         {
-        fprintf( stderr, "Lua init error - error reading PAC name!\n" );
+        sprintf( G_LOG->msg, "Lua init error - error reading PAC name (rus)." );
+        G_LOG->write_log( i_log::P_CRIT );
+
         return 1;
         }
     const char *PAC_name_eng =
@@ -335,14 +337,16 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         "get_PAC_name_eng", "lua_manager::init" );
     if ( 0 == PAC_name_rus )
         {
-        fprintf( stderr, "Lua init error - error reading PAC name!\n" );
+        sprintf( G_LOG->msg, "Lua init error - error reading PAC name (eng)." );
+        G_LOG->write_log( i_log::P_CRIT );
+
         return 1;
         }
     tcp_communicator::init_instance( PAC_name_rus, PAC_name_eng );
 
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
-	G_CMMCTR->reg_service( 15, ModbusServ::ModbusService );
+    G_CMMCTR->reg_service( 15, ModbusServ::ModbusService );
 
 
     lua_gc( L, LUA_GCRESTART, 0 );

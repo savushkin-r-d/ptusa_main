@@ -1,6 +1,8 @@
 #include <bits/errno.h>
 
 #include "l_wago.h"
+#include "log.h"
+
 
 extern int errno;
 //-----------------------------------------------------------------------------
@@ -13,9 +15,11 @@ int wago_manager_linux::net_init( wago_node *node )
 
     if( sock < 0 )
         {
-#ifdef DEBUG
-        perror( "wago_manager_linux:net_init(...) - can't create socket" );
-#endif // DEBUG
+        sprintf( G_LOG->msg,
+            "%s : wago_manager_linux:net_init() - can't create socket.",
+            strerror( errno ) );
+        G_LOG->write_log( i_log::P_CRIT );
+
         return -4;
         }
 
@@ -31,7 +35,11 @@ int wago_manager_linux::net_init( wago_node *node )
 
     if ( setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &C_ON, sizeof( C_ON ) ) )
         {
-        perror( "wago_manager_linux:net_init(...) - מרטבךא  גûחמגא  setsockopt" );
+        sprintf( G_LOG->msg,
+            "%s : wago_manager_linux:net_init() - error setsockopt.",
+            strerror( errno ) );
+        G_LOG->write_log( i_log::P_CRIT );
+
         close( sock );
         return -5;
         }
@@ -40,9 +48,11 @@ int wago_manager_linux::net_init( wago_node *node )
     err = fcntl( sock, F_SETFL, O_NONBLOCK );
     if ( err != 0 )
         {
-#ifdef DEBUG
-        perror( "wago_manager_linux:net_init(...) - מרטבךא  גûחמגא  fcntl" );
-#endif
+        sprintf( G_LOG->msg,
+            "%s : wago_manager_linux:net_init() - error fcntl.",
+            strerror( errno ) );
+        G_LOG->write_log( i_log::P_CRIT );
+
         close( sock );
         return -5;
         }
@@ -63,21 +73,23 @@ int wago_manager_linux::net_init( wago_node *node )
 
     if ( err <= 0 )
         {
-#ifdef DEBUG
         if ( node->is_set_err == false )
             {
             if ( err < 0 )
                 {
-                printf( "wago_manager_linux:net_init(...) - can't connect to \"%s\":%d : %s\n",
-                    node->ip_address, PORT, strerror( err ) );
+                sprintf( G_LOG->msg,
+                    "%s : wago_manager_linux:net_init() - can't connect to \"%s\":%d.",
+                    strerror( errno ), node->ip_address, PORT );
+                G_LOG->write_log( i_log::P_CRIT );
                 }
             else // = 0
                 {
-                printf( "wago_manager_linux:net_init(...) - can't connect to \"%s\":%d : timeout\n",
+                sprintf( G_LOG->msg,
+                    "wago_manager_linux:net_init() - can't connect to \"%s\":%d : timeout.",
                     node->ip_address, PORT );
+                G_LOG->write_log( i_log::P_CRIT );
                 }
             }
-#endif // DEBUG
 
         close( sock );
         return -5;
@@ -91,12 +103,13 @@ int wago_manager_linux::net_init( wago_node *node )
         err_len = sizeof( error );
         if( getsockopt( sock, SOL_SOCKET, SO_ERROR, &error, &err_len ) < 0 || error != 0 )
             {
-#ifdef DEBUG
             if ( node->is_set_err == false )
                 {
-                perror( "wago_manager::net_init(...) select error" );
+                sprintf( G_LOG->msg,
+                    "%s : wago_manager_linux:net_init() - error select.",
+                    strerror( errno ) );
+                G_LOG->write_log( i_log::P_CRIT );
                 }
-#endif // DEBUG
 
             close( sock );
             return -6;
@@ -104,7 +117,7 @@ int wago_manager_linux::net_init( wago_node *node )
         }
 
 #ifdef DEBUG
-    printf( "Socket %d is successfully connected to \"%s\":%d\n",
+    printf( "wago_manager_linux:net_init() : socket %d is successfully connected to \"%s\":%d\n",
         sock, node->ip_address, PORT );
 #endif // DEBUG
 
@@ -174,7 +187,7 @@ int wago_manager_linux::write_outputs()
 #endif // DEBUG
                     }
                 }// if ( nd->DO_cnt > 0 )
-           
+
             if ( nd->AO_cnt > 0 )
                 {
                 u_int bytes_cnt = nd->AO_size;
@@ -288,12 +301,11 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
     int res = send( node->sock, buff, bytes_to_send, 0 );
     if( res < 0 )
         {
-#ifdef DEBUG
-        if ( node->is_set_err == false )
-            {
-            perror( "wago_manager::e_communicate(...) send error" );
-            }
-#endif
+        sprintf( G_LOG->msg,
+            "%s : wago_manager::e_communicate() error send.",
+            strerror( errno ) );
+        G_LOG->write_log( i_log::P_ERR );
+
         disconnect( node );
         return -101;
         }
@@ -304,12 +316,14 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
 
     if( res <= 0 ) /* read error */
         {
-#ifdef DEBUG
         if ( node->is_set_err == false )
             {
-            perror( "wago_manager::e_communicate(...) recvtimeout error\n" );
+            sprintf( G_LOG->msg,
+                "%s : wago_manager::e_communicate() error recvtimeout.",
+                strerror( errno ) );
+            G_LOG->write_log( i_log::P_ERR );
             }
-#endif
+
         disconnect( node );
         return -102;
         }

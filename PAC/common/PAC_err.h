@@ -119,7 +119,7 @@ class PAC_critical_errors_manager
                 switch( err_sub_class )
                     {
                 case AS_WAGO:
-                    sprintf( tmp, 
+                    sprintf( tmp,
                         "Нет связи с узлом Wago '%s' ('%s', '%s')",
                         G_WAGO_MANAGER()->get_node( par - 1 )->name,
                         G_WAGO_MANAGER()->get_node( par - 1 )->ip_address,
@@ -175,7 +175,7 @@ class PAC_critical_errors_manager
 
         std::vector< critical_error >  errors;
 
-        u_int_2 errors_id;       
+        u_int_2 errors_id;
     };
 //-----------------------------------------------------------------------------
 #endif // PAC_ERRORS_H

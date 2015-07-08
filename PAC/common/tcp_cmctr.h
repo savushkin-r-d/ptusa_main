@@ -61,12 +61,13 @@ class tcp_communicator
         enum CONSTANTS
             {
             BUFSIZE     = 50000,           ///< Размер буфера.
-            PORT 	    = 10000,           ///< Порт.
+            PORT        = 10000,           ///< Порт.
+            PORT_MODBUS = 10502,
 #ifdef LINUX_OS
             MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
 #endif // LINUX_OS
 #ifdef WIN_OS
-            MAX_SOCKETS = 32,            ///< Максимальное количество сокетов.
+            MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
 #endif // WIN_OS
             QLEN        = MAX_SOCKETS - 1, ///< Максимальное количество соединений.
 

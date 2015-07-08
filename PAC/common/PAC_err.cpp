@@ -1,11 +1,14 @@
-#include <stdio.h>
-
 #include "PAC_err.h"
+
+#include <stdio.h>
+#include <vector>
+
+#include "log.h"
 
 auto_smart_ptr < PAC_critical_errors_manager > PAC_critical_errors_manager::instance;
 //-----------------------------------------------------------------------------
 PAC_critical_errors_manager::PAC_critical_errors_manager(
-    ): errors_id( 0 )    
+    ): errors_id( 0 )
     {
 #ifndef __BORLANDC__
     errors.clear();
@@ -84,11 +87,11 @@ void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
 
     if ( b == 0 )
         {
-#ifdef DEBUG
-        Print( "Set Error: class: %d, p1: %d, p2: %lu.\n", eclass, p1, p2 );
-#endif // DEBUG
-        errors.push_back( critical_error( eclass, p1, p2 ) );
+        sprintf( G_LOG->msg,
+            "Set global error: class: %d, p1: %d, p2: %lu.", eclass, p1, p2 );
+        G_LOG->write_log( i_log::P_ERR );
 
+        errors.push_back( critical_error( eclass, p1, p2 ) );
         errors_id++;
         }
     }
@@ -111,9 +114,10 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
     if ( idx >= 0 )
         {
         errors.erase( errors.begin() + idx );
-#ifdef DEBUG
-        Print( "Reset Error: class: %d, p1: %d, p2: %lu \n", eclass, p1, p2 );
-#endif // DEBUG
+
+        sprintf( G_LOG->msg,
+            "Reset global error: class: %d, p1: %d, p2: %lu.", eclass, p1, p2 );
+        G_LOG->write_log( i_log::P_ERR );
 
         errors_id++;
         }

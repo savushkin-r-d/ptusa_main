@@ -7,6 +7,8 @@
 extern "C" {
 #include <nvram.h>
     }
+
+#include "log.h"
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 eeprom_PFC200::eeprom_PFC200(int total_size, int available_start_pos,
@@ -15,7 +17,8 @@ eeprom_PFC200::eeprom_PFC200(int total_size, int available_start_pos,
     {
     if ( nvram_init() < 0 )
         {
-        fprintf( stderr, "NVRAM init failed\n" );
+        sprintf( G_LOG->msg, "NVRAM init failed." );
+        G_LOG->write_log( i_log::P_CRIT );
         exit( EXIT_FAILURE );
         }
 

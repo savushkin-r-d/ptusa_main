@@ -9,70 +9,103 @@
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
+
+#include "log.h"
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 wago_manager_PFC200::wago_manager_PFC200(): task_id( 0 )
     {
-	adi = adi_GetApplicationInterface(); // Connect to ADI-interface.
-	adi->Init();                         // Init interface.
-	adi->ScanDevices();                  // Scan devices.
-	adi->GetDeviceList( sizeof( deviceList ), deviceList, &nr_devices_found );
+    adi = adi_GetApplicationInterface(); // Connect to ADI-interface.
 
-	// Find kbus device.
-	nr_kbus_found = -1;
-	for ( size_t i = 0; i < nr_devices_found; ++i )
+    if ( adi->Init() != DAL_SUCCESS )
         {
-		if ( strcmp( deviceList[ i ].DeviceName, "libpackbus" ) == 0 )
+        sprintf( G_LOG->msg, "Kbus device initialization failed." );
+        G_LOG->write_log( i_log::P_CRIT );
+
+        adi->Exit();
+        exit( EXIT_FAILURE );
+        }
+
+    if ( adi->ScanDevices() != DAL_SUCCESS )
+        {
+        sprintf( G_LOG->msg, "Kbus scan devices failed." );
+        G_LOG->write_log( i_log::P_CRIT );
+
+        adi->Exit();
+        exit( EXIT_FAILURE );
+        }
+
+    int res = adi->GetDeviceList( sizeof( devList ), devList, &nr_devices_found );
+    if ( res != DAL_SUCCESS )
+        {
+        sprintf( G_LOG->msg, "Kbus get devices list failed." );
+        G_LOG->write_log( i_log::P_CRIT );
+
+        adi->Exit();
+        exit( EXIT_FAILURE );
+        }
+
+    // Find kbus device.
+    nr_kbus_found = -1;
+    for ( size_t i = 0; i < nr_devices_found; ++i )
+        {
+        if ( strcmp( devList[ i ].DeviceName, "libpackbus" ) == 0 )
             {
-			nr_kbus_found = i;
-			fprintf( stderr, "KBUS device found as device %i.\n", i );
+            nr_kbus_found = i;
+#ifdef DEBUG
+            printf( "KBUS device found as device %i.\n", i );
+#endif // DEBUG
             }
         }
 
-	// Kbus not found > exit.
-	if ( nr_kbus_found < 0 )
+    // Kbus not found > exit.
+    if ( nr_kbus_found < 0 )
         {
-		fprintf( stderr, "No KBUS device found. \n" );
-		adi->Exit();            // Disconnect ADI-Interface.
-		exit( EXIT_FAILURE );   // Exit program.
+        sprintf( G_LOG->msg, "No KBUS device found." );
+        G_LOG->write_log( i_log::P_CRIT );
+        adi->Exit();            // Disconnect ADI-Interface.
+        exit( EXIT_FAILURE );   // Exit program.
         }
 
-	// Switch to RT Priority.
+    // Switch to RT Priority.
     struct sched_param s_param;
     const int KBUS_MAINPRIO = 40;
-	s_param.sched_priority = KBUS_MAINPRIO;
-	sched_setscheduler( 0, SCHED_FIFO, &s_param );
+    s_param.sched_priority = KBUS_MAINPRIO;
+    sched_setscheduler( 0, SCHED_FIFO, &s_param );
 #ifdef DEBUG
-	printf( "Switch to RT Priority 'KBUS_MAINPRIO'\n" );
+    printf( "Switch to RT Priority 'KBUS_MAINPRIO'\n" );
 #endif // DEBUG
 
-	// Open kbus device.
-	kbus_device_id = deviceList[ nr_kbus_found ].DeviceId;
-	if ( adi->OpenDevice( kbus_device_id ) != DAL_SUCCESS )
+    // Open kbus device.
+    kbus_device_id = devList[ nr_kbus_found ].DeviceId;
+    if ( adi->OpenDevice( kbus_device_id ) != DAL_SUCCESS )
         {
-		fprintf( stderr, "Kbus device open failed.\n" );
-		adi->Exit();
-		exit( EXIT_FAILURE );
+        sprintf( G_LOG->msg, "Kbus device open failed." );
+        G_LOG->write_log( i_log::P_CRIT );
+
+        adi->Exit();
+        exit( EXIT_FAILURE );
         }
 #ifdef DEBUG
     printf( "KBUS device open OK.\n" );
 #endif // DEBUG
 
     // Set application state to "Unconfigured" to let library drive kbus by
-	// themselves. In this mode library set up a thread who drive the kbus cyclic.
+    // themselves. In this mode library set up a thread who drive the kbus cyclic.
     tApplicationStateChangedEvent event;
     event.State = ApplicationState_Unconfigured;
     if ( adi->ApplicationStateChanged( event ) != DAL_SUCCESS )
         {
-      	// Set application state to "Unconfigured" failed.
-      	fprintf( stderr, "Set application state to 'Unconfigured' failed.\n" );
-		adi->CloseDevice( kbus_device_id ); // Close kbus device.
-    	adi->Exit();
-    	exit( EXIT_FAILURE );
+        sprintf( G_LOG->msg, "Set application state to 'Unconfigured' failed."  );
+        G_LOG->write_log( i_log::P_CRIT );
+
+        adi->CloseDevice( kbus_device_id ); // Close kbus device.
+        adi->Exit();
+        exit( EXIT_FAILURE );
         }
 
 #ifdef DEBUG
-	printf( "Set application state to 'Unconfigured'.\n" );
+    printf( "Set application state to 'Unconfigured'.\n" );
 #endif // DEBUG
     }
 //-----------------------------------------------------------------------------
@@ -96,9 +129,6 @@ int wago_manager_PFC200::read_inputs()
                 {
                 continue;
                 }
-
-            usleep( 1000 );         // Wait 1 ms.
-            adi->WatchdogTrigger(); // Trigger Watchdog.
 
             // Read inputs.
             int size = nd->AI_size + nd->DI_cnt / 8 + 1;
@@ -222,7 +252,7 @@ int wago_manager_PFC200::write_outputs()
 
                 pd_out[ offset ] = val & 0xFF;
                 pd_out[ offset + 1 ] = val >> 8;
-                
+
                 if ( nd->AO_types[ j ] == 638 )
                     {
                     pd_out[ offset     ] = 0;
@@ -230,7 +260,7 @@ int wago_manager_PFC200::write_outputs()
                     pd_out[ offset + 2 ] = 0;
                     pd_out[ offset + 3 ] = 0;
                     }
-                
+
                 nd->AO[ j ] = nd->AO_[ j ];
 #ifdef DEBUG_KBUS
                 printf( "%d -> %u, ", j, nd->AO_[ j ] );
@@ -239,9 +269,6 @@ int wago_manager_PFC200::write_outputs()
 #ifdef DEBUG_KBUS
             printf( "\n" );
 #endif // DEBUG_KBUS
-
-            usleep( 1000 );         // Wait 1 ms.
-            adi->WatchdogTrigger(); // Trigger Watchdog.
 
             int size = nd->AO_size + nd->DO_cnt / 8 + 1;
             adi->WriteStart( kbus_device_id, task_id );    // Lock PD-In data.

@@ -1,5 +1,5 @@
-/// @par Описание директив препроцессора:
-/// @c LINUX_OS         - компиляция для ОС Linux.
+///// @par Описание директив препроцессора:
+///// @c LINUX_OS         - компиляция для ОС Linux.
 /// @par Тип PAC:
 /// @c PAC_PC           - PAC на PC с ОС Linux.
 /// @c PAC_WAGO_750_860 - PAC Wago 750-860.
@@ -21,6 +21,7 @@
 #include "PAC_err.h"
 
 #include "rm_manager.h"
+#include "log.h"
 
 int main( int argc, char *argv[] )
     {
@@ -34,8 +35,8 @@ int main( int argc, char *argv[] )
         return EXIT_SUCCESS;
         }
 
-    time_t t = time( 0 );
-    fprintf( stderr, "\nProgram started - %s\n", asctime( localtime( &t ) ) );
+    sprintf( G_LOG->msg, "Program started." );
+    G_LOG->write_log( i_log::P_INFO );
 
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
@@ -43,7 +44,9 @@ int main( int argc, char *argv[] )
 
     if ( res ) //-Ошибка инициализации.
         {
-        fprintf( stderr, "Lua init error - %d!\n", res );
+        sprintf( G_LOG->msg, "Lua init error - %d!", res );
+        G_LOG->write_log( i_log::P_CRIT );
+
         debug_break;
         return EXIT_FAILURE;
         }
@@ -58,9 +61,11 @@ int main( int argc, char *argv[] )
         char *stopstring;
         sleep_time_ms = strtol( argv[ 2 ], &stopstring, 10 );
         }
-    fprintf( stderr, "Sleep time is %li ms.\n", sleep_time_ms );
+    sprintf( G_LOG->msg, "Sleep time is %li ms.", sleep_time_ms );
+    G_LOG->write_log( i_log::P_INFO );
 
-    fprintf( stderr, "Starting main loop!\n" );
+    sprintf( G_LOG->msg, "Starting main loop!" );
+    G_LOG->write_log( i_log::P_INFO );
 
 #ifdef DEBUG
     while ( !kb_hit() )
@@ -115,48 +120,61 @@ int main( int argc, char *argv[] )
 #ifdef TEST_SPEED
         //-Информация о времени выполнения цикла программы.!->
         all_time += get_delta_millisec( st_time );
-#if defined LINUX_OS
-#if defined PAC_PC || defined PAC_WAGO_PFC200
-        const u_int MAX_ITERATION = 1000;
-#endif // PAC_PC
-#ifdef PAC_WAGO_750_860
-        const u_int MAX_ITERATION = 1500;
-#endif // PAC_WAGO_750_860
-#endif // defined LINUX_OS
-
-#ifdef WIN_OS
-        const u_int MAX_ITERATION = 10000;
-#endif // WIN_OS
-        const u_int END_ITERATION = 5;
 
         static u_int max_cycle_time = 0;
+
         u_int cycle_time = get_delta_millisec( st_time );
 
         if ( max_cycle_time < cycle_time )
             {
             max_cycle_time = cycle_time;
-            print_time( " Main cycle avg time = %lu ms, max time = %4u, Lua mem = %d b\n",
+
+            sprintf( G_LOG->msg,
+                "Main cycle avg = %lu ms, max = %4u ms, Lua mem = %d b\n",
                 all_time / cycles_cnt, max_cycle_time,
                 lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
                 lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
-            fflush( stdout );
+            G_LOG->write_log( i_log::P_INFO );
             }
 
-        static u_int print_cycle_time_count = 0;
-        if ( cycles_cnt > MAX_ITERATION )
+        static u_int max_iteration_cycle_time = 0;
+        static u_int cycles_per_period        = 0;
+        cycles_per_period++;
+
+        static time_t t_;
+        extern struct tm *timeInfo_;
+        t_ = time( 0 );
+        timeInfo_ = localtime( &t_ );
+        static int print_cycle_last_h = timeInfo_->tm_hour;
+
+        if ( max_iteration_cycle_time < cycle_time )
             {
-            if ( print_cycle_time_count < END_ITERATION )
+            max_iteration_cycle_time = cycle_time;
+            }
+
+        //Once per hour writing performance info.
+        if ( print_cycle_last_h != timeInfo_->tm_hour )
+            {
+            u_long avg_time = all_time / cycles_cnt;
+            sprintf( G_LOG->msg,
+                "%4u cycles, avg = %lu ms, max = %4u ms, Lua mem = %d b\n",
+                cycles_per_period,
+                avg_time, max_iteration_cycle_time,
+                lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
+                lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
+            G_LOG->write_log( i_log::P_INFO );
+
+            //At 0:0:0 set max time to 2*average.
+            if ( timeInfo_->tm_hour == 0 )
                 {
-                print_time( " Main cycle avg time = %lu ms, max time = %4u, Lua mem = %d b\n",
-                    all_time / cycles_cnt, max_cycle_time,
-                    lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
-                    lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
-                print_cycle_time_count++;
-                fflush( stdout );
+                max_cycle_time = avg_time + avg_time;
                 }
 
             all_time   = 0;
             cycles_cnt = 0;
+            max_iteration_cycle_time = 0;
+            cycles_per_period 		 = 0;
+            print_cycle_last_h       = timeInfo_->tm_hour;
             }
         //-Информация о времени выполнения цикла программы.!->
 #endif // TEST_SPEED

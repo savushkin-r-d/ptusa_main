@@ -273,7 +273,7 @@ class wago_manager
                 T_EMPTY = -1,   ///< Не задан.
 
                 T_750_86x = 0,  ///< Wago 750-863.
-                
+
                 T_750_820x = 2, ///< Wago PFC200.
 
                 T_750_XXX_ETHERNET = 100,///< Ethernet 750-341 и т.д.

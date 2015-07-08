@@ -16,6 +16,7 @@
 
 #include <sys/socket.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include "wago.h"
 
@@ -58,7 +59,7 @@ class wago_manager_linux : public wago_manager
         /// @return -   0 - ок.
         /// @return - < 0 - ошибка.
         int e_communicate( wago_node *node, int bytes_to_send, int bytes_to_receive );
-        
+
         int read_inputs();
         int write_outputs();
 
