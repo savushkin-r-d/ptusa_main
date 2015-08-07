@@ -21,7 +21,7 @@
 ///
 class i_log
     {
-    enum CONST
+    enum CONSTANT
         {
         C_BUFF_SIZE = 1024,
         };
