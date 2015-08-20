@@ -386,6 +386,7 @@ class device : public i_DO_AO_device, public par_device
             DST_V_DO2_DI2,      ///< Клапан с двумя каналами управления и двумя обратными связями.
             DST_V_MIXPROOF,     ///< Клапан противосмешивающий.
             DST_V_AS_MIXPROOF,  ///< Клапан с двумя каналами управления и двумя обратными связями с AS интерфейсом (противосмешивающий).
+            DST_V_BOTTOM_MIXPROOF, ///<Донный клапан.
 
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
@@ -1533,6 +1534,187 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
 
             MAILBOX_OFFSET = 8
             };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан донный.
+class valve_bottom_mix_proof : public i_mix_proof,  public valve
+    {
+    public:
+        valve_bottom_mix_proof( const char *dev_name
+            ): valve( true, true, dev_name, DT_V, DST_V_BOTTOM_MIXPROOF ),
+            is_switching_on( false )
+            {
+            }
+
+        /// @brief Открыть верхнее седло.
+        void open_upper_seat()
+            {
+            }
+
+        /// @brief Открыть нижнее седло.
+        void open_lower_seat()
+            {
+            direct_set_state( V_LOWER_SEAT );
+            }
+
+    private:
+        enum CONSTANTS
+            {
+            DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
+            DO_INDEX_MINI_V,///< Индекс канала дискретного выхода мини клапана.
+            DO_INDEX_L,     ///< Индекс канала дискретного выхода нижнего седла.
+
+            DI_INDEX_OPEN = 0, ///< Индекс канала дискретного входа Открыт.
+            DI_INDEX_CLOSE,     ///< Индекс канала дискретного входа Закрыт.
+            };
+
+        void direct_set_state( int new_state )
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            state = ( char ) new_state;
+#else
+            switch ( new_state )
+                {
+                case V_OFF:
+                    direct_off();
+                    break;
+
+                case V_ON:
+                    direct_on();
+                    break;
+
+                case V_UPPER_SEAT:
+                    break;
+
+                case V_LOWER_SEAT:
+                    {
+                    direct_off();
+
+                    int l = get_DO( DO_INDEX_L );
+                    if ( 0 == l )
+                        {
+                        start_switch_time = get_millisec();
+                        set_DO( DO_INDEX_L, 1 );
+                        }
+                    break;
+                    }
+
+                default:
+                    direct_on();
+                    break;
+                }
+#endif //DEBUG_NO_WAGO_MODULES
+            }
+
+        void on()
+            {
+            //Для открытия мини клапана с задержкой запоминаем время первого
+            //включения и помещаем в вектор открытых клапанов, его содержимое
+            //будет обрабатываться потом в статическом методе класса evaluate.
+            if ( false == is_switching_on )
+                {
+                is_switching_on = true;
+                start_on_time = get_millisec();
+
+                to_switch_on.push_back( this );
+                }
+
+            valve::on();
+            }
+
+        void off()
+            {
+            valve::off();
+            is_switching_on = false;
+
+            for( std::vector< valve* >::iterator iter = to_switch_on.begin();
+                iter != to_switch_on.end(); iter++ )
+                {
+                valve* v = *iter;
+                if ( v == this )
+                	{
+                    to_switch_on.erase( iter );
+                    break;
+                	}
+                }
+            }
+        
+#ifndef DEBUG_NO_WAGO_MODULES
+        void direct_on();
+        void direct_off();
+#endif // DEBUG_NO_WAGO_MODULES
+
+        //Интерфейс для реализации получения расширенного состояния с учетом
+        //всех вариантов (ручной режим, обратная связь, ...).
+    protected:
+        VALVE_STATE get_valve_state()
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return ( VALVE_STATE ) digital_wago_device::get_state();
+#else
+            int o = get_DO( DO_INDEX );
+
+            if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return V_LOWER_SEAT;
+
+            return ( VALVE_STATE ) o;
+#endif // DEBUG_NO_WAGO_MODULES
+            }
+
+        bool get_fb_state()
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return true;
+#else
+            int o = get_DO( DO_INDEX );
+            int i0 = get_DI( DI_INDEX_CLOSE );
+            int i1 = get_DI( DI_INDEX_OPEN );
+
+            if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+                ( o == 1 && i1 == 1 && i0 == 0 ) )
+                {
+                return true;
+                }
+
+            if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return true;
+
+            if ( get_delta_millisec( start_switch_time ) < 
+                get_par( valve::P_ON_TIME, 0 ) )
+                {
+                return true;
+                }
+
+            return false;
+#endif // DEBUG_NO_WAGO_MODULE
+            }
+
+#ifndef DEBUG_NO_WAGO_MODULES
+        int get_off_fb_value()
+            {
+            return get_DI( DI_INDEX_CLOSE );
+            }
+
+        int get_on_fb_value()
+            {
+            return get_DI( DI_INDEX_OPEN );
+            }
+#endif // DEBUG_NO_WAGO_MODULES
+
+#ifdef _MSC_VER
+#pragma region Включение мини клапана с задержкой.
+#endif
+        /// @brief Вектор клапанов, ожидающих включение.
+        static std::vector< valve* > to_switch_on;
+
+        bool is_switching_on; //Признак начала открытия клапана.
+        u_long start_on_time; //Время начала открытия клапана.
+
+    public:
+        static void evaluate();
+
+#ifdef _MSC_VER
+#pragma endregion Отключение клапана с задержкой.
+#endif
+
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым входом.

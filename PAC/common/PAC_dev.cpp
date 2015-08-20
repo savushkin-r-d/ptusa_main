@@ -8,6 +8,8 @@ auto_smart_ptr < device_manager > device_manager::instance;
 
 std::vector<valve*> valve::to_switch_off;
 
+std::vector<valve*> valve_bottom_mix_proof::to_switch_on;
+
 const char device::DEV_NAMES[][ 5 ] =
     {
     "V",       ///< Клапан.
@@ -608,6 +610,11 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                 case device::DST_V_AS_MIXPROOF:
                     new_device      = new valve_AS_mix_proof( dev_name );
                     new_wago_device = ( valve_AS_mix_proof* ) new_device;
+                    break;
+
+                case device::DST_V_BOTTOM_MIXPROOF:
+                    new_device      = new valve_bottom_mix_proof( dev_name );
+                    new_wago_device = ( valve_bottom_mix_proof* ) new_device;
                     break;
 
                 default:
@@ -1773,6 +1780,52 @@ void valve_mix_proof::direct_off()
 
     set_DO( DO_INDEX_U, 0 );
     set_DO( DO_INDEX_L, 0 );
+    int o = get_DO( DO_INDEX );
+
+    if ( o != 0 || was_seat )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 0 );
+        }
+    }
+#endif // DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void valve_bottom_mix_proof::evaluate()
+    {
+    for( std::vector< valve* >::iterator iter = to_switch_on.begin();
+        iter != to_switch_on.end(); iter++ )
+        {
+        valve* v = *iter;
+        v->on();
+        }
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+void valve_bottom_mix_proof:direct_on()
+    {
+    set_DO( DO_INDEX_L, 0 );
+    int o = get_DO( DO_INDEX );
+
+    if ( 0 == o )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX, 1 );
+        }
+
+    u_int delay = G_PAC_INFO()->par[ PAC_info::P_V_BOTTOM_ON_DELAY_TIME ];
+    if ( get_delta_millisec( start_on_time ) > delay )
+    	{
+        set_DO( DO_INDEX_MINI_V, 1 );
+    	}
+//-----------------------------------------------------------------------------
+void valve_bottom_mix_proof::direct_off()
+    {
+    VALVE_STATE st = get_valve_state();
+    bool was_seat = st == V_LOWER_SEAT;
+
+    set_DO( DO_INDEX_L, 0 );
+    set_DO( DO_INDEX_MINI_V, 0 );
     int o = get_DO( DO_INDEX );
 
     if ( o != 0 || was_seat )

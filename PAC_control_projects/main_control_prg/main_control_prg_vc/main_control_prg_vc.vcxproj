@@ -181,6 +181,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClInclude Include="..\..\..\PAC\common\cip_tech_def.h" />
     <ClInclude Include="..\..\..\common\win_util\WSA_err_decode.h" />
     <ClInclude Include="..\..\..\PAC\common\i_tech_def.h" />
+    <ClInclude Include="..\..\..\PAC\common\log.h" />
     <ClInclude Include="..\..\..\PAC\common\mcaRec.h" />
     <ClInclude Include="..\..\..\PAC\common\modbus_client.h" />
     <ClInclude Include="..\..\..\PAC\common\modbus_serv.h" />
@@ -204,6 +205,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClInclude Include="..\..\..\PAC\common\tech_def.h" />
     <ClInclude Include="..\..\..\PAC\common\wago.h" />
     <ClInclude Include="..\..\..\PAC\win\PAC_PC\wago_PC.h" />
+    <ClInclude Include="..\..\..\PAC\win\w_log.h" />
     <ClInclude Include="..\..\..\PAC\win\w_rm_tech_def.h" />
     <ClInclude Include="..\..\..\PAC\win\w_tcp_client.h" />
     <ClInclude Include="..\..\..\PAC\win\w_tcp_cmctr.h" />
@@ -254,6 +256,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClCompile Include="..\..\..\common\tolua++\tolua_to.c" />
     <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp" />
     <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\log.cpp" />
     <ClCompile Include="..\..\..\PAC\common\mcaRec.cpp" />
     <ClCompile Include="..\..\..\PAC\common\modbus_client.cpp" />
     <ClCompile Include="..\..\..\PAC\common\modbus_serv.cpp" />

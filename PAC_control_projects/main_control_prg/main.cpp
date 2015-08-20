@@ -95,6 +95,7 @@ int main( int argc, char *argv[] )
 #endif // DEBUG_NO_WAGO_MODULES
 
         valve::evaluate();
+        valve_bottom_mix_proof::evaluate();
         G_TECH_OBJECT_MNGR()->evaluate();
         sleep_ms( sleep_time_ms );
 
@@ -142,7 +143,7 @@ int main( int argc, char *argv[] )
         cycles_per_period++;
 
         static time_t t_;
-        extern struct tm *timeInfo_;
+        struct tm *timeInfo_;
         t_ = time( 0 );
         timeInfo_ = localtime( &t_ );
         static int print_cycle_last_h = timeInfo_->tm_hour;
