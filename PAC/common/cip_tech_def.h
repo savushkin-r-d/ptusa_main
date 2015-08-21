@@ -10,6 +10,8 @@
 
 #define NOCONC       0.1
 
+#define TECH_TYPE_CAR_WASH 113
+
 ///@brief Максимальная длина списка рецептов
 #define PROGRAM_LIST_MAX_LEN 600
 ///@brief Максимальная длина названия программы мойки
@@ -622,6 +624,8 @@ class cipline_tech_object: public tech_object
 		i_AI_device* LTS;
 		i_AI_device* LTW;
 
+		unsigned long timer_no_ret;
+		i_DI_device* LSRET; //датчик уровня на возврате
 
 		i_DO_AO_device* NP;
 		i_DO_AO_device* NK;
@@ -692,6 +696,7 @@ class cipline_tech_object: public tech_object
 		virtual int SetRet(int val);
 		virtual int GetRetState();
 		virtual int HasRet();
+		virtual int ForceRet(int val);
 		virtual void ResetStat(void);
 		////-----error service-------
 		virtual void ResetErr(void);

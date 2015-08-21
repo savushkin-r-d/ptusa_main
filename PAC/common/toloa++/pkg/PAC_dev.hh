@@ -59,6 +59,9 @@ class i_DO_device: public i_DI_device
         /// его деактивирование, то есть если он нормально закрытый - закрытие.
         void off();
 
+		/// @brief немедленное выключение устройства
+		void direct_off();
+
         /// @brief ”становка нового состо€ни€ устройства.
         ///
         /// @param new_state - новое состо€ние объекта.
@@ -127,25 +130,12 @@ class i_DO_AO_device: public i_DO_device, public i_AO_device
         /// его деактивирование, то есть если он нормально закрытый - закрытие.
         void off();
 
-        /// @brief ”становка нового состо€ни€ устройства.
-        ///
-        /// @param new_state - новое состо€ние объекта.
-        void set_state( int new_state );
-
-
-
-	    /// @brief ѕолучение текущего состо€ни€ устройства.
+ 		/// @brief ѕолучение текущего состо€ни€ устройства.
         ///
         /// @return - текущее состо€ние устройства в виде дробного числа.
         float get_value();
 
-        /// @brief ¬ыключение устройства.
-        ///
-        /// ”становка устройства в пассивное состо€ние. ƒл€ клапана это означает
-        /// его деактивирование, то есть если он нормально закрытый - закрытие.
-        void off();
-
-        /// @brief ”становка текущего состо€ни€ устройства.
+          /// @brief ”становка текущего состо€ни€ устройства.
         ///
         /// @param new_value - новое состо€ние устройства.
         void set_value( float new_value );
@@ -1164,6 +1154,7 @@ class cipline_tech_object: public tech_object
 		float GetConc( int what );
 		void SortRR( int where, int forcetotank);
 		int SetRet(int val);
+		int ForceRet(int val);
 		int GetRetState();
 		int HasRet();
 	};

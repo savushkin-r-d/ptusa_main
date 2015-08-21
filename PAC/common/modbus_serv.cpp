@@ -201,7 +201,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 								case OTHER_SWITCH2:
 								case OTHER_SWITCH3:
 								case OTHER_SWITCH4:
-									ForceBit(i, &outdata[3], cipline_tech_object::Mdls[line-1]->getSwitch(objnumber + 1 - OTHER_SWITCH1) ? ON : OFF);
+									ForceBit(i, &outdata[3], cipline_tech_object::Mdls[line-1]->getSwitch(objnumber + 1 - OTHER_SWITCH1));
 									break;
 								}
 							break;
@@ -691,7 +691,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							case OTHER_SWITCH2:
 							case OTHER_SWITCH3:
 							case OTHER_SWITCH4:
-								cipline_tech_object::Mdls[line - 1]->setSwitch(objnumber + 1 - OTHER_SWITCH1, data[4]);
+								cipline_tech_object::Mdls[line - 1]->setSwitch(objnumber + 1 - OTHER_SWITCH1, data[4] ? ON : OFF);
 								break;
 							}
 						break;

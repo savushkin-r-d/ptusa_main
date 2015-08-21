@@ -347,59 +347,43 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, double val )
 		return 0;
 		}
 
-	if (0 == strcmp(prop, "NCAR1") || 0 == strcmp(prop, "NCAR"))
+	if (0 == strcmp(prop, "NCAR"))
 		{
-		sprintf(ncar1, "%d", (int)val);
+		switch (idx)
+			{
+			case 0:
+			case 1:
+				sprintf(ncar1, "%d", (int)val);
+				break;
+			case 2:
+				sprintf(ncar2, "%d", (int)val);
+				break;
+			case 3:
+				sprintf(ncar3, "%d", (int)val);
+				break;
+			case 4:
+				sprintf(ncar4, "%d", (int)val);
+				break;
+			}
+
 		return 0;
 		}
 
-	if (0 == strcmp(prop, "NCAR2"))
+
+	if ( strcmp( prop, "SWITCH" ) == 0 )
 		{
-		sprintf(ncar2, "%d", (int)val);
+		setSwitch(idx, (int) val);
 		return 0;
 		}
 
-	if (0 == strcmp(prop, "NCAR3"))
-		{
-		sprintf(ncar3, "%d", (int)val);
-		return 0;
-		}
 
-	if (0 == strcmp(prop, "NCAR4"))
-		{
-		sprintf(ncar4, "%d", (int)val);
-		return 0;
-		}
 
-	if ( strcmp( prop, "SWITCH1" ) == 0 )
-		{
-		switch1 = ( int ) val;
-		return 0;
-		}
-
-	if ( strcmp( prop, "SWITCH2" ) == 0 )
-		{
-		switch2 = ( int ) val;
-		return 0;
-		}
-
-	if ( strcmp( prop, "SWITCH3" ) == 0 )
-		{
-		switch3 = ( int ) val;
-		return 0;
-		}
-
-	if ( strcmp( prop, "SWITCH4" ) == 0 )
-		{
-		switch4 = ( int ) val;
-		return 0;
-		}
 
 #ifdef DEBUG
 	Print( "Eror tech_object::set_cmd(...), prop = \"%s\", idx = %u, val = %f\n",
 		prop, idx, val );
 #endif // DEBUG
-
+	
 	return 1;
 	}
 
@@ -415,42 +399,45 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 #endif
 		return 0;
 		}
-	if (0 == strcmp(prop, "NCAR1") || 0 == strcmp(prop, "NCAR"))
+	if (0 == strcmp(prop, "NCAR"))
 		{
+		switch (idx)
+			{
+			case 0:
+			case 1:
 #ifdef WIN_OS
-		strncpy_s(ncar1, CAR_NAME_MAX_LENGTH, val, _TRUNCATE);
+				strncpy_s(ncar1, CAR_NAME_MAX_LENGTH, val, _TRUNCATE);
 #else
-		strncpy( ncar1, val, CAR_NAME_MAX_LENGTH );
+				strncpy( ncar1, val, CAR_NAME_MAX_LENGTH );
 #endif
+
+				break;
+			case 2:
+#ifdef WIN_OS
+				strncpy_s(ncar2, CAR_NAME_MAX_LENGTH, val, _TRUNCATE);
+#else
+				strncpy( ncar2, val, CAR_NAME_MAX_LENGTH );
+#endif
+				break;
+			case 3:
+#ifdef WIN_OS
+				strncpy_s(ncar3, CAR_NAME_MAX_LENGTH, val, _TRUNCATE);
+#else
+				strncpy( ncar3, val, CAR_NAME_MAX_LENGTH );
+#endif
+				break;
+			case 4:
+#ifdef WIN_OS
+				strncpy_s(ncar4, CAR_NAME_MAX_LENGTH, val, _TRUNCATE);
+#else
+				strncpy( ncar4, val, CAR_NAME_MAX_LENGTH );
+#endif
+				break;
+			}
+
 		return 0;
 		}
-	if (0 == strcmp(prop, "NCAR2"))
-		{
-#ifdef WIN_OS
-		strncpy_s(ncar1, CAR_NAME_MAX_LENGTH, val, _TRUNCATE);
-#else
-		strncpy( ncar2, val, CAR_NAME_MAX_LENGTH );
-#endif
-		return 0;
-		}
-	if (0 == strcmp(prop, "NCAR3"))
-		{
-#ifdef WIN_OS
-		strncpy_s(ncar1, CAR_NAME_MAX_LENGTH, val, _TRUNCATE);
-#else
-		strncpy( ncar3, val, CAR_NAME_MAX_LENGTH );
-#endif
-		return 0;
-		}
-	if (0 == strcmp(prop, "NCAR4"))
-		{
-#ifdef WIN_OS
-		strncpy_s(ncar1, CAR_NAME_MAX_LENGTH, val, _TRUNCATE);
-#else
-		strncpy( ncar4, val, CAR_NAME_MAX_LENGTH );
-#endif
-		return 0;
-		}
+
 #ifdef DEBUG
 	Print( "Eror tech_object::set_cmd(...), prop = \"%s\", idx = %u, val = %s\n",
 		prop, idx, val );
@@ -514,6 +501,9 @@ void cipline_tech_object::initline()
 		LSL = LS(5);
 		LKH = LS(6);
 		LKL = LS(7);
+
+		sprintf(devname, "LINE%dLS%d", number, 1001);
+		LSRET = LS(devname);
 
 		LTS = LT("LT1");
 		LTK = LT("LT2");
@@ -582,6 +572,9 @@ void cipline_tech_object::initline()
 		LSL = LS(5);
 		LKH = LS(6);
 		LKL = LS(7);
+
+		sprintf(devname, "LINE%dLS%d", number, 1001);
+		LSRET = LS(devname);
 
 		LTS = LT("LT1");
 		LTK = LT("LT2");
@@ -1360,6 +1353,15 @@ int cipline_tech_object::EvalCommands()
 							}
 						}
 					}
+
+				if (TECH_TYPE_CAR_WASH == tech_type)
+					{
+					if (!(switch1 || switch2 || switch3 || switch4))
+						{
+						return 0;
+						}
+					}
+
 				state=1;
 				valvesAreInConflict = getValvesConflict();
 				if (valvesAreInConflict)
@@ -1375,7 +1377,7 @@ int cipline_tech_object::EvalCommands()
 					else
 						{
 						closeLineValves();
-						if (113 == tech_type)
+						if (TECH_TYPE_CAR_WASH == tech_type)
 							{
 							char vname[15];
 							if (switch1)
@@ -1428,6 +1430,10 @@ int cipline_tech_object::EvalCommands()
 								}
 							}
 						lineRecipes->OnRecipeDevices(loadedRecipe, nmr);
+						if (TECH_TYPE_CAR_WASH == tech_type)
+							{
+							curstep = LoadProgram();
+							} 
 						InitStep(curstep, 0);
 						}
 					}
@@ -1447,17 +1453,13 @@ int cipline_tech_object::EvalCommands()
 		case MCMD_FORCE_RET_ON:
 			if (state)
 				{
-				ret_overrride = 0;
-				SetRet(ON);
-				ret_overrride = 1;
+				ForceRet(ON);
 				}
 			break;
 		case MCMD_FORCE_RET_OFF:
 			if (state)
 				{
-				ret_overrride = 0;
-				SetRet(OFF);
-				ret_overrride = 1;
+				ForceRet(OFF);
 				}
 			break;
 		}
@@ -1666,6 +1668,7 @@ int cipline_tech_object::InitStep( int step, int f )
 	{
 	int i, pr_media;
 	sort_delay = get_millisec();
+	timer_no_ret = get_millisec();
 	if (sort_delay > SORT_SWITCH_DELAY + 1)
 		{
 		sort_delay -= SORT_SWITCH_DELAY + 1;
@@ -2287,6 +2290,14 @@ int cipline_tech_object::HasRet()
 		}
 	}
 
+int cipline_tech_object::ForceRet( int val )
+	{
+	ret_overrride = 0;
+	SetRet(val);
+	ret_overrride = 1;
+	return 0;
+	}
+
 void cipline_tech_object::ResetErr( void )
 	{
 	T[TMR_NO_FLOW]->reset();
@@ -2878,7 +2889,7 @@ int cipline_tech_object::FilRR( int where )
 	tmp=cnt->get_quantity();
 
 
-	rt_par_float[STP_WC] = tmp - rt_par_float[STP_LV];
+	rt_par_float[STP_WC] = rt_par_float[STP_WC] + tmp - rt_par_float[STP_LV];
 	rt_par_float[STP_LV] = tmp;
 	switch (where)
 		{
@@ -4250,6 +4261,21 @@ int cipline_tech_object::OporCIP( int where )
 			return 0;
 			}
 		}
+
+	//if (TECH_TYPE_CAR_WASH == tech_type)
+	//	{
+	//	if (LSRET->is_active())
+	//		{
+	//		timer_no_ret = get_millisec();
+	//		}
+	//	else
+	//		{
+	//		if (get_delta_millisec(timer_no_ret) > (rt_par_float[P_TM_RET_IS_EMPTY] * 1000L / 2))
+	//			{
+	//			return 1;
+	//			}
+	//		}
+	//	}
 
 	if (FL->get_state() == FLIS)
 		{
@@ -5654,12 +5680,16 @@ void cipline_tech_object::setSwitch( int switchNO, int value )
 		{
 		case 1:
 			switch1 = value;
+			break;
 		case 2:
 			switch2 = value;
+			break;
 		case 3:
 			switch3 = value;
+			break;
 		case 4:
 			switch4 = value;
+			break;
 		}
 	}
 
