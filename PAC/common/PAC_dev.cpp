@@ -38,9 +38,9 @@ int par_device::save_device ( char *str )
     str[ 0 ] = 0;
 
     if ( par == 0 )
-    	{
+        {
         return 0;
-    	}
+        }
 
     int res = 0;
     for ( u_int i = 0; i < par->get_count(); i++ )
@@ -141,9 +141,9 @@ par_device::~par_device()
 float par_device::get_par( u_int idx, u_int offset )
     {
     if ( par )
-    	{
+        {
         return par[ 0 ][ offset + idx ];
-    	}
+        }
 
     return 0;
     }
@@ -351,9 +351,9 @@ par_device( par_cnt ),
     is_manual_mode( false )
     {
     if ( dev_name )
-    	{
+        {
         strcpy( this->name, dev_name );
-    	}
+        }
     }
 //-----------------------------------------------------------------------------
 device::~device()
@@ -554,9 +554,9 @@ i_AI_device* device_manager::get_QT( const char *dev_name )
     }
 //-----------------------------------------------------------------------------
 wages* device_manager::get_WT( const char *dev_name )
-	{
-	return (wages*)get_device( device::DT_WT, dev_name );
-	}
+    {
+    return (wages*)get_device( device::DT_WT, dev_name );
+    }
 //-----------------------------------------------------------------------------
 wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                                              const char* dev_name, char * descr )
@@ -715,10 +715,10 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             new_wago_device = ( state_s* ) new_device;
             break;
 
-		case device::DT_WT:
-			new_device      = new wages( dev_name );
-			new_wago_device = ( wages* ) new_device;
-			break;
+        case device::DT_WT:
+            new_device      = new wages( dev_name );
+            new_wago_device = ( wages* ) new_device;
+            break;
 
         default:
 #ifdef DEBUG
@@ -812,10 +812,10 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char *dev_
     int u = -1;
 
     if ( ( int ) dev_type < ( int ) device::C_DEVICE_TYPE_CNT )
-    	{
+        {
         l = dev_types_ranges[ dev_type ].start_pos;
         u = dev_types_ranges[ dev_type ].end_pos;
-    	}    
+        }
 
     if ( -1 == l ) return -1; // Нет устройств.
 
@@ -1290,7 +1290,7 @@ digital_wago_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
     set_par_name( P_FB,  0, "P_FB" );
     }
 //-----------------------------------------------------------------------------
-valve::valve( const char *dev_name, device::DEVICE_TYPE type, 
+valve::valve( const char *dev_name, device::DEVICE_TYPE type,
     device::DEVICE_SUB_TYPE sub_type ) :
     digital_wago_device( dev_name, type, sub_type, 0 ),
     is_on_fb( false ),
@@ -1542,9 +1542,9 @@ void valve::evaluate()
     u_int delay = G_PAC_INFO()->par[ PAC_info::P_V_OFF_DELAY_TIME ];
 
     for( std::vector< valve* >::iterator iter = to_switch_off.begin();
-    		iter != to_switch_off.end(); iter++ )
+            iter != to_switch_off.end(); iter++ )
         {
-    	valve* v = *iter;
+        valve* v = *iter;
 
         if ( v->is_switching_off &&
             get_delta_millisec( v->start_off_time ) > delay )
@@ -1569,14 +1569,14 @@ void valve::off()
     if ( false == was_on_auto ||                //Если был включен вручную.
         get_valve_state() == V_UPPER_SEAT ||
         get_valve_state() == V_LOWER_SEAT )
-    	{
+        {
         if ( !get_manual_mode() )
             {
             direct_off();
             }
 
         return;
-    	}
+        }
 
     if ( false == is_switching_off )
         {
@@ -1802,7 +1802,7 @@ void valve_bottom_mix_proof::evaluate()
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
-void valve_bottom_mix_proof:direct_on()
+void valve_bottom_mix_proof::direct_on()
     {
     set_DO( DO_INDEX_L, 0 );
     int o = get_DO( DO_INDEX );
@@ -1815,9 +1815,10 @@ void valve_bottom_mix_proof:direct_on()
 
     u_int delay = G_PAC_INFO()->par[ PAC_info::P_V_BOTTOM_ON_DELAY_TIME ];
     if ( get_delta_millisec( start_on_time ) > delay )
-    	{
+        {
         set_DO( DO_INDEX_MINI_V, 1 );
-    	}
+        }
+    }
 //-----------------------------------------------------------------------------
 void valve_bottom_mix_proof::direct_off()
     {
@@ -1886,75 +1887,75 @@ void AI1::direct_set_value( float new_value )
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-wages::wages( const char *dev_name ) : analog_wago_device( 
+wages::wages( const char *dev_name ) : analog_wago_device(
     dev_name, DT_WT, DST_NONE, ADDITIONAL_PARAM_COUNT )
-	{
-	set_par_name( P_NOMINAL_W,  0, "P_NOMINAL_W" );
-	set_par_name( P_RKP, 0, "P_RKP");
-	set_par_name( P_C0, 0, "P_CZ" );
-	set_par_name( P_DT, 0, "P_DT");
-	weight = 0;
-	filter_time = get_millisec();
-	}
+    {
+    set_par_name( P_NOMINAL_W,  0, "P_NOMINAL_W" );
+    set_par_name( P_RKP, 0, "P_RKP");
+    set_par_name( P_C0, 0, "P_CZ" );
+    set_par_name( P_DT, 0, "P_DT");
+    weight = 0;
+    filter_time = get_millisec();
+    }
 //-----------------------------------------------------------------------------
 void wages::tare()
-	{
-	set_par(P_C0, 0, -weight);
-	return;
-	}
+    {
+    set_par(P_C0, 0, -weight);
+    return;
+    }
 
 float wages::get_weight()
-	{
-	if (get_delta_millisec(filter_time) > 500)
-		{
-		filter_time = get_millisec();
-		float rkp = get_par(P_RKP, 0);
-		if (0 == rkp) return -1001;
-		float uref = get_AI(C_AI_Uref);
-		if (0 == uref) return -1002;
-		float filterval = get_par(P_DT, 0);
-		float now_weight = get_AI(C_AI_Ud) / rkp / uref * get_par(P_NOMINAL_W, 0);
-		if (fabs(now_weight - weight) > filterval)
-			{
-			weight = now_weight;
-			}
-		if (filterval >= 1)
-			{
-			weight = ceilf(weight);
-			}
-		}
-	return weight + get_par(P_C0, 0);
-	}
+    {
+    if (get_delta_millisec(filter_time) > 500)
+        {
+        filter_time = get_millisec();
+        float rkp = get_par(P_RKP, 0);
+        if (0 == rkp) return -1001;
+        float uref = get_AI(C_AI_Uref);
+        if (0 == uref) return -1002;
+        float filterval = get_par(P_DT, 0);
+        float now_weight = get_AI(C_AI_Ud) / rkp / uref * get_par(P_NOMINAL_W, 0);
+        if (fabs(now_weight - weight) > filterval)
+            {
+            weight = now_weight;
+            }
+        if (filterval >= 1)
+            {
+            weight = ceilf(weight);
+            }
+        }
+    return weight + get_par(P_C0, 0);
+    }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_WAGO_MODULES
 
 float wages::get_value()
-	{
-	return weight + get_par(P_C0, 0);
-	}
+    {
+    return weight + get_par(P_C0, 0);
+    }
 //-----------------------------------------------------------------------------
 void wages::direct_set_value( float new_value )
-	{
-	weight = new_value;
-	}
+    {
+    weight = new_value;
+    }
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
 float wages::get_value()
-	{
-	return get_weight();
-	}
+    {
+    return get_weight();
+    }
 
 void wages::direct_set_state( int new_state )
-	{
-	switch ( new_state )
-		{
-		case S_TARE:
-			tare();
-			break;
-		}
-	}
+    {
+    switch ( new_state )
+        {
+        case S_TARE:
+            tare();
+            break;
+        }
+    }
 
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
@@ -2004,8 +2005,8 @@ float motor::get_value()
 #ifdef DEBUG_NO_WAGO_MODULES
     return freq;
 #else
-    if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ || 
-        sub_type == device::DST_M_REV_FREQ_2 || 
+    if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ ||
+        sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
         return get_AO( AO_INDEX, C_MIN_VALUE, C_MAX_VALUE );
@@ -2020,8 +2021,8 @@ void motor::direct_set_value( float value )
 #ifdef DEBUG_NO_WAGO_MODULES
     freq = value;
 #else
-    if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ || 
-        sub_type == device::DST_M_REV_FREQ_2 || 
+    if ( sub_type == device::DST_M_FREQ || sub_type == device::DST_M_REV_FREQ ||
+        sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
         set_AO( AO_INDEX, value, C_MIN_VALUE, C_MAX_VALUE );
@@ -2067,8 +2068,8 @@ void motor::direct_set_state( int new_state )
             }
         }
 
-    if ( sub_type == device::DST_M_REV_2 || 
-        sub_type == device::DST_M_REV_FREQ_2 || 
+    if ( sub_type == device::DST_M_REV_2 ||
+        sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::M_REV_2_ERROR ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
@@ -2116,30 +2117,30 @@ int motor::get_state()
     int o  = get_DO( DO_INDEX );
     int i  = get_DI( DI_INDEX );
 
-    if ( sub_type == device::M_REV_2_ERROR || 
+    if ( sub_type == device::M_REV_2_ERROR ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
         int err = get_DI( DI_INDEX_ERROR );
-        
-        if ( 0 == err && 
+
+        if ( 0 == err &&
             get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
-            {            
+            {
             return -1;
             }
-        
-        if ( 1 != i ) 
+
+        if ( 1 != i )
             {
             start_switch_time = get_millisec();
             }
-        
-        int ro = get_DO( DO_INDEX_REVERSE ); 
+
+        int ro = get_DO( DO_INDEX_REVERSE );
         if ( 1 == ro )
             {
             return 2;
             }
 
         if ( 1 == o )
-            {            
+            {
             return 1;
             }
 
@@ -2208,7 +2209,7 @@ void motor::direct_on()
 #else
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
-        sub_type == device::M_REV_2_ERROR || 
+        sub_type == device::M_REV_2_ERROR ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
         // Выключение реверса.
@@ -2243,7 +2244,7 @@ void motor::direct_off()
 
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
-        sub_type == device::M_REV_2_ERROR || 
+        sub_type == device::M_REV_2_ERROR ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
         // Отключение реверса.
@@ -2263,14 +2264,14 @@ int motor::save_device_ex( char *buff )
     {
     int res = 0;
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
-        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 || 
-        sub_type == device::M_REV_2_ERROR || 
+        sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
+        sub_type == device::M_REV_2_ERROR ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
-        if ( sub_type == device::M_REV_2_ERROR || 
+        if ( sub_type == device::M_REV_2_ERROR ||
             sub_type == device::DST_M_REV_FREQ_2_ERROR )
             {
-            res = sprintf( buff, "R=%d, ERR=%d, ", 
+            res = sprintf( buff, "R=%d, ERR=%d, ",
                 get_DO( DO_INDEX_REVERSE ), get_DI( DI_INDEX_ERROR ) );
             }
         else
@@ -2447,16 +2448,16 @@ bool timer::is_time_up() const
     }
 //-----------------------------------------------------------------------------
 u_long timer::get_work_time() const
-	{
-	if (S_WORK == state)
-		{
-		return work_time + get_delta_millisec( last_time );
-		}
-	else
-		{
-		return work_time;
-		}
-	}
+    {
+    if (S_WORK == state)
+        {
+        return work_time + get_delta_millisec( last_time );
+        }
+    else
+        {
+        return work_time;
+        }
+    }
 //-----------------------------------------------------------------------------
 void timer::set_countdown_time( u_long new_countdown_time )
     {
@@ -2658,11 +2659,11 @@ i_DI_device* DI( const char *dev_name )
     }
 
 i_DI_device* DI( u_int dev_n )
-	{
-	static char name[ 20 ] = { 0 };
-	snprintf( name, sizeof( name ), "DI%d", dev_n );
-	return G_DEVICE_MANAGER()->get_DI( name );
-	}
+    {
+    static char name[ 20 ] = { 0 };
+    snprintf( name, sizeof( name ), "DI%d", dev_n );
+    return G_DEVICE_MANAGER()->get_DI( name );
+    }
 
 //-----------------------------------------------------------------------------
 i_DO_device* DO( const char *dev_name )
@@ -2671,11 +2672,11 @@ i_DO_device* DO( const char *dev_name )
     }
 
 i_DO_device* DO( u_int dev_n )
-	{
-	static char name[ 20 ] = { 0 };
-	snprintf( name, sizeof( name ), "DO%d", dev_n );
-	return G_DEVICE_MANAGER()->get_DO( name );
-	}
+    {
+    static char name[ 20 ] = { 0 };
+    snprintf( name, sizeof( name ), "DO%d", dev_n );
+    return G_DEVICE_MANAGER()->get_DO( name );
+    }
 //-----------------------------------------------------------------------------
 i_AI_device* QT( u_int dev_n )
     {
@@ -2704,17 +2705,17 @@ i_AI_device* PT( const char *dev_name )
     }
 //-----------------------------------------------------------------------------
 wages* WT( u_int dev_n )
-	{
-	static char name[ 20 ] = { 0 };
-	snprintf( name, sizeof( name ), "WT%d", dev_n );
+    {
+    static char name[ 20 ] = { 0 };
+    snprintf( name, sizeof( name ), "WT%d", dev_n );
 
-	return G_DEVICE_MANAGER()->get_WT( name );
-	}
+    return G_DEVICE_MANAGER()->get_WT( name );
+    }
 
 wages* WT( const char *dev_name )
-	{
-	return G_DEVICE_MANAGER()->get_WT( dev_name );
-	}
+    {
+    return G_DEVICE_MANAGER()->get_WT( dev_name );
+    }
 //-----------------------------------------------------------------------------
 dev_stub* STUB()
     {
