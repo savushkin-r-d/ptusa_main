@@ -8,7 +8,7 @@ auto_smart_ptr < device_manager > device_manager::instance;
 
 std::vector<valve*> valve::to_switch_off;
 
-std::vector<valve*> valve_bottom_mix_proof::to_switch_on;
+std::vector<valve_bottom_mix_proof*> valve_bottom_mix_proof::to_switch_off;
 
 const char device::DEV_NAMES[][ 5 ] =
     {
@@ -1791,14 +1791,40 @@ void valve_mix_proof::direct_off()
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+/// @brief Определение завершения отключения клапана с задержкой.
+bool valve_bottom_mix_proof::is_switching_off_finished( 
+    valve_bottom_mix_proof *v )
+    {
+    //Если открыли клапан раньше завершения закрытия, то его можно удалять из
+    //вектора.
+    if ( v->get_valve_state() == V_ON )
+        {
+        return true;
+        }
+
+    u_int delay = G_PAC_INFO()->par[ PAC_info::P_V_BOTTOM_OFF_DELAY_TIME ];
+
+    //Если завершилось время задержки, выключаем мини клапан перед удалением 
+    //клапана из вектора.
+    if ( get_delta_millisec( v->start_off_time ) > delay )
+        {
+        v->set_DO( DO_INDEX_MINI_V, 0 );    
+        return true;
+        }
+
+    return false;
+    };
+//-----------------------------------------------------------------------------
 void valve_bottom_mix_proof::evaluate()
     {
-    for( std::vector< valve* >::iterator iter = to_switch_on.begin();
-        iter != to_switch_on.end(); iter++ )
+    if ( to_switch_off.empty() )
         {
-        valve* v = *iter;
-        v->on();
+        return;
         }
+        
+    to_switch_off.erase(
+        std::remove_if( to_switch_off.begin(), to_switch_off.end(),
+        is_switching_off_finished ), to_switch_off.end() );
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
@@ -1811,11 +1837,7 @@ void valve_bottom_mix_proof::direct_on()
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 1 );
-        }
 
-    u_int delay = G_PAC_INFO()->par[ PAC_info::P_V_BOTTOM_ON_DELAY_TIME ];
-    if ( get_delta_millisec( start_on_time ) > delay )
-        {
         set_DO( DO_INDEX_MINI_V, 1 );
         }
     }
@@ -1824,15 +1846,20 @@ void valve_bottom_mix_proof::direct_off()
     {
     VALVE_STATE st = get_valve_state();
     bool was_seat = st == V_LOWER_SEAT;
-
-    set_DO( DO_INDEX_L, 0 );
-    set_DO( DO_INDEX_MINI_V, 0 );
     int o = get_DO( DO_INDEX );
 
-    if ( o != 0 || was_seat )
+    if ( was_seat )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX_L, 0 );    
+        }
+
+    if ( o != 0 )
         {
         start_switch_time = get_millisec();
         set_DO( DO_INDEX, 0 );
+
+        to_switch_off.push_back( this );
         }
     }
 #endif // DEBUG_NO_WAGO_MODULES

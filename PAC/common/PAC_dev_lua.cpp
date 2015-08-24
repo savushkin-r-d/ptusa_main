@@ -8965,7 +8965,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"P_MIX_FLIP_UPPER_TIME",PAC_info::P_MIX_FLIP_UPPER_TIME);
    tolua_constant(tolua_S,"P_MIX_FLIP_LOWER_TIME",PAC_info::P_MIX_FLIP_LOWER_TIME);
    tolua_constant(tolua_S,"P_V_OFF_DELAY_TIME",PAC_info::P_V_OFF_DELAY_TIME);
-   tolua_constant(tolua_S,"P_V_BOTTOM_ON_DELAY_TIME",PAC_info::P_V_BOTTOM_ON_DELAY_TIME);
+   tolua_constant(tolua_S,"P_V_BOTTOM_ON_DELAY_TIME",PAC_info::P_V_BOTTOM_OFF_DELAY_TIME);
    tolua_variable(tolua_S,"par",tolua_get_PAC_info_par,tolua_set_PAC_info_par);
    tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_PAC_info_set_cmd00);
   tolua_endmodule(tolua_S);

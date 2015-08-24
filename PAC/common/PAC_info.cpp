@@ -52,7 +52,7 @@ void PAC_info::reset_params()
     par[ P_MIX_FLIP_UPPER_TIME ]    = 1000;
 	par[ P_MIX_FLIP_LOWER_TIME ]	= 1000;
     par[ P_V_OFF_DELAY_TIME ] = 1000;
-    par[ P_V_BOTTOM_ON_DELAY_TIME ] = 1200;
+    par[ P_V_BOTTOM_OFF_DELAY_TIME ] = 1200;
     par.save_all();
     }
 //-----------------------------------------------------------------------------
@@ -78,7 +78,7 @@ int PAC_info::save_device( char *buff )
     answer_size += sprintf( buff + answer_size, "\tP_V_OFF_DELAY_TIME=%d,\n",
         par[ P_V_OFF_DELAY_TIME ] );
     answer_size += sprintf( buff + answer_size, "\tP_V_BOTTOM_ON_DELAY_TIME=%d,\n",
-        par[ P_V_BOTTOM_ON_DELAY_TIME ] );
+        par[ P_V_BOTTOM_OFF_DELAY_TIME ] );
     
     answer_size += sprintf( buff + answer_size, "\t}\n" );
     

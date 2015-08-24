@@ -1544,12 +1544,12 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
     {
     public:
         valve_bottom_mix_proof( const char *dev_name
-            ): valve( true, true, dev_name, DT_V, DST_V_BOTTOM_MIXPROOF ),
-            is_switching_on( false )
+            ): valve( true, true, dev_name, DT_V, DST_V_BOTTOM_MIXPROOF )
             {
             }
 
-        /// @brief Открыть верхнее седло.
+        /// @brief Открыть верхнее седло. Не делаем ничего, так как верхнего
+        /// седла нет.
         void open_upper_seat()
             {
             }
@@ -1607,39 +1607,6 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
                     break;
                 }
 #endif //DEBUG_NO_WAGO_MODULES
-            }
-
-        void on()
-            {
-            //Для открытия мини клапана с задержкой запоминаем время первого
-            //включения и помещаем в вектор открытых клапанов, его содержимое
-            //будет обрабатываться потом в статическом методе класса evaluate.
-            if ( false == is_switching_on )
-                {
-                is_switching_on = true;
-                start_on_time = get_millisec();
-
-                to_switch_on.push_back( this );
-                }
-
-            valve::on();
-            }
-
-        void off()
-            {
-            valve::off();
-            is_switching_on = false;
-
-            for( std::vector< valve* >::iterator iter = to_switch_on.begin();
-                iter != to_switch_on.end(); iter++ )
-                {
-                valve* v = *iter;
-                if ( v == this )
-                	{
-                    to_switch_on.erase( iter );
-                    break;
-                	}
-                }
             }
         
 #ifndef DEBUG_NO_WAGO_MODULES
@@ -1703,19 +1670,22 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 #endif // DEBUG_NO_WAGO_MODULES
 
 #ifdef _MSC_VER
-#pragma region Включение мини клапана с задержкой.
+#pragma region Выключение мини клапана с задержкой.
 #endif
-        /// @brief Вектор клапанов, ожидающих включение.
-        static std::vector< valve* > to_switch_on;
+        /// @brief Вектор клапанов, ожидающих выключение.
+        static std::vector< valve_bottom_mix_proof* > to_switch_off;
 
-        bool is_switching_on; //Признак начала открытия клапана.
-        u_long start_on_time; //Время начала открытия клапана.
+        u_long start_off_time; //Время начала открытия клапана.
 
     public:
+        /// @brief Определение завершения отключения клапана с задержкой.
+        static bool is_switching_off_finished( valve_bottom_mix_proof *v );
+
+        /// @brief Выключение мини клапанов с задержкой.
         static void evaluate();
 
 #ifdef _MSC_VER
-#pragma endregion Отключение клапана с задержкой.
+#pragma endregion Выключение мини клапана с задержкой.
 #endif
 
     };

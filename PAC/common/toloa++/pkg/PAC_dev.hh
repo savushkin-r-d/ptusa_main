@@ -1011,7 +1011,8 @@ class PAC_info: public i_Lua_save_device
 
 			P_V_OFF_DELAY_TIME,    ///< Время задержки закрытия клапанов, мсек.
 
-            P_V_BOTTOM_ON_DELAY_TIME, 
+            ///< Время задержки закрытия для донных клапанов, мсек.
+            P_V_BOTTOM_OFF_DELAY_TIME, 
 			};
 
         saved_params_u_int_4 par;
