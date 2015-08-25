@@ -219,8 +219,8 @@ class i_DO_device: public i_DI_device
         /// @brief Выключение устройства с учетом ручного режима.
         virtual void off() = 0;
 
-		/// @brief немедленное выключение устройства
-		virtual void direct_off() = 0;
+        /// @brief немедленное выключение устройства
+        virtual void direct_off() = 0;
 
         /// @brief Установка нового состояния устройства с учетом ручного режима.
         ///
@@ -397,20 +397,20 @@ class device : public i_DO_AO_device, public par_device
 
             //M,
             DST_M = 1,          ///< Мотор без управления частотой вращения.
-            DST_M_FREQ,         ///< Мотор с управлением частотой вращения.           
+            DST_M_FREQ,         ///< Мотор с управлением частотой вращения.
 
             DST_M_REV,          ///< Мотор с реверсом без управления частотой вращения. Реверс включается совместно.
             DST_M_REV_FREQ,     ///< Мотор с реверсом с управлением частотой вращения. Реверс включается совместно.
             DST_M_REV_2,        ///< Мотор с реверсом без управления частотой вращения. Реверс включается отдельно.
-            DST_M_REV_FREQ_2,   ///< Мотор с реверсом с управлением частотой вращения. Реверс включается отдельно. 
+            DST_M_REV_FREQ_2,   ///< Мотор с реверсом с управлением частотой вращения. Реверс включается отдельно.
 
-            
-            /// Мотор с реверсом. Реверс включается отдельно. Отдельный сигнал 
+
+            /// Мотор с реверсом. Реверс включается отдельно. Отдельный сигнал
             /// ошибки.
-            M_REV_2_ERROR, 
-            
-            /// Мотор с реверсом с управлением частотой вращения. Реверс 
-            /// включается отдельно. Отдельный сигнал ошибки. 
+            M_REV_2_ERROR,
+
+            /// Мотор с реверсом с управлением частотой вращения. Реверс
+            /// включается отдельно. Отдельный сигнал ошибки.
             DST_M_REV_FREQ_2_ERROR,
             };
 
@@ -687,7 +687,7 @@ class valve: public digital_wago_device
         /// @param number - номер устройства.
         /// @param type - тип устройства.
         /// @param sub_type - подтип устройства.
-        valve( const char *dev_name, device::DEVICE_TYPE type, 
+        valve( const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type );
 
 #ifdef _MSC_VER
@@ -1544,7 +1544,8 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
     {
     public:
         valve_bottom_mix_proof( const char *dev_name
-            ): valve( true, true, dev_name, DT_V, DST_V_BOTTOM_MIXPROOF )
+            ): valve( true, true, dev_name, DT_V, DST_V_BOTTOM_MIXPROOF ),
+            is_closing_mini(0)
             {
             }
 
@@ -1586,21 +1587,27 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
                     direct_on();
                     break;
 
-                case V_UPPER_SEAT:
+                case V_UPPER_SEAT: //Открываем микроклапан
+                    direct_off();
+                    is_closing_mini = 0;
+
+                    if (0 == get_DO(DO_INDEX_MINI_V))
+                        {
+                        start_switch_time = get_millisec();
+                        set_DO( DO_INDEX_MINI_V, 1);
+                        }
                     break;
 
                 case V_LOWER_SEAT:
-                    {
                     direct_off();
 
-                    int l = get_DO( DO_INDEX_L );
-                    if ( 0 == l )
+                    if ( 0 == get_DO( DO_INDEX_L ) )
                         {
                         start_switch_time = get_millisec();
                         set_DO( DO_INDEX_L, 1 );
                         }
                     break;
-                    }
+
 
                 default:
                     direct_on();
@@ -1608,7 +1615,7 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
                 }
 #endif //DEBUG_NO_WAGO_MODULES
             }
-        
+
 #ifndef DEBUG_NO_WAGO_MODULES
         void direct_on();
         void direct_off();
@@ -1623,6 +1630,8 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
             return ( VALVE_STATE ) digital_wago_device::get_state();
 #else
             int o = get_DO( DO_INDEX );
+
+            if (o == 0 && get_DO(DO_INDEX_MINI_V) == 1) return V_UPPER_SEAT;
 
             if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return V_LOWER_SEAT;
 
@@ -1647,7 +1656,7 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 
             if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return true;
 
-            if ( get_delta_millisec( start_switch_time ) < 
+            if ( get_delta_millisec( start_switch_time ) <
                 get_par( valve::P_ON_TIME, 0 ) )
                 {
                 return true;
@@ -1676,6 +1685,8 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
         static std::vector< valve_bottom_mix_proof* > to_switch_off;
 
         u_long start_off_time; //Время начала открытия клапана.
+
+        int is_closing_mini; //Мини клапан в режиме закрытия
 
     public:
         /// @brief Определение завершения отключения клапана с задержкой.
@@ -1737,7 +1748,7 @@ class AI1 : public analog_wago_device
 class temperature_e : public AI1
     {
     public:
-        temperature_e( const char *dev_name ): AI1( dev_name, DT_TE, DST_NONE, 
+        temperature_e( const char *dev_name ): AI1( dev_name, DT_TE, DST_NONE,
             ADDITIONAL_PARAM_COUNT, &start_param_idx )
             {
             set_par_name( P_ERR_T,  start_param_idx, "P_ERR_T" );
@@ -1748,7 +1759,7 @@ class temperature_e : public AI1
 #ifdef DEBUG_NO_WAGO_MODULES
             float v = analog_wago_device::get_value();
 
-            return -1000 == v ? get_par( P_ERR_T, start_param_idx ) : 
+            return -1000 == v ? get_par( P_ERR_T, start_param_idx ) :
                 AI1::get_value();
 #else
             float v = get_AI( C_AI_INDEX, 0, 0 );
@@ -1892,7 +1903,7 @@ class wages : public analog_wago_device, public i_wages
 
 #ifdef DEBUG_NO_WAGO_MODULES
         float get_value();
-		void  direct_set_value( float new_value );
+        void  direct_set_value( float new_value );
 #endif // DEBUG_NO_WAGO_MODULES
 
 #ifndef DEBUG_NO_WAGO_MODULES

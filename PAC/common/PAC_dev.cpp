@@ -1792,7 +1792,7 @@ void valve_mix_proof::direct_off()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 /// @brief Определение завершения отключения клапана с задержкой.
-bool valve_bottom_mix_proof::is_switching_off_finished( 
+bool valve_bottom_mix_proof::is_switching_off_finished(
     valve_bottom_mix_proof *v )
     {
     //Если открыли клапан раньше завершения закрытия, то его можно удалять из
@@ -1802,13 +1802,20 @@ bool valve_bottom_mix_proof::is_switching_off_finished(
         return true;
         }
 
+    //Если сняли флаг закрытия, то удаляем из вектора
+    if (!v->is_closing_mini)
+        {
+        return true;
+        }
+
     u_int delay = G_PAC_INFO()->par[ PAC_info::P_V_BOTTOM_OFF_DELAY_TIME ];
 
-    //Если завершилось время задержки, выключаем мини клапан перед удалением 
+    //Если завершилось время задержки, выключаем мини клапан перед удалением
     //клапана из вектора.
     if ( get_delta_millisec( v->start_off_time ) > delay )
         {
-        v->set_DO( DO_INDEX_MINI_V, 0 );    
+        v->set_DO( DO_INDEX_MINI_V, 0 );
+        v->is_closing_mini = 0;
         return true;
         }
 
@@ -1821,7 +1828,7 @@ void valve_bottom_mix_proof::evaluate()
         {
         return;
         }
-        
+
     to_switch_off.erase(
         std::remove_if( to_switch_off.begin(), to_switch_off.end(),
         is_switching_off_finished ), to_switch_off.end() );
@@ -1846,18 +1853,27 @@ void valve_bottom_mix_proof::direct_off()
     {
     VALVE_STATE st = get_valve_state();
     bool was_seat = st == V_LOWER_SEAT;
+    bool was_mini = st == V_UPPER_SEAT;
     int o = get_DO( DO_INDEX );
 
     if ( was_seat )
         {
         start_switch_time = get_millisec();
-        set_DO( DO_INDEX_L, 0 );    
+        set_DO( DO_INDEX_L, 0 );
+        }
+
+    if ( was_mini && !is_closing_mini )
+        {
+        start_switch_time = get_millisec();
+        set_DO( DO_INDEX_MINI_V, 0 );
         }
 
     if ( o != 0 )
         {
         start_switch_time = get_millisec();
+        start_off_time = get_millisec();
         set_DO( DO_INDEX, 0 );
+        is_closing_mini = 1;
 
         to_switch_off.push_back( this );
         }
