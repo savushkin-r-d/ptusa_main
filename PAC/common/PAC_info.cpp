@@ -126,6 +126,12 @@ int PAC_info::set_cmd( const char *prop, u_int idx, double val )
         return 0;
         }
 
+	if ( strcmp( prop, "P_V_BOTTOM_ON_DELAY_TIME" ) == 0 )
+		{
+		par.save( P_V_BOTTOM_OFF_DELAY_TIME, ( u_int_4 ) val );
+		return 0;
+		}
+
     return 0;
     }
 //-----------------------------------------------------------------------------
