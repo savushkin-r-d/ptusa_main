@@ -1356,9 +1356,16 @@ int cipline_tech_object::EvalCommands()
 
 				if (TECH_TYPE_CAR_WASH == tech_type)
 					{
-					if (!(switch1 || switch2 || switch3 || switch4))
+					if (!(switch1 || switch2 || switch3 || switch4) && rt_par_float[P_PROGRAM] != SPROG_ACID_PREPARATION && rt_par_float[P_PROGRAM] != SPROG_CAUSTIC_PREPARATION)
 						{
 						return 0;
+						}
+					if (rt_par_float[P_PROGRAM] == SPROG_CAUSTIC_PREPARATION || rt_par_float[P_PROGRAM] == SPROG_ACID_PREPARATION)
+						{
+						switch1 = 0;
+						switch2 = 0;
+						switch3 = 0;
+						switch4 = 0;
 						}
 					}
 
@@ -2662,6 +2669,14 @@ int cipline_tech_object::InitFilRR( int where )
 	if (0 == divider)
 		{
 		divider = 1;
+		}
+	if (kk == 0)
+		{
+		kk = 1;
+		}
+	if (ro == 0)
+		{
+		ro = 1;
 		}
 	v=kz*1000/((divider)*kk*ro);
 	//   printf("\n\rfillRR v1M3: %f,pd: %f, kk: %f, kz: %f, ro: %f", v, pd, kk, kz, ro);

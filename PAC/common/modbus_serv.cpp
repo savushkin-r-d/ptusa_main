@@ -336,6 +336,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 						case C_TE:
 						case C_QE:
 						case C_AI:
+						case C_LE:
 							PackFloat(get_device(coilgroup, objnumber)->get_value(),&outdata[3+i*2]);
 							i++;
 							break;
