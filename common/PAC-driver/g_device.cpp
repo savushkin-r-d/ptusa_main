@@ -88,16 +88,19 @@ long device_communicator::write_devices_states_service(
             answer_size++; // Учитываем завершающий \0.
 
 #ifdef DEBUG
-            std::string source = ( char* ) outdata + 2;
-            for ( u_int i = 0; i < source.length(); i++ )
+            if ( answer_size < 40000 ) //Вывод больших строк тормозит работу.
                 {
-                if ( source[ i ] == '\t' )
+                std::string source = ( char* ) outdata + 2;
+                for ( u_int i = 0; i < source.length(); i++ )
                     {
-                    source[ i ] = ' ';
+                    if ( source[ i ] == '\t' )
+                        {
+                        source[ i ] = ' ';
+                        }
                     }
-                }
 
-            printf( "%s", source.c_str() );
+                printf( "%s", source.c_str() );
+                }
 #endif // DEBUG
 
 #ifdef DEBUG_DEV_CMCTR

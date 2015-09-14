@@ -60,7 +60,7 @@ class tcp_communicator
 
         enum CONSTANTS
             {
-            BUFSIZE     = 50000,           ///< Размер буфера.
+            BUFSIZE     = 100000,          ///< Размер буфера.
             PORT        = 10000,           ///< Порт.
             PORT_MODBUS = 10502,
 #ifdef LINUX_OS
