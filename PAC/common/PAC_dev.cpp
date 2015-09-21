@@ -437,9 +437,8 @@ void device_manager::print() const
     for ( u_int i = 0; i < project_devices.size(); i++ )
         {
         Print( "    %3i. ", i + 1 );
-        //Print( "%-8s %s",
-        //    project_devices[ i ]->get_name(), project_devices[ i ]->get_description() );
-        project_devices[ i ]->print();
+        Print( "%-8s %s",
+            project_devices[ i ]->get_name(), project_devices[ i ]->get_description() );
         Print( "\n" );
         }
     }
