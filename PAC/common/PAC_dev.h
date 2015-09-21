@@ -381,15 +381,16 @@ class device : public i_DO_AO_device, public par_device
             DST_NONE = -1,      ///< Подтип не определен.
 
             //V
-            DST_V_DO1 = 1,      ///< Клапан с одним каналом управления.
-            DST_V_DO2,          ///< Клапан с двумя каналами управления.
+            DST_V_DO1 = 1,         ///< Клапан с одним каналом управления.
+            DST_V_DO2,             ///< Клапан с двумя каналами управления.
             DST_V_DO1_DI1_FB_OFF,  ///< Клапан с одним каналом управления и одной обратной связью на закрытое состояние.
             DST_V_DO1_DI1_FB_ON,   ///< Клапан с одним каналом управления и одной обратной связью на открытое состояние.
-            DST_V_DO1_DI2,      ///< Клапан с одним каналом управления и двумя обратными связями.
-            DST_V_DO2_DI2,      ///< Клапан с двумя каналами управления и двумя обратными связями.
-            DST_V_MIXPROOF,     ///< Клапан противосмешивающий.
-            DST_V_AS_MIXPROOF,  ///< Клапан с двумя каналами управления и двумя обратными связями с AS интерфейсом (противосмешивающий).
-            DST_V_BOTTOM_MIXPROOF, ///<Донный клапан.
+            DST_V_DO1_DI2,         ///< Клапан с одним каналом управления и двумя обратными связями.
+            DST_V_DO2_DI2,         ///< Клапан с двумя каналами управления и двумя обратными связями.
+            DST_V_MIXPROOF,        ///< Клапан противосмешивающий.
+            DST_V_AS_MIXPROOF,     ///< Клапан с двумя каналами управления и двумя обратными связями с AS интерфейсом (противосмешивающий).
+            DST_V_BOTTOM_MIXPROOF, ///< Донный клапан.
+            DST_V_AS_DO1_DI2,      ///< Клапан с одним каналом управления и двумя обратными связями с AS интерфейсом.
 
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
@@ -1221,26 +1222,17 @@ class valve_mix_proof : public i_mix_proof,  public valve
 
     };
 //-----------------------------------------------------------------------------
-/// @brief Клапан AS-mixproof.
-class valve_AS_mix_proof : public i_mix_proof,  public valve
+//-----------------------------------------------------------------------------
+/// @brief Клапан AS-interface.
+class valve_AS : public valve
     {
     public:
-        valve_AS_mix_proof( const char *dev_name );
-
-        void open_upper_seat()
-            {
-            direct_set_state( V_UPPER_SEAT );
-            }
-
-        void open_lower_seat()
-            {
-            direct_set_state( V_LOWER_SEAT );
-            }
+        valve_AS( const char *dev_name, device::DEVICE_SUB_TYPE sub_type );
 
         void print() const
             {
 #ifdef DEBUG
-            Print( "%s [%u:%u]\t", get_name(), AS_gateway, AS_number );
+            Print( "%s [%u]\t", get_name(), AS_number );
 #endif // DEBUG
             }
 
@@ -1249,10 +1241,6 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
             switch ( idx )
                 {
                 case 1:
-                    AS_gateway = ( u_int ) value;
-                    break;
-
-                case 2:
                     AS_number = ( u_int ) value;
                     break;
 
@@ -1275,9 +1263,9 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
                 state >>= 4;
                 }
 
-            int o = ( state & C_OPEN ) > 0 ? 1 : 0;
-            int l = ( state & C_LOWER_SEAT ) > 0 ? 1 : 0;
-            int u = ( state & C_UPPER_SEAT ) > 0 ? 1 : 0;
+            int o = ( state & C_OPEN_S1 ) > 0 ? 1 : 0;
+            int l = ( state & C_OPEN_S2 ) > 0 ? 1 : 0;
+            int u = ( state & C_OPEN_S3 ) > 0 ? 1 : 0;
 
             if ( o == 0 && u == 1 ) return V_UPPER_SEAT;
             if ( o == 0 && l == 1 ) return V_LOWER_SEAT;
@@ -1299,9 +1287,9 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
                 AO_state >>= 4;
                 }
 
-            int o = ( AO_state & C_OPEN ) > 0 ? 1 : 0;
-            int l = ( AO_state & C_LOWER_SEAT ) > 0 ? 1 : 0;
-            int u = ( AO_state & C_UPPER_SEAT ) > 0 ? 1 : 0;
+            int o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0;
+            int l = ( AO_state & C_OPEN_S2 ) > 0 ? 1 : 0;
+            int u = ( AO_state & C_OPEN_S3 ) > 0 ? 1 : 0;
 
             char* AI_data = ( char* ) get_AI_data( AI_INDEX );
             char AI_state = AI_data[ MAILBOX_OFFSET + AS_number / 2 ];
@@ -1375,7 +1363,7 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
                 read_state >>= 4;
                 }
 
-            int o = ( read_state & C_OPEN ) > 0 ? 1 : 0;
+            int o = ( read_state & C_OPEN_S1 ) > 0 ? 1 : 0;
 
             if ( 1 == o )
                 {
@@ -1404,7 +1392,7 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
                 read_state >>= 4;
                 }
 
-            int o = ( read_state & C_OPEN ) > 0 ? 1 : 0;
+            int o = ( read_state & C_OPEN_S1 ) > 0 ? 1 : 0;
 
             if ( 0 == o )
                 {
@@ -1412,15 +1400,15 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
                 }
             if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
                 {
-                *write_state |= C_OPEN << 4;
-                *write_state &= ~( C_UPPER_SEAT << 4 );
-                *write_state &= ~( C_LOWER_SEAT << 4 );
+                *write_state |= C_OPEN_S1 << 4;
+                *write_state &= ~( C_OPEN_S3 << 4 );
+                *write_state &= ~( C_OPEN_S2 << 4 );
                 }
             else
                 {
-                *write_state |= C_OPEN;
-                *write_state &= ~C_UPPER_SEAT;
-                *write_state &= ~C_LOWER_SEAT;
+                *write_state |= C_OPEN_S1;
+                *write_state &= ~C_OPEN_S3;
+                *write_state &= ~C_OPEN_S2;
                 }
 
             //            if ( strcmp( get_name(), "H1V1" ) == 0 )
@@ -1461,7 +1449,7 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
                         read_state >>= 4;
                         }
 
-                    int u = ( read_state & C_UPPER_SEAT ) > 0 ? 1 : 0;
+                    int u = ( read_state & C_OPEN_S3 ) > 0 ? 1 : 0;
 
                     if ( 0 == u )
                         {
@@ -1470,11 +1458,11 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
 
                     if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
                         {
-                        *write_state |= C_UPPER_SEAT << 4;
+                        *write_state |= C_OPEN_S3 << 4;
                         }
                     else
                         {
-                        *write_state |= C_UPPER_SEAT;
+                        *write_state |= C_OPEN_S3;
                         }
 
                     break;
@@ -1493,7 +1481,7 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
                         read_state >>= 4;
                         }
 
-                    int l = ( read_state & C_LOWER_SEAT ) > 0 ? 1 : 0;
+                    int l = ( read_state & C_OPEN_S2 ) > 0 ? 1 : 0;
 
                     if ( 0 == l )
                         {
@@ -1502,11 +1490,11 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
 
                     if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
                         {
-                        *write_state |= C_LOWER_SEAT << 4;
+                        *write_state |= C_OPEN_S2 << 4;
                         }
                     else
                         {
-                        *write_state |= C_LOWER_SEAT;
+                        *write_state |= C_OPEN_S2;
                         }
                     break;
                     }
@@ -1518,9 +1506,7 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
 #endif //DEBUG_NO_WAGO_MODULES
             }
 
-    private:
-
-        u_int AS_gateway;   ///< AS-шлюз.
+    private:        
         u_int AS_number;    ///< AS-номер устройства.
 
         enum CONSTANTS
@@ -1528,15 +1514,39 @@ class valve_AS_mix_proof : public i_mix_proof,  public valve
             AI_INDEX = 0,   ///< Индекс канала аналогового входа.
             AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
 
-            C_OPEN = 0x2,       ///< Открыть.
-            C_LOWER_SEAT = 0x4, ///< Открыть нижнее седло.
-            C_UPPER_SEAT = 0x8, ///< Открыть верхнее седло.
+            C_OPEN_S1 = 0x2,    ///< Открыть соленоид 1.
+            C_OPEN_S2 = 0x4,    ///< Открыть соленоид 2.
+            C_OPEN_S3 = 0x8,    ///< Открыть соленоид 3.
 
             S_CLOSED = 0x1,     ///< Клапан закрыт.
             S_OPENED = 0x2,     ///< Клапан открыт.
 
             MAILBOX_OFFSET = 8
             };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан AS-mixproof.
+class valve_AS_mix_proof : public i_mix_proof,  public valve_AS
+    {
+    public:
+        valve_AS_mix_proof( const char *dev_name );
+
+        void open_upper_seat()
+            {
+            direct_set_state( V_UPPER_SEAT );
+            }
+
+        void open_lower_seat()
+            {
+            direct_set_state( V_LOWER_SEAT );
+            }
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан AS-i отсечной.
+class valve_AS_DO1_DI2 : public valve_AS
+    {
+    public:
+        valve_AS_DO1_DI2( const char *dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан донный.

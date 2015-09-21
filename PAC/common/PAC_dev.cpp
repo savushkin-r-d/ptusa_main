@@ -437,8 +437,9 @@ void device_manager::print() const
     for ( u_int i = 0; i < project_devices.size(); i++ )
         {
         Print( "    %3i. ", i + 1 );
-        Print( "%-8s %s",
-            project_devices[ i ]->get_name(), project_devices[ i ]->get_description() );
+        //Print( "%-8s %s",
+        //    project_devices[ i ]->get_name(), project_devices[ i ]->get_description() );
+        project_devices[ i ]->print();
         Print( "\n" );
         }
     }
@@ -615,6 +616,11 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                 case device::DST_V_BOTTOM_MIXPROOF:
                     new_device      = new valve_bottom_mix_proof( dev_name );
                     new_wago_device = ( valve_bottom_mix_proof* ) new_device;
+                    break;
+
+                case device::DST_V_AS_DO1_DI2:
+                    new_device      = new valve_AS_DO1_DI2( dev_name );
+                    new_wago_device = ( valve_AS_DO1_DI2* ) new_device;
                     break;
 
                 default:
@@ -2771,9 +2777,21 @@ device* DEVICE( int s_number )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-valve_AS_mix_proof::valve_AS_mix_proof( const char *dev_name
-    ): valve( true, true, dev_name, DT_V, DST_V_AS_MIXPROOF ),
-    AS_gateway( 0 ), AS_number( 0 )
+valve_AS::valve_AS( const char *dev_name, DEVICE_SUB_TYPE sub_type ):
+    valve( true, true, dev_name, DT_V, sub_type ),
+    AS_number( 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_AS_mix_proof::valve_AS_mix_proof( const char *dev_name ):
+    valve_AS( dev_name, DST_V_AS_MIXPROOF )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_AS_DO1_DI2::valve_AS_DO1_DI2( const char *dev_name ):
+    valve_AS( dev_name, DST_V_AS_DO1_DI2 )
     {
     }
 //-----------------------------------------------------------------------------
