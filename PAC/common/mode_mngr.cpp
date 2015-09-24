@@ -724,14 +724,10 @@ void wash_action::evaluate()
             break;
             }
         }
-    // Если есть ошибки устройств, отключаем все устройства, снимаем
+    // Если есть ошибки устройств, не отключая все устройства, снимаем
     // сигналы "Мойка ОК".
     if ( is_dev_error )
         {
-        for ( u_int i = 0; i < devices[ G_DEV ].size(); i++ )
-            {
-            devices[ G_DEV ][ i ]->off();
-            }
         for ( u_int i = 0; i < devices[ G_DO ].size(); i++ )
             {
             devices[ G_DO ][ i ]->off();
