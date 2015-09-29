@@ -111,7 +111,7 @@ class ModbusServ
 		static unsigned int UnpackWord(unsigned char* Buf);
         static int_2 PackInt16(int_2 wvalue,unsigned char* Buf);
 		static int_2 UnpackInt16(unsigned char* Buf);
-		static int PackLong(unsigned long lvalue,char* Buf);
+		static int PackLong(unsigned long lvalue,unsigned char* Buf);
 		static unsigned long UnpackLong(unsigned char* Buf);
 		static int CP1251toUnicode( const char* Input, unsigned char* Buf);
 		static int UnicodetoCP1251(char* Output, unsigned char* Buf, int inputlen);

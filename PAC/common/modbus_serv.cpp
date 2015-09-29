@@ -629,6 +629,13 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 										CP1251toUnicode( val, &outdata[ 3 + idx * 2 ] );                       
 										break;
 										}
+
+									case 5: // UInt32                                    
+										{
+										u_long val = ( u_long ) lua_tonumber( L, -1 );
+										PackLong( val, &outdata[ 3 + idx * 2 ] );                   
+										break;
+										}
 									}   
 
 								lua_pop( L, 1 );
@@ -1085,7 +1092,7 @@ int ModbusServ::PackWord( unsigned int wvalue,char* Buf )
 	return 0;
 	}
 
-int ModbusServ::PackLong( unsigned long lvalue,char* Buf )
+int ModbusServ::PackLong( unsigned long lvalue,unsigned char* Buf )
 	{
 	Buf[0] = ((char*)&lvalue)[1];
 	Buf[1] = ((char*)&lvalue)[0];
