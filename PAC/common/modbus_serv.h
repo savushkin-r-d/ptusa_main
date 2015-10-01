@@ -125,6 +125,11 @@ class ModbusServ
 		static void UpdatePrograms();
 		static void UpdateLinePrograms(int line);
 
+		static int_4 UnpackInt32( unsigned char* Buf, int offset )
+			{
+			return UnpackLong( Buf + offset );
+			}
+
         static int_2 UnpackInt16( unsigned char* Buf, int offset )
             {
             return UnpackInt16( Buf + offset );

@@ -1192,8 +1192,8 @@ class modbus_client
 		int write_coil(unsigned int address, unsigned char value);
 		int force_multiply_coils(unsigned int address, unsigned int quantity);
 		int write_multiply_registers(unsigned int address, unsigned int quantity);
-		//int async_read_discrete_inputs(unsigned int start_address, unsigned int quantity);
-		//int get_async_result();
+//		int async_read_discrete_inputs(unsigned int start_address, unsigned int quantity);
+//		int get_async_result();
 		//функции для работы с буфером из Lua
 		void zero_output_buff();
 		void set_int2(unsigned int address, short value);
@@ -1211,6 +1211,7 @@ class ModbusServ
     {
     public:
         static short int UnpackInt16( unsigned char* buf, int offset );
+		static long int UnpackInt32( unsigned char* buf, int offset );
         static float UnpackFloat( unsigned char* Buf, int offset  );
     }
 //-------------------------------------------------------------------------
