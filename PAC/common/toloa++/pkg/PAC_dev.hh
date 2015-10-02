@@ -457,6 +457,11 @@ class dev_errors_manager
 class valve 
     {
     public:
+        /// @brief Получение значения обратной связи на включенное состояние.
+        int get_on_fb_value();
+
+        /// @brief Получение значения обратной связи на выключенное состояние.
+        int get_off_fb_value();
 
     ///Состояние клапана без учета обратной связи.
     enum VALVE_STATE
