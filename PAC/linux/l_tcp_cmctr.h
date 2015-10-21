@@ -47,7 +47,7 @@ class tcp_communicator_linux : public tcp_communicator
             /// @brief Итерация обмена данными с сервером.
             int evaluate();
 
-	private:
+    private:
             sockaddr_in ssin; 	        ///< Адрес клиента.
             u_int       sin_len;    	///< Длина адреса.
             int         master_socket;	///< Мастер-сокет для прослушивания.
@@ -94,8 +94,8 @@ class tcp_communicator_linux : public tcp_communicator
                         if ( err_cnt > 3 )
                             {
 #ifdef DEBUG
-                            Print( "tcp_communicator_linux::send_all(): "
-                                "send %i byte of %d.\n", total_size, len );
+//                            Print( "tcp_communicator_linux::send_all(): "
+//                                "send %i byte of %d.\n", total_size, len );
 #endif
                             break;
                             }
@@ -128,6 +128,6 @@ class tcp_communicator_linux : public tcp_communicator
             /// @return >= 0 - размер реально считанных данных.
             static int  recvtimeout( int s, u_char *buf, int len,
                 int sec, int usec, char* IP );
-	};
+    };
 //-----------------------------------------------------------------------------
 #endif //TCP_CMCTR_LINUX

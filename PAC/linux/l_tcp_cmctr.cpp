@@ -314,27 +314,27 @@ int tcp_communicator_linux::evaluate()
                         }
 
 #ifdef DEBUG
-                    if (i != modbus_socket)
-                    {
-                    // Определение имени клиента.
-                    hostent *client = gethostbyaddr( &ssin.sin_addr, 4, AF_INET );
-                    if ( client )
-                        {
-                        printf( "Accepted connection on %d socket from %s [ %s ].\n",
-                            slave_socket, inet_ntoa( ssin.sin_addr ), client->h_name  );
-                        }
-                    else
-                        {
-                        herror( "Error getting client name" );
-                        Print( "Accepted connection on %d socket from %s.\n",
-                            slave_socket, inet_ntoa( ssin.sin_addr ) );
-                        }
-                    }
-                    else
-                    {
-                    Print( "Accepted connection on %d socket from %s.\n",
-                        slave_socket, inet_ntoa( ssin.sin_addr ) );
-                    }
+//                    if (i != modbus_socket)
+//                    {
+//                    // Определение имени клиента.
+//                    hostent *client = gethostbyaddr( &ssin.sin_addr, 4, AF_INET );
+//                    if ( client )
+//                        {
+//                        printf( "Accepted connection on %d socket from %s [ %s ].\n",
+//                            slave_socket, inet_ntoa( ssin.sin_addr ), client->h_name  );
+//                        }
+//                    else
+//                        {
+//                        herror( "Error getting client name" );
+//                        Print( "Accepted connection on %d socket from %s.\n",
+//                            slave_socket, inet_ntoa( ssin.sin_addr ) );
+//                        }
+//                    }
+//                    else
+//                    {
+//                    Print( "Accepted connection on %d socket from %s.\n",
+//                        slave_socket, inet_ntoa( ssin.sin_addr ) );
+//                    }
 #endif // DEBUG
 
                     FD_SET( slave_socket, &rfds );
