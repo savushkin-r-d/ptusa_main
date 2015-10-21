@@ -46,7 +46,7 @@ int wago_device::get_DO( u_int index )
         index, DO_channels.count, ( int ) DO_channels.char_write_values );
     if ( DI_channels.char_write_values )
         {
-        Print( ", DO_channels.char_write_values[ index ]=%d",       
+        Print( ", DO_channels.char_write_values[ index ]=%d",
             ( int ) DO_channels.char_write_values[ index ] );
         }
     Print( "\n" );
@@ -93,7 +93,7 @@ int wago_device::get_DI( u_int index )
         index, DI_channels.count, ( int ) DI_channels.char_read_values );
     if ( DI_channels.char_read_values )
         {
-        Print( ", DI_channels.char_read_values[ index ]=%d",       
+        Print( ", DI_channels.char_read_values[ index ]=%d",
             ( int ) DI_channels.char_read_values[ index ] );
         }
     Print( "\n" );
@@ -172,7 +172,7 @@ float wago_device::get_AO( u_int index, float min_value, float max_value )
         index, AO_channels.count, ( int ) AO_channels.int_write_values );
     if ( AO_channels.int_write_values )
         {
-        Print( ", AO_channels.int_write_values[ index ]=%d",       
+        Print( ", AO_channels.int_write_values[ index ]=%d",
             ( int ) AO_channels.int_write_values[ index ] );
         }
     Print( "\n" );
@@ -233,6 +233,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
         switch ( module_type )
             {
             // Выход модуля 461.
+            // Выход модуля 450, Pt100 Setting (IEC 751), Standard Format.
             //   -------------------------------------------------------------------------
             //   Temperature  Voltage     Voltage     Binary value
             //   °C           (Ohm)       (Ohm)                               Hex.     Dec.
@@ -249,6 +250,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
             //                <18                     1000 0000 0000 0000     8000   -32767
             //
             case 461:
+            case 450:
                 if ( val >= 0xF830 && val <= 0xFFFF ) // -0,1..-200 °C
                     {
                     val -= 0x10000; //65536
@@ -310,7 +312,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
             // Process values of module 750-491
             //Signal           Numerical value
             //voltage UD       binary
-            //  
+            //
             //ca.-15.5000   '0111.1111.1111.1111' 0x7FFF 32767  0x41 on
             //ca.-15.5000   '0000.0000.0000.0000' 0x0000 0      0x00 off
             //-15.0000      '1000.1010.1101.0000' 0x8AD0 -30000 0x00 off
@@ -351,10 +353,10 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
         index, AI_channels.count, ( int ) AI_channels.int_read_values );
     if ( AI_channels.int_read_values )
         {
-        Print( ", AI_channels.int_read_values[ index ]=%d",       
+        Print( ", AI_channels.int_read_values[ index ]=%d",
             ( int ) AI_channels.int_read_values[ index ] );
         }
-    Print( "\n" );    
+    Print( "\n" );
 #endif // DEBUG
 
     return 0;
@@ -375,10 +377,10 @@ int* wago_device::get_AI_data( u_int index )
         index, AI_channels.count, ( int ) AI_channels.int_read_values );
     if ( AI_channels.int_read_values )
         {
-        Print( ", AI_channels.int_read_values[ index ]=%d",       
+        Print( ", AI_channels.int_read_values[ index ]=%d",
             ( int ) AI_channels.int_read_values[ index ] );
         }
-    Print( "\n" ); 
+    Print( "\n" );
 #endif // DEBUG
 
     return 0;
@@ -399,7 +401,7 @@ int* wago_device::get_AO_write_data( u_int index )
         index, AO_channels.count, ( int ) AO_channels.int_write_values );
     if ( AO_channels.int_write_values )
         {
-        Print( ", AO_channels.int_write_values[ index ]=%d",       
+        Print( ", AO_channels.int_write_values[ index ]=%d",
             ( int ) AO_channels.int_write_values[ index ] );
         }
     Print( "\n" );
@@ -422,7 +424,7 @@ int* wago_device::get_AO_read_data( u_int index )
         index, AO_channels.count, ( int ) AO_channels.int_read_values );
     if ( AO_channels.int_read_values )
         {
-        Print( ", AO_channels.int_read_values[ index ]=%d",       
+        Print( ", AO_channels.int_read_values[ index ]=%d",
             ( int ) AO_channels.int_read_values[ index ] );
         }
     Print( "\n" );

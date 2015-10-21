@@ -189,6 +189,10 @@ int wago_manager_PFC200::read_inputs()
                         val = pd_in[ offset ] + 256 * pd_in[ offset + 1 ];
                         break;
 
+                    case 450:
+                        val = pd_in[ offset + 1 ] + 256 * pd_in[ offset + 2 ];
+                        break;
+
                     case 638:
                         val = pd_in[ offset + 2 ] + 256 * pd_in[ offset + 3 ];
                         break;
