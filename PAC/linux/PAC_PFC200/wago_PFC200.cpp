@@ -177,27 +177,63 @@ int wago_manager_PFC200::read_inputs()
             if ( nd->AI_cnt > 0 )
                 {
                 // AI
+                u_int idx = 0;
+                bool is_first_655 = true;
+
                 for ( u_int j = 0; j < nd->AI_cnt; j++ )
-                    {
-                    u_int val = 0;
+                    {                   
                     u_int offset = nd->AI_offsets[ j ];
+                    u_int val = pd_in[ offset ] + 256 * pd_in[ offset + 1 ];
+
+                    if ( nd->AI_types[ j ] != 655 )
+                        {
+                        // ѕо€вилс€ другой модуль, значит следующий 655 будет
+                        // первым.
+                        is_first_655 = true;
+                        }
 
                     switch ( nd->AI_types[ j ] )
                         {
-                    case 466:
-                    case 461:
-                        val = pd_in[ offset ] + 256 * pd_in[ offset + 1 ];
-                        break;
+                        case 466:
+                        case 461:
+                            val = pd_in[ offset ] + 256 * pd_in[ offset + 1 ];                            
+                            nd->AI[ idx++ ] = val;
+                            break;
 
-                    case 450:
-                        val = pd_in[ offset + 1 ] + 256 * pd_in[ offset + 2 ];
-                        break;
+                        case 638:
+                            val = pd_in[ offset + 2 ] + 256 * pd_in[ offset + 3 ];
+                            nd->AI[ idx++ ] = val;
+                            break;
 
-                    case 638:
-                        val = pd_in[ offset + 2 ] + 256 * pd_in[ offset + 3 ];
-                        break;
+                        case 655:
+                            if ( !is_first_655 ) //„итаем по первому каналу все 20 слов!
+                                {
+                                break;
+                                }
+
+                            char* data = ( char* ) ( nd->AI + idx );
+#ifdef DEBUG_ASI
+                            printf( "750-655 AI, idx = %d\n", idx );
+#endif // DEBUG_ASI
+                            for ( int l = 0; l < 40; l++ )
+                                {
+                                data[ l ] = pd_in[ offset + l ];
+#ifdef DEBUG_ASI
+                                printf( "%d -> %d, ", l, data[ l ] );
+#endif // DEBUG_ASI
+                                }
+#ifdef DEBUG_ASI
+                            printf( "\n" );
+#endif // DEBUG_ASI
+                            is_first_655 = false;
+                            idx += 20;
+                            break;
+
+                        default:
+                            nd->AI[ idx++ ] = val;
+                            break;
                         }
-                    nd->AI[ j ] = val;
+
 #ifdef DEBUG_KBUS
                     printf( "%d -> %u, ", j, nd->AI[ j ] );
 #endif // DEBUG_KBUS
@@ -249,27 +285,75 @@ int wago_manager_PFC200::write_outputs()
 #endif // DEBUG_KBUS
 
             // AO
+            int in_idx  = 0;
+            bool is_first_655 = true;
+
             for ( u_int j = 0; j < nd->AO_cnt; j++ )
-                {
-                int val = nd->AO_[ j ];
+                {                
                 u_int offset = nd->AO_offsets[ j ];
 
-                pd_out[ offset ] = val & 0xFF;
-                pd_out[ offset + 1 ] = val >> 8;
-
-                if ( nd->AO_types[ j ] == 638 )
+                if ( nd->AO_types[ j ] != 655 )
                     {
-                    pd_out[ offset     ] = 0;
-                    pd_out[ offset + 1 ] = 0;
-                    pd_out[ offset + 2 ] = 0;
-                    pd_out[ offset + 3 ] = 0;
+                    // ѕо€вилс€ другой модуль, значит следующий 655 будет
+                    // первым.
+                    is_first_655 = true;
                     }
 
-                nd->AO[ j ] = nd->AO_[ j ];
+                switch ( nd->AO_types[ j ] )
+                    {
+                    case 638:
+                        pd_out[ offset     ] = 0;
+                        pd_out[ offset + 1 ] = 0;
+                        pd_out[ offset + 2 ] = 0;
+                        pd_out[ offset + 3 ] = 0;
+
+                        in_idx++;                        
+                        break;
+
+                    case 655:
+                        {
+                        if ( !is_first_655 ) //ѕишем по первому каналу все 20 слов!
+                            {
+                            break;
+                            }
+
+                        char* data = ( char* ) ( nd->AO_ + in_idx );
+#ifdef DEBUG_ASI
+                        printf( "750-655, idx = %d\n", in_idx );
+#endif // DEBUG_ASI
+                        for ( int l = 0; l < 40; l++ )
+                            {
+                            pd_out[ offset + l ] = data[ l ];
+#ifdef DEBUG_ASI
+                            printf( "%d -> %d, ", l, data[ l ] );
+#endif // DEBUG_ASI
+                            }
+#ifdef DEBUG_ASI
+                        printf( "\n" );
+#endif // DEBUG_ASI
+                        in_idx += 20;
+                        is_first_655 = false;
+                        break;
+                        }
+
+                    default:
+                        {
+                        int val = nd->AO_[ in_idx ];
+                        
+                        pd_out[ offset ] = val & 0xFF;
+                        pd_out[ offset + 1 ] = val >> 8;
+                        in_idx++;
+                        break;
+                        }
+                    }
+                                
 #ifdef DEBUG_KBUS
                 printf( "%d -> %u, ", j, nd->AO_[ j ] );
 #endif // DEBUG_KBUS
                 }
+
+            memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
+
 #ifdef DEBUG_KBUS
             printf( "\n" );
 #endif // DEBUG_KBUS
