@@ -181,7 +181,7 @@ int wago_manager_PFC200::read_inputs()
                 bool is_first_655 = true;
 
                 for ( u_int j = 0; j < nd->AI_cnt; j++ )
-                    {                   
+                    {
                     u_int offset = nd->AI_offsets[ j ];
                     u_int val = pd_in[ offset ] + 256 * pd_in[ offset + 1 ];
 
@@ -196,7 +196,7 @@ int wago_manager_PFC200::read_inputs()
                         {
                         case 466:
                         case 461:
-                            val = pd_in[ offset ] + 256 * pd_in[ offset + 1 ];                            
+                            val = pd_in[ offset ] + 256 * pd_in[ offset + 1 ];
                             nd->AI[ idx++ ] = val;
                             break;
 
@@ -206,6 +206,7 @@ int wago_manager_PFC200::read_inputs()
                             break;
 
                         case 655:
+                        {
                             if ( !is_first_655 ) //Читаем по первому каналу все 20 слов!
                                 {
                                 break;
@@ -227,7 +228,9 @@ int wago_manager_PFC200::read_inputs()
 #endif // DEBUG_ASI
                             is_first_655 = false;
                             idx += 20;
+
                             break;
+                        }
 
                         default:
                             nd->AI[ idx++ ] = val;
@@ -289,7 +292,7 @@ int wago_manager_PFC200::write_outputs()
             bool is_first_655 = true;
 
             for ( u_int j = 0; j < nd->AO_cnt; j++ )
-                {                
+                {
                 u_int offset = nd->AO_offsets[ j ];
 
                 if ( nd->AO_types[ j ] != 655 )
@@ -307,7 +310,7 @@ int wago_manager_PFC200::write_outputs()
                         pd_out[ offset + 2 ] = 0;
                         pd_out[ offset + 3 ] = 0;
 
-                        in_idx++;                        
+                        in_idx++;
                         break;
 
                     case 655:
@@ -339,14 +342,14 @@ int wago_manager_PFC200::write_outputs()
                     default:
                         {
                         int val = nd->AO_[ in_idx ];
-                        
+
                         pd_out[ offset ] = val & 0xFF;
                         pd_out[ offset + 1 ] = val >> 8;
                         in_idx++;
                         break;
                         }
                     }
-                                
+
 #ifdef DEBUG_KBUS
                 printf( "%d -> %u, ", j, nd->AO_[ j ] );
 #endif // DEBUG_KBUS
