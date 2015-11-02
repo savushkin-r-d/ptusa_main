@@ -1547,6 +1547,8 @@ class valve_AS_DO1_DI2 : public valve_AS
     {
     public:
         valve_AS_DO1_DI2( const char *dev_name );
+
+        void direct_set_state( int new_state );
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан донный.

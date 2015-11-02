@@ -2793,5 +2793,20 @@ valve_AS_DO1_DI2::valve_AS_DO1_DI2( const char *dev_name ):
     valve_AS( dev_name, DST_V_AS_DO1_DI2 )
     {
     }
+//---------------------------------------------------------------------------
+void valve_AS_DO1_DI2::direct_set_state(int new_state)
+    {
+    switch ( new_state )
+        {
+        case V_UPPER_SEAT:
+        case V_LOWER_SEAT:
+            //Ничего не делаем, так как нет седел.
+            break;
+
+        default:
+            valve_AS::direct_set_state( new_state );
+            break;
+        }
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
