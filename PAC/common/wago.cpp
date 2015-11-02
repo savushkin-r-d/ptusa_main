@@ -362,7 +362,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int* wago_device::get_AI_data( u_int index )
+int_2* wago_device::get_AI_data( u_int index )
     {
     if ( index < AI_channels.count && AI_channels.int_read_values )
         {
@@ -386,7 +386,7 @@ int* wago_device::get_AI_data( u_int index )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int* wago_device::get_AO_write_data( u_int index )
+int_2* wago_device::get_AO_write_data( u_int index )
     {
     if ( index < AO_channels.count && AO_channels.int_write_values )
         {
@@ -409,7 +409,7 @@ int* wago_device::get_AO_write_data( u_int index )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int* wago_device::get_AO_read_data( u_int index )
+int_2* wago_device::get_AO_read_data( u_int index )
     {
     if ( index < AO_channels.count && AO_channels.int_read_values )
         {
@@ -560,12 +560,12 @@ void wago_device::IO_channels::init( int ch_count )
                 break;
 
             case IO_channels::CT_AI:
-                int_read_values = new int*[ count ];
+                int_read_values = new int_2*[ count ];
                 break;
 
             case IO_channels::CT_AO:
-                int_read_values  = new int*[ count ];
-                int_write_values = new int*[ count ];
+                int_read_values  = new int_2*[ count ];
+                int_write_values = new int_2*[ count ];
                 break;
             }
         }
@@ -725,7 +725,7 @@ u_char* wago_manager::get_DO_read_data( u_int node_n, u_int offset )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int* wago_manager::get_AI_read_data( u_int node_n, u_int offset )
+int_2* wago_manager::get_AI_read_data( u_int node_n, u_int offset )
     {
     if ( node_n < nodes_count && nodes )
         {
@@ -741,7 +741,7 @@ int* wago_manager::get_AI_read_data( u_int node_n, u_int offset )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int* wago_manager::get_AO_read_data( u_int node_n, u_int offset )
+int_2* wago_manager::get_AO_read_data( u_int node_n, u_int offset )
     {
     if ( node_n < nodes_count && nodes )
         {
@@ -773,7 +773,7 @@ u_char* wago_manager::get_DO_write_data( u_int node_n, u_int offset )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int* wago_manager::get_AO_write_data( u_int node_n, u_int offset )
+int_2* wago_manager::get_AO_write_data( u_int node_n, u_int offset )
     {
     if ( node_n < nodes_count && nodes )
         {

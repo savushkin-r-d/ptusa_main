@@ -100,7 +100,7 @@ class wago_device
         /// устройства.
         ///
         /// @return -  указатель на данные канала.
-        int* get_AI_data( u_int index );
+        int_2* get_AI_data( u_int index );
 
         /// @brief Получение установленных данных канала аналогового выхода.
         ///
@@ -108,7 +108,7 @@ class wago_device
         /// устройства.
         ///
         /// @return -  указатель на данные канала.
-        int* get_AO_write_data( u_int index );
+        int_2* get_AO_write_data( u_int index );
 
         /// @brief Получение текущих данных канала аналогового выхода.
         ///
@@ -116,7 +116,7 @@ class wago_device
         /// устройства.
         ///
         /// @return -  указатель на данные канала.
-        int* get_AO_read_data( u_int index );
+        int_2* get_AO_read_data( u_int index );
 
         virtual void print() const;
 
@@ -136,8 +136,8 @@ class wago_device
             u_int* tables;  ///< Массив таблиц.
             u_int* offsets; ///< Массив смещений в пределах таблиц.
 
-            int  **int_read_values;      ///< Массив значений для чтения.
-            int  **int_write_values;     ///< Массив значений для записи.
+            int_2  **int_read_values;      ///< Массив значений для чтения.
+            int_2  **int_write_values;     ///< Массив значений для записи.
             u_char **char_read_values;   ///< Массив значений для чтения.
             u_char **char_write_values;  ///< Массив значений для записи.
 
@@ -222,7 +222,7 @@ class wago_manager
         /// @param offset - смещение в пределах узла.
         ///
         /// @return - указатель на данные канала.
-        int* get_AI_read_data( u_int node_n, u_int offset );
+        int_2* get_AI_read_data( u_int node_n, u_int offset );
 
         /// @brief Получение области чтения данных заданного канала
         /// аналогового выхода.
@@ -231,7 +231,7 @@ class wago_manager
         /// @param offset - смещение в пределах узла.
         ///
         /// @return - указатель на данные канала.
-        int* get_AO_read_data( u_int node_n, u_int offset );
+        int_2* get_AO_read_data( u_int node_n, u_int offset );
 
         /// @brief Получение области записи данных заданного канала
         /// аналогового выхода.
@@ -240,7 +240,7 @@ class wago_manager
         /// @param offset - смещение в пределах узла.
         ///
         /// @return - указатель на данные канала.
-        int* get_AO_write_data( u_int node_n, u_int offset );
+        int_2* get_AO_write_data( u_int node_n, u_int offset );
 
     protected:
         wago_manager();
@@ -303,11 +303,11 @@ class wago_manager
             u_char *DO_;        ///< To write.
 
             // Analog outputs ( AO ).
-            u_int AO_cnt;       ///< Amount of AO.
-            int AO[ C_ANALOG_BUF_SIZE ];          ///< Current values.
-            int AO_[ C_ANALOG_BUF_SIZE ];         ///< To write.
-            u_int *AO_offsets;  ///< Offsets in common data.
-            u_int *AO_types;    ///< Channels type.
+            u_int AO_cnt;       			///< Amount of AO.
+            int_2 AO[ C_ANALOG_BUF_SIZE ];  ///< Current values.
+            int_2 AO_[ C_ANALOG_BUF_SIZE ]; ///< To write.
+            u_int *AO_offsets;  			///< Offsets in common data.
+            u_int *AO_types;    			///< Channels type.
             u_int AO_size;
 
             // Digital inputs ( DI ).
@@ -315,10 +315,10 @@ class wago_manager
             u_char *DI;         ///< Current values.
 
             // Analog inputs ( AI ).
-            u_int AI_cnt;       ///< Amount of AI.
-            int AI[ C_ANALOG_BUF_SIZE ];          ///< Current values.
-            u_int *AI_offsets;  ///< Offsets in common data.
-            u_int *AI_types;    ///< Channels type.
+            u_int AI_cnt;       			///< Amount of AI.
+            int_2 AI[ C_ANALOG_BUF_SIZE ];  ///< Current values.
+            u_int *AI_offsets;  			///< Offsets in common data.
+            u_int *AI_types;    			///< Channels type.
             u_int AI_size;
 
             u_long last_init_time; ///< Время последней попытки подключиться, мсек.
