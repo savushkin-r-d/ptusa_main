@@ -22,7 +22,9 @@
 
 #include "rm_manager.h"
 #include "log.h"
+#ifdef PAC_WAGO_750_860
 #include "l_log.h"
+#endif
 
 int main( int argc, char *argv[] )
     {

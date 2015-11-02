@@ -64,7 +64,9 @@ class log_mngr
     public:
 
     static i_log* get_log();
+#ifdef PAC_WAGO_750_860
     static i_log *lg;
+#endif
 
     private:
 
@@ -78,6 +80,10 @@ class log_mngr
         delete lg;
         lg = 0;
         }
+
+#ifndef PAC_WAGO_750_860
+	static i_log *lg;
+#endif
   
     };
 //-----------------------------------------------------------------------------
