@@ -64,6 +64,7 @@ class log_mngr
     public:
 
     static i_log* get_log();
+    static i_log *lg;
 
     private:
 
@@ -77,8 +78,7 @@ class log_mngr
         delete lg;
         lg = 0;
         }
-
-    static i_log *lg;
+  
     };
 //-----------------------------------------------------------------------------
 #define G_LOG log_mngr::get_log()

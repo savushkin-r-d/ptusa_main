@@ -22,6 +22,7 @@
 
 #include "rm_manager.h"
 #include "log.h"
+#include "l_log.h"
 
 int main( int argc, char *argv[] )
     {
@@ -34,6 +35,9 @@ int main( int argc, char *argv[] )
         fprintf( stderr, "Usage: main script.plua\n" );
         return EXIT_SUCCESS;
         }
+#ifdef PAC_WAGO_750_860
+    log_mngr::lg = new l_log();
+#endif
 
     sprintf( G_LOG->msg, "Program started." );
     G_LOG->write_log( i_log::P_INFO );

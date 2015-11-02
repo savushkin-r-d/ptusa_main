@@ -35,7 +35,7 @@ class l_log: public i_log
     void virtual write_log(PRIORITIES priority)
         {
 #ifdef SIMPLE_LOG
-        printf("%s\n\r",msg);
+        printf("%s\n",msg);
 #else
         //Using openlog() because kbus functions also use it
         //(openlog( "kbus", ...)).
