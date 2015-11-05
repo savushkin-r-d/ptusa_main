@@ -308,6 +308,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
                     }
 
                 return val;
+
             //Тензорезистор
             // Process values of module 750-491
             //Signal           Numerical value
@@ -327,17 +328,17 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
             //>ca.15.5000   '0111.1111.1111.1111' 0x7FFF 32767  0x41 on
             //Broken wire   '0111.1111.1111.1111' 0x7FFF 32767  0x41 on
             case 491:
-                if (val >= 0x8AD0 && val <= 0xFFFF)
-                {
+                if ( val >= 0x8AD0 && val <= 0xFFFF )
+                    {
                     val -= 0x10000;
                     val *= 0.0005f;
                     return val;
-                }
-                if (val >= 0x0 && val <= 0x7530)
-                {
+                    }
+                if ( val >= 0x0 && val <= 0x7530 )
+                    {
                     val *= 0.0005f;
                     return val;
-                }
+                    }
                 return -1000;
 
             default:

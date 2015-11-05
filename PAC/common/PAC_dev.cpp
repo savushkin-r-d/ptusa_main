@@ -1105,7 +1105,7 @@ void counter::abs_reset()
 u_int counter::get_abs_quantity()
     {
     u_int delta;
-    u_int current = ( u_int ) get_AI( AI_Q_INDEX );
+    u_int current = *( ( u_int_2* ) get_AI_data( AI_Q_INDEX ) );
 
     if ( current < abs_last_read_value )
         {
@@ -1119,17 +1119,7 @@ u_int counter::get_abs_quantity()
     abs_last_read_value = current;
     if ( delta > 0 )
         {
-        //ѕри первом вызове данного метода игнорируем значение, считанное
-        //из модул€.
-        static bool is_first = true;
-        if ( !is_first )
-            {
-            abs_value += delta;
-            }
-        else
-            {
-            is_first = false;
-            }
+        abs_value += delta;
         }
 
     return abs_value;
@@ -1141,7 +1131,8 @@ u_int counter::get_quantity()
     if ( S_WORK == state )
         {
         u_int delta;
-        u_int current = ( u_int ) get_AI( AI_Q_INDEX );
+        u_int current = *( ( u_int_2* ) get_AI_data( AI_Q_INDEX ) );
+
 
         if ( current < last_read_value )
             {
@@ -1155,17 +1146,7 @@ u_int counter::get_quantity()
         last_read_value = current;
         if ( delta > 0 )
             {
-            //ѕри первом вызове данного метода игнорируем значение, считанное
-            //из модул€.
-            static bool is_first = true;
-            if ( !is_first )
-                {
-                value += delta;
-                }
-            else
-                {
-                is_first = false;
-                }
+            value += delta;
             }
         }
 
