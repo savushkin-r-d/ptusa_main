@@ -185,11 +185,6 @@ int wago_manager_PFC200::read_inputs()
 
                     switch ( nd->AI_types[ j ] ) //More than one word.
                         {
-                    case 450:
-                        val = pd_in[ offset + 2 ] + 256 * pd_in[ offset + 3 ];
-                        offset += 4;
-                        break;
-
                     case 638:
                         val = pd_in[ offset + 2 ] + 256 * pd_in[ offset + 3 ];
                         offset += 4;
@@ -261,7 +256,6 @@ int wago_manager_PFC200::write_outputs()
 
                 switch ( nd->AO_types[ j ] ) //More than one word.
                     {
-                    case 450:
                     case 638:
                         pd_out[ offset     ] = 0;
                         pd_out[ offset + 1 ] = 0;
