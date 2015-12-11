@@ -1250,18 +1250,61 @@ class valve_AS : public valve
                 }
             }
 
+        /// @brief Получение данных состояния устройства.
+        char get_state_data( char* data )
+            {
+            char state = 0;
+            u_int offset = 0;
+
+            if ( AS_number < 32 )		 //Eсли номер < 32).
+                {
+                offset = MAILBOX_OFFSET + AS_number / 2;
+                state = data[ offset ];
+                if ( AS_number % 2 == 0 )//Четный номер - старшие четыре бита.
+                    {
+                    state >>= 4;
+                    }
+                }
+            else
+                {
+                u_int new_n = AS_number - 32;
+                offset = MAILBOX_OFFSET + ( 32 / 2 ) + new_n / 2 + new_n % 2;
+                state = data[ offset ];
+                if ( AS_number % 2 == 1 )//Нечетный номер - старшие четыре бита.
+                    {
+                    state >>= 4;
+                    }
+                }
+
+            return state;
+            }
+
+        char* get_data_with_offset( char* data )
+            {
+            char* state;
+            u_int offset = 0;
+
+            if ( AS_number < 32 )		 //Eсли номер < 32).
+                {
+                offset = MAILBOX_OFFSET + AS_number / 2;
+                }
+            else
+                {
+                u_int new_n = AS_number - 32;
+                offset = MAILBOX_OFFSET + ( 32 / 2 ) + new_n / 2 + new_n % 2;
+                }
+
+            state = data + offset;
+            return state;
+            }
+
         VALVE_STATE get_valve_state()
             {
 #ifdef DEBUG_NO_WAGO_MODULES
             return ( VALVE_STATE ) digital_wago_device::get_state();
 #else
             char* data = ( char* ) get_AO_read_data( AO_INDEX );
-            char state = data[ MAILBOX_OFFSET + AS_number / 2 ];
-
-            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-                {
-                state >>= 4;
-                }
+            char state = get_state_data( data );
 
             int o = ( state & C_OPEN_S1 ) > 0 ? 1 : 0;
             int l = ( state & C_OPEN_S2 ) > 0 ? 1 : 0;
@@ -1280,24 +1323,14 @@ class valve_AS : public valve
             return true;
 #else
             char* AO_data = ( char* ) get_AO_read_data( AO_INDEX );
-            char AO_state = AO_data[ MAILBOX_OFFSET + AS_number / 2 ];
-
-            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-                {
-                AO_state >>= 4;
-                }
+            char AO_state = get_state_data( AO_data );
 
             int o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0;
             int l = ( AO_state & C_OPEN_S2 ) > 0 ? 1 : 0;
             int u = ( AO_state & C_OPEN_S3 ) > 0 ? 1 : 0;
 
             char* AI_data = ( char* ) get_AI_data( AI_INDEX );
-            char AI_state = AI_data[ MAILBOX_OFFSET + AS_number / 2 ];
-
-            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-                {
-                AI_state >>= 4;
-                }
+            char AI_state = get_state_data( AI_data );
 
             int i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0;
             int i1 = ( AI_state & S_OPENED ) > 0 ? 1 : 0;
@@ -1325,12 +1358,7 @@ class valve_AS : public valve
         int get_off_fb_value()
             {
             char* AI_data = ( char* ) get_AI_data( AI_INDEX );
-            int AI_state = AI_data[ MAILBOX_OFFSET + AS_number / 2 ];
-
-            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-                {
-                AI_state >>= 4;
-                }
+            char AI_state = get_state_data( AI_data );
 
             int i0 = AI_state & S_CLOSED;
 
@@ -1340,12 +1368,7 @@ class valve_AS : public valve
         int get_on_fb_value()
             {
             char* AI_data = ( char* ) get_AI_data( AI_INDEX );
-            int AI_state = AI_data[ MAILBOX_OFFSET + AS_number / 2 ];
-
-            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-                {
-                AI_state >>= 4;
-                }
+            char AI_state = get_state_data( AI_data );
 
             int i1 = AI_state & S_OPENED;
 
@@ -1355,13 +1378,8 @@ class valve_AS : public valve
         void direct_off()
             {
             char* data = ( char* ) get_AO_write_data( AO_INDEX );
-            char* write_state = data + MAILBOX_OFFSET + AS_number / 2;
-            char read_state = *write_state;
-
-            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-                {
-                read_state >>= 4;
-                }
+            char* write_state = get_data_with_offset( data );
+            char read_state = get_state_data( data );
 
             int o = ( read_state & C_OPEN_S1 ) > 0 ? 1 : 0;
 
@@ -1369,47 +1387,45 @@ class valve_AS : public valve
                 {
                 start_switch_time = get_millisec();
                 }
-            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
+
+            int offset = 0;
+            //Для первого 31-го устройства четный номер - старшие четыре
+            //бита (1), для остальных устройств нечетный номер - старшие четыре
+            //бита (2).
+            if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    			//1
+                    ( AS_number >= 32 && AS_number % 2 == 1 ) )				//2
                 {
-                //Сбрасываем в ноль все четыре нужные бита.
-                *write_state &= 0x0F;
+                offset = 4;
                 }
-            else
-                {
-                //Сбрасываем в ноль все четыре нужные бита.
-                *write_state &= 0xF0;
-                }
+
+            //Сбрасываем в ноль все четыре нужные бита.
+            *write_state &= 0xF0 >> offset;
             }
 
         void direct_on()
             {
             char* data = ( char* ) get_AO_write_data( AO_INDEX );
-            char* write_state = data + MAILBOX_OFFSET + AS_number / 2;
-            char read_state = *write_state;
-
-            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-                {
-                read_state >>= 4;
-                }
+            char* write_state = get_data_with_offset( data );
+            char read_state = get_state_data( data );
 
             int o = ( read_state & C_OPEN_S1 ) > 0 ? 1 : 0;
-
             if ( 0 == o )
                 {
                 start_switch_time = get_millisec();
                 }
-            if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
+
+            int offset = 0;
+            //Для первого 31-го устройства четный номер - старшие четыре
+            //бита (1), для остальных устройств нечетный номер - старшие четыре
+            //бита (2).
+            if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    			//1
+                    ( AS_number >= 32 && AS_number % 2 == 1 ) )				//2
                 {
-                *write_state |= C_OPEN_S1 << 4;
-                *write_state &= ~( C_OPEN_S3 << 4 );
-                *write_state &= ~( C_OPEN_S2 << 4 );
+                offset = 4;
                 }
-            else
-                {
-                *write_state |= C_OPEN_S1;
-                *write_state &= ~C_OPEN_S3;
-                *write_state &= ~C_OPEN_S2;
-                }
+            *write_state |= C_OPEN_S1 << offset;
+            *write_state &= ~( C_OPEN_S3 << offset );
+            *write_state &= ~( C_OPEN_S2 << offset );
 
             //            if ( strcmp( get_name(), "H1V1" ) == 0 )
             //                {
@@ -1426,6 +1442,16 @@ class valve_AS : public valve
 #ifdef DEBUG_NO_WAGO_MODULES
             state = ( char ) new_state;
 #else
+            int offset = 0;
+            //Для первого 31-го устройства четный номер - старшие четыре
+            //бита (1), для остальных устройств нечетный номер - старшие четыре
+            //бита (2).
+            if ( ( AS_number < 32 && AS_number % 2 == 0 ) ||    			//1
+                    ( AS_number >= 32 && AS_number % 2 == 1 ) )				//2
+                {
+                offset = 4;
+                }
+
             switch ( new_state )
                 {
                 case V_OFF:
@@ -1441,29 +1467,15 @@ class valve_AS : public valve
                     direct_off();
 
                     char* data = ( char* ) get_AO_write_data( AO_INDEX );
-                    char* write_state = data + MAILBOX_OFFSET + AS_number / 2;
-                    char read_state = *write_state;
-
-                    if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-                        {
-                        read_state >>= 4;
-                        }
+                    char* write_state = get_data_with_offset( data );
+                    char read_state = get_state_data( data );
 
                     int u = ( read_state & C_OPEN_S3 ) > 0 ? 1 : 0;
-
                     if ( 0 == u )
                         {
                         start_switch_time = get_millisec();
                         }
-
-                    if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-                        {
-                        *write_state |= C_OPEN_S3 << 4;
-                        }
-                    else
-                        {
-                        *write_state |= C_OPEN_S3;
-                        }
+                    *write_state |= C_OPEN_S3 << offset;
 
                     break;
                     }
@@ -1473,29 +1485,16 @@ class valve_AS : public valve
                     direct_off();
 
                     char* data = ( char* ) get_AO_write_data( AO_INDEX );
-                    char* write_state = data + MAILBOX_OFFSET + AS_number / 2;
-                    char read_state = *write_state;
-
-                    if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-                        {
-                        read_state >>= 4;
-                        }
+                    char* write_state = get_data_with_offset( data );
+                    char read_state = get_state_data( data );
 
                     int l = ( read_state & C_OPEN_S2 ) > 0 ? 1 : 0;
-
                     if ( 0 == l )
                         {
                         start_switch_time = get_millisec();
                         }
+                    *write_state |= C_OPEN_S2 << offset;
 
-                    if ( AS_number % 2 == 0 ) //Четный номер - старшие четыре бита.
-                        {
-                        *write_state |= C_OPEN_S2 << 4;
-                        }
-                    else
-                        {
-                        *write_state |= C_OPEN_S2;
-                        }
                     break;
                     }
 
@@ -1506,7 +1505,7 @@ class valve_AS : public valve
 #endif //DEBUG_NO_WAGO_MODULES
             }
 
-    private:        
+    private:
         u_int AS_number;    ///< AS-номер устройства.
 
         enum CONSTANTS
