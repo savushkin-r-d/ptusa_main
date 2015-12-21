@@ -2292,6 +2292,9 @@ void motor::direct_off()
 int motor::save_device_ex( char *buff )
     {
     int res = 0;
+#ifdef DEBUG_NO_WAGO_MODULES
+    res = sprintf( buff, "R=0," );
+#else    
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::M_REV_2_ERROR ||
@@ -2308,6 +2311,7 @@ int motor::save_device_ex( char *buff )
             res = sprintf( buff, "R=%d,", get_DO( DO_INDEX_REVERSE ) );
             }
         }
+#endif //DEBUG_NO_WAGO_MODULES
     return res;
     }
 //-----------------------------------------------------------------------------
