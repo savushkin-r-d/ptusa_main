@@ -35,6 +35,8 @@ class i_tech_object
     /// @return  1 - режим ранее был включен (отключен).
     /// @return  3 - нет такого режима.
     virtual int set_mode( u_int mode, int new_state ) = 0;
+
+    virtual const char* get_name() const = 0;
     };
 
 #endif // I_TECH_H
