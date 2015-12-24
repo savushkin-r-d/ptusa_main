@@ -2276,7 +2276,9 @@ class counter : public device,
             abs_value( 0 ),
             abs_last_read_value( 0 ),
             state( S_WORK ),
-            flow_value( 0 )
+            flow_value( 0 ),
+            is_first_read( true ),
+            is_first_read_abs( true )
             {
             set_par_name( P_MIN_FLOW,  0, "P_MIN_FLOW" );
             set_par_name( P_MAX_FLOW,  0, "P_MAX_FLOW" );
@@ -2371,6 +2373,9 @@ class counter : public device,
         STATES state;
 
         float flow_value;
+
+        bool is_first_read;         ///< Флаг первой установки значения.
+        bool is_first_read_abs;     ///< Флаг первой установки значения.
 
         std::vector < device* > motors;
     };

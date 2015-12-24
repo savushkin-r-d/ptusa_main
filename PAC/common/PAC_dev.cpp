@@ -1051,6 +1051,7 @@ void counter::direct_set_state( int new_state )
     switch ( new_state )
         {
         case S_STOP:
+            state = S_STOP;
             reset();
             break;
 
@@ -1092,8 +1093,7 @@ void counter::start()
     }
 //-----------------------------------------------------------------------------
 void counter::reset()
-    {
-    state = S_STOP;
+    {    
     value = 0;
     }
 //-----------------------------------------------------------------------------
@@ -1104,22 +1104,34 @@ void counter::abs_reset()
 //-----------------------------------------------------------------------------
 u_int counter::get_abs_quantity()
     {
-    u_int delta;
+
     u_int current = *( ( u_int_2* ) get_AI_data( AI_Q_INDEX ) );
 
-    if ( current < abs_last_read_value )
+    if ( is_first_read_abs )
         {
-        delta = MAX_VAL - abs_last_read_value + current;
+        if ( current != 0 )
+            {
+            abs_last_read_value = current;
+            is_first_read_abs = false;
+            }
         }
     else
         {
-        delta = current - abs_last_read_value;
-        }
+        u_int delta;
+        if ( current < abs_last_read_value )
+            {
+            delta = MAX_VAL - abs_last_read_value + current;
+            }
+        else
+            {
+            delta = current - abs_last_read_value;
+            }
 
-    abs_last_read_value = current;
-    if ( delta > 0 )
-        {
-        abs_value += delta;
+        abs_last_read_value = current;
+        if ( delta > 0 )
+            {
+            abs_value += delta;
+            }
         }
 
     return abs_value;
@@ -1127,26 +1139,35 @@ u_int counter::get_abs_quantity()
 //-----------------------------------------------------------------------------
 u_int counter::get_quantity()
     {
-
     if ( S_WORK == state )
-        {
-        u_int delta;
+        {        
         u_int current = *( ( u_int_2* ) get_AI_data( AI_Q_INDEX ) );
 
-
-        if ( current < last_read_value )
-            {
-            delta = MAX_VAL - last_read_value + current;
+        if ( is_first_read )
+        	{
+            if ( current != 0 )
+                {
+                last_read_value = current;
+                is_first_read = false;
+                }
             }
         else
             {
-            delta = current - last_read_value;
-            }
+            u_int delta;
+            if ( current < last_read_value )
+                {
+                delta = MAX_VAL - last_read_value + current;
+                }
+            else
+                {
+                delta = current - last_read_value;
+                }
 
-        last_read_value = current;
-        if ( delta > 0 )
-            {
-            value += delta;
+            last_read_value = current;
+            if ( delta > 0 )
+                {
+                value += delta;
+                }
             }
         }
 
