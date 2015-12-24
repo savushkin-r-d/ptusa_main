@@ -47,4 +47,8 @@ u_long get_delta_millisec( u_long time1 );
 /// @param ms - время ожидания, мс.
 void sleep_ms( u_int ms );
 //-----------------------------------------------------------------------------
+/// @brief Получение текущей информации о времени.
+///
+/// @return Текущая дата и время.
+extern struct tm get_time();
 #endif // DTIME_H

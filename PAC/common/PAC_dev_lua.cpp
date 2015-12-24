@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 10/02/15 16:23:53.
+** Generated automatically by tolua++-1.0.92 on 12/22/15 17:48:59.
 */
 
 #ifndef __cplusplus
@@ -32,6 +32,13 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 static int tolua_collect_PID (lua_State* tolua_S)
 {
  PID* self = (PID*) tolua_tousertype(tolua_S,1,0);
+	Mtolua_delete(self);
+	return 0;
+}
+
+static int tolua_collect_tm (lua_State* tolua_S)
+{
+ tm* self = (tm*) tolua_tousertype(tolua_S,1,0);
 	Mtolua_delete(self);
 	return 0;
 }
@@ -81,13 +88,14 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"dev_stub");
  tolua_usertype(tolua_S,"action");
  tolua_usertype(tolua_S,"ModbusServ");
+ tolua_usertype(tolua_S,"modbus_client");
  tolua_usertype(tolua_S,"dev_errors_manager");
  tolua_usertype(tolua_S,"device_manager");
- tolua_usertype(tolua_S,"modbus_client");
  tolua_usertype(tolua_S,"rm_manager");
  tolua_usertype(tolua_S,"cipline_tech_object");
- tolua_usertype(tolua_S,"mode");
  tolua_usertype(tolua_S,"MSAPID");
+ tolua_usertype(tolua_S,"mode");
+ tolua_usertype(tolua_S,"tm");
  tolua_usertype(tolua_S,"mode_manager");
  tolua_usertype(tolua_S,"i_Lua_save_device");
  tolua_usertype(tolua_S,"i_DI_device");
@@ -5532,6 +5540,313 @@ static int tolua_PAC_dev_sleep_ms00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* get function: tm_sec of class  tm */
+#ifndef TOLUA_DISABLE_tolua_get_tm_tm_sec
+static int tolua_get_tm_tm_sec(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_sec'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->tm_sec);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: tm_sec of class  tm */
+#ifndef TOLUA_DISABLE_tolua_set_tm_tm_sec
+static int tolua_set_tm_tm_sec(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_sec'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->tm_sec = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: tm_min of class  tm */
+#ifndef TOLUA_DISABLE_tolua_get_tm_tm_min
+static int tolua_get_tm_tm_min(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_min'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->tm_min);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: tm_min of class  tm */
+#ifndef TOLUA_DISABLE_tolua_set_tm_tm_min
+static int tolua_set_tm_tm_min(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_min'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->tm_min = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: tm_hour of class  tm */
+#ifndef TOLUA_DISABLE_tolua_get_tm_tm_hour
+static int tolua_get_tm_tm_hour(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_hour'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->tm_hour);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: tm_hour of class  tm */
+#ifndef TOLUA_DISABLE_tolua_set_tm_tm_hour
+static int tolua_set_tm_tm_hour(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_hour'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->tm_hour = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: tm_mday of class  tm */
+#ifndef TOLUA_DISABLE_tolua_get_tm_tm_mday
+static int tolua_get_tm_tm_mday(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_mday'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->tm_mday);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: tm_mday of class  tm */
+#ifndef TOLUA_DISABLE_tolua_set_tm_tm_mday
+static int tolua_set_tm_tm_mday(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_mday'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->tm_mday = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: tm_mon of class  tm */
+#ifndef TOLUA_DISABLE_tolua_get_tm_tm_mon
+static int tolua_get_tm_tm_mon(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_mon'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->tm_mon);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: tm_mon of class  tm */
+#ifndef TOLUA_DISABLE_tolua_set_tm_tm_mon
+static int tolua_set_tm_tm_mon(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_mon'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->tm_mon = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: tm_year of class  tm */
+#ifndef TOLUA_DISABLE_tolua_get_tm_tm_year
+static int tolua_get_tm_tm_year(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_year'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->tm_year);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: tm_year of class  tm */
+#ifndef TOLUA_DISABLE_tolua_set_tm_tm_year
+static int tolua_set_tm_tm_year(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_year'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->tm_year = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: tm_wday of class  tm */
+#ifndef TOLUA_DISABLE_tolua_get_tm_tm_wday
+static int tolua_get_tm_tm_wday(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_wday'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->tm_wday);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: tm_wday of class  tm */
+#ifndef TOLUA_DISABLE_tolua_set_tm_tm_wday
+static int tolua_set_tm_tm_wday(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_wday'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->tm_wday = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: tm_yday of class  tm */
+#ifndef TOLUA_DISABLE_tolua_get_tm_tm_yday
+static int tolua_get_tm_tm_yday(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_yday'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->tm_yday);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: tm_yday of class  tm */
+#ifndef TOLUA_DISABLE_tolua_set_tm_tm_yday
+static int tolua_set_tm_tm_yday(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_yday'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->tm_yday = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: tm_isdst of class  tm */
+#ifndef TOLUA_DISABLE_tolua_get_tm_tm_isdst
+static int tolua_get_tm_tm_isdst(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_isdst'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->tm_isdst);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: tm_isdst of class  tm */
+#ifndef TOLUA_DISABLE_tolua_set_tm_tm_isdst
+static int tolua_set_tm_tm_isdst(lua_State* tolua_S)
+{
+  tm* self = (tm*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'tm_isdst'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->tm_isdst = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* function: get_time */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_get_time00
+static int tolua_PAC_dev_get_time00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isnoobj(tolua_S,1,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  {
+   tm tolua_ret = (tm)  get_time();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = Mtolua_new((tm)(tolua_ret));
+     tolua_pushusertype(tolua_S,tolua_obj,"tm");
+    tolua_register_gc(tolua_S,lua_gettop(tolua_S));
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(tm));
+     tolua_pushusertype(tolua_S,tolua_obj,"tm");
+    tolua_register_gc(tolua_S,lua_gettop(tolua_S));
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_time'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: eval of class  MSAPID */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_MSAPID_eval00
 static int tolua_PAC_dev_MSAPID_eval00(lua_State* tolua_S)
@@ -9078,6 +9393,23 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_function(tolua_S,"get_millisec",tolua_PAC_dev_get_millisec00);
   tolua_function(tolua_S,"get_delta_millisec",tolua_PAC_dev_get_delta_millisec00);
   tolua_function(tolua_S,"sleep_ms",tolua_PAC_dev_sleep_ms00);
+  #ifdef __cplusplus
+  tolua_cclass(tolua_S,"tm","tm","",tolua_collect_tm);
+  #else
+  tolua_cclass(tolua_S,"tm","tm","",NULL);
+  #endif
+  tolua_beginmodule(tolua_S,"tm");
+   tolua_variable(tolua_S,"tm_sec",tolua_get_tm_tm_sec,tolua_set_tm_tm_sec);
+   tolua_variable(tolua_S,"tm_min",tolua_get_tm_tm_min,tolua_set_tm_tm_min);
+   tolua_variable(tolua_S,"tm_hour",tolua_get_tm_tm_hour,tolua_set_tm_tm_hour);
+   tolua_variable(tolua_S,"tm_mday",tolua_get_tm_tm_mday,tolua_set_tm_tm_mday);
+   tolua_variable(tolua_S,"tm_mon",tolua_get_tm_tm_mon,tolua_set_tm_tm_mon);
+   tolua_variable(tolua_S,"tm_year",tolua_get_tm_tm_year,tolua_set_tm_tm_year);
+   tolua_variable(tolua_S,"tm_wday",tolua_get_tm_tm_wday,tolua_set_tm_tm_wday);
+   tolua_variable(tolua_S,"tm_yday",tolua_get_tm_tm_yday,tolua_set_tm_tm_yday);
+   tolua_variable(tolua_S,"tm_isdst",tolua_get_tm_tm_isdst,tolua_set_tm_tm_isdst);
+  tolua_endmodule(tolua_S);
+  tolua_function(tolua_S,"get_time",tolua_PAC_dev_get_time00);
   tolua_cclass(tolua_S,"MSAPID","MSAPID","",NULL);
   tolua_beginmodule(tolua_S,"MSAPID");
    tolua_function(tolua_S,"eval",tolua_PAC_dev_MSAPID_eval00);

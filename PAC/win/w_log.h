@@ -20,7 +20,7 @@ class w_log: public i_log
 
 		void virtual write_log(PRIORITIES priority)
 			{
-			printf("\n\r%s", msg);
+			printf( "%s", msg );
 			}
 
 		w_log()
