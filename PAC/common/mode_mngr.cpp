@@ -413,7 +413,7 @@ open_seat_action::open_seat_action( bool is_mode, step *owner ) :
     active_group_n( 0 ),
     wait_time( 60000 ),
     wash_time_upper( 1000 ),
-	wash_time_lower( 1000 ),
+    wash_time_lower( 1000 ),
     start_cycle_time( 0 ),
     is_mode( is_mode ),
     owner( owner )
@@ -436,8 +436,8 @@ void open_seat_action::init()
     phase             = P_WAIT;
     next_phase        = P_OPEN_UPPER;
     active_group_n    = 0;
-    
-    int groups_cnt    =  wash_upper_seat_devices.size() + 
+
+    int groups_cnt    =  wash_upper_seat_devices.size() +
         wash_lower_seat_devices.size();
 
     saved_params_u_int_4 &par = PAC_info::get_instance()->par;
@@ -445,19 +445,19 @@ void open_seat_action::init()
     wait_time = par[ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;
     wait_time /= groups_cnt;
 
-    // Для шага: для одной группы - середина продолжительности шага,  
+    // Для шага: для одной группы - середина продолжительности шага,
     // для двух групп - треть и т.д.
-    if ( !is_mode ) 
+    if ( !is_mode )
         {
         u_int_4 wait_time = owner->get_step_time() / ( groups_cnt + 1 );
         if ( wait_time > 0 )
-        	{
+            {
             this->wait_time = wait_time;
-        	}
+            }
         }
 
     wash_time_upper = par[ PAC_info::P_MIX_FLIP_UPPER_TIME ];
-	wash_time_lower = par[ PAC_info::P_MIX_FLIP_LOWER_TIME ];
+    wash_time_lower = par[ PAC_info::P_MIX_FLIP_LOWER_TIME ];
 
     active_group_n = 0;
     }
@@ -891,16 +891,16 @@ void mode::evaluate()
                 }
 
             if ( -1 == active_step_next_step_n )
-            	{
+                {
                 if ( n > 0 )
-                	{
+                    {
                     owner->off_mode( n );
-                	}
+                    }
                 else
                     {
                     final(); //Для режима-заглушки.
                     }
-            	}
+                }
             else
                 {
                 to_step( active_step_next_step_n, step_switch_time );
@@ -1113,8 +1113,8 @@ void mode_manager::print()
     }
 //-----------------------------------------------------------------------------
 mode_manager::mode_manager( u_int modes_cnt, i_tech_object *owner ):
-    last_action_time( get_millisec() ),
-    owner( owner )
+    owner( owner ),
+    last_action_time( get_millisec() )
     {
     mode_stub = new mode( "Режим-заглушка", this, -1 );
     }
