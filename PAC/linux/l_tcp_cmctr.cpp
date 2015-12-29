@@ -8,6 +8,7 @@
 
 #include "l_tcp_cmctr.h"
 #include "PAC_err.h"
+#include "tcp_client.h"
 
 #include "log.h"
 
@@ -33,6 +34,10 @@ tcp_communicator_linux::tcp_communicator_linux( const char *name_rus,
 #endif // DEBUG
 
     //net_init();
+    slave_socket = 0;
+    modbus_socket = 0;
+    master_socket = 0;
+    rc = 0;
 
     glob_last_transfer_time = get_millisec();
     }
@@ -41,14 +46,15 @@ void tcp_communicator_linux::killsockets()
     {
     FD_ZERO( &rfds ); /* clear FD set */
 
-    for ( int i = 0; i < MAX_SOCKETS; i++ )
+    for ( u_int i = 0; i < sst.size(); i++ )
         {
         if ( sst[ i ].active )
             {
-            shutdown( i, SHUT_RDWR );
-            close( i );
+            shutdown( sst[ i ].socket, SHUT_RDWR );
+            close( sst[ i ].socket );
             }
         }
+    sst.clear();
     }
 //------------------------------------------------------------------------------
 int tcp_communicator_linux::net_init()
@@ -78,11 +84,13 @@ int tcp_communicator_linux::net_init()
     fcntl( master_socket, F_SETFL, O_NONBLOCK );
 
     // Адресация мастер-сокета.
-    memset( &sst[ master_socket ].sin, 0, sizeof( sst[ master_socket ].sin ) );
-    sst[ master_socket ].sin.sin_family 	 = AF_INET;
-    sst[ master_socket ].sin.sin_addr.s_addr = INADDR_ANY;
-    sst[ master_socket ].sin.sin_port 		 = htons ( PORT );
-    sst[ master_socket ].ismodbus = 0;
+    socket_state master_socket_state;
+    memset( &master_socket_state.sin, 0, sizeof( master_socket_state.sin ) );
+    master_socket_state.socket = master_socket;
+    master_socket_state.sin.sin_family 	 = AF_INET;
+    master_socket_state.sin.sin_addr.s_addr = INADDR_ANY;
+    master_socket_state.sin.sin_port 		 = htons ( PORT );
+    master_socket_state.ismodbus = 0;
 
     const int on = 1;
 
@@ -98,8 +106,8 @@ int tcp_communicator_linux::net_init()
         }
 
     // Привязка сокета.
-    err = bind( master_socket, ( struct sockaddr * ) & sst[ master_socket ].sin,
-        sizeof( sst[ master_socket ].sin ) );
+    err = bind( master_socket, ( struct sockaddr * ) & master_socket_state.sin,
+        sizeof( master_socket_state.sin ) );
     if ( err < 0 )
         {
         sprintf( G_LOG->msg,
@@ -125,6 +133,13 @@ int tcp_communicator_linux::net_init()
 
     int val = 1;
     setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, &val, sizeof( val ) );
+
+    master_socket_state.active      = 1; // мастер-сокет всегда активный.
+    master_socket_state.is_listener = 1; // сокет является слушателем.
+    master_socket_state.evaluated   = 0;
+
+    sst.push_back( master_socket_state );
+
     // Создание серверного сокета modbus_socket.
     err = modbus_socket = socket ( PF_INET, type, protocol );
 
@@ -143,13 +158,16 @@ int tcp_communicator_linux::net_init()
         return -4;
         }
     // Адресация modbus_socket сокета.
-    memset( &sst[ modbus_socket ].sin, 0, sizeof ( sst[ modbus_socket ].sin ) );
-    sst[ modbus_socket ].sin.sin_family 	  = AF_INET;
-    sst[ modbus_socket ].sin.sin_addr.s_addr = 0;
-    sst[ modbus_socket ].sin.sin_port 		  = htons ( PORT_MODBUS ); // Порт.
-    sst[ modbus_socket ].ismodbus = 1;
-    err = bind( modbus_socket, ( struct sockaddr * ) & sst[ modbus_socket ].sin,
-        sizeof ( sst[ modbus_socket ].sin ) );	   // Привязка сокета.
+    socket_state modbus_socket_state;
+    memset( &modbus_socket_state.sin, 0, sizeof ( modbus_socket_state.sin ) );
+    modbus_socket_state.socket = modbus_socket;
+    modbus_socket_state.sin.sin_family 	  = AF_INET;
+    modbus_socket_state.sin.sin_addr.s_addr = 0;
+    modbus_socket_state.sin.sin_port 		  = htons ( PORT_MODBUS ); // Порт.
+    modbus_socket_state.ismodbus = 1;
+
+    err = bind( modbus_socket, ( struct sockaddr * ) & modbus_socket_state.sin,
+        sizeof ( modbus_socket_state.sin ) );	   // Привязка сокета.
     if ( err < 0 )
         {
         sprintf( G_LOG->msg,
@@ -172,20 +190,13 @@ int tcp_communicator_linux::net_init()
         return -6;
         }
 
-    FD_ZERO ( &rfds );
-    for ( int i = 0; i < MAX_SOCKETS; i++ )
-        {
-        sst[ i ].active     = 0;
-        sst[ i ].init       = 0;
-        sst[ i ].evaluated  = 0;
-        }
-    sst[ master_socket ].active      = 1; // мастер-сокет всегда активный.
-    sst[ master_socket ].is_listener = 1; // сокет является слушателем.
-    sst[ master_socket ].evaluated   = 0;
+    modbus_socket_state.active      = 1;
+    modbus_socket_state.is_listener = 1;
+    modbus_socket_state.evaluated   = 0;
 
-    sst[ modbus_socket ].active      = 1;
-    sst[ modbus_socket ].is_listener = 1;
-    sst[ modbus_socket ].evaluated   = 0;
+    sst.push_back(modbus_socket_state);
+
+    FD_ZERO ( &rfds );
 
     netOK = 1;
     return 0;
@@ -238,26 +249,42 @@ int tcp_communicator_linux::evaluate()
     // Инициализация сети, при необходимости.-!>
 
     int count_cycles = 0;
+    int max_sock_number = 0;
     while ( count_cycles < max_cycles )
         {
         /* service loop */
         count_cycles++;
         sleep_ms(1);
+        max_sock_number = 0;
 
         FD_ZERO( &rfds );
-        for ( int i = 0; i < MAX_SOCKETS; i++ )
+        for ( u_int i = 0; i < sst.size(); i++ )
             {
             if ( sst[ i ].active &&
                 sst[ i ].is_listener &&
                 !sst[ i ].evaluated )
                 {
                 /* re-join active sockets */
-                FD_SET( i, &rfds );
+                FD_SET( sst[ i ].socket, &rfds );
+                if (sst[ i ].socket > max_sock_number)
+                    {
+                    max_sock_number = sst[ i ].socket;
+                    }
+                }
+            }
+
+        //Добавляем асинхронные сокеты в список прослушки
+        for (std::map<int, tcp_client*>::iterator it = clients->begin(); it != clients->end(); ++ it)
+            {
+            FD_SET( it->second->get_socket(), &rfds);
+            if (it->second->get_socket() > max_sock_number)
+                {
+                max_sock_number = it->second->get_socket();
                 }
             }
 
         // Ждём события в одном из сокетов.
-        rc = select( MAX_SOCKETS + 1, &rfds, NULL, NULL, &tv );
+        rc = select( max_sock_number + 1, &rfds, NULL, NULL, &tv );
 
         if ( 0 == rc ) break; // Ничего не произошло.
 
@@ -271,16 +298,16 @@ int tcp_communicator_linux::evaluate()
             continue;
             }
 
-        for ( int i = 0; i < MAX_SOCKETS; i++ )  /* scan all possible sockets */
+        for ( u_int i = 0; i < sst.size(); i++ )  /* scan all possible sockets */
             {
             // Поступил новый запрос на соединение.
-            if ( FD_ISSET ( i, &rfds ) )
+            if ( FD_ISSET ( sst[ i ].socket, &rfds ) )
                 {
-                if ( i == master_socket || i == modbus_socket )
+                if ( sst[ i ].socket == master_socket || sst[ i ].socket == modbus_socket )
                      {
                     /* master socket */
                     memset( &ssin, 0, sizeof ( ssin ) );
-                    slave_socket = accept ( i,
+                    slave_socket = accept ( sst[ i ].socket,
                         ( struct sockaddr * ) &ssin, &sin_len );
 
                     if ( slave_socket <= 0 )    // Ошибка.
@@ -293,7 +320,7 @@ int tcp_communicator_linux::evaluate()
                         continue;
                         }
 
-                    if ( i != modbus_socket )
+                    if ( sst[ i ].socket != modbus_socket )
                         {
                         char Message1[] = "PAC accept";
                         send( slave_socket, Message1, strlen ( Message1 ), MSG_NOSIGNAL );
@@ -336,13 +363,15 @@ int tcp_communicator_linux::evaluate()
 //                        slave_socket, inet_ntoa( ssin.sin_addr ) );
 //                    }
 #endif // DEBUG
-
                     FD_SET( slave_socket, &rfds );
-                    sst[ slave_socket ].active = 1;
-                    sst[ slave_socket ].init   = 1;
-                    sst[ slave_socket ].is_listener = 1;
-                    sst[ slave_socket ].evaluated = 0;
-                    memcpy( &sst[ slave_socket ].sin, &ssin, sin_len );
+                    socket_state slave_socket_state;
+                    slave_socket_state.socket = slave_socket;
+                    slave_socket_state.active = 1;
+                    slave_socket_state.init   = 1;
+                    slave_socket_state.is_listener = 1;
+                    slave_socket_state.evaluated = 0;
+                    memcpy( &slave_socket_state.sin, &ssin, sin_len );
+                    sst.push_back(slave_socket_state);
                     }
                 else         /* slave socket */
                     {
@@ -351,9 +380,51 @@ int tcp_communicator_linux::evaluate()
                     }
                 }
             }
+
+        //проверка асинхронных сокетов на предмет поступления данных
+         for (std::map<int, tcp_client*>::iterator it = clients->begin(); it != clients->end();)
+             {
+             int is_removed = 0;
+             if (FD_ISSET(it->second->get_socket(), &rfds)) //если есть событие на сокете
+                 {
+                 int err = recvtimeout(it->second->get_socket(), (unsigned char*)it->second->buff, it->second->buff_size, 1, 0, it->second->ip);
+                 if (err <= 0) //Ошибка чтения
+                     {
+                     it->second->Disconnect();
+                     it->second->set_async_result(it->second->AR_SOCKETERROR);
+                     }
+                 else //Получены данные
+                     {
+                     in_buffer_count = err;
+                     it->second->set_async_result(in_buffer_count);
+                     }
+                 is_removed = 1;
+                 }
+             else //проверяем на таймаут
+                 {
+                 if (get_delta_millisec(it->second->async_queued) > it->second->async_timeout)
+                     {
+                     it->second->Disconnect();
+                     it->second->set_async_result(it->second->AR_TIMEOUT);
+                     is_removed = 1;
+                     }
+                 }
+
+             if (is_removed)
+                 {
+                 clients->erase(it++);
+                 }
+             else
+                 {
+                 it++;
+                 }
+             }
+
         }  /* service loop */
 
-    for ( int i = 0; i < MAX_SOCKETS; i++ )
+
+
+    for ( u_int i = 0; i < sst.size(); i++ )
         {
         sst[ i ].evaluated = 0;
         }
@@ -420,29 +491,30 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
     return res;
     }
 //------------------------------------------------------------------------------
-int tcp_communicator_linux::do_echo ( int skt )
+int tcp_communicator_linux::do_echo ( int idx )
     {
-    FD_CLR( skt, &rfds );
+    socket_state &sock_state = sst[ idx ];
+    FD_CLR( sock_state.socket, &rfds );
 
     int err = 0, res;
 
-    if ( sst[ skt ].init )         /* socket is just initiated */
+    if ( sock_state.init )         /* socket is just initiated */
         {
-        sst[ skt ].init = 0;
+        sock_state.init = 0;
         }
 
-    sst[ skt ].evaluated = 1;
+    sock_state.evaluated = 1;
     memset( buf, 0, BUFSIZE );
 
     // Ожидаем данные с таймаутом 5 сек.
-    err = in_buffer_count = recvtimeout( skt, buf, BUFSIZE, 5, 0,
-        inet_ntoa( sst[ skt ].sin.sin_addr ) );
+    err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 5, 0,
+        inet_ntoa( sock_state.sin.sin_addr ) );
 
     if ( err <= 0 )               /* read error */
         {
-        sst[ skt ].active = 0;
-        shutdown( skt, 0 );
-        close( skt );
+        shutdown( sock_state.socket, 0 );
+        close( sock_state.socket );
+        sst.erase(sst.begin() + idx, sst.begin() + idx + 1);
         return err;
         }
 
@@ -492,7 +564,7 @@ int tcp_communicator_linux::do_echo ( int skt )
 
                 sprintf( G_LOG->msg,
                     "tcp_communicator_linux::do_echo wrong command received on socket %d->\"%s\".",
-                    skt, inet_ntoa( sst[ skt ].sin.sin_addr ) );
+                    sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ) );
                 G_LOG->write_log( i_log::P_WARNING );
                 break;
             }
@@ -510,7 +582,7 @@ int tcp_communicator_linux::do_echo ( int skt )
                 buf[ 5 ] = res & 0xFF;
                 in_buffer_count = res + 6;
                 }
-            sst[ skt ].evaluated = 0;
+            sock_state.evaluated = 0;
             }
         else
             {
@@ -518,12 +590,12 @@ int tcp_communicator_linux::do_echo ( int skt )
 
             sprintf( G_LOG->msg,
                 "No such service %d at socket %d->\"%s\".",
-                buf[ 1 ], skt, inet_ntoa( sst[ skt ].sin.sin_addr ) );
+                buf[ 1 ], sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ) );
             G_LOG->write_log( i_log::P_WARNING );
             }
         }
 
-    err = sendall( skt, buf, in_buffer_count, MSG_NOSIGNAL );
+    err = sendall( sock_state.socket, buf, in_buffer_count, MSG_NOSIGNAL );
     if ( is_going_to_reboot )
         {
         killsockets();
@@ -534,12 +606,12 @@ int tcp_communicator_linux::do_echo ( int skt )
         {
         sprintf( G_LOG->msg,
             "%s : tcp_communicator_linux::do_echo socket %d->\"%s\" disconnected on write try.",
-            strerror( errno ), skt, inet_ntoa( sst[ skt ].sin.sin_addr ) );
+            strerror( errno ), sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ) );
         G_LOG->write_log( i_log::P_ERR );
 
-        sst[ skt ].active = 0;
-        shutdown( skt, 0 );
-        close( skt );
+        shutdown( sock_state.socket, 0 );
+        close( sock_state.socket );
+        sst.erase(sst.begin() + idx, sst.begin() + idx + 1);
 
         return err;
         }

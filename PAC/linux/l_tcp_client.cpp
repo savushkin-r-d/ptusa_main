@@ -109,8 +109,8 @@ int linux_tcp_client::Connect()
     FD_ZERO(&rdevents);
     FD_SET(socket_number, &rdevents);
 
-    tv.tv_sec = 0;
-    tv.tv_usec = 100000;
+    tv.tv_sec = connectTimeout / 1000;
+    tv.tv_usec = (connectTimeout % 1000) * 1000;
 
     res = select( socket_number + 1, 0, &rdevents, 0, &tv );
 
@@ -152,6 +152,50 @@ void linux_tcp_client::Disconnect()
     socket_number = 0;
     connectedstate = 0;
     }
+
+int linux_tcp_client::AsyncSend( unsigned int bytestosend )
+{
+    async_result = AR_BUSY;
+
+    if (!connectedstate)
+        {
+        if (get_delta_millisec(async_last_connect_try) > reconnectTimeout)
+            {
+            async_last_connect_try = get_millisec();
+            if (!Connect())
+                {
+                async_result = AR_SOCKETERROR;
+                reconnectTimeout += connectTimeout;
+                if (reconnectTimeout > maxreconnectTimeout)
+                    {
+                    reconnectTimeout = maxreconnectTimeout;
+                    }
+                return 0;
+                }
+            else
+                {
+                reconnectTimeout = connectTimeout * RECONNECT_MIN_MULTIPLIER;
+                }
+            }
+        else
+            {
+            async_result = AR_SOCKETERROR;
+            return 0;
+            }
+        }
+
+    int res = send(socket_number, buff, bytestosend, 0 );
+    if ( res < 0)
+        {
+        async_result = AR_SOCKETERROR;
+        Disconnect();
+        return 0;
+        }
+    else
+        {
+        return tcp_client::AsyncSend(bytestosend);
+        }
+}
 
 linux_tcp_client::~linux_tcp_client()
     {

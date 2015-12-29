@@ -24,10 +24,12 @@
 
 #include <fcntl.h>
 #include <stdio.h>
+#include <vector>
 //-----------------------------------------------------------------------------
 /// @brief Cостояние сокета.
 struct socket_state
     {
+    int socket;
     int active;      ///< Сокет активен.
     int init;        ///< Сокет только что был активирован.
     int is_listener; ///< Сокет является инициатором соединения ( = 0 )/сокет является слушателем ( != 0 ).
@@ -59,13 +61,13 @@ class tcp_communicator_linux : public tcp_communicator
             /// @brief Посылка ответных данных на сервер.
             ///
             /// @param skt - сокет.
-            int do_echo( int skt );
+            int do_echo( int idx );
 
             u_long glob_last_transfer_time;  ///< Время последней успешной передачи данных.
 
             timeval tv;                      ///< Задержка ожидания функции опроса состояний сокетов, 0 по умолчанию.
             fd_set rfds;                     ///< Набор дескрипторов сокетных файлов для чтения.
-            socket_state sst[ MAX_SOCKETS ]; ///< Таблица состояния сокетов.
+            std::vector< socket_state > sst; ///< Таблица состояния сокетов.
             int netOK;                       ///< Признак успешной инициализации сети.
 
             /// @brief Уничтожение сокетов.

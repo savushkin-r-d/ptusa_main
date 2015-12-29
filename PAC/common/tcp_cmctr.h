@@ -15,8 +15,11 @@
 #define TCP_CMCTR_H
 
 #include <stdio.h>
+#include <map>
 
 #include "smart_ptr.h"
+
+class tcp_client;
 
 //-----------------------------------------------------------------------------
 /// @brief Базовый класс коммуникатор - обмен данными PAC-сервер.
@@ -55,6 +58,9 @@ class tcp_communicator
         ///
         /// @return - сетевое имя PAC на английском языке.
         char* get_host_name_eng();
+
+		virtual int add_async_client(tcp_client* client);
+		virtual int remove_async_client(tcp_client* client);
 
         virtual ~tcp_communicator();
 
@@ -111,6 +117,8 @@ class tcp_communicator
 
         u_char pidx;            ///< Номер ответа.
         int    net_id;          ///< Номер PAC.
+
+		std::map<int, tcp_client*> *clients;
 
         void _ErrorAkn( u_char error );
         void _AknData( u_long len );

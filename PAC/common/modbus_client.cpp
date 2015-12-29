@@ -9,6 +9,8 @@ modbus_client::modbus_client(unsigned int id, char* ip, unsigned int port, unsig
 #endif // DEBUG
 	tcpclient = tcp_client::Create( ip, port, id, PAC_critical_errors_manager::AS_MODBUS_DEVICE, 256, exchangetimeout  );
 	zero_output_buff();
+	modbus_async_result = 0;
+	modbus_expected_length = 0;
 	}
 
 modbus_client::~modbus_client()
@@ -299,4 +301,32 @@ int modbus_client::get_bit( unsigned int address )
 int modbus_client::get_id()
 	{
 	return tcpclient->get_id();
+	}
+
+int modbus_client::async_read_discrete_inputs( unsigned int start_address, unsigned int quantity )
+	{
+	if (get_async_result() == tcp_client::AR_BUSY)
+		{
+		return 0;
+		}
+	tcpclient->buff[0] = 0;
+	tcpclient->buff[1] = 0;
+	tcpclient->buff[2] = 0;
+	tcpclient->buff[3] = 0;
+	tcpclient->buff[4] = 0;
+	tcpclient->buff[5] = 6;
+	tcpclient->buff[6] = 1;
+	tcpclient->buff[7] = 2;
+	tcpclient->buff[8] = ((int_2)start_address) >> 8;
+	tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
+	tcpclient->buff[10] = ((int_2)quantity) >> 8;;
+	tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
+	modbus_async_result = tcpclient->AsyncSend(12);
+	modbus_expected_length = 9 + quantity / 8 + (quantity % 8 ? 1:0);
+	return 0;
+	}
+
+int modbus_client::get_async_result()
+	{
+	return tcpclient->get_async_result();
 	}

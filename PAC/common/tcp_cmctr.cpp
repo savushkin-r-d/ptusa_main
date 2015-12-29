@@ -3,6 +3,7 @@
 #endif
 
 #include "tcp_cmctr.h"
+#include "tcp_client.h"
 
 #ifdef WIN_OS
 #include "w_tcp_cmctr.h"
@@ -25,6 +26,7 @@ tcp_communicator::tcp_communicator(): in_buffer_count( 0 ), pidx( 0 ), net_id( 0
     memset( host_name_eng, 0, TC_MAX_HOST_NAME );
 
     memset( buf, 0, BUFSIZE );
+	clients = new std::map<int, tcp_client*>();
     }
 //------------------------------------------------------------------------------
 tcp_communicator::srv_ptr tcp_communicator::reg_service( u_char srv_id,
@@ -89,6 +91,7 @@ char* tcp_communicator::get_host_name_eng()
 //------------------------------------------------------------------------------
 tcp_communicator::~tcp_communicator()
     {
+	delete clients;
     }
 //------------------------------------------------------------------------------
 void tcp_communicator::init_instance( const char *name_rus, const char *name_eng )
@@ -101,4 +104,22 @@ void tcp_communicator::init_instance( const char *name_rus, const char *name_eng
     instance = new tcp_communicator_linux( name_rus, name_eng );
 #endif
     }
+
+int tcp_communicator::add_async_client( tcp_client* client )
+	{
+	clients[0][client->get_socket()] = client;
+	client->async_queued = get_millisec();
+	return 0;
+	}
+
+int tcp_communicator::remove_async_client( tcp_client* client )
+	{
+	std::map<int, tcp_client*>::iterator it = clients->find(client->get_socket());
+	if (it != clients->end())
+		{
+		clients->erase(it);
+		}
+	return 0;
+	}
+
 //------------------------------------------------------------------------------
