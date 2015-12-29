@@ -205,6 +205,7 @@ int win_tcp_client::Connect()
 
 void win_tcp_client::Disconnect()
 	{
+	//tcp_communicator::get_instance()->remove_async_client(this);
 	shutdown( socket_number, SD_BOTH );
 	closesocket( socket_number );
 	socket_number = 0;
@@ -218,4 +219,59 @@ win_tcp_client::~win_tcp_client()
 		Disconnect();
 		}
 	}
+
+int win_tcp_client::AsyncSend( unsigned int bytestosend )
+{
+	async_result = AR_BUSY;
+	if(!is_initialized)
+		{
+		if (!InitLib())
+			{
+			async_result = AR_SOCKETERROR;
+			return 0;
+			}
+		}
+	if (!connectedstate)
+		{
+		if (get_delta_millisec(async_last_connect_try) > reconnectTimeout)
+			{
+			async_last_connect_try = get_millisec();
+			if (!Connect())
+				{
+				async_result = AR_SOCKETERROR;
+                reconnectTimeout += connectTimeout;
+                if (reconnectTimeout > maxreconnectTimeout)
+                    {
+                    reconnectTimeout = maxreconnectTimeout;
+                    }
+				return 0;
+				}
+            else
+                {
+                reconnectTimeout = connectTimeout * RECONNECT_MIN_MULTIPLIER;
+                }
+			}
+		else
+			{
+			async_result = AR_SOCKETERROR;
+			return 0;
+			}
+		}
+
+	int res = send(socket_number, buff, bytestosend, 0 );
+	if ( res == SOCKET_ERROR)
+		{
+#ifdef DEBUG
+		printf("tcp_client_%d Ошибка %d отсылки сообщения.\n", id, WSAGetLastError());
+#endif //DEBUG
+		async_result = AR_SOCKETERROR;
+		Disconnect();
+		return 0;
+		}
+	else
+		{
+		return tcp_client::AsyncSend(bytestosend);
+		}
+	}
+
 

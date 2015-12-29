@@ -9,12 +9,15 @@
 
 #include "w_tcp_cmctr.h"
 #include "PAC_err.h"
+
+#include "tcp_client.h"
 //------------------------------------------------------------------------------
 #ifdef DEBUG
 unsigned int max_buffer_use = 0;
 #endif
 //------------------------------------------------------------------------------
 char* WSA_Err_Decode( int ErrCode );
+
 //------------------------------------------------------------------------------
 tcp_communicator_win::tcp_communicator_win( const char *name_rus, const char *name_eng ):
 tcp_communicator(),
@@ -187,7 +190,7 @@ int tcp_communicator_win::net_init()
     memset( &modbus_socket_state.sin, 0, sizeof ( modbus_socket_state.sin ) );
     modbus_socket_state.sin.sin_family 	    = AF_INET;
     modbus_socket_state.sin.sin_addr.s_addr = 0;
-    modbus_socket_state.sin.sin_port 		= htons ( 502 ); // Порт.
+    modbus_socket_state.sin.sin_port 		= htons ( 10502 ); // Порт.
 	modbus_socket_state.socket = modbus_socket;
 
     modbus_socket_state.active      = 1;
@@ -286,7 +289,13 @@ int tcp_communicator_win::evaluate()
                 //- Re-join active sockets.
                 FD_SET( sst[ i ].socket, &rfds );
                 }
-            }              
+            }
+
+		//Добавляем асинхронные сокеты в список прослушки
+		for (std::map<int, tcp_client*>::iterator it = clients->begin(); it != clients->end(); ++ it)
+			{
+			FD_SET( it->second->get_socket(), &rfds);
+			}
 
         //-Ждём события в одном из сокетов.
         rc = select( 0/*Не учитывается*/, &rfds, NULL, NULL, &tv );
@@ -382,11 +391,49 @@ int tcp_communicator_win::evaluate()
                     }
                 else         /* slave socket */
                     {
-                    do_echo ( i );
-                    glob_last_transfer_time = get_sec();
+					do_echo ( i );
+					glob_last_transfer_time = get_sec();
                     }
                 }
             }
+//проверка асинхронных сокетов на предмет поступления данных
+		for (std::map<int, tcp_client*>::iterator it = clients->begin(); it != clients->end();)
+			{
+			int is_removed = 0;
+			if (FD_ISSET(it->second->get_socket(), &rfds)) //если есть событие на сокете
+				{
+				int err = in_buffer_count = recvtimeout(it->second->get_socket(), (unsigned char*)it->second->buff, it->second->buff_size, 1, 0);
+				if (err <= 0) //Ошибка чтения
+					{
+					it->second->Disconnect();
+					it->second->set_async_result(it->second->AR_SOCKETERROR);
+					}
+				else //Получены данные
+					{
+					it->second->set_async_result(in_buffer_count);
+					}
+				is_removed = 1;
+				}
+			else //проверяем на таймаут
+				{
+				if (get_delta_millisec(it->second->async_queued) > it->second->async_timeout)
+					{
+					it->second->Disconnect();
+					it->second->set_async_result(it->second->AR_TIMEOUT);
+					is_removed = 1;
+					}
+				}
+
+			if (is_removed)
+				{
+				clients->erase(it++);
+				}
+			else
+				{
+				it++;
+				}
+			}
+
         }  /* service loop */
 
     for ( u_int i = 0; i < sst.size(); i++ )

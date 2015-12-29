@@ -12,9 +12,10 @@ class win_tcp_client: public tcp_client
 		int InitLib();
 		void DeinitLib();
 		int Connect();
-		void Disconnect();
-		win_tcp_client(const char* client_ip, unsigned int client_port, unsigned int client_id, unsigned char alarm_subclass, unsigned int exchange_buf_size = 256, unsigned long send_receive_timeout = 100);
+		virtual void Disconnect();
 		virtual int Communicate( unsigned int bytestosend ) override;
+		virtual int AsyncSend(unsigned int bytestosend);
+		win_tcp_client(const char* client_ip, unsigned int client_port, unsigned int client_id, unsigned char alarm_subclass, unsigned int exchange_buf_size = 256, unsigned long send_receive_timeout = 100);
 		~win_tcp_client();
 
 	};

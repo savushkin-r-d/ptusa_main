@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 12/22/15 17:48:59.
+** Generated automatically by tolua++-1.0.92 on 12/29/15 11:57:36.
 */
 
 #ifndef __cplusplus
@@ -8617,6 +8617,74 @@ static int tolua_PAC_dev_modbus_client_write_multiply_registers00(lua_State* tol
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: async_read_discrete_inputs of class  modbus_client */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_async_read_discrete_inputs00
+static int tolua_PAC_dev_modbus_client_async_read_discrete_inputs00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"modbus_client",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  modbus_client* self = (modbus_client*)  tolua_tousertype(tolua_S,1,0);
+  unsigned int start_address = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
+  unsigned int quantity = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'async_read_discrete_inputs'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->async_read_discrete_inputs(start_address,quantity);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'async_read_discrete_inputs'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_async_result of class  modbus_client */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_get_async_result00
+static int tolua_PAC_dev_modbus_client_get_async_result00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"modbus_client",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  modbus_client* self = (modbus_client*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_async_result'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->get_async_result();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_async_result'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: zero_output_buff of class  modbus_client */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_zero_output_buff00
 static int tolua_PAC_dev_modbus_client_zero_output_buff00(lua_State* tolua_S)
@@ -9518,6 +9586,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"write_coil",tolua_PAC_dev_modbus_client_write_coil00);
    tolua_function(tolua_S,"force_multiply_coils",tolua_PAC_dev_modbus_client_force_multiply_coils00);
    tolua_function(tolua_S,"write_multiply_registers",tolua_PAC_dev_modbus_client_write_multiply_registers00);
+   tolua_function(tolua_S,"async_read_discrete_inputs",tolua_PAC_dev_modbus_client_async_read_discrete_inputs00);
+   tolua_function(tolua_S,"get_async_result",tolua_PAC_dev_modbus_client_get_async_result00);
    tolua_function(tolua_S,"zero_output_buff",tolua_PAC_dev_modbus_client_zero_output_buff00);
    tolua_function(tolua_S,"set_int2",tolua_PAC_dev_modbus_client_set_int200);
    tolua_function(tolua_S,"get_int2",tolua_PAC_dev_modbus_client_get_int200);
