@@ -413,6 +413,11 @@ class device : public i_DO_AO_device, public par_device
             /// Мотор с реверсом с управлением частотой вращения. Реверс
             /// включается отдельно. Отдельный сигнал ошибки.
             DST_M_REV_FREQ_2_ERROR,
+
+            //FQT
+
+            DST_FQT = 1,   ///< Счетчик.
+            DST_FQT_F,     ///< Счетчик + Расход.
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -2268,23 +2273,9 @@ class counter : public device,
     public wago_device
     {
     public:
-        counter( const char *dev_name ): device(
-            dev_name, DT_FQT, DST_NONE, ADDITIONAL_PARAMS_COUNT ),
-            wago_device( dev_name ),
-            value( 0 ),
-            last_read_value( 0 ),
-            abs_value( 0 ),
-            abs_last_read_value( 0 ),
-            state( S_WORK ),
-            flow_value( 0 ),
-            is_first_read( true ),
-            is_first_read_abs( true )
-            {
-            set_par_name( P_MIN_FLOW,  0, "P_MIN_FLOW" );
-            set_par_name( P_MAX_FLOW,  0, "P_MAX_FLOW" );
-            set_par_name( P_CZ,        0, "P_CZ" );
-            set_par_name( P_DT,        0, "P_DT" );
-            }
+        counter( const char *dev_name,
+            DEVICE_SUB_TYPE sub_type = device::DST_FQT,
+            int extra_par_cnt = ADDITIONAL_PARAMS_COUNT );
 
         virtual ~counter()
             {
@@ -2302,7 +2293,10 @@ class counter : public device,
         void  start();
         void  reset();
         u_int get_quantity();
-        float get_flow();
+        float get_flow()
+            {
+            return 0;
+            }
 
         /// @brief Получение абсолютного значения счетчика (без учета
         /// состояния паузы).
@@ -2311,35 +2305,14 @@ class counter : public device,
         /// @brief Сброс абсолютного значения счетчика.
         void  abs_reset();
 
-        void set_property( const char* field, device* dev );
-
-        int set_cmd( const char *prop, u_int idx, double val )
-            {
-            switch ( prop[ 0 ] )
-                {
-                case 'F':
-                    flow_value = ( float ) val;
-                    break;
-
-                case 'A': //ABS_V
-                    abs_value = ( u_int ) val;
-                    break;
-
-                default:
-                    return device::set_cmd( prop, idx, val );
-                }
-
-            return 0;
-            }
+        int set_cmd( const char *prop, u_int idx, double val );
 
         //Lua.
         int save_device_ex( char *buff )
             {
-            return sprintf( buff, "F=%.2f, ABS_V=%u, ",
-                get_flow(), get_abs_quantity() );
+            return sprintf( buff, "ABS_V=%u, ", get_abs_quantity() );
             }
 
-    private:
         enum STATES
             {
             S_STOP,
@@ -2348,6 +2321,62 @@ class counter : public device,
 
             S_ERROR = -1,
             };
+    
+    protected:
+        STATES state;
+
+    private:
+
+        enum CONSTANTS
+            {
+            ADDITIONAL_PARAMS_COUNT = 0,
+
+            AI_Q_INDEX    = 0,  ///< Индекс канала аналогового входа (объем).
+
+            MAX_VAL = 65535L,   ///< Максимальное значение счетчика.
+            };
+
+        u_int value;
+        u_int last_read_value;
+
+        u_int abs_value;       ///< Абсолютное значение (не становится на паузу).
+        u_int abs_last_read_value;
+
+        bool is_first_read;         ///< Флаг первой установки значения.
+        bool is_first_read_abs;     ///< Флаг первой установки значения.
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+/// @brief Счетчик.
+class counter_f : public counter
+    {
+    public:
+        counter_f( const char *dev_name ):
+            counter( dev_name, DST_FQT_F,  ADDITIONAL_PARAMS_COUNT ),
+            flow_value( 0 )
+            {
+            set_par_name( P_MIN_FLOW,  0, "P_MIN_FLOW" );
+            set_par_name( P_MAX_FLOW,  0, "P_MAX_FLOW" );
+            set_par_name( P_CZ,        0, "P_CZ" );
+            set_par_name( P_DT,        0, "P_DT" );
+            }
+
+        virtual ~counter_f()
+            {
+            }
+
+        int get_state();
+
+        float get_flow();
+
+        void set_property( const char* field, device* dev );
+
+        int set_cmd( const char *prop, u_int idx, double val );
+
+        //Lua.
+        int save_device_ex( char *buff );
+
+    private:
 
         enum CONSTANTS
             {
@@ -2360,22 +2389,9 @@ class counter : public device,
 
             AI_FLOW_INDEX = 0,  ///< Индекс канала аналогового входа (поток).
             AI_Q_INDEX    = 1,  ///< Индекс канала аналогового входа (объем).
-
-            MAX_VAL = 65535L,   ///< Максимальное значение счетчика.
             };
 
-        u_int value;
-        u_int last_read_value;
-
-        u_int abs_value;       ///< Абсолютное значение (не становится на паузу).
-        u_int abs_last_read_value;
-
-        STATES state;
-
         float flow_value;
-
-        bool is_first_read;         ///< Флаг первой установки значения.
-        bool is_first_read_abs;     ///< Флаг первой установки значения.
 
         std::vector < device* > motors;
     };
