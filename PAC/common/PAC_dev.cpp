@@ -499,7 +499,15 @@ i_counter* device_manager::get_FQT( const char *dev_name )
     {
     int res = get_device_n( device::DT_FQT, dev_name );
 
-    if ( res >= 0 ) return ( i_counter* ) project_devices.at( res );
+    device *res_ctr = project_devices.at( res );
+    if ( res_ctr->get_sub_type() == device::DST_FQT_F )
+    	{
+        return ( counter_f* ) res_ctr;
+    	}
+    else
+        {
+        return ( counter* ) res_ctr;
+        }    
 
 #ifdef DEBUG
     Print( "Error - \"%s\" not found!\n", dev_name );
