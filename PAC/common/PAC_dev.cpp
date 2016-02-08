@@ -498,15 +498,17 @@ i_AO_device* device_manager::get_AO( const char *dev_name )
 i_counter* device_manager::get_FQT( const char *dev_name )
     {
     int res = get_device_n( device::DT_FQT, dev_name );
-
-    device *res_ctr = project_devices.at( res );
-    if ( res_ctr->get_sub_type() == device::DST_FQT_F )
-    	{
-        return ( counter_f* ) res_ctr;
-    	}
-    else
+    if ( res > -1 )
         {
-        return ( counter* ) res_ctr;
+        device *res_ctr = project_devices.at( res );
+        if ( res_ctr->get_sub_type() == device::DST_FQT_F )
+            {
+            return ( counter_f* ) res_ctr;
+            }
+        else
+            {
+            return ( counter* ) res_ctr;
+            }
         }    
 
 #ifdef DEBUG
