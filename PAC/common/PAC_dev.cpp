@@ -509,7 +509,7 @@ i_counter* device_manager::get_FQT( const char *dev_name )
             {
             return ( counter* ) res_ctr;
             }
-        }    
+        }
 
 #ifdef DEBUG
     Print( "Error - \"%s\" not found!\n", dev_name );
@@ -1062,7 +1062,7 @@ void counter::start()
     }
 //-----------------------------------------------------------------------------
 void counter::reset()
-    {    
+    {
     value = 0;
     }
 //-----------------------------------------------------------------------------
@@ -1108,7 +1108,7 @@ u_int counter::get_abs_quantity()
 u_int counter::get_quantity()
     {
     if ( S_WORK == state )
-        {        
+        {
         u_int current = *( ( u_int_2* ) get_AI_data( AI_Q_INDEX ) );
 
         if ( is_first_read )
@@ -1142,10 +1142,11 @@ u_int counter::get_quantity()
     return value;
     }
 //-----------------------------------------------------------------------------
-counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type, 
+counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
                      int extra_par_cnt ):
     device( dev_name, DT_FQT, DST_FQT, extra_par_cnt ),
     wago_device( dev_name ),
+    state( S_WORK ),
     value( 0 ),
     last_read_value( 0 ),
     abs_value( 0 ),
@@ -2394,7 +2395,7 @@ int motor::save_device_ex( char *buff )
     int res = 0;
 #ifdef DEBUG_NO_WAGO_MODULES
     res = sprintf( buff, "R=0," );
-#else    
+#else
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||
         sub_type == device::M_REV_2_ERROR ||

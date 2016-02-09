@@ -2321,7 +2321,7 @@ class counter : public device,
 
             S_ERROR = -1,
             };
-    
+
     protected:
         STATES state;
 
@@ -2387,8 +2387,7 @@ class counter_f : public counter
             P_CZ,
             P_DT,
 
-            AI_FLOW_INDEX = 0,  ///< Индекс канала аналогового входа (поток).
-            AI_Q_INDEX    = 1,  ///< Индекс канала аналогового входа (объем).
+            AI_FLOW_INDEX = 1,  ///< Индекс канала аналогового входа (поток).
             };
 
         float flow_value;
