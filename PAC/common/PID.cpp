@@ -146,6 +146,23 @@ float PID::eval( float currentValue, int deltaSign )
     //-ќграничение на выходное значение.
     float out_max = par[ 0 ][ P_out_max ];
     float out_min = par[ 0 ][ P_out_min ];
+
+#ifdef DEBUG
+    if ( out_max <= out_min )
+        {
+        Print( "Error! PID::eval out_max <= out_min (%f == %f)!\n",
+            out_max, out_min );
+        Print( "Press any key!" );
+        get_char();
+        }
+    if ( out_max == 0 )
+        {
+        Print( "Error! PID::eval out_max = 0!\n" );
+        Print( "Press any key!" );
+        get_char();
+        }
+#endif
+
     if ( Uk < out_min )
         {
         Uk = out_min;
@@ -214,13 +231,13 @@ void PID::init_param( PARAM par_n, float val )
         {
         //ѕроверка выхода за диапазон допустимых значений.
         if ( par_n == P_out_min && val < 0 )
-            {                
+            {
             val = 0;
             }
         if ( par_n == P_out_max && val > 100 )
-            {                
+            {
             val = 100;
-            }    
+            }
 
         par[ 0 ][ par_n ] = val;
         }
@@ -228,7 +245,7 @@ void PID::init_param( PARAM par_n, float val )
 //-----------------------------------------------------------------------------
 void PID::init_work_param( WORK_PARAM par_n, float val )
     {
-    if ( par_n > 0 && ( u_int ) par_n <= w_par->get_count() )    
+    if ( par_n > 0 && ( u_int ) par_n <= w_par->get_count() )
         {
         w_par[ 0 ][ par_n ] = val;
         }
@@ -290,54 +307,54 @@ void PID::acceleration( float accel_time )
     }
 //-----------------------------------------------------------------------------
 int PID::set_cmd( const char *prop, u_int idx, double val )
-	{
-	if ( 0 == strcmp( prop, "RT_PAR_F" ) )
-		{
-		if ( idx > 0 && idx <= w_par->get_count() )
-			{
-			w_par[ 0 ][ idx ] = ( float ) val;
-			return 0;
-			}
-		}
-	if ( 0 == strcmp( prop, "S_PAR_F" ) )
-		{
-		if ( idx > 0 && idx <= par->get_count() )
-			{
+    {
+    if ( 0 == strcmp( prop, "RT_PAR_F" ) )
+        {
+        if ( idx > 0 && idx <= w_par->get_count() )
+            {
+            w_par[ 0 ][ idx ] = ( float ) val;
+            return 0;
+            }
+        }
+    if ( 0 == strcmp( prop, "S_PAR_F" ) )
+        {
+        if ( idx > 0 && idx <= par->get_count() )
+            {
             //ѕроверка выхода за диапазон допустимых значений.
             if ( idx == P_out_min && val < 0 )
-                {                
+                {
                 val = 0;
                 }
             if ( idx == P_out_max && val > 100 )
-                {                
+                {
                 val = 100;
-                }              
+                }
             if ( ( idx == P_out_min && val > par[ 0 ][ P_out_max ] ) ||
                 ( idx == P_out_max && val < par[ 0 ][ P_out_min ] ) )
-                {                
+                {
                 return 0;
                 }
-           
-			par->save( idx, ( float ) val );
-			return 0;
-			}
-		}
-	return 0;
-	}
+
+            par->save( idx, ( float ) val );
+            return 0;
+            }
+        }
+    return 0;
+    }
 //-----------------------------------------------------------------------------
 int PID::set_cmd( const char *prop, u_int idx, char *val )
-	{
+    {
 #ifdef WIN_OS
-	throw std::exception( "The method or operation is not implemented." );
+    throw std::exception( "The method or operation is not implemented." );
 #endif
-    
+
     return 0;
-	}
+    }
 //-----------------------------------------------------------------------------
 u_int_4 PID::get_state()
-	{
-	return state;
-	}
+    {
+    return state;
+    }
 //-----------------------------------------------------------------------------
 int PID::save_device( char *buff )
     {
