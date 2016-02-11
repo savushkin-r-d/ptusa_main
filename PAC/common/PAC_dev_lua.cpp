@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 12/29/15 11:57:36.
+** Generated automatically by tolua++-1.0.92 on 02/11/16 10:48:15.
 */
 
 #ifndef __cplusplus
@@ -5196,6 +5196,38 @@ static int tolua_PAC_dev_PID_print00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: get_state of class  PID */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_PID_get_state00
+static int tolua_PAC_dev_PID_get_state00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"PID",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  PID* self = (PID*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_state'", NULL);
+#endif
+  {
+   unsigned int tolua_ret = (unsigned int)  self->get_state();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_state'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: set_cmd of class  PID */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_PID_set_cmd00
 static int tolua_PAC_dev_PID_set_cmd00(lua_State* tolua_S)
@@ -9438,6 +9470,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"save_param",tolua_PAC_dev_PID_save_param00);
    tolua_function(tolua_S,"set_used_par",tolua_PAC_dev_PID_set_used_par00);
    tolua_function(tolua_S,"print",tolua_PAC_dev_PID_print00);
+   tolua_function(tolua_S,"get_state",tolua_PAC_dev_PID_get_state00);
    tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_PID_set_cmd00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"PAC_info","PAC_info","i_Lua_save_device",NULL);

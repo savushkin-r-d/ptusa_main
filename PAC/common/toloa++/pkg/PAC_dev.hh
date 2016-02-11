@@ -1002,6 +1002,9 @@ class PID
         /// @brief Отладочная печать объекта в консоль.
         void print();
 
+        /// @brief Состояние регулятора.
+        unsigned int get_state();
+
 		int set_cmd( const char *prop, unsigned int idx, double val );
     };
 //-----------------------------------------------------------------------------
