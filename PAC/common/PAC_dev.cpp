@@ -682,6 +682,14 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                     new_device      = new counter_f( dev_name );
                     new_wago_device = ( counter_f* ) new_device;
                     break;
+
+                default:
+#ifdef DEBUG
+                    Print( "Unknown FQT device subtype %d!\n", dev_sub_type );
+                    get_char();
+#endif // DEBUG
+                    new_device      = new dev_stub();
+                    break;
                 }
 
             break;
