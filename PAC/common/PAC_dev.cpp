@@ -1065,7 +1065,7 @@ void counter::start()
             }
 
         state = S_WORK;
-        last_read_value = ( u_int ) get_AI( AI_Q_INDEX );
+        last_read_value = *( ( u_int_2* ) get_AI_data( AI_Q_INDEX ) );
         }
     }
 //-----------------------------------------------------------------------------
