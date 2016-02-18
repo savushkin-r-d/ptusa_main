@@ -1219,6 +1219,12 @@ class modbus_client
 		int force_multiply_coils(unsigned int address, unsigned int quantity);
 		int write_multiply_registers(unsigned int address, unsigned int quantity);
 		int async_read_discrete_inputs(unsigned int start_address, unsigned int quantity);
+        int async_read_coils(unsigned int start_address, unsigned int quantity);
+        int async_read_holding_registers(unsigned int address, unsigned int quantity);
+        int async_read_input_registers(unsigned int address, unsigned int quantity);
+        int async_write_coil(unsigned int address, unsigned char value);
+        int async_force_multiply_coils(unsigned int address, unsigned int quantity);
+        int async_write_multiply_registers(unsigned int address, unsigned int quantity);
 		int get_async_result();
 		//функции для работы с буфером из Lua
 		void zero_output_buff();

@@ -36,7 +36,7 @@ int modbus_client::read_discrete_inputs( unsigned int start_address, unsigned in
 	if (res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
 		{
 #ifdef DEBUG
-		Print("modbus_client_%d: read_discrete_inputs - error in exchange. Received %d bytes\n", tcpclient->get_id(), res);
+		Print("modbus_client_%d: read_discrete_inputs - error in exchange. Received %u bytes\n", tcpclient->get_id(), res);
 #endif // DEBUG
 		return 0;
 		}
@@ -61,7 +61,7 @@ int modbus_client::read_coils( unsigned int start_address, unsigned int quantity
 	if (res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
 		{
 #ifdef DEBUG
-		Print("modbus_client_%d: read_coils - error in exchange. Received %d bytes\n", tcpclient->get_id(), res);
+		Print("modbus_client_%d: read_coils - error in exchange. Received %u bytes\n", tcpclient->get_id(), res);
 #endif // DEBUG
 		return 0;
 		}
@@ -86,7 +86,7 @@ int modbus_client::read_holding_registers( unsigned int address, unsigned int qu
 	if (res != 9 + quantity * 2)
 		{
 #ifdef DEBUG
-		Print("modbus_client_%d: read_holding_registers - error in exchange. Received %d bytes\n", tcpclient->get_id(), res);
+		Print("modbus_client_%d: read_holding_registers - error in exchange. Received %u bytes\n", tcpclient->get_id(), res);
 #endif // DEBUG
 		return 0;
 		}
@@ -111,7 +111,7 @@ int modbus_client::read_input_registers( unsigned int address, unsigned int quan
 	if (res != 9 + quantity * 2)
 		{
 #ifdef DEBUG
-		Print("modbus_client_%d: read_input_registers at %d- error in exchange. Received %d bytes\n", tcpclient->get_id(), address, res);
+		Print("modbus_client_%d: read_input_registers at %u- error in exchange. Received %u bytes\n", tcpclient->get_id(), address, res);
 #endif // DEBUG
 		return 0;
 		}
@@ -137,7 +137,7 @@ int modbus_client::write_coil( unsigned int address, unsigned char value )
 	if (res != 12)
 		{
 #ifdef DEBUG
-		Print("modbus_client_%d: write coil %d - error in exchange. Received %d bytes\n", tcpclient->get_id(), address, res);
+		Print("modbus_client_%d: write coil %u - error in exchange. Received %d bytes\n", tcpclient->get_id(), address, res);
 #endif // DEBUG
 		return 0;
 		}
@@ -165,7 +165,7 @@ int modbus_client::force_multiply_coils( unsigned int address, unsigned int quan
 	if (res != 12)
 		{
 #ifdef DEBUG
-		Print("modbus_client_%d: force_multiply_coils at %d- error in exchange. Received %d bytes\n", tcpclient->get_id(), address, res);
+		Print("modbus_client_%d: force_multiply_coils at %u- error in exchange. Received %d bytes\n", tcpclient->get_id(), address, res);
 #endif // DEBUG
 		return 0;
 		}
@@ -193,7 +193,7 @@ int modbus_client::write_multiply_registers( unsigned int address, unsigned int 
 	if (res != 12)
 		{
 #ifdef DEBUG
-		Print("modbus_client_%d: force_multiply_registers at %d- error in exchange. Received %d bytes\n", tcpclient->get_id(), address, res);
+		Print("modbus_client_%d: force_multiply_registers at %u- error in exchange. Received %d bytes\n", tcpclient->get_id(), address, res);
 #endif // DEBUG
 		return 0;
 		}
@@ -304,29 +304,257 @@ int modbus_client::get_id()
 	}
 
 int modbus_client::async_read_discrete_inputs( unsigned int start_address, unsigned int quantity )
-	{
-	if (get_async_result() == tcp_client::AR_BUSY)
-		{
-		return 0;
-		}
-	tcpclient->buff[0] = 0;
-	tcpclient->buff[1] = 0;
-	tcpclient->buff[2] = 0;
-	tcpclient->buff[3] = 0;
-	tcpclient->buff[4] = 0;
-	tcpclient->buff[5] = 6;
-	tcpclient->buff[6] = 1;
-	tcpclient->buff[7] = 2;
-	tcpclient->buff[8] = ((int_2)start_address) >> 8;
-	tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
-	tcpclient->buff[10] = ((int_2)quantity) >> 8;;
-	tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
-	modbus_async_result = tcpclient->AsyncSend(12);
-	modbus_expected_length = 9 + quantity / 8 + (quantity % 8 ? 1:0);
-	return 0;
-	}
+    {
+    int ar = get_async_result();
+    if (ar == tcp_client::AR_BUSY)
+        {
+        return 0;
+        }
+    else
+        {
+        if (ar > 0 && ar == modbus_expected_length)
+            {
+            tcpclient->set_async_result(tcp_client::AR_FREE);
+            return 1;
+            }
+        else
+            {
+            tcpclient->buff[0] = 0;
+            tcpclient->buff[1] = 0;
+            tcpclient->buff[2] = 0;
+            tcpclient->buff[3] = 0;
+            tcpclient->buff[4] = 0;
+            tcpclient->buff[5] = 6;
+            tcpclient->buff[6] = 1;
+            tcpclient->buff[7] = 2;
+            tcpclient->buff[8] = ((int_2)start_address) >> 8;
+            tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
+            tcpclient->buff[10] = ((int_2)quantity) >> 8;;
+            tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
+            modbus_async_result = tcpclient->AsyncSend(12);
+            modbus_expected_length = 9 + quantity / 8 + (quantity % 8 ? 1:0);
+            }
+        return 0;
+        }
+    }
 
 int modbus_client::get_async_result()
 	{
 	return tcpclient->get_async_result();
 	}
+
+int modbus_client::async_read_coils( unsigned int start_address, unsigned int quantity )
+    {
+    int ar = get_async_result();
+    if (ar == tcp_client::AR_BUSY)
+        {
+        return 0;
+        }
+    else
+        {
+        if (ar > 0 && ar == modbus_expected_length)
+            {
+            tcpclient->set_async_result(tcp_client::AR_FREE);
+            return 1;
+            }
+        else
+            {
+            tcpclient->buff[0] = 0;
+            tcpclient->buff[1] = 0;
+            tcpclient->buff[2] = 0;
+            tcpclient->buff[3] = 0;
+            tcpclient->buff[4] = 0;
+            tcpclient->buff[5] = 6;
+            tcpclient->buff[6] = 1;
+            tcpclient->buff[7] = 1;
+            tcpclient->buff[8] = ((int_2)start_address) >> 8;
+            tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
+            tcpclient->buff[10] = ((int_2)quantity) >> 8;;
+            tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
+            modbus_async_result = tcpclient->AsyncSend(12);
+            modbus_expected_length = 9 + quantity / 8 + (quantity % 8 ? 1:0);
+            }
+        return 0;
+        }
+    }
+
+int modbus_client::async_read_holding_registers( unsigned int address, unsigned int quantity )
+    {
+    int ar = get_async_result();
+    if (ar == tcp_client::AR_BUSY)
+        {
+        return 0;
+        }
+    else
+        {
+        if (ar > 0 && ar == modbus_expected_length)
+            {
+            tcpclient->set_async_result(tcp_client::AR_FREE);
+            return 1;
+            }
+        else
+            {
+            tcpclient->buff[0] = 0;
+            tcpclient->buff[1] = 0;
+            tcpclient->buff[2] = 0;
+            tcpclient->buff[3] = 0;
+            tcpclient->buff[4] = 0;
+            tcpclient->buff[5] = 6;
+            tcpclient->buff[6] = 1;
+            tcpclient->buff[7] = 3;
+            tcpclient->buff[8] = ((int_2)address) >> 8;
+            tcpclient->buff[9] = ((int_2)address) & 0xFF;
+            tcpclient->buff[10] = ((int_2)quantity) >> 8;;
+            tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
+            modbus_async_result = tcpclient->AsyncSend(12);
+            modbus_expected_length = 9 + quantity * 2;
+            }
+        return 0;
+        }
+    }
+
+int modbus_client::async_read_input_registers( unsigned int address, unsigned int quantity )
+    {
+    int ar = get_async_result();
+    if (ar == tcp_client::AR_BUSY)
+        {
+        return 0;
+        }
+    else
+        {
+        if (ar > 0 && ar == modbus_expected_length)
+            {
+            tcpclient->set_async_result(tcp_client::AR_FREE);
+            return 1;
+            }
+        else
+            {
+            tcpclient->buff[0] = 0;
+            tcpclient->buff[1] = 0;
+            tcpclient->buff[2] = 0;
+            tcpclient->buff[3] = 0;
+            tcpclient->buff[4] = 0;
+            tcpclient->buff[5] = 6;
+            tcpclient->buff[6] = 1;
+            tcpclient->buff[7] = 4;
+            tcpclient->buff[8] = ((int_2)address) >> 8;
+            tcpclient->buff[9] = ((int_2)address) & 0xFF;
+            tcpclient->buff[10] = ((int_2)quantity) >> 8;;
+            tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
+            modbus_async_result = tcpclient->AsyncSend(12);
+            modbus_expected_length = 9 + quantity * 2;
+            }
+        return 0;
+        }
+    
+    }
+
+int modbus_client::async_write_coil( unsigned int address, unsigned char value )
+    {
+    int ar = get_async_result();
+    if (ar == tcp_client::AR_BUSY)
+        {
+        return 0;
+        }
+    else
+        {
+        if (ar > 0 && ar == modbus_expected_length)
+            {
+            tcpclient->set_async_result(tcp_client::AR_FREE);
+            return 1;
+            }
+        else
+            {
+            unsigned char bitstate = value ? 0xFF : 0;
+            tcpclient->buff[0] = 0;
+            tcpclient->buff[1] = 0;
+            tcpclient->buff[2] = 0;
+            tcpclient->buff[3] = 0;
+            tcpclient->buff[4] = 0;
+            tcpclient->buff[5] = 6;
+            tcpclient->buff[6] = 1;
+            tcpclient->buff[7] = 5;
+            tcpclient->buff[8] = ((int_2)address) >> 8;
+            tcpclient->buff[9] = ((int_2)address) & 0xFF;
+            tcpclient->buff[10] = bitstate;
+            tcpclient->buff[11] = 0;
+            modbus_async_result = tcpclient->AsyncSend(12);
+            modbus_expected_length = 12;
+            }
+        return 0;
+        }
+    }
+
+int modbus_client::async_force_multiply_coils( unsigned int address, unsigned int quantity )
+    {
+    int ar = get_async_result();
+    if (ar == tcp_client::AR_BUSY)
+        {
+        return 0;
+        }
+    else
+        {
+        if (ar > 0 && ar == modbus_expected_length)
+            {
+            tcpclient->set_async_result(tcp_client::AR_FREE);
+            return 1;
+            }
+        else
+            {
+            unsigned char bytecount = (unsigned char)quantity / 8 + (((unsigned char)quantity % 8) ? 1:0);
+            tcpclient->buff[0] = 0;
+            tcpclient->buff[1] = 0;
+            tcpclient->buff[2] = 0;
+            tcpclient->buff[3] = 0;
+            tcpclient->buff[4] = 0;
+            tcpclient->buff[5] = 7 + bytecount;
+            tcpclient->buff[6] = 1;
+            tcpclient->buff[7] = 0x0F;
+            tcpclient->buff[8] = ((int_2)address) >> 8;
+            tcpclient->buff[9] = ((int_2)address) & 0xFF;
+            tcpclient->buff[10] = ((int_2)quantity) >> 8;
+            tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
+            tcpclient->buff[12] = bytecount;
+            modbus_async_result = tcpclient->AsyncSend(13 + bytecount);
+            modbus_expected_length = 12;
+            }
+        return 0;
+        }
+    }
+
+int modbus_client::async_write_multiply_registers( unsigned int address, unsigned int quantity )
+    {
+    int ar = get_async_result();
+    if (ar == tcp_client::AR_BUSY)
+        {
+        return 0;
+        }
+    else
+        {
+        if (ar > 0 && ar == modbus_expected_length)
+            {
+            tcpclient->set_async_result(tcp_client::AR_FREE);
+            return 1;
+            }
+        else
+            {
+            unsigned char bytecount = (unsigned char)(quantity * 2);
+            tcpclient->buff[0] = 0;
+            tcpclient->buff[1] = 0;
+            tcpclient->buff[2] = 0;
+            tcpclient->buff[3] = 0;
+            tcpclient->buff[4] = ((int_2)(7 + bytecount)) >> 8;
+            tcpclient->buff[5] = ((int_2)(7 + bytecount)) & 0xFF;
+            tcpclient->buff[6] = 1;
+            tcpclient->buff[7] = 0x10;
+            tcpclient->buff[8] = ((int_2)address) >> 8;
+            tcpclient->buff[9] = ((int_2)address) & 0xFF;
+            tcpclient->buff[10] = ((int_2)quantity) >> 8;
+            tcpclient->buff[11] = ((int_2)quantity) & 0xFF;
+            tcpclient->buff[12] = bytecount;
+            modbus_async_result = tcpclient->AsyncSend(13 + bytecount);
+            modbus_expected_length = 12;
+            }
+        return 0;
+        }
+    }
