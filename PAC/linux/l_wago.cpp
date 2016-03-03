@@ -237,7 +237,7 @@ int wago_manager_linux::write_outputs()
                 else
                     {
 #ifdef DEBUG
-                    Print("\nWrite AO:Wago returned error...\n");
+                    //Print("\nWrite AO:Wago returned error...\n");
 #endif // DEBUG
                     }
                 }// if ( nd->AO_cnt > 0 )
