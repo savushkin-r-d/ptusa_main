@@ -2116,7 +2116,7 @@ class motor : public device, public wago_device
         motor( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
             device( dev_name, DT_M, sub_type, ADDITIONAL_PARAM_COUNT ),
             wago_device( dev_name ),
-            start_switch_time( 0 )
+            start_switch_time( get_millisec() )
 #ifdef DEBUG_NO_WAGO_MODULES
             ,state( 0 ),
             freq( 0 )
