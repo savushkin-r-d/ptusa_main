@@ -469,6 +469,21 @@ void open_seat_action::evaluate()
     switch ( phase )
         {
     case P_WAIT:
+        for ( u_int i = 0; i < wash_lower_seat_devices.size(); i++ )
+        	{        	
+            for ( u_int j = 0; j < wash_lower_seat_devices[ i ].size(); j++ )
+                {
+                wash_lower_seat_devices[ i ][ j ]->off();
+                }
+            }
+        for ( u_int i = 0; i < wash_upper_seat_devices.size(); i++ )
+            {        	
+            for ( u_int j = 0; j < wash_upper_seat_devices[ i ].size(); j++ )
+                {
+                wash_upper_seat_devices[ i ][ j ]->off();
+                }
+            }
+
         // Пора промывать седла.
         if ( get_delta_millisec( start_cycle_time ) > wait_time )
             {
