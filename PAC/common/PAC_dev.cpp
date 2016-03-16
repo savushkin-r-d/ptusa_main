@@ -194,6 +194,8 @@ void par_device::set_par_name( u_int idx, u_int offset, const char* name )
 //-----------------------------------------------------------------------------
 void device::set_descr( const char *new_description )
     {
+    delete[] description;
+
     //Копирование с учетом нуль-символа.
     int len = strlen( new_description ) + 1;
     description = new char[ len ];
@@ -354,6 +356,13 @@ par_device( par_cnt ),
         {
         strcpy( this->name, dev_name );
         }
+    else
+        {
+        strcpy( this->name, "?" );
+        }
+
+    description = new char[ 1 ];
+    description[ 0 ] = 0;
     }
 //-----------------------------------------------------------------------------
 device::~device()
