@@ -1994,7 +1994,55 @@ void DI1::direct_on()
 void DI1::direct_off()
     {
     }
+//-----------------------------------------------------------------------------
+int DI1::get_state()
+    {
+    u_int_4 dt = ( u_int_4 ) get_par( P_DT, 0 );
 
+    if ( dt > 0 )
+        {
+        if ( current_state != get_DI( DI_INDEX ) )
+            {
+            if ( get_delta_millisec( time ) > dt  ) 
+                {
+                current_state = get_DI( DI_INDEX );
+                time = get_millisec();
+                }
+            }
+        else 
+            {
+            time = get_millisec();
+            }
+        }
+    else current_state = get_DI( DI_INDEX );
+
+    return current_state;
+    }
+//-----------------------------------------------------------------------------
+#else
+int DI1::get_state()
+    {
+    u_int_4 dt = ( u_int_4 ) get_par( P_DT, 0 );
+
+    if ( dt > 0 )
+        {
+        if ( current_state != digital_wago_device::get_state() )
+            {
+            if ( get_delta_millisec( time ) > dt  ) 
+                {
+                current_state = digital_wago_device::get_state();
+                time = get_millisec();
+                }
+            }
+        else 
+            {
+            time = get_millisec();
+            }
+        }
+    else current_state = digital_wago_device::get_state();
+
+    return current_state;
+    }
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2452,9 +2500,8 @@ bool level_s::is_active()
     }
 //-----------------------------------------------------------------------------
 level_s::level_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
-    DI1( dev_name, DT_LS, sub_type, ADDITIONAL_PARAMS_COUNT )
+    DI1( dev_name, DT_LS, sub_type, 0 )
     {
-    set_par_name( P_DT,  0, "P_DT" );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

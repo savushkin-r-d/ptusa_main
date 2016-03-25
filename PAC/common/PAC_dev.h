@@ -2039,8 +2039,12 @@ class DI1 : public digital_wago_device
         DI1( const char *dev_name,
             device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ):
-        digital_wago_device( dev_name, type, sub_type, par_cnt )
+        digital_wago_device( dev_name, type, sub_type,
+            ADDITIONAL_PARAMS_COUNT + par_cnt ),
+            current_state( 0 ),
+            time( 0 )
             {
+            set_par_name( P_DT,  0, "P_DT" );
             }
 
 #ifndef DEBUG_NO_WAGO_MODULES
@@ -2048,17 +2052,27 @@ class DI1 : public digital_wago_device
         void direct_on();
         void direct_off();
 
-        int get_state()
-            {
-            return get_DI( DI_INDEX );
-            }
+        int get_state();
+#else
+        /// @brief Получение состояния объекта.
+        ///
+        /// @return - состояние объекта.
+        int  get_state();
+#endif // DEBUG_NO_WAGO_MODULES
+
 
     private:
+        int current_state;
+        u_int_4 time;
+
         enum CONSTANTS
             {
             DI_INDEX = 0,   ///< Индекс канала дискретного входа.
+
+            ADDITIONAL_PARAMS_COUNT = 1,
+
+            P_DT = 1,
             };
-#endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним каналом управления.
@@ -2116,7 +2130,7 @@ class motor : public device, public wago_device
         motor( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
             device( dev_name, DT_M, sub_type, ADDITIONAL_PARAM_COUNT ),
             wago_device( dev_name ),
-            start_switch_time( get_millisec() )
+            start_switch_time( 0 )
 #ifdef DEBUG_NO_WAGO_MODULES
             ,state( 0 ),
             freq( 0 )
@@ -2174,14 +2188,6 @@ class level_s : public DI1
         level_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type );
 
         bool is_active();
-
-    private:
-        enum CONSTANTS
-            {
-            ADDITIONAL_PARAMS_COUNT = 1,
-
-            P_DT = 1,
-            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора расхода.
@@ -2189,18 +2195,9 @@ class flow_s : public DI1
     {
     public:
         flow_s( const char *dev_name ): DI1( dev_name, DT_FS, DST_NONE,
-            ADDITIONAL_PARAMS_COUNT )
-            {
-            set_par_name( P_DT,  0, "P_DT" );
+            0 )
+            {            
             }
-
-    private:
-        enum CONSTANTS
-            {
-            ADDITIONAL_PARAMS_COUNT = 1,
-
-            P_DT = 1,
-            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик положения.
@@ -2208,18 +2205,9 @@ class state_s : public DI1
     {
     public:
         state_s( const char *dev_name ): DI1( dev_name, DT_GS, DST_NONE,
-            ADDITIONAL_PARAMS_COUNT )
-            {
-            set_par_name( P_DT,  0, "P_DT" );
+            0 )
+            {           
             }
-
-    private:
-        enum CONSTANTS
-            {
-            ADDITIONAL_PARAMS_COUNT = 1,
-
-            P_DT = 1,
-            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик дискретного входа связи.
