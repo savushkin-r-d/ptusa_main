@@ -178,6 +178,7 @@ enum MODULE_CONSTANTS
 
 //errors
 #define SERR_UNKNOWN_STEP  -2
+#define ERR_POSSIBLE_NO_MEDIUM -9
 #define NO_ACID            -10
 #define NO_ALKALINE        -11
 #define NO_RETURN          -12
@@ -504,6 +505,11 @@ class cipline_tech_object: public tech_object
 
 		virtual void resetCarNumber();
 
+        //для ошибки "возможно отсутствует концентрированный раствор"
+        int no_liquid_is_warning;
+        int no_liquid_phase;
+        float no_liquid_last_time;
+
 		//Обработчики LUA
 		int is_in_evaluate_func;
 		int is_InitCustomStep_func;
@@ -707,7 +713,7 @@ class cipline_tech_object: public tech_object
 		virtual int InitFilRR(int where);
 		virtual int InitCircRR(int where);
 		virtual int InitCheckConc(int where);
-		virtual int InitAddRR(int where);
+		virtual int InitAddRR(int where, int step, int first_init_flag);
 		virtual int InitOpolRR(int where);
 		virtual int FilRR(int where);
 		virtual int CircRR(int where);

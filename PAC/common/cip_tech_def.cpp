@@ -153,6 +153,11 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
     is_InitCustomStep_func = 0;
     is_DoCustomStep_func = 0;
 
+    //дл€ ошибки "возможно отсутствует концентрированный раствор"
+    no_liquid_is_warning = 0;
+    no_liquid_phase = 0;
+    no_liquid_last_time = 0;
+
     if (tech_type == 112)
         {
         scenabled = 1;
@@ -1794,12 +1799,12 @@ int cipline_tech_object::InitStep( int step, int f )
         case 105: return InitFilRR(TANK_S);
         case 106: return InitCircRR(TANK_S);
         case 108: return InitCheckConc(TANK_S);
-        case 109: return InitAddRR(TANK_S);
+        case 109: return InitAddRR(TANK_S, step, f);
         case 111: return InitOpolRR(TANK_S);
         case 115: return InitFilRR(TANK_K);
         case 116: return InitCircRR(TANK_K);
         case 118: return InitCheckConc(TANK_K);
-        case 119: return InitAddRR(TANK_K);
+        case 119: return InitAddRR(TANK_K, step, f);
         case 121: return InitOpolRR(TANK_K);
 
         case 151: return SCInitPumping(WATER, TANK_W, KANAL, -1, step, f);
@@ -2765,8 +2770,8 @@ int cipline_tech_object::InitCheckConc( int where )
     return 0;
     }
 
-int cipline_tech_object::InitAddRR( int where )
-    {
+int cipline_tech_object::InitAddRR( int where, int step, int first_init_flag )
+{
     float v, pd = 0, kk = 0, kz = 0, ro = 0, vt = 0, kt;
     V05->off();
     V06->on();
@@ -2806,15 +2811,6 @@ int cipline_tech_object::InitAddRR( int where )
         }
     kt=rt_par_float[P_CONC] / 100;
 
-    float divider = (1-kz)*kk*ro;
-    if (0 == divider)
-        {
-        divider = 1;
-        }
-    v=(kz-kt)*vt/(divider);
-
-    if (v<1) v=1;
-
     NP->on();
     rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
     PIDP->on();
@@ -2827,16 +2823,50 @@ int cipline_tech_object::InitAddRR( int where )
     rt_par_float[P_VRAB] = 0;
 
     rt_par_float[P_OP_TIME_LEFT] = 0;
-    divider = pd;
-    if (0 == divider)
+
+    if (0 == first_init_flag)
         {
-        divider = 1;
+        float divider = (1-kz)*kk*ro;
+        if (0 == divider)
+            {
+            divider = 1;
+            }
+        v=(kz-kt)*vt/(divider);
+
+        if (v<1) v=1;
+        divider = pd;
+        if (0 == divider)
+            {
+            divider = 1;
+            }
+        rt_par_float[P_MAX_OPER_TM] = (v/divider)*3600;
+        switch (no_liquid_phase)
+            {
+            case 0: //начало первого цикла добавлени€ раствора - запоминаем врем€
+                no_liquid_last_time = v/divider*1000;
+                no_liquid_phase = 1;
+                no_liquid_is_warning = 0;
+                break;
+            case 1: //не первый цикл. сравниваем врем€ с предыдущим. ≈сли совпадают с допуском до 10% выдаем 1 раз ошибку.
+                if (fabs(no_liquid_last_time - v/divider*1000) < no_liquid_last_time * 0.1)
+                    {
+                    no_liquid_is_warning = 1;
+                    }
+                no_liquid_last_time = v/divider*1000;
+                break;
+            default:
+                no_liquid_last_time = v/divider*1000;
+                no_liquid_phase = 1;
+                no_liquid_is_warning = 0;
+                break;
+            }
+        T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000L);
+
+        rt_par_float[P_SUM_OP] = 0;
         }
-    rt_par_float[P_MAX_OPER_TM] = (v/divider)*3600;
-    T[TMR_OP_TIME]->set_countdown_time((unsigned long)rt_par_float[P_MAX_OPER_TM] * 1000L);
     T[TMR_OP_TIME]->start();
-    rt_par_float[P_SUM_OP] = 0;
     cnt->start();
+
     return 0;
     }
 
@@ -3071,6 +3101,11 @@ int cipline_tech_object::AddRR( int where )
     if (T[TMR_OP_TIME]->is_time_up())
         {
         return 1;
+        }
+    if (no_liquid_is_warning)
+        {
+        no_liquid_is_warning = 0;
+        return ERR_POSSIBLE_NO_MEDIUM;
         }
     return 0;
     }
@@ -3477,7 +3512,14 @@ int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
     T[TMR_RETURN]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_FLOW_R] * 1000);
     T[TMR_RETURN]->reset();
     T[TMR_CHK_CONC]->reset();
-    T[TMR_CHK_CONC]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_CONC] * 1000);
+    if (what == TANK_K || what == TANK_S || where == TANK_S || where == TANK_K)
+        {
+        T[TMR_CHK_CONC]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_CONC] * 1000 * 2); //дл€ ошибки "высока€ концентраци€ в возвратной трубе"
+        }
+    else
+        {
+        T[TMR_CHK_CONC]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_CONC] * 1000); //дл€ ошибки "нет концентрации в возвратной трубе"
+        }
     rt_par_float[P_SUM_OP] = 0;
 
     rt_par_float[P_ZAD_CONC] = z;
