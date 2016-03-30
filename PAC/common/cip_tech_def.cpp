@@ -2169,6 +2169,8 @@ void cipline_tech_object::ResetLinesDevicesBeforeReset( void )
     dev_upr_desinfection = 0;
     dev_upr_cip_ready = 0;
     dev_upr_cip_finished = 0;
+    no_liquid_is_warning = 0;
+    no_liquid_phase = 0;
     //ѕеременные дл€ циркул€ции
     circ_tank_s = 0;
     circ_tank_k = 0;
