@@ -73,68 +73,31 @@ int wago_manager_w750::read_inputs()
 #endif // DEBUG_KBUS
 
                 // AI
-                u_int idx = 0;
-                bool is_first_655 = true;
+                u_int offset = 0;
 
                 for ( u_int j = 0; j < nd->AI_cnt; j++ )
                     {
-                    u_int offset = nd->AI_offsets[ j ];
-                    u_int val = pstPabIN->uc.Pab[ offset ] +
-                        256 * pstPabIN->uc.Pab[ offset + 1 ];
+                    u_int val = 0;
 
-                    if ( nd->AI_types[ j ] != 655 )
+                    switch ( nd->AI_types[ j ] ) //More than one word.
                         {
-                        // ѕо€вилс€ другой модуль, значит следующий 655 будет
-                        // первым.
-                        is_first_655 = true;
-                        }
-
-                    switch ( nd->AI_types[ j ] )
-                        {
-                    case 466:
-                    case 461:
-                        val = pstPabIN->uc.Pab[ offset ] +
-                            256 * pstPabIN->uc.Pab[ offset + 1 ];
-                        nd->AI[ idx++ ] = val;
-                        break;
-
-                    case 638:
-                        val = pstPabIN->uc.Pab[ offset + 2 ] +
-                            256 * pstPabIN->uc.Pab[ offset + 3 ];
-                        nd->AI[ idx++ ] = val;
-                        break;
-
-                    case 655:
-                        if ( !is_first_655 ) //„итаем по первому каналу все 20 слов!
-                            {
-                            break;
-                            }
-
-                        char* data = ( char* ) ( nd->AI + idx );
-#ifdef DEBUG_ASI
-                        printf( "750-655 AI, idx = %d\n", idx );
-#endif // DEBUG_ASI
-                        for ( int l = 0; l < 40; l++ )
-                            {
-                            data[ l ] = pstPabIN->uc.Pab[ offset + l ];
-#ifdef DEBUG_ASI
-                            printf( "%d -> %d, ", l, data[ l ] );
-#endif // DEBUG_ASI
-                            }
-#ifdef DEBUG_ASI
-                            printf( "\n" );
-#endif // DEBUG_ASI
-                        is_first_655 = false;
-                        idx += 20;
+                    case 450:
+                        val = pstPabIN->uc.Pab[ offset + 2 ] + 256 * pstPabIN->uc.Pab[ offset + 3 ];
+                        offset += 4;
+                        break;                    case 638:
+                        val = pstPabIN->uc.Pab[ offset + 2 ] + 256 * pstPabIN->uc.Pab[ offset + 3 ];
+                        offset += 4;
                         break;
 
                     default:
-                        nd->AI[ idx++ ] = val;
+                        val = pstPabIN->uc.Pab[ offset ] + 256 * pstPabIN->uc.Pab[ offset + 1 ];
+                        offset += 2;
                         break;
                         }
 
+                    nd->AI[ j ] = val;
 #ifdef DEBUG_KBUS
-                    printf( "%d -> %u, ", idx, nd->AI[ idx ] );
+                    printf( "%d -> %u, ", j, nd->AI[ j ] );
 #endif // DEBUG_KBUS
                     }
 #ifdef DEBUG_KBUS
@@ -188,72 +151,34 @@ int wago_manager_w750::write_outputs()
 #endif // DEBUG_KBUS
 
                 // AO
-                int in_idx  = 0;
-                bool is_first_655 = true;
+            u_int offset = 0;
 
-                for ( u_int j = 0; j < nd->AO_cnt; j++ )
+            for ( u_int j = 0; j < nd->AO_cnt; j++ )
+                {
+                int_2 val = nd->AO_[ j ];
+
+                switch ( nd->AO_types[ j ] ) //More than one word.
                     {
-                    u_int offset = nd->AO_offsets[ j ];
+                    case 450:                    case 638:
+                        pstPabOUT->uc.Pab[ offset     ] = 0;
+                        pstPabOUT->uc.Pab[ offset + 1 ] = 0;
+                        pstPabOUT->uc.Pab[ offset + 2 ] = 0;
+                        pstPabOUT->uc.Pab[ offset + 3 ] = 0;
+                        offset += 4;
+                        break;
 
-                    if ( nd->AO_types[ j ] != 655 )
-                        {
-                        // ѕо€вилс€ другой модуль, значит следующий 655 будет
-                        // первым.
-                        is_first_655 = true;
-                        }
-
-                    switch ( nd->AO_types[ j ] )
-                        {
-                        case 638:
-                            pstPabOUT->uc.Pab[ offset     ] = 0;
-                            pstPabOUT->uc.Pab[ offset + 1 ] = 0;
-                            pstPabOUT->uc.Pab[ offset + 2 ] = 0;
-                            pstPabOUT->uc.Pab[ offset + 3 ] = 0;
-
-                            in_idx++;
-                            break;
-
-                        case 655:
-                            {
-                            if ( !is_first_655 ) //ѕишем по первому каналу все 20 слов!
-                                {
-                                break;
-                                }
-
-                            char* data = ( char* ) ( nd->AO_ + in_idx );
-#ifdef DEBUG_ASI
-                            printf( "750-655, idx = %d\n", in_idx );
-#endif // DEBUG_ASI
-                            for ( int l = 0; l < 40; l++ )
-                                {
-                                pstPabOUT->uc.Pab[ offset + l ] = data[ l ];
-#ifdef DEBUG_ASI
-                                printf( "%d -> %d, ", l, data[ l ] );
-#endif // DEBUG_ASI
-                                }
-#ifdef DEBUG_ASI
-                            printf( "\n" );
-#endif // DEBUG_ASI
-                            in_idx += 20;
-                            is_first_655 = false;
-                            break;
-                            }
-
-                        default:
-                            {
-                            int val = nd->AO_[ in_idx ];
-
-                            pstPabOUT->uc.Pab[ offset     ] = val & 0xFF;
-                            pstPabOUT->uc.Pab[ offset + 1 ] = val >> 8;
-                            in_idx++;
-                            break;
-                            }
-                        }
-
-#ifdef DEBUG_KBUS
-                    printf( "%d -> %u, ", j, nd->AO_[ j ] );
-#endif // DEBUG_KBUS
+                    default:
+                        pstPabOUT->uc.Pab[ offset     ] = val & 0xFF;
+                        pstPabOUT->uc.Pab[ offset + 1 ] = val >> 8;
+                        offset += 2;
+                        break;
                     }
+
+                nd->AO[ j ] = nd->AO_[ j ];
+#ifdef DEBUG_KBUS
+                printf( "%d -> %u, ", j, nd->AO_[ j ] );
+#endif // DEBUG_KBUS
+                }
 
                 memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
 
