@@ -134,6 +134,16 @@ int PAC_info::set_cmd( const char *prop, u_int idx, double val )
 
     return 0;
     }
+
+bool PAC_info::is_emulator()
+    {
+#ifdef DEBUG_NO_WAGO_MODULES
+    return true;
+#else
+    return false;
+#endif
+    }
+
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 PAC_info* G_PAC_INFO()

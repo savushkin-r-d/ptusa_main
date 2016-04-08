@@ -1026,6 +1026,7 @@ class PAC_info: public i_Lua_save_device
         saved_params_u_int_4 par;
 
         int set_cmd( const char *prop, unsigned int idx, double val );
+        bool is_emulator();
 	};
 //----------------------------------------------------------------------------
 class siren_lights_manager
@@ -1226,6 +1227,7 @@ class modbus_client
         int async_force_multiply_coils(unsigned int address, unsigned int quantity);
         int async_write_multiply_registers(unsigned int address, unsigned int quantity);
 		int get_async_result();
+        void set_station(unsigned char new_station_id);
 		//функции для работы с буфером из Lua
 		void zero_output_buff();
 		void set_int2(unsigned int address, short value);

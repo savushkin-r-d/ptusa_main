@@ -8,6 +8,7 @@ class modbus_client
 		tcp_client* tcpclient;
 		int modbus_expected_length;
 		int modbus_async_result;
+        unsigned char stationid;
 	public:
 		modbus_client(unsigned int id, char* ip, unsigned int port = 502, unsigned long exchangetimeout = 50);
 		int get_id();
@@ -27,6 +28,7 @@ class modbus_client
         int async_force_multiply_coils(unsigned int address, unsigned int quantity);
         int async_write_multiply_registers(unsigned int address, unsigned int quantity);
 		int get_async_result();
+        void set_station(unsigned char new_station_id);
 		//функции для работы с буфером из lua
 		void zero_output_buff();
 		void set_int2(unsigned int address, int_2 value);

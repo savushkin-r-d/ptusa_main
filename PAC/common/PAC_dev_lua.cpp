@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 02/18/16 12:24:34.
+** Generated automatically by tolua++-1.0.92 on 04/08/16 12:16:22.
 */
 
 #ifndef __cplusplus
@@ -5334,6 +5334,38 @@ static int tolua_PAC_dev_PAC_info_set_cmd00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: is_emulator of class  PAC_info */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_PAC_info_is_emulator00
+static int tolua_PAC_dev_PAC_info_is_emulator00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"PAC_info",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  PAC_info* self = (PAC_info*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'is_emulator'", NULL);
+#endif
+  {
+   bool tolua_ret = (bool)  self->is_emulator();
+   tolua_pushboolean(tolua_S,(bool)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'is_emulator'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: init of class  siren_lights_manager */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_siren_lights_manager_init00
 static int tolua_PAC_dev_siren_lights_manager_init00(lua_State* tolua_S)
@@ -8933,6 +8965,39 @@ static int tolua_PAC_dev_modbus_client_get_async_result00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: set_station of class  modbus_client */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_set_station00
+static int tolua_PAC_dev_modbus_client_set_station00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"modbus_client",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  modbus_client* self = (modbus_client*)  tolua_tousertype(tolua_S,1,0);
+  unsigned char new_station_id = ((unsigned char)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_station'", NULL);
+#endif
+  {
+   self->set_station(new_station_id);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_station'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: zero_output_buff of class  modbus_client */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_zero_output_buff00
 static int tolua_PAC_dev_modbus_client_zero_output_buff00(lua_State* tolua_S)
@@ -9698,6 +9763,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"P_V_BOTTOM_OFF_DELAY_TIME",PAC_info::P_V_BOTTOM_OFF_DELAY_TIME);
    tolua_variable(tolua_S,"par",tolua_get_PAC_info_par,tolua_set_PAC_info_par);
    tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_PAC_info_set_cmd00);
+   tolua_function(tolua_S,"is_emulator",tolua_PAC_dev_PAC_info_is_emulator00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"siren_lights_manager","siren_lights_manager","",NULL);
   tolua_beginmodule(tolua_S,"siren_lights_manager");
@@ -9843,6 +9909,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"async_force_multiply_coils",tolua_PAC_dev_modbus_client_async_force_multiply_coils00);
    tolua_function(tolua_S,"async_write_multiply_registers",tolua_PAC_dev_modbus_client_async_write_multiply_registers00);
    tolua_function(tolua_S,"get_async_result",tolua_PAC_dev_modbus_client_get_async_result00);
+   tolua_function(tolua_S,"set_station",tolua_PAC_dev_modbus_client_set_station00);
    tolua_function(tolua_S,"zero_output_buff",tolua_PAC_dev_modbus_client_zero_output_buff00);
    tolua_function(tolua_S,"set_int2",tolua_PAC_dev_modbus_client_set_int200);
    tolua_function(tolua_S,"get_int2",tolua_PAC_dev_modbus_client_get_int200);

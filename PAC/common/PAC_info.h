@@ -33,6 +33,8 @@ class PAC_info: public i_Lua_save_device
 
         int save_device( char *buff );
 
+        bool is_emulator();
+
 #ifdef RM_PAC
         int rm_save_device_state( char *buff )
             {

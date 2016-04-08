@@ -704,8 +704,24 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_AO:
-            new_device      = new analog_output( dev_name );
-            new_wago_device = ( analog_output* ) new_device;
+            switch (dev_sub_type)
+                {
+                case device::DST_NONE:
+                case device::DST_AO:
+                    new_device      = new analog_output( dev_name );
+                    new_wago_device = ( analog_output* ) new_device;
+                    break;
+                case device::DST_AO_VIRT:
+                    new_device      = new virtual_device( dev_name, device::DT_AO, device::DST_AO_VIRT );
+                    break;
+                default:
+#ifdef DEBUG
+                    Print( "Unknown AO device subtype %d!\n", dev_sub_type );
+                    get_char();
+#endif // DEBUG
+                    new_device      = new dev_stub();
+                    break;
+                }
             break;
 
         case device::DT_LT:
@@ -714,13 +730,45 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_DI:
-            new_device      = new DI_signal( dev_name );
-            new_wago_device = ( DI_signal* ) new_device;
+            switch (dev_sub_type)
+                {
+                case device::DST_NONE:
+                case device::DST_DI:
+                    new_device      = new DI_signal( dev_name );
+                    new_wago_device = ( DI_signal* ) new_device;
+                    break;
+                case device::DST_DI_VIRT:
+                    new_device      = new virtual_device( dev_name, device::DT_DI, device::DST_DI_VIRT );
+                    break;
+                default:
+#ifdef DEBUG
+                    Print( "Unknown DI device subtype %d!\n", dev_sub_type );
+                    get_char();
+#endif // DEBUG
+                    new_device      = new dev_stub();
+                    break;
+                }
             break;
 
         case device::DT_DO:
-            new_device      = new DO_signal( dev_name );
-            new_wago_device = ( DO_signal* ) new_device;
+            switch (dev_sub_type)
+                {
+                case device::DST_NONE:
+                case device::DST_DO:
+                    new_device      = new DO_signal( dev_name );
+                    new_wago_device = ( DO_signal* ) new_device;
+                    break;
+                case device::DST_DO_VIRT:
+                    new_device      = new virtual_device( dev_name, device::DT_DO, device::DST_DO_VIRT );
+                    break;
+                default:
+#ifdef DEBUG
+                    Print( "Unknown DO device subtype %d!\n", dev_sub_type );
+                    get_char();
+#endif // DEBUG
+                    new_device      = new dev_stub();
+                    break;
+                }
             break;
 
         case device::DT_PT:
@@ -734,8 +782,24 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_AI:
-            new_device      = new analog_input( dev_name );
-            new_wago_device = ( analog_input* ) new_device;
+            switch (dev_sub_type)
+                {
+                case device::DST_NONE:
+                case device::DST_AI:
+                    new_device      = new analog_input( dev_name );
+                    new_wago_device = ( analog_input* ) new_device;
+                    break;
+                case device::DST_AI_VIRT:
+                    new_device      = new virtual_device( dev_name, device::DT_AI, device::DST_AI_VIRT );
+                    break;
+                default:
+#ifdef DEBUG
+                    Print( "Unknown AI device subtype %d!\n", dev_sub_type );
+                    get_char();
+#endif // DEBUG
+                    new_device      = new dev_stub();
+                    break;
+                }
             break;
 
         case device::DT_HA:
@@ -2960,3 +3024,41 @@ void valve_AS_DO1_DI2::direct_set_state(int new_state)
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+
+void virtual_device::direct_off()
+    {
+    state = 0;
+    }
+
+void virtual_device::direct_set_value( float new_value )
+    {
+    value = new_value;
+    }
+
+float virtual_device::get_value()
+    {
+    return value;
+    }
+
+void virtual_device::direct_set_state( int new_state )
+    {
+    state = new_state;
+    }
+
+void virtual_device::direct_on()
+    {
+    state = 1;
+    }
+
+int virtual_device::get_state()
+    {
+    return state;
+    }
+
+virtual_device::virtual_device( const char *dev_name, device::DEVICE_TYPE dev_type, device::DEVICE_SUB_TYPE dev_sub_type ) : device (dev_name, dev_type, dev_sub_type, 0)
+    {
+    value = 0;
+    state = 0;
+    }
+
+

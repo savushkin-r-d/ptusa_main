@@ -418,6 +418,22 @@ class device : public i_DO_AO_device, public par_device
 
             DST_FQT = 1,   ///< Счетчик.
             DST_FQT_F,     ///< Счетчик + Расход.
+
+            //DO
+            DST_DO = 1,         ///Обычный дискретный выход с привязкой к модулям
+            DST_DO_VIRT,    ///Виртуальный дискретный выход(без привязки к модулям)
+
+            //DI
+            DST_DI = 1,         ///Обычный дискретный вход с привязкой к модулям
+            DST_DI_VIRT,    ///Виртуальный дискретный вход(без привязки к модулям)
+
+            //AO
+            DST_AO = 1,         ///Обычный аналоговый выход с привязкой к модулям
+            DST_AO_VIRT,    ///Виртуальный аналоговый выход(без привязки к модулям)
+
+            //AI
+            DST_AI = 1,         ///Обычный аналоговый вход с привязкой к модулям
+            DST_AI_VIRT,    ///Виртуальный аналоговый вход(без привязки к модулям)
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -1943,6 +1959,33 @@ class wages : public analog_wago_device, public i_wages
             return sprintf( buff, "W=%.3f, ", get_value() );
             }
     };
+//-----------------------------------------------------------------------------
+/// @brief Виртуальное устройство без привязки к модулям ввода-вывода
+class virtual_device : public device
+    {
+    public:
+        virtual_device( const char *dev_name, device::DEVICE_TYPE dev_type, device::DEVICE_SUB_TYPE dev_sub_type);
+
+    protected:
+
+        float value;
+        int state;
+
+    public:
+
+        virtual void direct_off();
+
+        virtual void direct_set_value( float new_value );
+
+        virtual float get_value();
+
+        virtual void direct_set_state( int new_state );
+
+        virtual void direct_on();
+
+        virtual int get_state();
+
+     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым выходом.
 ///

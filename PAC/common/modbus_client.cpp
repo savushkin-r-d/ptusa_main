@@ -11,6 +11,7 @@ modbus_client::modbus_client(unsigned int id, char* ip, unsigned int port, unsig
 	zero_output_buff();
 	modbus_async_result = 0;
 	modbus_expected_length = 0;
+    stationid = 1;
 	}
 
 modbus_client::~modbus_client()
@@ -26,7 +27,7 @@ int modbus_client::read_discrete_inputs( unsigned int start_address, unsigned in
 	tcpclient->buff[3] = 0;
 	tcpclient->buff[4] = 0;
 	tcpclient->buff[5] = 6;
-	tcpclient->buff[6] = 1;
+	tcpclient->buff[6] = stationid;
 	tcpclient->buff[7] = 2;
 	tcpclient->buff[8] = ((int_2)start_address) >> 8;
 	tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
@@ -51,7 +52,7 @@ int modbus_client::read_coils( unsigned int start_address, unsigned int quantity
 	tcpclient->buff[3] = 0;
 	tcpclient->buff[4] = 0;
 	tcpclient->buff[5] = 6;
-	tcpclient->buff[6] = 1;
+	tcpclient->buff[6] = stationid;
 	tcpclient->buff[7] = 1;
 	tcpclient->buff[8] = ((int_2)start_address) >> 8;
 	tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
@@ -76,7 +77,7 @@ int modbus_client::read_holding_registers( unsigned int address, unsigned int qu
 	tcpclient->buff[3] = 0;
 	tcpclient->buff[4] = 0;
 	tcpclient->buff[5] = 6;
-	tcpclient->buff[6] = 1;
+	tcpclient->buff[6] = stationid;
 	tcpclient->buff[7] = 3;
 	tcpclient->buff[8] = ((int_2)address) >> 8;
 	tcpclient->buff[9] = ((int_2)address) & 0xFF;
@@ -101,7 +102,7 @@ int modbus_client::read_input_registers( unsigned int address, unsigned int quan
 	tcpclient->buff[3] = 0;
 	tcpclient->buff[4] = 0;
 	tcpclient->buff[5] = 6;
-	tcpclient->buff[6] = 1;
+	tcpclient->buff[6] = stationid;
 	tcpclient->buff[7] = 4;
 	tcpclient->buff[8] = ((int_2)address) >> 8;
 	tcpclient->buff[9] = ((int_2)address) & 0xFF;
@@ -127,7 +128,7 @@ int modbus_client::write_coil( unsigned int address, unsigned char value )
 	tcpclient->buff[3] = 0;
 	tcpclient->buff[4] = 0;
 	tcpclient->buff[5] = 6;
-	tcpclient->buff[6] = 1;
+	tcpclient->buff[6] = stationid;
 	tcpclient->buff[7] = 5;
 	tcpclient->buff[8] = ((int_2)address) >> 8;
 	tcpclient->buff[9] = ((int_2)address) & 0xFF;
@@ -153,7 +154,7 @@ int modbus_client::force_multiply_coils( unsigned int address, unsigned int quan
 	tcpclient->buff[3] = 0;
 	tcpclient->buff[4] = 0;
 	tcpclient->buff[5] = 7 + bytecount;
-	tcpclient->buff[6] = 1;
+	tcpclient->buff[6] = stationid;
 	tcpclient->buff[7] = 0x0F;
 	tcpclient->buff[8] = ((int_2)address) >> 8;
 	tcpclient->buff[9] = ((int_2)address) & 0xFF;
@@ -181,7 +182,7 @@ int modbus_client::write_multiply_registers( unsigned int address, unsigned int 
 	tcpclient->buff[3] = 0;
 	tcpclient->buff[4] = ((int_2)(7 + bytecount)) >> 8;
 	tcpclient->buff[5] = ((int_2)(7 + bytecount)) & 0xFF;
-	tcpclient->buff[6] = 1;
+	tcpclient->buff[6] = stationid;
 	tcpclient->buff[7] = 0x10;
 	tcpclient->buff[8] = ((int_2)address) >> 8;
 	tcpclient->buff[9] = ((int_2)address) & 0xFF;
@@ -325,7 +326,7 @@ int modbus_client::async_read_discrete_inputs( unsigned int start_address, unsig
             tcpclient->buff[3] = 0;
             tcpclient->buff[4] = 0;
             tcpclient->buff[5] = 6;
-            tcpclient->buff[6] = 1;
+            tcpclient->buff[6] = stationid;
             tcpclient->buff[7] = 2;
             tcpclient->buff[8] = ((int_2)start_address) >> 8;
             tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
@@ -365,7 +366,7 @@ int modbus_client::async_read_coils( unsigned int start_address, unsigned int qu
             tcpclient->buff[3] = 0;
             tcpclient->buff[4] = 0;
             tcpclient->buff[5] = 6;
-            tcpclient->buff[6] = 1;
+            tcpclient->buff[6] = stationid;
             tcpclient->buff[7] = 1;
             tcpclient->buff[8] = ((int_2)start_address) >> 8;
             tcpclient->buff[9] = ((int_2)start_address) & 0xFF;
@@ -400,7 +401,7 @@ int modbus_client::async_read_holding_registers( unsigned int address, unsigned 
             tcpclient->buff[3] = 0;
             tcpclient->buff[4] = 0;
             tcpclient->buff[5] = 6;
-            tcpclient->buff[6] = 1;
+            tcpclient->buff[6] = stationid;
             tcpclient->buff[7] = 3;
             tcpclient->buff[8] = ((int_2)address) >> 8;
             tcpclient->buff[9] = ((int_2)address) & 0xFF;
@@ -435,7 +436,7 @@ int modbus_client::async_read_input_registers( unsigned int address, unsigned in
             tcpclient->buff[3] = 0;
             tcpclient->buff[4] = 0;
             tcpclient->buff[5] = 6;
-            tcpclient->buff[6] = 1;
+            tcpclient->buff[6] = stationid;
             tcpclient->buff[7] = 4;
             tcpclient->buff[8] = ((int_2)address) >> 8;
             tcpclient->buff[9] = ((int_2)address) & 0xFF;
@@ -472,7 +473,7 @@ int modbus_client::async_write_coil( unsigned int address, unsigned char value )
             tcpclient->buff[3] = 0;
             tcpclient->buff[4] = 0;
             tcpclient->buff[5] = 6;
-            tcpclient->buff[6] = 1;
+            tcpclient->buff[6] = stationid;
             tcpclient->buff[7] = 5;
             tcpclient->buff[8] = ((int_2)address) >> 8;
             tcpclient->buff[9] = ((int_2)address) & 0xFF;
@@ -508,7 +509,7 @@ int modbus_client::async_force_multiply_coils( unsigned int address, unsigned in
             tcpclient->buff[3] = 0;
             tcpclient->buff[4] = 0;
             tcpclient->buff[5] = 7 + bytecount;
-            tcpclient->buff[6] = 1;
+            tcpclient->buff[6] = stationid;
             tcpclient->buff[7] = 0x0F;
             tcpclient->buff[8] = ((int_2)address) >> 8;
             tcpclient->buff[9] = ((int_2)address) & 0xFF;
@@ -545,7 +546,7 @@ int modbus_client::async_write_multiply_registers( unsigned int address, unsigne
             tcpclient->buff[3] = 0;
             tcpclient->buff[4] = ((int_2)(7 + bytecount)) >> 8;
             tcpclient->buff[5] = ((int_2)(7 + bytecount)) & 0xFF;
-            tcpclient->buff[6] = 1;
+            tcpclient->buff[6] = stationid;
             tcpclient->buff[7] = 0x10;
             tcpclient->buff[8] = ((int_2)address) >> 8;
             tcpclient->buff[9] = ((int_2)address) & 0xFF;
@@ -557,4 +558,9 @@ int modbus_client::async_write_multiply_registers( unsigned int address, unsigne
             }
         return 0;
         }
+    }
+
+void modbus_client::set_station( unsigned char new_station_id )
+    {
+    stationid = new_station_id;
     }
