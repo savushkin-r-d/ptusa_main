@@ -524,7 +524,26 @@ int profibus_slave_PFC200::eval()
 
     return (iDalResult);
     }
-//----------------------------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+double profibus_slave_PFC200::get_double( int offset )
+    {
+    double res = 0;
+    if ( offset < 244 )
+	{
+	char tmp[4];
+
+	tmp[0] = aucPlcPrcImgInp[offset + 3];
+	tmp[1] = aucPlcPrcImgInp[offset + 2];
+	tmp[2] = aucPlcPrcImgInp[offset + 1];
+	tmp[3] = aucPlcPrcImgInp[offset];
+
+	float *val = (float*) tmp;
+	res = *val;
+	}
+
+    return res;
+    }
+//------------------------------------------------------------------------------
 void profibus_slave_PFC200::close()
     {
     (void) stop_watchdog( pstAdi );
