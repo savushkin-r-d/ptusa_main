@@ -1707,6 +1707,7 @@ int cipline_tech_object::InitStep( int step, int f )
         {
         RT();
         cnt->reset();
+        cnt->pause();
         rt_par_float[ STP_LV] = 0 ; //stat._lv=0;
         for (i=0; i<SAV_CNT; i++)
             {
