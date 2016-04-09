@@ -30,8 +30,6 @@ public:
     virtual double get_double( int offset ) = 0;
     };
 //-----------------------------------------------------------------------------
-profibus_slave* G_PROFIBUS_SLAVE_LUA()
-    {
-    return profibus_slave::get_instance();
-    }
+profibus_slave* G_PROFIBUS_SLAVE_LUA();
+
 #endif // PROFIBUS_SLAVE
