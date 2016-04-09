@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/08/16 12:16:22.
+** Generated automatically by tolua++-1.0.92 on 04/09/16 14:43:03.
 */
 
 #ifndef __cplusplus
@@ -25,6 +25,7 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 #include "rm_manager.h"
 #include "modbus_client.h"
 #include "modbus_serv.h"
+#include "profibus_slave.h"
 
 /* function to release collected object via destructor */
 #ifdef __cplusplus
@@ -87,6 +88,7 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"timer");
  tolua_usertype(tolua_S,"dev_stub");
  tolua_usertype(tolua_S,"action");
+ tolua_usertype(tolua_S,"profibus_slave");
  tolua_usertype(tolua_S,"ModbusServ");
  tolua_usertype(tolua_S,"modbus_client");
  tolua_usertype(tolua_S,"dev_errors_manager");
@@ -9433,6 +9435,67 @@ static int tolua_PAC_dev_ModbusServ_UnpackFloat00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: get_double of class  profibus_slave */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_get_double00
+static int tolua_PAC_dev_profibus_slave_get_double00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"profibus_slave",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
+  int offset = ((int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_double'", NULL);
+#endif
+  {
+   double tolua_ret = (double)  self->get_double(offset);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_double'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* function: G_PROFIBUS_SLAVE_LUA */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_G_PROFIBUS_SLAVE_LUA00
+static int tolua_PAC_dev_G_PROFIBUS_SLAVE_LUA00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isnoobj(tolua_S,1,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  {
+   profibus_slave* tolua_ret = (profibus_slave*)  G_PROFIBUS_SLAVE_LUA();
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"profibus_slave");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'G_PROFIBUS_SLAVE_LUA'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* Open function */
 TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
 {
@@ -9927,6 +9990,11 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"UnpackInt32",tolua_PAC_dev_ModbusServ_UnpackInt3200);
    tolua_function(tolua_S,"UnpackFloat",tolua_PAC_dev_ModbusServ_UnpackFloat00);
   tolua_endmodule(tolua_S);
+  tolua_cclass(tolua_S,"profibus_slave","profibus_slave","",NULL);
+  tolua_beginmodule(tolua_S,"profibus_slave");
+   tolua_function(tolua_S,"get_double",tolua_PAC_dev_profibus_slave_get_double00);
+  tolua_endmodule(tolua_S);
+  tolua_function(tolua_S,"G_PROFIBUS_SLAVE_LUA",tolua_PAC_dev_G_PROFIBUS_SLAVE_LUA00);
  tolua_endmodule(tolua_S);
  return 1;
 }

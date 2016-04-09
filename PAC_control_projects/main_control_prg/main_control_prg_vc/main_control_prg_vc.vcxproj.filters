@@ -294,6 +294,9 @@
     <ClInclude Include="..\..\..\PAC\common\log.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\profibus_slave.h">
+      <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">

@@ -21,6 +21,8 @@ $#include "rm_manager.h"
 $#include "modbus_client.h"
 
 $#include "modbus_serv.h"
+
+$#include "profibus_slave.h"
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе дискретного входа.
 ///
@@ -1247,5 +1249,18 @@ class ModbusServ
         static short int UnpackInt16( unsigned char* buf, int offset );
 		static long int UnpackInt32( unsigned char* buf, int offset );
         static float UnpackFloat( unsigned char* Buf, int offset  );
-    }
-//-------------------------------------------------------------------------
+    };
+//-----------------------------------------------------------------------------
+/// @brief Работа с Profibus Slave.
+class profibus_slave
+    {
+    public:
+        /// <summary>
+        /// Добавление значения типа double.
+        /// </summary>
+        /// <param name="offset">Смещение, диапазон 0..240.</param>
+        virtual double get_double( int offset );
+    };
+
+profibus_slave* G_PROFIBUS_SLAVE_LUA();
+//-----------------------------------------------------------------------------

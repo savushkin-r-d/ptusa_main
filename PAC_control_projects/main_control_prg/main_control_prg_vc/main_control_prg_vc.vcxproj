@@ -192,6 +192,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClInclude Include="..\..\..\PAC\common\param_ex.h" />
     <ClInclude Include="..\..\..\PAC\common\PID.h" />
     <ClInclude Include="..\..\..\PAC\common\prj_mngr.h" />
+    <ClInclude Include="..\..\..\PAC\common\profibus_slave.h" />
     <ClInclude Include="..\..\..\PAC\common\rm_manager.h" />
     <ClInclude Include="..\..\..\PAC\common\rm_tech_def.h" />
     <ClInclude Include="..\..\..\PAC\common\sys\debug.h" />
