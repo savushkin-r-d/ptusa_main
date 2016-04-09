@@ -26,6 +26,10 @@
 #include "l_log.h"
 #endif
 
+#ifdef USE_PROFIBUS_SLAVE_PFC200
+#include "profibus_slave_PFC200.h"
+#endif //USE_PROFIBUS_SLAVE_PFC200
+
 int main( int argc, char *argv[] )
     {
 #if defined WIN_OS
@@ -60,6 +64,11 @@ int main( int argc, char *argv[] )
 #ifdef DEBUG
     fflush( stdout );
 #endif // DEBUG
+
+#ifdef USE_PROFIBUS_SLAVE_PFC200
+    G_PROFIBUS_SLAVE->init();
+#endif //USE_PROFIBUS_SLAVE_PFC200
+
 
     long int sleep_time_ms = 2;
     if ( argc >= 3 )
@@ -123,6 +132,10 @@ int main( int argc, char *argv[] )
         // Связь с удаленными PAC.
         G_RM_MANAGER()->evaluate();
 #endif // RM_PAC
+
+#ifdef USE_PROFIBUS_SLAVE_PFC200
+    G_PROFIBUS_SLAVE->eval();
+#endif //USE_PROFIBUS_SLAVE_PFC200
 
 #ifdef TEST_SPEED
         //-Информация о времени выполнения цикла программы.!->
@@ -189,3 +202,4 @@ int main( int argc, char *argv[] )
 
     return( EXIT_SUCCESS );
     }
+
