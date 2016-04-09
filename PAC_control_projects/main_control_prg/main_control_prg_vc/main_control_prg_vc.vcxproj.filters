@@ -473,9 +473,6 @@
     <ClCompile Include="..\..\..\PAC\common\sys\base_mem.cpp">
       <Filter>Source Files\PAC\common\sys</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp">
-      <Filter>Source Files\PAC\common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\rm_tech_def.cpp">
       <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
@@ -511,6 +508,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\profibus_slave.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp">
+      <Filter>Source Files\PAC\common\sys</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

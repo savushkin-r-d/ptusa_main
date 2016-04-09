@@ -23,6 +23,11 @@ $#include "modbus_client.h"
 $#include "modbus_serv.h"
 
 $#include "profibus_slave.h"
+
+$#ifdef WIN_OS
+$#pragma warning(disable: 4800) //Warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+$#endif // WIN_OS
+
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе дискретного входа.
 ///

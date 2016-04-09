@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/09/16 15:40:14.
+** Generated automatically by tolua++-1.0.92 on 04/09/16 16:07:00.
 */
 
 #ifndef __cplusplus
@@ -26,6 +26,9 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 #include "modbus_client.h"
 #include "modbus_serv.h"
 #include "profibus_slave.h"
+#ifdef WIN_OS
+#pragma warning(disable: 4800) //Warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+#endif // WIN_OS
 
 /* function to release collected object via destructor */
 #ifdef __cplusplus
@@ -9525,7 +9528,7 @@ static int tolua_PAC_dev_profibus_slave_set_bool00(lua_State* tolua_S)
   profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
   int byte_offset = ((int)  tolua_tonumber(tolua_S,2,0));
   int bit_offset = ((int)  tolua_tonumber(tolua_S,3,0));
-  bool val = tolua_toboolean(tolua_S,4,0) > 0;
+  bool val = ((bool)  tolua_toboolean(tolua_S,4,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_bool'", NULL);
 #endif
