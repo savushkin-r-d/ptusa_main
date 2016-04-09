@@ -269,6 +269,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClCompile Include="..\..\..\PAC\common\param_ex.cpp" />
     <ClCompile Include="..\..\..\PAC\common\PID.cpp" />
     <ClCompile Include="..\..\..\PAC\common\prj_mngr.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\profibus_slave.cpp" />
     <ClCompile Include="..\..\..\PAC\common\rm_manager.cpp" />
     <ClCompile Include="..\..\..\PAC\common\rm_tech_def.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys\io.cpp" />
