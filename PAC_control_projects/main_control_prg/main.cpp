@@ -134,7 +134,7 @@ int main( int argc, char *argv[] )
 #endif // RM_PAC
 
 #ifdef USE_PROFIBUS_SLAVE_PFC200
-    G_PROFIBUS_SLAVE->eval();
+        G_PROFIBUS_SLAVE->eval();
 #endif //USE_PROFIBUS_SLAVE_PFC200
 
 #ifdef TEST_SPEED

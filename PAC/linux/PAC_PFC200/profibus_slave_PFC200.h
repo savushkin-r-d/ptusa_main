@@ -67,9 +67,12 @@ public:
     /// processed. In other cases it returns \ref DAL_FAILURE.
     int eval();
 
-    //Доступные в Lua.
+    //Lua functions.
 
     double get_double( int offset );
+    bool get_bool( int byte_offset, int bit_offset );
+
+    void set_bool( int byte_offset, int bit_offset, bool val );
 
 private:
     profibus_slave_PFC200()
