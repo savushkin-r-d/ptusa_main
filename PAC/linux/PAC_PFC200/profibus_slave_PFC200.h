@@ -31,13 +31,13 @@ extern "C"
 #include "dpsTypes.h"                         /* type definitions of the PROFIBUS slave device interface */
     }
 
-
+#include "profibus_slave.h"
 #include "smart_ptr.h"
 #include "log.h"
 
 //-----------------------------------------------------------------------------
 /// @brief Работа с Profibus Slave.
-class profibus_slave_PFC200
+class profibus_slave_PFC200: public profibus_slave
     {
 public:
     enum CONSTANTS

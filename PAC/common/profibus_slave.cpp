@@ -1,5 +1,9 @@
 #include "profibus_slave.h"
 
+#ifdef USE_PROFIBUS_SLAVE_PFC200
+#include "profibus_slave_PFC200.h"
+#endif // USE_PROFIBUS_SLAVE_PFC200
+
 //-----------------------------------------------------------------------------
 profibus_slave* profibus_slave::get_instance()
     {
