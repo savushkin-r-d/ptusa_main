@@ -24,14 +24,7 @@ public:
     ///
     /// @return - указатель на единственный объект класса @ref
     /// profibus_slave_PFC200.
-    static profibus_slave* get_instance()
-        {
-#ifdef USE_PROFIBUS_SLAVE_PFC200
-        return profibus_slave_PFC200::get_instance();
-#endif // USE_PROFIBUS_SLAVE_PFC200
-
-        return 0;
-        }
+    static profibus_slave* get_instance();
 
     //Доступные в Lua.
     virtual double get_double( int offset ) = 0;
