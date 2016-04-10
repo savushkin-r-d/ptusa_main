@@ -1010,7 +1010,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 					}
 				}
 
-			return 7;
+			return 6;
 			}
 		}
 
