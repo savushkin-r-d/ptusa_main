@@ -297,6 +297,9 @@
     <ClInclude Include="..\..\..\PAC\common\profibus_slave.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.h">
+      <Filter>Header Files\PAC\win\PAC_PC</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -511,6 +514,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp">
       <Filter>Source Files\PAC\common\sys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

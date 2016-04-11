@@ -1280,6 +1280,19 @@ class profibus_slave
         /// <param name="bit_offset">Смещение, диапазон 0..7.</param>
         /// <param name="val">Значение.</param>
         virtual void set_bool( int byte_offset, int bit_offset, bool val ) = 0;
+
+        /// <summary>
+        /// Получение значения типа int.
+        /// </summary>
+        /// <param name="byte_offset">Смещение, диапазон 0..242.</param>
+        virtual int get_int( int byte_offset ) = 0;
+
+        /// <summary>
+        /// Установка значения типа int.
+        /// </summary>
+        /// <param name="byte_offset">Смещение, диапазон 0..242.</param>
+        /// <param name="val">Значение.</param>
+        virtual void set_int( int byte_offset, int val ) = 0;
     };
 
 profibus_slave* G_PROFIBUS_SLAVE_LUA();
