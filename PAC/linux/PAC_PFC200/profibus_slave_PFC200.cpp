@@ -334,7 +334,7 @@ int32_t profibus_slave_PFC200::configure_device(
 
     //Set the slave parameter.
     stDeviceConfig.lDeviceId = iDpsDeviceId;
-    stDeviceConfig.ulDpSlaveAdress = 3;
+    stDeviceConfig.ulDpSlaveAdress = 40;
 
     //Assign the real configuration description.
     stDeviceConfig.stRealConfigDesc.bRealCfgModeStatic = false;
@@ -467,8 +467,9 @@ int profibus_slave_PFC200::eval()
 	    }
 	}
 
+    //Test.
     //Echo the process data.
-    memcpy(&aucPlcPrcImgOutp[0], &aucPlcPrcImgInp[0], sizeof(aucPlcPrcImgInp));
+    //memcpy(&aucPlcPrcImgOutp[0], &aucPlcPrcImgInp[0], sizeof(aucPlcPrcImgInp));
 
     //Write data to the fieldbus input process image.
     if ( iDalResult == DAL_SUCCESS )
@@ -491,7 +492,8 @@ int profibus_slave_PFC200::eval()
     /* print the PLC input process data */
     if ( iDalResult == DAL_SUCCESS )
 	{
-	printf( "PLC input data = 0x%02X %02X %02X %02X %02X %02X %02X %02X - ",
+	printf( "PROFIBUS slave DP"
+		"PLC input data = 0x%02X %02X %02X %02X %02X %02X %02X %02X - ",
 		aucPlcPrcImgOutp[0], aucPlcPrcImgOutp[1], aucPlcPrcImgOutp[2],
 		aucPlcPrcImgOutp[3], aucPlcPrcImgOutp[4], aucPlcPrcImgOutp[5],
 		aucPlcPrcImgOutp[6], aucPlcPrcImgOutp[7] );
@@ -516,7 +518,7 @@ int profibus_slave_PFC200::eval()
 	    {
 	    if ( DPS_SUCCESS == ulStatus )
 		{
-		printf( "Device state %d\n", ucDevState );
+		printf( "PROFIBUS slave DP device state %d\n", ucDevState );
 		}
 	    }
 	}
@@ -554,6 +556,27 @@ bool profibus_slave_PFC200::get_bool( int byte_offset, int bit_offset )
 	}
 
     return res;
+    }
+//------------------------------------------------------------------------------
+int profibus_slave_PFC200::get_int( int byte_offset )
+    {
+    int res = 0;
+    if ( byte_offset < 242 )
+	{
+	res = 256 * aucPlcPrcImgInp[byte_offset] +
+	    aucPlcPrcImgInp[byte_offset + 1];
+	}
+
+    return res;
+    }
+//------------------------------------------------------------------------------
+void profibus_slave_PFC200::set_int( int byte_offset, int val )
+    {
+    if ( byte_offset < 242 )
+	{
+	aucPlcPrcImgOutp[byte_offset] = val >> 8;
+	aucPlcPrcImgOutp[byte_offset + 1] = val;
+	}
     }
 //------------------------------------------------------------------------------
 void profibus_slave_PFC200::set_bool( int byte_offset, int bit_offset, bool val )

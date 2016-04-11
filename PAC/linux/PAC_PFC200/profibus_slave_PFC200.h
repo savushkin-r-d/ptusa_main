@@ -70,9 +70,12 @@ public:
     //Lua functions.
 
     double get_double( int offset );
-    bool get_bool( int byte_offset, int bit_offset );
 
+    bool get_bool( int byte_offset, int bit_offset );
     void set_bool( int byte_offset, int bit_offset, bool val );
+
+    int get_int( int byte_offset );
+    void set_int( int byte_offset, int val );
 
 private:
     profibus_slave_PFC200()
