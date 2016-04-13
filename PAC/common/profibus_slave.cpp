@@ -13,6 +13,8 @@ profibus_slave* profibus_slave::get_instance()
     return profibus_slave_PFC200::get_instance();
 #elif defined WIN_OS && defined PAC_PC
     return profibus_slave_PC::get_instance();
+#else
+    return 0;
 #endif // USE_PROFIBUS_SLAVE_PFC200
     }
 //-----------------------------------------------------------------------------

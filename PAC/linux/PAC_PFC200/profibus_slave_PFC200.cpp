@@ -583,9 +583,15 @@ void profibus_slave_PFC200::set_bool( int byte_offset, int bit_offset, bool val 
     {
     if ( byte_offset < 244 && bit_offset < 8 )
 	{
-	char tmp = 0xFF & ( val << bit_offset );
-
-	aucPlcPrcImgOutp[byte_offset] &= tmp;
+	char tmp = 1 << bit_offset;
+        if ( val )
+            {
+            aucPlcPrcImgOutp[byte_offset] |= tmp;
+            }
+        else
+            {
+            aucPlcPrcImgOutp[byte_offset] &= ~tmp;
+            }
 	}
     }
 //------------------------------------------------------------------------------
