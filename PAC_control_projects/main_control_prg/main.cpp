@@ -26,9 +26,7 @@
 #include "l_log.h"
 #endif
 
-#ifdef USE_PROFIBUS_SLAVE_PFC200
-#include "profibus_slave_PFC200.h"
-#endif //USE_PROFIBUS_SLAVE_PFC200
+#include "profibus_slave.h"
 
 int main( int argc, char *argv[] )
     {
@@ -65,10 +63,10 @@ int main( int argc, char *argv[] )
     fflush( stdout );
 #endif // DEBUG
 
-#ifdef USE_PROFIBUS_SLAVE_PFC200
-    G_PROFIBUS_SLAVE->init();
-#endif //USE_PROFIBUS_SLAVE_PFC200
-
+    if ( G_PROFIBUS_SLAVE()->is_active() )
+        {
+        G_PROFIBUS_SLAVE()->init();
+        }
 
     long int sleep_time_ms = 2;
     if ( argc >= 3 )
@@ -133,9 +131,11 @@ int main( int argc, char *argv[] )
         G_RM_MANAGER()->evaluate();
 #endif // RM_PAC
 
-#ifdef USE_PROFIBUS_SLAVE_PFC200
-        G_PROFIBUS_SLAVE->eval();
-#endif //USE_PROFIBUS_SLAVE_PFC200
+        if ( G_PROFIBUS_SLAVE()->is_active() )
+            {
+            G_PROFIBUS_SLAVE()->eval();
+            }
+
 
 #ifdef TEST_SPEED
         //-Информация о времени выполнения цикла программы.!->

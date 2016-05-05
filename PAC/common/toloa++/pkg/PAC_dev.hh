@@ -1259,6 +1259,28 @@ class ModbusServ
 /// @brief Работа с Profibus Slave.
 class profibus_slave
     {
+    //Конфигурирование клиента.
+    public:
+        /// <summary>
+        /// Включение модуля обмена.
+        /// </summary>
+        void activate();
+
+        /// <summary>
+        /// Установка адреса станции.
+        /// </summary>
+        void set_station_address( int address );
+
+        /// <summary>
+        /// Установка размера массива области записи.
+        /// </summary>
+        void set_output_byte_size( int size );
+
+        /// <summary>
+        /// Установка размера массива области чтения.
+        /// </summary>
+        void set_input_byte_size( int size );
+
     public:
         /// <summary>
         /// Получение значения типа double.

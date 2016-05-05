@@ -19,47 +19,105 @@
 /// @brief Работа с Profibus Slave.
 class profibus_slave
     {
-public:
-    /// @brief Получение единственного экземпляра класса для работы.
-    ///
-    /// @return - указатель на единственный объект класса.
-    static profibus_slave* get_instance();
+    //Конфигурирование клиента.
+    public:
+        /// <summary>
+        /// Включение модуля обмена.
+        /// </summary>
+        void activate()
+            {
+            active = true;
+            }
 
-    /// <summary>
-    /// Получение значения типа double.
-    /// </summary>
-    /// <param name="offset">Смещение, диапазон 0..239.</param>
-    virtual double get_double( int offset ) = 0;
+        /// <summary>
+        /// Установка адреса станции.
+        /// </summary>
+        void set_station_address( int address )
+            {
+            station_address = address;
+            }
 
-    /// <summary>
-    /// Получение значения типа bool.
-    /// </summary>
-    /// <param name="byte_offset">Смещение, диапазон 0..243.</param>
-    /// <param name="bit_offset">Смещение, диапазон 0..7.</param>
-    virtual bool get_bool( int byte_offset, int bit_offset ) = 0;
+        /// <summary>
+        /// Установка размера массива области записи.
+        /// </summary>
+        void set_output_byte_size( int size )
+            {
+            output_byte_size = size;
+            }
 
-    /// <summary>
-    /// Установка значения типа bool.
-    /// </summary>
-    /// <param name="byte_offset">Смещение, диапазон 0..243.</param>
-    /// <param name="bit_offset">Смещение, диапазон 0..7.</param>
-    /// <param name="val">Значение.</param>
-    virtual void set_bool( int byte_offset, int bit_offset, bool val ) = 0;
+        /// <summary>
+        /// Установка размера массива области чтения.
+        /// </summary>
+        void set_input_byte_size( int size )
+            {
+            input_byte_size = size;
+            }
 
-    /// <summary>
-    /// Получение значения типа int.
-    /// </summary>
-    /// <param name="byte_offset">Смещение, диапазон 0..242.</param>
-    virtual int get_int( int byte_offset ) = 0;
+    public:
+        profibus_slave()
+            {
+            active = false;
+            station_address = 2;
+            output_byte_size = 1;
+            input_byte_size = 1;
+            }
 
-    /// <summary>
-    /// Установка значения типа int.
-    /// </summary>
-    /// <param name="byte_offset">Смещение, диапазон 0..242.</param>
-    /// <param name="val">Значение.</param>
-    virtual void set_int( int byte_offset, int val ) = 0;
+        inline bool is_active() const
+            {
+            return active;
+            };
+
+        virtual int init() = 0;
+        virtual int eval() = 0;
+
+    public:
+        /// @brief Получение единственного экземпляра класса для работы.
+        ///
+        /// @return - указатель на единственный объект класса.
+        static profibus_slave* get_instance();
+
+        /// <summary>
+        /// Получение значения типа double.
+        /// </summary>
+        /// <param name="offset">Смещение, диапазон 0..239.</param>
+        virtual double get_double( int offset ) = 0;
+
+        /// <summary>
+        /// Получение значения типа bool.
+        /// </summary>
+        /// <param name="byte_offset">Смещение, диапазон 0..243.</param>
+        /// <param name="bit_offset">Смещение, диапазон 0..7.</param>
+        virtual bool get_bool( int byte_offset, int bit_offset ) = 0;
+
+        /// <summary>
+        /// Установка значения типа bool.
+        /// </summary>
+        /// <param name="byte_offset">Смещение, диапазон 0..243.</param>
+        /// <param name="bit_offset">Смещение, диапазон 0..7.</param>
+        /// <param name="val">Значение.</param>
+        virtual void set_bool( int byte_offset, int bit_offset, bool val ) = 0;
+
+        /// <summary>
+        /// Получение значения типа int.
+        /// </summary>
+        /// <param name="byte_offset">Смещение, диапазон 0..242.</param>
+        virtual int get_int( int byte_offset ) = 0;
+
+        /// <summary>
+        /// Установка значения типа int.
+        /// </summary>
+        /// <param name="byte_offset">Смещение, диапазон 0..242.</param>
+        /// <param name="val">Значение.</param>
+        virtual void set_int( int byte_offset, int val ) = 0;
+
+    private:
+        bool active;
+        int station_address;
+        int output_byte_size;
+        int input_byte_size;
     };
 //-----------------------------------------------------------------------------
 profibus_slave* G_PROFIBUS_SLAVE_LUA();
+profibus_slave* G_PROFIBUS_SLAVE();
 
 #endif // PROFIBUS_SLAVE

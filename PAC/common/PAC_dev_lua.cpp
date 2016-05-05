@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/11/16 13:03:52.
+** Generated automatically by tolua++-1.0.92 on 04/21/16 10:48:34.
 */
 
 #ifndef __cplusplus
@@ -9438,6 +9438,136 @@ static int tolua_PAC_dev_ModbusServ_UnpackFloat00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: activate of class  profibus_slave */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_activate00
+static int tolua_PAC_dev_profibus_slave_activate00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"profibus_slave",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'activate'", NULL);
+#endif
+  {
+   self->activate();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'activate'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_station_address of class  profibus_slave */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_set_station_address00
+static int tolua_PAC_dev_profibus_slave_set_station_address00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"profibus_slave",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
+  int address = ((int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_station_address'", NULL);
+#endif
+  {
+   self->set_station_address(address);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_station_address'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_output_byte_size of class  profibus_slave */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_set_output_byte_size00
+static int tolua_PAC_dev_profibus_slave_set_output_byte_size00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"profibus_slave",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
+  int size = ((int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_output_byte_size'", NULL);
+#endif
+  {
+   self->set_output_byte_size(size);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_output_byte_size'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_input_byte_size of class  profibus_slave */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_set_input_byte_size00
+static int tolua_PAC_dev_profibus_slave_set_input_byte_size00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"profibus_slave",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  profibus_slave* self = (profibus_slave*)  tolua_tousertype(tolua_S,1,0);
+  int size = ((int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_input_byte_size'", NULL);
+#endif
+  {
+   self->set_input_byte_size(size);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_input_byte_size'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: get_double of class  profibus_slave */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_get_double00
 static int tolua_PAC_dev_profibus_slave_get_double00(lua_State* tolua_S)
@@ -10137,6 +10267,10 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"profibus_slave","profibus_slave","",NULL);
   tolua_beginmodule(tolua_S,"profibus_slave");
+   tolua_function(tolua_S,"activate",tolua_PAC_dev_profibus_slave_activate00);
+   tolua_function(tolua_S,"set_station_address",tolua_PAC_dev_profibus_slave_set_station_address00);
+   tolua_function(tolua_S,"set_output_byte_size",tolua_PAC_dev_profibus_slave_set_output_byte_size00);
+   tolua_function(tolua_S,"set_input_byte_size",tolua_PAC_dev_profibus_slave_set_input_byte_size00);
    tolua_function(tolua_S,"get_double",tolua_PAC_dev_profibus_slave_get_double00);
    tolua_function(tolua_S,"get_bool",tolua_PAC_dev_profibus_slave_get_bool00);
    tolua_function(tolua_S,"set_bool",tolua_PAC_dev_profibus_slave_set_bool00);

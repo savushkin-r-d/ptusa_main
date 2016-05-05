@@ -22,6 +22,16 @@
 class profibus_slave_PC : public profibus_slave
     {
     public:
+        int init()
+            {
+            return 0;
+            }
+
+        int eval()
+            {
+            return 0;
+            }
+
         static profibus_slave* get_instance()
             {
             return instance;
@@ -54,6 +64,5 @@ class profibus_slave_PC : public profibus_slave
         static profibus_slave_PC* instance;
     };
 //-----------------------------------------------------------------------------
-profibus_slave* G_PROFIBUS_SLAVE_LUA();
 
 #endif // PROFIBUS_SLAVE

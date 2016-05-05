@@ -23,3 +23,8 @@ profibus_slave* G_PROFIBUS_SLAVE_LUA()
     return profibus_slave::get_instance();
     }
 //-----------------------------------------------------------------------------
+profibus_slave* G_PROFIBUS_SLAVE()
+    {
+    return profibus_slave::get_instance();
+    }
+//-----------------------------------------------------------------------------

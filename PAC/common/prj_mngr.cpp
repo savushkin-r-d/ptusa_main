@@ -177,6 +177,17 @@ int project_manager::lua_load_configuration()
    
     G_DEVICE_CMMCTR->add_device( siren_lights_manager::get_instance() );
 
+#ifdef DEBUG
+    printf( "Получение конфигурации Profibus DP slave...\n");
+#endif // DEBUG
+    
+    lua_manager::get_instance()->void_exec_lua_method( "system",
+        "init_profibus", "project_manager::lua_load_configuration()" );
+#ifdef DEBUG
+    printf( "Oк.\n");
+#endif // DEBUG
+
+
 #ifdef RM_PAC
     // Добавление удаленных PAC.
 #ifdef DEBUG
