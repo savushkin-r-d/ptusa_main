@@ -59,8 +59,8 @@ int profibus_slave_PFC200::init()
 
 	if ( DAL_SUCCESS == iDalResult )
 	    {
-//	    //Set up the watchdog.
-//	    iDalResult = setup_watchdog( pstAdi );
+	    ////Set up the watchdog.
+	    //iDalResult = setup_watchdog( pstAdi );
 
 	    //Configure the device.
 	    if ( DAL_SUCCESS == iDalResult )
@@ -74,11 +74,11 @@ int profibus_slave_PFC200::init()
 		iDalResult = report_app_state_running_evt( pstAdi );
 		}
 
-//	    //Start the watchdog.
-//	    if ( DAL_SUCCESS == iDalResult )
-//		{
-//		iDalResult = start_watchdog( pstAdi );
-//		}
+	    ////Start the watchdog.
+	    //if ( DAL_SUCCESS == iDalResult )
+	    //	{
+	    //	iDalResult = start_watchdog( pstAdi );
+	    //	}
 	    }
 	}
 
@@ -314,17 +314,17 @@ int32_t profibus_slave_PFC200::configure_device(
 
     //Set up the real configuration.
 
-    //Slot 1 - 8 byte DP-Master output (BYTE Array [8] (DPM-OUT)).
+    //Slot 1 - 16 byte DP-Master output (BYTE Array [output_byte_size] (DPM-OUT)).
     astRealSlotCfgDesc[0].enmDataType = DPS_ARRAY_OF_BYTE;
     astRealSlotCfgDesc[0].ulPiInpDataBitOffset = 0;
     astRealSlotCfgDesc[0].ulPiInpDataBitLen = 0;
     astRealSlotCfgDesc[0].ulPiOutpDataBitOffset = 0;
-    astRealSlotCfgDesc[0].ulPiOutpDataBitLen = 128;
+    astRealSlotCfgDesc[0].ulPiOutpDataBitLen = output_byte_size * 8;
 
-    //Slot 2 - 8 byte DP-Master input (BYTE Array [8] (DPM-IN)).
+    //Slot 2 - 16 byte DP-Master input (BYTE Array [input_byte_size] (DPM-IN)).
     astRealSlotCfgDesc[1].enmDataType = DPS_ARRAY_OF_BYTE;
     astRealSlotCfgDesc[1].ulPiInpDataBitOffset = 0;
-    astRealSlotCfgDesc[1].ulPiInpDataBitLen = 128;
+    astRealSlotCfgDesc[1].ulPiInpDataBitLen = input_byte_size * 8;
     astRealSlotCfgDesc[1].ulPiOutpDataBitOffset = 0;
     astRealSlotCfgDesc[1].ulPiOutpDataBitLen = 0;
 
@@ -334,7 +334,7 @@ int32_t profibus_slave_PFC200::configure_device(
 
     //Set the slave parameter.
     stDeviceConfig.lDeviceId = iDpsDeviceId;
-    stDeviceConfig.ulDpSlaveAdress = 40;
+    stDeviceConfig.ulDpSlaveAdress = station_address;
 
     //Assign the real configuration description.
     stDeviceConfig.stRealConfigDesc.bRealCfgModeStatic = false;
@@ -361,8 +361,8 @@ int32_t profibus_slave_PFC200::configure_device(
 	}
 
 #ifdef DEBUG_PROFIBUS_SLAVE
-    printf( "    Slot 1: BYTE Array [16] (DPM-OUT)\n" );
-    printf( "    Slot 2: BYTE Array [16] (DPM-IN)\n" );
+    printf( "    Slot 1: BYTE Array [%d] (DPM-OUT)\n", output_byte_size );
+    printf( "    Slot 2: BYTE Array [%d] (DPM-IN)\n", input_byte_size  );
 #endif // DEBUG_PROFIBUS_SLAVE
 
     return (iDalResult);
@@ -447,8 +447,8 @@ int profibus_slave_PFC200::eval()
     uint8_t ucDevState = 0;           //Current device state.
 #endif // DEBUG_PROFIBUS_SLAVE
 
-//    //Trigger the watchdog.
-//    iDalResult = pstAdi->WatchdogTrigger();
+    ////Trigger the watchdog.
+    //iDalResult = pstAdi->WatchdogTrigger();
 
     //Read data from fieldbus output process image.
     if ( iDalResult == DAL_SUCCESS )

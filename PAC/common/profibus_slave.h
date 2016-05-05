@@ -110,7 +110,7 @@ class profibus_slave
         /// <param name="val">Значение.</param>
         virtual void set_int( int byte_offset, int val ) = 0;
 
-    private:
+    protected:
         bool active;
         int station_address;
         int output_byte_size;

@@ -220,5 +220,4 @@ private:
     uint8_t aucPlcPrcImgOutp[244]; 	//Output process image of the PLC.
     };
 //-----------------------------------------------------------------------------
-#define G_PROFIBUS_SLAVE profibus_slave_PFC200::get_instance()
 #endif // PROFIBUS_SLAVE_PFC200
