@@ -514,6 +514,10 @@ class cipline_tech_object: public tech_object
 		int is_in_evaluate_func;
 		int is_InitCustomStep_func;
 		int is_DoCustomStep_func;
+        int is_GoToStep_func;
+        int is_DoStep_func;
+        int is_InitStep_func;
+        int is_LoadProgram_func;
 
 	public:
 		cipline_tech_object( const char* name, u_int number, u_int type, const char* name_Lua,
@@ -693,10 +697,6 @@ class cipline_tech_object: public tech_object
 		virtual void StopDev(void);
 		virtual void ResetLinesDevicesBeforeReset(void);
 		virtual int SetCommand(int command);
-		virtual int DoStep(int step);
-		virtual int GoToStep(int cur, int param);
-		virtual int InitStep(int step, int f);
-		virtual int LoadProgram(void);
 		virtual void ResetWP(void);
 		virtual void Stop(int step);
 		virtual int SetRet(int val);
@@ -704,6 +704,18 @@ class cipline_tech_object: public tech_object
 		virtual int HasRet();
 		virtual int ForceRet(int val);
 		virtual void ResetStat(void);
+        ///Базовые функции. При необходимости могут вызываться из Lua. Могут быть переопределены.
+        virtual int _DoStep(int step_to_do);  //Выполнение шага, заданного параметром.
+        virtual int _GoToStep(int cur, int param); //Переход к следующему шагу.
+        virtual int _InitStep(int step_to_init, int not_first_call);          //cip_InitStep(steptoinit, param)
+        virtual int _LoadProgram(void);
+        ///-----------------------------------------------
+        ////Функции, вызывающие обработчики на Lua. При отсутствии обработчиков вызываются стандартные функции.
+        virtual int DoStep(int step_to_do);                   //cip_DoStep(step)
+        virtual int GoToStep(int cur, int param);       //cip_GoToStep(currentstep,param)
+        virtual int InitStep(int step_to_init, int not_first_call);          //cip_InitStep(steptoinit, param)
+        virtual int LoadProgram(void);                                  //cip_LoadProgram()
+        ////--------------------------------------------
 		////-----error service-------
 		virtual void ResetErr(void);
 		virtual int CheckErr(void);

@@ -152,6 +152,10 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
     is_in_evaluate_func = 0;
     is_InitCustomStep_func = 0;
     is_DoCustomStep_func = 0;
+    is_GoToStep_func = 0;
+    is_DoStep_func = 0;
+    is_InitStep_func = 0;
+    is_LoadProgram_func = 0;
 
     //для ошибки "возможно отсутствует концентрированный раствор"
     no_liquid_is_warning = 0;
@@ -450,6 +454,79 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
     return 1;
     }
 
+int cipline_tech_object::evaluate()
+    {
+    int res;
+    if (EvalBlock())
+        {
+        return -1;
+        }
+
+    if (dev_upr_cip_in_progress)
+        {
+        if (state > 0)
+            {
+            dev_upr_cip_in_progress->on();
+            }
+        else
+            {
+            dev_upr_cip_in_progress->off();
+            }
+        }
+
+    EvalRecipes();
+    EvalCipReadySignal();
+
+    if (ncmd!=0)
+        {
+        EvalCommands();
+        ncmd=0;
+        }
+    else
+        {
+
+        if ( is_in_evaluate_func == 0 )
+            {
+            lua_State* L = lua_manager::get_instance()->get_Lua();
+            lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+            lua_getfield( L, -1, "in_evaluate" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_in_evaluate_func = 2;
+                }
+            else
+                {
+                is_in_evaluate_func = 1;
+                }
+            lua_remove(L, -1); // Stack: remove function "in_evaluate".
+            }
+
+
+        if (state>0)
+            {
+            EvalPIDS();
+            res = EvalCipInProgress();
+            if (res < 0)
+                {
+                return res;
+                }
+            cip_in_error = 0;
+            }
+        else
+            {
+            EvalCipInError();
+            if (!cip_in_error)
+                {
+                rt_par_float[STP_ERRCOUNT] = rt_par_float[STP_ERRCOUNT] + 1;
+                cip_in_error = 1;
+                }
+            }
+        }
+    return 0;
+    }
+
 void cipline_tech_object::initline()
     {
     is_old_definition = 1;
@@ -685,79 +762,78 @@ void cipline_tech_object::initline()
             }
         lua_remove(L, -1); // Stack: remove function "do_custom_step".
         }
-    }
 
-int cipline_tech_object::evaluate()
-    {
-    int res;
-    if (EvalBlock())
+    if ( is_GoToStep_func == 0 )
         {
-        return -1;
-        }
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_GoToStep" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-    if (dev_upr_cip_in_progress)
-        {
-        if (state > 0)
+        if ( lua_isfunction( L, -1 ) )
             {
-            dev_upr_cip_in_progress->on();
+            is_GoToStep_func = 2;
             }
         else
             {
-            dev_upr_cip_in_progress->off();
+            is_GoToStep_func = 1;
             }
+        lua_remove(L, -1); // Stack: remove function "cip_GoToStep".
         }
 
-    EvalRecipes();
-    EvalCipReadySignal();
-
-    if (ncmd!=0)
+    if ( is_DoStep_func == 0 )
         {
-        EvalCommands();
-        ncmd=0;
-        }
-    else
-        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_DoStep" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( is_in_evaluate_func == 0 )
+        if ( lua_isfunction( L, -1 ) )
             {
-            lua_State* L = lua_manager::get_instance()->get_Lua();
-            lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-            lua_getfield( L, -1, "in_evaluate" );
-            lua_remove( L, -2 );  // Stack: remove OBJECT.
-
-            if ( lua_isfunction( L, -1 ) )
-                {
-                is_in_evaluate_func = 2;
-                }
-            else
-                {
-                is_in_evaluate_func = 1;
-                }
-            lua_remove(L, -1); // Stack: remove function "in_evaluate".
-            }
-
-
-        if (state>0)
-            {
-            EvalPIDS();
-            res = EvalCipInProgress();
-            if (res < 0)
-                {
-                return res;
-                }
-            cip_in_error = 0;
+            is_DoStep_func = 2;
             }
         else
             {
-            EvalCipInError();
-            if (!cip_in_error)
-                {
-                rt_par_float[STP_ERRCOUNT] = rt_par_float[STP_ERRCOUNT] + 1;
-                cip_in_error = 1;
-                }
+            is_DoStep_func = 1;
             }
+        lua_remove(L, -1); // Stack: remove function "cip_DoStep".
         }
-    return 0;
+
+    if ( is_InitStep_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_InitStep" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_InitStep_func = 2;
+            }
+        else
+            {
+            is_InitStep_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_InitStep".
+        }
+
+    if ( is_LoadProgram_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_LoadProgram" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_LoadProgram_func = 2;
+            }
+        else
+            {
+            is_LoadProgram_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_LoadProgram".
+        }
     }
 
 void cipline_tech_object::resetProgramName()
@@ -1478,7 +1554,7 @@ int cipline_tech_object::EvalCommands()
     return 0;
     }
 
-int cipline_tech_object::GoToStep( int cur, int param )
+int cipline_tech_object::_GoToStep( int cur, int param )
     {
     switch(cur)
         {
@@ -1676,8 +1752,8 @@ int cipline_tech_object::GoToStep( int cur, int param )
     return SERR_UNKNOWN_STEP;
     }
 
-int cipline_tech_object::InitStep( int step, int f )
-    {
+int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
+{
     int i, pr_media;
     sort_delay = get_millisec();
     timer_no_ret = get_millisec();
@@ -1703,7 +1779,7 @@ int cipline_tech_object::InitStep( int step, int f )
     PIDP->reset();
     PIDF->reset();
     ResetErr();
-    if (f==0)
+    if (not_first_call==0)
         {
         RT();
         cnt->reset();
@@ -1716,7 +1792,7 @@ int cipline_tech_object::InitStep( int step, int f )
         }
 
     pr_media=WATER;
-    if (step>30 && step<42)
+    if (step_to_init>30 && step_to_init<42)
         {
         if (((int)rt_par_float[P_PROGRAM]>>PRG_K) & 1)
             {
@@ -1724,7 +1800,7 @@ int cipline_tech_object::InitStep( int step, int f )
             }
         }
 
-    switch (step)
+    switch (step_to_init)
         {
         case 0: //INIT fill circ tank
             RHI();
@@ -1734,120 +1810,120 @@ int cipline_tech_object::InitStep( int step, int f )
                 V00->on();
                 }
             return 0;
-        case 5:  return InitToObject(TANK_W, KANAL, step, f);
-        case 6:  return InitOporCIP(KANAL, step, f);
-        case 7:  return InitFromObject(TANK_W, KANAL, step, f);
-        case 8:  return InitToObject(TANK_W, KANAL, step, f);
-        case 9:  return InitOporCIP(KANAL, step, f);
-        case 10: return InitFilCirc(WITH_RETURN, step, f);
-        case 11: return InitCirc(WATER, step, f);
-        case 12: return InitOporCirc(KANAL, step, f);
-        case 13: return InitFilCirc(WITH_RETURN, step, f);
-        case 14: return InitToObject(TANK_W, KANAL, step, f);
-        case 15: return InitOporCirc(KANAL, step, f);
-        case 16: return InitOporCirc(KANAL, step, f);
-        case 22: return InitToObject(TANK_S, KANAL, step, f);
-        case 23: return InitOporCIP(KANAL, step, f);
-        case 24: return InitFromObject(TANK_S, KANAL, step, f);
-        case 26: return InitFilCirc(WITH_RETURN, step, f);
-        case 28: return InitCirc(SHCH, step, f);
-        case 29: return InitOporCirc(TANK_S, step, f);
+        case 5:  return InitToObject(TANK_W, KANAL, step_to_init, not_first_call);
+        case 6:  return InitOporCIP(KANAL, step_to_init, not_first_call);
+        case 7:  return InitFromObject(TANK_W, KANAL, step_to_init, not_first_call);
+        case 8:  return InitToObject(TANK_W, KANAL, step_to_init, not_first_call);
+        case 9:  return InitOporCIP(KANAL, step_to_init, not_first_call);
+        case 10: return InitFilCirc(WITH_RETURN, step_to_init, not_first_call);
+        case 11: return InitCirc(WATER, step_to_init, not_first_call);
+        case 12: return InitOporCirc(KANAL, step_to_init, not_first_call);
+        case 13: return InitFilCirc(WITH_RETURN, step_to_init, not_first_call);
+        case 14: return InitToObject(TANK_W, KANAL, step_to_init, not_first_call);
+        case 15: return InitOporCirc(KANAL, step_to_init, not_first_call);
+        case 16: return InitOporCirc(KANAL, step_to_init, not_first_call);
+        case 22: return InitToObject(TANK_S, KANAL, step_to_init, not_first_call);
+        case 23: return InitOporCIP(KANAL, step_to_init, not_first_call);
+        case 24: return InitFromObject(TANK_S, KANAL, step_to_init, not_first_call);
+        case 26: return InitFilCirc(WITH_RETURN, step_to_init, not_first_call);
+        case 28: return InitCirc(SHCH, step_to_init, not_first_call);
+        case 29: return InitOporCirc(TANK_S, step_to_init, not_first_call);
 
-        case 31: return InitFilCirc(WITH_WATER, step, f);
-        case 33: return InitToObject(pr_media, TANK_S, step, f);
-        case 34: return InitOporCIP(TANK_S, step, f);
-        case 35: return InitFromObject(pr_media, TANK_S, step, f);
-        case 37: return InitToObject(pr_media, TANK_W, step, f);
-        case 39: return InitOporCirc(TANK_W, step, f);
-        case 40: return InitOporCIP(TANK_W, step, f);
+        case 31: return InitFilCirc(WITH_WATER, step_to_init, not_first_call);
+        case 33: return InitToObject(pr_media, TANK_S, step_to_init, not_first_call);
+        case 34: return InitOporCIP(TANK_S, step_to_init, not_first_call);
+        case 35: return InitFromObject(pr_media, TANK_S, step_to_init, not_first_call);
+        case 37: return InitToObject(pr_media, TANK_W, step_to_init, not_first_call);
+        case 39: return InitOporCirc(TANK_W, step_to_init, not_first_call);
+        case 40: return InitOporCIP(TANK_W, step_to_init, not_first_call);
 
-        case 42: return InitToObject(TANK_K, KANAL, step, f);
-        case 43: return InitOporCIP(KANAL, step, f);
-        case 44: return InitFromObject(TANK_K, KANAL, step, f);
-        case 46: return InitFilCirc(WITH_RETURN, step, f);
-        case 48: return InitCirc(KISL, step, f);
-        case 49: return InitOporCirc(TANK_K, step, f);
-        case 53: return InitToObject(WATER, TANK_K, step, f);
-        case 54: return InitOporCIP(TANK_K, step, f);
-        case 55: return InitFromObject(WATER, TANK_K, step, f);
-        case 57: return InitToObject(WATER, TANK_W, step, f);
-        case 59: return InitOporCirc(TANK_W, step, f);
-        case 60: return InitOporCIP(TANK_W, step, f);
-        case 61: return InitFilCirc(WITH_WATER, step, f);
-        case 62: return InitToObject(WATER, TANK_W, step, f);
-        case 63: return InitOporCIP(TANK_W, step, f);
-        case 64: return InitFromObject(WATER, TANK_W, step, f);
-        case 65: return InitFilCirc(WITH_WATER, step, f);
-        case 66: return InitCirc(HOT_WATER, step, f);
-        case 67: return InitOporCirc(TANK_W, step, f);
+        case 42: return InitToObject(TANK_K, KANAL, step_to_init, not_first_call);
+        case 43: return InitOporCIP(KANAL, step_to_init, not_first_call);
+        case 44: return InitFromObject(TANK_K, KANAL, step_to_init, not_first_call);
+        case 46: return InitFilCirc(WITH_RETURN, step_to_init, not_first_call);
+        case 48: return InitCirc(KISL, step_to_init, not_first_call);
+        case 49: return InitOporCirc(TANK_K, step_to_init, not_first_call);
+        case 53: return InitToObject(WATER, TANK_K, step_to_init, not_first_call);
+        case 54: return InitOporCIP(TANK_K, step_to_init, not_first_call);
+        case 55: return InitFromObject(WATER, TANK_K, step_to_init, not_first_call);
+        case 57: return InitToObject(WATER, TANK_W, step_to_init, not_first_call);
+        case 59: return InitOporCirc(TANK_W, step_to_init, not_first_call);
+        case 60: return InitOporCIP(TANK_W, step_to_init, not_first_call);
+        case 61: return InitFilCirc(WITH_WATER, step_to_init, not_first_call);
+        case 62: return InitToObject(WATER, TANK_W, step_to_init, not_first_call);
+        case 63: return InitOporCIP(TANK_W, step_to_init, not_first_call);
+        case 64: return InitFromObject(WATER, TANK_W, step_to_init, not_first_call);
+        case 65: return InitFilCirc(WITH_WATER, step_to_init, not_first_call);
+        case 66: return InitCirc(HOT_WATER, step_to_init, not_first_call);
+        case 67: return InitOporCirc(TANK_W, step_to_init, not_first_call);
 
-        case 71: return InitFilCirc(SANITIZER, step, f);
-        case 72: return InitToObject(SANITIZER, TANK_W, step, f);
-        case 73: return InitOporCIP(TANK_W, step, f);
-        case 74: return InitFromObject(SANITIZER, TANK_W, step, f);
-        case 75: return InitFilCirc(SANITIZER, step, f);
-        case 76: return InitDoseRR(SANITIZER, step, f);
-        case 77: return InitCirc(SANITIZER, step, f);
-        case 78: return InitOporCirc(KANAL, step, f);
-        case 79: return InitOporCIP(KANAL, step, f);
+        case 71: return InitFilCirc(SANITIZER, step_to_init, not_first_call);
+        case 72: return InitToObject(SANITIZER, TANK_W, step_to_init, not_first_call);
+        case 73: return InitOporCIP(TANK_W, step_to_init, not_first_call);
+        case 74: return InitFromObject(SANITIZER, TANK_W, step_to_init, not_first_call);
+        case 75: return InitFilCirc(SANITIZER, step_to_init, not_first_call);
+        case 76: return InitDoseRR(SANITIZER, step_to_init, not_first_call);
+        case 77: return InitCirc(SANITIZER, step_to_init, not_first_call);
+        case 78: return InitOporCirc(KANAL, step_to_init, not_first_call);
+        case 79: return InitOporCIP(KANAL, step_to_init, not_first_call);
 
-        case 81: return InitFilCirc(WITH_WATER, step, f);
-        case 83: return InitToObject(WATER, TANK_W, step, f);
-        case 84: return InitOporCIP(TANK_W, step, f);
-        case 85: return InitFromObject(WATER, TANK_W, step, f);
-        case 86: return InitToObject(WATER, TANK_W, step, f);
-        case 91: return InitOporCIP(TANK_W, step, f);
+        case 81: return InitFilCirc(WITH_WATER, step_to_init, not_first_call);
+        case 83: return InitToObject(WATER, TANK_W, step_to_init, not_first_call);
+        case 84: return InitOporCIP(TANK_W, step_to_init, not_first_call);
+        case 85: return InitFromObject(WATER, TANK_W, step_to_init, not_first_call);
+        case 86: return InitToObject(WATER, TANK_W, step_to_init, not_first_call);
+        case 91: return InitOporCIP(TANK_W, step_to_init, not_first_call);
         case 105: return InitFilRR(TANK_S);
         case 106: return InitCircRR(TANK_S);
         case 108: return InitCheckConc(TANK_S);
-        case 109: return InitAddRR(TANK_S, step, f);
+        case 109: return InitAddRR(TANK_S, step_to_init, not_first_call);
         case 111: return InitOpolRR(TANK_S);
         case 115: return InitFilRR(TANK_K);
         case 116: return InitCircRR(TANK_K);
         case 118: return InitCheckConc(TANK_K);
-        case 119: return InitAddRR(TANK_K, step, f);
+        case 119: return InitAddRR(TANK_K, step_to_init, not_first_call);
         case 121: return InitOpolRR(TANK_K);
 
-        case 151: return SCInitPumping(WATER, TANK_W, KANAL, -1, step, f);
-        case 152: return SCInitPumping(WATER, TANK_W, KANAL, -1, step, f);
-        case 153: return SCInitPumping(WATER, WATER, TANK_W_MG, -1, step, f);
-        case 154: return SCInitPumping(WATER, -1, -1, TANK_W_DREN, step, f);
-        case 155: return SCInitPumping(SHCH, TANK_S, TANK_S, -1, step, f);
-        case 156: return SCInitPumping(SHCH, TANK_S, TANK_W_MG, -1, step, f);
-        case 157: return SCInitPumping(SHCH, TANK_S, TANK_W_MG, -1, step, f);
+        case 151: return SCInitPumping(WATER, TANK_W, KANAL, -1, step_to_init, not_first_call);
+        case 152: return SCInitPumping(WATER, TANK_W, KANAL, -1, step_to_init, not_first_call);
+        case 153: return SCInitPumping(WATER, WATER, TANK_W_MG, -1, step_to_init, not_first_call);
+        case 154: return SCInitPumping(WATER, -1, -1, TANK_W_DREN, step_to_init, not_first_call);
+        case 155: return SCInitPumping(SHCH, TANK_S, TANK_S, -1, step_to_init, not_first_call);
+        case 156: return SCInitPumping(SHCH, TANK_S, TANK_W_MG, -1, step_to_init, not_first_call);
+        case 157: return SCInitPumping(SHCH, TANK_S, TANK_W_MG, -1, step_to_init, not_first_call);
             //	case 158: return SCInitPumping(SHCH, TANK_S, TANK_W_MG, -1, step, f);
             //	case 159: return SCInitPumping(SHCH, TANK_S, NEUTRO, -1, step, f);
-        case 160: return SCInitPumping(SHCH, WATER, TANK_S, -1, step, f);
-        case 161: return SCInitPumping(SHCH, TANK_W, TANK_W_MG, TANK_S_DREN, step, f);
-        case 162: return SCInitPumping(KISL, TANK_K, TANK_K, -1, step, f);
-        case 163: return SCInitPumping(KISL, TANK_K, TANK_S_MG, -1, step, f);
-        case 164: return SCInitPumping(KISL, TANK_K, TANK_S_MG, -1, step, f);
+        case 160: return SCInitPumping(SHCH, WATER, TANK_S, -1, step_to_init, not_first_call);
+        case 161: return SCInitPumping(SHCH, TANK_W, TANK_W_MG, TANK_S_DREN, step_to_init, not_first_call);
+        case 162: return SCInitPumping(KISL, TANK_K, TANK_K, -1, step_to_init, not_first_call);
+        case 163: return SCInitPumping(KISL, TANK_K, TANK_S_MG, -1, step_to_init, not_first_call);
+        case 164: return SCInitPumping(KISL, TANK_K, TANK_S_MG, -1, step_to_init, not_first_call);
             //	case 165: return SCInitPumping(KISL, TANK_K, TANK_S_MG, -1, step, f);
             //	case 166: return SCInitPumping(KISL, TANK_K, NEUTRO, -1, step, f);
-        case 167: return SCInitPumping(KISL, WATER,TANK_K_MG, -1, step, f);
-        case 168: return SCInitPumping(KISL, TANK_S, TANK_S_MG, TANK_K_DREN, step, f);
-        case 169: return SCInitPumping(SHCH, TANK_W, TANK_K_MG, -1, step, f);
-        case 170: return SCInitPumping(SHCH, TANK_W, TANK_K_MG, -1, step, f);
+        case 167: return SCInitPumping(KISL, WATER,TANK_K_MG, -1, step_to_init, not_first_call);
+        case 168: return SCInitPumping(KISL, TANK_S, TANK_S_MG, TANK_K_DREN, step_to_init, not_first_call);
+        case 169: return SCInitPumping(SHCH, TANK_W, TANK_K_MG, -1, step_to_init, not_first_call);
+        case 170: return SCInitPumping(SHCH, TANK_W, TANK_K_MG, -1, step_to_init, not_first_call);
             //	case 171: return SCInitPumping(SHCH, TANK_W, TANK_K_MG, -1, step, f);
             //	case 172: return SCInitPumping(SHCH, TANK_W, NEUTRO, -1, step, f);
-        case 173: return SCInitPumping(SHCH, WATER, TANK_W, -1, step, f);
-        case 174: return SCInitPumping(SHCH, TANK_K,TANK_K_MG, TANK_W_DREN, step, f);
-        case 175: return SCInitPumping(KISL, TANK_S, TANK_W_MG, -1, step, f);
-        case 176: return SCInitPumping(KISL, TANK_S, NEUTRO, -1, step, f);
-        case 177: return SCInitPumping(KISL, TANK_S, TANK_W_MG, -1, step, f);
-        case 178: return SCInitPumping(KISL, TANK_S, NEUTRO, -1, step, f);
-        case 179: return SCInitPumping(KISL, WATER, TANK_S_MG, -1, step, f);
-        case 180: return SCInitPumping(KISL, TANK_W, TANK_W_MG, TANK_S_DREN, step, f);
-        case 181: return SCInitPumping(SHCH, TANK_K, NEUTRO, -1, step, f);
-        case 182: return SCInitPumping(SHCH, TANK_K, NEUTRO, -1, step, f);
-        case 183: return SCInitPumping(KISL, TANK_W, NEUTRO, TANK_K_DREN, step, f);
-        case 184: return SCInitPumping(KISL, TANK_W, NEUTRO, TANK_K_DREN, step, f);
-        case 185: return SCInitPumping(WATER, WATER, TANK_S_MG, TANK_KW_DREN, step, f);
-        case 186: return SCInitPumping(WATER, WATER, TANK_K_MG, TANK_SW_DREN, step, f);
-        case 187: return SCInitPumping(WATER, WATER, TANK_W_MG, TANK_SK_DREN, step, f);
-        case 188: return SCInitPumping(-1, -1, -1, TANK_SKW_DREN, step, f);
+        case 173: return SCInitPumping(SHCH, WATER, TANK_W, -1, step_to_init, not_first_call);
+        case 174: return SCInitPumping(SHCH, TANK_K,TANK_K_MG, TANK_W_DREN, step_to_init, not_first_call);
+        case 175: return SCInitPumping(KISL, TANK_S, TANK_W_MG, -1, step_to_init, not_first_call);
+        case 176: return SCInitPumping(KISL, TANK_S, NEUTRO, -1, step_to_init, not_first_call);
+        case 177: return SCInitPumping(KISL, TANK_S, TANK_W_MG, -1, step_to_init, not_first_call);
+        case 178: return SCInitPumping(KISL, TANK_S, NEUTRO, -1, step_to_init, not_first_call);
+        case 179: return SCInitPumping(KISL, WATER, TANK_S_MG, -1, step_to_init, not_first_call);
+        case 180: return SCInitPumping(KISL, TANK_W, TANK_W_MG, TANK_S_DREN, step_to_init, not_first_call);
+        case 181: return SCInitPumping(SHCH, TANK_K, NEUTRO, -1, step_to_init, not_first_call);
+        case 182: return SCInitPumping(SHCH, TANK_K, NEUTRO, -1, step_to_init, not_first_call);
+        case 183: return SCInitPumping(KISL, TANK_W, NEUTRO, TANK_K_DREN, step_to_init, not_first_call);
+        case 184: return SCInitPumping(KISL, TANK_W, NEUTRO, TANK_K_DREN, step_to_init, not_first_call);
+        case 185: return SCInitPumping(WATER, WATER, TANK_S_MG, TANK_KW_DREN, step_to_init, not_first_call);
+        case 186: return SCInitPumping(WATER, WATER, TANK_K_MG, TANK_SW_DREN, step_to_init, not_first_call);
+        case 187: return SCInitPumping(WATER, WATER, TANK_W_MG, TANK_SK_DREN, step_to_init, not_first_call);
+        case 188: return SCInitPumping(-1, -1, -1, TANK_SKW_DREN, step_to_init, not_first_call);
 
-        case 300: return InitCustomStep(WATER, WATER, KANAL, 0, step, f);
+        case 300: return InitCustomStep(WATER, WATER, KANAL, 0, step_to_init, not_first_call);
 
         case 555:
             RHI();
@@ -1928,17 +2004,17 @@ int cipline_tech_object::EvalCipInProgress()
     return 0;
     }
 
-int cipline_tech_object::DoStep( int step )
-    {
+int cipline_tech_object::_DoStep( int step_to_do )
+{
     int res, pr_media;
 
     if (dev_upr_caustic)
         {
-        if (step >= 24 && step <=33) dev_upr_caustic->on(); else dev_upr_caustic->off();
+        if (step_to_do >= 24 && step_to_do <=33) dev_upr_caustic->on(); else dev_upr_caustic->off();
         }
     if (dev_upr_acid)
         {
-        if (step >= 44 && step <=53) dev_upr_acid->on(); else dev_upr_acid->off();
+        if (step_to_do >= 44 && step_to_do <=53) dev_upr_acid->on(); else dev_upr_acid->off();
         }
 
     res=CheckErr();
@@ -1949,7 +2025,7 @@ int cipline_tech_object::DoStep( int step )
         }
 
     pr_media=WATER;
-    if (step>30 && step<42)
+    if (step_to_do>30 && step_to_do<42)
         {
         if ((((int)rt_par_float[P_PROGRAM]) >> PRG_K) & 1)
             {
@@ -1957,7 +2033,7 @@ int cipline_tech_object::DoStep( int step )
             }
         }
 
-    switch (step)
+    switch (step_to_do)
         {
         case 0:
             if (LM->is_active()) return 1;
@@ -2205,7 +2281,7 @@ int cipline_tech_object::SetCommand( int command )
     return l;
     }
 
-int cipline_tech_object::LoadProgram( void )
+int cipline_tech_object::_LoadProgram( void )
     {
     curprg=getNexpPrg(curprg, ( int ) rt_par_float[P_PROGRAM]);
     switch (curprg)
@@ -5751,6 +5827,133 @@ void cipline_tech_object::setSwitch( int switchNO, int value )
             switch4 = value;
             break;
         }
+    }
+
+
+//Функции вызывающие обработчики LUA
+int cipline_tech_object::GoToStep( int cur, int param )
+    {
+    int luares = 0;
+
+    if (2 == is_GoToStep_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_GoToStep" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, cur);
+        lua_pushinteger(L, param);
+        if (0 == lua_pcall(L, 3, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_GoToStep: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _GoToStep(cur, param);
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::DoStep( int step_to_do )
+{
+    int luares = 0;
+
+    if (2 == is_DoStep_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_DoStep" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, step_to_do);
+        if (0 == lua_pcall(L, 2, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_DoStep: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _DoStep(step_to_do);
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::InitStep( int step_to_init, int not_first_call )
+    {
+    int luares = 0;
+
+    if (2 == is_InitStep_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_InitStep" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, step_to_init);
+        lua_pushinteger(L, not_first_call);
+        if (0 == lua_pcall(L, 3, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_InitStep: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _InitStep(step_to_init, not_first_call);
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::LoadProgram( void )
+    {
+    int luares = 0;
+
+    if (2 == is_InitStep_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_LoadProgram" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        if (0 == lua_pcall(L, 1, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_LoadProgram: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _LoadProgram();
+        }
+
+    return luares;
     }
 
 i_DO_device* cipline_tech_object::VWDREN = 0;

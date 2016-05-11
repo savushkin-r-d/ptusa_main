@@ -230,6 +230,13 @@ class device
 
 		void set_descr( const char *description );
 
+        /// @brief Выключение устройства с учетом ручного режима.
+        void off();
+        /// @brief Включение устройства с учетом ручного режима.
+        virtual void on();
+        /// @brief Установка текущего состояния устройства с учетом ручного режима.
+        virtual void set_value( float new_value );
+
 		enum DEVICE_TYPE
             {
             DT_NONE = -1,///< Тип не определен.
@@ -1216,6 +1223,12 @@ class cipline_tech_object: public tech_object
 		int ForceRet(int val);
 		int GetRetState();
 		int HasRet();
+
+        //Базовые методы для вызова из модифицированных на LUA
+        int _GoToStep(int cur, int param); //cip_GoToStep(currentstep,param)
+        int _DoStep(int step_to_do); //cip_DoStep(step)
+        int _InitStep(int step_to_init, int not_first_call);          //cip_InitStep(steptoinit, param)
+        int _LoadProgram(void);
 	};
 //---------------------------------------------------------------------------
 rm_manager* G_RM_MANAGER();
