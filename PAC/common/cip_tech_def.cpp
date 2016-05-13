@@ -156,6 +156,8 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
     is_DoStep_func = 0;
     is_InitStep_func = 0;
     is_LoadProgram_func = 0;
+    is_StopDev_func = 0;
+    is_ResetLinesDevicesBeforeReset_func = 0;
 
     //для ошибки "возможно отсутствует концентрированный раствор"
     no_liquid_is_warning = 0;
@@ -834,6 +836,42 @@ void cipline_tech_object::initline()
             }
         lua_remove(L, -1); // Stack: remove function "cip_LoadProgram".
         }
+
+    if ( is_StopDev_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_StopDev" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_StopDev_func = 2;
+            }
+        else
+            {
+            is_StopDev_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_StopDev".
+        }
+
+    if ( is_ResetLinesDevicesBeforeReset_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_ResetLinesDevicesBeforeReset" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_ResetLinesDevicesBeforeReset_func = 2;
+            }
+        else
+            {
+            is_ResetLinesDevicesBeforeReset_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_ResetLinesDevicesBeforeReset".
+        }
     }
 
 void cipline_tech_object::resetProgramName()
@@ -1197,7 +1235,7 @@ int cipline_tech_object::EvalBlock()
     return 1;
     }
 
-void cipline_tech_object::StopDev( void )
+void cipline_tech_object::_StopDev( void )
     {
     V01->off();
     V03->off();
@@ -2198,7 +2236,7 @@ int cipline_tech_object::_DoStep( int step_to_do )
         return 0;
         }
 
-void cipline_tech_object::ResetLinesDevicesBeforeReset( void )
+void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
     {
     curprg = -1;
     if (valvesAreInConflict)
@@ -5930,7 +5968,7 @@ int cipline_tech_object::LoadProgram( void )
     {
     int luares = 0;
 
-    if (2 == is_InitStep_func)
+    if (2 == is_LoadProgram_func)
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getglobal( L, name_Lua );
@@ -5954,6 +5992,52 @@ int cipline_tech_object::LoadProgram( void )
         }
 
     return luares;
+    }
+
+void cipline_tech_object::StopDev( void )
+    {
+    if (2 == is_StopDev_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_StopDev" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        if (0 != lua_pcall(L, 1, 0, 0))
+            {
+            Print("Error in calling cip_StopDev: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        _StopDev();
+        }
+
+    return;
+    }
+
+void cipline_tech_object::ResetLinesDevicesBeforeReset( void )
+    {
+    if (2 == is_ResetLinesDevicesBeforeReset_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_ResetLinesDevicesBeforeReset" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        if (0 != lua_pcall(L, 1, 0, 0))
+            {
+            Print("Error in calling cip_ResetLinesDevicesBeforeReset: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        _ResetLinesDevicesBeforeReset();
+        }
+
+    return;
     }
 
 i_DO_device* cipline_tech_object::VWDREN = 0;

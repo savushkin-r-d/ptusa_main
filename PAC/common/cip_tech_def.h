@@ -518,6 +518,8 @@ class cipline_tech_object: public tech_object
         int is_DoStep_func;
         int is_InitStep_func;
         int is_LoadProgram_func;
+        int is_StopDev_func;
+        int is_ResetLinesDevicesBeforeReset_func;
 
 	public:
 		cipline_tech_object( const char* name, u_int number, u_int type, const char* name_Lua,
@@ -694,8 +696,6 @@ class cipline_tech_object: public tech_object
 		virtual void RHI(void);
 		virtual void RT(void);
 		virtual void PT(void);
-		virtual void StopDev(void);
-		virtual void ResetLinesDevicesBeforeReset(void);
 		virtual int SetCommand(int command);
 		virtual void ResetWP(void);
 		virtual void Stop(int step);
@@ -709,12 +709,16 @@ class cipline_tech_object: public tech_object
         virtual int _GoToStep(int cur, int param); //Переход к следующему шагу.
         virtual int _InitStep(int step_to_init, int not_first_call);          //cip_InitStep(steptoinit, param)
         virtual int _LoadProgram(void);
+        virtual void _StopDev(void);
+        virtual void _ResetLinesDevicesBeforeReset(void);
         ///-----------------------------------------------
         ////Функции, вызывающие обработчики на Lua. При отсутствии обработчиков вызываются стандартные функции.
-        virtual int DoStep(int step_to_do);                   //cip_DoStep(step)
-        virtual int GoToStep(int cur, int param);       //cip_GoToStep(currentstep,param)
-        virtual int InitStep(int step_to_init, int not_first_call);          //cip_InitStep(steptoinit, param)
-        virtual int LoadProgram(void);                                  //cip_LoadProgram()
+        virtual int DoStep(int step_to_do);                                     //cip_DoStep(step)
+        virtual int GoToStep(int cur, int param);                               //cip_GoToStep(currentstep,param)
+        virtual int InitStep(int step_to_init, int not_first_call);             //cip_InitStep(steptoinit, param)
+        virtual int LoadProgram(void);                                          //cip_LoadProgram()
+        virtual void StopDev(void);                                             //cip_StopDev()
+        virtual void ResetLinesDevicesBeforeReset(void);
         ////--------------------------------------------
 		////-----error service-------
 		virtual void ResetErr(void);

@@ -1229,6 +1229,9 @@ class cipline_tech_object: public tech_object
         int _DoStep(int step_to_do); //cip_DoStep(step)
         int _InitStep(int step_to_init, int not_first_call);          //cip_InitStep(steptoinit, param)
         int _LoadProgram(void);
+        void _StopDev(void); 
+        int ToObject(int from, int where);
+        int FromObject(int what, int where);
 	};
 //---------------------------------------------------------------------------
 rm_manager* G_RM_MANAGER();
