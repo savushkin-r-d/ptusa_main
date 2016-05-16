@@ -3257,14 +3257,14 @@ int cipline_tech_object::OpolRR( int where )
     return 0;
     }
 
-int cipline_tech_object::InitToObject( int from, int where, int step, int f )
+int cipline_tech_object::InitToObject( int from, int where, int step_to_init, int f )
     {
     float v=1, p=1, z=0;
     //	int ot;
     V05->on();
     V06->off();
 
-    if (step == 5 || step == 22 || step == 42 || step == 62 || step == 72 || (step == 83 && rt_par_float[P_PROGRAM] == SPROG_HOTWATER))
+    if (step_to_init == 5 || step_to_init == 22 || step_to_init == 42 || step_to_init == 62 || step_to_init == 72 || (step_to_init == 83 && rt_par_float[P_PROGRAM] == SPROG_HOTWATER))
         {
         enable_ret_pump = 1;
         }
@@ -3358,7 +3358,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
     NP->on();
     SetRet(ON);
 
-    switch (step)
+    switch (step_to_init)
         {
         case 5:
         case 8:
@@ -3406,7 +3406,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
                 }
             break;
         }
-    switch (step)
+    switch (step_to_init)
         {
         case 5:
         case 22:
@@ -3446,7 +3446,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
             break;
         }
     rt_par_float[P_ZAD_PODOGR] = v;
-    if (/*disable_tank_heating && */isTank() && (22 == step || 42 == step || 62 == step))
+    if (/*disable_tank_heating && */isTank() && (22 == step_to_init || 42 == step_to_init || 62 == step_to_init))
         {
         rt_par_float[P_ZAD_PODOGR] = 0;
         PIDP->off();
@@ -3475,7 +3475,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step, int f )
     return 0;
     }
 
-int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
+int cipline_tech_object::InitFromObject( int what, int where, int step_to_init, int f )
     {
     float v = 0, p = 0, z=0;
     //	int ot;
@@ -3562,7 +3562,7 @@ int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
 
     SetRet(OFF);
 
-    switch (step)
+    switch (step_to_init)
         {
         case 7:
             v=rt_par_float[P_T_WP];
@@ -3605,7 +3605,7 @@ int cipline_tech_object::InitFromObject( int what, int where, int step, int f )
         }
     p=rt_par_float[PV2];
     rt_par_float[P_ZAD_PODOGR] = v;
-    if (disable_tank_heating && isTank() && (24 == step || 44 == step || 64 == step))
+    if (disable_tank_heating && isTank() && (24 == step_to_init || 44 == step_to_init || 64 == step_to_init))
         {
         rt_par_float[P_ZAD_PODOGR] = 0;
         PIDP->off();
@@ -3723,7 +3723,7 @@ int cipline_tech_object::InitOporCIP( int where, int step, int f )
     return 0;
     }
 
-int cipline_tech_object::InitFilCirc( int with_what, int step, int f )
+int cipline_tech_object::InitFilCirc( int with_what, int step_to_init, int f )
     {
     V01->on();
     V11->off();
@@ -3749,7 +3749,7 @@ int cipline_tech_object::InitFilCirc( int with_what, int step, int f )
             V06->off();
             NP->on();
             SetRet(ON);
-            if (isTank() && (26 == step || 46 == step || 65 == step))
+            if (isTank() && (26 == step_to_init || 46 == step_to_init || 65 == step_to_init))
                 {
                 PIDP->off();
                 }
@@ -3760,7 +3760,7 @@ int cipline_tech_object::InitFilCirc( int with_what, int step, int f )
             PIDF->on();
             break;
         }
-    switch (step)
+    switch (step_to_init)
         {
         case 26:
             V03->on();

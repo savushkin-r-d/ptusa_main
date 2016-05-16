@@ -1232,6 +1232,12 @@ class cipline_tech_object: public tech_object
         void _StopDev(void); 
         int ToObject(int from, int where);
         int FromObject(int what, int where);
+        int InitToObject(int from, int where, int step_to_init, int f);
+        int InitFromObject(int what, int where, int step_to_init, int f);
+        int InitCirc(int what, int step_to_init, int f);
+        int Circ(int what);
+        int FilCirc(int with_what);
+        int InitFilCirc(int with_what, int step_to_init, int f);
 	};
 //---------------------------------------------------------------------------
 rm_manager* G_RM_MANAGER();

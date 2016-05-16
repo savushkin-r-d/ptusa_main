@@ -737,10 +737,10 @@ class cipline_tech_object: public tech_object
 		virtual int AddRR(int where);
 		virtual int OpolRR(int where);
 		////-------------------------
-		virtual int InitToObject(int from, int where, int step, int f);
-		virtual int InitFromObject(int what, int where, int step, int f);
+		virtual int InitToObject(int from, int where, int step_to_init, int f);
+		virtual int InitFromObject(int what, int where, int step_to_init, int f);
 		virtual int InitOporCIP(int where, int step, int f);
-		virtual int InitFilCirc(int with_what, int step, int f);
+		virtual int InitFilCirc(int with_what, int step_to_init, int f);
 		virtual int InitCirc(int what, int step, int f);
 		virtual int InitOporCirc(int where, int step, int f);
 		virtual int ToObject(int from, int where);
