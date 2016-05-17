@@ -4098,74 +4098,12 @@ int cipline_tech_object::ToObject( int from, int where )
                 }
             break;
         case TANK_K:
-            if (LKH->is_active())
-                {
-                tankfull = 1;
-                tankfulltimer = get_millisec();
-                }
-
-            if (tankfull)
-                {
-                if (get_delta_millisec(tankfulltimer) > 60000L)
-                    {
-                    tankfull = 0;
-                    }
-                }
-
             c=GetConc(KISL);
-            if (tankfull)
-                {
-                V08->off();
-                V09->off();
-                V10->off();
-                V11->off();
-                if (no_neutro) {V11->on();} else {V12->on();}
-                V07->off();
-                }
-            else
-                {
-                V08->on();
-                V09->off();
-                V10->off();
-                V11->off();
-                V12->off();
-                V07->off();
-                }
+            SortRR(TANK_K);
             break;
         case TANK_S:
-            if (LSH->is_active())
-                {
-                tankfull = 1;
-                tankfulltimer = get_millisec();
-                }
-
-            if (tankfull)
-                {
-                if (get_delta_millisec(tankfulltimer) > 60000L)
-                    {
-                    tankfull = 0;
-                    }
-                }
-
             c=GetConc(SHCH);
-            if (tankfull)
-                {
-                V08->off();
-                V09->off();
-                V10->off();
-                V11->off();
-                if (no_neutro) {V11->on();} else {V12->on();}
-                V07->off();
-                }
-            else
-                {
-                V08->off();
-                V09->on();
-                V10->off();
-                V11->off();
-                V12->off();
-                V07->off();
-                }
+            SortRR(TANK_S);
             break;
         }
     rt_par_float[P_CONC] = c;
