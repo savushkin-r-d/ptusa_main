@@ -1238,6 +1238,8 @@ class cipline_tech_object: public tech_object
         int Circ(int what);
         int FilCirc(int with_what);
         int InitFilCirc(int with_what, int step_to_init, int f);
+        int InitOporCIP(int where, int step_to_init, int f);
+        int OporCIP(int where);
 	};
 //---------------------------------------------------------------------------
 rm_manager* G_RM_MANAGER();

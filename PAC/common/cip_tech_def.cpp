@@ -3646,7 +3646,7 @@ int cipline_tech_object::InitFromObject( int what, int where, int step_to_init, 
     return 0;
     }
 
-int cipline_tech_object::InitOporCIP( int where, int step, int f )
+int cipline_tech_object::InitOporCIP( int where, int step_to_init, int f )
     {
     float z=0;
     opcip=0;
