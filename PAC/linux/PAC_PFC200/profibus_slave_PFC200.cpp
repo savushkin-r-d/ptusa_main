@@ -59,8 +59,8 @@ int profibus_slave_PFC200::init()
 
 	if ( DAL_SUCCESS == iDalResult )
 	    {
-	    ////Set up the watchdog.
-	    //iDalResult = setup_watchdog( pstAdi );
+	    //Set up the watchdog.
+	    iDalResult = setup_watchdog( pstAdi );
 
 	    //Configure the device.
 	    if ( DAL_SUCCESS == iDalResult )
@@ -74,11 +74,11 @@ int profibus_slave_PFC200::init()
 		iDalResult = report_app_state_running_evt( pstAdi );
 		}
 
-	    ////Start the watchdog.
-	    //if ( DAL_SUCCESS == iDalResult )
-	    //	{
-	    //	iDalResult = start_watchdog( pstAdi );
-	    //	}
+	    //Start the watchdog.
+	    if ( DAL_SUCCESS == iDalResult )
+	    	{
+	    	iDalResult = start_watchdog( pstAdi );
+	    	}
 	    }
 	}
 
@@ -447,8 +447,8 @@ int profibus_slave_PFC200::eval()
     uint8_t ucDevState = 0;           //Current device state.
 #endif // DEBUG_PROFIBUS_SLAVE
 
-    ////Trigger the watchdog.
-    //iDalResult = pstAdi->WatchdogTrigger();
+    //Trigger the watchdog.
+    iDalResult = pstAdi->WatchdogTrigger();
 
     //Read data from fieldbus output process image.
     if ( iDalResult == DAL_SUCCESS )
@@ -492,17 +492,17 @@ int profibus_slave_PFC200::eval()
     /* print the PLC input process data */
     if ( iDalResult == DAL_SUCCESS )
 	{
-	printf( "PROFIBUS slave DP"
+	printf( "PROFIBUS slave DP "
 		"PLC input data = 0x%02X %02X %02X %02X %02X %02X %02X %02X - ",
-		aucPlcPrcImgOutp[0], aucPlcPrcImgOutp[1], aucPlcPrcImgOutp[2],
-		aucPlcPrcImgOutp[3], aucPlcPrcImgOutp[4], aucPlcPrcImgOutp[5],
-		aucPlcPrcImgOutp[6], aucPlcPrcImgOutp[7] );
+		aucPlcPrcImgInp[0], aucPlcPrcImgInp[1], aucPlcPrcImgInp[2],
+		aucPlcPrcImgInp[3], aucPlcPrcImgInp[4], aucPlcPrcImgInp[5],
+		aucPlcPrcImgInp[6], aucPlcPrcImgInp[7] );
 	}
     char tmp[4];
-    tmp[0] = aucPlcPrcImgOutp[3];
-    tmp[1] = aucPlcPrcImgOutp[2];
-    tmp[2] = aucPlcPrcImgOutp[1];
-    tmp[3] = aucPlcPrcImgOutp[0];
+    tmp[0] = aucPlcPrcImgInp[3];
+    tmp[1] = aucPlcPrcImgInp[2];
+    tmp[2] = aucPlcPrcImgInp[1];
+    tmp[3] = aucPlcPrcImgInp[0];
 
     float *val = (float*) tmp;
     double dval = *val;
