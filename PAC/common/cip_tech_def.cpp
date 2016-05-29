@@ -4048,18 +4048,7 @@ int cipline_tech_object::ToObject( int from, int where )
                 }
             break;
         }
-
-    if (cnt->get_quantity() >= rt_par_float[P_VRAB])
-        {
-        return 1;
-        }
-
-    if (curstep==86 && TR->get_value()<5 && rt_par_float[P_PROGRAM] != SPROG_RINSING_CLEAN)
-        {
-        return 1;
-        }
-
-
+    
     switch (where)
         {
         case TANK_W:
@@ -4106,6 +4095,18 @@ int cipline_tech_object::ToObject( int from, int where )
             SortRR(TANK_S);
             break;
         }
+
+
+    if (cnt->get_quantity() >= rt_par_float[P_VRAB])
+        {
+        return 1;
+        }
+
+    if (curstep==86 && TR->get_value()<5 && rt_par_float[P_PROGRAM] != SPROG_RINSING_CLEAN)
+        {
+        return 1;
+        }
+
     rt_par_float[P_CONC] = c;
 
     return 0;
