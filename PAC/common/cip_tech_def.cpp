@@ -5971,10 +5971,7 @@ void cipline_tech_object::ResetLinesDevicesBeforeReset( void )
             lua_pop(L, 1);
             }
         }
-    else
-        {
-        _ResetLinesDevicesBeforeReset();
-        }
+    _ResetLinesDevicesBeforeReset();
 
     return;
     }
