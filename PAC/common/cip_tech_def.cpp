@@ -4060,7 +4060,7 @@ int cipline_tech_object::ToObject( int from, int where )
 
             if (tankfull)
                 {
-                if (get_delta_millisec(tankfulltimer) > 60000L)
+                if (get_delta_millisec(tankfulltimer) > 60000L && (!LWH->is_active()))
                     {
                     tankfull = 0;
                     }
@@ -4282,7 +4282,7 @@ int cipline_tech_object::FromObject( int what, int where )
 
             if (tankfull)
                 {
-                if (get_delta_millisec(tankfulltimer) > 60000L)
+                if (get_delta_millisec(tankfulltimer) > 60000L && (!LWH->is_active()))
                     {
                     tankfull = 0;
                     }
