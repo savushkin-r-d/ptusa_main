@@ -141,9 +141,9 @@ int main( int argc, char *argv[] )
         //-Информация о времени выполнения цикла программы.!->
         all_time += get_delta_millisec( st_time );
 
-        static u_int max_cycle_time = 0;
-
-        u_int cycle_time = get_delta_millisec( st_time );
+        static u_int max_cycle_time = 500;
+        static u_int cycle_time = 0;
+        cycle_time = get_delta_millisec( st_time );
 
         if ( max_cycle_time < cycle_time )
             {

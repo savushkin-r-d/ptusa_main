@@ -387,7 +387,9 @@ int tcp_communicator_linux::evaluate()
              int is_removed = 0;
              if (FD_ISSET(it->second->get_socket(), &rfds)) //если есть событие на сокете
                  {
-                 int err = recvtimeout(it->second->get_socket(), (unsigned char*)it->second->buff, it->second->buff_size, 1, 0, it->second->ip);
+                 int err = recvtimeout(it->second->get_socket(),
+                     (unsigned char*)it->second->buff, it->second->buff_size,
+		     1, 0, it->second->ip, "async client", 0 );
                  if (err <= 0) //Ошибка чтения
                      {
                      it->second->Disconnect();
@@ -433,8 +435,47 @@ int tcp_communicator_linux::evaluate()
     }
 //------------------------------------------------------------------------------
 int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
-    int len, int sec, int usec, char* IP )
+    int len, int sec, int usec, const char* IP, const char* name,
+    stat_time *stat )
     {
+
+    //Network performance info.
+    if ( stat )
+	{
+	static time_t t_;
+	struct tm *timeInfo_;
+	t_ = time( 0 );
+	timeInfo_ = localtime( &t_ );
+
+	//Once per hour writes performance info.
+	if ( stat->print_cycle_last_h != timeInfo_->tm_hour )
+	    {
+	    stat->print_cycle_last_h = timeInfo_->tm_hour;
+
+	    u_long avg_time = stat->all_time / stat->cycles_cnt;
+	    sprintf( G_LOG->msg,
+		    "tcp_communicator_linux:recvtimeout() socket %d->\"%s\":\"%s\""
+		    " stat %lu %u %u (ms).",
+		    s, name, IP,
+		    avg_time, stat->min_iteration_cycle_time,
+		    stat->max_iteration_cycle_time );
+	    G_LOG->write_log( i_log::P_DEBUG );
+
+	    u_int t = G_PAC_INFO()->par[ PAC_info::P_WAGO_TCP_NODE_WARN_ANSWER_TIME ];
+
+	    if ( t < avg_time )
+		{
+		sprintf( G_LOG->msg,
+			"tcp_communicator_linux:recvtimeout() socket %d->\"%s\":\"%s\""
+			" avg time exceeds limit %lu > %u (ms).",
+			s, name, IP, avg_time, t );
+		G_LOG->write_log( i_log::P_DEBUG );
+		}
+
+	    stat->clear();
+	    }
+	}
+
     errno = 0;
 
     // Настраиваем  file descriptor set.
@@ -447,13 +488,22 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
     rec_tv.tv_sec = sec;
     rec_tv.tv_usec = usec;
 
+    static u_long st_time;
+    static u_int select_wait_time;
+
+    st_time = get_millisec();
+
     // Ждем таймаута или полученных данных.
     int n = select( s + 1, &fds, NULL, NULL, &rec_tv );
+
     if ( 0 == n )
         {
         sprintf( G_LOG->msg,
-            "tcp_communicator_linux:recvtimeout() socket %d->\"%s\" disconnected on read try - timeout.",
-                s, IP );
+            "tcp_communicator_linux:recvtimeout() socket %d->\"%s\":\"%s\""
+             " disconnected on read try - timeout (%d ms).",
+             s, name, IP,
+	     usec / 1000  );
+
         G_LOG->write_log( i_log::P_ERR );
 
         return -2;  // timeout!
@@ -462,8 +512,9 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
     if ( -1 == n )
         {
         sprintf( G_LOG->msg,
-            "%s : tcp_communicator_linux:recvtimeout() socket %d->\"%s\" disconnected on read try.",
-            strerror( errno ), s, IP );
+            "%s : tcp_communicator_linux:recvtimeout() socket %d->\"%s\":\"%s\""
+            " disconnected on read try.",
+            strerror( errno ), s, name, IP );
         G_LOG->write_log( i_log::P_ERR );
 
         return -1; // error
@@ -472,21 +523,41 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
     // Данные должны быть здесь, поэтому делаем обычный recv().
     int res = recv( s, buf, len, MSG_NOSIGNAL );
 
+    select_wait_time = get_delta_millisec( st_time );
+
     if ( 0 == res )
         {
         sprintf( G_LOG->msg,
-            "tcp_communicator_linux:recvtimeout() socket %d->\"%s\" was closed.",
-            s, IP );
+            "tcp_communicator_linux:recvtimeout() socket %d->\"%s\":\"%s\""
+            " was closed.",
+            s, name, IP );
         G_LOG->write_log( i_log::P_WARNING );
         }
 
     if ( res < 0 )
         {
         sprintf( G_LOG->msg,
-            "%s : tcp_communicator_linux:recvtimeout() socket %d->\"%s\" disconnected on read try (unknown).",
-            strerror( errno ), s, IP );
+            "%s : tcp_communicator_linux:recvtimeout() socket %d->\"%s\":\"%s\""
+            " disconnected on read try (unknown).",
+            strerror( errno ), s, name, IP );
         G_LOG->write_log( i_log::P_ERR );
         }
+
+    //Network performance info.
+    if ( stat )
+	{
+	stat->cycles_cnt++;
+	stat->all_time += select_wait_time;
+
+	if ( select_wait_time > stat->max_iteration_cycle_time )
+	    {
+	    stat->max_iteration_cycle_time = select_wait_time;
+	    }
+	if ( select_wait_time < stat->min_iteration_cycle_time )
+	    {
+	    stat->min_iteration_cycle_time = select_wait_time;
+	    }
+	}
 
     return res;
     }
@@ -507,8 +578,8 @@ int tcp_communicator_linux::do_echo ( int idx )
     memset( buf, 0, BUFSIZE );
 
     // Ожидаем данные с таймаутом 5 сек.
-    err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 5, 0,
-        inet_ntoa( sock_state.sin.sin_addr ) );
+    err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 50, 0,
+        inet_ntoa( sock_state.sin.sin_addr ), "l_tcp_communicator", &sock_state.stat );
 
     if ( err <= 0 )               /* read error */
         {

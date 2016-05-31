@@ -85,8 +85,10 @@ int wago_manager_linux::net_init( wago_node *node )
             else // = 0
                 {
                 sprintf( G_LOG->msg,
-                    "wago_manager_linux:net_init() - can't connect to \"%s\":%d : timeout.",
-                    node->ip_address, PORT );
+                    "wago_manager_linux:net_init() - can't connect "
+                    "to \"%s\":\"%s\":%d : timeout (%d ms).",
+                    node->name, node->ip_address, PORT,
+		    wago_node::C_CNT_TIMEOUT_US / 1000  );
                 G_LOG->write_log( i_log::P_CRIT );
                 }
             }
@@ -117,8 +119,9 @@ int wago_manager_linux::net_init( wago_node *node )
         }
 
 #ifdef DEBUG
-    printf( "wago_manager_linux:net_init() : socket %d is successfully connected to \"%s\":%d\n",
-        sock, node->ip_address, PORT );
+    printf( "wago_manager_linux:net_init() : socket %d is successfully"
+	" connected to \"%s\":\"%s\":%d\n",
+        sock, node->name, node->ip_address, PORT );
 #endif // DEBUG
 
     node->sock   = sock;
@@ -312,18 +315,11 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
 
     // Получение данных.
     res = tcp_communicator_linux::recvtimeout( node->sock, buff,
-        bytes_to_receive, 0, wago_node::C_RCV_TIMEOUT_US, node->ip_address );
+        bytes_to_receive, 0, wago_node::C_RCV_TIMEOUT_US, node->ip_address,
+	node->name, &node->stat );
 
     if( res <= 0 ) /* read error */
         {
-        if ( node->is_set_err == false )
-            {
-            sprintf( G_LOG->msg,
-                "%s : wago_manager::e_communicate() error recvtimeout.",
-                strerror( errno ) );
-            G_LOG->write_log( i_log::P_ERR );
-            }
-
         disconnect( node );
         return -102;
         }

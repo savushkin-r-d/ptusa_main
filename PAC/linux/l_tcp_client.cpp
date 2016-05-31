@@ -24,7 +24,8 @@ int linux_tcp_client::Communicate( unsigned int bytestosend )
         return 0;
         }
 
-    int res = tcp_communicator_linux::recvtimeout(socket_number, (unsigned char*)buff, buff_size, 0, timeout * 1000, ip  );
+    int res = tcp_communicator_linux::recvtimeout(socket_number,
+        (unsigned char*)buff, buff_size, 0, timeout * 1000, ip, "tcp client", 0  );
 
     if (0 == res)
     {

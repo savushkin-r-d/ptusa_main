@@ -48,11 +48,14 @@ void PAC_info::eval()
 //-----------------------------------------------------------------------------
 void PAC_info::reset_params()
     {   
-    par[ P_MIX_FLIP_PERIOD ]  = 60;
-    par[ P_MIX_FLIP_UPPER_TIME ]    = 1000;
-	par[ P_MIX_FLIP_LOWER_TIME ]	= 1000;
-    par[ P_V_OFF_DELAY_TIME ] = 1000;
+    par[ P_MIX_FLIP_PERIOD ]  	= 60;
+    par[ P_MIX_FLIP_UPPER_TIME ]= 1000;
+    par[ P_MIX_FLIP_LOWER_TIME ]= 1000;
+    par[ P_V_OFF_DELAY_TIME ] 	= 1000;
     par[ P_V_BOTTOM_OFF_DELAY_TIME ] = 1200;
+
+    par[ P_WAGO_TCP_NODE_WARN_ANSWER_TIME ] = 50;
+
     par.save_all();
     }
 //-----------------------------------------------------------------------------
@@ -80,6 +83,10 @@ int PAC_info::save_device( char *buff )
     answer_size += sprintf( buff + answer_size, "\tP_V_BOTTOM_ON_DELAY_TIME=%d,\n",
         par[ P_V_BOTTOM_OFF_DELAY_TIME ] );
     
+    answer_size += sprintf( buff + answer_size,
+	    "\tP_WAGO_TCP_NODE_WARN_ANSWER_TIME=%d,\n",
+            par[ P_WAGO_TCP_NODE_WARN_ANSWER_TIME ] );
+
     answer_size += sprintf( buff + answer_size, "\t}\n" );
     
     return answer_size;
@@ -114,11 +121,11 @@ int PAC_info::set_cmd( const char *prop, u_int idx, double val )
         return 0;
         }
 
-	if ( strcmp( prop, "WASH_VALVE_LOWER_SEAT_TIME" ) == 0 )
-		{
-		par.save( P_MIX_FLIP_LOWER_TIME, ( u_int_4 ) val );
-		return 0;
-		}
+    if ( strcmp( prop, "WASH_VALVE_LOWER_SEAT_TIME" ) == 0 )
+	{
+	par.save( P_MIX_FLIP_LOWER_TIME, ( u_int_4 ) val );
+	return 0;
+	}
 
     if ( strcmp( prop, "P_V_OFF_DELAY_TIME" ) == 0 )
         {
@@ -126,11 +133,17 @@ int PAC_info::set_cmd( const char *prop, u_int idx, double val )
         return 0;
         }
 
-	if ( strcmp( prop, "P_V_BOTTOM_ON_DELAY_TIME" ) == 0 )
-		{
-		par.save( P_V_BOTTOM_OFF_DELAY_TIME, ( u_int_4 ) val );
-		return 0;
-		}
+    if ( strcmp( prop, "P_V_BOTTOM_ON_DELAY_TIME" ) == 0 )
+	{
+	par.save( P_V_BOTTOM_OFF_DELAY_TIME, ( u_int_4 ) val );
+	return 0;
+	}
+
+    if ( strcmp( prop, "P_WAGO_TCP_NODE_WARN_ANSWER_TIME" ) == 0 )
+	{
+	par.save( P_WAGO_TCP_NODE_WARN_ANSWER_TIME, ( u_int_4 ) val );
+	return 0;
+	}
 
     return 0;
     }
@@ -143,7 +156,6 @@ bool PAC_info::is_emulator()
     return false;
 #endif
     }
-
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 PAC_info* G_PAC_INFO()

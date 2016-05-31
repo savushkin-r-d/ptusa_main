@@ -15,7 +15,7 @@ class PAC_info: public i_Lua_save_device
 
         enum PARAMETERS
             {
-            P_PARAMS_COUNT  = 5,   ///< Количество параметров.
+            P_PARAMS_COUNT  = 6,   ///< Количество параметров.
             
             P_MIX_FLIP_PERIOD = 1, ///< Интервал промывки седел клапанов, сек.
             P_MIX_FLIP_UPPER_TIME, ///< Время промывки верхних седел клапанов, мсек.
@@ -25,6 +25,9 @@ class PAC_info: public i_Lua_save_device
             
             ///< Время задержки закрытия для донных клапанов, мсек.
             P_V_BOTTOM_OFF_DELAY_TIME, 
+
+	    ///< Время задержки получения ответа от узла Wago, мсек.
+	    P_WAGO_TCP_NODE_WARN_ANSWER_TIME,
             };
 
         saved_params_u_int_4 par;

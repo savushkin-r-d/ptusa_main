@@ -20,11 +20,13 @@
 
 #include "s_types.h"
 
+#include <time.h>
+
 //-----------------------------------------------------------------------------
 /// @brief Получение текущего времени в секундах.
 ///
 /// @return Текущее время.
-/// @warning Время возвращается в секундах с 01.01.1970, в 2038 произойдет 
+/// @warning Время возвращается в секундах с 01.01.1970, в 2038 произойдет
 /// переполнение.
 u_long get_sec();
 //-----------------------------------------------------------------------------
@@ -51,4 +53,32 @@ void sleep_ms( u_int ms );
 ///
 /// @return Текущая дата и время.
 extern struct tm get_time();
+//-----------------------------------------------------------------------------
+struct stat_time
+    {
+    u_long all_time;
+    u_long cycles_cnt;
+
+    u_int  max_iteration_cycle_time;
+    u_int  min_iteration_cycle_time;
+
+    int print_cycle_last_h;
+
+    stat_time() : all_time( 0 ), cycles_cnt( 1 ), max_iteration_cycle_time( 0 ),
+	    min_iteration_cycle_time( 10000 )
+	{
+        time_t t_ = time( 0 );
+        struct tm *timeInfo_ = localtime( &t_ );
+
+        print_cycle_last_h = timeInfo_->tm_hour;
+	}
+
+    void clear()
+	{
+	all_time = 0;
+	cycles_cnt = 1;
+	max_iteration_cycle_time = 0;
+	min_iteration_cycle_time = 10000;
+	}
+    };
 #endif // DTIME_H

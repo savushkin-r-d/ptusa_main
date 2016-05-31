@@ -16,6 +16,8 @@
 
 #include "tcp_cmctr.h"
 
+#include "dtime.h"
+
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -36,6 +38,9 @@ struct socket_state
     int evaluated;   ///< В данном цикле уже произошел обмен информацией по данному сокету.
     int ismodbus;
     sockaddr_in sin; ///< Адрес клиента.
+
+
+    stat_time stat;  ///< Статистика работы с сокетом.
     };
 //-----------------------------------------------------------------------------
 /// @brief Коммуникатор для Linux - обмен данными PAC<->сервер.
@@ -124,12 +129,14 @@ class tcp_communicator_linux : public tcp_communicator
             /// @param usec     - время ожидания, мк сек.
             /// @param usec     - время ожидания, мк сек.
             /// @param IP       - IP-адрес источника.
+            /// @param name     - имя источника.
             ///
             /// @return -1   - ошибка работы с сокетом.
             /// @return -2   - ошибка таймаута.
             /// @return >= 0 - размер реально считанных данных.
             static int  recvtimeout( int s, u_char *buf, int len,
-                int sec, int usec, char* IP );
+                int sec, int usec, const char* IP, const char* name,
+		stat_time *stat );
     };
 //-----------------------------------------------------------------------------
 #endif //TCP_CMCTR_LINUX
