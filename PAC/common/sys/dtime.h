@@ -54,6 +54,10 @@ void sleep_ms( u_int ms );
 /// @return Текущая дата и время.
 extern struct tm get_time();
 //-----------------------------------------------------------------------------
+#ifdef WIN_OS
+#pragma warning(disable : 4996) // localtime to localtime_s
+#endif // WIN
+
 struct stat_time
     {
     u_long all_time;
