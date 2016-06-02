@@ -455,7 +455,7 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
 	    u_long avg_time = stat->all_time / stat->cycles_cnt;
 	    sprintf( G_LOG->msg,
 		    "tcp_communicator_linux:recvtimeout() socket %d->\"%s\":\"%s\""
-		    " stat %lu %u %u (ms).",
+		    " avg = %lu, min = %u, max = %u (ms).",
 		    s, name, IP,
 		    avg_time, stat->min_iteration_cycle_time,
 		    stat->max_iteration_cycle_time );
@@ -577,9 +577,19 @@ int tcp_communicator_linux::do_echo ( int idx )
     sock_state.evaluated = 1;
     memset( buf, 0, BUFSIZE );
 
+    static const char* const SERVER = "server";
+    static const char* const MODBUS_DEV = "modbus device";
+    const char *dev_name = SERVER;
+
+    if ( sock_state.ismodbus )
+	{
+	dev_name = MODBUS_DEV;
+	}
+
     // ќжидаем данные с таймаутом 5 сек.
     err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 50, 0,
-        inet_ntoa( sock_state.sin.sin_addr ), "l_tcp_communicator", &sock_state.stat );
+        inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.stat );
+
 
     if ( err <= 0 )               /* read error */
         {
@@ -591,11 +601,12 @@ int tcp_communicator_linux::do_echo ( int idx )
 
     if ( in_buffer_count > max_buffer_use )
         {
-        max_buffer_use = in_buffer_count;
         sprintf( G_LOG->msg,
             "tcp_communicator_linux::do_echo max buffer use %u (in).",
-            max_buffer_use );
+	    in_buffer_count );
         G_LOG->write_log( i_log::P_WARNING );
+
+        max_buffer_use = in_buffer_count + 0.1 * in_buffer_count;
         }
 
     net_id = buf[ 0 ];
@@ -613,11 +624,12 @@ int tcp_communicator_linux::do_echo ( int idx )
 
                 if ( ( unsigned int ) res > max_buffer_use )
                     {
-                    max_buffer_use = res;
                     sprintf( G_LOG->msg,
                         "tcp_communicator_linux::do_echo max buffer use %u (out).",
-                        max_buffer_use );
+                        res );
                     G_LOG->write_log( i_log::P_WARNING );
+
+                    max_buffer_use = res + 0.1 * res;
                     }
 
                 if ( res == 0 )

@@ -43,7 +43,7 @@ int main( int argc, char *argv[] )
     log_mngr::lg = new l_log();
 #endif
 
-    sprintf( G_LOG->msg, "Program started." );
+    sprintf( G_LOG->msg, "Program started.\n" );
     G_LOG->write_log( i_log::P_INFO );
 
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
@@ -52,7 +52,7 @@ int main( int argc, char *argv[] )
 
     if ( res ) //-Ошибка инициализации.
         {
-        sprintf( G_LOG->msg, "Lua init error - %d!", res );
+        sprintf( G_LOG->msg, "Lua init error - %d!\n", res );
         G_LOG->write_log( i_log::P_CRIT );
 
         debug_break;
@@ -74,10 +74,9 @@ int main( int argc, char *argv[] )
         char *stopstring;
         sleep_time_ms = strtol( argv[ 2 ], &stopstring, 10 );
         }
-    sprintf( G_LOG->msg, "Sleep time is %li ms.", sleep_time_ms );
-    G_LOG->write_log( i_log::P_INFO );
 
-    sprintf( G_LOG->msg, "Starting main loop!" );
+    sprintf( G_LOG->msg, "Starting main loop! Sleep time is %li ms.\n",
+	    sleep_time_ms);
     G_LOG->write_log( i_log::P_INFO );
 
 #ifdef DEBUG
@@ -150,7 +149,7 @@ int main( int argc, char *argv[] )
             max_cycle_time = cycle_time;
 
             sprintf( G_LOG->msg,
-                "Main cycle avg = %lu ms, max = %4u ms, Lua mem = %d b\n",
+                "Main cycle avg = %lu ms, max = %4u ms, Lua mem = %d b.\n",
                 all_time / cycles_cnt, max_cycle_time,
                 lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
                 lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
@@ -177,7 +176,7 @@ int main( int argc, char *argv[] )
             {
             u_long avg_time = all_time / cycles_cnt;
             sprintf( G_LOG->msg,
-                "%4u cycles, avg = %lu ms, max = %4u ms, Lua mem = %d b\n",
+                "%4u cycles, avg = %lu, max = %4u (ms), Lua mem = %d b.\n",
                 cycles_per_period,
                 avg_time, max_iteration_cycle_time,
                 lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
@@ -193,7 +192,7 @@ int main( int argc, char *argv[] )
             all_time   = 0;
             cycles_cnt = 0;
             max_iteration_cycle_time = 0;
-            cycles_per_period 		 = 0;
+            cycles_per_period 	     = 0;
             print_cycle_last_h       = timeInfo_->tm_hour;
             }
         //-Информация о времени выполнения цикла программы.!->
