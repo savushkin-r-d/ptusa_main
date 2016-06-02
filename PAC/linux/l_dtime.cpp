@@ -2,6 +2,7 @@
 #include <limits.h>
 #include <time.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "console.h"
 
@@ -9,8 +10,10 @@
 unsigned long get_millisec()
     {
     timespec start_tv;
-    clock_gettime( 0, &start_tv );
+    clock_gettime( CLOCK_MONOTONIC, &start_tv );
+
     unsigned long now = 1000UL * start_tv.tv_sec + start_tv.tv_nsec / 1000000UL;
+
     return now;
     }
 //-----------------------------------------------------------------------------
