@@ -520,6 +520,19 @@ class cipline_tech_object: public tech_object
         int is_LoadProgram_func;
         int is_StopDev_func;
         int is_ResetLinesDevicesBeforeReset_func;
+        int is_OporCIP_func;
+        int is_InitOporCIP_func;
+        int is_CheckErr_func;
+        int is_Circ_func;
+        int is_InitCirc_func;
+        int is_ToObject_func;
+        int is_InitToObject_func;
+        int is_FromObject_func;
+        int is_InitFromObject_func;
+        int is_FillCirc_func;
+        int is_InitFillCirc_func;
+        int is_OporCirc_func;
+        int is_InitOporCirc_func;
 
 	public:
 		cipline_tech_object( const char* name, u_int number, u_int type, const char* name_Lua,
@@ -711,6 +724,20 @@ class cipline_tech_object: public tech_object
         virtual int _LoadProgram(void);
         virtual void _StopDev(void);
         virtual void _ResetLinesDevicesBeforeReset(void);
+        virtual int _OporCIP(int where);
+        virtual int _InitOporCIP(int where, int step_to_init, int not_first_call);
+        virtual int _CheckErr(void);
+        virtual int _Circ(int what);
+        virtual int _InitCirc(int what, int step_to_init, int not_first_call);
+        virtual int _InitToObject(int from, int where, int step_to_init, int f);
+        virtual int _InitFromObject(int what, int where, int step_to_init, int f);
+        virtual int _InitFilCirc(int with_what, int step_to_init, int f);
+        virtual int _InitOporCirc(int where, int step_to_init, int not_first_call);
+        virtual int _ToObject(int from, int where);
+        virtual int _FromObject(int what, int where);
+        virtual int _FilCirc(int with_what);
+        virtual int _OporCirc(int where);
+
         ///-----------------------------------------------
         ////Функции, вызывающие обработчики на Lua. При отсутствии обработчиков вызываются стандартные функции.
         virtual int DoStep(int step_to_do);                                     //cip_DoStep(step)
@@ -719,10 +746,22 @@ class cipline_tech_object: public tech_object
         virtual int LoadProgram(void);                                          //cip_LoadProgram()
         virtual void StopDev(void);                                             //cip_StopDev()
         virtual void ResetLinesDevicesBeforeReset(void);
+        virtual int OporCIP(int where);
+        virtual int InitOporCIP(int where, int step_to_init, int not_first_call);
+        virtual int CheckErr(void);
+        virtual int Circ(int what);
+        virtual int InitCirc(int what, int step_to_init, int not_first_call);
+        virtual int InitToObject(int from, int where, int step_to_init, int not_first_call);
+        virtual int InitFromObject(int what, int where, int step_to_init, int not_first_call);
+        virtual int InitFilCirc(int with_what, int step_to_init, int not_first_call);
+        virtual int InitOporCirc(int where, int step_to_init, int not_first_call);
+        virtual int ToObject(int from, int where);
+        virtual int FromObject(int what, int where);
+        virtual int FilCirc(int with_what);
+        virtual int OporCirc(int where);
         ////--------------------------------------------
 		////-----error service-------
 		virtual void ResetErr(void);
-		virtual int CheckErr(void);
 		////-----for main station----
 		virtual void SortRR(int where, int forcetotank = 0);
 		virtual float GetConc(int what);
@@ -737,18 +776,7 @@ class cipline_tech_object: public tech_object
 		virtual int AddRR(int where);
 		virtual int OpolRR(int where);
 		////-------------------------
-		virtual int InitToObject(int from, int where, int step_to_init, int f);
-		virtual int InitFromObject(int what, int where, int step_to_init, int f);
-		virtual int InitOporCIP(int where, int step_to_init, int f);
-		virtual int InitFilCirc(int with_what, int step_to_init, int f);
-		virtual int InitCirc(int what, int step, int f);
-		virtual int InitOporCirc(int where, int step, int f);
-		virtual int ToObject(int from, int where);
-		virtual int FromObject(int what, int where);
-		virtual int OporCIP(int where);
-		virtual int FilCirc(int with_what);
-		virtual int Circ(int what);
-		virtual int OporCirc(int where);
+
 		virtual int InitDoseRR(int what, int step, int f);
 		virtual int DoseRR(int what);
 		////-------------------

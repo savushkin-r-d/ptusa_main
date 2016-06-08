@@ -158,6 +158,19 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
     is_LoadProgram_func = 0;
     is_StopDev_func = 0;
     is_ResetLinesDevicesBeforeReset_func = 0;
+    is_OporCIP_func = 0;
+    is_InitOporCIP_func = 0;
+    is_CheckErr_func = 0;
+    is_Circ_func = 0;
+    is_InitCirc_func = 0;
+    is_ToObject_func = 0;
+    is_InitToObject_func = 0;
+    is_FromObject_func = 0;
+    is_InitFromObject_func = 0;
+    is_FillCirc_func = 0;
+    is_InitFillCirc_func = 0;
+    is_OporCirc_func = 0;
+    is_InitOporCirc_func = 0;
 
     //для ошибки "возможно отсутствует концентрированный раствор"
     no_liquid_is_warning = 0;
@@ -487,23 +500,7 @@ int cipline_tech_object::evaluate()
     else
         {
 
-        if ( is_in_evaluate_func == 0 )
-            {
-            lua_State* L = lua_manager::get_instance()->get_Lua();
-            lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-            lua_getfield( L, -1, "in_evaluate" );
-            lua_remove( L, -2 );  // Stack: remove OBJECT.
-
-            if ( lua_isfunction( L, -1 ) )
-                {
-                is_in_evaluate_func = 2;
-                }
-            else
-                {
-                is_in_evaluate_func = 1;
-                }
-            lua_remove(L, -1); // Stack: remove function "in_evaluate".
-            }
+ 
 
 
         if (state>0)
@@ -872,6 +869,152 @@ void cipline_tech_object::initline()
             }
         lua_remove(L, -1); // Stack: remove function "cip_ResetLinesDevicesBeforeReset".
         }
+
+    if ( is_OporCIP_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_OporCIP" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_OporCIP_func = 2;
+            }
+        else
+            {
+            is_OporCIP_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_OporCIP".
+        }
+
+    if ( is_InitOporCIP_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_InitOporCIP" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_InitOporCIP_func = 2;
+            }
+        else
+            {
+            is_InitOporCIP_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_InitOporCIP".
+        }
+
+    if ( is_in_evaluate_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "in_evaluate" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_in_evaluate_func = 2;
+            }
+        else
+            {
+            is_in_evaluate_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "in_evaluate".
+        }
+
+    if ( is_InitCirc_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_InitCirc" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_InitCirc_func = 2;
+            }
+        else
+            {
+            is_InitCirc_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_InitCirc".
+        }
+
+    if ( is_Circ_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_Circ" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_Circ_func = 2;
+            }
+        else
+            {
+            is_Circ_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_Circ".
+        }
+
+    if ( is_CheckErr_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_CheckErr" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_CheckErr_func = 2;
+            }
+        else
+            {
+            is_CheckErr_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_CheckErr".
+        }
+
+    if ( is_ToObject_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_ToObject" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_ToObject_func = 2;
+            }
+        else
+            {
+            is_ToObject_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_ToObject".
+        }
+
+    if ( is_InitToObject_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_InitToObject" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_InitToObject_func = 2;
+            }
+        else
+            {
+            is_InitToObject_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_InitToObject".
+        }
+
+
     }
 
 void cipline_tech_object::resetProgramName()
@@ -2432,7 +2575,7 @@ void cipline_tech_object::ResetErr( void )
     T[TMR_NO_FLOW]->reset();
     }
 
-int cipline_tech_object::CheckErr( void )
+int cipline_tech_object::_CheckErr( void )
     {
     float delta=0;
     unsigned long block_flags = (unsigned long)parpar[0][P_BLOCK_ERRORS];
@@ -3257,7 +3400,7 @@ int cipline_tech_object::OpolRR( int where )
     return 0;
     }
 
-int cipline_tech_object::InitToObject( int from, int where, int step_to_init, int f )
+int cipline_tech_object::_InitToObject( int from, int where, int step_to_init, int f )
     {
     float v=1, p=1, z=0;
     //	int ot;
@@ -3475,7 +3618,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step_to_init, in
     return 0;
     }
 
-int cipline_tech_object::InitFromObject( int what, int where, int step_to_init, int f )
+int cipline_tech_object::_InitFromObject( int what, int where, int step_to_init, int f )
     {
     float v = 0, p = 0, z=0;
     //	int ot;
@@ -3646,8 +3789,8 @@ int cipline_tech_object::InitFromObject( int what, int where, int step_to_init, 
     return 0;
     }
 
-int cipline_tech_object::InitOporCIP( int where, int step_to_init, int f )
-    {
+int cipline_tech_object::_InitOporCIP( int where, int step_to_init, int not_first_call )
+{
     float z=0;
     opcip=0;
     if (isLine()) return 0;
@@ -3723,7 +3866,7 @@ int cipline_tech_object::InitOporCIP( int where, int step_to_init, int f )
     return 0;
     }
 
-int cipline_tech_object::InitFilCirc( int with_what, int step_to_init, int f )
+int cipline_tech_object::_InitFilCirc( int with_what, int step_to_init, int f )
     {
     V01->on();
     V11->off();
@@ -3780,8 +3923,8 @@ int cipline_tech_object::InitFilCirc( int with_what, int step_to_init, int f )
     return 0;
     }
 
-int cipline_tech_object::InitOporCirc( int where, int step, int f )
-    {
+int cipline_tech_object::_InitOporCirc( int where, int step_to_init, int not_first_call )
+{
     V11->off();
     V00->off();
     V01->on();
@@ -3827,7 +3970,7 @@ int cipline_tech_object::InitOporCirc( int where, int step, int f )
             V12->off();
             break;
         }
-    switch (step)
+    switch (step_to_init)
         {
         case 29:
             rt_par_float[P_ZAD_PODOGR] = rt_par_float[P_T_WSP];
@@ -3859,9 +4002,9 @@ int cipline_tech_object::InitOporCirc( int where, int step, int f )
     return 0;
     }
 
-int cipline_tech_object::InitCirc( int what, int step, int f )
+int cipline_tech_object::_InitCirc( int what, int step_to_init, int not_first_call )
     {
-    if (0 == f)
+    if (0 == not_first_call)
         {
         circ_podp_count = 0;
         circ_was_feed = 0;
@@ -3875,7 +4018,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
     float t=600, z=0;
     unsigned long tm = 0;
     ret_circ_flag = 0;
-    if ((circ_tank_s && 28 == step) || (circ_tank_k && 48 == step))
+    if ((circ_tank_s && 28 == step_to_init) || (circ_tank_k && 48 == step_to_init))
         {
         V01->off();
         V10->off();
@@ -3967,7 +4110,7 @@ int cipline_tech_object::InitCirc( int what, int step, int f )
     return 0;
     }
 
-int cipline_tech_object::ToObject( int from, int where )
+int cipline_tech_object::_ToObject( int from, int where )
     {
     float c=0;
     unsigned long tmp;
@@ -4112,7 +4255,7 @@ int cipline_tech_object::ToObject( int from, int where )
     return 0;
     }
 
-int cipline_tech_object::FromObject( int what, int where )
+int cipline_tech_object::_FromObject( int what, int where )
     {
     float c = 0;
     int dst;
@@ -4321,7 +4464,7 @@ int cipline_tech_object::FromObject( int what, int where )
     return 0;
     }
 
-int cipline_tech_object::OporCIP( int where )
+int cipline_tech_object::_OporCIP( int where )
     {
     //				int ot;
     float c;
@@ -4420,7 +4563,7 @@ int cipline_tech_object::OporCIP( int where )
     return 0;
     }
 
-int cipline_tech_object::FilCirc( int with_what )
+int cipline_tech_object::_FilCirc( int with_what )
     {
     rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
     rt_par_float[P_SUM_OP] = cnt->get_quantity();
@@ -4430,7 +4573,7 @@ int cipline_tech_object::FilCirc( int with_what )
     return 0;
     }
 
-int cipline_tech_object::Circ( int what )
+int cipline_tech_object::_Circ( int what )
     {
     float c;
     V06->off();
@@ -4564,7 +4707,7 @@ int cipline_tech_object::Circ( int what )
     return 0;
     }
 
-int cipline_tech_object::OporCirc( int where )
+int cipline_tech_object::_OporCirc( int where )
     {
     switch (where)
         {
@@ -5974,6 +6117,424 @@ void cipline_tech_object::ResetLinesDevicesBeforeReset( void )
     _ResetLinesDevicesBeforeReset();
 
     return;
+    }
+
+int cipline_tech_object::OporCIP( int where )
+    {
+    int luares = 0;
+
+    if (2 == is_OporCIP_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_OporCIP" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, where);
+        if (0 == lua_pcall(L, 2, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_OporCIP: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _OporCIP(where);
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::InitOporCIP( int where, int step_to_init, int not_first_call )
+    {
+    int luares = 0;
+
+    if (2 == is_InitOporCIP_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_InitOporCIP" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, where);
+        lua_pushinteger(L, step_to_init);
+        lua_pushinteger(L, not_first_call);
+        if (0 == lua_pcall(L, 4, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_InitOporCIP: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _InitOporCIP(where, step_to_init, not_first_call);
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::CheckErr( void )
+    {
+    int luares = 0;
+
+    if (2 == is_CheckErr_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_CheckError" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        if (0 == lua_pcall(L, 1, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_CheckError: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _CheckErr();
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::InitCirc( int what, int step_to_init, int not_first_call )
+    {
+    int luares = 0;
+
+    if (2 == is_InitCirc_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_InitCirc" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, what);
+        lua_pushinteger(L, step_to_init);
+        lua_pushinteger(L, not_first_call);
+        if (0 == lua_pcall(L, 4, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_InitCirc: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _InitCirc(what, step_to_init, not_first_call);
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::Circ( int what )
+    {
+    int luares = 0;
+
+    if (2 == is_Circ_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_Circ" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, what);
+        if (0 == lua_pcall(L, 2, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_Circ: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _Circ( what );
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::InitToObject( int from, int where, int step_to_init, int not_first_call )
+    {
+    int luares = 0;
+
+    if (2 == is_InitToObject_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_InitToObject" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, from);
+        lua_pushinteger(L, where);
+        lua_pushinteger(L, step_to_init);
+        lua_pushinteger(L, not_first_call);
+        if (0 == lua_pcall(L, 5, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_InitToObject: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _InitToObject(from, where, step_to_init, not_first_call);
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::InitFromObject( int what, int where, int step_to_init, int not_first_call )
+    {
+    int luares = 0;
+
+    if (2 == is_InitFromObject_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_InitFromObject" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, what);
+        lua_pushinteger(L, where);
+        lua_pushinteger(L, step_to_init);
+        lua_pushinteger(L, not_first_call);
+        if (0 == lua_pcall(L, 5, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_InitFromObject: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _InitFromObject(what, where, step_to_init, not_first_call);
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::InitFilCirc( int with_what, int step_to_init, int not_first_call )
+    {
+    int luares = 0;
+
+    if (2 == is_InitFillCirc_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_InitFillCirc" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, with_what);
+        lua_pushinteger(L, step_to_init);
+        lua_pushinteger(L, not_first_call);
+        if (0 == lua_pcall(L, 4, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_InitFillCirc: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _InitFilCirc(with_what, step_to_init, not_first_call);
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::InitOporCirc( int where, int step_to_init, int not_first_call )
+    {
+    int luares = 0;
+
+    if (2 == is_InitOporCirc_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_InitOporCirc" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, where);
+        lua_pushinteger(L, step_to_init);
+        lua_pushinteger(L, not_first_call);
+        if (0 == lua_pcall(L, 4, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_InitOporCirc: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _InitOporCirc(where, step_to_init, not_first_call);
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::ToObject( int from, int where )
+    {
+    int luares = 0;
+
+    if (2 == is_ToObject_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_ToObject" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, from);
+        lua_pushinteger(L, where);
+        if (0 == lua_pcall(L, 3, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_ToObject: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _ToObject(from, where);
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::FromObject( int what, int where )
+    {
+    int luares = 0;
+
+    if (2 == is_FromObject_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_FromObject" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, what);
+        lua_pushinteger(L, where);
+        if (0 == lua_pcall(L, 3, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_FromObject: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _FromObject(what, where);
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::FilCirc( int with_what )
+    {
+    int luares = 0;
+
+    if (2 == is_FillCirc_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_FillCirc" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, with_what);
+        if (0 == lua_pcall(L, 2, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_FillCirc: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _FilCirc( with_what );
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::OporCirc( int where )
+    {
+    int luares = 0;
+
+    if (2 == is_OporCirc_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_OporCirc" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, where);
+        if (0 == lua_pcall(L, 2, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_OporCirc: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _OporCirc( where );
+        }
+
+    return luares;
     }
 
 i_DO_device* cipline_tech_object::VWDREN = 0;
