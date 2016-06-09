@@ -36,43 +36,43 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 static int tolua_collect_PID (lua_State* tolua_S)
 {
  PID* self = (PID*) tolua_tousertype(tolua_S,1,0);
-	Mtolua_delete(self);
-	return 0;
+    Mtolua_delete(self);
+    return 0;
 }
 
 static int tolua_collect_tm (lua_State* tolua_S)
 {
  tm* self = (tm*) tolua_tousertype(tolua_S,1,0);
-	Mtolua_delete(self);
-	return 0;
+    Mtolua_delete(self);
+    return 0;
 }
 
 static int tolua_collect_timer (lua_State* tolua_S)
 {
  timer* self = (timer*) tolua_tousertype(tolua_S,1,0);
-	Mtolua_delete(self);
-	return 0;
+    Mtolua_delete(self);
+    return 0;
 }
 
 static int tolua_collect_cipline_tech_object (lua_State* tolua_S)
 {
  cipline_tech_object* self = (cipline_tech_object*) tolua_tousertype(tolua_S,1,0);
-	Mtolua_delete(self);
-	return 0;
+    Mtolua_delete(self);
+    return 0;
 }
 
 static int tolua_collect_modbus_client (lua_State* tolua_S)
 {
  modbus_client* self = (modbus_client*) tolua_tousertype(tolua_S,1,0);
-	Mtolua_delete(self);
-	return 0;
+    Mtolua_delete(self);
+    return 0;
 }
 
 static int tolua_collect_tech_object (lua_State* tolua_S)
 {
  tech_object* self = (tech_object*) tolua_tousertype(tolua_S,1,0);
-	Mtolua_delete(self);
-	return 0;
+    Mtolua_delete(self);
+    return 0;
 }
 #endif
 
@@ -10215,6 +10215,7 @@ static int tolua_PAC_dev_ModbusServ_UnpackFloat00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+#ifdef USE_PROFIBUS
 /* method: activate of class  profibus_slave */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_activate00
 static int tolua_PAC_dev_profibus_slave_activate00(lua_State* tolua_S)
@@ -10547,6 +10548,7 @@ static int tolua_PAC_dev_G_PROFIBUS_SLAVE_LUA00(lua_State* tolua_S)
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
+#endif // USE_PROFIBUS
 
 /* Open function */
 TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
@@ -11065,6 +11067,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"UnpackInt32",tolua_PAC_dev_ModbusServ_UnpackInt3200);
    tolua_function(tolua_S,"UnpackFloat",tolua_PAC_dev_ModbusServ_UnpackFloat00);
   tolua_endmodule(tolua_S);
+#ifdef USE_PROFIBUS
   tolua_cclass(tolua_S,"profibus_slave","profibus_slave","",NULL);
   tolua_beginmodule(tolua_S,"profibus_slave");
    tolua_function(tolua_S,"activate",tolua_PAC_dev_profibus_slave_activate00);
@@ -11079,6 +11082,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_PROFIBUS_SLAVE_LUA",tolua_PAC_dev_G_PROFIBUS_SLAVE_LUA00);
  tolua_endmodule(tolua_S);
+#endif // USE_PROFIBUS
  return 1;
 }
 

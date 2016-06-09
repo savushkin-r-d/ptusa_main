@@ -1,12 +1,15 @@
 #include "profibus_slave_PFC200.h"
+
+#ifdef USE_PROFIBUS
+
 auto_smart_ptr < profibus_slave_PFC200 > profibus_slave_PFC200::instance = 0;
 //------------------------------------------------------------------------------
 profibus_slave_PFC200* profibus_slave_PFC200::get_instance()
     {
     if ( instance.is_null() )
-	{
-	instance = new profibus_slave_PFC200();
-	}
+    {
+    instance = new profibus_slave_PFC200();
+    }
 
     return instance;
     }
@@ -27,60 +30,60 @@ int profibus_slave_PFC200::init()
     iDalResult = get_ADI( &pstAdi );
 
     if ( DAL_SUCCESS == iDalResult )
-	{
-	//Initialize the ADI.
-	iDalResult = init_ADI( pstAdi );
-	}
+    {
+    //Initialize the ADI.
+    iDalResult = init_ADI( pstAdi );
+    }
 
     if ( DAL_SUCCESS == iDalResult )
-	{
-	//Scan for devices.
-	iDalResult = scan_for_devices( pstAdi );
+    {
+    //Scan for devices.
+    iDalResult = scan_for_devices( pstAdi );
 
-	if ( DAL_SUCCESS == iDalResult )
-	    {
-	    //Get the device list.
-	    iDalResult = get_device_list( pstAdi, &nrDevicesFound,
-		    astDeviceList, MAX_DEVICE_LIST_ENTRIES );
-	    }
+    if ( DAL_SUCCESS == iDalResult )
+        {
+        //Get the device list.
+        iDalResult = get_device_list( pstAdi, &nrDevicesFound,
+            astDeviceList, MAX_DEVICE_LIST_ENTRIES );
+        }
 
-	if ( DAL_SUCCESS == iDalResult )
-	    {
-	    //Get the PROFIBUS slave device ID.
-	    iDalResult = get_device_id( nrDevicesFound, astDeviceList,
-		    &iDpsDeviceId );
-	    }
+    if ( DAL_SUCCESS == iDalResult )
+        {
+        //Get the PROFIBUS slave device ID.
+        iDalResult = get_device_id( nrDevicesFound, astDeviceList,
+            &iDpsDeviceId );
+        }
 
-	if ( DAL_SUCCESS == iDalResult )
-	    {
-	    //Open the device.
-	    iDalResult = open_device( pstAdi, iDpsDeviceId );
-	    }
+    if ( DAL_SUCCESS == iDalResult )
+        {
+        //Open the device.
+        iDalResult = open_device( pstAdi, iDpsDeviceId );
+        }
 
-	if ( DAL_SUCCESS == iDalResult )
-	    {
-	    //Set up the watchdog.
-	    iDalResult = setup_watchdog( pstAdi );
+    if ( DAL_SUCCESS == iDalResult )
+        {
+        //Set up the watchdog.
+        iDalResult = setup_watchdog( pstAdi );
 
-	    //Configure the device.
-	    if ( DAL_SUCCESS == iDalResult )
-		{
-		iDalResult = configure_device( pstAdi, iDpsDeviceId );
-		}
+        //Configure the device.
+        if ( DAL_SUCCESS == iDalResult )
+        {
+        iDalResult = configure_device( pstAdi, iDpsDeviceId );
+        }
 
-	    //Report the application state running event.
-	    if ( DAL_SUCCESS == iDalResult )
-		{
-		iDalResult = report_app_state_running_evt( pstAdi );
-		}
+        //Report the application state running event.
+        if ( DAL_SUCCESS == iDalResult )
+        {
+        iDalResult = report_app_state_running_evt( pstAdi );
+        }
 
-	    //Start the watchdog.
-	    if ( DAL_SUCCESS == iDalResult )
-	    	{
-	    	iDalResult = start_watchdog( pstAdi );
-	    	}
-	    }
-	}
+        //Start the watchdog.
+        if ( DAL_SUCCESS == iDalResult )
+            {
+            iDalResult = start_watchdog( pstAdi );
+            }
+        }
+    }
 
     //Clean the process images.
     (void) memset( aucPlcPrcImgInp, 0x00, sizeof(aucPlcPrcImgInp) );
@@ -95,20 +98,20 @@ int32_t profibus_slave_PFC200::get_ADI( tApplicationDeviceInterface** ppstAdi )
     *ppstAdi = adi_GetApplicationInterface();
 
     if ( NULL != ppstAdi )
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf ("-> Request the application device interface (ADI)...      ");
-	printf ("success\n");
+    printf ("-> Request the application device interface (ADI)...      ");
+    printf ("success\n");
 #endif // DEBUG_PROFIBUS_SLAVE
-	}
+    }
     else
-	{
-	sprintf( G_LOG->msg, "profibus_slave_PFC200: "
-		"Request the application device interface (ADI) - failed." );
-	G_LOG->write_log( i_log::P_CRIT );
+    {
+    sprintf( G_LOG->msg, "profibus_slave_PFC200: "
+        "Request the application device interface (ADI) - failed." );
+    G_LOG->write_log( i_log::P_CRIT );
 
-	iDalResult = DAL_FAILURE;
-	}
+    iDalResult = DAL_FAILURE;
+    }
 
     return (iDalResult);
     }
@@ -122,18 +125,18 @@ int32_t profibus_slave_PFC200::init_ADI( tApplicationDeviceInterface* pstAdi )
     iDalResult = pstAdi->Init();
 
     if ( DAL_SUCCESS == iDalResult )
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf ("-> Initialize the application device interface (ADI)...   ");
-	printf ("success\n");
+    printf ("-> Initialize the application device interface (ADI)...   ");
+    printf ("success\n");
 #endif // DEBUG_PROFIBUS_SLAVE
-	}
+    }
     else
-	{
-	sprintf( G_LOG->msg, "profibus_slave_PFC200: "
-		"Initialize the application device interface (ADI) - failed." );
-	G_LOG->write_log( i_log::P_CRIT );
-	}
+    {
+    sprintf( G_LOG->msg, "profibus_slave_PFC200: "
+        "Initialize the application device interface (ADI) - failed." );
+    G_LOG->write_log( i_log::P_CRIT );
+    }
 
     return (iDalResult);
     }
@@ -147,51 +150,51 @@ int32_t profibus_slave_PFC200::scan_for_devices( tApplicationDeviceInterface* ps
     iDalResult = pstAdi->ScanDevices();
 
     if ( DAL_SUCCESS == iDalResult )
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "-> Scan for devices...                                    " );
-	printf ("success\n");
+    printf( "-> Scan for devices...                                    " );
+    printf ("success\n");
 #endif // DEBUG_PROFIBUS_SLAVE
-	}
+    }
     else
-	{
-	sprintf( G_LOG->msg, "profibus_slave_PFC200: "
-		"Scan for devices - failed." );
-	G_LOG->write_log( i_log::P_CRIT );
-	}
+    {
+    sprintf( G_LOG->msg, "profibus_slave_PFC200: "
+        "Scan for devices - failed." );
+    G_LOG->write_log( i_log::P_CRIT );
+    }
 
     return (iDalResult);
     }
 //------------------------------------------------------------------------------
 int32_t profibus_slave_PFC200::get_device_list(
-	tApplicationDeviceInterface* pstAdi, size_t* pulNrDevicesFound,
-	tDeviceInfo* pastDeviceList, size_t ulMaxNumOfDevicesInList )
+    tApplicationDeviceInterface* pstAdi, size_t* pulNrDevicesFound,
+    tDeviceInfo* pastDeviceList, size_t ulMaxNumOfDevicesInList )
     {
     int32_t iDalResult = DAL_FAILURE;
     if( NULL == pstAdi ) return iDalResult;
 
     iDalResult = pstAdi->GetDeviceList( ulMaxNumOfDevicesInList, pastDeviceList,
-	    pulNrDevicesFound );
+        pulNrDevicesFound );
 
     if ( DAL_SUCCESS == iDalResult )
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "-> Get the device list...                                 " );
-	printf ("success\n");
+    printf( "-> Get the device list...                                 " );
+    printf ("success\n");
 #endif // DEBUG_PROFIBUS_SLAVE
-	}
+    }
     else
-	{
-	sprintf( G_LOG->msg, "profibus_slave_PFC200: "
-		"Get the device list - failed." );
-	G_LOG->write_log( i_log::P_CRIT );
-	}
+    {
+    sprintf( G_LOG->msg, "profibus_slave_PFC200: "
+        "Get the device list - failed." );
+    G_LOG->write_log( i_log::P_CRIT );
+    }
 
     return (iDalResult);
     }
 //------------------------------------------------------------------------------
 int32_t profibus_slave_PFC200::get_device_id( size_t ulNrDevicesFound,
-	tDeviceInfo* pastDeviceList, tDeviceId* piDpsDeviceId )
+    tDeviceInfo* pastDeviceList, tDeviceId* piDpsDeviceId )
     {
     int32_t iDalResult = DAL_SUCCESS;
     uint_t uiIndex;
@@ -205,69 +208,69 @@ int32_t profibus_slave_PFC200::get_device_id( size_t ulNrDevicesFound,
 
 
     for ( uiIndex = 0; uiIndex < ulNrDevicesFound; uiIndex++ )
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "    Device-ID %d = %s... ", pastDeviceList[uiIndex].DeviceId,
-		pastDeviceList[uiIndex].DeviceName );
+    printf( "    Device-ID %d = %s... ", pastDeviceList[uiIndex].DeviceId,
+        pastDeviceList[uiIndex].DeviceName );
 #endif // DEBUG_PROFIBUS_SLAVE
 
 
-	if ( strcmp( pastDeviceList[uiIndex].DeviceName, "libdps" ) == 0 )
-	    {
-	    *piDpsDeviceId = pastDeviceList[uiIndex].DeviceId;
+    if ( strcmp( pastDeviceList[uiIndex].DeviceName, "libdps" ) == 0 )
+        {
+        *piDpsDeviceId = pastDeviceList[uiIndex].DeviceId;
 #ifdef DEBUG_PROFIBUS_SLAVE
-	    printf( "found\n" );
+        printf( "found\n" );
 #endif // DEBUG_PROFIBUS_SLAVE
-	    }
-	else
-	    {
+        }
+    else
+        {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	    printf( "\n" );
+        printf( "\n" );
 #endif // DEBUG_PROFIBUS_SLAVE
-	    }
-	}
+        }
+    }
 
     if ( -1 == *piDpsDeviceId )
-	{
-	sprintf( G_LOG->msg, "profibus_slave_PFC200: "
-		"Find the PROFIBUS slave device <libdps> - failed." );
-	G_LOG->write_log( i_log::P_CRIT );
-	iDalResult = DAL_FAILURE;
-	}
+    {
+    sprintf( G_LOG->msg, "profibus_slave_PFC200: "
+        "Find the PROFIBUS slave device <libdps> - failed." );
+    G_LOG->write_log( i_log::P_CRIT );
+    iDalResult = DAL_FAILURE;
+    }
 
     return (iDalResult);
     }
 //------------------------------------------------------------------------------
 int32_t profibus_slave_PFC200::open_device( tApplicationDeviceInterface* pstAdi,
-	tDeviceId iDpsDeviceId )
+    tDeviceId iDpsDeviceId )
     {
     int32_t iDalResult = DAL_FAILURE;
     if( NULL == pstAdi ) return iDalResult;
 
     tError ulError;
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "-> Open the device...                                     " );
+    printf( "-> Open the device...                                     " );
 #endif // DEBUG_PROFIBUS_SLAVE
 
     iDalResult = pstAdi->OpenDevice( iDpsDeviceId );
 
     if ( DAL_SUCCESS == iDalResult )
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "success\n" );
+    printf( "success\n" );
 #endif // DEBUG_PROFIBUS_SLAVE
-	}
+    }
     else
-	{
-	(void) pstAdi->GetLastError( iDpsDeviceId, &ulError );
+    {
+    (void) pstAdi->GetLastError( iDpsDeviceId, &ulError );
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "failed (%u)\n", ulError );
+    printf( "failed (%u)\n", ulError );
 #else
-	sprintf( G_LOG->msg, "profibus_slave_PFC200: "
-	    "Open the device - failed (%u).", ulError );
-	G_LOG->write_log( i_log::P_CRIT );
+    sprintf( G_LOG->msg, "profibus_slave_PFC200: "
+        "Open the device - failed (%u).", ulError );
+    G_LOG->write_log( i_log::P_CRIT );
 #endif // DEBUG_PROFIBUS_SLAVE
-	}
+    }
 
     return (iDalResult);
     }
@@ -284,21 +287,21 @@ int32_t profibus_slave_PFC200::setup_watchdog( tApplicationDeviceInterface* pstA
     iDalResult = pstAdi->WatchdogSetTime( 3, 10000000 );
 
     if ( DAL_SUCCESS == iDalResult )
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "success\n" );
+    printf( "success\n" );
 #endif // DEBUG_PROFIBUS_SLAVE
-	}
+    }
     else
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "failed\n" );
+    printf( "failed\n" );
 #else
-	sprintf( G_LOG->msg, "profibus_slave_PFC200: "
-	    "Set up the watchdog - failed." );
-	G_LOG->write_log( i_log::P_CRIT );
+    sprintf( G_LOG->msg, "profibus_slave_PFC200: "
+        "Set up the watchdog - failed." );
+    G_LOG->write_log( i_log::P_CRIT );
 #endif // DEBUG_PROFIBUS_SLAVE
-	}
+    }
 
     return (iDalResult);
     }
@@ -344,21 +347,21 @@ int32_t profibus_slave_PFC200::configure_device(
     iDalResult = pstAdi->ConfigureDevice( iDpsDeviceId, &stDeviceConfig );
 
     if ( DAL_SUCCESS == iDalResult )
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "success\n" );
+    printf( "success\n" );
 #endif // DEBUG_PROFIBUS_SLAVE
-	}
+    }
     else
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "failed\n" );
+    printf( "failed\n" );
 #else
-	sprintf( G_LOG->msg, "profibus_slave_PFC200: "
-	    "Configure the device - failed." );
-	G_LOG->write_log( i_log::P_CRIT );
+    sprintf( G_LOG->msg, "profibus_slave_PFC200: "
+        "Configure the device - failed." );
+    G_LOG->write_log( i_log::P_CRIT );
 #endif // DEBUG_PROFIBUS_SLAVE
-	}
+    }
 
 #ifdef DEBUG_PROFIBUS_SLAVE
     printf( "    Slot 1: BYTE Array [%d] (DPM-OUT)\n", output_byte_size );
@@ -369,7 +372,7 @@ int32_t profibus_slave_PFC200::configure_device(
     }
 //------------------------------------------------------------------------------
 int32_t profibus_slave_PFC200::report_app_state_running_evt(
-	tApplicationDeviceInterface* pstAdi )
+    tApplicationDeviceInterface* pstAdi )
     {
     int32_t iDalResult = DAL_FAILURE;
     if( NULL == pstAdi ) return iDalResult;
@@ -385,28 +388,28 @@ int32_t profibus_slave_PFC200::report_app_state_running_evt(
     iDalResult = pstAdi->ApplicationStateChanged( event );
 
     if ( DAL_SUCCESS == iDalResult )
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "success\n" );
+    printf( "success\n" );
 #endif // DEBUG_PROFIBUS_SLAVE
 
-	}
+    }
     else
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "failed\n" );
+    printf( "failed\n" );
 #else
-	sprintf( G_LOG->msg, "profibus_slave_PFC200: "
-	    "Report the application state running event - failed." );
-	G_LOG->write_log( i_log::P_CRIT );
+    sprintf( G_LOG->msg, "profibus_slave_PFC200: "
+        "Report the application state running event - failed." );
+    G_LOG->write_log( i_log::P_CRIT );
 #endif // DEBUG_PROFIBUS_SLAVE
-	}
+    }
 
     return (iDalResult);
     }
 //------------------------------------------------------------------------------
 int32_t profibus_slave_PFC200::start_watchdog(
-	tApplicationDeviceInterface* pstAdi )
+    tApplicationDeviceInterface* pstAdi )
     {
     int32_t iDalResult = DAL_FAILURE;
     if( NULL == pstAdi ) return iDalResult;
@@ -418,21 +421,21 @@ int32_t profibus_slave_PFC200::start_watchdog(
     iDalResult = pstAdi->WatchdogStart();
 
     if ( DAL_SUCCESS == iDalResult )
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "success\n" );
+    printf( "success\n" );
 #endif // DEBUG_PROFIBUS_SLAVE
-	}
+    }
     else
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "failed\n" );
+    printf( "failed\n" );
 #else
-	sprintf( G_LOG->msg, "profibus_slave_PFC200: "
-	    "Start the watchdog - failed." );
-	G_LOG->write_log( i_log::P_CRIT );
+    sprintf( G_LOG->msg, "profibus_slave_PFC200: "
+        "Start the watchdog - failed." );
+    G_LOG->write_log( i_log::P_CRIT );
 #endif // DEBUG_PROFIBUS_SLAVE
-	}
+    }
 
     return (iDalResult);
     }
@@ -452,20 +455,20 @@ int profibus_slave_PFC200::eval()
 
     //Read data from fieldbus output process image.
     if ( iDalResult == DAL_SUCCESS )
-	{
-	iDalResult = pstAdi->ReadStart( iDpsDeviceId, 0 );
+    {
+    iDalResult = pstAdi->ReadStart( iDpsDeviceId, 0 );
 
-	if ( iDalResult == DAL_SUCCESS )
-	    {
-	    iDalResult = pstAdi->ReadBytes( iDpsDeviceId, 0, 0, 244,
-		    &aucPlcPrcImgInp[0] );
+    if ( iDalResult == DAL_SUCCESS )
+        {
+        iDalResult = pstAdi->ReadBytes( iDpsDeviceId, 0, 0, 244,
+            &aucPlcPrcImgInp[0] );
 
-	    if ( iDalResult == DAL_SUCCESS )
-		{
-		iDalResult = pstAdi->ReadEnd( iDpsDeviceId, 0 );
-		}
-	    }
-	}
+        if ( iDalResult == DAL_SUCCESS )
+        {
+        iDalResult = pstAdi->ReadEnd( iDpsDeviceId, 0 );
+        }
+        }
+    }
 
     //Test.
     //Echo the process data.
@@ -473,31 +476,31 @@ int profibus_slave_PFC200::eval()
 
     //Write data to the fieldbus input process image.
     if ( iDalResult == DAL_SUCCESS )
-	{
-	iDalResult = pstAdi->WriteStart( iDpsDeviceId, 0 );
+    {
+    iDalResult = pstAdi->WriteStart( iDpsDeviceId, 0 );
 
-	if ( iDalResult == DAL_SUCCESS )
-	    {
-	    iDalResult = pstAdi->WriteBytes( iDpsDeviceId, 0, 0, 244,
-		    &aucPlcPrcImgOutp[0] );
+    if ( iDalResult == DAL_SUCCESS )
+        {
+        iDalResult = pstAdi->WriteBytes( iDpsDeviceId, 0, 0, 244,
+            &aucPlcPrcImgOutp[0] );
 
-	    if ( iDalResult == DAL_SUCCESS )
-		{
-		iDalResult = pstAdi->WriteEnd( iDpsDeviceId, 0 );
-		}
-	    }
-	}
+        if ( iDalResult == DAL_SUCCESS )
+        {
+        iDalResult = pstAdi->WriteEnd( iDpsDeviceId, 0 );
+        }
+        }
+    }
 
 #ifdef DEBUG_PROFIBUS_SLAVE
     /* print the PLC input process data */
     if ( iDalResult == DAL_SUCCESS )
-	{
-	printf( "PROFIBUS slave DP "
-		"PLC input data = 0x%02X %02X %02X %02X %02X %02X %02X %02X - ",
-		aucPlcPrcImgInp[0], aucPlcPrcImgInp[1], aucPlcPrcImgInp[2],
-		aucPlcPrcImgInp[3], aucPlcPrcImgInp[4], aucPlcPrcImgInp[5],
-		aucPlcPrcImgInp[6], aucPlcPrcImgInp[7] );
-	}
+    {
+    printf( "PROFIBUS slave DP "
+        "PLC input data = 0x%02X %02X %02X %02X %02X %02X %02X %02X - ",
+        aucPlcPrcImgInp[0], aucPlcPrcImgInp[1], aucPlcPrcImgInp[2],
+        aucPlcPrcImgInp[3], aucPlcPrcImgInp[4], aucPlcPrcImgInp[5],
+        aucPlcPrcImgInp[6], aucPlcPrcImgInp[7] );
+    }
     char tmp[4];
     tmp[0] = aucPlcPrcImgInp[3];
     tmp[1] = aucPlcPrcImgInp[2];
@@ -510,18 +513,18 @@ int profibus_slave_PFC200::eval()
 
     /* get the device state */
     if ( iDalResult == DAL_SUCCESS )
-	{
-	iDalResult = pstAdi->CallDeviceSpecificFunction( "DPS_GET_DEV_STATE",
-		&ulStatus, &ucDevState );
+    {
+    iDalResult = pstAdi->CallDeviceSpecificFunction( "DPS_GET_DEV_STATE",
+        &ulStatus, &ucDevState );
 
-	if ( DAL_SUCCESS == iDalResult )
-	    {
-	    if ( DPS_SUCCESS == ulStatus )
-		{
-		printf( "PROFIBUS slave DP device state %d\n", ucDevState );
-		}
-	    }
-	}
+    if ( DAL_SUCCESS == iDalResult )
+        {
+        if ( DPS_SUCCESS == ulStatus )
+        {
+        printf( "PROFIBUS slave DP device state %d\n", ucDevState );
+        }
+        }
+    }
 #endif // DEBUG_PROFIBUS_SLAVE
 
     return (iDalResult);
@@ -531,17 +534,17 @@ double profibus_slave_PFC200::get_double( int offset )
     {
     double res = 0;
     if ( offset < 240 )
-	{
-	char tmp[4];
+    {
+    char tmp[4];
 
-	tmp[0] = aucPlcPrcImgInp[offset + 3];
-	tmp[1] = aucPlcPrcImgInp[offset + 2];
-	tmp[2] = aucPlcPrcImgInp[offset + 1];
-	tmp[3] = aucPlcPrcImgInp[offset];
+    tmp[0] = aucPlcPrcImgInp[offset + 3];
+    tmp[1] = aucPlcPrcImgInp[offset + 2];
+    tmp[2] = aucPlcPrcImgInp[offset + 1];
+    tmp[3] = aucPlcPrcImgInp[offset];
 
-	float *val = (float*) tmp;
-	res = *val;
-	}
+    float *val = (float*) tmp;
+    res = *val;
+    }
 
     return res;
     }
@@ -550,10 +553,10 @@ bool profibus_slave_PFC200::get_bool( int byte_offset, int bit_offset )
     {
     bool res = false;
     if ( byte_offset < 244 && bit_offset < 8 )
-	{
-	char tmp = aucPlcPrcImgInp[byte_offset];
-	res = ( 1 << bit_offset ) & tmp;
-	}
+    {
+    char tmp = aucPlcPrcImgInp[byte_offset];
+    res = ( 1 << bit_offset ) & tmp;
+    }
 
     return res;
     }
@@ -562,10 +565,10 @@ int profibus_slave_PFC200::get_int( int byte_offset )
     {
     int res = 0;
     if ( byte_offset < 242 )
-	{
-	res = 256 * aucPlcPrcImgInp[byte_offset] +
-	    aucPlcPrcImgInp[byte_offset + 1];
-	}
+    {
+    res = 256 * aucPlcPrcImgInp[byte_offset] +
+        aucPlcPrcImgInp[byte_offset + 1];
+    }
 
     return res;
     }
@@ -573,17 +576,17 @@ int profibus_slave_PFC200::get_int( int byte_offset )
 void profibus_slave_PFC200::set_int( int byte_offset, int val )
     {
     if ( byte_offset < 242 )
-	{
-	aucPlcPrcImgOutp[byte_offset] = val >> 8;
-	aucPlcPrcImgOutp[byte_offset + 1] = val;
-	}
+    {
+    aucPlcPrcImgOutp[byte_offset] = val >> 8;
+    aucPlcPrcImgOutp[byte_offset + 1] = val;
+    }
     }
 //------------------------------------------------------------------------------
 void profibus_slave_PFC200::set_bool( int byte_offset, int bit_offset, bool val )
     {
     if ( byte_offset < 244 && bit_offset < 8 )
-	{
-	char tmp = 1 << bit_offset;
+    {
+    char tmp = 1 << bit_offset;
         if ( val )
             {
             aucPlcPrcImgOutp[byte_offset] |= tmp;
@@ -592,7 +595,7 @@ void profibus_slave_PFC200::set_bool( int byte_offset, int bit_offset, bool val 
             {
             aucPlcPrcImgOutp[byte_offset] &= ~tmp;
             }
-	}
+    }
     }
 //------------------------------------------------------------------------------
 void profibus_slave_PFC200::close()
@@ -618,21 +621,21 @@ int32_t profibus_slave_PFC200::stop_watchdog( tApplicationDeviceInterface* pstAd
     iDalResult = pstAdi->WatchdogStop();
 
     if ( DAL_SUCCESS == iDalResult )
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "success\n" );
+    printf( "success\n" );
 #endif // DEBUG_PROFIBUS_SLAVE
-	}
+    }
     else
-	{
+    {
 #ifdef DEBUG_PROFIBUS_SLAVE
-	printf( "failed\n" );
+    printf( "failed\n" );
 #else
-	sprintf( G_LOG->msg, "profibus_slave_PFC200: "
-	    "Stop the watchdog - failed." );
-	G_LOG->write_log( i_log::P_CRIT );
+    sprintf( G_LOG->msg, "profibus_slave_PFC200: "
+        "Stop the watchdog - failed." );
+    G_LOG->write_log( i_log::P_CRIT );
 #endif // DEBUG_PROFIBUS_SLAVE
-	}
+    }
 
     return (iDalResult);
     }
@@ -647,13 +650,13 @@ int32_t profibus_slave_PFC200::close_device( tApplicationDeviceInterface* pstAdi
     iDalResult = pstAdi->Exit();
 
     if ( DAL_SUCCESS == iDalResult )
-	{
-	printf( "success\n" );
-	}
+    {
+    printf( "success\n" );
+    }
     else
-	{
-	printf( "failed\n" );
-	}
+    {
+    printf( "failed\n" );
+    }
 
     return (iDalResult);
     }
@@ -668,14 +671,17 @@ int32_t profibus_slave_PFC200::release_ADI( tApplicationDeviceInterface* pstAdi 
     iDalResult = pstAdi->Exit();
 
     if ( DAL_SUCCESS == iDalResult )
-	{
-	printf( "success\n" );
-	}
+    {
+    printf( "success\n" );
+    }
     else
-	{
-	printf( "failed\n" );
-	}
+    {
+    printf( "failed\n" );
+    }
 
     return (iDalResult);
     }
 //------------------------------------------------------------------------------
+
+#endif // USE_PROFIBUS
+

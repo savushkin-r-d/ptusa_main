@@ -63,10 +63,12 @@ int main( int argc, char *argv[] )
     fflush( stdout );
 #endif // DEBUG
 
+#ifdef USE_PROFIBUS
     if ( G_PROFIBUS_SLAVE()->is_active() )
         {
         G_PROFIBUS_SLAVE()->init();
         }
+#endif // USE_PROFIBUS
 
     long int sleep_time_ms = 2;
     if ( argc >= 3 )
@@ -76,7 +78,7 @@ int main( int argc, char *argv[] )
         }
 
     sprintf( G_LOG->msg, "Starting main loop! Sleep time is %li ms.\n",
-	    sleep_time_ms);
+        sleep_time_ms);
     G_LOG->write_log( i_log::P_INFO );
 
 #ifdef DEBUG
@@ -130,10 +132,12 @@ int main( int argc, char *argv[] )
         G_RM_MANAGER()->evaluate();
 #endif // RM_PAC
 
+#ifdef USE_PROFIBUS
         if ( G_PROFIBUS_SLAVE()->is_active() )
             {
             G_PROFIBUS_SLAVE()->eval();
             }
+#endif // USE_PROFIBUS
 
 
 #ifdef TEST_SPEED

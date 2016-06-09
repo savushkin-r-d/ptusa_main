@@ -19,6 +19,7 @@
 #ifndef PROFIBUS_SLAVE_PFC200
 #define PROFIBUS_SLAVE_PFC200
 
+#ifdef USE_PROFIBUS
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
@@ -41,9 +42,9 @@ class profibus_slave_PFC200: public profibus_slave
     {
 public:
     enum CONSTANTS
-	{
-	MAX_DEVICE_LIST_ENTRIES = 10,
-	};
+    {
+    MAX_DEVICE_LIST_ENTRIES = 10,
+    };
 
     /// @brief Получение единственного экземпляра класса для работы.
     ///
@@ -52,9 +53,9 @@ public:
     static profibus_slave_PFC200* get_instance();
 
     virtual ~profibus_slave_PFC200()
-	{
-	close();
-	}
+    {
+    close();
+    }
 
     int init();
 
@@ -79,10 +80,10 @@ public:
 
 private:
     profibus_slave_PFC200()
-	{
-	pstAdi = NULL;
-	iDpsDeviceId = 0;
-	}
+    {
+    pstAdi = NULL;
+    iDpsDeviceId = 0;
+    }
 
     void close();
 
@@ -127,8 +128,8 @@ private:
     /// @return - \ref DAL_SUCCESS when the function has successfully
     /// processed. In other cases it returns \ref DAL_FAILURE.
     int32_t get_device_list( tApplicationDeviceInterface* pstAdi,
-	size_t* pulNrDevicesFound, tDeviceInfo* pastDeviceList,
-	size_t ulMaxNumOfDevicesInList );
+    size_t* pulNrDevicesFound, tDeviceInfo* pastDeviceList,
+    size_t ulMaxNumOfDevicesInList );
 
     /// @brief This function returns the PROFIBUS slave device ID.
     ///
@@ -139,7 +140,7 @@ private:
     /// @return - \ref DAL_SUCCESS when the function has successfully
     /// processed. In other cases it returns \ref DAL_FAILURE.
     int32_t get_device_id( size_t ulNrDevicesFound,
-	tDeviceInfo* pastDeviceList, tDeviceId* piDpsDeviceId );
+    tDeviceInfo* pastDeviceList, tDeviceId* piDpsDeviceId );
 
     /// @brief This function opens the PROFIBUS slave device.
     ///
@@ -149,7 +150,7 @@ private:
     /// @return - \ref DAL_SUCCESS when the function has successfully
     /// processed. In other cases it returns \ref DAL_FAILURE.
     int32_t open_device( tApplicationDeviceInterface* pstAdi,
-    	tDeviceId iDpsDeviceId );
+        tDeviceId iDpsDeviceId );
 
     /// @brief This function sets up the PLC watchdog.
     ///
@@ -168,7 +169,7 @@ private:
     /// @return - \ref DAL_SUCCESS when the function has successfully
     /// processed. In other cases it returns \ref DAL_FAILURE.
     int32_t configure_device( tApplicationDeviceInterface* pstAdi,
-    	tDeviceId iDpsDeviceId );
+        tDeviceId iDpsDeviceId );
 
     /// @brief This function reports that the application has changed to the
     /// running state.
@@ -220,4 +221,6 @@ private:
     uint8_t aucPlcPrcImgOutp[244]; 	//Output process image of the PLC.
     };
 //-----------------------------------------------------------------------------
+#endif // USE_PROFIBUS
+
 #endif // PROFIBUS_SLAVE_PFC200

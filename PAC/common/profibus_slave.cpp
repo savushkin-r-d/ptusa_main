@@ -1,3 +1,5 @@
+#ifdef USE_PROFIBUS
+
 #include "profibus_slave.h"
 
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
@@ -32,3 +34,5 @@ profibus_slave* G_PROFIBUS_SLAVE()
     return profibus_slave::get_instance();
     }
 //-----------------------------------------------------------------------------
+
+#endif //USE_PROFIBUS
