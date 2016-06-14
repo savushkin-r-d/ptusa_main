@@ -1191,6 +1191,7 @@ class cipline_tech_object: public tech_object
 		i_AO_device* PUMPFREQ;
 		i_DI_device* FL;
 		i_counter *cnt;
+        timer* T[10];
 
 		MSAPID* PIDP;
 		MSAPID* PIDF;
@@ -1225,21 +1226,26 @@ class cipline_tech_object: public tech_object
 		int HasRet();
 
         //Базовые методы для вызова из модифицированных на LUA
-        int _GoToStep(int cur, int param); //cip_GoToStep(currentstep,param)
-        int _DoStep(int step_to_do); //cip_DoStep(step)
-        int _InitStep(int step_to_init, int not_first_call);          //cip_InitStep(steptoinit, param)
-        int _LoadProgram(void);
-        void _StopDev(void); 
-        int ToObject(int from, int where);
-        int FromObject(int what, int where);
-        int InitToObject(int from, int where, int step_to_init, int f);
-        int InitFromObject(int what, int where, int step_to_init, int f);
-        int InitCirc(int what, int step_to_init, int f);
-        int Circ(int what);
-        int FilCirc(int with_what);
-        int InitFilCirc(int with_what, int step_to_init, int f);
-        int InitOporCIP(int where, int step_to_init, int f);
-        int OporCIP(int where);
+        virtual int _DoStep(int step_to_do); 
+        virtual int _GoToStep(int cur, int param);
+        virtual int _InitStep(int step_to_init, int not_first_call);
+        virtual int _LoadProgram(void);
+        virtual void _StopDev(void);
+        virtual void _ResetLinesDevicesBeforeReset(void);
+        virtual int _OporCIP(int where);
+        virtual int _InitOporCIP(int where, int step_to_init, int not_first_call);
+        virtual int _CheckErr(void);
+        virtual int _Circ(int what);
+        virtual int _InitCirc(int what, int step_to_init, int not_first_call);
+        virtual int _InitToObject(int from, int where, int step_to_init, int f);
+        virtual int _InitFromObject(int what, int where, int step_to_init, int f);
+        virtual int _InitFilCirc(int with_what, int step_to_init, int f);
+        virtual int _InitOporCirc(int where, int step_to_init, int not_first_call);
+        virtual int _ToObject(int from, int where);
+        virtual int _FromObject(int what, int where);
+        virtual int _FillCirc(int with_what);
+        virtual int _OporCirc(int where);
+        virtual void _RT(void);
 	};
 //---------------------------------------------------------------------------
 rm_manager* G_RM_MANAGER();
@@ -1303,7 +1309,7 @@ class ModbusServ
 		static long int UnpackInt32( unsigned char* buf, int offset );
         static float UnpackFloat( unsigned char* Buf, int offset  );
     };
-//-----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 /// @brief Работа с Profibus Slave.
 class profibus_slave
     {

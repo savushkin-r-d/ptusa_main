@@ -171,13 +171,14 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
     is_InitFillCirc_func = 0;
     is_OporCirc_func = 0;
     is_InitOporCirc_func = 0;
+    is_RT_func = 0;
 
     //для ошибки "возможно отсутствует концентрированный раствор"
     no_liquid_is_warning = 0;
     no_liquid_phase = 0;
     no_liquid_last_time = 0;
 
-    if (tech_type == 112)
+    if (tech_type == TECH_TYPE_SELF_CLEAN)
         {
         scenabled = 1;
         scline = 0;
@@ -1014,6 +1015,24 @@ void cipline_tech_object::initline()
         lua_remove(L, -1); // Stack: remove function "cip_InitToObject".
         }
 
+    if ( is_RT_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_RT" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_RT_func = 2;
+            }
+        else
+            {
+            is_RT_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_RT".
+        }
+
 
     }
 
@@ -1456,7 +1475,7 @@ void cipline_tech_object::PT( void )
     for (i=0; i<TMR_CNT; i++) T[i]->pause();
     }
 
-void cipline_tech_object::RT( void )
+void cipline_tech_object::_RT( void )
     {
     int i;
     for (i=0; i<TMR_CNT; i++) T[i]->reset();
@@ -2224,21 +2243,21 @@ int cipline_tech_object::_DoStep( int step_to_do )
         case 7:  return FromObject(TANK_W, KANAL);
         case 8:  return ToObject(TANK_W, KANAL);
         case 9:  return OporCIP(KANAL);
-        case 10: return FilCirc(WITH_RETURN);
+        case 10: return FillCirc(WITH_RETURN);
         case 11: return Circ(WATER);
         case 12: return OporCirc(KANAL);
-        case 13: return FilCirc(WITH_RETURN);
+        case 13: return FillCirc(WITH_RETURN);
         case 14: return ToObject(TANK_W, KANAL);
         case 15: return OporCirc(KANAL);
         case 16: return OporCirc(KANAL);
         case 22: return ToObject(TANK_S, KANAL);
         case 23: return OporCIP(KANAL);
         case 24: return FromObject(TANK_S, KANAL);
-        case 26: return FilCirc(WITH_RETURN);
+        case 26: return FillCirc(WITH_RETURN);
         case 28: return Circ(SHCH);
         case 29: return OporCirc(TANK_S);
 
-        case 31: return FilCirc(WITH_WATER);
+        case 31: return FillCirc(WITH_WATER);
         case 33: return ToObject(pr_media, TANK_S);
         case 34: return OporCIP(TANK_S);
         case 35: return FromObject(pr_media, TANK_S);
@@ -2249,7 +2268,7 @@ int cipline_tech_object::_DoStep( int step_to_do )
         case 42: return ToObject(TANK_K, KANAL);
         case 43: return OporCIP(KANAL);
         case 44: return FromObject(TANK_K, KANAL);
-        case 46: return FilCirc(WITH_RETURN);
+        case 46: return FillCirc(WITH_RETURN);
         case 48: return Circ(KISL);
         case 49: return OporCirc(TANK_K);
         case 53: return ToObject(WATER, TANK_K);
@@ -2258,25 +2277,25 @@ int cipline_tech_object::_DoStep( int step_to_do )
         case 57: return ToObject(WATER, TANK_W);
         case 59: return OporCirc(TANK_W);
         case 60: return OporCIP(TANK_W);
-        case 61: return FilCirc(WITH_WATER);
+        case 61: return FillCirc(WITH_WATER);
         case 62: return ToObject(WATER, TANK_W);
         case 63: return OporCIP(TANK_W);
         case 64: return FromObject(WATER, TANK_W);
-        case 65: return FilCirc(WITH_WATER);
+        case 65: return FillCirc(WITH_WATER);
         case 66: return Circ(HOT_WATER);
         case 67: return OporCirc(TANK_W);
 
-        case 71: return FilCirc(SANITIZER);
+        case 71: return FillCirc(SANITIZER);
         case 72: return ToObject(SANITIZER, TANK_W);
         case 73: return OporCIP(TANK_W);
         case 74: return FromObject(SANITIZER,TANK_W);
-        case 75: return FilCirc(SANITIZER);
+        case 75: return FillCirc(SANITIZER);
         case 76: return DoseRR(SANITIZER);
         case 77: return Circ(SANITIZER);
         case 78: return OporCirc(KANAL);
         case 79: return OporCIP(KANAL);
 
-        case 81: return FilCirc(WITH_WATER);
+        case 81: return FillCirc(WITH_WATER);
         case 83: return ToObject(WATER, TANK_W);
         case 84: return OporCIP(TANK_W);
         case 85: return FromObject(WATER, TANK_W);
@@ -4563,7 +4582,7 @@ int cipline_tech_object::_OporCIP( int where )
     return 0;
     }
 
-int cipline_tech_object::_FilCirc( int with_what )
+int cipline_tech_object::_FillCirc( int with_what )
     {
     rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
     rt_par_float[P_SUM_OP] = cnt->get_quantity();
@@ -6475,7 +6494,7 @@ int cipline_tech_object::FromObject( int what, int where )
     return luares;
     }
 
-int cipline_tech_object::FilCirc( int with_what )
+int cipline_tech_object::FillCirc( int with_what )
     {
     int luares = 0;
 
@@ -6500,7 +6519,7 @@ int cipline_tech_object::FilCirc( int with_what )
         }
     else
         {
-        luares = _FilCirc( with_what );
+        luares = _FillCirc( with_what );
         }
 
     return luares;
@@ -6535,6 +6554,27 @@ int cipline_tech_object::OporCirc( int where )
         }
 
     return luares;
+    }
+
+void cipline_tech_object::RT( void )
+    {
+    if (2 == is_RT_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_RT" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        if (0 != lua_pcall(L, 1, 0, 0))
+            {
+            Print("Error in calling cip_RT: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        _RT();
+        }
     }
 
 i_DO_device* cipline_tech_object::VWDREN = 0;

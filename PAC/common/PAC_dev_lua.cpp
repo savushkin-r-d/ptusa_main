@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 05/17/16 14:19:47.
+** Generated automatically by tolua++-1.0.92 on 06/14/16 17:11:52.
 */
 
 #ifndef __cplusplus
@@ -36,43 +36,43 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 static int tolua_collect_PID (lua_State* tolua_S)
 {
  PID* self = (PID*) tolua_tousertype(tolua_S,1,0);
-    Mtolua_delete(self);
-    return 0;
+	Mtolua_delete(self);
+	return 0;
 }
 
 static int tolua_collect_tm (lua_State* tolua_S)
 {
  tm* self = (tm*) tolua_tousertype(tolua_S,1,0);
-    Mtolua_delete(self);
-    return 0;
+	Mtolua_delete(self);
+	return 0;
 }
 
 static int tolua_collect_timer (lua_State* tolua_S)
 {
  timer* self = (timer*) tolua_tousertype(tolua_S,1,0);
-    Mtolua_delete(self);
-    return 0;
+	Mtolua_delete(self);
+	return 0;
 }
 
 static int tolua_collect_cipline_tech_object (lua_State* tolua_S)
 {
  cipline_tech_object* self = (cipline_tech_object*) tolua_tousertype(tolua_S,1,0);
-    Mtolua_delete(self);
-    return 0;
+	Mtolua_delete(self);
+	return 0;
 }
 
 static int tolua_collect_modbus_client (lua_State* tolua_S)
 {
  modbus_client* self = (modbus_client*) tolua_tousertype(tolua_S,1,0);
-    Mtolua_delete(self);
-    return 0;
+	Mtolua_delete(self);
+	return 0;
 }
 
 static int tolua_collect_tech_object (lua_State* tolua_S)
 {
  tech_object* self = (tech_object*) tolua_tousertype(tolua_S,1,0);
-    Mtolua_delete(self);
-    return 0;
+	Mtolua_delete(self);
+	return 0;
 }
 #endif
 
@@ -7674,6 +7674,58 @@ static int tolua_set_cipline_tech_object_cnt_ptr(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* get function: T of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_PAC_dev_cipline_tech_object_T
+static int tolua_get_PAC_dev_cipline_tech_object_T(lua_State* tolua_S)
+{
+ int tolua_index;
+  cipline_tech_object* self;
+ lua_pushstring(tolua_S,".self");
+ lua_rawget(tolua_S,1);
+ self = (cipline_tech_object*)  lua_touserdata(tolua_S,-1);
+#ifndef TOLUA_RELEASE
+ {
+  tolua_Error tolua_err;
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in array indexing.",&tolua_err);
+ }
+#endif
+ tolua_index = (int)tolua_tonumber(tolua_S,2,0);
+#ifndef TOLUA_RELEASE
+ if (tolua_index<0 || tolua_index>=10)
+  tolua_error(tolua_S,"array indexing out of range.",NULL);
+#endif
+  tolua_pushusertype(tolua_S,(void*)self->T[tolua_index],"timer");
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: T of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_PAC_dev_cipline_tech_object_T
+static int tolua_set_PAC_dev_cipline_tech_object_T(lua_State* tolua_S)
+{
+ int tolua_index;
+  cipline_tech_object* self;
+ lua_pushstring(tolua_S,".self");
+ lua_rawget(tolua_S,1);
+ self = (cipline_tech_object*)  lua_touserdata(tolua_S,-1);
+#ifndef TOLUA_RELEASE
+ {
+  tolua_Error tolua_err;
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in array indexing.",&tolua_err);
+ }
+#endif
+ tolua_index = (int)tolua_tonumber(tolua_S,2,0);
+#ifndef TOLUA_RELEASE
+ if (tolua_index<0 || tolua_index>=10)
+  tolua_error(tolua_S,"array indexing out of range.",NULL);
+#endif
+  self->T[tolua_index] = ((timer*)  tolua_tousertype(tolua_S,3,0));
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* get function: PIDP of class  cipline_tech_object */
 #ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_PIDP_ptr
 static int tolua_get_cipline_tech_object_PIDP_ptr(lua_State* tolua_S)
@@ -8537,6 +8589,40 @@ static int tolua_PAC_dev_cipline_tech_object_HasRet00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: _DoStep of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__DoStep00
+static int tolua_PAC_dev_cipline_tech_object__DoStep00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+  int step_to_do = ((int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_DoStep'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->_DoStep(step_to_do);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function '_DoStep'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: _GoToStep of class  cipline_tech_object */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__GoToStep00
 static int tolua_PAC_dev_cipline_tech_object__GoToStep00(lua_State* tolua_S)
@@ -8568,40 +8654,6 @@ static int tolua_PAC_dev_cipline_tech_object__GoToStep00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function '_GoToStep'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: _DoStep of class  cipline_tech_object */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__DoStep00
-static int tolua_PAC_dev_cipline_tech_object__DoStep00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
-  int step_to_do = ((int)  tolua_tonumber(tolua_S,2,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_DoStep'", NULL);
-#endif
-  {
-   int tolua_ret = (int)  self->_DoStep(step_to_do);
-   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function '_DoStep'.",&tolua_err);
  return 0;
 #endif
 }
@@ -8706,45 +8758,74 @@ static int tolua_PAC_dev_cipline_tech_object__StopDev00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: ToObject of class  cipline_tech_object */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object_ToObject00
-static int tolua_PAC_dev_cipline_tech_object_ToObject00(lua_State* tolua_S)
+/* method: _ResetLinesDevicesBeforeReset of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__ResetLinesDevicesBeforeReset00
+static int tolua_PAC_dev_cipline_tech_object__ResetLinesDevicesBeforeReset00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
      !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,4,&tolua_err)
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
   cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
-  int from = ((int)  tolua_tonumber(tolua_S,2,0));
-  int where = ((int)  tolua_tonumber(tolua_S,3,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'ToObject'", NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_ResetLinesDevicesBeforeReset'", NULL);
 #endif
   {
-   int tolua_ret = (int)  self->ToObject(from,where);
+   self->_ResetLinesDevicesBeforeReset();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function '_ResetLinesDevicesBeforeReset'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: _OporCIP of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__OporCIP00
+static int tolua_PAC_dev_cipline_tech_object__OporCIP00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+  int where = ((int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_OporCIP'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->_OporCIP(where);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'ToObject'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function '_OporCIP'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: FromObject of class  cipline_tech_object */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object_FromObject00
-static int tolua_PAC_dev_cipline_tech_object_FromObject00(lua_State* tolua_S)
+/* method: _InitOporCIP of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__InitOporCIP00
+static int tolua_PAC_dev_cipline_tech_object__InitOporCIP00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -8752,7 +8833,76 @@ static int tolua_PAC_dev_cipline_tech_object_FromObject00(lua_State* tolua_S)
      !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,4,&tolua_err)
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+  int where = ((int)  tolua_tonumber(tolua_S,2,0));
+  int step_to_init = ((int)  tolua_tonumber(tolua_S,3,0));
+  int not_first_call = ((int)  tolua_tonumber(tolua_S,4,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_InitOporCIP'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->_InitOporCIP(where,step_to_init,not_first_call);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function '_InitOporCIP'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: _CheckErr of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__CheckErr00
+static int tolua_PAC_dev_cipline_tech_object__CheckErr00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_CheckErr'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->_CheckErr();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function '_CheckErr'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: _Circ of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__Circ00
+static int tolua_PAC_dev_cipline_tech_object__Circ00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -8760,27 +8910,64 @@ static int tolua_PAC_dev_cipline_tech_object_FromObject00(lua_State* tolua_S)
  {
   cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
   int what = ((int)  tolua_tonumber(tolua_S,2,0));
-  int where = ((int)  tolua_tonumber(tolua_S,3,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'FromObject'", NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_Circ'", NULL);
 #endif
   {
-   int tolua_ret = (int)  self->FromObject(what,where);
+   int tolua_ret = (int)  self->_Circ(what);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'FromObject'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function '_Circ'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: InitToObject of class  cipline_tech_object */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object_InitToObject00
-static int tolua_PAC_dev_cipline_tech_object_InitToObject00(lua_State* tolua_S)
+/* method: _InitCirc of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__InitCirc00
+static int tolua_PAC_dev_cipline_tech_object__InitCirc00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+  int what = ((int)  tolua_tonumber(tolua_S,2,0));
+  int step_to_init = ((int)  tolua_tonumber(tolua_S,3,0));
+  int not_first_call = ((int)  tolua_tonumber(tolua_S,4,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_InitCirc'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->_InitCirc(what,step_to_init,not_first_call);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function '_InitCirc'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: _InitToObject of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__InitToObject00
+static int tolua_PAC_dev_cipline_tech_object__InitToObject00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -8802,25 +8989,25 @@ static int tolua_PAC_dev_cipline_tech_object_InitToObject00(lua_State* tolua_S)
   int step_to_init = ((int)  tolua_tonumber(tolua_S,4,0));
   int f = ((int)  tolua_tonumber(tolua_S,5,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'InitToObject'", NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_InitToObject'", NULL);
 #endif
   {
-   int tolua_ret = (int)  self->InitToObject(from,where,step_to_init,f);
+   int tolua_ret = (int)  self->_InitToObject(from,where,step_to_init,f);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'InitToObject'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function '_InitToObject'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: InitFromObject of class  cipline_tech_object */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object_InitFromObject00
-static int tolua_PAC_dev_cipline_tech_object_InitFromObject00(lua_State* tolua_S)
+/* method: _InitFromObject of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__InitFromObject00
+static int tolua_PAC_dev_cipline_tech_object__InitFromObject00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -8842,131 +9029,25 @@ static int tolua_PAC_dev_cipline_tech_object_InitFromObject00(lua_State* tolua_S
   int step_to_init = ((int)  tolua_tonumber(tolua_S,4,0));
   int f = ((int)  tolua_tonumber(tolua_S,5,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'InitFromObject'", NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_InitFromObject'", NULL);
 #endif
   {
-   int tolua_ret = (int)  self->InitFromObject(what,where,step_to_init,f);
+   int tolua_ret = (int)  self->_InitFromObject(what,where,step_to_init,f);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'InitFromObject'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function '_InitFromObject'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: InitCirc of class  cipline_tech_object */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object_InitCirc00
-static int tolua_PAC_dev_cipline_tech_object_InitCirc00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,5,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
-  int what = ((int)  tolua_tonumber(tolua_S,2,0));
-  int step_to_init = ((int)  tolua_tonumber(tolua_S,3,0));
-  int f = ((int)  tolua_tonumber(tolua_S,4,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'InitCirc'", NULL);
-#endif
-  {
-   int tolua_ret = (int)  self->InitCirc(what,step_to_init,f);
-   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'InitCirc'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: Circ of class  cipline_tech_object */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object_Circ00
-static int tolua_PAC_dev_cipline_tech_object_Circ00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
-  int what = ((int)  tolua_tonumber(tolua_S,2,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'Circ'", NULL);
-#endif
-  {
-   int tolua_ret = (int)  self->Circ(what);
-   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'Circ'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: FilCirc of class  cipline_tech_object */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object_FilCirc00
-static int tolua_PAC_dev_cipline_tech_object_FilCirc00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
-  int with_what = ((int)  tolua_tonumber(tolua_S,2,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'FilCirc'", NULL);
-#endif
-  {
-   int tolua_ret = (int)  self->FilCirc(with_what);
-   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'FilCirc'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: InitFilCirc of class  cipline_tech_object */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object_InitFilCirc00
-static int tolua_PAC_dev_cipline_tech_object_InitFilCirc00(lua_State* tolua_S)
+/* method: _InitFilCirc of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__InitFilCirc00
+static int tolua_PAC_dev_cipline_tech_object__InitFilCirc00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -8986,25 +9067,25 @@ static int tolua_PAC_dev_cipline_tech_object_InitFilCirc00(lua_State* tolua_S)
   int step_to_init = ((int)  tolua_tonumber(tolua_S,3,0));
   int f = ((int)  tolua_tonumber(tolua_S,4,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'InitFilCirc'", NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_InitFilCirc'", NULL);
 #endif
   {
-   int tolua_ret = (int)  self->InitFilCirc(with_what,step_to_init,f);
+   int tolua_ret = (int)  self->_InitFilCirc(with_what,step_to_init,f);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'InitFilCirc'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function '_InitFilCirc'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: InitOporCIP of class  cipline_tech_object */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object_InitOporCIP00
-static int tolua_PAC_dev_cipline_tech_object_InitOporCIP00(lua_State* tolua_S)
+/* method: _InitOporCirc of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__InitOporCirc00
+static int tolua_PAC_dev_cipline_tech_object__InitOporCirc00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -9022,27 +9103,133 @@ static int tolua_PAC_dev_cipline_tech_object_InitOporCIP00(lua_State* tolua_S)
   cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
   int where = ((int)  tolua_tonumber(tolua_S,2,0));
   int step_to_init = ((int)  tolua_tonumber(tolua_S,3,0));
-  int f = ((int)  tolua_tonumber(tolua_S,4,0));
+  int not_first_call = ((int)  tolua_tonumber(tolua_S,4,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'InitOporCIP'", NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_InitOporCirc'", NULL);
 #endif
   {
-   int tolua_ret = (int)  self->InitOporCIP(where,step_to_init,f);
+   int tolua_ret = (int)  self->_InitOporCirc(where,step_to_init,not_first_call);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'InitOporCIP'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function '_InitOporCirc'.",&tolua_err);
  return 0;
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: OporCIP of class  cipline_tech_object */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object_OporCIP00
-static int tolua_PAC_dev_cipline_tech_object_OporCIP00(lua_State* tolua_S)
+/* method: _ToObject of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__ToObject00
+static int tolua_PAC_dev_cipline_tech_object__ToObject00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+  int from = ((int)  tolua_tonumber(tolua_S,2,0));
+  int where = ((int)  tolua_tonumber(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_ToObject'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->_ToObject(from,where);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function '_ToObject'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: _FromObject of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__FromObject00
+static int tolua_PAC_dev_cipline_tech_object__FromObject00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+  int what = ((int)  tolua_tonumber(tolua_S,2,0));
+  int where = ((int)  tolua_tonumber(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_FromObject'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->_FromObject(what,where);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function '_FromObject'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: _FillCirc of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__FillCirc00
+static int tolua_PAC_dev_cipline_tech_object__FillCirc00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+  int with_what = ((int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_FillCirc'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->_FillCirc(with_what);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function '_FillCirc'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: _OporCirc of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__OporCirc00
+static int tolua_PAC_dev_cipline_tech_object__OporCirc00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
@@ -9058,17 +9245,48 @@ static int tolua_PAC_dev_cipline_tech_object_OporCIP00(lua_State* tolua_S)
   cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
   int where = ((int)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'OporCIP'", NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_OporCirc'", NULL);
 #endif
   {
-   int tolua_ret = (int)  self->OporCIP(where);
+   int tolua_ret = (int)  self->_OporCirc(where);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
  return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'OporCIP'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function '_OporCirc'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: _RT of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_cipline_tech_object__RT00
+static int tolua_PAC_dev_cipline_tech_object__RT00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"cipline_tech_object",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function '_RT'", NULL);
+#endif
+  {
+   self->_RT();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function '_RT'.",&tolua_err);
  return 0;
 #endif
 }
@@ -10215,7 +10433,6 @@ static int tolua_PAC_dev_ModbusServ_UnpackFloat00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-#ifdef USE_PROFIBUS
 /* method: activate of class  profibus_slave */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_activate00
 static int tolua_PAC_dev_profibus_slave_activate00(lua_State* tolua_S)
@@ -10548,7 +10765,6 @@ static int tolua_PAC_dev_G_PROFIBUS_SLAVE_LUA00(lua_State* tolua_S)
 #endif
 }
 #endif //#ifndef TOLUA_DISABLE
-#endif // USE_PROFIBUS
 
 /* Open function */
 TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
@@ -10977,6 +11193,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_variable(tolua_S,"PUMPFREQ",tolua_get_cipline_tech_object_PUMPFREQ_ptr,tolua_set_cipline_tech_object_PUMPFREQ_ptr);
    tolua_variable(tolua_S,"FL",tolua_get_cipline_tech_object_FL_ptr,tolua_set_cipline_tech_object_FL_ptr);
    tolua_variable(tolua_S,"cnt",tolua_get_cipline_tech_object_cnt_ptr,tolua_set_cipline_tech_object_cnt_ptr);
+   tolua_array(tolua_S,"T",tolua_get_PAC_dev_cipline_tech_object_T,tolua_set_PAC_dev_cipline_tech_object_T);
    tolua_variable(tolua_S,"PIDP",tolua_get_cipline_tech_object_PIDP_ptr,tolua_set_cipline_tech_object_PIDP_ptr);
    tolua_variable(tolua_S,"PIDF",tolua_get_cipline_tech_object_PIDF_ptr,tolua_set_cipline_tech_object_PIDF_ptr);
    tolua_variable(tolua_S,"msa_number",tolua_get_cipline_tech_object_msa_number,tolua_set_cipline_tech_object_msa_number);
@@ -11004,21 +11221,26 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"ForceRet",tolua_PAC_dev_cipline_tech_object_ForceRet00);
    tolua_function(tolua_S,"GetRetState",tolua_PAC_dev_cipline_tech_object_GetRetState00);
    tolua_function(tolua_S,"HasRet",tolua_PAC_dev_cipline_tech_object_HasRet00);
-   tolua_function(tolua_S,"_GoToStep",tolua_PAC_dev_cipline_tech_object__GoToStep00);
    tolua_function(tolua_S,"_DoStep",tolua_PAC_dev_cipline_tech_object__DoStep00);
+   tolua_function(tolua_S,"_GoToStep",tolua_PAC_dev_cipline_tech_object__GoToStep00);
    tolua_function(tolua_S,"_InitStep",tolua_PAC_dev_cipline_tech_object__InitStep00);
    tolua_function(tolua_S,"_LoadProgram",tolua_PAC_dev_cipline_tech_object__LoadProgram00);
    tolua_function(tolua_S,"_StopDev",tolua_PAC_dev_cipline_tech_object__StopDev00);
-   tolua_function(tolua_S,"ToObject",tolua_PAC_dev_cipline_tech_object_ToObject00);
-   tolua_function(tolua_S,"FromObject",tolua_PAC_dev_cipline_tech_object_FromObject00);
-   tolua_function(tolua_S,"InitToObject",tolua_PAC_dev_cipline_tech_object_InitToObject00);
-   tolua_function(tolua_S,"InitFromObject",tolua_PAC_dev_cipline_tech_object_InitFromObject00);
-   tolua_function(tolua_S,"InitCirc",tolua_PAC_dev_cipline_tech_object_InitCirc00);
-   tolua_function(tolua_S,"Circ",tolua_PAC_dev_cipline_tech_object_Circ00);
-   tolua_function(tolua_S,"FilCirc",tolua_PAC_dev_cipline_tech_object_FilCirc00);
-   tolua_function(tolua_S,"InitFilCirc",tolua_PAC_dev_cipline_tech_object_InitFilCirc00);
-   tolua_function(tolua_S,"InitOporCIP",tolua_PAC_dev_cipline_tech_object_InitOporCIP00);
-   tolua_function(tolua_S,"OporCIP",tolua_PAC_dev_cipline_tech_object_OporCIP00);
+   tolua_function(tolua_S,"_ResetLinesDevicesBeforeReset",tolua_PAC_dev_cipline_tech_object__ResetLinesDevicesBeforeReset00);
+   tolua_function(tolua_S,"_OporCIP",tolua_PAC_dev_cipline_tech_object__OporCIP00);
+   tolua_function(tolua_S,"_InitOporCIP",tolua_PAC_dev_cipline_tech_object__InitOporCIP00);
+   tolua_function(tolua_S,"_CheckErr",tolua_PAC_dev_cipline_tech_object__CheckErr00);
+   tolua_function(tolua_S,"_Circ",tolua_PAC_dev_cipline_tech_object__Circ00);
+   tolua_function(tolua_S,"_InitCirc",tolua_PAC_dev_cipline_tech_object__InitCirc00);
+   tolua_function(tolua_S,"_InitToObject",tolua_PAC_dev_cipline_tech_object__InitToObject00);
+   tolua_function(tolua_S,"_InitFromObject",tolua_PAC_dev_cipline_tech_object__InitFromObject00);
+   tolua_function(tolua_S,"_InitFilCirc",tolua_PAC_dev_cipline_tech_object__InitFilCirc00);
+   tolua_function(tolua_S,"_InitOporCirc",tolua_PAC_dev_cipline_tech_object__InitOporCirc00);
+   tolua_function(tolua_S,"_ToObject",tolua_PAC_dev_cipline_tech_object__ToObject00);
+   tolua_function(tolua_S,"_FromObject",tolua_PAC_dev_cipline_tech_object__FromObject00);
+   tolua_function(tolua_S,"_FillCirc",tolua_PAC_dev_cipline_tech_object__FillCirc00);
+   tolua_function(tolua_S,"_OporCirc",tolua_PAC_dev_cipline_tech_object__OporCirc00);
+   tolua_function(tolua_S,"_RT",tolua_PAC_dev_cipline_tech_object__RT00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_RM_MANAGER",tolua_PAC_dev_G_RM_MANAGER00);
   tolua_cclass(tolua_S,"rm_manager","rm_manager","",NULL);
@@ -11067,7 +11289,6 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"UnpackInt32",tolua_PAC_dev_ModbusServ_UnpackInt3200);
    tolua_function(tolua_S,"UnpackFloat",tolua_PAC_dev_ModbusServ_UnpackFloat00);
   tolua_endmodule(tolua_S);
-#ifdef USE_PROFIBUS
   tolua_cclass(tolua_S,"profibus_slave","profibus_slave","",NULL);
   tolua_beginmodule(tolua_S,"profibus_slave");
    tolua_function(tolua_S,"activate",tolua_PAC_dev_profibus_slave_activate00);
@@ -11082,7 +11303,6 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_PROFIBUS_SLAVE_LUA",tolua_PAC_dev_G_PROFIBUS_SLAVE_LUA00);
  tolua_endmodule(tolua_S);
-#endif // USE_PROFIBUS
  return 1;
 }
 

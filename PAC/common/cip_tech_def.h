@@ -10,6 +10,7 @@
 
 #define NOCONC       0.1
 
+#define  TECH_TYPE_SELF_CLEAN 112
 #define TECH_TYPE_CAR_WASH 113
 
 ///@brief Максимальная длина списка рецептов
@@ -533,6 +534,7 @@ class cipline_tech_object: public tech_object
         int is_InitFillCirc_func;
         int is_OporCirc_func;
         int is_InitOporCirc_func;
+        int is_RT_func;
 
 	public:
 		cipline_tech_object( const char* name, u_int number, u_int type, const char* name_Lua,
@@ -707,7 +709,6 @@ class cipline_tech_object: public tech_object
 
 		////-------------------
 		virtual void RHI(void);
-		virtual void RT(void);
 		virtual void PT(void);
 		virtual int SetCommand(int command);
 		virtual void ResetWP(void);
@@ -735,8 +736,9 @@ class cipline_tech_object: public tech_object
         virtual int _InitOporCirc(int where, int step_to_init, int not_first_call);
         virtual int _ToObject(int from, int where);
         virtual int _FromObject(int what, int where);
-        virtual int _FilCirc(int with_what);
+        virtual int _FillCirc(int with_what);
         virtual int _OporCirc(int where);
+        virtual void _RT(void);
 
         ///-----------------------------------------------
         ////Функции, вызывающие обработчики на Lua. При отсутствии обработчиков вызываются стандартные функции.
@@ -757,8 +759,9 @@ class cipline_tech_object: public tech_object
         virtual int InitOporCirc(int where, int step_to_init, int not_first_call);
         virtual int ToObject(int from, int where);
         virtual int FromObject(int what, int where);
-        virtual int FilCirc(int with_what);
+        virtual int FillCirc(int with_what);
         virtual int OporCirc(int where);
+        virtual void RT(void);
         ////--------------------------------------------
 		////-----error service-------
 		virtual void ResetErr(void);
