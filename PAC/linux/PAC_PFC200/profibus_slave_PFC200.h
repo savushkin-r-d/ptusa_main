@@ -19,25 +19,72 @@
 #ifndef PROFIBUS_SLAVE_PFC200
 #define PROFIBUS_SLAVE_PFC200
 
-#ifdef USE_PROFIBUS
 #include <stdint.h>
 #include <stdbool.h>
 #include <unistd.h>
 #include <assert.h>
 
+#ifdef USE_PROFIBUS
 extern "C"
     {
 #include <dal/adi_application_interface.h>    /* application device interface (ADI) */
 
 #include "dpsTypes.h"                         /* type definitions of the PROFIBUS slave device interface */
     }
+#endif // USE_PROFIBUS
 
 #include "profibus_slave.h"
 #include "smart_ptr.h"
 #include "log.h"
 
+#ifndef USE_PROFIBUS
+class profibus_slave_PFC200: public profibus_slave
+    {
+private:
+    static auto_smart_ptr < profibus_slave_PFC200 > instance;
+
+public:
+    enum CONSTANTS
+    {
+    MAX_DEVICE_LIST_ENTRIES = 10,
+    };
+
+    /// @brief Получение единственного экземпляра класса для работы.
+    ///
+    /// @return - указатель на единственный объект класса @ref
+    /// profibus_slave_PFC200.
+    static profibus_slave_PFC200* get_instance();
+
+    virtual ~profibus_slave_PFC200() {}
+
+    int init() { return 0; }
+
+    /// @brief This function is the main loop. It exchanges the process data between the input an output process images.
+    ///
+    /// @param pstAdi - pointer to the initialized ADI structure.
+    /// @param iDpsDeviceId - identification of the PROFIBUS slave device.
+    ///
+    /// @return - \ref DAL_SUCCESS when the function has successfully
+    /// processed. In other cases it returns \ref DAL_FAILURE.
+    int eval() { return 0; }
+
+    //Lua functions.
+
+    double get_double( int offset ) { return 0.0; }
+
+    bool get_bool( int byte_offset, int bit_offset ) { return false; }
+    void set_bool( int byte_offset, int bit_offset, bool val ) {}
+
+    int get_int( int byte_offset ) { return 0; }
+    void set_int( int byte_offset, int val ) {}
+    };
+
+#else // USE_PROFIBUS
+
 //-----------------------------------------------------------------------------
 /// @brief Работа с Profibus Slave.
+
+
 class profibus_slave_PFC200: public profibus_slave
     {
 public:
@@ -53,9 +100,9 @@ public:
     static profibus_slave_PFC200* get_instance();
 
     virtual ~profibus_slave_PFC200()
-    {
-    close();
-    }
+        {
+        close();
+        }
 
     int init();
 
@@ -80,10 +127,10 @@ public:
 
 private:
     profibus_slave_PFC200()
-    {
-    pstAdi = NULL;
-    iDpsDeviceId = 0;
-    }
+        {
+        pstAdi = NULL;
+        iDpsDeviceId = 0;
+        }
 
     void close();
 
@@ -221,6 +268,6 @@ private:
     uint8_t aucPlcPrcImgOutp[244]; 	//Output process image of the PLC.
     };
 //-----------------------------------------------------------------------------
-#endif // USE_PROFIBUS
+#endif //USE_PROFIBUS
 
 #endif // PROFIBUS_SLAVE_PFC200

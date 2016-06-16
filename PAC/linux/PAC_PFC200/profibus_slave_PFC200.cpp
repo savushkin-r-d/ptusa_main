@@ -1,7 +1,5 @@
 #include "profibus_slave_PFC200.h"
 
-#ifdef USE_PROFIBUS
-
 auto_smart_ptr < profibus_slave_PFC200 > profibus_slave_PFC200::instance = 0;
 //------------------------------------------------------------------------------
 profibus_slave_PFC200* profibus_slave_PFC200::get_instance()
@@ -14,6 +12,9 @@ profibus_slave_PFC200* profibus_slave_PFC200::get_instance()
     return instance;
     }
 //----------------------------------------------------------------------------------------------------------------------
+#ifndef USE_PROFIBUS
+
+#else
 int profibus_slave_PFC200::init()
     {
     int32_t iDalResult = DAL_SUCCESS; 			//Return value of the DAL interface.
@@ -682,6 +683,4 @@ int32_t profibus_slave_PFC200::release_ADI( tApplicationDeviceInterface* pstAdi 
     return (iDalResult);
     }
 //------------------------------------------------------------------------------
-
-#endif // USE_PROFIBUS
-
+#endif
