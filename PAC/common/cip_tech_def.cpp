@@ -172,6 +172,7 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
     is_OporCirc_func = 0;
     is_InitOporCirc_func = 0;
     is_RT_func = 0;
+    is_Stop_func = 0;
 
     //для ошибки "возможно отсутствует концентрированный раствор"
     no_liquid_is_warning = 0;
@@ -501,7 +502,19 @@ int cipline_tech_object::evaluate()
     else
         {
 
- 
+        if (2 == is_in_evaluate_func)
+            {
+            lua_State* L = lua_manager::get_instance()->get_Lua();
+            lua_getglobal( L, name_Lua );
+            lua_getfield( L, -1, "cip_in_evaluate" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
+            lua_getglobal( L, name_Lua );
+            if (0 != lua_pcall(L, 1, 0, 0))
+                {
+                Print("Error in calling cip_in_evaluate: %s\n", lua_tostring(L, -1));
+                lua_pop(L, 1);
+                }
+            } 
 
 
         if (state>0)
@@ -911,7 +924,7 @@ void cipline_tech_object::initline()
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "in_evaluate" );
+        lua_getfield( L, -1, "cip_in_evaluate" );
         lua_remove( L, -2 );  // Stack: remove OBJECT.
 
         if ( lua_isfunction( L, -1 ) )
@@ -1033,6 +1046,23 @@ void cipline_tech_object::initline()
         lua_remove(L, -1); // Stack: remove function "cip_RT".
         }
 
+    if ( is_Stop_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_Stop" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_Stop_func = 2;
+            }
+        else
+            {
+            is_Stop_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_Stop".
+        }
 
     }
 
@@ -1443,9 +1473,9 @@ void cipline_tech_object::_StopDev( void )
     RHI();
     }
 
-void cipline_tech_object::Stop( int step )
+void cipline_tech_object::_Stop( int step_to_stop )
     {
-    switch (step)
+    switch (step_to_stop)
         {
         case 105:
         case 109:
@@ -2185,8 +2215,9 @@ int cipline_tech_object::EvalCipInProgress()
 
     if (res>0 && curstep != 555)
         { //All Ok step is over
+        int nowstep = curstep;
         curstep=GoToStep(curstep, res);
-        InitStep(curstep, 0);
+        if (curstep!=nowstep) InitStep(curstep, 0);
         }
     else
         {
@@ -6574,6 +6605,28 @@ void cipline_tech_object::RT( void )
     else
         {
         _RT();
+        }
+    }
+
+void cipline_tech_object::Stop( int step_to_stop )
+    {
+    if (2 == is_Stop_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_Stop" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, step_to_stop);
+        if (0 != lua_pcall(L, 2, 0, 0))
+            {
+            Print("Error in calling cip_Stop: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        _Stop( step_to_stop );
         }
     }
 

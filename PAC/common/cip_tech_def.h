@@ -535,6 +535,7 @@ class cipline_tech_object: public tech_object
         int is_OporCirc_func;
         int is_InitOporCirc_func;
         int is_RT_func;
+        int is_Stop_func;
 
 	public:
 		cipline_tech_object( const char* name, u_int number, u_int type, const char* name_Lua,
@@ -712,7 +713,6 @@ class cipline_tech_object: public tech_object
 		virtual void PT(void);
 		virtual int SetCommand(int command);
 		virtual void ResetWP(void);
-		virtual void Stop(int step);
 		virtual int SetRet(int val);
 		virtual int GetRetState();
 		virtual int HasRet();
@@ -739,6 +739,7 @@ class cipline_tech_object: public tech_object
         virtual int _FillCirc(int with_what);
         virtual int _OporCirc(int where);
         virtual void _RT(void);
+        virtual void _Stop(int step_to_stop);
 
         ///-----------------------------------------------
         ////Функции, вызывающие обработчики на Lua. При отсутствии обработчиков вызываются стандартные функции.
@@ -762,6 +763,7 @@ class cipline_tech_object: public tech_object
         virtual int FillCirc(int with_what);
         virtual int OporCirc(int where);
         virtual void RT(void);
+        virtual void Stop(int step_to_stop);
         ////--------------------------------------------
 		////-----error service-------
 		virtual void ResetErr(void);

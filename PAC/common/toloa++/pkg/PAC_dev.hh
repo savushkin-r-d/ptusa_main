@@ -1224,6 +1224,7 @@ class cipline_tech_object: public tech_object
 		int ForceRet(int val);
 		int GetRetState();
 		int HasRet();
+        int timeIsOut();
 
         //Базовые методы для вызова из модифицированных на LUA
         virtual int _DoStep(int step_to_do); 
@@ -1246,6 +1247,7 @@ class cipline_tech_object: public tech_object
         virtual int _FillCirc(int with_what);
         virtual int _OporCirc(int where);
         virtual void _RT(void);
+        virtual void _Stop(int step_to_stop);
 	};
 //---------------------------------------------------------------------------
 rm_manager* G_RM_MANAGER();
