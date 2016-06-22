@@ -125,6 +125,7 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
     dev_upr_cip_finished = 0;
     dev_upr_cip_in_progress = 0;
     dev_ai_pump_frequency = 0;
+    dev_upr_sanitizer_pump = 0;
 
     pumpflag = 0;
     pumptimer = get_millisec();
@@ -150,6 +151,7 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
     circ_max_timer = get_millisec();
 
     is_in_evaluate_func = 0;
+    is_in_error_func = 0;
     is_InitCustomStep_func = 0;
     is_DoCustomStep_func = 0;
     is_GoToStep_func = 0;
@@ -173,6 +175,8 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
     is_InitOporCirc_func = 0;
     is_RT_func = 0;
     is_Stop_func = 0;
+    is_DoseRR_func = 0;
+    is_InitDoseRR_func = 0;
 
     //дл€ ошибки "возможно отсутствует концентрированный раствор"
     no_liquid_is_warning = 0;
@@ -935,7 +939,25 @@ void cipline_tech_object::initline()
             {
             is_in_evaluate_func = 1;
             }
-        lua_remove(L, -1); // Stack: remove function "in_evaluate".
+        lua_remove(L, -1); // Stack: remove function "cip_in_evaluate".
+        }
+
+    if ( is_in_error_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_in_error" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_in_error_func = 2;
+            }
+        else
+            {
+            is_in_error_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_in_error".
         }
 
     if ( is_InitCirc_func == 0 )
@@ -1062,6 +1084,42 @@ void cipline_tech_object::initline()
             is_Stop_func = 1;
             }
         lua_remove(L, -1); // Stack: remove function "cip_Stop".
+        }
+
+    if ( is_DoseRR_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_DoseRR" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_DoseRR_func = 2;
+            }
+        else
+            {
+            is_DoseRR_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_DoseRR".
+        }
+
+    if ( is_InitDoseRR_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_InitDoseRR" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_InitDoseRR_func = 2;
+            }
+        else
+            {
+            is_InitDoseRR_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_InitDoseRR".
         }
 
     }
@@ -1460,6 +1518,10 @@ void cipline_tech_object::_StopDev( void )
     if (dev_upr_caustic)
         {
         dev_upr_caustic->off();
+        }
+    if (dev_upr_sanitizer_pump)
+        {
+        dev_upr_sanitizer_pump->off();
         }
     if (scenabled && scline == nmr)
         {
@@ -2426,6 +2488,21 @@ int cipline_tech_object::_DoStep( int step_to_do )
                 InitStep(curstep, 1);
                 }
             }
+
+        if (2 == is_in_error_func)
+            {
+            lua_State* L = lua_manager::get_instance()->get_Lua();
+            lua_getglobal( L, name_Lua );
+            lua_getfield( L, -1, "cip_in_error" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
+            lua_getglobal( L, name_Lua );
+            if (0 != lua_pcall(L, 1, 0, 0))
+                {
+                Print("Error in calling cip_in_error: %s\n", lua_tostring(L, -1));
+                lua_pop(L, 1);
+                }
+            } 
+
         return 0;
         }
 
@@ -2465,6 +2542,10 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
         {
         dev_upr_cip_ready->off();
         }
+    if (dev_upr_sanitizer_pump)
+        {
+        dev_upr_sanitizer_pump->off();
+        }
     dev_upr_cip_in_progress = 0;
     dev_upr_ret = 0;
     dev_m_ret = 0;
@@ -2477,6 +2558,7 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
     dev_upr_desinfection = 0;
     dev_upr_cip_ready = 0;
     dev_upr_cip_finished = 0;
+    dev_upr_sanitizer_pump = 0;
     no_liquid_is_warning = 0;
     no_liquid_phase = 0;
     //ѕеременные дл€ циркул€ции
@@ -4792,8 +4874,8 @@ int cipline_tech_object::_OporCirc( int where )
     return 0;
     }
 
-int cipline_tech_object::InitDoseRR( int what, int step, int f )
-    {
+int cipline_tech_object::_InitDoseRR( int what, int step_to_init, int not_first_call )
+{
     switch (what)
         {
         case SANITIZER:
@@ -4814,6 +4896,10 @@ int cipline_tech_object::InitDoseRR( int what, int step, int f )
             V12->off();
             break;
         }
+    if (dev_upr_sanitizer_pump)
+    {
+    dev_upr_sanitizer_pump->on();
+    }
     rt_par_float[P_MAX_OPER_TM] = rt_par_float[PTM_SANITIZER_INJECT];
     T[TMR_OP_TIME]->set_countdown_time( ( u_long )
         rt_par_float[P_MAX_OPER_TM]*1000L);
@@ -4829,7 +4915,7 @@ int cipline_tech_object::InitDoseRR( int what, int step, int f )
     return 0;
     }
 
-int cipline_tech_object::DoseRR( int what )
+int cipline_tech_object::_DoseRR( int what )
     {
     if (!LH->is_active())
         {
@@ -5028,6 +5114,42 @@ int cipline_tech_object::init_object_devices()
     else
         {
         dev_upr_ret = 0;
+        }
+    //—игнал управлени€ насосом подачи дезинфицирующего средства
+    dev_no = (u_int)rt_par_float[P_SIGNAL_SANITIZER_PUMP];
+    if (dev_no > 0)
+        {
+        sprintf(devname, "LINE%dDO%d", nmr, dev_no);
+        dev = (device*)DO(devname);
+        if (dev->get_serial_n() > 0)
+            {
+            dev_upr_sanitizer_pump = dev;
+            }
+        else
+            {
+            dev = (device*)(DO(dev_no));
+            if (dev->get_serial_n() > 0)
+                {
+                dev_upr_sanitizer_pump = dev;
+                }
+            else
+                {
+                dev = DEVICE(dev_no);
+                if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DO)
+                    {
+                    dev_upr_sanitizer_pump = dev;
+                    }
+                else
+                    {
+                    dev_upr_sanitizer_pump = 0;
+                    return -1;
+                    }
+                }
+            }
+        }
+    else
+        {
+        dev_upr_sanitizer_pump = 0;
         }
     //—мена среды
     dev_no = (u_int)rt_par_float[P_SIGNAL_MEDIUM_CHANGE];
@@ -6628,6 +6750,70 @@ void cipline_tech_object::Stop( int step_to_stop )
         {
         _Stop( step_to_stop );
         }
+    }
+
+int cipline_tech_object::InitDoseRR( int what, int step_to_init, int not_first_call )
+{
+    int luares = 0;
+
+    if (2 == is_InitDoseRR_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_InitDoseRR" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, what);
+        lua_pushinteger(L, step_to_init);
+        lua_pushinteger(L, not_first_call);
+        if (0 == lua_pcall(L, 4, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_InitDoseRR: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _InitDoseRR(what, step_to_init, not_first_call);
+        }
+
+    return luares;
+    }
+
+int cipline_tech_object::DoseRR( int what )
+    {
+    int luares = 0;
+
+    if (2 == is_DoseRR_func)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getglobal( L, name_Lua );
+        lua_getfield( L, -1, "cip_DoseRR" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        lua_getglobal( L, name_Lua );
+        lua_pushinteger(L, what);
+        if (0 == lua_pcall(L, 2, 1, 0))
+            {
+            luares = lua_tointeger(L, -1);
+            lua_pop(L, 1);
+            }
+        else
+            {
+            Print("Error in calling cip_DoseRR: %s\n", lua_tostring(L, -1));
+            lua_pop(L, 1);
+            }
+        }
+    else
+        {
+        luares = _DoseRR(what);
+        }
+
+    return luares;
     }
 
 i_DO_device* cipline_tech_object::VWDREN = 0;

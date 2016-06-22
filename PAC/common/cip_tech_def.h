@@ -513,6 +513,7 @@ class cipline_tech_object: public tech_object
 
 		//Обработчики LUA
 		int is_in_evaluate_func;
+        int is_in_error_func;
 		int is_InitCustomStep_func;
 		int is_DoCustomStep_func;
         int is_GoToStep_func;
@@ -536,6 +537,8 @@ class cipline_tech_object: public tech_object
         int is_InitOporCirc_func;
         int is_RT_func;
         int is_Stop_func;
+        int is_DoseRR_func;
+        int is_InitDoseRR_func;
 
 	public:
 		cipline_tech_object( const char* name, u_int number, u_int type, const char* name_Lua,
@@ -697,6 +700,7 @@ class cipline_tech_object: public tech_object
 		device* dev_upr_cip_in_progress;	//Сигнал "готовность к мойке"
 		device* dev_upr_cip_finished;		//Сигнал "мойка окончена"
 		device* dev_ai_pump_frequency;		//Задание частоты подающего насоса
+        device* dev_upr_sanitizer_pump;  //Управление насосом подачи дезинфицирующего средства
 		int init_object_devices();			//Функция для инициализации устройств объекта мойки
 		//----------------------------------------------
 
@@ -740,7 +744,8 @@ class cipline_tech_object: public tech_object
         virtual int _OporCirc(int where);
         virtual void _RT(void);
         virtual void _Stop(int step_to_stop);
-
+        virtual int _InitDoseRR(int what, int step_to_init, int not_first_call);
+        virtual int _DoseRR(int what);
         ///-----------------------------------------------
         ////Функции, вызывающие обработчики на Lua. При отсутствии обработчиков вызываются стандартные функции.
         virtual int DoStep(int step_to_do);                                     //cip_DoStep(step)
@@ -764,6 +769,8 @@ class cipline_tech_object: public tech_object
         virtual int OporCirc(int where);
         virtual void RT(void);
         virtual void Stop(int step_to_stop);
+        virtual int InitDoseRR(int what, int step_to_init, int not_first_call);
+        virtual int DoseRR(int what);
         ////--------------------------------------------
 		////-----error service-------
 		virtual void ResetErr(void);
@@ -780,10 +787,6 @@ class cipline_tech_object: public tech_object
 		virtual int CheckConc(int where);
 		virtual int AddRR(int where);
 		virtual int OpolRR(int where);
-		////-------------------------
-
-		virtual int InitDoseRR(int what, int step, int f);
-		virtual int DoseRR(int what);
 		////-------------------
 		virtual int EvalBlock();
 		////-------------------

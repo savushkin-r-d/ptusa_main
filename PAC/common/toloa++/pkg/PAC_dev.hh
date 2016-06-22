@@ -1248,6 +1248,8 @@ class cipline_tech_object: public tech_object
         virtual int _OporCirc(int where);
         virtual void _RT(void);
         virtual void _Stop(int step_to_stop);
+        virtual int _InitDoseRR(int what, int step_to_init, int not_first_call);
+        virtual int _DoseRR(int what);
 	};
 //---------------------------------------------------------------------------
 rm_manager* G_RM_MANAGER();
