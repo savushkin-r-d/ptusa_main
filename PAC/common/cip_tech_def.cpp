@@ -2060,6 +2060,10 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
     {
     dev_upr_medium_change->off();
     }
+    if (dev_upr_sanitizer_pump)
+    {
+    dev_upr_sanitizer_pump->off();
+    }
     tankempty = 0;
     tankemptytimer = get_millisec();
     tankfull = 0;
@@ -4750,10 +4754,7 @@ int cipline_tech_object::_Circ( int what )
         {
         T[TMR_OP_TIME]->pause();
         }
-    if (T[TMR_OP_TIME]->is_time_up()==1)
-        {
-        return 1;
-        }
+
     c=GetConc(what);
     if (FL->get_state()==FLIS) SAV[SAV_CONC]->Add(c, cnt->get_quantity());
     SAV[SAV_CONC]->Add(c, cnt->get_quantity());
@@ -4836,6 +4837,11 @@ int cipline_tech_object::_Circ( int what )
         }
     rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
     rt_par_float[P_SUM_OP] = cnt->get_quantity();
+
+    if (T[TMR_OP_TIME]->is_time_up()==1)
+        {
+        return 1;
+        }
     return 0;
     }
 
