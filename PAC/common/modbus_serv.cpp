@@ -397,7 +397,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 									i+=TRecipeManager::recipeNameLength - 1;
 									break;
 								case RC_SELECT_REC:
-									PackInt16(0,&outdata[3+i*2]);
+									PackInt16(-1,&outdata[3+i*2]);
 									break;
 								case RC_LIST_UPDATE:
 									PackInt16(updateRecFlag[line],&outdata[3+i*2]);
@@ -414,7 +414,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 									PackInt16(k,&outdata[3+i*2]);
 									break;
 								case RC_PRG_SELECT:
-									PackInt16(0,&outdata[3+i*2]);
+									PackInt16(-1,&outdata[3+i*2]);
 									break;
 								case RC_PRG_UPDATE:
 									PackInt16(updatePrgFlag[line],&outdata[3+i*2]);
