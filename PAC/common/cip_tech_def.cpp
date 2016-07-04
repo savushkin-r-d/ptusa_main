@@ -533,11 +533,14 @@ int cipline_tech_object::evaluate()
             }
         else
             {
-            EvalCipInError();
-            if (!cip_in_error)
+            if (state < 0)
                 {
-                rt_par_float[STP_ERRCOUNT] = rt_par_float[STP_ERRCOUNT] + 1;
-                cip_in_error = 1;
+                EvalCipInError();
+                if (!cip_in_error)
+                    {
+                    rt_par_float[STP_ERRCOUNT] = rt_par_float[STP_ERRCOUNT] + 1;
+                    cip_in_error = 1;
+                    }
                 }
             }
         }
@@ -1443,7 +1446,7 @@ float cipline_tech_object::get_station_par( int parno )
 
 void cipline_tech_object::ResetStat( void )
     {
-    for ( int i = STP_QAVS; i <= STP_ERRCOUNT; i++ )
+    for ( int i = STP_QAVS; i <= STP_PODP_WATER; i++ )
         {
         rt_par_float[i] = 0;
         }
@@ -1648,6 +1651,7 @@ int cipline_tech_object::EvalCommands()
             if (state !=0 && curstep != 555)
                 {
                 rt_par_float[STP_STEPS_OVER] = rt_par_float[STP_STEPS_OVER] + 1; //количество пропущенных операций
+                rt_par_float[STP_LAST_STEP] = curstep;
                 curstep=GoToStep(curstep, 0);
                 state=1;
                 InitStep(curstep, 0);
@@ -2078,6 +2082,7 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
     if (not_first_call==0)
         {
         RT();
+        rt_par_float[STP_LAST_STEP_COUNTER] = cnt->get_quantity();
         cnt->reset();
         cnt->pause();
         rt_par_float[ STP_LV] = 0 ; //stat._lv=0;
@@ -2283,7 +2288,11 @@ int cipline_tech_object::EvalCipInProgress()
         { //All Ok step is over
         int nowstep = curstep;
         curstep=GoToStep(curstep, res);
-        if (curstep!=nowstep) InitStep(curstep, 0);
+        if (curstep!=nowstep) 
+            {
+            rt_par_float[STP_LAST_STEP] = nowstep;
+            InitStep(curstep, 0);
+            }
         }
     else
         {
@@ -4275,6 +4284,10 @@ int cipline_tech_object::_ToObject( int from, int where )
             if (LH->is_active()) V00->off();
             tmp=cnt->get_quantity();
             rt_par_float[STP_WC] = rt_par_float[STP_WC] + tmp - rt_par_float[STP_LV];
+            if (curstep == 62)
+            {
+            rt_par_float[STP_USED_HOTWATER] = rt_par_float[STP_USED_HOTWATER] + tmp - rt_par_float[STP_LV];
+            }
             rt_par_float[STP_LV] = tmp;
             break;
         case TANK_W:
@@ -4314,6 +4327,9 @@ int cipline_tech_object::_ToObject( int from, int where )
             break;
         case TANK_K:
             c=GetConc(KISL);
+            tmp=cnt->get_quantity();
+            rt_par_float[STP_USED_ACID] = rt_par_float[STP_USED_ACID] + tmp - rt_par_float[STP_LV];
+            rt_par_float[STP_LV] = tmp;
             if (!LKL->is_active())
                 {
                 return NO_ACID;
@@ -4321,6 +4337,9 @@ int cipline_tech_object::_ToObject( int from, int where )
             break;
         case TANK_S:
             c=GetConc(SHCH);
+            tmp=cnt->get_quantity();
+            rt_par_float[STP_USED_CAUSTIC] = rt_par_float[STP_USED_CAUSTIC] + tmp - rt_par_float[STP_LV];
+            rt_par_float[STP_LV] = tmp;
             if (!LSL->is_active())
                 {
                 return NO_ALKALINE;
@@ -4495,6 +4514,10 @@ int cipline_tech_object::_FromObject( int what, int where )
             if (LH->is_active()) V00->off();
             tmp=cnt->get_quantity();
             rt_par_float[STP_WC] = rt_par_float[STP_WC] + tmp - rt_par_float[STP_LV] ;
+            if (curstep == 64)
+                {
+                rt_par_float[STP_USED_HOTWATER] = rt_par_float[STP_USED_HOTWATER] + tmp - rt_par_float[STP_LV];
+                }
             rt_par_float[STP_LV] = tmp ;
             break;
         case TANK_W:
@@ -4534,6 +4557,9 @@ int cipline_tech_object::_FromObject( int what, int where )
             break;
         case TANK_K:
             c=GetConc(KISL);
+            tmp=cnt->get_quantity();
+            rt_par_float[STP_USED_ACID] = rt_par_float[STP_USED_ACID] + tmp - rt_par_float[STP_LV];
+            rt_par_float[STP_LV] = tmp;
             if (!LKL->is_active())
                 {
                 return NO_ACID;
@@ -4542,6 +4568,9 @@ int cipline_tech_object::_FromObject( int what, int where )
             break;
         case TANK_S:
             c=GetConc(SHCH);
+            tmp=cnt->get_quantity();
+            rt_par_float[STP_USED_CAUSTIC] = rt_par_float[STP_USED_CAUSTIC] + tmp - rt_par_float[STP_LV];
+            rt_par_float[STP_LV] = tmp;
             if (!LSL->is_active())
                 {
                 return NO_ALKALINE;
@@ -4780,6 +4809,7 @@ int cipline_tech_object::_Circ( int what )
                     if (1 == circ_was_feed)
                         {
                         circ_podp_count++;
+                        rt_par_float[STP_PODP_ACID] = rt_par_float[STP_PODP_ACID] + 1;
                         }
                     circ_was_feed = 0;
                     }
@@ -4804,6 +4834,7 @@ int cipline_tech_object::_Circ( int what )
                     if (1 == circ_was_feed)
                         {
                         circ_podp_count++;
+                        rt_par_float[STP_PODP_CAUSTIC] = rt_par_float[STP_PODP_CAUSTIC] + 1;
                         }
                     circ_was_feed = 0;
                     }
@@ -4829,6 +4860,7 @@ int cipline_tech_object::_Circ( int what )
                     if (1 == circ_was_feed)
                         {
                         circ_podp_count++;
+                        rt_par_float[STP_PODP_WATER] = rt_par_float[STP_PODP_WATER] + 1;
                         }
                     circ_was_feed = 0;
                     }
@@ -6369,7 +6401,7 @@ int cipline_tech_object::CheckErr( void )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getglobal( L, name_Lua );
-        lua_getfield( L, -1, "cip_CheckError" );
+        lua_getfield( L, -1, "cip_CheckErr" );
         lua_remove( L, -2 );  // Stack: remove OBJECT.
         lua_getglobal( L, name_Lua );
         if (0 == lua_pcall(L, 1, 1, 0))
@@ -6379,7 +6411,7 @@ int cipline_tech_object::CheckErr( void )
             }
         else
             {
-            Print("Error in calling cip_CheckError: %s\n", lua_tostring(L, -1));
+            Print("Error in calling cip_CheckErr: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
