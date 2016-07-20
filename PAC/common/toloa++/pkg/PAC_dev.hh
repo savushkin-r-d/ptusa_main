@@ -1156,6 +1156,9 @@ class cipline_tech_object: public tech_object
 		int nmr;
 		int cip_in_error;
 		int disable_tank_heating; //отключение подогрева при начале подачи растворов в танк(для МСА со старыми регулирующими клапанами)
+        int ret_overrride; //флаг принудительного включения/выключения возвратного насооса
+        int return_ok; //есть расход на возврате
+        int concentration_ok; //есть концентрация на возврате
 
 		i_DO_device* V00;
 		i_DO_device* V01;

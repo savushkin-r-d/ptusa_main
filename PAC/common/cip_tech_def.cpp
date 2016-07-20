@@ -177,6 +177,7 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
     is_Stop_func = 0;
     is_DoseRR_func = 0;
     is_InitDoseRR_func = 0;
+    is_On_Resume_func = 0;
 
     //для ошибки "возможно отсутствует концентрированный раствор"
     no_liquid_is_warning = 0;
@@ -660,8 +661,22 @@ void cipline_tech_object::initline()
 
         sprintf(devname, "LINE%dM%d", number, 1);
         NP = M(devname);
-        NK = M(2);
-        NS = M(1);
+        if (((device*)M("M1"))->get_type() == device::DT_NONE)
+            {
+            NS = (i_DO_AO_device*)V(1);
+            }
+        else
+            {
+            NS = M(1);
+            }
+        if (((device*)M("M2"))->get_type() == device::DT_NONE)
+            {
+            NK = (i_DO_AO_device*)V(2);
+            }
+        else
+            {
+            NK = M(2);
+            }
         sprintf(devname, "LINE%dLS%d", number, 3);
         LL = LS(devname);
         sprintf(devname, "LINE%dLS%d", number, 2);
@@ -1123,6 +1138,24 @@ void cipline_tech_object::initline()
             is_InitDoseRR_func = 1;
             }
         lua_remove(L, -1); // Stack: remove function "cip_InitDoseRR".
+        }
+
+    if ( is_On_Resume_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_On_Resume" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_On_Resume_func = 2;
+            }
+        else
+            {
+            is_On_Resume_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_On_Resume".
         }
 
     }
@@ -1696,8 +1729,24 @@ int cipline_tech_object::EvalCommands()
                         }
                     else
                         {
-                        state=1;
-                        InitStep(curstep, 1);
+                        if (2 == is_On_Resume_func)
+                            {
+                            lua_State* L = lua_manager::get_instance()->get_Lua();
+                            lua_getglobal( L, name_Lua );
+                            lua_getfield( L, -1, "cip_On_Resume" );
+                            lua_remove( L, -2 );  // Stack: remove OBJECT.
+                            lua_getglobal( L, name_Lua );
+                            if (0 != lua_pcall(L, 1, 0, 0))
+                                {
+                                Print("Error in calling cip_On_Resume: %s\n", lua_tostring(L, -1));
+                                lua_pop(L, 1);
+                                }
+                            }
+                        else
+                            {
+                            state=1;
+                            InitStep(curstep, 1);
+                            }
                         }
                     }
                 }
