@@ -2150,6 +2150,12 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
             }
         }
 
+    int cleanrinsingto = TANK_W;
+    if (((int)rt_par_float[P_PROGRAM]) == SPROG_RINSING_CLEAN)
+        {
+        cleanrinsingto = KANAL;
+        }
+
     switch (step_to_init)
         {
         case 0: //INIT fill circ tank
@@ -2218,11 +2224,11 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
         case 79: return InitOporCIP(KANAL, step_to_init, not_first_call);
 
         case 81: return InitFilCirc(WITH_WATER, step_to_init, not_first_call);
-        case 83: return InitToObject(WATER, TANK_W, step_to_init, not_first_call);
-        case 84: return InitOporCIP(TANK_W, step_to_init, not_first_call);
-        case 85: return InitFromObject(WATER, TANK_W, step_to_init, not_first_call);
-        case 86: return InitToObject(WATER, TANK_W, step_to_init, not_first_call);
-        case 91: return InitOporCIP(TANK_W, step_to_init, not_first_call);
+        case 83: return InitToObject(WATER, cleanrinsingto, step_to_init, not_first_call);
+        case 84: return InitOporCIP(cleanrinsingto, step_to_init, not_first_call);
+        case 85: return InitFromObject(WATER, cleanrinsingto, step_to_init, not_first_call);
+        case 86: return InitToObject(WATER, cleanrinsingto, step_to_init, not_first_call);
+        case 91: return InitOporCIP(cleanrinsingto, step_to_init, not_first_call);
         case 105: return InitFilRR(TANK_S);
         case 106: return InitCircRR(TANK_S);
         case 108: return InitCheckConc(TANK_S);
@@ -2388,6 +2394,12 @@ int cipline_tech_object::_DoStep( int step_to_do )
             }
         }
 
+    int cleanrinsingto = TANK_W;
+    if (((int)rt_par_float[P_PROGRAM]) == SPROG_RINSING_CLEAN)
+        {
+        cleanrinsingto = KANAL;
+        }
+
     switch (step_to_do)
         {
         case 0:
@@ -2451,11 +2463,11 @@ int cipline_tech_object::_DoStep( int step_to_do )
         case 79: return OporCIP(KANAL);
 
         case 81: return FillCirc(WITH_WATER);
-        case 83: return ToObject(WATER, TANK_W);
-        case 84: return OporCIP(TANK_W);
-        case 85: return FromObject(WATER, TANK_W);
-        case 86: return ToObject(WATER, TANK_W);
-        case 91: return OporCIP(TANK_W);
+        case 83: return ToObject(WATER, cleanrinsingto);
+        case 84: return OporCIP(cleanrinsingto);
+        case 85: return FromObject(WATER, cleanrinsingto);
+        case 86: return ToObject(WATER, cleanrinsingto);
+        case 91: return OporCIP(cleanrinsingto);
         case 105: return FilRR(TANK_S);
         case 106: return CircRR(TANK_S);
         case 108: return CheckConc(TANK_S);
