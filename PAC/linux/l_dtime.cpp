@@ -10,7 +10,11 @@
 unsigned long get_millisec()
     {
     timespec start_tv;
+#ifdef PAC_WAGO_750_860
+    clock_gettime( CLOCK_REALTIME, &start_tv );
+#else
     clock_gettime( CLOCK_MONOTONIC, &start_tv );
+#endif
 
     unsigned long now = 1000UL * start_tv.tv_sec + start_tv.tv_nsec / 1000000UL;
 
