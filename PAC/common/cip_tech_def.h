@@ -126,6 +126,8 @@ enum selectablePrograms
 	SPROG_CAUSTIC_PREPARATION = 512,
 	SPROG_REMOTE = 1024,
 	SPROG_SELF_CLEAN = 2048,
+    SPROG_AP_RC_KANAL = 9000,
+    SPROG_AP_RC_SW = 9001,
 	};
 
 #define KS_MASK             56
@@ -516,6 +518,8 @@ class cipline_tech_object: public tech_object
         int no_liquid_is_warning;
         int no_liquid_phase;
         float no_liquid_last_time;
+
+        int clean_water_rinsing_return; //Куда возвращать на операции окончательного ополаскивания
 
 		//Обработчики LUA
 		int is_in_evaluate_func;

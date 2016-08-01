@@ -184,6 +184,8 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
     no_liquid_phase = 0;
     no_liquid_last_time = 0;
 
+    clean_water_rinsing_return = TANK_W; //по-умолчанию возвращаем в танк со вторичной водой.
+
     if (tech_type == TECH_TYPE_SELF_CLEAN)
         {
         scenabled = 1;
@@ -1289,10 +1291,15 @@ void cipline_tech_object::formProgramList( unsigned long programmask )
         }
     if ((programmask >> 9) & 1)
         {
-        sprintf(tmp_str, "%d##ќпол.чист.водой||", SPROG_RINSING_CLEAN);
+        sprintf(tmp_str, "%d##ќпол.ч.водой в канал.||", SPROG_AP_RC_KANAL);
         strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "ќпол.чист водой");
-        prgNumber[prgListLen] = SPROG_RINSING_CLEAN;
+        sprintf(prgArray[prgListLen], "ќпол.ч.водой в канал.");
+        prgNumber[prgListLen] = SPROG_AP_RC_KANAL;
+        prgListLen++;
+        sprintf(tmp_str, "%d##ќпол.ч.водой в танк||", SPROG_AP_RC_SW);
+        strcat(programList,tmp_str);
+        sprintf(prgArray[prgListLen], "ќпол.ч.водой в танк");
+        prgNumber[prgListLen] = SPROG_AP_RC_SW;
         prgListLen++;
         }
     if ((programmask >> 10) & 1)
@@ -1376,6 +1383,16 @@ void cipline_tech_object::loadProgramFromList( int selectedPrg )
         case SPROG_REMOTE:
             sprintf(currentProgramName, "”правл€ема€ мойка");
             rt_par_float[P_PROGRAM] = SPROG_REMOTE;
+            break;
+        case SPROG_AP_RC_KANAL:
+            sprintf(currentProgramName, "ќпол.чист.водой в канал.");
+            clean_water_rinsing_return = KANAL;
+            rt_par_float[P_PROGRAM] = SPROG_RINSING_CLEAN;
+            break;
+        case SPROG_AP_RC_SW:
+            sprintf(currentProgramName, "ќпол.чист.водой в танк");
+            clean_water_rinsing_return = TANK_W;
+            rt_par_float[P_PROGRAM] = SPROG_RINSING_CLEAN;
             break;
         }
     }
@@ -2150,11 +2167,7 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
             }
         }
 
-    int cleanrinsingto = TANK_W;
-    if (((int)rt_par_float[P_PROGRAM]) == SPROG_RINSING_CLEAN)
-        {
-        cleanrinsingto = KANAL;
-        }
+    int cleanrinsingto = clean_water_rinsing_return;
 
     switch (step_to_init)
         {
@@ -2394,11 +2407,7 @@ int cipline_tech_object::_DoStep( int step_to_do )
             }
         }
 
-    int cleanrinsingto = TANK_W;
-    if (((int)rt_par_float[P_PROGRAM]) == SPROG_RINSING_CLEAN)
-        {
-        cleanrinsingto = KANAL;
-        }
+    int cleanrinsingto = clean_water_rinsing_return;
 
     switch (step_to_do)
         {
@@ -2644,6 +2653,7 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
     circ_podp_count = 0;
     circ_podp_max_count = 0;
     circ_water_no_pump_stop = 0;
+    clean_water_rinsing_return = TANK_W;
     if (scenabled && scline == nmr)
         {
         scline = 0;
