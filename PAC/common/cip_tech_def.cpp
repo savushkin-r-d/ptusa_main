@@ -1983,7 +1983,11 @@ int cipline_tech_object::_GoToStep( int cur, int param )
         case 59: return 60;
         case 60: return LoadProgram();
         case 61:
-            if ((int)(rt_par_float[P_PROGRAM]) & KS_MASK) return 66;
+            if ((int)(rt_par_float[P_PROGRAM]) & KS_MASK) 
+                {
+                rt_par_float[STP_USED_HOTWATER] = rt_par_float[STP_USED_HOTWATER] + rt_par_float[PV1] + rt_par_float[PV2]; //Если в программе присутствует мойка щелочью или кислотой, то контур на дезинфекции уже заполнен чистой водой.
+                return 66;
+                }
             return 62;
         case 62:
         case 63: return cur+1;
