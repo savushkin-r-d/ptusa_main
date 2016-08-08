@@ -554,8 +554,10 @@ void cipline_tech_object::initline()
     {
     is_old_definition = 1;
     char devname[20] = {0};
+    char devname2[20] = {0};
     sprintf(devname, "LINE%dV%d", number, number * 100);
-    if (((device*)V(devname))->get_type() == device::DT_NONE)
+    sprintf(devname2, "LINE%dV%d", number, number * 100 + 11);
+    if (((device*)V(devname))->get_type() == device::DT_NONE || ((device*)V(devname2))->get_type() == device::DT_NONE)
         {
         is_old_definition = 0;
         }
