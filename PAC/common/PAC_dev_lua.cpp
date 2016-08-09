@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 07/20/16 12:12:51.
+** Generated automatically by tolua++-1.0.92 on 08/09/16 12:20:08.
 */
 
 #ifndef __cplusplus
@@ -6654,6 +6654,36 @@ static int tolua_set_cipline_tech_object_cip_in_error(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* get function: no_neutro of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_no_neutro
+static int tolua_get_cipline_tech_object_no_neutro(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'no_neutro'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->no_neutro);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: no_neutro of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_no_neutro
+static int tolua_set_cipline_tech_object_no_neutro(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'no_neutro'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->no_neutro = ((char)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* get function: disable_tank_heating of class  cipline_tech_object */
 #ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_disable_tank_heating
 static int tolua_get_cipline_tech_object_disable_tank_heating(lua_State* tolua_S)
@@ -11386,6 +11416,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_variable(tolua_S,"curprg",tolua_get_cipline_tech_object_curprg,tolua_set_cipline_tech_object_curprg);
    tolua_variable(tolua_S,"nmr",tolua_get_cipline_tech_object_nmr,tolua_set_cipline_tech_object_nmr);
    tolua_variable(tolua_S,"cip_in_error",tolua_get_cipline_tech_object_cip_in_error,tolua_set_cipline_tech_object_cip_in_error);
+   tolua_variable(tolua_S,"no_neutro",tolua_get_cipline_tech_object_no_neutro,tolua_set_cipline_tech_object_no_neutro);
    tolua_variable(tolua_S,"disable_tank_heating",tolua_get_cipline_tech_object_disable_tank_heating,tolua_set_cipline_tech_object_disable_tank_heating);
    tolua_variable(tolua_S,"ret_overrride",tolua_get_cipline_tech_object_ret_overrride,tolua_set_cipline_tech_object_ret_overrride);
    tolua_variable(tolua_S,"return_ok",tolua_get_cipline_tech_object_return_ok,tolua_set_cipline_tech_object_return_ok);
