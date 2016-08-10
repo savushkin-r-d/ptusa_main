@@ -1160,6 +1160,7 @@ class cipline_tech_object: public tech_object
         int ret_overrride; //флаг принудительного включения/выключения возвратного насооса
         int return_ok; //есть расход на возврате
         int concentration_ok; //есть концентрация на возврате
+        int enable_ret_pump; //используется для того, чтобы определить, нужно ли отключать возвратный насос
 
 		i_DO_device* V00;
 		i_DO_device* V01;

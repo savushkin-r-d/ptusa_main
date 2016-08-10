@@ -483,7 +483,6 @@ class cipline_tech_object: public tech_object
 		unsigned int tech_type; //подтип объекта
 		int ret_circ_flag; //флаг управлени€ возвратным насосом при циркул€ции
 		unsigned long ret_circ_delay; //задержка обратного включени€ возвратного насоса
-		int enable_ret_pump; //используетс€ дл€ того, чтобы определить, нужно ли отключать возвратный насос
 
 		unsigned long steam_valve_delay; //таймер задержки включени€ отсечного клапана пара (чтобы не включалс€/выключалс€ на граничных значени€х температуры)
 		unsigned long bachok_lvl_err_delay; //задержка дл€ по€влени€ ошибки уровн€ бачка
@@ -574,6 +573,7 @@ class cipline_tech_object: public tech_object
         int ret_overrride; //флаг принудительного включени€/выключени€ возвратного насооса
         int return_ok; //есть расход на возврате
         int concentration_ok; //есть концентраци€ на возврате
+        int enable_ret_pump; //используетс€ дл€ того, чтобы определить, нужно ли отключать возвратный насос
 
 		//ѕеременные дл€ циркул€ции
 		char circ_tank_s; //÷иркулировать ли через танк со щелочью
