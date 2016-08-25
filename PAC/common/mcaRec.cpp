@@ -376,6 +376,10 @@ int TRecipeManager::OnRecipeDevices( int recipeNo, int msaline /*= 1*/ )
 	device* dev;
 	int i;
 	int errflag = 0;
+    if (recipeNo < 0)
+        {
+        return 0;
+        }
 	for (i = RV_FIRSTVALVEON; i<= RV_LASTVALVEON; i++)
 		{
 		devNo = (unsigned long)getRecipeValue(recipeNo, i);
@@ -442,6 +446,10 @@ int TRecipeManager::OffRecipeDevices( int recipeNo, int msaline /*= 1*/ )
 	device* dev;
 	int i;
 	int errflag = 0;
+    if (recipeNo < 0)
+        {
+        return 0;
+        }
 	for (i = RV_FIRSTVALVEON; i<= RV_LASTVALVEON; i++)
 		{
 		devNo = (unsigned long)getRecipeValue(recipeNo, i);
