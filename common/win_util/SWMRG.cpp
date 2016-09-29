@@ -2,7 +2,9 @@
 Module:  SWMRG.cpp
 Notices: Copyright (c) 2000 Jeffrey Richter
 ******************************************************************************/
+#ifdef USE_STDAFX
 #include "stdafx.h" //Стандартный заголовочный файл для использования precompiled headers.
+#endif //USE_STDAFX
 
 #include "CmnHdr.h"     
 #include "SWMRG.h"

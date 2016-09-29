@@ -234,29 +234,6 @@ inline void chSETDLGICONS(HWND hwnd, int idi) {
 #endif
 
 
-/////////////////////////// OS Version Check Macros ///////////////////////////
-
-
-inline void chWindows9xNotAllowed() {
-    OSVERSIONINFO vi = { sizeof(vi) };
-    GetVersionEx(&vi);
-    if (vi.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
-        chMB("This application requires features not present in Windows 9x.");
-        ExitProcess(0);
-        }
-    }
-
-
-inline void chWindows2000Required() {
-    OSVERSIONINFO vi = { sizeof(vi) };
-    GetVersionEx(&vi);
-    if ((vi.dwPlatformId != VER_PLATFORM_WIN32_NT) && (vi.dwMajorVersion < 5)) {
-        chMB("This application requires features present in Windows 2000.");
-        ExitProcess(0);
-        }
-    }
-
-
 ///////////////////////////// UNICODE Check Macro /////////////////////////////
 
 
@@ -265,7 +242,7 @@ inline void chWindows2000Required() {
 
 // This is accomplished by creating a global C++ object. Its constructor is
 // executed before WinMain.
-
+ 
 #ifdef UNICODE
 
 class CUnicodeSupported {
