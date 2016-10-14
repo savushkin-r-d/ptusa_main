@@ -69,6 +69,9 @@ class i_DO_device: public i_DI_device
 		/// @brief немедленное выключение устройства
 		void direct_off();
 
+        /// @brief немедленное выключение устройства c учетом ручного режима
+        void instant_off();
+
         /// @brief Установка нового состояния устройства.
         ///
         /// @param new_state - новое состояние объекта.

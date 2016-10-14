@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 08/10/16 16:03:16.
+** Generated automatically by tolua++-1.0.92 on 10/14/16 10:34:15.
 */
 
 #ifndef __cplusplus
@@ -272,6 +272,37 @@ static int tolua_PAC_dev_i_DO_device_direct_off00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'direct_off'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: instant_off of class  i_DO_device */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_DO_device_instant_off00
+static int tolua_PAC_dev_i_DO_device_instant_off00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"i_DO_device",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  i_DO_device* self = (i_DO_device*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'instant_off'", NULL);
+#endif
+  {
+   self->instant_off();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'instant_off'.",&tolua_err);
  return 0;
 #endif
 }
@@ -11070,6 +11101,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"on",tolua_PAC_dev_i_DO_device_on00);
    tolua_function(tolua_S,"off",tolua_PAC_dev_i_DO_device_off00);
    tolua_function(tolua_S,"direct_off",tolua_PAC_dev_i_DO_device_direct_off00);
+   tolua_function(tolua_S,"instant_off",tolua_PAC_dev_i_DO_device_instant_off00);
    tolua_function(tolua_S,"set_state",tolua_PAC_dev_i_DO_device_set_state00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"i_AI_device","i_AI_device","",NULL);

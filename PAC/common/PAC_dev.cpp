@@ -981,6 +981,15 @@ void i_DO_device::on()
         direct_on();
         }
     }
+
+void i_DO_device::instant_off()
+    {
+    if ( !get_manual_mode() )
+        {
+        direct_off();
+        }
+    }
+
 //-----------------------------------------------------------------------------
 void i_DO_device::set_state( int new_state )
     {
