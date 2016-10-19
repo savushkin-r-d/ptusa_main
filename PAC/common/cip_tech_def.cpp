@@ -1555,7 +1555,7 @@ void cipline_tech_object::_StopDev( void )
     V10->off();
     V11->off();
     V12->off();
-    V00->off();
+    V00->instant_off();
     NP->off();
     if (PIDP->HI==0) PIDP->off();
     if (PIDF->HI==0) PIDF->off();
@@ -3194,7 +3194,7 @@ int cipline_tech_object::InitCircRR( int where )
     float z=0;
     V05->off();
     V06->on();
-    V00->off();
+    V00->instant_off();
     V01->off();
     V04->off();
     V07->off();
@@ -3257,7 +3257,7 @@ int cipline_tech_object::InitAddRR( int where, int step, int first_init_flag )
     float v, pd = 0, kk = 0, kz = 0, ro = 0, vt = 0, kt;
     V05->off();
     V06->on();
-    V00->off();
+    V00->instant_off();
     V01->off();
     V04->off();
     V07->off();
@@ -3448,7 +3448,7 @@ int cipline_tech_object::FilRR( int where )
             break;
         }
     if (!LM->is_active()) V00->on();
-    if (LH->is_active()) V00->off();
+    if (LH->is_active()) V00->instant_off();
     return 0;
     }
 
@@ -3618,7 +3618,7 @@ int cipline_tech_object::OpolRR( int where )
         if (T[TMR_CHK_CONC]->is_time_up()) return 1;
         }
     if (!LM->is_active()) V00->on();
-    if (LH->is_active()) V00->off();
+    if (LH->is_active()) V00->instant_off();
     return 0;
     }
 
@@ -3649,21 +3649,21 @@ int cipline_tech_object::_InitToObject( int from, int where, int step_to_init, i
             V04->off();
             break;
         case TANK_W:
-            V00->off();
+            V00->instant_off();
             V01->off();
             V02->off();
             V03->off();
             V04->on();
             break;
         case TANK_K:
-            V00->off();
+            V00->instant_off();
             V01->off();
             V02->on();
             V03->off();
             V04->off();
             break;
         case TANK_S:
-            V00->off();
+            V00->instant_off();
             V01->off();
             V02->off();
             V03->on();
@@ -3862,14 +3862,14 @@ int cipline_tech_object::_InitFromObject( int what, int where, int step_to_init,
             V04->off();
             break;
         case TANK_W:
-            V00->off();
+            V00->instant_off();
             V01->off();
             V02->off();
             V03->off();
             V04->on();
             break;
         case TANK_K:
-            V00->off();
+            V00->instant_off();
             V01->off();
             V02->on();
             V03->off();
@@ -3877,7 +3877,7 @@ int cipline_tech_object::_InitFromObject( int what, int where, int step_to_init,
             z=parpar[0][P_CZAD_K];
             break;
         case TANK_S:
-            V00->off();
+            V00->instant_off();
             V01->off();
             V02->off();
             V03->on();
@@ -4023,7 +4023,7 @@ int cipline_tech_object::_InitOporCIP( int where, int step_to_init, int not_firs
         }
     V05->on();
     V06->off();
-    V00->off();
+    V00->instant_off();
     V01->off();
     V03->off();
     V02->off();
@@ -4105,7 +4105,7 @@ int cipline_tech_object::_InitFilCirc( int with_what, int step_to_init, int f )
             PIDF->off();
             break;
         case WITH_RETURN:
-            V00->off();
+            V00->instant_off();
             V10->on();
             V07->off();
             V08->off();
@@ -4148,7 +4148,7 @@ int cipline_tech_object::_InitFilCirc( int with_what, int step_to_init, int f )
 int cipline_tech_object::_InitOporCirc( int where, int step_to_init, int not_first_call )
 {
     V11->off();
-    V00->off();
+    V00->instant_off();
     V01->on();
     V03->off();
     V02->off();
@@ -4250,7 +4250,7 @@ int cipline_tech_object::_InitCirc( int what, int step_to_init, int not_first_ca
         V01->on();
         V10->on();
         }
-    V00->off();
+    V00->instant_off();
     V03->off();
     V04->off();
     V02->off();
@@ -4358,7 +4358,7 @@ int cipline_tech_object::_ToObject( int from, int where )
         case WATER:
         case SANITIZER:
             if (!LM->is_active()) V00->on();
-            if (LH->is_active()) V00->off();
+            if (LH->is_active()) V00->instant_off();
             tmp=cnt->get_quantity();
             rt_par_float[STP_WC] = rt_par_float[STP_WC] + tmp - rt_par_float[STP_LV];
             if (curstep == 62)
@@ -4390,7 +4390,7 @@ int cipline_tech_object::_ToObject( int from, int where )
                 V04->off();
                 V01->on();
                 if (!LM->is_active()) V00->on();
-                if (LH->is_active()) V00->off();
+                if (LH->is_active()) V00->instant_off();
                 }
             else
                 {
@@ -4398,7 +4398,7 @@ int cipline_tech_object::_ToObject( int from, int where )
                 rt_par_float[STP_WS] = rt_par_float[STP_WS] + tmp - rt_par_float[STP_LV];
                 rt_par_float[STP_LV] = tmp;
                 V04->on();
-                V00->off();
+                V00->instant_off();
                 V01->off();
                 }
             break;
@@ -4588,7 +4588,7 @@ int cipline_tech_object::_FromObject( int what, int where )
         case WATER:
         case SANITIZER:
             if (!LM->is_active()) V00->on();
-            if (LH->is_active()) V00->off();
+            if (LH->is_active()) V00->instant_off();
             tmp=cnt->get_quantity();
             rt_par_float[STP_WC] = rt_par_float[STP_WC] + tmp - rt_par_float[STP_LV] ;
             if (curstep == 64)
@@ -4620,7 +4620,7 @@ int cipline_tech_object::_FromObject( int what, int where )
                 V04->off();
                 V01->on();
                 if (!LM->is_active()) V00->on();
-                if (LH->is_active()) V00->off();
+                if (LH->is_active()) V00->instant_off();
                 }
             else
                 {
@@ -4628,7 +4628,7 @@ int cipline_tech_object::_FromObject( int what, int where )
                 rt_par_float[STP_WS] = rt_par_float[STP_WS] + tmp - rt_par_float[STP_LV] ;
                 rt_par_float[STP_LV] = tmp ;
                 V04->on();
-                V00->off();
+                V00->instant_off();
                 V01->off();
                 }
             break;
@@ -4933,7 +4933,7 @@ int cipline_tech_object::_Circ( int what )
                     }
                 if (LM->is_active() || LH->is_active() || (circ_was_feed && get_delta_millisec(circ_max_timer) > 60000L))
                     {
-                    V00->off();
+                    V00->instant_off();
                     if (1 == circ_was_feed)
                         {
                         circ_podp_count++;
@@ -4998,7 +4998,7 @@ int cipline_tech_object::_InitDoseRR( int what, int step_to_init, int not_first_
             StopDev();
             V01->on();
             V10->on();
-            V00->off();
+            V00->instant_off();
             V03->off();
             V04->off();
             V02->off();
@@ -5933,7 +5933,7 @@ int cipline_tech_object::SCPumping( int what, int from, int where, int whatdrain
                 }
             if (LM->is_active() || LH->is_active())
                 {
-                V00->off();
+                V00->instant_off();
                 }
             break;
         default:
