@@ -60,7 +60,104 @@ enum ALARM_CLASS_PRIORITY
     };
 
 #endif // defined PAC || defined WIN32
+//-----------------------------------------------------------------------------
+#ifdef DRIVER
+#include <string.h>
 
+typedef unsigned char UCHAR;
+typedef unsigned int  UINT;
+
+#pragma pack( push, 8 ) //¬ыравнивание полей структур по 8 байт.
+
+/// @brief √лобальный идентификатор тревоги. 
+struct alarm_id
+    {
+    int object_type;
+    int object_number;
+    int object_alarm_number;
+    };
+//-----------------------------------------------------------------------------
+struct alarm_params 
+    {
+    double  param1;
+    double  param2;
+    double  param3;
+    double  param4;
+    double  param5;
+    double  param6;
+    double  param7;
+    double  param8;
+    double  param9;
+    double  param10;
+    };
+
+struct alarm
+    {
+    alarm_params params;
+
+    //     atDiscrete      - дискретна€ ( true/false )
+    //     atValue         - контрол€ значени€ ( Lo/LoLo, Hi/HiHi )
+    //     atDeviation     - отклонени€ ( MinValue/MaxValue )
+    //     atRateOfChange  - изменени€ скорости ( speed )
+    //     atSpecial       - специальна€
+    ALARM_TYPE type;    ///< “ип тревоги.
+
+    char *description;  ///< ќписание тревоги.
+    UCHAR enable;       ///< Ѕлокировка тревоги на этапе проектировани€.
+    char *group;        ///< ќпредел€ет принадлежность тревоги какой либо группе тревог.
+    UCHAR  inhibit;     ///< Ѕлокировка тревоги во врем€ работы.
+
+    //  ѕриоритеты тревоги:
+    //     0       - системные
+    //     1-249   - критические
+    //     250-499 - важные
+    //     500-749 - маловажные
+    //     750-999 - информационные
+    int priority; ///< ѕриоритет тревоги ( 0 - 999 ).
+
+    //     asNormal    - тревоги нет
+    //     asAlarm     - тревога есть
+    //     asReturn    - контролируемое значение
+    //                вернулось в нормальное
+    //                состо€ние
+    //     asAccept    - тревога подтверждена
+    ALARM_STATE state;  ///< —осто€ние тревоги.
+
+    bool suppress;      ///< ѕодавление тревоги клиентами.
+    alarm_id id;        ///< √лобальный идентификатор тревоги.    
+    UCHAR driver_id;    ///< id драйвера.
+    };
+
+struct all_alarm
+    {
+    int     cnt;
+    alarm   *alarms; 
+    int     id;
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+struct error_cmd
+    {
+    int cmd; 
+    int object_type;
+    int object_number;
+    int object_alarm_number;
+    };
+
+enum ERR_CONSTANTS
+    {
+    MAX_PROJECTS_CNT = 256,
+    MAX_ALARMS_CNT   = 200,
+
+    MAX_DESCR_LEN    = 150,
+    MAX_GROUP_LEN    = 10,
+    };
+
+int save_to_stream( alarm &a, char *buff );
+int load_from_stream( alarm &a, char *buff );
+
+#endif // DRIVER
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #ifdef PAC
 #include "param_ex.h"
