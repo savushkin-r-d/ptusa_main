@@ -518,7 +518,7 @@ class cipline_tech_object: public tech_object
         int no_liquid_phase;
         float no_liquid_last_time;
 
-        int clean_water_rinsing_return; //Куда возвращать на операции окончательного ополаскивания
+        
 
 		//Обработчики LUA
 		int is_in_evaluate_func;
@@ -628,6 +628,7 @@ class cipline_tech_object: public tech_object
 
 		unsigned long default_programlist; //список доступных программ мойки по-умолчанию
 		int disable_tank_heating; //отключение подогрева при начале подачи растворов в танк(для МСА со старыми регулирующими клапанами)
+        int clean_water_rinsing_return; //Куда возвращать на операции окончательного ополаскивания
 
 		static int blockAlarm;
 		static cipline_tech_object* Mdls[10];

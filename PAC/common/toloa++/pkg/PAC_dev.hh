@@ -1164,6 +1164,7 @@ class cipline_tech_object: public tech_object
         int return_ok; //есть расход на возврате
         int concentration_ok; //есть концентрация на возврате
         int enable_ret_pump; //используется для того, чтобы определить, нужно ли отключать возвратный насос
+        int clean_water_rinsing_return; //Куда возвращать на операции окончательного ополаскивания
 
 		i_DO_device* V00;
 		i_DO_device* V01;

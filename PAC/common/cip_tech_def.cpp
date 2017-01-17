@@ -1072,6 +1072,42 @@ void cipline_tech_object::initline()
         lua_remove(L, -1); // Stack: remove function "cip_InitToObject".
         }
 
+    if ( is_FromObject_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_FromObject" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_FromObject_func = 2;
+            }
+        else
+            {
+            is_FromObject_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_FromObject".
+        }
+
+    if ( is_InitFromObject_func == 0 )
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
+        lua_getfield( L, -1, "cip_InitFromObject" );
+        lua_remove( L, -2 );  // Stack: remove OBJECT.
+
+        if ( lua_isfunction( L, -1 ) )
+            {
+            is_InitFromObject_func = 2;
+            }
+        else
+            {
+            is_InitFromObject_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_InitFromObject".
+        }
+
     if ( is_RT_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
