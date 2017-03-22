@@ -140,6 +140,11 @@ class ModbusServ
             return UnpackFloat( Buf + offset );
             }
 
+        static u_int_2 UnpackWord( unsigned char* Buf, int offset )
+            {
+            return UnpackWord( Buf + offset );
+            }
+
 		static device* get_device(unsigned int group, unsigned int number);
 	};
 

@@ -1321,6 +1321,7 @@ class ModbusServ
         static short int UnpackInt16( unsigned char* buf, int offset );
 		static long int UnpackInt32( unsigned char* buf, int offset );
         static float UnpackFloat( unsigned char* Buf, int offset  );
+        static unsigned int UnpackWord( unsigned char* Buf, int offset );
     };
 //----------------------------------------------------------------------------
 /// @brief Работа с Profibus Slave.

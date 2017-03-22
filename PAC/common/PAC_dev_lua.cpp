@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 01/16/17 11:44:18.
+** Generated automatically by tolua++-1.0.92 on 03/22/17 09:31:31.
 */
 
 #ifndef __cplusplus
@@ -10781,6 +10781,38 @@ static int tolua_PAC_dev_ModbusServ_UnpackFloat00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: UnpackWord of class  ModbusServ */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_ModbusServ_UnpackWord00
+static int tolua_PAC_dev_ModbusServ_UnpackWord00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertable(tolua_S,1,"ModbusServ",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  unsigned char* Buf = ((unsigned char*)  tolua_tostring(tolua_S,2,0));
+  int offset = ((int)  tolua_tonumber(tolua_S,3,0));
+  {
+   unsigned int tolua_ret = (unsigned int)  ModbusServ::UnpackWord(Buf,offset);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'UnpackWord'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: activate of class  profibus_slave */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_profibus_slave_activate00
 static int tolua_PAC_dev_profibus_slave_activate00(lua_State* tolua_S)
@@ -11647,6 +11679,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"UnpackInt16",tolua_PAC_dev_ModbusServ_UnpackInt1600);
    tolua_function(tolua_S,"UnpackInt32",tolua_PAC_dev_ModbusServ_UnpackInt3200);
    tolua_function(tolua_S,"UnpackFloat",tolua_PAC_dev_ModbusServ_UnpackFloat00);
+   tolua_function(tolua_S,"UnpackWord",tolua_PAC_dev_ModbusServ_UnpackWord00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"profibus_slave","profibus_slave","",NULL);
   tolua_beginmodule(tolua_S,"profibus_slave");
