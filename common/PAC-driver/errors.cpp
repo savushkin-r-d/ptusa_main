@@ -39,7 +39,7 @@ int tech_dev_error::save_as_Lua_str( char *str )
     {
     int res = 0;
     str[ 0 ] = 0;
-   
+
     if ( AS_ALARM == error_state || AS_ACCEPT == error_state ||
         AS_RETURN == error_state ) // Есть ошибка.
         {
@@ -129,7 +129,7 @@ void tech_dev_error::evaluate( bool &is_new_state )
                 }
             break;
         }
-    // Проверка текущего состояния устройства.-!>   
+    // Проверка текущего состояния устройства.-!>
     }
 //-----------------------------------------------------------------------------
 void tech_dev_error::print() const
@@ -153,7 +153,7 @@ unsigned int tech_dev_error::get_object_n() const
 int tech_dev_error::set_cmd( int cmd, int object_alarm_number )
     {
     int res = 0;
-	int current_state = err_par[ P_PARAM_N ];
+    int current_state = err_par[ P_PARAM_N ];
 
     switch ( cmd )
         {
@@ -214,7 +214,7 @@ int tech_obj_error::save_as_Lua_str( char *str )
     {
     int res = 0;
     str[ 0 ] = 0;
-        
+
     for ( u_int i = 0; i < tech_dev->get_errors().size(); i++ )
         {
         res += sprintf( str + res, "\t%s\n", "{" );
@@ -296,6 +296,8 @@ int tech_obj_error::get_priority( tech_object::ERR_MSG_TYPES err_type )
         {
         case tech_object::ERR_CANT_ON:
         case tech_object::ERR_ON_WITH_ERRORS:
+        case tech_object::ERR_CANT_ON_2_OPER:
+        case tech_object::ERR_CANT_ON_2_OBJ:
             return P_ANSWER;
 
         case tech_object::ERR_OFF:
@@ -304,6 +306,7 @@ int tech_obj_error::get_priority( tech_object::ERR_MSG_TYPES err_type )
             return P_MESSAGE;
 
         case tech_object::ERR_ALARM:
+        case tech_object::ERR_TO_FAIL_STATE:
             return P_ALARM;
         }
 
@@ -316,6 +319,8 @@ const char* tech_obj_error::get_group( tech_object::ERR_MSG_TYPES err_type )
         {
         case tech_object::ERR_CANT_ON:
         case tech_object::ERR_ON_WITH_ERRORS:
+        case tech_object::ERR_CANT_ON_2_OPER:
+        case tech_object::ERR_CANT_ON_2_OBJ:
             return "ответ";
 
         case tech_object::ERR_OFF:
@@ -324,6 +329,7 @@ const char* tech_obj_error::get_group( tech_object::ERR_MSG_TYPES err_type )
             return "сообщение";
 
         case tech_object::ERR_ALARM:
+        case tech_object::ERR_TO_FAIL_STATE:
             return "тревога";
         }
 
@@ -421,9 +427,9 @@ void errors_manager::set_cmd( unsigned int cmd, unsigned int object_type,
         {
         int result = res->set_cmd( cmd, object_alarm_number );
         if ( 0 == result )
-        	{
+            {
             errors_id++; // Cостояние ошибок изменилось.
-        	}
+            }
         }
     else
         {
@@ -464,7 +470,7 @@ errors_manager* errors_manager::get_instance()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void siren_lights_manager::eval()
-    {    
+    {
     if ( green == NULL || red == NULL || yellow == NULL || srn == NULL )
         {
         return;
@@ -484,7 +490,7 @@ void siren_lights_manager::eval()
 
     //Красный свет - аварии и тревоги.
     red->off();
-    if ( PAC_critical_errors_manager::get_instance()->is_any_error() || 
+    if ( PAC_critical_errors_manager::get_instance()->is_any_error() ||
         tech_dev_error::is_any_error )
         {
         if ( is_red_built_in_blink )
@@ -504,20 +510,20 @@ void siren_lights_manager::eval()
                     if ( get_delta_millisec( start_blink_time ) > 250 )
                         {
                         start_wait_time = get_millisec();
-                        step = 1; 
+                        step = 1;
                         }
                     break;
 
-                case 1:    
+                case 1:
                     //red->off();
                     if ( get_delta_millisec( start_wait_time ) > 250 )
                         {
                         start_blink_time = get_millisec();
-                        step = 0;               
+                        step = 0;
                         }
                     break;
-                } 
-            }       
+                }
+            }
         }
 
     //Дополнительное включение сирены при появлении аварии (узлы Wago, ...).
@@ -533,7 +539,7 @@ void siren_lights_manager::eval()
 
     //Дополнительное включение сирены при появлении тревоги (ошибки устройств).
     if ( tech_dev_error::is_new_error )
-        {            
+        {
         srn->on();
 
 #ifdef DEBUG
@@ -556,7 +562,7 @@ void siren_lights_manager::eval()
                 if ( get_delta_millisec( start_blink_time ) > 1000 )
                     {
                     start_wait_time = get_millisec();
-                    step = 1; 
+                    step = 1;
                     }
                 break;
 
@@ -565,10 +571,10 @@ void siren_lights_manager::eval()
                 if ( get_delta_millisec( start_wait_time ) > 1000 )
                     {
                     start_blink_time = get_millisec();
-                    step = 0;               
+                    step = 0;
                     }
                 break;
-            }        
+            }
         }
 
     //Отключаем сирену, если нет аварий.
@@ -590,20 +596,20 @@ int siren_lights_manager::init( device *red, device *yellow, device *green,
                                device *srn )
     {
     this->green = green;
-    this->red = red; 
+    this->red = red;
     this->yellow = yellow;
     this->srn = srn;
-   
+
     return 0;
     }
 //-----------------------------------------------------------------------------
 int siren_lights_manager::save_device( char *buff )
     {
-    int answer_size = sprintf( buff, 
+    int answer_size = sprintf( buff,
         "t.%s = \n"
         "\t{\n"
         "\tMANUAL_MODE=%d,\n"
-        "\t}\n", 
+        "\t}\n",
         "G_SIREN_MNGR", par[ P_MANUAL_MODE ] );
 
     return answer_size;
