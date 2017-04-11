@@ -5,7 +5,7 @@ void print_binary( unsigned int c )
     {
     if ( 0 == c )
         {
-        Print( "0" );
+        printf( "0" );
         return;
         }
 
@@ -13,7 +13,7 @@ void print_binary( unsigned int c )
     while( !( c & mask ) ) mask >>= 1;
     while ( mask )
         {
-        Print( "%d", ( c & mask ) > 0 ? 1 : 0 );
+        printf( "%d", ( c & mask ) > 0 ? 1 : 0 );
         mask >>= 1;
         }
     }

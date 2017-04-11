@@ -34,8 +34,9 @@
 
 #include "i_tech_def.h"
 
-class mode_manager;
+class operation_manager;
 class step;
+
 //-----------------------------------------------------------------------------
 /// @brief Действие над устройствами (включение, выключение и т.д.).
 class action
@@ -68,9 +69,6 @@ class action
         virtual void init() {}
 
         /// @brief Выполнение действия.
-        ///
-        /// @return результат выполнения действия. Трактуется в зависимости от
-        /// действия.
         virtual void evaluate() {}
 
         /// @brief Завершения действия.
@@ -96,9 +94,29 @@ class action
         /// @return 0 - нет ошибок, 1 - есть ошибки.
         int check_devices( char* err_dev_name, int max_to_write ) const;
 
+        /// @brief Установка параметров для действия.
+        ///
+        /// @param [in] par Параметры.
+        virtual void set_params( const saved_params_float *par ) 
+            {
+            this->par = par;
+            }
+
+        /// @brief Добавление индексов используемых параметров к действию.
+        ///
+        /// @param [in] idx Индекс параметра.
+        void add_param_idx( int idx )
+            {
+            par_idx.push_back( idx );
+            }
+
     protected:
         std::vector< std::vector< device* > > devices;  ///< Устройства.
         std::string name;                               ///< Имя действия.
+
+        const saved_params_float *par;      ///< Параметры действия.
+        std::vector< int >        par_idx;  ///< Индексы параметров действия.
+
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -240,7 +258,7 @@ class required_DI_action: public action
 class wash_action: public action
     {
     public:
-        wash_action(): action( "Мойка", 3 )
+        wash_action(): action( "Мойка", G_GROUPS_CNT )
             {
             }
 
@@ -253,9 +271,17 @@ class wash_action: public action
     private:
         enum GROUPS
             {
-            G_DI = 0, //Входные сигналы запроса включения устройств.
-            G_DO,     //Выходные сигналы "Мойка ОК".
-            G_DEV,    //Устройства, включаемые по запросу.
+            G_DI = 0,       //Входные сигналы запроса включения устройств.
+            G_DO,           //Выходные сигналы "Мойка ОК".
+            G_DEV,          //Устройства, включаемые по запросу.
+            G_REV_DEV,      //Реверсные устройства, включаемые по запросу.
+
+            G_GROUPS_CNT,   //Количество групп.
+            };
+
+        enum PARAMS_IDX
+            {
+            P_PUMP_FREQ = 0,
             };
     };
 //-----------------------------------------------------------------------------
@@ -311,10 +337,10 @@ class step
             actions[ A_OFF ]->evaluate();
             };
 
-        void final() const;
+        void final();
 
-        /// Получение времени начала шага.
-        u_int_4 get_start_time() const;
+        /// Получение времени выполнения шага.
+        u_int_4 get_eval_time() const;
 
         /// Установление времени начала шага.
         void set_start_time( u_int_4 start_time );
@@ -349,10 +375,17 @@ class step
         action action_stub;             ///< Фиктивное действие.
         u_int_4 start_time;             ///< Время старта шага.
 
-        u_int_4 step_time;              ///< Время  шага.
+        u_int_4 step_time;              ///< Заданное время шага.
 
         bool is_mode;     ///< Выполняется ли все время во время операции.
         std::string name; ///< Имя.
+
+    private:
+        u_int_4 dx_time;                ///< Время шага, отработанное до паузы.
+
+    public:
+        /// Добавление времени для возобновления после паузы.
+        void set_dx_time( u_int_4 dx_time );
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об операции, состоящей из шагов.
@@ -362,19 +395,16 @@ class step
 /// Для операции определяется, является ли она основной (мойка и т.п.) или
 /// вспомогательной (перемешивание и т.п.), также при включении данной операции
 /// отключать ли другие активные операции (сквашивание и т.п.).
-class mode
+class operation_state
     {
     public:
-        mode( const char* name, mode_manager *owner, int n );
+        operation_state( const char* name, operation_manager *owner, int n );
 
         step* add_step( const char* name, int next_step_n,
             u_int step_duration_par_n );
 
         /// @brief Установка номера параметра со временем переходного переключения шагов.
-        void set_step_cooperate_time_par_n( int step_cooperate_time_par_n )
-            {
-            this->step_cooperate_time_par_n = step_cooperate_time_par_n;
-            }
+        void set_step_cooperate_time_par_n( int step_cooperate_time_par_n );
 
         /// @brief Получение операции через операцию индексирования.
         ///
@@ -399,40 +429,20 @@ class mode
         /// @param cooperative_time - время совместной работы (сек).
         void to_step( u_int new_step, u_long cooperative_time = 0 );
 
-        u_long evaluation_time()
-            {
-            return get_delta_millisec( start_time );
-            }
+        u_long evaluation_time();
 
-        u_long active_step_evaluation_time() const
-            {
-            if ( active_step_n >= 0 )
-                {
-                return get_delta_millisec( steps[ active_step_n ]->get_start_time() );
-                }
+        u_long active_step_evaluation_time() const;
+        u_long get_active_step_set_time() const;
 
-            return 0;
-            }
-
-        u_int active_step() const
-            {
-            if ( active_step_second_n > -1 )
-                {
-                return active_step_second_n + 1;
-                }
-
-            return active_step_n + 1;
-            }
+        u_int active_step() const;
 
         /// Выводит на консоль объект.
         void print( const char* prefix = "" ) const;
 
-        const char* get_name() const
-            {
-            return name.c_str();
-            }
+        const char* get_name() const;
 
         int check_devices( char* err_dev_name, int str_len );
+
     private:
         std::string name;
         std::vector< step* > steps;
@@ -461,48 +471,168 @@ class mode
         u_int_4 start_time; ///< Время начала операции.
         step step_stub;     ///< Шаг-заглушка.
 
-        mode_manager *owner;
+        operation_manager *owner;
         int n;              /// Номер.
+
+    private:
+        /// Время выполнения активного шага, для возобновления после паузы.
+        u_int_4 dx_step_time;
+
+    public:
+        /// Добавление времени выполнения активного шага при возобновлении
+        /// после паузы.
+        void add_dx_step_time();
     };
 //-----------------------------------------------------------------------------
-/// @brief Содержит информацию о всех операциях какого-либо объекта (танк,
+/// @brief Содержит информацию об операции.
+class operation
+    {
+    public:
+        operation( const char* name, operation_manager *owner, int n );
+#ifndef __GNUC__
+#pragma region Совместимость со старой версией.
+#endif
+        int check_devices_on_run_state( char* err_dev_name, int str_len );
+
+        int check_on_run_state( char* reason ) const;
+
+        void init_run_state( u_int start_step = 1 );
+
+        u_long evaluation_time();
+
+        void evaluate();
+
+        void final();
+
+        u_int active_step() const;
+        u_int get_run_step() const;
+
+        const char* get_name() const;
+
+        void print( const char* prefix /*= "" */ ) const;
+
+        u_long active_step_evaluation_time() const;
+        u_long get_active_step_set_time() const;
+
+        /// @brief Переход к заданному  шагу.
+        ///
+        /// @param new_step - номер шага (с единицы).
+        /// @param cooperative_time - время совместной работы (сек).
+        void to_step( unsigned int new_step, unsigned long cooperative_time = 0 );
+#ifndef __GNUC__
+#pragma endregion
+#endif
+
+#ifndef __GNUC__
+#pragma region Новая функциональность по состояниям операции.
+#endif
+
+        enum state_idx
+            {
+            OFF = 0,//Отключено.
+            RUN,    // Выполнение.
+            PAUSE,  // Пауза.
+            STOP,   // Остановлен.
+
+			STATES_MAX,
+            };
+
+        static const char* state_str [];
+
+        state_idx get_state() const;
+
+        int pause();
+
+        int stop();
+
+        int start();
+#ifndef __GNUC__
+#pragma endregion
+#endif
+
+#ifndef __GNUC__
+#pragma region Загрузка описания.
+#endif
+        /// @brief Получение операции через индексирование.
+        ///
+        /// @param idx - индекс операции.
+        operation_state* operator[] ( int idx )
+            {
+            if ( idx < STATES_MAX )
+                {
+                return states[ idx ];
+                }
+            else
+                {
+                if ( G_DEBUG )
+                    {
+                    printf( "Error operation_state* operation::operator[] "
+                        "( int idx ) - idx %d > count %d.\n",
+                        idx, STATES_MAX );
+                    }
+                return &stub;
+                }
+            }
+
+    public:
+        step* add_step( const char* name, int next_step_n,
+            unsigned int step_duration_par_n, state_idx s_idx = RUN );
+
+        /// @brief Установка номера параметра со временем переходного переключения шагов.
+        void set_step_cooperate_time_par_n( int step_cooperate_time_par_n );
+#ifndef __GNUC__
+#pragma endregion
+#endif
+
+    private:
+        state_idx current_state;
+
+        std::vector< operation_state* > states;
+
+        std::string name;
+        operation_manager *owner;
+        int n;                                /// Номер операции у владельца.
+
+        operation_state stub;
+
+        /// Шаг для состояния Выполнение. Нужен для запуска после паузы,
+        /// остановки и т.д.
+        u_int run_step;
+
+        u_int run_time;  /// Время выполнения операции (состояние run).
+    };
+//-----------------------------------------------------------------------------
+/// @brief Содержит информацию об операциях какого-либо объекта (танк,
 /// линия, ...).
 ///
 /// У объекта (танк, ...) может быть включено параллельно несколько операций.
-/// Ограничения на операции. Для каждой операции определяется:
-/// 1. можно ли ее отключить.
-/// 2. с какими другими ее можно включить параллельно.
-/// 3. после каких предыдущих операций ее можно включить.
-/// Данные ограничения хранятся в виде массивов.
-/// Также имеется массив, определяющий какие операции сейчас доступны (0 -
-/// операция недоступна, 1 - операция доступна), имеется массив со строковым
-/// пояснением почему операция недоступна. Данный массив обновляется при
-/// включении/отключении операции.
-class mode_manager
+///
+class operation_manager
     {
     public:
         /// @brief Конструктор с параметрами.
         ///
         /// @param modes_cnt - количество операций.
         /// @param i_tech_object - техобъект-владелец.
-        mode_manager( u_int modes_cnt, i_tech_object *owner );
+        operation_manager( u_int modes_cnt, i_tech_object *owner );
 
-        ~mode_manager();
+        ~operation_manager();
 
-        mode* add_mode( const char* name );
+        //NOTE Поддержка старой версии.
+        operation* add_mode( const char* name )
+            {
+            return add_operation( name );
+            }
 
-        void set_param( saved_params_u_int_4 *par );
-
-        saved_params_u_int_4* get_param() const;
+        operation* add_operation( const char* name );
 
         /// @brief Получение операции через индексирование.
         ///
         /// @param idx - индекс операции.
         ///
         /// @return - значение операции с заданным индексом. Если индекс
-        /// выходит за диапазон, возвращается значение заглушки - поля @ref
-        /// mode_manager::mode_stub.
-        mode* operator[] ( unsigned int idx );
+        /// выходит за диапазон, возвращается значение заглушки.
+        operation* operator[] ( unsigned int idx );
 
         /// @brief Время бездействия (нет включенных операций).
         ///
@@ -522,37 +652,48 @@ class mode_manager
             owner->set_mode( mode, 0 );
             }
 
+        float get_step_param( u_int idx ) const
+            {
+            return owner->get_step_param( idx );
+            }
 
-        /// @brief Обновление состояния доступности операций.
-        ///
-        /// Для каждой операции:
-        /// 1. Проверяем, если она включена, то можно ли ее отключить из
-        /// соответствующего массива доступности. Если нет, то формируем
-        /// также пояснение.
-        /// 2. Если операция не включена, то проверяем, есть ли хотя бы одна
-        /// активная операция (основная).
-        /// 2.1 Если есть, то для каждой активной операции проверяем, можно ли
-        /// с ней параллельно запустить данную операцию, если нет, то формируем
-        /// пояснение.
-        /// 3. Если нет активных (основных) операций, проверяем на возможность
-        /// включения после последней выключенной операции (основной), если
-        /// нет, то формируем пояснение.
-        //int refresh_availability( int *modes_states, int last_mode )
-        //    {
-        //    }
+        const saved_params_float* get_params() const
+            {
+            return owner->get_params();
+            }
+
+        /////TODO. Будущая функциональность.
+        ///// @brief Обновление состояния доступности операций.
+        /////
+        ///// Для каждой операции:
+        ///// 1. Проверяем, если она включена, то можно ли ее отключить из
+        ///// соответствующего массива доступности. Если нет, то формируем
+        ///// также пояснение.
+        ///// 2. Если операция не включена, то проверяем, есть ли хотя бы одна
+        ///// активная операция (основная).
+        ///// 2.1 Если есть, то для каждой активной операции проверяем, можно ли
+        ///// с ней параллельно запустить данную операцию, если нет, то формируем
+        ///// пояснение.
+        ///// 3. Если нет активных (основных) операций, проверяем на возможность
+        ///// включения после последней выключенной операции (основной), если
+        ///// нет, то формируем пояснение.
+        ////int refresh_availability( int *modes_states, int last_mode )
+        ////    {
+        ////    }
 
         i_tech_object *owner;              ///Техобъект-владелец.
+
     private:
         /// @brief Параметры, содержащие продолжительность шагов, операций.
         saved_params_u_int_4 *par;
 
-        std::vector< mode* > modes; ///< Операции.
+        std::vector< operation* > operations; ///< Операции.
+        operation *oper_stub;                 ///< Операция-заглушка.
 
-        mode *mode_stub;            ///< Операция-заглушка.
+        /// @brief Время последнего вкл/выкл операции.
+        u_int_4 last_action_time;
 
-        u_int_4 last_action_time;   ///Время последнего вкл/выкл операции.
-
-        static const char* UNKN_MODE_NAME; ///Имя для "неизвестной" операции.
+        static const char* UNKN_OPER_NAME;    ///Имя для "неизвестной" операции.
     };
 //-----------------------------------------------------------------------------
 #endif // MODE_MNGR

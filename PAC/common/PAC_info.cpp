@@ -2,6 +2,8 @@
 
 #include "PAC_info.h"
 
+#include "lua_manager.h"
+
 auto_smart_ptr < PAC_info > PAC_info::instance;///< Экземпляр класса.
 
 const u_int_4 PAC_info::MSEC_IN_DAY = 24UL * 60UL * 60UL * 1000UL;
@@ -15,9 +17,12 @@ PAC_info::PAC_info() :
     up_secs( 0 ),
     up_msec( 0 ),
     last_check_time( get_millisec() ),
-    reset_type( 1 ) //+ IsResetByWatchDogTimer()
+    reset_type( 1 ), //+ IsResetByWatchDogTimer()
+    cmd( 0 ),
+    restrictions_set_to_off_time( 0 )
     {
     strcpy( up_time_str, "0 дн. 0:0:0" );
+    cmd_answer[ 0 ] = 0;
     }
 //-----------------------------------------------------------------------------
 PAC_info::~PAC_info()
@@ -26,6 +31,14 @@ PAC_info::~PAC_info()
 //-----------------------------------------------------------------------------
 void PAC_info::eval()
     {
+    if ( restrictions_set_to_off_time &&
+        get_delta_millisec( restrictions_set_to_off_time ) >
+        par[ P_RESTRICTIONS_MANUAL_TIME ] )
+        {
+        par[ P_RESTRICTIONS_MODE ] = 0;
+        restrictions_set_to_off_time = 0;
+        }
+
     if ( get_delta_millisec( last_check_time ) > 1000 )
         {
         up_msec += get_delta_millisec( last_check_time );
@@ -54,7 +67,14 @@ void PAC_info::reset_params()
     par[ P_V_OFF_DELAY_TIME ] 	= 1000;
     par[ P_V_BOTTOM_OFF_DELAY_TIME ] = 1200;
 
-    par[ P_WAGO_TCP_NODE_WARN_ANSWER_TIME ] = 50;
+    par[ P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME ] = 50;
+    par[ P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME ] = 300;
+
+    par[ P_RESTRICTIONS_MODE ] = 0;
+    par[ P_RESTRICTIONS_MANUAL_TIME ] = 2 * 60 * 1000; // 2 min
+
+    par[ P_RESTRICTIONS_MANUAL_TIME ] = 0;
+    par[ P_AUTO_PAUSE_OPER_ON_DEV_ERR ] = 0;
 
     par.save_all();
     }
@@ -84,11 +104,27 @@ int PAC_info::save_device( char *buff )
         par[ P_V_BOTTOM_OFF_DELAY_TIME ] );
     
     answer_size += sprintf( buff + answer_size,
-	    "\tP_WAGO_TCP_NODE_WARN_ANSWER_TIME=%d,\n",
-            par[ P_WAGO_TCP_NODE_WARN_ANSWER_TIME ] );
+	    "\tP_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME=%d,\n",
+            par[ P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME ] );
+    answer_size += sprintf( buff + answer_size,
+        "\tP_MAIN_CYCLE_WARN_ANSWER_AVG_TIME=%d,\n", 
+        par[ P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME ] );
+
+    answer_size += sprintf( buff + answer_size,
+        "\tP_RESTRICTIONS_MODE=%d,\n", par[ P_RESTRICTIONS_MODE ] );
+    answer_size += sprintf( buff + answer_size, 
+        "\tP_RESTRICTIONS_MANUAL_TIME=%d,\n", par[ P_RESTRICTIONS_MANUAL_TIME ] );
+
+    answer_size += sprintf( buff + answer_size, 
+        "\tP_AUTO_PAUSE_OPER_ON_DEV_ERR=%d,\n", 
+        par[ P_AUTO_PAUSE_OPER_ON_DEV_ERR ] );    
+
+    answer_size += sprintf( buff + answer_size,
+        "\tCMD=%d,\n", cmd );
+    answer_size += sprintf( buff + answer_size,
+        "\tCMD_ANSWER=\"%s\",\n", cmd_answer );
 
     answer_size += sprintf( buff + answer_size, "\t}\n" );
-    
     return answer_size;
     }
 //-----------------------------------------------------------------------------
@@ -104,11 +140,29 @@ PAC_info* PAC_info::get_instance()
 //-----------------------------------------------------------------------------
 void PAC_info::print() const
     {
-    Print( "PAC_info\n" );
+    printf( "PAC_info\n" );
     }
 //-----------------------------------------------------------------------------
 int PAC_info::set_cmd( const char *prop, u_int idx, double val )
     {
+    if ( strcmp( prop, "CMD" ) == 0 )
+        {
+        if ( 100 == val )
+            {
+            const int SCRIPT_N =
+#if defined RM_PAC
+                9;
+#else   
+                8;
+#endif // defined RM_PAC
+
+            cmd = G_LUA_MANAGER->reload_script( SCRIPT_N, "restrictions",
+                cmd_answer, sizeof( cmd_answer ) );
+            }
+
+        return 0;
+        }
+
     if ( strcmp( prop, "WASH_VALVE_SEAT_PERIOD" ) == 0 )
         {        
         par.save( P_MIX_FLIP_PERIOD, ( u_int_4 ) val );
@@ -122,10 +176,10 @@ int PAC_info::set_cmd( const char *prop, u_int idx, double val )
         }
 
     if ( strcmp( prop, "WASH_VALVE_LOWER_SEAT_TIME" ) == 0 )
-	{
-	par.save( P_MIX_FLIP_LOWER_TIME, ( u_int_4 ) val );
-	return 0;
-	}
+	    {
+	    par.save( P_MIX_FLIP_LOWER_TIME, ( u_int_4 ) val );
+	    return 0;
+	    }
 
     if ( strcmp( prop, "P_V_OFF_DELAY_TIME" ) == 0 )
         {
@@ -135,15 +189,48 @@ int PAC_info::set_cmd( const char *prop, u_int idx, double val )
 
     if ( strcmp( prop, "P_V_BOTTOM_ON_DELAY_TIME" ) == 0 )
 	{
-	par.save( P_V_BOTTOM_OFF_DELAY_TIME, ( u_int_4 ) val );
-	return 0;
-	}
+	    par.save( P_V_BOTTOM_OFF_DELAY_TIME, ( u_int_4 ) val );
+	    return 0;
+	    }
 
-    if ( strcmp( prop, "P_WAGO_TCP_NODE_WARN_ANSWER_TIME" ) == 0 )
-	{
-	par.save( P_WAGO_TCP_NODE_WARN_ANSWER_TIME, ( u_int_4 ) val );
-	return 0;
-	}
+    if ( strcmp( prop, "P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME" ) == 0 )
+        {
+        par.save( P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME, ( u_int_4 ) val );
+        return 0;
+        }
+    if ( strcmp( prop, "P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME" ) == 0 )
+        {
+        par.save( P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME, ( u_int_4 ) val );
+        return 0;
+        }
+
+
+    if ( strcmp( prop, "P_RESTRICTIONS_MODE" ) == 0 )
+        {
+        par.save( P_RESTRICTIONS_MODE, (u_int_4)val );
+
+        if ( val == 2 ) //Полуавтоматический режим.
+        	{
+            restrictions_set_to_off_time = get_millisec();
+        	}
+        else
+            {
+            restrictions_set_to_off_time = 0;
+            }
+        
+        return 0;
+        }
+    if ( strcmp( prop, "P_RESTRICTIONS_MANUAL_TIME" ) == 0 )
+        {
+        par.save( P_RESTRICTIONS_MANUAL_TIME, (u_int_4)val );
+        return 0;
+        } 
+
+    if ( strcmp( prop, "P_AUTO_PAUSE_OPER_ON_DEV_ERR" ) == 0 )
+        {
+        par.save( P_AUTO_PAUSE_OPER_ON_DEV_ERR, (u_int_4)val );
+        return 0;
+        }
 
     return 0;
     }

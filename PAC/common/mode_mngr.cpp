@@ -5,7 +5,6 @@
 ///
 /// @par Описание директив препроцессора:
 /// @c USE_NO_COMB - компиляция без гребенки (объекта g_greb).@n
-/// @c DEBUG       - отладочная компиляцию с выводом дополнительной информации
 /// в консоль.
 ///
 /// @par Текущая версия:
@@ -15,9 +14,256 @@
 
 #include "mode_mngr.h"
 #include "errors.h"
-
 //-----------------------------------------------------------------------------
-action::action( std::string name, u_int group_cnt ) : name( name )
+const char* operation::state_str [] =
+    {
+    "Отключен",
+    "Выполнение",
+    "Пауза",
+    "Остановлен"
+    };                               
+//-----------------------------------------------------------------------------
+operation::operation(const char* name, operation_manager *owner, int n) :
+    current_state ( OFF ), name( name ),
+    owner( owner ),
+    n( n ),
+    stub( "заглушка", owner, -1 ),
+    run_step( -1 ),
+    run_time( 0 )
+    {
+    states.push_back( new operation_state( "off",  owner, n ) );
+    states.push_back( new operation_state( "run",  owner, n ) );
+    states.push_back( new operation_state( "pause",owner, n ) );
+    states.push_back( new operation_state( "stop", owner, n ) );
+    }
+//-----------------------------------------------------------------------------
+operation::state_idx operation::get_state() const
+    {
+    return ( state_idx ) current_state;
+    }
+//-----------------------------------------------------------------------------
+int operation::pause()
+    {
+    switch ( current_state )
+        {
+        case OFF:
+            break;
+
+        case PAUSE:
+            break;
+
+        case RUN:
+            current_state = PAUSE;
+
+            run_time += states[ RUN ]->evaluation_time();
+            run_step = states[ RUN ]->active_step();
+
+            states[ RUN ]->final();            
+            break;
+
+        case STOP:
+            break;
+
+        default:
+        	break;
+        }
+    
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int operation::stop()
+    {
+    switch ( current_state )
+        {
+        case OFF:
+            break;
+
+        case PAUSE:
+            current_state = STOP;
+            states[ PAUSE ]->final();
+            break;
+
+        case RUN:
+            current_state = STOP;
+            run_time += states[ RUN ]->evaluation_time();
+            run_step = states[ RUN ]->active_step();
+
+            states[ RUN ]->final();
+            break;
+
+        case STOP:
+            break;
+
+        default:
+        	break;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int operation::start()
+    {    
+    switch ( current_state )
+        {
+        case OFF:
+            current_state = RUN;
+            states[ RUN ]->init();
+            break;
+
+        case PAUSE:
+            current_state = RUN;
+            if ( run_step > 0 )
+                {
+                states[ RUN ]->init( run_step );
+                }
+            else
+                {
+                states[ RUN ]->init();
+                }
+            
+            states[ RUN ]->add_dx_step_time();
+
+            break;
+
+        case RUN:
+            break;
+
+        case STOP:
+            break;
+
+        default:
+        	break;
+        }
+        
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int operation::check_devices_on_run_state(char* err_dev_name, int str_len)
+    {
+    return states[ RUN ]->check_devices( err_dev_name, str_len );
+    }
+//-----------------------------------------------------------------------------
+int operation::check_on_run_state(char* reason) const
+    {
+    return states[ RUN ]->check_on( reason );
+    }
+//-----------------------------------------------------------------------------
+void operation::init_run_state( u_int start_step /*= 1 */)
+    {
+    run_time = 0;
+    states[ RUN ]->init( start_step );
+    }
+//-----------------------------------------------------------------------------
+u_long operation::evaluation_time()
+    {
+    if ( current_state >= 0 && current_state < STATES_MAX )
+        {
+        if ( current_state == RUN )
+        	{
+            return run_time + states[ RUN ]->evaluation_time();
+        	}
+
+        return run_time;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void operation::evaluate()
+    {
+    if ( current_state >= 0 && current_state < STATES_MAX )
+        {
+        states[ current_state ]->evaluate();
+        }
+    }
+//-----------------------------------------------------------------------------
+void operation::final()
+    {
+    //Для состояния OFF ничего не делаем, поэтому current_state > 0.
+    if ( current_state > 0 && current_state < STATES_MAX )
+        {
+        states[ current_state ]->final();
+        current_state = OFF;        
+        }                          
+    }
+//-----------------------------------------------------------------------------
+u_int operation::active_step() const
+    {
+    //Для состояния OFF  возвращаем 0, поэтому current_state > 0.
+    if ( current_state > 0 && current_state < STATES_MAX )
+        {
+        return states[ current_state ]->active_step();
+        }
+    return 0;  
+    }
+//-----------------------------------------------------------------------------
+u_int operation::get_run_step() const
+    {
+    return run_step;
+    }
+//-----------------------------------------------------------------------------
+const char* operation::get_name() const
+    {
+    return name.c_str();
+    }
+//-----------------------------------------------------------------------------
+void operation::print( const char* prefix /*= "" */) const
+    {
+    printf( "%s\n", name.c_str() );
+
+    for ( int idx = OFF; idx < STATES_MAX; idx++  )
+        {
+        states[ idx ]->print( prefix );
+        }
+    }
+//-----------------------------------------------------------------------------
+u_long operation::active_step_evaluation_time() const
+    {
+    if ( current_state >= 0 && current_state < STATES_MAX )
+        {
+        return states[ current_state ]->active_step_evaluation_time();
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+u_long operation::get_active_step_set_time() const
+    {
+    if ( current_state >= 0 && current_state < STATES_MAX )
+        {
+        return states[ current_state - 1 ]->get_active_step_set_time();
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void operation::to_step( unsigned int new_step, unsigned long cooperative_time /*= 0 */)
+    {
+    if ( current_state >= 0 && current_state < STATES_MAX )
+        {
+        states[ current_state ]->to_step( new_step, cooperative_time );
+        }
+    }
+//-----------------------------------------------------------------------------
+step* operation::add_step( const char* name, int next_step_n, 
+                          unsigned int step_duration_par_n, state_idx s_idx /*= RUN */)
+    {
+    if ( current_state >= 0 && current_state < STATES_MAX )
+        {
+        return states[ s_idx ]->add_step( name, next_step_n,
+            step_duration_par_n );
+        }
+
+    return stub.add_step( name, next_step_n, step_duration_par_n );
+    }
+//-----------------------------------------------------------------------------
+void operation::set_step_cooperate_time_par_n( int step_cooperate_time_par_n )
+    {
+    states[ RUN ]->set_step_cooperate_time_par_n( step_cooperate_time_par_n );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+action::action( std::string name, u_int group_cnt ) : name( name ), par( 0 )
     {
     for ( u_int i = 0; i < group_cnt; i++ )
         {
@@ -39,7 +285,7 @@ void action::print( const char* prefix /*= "" */ ) const
         return;
         }
 
-    Print( "%s%s: ", prefix, name.c_str() );
+    printf( "%s%s: ", prefix, name.c_str() );
 
     for ( u_int i = 0; i < devices.size(); i++ )
         {
@@ -48,16 +294,16 @@ void action::print( const char* prefix /*= "" */ ) const
             continue;
             }
 
-        Print( "{" );
+        printf( "{" );
         for ( u_int j = 0; j < devices[ i ].size(); j++ )
             {
-            Print( "%s", devices[ i ][ j ]->get_name() );
-            if ( j + 1 < devices[ i ].size() ) Print( " " );
+            printf( "%s", devices[ i ][ j ]->get_name() );
+            if ( j + 1 < devices[ i ].size() ) printf( " " );
             }
-        Print( "} " );
+        printf( "} " );
         }
 
-    Print( "\n" );
+    printf( "\n" );
     }
 //-----------------------------------------------------------------------------
 void action::final()
@@ -99,7 +345,7 @@ int action::check_devices( char* err_dev_name, int max_to_write ) const
                 if ( ( par & base_error::P_IS_SUPPRESS ) == 0 )
                     {
                     max_to_write -= snprintf( err_dev_name + strlen( err_dev_name ),
-                        max_to_write, "%s, ",
+                        max_to_write, "'%s', ",
                         devices[ i ][ j ]->get_name() );
 
                     if ( max_to_write < 0 )
@@ -144,12 +390,13 @@ void action::add_dev( device *dev, u_int group /*= 0 */ )
 
     if (  group >= devices.size() )
         {
-#ifdef DEBUG
-        Print( "Error device:add_dev(...) - group (%d) >= group count"
-            "(%d), device \"%s\""
-            " action \"%s\".\n",
-            group, devices.size(), dev->get_name(), name.c_str() );
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            printf( "Error device:add_dev(...) - group (%d) >= group count"
+                "(%d), device \"%s\""
+                " action \"%s\".\n",
+                group, devices.size(), dev->get_name(), name.c_str() );
+            }
         return;
         }
 
@@ -160,7 +407,7 @@ void action::add_dev( device *dev, u_int group /*= 0 */ )
 //-----------------------------------------------------------------------------
 void on_action::evaluate()
     {
-    if ( devices.size() == 0  )
+    if ( devices.empty() )
         {
         return;
         }
@@ -214,7 +461,8 @@ int required_DI_action::check( char* reason ) const
 step::step( std::string name, bool is_mode /*= false */ ) : action_stub( "Заглушка" ),
     start_time( 0 ),
     is_mode( is_mode ),
-    name( name )
+    name( name ),
+    dx_time( 0 )
     {
     actions.push_back( new on_action() );
     actions.push_back( new off_action() );
@@ -264,17 +512,18 @@ void step::evaluate() const
         }
     }
 //-----------------------------------------------------------------------------
-void step::final() const
+void step::final() 
     {
     for ( u_int i = 0; i < actions.size(); i++  )
         {
         actions[ i ]->final();
         }
+    dx_time = 0;
     }
 //-----------------------------------------------------------------------------
-u_int_4 step::get_start_time() const
+u_int_4 step::get_eval_time() const
     {
-    return start_time;
+    return get_delta_millisec( start_time ) + dx_time;
     }
 //-----------------------------------------------------------------------------
 void step::set_start_time( u_int_4 start_time )
@@ -289,7 +538,7 @@ void step::set_step_time( u_int_4 step_time )
 //-----------------------------------------------------------------------------
 void step::print( const char* prefix /*= "" */ ) const
     {
-    Print( "%s \n", name.c_str() );
+    printf( "%s \n", name.c_str() );
     std::string new_prefix = prefix;
     new_prefix += "  ";
 
@@ -306,10 +555,11 @@ action* step::operator[]( int idx )
         return actions[ idx ];
         }
 
-#ifdef DEBUG
-    Print( "Error step::action* operator[] ( int idx ) - idx %d > count %d.\n",
-        idx, actions.size() );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "Error step::action* operator[] ( int idx ) - idx %d > count %d.\n",
+            idx, actions.size() );
+        }
 
     return &action_stub;
     }
@@ -341,6 +591,11 @@ int step::check_devices( char* err_dev_name, int str_len )
 
     return 0;
     }
+//-----------------------------------------------------------------------------
+void step::set_dx_time( u_int_4 dx_time )
+    {
+    this->dx_time = dx_time;
+    }                                                                          
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void DI_DO_action::evaluate()
@@ -385,7 +640,7 @@ void DI_DO_action::print( const char* prefix /*= "" */ ) const
         return;
         }
 
-    Print( "%s%s: ", prefix, name.c_str() );
+    printf( "%s%s: ", prefix, name.c_str() );
     for ( u_int i = 0; i < devices.size(); i++ )
         {
         if ( devices[ i ].empty() )
@@ -393,17 +648,17 @@ void DI_DO_action::print( const char* prefix /*= "" */ ) const
             continue;
             }
 
-        Print( "{%s", devices[ i ][ 0 ]->get_name() );
-        Print( "->" );
+        printf( "{%s", devices[ i ][ 0 ]->get_name() );
+        printf( "->" );
         for ( u_int j = 1; j < devices[ i ].size(); j++ )
             {
-            Print( "%s", devices[ i ][ j ]->get_name() );
-            if ( j + 1 < devices[ i ].size() ) Print( " " );
+            printf( "%s", devices[ i ][ j ]->get_name() );
+            if ( j + 1 < devices[ i ].size() ) printf( " " );
             }
-        Print( "} " );
+        printf( "} " );
         }
 
-    Print( "\n" );
+    printf( "\n" );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -470,14 +725,14 @@ void open_seat_action::evaluate()
         {
     case P_WAIT:
         for ( u_int i = 0; i < wash_lower_seat_devices.size(); i++ )
-        	{        	
+            {
             for ( u_int j = 0; j < wash_lower_seat_devices[ i ].size(); j++ )
                 {
                 wash_lower_seat_devices[ i ][ j ]->off();
                 }
             }
         for ( u_int i = 0; i < wash_upper_seat_devices.size(); i++ )
-            {        	
+            {
             for ( u_int j = 0; j < wash_upper_seat_devices[ i ].size(); j++ )
                 {
                 wash_upper_seat_devices[ i ][ j ]->off();
@@ -615,10 +870,11 @@ void open_seat_action::add_dev( device *dev, u_int group, u_int seat_type )
 
     if ( group >= seat_group[ 0 ].size() )
         {
-#ifdef DEBUG
-        Print( "Error open_seat_action:add_dev: group %d > %d, seat_type %d.\n",
-            group, seat_group[ 0 ].size(), seat_type );
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            printf( "Error open_seat_action:add_dev: group %d > %d, seat_type %d.\n",
+                group, seat_group[ 0 ].size(), seat_type );
+            }
         return;
         }
 
@@ -632,41 +888,41 @@ void open_seat_action::print( const char* prefix /*= "" */ ) const
         return;
         }
 
-    Print( "%s%s: ", prefix, name.c_str() );
+    printf( "%s%s: ", prefix, name.c_str() );
 
     if ( !wash_upper_seat_devices.empty() )
         {
-        Print( "верхние " );
+        printf( "верхние " );
         for ( u_int i = 0; i < wash_upper_seat_devices.size(); i++ )
             {
-            Print( " {" );
+            printf( " {" );
             for ( u_int j = 0; j < wash_upper_seat_devices[ i ].size(); j++ )
                 {
-                Print( "%s",  wash_upper_seat_devices[ i ][ j ]->get_name() );
-                if ( j + 1 < wash_upper_seat_devices[ i ].size() ) Print( " " );
+                printf( "%s",  wash_upper_seat_devices[ i ][ j ]->get_name() );
+                if ( j + 1 < wash_upper_seat_devices[ i ].size() ) printf( " " );
                 }
 
-            Print( "}" );
+            printf( "}" );
             }
         }
 
     if ( !wash_lower_seat_devices.empty() )
         {
-        Print( "; нижние " );
+        printf( "; нижние " );
         for ( u_int i = 0; i < wash_lower_seat_devices.size(); i++ )
             {
-            Print( " {" );
+            printf( " {" );
             for ( u_int j = 0; j < wash_lower_seat_devices[ i ].size(); j++ )
                 {
-                Print( "%s ", wash_lower_seat_devices[ i ][ j ]->get_name() );
-                if ( j + 1 < wash_lower_seat_devices[ i ].size() ) Print( " " );
+                printf( "%s ", wash_lower_seat_devices[ i ][ j ]->get_name() );
+                if ( j + 1 < wash_lower_seat_devices[ i ].size() ) printf( " " );
                 }
 
-            Print( "}" );
+            printf( "}" );
             }
         }
 
-    Print( "\n" );
+    printf( "\n" );
     }
 //-----------------------------------------------------------------------------
 bool open_seat_action::is_empty() const
@@ -700,6 +956,10 @@ void wash_action::final()
         {
         devices[ G_DEV ][ i ]->off();
         }
+    for ( u_int i = 0; i < devices[ G_REV_DEV ].size(); i++ )
+        {
+        devices[ G_REV_DEV ][ i ]->off();
+        }
     }
 //---------------------------------------------------------------------------
 void wash_action::evaluate()
@@ -709,23 +969,47 @@ void wash_action::evaluate()
         {
         devices[ G_DO ][ i ]->on();
         }
-
-    // В зависимости от сигнала запроса включения устройств выключаем устройства.
+        
     int new_state = 0;
 
-    for ( u_int i = 0; i < devices[ G_DI ].size(); i++ )
+    // Если нет сигналов, то устройства включаем.
+    if ( devices[ G_DI ].empty() )
         {
-        if ( devices[ G_DI ][ i ]->is_active() )
+        new_state = 1;
+        }
+    else
+        {
+        // В зависимости от сигнала запроса включения устройств выключаем
+        // устройства.    
+        for ( u_int i = 0; i < devices[ G_DI ].size(); i++ )
             {
-            new_state = 1;
-            break;
+            if ( devices[ G_DI ][ i ]->is_active() )
+                {
+                new_state = 1;
+                break;
+                }
             }
         }
+
+    float new_val = -1;
+    if ( !par_idx.empty() )
+        {
+        new_val = ( *par )[ par_idx[ P_PUMP_FREQ ] ];
+        }
+    
 
     //Включаем или выключаем устройства.
     for ( u_int i = 0; i < devices[ G_DEV ].size(); i++ )
         {
         devices[ G_DEV ][ i ]->set_state( new_state );
+        }
+    for ( u_int i = 0; i < devices[ G_REV_DEV ].size(); i++ )
+        {
+        devices[ G_REV_DEV ][ i ]->set_state( new_state > 0 ? 2 : 0 );
+        if ( new_val != -1 )
+            {
+            devices[ G_REV_DEV ][ i ]->set_value( new_state > 0 ? new_val : 0 );
+            }
         }
 
     bool is_dev_error = false;
@@ -734,6 +1018,14 @@ void wash_action::evaluate()
     for ( u_int i = 0; i < devices[ G_DEV ].size(); i++ )
         {
         if ( devices[ G_DEV ][ i ]->get_state() == -1 )
+            {
+            is_dev_error = true;
+            break;
+            }
+        }
+    for ( u_int i = 0; i < devices[ G_REV_DEV ].size(); i++ )
+        {
+        if ( devices[ G_REV_DEV ][ i ]->get_state() == -1 )
             {
             is_dev_error = true;
             break;
@@ -758,54 +1050,69 @@ void wash_action::print( const char* prefix /*= "" */ ) const
         return;
         }
 
-    Print( "%s%s: ", prefix, name.c_str() );
+    printf( "%s%s: ", prefix, name.c_str() );
 
     if ( !devices[ G_DI ].empty() )
         {
-        Print( "FB " );
-        Print( "{" );
+        printf( "FB " );
+        printf( "{" );
         for ( u_int j = 0; j < devices[ G_DI ].size(); j++ )
             {
-            Print( "%s",  devices[ G_DI ][ j ]->get_name() );
-            if ( j + 1 < devices[ G_DI ].size() ) Print( " " );
+            printf( "%s",  devices[ G_DI ][ j ]->get_name() );
+            if ( j + 1 < devices[ G_DI ].size() ) printf( " " );
             }
 
-        Print( "}" );
+        printf( "}" );
         }
 
     if ( !devices[ G_DO ].empty() )
         {
-        Print( "; DO " );
+        printf( "; DO " );
 
-        Print( "{" );
+        printf( "{" );
         for ( u_int j = 0; j < devices[ G_DO ].size(); j++ )
             {
-            Print( "%s", devices[ G_DO ][ j ]->get_name() );
-            if ( j + 1 < devices[ G_DO ].size() ) Print( " " );
+            printf( "%s", devices[ G_DO ][ j ]->get_name() );
+            if ( j + 1 < devices[ G_DO ].size() ) printf( " " );
             }
 
-        Print( "}" );
+        printf( "}" );
         }
 
     if ( !devices[ G_DEV ].empty() )
         {
-        Print( "; DEV " );
+        printf( "; DEV " );
 
-        Print( "{" );
+        printf( "{" );
         for ( u_int j = 0; j < devices[ G_DEV ].size(); j++ )
             {
-            Print( "%s", devices[ G_DEV ][ j ]->get_name() );
-            if ( j + 1 < devices[ G_DEV ].size() ) Print( " " );
+            printf( "%s", devices[ G_DEV ][ j ]->get_name() );
+            if ( j + 1 < devices[ G_DEV ].size() ) printf( " " );
             }
 
-        Print( "}" );
+        printf( "}" );
         }
 
-    Print( "\n" );
+    if ( !devices[ G_REV_DEV ].empty() )
+        {
+        printf( "; REV_DEV " );
+
+        printf( "{" );
+        for ( u_int j = 0; j < devices[ G_REV_DEV ].size(); j++ )
+            {
+            printf( "%s", devices[ G_REV_DEV ][ j ]->get_name() );
+            if ( j + 1 < devices[ G_REV_DEV ].size() ) printf( " " );
+            }
+
+        printf( "}" );
+        }
+
+    printf( "\n" );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-mode::mode( const char* name, mode_manager *owner, int n ) : name( name ),
+operation_state::operation_state( const char* name,
+    operation_manager *owner, int n ) : name( name ),
     mode_step(  new step( "Шаг режима", true ) ),
     active_step_n( -1 ),
     active_step_second_n( -1 ),
@@ -813,26 +1120,30 @@ mode::mode( const char* name, mode_manager *owner, int n ) : name( name ),
     start_time( get_millisec() ),
     step_stub( "Шаг-заглушка" ),
     owner( owner ),
-    n( n )
+    n( n ),
+    dx_step_time( 0 )
     {
+
+    mode_step[ 0 ][ step::A_WASH ]->set_params( owner->get_params() );
     }
 //-----------------------------------------------------------------------------
-step* mode::add_step( const char* name, int next_step_n,
+step* operation_state::add_step( const char* name, int next_step_n,
     u_int step_duration_par_n )
     {
-    steps.push_back( new step( name ) );
+    steps.push_back( new step( name, false ) );
+
     next_step_ns.push_back( next_step_n );
     step_duration_par_ns.push_back( step_duration_par_n );
 
     return steps[ steps.size() - 1 ];
     }
 //-----------------------------------------------------------------------------
-int mode::check_on( char* reason ) const
+int operation_state::check_on( char* reason ) const
     {
     return mode_step->check( reason );
     }
 //-----------------------------------------------------------------------------
-void mode::init( u_int start_step /*= 1 */ )
+void operation_state::init( u_int start_step /*= 1 */ )
     {
     mode_step->init();
     start_time = get_millisec();
@@ -848,13 +1159,13 @@ void mode::init( u_int start_step /*= 1 */ )
 
     to_step( start_step );
 
-#ifdef DEBUG
-    Print( " INIT STEP [ %d ]\n", active_step_n + 1 );
-    steps[ active_step_n ]->print( " " );
-    Print( " TIME %d ms, NEXT STEP -> %d \n",
-        active_step_time,
-        active_step_next_step_n );
-#endif
+    if ( G_DEBUG )
+        {
+        printf( " INIT STEP [ %d ]\n", active_step_n + 1 );
+        steps[ active_step_n ]->print( " " );
+        printf( " TIME %d ms, NEXT STEP -> %d \n",
+            active_step_time, active_step_next_step_n );
+        }
     }
 //-----------------------------------------------------------------------------
 // Если есть активный шаг, проверяем на наличие параллельного нового шага (1).
@@ -862,7 +1173,7 @@ void mode::init( u_int start_step /*= 1 */ )
 // шагов (2). Потом проверяем время переходного режима. Если оно вышло,
 // отключаем активный шаг, в качестве активного шага переназначаем параллельный
 // новый шаг.
-void mode::evaluate()
+void operation_state::evaluate()
     {
     mode_step->evaluate();
 
@@ -885,9 +1196,10 @@ void mode::evaluate()
             active_step_second_n = -1;
 
             steps[ active_step_n ]->evaluate();
-#ifdef DEBUG
-            Print( "  cooperate off\n" );
-#endif
+            if ( G_DEBUG )
+                {
+                printf( "  cooperate off\n" );
+                }
             }
         }
     else
@@ -895,14 +1207,14 @@ void mode::evaluate()
         steps[ active_step_n ]->evaluate();
 
         if ( active_step_time != 0 &&
-            get_delta_millisec( steps[ active_step_n ]->get_start_time() ) >
-            ( u_int ) active_step_time )
+            steps[ active_step_n ]->get_eval_time() > ( u_int ) active_step_time )
             {
             u_long step_switch_time = 0;
-            if ( owner->get_param() != 0 && step_cooperate_time_par_n > -1 )
+            if ( step_cooperate_time_par_n > 0 &&
+                owner->get_step_param( step_cooperate_time_par_n ) > 0 )
                 {
                 step_switch_time = ( u_long )
-                    owner->get_param()[ 0 ][ step_cooperate_time_par_n ];
+                    owner->get_step_param( step_cooperate_time_par_n );
                 }
 
             if ( -1 == active_step_next_step_n )
@@ -924,30 +1236,39 @@ void mode::evaluate()
         }
     }
 //-----------------------------------------------------------------------------
-void mode::final()
+void operation_state::final()
     {
     mode_step->final();
     start_time = get_millisec();
 
+    //Если активный шаг не завершился, сохраняем время его выполнения для
+    //возобновления в случае снятия с паузы.
+    if ( active_step_n >= 0 && active_step_second_n == -1 )
+        {
+        dx_step_time = active_step_evaluation_time();
+        }
+
     if ( active_step_n >= 0 )
         {
         steps[ active_step_n ]->final();
-#ifdef DEBUG
-        Print( " FINAL ACTIVE STEP [ %d ] \n", active_step_n );
-#endif
+        if ( G_DEBUG )
+            {
+            printf( " FINAL ACTIVE STEP [ %d ] \n", active_step_n );
+            }
         active_step_n = -1;
         }
     if ( active_step_second_n >= 0 )
         {
         steps[ active_step_second_n ]->final();
-#ifdef DEBUG
-        Print( " FINAL ACTIVE STEP SECOND [ %d ] \n", active_step_second_n );
-#endif
+        if ( G_DEBUG )
+            {
+            printf( " FINAL ACTIVE STEP SECOND [ %d ] \n", active_step_second_n );
+            }
         active_step_second_n = -1;
         }
     }
 //-----------------------------------------------------------------------------
-step* mode::operator[]( int idx )
+step* operation_state::operator[]( int idx )
     {
     if ( -1 == idx )
         {
@@ -959,23 +1280,24 @@ step* mode::operator[]( int idx )
         return steps[ idx - 1 ];
         }
 
-#ifdef DEBUG
-    Print( "Error mode::step& operator[] ( int idx ) - idx %d > count %d.\n",
-        idx, steps.size() );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "Error operation_state::step& operator[] ( int idx ) - idx %d > count %d.\n",
+            idx, steps.size() );
+        }
 
     return &step_stub;
     }
 //-----------------------------------------------------------------------------
-void mode::to_step( u_int new_step, u_long cooperative_time )
+void operation_state::to_step( u_int new_step, u_long cooperative_time )
     {
     if ( new_step > steps.size() || new_step <= 0 )
         {
-#ifdef DEBUG
-        Print( "Error mode::to_step step %d > steps size %d.\n",
-            new_step, steps.size() );
-#endif // DEBUG
-
+        if ( G_DEBUG )
+            {
+            printf( "Error mode::to_step step %d > steps size %d.\n",
+                new_step, steps.size() );
+            }
         return;
         }
 
@@ -993,9 +1315,9 @@ void mode::to_step( u_int new_step, u_long cooperative_time )
 
         int par_n = step_duration_par_ns[ active_step_second_n ];
 
-        if ( owner->get_param() != 0 && par_n > 0 )
+        if ( par_n > 0 && owner->get_step_param( par_n ) > 0 )
             {
-            active_step_time = u_int( owner->get_param()[ 0 ][ par_n ] * 1000L );
+            active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
             active_step_time += step_cooperate_time;
             active_step_next_step_n = next_step_ns[ active_step_second_n ];
 
@@ -1023,9 +1345,9 @@ void mode::to_step( u_int new_step, u_long cooperative_time )
 
         //Время шага
         int par_n = step_duration_par_ns[ active_step_n ];
-        if ( owner->get_param() != 0 && par_n > 0 )
+        if ( par_n > 0 && owner->get_step_param( par_n ) > 0 )
             {
-            active_step_time = u_int( owner->get_param()[ 0 ][ par_n ] * 1000L );
+            active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
             active_step_next_step_n = next_step_ns[ active_step_n ];
             }
 
@@ -1034,39 +1356,53 @@ void mode::to_step( u_int new_step, u_long cooperative_time )
         steps[ active_step_n ]->evaluate();
         }
 
-#ifdef DEBUG
-    Print( "\"%s\" mode %d \"%s\" to_step() -> %d, step time %d ms, coop time %lu ms.\n",
-        owner->owner->get_name(),
-        n, name.c_str(), new_step, active_step_time,
-        ( u_long ) step_cooperate_time );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "\"%s\" mode %d \"%s\" to_step() -> %d, step time %d ms, coop time %lu ms.\n",
+            owner->owner->get_name(),
+            n, name.c_str(), new_step, active_step_time,
+            ( u_long ) step_cooperate_time );
+        }
     }
 //-----------------------------------------------------------------------------
-void mode::print( const char* prefix /*= "" */ ) const
+void operation_state::print( const char* prefix /*= "" */ ) const
     {
+    if ( mode_step->is_empty() && steps.empty() )
+    	{
+        return;
+    	}
+
     std::string new_prefix = prefix;
     new_prefix += "    ";
 
-    Print( "%s\n", name.c_str() );
+    printf( "%s%s\n", prefix, name.c_str() );
 
     if ( !mode_step->is_empty() )
         {
-        Print( "%s0 ", new_prefix.c_str() );
+        printf( "%s0 ", new_prefix.c_str() );
         mode_step->print( new_prefix.c_str() );
         }
 
     for ( u_int i = 0; i < steps.size(); i++ )
         {
-        Print( "%s%d ", new_prefix.c_str(), i + 1 );
+        printf( "%s%d ", new_prefix.c_str(), i + 1 );
         steps[ i ]->print( new_prefix.c_str() );
         }
     }
 //----------------------------------------------------------------------------
-int mode::check_devices( char* err_dev_name, int str_len )
+int operation_state::check_devices( char* err_dev_name, int str_len )
     {
+    int res = mode_step->check_devices( err_dev_name +
+        strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
+
+    if ( res )
+        {
+        return 1;
+        }
+
     for ( u_int i = 0; i < steps.size(); i++ )
         {
-        int res = steps[ i ]->check_devices( err_dev_name +
+        res = steps[ i ]->check_devices( err_dev_name +
             strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
 
         if ( res )
@@ -1078,66 +1414,110 @@ int mode::check_devices( char* err_dev_name, int str_len )
     return 0;
     }
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-mode* mode_manager::add_mode( const char* name )
+void operation_state::add_dx_step_time()
     {
-    modes.push_back( new mode( name, this, modes.size() + 1 ) );
-
-    return modes[ modes.size() - 1 ];
-    }
-//-----------------------------------------------------------------------------
-void mode_manager::set_param( saved_params_u_int_4 *par )
-    {
-    this->par = par;
-    }
-//-----------------------------------------------------------------------------
-saved_params_u_int_4 * mode_manager::get_param() const
-    {
-    return par;
-    }
-//-----------------------------------------------------------------------------
-mode* mode_manager::operator[]( unsigned int idx )
-    {
-    if ( idx > 0 && idx <= modes.size() )
+    if ( active_step_n >= 0 )
         {
-        return modes[ idx - 1 ];
+        steps[ active_step_n ]->set_dx_time( dx_step_time );
+        }
+    }
+//-----------------------------------------------------------------------------
+void operation_state::set_step_cooperate_time_par_n(int step_cooperate_time_par_n)
+    {
+    this->step_cooperate_time_par_n = step_cooperate_time_par_n;
+    }
+//-----------------------------------------------------------------------------
+u_long operation_state::evaluation_time()
+    {
+    return get_delta_millisec( start_time );
+    }
+//-----------------------------------------------------------------------------
+u_long operation_state::active_step_evaluation_time() const
+    {
+    if ( active_step_n >= 0 )
+        {
+        return steps[ active_step_n ]->get_eval_time();
         }
 
-#ifdef DEBUG
-    Print( "Error mode_manager::operator[] idx %d > modes count %d.\n",
-        idx, modes.size() );
-#endif // DEBUG
-
-    return mode_stub;
+    return 0;
     }
 //-----------------------------------------------------------------------------
-unsigned long mode_manager::get_idle_time()
+u_long operation_state::get_active_step_set_time() const
+    {
+    if ( active_step_n >= 0 )
+        {
+        return steps[ active_step_n ]->get_step_time();
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+u_int operation_state::active_step() const
+    {
+    if ( active_step_second_n > -1 )
+        {
+        return active_step_second_n + 1;
+        }
+
+    return active_step_n + 1;
+    }
+//-----------------------------------------------------------------------------
+const char* operation_state::get_name() const
+    {
+    return name.c_str();
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+operation* operation_manager::add_operation( const char* name )
+    {
+    operations.push_back( new operation( name, this, operations.size() + 1 ) );
+
+    return operations[ operations.size() - 1 ];
+    }
+//-----------------------------------------------------------------------------
+operation* operation_manager::operator[]( unsigned int idx )
+    {
+    if ( idx > 0 && idx <= operations.size() )
+        {
+        return operations[ idx - 1 ];
+        }
+
+    if ( G_DEBUG )
+        {
+        printf( "Error operation_manager::operator[] idx %d > operations count %d.\n",
+            idx, operations.size() );
+        }
+
+    return oper_stub;
+    }
+//-----------------------------------------------------------------------------
+unsigned long operation_manager::get_idle_time()
     {
     return get_delta_millisec( last_action_time );
     }
 //-----------------------------------------------------------------------------
-void mode_manager::print()
+void operation_manager::print()
     {
-    Print( "modes manager, %d\n", modes.size() );
+    printf( "operations manager, %d\n", operations.size() );
 
-    for ( u_int i = 0; i < modes.size(); i++ )
+    for ( u_int i = 0; i < operations.size(); i++ )
         {
-        Print( "  %3d ", i + 1 );
-        modes[ i ]->print( "  " );
+        printf( "  %2d ", i + 1 );
+        operations[ i ]->print( "    " );
         }
     }
 //-----------------------------------------------------------------------------
-mode_manager::mode_manager( u_int modes_cnt, i_tech_object *owner ):
+operation_manager::operation_manager( u_int modes_cnt, i_tech_object *owner ):
     owner( owner ),
     last_action_time( get_millisec() )
     {
-    mode_stub = new mode( "Режим-заглушка", this, -1 );
+    oper_stub = new operation( "Операция-заглушка", this, -1 );
     }
 //-----------------------------------------------------------------------------
-mode_manager::~mode_manager()
+operation_manager::~operation_manager()
     {
-    delete mode_stub;
-    mode_stub = 0;
+    delete oper_stub;
+    oper_stub = 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

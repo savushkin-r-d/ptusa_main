@@ -5,7 +5,6 @@
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
-/// @c DEBUG    - компиляция c выводом отладочной информации в консоль.@n@n
 ///
 /// @par Текущая версия:
 /// @$Rev: 220 $.\n
@@ -24,19 +23,19 @@ class eeprom_PFC200: public NV_memory
     {
     friend class NV_memory_manager;
 
-	public:
-    	virtual ~eeprom_PFC200();
+    public:
+        virtual ~eeprom_PFC200();
 
-	private:
+    private:
         eeprom_PFC200( int total_size, int available_start_pos,
             int available_end_pos );
-        
+
         /// @brief Метод интерфейса @ref i_memory.
         int read( void *buff, u_int count, u_int start_pos );
 
         /// @brief Метод интерфейса @ref i_memory.
         int write( void *buff, u_int count, u_int start_pos );
-        
+
         char * NV_ram_data; 	// Pointer to begin of NVRAM
     };
 //-----------------------------------------------------------------------------

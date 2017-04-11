@@ -52,9 +52,10 @@ wago_manager_PFC200::wago_manager_PFC200(): task_id( 0 )
         if ( strcmp( devList[ i ].DeviceName, "libpackbus" ) == 0 )
             {
             nr_kbus_found = i;
-#ifdef DEBUG
-            printf( "KBUS device found as device %i.\n", i );
-#endif // DEBUG
+            if ( G_DEBUG )
+                {
+                printf( "KBUS device found as device %i.\n", i );
+                }
             }
         }
 
@@ -72,9 +73,10 @@ wago_manager_PFC200::wago_manager_PFC200(): task_id( 0 )
     const int KBUS_MAINPRIO = 40;
     s_param.sched_priority = KBUS_MAINPRIO;
     sched_setscheduler( 0, SCHED_FIFO, &s_param );
-#ifdef DEBUG
-    printf( "Switch to RT Priority 'KBUS_MAINPRIO'\n" );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "Switch to RT Priority 'KBUS_MAINPRIO'\n" );
+        }
 
     // Open kbus device.
     kbus_device_id = devList[ nr_kbus_found ].DeviceId;
@@ -86,9 +88,11 @@ wago_manager_PFC200::wago_manager_PFC200(): task_id( 0 )
         adi->Exit();
         exit( EXIT_FAILURE );
         }
-#ifdef DEBUG
-    printf( "KBUS device open OK.\n" );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "KBUS device open OK.\n" );
+        }
+
 
     // Set application state to "Unconfigured" to let library drive kbus by
     // themselves. In this mode library set up a thread who drive the kbus cyclic.
@@ -104,9 +108,10 @@ wago_manager_PFC200::wago_manager_PFC200(): task_id( 0 )
         exit( EXIT_FAILURE );
         }
 
-#ifdef DEBUG
-    printf( "Set application state to 'Unconfigured'.\n" );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "Set application state to 'Unconfigured'.\n" );
+        }
     }
 //-----------------------------------------------------------------------------
 wago_manager_PFC200::~wago_manager_PFC200()
@@ -167,11 +172,11 @@ int wago_manager_PFC200::read_inputs()
 #endif // DEBUG_KBUS
                     }
                     else
-                    {
-#ifdef DEBUG
-                    Print("\nRead DI:Wago returned error...\n");
-#endif // DEBUG
-                    }// if ( res == 0 )
+                        {
+#ifdef DEBUG_KBUS
+                        Print("\nRead DI:Wago returned error...\n");
+#endif // DEBUG_KBUS
+                        }// if ( res == 0 )
                 }// if ( nd->DI_cnt > 0 )
 
             if ( nd->AI_cnt > 0 )

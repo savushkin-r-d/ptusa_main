@@ -50,6 +50,9 @@ class lua_manager
 
         lua_State * get_Lua() const;
 
+        int reload_script( int script_n, const char* script_function_name,
+            char *res_str, int max_res_str_length );
+
     private:
         lua_manager() : is_free_lua( 0 )
             {
@@ -67,6 +70,11 @@ class lua_manager
         lua_State * L;
 
         int is_free_lua;
+
+        enum CONSTANTS
+            {
+            MAX_ERRORS = 50,
+            };
     };
 //-----------------------------------------------------------------------------
 #define G_LUA_MANAGER lua_manager::get_instance()

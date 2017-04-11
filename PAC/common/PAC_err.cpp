@@ -5,6 +5,10 @@
 
 #include "log.h"
 
+#ifdef WIN_OS
+extern char* WSA_Last_Err_Decode ();
+#endif // WINDOWS_OS
+
 auto_smart_ptr < PAC_critical_errors_manager > PAC_critical_errors_manager::instance;
 //-----------------------------------------------------------------------------
 PAC_critical_errors_manager::PAC_critical_errors_manager(
@@ -15,7 +19,7 @@ PAC_critical_errors_manager::PAC_critical_errors_manager(
 #endif // __BORLANDC__
     }
 //-----------------------------------------------------------------------------
-void PAC_critical_errors_manager::show_errors()
+void PAC_critical_errors_manager::show_errors() const
     {
     static u_char show_step = 0;
     static u_long start_time = get_millisec();
@@ -87,8 +91,7 @@ void PAC_critical_errors_manager::set_global_error( ALARM_CLASS eclass,
 
     if ( b == 0 )
         {
-        sprintf( G_LOG->msg,
-            "Set global error: class: %d, p1: %d, p2: %lu.", eclass, p1, p2 );
+        sprintf( G_LOG->msg, "%s", get_alarm_descr( eclass, p1, p2, true ) );
         G_LOG->write_log( i_log::P_ERR );
 
         errors.push_back( critical_error( eclass, p1, p2 ) );
@@ -115,8 +118,7 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
         {
         errors.erase( errors.begin() + idx );
 
-        sprintf( G_LOG->msg,
-            "Reset global error: class: %d, p1: %d, p2: %lu.", eclass, p1, p2 );
+        sprintf( G_LOG->msg, "%s", get_alarm_descr( eclass, p1, p2, false ) );
         G_LOG->write_log( i_log::P_ERR );
 
         errors_id++;
@@ -133,7 +135,7 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
 
         res += sprintf( str + res, "\tdescription = \"%s\",\n",
             get_alarm_descr( ( ALARM_CLASS ) errors[ i ].err_class,
-            ( ALARM_SUBCLASS ) errors[ i ].err_sub_class, errors[ i ].param ) );
+            ( ALARM_SUBCLASS ) errors[ i ].err_sub_class, errors[ i ].param, true ) );
 
         res += sprintf( str + res, "\t%s\n", "type = AT_SPECIAL," );
         res += sprintf( str + res, "\t%s%s%s\n", "group = '",
@@ -151,7 +153,7 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
    id = errors_id;
 
 #ifdef DEBUG_PAC_ERR
-    Print( "%s\n", str );
+    printf( "%s\n", str );
 #endif // DEBUG_PAC_ERR
 
     return res;
@@ -165,6 +167,147 @@ PAC_critical_errors_manager * PAC_critical_errors_manager::get_instance()
         }
 
     return instance;
+    }
+//-----------------------------------------------------------------------------
+const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
+    ALARM_SUBCLASS err_sub_class, int par, bool is_set )
+    {
+    static char tmp[ 100 ] = "";
+    sprintf( tmp, "%d-%d-%d : ",
+        ( int ) err_class, ( int ) err_sub_class, par );
+
+    switch( err_class )
+        {
+    case AC_UNKNOWN:
+        sprintf( tmp + strlen( tmp ), "?" );
+        break;
+
+    case AC_NO_CONNECTION:
+        if ( is_set )
+            {
+            sprintf( tmp + strlen( tmp ), "%s", "Lost connection with " );
+            }
+        else
+            {
+            sprintf( tmp + strlen( tmp ), "%s", "Get connection with " );
+            }
+
+        switch( err_sub_class )
+            {
+        case AS_WAGO:
+            sprintf( tmp + strlen( tmp ),
+                "узлом Wago '%s' ('%s', '%s')",
+                G_WAGO_MANAGER()->get_node( par - 1 )->name,
+                G_WAGO_MANAGER()->get_node( par - 1 )->ip_address,
+                G_CMMCTR->get_host_name_rus() );
+            break;
+
+        case AS_PANEL:
+            sprintf( tmp + strlen( tmp ), "panel EasyView №%d.", par );
+            break;
+
+        case AS_MODBUS_DEVICE:
+            sprintf( tmp + strlen( tmp ), "Modbus-device №%d.", par );
+            break;
+
+        case AS_EASYSERVER:
+            sprintf( tmp + strlen( tmp ), "EasyServer." );
+            break;
+
+        case AS_REMOTE_PAC:
+            sprintf( tmp + strlen( tmp ), "remote PAC." );
+            break;
+
+        default:
+        	break;
+            }//switch( err_sub_class )
+        break;
+
+    case AC_COM_DRIVER:
+        return "?";
+        break;
+
+    case AC_RUNTIME_ERROR:
+        switch( err_sub_class )
+            {
+        case AS_EMERGENCY_BUTTON:
+            break;
+
+        default:
+            break;
+            }// switch( err_sub_class )
+
+    case AC_NET:
+        if ( is_set )
+            {
+            sprintf( tmp + strlen( tmp ), "%s", "Network communication error : " );
+            }
+        else
+            {
+            sprintf( tmp + strlen( tmp ), "%s", "Network communication OK : " );
+            }
+
+        switch( par )
+            {
+            case 0:
+                sprintf( tmp + strlen( tmp ),
+                    "master : " );
+                break;
+
+            case 1:
+                sprintf( tmp + strlen( tmp ),
+                    "modbus : " );
+                break;
+
+            default:
+                break;
+            }
+
+        switch( err_sub_class )
+            {
+            case AS_SOCKET_F:
+                sprintf( tmp + strlen( tmp ),
+                    "calling function socket(...) : " );
+                break;
+
+            case AS_BIND_F:
+                sprintf( tmp + strlen( tmp ),
+                    "calling function bind(...) : " );
+                break;
+
+            case AS_SETSOCKOPT_F:
+                sprintf( tmp + strlen( tmp ),
+                    "calling function setsockopt(...) : " );
+                break;
+
+            case AS_LISTEN_F:
+                sprintf( tmp + strlen( tmp ),
+                    "calling function listen(...) : " );
+                break;
+
+            default:
+                sprintf( tmp + strlen( tmp ),
+                    "? : " );
+                break;
+            }// switch( err_sub_class )
+
+        if ( is_set )
+            {
+#ifdef LINUX_OS
+            sprintf( tmp + strlen( tmp ), "%s.", strerror( errno ) );
+#endif // LINUX_OS
+
+#ifdef WIN_OS
+            sprintf( tmp + strlen( tmp ), "%s", WSA_Last_Err_Decode() );
+#endif // WINDOWS_OS
+            }
+        else
+            {
+            sprintf( tmp + strlen( tmp ) - 3, "." );
+            }
+        }
+
+    return tmp;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

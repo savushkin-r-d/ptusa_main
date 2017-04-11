@@ -1,12 +1,11 @@
-///// @par Описание директив препроцессора:
-///// @c LINUX_OS         - компиляция для ОС Linux.
+/// @par Описание директив препроцессора:
+/// @c LINUX_OS         - компиляция для ОС Linux.
 /// @par Тип PAC:
 /// @c PAC_PC           - PAC на PC с ОС Linux.
 /// @c PAC_WAGO_750_860 - PAC Wago 750-860.
 ///
 /// @c WIN_OS           - компиляция для ОС Windows.
 ///
-/// @c DEBUG - компиляция c выводом отладочной информации в консоль.@n@n
 
 #include <stdlib.h>
 #include "fcntl.h"
@@ -28,6 +27,8 @@
 
 #include "profibus_slave.h"
 
+int G_DEBUG = 0; //Вывод дополнительной отладочной информации.
+
 int main( int argc, char *argv[] )
     {
 #if defined WIN_OS
@@ -36,14 +37,14 @@ int main( int argc, char *argv[] )
 
     if ( argc < 2 )
         {
-        fprintf( stderr, "Usage: main script.plua\n" );
+        printf( "Usage: main script.plua\n" );
         return EXIT_SUCCESS;
         }
 #ifdef PAC_WAGO_750_860
     log_mngr::lg = new l_log();
 #endif
 
-    sprintf( G_LOG->msg, "Program started.\n" );
+    sprintf( G_LOG->msg, "Program started." );
     G_LOG->write_log( i_log::P_INFO );
 
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
@@ -52,16 +53,12 @@ int main( int argc, char *argv[] )
 
     if ( res ) //-Ошибка инициализации.
         {
-        sprintf( G_LOG->msg, "Lua init error - %d!\n", res );
+        sprintf( G_LOG->msg, "Lua init returned error code %d!", res );
         G_LOG->write_log( i_log::P_CRIT );
 
         debug_break;
         return EXIT_FAILURE;
         }
-
-#ifdef DEBUG
-    fflush( stdout );
-#endif // DEBUG
 
 #ifdef USE_PROFIBUS
     if ( G_PROFIBUS_SLAVE()->is_active() )
@@ -77,16 +74,17 @@ int main( int argc, char *argv[] )
         sleep_time_ms = strtol( argv[ 2 ], &stopstring, 10 );
         }
 
-    sprintf( G_LOG->msg, "Starting main loop! Sleep time is %li ms.\n",
+    sprintf( G_LOG->msg, "Starting main loop! Sleep time is %li ms.",
         sleep_time_ms);
     G_LOG->write_log( i_log::P_INFO );
 
-#ifdef DEBUG
-    while ( !kb_hit() )
-#else
     while ( 1 )
-#endif // DEBUG
         {
+        if ( G_DEBUG )
+            {
+            fflush( stdout );
+            }
+
 #ifdef TEST_SPEED
         static u_long st_time;
         static u_long all_time   = 0;
@@ -95,10 +93,6 @@ int main( int argc, char *argv[] )
         st_time = get_millisec();
         cycles_cnt++;
 #endif // TEST_SPEED
-
-#ifdef DEBUG
-        fflush( stdout );
-#endif // DEBUG
 
         lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, 200 );
         sleep_ms( sleep_time_ms );
@@ -141,24 +135,14 @@ int main( int argc, char *argv[] )
 
 
 #ifdef TEST_SPEED
+        u_int TRESH_AVG =
+            G_PAC_INFO()->par[ PAC_info::P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME ];
+
         //-Информация о времени выполнения цикла программы.!->
         all_time += get_delta_millisec( st_time );
 
-        static u_int max_cycle_time = 500;
         static u_int cycle_time = 0;
         cycle_time = get_delta_millisec( st_time );
-
-        if ( max_cycle_time < cycle_time )
-            {
-            max_cycle_time = cycle_time;
-
-            sprintf( G_LOG->msg,
-                "Main cycle avg = %lu ms, max = %4u ms, Lua mem = %d b.\n",
-                all_time / cycles_cnt, max_cycle_time,
-                lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
-                lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
-            G_LOG->write_log( i_log::P_INFO );
-            }
 
         static u_int max_iteration_cycle_time = 0;
         static u_int cycles_per_period        = 0;
@@ -179,19 +163,26 @@ int main( int argc, char *argv[] )
         if ( print_cycle_last_h != timeInfo_->tm_hour )
             {
             u_long avg_time = all_time / cycles_cnt;
+
+            if ( TRESH_AVG < avg_time )
+                {
+                sprintf( G_LOG->msg,
+                    "Main control cycle avg time above threshold : "
+                    "%4lu > %4u ms (Lua mem = %d b).",
+                    avg_time, TRESH_AVG,
+                    lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
+                    lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
+                G_LOG->write_log( i_log::P_ALERT );
+                }
+
             sprintf( G_LOG->msg,
-                "%4u cycles, avg = %lu, max = %4u (ms), Lua mem = %d b.\n",
+                "Main control cycle performance : "
+                "avg = %lu, max = %4u, tresh = %4u ms (%4u cycles, Lua mem = %d b).",
+                avg_time, max_iteration_cycle_time, TRESH_AVG,
                 cycles_per_period,
-                avg_time, max_iteration_cycle_time,
                 lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
                 lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
             G_LOG->write_log( i_log::P_INFO );
-
-            //At 0:0:0 set max time to 2*average.
-            if ( timeInfo_->tm_hour == 0 )
-                {
-                max_cycle_time = avg_time + avg_time;
-                }
 
             all_time   = 0;
             cycles_cnt = 0;

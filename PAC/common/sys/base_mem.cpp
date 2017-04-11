@@ -48,11 +48,12 @@ int memory_range::read( void *buf, u_int count, u_int start_pos )
         {
         if ( check_params( count, start_pos ) != 0 )
             {
-#ifdef DEBUG
-            Print( "memory_range::write(...) - size[ %u ], incorrect params -> "
-                "count[ %u ], start_pos[ %u ] \n",
-                size, count, start_pos );
-#endif // DEBUG
+            if ( G_DEBUG )
+                {
+                printf( "memory_range::write(...) - size[ %u ], incorrect params -> "
+                    "count[ %u ], start_pos[ %u ] \n",
+                    size, count, start_pos );
+                }
             return 0;
             }
 
@@ -68,11 +69,12 @@ int memory_range::write( void *buf, u_int count, u_int start_pos )
         {
         if ( check_params( count, start_pos ) != 0 )
             {
-#ifdef DEBUG
-            Print( "memory_range::write(...) - size[ %u ], incorrect params -> "
-                "count[ %u ], start_pos[ %u ] \n",
-                size, count, start_pos );
-#endif // DEBUG
+            if ( G_DEBUG )
+                {
+                printf( "memory_range::write(...) - size[ %u ], incorrect params -> "
+                    "count[ %u ], start_pos[ %u ] \n",
+                    size, count, start_pos );
+                }
             return 0;
             }
 
@@ -127,11 +129,9 @@ NV_memory_manager::NV_memory_manager() : PAC_NVRAM( 0 ),
 memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
     u_int count )
     {
-    NV_memory    *memory = 0;
-    u_int        *last_mem_pos = 0;
-#ifdef DEBUG
+    NV_memory *memory = 0;
+    u_int     *last_mem_pos = 0;
     char      mem_name[ 10 ];
-#endif // DEBUG
 
     // ¬ыбор пам€ти, с которой будем работать.
     switch ( m_type )
@@ -139,53 +139,55 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
     case MT_NVRAM:
         memory = PAC_NVRAM;
         last_mem_pos = &last_NVRAM_pos;
-#ifdef DEBUG
-        strcpy( mem_name, "NVRAM" );
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            strcpy( mem_name, "NVRAM" );
+            }
         break;
 
     case MT_EEPROM:
         memory = PAC_EEPROM;
         last_mem_pos = &last_EEPROM_pos;
-#ifdef DEBUG
-        strcpy( mem_name, "EEPROM" );
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            strcpy( mem_name, "EEPROM" );
+            }
         break;
 
     default:
-#ifdef DEBUG
-        Print( "NV_memory_manager:get_memory_block(...) - incorrect memory "
-            "type!\n" );
-        get_char();
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            printf( "NV_memory_manager:get_memory_block(...) - incorrect memory "
+                "type!\n" );            
+            }
 
         return new memory_range( 0, 0, 0 );
         }
 
     if ( 0 == memory )
         {
-#ifdef DEBUG
-        Print( "NV_memory_manager:get_memory_block(...) - memory = NULL!\n" );
-        get_char();
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            printf( "NV_memory_manager:get_memory_block(...) - memory = NULL!\n" );        
+            }
         new memory_range( 0, 0, 0 );
         }
 
     if ( *last_mem_pos + count >
         memory->get_available_end_pos() )
         {
-#ifdef DEBUG
-        Print( "NV_memory_manager:get_memory_block(...) - count [ %u ] + last "
-            "memory position [ %u ] > available %s memory [ %u ], start "
-            "position = %u, end position = %u\n",
-            count,
-            *last_mem_pos,
-            mem_name,
-            memory->get_size(),
-            memory->get_available_start_pos(),
-            memory->get_available_end_pos() );
-        get_char();
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            printf( "NV_memory_manager:get_memory_block(...) - count [ %u ] + last "
+                "memory position [ %u ] > available %s memory [ %u ], start "
+                "position = %u, end position = %u\n",
+                count,
+                *last_mem_pos,
+                mem_name,
+                memory->get_size(),
+                memory->get_available_start_pos(),
+                memory->get_available_end_pos() );        
+            }
         new memory_range( 0, 0, 0 );
         }
 

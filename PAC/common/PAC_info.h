@@ -15,7 +15,7 @@ class PAC_info: public i_Lua_save_device
 
         enum PARAMETERS
             {
-            P_PARAMS_COUNT  = 6,   ///< Количество параметров.
+            P_PARAMS_COUNT  = 10,   ///< Количество параметров.
             
             P_MIX_FLIP_PERIOD = 1, ///< Интервал промывки седел клапанов, сек.
             P_MIX_FLIP_UPPER_TIME, ///< Время промывки верхних седел клапанов, мсек.
@@ -26,8 +26,23 @@ class PAC_info: public i_Lua_save_device
             ///< Время задержки закрытия для донных клапанов, мсек.
             P_V_BOTTOM_OFF_DELAY_TIME, 
 
-	    ///< Время задержки получения ответа от узла Wago, мсек.
-	    P_WAGO_TCP_NODE_WARN_ANSWER_TIME,
+	        ///< Среднее время задержки получения ответа от узла Wago, мсек.
+	        P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME,
+            ///< Среднее время цикла программы, мсек.
+            P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME,    
+
+
+            ///< Работа модуля ограничений.
+            /// 0 - авто, 1 - ручной, 2 - полуручной (через время 
+            /// @P_RESTRICTIONS_MANUAL_TIME вернется в автоматический режим).
+            P_RESTRICTIONS_MODE,
+
+            ///< Работа модуля ограничений в ручном режиме заданное время.
+            P_RESTRICTIONS_MANUAL_TIME,
+
+            ///< Переход на паузу операции при ошибке устройств,
+            /// 0 - авто (есть), 1 - ручной (нет). 
+            P_AUTO_PAUSE_OPER_ON_DEV_ERR,
             };
 
         saved_params_u_int_4 par;
@@ -81,6 +96,11 @@ class PAC_info: public i_Lua_save_device
         u_int_4 reset_type;
 
         char up_time_str[ C_MAX_STR_LENGTH ];
+
+        int  cmd;
+        char cmd_answer[ 200 ];
+
+        u_int_4 restrictions_set_to_off_time;
     };
 //-----------------------------------------------------------------------------
 PAC_info* G_PAC_INFO();

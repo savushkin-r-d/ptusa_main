@@ -45,9 +45,10 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
                                          name_Lua, states_count, timers_count, par_float_count, runtime_par_float_count,
                                          par_uint_count, runtime_par_uint_count)
     {
-#ifdef DEBUG
-    Print("\n\r Create cip tech_object\n\r");
-#endif //DEBUG
+    if ( G_DEBUG )
+        {
+        printf("\n\r Create cip tech_object\n\r");
+        }
     int i;
     nmr = number;
     tech_type = type;
@@ -287,7 +288,7 @@ int cipline_tech_object::save_device( char *buff )
     u_int_4 up_mins;
     u_int_4 up_secs;
 
-    up_secs = modes_manager->get_idle_time() / 1000;
+    up_secs = operations_manager->get_idle_time() / 1000;
 
     up_hours = up_secs / ( 60 * 60 );
     up_mins = up_secs / 60 % 60 ;
@@ -518,7 +519,7 @@ int cipline_tech_object::evaluate()
             lua_getglobal( L, name_Lua );
             if (0 != lua_pcall(L, 1, 0, 0))
                 {
-                Print("Error in calling cip_in_evaluate: %s\n", lua_tostring(L, -1));
+                printf("Error in calling cip_in_evaluate: %s\n", lua_tostring(L, -1));
                 lua_pop(L, 1);
                 }
             } 
@@ -720,21 +721,21 @@ void cipline_tech_object::initline()
 
     PIDF = new MSAPID(&rt_par_float, 72, P_ZAD_FLOW, PUMPFREQ, 0, cnt );
     PIDP = new MSAPID(&rt_par_float, 61, P_ZAD_PODOGR, ao, TP, 0);
+    
+    if ( G_DEBUG )
+        {
+        LSL->set_cmd("ST", 0, 1);
+        LSH->set_cmd("ST", 0, 1);
+        LKL->set_cmd("ST", 0, 1);
+        LKH->set_cmd("ST", 0, 1);
+        LWL->set_cmd("ST", 0, 1);
+        LWH->set_cmd("ST", 0, 1);
+        LL->set_cmd("ST", 0, 1);
+        LM->set_cmd("ST", 0, 1);
+        LH->set_cmd("ST", 0, 1);
+        printf("Init Line %d\n\r", number);
+        }
 
-
-
-#ifdef DEBUG
-    LSL->set_cmd("ST", 0, 1);
-    LSH->set_cmd("ST", 0, 1);
-    LKL->set_cmd("ST", 0, 1);
-    LKH->set_cmd("ST", 0, 1);
-    LWL->set_cmd("ST", 0, 1);
-    LWH->set_cmd("ST", 0, 1);
-    LL->set_cmd("ST", 0, 1);
-    LM->set_cmd("ST", 0, 1);
-    LH->set_cmd("ST", 0, 1);
-    Print("Init Line %d\n\r", number);
-#endif //DEBUG
     Mdls[nmr - 1] = this;
     MdlsCNT++;
     rt_par_float[P_R_NO_FLOW] = 2;
@@ -1441,17 +1442,19 @@ void cipline_tech_object::closeLineValves()
     unsigned int vstart = 1001;
     unsigned int vend = 1099;
     char devname[25];
-#ifdef DEBUG
-    Print("\n\rClosing line valves from %d to %d...", vstart, vend);
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf("\n\rClosing line valves from %d to %d...", vstart, vend);
+        }
     for (i = vstart; i <= vend; i++)
         {
         sprintf(devname, "LINE%dV%d", nmr, i);
         V(devname)->off();
         }
-#ifdef DEBUG
-    Print("\n\rDone closing valves\n\r");
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf("\n\rDone closing valves\n\r");
+        }
     }
 
 int cipline_tech_object::isTank()
@@ -1495,9 +1498,10 @@ int cipline_tech_object::getValvesConflict()
                             {
                             if (lineRecipes->getRecipeValue(loadedRecipe, i) == Mdls[j]->lineRecipes->getRecipeValue(Mdls[j]->loadedRecipe, k) && lineRecipes->getRecipeValue(loadedRecipe, i) < 1000)
                                 {
-#ifdef DEBUG
-                                Print("Opened valve %d on line %d conflicts with valve on line %d", (int)lineRecipes->getRecipeValue(loadedRecipe, i), nmr, Mdls[j]->nmr);
-#endif
+                                if ( G_DEBUG )
+                                    {
+                                    printf("Opened valve %d on line %d conflicts with valve on line %d", (int)lineRecipes->getRecipeValue(loadedRecipe, i), nmr, Mdls[j]->nmr);
+                                    }
                                 return 1;
                                 }
                             }
@@ -1508,9 +1512,10 @@ int cipline_tech_object::getValvesConflict()
                             {
                             if (lineRecipes->getRecipeValue(loadedRecipe, i) == Mdls[j]->lineRecipes->getRecipeValue(Mdls[j]->loadedRecipe, k) && lineRecipes->getRecipeValue(loadedRecipe, i) < 1000)
                                 {
-#ifdef DEBUG
-                                Print("Closed valve %d on line %d conflicts with opened valve on line %d",(int)lineRecipes->getRecipeValue(loadedRecipe, i), nmr, Mdls[j]->nmr);
-#endif
+                                if ( G_DEBUG )
+                                    {
+                                    printf("Closed valve %d on line %d conflicts with opened valve on line %d",(int)lineRecipes->getRecipeValue(loadedRecipe, i), nmr, Mdls[j]->nmr);
+                                    }
                                 return 1;
                                 }
                             }
@@ -1793,7 +1798,7 @@ int cipline_tech_object::EvalCommands()
                             lua_getglobal( L, name_Lua );
                             if (0 != lua_pcall(L, 1, 0, 0))
                                 {
-                                Print("Error in calling cip_On_Resume: %s\n", lua_tostring(L, -1));
+                                printf("Error in calling cip_On_Resume: %s\n", lua_tostring(L, -1));
                                 lua_pop(L, 1);
                                 }
                             }
@@ -2623,7 +2628,7 @@ int cipline_tech_object::_DoStep( int step_to_do )
             lua_getglobal( L, name_Lua );
             if (0 != lua_pcall(L, 1, 0, 0))
                 {
-                Print("Error in calling cip_in_error: %s\n", lua_tostring(L, -1));
+                printf( "Error in calling cip_in_error: %s\n", lua_tostring( L, -1 ) );
                 lua_pop(L, 1);
                 }
             } 
@@ -2843,33 +2848,34 @@ int cipline_tech_object::_CheckErr( void )
         return 0;
         }
 
-#ifndef DEBUG
-    if (NP->get_state() == -1)
+    if ( !G_DEBUG )
         {
-        if (!pumpflag)
+        if (NP->get_state() == -1)
             {
-            pumpflag = 1;
-            pumptimer = get_millisec();
+            if (!pumpflag)
+                {
+                pumpflag = 1;
+                pumptimer = get_millisec();
+                }
+            if (get_delta_millisec(pumptimer) > 1500)
+                {
+                return ERR_PUMP;
+                }
             }
-        if (get_delta_millisec(pumptimer) > 1500)
+        else
             {
-            return ERR_PUMP;
+            pumpflag = 0;
             }
         }
-    else
-        {
-        pumpflag = 0;
-        }
-#endif
 
-
-#ifndef DEBUG
-    //обратная связь возвратного насоса
-    if (dev_m_ret)
+    if ( !G_DEBUG )
         {
-        if (-1 == dev_m_ret->get_state()) return ERR_RET;
+        //обратная связь возвратного насоса
+        if (dev_m_ret)
+            {
+            if (-1 == dev_m_ret->get_state()) return ERR_RET;
+            }
         }
-#endif
     //Проверка обратной связи объекта
     if (dev_os_object)
         {
@@ -2948,9 +2954,10 @@ int cipline_tech_object::_CheckErr( void )
             T[TMR_NO_FLOW]->start();
             if (T[TMR_NO_FLOW]->is_time_up())
                 {
-#ifndef DEBUG
-                return ERR_NO_FLOW;
-#endif // !DEBUG
+                if ( !G_DEBUG )
+                    {
+                    return ERR_NO_FLOW;
+                    }
                 }
             }
         else
@@ -5114,14 +5121,17 @@ int cipline_tech_object::init_object_devices()
         {
         return ERR_WRONG_OS_OR_RECIPE_ERROR;
         }
-#ifdef DEBUG
-    Print("Circ options:FW=%d,FS=%d,FK=%d,CS=%d,CK=%d,SP=%d,count=%d\n\r",
-        circ_podp_water, circ_podp_s, circ_podp_k, circ_tank_s, circ_tank_k, circ_water_no_pump_stop, circ_podp_max_count);
-#endif
+    if ( G_DEBUG )
+        {
+        printf("Circ options:FW=%d,FS=%d,FK=%d,CS=%d,CK=%d,SP=%d,count=%d\n\r",
+            circ_podp_water, circ_podp_s, circ_podp_k, circ_tank_s,
+            circ_tank_k, circ_water_no_pump_stop, circ_podp_max_count);
+        }
 
-#ifdef DEBUG
-    Print("init_object_devices\n\r");
-#endif //DEBUG
+    if ( G_DEBUG )
+        {
+        printf("init_object_devices\n\r");
+        }
     //Обратная связь
     dev_no = (u_int)rt_par_float[P_OS];
     if (dev_no > 0)
@@ -6193,7 +6203,7 @@ int cipline_tech_object::InitCustomStep( int what, int from, int where, int how,
             }
         else
             {
-            Print("Error in calling init_custom_step: %s\n", lua_tostring(L, -1));
+            printf("Error in calling init_custom_step: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6220,7 +6230,7 @@ int cipline_tech_object::EvalCustomStep( int what, int from, int where, int how 
             }
         else
             {
-            Print("Error in calling do_custom_step: %s\n", lua_tostring(L, -1));
+            printf("Error in calling do_custom_step: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6294,7 +6304,7 @@ int cipline_tech_object::GoToStep( int cur, int param )
             }
         else
             {
-            Print("Error in calling cip_GoToStep: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_GoToStep: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6325,7 +6335,7 @@ int cipline_tech_object::DoStep( int step_to_do )
             }
         else
             {
-            Print("Error in calling cip_DoStep: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_DoStep: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6357,7 +6367,7 @@ int cipline_tech_object::InitStep( int step_to_init, int not_first_call )
             }
         else
             {
-            Print("Error in calling cip_InitStep: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_InitStep: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6387,7 +6397,7 @@ int cipline_tech_object::LoadProgram( void )
             }
         else
             {
-            Print("Error in calling cip_LoadProgram: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_LoadProgram: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6410,7 +6420,7 @@ void cipline_tech_object::StopDev( void )
         lua_getglobal( L, name_Lua );
         if (0 != lua_pcall(L, 1, 0, 0))
             {
-            Print("Error in calling cip_StopDev: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_StopDev: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6433,7 +6443,7 @@ void cipline_tech_object::ResetLinesDevicesBeforeReset( void )
         lua_getglobal( L, name_Lua );
         if (0 != lua_pcall(L, 1, 0, 0))
             {
-            Print("Error in calling cip_ResetLinesDevicesBeforeReset: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_ResetLinesDevicesBeforeReset: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6461,7 +6471,7 @@ int cipline_tech_object::OporCIP( int where )
             }
         else
             {
-            Print("Error in calling cip_OporCIP: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_OporCIP: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6494,7 +6504,7 @@ int cipline_tech_object::InitOporCIP( int where, int step_to_init, int not_first
             }
         else
             {
-            Print("Error in calling cip_InitOporCIP: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_InitOporCIP: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6524,7 +6534,7 @@ int cipline_tech_object::CheckErr( void )
             }
         else
             {
-            Print("Error in calling cip_CheckErr: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_CheckErr: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6557,7 +6567,7 @@ int cipline_tech_object::InitCirc( int what, int step_to_init, int not_first_cal
             }
         else
             {
-            Print("Error in calling cip_InitCirc: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_InitCirc: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6588,7 +6598,7 @@ int cipline_tech_object::Circ( int what )
             }
         else
             {
-            Print("Error in calling cip_Circ: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_Circ: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6622,7 +6632,7 @@ int cipline_tech_object::InitToObject( int from, int where, int step_to_init, in
             }
         else
             {
-            Print("Error in calling cip_InitToObject: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_InitToObject: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6656,7 +6666,7 @@ int cipline_tech_object::InitFromObject( int what, int where, int step_to_init, 
             }
         else
             {
-            Print("Error in calling cip_InitFromObject: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_InitFromObject: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6689,7 +6699,7 @@ int cipline_tech_object::InitFilCirc( int with_what, int step_to_init, int not_f
             }
         else
             {
-            Print("Error in calling cip_InitFillCirc: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_InitFillCirc: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6722,7 +6732,7 @@ int cipline_tech_object::InitOporCirc( int where, int step_to_init, int not_firs
             }
         else
             {
-            Print("Error in calling cip_InitOporCirc: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_InitOporCirc: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6754,7 +6764,7 @@ int cipline_tech_object::ToObject( int from, int where )
             }
         else
             {
-            Print("Error in calling cip_ToObject: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_ToObject: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6786,7 +6796,7 @@ int cipline_tech_object::FromObject( int what, int where )
             }
         else
             {
-            Print("Error in calling cip_FromObject: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_FromObject: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6817,7 +6827,7 @@ int cipline_tech_object::FillCirc( int with_what )
             }
         else
             {
-            Print("Error in calling cip_FillCirc: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_FillCirc: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6848,7 +6858,7 @@ int cipline_tech_object::OporCirc( int where )
             }
         else
             {
-            Print("Error in calling cip_OporCirc: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_OporCirc: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6871,7 +6881,7 @@ void cipline_tech_object::RT( void )
         lua_getglobal( L, name_Lua );
         if (0 != lua_pcall(L, 1, 0, 0))
             {
-            Print("Error in calling cip_RT: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_RT: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6893,7 +6903,7 @@ void cipline_tech_object::Stop( int step_to_stop )
         lua_pushinteger(L, step_to_stop);
         if (0 != lua_pcall(L, 2, 0, 0))
             {
-            Print("Error in calling cip_Stop: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_Stop: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6924,7 +6934,7 @@ int cipline_tech_object::InitDoseRR( int what, int step_to_init, int not_first_c
             }
         else
             {
-            Print("Error in calling cip_InitDoseRR: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_InitDoseRR: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -6955,7 +6965,7 @@ int cipline_tech_object::DoseRR( int what )
             }
         else
             {
-            Print("Error in calling cip_DoseRR: %s\n", lua_tostring(L, -1));
+            printf("Error in calling cip_DoseRR: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
             }
         }
@@ -7108,30 +7118,26 @@ float MSAPID::pid_eval( float current_value, int delta_sign /*= 1 */ )
     if ( dmax == dmin )
         {
         dmax = dmin + 1;
-#ifdef DEBUG
-        Print( "Error! PID::eval dmax == dmin!\n" );
-        Print( "Press any key!" );
-        get_char();
-#endif
+        if ( G_DEBUG )
+            {
+            printf( "Error! PID::eval dmax == dmin!\n" );
+            }
         }
 
     float ek = delta_sign * 100 * ( par[ 0 ][ pid_par_offset + P_Z ] - current_value ) /
         ( dmax - dmin );
 
-#ifdef DEBUG
-    if ( dt == 0 )
+    if ( G_DEBUG )
         {
-        Print( "Error! PID::eval dt = 0!\n" );
-        Print( "Press any key!" );
-        get_char();
+        if ( dt == 0 )
+            {
+            printf( "Error! PID::eval dt = 0!\n" );
+            }
+        if ( TI == 0 )
+            {
+            printf( "Error! PID::eval TI = 0!\n" );
+            }
         }
-    if ( TI == 0 )
-        {
-        Print( "Error! PID::eval TI = 0!\n" );
-        Print( "Press any key!" );
-        get_char();
-        }
-#endif
 
     if ( dt == 0 ) dt = 1;
     if ( TI == 0 ) TI = 0.0001f;

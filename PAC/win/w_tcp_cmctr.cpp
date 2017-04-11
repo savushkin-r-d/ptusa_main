@@ -3,8 +3,6 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include <tchar.h>
-
 #include "dtime.h"
 
 #include "w_tcp_cmctr.h"
@@ -12,15 +10,14 @@
 
 #include "tcp_client.h"
 //------------------------------------------------------------------------------
-#ifdef DEBUG
 unsigned int max_buffer_use = 0;
-#endif
+
 //------------------------------------------------------------------------------
-char* WSA_Err_Decode( int ErrCode );
+char* WSA_Last_Err_Decode();
 
 //------------------------------------------------------------------------------
 tcp_communicator_win::tcp_communicator_win( const char *name_rus, const char *name_eng ):
-tcp_communicator(),
+    tcp_communicator(),
     netOK( 0 )
     {
     // Задаем таймаут.
@@ -33,28 +30,29 @@ tcp_communicator(),
 
     net_init();
 
-#ifdef DEBUG
-    char tmp_host_name[ TC_MAX_HOST_NAME ] = { 0 };
-    gethostname( tmp_host_name, TC_MAX_HOST_NAME );
-    printf ( "Host name - \"%s\".\n", tmp_host_name );    
-    hostent *server = gethostbyname( tmp_host_name );
-    if ( server )
+    if ( G_DEBUG ) 
         {
-        if ( server->h_addr_list[ 0 ] )
-        	{
-            struct in_addr addr;
-            addr.s_addr = *( u_long * ) ( server->h_addr_list[ 0 ] );
-            printf( "Host IP   - \"%s\".\n", inet_ntoa( addr ) );
-        	}       
-        }
-    else
-        {
-        Print( "Ошибка получения адреса сервера: %s\n",
-            WSA_Err_Decode( WSAGetLastError() ) );
-        }
+        char tmp_host_name[ TC_MAX_HOST_NAME ] = { 0 };
+        gethostname( tmp_host_name, TC_MAX_HOST_NAME );
+        printf ( "Host name - \"%s\".\n", tmp_host_name );    
+        hostent *server = gethostbyname( tmp_host_name );
+        if ( server )
+            {
+            if ( server->h_addr_list[ 0 ] )
+                {
+                struct in_addr addr;
+                addr.s_addr = *( u_long * ) ( server->h_addr_list[ 0 ] );
+                printf( "Host IP   - \"%s\".\n", inet_ntoa( addr ) );
+                }       
+            }
+        else
+            {
+            printf( "Ошибка получения адреса сервера: %s\n",
+                WSA_Last_Err_Decode() );
+            }
 
-    printf ( "PAC name  - \"%s\" (\"%s\").\n", host_name_rus, host_name_eng );
-#endif // DEBUG
+        printf ( "PAC name  - \"%s\" (\"%s\").\n", host_name_rus, host_name_eng );
+        }
 
     glob_last_transfer_time = get_sec();
     }
@@ -76,14 +74,15 @@ void tcp_communicator_win::killsockets()
     sst.clear();
     }
 //------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int tcp_communicator_win::net_init()
     {
     WSAData tmp_WSA_data;
 
     if ( WSAStartup( 0x202, &tmp_WSA_data ) )
         {
-        Print( "Ошибка инициализации сетевой библиотеки: %s\n",
-            WSA_Err_Decode( WSAGetLastError() ) );
+        printf( "Ошибка инициализации сетевой библиотеки: %s\n",
+            WSA_Last_Err_Decode() );
         return -1;
         }
 
@@ -94,25 +93,27 @@ int tcp_communicator_win::net_init()
 
     if ( master_socket < 0 )
         {
-#ifdef DEBUG
-        Print( "tcp_communicator_windows:net_init() - can't create master socket: %s\n",
-            WSA_Err_Decode( WSAGetLastError() ) );
-#endif // DEBUG
+        if ( G_DEBUG ) 
+            {
+            printf( "tcp_communicator_windows:net_init() - can't create master socket: %s\n",
+                WSA_Last_Err_Decode() );
+            }
         return -4;
         }
 
-#ifdef DEBUG
-    printf( "tcp_communicator_windows:net_init() - master socket [ %d ] created.\n",
-        master_socket );
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        printf( "tcp_communicator_windows:net_init() - master socket [ %d ] created.\n",
+            master_socket );
+        }
 
     //-Переводим в неблокирующий режим.
     u_long mode = 0;
     int res = ioctlsocket( master_socket, FIONBIO, &mode );
     if ( res == SOCKET_ERROR )
         { 
-        Print( "tcp_communicator_windows:net_init() - ошибка  вызова  ioctlsocket: %s\n",
-            WSA_Err_Decode( WSAGetLastError() ) );
+        printf( "tcp_communicator_windows:net_init() - ошибка  вызова  ioctlsocket: %s\n",
+            WSA_Last_Err_Decode() );
         closesocket( master_socket );
         return -1;
         }
@@ -131,37 +132,51 @@ int tcp_communicator_win::net_init()
 
     sst.push_back( master_socket_state );
 
-    const int on = 1;
-    if ( setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, 
-        ( char* ) &on, sizeof( on ) ) )
-        {
-        Print( "tcp_communicator_windows:net_init() - ошибка  вызова  setsockopt: %s\n",
-            WSA_Err_Decode( WSAGetLastError() ) );        
-        closesocket( master_socket );
-        return -5;
-        }
+    //TODO. Для win версии это отключено, чтобы явно возникала ошибка при
+    //запуске двух и более экземпляров программы. Для linux надо изучить
+    //как данный параметр влияет на работу с сокетом. При необходимости
+    //реализовать проверку на максимальное ожидание запросов от сервера.
+    //
+    //const int on = 1;
+    //if ( setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, 
+    //    ( char* ) &on, sizeof( on ) ) )
+    //    {
+    //    printf( "tcp_communicator_windows:net_init() - ошибка  вызова  setsockopt: %s\n",
+    //        WSA_Last_Err_Decode() );        
+    //    closesocket( master_socket );
+    //    return -5;
+    //    }
 
     //-Привязка сокета.
     int err = bind( master_socket, ( struct sockaddr * ) 
         & master_socket_state.sin, sizeof( master_socket_state.sin ) );
     if ( err < 0 )
         {
-#ifdef DEBUG
-        Print( "tcp_communicator_windows:net_init() - can't bind master socket to port %d : %s\n",
-            PORT, WSA_Err_Decode( WSAGetLastError() ) );
-#endif // DEBUG
+        PAC_critical_errors_manager::get_instance()->set_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_BIND_F,
+            0 );                                        //Мастер сокет.
+                
         closesocket( master_socket );
         return -5;
+        }
+    else
+        {
+        PAC_critical_errors_manager::get_instance()->reset_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_BIND_F,
+            0 );
         }
 
     err = listen( master_socket, QLEN ); // Делаем мастер-сокет слушателем.
     if ( type == SOCK_STREAM && err < 0 )
         {
         closesocket( master_socket );
-#ifdef DEBUG
-        Print( "tcp_communicator_windows:net_init() - listen: %s\n",
-            WSA_Err_Decode( WSAGetLastError() ) );        
-#endif // DEBUG
+        if ( G_DEBUG ) 
+            {
+            printf( "tcp_communicator_windows:net_init() - listen: %s\n",
+                WSA_Last_Err_Decode() );        
+            }
         return -6;
         }
 
@@ -172,16 +187,18 @@ int tcp_communicator_win::net_init()
     // Создание серверного сокета modbus_socket.
     err = modbus_socket = socket ( PF_INET, type, protocol );
 
-#ifdef DEBUG
-    printf( "tcp_communicator_windows:net_init() - modbus socket created. Has number %d\n\r",
-        modbus_socket );
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        printf( "tcp_communicator_windows:net_init() - modbus socket created. Has number %d\n\r",
+            modbus_socket );
+        }
 
     if ( modbus_socket < 0 )
         {
-#ifdef DEBUG
-        perror( "tcp_communicator_windows:net_init() - can't create modbus socket" );
-#endif //DEBUG
+        if ( G_DEBUG ) 
+            {
+            perror( "tcp_communicator_windows:net_init() - can't create modbus socket" );
+            }
 
         return -4;
         }
@@ -191,7 +208,7 @@ int tcp_communicator_win::net_init()
     modbus_socket_state.sin.sin_family 	    = AF_INET;
     modbus_socket_state.sin.sin_addr.s_addr = 0;
     modbus_socket_state.sin.sin_port 		= htons ( 10502 ); // Порт.
-	modbus_socket_state.socket = modbus_socket;
+    modbus_socket_state.socket = modbus_socket;
 
     modbus_socket_state.active      = 1;
     modbus_socket_state.is_listener = 1;
@@ -203,10 +220,11 @@ int tcp_communicator_win::net_init()
         sizeof ( modbus_socket_state.sin ) );	   // Привязка сокета.
     if ( err < 0 )
         {
-#ifdef DEBUG
-        printf( "tcp_communicator_windows:net_init() - can't bind modbus socket to port %d : %s\n",
-            502, strerror( errno ) );
-#endif // DEBUG
+        if ( G_DEBUG ) 
+            {
+            printf( "tcp_communicator_windows:net_init() - can't bind modbus socket to port %d : %s\n",
+                10502, WSA_Last_Err_Decode() );
+            }
 
         closesocket( modbus_socket );
         return -5;
@@ -215,9 +233,10 @@ int tcp_communicator_win::net_init()
     if ( type == SOCK_STREAM && err < 0 )
         {
         closesocket( modbus_socket );
-#ifdef DEBUG
-        perror( "tcp_communicator_windows:net_init() - listen" );
-#endif // DEBUG
+        if ( G_DEBUG ) 
+            {
+            perror( "tcp_communicator_windows:net_init() - listen" );
+            }
         return -6;
         }
 #endif //MODBUS
@@ -272,7 +291,7 @@ int tcp_communicator_win::evaluate()
         if ( !netOK ) return -100;
         }
     // Инициализация сети, при необходимости.-!>
-    
+
     int count_cycles = 0;
     while ( count_cycles < max_cycles )
         {
@@ -291,11 +310,11 @@ int tcp_communicator_win::evaluate()
                 }
             }
 
-		//Добавляем асинхронные сокеты в список прослушки
-		for (std::map<int, tcp_client*>::iterator it = clients->begin(); it != clients->end(); ++ it)
-			{
-			FD_SET( it->second->get_socket(), &rfds);
-			}
+        //Добавляем асинхронные сокеты в список прослушки
+        for (std::map<int, tcp_client*>::iterator it = clients->begin(); it != clients->end(); ++ it)
+            {
+            FD_SET( it->second->get_socket(), &rfds);
+            }
 
         //-Ждём события в одном из сокетов.
         rc = select( 0/*Не учитывается*/, &rfds, NULL, NULL, &tv );
@@ -303,10 +322,14 @@ int tcp_communicator_win::evaluate()
 
         if ( rc < 0 )
             {
-#ifdef DEBUG     
-            Print( "Ошибка select: %s\n", WSA_Err_Decode( WSAGetLastError() ) );
-#endif
-            continue;
+            if ( G_DEBUG ) 
+                {     
+                printf( "Ошибка select: %s\n", WSA_Last_Err_Decode() );
+                }
+
+            net_terminate();
+            WSACleanup();
+            return -1;           
             }
 
         for ( u_int i = 0; i < sst.size(); i++ )  /* scan all possible sockets */
@@ -328,45 +351,47 @@ int tcp_communicator_win::evaluate()
 
                     if ( slave_socket <= 0 )    // Ошибка.
                         {
-#ifdef DEBUG
-                        Print( "Ошибка accept(): %s\n",
-                            WSA_Err_Decode( WSAGetLastError() ) );                        
-#endif                        
+                        if ( G_DEBUG ) 
+                            {
+                            printf( "Ошибка accept(): %s\n",
+                                WSA_Last_Err_Decode() );                        
+                            }                       
                         continue;   
                         }
                     // Установка сокета в неблокирующий режим.
                     u_long mode = 0;
                     if ( ioctlsocket( slave_socket, FIONBIO, &mode ) == SOCKET_ERROR ) 
                         {
-                        Print( "Ошибка перевода клиентского сокета в неблокирующий режим: %s\n",
-                            WSA_Err_Decode( WSAGetLastError() ) );
+                        printf( "Ошибка перевода клиентского сокета в неблокирующий режим: %s\n",
+                            WSA_Last_Err_Decode() );
                         // Ошибка, разрушаем сокет.
                         shutdown( slave_socket, SD_BOTH );
                         closesocket( slave_socket );
                         continue;
                         }
-#ifdef DEBUG
+                    if ( G_DEBUG ) 
+                        {
 #ifndef MODBUS
-                    // Определение имени клиента.
-                    hostent *client = gethostbyaddr( ( char* ) &ssin.sin_addr, 4, AF_INET );
+                        // Определение имени клиента.
+                        hostent *client = gethostbyaddr( ( char* ) &ssin.sin_addr, 4, AF_INET );
 
-                    if ( client )
-                        {
-                        printf( "Accepted connection on %d socket from %s [ %s ].\n",
-                            slave_socket, inet_ntoa( ssin.sin_addr ), client->h_name  );
-                        }
+                        if ( client )
+                            {
+                            printf( "Accepted connection on %d socket from %s [ %s ].\n",
+                                slave_socket, inet_ntoa( ssin.sin_addr ), client->h_name  );
+                            }
 
-                    else
-                        {
-                        printf( "Error getting client name. " );
+                        else
+                            {
+                            printf( "Error getting client name. " );
+                            printf( "Accepted connection on %d socket from %s.\n",
+                                slave_socket, inet_ntoa( ssin.sin_addr ) );
+                            }
+#else
                         printf( "Accepted connection on %d socket from %s.\n",
                             slave_socket, inet_ntoa( ssin.sin_addr ) );
-                        }
-#else
-                    printf( "Accepted connection on %d socket from %s.\n",
-                        slave_socket, inet_ntoa( ssin.sin_addr ) );
 #endif //  MODBUS
-#endif // DEBUG
+                        }
 
 #ifdef MODBUS
                     if ( sst[ i ].socket != modbus_socket )
@@ -391,48 +416,48 @@ int tcp_communicator_win::evaluate()
                     }
                 else         /* slave socket */
                     {
-					do_echo ( i );
-					glob_last_transfer_time = get_sec();
+                    do_echo ( i );
+                    glob_last_transfer_time = get_sec();
                     }
                 }
             }
-//проверка асинхронных сокетов на предмет поступления данных
-		for (std::map<int, tcp_client*>::iterator it = clients->begin(); it != clients->end();)
-			{
-			int is_removed = 0;
-			if (FD_ISSET(it->second->get_socket(), &rfds)) //если есть событие на сокете
-				{
-				int err = in_buffer_count = recvtimeout(it->second->get_socket(), (unsigned char*)it->second->buff, it->second->buff_size, 1, 0);
-				if (err <= 0) //Ошибка чтения
-					{
-					it->second->Disconnect();
-					it->second->set_async_result(it->second->AR_SOCKETERROR);
-					}
-				else //Получены данные
-					{
-					it->second->set_async_result(in_buffer_count);
-					}
-				is_removed = 1;
-				}
-			else //проверяем на таймаут
-				{
-				if (get_delta_millisec(it->second->async_queued) > it->second->async_timeout)
-					{
-					it->second->Disconnect();
-					it->second->set_async_result(it->second->AR_TIMEOUT);
-					is_removed = 1;
-					}
-				}
+        //проверка асинхронных сокетов на предмет поступления данных
+        for (std::map<int, tcp_client*>::iterator it = clients->begin(); it != clients->end();)
+            {
+            int is_removed = 0;
+            if (FD_ISSET(it->second->get_socket(), &rfds)) //если есть событие на сокете
+                {
+                int err = in_buffer_count = recvtimeout(it->second->get_socket(), (unsigned char*)it->second->buff, it->second->buff_size, 1, 0);
+                if (err <= 0) //Ошибка чтения
+                    {
+                    it->second->Disconnect();
+                    it->second->set_async_result(it->second->AR_SOCKETERROR);
+                    }
+                else //Получены данные
+                    {
+                    it->second->set_async_result(in_buffer_count);
+                    }
+                is_removed = 1;
+                }
+            else //проверяем на таймаут
+                {
+                if (get_delta_millisec(it->second->async_queued) > it->second->async_timeout)
+                    {
+                    it->second->Disconnect();
+                    it->second->set_async_result(it->second->AR_TIMEOUT);
+                    is_removed = 1;
+                    }
+                }
 
-			if (is_removed)
-				{
-				clients->erase(it++);
-				}
-			else
-				{
-				it++;
-				}
-			}
+            if (is_removed)
+                {
+                clients->erase(it++);
+                }
+            else
+                {
+                it++;
+                }
+            }
 
         }  /* service loop */
 
@@ -445,7 +470,7 @@ int tcp_communicator_win::evaluate()
     }
 //------------------------------------------------------------------------------
 int tcp_communicator_win::recvtimeout( u_int s, u_char *buf,
-    int len, int timeout, int usec )
+                                      int len, int timeout, int usec )
     {
     // Настраиваем  file descriptor set.
     fd_set fds;
@@ -491,32 +516,33 @@ int tcp_communicator_win::do_echo( int idx )
 
     if ( err <= 0 )               /* read error */
         {
-#ifdef DEBUG
-        switch ( err )
+        if ( G_DEBUG ) 
             {
-        case 0:
-            printf( "Socket %d->\"%s\" was closed.\n",
-                sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ) );
-            break;
+            switch ( err )
+                {
+                case 0:
+                    printf( "Socket %d->\"%s\" was closed.\n",
+                        sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ) );
+                    break;
 
-        case -1:
-            printf( "Socket %d->\"%s\" disconnected on read try : %s\n",
-                sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ),
-                WSA_Err_Decode( WSAGetLastError() ) );
-            break;
+                case -1:
+                    printf( "Socket %d->\"%s\" disconnected on read try : %s\n",
+                        sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ),
+                        WSA_Last_Err_Decode() );
+                    break;
 
-        case -2:
-            printf( "Socket %d->\"%s\" disconnected on read try - timeout.\n",
-                sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ) );
-            break;
+                case -2:
+                    printf( "Socket %d->\"%s\" disconnected on read try - timeout.\n",
+                        sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ) );
+                    break;
 
-        default:
-            printf( "Socket %d->\"%s\" disconnected on read try : %s\n",
-                sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ),
-                WSA_Err_Decode( WSAGetLastError() ) );
-            break;
+                default:
+                    printf( "Socket %d->\"%s\" disconnected on read try : %s\n",
+                        sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ),
+                        WSA_Last_Err_Decode() );
+                    break;
+                }
             }
-#endif // DEBUG
 
         shutdown( sock_state.socket, 0 );
         closesocket( sock_state.socket );
@@ -524,13 +550,14 @@ int tcp_communicator_win::do_echo( int idx )
         return err;
         }
 
-#ifdef DEBUG
-    if ( in_buffer_count > max_buffer_use )
+    if ( G_DEBUG ) 
         {
-        max_buffer_use = in_buffer_count;
-        printf( "Max buffer use %u\n", max_buffer_use );
+        if ( in_buffer_count > max_buffer_use )
+            {            
+            max_buffer_use = in_buffer_count + in_buffer_count / 10;
+            printf( "Max buffer use %u\n", max_buffer_use );
+            }
         }
-#endif // DEBUG
 
     //Структура полученных данных.
     //buff[0] = 's';
@@ -549,34 +576,36 @@ int tcp_communicator_win::do_echo( int idx )
         {
         switch ( buf[ 2 ] )
             {
-        case FRAME_SINGLE:
-            res = services[ buf[ 1 ] ] ( 
-                ( u_int ) ( buf[ 4 ] * 256 + buf[ 5 ] ), buf + 6, buf + 5 );
+            case FRAME_SINGLE:
+                res = services[ buf[ 1 ] ] ( 
+                    ( u_int ) ( buf[ 4 ] * 256 + buf[ 5 ] ), buf + 6, buf + 5 );
 
-            if ( res == 0 )
-                {
-                _AknOK();
-                }
-            else
-                {
-                _AknData( res );
-#ifdef DEBUG
-                if ( ( unsigned int ) res > max_buffer_use )
+                if ( res == 0 )
                     {
-                    max_buffer_use = res;
-                    printf( "Max buffer use %u\n", res );
+                    _AknOK();
                     }
-#endif
-                }
-            break;
+                else
+                    {
+                    _AknData( res );
+                    if ( G_DEBUG ) 
+                        {
+                        if ( ( unsigned int ) res > max_buffer_use )
+                            {
+                            max_buffer_use = res + res / 10;
+                            printf( "Max buffer use %u\n", res );
+                            }
+                        }
+                    }
+                break;
 
-        default:
-            _ErrorAkn( ERR_WRONG_CMD );
-#ifdef DEBUG
-            printf( "Wrong command received on socket %d->\"%s\"\n",
-                sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ) );
-#endif // DEBUG
-            break;
+            default:
+                _ErrorAkn( ERR_WRONG_CMD );
+                if ( G_DEBUG ) 
+                    {
+                    printf( "Wrong command received on socket %d->\"%s\"\n",
+                        sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ) );
+                    }
+                break;
             }
         }
     else
@@ -597,28 +626,25 @@ int tcp_communicator_win::do_echo( int idx )
         else
             {
             _ErrorAkn( ERR_WRONG_SERVICE );
-#ifdef DEBUG
-            printf( "No such service %d at socket %d->\"%s\"\n",
-                buf[ 1 ], sock_state.socket, 
-                inet_ntoa( sock_state.sin.sin_addr ) );
-#endif // DEBUG
+            if ( G_DEBUG ) 
+                {
+                printf( "No such service %d at socket %d->\"%s\"\n",
+                    buf[ 1 ], sock_state.socket, 
+                    inet_ntoa( sock_state.sin.sin_addr ) );
+                }
             }
         }
 
     err = send( sock_state.socket, ( char* ) buf, in_buffer_count, 0 );
-    if ( is_going_to_reboot )
-        {
-        killsockets();
-        Sleep( 800000 );
-        }
 
     if ( err <= 0 )               /* write error */
         {
-#ifdef DEBUG
-        printf( "Socket %d->\"%s\" disconnected on write try : %s\n",
-            sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ),
-            WSA_Err_Decode( WSAGetLastError() ) );
-#endif // DEBUG
+        if ( G_DEBUG ) 
+            {
+            printf( "Socket %d->\"%s\" disconnected on write try : %s\n",
+                sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ),
+                WSA_Last_Err_Decode() );
+            }
 
         shutdown( sock_state.socket, 0 );
         closesocket( sock_state.socket );

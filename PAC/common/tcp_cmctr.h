@@ -59,14 +59,14 @@ class tcp_communicator
         /// @return - сетевое имя PAC на английском языке.
         char* get_host_name_eng();
 
-		virtual int add_async_client(tcp_client* client);
-		virtual int remove_async_client(tcp_client* client);
+        virtual int add_async_client(tcp_client* client);
+        virtual int remove_async_client(tcp_client* client);
 
         virtual ~tcp_communicator();
 
         enum CONSTANTS
             {
-            BUFSIZE     = 100000,          ///< Размер буфера.
+            BUFSIZE     = 5000000,         ///< Размер буфера.
             PORT        = 10000,           ///< Порт.
             PORT_MODBUS = 10502,
 #ifdef LINUX_OS
@@ -109,7 +109,6 @@ class tcp_communicator
         char    host_name_eng[ TC_MAX_HOST_NAME ];      ///< Сетевое имя PAC.
 
         int max_cycles;         ///< Максимальное количество циклов обработки состояний сокетов за 1 проход.
-        int is_going_to_reboot; ///< Флаг перезагрузки PAC.
         int glob_cmctr_ok;      ///< Флаг активности обмена с сервером.
 
         u_int   in_buffer_count;///< Количество данных в буфере.
@@ -118,7 +117,7 @@ class tcp_communicator
         u_char pidx;            ///< Номер ответа.
         int    net_id;          ///< Номер PAC.
 
-		std::map<int, tcp_client*> *clients;
+        std::map<int, tcp_client*> *clients;
 
         void _ErrorAkn( u_char error );
         void _AknData( u_long len );

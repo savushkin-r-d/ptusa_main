@@ -30,15 +30,26 @@ int project_manager::proc_main_params( int argc, char *argv[] )
     {
     for ( int i = 1; i < argc; i++ )
         {
+        if ( strcmp( argv[ i ], "debug" ) == 0 )
+            {
+            G_DEBUG = 1;
+            printf( "DEBUG ON.\n" );
+            }
+        }
+
+    for ( int i = 1; i < argc; i++ )
+        {
         if ( strcmp( argv[ i ], "rcrc" ) == 0 )
             {
-#ifdef DEBUG
-            Print( "Resetting CRC ... " );
-#endif
+            if ( G_DEBUG ) 
+                {
+                printf( "Resetting CRC ... " );
+                }
             params_manager::get_instance()->reset_CRC();
-#ifdef DEBUG
-            Print( "completed.\n" );
-#endif
+            if ( G_DEBUG ) 
+                {
+                printf( "completed.\n" );
+                }
             }
         }
 
@@ -78,63 +89,72 @@ project_manager::~project_manager()
 //3.Переменные для доступа к устройства из Lua (совпадают с именем устройства).
 int project_manager::lua_load_configuration()
     {
-#ifdef DEBUG
-    Print( "\nProject manager - processing configuration...\n" );
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        printf( "\nProject manager - processing configuration...\n" );
+        }
 
     //-Wago modules data.
     lua_manager::get_instance()->void_exec_lua_method( "system",
         "create_wago", "project_manager::lua_load_configuration()" );
 
-#ifdef DEBUG
-    wago_manager::get_instance()->print();
-    Print( "\n" );
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        wago_manager::get_instance()->print();
+        printf( "\n" );
+        }
 
     //-Devices data.
     lua_manager::get_instance()->void_exec_lua_method( "system",
         "create_devices", "project_manager::lua_load_configuration()" );
 
-#ifdef DEBUG
-    printf( "Получение имен и комментария к устройствам из Lua...\n");
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        printf( "Получение имен и комментария к устройствам из Lua...\n");
+        }
     //Получение имен и комментария к устройствам из Lua.
     lua_manager::get_instance()->void_exec_lua_method( "system",
         "init_devices_names", "project_manager::lua_load_configuration()" );
-#ifdef DEBUG
-    printf( "Oк.\n");
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        printf( "Oк.\n");
+        }
 
-#ifdef DEBUG
-    printf( "Name for devices to access from Lua...\n");
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        printf( "Name for devices to access from Lua...\n");
+        }
     //-Name for devices to access from Lua.
     lua_manager::get_instance()->void_exec_lua_method( "system",
         "init_dev_names", "project_manager::lua_load_configuration()" );
-#ifdef DEBUG
-    printf( "Oк.\n");
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        printf( "Oк.\n");
+        }
 
-#ifdef DEBUG
-    printf( "Devices properties...\n");
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        printf( "Devices properties...\n");
+        }
     //-Devices properties.
     lua_manager::get_instance()->void_exec_lua_method( "system",
         "init_devices_properties", "project_manager::lua_load_configuration()" );
-#ifdef DEBUG
-    printf( "Oк.\n");
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        printf( "Oк.\n");
+        }
 
-#ifdef DEBUG
-    G_DEVICE_MANAGER()->print();
-    Print( "\n" );
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        G_DEVICE_MANAGER()->print();
+        printf( "\n" );
+        }
 
     int res = lua_manager::get_instance()->int_exec_lua_method( "",
         "init_tech_objects", 0, "project_manager::lua_load_configuration()" );
     if ( res )
         {
-        Print( "Fatal error!\n" );
+        printf( "Fatal error!\n" );
         return 1;
         }
 
@@ -142,7 +162,7 @@ int project_manager::lua_load_configuration()
         "get_objects_count", 0, "project_manager::lua_load_configuration()" );
     if ( res < 0 )
         {
-        Print( "Fatal error!\n" );
+        printf( "Fatal error!\n" );
         return 1;
         }
 
@@ -155,17 +175,18 @@ int project_manager::lua_load_configuration()
 
         if ( 0 == res_object )
             {
-            Print( "Fatal error!\n" );
+            printf( "Fatal error!\n" );
             return 1;
             }
 
         G_TECH_OBJECT_MNGR()->add_tech_object( ( tech_object * ) res_object );
         }
 
-#ifdef DEBUG
-    G_TECH_OBJECT_MNGR()->print();
-    Print( "\n" );
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        G_TECH_OBJECT_MNGR()->print();
+        printf( "\n" );
+        }
 
     //-Добавление технологических объектов проекта.
     for ( u_int i = 0; i < G_TECH_OBJECT_MNGR()->get_count(); i++ )
@@ -174,45 +195,50 @@ int project_manager::lua_load_configuration()
         }
     //-Добавление системных тегов контроллера.
     G_DEVICE_CMMCTR->add_device( PAC_info::get_instance() );
-   
+
     G_DEVICE_CMMCTR->add_device( siren_lights_manager::get_instance() );
 
-#ifdef DEBUG
-    printf( "Получение конфигурации Profibus DP slave...\n");
-#endif // DEBUG
-    
+    if ( G_DEBUG ) 
+        {
+        printf( "Получение конфигурации Profibus DP slave...\n");
+        }
+
     lua_manager::get_instance()->void_exec_lua_method( "system",
         "init_profibus", "project_manager::lua_load_configuration()" );
-#ifdef DEBUG
-    printf( "Oк.\n");
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        printf( "Oк.\n");
+        }
 
 
 #ifdef RM_PAC
     // Добавление удаленных PAC.
-#ifdef DEBUG
-    printf( "Remote PAC's...\n");
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        printf( "Remote PAC's...\n");
+        }
 
     res = lua_manager::get_instance()->int_exec_lua_method( "system",
         "init_rm_PACs", 0, "project_manager::lua_load_configuration()" );
     if ( res < 0 )
         {
-        Print( "Fatal error!\n" );
+        printf( "Fatal error!\n" );
         return 1;
         }
 
-#ifdef DEBUG
-    G_RM_MANAGER()->print();
-    Print( "\n" );
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        G_RM_MANAGER()->print();
+        printf( "\n" );
+        }
 
 #endif // RM_PAC
 
-#ifdef DEBUG
-    Print( "Project manager - processing configuration completed.\n" );
-    Print( "\n" );
-#endif // DEBUG
+    if ( G_DEBUG ) 
+        {
+        printf( "Project manager - processing configuration completed.\n" );
+        printf( "\n" );
+        }
 
     return 0;
     }

@@ -1,6 +1,11 @@
 #include "WSA_err_decode.h"
 #include <windows.h>
 //-----------------------------------------------------------------------------
+char* WSA_Last_Err_Decode ()
+    {
+    return WSA_Err_Decode( WSAGetLastError() );
+    }
+//-----------------------------------------------------------------------------
 char* WSA_Err_Decode ( int err_code )
     {
     switch ( err_code )

@@ -91,11 +91,8 @@
     <Filter Include="Source Files\common\QuickLZ">
       <UniqueIdentifier>{381898a8-2025-474c-892f-c3f50269d0fd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\PAC\common\cip">
-      <UniqueIdentifier>{9f30934f-9bf6-4da9-9c19-779d5d8319bd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\PAC\common\cip">
-      <UniqueIdentifier>{85af4eb6-ac0a-4ffe-9137-4e0e7eaa2a49}</UniqueIdentifier>
+    <Filter Include="Source Files\PAC\linux">
+      <UniqueIdentifier>{5a35783f-4790-493c-b0d6-794b3ac0e1eb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -258,6 +255,9 @@
     <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh">
       <Filter>pkg</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\cip_tech_def.h">
+      <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\rm_tech_def.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
@@ -269,6 +269,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\common\win_util\WSA_err_decode.h">
       <Filter>Header Files\PAC\win</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\mcaRec.h">
+      <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\modbus_serv.h">
       <Filter>Header Files\PAC\common</Filter>
@@ -299,12 +302,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.h">
       <Filter>Header Files\PAC\win\PAC_PC</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\PAC\common\cip_tech_def.h">
-      <Filter>Header Files\PAC\common\cip</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\PAC\common\mcaRec.h">
-      <Filter>Header Files\PAC\common\cip</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -494,6 +491,9 @@
     <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp">
       <Filter>Source Files\PAC\win</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\mcaRec.cpp">
+      <Filter>Source Files\PAC\common</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\modbus_serv.cpp">
       <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
@@ -515,14 +515,29 @@
     <ClCompile Include="..\..\..\PAC\common\profibus_slave.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp">
+      <Filter>Source Files\PAC\common\sys</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp">
-      <Filter>Source Files\PAC\common\cip</Filter>
+    <ClCompile Include="..\..\..\PAC\linux\l_console.cpp">
+      <Filter>Source Files\PAC\linux</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\PAC\common\mcaRec.cpp">
-      <Filter>Source Files\PAC\common\cip</Filter>
+    <ClCompile Include="..\..\..\PAC\linux\l_dtime.cpp">
+      <Filter>Source Files\PAC\linux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\linux\l_mem.cpp">
+      <Filter>Source Files\PAC\linux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\linux\l_tcp_client.cpp">
+      <Filter>Source Files\PAC\linux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\linux\l_tcp_cmctr.cpp">
+      <Filter>Source Files\PAC\linux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\linux\l_wago.cpp">
+      <Filter>Source Files\PAC\linux</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

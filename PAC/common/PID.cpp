@@ -45,18 +45,19 @@ float PID::eval( float currentValue, int deltaSign )
         TI = par[ 0 ][ P_Ti2 ];
         TD = par[ 0 ][ P_Td2 ];
         }
-#ifdef DEBUG
     else
         {
-        if ( used_par_n != 1 )
+        if ( G_DEBUG )
             {
-            Print( "Error: void  PID::eval( float currentValue, int deltaSign ), used_par_n = %d\n",
-                used_par_n );
-            Print( "Press any key!\n" );
-            get_char();
+            if ( used_par_n != 1 )
+                {
+                printf( "Error: void  PID::eval( float currentValue, int deltaSign ), used_par_n = %d\n",
+                    used_par_n );
+                printf( "Press any key!\n" );
+                get_char();
+                }
             }
         }
-#endif
 
     float dt = par[ 0 ][ P_dt ] / 1000;
     float dmax = par[ 0 ][ P_max ];
@@ -65,30 +66,32 @@ float PID::eval( float currentValue, int deltaSign )
     if ( dmax == dmin )
         {
         dmax = dmin + 1;
-#ifdef DEBUG
-        Print( "Error! PID::eval dmax == dmin!\n" );
-        Print( "Press any key!" );
-        get_char();
-#endif
+        if ( G_DEBUG )
+            {
+            printf( "Error! PID::eval dmax == dmin!\n" );
+            printf( "Press any key!" );
+            get_char();
+            }
         }
 
     float ek = deltaSign * 100 * ( w_par[ 0 ][ WP_Z ] - currentValue ) /
         ( dmax - dmin );
 
-#ifdef DEBUG
-    if ( dt == 0 )
+    if ( G_DEBUG )
         {
-        Print( "Error! PID::eval dt = 0!\n" );
-        Print( "Press any key!" );
-        get_char();
+        if ( dt == 0 )
+            {
+            printf( "Error! PID::eval dt = 0!\n" );
+            printf( "Press any key!" );
+            get_char();
+            }
+        if ( TI == 0 )
+            {
+            printf( "Error! PID::eval TI = 0!\n" );
+            printf( "Press any key!" );
+            get_char();
+            }
         }
-    if ( TI == 0 )
-        {
-        Print( "Error! PID::eval TI = 0!\n" );
-        Print( "Press any key!" );
-        get_char();
-        }
-#endif
 
     if ( dt == 0 ) dt = 1;
     if ( TI == 0 ) TI = 0.0001f;
@@ -147,21 +150,22 @@ float PID::eval( float currentValue, int deltaSign )
     float out_max = par[ 0 ][ P_out_max ];
     float out_min = par[ 0 ][ P_out_min ];
 
-#ifdef DEBUG
-    if ( out_max <= out_min )
+    if ( G_DEBUG )
         {
-        Print( "Error! PID::eval out_max <= out_min (%f == %f)!\n",
-            out_max, out_min );
-        Print( "Press any key!" );
-        get_char();
+        if ( out_max <= out_min )
+            {
+            printf( "Error! PID::eval out_max <= out_min (%f == %f)!\n",
+                out_max, out_min );
+            printf( "Press any key!" );
+            get_char();
+            }
+        if ( out_max == 0 )
+            {
+            printf( "Error! PID::eval out_max = 0!\n" );
+            printf( "Press any key!" );
+            get_char();
+            }
         }
-    if ( out_max == 0 )
-        {
-        Print( "Error! PID::eval out_max = 0!\n" );
-        Print( "Press any key!" );
-        get_char();
-        }
-#endif
 
     if ( Uk < out_min )
         {
@@ -215,11 +219,12 @@ void  PID::set_used_par( int parN )
     {
     if ( parN < 1 || parN > 2 )
         {
-#ifdef DEBUG
-        Print( "Error: void  PID::set_used_par ( int parN ), parN = %d\n", parN );
-        Print( "Press any key!\n" );
-        get_char();
-#endif
+        if ( G_DEBUG )
+            {
+            printf( "Error: void  PID::set_used_par ( int parN ), parN = %d\n", parN );
+            printf( "Press any key!\n" );
+            get_char();
+            }
         used_par_n = 1;
         }
     else used_par_n = parN;
@@ -282,10 +287,10 @@ float PID::get_assignment()
 //-----------------------------------------------------------------------------
 void PID::print() const
     {
-    Print( "PID\n" );
+    printf( "PID\n" );
 
     par->print();
-    Print( "P_k = %f\n", par[ 0 ][ P_k ] );
+    printf( "P_k = %f\n", par[ 0 ][ P_k ] );
 
     w_par->print();
     }

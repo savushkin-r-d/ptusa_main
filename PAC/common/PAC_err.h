@@ -19,6 +19,8 @@
 #ifndef PAC_ERRORS_H
 #define PAC_ERRORS_H
 
+#include <errno.h>
+
 #include <string.h>
 #include <vector>
 
@@ -55,6 +57,8 @@ class PAC_critical_errors_manager
 
             AC_COM_DRIVER,    ///< Ошибка работы с COM-портом.
             AC_RUNTIME_ERROR, ///< Ошибки во время работы.
+
+            AC_NET,           ///< Ошибки сетевой работы.
             };
 
         enum ALARM_SUBCLASS         ///< Подкласс тревоги.
@@ -69,6 +73,12 @@ class PAC_critical_errors_manager
 
             //AC_RUNTIME_ERROR,     ///< Ошибки во время работы.
             AS_EMERGENCY_BUTTON = 1,///< Нажата аварийная кнопка.
+
+            //AC_NET,               ///< Ошибки сетевой работы.
+            AS_SOCKET_F         = 1,///< Функция socket.
+            AS_BIND_F,              ///< Функция bind.
+            AS_SETSOCKOPT_F,
+            AS_LISTEN_F,
             };
 
     public:
@@ -79,7 +89,7 @@ class PAC_critical_errors_manager
 
         PAC_critical_errors_manager();
 
-        void show_errors();
+        void show_errors() const;
         void set_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1,
             unsigned long param );
         void reset_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1,
@@ -100,66 +110,14 @@ class PAC_critical_errors_manager
             }
 
     private:
-        const char* get_alarm_group()
+        static const char* get_alarm_group()
             {
             return "Авария";
             }
 
         const char* get_alarm_descr( ALARM_CLASS err_class,
-            ALARM_SUBCLASS err_sub_class, int par )
-            {
-            static char tmp[ 100 ] = "";
+            ALARM_SUBCLASS err_sub_class, int par, bool is_set );
 
-            switch( err_class )
-                {
-            case AC_UNKNOWN:
-                return "?";
-
-            case AC_NO_CONNECTION:
-                switch( err_sub_class )
-                    {
-                case AS_WAGO:
-                    sprintf( tmp,
-                        "Нет связи с узлом Wago '%s' ('%s', '%s')",
-                        G_WAGO_MANAGER()->get_node( par - 1 )->name,
-                        G_WAGO_MANAGER()->get_node( par - 1 )->ip_address,
-                        G_CMMCTR->get_host_name_rus() );
-                    return tmp;
-
-                case AS_PANEL:
-                    sprintf( tmp, "Нет связи с панелью EasyView №%d", par );
-                    return tmp;
-
-                case AS_MODBUS_DEVICE:
-                    sprintf( tmp, "Нет связи с Modbus-устройством №%d", par );
-                    return tmp;
-
-                case AS_EASYSERVER:
-                    return "EasyServer";
-
-                case AS_REMOTE_PAC:
-                    return "Remote PAC";
-                    }//switch( err_sub_class )
-                break;
-
-            case AC_COM_DRIVER:
-                return "?";
-                break;
-
-            case AC_RUNTIME_ERROR:
-                switch( err_sub_class )
-                    {
-                case AS_EMERGENCY_BUTTON:
-                    sprintf( tmp, "нажата аварийная кнопка №%d", par );
-                    return tmp;
-
-                default:
-                    return "?";
-                    }// switch( err_sub_class )
-                }// switch( err_class )
-
-            return "?";
-            }
 
         static auto_smart_ptr < PAC_critical_errors_manager > instance;
 

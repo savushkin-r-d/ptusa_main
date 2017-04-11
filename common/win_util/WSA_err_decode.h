@@ -12,6 +12,8 @@
 /// @$Date::                     $.
 
 #pragma once
+/// @brief Расшифровка последней ошибки библиотеки WSA.
+char* WSA_Last_Err_Decode ();
 
 /// @brief Расшифровка ошибок библиотеки WSA.
 ///

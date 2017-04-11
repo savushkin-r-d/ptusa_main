@@ -10,7 +10,7 @@ int win_rm_cmmctr::net_init()
     if ( WSAStartup( 0x202, &tmpWSAData ) )
         {
         fprintf( stderr, "Error initializing network library: " );
-        fprintf( stderr, WSA_Err_Decode( WSAGetLastError() ) );
+        fprintf( stderr, WSA_Last_Err_Decode() );
         fprintf( stderr, "\n" );
         return 1;
         }
@@ -96,9 +96,10 @@ int win_rm_cmmctr::send_2_PAC( int service_n, const char *cmd_str, int length )
         {
         fprintf( stderr, "Возвращен неверный ответ!" );        
         disconnect();
-#ifdef DEBUG
-        //        _DebugBreak();
-#endif
+        if ( G_DEBUG ) 
+            {
+            //        _DebugBreak();
+            }
         return 1;
         }           
 
@@ -211,7 +212,7 @@ int win_rm_cmmctr::evaluate()
             { 
             if ( devices_request_id != ( ( u_int_2* ) answer )[ 0 ] )
                 {
-                Print( "Устройства %s изменились.\n", name );
+                printf( "Устройства %s изменились.\n", name.c_str() );
 
                 got_devices = false;
                 }
@@ -256,28 +257,30 @@ int win_rm_cmmctr::connect_to_PAC()
 
     if ( remote_PAC_socket < 0 )
         {
-#ifdef DEBUG
-        Print( "rm_cmmct_win - can't create master socket: %s\n",
-            WSA_Err_Decode( WSAGetLastError() ) );
-#endif // DEBUG
+if ( G_DEBUG ) 
+ {
+        printf( "rm_cmmct_win - can't create master socket: %s\n",
+            WSA_Last_Err_Decode() );
+}
         return -4;
         }
 
-#ifdef DEBUG
+if ( G_DEBUG ) 
+ {
     if( is_set_select_err == false )
         {
-        Print( "rm_cmmct_win - master socket [ %d ] created.\n",
+        printf( "rm_cmmct_win - master socket [ %d ] created.\n",
             remote_PAC_socket );
         }
-#endif // DEBUG
+}
 
     //-Адресация мастер-сокета.
     const int on = 1;
     if ( setsockopt( remote_PAC_socket, SOL_SOCKET, SO_REUSEADDR, 
         ( char* ) &on, sizeof( on ) ) )
         {
-        Print( "rm_cmmct_win - ошибка  вызова  setsockopt: %s\n",
-            WSA_Err_Decode( WSAGetLastError() ) );        
+        printf( "rm_cmmct_win - ошибка  вызова  setsockopt: %s\n",
+            WSA_Last_Err_Decode() );        
         closesocket( remote_PAC_socket );
         return -5;
         }

@@ -17,7 +17,6 @@ auto_smart_ptr < tcp_communicator > tcp_communicator::instance = 0;
 //------------------------------------------------------------------------------
 tcp_communicator::tcp_communicator(): in_buffer_count( 0 ), pidx( 0 ), net_id( 0 )
     {
-    is_going_to_reboot  = 0;
     max_cycles          = 10;
     glob_cmctr_ok       = 1;
     for ( int i = 0; i < TC_MAX_SERVICE_NUMBER; i++ ) services[ i ] = NULL;
@@ -26,7 +25,7 @@ tcp_communicator::tcp_communicator(): in_buffer_count( 0 ), pidx( 0 ), net_id( 0
     memset( host_name_eng, 0, TC_MAX_HOST_NAME );
 
     memset( buf, 0, BUFSIZE );
-	clients = new std::map<int, tcp_client*>();
+    clients = new std::map<int, tcp_client*>();
     }
 //------------------------------------------------------------------------------
 tcp_communicator::srv_ptr tcp_communicator::reg_service( u_char srv_id,
@@ -91,7 +90,7 @@ char* tcp_communicator::get_host_name_eng()
 //------------------------------------------------------------------------------
 tcp_communicator::~tcp_communicator()
     {
-	delete clients;
+    delete clients;
     }
 //------------------------------------------------------------------------------
 void tcp_communicator::init_instance( const char *name_rus, const char *name_eng )
@@ -106,20 +105,20 @@ void tcp_communicator::init_instance( const char *name_rus, const char *name_eng
     }
 
 int tcp_communicator::add_async_client( tcp_client* client )
-	{
-	clients[0][client->get_socket()] = client;
-	client->async_queued = get_millisec();
-	return 0;
-	}
+    {
+    clients[0][client->get_socket()] = client;
+    client->async_queued = get_millisec();
+    return 0;
+    }
 
 int tcp_communicator::remove_async_client( tcp_client* client )
-	{
-	std::map<int, tcp_client*>::iterator it = clients->find(client->get_socket());
-	if (it != clients->end())
-		{
-		clients->erase(it);
-		}
-	return 0;
-	}
+    {
+    std::map<int, tcp_client*>::iterator it = clients->find(client->get_socket());
+    if (it != clients->end())
+        {
+        clients->erase(it);
+        }
+    return 0;
+    }
 
 //------------------------------------------------------------------------------

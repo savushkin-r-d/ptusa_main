@@ -40,7 +40,8 @@ struct socket_state
     sockaddr_in sin; ///< Адрес клиента.
 
 
-    stat_time stat;  ///< Статистика работы с сокетом.
+    stat_time recv_stat;  ///< Статистика работы с сокетом.
+    stat_time send_stat;  ///< Статистика работы с сокетом.
     };
 //-----------------------------------------------------------------------------
 /// @brief Коммуникатор для Linux - обмен данными PAC<->сервер.
@@ -85,40 +86,9 @@ class tcp_communicator_linux : public tcp_communicator
             void net_terminate();
 
         public:
-            int sendall (int sockfd, unsigned char *buf, int len, long fsize)
-                {
-                int total_size = 0;
-                int n = 1;
-                unsigned char *p = buf;
-
-                for ( int i = len; i > 0; )
-                    {
-                    static int err_cnt = 0;
-                    if ( ( n = send( sockfd, p, i, 0 ) ) < 0 )
-                        {
-                        err_cnt++;
-                        usleep( 100000 );
-                        if ( err_cnt > 3 )
-                            {
-#ifdef DEBUG
-//                            Print( "tcp_communicator_linux::send_all(): "
-//                                "send %i byte of %d.\n", total_size, len );
-#endif
-                            break;
-                            }
-
-                        continue;
-                        }
-
-                    err_cnt = 0;
-                    i -= n;
-                    p += n;
-
-                    total_size += n;
-                    }
-
-                return n;
-                }
+            static int sendall (int sockfd, unsigned char *buf, int len,
+                int sec, int usec, const char* IP, const char* name,
+                stat_time *stat );
 
             /// @brief Получение данных с таймаутом.
             ///
@@ -136,7 +106,7 @@ class tcp_communicator_linux : public tcp_communicator
             /// @return >= 0 - размер реально считанных данных.
             static int  recvtimeout( int s, u_char *buf, int len,
                 int sec, int usec, const char* IP, const char* name,
-		stat_time *stat );
+                stat_time *stat );
     };
 //-----------------------------------------------------------------------------
 #endif //TCP_CMCTR_LINUX

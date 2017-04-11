@@ -12,14 +12,12 @@
 
 #include "log.h"
 
-//#ifdef DEBUG
 unsigned int max_buffer_use = 0;
-//#endif
 
 //------------------------------------------------------------------------------
 tcp_communicator_linux::tcp_communicator_linux( const char *name_rus,
     const char *name_eng ):tcp_communicator(),
-    netOK( 0 )
+    sst(), netOK( 0 )
     {
     // Задаем таймаут.
     tv.tv_sec  = 0;
@@ -29,9 +27,10 @@ tcp_communicator_linux::tcp_communicator_linux( const char *name_rus,
     strcpy( host_name_rus, name_rus );
     strcpy( host_name_eng, name_eng );
 
-#ifdef DEBUG
-    printf ( "PAC name \"%s\" (\"%s\").\n", host_name_rus, host_name_eng );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf ( "PAC name \"%s\" (\"%s\").\n", host_name_rus, host_name_eng );
+        }
 
     //net_init();
     slave_socket = 0;
@@ -65,19 +64,27 @@ int tcp_communicator_linux::net_init()
     int protocol = 0;        /* всегда 0 */
     int err = master_socket = socket( PF_INET, type, protocol ); // Cоздание мастер-сокета.
 
-#ifdef DEBUG
-    printf( "tcp_communicator_linux:net_init() - master socket created. Has number %d\n\r",
-        master_socket );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "tcp_communicator_linux:net_init() - master socket created. "
+            "Has number %d\n\r", master_socket );
+        }
 
     if ( master_socket < 0 )
         {
-        sprintf( G_LOG->msg,
-            "%s : cp_communicator_linux:net_init() - can't create master socket.",
-            strerror( errno ) );
-        G_LOG->write_log( i_log::P_CRIT );
+        PAC_critical_errors_manager::get_instance()->set_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_SOCKET_F,
+            0 );                                        //Мастер сокет.
 
         return -4;
+        }
+    else
+        {
+        PAC_critical_errors_manager::get_instance()->reset_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_SOCKET_F,
+            0 );
         }
 
     // Переводим в неблокирующий режим.
@@ -96,13 +103,20 @@ int tcp_communicator_linux::net_init()
 
     if ( setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof( on ) ) )
         {
-        sprintf( G_LOG->msg,
-            "%s : tcp_communicator_linux:net_init() - error calling setsockopt.",
-            strerror( errno ) );
-        G_LOG->write_log( i_log::P_CRIT );
+        PAC_critical_errors_manager::get_instance()->set_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_SETSOCKOPT_F,
+            0 );                                        //Мастер сокет.
 
         close( master_socket );
         return -5;
+        }
+    else
+        {
+        PAC_critical_errors_manager::get_instance()->reset_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_SETSOCKOPT_F,
+            0 );
         }
 
     // Привязка сокета.
@@ -110,25 +124,39 @@ int tcp_communicator_linux::net_init()
         sizeof( master_socket_state.sin ) );
     if ( err < 0 )
         {
-        sprintf( G_LOG->msg,
-            "%s : tcp_communicator_linux:net_init() - can't bind master socket to port %d.",
-            strerror( errno ), PORT );
-        G_LOG->write_log( i_log::P_CRIT );
+        PAC_critical_errors_manager::get_instance()->set_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_BIND_F,
+            0 );                                        //Мастер сокет.
 
         close( master_socket );
         return -5;
+        }
+    else
+        {
+        PAC_critical_errors_manager::get_instance()->reset_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_BIND_F,
+            0 );
         }
 
     err = listen( master_socket, QLEN ); // Делаем мастер-сокет слушателем.
     if ( type == SOCK_STREAM && err < 0 )
         {
-        sprintf( G_LOG->msg,
-            "%s : tcp_communicator_linux:net_init() - listen.",
-            strerror( errno ) );
-        G_LOG->write_log( i_log::P_CRIT );
+        PAC_critical_errors_manager::get_instance()->set_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_LISTEN_F,
+            0 );
 
         close( master_socket );
         return -6;
+        }
+    else
+        {
+        PAC_critical_errors_manager::get_instance()->reset_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_LISTEN_F,
+            0 );
         }
 
     int val = 1;
@@ -143,20 +171,30 @@ int tcp_communicator_linux::net_init()
     // Создание серверного сокета modbus_socket.
     err = modbus_socket = socket ( PF_INET, type, protocol );
 
-#ifdef DEBUG
-    printf( "tcp_communicator_linux:net_init() - modbus socket created. Has number %d\n\r",
-        modbus_socket );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "tcp_communicator_linux:net_init() - modbus socket created. "
+            "Has number %d\n\r",
+            modbus_socket );
+        }
 
     if ( modbus_socket < 0 )
         {
-        sprintf( G_LOG->msg,
-            "%s : cp_communicator_linux:net_init() - can't create modbus socket.",
-            strerror( errno ) );
-        G_LOG->write_log( i_log::P_CRIT );
+        PAC_critical_errors_manager::get_instance()->set_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_SOCKET_F,
+            1 );                                        //Modbus сокет.
 
         return -4;
         }
+    else
+        {
+        PAC_critical_errors_manager::get_instance()->reset_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_SOCKET_F,
+            1 );
+        }
+
     // Адресация modbus_socket сокета.
     socket_state modbus_socket_state;
     memset( &modbus_socket_state.sin, 0, sizeof ( modbus_socket_state.sin ) );
@@ -170,24 +208,39 @@ int tcp_communicator_linux::net_init()
         sizeof ( modbus_socket_state.sin ) );	   // Привязка сокета.
     if ( err < 0 )
         {
-        sprintf( G_LOG->msg,
-            "%s : tcp_communicator_linux:net_init() - can't bind modbus socket to port %d.",
-            strerror( errno ), PORT_MODBUS );
-        G_LOG->write_log( i_log::P_CRIT );
+        PAC_critical_errors_manager::get_instance()->set_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_BIND_F,
+            1 );
 
-        close( modbus_socket );
+        close( master_socket );
         return -5;
         }
+    else
+        {
+        PAC_critical_errors_manager::get_instance()->reset_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_BIND_F,
+            1 );
+        }
+
     err = listen( modbus_socket, QLEN ); // Делаем слушателем.
     if ( type == SOCK_STREAM && err < 0 )
         {
-        sprintf( G_LOG->msg,
-            "%s : tcp_communicator_linux:net_init() - listen modbus.",
-            strerror( errno ) );
-        G_LOG->write_log( i_log::P_CRIT );
+        PAC_critical_errors_manager::get_instance()->set_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_LISTEN_F,
+            1 );
 
-        close( modbus_socket );
+        close( master_socket );
         return -6;
+        }
+    else
+        {
+        PAC_critical_errors_manager::get_instance()->reset_global_error(
+            PAC_critical_errors_manager::AC_NET,
+            PAC_critical_errors_manager::AS_LISTEN_F,
+            1 );
         }
 
     modbus_socket_state.active      = 1;
@@ -291,7 +344,7 @@ int tcp_communicator_linux::evaluate()
         if ( rc < 0 )
             {
             sprintf( G_LOG->msg,
-                "%s : tcp_communicator_linux:evaluate() - select socket.",
+                "Network communication : select socket : %s.",
                 strerror( errno ) );
             G_LOG->write_log( i_log::P_ERR );
 
@@ -313,7 +366,7 @@ int tcp_communicator_linux::evaluate()
                     if ( slave_socket <= 0 )    // Ошибка.
                         {
                         sprintf( G_LOG->msg,
-                            "%s : tcp_communicator_linux:evaluate() - accept.",
+                            "Network communication : accept socket : %s.",
                             strerror( errno ) );
                         G_LOG->write_log( i_log::P_ERR );
 
@@ -333,36 +386,38 @@ int tcp_communicator_linux::evaluate()
                         close( slave_socket );
 
                         sprintf( G_LOG->msg,
-                            "%s : tcp_communicator_linux:evaluate() - fcntl.",
+                            "Network communication : fcntl socket : %s.",
                             strerror( errno ) );
                         G_LOG->write_log( i_log::P_ERR );
 
                         continue;
                         }
 
-#ifdef DEBUG
-//                    if (i != modbus_socket)
-//                    {
-//                    // Определение имени клиента.
-//                    hostent *client = gethostbyaddr( &ssin.sin_addr, 4, AF_INET );
-//                    if ( client )
-//                        {
-//                        printf( "Accepted connection on %d socket from %s [ %s ].\n",
-//                            slave_socket, inet_ntoa( ssin.sin_addr ), client->h_name  );
-//                        }
-//                    else
-//                        {
-//                        herror( "Error getting client name" );
-//                        Print( "Accepted connection on %d socket from %s.\n",
-//                            slave_socket, inet_ntoa( ssin.sin_addr ) );
-//                        }
-//                    }
-//                    else
-//                    {
-//                    Print( "Accepted connection on %d socket from %s.\n",
-//                        slave_socket, inet_ntoa( ssin.sin_addr ) );
-//                    }
-#endif // DEBUG
+                    const char *DESCR = "modbus";
+                    if ( sst[ i ].socket != modbus_socket )
+                        {
+                        DESCR = "server";
+                        }
+
+                    // Определение имени клиента.
+                    hostent *client = gethostbyaddr( &ssin.sin_addr, 4, AF_INET);
+                    if (client)
+                        {
+                        sprintf( G_LOG->msg,
+                           "Network communication : accepted %s connection : s%d->\"%s\":\"%s\".\n",
+                           DESCR, slave_socket, client->h_name, inet_ntoa(ssin.sin_addr) );
+                        G_LOG->write_log( i_log::P_INFO );
+                        }
+                    else
+                        {
+                        const char* err_str = hstrerror( h_errno );
+                        sprintf( G_LOG->msg,
+                           "Network communication : accepted %s connection : s%d->\"%s\":\"%s\".\n",
+                           DESCR, slave_socket, err_str, inet_ntoa(ssin.sin_addr));
+                        G_LOG->write_log( i_log::P_INFO );
+                        }
+
+
                     FD_SET( slave_socket, &rfds );
                     socket_state slave_socket_state;
                     slave_socket_state.socket = slave_socket;
@@ -371,6 +426,15 @@ int tcp_communicator_linux::evaluate()
                     slave_socket_state.is_listener = 1;
                     slave_socket_state.evaluated = 0;
                     memcpy( &slave_socket_state.sin, &ssin, sin_len );
+                    if ( sst[ i ].socket == modbus_socket )
+                        {
+                        slave_socket_state.ismodbus = 1;
+                        }
+                    else
+                        {
+                        slave_socket_state.ismodbus = 0;
+                        }
+
                     sst.push_back(slave_socket_state);
                     }
                 else         /* slave socket */
@@ -389,7 +453,7 @@ int tcp_communicator_linux::evaluate()
                  {
                  int err = recvtimeout(it->second->get_socket(),
                      (unsigned char*)it->second->buff, it->second->buff_size,
-		     1, 0, it->second->ip, "async client", 0 );
+             1, 0, it->second->ip, "async client", 0 );
                  if (err <= 0) //Ошибка чтения
                      {
                      it->second->Disconnect();
@@ -434,47 +498,181 @@ int tcp_communicator_linux::evaluate()
     return 0;
     }
 //------------------------------------------------------------------------------
+int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
+    int sec, int usec, const char* IP, const char* name,
+    stat_time *stat )
+    {
+    //Network performance info.
+    if (stat)
+        {
+        static time_t t_;
+        struct tm *timeInfo_;
+        t_ = time(0);
+        timeInfo_ = localtime(&t_);
+
+        //Once per hour writes performance info.
+        if (stat->print_cycle_last_h != timeInfo_->tm_hour)
+            {
+            u_int t =
+                G_PAC_INFO()->par[PAC_info::P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME];
+
+            stat->print_cycle_last_h = timeInfo_->tm_hour;
+
+            u_long avg_time = stat->all_time / stat->cycles_cnt;
+            sprintf( G_LOG->msg,
+                "Network performance : send : s%d->\"%s\":\"%s\" "
+                "avg = %lu, min = %u, max = %u, tresh = %u (ms).",
+                sockfd, name, IP,
+                avg_time, stat->min_iteration_cycle_time,
+                stat->max_iteration_cycle_time, t );
+            G_LOG->write_log( i_log::P_DEBUG );
+
+            if (t < avg_time)
+                {
+                sprintf( G_LOG->msg,
+                    "Network performance : send : s%d->\"%s\":\"%s\" "
+                    "avg %lu > tresh %u (ms).",
+                    sockfd, name, IP, avg_time, t );
+                G_LOG->write_log( i_log::P_ALERT );
+                }
+
+            stat->clear();
+            }
+        }
+
+    int total_size = 0;
+    unsigned char *p = buf;
+
+    // Настраиваем  file descriptor set.
+    fd_set fds;
+    FD_ZERO( &fds );
+    FD_SET( sockfd, &fds );
+
+    // Настраиваем время на таймаут.
+    timeval rec_tv;
+    rec_tv.tv_sec = sec;
+    rec_tv.tv_usec = usec;
+
+    //Network performance info.
+    static u_long st_time;
+    static u_int select_wait_time;
+    st_time = get_millisec();
+
+    int res = 0;
+
+    for ( int i = len; i > 0; )
+        {
+        // Ждем таймаута или возможности отсылки данных.
+        res = select( sockfd + 1, NULL, &fds, NULL, &rec_tv );
+
+        if ( 0 == res )
+            {
+            sprintf( G_LOG->msg,
+                "Network device : s%d->\"%s\":\"%s\""
+                " disconnected on select write try : timeout (%d ms).",
+                sockfd, name, IP, sec * 1000 + usec / 1000 );
+
+            G_LOG->write_log( i_log::P_ERR );
+
+            return -2;  // timeout!
+            }
+
+        if ( -1 == res )
+            {
+            sprintf( G_LOG->msg,
+                "Network device : s%d->\"%s\":\"%s\""
+                " disconnected on select write try : %s.",
+                sockfd, name, IP, strerror( errno ) );
+            G_LOG->write_log( i_log::P_ERR );
+
+            return -1; // error
+            }
+
+        int n = 0;
+
+
+        if ( ( n = send( sockfd, p, i, 0 ) ) < 0 )
+            {
+            sprintf( G_LOG->msg,
+                "Network device : s%d->\"%s\":\"%s\""
+                " disconnected on write try : %s.",
+                sockfd, name, IP, strerror( errno ) );
+            G_LOG->write_log( i_log::P_ERR );
+
+            res = -3; //send error
+            break;
+            }
+
+        usleep( 1 );
+        i -= n;
+        p += n;
+
+        total_size += n;
+        }
+
+    //Network performance info.
+    select_wait_time = get_delta_millisec( st_time );
+
+    if ( stat )
+        {
+        stat->cycles_cnt++;
+        stat->all_time += select_wait_time;
+
+        if ( select_wait_time > stat->max_iteration_cycle_time )
+            {
+            stat->max_iteration_cycle_time = select_wait_time;
+            }
+        if ( select_wait_time < stat->min_iteration_cycle_time )
+            {
+            stat->min_iteration_cycle_time = select_wait_time;
+            }
+        }
+
+    return res;
+    }
+//------------------------------------------------------------------------------
 int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
     int len, int sec, int usec, const char* IP, const char* name,
     stat_time *stat )
     {
 
     //Network performance info.
-    if ( stat )
-	{
-	static time_t t_;
-	struct tm *timeInfo_;
-	t_ = time( 0 );
-	timeInfo_ = localtime( &t_ );
+    if (stat)
+        {
+        static time_t t_;
+        struct tm *timeInfo_;
+        t_ = time(0);
+        timeInfo_ = localtime(&t_);
 
-	//Once per hour writes performance info.
-	if ( stat->print_cycle_last_h != timeInfo_->tm_hour )
-	    {
-	    stat->print_cycle_last_h = timeInfo_->tm_hour;
+        //Once per hour writes performance info.
+        if (stat->print_cycle_last_h != timeInfo_->tm_hour)
+            {
+            u_int t =
+                G_PAC_INFO()->par[PAC_info::P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME];
 
-	    u_long avg_time = stat->all_time / stat->cycles_cnt;
-	    sprintf( G_LOG->msg,
-		    "tcp_communicator_linux:recvtimeout() socket %d->\"%s\":\"%s\""
-		    " avg = %lu, min = %u, max = %u (ms).",
-		    s, name, IP,
-		    avg_time, stat->min_iteration_cycle_time,
-		    stat->max_iteration_cycle_time );
-	    G_LOG->write_log( i_log::P_DEBUG );
+            stat->print_cycle_last_h = timeInfo_->tm_hour;
 
-	    u_int t = G_PAC_INFO()->par[ PAC_info::P_WAGO_TCP_NODE_WARN_ANSWER_TIME ];
+            u_long avg_time = stat->all_time / stat->cycles_cnt;
+            sprintf( G_LOG->msg,
+                "Network performance : recv : s%d->\"%s\":\"%s\" "
+                "avg = %lu, min = %u, max = %u, tresh = %u (ms).",
+                s, name, IP,
+                avg_time, stat->min_iteration_cycle_time,
+                stat->max_iteration_cycle_time, t );
+            G_LOG->write_log( i_log::P_DEBUG );
 
-	    if ( t < avg_time )
-		{
-		sprintf( G_LOG->msg,
-			"tcp_communicator_linux:recvtimeout() socket %d->\"%s\":\"%s\""
-			" avg time exceeds limit %lu > %u (ms).",
-			s, name, IP, avg_time, t );
-		G_LOG->write_log( i_log::P_DEBUG );
-		}
+            if (t < avg_time)
+                {
+                sprintf( G_LOG->msg,
+                    "Network performance : recv : s%d->\"%s\":\"%s\" "
+                    "avg %lu > tresh %u (ms).",
+                    s, name, IP, avg_time, t );
+                G_LOG->write_log( i_log::P_ALERT );
+                }
 
-	    stat->clear();
-	    }
-	}
+            stat->clear();
+            }
+        }
 
     errno = 0;
 
@@ -488,9 +686,9 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
     rec_tv.tv_sec = sec;
     rec_tv.tv_usec = usec;
 
+    //Network performance info.
     static u_long st_time;
     static u_int select_wait_time;
-
     st_time = get_millisec();
 
     // Ждем таймаута или полученных данных.
@@ -499,10 +697,9 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
     if ( 0 == n )
         {
         sprintf( G_LOG->msg,
-            "tcp_communicator_linux:recvtimeout() socket %d->\"%s\":\"%s\""
-             " disconnected on read try - timeout (%d ms).",
-             s, name, IP,
-	     usec / 1000  );
+            "Network device : s%d->\"%s\":\"%s\""
+            " disconnected on select read try : timeout (%d ms).",
+            s, name, IP, sec * 1000 + usec / 1000 );
 
         G_LOG->write_log( i_log::P_ERR );
 
@@ -512,9 +709,9 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
     if ( -1 == n )
         {
         sprintf( G_LOG->msg,
-            "%s : tcp_communicator_linux:recvtimeout() socket %d->\"%s\":\"%s\""
-            " disconnected on read try.",
-            strerror( errno ), s, name, IP );
+            "Network device : s%d->\"%s\":\"%s\""
+            " disconnected on select read try : %s.",
+            s, name, IP, strerror( errno ) );
         G_LOG->write_log( i_log::P_ERR );
 
         return -1; // error
@@ -528,7 +725,7 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
     if ( 0 == res )
         {
         sprintf( G_LOG->msg,
-            "tcp_communicator_linux:recvtimeout() socket %d->\"%s\":\"%s\""
+            "Network device : s%d->\"%s\":\"%s\""
             " was closed.",
             s, name, IP );
         G_LOG->write_log( i_log::P_WARNING );
@@ -537,27 +734,27 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
     if ( res < 0 )
         {
         sprintf( G_LOG->msg,
-            "%s : tcp_communicator_linux:recvtimeout() socket %d->\"%s\":\"%s\""
-            " disconnected on read try (unknown).",
-            strerror( errno ), s, name, IP );
+            "Network device : s%d->\"%s\":\"%s\""
+            " disconnected on read try : %s.",
+            s, name, IP, strerror( errno ) );
         G_LOG->write_log( i_log::P_ERR );
         }
 
     //Network performance info.
     if ( stat )
-	{
-	stat->cycles_cnt++;
-	stat->all_time += select_wait_time;
+        {
+        stat->cycles_cnt++;
+        stat->all_time += select_wait_time;
 
-	if ( select_wait_time > stat->max_iteration_cycle_time )
-	    {
-	    stat->max_iteration_cycle_time = select_wait_time;
-	    }
-	if ( select_wait_time < stat->min_iteration_cycle_time )
-	    {
-	    stat->min_iteration_cycle_time = select_wait_time;
-	    }
-	}
+        if ( select_wait_time > stat->max_iteration_cycle_time )
+            {
+            stat->max_iteration_cycle_time = select_wait_time;
+            }
+        if ( select_wait_time < stat->min_iteration_cycle_time )
+            {
+            stat->min_iteration_cycle_time = select_wait_time;
+            }
+        }
 
     return res;
     }
@@ -566,6 +763,15 @@ int tcp_communicator_linux::do_echo ( int idx )
     {
     socket_state &sock_state = sst[ idx ];
     FD_CLR( sock_state.socket, &rfds );
+
+    static const char* const SERVER = "easyserver";
+    static const char* const MODBUS_DEV = "modbus device";
+
+    const char *dev_name = SERVER;
+    if ( sock_state.ismodbus )
+        {
+        dev_name = MODBUS_DEV;
+        }
 
     int err = 0, res;
 
@@ -577,18 +783,9 @@ int tcp_communicator_linux::do_echo ( int idx )
     sock_state.evaluated = 1;
     memset( buf, 0, BUFSIZE );
 
-    static const char* const SERVER = "server";
-    static const char* const MODBUS_DEV = "modbus device";
-    const char *dev_name = SERVER;
-
-    if ( sock_state.ismodbus )
-	{
-	dev_name = MODBUS_DEV;
-	}
-
-    // Ожидаем данные с таймаутом 5 сек.
-    err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 50, 0,
-        inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.stat );
+    // Ожидаем данные с таймаутом 300 мсек.
+    err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 0, 300000,
+        inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.recv_stat );
 
 
     if ( err <= 0 )               /* read error */
@@ -602,8 +799,8 @@ int tcp_communicator_linux::do_echo ( int idx )
     if ( in_buffer_count > max_buffer_use )
         {
         sprintf( G_LOG->msg,
-            "tcp_communicator_linux::do_echo max buffer use %u (in).",
-	    in_buffer_count );
+            "Network performance : (in) buffer use max = %u, tresh = %u (b).",
+            in_buffer_count, BUFSIZE );
         G_LOG->write_log( i_log::P_WARNING );
 
         max_buffer_use = in_buffer_count + 0.1 * in_buffer_count;
@@ -625,8 +822,8 @@ int tcp_communicator_linux::do_echo ( int idx )
                 if ( ( unsigned int ) res > max_buffer_use )
                     {
                     sprintf( G_LOG->msg,
-                        "tcp_communicator_linux::do_echo max buffer use %u (out).",
-                        res );
+                        "Network performance : (out) buffer use max = %u, tresh = %u (b).",
+                         res, BUFSIZE );
                     G_LOG->write_log( i_log::P_WARNING );
 
                     max_buffer_use = res + 0.1 * res;
@@ -678,20 +875,11 @@ int tcp_communicator_linux::do_echo ( int idx )
             }
         }
 
-    err = sendall( sock_state.socket, buf, in_buffer_count, MSG_NOSIGNAL );
-    if ( is_going_to_reboot )
-        {
-        killsockets();
-        sleep_ms( 800 );
-        }
+    err = sendall( sock_state.socket, buf, in_buffer_count, 0, 300000,
+        inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.send_stat );
 
     if ( err <= 0 )               /* write error */
         {
-        sprintf( G_LOG->msg,
-            "%s : tcp_communicator_linux::do_echo socket %d->\"%s\" disconnected on write try.",
-            strerror( errno ), sock_state.socket, inet_ntoa( sock_state.sin.sin_addr ) );
-        G_LOG->write_log( i_log::P_ERR );
-
         shutdown( sock_state.socket, 0 );
         close( sock_state.socket );
         sst.erase(sst.begin() + idx, sst.begin() + idx + 1);

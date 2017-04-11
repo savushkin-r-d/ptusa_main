@@ -38,19 +38,20 @@ int wago_device::get_DO( u_int index )
         return *DO_channels.char_write_values[ index ];
         }
 
-#ifdef DEBUG
-    print();
-    Print( "wago_device->get_DO(...) - error! " );
-    Print( "index = %d, DO_channels.count = %d, "
-        "DO_channels.char_write_values = %d",
-        index, DO_channels.count, ( int ) DO_channels.char_write_values );
-    if ( DI_channels.char_write_values )
+    if ( G_DEBUG )
         {
-        Print( ", DO_channels.char_write_values[ index ]=%d",
-            ( int ) DO_channels.char_write_values[ index ] );
+        print();
+        printf( "wago_device->get_DO(...) - error! " );
+        printf( "index = %d, DO_channels.count = %d, "
+            "DO_channels.char_write_values = %d",
+            index, DO_channels.count, ( int ) DO_channels.char_write_values );
+        if ( DI_channels.char_write_values )
+            {
+            printf( ", DO_channels.char_write_values[ index ]=%d",
+                ( int ) DO_channels.char_write_values[ index ] );
+            }
+        printf( "\n" );
         }
-    Print( "\n" );
-#endif // DEBUG
 
     return 0;
     }
@@ -65,13 +66,14 @@ int wago_device::set_DO( u_int index, char value )
         return 0;
         }
 
-#ifdef DEBUG
-    print();
-    Print( "wago_device->set_DO(...) - error! %d, %d, %d, %d\n",
-        index, DO_channels.count, ( int ) DO_channels.char_write_values,
-        ( int ) DO_channels.char_write_values[ index ] );
-    print();
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        print();
+        printf( "wago_device->set_DO(...) - error! %d, %d, %d, %d\n",
+            index, DO_channels.count, ( int ) DO_channels.char_write_values,
+            ( int ) DO_channels.char_write_values[ index ] );
+        print();
+        }
 
     return 1;
     }
@@ -85,19 +87,20 @@ int wago_device::get_DI( u_int index )
         return *DI_channels.char_read_values[ index ];
         }
 
-#ifdef DEBUG
-    print();
-    Print( "wago_device->get_DI(...) - error! " );
-    Print( "index = %d, DI_channels.count = %d, "
-        "DI_channels.char_read_values = %d",
-        index, DI_channels.count, ( int ) DI_channels.char_read_values );
-    if ( DI_channels.char_read_values )
+    if ( G_DEBUG )
         {
-        Print( ", DI_channels.char_read_values[ index ]=%d",
-            ( int ) DI_channels.char_read_values[ index ] );
+        print();
+        printf( "wago_device->get_DI(...) - error! " );
+        printf( "index = %d, DI_channels.count = %d, "
+            "DI_channels.char_read_values = %d",
+            index, DI_channels.count, ( int ) DI_channels.char_read_values );
+        if ( DI_channels.char_read_values )
+            {
+            printf( ", DI_channels.char_read_values[ index ]=%d",
+                ( int ) DI_channels.char_read_values[ index ] );
+            }
+        printf( "\n" );
         }
-    Print( "\n" );
-#endif // DEBUG
 
     return 0;
     }
@@ -164,19 +167,20 @@ float wago_device::get_AO( u_int index, float min_value, float max_value )
             }
         }
 
-#ifdef DEBUG
-    print();
-    Print( "wago_device->get_AO(...) - error! " );
-    Print( "index = %d, AO_channels.count = %d, "
-        "AO_channels.int_write_values = %d",
-        index, AO_channels.count, ( int ) AO_channels.int_write_values );
-    if ( AO_channels.int_write_values )
+    if ( G_DEBUG )
         {
-        Print( ", AO_channels.int_write_values[ index ]=%d",
-            ( int ) AO_channels.int_write_values[ index ] );
+        print();
+        printf( "wago_device->get_AO(...) - error! " );
+        printf( "index = %d, AO_channels.count = %d, "
+            "AO_channels.int_write_values = %d",
+            index, AO_channels.count, ( int ) AO_channels.int_write_values );
+        if ( AO_channels.int_write_values )
+            {
+            printf( ", AO_channels.int_write_values[ index ]=%d",
+                ( int ) AO_channels.int_write_values[ index ] );
+            }
+        printf( "\n" );
         }
-    Print( "\n" );
-#endif // DEBUG
 
     return 0;
     }
@@ -205,15 +209,18 @@ int wago_device::set_AO( u_int index, float value, float min_value,
             }
 
         *AO_channels.int_write_values[ index ] = ( u_int ) value;
-#ifdef DEBUG
-        //Print("set_AO value=%d\n", ( u_int ) value );
-#endif //DEBUG
+        
+        //if ( G_DEBUG )
+        //    {
+        //    printf("set_AO value=%d\n", ( u_int ) value );
+        //    }
         return 0;
         }
 
-#ifdef DEBUG
-    Print( "wago_device->set_AO(...) - error!\n" );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "wago_device->set_AO(...) - error!\n" );
+        }
 
     return 0;
     }
@@ -308,24 +315,24 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
 
                 return val;
 
-            //Тензорезистор
-            // Process values of module 750-491
-            //Signal           Numerical value
-            //voltage UD       binary
-            //
-            //ca.-15.5000   '0111.1111.1111.1111' 0x7FFF 32767  0x41 on
-            //ca.-15.5000   '0000.0000.0000.0000' 0x0000 0      0x00 off
-            //-15.0000      '1000.1010.1101.0000' 0x8AD0 -30000 0x00 off
-            //-10.0000      '1011.0001.1110.0000' 0xB1E0 -20000 0x00 off
-            //-5.0000       '1101.1000.1111.0000' 0xD8F0 -10000 0x00 off
-            //-0.0005       '1111.1111.1111.1111' 0xFFFF -1     0x00 off
-            //0.0000        '0000.0000.0000.0000' 0x0000 0      0x00 off
-            //0.0005        '0000.0000.0000.0001' 0x0001 1      0x00 off
-            //5.0000        '0010.0111.0001.0000' 0x2710 10000  0x00 off
-            //10.0000       '0100.1110.0010.0000' 0x4E20 20000  0x00 off
-            //15.0000       '0111.0101.0011.0000' 0x7530 30000  0x00 off
-            //>ca.15.5000   '0111.1111.1111.1111' 0x7FFF 32767  0x41 on
-            //Broken wire   '0111.1111.1111.1111' 0x7FFF 32767  0x41 on
+                //Тензорезистор
+                // Process values of module 750-491
+                //Signal           Numerical value
+                //voltage UD       binary
+                //
+                //ca.-15.5000   '0111.1111.1111.1111' 0x7FFF 32767  0x41 on
+                //ca.-15.5000   '0000.0000.0000.0000' 0x0000 0      0x00 off
+                //-15.0000      '1000.1010.1101.0000' 0x8AD0 -30000 0x00 off
+                //-10.0000      '1011.0001.1110.0000' 0xB1E0 -20000 0x00 off
+                //-5.0000       '1101.1000.1111.0000' 0xD8F0 -10000 0x00 off
+                //-0.0005       '1111.1111.1111.1111' 0xFFFF -1     0x00 off
+                //0.0000        '0000.0000.0000.0000' 0x0000 0      0x00 off
+                //0.0005        '0000.0000.0000.0001' 0x0001 1      0x00 off
+                //5.0000        '0010.0111.0001.0000' 0x2710 10000  0x00 off
+                //10.0000       '0100.1110.0010.0000' 0x4E20 20000  0x00 off
+                //15.0000       '0111.0101.0011.0000' 0x7530 30000  0x00 off
+                //>ca.15.5000   '0111.1111.1111.1111' 0x7FFF 32767  0x41 on
+                //Broken wire   '0111.1111.1111.1111' 0x7FFF 32767  0x41 on
             case 491:
                 if ( val >= 0x8AD0 && val <= 0xFFFF )
                     {
@@ -345,19 +352,20 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
             }
         }
 
-#ifdef DEBUG
-    print();
-    Print( "wago_device->get_AI(...) - error! " );
-    Print( "index = %d, AI_channels.count = %d, "
-        "AI_channels.int_read_values = %d",
-        index, AI_channels.count, ( int ) AI_channels.int_read_values );
-    if ( AI_channels.int_read_values )
+    if ( G_DEBUG )
         {
-        Print( ", AI_channels.int_read_values[ index ]=%d",
-            ( int ) AI_channels.int_read_values[ index ] );
+        print();
+        printf( "wago_device->get_AI(...) - error! " );
+        printf( "index = %d, AI_channels.count = %d, "
+            "AI_channels.int_read_values = %d",
+            index, AI_channels.count, ( int ) AI_channels.int_read_values );
+        if ( AI_channels.int_read_values )
+            {
+            printf( ", AI_channels.int_read_values[ index ]=%d",
+                ( int ) AI_channels.int_read_values[ index ] );
+            }
+        printf( "\n" );
         }
-    Print( "\n" );
-#endif // DEBUG
 
     return 0;
     }
@@ -369,19 +377,20 @@ int_2* wago_device::get_AI_data( u_int index )
         return AI_channels.int_read_values[ index ];
         }
 
-#ifdef DEBUG
-    print();
-    Print( "wago_device->get_AI_data(...) - error! " );
-    Print( "index = %d, AI_channels.count = %d, "
-        "AI_channels.int_read_values = %d",
-        index, AI_channels.count, ( int ) AI_channels.int_read_values );
-    if ( AI_channels.int_read_values )
+    if ( G_DEBUG )
         {
-        Print( ", AI_channels.int_read_values[ index ]=%d",
-            ( int ) AI_channels.int_read_values[ index ] );
+        print();
+        printf( "wago_device->get_AI_data(...) - error! " );
+        printf( "index = %d, AI_channels.count = %d, "
+            "AI_channels.int_read_values = %d",
+            index, AI_channels.count, ( int ) AI_channels.int_read_values );
+        if ( AI_channels.int_read_values )
+            {
+            printf( ", AI_channels.int_read_values[ index ]=%d",
+                ( int ) AI_channels.int_read_values[ index ] );
+            }
+        printf( "\n" );
         }
-    Print( "\n" );
-#endif // DEBUG
 
     return 0;
     }
@@ -393,19 +402,20 @@ int_2* wago_device::get_AO_write_data( u_int index )
         return AO_channels.int_write_values[ index ];
         }
 
-#ifdef DEBUG
-    print();
-    Print( "wago_device->get_AO_write_data(...) - error! " );
-    Print( "index = %d, AO_channels.count = %d, "
-        "AO_channels.int_write_values = %d",
-        index, AO_channels.count, ( int ) AO_channels.int_write_values );
-    if ( AO_channels.int_write_values )
+    if ( G_DEBUG )
         {
-        Print( ", AO_channels.int_write_values[ index ]=%d",
-            ( int ) AO_channels.int_write_values[ index ] );
+        print();
+        printf( "wago_device->get_AO_write_data(...) - error! " );
+        printf( "index = %d, AO_channels.count = %d, "
+            "AO_channels.int_write_values = %d",
+            index, AO_channels.count, ( int ) AO_channels.int_write_values );
+        if ( AO_channels.int_write_values )
+            {
+            printf( ", AO_channels.int_write_values[ index ]=%d",
+                ( int ) AO_channels.int_write_values[ index ] );
+            }
+        printf( "\n" );
         }
-    Print( "\n" );
-#endif // DEBUG
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -416,31 +426,32 @@ int_2* wago_device::get_AO_read_data( u_int index )
         return AO_channels.int_read_values[ index ];
         }
 
-#ifdef DEBUG
-    print();
-    Print( "wago_device->get_AO_read_data(...) - error! " );
-    Print( "index = %d, AO_channels.count = %d, "
-        "AO_channels.int_read_values = %d",
-        index, AO_channels.count, ( int ) AO_channels.int_read_values );
-    if ( AO_channels.int_read_values )
+    if ( G_DEBUG )
         {
-        Print( ", AO_channels.int_read_values[ index ]=%d",
-            ( int ) AO_channels.int_read_values[ index ] );
+        print();
+        printf( "wago_device->get_AO_read_data(...) - error! " );
+        printf( "index = %d, AO_channels.count = %d, "
+            "AO_channels.int_read_values = %d",
+            index, AO_channels.count, ( int ) AO_channels.int_read_values );
+        if ( AO_channels.int_read_values )
+            {
+            printf( ", AO_channels.int_read_values[ index ]=%d",
+                ( int ) AO_channels.int_read_values[ index ] );
+            }
+        printf( "\n" );
         }
-    Print( "\n" );
-#endif // DEBUG
     return 0;
     }
 //-----------------------------------------------------------------------------
 void wago_device::print() const
     {
-    Print( " " );
+    printf( " " );
 
     DI_channels.print();
     DO_channels.print();
     AI_channels.print();
     AO_channels.print();
-    //Print( "\n" );
+    //printf( "\n" );
     }
 //-----------------------------------------------------------------------------
 wago_device::wago_device( const char* name ) : name( name ),
@@ -578,34 +589,34 @@ void wago_device::IO_channels::print() const
         switch ( type )
             {
             case CT_DI:
-                Print( "DI" );
+                printf( "DI" );
                 break;
 
             case CT_DO:
-                Print( "DO" );
+                printf( "DO" );
                 break;
 
             case CT_AI:
-                Print( "AI" );
+                printf( "AI" );
                 break;
 
             case CT_AO:
-                Print( "AO" );
+                printf( "AO" );
                 break;
             }
 
-        Print( ":%d; ", count );
+        printf( ":%d; ", count );
         //if ( count )
         //    {
-        //    Print( "[ " );
+        //    printf( "[ " );
         //    for ( u_int i = 0; i < count; i++ )
         //        {
-        //        Print("%d:%2d", tables[ i ], offsets[ i ] );
-        //        if ( i < count - 1 ) Print( "; " );
+        //        printf("%d:%2d", tables[ i ], offsets[ i ] );
+        //        if ( i < count - 1 ) printf( "; " );
         //        }
-        //    Print( " ]" );
+        //    printf( " ]" );
         //    }
-        //Print( "; " );
+        //printf( "; " );
         }
     }
 //-----------------------------------------------------------------------------
@@ -646,9 +657,10 @@ void wago_device::IO_channels::init_channel( u_int ch_index, int node, int offse
 
     else
         {
-#ifdef DEBUG
-        Print( "Error wago_device::IO_channels::init_channel - index out of bound!\n" );
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            printf( "Error wago_device::IO_channels::init_channel - index out of bound!\n" );
+            }
         }
     }
 //-----------------------------------------------------------------------------
@@ -702,9 +714,10 @@ u_char* wago_manager::get_DI_read_data( u_int node_n, u_int offset )
             }
         }
 
-#ifdef DEBUG
-    Print( "wago_manager::get_DI_data() - error!\n" );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "wago_manager::get_DI_data() - error!\n" );
+        }
 
     return 0;
     }
@@ -718,9 +731,10 @@ u_char* wago_manager::get_DO_read_data( u_int node_n, u_int offset )
             return &nodes[ node_n ]->DO[ offset ];
             }
         }
-#ifdef DEBUG
-    Print( "wago_manager::get_DO_data() - error!\n" );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "wago_manager::get_DO_data() - error!\n" );
+        }
 
     return 0;
     }
@@ -734,9 +748,10 @@ int_2* wago_manager::get_AI_read_data( u_int node_n, u_int offset )
             return &( nodes[ node_n ]->AI[ offset ] );
             }
         }
-#ifdef DEBUG
-    Print( "wago_manager::get_AI_data() - error!\n" );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "wago_manager::get_AI_data() - error!\n" );
+        }
 
     return 0;
     }
@@ -750,9 +765,10 @@ int_2* wago_manager::get_AO_read_data( u_int node_n, u_int offset )
             return &nodes[ node_n ]->AO[ offset ];
             }
         }
-#ifdef DEBUG
-    Print( "wago_manager::get_AO_data() - error!\n" );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "wago_manager::get_AO_data() - error!\n" );
+        }
 
     return 0;
     }
@@ -766,9 +782,10 @@ u_char* wago_manager::get_DO_write_data( u_int node_n, u_int offset )
             return &nodes[ node_n ]->DO_[ offset ];
             }
         }
-#ifdef DEBUG
-    Print( "wago_manager::get_DO_write_data() - error!\n" );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "wago_manager::get_DO_write_data() - error!\n" );
+        }
 
     return 0;
     }
@@ -782,9 +799,10 @@ int_2* wago_manager::get_AO_write_data( u_int node_n, u_int offset )
             return &nodes[ node_n ]->AO_[ offset ];
             }
         }
-#ifdef DEBUG
-    Print( "wago_manager::get_AO_write_data() - error!\n" );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "wago_manager::get_AO_write_data() - error!\n" );
+        }
 
     return 0;
     }
@@ -814,8 +832,9 @@ wago_manager::wago_node * wago_manager::get_node( int node_n )
     }
 //-----------------------------------------------------------------------------
 void wago_manager::add_node( u_int index, int ntype, int address,
-                            char* IP_address, char *name, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
-                            int AI_cnt, int AI_size )
+    char* IP_address, char *name,
+    int DO_cnt, int DI_cnt, 
+    int AO_cnt, int AO_size, int AI_cnt, int AI_size )
     {
     if ( index < nodes_count )
         {
@@ -846,7 +865,7 @@ void wago_manager::init_node_AI( u_int node_index, u_int AI_index,
 //-----------------------------------------------------------------------------
 void wago_manager::print() const
     {
-    Print( "Wago manager [%d]:\n", nodes_count );
+    printf( "Wago manager [%d]:\n", nodes_count );
     for ( u_int i = 0; i < nodes_count; i++ )
         {
         nodes[ i ]->print();
@@ -918,19 +937,21 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
     if ( ip_address[ 0 ] == 0 && type >= T_750_XXX_ETHERNET )
         {
         is_active = false;
-#ifdef DEBUG
-        Print( "Узел Wago \"%s\" отключен, так как не задан его IP адрес.\n",
-            name );
-#endif
+        if ( G_DEBUG ) 
+            {
+            printf( "Узел Wago \"%s\" отключен, так как не задан его IP адрес.\n",
+                name );
+            }
         }
 
     if ( type == T_EMPTY )
         {
         is_active = false;
-#ifdef DEBUG
-        Print( "Узел Wago \"%s\" отключен, так как не задан его тип.\n",
-            name );
-#endif
+        if ( G_DEBUG ) 
+            {
+            printf( "Узел Wago \"%s\" отключен, так как не задан его тип.\n",
+                name );
+            }
         }
 
     if ( name )
@@ -973,30 +994,28 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
 //-----------------------------------------------------------------------------
 void wago_manager::wago_node::print()
     {
-#ifdef DEBUG
-    Print( "\"%s\" - type %d, number %d, IP \"%s\". ",
+    printf( "\"%s\" - type %d, number %d, IP \"%s\". ",
         name, type, number, ip_address );
-    Print( "DI %d, DO %d, AI %d [%d], AO %d [%d].\n",
+    printf( "DI %d, DO %d, AI %d [%d], AO %d [%d].\n",
         DI_cnt, DO_cnt, AI_cnt, AI_size, AO_cnt, AO_size );
 
     for ( u_int i = 0; i < AI_cnt; i++ )
         {
         if ( 0 == i )
             {
-            Print( "\tAI\n");
+            printf( "\tAI\n");
             }
-        Print( "\t%2.d %u %2.u\n", i + 1, AI_types[ i ], AI_offsets[ i ] );
+        printf( "\t%2.d %u %2.u\n", i + 1, AI_types[ i ], AI_offsets[ i ] );
         }
 
     for ( u_int i = 0; i < AO_cnt; i++ )
         {
         if ( 0 == i )
             {
-            Print( "\tAO\n");
+            printf( "\tAO\n");
             }
-        Print( "\t%2.d %u %2.u\n", i + 1, AO_types[ i ], AO_offsets[ i ] );
+        printf( "\t%2.d %u %2.u\n", i + 1, AO_types[ i ], AO_offsets[ i ] );
         }
-#endif // DEBUG
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

@@ -4,9 +4,10 @@
 
 modbus_client::modbus_client(unsigned int id, char* ip, unsigned int port, unsigned long exchangetimeout )
 	{
-#ifdef DEBUG
-	Print("Create modbus client with ip = %s\n\r", ip);
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf("Create modbus client with ip = %s\n\r", ip);
+        }
 	tcpclient = tcp_client::Create( ip, port, id, PAC_critical_errors_manager::AS_MODBUS_DEVICE, 256, exchangetimeout  );
 	zero_output_buff();
 	modbus_async_result = 0;
@@ -36,9 +37,10 @@ int modbus_client::read_discrete_inputs( unsigned int start_address, unsigned in
 	unsigned int res = tcpclient->Communicate(12);
 	if (res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
 		{
-#ifdef DEBUG
-		Print("modbus_client_%d: read_discrete_inputs - error in exchange. Received %u bytes\n", tcpclient->get_id(), res);
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            printf("modbus_client_%d: read_discrete_inputs - error in exchange. Received %u bytes\n", tcpclient->get_id(), res);
+            }
 		return 0;
 		}
 	return 1;
@@ -61,9 +63,10 @@ int modbus_client::read_coils( unsigned int start_address, unsigned int quantity
 	unsigned int res = tcpclient->Communicate(12);
 	if (res != 9 + quantity / 8 + (quantity % 8 ? 1:0))
 		{
-#ifdef DEBUG
-		Print("modbus_client_%d: read_coils - error in exchange. Received %u bytes\n", tcpclient->get_id(), res);
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            printf("modbus_client_%d: read_coils - error in exchange. Received %u bytes\n", tcpclient->get_id(), res);
+            }
 		return 0;
 		}
 	return 1;
@@ -86,9 +89,10 @@ int modbus_client::read_holding_registers( unsigned int address, unsigned int qu
 	unsigned int res = tcpclient->Communicate(12);
 	if (res != 9 + quantity * 2)
 		{
-#ifdef DEBUG
-		Print("modbus_client_%d: read_holding_registers - error in exchange. Received %u bytes\n", tcpclient->get_id(), res);
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            printf("modbus_client_%d: read_holding_registers - error in exchange. Received %u bytes\n", tcpclient->get_id(), res);
+            }
 		return 0;
 		}
 	return 1;
@@ -111,9 +115,10 @@ int modbus_client::read_input_registers( unsigned int address, unsigned int quan
 	unsigned int res = tcpclient->Communicate(12);
 	if (res != 9 + quantity * 2)
 		{
-#ifdef DEBUG
-		Print("modbus_client_%d: read_input_registers at %u- error in exchange. Received %u bytes\n", tcpclient->get_id(), address, res);
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            printf("modbus_client_%d: read_input_registers at %u- error in exchange. Received %u bytes\n", tcpclient->get_id(), address, res);
+            }
 		return 0;
 		}
 	return 1;
@@ -137,9 +142,10 @@ int modbus_client::write_coil( unsigned int address, unsigned char value )
 	int res = tcpclient->Communicate(12);
 	if (res != 12)
 		{
-#ifdef DEBUG
-		Print("modbus_client_%d: write coil %u - error in exchange. Received %d bytes\n", tcpclient->get_id(), address, res);
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            printf("modbus_client_%d: write coil %u - error in exchange. Received %d bytes\n", tcpclient->get_id(), address, res);
+            }
 		return 0;
 		}
 	return 1;
@@ -165,9 +171,10 @@ int modbus_client::force_multiply_coils( unsigned int address, unsigned int quan
 	zero_output_buff();
 	if (res != 12)
 		{
-#ifdef DEBUG
-		Print("modbus_client_%d: force_multiply_coils at %u- error in exchange. Received %d bytes\n", tcpclient->get_id(), address, res);
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            printf("modbus_client_%d: force_multiply_coils at %u- error in exchange. Received %d bytes\n", tcpclient->get_id(), address, res);
+            }
 		return 0;
 		}
 	return 1;
@@ -193,9 +200,10 @@ int modbus_client::write_multiply_registers( unsigned int address, unsigned int 
 	zero_output_buff();
 	if (res != 12)
 		{
-#ifdef DEBUG
-		Print("modbus_client_%d: force_multiply_registers at %u- error in exchange. Received %d bytes\n", tcpclient->get_id(), address, res);
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            printf("modbus_client_%d: force_multiply_registers at %u- error in exchange. Received %d bytes\n", tcpclient->get_id(), address, res);
+            }
 		return 0;
 		}
 	return 1;

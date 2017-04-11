@@ -6,7 +6,6 @@
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
-/// @c DEBUG   - компиляция c выводом отладочной информации в консоль.
 ///
 /// @par Текущая версия:
 /// @$Rev$.\n
@@ -90,6 +89,16 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         /// @return 0 - режим не включен.
         int get_mode( u_int mode );
 
+        /// @brief Получение состояния операции.
+        ///
+        /// @param mode - режим.
+        ///
+        /// @return ... - режим в ...
+        /// @return 2 - режим в паузе.
+        /// @return 1 - режим включен.
+        /// @return 0 - режим не включен.
+        int get_operation_state( u_int mode );
+
         virtual int  evaluate();
 
         /// @brief Проверка возможности включения режима.
@@ -101,14 +110,6 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         /// @return 1 - режим нельзя включить.
         /// @return 0 - режим можно включить.
         int check_on_mode( u_int mode, char* reason );
-
-        /// @brief Инициализация режима.
-        ///
-        /// При инициализации режима выполнение нужных действий -
-        /// включение маршрута, включение/выключение клапанов и т.д.
-        ///
-        /// @param mode - режим.
-        void init_mode( u_int mode );
 
         /// @brief Проверка возможности выключения режима.
         ///
@@ -143,10 +144,11 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         ///
         int exec_cmd( u_int cmd )
             {
-#ifdef DEBUG
-            Print ( "\'%.40s\' - exec command command = %2d\n",
-                name, cmd );
-#endif
+            if ( G_DEBUG ) 
+                {
+                printf ( "\'%.40s\' - exec command command = %2d\n",
+                    name, cmd );
+                }
             return 0;
             }
 
@@ -164,7 +166,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
 
         u_int get_modes_count() const
             {
-            return modes_count;
+            return operations_count;
             }
 
         saved_params_float      par_float;      ///< Сохраняемые параметры, тип float.
@@ -179,10 +181,15 @@ class tech_object: public i_tech_object, public i_Lua_save_device
 
         int  lua_check_on_mode( u_int mode );
         void lua_init_mode( u_int mode );
+        
         int  lua_check_off_mode( u_int mode );
         int  lua_final_mode( u_int mode );
         int  lua_init_params();
         int  lua_init_runtime_params();
+
+        int lua_on_start( u_int mode );
+        int lua_on_pause( u_int mode );
+        int lua_on_stop( u_int mode );
         // Lua implemented methods.
 
 
@@ -203,6 +210,10 @@ class tech_object: public i_tech_object, public i_Lua_save_device
             ERR_OFF_AND_ON,
             ERR_DURING_WORK,
             ERR_ALARM,
+
+            ERR_TO_FAIL_STATE,
+            ERR_CANT_ON_2_OPER, //Уже включена блокирующая операция.
+            ERR_CANT_ON_2_OBJ, //Уже включена блокирующая операция другого объекта.
             };
 
         struct  err_info
@@ -237,18 +248,18 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         /// @brief Отладочная печать объекта.
         void print() const
             {
-            Print( "Object \'%.40s\' [%d], type %d\n", name, number, type );
-            Print( "par_float[%d] par_uint[%d] rt_par_float[%d] rt_par_uint[%d]\n",
+            printf( "Object \'%.40s\' [%d], type %d\n", name, number, type );
+            printf( "par_float[%d] par_uint[%d] rt_par_float[%d] rt_par_uint[%d]\n",
                 par_float.get_count(), par_uint.get_count(),
                 rt_par_float.get_count(), rt_par_uint.get_count() );
-            Print( "timers[%d]\n", timers.get_count() );
+            printf( "timers[%d]\n", timers.get_count() );
 
             par_float.print();
             par_uint.print();
             rt_par_float.print();
             rt_par_uint.print();
 
-            modes_manager->print();
+            operations_manager->print();
             }
 
         const char* get_name_in_Lua() const
@@ -263,9 +274,37 @@ class tech_object: public i_tech_object, public i_Lua_save_device
             return name;
             }
 
-        mode_manager* get_modes_manager()
+        //Получение параметров для шага. Для старого описания используем 
+        //параметры par_uint, для нового описания вместо них используем
+        //par_float. 
+        float get_step_param( u_int idx ) const
             {
-            return modes_manager;
+            if ( idx >= 1 )
+                {
+                if ( par_uint.get_count() >= idx )
+                    {
+                    return (float)par_uint[ idx ];
+                    }
+                else
+                    {
+                    if ( par_float.get_count() >= idx )
+                        {
+                        return par_float[ idx ];
+                        }
+                    }
+                }
+                
+            return -1.;
+            }
+
+        const saved_params_float* get_params() const
+            {
+            return &par_float;
+            }
+
+        operation_manager* get_modes_manager()
+            {
+            return operations_manager;
             }
 
         virtual int save_device( char *buff );
@@ -283,15 +322,23 @@ class tech_object: public i_tech_object, public i_Lua_save_device
             }
 #endif // RM_PAC
 
+        /// @brief Установка последовательного номера объекта, начинается с 1.
+        ///
+        /// @param idx - последовательный номер, >= 1.
+        void set_serial_idx( u_int idx );
+
     protected:
-        u_int   number;         ///< Номер объекта.
-        u_int   type;           ///< Тип объекта (для ошибок).
-        u_int_4 cmd;            ///< Хранение команды объекта.
-        u_int   modes_count;    ///< Количество режимов.
+        u_int serial_idx;           ///< Последовательный индекс объекта (с 1).
 
-        std::vector< u_int_4 >  state;  ///< Состояние объекта.
+        u_int   number;             ///< Номер объекта.
+        u_int   type;               ///< Тип объекта (для ошибок).
+        u_int_4 cmd;                ///< Хранение команды объекта.
+        u_int   operations_count;   ///< Количество операций.
 
-        run_time_params_u_int_4 modes_time;    ///< Время режимов, сек.
+        std::vector< u_int_4 >  state;  ///< Состояние объекта (битовое).
+        run_time_params_u_int_4 modes_time;    ///< Время операций, сек.
+
+        std::vector< u_int_4 >  available;     ///< Доступность операций.
 
         enum CONSTANTS
             {
@@ -300,7 +347,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         char name[ C_MAX_NAME_LENGTH ];        ///< Имя объекта.
         char name_Lua[ C_MAX_NAME_LENGTH ];    ///< Имя объекта в Lua.
 
-        smart_ptr< mode_manager > modes_manager; ///< Шаги режимов.
+        smart_ptr< operation_manager > operations_manager; ///< Шаги режимов.
 
         enum PARAMS_ID
             {
@@ -318,6 +365,9 @@ class tech_object: public i_tech_object, public i_Lua_save_device
 
         std::vector< err_info* > errors;
         // Работа с ошибками.
+
+        //Проверка на ограничения операции.
+        void check_availability( u_int operation_n );
     };
 //-----------------------------------------------------------------------------
 class tech_object_manager
@@ -378,7 +428,7 @@ class tech_object_manager
         /// @brief Отладочная печать объекта.
         void print()
             {
-            Print( "Technological objects manager [%d]:\n",
+            printf( "Technological objects manager [%d]:\n",
                 tech_objects.size() );
 
             for ( u_int i = 0; i < tech_objects.size(); i++ )
@@ -386,9 +436,9 @@ class tech_object_manager
                 tech_objects[ i ]->print();
 
 #ifdef KEY_CONFIRM
-                Print( "Press any key to continue..." );
+                printf( "Press any key to continue..." );
                 Getch();
-                Print( "\n" );
+                printf( "\n" );
 #endif // KEY_CONFIRM
                 }
             }
@@ -398,10 +448,14 @@ class tech_object_manager
 #endif // __BORLANDC__
 
     private:
+        tech_object_manager();
+
         /// Единственный экземпляр класса.
         static auto_smart_ptr < tech_object_manager > instance;
 
         std::vector< tech_object* > tech_objects; ///< Технологические объекты.
+
+        tech_object* stub;
     };
 //-----------------------------------------------------------------------------
 tech_object_manager* G_TECH_OBJECT_MNGR();

@@ -22,7 +22,9 @@
 
 #ifdef WIN_OS
 #include "w_types.h"
+#if _MSC_VER <= 1700            //Visual Studio 2012
 #define snprintf _snprintf
+#endif
 #endif // WIN_OS
 
 #ifdef LINUX_OS
@@ -33,5 +35,7 @@
 typedef unsigned char     u_char;
 typedef unsigned int      u_int;
 typedef unsigned long int u_long;
+
+extern int G_DEBUG;
 
 #endif // TYPES_H

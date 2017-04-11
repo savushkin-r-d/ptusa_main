@@ -55,7 +55,7 @@ template < class type > class smart_ptr
             {
             if ( pointer == NULL )
                 {
-                Print( "smart_ptr - pointer is NULL!\n" );
+                printf( "smart_ptr - pointer is NULL!\n" );
                 debug_break;
                 }
 
@@ -67,7 +67,7 @@ template < class type > class smart_ptr
             {
             if ( pointer == NULL )
                 {
-                Print( "smart_ptr - dereferencing NULL!\n" );
+                printf( "smart_ptr - dereferencing NULL!\n" );
                 debug_break;
                 }
             return pointer;
@@ -78,7 +78,7 @@ template < class type > class smart_ptr
             {
             if ( pointer == NULL )
                 {
-                Print( "smart_ptr - dereferencing NULL!\n" );
+                printf( "smart_ptr - dereferencing NULL!\n" );
                 debug_break;
                 }
             return pointer;

@@ -30,6 +30,6 @@
 #define debug_break _asm { int 3 }
 #endif // defined WIN_OS 
 
-#endif // DEBUG
+#endif // DEBUG_IDE
 //-----------------------------------------------------------------------------
 #endif // DEBUG_H

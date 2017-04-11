@@ -81,19 +81,21 @@ int par_device::set_cmd( const char *name, double val )
             if ( strcmp( par_name[ i ], name ) == 0 )
                 {
                 par->save( i + 1, ( float ) val );
-#ifdef DEBUG
-                Print( "par_device::set_cmd() - name = %s, val = %f.\n",
-                    name, val );
-#endif // DEBUG
+                if ( G_DEBUG )
+                    {
+                    printf( "par_device::set_cmd() - name = %s, val = %f.\n",
+                        name, val );
+                    }
                 return 0;
                 }
             }
         }
 
-#ifdef DEBUG
-    Print( "par_device::set_cmd() - name = %s wasn't found.\n",
-        name );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "par_device::set_cmd() - name = %s wasn't found.\n",
+            name );
+        }
     return 1;
     }
 //-----------------------------------------------------------------------------
@@ -156,11 +158,12 @@ void par_device::set_par_name( u_int idx, u_int offset, const char* name )
             {
             if ( strlen( name ) > C_MAX_PAR_NAME_LENGTH )
                 {
-#ifdef DEBUG
-                Print( "Error par_device::set_par_name( u_int idx, u_int offset, const char* name ) - "
-                    "name length (%d) > param C_MAX_PAR_NAME_LENGTH (%d).",
-                    strlen( name ), C_MAX_PAR_NAME_LENGTH );
-#endif // DEBUG
+                if ( G_DEBUG )
+                    {
+                    printf( "Error par_device::set_par_name( u_int idx, u_int offset, const char* name ) - "
+                        "name length (%d) > param C_MAX_PAR_NAME_LENGTH (%d).",
+                        strlen( name ), C_MAX_PAR_NAME_LENGTH );
+                    }
 
                 return;
                 }
@@ -170,24 +173,25 @@ void par_device::set_par_name( u_int idx, u_int offset, const char* name )
                 par_name[ offset + idx - 1 ] = new char[ strlen( name ) + 1 ];
                 strcpy( par_name[ offset + idx - 1 ], name );
                 }
-#ifdef DEBUG
             else
                 {
-                Print( "Error par_device::set_par_name (u_int idx, u_int offset, const char* name) - "
-                    "param (%d %d) already has name (%s).",
-                    offset, idx, par_name[ offset + idx - 1 ] );
+                if ( G_DEBUG )
+                    {
+                    printf( "Error par_device::set_par_name (u_int idx, u_int offset, const char* name) - "
+                        "param (%d %d) already has name (%s).",
+                        offset, idx, par_name[ offset + idx - 1 ] );
+                    }
                 }
-#endif // DEBUG
-
             }
-#ifdef DEBUG
         else
             {
-            Print( "Error par_device::set_par_name (u_int idx, u_int offset, const char* name) - "
-                "offset (%d) + idx (%d) > param count ( %d ).",
-                offset, idx, par->get_count() );
+            if ( G_DEBUG )
+                {
+                printf( "Error par_device::set_par_name (u_int idx, u_int offset, const char* name) - "
+                    "offset (%d) + idx (%d) > param count ( %d ).",
+                    offset, idx, par->get_count() );
+                }
             }
-#endif // DEBUG
         }
     }
 //-----------------------------------------------------------------------------
@@ -204,9 +208,7 @@ void device::set_descr( const char *new_description )
 //-----------------------------------------------------------------------------
 void device::print() const
     {
-#ifdef DEBUG
-    Print( "%s\t", name );
-#endif // DEBUG
+    printf( "%s\t", name );
     }
 //-----------------------------------------------------------------------------
 void device::off()
@@ -292,7 +294,8 @@ int device::rm_save_device_state( char *buff, const char *prefix )
             }
         else
             {
-            res += sprintf( buff + res, "%s.%s.V=%.2f\n", get_value() );
+            res += sprintf( buff + res, "%s.%s.V=%.2f\n", 
+                prefix, name, get_value() );
             }
         }
 
@@ -302,20 +305,22 @@ int device::rm_save_device_state( char *buff, const char *prefix )
 //-----------------------------------------------------------------------------
 int device::set_cmd( const char *prop, u_int idx, char *val )
     {
-#ifdef DEBUG
-    Print( "%s\t device::set_cmd() - prop = %s, idx = %d, val = %s\n",
-        name, prop, idx, val );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "%s\t device::set_cmd() - prop = %s, idx = %d, val = %s\n",
+            name, prop, idx, val );
+        }
 
     return 0;
     }
 //-----------------------------------------------------------------------------
 int device::set_cmd( const char *prop, u_int idx, double val )
     {
-#ifdef DEBUG
-    Print( "%s\t device::set_cmd() - prop = %s, idx = %d, val = %f\n",
-        name, prop, idx, val );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "%s\t device::set_cmd() - prop = %s, idx = %d, val = %f\n",
+            name, prop, idx, val );
+        }
 
     switch ( prop[ 0 ] )
         {
@@ -335,11 +340,12 @@ int device::set_cmd( const char *prop, u_int idx, double val )
             par_device::set_cmd( prop, val );
             break;
 
-#ifdef DEBUG
         default:
-            Print( "Error device::set_cmd() - prop = %s, val = %f\n",
-                prop, val );
-#endif // DEBUG
+            if ( G_DEBUG )
+                {
+                printf( "Error device::set_cmd() - prop = %s, val = %f\n",
+                    prop, val );
+                }
         }
 
     return 0;
@@ -422,19 +428,20 @@ device* device_manager::get_device( int dev_type,
         }
     else
         {
-#ifdef DEBUG
-        Print( "Error - " );
-        if ( dev_type <= device::C_DEVICE_TYPE_CNT )
+        if ( G_DEBUG )
             {
-            Print( "%3s ", device::DEV_NAMES[ dev_type ] );
-            }
-        else
-            {
-            Print( "unknown " );
-            }
+            printf( "Error - " );
+            if ( dev_type <= device::C_DEVICE_TYPE_CNT )
+                {
+                printf( "%3s ", device::DEV_NAMES[ dev_type ] );
+                }
+            else
+                {
+                printf( "unknown " );
+                }
 
-        Print( "\"%s\" not found!\n", dev_name );
-#endif // DEBUG
+            printf( "\"%s\" not found!\n", dev_name );
+            }
         }
 
     return &stub;
@@ -442,13 +449,13 @@ device* device_manager::get_device( int dev_type,
 //-----------------------------------------------------------------------------
 void device_manager::print() const
     {
-    Print( "Device manager [%d]:\n", project_devices.size() );
+    printf( "Device manager [%d]:\n", project_devices.size() );
     for ( u_int i = 0; i < project_devices.size(); i++ )
         {
-        Print( "    %3i. ", i + 1 );
-        Print( "%-8s %s",
+        printf( "    %3i. ", i + 1 );
+        printf( "%-8s %s",
             project_devices[ i ]->get_name(), project_devices[ i ]->get_description() );
-        Print( "\n" );
+        printf( "\n" );
         }
     }
 //-----------------------------------------------------------------------------
@@ -520,9 +527,10 @@ i_counter* device_manager::get_FQT( const char *dev_name )
             }
         }
 
-#ifdef DEBUG
-    Print( "Error - \"%s\" not found!\n", dev_name );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "Error - \"%s\" not found!\n", dev_name );
+        }
 
     return &stub;
     }
@@ -642,10 +650,10 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                     break;
 
                 default:
-#ifdef DEBUG
-                    Print( "Unknown V device subtype %d!\n", dev_sub_type );
-                    get_char();
-#endif // DEBUG
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown V device subtype %d!\n", dev_sub_type );
+                        }
                     new_device      = new dev_stub();
                     break;
                 }
@@ -693,10 +701,10 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                     break;
 
                 default:
-#ifdef DEBUG
-                    Print( "Unknown FQT device subtype %d!\n", dev_sub_type );
-                    get_char();
-#endif // DEBUG
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown FQT device subtype %d!\n", dev_sub_type );
+                        }
                     new_device      = new dev_stub();
                     break;
                 }
@@ -715,10 +723,10 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                     new_device      = new virtual_device( dev_name, device::DT_AO, device::DST_AO_VIRT );
                     break;
                 default:
-#ifdef DEBUG
-                    Print( "Unknown AO device subtype %d!\n", dev_sub_type );
-                    get_char();
-#endif // DEBUG
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown AO device subtype %d!\n", dev_sub_type );
+                        }
                     new_device      = new dev_stub();
                     break;
                 }
@@ -741,10 +749,10 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                     new_device      = new virtual_device( dev_name, device::DT_DI, device::DST_DI_VIRT );
                     break;
                 default:
-#ifdef DEBUG
-                    Print( "Unknown DI device subtype %d!\n", dev_sub_type );
-                    get_char();
-#endif // DEBUG
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown DI device subtype %d!\n", dev_sub_type );
+                        }
                     new_device      = new dev_stub();
                     break;
                 }
@@ -762,10 +770,10 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                     new_device      = new virtual_device( dev_name, device::DT_DO, device::DST_DO_VIRT );
                     break;
                 default:
-#ifdef DEBUG
-                    Print( "Unknown DO device subtype %d!\n", dev_sub_type );
-                    get_char();
-#endif // DEBUG
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown DO device subtype %d!\n", dev_sub_type );
+                        }
                     new_device      = new dev_stub();
                     break;
                 }
@@ -793,10 +801,10 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                     new_device      = new virtual_device( dev_name, device::DT_AI, device::DST_AI_VIRT );
                     break;
                 default:
-#ifdef DEBUG
-                    Print( "Unknown AI device subtype %d!\n", dev_sub_type );
-                    get_char();
-#endif // DEBUG
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown AI device subtype %d!\n", dev_sub_type );
+                        }
                     new_device      = new dev_stub();
                     break;
                 }
@@ -828,9 +836,10 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             break;
 
         default:
-#ifdef DEBUG
-            Print( "Unknown device type %d!\n", dev_type );
-#endif // DEBUG
+            if ( G_DEBUG )
+                {
+                printf( "Unknown device type %d!\n", dev_type );
+                }
             new_device = new dev_stub();
             break;
         }
@@ -981,7 +990,7 @@ void i_DO_device::on()
         direct_on();
         }
     }
-
+//-----------------------------------------------------------------------------
 void i_DO_device::instant_off()
     {
     if ( !get_manual_mode() )
@@ -989,7 +998,6 @@ void i_DO_device::instant_off()
         direct_off();
         }
     }
-
 //-----------------------------------------------------------------------------
 void i_DO_device::set_state( int new_state )
     {
@@ -1043,9 +1051,7 @@ u_int_4 dev_stub::get_serial_n() const
 //-----------------------------------------------------------------------------
 void dev_stub::print() const
     {
-#ifdef DEBUG
-    Print( "virtual device" );
-#endif // DEBUG
+    printf( "virtual device" );
     }
 //-----------------------------------------------------------------------------
 void dev_stub::pause()
@@ -1683,10 +1689,8 @@ int valve::get_state()
 #ifdef DEBUG_NO_WAGO_MODULES
 int valve::set_cmd( const char *prop, u_int idx, double val )
     {
-#ifdef DEBUG
-    Print( "valve::set_cmd() - prop = %s, idx = %d, val = %f\n",
+    printf( "valve::set_cmd() - prop = %s, idx = %d, val = %f\n",
         prop, idx, val );
-#endif // DEBUG
 
     switch ( prop[ 0 ] )
         {
@@ -2382,21 +2386,21 @@ int motor::get_state()
 #ifdef DEBUG_NO_WAGO_MODULES
     return state;
 #else
-    int o  = get_DO( DO_INDEX );
-    int i  = get_DI( DI_INDEX );
+    int o = get_DO( DO_INDEX );
 
     if ( sub_type == device::M_REV_2_ERROR ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
         int err = get_DI( DI_INDEX_ERROR );
 
-        if ( 0 == err &&
-            get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
+        if ( 1 == err )
             {
-            return -1;
+            if ( get_delta_millisec( start_switch_time ) > get_par( P_ON_TIME, 0 ) )
+                {
+                return -1;
+                }
             }
-
-        if ( 1 != i )
+        else
             {
             start_switch_time = get_millisec();
             }
@@ -2414,6 +2418,8 @@ int motor::get_state()
 
         return 0;
         }
+
+    int i = get_DI( DI_INDEX );
 
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 )
@@ -2732,13 +2738,14 @@ u_long timer::get_work_time() const
 //-----------------------------------------------------------------------------
 void timer::set_countdown_time( u_long new_countdown_time )
     {
-#ifdef DEBUG
-    if ( 0 == new_countdown_time )
+    if ( G_DEBUG )
         {
-        Print( "Error void timer::set_countdown_time( u_long time ), time = %lu!\n",
-            new_countdown_time );
+        if ( 0 == new_countdown_time )
+            {
+            printf( "Error void timer::set_countdown_time( u_long time ), time = %lu!\n",
+                new_countdown_time );
+            }
         }
-#endif
 
     countdown_time = new_countdown_time;
     }
@@ -2781,13 +2788,14 @@ timer* timer_manager::operator[]( unsigned int index )
         {
         return &timers[ index ];
         }
-#ifdef DEBUG
     else
         {
-        Print( "timer_manager[] - error: index[ %u ] > count [ %u ]\n",
-            index, timers_cnt );
+        if ( G_DEBUG )
+            {
+            printf( "timer_manager[] - error: index[ %u ] > count [ %u ]\n",
+                index, timers_cnt );
+            }
         }
-#endif // DEBUG
 
     return &stub;
     }

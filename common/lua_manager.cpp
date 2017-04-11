@@ -56,10 +56,10 @@ int check_file( const char* file_name, char* err_str )
 //-----------------------------------------------------------------------------
 #if !defined RM_PAC
 const int SYS_FILE_CNT = 3;
-const int FILE_CNT     = 8;
+const int FILE_CNT     = 9;
 #else
 const int SYS_FILE_CNT = 4;
-const int FILE_CNT     = 10;
+const int FILE_CNT     = 11;
 #endif // RM_PAC
 //-----------------------------------------------------------------------------
 #ifdef PAC_PC
@@ -84,6 +84,7 @@ const char *FILES[ FILE_CNT ] =
     "main.objects.lua",
     "main.modbus_srv.lua",
     "main.profibus.lua",
+    "main.restrictions.lua",
 #if defined RM_PAC
     "main.rm_PACS.lua"
 #endif // defined RM_PAC
@@ -93,7 +94,7 @@ const int FILES_VERSION[ FILE_CNT ] =
     {
     1, //"sys.wago.plua",
     1, //"sys.devices.lua",
-    1, //"sys.tech_objects.plua",
+    2, //"sys.objects.plua",
 #if defined RM_PAC
     1, //"sys.rm_PACS.lua",
 #endif // defined RM_PAC
@@ -103,6 +104,7 @@ const int FILES_VERSION[ FILE_CNT ] =
     1, //"main.objects.plua",
     1, //"main.modbus_srv.lua",
     1, //"main.profibus.lua",
+    1, //"main.restrictions.lua"
 #if defined RM_PAC
     1, //"main.rm_PACS.lua"
 #endif // defined RM_PAC
@@ -141,9 +143,10 @@ const int FILES_VERSION[ FILE_CNT ] =
 
 int lua_manager::init( lua_State* lua_state, char* script_name )
     {
-#if defined DEBUG
-    Print( "Init Lua...\n" );
-#endif
+    if ( G_DEBUG )
+        {
+        printf( "Init Lua...\n" );
+        }
 
     if ( 0 == lua_state )
         {
@@ -152,7 +155,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
 
         if ( NULL == L )
             {
-            Print( "Error creating Lua context.\n" );
+            printf( "Error creating Lua context.\n" );
             return 1;
             }
         is_free_lua = 1;
@@ -168,9 +171,10 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
 
     //I
     //Проверка наличия и версии скриптов.
-#ifdef DEBUG
-    printf( "Проверка наличия и версии скриптов.\n" );
-#endif
+    if ( G_DEBUG )
+        {
+        printf( "Проверка наличия и версии скриптов.\n" );
+        }
     char err_str[ 100 ] = "";
 
     int res = 0;
@@ -195,7 +199,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             res = check_file( FILES[ i ], err_str ); // .
             if ( -1 == res )
                 {
-                Print( "%s", err_str );
+                printf( "%s", err_str );
                 return 1;
                 }
             }
@@ -203,7 +207,7 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         res = check_file( FILES[ i ], err_str );     // .
         if ( -1 == res )
             {
-            Print( "%s", err_str );
+            printf( "%s", err_str );
             return 1;
             }
 #endif // PAC_PC
@@ -212,15 +216,17 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             {
             sprintf( err_str, "File \"%s\" has version %d, must be %d!\n",
                 FILES[ i ], res, FILES_VERSION[ i ] );
-            Print( "%s", err_str );
+            printf( "%s", err_str );
             return 1;
             }
         }
 
     //-Выполнение системных скриптов sys.lua.
-#ifdef DEBUG
-    printf( "Выполнение системных скриптов sys.lua.\n" );
-#endif
+    if ( G_DEBUG )
+        {
+        printf( "Выполнение системных скриптов sys.lua.\n" );
+        }
+
     for ( int i = 0; i < FILE_CNT; i++ )
         {
 
@@ -240,11 +246,14 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
             lua_pop( L, 1 ); // Удаляем ошибку о ненайденном файле.
             if ( luaL_dofile( L, FILES[ i ] ) != 0 ) // .
                 {
-#ifdef DEBUG
-                Print( "Load Lua script \"%s\" error!\n",
-                    FILES[ i ] );
-                Print( "\t%s\n", lua_tostring( L, -1 ) );
-#endif // DEBUG
+                //if ( G_DEBUG )
+                    //{
+                    sprintf( G_LOG->msg, "\n%s", lua_tostring( L, -1 ) );
+                    G_LOG->write_log( i_log::P_ERR );
+
+                    //printf( "Load Lua script \"%s\" error!\n", FILES[ i ] );
+                    //printf( "\t%s\n",  );
+                    //}
                 lua_pop( L, 1 );
 
                 return 1;
@@ -254,11 +263,12 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
 #else // PAC_PC
         if ( luaL_dofile( L, FILES[ i ] ) != 0 )
             {
-#ifdef DEBUG
-            Print( "Load Lua script \"%s\" error!\n",
-                FILES[ i ] );
-            Print( "\t%s\n", lua_tostring( L, -1 ) );
-#endif // DEBUG
+            if ( G_DEBUG )
+                {
+                printf( "Load Lua script \"%s\" error!\n",
+                    FILES[ i ] );
+                printf( "\t%s\n", lua_tostring( L, -1 ) );
+                }
             lua_pop( L, 1 );
 
             return 1;
@@ -268,15 +278,17 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
 
     //II
     //Экспорт в Lua необходимых объектов.
-#ifdef DEBUG
-    printf( "Экспорт в Lua необходимых объектов.\n" );
-#endif
+    if ( G_DEBUG )
+        {
+        printf( "Экспорт в Lua необходимых объектов.\n" );
+        }
     tolua_PAC_dev_open( L );
 
     //-Загрузка параметров.
-#ifdef DEBUG
-    printf( "Загрузка параметров.\n" );
-#endif
+    if ( G_DEBUG )
+        {
+        printf( "Загрузка параметров.\n" );
+        }
     const int PAC_ID =
         lua_manager::get_instance()->int_no_param_exec_lua_method( "system",
         "get_PAC_id", "main" );
@@ -284,9 +296,10 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
 
     //III
     //Выполнение процедуры инициализации.
-#ifdef DEBUG
-    printf( "Выполнение процедуры инициализации.\n" );
-#endif
+    if ( G_DEBUG )
+        {
+        printf( "Выполнение процедуры инициализации.\n" );
+        }
     res = G_PROJECT_MANAGER->lua_load_configuration();
     if ( res )
         {
@@ -298,8 +311,8 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         {
         if( luaL_loadfile( L, script_name ) != 0 )
             {
-            Print( "Load Lua main script \"%s\" error!\n", script_name );
-            Print( "\t%s\n", lua_tostring( L, -1 ) );
+            printf( "Load Lua main script \"%s\" error!\n", script_name );
+            printf( "\t%s\n", lua_tostring( L, -1 ) );
 
             lua_pop( L, 1 );
             return 1;
@@ -309,8 +322,8 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         int i_line = lua_pcall( L, 0, LUA_MULTRET, 0 );
         if ( i_line != 0 )
             {
-            Print( "Evaluate Lua script error!\n" );
-            Print( "\t%s\n", lua_tostring( L, -1 ) );
+            printf( "Evaluate Lua script error!\n" );
+            printf( "\t%s\n", lua_tostring( L, -1 ) );
 
             lua_pop( L, 1 );
             return 1;
@@ -357,9 +370,10 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
     //Инициализация параметров при необходимости.
     params_manager::get_instance()->final_init();
 
-#if defined DEBUG
-    Print( "Init Lua Ok.\n" );
-#endif
+    if ( G_DEBUG )
+        {
+        printf( "Init Lua Ok.\n" );
+        }
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -385,9 +399,6 @@ int lua_manager::void_exec_lua_method( const char *object_name,
     else
         {
         res = 1;
-#ifdef DEBUG
-        Print( "Error during C++ call - \"%s\"\n", c_function_name );
-#endif // DEBUG
         }
 
     return res;
@@ -405,9 +416,6 @@ int lua_manager::int_exec_lua_method( const char *object_name,
     else
         {
         res = -1;
-#ifdef DEBUG
-        Print( "Error during C++ call - \"%s\"\n", c_function_name );
-#endif // DEBUG
         }
 
     return res;
@@ -421,12 +429,6 @@ void* lua_manager::user_object_exec_lua_method( const char *object_name,
         {
         res = tolua_tousertype( L, -1, NULL );
         lua_remove( L, -1 );
-        }
-    else
-        {
-#ifdef DEBUG
-        Print( "Error during C++ call - \"%s\"\n", c_function_name );
-#endif // DEBUG
         }
 
     return res;
@@ -484,30 +486,47 @@ int lua_manager::exec_lua_method( const char *object_name,
     //    u_long finish_time;
     //    finish_time = get_millisec();
     //    u_long call_time = finish_time - start_time;
-    //    Print( "Lua call time - %lums\n", call_time );
+    //    printf( "Lua call time - %lums\n", call_time );
 
     return res;
     }
 //-----------------------------------------------------------------------------
 int lua_manager::error_trace( lua_State * L )
     {
-#ifdef DEBUG
-    Print( "%s\n", lua_tostring( L, -1 ) );
+    static std::vector< std::string > errors;
+
+    std::string err_str = lua_tostring( L, -1 );
     lua_pop( L, 1 );
 
-    Print( "\tstack traceback:\n" );
-    lua_Debug ar;
-    int level = 1;
-
-    while( lua_getstack( L, level, &ar ) )
+    if ( std::binary_search( errors.begin(), errors.end(), err_str ) != true )
         {
-        lua_getinfo( L, "Sln", &ar );
-        Print( "\t\t%s:%d: in function '%s' ('%s')\n",
-            ar.source, ar.currentline, ar.name, ar.namewhat );
+        sprintf( G_LOG->msg, "\nlua: %s", err_str.c_str() );
+        G_LOG->write_log( i_log::P_ERR );
 
-        level++;
+        if ( G_DEBUG )
+            {
+            printf( "\tstack traceback:\n" );
+            lua_Debug ar;
+            int level = 1;
+
+            while( lua_getstack( L, level, &ar ) )
+                {
+                lua_getinfo( L, "Sln", &ar );
+                printf( "\t\t%s:%d: in function '%s' ('%s')\n",
+                    ar.source, ar.currentline, ar.name, ar.namewhat );
+
+                level++;
+                }
+            }
+
+        errors.push_back( err_str );
+        if ( errors.size() > MAX_ERRORS )
+            {
+            errors.erase( errors.begin(), errors.end() - MAX_ERRORS / 2 );
+            }
+
+        std::sort( errors.begin(), errors.begin() );
         }
-#endif // DEBUG
 
     return 0;
     }
@@ -523,9 +542,6 @@ int lua_manager::int_no_param_exec_lua_method( const char *object_name,
         }
     else
         {
-#ifdef DEBUG
-        Print( "Error during C++ call - \"%s\"\n", c_function_name );
-#endif // DEBUG
         res = 1;
         }
 
@@ -541,12 +557,6 @@ const char* lua_manager::char_exec_lua_method( const char *object_name,
         res = tolua_tostring( L, -1, 0 );
         lua_remove( L, -1 );
         }
-    else
-        {
-#ifdef DEBUG
-        Print( "Error during C++ call - \"%s\"\n", c_function_name );
-#endif // DEBUG
-        }
 
     return res;
     }
@@ -559,12 +569,6 @@ const char* lua_manager::char_no_param_exec_lua_method( const char *object_name,
         {
         res = tolua_tostring( L, -1, 0 );
         lua_remove( L, -1 );
-        }
-    else
-        {
-#ifdef DEBUG
-        Print( "Error during C++ call - \"%s\"\n", c_function_name );
-#endif // DEBUG
         }
 
     return res;
@@ -579,8 +583,9 @@ int lua_manager::exec_Lua_str( const char *Lua_str, const char *error_str,
         {
         if ( is_print_error_msg )
             {
-            Print( "Error during C++ call - \"%s\" - %s\n",
+            sprintf( G_LOG->msg, "Error during C++ call - \"%s\" - %s\n",
                 error_str, lua_tostring( L, -1 ) );
+            G_LOG->write_log( i_log::P_ERR );
             }
 
         lua_pop( L, 1 );
@@ -593,6 +598,123 @@ int lua_manager::exec_Lua_str( const char *Lua_str, const char *error_str,
 lua_State * lua_manager::get_Lua() const
     {
     return L;
+    }
+//-----------------------------------------------------------------------------
+int lua_manager::reload_script( int script_n, const char* script_function_name,
+    char *res_str, int max_res_str_length )
+    {
+    res_str[ 0 ] = 0;
+
+    if ( G_DEBUG )
+        {
+        printf( "Start reload Lua script №%d.\n", script_n );
+        }
+
+    if ( 0 == L )
+        {
+        return 1;
+        }
+
+    if ( script_n >= FILE_CNT )
+    	{
+        if ( G_DEBUG )
+            {
+            printf( "Reload Lua script error - script_n >= FILE_CNT (%d>=%d).\n",
+                script_n, FILE_CNT );
+            } 
+
+        return 1;
+    	}
+
+    //Проверка наличия и версии скрипта.
+    if ( G_DEBUG )
+        {
+        printf( "Проверка наличия и версии скрипта - " );
+        }
+    char err_str[ 100 ] = "";
+
+    int res = 0;
+
+    char path[ 100 ];
+    sprintf( path, "%s", FILES[ script_n ] );
+
+#ifdef PAC_PC
+    if ( script_n < SYS_FILE_CNT )
+        {
+        sprintf( path, "%s%s", SYS_PATH, FILES[ script_n ] );
+        }
+#endif // PAC_PC
+
+    res = check_file( path, err_str );
+
+    if ( -1 == res )                             // ../system scripts
+        {
+        res = check_file( FILES[ script_n ], err_str ); // .
+        if ( -1 == res )
+            {
+            printf( "%s\n", err_str );
+            strcpy( res_str, err_str );
+            return 1;
+            }
+        }
+
+    if ( FILES_VERSION[ script_n ] != res )
+        {
+        sprintf( err_str, "file \"%s\" has version %d, must be %d!\n",
+            FILES[ script_n ], res, FILES_VERSION[ script_n ] );
+        printf( "%s", err_str );
+        strcpy( res_str, err_str );
+        return 1;
+        }
+
+    printf( "%s\n", "Ok." );
+    
+    ////Сохранение предыдущей функции скрипта. Оставлен шаблон, все работает
+    // и так при ошибке в новой функции.
+    //char f_name[ 100 ];
+    //sprintf( f_name, "%s_old = %s\n", 
+    //    script_function_name, script_function_name );
+    //if ( luaL_dostring( L, f_name ) != 0 )
+    //    {
+    //    sprintf( G_LOG->msg, "\nReload Lua script - %s", lua_tostring( L, -1 ) );
+    //    G_LOG->write_log( i_log::P_ERR );
+    //    lua_pop( L, 1 );
+    //    return 1;
+    //    }
+   
+    //-Выполнение скрипта.
+    if ( luaL_dofile( L, path ) != 0 )
+        {
+        lua_pop( L, 1 );
+        if ( luaL_dofile( L, FILES[ script_n ] ) != 0 )
+            {
+            sprintf( G_LOG->msg, "\nReload Lua script - %s", lua_tostring( L, -1 ) );
+            G_LOG->write_log( i_log::P_ERR );
+
+            strncpy( res_str, G_LOG->msg + 1 /*не копируем первый \n*/,
+                max_res_str_length );
+            lua_pop( L, 1 );
+
+            ////Выполнение предыдущей функции скрипта. Оставлен шаблон, все работает
+            // и так при ошибке в новой функции.
+            //sprintf( f_name, "%s = %s_old\n",
+            //    script_function_name, script_function_name );
+            //if ( luaL_dostring( L, f_name ) != 0 )
+            //    {
+            //    sprintf( G_LOG->msg, "\nReload Lua script - %s", lua_tostring( L, -1 ) );
+            //    G_LOG->write_log( i_log::P_ERR );
+            //    lua_pop( L, 1 );
+            //    }
+
+            return 1;
+            }
+        }
+
+   if ( G_DEBUG )
+        {
+        printf( "Reload Lua script \"%s\" - Ok.\n", path );
+        }
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

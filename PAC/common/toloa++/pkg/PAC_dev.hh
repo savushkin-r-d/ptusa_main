@@ -559,6 +559,16 @@ class tech_object
         /// @return 1 - режим включен.
         /// @return 0 - режим не включен.
         int get_mode( unsigned int mode );
+        
+        /// @brief Получение состояния режима.
+        ///
+        /// @param mode - режим.
+        ///
+        /// @return ... - режим в ...
+        /// @return 2 - режим в паузе.
+        /// @return 1 - режим включен.
+        /// @return 0 - режим не включен.
+        int get_operation_state( unsigned int mode );
 
         /// @brief Выполнение команды.
         ///
@@ -579,7 +589,7 @@ class tech_object
 
         timer_manager           timers;		 ///< Таймеры объекта.
 
-        mode_manager* get_modes_manager();
+        operation_manager* get_modes_manager();
 
         /// @brief Запрос отсутствия выполняющихся режимов.
         ///
@@ -623,44 +633,33 @@ class tech_object_manager
         void print();
     };
 //-----------------------------------------------------------------------------
-/// @brief Содержит информацию о всех режимах какого-либо объекта (танк, 
-/// гребенка).
-/// 
-/// У объекта (танк, ...) может быть включено параллельно несколько режимов.
-class mode_manager
-    {    
-    public:
-        mode* add_mode( const char* name );
-
-		/// @brief Получение режима через операцию индексирования.
-        ///
-        /// @param idx - индекс режима.
-        ///
-        /// @return - значение режима с заданным индексом. Если индекс
-        /// выходит за диапазон, возвращается значение заглушки - поля
-        /// mode_stub.
-        mode* operator[] ( unsigned int idx );
-
-		/// @brief Время бездействия (нет включенных режимов).
-        ///
-        /// @return - время системы без активных режимов.
-        unsigned long get_idle_time();
-    };
 //-----------------------------------------------------------------------------
-class mode
-    {    
-	public:
-		unsigned long evaluation_time();
+/// @brief Содержит информацию об операции.
+///
+/// Операция может находиться в одном из состояний.
+class operation 
+    {
+    public:
+        enum state_idx
+            {
+            RUN = 1,// Выполнение
+            PAUSE,  // Пауза
+            STOP,   // Остановлен
+            };
 
-        step* add_step( const char* name, int next_step_n,
-            unsigned int step_duration_par_n );
-
-        /// @brief Установка номера параметра со временем переходного переключения шагов.
-        void set_step_cooperate_time_par_n( int step_cooperate_time_par_n );
-
-		unsigned int active_step() const;
+    public:
+        unsigned long evaluation_time();
+        
+        unsigned int active_step() const;
 
         unsigned long active_step_evaluation_time() const;
+        unsigned long get_active_step_set_time() const;
+
+        /// @brief Переход к заданному шагу.
+        ///
+        /// @param new_step - номер шага (с единицы).
+        /// @param cooperative_time - время совместной работы (сек).
+        void to_step( unsigned int new_step, unsigned long cooperative_time = 0 );
 
         /// @brief Получение режима через операцию индексирования.
         ///
@@ -669,19 +668,60 @@ class mode
         /// @return - значение режима с заданным индексом. Если индекс
         /// выходит за диапазон, возвращается значение заглушки - поля 
         /// mode_stub.
-        step* operator[]( int idx );
+        operation_state* operator[]( int idx );
 
-		/// @brief Переход к заданному шагу.
-        ///
-        /// @param new_step - шаг, к которому надо перейти.
-		void to_step( unsigned int new_step );
+    public:
+        step* add_step( const char* name, int next_step_n,
+            unsigned int step_duration_par_n, state_idx s_idx = RUN );
 
-        /// @brief Переход к заданному шагу.
+        /// @brief Установка номера параметра со временем переходного переключения шагов.
+        void set_step_cooperate_time_par_n( int step_cooperate_time_par_n );
+
+    public:
+
+        state_idx get_state() const;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Содержит информацию о всех операциях какого-либо объекта (танк, 
+/// бачок и т.д.).
+/// 
+/// У объекта (танк, ...) операции включаются пользователем, системой и т.д.
+class operation_manager
+    {    
+    public:
+        operation* add_mode( const char* name );
+        operation* add_operation( const char* name );
+
+		/// @brief Получение режима через операцию индексирования.
         ///
-        /// @param new_step - номер шага (с единицы).
-        /// @param cooperative_time - время совместной работы (сек).
-        void to_step( unsigned int new_step, unsigned long cooperative_time = 0 );
-		}
+        /// @param idx - индекс режима.
+        ///
+        /// @return - значение режима с заданным индексом. Если индекс
+        /// выходит за диапазон, возвращается значение заглушки - поля
+        /// mode_stub.
+        operation* operator[] ( unsigned int idx );
+
+		/// @brief Время бездействия (нет включенных операций).
+        ///
+        /// @return - время системы без активных операций.
+        unsigned long get_idle_time();
+    };
+//-----------------------------------------------------------------------------
+/// @brief Состояние операции. 
+///
+/// Содержит группу шагов, выполняемых последовательно (или в ином порядке).
+class operation_state
+    {    
+    public:
+        /// @brief Получение операции через операцию индексирования.
+        ///
+        /// @param idx - индекс операции.
+        ///
+        /// @return - значение операции с заданным индексом. Если индекс
+        /// выходит за диапазон, возвращается значение заглушки - поля @ref
+        /// mode::step_stub.
+        step* operator[] ( int idx );
+	};
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об устройствах, которые входят в шаг (открываются/
 /// закрываются).
@@ -1062,6 +1102,23 @@ class PAC_info: public i_Lua_save_device
 
             ///< Время задержки закрытия для донных клапанов, мсек.
             P_V_BOTTOM_OFF_DELAY_TIME, 
+
+            ///< Среднее время задержки получения ответа от узла Wago, мсек.
+            P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME,
+            ///< Среднее время цикла программы, мсек.
+            P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME,    
+            
+            ///< Работа модуля ограничений.
+            /// 0 - авто, 1 - ручной, 2 - полуручной (через время 
+            /// @P_RESTRICTIONS_MANUAL_TIME вернется в автоматический режим).
+            P_RESTRICTIONS_MODE,
+
+            ///< Работа модуля ограничений в ручном режиме заданное время.
+            P_RESTRICTIONS_MANUAL_TIME,
+
+            ///< Переход на паузу операции при ошибке устройств,
+            /// 0 - авто (есть), 1 - ручной (нет). 
+            P_AUTO_PAUSE_OPER_ON_DEV_ERR,
 			};
 
         saved_params_u_int_4 par;
@@ -1128,7 +1185,7 @@ struct tm {
 ///
 /// @return Текущая дата и время.
 tm get_time();
-//-----------------------------------------------------------------------------
+////-----------------------------------------------------------------------------
 /// @brief Класс регулятора для моечной станции
 class MSAPID
 	{
@@ -1140,7 +1197,7 @@ class MSAPID
 		void set( float new_z );
 		int get_state();
 	};
-
+//
 /// @brief Класс для модуля моечной станции
 class cipline_tech_object: public tech_object
 	{
@@ -1157,6 +1214,7 @@ class cipline_tech_object: public tech_object
 		int state;
 		int curprg;
 		int nmr;
+
 		int cip_in_error;
         char no_neutro; ///Флаг отсутствия нейтрализации
 		int disable_tank_heating; //отключение подогрева при начале подачи растворов в танк(для МСА со старыми регулирующими клапанами)

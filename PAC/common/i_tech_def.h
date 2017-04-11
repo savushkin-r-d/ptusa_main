@@ -6,7 +6,6 @@
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
-/// @c DEBUG   - компиляция c выводом отладочной информации в консоль.
 ///
 /// @par Текущая версия:
 /// @$Rev: 868 $.\n
@@ -16,6 +15,7 @@
 #define I_TECH_H
 
 #include "s_types.h"
+#include "param_ex.h"
 //-----------------------------------------------------------------------------
 /// @brief Работа с технологическим объектом.
 ///
@@ -37,6 +37,10 @@ class i_tech_object
     virtual int set_mode( u_int mode, int new_state ) = 0;
 
     virtual const char* get_name() const = 0;
+
+    virtual float get_step_param( u_int idx ) const = 0;
+
+    virtual const saved_params_float* get_params() const = 0;
     };
 
 #endif // I_TECH_H

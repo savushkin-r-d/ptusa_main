@@ -272,7 +272,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 
 					if ( i_line != 0 )
 						{
-						Print( "Evaluate Modbus service error: %s\n",
+						printf( "Evaluate Modbus service error: %s\n",
 							lua_tostring( L, -1 ) );
 
 						lua_pop( L, 1 );  
@@ -426,7 +426,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 									if (objnumber >= RC_LIST_START && objnumber < RC_PRG_SELECT)
 										{
 										int recipeno = (objnumber - RC_LIST_START) / TRecipeManager::recipeNameLength;
-										//								Print("\n\rRecipeNo = %d", recipeno);
+										//								printf("\n\rRecipeNo = %d", recipeno);
 										k = -1;
 										for (j = 0; j < u_int(cipline_tech_object::Mdls[line - 1]->lineRecipes->recipePerLine); j++)
 											{
@@ -464,11 +464,12 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 													}
 												} 
 											else
-												{
-#ifdef DEBUG 
-												Print("\n\rRead Unsigned register");
-#endif
-												}
+                                                {
+                                                if ( G_DEBUG ) 
+                                                    { 
+                                                    printf("\n\rRead Unsigned register");
+                                                    }
+                                                }
 											}
 										}
 									break;
@@ -583,7 +584,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 
 					if ( i_line != 0 )
 						{
-						Print( "Evaluate Modbus service error: %s\n",
+						printf( "Evaluate Modbus service error: %s\n",
 							lua_tostring( L, -1 ) );
 
 						lua_pop( L, 1 );  
@@ -647,7 +648,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 						}  
 					else
 						{
-						Print( "Evaluate Modbus service error: %s\n",
+						printf( "Evaluate Modbus service error: %s\n",
 							lua_tostring( L, -1 ) );
 
 						lua_pop( L, 1 );  
@@ -758,7 +759,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 
 					if ( i_line != 0 )
 						{
-						Print( "Evaluate Modbus service error: %s\n",
+						printf( "Evaluate Modbus service error: %s\n",
 							lua_tostring( L, -1 ) );
 
 						lua_pop( L, 1 );  
@@ -863,7 +864,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 										}
 									break;
 								case RC_EDITED_REC:
-									//Print("\n\rEdit recipe. Words - %d", numberofElements);
+									//printf("\n\rEdit recipe. Words - %d", numberofElements);
 									UnicodetoCP1251(cipline_tech_object::Mdls[line-1]->lineRecipes->currentRecipeName, &data[7+i*2], 24);
 									i+= cipline_tech_object::Mdls[line-1]->lineRecipes->recipeNameLength - 1;
 									break;
@@ -924,9 +925,10 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 						case C_MSA_STATIONPARAMS:
 							if ((objnumber / 2) <= cipline_tech_object::Mdls[0]->parpar->get_count())
 								{
-#ifdef DEBUG 
-								Print("\n\rWrite Station param %d = %f", objnumber / 2, UnpackFloat(&data[7+i*2]));
-#endif
+                                if ( G_DEBUG ) 
+                                    { 
+                                    printf("\n\rWrite Station param %d = %f", objnumber / 2, UnpackFloat(&data[7+i*2]));
+                                    }
 								cipline_tech_object::Mdls[0]->set_station_par(objnumber / 2, UnpackFloat(&data[7+i*2]));
 								}
 							i++;
@@ -963,9 +965,10 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							i++;
 							break;
 						default:
-#ifdef DEBUG 
-							Print("\n\rWrite Unsigned register");
-#endif
+                            if ( G_DEBUG ) 
+                                { 
+                                printf("\n\rWrite Unsigned register");
+                                }
 							break;
 						}
 					}
@@ -1001,7 +1004,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 
 					if ( i_line != 0 )
 						{
-						Print( "Evaluate Modbus service error: %s\n",
+						printf( "Evaluate Modbus service error: %s\n",
 							lua_tostring( L, -1 ) );
 
 						lua_pop( L, 1 );  
@@ -1177,9 +1180,10 @@ int ModbusServ::CP1251toUnicode( const char* Input, unsigned char* Buf)
 				}
 
 			}
-#ifdef DEBUG
-		//Print("\n\r%d. %d %d", i, Buf[i*2], Buf[i*2 + 1]);
-#endif //DEBUG
+        if ( G_DEBUG ) 
+            {
+            //printf("\n\r%d. %d %d", i, Buf[i*2], Buf[i*2 + 1]);
+            }
 		}
 	return 0;
 	}
@@ -1230,9 +1234,10 @@ int ModbusServ::UnicodetoCP1251( char* Output, unsigned char* Buf, int inputlen 
 		{
 		upperbyte = Buf[2 * i];
 		lowerbyte = Buf[2 * i + 1];
-#ifdef DEBUG
-		Print("\n\r%d symbol codes: %d %d", i + 1, upperbyte, lowerbyte);
-#endif //DEBUG
+        if ( G_DEBUG ) 
+            {
+            printf("\n\r%d symbol codes: %d %d", i + 1, upperbyte, lowerbyte);
+            }
 
 		if (i == inputlen - 1 || (0 == upperbyte && 0 == lowerbyte))
 			{

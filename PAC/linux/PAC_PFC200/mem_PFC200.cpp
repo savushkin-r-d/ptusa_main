@@ -22,11 +22,11 @@ eeprom_PFC200::eeprom_PFC200(int total_size, int available_start_pos,
         exit( EXIT_FAILURE );
         }
 
-#ifdef DEBUG
-    int nvram_size = nvram_get_size();
-    printf( "Total EEPROM size %d, mem size %d\n",
-        nvram_size, total_size );
-#endif
+    if ( G_DEBUG )
+        {
+        int nvram_size = nvram_get_size();
+        printf( "Total EEPROM size %d, mem size %d\n", nvram_size, total_size );
+        }
 
     NV_ram_data = ( char* ) nvram_get_mapping();  // get begin of NVRAM;
     }

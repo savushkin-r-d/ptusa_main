@@ -41,10 +41,11 @@ SRAM::SRAM( const char *file_name,
                 S_IRUSR | S_IWUSR ) ) < 0 )
                 {
 
-#ifdef DEBUG
+if ( G_DEBUG ) 
+ {
                     printf( "SRAM() - ERROR: Can't open device (%s) : %s.\n",
                         file_name, strerror( errno ) );
-#endif // DEBUG
+}
                     file = 0;
                 }
             }
@@ -70,13 +71,14 @@ int SRAM::read( void *buff, u_int count, u_int start_pos )
         lseek( file, get_available_start_pos() + start_pos, SEEK_SET );
         res = read_file( file, buff, count );
 
-#ifdef DEBUG
+if ( G_DEBUG ) 
+ {
         if ( res < 0 )
             {
             printf( "Error reading device (%s) : %s.\n",
                 file_name, strerror( errno )  );
             }
-#endif // DEBUG
+}
 
         }
 
@@ -92,13 +94,14 @@ int SRAM::write( void *buff, u_int count, u_int start_pos )
         lseek( file, get_available_start_pos() + start_pos, SEEK_SET );
         res = write_file( file, buff, count );
 
-#ifdef DEBUG
+if ( G_DEBUG ) 
+ {
         if ( res < 0 )
             {
             printf( "Error writing device (%s) : %s.\n",
                 file_name, strerror( errno )  );
             }
-#endif // DEBUG
+}
         }
 
     return res;
@@ -135,9 +138,10 @@ char* data_file::fget_line()
     int res = read( f, tmp_buff, 1 );
     if ( res != 1 )
         {
-#ifdef DEBUG
-        Print( "Error reading file - can\'t read!\n" );
-#endif // DEBUG
+if ( G_DEBUG ) 
+ {
+        printf( "Error reading file - can\'t read!\n" );
+}
         return buf;
         }
 
@@ -148,18 +152,20 @@ char* data_file::fget_line()
 
         if ( res != 1 )
             {
-#ifdef DEBUG
-            Print( "Error reading file - can\'t read more!\n" );
-#endif // DEBUG
+if ( G_DEBUG ) 
+ {
+            printf( "Error reading file - can\'t read more!\n" );
+}
             break;
             }
 
         pos++;
         if ( pos >= C_MAX_BUFFER_SIZE )
             {
-#ifdef DEBUG
-            Print( "Error reading file - line is too long!\n" );
-#endif // DEBUG
+if ( G_DEBUG ) 
+ {
+            printf( "Error reading file - line is too long!\n" );
+}
             break;
             }
         }

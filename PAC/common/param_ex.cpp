@@ -76,15 +76,19 @@ int params_manager::init( unsigned int project_id )
     int chk = check_CRC();
     if ( 0 == chk ) 
         {
-#ifdef DEBUG
-        Print( "PARAMS OK. PARAMS LOADED.\n" );
-#endif
+        if ( G_DEBUG )
+            {
+            printf( "PARAMS OK. PARAMS LOADED.\n" );
+            }
         loaded = 1;
         } 
     else 
         {
-        printf( "Project id = %u. PARAMS CRC CHECK FAILED: Trying to reinitialize...\n", 
-            project_id );
+        if ( G_DEBUG )
+            {
+            printf( "Project id = %u. PARAMS CRC CHECK FAILED: Trying to reinitialize...\n", 
+                project_id );
+            }
         loaded = -1;
         }
     return chk;
@@ -109,9 +113,12 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
                                 int auto_init_work_params /*= 1*/, 
                                 void ( *custom_init_params_function )() /*= 0 */ )
     {
-    Print( "Total memory used: %u of %u bytes[ %.2f%c ]. \n",
-        last_idx, C_TOTAL_PARAMS_SIZE, 
-        100. * last_idx / C_TOTAL_PARAMS_SIZE, '%' );
+    if ( G_DEBUG )
+    	{
+        printf( "Total memory used: %u of %u bytes[ %.2f%c ]. \n",
+            last_idx, C_TOTAL_PARAMS_SIZE, 
+            100. * last_idx / C_TOTAL_PARAMS_SIZE, '%' );
+    	}
 
     G_DEVICE_MANAGER()->init_rt_params();
     
@@ -121,8 +128,12 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
     u_int* last_idx_ = ( u_int* ) buff;
     if ( *last_idx_ != last_idx )
         {
-        printf( "Total params size has changed ( %d != %d ). Trying to reinitialize...\n", 
-            last_idx, *last_idx_ );
+        if ( G_DEBUG )
+            {
+            printf( "Total params size has changed ( %d != %d ). "
+                "Trying to reinitialize...\n", 
+                last_idx, *last_idx_ );
+            }
 
         char *buff = ( char* ) &last_idx;   //Запись количества параметров.
         CRC_mem->write( buff, 4, C_LAST_IDX_OFFSET );
@@ -164,38 +175,46 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
         save();
         if ( check_CRC() == 0 )
             {
-            printf( "%s", "PARAMS OK: PARAMS SUCCESFULLY REINITIALIZED.\n" );
+            if ( G_DEBUG )                
+                {
+                printf( "%s", "PARAMS OK: PARAMS SUCCESFULLY REINITIALIZED.\n" );
+                }
+
             par[ 0 ][ P_IS_RESET_PARAMS ] = 1;
             par->save_all();
             }
         else
             {
-            printf( "%s", "PARAMS: FATAL ERROR.\n" );
+            if ( G_DEBUG )                
+                {
+                printf( "%s", "PARAMS: FATAL ERROR.\n" );
+                }
             }
 #ifdef KEY_CONFIRM
-        Print( "Press any key to continue..." );
+        printf( "Press any key to continue..." );
         get_char();
-        Print( "\n" );
+        printf( "\n" );
 #endif // KEY_CONFIRM
 
         }
     else
         {
-#ifdef DEBUG
-        if ( check_CRC() == 0 )
+        if ( G_DEBUG )                
             {
-            Print( "PARAMS OK: DON'T NEED REINITIALIZING.\n" );
-            }
-        else
-            {
-            Print( "PARAMS: FATAL ERROR.\n" );
-            }
+            if ( check_CRC() == 0 )
+                {
+                printf( "PARAMS OK: DON'T NEED REINITIALIZING.\n" );
+                }
+            else
+                {
+                printf( "PARAMS: FATAL ERROR.\n" );
+                }
 #ifdef KEY_CONFIRM
-        Print( "Press any key to continue..." );
-        get_char();
-        Print( "\n" );
+            printf( "Press any key to continue..." );
+            get_char();
+            printf( "\n" );
 #endif // KEY_CONFIRM
-#endif // DEBUG
+            }
         }
     }
 //-----------------------------------------------------------------------------
@@ -231,10 +250,11 @@ char* params_manager::get_params_data( int size, int &start_pos )
 
     if ( last_idx + size > params_mem->get_size() )
         {
-#ifdef DEBUG
-        Print( "params_manager::get_params_data() - is not enough memory ( %d + %d < %d ) !\n",
-            last_idx, size, params_mem->get_size() );
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            printf( "params_manager::get_params_data() - is not enough memory ( %d + %d < %d ) !\n",
+                last_idx, size, params_mem->get_size() );
+            }
         return 0;
         }    
 
@@ -323,9 +343,10 @@ int params_manager::restore_params_from_server_backup( char *backup_str )
 //-----------------------------------------------------------------------------
 int params_test::make_test()
     {
-#ifdef DEBUG
-    Print( "Start params test.\n" );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "Start params test.\n" );
+        }
 
     const u_int POJECT_ID = 2;
     params_manager::get_instance()->init( POJECT_ID );
@@ -351,40 +372,31 @@ int params_test::make_test()
         test[ 1 ] != 12 ||
         test[ 2 ] != 13 )
         {
-#ifdef DEBUG
-        Print( "Error passing params test!\n" );
-        Print( "test[ 0 ] = %f\n", test[ 0 ] );
-        Print( "test[ 1 ] = %f\n", test[ 1 ] );
-        Print( "test[ 2 ] = %f\n", test[ 2 ] );
+        if ( G_DEBUG )
+            {
+            printf( "Error passing params test!\n" );
+            printf( "test[ 0 ] = %f\n", test[ 0 ] );
+            printf( "test[ 1 ] = %f\n", test[ 1 ] );
+            printf( "test[ 2 ] = %f\n", test[ 2 ] );
 
-        Print( "test1[ 0 ] = %lu\n", ( u_long ) test1[ 0 ] );
-        Print( "test1[ 1 ] = %lu\n", ( u_long ) test1[ 1 ] );
-        Print( "test1[ 2 ] = %lu\n", ( u_long ) test1[ 2 ] );
-        get_char();
-#endif // DEBUG
+            printf( "test1[ 0 ] = %lu\n", ( u_long ) test1[ 0 ] );
+            printf( "test1[ 1 ] = %lu\n", ( u_long ) test1[ 1 ] );
+            printf( "test1[ 2 ] = %lu\n", ( u_long ) test1[ 2 ] );
+            get_char();
+            }
         return 1;
         }
 
-#ifdef DEBUG
-        Print( "Error passing params test!\n" );
-        Print( "test[ 0 ] = %f\n", test[ 0 ] );
-        Print( "test[ 1 ] = %f\n", test[ 1 ] );
-        Print( "test[ 2 ] = %f\n", test[ 2 ] );
-
-        Print( "test1[ 0 ] = %lu\n", ( u_long ) test1[ 0 ] );
-        Print( "test1[ 1 ] = %lu\n", ( u_long ) test1[ 1 ] );
-        Print( "test1[ 2 ] = %lu\n", ( u_long ) test1[ 2 ] );
-        get_char();
-
-    Print( "Passing params test - ok!\n" );
+    if ( G_DEBUG )
+        {
+        printf( "Passing params test - ok!\n" );
 
 #ifdef KEY_CONFIRM
-    Print( "Press any key to continue..." );
-    get_char();
-    Print( "\n" );
+        printf( "Press any key to continue..." );
+        get_char();
+        printf( "\n" );
 #endif // KEY_CONFIRM
-
-#endif // DEBUG
+        }
 
     return 0;
     }

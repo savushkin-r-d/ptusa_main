@@ -7,7 +7,6 @@
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
-/// @c DEBUG - компиляция c выводом отладочной информации в консоль.
 /// @c DEBUG_NO_WAGO_MODULES - простые устройства работают без модулей
 /// Wago (состояния хранят в себе).
 ///
@@ -444,6 +443,56 @@ class device : public i_DO_AO_device, public par_device
 
         virtual ~device();
 
+        const char *get_type_name() const
+            {
+            switch ( type )
+                {
+                case DT_V:
+                    return "Клапан";
+                case DT_VC:
+                    return "Управляемый клапан";
+                case DT_M:
+                    return "Двигатель";
+
+                case DT_LS:
+                    return "Уровень";
+                case DT_TE:
+                    return "Температура";
+                case DT_FS:
+                    return "Расход"; 
+                case DT_GS:
+                    return "Датчик положения";
+                case DT_FQT:
+                    return "Счетчик";
+                case DT_LT:
+                    return "Уровень";
+                case DT_QT:
+                    return "Концентрация";
+                case DT_HA:
+                    return "Аварийная звуковая сигнализация";
+                case DT_HL:
+                    return "Аварийная световая сигнализация";
+                case DT_SB:
+                    return "Кнопка";
+                case DT_DI:
+                    return "Дискретный входной сигнал";
+                case DT_DO:
+                    return "Дискретный выходной сигнал";
+                case DT_AI:
+                    return "Аналоговый входной сигнал";
+                case DT_AO:
+                    return "Аналоговый выходной сигнал";
+                case DT_WT:
+                    return "Тензорезистор";
+                case DT_PT:
+                    return "Давление";
+                default:
+                    return "???";
+                } 
+
+            return "???";
+            }
+
         const char *get_name() const
             {
             return name;
@@ -591,7 +640,7 @@ class digital_wago_device : public device,
         void direct_off();
 #endif // DEBUG_NO_WAGO_MODULES
 
-        void    print() const;
+        virtual void print() const;
 
 #ifdef DEBUG_NO_WAGO_MODULES
     protected:
@@ -620,7 +669,7 @@ class analog_wago_device : public device, public wago_device
         void  direct_set_state( int new_state );
         int   get_state();
 
-        void  print() const;
+        virtual void  print() const;
         void  direct_on();
         void  direct_off();
 
@@ -1255,9 +1304,7 @@ class valve_AS : public valve
 
         void print() const
             {
-#ifdef DEBUG
-            Print( "%s [%u]\t", get_name(), AS_number );
-#endif // DEBUG
+            printf( "%s [%u]\t", get_name(), AS_number );
             }
 
         void set_rt_par( u_int idx, float value )
@@ -1453,10 +1500,10 @@ class valve_AS : public valve
 
             //            if ( strcmp( get_name(), "H1V1" ) == 0 )
             //                {
-            //                Print( "AO_INDEX = %d\n", AO_INDEX );
-            //                Print( "AS_number = %d\n", AS_number);
+            //                printf( "AO_INDEX = %d\n", AO_INDEX );
+            //                printf( "AS_number = %d\n", AS_number);
             //
-            //                Print( "*write_state = %d\n", ( int ) *write_state );
+            //                printf( "*write_state = %d\n", ( int ) *write_state );
             //                }
             }
 #endif // DEBUG_NO_WAGO_MODULES
@@ -2199,6 +2246,11 @@ class motor : public device, public wago_device
 
         void direct_off();
 
+        virtual void print() const
+            {
+            device::print();
+            }
+
     private:
         enum CONSTANTS
             {
@@ -2212,8 +2264,9 @@ class motor : public device, public wago_device
             DO_INDEX = 0,         ///< Индекс канала дискретного выхода.
             DO_INDEX_REVERSE = 1, ///< Индекс канала дискретного выхода реверса.
 
-            DI_INDEX = 0,         ///< Индекс канала дискретного входа.
-            DI_INDEX_ERROR = 1,   ///< Индекс канала дискретного входа ошибки.
+            DI_INDEX       = 0,   ///< Индекс канала дискретного входа.
+                                  //   Или
+            DI_INDEX_ERROR = 0,   ///< Индекс канала дискретного входа ошибки.
 
             AO_INDEX = 0,     ///< Индекс канала аналогового выхода.
             };
@@ -2321,7 +2374,7 @@ class counter : public device,
         void  direct_on();
         void  direct_off();
         void  direct_set_state( int new_state );
-        void  print() const;
+        virtual void  print() const;
 
         void  pause();
         void  start();

@@ -4,7 +4,6 @@
 /// @author  »ванюк ƒмитрий —ергеевич.
 ///
 /// @par ќписание директив препроцессора:
-/// @c DEBUG - компил€ци€ с выводом отладочной информации в консоль.@n
 /// @c KEY_CONFIRM - переход к следующему отладочному сообщению по нажатии
 /// клавиши.@n@n
 /// @c USE_SIMPLE_DEV_ERRORS   - компил€ци€ с модулем ошибок устройств.@n
@@ -193,22 +192,23 @@ template < class type, bool is_float > class parameters
             if ( index <= count && index > 0 )
                 {
                 return values[ index - 1 ];
-                }
-#ifdef DEBUG
+                }            
             else
-                {
-                if ( 0 == index )
+                {                
+                if ( G_DEBUG )
                     {
-                    Print( "\"%s\" parameters[] - error: index = %u\n",
-                        name, index );
-                    }
-                else
-                    {
-                    Print( "\"%s\" parameters[] - error: index[ %u ] > count [ %u ]\n",
-                        name, index, count );
+                    if ( 0 == index )
+                        {
+                        printf( "\"%s\" parameters[] - error: index = %u\n",
+                            name, index );
+                        }
+                    else
+                        {
+                        printf( "\"%s\" parameters[] - error: index[ %u ] > count [ %u ]\n",
+                            name, index, count );
+                        }
                     }
                 }
-#endif // DEBUG
 
             return stub;
             }
@@ -226,13 +226,14 @@ template < class type, bool is_float > class parameters
                 {
                 return values[ index - 1 ];
                 }
-#ifdef DEBUG
             else
                 {
-                Print( "parameters[] - error: index[ %u ] > count [ %u ]\n",
-                    index, count );
+                if ( G_DEBUG ) 
+                    {
+                    printf( "parameters[] - error: index[ %u ] > count [ %u ]\n",
+                        index, count );
+                    }
                 }
-#endif // DEBUG
 
             return stub;
             }
@@ -280,7 +281,7 @@ template < class type, bool is_float > class parameters
 #ifdef DEBUG_IDE
             if ( 0 == count )
                 {
-                Print( "parameters(...) - error: count = 0!\n" );
+                printf( "parameters(...) - error: count = 0!\n" );
                 }
             //debug_break;
 #endif // DEBUG_IDE
@@ -305,20 +306,20 @@ template < class type, bool is_float > class parameters
 
         virtual void print() const
             {
-            Print( "\"%s\"\t - ", name );
+            printf( "\"%s\"\t - ", name );
             for ( u_int i = 1; i <= count; i++ )
                 {
-                Print( "[%u]=", i );
+                printf( "[%u]=", i );
                 if ( is_float )
                 	{
-                    Print( "%.2f,", ( float ) values[ i - 1 ] );
+                    printf( "%.2f,", ( float ) values[ i - 1 ] );
                 	}
                 else
                     {
-                    Print( "%d,", ( int ) values[ i - 1 ] );
+                    printf( "%d,", ( int ) values[ i - 1 ] );
                     }
                 }
-            Print( "\n" );
+            printf( "\n" );
             }
 
         int save_device_ex( char *buff, const char *prefix, const char *new_name )
@@ -487,21 +488,22 @@ public parameters < type, is_float >
                 params_manager::get_instance()->save(
                     start_pos + idx * sizeof( type ), sizeof( type ) );
                 }
-#ifdef DEBUG
             else
                 {
-                if ( 0 == idx )
+                if ( G_DEBUG ) 
                     {
-                    Print( "parameters:save - index = %u\n",
-                        idx );
-                    }
-                else
-                    {
-                    Print( "parameters:save - index[ %u ] > count [ %u ]\n",
-                        idx, parameters< type, is_float >::get_count() );
+                    if ( 0 == idx )
+                        {
+                        printf( "parameters:save - index = %u\n",
+                            idx );
+                        }
+                    else
+                        {
+                        printf( "parameters:save - index[ %u ] > count [ %u ]\n",
+                            idx, parameters< type, is_float >::get_count() );
+                        }
                     }
                 }
-#endif // DEBUG
             return value;
             }
 

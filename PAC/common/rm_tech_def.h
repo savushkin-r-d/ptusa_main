@@ -5,7 +5,6 @@
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
-/// @c DEBUG   - компиляция c выводом отладочной информации в консоль.
 ///
 /// @par Текущая версия:
 /// @$Rev: 678 $.\n
@@ -73,7 +72,7 @@ class i_rm_cmmctr
 
         void print() const
             {
-            Print( "\"%s\" - \"%s\" (%d)\n",
+            printf( "\"%s\" - \"%s\" (%d)\n",
                 name.c_str(), IP_address.c_str(), remote_PAC_id );
             }
 
