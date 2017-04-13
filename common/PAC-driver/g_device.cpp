@@ -85,7 +85,7 @@ long device_communicator::write_devices_states_service(
             for ( u_int i = 0; i < dev.size(); i++ )
                 {
                 answer_size += dev[ i ]->save_device( ( char* ) outdata +
-                    answer_size );
+                    answer_size );                                    
                 }
             answer_size++; // Учитываем завершающий \0.
 
@@ -252,7 +252,7 @@ long device_communicator::write_devices_states_service(
         case CMD_RESTORE_PARAMS:
             {
 #ifdef DEBUG_DEV_CMCTR
-            printf( "\CMD_RESTORE_PARAMS\n" );
+            printf( "CMD_RESTORE_PARAMS\n" );
             printf( "cmd = %s\n",  data + 1 );
 #endif // DEBUG_DEV_CMCTR
 
