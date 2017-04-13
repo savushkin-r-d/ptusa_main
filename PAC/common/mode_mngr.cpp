@@ -1107,6 +1107,18 @@ void wash_action::print( const char* prefix /*= "" */ ) const
         printf( "}" );
         }
 
+    if ( !par_idx.empty() )
+        {
+        printf( "; FREQ_PARAM " );
+        printf( "{" );
+        for ( u_int j = 0; j < par_idx.size(); j++ )
+            {
+            printf( "%d", par_idx[ j ] ); 
+            if ( j + 1 < par_idx.size() ) printf( " " );
+            }
+        printf( "}" );
+        }
+
     printf( "\n" );
     }
 //-----------------------------------------------------------------------------

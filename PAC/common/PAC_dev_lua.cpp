@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/11/17 08:45:40.
+** Generated automatically by tolua++-1.0.92 on 04/13/17 11:17:10.
 */
 
 #ifndef __cplusplus
@@ -3883,6 +3883,39 @@ static int tolua_PAC_dev_action_add_dev01(lua_State* tolua_S)
  return 0;
 tolua_lerror:
  return tolua_PAC_dev_action_add_dev00(tolua_S);
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: add_param_idx of class  action */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_action_add_param_idx00
+static int tolua_PAC_dev_action_add_param_idx00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"action",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  action* self = (action*)  tolua_tousertype(tolua_S,1,0);
+  int idx = ((int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_param_idx'", NULL);
+#endif
+  {
+   self->add_param_idx(idx);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'add_param_idx'.",&tolua_err);
+ return 0;
+#endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
@@ -11513,6 +11546,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_beginmodule(tolua_S,"action");
    tolua_function(tolua_S,"add_dev",tolua_PAC_dev_action_add_dev00);
    tolua_function(tolua_S,"add_dev",tolua_PAC_dev_action_add_dev01);
+   tolua_function(tolua_S,"add_param_idx",tolua_PAC_dev_action_add_param_idx00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_DEVICE_MANAGER",tolua_PAC_dev_G_DEVICE_MANAGER00);
   tolua_function(tolua_S,"G_TECH_OBJECTS",tolua_PAC_dev_G_TECH_OBJECTS00);

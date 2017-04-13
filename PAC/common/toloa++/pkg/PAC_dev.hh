@@ -770,6 +770,11 @@ class action
         /// @param [in] subgroup Дополнительный параметр.
         virtual void add_dev( device *dev, unsigned int group, 
             unsigned int subgroup );
+
+        /// @brief Добавление индексов используемых параметров к действию.
+        ///
+        /// @param [in] idx Индекс параметра.
+        void add_param_idx( int idx );
     };
 //-----------------------------------------------------------------------------
 ///@brief Получение менеджера устройств.
