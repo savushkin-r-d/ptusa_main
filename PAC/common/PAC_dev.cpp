@@ -733,8 +733,35 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_LT:
-            new_device      = new level_e( dev_name );
-            new_wago_device = ( level_e* ) new_device;
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_LT:
+                    new_device = new level_e( dev_name );
+                    new_wago_device = ( level_e* ) new_device;
+                    break;
+
+                case device::DST_LT_CYL:
+                    new_device = new level_e_cyl( dev_name );
+                    new_wago_device = ( level_e_cyl* ) new_device;
+                    break;
+
+                case device::DST_LT_CONE:
+                    new_device = new level_e_cone( dev_name );
+                    new_wago_device = (level_e_cone*)new_device;
+                    break;
+
+                case device::DST_LT_TRUNC:
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown LT device subtype %d!\n", dev_sub_type );
+                        }
+                    new_device = new dev_stub();
+                    break;
+                }
+            
+            
             break;
 
         case device::DT_DI:
@@ -2257,6 +2284,30 @@ float level_e::get_min_val()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+float level_e_cyl::get_value()
+    {
+    float r = get_par( P_R, start_param_idx );
+    return ( float ) M_PI * r * r *  AI1::get_value();
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float level_e_cone::get_value()
+    {
+    float r = get_par( P_R, start_param_idx );
+    float tg_a = r / get_par( P_H_CONE, start_param_idx );
+    float h_cone = get_par( P_H_CONE, start_param_idx );
+    float h_curr = AI1::get_value();
+
+    if ( h_curr < h_cone )
+        {
+        return ( float ) ( 1 / 3 * M_PI * h_curr * tg_a * h_curr * tg_a * h_curr );
+        }
+
+    return ( float ) ( 1 / 3 * M_PI * r * r * h_cone + 
+        M_PI * r * r * ( h_curr - h_cone ) );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
 
 void valve_DO1::direct_on()
@@ -3077,5 +3128,3 @@ virtual_device::virtual_device( const char *dev_name, device::DEVICE_TYPE dev_ty
     value = 0;
     state = 0;
     }
-
-

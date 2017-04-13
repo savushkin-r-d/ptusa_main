@@ -25,6 +25,9 @@
 #include <string>
 #include <algorithm>
 
+#define _USE_MATH_DEFINES // for C++  
+#include <cmath>
+
 #include "smart_ptr.h"
 
 #include "dtime.h"
@@ -421,21 +424,27 @@ class device : public i_DO_AO_device, public par_device
             DST_FQT = 1,   ///< Счетчик.
             DST_FQT_F,     ///< Счетчик + Расход.
 
+            //LT
+            DST_LT = 1,    ///Текущий уровень без дополнительных параметров
+            DST_LT_CYL,    ///Текущий уровень для цилиндрического танка
+            DST_LT_CONE,   ///Текущий уровень для танка с конусом в основании 
+            DST_LT_TRUNC,  ///Текущий уровень для танка с усеченным цилиндром в основании
+
             //DO
-            DST_DO = 1,         ///Обычный дискретный выход с привязкой к модулям
-            DST_DO_VIRT,    ///Виртуальный дискретный выход(без привязки к модулям)
+            DST_DO = 1,    ///Обычный дискретный выход с привязкой к модулям
+            DST_DO_VIRT,   ///Виртуальный дискретный выход(без привязки к модулям)
 
             //DI
-            DST_DI = 1,         ///Обычный дискретный вход с привязкой к модулям
-            DST_DI_VIRT,    ///Виртуальный дискретный вход(без привязки к модулям)
+            DST_DI = 1,    ///Обычный дискретный вход с привязкой к модулям
+            DST_DI_VIRT,   ///Виртуальный дискретный вход(без привязки к модулям)
 
             //AO
-            DST_AO = 1,         ///Обычный аналоговый выход с привязкой к модулям
-            DST_AO_VIRT,    ///Виртуальный аналоговый выход(без привязки к модулям)
+            DST_AO = 1,    ///Обычный аналоговый выход с привязкой к модулям
+            DST_AO_VIRT,   ///Виртуальный аналоговый выход(без привязки к модулям)
 
             //AI
-            DST_AI = 1,         ///Обычный аналоговый вход с привязкой к модулям
-            DST_AI_VIRT,    ///Виртуальный аналоговый вход(без привязки к модулям)
+            DST_AI = 1,    ///Обычный аналоговый вход с привязкой к модулям
+            DST_AI_VIRT,   ///Виртуальный аналоговый вход(без привязки к модулям)
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -1864,12 +1873,84 @@ class temperature_e : public AI1
 class level_e : public AI1
     {
     public:
-        level_e( const char *dev_name ): AI1( dev_name, DT_LT, DST_NONE, 0, 0 )
+        level_e( const char *dev_name ): AI1( dev_name, DT_LT, DST_LT, 0, 0 )
             {
             }
 
         float get_max_val();
         float get_min_val();
+    };
+//-----------------------------------------------------------------------------
+/// @brief Текущий уровень c для танка цилиндрической формы.
+class level_e_cyl : public AI1
+    {
+    public:
+        level_e_cyl( const char *dev_name ) : AI1(
+            dev_name, DT_LT, DST_LT_CYL, ADDITIONAL_PARAM_COUNT, &start_param_idx )
+            {
+            set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
+            set_par_name( P_R, start_param_idx, "P_R" );
+            }
+
+        float get_max_val()
+            {
+            return get_par( P_MAX_P, start_param_idx );
+            }
+
+        float get_min_val()
+            {
+            return 0;
+            }
+
+        float get_value();
+
+    private:
+        enum CONSTANTS
+            {
+            ADDITIONAL_PARAM_COUNT = 2,
+
+            P_MAX_P = 1, ///< Индекс параметра давление настройки датчика (бар).
+            P_R,         ///< Индекс параметра радиуса танка (м).
+            };
+
+        u_int start_param_idx;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Текущий уровень c для цилиндрического танка с конусным основанием.
+class level_e_cone : public AI1
+    {
+    public:
+        level_e_cone( const char *dev_name ) : AI1(
+            dev_name, DT_LT, DST_LT_CONE, ADDITIONAL_PARAM_COUNT, &start_param_idx )
+            {
+            set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
+            set_par_name( P_R, start_param_idx, "P_R" );
+            set_par_name( P_H_CONE, start_param_idx, "P_H_CONE" );
+            }
+
+        float get_max_val()
+            {
+            return get_par( P_MAX_P, start_param_idx );
+            }
+
+        float get_min_val()
+            {
+            return 0;
+            }
+
+        float get_value();
+
+    private:
+        enum CONSTANTS
+            {
+            ADDITIONAL_PARAM_COUNT = 3,
+
+            P_MAX_P = 1, ///< Индекс параметра давление настройки датчика (бар).
+            P_R,         ///< Индекс параметра радиуса танка (м).
+            P_H_CONE,    ///< Индекс параметра высоты конуса танка (м).
+            };
+
+        u_int start_param_idx;
     };
 //-----------------------------------------------------------------------------
 /// @brief Текущее давление.
