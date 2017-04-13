@@ -1113,7 +1113,7 @@ void wash_action::print( const char* prefix /*= "" */ ) const
 //-----------------------------------------------------------------------------
 operation_state::operation_state( const char* name,
     operation_manager *owner, int n ) : name( name ),
-    mode_step(  new step( "Шаг режима", true ) ),
+    mode_step(  new step( "Шаг операции", true ) ),
     active_step_n( -1 ),
     active_step_second_n( -1 ),
     step_cooperate_time_par_n( -1 ),
