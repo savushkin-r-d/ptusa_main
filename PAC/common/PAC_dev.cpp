@@ -760,8 +760,6 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                     new_device = new dev_stub();
                     break;
                 }
-            
-            
             break;
 
         case device::DT_DI:
@@ -812,8 +810,27 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_QT:
-            new_device      = new concentration_e( dev_name );
-            new_wago_device = ( concentration_e* ) new_device;
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_QT:
+                    new_device = new concentration_e( dev_name, device::DST_QT );
+                    new_wago_device = (concentration_e*)new_device;
+                    break;
+
+                case device::DST_QT_OK:
+                    new_device = new concentration_e_ok( dev_name );
+                    new_wago_device = (concentration_e_ok*)new_device;
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown QT device subtype %d!\n", dev_sub_type );
+                        }
+                    new_device = new dev_stub();
+                    break;
+                }
             break;
 
         case device::DT_AI:
@@ -2589,7 +2606,7 @@ int motor::save_device_ex( char *buff )
     {
     int res = 0;
 #ifdef DEBUG_NO_WAGO_MODULES
-    res = sprintf( buff, "R=0," );
+    res = sprintf( buff, "R=0, " );
 #else
     if ( sub_type == device::DST_M_REV || sub_type == device::DST_M_REV_FREQ ||
         sub_type == device::DST_M_REV_2 || sub_type == device::DST_M_REV_FREQ_2 ||

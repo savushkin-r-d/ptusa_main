@@ -420,9 +420,12 @@ class device : public i_DO_AO_device, public par_device
             DST_M_REV_FREQ_2_ERROR,
 
             //FQT
-
             DST_FQT = 1,   ///< Счетчик.
             DST_FQT_F,     ///< Счетчик + Расход.
+
+            //QT
+            DST_QT = 1,   ///< Концентратомер.
+            DST_QT_OK,    ///< Концентратомер c диагностикой.
 
             //LT
             DST_LT = 1,    ///Текущий уровень без дополнительных параметров
@@ -1983,8 +1986,8 @@ class pressure_e : public AI1
 class concentration_e : public AI1
     {
     public:
-        concentration_e( const char *dev_name ): AI1( dev_name, DT_QT, DST_NONE,
-            ADDITIONAL_PARAM_COUNT, &start_param_idx )
+        concentration_e( const char *dev_name, DEVICE_SUB_TYPE sub_type ): AI1(
+            dev_name, DT_QT, sub_type, ADDITIONAL_PARAM_COUNT, &start_param_idx )
             {
             set_par_name( P_MIN_V,  start_param_idx, "P_MIN_V" );
             set_par_name( P_MAX_V,  start_param_idx, "P_MAX_V" );
@@ -2003,6 +2006,59 @@ class concentration_e : public AI1
             };
 
         u_int start_param_idx;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Концентрация с сигналом диагностики.
+class concentration_e_ok : public concentration_e
+    {
+    public:
+        concentration_e_ok( const char *dev_name ) : concentration_e( dev_name, 
+            DST_QT_OK )
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            st = 1;
+#endif
+            }
+        
+        int get_state()
+            {
+#ifndef DEBUG_NO_WAGO_MODULES
+            int i = get_DI( DI_INDEX );
+
+            return i == 1 ? 1 : -1;
+#else
+            return st;
+#endif
+            }
+
+#ifdef DEBUG_NO_WAGO_MODULES
+        void set_state( int new_state )
+            {
+            st = new_state;
+            }
+#endif
+
+        int concentration_e_ok::save_device_ex( char *buff )
+            {
+            int res = 0;
+#ifdef DEBUG_NO_WAGO_MODULES
+            res = sprintf( buff, "OK=1, " );
+#else
+            res = sprintf( buff, "OK=%d, ", get_DI( DI_INDEX ) );
+#endif //DEBUG_NO_WAGO_MODULES
+            return res;
+            }
+
+    private:
+
+        enum CONSTANTS
+            {
+            DI_INDEX = 0,         ///< Индекс канала дискретного входа.
+            };
+
+#ifdef DEBUG_NO_WAGO_MODULES
+        int st;
+#endif
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство аналогового входа.
