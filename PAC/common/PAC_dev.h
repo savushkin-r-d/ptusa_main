@@ -601,7 +601,7 @@ class dev_stub : public device,
     public i_counter
     {
     public:
-        dev_stub(): device( 0, DT_NONE, DST_NONE, 1 )
+        dev_stub(): device( "STUB", DT_NONE, DST_NONE, 1 )
             {
             }
 
