@@ -700,6 +700,11 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                     new_wago_device = ( counter_f* ) new_device;
                     break;
 
+                case device::DST_FQT_F_OK:
+                    new_device = new counter_f_ok( dev_name );
+                    new_wago_device = (counter_f_ok*)new_device;
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -1312,6 +1317,16 @@ int counter::set_cmd(const char *prop, u_int idx, double val)
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+counter_f::counter_f( const char *dev_name ) :
+    counter( dev_name, DST_FQT_F, ADDITIONAL_PARAMS_COUNT ),
+    flow_value( 0 )
+    {
+    set_par_name( P_MIN_FLOW, 0, "P_MIN_FLOW" );
+    set_par_name( P_MAX_FLOW, 0, "P_MAX_FLOW" );
+    set_par_name( P_CZ, 0, "P_CZ" );
+    set_par_name( P_DT, 0, "P_DT" );
+    }
+//-----------------------------------------------------------------------------
 int counter_f::get_state()
     {
     if ( !motors.empty() )
@@ -1414,6 +1429,36 @@ int counter_f::save_device_ex( char *buff )
         get_flow() );
 
     return res;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+counter_f_ok::counter_f_ok( const char *dev_name ) : counter_f( dev_name )
+    {
+    sub_type = DEVICE_SUB_TYPE::DST_FQT_F_OK;
+    }
+//-----------------------------------------------------------------------------
+int counter_f_ok::save_device_ex( char *buff )
+    {
+    int res = counter_f::save_device_ex( buff );
+
+#ifdef DEBUG_NO_WAGO_MODULES
+    res += sprintf( buff + res, "OK=1, " );
+#else
+    res += sprintf( buff + res, "OK=%d, ", get_DI( DI_INDEX ) );
+#endif //DEBUG_NO_WAGO_MODULES
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+int counter_f_ok::get_state()
+    {
+#ifndef DEBUG_NO_WAGO_MODULES
+    int i = get_DI( DI_INDEX );
+
+    return i == 1 ? counter_f::get_state() : counter::STATES::S_ERROR;
+#else
+    return counter_f::get_state();
+#endif
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -3140,7 +3185,9 @@ int virtual_device::get_state()
     return state;
     }
 
-virtual_device::virtual_device( const char *dev_name, device::DEVICE_TYPE dev_type, device::DEVICE_SUB_TYPE dev_sub_type ) : device (dev_name, dev_type, dev_sub_type, 0)
+virtual_device::virtual_device( const char *dev_name,
+    device::DEVICE_TYPE dev_type,
+    device::DEVICE_SUB_TYPE dev_sub_type ) : device (dev_name, dev_type, dev_sub_type, 0)
     {
     value = 0;
     state = 0;

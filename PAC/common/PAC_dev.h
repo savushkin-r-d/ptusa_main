@@ -421,7 +421,8 @@ class device : public i_DO_AO_device, public par_device
 
             //FQT
             DST_FQT = 1,   ///< Счетчик.
-            DST_FQT_F,     ///< Счетчик + Расход.
+            DST_FQT_F,     ///< Счетчик + расход.
+            DST_FQT_F_OK,  ///< Счетчик + расход c диагностикой.
 
             //QT
             DST_QT = 1,   ///< Концентратомер.
@@ -2151,7 +2152,8 @@ class wages : public analog_wago_device, public i_wages
 class virtual_device : public device
     {
     public:
-        virtual_device( const char *dev_name, device::DEVICE_TYPE dev_type, device::DEVICE_SUB_TYPE dev_sub_type);
+        virtual_device( const char *dev_name, device::DEVICE_TYPE dev_type,
+            device::DEVICE_SUB_TYPE dev_sub_type);
 
     protected:
 
@@ -2575,15 +2577,7 @@ class counter : public device,
 class counter_f : public counter
     {
     public:
-        counter_f( const char *dev_name ):
-            counter( dev_name, DST_FQT_F,  ADDITIONAL_PARAMS_COUNT ),
-            flow_value( 0 )
-            {
-            set_par_name( P_MIN_FLOW,  0, "P_MIN_FLOW" );
-            set_par_name( P_MAX_FLOW,  0, "P_MAX_FLOW" );
-            set_par_name( P_CZ,        0, "P_CZ" );
-            set_par_name( P_DT,        0, "P_DT" );
-            }
+        counter_f( const char *dev_name );
 
         virtual ~counter_f()
             {
@@ -2617,6 +2611,25 @@ class counter_f : public counter
         float flow_value;
 
         std::vector < device* > motors;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Счетчик c диагностикой.
+class counter_f_ok : public counter_f
+    {
+    public:
+        counter_f_ok( const char *dev_name );
+
+        //Lua.
+        int save_device_ex( char *buff );
+
+        int get_state();
+
+    private:
+
+        enum CONSTANTS
+            {
+            DI_INDEX = 1,  ///< Индекс канала дискретного входа (диагностики).
+            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.
