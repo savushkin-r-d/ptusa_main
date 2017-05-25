@@ -108,7 +108,7 @@ void TRecipeManager::EvalRecipe()
 		case 1:
 			ResetRecipeToDefaults(currentRecipe);
 #ifdef DEBUG
-			Print("Reset recipe %d to defaults",currentRecipe);
+            printf("Reset recipe %d to defaults",currentRecipe);
 #endif
 			break;
 		case 2:
@@ -196,11 +196,11 @@ int TRecipeManager::LoadRecipeToParams( int recipeNo, int recipeStartPos, int pa
 			{
 			par[0][paramsStartPos + i] = getRecipeValue(recipeNo, recipeStartPos + i);
 			#ifdef DEBUG
- Print("\n\rsetparamm %d %f\n\r", paramsStartPos + i, par[0][paramsStartPos + i]);
+            printf("\n\rsetparamm %d %f\n\r", paramsStartPos + i, par[0][paramsStartPos + i]);
  #endif
 			}
 		#ifdef DEBUG
- Print("\n\rLoaded recipe %d\n\r",recipeNo);
+        printf("\n\rLoaded recipe %d\n\r",recipeNo);
  #endif
 		return 1;
 		}
@@ -401,7 +401,7 @@ int TRecipeManager::OnRecipeDevices( int recipeNo, int msaline /*= 1*/ )
 				else
 					{
 #ifdef DEBUG
-					Print("\n\rOn recipe devices. Valve %u from param %d not found in device list\n\r", devNo, i);
+                    printf("\n\rOn recipe devices. Valve %u from param %d not found in device list\n\r", devNo, i);
 #endif
 					errflag = 1;
 					}
@@ -429,7 +429,7 @@ int TRecipeManager::OnRecipeDevices( int recipeNo, int msaline /*= 1*/ )
 				else
 					{
 #ifdef DEBUG
-					Print("\n\rOff recipe devices. Valve %u from param %d not found in device list\n\r", devNo, i);
+                    printf("\n\rOff recipe devices. Valve %u from param %d not found in device list\n\r", devNo, i);
 #endif
 					errflag = 1;
 					}
@@ -471,7 +471,7 @@ int TRecipeManager::OffRecipeDevices( int recipeNo, int msaline /*= 1*/ )
 				else
 					{
 #ifdef DEBUG
-					Print("\n\rOff recipe devices. Valve %u from param %d not found in device list\n\r", devNo, i);
+                    printf("\n\rOff recipe devices. Valve %u from param %d not found in device list\n\r", devNo, i);
 #endif
 					errflag = 1;
 					}
@@ -525,7 +525,7 @@ int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length, uns
 int TRecipeManager::SaveToFile(const char* filename)
 	{
 #ifdef DEBUG
-	Print("Saving recipes to file %s\n", filename);
+    printf("Saving recipes to file %s\n", filename);
 #endif // DEBUG
 	FILE* memFile = NULL;
 	memFile = fopen(filename, "r+b");

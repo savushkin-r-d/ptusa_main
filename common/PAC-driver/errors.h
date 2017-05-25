@@ -296,7 +296,7 @@ class tech_obj_error: public base_error
         void print() const
             {
 #ifdef DEBUG
-            Print( "%s\n",
+            printf( "%s\n",
                 tech_dev->get_name_in_Lua() );
 #endif // DEBUG
             }

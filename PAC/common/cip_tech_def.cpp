@@ -414,7 +414,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, double val )
 
 
 #ifdef DEBUG
-    Print( "Eror tech_object::set_cmd(...), prop = \"%s\", idx = %u, val = %f\n",
+    printf( "Eror tech_object::set_cmd(...), prop = \"%s\", idx = %u, val = %f\n",
         prop, idx, val );
 #endif // DEBUG
 
@@ -473,7 +473,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
         }
 
 #ifdef DEBUG
-    Print( "Eror tech_object::set_cmd(...), prop = \"%s\", idx = %u, val = %s\n",
+    printf( "Eror tech_object::set_cmd(...), prop = \"%s\", idx = %u, val = %s\n",
         prop, idx, val );
 #endif // DEBUG
     return 1;

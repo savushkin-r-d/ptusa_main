@@ -134,10 +134,11 @@ void tech_dev_error::evaluate( bool &is_new_state )
 //-----------------------------------------------------------------------------
 void tech_dev_error::print() const
     {
-#ifdef DEBUG
-    Print( "%s - state[ %3d ], par[ %d ]\n",
-        simple_device->get_name(), error_state, err_par[ P_PARAM_N ] );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "%s - state[ %3d ], par[ %d ]\n",
+            simple_device->get_name(), error_state, err_par[ P_PARAM_N ] );
+        }
     }
 //-----------------------------------------------------------------------------
 unsigned char tech_dev_error::get_object_type() const
@@ -188,10 +189,11 @@ int tech_dev_error::set_cmd( int cmd, int object_alarm_number )
                 }
             else
                 {
-#ifdef DEBUG
-                Print( "simple_error::set_cmd(...) - error state = %d, \
+                if ( G_DEBUG )
+                    {
+                    printf( "simple_error::set_cmd(...) - error state = %d, \
                        trying to set to ACCEPT!\n", error_state );
-#endif // DEBUG
+                    }
                 res = 1;
                 }
             break;
@@ -201,10 +203,11 @@ int tech_dev_error::set_cmd( int cmd, int object_alarm_number )
             break;
         }
 
-#ifdef DEBUG
-    Print( "simple_error::set_cmd(...) - cmd = %d\n", cmd );
-    print();
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "simple_error::set_cmd(...) - cmd = %d\n", cmd );
+        print();
+        }
 
     return res;
     }
@@ -269,23 +272,25 @@ int tech_obj_error::set_cmd( int cmd, int object_alarm_number )
             tech_dev->get_errors().erase(
                 tech_dev->get_errors().begin() + i );
 
-#ifdef DEBUG
-            Print( "Object \"%s\" (%s %d) set error cmd %d to error %d!\n",
-                tech_dev->get_name_in_Lua(),
-                tech_dev->get_name(), tech_dev->get_number(),
-                cmd, object_alarm_number );
-#endif // DEBUG
+            if ( G_DEBUG )
+                {
+                printf( "Object \"%s\" (%s %d) set error cmd %d to error %d!\n",
+                    tech_dev->get_name_in_Lua(),
+                    tech_dev->get_name(), tech_dev->get_number(),
+                    cmd, object_alarm_number );
+                }
             was_set_cmd = true;
             return 0;
             }
         }
-#ifdef DEBUG
-    Print( "Error! Object \"%s\" (%s %d) set error cmd - alarm number"
-        " %d not found!\n",
-        tech_dev->get_name_in_Lua(),
-        tech_dev->get_name(), tech_dev->get_number(),
-        object_alarm_number );
-#endif // DEBUG
+    if ( G_DEBUG )
+        {
+        printf( "Error! Object \"%s\" (%s %d) set error cmd - alarm number"
+            " %d not found!\n",
+            tech_dev->get_name_in_Lua(),
+            tech_dev->get_name(), tech_dev->get_number(),
+            object_alarm_number );
+        }
 
     return 1;
     }
@@ -386,15 +391,16 @@ int errors_manager::add_error( base_error  *s_error )
 //-----------------------------------------------------------------------------
 void errors_manager::print()
     {
-#ifdef DEBUG
-    Print( "dev_errors_manager\n" );
-
-    for ( u_int i = 0; i < s_errors_vector.size(); i++ )
+    if ( G_DEBUG )
         {
-        s_errors_vector[ i ]->print();
-        }
+        printf( "dev_errors_manager\n" );
 
-#endif // DEBUG
+        for ( u_int i = 0; i < s_errors_vector.size(); i++ )
+            {
+            s_errors_vector[ i ]->print();
+            }
+
+        }
     }
 //-----------------------------------------------------------------------------
 void errors_manager::reset_errors_params()
@@ -433,12 +439,13 @@ void errors_manager::set_cmd( unsigned int cmd, unsigned int object_type,
         }
     else
         {
-#ifdef DEBUG
-        Print( "Error dev_errors_manager::set_cmd(...) - cmd = %u, object_type = %u,\
+        if ( G_DEBUG )
+            {
+            printf( "Error dev_errors_manager::set_cmd(...) - cmd = %u, object_type = %u,\
                object_number = %u, object_alarm_number = %u\n",
-               cmd, object_type, object_number, object_alarm_number );
-        Print( "Error object not found!\n" );
-#endif // DEBUG
+                cmd, object_type, object_number, object_alarm_number );
+            printf( "Error object not found!\n" );
+            }
         }
 
 #ifdef DEBUG
@@ -532,9 +539,10 @@ void siren_lights_manager::eval()
         critical_error_n = PAC_critical_errors_manager::get_instance()->get_id();
         srn->on();
 
-#ifdef DEBUG
-        //Print( "PAC_critical_errors_manager::get_error_n() != critical_error_n\n" );
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            //Print( "PAC_critical_errors_manager::get_error_n() != critical_error_n\n" );
+            }
         }
 
     //Дополнительное включение сирены при появлении тревоги (ошибки устройств).
@@ -542,9 +550,10 @@ void siren_lights_manager::eval()
         {
         srn->on();
 
-#ifdef DEBUG
-        //Print( "base_error::is_new_active_alarm\n" );
-#endif // DEBUG
+        if ( G_DEBUG )
+            {
+            //Print( "base_error::is_new_active_alarm\n" );
+            }
         }
 
     //Желтый свет - сообщения (технологические объекты).
