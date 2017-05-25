@@ -512,14 +512,8 @@
     <ClCompile Include="..\..\..\PAC\common\log.cpp">
       <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\PAC\common\profibus_slave.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp">
       <Filter>Source Files\PAC\common\sys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.cpp">
-      <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\linux\l_console.cpp">
       <Filter>Source Files\PAC\linux</Filter>
@@ -538,6 +532,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\linux\l_wago.cpp">
       <Filter>Source Files\PAC\linux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\profibus_slave.cpp">
+      <Filter>Source Files\PAC\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.cpp">
+      <Filter>Source Files\PAC\win\PAC_PC</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
