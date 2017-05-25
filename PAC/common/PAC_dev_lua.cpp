@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/13/17 11:17:10.
+** Generated automatically by tolua++-1.0.92 on 05/25/17 12:57:04.
 */
 
 #ifndef __cplusplus
@@ -11495,6 +11495,9 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"ERR_OFF_AND_ON",tech_object::ERR_OFF_AND_ON);
    tolua_constant(tolua_S,"ERR_DURING_WORK",tech_object::ERR_DURING_WORK);
    tolua_constant(tolua_S,"ERR_ALARM",tech_object::ERR_ALARM);
+   tolua_constant(tolua_S,"ERR_TO_FAIL_STATE",tech_object::ERR_TO_FAIL_STATE);
+   tolua_constant(tolua_S,"ERR_CANT_ON_2_OPER",tech_object::ERR_CANT_ON_2_OPER);
+   tolua_constant(tolua_S,"ERR_CANT_ON_2_OBJ",tech_object::ERR_CANT_ON_2_OBJ);
    tolua_function(tolua_S,"set_err_msg",tolua_PAC_dev_tech_object_set_err_msg00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_TECH_OBJECT_MNGR",tolua_PAC_dev_G_TECH_OBJECT_MNGR00);

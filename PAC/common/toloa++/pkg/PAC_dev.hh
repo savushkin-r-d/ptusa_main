@@ -605,6 +605,10 @@ class tech_object
             ERR_OFF_AND_ON,
             ERR_DURING_WORK,
             ERR_ALARM,
+
+            ERR_TO_FAIL_STATE,
+            ERR_CANT_ON_2_OPER, //Уже включена блокирующая операция.
+            ERR_CANT_ON_2_OBJ,  //Уже включена блокирующая операция другого объекта.
             };
 
         int set_err_msg( const char *err_msg, int mode, int new_mode = 0, 
