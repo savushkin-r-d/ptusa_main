@@ -168,6 +168,10 @@ int lua_manager::init( lua_State* lua_state, char* script_name )
         L = lua_state;
         is_free_lua = 0;
         }
+#ifdef PAC_PC
+    //Добавление каталога с системными скриптами.
+    luaL_dostring( L, "package.path = package.path .. ';../../system scripts/?.lua'" );
+#endif
 
     //I
     //Проверка наличия и версии скриптов.
@@ -500,24 +504,30 @@ int lua_manager::error_trace( lua_State * L )
 
     if ( std::binary_search( errors.begin(), errors.end(), err_str ) != true )
         {
-        sprintf( G_LOG->msg, "\nlua: %s", err_str.c_str() );
-        G_LOG->write_log( i_log::P_ERR );
-
-        if ( G_DEBUG )
+        sprintf( G_LOG->msg, "Lua error:\n%s", err_str.c_str() );
+        if ( G_LOG->msg[ strlen( G_LOG->msg ) - 1 ] == '\n' )
             {
-            printf( "\tstack traceback:\n" );
-            lua_Debug ar;
-            int level = 1;
-
-            while( lua_getstack( L, level, &ar ) )
-                {
-                lua_getinfo( L, "Sln", &ar );
-                printf( "\t\t%s:%d: in function '%s' ('%s')\n",
-                    ar.source, ar.currentline, ar.name, ar.namewhat );
-
-                level++;
-                }
+            //Удаляем последний CR
+            G_LOG->msg[ strlen( G_LOG->msg ) - 1 ] = 0;
             }
+
+        G_LOG->write_log( i_log::P_ERR );
+       
+        int res = sprintf( G_LOG->msg, "Lua stack traceback:" );        
+
+        lua_Debug ar;
+        int level = 1;
+
+        while( lua_getstack( L, level, &ar ) )
+            {
+            lua_getinfo( L, "Sln", &ar );
+
+            res += sprintf( G_LOG->msg + res, "\n\t%s:%d: in function '%s' ('%s')",
+                ar.short_src, ar.currentline, ar.name, ar.namewhat );            
+            level++;
+            }
+
+        G_LOG->write_log( i_log::P_ERR );
 
         errors.push_back( err_str );
         if ( errors.size() > MAX_ERRORS )
