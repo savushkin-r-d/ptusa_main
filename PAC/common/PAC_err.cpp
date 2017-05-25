@@ -185,11 +185,11 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
     case AC_NO_CONNECTION:
         if ( is_set )
             {
-            sprintf( tmp + strlen( tmp ), "%s", "Lost connection with " );
+            sprintf( tmp + strlen( tmp ), "%s", "Нет связи с " );
             }
         else
             {
-            sprintf( tmp + strlen( tmp ), "%s", "Get connection with " );
+            sprintf( tmp + strlen( tmp ), "%s", "Есть связь с " );
             }
 
         switch( err_sub_class )
