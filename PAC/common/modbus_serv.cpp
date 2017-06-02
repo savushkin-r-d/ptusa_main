@@ -365,6 +365,21 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->ncar4, &outdata[3+i*2]);
 									i+= CAR_NAME_MAX_LENGTH;
 									break;
+								case OTHER_CAUSTIC_COUNT:
+									PackInt16(cipline_tech_object::Mdls[line - 1]->objectstats->objcausticwashes, &outdata[3 + i * 2]);
+									break;
+								case OTHER_LAST_ACID_WASH:
+									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->objectstats->objlastacidwash, &outdata[3 + i * 2]);
+									i += MAX_FIELD_LENGTH-1;
+									break;
+								case OTHER_LAST_WASH:
+									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->objectstats->objlastwash, &outdata[3 + i * 2]);
+									i += MAX_FIELD_LENGTH-1;
+									break;
+								case OTHER_LAST_WASH_PROGRAM:
+									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->objectstats->objlastwashprogram, &outdata[3 + i * 2]);
+									i += MAX_FIELD_LENGTH-1;
+									break;
 								default:
 									break;
 								}
@@ -802,7 +817,11 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							switch (objnumber)
 								{
 								case OTHER_CARNO1:
-									UnicodetoCP1251(cipline_tech_object::Mdls[line - 1]->ncar1,  &data[7+i*2], 15);
+                                    if (cipline_tech_object::Mdls[line - 1]->state == 0)
+                                        {
+                                        UnicodetoCP1251(cipline_tech_object::Mdls[line - 1]->ncar1, &data[7 + i * 2], 15);
+                                        cipline_tech_object::Mdls[line - 1]->objectstats = cipline_tech_object::statsbase->stats_if_exists(cipline_tech_object::Mdls[line - 1]->ncar1, cipline_tech_object::Mdls[line - 1]->emptystats);
+                                        }
 									i+= CAR_NAME_MAX_LENGTH;
 									break;
 								case OTHER_CARNO2:

@@ -6,6 +6,7 @@
 #include "PID.h"
 #include "modbus_serv.h"
 #include "PAC_dev.h"
+#include "cip_stats.h"
 
 
 #define NOCONC       0.1
@@ -86,6 +87,12 @@
 
 #define  P_MAX_BULK_FOR_CAUSTIC	31	//максимальный аналоговый уровень при наполнении танка щелочи при наведении
 #define  P_MAX_BULK_FOR_ACID	32	//максимальный аналоговый уровень при наполнении танка кислоты при наведении
+#define  P_CAUSTIC_TYPE	        33	//Тип щелочного раствора
+#define  P_ACID_TYPE	        34	//Тип кислотного раствора
+#define  P_DEZINFECTION_TYPE    35	//Тип дезинфицирующего раствора
+#define  P_CAUSTIC_SELECTED     36	//Выбранный рецепт щелочного раствора
+#define  P_ACID_SELECTED        37	//Выбранный рецепт кислотного раствора
+
 
 //programms of moika
 #define PRG_SELFCLEAN		11
@@ -145,8 +152,17 @@ enum MODULE_COMMANDS
 	MCMD_LOAD_RECIPE = 20,
 	MCMD_NEXT_RECIPE,
 	MCMD_PREV_RECIPE,
+    MCMD_CAUSTIC_NEXT_RECIPE,
+    MCMD_CAUSTIC_PREV_RECIPE,
+    MCMD_ACID_NEXT_RECIPE,
+    MCMD_ACID_PREV_RECIPE,
 	MCMD_FORCE_RET_ON = 30, //принудительное включение возвратного насоса
 	MCMD_FORCE_RET_OFF,	//принудетельное выключение возвратного насоса
+    MCMD_RELOAD_RECIPES = 256,
+    MCMD_RELOAD_ALL_RECIPES = 257,
+    MCMD_RELOAD_CAUSTIC_RECIPES = 258,
+    MCMD_RELOAD_ACID_RECIPES = 259,
+    MCMD_RELOAD_WASH_STATS = 260,
 	};
 
 
@@ -568,8 +584,15 @@ class cipline_tech_object: public tech_object
 		float get_station_par(int parno);
 		void set_station_par(int parno, float newval);
 
+        //Статистика по объектам мойки
+        static cip_stats* statsbase;
+        cip_object_stats* objectstats;
+        cip_object_stats* emptystats;
+
 		///Флаг отсутствия нейтрализации
 		char no_neutro;
+		///Флаг использования танка для вторичной воды
+		char dont_use_water_tank;
         int ret_overrride; //флаг принудительного включения/выключения возвратного насооса
         int return_ok; //есть расход на возврате
         int concentration_ok; //есть концентрация на возврате
@@ -594,6 +617,14 @@ class cipline_tech_object: public tech_object
 		char* loadedRecName;
 		char* programList;
 		char* currentProgramName;
+
+		//Выбор моющего средства
+		static TMediumRecipeManager* causticRecipes;
+		static char* causticName;
+        static int causticLoadedRecipe;
+		static TMediumRecipeManager* acidRecipes;
+		static char* acidName;
+        static int acidLoadedRecipe;
 
 		//Номер машины(или что-нибудь другое)
 		char* ncar1;
@@ -814,6 +845,8 @@ class cipline_tech_object: public tech_object
 		////------------------------------
 		virtual int InitCustomStep(int what, int from, int where, int how, int step, int f);
 		virtual int EvalCustomStep(int what, int from, int where, int how);
+       ////Вспомогательные функции
+        void DateToChar(char* buff);
 	};
 
 

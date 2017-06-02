@@ -1226,6 +1226,7 @@ class cipline_tech_object: public tech_object
 
 		int cip_in_error;
         char no_neutro; ///Флаг отсутствия нейтрализации
+		char dont_use_water_tank; //Флаг возможности использования танка вторичной воды для мойки
 		int disable_tank_heating; //отключение подогрева при начале подачи растворов в танк(для МСА со старыми регулирующими клапанами)
         int ret_overrride; //флаг принудительного включения/выключения возвратного насооса
         int return_ok; //есть расход на возврате

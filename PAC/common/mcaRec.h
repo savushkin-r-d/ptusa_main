@@ -116,7 +116,6 @@ class TRecipeManager
 		RV_LASTVALVEOFF = 119,
 		};
 	private:
-		char* defaultfilename;
 		///@brief Флаг, сигнализирующий об изменении параметров рецепта
 		int recipechanged;
 		unsigned long recipechangechecktime;
@@ -135,6 +134,8 @@ class TRecipeManager
 		int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf);
 		int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf);
 	public:
+        ///@brief Имя файла с рецептами
+        char* defaultfilename;
 		///@brief Начальный блок для всех экземляров рецептов
 		static int startRecipeBlock;
 		///@brief Количество рецептов на линию
@@ -265,6 +266,182 @@ class TRecipeManager
 		/// @return
 		TRecipeManager(int lineNo);
 		~TRecipeManager();
+	};
+
+
+	class TMediumRecipeManager
+	{
+	public:
+		enum RecipeValues
+		{
+			RV_IS_USED = 0,
+			RV_TO_DEFAULTS,
+            RV_P_TYPE,                       //код раствора
+            RV_P_CZAD,                       //концентрация рабочего раствора
+            RV_P_CMIN,                       //минимальная концентрация рабочего раствора
+            RV_P_CKANAL,                     //максимальная концентрация раствора для канализации
+            RV_P_ALF,                        //коэффициент температурной зависимости
+            RV_P_K,                          //концентрация концентрированного раствора
+            RV_P_RO,                         //плотность концентрированного раствора
+            RV_P_CONC25,                     //концентрация в заданной точке
+            RV_P_MS25,                     //проводимость в заданной точке
+		};
+
+		enum MediumTypes
+		{
+			MT_CAUSTIC = 0,
+			MT_ACID,
+		};
+	private:
+		///@brief Флаг, сигнализирующий об изменении параметров рецепта
+		int recipechanged;
+		int mediumType;
+		unsigned long recipechangechecktime;
+		int currentRecipe;
+		int curRecipeStartBlock;
+		unsigned long lastEvalTime;
+		unsigned long recipeStartAddr;
+		void SaveRecipeName();
+
+		void FormRecipeList();
+		unsigned long startAddr();
+		unsigned long startAddr(int recNo);
+		unsigned char* recipeMemory;
+		unsigned long recipeMemorySize;
+		int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf);
+		int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf);
+	public:
+        char* defaultfilename;
+		///@brief Начальный блок для всех экземляров рецептов
+		static int startRecipeBlock;
+		///@brief Количество рецептов на линию
+		static int recipePerLine;
+		///@brief Длина рецепта в блоках
+		static int blocksPerRecipe;
+		///@brief Длина имени рецепта
+		static int recipeNameLength;
+		///@brief Относительный адрес начала параметров (от начального адреса рецепта)
+		static int startRecipeParamsOffset;
+		///@brief Буфер для копирования рецептов
+		static unsigned char* recipeCopyBuffer;
+		///@brief Имя текущего рецепта
+		char* currentRecipeName;
+		///@brief Список рецептов для сервера
+		char* recipeList;
+		/// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
+		/// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры
+		/// @param recipeNo - номер рецепта
+		/// @param recipeStartPos - с данного параметра рецепта начинается загрузка
+		/// @param paramsStartPos - начальная позиция в рецепте
+		/// @param parQuantity - количество загружаемых параметров
+		/// @param par - указатель на класс параметров TParams
+		/// @return   int - возвращает 0 при ошибке и !0 при успешном завершении
+		int LoadRecipeToParams(int recipeNo, saved_params<float, true> par);
+		/// @fn  int TRecipeManager::getCurrentRecipe()
+		/// @brief Возвращает номер текущего рецепта
+		/// @return   int Номер рецепта
+		int getCurrentRecipe();
+		/// @fn  int TRecipeManager::setCurrentRecipe(int recipeNo)
+		/// @brief Задает текущий рецепт
+		/// @param recipeNo Номер рецепта
+		/// @return   int 0 - заданный номер рецепта > максимального количества рецептов
+		int setCurrentRecipe(int recipeNo);
+		/// @fn  float TRecipeManager::getRecipeValue(int recNo, int valueNo)
+		/// @brief Возвращает значение параметра указанного рецепта
+		/// @param recNo Номер рецепта
+		/// @param valueNo Номер параметра
+		/// @return   float Значение параметра
+		float getRecipeValue(int recNo, int valueNo);
+		/// @fn  float TRecipeManager::getValue(int valueNo)
+		/// @brief Возвращает значение параметра текущего рецепта
+		/// @param valueNo Номер параметра
+		/// @return   float Значение параметра
+		float getValue(int valueNo);
+		/// @fn  int TRecipeManager::getRecipeName(int recNO, char* recName)
+		/// @brief Получает строку с именем рецепта
+		/// @param recNO Номер рецепта
+		/// @param recName Указатель на строку, в которую будет записан рецепт
+		/// @return   int 0 - ошибка !0 - ОК
+		int getRecipeName(int recNO, char* recName);
+		/// @fn  int TRecipeManager::setRecipeValue(int recNo, int valueNo, float newValue)
+		/// @brief Устанавливает значение заданного параметра заданного рецепта
+		/// @param recNo Номер рецепта
+		/// @param valueNo Номер параметра
+		/// @param newValue Новое значение
+		/// @return   int 0 - ошибка !0 - ОК
+		int setRecipeValue(int recNo, int valueNo, float newValue);
+		/// @fn  int TRecipeManager::setValue(int valueNo, float newValue)
+		/// @brief Устанавливает значение заданного параметра текущего рецепта
+		/// @param valueNo Номер параметра
+		/// @param newValue Новое значение
+		/// @return   int 0 - ошибка !0 - ОК
+		int setValue(int valueNo, float newValue);
+		/// @fn  int TRecipeManager::NextRecipe()
+		/// @brief Переход к следующему рецепту
+		/// @return   int 0 - ошибка !0 - ОК
+		int NextRecipe();
+		/// @fn  int TRecipeManager::PrevRecipe()
+		/// @brief Переход к предыдущему рецепту
+		/// @return   int 0 - ошибка !0 - ОК
+		int PrevRecipe();
+		/// @fn  int TRecipeManager::ToRecipe(int recNo)
+		/// @brief Переход к указанному рецепту
+		/// @param recNo - номер рецепта
+		/// @return   int 0 - ошибка !0 - ОК
+		int ToRecipe(int recNo);
+		/// @fn  int TRecipeManager::OnRecipeDevices(int recipeNo)
+		/// @brief Включает устройства рецепта
+		/// @param recipeNo Номер рецепта
+		/// @return   int 0 - ошибка !0 - ОК
+		int OnRecipeDevices(int recipeNo, int msaline = 1);
+		/// @fn  int TRecipeManager::OffRecipeDevices(int recipeNo)
+		/// @brief Выключает устройства рецепта
+		/// @param recipeNo Номер рецепта
+		/// @return   int 0 - ошибка !0 - ОК
+		int OffRecipeDevices(int recipeNo, int msaline = 1);
+		/// @fn  int TRecipeManager::GetParamsCount()
+		/// @brief Возвращает количество параметров для рецепта
+		/// @return   int Количество параметров рецепта
+		int GetParamsCount();
+		/// @fn  int TRecipeManager::ResetRecipeToDefaults(int recipeNo)
+		/// @brief Сбрасывает значения параметров указанного рецепта на значения по-умолчанию
+		/// @param recipeNo Номер рецепта
+		/// @return   int 0 - ошибка !0 - ОК
+		int ResetRecipeToDefaults(int recipeNo);
+		/// @fn  void TRecipeManager::LoadRecipeName()
+		/// @brief Обновляет имя рецепта из энергонезависимой памяти
+		/// @return   void
+		void LoadRecipeName();
+		/// @fn  void TRecipeManager::EvalRecipe()
+		/// @brief Обработка рецептов, периодически сохраняет текущее имя рецепта в энергонезависимую память и формирует список рецептов
+		/// @return   void
+		void EvalRecipe();
+		/// @fn  void TRecipeManager::CopyRecipe()
+		/// @brief Копирует текущий рецепт в буфер
+		/// @return   void
+		void CopyRecipe();
+		/// @fn  void TRecipeManager::PasteRecipe()
+		/// @brief Переписывает текущий рецепт значениями из буффера
+		/// @return   void
+		void PasteRecipe();
+		/// @fn int TRecipeManager::SaveToFile()
+		/// @brief Сохранение рецептов модуля в файл
+		/// @return Возвращает 0 в случае успешного завершения
+		int SaveToFile(const char* filename);
+		/// @fn int TRecipeManager::LoadFromFile()
+		/// @brief Загрузка рецептов из сохраненного файла
+		/// @return Возвращает 0 в случае успешного завершения
+		int LoadFromFile(const char* filename);
+		/// @fn  void TRecipeManager::NullifyRecipe()
+		/// @brief Обнуляет текущий рецепт
+		/// @return   void
+		void NullifyRecipe();
+		/// @fn   TRecipeManager::TRecipeManager(int lineNo)
+		/// @brief Конструктор класса
+		/// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти
+		/// @return
+		TMediumRecipeManager(MediumTypes mType);
+		~TMediumRecipeManager();
 	};
 
 

@@ -180,6 +180,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClInclude Include="..\..\..\common\tolua++\tolua_base.h" />
     <ClInclude Include="..\..\..\common\tolua++\tolua_event.h" />
     <ClInclude Include="..\..\..\common\util\smart_ptr.h" />
+    <ClInclude Include="..\..\..\PAC\common\cip_stats.h" />
     <ClInclude Include="..\..\..\PAC\common\cip_tech_def.h" />
     <ClInclude Include="..\..\..\common\win_util\WSA_err_decode.h" />
     <ClInclude Include="..\..\..\PAC\common\i_tech_def.h" />
@@ -258,6 +259,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClCompile Include="..\..\..\common\tolua++\tolua_map.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_push.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_to.c" />
+    <ClCompile Include="..\..\..\PAC\common\cip_stats.cpp" />
     <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp" />
     <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp" />
     <ClCompile Include="..\..\..\PAC\common\log.cpp" />

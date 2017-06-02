@@ -6,6 +6,20 @@
 #include "cip_tech_def.h"
 #include "lua_manager.h"
 
+TMediumRecipeManager* cipline_tech_object::causticRecipes = 0;
+
+char* cipline_tech_object::causticName = 0;
+
+int cipline_tech_object::causticLoadedRecipe = -1;
+
+TMediumRecipeManager* cipline_tech_object::acidRecipes = 0;
+
+char* cipline_tech_object::acidName = 0;
+
+int cipline_tech_object::acidLoadedRecipe = -1;
+
+cip_stats* cipline_tech_object::statsbase = 0;
+
 int isMsa = 0;
 
 int getNexpPrg(int cur, unsigned long prg)
@@ -38,14 +52,14 @@ int getNexpPrg(int cur, unsigned long prg)
 
 
 
-cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int type,
-                                         const char* name_Lua, u_int states_count, u_int timers_count,
-                                         u_int par_float_count, u_int runtime_par_float_count, u_int par_uint_count,
-                                         u_int runtime_par_uint_count ) : tech_object(name, number, type,
-                                         name_Lua, states_count, timers_count, par_float_count, runtime_par_float_count,
-                                         par_uint_count, runtime_par_uint_count)
+cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int type,
+    const char* name_Lua, u_int states_count, u_int timers_count,
+    u_int par_float_count, u_int runtime_par_float_count, u_int par_uint_count,
+    u_int runtime_par_uint_count) : tech_object(name, number, type,
+    name_Lua, states_count, timers_count, par_float_count, runtime_par_float_count,
+    par_uint_count, runtime_par_uint_count)
     {
-    if ( G_DEBUG )
+    if (G_DEBUG)
         {
         printf("\n\r Create cip tech_object\n\r");
         }
@@ -56,6 +70,32 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
         {
         parpar = new saved_params<float, true>(STATION_PAR_COUNT, "PAR_MAIN");
         }
+    if (0 == causticRecipes)
+        {
+        causticRecipes = new TMediumRecipeManager(TMediumRecipeManager::MT_CAUSTIC);
+        }
+    if (0 == acidRecipes)
+        {
+        acidRecipes = new TMediumRecipeManager(TMediumRecipeManager::MT_ACID);
+        }
+    if (0 == causticName)
+        {
+        causticName = new char[TMediumRecipeManager::recipeNameLength];
+        strcpy(causticName, "");
+        }
+    if (0 == acidName)
+        {
+        acidName = new char[TMediumRecipeManager::recipeNameLength];
+        strcpy(acidName, "");
+        }
+    if (0 == statsbase)
+        {
+        statsbase = new cip_stats();
+        statsbase->loadFromFile(statsbase->filename);
+        statsbase->saveToFile(statsbase->filename);
+        }
+    emptystats = new cip_object_stats("emptyname");
+    objectstats = emptystats;
     for (i = 0; i < TMR_CNT; i++)
         {
         T[i]=new timer;
@@ -65,6 +105,7 @@ cipline_tech_object::cipline_tech_object( const char* name, u_int number, u_int 
         SAV[i]=new TSav;
         }
     no_neutro = 0;
+	dont_use_water_tank = 0;
     ret_circ_flag = 0;
     ret_circ_delay = get_millisec();
     ret_overrride = 0;
@@ -235,6 +276,32 @@ cipline_tech_object::~cipline_tech_object()
         {
         delete lineRecipes;
         }
+    if (causticRecipes)
+        {
+        delete causticRecipes;
+        causticRecipes = 0;
+        }
+    if (acidRecipes)
+        {
+        delete acidRecipes;
+        acidRecipes = 0;
+        }
+    if (acidName)
+        {
+        delete[] acidName;
+        }
+    if (causticName)
+        {
+        delete[] causticName;
+        }
+    if (statsbase)
+    {
+        statsbase->clear();
+        delete statsbase;
+        statsbase = NULL;
+    }
+    objectstats = NULL;
+    delete emptystats;
     delete[] loadedRecName;
     delete[] programList;
     delete[] currentProgramName;
@@ -318,7 +385,30 @@ int cipline_tech_object::save_device( char *buff )
         {
         answer_size += sprintf(buff + answer_size, "%.2f, ", lineRecipes->getValue(i-1));
         }
-    answer_size += sprintf(buff + answer_size, "\n\t}\n");
+    answer_size += sprintf(buff + answer_size, "\n\t},\n");
+
+    //Статистика по мойке выбранного объекта
+    answer_size += sprintf(buff + answer_size, "\tOBJSTATS_LASTWASH='%s',\n", objectstats->objlastwash);
+    answer_size += sprintf(buff + answer_size, "\tOBJSTATS_LASTPROGRAM='%s',\n", objectstats->objlastwashprogram);
+    answer_size += sprintf(buff + answer_size, "\tOBJSTATS_CAUSTICCOUNT=%d,\n", objectstats->objcausticwashes);
+    answer_size += sprintf(buff + answer_size, "\tOBJSTATS_LASTACIDWASH='%s',\n", objectstats->objlastacidwash);
+
+
+    //Выбор моющих средств
+    if (nmr == 1)
+    {
+        //Список доступных щелочных растворов
+        answer_size += sprintf(buff + answer_size, "\tCAUSTIC_REC_LIST='%s',\n", causticRecipes->recipeList);
+        answer_size += sprintf(buff + answer_size, "\tCAUSTIC_REC_NMR='%d',\n", causticRecipes->getCurrentRecipe());
+        answer_size += sprintf(buff + answer_size, "\tCAUSTICNAME='%s',\n", causticName);
+        answer_size += sprintf(buff + answer_size, "\tCAUSTIC_PAR_NAME='%s',\n", causticRecipes->currentRecipeName);
+        answer_size += sprintf(buff + answer_size, "\tCAUSTIC_PAR = \n\t{\n\t\t");
+        for (i = 1; i <= causticRecipes->GetParamsCount(); i++)
+            {
+            answer_size += sprintf(buff + answer_size, "%.2f, ", causticRecipes->getValue(i - 1));
+            }
+        answer_size += sprintf(buff + answer_size, "\n\t}\n");
+    }
 
     answer_size += sprintf( buff + answer_size, "\t}\n" );
     return answer_size;
@@ -347,6 +437,14 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, double val )
 
     if ( strcmp( prop, "PAR_MAIN" ) == 0 )
         {
+        if (idx == P_CAUSTIC_SELECTED)
+        {
+            causticLoadedRecipe = -1;
+        }
+        if (idx == P_ACID_SELECTED)
+        {
+            acidLoadedRecipe = -1;
+        }
         parpar->save( idx, ( float ) val );
         return 0;
         }
@@ -375,6 +473,18 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, double val )
         return 0;
         }
 
+    if (strcmp(prop, "CAUSTIC_PAR") == 0)
+        {
+        causticRecipes->setValue(idx - 1, (float)val);
+        return 0;
+        }
+
+    if (strcmp(prop, "ACID_PAR") == 0)
+        {
+        acidRecipes->setValue(idx - 1, (float)val);
+        return 0;
+        }
+
     if ( strcmp( prop, "CMD" ) == 0 )
         {
         ncmd = (u_int_4) val;
@@ -388,6 +498,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, double val )
             case 0:
             case 1:
                 sprintf(ncar1, "%d", (int)val);
+                objectstats = statsbase->stats_if_exists(ncar1, emptystats);
                 break;
             case 2:
                 sprintf(ncar2, "%d", (int)val);
@@ -433,6 +544,29 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 #endif
         return 0;
         }
+
+    if (0 == strcmp(prop, "CAUSTIC_PAR_NAME"))
+        {
+#ifdef WIN_OS
+        strncpy_s(causticRecipes->currentRecipeName, causticRecipes->recipeNameLength,
+            val, _TRUNCATE);
+#else
+        strncpy(causticRecipes->currentRecipeName, val, causticRecipes->recipeNameLength);
+#endif
+        return 0;
+        }
+
+    if (0 == strcmp(prop, "ACID_PAR_NAME"))
+        {
+#ifdef WIN_OS
+        strncpy_s(acidRecipes->currentRecipeName, acidRecipes->recipeNameLength,
+            val, _TRUNCATE);
+#else
+        strncpy(acidRecipes->currentRecipeName, val, acidRecipes->recipeNameLength);
+#endif
+        return 0;
+        }
+
     if (0 == strcmp(prop, "NCAR"))
         {
         switch (idx)
@@ -444,7 +578,7 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, const char* val )
 #else
                 strncpy( ncar1, val, CAR_NAME_MAX_LENGTH );
 #endif
-
+                objectstats = statsbase->stats_if_exists(ncar1, emptystats);
                 break;
             case 2:
 #ifdef WIN_OS
@@ -499,6 +633,10 @@ int cipline_tech_object::evaluate()
             }
         }
 
+    if (nmr == 1)
+    {
+        statsbase->evaluate();
+    }
     EvalRecipes();
     EvalCipReadySignal();
 
@@ -1199,6 +1337,31 @@ void cipline_tech_object::initline()
         lua_remove(L, -1); // Stack: remove function "cip_On_Resume".
         }
 
+    if (nmr == 1)
+        {
+        causticLoadedRecipe = (int)(parpar[0][P_CAUSTIC_SELECTED]);
+        if (causticLoadedRecipe >= 0 && causticLoadedRecipe < causticRecipes->recipePerLine)
+            {
+            causticRecipes->getRecipeName(causticLoadedRecipe, causticName);
+            }
+        else
+            {
+            parpar->save(P_CAUSTIC_SELECTED, -1);
+            causticLoadedRecipe = -1;
+            }
+        
+        acidLoadedRecipe = (int)(parpar[0][P_ACID_SELECTED]);
+        if (acidLoadedRecipe >= 0 && acidLoadedRecipe < acidRecipes->recipePerLine)
+            {
+            acidRecipes->getRecipeName(acidLoadedRecipe, acidName);
+            }
+        else
+            {
+            parpar->save(P_ACID_SELECTED, -1);
+            acidLoadedRecipe = -1;
+            }
+        }
+
     }
 
 void cipline_tech_object::resetProgramName()
@@ -1209,6 +1372,9 @@ void cipline_tech_object::resetProgramName()
 void cipline_tech_object::resetRecipeName()
     {
     sprintf(loadedRecName, "%c%c %c%c%c%c%c%c%c",205,229,226,251,225,240,224,237,0);
+    //Обнуляем ссылку на статистику мойки объекта.
+	emptystats->resetstats();
+    objectstats = emptystats;
     }
 
 void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*/ )
@@ -1671,6 +1837,28 @@ void cipline_tech_object::_RT( void )
 
 int cipline_tech_object::EvalRecipes()
     {
+    if (1 == nmr)
+        {
+        acidRecipes->EvalRecipe();
+        causticRecipes->EvalRecipe();
+        }
+    //Выбор раствора
+    if ((int)(parpar[0][P_CAUSTIC_SELECTED]) != causticLoadedRecipe) 
+    {
+        int newcausticrecipe = (int)(parpar[0][P_CAUSTIC_SELECTED]);
+        if (newcausticrecipe >= 0 && newcausticrecipe < causticRecipes->recipePerLine)
+            {
+            causticRecipes->getRecipeName(newcausticrecipe, causticName);
+            causticRecipes->LoadRecipeToParams(newcausticrecipe, parpar[0]);
+            causticLoadedRecipe = newcausticrecipe;
+            }
+        else
+            {
+            parpar->save(P_CAUSTIC_SELECTED, causticLoadedRecipe);
+            }
+    }
+
+
     lineRecipes->EvalRecipe();
     rt_par_float[P_LOADED_RECIPE] = loadedRecipe + 1;
     //переход к рецепту
@@ -1689,6 +1877,12 @@ int cipline_tech_object::EvalRecipes()
         loadedRecipe = ( int ) rt_par_float[P_SELECT_REC] - 1;
         rt_par_float[P_SELECT_REC] = 0;
         formProgramList((unsigned int)(rt_par_float[P_PROGRAM_MASK]));
+		//Загрузка статистики
+        if (tech_type != TECH_TYPE_CAR_WASH)
+            {
+            objectstats = statsbase->get_obj_stats(loadedRecName);
+            objectstats->changed = 0;
+            }
         }
     //выбор программы
     if (rt_par_float[P_SELECT_PRG] > 0)
@@ -1738,6 +1932,7 @@ int cipline_tech_object::SetRet( int val )
 
 int cipline_tech_object::EvalCommands()
     {
+    int i;
     switch (ncmd)
         {
         case MCMD_NEXT:
@@ -1853,6 +2048,10 @@ int cipline_tech_object::EvalCommands()
                         switch3 = 0;
                         switch4 = 0;
                         }
+                    else
+                        {
+                        objectstats = statsbase->get_obj_stats(ncar1);
+                        }
                     }
 
                 state=1;
@@ -1943,6 +2142,18 @@ int cipline_tech_object::EvalCommands()
             lineRecipes->PrevRecipe();
             rt_par_float[P_CUR_REC] = lineRecipes->getCurrentRecipe() + 1;
             break;
+        case MCMD_CAUSTIC_NEXT_RECIPE:
+            causticRecipes->NextRecipe();
+            break;
+        case MCMD_CAUSTIC_PREV_RECIPE:
+            causticRecipes->PrevRecipe();
+            break;
+        case MCMD_ACID_NEXT_RECIPE:
+            acidRecipes->NextRecipe();
+            break;
+        case MCMD_ACID_PREV_RECIPE:
+            acidRecipes->PrevRecipe();
+            break;
         case MCMD_FORCE_RET_ON:
             if (state)
                 {
@@ -1953,6 +2164,43 @@ int cipline_tech_object::EvalCommands()
             if (state)
                 {
                 ForceRet(OFF);
+                }
+            break;
+        case MCMD_RELOAD_RECIPES:
+            lineRecipes->LoadFromFile(lineRecipes->defaultfilename);
+            lineRecipes->LoadRecipeName();
+            break;
+        case MCMD_RELOAD_CAUSTIC_RECIPES:
+            causticRecipes->LoadFromFile(causticRecipes->defaultfilename);
+            causticRecipes->LoadRecipeName();
+            break;
+        case MCMD_RELOAD_ACID_RECIPES:
+            acidRecipes->LoadFromFile(acidRecipes->defaultfilename);
+            acidRecipes->LoadRecipeName();
+            break;
+        case MCMD_RELOAD_WASH_STATS:
+            for (i = 0; i < MdlsCNT; i++)
+                {
+                Mdls[i]->objectstats = Mdls[i]->emptystats;
+                }
+            statsbase->clear();
+            statsbase->loadFromFile(statsbase->filename);
+            for (i = 0; i < MdlsCNT; i++)
+                {
+                if (Mdls[i]->state != 0 && Mdls[i]->rt_par_float[P_PROGRAM] != SPROG_CAUSTIC_PREPARATION && Mdls[i]->rt_par_float[P_PROGRAM] != SPROG_ACID_PREPARATION &&
+                    Mdls[i]->rt_par_float[P_PROGRAM] != SPROG_SELF_CLEAN)
+                    {
+                    if (tech_type != TECH_TYPE_CAR_WASH)
+                        {
+                        Mdls[i]->objectstats = statsbase->stats_if_exists(Mdls[i]->loadedRecName, Mdls[i]->emptystats);
+                        Mdls[i]->objectstats->changed = 0;
+                        }
+                    else
+                        {
+                        Mdls[i]->objectstats = statsbase->stats_if_exists(Mdls[i]->ncar1, Mdls[i]->emptystats);
+                        Mdls[i]->objectstats->changed = 0;
+                        }
+                    }
                 }
             break;
         }
@@ -2214,6 +2462,16 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
             }
         }
 
+	int tank_w_dest = TANK_W;
+	int tank_w_src = TANK_W;
+
+	if (1 == dont_use_water_tank)
+	{
+		tank_w_dest = KANAL;
+		tank_w_src = WATER;
+		pr_media = WATER;
+	}
+
     int cleanrinsingto = clean_water_rinsing_return;
 
     switch (step_to_init)
@@ -2226,16 +2484,16 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
                 V00->on();
                 }
             return 0;
-        case 5:  return InitToObject(TANK_W, KANAL, step_to_init, not_first_call);
+        case 5:  return InitToObject(tank_w_src, KANAL, step_to_init, not_first_call);
         case 6:  return InitOporCIP(KANAL, step_to_init, not_first_call);
-        case 7:  return InitFromObject(TANK_W, KANAL, step_to_init, not_first_call);
-        case 8:  return InitToObject(TANK_W, KANAL, step_to_init, not_first_call);
+        case 7:  return InitFromObject(tank_w_src, KANAL, step_to_init, not_first_call);
+        case 8:  return InitToObject(tank_w_src, KANAL, step_to_init, not_first_call);
         case 9:  return InitOporCIP(KANAL, step_to_init, not_first_call);
         case 10: return InitFilCirc(WITH_RETURN, step_to_init, not_first_call);
         case 11: return InitCirc(WATER, step_to_init, not_first_call);
         case 12: return InitOporCirc(KANAL, step_to_init, not_first_call);
         case 13: return InitFilCirc(WITH_RETURN, step_to_init, not_first_call);
-        case 14: return InitToObject(TANK_W, KANAL, step_to_init, not_first_call);
+        case 14: return InitToObject(tank_w_src, KANAL, step_to_init, not_first_call);
         case 15: return InitOporCirc(KANAL, step_to_init, not_first_call);
         case 16: return InitOporCirc(KANAL, step_to_init, not_first_call);
         case 22: return InitToObject(TANK_S, KANAL, step_to_init, not_first_call);
@@ -2249,9 +2507,9 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
         case 33: return InitToObject(pr_media, TANK_S, step_to_init, not_first_call);
         case 34: return InitOporCIP(TANK_S, step_to_init, not_first_call);
         case 35: return InitFromObject(pr_media, TANK_S, step_to_init, not_first_call);
-        case 37: return InitToObject(pr_media, TANK_W, step_to_init, not_first_call);
-        case 39: return InitOporCirc(TANK_W, step_to_init, not_first_call);
-        case 40: return InitOporCIP(TANK_W, step_to_init, not_first_call);
+        case 37: return InitToObject(pr_media, tank_w_dest, step_to_init, not_first_call);
+        case 39: return InitOporCirc(tank_w_dest, step_to_init, not_first_call);
+        case 40: return InitOporCIP(tank_w_dest, step_to_init, not_first_call);
 
         case 42: return InitToObject(TANK_K, KANAL, step_to_init, not_first_call);
         case 43: return InitOporCIP(KANAL, step_to_init, not_first_call);
@@ -2262,21 +2520,21 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
         case 53: return InitToObject(WATER, TANK_K, step_to_init, not_first_call);
         case 54: return InitOporCIP(TANK_K, step_to_init, not_first_call);
         case 55: return InitFromObject(WATER, TANK_K, step_to_init, not_first_call);
-        case 57: return InitToObject(WATER, TANK_W, step_to_init, not_first_call);
-        case 59: return InitOporCirc(TANK_W, step_to_init, not_first_call);
-        case 60: return InitOporCIP(TANK_W, step_to_init, not_first_call);
+        case 57: return InitToObject(WATER, tank_w_dest, step_to_init, not_first_call);
+        case 59: return InitOporCirc(tank_w_dest, step_to_init, not_first_call);
+        case 60: return InitOporCIP(tank_w_dest, step_to_init, not_first_call);
         case 61: return InitFilCirc(WITH_WATER, step_to_init, not_first_call);
-        case 62: return InitToObject(WATER, TANK_W, step_to_init, not_first_call);
-        case 63: return InitOporCIP(TANK_W, step_to_init, not_first_call);
-        case 64: return InitFromObject(WATER, TANK_W, step_to_init, not_first_call);
+        case 62: return InitToObject(WATER, tank_w_dest, step_to_init, not_first_call);
+        case 63: return InitOporCIP(tank_w_dest, step_to_init, not_first_call);
+        case 64: return InitFromObject(WATER, tank_w_dest, step_to_init, not_first_call);
         case 65: return InitFilCirc(WITH_WATER, step_to_init, not_first_call);
         case 66: return InitCirc(HOT_WATER, step_to_init, not_first_call);
-        case 67: return InitOporCirc(TANK_W, step_to_init, not_first_call);
+        case 67: return InitOporCirc(tank_w_dest, step_to_init, not_first_call);
 
         case 71: return InitFilCirc(SANITIZER, step_to_init, not_first_call);
-        case 72: return InitToObject(SANITIZER, TANK_W, step_to_init, not_first_call);
-        case 73: return InitOporCIP(TANK_W, step_to_init, not_first_call);
-        case 74: return InitFromObject(SANITIZER, TANK_W, step_to_init, not_first_call);
+        case 72: return InitToObject(SANITIZER, tank_w_dest, step_to_init, not_first_call);
+        case 73: return InitOporCIP(tank_w_dest, step_to_init, not_first_call);
+        case 74: return InitFromObject(SANITIZER, tank_w_dest, step_to_init, not_first_call);
         case 75: return InitFilCirc(SANITIZER, step_to_init, not_first_call);
         case 76: return InitDoseRR(SANITIZER, step_to_init, not_first_call);
         case 77: return InitCirc(SANITIZER, step_to_init, not_first_call);
@@ -2456,21 +2714,31 @@ int cipline_tech_object::_DoStep( int step_to_do )
 
     int cleanrinsingto = clean_water_rinsing_return;
 
+	int tank_w_dest = TANK_W;
+	int tank_w_src = TANK_W;
+
+	if (1 == dont_use_water_tank)
+	{
+		tank_w_dest = KANAL;
+		tank_w_src = WATER;
+		pr_media = WATER;
+	}
+
     switch (step_to_do)
         {
         case 0:
             if (LM->is_active()) return 1;
             return 0;
-        case 5:  return ToObject(TANK_W, KANAL);
+        case 5:  return ToObject(tank_w_src, KANAL);
         case 6:  return OporCIP(KANAL);
-        case 7:  return FromObject(TANK_W, KANAL);
-        case 8:  return ToObject(TANK_W, KANAL);
+        case 7:  return FromObject(tank_w_src, KANAL);
+        case 8:  return ToObject(tank_w_src, KANAL);
         case 9:  return OporCIP(KANAL);
         case 10: return FillCirc(WITH_RETURN);
         case 11: return Circ(WATER);
         case 12: return OporCirc(KANAL);
         case 13: return FillCirc(WITH_RETURN);
-        case 14: return ToObject(TANK_W, KANAL);
+        case 14: return ToObject(tank_w_src, KANAL);
         case 15: return OporCirc(KANAL);
         case 16: return OporCirc(KANAL);
         case 22: return ToObject(TANK_S, KANAL);
@@ -2484,9 +2752,9 @@ int cipline_tech_object::_DoStep( int step_to_do )
         case 33: return ToObject(pr_media, TANK_S);
         case 34: return OporCIP(TANK_S);
         case 35: return FromObject(pr_media, TANK_S);
-        case 37: return ToObject(pr_media, TANK_W);
-        case 39: return OporCirc(TANK_W);
-        case 40: return OporCIP(TANK_W);
+        case 37: return ToObject(pr_media, tank_w_dest);
+        case 39: return OporCirc(tank_w_dest);
+        case 40: return OporCIP(tank_w_dest);
 
         case 42: return ToObject(TANK_K, KANAL);
         case 43: return OporCIP(KANAL);
@@ -2497,21 +2765,21 @@ int cipline_tech_object::_DoStep( int step_to_do )
         case 53: return ToObject(WATER, TANK_K);
         case 54: return OporCIP(TANK_K);
         case 55: return FromObject(WATER, TANK_K);
-        case 57: return ToObject(WATER, TANK_W);
-        case 59: return OporCirc(TANK_W);
-        case 60: return OporCIP(TANK_W);
+        case 57: return ToObject(WATER, tank_w_dest);
+        case 59: return OporCirc(tank_w_dest);
+        case 60: return OporCIP(tank_w_dest);
         case 61: return FillCirc(WITH_WATER);
-        case 62: return ToObject(WATER, TANK_W);
-        case 63: return OporCIP(TANK_W);
-        case 64: return FromObject(WATER, TANK_W);
+        case 62: return ToObject(WATER, tank_w_dest);
+        case 63: return OporCIP(tank_w_dest);
+        case 64: return FromObject(WATER, tank_w_dest);
         case 65: return FillCirc(WITH_WATER);
         case 66: return Circ(HOT_WATER);
-        case 67: return OporCirc(TANK_W);
+        case 67: return OporCirc(tank_w_dest);
 
         case 71: return FillCirc(SANITIZER);
-        case 72: return ToObject(SANITIZER, TANK_W);
-        case 73: return OporCIP(TANK_W);
-        case 74: return FromObject(SANITIZER,TANK_W);
+        case 72: return ToObject(SANITIZER, tank_w_dest);
+        case 73: return OporCIP(tank_w_dest);
+        case 74: return FromObject(SANITIZER,tank_w_dest);
         case 75: return FillCirc(SANITIZER);
         case 76: return DoseRR(SANITIZER);
         case 77: return Circ(SANITIZER);
@@ -2579,6 +2847,10 @@ int cipline_tech_object::_DoStep( int step_to_do )
         case 555:
             if (get_delta_millisec(enddelayTimer) > WASH_END_DELAY)
                 {
+                strcpy(objectstats->objlastwashprogram, currentProgramName);
+                DateToChar(objectstats->objlastwash);
+                objectstats->changed = 0;
+                statsbase->apply();
                 Stop(curstep);
                 curstep=0;
                 ResetLinesDevicesBeforeReset();
@@ -4992,6 +5264,17 @@ int cipline_tech_object::_Circ( int what )
 
     if (T[TMR_OP_TIME]->is_time_up()==1)
         {
+        if (what == SHCH)
+            {
+            objectstats->objcausticwashes++;
+            objectstats->changed = 1;
+            }
+        if (what == KISL)
+        {
+            objectstats->objcausticwashes = 0;
+            DateToChar(objectstats->objlastacidwash);
+            objectstats->changed = 1;
+        }
         return 1;
         }
     return 0;
@@ -6236,6 +6519,12 @@ int cipline_tech_object::EvalCustomStep( int what, int from, int where, int how 
         }
 
     return luares;
+    }
+
+void cipline_tech_object::DateToChar(char* buff)
+    {
+    tm curdate = get_time();
+    sprintf(buff, "%02d-%02d-%04d %02d:%02d", curdate.tm_mday, curdate.tm_mon + 1, curdate.tm_year + 1900, curdate.tm_hour, curdate.tm_min);
     }
 
 void cipline_tech_object::resetCarNumber()
