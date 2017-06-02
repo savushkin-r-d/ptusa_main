@@ -25,7 +25,7 @@
 #include <string>
 #include <algorithm>
 
-#define _USE_MATH_DEFINES // for C++  
+#define _USE_MATH_DEFINES // for C++
 #include <cmath>
 
 #include "smart_ptr.h"
@@ -431,7 +431,7 @@ class device : public i_DO_AO_device, public par_device
             //LT
             DST_LT = 1,    ///Текущий уровень без дополнительных параметров
             DST_LT_CYL,    ///Текущий уровень для цилиндрического танка
-            DST_LT_CONE,   ///Текущий уровень для танка с конусом в основании 
+            DST_LT_CONE,   ///Текущий уровень для танка с конусом в основании
             DST_LT_TRUNC,  ///Текущий уровень для танка с усеченным цилиндром в основании
 
             //DO
@@ -472,7 +472,7 @@ class device : public i_DO_AO_device, public par_device
                 case DT_TE:
                     return "Температура";
                 case DT_FS:
-                    return "Расход"; 
+                    return "Расход";
                 case DT_GS:
                     return "Датчик положения";
                 case DT_FQT:
@@ -501,7 +501,7 @@ class device : public i_DO_AO_device, public par_device
                     return "Давление";
                 default:
                     return "???";
-                } 
+                }
 
             return "???";
             }
@@ -2013,14 +2013,14 @@ class concentration_e : public AI1
 class concentration_e_ok : public concentration_e
     {
     public:
-        concentration_e_ok( const char *dev_name ) : concentration_e( dev_name, 
+        concentration_e_ok( const char *dev_name ) : concentration_e( dev_name,
             DST_QT_OK )
             {
 #ifdef DEBUG_NO_WAGO_MODULES
             st = 1;
 #endif
             }
-        
+
         int get_state()
             {
 #ifndef DEBUG_NO_WAGO_MODULES
@@ -2039,7 +2039,7 @@ class concentration_e_ok : public concentration_e
             }
 #endif
 
-        int concentration_e_ok::save_device_ex( char *buff )
+        int save_device_ex( char *buff )
             {
             int res = 0;
 #ifdef DEBUG_NO_WAGO_MODULES
@@ -2434,7 +2434,7 @@ class flow_s : public DI1
     public:
         flow_s( const char *dev_name ): DI1( dev_name, DT_FS, DST_NONE,
             0 )
-            {            
+            {
             }
     };
 //-----------------------------------------------------------------------------
@@ -2444,7 +2444,7 @@ class state_s : public DI1
     public:
         state_s( const char *dev_name ): DI1( dev_name, DT_GS, DST_NONE,
             0 )
-            {           
+            {
             }
     };
 //-----------------------------------------------------------------------------

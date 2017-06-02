@@ -294,7 +294,7 @@ int device::rm_save_device_state( char *buff, const char *prefix )
             }
         else
             {
-            res += sprintf( buff + res, "%s.%s.V=%.2f\n", 
+            res += sprintf( buff + res, "%s.%s.V=%.2f\n",
                 prefix, name, get_value() );
             }
         }
@@ -1434,7 +1434,7 @@ int counter_f::save_device_ex( char *buff )
 //-----------------------------------------------------------------------------
 counter_f_ok::counter_f_ok( const char *dev_name ) : counter_f( dev_name )
     {
-    sub_type = DEVICE_SUB_TYPE::DST_FQT_F_OK;
+    sub_type = DST_FQT_F_OK;
     }
 //-----------------------------------------------------------------------------
 int counter_f_ok::save_device_ex( char *buff )
@@ -1455,7 +1455,7 @@ int counter_f_ok::get_state()
 #ifndef DEBUG_NO_WAGO_MODULES
     int i = get_DI( DI_INDEX );
 
-    return i == 1 ? counter_f::get_state() : counter::STATES::S_ERROR;
+    return i == 1 ? counter_f::get_state() : S_ERROR;
 #else
     return counter_f::get_state();
 #endif
@@ -2169,13 +2169,13 @@ int DI1::get_state()
         {
         if ( current_state != get_DI( DI_INDEX ) )
             {
-            if ( get_delta_millisec( time ) > dt  ) 
+            if ( get_delta_millisec( time ) > dt  )
                 {
                 current_state = get_DI( DI_INDEX );
                 time = get_millisec();
                 }
             }
-        else 
+        else
             {
             time = get_millisec();
             }
@@ -2194,13 +2194,13 @@ int DI1::get_state()
         {
         if ( current_state != digital_wago_device::get_state() )
             {
-            if ( get_delta_millisec( time ) > dt  ) 
+            if ( get_delta_millisec( time ) > dt  )
                 {
                 current_state = digital_wago_device::get_state();
                 time = get_millisec();
                 }
             }
-        else 
+        else
             {
             time = get_millisec();
             }
@@ -2365,7 +2365,7 @@ float level_e_cone::get_value()
         return ( float ) ( 1 / 3 * M_PI * h_curr * tg_a * h_curr * tg_a * h_curr );
         }
 
-    return ( float ) ( 1 / 3 * M_PI * r * r * h_cone + 
+    return ( float ) ( 1 / 3 * M_PI * r * r * h_cone +
         M_PI * r * r * ( h_curr - h_cone ) );
     }
 //-----------------------------------------------------------------------------

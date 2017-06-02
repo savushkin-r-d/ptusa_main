@@ -69,11 +69,11 @@ void cip_object_stats::deserialize(std::istream& stream)
 
 void cip_object_stats::resetstats()
 {
-	strcpy(objlastacidwash, "Не известно");
-	strcpy(objlastwashprogram, "Не определено");
-	strcpy(objlastwash, "Не известно");
-	objcausticwashes = 0;
-	changed = 0;
+    strcpy(objlastacidwash, "Не известно");
+    strcpy(objlastwashprogram, "Не определено");
+    strcpy(objlastwash, "Не известно");
+    objcausticwashes = 0;
+    changed = 0;
 }
 
 
@@ -110,7 +110,6 @@ cip_object_stats* cip_stats::stats_if_exists(char* objid, cip_object_stats* cip_
 
 cip_stats::cip_stats()
     {
-    obj_stats = {};
     changed = false;
     lastchanged = get_sec();
     changespending = 0;
@@ -141,7 +140,7 @@ void cip_stats::deserialize(std::istream& stream)
     clear();
     for (int i = 0; i < reccount; i++)
         {
-        char* obj_name = new char[MAX_ID_LENGTH]; 
+        char* obj_name = new char[MAX_ID_LENGTH];
         cip_object_stats* cos = new cip_object_stats("tmp");
         cos->deserialize(stream);
         strcpy(obj_name, cos->objid);

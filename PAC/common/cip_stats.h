@@ -6,6 +6,7 @@
 #include <map>
 #include <fstream>
 #include "dtime.h"
+#include <cstring>
 #define MAX_ID_LENGTH 32
 #define MAX_FIELD_LENGTH 24
 
@@ -22,7 +23,7 @@ struct cmp_str
     {
     bool operator()(char const *a, char const *b) const
         {
-        return std::strcmp(a, b) < 0;
+        return strcmp(a, b) < 0;
         }
     };
 
@@ -39,7 +40,7 @@ class cip_object_stats : public Serializable
         int changed;
         virtual void serialize(std::ostream& stream);
         virtual void deserialize(std::istream& stream);
-		void resetstats();
+        void resetstats();
     private:
     };
 
