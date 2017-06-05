@@ -632,7 +632,7 @@ int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
     }
 //------------------------------------------------------------------------------
 int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
-    int len, int sec, int usec, const char* IP, const char* name,
+    int len, long int sec, long int usec, const char* IP, const char* name,
     stat_time *stat )
     {
 
@@ -783,8 +783,9 @@ int tcp_communicator_linux::do_echo ( int idx )
     sock_state.evaluated = 1;
     memset( buf, 0, BUFSIZE );
 
-    // ќжидаем данные с таймаутом 300 мсек.
-    err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 0, 300000,
+
+    // ќжидаем данные с таймаутом 500 мсек.
+    err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 0, 500000L,
         inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.recv_stat );
 
 

@@ -105,7 +105,7 @@ class tcp_communicator_linux : public tcp_communicator
             /// @return -2   - ошибка таймаута.
             /// @return >= 0 - размер реально считанных данных.
             static int  recvtimeout( int s, u_char *buf, int len,
-                int sec, int usec, const char* IP, const char* name,
+                long int sec, long int usec, const char* IP, const char* name,
                 stat_time *stat );
     };
 //-----------------------------------------------------------------------------
