@@ -380,6 +380,13 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->objectstats->objlastwashprogram, &outdata[3 + i * 2]);
 									i += MAX_FIELD_LENGTH-1;
 									break;
+                                case OTHER_PLC_TIME:
+                                    char tempdatetime[17];
+                                    cipline_tech_object::Mdls[0]->DateToChar(tempdatetime);
+                                    tempdatetime[16] = 0;
+                                    PackString(tempdatetime, &outdata[3 + i * 2]);
+                                    i += 7;
+                                    break;
 								default:
 									break;
 								}

@@ -67,6 +67,7 @@ enum OtherEnum
 	OTHER_LAST_ACID_WASH = 200,
 	OTHER_LAST_WASH = 224,
 	OTHER_LAST_WASH_PROGRAM = 248,
+    OTHER_PLC_TIME = 300,
 	};
 
 enum ControlEnum

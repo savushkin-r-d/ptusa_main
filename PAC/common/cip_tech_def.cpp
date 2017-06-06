@@ -2850,7 +2850,10 @@ int cipline_tech_object::_DoStep( int step_to_do )
                 strcpy(objectstats->objlastwashprogram, currentProgramName);
                 DateToChar(objectstats->objlastwash);
                 objectstats->changed = 0;
-                statsbase->apply();
+                if (rt_par_float[STP_RESETSTEP] == 0)
+                    {
+                    statsbase->apply();
+                    }
                 Stop(curstep);
                 curstep=0;
                 ResetLinesDevicesBeforeReset();
