@@ -41,15 +41,8 @@ int project_manager::proc_main_params( int argc, char *argv[] )
         {
         if ( strcmp( argv[ i ], "rcrc" ) == 0 )
             {
-            if ( G_DEBUG ) 
-                {
-                printf( "Resetting CRC ... " );
-                }
-            params_manager::get_instance()->reset_CRC();
-            if ( G_DEBUG ) 
-                {
-                printf( "completed.\n" );
-                }
+            printf( "Resetting params." );            
+            params_manager::get_instance()->reset_params_size();
             }
         }
 

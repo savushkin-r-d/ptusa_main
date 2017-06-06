@@ -13,6 +13,8 @@ auto_smart_ptr< params_manager > params_manager::instance = 0;
 
 #include "PAC_info.h"
 #include "errors.h"
+
+#include "log.h"
 //-----------------------------------------------------------------------------
 params_manager::params_manager(): par( 0 ) 
     {
@@ -66,6 +68,12 @@ u_int_2 params_manager::solve_CRC()
     return CRC;
     }
 //-----------------------------------------------------------------------------
+void params_manager::reset_params_size()
+    {
+    unsigned char buff[ 4 ] = { 0 };
+    CRC_mem->write( ( char* )buff, 4, C_LAST_IDX_OFFSET );
+    }
+//-----------------------------------------------------------------------------
 int params_manager::init( unsigned int project_id )
     {
     params_manager::project_id = project_id;
@@ -73,40 +81,7 @@ int params_manager::init( unsigned int project_id )
     memset( params, 0, C_TOTAL_PARAMS_SIZE );
     params_mem->read( params, C_TOTAL_PARAMS_SIZE, 0 );
 
-    int chk = check_CRC();
-    if ( 0 == chk ) 
-        {
-        if ( G_DEBUG )
-            {
-            printf( "PARAMS OK. PARAMS LOADED.\n" );
-            }
-        loaded = 1;
-        } 
-    else 
-        {
-        if ( G_DEBUG )
-            {
-            printf( "Project id = %u. PARAMS CRC CHECK FAILED: Trying to reinitialize...\n", 
-                project_id );
-            }
-        loaded = -1;
-        }
-    return chk;
-    }
-//-----------------------------------------------------------------------------
-int params_manager::check_CRC()
-    {
-    unsigned char buff[ 2 ] = { 0 };
-    CRC_mem->read( ( char* ) buff, 2, C_CRC_OFFSET );
-
-    u_int_2 read_CRC = 256 * buff[ 1 ] + buff[ 0 ];
-
-    if ( solve_CRC() == read_CRC )
-        {
-        return 0;
-        }
-
-    return 1;
+    return 0;
     }
 //-----------------------------------------------------------------------------
 void params_manager::final_init( int auto_init_params /*= 1*/, 
@@ -128,103 +103,58 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
     u_int* last_idx_ = ( u_int* ) buff;
     if ( *last_idx_ != last_idx )
         {
-        if ( G_DEBUG )
-            {
-            printf( "Total params size has changed ( %d != %d ). "
-                "Trying to reinitialize...\n", 
-                last_idx, *last_idx_ );
-            }
+        sprintf( G_LOG->msg, 
+            "Total params size has changed (%d != %d), reinitialization.\n",
+            last_idx, *last_idx_ );
+        G_LOG->write_log( i_log::P_NOTICE );
 
         char *buff = ( char* ) &last_idx;   //Запись количества параметров.
         CRC_mem->write( buff, 4, C_LAST_IDX_OFFSET );
 
-        loaded = -1;
-        }
-
-    if ( -1 == loaded )
-        {
-        memset( params, 0, C_TOTAL_PARAMS_SIZE );
-
-        if ( custom_init_params_function != 0 ) 
-            {
-            ( *custom_init_params_function )();
-            }
-
-            PAC_info::get_instance()->reset_params();
-
-        if ( auto_init_params ) 
-            {
-#ifndef USE_NO_TANK_COMB_DEVICE
-            tech_object_manager::get_instance()->init_params();
-#endif // USE_NO_TANK_COMB_DEVICE
-
-            G_ERRORS_MANAGER->reset_errors_params();
-
-            G_DEVICE_MANAGER()->init_params();
-            }
-
-        if ( auto_init_work_params ) 
-            {
-#ifndef USE_NO_TANK_COMB_DEVICE
-            tech_object_manager::get_instance()->init_runtime_params();            
-#endif // USE_NO_TANK_COMB_DEVICE            
-            }
-
-        par[ 0 ][ P_IS_RESET_PARAMS ] = 0;
-
-        save();
-        if ( check_CRC() == 0 )
-            {
-            if ( G_DEBUG )                
-                {
-                printf( "%s", "PARAMS OK: PARAMS SUCCESFULLY REINITIALIZED.\n" );
-                }
-
-            par[ 0 ][ P_IS_RESET_PARAMS ] = 1;
-            par->save_all();
-            }
-        else
-            {
-            if ( G_DEBUG )                
-                {
-                printf( "%s", "PARAMS: FATAL ERROR.\n" );
-                }
-            }
-#ifdef KEY_CONFIRM
-        printf( "Press any key to continue..." );
-        get_char();
-        printf( "\n" );
-#endif // KEY_CONFIRM
-
-        }
-    else
-        {
-        if ( G_DEBUG )                
-            {
-            if ( check_CRC() == 0 )
-                {
-                printf( "PARAMS OK: DON'T NEED REINITIALIZING.\n" );
-                }
-            else
-                {
-                printf( "PARAMS: FATAL ERROR.\n" );
-                }
-#ifdef KEY_CONFIRM
-            printf( "Press any key to continue..." );
-            get_char();
-            printf( "\n" );
-#endif // KEY_CONFIRM
-            }
+        reset_to_default( custom_init_params_function, auto_init_params,
+            auto_init_work_params );
         }
     }
 //-----------------------------------------------------------------------------
-void params_manager::make_CRC()
+void params_manager::reset_to_default( void( *custom_init_params_function )( ),
+    int auto_init_params, int auto_init_work_params )
     {
-    u_int_2 CRC = solve_CRC();
-    char *buff = ( char* ) &CRC;
+    memset( params, 0, C_TOTAL_PARAMS_SIZE );
 
-    CRC_mem->write( buff, 2, C_CRC_OFFSET );
-    }
+    if ( custom_init_params_function != 0 )
+        {
+        ( *custom_init_params_function )( );
+        }
+
+    PAC_info::get_instance()->reset_params();
+
+    if ( auto_init_params )
+        {
+#ifndef USE_NO_TANK_COMB_DEVICE
+        tech_object_manager::get_instance()->init_params();
+#endif // USE_NO_TANK_COMB_DEVICE
+
+        G_ERRORS_MANAGER->reset_errors_params();
+
+        G_DEVICE_MANAGER()->init_params();
+        }
+
+    if ( auto_init_work_params )
+        {
+#ifndef USE_NO_TANK_COMB_DEVICE
+        tech_object_manager::get_instance()->init_runtime_params();
+#endif // USE_NO_TANK_COMB_DEVICE            
+        }
+
+    par[ 0 ][ P_IS_RESET_PARAMS ] = 0;
+
+    save();
+#ifdef KEY_CONFIRM
+    printf( "Press any key to continue..." );
+    get_char();
+    printf( "\n" );
+#endif // KEY_CONFIRM
+        }                                                                      
 //-----------------------------------------------------------------------------
 void params_manager::save( int start_pos, int count )
     {        
@@ -234,14 +164,6 @@ void params_manager::save( int start_pos, int count )
         }
 
     params_mem->write( params + start_pos, count, start_pos );
-
-    make_CRC();
-    }
-//-----------------------------------------------------------------------------
-void params_manager::reset_CRC()
-    {
-    char buff[ 2 ] = { 0 };
-    CRC_mem->write( buff, 2, 0 );
     }
 //-----------------------------------------------------------------------------
 char* params_manager::get_params_data( int size, int &start_pos )

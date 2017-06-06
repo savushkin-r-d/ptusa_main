@@ -99,10 +99,6 @@ class params_manager
         /// @param count - количество записываемых байт.
         void save( int start_pos = 0, int count = 0 );
 
-        /// @brief Сброс контрольной суммы (для инициализации значениями по
-        /// умолчанию).
-        void reset_CRC();
-
         /// @brief Получение указателя на блок данных параметров.
         ///
         /// @param size      - размер блока данных в байтах.
@@ -131,7 +127,11 @@ class params_manager
         // Высчитывание контрольной суммы.
         u_int_2 solve_CRC();
 
+        void reset_params_size();
     private:
+        void reset_to_default( void( *custom_init_params_function )( ),
+            int auto_init_params, int auto_init_work_params );
+        
         /// @brief Закрытый конструктор.
         ///
         /// Для вызова методов используется статический метод @ref get_instance.
@@ -147,26 +147,10 @@ class params_manager
         /// экземпляра класса @ref parameters.
         u_int last_idx;
 
-        /// Признак корректной загрузки параметров (достоверность контрольной
-        /// суммы).
-        int loaded;
-
         u_int project_id;   ///< Номер проекта (для уникальности параметров).
 
         memory_range *params_mem; ///< Память параметров.
         memory_range *CRC_mem;    ///< Память контрольной суммы.
-
-        /// @brief Проверка контрольной суммы.
-        ///
-        /// Рассчет контрольной суммы и сравнение ее со значением,
-        /// хранящемся в NVRAM (2 первых байта NVRAM).
-        ///
-        /// @return 0 - ОК.
-        /// @return 1 - Ошибка контрольной суммы.
-        int check_CRC();
-
-        /// @brief Рассчет контрольной суммы и запись ее в NVRAM.
-        void make_CRC();
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с массивом параметров.

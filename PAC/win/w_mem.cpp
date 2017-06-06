@@ -8,9 +8,9 @@ FILE* SRAM::file = 0;
 SRAM::SRAM( const char *file_name,
     u_int total_size,
     u_int available_start_pos,
-    u_int available_end_pos ): NV_memory( total_size,
-    available_start_pos,
-    available_end_pos )
+    u_int available_end_pos ) : NV_memory( total_size,
+        available_start_pos,
+        available_end_pos )
     {
     if ( strlen( file_name ) > C_MAX_FILE_NAME - 1 )
         {
@@ -23,14 +23,26 @@ SRAM::SRAM( const char *file_name,
 
         if ( 0 == file )
             {
-            if( ( file = fopen( file_name, "r+b" ) ) <= 0 )
+            if ( ( file = fopen( file_name, "r+b" ) ) <= 0 )
                 {
-if ( G_DEBUG ) 
- {
-                printf( "SRAM() - ERROR: Can't open device (%s) : %s.\n",
-                    file_name, strerror( errno ) );
-}
-                file = 0;
+                //ѕытаемс€ создать файл
+                file = fopen( file_name, "w+b" );
+                if ( file )
+                    {
+                    fseek( file, total_size, SEEK_SET );
+                    char tmp = 0;
+                    fwrite( &tmp, sizeof( tmp ), 1, file );
+                    fflush( file );
+                    }
+                else
+                    {
+                    if ( G_DEBUG )
+                        {       
+                        printf( "SRAM() - ERROR: Can't open device (%s) : %s.\n",
+                            file_name, strerror( errno ) );                      
+                        }
+                    file = 0;
+                    }                
                 }
             }
         }
@@ -54,14 +66,14 @@ int SRAM::read( void *buff, u_int count, u_int start_pos )
         fseek( file, get_available_start_pos() + start_pos, SEEK_SET );
         res = fread( buff, sizeof( char ), count, file );
 
-if ( G_DEBUG ) 
- {
-        if ( res <= 0 )
+        if ( G_DEBUG )
             {
-            printf( "Error reading device (%s) : %s.\n",
-                file_name, strerror( errno )  );
+            if ( res <= 0 )
+                {
+                printf( "Error reading device (%s) : %s.\n",
+                    file_name, strerror( errno ) );
+                }
             }
-}
 
         }
 
@@ -77,14 +89,14 @@ int SRAM::write( void *buff, u_int count, u_int start_pos )
         fseek( file, get_available_start_pos() + start_pos, SEEK_SET );
         res = fwrite( buff, sizeof( char ), count, file );
 
-if ( G_DEBUG ) 
- {
-        if ( res <= 0 )
+        if ( G_DEBUG )
             {
-            printf( "Error writing device (%s) : %s.\n",
-                file_name, strerror( errno )  );
+            if ( res <= 0 )
+                {
+                printf( "Error writing device (%s) : %s.\n",
+                    file_name, strerror( errno ) );
+                }
             }
-}
 
         fflush( file );
         }
@@ -102,7 +114,7 @@ int data_file::file_open( const char* file_name )
     {
     file_close();
 
-    f = fopen( file_name, "r" );
+    f = fopen( file_name, "r+" );
     if ( 0 == f )
         {
         printf( "Error open file \"%s\".\n", file_name );
@@ -132,10 +144,10 @@ char* data_file::fget_line()
     int res = fread( tmp_buff, sizeof( char ), 1, f );
     if ( res != 1 )
         {
-if ( G_DEBUG ) 
- {
-        printf( "Error reading file - can\'t read!\n" );
-}
+        if ( G_DEBUG )
+            {
+            printf( "Error reading file - can\'t read!\n" );
+            }
         return buf;
         }
 
@@ -146,20 +158,20 @@ if ( G_DEBUG )
 
         if ( res != 1 )
             {
-if ( G_DEBUG ) 
- {
-            printf( "Error reading file - can\'t read more!\n" );
-}
+            if ( G_DEBUG )
+                {
+                printf( "Error reading file - can\'t read more!\n" );
+                }
             break;
             }
 
         pos++;
         if ( pos >= C_MAX_BUFFER_SIZE )
             {
-if ( G_DEBUG ) 
- {
-            printf( "Error reading file - line is too long!\n" );
-}
+            if ( G_DEBUG )
+                {
+                printf( "Error reading file - line is too long!\n" );
+                }
             break;
             }
         }
