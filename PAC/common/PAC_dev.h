@@ -1896,17 +1896,10 @@ class level_e_cyl : public AI1
             set_par_name( P_R, start_param_idx, "P_R" );
             }
 
-        float get_max_val()
-            {
-            return get_par( P_MAX_P, start_param_idx );
-            }
+        float get_max_val();
+        float get_min_val();
 
-        float get_min_val()
-            {
-            return 0;
-            }
-
-        float get_value();
+        int save_device_ex( char *buff );
 
     private:
         enum CONSTANTS
@@ -1932,17 +1925,10 @@ class level_e_cone : public AI1
             set_par_name( P_H_CONE, start_param_idx, "P_H_CONE" );
             }
 
-        float get_max_val()
-            {
-            return get_par( P_MAX_P, start_param_idx );
-            }
+        float get_max_val();
+        float get_min_val();
 
-        float get_min_val()
-            {
-            return 0;
-            }
-
-        float get_value();
+        int save_device_ex( char *buff );
 
     private:
         enum CONSTANTS

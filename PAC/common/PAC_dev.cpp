@@ -2169,7 +2169,7 @@ int DI1::get_state()
         {
         if ( current_state != get_DI( DI_INDEX ) )
             {
-            if ( get_delta_millisec( time ) > dt  )
+            if ( get_delta_millisec( time ) > dt ) 
                 {
                 current_state = get_DI( DI_INDEX );
                 time = get_millisec();
@@ -2346,27 +2346,62 @@ float level_e::get_min_val()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-float level_e_cyl::get_value()
+float level_e_cyl::get_max_val()
     {
-    float r = get_par( P_R, start_param_idx );
-    return ( float ) M_PI * r * r *  AI1::get_value();
+    return get_par( P_MAX_P, start_param_idx );
+    }
+//-----------------------------------------------------------------------------
+float level_e_cyl::get_min_val()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int level_e_cyl::save_device_ex( char *buff )
+    {
+    int res = 0;
+
+    float v = get_par( P_R, start_param_idx );
+    v = (float)M_PI * v * v *  AI1::get_value();
+
+    res = sprintf( buff, "CLEVEL=%.2f, ", v );
+
+    return res;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-float level_e_cone::get_value()
+float level_e_cone::get_max_val()
     {
+    return get_par( P_MAX_P, start_param_idx );
+    }
+//-----------------------------------------------------------------------------
+float level_e_cone::get_min_val()
+    {
+    return 0;
+    }                                                                          
+//-----------------------------------------------------------------------------
+int level_e_cone::save_device_ex( char *buff )
+    {
+    int res = 0;
+
     float r = get_par( P_R, start_param_idx );
     float tg_a = r / get_par( P_H_CONE, start_param_idx );
     float h_cone = get_par( P_H_CONE, start_param_idx );
     float h_curr = AI1::get_value();
 
+    float v = 0;
     if ( h_curr < h_cone )
         {
-        return ( float ) ( 1 / 3 * M_PI * h_curr * tg_a * h_curr * tg_a * h_curr );
+        v = (float)( 1 / 3 * M_PI * h_curr * tg_a * h_curr * tg_a * h_curr );
+        }
+    else
+        {
+        v = (float)( 1 / 3 * M_PI * r * r * h_cone + 
+            M_PI * r * r * ( h_curr - h_cone ) );
         }
 
-    return ( float ) ( 1 / 3 * M_PI * r * r * h_cone +
-        M_PI * r * r * ( h_curr - h_cone ) );
+    res = sprintf( buff, "CLEVEL=%.2f, ", v );
+
+    return res;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
