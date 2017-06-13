@@ -2348,7 +2348,7 @@ float level_e::get_min_val()
 //-----------------------------------------------------------------------------
 float level_e_cyl::get_max_val()
     {
-    return get_par( P_MAX_P, start_param_idx );
+    return 100;
     }
 //-----------------------------------------------------------------------------
 float level_e_cyl::get_min_val()
@@ -2361,7 +2361,8 @@ int level_e_cyl::save_device_ex( char *buff )
     int res = 0;
 
     float v = get_par( P_R, start_param_idx );
-    v = (float)M_PI * v * v *  AI1::get_value();
+    v = (float)M_PI * v * v *  AI1::get_value() *
+        get_par( P_MAX_P, start_param_idx ) / ( float ) 9.81;
 
     res = sprintf( buff, "CLEVEL=%.2f, ", v );
 
@@ -2371,7 +2372,7 @@ int level_e_cyl::save_device_ex( char *buff )
 //-----------------------------------------------------------------------------
 float level_e_cone::get_max_val()
     {
-    return get_par( P_MAX_P, start_param_idx );
+    return 100;
     }
 //-----------------------------------------------------------------------------
 float level_e_cone::get_min_val()
@@ -2398,6 +2399,8 @@ int level_e_cone::save_device_ex( char *buff )
         v = (float)( 1 / 3 * M_PI * r * r * h_cone + 
             M_PI * r * r * ( h_curr - h_cone ) );
         }
+
+    v = v * get_par( P_MAX_P, start_param_idx ) / ( float ) 9.81;
 
     res = sprintf( buff, "CLEVEL=%.2f, ", v );
 
