@@ -517,13 +517,19 @@ i_counter* device_manager::get_FQT( const char *dev_name )
     if ( res > -1 )
         {
         device *res_ctr = project_devices.at( res );
-        if ( res_ctr->get_sub_type() == device::DST_FQT_F )
+        switch ( res_ctr->get_sub_type() )
             {
-            return ( counter_f* ) res_ctr;
-            }
-        else
-            {
-            return ( counter* ) res_ctr;
+            case device::DST_FQT_F:
+                return ( counter_f* )res_ctr;
+
+            case device::DST_FQT_F_OK:
+                return ( counter_f_ok* )res_ctr;
+
+            case device::DST_FQT:
+                return ( counter* )res_ctr;
+
+            default:
+                break;
             }
         }
 
