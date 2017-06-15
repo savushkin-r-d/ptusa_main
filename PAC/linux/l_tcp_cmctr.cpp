@@ -698,7 +698,7 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
         {
         sprintf( G_LOG->msg,
             "Network device : s%d->\"%s\":\"%s\""
-            " disconnected on select read try : timeout (%d ms).",
+            " disconnected on select read try : timeout (%ld ms).",
             s, name, IP, sec * 1000 + usec / 1000 );
 
         G_LOG->write_log( i_log::P_ERR );
