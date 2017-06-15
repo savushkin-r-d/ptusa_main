@@ -212,27 +212,24 @@ class DI_DO_action: public action
 
         void print( const char* prefix = "" ) const;
 
-        void final()
+        void final();
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
+/// Пары AI->AO.
+/// </summary>
+class AI_AO_action : public action
+    {
+    public:
+        AI_AO_action() :action( "Группы AI->AO AO ..." )
             {
-            if ( devices.empty() )
-                {
-                return;
-                }
-
-            for ( u_int i = 0; i < devices.size(); i++ )
-                {
-                if ( devices[ i ].empty() )
-                    {
-                    continue;
-                    }
-
-                //Отключаем выходные сигналы.
-                for ( u_int j = 1; j < devices[ i ].size(); j++ )
-                    {
-                    devices[ i ][ j ]->off();
-                    }
-                }
             }
+
+        void evaluate();
+
+        void print( const char* prefix = "" ) const;
+
+        void final();
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -300,7 +297,8 @@ class step
             A_LOWER_SEATS_ON = A_UPPER_SEATS_ON,
 
             A_REQUIRED_FB,
-            A_DO_DI,
+            A_DI_DO,
+            A_AI_AO,
             A_WASH,
             };
 

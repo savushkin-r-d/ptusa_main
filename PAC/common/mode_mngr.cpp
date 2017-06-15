@@ -472,6 +472,7 @@ step::step( std::string name, bool is_mode /*= false */ ) : action_stub( "Заглуш
         {
         actions.push_back( new required_DI_action() );
         actions.push_back( new DI_DO_action() );
+        actions.push_back( new AI_AO_action() );
         actions.push_back( new wash_action() );
         }
     }
@@ -629,7 +630,105 @@ void DI_DO_action::evaluate()
         }
     }
 //-----------------------------------------------------------------------------
+void DI_DO_action::final()
+    {
+    if ( devices.empty() )
+        {
+        return;
+        }
+
+    for ( u_int i = 0; i < devices.size(); i++ )
+        {
+        if ( devices[ i ].empty() )
+            {
+            continue;
+            }
+
+        //Отключаем выходные сигналы.
+        for ( u_int j = 1; j < devices[ i ].size(); j++ )
+            {
+            devices[ i ][ j ]->off();
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
 void DI_DO_action::print( const char* prefix /*= "" */ ) const
+    {
+    if ( devices.empty() )
+        {
+        return;
+        }
+    if ( devices[ 0 ].empty() )
+        {
+        return;
+        }
+
+    printf( "%s%s: ", prefix, name.c_str() );
+    for ( u_int i = 0; i < devices.size(); i++ )
+        {
+        if ( devices[ i ].empty() )
+            {
+            continue;
+            }
+
+        printf( "{%s", devices[ i ][ 0 ]->get_name() );
+        printf( "->" );
+        for ( u_int j = 1; j < devices[ i ].size(); j++ )
+            {
+            printf( "%s", devices[ i ][ j ]->get_name() );
+            if ( j + 1 < devices[ i ].size() ) printf( " " );
+            }
+        printf( "} " );
+        }
+
+    printf( "\n" );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void AI_AO_action::evaluate()
+    {
+    if ( devices.empty() )
+        {
+        return;
+        }
+
+    for ( u_int i = 0; i < devices.size(); i++ )
+        {
+        if ( devices[ i ].empty() )
+            {
+            continue;
+            }
+
+        for ( u_int j = 1; j < devices[ i ].size(); j++ )
+            {
+            devices[ i ][ j ]->set_value( devices[ i ][ 0 ]->get_value() );
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void AI_AO_action::final()
+    {
+    if ( devices.empty() )
+        {
+        return;
+        }
+
+    for ( u_int i = 0; i < devices.size(); i++ )
+        {
+        if ( devices[ i ].empty() )
+            {
+            continue;
+            }
+
+        //Отключаем выходные сигналы.
+        for ( u_int j = 1; j < devices[ i ].size(); j++ )
+            {
+            devices[ i ][ j ]->set_value( 0 );
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void AI_AO_action::print( const char* prefix /*= "" */ ) const
     {
     if ( devices.empty() )
         {

@@ -752,7 +752,8 @@ class step
             A_LOWER_SEATS_ON = A_UPPER_SEATS_ON,
 
             A_REQUIRED_FB,            
-            A_DO_DI,
+            A_DI_DO,
+            A_AI_AO,
             A_WASH,
             };
     };

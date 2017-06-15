@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 06/02/17 15:06:05.
+** Generated automatically by tolua++-1.0.92 on 06/15/17 09:36:13.
 */
 
 #ifndef __cplusplus
@@ -11572,7 +11572,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"A_UPPER_SEATS_ON",step::A_UPPER_SEATS_ON);
    tolua_constant(tolua_S,"A_LOWER_SEATS_ON",step::A_LOWER_SEATS_ON);
    tolua_constant(tolua_S,"A_REQUIRED_FB",step::A_REQUIRED_FB);
-   tolua_constant(tolua_S,"A_DO_DI",step::A_DO_DI);
+   tolua_constant(tolua_S,"A_DI_DO",step::A_DI_DO);
+   tolua_constant(tolua_S,"A_AI_AO",step::A_AI_AO);
    tolua_constant(tolua_S,"A_WASH",step::A_WASH);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"action","action","",NULL);
