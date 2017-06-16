@@ -1026,7 +1026,7 @@ class valve_DO1_DI1_on : public valve
 #else
             int o = get_DO( DO_INDEX );
 
-            return ( VALVE_STATE ) !o;
+            return ( VALVE_STATE ) o;
 #endif // DEBUG_NO_WAGO_MODULES
             }
 
