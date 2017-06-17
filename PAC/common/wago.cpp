@@ -136,6 +136,7 @@ float wago_device::get_AO( u_int index, float min_value, float max_value )
             //    0               4               0000 0000 0000 0000     00 00         0
             //
             case 554:
+            case 555:
                 if ( 0 == min_value && 0 == max_value )
                     {
                     if ( val < 7 )
@@ -209,7 +210,7 @@ int wago_device::set_AO( u_int index, float value, float min_value,
             }
 
         *AO_channels.int_write_values[ index ] = ( u_int ) value;
-        
+
         //if ( G_DEBUG )
         //    {
         //    printf("set_AO value=%d\n", ( u_int ) value );
@@ -289,6 +290,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
                 //    0               4               0000 0000 0000 0000     00 00         0
                 //
             case 466:
+            case 496:
                 if ( 0 == min_value && 0 == max_value )
                     {
                     if ( val < 7 )
@@ -833,7 +835,7 @@ wago_manager::wago_node * wago_manager::get_node( int node_n )
 //-----------------------------------------------------------------------------
 void wago_manager::add_node( u_int index, int ntype, int address,
     char* IP_address, char *name,
-    int DO_cnt, int DI_cnt, 
+    int DO_cnt, int DI_cnt,
     int AO_cnt, int AO_size, int AI_cnt, int AI_size )
     {
     if ( index < nodes_count )
@@ -937,7 +939,7 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
     if ( ip_address[ 0 ] == 0 && type >= T_750_XXX_ETHERNET )
         {
         is_active = false;
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
             printf( "Узел Wago \"%s\" отключен, так как не задан его IP адрес.\n",
                 name );
@@ -947,7 +949,7 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
     if ( type == T_EMPTY )
         {
         is_active = false;
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
             printf( "Узел Wago \"%s\" отключен, так как не задан его тип.\n",
                 name );
