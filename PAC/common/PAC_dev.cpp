@@ -1387,6 +1387,15 @@ int counter_f::get_state()
             }
         }// if ( motors.size() > 0
 
+    if ( get_flow() == -1. )
+        {
+        return S_LOW_ERR;
+        }
+    if ( get_flow() == -2. )
+        {
+        return S_HI_ERR;
+        }
+
     return state;
     }
 //-----------------------------------------------------------------------------

@@ -1976,12 +1976,43 @@ class concentration_e : public AI1
         concentration_e( const char *dev_name, DEVICE_SUB_TYPE sub_type ): AI1(
             dev_name, DT_QT, sub_type, ADDITIONAL_PARAM_COUNT, &start_param_idx )
             {
+#ifdef DEBUG_NO_WAGO_MODULES
+            st = 1;
+#endif
             set_par_name( P_MIN_V,  start_param_idx, "P_MIN_V" );
             set_par_name( P_MAX_V,  start_param_idx, "P_MAX_V" );
             }
 
         float get_max_val();
         float get_min_val();
+
+#ifdef DEBUG_NO_WAGO_MODULES
+        void set_state( int new_state )
+            {
+            st = new_state;
+            }
+#endif
+
+#ifndef DEBUG_NO_WAGO_MODULES
+        int get_state()
+            {
+            if ( get_AI( C_AI_INDEX, 0, 0 ) == -1. )
+                {
+                return -2;
+                }
+            if ( get_AI( C_AI_INDEX, 0, 0 ) == -2. )
+                {
+                return -3;
+                }
+                
+            return st;
+            }
+#endif
+
+    protected:
+#ifdef DEBUG_NO_WAGO_MODULES
+        int st;
+#endif
 
     private:
         enum CONSTANTS
@@ -2002,9 +2033,6 @@ class concentration_e_ok : public concentration_e
         concentration_e_ok( const char *dev_name ) : concentration_e( dev_name,
             DST_QT_OK )
             {
-#ifdef DEBUG_NO_WAGO_MODULES
-            st = 1;
-#endif
             }
 
         int get_state()
@@ -2012,18 +2040,11 @@ class concentration_e_ok : public concentration_e
 #ifndef DEBUG_NO_WAGO_MODULES
             int i = get_DI( DI_INDEX );
 
-            return i == 1 ? 1 : -1;
+            return i == 1 ? concentration_e::get_state() : -1;
 #else
-            return st;
+            return concentration_e::get_state();
 #endif
             }
-
-#ifdef DEBUG_NO_WAGO_MODULES
-        void set_state( int new_state )
-            {
-            st = new_state;
-            }
-#endif
 
         int save_device_ex( char *buff )
             {
@@ -2037,15 +2058,10 @@ class concentration_e_ok : public concentration_e
             }
 
     private:
-
         enum CONSTANTS
             {
             DI_INDEX = 0,         ///< Индекс канала дискретного входа.
             };
-
-#ifdef DEBUG_NO_WAGO_MODULES
-        int st;
-#endif
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство аналогового входа.
@@ -2532,6 +2548,9 @@ class counter : public device,
             S_PAUSE,
 
             S_ERROR = -1,
+
+            S_LOW_ERR = -2,
+            S_HI_ERR = -3,
             };
 
     protected:

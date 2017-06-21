@@ -291,27 +291,22 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
                 //
             case 466:
             case 496:
+                if ( val < 7 )
+                    {
+                    return -1.;
+                    }
+                if ( val > 32760 )
+                    {
+                    return -2.;
+                    }
+
                 if ( 0 == min_value && 0 == max_value )
                     {
-                    if ( val < 7 )
-                        {
-                        val = 0;
-                        }
-                    else
-                        {
-                        val = 4 + val / 2047.5f;
-                        }
+                    val = 4 + val / 2047.5f;
                     }
                 else
                     {
-                    if ( val < 7 )
-                        {
-                        val = 4;
-                        }
-                    else
-                        {
-                        val = 4 + val / 2047.5f;
-                        }
+                    val = 4 + val / 2047.5f;                        
                     val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
                     }
 
