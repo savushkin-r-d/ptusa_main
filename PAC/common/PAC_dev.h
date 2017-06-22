@@ -2004,8 +2004,11 @@ class concentration_e : public AI1
                 {
                 return -3;
                 }
-                
+
+            return 1;
+#ifdef DEBUG_NO_WAGO_MODULES
             return st;
+#endif
             }
 #endif
 
