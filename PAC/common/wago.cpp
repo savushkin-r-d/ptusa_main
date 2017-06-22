@@ -200,6 +200,7 @@ int wago_device::set_AO( u_int index, float value, float min_value,
         switch ( module_type )
             {
             case 554:
+            case 555:
                 if ( 0 != min_value || 0 != max_value )
                     {
                     value = 4 + 16 * ( value - min_value ) / ( max_value - min_value );
@@ -306,7 +307,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
                     }
                 else
                     {
-                    val = 4 + val / 2047.5f;                        
+                    val = 4 + val / 2047.5f;
                     val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
                     }
 
