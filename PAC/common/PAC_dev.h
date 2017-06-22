@@ -1987,15 +1987,15 @@ class concentration_e : public AI1
         float get_min_val();
 
 #ifdef DEBUG_NO_WAGO_MODULES
-        void set_state( int new_state )
+        void direct_set_state( int new_state )
             {
             st = new_state;
             }
-#endif
+#endif                       
 
-#ifndef DEBUG_NO_WAGO_MODULES
         int get_state()
             {
+#ifndef DEBUG_NO_WAGO_MODULES
             if ( get_AI( C_AI_INDEX, 0, 0 ) == -1. )
                 {
                 return -2;
@@ -2004,13 +2004,11 @@ class concentration_e : public AI1
                 {
                 return -3;
                 }
-
             return 1;
-#ifdef DEBUG_NO_WAGO_MODULES
+#else
             return st;
 #endif
             }
-#endif
 
     protected:
 #ifdef DEBUG_NO_WAGO_MODULES

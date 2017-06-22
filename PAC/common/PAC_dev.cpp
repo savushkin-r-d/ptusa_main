@@ -1168,6 +1168,9 @@ void counter::direct_off()
 //-----------------------------------------------------------------------------
 void counter::direct_set_state( int new_state )
     {
+#ifdef DEBUG_NO_WAGO_MODULES
+    state = ( STATES ) new_state;
+#else
     switch ( new_state )
         {
         case S_STOP:
@@ -1183,6 +1186,7 @@ void counter::direct_set_state( int new_state )
             pause();
             break;
         }
+#endif
     }
 //-----------------------------------------------------------------------------
 void counter::print() const
