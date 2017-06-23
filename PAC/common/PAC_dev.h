@@ -1337,6 +1337,11 @@ class valve_AS : public valve
         /// @brief ѕолучение данных состо€ни€ устройства.
         char get_state_data( char* data )
             {
+            if ( data == 0 )
+                {
+                return 0;
+                }
+
             char state = 0;
             u_int offset = 0;
 
@@ -1365,6 +1370,11 @@ class valve_AS : public valve
 
         char* get_data_with_offset( char* data )
             {
+            if ( data == 0 )
+                {
+                return 0;
+                }
+
             char* state;
             u_int offset = 0;
 
