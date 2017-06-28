@@ -292,7 +292,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
                 //
             case 466:
             case 496:
-                if ( val < 7 )
+                if ( 3 == val )
                     {
                     return -1.;
                     }
