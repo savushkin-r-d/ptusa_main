@@ -1575,7 +1575,7 @@ digital_wago_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
     on_fb( true ),
     off_fb( true ),
     was_on_auto( false ),
-    start_switch_time( 0 )
+    start_switch_time( get_millisec() )
     {
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     set_par_name( P_FB,  0, "P_FB" );
@@ -1587,7 +1587,7 @@ valve::valve( const char *dev_name, device::DEVICE_TYPE type,
     is_on_fb( false ),
     is_off_fb( false ),
     was_on_auto( false ),
-    start_switch_time( 0 )
+    start_switch_time( get_millisec() )
     {
     }
 //-----------------------------------------------------------------------------
@@ -2188,7 +2188,7 @@ int DI1::get_state()
         {
         if ( current_state != get_DI( DI_INDEX ) )
             {
-            if ( get_delta_millisec( time ) > dt ) 
+            if ( get_delta_millisec( time ) > dt )
                 {
                 current_state = get_DI( DI_INDEX );
                 time = get_millisec();
@@ -2397,7 +2397,7 @@ float level_e_cone::get_max_val()
 float level_e_cone::get_min_val()
     {
     return 0;
-    }                                                                          
+    }
 //-----------------------------------------------------------------------------
 int level_e_cone::save_device_ex( char *buff )
     {
@@ -2415,7 +2415,7 @@ int level_e_cone::save_device_ex( char *buff )
         }
     else
         {
-        v = (float)( 1 / 3 * M_PI * r * r * h_cone + 
+        v = (float)( 1 / 3 * M_PI * r * r * h_cone +
             M_PI * r * r * ( h_curr - h_cone ) );
         }
 
