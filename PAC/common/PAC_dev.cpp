@@ -224,8 +224,7 @@ int device::save_device( char *buff, const char *prefix )
     int res = sprintf( buff, "%s%s={M=%d, ",
         prefix,  name, is_manual_mode );
 
-    if ( type != DT_AO &&
-        type != DT_TE )
+    if ( type != DT_AO )
         {
         res += sprintf( buff + res, "ST=%d, ", get_state() );
         }
@@ -2232,16 +2231,17 @@ int DI1::get_state()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 AI1::AI1( const char *dev_name, device::DEVICE_TYPE type,
-         device::DEVICE_SUB_TYPE sub_type, u_int par_cnt,
-         u_int *start_par_idx ) : analog_wago_device( dev_name, type, sub_type,
-         par_cnt + ADDITIONAL_PARAM_COUNT )
+    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt,
+    u_int *start_par_idx ) : analog_wago_device( dev_name, type, sub_type,
+        par_cnt + ADDITIONAL_PARAM_COUNT ),
+    st( 1 )
     {
     if ( start_par_idx )
         {
         *start_par_idx = ADDITIONAL_PARAM_COUNT;
         }
 
-    set_par_name( P_ZERO_ADJUST_COEFF,  0, "P_CZ" );
+    set_par_name( P_ZERO_ADJUST_COEFF, 0, "P_CZ" );
     }
 //-----------------------------------------------------------------------------
 #ifdef DEBUG_NO_WAGO_MODULES

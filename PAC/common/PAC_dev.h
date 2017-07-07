@@ -1815,8 +1815,36 @@ class AI1 : public analog_wago_device
         AI1( const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, u_int *start_par_idx );
 
-    protected:
+#ifdef DEBUG_NO_WAGO_MODULES
+        float get_value();
 
+        void direct_set_state( int new_state )
+            {
+            st = new_state;
+            }
+#endif // DEBUG_NO_WAGO_MODULES
+
+#ifndef DEBUG_NO_WAGO_MODULES
+        int get_state()
+            {
+            if ( get_AI( C_AI_INDEX, 0, 0 ) == -1. )
+                {
+                return -2;
+                }
+            if ( get_AI( C_AI_INDEX, 0, 0 ) == -2. )
+                {
+                return -3;
+                }
+            return 1;
+            }
+#else
+        int get_state()
+            {
+            return st;
+            }
+#endif
+
+    protected:
         enum CONSTANTS
             {
             P_ZERO_ADJUST_COEFF = 1,    ///< Сдвиг нуля.
@@ -1837,9 +1865,11 @@ class AI1 : public analog_wago_device
             {
             return 0;
             }
+
+    protected:
 #ifdef DEBUG_NO_WAGO_MODULES
-        float get_value();
-#endif // DEBUG_NO_WAGO_MODULES
+        int st;
+#endif
 
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
@@ -1863,8 +1893,7 @@ class temperature_e : public AI1
             {
 #ifdef DEBUG_NO_WAGO_MODULES
             float v = analog_wago_device::get_value();
-
-            return -1000 == v ? get_par( P_ERR_T, start_param_idx ) :
+            return -1000 == v ? get_par( P_ERR_T, start_param_idx ) : 
                 AI1::get_value();
 #else
             float v = get_AI( C_AI_INDEX, 0, 0 );
@@ -1872,6 +1901,19 @@ class temperature_e : public AI1
                 get_par( P_ZERO_ADJUST_COEFF, 0 ) + v;
 #endif
             }
+
+#ifndef DEBUG_NO_WAGO_MODULES
+        int get_state()
+            {
+            float v = get_AI( C_AI_INDEX, 0, 0 );
+            if ( -1000 == v )
+                {
+                return -1;
+                }
+
+            return 1;
+            }
+#endif
 
     private:
         u_int start_param_idx;
@@ -1996,35 +2038,6 @@ class concentration_e : public AI1
         float get_max_val();
         float get_min_val();
 
-#ifdef DEBUG_NO_WAGO_MODULES
-        void direct_set_state( int new_state )
-            {
-            st = new_state;
-            }
-#endif
-
-        int get_state()
-            {
-#ifndef DEBUG_NO_WAGO_MODULES
-            if ( get_AI( C_AI_INDEX, 0, 0 ) == -1. )
-                {
-                return -2;
-                }
-            if ( get_AI( C_AI_INDEX, 0, 0 ) == -2. )
-                {
-                return -3;
-                }
-            return 1;
-#else
-            return st;
-#endif
-            }
-
-    protected:
-#ifdef DEBUG_NO_WAGO_MODULES
-        int st;
-#endif
-
     private:
         enum CONSTANTS
             {
@@ -2144,9 +2157,9 @@ class wages : public analog_wago_device, public i_wages
         float get_value();
         void direct_set_state( int new_state );
         void  direct_set_value( float new_value )
-        {
+            {
             return;
-        }
+            }
 
 #endif // DEBUG_NO_WAGO_MODULES
     public:
