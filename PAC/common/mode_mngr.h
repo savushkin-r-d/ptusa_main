@@ -421,6 +421,11 @@ class operation_state
 
         void final();
 
+        void reset_eval_time()
+            {
+            dx_step_time = 0;
+            }
+
         /// @brief Переход к заданному шагу.
         ///
         /// @param new_step - номер шага (с единицы).
@@ -493,8 +498,6 @@ class operation
         int check_devices_on_run_state( char* err_dev_name, int str_len );
 
         int check_on_run_state( char* reason ) const;
-
-        void init_run_state( u_int start_step = 1 );
 
         u_long evaluation_time();
 

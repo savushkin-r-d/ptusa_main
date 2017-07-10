@@ -108,6 +108,8 @@ int operation::start()
         case OFF:
             current_state = RUN;
             states[ RUN ]->init();
+
+            run_time = 0;
             break;
 
         case PAUSE:
@@ -148,12 +150,6 @@ int operation::check_on_run_state(char* reason) const
     return states[ RUN ]->check_on( reason );
     }
 //-----------------------------------------------------------------------------
-void operation::init_run_state( u_int start_step /*= 1 */)
-    {
-    run_time = 0;
-    states[ RUN ]->init( start_step );
-    }
-//-----------------------------------------------------------------------------
 u_long operation::evaluation_time()
     {
     if ( current_state >= 0 && current_state < STATES_MAX )
@@ -183,6 +179,11 @@ void operation::final()
     if ( current_state > 0 && current_state < STATES_MAX )
         {
         states[ current_state ]->final();
+        for ( int idx = OFF; idx < STATES_MAX; idx++ )
+            {
+            states[ idx ]->reset_eval_time();
+            }
+        
         current_state = OFF;        
         }                          
     }
