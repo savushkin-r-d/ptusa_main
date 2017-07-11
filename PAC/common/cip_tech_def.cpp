@@ -115,7 +115,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     enddelayTimer = 0;
     blocked = 0;
     disable_tank_heating = 0;
-    default_programlist = 0x3FF;
+    default_programlist = 0x3FB;
     bachok_lvl_err_delay = get_millisec();
     steam_valve_delay = get_millisec();
     loadedRecName = new char[TRecipeManager::recipeNameLength];
@@ -1857,6 +1857,21 @@ int cipline_tech_object::EvalRecipes()
             parpar->save(P_CAUSTIC_SELECTED, causticLoadedRecipe);
             }
     }
+
+    if ((int)(parpar[0][P_ACID_SELECTED]) != acidLoadedRecipe)
+        {
+        int newacidrecipe = (int)(parpar[0][P_ACID_SELECTED]);
+        if (newacidrecipe >= 0 && newacidrecipe < acidRecipes->recipePerLine)
+            {
+            acidRecipes->getRecipeName(newacidrecipe, acidName);
+            acidRecipes->LoadRecipeToParams(newacidrecipe, parpar[0]);
+            acidLoadedRecipe = newacidrecipe;
+            }
+        else
+            {
+            parpar->save(P_ACID_SELECTED, acidLoadedRecipe);
+            }
+        }
 
 
     lineRecipes->EvalRecipe();
