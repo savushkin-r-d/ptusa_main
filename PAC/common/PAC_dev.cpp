@@ -2233,8 +2233,10 @@ int DI1::get_state()
 AI1::AI1( const char *dev_name, device::DEVICE_TYPE type,
     device::DEVICE_SUB_TYPE sub_type, u_int par_cnt,
     u_int *start_par_idx ) : analog_wago_device( dev_name, type, sub_type,
-        par_cnt + ADDITIONAL_PARAM_COUNT ),
-    st( 1 )
+        par_cnt + ADDITIONAL_PARAM_COUNT )
+#ifdef DEBUG_NO_WAGO_MODULES
+        ,st( 1 )
+#endif
     {
     if ( start_par_idx )
         {
