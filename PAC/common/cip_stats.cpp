@@ -151,7 +151,7 @@ void cip_stats::deserialize(std::istream& stream)
 void cip_stats::loadFromFile(const char* filename)
     {
     std::ifstream ifs(filename, std::ios::binary);
-    if (!ifs.bad())
+    if (ifs.good())
         {
         deserialize(ifs);
         ifs.close();

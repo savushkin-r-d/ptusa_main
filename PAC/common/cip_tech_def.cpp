@@ -92,7 +92,6 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
         {
         statsbase = new cip_stats();
         statsbase->loadFromFile(statsbase->filename);
-        statsbase->saveToFile(statsbase->filename);
         }
     emptystats = new cip_object_stats("emptyname");
     objectstats = emptystats;
