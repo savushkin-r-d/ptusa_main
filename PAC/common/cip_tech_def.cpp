@@ -114,7 +114,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     enddelayTimer = 0;
     blocked = 0;
     disable_tank_heating = 0;
-    default_programlist = 0x3FB;
+    default_programlist = 0x13FB;
     bachok_lvl_err_delay = get_millisec();
     steam_valve_delay = get_millisec();
     loadedRecName = new char[TRecipeManager::recipeNameLength];
@@ -1496,12 +1496,15 @@ void cipline_tech_object::formProgramList( unsigned long programmask )
     if ((programmask >> 9) & 1)
         {
         sprintf(tmp_str, "%d##ќпол.ч.водой в канал.||", SPROG_AP_RC_KANAL);
-        strcat(programList,tmp_str);
+        strcat(programList, tmp_str);
         sprintf(prgArray[prgListLen], "ќпол.ч.водой в канал.");
         prgNumber[prgListLen] = SPROG_AP_RC_KANAL;
         prgListLen++;
+        }
+    if ((programmask >> 12) & 1)
+        {
         sprintf(tmp_str, "%d##ќпол.ч.водой в танк||", SPROG_AP_RC_SW);
-        strcat(programList,tmp_str);
+        strcat(programList, tmp_str);
         sprintf(prgArray[prgListLen], "ќпол.ч.водой в танк");
         prgNumber[prgListLen] = SPROG_AP_RC_SW;
         prgListLen++;
