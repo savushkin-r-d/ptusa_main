@@ -785,7 +785,7 @@ int tcp_communicator_linux::do_echo ( int idx )
 
 
     // ќжидаем данные с таймаутом 500 мсек.
-    err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 0, 500000L,
+    err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 0, 1000000L,
         inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.recv_stat );
 
 
