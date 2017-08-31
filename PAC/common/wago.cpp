@@ -1,7 +1,8 @@
 #if !defined WIN_OS && \
     !( defined LINUX_OS && defined PAC_PC ) && \
     !( defined LINUX_OS && defined PAC_WAGO_750_860 ) && \
-    !( defined LINUX_OS && defined PAC_WAGO_PFC200 )
+    !( defined LINUX_OS && defined PAC_WAGO_PFC200 ) && \
+	!( defined LINUX_OS && defined PAC_PLCNEXT )
 #error You must define OS!
 #endif
 
@@ -24,6 +25,10 @@
 
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
 #include "wago_PFC200.h"
+#endif
+
+#if defined LINUX_OS && defined PAC_PLCNEXT
+#include "l_wago.h"
 #endif
 
 auto_smart_ptr < wago_manager > wago_manager::instance;
@@ -697,6 +702,10 @@ wago_manager* wago_manager::get_instance()
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
         instance = new wago_manager_PFC200();
 #endif // defined LINUX_OS && defined PAC_WAGO_750_860
+
+#if defined LINUX_OS && defined PAC_PLCNEXT
+        instance = new wago_manager_linux();
+#endif // defined LINUX_OS && defined PAC_PC
         }
 
     return instance;
