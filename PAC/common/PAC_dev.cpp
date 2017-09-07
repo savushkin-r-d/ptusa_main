@@ -1227,7 +1227,8 @@ void counter::abs_reset()
 //-----------------------------------------------------------------------------
 u_int counter::get_abs_quantity()
     {
-    u_int current = *( ( u_int_2* ) get_AI_data( AI_Q_INDEX ) );
+#ifndef DEBUG_NO_WAGO_MODULES
+    u_int current = *( (u_int_2*)get_AI_data( AI_Q_INDEX ) );
 
     if ( is_first_read_abs )
         {
@@ -1254,16 +1255,18 @@ u_int counter::get_abs_quantity()
             {
             abs_value += delta;
             }
-        }
+        }          
+#endif // NO_WAGO_MODULES
 
     return abs_value;
     }
 //-----------------------------------------------------------------------------
 u_int counter::get_quantity()
     {
+#ifndef DEBUG_NO_WAGO_MODULES
     if ( S_WORK == state )
         {
-        u_int current = *( ( u_int_2* ) get_AI_data( AI_Q_INDEX ) );
+        u_int current = *( (u_int_2*)get_AI_data( AI_Q_INDEX ) );
 
         if ( is_first_read )
             {
@@ -1292,6 +1295,7 @@ u_int counter::get_quantity()
                 }
             }
         }
+#endif // NO_WAGO_MODULES
 
     return value;
     }
