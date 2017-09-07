@@ -301,10 +301,6 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
                     {
                     return -1.;
                     }
-                if ( val > 32760 )
-                    {
-                    return -2.;
-                    }
 
                 if ( 0 == min_value && 0 == max_value )
                     {
