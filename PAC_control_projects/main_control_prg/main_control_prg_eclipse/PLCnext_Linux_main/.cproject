@@ -19,16 +19,16 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -f" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;" id="com.phoenixcontact.cdt.axc2152.toolchain.configuration.release.605381909" name="Release" parent="com.phoenixcontact.cdt.axc2152.toolchain.configuration.release">
+				<configuration artifactExtension="" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -f" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="com.phoenixcontact.cdt.axc2152.toolchain.configuration.release.605381909" name="Release" parent="com.phoenixcontact.cdt.axc2152.toolchain.configuration.release" postannouncebuildStep="" postbuildStep="" preannouncebuildStep="" prebuildStep="">
 					<folderInfo id="com.phoenixcontact.cdt.axc2152.toolchain.configuration.release.605381909." name="/" resourcePath="">
-						<toolChain id="com.phoenixcontact.cdt.axc.toolchain.axc2152.release.1189554734" name="AXC F 2152 Toolchain" superClass="com.phoenixcontact.cdt.axc.toolchain.axc2152.release">
+						<toolChain errorParsers="" id="com.phoenixcontact.cdt.axc.toolchain.axc2152.release.1189554734" name="AXC F 2152 Toolchain" superClass="com.phoenixcontact.cdt.axc.toolchain.axc2152.release">
 							<option id="com.phoenixcontact.cdt.axc2152.toolchain.prefix.2100174895" name="Prefix" superClass="com.phoenixcontact.cdt.axc2152.toolchain.prefix" useByScannerDiscovery="false" value="arm-pxc-linux-gnueabi-" valueType="string"/>
 							<option id="com.phoenixcontact.cdt.axc2152.toolchain.path.2083492107" name="Toolchain Path" superClass="com.phoenixcontact.cdt.axc2152.toolchain.path" useByScannerDiscovery="false" value="D:/tmp/SDK/sysroots/x86_64-pokysdk-mingw32/usr/bin/arm-pxc-linux-gnueabi" valueType="string"/>
 							<targetPlatform id="com.phoenixcontact.cdt.axc.toolchain.axc2152target.base.1179406532" isAbstract="false" name="AXC F 2152" superClass="com.phoenixcontact.cdt.axc.toolchain.axc2152target.base"/>
-							<builder buildPath="${workspace_loc:/PLCnext-win}/Release" id="com.phoenixcontact.cdt.axc.toolchain.axc2152builder.base.960911140" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="com.phoenixcontact.cdt.axc.toolchain.axc2152builder.base"/>
-							<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="com.phoenixcontact.cdt.axc.toolchain.cpp.compiler.so.base.393361235" name="Cross G++ Compiler" superClass="com.phoenixcontact.cdt.axc.toolchain.cpp.compiler.so.base">
-								<option id="gnu.cpp.compiler.option.optimization.level.1167463625" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.debugging.level.1879966152" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
+							<builder buildPath="${workspace_loc:/PLCnext-win}/Release" errorParsers="" id="com.phoenixcontact.cdt.axc.toolchain.axc2152builder.base.960911140" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="com.phoenixcontact.cdt.axc.toolchain.axc2152builder.base"/>
+							<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="com.phoenixcontact.cdt.axc.toolchain.cpp.compiler.so.base.393361235" name="Cross G++ Compiler" superClass="com.phoenixcontact.cdt.axc.toolchain.cpp.compiler.so.base">
+								<option id="gnu.cpp.compiler.option.optimization.level.1167463625" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.1879966152" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1968393186" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="D:\tmp\SDK\sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext"/>
 									<listOptionValue builtIn="false" value="D:\tmp\SDK\sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include"/>
@@ -54,7 +54,7 @@
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.815561062" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
-							<tool id="com.phoenixcontact.cdt.axc.toolchain.cpp.linker.so.base.839437055" name="Cross G++ Linker" superClass="com.phoenixcontact.cdt.axc.toolchain.cpp.linker.so.base">
+							<tool errorParsers="org.eclipse.cdt.core.GLDErrorParser" id="com.phoenixcontact.cdt.axc.toolchain.cpp.linker.so.base.839437055" name="Cross G++ Linker" superClass="com.phoenixcontact.cdt.axc.toolchain.cpp.linker.so.base">
 								<option defaultValue="true" id="gnu.cpp.link.option.shared.1183984479" name="Shared (-shared)" superClass="gnu.cpp.link.option.shared" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<option id="com.phoenixcontact.cdt.axc2152.toolchain.cpp.linker.pxcsettings.sysroot.443058614" name="sysroot" superClass="com.phoenixcontact.cdt.axc2152.toolchain.cpp.linker.pxcsettings.sysroot" useByScannerDiscovery="false" value="D:\tmp\SDK\sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.2033558150" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
@@ -62,12 +62,12 @@
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
 								</inputType>
 							</tool>
-							<tool id="com.phoenixcontact.cdt.axc.toolchain.assembler.so.base.563603015" name="Cross GCC Assembler" superClass="com.phoenixcontact.cdt.axc.toolchain.assembler.so.base">
+							<tool errorParsers="org.eclipse.cdt.core.GASErrorParser" id="com.phoenixcontact.cdt.axc.toolchain.assembler.so.base.563603015" name="Cross GCC Assembler" superClass="com.phoenixcontact.cdt.axc.toolchain.assembler.so.base">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.312962720" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
-							<tool id="com.phoenixcontact.cdt.axc.toolchain.c.compiler.so.base.186320089" name="Cross GCC Compiler" superClass="com.phoenixcontact.cdt.axc.toolchain.c.compiler.so.base">
-								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.option.optimization.level.1363447750" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
-								<option id="gnu.c.compiler.option.debugging.level.486823166" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+							<tool errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="com.phoenixcontact.cdt.axc.toolchain.c.compiler.so.base.186320089" name="Cross GCC Compiler" superClass="com.phoenixcontact.cdt.axc.toolchain.c.compiler.so.base">
+								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.option.optimization.level.1363447750" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.debugging.level.486823166" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.1760342629" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="D:\tmp\SDK\sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext"/>
 									<listOptionValue builtIn="false" value="D:\tmp\SDK\sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include"/>
@@ -75,7 +75,7 @@
 									<listOptionValue builtIn="false" value="D:\tmp\SDK\sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/6.2.0"/>
 									<listOptionValue builtIn="false" value="&quot;P:\PTUSA\common\lua&quot;"/>
 								</option>
-								<option id="gnu.c.compiler.option.dialect.std.868440369" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.c11" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.dialect.std.868440369" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.misc.pic.726285573" name="Position Independent Code (-fPIC)" superClass="gnu.c.compiler.option.misc.pic" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option id="gnu.c.compiler.option.misc.other.1908165981" name="Other flags" superClass="gnu.c.compiler.option.misc.other" useByScannerDiscovery="false" value="-c -fmessage-length=0  -Wno-unknown-pragmas -Wno-strict-aliasing -march=armv7-a -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 -mthumb" valueType="string"/>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1269920269" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
@@ -113,14 +113,14 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -f" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;" id="com.phoenixcontact.cdt.axc2152.toolchain.configuration.debug.610075846" name="Debug" parent="com.phoenixcontact.cdt.axc2152.toolchain.configuration.debug">
+				<configuration artifactExtension="" artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -f" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;org.eclipse.cdt.core.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser" id="com.phoenixcontact.cdt.axc2152.toolchain.configuration.debug.610075846" name="Debug" parent="com.phoenixcontact.cdt.axc2152.toolchain.configuration.debug" postannouncebuildStep="" postbuildStep="" preannouncebuildStep="" prebuildStep="">
 					<folderInfo id="com.phoenixcontact.cdt.axc2152.toolchain.configuration.debug.610075846." name="/" resourcePath="">
-						<toolChain id="com.phoenixcontact.cdt.axc.toolchain.axc2152.debug.1507162055" name="AXC F 2152 Toolchain" superClass="com.phoenixcontact.cdt.axc.toolchain.axc2152.debug">
+						<toolChain errorParsers="" id="com.phoenixcontact.cdt.axc.toolchain.axc2152.debug.1507162055" name="AXC F 2152 Toolchain" superClass="com.phoenixcontact.cdt.axc.toolchain.axc2152.debug">
 							<option id="com.phoenixcontact.cdt.axc2152.toolchain.prefix.1213524537" name="Prefix" superClass="com.phoenixcontact.cdt.axc2152.toolchain.prefix" useByScannerDiscovery="false" value="arm-pxc-linux-gnueabi-" valueType="string"/>
 							<option id="com.phoenixcontact.cdt.axc2152.toolchain.path.268672900" name="Toolchain Path" superClass="com.phoenixcontact.cdt.axc2152.toolchain.path" useByScannerDiscovery="false" value="D:/tmp/SDK/sysroots/x86_64-pokysdk-mingw32/usr/bin/arm-pxc-linux-gnueabi" valueType="string"/>
-							<targetPlatform id="com.phoenixcontact.cdt.axc.toolchain.axc2152target.base.1579666470" isAbstract="false" name="AXC F 2152" superClass="com.phoenixcontact.cdt.axc.toolchain.axc2152target.base"/>
-							<builder buildPath="${workspace_loc:/PLCnext-win}/Debug" id="com.phoenixcontact.cdt.axc.toolchain.axc2152builder.base.1008040454" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="com.phoenixcontact.cdt.axc.toolchain.axc2152builder.base"/>
-							<tool id="com.phoenixcontact.cdt.axc.toolchain.cpp.compiler.so.debug.1951304290" name="Cross G++ Compiler" superClass="com.phoenixcontact.cdt.axc.toolchain.cpp.compiler.so.debug">
+							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF" id="com.phoenixcontact.cdt.axc.toolchain.axc2152target.base.1579666470" isAbstract="false" name="AXC F 2152" superClass="com.phoenixcontact.cdt.axc.toolchain.axc2152target.base"/>
+							<builder buildPath="${workspace_loc:/PLCnext-win}/Debug" errorParsers="" id="com.phoenixcontact.cdt.axc.toolchain.axc2152builder.base.1008040454" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="com.phoenixcontact.cdt.axc.toolchain.axc2152builder.base"/>
+							<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="com.phoenixcontact.cdt.axc.toolchain.cpp.compiler.so.debug.1951304290" name="Cross G++ Compiler" superClass="com.phoenixcontact.cdt.axc.toolchain.cpp.compiler.so.debug">
 								<option id="com.phoenixcontact.cdt.axc.toolchain.cpp.compiler.mingw.so.debug.option.optimization.level.1749715224" name="Optimization Level" superClass="com.phoenixcontact.cdt.axc.toolchain.cpp.compiler.mingw.so.debug.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="com.phoenixcontact.cdt.axc.toolchain.cpp.compiler.mingw.so.debug.option.debugging.level.333319419" name="Debug Level" superClass="com.phoenixcontact.cdt.axc.toolchain.cpp.compiler.mingw.so.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.708469106" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
@@ -148,7 +148,7 @@
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.528965469" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
-							<tool id="com.phoenixcontact.cdt.axc.toolchain.cpp.linker.so.debug.1188482577" name="Cross G++ Linker" superClass="com.phoenixcontact.cdt.axc.toolchain.cpp.linker.so.debug">
+							<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GLDErrorParser" id="com.phoenixcontact.cdt.axc.toolchain.cpp.linker.so.debug.1188482577" name="Cross G++ Linker" superClass="com.phoenixcontact.cdt.axc.toolchain.cpp.linker.so.debug">
 								<option defaultValue="true" id="com.phoenixcontact.cdt.axc.toolchain.cpp.linker.mingw.so.debug.option.shared.789523766" name="Shared (-shared)" superClass="com.phoenixcontact.cdt.axc.toolchain.cpp.linker.mingw.so.debug.option.shared" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<option id="com.phoenixcontact.cdt.axc2152.toolchain.cpp.linker.pxcsettings.sysroot.1536039633" name="sysroot" superClass="com.phoenixcontact.cdt.axc2152.toolchain.cpp.linker.pxcsettings.sysroot" useByScannerDiscovery="false" value="D:\tmp\SDK\sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1075573330" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
@@ -156,10 +156,10 @@
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
 								</inputType>
 							</tool>
-							<tool id="com.phoenixcontact.cdt.axc.toolchain.assembler.so.debug.1855671742" name="Cross GCC Assembler" superClass="com.phoenixcontact.cdt.axc.toolchain.assembler.so.debug">
+							<tool command="as" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GASErrorParser" id="com.phoenixcontact.cdt.axc.toolchain.assembler.so.debug.1855671742" name="Cross GCC Assembler" superClass="com.phoenixcontact.cdt.axc.toolchain.assembler.so.debug">
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.678670032" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
-							<tool id="com.phoenixcontact.cdt.axc.toolchain.c.compiler.so.debug.1725263619" name="Cross GCC Compiler" superClass="com.phoenixcontact.cdt.axc.toolchain.c.compiler.so.debug">
+							<tool command="gcc" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GCCErrorParser" id="com.phoenixcontact.cdt.axc.toolchain.c.compiler.so.debug.1725263619" name="Cross GCC Compiler" superClass="com.phoenixcontact.cdt.axc.toolchain.c.compiler.so.debug">
 								<option defaultValue="gnu.c.optimization.level.none" id="com.phoenixcontact.cdt.axc.toolchain.c.compiler.mingw.so.debug.option.optimization.level.725768033" name="Optimization Level" superClass="com.phoenixcontact.cdt.axc.toolchain.c.compiler.mingw.so.debug.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
 								<option id="com.phoenixcontact.cdt.axc.toolchain.c.compiler.mingw.so.debug.option.debugging.level.1049290995" name="Debug Level" superClass="com.phoenixcontact.cdt.axc.toolchain.c.compiler.mingw.so.debug.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.1542051978" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
@@ -174,6 +174,7 @@
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1605916250" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="LUA_USE_MKSTEMP"/>
 								</option>
+								<option id="gnu.c.compiler.option.dialect.std.2130084883" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1052146843" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="com.phoenixcontact.cdt.axc.toolchain.c.linker.so.debug.487889266" name="Cross GCC Linker" superClass="com.phoenixcontact.cdt.axc.toolchain.c.linker.so.debug">
