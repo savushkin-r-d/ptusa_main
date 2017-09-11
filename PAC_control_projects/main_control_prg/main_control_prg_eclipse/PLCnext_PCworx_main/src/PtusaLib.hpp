@@ -8,17 +8,17 @@
 using namespace Arp;
 using namespace Arp::System::Acf;
 
-namespace ptusa
+namespace PtusaLib
 {
 
-class ptusa : public LibraryBase, public Singleton<ptusa>
+class PtusaLib : public LibraryBase, public Singleton<PtusaLib>
 {
 public: // typedefs
-    typedef Singleton<ptusa> TSingletonBase;
+    typedef Singleton<PtusaLib> TSingletonBase;
 
 public: // construction/destruction
-    ptusa(AppDomain& appDomain);
-    virtual ~ptusa(void) = default;
+    PtusaLib(AppDomain& appDomain);
+    virtual ~PtusaLib(void) = default;
 
 public: // overridden operations
 
@@ -27,8 +27,8 @@ public: // static operations (called through reflection)
     static ILibrary* GetInstance(void);
 
 private: // methods
-    ptusa(const ptusa& arg) = delete;
-    ptusa& operator= (const ptusa& arg) = delete;
+    PtusaLib(const PtusaLib& arg) = delete;
+    PtusaLib& operator= (const PtusaLib& arg) = delete;
 };
 
 extern "C" ARP_CXX_SYMBOL_EXPORT void DynamicLibrary_Main(AppDomain& appDomain);
@@ -37,4 +37,4 @@ extern "C" ARP_CXX_SYMBOL_EXPORT ILibrary* DynamicLibrary_GetInstance(void);
 ///////////////////////////////////////////////////////////////////////////////
 // inline methods of class SimulinkMode1Library
 
-} // end of namespace ptusa
+} // end of namespace PtusaLib

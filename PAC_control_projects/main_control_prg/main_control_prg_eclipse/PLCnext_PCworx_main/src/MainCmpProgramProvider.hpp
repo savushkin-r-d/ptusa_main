@@ -5,22 +5,22 @@
 using namespace Arp;
 using namespace Arp::Plc::Esm;
 
-namespace ptusa
+namespace PtusaLib
 {
 
-class mainProgramProvider : public IProgramProvider
+class MainCmpProgramProvider : public IProgramProvider
 {
 public:                             // typedefs
 
 public:                             // construction/destruction
-	mainProgramProvider(void) = default;
-	mainProgramProvider(const mainProgramProvider& arg) = delete;
-    ~mainProgramProvider(void) = default;
+	MainCmpProgramProvider(void) = default;
+	MainCmpProgramProvider(const MainCmpProgramProvider& arg) = delete;
+    ~MainCmpProgramProvider(void) = default;
 
 public:                             // static operations
 
 public:                             // operators
-    mainProgramProvider& operator= (const mainProgramProvider& arg) = delete;
+    MainCmpProgramProvider& operator= (const MainCmpProgramProvider& arg) = delete;
 
 public:                             // properties
 
@@ -34,4 +34,4 @@ private:                            // fields
 private:                            // static fields
 };
 
-} // end of namespace ptusa
+} // end of namespace PtusaLib

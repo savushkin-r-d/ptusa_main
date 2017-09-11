@@ -1,4 +1,4 @@
-#include "main.hpp"
+#include "MainPrg.hpp"
 #include "Arp/System/Commons/Logging.h"
 #include "Arp/System/Core/ByteConverter.hpp"
 
@@ -18,19 +18,27 @@
 #include "log.h"
 #include "profibus_slave.h"
 
-namespace ptusa { namespace main {
+int G_DEBUG = 0; //Вывод дополнительной отладочной информации.
 
-main::main(const String& name) : ProgramBase(name)
+namespace PtusaLib { namespace MainCmp {
+
+MainPrg::MainPrg(const String& name) : ProgramBase(name), cnt_out( 0 ), cnt_in( 0 )
 {
-   //TODO AddPortInfo
+	AddPortInfo("cnt_out", this->cnt_out);
+	AddPortInfo("cnt_in", this->cnt_in);
 }
  
-void main::Execute()
-	{
+void MainPrg::Execute()
+{
+	Log::Info( "void MainPrg::Execute()" );
+
 	static bool is_init = false;
 	static bool ok_init = false;
 
 	long int sleep_time_ms = 2;
+
+	cnt_out++;
+	Log::Debug( "Cnt=%d", cnt_out );
 
 	if ( is_init == false )
 		{
@@ -40,7 +48,7 @@ void main::Execute()
 		G_LOG->write_log( i_log::P_INFO );
 
 		int argc = 1;
-		char *argv[] = { "main.plua" };
+		const char* argv[] = { "main.plua" };
 		G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
 		int res = G_LUA_MANAGER->init( 0, argv[ 0 ] ); //-Инициализация Lua.
@@ -70,6 +78,9 @@ void main::Execute()
 
 	if ( ok_init )
 		{
+		cnt_out++;
+		Log::Debug( "Cnt=%d", cnt_out );
+
 		if ( G_DEBUG )
 			{
 			fflush( stdout );
@@ -183,6 +194,6 @@ void main::Execute()
 		//-Информация о времени выполнения цикла программы.!->
 #endif // TEST_SPEED
 		}
-	}
+}
 
-}} // end of namespace ptusa::main
+}} // end of namespace PtusaLib::MainCmp

@@ -3,22 +3,22 @@
 #include "Arp/Plc/Esm/ProgramBase.hpp"
 #include "Arp/System/Commons/Logging.h"
 
-namespace ptusa { namespace main {
+namespace PtusaLib { namespace MainCmp {
 
 using namespace Arp;
 using namespace Arp::Plc::Esm;
 
-class main : public ProgramBase, private Loggable<main>
+class MainPrg : public ProgramBase, private Loggable<MainPrg>
 {
 public: // typedefs
 
 public: // construction/destruction
-    main(const String& name);
-    main(const main& arg) = delete;
-    virtual ~main(void) = default;
+    MainPrg(const String& name);
+    MainPrg(const MainPrg& arg) = delete;
+    virtual ~MainPrg(void) = default;
 
 public: // operators
-    main&  operator=(const main& arg) = delete;
+    MainPrg&  operator=(const MainPrg& arg) = delete;
 
 public: // properties
 
@@ -27,9 +27,13 @@ public: // operations
 
 private: // fields
 
+    uint32  cnt_out;
+    int16   cnt_in;
+
+
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // inline methods of class ProgramBase
 
-}} // end of namespace ptusa::main
+}} // end of namespace PtusaLib::MainCmp

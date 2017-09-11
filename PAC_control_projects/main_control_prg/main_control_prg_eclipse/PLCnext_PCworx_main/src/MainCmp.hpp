@@ -4,22 +4,22 @@
 #include "Arp/System/Acf/IApplication.hpp"
 #include "Arp/Plc/Esm/IProgramComponent.hpp"
 
-#include "mainProgramProvider.hpp"
+#include "MainCmpProgramProvider.hpp"
 
 using namespace Arp;
 using namespace Arp::System::Acf;
 using namespace Arp::Plc::Esm;
 
-namespace ptusa
+namespace PtusaLib
 {
 
-class main : public ComponentBase, public IProgramComponent
+class MainCmp : public ComponentBase, public IProgramComponent
 {
 public: // typedefs
 
 public: // construction/destruction
-    main(IApplication& application, const String& name);
-    virtual ~main(void) = default;
+    MainCmp(IApplication& application, const String& name);
+    virtual ~MainCmp(void) = default;
 
 public: // static factory operations
     static IComponent::Ptr Create(IApplication& application, const String& componentName);
@@ -39,28 +39,28 @@ public: // IProgramProviderComponent operations
     IProgramProvider* GetProgramProvider(void)override;
 
 private: // methods
-    main(const main& arg) = delete;
-    main& operator= (const main& arg) = delete;
+    MainCmp(const MainCmp& arg) = delete;
+    MainCmp& operator= (const MainCmp& arg) = delete;
 
 private: // fields
-    mainProgramProvider programProvider;
+    MainCmpProgramProvider programProvider;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 // inline methods of class SimulinkMode1Component
-inline main::main(IApplication& application, const String& name)
+inline MainCmp::MainCmp(IApplication& application, const String& name)
 : ComponentBase(application, name, ComponentCategory::Custom, Version(0))
 {
 }
 
-inline IComponent::Ptr main::Create(IApplication& application, const String& componentName)
+inline IComponent::Ptr MainCmp::Create(IApplication& application, const String& componentName)
 {
-    return IComponent::Ptr(new main(application, componentName));
+    return IComponent::Ptr(new MainCmp(application, componentName));
 }
 
-inline IProgramProvider* main::GetProgramProvider()
+inline IProgramProvider* MainCmp::GetProgramProvider()
 {
     return &programProvider;
 }
 
-} // end of namespace ptusa
+} // end of namespace PtusaLib

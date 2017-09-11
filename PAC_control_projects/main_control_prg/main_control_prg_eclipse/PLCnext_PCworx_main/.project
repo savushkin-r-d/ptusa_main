@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>PLCnext-PCworx-main</name>
+	<name>PLCnext_PCworx_main</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -23,7 +23,6 @@
 		<nature>org.eclipse.cdt.core.ccnature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
-		<nature>com.phoenixcontact.cdt.common.plcnextNature</nature>
 	</natures>
 	<linkedResources>
 		<link>
@@ -710,16 +709,6 @@
 			<name>common/util/smart_ptr.h</name>
 			<type>1</type>
 			<locationURI>PARENT-4-PROJECT_LOC/common/util/smart_ptr.h</locationURI>
-		</link>
-		<link>
-			<name>common/util/snprintf.c</name>
-			<type>1</type>
-			<locationURI>PARENT-4-PROJECT_LOC/common/util/snprintf.c</locationURI>
-		</link>
-		<link>
-			<name>common/util/snprintf.h</name>
-			<type>1</type>
-			<locationURI>PARENT-4-PROJECT_LOC/common/util/snprintf.h</locationURI>
 		</link>
 		<link>
 			<name>PAC/common/sys/base_mem.cpp</name>
