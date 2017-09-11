@@ -18,7 +18,7 @@
 #include "log.h"
 #include "profibus_slave.h"
 
-int G_DEBUG = 0; //Вывод дополнительной отладочной информации.
+int G_DEBUG = 1; //Вывод дополнительной отладочной информации.
 
 namespace PtusaLib { namespace MainCmp {
 
@@ -38,7 +38,7 @@ void MainPrg::Execute()
 	long int sleep_time_ms = 2;
 
 	cnt_out++;
-	Log::Debug( "Cnt=%d", cnt_out );
+	Log::Debug( "Cnt = {0}", cnt_out );
 
 	if ( is_init == false )
 		{
@@ -79,7 +79,7 @@ void MainPrg::Execute()
 	if ( ok_init )
 		{
 		cnt_out++;
-		Log::Debug( "Cnt=%d", cnt_out );
+		Log::Debug( "Cnt={0}", cnt_out );
 
 		if ( G_DEBUG )
 			{
