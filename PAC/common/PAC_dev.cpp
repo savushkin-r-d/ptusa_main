@@ -1304,7 +1304,7 @@ counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
                      int extra_par_cnt ):
     device( dev_name, DT_FQT, DST_FQT, extra_par_cnt ),
     wago_device( dev_name ),
-    state( S_STOP ),
+    state( S_WORK ),
     value( 0 ),
     last_read_value( 0 ),
     abs_value( 0 ),
