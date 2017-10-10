@@ -106,7 +106,7 @@ class tcp_communicator_linux : public tcp_communicator
             /// @return >= 0 - размер реально считанных данных.
             static int  recvtimeout( int s, u_char *buf, int len,
                 long int sec, long int usec, const char* IP, const char* name,
-                stat_time *stat );
+                stat_time *stat, char first_connect = 0 );
     };
 //-----------------------------------------------------------------------------
 #endif //TCP_CMCTR_LINUX

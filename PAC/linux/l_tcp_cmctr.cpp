@@ -633,7 +633,7 @@ int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
 //------------------------------------------------------------------------------
 int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
     int len, long int sec, long int usec, const char* IP, const char* name,
-    stat_time *stat )
+    stat_time *stat, char first_connect )
     {
 
     //Network performance info.
@@ -696,13 +696,15 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
 
     if ( 0 == n )
         {
-        sprintf( G_LOG->msg,
-            "Network device : s%d->\"%s\":\"%s\""
-            " disconnected on select read try : timeout (%ld ms).",
-            s, name, IP, sec * 1000 + usec / 1000 );
+        if (!first_connect)
+            {
+            sprintf( G_LOG->msg,
+                "Network device : s%d->\"%s\":\"%s\""
+                " disconnected on select read try : timeout (%ld ms).",
+                s, name, IP, sec * 1000 + usec / 1000 );
 
-        G_LOG->write_log( i_log::P_ERR );
-
+            G_LOG->write_log( i_log::P_ERR );
+            }
         return -2;  // timeout!
         }
 
@@ -775,18 +777,41 @@ int tcp_communicator_linux::do_echo ( int idx )
 
     int err = 0, res;
 
-    if ( sock_state.init )         /* socket is just initiated */
-        {
-        sock_state.init = 0;
-        }
-
     sock_state.evaluated = 1;
     memset( buf, 0, BUFSIZE );
 
+    if (sock_state.init)
+        {
+        sock_state.init = 0;
+        if (sock_state.ismodbus)
+            {
+            // Ожидаем данные с таймаутом 50 мсек.
+            err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 0, 50000L,
+                inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.recv_stat, 1 );
+            if (err == -2)
+                {
+                //Если при подключении на модбас-сокет первый раз данные не пришли, то игнорируем(панель Weintek)
+                return 0;
+                }
+            }
+        else
+            {
+            // Ожидаем данные с таймаутом 300 мсек.
+            err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 0, 300000L,
+                inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.recv_stat );
+            }
+        }
+    else
+        {
+        // Ожидаем данные с таймаутом 300 мсек.
+        err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 0, 300000L,
+            inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.recv_stat );
+        }
 
-    // Ожидаем данные с таймаутом 500 мсек.
-    err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 0, 1000000L,
-        inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.recv_stat );
+
+
+
+
 
 
     if ( err <= 0 )               /* read error */
@@ -795,6 +820,11 @@ int tcp_communicator_linux::do_echo ( int idx )
         close( sock_state.socket );
         sst.erase(sst.begin() + idx, sst.begin() + idx + 1);
         return err;
+        }
+
+    if ( sock_state.init )         /* socket is just initiated */
+        {
+        sock_state.init = 0;
         }
 
     if ( in_buffer_count > max_buffer_use )
