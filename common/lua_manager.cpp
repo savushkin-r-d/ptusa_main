@@ -141,7 +141,7 @@ const int FILES_VERSION[ FILE_CNT ] =
 //II
 //Ёкспортируем в Lua классы и функции из C++.
 
-int lua_manager::init( lua_State* lua_state, char* script_name )
+int lua_manager::init( lua_State* lua_state, const char* script_name )
     {
     if ( G_DEBUG )
         {

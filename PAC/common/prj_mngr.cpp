@@ -26,7 +26,7 @@
 
 auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
-int project_manager::proc_main_params( int argc, char *argv[] )
+int project_manager::proc_main_params( int argc, const char *argv[] )
     {
     for ( int i = 1; i < argc; i++ )
         {

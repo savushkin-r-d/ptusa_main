@@ -26,7 +26,7 @@ class project_manager
         /// 
         /// @param argc - количество параметров.
         /// @param argv - массив параметров.
-        int proc_main_params( int argc, char *argv[] );
+        int proc_main_params( int argc, const char *argv[] );
 
         /// @brief «агрузка системной конфигурации проекта на основе скрипта.
         /// 

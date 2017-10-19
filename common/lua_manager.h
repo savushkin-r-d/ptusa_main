@@ -21,7 +21,7 @@ class lua_manager
     public:
         static lua_manager* get_instance();
 
-        int init( lua_State* L, char* script_name );
+        int init( lua_State* L, const char* script_name );
 
         ~lua_manager();
 

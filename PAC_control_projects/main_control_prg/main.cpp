@@ -29,7 +29,7 @@
 
 int G_DEBUG = 0; //Вывод дополнительной отладочной информации.
 
-int main( int argc, char *argv[] )
+int main( int argc, const char *argv[] )
     {
 #if defined WIN_OS
     setlocale( LC_ALL, "" );
