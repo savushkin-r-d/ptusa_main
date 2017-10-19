@@ -567,9 +567,6 @@ int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap) {
       }
       p += n; str_l += n;
     } else {
-#ifndef MINIOS7
-      const char *starting_p;
-#endif
       size_t min_field_width = 0, precision = 0;
       int zero_padding = 0, precision_specified = 0, justify_left = 0;
       int alternate_form = 0, force_sign = 0;
@@ -598,10 +595,7 @@ int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap) {
 
       str_arg = credits;/* just to make compiler happy (defined but not used)*/
       str_arg = NULL;
-#ifndef MINIOS7
-      starting_p = p;
-#endif
-	   p++;  /* skip '%' */
+      p++;  /* skip '%' */
    /* parse flags */
       while (*p == '0' || *p == '-' || *p == '+' ||
              *p == ' ' || *p == '#' || *p == '\'') {
@@ -718,7 +712,7 @@ int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap) {
 #else
 			const char *q = (const char* ) memchr(str_arg, '\0',
                              precision <= 0x7fffffff ? precision : 0x7fffffff);
-#endif MINIOS7
+#endif //MINIOS7
             str_arg_l = !q ? precision : (q-str_arg);
           }
           break;
