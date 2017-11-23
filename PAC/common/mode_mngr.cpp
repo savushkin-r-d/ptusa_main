@@ -1095,13 +1095,16 @@ void wash_action::evaluate()
     if ( !par_idx.empty() )
         {
         new_val = ( *par )[ par_idx[ P_PUMP_FREQ ] ];
-        }
-    
+        }           
 
     //Включаем или выключаем устройства.
     for ( u_int i = 0; i < devices[ G_DEV ].size(); i++ )
         {
         devices[ G_DEV ][ i ]->set_state( new_state );
+        if ( new_val != -1 )
+            {
+            devices[ G_DEV ][ i ]->set_value( new_state > 0 ? new_val : 0 );
+            }
         }
     for ( u_int i = 0; i < devices[ G_REV_DEV ].size(); i++ )
         {
