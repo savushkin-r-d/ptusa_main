@@ -219,6 +219,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     is_DoseRR_func = 0;
     is_InitDoseRR_func = 0;
     is_On_Resume_func = 0;
+    is_ConfigureLine_func = 0;
 
     //для ошибки "возможно отсутствует концентрированный раствор"
     no_liquid_is_warning = 0;
@@ -1336,6 +1337,24 @@ void cipline_tech_object::initline()
         lua_remove(L, -1); // Stack: remove function "cip_On_Resume".
         }
 
+    if (is_ConfigureLine_func == 0)
+        {
+        lua_State* L = lua_manager::get_instance()->get_Lua();
+        lua_getfield(L, LUA_GLOBALSINDEX, name_Lua);
+        lua_getfield(L, -1, "cip_ConfigureLine");
+        lua_remove(L, -2);  // Stack: remove OBJECT.
+
+        if (lua_isfunction(L, -1))
+            {
+            is_ConfigureLine_func = 2;
+            }
+        else
+            {
+            is_ConfigureLine_func = 1;
+            }
+        lua_remove(L, -1); // Stack: remove function "cip_On_Resume".
+        }
+
     if (nmr == 1)
         {
         causticLoadedRecipe = (int)(parpar[0][P_CAUSTIC_SELECTED]);
@@ -2086,58 +2105,32 @@ int cipline_tech_object::EvalCommands()
                     else
                         {
                         closeLineValves();
-                        if (TECH_TYPE_CAR_WASH == tech_type)
+
+                        int luares = 0;
+                        if (2 == is_ConfigureLine_func)
                             {
-                            char vname[15];
-                            if (switch1)
+                            lua_State* L = lua_manager::get_instance()->get_Lua();
+                            lua_getglobal(L, name_Lua);
+                            lua_getfield(L, -1, "cip_ConfigureLine");
+                            lua_remove(L, -2);  // Stack: remove OBJECT.
+                            lua_getglobal(L, name_Lua);
+                            lua_pushinteger(L, switch1);
+                            lua_pushinteger(L, switch2);
+                            lua_pushinteger(L, switch3);
+                            lua_pushinteger(L, switch4);
+                            if (0 == lua_pcall(L, 5, 1, 0))
                                 {
-                                sprintf(vname, "LINE%dV%d", nmr, 1011);
-                                V(vname)->on();
-                                sprintf(vname, "LINE%dV%d", nmr, 1012);
-                                V(vname)->on();
-                                sprintf(vname, "LINE%dV%d", nmr, 1006);
-                                V(vname)->on();
-                                sprintf(vname, "LINE%dV%d", nmr, 1002);
-                                V(vname)->on();
+                                luares = lua_tointeger(L, -1);
+                                lua_pop(L, 1);
                                 }
-                            if (switch2)
+                            else
                                 {
-                                sprintf(vname, "LINE%dV%d", nmr, 1021);
-                                V(vname)->on();
-                                sprintf(vname, "LINE%dV%d", nmr, 1022);
-                                V(vname)->on();
-                                sprintf(vname, "LINE%dV%d", nmr, 1006);
-                                V(vname)->on();
-                                sprintf(vname, "LINE%dV%d", nmr, 1002);
-                                V(vname)->on();
-                                }
-                            if (switch3)
-                                {
-                                sprintf(vname, "LINE%dV%d", nmr, 1031);
-                                V(vname)->on();
-                                sprintf(vname, "LINE%dV%d", nmr, 1032);
-                                V(vname)->on();
-                                sprintf(vname, "LINE%dV%d", nmr, 1006);
-                                V(vname)->on();
-                                sprintf(vname, "LINE%dV%d", nmr, 1001);
-                                V(vname)->on();
-                                sprintf(vname, "LINE%dV%d", nmr, 1004);
-                                V(vname)->on();
-                                }
-                            if (switch4)
-                                {
-                                sprintf(vname, "LINE%dV%d", nmr, 1041);
-                                V(vname)->on();
-                                sprintf(vname, "LINE%dV%d", nmr, 1042);
-                                V(vname)->on();
-                                sprintf(vname, "LINE%dV%d", nmr, 1006);
-                                V(vname)->on();
-                                sprintf(vname, "LINE%dV%d", nmr, 1001);
-                                V(vname)->on();
-                                sprintf(vname, "LINE%dV%d", nmr, 1004);
-                                V(vname)->on();
+                                printf("Error in calling cip_ConfigureLIne: %s\n", lua_tostring(L, -1));
+                                lua_pop(L, 1);
+                                luares = -1;
                                 }
                             }
+  
                         lineRecipes->OnRecipeDevices(loadedRecipe, nmr);
                         if (TECH_TYPE_CAR_WASH == tech_type)
                             {

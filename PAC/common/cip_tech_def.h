@@ -565,6 +565,7 @@ class cipline_tech_object: public tech_object
         int is_DoseRR_func;
         int is_InitDoseRR_func;
         int is_On_Resume_func;
+        int is_ConfigureLine_func;
 
 	public:
 		cipline_tech_object( const char* name, u_int number, u_int type, const char* name_Lua,
