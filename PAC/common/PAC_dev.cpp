@@ -2386,8 +2386,8 @@ int level_e_cyl::save_device_ex( char *buff )
     int res = 0;
 
     float v = get_par( P_R, start_param_idx );
-    v = (float)M_PI * v * v *  AI1::get_value() *
-        get_par( P_MAX_P, start_param_idx ) / ( float ) 9.81;
+    v = (float) M_PI * v * v *  AI1::get_value() *
+        get_par( P_MAX_P, start_param_idx ) / 9.81f;
 
     res = sprintf( buff, "CLEVEL=%.2f, ", v );
 
@@ -2410,23 +2410,25 @@ int level_e_cone::save_device_ex( char *buff )
     int res = 0;
 
     float r = get_par( P_R, start_param_idx );
-    float tg_a = r / get_par( P_H_CONE, start_param_idx );
+    float tg_a = 0;
+    if ( get_par( P_H_CONE, start_param_idx ) > 0 )
+        {
+        tg_a = r / get_par( P_H_CONE, start_param_idx );
+        }
+
     float h_cone = get_par( P_H_CONE, start_param_idx );
-    float h_curr = AI1::get_value();
+    float h_curr = get_par( P_MAX_P, start_param_idx ) * AI1::get_value() / 9.81f;
 
     float v = 0;
-    if ( h_curr < h_cone )
+    if ( h_curr <= h_cone )
         {
-        v = (float)( 1 / 3 * M_PI * h_curr * tg_a * h_curr * tg_a * h_curr );
+        v = (float) M_PI * h_curr * tg_a * h_curr * tg_a * h_curr / 3;
         }
     else
         {
-        v = (float)( 1 / 3 * M_PI * r * r * h_cone +
-            M_PI * r * r * ( h_curr - h_cone ) );
+        v = (float) M_PI * r * r * ( h_curr - h_cone * 2 / 3 );
         }
-
-    v = v * get_par( P_MAX_P, start_param_idx ) / ( float ) 9.81;
-
+    
     res = sprintf( buff, "CLEVEL=%.2f, ", v );
 
     return res;
