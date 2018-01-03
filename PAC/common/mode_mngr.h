@@ -35,7 +35,7 @@
 #include "i_tech_def.h"
 
 class operation_manager;
-class step;
+class operation_state;
 
 //-----------------------------------------------------------------------------
 /// @brief Действие над устройствами (включение, выключение и т.д.).
@@ -116,7 +116,6 @@ class action
 
         const saved_params_float *par;      ///< Параметры действия.
         std::vector< int >        par_idx;  ///< Индексы параметров действия.
-
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -151,7 +150,7 @@ class off_action: public action
 class open_seat_action: public action
     {
     public:
-        open_seat_action( bool is_mode, step *owner );
+        open_seat_action( bool is_mode, operation_state *owner );
 
         void init();
         void evaluate();
@@ -185,8 +184,8 @@ class open_seat_action: public action
 
         u_int_4 wait_time;      ///< Время ожидания перед промыванием седел.
         u_int_4 wait_seat_time; ///< Время ожидания перед промыванием седел группы.
-        u_int_4 wash_time_upper;      ///< Время промывки верхних седел текущей группы клапанов.
-        u_int_4 wash_time_lower;      ///< Время промывки нижних седел текущей группы клапанов.
+        u_int_4 wash_time_upper;///< Время промывки верхних седел текущей группы клапанов.
+        u_int_4 wash_time_lower;///< Время промывки нижних седел текущей группы клапанов.
 
         /// Седла.
         std::vector< std::vector< device* > > wash_upper_seat_devices;
@@ -195,7 +194,7 @@ class open_seat_action: public action
         u_int_4 start_cycle_time; ///< Время старта цикла (ожидания или промывки).
 
         bool is_mode;             ///< Является ли шагом операции.
-        step* owner;
+        operation_state* owner;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -302,7 +301,7 @@ class step
             A_WASH,
             };
 
-        step( std::string name, bool is_mode = false );
+        step( std::string name, operation_state *owner, bool is_mode = false );
 
         ~step();
 
@@ -343,15 +342,6 @@ class step
         /// Установление времени начала шага.
         void set_start_time( u_int_4 start_time );
 
-        /// Установление времени шага.
-        void set_step_time( u_int_4 step_time );
-
-        /// Получение времени шага.
-        u_int_4 get_step_time() const
-            {
-            return step_time;
-            }
-
         /// Выводит на консоль объект.
         void print( const char* prefix = "" ) const;
 
@@ -372,8 +362,6 @@ class step
         std::vector< action* > actions; ///< Действия.
         action action_stub;             ///< Фиктивное действие.
         u_int_4 start_time;             ///< Время старта шага.
-
-        u_int_4 step_time;              ///< Заданное время шага.
 
         bool is_mode;     ///< Выполняется ли все время во время операции.
         std::string name; ///< Имя.
@@ -400,9 +388,6 @@ class operation_state
 
         step* add_step( const char* name, int next_step_n,
             u_int step_duration_par_n );
-
-        /// @brief Установка номера параметра со временем переходного переключения шагов.
-        void set_step_cooperate_time_par_n( int step_cooperate_time_par_n );
 
         /// @brief Получение операции через операцию индексирования.
         ///
@@ -455,15 +440,6 @@ class operation_state
         int active_step_n;           ///< Активный шаг.
         int active_step_time;        ///< Время активного шага.
         int active_step_next_step_n; ///< Следующий шаг.
-
-        int active_step_second_n;             ///< Параллельный активный шаг.
-        int active_step_second_start_time;    ///< Параллельный активный шаг.
-
-        /// @brief Время переходного времени шагов.
-        u_int step_cooperate_time;
-
-        /// @brief Номер параметра со временем переходного времени шагов.
-        int step_cooperate_time_par_n;
 
         /// @brief Номера параметров времен шагов.
         std::vector< int > step_duration_par_ns;
@@ -579,8 +555,6 @@ class operation
         step* add_step( const char* name, int next_step_n,
             unsigned int step_duration_par_n, state_idx s_idx = RUN );
 
-        /// @brief Установка номера параметра со временем переходного переключения шагов.
-        void set_step_cooperate_time_par_n( int step_cooperate_time_par_n );
 #ifndef __GNUC__
 #pragma endregion
 #endif

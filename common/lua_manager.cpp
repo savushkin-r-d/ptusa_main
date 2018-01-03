@@ -94,7 +94,7 @@ const int FILES_VERSION[ FILE_CNT ] =
     {
     1, //"sys.wago.plua",
     1, //"sys.devices.lua",
-    3, //"sys.objects.plua",
+    4, //"sys.objects.plua",
 #if defined RM_PAC
     1, //"sys.rm_PACS.lua",
 #endif // defined RM_PAC
@@ -218,9 +218,10 @@ int lua_manager::init( lua_State* lua_state, const char* script_name )
 
         if ( FILES_VERSION[ i ] != res )
             {
-            sprintf( err_str, "File \"%s\" has version %d, must be %d!\n",
+            sprintf( G_LOG->msg, "File \"%s\" has version %d, must be %d!",
                 FILES[ i ], res, FILES_VERSION[ i ] );
-            printf( "%s", err_str );
+            G_LOG->write_log( i_log::P_CRIT );
+
             return 1;
             }
         }

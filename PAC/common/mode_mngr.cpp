@@ -258,11 +258,6 @@ step* operation::add_step( const char* name, int next_step_n,
     return stub.add_step( name, next_step_n, step_duration_par_n );
     }
 //-----------------------------------------------------------------------------
-void operation::set_step_cooperate_time_par_n( int step_cooperate_time_par_n )
-    {
-    states[ RUN ]->set_step_cooperate_time_par_n( step_cooperate_time_par_n );
-    }
-//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 action::action( std::string name, u_int group_cnt ) : name( name ), par( 0 )
     {
@@ -459,7 +454,8 @@ int required_DI_action::check( char* reason ) const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-step::step( std::string name, bool is_mode /*= false */ ) : action_stub( "Заглушка" ),
+step::step( std::string name, operation_state *owner, 
+    bool is_mode /*= false */ ) : action_stub( "Заглушка" ),
     start_time( 0 ),
     is_mode( is_mode ),
     name( name ),
@@ -467,7 +463,7 @@ step::step( std::string name, bool is_mode /*= false */ ) : action_stub( "Заглуш
     {
     actions.push_back( new on_action() );
     actions.push_back( new off_action() );
-    actions.push_back( new open_seat_action( is_mode, this ) );
+    actions.push_back( new open_seat_action( is_mode, owner ) );
 
     if ( is_mode )
         {
@@ -531,11 +527,6 @@ u_int_4 step::get_eval_time() const
 void step::set_start_time( u_int_4 start_time )
     {
     this->start_time = start_time;
-    }
-//----------------------------------------------------------------------------
-void step::set_step_time( u_int_4 step_time )
-    {
-    this->step_time = step_time;
     }
 //-----------------------------------------------------------------------------
 void step::print( const char* prefix /*= "" */ ) const
@@ -762,7 +753,7 @@ void AI_AO_action::print( const char* prefix /*= "" */ ) const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-open_seat_action::open_seat_action( bool is_mode, step *owner ) :
+open_seat_action::open_seat_action( bool is_mode, operation_state *owner ) :
     action( "Промывка седел" ),
     phase( P_WAIT ),
     active_group_n( 0 ),
@@ -804,7 +795,7 @@ void open_seat_action::init()
     // для двух групп - треть и т.д.
     if ( !is_mode )
         {
-        u_int_4 wait_time = owner->get_step_time() / ( groups_cnt + 1 );
+        u_int_4 wait_time = owner->get_active_step_set_time() / ( groups_cnt + 1 );
         if ( wait_time > 0 )
             {
             this->wait_time = wait_time;
@@ -1228,24 +1219,21 @@ void wash_action::print( const char* prefix /*= "" */ ) const
 //-----------------------------------------------------------------------------
 operation_state::operation_state( const char* name,
     operation_manager *owner, int n ) : name( name ),
-    mode_step(  new step( "Шаг операции", true ) ),
+    mode_step(  new step( "Шаг операции", this, true ) ),
     active_step_n( -1 ),
-    active_step_second_n( -1 ),
-    step_cooperate_time_par_n( -1 ),
     start_time( get_millisec() ),
-    step_stub( "Шаг-заглушка" ),
+    step_stub( "Шаг-заглушка", this ),
     owner( owner ),
     n( n ),
     dx_step_time( 0 )
     {
-
     mode_step[ 0 ][ step::A_WASH ]->set_params( owner->get_params() );
     }
 //-----------------------------------------------------------------------------
 step* operation_state::add_step( const char* name, int next_step_n,
     u_int step_duration_par_n )
     {
-    steps.push_back( new step( name, false ) );
+    steps.push_back( new step( name, this ) );
 
     next_step_ns.push_back( next_step_n );
     step_duration_par_ns.push_back( step_duration_par_n );
@@ -1264,7 +1252,6 @@ void operation_state::init( u_int start_step /*= 1 */ )
     start_time = get_millisec();
 
     active_step_n = -1;
-    active_step_second_n = -1;
 
     if ( steps.empty() )
         {
@@ -1283,72 +1270,42 @@ void operation_state::init( u_int start_step /*= 1 */ )
         }
     }
 //-----------------------------------------------------------------------------
-// Если есть активный шаг, проверяем на наличие параллельного нового шага (1).
-// Если он есть, то раздельно выключаем и включаем устройства двух активных
-// шагов (2). Потом проверяем время переходного режима. Если оно вышло,
-// отключаем активный шаг, в качестве активного шага переназначаем параллельный
-// новый шаг.
+// Если есть активный шаг, проверяем время. Если оно вышло,
+// отключаем активный шаг, в качестве активного шага переназначаем новый шаг.
 void operation_state::evaluate()
     {
     mode_step->evaluate();
 
     if ( active_step_n < 0 ) return;
 
-    if ( active_step_second_n >= 0 )                                       //1
+    //Время шага
+    int par_n = step_duration_par_ns[ active_step_n ];
+    if ( par_n > 0 && owner->get_step_param( par_n ) > 0 )
         {
-        steps[ active_step_n ]->evaluate_off();                            //2
-        steps[ active_step_second_n ]->evaluate_off();
+        active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
+        }    
+   
+    steps[ active_step_n ]->evaluate();
 
-        steps[ active_step_n ]->evaluate_on();
-        steps[ active_step_second_n ]->evaluate_on();
-
-        if ( get_delta_millisec( active_step_second_start_time ) >
-            step_cooperate_time )
-            {
-            steps[ active_step_n ]->final();
-
-            active_step_n = active_step_second_n;
-            active_step_second_n = -1;
-
-            steps[ active_step_n ]->evaluate();
-            if ( G_DEBUG )
-                {
-                printf( "  cooperate off\n" );
-                }
-            }
-        }
-    else
+    if ( active_step_time != 0 &&
+        steps[ active_step_n ]->get_eval_time() > ( u_int ) active_step_time )
         {
-        steps[ active_step_n ]->evaluate();
-
-        if ( active_step_time != 0 &&
-            steps[ active_step_n ]->get_eval_time() > ( u_int ) active_step_time )
+        if ( -1 == active_step_next_step_n )
             {
-            u_long step_switch_time = 0;
-            if ( step_cooperate_time_par_n > 0 &&
-                owner->get_step_param( step_cooperate_time_par_n ) > 0 )
+            if ( n > 0 )
                 {
-                step_switch_time = ( u_long )
-                    owner->get_step_param( step_cooperate_time_par_n );
-                }
-
-            if ( -1 == active_step_next_step_n )
-                {
-                if ( n > 0 )
-                    {
-                    owner->off_mode( n );
-                    }
-                else
-                    {
-                    final(); //Для режима-заглушки.
-                    }
+                owner->off_mode( n );
                 }
             else
                 {
-                to_step( active_step_next_step_n, step_switch_time );
+                final(); //Для режима-заглушки.
                 }
             }
-        }
+        else
+            {
+            to_step( active_step_next_step_n, 0 );
+            }
+        }       
     }
 //-----------------------------------------------------------------------------
 void operation_state::final()
@@ -1358,7 +1315,7 @@ void operation_state::final()
 
     //Если активный шаг не завершился, сохраняем время его выполнения для
     //возобновления в случае снятия с паузы.
-    if ( active_step_n >= 0 && active_step_second_n == -1 )
+    if ( active_step_n >= 0 )
         {
         dx_step_time = active_step_evaluation_time();
         }
@@ -1371,16 +1328,7 @@ void operation_state::final()
             printf( " FINAL ACTIVE STEP [ %d ] \n", active_step_n );
             }
         active_step_n = -1;
-        }
-    if ( active_step_second_n >= 0 )
-        {
-        steps[ active_step_second_n ]->final();
-        if ( G_DEBUG )
-            {
-            printf( " FINAL ACTIVE STEP SECOND [ %d ] \n", active_step_second_n );
-            }
-        active_step_second_n = -1;
-        }
+        }    
     }
 //-----------------------------------------------------------------------------
 step* operation_state::operator[]( int idx )
@@ -1414,69 +1362,34 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
                 new_step, steps.size() );
             }
         return;
-        }
-
-    step_cooperate_time = 1000 * cooperative_time;
+        }  
 
     active_step_time        = 0;
-    active_step_next_step_n = 0;
+    active_step_next_step_n = 0;   
 
-    // Если есть текущий шаг и время переключения больше нуля,
-    // то включаем совместный шаг.
-    if ( active_step_n >= 0 && step_cooperate_time > 0 )
+    if ( active_step_n >= 0 )
         {
-        active_step_second_n = new_step - 1;
-        active_step_second_start_time = get_millisec();
-
-        int par_n = step_duration_par_ns[ active_step_second_n ];
-
-        if ( par_n > 0 && owner->get_step_param( par_n ) > 0 )
-            {
-            active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
-            active_step_time += step_cooperate_time;
-            active_step_next_step_n = next_step_ns[ active_step_second_n ];
-
-            steps[ active_step_second_n ]->set_step_time( active_step_time );
-            steps[ active_step_second_n ]->init();
-            }
+        steps[ active_step_n ]->final();
         }
-    else
-        //Нет совместного шага.
+    active_step_n = new_step - 1;
+
+    //Время шага
+    int par_n = step_duration_par_ns[ active_step_n ];
+    if ( par_n > 0 && owner->get_step_param( par_n ) > 0 )
         {
-        if ( active_step_n >= 0 )
-            {
-            steps[ active_step_n ]->final();
-            }
-        active_step_n = new_step - 1;
-
-        if ( active_step_second_n >= 0 )
-            {
-            steps[ active_step_second_n ]->final();
-            }
-        active_step_second_n = -1;
-
-        active_step_time        = 0;
-        active_step_next_step_n = 0;
-
-        //Время шага
-        int par_n = step_duration_par_ns[ active_step_n ];
-        if ( par_n > 0 && owner->get_step_param( par_n ) > 0 )
-            {
-            active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
-            active_step_next_step_n = next_step_ns[ active_step_n ];
-            }
-
-        steps[ active_step_n ]->set_step_time( active_step_time );
-        steps[ active_step_n ]->init();
-        steps[ active_step_n ]->evaluate();
+        active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
+        active_step_next_step_n = next_step_ns[ active_step_n ];
         }
+
+    steps[ active_step_n ]->init();
+    steps[ active_step_n ]->evaluate();
+ 
 
     if ( G_DEBUG )
         {
-        printf( "\"%s\" mode %d \"%s\" to_step() -> %d, step time %d ms, coop time %lu ms.\n",
+        printf( "\"%s\" mode %d \"%s\" to_step() -> %d, step time %d ms.\n",
             owner->owner->get_name(),
-            n, name.c_str(), new_step, active_step_time,
-            ( u_long ) step_cooperate_time );
+            n, name.c_str(), new_step, active_step_time );
         }
     }
 //-----------------------------------------------------------------------------
@@ -1537,11 +1450,6 @@ void operation_state::add_dx_step_time()
         }
     }
 //-----------------------------------------------------------------------------
-void operation_state::set_step_cooperate_time_par_n(int step_cooperate_time_par_n)
-    {
-    this->step_cooperate_time_par_n = step_cooperate_time_par_n;
-    }
-//-----------------------------------------------------------------------------
 u_long operation_state::evaluation_time()
     {
     return get_delta_millisec( start_time );
@@ -1561,7 +1469,7 @@ u_long operation_state::get_active_step_set_time() const
     {
     if ( active_step_n >= 0 )
         {
-        return steps[ active_step_n ]->get_step_time();
+        return active_step_time;
         }
 
     return 0;
@@ -1569,11 +1477,6 @@ u_long operation_state::get_active_step_set_time() const
 //-----------------------------------------------------------------------------
 u_int operation_state::active_step() const
     {
-    if ( active_step_second_n > -1 )
-        {
-        return active_step_second_n + 1;
-        }
-
     return active_step_n + 1;
     }
 //-----------------------------------------------------------------------------
