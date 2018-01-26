@@ -407,6 +407,18 @@ int cipline_tech_object::save_device( char *buff )
             {
             answer_size += sprintf(buff + answer_size, "%.2f, ", causticRecipes->getValue(i - 1));
             }
+        answer_size += sprintf(buff + answer_size, "\n\t},\n");
+
+        //Список доступных кислотных растворов
+        answer_size += sprintf(buff + answer_size, "\tACID_REC_LIST='%s',\n", acidRecipes->recipeList);
+        answer_size += sprintf(buff + answer_size, "\tACID_REC_NMR='%d',\n", acidRecipes->getCurrentRecipe());
+        answer_size += sprintf(buff + answer_size, "\tACIDNAME='%s',\n", acidName);
+        answer_size += sprintf(buff + answer_size, "\tACID_PAR_NAME='%s',\n", acidRecipes->currentRecipeName);
+        answer_size += sprintf(buff + answer_size, "\tACID_PAR = \n\t{\n\t\t");
+        for (i = 1; i <= acidRecipes->GetParamsCount(); i++)
+            {
+            answer_size += sprintf(buff + answer_size, "%.2f, ", acidRecipes->getValue(i - 1));
+            }
         answer_size += sprintf(buff + answer_size, "\n\t}\n");
     }
 

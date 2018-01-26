@@ -251,7 +251,7 @@ int win_tcp_client::AsyncSend( unsigned int bytestosend )
             if (!Connect())
                 {
                 async_result = AR_SOCKETERROR;
-                reconnectTimeout += connectTimeout;
+                reconnectTimeout *= 2;
                 if (reconnectTimeout > maxreconnectTimeout)
                     {
                     reconnectTimeout = maxreconnectTimeout;

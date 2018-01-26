@@ -292,7 +292,7 @@ void modbus_client::set_bit( unsigned int address, int value )
 	{
 	int numbyte = address / 8;
 	int numbit = address % 8;
-	tcpclient->buff[13 + numbyte] = tcpclient->buff[13 + numbyte] | ((value ? 1:0) << numbit);
+	tcpclient->buff[13 + numbyte] ^= (-(value ? 1 : 0) ^ tcpclient->buff[13 + numbyte]) & (1 << numbit);
 	}
 
 int modbus_client::get_bit( unsigned int address )
