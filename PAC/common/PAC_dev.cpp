@@ -2757,7 +2757,8 @@ bool level_s::is_active()
     }
 //-----------------------------------------------------------------------------
 level_s::level_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
-    DI1( dev_name, DT_LS, sub_type, 0 )
+    DI1( dev_name, DT_LS, sub_type, 0,
+        sub_type == DEVICE_SUB_TYPE::DST_LS_MAX ? 1 : 0 )
     {
     }
 //-----------------------------------------------------------------------------
