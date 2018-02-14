@@ -8,6 +8,7 @@
 ///
 
 #include <stdlib.h>
+#include <signal.h>
 #include "fcntl.h"
 
 #include "dtime.h"
@@ -21,19 +22,35 @@
 
 #include "rm_manager.h"
 #include "log.h"
-#ifdef PAC_WAGO_750_860
+#ifdef PAC_WAGO_750_860r
 #include "l_log.h"
 #endif
 
 #include "profibus_slave.h"
 
+#ifdef OPCUA
+#include "OPCUAServer.h"
+#endif
+
+
 int G_DEBUG = 0; //Вывод дополнительной отладочной информации.
+
+bool running = true;
+static void stopHandler(int sig)
+    {
+    running = false;
+    }
+
+
+
 
 int main( int argc, const char *argv[] )
     {
 #if defined WIN_OS
     setlocale( LC_ALL, "" );
 #endif
+    signal(SIGINT, stopHandler);
+    signal(SIGTERM, stopHandler);
 
     if ( argc < 2 )
         {
@@ -46,6 +63,9 @@ int main( int argc, const char *argv[] )
 
     sprintf( G_LOG->msg, "Program started." );
     G_LOG->write_log( i_log::P_INFO );
+#ifdef OPCUA
+    OPCUAServer::getInstance().Init(4840);
+#endif
 
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
@@ -74,11 +94,28 @@ int main( int argc, const char *argv[] )
         sleep_time_ms = strtol( argv[ 2 ], &stopstring, 10 );
         }
 
+#ifdef OPCUA
+    OPCUAServer::getInstance().TestConfig();
+
+    UA_StatusCode retval = OPCUAServer::getInstance().Start();
+    if(retval != UA_STATUSCODE_GOOD)
+        {
+        sprintf( G_LOG->msg, "OPC UA server start failed. Returned error code %d!", retval );
+        G_LOG->write_log( i_log::P_CRIT );
+        debug_break;
+        return EXIT_FAILURE;
+        }
+#endif
+
+
+
+
+
     sprintf( G_LOG->msg, "Starting main loop! Sleep time is %li ms.",
         sleep_time_ms);
     G_LOG->write_log( i_log::P_INFO );
 
-    while ( 1 )
+    while ( running )
         {
         if ( G_DEBUG )
             {
@@ -113,6 +150,10 @@ int main( int argc, const char *argv[] )
 #endif // ifndef
 
         G_CMMCTR->evaluate();
+#ifdef OPCUA
+        OPCUAServer::getInstance().Evaluate();
+#endif
+
         sleep_ms( sleep_time_ms );
 
         PAC_info::get_instance()->eval();
@@ -193,6 +234,10 @@ int main( int argc, const char *argv[] )
         //-Информация о времени выполнения цикла программы.!->
 #endif // TEST_SPEED
         }
+#ifdef OPCUA
+    OPCUAServer::getInstance().Shutdown();
+#endif
+
 
     return( EXIT_SUCCESS );
     }
