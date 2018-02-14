@@ -2389,7 +2389,9 @@ int level_e_cyl::save_device_ex( char *buff )
     v = (float) M_PI * v * v *  AI1::get_value() *
         get_par( P_MAX_P, start_param_idx ) / 9.81f;
 
-    res = sprintf( buff, "CLEVEL=%.2f, ", v );
+    int v_kg = (int)( v * 1000 + 0.5f ); //Переводим в килограммы.
+
+    res = sprintf( buff, "CLEVEL=%d, ", v_kg );
 
     return res;
     }
@@ -2428,8 +2430,9 @@ int level_e_cone::save_device_ex( char *buff )
         {
         v = (float) M_PI * r * r * ( h_curr - h_cone * 2 / 3 );
         }
+    int v_kg = ( int ) ( v * 1000 + 0.5f ); //Переводим в килограммы.
     
-    res = sprintf( buff, "CLEVEL=%.2f, ", v );
+    res = sprintf( buff, "CLEVEL=%d, ", v_kg );
 
     return res;
     }
