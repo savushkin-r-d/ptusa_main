@@ -1255,7 +1255,7 @@ u_int counter::get_abs_quantity()
             {
             abs_value += delta;
             }
-        }          
+        }
 #endif // NO_WAGO_MODULES
 
     return abs_value;
@@ -2431,7 +2431,7 @@ int level_e_cone::save_device_ex( char *buff )
         v = (float) M_PI * r * r * ( h_curr - h_cone * 2 / 3 );
         }
     int v_kg = ( int ) ( v * 1000 + 0.5f ); //Переводим в килограммы.
-    
+
     res = sprintf( buff, "CLEVEL=%d, ", v_kg );
 
     return res;
@@ -2761,7 +2761,7 @@ bool level_s::is_active()
 //-----------------------------------------------------------------------------
 level_s::level_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
     DI1( dev_name, DT_LS, sub_type, 0,
-        sub_type == DEVICE_SUB_TYPE::DST_LS_MAX ? 1 : 0 )
+        sub_type == DST_LS_MAX ? 1 : 0 )
     {
     }
 //-----------------------------------------------------------------------------
