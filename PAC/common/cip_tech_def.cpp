@@ -104,7 +104,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
         SAV[i]=new TSav;
         }
     no_neutro = 0;
-	dont_use_water_tank = 0;
+    dont_use_water_tank = 0;
     ret_circ_flag = 0;
     ret_circ_delay = get_millisec();
     ret_overrride = 0;
@@ -672,7 +672,7 @@ int cipline_tech_object::evaluate()
                 printf("Error in calling cip_in_evaluate: %s\n", lua_tostring(L, -1));
                 lua_pop(L, 1);
                 }
-            } 
+            }
 
 
         if (state>0)
@@ -871,7 +871,7 @@ void cipline_tech_object::initline()
 
     PIDF = new MSAPID(&rt_par_float, 72, P_ZAD_FLOW, PUMPFREQ, 0, cnt );
     PIDP = new MSAPID(&rt_par_float, 61, P_ZAD_PODOGR, ao, TP, 0);
-    
+
     if ( G_DEBUG )
         {
         LSL->set_cmd("ST", 0, 1);
@@ -1379,7 +1379,7 @@ void cipline_tech_object::initline()
             parpar->save(P_CAUSTIC_SELECTED, -1);
             causticLoadedRecipe = -1;
             }
-        
+
         acidLoadedRecipe = (int)(parpar[0][P_ACID_SELECTED]);
         if (acidLoadedRecipe >= 0 && acidLoadedRecipe < acidRecipes->recipePerLine)
             {
@@ -1403,7 +1403,7 @@ void cipline_tech_object::resetRecipeName()
     {
     sprintf(loadedRecName, "%c%c %c%c%c%c%c%c%c",205,229,226,251,225,240,224,237,0);
     //Обнуляем ссылку на статистику мойки объекта.
-	emptystats->resetstats();
+    emptystats->resetstats();
     objectstats = emptystats;
     }
 
@@ -1876,7 +1876,7 @@ int cipline_tech_object::EvalRecipes()
         causticRecipes->EvalRecipe();
         }
     //Выбор раствора
-    if ((int)(parpar[0][P_CAUSTIC_SELECTED]) != causticLoadedRecipe) 
+    if ((int)(parpar[0][P_CAUSTIC_SELECTED]) != causticLoadedRecipe)
     {
         int newcausticrecipe = (int)(parpar[0][P_CAUSTIC_SELECTED]);
         if (newcausticrecipe >= 0 && newcausticrecipe < causticRecipes->recipePerLine)
@@ -1925,7 +1925,7 @@ int cipline_tech_object::EvalRecipes()
         loadedRecipe = ( int ) rt_par_float[P_SELECT_REC] - 1;
         rt_par_float[P_SELECT_REC] = 0;
         formProgramList((unsigned int)(rt_par_float[P_PROGRAM_MASK]));
-		//Загрузка статистики
+        //Загрузка статистики
         if (tech_type != TECH_TYPE_CAR_WASH)
             {
             objectstats = statsbase->get_obj_stats(loadedRecName);
@@ -2118,7 +2118,6 @@ int cipline_tech_object::EvalCommands()
                         {
                         closeLineValves();
 
-                        int luares = 0;
                         if (2 == is_ConfigureLine_func)
                             {
                             lua_State* L = lua_manager::get_instance()->get_Lua();
@@ -2132,17 +2131,15 @@ int cipline_tech_object::EvalCommands()
                             lua_pushinteger(L, switch4);
                             if (0 == lua_pcall(L, 5, 1, 0))
                                 {
-                                luares = lua_tointeger(L, -1);
                                 lua_pop(L, 1);
                                 }
                             else
                                 {
                                 printf("Error in calling cip_ConfigureLIne: %s\n", lua_tostring(L, -1));
                                 lua_pop(L, 1);
-                                luares = -1;
                                 }
                             }
-  
+
                         lineRecipes->OnRecipeDevices(loadedRecipe, nmr);
                         if (TECH_TYPE_CAR_WASH == tech_type)
                             {
@@ -2296,7 +2293,7 @@ int cipline_tech_object::_GoToStep( int cur, int param )
         case 59: return 60;
         case 60: return LoadProgram();
         case 61:
-            if ((int)(rt_par_float[P_PROGRAM]) & KS_MASK) 
+            if ((int)(rt_par_float[P_PROGRAM]) & KS_MASK)
                 {
                 rt_par_float[STP_USED_HOTWATER] = rt_par_float[STP_USED_HOTWATER] + rt_par_float[PV1] + rt_par_float[PV2]; //Если в программе присутствует мойка щелочью или кислотой, то контур на дезинфекции уже заполнен чистой водой.
                 return 66;
@@ -2484,15 +2481,15 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
             }
         }
 
-	int tank_w_dest = TANK_W;
-	int tank_w_src = TANK_W;
+    int tank_w_dest = TANK_W;
+    int tank_w_src = TANK_W;
 
-	if (1 == dont_use_water_tank)
-	{
-		tank_w_dest = KANAL;
-		tank_w_src = WATER;
-		pr_media = WATER;
-	}
+    if (1 == dont_use_water_tank)
+    {
+        tank_w_dest = KANAL;
+        tank_w_src = WATER;
+        pr_media = WATER;
+    }
 
     int cleanrinsingto = clean_water_rinsing_return;
 
@@ -2683,7 +2680,7 @@ int cipline_tech_object::EvalCipInProgress()
         { //All Ok step is over
         int nowstep = curstep;
         curstep=GoToStep(curstep, res);
-        if (curstep!=nowstep) 
+        if (curstep!=nowstep)
             {
             rt_par_float[STP_LAST_STEP] = nowstep;
             InitStep(curstep, 0);
@@ -2736,15 +2733,15 @@ int cipline_tech_object::_DoStep( int step_to_do )
 
     int cleanrinsingto = clean_water_rinsing_return;
 
-	int tank_w_dest = TANK_W;
-	int tank_w_src = TANK_W;
+    int tank_w_dest = TANK_W;
+    int tank_w_src = TANK_W;
 
-	if (1 == dont_use_water_tank)
-	{
-		tank_w_dest = KANAL;
-		tank_w_src = WATER;
-		pr_media = WATER;
-	}
+    if (1 == dont_use_water_tank)
+    {
+        tank_w_dest = KANAL;
+        tank_w_src = WATER;
+        pr_media = WATER;
+    }
 
     switch (step_to_do)
         {
@@ -2928,7 +2925,7 @@ int cipline_tech_object::_DoStep( int step_to_do )
                 printf( "Error in calling cip_in_error: %s\n", lua_tostring( L, -1 ) );
                 lua_pop(L, 1);
                 }
-            } 
+            }
 
         return 0;
         }
@@ -4763,7 +4760,7 @@ int cipline_tech_object::_ToObject( int from, int where )
                 }
             break;
         }
-    
+
     switch (where)
         {
         case TANK_W:
