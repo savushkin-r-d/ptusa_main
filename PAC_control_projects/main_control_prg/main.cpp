@@ -42,8 +42,6 @@ static void stopHandler(int sig)
     }
 
 
-
-
 int main( int argc, const char *argv[] )
     {
 #if defined WIN_OS
@@ -106,10 +104,6 @@ int main( int argc, const char *argv[] )
         return EXIT_FAILURE;
         }
 #endif
-
-
-
-
 
     sprintf( G_LOG->msg, "Starting main loop! Sleep time is %li ms.",
         sleep_time_ms);
@@ -174,7 +168,6 @@ int main( int argc, const char *argv[] )
             }
 #endif // USE_PROFIBUS
 
-
 #ifdef TEST_SPEED
         u_int TRESH_AVG =
             G_PAC_INFO()->par[ PAC_info::P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME ];
@@ -237,7 +230,6 @@ int main( int argc, const char *argv[] )
 #ifdef OPCUA
     OPCUAServer::getInstance().Shutdown();
 #endif
-
 
     return( EXIT_SUCCESS );
     }
