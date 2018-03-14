@@ -96,7 +96,7 @@ int tcp_communicator_linux::net_init()
     master_socket_state.socket = master_socket;
     master_socket_state.sin.sin_family 	 = AF_INET;
     master_socket_state.sin.sin_addr.s_addr = INADDR_ANY;
-    master_socket_state.sin.sin_port 		 = htons ( PORT );
+    master_socket_state.sin.sin_port 		 = htons ( port );
     master_socket_state.ismodbus = 0;
 
     const int on = 1;
@@ -201,7 +201,7 @@ int tcp_communicator_linux::net_init()
     modbus_socket_state.socket = modbus_socket;
     modbus_socket_state.sin.sin_family 	  = AF_INET;
     modbus_socket_state.sin.sin_addr.s_addr = 0;
-    modbus_socket_state.sin.sin_port 		  = htons ( PORT_MODBUS ); // Порт.
+    modbus_socket_state.sin.sin_port 		  = htons ( port_modbus ); // Порт.
     modbus_socket_state.ismodbus = 1;
 
     err = bind( modbus_socket, ( struct sockaddr * ) & modbus_socket_state.sin,

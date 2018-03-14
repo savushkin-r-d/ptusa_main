@@ -14,6 +14,8 @@
 #endif
 
 auto_smart_ptr < tcp_communicator > tcp_communicator::instance = 0;
+int tcp_communicator::port = 10000;
+int tcp_communicator::port_modbus = 10502;
 //------------------------------------------------------------------------------
 tcp_communicator::tcp_communicator(): in_buffer_count( 0 ), pidx( 0 ), net_id( 0 )
     {

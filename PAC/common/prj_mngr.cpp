@@ -15,6 +15,7 @@
 #include "tech_def.h"
 
 #include "rm_manager.h"
+#include "log.h"
 
 #ifdef WIN_OS
 #include "w_mem.h"
@@ -46,6 +47,24 @@ int project_manager::proc_main_params( int argc, const char *argv[] )
                 printf( "Resetting params (command line parameter \"rcrc\").\n" );
                 }            
             params_manager::get_instance()->reset_params_size();
+            }
+        }
+
+    // port 10001
+    for ( int i = 1; i < argc - 1; i++ )
+        {
+        if ( strcmp( argv[ i ], "port" ) == 0 )
+            {
+            int p = atoi( argv[ i + 1 ] );
+
+            if ( p > 0 )
+                {
+                tcp_communicator::set_port( p, p + 502 );
+
+                sprintf( G_LOG->msg, 
+                    "New tcp_communicator ports: %d [modbus %d].", p, p + 502 );
+                G_LOG->write_log( i_log::P_NOTICE );
+                }
             }
         }
 

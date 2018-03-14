@@ -63,12 +63,17 @@ class tcp_communicator
         virtual int remove_async_client(tcp_client* client);
 
         virtual ~tcp_communicator();
+        
+        static void set_port( int new_port, int new_port_modbus )
+            {
+            port = new_port;
+            port_modbus = new_port_modbus;
+            }
 
         enum CONSTANTS
             {
             BUFSIZE     = 5000000,         ///< Размер буфера.
-            PORT        = 10000,           ///< Порт.
-            PORT_MODBUS = 10502,
+
 #ifdef LINUX_OS
             MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
 #endif // LINUX_OS
@@ -82,6 +87,9 @@ class tcp_communicator
             };
 
     protected:
+        static int port;                  ///< Порт.
+        static int port_modbus;
+
         tcp_communicator();
 
         //ERRORS DEFINITION

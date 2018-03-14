@@ -13,7 +13,7 @@
 unsigned int max_buffer_use = 0;
 
 //------------------------------------------------------------------------------
-char* WSA_Last_Err_Decode();
+const char* WSA_Last_Err_Decode();
 
 //------------------------------------------------------------------------------
 tcp_communicator_win::tcp_communicator_win( const char *name_rus, const char *name_eng ):
@@ -123,7 +123,7 @@ int tcp_communicator_win::net_init()
     memset( &master_socket_state.sin, 0, sizeof( master_socket_state.sin ) );
     master_socket_state.sin.sin_family 	    = AF_INET;
     master_socket_state.sin.sin_addr.s_addr = INADDR_ANY;
-    master_socket_state.sin.sin_port 		= htons( PORT );
+    master_socket_state.sin.sin_port 		= htons( port );
     master_socket_state.socket              = master_socket;
 
     master_socket_state.active      = 1; // мастер-сокет всегда активный.
@@ -207,7 +207,7 @@ int tcp_communicator_win::net_init()
     memset( &modbus_socket_state.sin, 0, sizeof ( modbus_socket_state.sin ) );
     modbus_socket_state.sin.sin_family 	    = AF_INET;
     modbus_socket_state.sin.sin_addr.s_addr = 0;
-    modbus_socket_state.sin.sin_port 		= htons ( 10502 ); // Порт.
+    modbus_socket_state.sin.sin_port 		= htons ( port_modbus ); // Порт.
     modbus_socket_state.socket = modbus_socket;
 
     modbus_socket_state.active      = 1;
