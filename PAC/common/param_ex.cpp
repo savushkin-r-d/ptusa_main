@@ -16,7 +16,7 @@ auto_smart_ptr< params_manager > params_manager::instance = 0;
 
 #include "log.h"
 //-----------------------------------------------------------------------------
-params_manager::params_manager(): par( 0 ) 
+params_manager::params_manager(): par( 0 ), project_id( 0 )
     {
     last_idx = 0;
     CRC_mem = NV_memory_manager::get_instance()->get_memory_block(
@@ -104,7 +104,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
     if ( *last_idx_ != last_idx )
         {
         sprintf( G_LOG->msg, 
-            "Total params size has changed (%d != %d), reinitialization.\n",
+            "Total params size has changed (%d != %d), reinitialization.",
             last_idx, *last_idx_ );
         G_LOG->write_log( i_log::P_NOTICE );
 
