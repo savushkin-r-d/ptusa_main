@@ -508,7 +508,8 @@ public parameters < type, is_float >
         /// в энергонезависимой памяти.
         void reset_to_0()
             {
-            for ( u_int i = 0; i <  parameters< type, is_float >::get_count(); i++ )
+        	u_int size = parameters< type, is_float >::get_count();
+            for ( u_int i = 0; i < size; i++ )
                 {
                 parameters< type, is_float >::get_values()[ i ] = 0;
                 }
