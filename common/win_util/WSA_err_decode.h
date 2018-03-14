@@ -13,11 +13,11 @@
 
 #pragma once
 /// @brief Расшифровка последней ошибки библиотеки WSA.
-char* WSA_Last_Err_Decode ();
+const char* WSA_Last_Err_Decode ();
 
 /// @brief Расшифровка ошибок библиотеки WSA.
 ///
 /// @param err_code [ in ] - код ошибки.
 ///
 /// @return Строка с расшифровкой ошибки.
-char* WSA_Err_Decode ( int err_code );
+const char* WSA_Err_Decode ( int err_code );

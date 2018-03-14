@@ -6,7 +6,7 @@
 #include "log.h"
 
 #ifdef WIN_OS
-extern char* WSA_Last_Err_Decode ();
+extern const char* WSA_Last_Err_Decode ();
 #endif // WINDOWS_OS
 
 auto_smart_ptr < PAC_critical_errors_manager > PAC_critical_errors_manager::instance;
