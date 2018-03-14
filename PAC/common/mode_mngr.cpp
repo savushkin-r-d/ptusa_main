@@ -203,6 +203,16 @@ u_int operation::get_run_step() const
     return run_step;
     }
 //-----------------------------------------------------------------------------
+u_int operation::get_run_steps_count() const
+    {
+    return states[ RUN ]->steps_count();
+    }
+//-----------------------------------------------------------------------------
+u_int operation::get_run_active_step() const
+    {
+    return states[ RUN ]->active_step();
+    }
+//-----------------------------------------------------------------------------
 const char* operation::get_name() const
     {
     return name.c_str();
@@ -1478,6 +1488,11 @@ u_long operation_state::get_active_step_set_time() const
 u_int operation_state::active_step() const
     {
     return active_step_n + 1;
+    }
+//-----------------------------------------------------------------------------
+u_int operation_state::steps_count() const
+    {
+    return steps.size();
     }
 //-----------------------------------------------------------------------------
 const char* operation_state::get_name() const

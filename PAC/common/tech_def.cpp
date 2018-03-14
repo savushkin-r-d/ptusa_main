@@ -734,10 +734,10 @@ int tech_object::save_device( char *buff )
                 }
             else
                 {
-                sprintf( up_time_str, "\'      %02lu\', ",
-                    ( u_long ) up_secs );
-                }
-            }
+                    sprintf( up_time_str, "\'      %02lu\', ",
+                        (u_long)up_secs );
+                    }
+                    }
 
         res += sprintf( buff + res, "%s", up_time_str );        
         }
@@ -759,6 +759,32 @@ int tech_object::save_device( char *buff )
             ( *operations_manager )[ i + 1 ]->get_run_step() );
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
+
+    
+    for ( u_int i = 1; i <= operations_count; i++ )
+        {        
+        u_int steps_count = ( *operations_manager )[ i ]->get_run_steps_count();
+        if ( steps_count == 0 )
+            {
+            continue;
+            }
+
+        res += sprintf( buff + res, "\tSTEPS%d=\n\t\t{\n\t\t", i );
+        u_int run_step = ( *operations_manager )[ i ]->get_run_active_step();
+
+        for ( u_int j = 1; j <= steps_count; j++ )
+            {
+            if ( run_step == j )
+                {
+                res += sprintf( buff + res, "1, " );
+                }
+            else
+                {
+                res += sprintf( buff + res, "0, " );
+                }
+            }
+        res += sprintf( buff + res, "\n\t\t},\n" );
+        }    
 
     //Параметры.
     res += par_float.save_device( buff + res, "\t" );

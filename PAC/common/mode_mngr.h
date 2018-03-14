@@ -423,6 +423,7 @@ class operation_state
         u_long get_active_step_set_time() const;
 
         u_int active_step() const;
+        u_int steps_count() const;
 
         /// Выводит на консоль объект.
         void print( const char* prefix = "" ) const;
@@ -483,6 +484,9 @@ class operation
 
         u_int active_step() const;
         u_int get_run_step() const;
+
+        u_int get_run_steps_count() const;
+        u_int get_run_active_step() const;
 
         const char* get_name() const;
 
