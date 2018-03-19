@@ -13,6 +13,7 @@
 
 #define  TECH_TYPE_SELF_CLEAN 112
 #define TECH_TYPE_CAR_WASH 113
+#define TECH_TYPE_CAR_WASH_SELF_CLEAN 114
 
 ///@brief Максимальная длина списка рецептов
 #define PROGRAM_LIST_MAX_LEN 600
