@@ -228,7 +228,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
 
     clean_water_rinsing_return = TANK_W; //по-умолчанию возвращаем в танк со вторичной водой.
 
-    if (tech_type == TECH_TYPE_SELF_CLEAN)
+    if (tech_type == TECH_TYPE_SELF_CLEAN || tech_type == TECH_TYPE_CAR_WASH_SELF_CLEAN)
         {
         scenabled = 1;
         scline = 0;
@@ -818,19 +818,19 @@ void cipline_tech_object::initline()
         NP = M(devname);
         if (((device*)M("M1"))->get_type() == device::DT_NONE)
             {
-            NS = (i_DO_AO_device*)V(1);
+            NS = (i_DO_AO_device*)V(101);
             }
         else
             {
-            NS = M(1);
+            NS = M("M1");
             }
         if (((device*)M("M2"))->get_type() == device::DT_NONE)
             {
-            NK = (i_DO_AO_device*)V(2);
+            NK = (i_DO_AO_device*)V(102);
             }
         else
             {
-            NK = M(2);
+            NK = M("M2");
             }
         sprintf(devname, "LINE%dLS%d", number, 3);
         LL = LS(devname);
@@ -1926,7 +1926,7 @@ int cipline_tech_object::EvalRecipes()
         rt_par_float[P_SELECT_REC] = 0;
         formProgramList((unsigned int)(rt_par_float[P_PROGRAM_MASK]));
         //Загрузка статистики
-        if (tech_type != TECH_TYPE_CAR_WASH)
+        if ((tech_type != TECH_TYPE_CAR_WASH) && (tech_type != TECH_TYPE_CAR_WASH_SELF_CLEAN))
             {
             objectstats = statsbase->get_obj_stats(loadedRecName);
             objectstats->changed = 0;
@@ -2083,7 +2083,7 @@ int cipline_tech_object::EvalCommands()
                         }
                     }
 
-                if (TECH_TYPE_CAR_WASH == tech_type)
+                if (TECH_TYPE_CAR_WASH == tech_type || TECH_TYPE_CAR_WASH_SELF_CLEAN == tech_type)
                     {
                     if (!(switch1 || switch2 || switch3 || switch4) && rt_par_float[P_PROGRAM] != SPROG_ACID_PREPARATION && rt_par_float[P_PROGRAM] != SPROG_CAUSTIC_PREPARATION)
                         {
@@ -2141,7 +2141,7 @@ int cipline_tech_object::EvalCommands()
                             }
 
                         lineRecipes->OnRecipeDevices(loadedRecipe, nmr);
-                        if (TECH_TYPE_CAR_WASH == tech_type)
+                        if (TECH_TYPE_CAR_WASH == tech_type || TECH_TYPE_CAR_WASH_SELF_CLEAN == tech_type)
                             {
                             curstep = LoadProgram();
                             }
@@ -2209,7 +2209,7 @@ int cipline_tech_object::EvalCommands()
                 if (Mdls[i]->state != 0 && Mdls[i]->rt_par_float[P_PROGRAM] != SPROG_CAUSTIC_PREPARATION && Mdls[i]->rt_par_float[P_PROGRAM] != SPROG_ACID_PREPARATION &&
                     Mdls[i]->rt_par_float[P_PROGRAM] != SPROG_SELF_CLEAN)
                     {
-                    if (tech_type != TECH_TYPE_CAR_WASH)
+                    if ((tech_type != TECH_TYPE_CAR_WASH) && (tech_type  != TECH_TYPE_CAR_WASH_SELF_CLEAN))
                         {
                         Mdls[i]->objectstats = statsbase->stats_if_exists(Mdls[i]->loadedRecName, Mdls[i]->emptystats);
                         Mdls[i]->objectstats->changed = 0;
