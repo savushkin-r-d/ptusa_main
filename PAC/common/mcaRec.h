@@ -106,7 +106,20 @@ class TRecipeManager
 		RV_PIDF_UManual,           //Заданное ручное значение выходного сигнала.
 		RV_PIDF_Uk,                //Выход ПИД.
 		//-PID2-!>
-		P_TM_MAX_TIME_OPORCIP,	//Максимальное время операции "Опорожнение объекта CIP"
+		RV_TM_MAX_TIME_OPORCIP,	//Максимальное время операции "Опорожнение объекта CIP"
+        RV_SIGNAL_MEDIUM_CHANGE,		//Сигнал out "Смена среды"
+        RV_SIGNAL_CAUSTIC,			//Сигнал out"Щелочь в трубе"
+        RV_SIGNAL_ACID,				//Сигнал out"Кислота в трубе"
+        RV_SIGNAL_CIP_IN_PROGRESS,	//Сигнал out"Мойка идет"
+        RV_SIGNAL_CIPEND,			//Сигнал out"Мойка окончена"
+        RV_SIGNAL_CIP_READY,			//Сигнал out "Мойка готова"
+        RV_SIGNAL_OBJECT_READY,		//Сигнал in "Готовность объекта к мойке"
+        RV_SIGNAL_SANITIZER_PUMP,	//Сигнал out управления дозатором дезинфицирующего средства
+        RV_RESUME_CIP_ON_SIGNAL,		//Автоматическое возобновление мойки при пропадании ошибки объекта CIP
+        RV_SIGNAL_PUMP_CONTROL,		//Сигнал in analog "Управление производительностью подающего насоса"
+        RV_SIGNAL_DESINSECTION,      //Сигнал out "Дезинфекция"
+        RV_SIGNAL_OBJECT_PAUSE,      //Сигнал in "Пауза"
+        RV_SIGNAL_CIRCULATION,       //Сигнал out циркуляция.
 		RV_RESERV_START, //начало резервных параметров
 
 

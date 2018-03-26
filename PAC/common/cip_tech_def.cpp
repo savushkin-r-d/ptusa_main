@@ -167,6 +167,8 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     dev_upr_cip_in_progress = 0;
     dev_ai_pump_frequency = 0;
     dev_upr_sanitizer_pump = 0;
+    dev_os_object_pause = 0;
+    dev_upr_circulation = 0;
 
     pumpflag = 0;
     pumptimer = get_millisec();
@@ -1818,6 +1820,14 @@ void cipline_tech_object::_StopDev( void )
         {
         dev_upr_sanitizer_pump->off();
         }
+    if (dev_upr_desinfection)
+        {
+        dev_upr_desinfection->off();
+        }
+    if (dev_upr_circulation)
+        {
+        dev_upr_circulation->off();
+        }
     if (scenabled && scline == nmr)
         {
         VSMG->off();
@@ -2714,6 +2724,14 @@ int cipline_tech_object::_DoStep( int step_to_do )
         {
         if (step_to_do >= 44 && step_to_do <=53) dev_upr_acid->on(); else dev_upr_acid->off();
         }
+    if (dev_upr_desinfection)
+        {
+        if (step_to_do >= 64 && step_to_do <= 66) dev_upr_desinfection->on(); else dev_upr_desinfection->off();
+        }
+    if (dev_upr_circulation)
+        {
+        if (step_to_do == 28 || step_to_do == 48 || step_to_do == 66 || step_to_do == 77) dev_upr_circulation->on(); else dev_upr_circulation->off();
+        }
 
     res=CheckErr();
     if (res!=0)
@@ -2906,6 +2924,13 @@ int cipline_tech_object::_DoStep( int step_to_do )
                     objready = 0;
                     }
                 }
+            if (dev_os_object_pause)
+                {
+                if (dev_os_object_pause->get_state() == ON)
+                    {
+                    objready = 0;
+                    }
+                }
             if (objready && (state == ERR_CIP_OBJECT || state == ERR_OS))
                 {
                 state = 1;
@@ -2950,6 +2975,10 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
         {
         dev_upr_acid->off();
         }
+    if (dev_upr_circulation)
+        {
+        dev_upr_circulation->off();
+        }
     if (dev_upr_caustic)
         {
         dev_upr_caustic->off();
@@ -2970,10 +2999,16 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
         {
         dev_upr_sanitizer_pump->off();
         }
+    if (dev_upr_desinfection)
+        {
+        dev_upr_desinfection->off();
+        }
+    dev_upr_circulation = 0;
     dev_upr_cip_in_progress = 0;
     dev_upr_ret = 0;
     dev_m_ret = 0;
     dev_os_object = 0;
+    dev_os_object_pause = 0;
     dev_os_object_ready = 0;
     dev_os_object_empty = 0;
     dev_upr_medium_change = 0;
@@ -3181,6 +3216,13 @@ int cipline_tech_object::_CheckErr( void )
     if (dev_os_object_ready)
         {
         if (!dev_os_object_ready->get_state())
+            {
+            return ERR_OS;
+            }
+        }
+    if (dev_os_object_pause)
+        {
+        if (dev_os_object_pause->get_state())
             {
             return ERR_OS;
             }
@@ -5509,6 +5551,42 @@ int cipline_tech_object::init_object_devices()
         {
         dev_os_object_ready = 0;
         }
+    //Обратная связь - пауза(остановка мойки)
+    dev_no = (u_int)rt_par_float[P_SIGNAL_OBJECT_PAUSE];
+    if (dev_no > 0)
+        {
+        sprintf(devname, "LINE%dDI%d", nmr, dev_no);
+        dev = (device*)DI(devname);
+        if (dev->get_serial_n() > 0)
+            {
+            dev_os_object_pause = dev;
+            }
+        else
+            {
+            dev = (device*)(DI(dev_no));
+            if (dev->get_serial_n() > 0)
+                {
+                dev_os_object_pause = dev;
+                }
+            else
+                {
+                dev = DEVICE(dev_no);
+                if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DI)
+                    {
+                    dev_os_object_pause = dev;
+                    }
+                else
+                    {
+                    dev_os_object_pause = 0;
+                    return -1;
+                    }
+                }
+            }
+        }
+    else
+        {
+        dev_os_object_pause = 0;
+        }
     //Возвратный насос
     dev_no = (u_int)rt_par_float[P_N_RET];
     if (dev_no > 0)
@@ -5760,6 +5838,78 @@ int cipline_tech_object::init_object_devices()
     else
         {
         dev_upr_acid = 0;
+        }
+    //Дезинфекция
+    dev_no = (u_int)rt_par_float[P_SIGNAL_DESINSECTION];
+    if (dev_no > 0)
+        {
+        sprintf(devname, "LINE%dDO%d", nmr, dev_no);
+        dev = (device*)DO(devname);
+        if (dev->get_serial_n() > 0)
+            {
+            dev_upr_desinfection = dev;
+            }
+        else
+            {
+            dev = (device*)(DO(dev_no));
+            if (dev->get_serial_n() > 0)
+                {
+                dev_upr_desinfection = dev;
+                }
+            else
+                {
+                dev = DEVICE(dev_no);
+                if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DO)
+                    {
+                    dev_upr_desinfection = dev;
+                    }
+                else
+                    {
+                    dev_upr_desinfection = 0;
+                    return -1;
+                    }
+                }
+            }
+        }
+    else
+        {
+        dev_upr_desinfection = 0;
+        }
+    //Циркуляция
+    dev_no = (u_int)rt_par_float[P_SIGNAL_CIRCULATION];
+    if (dev_no > 0)
+        {
+        sprintf(devname, "LINE%dDO%d", nmr, dev_no);
+        dev = (device*)DO(devname);
+        if (dev->get_serial_n() > 0)
+            {
+            dev_upr_circulation = dev;
+            }
+        else
+            {
+            dev = (device*)(DO(dev_no));
+            if (dev->get_serial_n() > 0)
+                {
+                dev_upr_circulation = dev;
+                }
+            else
+                {
+                dev = DEVICE(dev_no);
+                if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DO)
+                    {
+                    dev_upr_circulation = dev;
+                    }
+                else
+                    {
+                    dev_upr_circulation = 0;
+                    return -1;
+                    }
+                }
+            }
+        }
+    else
+        {
+        dev_upr_circulation = 0;
         }
     //Мойка окончена
     dev_no = (u_int)rt_par_float[P_SIGNAL_CIPEND];

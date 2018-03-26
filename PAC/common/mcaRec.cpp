@@ -312,7 +312,19 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
 		setRecipeValue(recipeNo, RV_PIDF_UManual, 15);
 		setRecipeValue(recipeNo, RV_PIDF_Uk, 0);
 		//-PID2-!>
-		setRecipeValue(recipeNo, P_TM_MAX_TIME_OPORCIP, 300);
+		setRecipeValue(recipeNo, RV_TM_MAX_TIME_OPORCIP, 300);
+        setRecipeValue(recipeNo, RV_SIGNAL_MEDIUM_CHANGE, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_CAUSTIC, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_ACID, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_CIP_IN_PROGRESS, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_CIPEND, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_CIP_READY, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_OBJECT_READY, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_SANITIZER_PUMP, 0);
+        setRecipeValue(recipeNo, RV_RESUME_CIP_ON_SIGNAL, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_PUMP_CONTROL, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_DESINSECTION, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_OBJECT_PAUSE, 0);
 		for (int i = RV_RESERV_START; i <= RV_LASTVALVEOFF; i++)
 			{
 			setRecipeValue(recipeNo, i, 0);

@@ -341,6 +341,9 @@ enum workParameters
 	P_SIGNAL_SANITIZER_PUMP,	//Сигнал out управления дозатором дезинфицирующего средства
 	P_RESUME_CIP_ON_SIGNAL,		//Автоматическое возобновление мойки при пропадании ошибки объекта CIP
 	P_SIGNAL_PUMP_CONTROL,		//Сигнал in analog "Управление производительностью подающего насоса"
+    P_SIGNAL_DESINSECTION,      //Сигнал out "Дезинфекция"
+    P_SIGNAL_OBJECT_PAUSE,      //Сигнал in "Пауза"
+    P_SIGNAL_CIRCULATION,       //Сигнал out циркуляция.
 	P_RESERV_START,
 	
 
@@ -739,6 +742,7 @@ class cipline_tech_object: public tech_object
 		device* dev_m_ret;					//Возвратный насос на моечной станции
 		device* dev_os_object;				//Обратная связь объекта мойки
 		device* dev_os_object_ready;		//Обратная связь объекта мойки 2
+        device* dev_os_object_pause;		//Обратная связь объекта сигнал "пауза"
 		device* dev_os_object_empty;		//Сигнал "объект опорожнен"
 		device* dev_upr_medium_change;		//Сигнал "смена среды"
 		device* dev_upr_caustic;			//Сигнал "щелочь"
@@ -748,7 +752,8 @@ class cipline_tech_object: public tech_object
 		device* dev_upr_cip_in_progress;	//Сигнал "готовность к мойке"
 		device* dev_upr_cip_finished;		//Сигнал "мойка окончена"
 		device* dev_ai_pump_frequency;		//Задание частоты подающего насоса
-        device* dev_upr_sanitizer_pump;  //Управление насосом подачи дезинфицирующего средства
+        device* dev_upr_sanitizer_pump;     //Управление насосом подачи дезинфицирующего средства
+        device* dev_upr_circulation;        //Сигнал "Циркуляция"
 		int init_object_devices();			//Функция для инициализации устройств объекта мойки
 		//----------------------------------------------
 
