@@ -2661,7 +2661,21 @@ int cipline_tech_object::EvalPIDS()
         }
     else
         {
-        PIDF->eval();
+        if (dev_os_object_pause)
+            {
+            if (dev_os_object_pause->get_state())
+                {
+                NP->set_value(0);
+                }
+            else
+                {
+                PIDF->eval();
+                }
+            }
+        else
+            {
+            PIDF->eval();
+            }
         }
 
     //Клапан пара
@@ -2924,13 +2938,7 @@ int cipline_tech_object::_DoStep( int step_to_do )
                     objready = 0;
                     }
                 }
-            if (dev_os_object_pause)
-                {
-                if (dev_os_object_pause->get_state() == ON)
-                    {
-                    objready = 0;
-                    }
-                }
+     
             if (objready && (state == ERR_CIP_OBJECT || state == ERR_OS))
                 {
                 state = 1;
@@ -3220,13 +3228,6 @@ int cipline_tech_object::_CheckErr( void )
             return ERR_OS;
             }
         }
-    if (dev_os_object_pause)
-        {
-        if (dev_os_object_pause->get_state())
-            {
-            return ERR_OS;
-            }
-        }
 
     //проверка уровней в бачке
     if ((!LL->is_active() && (LM->is_active() || LH->is_active())) || (!LM->is_active() && LH->is_active()))
@@ -3285,7 +3286,15 @@ int cipline_tech_object::_CheckErr( void )
     if (NP->get_state() == ON && 0 == dev_ai_pump_frequency)
         {
         delta = rt_par_float[P_R_NO_FLOW];
-        if (cnt->get_flow() <= delta)
+        int is_paused = 0;
+        if (dev_os_object_pause)
+            {
+            if (dev_os_object_pause->get_state())
+                {
+                is_paused = 1;
+                }
+            }
+        if (cnt->get_flow() <= delta && (!is_paused))
             {
             T[TMR_NO_FLOW]->start();
             if (T[TMR_NO_FLOW]->is_time_up())
