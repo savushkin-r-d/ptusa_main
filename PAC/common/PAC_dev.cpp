@@ -1081,9 +1081,9 @@ void dev_stub::direct_set_value( float new_value )
     {
     }
 //-----------------------------------------------------------------------------
-int dev_stub::get_state()
+valve::VALVE_STATE dev_stub::get_valve_state()
     {
-    return 0;
+    return V_OFF;
     }
 //-----------------------------------------------------------------------------
 void dev_stub::direct_on()
@@ -2996,9 +2996,9 @@ i_DO_device* V( u_int dev_n )
     return G_DEVICE_MANAGER()->get_V( name );
     }
 
-i_DO_device* V( const char *dev_name )
+valve* V( const char *dev_name )
     {
-    return G_DEVICE_MANAGER()->get_V( dev_name );
+    return ( valve* ) G_DEVICE_MANAGER()->get_V( dev_name );
     }
 //-----------------------------------------------------------------------------
 i_AO_device* VC( const char *dev_name )

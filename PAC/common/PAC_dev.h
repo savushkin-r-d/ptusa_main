@@ -153,7 +153,6 @@ class i_counter
         /// @brief Получение состояния работы счетчика.
         virtual int get_state() = 0;
 
-
         /// @brief Получение абсолютного значения счетчика (без учета
         /// состояния паузы).
         virtual u_int get_abs_quantity() = 0;
@@ -594,39 +593,6 @@ class device : public i_DO_AO_device, public par_device
         char *description;
     };
 //-----------------------------------------------------------------------------
-/// @brief Виртуальное устройство.
-///
-/// Необходимо для возвращения результата поиска устройства с несуществующим
-/// номером. Методы данного класса ничего не делают.
-class dev_stub : public device,
-    public i_counter
-    {
-    public:
-        dev_stub(): device( "STUB", DT_NONE, DST_NONE, 1 )
-            {
-            }
-
-        u_int_4 get_serial_n() const;
-        void    print() const;
-
-        float   get_value();
-        void    direct_set_value( float new_value );
-
-        void    direct_on();
-        void    direct_off();
-        void    direct_set_state( int new_state );
-        int     get_state();
-
-        void    pause();
-        void    start();
-        void    reset();
-        u_int   get_quantity();
-        float   get_flow();
-
-        u_int get_abs_quantity();
-        void  abs_reset();
-    };
-//-----------------------------------------------------------------------------
 /// @brief Устройство с дискретными входами/выходами.
 ///
 /// Базовый класс для различных дискретных устройств.
@@ -842,12 +808,7 @@ class valve: public digital_wago_device
 
         /// @brief Получение расширенного состояния клапана (учет обратной
         /// связи, ручного режима, ...).
-        int get_state()
-#if _MSC_VER >= 1700
-            final;
-#else
-            ;
-#endif
+        int get_state();
 
 #ifdef DEBUG_NO_WAGO_MODULES
         int set_cmd( const char *prop, u_int idx, double val );
@@ -920,6 +881,43 @@ class valve: public digital_wago_device
 
     protected:
         u_long start_switch_time;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Виртуальное устройство.
+///
+/// Необходимо для возвращения результата поиска устройства с несуществующим
+/// номером. Методы данного класса ничего не делают.
+class dev_stub : public i_counter, public valve
+    {
+    public:
+        dev_stub() : valve( "STUB", DT_NONE, DST_NONE )
+            {
+            }
+
+        u_int_4 get_serial_n() const;
+        void    print() const;
+
+        float   get_value();
+        void    direct_set_value( float new_value );
+
+        void    direct_on();
+        void    direct_off();
+        void    direct_set_state( int new_state );
+        
+        VALVE_STATE get_valve_state();
+        int get_state()
+            {
+            return 0;
+            }
+
+        void    pause();
+        void    start();
+        void    reset();
+        u_int   get_quantity();
+        float   get_flow();
+
+        u_int get_abs_quantity();
+        void  abs_reset();
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним дискретным выходом и одним дискретным входом.
@@ -2930,7 +2928,7 @@ device_manager* G_DEVICE_MANAGER();
 /// @return - клапан с заданным номером. Если нет такого клапана, возвращается
 /// заглушка (@ref dev_stub).
 i_DO_device* V( u_int dev_n );
-i_DO_device* V( const char *dev_name );
+valve* V( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение управляемого клапана по номеру.
 ///

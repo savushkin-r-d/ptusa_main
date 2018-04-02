@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 01/03/18 12:00:10.
+** Generated automatically by tolua++-1.0.92 on 04/02/18 09:07:25.
 */
 
 #ifndef __cplusplus
@@ -247,7 +247,7 @@ static int tolua_PAC_dev_i_DO_device_off00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: direct_off of class  i_DO_device */
+/* method: instant_off of class  i_DO_device */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_i_DO_device_direct_off00
 static int tolua_PAC_dev_i_DO_device_direct_off00(lua_State* tolua_S)
 {
@@ -263,10 +263,10 @@ static int tolua_PAC_dev_i_DO_device_direct_off00(lua_State* tolua_S)
  {
   i_DO_device* self = (i_DO_device*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'direct_off'", NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'instant_off'", NULL);
 #endif
   {
-   self->direct_off();
+   self->instant_off();
   }
  }
  return 0;
@@ -1427,8 +1427,8 @@ static int tolua_PAC_dev_V00(lua_State* tolua_S)
  {
   const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_DO_device* tolua_ret = (i_DO_device*)  V(dev_name);
-    tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DO_device");
+   valve* tolua_ret = (valve*)  V(dev_name);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"valve");
   }
  }
  return 1;
@@ -11453,7 +11453,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"get_instance",tolua_PAC_dev_dev_errors_manager_get_instance00);
    tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_dev_errors_manager_set_cmd00);
   tolua_endmodule(tolua_S);
-  tolua_cclass(tolua_S,"valve","valve","",NULL);
+  tolua_cclass(tolua_S,"valve","valve","i_DO_device",NULL);
   tolua_beginmodule(tolua_S,"valve");
    tolua_function(tolua_S,"get_on_fb_value",tolua_PAC_dev_valve_get_on_fb_value00);
    tolua_function(tolua_S,"get_off_fb_value",tolua_PAC_dev_valve_get_off_fb_value00);
