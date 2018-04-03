@@ -672,7 +672,7 @@ void TMediumRecipeManager::EvalRecipe()
 		case 1:
 			ResetRecipeToDefaults(currentRecipe);
 #ifdef DEBUG
-			Print("Reset recipe %d to defaults", currentRecipe);
+			printf("Reset recipe %d to defaults", currentRecipe);
 #endif
 			break;
 		case 2:
@@ -899,7 +899,7 @@ int TMediumRecipeManager::WriteMem(unsigned long startaddr, unsigned long length
 int TMediumRecipeManager::SaveToFile(const char* filename)
 {
 #ifdef DEBUG
-	Print("Saving recipes to file %s\n", filename);
+	printf("Saving recipes to file %s\n", filename);
 #endif // DEBUG
 	FILE* memFile = NULL;
 	memFile = fopen(filename, "r+b");
