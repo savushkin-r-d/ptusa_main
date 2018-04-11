@@ -325,6 +325,8 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
         setRecipeValue(recipeNo, RV_SIGNAL_PUMP_CONTROL, 0);
         setRecipeValue(recipeNo, RV_SIGNAL_DESINSECTION, 0);
         setRecipeValue(recipeNo, RV_SIGNAL_OBJECT_PAUSE, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_PUMP_CAN_RUN, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_PUMP_CONTROL_FEEDBACK, 0);
 		for (int i = RV_RESERV_START; i <= RV_LASTVALVEOFF; i++)
 			{
 			setRecipeValue(recipeNo, i, 0);

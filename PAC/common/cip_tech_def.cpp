@@ -103,6 +103,9 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
         {
         SAV[i]=new TSav;
         }
+    pidf_override = false;
+    nplaststate = false;
+    flagnplaststate = false;
     no_neutro = 0;
     dont_use_water_tank = 0;
     ret_circ_flag = 0;
@@ -166,9 +169,11 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     dev_upr_cip_finished = 0;
     dev_upr_cip_in_progress = 0;
     dev_ai_pump_frequency = 0;
+    dev_ai_pump_feedback = 0;
     dev_upr_sanitizer_pump = 0;
     dev_os_object_pause = 0;
     dev_upr_circulation = 0;
+    dev_os_pump_can_run = 0;
 
     pumpflag = 0;
     pumptimer = get_millisec();
@@ -1799,6 +1804,7 @@ void cipline_tech_object::_StopDev( void )
     V12->off();
     V00->instant_off();
     NP->off();
+    nplaststate = false;
     if (PIDP->HI==0) PIDP->off();
     if (PIDF->HI==0) PIDF->off();
     ret_overrride = 0;
@@ -2633,6 +2639,7 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
             PT();
             cnt->pause();
             NP->off();
+            nplaststate = false;
             if (PIDP->HI==0) PIDP->off();
             if (PIDF->HI==0) PIDF->off();
             ret_overrride = 0;
@@ -2655,21 +2662,17 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
 int cipline_tech_object::EvalPIDS()
     {
     PIDP->eval();
-    if (dev_ai_pump_frequency)
+    if (!pidf_override)
         {
-        NP->set_value(dev_ai_pump_frequency->get_value());
-        }
-    else
-        {
-        if (dev_os_object_pause)
+        if (dev_ai_pump_frequency)
             {
-            if (dev_os_object_pause->get_state())
+            if (dev_ai_pump_feedback)
                 {
-                NP->set_value(0);
+                PIDF->eval(dev_ai_pump_feedback->get_value(), dev_ai_pump_frequency->get_value());
                 }
             else
                 {
-                PIDF->eval();
+                NP->set_value(dev_ai_pump_frequency->get_value());
                 }
             }
         else
@@ -2677,6 +2680,42 @@ int cipline_tech_object::EvalPIDS()
             PIDF->eval();
             }
         }
+
+    if (dev_os_object_pause || dev_os_pump_can_run)
+        {
+        bool pump_can_run = true;
+        if (dev_os_pump_can_run)
+            {
+            if (!dev_os_pump_can_run->get_state()) pump_can_run = false;
+            }
+
+        if (dev_os_object_pause)
+            {
+            if (dev_os_object_pause->get_state()) pump_can_run = false;
+            }
+
+        if (!pump_can_run)
+            {
+            if (!flagnplaststate)
+                {
+                nplaststate = NP->get_state() == ON ? true : false;
+                flagnplaststate = true;
+                }
+            NP->off();
+            NP->set_value(0);
+            }
+        else
+            {
+            if (flagnplaststate)
+                {
+                PIDF->pid_reset();
+                NP->set_state(nplaststate);
+                flagnplaststate = false;
+                }
+            }
+     
+        }
+   
 
     // лапан пара
     if (ao->get_value()>1 && PIDP->get_state() == ON && cnt->get_flow() > rt_par_float[P_R_NO_FLOW] && NP->get_state() == ON)
@@ -3015,6 +3054,8 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
     dev_upr_cip_in_progress = 0;
     dev_upr_ret = 0;
     dev_m_ret = 0;
+    nplaststate = false;
+    flagnplaststate = false;
     dev_os_object = 0;
     dev_os_object_pause = 0;
     dev_os_object_ready = 0;
@@ -3026,8 +3067,12 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
     dev_upr_cip_ready = 0;
     dev_upr_cip_finished = 0;
     dev_upr_sanitizer_pump = 0;
+    dev_os_pump_can_run = 0;
+    dev_ai_pump_feedback = 0;
+    dev_ai_pump_frequency = 0;
     no_liquid_is_warning = 0;
     no_liquid_phase = 0;
+    pidf_override = false;
     //ѕеременные дл€ циркул€ции
     circ_tank_s = 0;
     circ_tank_k = 0;
@@ -3283,18 +3328,10 @@ int cipline_tech_object::_CheckErr( void )
         {
         T[TMR_NO_FLOW]->set_countdown_time((unsigned long)rt_par_float[P_TM_R_NO_FLOW] * 1000L);
         }
-    if (NP->get_state() == ON && 0 == dev_ai_pump_frequency)
+    if (NP->get_state() == ON)
         {
         delta = rt_par_float[P_R_NO_FLOW];
-        int is_paused = 0;
-        if (dev_os_object_pause)
-            {
-            if (dev_os_object_pause->get_state())
-                {
-                is_paused = 1;
-                }
-            }
-        if (cnt->get_flow() <= delta && (!is_paused))
+        if (cnt->get_flow() <= delta)
             {
             T[TMR_NO_FLOW]->start();
             if (T[TMR_NO_FLOW]->is_time_up())
@@ -3535,6 +3572,7 @@ int cipline_tech_object::InitFilRR( int where )
         }
 
     NP->on();
+    nplaststate = true;
     rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
     PIDP->on();
     V13->on();
@@ -3611,6 +3649,7 @@ int cipline_tech_object::InitCircRR( int where )
         }
 
     NP->on();
+    nplaststate = true;
     rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
     PIDP->on();
 
@@ -3682,6 +3721,7 @@ int cipline_tech_object::InitAddRR( int where, int step, int first_init_flag )
     kt=rt_par_float[P_CONC] / 100;
 
     NP->on();
+    nplaststate = true;
     rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
     PIDP->on();
 
@@ -3774,6 +3814,7 @@ int cipline_tech_object::InitOpolRR( int where )
             break;
         }
     NP->on();
+    nplaststate = true;
     rt_par_float[P_ZAD_PODOGR] = parpar[0][P_T_RR];
     PIDP->on();
 
@@ -4109,6 +4150,7 @@ int cipline_tech_object::_InitToObject( int from, int where, int step_to_init, i
         }
 
     NP->on();
+    nplaststate = true;
     SetRet(ON);
 
     switch (step_to_init)
@@ -4312,7 +4354,7 @@ int cipline_tech_object::_InitFromObject( int what, int where, int step_to_init,
         }
 
     NP->on();
-
+    nplaststate = true;
     SetRet(OFF);
 
     switch (step_to_init)
@@ -4455,6 +4497,7 @@ int cipline_tech_object::_InitOporCIP( int where, int step_to_init, int not_firs
         }
 
     NP->off();
+    nplaststate = false;
     SetRet(ON);
     rt_par_float[P_ZAD_PODOGR] = 0;
     PIDP->off();
@@ -4488,6 +4531,7 @@ int cipline_tech_object::_InitFilCirc( int with_what, int step_to_init, int f )
             V00->on();
             V10->off();
             NP->off();
+            nplaststate = false;
             SetRet(OFF);
             PIDP->off();
             PIDF->off();
@@ -4501,6 +4545,7 @@ int cipline_tech_object::_InitFilCirc( int with_what, int step_to_init, int f )
             V05->on();
             V06->off();
             NP->on();
+            nplaststate = true;
             SetRet(ON);
             if (isTank() && (26 == step_to_init || 46 == step_to_init || 65 == step_to_init))
                 {
@@ -4542,6 +4587,7 @@ int cipline_tech_object::_InitOporCirc( int where, int step_to_init, int not_fir
     V02->off();
     V04->off();
     NP->on();
+    nplaststate = true;
     SetRet(ON);
     V05->on();
     V06->off();
@@ -4702,6 +4748,7 @@ int cipline_tech_object::_InitCirc( int what, int step_to_init, int not_first_ca
     rt_par_float[P_ZAD_PODOGR] = t;
     PIDP->on();
     NP->on();
+    nplaststate = true;
     SetRet(ON);
     rt_par_float[P_ZAD_FLOW] = rt_par_float[P_FLOW];
     PIDF->on();
@@ -5420,6 +5467,7 @@ int cipline_tech_object::_InitDoseRR( int what, int step_to_init, int not_first_
     T[TMR_OP_TIME]->start();
     rt_par_float[P_SUM_OP] = 0;
     NP->on();
+    nplaststate = true;
     SetRet(ON);
     rt_par_float[P_ZAD_PODOGR] = rt_par_float[P_T_SANITIZER];
     rt_par_float[P_ZAD_FLOW] = rt_par_float[P_FLOW];
@@ -6020,6 +6068,70 @@ int cipline_tech_object::init_object_devices()
         {
         dev_ai_pump_frequency = 0;
         }
+    //—игнал уровн€ дл€ управлени€ производительностью подающего насоса
+    dev_no = (u_int)rt_par_float[P_SIGNAL_PUMP_CONTROL_FEEDBACK];
+    if (dev_no > 0)
+        {
+        sprintf(devname, "LINE%dAI%d", nmr, dev_no);
+        dev = (device*)AI(devname);
+        if (dev->get_serial_n() > 0)
+            {
+            dev_ai_pump_feedback = dev;
+            }
+        else
+            {
+            dev = DEVICE(dev_no);
+            if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_AI)
+                {
+                dev_ai_pump_feedback = dev;
+                }
+            else
+                {
+                dev_ai_pump_feedback = 0;
+                return -1;
+                }
+            }
+        }
+    else
+        {
+        dev_ai_pump_feedback = 0;
+        }
+    //—игнал, запрещающий включение подающего насоса.
+    dev_no = (u_int)rt_par_float[P_SIGNAL_PUMP_CAN_RUN];
+    if (dev_no > 0)
+        {
+        sprintf(devname, "LINE%dDI%d", nmr, dev_no);
+        dev = (device*)DI(devname);
+        if (dev->get_serial_n() > 0)
+            {
+            dev_os_pump_can_run = dev;
+            }
+        else
+            {
+            dev = (device*)(DI(dev_no));
+            if (dev->get_serial_n() > 0)
+                {
+                dev_os_pump_can_run = dev;
+                }
+            else
+                {
+                dev = DEVICE(dev_no);
+                if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DI)
+                    {
+                    dev_os_pump_can_run = dev;
+                    }
+                else
+                    {
+                    dev_os_pump_can_run = 0;
+                    return -1;
+                    }
+                }
+            }
+        }
+    else
+        {
+        dev_os_object = 0;
+        }
     return 0;
     }
 
@@ -6384,12 +6496,14 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
     if (from >= 0)
         {
         NP->on();
+        nplaststate = true;
         PIDF->on();
         }
     else
         {
         PIDF->off();
         NP->off();
+        nplaststate = false;
         operFlow = -1;
         }
 
@@ -7510,6 +7624,16 @@ void MSAPID::eval()
             {
             output->set_value( pid_eval(input2->get_flow()));
             }
+        }
+    }
+
+void MSAPID::eval(float inputvalue, float task)
+    {
+    if (1 == get_state())
+        {
+        lastEvalInOnState = get_millisec();
+        set(task);
+        output->set_value(pid_eval(inputvalue));
         }
     }
 

@@ -120,6 +120,8 @@ class TRecipeManager
         RV_SIGNAL_DESINSECTION,      //Сигнал out "Дезинфекция"
         RV_SIGNAL_OBJECT_PAUSE,      //Сигнал in "Пауза"
         RV_SIGNAL_CIRCULATION,       //Сигнал out циркуляция.
+        RV_SIGNAL_PUMP_CAN_RUN,      //Сигнал in "Возможно включение подающего насоса"
+        RV_SIGNAL_PUMP_CONTROL_FEEDBACK,    //Сигнал in analog "Контролируемый уровень для насоса подачи"
 		RV_RESERV_START, //начало резервных параметров
 
 

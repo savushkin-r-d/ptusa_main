@@ -344,6 +344,8 @@ enum workParameters
     P_SIGNAL_DESINSECTION,      //Сигнал out "Дезинфекция"
     P_SIGNAL_OBJECT_PAUSE,      //Сигнал in "Пауза"
     P_SIGNAL_CIRCULATION,       //Сигнал out циркуляция.
+    P_SIGNAL_PUMP_CAN_RUN,      //Сигнал in "Возможно включение подающего насоса"
+    P_SIGNAL_PUMP_CONTROL_FEEDBACK,    //Сигнал in analog "Контролируемый уровень для насоса подачи"
 	P_RESERV_START,
 	
 
@@ -406,6 +408,7 @@ class MSAPID
 		int pid_par_offset;
 		MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_device* ao = 0, i_AI_device* ai = 0, i_counter* ai2 = 0 );
 		void eval();
+        void eval(float input, float task);
 		void reset();
 		void on( int accel = 0 );
 		void off();
@@ -602,6 +605,11 @@ class cipline_tech_object: public tech_object
         int return_ok; //есть расход на возврате
         int concentration_ok; //есть концентрация на возврате
         int enable_ret_pump; //используется для того, чтобы определить, нужно ли отключать возвратный насос
+        ///Ручное управление ПИД-регулятором подачи из скрипта
+        bool pidf_override;
+        ///Последнее состояние подающего насоса
+        bool nplaststate;
+        bool flagnplaststate;
 
 		//Переменные для циркуляции
 		char circ_tank_s; //Циркулировать ли через танк со щелочью
@@ -752,8 +760,10 @@ class cipline_tech_object: public tech_object
 		device* dev_upr_cip_in_progress;	//Сигнал "готовность к мойке"
 		device* dev_upr_cip_finished;		//Сигнал "мойка окончена"
 		device* dev_ai_pump_frequency;		//Задание частоты подающего насоса
+        device* dev_ai_pump_feedback;		//Уровень для контроля подающего насоса
         device* dev_upr_sanitizer_pump;     //Управление насосом подачи дезинфицирующего средства
         device* dev_upr_circulation;        //Сигнал "Циркуляция"
+        device* dev_os_pump_can_run;           //Сигнал, запрещающий включение подающего насоса.
 		int init_object_devices();			//Функция для инициализации устройств объекта мойки
 		//----------------------------------------------
 

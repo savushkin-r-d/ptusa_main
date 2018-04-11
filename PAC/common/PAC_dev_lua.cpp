@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/03/18 09:57:23.
+** Generated automatically by tolua++-1.0.92 on 04/06/18 09:52:31.
 */
 
 #ifndef __cplusplus
@@ -6548,6 +6548,36 @@ static int tolua_PAC_dev_MSAPID_eval00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: eval of class  MSAPID */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_MSAPID_eval01
+static int tolua_PAC_dev_MSAPID_eval01(lua_State* tolua_S)
+{
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"MSAPID",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+ {
+  MSAPID* self = (MSAPID*)  tolua_tousertype(tolua_S,1,0);
+  float inputvalue = ((float)  tolua_tonumber(tolua_S,2,0));
+  float task = ((float)  tolua_tonumber(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'eval'", NULL);
+#endif
+  {
+   self->eval(inputvalue,task);
+  }
+ }
+ return 0;
+tolua_lerror:
+ return tolua_PAC_dev_MSAPID_eval00(tolua_S);
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: reset of class  MSAPID */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_MSAPID_reset00
 static int tolua_PAC_dev_MSAPID_reset00(lua_State* tolua_S)
@@ -6980,6 +7010,66 @@ static int tolua_set_cipline_tech_object_nmr(lua_State* tolua_S)
    tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
 #endif
   self->nmr = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: nplaststate of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_nplaststate
+static int tolua_get_cipline_tech_object_nplaststate(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'nplaststate'",NULL);
+#endif
+  tolua_pushboolean(tolua_S,(bool)self->nplaststate);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: nplaststate of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_nplaststate
+static int tolua_set_cipline_tech_object_nplaststate(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'nplaststate'",NULL);
+  if (!tolua_isboolean(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->nplaststate = ((bool)  tolua_toboolean(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: pidf_override of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_pidf_override
+static int tolua_get_cipline_tech_object_pidf_override(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'pidf_override'",NULL);
+#endif
+  tolua_pushboolean(tolua_S,(bool)self->pidf_override);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: pidf_override of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_pidf_override
+static int tolua_set_cipline_tech_object_pidf_override(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'pidf_override'",NULL);
+  if (!tolua_isboolean(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->pidf_override = ((bool)  tolua_toboolean(tolua_S,2,0))
 ;
  return 0;
 }
@@ -11903,6 +11993,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_cclass(tolua_S,"MSAPID","MSAPID","",NULL);
   tolua_beginmodule(tolua_S,"MSAPID");
    tolua_function(tolua_S,"eval",tolua_PAC_dev_MSAPID_eval00);
+   tolua_function(tolua_S,"eval",tolua_PAC_dev_MSAPID_eval01);
    tolua_function(tolua_S,"reset",tolua_PAC_dev_MSAPID_reset00);
    tolua_function(tolua_S,"on",tolua_PAC_dev_MSAPID_on00);
    tolua_function(tolua_S,"off",tolua_PAC_dev_MSAPID_off00);
@@ -11924,6 +12015,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_variable(tolua_S,"state",tolua_get_cipline_tech_object_state,tolua_set_cipline_tech_object_state);
    tolua_variable(tolua_S,"curprg",tolua_get_cipline_tech_object_curprg,tolua_set_cipline_tech_object_curprg);
    tolua_variable(tolua_S,"nmr",tolua_get_cipline_tech_object_nmr,tolua_set_cipline_tech_object_nmr);
+   tolua_variable(tolua_S,"nplaststate",tolua_get_cipline_tech_object_nplaststate,tolua_set_cipline_tech_object_nplaststate);
+   tolua_variable(tolua_S,"pidf_override",tolua_get_cipline_tech_object_pidf_override,tolua_set_cipline_tech_object_pidf_override);
    tolua_variable(tolua_S,"cip_in_error",tolua_get_cipline_tech_object_cip_in_error,tolua_set_cipline_tech_object_cip_in_error);
    tolua_variable(tolua_S,"no_neutro",tolua_get_cipline_tech_object_no_neutro,tolua_set_cipline_tech_object_no_neutro);
    tolua_variable(tolua_S,"dont_use_water_tank",tolua_get_cipline_tech_object_dont_use_water_tank,tolua_set_cipline_tech_object_dont_use_water_tank);

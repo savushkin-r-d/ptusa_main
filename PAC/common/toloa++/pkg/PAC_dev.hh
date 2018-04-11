@@ -1225,6 +1225,7 @@ class MSAPID
 	{
 	public:
 		void eval();
+        void eval(float inputvalue, float task);
 		void reset();
 		void on( int accel = 0 );
 		void off();
@@ -1249,6 +1250,8 @@ class cipline_tech_object: public tech_object
 		int curprg;
 		int nmr;
 
+        bool nplaststate;   //Последнее состояние подающего насоса.
+        bool pidf_override; //Управление пид-регулятором насоса подачи из скрипта.
 		int cip_in_error;
         char no_neutro; ///Флаг отсутствия нейтрализации
 		char dont_use_water_tank; //Флаг возможности использования танка вторичной воды для мойки
