@@ -3227,6 +3227,7 @@ void valve_AS_DO1_DI2::direct_set_state(int new_state)
 void virtual_device::direct_off()
     {
     state = 0;
+    value = 0;
     }
 
 void virtual_device::direct_set_value( float new_value )
