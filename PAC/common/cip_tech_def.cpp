@@ -1547,6 +1547,30 @@ void cipline_tech_object::formProgramList( unsigned long programmask )
         prgNumber[prgListLen] = SPROG_AP_RC_SW;
         prgListLen++;
         }
+    if ((programmask >> 13) & 1)
+        {
+        sprintf(tmp_str, "%d##Щел+ДезСР||", SPROG_CAUSTIC_SANITIZER);
+        strcat(programList, tmp_str);
+        sprintf(prgArray[prgListLen], "Щел+ДезСР");
+        prgNumber[prgListLen] = SPROG_CAUSTIC_SANITIZER;
+        prgListLen++;
+        }
+    if ((programmask >> 14) & 1)
+        {
+        sprintf(tmp_str, "%d##Кисл+ДезСР||", SPROG_ACID_SANITIZER);
+        strcat(programList, tmp_str);
+        sprintf(prgArray[prgListLen], "Кисл+ДезСР");
+        prgNumber[prgListLen] = SPROG_ACID_SANITIZER;
+        prgListLen++;
+        }
+    if ((programmask >> 15) & 1)
+        {
+        sprintf(tmp_str, "%d##Щел+Кисл+ДезСР||", SPROG_CAUSTIC_ACID_SANITIZER);
+        strcat(programList, tmp_str);
+        sprintf(prgArray[prgListLen], "Щел+Кисл+ДезСР");
+        prgNumber[prgListLen] = SPROG_CAUSTIC_ACID_SANITIZER;
+        prgListLen++;
+        }
     if ((programmask >> 10) & 1)
         {
         sprintf(tmp_str, "%d##ДезСР||", SPROG_SANITIZER);
@@ -1612,6 +1636,18 @@ void cipline_tech_object::loadProgramFromList( int selectedPrg )
         case SPROG_CAUSTIC_ACID_HOTWATER:
             sprintf(currentProgramName, "Щел+Кисл+Дез");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_ACID_HOTWATER;
+            break;
+        case SPROG_CAUSTIC_ACID_SANITIZER:
+            sprintf(currentProgramName, "Щел+Кисл+ДезСР");
+            rt_par_float[P_PROGRAM] = SPROG_CAUSTIC_ACID_SANITIZER;
+            break;
+        case SPROG_CAUSTIC_SANITIZER:
+            sprintf(currentProgramName, "Щел+ДезСР");
+            rt_par_float[P_PROGRAM] = SPROG_CAUSTIC_SANITIZER;
+            break;
+        case SPROG_ACID_SANITIZER:
+            sprintf(currentProgramName, "Кисл+ДезСР");
+            rt_par_float[P_PROGRAM] = SPROG_ACID_SANITIZER;
             break;
         case SPROG_ACID_PREPARATION:
             sprintf(currentProgramName, "Нав. кислоты");
