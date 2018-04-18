@@ -6166,7 +6166,7 @@ int cipline_tech_object::init_object_devices()
         }
     else
         {
-        dev_os_object = 0;
+        dev_os_pump_can_run = 0;
         }
     return 0;
     }
