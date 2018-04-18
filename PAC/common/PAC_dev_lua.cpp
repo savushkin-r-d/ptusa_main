@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/06/18 09:52:31.
+** Generated automatically by tolua++-1.0.92 on 04/18/18 08:56:26.
 */
 
 #ifndef __cplusplus
@@ -83,6 +83,7 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"i_DO_AO_device");
  tolua_usertype(tolua_S,"step");
  tolua_usertype(tolua_S,"wago_device");
+ tolua_usertype(tolua_S,"level");
  tolua_usertype(tolua_S,"siren_lights_manager");
  tolua_usertype(tolua_S,"saved_params_float");
  tolua_usertype(tolua_S,"device");
@@ -102,21 +103,21 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"cipline_tech_object");
  tolua_usertype(tolua_S,"MSAPID");
  tolua_usertype(tolua_S,"tm");
- tolua_usertype(tolua_S,"timer_manager");
  tolua_usertype(tolua_S,"i_Lua_save_device");
+ tolua_usertype(tolua_S,"PAC_info");
  tolua_usertype(tolua_S,"i_DI_device");
  tolua_usertype(tolua_S,"saved_params_u_int_4");
- tolua_usertype(tolua_S,"PAC_info");
  tolua_usertype(tolua_S,"PID");
+ tolua_usertype(tolua_S,"wago_manager");
  tolua_usertype(tolua_S,"i_counter");
  tolua_usertype(tolua_S,"i_DO_device");
  tolua_usertype(tolua_S,"i_AO_device");
  tolua_usertype(tolua_S,"i_wages");
  tolua_usertype(tolua_S,"valve");
  tolua_usertype(tolua_S,"i_AI_device");
- tolua_usertype(tolua_S,"wago_manager");
  tolua_usertype(tolua_S,"run_time_params_float");
  tolua_usertype(tolua_S,"run_time_params_u_int_4");
+ tolua_usertype(tolua_S,"timer_manager");
  tolua_usertype(tolua_S,"operation_manager");
  tolua_usertype(tolua_S,"tech_object");
 }
@@ -1688,8 +1689,8 @@ static int tolua_PAC_dev_LT00(lua_State* tolua_S)
  {
   const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_AI_device* tolua_ret = (i_AI_device*)  LT(dev_name);
-    tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_AI_device");
+   level* tolua_ret = (level*)  LT(dev_name);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"level");
   }
  }
  return 1;
@@ -2717,6 +2718,38 @@ static int tolua_PAC_dev_valve_get_off_fb_value00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'get_off_fb_value'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_volume of class  level */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_level_get_volume00
+static int tolua_PAC_dev_level_get_volume00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"level",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  level* self = (level*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_volume'", NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->get_volume();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_volume'.",&tolua_err);
  return 0;
 #endif
 }
@@ -11746,6 +11779,10 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"V_UPPER_SEAT",valve::V_UPPER_SEAT);
    tolua_constant(tolua_S,"V_ON",valve::V_ON);
    tolua_constant(tolua_S,"V_OFF",valve::V_OFF);
+  tolua_endmodule(tolua_S);
+  tolua_cclass(tolua_S,"level","level","i_AI_device",NULL);
+  tolua_beginmodule(tolua_S,"level");
+   tolua_function(tolua_S,"get_volume",tolua_PAC_dev_level_get_volume00);
   tolua_endmodule(tolua_S);
   #ifdef __cplusplus
   tolua_cclass(tolua_S,"tech_object","tech_object","",tolua_collect_tech_object);

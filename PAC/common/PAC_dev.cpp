@@ -2383,17 +2383,20 @@ float level_e_cyl::get_min_val()
 //-----------------------------------------------------------------------------
 int level_e_cyl::save_device_ex( char *buff )
     {
-    int res = 0;
+    int res = sprintf( buff, "CLEVEL=%d, ", get_volume() );
 
+    return res;
+    }
+//-----------------------------------------------------------------------------
+int level_e_cyl::get_volume()
+    {
     float v = get_par( P_R, start_param_idx );
-    v = (float) M_PI * v * v *  AI1::get_value() *
+    v = (float)M_PI * v * v *  AI1::get_value() *
         get_par( P_MAX_P, start_param_idx ) / 9.81f;
 
     int v_kg = 10 * (int)( v * 100 + 0.5f ); //Переводим в килограммы.
 
-    res = sprintf( buff, "CLEVEL=%d, ", v_kg );
-
-    return res;
+    return v_kg;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -2409,8 +2412,13 @@ float level_e_cone::get_min_val()
 //-----------------------------------------------------------------------------
 int level_e_cone::save_device_ex( char *buff )
     {
-    int res = 0;
+    int res = sprintf( buff, "CLEVEL=%d, ", get_volume() );
 
+    return res;
+    }
+//-----------------------------------------------------------------------------
+int level_e_cone::get_volume()
+    {
     float r = get_par( P_R, start_param_idx );
     float tg_a = 0;
     if ( get_par( P_H_CONE, start_param_idx ) > 0 )
@@ -2424,17 +2432,15 @@ int level_e_cone::save_device_ex( char *buff )
     float v = 0;
     if ( h_curr <= h_cone )
         {
-        v = (float) M_PI * h_curr * tg_a * h_curr * tg_a * h_curr / 3;
+        v = (float)M_PI * h_curr * tg_a * h_curr * tg_a * h_curr / 3;
         }
     else
         {
-        v = (float) M_PI * r * r * ( h_curr - h_cone * 2 / 3 );
+        v = (float)M_PI * r * r * ( h_curr - h_cone * 2 / 3 );
         }
-    int v_kg = 10 * ( int ) ( v * 100 + 0.5f ); //Переводим в килограммы.
+    int v_kg = 10 * (int)( v * 100 + 0.5f ); //Переводим в килограммы.
 
-    res = sprintf( buff, "CLEVEL=%d, ", v_kg );
-
-    return res;
+    return v_kg;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -3089,9 +3095,9 @@ i_AI_device* TE( const char *dev_name )
     return G_DEVICE_MANAGER()->get_TE( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_AI_device* LT( const char *dev_name )
+level* LT( const char *dev_name )
     {
-    return G_DEVICE_MANAGER()->get_LT( dev_name );
+    return ( level* ) G_DEVICE_MANAGER()->get_LT( dev_name );
     }
 //-----------------------------------------------------------------------------
 i_DI_device* GS( const char *dev_name )

@@ -1923,11 +1923,27 @@ class temperature_e : public AI1
             };
     };
 //-----------------------------------------------------------------------------
-/// @brief Текущий уровень.
-class level_e : public AI1
+/// @brief Интерфейс текущего уровня.
+class level: public AI1
     {
     public:
-        level_e( const char *dev_name ): AI1( dev_name, DT_LT, DST_LT, 0, 0 )
+        level( const char *dev_name, device::DEVICE_SUB_TYPE sub_type,
+            u_int par_cnt, u_int *start_par_idx ):AI1(
+                dev_name, DT_LT, sub_type, par_cnt, start_par_idx )
+            {
+            }
+
+        virtual int get_volume()
+            {
+            return ( int ) get_value();
+            }
+    };
+//-----------------------------------------------------------------------------
+/// @brief Текущий уровень.
+class level_e : public level
+    {
+    public:
+        level_e( const char *dev_name ): level( dev_name, DST_LT, 0, 0 )
             {
             }
 
@@ -1936,11 +1952,11 @@ class level_e : public AI1
     };
 //-----------------------------------------------------------------------------
 /// @brief Текущий уровень c для танка цилиндрической формы.
-class level_e_cyl : public AI1
+class level_e_cyl : public level
     {
     public:
-        level_e_cyl( const char *dev_name ) : AI1(
-            dev_name, DT_LT, DST_LT_CYL, ADDITIONAL_PARAM_COUNT, &start_param_idx )
+        level_e_cyl( const char *dev_name ) : level(
+            dev_name, DST_LT_CYL, ADDITIONAL_PARAM_COUNT, &start_param_idx )
             {
             set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
             set_par_name( P_R, start_param_idx, "P_R" );
@@ -1950,6 +1966,8 @@ class level_e_cyl : public AI1
         float get_min_val();
 
         int save_device_ex( char *buff );
+
+        int get_volume();
 
     private:
         enum CONSTANTS
@@ -1964,11 +1982,11 @@ class level_e_cyl : public AI1
     };
 //-----------------------------------------------------------------------------
 /// @brief Текущий уровень c для цилиндрического танка с конусным основанием.
-class level_e_cone : public AI1
+class level_e_cone : public level
     {
     public:
-        level_e_cone( const char *dev_name ) : AI1(
-            dev_name, DT_LT, DST_LT_CONE, ADDITIONAL_PARAM_COUNT, &start_param_idx )
+        level_e_cone( const char *dev_name ) : level(
+            dev_name, DST_LT_CONE, ADDITIONAL_PARAM_COUNT, &start_param_idx )
             {
             set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
             set_par_name( P_R, start_param_idx, "P_R" );
@@ -1979,6 +1997,8 @@ class level_e_cone : public AI1
         float get_min_val();
 
         int save_device_ex( char *buff );
+
+        int get_volume();
 
     private:
         enum CONSTANTS
@@ -2997,7 +3017,7 @@ i_AI_device* TE( const char *dev_name );
 /// @param number - номер текущего уровня.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_AI_device* LT( const char *dev_name );
+level* LT( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение датчика положения по номеру.
 ///
