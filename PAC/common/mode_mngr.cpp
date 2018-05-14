@@ -815,6 +815,9 @@ void open_seat_action::init()
     wash_time_upper = par[ PAC_info::P_MIX_FLIP_UPPER_TIME ];
     wash_time_lower = par[ PAC_info::P_MIX_FLIP_LOWER_TIME ];
 
+    wait_time -= ( wash_time_upper > wash_time_lower ? 
+        wash_time_upper: wash_time_lower ) / 2;
+
     active_group_n = 0;
     }
 //-----------------------------------------------------------------------------
