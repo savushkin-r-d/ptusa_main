@@ -23,6 +23,26 @@
 	#define HANDLE			sem_t
 #endif
 
+const int EPC_STR_LENGTH = 40;
+
+struct EPC_info
+    {
+    char* EPC_str;
+    int  antenna;
+    int RSSI;
+
+    EPC_info()
+        {
+        EPC_str = new char[ EPC_STR_LENGTH ];
+        }
+
+    ~EPC_info()
+        {
+        delete [] EPC_str;
+        EPC_str = 0;
+        }
+    };
+
 class rfid_reader
 	{
 	public:
@@ -30,25 +50,18 @@ class rfid_reader
 	enum CONSTANTS
 		{
 	    MAX_READERS_COUNT = 10,
-		MAX_EPS_COUNT = 10,
-		EPC_STR_LENGTH = 40,
+		MAX_EPS_COUNT = 10,		
 
 		ST_ACTIVE 			= 0,
 		ST_CANT_CONNECT 	= -1,
 		};
 
-	typedef struct
-		{
-		char EPC_str[ EPC_STR_LENGTH ];
-		int  antenna;
-		int RSSI;
-		} EPC_info;
-
 		static rfid_reader* add_reader( const char* ip_address );
 
 		int evaluate();
 
-		EPC_info* get_EPC_info( int& EPC_cnt );
+		const EPC_info* get_EPC_info( int idx ) const;
+        int get_EPC_cnt() const;
 
 		~rfid_reader();
 

@@ -1,5 +1,8 @@
 #include "rfid_reader.h"
 
+#pragma warning( push )
+#pragma warning( disable: 4996 ) 
+
  rfid_reader* rfid_reader::rfid_readers[ MAX_READERS_COUNT ] = { 0 };
  int rfid_reader::cnt = 0;
 
@@ -32,21 +35,20 @@ int rfid_reader::evaluate()
 	}
 
 //-----------------------------------------------------------------------------
-rfid_reader::EPC_info* rfid_reader::get_EPC_info( int& EPC_cnt )
+const EPC_info* rfid_reader::get_EPC_info( int idx ) const
 	{
-	if ( G_DEBUG )
-		{
-		for ( int i = 0; i < this->EPC_cnt; i++ )
-			{
-			printf( "%s, Antenna %d\n",
-				EPC_info_array[ i ].EPC_str, EPC_info_array[ i ].antenna );
-			}
-		}
+    if ( idx <= this->EPC_cnt )
+        {
+        return &EPC_info_array[ idx - 1 ];
+        }
 
-	EPC_cnt = this->EPC_cnt;
-	return EPC_info_array;
+    return 0;
 	}
-
+//-----------------------------------------------------------------------------
+int rfid_reader::get_EPC_cnt() const
+    {
+    return EPC_cnt;
+    }
 //-----------------------------------------------------------------------------
 rfid_reader::~rfid_reader()
 	{
@@ -77,7 +79,7 @@ void rfid_reader::disconnect()
 //-----------------------------------------------------------------------------
 rfid_reader::rfid_reader( const char* ip_address )
 	{
-	this->ip_address = new char( strlen( ip_address ) + 1 );
+	this->ip_address = new char[ strlen( ip_address ) + 1 ];
 	strcpy( this->ip_address, ip_address );
 
 
@@ -139,7 +141,7 @@ rfid_reader::rfid_reader( const char* ip_address )
 	communicationConfigData.ustCommunicationConfigParameters.stEthernet.enIPAddressType = IPAT_IPv4; // IPv6 not supported yet
 	// Note: Let's set our ip address as a network name, it works like a charm.
 	strcpy(communicationConfigData.ustCommunicationConfigParameters.stEthernet.uKindOfConnection.rgcNetworkName, this->ip_address ); // network name, bIsIPAddress must be set to 0
-	communicationConfigData.ustCommunicationConfigParameters.stEthernet.udwKeepAliveTime = 1000; // keep-alive time
+	communicationConfigData.ustCommunicationConfigParameters.stEthernet.udwKeepAliveTime = 300; // keep-alive time
 	communicationConfigData.ustCommunicationConfigParameters.stEthernet.pcSSHAuth = NULL; // NULL: don't use ssh connection, != NULL: password or path to key file
 	communicationConfigData.ustCommunicationConfigParameters.stEthernet.pcSSHUser = NULL; // NULL: username for ssh connection is "root", != NULL: username for ssh connection
 
@@ -251,7 +253,7 @@ void rfid_reader::CallSyncGetEPCs()
 			// wait until the result handler was called.
 #ifdef _WIN32
 			if ( WAIT_OBJECT_0 ==
-				WaitForSingleObject( _hResultHandlerEvent, 10000 ) )
+				WaitForSingleObject( _hResultHandlerEvent, 100 ) )
 #else
 			clock_gettime( CLOCK_REALTIME, &_ts );
 			_ts.tv_sec += 5;
@@ -318,7 +320,7 @@ TBool rfid_reader::CallSetExtResultFlag(TByte ubExtendedResultFlagMask)
 		// until the result handler was called.
 #ifdef _WIN32
 		if ( WAIT_OBJECT_0 ==
-			WaitForSingleObject( _hResultHandlerEvent, 5000 ) )
+			WaitForSingleObject( _hResultHandlerEvent, 100 ) )
 #else
 		clock_gettime( CLOCK_REALTIME, &_ts );
 		_ts.tv_sec += 5;
@@ -367,3 +369,5 @@ TBool rfid_reader::CallSetExtResultFlag(TByte ubExtendedResultFlagMask)
 
 	return result;
 	}
+
+#pragma warning( pop )

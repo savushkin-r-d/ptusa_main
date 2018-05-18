@@ -288,6 +288,9 @@ int lua_manager::init( lua_State* lua_state, const char* script_name )
         printf( "Экспорт в Lua необходимых объектов.\n" );
         }
     tolua_PAC_dev_open( L );
+#ifdef RFID
+    tolua_rfid_reader_open( L );
+#endif
 
     //-Загрузка параметров.
     if ( G_DEBUG )

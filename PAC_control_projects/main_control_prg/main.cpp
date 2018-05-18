@@ -32,13 +32,16 @@
 #include "OPCUAServer.h"
 #endif
 
+#ifdef RFID
+#include "rfid_reader.h"
+#endif
 
 int G_DEBUG = 0; //Вывод дополнительной отладочной информации.
 
-bool running = true;
+int running = 1;
 static void stopHandler(int sig)
     {
-    running = false;
+    running = 0;
     }
 
 
