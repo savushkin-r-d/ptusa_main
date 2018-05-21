@@ -36,70 +36,51 @@ int rfid_reader::evaluate()
 #ifdef _WIN32
                 printf( "rfid_reader: Ошибка создания сокета %d!\n",
                     WSAGetLastError() );
+#else
+                printf( "rfid_reader: Ошибка создания сокета!\n" );
 #endif
                 }
             }
         else
             {
-            unsigned long timeout = 300;
-            int vlen = sizeof( timeout );
-
-            int res1 = setsockopt( socket_number, SOL_SOCKET, SO_SNDTIMEO,
-                ( char* )&timeout, vlen );
-            int res2 = setsockopt( socket_number, SOL_SOCKET, SO_RCVTIMEO,
-                ( char* )&timeout, vlen );
-
-            if ( res1 == SOCKET_ERROR || res2 == SOCKET_ERROR )
-                {
-                if ( G_DEBUG )
-                    {
+			//Переводим сокет в неблокирующий режим.
 #ifdef _WIN32
-                    printf( "rfid_reader: Ошибка установления параметров "
-                        "сокета %d!\n",
-                        WSAGetLastError() );
-#endif
-                    }
-                }
-            else
-                {
-				//Переводим сокет в неблокирующий режим.
-#ifdef _WIN32
-            	u_long mode = 1;
-                int res = ioctlsocket( socket_number, FIONBIO, &mode );
+			u_long mode = 1;
+			int res = ioctlsocket( socket_number, FIONBIO, &mode );
 #else
-                int res = fcntl( socket_number, F_SETFL, O_NONBLOCK );
+			int res = fcntl( socket_number, F_SETFL, O_NONBLOCK );
 #endif
 
-                if ( res == SOCKET_ERROR )
-                    {
-                    if ( G_DEBUG )
-                        {
+			if ( res == SOCKET_ERROR )
+				{
+				if ( G_DEBUG )
+					{
 #ifdef _WIN32
-                        printf( "rfid_reader: Ошибка перевода сокета в "
-                            "неблокирующий режим %d!\n",
-                            WSAGetLastError() );
-#endif
-                        }
-#ifdef _WIN32
-                    closesocket( socket_number );
+					printf( "rfid_reader: Ошибка перевода сокета в "
+						"неблокирующий режим %d!\n", WSAGetLastError() );
 #else
-                    close( socket_number );
+					printf( "rfid_reader: Ошибка перевода сокета в "
+						"неблокирующий режим!\n" );
 #endif
-                    socket_number = 0;
-                    }
-                else
-                    {
-                    unsigned int port = 22;
-                    tv.tv_sec = timeout / 1000;
-                    tv.tv_usec = ( timeout % 1000 ) * 1000;
+					}
+#ifdef _WIN32
+				closesocket( socket_number );
+#else
+				close( socket_number );
+#endif
+				socket_number = 0;
+				}
+			else
+				{
+				unsigned int port = 22;
+				tv.tv_sec = 0;
+				tv.tv_usec = 300;
 
-                    memset( &sock_address, 0, sizeof( sockaddr_in ) );
-                    sock_address.sin_family = AF_INET;
-                    sock_address.sin_port = htons( ( u_short )port );
-                    sock_address.sin_addr.s_addr = inet_addr( ip_address );
-
-                    }
-                }
+				memset( &sock_address, 0, sizeof( sockaddr_in ) );
+				sock_address.sin_family = AF_INET;
+				sock_address.sin_port = htons( ( u_short )port );
+				sock_address.sin_addr.s_addr = inet_addr( ip_address );
+				}
             }
 
         if ( socket_number > 0 )
@@ -110,7 +91,7 @@ int rfid_reader::evaluate()
             fd_set rfds;
             FD_ZERO( &rfds );
             FD_SET( socket_number, &rfds );
-            int res = select( 0, 0, &rfds, 0, &tv );
+            int res = select( socket_number + 1, 0, &rfds, 0, &tv );
 
 #ifdef _WIN32
             closesocket( socket_number );
@@ -122,7 +103,7 @@ int rfid_reader::evaluate()
             if ( res > 0 )
                 {
                 connect();
-                }        
+                }
             }
 		}
 
