@@ -94,6 +94,9 @@
     <Filter Include="Source Files\PAC\linux">
       <UniqueIdentifier>{5a35783f-4790-493c-b0d6-794b3ac0e1eb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\common\RFID">
+      <UniqueIdentifier>{78531a95-9582-41e6-8cfd-3b88e9ce1173}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\PAC\common\PAC_dev.h">
@@ -305,6 +308,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\cip_stats.h">
       <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\rfid_reader.hh">
+      <Filter>pkg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -544,6 +550,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.cpp">
       <Filter>Source Files\PAC\win\PAC_PC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\RFID\rfid_reader.cpp">
+      <Filter>Source Files\common\RFID</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\rfid_reader_tolua.cpp">
+      <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

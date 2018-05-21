@@ -13,6 +13,10 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="RFID_Debug|Win32">
+      <Configuration>RFID_Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C97BEA2A-017D-41B6-8F4B-39026C548DE7}</ProjectGuid>
@@ -27,10 +31,16 @@
     <CharacterSet>NotSet</CharacterSet>
     <PlatformToolset>v140_xp</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'" Label="Configuration">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>NotSet</CharacterSet>
+    <PlatformToolset>v140_xp</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
     <PlatformToolset>v140_xp</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -46,6 +56,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -59,15 +72,21 @@
     <TargetName>main</TargetName>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;../../../common/RFID;$(IncludePath)</IncludePath>
+    <TargetName>main</TargetName>
+    <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../../../PAC/common;../../../common/util;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(IncludePath)</IncludePath>
+    <IncludePath>../../../PAC/common;../../../common/util;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\atlmfc\include\;$(IncludePath)</IncludePath>
     <TargetName>main</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>ptusa</TargetName>
-    <IncludePath>../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(IncludePath)</IncludePath>
+    <IncludePath>../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\atlmfc\include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -84,6 +103,34 @@
     </Link>
     <PreBuildEvent>
       <Command>tolua++ -n PAC_dev -o "..\..\..\PAC\common\PAC_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh"</Command>
+    </PreBuildEvent>
+    <PreBuildEvent>
+      <Message>tolua++</Message>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>copy "$(TargetDir)$(TargetFileName)" "p:\PTUSA projects\editor\bin_lua\lua.exe"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Копирование интерпретатора Lua.</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;MODBUS;DEBUG_NO_WAGO_MODULES;DEBUG;TEST_SPEED;RM_PAC;RFID;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>ws2_32.lib;User32.lib;RRU4.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../../../common/RFID/dll/win;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PreBuildEvent>
+      <Command>tolua++ -n PAC_dev -o "..\..\..\PAC\common\PAC_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh"
+tolua++ -n rfid_reader -o "..\..\..\PAC\common\rfid_reader_tolua.cpp" "..\..\..\PAC\common\toloa++\pkg\rfid_reader.hh"</Command>
     </PreBuildEvent>
     <PreBuildEvent>
       <Message>tolua++</Message>
@@ -207,6 +254,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClInclude Include="..\..\..\PAC\common\tcp_client.h" />
     <ClInclude Include="..\..\..\PAC\common\tcp_cmctr.h" />
     <ClInclude Include="..\..\..\PAC\common\tech_def.h" />
+    <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\rfid_reader.hh" />
     <ClInclude Include="..\..\..\PAC\common\wago.h" />
     <ClInclude Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.h" />
     <ClInclude Include="..\..\..\PAC\win\PAC_PC\wago_PC.h" />
@@ -254,6 +302,11 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp" />
     <ClCompile Include="..\..\..\common\PAC-driver\g_device.cpp" />
     <ClCompile Include="..\..\..\common\QuickLZ\quicklz.c" />
+    <ClCompile Include="..\..\..\common\RFID\rfid_reader.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\common\tolua++\tolua_event.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_is.c" />
     <ClCompile Include="..\..\..\common\tolua++\tolua_map.c" />
@@ -275,6 +328,11 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClCompile Include="..\..\..\PAC\common\PID.cpp" />
     <ClCompile Include="..\..\..\PAC\common\prj_mngr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\profibus_slave.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\rfid_reader_tolua.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\rm_manager.cpp" />
     <ClCompile Include="..\..\..\PAC\common\rm_tech_def.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys\io.cpp" />
@@ -287,31 +345,37 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClCompile Include="..\..\..\PAC\linux\l_console.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\linux\l_dtime.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\linux\l_mem.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\linux\l_tcp_client.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\linux\l_tcp_cmctr.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\linux\l_wago.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.cpp" />
