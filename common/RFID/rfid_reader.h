@@ -10,6 +10,14 @@
 	#include <windows.h>
 	#include <conio.h>    
 #else
+	#include <sys/socket.h>
+	#include <netinet/in.h>
+	#include <arpa/inet.h>
+	#include <fcntl.h>
+
+	#define INVALID_SOCKET (-1)
+	#define SOCKET_ERROR   (-1)
+
 	#include <semaphore.h>
 	#include <termios.h>
 	#include <time.h>

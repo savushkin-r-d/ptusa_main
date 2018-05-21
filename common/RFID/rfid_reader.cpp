@@ -1,9 +1,10 @@
 #include "rfid_reader.h"
 #include "dtime.h"
 
-
+#ifdef _WIN32
 #pragma warning( push )
 #pragma warning( disable: 4996 ) 
+#endif
 
  rfid_reader* rfid_reader::rfid_readers[ MAX_READERS_COUNT ] = { 0 };
  int rfid_reader::cnt = 0;
@@ -32,8 +33,10 @@ int rfid_reader::evaluate()
             {
             if ( G_DEBUG )
                 {
+#ifdef _WIN32
                 printf( "rfid_reader: Ошибка создания сокета %d!\n",
                     WSAGetLastError() );
+#endif
                 }
             }
         else
@@ -50,26 +53,38 @@ int rfid_reader::evaluate()
                 {
                 if ( G_DEBUG )
                     {
+#ifdef _WIN32
                     printf( "rfid_reader: Ошибка установления параметров "
                         "сокета %d!\n",
                         WSAGetLastError() );
+#endif
                     }
                 }
             else
                 {
-                //Переводим сокет в неблокирующий режим.
-                u_long mode = 1;
+				//Переводим сокет в неблокирующий режим.
+#ifdef _WIN32
+            	u_long mode = 1;
                 int res = ioctlsocket( socket_number, FIONBIO, &mode );
+#else
+                int res = fcntl( socket_number, F_SETFL, O_NONBLOCK );
+#endif
+
                 if ( res == SOCKET_ERROR )
                     {
                     if ( G_DEBUG )
                         {
+#ifdef _WIN32
                         printf( "rfid_reader: Ошибка перевода сокета в "
                             "неблокирующий режим %d!\n",
                             WSAGetLastError() );
+#endif
                         }
-
+#ifdef _WIN32
                     closesocket( socket_number );
+#else
+                    close( socket_number );
+#endif
                     socket_number = 0;
                     }
                 else
@@ -82,13 +97,14 @@ int rfid_reader::evaluate()
                     sock_address.sin_family = AF_INET;
                     sock_address.sin_port = htons( ( u_short )port );
                     sock_address.sin_addr.s_addr = inet_addr( ip_address );
+
                     }
                 }
             }
 
         if ( socket_number > 0 )
             {
-            ::connect( socket_number, ( SOCKADDR* )&sock_address,
+            ::connect( socket_number, ( struct sockaddr * ) &sock_address,
                 sizeof( sockaddr_in ) );
 
             fd_set rfds;
@@ -96,7 +112,11 @@ int rfid_reader::evaluate()
             FD_SET( socket_number, &rfds );
             int res = select( 0, 0, &rfds, 0, &tv );
 
+#ifdef _WIN32
             closesocket( socket_number );
+#else
+            close( socket_number );
+#endif
             socket_number = 0;
 
             if ( res > 0 )
@@ -450,4 +470,6 @@ TBool rfid_reader::CallSetExtResultFlag(TByte ubExtendedResultFlagMask)
 	return result;
 	}
 
+#ifdef _WIN32
 #pragma warning( pop )
+#endif
