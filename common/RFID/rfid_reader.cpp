@@ -63,11 +63,7 @@ int rfid_reader::evaluate()
 						"неблокирующий режим!\n" );
 #endif
 					}
-#ifdef _WIN32
 				closesocket( socket_number );
-#else
-				close( socket_number );
-#endif
 				socket_number = 0;
 				}
 			else
@@ -93,11 +89,7 @@ int rfid_reader::evaluate()
             FD_SET( socket_number, &rfds );
             int res = select( socket_number + 1, 0, &rfds, 0, &tv );
 
-#ifdef _WIN32
             closesocket( socket_number );
-#else
-            close( socket_number );
-#endif
             socket_number = 0;
 
             if ( res > 0 )

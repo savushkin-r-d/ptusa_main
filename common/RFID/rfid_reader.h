@@ -15,6 +15,7 @@
 	#include <arpa/inet.h>
 	#include <fcntl.h>
 
+	#define closesocket close
 	#define INVALID_SOCKET (-1)
 	#define SOCKET_ERROR   (-1)
 
