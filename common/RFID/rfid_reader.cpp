@@ -1,4 +1,6 @@
 #include "rfid_reader.h"
+#include "dtime.h"
+
 
 #pragma warning( push )
 #pragma warning( disable: 4996 ) 
@@ -23,7 +25,85 @@ int rfid_reader::evaluate()
 	{
 	if ( _hReader == 0 )
 		{
-		connect();
+
+        //Для проверки доступности reader'а в сети
+        socket_number = socket( AF_INET, SOCK_STREAM, IPPROTO_IP );
+        if ( socket_number == INVALID_SOCKET )
+            {
+            if ( G_DEBUG )
+                {
+                printf( "rfid_reader: Ошибка создания сокета %d!\n",
+                    WSAGetLastError() );
+                }
+            }
+        else
+            {
+            unsigned long timeout = 300;
+            int vlen = sizeof( timeout );
+
+            int res1 = setsockopt( socket_number, SOL_SOCKET, SO_SNDTIMEO,
+                ( char* )&timeout, vlen );
+            int res2 = setsockopt( socket_number, SOL_SOCKET, SO_RCVTIMEO,
+                ( char* )&timeout, vlen );
+
+            if ( res1 == SOCKET_ERROR || res2 == SOCKET_ERROR )
+                {
+                if ( G_DEBUG )
+                    {
+                    printf( "rfid_reader: Ошибка установления параметров "
+                        "сокета %d!\n",
+                        WSAGetLastError() );
+                    }
+                }
+            else
+                {
+                //Переводим сокет в неблокирующий режим.
+                u_long mode = 1;
+                int res = ioctlsocket( socket_number, FIONBIO, &mode );
+                if ( res == SOCKET_ERROR )
+                    {
+                    if ( G_DEBUG )
+                        {
+                        printf( "rfid_reader: Ошибка перевода сокета в "
+                            "неблокирующий режим %d!\n",
+                            WSAGetLastError() );
+                        }
+
+                    closesocket( socket_number );
+                    socket_number = 0;
+                    }
+                else
+                    {
+                    unsigned int port = 22;
+                    tv.tv_sec = timeout / 1000;
+                    tv.tv_usec = ( timeout % 1000 ) * 1000;
+
+                    memset( &sock_address, 0, sizeof( sockaddr_in ) );
+                    sock_address.sin_family = AF_INET;
+                    sock_address.sin_port = htons( ( u_short )port );
+                    sock_address.sin_addr.s_addr = inet_addr( ip_address );
+                    }
+                }
+            }
+
+        if ( socket_number > 0 )
+            {
+            ::connect( socket_number, ( SOCKADDR* )&sock_address,
+                sizeof( sockaddr_in ) );
+
+            fd_set rfds;
+            FD_ZERO( &rfds );
+            FD_SET( socket_number, &rfds );
+            int res = select( 0, 0, &rfds, 0, &tv );
+
+            closesocket( socket_number );
+            socket_number = 0;
+
+            if ( res > 0 )
+                {
+                connect();
+                }        
+            }
 		}
 
 	if ( _hReader )
@@ -70,19 +150,20 @@ void rfid_reader::disconnect()
 	{
 	if ( _hReader )
 		{
-		DisconnectReader( _hReader );
+        EPC_cnt = 0;
+
+        DisconnectReader( _hReader );
 		_hReader = 0;
 		state = ST_CANT_CONNECT;
 		}
 	}
 
 //-----------------------------------------------------------------------------
-rfid_reader::rfid_reader( const char* ip_address )
+rfid_reader::rfid_reader( const char* ip_address ): _hReader( 0 )
 	{
 	this->ip_address = new char[ strlen( ip_address ) + 1 ];
 	strcpy( this->ip_address, ip_address );
-
-
+           
 #ifdef _WIN32
 	_hResultHandlerEvent = CreateEvent( NULL, FALSE, FALSE, NULL );
 #else
@@ -141,11 +222,9 @@ rfid_reader::rfid_reader( const char* ip_address )
 	communicationConfigData.ustCommunicationConfigParameters.stEthernet.enIPAddressType = IPAT_IPv4; // IPv6 not supported yet
 	// Note: Let's set our ip address as a network name, it works like a charm.
 	strcpy(communicationConfigData.ustCommunicationConfigParameters.stEthernet.uKindOfConnection.rgcNetworkName, this->ip_address ); // network name, bIsIPAddress must be set to 0
-	communicationConfigData.ustCommunicationConfigParameters.stEthernet.udwKeepAliveTime = 300; // keep-alive time
+	communicationConfigData.ustCommunicationConfigParameters.stEthernet.udwKeepAliveTime = 3000; // keep-alive time
 	communicationConfigData.ustCommunicationConfigParameters.stEthernet.pcSSHAuth = NULL; // NULL: don't use ssh connection, != NULL: password or path to key file
 	communicationConfigData.ustCommunicationConfigParameters.stEthernet.pcSSHUser = NULL; // NULL: username for ssh connection is "root", != NULL: username for ssh connection
-
-	connect();
 	}
 
 //-----------------------------------------------------------------------------
@@ -210,7 +289,8 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
 
 				memset( EPC_str, 0, EPC_STR_LENGTH );
 
-				for ( int j = 0; pResultListEntry->stEPC.ubEPCWordLength > j; j++ )
+				for ( int j = 0; pResultListEntry->stEPC.ubEPCWordLength > j && 
+                    j < MAX_EPS_COUNT; j++ )
 					{
 					sprintf( EPC_str + strlen( EPC_str ), "%04X",
 						pResultListEntry->stEPC.rguwEPC[ pResultListEntry->stEPC.ubEPCWordLength - j - 1 ] );

@@ -5,8 +5,10 @@
 #include <string.h>
 
 #ifdef _WIN32
+    #include <winsock2.h>
+
 	#include <windows.h>
-	#include <conio.h>
+	#include <conio.h>    
 #else
 	#include <semaphore.h>
 	#include <termios.h>
@@ -47,10 +49,12 @@ class rfid_reader
 	{
 	public:
 
-	enum CONSTANTS
-		{
-	    MAX_READERS_COUNT = 10,
-		MAX_EPS_COUNT = 10,		
+    enum CONSTANTS
+        {
+        MAX_READERS_COUNT = 10,
+        MAX_EPS_COUNT = 10,
+
+        MAX_WAIT_TIME = 30000,
 
 		ST_ACTIVE 			= 0,
 		ST_CANT_CONNECT 	= -1,
@@ -103,4 +107,8 @@ class rfid_reader
 
 		int EPC_cnt;
 		EPC_info EPC_info_array[ MAX_EPS_COUNT ];
+        
+        int socket_number;
+        sockaddr_in sock_address;
+        timeval tv;
 	};
