@@ -1,0 +1,440 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug_IDE|Win32">
+      <Configuration>Debug_IDE</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug_IDE|x64">
+      <Configuration>Debug_IDE</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RFID_Debug|Win32">
+      <Configuration>RFID_Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RFID_Debug|x64">
+      <Configuration>RFID_Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{5F2D0ECA-D2D3-402F-A59C-98A21B12007C}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>maincontroldllvc</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>../../../PAC/common;../../../common/util;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\atlmfc\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>c:\lua\bin\;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>../../../PAC/common;../../../common/util;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\atlmfc\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>c:\lua\bin;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>../../../PAC/common;../../../common/util;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\atlmfc\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>c:\lua\bin;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>../../../PAC/common;../../../common/util;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\atlmfc\include\;$(IncludePath)</IncludePath>
+    <LibraryPath>c:\lua\bin;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;MAINCONTROLDLLVC_EXPORTS;_WINDOWS;_USRDLL;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG_IDE;TEST_SPEED;RM_PAC;MODBUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>lua51.lib;ws2_32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)$(Configuration)\$(ProjectName).dll c:\lua\lib\lua\5.1\main_control.dll
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;MAINCONTROLDLLVC_EXPORTS;_WINDOWS;_USRDLL;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG_IDE;TEST_SPEED;RM_PAC;MODBUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>lua51.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;MAINCONTROLDLLVC_EXPORTS;_WINDOWS;_USRDLL;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG_IDE;TEST_SPEED;RM_PAC;MODBUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>lua51.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;MAINCONTROLDLLVC_EXPORTS;_WINDOWS;_USRDLL;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG_IDE;TEST_SPEED;RM_PAC;MODBUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>lua51.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)$(Configuration)\$(ProjectName).dll c:\lua\lib\lua\5.1\main_control.dll</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;MAINCONTROLDLLVC_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RFID_Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;MAINCONTROLDLLVC_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;MAINCONTROLDLLVC_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;MAINCONTROLDLLVC_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\common\lua\lapi.h" />
+    <ClInclude Include="..\..\..\common\lua\lauxlib.h" />
+    <ClInclude Include="..\..\..\common\lua\lcode.h" />
+    <ClInclude Include="..\..\..\common\lua\ldebug.h" />
+    <ClInclude Include="..\..\..\common\lua\ldo.h" />
+    <ClInclude Include="..\..\..\common\lua\lfunc.h" />
+    <ClInclude Include="..\..\..\common\lua\lgc.h" />
+    <ClInclude Include="..\..\..\common\lua\llex.h" />
+    <ClInclude Include="..\..\..\common\lua\llimits.h" />
+    <ClInclude Include="..\..\..\common\lua\lmem.h" />
+    <ClInclude Include="..\..\..\common\lua\lobject.h" />
+    <ClInclude Include="..\..\..\common\lua\lopcodes.h" />
+    <ClInclude Include="..\..\..\common\lua\lparser.h" />
+    <ClInclude Include="..\..\..\common\lua\lstate.h" />
+    <ClInclude Include="..\..\..\common\lua\lstring.h" />
+    <ClInclude Include="..\..\..\common\lua\ltable.h" />
+    <ClInclude Include="..\..\..\common\lua\ltm.h" />
+    <ClInclude Include="..\..\..\common\lua\lua.h" />
+    <ClInclude Include="..\..\..\common\lua\luaconf.h" />
+    <ClInclude Include="..\..\..\common\lua\lualib.h" />
+    <ClInclude Include="..\..\..\common\lua\lundump.h" />
+    <ClInclude Include="..\..\..\common\lua\lvm.h" />
+    <ClInclude Include="..\..\..\common\lua\lzio.h" />
+    <ClInclude Include="..\..\..\common\lua_manager.h" />
+    <ClInclude Include="..\..\..\common\PAC-driver\errors.h" />
+    <ClInclude Include="..\..\..\common\PAC-driver\g_device.h" />
+    <ClInclude Include="..\..\..\common\QuickLZ\quicklz.h" />
+    <ClInclude Include="..\..\..\common\RFID\rfid_reader.h" />
+    <ClInclude Include="..\..\..\common\tolua++\tolua++.h" />
+    <ClInclude Include="..\..\..\common\tolua++\tolua_base.h" />
+    <ClInclude Include="..\..\..\common\tolua++\tolua_event.h" />
+    <ClInclude Include="..\..\..\common\win_util\SWMRG.h" />
+    <ClInclude Include="..\..\..\common\win_util\WSA_err_decode.h" />
+    <ClInclude Include="..\..\..\PAC\common\cip_stats.h" />
+    <ClInclude Include="..\..\..\PAC\common\cip_tech_def.h" />
+    <ClInclude Include="..\..\..\PAC\common\i_tech_def.h" />
+    <ClInclude Include="..\..\..\PAC\common\log.h" />
+    <ClInclude Include="..\..\..\PAC\common\mcaRec.h" />
+    <ClInclude Include="..\..\..\PAC\common\modbus_client.h" />
+    <ClInclude Include="..\..\..\PAC\common\modbus_serv.h" />
+    <ClInclude Include="..\..\..\PAC\common\mode_mngr.h" />
+    <ClInclude Include="..\..\..\PAC\common\PAC_dev.h" />
+    <ClInclude Include="..\..\..\PAC\common\PAC_err.h" />
+    <ClInclude Include="..\..\..\PAC\common\PAC_info.h" />
+    <ClInclude Include="..\..\..\PAC\common\param_ex.h" />
+    <ClInclude Include="..\..\..\PAC\common\PID.h" />
+    <ClInclude Include="..\..\..\PAC\common\prj_mngr.h" />
+    <ClInclude Include="..\..\..\PAC\common\profibus_slave.h" />
+    <ClInclude Include="..\..\..\PAC\common\rm_manager.h" />
+    <ClInclude Include="..\..\..\PAC\common\rm_tech_def.h" />
+    <ClInclude Include="..\..\..\PAC\common\sys\base_mem.h" />
+    <ClInclude Include="..\..\..\PAC\common\sys\console.h" />
+    <ClInclude Include="..\..\..\PAC\common\sys\debug.h" />
+    <ClInclude Include="..\..\..\PAC\common\sys\dtime.h" />
+    <ClInclude Include="..\..\..\PAC\common\sys\led.h" />
+    <ClInclude Include="..\..\..\PAC\common\sys\s_types.h" />
+    <ClInclude Include="..\..\..\PAC\common\tcp_client.h" />
+    <ClInclude Include="..\..\..\PAC\common\tcp_cmctr.h" />
+    <ClInclude Include="..\..\..\PAC\common\tech_def.h" />
+    <ClInclude Include="..\..\..\PAC\common\wago.h" />
+    <ClInclude Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.h" />
+    <ClInclude Include="..\..\..\PAC\win\PAC_PC\wago_PC.h" />
+    <ClInclude Include="..\..\..\PAC\win\w_console.h" />
+    <ClInclude Include="..\..\..\PAC\win\w_led.h" />
+    <ClInclude Include="..\..\..\PAC\win\w_log.h" />
+    <ClInclude Include="..\..\..\PAC\win\w_mem.h" />
+    <ClInclude Include="..\..\..\PAC\win\w_rm_tech_def.h" />
+    <ClInclude Include="..\..\..\PAC\win\w_tcp_client.h" />
+    <ClInclude Include="..\..\..\PAC\win\w_tcp_cmctr.h" />
+    <ClInclude Include="..\..\..\PAC\win\w_types.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\common\lua\lapi.c" />
+    <ClCompile Include="..\..\..\common\lua\lauxlib.c" />
+    <ClCompile Include="..\..\..\common\lua\lbaselib.c" />
+    <ClCompile Include="..\..\..\common\lua\lcode.c" />
+    <ClCompile Include="..\..\..\common\lua\ldblib.c" />
+    <ClCompile Include="..\..\..\common\lua\ldebug.c" />
+    <ClCompile Include="..\..\..\common\lua\ldo.c" />
+    <ClCompile Include="..\..\..\common\lua\ldump.c" />
+    <ClCompile Include="..\..\..\common\lua\lfunc.c" />
+    <ClCompile Include="..\..\..\common\lua\lgc.c" />
+    <ClCompile Include="..\..\..\common\lua\linit.c" />
+    <ClCompile Include="..\..\..\common\lua\liolib.c" />
+    <ClCompile Include="..\..\..\common\lua\llex.c" />
+    <ClCompile Include="..\..\..\common\lua\lmathlib.c" />
+    <ClCompile Include="..\..\..\common\lua\lmem.c" />
+    <ClCompile Include="..\..\..\common\lua\loadlib.c" />
+    <ClCompile Include="..\..\..\common\lua\lobject.c" />
+    <ClCompile Include="..\..\..\common\lua\lopcodes.c" />
+    <ClCompile Include="..\..\..\common\lua\loslib.c" />
+    <ClCompile Include="..\..\..\common\lua\lparser.c" />
+    <ClCompile Include="..\..\..\common\lua\lstate.c" />
+    <ClCompile Include="..\..\..\common\lua\lstring.c" />
+    <ClCompile Include="..\..\..\common\lua\lstrlib.c" />
+    <ClCompile Include="..\..\..\common\lua\ltable.c" />
+    <ClCompile Include="..\..\..\common\lua\ltablib.c" />
+    <ClCompile Include="..\..\..\common\lua\ltm.c" />
+    <ClCompile Include="..\..\..\common\lua\lundump.c" />
+    <ClCompile Include="..\..\..\common\lua\lvm.c" />
+    <ClCompile Include="..\..\..\common\lua\lzio.c" />
+    <ClCompile Include="..\..\..\common\lua\print.c" />
+    <ClCompile Include="..\..\..\common\lua_manager.cpp" />
+    <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp" />
+    <ClCompile Include="..\..\..\common\PAC-driver\g_device.cpp" />
+    <ClCompile Include="..\..\..\common\QuickLZ\quicklz.c" />
+    <ClCompile Include="..\..\..\common\tolua++\tolua_event.c" />
+    <ClCompile Include="..\..\..\common\tolua++\tolua_is.c" />
+    <ClCompile Include="..\..\..\common\tolua++\tolua_map.c" />
+    <ClCompile Include="..\..\..\common\tolua++\tolua_push.c" />
+    <ClCompile Include="..\..\..\common\tolua++\tolua_to.c" />
+    <ClCompile Include="..\..\..\common\win_util\SWMRG.cpp" />
+    <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\cip_stats.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\log.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\mcaRec.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\modbus_client.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\modbus_serv.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\mode_mngr.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\PAC_dev.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\PAC_dev_lua.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\PAC_err.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\PAC_info.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\param_ex.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\PID.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\prj_mngr.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\profibus_slave.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\rm_manager.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\rm_tech_def.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\sys\base_mem.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\sys\io.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\sys\led.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\tcp_client.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\tcp_cmctr.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\tech_def.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\wago.cpp" />
+    <ClCompile Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.cpp" />
+    <ClCompile Include="..\..\..\PAC\win\PAC_PC\wago_PC.cpp" />
+    <ClCompile Include="..\..\..\PAC\win\w_console.cpp" />
+    <ClCompile Include="..\..\..\PAC\win\w_dtime.cpp" />
+    <ClCompile Include="..\..\..\PAC\win\w_mem.cpp" />
+    <ClCompile Include="..\..\..\PAC\win\w_rm_tech_def.cpp" />
+    <ClCompile Include="..\..\..\PAC\win\w_tcp_client.cpp" />
+    <ClCompile Include="..\..\..\PAC\win\w_tcp_cmctr.cpp" />
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="main_control_dll_vc.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
