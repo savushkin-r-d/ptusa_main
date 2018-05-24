@@ -11,6 +11,13 @@
 
  extern int G_DEBUG;
  //-----------------------------------------------------------------------------
+ EPC_info::EPC_info( char* EPC_str, int antenna, int RSSI ) : antenna( antenna ),
+     RSSI( RSSI )
+     {
+     this->EPC_str = new char[ EPC_STR_LENGTH ];
+     strcpy( this->EPC_str, EPC_str );
+     }                                                                          
+ //-----------------------------------------------------------------------------
  rfid_reader* rfid_reader::add_reader( const char* ip_address )
 	{
 	if ( cnt < MAX_READERS_COUNT )
@@ -258,26 +265,20 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
 
 			int idx = 0;
 
-			// Display all available epcs in the antenna field.
+            // Display all available epcs in the antenna field.
+            static std::vector< std::pair< EPC_info*, int > > tags;
+
+            if ( G_DEBUG )
+                {
+                for ( unsigned int i = 0; i < tags.size(); i++ )
+                    {
+                    tags[ i ].second = 0;
+                    }
+                }
+
 			pResultListEntry = pEPCList;
 			while (pResultListEntry != NULL)
 				{
-				TByte ubTemp;
-
-				if ( G_DEBUG )
-					{
-					printf("EPC: ");
-					for ( ubTemp = 0;
-						pResultListEntry->stEPC.ubEPCWordLength > ubTemp; ubTemp++)
-						{
-						printf("%04X", pResultListEntry->stEPC.rguwEPC[
-							pResultListEntry->stEPC.ubEPCWordLength - ubTemp - 1 ] );
-						}
-
-					printf(", Antenna: %u, RSSI: %u\r\n",
-						pResultListEntry->ubPort, pResultListEntry->ubRSSI);
-					}
-
 				char *EPC_str = rfid_readers[ i ]->EPC_info_array[ idx ].EPC_str;
 
 				memset( EPC_str, 0, EPC_STR_LENGTH );
@@ -292,10 +293,50 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
 					pResultListEntry->ubPort;
 
 				idx++;
+                				
+                if ( G_DEBUG )
+                    {
+                    bool was = false;
+                    for ( unsigned int i = 0; i < tags.size(); i++ )
+                        {                        
+                        if ( strcmp( tags[ i ].first->EPC_str, EPC_str ) == 0 )
+                            {
+                            tags[ i ].second = 2;
+                            was = true;
+                            }
+                        }
+                    if ( was == false )
+                        {
+                        tags.push_back(
+                            std::pair< EPC_info*, int >( new EPC_info( 
+                            EPC_str, pResultListEntry->ubPort,
+                            pResultListEntry->ubRSSI ), 1 ) );
+                        }
+                    }
 
-				pResultListEntry = pResultListEntry->pNext;
+                pResultListEntry = pResultListEntry->pNext;
 				}
 			rfid_readers[ i ]->EPC_cnt = idx;
+
+            if ( G_DEBUG )
+                {
+                for ( unsigned int i = 0; i < tags.size(); i++ )
+                    {
+                    switch ( tags[ i ].second )
+                        {         
+                        case 0: // Удалилась
+                            printf( "off: %d %s\n", tags[ i ].first->antenna,
+                                tags[ i ].first->EPC_str );
+                            tags.erase( tags.begin() + i );
+                            break;
+
+                        case 1: // Появилась
+                            printf( "on:  %d %s %02d\n", tags[ i ].first->antenna,
+                                tags[ i ].first->EPC_str, tags[ i ].first->RSSI );
+                            break;
+                        }
+                    }
+                }
 
 			// Let's set the event so that the calling process knows the
 			// command was processed by reader and the result is ready to get
@@ -335,7 +376,7 @@ void rfid_reader::CallSyncGetEPCs()
 				{
 				// The reader's work is done and the result handler was called.
 				// Let's check the result flag to make sure everything is ok.
-				if ( _enResultFlag == RF_NoError )
+				if ( _enResultFlag == RF_NoError || _enResultFlag == RF_NoTag )
 					{
 					// The command was successfully processed by the reader.
 					// We'll display the result in the result handler.
@@ -373,10 +414,10 @@ void rfid_reader::CallSyncGetEPCs()
 				}
 			}
 		}
-	if ( G_DEBUG )
-		{
-		printf( "\r\n" );
-		}
+	//if ( G_DEBUG )
+	//	{
+	//	printf( "\r\n" );
+	//	}
 	}
 
 //-----------------------------------------------------------------------------

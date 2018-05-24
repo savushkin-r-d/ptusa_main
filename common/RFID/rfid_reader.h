@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <vector>
+
 #ifdef _WIN32
     #include <winsock2.h>
 
@@ -46,6 +48,8 @@ struct EPC_info
         {
         EPC_str = new char[ EPC_STR_LENGTH ];
         }
+
+    EPC_info( char* EPC_str, int antenna, int RSSI );
 
     ~EPC_info()
         {
