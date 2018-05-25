@@ -18,11 +18,11 @@
      strcpy( this->EPC_str, EPC_str );
      }                                                                          
  //-----------------------------------------------------------------------------
- rfid_reader* rfid_reader::add_reader( const char* ip_address )
+ rfid_reader* rfid_reader::add_reader( const char* ip_address, int number )
 	{
 	if ( cnt < MAX_READERS_COUNT )
 		{
-		return rfid_readers[ cnt++ ] = new rfid_reader( ip_address );
+		return rfid_readers[ cnt++ ] = new rfid_reader( ip_address, number );
 		}
 
 	return 0;
@@ -77,7 +77,7 @@ int rfid_reader::evaluate()
 				{
 				unsigned int port = 22;
 				tv.tv_sec = 0;
-				tv.tv_usec = 300;
+				tv.tv_usec = MAX_WAIT_TIME;
 
 				memset( &sock_address, 0, sizeof( sockaddr_in ) );
 				sock_address.sin_family = AF_INET;
@@ -110,6 +110,29 @@ int rfid_reader::evaluate()
 		{
 		CallSyncGetEPCs();
 		}
+
+    // Проверка связи.
+    if ( _hReader == 0 )
+        {        
+        if ( false == is_set_err )
+            {
+            is_set_err = true;
+            PAC_critical_errors_manager::get_instance()->set_global_error(
+                PAC_critical_errors_manager::AC_NO_CONNECTION,
+                PAC_critical_errors_manager::AS_RFID_READER, number );
+            }
+        }
+    else
+        {
+        if ( is_set_err )
+            {
+            is_set_err = false;
+            PAC_critical_errors_manager::get_instance()->reset_global_error(
+                PAC_critical_errors_manager::PAC_critical_errors_manager::AC_NO_CONNECTION,
+                PAC_critical_errors_manager::AS_RFID_READER, number );
+            }
+        }
+    // Проверка связи.-!>
 
 	return 0;
 	}
@@ -159,7 +182,8 @@ void rfid_reader::disconnect()
 	}
 
 //-----------------------------------------------------------------------------
-rfid_reader::rfid_reader( const char* ip_address ): _hReader( 0 )
+rfid_reader::rfid_reader( const char* ip_address, int number ): _hReader( 0 ),
+    number( number )
 	{
 	this->ip_address = new char[ strlen( ip_address ) + 1 ];
 	strcpy( this->ip_address, ip_address );
@@ -367,7 +391,7 @@ void rfid_reader::CallSyncGetEPCs()
 			// wait until the result handler was called.
 #ifdef _WIN32
 			if ( WAIT_OBJECT_0 ==
-				WaitForSingleObject( _hResultHandlerEvent, 100 ) )
+				WaitForSingleObject( _hResultHandlerEvent, MAX_WAIT_TIME ) )
 #else
 			clock_gettime( CLOCK_REALTIME, &_ts );
 			_ts.tv_sec += 5;
@@ -380,6 +404,8 @@ void rfid_reader::CallSyncGetEPCs()
 					{
 					// The command was successfully processed by the reader.
 					// We'll display the result in the result handler.
+
+                    retr_cnt = 0;
 					}
 				else
 					{
@@ -394,13 +420,17 @@ void rfid_reader::CallSyncGetEPCs()
 				}
 			else
 				{
-				// We're getting no answer from the reader within 5 seconds.
+				// We're getting no answer from the reader within MAX_WAIT_TIME mseconds.
 				if ( G_DEBUG )
 					{
 					printf( "Command \"SyncGetEPCs\" timed out\r\n" );
 					}
 
-				disconnect();
+                retr_cnt++;
+                if ( retr_cnt > MAX_RETR_CNT )
+                    {
+                    disconnect();
+                    }
 				}
 			}
 		else
@@ -434,7 +464,7 @@ TBool rfid_reader::CallSetExtResultFlag(TByte ubExtendedResultFlagMask)
 		// until the result handler was called.
 #ifdef _WIN32
 		if ( WAIT_OBJECT_0 ==
-			WaitForSingleObject( _hResultHandlerEvent, 100 ) )
+			WaitForSingleObject( _hResultHandlerEvent, MAX_WAIT_TIME ) )
 #else
 		clock_gettime( CLOCK_REALTIME, &_ts );
 		_ts.tv_sec += 5;
@@ -446,6 +476,7 @@ TBool rfid_reader::CallSetExtResultFlag(TByte ubExtendedResultFlagMask)
 			if (_enResultFlag == RF_NoError)
 				{
 				// The command was successfully processed by the reader.
+                retr_cnt = 0;
 				result = true;
 				}
 			else
@@ -461,13 +492,17 @@ TBool rfid_reader::CallSetExtResultFlag(TByte ubExtendedResultFlagMask)
 			}
 		else
 			{
-			// We're getting no answer from the reader within 5 seconds.
+			// We're getting no answer from the reader within MAX_WAIT_TIME mseconds.
 			if ( G_DEBUG )
 				{
 				printf("Command \"SetExtendedResultFlag\" timed out\r\n");
 				}
 
-			disconnect();
+            retr_cnt++;
+            if ( retr_cnt > MAX_RETR_CNT )
+                {
+                disconnect();
+                }
 			}
 		}
 	else

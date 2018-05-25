@@ -18,7 +18,7 @@ class rfid_reader
             ST_CANT_CONNECT = -1,
             };
 
-        static rfid_reader* add_reader( const char* ip_address );
+        static rfid_reader* add_reader( const char* ip_address, int number );
 
         int evaluate();
 

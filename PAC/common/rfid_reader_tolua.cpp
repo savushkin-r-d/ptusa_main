@@ -1,6 +1,6 @@
 /*
 ** Lua binding: rfid_reader
-** Generated automatically by tolua++-1.0.92 on 05/18/18 10:40:47.
+** Generated automatically by tolua++-1.0.92 on 05/24/18 17:39:53.
 */
 
 #ifndef __cplusplus
@@ -121,15 +121,17 @@ static int tolua_rfid_reader_rfid_reader_add_reader00(lua_State* tolua_S)
  if (
      !tolua_isusertable(tolua_S,1,"rfid_reader",0,&tolua_err) ||
      !tolua_isstring(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
   const char* ip_address = ((const char*)  tolua_tostring(tolua_S,2,0));
+  int number = ((int)  tolua_tonumber(tolua_S,3,0));
   {
-   rfid_reader* tolua_ret = (rfid_reader*)  rfid_reader::add_reader(ip_address);
+   rfid_reader* tolua_ret = (rfid_reader*)  rfid_reader::add_reader(ip_address,number);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"rfid_reader");
   }
  }

@@ -36,6 +36,8 @@
 	#define HANDLE			sem_t
 #endif
 
+#include "PAC_err.h"
+
 const int EPC_STR_LENGTH = 40;
 
 struct EPC_info
@@ -62,18 +64,20 @@ class rfid_reader
 	{
 	public:
 
-    enum CONSTANTS
-        {
-        MAX_READERS_COUNT = 10,
-        MAX_EPS_COUNT = 10,
+        enum CONSTANTS
+            {
+            MAX_READERS_COUNT = 10,
+            MAX_EPS_COUNT = 10,
 
-        MAX_WAIT_TIME = 30000,
+            MAX_WAIT_TIME = 300,
 
-		ST_ACTIVE 			= 0,
-		ST_CANT_CONNECT 	= -1,
-		};
+            ST_ACTIVE = 0,
+            ST_CANT_CONNECT = -1,
 
-		static rfid_reader* add_reader( const char* ip_address );
+            MAX_RETR_CNT = 3,
+		    };
+
+		static rfid_reader* add_reader( const char* ip_address, int number );
 
 		int evaluate();
 
@@ -88,7 +92,7 @@ class rfid_reader
 
 		void disconnect();
 
-		rfid_reader( const char* ip_address );
+		rfid_reader( const char* ip_address, int number );
 
 		static void ResultHandlerSetExtendedResultFlag( tResultFlag enResultFlag,
 			RRU4 hHandle, void *pTag );
@@ -110,6 +114,7 @@ class rfid_reader
 		struct timespec _ts;
 #endif
 
+        int number;
 		char* ip_address;
 		tCommunicationConfigData communicationConfigData;
 
@@ -124,4 +129,7 @@ class rfid_reader
         int socket_number;
         sockaddr_in sock_address;
         timeval tv;
+
+        int retr_cnt = 0;
+        bool is_set_err = false;
 	};

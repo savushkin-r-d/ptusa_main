@@ -67,6 +67,7 @@ class PAC_critical_errors_manager
             AS_WAGO = 1,            ///< Ошибки модулей WAGO.
             AS_PANEL,               ///< Ошибки панелей EasyView.
             AS_MODBUS_DEVICE,       ///< Ошибки устройства, опрашиваемого по Modbus.
+            AS_RFID_READER,         ///< Ошибки RFID-reader'а.
 
             AS_EASYSERVER = 5,      ///< Ошибки EasyServer.
             AS_REMOTE_PAC,          ///< Ошибки связи с удаленным PAC.

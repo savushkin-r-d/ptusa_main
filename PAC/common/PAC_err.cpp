@@ -210,6 +210,10 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             sprintf( tmp + strlen( tmp ), "Modbus-device ¹%d.", par );
             break;
 
+        case AS_RFID_READER:
+            sprintf( tmp + strlen( tmp ), "RFID-reader ¹%d.", par );
+            break;
+
         case AS_EASYSERVER:
             sprintf( tmp + strlen( tmp ), "EasyServer." );
             break;
