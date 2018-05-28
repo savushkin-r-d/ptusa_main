@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/18/18 08:56:26.
+** Generated automatically by tolua++-1.0.92 on 05/28/18 10:57:43.
 */
 
 #ifndef __cplusplus
@@ -3084,6 +3084,40 @@ static int tolua_PAC_dev_tech_object_get_modes_count00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'get_modes_count'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: check_operation_on of class  tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_tech_object_check_operation_on00
+static int tolua_PAC_dev_tech_object_check_operation_on00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"tech_object",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  tech_object* self = (tech_object*)  tolua_tousertype(tolua_S,1,0);
+  unsigned int operation_n = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'check_operation_on'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->check_operation_on(operation_n);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'check_operation_on'.",&tolua_err);
  return 0;
 #endif
 }
@@ -11800,6 +11834,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"get_operation_state",tolua_PAC_dev_tech_object_get_operation_state00);
    tolua_function(tolua_S,"exec_cmd",tolua_PAC_dev_tech_object_exec_cmd00);
    tolua_function(tolua_S,"get_modes_count",tolua_PAC_dev_tech_object_get_modes_count00);
+   tolua_function(tolua_S,"check_operation_on",tolua_PAC_dev_tech_object_check_operation_on00);
    tolua_variable(tolua_S,"par_float",tolua_get_tech_object_par_float,tolua_set_tech_object_par_float);
    tolua_variable(tolua_S,"rt_par_float",tolua_get_tech_object_rt_par_float,tolua_set_tech_object_rt_par_float);
    tolua_variable(tolua_S,"par_uint",tolua_get_tech_object_par_uint,tolua_set_tech_object_par_uint);

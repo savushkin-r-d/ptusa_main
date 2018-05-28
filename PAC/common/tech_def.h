@@ -169,6 +169,10 @@ class tech_object: public i_tech_object, public i_Lua_save_device
             return operations_count;
             }
 
+        /// @brief Проверка на возможность включения операции.
+        ///
+        int check_operation_on( u_int operation_n );
+
         saved_params_float      par_float;      ///< Сохраняемые параметры, тип float.
         run_time_params_float   rt_par_float;   ///< Рабочие параметры, тип float.
         saved_params_u_int_4    par_uint;       ///< Сохраняемые параметры, тип u_int.

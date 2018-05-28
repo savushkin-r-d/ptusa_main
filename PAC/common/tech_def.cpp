@@ -418,8 +418,35 @@ int tech_object::lua_check_on_mode( u_int mode )
         return 1000 + res;
         }
 
-    return lua_manager::get_instance()->int_exec_lua_method( name_Lua,
-        "check_on_mode", mode, "int tech_object::lua_check_on_mode( u_int mode )" );
+    //TODO. Устаревшее название функции. Оставлено для совместимости.
+    //Проверка на наличии функции check_on_mode.
+    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
+        name_Lua );
+    lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "check_on_mode" );
+    lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
+
+    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+        {
+        return lua_manager::get_instance()->int_exec_lua_method( name_Lua,
+            "check_on_mode", mode,
+            "int tech_object::lua_check_on_mode( u_int mode )" );
+        }
+
+    //Проверка на наличии функции user_check_operation_on.
+    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
+        name_Lua );
+    lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "user_check_operation_on" );
+    lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
+
+    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+        {
+        return lua_manager::get_instance()->int_exec_lua_method( name_Lua,
+            "user_check_operation_on", mode,
+            "int tech_object::lua_check_on_mode( u_int mode )" );
+        }
+    
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 void tech_object::lua_init_mode( u_int mode )
@@ -1170,6 +1197,35 @@ bool tech_object::is_any_important_mode()
         }
 
     return false;
+    }
+//-----------------------------------------------------------------------------
+int tech_object::check_operation_on( u_int operation_n )
+    {
+    operation* op = ( *operations_manager )[ operation_n ];
+
+    //Проверка режима на проверку ОС устройств.
+    const int S_SIZE = 41;
+    char res_str[ S_SIZE ] = "обр. связь ";
+
+    int l = strlen( res_str );
+    int res = op->check_devices_on_run_state( res_str + l, S_SIZE - l );
+    if ( res && is_check_mode( operation_n ) == 1 )
+        {
+        set_err_msg( res_str, operation_n );
+        res = operation_n + 1000;
+        }
+    else
+        {
+        if ( ( res = lua_check_on_mode( operation_n ) ) == 0 ) // Check if possible.
+            {
+            }
+        else
+            {
+            res += 100;
+            }
+        }
+
+    return res;
     }
 //-----------------------------------------------------------------------------
 void tech_object::set_serial_idx( u_int idx )
