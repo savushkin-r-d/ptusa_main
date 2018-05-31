@@ -375,21 +375,19 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
                             {
                             printf( "%d on:  %d %s %02d\n", i,
                                 r->tags[ k ].first->antenna,
-                                r->tags[ k ].first->EPC_str, 
+                                r->tags[ k ].first->EPC_str,
                                 r->tags[ k ].first->RSSI );
-                            }                        
+                            }
+                    case 4:
+                        char *EPC_str = r->EPC_info_array[ idx ].EPC_str;
+                        memset( EPC_str, 0, EPC_STR_LENGTH );
+                        sprintf( EPC_str, "%s", r->tags[ k ].first->EPC_str );
+                        r->EPC_info_array[ idx ].antenna = r->tags[ k ].first->antenna;
+                        r->EPC_info_array[ idx ].RSSI = r->tags[ k ].first->RSSI;
+
+                        idx++;
+                                         
                         break;
-                    }
-
-                if ( r->tags[ k ].second >= 3 )
-                    {
-                    char *EPC_str = r->EPC_info_array[ idx ].EPC_str;
-                    memset( EPC_str, 0, EPC_STR_LENGTH );
-                    sprintf( EPC_str, "%s", r->tags[ k ].first->EPC_str );
-                    r->EPC_info_array[ idx ].antenna = r->tags[ k ].first->antenna;
-                    r->EPC_info_array[ idx ].RSSI = r->tags[ k ].first->RSSI;
-
-                    idx++;
                     }
                 }
 
