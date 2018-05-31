@@ -317,11 +317,24 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
                     {                        
                     if ( strcmp( r->tags[ i ].first->EPC_str, EPC_str ) == 0 )
                         {
-                        r->tags[ i ].second = 2;
-                        if ( r->tags[ i ].first->cnt <= 4 )
+
+                        if ( r->tags[ i ].first->cnt < 4 )
                             {
+                        	r->tags[ i ].second = 2;
                             r->tags[ i ].first->cnt++;
                             }
+                        else
+                        	{
+                        	if ( r->tags[ i ].first->cnt == 4 )
+								{
+								r->tags[ i ].second = 3;
+								r->tags[ i ].first->cnt++;
+								}
+							else
+								{
+								r->tags[ i ].second = 4;
+								}
+                        	}
                         was = true;
                         }
                     }
@@ -360,7 +373,7 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
                             {
                             if ( G_DEBUG )
                                 {
-                                printf( "%d off: %d %s\n", k,
+                                printf( "%d off: %d %s\n", i,
                                     r->tags[ k ].first->antenna,
                                     r->tags[ k ].first->EPC_str );
                                 }
@@ -371,7 +384,7 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
                     case 3: // Появилась
                         if ( G_DEBUG )
                             {
-                            printf( "%d on:  %d %s %02d\n", k, 
+                            printf( "%d on:  %d %s %02d\n", i,
                                 r->tags[ k ].first->antenna,
                                 r->tags[ k ].first->EPC_str, 
                                 r->tags[ k ].first->RSSI );
