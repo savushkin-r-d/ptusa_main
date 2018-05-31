@@ -342,19 +342,19 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
 
             if ( G_DEBUG )
                 {
-                for ( unsigned int i = 0; i < r->tags.size(); i++ )
+                for ( unsigned int k = 0; k < r->tags.size(); k++ )
                     {
-                    switch ( r->tags[ i ].second )
+                    switch ( r->tags[ k ].second )
                         {         
                         case 0: // Удалилась
-                            printf( "off: %d %s\n", r->tags[ i ].first->antenna,
-                                r->tags[ i ].first->EPC_str );
-                            r->tags.erase( r->tags.begin() + i );
+                            printf( "%d off: %d %s\n", k, r->tags[ k ].first->antenna,
+                                r->tags[ k ].first->EPC_str );
+                            r->tags.erase( r->tags.begin() + k );
                             break;
 
                         case 1: // Появилась
-                            printf( "on:  %d %s %02d\n", r->tags[ i ].first->antenna,
-                                r->tags[ i ].first->EPC_str, r->tags[ i ].first->RSSI );
+                            printf( "%d on:  %d %s %02d\n", k, r->tags[ k ].first->antenna,
+                                r->tags[ k ].first->EPC_str, r->tags[ k ].first->RSSI );
                             break;
                         }
                     }
