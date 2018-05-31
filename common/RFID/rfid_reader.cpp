@@ -289,13 +289,9 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
 			r->_enResultFlag = enResultFlag;
 
 			int idx = 0;
-                        
-            if ( G_DEBUG )
+            for ( unsigned int i = 0; i < r->tags.size(); i++ )
                 {
-                for ( unsigned int i = 0; i < r->tags.size(); i++ )
-                    {
-                    r->tags[ i ].second = 0;
-                    }
+                r->tags[ i ].second = 0;
                 }
 
 			pResultListEntry = pEPCList;
@@ -315,50 +311,75 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
 					pResultListEntry->ubPort;
 
 				idx++;
-                				
-                if ( G_DEBUG )
-                    {
-                    bool was = false;
-                    for ( unsigned int i = 0; i < r->tags.size(); i++ )
-                        {                        
-                        if ( strcmp( r->tags[ i ].first->EPC_str, EPC_str ) == 0 )
-                            {
-                            r->tags[ i ].second = 2;
-                            was = true;
-                            }
-                        }
-                    if ( was == false )
+
+                bool was = false;
+                for ( unsigned int i = 0; i < r->tags.size(); i++ )
+                    {                        
+                    if ( strcmp( r->tags[ i ].first->EPC_str, EPC_str ) == 0 )
                         {
-                        r->tags.push_back(
-                            std::pair< EPC_info*, int >( new EPC_info( 
-                            EPC_str, pResultListEntry->ubPort,
-                            pResultListEntry->ubRSSI ), 1 ) );
+                        r->tags[ i ].second = 2;
+                        if ( r->tags[ i ].first->cnt <= 4 )
+                            {
+                            r->tags[ i ].first->cnt++;
+                            }
+                        was = true;
                         }
                     }
+                if ( was == false )
+                    {
+                    r->tags.push_back(
+                        std::pair< EPC_info*, int >( new EPC_info( 
+                        EPC_str, pResultListEntry->ubPort,
+                        pResultListEntry->ubRSSI ), 1 ) );
+                    }
+
 
                 pResultListEntry = pResultListEntry->pNext;
 				}
 			r->EPC_cnt = idx;
 
-            if ( G_DEBUG )
+            for ( unsigned int i = 0; i < r->tags.size(); i++ )
                 {
-                for ( unsigned int k = 0; k < r->tags.size(); k++ )
+                if ( r->tags[ i ].second == 0 )
                     {
-                    switch ( r->tags[ k ].second )
-                        {         
-                        case 0: // Удалилась
-                            printf( "%d off: %d %s\n", k, r->tags[ k ].first->antenna,
-                                r->tags[ k ].first->EPC_str );
-                            r->tags.erase( r->tags.begin() + k );
-                            break;
-
-                        case 1: // Появилась
-                            printf( "%d on:  %d %s %02d\n", k, r->tags[ k ].first->antenna,
-                                r->tags[ k ].first->EPC_str, r->tags[ k ].first->RSSI );
-                            break;
-                        }
+                    r->tags[ i ].first->cnt--;
+                    }
+                                
+                if ( r->tags[ i ].second == 2 && r->tags[ i ].first->cnt > 4 )
+                    {
+                    r->tags[ i ].second = 3;
                     }
                 }
+            
+            for ( unsigned int k = 0; k < r->tags.size(); k++ )
+                {
+                switch ( r->tags[ k ].second )
+                    {         
+                    case 0: // Удалилась
+                        if ( r->tags[ i ].first->cnt <= 0 )
+                            {
+                            if ( G_DEBUG )
+                                {
+                                printf( "%d off: %d %s\n", k,
+                                    r->tags[ k ].first->antenna,
+                                    r->tags[ k ].first->EPC_str );
+                                }
+                            r->tags.erase( r->tags.begin() + k );
+                            }
+                        break;
+
+                    case 3: // Появилась
+                        if ( G_DEBUG )
+                            {
+                            printf( "%d on:  %d %s %02d\n", k, 
+                                r->tags[ k ].first->antenna,
+                                r->tags[ k ].first->EPC_str, 
+                                r->tags[ k ].first->RSSI );
+                            }
+                        break;
+                    }
+                }
+                
 
 			// Let's set the event so that the calling process knows the
 			// command was processed by reader and the result is ready to get

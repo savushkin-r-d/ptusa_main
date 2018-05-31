@@ -46,6 +46,8 @@ struct EPC_info
     int  antenna;
     int RSSI;
 
+    int cnt = 1;
+
     EPC_info()
         {
         EPC_str = new char[ EPC_STR_LENGTH ];
