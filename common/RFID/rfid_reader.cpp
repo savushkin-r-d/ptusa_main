@@ -287,8 +287,7 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
 			// Let's store the result flag in a global variable to get access
 			// from everywhere.
 			r->_enResultFlag = enResultFlag;
-
-			int idx = 0;
+            			
             for ( unsigned int i = 0; i < r->tags.size(); i++ )
                 {
                 r->tags[ i ].second = 0;
@@ -297,20 +296,15 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
 			pResultListEntry = pEPCList;
 			while (pResultListEntry != NULL)
 				{
-				char *EPC_str = r->EPC_info_array[ idx ].EPC_str;
+                static char EPC_str[ EPC_STR_LENGTH ];
+                memset( EPC_str, 0, EPC_STR_LENGTH );
 
-				memset( EPC_str, 0, EPC_STR_LENGTH );
-
-				for ( int j = 0; pResultListEntry->stEPC.ubEPCWordLength > j && 
+                for ( int j = 0; pResultListEntry->stEPC.ubEPCWordLength > j &&
                     j < MAX_EPS_COUNT; j++ )
-					{
-					sprintf( EPC_str + strlen( EPC_str ), "%04X",
-						pResultListEntry->stEPC.rguwEPC[ pResultListEntry->stEPC.ubEPCWordLength - j - 1 ] );
-					}
-				r->EPC_info_array[ idx ].antenna =
-					pResultListEntry->ubPort;
-
-				idx++;
+                    {
+                    sprintf( EPC_str + strlen( EPC_str ), "%04X",
+                        pResultListEntry->stEPC.rguwEPC[ pResultListEntry->stEPC.ubEPCWordLength - j - 1 ] );
+                    }
 
                 bool was = false;
                 for ( unsigned int i = 0; i < r->tags.size(); i++ )
@@ -349,8 +343,7 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
 
                 pResultListEntry = pResultListEntry->pNext;
 				}
-			r->EPC_cnt = idx;
-
+			
             for ( unsigned int i = 0; i < r->tags.size(); i++ )
                 {
                 if ( r->tags[ i ].second == 0 )
@@ -359,6 +352,7 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
                     }
                 }
             
+            int idx = 0;
             for ( unsigned int k = 0; k < r->tags.size(); k++ )
                 {
                 switch ( r->tags[ k ].second )
@@ -383,10 +377,23 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
                                 r->tags[ k ].first->antenna,
                                 r->tags[ k ].first->EPC_str, 
                                 r->tags[ k ].first->RSSI );
-                            }
+                            }                        
                         break;
                     }
+
+                if ( r->tags[ k ].second >= 3 )
+                    {
+                    char *EPC_str = r->EPC_info_array[ idx ].EPC_str;
+                    memset( EPC_str, 0, EPC_STR_LENGTH );
+                    sprintf( EPC_str, "%s", r->tags[ k ].first->EPC_str );
+                    r->EPC_info_array[ idx ].antenna = r->tags[ k ].first->antenna;
+                    r->EPC_info_array[ idx ].RSSI = r->tags[ k ].first->RSSI;
+
+                    idx++;
+                    }
                 }
+
+            r->EPC_cnt = idx;
                 
 
 			// Let's set the event so that the calling process knows the
