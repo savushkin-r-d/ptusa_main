@@ -132,4 +132,7 @@ class rfid_reader
 
         int retr_cnt = 0;
         bool is_set_err = false;
+
+        // Display all available epcs in the antenna field.
+        std::vector< std::pair< EPC_info*, int > > tags;
 	};

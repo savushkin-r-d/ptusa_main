@@ -281,29 +281,27 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
 		{
 		if ( rfid_readers[ i ]->_hReader == hHandle )
 			{
+            rfid_reader* r = rfid_readers[ i ];
 			tEPCListEntry *pResultListEntry;
 
 			// Let's store the result flag in a global variable to get access
 			// from everywhere.
-			rfid_readers[ i ]->_enResultFlag = enResultFlag;
+			r->_enResultFlag = enResultFlag;
 
 			int idx = 0;
-
-            // Display all available epcs in the antenna field.
-            static std::vector< std::pair< EPC_info*, int > > tags;
-
+                        
             if ( G_DEBUG )
                 {
-                for ( unsigned int i = 0; i < tags.size(); i++ )
+                for ( unsigned int i = 0; i < r->tags.size(); i++ )
                     {
-                    tags[ i ].second = 0;
+                    r->tags[ i ].second = 0;
                     }
                 }
 
 			pResultListEntry = pEPCList;
 			while (pResultListEntry != NULL)
 				{
-				char *EPC_str = rfid_readers[ i ]->EPC_info_array[ idx ].EPC_str;
+				char *EPC_str = r->EPC_info_array[ idx ].EPC_str;
 
 				memset( EPC_str, 0, EPC_STR_LENGTH );
 
@@ -313,7 +311,7 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
 					sprintf( EPC_str + strlen( EPC_str ), "%04X",
 						pResultListEntry->stEPC.rguwEPC[ pResultListEntry->stEPC.ubEPCWordLength - j - 1 ] );
 					}
-				rfid_readers[ i ]->EPC_info_array[ idx ].antenna =
+				r->EPC_info_array[ idx ].antenna =
 					pResultListEntry->ubPort;
 
 				idx++;
@@ -321,17 +319,17 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
                 if ( G_DEBUG )
                     {
                     bool was = false;
-                    for ( unsigned int i = 0; i < tags.size(); i++ )
+                    for ( unsigned int i = 0; i < r->tags.size(); i++ )
                         {                        
-                        if ( strcmp( tags[ i ].first->EPC_str, EPC_str ) == 0 )
+                        if ( strcmp( r->tags[ i ].first->EPC_str, EPC_str ) == 0 )
                             {
-                            tags[ i ].second = 2;
+                            r->tags[ i ].second = 2;
                             was = true;
                             }
                         }
                     if ( was == false )
                         {
-                        tags.push_back(
+                        r->tags.push_back(
                             std::pair< EPC_info*, int >( new EPC_info( 
                             EPC_str, pResultListEntry->ubPort,
                             pResultListEntry->ubRSSI ), 1 ) );
@@ -340,23 +338,23 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
 
                 pResultListEntry = pResultListEntry->pNext;
 				}
-			rfid_readers[ i ]->EPC_cnt = idx;
+			r->EPC_cnt = idx;
 
             if ( G_DEBUG )
                 {
-                for ( unsigned int i = 0; i < tags.size(); i++ )
+                for ( unsigned int i = 0; i < r->tags.size(); i++ )
                     {
-                    switch ( tags[ i ].second )
+                    switch ( r->tags[ i ].second )
                         {         
                         case 0: // Удалилась
-                            printf( "off: %d %s\n", tags[ i ].first->antenna,
-                                tags[ i ].first->EPC_str );
-                            tags.erase( tags.begin() + i );
+                            printf( "off: %d %s\n", r->tags[ i ].first->antenna,
+                                r->tags[ i ].first->EPC_str );
+                            r->tags.erase( r->tags.begin() + i );
                             break;
 
                         case 1: // Появилась
-                            printf( "on:  %d %s %02d\n", tags[ i ].first->antenna,
-                                tags[ i ].first->EPC_str, tags[ i ].first->RSSI );
+                            printf( "on:  %d %s %02d\n", r->tags[ i ].first->antenna,
+                                r->tags[ i ].first->EPC_str, r->tags[ i ].first->RSSI );
                             break;
                         }
                     }
@@ -365,7 +363,7 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
 			// Let's set the event so that the calling process knows the
 			// command was processed by reader and the result is ready to get
 			// processed.
-			SetEvent( rfid_readers[ i ]->_hResultHandlerEvent );
+			SetEvent( r->_hResultHandlerEvent );
 			}
 		}
 	}
