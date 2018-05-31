@@ -357,11 +357,6 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
                     {
                     r->tags[ i ].first->cnt--;
                     }
-                                
-                if ( r->tags[ i ].second == 2 && r->tags[ i ].first->cnt > 4 )
-                    {
-                    r->tags[ i ].second = 3;
-                    }
                 }
             
             for ( unsigned int k = 0; k < r->tags.size(); k++ )
@@ -369,7 +364,7 @@ void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
                 switch ( r->tags[ k ].second )
                     {         
                     case 0: // Удалилась
-                        if ( r->tags[ i ].first->cnt <= 0 )
+                        if ( r->tags[ k ].first->cnt <= 0 )
                             {
                             if ( G_DEBUG )
                                 {
