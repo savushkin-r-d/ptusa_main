@@ -10,7 +10,10 @@
     #include <winsock2.h>
 
 	#include <windows.h>
-	#include <conio.h>    
+	#include <conio.h>   
+    
+    void SetColor( WORD color );
+
 #else
 	#include <sys/socket.h>
 	#include <netinet/in.h>
@@ -36,6 +39,26 @@
 	#define HANDLE			sem_t
 #endif
 
+// macros
+#ifdef _WIN32
+#define RED				(FOREGROUND_RED | FOREGROUND_INTENSITY)
+#define GREEN			(FOREGROUND_GREEN | FOREGROUND_INTENSITY)
+#define YELLOW			(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY)
+#define WHITE			(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY)
+
+#define CLEARSCREEN		system("cls")
+#else
+#define RED				"\e[1;31m"
+#define GREEN			"\e[1;32m"
+#define YELLOW			"\e[1;33m"
+#define WHITE			"\e[1;37m"
+#define RESET			"\e[0m"
+
+#define CLEARSCREEN		printf("\e[2J\e[H")
+#define _getch()		getchar()
+#define SetColor(x)		printf(x)
+#endif
+
 #include "PAC_err.h"
 
 const int EPC_STR_LENGTH = 40;
@@ -45,8 +68,6 @@ struct EPC_info
     char* EPC_str;
     int  antenna;
     int RSSI;
-
-    int cnt = 1;
 
     EPC_info()
         {
@@ -99,11 +120,23 @@ class rfid_reader
 		static void ResultHandlerSetExtendedResultFlag( tResultFlag enResultFlag,
 			RRU4 hHandle, void *pTag );
 
-		static void ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
-			TByte ubExtendedResultFlagMask,
-			tEPCListEntry *pEPCList, RRU4 hHandle, void *pTag );
+        static void ResultHandlerASyncReadDataUntilEndOfBankAnySync(
+            tResultFlag enResultFlag,
+            tStartStopHeartbeatFlag enStartStopHeartbeatFlag,
+            RRU4 hHandle, void *pTag );
+
+        static void ResultHandlerASyncReadDataUntilEndOfBankAnyASync(
+            tComingGoingFlag enComingGoingFlag, TByte ubExtendedResultFlagMask,
+            tEPCListEntry *pEPCList, RRU4 hHandle, void *pTag );
+
+        static void ResultHandlerASyncStopCommand( tResultFlag enResultFlag,
+            RRU4 hHandle, void *pTag );
 
 		void CallSyncGetEPCs();
+
+        void CallASyncReadDataAny();
+
+        void stopAsyncREading();
 
 		TBool CallSetExtResultFlag(TByte ubExtendedResultFlagMask);
 
@@ -125,8 +158,8 @@ class rfid_reader
 
 		int state;
 
-		int EPC_cnt;
-		EPC_info EPC_info_array[ MAX_EPS_COUNT ];
+		int EPC_cnt = 0;
+		EPC_info EPC_info_array[ MAX_EPS_COUNT ];        
         
         int socket_number;
         sockaddr_in sock_address;
@@ -135,6 +168,5 @@ class rfid_reader
         int retr_cnt = 0;
         bool is_set_err = false;
 
-        // Display all available epcs in the antenna field.
-        std::vector< std::pair< EPC_info*, int > > tags;
+        bool asinc_going = false;
 	};

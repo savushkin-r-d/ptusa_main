@@ -4,6 +4,14 @@
 #ifdef _WIN32
 #pragma warning( push )
 #pragma warning( disable: 4996 ) 
+
+HANDLE _hStdOut;
+
+void SetColor( WORD color )
+    {
+    if ( _hStdOut == NULL ) _hStdOut = GetStdHandle( STD_OUTPUT_HANDLE );
+    SetConsoleTextAttribute( _hStdOut, color );
+    }
 #endif
 
  rfid_reader* rfid_reader::rfid_readers[ MAX_READERS_COUNT ] = { 0 };
@@ -108,7 +116,7 @@ int rfid_reader::evaluate()
 
 	if ( _hReader )
 		{
-		CallSyncGetEPCs();
+        CallASyncReadDataAny();
 		}
 
     // Проверка связи.
@@ -128,7 +136,7 @@ int rfid_reader::evaluate()
             {
             is_set_err = false;
             PAC_critical_errors_manager::get_instance()->reset_global_error(
-                PAC_critical_errors_manager::PAC_critical_errors_manager::AC_NO_CONNECTION,
+                PAC_critical_errors_manager::AC_NO_CONNECTION,
                 PAC_critical_errors_manager::AS_RFID_READER, number );
             }
         }
@@ -174,11 +182,15 @@ void rfid_reader::disconnect()
 	if ( _hReader )
 		{
         EPC_cnt = 0;
+        
+        stopAsyncREading();
 
         DisconnectReader( _hReader );
 		_hReader = 0;
 		state = ST_CANT_CONNECT;
 		}
+
+    asinc_going = false;
 	}
 
 //-----------------------------------------------------------------------------
@@ -195,27 +207,34 @@ rfid_reader::rfid_reader( const char* ip_address, int number ): _hReader( 0 ),
 #endif
 	// ------------------------------------------------------------------------
 	// Let's connecting the result handlers.
-	// The reader calls a command-specific result handler if a command is done and the answer is ready to send.
-	// So let's tell the reader which functions should be called if a result is ready to send.
+	// The reader calls a command-specific result handler if a command is done
+    // and the answer is ready to send.
+	// So let's tell the reader which functions should be called if a result is
+    // ready to send.
 
 	// result handler for setting an extended result flag
 	SetDllResultHandlerSetExtendedResultFlag( ResultHandlerSetExtendedResultFlag );
 
 	// result handler for reading epcs synchronous
-	SetDllResultHandlerSyncGetEPCs( ResultHandlerSyncGetEPCs );
+	SetDllResultHandlerSyncGetEPCs( 0 );
 
 	// result handler for reading EPCs data asynchronous
 	// Note: Here we need two result handler,
-	// first is the result handler for the answer of sending the command to the reader,
-	// second is the result handler for the asynchronous answers (if a tag comes or leaves the antenna field).
-	SetDllResultHandlerASyncReadDataUntilEndOfBankAny( 0, 0 );
+	// first is the result handler for the answer of sending the command to
+    // the reader, second is the result handler for the asynchronous
+    // answers (if a tag comes or leaves the antenna field).    
+    SetDllResultHandlerASyncReadDataUntilEndOfBankAny(
+        ResultHandlerASyncReadDataUntilEndOfBankAnySync,
+        ResultHandlerASyncReadDataUntilEndOfBankAnyASync );
 
 	// result handler for asynchronous stop command
-	// Note: The reader will do his asynchronous job until the "ASyncStopCommand" is called.
+	// Note: The reader will do his asynchronous job until the
+    // "ASyncStopCommand" is called.
 	// Even if you disconnect, the reader will still do his job.
-	// Note: Only one receiver of the asynchronous answers is possible, that means if a second reader instance is sending
+	// Note: Only one receiver of the asynchronous answers is possible,
+    // that means if a second reader instance is sending
 	// an asynchronous start command, the first reader will not get any answers.
-	SetDllResultHandlerASyncStopCommand( 0 );
+	SetDllResultHandlerASyncStopCommand( ResultHandlerASyncStopCommand );
 
 	// result handler for adding an action to an actionlist
 	SetDllResultHandlerGPIOAddActionToActionlist( 0 );
@@ -241,14 +260,21 @@ rfid_reader::rfid_reader( const char* ip_address, int number ): _hReader( 0 ),
 	// To connect via another option, just uncomment the corresponding code-block.
 
 	// connect via ethernet
-	communicationConfigData.enCommunicationType = CT_EthernetAuto; // auto detect ethernet communication type (auto detect generation 2 / generation 3 reader)
-	communicationConfigData.ustCommunicationConfigParameters.stEthernet.bIsIPAddress = 0; // 0: network name; 1: ip address
-	communicationConfigData.ustCommunicationConfigParameters.stEthernet.enIPAddressType = IPAT_IPv4; // IPv6 not supported yet
+    // auto detect ethernet communication type
+	communicationConfigData.enCommunicationType = CT_EthernetAuto; 
+    // 0: network name; 1: ip address
+	communicationConfigData.ustCommunicationConfigParameters.stEthernet.bIsIPAddress = 0; 
+    // IPv6 not supported yet
+	communicationConfigData.ustCommunicationConfigParameters.stEthernet.enIPAddressType = IPAT_IPv4;
 	// Note: Let's set our ip address as a network name, it works like a charm.
-	strcpy(communicationConfigData.ustCommunicationConfigParameters.stEthernet.uKindOfConnection.rgcNetworkName, this->ip_address ); // network name, bIsIPAddress must be set to 0
-	communicationConfigData.ustCommunicationConfigParameters.stEthernet.udwKeepAliveTime = 3000; // keep-alive time
-	communicationConfigData.ustCommunicationConfigParameters.stEthernet.pcSSHAuth = NULL; // NULL: don't use ssh connection, != NULL: password or path to key file
-	communicationConfigData.ustCommunicationConfigParameters.stEthernet.pcSSHUser = NULL; // NULL: username for ssh connection is "root", != NULL: username for ssh connection
+    // network name, bIsIPAddress must be set to 0
+	strcpy(communicationConfigData.ustCommunicationConfigParameters.stEthernet.uKindOfConnection.rgcNetworkName, this->ip_address );
+    // keep-alive time
+    communicationConfigData.ustCommunicationConfigParameters.stEthernet.udwKeepAliveTime = 3000;
+    // NULL: don't use ssh connection, != NULL: password or path to key file
+	communicationConfigData.ustCommunicationConfigParameters.stEthernet.pcSSHAuth = NULL;
+    // NULL: username for ssh connection is "root", != NULL: username for ssh connection
+	communicationConfigData.ustCommunicationConfigParameters.stEthernet.pcSSHUser = NULL;
 	}
 
 //-----------------------------------------------------------------------------
@@ -271,137 +297,138 @@ void rfid_reader::ResultHandlerSetExtendedResultFlag(
 			}
 		}
 	}
-
 //-----------------------------------------------------------------------------
-void rfid_reader::ResultHandlerSyncGetEPCs( tResultFlag enResultFlag,
-	TByte ubExtendedResultFlagMask, tEPCListEntry *pEPCList,
-	RRU4 hHandle, void *pTag )
-	{
-	for ( int i = 0; i < cnt; i++ )
-		{
-		if ( rfid_readers[ i ]->_hReader == hHandle )
-			{
-            rfid_reader* r = rfid_readers[ i ];
-			tEPCListEntry *pResultListEntry;
+void rfid_reader::ResultHandlerASyncReadDataUntilEndOfBankAnySync(
+    tResultFlag enResultFlag,
+    tStartStopHeartbeatFlag enStartStopHeartbeatFlag,
+    RRU4 hHandle, void *pTag )
+    {
+    for ( int i = 0; i < cnt; i++ )
+        {
+        if ( rfid_readers[ i ]->_hReader == hHandle )
+            {
+            // Let's store the result flag in a global variable to get
+            // access from everywhere.
+            rfid_readers[ i ]->_enResultFlag = enResultFlag;
 
-			// Let's store the result flag in a global variable to get access
-			// from everywhere.
-			r->_enResultFlag = enResultFlag;
-            			
-            for ( unsigned int i = 0; i < r->tags.size(); i++ )
+            // Let's set the event so that the calling process knows
+            // the command was processed by reader and the result is
+            // ready to get processed.
+            SetEvent( rfid_readers[ i ]->_hResultHandlerEvent );
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void rfid_reader::ResultHandlerASyncReadDataUntilEndOfBankAnyASync(
+    tComingGoingFlag enComingGoingFlag, TByte ubExtendedResultFlagMask,
+    tEPCListEntry *pEPCList, RRU4 hHandle, void *pTag )
+    {
+    for ( int i = 0; i < cnt; i++ )
+        {
+        rfid_reader* r = rfid_readers[ i ];
+        if ( r->_hReader == hHandle )
+            {
+            tEPCListEntry *pResultListEntry;
+
+            // Display all available epcs in the antenna field.
+            pResultListEntry = pEPCList;
+            while ( pResultListEntry != NULL )
                 {
-                r->tags[ i ].second = 0;
-                }
+                TByte ubTemp;
 
-			pResultListEntry = pEPCList;
-			while (pResultListEntry != NULL)
-				{
-                static char EPC_str[ EPC_STR_LENGTH ];
-                memset( EPC_str, 0, EPC_STR_LENGTH );
-
-                for ( int j = 0; pResultListEntry->stEPC.ubEPCWordLength > j &&
-                    j < MAX_EPS_COUNT; j++ )
+                // At asynchronous commands you will get the requested data
+                // and the epc.
+                if ( enComingGoingFlag == CGF_Coming )
                     {
-                    sprintf( EPC_str + strlen( EPC_str ), "%04X",
-                        pResultListEntry->stEPC.rguwEPC[ pResultListEntry->stEPC.ubEPCWordLength - j - 1 ] );
-                    }
+                    char* EPC_str = r->EPC_info_array[ r->EPC_cnt ].EPC_str;
+                    memset( EPC_str, 0, EPC_STR_LENGTH );
 
-                bool was = false;
-                for ( unsigned int i = 0; i < r->tags.size(); i++ )
-                    {                        
-                    if ( strcmp( r->tags[ i ].first->EPC_str, EPC_str ) == 0 )
+                    for ( int j = 0; pResultListEntry->stEPC.ubEPCWordLength > j; j++ )
                         {
+                        sprintf( EPC_str + strlen( EPC_str ), "%04X",
+                            pResultListEntry->stEPC.rguwEPC[
+                            pResultListEntry->stEPC.ubEPCWordLength - j - 1 ] );
+                        }
+                    r->EPC_info_array[ r->EPC_cnt ].antenna = pResultListEntry->ubPort;
+                    r->EPC_info_array[ r->EPC_cnt ].RSSI = pResultListEntry->ubRSSI;
 
-                        if ( r->tags[ i ].first->cnt < 4 )
-                            {
-                        	r->tags[ i ].second = 2;
-                            r->tags[ i ].first->cnt++;
-                            }
-                        else
-                        	{
-                        	if ( r->tags[ i ].first->cnt == 4 )
-								{
-								r->tags[ i ].second = 3;
-								r->tags[ i ].first->cnt++;
-								}
-							else
-								{
-								r->tags[ i ].second = 4;
-								}
-                        	}
-                        was = true;
+                    r->EPC_cnt++;
+
+                    if ( G_DEBUG )
+                        {
+                        SetColor( WHITE );
+                        printf( "%d EPC: ", i + 1 );
+                        for ( ubTemp = 0; pResultListEntry->stEPC.ubEPCWordLength > ubTemp; ubTemp++ )
+                            printf( "%04X", pResultListEntry->stEPC.rguwEPC[ pResultListEntry->stEPC.ubEPCWordLength - ubTemp - 1 ] );
+                        printf( ", Antenna: %u, RSSI: %u is ", pResultListEntry->ubPort, pResultListEntry->ubRSSI );
+                        SetColor( GREEN );
+                        printf( "coming" );
+                        SetColor( WHITE );
+                        printf( "\r\n" );
                         }
                     }
-                if ( was == false )
+                else if ( enComingGoingFlag == CGF_Going )
                     {
-                    r->tags.push_back(
-                        std::pair< EPC_info*, int >( new EPC_info( 
-                        EPC_str, pResultListEntry->ubPort,
-                        pResultListEntry->ubRSSI ), 1 ) );
-                    }
+                    static char EPC_str[ EPC_STR_LENGTH ];
+                    memset( EPC_str, 0, EPC_STR_LENGTH );
 
+                    for ( int j = 0; pResultListEntry->stEPC.ubEPCWordLength > j; j++ )
+                        {
+                        sprintf( EPC_str + strlen( EPC_str ), "%04X",
+                            pResultListEntry->stEPC.rguwEPC[ pResultListEntry->stEPC.ubEPCWordLength - j - 1 ] );
+                        }
+                    //Ищем и удаляем данную метку.
+                    for ( int j = 0; j < r->EPC_cnt; j++ )
+                        {
+                        if ( pResultListEntry->ubPort == r->EPC_info_array[ j ].antenna &&
+                            strcmp( EPC_str, r->EPC_info_array[ j ].EPC_str ) == 0 )
+                            {
+                            for ( int l = j; l < r->EPC_cnt - 1; l++ )
+                                {
+                                r->EPC_info_array[ l ].antenna = r->EPC_info_array[ l + 1 ].antenna;
+                                r->EPC_info_array[ l ].RSSI = r->EPC_info_array[ l + 1 ].RSSI;
+                                strcpy( r->EPC_info_array[ l ].EPC_str, r->EPC_info_array[ l + 1 ].EPC_str );
+                                }
+
+                            r->EPC_cnt--;
+                            }
+                        }
+
+                    if ( G_DEBUG )
+                        {
+                        SetColor( WHITE );
+                        printf( "%d EPC: ", i + 1 );
+                        for ( ubTemp = 0; pResultListEntry->stEPC.ubEPCWordLength > ubTemp; ubTemp++ )
+                            printf( "%04X", pResultListEntry->stEPC.rguwEPC[ pResultListEntry->stEPC.ubEPCWordLength - ubTemp - 1 ] );
+                        printf( ", Antenna: %u, Reads: %u is ", pResultListEntry->ubPort, pResultListEntry->uwReadCount );
+                        SetColor( RED );
+                        printf( "going\r\n" );
+                        }
+                    }
+                else
+                    {
+                    if ( G_DEBUG )
+                        {
+                        SetColor( WHITE );
+                        printf( "%d EPC: ", i + 1 );
+                        for ( ubTemp = 0; pResultListEntry->stEPC.ubEPCWordLength > ubTemp; ubTemp++ )
+                            printf( "%04X", pResultListEntry->stEPC.rguwEPC[ pResultListEntry->stEPC.ubEPCWordLength - ubTemp - 1 ] );
+                        printf( ", Antenna: %u is ", pResultListEntry->ubPort );
+                        SetColor( YELLOW );
+                        printf( "data changing\r\n" );
+                        }
+                    }
 
                 pResultListEntry = pResultListEntry->pNext;
-				}
-			
-            for ( unsigned int i = 0; i < r->tags.size(); i++ )
-                {
-                if ( r->tags[ i ].second == 0 )
-                    {
-                    r->tags[ i ].first->cnt--;
-                    }
-                }
-            
-            int idx = 0;
-            for ( unsigned int k = 0; k < r->tags.size(); k++ )
-                {
-                switch ( r->tags[ k ].second )
-                    {         
-                    case 0: // Удалилась
-                        if ( r->tags[ k ].first->cnt <= 0 )
-                            {
-                            if ( G_DEBUG )
-                                {
-                                printf( "%d off: %d %s\n", i,
-                                    r->tags[ k ].first->antenna,
-                                    r->tags[ k ].first->EPC_str );
-                                }
-                            r->tags.erase( r->tags.begin() + k );
-                            }
-                        break;
-
-                    case 3: // Появилась
-                        if ( G_DEBUG )
-                            {
-                            printf( "%d on:  %d %s %02d\n", i,
-                                r->tags[ k ].first->antenna,
-                                r->tags[ k ].first->EPC_str,
-                                r->tags[ k ].first->RSSI );
-                            }
-                    case 4:
-                        char *EPC_str = r->EPC_info_array[ idx ].EPC_str;
-                        memset( EPC_str, 0, EPC_STR_LENGTH );
-                        sprintf( EPC_str, "%s", r->tags[ k ].first->EPC_str );
-                        r->EPC_info_array[ idx ].antenna = r->tags[ k ].first->antenna;
-                        r->EPC_info_array[ idx ].RSSI = r->tags[ k ].first->RSSI;
-
-                        idx++;
-                                         
-                        break;
-                    }
                 }
 
-            r->EPC_cnt = idx;
-                
-
-			// Let's set the event so that the calling process knows the
-			// command was processed by reader and the result is ready to get
-			// processed.
-			SetEvent( r->_hResultHandlerEvent );
-			}
-		}
-	}
-
+            // Let's set the event so that the calling process knows 
+            // the command was processed by reader and the result is
+            // ready to get processed.
+            SetEvent( r->_hResultHandlerEvent );
+            }
+        }
+    }
 //-----------------------------------------------------------------------------
 void rfid_reader::CallSyncGetEPCs()
 	{
@@ -426,7 +453,7 @@ void rfid_reader::CallSyncGetEPCs()
 				WaitForSingleObject( _hResultHandlerEvent, MAX_WAIT_TIME ) )
 #else
 			clock_gettime( CLOCK_REALTIME, &_ts );
-			_ts.tv_sec += 5;
+			_ts.tv_sec += 1;
 			if (!sem_timedwait( &_hResultHandlerEvent, &_ts ) )
 #endif
 				{
@@ -476,12 +503,152 @@ void rfid_reader::CallSyncGetEPCs()
 				}
 			}
 		}
-	//if ( G_DEBUG )
-	//	{
-	//	printf( "\r\n" );
-	//	}
 	}
+//-----------------------------------------------------------------------------
+void rfid_reader::CallASyncReadDataAny()
+    {
+    // Let's set the extended result flag to "ERF_00RA". This means, that we'll
+    //receive the antenna and rssi value.
+    if ( CallSetExtResultFlag( ERF_MASK_A | ERF_MASK_R ) )
+        {
+        // The command was successfully processed by the reader.
 
+        if ( asinc_going ) return;
+
+        // Let's use the command "ASyncReadDataUntilEndOfBankAny" to read the
+        //complete tid memory bank.
+        // Using this command prevents error if a tags memory bank is not
+        //accessible.
+        ResetEvent( _hResultHandlerEvent );
+        tReaderErrorCode enReaderErrorCode = 
+            ASyncReadDataUntilEndOfBankAny( _hReader, 0, TMB_TID, 0, 0xFF );
+        if ( enReaderErrorCode == REC_NoError )
+            {
+            // No error occurs while sending the command to the reader. Let's
+            //wait until the result handler was called.
+#ifdef _WIN32
+            if ( WAIT_OBJECT_0 == 
+                WaitForSingleObject( _hResultHandlerEvent, MAX_WAIT_TIME ) )
+#else
+            clock_gettime( CLOCK_REALTIME, &_ts );
+            _ts.tv_sec += 1;
+            if ( !sem_timedwait( &_hResultHandlerEvent, &_ts ) )
+#endif
+                {
+                // The reader's work is done and the result handler was called.
+                //Let's check the result flag to make sure everything is ok.
+                if ( _enResultFlag == RF_NoError )
+                    {
+                    asinc_going = true;
+                    }
+                else
+                    {
+                    if ( G_DEBUG )
+                        {
+                        // The command can't be proccessed by the reader. To know
+                        //why check the result flag.
+                        SetColor( RED );
+                        printf( "Command \"ASyncReadDataUntilEndOfBankAny\" "
+                            "exited with error %u\r\n", _enResultFlag );
+                        SetColor( WHITE );
+                        }
+                    }
+                }
+            else
+                {
+                if ( G_DEBUG )
+                    {
+                    // We're getting no answer from the reader within MAX_WAIT_TIME.
+                    SetColor( RED );
+                    printf( "Command \"ASyncReadDataUntilEndOfBankAny\" "
+                        "timed out\r\n" );
+                    SetColor( WHITE );
+                    }
+                }
+            }
+        else
+            {
+            if ( G_DEBUG )
+                {
+                // Sending the command to the reader failed. To know why check the
+                //error code.
+                SetColor( RED );
+                printf( "Sending the command \"ASyncReadDataUntilEndOfBankAny\" "
+                    "was not successful (%u)\r\n", enReaderErrorCode );
+                SetColor( WHITE );
+                }
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void rfid_reader::stopAsyncREading()
+    {    
+    ResetEvent( _hResultHandlerEvent );
+    tReaderErrorCode enReaderErrorCode = ASyncStopCommand( _hReader );
+    if ( enReaderErrorCode == REC_NoError )
+        {
+        // No error occurs while sending the command to the reader. Let's wait
+        //until the result handler was called.
+#ifdef _WIN32
+        if ( WAIT_OBJECT_0 == WaitForSingleObject( _hResultHandlerEvent, MAX_WAIT_TIME ) )
+#else
+        clock_gettime( CLOCK_REALTIME, &_ts );
+        _ts.tv_sec += 1;
+        if ( !sem_timedwait( &_hResultHandlerEvent, &_ts ) )
+#endif
+            {
+            // The reader's work is done and the result handler was called.
+            //Let's check the result flag to make sure everything is ok.
+            if ( _enResultFlag == RF_NoError )
+                {
+                // The command was successfully processed by the reader.
+                }
+            else
+                {
+                if ( G_DEBUG )
+                    {
+                    // The command can't be proccessed by the reader. To know why
+                    //check the result flag.
+                    SetColor( RED );
+                    printf( "Command \"ASyncStopCommand\" exited with error %u\r\n",
+                        _enResultFlag );
+                    SetColor( WHITE );
+                    }
+                }
+            }
+        else
+            {
+            if ( G_DEBUG )
+                {
+                // We're getting no answer from the reader within MAX_WAIT_TIME
+                // time.
+                SetColor( RED );
+                printf( "Command \"ASyncStopCommand\" timed out\r\n" );
+                SetColor( WHITE );
+                }
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void rfid_reader::ResultHandlerASyncStopCommand( tResultFlag enResultFlag,
+    RRU4 hHandle, void *pTag )
+    {
+    for ( int i = 0; i < cnt; i++ )
+        {
+        if ( rfid_readers[ i ]->_hReader == hHandle )
+            {
+
+            // Let's store the result flag in a global variable to get access
+            // from everywhere.
+            rfid_readers[ i ]->_enResultFlag = enResultFlag;
+
+            // Let's set the event so that the calling process knows the
+            // command was processed by reader and the result is ready to
+            // get processed.
+            SetEvent( rfid_readers[ i ]->_hResultHandlerEvent );
+            }
+        }
+    }
 //-----------------------------------------------------------------------------
 TBool rfid_reader::CallSetExtResultFlag(TByte ubExtendedResultFlagMask)
 	{
@@ -546,6 +713,12 @@ TBool rfid_reader::CallSetExtResultFlag(TByte ubExtendedResultFlagMask)
 			printf("Sending the command \"SetExtendedResultFlag\" was not "
 					"successful (%u)\r\n", enReaderErrorCode);
 			}
+
+        retr_cnt++;
+        if ( retr_cnt > MAX_RETR_CNT )
+            {
+            disconnect();
+            }        
 		}
 
 	return result;
