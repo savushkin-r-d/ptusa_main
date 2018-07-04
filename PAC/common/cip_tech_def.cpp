@@ -2137,11 +2137,11 @@ int cipline_tech_object::EvalCommands()
 
                 if (TECH_TYPE_CAR_WASH == tech_type || TECH_TYPE_CAR_WASH_SELF_CLEAN == tech_type)
                     {
-                    if (!(switch1 || switch2 || switch3 || switch4) && rt_par_float[P_PROGRAM] != SPROG_ACID_PREPARATION && rt_par_float[P_PROGRAM] != SPROG_CAUSTIC_PREPARATION)
+                    if (!(switch1 || switch2 || switch3 || switch4) && rt_par_float[P_PROGRAM] != SPROG_ACID_PREPARATION && rt_par_float[P_PROGRAM] != SPROG_CAUSTIC_PREPARATION && rt_par_float[P_PROGRAM] != SPROG_SELF_CLEAN)
                         {
                         return 0;
                         }
-                    if (rt_par_float[P_PROGRAM] == SPROG_CAUSTIC_PREPARATION || rt_par_float[P_PROGRAM] == SPROG_ACID_PREPARATION)
+                    if (rt_par_float[P_PROGRAM] == SPROG_CAUSTIC_PREPARATION || rt_par_float[P_PROGRAM] == SPROG_ACID_PREPARATION || rt_par_float[P_PROGRAM] == SPROG_SELF_CLEAN)
                         {
                         switch1 = 0;
                         switch2 = 0;
