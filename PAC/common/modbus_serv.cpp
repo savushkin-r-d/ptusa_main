@@ -238,11 +238,14 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 								ForceBit(i,&outdata[3],cipline_tech_object::Mdls[coilgroup - C_MSA_LINE1PARAMS]->rt_par_float[objnumber - 1] != 0 ? 1 : 0);
 								}
 							break;
+                        default:
+                            goto luareadcoils;
 						}
 					}
 				} 
 			else
 				{
+                luareadcoils:
 				static char has_Lua_read_coils = 0;
 				if ( has_Lua_read_coils == 0 )
 					{
@@ -571,12 +574,13 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							i++;
 							break;
 						default:
-							break;
+                            goto luareadregisters;
 						}
 					}
 				}
 			else
 				{
+                luareadregisters:
 				int idx = 0;
 				static char has_Lua_read_holding_registers = 0;
 				if ( has_Lua_read_holding_registers == 0 )
@@ -749,10 +753,13 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 								}
 							}
 						break;
+                    default:
+                        goto luawritecoils;
 					}
 				}
 			else
 				{
+                luawritecoils:
 				static char has_Lua_write_coils = 0;
 				if ( has_Lua_write_coils == 0 )
 					{
@@ -991,34 +998,31 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							i++;
 							break;
 						default:
-                            if ( G_DEBUG ) 
-                                { 
-                                printf("\n\rWrite Unsigned register");
-                                }
-							break;
+                            goto luawriteregisters;
 						}
 					}
 				}
 			else
 				{
-				static char has_Lua_write_coils = 0;
-				if ( has_Lua_write_coils == 0 )
+                luawriteregisters:
+				static char has_Lua_write_registers = 0;
+				if ( has_Lua_write_registers == 0 )
 					{
 					lua_getfield( L, LUA_GLOBALSINDEX, "write_holding_registers" );
 
 					if ( lua_isfunction( L, -1 ) )
 						{
-						has_Lua_write_coils = 2;
+						has_Lua_write_registers = 2;
 						}
 					else
 						{
-						has_Lua_write_coils = 1;
+						has_Lua_write_registers = 1;
 						}
 
 					lua_remove( L, -1 );  // Stack: remove function "write_holding_registers".
 					}
 
-				if ( has_Lua_write_coils == 2 )
+				if ( has_Lua_write_registers == 2 )
 					{
 					lua_getfield( L, LUA_GLOBALSINDEX, "write_holding_registers" );
 					lua_pushnumber( L, coilgroup );
