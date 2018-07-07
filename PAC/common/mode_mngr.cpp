@@ -437,6 +437,29 @@ void off_action::evaluate()
 
     for ( u_int i = 0; i < devices[ IDX ].size(); i++ )
         {
+        if ( devices[ IDX ][ i ]->get_type() == device::DT_V &&
+            ( devices[ IDX ][ i ]->get_state() == valve::V_LOWER_SEAT ||
+            devices[ IDX ][ i ]->get_state() == valve::V_UPPER_SEAT ) )
+            {
+            }
+        else
+            {
+            devices[ IDX ][ i ]->off();
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void off_action::init()
+    {
+    if ( devices.size() == 0 )
+        {
+        return;
+        }
+
+    const u_int IDX = 0;
+
+    for ( u_int i = 0; i < devices[ IDX ].size(); i++ )
+        {
         devices[ IDX ][ i ]->off();
         }
     }

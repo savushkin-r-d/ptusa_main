@@ -142,6 +142,8 @@ class off_action: public action
             }
 
         void evaluate();
+
+        void init();
     };
 //-----------------------------------------------------------------------------
 /// <summary>
