@@ -4566,6 +4566,7 @@ int cipline_tech_object::_InitFilCirc( int with_what, int step_to_init, int f )
         case SANITIZER:
             V00->on();
             V10->off();
+            V11->on();
             NP->off();
             nplaststate = false;
             SetRet(OFF);
