@@ -124,6 +124,8 @@ public:
     int get_int( int byte_offset );
     void set_int( int byte_offset, int val );
 
+    int get_int4( int byte_offset );
+
 private:
     profibus_slave_PFC200()
         {

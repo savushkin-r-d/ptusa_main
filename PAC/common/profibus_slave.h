@@ -103,6 +103,12 @@ class profibus_slave
         virtual int get_int( int byte_offset ) = 0;
 
         /// <summary>
+        /// Получение значения типа int (4 байта).
+        /// </summary>
+        /// <param name="byte_offset">Смещение, диапазон 0..240.</param>
+        virtual int get_int4( int byte_offset ) = 0;
+
+        /// <summary>
         /// Установка значения типа int.
         /// </summary>
         /// <param name="byte_offset">Смещение, диапазон 0..242.</param>

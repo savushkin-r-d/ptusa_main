@@ -17,9 +17,9 @@ profibus_slave_PFC200* profibus_slave_PFC200::get_instance()
 #else
 int profibus_slave_PFC200::init()
     {
-    int32_t iDalResult = DAL_SUCCESS; 			//Return value of the DAL interface.
+    int32_t iDalResult = DAL_SUCCESS;             	//Return value of the DAL interface.
     tDeviceInfo astDeviceList[MAX_DEVICE_LIST_ENTRIES]; //The list of devices given by the ADI.
-    size_t nrDevicesFound = 0; 				//Number of devices found.
+    size_t nrDevicesFound = 0;                 //Number of devices found.
 
 #ifdef DEBUG_PROFIBUS_SLAVE
     printf("\n***************************************************\n");
@@ -422,21 +422,21 @@ int32_t profibus_slave_PFC200::start_watchdog(
     iDalResult = pstAdi->WatchdogStart();
 
     if ( DAL_SUCCESS == iDalResult )
-    {
+        {
 #ifdef DEBUG_PROFIBUS_SLAVE
-    printf( "success\n" );
+        printf( "success\n" );
 #endif // DEBUG_PROFIBUS_SLAVE
-    }
+        }
     else
-    {
+        {
 #ifdef DEBUG_PROFIBUS_SLAVE
-    printf( "failed\n" );
+        printf( "failed\n" );
 #else
-    sprintf( G_LOG->msg, "profibus_slave_PFC200: "
-        "Start the watchdog - failed." );
-    G_LOG->write_log( i_log::P_CRIT );
+        sprintf( G_LOG->msg, "profibus_slave_PFC200: "
+                "Start the watchdog - failed." );
+        G_LOG->write_log( i_log::P_CRIT );
 #endif // DEBUG_PROFIBUS_SLAVE
-    }
+        }
 
     return (iDalResult);
     }
@@ -447,8 +447,8 @@ int profibus_slave_PFC200::eval()
 
     int32_t iDalResult = DAL_SUCCESS; //DAL result.
 #ifdef DEBUG_PROFIBUS_SLAVE
-    uint32_t ulStatus; 		      //Status of the device specific function call.
-    uint8_t ucDevState = 0;           //Current device state.
+    uint32_t ulStatus;               //Status of the device specific function call.
+    uint8_t ucDevState = 0;       //Current device state.
 #endif // DEBUG_PROFIBUS_SLAVE
 
     //Trigger the watchdog.
@@ -456,61 +456,56 @@ int profibus_slave_PFC200::eval()
 
     //Read data from fieldbus output process image.
     if ( iDalResult == DAL_SUCCESS )
-    {
-    iDalResult = pstAdi->ReadStart( iDpsDeviceId, 0 );
-
-    if ( iDalResult == DAL_SUCCESS )
         {
-        iDalResult = pstAdi->ReadBytes( iDpsDeviceId, 0, 0, 244,
-            &aucPlcPrcImgInp[0] );
+        iDalResult = pstAdi->ReadStart( iDpsDeviceId, 0 );
 
         if ( iDalResult == DAL_SUCCESS )
-        {
-        iDalResult = pstAdi->ReadEnd( iDpsDeviceId, 0 );
+            {
+            iDalResult = pstAdi->ReadBytes( iDpsDeviceId, 0, 0, 244,
+                &aucPlcPrcImgInp[0] );
+
+            if ( iDalResult == DAL_SUCCESS )
+                {
+                iDalResult = pstAdi->ReadEnd( iDpsDeviceId, 0 );
+                }
+            }
         }
-        }
-    }
 
     //Test.
     //Echo the process data.
-    //memcpy(&aucPlcPrcImgOutp[0], &aucPlcPrcImgInp[0], sizeof(aucPlcPrcImgInp));
+    memcpy(&aucPlcPrcImgOutp[0], &aucPlcPrcImgInp[0], sizeof(aucPlcPrcImgInp));
 
     //Write data to the fieldbus input process image.
     if ( iDalResult == DAL_SUCCESS )
-    {
-    iDalResult = pstAdi->WriteStart( iDpsDeviceId, 0 );
-
-    if ( iDalResult == DAL_SUCCESS )
         {
-        iDalResult = pstAdi->WriteBytes( iDpsDeviceId, 0, 0, 244,
-            &aucPlcPrcImgOutp[0] );
+        iDalResult = pstAdi->WriteStart( iDpsDeviceId, 0 );
 
         if ( iDalResult == DAL_SUCCESS )
-        {
-        iDalResult = pstAdi->WriteEnd( iDpsDeviceId, 0 );
+            {
+            iDalResult = pstAdi->WriteBytes( iDpsDeviceId, 0, 0, 244,
+                &aucPlcPrcImgOutp[0] );
+
+            if ( iDalResult == DAL_SUCCESS )
+                {
+                iDalResult = pstAdi->WriteEnd( iDpsDeviceId, 0 );
+                }
+            }
         }
-        }
-    }
 
 #ifdef DEBUG_PROFIBUS_SLAVE
     /* print the PLC input process data */
     if ( iDalResult == DAL_SUCCESS )
-    {
-    printf( "PROFIBUS slave DP "
-        "PLC input data = 0x%02X %02X %02X %02X %02X %02X %02X %02X - ",
+        {
+        printf( "PROFIBUS slave DP PLC input data = "
+            "0x%02X %02X %02X %02X %02X "
+              "%02X %02X %02X %02X %02X "
+              "%02X %02X %02X %02X %02X\n",
         aucPlcPrcImgInp[0], aucPlcPrcImgInp[1], aucPlcPrcImgInp[2],
         aucPlcPrcImgInp[3], aucPlcPrcImgInp[4], aucPlcPrcImgInp[5],
-        aucPlcPrcImgInp[6], aucPlcPrcImgInp[7] );
-    }
-    char tmp[4];
-    tmp[0] = aucPlcPrcImgInp[3];
-    tmp[1] = aucPlcPrcImgInp[2];
-    tmp[2] = aucPlcPrcImgInp[1];
-    tmp[3] = aucPlcPrcImgInp[0];
-
-    float *val = (float*) tmp;
-    double dval = *val;
-    printf( "float = %g\n", dval );
+        aucPlcPrcImgInp[6], aucPlcPrcImgInp[7], aucPlcPrcImgInp[8],
+        aucPlcPrcImgInp[9], aucPlcPrcImgInp[10], aucPlcPrcImgInp[11],
+        aucPlcPrcImgInp[12], aucPlcPrcImgInp[13], aucPlcPrcImgInp[14] );
+        }
 
     /* get the device state */
     if ( iDalResult == DAL_SUCCESS )
@@ -521,9 +516,9 @@ int profibus_slave_PFC200::eval()
     if ( DAL_SUCCESS == iDalResult )
         {
         if ( DPS_SUCCESS == ulStatus )
-        {
-        printf( "PROFIBUS slave DP device state %d\n", ucDevState );
-        }
+            {
+            printf( "PROFIBUS slave DP device state %d\n", ucDevState );
+            }
         }
     }
 #endif // DEBUG_PROFIBUS_SLAVE
@@ -535,17 +530,17 @@ double profibus_slave_PFC200::get_double( int offset )
     {
     double res = 0;
     if ( offset < 240 )
-    {
-    char tmp[4];
+        {
+        char tmp[4];
 
-    tmp[0] = aucPlcPrcImgInp[offset + 3];
-    tmp[1] = aucPlcPrcImgInp[offset + 2];
-    tmp[2] = aucPlcPrcImgInp[offset + 1];
-    tmp[3] = aucPlcPrcImgInp[offset];
+        tmp[0] = aucPlcPrcImgInp[offset + 3];
+        tmp[1] = aucPlcPrcImgInp[offset + 2];
+        tmp[2] = aucPlcPrcImgInp[offset + 1];
+        tmp[3] = aucPlcPrcImgInp[offset];
 
-    float *val = (float*) tmp;
-    res = *val;
-    }
+        float *val = (float*) tmp;
+        res = *val;
+        }
 
     return res;
     }
@@ -554,10 +549,10 @@ bool profibus_slave_PFC200::get_bool( int byte_offset, int bit_offset )
     {
     bool res = false;
     if ( byte_offset < 244 && bit_offset < 8 )
-    {
-    char tmp = aucPlcPrcImgInp[byte_offset];
-    res = ( 1 << bit_offset ) & tmp;
-    }
+        {
+        char tmp = aucPlcPrcImgInp[byte_offset];
+        res = ( 1 << bit_offset ) & tmp;
+        }
 
     return res;
     }
@@ -566,10 +561,24 @@ int profibus_slave_PFC200::get_int( int byte_offset )
     {
     int res = 0;
     if ( byte_offset < 242 )
-    {
-    res = 256 * aucPlcPrcImgInp[byte_offset] +
-        aucPlcPrcImgInp[byte_offset + 1];
+        {
+        res = 256 * aucPlcPrcImgInp[byte_offset] +
+            aucPlcPrcImgInp[byte_offset + 1];
+        }
+
+    return res;
     }
+//------------------------------------------------------------------------------
+int profibus_slave_PFC200::get_int4( int byte_offset )
+    {
+    int res = 0;
+    if ( byte_offset < 240 )
+        {
+        res = 16777216 * aucPlcPrcImgInp[byte_offset] +
+            65536 * aucPlcPrcImgInp[byte_offset + 1] +
+            256 * aucPlcPrcImgInp[byte_offset + 2] +
+            aucPlcPrcImgInp[byte_offset + 3];
+        }
 
     return res;
     }
@@ -577,17 +586,17 @@ int profibus_slave_PFC200::get_int( int byte_offset )
 void profibus_slave_PFC200::set_int( int byte_offset, int val )
     {
     if ( byte_offset < 242 )
-    {
-    aucPlcPrcImgOutp[byte_offset] = val >> 8;
-    aucPlcPrcImgOutp[byte_offset + 1] = val;
-    }
+        {
+        aucPlcPrcImgOutp[byte_offset] = val >> 8;
+        aucPlcPrcImgOutp[byte_offset + 1] = val;
+        }
     }
 //------------------------------------------------------------------------------
 void profibus_slave_PFC200::set_bool( int byte_offset, int bit_offset, bool val )
     {
     if ( byte_offset < 244 && bit_offset < 8 )
-    {
-    char tmp = 1 << bit_offset;
+        {
+        char tmp = 1 << bit_offset;
         if ( val )
             {
             aucPlcPrcImgOutp[byte_offset] |= tmp;
@@ -596,7 +605,7 @@ void profibus_slave_PFC200::set_bool( int byte_offset, int bit_offset, bool val 
             {
             aucPlcPrcImgOutp[byte_offset] &= ~tmp;
             }
-    }
+        }
     }
 //------------------------------------------------------------------------------
 void profibus_slave_PFC200::close()
@@ -622,21 +631,21 @@ int32_t profibus_slave_PFC200::stop_watchdog( tApplicationDeviceInterface* pstAd
     iDalResult = pstAdi->WatchdogStop();
 
     if ( DAL_SUCCESS == iDalResult )
-    {
+        {
 #ifdef DEBUG_PROFIBUS_SLAVE
-    printf( "success\n" );
+        printf( "success\n" );
 #endif // DEBUG_PROFIBUS_SLAVE
-    }
+        }
     else
-    {
+        {
 #ifdef DEBUG_PROFIBUS_SLAVE
-    printf( "failed\n" );
+        printf( "failed\n" );
 #else
-    sprintf( G_LOG->msg, "profibus_slave_PFC200: "
-        "Stop the watchdog - failed." );
-    G_LOG->write_log( i_log::P_CRIT );
+        sprintf( G_LOG->msg, "profibus_slave_PFC200: "
+            "Stop the watchdog - failed." );
+        G_LOG->write_log( i_log::P_CRIT );
 #endif // DEBUG_PROFIBUS_SLAVE
-    }
+        }
 
     return (iDalResult);
     }
@@ -651,13 +660,13 @@ int32_t profibus_slave_PFC200::close_device( tApplicationDeviceInterface* pstAdi
     iDalResult = pstAdi->Exit();
 
     if ( DAL_SUCCESS == iDalResult )
-    {
-    printf( "success\n" );
-    }
+        {
+        printf( "success\n" );
+        }
     else
-    {
-    printf( "failed\n" );
-    }
+        {
+        printf( "failed\n" );
+        }
 
     return (iDalResult);
     }
@@ -672,13 +681,13 @@ int32_t profibus_slave_PFC200::release_ADI( tApplicationDeviceInterface* pstAdi 
     iDalResult = pstAdi->Exit();
 
     if ( DAL_SUCCESS == iDalResult )
-    {
-    printf( "success\n" );
-    }
+        {
+        printf( "success\n" );
+        }
     else
-    {
-    printf( "failed\n" );
-    }
+        {
+        printf( "failed\n" );
+        }
 
     return (iDalResult);
     }
