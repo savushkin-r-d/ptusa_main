@@ -75,6 +75,7 @@ public:
     void set_bool( int byte_offset, int bit_offset, bool val ) {}
 
     int get_int( int byte_offset ) { return 0; }
+    int get_int4( int byte_offset ) { return 0; }
     void set_int( int byte_offset, int val ) {}
     };
 
