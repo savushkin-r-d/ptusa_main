@@ -842,6 +842,21 @@ void open_seat_action::init()
         wash_time_upper: wash_time_lower ) / 2;
 
     active_group_n = 0;
+
+    for ( u_int i = 0; i < wash_lower_seat_devices.size(); i++ )
+        {
+        for ( u_int j = 0; j < wash_lower_seat_devices[ i ].size(); j++ )
+            {
+            wash_lower_seat_devices[ i ][ j ]->off();
+            }
+        }
+    for ( u_int i = 0; i < wash_upper_seat_devices.size(); i++ )
+        {
+        for ( u_int j = 0; j < wash_upper_seat_devices[ i ].size(); j++ )
+            {
+            wash_upper_seat_devices[ i ][ j ]->off();
+            }
+        }
     }
 //-----------------------------------------------------------------------------
 void open_seat_action::evaluate()
@@ -855,17 +870,35 @@ void open_seat_action::evaluate()
             {
             for ( u_int j = 0; j < wash_lower_seat_devices[ i ].size(); j++ )
                 {
-                wash_lower_seat_devices[ i ][ j ]->off();
+                device *v = wash_lower_seat_devices[ i ][ j ];
+
+                if ( v->get_state() == valve::V_LOWER_SEAT ||
+                    v->get_state() == valve::V_UPPER_SEAT )
+                    {
+                    }
+                else
+                    {
+                    v->off();
+                    }
                 }
             }
         for ( u_int i = 0; i < wash_upper_seat_devices.size(); i++ )
             {
             for ( u_int j = 0; j < wash_upper_seat_devices[ i ].size(); j++ )
                 {
-                wash_upper_seat_devices[ i ][ j ]->off();
+                device *v = wash_upper_seat_devices[ i ][ j ];
+
+                if ( v->get_state() == valve::V_LOWER_SEAT ||
+                    v->get_state() == valve::V_UPPER_SEAT )
+                    {
+                    }
+                else
+                    {
+                    v->off();
+                    }
                 }
             }
-
+        
         // Пора промывать седла.
         if ( get_delta_millisec( start_cycle_time ) > wait_time )
             {
