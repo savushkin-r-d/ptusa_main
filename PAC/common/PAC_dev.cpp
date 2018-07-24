@@ -1578,7 +1578,8 @@ digital_wago_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
     on_fb( true ),
     off_fb( true ),
     was_on_auto( false ),
-    start_switch_time( get_millisec() )
+    start_switch_time( get_millisec() ),
+    wash_flag ( false )
     {
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     set_par_name( P_FB,  0, "P_FB" );
@@ -1590,7 +1591,8 @@ valve::valve( const char *dev_name, device::DEVICE_TYPE type,
     is_on_fb( false ),
     is_off_fb( false ),
     was_on_auto( false ),
-    start_switch_time( get_millisec() )
+    start_switch_time( get_millisec() ),
+    wash_flag ( false )
     {
     }
 //-----------------------------------------------------------------------------

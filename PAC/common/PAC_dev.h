@@ -824,6 +824,14 @@ class valve: public digital_wago_device
             V_OFF = 0,        ///< Выключен.
             };
 
+        bool is_wash_seat_active() const
+            {
+            return wash_flag;
+            }
+        void set_seat_wash_state( bool wash_flag )
+            {
+            this->wash_flag = wash_flag;
+            }
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
     protected:
@@ -881,6 +889,9 @@ class valve: public digital_wago_device
 
     protected:
         u_long start_switch_time;
+
+    private:
+        bool wash_flag;
     };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство.
@@ -903,7 +914,7 @@ class dev_stub : public i_counter, public valve
         void    direct_on();
         void    direct_off();
         void    direct_set_state( int new_state );
-        
+
         VALVE_STATE get_valve_state();
         int get_state()
             {
@@ -1891,7 +1902,7 @@ class temperature_e : public AI1
             {
 #ifdef DEBUG_NO_WAGO_MODULES
             float v = analog_wago_device::get_value();
-            return -1000 == v ? get_par( P_ERR_T, start_param_idx ) : 
+            return -1000 == v ? get_par( P_ERR_T, start_param_idx ) :
                 AI1::get_value();
 #else
             float v = get_AI( C_AI_INDEX, 0, 0 );

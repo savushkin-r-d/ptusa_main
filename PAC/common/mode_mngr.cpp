@@ -21,7 +21,7 @@ const char* operation::state_str [] =
     "Выполнение",
     "Пауза",
     "Остановлен"
-    };                               
+    };
 //-----------------------------------------------------------------------------
 operation::operation(const char* name, operation_manager *owner, int n) :
     current_state ( OFF ), name( name ),
@@ -58,16 +58,16 @@ int operation::pause()
             run_time += states[ RUN ]->evaluation_time();
             run_step = states[ RUN ]->active_step();
 
-            states[ RUN ]->final();            
+            states[ RUN ]->final();
             break;
 
         case STOP:
             break;
 
         default:
-        	break;
+            break;
         }
-    
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -95,14 +95,14 @@ int operation::stop()
             break;
 
         default:
-        	break;
+            break;
         }
 
     return 0;
     }
 //-----------------------------------------------------------------------------
 int operation::start()
-    {    
+    {
     switch ( current_state )
         {
         case OFF:
@@ -122,7 +122,7 @@ int operation::start()
                 {
                 states[ RUN ]->init();
                 }
-            
+
             states[ RUN ]->add_dx_step_time();
 
             break;
@@ -134,9 +134,9 @@ int operation::start()
             break;
 
         default:
-        	break;
+            break;
         }
-        
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -155,9 +155,9 @@ u_long operation::evaluation_time()
     if ( current_state >= 0 && current_state < STATES_MAX )
         {
         if ( current_state == RUN )
-        	{
+            {
             return run_time + states[ RUN ]->evaluation_time();
-        	}
+            }
 
         return run_time;
         }
@@ -183,9 +183,9 @@ void operation::final()
             {
             states[ idx ]->reset_eval_time();
             }
-        
-        current_state = OFF;        
-        }                          
+
+        current_state = OFF;
+        }
     }
 //-----------------------------------------------------------------------------
 u_int operation::active_step() const
@@ -195,7 +195,7 @@ u_int operation::active_step() const
         {
         return states[ current_state ]->active_step();
         }
-    return 0;  
+    return 0;
     }
 //-----------------------------------------------------------------------------
 u_int operation::get_run_step() const
@@ -256,7 +256,7 @@ void operation::to_step( unsigned int new_step, unsigned long cooperative_time /
         }
     }
 //-----------------------------------------------------------------------------
-step* operation::add_step( const char* name, int next_step_n, 
+step* operation::add_step( const char* name, int next_step_n,
                           unsigned int step_duration_par_n, state_idx s_idx /*= RUN */)
     {
     if ( current_state >= 0 && current_state < STATES_MAX )
@@ -437,10 +437,16 @@ void off_action::evaluate()
 
     for ( u_int i = 0; i < devices[ IDX ].size(); i++ )
         {
-        if ( devices[ IDX ][ i ]->get_type() == device::DT_V &&
-            ( devices[ IDX ][ i ]->get_state() == valve::V_LOWER_SEAT ||
-            devices[ IDX ][ i ]->get_state() == valve::V_UPPER_SEAT ) )
+        if ( devices[ IDX ][ i ]->get_type() == device::DT_V )
             {
+            valve *v  = ( valve* ) devices[ IDX ][ i ];
+            if ( v->is_wash_seat_active() )
+                {
+                }
+            else
+                {
+                v->off();
+                }
             }
         else
             {
@@ -487,7 +493,7 @@ int required_DI_action::check( char* reason ) const
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-step::step( std::string name, operation_state *owner, 
+step::step( std::string name, operation_state *owner,
     bool is_mode /*= false */ ) : action_stub( "Заглушка" ),
     start_time( 0 ),
     is_mode( is_mode ),
@@ -543,7 +549,7 @@ void step::evaluate() const
         }
     }
 //-----------------------------------------------------------------------------
-void step::final() 
+void step::final()
     {
     for ( u_int i = 0; i < actions.size(); i++  )
         {
@@ -621,7 +627,7 @@ int step::check_devices( char* err_dev_name, int str_len )
 void step::set_dx_time( u_int_4 dx_time )
     {
     this->dx_time = dx_time;
-    }                                                                          
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void DI_DO_action::evaluate()
@@ -838,7 +844,7 @@ void open_seat_action::init()
     wash_time_upper = par[ PAC_info::P_MIX_FLIP_UPPER_TIME ];
     wash_time_lower = par[ PAC_info::P_MIX_FLIP_LOWER_TIME ];
 
-    wait_time -= ( wash_time_upper > wash_time_lower ? 
+    wait_time -= ( wash_time_upper > wash_time_lower ?
         wash_time_upper: wash_time_lower ) / 2;
 
     active_group_n = 0;
@@ -870,13 +876,9 @@ void open_seat_action::evaluate()
             {
             for ( u_int j = 0; j < wash_lower_seat_devices[ i ].size(); j++ )
                 {
-                device *v = wash_lower_seat_devices[ i ][ j ];
+                valve *v  = ( valve* ) wash_lower_seat_devices[ i ][ j ];
 
-                if ( v->get_state() == valve::V_LOWER_SEAT ||
-                    v->get_state() == valve::V_UPPER_SEAT )
-                    {
-                    }
-                else
+                if ( !v->is_wash_seat_active() )
                     {
                     v->off();
                     }
@@ -886,19 +888,15 @@ void open_seat_action::evaluate()
             {
             for ( u_int j = 0; j < wash_upper_seat_devices[ i ].size(); j++ )
                 {
-                device *v = wash_upper_seat_devices[ i ][ j ];
+                valve *v  = ( valve* ) wash_upper_seat_devices[ i ][ j ];
 
-                if ( v->get_state() == valve::V_LOWER_SEAT ||
-                    v->get_state() == valve::V_UPPER_SEAT )
-                    {
-                    }
-                else
+                if ( !v->is_wash_seat_active() )
                     {
                     v->off();
                     }
                 }
             }
-        
+
         // Пора промывать седла.
         if ( get_delta_millisec( start_cycle_time ) > wait_time )
             {
@@ -919,8 +917,9 @@ void open_seat_action::evaluate()
             {
             for ( u_int j = 0; j < wash_upper_seat_devices[ active_group_n ].size(); j++ )
                 {
-                wash_upper_seat_devices[ active_group_n ][ j ]->set_state(
-                    valve::V_UPPER_SEAT );
+                valve *v  = ( valve* ) wash_upper_seat_devices[ active_group_n ][ j ];
+                v->set_state( valve::V_UPPER_SEAT );
+                v->set_seat_wash_state( true );
                 }
             }
         else //Время промывки седел вышло.
@@ -953,8 +952,9 @@ void open_seat_action::evaluate()
             {
             for ( u_int j = 0; j < wash_lower_seat_devices[ active_group_n ].size(); j++ )
                 {
-                wash_lower_seat_devices[ active_group_n ][ j ]->set_state(
-                    valve::V_LOWER_SEAT );
+                valve *v  = ( valve* ) wash_lower_seat_devices[ active_group_n ][ j ];
+                v->set_state( valve::V_LOWER_SEAT );
+                v->set_seat_wash_state( true );
                 }
             }
         else //Время промывки седел вышло.
@@ -991,7 +991,9 @@ void open_seat_action::final()
 
             for ( u_int j = 0; j < wash_upper_seat_devices[ active_group_n ].size(); j++ )
                 {
-                wash_upper_seat_devices[ active_group_n ][ j ]->off();
+                valve *v  = ( valve* ) wash_upper_seat_devices[ active_group_n ][ j ];
+                v->off();
+                v->set_seat_wash_state( false );
                 }
             break;
 
@@ -1000,7 +1002,9 @@ void open_seat_action::final()
 
             for ( u_int j = 0; j < wash_lower_seat_devices[ active_group_n ].size(); j++ )
                 {
-                wash_lower_seat_devices[ active_group_n ][ j ]->off();
+                valve *v  = ( valve* ) wash_lower_seat_devices[ active_group_n ][ j ];
+                v->off();
+                v->set_seat_wash_state( false );
                 }
             break;
         }
@@ -1129,7 +1133,7 @@ void wash_action::evaluate()
         {
         devices[ G_DO ][ i ]->on();
         }
-        
+
     int new_state = 0;
 
     // Если нет сигналов, то устройства включаем.
@@ -1140,7 +1144,7 @@ void wash_action::evaluate()
     else
         {
         // В зависимости от сигнала запроса включения устройств выключаем
-        // устройства.    
+        // устройства.
         for ( u_int i = 0; i < devices[ G_DI ].size(); i++ )
             {
             if ( devices[ G_DI ][ i ]->is_active() )
@@ -1155,7 +1159,7 @@ void wash_action::evaluate()
     if ( !par_idx.empty() )
         {
         new_val = ( *par )[ par_idx[ P_PUMP_FREQ ] ];
-        }           
+        }
 
     //Включаем или выключаем устройства.
     for ( u_int i = 0; i < devices[ G_DEV ].size(); i++ )
@@ -1276,7 +1280,7 @@ void wash_action::print( const char* prefix /*= "" */ ) const
         printf( "{" );
         for ( u_int j = 0; j < par_idx.size(); j++ )
             {
-            printf( "%d", par_idx[ j ] ); 
+            printf( "%d", par_idx[ j ] );
             if ( j + 1 < par_idx.size() ) printf( " " );
             }
         printf( "}" );
@@ -1352,8 +1356,8 @@ void operation_state::evaluate()
     if ( par_n > 0 && owner->get_step_param( par_n ) > 0 )
         {
         active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
-        }    
-   
+        }
+
     steps[ active_step_n ]->evaluate();
 
     if ( active_step_time != 0 &&
@@ -1374,7 +1378,7 @@ void operation_state::evaluate()
             {
             to_step( active_step_next_step_n, 0 );
             }
-        }       
+        }
     }
 //-----------------------------------------------------------------------------
 void operation_state::final()
@@ -1397,7 +1401,7 @@ void operation_state::final()
             printf( " FINAL ACTIVE STEP [ %d ] \n", active_step_n );
             }
         active_step_n = -1;
-        }    
+        }
     }
 //-----------------------------------------------------------------------------
 step* operation_state::operator[]( int idx )
@@ -1431,10 +1435,10 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
                 new_step, steps.size() );
             }
         return;
-        }  
+        }
 
     active_step_time        = 0;
-    active_step_next_step_n = 0;   
+    active_step_next_step_n = 0;
 
     if ( active_step_n >= 0 )
         {
@@ -1452,7 +1456,7 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
 
     steps[ active_step_n ]->init();
     steps[ active_step_n ]->evaluate();
- 
+
 
     if ( G_DEBUG )
         {
@@ -1465,9 +1469,9 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
 void operation_state::print( const char* prefix /*= "" */ ) const
     {
     if ( mode_step->is_empty() && steps.empty() )
-    	{
+        {
         return;
-    	}
+        }
 
     std::string new_prefix = prefix;
     new_prefix += "    ";
