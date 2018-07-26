@@ -471,9 +471,10 @@ int profibus_slave_PFC200::eval()
             }
         }
 
-    //Test.
+#ifdef DEBUG_PROFIBUS_SLAVE_ECHO
     //Echo the process data.
     memcpy(&aucPlcPrcImgOutp[0], &aucPlcPrcImgInp[0], sizeof(aucPlcPrcImgInp));
+#endif
 
     //Write data to the fieldbus input process image.
     if ( iDalResult == DAL_SUCCESS )
