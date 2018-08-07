@@ -527,6 +527,9 @@ i_counter* device_manager::get_FQT( const char *dev_name )
             case device::DST_FQT:
                 return ( counter* )res_ctr;
 
+            case device::DST_FQT_VIRT:
+                return ( virtual_counter* ) res_ctr;
+
             default:
                 break;
             }
@@ -538,6 +541,31 @@ i_counter* device_manager::get_FQT( const char *dev_name )
         }
 
     return &stub;
+    }
+//-----------------------------------------------------------------------------
+virtual_counter* device_manager::get_virtual_FQT( const char *dev_name )
+    {
+    int res = get_device_n( device::DT_FQT, dev_name );
+    if ( res > -1 )
+        {
+        device *res_ctr = project_devices.at( res );
+        switch ( res_ctr->get_sub_type() )
+            {
+            case device::DST_FQT_VIRT:
+                return ( virtual_counter* ) res_ctr;
+
+            default:
+                break;
+            }
+        }
+
+    if ( G_DEBUG )
+        {
+        printf( "Error - \"%s\" not found!\n", dev_name );
+        }
+
+    static virtual_counter stub_fqt( "stub" );
+    return &stub_fqt;
     }
 //-----------------------------------------------------------------------------
 i_AI_device* device_manager::get_TE( const char *dev_name )
@@ -708,6 +736,10 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                 case device::DST_FQT_F_OK:
                     new_device = new counter_f_ok( dev_name );
                     new_wago_device = (counter_f_ok*)new_device;
+                    break;
+
+                case device::DST_FQT_VIRT:
+                    new_device = new virtual_counter( dev_name );
                     break;
 
                 default:
@@ -3083,6 +3115,11 @@ i_counter* FQT( const char *dev_name )
     {
     return G_DEVICE_MANAGER()->get_FQT( dev_name );
     }
+
+virtual_counter* virtual_FQT( const char *dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_virtual_FQT( dev_name );
+    }
 //-----------------------------------------------------------------------------
 i_AI_device* TE( u_int dev_n )
     {
@@ -3231,7 +3268,6 @@ void valve_AS_DO1_DI2::direct_set_state(int new_state)
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-
 void virtual_device::direct_off()
     {
     state = 0;
@@ -3270,3 +3306,175 @@ virtual_device::virtual_device( const char *dev_name,
     value = 0;
     state = 0;
     }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+virtual_counter::virtual_counter( const char *dev_name ) :
+    device( dev_name, DT_FQT, DST_FQT_VIRT, 0 ),
+    state( S_WORK ),
+    flow_value( 0 ),
+    value( 0 ),
+    abs_value( 0 ),
+    is_first_read( true )
+    {
+    }
+//-----------------------------------------------------------------------------
+float virtual_counter::get_value()
+    {
+    return (float)get_quantity();
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::direct_set_value( float new_value )
+    {
+    value = (u_int)new_value;
+    }
+//-----------------------------------------------------------------------------
+int virtual_counter::get_state()
+    {
+    return state;
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::direct_on()
+    {
+    start();
+    }
+
+void  virtual_counter::direct_off()
+    {
+    reset();
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case S_STOP:
+            state = S_STOP;
+            reset();
+            break;
+
+        case S_WORK:
+            start();
+            break;
+
+        case S_PAUSE:
+            pause();
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::pause()
+    {
+    state = S_PAUSE;
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::start()
+    {
+    if ( S_STOP == state || S_PAUSE == state )
+        {
+        if ( S_STOP == state )
+            {
+            value = 0;
+            }
+
+        state = S_WORK;
+        }
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::reset()
+    {
+    value = 0;
+    }
+//-----------------------------------------------------------------------------
+u_int virtual_counter::get_quantity()
+    {
+    return value;
+    }
+//-----------------------------------------------------------------------------
+float virtual_counter::get_flow()
+    {
+    return flow_value;
+    }
+//-----------------------------------------------------------------------------
+/// @brief Получение абсолютного значения счетчика (без учета
+/// состояния паузы).
+u_int virtual_counter::get_abs_quantity()
+    {
+    return abs_value;
+    }
+
+/// @brief Сброс абсолютного значения счетчика.
+void  virtual_counter::abs_reset()
+    {
+    abs_value = 0;
+    }
+//-----------------------------------------------------------------------------
+int virtual_counter::set_cmd( const char *prop, u_int idx, double val )
+    {
+    switch ( prop[ 0 ] )
+        {
+        case 'A': //ABS_V
+            abs_value = (u_int)val;
+            break;
+
+        case 'F':
+            flow_value = (float)val;
+            break;
+
+        default:
+            return device::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::set( u_int value, u_int abs_value, float flow )
+    {
+    this->value = value;
+    this->abs_value = abs_value;
+
+    flow_value = flow;
+    }
+//-----------------------------------------------------------------------------
+void virtual_counter::eval( u_int read_value, u_int abs_read_value,
+    float read_flow = 0 )
+    {
+    if ( !is_first_read )        
+        {
+        if ( read_value >= last_read_value )
+            {
+            value += read_value - last_read_value;
+            }
+        else
+            {
+            value += read_value;
+            }
+
+        if ( abs_read_value >= abs_last_read_value )
+            {
+            abs_value += abs_read_value - abs_last_read_value;
+            }
+        else
+            {
+            abs_value += abs_read_value;
+            }
+        }        
+    else
+        {
+        is_first_read = false;
+        }        
+
+    last_read_value = read_value;
+    abs_last_read_value = abs_read_value;
+    flow_value = read_flow;
+    }
+//-----------------------------------------------------------------------------
+//Lua.
+int virtual_counter::save_device_ex( char *buff )
+    {
+    int res = sprintf( buff, "ABS_V=%u, ", get_abs_quantity() );
+    res += sprintf( buff + res, "F=%.2f, ", get_flow() );
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------

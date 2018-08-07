@@ -161,6 +161,18 @@ class i_counter
         virtual void  abs_reset() = 0;
 
         virtual ~i_counter();
+
+        enum STATES
+            {
+            S_STOP,
+            S_WORK,
+            S_PAUSE,
+
+            S_ERROR = -1,
+
+            S_LOW_ERR = -2,
+            S_HI_ERR = -3,
+            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс противосмешивающего клапана (mixproof).
@@ -422,6 +434,7 @@ class device : public i_DO_AO_device, public par_device
             DST_FQT = 1,   ///< Счетчик.
             DST_FQT_F,     ///< Счетчик + расход.
             DST_FQT_F_OK,  ///< Счетчик + расход c диагностикой.
+            DST_FQT_VIRT,  ///Виртуальный cчетчик (без привязки к модулям).
 
             //QT
             DST_QT = 1,   ///< Концентратомер.
@@ -2228,8 +2241,66 @@ class virtual_device : public device
         virtual void direct_on();
 
         virtual int get_state();
-
      };
+//-----------------------------------------------------------------------------
+/// @brief Виртуальное устройство без привязки к модулям ввода-вывода
+class virtual_counter : public device, public i_counter
+    {
+    public:
+        virtual_counter( const char *dev_name );
+
+        float get_value();
+
+        void direct_set_value( float new_value );
+
+        int get_state();
+
+        void direct_on();
+
+        void  direct_off();
+
+        void direct_set_state( int new_state );
+        
+        void pause();
+
+        void start();
+
+        void reset();
+
+        u_int get_quantity();
+
+        float get_flow();
+
+        /// @brief Получение абсолютного значения счетчика (без учета
+        /// состояния паузы).
+        u_int get_abs_quantity();
+
+        /// @brief Сброс абсолютного значения счетчика.
+        void  abs_reset();
+
+        int set_cmd( const char *prop, u_int idx, double val );
+
+        void set( u_int value, u_int abs_value, float flow );
+
+        void eval( u_int read_value, u_int abs_read_value, float read_flow );
+
+        //Lua.
+        int save_device_ex( char *buff );
+
+    protected:
+        STATES state;
+
+    private:
+        float flow_value;
+
+        u_int value;
+        u_int last_read_value;
+
+        u_int abs_value;       ///< Абсолютное значение (не становится на паузу).
+        u_int abs_last_read_value;
+
+        bool is_first_read;         ///< Флаг первой установки значения.        
+    };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым выходом.
 ///
@@ -2594,18 +2665,6 @@ class counter : public device,
             return sprintf( buff, "ABS_V=%u, ", get_abs_quantity() );
             }
 
-        enum STATES
-            {
-            S_STOP,
-            S_WORK,
-            S_PAUSE,
-
-            S_ERROR = -1,
-
-            S_LOW_ERR = -2,
-            S_HI_ERR = -3,
-            };
-
     protected:
         STATES state;
 
@@ -2740,6 +2799,7 @@ class device_manager: public i_Lua_save_device
 
         /// @brief Получение счетчика по номеру.
         i_counter* get_FQT( const char *dev_name );
+        virtual_counter* get_virtual_FQT( const char *dev_name );
 
         /// @brief Получение температуры по номеру.
         i_AI_device* get_TE( const char *dev_name );
@@ -3014,6 +3074,8 @@ i_AO_device* AO( const char *dev_name );
 /// возвращается заглушка (@ref dev_stub).
 i_counter* FQT( u_int dev_n );
 i_counter* FQT( const char *dev_name );
+
+virtual_counter* virtual_FQT( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение температуры по номеру.
 ///
