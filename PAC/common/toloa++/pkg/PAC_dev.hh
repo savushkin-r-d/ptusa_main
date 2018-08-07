@@ -338,6 +338,8 @@ i_AO_device* AO( const char *dev_name );
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
 i_counter* FQT( const char *dev_name );
+
+virtual_counter* virtual_FQT( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение температуры по имени.
 ///
@@ -547,6 +549,16 @@ class level : public i_AI_device
     {
     public:
         virtual float get_volume();
+    };
+//-----------------------------------------------------------------------------
+/// @brief Виртуальное устройство без привязки к модулям ввода-вывода
+class virtual_counter : public device, public i_counter
+    {
+    public:
+        void set( unsigned int value, unsigned int abs_value, float flow );
+
+        void eval( unsigned int read_value, unsigned int abs_read_value,
+            float read_flow );
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
