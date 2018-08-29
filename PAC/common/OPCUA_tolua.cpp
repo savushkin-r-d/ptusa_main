@@ -1,6 +1,6 @@
 /*
 ** Lua binding: OPC_UA
-** Generated automatically by tolua++-1.0.92 on 08/21/18 17:04:10.
+** Generated automatically by tolua++-1.0.92 on 08/29/18 17:02:49.
 */
 
 #ifndef __cplusplus
@@ -25,6 +25,7 @@ static void tolua_reg_types (lua_State* tolua_S)
 {
  tolua_usertype(tolua_S,"device");
  tolua_usertype(tolua_S,"OPCUAServer");
+ tolua_usertype(tolua_S,"tech_object");
 }
 
 /* method: BaseConfig of class  OPCUAServer */
@@ -93,6 +94,39 @@ static int tolua_OPC_UA_OPCUAServer_addPumpObject00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: addTechObject of class  OPCUAServer */
+#ifndef TOLUA_DISABLE_tolua_OPC_UA_OPCUAServer_addTechObject00
+static int tolua_OPC_UA_OPCUAServer_addTechObject00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"OPCUAServer",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,2,"tech_object",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  OPCUAServer* self = (OPCUAServer*)  tolua_tousertype(tolua_S,1,0);
+  tech_object* tobj = ((tech_object*)  tolua_tousertype(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'addTechObject'", NULL);
+#endif
+  {
+   self->addTechObject(tobj);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'addTechObject'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* function: OPC_UA_SERV */
 #ifndef TOLUA_DISABLE_tolua_OPC_UA_OPC_UA_SERV00
 static int tolua_OPC_UA_OPC_UA_SERV00(lua_State* tolua_S)
@@ -131,6 +165,7 @@ TOLUA_API int tolua_OPC_UA_open (lua_State* tolua_S)
   tolua_beginmodule(tolua_S,"OPCUAServer");
    tolua_function(tolua_S,"BaseConfig",tolua_OPC_UA_OPCUAServer_BaseConfig00);
    tolua_function(tolua_S,"addPumpObject",tolua_OPC_UA_OPCUAServer_addPumpObject00);
+   tolua_function(tolua_S,"addTechObject",tolua_OPC_UA_OPCUAServer_addTechObject00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"OPC_UA_SERV",tolua_OPC_UA_OPC_UA_SERV00);
  tolua_endmodule(tolua_S);
