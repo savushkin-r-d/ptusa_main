@@ -147,6 +147,24 @@ void OPCUAServer::BaseConfig(bool readonly)
     CreateFolders();
     CreateDeviceTypes(readonly);
     CreateTechObjectType(readonly);
+
+
+    UA_VariableAttributes attr = UA_VariableAttributes_default;
+    UA_Int32 myInteger = 42;
+    UA_Variant_setScalar(&attr.value, &myInteger, &UA_TYPES[UA_TYPES_INT32]);
+    attr.description = UA_LOCALIZEDTEXT("en-US", "the answer");
+    attr.displayName = UA_LOCALIZEDTEXT("en-US", "the answer");
+    attr.dataType = UA_TYPES[UA_TYPES_INT32].typeId;
+    attr.accessLevel = UA_ACCESSLEVELMASK_READ | UA_ACCESSLEVELMASK_WRITE;
+
+    /* Add the variable node to the information model */
+    UA_NodeId myIntegerNodeId = UA_NODEID_STRING(1, "the.answer");
+    UA_QualifiedName myIntegerName = UA_QUALIFIEDNAME(1, "the answer");
+    UA_NodeId parentNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_OBJECTSFOLDER);
+    UA_NodeId parentReferenceNodeId = UA_NODEID_NUMERIC(0, UA_NS0ID_ORGANIZES);
+    UA_Server_addVariableNode(server, myIntegerNodeId, parentNodeId,
+        parentReferenceNodeId, myIntegerName,
+        UA_NODEID_NUMERIC(0, UA_NS0ID_BASEDATAVARIABLETYPE), attr, NULL, NULL);
     
 }
 
@@ -196,6 +214,7 @@ void OPCUAServer::CreateDeviceTypes(bool readonly)
     /* Добавляем поле "Description" - описание устройства*/
     UA_VariableAttributes mnAttr = UA_VariableAttributes_default;
     mnAttr.displayName = UA_LOCALIZEDTEXT("en-US", "Description");
+    mnAttr.dataType = UA_NODEID_NUMERIC(0, UA_NS0ID_STRING);
     UA_NodeId deviceDescription;
     UA_Server_addVariableNode(server, UA_NODEID_NULL, deviceTypeId,
         UA_NODEID_NUMERIC(0, UA_NS0ID_HASCOMPONENT),
@@ -220,6 +239,7 @@ void OPCUAServer::CreateDeviceTypes(bool readonly)
     UA_VariableAttributes statusAttr = UA_VariableAttributes_default;
     statusAttr.displayName = UA_LOCALIZEDTEXT("en-US", "State");
     statusAttr.valueRank = -1;
+    statusAttr.dataType = UA_NODEID_NUMERIC(0, UA_NS0ID_INT32);
     if (!readonly) statusAttr.accessLevel = UA_ACCESSLEVELMASK_WRITE + UA_ACCESSLEVELMASK_READ;
     UA_NodeId statusId;
     UA_Server_addDataSourceVariableNode(server, UA_NODEID_NULL, pumpTypeId,
@@ -238,6 +258,10 @@ void OPCUAServer::CreateDeviceTypes(bool readonly)
     UA_VariableAttributes rpmAttr = UA_VariableAttributes_default;
     rpmAttr.displayName = UA_LOCALIZEDTEXT("en-US", "Frequency");
     rpmAttr.valueRank = -1;
+    UA_UInt32 * pOutputDimensions = UA_UInt32_new();
+    *pOutputDimensions = NULL;
+    rpmAttr.arrayDimensions = pOutputDimensions;
+    rpmAttr.dataType = UA_NODEID_NUMERIC(0, UA_NS0ID_FLOAT);
     if (!readonly) rpmAttr.accessLevel = UA_ACCESSLEVELMASK_WRITE + UA_ACCESSLEVELMASK_READ;
     UA_NodeId motorRpm;
     UA_Server_addDataSourceVariableNode(server, UA_NODEID_NULL, pumpTypeId,

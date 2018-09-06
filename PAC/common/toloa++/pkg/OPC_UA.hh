@@ -12,6 +12,7 @@ class OPCUAServer
     public:
         void BaseConfig(bool readonly);
         void addPumpObject(device* dev);
+        void addTechObject(tech_object* tobj);
     };
 
 OPCUAServer& OPC_UA_SERV();

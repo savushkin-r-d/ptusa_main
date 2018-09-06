@@ -1,6 +1,6 @@
 /*
 ** Lua binding: OPC_UA
-** Generated automatically by tolua++-1.0.92 on 08/29/18 17:02:49.
+** Generated automatically by tolua++-1.0.92 on 08/31/18 08:23:48.
 */
 
 #ifndef __cplusplus
