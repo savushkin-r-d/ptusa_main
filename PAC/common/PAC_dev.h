@@ -407,6 +407,7 @@ class device : public i_DO_AO_device, public par_device
             DST_V_AS_MIXPROOF,     ///< Клапан с двумя каналами управления и двумя обратными связями с AS интерфейсом (противосмешивающий).
             DST_V_BOTTOM_MIXPROOF, ///< Донный клапан.
             DST_V_AS_DO1_DI2,      ///< Клапан с одним каналом управления и двумя обратными связями с AS интерфейсом.
+            V_DO2_DI2_BISTABLE,    ///< Клапан с двумя каналами управления и двумя обратными связями бистабильный.
 
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
@@ -735,6 +736,8 @@ class DO2 : public digital_wago_device
 #endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
+class valve_DO2_DI2_bistable;
+
 /// @brief Устройство с обратными связями.
 ///
 class valve: public digital_wago_device
@@ -887,6 +890,11 @@ class valve: public digital_wago_device
         /// @brief Вектор клапанов, ожидающих отключение.
         static std::vector< valve* > to_switch_off;
 
+    protected:
+        /// @brief Вектор бистабильных клапанов.
+        static std::vector< valve_DO2_DI2_bistable* > v_bistable;
+
+    private:
         /// @brief Определение завершения отключения клапана с задержкой.
         static bool is_switching_off_finished( valve *v )
             {
@@ -1237,6 +1245,132 @@ class valve_DO2_DI2 : public valve
             }
 #endif // DEBUG_NO_WAGO_MODULES
 
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан с двумя каналами управления и двумя обратными связями 
+/// бистабильный.
+///
+class valve_DO2_DI2_bistable : public valve
+    {
+    public:
+        valve_DO2_DI2_bistable( const char *dev_name ) :
+            valve( true, true, dev_name, DT_V, V_DO2_DI2_BISTABLE )
+            {
+            v_bistable.push_back( this );
+            }
+
+        int evaluate()
+            {
+            int o = get_DI( DI_INDEX_OPEN );
+            int c = get_DI( DI_INDEX_CLOSE );
+
+            unsigned int t = (unsigned int) get_par( valve::P_ON_TIME, 0 );
+            if ( get_DO( DO_INDEX_OPEN ) == 1 )
+                {
+                if ( o == 1 || 
+                    get_delta_millisec( start_switch_time ) > t )
+                    {
+                    set_DO( DO_INDEX_OPEN, 0 );
+                    }
+                }
+            if ( get_DO( DO_INDEX_CLOSE ) == 1 )
+                {
+                if ( c == 1 ||
+                    get_delta_millisec( start_switch_time ) > t )
+                    {
+                    set_DO( DO_INDEX_CLOSE, 0 );
+                    }
+                }
+
+            return 0;
+            }
+
+    private:
+        enum CONSTANTS
+            {
+            DO_INDEX_OPEN = 0,  ///< Индекс канала дискретного выхода Открыть.
+            DO_INDEX_CLOSE,     ///< Индекс канала дискретного выхода Закрыть.
+
+            DI_INDEX_OPEN = 0,  ///< Индекс канала дискретного входа Открыт.
+            DI_INDEX_CLOSE,     ///< Индекс канала дискретного входа Закрыт.
+            };
+
+#ifndef DEBUG_NO_WAGO_MODULES
+    public:
+        void direct_on()
+            {
+            int o = get_DI( DI_INDEX_OPEN );
+            if ( 0 == o )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX_OPEN, 1 );
+                set_DO( DO_INDEX_CLOSE, 0 );
+                }
+            }
+
+        void direct_off()
+            {
+            int c = get_DI( DI_INDEX_CLOSE );
+            if ( 0 == c )
+                {
+                start_switch_time = get_millisec();
+                set_DO( DO_INDEX_OPEN, 0 );
+                set_DO( DO_INDEX_CLOSE, 1 );
+                }
+            }
+
+#endif // DEBUG_NO_WAGO_MODULES
+
+        //Интерфейс для реализации получения расширенного состояния с учетом
+        // всех вариантов (ручной режим, обратная связь, ...).
+    protected:
+        VALVE_STATE get_valve_state()
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return (VALVE_STATE)digital_wago_device::get_state();
+#else
+            int o = get_DI( DI_INDEX_OPEN );
+            return ( VALVE_STATE ) o;
+#endif // DEBUG_NO_WAGO_MODULES
+            }
+
+        bool get_fb_state()
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return true;
+#else
+            int i0 = get_DI( DI_INDEX_OPEN );
+            int i1 = get_DI( DI_INDEX_CLOSE );
+
+            if ( i0 == 1 && i1 == 1 )
+                {
+                return false;
+                }
+            if ( i0 == 1 || i1 == 1 )
+                {
+                return true;
+                }
+
+            if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
+                {
+                return true;
+                }
+
+            return false;
+#endif // DEBUG_NO_WAGO_MODULES
+            }
+
+#ifndef DEBUG_NO_WAGO_MODULES
+        int get_off_fb_value()
+            {
+            return get_DI( DI_INDEX_CLOSE );
+            }
+
+        int get_on_fb_value()
+            {
+            return get_DI( DI_INDEX_OPEN );
+            }
+#endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан mixproof.

@@ -7,6 +7,7 @@
 auto_smart_ptr < device_manager > device_manager::instance;
 
 std::vector<valve*> valve::to_switch_off;
+std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
 
 std::vector<valve_bottom_mix_proof*> valve_bottom_mix_proof::to_switch_off;
 
@@ -681,6 +682,10 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                     new_device      = new valve_AS_DO1_DI2( dev_name );
                     new_wago_device = ( valve_AS_DO1_DI2* ) new_device;
                     break;
+
+                case device::V_DO2_DI2_BISTABLE:
+                    new_device      = new valve_DO2_DI2_bistable( dev_name );
+                    new_wago_device = ( valve_DO2_DI2_bistable* ) new_device;
 
                 default:
                     if ( G_DEBUG )
@@ -1860,6 +1865,16 @@ int valve::set_cmd( const char *prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 void valve::evaluate()
     {
+    if ( v_bistable.empty() == false )
+        {
+        std::vector< valve_DO2_DI2_bistable* >::iterator iter;
+        for ( iter = v_bistable.begin(); iter != v_bistable.end(); iter++ )
+            {
+            valve_DO2_DI2_bistable* v = *iter;
+            v->evaluate();
+            }
+        }
+
     if ( to_switch_off.empty() )
         {
         return;
