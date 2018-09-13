@@ -838,6 +838,8 @@ class valve: public digital_wago_device
 
             V_ON  = 1,        ///< Включен.
             V_OFF = 0,        ///< Выключен.
+
+            V_STOP = 10,      ///< Остановлен.
             };
 
         bool is_wash_seat_active() const
@@ -1300,7 +1302,8 @@ class valve_DO2_DI2_bistable : public valve
         void direct_on()
             {
             int o = get_DI( DI_INDEX_OPEN );
-            if ( 0 == o )
+            int 
+            if ( 0 == o && get_DO( DO_INDEX_OPEN ) == 0 )
                 {
                 start_switch_time = get_millisec();
                 set_DO( DO_INDEX_OPEN, 1 );
@@ -1311,7 +1314,7 @@ class valve_DO2_DI2_bistable : public valve
         void direct_off()
             {
             int c = get_DI( DI_INDEX_CLOSE );
-            if ( 0 == c )
+            if ( 0 == c && get_DO( DO_INDEX_CLOSE ) == 0 )
                 {
                 start_switch_time = get_millisec();
                 set_DO( DO_INDEX_OPEN, 0 );
@@ -1339,6 +1342,8 @@ class valve_DO2_DI2_bistable : public valve
 #ifdef DEBUG_NO_WAGO_MODULES
             return true;
 #else
+            if ( is_stoped ) return true;
+
             int i0 = get_DI( DI_INDEX_OPEN );
             int i1 = get_DI( DI_INDEX_CLOSE );
 
@@ -1371,6 +1376,46 @@ class valve_DO2_DI2_bistable : public valve
             return get_DI( DI_INDEX_OPEN );
             }
 #endif // DEBUG_NO_WAGO_MODULES
+
+        void direct_set_state( int new_state )
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            valve::direct_set_state( new_state );
+#else
+            switch ( new_state )
+                {
+                case V_STOP:
+                    int i0 = get_DI( DI_INDEX_OPEN );
+                    int i1 = get_DI( DI_INDEX_CLOSE );
+
+                    //Если клапан полностью открыт\закрыт ничего не делаем.
+                    if ( i0 == 1 || i1 == 1 )
+                        {
+                        return;
+                        }
+
+                    is_stoped = true;
+                    if ( get_DO( DO_INDEX_OPEN ) == 1 )
+                        {
+                        set_DO( DO_INDEX_OPEN, 0 );
+                        }
+
+                    if ( get_DO( DO_INDEX_CLOSE ) == 1 )
+                        {
+                        set_DO( DO_INDEX_CLOSE, 0 );
+                        }
+                    break;
+
+                default:
+                    is_stoped = false;
+                    valve::direct_set_state( new_state );
+                    break;
+                }
+#endif //DEBUG_NO_WAGO_MODULES
+            }
+
+    private:
+        bool is_stoped = false;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан mixproof.
