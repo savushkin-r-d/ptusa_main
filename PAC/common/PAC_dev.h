@@ -839,7 +839,7 @@ class valve: public digital_wago_device
             V_ON  = 1,        ///< Включен.
             V_OFF = 0,        ///< Выключен.
 
-            V_STOP = 10,      ///< Остановлен.
+            V_STOP = 5,       ///< Остановлен.
             };
 
         bool is_wash_seat_active() const
@@ -1249,14 +1249,15 @@ class valve_DO2_DI2 : public valve
 
     };
 //-----------------------------------------------------------------------------
-/// @brief Клапан с двумя каналами управления и двумя обратными связями 
+/// @brief Клапан с двумя каналами управления и двумя обратными связями
 /// бистабильный.
 ///
 class valve_DO2_DI2_bistable : public valve
     {
     public:
         valve_DO2_DI2_bistable( const char *dev_name ) :
-            valve( true, true, dev_name, DT_V, V_DO2_DI2_BISTABLE )
+            valve( true, true, dev_name, DT_V, V_DO2_DI2_BISTABLE ),
+            is_stoped( false )
             {
             v_bistable.push_back( this );
             }
@@ -1269,7 +1270,7 @@ class valve_DO2_DI2_bistable : public valve
             unsigned int t = (unsigned int) get_par( valve::P_ON_TIME, 0 );
             if ( get_DO( DO_INDEX_OPEN ) == 1 )
                 {
-                if ( o == 1 || 
+                if ( o == 1 ||
                     get_delta_millisec( start_switch_time ) > t )
                     {
                     set_DO( DO_INDEX_OPEN, 0 );
@@ -1302,7 +1303,7 @@ class valve_DO2_DI2_bistable : public valve
         void direct_on()
             {
             int o = get_DI( DI_INDEX_OPEN );
-            int 
+
             if ( 0 == o && get_DO( DO_INDEX_OPEN ) == 0 )
                 {
                 start_switch_time = get_millisec();
@@ -1382,12 +1383,11 @@ class valve_DO2_DI2_bistable : public valve
 #ifdef DEBUG_NO_WAGO_MODULES
             valve::direct_set_state( new_state );
 #else
+            int i0 = get_DI( DI_INDEX_OPEN );
+            int i1 = get_DI( DI_INDEX_CLOSE );
             switch ( new_state )
                 {
                 case V_STOP:
-                    int i0 = get_DI( DI_INDEX_OPEN );
-                    int i1 = get_DI( DI_INDEX_CLOSE );
-
                     //Если клапан полностью открыт\закрыт ничего не делаем.
                     if ( i0 == 1 || i1 == 1 )
                         {
@@ -1415,7 +1415,7 @@ class valve_DO2_DI2_bistable : public valve
             }
 
     private:
-        bool is_stoped = false;
+        bool is_stoped;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан mixproof.
@@ -2439,7 +2439,7 @@ class virtual_counter : public device, public i_counter
         void  direct_off();
 
         void direct_set_state( int new_state );
-        
+
         void pause();
 
         void start();
@@ -2478,7 +2478,7 @@ class virtual_counter : public device, public i_counter
         u_int abs_value;       ///< Абсолютное значение (не становится на паузу).
         u_int abs_last_read_value;
 
-        bool is_first_read;         ///< Флаг первой установки значения.        
+        bool is_first_read;         ///< Флаг первой установки значения.
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым выходом.

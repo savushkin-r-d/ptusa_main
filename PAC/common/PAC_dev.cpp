@@ -1829,6 +1829,10 @@ int valve::get_state()
                     }
                 }
             break;
+
+        case V_STOP:
+            return V_STOP;
+            break;
         }
 
     return VX_UNKNOWN;
@@ -3453,7 +3457,7 @@ void virtual_counter::set( u_int value, u_int abs_value, float flow )
 void virtual_counter::eval( u_int read_value, u_int abs_read_value,
     float read_flow = 0 )
     {
-    if ( !is_first_read )        
+    if ( !is_first_read )
         {
         if ( read_value >= last_read_value )
             {
@@ -3472,11 +3476,11 @@ void virtual_counter::eval( u_int read_value, u_int abs_read_value,
             {
             abs_value += abs_read_value;
             }
-        }        
+        }
     else
         {
         is_first_read = false;
-        }        
+        }
 
     last_read_value = read_value;
     abs_last_read_value = abs_read_value;
