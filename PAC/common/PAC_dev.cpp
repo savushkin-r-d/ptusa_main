@@ -686,6 +686,7 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                 case device::V_DO2_DI2_BISTABLE:
                     new_device      = new valve_DO2_DI2_bistable( dev_name );
                     new_wago_device = ( valve_DO2_DI2_bistable* ) new_device;
+                    break;
 
                 default:
                     if ( G_DEBUG )
