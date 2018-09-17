@@ -1334,7 +1334,18 @@ class valve_DO2_DI2_bistable : public valve
             return (VALVE_STATE)digital_wago_device::get_state();
 #else
             int o = get_DI( DI_INDEX_OPEN );
-            return ( VALVE_STATE ) o;
+            int c = get_DI( DI_INDEX_CLOSE );
+
+            int o_do = get_DO( DO_INDEX_OPEN );
+            int c_do = get_DO( DO_INDEX_CLOSE );
+
+            if ( o == 1 ) return V_ON;
+            if ( c == 1 ) return V_OFF;
+
+            if ( o_do == 1 ) return V_ON;
+            if ( c_do == 1 ) return V_OFF;
+
+            return V_STOP;
 #endif // DEBUG_NO_WAGO_MODULES
             }
 
