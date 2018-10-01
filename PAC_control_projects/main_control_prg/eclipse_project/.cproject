@@ -116,8 +116,27 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1279002828.275152627" name="/" resourcePath="common/RFID">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.exe.debug.1559813995" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.exe.debug" unusedChildren="">
+							<option id="cdt.managedbuild.option.gnu.cross.prefix.519618896.1015778501" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix.519618896"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.1834698884.1805567979" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path.1834698884"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1349147973" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler.143524695">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.63338389" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1279706378" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1983069774">
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2013388118" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.309615744" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker.1193194000"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1913930153" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker.1354228135"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.2100503114" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver.1086927122"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.95832389" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler.1639849313">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.64611348" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
-						<entry excluding="common/WTL|PAC/common/toloa++/pkg|PAC/linux/PAC_PC|PAC/linux/PAC_WAGO_750_860|PAC/DOC|PAC/neuroPID|PAC/MINIOS7|PAC/win|common/util/snprintf.h|common/util/snprintf.c|common/win_util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="common/RFID|common/RFID/API|common/RFID/rfid_reader.cpp|PAC/common/rfid_reader_tolua.cpp|common/WTL|PAC/common/toloa++/pkg|PAC/linux/PAC_PC|PAC/linux/PAC_WAGO_750_860|PAC/DOC|PAC/neuroPID|PAC/MINIOS7|PAC/win|common/util/snprintf.h|common/util/snprintf.c|common/win_util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -188,18 +207,21 @@
 									<listOptionValue builtIn="false" value="../../../../../WAGO/ptxproj-2.2.20/platform-wago-pfc200/sysroot-target/usr/lib/glib-2.0/include"/>
 									<listOptionValue builtIn="false" value="/opt/OSELAS.Toolchain-2012.12.1/arm-cortexa8-linux-gnueabihf/gcc-4.7.3-glibc-2.16.0-binutils-2.22-kernel-3.6-sanitized/arm-cortexa8-linux-gnueabihf/include/c++/4.7.3/arm-cortexa8-linux-gnueabihf"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.dialect.std.97218326" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.dialect.std.97218326" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.c++11" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.2071690987" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="PAC_WAGO_PFC200"/>
+									<listOptionValue builtIn="false" value=""/>
 									<listOptionValue builtIn="false" value="TEST_SPEED"/>
 									<listOptionValue builtIn="false" value="LINUX_OS"/>
 								</option>
+								<option id="gnu.cpp.compiler.option.other.other.728806176" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -Wl,--allow-shlib-undefined" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1300546995" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.2030659299" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
 							<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG} ${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" errorParsers="org.eclipse.cdt.core.GLDErrorParser" id="cdt.managedbuild.tool.gnu.cross.cpp.linker.78347892" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
 								<option id="gnu.cpp.link.option.paths.1694927118" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/opt/OSELAS.Toolchain-2012.12.1/arm-cortexa8-linux-gnueabihf/gcc-4.7.3-glibc-2.16.0-binutils-2.22-kernel-3.6-sanitized/sysroot-arm-cortexa8-linux-gnueabihf/lib"/>
+									<listOptionValue builtIn="false" value="../../../../../WAGO/ptxproj-2.2.20/platform-wago-pfc200/sysroot-target/lib"/>
 									<listOptionValue builtIn="false" value="/home/id/WAGO/ptxproj-2.2.20/platform-wago-pfc200/sysroot-target/usr/lib"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.1550270371" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
@@ -235,8 +257,28 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1279002828.2058158337.1038314193" name="/" resourcePath="common/RFID">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.exe.debug.380226214" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.exe.debug" unusedChildren="">
+							<option id="cdt.managedbuild.option.gnu.cross.prefix.517971764.461596645" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix.517971764"/>
+							<option id="cdt.managedbuild.option.gnu.cross.path.1313504746.1402015997" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path.1313504746"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1438413007" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler.388889323">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1518500363" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.666331756" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler.361316412">
+								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.997687962" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.578248300" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker.2030659299"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.97359720" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker.78347892"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.2090569042" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver.851503259"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.1852291646" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler.349588810">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.864152846" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1279002828.2058158337.211293018" name="OPCUAServer.h" rcbsApplicability="disable" resourcePath="PAC/common/OPCUAServer.h" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="common/WTL|PAC/common/toloa++/pkg|PAC/linux/PAC_PC|PAC/linux/PAC_WAGO_750_860|PAC/DOC|PAC/neuroPID|PAC/MINIOS7|PAC/win|common/util/snprintf.h|common/util/snprintf.c|common/win_util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="PAC/common/OPCUA_tolua.cpp|common/RFID|common/RFID/API|common/RFID/rfid_reader.cpp|PAC/common/rfid_reader_tolua.cpp|PAC/common/OPCUAServer.cpp|PAC/common/OPCUAServer.h|common/WTL|PAC/common/toloa++/pkg|PAC/linux/PAC_PC|PAC/linux/PAC_WAGO_750_860|PAC/DOC|PAC/neuroPID|PAC/MINIOS7|PAC/win|common/util/snprintf.h|common/util/snprintf.c|common/win_util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -271,4 +313,5 @@
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 </cproject>
