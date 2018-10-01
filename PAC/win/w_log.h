@@ -6,6 +6,8 @@
 #include <iostream>
 #include <iomanip>
 #include "ctime"
+
+#include "w_console.h"
 //-----------------------------------------------------------------------------
 /// @brief Работа с журналом.
 ///
@@ -27,24 +29,33 @@ class w_log: public i_log
             std::time_t _tm = std::time( nullptr );
             std::tm tm = *std::localtime( &_tm );
 
-            std::cout << std::put_time( &tm, "log -> \"%Y-%m-%d %H.%M.%S\" " );
+            std::cout << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
             
             switch ( priority )
                 {
                 case i_log::P_ALERT:
-                    std::cout << "Alert  (1) -> ";
+                    SetColor( RED_I );
+                    std::cout << "ALERT  (1) -> ";
                     break;
 
                 case i_log::P_CRIT:
-                    std::cout << "Critic (2) -> ";
+                    SetColor( RED_I );
+                    std::cout << "CRITIC (2) -> ";
                     break;
 
                 case i_log::P_ERR:
-                    std::cout << "Error  (3) -> ";
+                    SetColor( RED );
+                    std::cout << "ERROR  (3) -> ";
                     break;
 
                 case i_log::P_INFO:
-                    std::cout << "Info   (6) -> ";
+                    SetColor( GREEN );
+                    std::cout << "INFO   (6) -> ";                    
+                    break;
+
+                case i_log::P_DEBUG:
+                    SetColor( YELLOW );
+                    std::cout << "DEBUG  (7) -> ";
                     break;
 
                 default:                    
@@ -52,6 +63,7 @@ class w_log: public i_log
                 }
 
             std::cout << msg << std::endl;	
+            SetColor( BLACK );
 
             fflush( stdout );
 			}

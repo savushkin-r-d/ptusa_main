@@ -23,6 +23,16 @@
 #else
 #define Print(...)
 #endif // DEBUG
+
+#define RED				"\e[31m"
+#define RED_I		    "\e[1;31m"
+#define GREEN			"\e[32m"
+#define YELLOW			"\e[33m"
+#define WHITE			"\e[37m"
+#define RESET			"\e[0m"
+
+#define CLEARSCREEN		printf("\e[2J\e[H")
+#define SetColor(x)		printf(x)
 //-----------------------------------------------------------------------------
 extern time_t t_;
 extern struct tm *timeInfo_;
