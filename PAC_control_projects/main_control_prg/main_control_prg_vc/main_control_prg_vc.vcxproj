@@ -299,6 +299,20 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)"
     <ClInclude Include="..\..\..\PAC\common\tech_def.h" />
     <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\rfid_reader.hh" />
     <ClInclude Include="..\..\..\PAC\common\wago.h" />
+    <ClInclude Include="..\..\..\PAC\linux\l_console.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\linux\l_log.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.h" />
     <ClInclude Include="..\..\..\PAC\win\PAC_PC\wago_PC.h" />
     <ClInclude Include="..\..\..\PAC\win\w_log.h" />

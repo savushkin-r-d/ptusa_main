@@ -97,6 +97,9 @@
     <Filter Include="Source Files\common\RFID">
       <UniqueIdentifier>{78531a95-9582-41e6-8cfd-3b88e9ce1173}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\PAC\linux">
+      <UniqueIdentifier>{064327e8-f7a5-4ca2-8fcc-300ee0a5749b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\PAC\common\PAC_dev.h">
@@ -311,6 +314,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\rfid_reader.hh">
       <Filter>pkg</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\linux\l_console.h">
+      <Filter>Header Files\PAC\linux</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\linux\l_log.h">
+      <Filter>Header Files\PAC\linux</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
