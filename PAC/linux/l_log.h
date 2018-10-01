@@ -46,7 +46,8 @@ class l_log: public i_log
         std::time_t _tm = std::time( nullptr );
         std::tm tm = *std::localtime( &_tm );
 
-        std::cout << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
+        printf( "%02d-%02d %02d:%02d:%02d ",
+            tm.tm_mday, tm.tm_mon + 1, tm.tm_hour, tm.tm_min, tm.tm_sec );
 
         switch ( priority )
             {
@@ -56,7 +57,7 @@ class l_log: public i_log
                 break;
 
             case i_log::P_CRIT:
-                SetColor( RED_I );
+                SetColor( RED );
                 std::cout << "CRITIC (2) -> ";
                 break;
 
