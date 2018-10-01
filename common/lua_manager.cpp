@@ -94,7 +94,7 @@ const int FILES_VERSION[ FILE_CNT ] =
     {
     1, //"sys.wago.plua",
     1, //"sys.devices.lua",
-    4, //"sys.objects.plua",
+    5, //"sys.objects.plua",
 #if defined RM_PAC
     1, //"sys.rm_PACS.lua",
 #endif // defined RM_PAC
@@ -218,7 +218,8 @@ int lua_manager::init( lua_State* lua_state, const char* script_name )
 
         if ( FILES_VERSION[ i ] != res )
             {
-            sprintf( G_LOG->msg, "File \"%s\" has version %d, must be %d!",
+            sprintf( G_LOG->msg, "File \"%s\" has version %d, must be %d "
+                "(consider updating \"main_PFC200\").",
                 FILES[ i ], res, FILES_VERSION[ i ] );
             G_LOG->write_log( i_log::P_CRIT );
 
@@ -677,7 +678,8 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
 
     if ( FILES_VERSION[ script_n ] != res )
         {
-        sprintf( err_str, "file \"%s\" has version %d, must be %d!\n",
+        sprintf( err_str, "file \"%s\" has version %d, must be %d "
+            "( consider updating \"main_PFC200\").",
             FILES[ script_n ], res, FILES_VERSION[ script_n ] );
         printf( "%s", err_str );
         strcpy( res_str, err_str );
