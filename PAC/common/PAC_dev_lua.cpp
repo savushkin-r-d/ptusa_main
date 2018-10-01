@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 08/07/18 15:50:02.
+** Generated automatically by tolua++-1.0.92 on 10/01/18 09:25:21.
 */
 
 #ifndef __cplusplus
@@ -12053,6 +12053,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,".geti",tolua_PAC_dev_step__geti00);
    tolua_function(tolua_S,"get_name",tolua_PAC_dev_step_get_name00);
    tolua_constant(tolua_S,"A_ON",step::A_ON);
+   tolua_constant(tolua_S,"A_ON_REVERSE",step::A_ON_REVERSE);
    tolua_constant(tolua_S,"A_OFF",step::A_OFF);
    tolua_constant(tolua_S,"A_UPPER_SEATS_ON",step::A_UPPER_SEATS_ON);
    tolua_constant(tolua_S,"A_LOWER_SEATS_ON",step::A_LOWER_SEATS_ON);

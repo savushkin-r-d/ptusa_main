@@ -132,6 +132,19 @@ class on_action: public action
     };
 //-----------------------------------------------------------------------------
 /// <summary>
+/// Включение реверсных устройств.
+/// </summary>
+class on_reverse_action : public action
+    {
+    public:
+        on_reverse_action() : action( "Включать реверс" )
+            {
+            }
+
+        void evaluate();
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
 /// Выключение устройств.
 /// </summary>
 class off_action: public action
@@ -293,6 +306,7 @@ class step
         enum ACTIONS
             {
             A_ON = 0,
+            A_ON_REVERSE,
             A_OFF,
             A_UPPER_SEATS_ON,
             A_LOWER_SEATS_ON = A_UPPER_SEATS_ON,

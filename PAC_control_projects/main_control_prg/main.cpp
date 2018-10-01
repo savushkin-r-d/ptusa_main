@@ -75,7 +75,7 @@ int main( int argc, const char *argv[] )
     if ( res ) //-Ошибка инициализации.
         {
         sprintf( G_LOG->msg, "Lua init returned error code %d!", res );
-        G_LOG->write_log( i_log::P_CRIT );
+        G_LOG->write_log( i_log::P_ALERT );
 
         debug_break;
         return EXIT_FAILURE;

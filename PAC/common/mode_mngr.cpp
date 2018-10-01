@@ -426,6 +426,21 @@ void on_action::evaluate()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+void on_reverse_action::evaluate()
+    {
+    if ( devices.empty() )
+        {
+        return;
+        }
+
+    const u_int IDX = 0;
+    for ( u_int i = 0; i < devices[ IDX ].size(); i++ )
+        {
+        devices[ IDX ][ i ]->set_state( 2 );
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 void off_action::evaluate()
     {
     if ( devices.size() == 0  )
@@ -501,6 +516,7 @@ step::step( std::string name, operation_state *owner,
     dx_time( 0 )
     {
     actions.push_back( new on_action() );
+    actions.push_back( new on_reverse_action() );
     actions.push_back( new off_action() );
     actions.push_back( new open_seat_action( is_mode, owner ) );
 
