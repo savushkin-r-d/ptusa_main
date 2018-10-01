@@ -1257,7 +1257,9 @@ class valve_DO2_DI2_bistable : public valve
     public:
         valve_DO2_DI2_bistable( const char *dev_name ) :
             valve( true, true, dev_name, DT_V, V_DO2_DI2_BISTABLE ),
-            is_stoped( false )
+            is_stoped( false ),
+            is_opening( false ),
+            is_closing( false )
             {
             v_bistable.push_back( this );
             }
@@ -1309,6 +1311,9 @@ class valve_DO2_DI2_bistable : public valve
                 start_switch_time = get_millisec();
                 set_DO( DO_INDEX_OPEN, 1 );
                 set_DO( DO_INDEX_CLOSE, 0 );
+
+                is_opening = true;
+                is_closing = false;
                 }
             }
 
@@ -1320,6 +1325,9 @@ class valve_DO2_DI2_bistable : public valve
                 start_switch_time = get_millisec();
                 set_DO( DO_INDEX_OPEN, 0 );
                 set_DO( DO_INDEX_CLOSE, 1 );
+
+                is_opening = false;
+                is_closing = true;
                 }
             }
 
@@ -1345,7 +1353,9 @@ class valve_DO2_DI2_bistable : public valve
             if ( o_do == 1 ) return V_ON;
             if ( c_do == 1 ) return V_OFF;
 
-            return V_STOP;
+            if ( is_stoped ) return V_STOP;
+
+            return V_OFF;
 #endif // DEBUG_NO_WAGO_MODULES
             }
 
@@ -1358,20 +1368,22 @@ class valve_DO2_DI2_bistable : public valve
 
             int i0 = get_DI( DI_INDEX_OPEN );
             int i1 = get_DI( DI_INDEX_CLOSE );
+            unsigned int t = (unsigned int) get_par( valve::P_ON_TIME, 0 );
+            unsigned int dt = get_delta_millisec( start_switch_time );
 
             if ( i0 == 1 && i1 == 1 )
                 {
                 return false;
                 }
-            if ( i0 == 1 || i1 == 1 )
-                {
-                return true;
-                }
+            //Заклинило в закрытом положении.
+            if ( is_opening && dt > t && i1 == 1 ) return false;
 
-            if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
-                {
-                return true;
-                }
+            //Заклинило в открытом положении.
+            if ( is_closing && dt > t && i0 == 1 ) return false;
+
+            if ( i0 == 1 || i1 == 1 ) return true;
+
+            if ( dt < t ) return true;
 
             return false;
 #endif // DEBUG_NO_WAGO_MODULES
@@ -1399,6 +1411,9 @@ class valve_DO2_DI2_bistable : public valve
             switch ( new_state )
                 {
                 case V_STOP:
+                    is_opening = false;
+                    is_closing = false;
+
                     //Если клапан полностью открыт\закрыт ничего не делаем.
                     if ( i0 == 1 || i1 == 1 )
                         {
@@ -1427,6 +1442,8 @@ class valve_DO2_DI2_bistable : public valve
 
     private:
         bool is_stoped;
+        bool is_opening;
+        bool is_closing;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан mixproof.
