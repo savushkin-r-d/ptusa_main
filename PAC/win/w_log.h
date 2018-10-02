@@ -63,7 +63,7 @@ class w_log: public i_log
                 }
 
             std::cout << msg << std::endl;	
-            SetColor( BLACK );
+            SetColor( RESET );
 
             fflush( stdout );
 			}
