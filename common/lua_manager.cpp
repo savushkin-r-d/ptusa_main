@@ -68,6 +68,8 @@ const char* SYS_PATH = "../../system scripts/";
 #else
 const char* SYS_PATH = "..\\..\\system scripts\\";
 #endif
+#else
+const char* SYS_PATH = "";      //Файлы находятся в одном каталоге /home/main.
 #endif // PAC_PC
 
 const char *FILES[ FILE_CNT ] =
@@ -141,7 +143,8 @@ const int FILES_VERSION[ FILE_CNT ] =
 //II
 //Экспортируем в Lua классы и функции из C++.
 
-int lua_manager::init( lua_State* lua_state, const char* script_name )
+int lua_manager::init( lua_State* lua_state, const char* script_name,
+    const char* dir )
     {
     if ( G_DEBUG )
         {
@@ -168,9 +171,14 @@ int lua_manager::init( lua_State* lua_state, const char* script_name )
         L = lua_state;
         is_free_lua = 0;
         }
+
 #ifdef PAC_PC
-    //Добавление каталога с системными скриптами.
-    luaL_dostring( L, "package.path = package.path .. ';../../system scripts/?.lua'" );
+    //Добавление каталога с системными скриптами.   
+    char cmd[ 500 ] = "package.path = package.path..';";
+    strcpy( cmd + strlen( cmd ), SYS_PATH );
+    strcpy( cmd + strlen( cmd ), "? .lua" ); 
+
+    luaL_dostring( L, cmd );
 #endif
 
     //I
@@ -184,37 +192,24 @@ int lua_manager::init( lua_State* lua_state, const char* script_name )
     int res = 0;
     for ( int i = 0; i < FILE_CNT; i++ )
         {
-
-#ifdef PAC_PC
         char path[ 100 ];
         if ( i < SYS_FILE_CNT )
             {
-            sprintf( path, "%s%s", SYS_PATH, FILES[ i ] );
+            sprintf( path, "%s%s%s", dir, SYS_PATH, FILES[ i ] );
             }
         else
             {
-            sprintf( path, "%s", FILES[ i ] );
+            sprintf( path, "%s%s", dir, FILES[ i ] );
             }
 
         res = check_file( path, err_str );
 
-        if ( -1 == res )                             // ../system scripts
-            {
-            res = check_file( FILES[ i ], err_str ); // .
-            if ( -1 == res )
-                {
-                printf( "%s", err_str );
-                return 1;
-                }
-            }
-#else
-        res = check_file( FILES[ i ], err_str );     // .
         if ( -1 == res )
             {
-            printf( "%s", err_str );
+            sprintf( G_LOG->msg, "File \"%s\" not found.", path );
+            G_LOG->write_log( i_log::P_CRIT );
             return 1;
             }
-#endif // PAC_PC
 
         if ( FILES_VERSION[ i ] != res )
             {
@@ -222,7 +217,6 @@ int lua_manager::init( lua_State* lua_state, const char* script_name )
                 "(consider updating \"main_PFC200\").",
                 FILES[ i ], res, FILES_VERSION[ i ] );
             G_LOG->write_log( i_log::P_CRIT );
-
             return 1;
             }
         }
@@ -235,51 +229,24 @@ int lua_manager::init( lua_State* lua_state, const char* script_name )
 
     for ( int i = 0; i < FILE_CNT; i++ )
         {
-
-#ifdef PAC_PC
         char path[ 100 ] = "";
         if ( i < SYS_FILE_CNT )
             {
-            sprintf( path, "%s%s", SYS_PATH, FILES[ i ] );
+            sprintf( path, "%s%s%s", dir, SYS_PATH, FILES[ i ] );
             }
         else
             {
-            sprintf( path, "%s", FILES[ i ] );
+            sprintf( path, "%s%s", dir, FILES[ i ] );
             }
 
-        if ( luaL_dofile( L, path ) != 0 )           // ../system scripts
+        if ( luaL_dofile( L, path ) != 0 )
             {
-            lua_pop( L, 1 ); // Удаляем ошибку о ненайденном файле.
-            if ( luaL_dofile( L, FILES[ i ] ) != 0 ) // .
-                {
-                //if ( G_DEBUG )
-                    //{
-                    sprintf( G_LOG->msg, "\n%s", lua_tostring( L, -1 ) );
-                    G_LOG->write_log( i_log::P_ERR );
-
-                    //printf( "Load Lua script \"%s\" error!\n", FILES[ i ] );
-                    //printf( "\t%s\n",  );
-                    //}
-                lua_pop( L, 1 );
-
-                return 1;
-                }
-            }
-
-#else // PAC_PC
-        if ( luaL_dofile( L, FILES[ i ] ) != 0 )
-            {
-            if ( G_DEBUG )
-                {
-                printf( "Load Lua script \"%s\" error!\n",
-                    FILES[ i ] );
-                printf( "\t%s\n", lua_tostring( L, -1 ) );
-                }
+            sprintf( G_LOG->msg, "\n%s", lua_tostring( L, -1 ) );
+            G_LOG->write_log( i_log::P_ERR );
             lua_pop( L, 1 );
 
             return 1;
             }
-#endif // PAC_PC
         }
 
     //II
