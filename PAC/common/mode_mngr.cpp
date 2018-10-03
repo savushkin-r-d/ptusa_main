@@ -314,6 +314,11 @@ void action::print( const char* prefix /*= "" */ ) const
 //-----------------------------------------------------------------------------
 void action::final()
     {
+    if ( devices.empty() )
+        {
+        return;
+        }
+
     for ( u_int i = 0; i < devices.size(); i++ )
         {
         for ( u_int j = 0; j < devices[ i ].size(); j++ )

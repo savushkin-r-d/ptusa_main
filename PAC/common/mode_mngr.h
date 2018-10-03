@@ -339,17 +339,6 @@ class step
 
         void evaluate() const;
 
-        void evaluate_on() const
-            {
-            actions[ A_ON ]->evaluate();
-            actions[ A_LOWER_SEATS_ON /*A_UPPER_SEATS_ON*/ ]->evaluate();
-            };
-
-        void evaluate_off() const
-            {
-            actions[ A_OFF ]->evaluate();
-            };
-
         void final();
 
         /// Получение времени выполнения шага.
