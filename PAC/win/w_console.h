@@ -16,14 +16,14 @@
 
 #pragma warning( disable : 4996 ) //strcpy and others unsafe functions
 
-#define RED		(FOREGROUND_RED)
-#define RED_I	(FOREGROUND_RED | FOREGROUND_INTENSITY)
-#define GREEN	(FOREGROUND_GREEN )
-#define YELLOW	(FOREGROUND_RED | FOREGROUND_GREEN )
-#define WHITE	(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE )
+#define RED		( FOREGROUND_RED )
+#define RED_I	( FOREGROUND_RED | FOREGROUND_INTENSITY )
+#define GREEN	( FOREGROUND_GREEN )
+#define YELLOW	( FOREGROUND_RED | FOREGROUND_GREEN )
+#define WHITE	( FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE )
 #define RESET	0
 
-#define CLEARSCREEN		system("cls")
+#define CLEARSCREEN		system( "cls" )
 
 #include <time.h>
 #include <conio.h>

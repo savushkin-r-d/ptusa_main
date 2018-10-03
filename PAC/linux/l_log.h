@@ -66,6 +66,12 @@ class l_log: public i_log
                 std::cout << "ERROR  (3) -> ";
                 break;
 
+            case i_log::P_NOTICE:
+                SetColor( YELLOW );
+                std::cout << "NOTICE (5) -> ";
+                break;
+
+
             case i_log::P_INFO:
                 SetColor( GREEN );
                 std::cout << "INFO   (6) -> ";
@@ -76,7 +82,8 @@ class l_log: public i_log
                 std::cout << "DEBUG  (7) -> ";
                 break;
 
-            default:
+            default:                
+                std::cout << "       (" << priority << ") -> ";
                 break;
             }
 
