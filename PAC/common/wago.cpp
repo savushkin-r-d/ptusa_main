@@ -2,7 +2,7 @@
     !( defined LINUX_OS && defined PAC_PC ) && \
     !( defined LINUX_OS && defined PAC_WAGO_750_860 ) && \
     !( defined LINUX_OS && defined PAC_WAGO_PFC200 ) && \
-	!( defined LINUX_OS && defined PAC_PLCNEXT )
+    !( defined LINUX_OS && defined PAC_PLCNEXT )
 #error You must define OS!
 #endif
 
@@ -30,6 +30,8 @@
 #if defined LINUX_OS && defined PAC_PLCNEXT
 #include "l_wago.h"
 #endif
+
+#include "log.h"
 
 auto_smart_ptr < wago_manager > wago_manager::instance;
 //-----------------------------------------------------------------------------
@@ -940,21 +942,17 @@ wago_manager::wago_node::wago_node( int type, int number, char *str_ip_address,
     if ( ip_address[ 0 ] == 0 && type >= T_750_XXX_ETHERNET )
         {
         is_active = false;
-        if ( G_DEBUG )
-            {
-            printf( "Узел Wago \"%s\" отключен, так как не задан его IP адрес.\n",
-                name );
-            }
+        sprintf( G_LOG->msg,
+            "Узел Wago \"%s\" отключен, так как не задан его IP адрес.", name );
+        G_LOG->write_log( i_log::P_NOTICE );
         }
 
     if ( type == T_EMPTY )
         {
         is_active = false;
-        if ( G_DEBUG )
-            {
-            printf( "Узел Wago \"%s\" отключен, так как не задан его тип.\n",
-                name );
-            }
+        sprintf( G_LOG->msg,
+            "Узел Wago \"%s\" отключен, так как не задан его тип.", name );
+        G_LOG->write_log( i_log::P_NOTICE );
         }
 
     if ( name )

@@ -66,11 +66,15 @@ class l_log: public i_log
                 std::cout << "ERROR  (3) -> ";
                 break;
 
+            case i_log::P_WARNING:
+                SetColor( YELLOW );
+                std::cout << "WARNING(4) -> ";
+                break;
+
             case i_log::P_NOTICE:
                 SetColor( YELLOW );
                 std::cout << "NOTICE (5) -> ";
                 break;
-
 
             case i_log::P_INFO:
                 SetColor( GREEN );
@@ -78,11 +82,11 @@ class l_log: public i_log
                 break;
 
             case i_log::P_DEBUG:
-                SetColor( YELLOW );
+                SetColor( GRAY );
                 std::cout << "DEBUG  (7) -> ";
                 break;
 
-            default:                
+            default:
                 std::cout << "       (" << priority << ") -> ";
                 break;
             }

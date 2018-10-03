@@ -404,7 +404,7 @@ int tcp_communicator_linux::evaluate()
                     if (client)
                         {
                         sprintf( G_LOG->msg,
-                           "Network communication : accepted %s connection : s%d->\"%s\":\"%s\".\n",
+                           "Network communication : accepted %s connection : s%d->\"%s\":\"%s\".",
                            DESCR, slave_socket, client->h_name, inet_ntoa(ssin.sin_addr) );
                         G_LOG->write_log( i_log::P_INFO );
                         }
@@ -412,7 +412,7 @@ int tcp_communicator_linux::evaluate()
                         {
                         const char* err_str = hstrerror( h_errno );
                         sprintf( G_LOG->msg,
-                           "Network communication : accepted %s connection : s%d->\"%s\":\"%s\".\n",
+                           "Network communication : accepted %s connection : s%d->\"%s\":\"%s\".",
                            DESCR, slave_socket, err_str, inet_ntoa(ssin.sin_addr));
                         G_LOG->write_log( i_log::P_INFO );
                         }
@@ -832,7 +832,7 @@ int tcp_communicator_linux::do_echo ( int idx )
         sprintf( G_LOG->msg,
             "Network performance : (in) buffer use max = %u, tresh = %u (b).",
             in_buffer_count, BUFSIZE );
-        G_LOG->write_log( i_log::P_WARNING );
+        G_LOG->write_log( i_log::P_DEBUG );
 
         max_buffer_use = in_buffer_count + 0.1 * in_buffer_count;
         }
@@ -855,7 +855,7 @@ int tcp_communicator_linux::do_echo ( int idx )
                     sprintf( G_LOG->msg,
                         "Network performance : (out) buffer use max = %u, tresh = %u (b).",
                          res, BUFSIZE );
-                    G_LOG->write_log( i_log::P_WARNING );
+                    G_LOG->write_log( i_log::P_DEBUG );
 
                     max_buffer_use = res + 0.1 * res;
                     }

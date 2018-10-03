@@ -28,7 +28,8 @@
 #define RED_I		    "\e[1;31m"
 #define GREEN			"\e[32m"
 #define YELLOW			"\e[33m"
-#define WHITE			"\e[37m"
+#define GRAY			"\e[37m"
+#define WHITE			"\e[1;37m"
 #define RESET			"\e[0m"
 
 #define CLEARSCREEN		printf("\e[2J\e[H")
