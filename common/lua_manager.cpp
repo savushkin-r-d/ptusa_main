@@ -63,11 +63,7 @@ const int FILE_CNT     = 11;
 #endif // RM_PAC
 //-----------------------------------------------------------------------------
 #ifdef PAC_PC
-#ifdef LINUX_OS
 const char* SYS_PATH = "../../system scripts/";
-#else
-const char* SYS_PATH = "..\\..\\system scripts\\";
-#endif
 #else
 const char* SYS_PATH = "";      //Файлы находятся в одном каталоге /home/main.
 #endif // PAC_PC
@@ -174,10 +170,10 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
 #ifdef PAC_PC
     //Добавление каталога с системными скриптами.   
-    char cmd[ 500 ] = "package.path = package.path..';";
+    char cmd[ 500 ] = "package.path = package.path..\";";
     strcpy( cmd + strlen( cmd ), SYS_PATH );
-    strcpy( cmd + strlen( cmd ), "? .lua" ); 
-
+    strcpy( cmd + strlen( cmd ), "?.lua\"" ); 
+        
     luaL_dostring( L, cmd );
 #endif
 
