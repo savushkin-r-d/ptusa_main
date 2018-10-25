@@ -6312,7 +6312,14 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
             break;
         case TANK_W_MG:
             V06->on();
-            V07->on();
+            if (scoldvalves != 0)
+                {
+                V07->off();
+                }
+            else
+                {
+                V07->on();
+                }
             V08->off();
             V09->off();
             V10->off();
@@ -6337,7 +6344,14 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
         case TANK_K_MG:
             V06->on();
             V07->off();
-            V08->on();
+            if (scoldvalves != 0)
+                {
+                V08->off();
+                }
+            else
+                {
+                V08->on();
+                }
             V09->off();
             V10->off();
             V11->off();
@@ -6362,7 +6376,14 @@ int cipline_tech_object::SCInitPumping( int what, int from, int where, int whatd
             V06->on();
             V07->off();
             V08->off();
-            V09->on();
+            if (scoldvalves != 0)
+                {
+                V09->off();
+                }
+            else
+                {
+                V09->on();
+                }
             V10->off();
             V11->off();
             V12->off();
@@ -6630,7 +6651,14 @@ int cipline_tech_object::SCPumping( int what, int from, int where, int whatdrain
                 }
             else
                 {
-                V07->on();
+                if (scoldvalves != 0)
+                    {
+                    V07->off();
+                    }
+                else
+                    {
+                    V07->on();
+                    }
                 VWMG->on();
                 V11->off();
                 V12->off();
@@ -6662,7 +6690,14 @@ int cipline_tech_object::SCPumping( int what, int from, int where, int whatdrain
                 }
             else
                 {
-                V08->on();
+                if (scoldvalves != 0)
+                    {
+                    V08->off();
+                    }
+                else
+                    {
+                    V08->on();
+                    }
                 VKMG->on();
                 V11->off();
                 V12->off();
@@ -6694,7 +6729,14 @@ int cipline_tech_object::SCPumping( int what, int from, int where, int whatdrain
                 }
             else
                 {
-                V09->on();
+                if (scoldvalves != 0)
+                    {
+                    V09->off();
+                    }
+                else
+                    {
+                    V09->on();
+                    }
                 VSMG->on();
                 V11->off();
                 V12->off();
@@ -7611,6 +7653,8 @@ i_DO_device* cipline_tech_object::VSDREN = 0;
 i_DO_device* cipline_tech_object::VSMG = 0;
 
 int cipline_tech_object::scenabled = 0;
+
+int cipline_tech_object::scoldvalves = 0;
 
 saved_params<float, true>* cipline_tech_object::scparams = 0;
 

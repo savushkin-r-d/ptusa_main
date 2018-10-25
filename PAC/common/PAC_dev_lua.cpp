@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 10/01/18 09:25:21.
+** Generated automatically by tolua++-1.0.92 on 10/22/18 14:45:21.
 */
 
 #ifndef __cplusplus
@@ -7533,6 +7533,36 @@ static int tolua_set_cipline_tech_object_clean_water_rinsing_return(lua_State* t
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* get function: scoldvalves of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_scoldvalves
+static int tolua_get_cipline_tech_object_scoldvalves(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'scoldvalves'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->scoldvalves);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: scoldvalves of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_scoldvalves
+static int tolua_set_cipline_tech_object_scoldvalves(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'scoldvalves'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->scoldvalves = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* get function: V00 of class  cipline_tech_object */
 #ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_V00_ptr
 static int tolua_get_cipline_tech_object_V00_ptr(lua_State* tolua_S)
@@ -12261,6 +12291,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_variable(tolua_S,"concentration_ok",tolua_get_cipline_tech_object_concentration_ok,tolua_set_cipline_tech_object_concentration_ok);
    tolua_variable(tolua_S,"enable_ret_pump",tolua_get_cipline_tech_object_enable_ret_pump,tolua_set_cipline_tech_object_enable_ret_pump);
    tolua_variable(tolua_S,"clean_water_rinsing_return",tolua_get_cipline_tech_object_clean_water_rinsing_return,tolua_set_cipline_tech_object_clean_water_rinsing_return);
+   tolua_variable(tolua_S,"scoldvalves",tolua_get_cipline_tech_object_scoldvalves,tolua_set_cipline_tech_object_scoldvalves);
    tolua_variable(tolua_S,"V00",tolua_get_cipline_tech_object_V00_ptr,tolua_set_cipline_tech_object_V00_ptr);
    tolua_variable(tolua_S,"V01",tolua_get_cipline_tech_object_V01_ptr,tolua_set_cipline_tech_object_V01_ptr);
    tolua_variable(tolua_S,"V02",tolua_get_cipline_tech_object_V02_ptr,tolua_set_cipline_tech_object_V02_ptr);

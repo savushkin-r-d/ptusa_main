@@ -690,6 +690,7 @@ class cipline_tech_object: public tech_object
 		static i_DO_device* VWDREN;
 		static int scline;
 		static int scenabled;
+        static int scoldvalves;
 		static saved_params<float, true>* scparams;
 		float get_selfclean_par(int parno);
 		void set_selfclean_par(int parno, float newval);
