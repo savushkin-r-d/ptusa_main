@@ -67,8 +67,8 @@ const int FILE_CNT     = 11;
 #endif // RM_PAC
 //-----------------------------------------------------------------------------
 
-const char *SYS_PATH = 
-#ifdef PAC_PC 
+const char *SYS_PATH =
+#ifdef PAC_PC
     "../../system scripts/";
 #else
     "";                     //Файлы находятся в одном каталоге /home/main.
@@ -174,7 +174,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         is_free_lua = 0;
         }
 
-#ifdef PAC_PC 
+#ifdef PAC_PC
 #ifdef VS_CODE
     char* dir_      = new char[ MAX_PATH + 1 ];
     char* sys_path_ = new char[ MAX_PATH + 1 ];
@@ -190,29 +190,28 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         if ( sys_path_[ i ] == '\\' ) sys_path_[ i ] = '/';
         }
 
-    //Добавление каталога с системными скриптами.   
+    //Добавление каталога с системными скриптами.
     char cmd[ 500 ] = "package.path = package.path..';";
     strcpy( cmd + strlen( cmd ), sys_path_ );
     strcpy( cmd + strlen( cmd ), "?.lua'" );
 
     luaL_dostring( L, cmd );
-#else // VS_CODE
 
-    //Добавление каталога с системными скриптами.   
-    char cmd[ 500 ] = "package.path = package.path..';";
-    strcpy( cmd + strlen( cmd ), SYS_PATH );
-    strcpy( cmd + strlen( cmd ), "?.lua'" );
-
-    luaL_dostring( L, cmd );
-#endif // else VS_CODE
-    
-#else // PAC_PC
     dir_ = new char[ strlen( dir ) + 1 ];
     strcpy( dir_, dir );
 
     sys_path_ = new char[ strlen( SYS_PATH ) + 1 ];
     strcpy( sys_path_, SYS_PATH );
-#endif
+#else // VS_CODE
+
+    //Добавление каталога с системными скриптами.
+    char cmd[ 500 ] = "package.path = package.path..';";
+    strcpy( cmd + strlen( cmd ), SYS_PATH );
+    strcpy( cmd + strlen( cmd ), "?.lua'" );
+
+    luaL_dostring( L, cmd );
+#endif // VS_CODE
+#endif // PAC_PC
 
     //I
     //Проверка наличия и версии скриптов.
@@ -277,7 +276,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
             sprintf( path, "%s%s", sys_path_, FILES[ i ] );
 #else
             sprintf( path, "%s%s%s", dir, SYS_PATH, FILES[ i ] );
-#endif            
+#endif
             }
         else
             {
@@ -285,7 +284,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
             sprintf( path, "%s%s", dir_, FILES[ i ] );
 #else
             sprintf( path, "%s%s", dir, FILES[ i ] );
-#endif            
+#endif
             }
 
         if ( luaL_dofile( L, path ) != 0 )
@@ -351,7 +350,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
             G_LOG->write_log( i_log::P_CRIT );
 
             lua_pop( L, 1 );
-            return 1;                     
+            return 1;
             }
         //-Инициализация Lua.--!>
 
@@ -544,8 +543,8 @@ int lua_manager::error_trace( lua_State * L )
             }
 
         G_LOG->write_log( i_log::P_ERR );
-       
-        int res = sprintf( G_LOG->msg, "Lua stack traceback:" );        
+
+        int res = sprintf( G_LOG->msg, "Lua stack traceback:" );
 
         lua_Debug ar;
         int level = 1;
@@ -555,7 +554,7 @@ int lua_manager::error_trace( lua_State * L )
             lua_getinfo( L, "Sln", &ar );
 
             res += sprintf( G_LOG->msg + res, "\n\t%s:%d: in function '%s' ('%s')",
-                ar.short_src, ar.currentline, ar.name, ar.namewhat );            
+                ar.short_src, ar.currentline, ar.name, ar.namewhat );
             level++;
             }
 
@@ -658,15 +657,15 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
         }
 
     if ( script_n >= FILE_CNT )
-    	{
+        {
         if ( G_DEBUG )
             {
             printf( "Reload Lua script error - script_n >= FILE_CNT (%d>=%d).\n",
                 script_n, FILE_CNT );
-            } 
+            }
 
         return 1;
-    	}
+        }
 
     //Проверка наличия и версии скрипта.
     if ( G_DEBUG )
@@ -711,11 +710,11 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
         }
 
     printf( "%s\n", "Ok." );
-    
+
     ////Сохранение предыдущей функции скрипта. Оставлен шаблон, все работает
     // и так при ошибке в новой функции.
     //char f_name[ 100 ];
-    //sprintf( f_name, "%s_old = %s\n", 
+    //sprintf( f_name, "%s_old = %s\n",
     //    script_function_name, script_function_name );
     //if ( luaL_dostring( L, f_name ) != 0 )
     //    {
@@ -724,7 +723,7 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
     //    lua_pop( L, 1 );
     //    return 1;
     //    }
-   
+
     //-Выполнение скрипта.
     if ( luaL_dofile( L, path ) != 0 )
         {
