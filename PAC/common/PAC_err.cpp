@@ -119,7 +119,7 @@ void PAC_critical_errors_manager::reset_global_error( ALARM_CLASS eclass,
         errors.erase( errors.begin() + idx );
 
         sprintf( G_LOG->msg, "%s", get_alarm_descr( eclass, p1, p2, false ) );
-        G_LOG->write_log( i_log::P_ERR );
+        G_LOG->write_log( i_log::P_INFO );
 
         errors_id++;
         }
