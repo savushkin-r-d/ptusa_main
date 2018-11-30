@@ -3,6 +3,7 @@
 
 #include "errors.h"
 #include "lua_manager.h"
+#include "log.h"
 
 auto_smart_ptr < device_manager > device_manager::instance;
 
@@ -428,20 +429,18 @@ device* device_manager::get_device( int dev_type,
         }
     else
         {
-        if ( G_DEBUG )
+        if ( dev_type <= device::C_DEVICE_TYPE_CNT )
             {
-            printf( "Error - " );
-            if ( dev_type <= device::C_DEVICE_TYPE_CNT )
-                {
-                printf( "%3s ", device::DEV_NAMES[ dev_type ] );
-                }
-            else
-                {
-                printf( "unknown " );
-                }
-
-            printf( "\"%s\" not found!\n", dev_name );
+            sprintf( G_LOG->msg, "%3s ", device::DEV_NAMES[ dev_type ] );
             }
+        else
+            {
+            sprintf( G_LOG->msg, "unknown " );
+            }
+        sprintf( G_LOG->msg + strlen( G_LOG->msg ), "\"%s\" not found!",
+            dev_name );
+
+        G_LOG->write_log( i_log::P_ERR );
         }
 
     return &stub;
@@ -536,10 +535,8 @@ i_counter* device_manager::get_FQT( const char *dev_name )
             }
         }
 
-    if ( G_DEBUG )
-        {
-        printf( "Error - \"%s\" not found!\n", dev_name );
-        }
+     sprintf( G_LOG->msg, "FQT \"%s\" not found!", dev_name );
+     G_LOG->write_log( i_log::P_ERR );
 
     return &stub;
     }
@@ -560,10 +557,8 @@ virtual_counter* device_manager::get_virtual_FQT( const char *dev_name )
             }
         }
 
-    if ( G_DEBUG )
-        {
-        printf( "Error - \"%s\" not found!\n", dev_name );
-        }
+    sprintf( G_LOG->msg, "FQT \"%s\" not found!", dev_name );
+    G_LOG->write_log( i_log::P_ERR );
 
     static virtual_counter stub_fqt( "stub" );
     return &stub_fqt;
@@ -596,7 +591,7 @@ i_DO_device* device_manager::get_DO( const char *dev_name )
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_HA( const char *dev_name )
     {
-    return get_device( device::DT_HA, dev_name );
+    return get_device( device::DT_HA, dev_name );        
     }
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_HL( const char *dev_name )
