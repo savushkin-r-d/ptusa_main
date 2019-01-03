@@ -7,12 +7,12 @@
 #include <vector>
 
 #ifdef _WIN32
-    #include <winsock2.h>
+#include <winsock2.h>
 
-	#include <windows.h>
-	#include <conio.h>   
+#include <windows.h>
+#include <conio.h>   
     
-    void SetColor( WORD color );
+#include "w_console.h"
 
 #else
 	#include <sys/socket.h>
@@ -37,26 +37,6 @@
 	#define SetEvent(x)		sem_post(&x)
 	#define ResetEvent(x)	while (!sem_trywait(&x));
 	#define HANDLE			sem_t
-#endif
-
-// macros
-#ifdef _WIN32
-#define RED				(FOREGROUND_RED | FOREGROUND_INTENSITY)
-#define GREEN			(FOREGROUND_GREEN | FOREGROUND_INTENSITY)
-#define YELLOW			(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY)
-#define WHITE			(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY)
-
-#define CLEARSCREEN		system("cls")
-#else
-#define RED				"\e[1;31m"
-#define GREEN			"\e[1;32m"
-#define YELLOW			"\e[1;33m"
-#define WHITE			"\e[1;37m"
-#define RESET			"\e[0m"
-
-#define CLEARSCREEN		printf("\e[2J\e[H")
-#define _getch()		getchar()
-#define SetColor(x)		printf(x)
 #endif
 
 #include "PAC_err.h"
@@ -92,7 +72,7 @@ class rfid_reader
             MAX_READERS_COUNT = 10,
             MAX_EPS_COUNT = 10,
 
-            MAX_WAIT_TIME = 300,
+            MAX_WAIT_TIME = 1000,
 
             ST_ACTIVE = 0,
             ST_CANT_CONNECT = -1,

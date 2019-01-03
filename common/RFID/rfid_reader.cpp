@@ -1,19 +1,6 @@
 #include "rfid_reader.h"
 #include "dtime.h"
 
-#ifdef _WIN32
-#pragma warning( push )
-#pragma warning( disable: 4996 ) 
-
-HANDLE _hStdOut;
-
-void SetColor( WORD color )
-    {
-    if ( _hStdOut == NULL ) _hStdOut = GetStdHandle( STD_OUTPUT_HANDLE );
-    SetConsoleTextAttribute( _hStdOut, color );
-    }
-#endif
-
  rfid_reader* rfid_reader::rfid_readers[ MAX_READERS_COUNT ] = { 0 };
  int rfid_reader::cnt = 0;
 
@@ -723,7 +710,3 @@ TBool rfid_reader::CallSetExtResultFlag(TByte ubExtendedResultFlagMask)
 
 	return result;
 	}
-
-#ifdef _WIN32
-#pragma warning( pop )
-#endif
