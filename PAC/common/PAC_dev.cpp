@@ -3455,23 +3455,15 @@ void virtual_counter::eval( u_int read_value, u_int abs_read_value,
     {
     if ( !is_first_read )
         {
-        if ( read_value >= last_read_value )
+        if ( read_value > last_read_value )
             {
             value += read_value - last_read_value;
             }
-        else
-            {
-            value += read_value;
-            }
-
-        if ( abs_read_value >= abs_last_read_value )
+        
+        if ( abs_read_value > abs_last_read_value )
             {
             abs_value += abs_read_value - abs_last_read_value;
-            }
-        else
-            {
-            abs_value += abs_read_value;
-            }
+            }        
         }
     else
         {
