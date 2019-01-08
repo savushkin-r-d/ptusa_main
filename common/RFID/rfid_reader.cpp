@@ -349,9 +349,8 @@ void rfid_reader::ResultHandlerASyncReadDataUntilEndOfBankAnyASync(
                             printf( "%04X", pResultListEntry->stEPC.rguwEPC[ pResultListEntry->stEPC.ubEPCWordLength - ubTemp - 1 ] );
                         printf( ", Antenna: %u, RSSI: %u is ", pResultListEntry->ubPort, pResultListEntry->ubRSSI );
                         SetColor( GREEN );
-                        printf( "coming" );
+                        printf( "coming\r\n" );
                         SetColor( WHITE );
-                        printf( "\r\n" );
                         }
                     }
                 else if ( enComingGoingFlag == CGF_Going )
@@ -390,6 +389,7 @@ void rfid_reader::ResultHandlerASyncReadDataUntilEndOfBankAnyASync(
                         printf( ", Antenna: %u, Reads: %u is ", pResultListEntry->ubPort, pResultListEntry->uwReadCount );
                         SetColor( RED );
                         printf( "going\r\n" );
+                        SetColor( WHITE );
                         }
                     }
                 else
@@ -403,6 +403,7 @@ void rfid_reader::ResultHandlerASyncReadDataUntilEndOfBankAnyASync(
                         printf( ", Antenna: %u is ", pResultListEntry->ubPort );
                         SetColor( YELLOW );
                         printf( "data changing\r\n" );
+                        SetColor( WHITE );
                         }
                     }
 
