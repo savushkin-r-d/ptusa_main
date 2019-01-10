@@ -1871,6 +1871,52 @@ class valve_AS_DO1_DI2 : public valve_AS
         valve_AS_DO1_DI2( const char *dev_name );
 
         void direct_set_state( int new_state );
+
+        VALVE_STATE get_valve_state()
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return (VALVE_STATE) digital_wago_device::get_state();
+#else
+            char* data = (char*) get_AO_read_data( AO_INDEX );
+            char state = get_state_data( data );
+
+            int o = ( state & C_OPEN_S1 ) > 0 ? 1 : 0;
+
+            return (VALVE_STATE) o;
+#endif // DEBUG_NO_WAGO_MODULES
+            }
+
+        bool get_fb_state()
+            {
+#ifdef DEBUG_NO_WAGO_MODULES
+            return true;
+#else
+            char* AO_data = (char*)get_AO_read_data( AO_INDEX );
+            char AO_state = get_state_data( AO_data );
+
+            int o = ( AO_state & C_OPEN_S1 ) > 0 ? 1 : 0;
+
+            char* AI_data = (char*)get_AI_data( AI_INDEX );
+            char AI_state = get_state_data( AI_data );
+
+            int i0 = ( AI_state & S_CLOSED ) > 0 ? 1 : 0;
+            int i1 = ( AI_state & S_OPENED ) > 0 ? 1 : 0;
+
+            if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
+                ( o == 1 && i1 == 1 && i0 == 0 ) )
+                {
+                return true;
+                }
+
+             if ( get_delta_millisec( start_switch_time ) <
+                get_par( valve::P_ON_TIME, 0 ) )
+                {
+                return true;
+                }
+
+            return false;
+#endif // DEBUG_NO_WAGO_MODULES
+            }
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан донный.
