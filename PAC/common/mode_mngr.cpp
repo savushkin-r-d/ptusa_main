@@ -1522,9 +1522,14 @@ int operation_state::check_devices( char* err_dev_name, int str_len )
         return 1;
         }
 
-    for ( u_int i = 0; i < steps.size(); i++ )
+    if ( steps.empty() )
         {
-        res = steps[ i ]->check_devices( err_dev_name +
+        return 0;
+        }
+
+    if ( active_step_n >= 0 && ( unsigned int ) active_step_n < steps.size() )
+        {
+        res = steps[ active_step_n ]->check_devices( err_dev_name +
             strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
 
         if ( res )
