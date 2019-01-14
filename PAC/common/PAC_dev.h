@@ -1828,7 +1828,7 @@ class valve_AS : public valve
 #endif //DEBUG_NO_WAGO_MODULES
             }
 
-    private:
+    protected:
         u_int AS_number;    ///< AS-номер устройства.
 
         enum CONSTANTS
