@@ -413,6 +413,9 @@ class device : public i_DO_AO_device, public par_device
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
             DST_LS_MAX,         ///< Подключение по схеме максимум.
 
+            LS_IOLINK_MIN,      ///< IOLInk уровень. Подключение по схеме минимум.
+            LS_IOLINK_MAX,      ///< IOLInk уровень. Подключение по схеме максимум.
+
             //M,
             DST_M = 1,          ///< Мотор без управления частотой вращения.
             DST_M_FREQ,         ///< Мотор с управлением частотой вращения.
@@ -2803,6 +2806,25 @@ class level_s : public DI1
     {
     public:
         level_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type );
+
+        bool is_active();
+    };
+//-----------------------------------------------------------------------------
+/// @brief Датчик сигнализатора уровня IO-Link.
+class level_s_iolink : public AO1
+    {
+    public:
+        level_s_iolink( const char *dev_name, device::DEVICE_SUB_TYPE sub_type );
+
+        float get_min_value();
+
+        float get_max_value();
+
+#ifndef DEBUG_NO_WAGO_MODULES               
+        float get_value();
+
+        int get_state();
+#endif
 
         bool is_active();
     };

@@ -232,8 +232,7 @@ int device::save_device( char *buff, const char *prefix )
         }
 
     if ( type != DT_V &&
-
-        type != DT_LS &&
+                
         type != DT_FS &&
         type != DT_GS &&
 
@@ -706,8 +705,28 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_LS:
-            new_device      = new level_s( dev_name,
-                ( device::DEVICE_SUB_TYPE ) dev_sub_type );
+            switch ( dev_sub_type )
+                {
+                case device::DST_LS_MIN:
+                case device::DST_LS_MAX:
+                    new_device = new level_s( dev_name,
+                        ( device::DEVICE_SUB_TYPE ) dev_sub_type );
+                    break;
+
+                case device::LS_IOLINK_MAX:
+                case device::LS_IOLINK_MIN:
+                    new_device = new level_s_iolink( dev_name,
+                        ( device::DEVICE_SUB_TYPE ) dev_sub_type );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown LS device subtype %d!\n", dev_sub_type );
+                        }
+                    new_device = new dev_stub();
+                    break;
+                }
             new_wago_device = ( level_s* ) new_device;
             break;
 
@@ -2818,6 +2837,56 @@ level_s::level_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
     DI1( dev_name, DT_LS, sub_type, 0,
         sub_type == DST_LS_MAX ? 1 : 0 )
     {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+level_s_iolink::level_s_iolink( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ) :
+    AO1( dev_name, DT_LS, sub_type, 0 )
+    {
+    }
+
+float level_s_iolink::get_min_value()
+    {
+    return 0;
+    }
+
+float level_s_iolink::get_max_value()
+    {
+    return 100;
+    }
+
+#ifndef DEBUG_NO_WAGO_MODULES               
+float level_s_iolink::get_value()
+    {
+    int_2* data = get_AO_read_data( AO_INDEX );
+    int val = data[ 0 ] >> 2;
+    return (float)val;
+    }
+
+int level_s_iolink::get_state()
+    {
+    int_2* data = get_AO_read_data( AO_INDEX );
+    int val = data[ 0 ] && 0x1;
+
+    return val;
+    }
+#endif
+
+bool level_s_iolink::is_active()
+    {
+    switch ( sub_type )
+        {
+        case LS_IOLINK_MIN:
+            return get_state() == 0 ? 0 : 1;
+            break;
+
+        case LS_IOLINK_MAX:
+            return get_state() == 0 ? 1 : 0;
+            break;
+
+        default:
+            return get_state() == 0 ? 0 : 1;
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
