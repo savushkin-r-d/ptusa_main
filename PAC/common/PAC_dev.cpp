@@ -232,13 +232,14 @@ int device::save_device( char *buff, const char *prefix )
         }
 
     if ( type != DT_V &&
-                
+
         type != DT_FS &&
         type != DT_GS &&
 
         type != DT_HA &&
         type != DT_HL &&
         type != DT_SB &&
+        ( type == DT_LS && ( sub_type != DST_LS_MAX && sub_type != DST_LS_MIN ) ) &&
 
         type != DT_DI &&
         type != DT_DO )
@@ -590,7 +591,7 @@ i_DO_device* device_manager::get_DO( const char *dev_name )
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_HA( const char *dev_name )
     {
-    return get_device( device::DT_HA, dev_name );        
+    return get_device( device::DT_HA, dev_name );
     }
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_HL( const char *dev_name )
@@ -2841,7 +2842,7 @@ level_s::level_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 level_s_iolink::level_s_iolink( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ) :
-    AO1( dev_name, DT_LS, sub_type, 0 )
+    AI1( dev_name, DT_LS, sub_type, 0, 0 )
     {
     }
 
@@ -2855,20 +2856,23 @@ float level_s_iolink::get_max_value()
     return 100;
     }
 
-#ifndef DEBUG_NO_WAGO_MODULES               
+#ifndef DEBUG_NO_WAGO_MODULES
 float level_s_iolink::get_value()
     {
-    int_2* data = get_AO_read_data( AO_INDEX );
-    int val = data[ 0 ] >> 2;
-    return (float)val;
+    char* data = ( char* ) get_AI_data( 0 );
+    int tmp = data[ 1 ] + 256 * data[ 0 ];
+    info = (LS_data*) &tmp;
+
+    return (float) info->v;
     }
 
 int level_s_iolink::get_state()
     {
-    int_2* data = get_AO_read_data( AO_INDEX );
-    int val = data[ 0 ] && 0x1;
+    char* data = ( char* ) get_AI_data( 0 );
+    int tmp = data[ 1 ] + 256 * data[ 0 ];
+    info = (LS_data*) &tmp;
 
-    return val;
+    return info->st1;
     }
 #endif
 
@@ -3528,11 +3532,11 @@ void virtual_counter::eval( u_int read_value, u_int abs_read_value,
             {
             value += read_value - last_read_value;
             }
-        
+
         if ( abs_read_value > abs_last_read_value )
             {
             abs_value += abs_read_value - abs_last_read_value;
-            }        
+            }
         }
     else
         {

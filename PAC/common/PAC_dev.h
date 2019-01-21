@@ -2811,7 +2811,7 @@ class level_s : public DI1
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора уровня IO-Link.
-class level_s_iolink : public AO1
+class level_s_iolink : public AI1
     {
     public:
         level_s_iolink( const char *dev_name, device::DEVICE_SUB_TYPE sub_type );
@@ -2820,13 +2820,23 @@ class level_s_iolink : public AO1
 
         float get_max_value();
 
-#ifndef DEBUG_NO_WAGO_MODULES               
+#ifndef DEBUG_NO_WAGO_MODULES
         float get_value();
 
         int get_state();
 #endif
 
         bool is_active();
+
+    private:
+        struct LS_data
+            {
+            char 	st1:1;
+            char 	st2:1;
+            int16_t v  :14;
+            };
+
+        LS_data *info;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора расхода.
