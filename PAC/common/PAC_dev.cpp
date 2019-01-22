@@ -3336,7 +3336,8 @@ valve_AS_mix_proof::valve_AS_mix_proof( const char *dev_name ):
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_AS_DO1_DI2::valve_AS_DO1_DI2( const char *dev_name ):
-    valve_AS( dev_name, DST_V_AS_DO1_DI2 )
+    valve_AS( dev_name, DST_V_AS_DO1_DI2 ),
+    start_err_time( get_millisec() )
     {
     }
 //---------------------------------------------------------------------------

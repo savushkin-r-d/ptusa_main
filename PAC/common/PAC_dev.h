@@ -874,10 +874,10 @@ class valve: public digital_wago_device
 
         enum CONSTANTS
             {
-            ADDITIONAL_PARAMS_COUNT = 2,  ///Количество дополнительных параметров.
+            ADDITIONAL_PARAMS_COUNT = 2,///Количество дополнительных параметров.
 
             P_ON_TIME = 1,
-            P_FB
+            P_FB,
             };
 
     private:
@@ -1908,6 +1908,7 @@ class valve_AS_DO1_DI2 : public valve_AS
             if ( ( o == 0 && i0 == 1 && i1 == 0 ) ||
                 ( o == 1 && i1 == 1 && i0 == 0 ) )
                 {
+                start_err_time = get_millisec();
                 return true;
                 }
 
@@ -1917,9 +1918,17 @@ class valve_AS_DO1_DI2 : public valve_AS
                 return true;
                 }
 
+             if ( get_delta_millisec( start_err_time ) < 500 )
+                {
+                return true;
+                }
+
             return false;
 #endif // DEBUG_NO_WAGO_MODULES
             }
+
+    private:
+        u_long start_err_time;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан донный.
