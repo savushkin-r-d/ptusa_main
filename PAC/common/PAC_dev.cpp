@@ -239,7 +239,7 @@ int device::save_device( char *buff, const char *prefix )
         type != DT_HA &&
         type != DT_HL &&
         type != DT_SB &&
-        ( type == DT_LS && ( sub_type != DST_LS_MAX && sub_type != DST_LS_MIN ) ) &&
+        !( type == DT_LS && ( sub_type == DST_LS_MAX || sub_type == DST_LS_MIN ) ) &&
 
         type != DT_DI &&
         type != DT_DO )
