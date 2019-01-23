@@ -552,9 +552,28 @@ class level : public i_AI_device
     };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство без привязки к модулям ввода-вывода
-class virtual_counter : public device, public i_counter
+class virtual_counter
     {
     public:
+        /// @brief Сброс счетчика.
+        void reset();
+
+        /// @brief Получение значения счетчика (объем).
+        unsigned int get_quantity();
+
+        /// @brief Получение значения счетчика (поток).
+        float get_flow();
+
+        /// @brief Получение состояния работы счетчика.
+        virtual int get_state();
+
+        /// @brief Получение абсолютного значения счетчика (без учета
+        /// состояния паузы).
+        unsigned int get_abs_quantity();
+
+        /// @brief Сброс абсолютного значения счетчика.
+        void abs_reset();
+
         void set( unsigned int value, unsigned int abs_value, float flow );
 
         void eval( unsigned int read_value, unsigned int abs_read_value,

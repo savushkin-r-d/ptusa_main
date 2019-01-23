@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 10/22/18 14:45:21.
+** Generated automatically by tolua++-1.0.92 on 01/23/19 09:15:00.
 */
 
 #ifndef __cplusplus
@@ -2785,6 +2785,196 @@ static int tolua_PAC_dev_level_get_volume00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: reset of class  virtual_counter */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_virtual_counter_reset00
+static int tolua_PAC_dev_virtual_counter_reset00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"virtual_counter",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  virtual_counter* self = (virtual_counter*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'reset'", NULL);
+#endif
+  {
+   self->reset();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'reset'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_quantity of class  virtual_counter */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_virtual_counter_get_quantity00
+static int tolua_PAC_dev_virtual_counter_get_quantity00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"virtual_counter",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  virtual_counter* self = (virtual_counter*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_quantity'", NULL);
+#endif
+  {
+   unsigned int tolua_ret = (unsigned int)  self->get_quantity();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_quantity'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_flow of class  virtual_counter */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_virtual_counter_get_flow00
+static int tolua_PAC_dev_virtual_counter_get_flow00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"virtual_counter",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  virtual_counter* self = (virtual_counter*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_flow'", NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->get_flow();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_flow'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_state of class  virtual_counter */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_virtual_counter_get_state00
+static int tolua_PAC_dev_virtual_counter_get_state00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"virtual_counter",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  virtual_counter* self = (virtual_counter*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_state'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->get_state();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_state'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_abs_quantity of class  virtual_counter */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_virtual_counter_get_abs_quantity00
+static int tolua_PAC_dev_virtual_counter_get_abs_quantity00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"virtual_counter",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  virtual_counter* self = (virtual_counter*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_abs_quantity'", NULL);
+#endif
+  {
+   unsigned int tolua_ret = (unsigned int)  self->get_abs_quantity();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_abs_quantity'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: abs_reset of class  virtual_counter */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_virtual_counter_abs_reset00
+static int tolua_PAC_dev_virtual_counter_abs_reset00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"virtual_counter",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  virtual_counter* self = (virtual_counter*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'abs_reset'", NULL);
+#endif
+  {
+   self->abs_reset();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'abs_reset'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: set of class  virtual_counter */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_virtual_counter_set00
 static int tolua_PAC_dev_virtual_counter_set00(lua_State* tolua_S)
@@ -2856,23 +3046,6 @@ static int tolua_PAC_dev_virtual_counter_eval00(lua_State* tolua_S)
  tolua_error(tolua_S,"#ferror in function 'eval'.",&tolua_err);
  return 0;
 #endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* get function: __i_counter__ of class  virtual_counter */
-#ifndef TOLUA_DISABLE_tolua_get_virtual_counter___i_counter__
-static int tolua_get_virtual_counter___i_counter__(lua_State* tolua_S)
-{
-  virtual_counter* self = (virtual_counter*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable '__i_counter__'",NULL);
-#endif
-#ifdef __cplusplus
-   tolua_pushusertype(tolua_S,(void*)static_cast<i_counter*>(self), "i_counter");
-#else
-   tolua_pushusertype(tolua_S,(void*)((i_counter*)self), "i_counter");
-#endif
- return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
 
@@ -12004,11 +12177,16 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_beginmodule(tolua_S,"level");
    tolua_function(tolua_S,"get_volume",tolua_PAC_dev_level_get_volume00);
   tolua_endmodule(tolua_S);
-  tolua_cclass(tolua_S,"virtual_counter","virtual_counter","device",NULL);
+  tolua_cclass(tolua_S,"virtual_counter","virtual_counter","",NULL);
   tolua_beginmodule(tolua_S,"virtual_counter");
+   tolua_function(tolua_S,"reset",tolua_PAC_dev_virtual_counter_reset00);
+   tolua_function(tolua_S,"get_quantity",tolua_PAC_dev_virtual_counter_get_quantity00);
+   tolua_function(tolua_S,"get_flow",tolua_PAC_dev_virtual_counter_get_flow00);
+   tolua_function(tolua_S,"get_state",tolua_PAC_dev_virtual_counter_get_state00);
+   tolua_function(tolua_S,"get_abs_quantity",tolua_PAC_dev_virtual_counter_get_abs_quantity00);
+   tolua_function(tolua_S,"abs_reset",tolua_PAC_dev_virtual_counter_abs_reset00);
    tolua_function(tolua_S,"set",tolua_PAC_dev_virtual_counter_set00);
    tolua_function(tolua_S,"eval",tolua_PAC_dev_virtual_counter_eval00);
-   tolua_variable(tolua_S,"__i_counter__",tolua_get_virtual_counter___i_counter__,NULL);
   tolua_endmodule(tolua_S);
   #ifdef __cplusplus
   tolua_cclass(tolua_S,"tech_object","tech_object","",tolua_collect_tech_object);
