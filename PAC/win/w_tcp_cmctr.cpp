@@ -42,7 +42,7 @@ tcp_communicator_win::tcp_communicator_win( const char *name_rus, const char *na
                 {
                 struct in_addr addr;
                 addr.s_addr = *( u_long * ) ( server->h_addr_list[ 0 ] );
-                printf( "Host IP   - \"%s\".\n", inet_ntoa( addr ) );
+                printf( "Host socket - \"%s\":%d.\n", inet_ntoa( addr ), port );
                 }       
             }
         else
