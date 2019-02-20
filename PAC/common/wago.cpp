@@ -281,7 +281,7 @@ float wago_device::get_AI( u_int index, float min_value, float max_value )
                 return -1000;
 
                 // Выход модуля 446.
-                // Три наименне значащих бита не учитываются.
+                // Три наименее значащих бита не учитываются.
                 //    -----------------------------------------------------------------------
                 //    Input           Input           Binary value
                 //    current 0-20	  current 4-20                            Hex.      Dec.
