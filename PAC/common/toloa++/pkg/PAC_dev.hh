@@ -552,7 +552,7 @@ class level : public i_AI_device
     };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство без привязки к модулям ввода-вывода
-class virtual_counter
+class virtual_counter : public device
     {
     public:
         /// @brief Сброс счетчика.

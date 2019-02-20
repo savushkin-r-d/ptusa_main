@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 01/23/19 09:15:00.
+** Generated automatically by tolua++-1.0.92 on 02/20/19 10:27:09.
 */
 
 #ifndef __cplusplus
@@ -12177,7 +12177,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_beginmodule(tolua_S,"level");
    tolua_function(tolua_S,"get_volume",tolua_PAC_dev_level_get_volume00);
   tolua_endmodule(tolua_S);
-  tolua_cclass(tolua_S,"virtual_counter","virtual_counter","",NULL);
+  tolua_cclass(tolua_S,"virtual_counter","virtual_counter","device",NULL);
   tolua_beginmodule(tolua_S,"virtual_counter");
    tolua_function(tolua_S,"reset",tolua_PAC_dev_virtual_counter_reset00);
    tolua_function(tolua_S,"get_quantity",tolua_PAC_dev_virtual_counter_get_quantity00);
