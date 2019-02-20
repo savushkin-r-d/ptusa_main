@@ -762,6 +762,10 @@ class valve: public digital_wago_device
         valve( const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type );
 
+        valve( bool is_on_fb, bool is_off_fb, const char *dev_name,
+            device::DEVICE_TYPE type, device::DEVICE_SUB_TYPE sub_type,
+            int extra_params_cnt );
+
 #ifdef _MSC_VER
 #pragma region Отключение клапана с задержкой.
 #endif
