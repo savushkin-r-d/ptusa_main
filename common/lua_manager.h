@@ -16,6 +16,8 @@ extern "C" {
 //-----------------------------------------------------------------------------
 TOLUA_API int tolua_PAC_dev_open ( lua_State* tolua_S );
 
+TOLUA_API int tolua_IOT_dev_open(lua_State* tolua_S);
+
 #ifdef RFID
 TOLUA_API int tolua_rfid_reader_open( lua_State* tolua_S );
 #endif

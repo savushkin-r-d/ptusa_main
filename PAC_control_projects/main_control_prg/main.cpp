@@ -96,7 +96,8 @@ int main( int argc, const char *argv[] )
         }
 
 #ifdef OPCUA
-    OPCUAServer::getInstance().TestConfig();
+    OPCUAServer::getInstance().UserInit();
+    //OPCUAServer::getInstance().BaseConfig();
 
     UA_StatusCode retval = OPCUAServer::getInstance().Start();
     if(retval != UA_STATUSCODE_GOOD)

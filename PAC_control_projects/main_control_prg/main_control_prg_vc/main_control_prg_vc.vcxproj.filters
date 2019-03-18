@@ -100,6 +100,12 @@
     <Filter Include="Header Files\PAC\linux">
       <UniqueIdentifier>{064327e8-f7a5-4ca2-8fcc-300ee0a5749b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\IoT">
+      <UniqueIdentifier>{5b5c9a60-f8a2-48f1-abaf-a1926b04396d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\IoT">
+      <UniqueIdentifier>{134bc52e-8f04-4370-b2de-71f1452e3649}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\PAC\common\PAC_dev.h">
@@ -320,6 +326,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\linux\l_log.h">
       <Filter>Header Files\PAC\linux</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\IoT\iot_altivar.h">
+      <Filter>Header Files\IoT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\IOT_dev.hh">
+      <Filter>pkg</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -565,6 +577,12 @@
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\rfid_reader_tolua.cpp">
       <Filter>Source Files\PAC\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\IoT\iot_altivar.cpp">
+      <Filter>Source Files\IoT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\IoT\IOT_dev_lua.cpp">
+      <Filter>Source Files\IoT</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
