@@ -814,6 +814,11 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                     new_wago_device = (level_e_cone*)new_device;
                     break;
 
+                case device::DST_LT_IOLINK:
+                    new_device = new level_e_iolink( dev_name );
+                    new_wago_device = (level_e_iolink*)new_device;
+                    break;
+
                 case device::DST_LT_TRUNC:
                 default:
                     if ( G_DEBUG )
@@ -2908,6 +2913,42 @@ bool level_s_iolink::is_active()
             return get_state() == 0 ? 0 : 1;
         }
     }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+level_e_iolink::level_e_iolink( const char *dev_name ) :
+    AI1( dev_name, DT_LT, DST_LT_IOLINK, 0, 0 )
+    {
+    }
+
+float level_e_iolink::get_min_value()
+    {
+    return 0;
+    }
+
+float level_e_iolink::get_max_value()
+    {
+    return 100;
+    }
+
+#ifndef DEBUG_NO_WAGO_MODULES
+float level_e_iolink::get_value()
+    {
+    char* data = (char*)get_AI_data( 0 );
+    int tmp = data[ 1 ] + 256 * data[ 0 ];
+    info = (LT_data*)&tmp;
+
+    return (float)info->v;
+    }
+
+int level_e_iolink::get_state()
+    {
+    char* data = (char*)get_AI_data( 0 );
+    int tmp = data[ 1 ] + 256 * data[ 0 ];
+    info = (LT_data*)&tmp;
+
+    return info->st1;
+    }
+#endif
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float pressure_e::get_max_val()

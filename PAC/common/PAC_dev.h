@@ -445,10 +445,12 @@ class device : public i_DO_AO_device, public par_device
             DST_QT_OK,    ///<  онцентратомер c диагностикой.
 
             //LT
-            DST_LT = 1,    ///“екущий уровень без дополнительных параметров
-            DST_LT_CYL,    ///“екущий уровень дл€ цилиндрического танка
-            DST_LT_CONE,   ///“екущий уровень дл€ танка с конусом в основании
-            DST_LT_TRUNC,  ///“екущий уровень дл€ танка с усеченным цилиндром в основании
+            DST_LT = 1,    ///“екущий уровень без дополнительных параметров.
+            DST_LT_CYL,    ///“екущий уровень дл€ цилиндрического танка.
+            DST_LT_CONE,   ///“екущий уровень дл€ танка с конусом в основании.
+            DST_LT_TRUNC,  ///“екущий уровень дл€ танка с усеченным цилиндром в основании.
+
+            DST_LT_IOLINK, ///“екущий IOLInk уровень без дополнительных параметров.
 
             //DO
             DST_DO = 1,    ///ќбычный дискретный выход с прив€зкой к модул€м
@@ -2304,6 +2306,31 @@ class level_e_cone : public level
             };
 
         u_int start_param_idx;
+    };
+//-----------------------------------------------------------------------------
+/// @brief ƒатчик сигнализатора уровн€ IO-Link.
+class level_e_iolink : public AI1
+    {
+    public:
+        level_e_iolink( const char *dev_name );
+
+        float get_min_value();
+        float get_max_value();
+
+#ifndef DEBUG_NO_WAGO_MODULES
+        float level_e_iolink::get_value();
+        int level_e_iolink::get_state();
+#endif
+
+    private:
+        struct LT_data
+            {
+            char 	st1 : 1;
+            char 	st2 : 1;
+            int16_t v   : 14;
+            };
+
+        LT_data *info;
     };
 //-----------------------------------------------------------------------------
 /// @brief “екущее давление.
