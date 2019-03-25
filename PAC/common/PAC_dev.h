@@ -2318,8 +2318,8 @@ class level_e_iolink : public AI1
         float get_max_value();
 
 #ifndef DEBUG_NO_WAGO_MODULES
-        float level_e_iolink::get_value();
-        int level_e_iolink::get_state();
+        float get_value();
+        int get_state();
 #endif
 
     private:
