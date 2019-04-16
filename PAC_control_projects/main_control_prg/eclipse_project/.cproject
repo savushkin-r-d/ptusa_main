@@ -135,8 +135,9 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1279002828.1196104483" name="OPCUAServer.h" rcbsApplicability="disable" resourcePath="PAC/common/OPCUAServer.h" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="common/RFID|common/RFID/API|common/RFID/rfid_reader.cpp|PAC/common/rfid_reader_tolua.cpp|common/WTL|PAC/common/toloa++/pkg|PAC/linux/PAC_PC|PAC/linux/PAC_WAGO_750_860|PAC/DOC|PAC/neuroPID|PAC/MINIOS7|PAC/win|common/util/snprintf.h|common/util/snprintf.c|common/win_util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|common/RFID|common/RFID/API|common/RFID/rfid_reader.cpp|PAC/common/rfid_reader_tolua.cpp|common/WTL|PAC/common/toloa++/pkg|PAC/linux/PAC_PC|PAC/linux/PAC_WAGO_750_860|PAC/DOC|PAC/neuroPID|PAC/MINIOS7|PAC/win|common/util/snprintf.h|common/util/snprintf.c|common/win_util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -172,6 +173,7 @@
 									<listOptionValue builtIn="false" value="../../../../../WAGO/ptxproj-2.2.20/platform-wago-pfc200/sysroot-target/usr/include"/>
 									<listOptionValue builtIn="false" value="../../../../common/lua"/>
 									<listOptionValue builtIn="false" value="../../../../PAC/common"/>
+									<listOptionValue builtIn="false" value="../../../../PAC/IoT"/>
 									<listOptionValue builtIn="false" value="/opt/OSELAS.Toolchain-2012.12.1/arm-cortexa8-linux-gnueabihf/gcc-4.7.3-glibc-2.16.0-binutils-2.22-kernel-3.6-sanitized/sysroot-arm-cortexa8-linux-gnueabihf/usr/include"/>
 								</option>
 								<option id="gnu.c.compiler.option.warnings.extrawarn.577398661" name="Extra warnings (-Wextra)" superClass="gnu.c.compiler.option.warnings.extrawarn" useByScannerDiscovery="false" value="true" valueType="boolean"/>
@@ -189,6 +191,7 @@
 								<option id="gnu.cpp.compiler.option.optimization.level.1011454404" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.debugging.level.418759811" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.667062159" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="/home/id/PTUSA/PAC/IoT"/>
 									<listOptionValue builtIn="false" value="/home/id/PTUSA/PAC/linux"/>
 									<listOptionValue builtIn="false" value="/home/id/PTUSA/PAC/common/sys"/>
 									<listOptionValue builtIn="false" value="/home/id/PTUSA/PAC/linux/PAC_PFC200"/>
