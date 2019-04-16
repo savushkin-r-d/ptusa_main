@@ -17,6 +17,13 @@ class tcp_client
             AR_FREE = 0,
             };
 
+		enum ASYNCCONNECTSTATE
+		{
+			ACS_CONNECTED = 1,
+			ACS_DISCONNECTED = 0,
+			ACS_CONNECTING = -1,
+		};
+
         unsigned long async_timeout;
         unsigned long async_queued;
         unsigned long async_last_connect_try;
@@ -42,7 +49,7 @@ class tcp_client
         virtual int get_socket();
         virtual void Disconnect() = 0;
         int get_id();
-        int get_async_result();
+        virtual int get_async_result();
         int set_async_result(int ar);
         char* buff;
         tcp_client(const char* client_ip, unsigned int client_port, unsigned int client_id, unsigned char alarm_subclass, unsigned int exchange_buf_size = 256, unsigned long send_receive_timeout = 100);

@@ -84,6 +84,9 @@ win_tcp_client::win_tcp_client( const char* client_ip, unsigned int client_port,
     {
     tv.tv_sec = timeout / 1000;
     tv.tv_usec = (timeout % 1000) * 1000;
+	async_startconnnect = get_millisec();
+	async_tv.tv_sec = 0;
+	async_tv.tv_usec = 100;
     }
 
 int win_tcp_client::InitLib()
@@ -215,6 +218,134 @@ int win_tcp_client::Connect()
     return 1;
     }
 
+int win_tcp_client::AsyncConnect()
+{
+	int res;
+	if (connectedstate == ACS_CONNECTED)
+	{
+		return 1;
+	}
+	else
+
+	{
+		if (connectedstate == ACS_DISCONNECTED)
+		{
+
+			socket_number = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
+			if (socket_number == INVALID_SOCKET)
+			{
+				if (G_DEBUG)
+				{
+					printf("tcp_client_%d: Ошибка создания сокета %d!\n", id, WSAGetLastError());
+				}
+
+				return 0;
+			}
+
+			int vlen = sizeof(timeout);
+
+			if (setsockopt(socket_number, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout, vlen) == SOCKET_ERROR ||
+				setsockopt(socket_number, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, vlen) == SOCKET_ERROR)
+			{
+				if (G_DEBUG)
+				{
+					printf("tcp_client_%d: Ошибка установления параметров сокета %d!\n", id, WSAGetLastError());
+				}
+				return 0;
+			}
+
+			//Переводим сокет в неблокирующий режим.
+			u_long mode = 1;
+			res = ioctlsocket(socket_number, FIONBIO, &mode);
+			if (res == SOCKET_ERROR)
+			{
+				if (G_DEBUG)
+				{
+					printf("tcp_client_%d: Ошибка перевода сокета в неблокирующий режим %d!\n", id, WSAGetLastError());
+				}
+
+
+				closesocket(socket_number);
+				socket_number = 0;
+				return 0;
+			}
+
+			sockaddr_in async_sock_address;
+			memset(&async_sock_address, 0, sizeof(sockaddr_in));
+			async_sock_address.sin_family = AF_INET;
+			async_sock_address.sin_port = htons((u_short)port);
+			async_sock_address.sin_addr.s_addr = inet_addr(ip);
+
+			connect(socket_number, (SOCKADDR*)&async_sock_address, sizeof(sockaddr_in));
+			async_startconnnect = get_millisec();
+
+			connectedstate = ACS_CONNECTING;
+		}
+
+		if (connectedstate == ACS_CONNECTING)
+		{
+			FD_ZERO(&rfds);
+			FD_SET(socket_number, &rfds);
+			res = select(0, 0, &rfds, 0, &async_tv);
+
+			if (res == 0)
+			{
+				if (get_delta_millisec(async_startconnnect) > timeout)
+				{
+
+					if (G_DEBUG)
+					{
+						printf("tcp_client_%d: Ошибка соединения. Таймаут\n", id);
+					}
+					closesocket(socket_number);
+					socket_number = 0;
+					connectedstate = ACS_DISCONNECTED;
+					return ACS_DISCONNECTED;
+				}
+				else
+				{
+					connectedstate = ACS_CONNECTING;
+					return ACS_CONNECTING;
+				}
+			}
+
+			if (res < 0)
+			{
+				if (G_DEBUG)
+				{
+					printf("tcp_client_%d: Ошибка соединения %d!\n", id, WSAGetLastError());
+				}
+				closesocket(socket_number);
+				socket_number = 0;
+				connectedstate = ACS_DISCONNECTED;
+				return ACS_DISCONNECTED;
+			}
+
+			int sock_error;
+			int sock_err_len = sizeof(sock_error);
+
+			if (FD_ISSET(socket_number, &rfds))
+			{
+				res = getsockopt(socket_number, SOL_SOCKET, SO_ERROR, (char*)&sock_error, &sock_err_len);
+				if (res < 0 || sock_error != 0)
+				{
+					if (G_DEBUG)
+					{
+						printf("tcp_client_%d: Ошибка соединения(select) %d!\n", id, sock_error);
+					}
+					closesocket(socket_number);
+					socket_number = 0;
+					connectedstate = ACS_DISCONNECTED;
+					return ACS_DISCONNECTED;
+				}
+			}
+
+		}
+		connectedstate = ACS_CONNECTED;
+		return ACS_CONNECTED;
+	}
+}
+
 void win_tcp_client::Disconnect()
     {
     //tcp_communicator::get_instance()->remove_async_client(this);
@@ -235,6 +366,7 @@ win_tcp_client::~win_tcp_client()
 int win_tcp_client::AsyncSend( unsigned int bytestosend )
     {
     async_result = AR_BUSY;
+	async_bytes_to_send = bytestosend;
     if(!is_initialized)
         {
         if (!InitLib())
@@ -243,32 +375,46 @@ int win_tcp_client::AsyncSend( unsigned int bytestosend )
             return 0;
             }
         }
-    if (!connectedstate)
+    if (connectedstate != ACS_CONNECTED)
         {
-        if (get_delta_millisec(async_last_connect_try) > reconnectTimeout)
+        if (get_delta_millisec(async_last_connect_try) > reconnectTimeout || connectedstate == ACS_CONNECTING)
             {
-            async_last_connect_try = get_millisec();
-            if (!Connect())
-                {
-                async_result = AR_SOCKETERROR;
-                reconnectTimeout *= 2;
-                if (reconnectTimeout > maxreconnectTimeout)
-                    {
-                    reconnectTimeout = maxreconnectTimeout;
-                    }
-                return 0;
-                }
-            else
-                {
-                reconnectTimeout = connectTimeout * RECONNECT_MIN_MULTIPLIER;
-                }
-            }
-        else
-            {
-            async_result = AR_SOCKETERROR;
-            return 0;
+			if (connectedstate == ACS_DISCONNECTED)
+			{
+				async_last_connect_try = get_millisec();
+			}
+            
+			int connectres = AsyncConnect();
+
+			if (connectres == ACS_DISCONNECTED)
+			{
+				async_result = AR_SOCKETERROR;
+				reconnectTimeout *= 2;
+				if (reconnectTimeout > maxreconnectTimeout)
+				{
+					reconnectTimeout = maxreconnectTimeout;
+				}
+				return 0;
+			}
+
+			if (connectres == ACS_CONNECTING)
+			{
+				connectedstate = ACS_CONNECTING;
+				return 0;
+			}
+			
+			if (connectres == ACS_CONNECTED)
+			{
+				reconnectTimeout = connectTimeout * RECONNECT_MIN_MULTIPLIER;
+			}
+		}
+		else
+		{
+			async_result = AR_SOCKETERROR;
+			return 0;
             }
         }
+
 
     int res = send(socket_number, buff, bytestosend, 0 );
     if ( res == SOCKET_ERROR)
@@ -287,4 +433,13 @@ int win_tcp_client::AsyncSend( unsigned int bytestosend )
         }
     }
 
+int win_tcp_client::get_async_result()
+{
+	/// В процессе соединения циклично вызываем функцию для реализации асинхронного соединения.
+	if (connectedstate == ACS_CONNECTING)
+	{
+		AsyncSend(async_bytes_to_send);
+	}
+	return async_result;
+}
 

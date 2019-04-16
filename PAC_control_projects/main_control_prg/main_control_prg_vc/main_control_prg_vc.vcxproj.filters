@@ -333,6 +333,9 @@
     <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\IOT_dev.hh">
       <Filter>pkg</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\PAC\IoT\iot_common.h">
+      <Filter>Header Files\IoT</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -582,6 +585,9 @@
       <Filter>Source Files\IoT</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\IoT\IOT_dev_lua.cpp">
+      <Filter>Source Files\IoT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\IoT\iot_common.cpp">
       <Filter>Source Files\IoT</Filter>
     </ClCompile>
   </ItemGroup>

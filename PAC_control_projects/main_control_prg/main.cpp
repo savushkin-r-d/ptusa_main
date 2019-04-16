@@ -27,6 +27,7 @@
 #endif
 
 #include "profibus_slave.h"
+#include "iot_common.h"
 
 #ifdef OPCUA
 #include "OPCUAServer.h"
@@ -109,6 +110,9 @@ int main( int argc, const char *argv[] )
         }
 #endif
 
+	//Инициализация дополнительных устройств
+	IOT_INIT();
+
     sprintf( G_LOG->msg, "Starting main loop! Sleep time is %li ms.",
         sleep_time_ms);
     G_LOG->write_log( i_log::P_INFO );
@@ -151,6 +155,8 @@ int main( int argc, const char *argv[] )
 #ifdef OPCUA
         OPCUAServer::getInstance().Evaluate();
 #endif
+		//Основной цикл работы с дополнительными устройствами
+		IOT_EVALUATE();
 
         sleep_ms( sleep_time_ms );
 
@@ -190,7 +196,7 @@ int main( int argc, const char *argv[] )
         struct tm *timeInfo_;
         t_ = time( 0 );
         timeInfo_ = localtime( &t_ );
-        static int print_cycle_last_h = timeInfo_->tm_hour;
+        static int print_cycle_last_h = timeInfo_->tm_sec;
 
         if ( max_iteration_cycle_time < cycle_time )
             {
@@ -198,7 +204,7 @@ int main( int argc, const char *argv[] )
             }
 
         //Once per hour writing performance info.
-        if ( print_cycle_last_h != timeInfo_->tm_hour )
+        if ( print_cycle_last_h != timeInfo_->tm_sec )
             {
             u_long avg_time = all_time / cycles_cnt;
 
@@ -226,7 +232,7 @@ int main( int argc, const char *argv[] )
             cycles_cnt = 0;
             max_iteration_cycle_time = 0;
             cycles_per_period 	     = 0;
-            print_cycle_last_h       = timeInfo_->tm_hour;
+            print_cycle_last_h       = timeInfo_->tm_sec;
             }
         //-Информация о времени выполнения цикла программы.!->
 #endif // TEST_SPEED
@@ -234,6 +240,8 @@ int main( int argc, const char *argv[] )
 #ifdef OPCUA
     OPCUAServer::getInstance().Shutdown();
 #endif
+	//Деинициализация дополнительных устройств.
+	IOT_FINAL();
 
     return( EXIT_SUCCESS );
     }

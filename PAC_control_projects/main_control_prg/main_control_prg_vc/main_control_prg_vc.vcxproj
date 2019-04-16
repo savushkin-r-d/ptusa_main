@@ -351,6 +351,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)\..\..\system script
     <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\rfid_reader.hh" />
     <ClInclude Include="..\..\..\PAC\common\wago.h" />
     <ClInclude Include="..\..\..\PAC\IoT\iot_altivar.h" />
+    <ClInclude Include="..\..\..\PAC\IoT\iot_common.h" />
     <ClInclude Include="..\..\..\PAC\linux\l_console.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">true</ExcludedFromBuild>
@@ -458,6 +459,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)\..\..\system script
     <ClCompile Include="..\..\..\PAC\common\tech_def.cpp" />
     <ClCompile Include="..\..\..\PAC\common\wago.cpp" />
     <ClCompile Include="..\..\..\PAC\IoT\iot_altivar.cpp" />
+    <ClCompile Include="..\..\..\PAC\IoT\iot_common.cpp" />
     <ClCompile Include="..\..\..\PAC\IoT\IOT_dev_lua.cpp" />
     <ClCompile Include="..\..\..\PAC\linux\l_console.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>

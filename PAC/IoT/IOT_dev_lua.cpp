@@ -1,6 +1,6 @@
 /*
 ** Lua binding: IOT_dev
-** Generated automatically by tolua++-1.0.92 on 03/18/19 16:40:53.
+** Generated automatically by tolua++-1.0.92 on 04/11/19 14:45:59.
 */
 
 #ifndef __cplusplus
@@ -25,6 +25,47 @@ static void tolua_reg_types (lua_State* tolua_S)
 {
  tolua_usertype(tolua_S,"altivar_manager");
 }
+
+/* method: add_node of class  altivar_manager */
+#ifndef TOLUA_DISABLE_tolua_IOT_dev_altivar_manager_add_node00
+static int tolua_IOT_dev_altivar_manager_add_node00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"altivar_manager",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,3,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,5,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,6,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,7,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  altivar_manager* self = (altivar_manager*)  tolua_tousertype(tolua_S,1,0);
+  unsigned int index = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
+  char* IP_address = ((char*)  tolua_tostring(tolua_S,3,0));
+  char* name = ((char*)  tolua_tostring(tolua_S,4,0));
+  unsigned int port = ((unsigned int)  tolua_tonumber(tolua_S,5,0));
+  unsigned int timeout = ((unsigned int)  tolua_tonumber(tolua_S,6,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_node'", NULL);
+#endif
+  {
+   self->add_node(index,IP_address,name,port,timeout);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'add_node'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
 
 /* function: G_ALTIVAR_MANAGER */
 #ifndef TOLUA_DISABLE_tolua_IOT_dev_G_ALTIVAR_MANAGER00
@@ -60,6 +101,10 @@ TOLUA_API int tolua_IOT_dev_open (lua_State* tolua_S)
  tolua_reg_types(tolua_S);
  tolua_module(tolua_S,NULL,0);
  tolua_beginmodule(tolua_S,NULL);
+  tolua_cclass(tolua_S,"altivar_manager","altivar_manager","",NULL);
+  tolua_beginmodule(tolua_S,"altivar_manager");
+   tolua_function(tolua_S,"add_node",tolua_IOT_dev_altivar_manager_add_node00);
+  tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_ALTIVAR_MANAGER",tolua_IOT_dev_G_ALTIVAR_MANAGER00);
  tolua_endmodule(tolua_S);
  return 1;
