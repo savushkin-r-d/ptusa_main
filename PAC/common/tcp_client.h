@@ -17,12 +17,12 @@ class tcp_client
             AR_FREE = 0,
             };
 
-		enum ASYNCCONNECTSTATE
-		{
-			ACS_CONNECTED = 1,
-			ACS_DISCONNECTED = 0,
-			ACS_CONNECTING = -1,
-		};
+        enum ASYNCCONNECTSTATE
+        {
+            ACS_CONNECTED = 1,
+            ACS_DISCONNECTED = 0,
+            ACS_CONNECTING = -1,
+        };
 
         unsigned long async_timeout;
         unsigned long async_queued;
@@ -35,7 +35,7 @@ class tcp_client
         unsigned int port;
         int socket_number;
         unsigned long timeout;
-        char connectedstate;
+        int connectedstate;
         int id;
         unsigned char subclass;
         unsigned char is_initialized;

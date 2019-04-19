@@ -43,7 +43,7 @@ class l_log: public i_log
 #ifdef SIMPLE_LOG
         printf( "%s\n", msg );
 #else
-        std::time_t _tm = std::time( nullptr );
+        std::time_t _tm = std::time( 0 );
         std::tm tm = *std::localtime( &_tm );
 
         printf( "%02d-%02d %02d:%02d:%02d ",

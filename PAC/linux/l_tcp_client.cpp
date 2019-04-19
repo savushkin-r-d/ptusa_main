@@ -3,10 +3,12 @@
 
 #include "l_tcp_client.h"
 #include "l_tcp_cmctr.h"
+#include "PAC_err.h"
+#include "log.h"
+#include "errno.h"
 
 int linux_tcp_client::Communicate(unsigned int bytestosend)
     {
-
     if (!connectedstate)
         {
         if (!Connect())
@@ -42,7 +44,9 @@ linux_tcp_client::linux_tcp_client(const char* client_ip,
     tcp_client(client_ip, client_port, client_id, alarm_subclass,
         exchange_buf_size, send_receive_timeout)
     {
-
+    async_startconnnect = get_millisec();
+    async_tv.tv_sec = 0;
+    async_tv.tv_usec = 100;
     }
 
 int linux_tcp_client::Connect()
@@ -55,11 +59,8 @@ int linux_tcp_client::Connect()
     socket_number = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_number < 0)
         {
-        if (G_DEBUG)
-            {
-            printf("tcp_client_%d: Error creating socket!\n", id);
-            }
-
+        sprintf( G_LOG->msg, "Network device : s%d->\"%s\" error creating socket : timeout (%ld ms).", id, ip, connectTimeout );
+        G_LOG->write_log( i_log::P_ERR );
         return 0;
         }
 
@@ -68,22 +69,19 @@ int linux_tcp_client::Connect()
     if (setsockopt(socket_number, SOL_SOCKET, SO_REUSEADDR, &C_ON,
         sizeof(C_ON)))
         {
-        if (G_DEBUG)
-            {
-            printf("tcp_client_%d: Error setting socket params!\n", id);
-            }
+        sprintf( G_LOG->msg, "Network device : s%d->\"%s\" error setting socket params : timeout (%ld ms).", id, ip, connectTimeout );
+        G_LOG->write_log( i_log::P_ERR );
         close(socket_number);
         return 0;
         }
 
     //Переводим сокет в неблокирующий режим.
-    res = fcntl(socket_number, F_SETFL, O_NONBLOCK);
+    int flags = fcntl(socket_number, F_GETFL);
+    res = fcntl(socket_number, F_SETFL, flags | O_NONBLOCK);
     if (res != 0)
         {
-        if (G_DEBUG)
-            {
-            printf("tcp_client_%d: Error setting nonblock mode!\n", id);
-            }
+        sprintf( G_LOG->msg, "Network device : s%d->\"%s\" error setting nonblock mode : timeout (%ld ms).", id, ip, connectTimeout );
+        G_LOG->write_log( i_log::P_ERR );
         close(socket_number);
         socket_number = 0;
         return 0;
@@ -110,10 +108,8 @@ int linux_tcp_client::Connect()
 
     if (res <= 0)
         {
-        if (G_DEBUG)
-            {
-            printf("tcp_client_%d: Error in connect!\n", id);
-            }
+        sprintf( G_LOG->msg, "Network device : s%d->\"%s\" error in connect : timeout (%ld ms).", id, ip, connectTimeout );
+        G_LOG->write_log( i_log::P_ERR );
         close(socket_number);
         socket_number = 0;
         return 0;
@@ -127,10 +123,8 @@ int linux_tcp_client::Connect()
         if (getsockopt(socket_number, SOL_SOCKET, SO_ERROR, &error, &err_len)
             < 0 || error != 0)
             {
-            if (G_DEBUG)
-                {
-                printf("tcp_client_%d: Error in connect (select)!\n", id);
-                }
+            sprintf( G_LOG->msg, "Network device : s%d->\"%s\" error in connect : timeout (%ld ms).", id, ip, connectTimeout );
+            G_LOG->write_log( i_log::P_ERR );
             close(socket_number);
             socket_number = 0;
             return 0;
@@ -140,6 +134,126 @@ int linux_tcp_client::Connect()
     connectedstate = 1;
     return 1;
     }
+
+int linux_tcp_client::AsyncConnect()
+{
+    int res;
+    if (connectedstate == ACS_CONNECTED)
+        {
+        return 1;
+        }
+
+    else
+        {
+        if (connectedstate == ACS_DISCONNECTED)
+            {
+                socket_number = socket(AF_INET, SOCK_STREAM, IPPROTO_IP);
+                if (socket_number < 0)
+                    {
+                    sprintf( G_LOG->msg, "Network device : s%d->\"%s\" error creating socket : timeout (%ld ms).", id, ip, connectTimeout );
+                    G_LOG->write_log( i_log::P_ERR );
+                    return 0;
+                    }
+
+                const int C_ON = 1;
+
+                if (setsockopt(socket_number, SOL_SOCKET, SO_REUSEADDR, &C_ON,
+                    sizeof(C_ON)))
+                    {
+                    sprintf( G_LOG->msg, "Network device : s%d->\"%s\" error setting socket params : timeout (%ld ms).", id, ip, connectTimeout );
+                    G_LOG->write_log( i_log::P_ERR );
+                    close(socket_number);
+                    return 0;
+                    }
+
+                //Переводим сокет в неблокирующий режим.
+                int flags = fcntl(socket_number, F_GETFL);
+                res = fcntl(socket_number, F_SETFL, flags | O_NONBLOCK);
+                if (res != 0)
+                    {
+                    sprintf( G_LOG->msg, "Network device : s%d->\"%s\" error setting nonblock mode : timeout (%ld ms).", id, ip, connectTimeout );
+                    G_LOG->write_log( i_log::P_ERR );
+                    close(socket_number);
+                    socket_number = 0;
+                    return 0;
+                    }
+
+                struct sockaddr_in sock_address;
+                memset(&sock_address, 0, sizeof(sockaddr_in));
+                sock_address.sin_family = AF_INET;
+                sock_address.sin_port = htons((u_short) port);
+                sock_address.sin_addr.s_addr = inet_addr(ip);
+
+                int connectres = connect(socket_number, (struct sockaddr*) &sock_address, sizeof(sock_address));
+                if (connectres == -1 && errno != EINPROGRESS)
+                    {
+                    Disconnect();
+                    }
+                else
+                    {
+                    async_startconnnect = get_millisec();
+                    connectedstate = ACS_CONNECTING;
+                    }
+            }
+
+        if (connectedstate == ACS_CONNECTING)
+        {
+            fd_set rdevents;
+            FD_ZERO(&rdevents);
+            FD_SET(socket_number, &rdevents);
+            res = select(socket_number + 1, 0, &rdevents, 0, &async_tv);
+            if (res == 0)
+            {
+                if (get_delta_millisec(async_startconnnect) > timeout)
+                {
+                    sprintf( G_LOG->msg, "Network device : s%d->\"%s\" disconnected on timeout : timeout (%ld ms).", id, ip, connectTimeout );
+                    G_LOG->write_log( i_log::P_ERR );
+
+                    close(socket_number);
+                    socket_number = 0;
+                    connectedstate = ACS_DISCONNECTED;
+                    return ACS_DISCONNECTED;
+                }
+                else
+                {
+                    connectedstate = ACS_CONNECTING;
+                    return ACS_CONNECTING;
+                }
+            }
+
+            if (res < 0)
+            {
+                sprintf( G_LOG->msg, "Network device : s%d->\"%s\" connect error : timeout (%ld ms).", id, ip, connectTimeout );
+                G_LOG->write_log( i_log::P_ERR );
+                close(socket_number);
+                socket_number = 0;
+                connectedstate = ACS_DISCONNECTED;
+                return ACS_DISCONNECTED;
+            }
+
+
+            if (FD_ISSET(socket_number, &rdevents))
+                 {
+                 socklen_t err_len;
+                 int error = 0;
+                 err_len = sizeof(error);
+                 if (getsockopt(socket_number, SOL_SOCKET, SO_ERROR, &error, &err_len)
+                     < 0 || error != 0)
+                     {
+                     sprintf( G_LOG->msg, "Network device : s%d->\"%s\" error in connect(select) : timeout (%ld ms).", id, ip, connectTimeout );
+                     G_LOG->write_log( i_log::P_ERR );
+                     close(socket_number);
+                     socket_number = 0;
+                     return 0;
+                     }
+                 }
+
+        }
+        connectedstate = ACS_CONNECTED;
+        return ACS_CONNECTED;
+    }
+}
+
 
 void linux_tcp_client::Disconnect()
     {
@@ -152,42 +266,60 @@ void linux_tcp_client::Disconnect()
 int linux_tcp_client::AsyncSend(unsigned int bytestosend)
     {
     async_result = AR_BUSY;
+    async_bytes_to_send = bytestosend;
 
-    if (!connectedstate)
+    //printf("\n\rConnected state %d", connectedstate);
+    if (connectedstate != ACS_CONNECTED)
         {
-        if (get_delta_millisec(async_last_connect_try) > reconnectTimeout)
+        if (get_delta_millisec(async_last_connect_try) > reconnectTimeout || connectedstate == ACS_CONNECTING)
             {
-            async_last_connect_try = get_millisec();
-            if (!Connect())
+            if (connectedstate == ACS_DISCONNECTED)
+                {
+                async_last_connect_try = get_millisec();
+                }
+
+
+            int connectres = AsyncConnect();
+
+            if (connectres == ACS_DISCONNECTED)
                 {
                 async_result = AR_SOCKETERROR;
-                reconnectTimeout += connectTimeout;
+                reconnectTimeout *= 2;
                 if (reconnectTimeout > maxreconnectTimeout)
-                    {
+                {
                     reconnectTimeout = maxreconnectTimeout;
-                    }
+                }
                 return 0;
                 }
-            else
+
+            if (connectres == ACS_CONNECTING)
+                {
+                connectedstate = ACS_CONNECTING;
+                return 0;
+                }
+
+            if (connectres == ACS_CONNECTED)
                 {
                 reconnectTimeout = connectTimeout * RECONNECT_MIN_MULTIPLIER;
                 }
             }
         else
             {
-            async_result = AR_SOCKETERROR;
-            return 0;
+                async_result = AR_SOCKETERROR;
+                return 0;
             }
         }
 
-    int res = tcp_communicator_linux::sendall(socket_number,
-        (unsigned char*) buff, bytestosend, 0, timeout * 1000, ip,
-        "tcp client", 0);
+
+    //int res = tcp_communicator_linux::sendall(socket_number, (unsigned char*) buff, bytestosend, 0, timeout * 1000, ip, "tcp client", 0);
+    int res = send(socket_number,(unsigned char*) buff, bytestosend, 0);
 
     if (res < 0)
         {
         async_result = AR_SOCKETERROR;
         Disconnect();
+        sprintf( G_LOG->msg, "Network device : s%d->\"%s\" error on send - disconnect : timeout (%ld ms).", socket_number, ip, connectTimeout );
+        G_LOG->write_log( i_log::P_ERR );
         return 0;
         }
     else
@@ -196,11 +328,20 @@ int linux_tcp_client::AsyncSend(unsigned int bytestosend)
         }
     }
 
+int linux_tcp_client::get_async_result() {
+    /// В процессе соединения циклично вызываем функцию для реализации асинхронного соединения.
+    if (connectedstate == ACS_CONNECTING)
+    {
+        AsyncSend(async_bytes_to_send);
+    }
+    return async_result;
+}
+
 linux_tcp_client::~linux_tcp_client()
     {
     if (connectedstate)
         {
         Disconnect();
         }
-    }
+}
 
