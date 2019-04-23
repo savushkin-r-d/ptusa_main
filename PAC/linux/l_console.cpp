@@ -3,6 +3,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 
+#include <ctime>
+
 time_t t_;
 struct tm *timeInfo_;
 

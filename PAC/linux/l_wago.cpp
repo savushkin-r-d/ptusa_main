@@ -1,4 +1,4 @@
-#include <bits/errno.h>
+#include <errno.h>
 
 #include "l_wago.h"
 #include "log.h"
