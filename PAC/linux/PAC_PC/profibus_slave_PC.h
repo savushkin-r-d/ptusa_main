@@ -59,6 +59,11 @@ class profibus_slave_PC : public profibus_slave
             {
             }
 
+        virtual int get_int4( int byte_offset )
+            {
+            return 0;
+            }
+
     private:
         static profibus_slave_PC* instance;
     };
