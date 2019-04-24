@@ -3448,6 +3448,7 @@ void cipline_tech_object::SortRR( int where, int forcetotank /*= 0*/ )
                     V09->off();
                     V10->off();
                     V11->off();
+					V12->off();
                     if (no_neutro) {V11->on();} else {V12->on();}
                     break;
                 case 2: //tank
@@ -3503,6 +3504,7 @@ void cipline_tech_object::SortRR( int where, int forcetotank /*= 0*/ )
                     V08->off();
                     V10->off();
                     V11->off();
+					V12->off();
                     if (no_neutro) {V11->on();} else {V12->on();}
                     break;
                 case 2: //tank
