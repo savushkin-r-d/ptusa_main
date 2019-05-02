@@ -69,7 +69,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/7.3.0/include-fixed"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${HOME}/ptusa/common/lua&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/lua&quot;"/>
                                     								
                                 </option>
                                 								
@@ -91,9 +91,9 @@
                                     									
                                     <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${HOME}/ptusa/common/tolua++&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/tolua++&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${HOME}/ptusa/common/lua&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/lua&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/7.3.0"/>
                                     									
@@ -109,23 +109,23 @@
                                     									
                                     <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/7.3.0/include-fixed"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${HOME}/ptusa/PAC/common&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/common&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${HOME}/ptusa/PAC/common/sys&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/common/sys&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${HOME}/ptusa/PAC/linux&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/linux&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${HOME}/ptusa/common/util&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/util&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${HOME}/ptusa/common/PAC-driver&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/PAC-driver&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${HOME}/ptusa/common/QuickLZ&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/QuickLZ&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${HOME}/ptusa/common&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${HOME}/ptusa/PAC/linux/PAC_PC&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/linux/PAC_PC&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${HOME}/ptusa/PAC/IoT&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/IoT&quot;"/>
                                     								
                                 </option>
                                 								
