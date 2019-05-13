@@ -75,7 +75,7 @@ int linux_tcp_client::Connect()
         return 0;
         }
 
-    //Ïåðåâîäèì ñîêåò â íåáëîêèðóþùèé ðåæèì.
+    //ÐŸÐµÑ€ÐµÐ²Ð¾Ð´Ð¸Ð¼ ÑÐ¾ÐºÐµÑ‚ Ð² Ð½ÐµÐ±Ð»Ð¾ÐºÐ¸Ñ€ÑƒÑŽÑ‰Ð¸Ð¹ Ñ€ÐµÐ¶Ð¸Ð¼.
     int flags = fcntl(socket_number, F_GETFL);
     res = fcntl(socket_number, F_SETFL, flags | O_NONBLOCK);
     if (res != 0)
@@ -163,10 +163,11 @@ int linux_tcp_client::AsyncConnect()
                     sprintf( G_LOG->msg, "Network device : s%d->\"%s\" error setting socket params : timeout (%ld ms).", id, ip, connectTimeout );
                     G_LOG->write_log( i_log::P_ERR );
                     close(socket_number);
+                    socket_number = 0;
                     return 0;
                     }
 
-                //Ïåðåâîäèì ñîêåò â íåáëîêèðóþùèé ðåæèì.
+                //ÐŸÐµÑ€ÐµÐ²Ð¾Ð´Ð¸Ð¼ ÑÐ¾ÐºÐµÑ‚ Ð² Ð½ÐµÐ±Ð»Ð¾ÐºÐ¸Ñ€ÑƒÑŽÑ‰Ð¸Ð¹ Ñ€ÐµÐ¶Ð¸Ð¼.
                 int flags = fcntl(socket_number, F_GETFL);
                 res = fcntl(socket_number, F_SETFL, flags | O_NONBLOCK);
                 if (res != 0)
@@ -208,7 +209,7 @@ int linux_tcp_client::AsyncConnect()
                 {
                     sprintf( G_LOG->msg, "Network device : s%d->\"%s\" disconnected on timeout : timeout (%ld ms).", id, ip, connectTimeout );
                     G_LOG->write_log( i_log::P_ERR );
-
+                    shutdown(socket_number, SHUT_RDWR);
                     close(socket_number);
                     socket_number = 0;
                     connectedstate = ACS_DISCONNECTED;
@@ -225,6 +226,7 @@ int linux_tcp_client::AsyncConnect()
             {
                 sprintf( G_LOG->msg, "Network device : s%d->\"%s\" connect error : timeout (%ld ms).", id, ip, connectTimeout );
                 G_LOG->write_log( i_log::P_ERR );
+                shutdown(socket_number, SHUT_RDWR);
                 close(socket_number);
                 socket_number = 0;
                 connectedstate = ACS_DISCONNECTED;
@@ -242,9 +244,11 @@ int linux_tcp_client::AsyncConnect()
                      {
                      sprintf( G_LOG->msg, "Network device : s%d->\"%s\" error in connect(select) : timeout (%ld ms).", id, ip, connectTimeout );
                      G_LOG->write_log( i_log::P_ERR );
+                     shutdown(socket_number, SHUT_RDWR);
                      close(socket_number);
                      socket_number = 0;
-                     return 0;
+                     connectedstate = ACS_DISCONNECTED;
+                     return ACS_DISCONNECTED;
                      }
                  }
 
@@ -268,7 +272,6 @@ int linux_tcp_client::AsyncSend(unsigned int bytestosend)
     async_result = AR_BUSY;
     async_bytes_to_send = bytestosend;
 
-    //printf("\n\rConnected state %d", connectedstate);
     if (connectedstate != ACS_CONNECTED)
         {
         if (get_delta_millisec(async_last_connect_try) > reconnectTimeout || connectedstate == ACS_CONNECTING)
@@ -305,14 +308,14 @@ int linux_tcp_client::AsyncSend(unsigned int bytestosend)
             }
         else
             {
-                async_result = AR_SOCKETERROR;
-                return 0;
+            async_result = AR_SOCKETERROR;
+            return 0;
             }
         }
 
 
-    //int res = tcp_communicator_linux::sendall(socket_number, (unsigned char*) buff, bytestosend, 0, timeout * 1000, ip, "tcp client", 0);
-    int res = send(socket_number,(unsigned char*) buff, bytestosend, 0);
+    int res = tcp_communicator_linux::sendall(socket_number, (unsigned char*) buff, bytestosend, 0, timeout * 10, ip, "async tcp client", 0);
+    
 
     if (res < 0)
         {
@@ -329,7 +332,7 @@ int linux_tcp_client::AsyncSend(unsigned int bytestosend)
     }
 
 int linux_tcp_client::get_async_result() {
-    /// Â ïðîöåññå ñîåäèíåíèÿ öèêëè÷íî âûçûâàåì ôóíêöèþ äëÿ ðåàëèçàöèè àñèíõðîííîãî ñîåäèíåíèÿ.
+    /// Ð’ Ð¿Ñ€Ð¾Ñ†ÐµÑÑÐµ ÑÐ¾ÐµÐ´Ð¸Ð½ÐµÐ½Ð¸Ñ Ñ†Ð¸ÐºÐ»Ð¸Ñ‡Ð½Ð¾ Ð²Ñ‹Ð·Ñ‹Ð²Ð°ÐµÐ¼ Ñ„ÑƒÐ½ÐºÑ†Ð¸ÑŽ Ð´Ð»Ñ Ñ€ÐµÐ°Ð»Ð¸Ð·Ð°Ñ†Ð¸Ð¸ Ð°ÑÐ¸Ð½Ñ…Ñ€Ð¾Ð½Ð½Ð¾Ð³Ð¾ ÑÐ¾ÐµÐ´Ð¸Ð½ÐµÐ½Ð¸Ñ.
     if (connectedstate == ACS_CONNECTING)
     {
         AsyncSend(async_bytes_to_send);
