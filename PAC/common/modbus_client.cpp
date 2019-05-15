@@ -209,9 +209,9 @@ int modbus_client::write_multiply_registers( unsigned int address, unsigned int 
 	return 1;
 	}
 
-void modbus_client::zero_output_buff()
+void modbus_client::zero_output_buff(int startpos /*= 13*/)
 	{
-	memset(tcpclient->buff + 13, 0, tcpclient->buff_size - 13);
+	memset(tcpclient->buff + startpos, 0, tcpclient->buff_size - startpos);
 	}
 
 void modbus_client::set_int2( unsigned int address, int_2 value )
@@ -567,6 +567,47 @@ int modbus_client::async_write_multiply_registers( unsigned int address, unsigne
         return 0;
         }
     }
+
+int modbus_client::async_read_write_multiply_registers(unsigned int readaddress, unsigned int readquantity, unsigned int writeaddress, unsigned int writequantity)
+{
+	int ar = get_async_result();
+	if (ar == tcp_client::AR_BUSY)
+	{
+		return 0;
+	}
+	else
+	{
+		if (ar > 0 && ar == modbus_expected_length)
+		{
+			tcpclient->set_async_result(tcp_client::AR_FREE);
+			return 1;
+		}
+		else
+		{
+			unsigned char bytecount = (unsigned char)(writequantity * 2);
+			tcpclient->buff[0] = 0;
+			tcpclient->buff[1] = 0;
+			tcpclient->buff[2] = 0;
+			tcpclient->buff[3] = 0;
+			tcpclient->buff[4] = ((int_2)(11 + bytecount)) >> 8;
+			tcpclient->buff[5] = ((int_2)(11 + bytecount)) & 0xFF;
+			tcpclient->buff[6] = stationid;
+			tcpclient->buff[7] = 0x17;
+			tcpclient->buff[8] = ((int_2)readaddress) >> 8;
+			tcpclient->buff[9] = ((int_2)readaddress) & 0xFF;
+			tcpclient->buff[10] = ((int_2)readquantity) >> 8;
+			tcpclient->buff[11] = ((int_2)readquantity) & 0xFF;
+			tcpclient->buff[12] = ((int_2)writeaddress) >> 8;
+			tcpclient->buff[13] = ((int_2)writeaddress) & 0xFF;
+			tcpclient->buff[14] = ((int_2)writequantity) >> 8;
+			tcpclient->buff[15] = ((int_2)writequantity) & 0xFF;
+			tcpclient->buff[16] = bytecount;
+			modbus_async_result = tcpclient->AsyncSend(17 + bytecount);
+			modbus_expected_length = 9 + readquantity * 2;
+		}
+		return 0;
+	}
+}
 
 void modbus_client::set_station( unsigned char new_station_id )
     {
