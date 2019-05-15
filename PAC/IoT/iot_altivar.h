@@ -14,8 +14,30 @@ public:
 	altivar_node(unsigned int id, char* ip, unsigned int port, unsigned long exchangetimeout);
 	~altivar_node();
 	void Evaluate();
+	bool enabled;
+	unsigned long queryinterval;
+
+	enum CFG_STEP
+	{
+		CFG_STEP_END = 99,
+	};
+
+	enum RUN_STEP
+	{
+		RUN_STEP_CHECK_CONFIG = 0,
+		RUN_STEP_CONFIG = 1,
+		RUN_STEP_INIT_END = 98,
+		RUN_STEP_END = 99,
+	};
+
 protected:
 	modbus_client* mc;
+	float fc_setpoint;
+	float fc_value;
+	bool configure;
+	int querystep;
+	int configurestep;
+	unsigned long querytimer;
 };
 
 typedef std::map<std::string, altivar_node*> altivar_node_map;
