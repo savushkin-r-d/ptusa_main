@@ -683,6 +683,12 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                     new_wago_device = ( valve_DO2_DI2_bistable* ) new_device;
                     break;
 
+                case device::V_IOLINK_VTUG_DO1:
+                    new_device = new valve_iolink_vtug( dev_name,
+                        ( device::DEVICE_SUB_TYPE ) dev_sub_type );
+                    new_wago_device = (valve_iolink_vtug*)new_device;
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -2261,6 +2267,89 @@ void valve_bottom_mix_proof::direct_off()
         }
     }
 #endif // DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iolink_vtug::valve_iolink_vtug( const char *dev_name,
+    device::DEVICE_SUB_TYPE sub_type ) : valve( dev_name, DT_V, sub_type )
+    {
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_vtug::set_rt_par( u_int idx, float value )
+    {
+    switch ( idx )
+        {
+        case 1:
+            vtug_number = (u_int)value;
+            break;
+
+        default:
+            valve::set_rt_par( idx, value );
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+void valve_iolink_vtug::direct_on()
+    {
+    char* data = (char*)get_AO_write_data( AO_INDEX );
+    char read_state = get_state_data( data );
+
+    if ( 0 == read_state )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    u_int offset = ( vtug_number - 1 ) / 8;
+    data[ offset ] |= 1 << ( ( vtug_number - 1 ) % 8 );
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_vtug::direct_off()
+    {
+    char* data = (char*)get_AO_write_data( AO_INDEX );
+    char read_state = get_state_data( data );
+
+    if ( 1 == read_state )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    u_int offset = ( vtug_number - 1 ) / 8;
+    data[ offset ] ^= 1 << ( ( vtug_number - 1 ) % 8 );
+    }
+#endif // DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
+char valve_iolink_vtug::get_state_data( char* data )
+    {
+    if ( data == 0 )
+        {
+        return 0;
+        }
+
+    u_int offset = ( vtug_number - 1 ) / 8;
+    char state = data[ offset ];
+    state >>= ( vtug_number - 1 ) % 8;
+    state &= 1;
+
+    return state;
+    }
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE valve_iolink_vtug::get_valve_state()
+    {
+#ifdef DEBUG_NO_WAGO_MODULES
+    return (VALVE_STATE)digital_wago_device::get_state();
+#else
+    char* data = (char*)get_AO_read_data( AO_INDEX );
+    char state = get_state_data( data );
+
+    return (VALVE_STATE)state;
+#endif // DEBUG_NO_WAGO_MODULES
+    }
+//-----------------------------------------------------------------------------
+/// @brief Получение состояния обратной связи.
+bool valve_iolink_vtug::get_fb_state()
+    {
+    return true;
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
