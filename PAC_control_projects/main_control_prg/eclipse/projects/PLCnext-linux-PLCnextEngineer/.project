@@ -25,4 +25,16 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 		<nature>com.phoenixcontact.plcnext.cplusplus.project.plcprojectnature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>PAC</name>
+			<type>2</type>
+			<locationURI>PARENT-5-PROJECT_LOC/PAC</locationURI>
+		</link>
+		<link>
+			<name>common</name>
+			<type>2</type>
+			<locationURI>PARENT-5-PROJECT_LOC/common</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>
