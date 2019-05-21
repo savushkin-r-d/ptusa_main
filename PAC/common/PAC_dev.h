@@ -409,6 +409,8 @@ class device : public i_DO_AO_device, public par_device
             DST_V_AS_DO1_DI2,      ///< Клапан с одним каналом управления и двумя обратными связями с AS интерфейсом.
             V_DO2_DI2_BISTABLE,    ///< Клапан с двумя каналами управления и двумя обратными связями бистабильный.
 
+            V_IOLINK_VTUG_DO1,     ///< IO-Link VTUG8 клапан с одним каналом управления.
+
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
             DST_LS_MAX,         ///< Подключение по схеме максимум.
@@ -2097,6 +2099,41 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 #pragma endregion Выключение мини клапана с задержкой.
 #endif
 
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан IO-link VTUG с одним каналом управления.
+class valve_iolink_vtug : public valve
+    {
+    public:
+        valve_iolink_vtug( const char *dev_name,
+            device::DEVICE_SUB_TYPE sub_type );
+
+        void set_rt_par( u_int idx, float value );
+
+    private:
+        u_int vtug_number;    ///< Номер устройства.
+
+        enum CONSTANTS
+            {
+            AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
+            };
+
+#ifndef DEBUG_NO_WAGO_MODULES
+    public:
+        void direct_on();
+
+        void direct_off();
+#endif // DEBUG_NO_WAGO_MODULES
+
+
+    protected:
+        /// @brief Получение данных состояния устройства.
+        char get_state_data( char* data );
+
+        VALVE_STATE get_valve_state();
+
+        /// @brief Получение состояния обратной связи.
+        bool get_fb_state();
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым входом.
