@@ -19,6 +19,12 @@ public:
 
 	enum CFG_STEP
 	{
+		CFG_STEP_INIT_OUTPUTS = 0,
+		CFG_STEP_SET_OUTPUTS,
+		CFG_STEP_INIT_INPUTS,
+		CFG_STEP_SET_INPUTS,
+		CFG_STEP_INIT_IOSCANNER,
+		CFG_STEP_SET_IOSCANNER,
 		CFG_STEP_END = 99,
 	};
 
@@ -26,6 +32,8 @@ public:
 	{
 		RUN_STEP_CHECK_CONFIG = 0,
 		RUN_STEP_CONFIG = 1,
+		RUN_STEP_INIT_IOSCANNER,
+		RUN_STEP_QUERY_IOSCANNER,
 		RUN_STEP_INIT_END = 98,
 		RUN_STEP_END = 99,
 	};
@@ -34,6 +42,11 @@ protected:
 	modbus_client* mc;
 	float fc_setpoint;
 	float fc_value;
+	int state;
+	int remote_state;
+	int cmd;
+	float rpm_setpoint;
+	float rpm_value;
 	bool configure;
 	int querystep;
 	int configurestep;

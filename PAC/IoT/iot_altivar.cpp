@@ -83,18 +83,18 @@ void altivar_node::Evaluate()
 		case RUN_STEP_CHECK_CONFIG:
 			if (configure)
 			{
-				configurestep = 0;
+				configurestep = CFG_STEP_INIT_OUTPUTS;
 				querystep = RUN_STEP_CONFIG;
 			}
 			else
 			{
-				querystep = RUN_STEP_INIT_END;
+				querystep = RUN_STEP_INIT_IOSCANNER;
 			}
 			break;
 		case RUN_STEP_CONFIG:
 			switch (configurestep)
 			{
-			case 0:
+			case CFG_STEP_INIT_OUTPUTS:
 				mc->zero_output_buff();
 				mc->set_station(0);
 				mc->set_int2(0, 8501);	//CMD(Command word) --default
@@ -103,15 +103,15 @@ void altivar_node::Evaluate()
 				mc->set_int2(3, 0);
 				mc->set_int2(4, 0);
 				mc->set_int2(5, 0);
-				configurestep = 1;
+				configurestep = CFG_STEP_SET_OUTPUTS;
 				break;
-			case 1:
+			case CFG_STEP_SET_OUTPUTS:
 				if (mc->async_write_multiply_registers(15421, 6)) //Задание ouputs для modbus-scanner
 				{
-					configurestep = 2;
+					configurestep = CFG_STEP_INIT_INPUTS;
 				}
 				break;
-			case 2:
+			case CFG_STEP_INIT_INPUTS:
 				mc->zero_output_buff();
 				mc->set_station(0);
 				mc->set_int2(0, 3201);	//ETA(Status word) --default
@@ -120,10 +120,22 @@ void altivar_node::Evaluate()
 				mc->set_int2(3, 0);
 				mc->set_int2(4, 0);
 				mc->set_int2(5, 0);
-				configurestep = 3;
+				configurestep = CFG_STEP_SET_INPUTS;
 				break;
-			case 3:
+			case CFG_STEP_SET_INPUTS:
 				if (mc->async_write_multiply_registers(15401, 6)) //Задание inputs для modbus-scanner
+				{
+					configurestep = CFG_STEP_INIT_IOSCANNER;
+				}
+				break;
+			case CFG_STEP_INIT_IOSCANNER:
+				mc->zero_output_buff();
+				mc->set_station(0);
+				mc->set_int2(0, 1);
+				configurestep = CFG_STEP_SET_IOSCANNER;
+				break;
+			case CFG_STEP_SET_IOSCANNER:
+				if (mc->async_write_multiply_registers(64239, 1)) //Задание inputs для modbus-scanner
 				{
 					configurestep = CFG_STEP_END;
 				}
@@ -137,10 +149,23 @@ void altivar_node::Evaluate()
 				break;
 			}
 			break;
-		case 2:
+		case RUN_STEP_INIT_IOSCANNER:
 			mc->set_station(255);
-			querystep = RUN_STEP_INIT_END;
+			mc->set_int2(2, cmd);	
+			mc->set_int2(3, (int)fc_setpoint);	
+			mc->set_int2(4, 0);
+			mc->set_int2(5, 0);
+			mc->set_int2(6, 0);
+			mc->set_int2(7, 0);
+			querystep = RUN_STEP_QUERY_IOSCANNER;
 			break;
+		case RUN_STEP_QUERY_IOSCANNER:
+			if (mc->async_read_write_multiply_registers(0, 6, 0, 6))
+			{
+				remote_state = mc->get_int2(0);
+				rpm_value = mc->get_int2(1);
+				querystep = RUN_STEP_INIT_END;
+			}
 		case RUN_STEP_INIT_END:
 			querytimer = get_millisec();
 			querystep = RUN_STEP_END;
@@ -148,11 +173,11 @@ void altivar_node::Evaluate()
 		case RUN_STEP_END:
 			if (get_delta_millisec(querytimer) > queryinterval)
 			{
-				querystep = 0;
+				querystep = RUN_STEP_CHECK_CONFIG;
 			}
 			break;
 		default:
-			querystep = 0;
+			querystep = RUN_STEP_CHECK_CONFIG;
 			break;
 		}
 	}
