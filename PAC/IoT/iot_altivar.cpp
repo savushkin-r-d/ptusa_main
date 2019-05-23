@@ -22,7 +22,7 @@ altivar_manager* altivar_manager::get_instance()
 	return instance;
 }
 
-void altivar_manager::add_node(unsigned int index, char* IP_address, char* name, unsigned int port, unsigned int timeout)
+void altivar_manager::add_node(char* IP_address, char* name, unsigned int port, unsigned int timeout)
 {
 	std::string nodeip = std::string(IP_address);
 	nodeip.append(":");
@@ -32,6 +32,7 @@ void altivar_manager::add_node(unsigned int index, char* IP_address, char* name,
 	altivar_node* new_node = new altivar_node(SOCKID_ALTIVAR + index, IP_address, port, timeout);
 	nodes.insert(altivar_node_pair(nodeip, new_node));
 	num_nodes.insert(altivar_node_num_pair(index, new_node));
+	index++;
 }
 
 void altivar_manager::evaluate()
@@ -51,6 +52,8 @@ altivar_manager::altivar_manager()
 }
 
 auto_smart_ptr< altivar_manager > altivar_manager::instance;
+
+unsigned int altivar_manager::index = 0;
 
 altivar_manager * G_ALTIVAR_MANAGER()
 {

@@ -67,7 +67,7 @@ public:
 
 	/// @brief Получение единственного экземпляра класса.
 	static altivar_manager* get_instance();
-	void add_node(unsigned int index, char* IP_address, char* name, unsigned int port, unsigned int timeout);
+	void add_node(char* IP_address, char* name, unsigned int port, unsigned int timeout);
 	void evaluate();
 protected:
 	altivar_manager();
@@ -77,6 +77,7 @@ protected:
 	//u_int nodes_count;
 
 	static auto_smart_ptr< altivar_manager > instance;
+	static unsigned int index;
 };
 
 

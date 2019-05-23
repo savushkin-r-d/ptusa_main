@@ -233,6 +233,8 @@ class device
 
 		void set_property( const char* field, device* dev );
 
+		void set_string_property(const char* field, const char* value);
+
 		void set_descr( const char *description );
 
         /// @brief Выключение устройства с учетом ручного режима.

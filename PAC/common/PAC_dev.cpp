@@ -705,11 +705,21 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             new_wago_device = ( analog_valve* ) new_device;
             break;
 
-        case device::DT_M:
-            new_device      = new motor( dev_name,
-                ( device::DEVICE_SUB_TYPE ) dev_sub_type );
-            new_wago_device = ( motor* ) new_device;
-            break;
+		case device::DT_M:
+			switch (dev_sub_type)
+				{
+				case device::M_ATV:
+					new_device = new motor_altivar(dev_name,
+						(device::DEVICE_SUB_TYPE) dev_sub_type);
+					new_wago_device = (motor_altivar*)new_device;
+					break;
+				default:
+					new_device = new motor(dev_name,
+						(device::DEVICE_SUB_TYPE) dev_sub_type);
+					new_wago_device = (motor*)new_device;
+					break;
+				}
+			break;
 
         case device::DT_LS:
             switch ( dev_sub_type )
@@ -1472,7 +1482,7 @@ int counter_f::get_state()
 //-----------------------------------------------------------------------------
 float counter_f::get_flow()
     {
-    return get_par( P_CZ, 0 ) +
+	return get_par(P_CZ, 0);
 #ifdef DEBUG_NO_WAGO_MODULES
         flow_value;
 #else
@@ -3705,3 +3715,93 @@ int virtual_counter::save_device_ex( char *buff )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+
+int motor_altivar::save_device_ex(char * buff)
+	{
+	int res = 0;
+#ifdef DEBUG_NO_WAGO_MODULES
+	res = sprintf(buff, "R=0, ");
+#else
+	res = sprintf(buff, "R=0, ");
+#endif //DEBUG_NO_WAGO_MODULES
+	return res;
+	}
+
+float motor_altivar::get_value()
+	{
+#ifdef DEBUG_NO_WAGO_MODULES
+	return freq;
+#else
+	return 0.0f;
+#endif // DEBUG_NO_WAGO_MODULES
+	}
+
+void motor_altivar::direct_set_value(float value)
+	{
+#ifdef DEBUG_NO_WAGO_MODULES
+	freq = value;
+#else
+
+#endif // DEBUG_NO_WAGO_MODULES
+	}
+
+void motor_altivar::direct_set_state(int new_state)
+	{
+#ifdef DEBUG_NO_WAGO_MODULES
+	if (-1 == new_state)
+		{
+		state = (char)-1;
+		return;
+		}
+#endif // DEBUG_NO_WAGO_MODULES
+
+
+	if (new_state == 2)
+		{
+#ifdef DEBUG_NO_WAGO_MODULES
+		state = 2;
+#endif // DEBUG_NO_WAGO_MODULES
+		return;
+		}
+
+	if (new_state)
+		{
+		direct_on();
+		}
+	else
+		{
+		direct_off();
+		}
+	}
+
+int motor_altivar::get_state()
+	{
+#ifdef DEBUG_NO_WAGO_MODULES
+	return state;
+#else
+	return 0;
+#endif // DEBUG_NO_WAGO_MODULES
+	}
+
+void motor_altivar::direct_on()
+	{
+#ifdef DEBUG_NO_WAGO_MODULES
+	state = 1;
+#else
+
+#endif // DEBUG_NO_WAGO_MODULES
+	}
+
+void motor_altivar::direct_off()
+	{
+#ifdef DEBUG_NO_WAGO_MODULES
+	state = 1;
+#else
+	
+#endif // DEBUG_NO_WAGO_MODULES
+	}
+
+void motor_altivar::set_string_property(const char * field, const char * value)
+	{
+	printf("Set string property %s value %s\n", field, value);
+	}

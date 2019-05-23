@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 05/21/19 16:49:55.
+** Generated automatically by tolua++-1.0.92 on 05/23/19 17:06:36.
 */
 
 #ifndef __cplusplus
@@ -1232,6 +1232,41 @@ static int tolua_PAC_dev_device_set_property00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'set_property'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_string_property of class  device */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_set_string_property00
+static int tolua_PAC_dev_device_set_string_property00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"device",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  device* self = (device*)  tolua_tousertype(tolua_S,1,0);
+  const char* field = ((const char*)  tolua_tostring(tolua_S,2,0));
+  const char* value = ((const char*)  tolua_tostring(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_string_property'", NULL);
+#endif
+  {
+   self->set_string_property(field,value);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_string_property'.",&tolua_err);
  return 0;
 #endif
 }
@@ -12125,6 +12160,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"set_par",tolua_PAC_dev_device_set_par00);
    tolua_function(tolua_S,"set_rt_par",tolua_PAC_dev_device_set_rt_par00);
    tolua_function(tolua_S,"set_property",tolua_PAC_dev_device_set_property00);
+   tolua_function(tolua_S,"set_string_property",tolua_PAC_dev_device_set_string_property00);
    tolua_function(tolua_S,"set_descr",tolua_PAC_dev_device_set_descr00);
    tolua_function(tolua_S,"off",tolua_PAC_dev_device_off01);
    tolua_function(tolua_S,"on",tolua_PAC_dev_device_on01);
