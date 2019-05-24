@@ -196,7 +196,8 @@ tolua++ -n rfid_reader -o "..\..\..\PAC\common\rfid_reader_tolua.cpp" "..\..\..\
     <PreBuildEvent>
       <Command>tolua++ -n PAC_dev -o "..\..\..\PAC\common\PAC_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh"
 tolua++ -n IOT_dev -o "..\..\..\PAC\IoT\IOT_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\IOT_dev.hh"
-copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)\..\..\system scripts\"
+xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
+
 </Command>
     </PreBuildEvent>
     <PreBuildEvent>
@@ -351,6 +352,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)\..\..\system script
     <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\rfid_reader.hh" />
     <ClInclude Include="..\..\..\PAC\common\wago.h" />
     <ClInclude Include="..\..\..\PAC\IoT\iot_altivar.h" />
+    <ClInclude Include="..\..\..\PAC\IoT\iot_base.h" />
     <ClInclude Include="..\..\..\PAC\IoT\iot_common.h" />
     <ClInclude Include="..\..\..\PAC\linux\l_console.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
@@ -459,6 +461,7 @@ copy "p:\PTUSA projects\system scripts\*.lua" "$(ProjectDir)\..\..\system script
     <ClCompile Include="..\..\..\PAC\common\tech_def.cpp" />
     <ClCompile Include="..\..\..\PAC\common\wago.cpp" />
     <ClCompile Include="..\..\..\PAC\IoT\iot_altivar.cpp" />
+    <ClCompile Include="..\..\..\PAC\IoT\iot_base.cpp" />
     <ClCompile Include="..\..\..\PAC\IoT\iot_common.cpp" />
     <ClCompile Include="..\..\..\PAC\IoT\IOT_dev_lua.cpp" />
     <ClCompile Include="..\..\..\PAC\linux\l_console.cpp">
