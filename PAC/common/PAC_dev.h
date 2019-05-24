@@ -38,6 +38,9 @@
 
 #include "PAC_info.h"
 
+#include "iot_altivar.h"
+
+
 //-----------------------------------------------------------------------------
 /// @brief Устройство c параметрами.
 ///
@@ -2900,7 +2903,8 @@ public:
 	motor_altivar(const char *dev_name, device::DEVICE_SUB_TYPE sub_type) :
 		device(dev_name, DT_M, sub_type, ADDITIONAL_PARAM_COUNT),
 		wago_device(dev_name),
-		start_switch_time(get_millisec())
+		start_switch_time(get_millisec()),
+		atv(NULL)
 #ifdef DEBUG_NO_WAGO_MODULES
 		, state(0),
 		freq(0)
@@ -2951,6 +2955,8 @@ private:
 	};
 
 	u_long start_switch_time;
+
+	altivar_node* atv;
 
 #ifdef DEBUG_NO_WAGO_MODULES
 	char  state;  ///< Состояние устройства.

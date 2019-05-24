@@ -3804,4 +3804,23 @@ void motor_altivar::direct_off()
 void motor_altivar::set_string_property(const char * field, const char * value)
 	{
 	printf("Set string property %s value %s\n", field, value);
+	if (strcmp(field, "IP") == 0)
+		{
+		int port = 502;
+		int timeout = 300;
+		std::string nodeip = std::string(value);
+		nodeip.append(":");
+		nodeip.append(std::to_string(port));
+		nodeip.append(" ");
+		nodeip.append(std::to_string(timeout));
+		if (!atv)
+			{
+			atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
+			if (!atv)
+				{
+				G_ALTIVAR_MANAGER()->add_node(value, 502, 300);
+				atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
+				}
+			}
+		}
 	}

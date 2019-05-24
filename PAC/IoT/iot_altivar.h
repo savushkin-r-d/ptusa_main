@@ -1,57 +1,54 @@
 #pragma once
-#ifndef iot_altivar_h__
-#define iot_altivar_h__
 
+#include "iot_base.h"
 #include "smart_ptr.h"
-#include "iot_common.h"
-#include "modbus_client.h"
 #include <map>
-#include <string>
+class modbus_client;
 
-class altivar_node : public i_iot_node
-{
-public:
-	altivar_node(unsigned int id, char* ip, unsigned int port, unsigned long exchangetimeout);
-	~altivar_node();
-	void Evaluate();
-	bool enabled;
-	unsigned long queryinterval;
-
-	enum CFG_STEP
+class altivar_node: public i_iot_node
 	{
-		CFG_STEP_INIT_OUTPUTS = 0,
-		CFG_STEP_SET_OUTPUTS,
-		CFG_STEP_INIT_INPUTS,
-		CFG_STEP_SET_INPUTS,
-		CFG_STEP_INIT_IOSCANNER,
-		CFG_STEP_SET_IOSCANNER,
-		CFG_STEP_END = 99,
-	};
+	public:
+		altivar_node(unsigned int id, const char* ip, unsigned int port, unsigned long exchangetimeout);
+		~altivar_node();
+		void Evaluate();
+		bool enabled;
+		unsigned long queryinterval;
 
-	enum RUN_STEP
-	{
-		RUN_STEP_CHECK_CONFIG = 0,
-		RUN_STEP_CONFIG = 1,
-		RUN_STEP_INIT_IOSCANNER,
-		RUN_STEP_QUERY_IOSCANNER,
-		RUN_STEP_INIT_END = 98,
-		RUN_STEP_END = 99,
-	};
+		enum CFG_STEP
+			{
+			CFG_STEP_INIT_OUTPUTS = 0,
+			CFG_STEP_SET_OUTPUTS,
+			CFG_STEP_INIT_INPUTS,
+			CFG_STEP_SET_INPUTS,
+			CFG_STEP_INIT_IOSCANNER,
+			CFG_STEP_SET_IOSCANNER,
+			CFG_STEP_END = 99,
+			};
 
-protected:
-	modbus_client* mc;
-	float fc_setpoint;
-	float fc_value;
-	int state;
-	int remote_state;
-	int cmd;
-	float rpm_setpoint;
-	float rpm_value;
-	bool configure;
-	int querystep;
-	int configurestep;
-	unsigned long querytimer;
-};
+		enum RUN_STEP
+			{
+			RUN_STEP_CHECK_CONFIG = 0,
+			RUN_STEP_CONFIG = 1,
+			RUN_STEP_INIT_IOSCANNER,
+			RUN_STEP_QUERY_IOSCANNER,
+			RUN_STEP_INIT_END = 98,
+			RUN_STEP_END = 99,
+			};
+
+	protected:
+		modbus_client* mc;
+		float fc_setpoint;
+		float fc_value;
+		int state;
+		int remote_state;
+		int cmd;
+		float rpm_setpoint;
+		float rpm_value;
+		bool configure;
+		int querystep;
+		int configurestep;
+		unsigned long querytimer;
+	};
 
 typedef std::map<std::string, altivar_node*> altivar_node_map;
 typedef std::pair<std::string, altivar_node*> altivar_node_pair;
@@ -60,30 +57,28 @@ typedef std::map<unsigned int, altivar_node*> altivar_node_num_map;
 typedef std::pair<unsigned int, altivar_node*> altivar_node_num_pair;
 
 class altivar_manager
-{
-public:
+	{
+	public:
 
-	virtual ~altivar_manager();
+		virtual ~altivar_manager();
 
-	/// @brief Получение единственного экземпляра класса.
-	static altivar_manager* get_instance();
-	void add_node(char* IP_address, char* name, unsigned int port, unsigned int timeout);
-	void evaluate();
-protected:
-	altivar_manager();
-	altivar_node_map nodes;
-	altivar_node_num_map num_nodes;
-	//altivar_node** nodes;
-	//u_int nodes_count;
+		/// @brief Получение единственного экземпляра класса.
+		static altivar_manager* get_instance();
+		void add_node(const char* IP_address, unsigned int port, unsigned int timeout);
+		altivar_node* get_node(const char* IP_address);
+		void evaluate();
+	protected:
+		altivar_manager();
+		altivar_node_map nodes;
+		altivar_node_num_map num_nodes;
+		//altivar_node** nodes;
+		//u_int nodes_count;
 
-	static auto_smart_ptr< altivar_manager > instance;
-	static unsigned int index;
-};
+		static auto_smart_ptr< altivar_manager > instance;
+		static unsigned int index;
+	};
 
 
 
 altivar_manager* G_ALTIVAR_MANAGER();
 
-
-
-#endif // iot_altivar_h__
