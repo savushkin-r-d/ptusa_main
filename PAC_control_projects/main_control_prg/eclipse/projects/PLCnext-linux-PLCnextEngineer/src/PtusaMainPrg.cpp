@@ -21,14 +21,16 @@ namespace PtusaPLCnextEngineer
     {
     void PtusaMainPrg::Execute()
         {
+        sprintf( G_LOG->msg, "program started" );
+        G_LOG->write_log( i_log::P_INFO );
+
         static bool init_flag = true;
         static long int sleep_time_ms = 2;
         static int running = 1;
 
         if (init_flag)
             {
-
-            int res = G_LUA_MANAGER->init(0, "main.plua"); //-Инициализация Lua.
+            int res = G_LUA_MANAGER->init(0, "/opt/main/main.plua", "/opt/main/"); //-Инициализация Lua.
 
             if (res) //-Ошибка инициализации.
                 {

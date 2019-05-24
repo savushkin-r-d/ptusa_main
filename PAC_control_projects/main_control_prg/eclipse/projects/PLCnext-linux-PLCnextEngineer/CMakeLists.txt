@@ -11,6 +11,8 @@ endif()
 ################# create target #######################################################
 add_definitions(-DPAC_PLCNEXT)  
 add_definitions(-DLINUX_OS)
+add_definitions(-DTEST_SPEED)
+
 
 file(GLOB_RECURSE PLCnext_src src/*.cpp intermediate/code/*.cpp)
 
