@@ -14,6 +14,15 @@ class altivar_node: public i_iot_node
 		bool enabled;
 		unsigned long queryinterval;
 
+		float fc_setpoint;
+		float fc_value;
+		int state;
+		int remote_state;
+		int cmd;
+		float rpm_setpoint;
+		float rpm_value;
+		int reverse;
+
 		enum CFG_STEP
 			{
 			CFG_STEP_INIT_OUTPUTS = 0,
@@ -37,17 +46,12 @@ class altivar_node: public i_iot_node
 
 	protected:
 		modbus_client* mc;
-		float fc_setpoint;
-		float fc_value;
-		int state;
-		int remote_state;
-		int cmd;
-		float rpm_setpoint;
-		float rpm_value;
 		bool configure;
 		int querystep;
 		int configurestep;
 		unsigned long querytimer;
+		unsigned long modbustimeout;
+		int ismodbuserror;
 	};
 
 typedef std::map<std::string, altivar_node*> altivar_node_map;

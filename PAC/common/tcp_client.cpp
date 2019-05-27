@@ -70,6 +70,11 @@ int tcp_client::get_async_result()
     return async_result;
     }
 
+int tcp_client::get_connected_state()
+	{
+	return connectedstate;
+	}
+
 int tcp_client::get_socket()
     {
     return socket_number;

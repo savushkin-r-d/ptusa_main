@@ -29,6 +29,7 @@ class modbus_client
         int async_write_multiply_registers(unsigned int address, unsigned int quantity);
 		int async_read_write_multiply_registers(unsigned int readaddress, unsigned int readquantity, unsigned int wrireaddress, unsigned int writequantity);
 		int get_async_result();
+		int get_connected_state();
         void set_station(unsigned char new_station_id);
 		//функции для работы с буфером из lua
 		void zero_output_buff(int startpos = 13);

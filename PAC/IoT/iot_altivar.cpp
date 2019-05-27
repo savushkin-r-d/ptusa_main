@@ -86,6 +86,10 @@ altivar_node::altivar_node(unsigned int id, const char* ip, unsigned int port, u
 	enabled = true;
 	queryinterval = 200;
 	querytimer = get_millisec();
+	reverse = 0;
+	modbustimeout = get_millisec();
+	ismodbuserror = 0;
+	cmd = 0;
 	}
 
 altivar_node::~altivar_node()
@@ -95,6 +99,8 @@ altivar_node::~altivar_node()
 
 void altivar_node::Evaluate()
 	{
+#ifdef DEBUG_NO_WAGO_MODULES
+	int commres;
 	if (enabled)
 		{
 		switch (querystep)
@@ -117,7 +123,7 @@ void altivar_node::Evaluate()
 						mc->zero_output_buff();
 						mc->set_station(0);
 						mc->set_int2(0, 8501);	//CMD(Command word) --default
-						mc->set_int2(1, 8602);	//LFRT (Speed setpoint) --default
+						mc->set_int2(1, 8502);	//LFR (Frequency setpoint) --default
 						mc->set_int2(2, 0);
 						mc->set_int2(3, 0);
 						mc->set_int2(4, 0);
@@ -169,9 +175,10 @@ void altivar_node::Evaluate()
 					}
 				break;
 			case RUN_STEP_INIT_IOSCANNER:
+				mc->zero_output_buff(15);
 				mc->set_station(255);
 				mc->set_int2(2, cmd);
-				mc->set_int2(3, (int)fc_setpoint);
+				mc->set_int2(3, (int)(fc_setpoint * 10));
 				mc->set_int2(4, 0);
 				mc->set_int2(5, 0);
 				mc->set_int2(6, 0);
@@ -179,12 +186,19 @@ void altivar_node::Evaluate()
 				querystep = RUN_STEP_QUERY_IOSCANNER;
 				break;
 			case RUN_STEP_QUERY_IOSCANNER:
-				if (mc->async_read_write_multiply_registers(0, 6, 0, 6))
+				commres = mc->async_read_write_multiply_registers(1, 6, 1, 6);
+				if (commres == 1)
 					{
 					remote_state = mc->get_int2(0);
 					rpm_value = mc->get_int2(1);
 					querystep = RUN_STEP_INIT_END;
 					}
+				if (commres == -1) //IO scanner not configured. Launch configuration.
+					{
+					configure = 1;
+					querystep = RUN_STEP_CHECK_CONFIG;
+					}
+				break;
 			case RUN_STEP_INIT_END:
 				querytimer = get_millisec();
 				querystep = RUN_STEP_END;
@@ -199,7 +213,32 @@ void altivar_node::Evaluate()
 				querystep = RUN_STEP_CHECK_CONFIG;
 				break;
 			}
+
+
+		int ar = mc->get_connected_state();
+		if (ar != tcp_client::ACS_CONNECTED && get_delta_millisec(modbustimeout) > 5000L && !ismodbuserror)
+			{
+			PAC_critical_errors_manager::get_instance()->set_global_error(
+				PAC_critical_errors_manager::AC_NO_CONNECTION,
+				PAC_critical_errors_manager::AS_MODBUS_DEVICE,
+				mc->get_id());
+			ismodbuserror = 1;
+			}
+		if (ar == tcp_client::ACS_CONNECTED && ismodbuserror)
+			{
+			PAC_critical_errors_manager::get_instance()->reset_global_error(
+				PAC_critical_errors_manager::AC_NO_CONNECTION,
+				PAC_critical_errors_manager::AS_MODBUS_DEVICE,
+				mc->get_id());
+			ismodbuserror = 0;
+			}
+		if (ar == tcp_client::ACS_CONNECTED)
+			{
+			modbustimeout = get_millisec();
+			}
 		}
+
+#endif
 
 	}
 

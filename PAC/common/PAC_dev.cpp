@@ -3740,6 +3740,7 @@ void motor_altivar::direct_set_value(float value)
 	{
 #ifdef DEBUG_NO_WAGO_MODULES
 	freq = value;
+	atv->fc_setpoint = value / 2;
 #else
 
 #endif // DEBUG_NO_WAGO_MODULES
@@ -3795,7 +3796,7 @@ void motor_altivar::direct_on()
 void motor_altivar::direct_off()
 	{
 #ifdef DEBUG_NO_WAGO_MODULES
-	state = 1;
+	state = 0;
 #else
 	
 #endif // DEBUG_NO_WAGO_MODULES
@@ -3818,7 +3819,7 @@ void motor_altivar::set_string_property(const char * field, const char * value)
 			atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
 			if (!atv)
 				{
-				G_ALTIVAR_MANAGER()->add_node(value, 502, 300);
+				G_ALTIVAR_MANAGER()->add_node(value, port, timeout);
 				atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
 				}
 			}

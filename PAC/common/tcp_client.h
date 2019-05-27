@@ -50,6 +50,7 @@ class tcp_client
         virtual void Disconnect() = 0;
         int get_id();
         virtual int get_async_result();
+		virtual int get_connected_state();
         int set_async_result(int ar);
         char* buff;
         tcp_client(const char* client_ip, unsigned int client_port, unsigned int client_id, unsigned char alarm_subclass, unsigned int exchange_buf_size = 256, unsigned long send_receive_timeout = 100);

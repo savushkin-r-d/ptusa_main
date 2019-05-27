@@ -352,6 +352,11 @@ int modbus_client::get_async_result()
 	return tcpclient->get_async_result();
 	}
 
+int modbus_client::get_connected_state()
+	{
+	return tcpclient->get_connected_state();
+	}
+
 int modbus_client::async_read_coils( unsigned int start_address, unsigned int quantity )
     {
     int ar = get_async_result();
@@ -577,10 +582,17 @@ int modbus_client::async_read_write_multiply_registers(unsigned int readaddress,
 	}
 	else
 	{
-		if (ar > 0 && ar == modbus_expected_length)
+		if (ar > 0 && (ar == modbus_expected_length || ar == 9))
 		{
 			tcpclient->set_async_result(tcp_client::AR_FREE);
-			return 1;
+			if (ar == modbus_expected_length)
+			{
+				return 1;
+			} 
+			else
+			{
+				return -1;
+			}
 		}
 		else
 		{
