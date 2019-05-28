@@ -90,6 +90,11 @@ altivar_node::altivar_node(unsigned int id, const char* ip, unsigned int port, u
 	modbustimeout = get_millisec();
 	ismodbuserror = 0;
 	cmd = 0;
+	state = 0;
+	fc_setpoint = 0;
+	fc_value = 0;
+	rpm_value = 0;
+	rpm_setpoint = 0;
 	}
 
 altivar_node::~altivar_node()
@@ -123,7 +128,7 @@ void altivar_node::Evaluate()
 						mc->zero_output_buff();
 						mc->set_station(0);
 						mc->set_int2(0, 8501);	//CMD(Command word) --default
-						mc->set_int2(1, 8502);	//LFR (Frequency setpoint) --default
+						mc->set_int2(1, 8502);	//LFR (Frequency setpoint)
 						mc->set_int2(2, 0);
 						mc->set_int2(3, 0);
 						mc->set_int2(4, 0);
@@ -136,12 +141,13 @@ void altivar_node::Evaluate()
 							configurestep = CFG_STEP_INIT_INPUTS;
 							}
 						break;
+
 					case CFG_STEP_INIT_INPUTS:
 						mc->zero_output_buff();
 						mc->set_station(0);
 						mc->set_int2(0, 3201);	//ETA(Status word) --default
 						mc->set_int2(1, 8604);	//RFRD (Output velocity) --default
-						mc->set_int2(2, 0);
+						mc->set_int2(2, 3202);	//RFR (Output frequency)
 						mc->set_int2(3, 0);
 						mc->set_int2(4, 0);
 						mc->set_int2(5, 0);
@@ -153,6 +159,7 @@ void altivar_node::Evaluate()
 							configurestep = CFG_STEP_INIT_IOSCANNER;
 							}
 						break;
+
 					case CFG_STEP_INIT_IOSCANNER:
 						mc->zero_output_buff();
 						mc->set_station(0);
@@ -160,11 +167,64 @@ void altivar_node::Evaluate()
 						configurestep = CFG_STEP_SET_IOSCANNER;
 						break;
 					case CFG_STEP_SET_IOSCANNER:
-						if (mc->async_write_multiply_registers(64239, 1)) //Задание inputs для modbus-scanner
+						if (mc->async_write_multiply_registers(64239, 1)) //Включаем IO scanner
+							{
+							configurestep = CFG_STEP_INIT_IOPROFILE;
+							}
+						break;
+
+					case CFG_STEP_INIT_IOPROFILE:
+						mc->zero_output_buff();
+						mc->set_station(0);
+						mc->set_int2(0, 3);
+						configurestep = CFG_STEP_SET_IOPROFILE;
+						break;
+					case CFG_STEP_SET_IOPROFILE:
+						if (mc->async_write_multiply_registers(8401, 1)) //Задаем метод управления через IO-profile
+							{
+							configurestep = CFG_STEP_INIT_REF1;
+							}
+						break;
+
+					case CFG_STEP_INIT_REF1:
+						mc->zero_output_buff();
+						mc->set_station(0);
+						mc->set_int2(0, 164);
+						configurestep = CFG_STEP_SET_REF1;
+						break;
+					case CFG_STEP_SET_REF1:
+						if (mc->async_write_multiply_registers(8413, 1)) //Задаем канал управления частотой через modbus
+							{
+							configurestep = CFG_STEP_INIT_CMD1;
+							}
+						break;
+
+					case CFG_STEP_INIT_CMD1:
+						mc->zero_output_buff();
+						mc->set_station(0);
+						mc->set_int2(0, 10);
+						configurestep = CFG_STEP_SET_CMD1;
+						break;
+					case CFG_STEP_SET_CMD1:
+						if (mc->async_write_multiply_registers(8423, 1)) //Задаем канал команд через modbus
+							{
+							configurestep = CFG_STEP_INIT_SAVESETTINGS;
+							}
+						break;
+
+					case CFG_STEP_INIT_SAVESETTINGS:
+						mc->zero_output_buff();
+						mc->set_station(0);
+						mc->set_int2(0, 1);
+						configurestep = CFG_STEP_SET_SAVESETTINGS;
+						break;
+					case CFG_STEP_SET_SAVESETTINGS:
+						if (mc->async_write_multiply_registers(8001, 1)) //Сохраняем настройки как Profile1
 							{
 							configurestep = CFG_STEP_END;
 							}
 						break;
+
 					case CFG_STEP_END:
 						configure = false;
 						querystep = 2;
@@ -191,6 +251,23 @@ void altivar_node::Evaluate()
 					{
 					remote_state = mc->get_int2(0);
 					rpm_value = mc->get_int2(1);
+					fc_value = mc->get_int2(2);
+					int newstate = remote_state & 0x6F;
+					switch (newstate)
+						{
+						case 0x40:
+							state = -3;
+						case 0x0021:
+							state = -2;
+						case 0x23:
+							state = 0;
+						case 0x27:
+							reverse ? state = 2 : state = 1;
+						case 0x07:
+							state = -1;
+						default:
+							state = -1;
+						}
 					querystep = RUN_STEP_INIT_END;
 					}
 				if (commres == -1) //IO scanner not configured. Launch configuration.

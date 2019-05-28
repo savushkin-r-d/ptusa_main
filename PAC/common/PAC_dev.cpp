@@ -3729,20 +3729,19 @@ int motor_altivar::save_device_ex(char * buff)
 
 float motor_altivar::get_value()
 	{
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_WAGO_MODULES
 	return freq;
 #else
-	return 0.0f;
+	return atv->fc_setpoint * 2;
 #endif // DEBUG_NO_WAGO_MODULES
 	}
 
 void motor_altivar::direct_set_value(float value)
 	{
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_WAGO_MODULES
 	freq = value;
-	atv->fc_setpoint = value / 2;
 #else
-
+	atv->fc_setpoint = value / 2;
 #endif // DEBUG_NO_WAGO_MODULES
 	}
 
@@ -3759,8 +3758,10 @@ void motor_altivar::direct_set_state(int new_state)
 
 	if (new_state == 2)
 		{
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_WAGO_MODULES
 		state = 2;
+#else
+		atv->cmd = 3;
 #endif // DEBUG_NO_WAGO_MODULES
 		return;
 		}
@@ -3777,28 +3778,28 @@ void motor_altivar::direct_set_state(int new_state)
 
 int motor_altivar::get_state()
 	{
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_WAGO_MODULES
 	return state;
 #else
-	return 0;
+	return atv->state;
 #endif // DEBUG_NO_WAGO_MODULES
 	}
 
 void motor_altivar::direct_on()
 	{
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_WAGO_MODULES
 	state = 1;
 #else
-
+	atv->cmd = 1;
 #endif // DEBUG_NO_WAGO_MODULES
 	}
 
 void motor_altivar::direct_off()
 	{
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_WAGO_MODULES
 	state = 0;
 #else
-	
+	atv->cmd = 0;
 #endif // DEBUG_NO_WAGO_MODULES
 	}
 
