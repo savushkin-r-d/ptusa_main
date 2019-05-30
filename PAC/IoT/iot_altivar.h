@@ -3,6 +3,7 @@
 #include "iot_base.h"
 #include "smart_ptr.h"
 #include <map>
+#include <string>
 class modbus_client;
 
 class altivar_node: public i_iot_node
@@ -74,7 +75,7 @@ class altivar_manager
 
 		virtual ~altivar_manager();
 
-		/// @brief Получение единственного экземпляра класса.
+		/// @brief пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
 		static altivar_manager* get_instance();
 		void add_node(const char* IP_address, unsigned int port, unsigned int timeout);
 		altivar_node* get_node(const char* IP_address);
