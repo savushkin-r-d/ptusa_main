@@ -2324,7 +2324,7 @@ void valve_iolink_vtug::direct_off()
         }
 
     u_int offset = ( vtug_number - 1 ) / 8;
-    data[ offset ] ^= 1 << ( ( vtug_number - 1 ) % 8 );
+    data[ offset ] &= ~(1 << ( ( vtug_number - 1 ) % 8 ));
     }
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
@@ -3801,7 +3801,14 @@ void motor_altivar::direct_off()
 #ifdef DEBUG_NO_WAGO_MODULES
 	state = 0;
 #else
-	atv->cmd = 0;
+	if (atv->state < 0)
+		{
+			atv->cmd = 4; //2 bit - fault reset
+		}
+	else
+		{
+		atv->cmd = 0;
+		}
 	atv->reverse = 0;
 #endif // DEBUG_NO_WAGO_MODULES
 	}

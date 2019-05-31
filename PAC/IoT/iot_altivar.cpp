@@ -89,7 +89,7 @@ altivar_node::altivar_node(unsigned int id, const char* ip, unsigned int port, u
 	reverse = 0;
 	modbustimeout = get_millisec();
 	ismodbuserror = 0;
-	cmd = 0;
+	cmd = 4; //Сброс ошибки при запуске.
 	state = 0;
 	fc_setpoint = 0;
 	fc_value = 0;
@@ -189,7 +189,7 @@ void altivar_node::Evaluate()
 					case CFG_STEP_INIT_REF1:
 						mc->zero_output_buff();
 						mc->set_station(0);
-						mc->set_int2(0, 164);
+						mc->set_int2(0, 169);
 						configurestep = CFG_STEP_SET_REF1;
 						break;
 					case CFG_STEP_SET_REF1:
@@ -202,11 +202,26 @@ void altivar_node::Evaluate()
 					case CFG_STEP_INIT_CMD1:
 						mc->zero_output_buff();
 						mc->set_station(0);
-						mc->set_int2(0, 10);
+						mc->set_int2(0, 30);
 						configurestep = CFG_STEP_SET_CMD1;
 						break;
 					case CFG_STEP_SET_CMD1:
 						if (mc->async_write_multiply_registers(8423, 1)) //Задаем канал команд через modbus
+							{
+							configurestep = CFG_STEP_INIT_FAULTRESET;
+							}
+						break;
+
+					case CFG_STEP_INIT_FAULTRESET:
+						mc->zero_output_buff();
+						mc->set_station(0);
+						mc->set_int2(0, 1);		//Включаем automatic restart
+						mc->set_int2(1, 0);		//automatic restart timeout
+						mc->set_int2(2, 210);	//Биндим сброс ошибки на 2 бит управляющего слова CMD.
+						configurestep = CFG_STEP_SET_FAULTRESET;
+						break;
+					case CFG_STEP_SET_FAULTRESET:
+						if (mc->async_write_multiply_registers(7122, 3)) //Задаем параметры fault reset.
 							{
 							configurestep = CFG_STEP_INIT_SAVESETTINGS;
 							}
@@ -252,21 +267,27 @@ void altivar_node::Evaluate()
 					remote_state = mc->get_int2(0);
 					rpm_value = mc->get_int2(1);
 					fc_value = mc->get_int2(2);
-					int newstate = remote_state & 0x6F;
+					int newstate = remote_state & 0x006F;
 					switch (newstate)
 						{
-						case 0x40:
+						case 0x0040:
 							state = -3;
+							break;
 						case 0x0021:
 							state = -2;
-						case 0x23:
+							break;
+						case 0x0023:
 							state = 0;
-						case 0x27:
+							break;
+						case 0x0027:
 							reverse ? state = 2 : state = 1;
-						case 0x07:
+							break;
+						case 0x0007:
 							state = -1;
+							break;
 						default:
 							state = -1;
+							break;
 						}
 					querystep = RUN_STEP_INIT_END;
 					}
