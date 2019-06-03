@@ -2896,7 +2896,8 @@ class motor : public device, public wago_device
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-/// @brief Электродвигатель, управляемы частотным преобразователем altivar с интерфесной платой Ethernet
+/// @brief Электродвигатель, управляемый частотным преобразователем altivar с
+/// интерфейсной платой Ethernet.
 class motor_altivar : public device, public wago_device
 {
 public:
@@ -2910,7 +2911,7 @@ public:
 		freq(0)
 #endif // DEBUG_NO_WAGO_MODULES
 	{
-		set_par_name(P_ON_TIME, 0, "P_ON_TIME");
+	set_par_name(P_ON_TIME, 0, "P_ON_TIME");
 	}
 
 	int save_device_ex(char *buff);
@@ -2931,7 +2932,7 @@ public:
 
 	virtual void print() const
 	{
-		device::print();
+	device::print();
 	}
 
 private:
