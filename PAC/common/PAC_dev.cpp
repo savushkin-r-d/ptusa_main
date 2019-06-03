@@ -2324,7 +2324,7 @@ void valve_iolink_vtug::direct_off()
         }
 
     u_int offset = ( vtug_number - 1 ) / 8;
-    data[ offset ] &= ~(1 << ( ( vtug_number - 1 ) % 8 ));
+    data[ offset ] &= ~( 1 << ( ( vtug_number - 1 ) % 8 ) );
     }
 #endif // DEBUG_NO_WAGO_MODULES
 //-----------------------------------------------------------------------------
