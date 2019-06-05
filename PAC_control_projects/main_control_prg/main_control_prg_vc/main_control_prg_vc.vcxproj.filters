@@ -336,6 +336,9 @@
     <ClInclude Include="..\..\..\PAC\IoT\iot_common.h">
       <Filter>Header Files\IoT</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\PAC\IoT\iot_base.h">
+      <Filter>Header Files\IoT</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -588,6 +591,9 @@
       <Filter>Source Files\IoT</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\IoT\iot_common.cpp">
+      <Filter>Source Files\IoT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\IoT\iot_base.cpp">
       <Filter>Source Files\IoT</Filter>
     </ClCompile>
   </ItemGroup>

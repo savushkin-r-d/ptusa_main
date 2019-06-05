@@ -233,6 +233,8 @@ class device
 
 		void set_property( const char* field, device* dev );
 
+		void set_string_property(const char* field, const char* value);
+
 		void set_descr( const char *description );
 
         /// @brief Выключение устройства с учетом ручного режима.
@@ -1438,10 +1440,11 @@ class modbus_client
         int async_write_coil(unsigned int address, unsigned char value);
         int async_force_multiply_coils(unsigned int address, unsigned int quantity);
         int async_write_multiply_registers(unsigned int address, unsigned int quantity);
+		int async_read_write_multiply_registers(unsigned int readaddress, unsigned int readquantity, unsigned int wrireaddress, unsigned int writequantity);
 		int get_async_result();
         void set_station(unsigned char new_station_id);
 		//функции для работы с буфером из Lua
-		void zero_output_buff();
+		void zero_output_buff(int startpos = 13);
 		void set_int2(unsigned int address, short value);
 		short get_int2(unsigned int address);
 		void set_int4(unsigned int address, int value);
