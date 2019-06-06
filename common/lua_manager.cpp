@@ -174,6 +174,15 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         is_free_lua = 0;
         }
 
+    if ( dir )
+        {
+        //Добавление каталога для поиска.
+        char cmd[ 500 ] = "package.path = package.path..';";
+        strcpy( cmd + strlen( cmd ), dir );
+        strcpy( cmd + strlen( cmd ), "?.lua'" );
+        luaL_dostring( L, cmd );
+        }
+
 #ifdef PAC_PC
 #ifdef VS_CODE
     char* dir_      = new char[ MAX_PATH + 1 ];
@@ -304,7 +313,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         printf( "Экспорт в Lua необходимых объектов.\n" );
         }
     tolua_PAC_dev_open( L );
-	tolua_IOT_dev_open(L);
+    tolua_IOT_dev_open( L );
 #ifdef RFID
     tolua_rfid_reader_open( L );
 #endif
