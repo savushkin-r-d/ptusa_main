@@ -88,12 +88,10 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
                                 int auto_init_work_params /*= 1*/, 
                                 void ( *custom_init_params_function )() /*= 0 */ )
     {
-    if ( G_DEBUG )
-    	{
-        printf( "Total memory used: %u of %u bytes[ %.2f%c ]. \n",
-            last_idx, C_TOTAL_PARAMS_SIZE, 
+    sprintf( G_LOG->msg, "Total memory used: %u of %u bytes[ %.2f%c ].",
+            last_idx, C_TOTAL_PARAMS_SIZE,
             100. * last_idx / C_TOTAL_PARAMS_SIZE, '%' );
-    	}
+    G_LOG->write_log( i_log::P_DEBUG );
 
     G_DEVICE_MANAGER()->init_rt_params();
     

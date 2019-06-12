@@ -94,6 +94,8 @@ class NV_memory : public i_memory
             {
             }
 
+        virtual void init( void * NV_ram_data ) {}
+
     private:
 
         u_int total_size;           ///< Общий размер памяти.
@@ -222,6 +224,8 @@ class NV_memory_manager
         static NV_memory_manager* get_instance();
 
         virtual ~NV_memory_manager();
+
+        void init_ex( void * par );
 
     protected:
         /// Статический экземпляр класса для вызова методов.

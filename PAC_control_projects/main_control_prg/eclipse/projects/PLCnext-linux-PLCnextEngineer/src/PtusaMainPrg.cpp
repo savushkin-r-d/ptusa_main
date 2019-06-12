@@ -19,18 +19,20 @@ int G_DEBUG = 0; //Вывод дополнительной отладочной 
 
 namespace PtusaPLCnextEngineer
     {
+
     void PtusaMainPrg::Execute()
         {
-        sprintf( G_LOG->msg, "program started" );
-        G_LOG->write_log( i_log::P_INFO );
-
-        static bool init_flag = true;
         static long int sleep_time_ms = 2;
-        static int running = 1;
 
-        if (init_flag)
+        if (ptusaMainCmpnt.init_flag)
             {
-            int res = G_LUA_MANAGER->init(0, "/opt/main/main.plua", "/opt/main/"); //-Инициализация Lua.
+            sprintf(G_LOG->msg, "Program started.");
+            G_LOG->write_log(i_log::P_INFO);
+
+            NV_memory_manager::get_instance()->init_ex(NVRAM);
+
+            int res = G_LUA_MANAGER->init(0, "/opt/main/main.plua",
+                    "/opt/main/"); //-Инициализация Lua.
 
             if (res) //-Ошибка инициализации.
                 {
@@ -59,23 +61,15 @@ namespace PtusaPLCnextEngineer
                }
 #endif
 
-            //Инициализация дополнительных устройств
-            IOT_INIT();
-
             sprintf( G_LOG->msg, "Starting main loop! Sleep time is %li ms.",
                     sleep_time_ms);
             G_LOG->write_log(i_log::P_INFO);
 
-            init_flag = false;
+            ptusaMainCmpnt.init_flag = false;
             }
 
-        while (running)
+        while (ptusaMainCmpnt.running)
             {
-            if (G_DEBUG)
-                {
-                fflush( stdout);
-                }
-
 #ifdef TEST_SPEED
                static u_long st_time;
                static u_long all_time   = 0;
@@ -189,11 +183,10 @@ namespace PtusaPLCnextEngineer
                //-Информация о времени выполнения цикла программы.!->
        #endif // TEST_SPEED
             }
+
 #ifdef OPCUA
            OPCUAServer::getInstance().Shutdown();
 #endif
-        //Деинициализация дополнительных устройств.
-        IOT_FINAL();
         }
 
     } // end of namespace PtusaPLCnextEngineer

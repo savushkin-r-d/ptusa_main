@@ -25,7 +25,7 @@
 #endif // LINUX_OS
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
-#include "l_mem.h"
+#include "mem_PLCnext.h"
 #endif // LINUX_OS
 
 auto_smart_ptr < NV_memory_manager > NV_memory_manager::instance;
@@ -126,12 +126,20 @@ NV_memory_manager::NV_memory_manager() : PAC_NVRAM( 0 ),
 #endif
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
-    PAC_NVRAM  = new SRAM( "./nvram.txt", 32768, 0, 31 );
-    PAC_EEPROM = new SRAM( "./nvram.txt", 32768, 32, 32767 );
+    PAC_NVRAM  = new eeprom_PLCnext( 32768, 0,     31 );
+    PAC_EEPROM = new eeprom_PLCnext( 32768, 32, 32767 );
 #endif
 
     last_NVRAM_pos  = PAC_NVRAM->get_available_start_pos();
     last_EEPROM_pos = PAC_EEPROM->get_available_start_pos();
+    }
+//-----------------------------------------------------------------------------
+void NV_memory_manager::init_ex( void * par )
+    {
+#if defined LINUX_OS && defined PAC_PLCNEXT
+    PAC_NVRAM->init( par );
+    PAC_EEPROM->init( par );
+#endif
     }
 //-----------------------------------------------------------------------------
 memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
