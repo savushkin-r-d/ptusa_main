@@ -22,7 +22,6 @@ void IOT_EVALUATE()
 
 void IOT_FINAL()
 	{
-	((auto_smart_ptr< altivar_manager >)G_ALTIVAR_MANAGER()).free();
 	}
 
 
