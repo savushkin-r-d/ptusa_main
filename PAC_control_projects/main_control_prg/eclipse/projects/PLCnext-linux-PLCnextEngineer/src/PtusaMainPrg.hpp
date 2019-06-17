@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "Arp/System/Core/Arp.h"
 #include "Arp/Plc/Commons/Esm/ProgramBase.hpp"
 #include "Arp/System/Commons/Logging.h"
@@ -35,18 +35,10 @@ namespace PtusaPLCnextEngineer
         // operations
         void Execute() override;
 
-    public:
-        /* Ports
-         =====
-         Ports are defined in the following way:
-         //#port
-         //#attributes(Input|Retain)
-         //#name(NameOfPort)
-         boolean portField;
+        //#port
+        //#attributes(Output|Retain)
+        uint8 NVRAM[ 49000 ] = {0};
 
-         The attributes comment define the port attributes and is optional.
-         The name comment defines the name of the port and is optional. Default is the name of the field.
-         */
 
     private:
         // fields

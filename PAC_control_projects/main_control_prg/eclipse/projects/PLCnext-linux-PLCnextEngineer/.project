@@ -36,5 +36,15 @@
 			<type>2</type>
 			<locationURI>PARENT-5-PROJECT_LOC/common</locationURI>
 		</link>
+		<link>
+			<name>PAC/linux/PAC_PLCnext/mem_PLCnext.cpp</name>
+			<type>1</type>
+			<location>/home/id/ptusa_git/PAC/linux/PAC_PLCnext/mem_PLCnext.cpp</location>
+		</link>
+		<link>
+			<name>PAC/linux/PAC_PLCnext/mem_PLCnext.h</name>
+			<type>1</type>
+			<location>/home/id/ptusa_git/PAC/linux/PAC_PLCnext/mem_PLCnext.h</location>
+		</link>
 	</linkedResources>
 </projectDescription>

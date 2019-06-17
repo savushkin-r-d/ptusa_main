@@ -8,6 +8,10 @@
 #include "Arp/Plc/Commons/Meta/MetaLibraryBase.hpp"
 #include "Arp/System/Commons/Logging.h"
 
+#include "Arp/System/Acf/IControllerComponent.hpp"
+
+#include "log.h"
+
 namespace PtusaPLCnextEngineer
     {
     using namespace Arp;
@@ -18,12 +22,29 @@ namespace PtusaPLCnextEngineer
     //#component
     class PtusaMainCmpnt: public ComponentBase,
             public ProgramComponentBase,
-            private Loggable<PtusaMainCmpnt>
+            private Loggable<PtusaMainCmpnt>,
+            public IControllerComponent
         {
     public:
         // typedefs
 
     public:
+        void    Start(void)
+            {
+            sprintf( G_LOG->msg, "Start command" );
+            G_LOG->write_log( i_log::P_INFO );
+
+            running = 1;
+            };
+
+        void    Stop(void)
+            {
+            sprintf( G_LOG->msg, "Stop command" );
+            G_LOG->write_log( i_log::P_INFO );
+
+            running = 0;
+            };
+
         // construction/destruction
         PtusaMainCmpnt(IApplication& application, const String& name);
         virtual ~PtusaMainCmpnt() = default;
@@ -53,6 +74,10 @@ namespace PtusaPLCnextEngineer
     private:
         // fields
         PtusaMainCmpntProgramProvider programProvider;
+
+    public:
+        int running{ 1 };
+        bool init_flag{ true };
 
     public:
         /* Ports
