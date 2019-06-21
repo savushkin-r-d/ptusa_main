@@ -414,6 +414,9 @@ class device : public i_DO_AO_device, public par_device
 
             V_IOLINK_VTUG_DO1,     ///< IO-Link VTUG8 клапан с одним каналом управления.
 
+            V_IOLINK_VTUG_DO1_FB_OFF, ///< IO-Link VTUG клапан с одним каналом управления и одной обратной связью (выключенное состояние).
+            V_IOLINK_VTUG_DO1_FB_ON,  ///< IO-Link VTUG клапан с одним каналом управления и одной обратной связью (включенное состояние).
+
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
             DST_LS_MAX,         ///< Подключение по схеме максимум.
@@ -2126,14 +2129,6 @@ class valve_iolink_vtug : public valve
 
         void set_rt_par( u_int idx, float value );
 
-    private:
-        u_int vtug_number;    ///< Номер устройства.
-
-        enum CONSTANTS
-            {
-            AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
-            };
-
 #ifndef DEBUG_NO_WAGO_MODULES
     public:
         void direct_on();
@@ -2150,6 +2145,59 @@ class valve_iolink_vtug : public valve
 
         /// @brief Получение состояния обратной связи.
         bool get_fb_state();
+
+        u_int vtug_number;    ///< Номер устройства.
+
+        enum CONSTANTS
+            {
+            AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
+            };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан IO-link VTUG с одним каналом управления и обратной связью.
+class valve_iolink_vtug_on : public valve_iolink_vtug
+    {
+    public:
+        valve_iolink_vtug_on(const char* dev_name);
+
+    private:
+        enum CONSTANTS
+            {
+            DI_INDEX = 0,     ///< Индекс канала дискретного входа.
+            };
+
+    protected:
+#ifndef DEBUG_NO_WAGO_MODULES
+        /// @brief Получение состояния обратной связи.
+        bool get_fb_state();
+
+        int get_on_fb_value();
+
+        int get_off_fb_value();
+#endif // DEBUG_NO_WAGO_MODULES
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан IO-link VTUG с одним каналом управления и обратной связью.
+class valve_iolink_vtug_off : public valve_iolink_vtug
+    {
+    public:
+        valve_iolink_vtug_off(const char* dev_name);
+
+    private:
+        enum CONSTANTS
+            {
+            DI_INDEX = 0,     ///< Индекс канала дискретного входа.
+            };
+
+    protected:
+#ifndef DEBUG_NO_WAGO_MODULES
+        /// @brief Получение состояния обратной связи.
+        bool get_fb_state();
+
+        int get_on_fb_value();
+
+        int get_off_fb_value();
+#endif // DEBUG_NO_WAGO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым входом.
