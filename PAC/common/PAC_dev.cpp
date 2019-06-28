@@ -685,8 +685,18 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
 
                 case device::V_IOLINK_VTUG_DO1:
                     new_device = new valve_iolink_vtug( dev_name,
-                        ( device::DEVICE_SUB_TYPE ) dev_sub_type );
+                        device::V_IOLINK_VTUG_DO1 );
                     new_wago_device = (valve_iolink_vtug*)new_device;
+                    break;
+
+                case device::V_IOLINK_VTUG_DO1_FB_OFF:
+                    new_device = new valve_iolink_vtug_off(dev_name);
+                    new_wago_device = (valve_iolink_vtug_off*)new_device;
+                    break;
+
+                case device::V_IOLINK_VTUG_DO1_FB_ON:
+                    new_device = new valve_iolink_vtug_on(dev_name);
+                    new_wago_device = (valve_iolink_vtug_on*)new_device;
                     break;
 
                 default:
@@ -2280,7 +2290,8 @@ void valve_bottom_mix_proof::direct_off()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_iolink_vtug::valve_iolink_vtug( const char *dev_name,
-    device::DEVICE_SUB_TYPE sub_type ) : valve( dev_name, DT_V, sub_type )
+    device::DEVICE_SUB_TYPE sub_type ) : valve( dev_name, DT_V, sub_type ),
+    vtug_number( 0 )
     {
     }
 //-----------------------------------------------------------------------------
@@ -2362,8 +2373,83 @@ bool valve_iolink_vtug::get_fb_state()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+valve_iolink_vtug_on::valve_iolink_vtug_on(const char* dev_name) :
+    valve_iolink_vtug(dev_name, V_IOLINK_VTUG_DO1_FB_ON)
+    {
+    }
+//-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_WAGO_MODULES
+bool valve_iolink_vtug_on::get_fb_state()
+    {
+    char* data = (char*)get_AO_read_data(AO_INDEX);
+    int o = (int)get_state_data(data);
+    int i = get_DI(DI_INDEX);
 
+    if (o == i)
+        {
+        start_switch_time = get_millisec();
+        return true;
+        }
+
+    if (get_delta_millisec(start_switch_time) < get_par(valve::P_ON_TIME, 0))
+        {
+        return true;
+        }
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_vtug_on::get_on_fb_value()
+    {
+    return get_DI(DI_INDEX);
+    }
+//-----------------------------------------------------------------------------
+inline int valve_iolink_vtug_on::get_off_fb_value()
+    {
+    return false;
+    }
+#endif // DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iolink_vtug_off::valve_iolink_vtug_off(const char* dev_name) :
+    valve_iolink_vtug(dev_name, V_IOLINK_VTUG_DO1_FB_OFF)
+    {
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+bool valve_iolink_vtug_off::get_fb_state()
+    {
+    char* data = (char*)get_AO_read_data(AO_INDEX);
+    int o = (int)get_state_data(data);
+    int i = get_DI(DI_INDEX);
+
+    if (o != i)
+        {
+        start_switch_time = get_millisec();
+        return true;
+        }
+
+    if (get_delta_millisec(start_switch_time) < get_par(valve::P_ON_TIME, 0))
+        {
+        return true;
+        }
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_vtug_off::get_on_fb_value()
+    {
+    return false;
+    }
+//-----------------------------------------------------------------------------
+inline int valve_iolink_vtug_off::get_off_fb_value()
+    {    
+    return get_DI(DI_INDEX);
+    }
+#endif // DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
 void DI1::direct_on()
     {
     }
