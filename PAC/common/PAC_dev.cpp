@@ -715,21 +715,21 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             new_wago_device = ( analog_valve* ) new_device;
             break;
 
-		case device::DT_M:
-			switch (dev_sub_type)
-				{
-				case device::M_ATV:
-					new_device = new motor_altivar(dev_name,
-						(device::DEVICE_SUB_TYPE) dev_sub_type);
-					new_wago_device = (motor_altivar*)new_device;
-					break;
-				default:
-					new_device = new motor(dev_name,
-						(device::DEVICE_SUB_TYPE) dev_sub_type);
-					new_wago_device = (motor*)new_device;
-					break;
-				}
-			break;
+        case device::DT_M:
+            switch (dev_sub_type)
+                {
+                case device::M_ATV:
+                    new_device = new motor_altivar(dev_name,
+                        (device::DEVICE_SUB_TYPE) dev_sub_type);
+                    new_wago_device = (motor_altivar*)new_device;
+                    break;
+                default:
+                    new_device = new motor(dev_name,
+                        (device::DEVICE_SUB_TYPE) dev_sub_type);
+                    new_wago_device = (motor*)new_device;
+                    break;
+                }
+            break;
 
         case device::DT_LS:
             switch ( dev_sub_type )
@@ -1492,7 +1492,7 @@ int counter_f::get_state()
 //-----------------------------------------------------------------------------
 float counter_f::get_flow()
     {
-	return get_par(P_CZ, 0) +
+    return get_par(P_CZ, 0) +
 #ifdef DEBUG_NO_WAGO_MODULES
         flow_value;
 #else
@@ -2295,6 +2295,13 @@ valve_iolink_vtug::valve_iolink_vtug( const char *dev_name,
     {
     }
 //-----------------------------------------------------------------------------
+valve_iolink_vtug::valve_iolink_vtug(bool is_on_fb, bool is_off_fb,
+    const char* dev_name, device::DEVICE_SUB_TYPE sub_type) :
+    valve(is_on_fb, is_off_fb, dev_name, DT_V, sub_type),
+    vtug_number(0)
+    {
+    }
+//-----------------------------------------------------------------------------
 void valve_iolink_vtug::set_rt_par( u_int idx, float value )
     {
     switch ( idx )
@@ -2374,7 +2381,7 @@ bool valve_iolink_vtug::get_fb_state()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_iolink_vtug_on::valve_iolink_vtug_on(const char* dev_name) :
-    valve_iolink_vtug(dev_name, V_IOLINK_VTUG_DO1_FB_ON)
+    valve_iolink_vtug( true, false, dev_name, V_IOLINK_VTUG_DO1_FB_ON)
     {
     }
 //-----------------------------------------------------------------------------
@@ -2412,7 +2419,7 @@ inline int valve_iolink_vtug_on::get_off_fb_value()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_iolink_vtug_off::valve_iolink_vtug_off(const char* dev_name) :
-    valve_iolink_vtug(dev_name, V_IOLINK_VTUG_DO1_FB_OFF)
+    valve_iolink_vtug(false, true, dev_name, V_IOLINK_VTUG_DO1_FB_OFF)
     {
     }
 //-----------------------------------------------------------------------------
@@ -2443,7 +2450,7 @@ int valve_iolink_vtug_off::get_on_fb_value()
     }
 //-----------------------------------------------------------------------------
 inline int valve_iolink_vtug_off::get_off_fb_value()
-    {    
+    {
     return get_DI(DI_INDEX);
     }
 #endif // DEBUG_NO_WAGO_MODULES
@@ -3803,122 +3810,122 @@ int virtual_counter::save_device_ex( char *buff )
 //-----------------------------------------------------------------------------
 
 int motor_altivar::save_device_ex(char * buff)
-	{
-	int res = 0;
+    {
+    int res = 0;
 #ifdef DEBUG_NO_WAGO_MODULES
-	res = sprintf(buff, "R=0, FRQ=0, RPM=0, EST=0, ");
+    res = sprintf(buff, "R=0, FRQ=0, RPM=0, EST=0, ");
 #else
-	res = sprintf(buff, "R=%d, FRQ=%f, RPM=%f, EST=%d, ", atv->reverse, atv->fc_value / 10, atv->rpm_value, atv->remote_state );
+    res = sprintf(buff, "R=%d, FRQ=%f, RPM=%f, EST=%d, ", atv->reverse, atv->fc_value / 10, atv->rpm_value, atv->remote_state );
 #endif //DEBUG_NO_WAGO_MODULES
-	return res;
-	}
+    return res;
+    }
 
 float motor_altivar::get_value()
-	{
+    {
 #ifdef DEBUG_NO_WAGO_MODULES
-	return freq;
+    return freq;
 #else
-	return atv->fc_setpoint * 2;
+    return atv->fc_setpoint * 2;
 #endif // DEBUG_NO_WAGO_MODULES
-	}
+    }
 
 void motor_altivar::direct_set_value(float value)
-	{
+    {
 #ifdef DEBUG_NO_WAGO_MODULES
-	freq = value;
+    freq = value;
 #else
-	atv->fc_setpoint = value / 2;
+    atv->fc_setpoint = value / 2;
 #endif // DEBUG_NO_WAGO_MODULES
-	}
+    }
 
 void motor_altivar::direct_set_state(int new_state)
-	{
+    {
 #ifdef DEBUG_NO_WAGO_MODULES
-	if (-1 == new_state)
-		{
-		state = (char)-1;
-		return;
-		}
+    if (-1 == new_state)
+        {
+        state = (char)-1;
+        return;
+        }
 #endif // DEBUG_NO_WAGO_MODULES
 
 
-	if (new_state == 2)
-		{
+    if (new_state == 2)
+        {
 #ifdef DEBUG_NO_WAGO_MODULES
-		state = 2;
+        state = 2;
 #else
-		atv->cmd = 3;
-		atv->reverse = 1;
+        atv->cmd = 3;
+        atv->reverse = 1;
 #endif // DEBUG_NO_WAGO_MODULES
-		return;
-		}
+        return;
+        }
 
-	if (new_state)
-		{
-		direct_on();
-		}
-	else
-		{
-		direct_off();
-		}
-	}
+    if (new_state)
+        {
+        direct_on();
+        }
+    else
+        {
+        direct_off();
+        }
+    }
 
 int motor_altivar::get_state()
-	{
+    {
 #ifdef DEBUG_NO_WAGO_MODULES
-	return state;
+    return state;
 #else
-	return atv->state;
+    return atv->state;
 #endif // DEBUG_NO_WAGO_MODULES
-	}
+    }
 
 void motor_altivar::direct_on()
-	{
+    {
 #ifdef DEBUG_NO_WAGO_MODULES
-	state = 1;
+    state = 1;
 #else
-	atv->cmd = 1;
-	atv->reverse = 0;
+    atv->cmd = 1;
+    atv->reverse = 0;
 #endif // DEBUG_NO_WAGO_MODULES
-	}
+    }
 
 void motor_altivar::direct_off()
-	{
+    {
 #ifdef DEBUG_NO_WAGO_MODULES
-	state = 0;
+    state = 0;
 #else
-	if (atv->state < 0)
-		{
-			atv->cmd = 4; //2 bit - fault reset
-		}
-	else
-		{
-		atv->cmd = 0;
-		}
-	atv->reverse = 0;
+    if (atv->state < 0)
+        {
+            atv->cmd = 4; //2 bit - fault reset
+        }
+    else
+        {
+        atv->cmd = 0;
+        }
+    atv->reverse = 0;
 #endif // DEBUG_NO_WAGO_MODULES
-	}
+    }
 
 void motor_altivar::set_string_property(const char * field, const char * value)
-	{
-	printf("Set string property %s value %s\n", field, value);
-	if (strcmp(field, "IP") == 0)
-		{
-		int port = 502;
-		int timeout = 300;
-		std::string nodeip = std::string(value);
-		nodeip.append(":");
-		nodeip.append(std::to_string(port));
-		nodeip.append(" ");
-		nodeip.append(std::to_string(timeout));
-		if (!atv)
-			{
-			atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
-			if (!atv)
-				{
-				G_ALTIVAR_MANAGER()->add_node(value, port, timeout);
-				atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
-				}
-			}
-		}
-	}
+    {
+    printf("Set string property %s value %s\n", field, value);
+    if (strcmp(field, "IP") == 0)
+        {
+        int port = 502;
+        int timeout = 300;
+        std::string nodeip = std::string(value);
+        nodeip.append(":");
+        nodeip.append(std::to_string(port));
+        nodeip.append(" ");
+        nodeip.append(std::to_string(timeout));
+        if (!atv)
+            {
+            atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
+            if (!atv)
+                {
+                G_ALTIVAR_MANAGER()->add_node(value, port, timeout);
+                atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
+                }
+            }
+        }
+    }
