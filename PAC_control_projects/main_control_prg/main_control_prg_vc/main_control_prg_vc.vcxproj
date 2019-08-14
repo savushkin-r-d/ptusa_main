@@ -96,7 +96,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../../../PAC/IoT;../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(IncludePath)</IncludePath>
+    <IncludePath>../../../PAC/IoT;../../../PAC/common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(IncludePath)</IncludePath>
     <TargetName>main</TargetName>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
@@ -114,7 +114,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>ptusa</TargetName>
-    <IncludePath>../../../PAC/IoT;..\..\..\common/lua;..\../../PAC/common;..\../../common/util;..\../../common/win;..\../../common/PAC-driver;..\../../common/tolua++;..\../../common/QuickLZ;..\../../common;..\../../PAC/win;..\../../PAC/win/PAC_PC;.;..\../../PAC/common/sys;..\../../PAC/common/sys/win;..\../../common/win_util;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\atlmfc\include\;$(IncludePath)</IncludePath>
+    <IncludePath>../../../PAC/IoT;..\..\..\common/lua;..\../../PAC/common;..\../../common/util;..\../../common/win;..\../../common/PAC-driver;..\../../tolua++/include;..\../../tolua++/src/lib;..\../../common/QuickLZ;..\../../common;..\../../PAC/win;..\../../PAC/win/PAC_PC;.;..\../../PAC/common/sys;..\../../PAC/common/sys/win;..\../../common/win_util;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\atlmfc\include\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -310,9 +310,6 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
     <ClInclude Include="..\..\..\common\PAC-driver\errors.h" />
     <ClInclude Include="..\..\..\common\PAC-driver\g_device.h" />
     <ClInclude Include="..\..\..\common\QuickLZ\quicklz.h" />
-    <ClInclude Include="..\..\..\common\tolua++\tolua++.h" />
-    <ClInclude Include="..\..\..\common\tolua++\tolua_base.h" />
-    <ClInclude Include="..\..\..\common\tolua++\tolua_event.h" />
     <ClInclude Include="..\..\..\common\util\smart_ptr.h" />
     <ClInclude Include="..\..\..\PAC\common\cip_stats.h" />
     <ClInclude Include="..\..\..\PAC\common\cip_tech_def.h" />
@@ -380,6 +377,7 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
     <ClInclude Include="..\..\..\PAC\win\w_led.h" />
     <ClInclude Include="..\..\..\PAC\win\w_mem.h" />
     <ClInclude Include="..\..\..\PAC\win\w_types.h" />
+    <ClInclude Include="..\..\..\tolua++\include\tolua++.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\common\lua\lapi.c" />
@@ -423,11 +421,6 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\common\tolua++\tolua_event.c" />
-    <ClCompile Include="..\..\..\common\tolua++\tolua_is.c" />
-    <ClCompile Include="..\..\..\common\tolua++\tolua_map.c" />
-    <ClCompile Include="..\..\..\common\tolua++\tolua_push.c" />
-    <ClCompile Include="..\..\..\common\tolua++\tolua_to.c" />
     <ClCompile Include="..\..\..\PAC\common\cip_stats.cpp" />
     <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp" />
     <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp" />
@@ -520,6 +513,11 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
     <ClCompile Include="..\..\..\PAC\win\w_dtime.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_console.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_mem.cpp" />
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_event.c" />
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_is.c" />
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_map.c" />
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_push.c" />
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_to.c" />
     <ClCompile Include="..\main.cpp" />
   </ItemGroup>
   <ItemGroup>
