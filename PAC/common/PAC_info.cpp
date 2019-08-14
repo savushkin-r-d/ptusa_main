@@ -4,6 +4,8 @@
 
 #include "lua_manager.h"
 
+#include "wago.h"
+
 auto_smart_ptr < PAC_info > PAC_info::instance;///< Ёкземпл€р класса.
 
 const u_int_4 PAC_info::MSEC_IN_DAY = 24UL * 60UL * 60UL * 1000UL;
@@ -124,7 +126,19 @@ int PAC_info::save_device( char *buff )
     answer_size += sprintf( buff + answer_size,
         "\tCMD_ANSWER=\"%s\",\n", cmd_answer );
 
+	answer_size += sprintf(buff + answer_size, "\tNODEENABLED = \n\t{\n\t");
+
+	unsigned int nc = wago_manager::get_instance()->get_nodes_count();
+	for (unsigned int i = 0; i < nc ; i++)
+	{
+		wago_manager::wago_node* wn = wago_manager::get_instance()->get_node(i);
+		answer_size += sprintf(buff + answer_size, wn->is_active ? "1, " : "0, ");
+	}
+	answer_size += sprintf(buff + answer_size, "\n\t},\n");
+
     answer_size += sprintf( buff + answer_size, "\t}\n" );
+
+	printf("%s", buff);
     return answer_size;
     }
 //-----------------------------------------------------------------------------
@@ -231,6 +245,30 @@ int PAC_info::set_cmd( const char *prop, u_int idx, double val )
         par.save( P_AUTO_PAUSE_OPER_ON_DEV_ERR, (u_int_4)val );
         return 0;
         }
+
+	if (strcmp(prop, "NODEENABLED") == 0)
+		{
+		unsigned int noden = idx;
+		if (idx <= wago_manager::get_instance()->get_nodes_count())
+			{
+			wago_manager::wago_node* wn = wago_manager::get_instance()->get_node(idx - 1);
+			if (1 == val)
+				{
+				if (!wn->is_active)
+					{
+					wn->is_active = 1;
+					}
+				}
+			if (0 == val)
+				{
+				if (wn->is_active)
+					{
+					wago_manager::get_instance()->disconnect(wn);
+					wn->is_active = 0;
+					}
+				}
+			}
+		}
 
     return 0;
     }

@@ -456,14 +456,16 @@ int wago_manager_linux::read_inputs()
         return 0;
         }
 //-----------------------------------------------------------------------------
-void wago_manager_linux::disconnect( wago_node *node )
-    {
-    shutdown( node->sock, SHUT_RDWR );
-    close( node->sock );
-    node->sock = 0;
-
-    node->state = wago_node::ST_NO_CONNECT;
-    }
+		void wago_manager_linux::disconnect(wago_node *node)
+			{
+			if (node->sock)
+				{
+				shutdown(node->sock, SHUT_RDWR);
+				close(node->sock);
+				node->sock = 0;
+				}
+			node->state = wago_node::ST_NO_CONNECT;
+			}
 //-----------------------------------------------------------------------------
 wago_manager_linux::wago_manager_linux()
     {

@@ -243,93 +243,92 @@ class wago_manager
         /// @return - указатель на данные канала.
         int_2* get_AO_write_data( u_int node_n, u_int offset );
 
+		//---------------------------------------------------------------------
+		/// @brief Узел модулей ввода/вывода Wago.
+		//
+		///
+		struct wago_node
+			{
+			wago_node(int type, int number, char *str_ip_addres, char *name,
+				int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
+				int AI_cnt, int AI_size);
+
+			~wago_node();
+
+			void print();
+
+			enum W_CONST
+				{
+				C_MAX_WAIT_TIME = 6000,  ///< Время до установки ошибки связи с модулем, мсек.
+				C_ANALOG_BUF_SIZE = 256,   ///< Размер буфера аналоговых модулей.
+				C_MAX_DELAY = 60000, ///< Макс. время задержки переподключения, мсек.
+				C_CNT_TIMEOUT_US = 100000, ///< Время ожидания подключения от модуля, мксек.
+				C_RCV_TIMEOUT_US = 200000, ///< Время ожидания ответа от модуля, мксек.
+				};
+
+			enum TYPES ///< Типы модулей.
+				{
+				T_EMPTY = -1,   ///< Не задан.
+
+				T_750_86x = 0,  ///< Wago 750-863.
+
+				T_750_820x = 2, ///< Wago PFC200.
+
+				T_750_XXX_ETHERNET = 100,///< Ethernet 750-341 и т.д.
+				};
+
+			enum STATES           ///< Cостояния работы с узлом.
+				{
+				ST_NO_CONNECT = 0,
+				ST_OK,
+				};
+
+			wago_node::STATES  state;          ///< Cостояние работы с узлом.
+			TYPES   type;            ///< Тип.
+			u_int   number;          ///< Номер.
+			char    ip_address[16];///< IP-адрес.
+			char    name[20];      ///< Имя.
+
+			bool is_active;          ///< Признак работающего узла.
+
+			u_long  last_poll_time; ///< Время последнего опроса.
+			bool    is_set_err;     ///< Установлена ли ошибка связи.
+			int     sock;           ///< Сокет соединения.
+
+			// Digital outputs ( DO ).
+			u_int  DO_cnt;      ///< Amount of DO.
+			u_char *DO;         ///< Current values.
+			u_char *DO_;        ///< To write.
+
+			// Analog outputs ( AO ).
+			u_int AO_cnt;       			///< Amount of AO.
+			int_2 AO[C_ANALOG_BUF_SIZE];  ///< Current values.
+			int_2 AO_[C_ANALOG_BUF_SIZE]; ///< To write.
+			u_int *AO_offsets;  			///< Offsets in common data.
+			u_int *AO_types;    			///< Channels type.
+			u_int AO_size;
+
+			// Digital inputs ( DI ).
+			u_int  DI_cnt;      ///< Amount of DI.
+			u_char *DI;         ///< Current values.
+
+			// Analog inputs ( AI ).
+			u_int AI_cnt;       			///< Amount of AI.
+			int_2 AI[C_ANALOG_BUF_SIZE];  ///< Current values.
+			u_int *AI_offsets;  			///< Offsets in common data.
+			u_int *AI_types;    			///< Channels type.
+			u_int AI_size;
+
+			u_long last_init_time; ///< Время последней попытки подключиться, мсек.
+			u_long delay_time;     ///< Время ожидания до попытки подключиться, мсек.
+
+			stat_time recv_stat;  ///< Статистика работы с сокетом.
+			stat_time send_stat;  ///< Статистика работы с сокетом.
+			};
+		//---------------------------------------------------------------------
+
     protected:
         wago_manager();
-
-        //---------------------------------------------------------------------
-        /// @brief Узел модулей ввода/вывода Wago.
-        //
-        ///
-        struct wago_node
-            {
-            wago_node( int type, int number, char *str_ip_addres, char *name,
-                int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
-                int AI_cnt, int AI_size );
-
-            ~wago_node();
-
-            void print();
-
-            enum W_CONST
-                {
-                C_MAX_WAIT_TIME   = 6000,  ///< Время до установки ошибки связи с модулем, мсек.
-                C_ANALOG_BUF_SIZE = 256,   ///< Размер буфера аналоговых модулей.
-                C_MAX_DELAY       = 60000, ///< Макс. время задержки переподключения, мсек.
-                C_CNT_TIMEOUT_US = 100000, ///< Время ожидания подключения от модуля, мксек.
-                C_RCV_TIMEOUT_US = 200000, ///< Время ожидания ответа от модуля, мксек.
-                };
-
-            enum TYPES ///< Типы модулей.
-                {
-                T_EMPTY = -1,   ///< Не задан.
-
-                T_750_86x = 0,  ///< Wago 750-863.
-
-                T_750_820x = 2, ///< Wago PFC200.
-
-                T_750_XXX_ETHERNET = 100,///< Ethernet 750-341 и т.д.
-                };
-
-            enum STATES           ///< Cостояния работы с узлом.
-                {
-                ST_NO_CONNECT = 0,
-                ST_OK,
-                };
-
-            wago_node::STATES  state;          ///< Cостояние работы с узлом.
-            TYPES   type;            ///< Тип.
-            u_int   number;          ///< Номер.
-            char    ip_address[ 16 ];///< IP-адрес.
-            char    name[ 20 ];      ///< Имя.
-
-            bool is_active;          ///< Признак работающего узла.
-
-            u_long  last_poll_time; ///< Время последнего опроса.
-            bool    is_set_err;     ///< Установлена ли ошибка связи.
-            int     sock;           ///< Сокет соединения.
-
-            // Digital outputs ( DO ).
-            u_int  DO_cnt;      ///< Amount of DO.
-            u_char *DO;         ///< Current values.
-            u_char *DO_;        ///< To write.
-
-            // Analog outputs ( AO ).
-            u_int AO_cnt;       			///< Amount of AO.
-            int_2 AO[ C_ANALOG_BUF_SIZE ];  ///< Current values.
-            int_2 AO_[ C_ANALOG_BUF_SIZE ]; ///< To write.
-            u_int *AO_offsets;  			///< Offsets in common data.
-            u_int *AO_types;    			///< Channels type.
-            u_int AO_size;
-
-            // Digital inputs ( DI ).
-            u_int  DI_cnt;      ///< Amount of DI.
-            u_char *DI;         ///< Current values.
-
-            // Analog inputs ( AI ).
-            u_int AI_cnt;       			///< Amount of AI.
-            int_2 AI[ C_ANALOG_BUF_SIZE ];  ///< Current values.
-            u_int *AI_offsets;  			///< Offsets in common data.
-            u_int *AI_types;    			///< Channels type.
-            u_int AI_size;
-
-            u_long last_init_time; ///< Время последней попытки подключиться, мсек.
-            u_long delay_time;     ///< Время ожидания до попытки подключиться, мсек.
-
-            stat_time recv_stat;  ///< Статистика работы с сокетом.
-            stat_time send_stat;  ///< Статистика работы с сокетом.
-            };
-        //---------------------------------------------------------------------
-
         u_int       nodes_count;        ///< Количество узлов.
         wago_node **nodes;              ///< Узлы.
 
@@ -338,6 +337,8 @@ class wago_manager
 
     public:
         wago_node * get_node( int node_n );
+
+		u_int get_nodes_count();
 
         /// @brief Установка числа модулей.
         ///
@@ -362,6 +363,11 @@ class wago_manager
         /// Вызывается из Lua.
         void init_node_AI( u_int node_index, u_int AI_index,
             u_int type, u_int offset );
+
+		/// @brief Завершает соединение с узлом
+		virtual void disconnect(wago_node *node);
+
+
 
     };
 //-----------------------------------------------------------------------------

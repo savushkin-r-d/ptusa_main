@@ -44,11 +44,6 @@ class wago_manager_linux : public wago_manager
         /// @return - < 0 - ошибка.
         int net_init( wago_node *node );
 
-        /// @brief Отключение от узла wago.
-        ///
-        /// @param node - узел wago, от которого отключаемся.
-        void disconnect( wago_node *node );
-
         /// @brief Обмен с узлом wago.
         ///
         /// @param node             - узел wago, с которым осуществляется обмен.
@@ -66,6 +61,11 @@ class wago_manager_linux : public wago_manager
         wago_manager_linux();
 
         virtual ~wago_manager_linux();
+
+		/// @brief Отключение от узла wago.
+		///
+		/// @param node - узел wago, от которого отключаемся.
+		void disconnect(wago_node *node) override;
     };
 //-----------------------------------------------------------------------------
 #endif // WAGO_L_H
