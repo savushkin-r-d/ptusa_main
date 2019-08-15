@@ -138,7 +138,6 @@ int PAC_info::save_device( char *buff )
 
     answer_size += sprintf( buff + answer_size, "\t}\n" );
 
-	printf("%s", buff);
     return answer_size;
     }
 //-----------------------------------------------------------------------------
