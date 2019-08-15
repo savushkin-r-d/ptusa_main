@@ -59,7 +59,7 @@ class PAC_critical_errors_manager
             AC_RUNTIME_ERROR, ///< Ошибки во время работы.
 
             AC_NET,           ///< Ошибки сетевой работы.
-			AC_SERVICE,			/// Сервисное обслуживание устройства.
+            AC_SERVICE,			/// Сервисное обслуживание устройства.
             };
 
         enum ALARM_SUBCLASS         ///< Подкласс тревоги.
@@ -77,7 +77,7 @@ class PAC_critical_errors_manager
             AS_EMERGENCY_BUTTON = 1,///< Нажата аварийная кнопка.
 
             //AC_NET,               ///< Ошибки сетевой работы.
-            AS_SOCKET_F         = 1,///< Функция socket.
+            AS_SOCKET_F = 1,///< Функция socket.
             AS_BIND_F,              ///< Функция bind.
             AS_SETSOCKOPT_F,
             AS_LISTEN_F,
@@ -97,9 +97,9 @@ class PAC_critical_errors_manager
         void reset_global_error( ALARM_CLASS eclass, ALARM_SUBCLASS p1,
             unsigned long param );
 
-        int save_as_Lua_str( char *str, u_int_2 &id );
+        int save_as_Lua_str( char* str, u_int_2& id );
 
-        static PAC_critical_errors_manager * get_instance();
+        static PAC_critical_errors_manager* get_instance();
 
         u_int get_id() const
             {
