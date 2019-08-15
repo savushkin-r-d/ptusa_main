@@ -59,6 +59,7 @@ class PAC_critical_errors_manager
             AC_RUNTIME_ERROR, ///< Ошибки во время работы.
 
             AC_NET,           ///< Ошибки сетевой работы.
+			AC_SERVICE,			/// Сервисное обслуживание устройства.
             };
 
         enum ALARM_SUBCLASS         ///< Подкласс тревоги.

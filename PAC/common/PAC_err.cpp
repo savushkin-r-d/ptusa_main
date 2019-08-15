@@ -182,6 +182,27 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
         sprintf( tmp + strlen( tmp ), "?" );
         break;
 
+	case AC_SERVICE:
+		switch (err_sub_class)
+			{
+			case AS_WAGO:
+				sprintf(tmp + strlen(tmp),
+					"Узел ввода/вывода '%s' ('%s') - ",
+					G_WAGO_MANAGER()->get_node(par - 1)->name,
+					G_WAGO_MANAGER()->get_node(par - 1)->ip_address
+					);
+				break;
+			}
+		if (is_set)
+			{
+			sprintf(tmp + strlen(tmp), "%s", "отключен для обслуживания");
+			}
+		else
+			{
+			sprintf(tmp + strlen(tmp), "%s", "включен");
+			}
+		break;
+
     case AC_NO_CONNECTION:
         if ( is_set )
             {

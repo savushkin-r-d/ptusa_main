@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "PAC_info.h"
+#include "PAC_err.h"
 
 #include "lua_manager.h"
 
@@ -257,6 +258,9 @@ int PAC_info::set_cmd( const char *prop, u_int idx, double val )
 					{
 					wn->is_active = 1;
 					}
+				PAC_critical_errors_manager::get_instance()->reset_global_error(
+					PAC_critical_errors_manager::AC_SERVICE,
+					PAC_critical_errors_manager::AS_WAGO, wn->number);
 				}
 			if (0 == val)
 				{
@@ -265,6 +269,15 @@ int PAC_info::set_cmd( const char *prop, u_int idx, double val )
 					wago_manager::get_instance()->disconnect(wn);
 					wn->is_active = 0;
 					}
+				PAC_critical_errors_manager::get_instance()->set_global_error(
+					PAC_critical_errors_manager::AC_SERVICE,
+					PAC_critical_errors_manager::AS_WAGO, wn->number);
+				}
+			if (100 == val) //—брос ошибки.
+				{
+				PAC_critical_errors_manager::get_instance()->reset_global_error(
+					PAC_critical_errors_manager::AC_SERVICE,
+					PAC_critical_errors_manager::AS_WAGO, wn->number);
 				}
 			}
 		}
