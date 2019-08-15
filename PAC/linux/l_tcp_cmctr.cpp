@@ -591,7 +591,7 @@ int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
         int n = 0;
 
 
-        if ( ( n = send( sockfd, p, i, 0 ) ) < 0 )
+        if ( ( n = send( sockfd, p, i, MSG_NOSIGNAL ) ) < 0 )
             {
             sprintf( G_LOG->msg,
                 "Network device : s%d->\"%s\":\"%s\""
