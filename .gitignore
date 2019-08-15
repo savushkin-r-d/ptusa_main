@@ -41,3 +41,27 @@ PAC_control_projects/main_control_prg/eclipse/projects/WAGO-PFC-BSP-2014\.10\.3/
 PAC_control_projects/main_control_prg/eclipse_workspace/
 
 PAC_control_projects/main_control_prg/main_control_dll_vc/Debug/
+
+PAC_control_projects/main_control_prg/main_control_prg_vc/Release/
+
+PAC_control_projects/main_control_prg/main_control_dll_vc/Debug_IDE/
+
+PAC_control_projects/main_control_prg/main_control_prg_vc/Release_VS_CODE/
+
+PAC_control_projects/main_control_prg/main_control_prg_vc/RFID_debug/
+
+PAC_control_projects/main_control_prg/main_control_prg_vc/RFID_release/
+
+PAC_control_projects/main_control_prg/main_control_dll_vc/Release/
+
+PAC_control_projects/main_control_prg/main_control_dll_vc/Release_VS_CODE/
+
+PAC_control_projects/main_control_prg/main_control_dll_vc/RFID_debug/
+
+PAC_control_projects/main_control_prg/main_control_dll_vc/x64/
+
+PAC_control_projects/main_control_prg/eclipse/workspaces/WAGO-PFC-BSP-2014\.10\.3/\.*
+
+PAC_control_projects/main_control_prg/eclipse/workspaces/WAGO-PFC-BSP-2014\.10\.3/RemoteSystemsTempFiles/
+
+PAC_control_projects/main_control_prg/eclipse/projects/WAGO-PFC-BSP-2014\.10\.3/Debug/

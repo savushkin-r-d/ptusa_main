@@ -47,70 +47,70 @@
     <ProjectGuid>{5F2D0ECA-D2D3-402F-A59C-98A21B12007C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>maincontroldllvc</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RFID_debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -152,27 +152,27 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>../../../PAC/common;../../../common/util;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\atlmfc\include\;$(IncludePath)</IncludePath>
+    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;$(IncludePath)</IncludePath>
     <LibraryPath>c:\lua\bin\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>../../../PAC/common;../../../common/util;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\atlmfc\include\;$(IncludePath)</IncludePath>
+    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;$(IncludePath)</IncludePath>
     <LibraryPath>c:\lua\bin\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../../../PAC/common;../../../common/util;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\atlmfc\include\;$(IncludePath)</IncludePath>
+    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>c:\lua\bin;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../../../PAC/common;../../../common/util;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\atlmfc\include\;$(IncludePath)</IncludePath>
+    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(IncludePath)</IncludePath>
     <LibraryPath>c:\lua\bin;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../../../PAC/common;../../../common/util;../../../common/PAC-driver;../../../common/lua;../../../common/tolua++;../../../common/QuickLZ;../../../common;../../../PAC/win;../../../PAC/win/PAC_PC;.;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/win_util;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.12.25827\atlmfc\include\;$(IncludePath)</IncludePath>
+    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(IncludePath)</IncludePath>
     <LibraryPath>c:\lua\bin;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
     <TargetName>main_control</TargetName>
   </PropertyGroup>
@@ -392,9 +392,6 @@
     <ClInclude Include="..\..\..\common\PAC-driver\g_device.h" />
     <ClInclude Include="..\..\..\common\QuickLZ\quicklz.h" />
     <ClInclude Include="..\..\..\common\RFID\rfid_reader.h" />
-    <ClInclude Include="..\..\..\common\tolua++\tolua++.h" />
-    <ClInclude Include="..\..\..\common\tolua++\tolua_base.h" />
-    <ClInclude Include="..\..\..\common\tolua++\tolua_event.h" />
     <ClInclude Include="..\..\..\common\win_util\SWMRG.h" />
     <ClInclude Include="..\..\..\common\win_util\WSA_err_decode.h" />
     <ClInclude Include="..\..\..\PAC\common\cip_stats.h" />
@@ -424,6 +421,9 @@
     <ClInclude Include="..\..\..\PAC\common\tcp_cmctr.h" />
     <ClInclude Include="..\..\..\PAC\common\tech_def.h" />
     <ClInclude Include="..\..\..\PAC\common\wago.h" />
+    <ClInclude Include="..\..\..\PAC\IoT\iot_altivar.h" />
+    <ClInclude Include="..\..\..\PAC\IoT\iot_base.h" />
+    <ClInclude Include="..\..\..\PAC\IoT\iot_common.h" />
     <ClInclude Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.h" />
     <ClInclude Include="..\..\..\PAC\win\PAC_PC\wago_PC.h" />
     <ClInclude Include="..\..\..\PAC\win\w_console.h" />
@@ -434,6 +434,7 @@
     <ClInclude Include="..\..\..\PAC\win\w_tcp_client.h" />
     <ClInclude Include="..\..\..\PAC\win\w_tcp_cmctr.h" />
     <ClInclude Include="..\..\..\PAC\win\w_types.h" />
+    <ClInclude Include="..\..\..\tolua++\include\tolua++.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\common\lua\lapi.c" />
@@ -470,11 +471,6 @@
     <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp" />
     <ClCompile Include="..\..\..\common\PAC-driver\g_device.cpp" />
     <ClCompile Include="..\..\..\common\QuickLZ\quicklz.c" />
-    <ClCompile Include="..\..\..\common\tolua++\tolua_event.c" />
-    <ClCompile Include="..\..\..\common\tolua++\tolua_is.c" />
-    <ClCompile Include="..\..\..\common\tolua++\tolua_map.c" />
-    <ClCompile Include="..\..\..\common\tolua++\tolua_push.c" />
-    <ClCompile Include="..\..\..\common\tolua++\tolua_to.c" />
     <ClCompile Include="..\..\..\common\win_util\SWMRG.cpp" />
     <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp" />
     <ClCompile Include="..\..\..\PAC\common\cip_stats.cpp" />
@@ -501,6 +497,10 @@
     <ClCompile Include="..\..\..\PAC\common\tcp_cmctr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\tech_def.cpp" />
     <ClCompile Include="..\..\..\PAC\common\wago.cpp" />
+    <ClCompile Include="..\..\..\PAC\IoT\iot_altivar.cpp" />
+    <ClCompile Include="..\..\..\PAC\IoT\iot_base.cpp" />
+    <ClCompile Include="..\..\..\PAC\IoT\iot_common.cpp" />
+    <ClCompile Include="..\..\..\PAC\IoT\IOT_dev_lua.cpp" />
     <ClCompile Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.cpp" />
     <ClCompile Include="..\..\..\PAC\win\PAC_PC\wago_PC.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_console.cpp" />
@@ -509,6 +509,11 @@
     <ClCompile Include="..\..\..\PAC\win\w_rm_tech_def.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_tcp_client.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_tcp_cmctr.cpp" />
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_event.c" />
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_is.c" />
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_map.c" />
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_push.c" />
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_to.c" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="main_control_dll_vc.cpp" />
   </ItemGroup>

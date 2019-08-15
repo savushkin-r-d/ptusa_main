@@ -61,12 +61,6 @@
     <Filter Include="Файлы заголовков\common\sys\Lua">
       <UniqueIdentifier>{b86baf31-990c-4992-b6fe-c7d2a6bb2f3e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Файлы заголовков\common\sys\tolua++">
-      <UniqueIdentifier>{b58d397a-eeae-4253-bea1-5dcbdb403ae7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Исходные файлы\common\sys\tolua++">
-      <UniqueIdentifier>{a5fe77bd-f270-48e8-8b24-9e3d891c9807}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Исходные файлы\common\QuickLZ">
       <UniqueIdentifier>{87e5e599-c6e2-418e-bb37-83d7b3aab726}</UniqueIdentifier>
     </Filter>
@@ -87,6 +81,18 @@
     </Filter>
     <Filter Include="Исходные файлы\common\RFID">
       <UniqueIdentifier>{98d6d08e-52f3-42c8-8827-1b0b7939fedb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\tolua++">
+      <UniqueIdentifier>{272e8b76-5a31-4e63-a2c7-f5fbdd9c1d63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\tolua++">
+      <UniqueIdentifier>{3d477fe3-af7a-4447-97a0-984f50400e49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\PAC\IoT">
+      <UniqueIdentifier>{b44ac0ac-74d3-40a8-a581-80ef171ae139}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Файлы заголовков\PAC\IoT">
+      <UniqueIdentifier>{0e6dc3cf-8928-4ebe-945d-2a7645cbd48a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -270,15 +276,6 @@
     <ClInclude Include="..\..\..\common\lua\lzio.h">
       <Filter>Файлы заголовков\common\sys\Lua</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\common\tolua++\tolua_base.h">
-      <Filter>Файлы заголовков\common\sys\tolua++</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\common\tolua++\tolua_event.h">
-      <Filter>Файлы заголовков\common\sys\tolua++</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\common\tolua++\tolua++.h">
-      <Filter>Файлы заголовков\common\sys\tolua++</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\common\lua_manager.h">
       <Filter>Файлы заголовков\common\sys</Filter>
     </ClInclude>
@@ -299,6 +296,18 @@
     </ClInclude>
     <ClInclude Include="..\..\..\common\RFID\rfid_reader.h">
       <Filter>Исходные файлы\common\RFID</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\tolua++\include\tolua++.h">
+      <Filter>Файлы заголовков\tolua++</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\IoT\iot_altivar.h">
+      <Filter>Файлы заголовков\PAC\IoT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\IoT\iot_base.h">
+      <Filter>Файлы заголовков\PAC\IoT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\IoT\iot_common.h">
+      <Filter>Файлы заголовков\PAC\IoT</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -494,21 +503,6 @@
     <ClCompile Include="..\..\..\common\lua\print.c">
       <Filter>Исходные файлы\common\sys\Lua</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\common\tolua++\tolua_event.c">
-      <Filter>Исходные файлы\common\sys\tolua++</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\common\tolua++\tolua_is.c">
-      <Filter>Исходные файлы\common\sys\tolua++</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\common\tolua++\tolua_map.c">
-      <Filter>Исходные файлы\common\sys\tolua++</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\common\tolua++\tolua_push.c">
-      <Filter>Исходные файлы\common\sys\tolua++</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\common\tolua++\tolua_to.c">
-      <Filter>Исходные файлы\common\sys\tolua++</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\common\lua_manager.cpp">
       <Filter>Исходные файлы\common\sys</Filter>
     </ClCompile>
@@ -526,6 +520,33 @@
     </ClCompile>
     <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp">
       <Filter>Исходные файлы\common\win_util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_event.c">
+      <Filter>Исходные файлы\tolua++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_is.c">
+      <Filter>Исходные файлы\tolua++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_map.c">
+      <Filter>Исходные файлы\tolua++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_push.c">
+      <Filter>Исходные файлы\tolua++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_to.c">
+      <Filter>Исходные файлы\tolua++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\IoT\iot_altivar.cpp">
+      <Filter>Исходные файлы\PAC\IoT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\IoT\iot_base.cpp">
+      <Filter>Исходные файлы\PAC\IoT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\IoT\iot_common.cpp">
+      <Filter>Исходные файлы\PAC\IoT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\IoT\IOT_dev_lua.cpp">
+      <Filter>Исходные файлы\PAC\IoT</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
