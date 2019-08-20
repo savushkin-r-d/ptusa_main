@@ -37,7 +37,6 @@
 			<locationURI>PARENT-5-PROJECT_LOC/common</locationURI>
 		</link>
 		<link>
-		<link>
 			<name>tolua++</name>
 			<type>2</type>
 			<location>/home/id/ptusa_git/tolua++</location>

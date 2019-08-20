@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.13)
 
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+
 project(PtusaPLCnextEngineer)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -12,13 +14,12 @@ endif()
 add_definitions(-DPAC_PLCNEXT)  
 add_definitions(-DLINUX_OS)
 add_definitions(-DTEST_SPEED)
-add_definitions(-DLUA_USE_POSIX)
 
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../lua /home/id/ptusa_git/bin )
 
 file(GLOB_RECURSE PLCnext_src src/*.cpp intermediate/code/*.cpp)
 
 file(GLOB Main_src  
-					../../../../../common/lua/*.c
 					../../../../../common/PAC-driver/*.cpp
 					../../../../../common/QuickLZ/*.c
 					../../../../../common/util/*.c					
@@ -46,7 +47,6 @@ add_library(PtusaPLCnextEngineer SHARED ${Main_src} ${PLCnext_src})
 target_include_directories(PtusaPLCnextEngineer
     PUBLIC
    	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common/lua>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common/util>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common/PAC-driver>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common/QuickLZ>    
@@ -58,6 +58,10 @@ target_include_directories(PtusaPLCnextEngineer
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../PAC/IoT>
     
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../tolua++/include>
+	
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../lua/src>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../bin>
+		
     	
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/intermediate/code>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
@@ -85,7 +89,7 @@ target_link_options(PtusaPLCnextEngineer PRIVATE LINKER:--no-undefined)
 find_package(ArpDevice REQUIRED)
 find_package(ArpProgramming REQUIRED)
 
-target_link_libraries(PtusaPLCnextEngineer PRIVATE ArpDevice ArpProgramming)
+target_link_libraries(PtusaPLCnextEngineer PRIVATE ArpDevice ArpProgramming liblua_static )
 
 #######################################################################################
 
