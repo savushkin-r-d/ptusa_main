@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 3.13)
 
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
@@ -19,7 +19,6 @@ file(GLOB_RECURSE PLCnext_src src/*.cpp intermediate/code/*.cpp)
 
 file(GLOB Main_src  
 					../../../../../common/lua/*.c
-					../../../../../common/tolua++/*.c
 					../../../../../common/PAC-driver/*.cpp
 					../../../../../common/QuickLZ/*.c
 					../../../../../common/util/*.c					
@@ -31,6 +30,8 @@ file(GLOB Main_src
 					../../../../../PAC/linux/PAC_PC/*.cpp
 					../../../../../PAC/linux/PAC_PLCnext/*.cpp
 					../../../../../PAC/IoT/*.cpp
+					
+					../../../../../tolua++/src/lib/*.c
 					)				
 
 list(FILTER Main_src EXCLUDE REGEX ".*OPCUA*")
@@ -46,7 +47,6 @@ target_include_directories(PtusaPLCnextEngineer
     PUBLIC
    	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common/lua>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common/tolua++>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common/util>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common/PAC-driver>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common/QuickLZ>    
@@ -57,6 +57,8 @@ target_include_directories(PtusaPLCnextEngineer
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../PAC/linux/PAC_PLCnext>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../PAC/IoT>
     
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../tolua++/include>
+    	
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/intermediate/code>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 

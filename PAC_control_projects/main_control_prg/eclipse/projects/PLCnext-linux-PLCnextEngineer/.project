@@ -37,6 +37,12 @@
 			<locationURI>PARENT-5-PROJECT_LOC/common</locationURI>
 		</link>
 		<link>
+		<link>
+			<name>tolua++</name>
+			<type>2</type>
+			<location>/home/id/ptusa_git/tolua++</location>
+		</link>
+		<link>
 			<name>PAC/linux/PAC_PLCnext/mem_PLCnext.cpp</name>
 			<type>1</type>
 			<location>/home/id/ptusa_git/PAC/linux/PAC_PLCnext/mem_PLCnext.cpp</location>
