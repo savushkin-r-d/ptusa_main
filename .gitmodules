@@ -2,3 +2,6 @@
 	path = tolua++
 	url = https://github.com/savushkin-r-d/toluapp.git
 	branch = dev
+[submodule "lua"]
+	path = lua
+	url = http://github.com/LuaDist/lua.git
