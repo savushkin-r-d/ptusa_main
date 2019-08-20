@@ -40,6 +40,11 @@
 			<type>1</type>
 			<location>/mnt/hgfs/Git/ptusa_main/PAC_control_projects/main_control_prg/main.cpp</location>
 		</link>
+		<link>
+			<name>tolua++</name>
+			<type>2</type>
+			<location>/mnt/hgfs/Git/ptusa_main/tolua++</location>
+		</link>
 	</linkedResources>
 	<filteredResources>
 		<filter>
