@@ -6,14 +6,14 @@
 
 extern int errno;
 //-----------------------------------------------------------------------------
-int wago_manager_linux::net_init( wago_node *node )
+int wago_manager_linux::net_init( wago_node* node )
     {
     int type = SOCK_STREAM;
     int protocol = 0; /* всегда 0 */
     int err;
     int sock = err = socket( AF_INET, type, protocol ); // Cоздание сокета.
 
-    if( sock < 0 )
+    if ( sock < 0 )
         {
         sprintf( G_LOG->msg,
             "Network communication : can't create wago node socket : %s.",
@@ -27,9 +27,9 @@ int wago_manager_linux::net_init( wago_node *node )
     struct sockaddr_in socket_remote_server;
     const int PORT = 502;
     memset( &socket_remote_server, 0, sizeof( socket_remote_server ) );
-    socket_remote_server.sin_family 	 = AF_INET;
+    socket_remote_server.sin_family = AF_INET;
     socket_remote_server.sin_addr.s_addr = inet_addr( node->ip_address );
-    socket_remote_server.sin_port        = htons ( PORT );
+    socket_remote_server.sin_port = htons( PORT );
 
     const int C_ON = 1;
 
@@ -58,7 +58,7 @@ int wago_manager_linux::net_init( wago_node *node )
         }
 
     // Привязка сокета. Сразу возвращает управление в неблокирующем режиме.
-    err = connect( sock, ( struct sockaddr * ) &socket_remote_server,
+    err = connect( sock, ( struct sockaddr* ) & socket_remote_server,
         sizeof( socket_remote_server ) );
 
     fd_set rdevents;
@@ -66,7 +66,7 @@ int wago_manager_linux::net_init( wago_node *node )
     FD_ZERO( &rdevents );
     FD_SET( sock, &rdevents );
 
-    tv.tv_sec  = 0;
+    tv.tv_sec = 0;
     tv.tv_usec = wago_node::C_CNT_TIMEOUT_US;
 
     err = select( sock + 1, 0, &rdevents, 0, &tv );
@@ -89,7 +89,7 @@ int wago_manager_linux::net_init( wago_node *node )
                     "Network device : s%d->\"%s\":\"%s\""
                     " can't connect : timeout (%d ms).",
                     sock, node->name, node->ip_address,
-                    wago_node::C_CNT_TIMEOUT_US / 1000  );
+                    wago_node::C_CNT_TIMEOUT_US / 1000 );
 
                 G_LOG->write_log( i_log::P_CRIT );
                 }
@@ -99,13 +99,13 @@ int wago_manager_linux::net_init( wago_node *node )
         return -5;
         }
 
-    if( FD_ISSET( sock, &rdevents ) )
+    if ( FD_ISSET( sock, &rdevents ) )
         {
         socklen_t err_len;
         int error;
 
         err_len = sizeof( error );
-        if( getsockopt( sock, SOL_SOCKET, SO_ERROR, &error, &err_len ) < 0 || error != 0 )
+        if ( getsockopt( sock, SOL_SOCKET, SO_ERROR, &error, &err_len ) < 0 || error != 0 )
             {
             if ( node->is_set_err == false )
                 {
@@ -124,12 +124,12 @@ int wago_manager_linux::net_init( wago_node *node )
     if ( G_DEBUG )
         {
         printf( "wago_manager_linux:net_init() : socket %d is successfully"
-        " connected to \"%s\":\"%s\":%d\n",
+            " connected to \"%s\":\"%s\":%d\n",
             sock, node->name, node->ip_address, PORT );
         }
 
-    node->sock   = sock;
-    node->state  = wago_node::ST_OK;
+    node->sock = sock;
+    node->state = wago_node::ST_OK;
 
     return 0;
     }
@@ -140,7 +140,7 @@ int wago_manager_linux::write_outputs()
 
     for ( u_int i = 0; i < nodes_count; i++ )
         {
-        wago_node *nd = nodes[ i ];
+        wago_node* nd = nodes[ i ];
         if ( nd->type == wago_node::T_750_XXX_ETHERNET )
             {
             if ( !nd->is_active )
@@ -152,18 +152,18 @@ int wago_manager_linux::write_outputs()
                 {
                 u_int bytes_cnt = nd->DO_cnt / 8 + ( nd->DO_cnt % 8 > 0 ? 1 : 0 );
 
-                buff[ 0  ] = 's';
-                buff[ 1  ] = 's';
-                buff[ 2  ] = 0;
-                buff[ 3  ] = 0;
-                buff[ 4  ] = 0;
-                buff[ 5  ] = 7 + bytes_cnt;
-                buff[ 6  ] = 0; //nodes[ i ]->number;
-                buff[ 7  ] = 0x0F;
-                buff[ 8  ] = 0;
-                buff[ 9  ] = 0;
-                buff[ 10 ] = ( unsigned char ) nd->DO_cnt >> 8;
-                buff[ 11 ] = ( unsigned char ) nd->DO_cnt & 0xFF;
+                buff[ 0 ] = 's';
+                buff[ 1 ] = 's';
+                buff[ 2 ] = 0;
+                buff[ 3 ] = 0;
+                buff[ 4 ] = 0;
+                buff[ 5 ] = 7 + bytes_cnt;
+                buff[ 6 ] = 0; //nodes[ i ]->number;
+                buff[ 7 ] = 0x0F;
+                buff[ 8 ] = 0;
+                buff[ 9 ] = 0;
+                buff[ 10 ] = (unsigned char)nd->DO_cnt >> 8;
+                buff[ 11 ] = (unsigned char)nd->DO_cnt & 0xFF;
                 buff[ 12 ] = bytes_cnt;
 
                 for ( u_int j = 0, idx = 0; j < bytes_cnt; j++ )
@@ -200,16 +200,16 @@ int wago_manager_linux::write_outputs()
                 {
                 u_int bytes_cnt = nd->AO_size;
 
-                buff[ 0  ] = 's';
-                buff[ 1  ] = 's';
-                buff[ 2  ] = 0;
-                buff[ 3  ] = 0;
-                buff[ 4  ] = 0;
-                buff[ 5  ] = 7 + bytes_cnt;
-                buff[ 6  ] = 0; //nodes[ i ]->number;
-                buff[ 7  ] = 0x10;
-                buff[ 8  ] = 0;
-                buff[ 9  ] = 0;
+                buff[ 0 ] = 's';
+                buff[ 1 ] = 's';
+                buff[ 2 ] = 0;
+                buff[ 3 ] = 0;
+                buff[ 4 ] = 0;
+                buff[ 5 ] = 7 + bytes_cnt;
+                buff[ 6 ] = 0; //nodes[ i ]->number;
+                buff[ 7 ] = 0x10;
+                buff[ 8 ] = 0;
+                buff[ 9 ] = 0;
                 buff[ 10 ] = bytes_cnt / 2 >> 8;
                 buff[ 11 ] = bytes_cnt / 2 & 0xFF;
                 buff[ 12 ] = bytes_cnt;
@@ -217,10 +217,10 @@ int wago_manager_linux::write_outputs()
                 int l = 0;
                 for ( unsigned int idx = 0; idx < nd->AO_cnt; idx++ )
                     {
-                    switch( nd->AO_types[ idx ] )
+                    switch ( nd->AO_types[ idx ] )
                         {
                         case 638:
-                            buff[ 13 + l     ] = 0;
+                            buff[ 13 + l ] = 0;
                             buff[ 13 + l + 1 ] = 0;
                             buff[ 13 + l + 2 ] = 0;
                             buff[ 13 + l + 3 ] = 0;
@@ -228,8 +228,8 @@ int wago_manager_linux::write_outputs()
                             break;
 
                         default:
-                            buff[ 13 + l ] = ( u_char )(( nd->AO_[ idx ] >> 8 ) & 0xFF);
-                            buff[ 13 + l + 1 ] = ( u_char )(nd->AO_[ idx ] & 0xFF);
+                            buff[ 13 + l ] = (u_char)( ( nd->AO_[ idx ] >> 8 ) & 0xFF );
+                            buff[ 13 + l + 1 ] = (u_char)( nd->AO_[ idx ] & 0xFF );
                             l += 2;
                             break;
                         }
@@ -257,26 +257,26 @@ int wago_manager_linux::write_outputs()
     return 0;
     }
 //-----------------------------------------------------------------------------
-int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
+int wago_manager_linux::e_communicate( wago_node* node, int bytes_to_send,
     int bytes_to_receive )
     {
     // Проверка связи с узлом Wago.
-    if( get_delta_millisec(node->last_poll_time) > wago_node::C_MAX_WAIT_TIME )
+    if ( get_delta_millisec( node->last_poll_time ) > wago_node::C_MAX_WAIT_TIME )
         {
-        if( false == node->is_set_err )
+        if ( false == node->is_set_err )
             {
             node->is_set_err = true;
-            PAC_critical_errors_manager::get_instance( )->set_global_error(
+            PAC_critical_errors_manager::get_instance()->set_global_error(
                 PAC_critical_errors_manager::AC_NO_CONNECTION,
                 PAC_critical_errors_manager::AS_WAGO, node->number );
             }
         }
     else
         {
-        if( node->is_set_err )
+        if ( node->is_set_err )
             {
             node->is_set_err = false;
-            PAC_critical_errors_manager::get_instance( )->reset_global_error(
+            PAC_critical_errors_manager::get_instance()->reset_global_error(
                 PAC_critical_errors_manager::PAC_critical_errors_manager::AC_NO_CONNECTION,
                 PAC_critical_errors_manager::AS_WAGO, node->number );
             }
@@ -284,7 +284,7 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
     // Проверка связи с узлом Wago.-!>
 
     // Инициализация сетевого соединения, при необходимости.
-    if( node->state != wago_node::ST_OK )
+    if ( node->state != wago_node::ST_OK )
         {
         if ( get_delta_millisec( node->last_init_time ) < node->delay_time )
             {
@@ -292,7 +292,7 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
             }
 
         net_init( node );
-        if( node->state != wago_node::ST_OK )
+        if ( node->state != wago_node::ST_OK )
             {
             node->last_init_time = get_millisec();
             if ( node->delay_time < wago_node::C_MAX_DELAY )
@@ -311,7 +311,7 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
         bytes_to_send, 0, wago_node::C_RCV_TIMEOUT_US, node->ip_address,
         node->name, &node->send_stat );
 
-    if( res < 0 )
+    if ( res < 0 )
         {
         disconnect( node );
         return -101;
@@ -320,9 +320,9 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
     // Получение данных.
     res = tcp_communicator_linux::recvtimeout( node->sock, buff,
         bytes_to_receive, 0, wago_node::C_RCV_TIMEOUT_US, node->ip_address,
-    node->name, &node->recv_stat );
+        node->name, &node->recv_stat );
 
-    if( res <= 0 ) /* read error */
+    if ( res <= 0 ) /* read error */
         {
         disconnect( node );
         return -102;
@@ -333,135 +333,137 @@ int wago_manager_linux::e_communicate( wago_node *node, int bytes_to_send,
     }
 //-----------------------------------------------------------------------------
 int wago_manager_linux::read_inputs()
+    {
+    if ( 0 == nodes_count ) return 0;
+
+    for ( u_int i = 0; i < nodes_count; i++ )
         {
-        if ( 0 == nodes_count ) return 0;
+        wago_node* nd = nodes[ i ];
 
-        for ( u_int i = 0; i < nodes_count; i++ )
+        if ( nd->type == wago_node::T_750_XXX_ETHERNET ) // Ethernet Wago nodes.
             {
-            wago_node *nd = nodes[ i ];
-
-            if ( nd->type == wago_node::T_750_XXX_ETHERNET ) // Ethernet Wago nodes.
+            if ( !nd->is_active )
                 {
-                if ( !nd->is_active )
+                continue;
+                }
+
+            if ( nd->DI_cnt > 0 )
+                {
+                buff[ 0 ] = 's';
+                buff[ 1 ] = 's';
+                buff[ 2 ] = 0;
+                buff[ 3 ] = 0;
+                buff[ 4 ] = 0;
+                buff[ 5 ] = 6;
+                buff[ 6 ] = 0; //nd->number;
+                buff[ 7 ] = 0x02;
+                buff[ 8 ] = 0;
+                buff[ 9 ] = 0;
+                buff[ 10 ] = (unsigned char)nd->DI_cnt >> 8;
+                buff[ 11 ] = (unsigned char)nd->DI_cnt & 0xFF;
+
+                u_int bytes_cnt = nd->DI_cnt / 8 + ( nd->DI_cnt % 8 > 0 ? 1 : 0 );
+
+                if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
                     {
-                    continue;
-                    }
-
-                if ( nd->DI_cnt > 0 )
-                    {
-                    buff[ 0  ] = 's';
-                    buff[ 1  ] = 's';
-                    buff[ 2  ] = 0;
-                    buff[ 3  ] = 0;
-                    buff[ 4  ] = 0;
-                    buff[ 5  ] = 6;
-                    buff[ 6  ] = 0; //nd->number;
-                    buff[ 7  ] = 0x02;
-                    buff[ 8  ] = 0;
-                    buff[ 9  ] = 0;
-                    buff[ 10 ] = ( unsigned char ) nd->DI_cnt >> 8;
-                    buff[ 11 ] = ( unsigned char ) nd->DI_cnt & 0xFF;
-
-                    u_int bytes_cnt = nd->DI_cnt / 8 + ( nd->DI_cnt % 8 > 0 ? 1 : 0 );
-
-                    if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
+                    if ( buff[ 7 ] == 0x02 && buff[ 8 ] == bytes_cnt )
                         {
-                        if ( buff[ 7 ] == 0x02 && buff[ 8 ] == bytes_cnt )
+                        for ( u_int j = 0, idx = 0; j < bytes_cnt; j++ )
                             {
-                            for ( u_int j = 0, idx = 0; j < bytes_cnt; j++ )
+                            for ( int k = 0; k < 8; k++ )
                                 {
-                                for ( int k = 0; k < 8; k++ )
+                                if ( idx < nd->DI_cnt )
                                     {
-                                    if ( idx < nd->DI_cnt )
-                                        {
-                                        nd->DI[ idx ] =  ( buff[ j + 9 ] >> k ) & 1;
-    #ifdef DEBUG_KBUS
-                                        printf( "%d -> %d, ", idx, nd->DI[ idx ] );
-    #endif // DEBUG_KBUS
-                                        idx++;
-                                        }
-                                    }
-                                }
-    #ifdef DEBUG_KBUS
-                            printf( "\n" );
-    #endif // DEBUG_KBUS
-                            }
-                        else
-                            {
-                            if ( G_DEBUG )
-                                {
-                                //printf("\nRead DI:Wago returned error...\n");
-                                }
-                            }
-                        }// if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
-                    }// if ( nd->DI_cnt > 0 )
-
-                if ( nd->AI_cnt > 0 )
-                    {
-                    buff[ 0  ] = 's';
-                    buff[ 1  ] = 's';
-                    buff[ 2  ] = 0;
-                    buff[ 3  ] = 0;
-                    buff[ 4  ] = 0;
-                    buff[ 5  ] = 6;
-                    buff[ 6  ] = 0; //nd->number;
-                    buff[ 7  ] = 0x04;
-                    buff[ 8  ] = 0;
-                    buff[ 9  ] = 0;
-
-                    u_int bytes_cnt = nd->AI_size;
-
-                    buff[ 10 ] = ( unsigned char ) bytes_cnt / 2 >> 8;
-                    buff[ 11 ] = ( unsigned char ) bytes_cnt / 2 & 0xFF;
-
-                    if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
-                        {
-                        if ( buff[ 7 ] == 0x04 && buff[ 8 ] == bytes_cnt )
-                            {
-                            int idx = 0;
-                            for ( unsigned int l = 0; l < nd->AI_cnt; l++ )
-                                {
-                                switch( nd->AI_types[ l ] )
-                                    {
-                                    case 638:
-                                        nd->AI[ l ] = 256 * buff[ 9 + idx + 2 ] +
-                                            buff[ 9 + idx + 3 ];
-                                        idx += 4;
-                                        break;
-
-                                    default:
-                                        nd->AI[ l ] = 256 * buff[ 9 + idx ] +
-                                            buff[ 9 + idx + 1 ];
-                                        idx += 2;
-                                        break;
+                                    nd->DI[ idx ] = ( buff[ j + 9 ] >> k ) & 1;
+#ifdef DEBUG_KBUS
+                                    printf( "%d -> %d, ", idx, nd->DI[ idx ] );
+#endif // DEBUG_KBUS
+                                    idx++;
                                     }
                                 }
                             }
-                        else
+#ifdef DEBUG_KBUS
+                        printf( "\n" );
+#endif // DEBUG_KBUS
+                        }
+                    else
+                        {
+                        if ( G_DEBUG )
                             {
-    if ( G_DEBUG )
- {
-                            printf("\nRead AI:Wago returned error. Node %d.\n",
-                                nd->number );
-                            printf( "bytes_cnt = %d, %d %d \n",
-                                ( int ) buff[ 7 ], ( int ) buff[ 8 ], bytes_cnt );
-    }
+                            //printf("\nRead DI:Wago returned error...\n");
                             }
                         }
-                    }// if ( nd->AI_cnt > 0 )
+                    }// if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
+                }// if ( nd->DI_cnt > 0 )
 
-                }// if ( nd->type == wago_node::T_750_341 || ...
-            }// for ( u_int i = 0; i < nodes_count; i++ )
+            if ( nd->AI_cnt > 0 )
+                {
+                buff[ 0 ] = 's';
+                buff[ 1 ] = 's';
+                buff[ 2 ] = 0;
+                buff[ 3 ] = 0;
+                buff[ 4 ] = 0;
+                buff[ 5 ] = 6;
+                buff[ 6 ] = 0; //nd->number;
+                buff[ 7 ] = 0x04;
+                buff[ 8 ] = 0;
+                buff[ 9 ] = 0;
 
-        return 0;
-        }
+                u_int bytes_cnt = nd->AI_size;
+
+                buff[ 10 ] = (unsigned char)bytes_cnt / 2 >> 8;
+                buff[ 11 ] = (unsigned char)bytes_cnt / 2 & 0xFF;
+
+                if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
+                    {
+                    if ( buff[ 7 ] == 0x04 && buff[ 8 ] == bytes_cnt )
+                        {
+                        int idx = 0;
+                        for ( unsigned int l = 0; l < nd->AI_cnt; l++ )
+                            {
+                            switch ( nd->AI_types[ l ] )
+                                {
+                                case 638:
+                                    nd->AI[ l ] = 256 * buff[ 9 + idx + 2 ] +
+                                        buff[ 9 + idx + 3 ];
+                                    idx += 4;
+                                    break;
+
+                                default:
+                                    nd->AI[ l ] = 256 * buff[ 9 + idx ] +
+                                        buff[ 9 + idx + 1 ];
+                                    idx += 2;
+                                    break;
+                                }
+                            }
+                        }
+                    else
+                        {
+                        if ( G_DEBUG )
+                            {
+                            printf( "\nRead AI:Wago returned error. Node %d.\n",
+                                nd->number );
+                            printf( "bytes_cnt = %d, %d %d \n",
+                                (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
+                            }
+                        }
+                    }
+                }// if ( nd->AI_cnt > 0 )
+
+            }// if ( nd->type == wago_node::T_750_341 || ...
+        }// for ( u_int i = 0; i < nodes_count; i++ )
+
+    return 0;
+    }
 //-----------------------------------------------------------------------------
-void wago_manager_linux::disconnect( wago_node *node )
+void wago_manager_linux::disconnect( wago_node* node )
     {
-    shutdown( node->sock, SHUT_RDWR );
-    close( node->sock );
-    node->sock = 0;
-
+    if ( node->sock )
+        {
+        shutdown( node->sock, SHUT_RDWR );
+        close( node->sock );
+        node->sock = 0;
+        }
     node->state = wago_node::ST_NO_CONNECT;
     }
 //-----------------------------------------------------------------------------
