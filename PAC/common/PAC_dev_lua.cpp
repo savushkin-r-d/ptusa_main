@@ -18,7 +18,6 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 #include "tech_def.h"
 #include "cip_tech_def.h"
 #include "wago.h"
-#include "tolua_base.h"
 #include "PID.h"
 #include "g_device.h"
 #include "errors.h"

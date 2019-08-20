@@ -5,7 +5,7 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.debug.1279002828" moduleId="org.eclipse.cdt.core.settings" name="Debug">
 				<macros>
 					<stringMacro name="MYTOOLCHAINPATH" type="VALUE_TEXT" value="/home/id/WAGO/ptxproj-2.2.20"/>
-					<stringMacro name="REPOPATH" type="VALUE_TEXT" value="/home/id/PTUSA"/>
+					<stringMacro name="REPOPATH" type="VALUE_TEXT" value="/mnt/hgfs/P/savushkin-r-d/ptusa_main"/>
 				</macros>
 				<externalSettings/>
 				<extensions>
@@ -34,6 +34,7 @@
 									<listOptionValue builtIn="false" value="${MYTOOLCHAINPATH}/platform-wago-pfc200/build-target/led_server/include"/>
 									<listOptionValue builtIn="false" value="${MYTOOLCHAINPATH}/platform-wago-pfc200/sysroot-target/usr/include"/>
 									<listOptionValue builtIn="false" value="/opt/OSELAS.Toolchain-2012.12.1/arm-cortexa8-linux-gnueabihf/gcc-4.7.3-glibc-2.16.0-binutils-2.22-kernel-3.6-sanitized/sysroot-arm-cortexa8-linux-gnueabihf/usr/include"/>
+									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/tolua++/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/lua&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/PAC/IoT&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/PAC/common&quot;"/>
@@ -62,7 +63,7 @@
 									<listOptionValue builtIn="false" value="${MYTOOLCHAINPATH}/platform-wago-pfc200/sysroot-target/usr/include/dbus-1.0"/>
 									<listOptionValue builtIn="false" value="${MYTOOLCHAINPATH}/platform-wago-pfc200/sysroot-target/usr/lib/glib-2.0/include"/>
 									<listOptionValue builtIn="false" value="/opt/OSELAS.Toolchain-2012.12.1/arm-cortexa8-linux-gnueabihf/gcc-4.7.3-glibc-2.16.0-binutils-2.22-kernel-3.6-sanitized/arm-cortexa8-linux-gnueabihf/include/c++/4.7.3/arm-cortexa8-linux-gnueabihf"/>
-									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/tolua++&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/tolua++/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/QuickLZ&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/PAC-driver&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/util&quot;"/>
@@ -74,7 +75,7 @@
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/PAC/IoT&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/lua&quot;"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.dialect.std.659415073" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.dialect.std.659415073" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.c++11" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1967536305" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="PAC_WAGO_PFC200"/>
 									<listOptionValue builtIn="false" value="DEBUG"/>
@@ -143,7 +144,7 @@
 					</folderInfo>
 					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1279002828.1196104483" name="OPCUAServer.h" rcbsApplicability="disable" resourcePath="PAC/common/OPCUAServer.h" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|common/RFID|common/RFID/API|common/RFID/rfid_reader.cpp|PAC/common/rfid_reader_tolua.cpp|common/WTL|PAC/common/toloa++/pkg|PAC/linux/PAC_PC|PAC/linux/PAC_WAGO_750_860|PAC/DOC|PAC/neuroPID|PAC/MINIOS7|PAC/win|common/util/snprintf.h|common/util/snprintf.c|common/win_util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="tolua++/src/bin|tolua++/src/bin/lua|tolua++/src/tests|tolua++/win32|tolua++/doc|tolua++/debian|tolua++/cmake|PAC/linux/PAC_PLCnext|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|common/RFID|common/RFID/API|common/RFID/rfid_reader.cpp|PAC/common/rfid_reader_tolua.cpp|common/WTL|PAC/common/toloa++/pkg|PAC/linux/PAC_PC|PAC/linux/PAC_WAGO_750_860|PAC/DOC|PAC/neuroPID|PAC/MINIOS7|PAC/win|common/util/snprintf.h|common/util/snprintf.c|common/win_util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -153,7 +154,7 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.debug.1279002828.2058158337" moduleId="org.eclipse.cdt.core.settings" name="Release">
 				<macros>
 					<stringMacro name="MYTOOLCHAINPATH" type="VALUE_TEXT" value="/home/id/WAGO/ptxproj-2.2.20"/>
-					<stringMacro name="REPOPATH" type="VALUE_TEXT" value="/home/id/PTUSA"/>
+					<stringMacro name="REPOPATH" type="VALUE_TEXT" value="/mnt/hgfs/P/savushkin-r-d/ptusa_main"/>
 				</macros>
 				<externalSettings/>
 				<extensions>
@@ -183,6 +184,7 @@
 									<listOptionValue builtIn="false" value="${MYTOOLCHAINPATH}/platform-wago-pfc200/sysroot-target/usr/include"/>
 									<listOptionValue builtIn="false" value="/opt/OSELAS.Toolchain-2012.12.1/arm-cortexa8-linux-gnueabihf/gcc-4.7.3-glibc-2.16.0-binutils-2.22-kernel-3.6-sanitized/sysroot-arm-cortexa8-linux-gnueabihf/usr/include"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/lua&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/tolua++/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/PAC/IoT&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/PAC/common&quot;"/>
 								</option>
@@ -208,7 +210,7 @@
 									<listOptionValue builtIn="false" value="${MYTOOLCHAINPATH}/platform-wago-pfc200/sysroot-target/usr/include/dbus-1.0"/>
 									<listOptionValue builtIn="false" value="${MYTOOLCHAINPATH}/platform-wago-pfc200/sysroot-target/usr/lib/glib-2.0/include"/>
 									<listOptionValue builtIn="false" value="/opt/OSELAS.Toolchain-2012.12.1/arm-cortexa8-linux-gnueabihf/gcc-4.7.3-glibc-2.16.0-binutils-2.22-kernel-3.6-sanitized/arm-cortexa8-linux-gnueabihf/include/c++/4.7.3/arm-cortexa8-linux-gnueabihf"/>
-									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/tolua++&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/tolua++/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/QuickLZ&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/PAC-driver&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/util&quot;"/>
@@ -293,7 +295,7 @@
 					</folderInfo>
 					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1279002828.2058158337.211293018" name="OPCUAServer.h" rcbsApplicability="disable" resourcePath="PAC/common/OPCUAServer.h" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="PAC/common/OPCUA_tolua.cpp|common/RFID|common/RFID/API|common/RFID/rfid_reader.cpp|PAC/common/rfid_reader_tolua.cpp|PAC/common/OPCUAServer.cpp|PAC/common/OPCUAServer.h|common/WTL|PAC/common/toloa++/pkg|PAC/linux/PAC_PC|PAC/linux/PAC_WAGO_750_860|PAC/DOC|PAC/neuroPID|PAC/MINIOS7|PAC/win|common/util/snprintf.h|common/util/snprintf.c|common/win_util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="tolua++/src/bin|tolua++/src/bin/lua|tolua++/src/tests|tolua++/win32|PAC/common/OPCUA_tolua.cpp|common/RFID|common/RFID/API|common/RFID/rfid_reader.cpp|PAC/common/rfid_reader_tolua.cpp|PAC/common/OPCUAServer.cpp|PAC/common/OPCUAServer.h|common/WTL|PAC/common/toloa++/pkg|PAC/linux/PAC_PC|PAC/linux/PAC_WAGO_750_860|PAC/DOC|PAC/neuroPID|PAC/MINIOS7|PAC/win|common/util/snprintf.h|common/util/snprintf.c|common/win_util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

@@ -58,9 +58,6 @@
     <Filter Include="Header Files\common\sys">
       <UniqueIdentifier>{8bad2652-4d71-4370-96cd-fc9c903e17b9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\common\sys\tolua++">
-      <UniqueIdentifier>{ac0a524d-fc3c-4adc-9856-acbc86a850e4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\common\sys\lua">
       <UniqueIdentifier>{ae23b814-5b2d-4d41-8b99-688bd3639c28}</UniqueIdentifier>
     </Filter>
@@ -72,9 +69,6 @@
     </Filter>
     <Filter Include="Source Files\common\sys\lua">
       <UniqueIdentifier>{569bd168-5ef4-44de-944a-522440d0c290}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\common\sys\tolua++">
-      <UniqueIdentifier>{8fd73d80-cc1f-4162-b290-fe4606cac801}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files\PAC\common\sys">
       <UniqueIdentifier>{adb44268-a4a4-42f7-8d62-c00a0789186a}</UniqueIdentifier>
@@ -105,6 +99,12 @@
     </Filter>
     <Filter Include="Header Files\IoT">
       <UniqueIdentifier>{134bc52e-8f04-4370-b2de-71f1452e3649}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\tolua++">
+      <UniqueIdentifier>{9f521c0b-7f23-4688-b107-be1c44aa7954}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\tolua++">
+      <UniqueIdentifier>{f5b5d825-9d53-4170-a6ae-f69fa1ed8937}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -207,12 +207,6 @@
     <ClInclude Include="..\..\..\common\lua\lzio.h">
       <Filter>Header Files\common\sys\lua</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\common\tolua++\tolua_base.h">
-      <Filter>Header Files\common\sys\tolua++</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\common\tolua++\tolua_event.h">
-      <Filter>Header Files\common\sys\tolua++</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\mode_mngr.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
@@ -257,9 +251,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\sys\base_mem.h">
       <Filter>Header Files\PAC\common\sys</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\common\tolua++\tolua++.h">
-      <Filter>Header Files\common\sys\tolua++</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\common\PAC-driver\errors.h">
       <Filter>Header Files\common\PAC-driver</Filter>
@@ -339,6 +330,9 @@
     <ClInclude Include="..\..\..\PAC\IoT\iot_base.h">
       <Filter>Header Files\IoT</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\tolua++\include\tolua++.h">
+      <Filter>Header Files\tolua++</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -376,21 +370,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua_manager.cpp">
       <Filter>Source Files\common\sys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\common\tolua++\tolua_event.c">
-      <Filter>Source Files\common\sys\tolua++</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\common\tolua++\tolua_is.c">
-      <Filter>Source Files\common\sys\tolua++</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\common\tolua++\tolua_map.c">
-      <Filter>Source Files\common\sys\tolua++</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\common\tolua++\tolua_push.c">
-      <Filter>Source Files\common\sys\tolua++</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\common\tolua++\tolua_to.c">
-      <Filter>Source Files\common\sys\tolua++</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua\lapi.c">
       <Filter>Source Files\common\sys\lua</Filter>
@@ -595,6 +574,21 @@
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\IoT\iot_base.cpp">
       <Filter>Source Files\IoT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_event.c">
+      <Filter>Source Files\tolua++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_is.c">
+      <Filter>Source Files\tolua++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_map.c">
+      <Filter>Source Files\tolua++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_push.c">
+      <Filter>Source Files\tolua++</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_to.c">
+      <Filter>Source Files\tolua++</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
