@@ -442,9 +442,9 @@ class device : public i_DO_AO_device, public par_device
             /// включается отдельно. Отдельный сигнал ошибки.
             DST_M_REV_FREQ_2_ERROR,
 
-			/// Мотор, управляемый частотником Altivar. Связь с частотником по Ethernet.
-			/// Реверс и аварии опциональны.
-			M_ATV,
+            /// Мотор, управляемый частотником Altivar. Связь с частотником по Ethernet.
+            /// Реверс и аварии опциональны.
+            M_ATV,
 
 
             //FQT
@@ -599,13 +599,13 @@ class device : public i_DO_AO_device, public par_device
             {
             }
 
-		/// @brief Установка дополнительных свойств, значения которых -
-		/// строки.
-		///
-		/// Для использования в Lua.
-		virtual void set_string_property(const char* field, const char* value)
-			{
-			}
+        /// @brief Установка дополнительных свойств, значения которых -
+        /// строки.
+        ///
+        /// Для использования в Lua.
+        virtual void set_string_property(const char* field, const char* value)
+            {
+            }
 
     protected:
         /// @brief Сохранение дополнительных данных устройства в виде скрипта Lua.
@@ -2127,6 +2127,9 @@ class valve_iolink_vtug : public valve
         valve_iolink_vtug( const char *dev_name,
             device::DEVICE_SUB_TYPE sub_type );
 
+        valve_iolink_vtug( bool is_on_fb, bool is_off_fb, const char *dev_name,
+            device::DEVICE_SUB_TYPE sub_type);
+
         void set_rt_par( u_int idx, float value );
 
 #ifndef DEBUG_NO_WAGO_MODULES
@@ -2949,68 +2952,68 @@ class motor : public device, public wago_device
 class motor_altivar : public device, public wago_device
 {
 public:
-	motor_altivar(const char *dev_name, device::DEVICE_SUB_TYPE sub_type) :
-		device(dev_name, DT_M, sub_type, ADDITIONAL_PARAM_COUNT),
-		wago_device(dev_name),
-		start_switch_time(get_millisec()),
-		atv(NULL)
+    motor_altivar(const char *dev_name, device::DEVICE_SUB_TYPE sub_type) :
+        device(dev_name, DT_M, sub_type, ADDITIONAL_PARAM_COUNT),
+        wago_device(dev_name),
+        start_switch_time(get_millisec()),
+        atv(NULL)
 #ifdef DEBUG_NO_WAGO_MODULES
-		, state(0),
-		freq(0)
+        , state(0),
+        freq(0)
 #endif // DEBUG_NO_WAGO_MODULES
-	{
-	set_par_name(P_ON_TIME, 0, "P_ON_TIME");
-	}
+    {
+    set_par_name(P_ON_TIME, 0, "P_ON_TIME");
+    }
 
-	int save_device_ex(char *buff);
+    int save_device_ex(char *buff);
 
-	float get_value();
+    float get_value();
 
-	void direct_set_value(float value);
+    void direct_set_value(float value);
 
-	void direct_set_state(int new_state);
+    void direct_set_state(int new_state);
 
-	int  get_state();
+    int  get_state();
 
-	void direct_on();
+    void direct_on();
 
-	void direct_off();
+    void direct_off();
 
-	void set_string_property(const char* field, const char* value) override;
+    void set_string_property(const char* field, const char* value) override;
 
-	virtual void print() const
-	{
-	device::print();
-	}
+    virtual void print() const
+    {
+    device::print();
+    }
 
 private:
-	enum CONSTANTS
-	{
-		ADDITIONAL_PARAM_COUNT = 1,
+    enum CONSTANTS
+    {
+        ADDITIONAL_PARAM_COUNT = 1,
 
-		C_MIN_VALUE = 0,
-		C_MAX_VALUE = 100,
+        C_MIN_VALUE = 0,
+        C_MAX_VALUE = 100,
 
-		P_ON_TIME = 1,    ///< Индекс параметра времени включения (мсек).
+        P_ON_TIME = 1,    ///< Индекс параметра времени включения (мсек).
 
-		DO_INDEX = 0,         ///< Индекс канала дискретного выхода.
-		DO_INDEX_REVERSE = 1, ///< Индекс канала дискретного выхода реверса.
+        DO_INDEX = 0,         ///< Индекс канала дискретного выхода.
+        DO_INDEX_REVERSE = 1, ///< Индекс канала дискретного выхода реверса.
 
-		DI_INDEX = 0,   ///< Индекс канала дискретного входа.
-		//   Или
-		DI_INDEX_ERROR = 0,   ///< Индекс канала дискретного входа ошибки.
+        DI_INDEX = 0,   ///< Индекс канала дискретного входа.
+        //   Или
+        DI_INDEX_ERROR = 0,   ///< Индекс канала дискретного входа ошибки.
 
-		AO_INDEX = 0,     ///< Индекс канала аналогового выхода.
-	};
+        AO_INDEX = 0,     ///< Индекс канала аналогового выхода.
+    };
 
-	u_long start_switch_time;
+    u_long start_switch_time;
 
-	altivar_node* atv;
+    altivar_node* atv;
 
 #ifdef DEBUG_NO_WAGO_MODULES
-	char  state;  ///< Состояние устройства.
+    char  state;  ///< Состояние устройства.
 
-	float freq;   ///< Состояние устройства (частота).
+    float freq;   ///< Состояние устройства (частота).
 #endif // DEBUG_NO_WAGO_MODULES
 };
 //-----------------------------------------------------------------------------

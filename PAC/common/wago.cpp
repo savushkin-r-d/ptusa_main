@@ -835,6 +835,10 @@ wago_manager::wago_node * wago_manager::get_node( int node_n )
     {
     return nodes[ node_n ];
     }
+u_int wago_manager::get_nodes_count()
+	{
+	return nodes_count;
+	}
 //-----------------------------------------------------------------------------
 void wago_manager::add_node( u_int index, int ntype, int address,
     char* IP_address, char *name,
@@ -867,6 +871,10 @@ void wago_manager::init_node_AI( u_int node_index, u_int AI_index,
         nodes[ node_index ]->AI_offsets[ AI_index ] = offset;
         }
     }
+void wago_manager::disconnect(wago_node * node)
+	{
+	return;
+	}
 //-----------------------------------------------------------------------------
 void wago_manager::print() const
     {
