@@ -49,7 +49,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v141_xp</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -63,7 +63,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141_xp</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -96,35 +96,35 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;$(IncludePath)</IncludePath>
+    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../lua/src;../../../lua_conf;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;$(IncludePath)</IncludePath>
     <TargetName>main</TargetName>
     <PreBuildEventUseInBuild>false</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/RFID;$(IncludePath)</IncludePath>
+    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../lua/src;../../../lua_conf;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/RFID;$(IncludePath)</IncludePath>
     <TargetName>main</TargetName>
     <PreBuildEventUseInBuild>true</PreBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;$(IncludePath)</IncludePath>
+    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../lua/src;../../../lua_conf;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;$(IncludePath)</IncludePath>
     <TargetName>main</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>ptusa</TargetName>
-    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;$(IncludePath)</IncludePath>
+    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../lua/src;../../../lua_conf;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>ptusa</TargetName>
-    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;$(IncludePath)</IncludePath>
+    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../lua/src;../../../lua_conf;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>ptusa</TargetName>
-    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../common/lua;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/RFID;$(IncludePath)</IncludePath>
+    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../lua/src;../../../lua_conf;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../common/RFID;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -283,29 +283,6 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\common\lua\lapi.h" />
-    <ClInclude Include="..\..\..\common\lua\lauxlib.h" />
-    <ClInclude Include="..\..\..\common\lua\lcode.h" />
-    <ClInclude Include="..\..\..\common\lua\ldebug.h" />
-    <ClInclude Include="..\..\..\common\lua\ldo.h" />
-    <ClInclude Include="..\..\..\common\lua\lfunc.h" />
-    <ClInclude Include="..\..\..\common\lua\lgc.h" />
-    <ClInclude Include="..\..\..\common\lua\llex.h" />
-    <ClInclude Include="..\..\..\common\lua\llimits.h" />
-    <ClInclude Include="..\..\..\common\lua\lmem.h" />
-    <ClInclude Include="..\..\..\common\lua\lobject.h" />
-    <ClInclude Include="..\..\..\common\lua\lopcodes.h" />
-    <ClInclude Include="..\..\..\common\lua\lparser.h" />
-    <ClInclude Include="..\..\..\common\lua\lstate.h" />
-    <ClInclude Include="..\..\..\common\lua\lstring.h" />
-    <ClInclude Include="..\..\..\common\lua\ltable.h" />
-    <ClInclude Include="..\..\..\common\lua\ltm.h" />
-    <ClInclude Include="..\..\..\common\lua\lua.h" />
-    <ClInclude Include="..\..\..\common\lua\luaconf.h" />
-    <ClInclude Include="..\..\..\common\lua\lualib.h" />
-    <ClInclude Include="..\..\..\common\lua\lundump.h" />
-    <ClInclude Include="..\..\..\common\lua\lvm.h" />
-    <ClInclude Include="..\..\..\common\lua\lzio.h" />
     <ClInclude Include="..\..\..\common\lua_manager.h" />
     <ClInclude Include="..\..\..\common\PAC-driver\errors.h" />
     <ClInclude Include="..\..\..\common\PAC-driver\g_device.h" />
@@ -380,36 +357,6 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
     <ClInclude Include="..\..\..\tolua++\include\tolua++.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\common\lua\lapi.c" />
-    <ClCompile Include="..\..\..\common\lua\lauxlib.c" />
-    <ClCompile Include="..\..\..\common\lua\lbaselib.c" />
-    <ClCompile Include="..\..\..\common\lua\lcode.c" />
-    <ClCompile Include="..\..\..\common\lua\ldblib.c" />
-    <ClCompile Include="..\..\..\common\lua\ldebug.c" />
-    <ClCompile Include="..\..\..\common\lua\ldo.c" />
-    <ClCompile Include="..\..\..\common\lua\ldump.c" />
-    <ClCompile Include="..\..\..\common\lua\lfunc.c" />
-    <ClCompile Include="..\..\..\common\lua\lgc.c" />
-    <ClCompile Include="..\..\..\common\lua\linit.c" />
-    <ClCompile Include="..\..\..\common\lua\liolib.c" />
-    <ClCompile Include="..\..\..\common\lua\llex.c" />
-    <ClCompile Include="..\..\..\common\lua\lmathlib.c" />
-    <ClCompile Include="..\..\..\common\lua\lmem.c" />
-    <ClCompile Include="..\..\..\common\lua\loadlib.c" />
-    <ClCompile Include="..\..\..\common\lua\lobject.c" />
-    <ClCompile Include="..\..\..\common\lua\lopcodes.c" />
-    <ClCompile Include="..\..\..\common\lua\loslib.c" />
-    <ClCompile Include="..\..\..\common\lua\lparser.c" />
-    <ClCompile Include="..\..\..\common\lua\lstate.c" />
-    <ClCompile Include="..\..\..\common\lua\lstring.c" />
-    <ClCompile Include="..\..\..\common\lua\lstrlib.c" />
-    <ClCompile Include="..\..\..\common\lua\ltable.c" />
-    <ClCompile Include="..\..\..\common\lua\ltablib.c" />
-    <ClCompile Include="..\..\..\common\lua\ltm.c" />
-    <ClCompile Include="..\..\..\common\lua\lundump.c" />
-    <ClCompile Include="..\..\..\common\lua\lvm.c" />
-    <ClCompile Include="..\..\..\common\lua\lzio.c" />
-    <ClCompile Include="..\..\..\common\lua\print.c" />
     <ClCompile Include="..\..\..\common\lua_manager.cpp" />
     <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp" />
     <ClCompile Include="..\..\..\common\PAC-driver\g_device.cpp" />
@@ -421,6 +368,86 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\lua\src\lapi.c" />
+    <ClCompile Include="..\..\..\lua\src\lauxlib.c">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lua\src\lbaselib.c" />
+    <ClCompile Include="..\..\..\lua\src\lcode.c" />
+    <ClCompile Include="..\..\..\lua\src\ldblib.c" />
+    <ClCompile Include="..\..\..\lua\src\ldebug.c" />
+    <ClCompile Include="..\..\..\lua\src\ldo.c" />
+    <ClCompile Include="..\..\..\lua\src\ldump.c" />
+    <ClCompile Include="..\..\..\lua\src\lfunc.c" />
+    <ClCompile Include="..\..\..\lua\src\lgc.c" />
+    <ClCompile Include="..\..\..\lua\src\linit.c" />
+    <ClCompile Include="..\..\..\lua\src\liolib.c">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lua\src\llex.c" />
+    <ClCompile Include="..\..\..\lua\src\lmathlib.c" />
+    <ClCompile Include="..\..\..\lua\src\lmem.c" />
+    <ClCompile Include="..\..\..\lua\src\loadlib.c">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lua\src\lobject.c">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lua\src\lopcodes.c" />
+    <ClCompile Include="..\..\..\lua\src\loslib.c">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lua\src\lparser.c" />
+    <ClCompile Include="..\..\..\lua\src\lstate.c" />
+    <ClCompile Include="..\..\..\lua\src\lstring.c" />
+    <ClCompile Include="..\..\..\lua\src\lstrlib.c">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lua\src\ltable.c" />
+    <ClCompile Include="..\..\..\lua\src\ltablib.c" />
+    <ClCompile Include="..\..\..\lua\src\ltm.c" />
+    <ClCompile Include="..\..\..\lua\src\lundump.c" />
+    <ClCompile Include="..\..\..\lua\src\lvm.c">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\..\lua\src\lzio.c" />
+    <ClCompile Include="..\..\..\lua\src\print.c" />
+    <ClCompile Include="..\..\..\lua\src\wmain.c" />
     <ClCompile Include="..\..\..\PAC\common\cip_stats.cpp" />
     <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp" />
     <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp" />
@@ -515,7 +542,14 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
     <ClCompile Include="..\..\..\PAC\win\w_mem.cpp" />
     <ClCompile Include="..\..\..\tolua++\src\lib\tolua_event.c" />
     <ClCompile Include="..\..\..\tolua++\src\lib\tolua_is.c" />
-    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_map.c" />
+    <ClCompile Include="..\..\..\tolua++\src\lib\tolua_map.c">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="..\..\..\tolua++\src\lib\tolua_push.c" />
     <ClCompile Include="..\..\..\tolua++\src\lib\tolua_to.c" />
     <ClCompile Include="..\main.cpp" />
