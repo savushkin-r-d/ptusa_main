@@ -917,6 +917,11 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                     new_wago_device = (concentration_e_ok*)new_device;
                     break;
 
+                case device::DST_QT_IOLINK:
+                    new_device = new concentration_e_iolink(dev_name);
+                    new_wago_device = (concentration_e_iolink*)new_device;
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
