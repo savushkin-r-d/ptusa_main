@@ -36,6 +36,11 @@
 			<location>/mnt/hgfs/Git/ptusa_main/common</location>
 		</link>
 		<link>
+			<name>lua</name>
+			<type>2</type>
+			<location>/mnt/hgfs/Git/ptusa_main/lua</location>
+		</link>
+		<link>
 			<name>main.cpp</name>
 			<type>1</type>
 			<location>/mnt/hgfs/Git/ptusa_main/PAC_control_projects/main_control_prg/main.cpp</location>
