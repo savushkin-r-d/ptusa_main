@@ -12,6 +12,8 @@ std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
 
 std::vector<valve_bottom_mix_proof*> valve_bottom_mix_proof::to_switch_off;
 
+std::vector<concentration_e_iolink*> concentration_e_iolink::qt_e_iolink;
+
 const char device::DEV_NAMES[][ 5 ] =
     {
     "V",       ///< Клапан.
@@ -3168,6 +3170,36 @@ float concentration_e::get_min_val()
     {
     return get_par( P_MIN_V, start_param_idx );
     }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void concentration_e_iolink::evaluate()
+	{
+	if ( qt_e_iolink.empty() == false )
+		{
+		std::vector< concentration_e_iolink* >::iterator iter;
+		for ( iter = qt_e_iolink.begin(); iter != qt_e_iolink.end(); iter++ )
+			{
+			concentration_e_iolink* qt = *iter;
+
+			char* data = (char*)qt->get_AI_data(0);
+			const int SIZE = 12;
+			std::reverse_copy (data, data + SIZE, (char*) qt->info);
+
+#ifdef DEBUG_IOLINK_QT
+			char *tmp = (char*) qt->info;
+			printf( "%x %x %x %x %x %x %x %x %x %x %x %x\n",
+				tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ],
+				tmp[ 4 ], tmp[ 5 ], tmp[ 6 ], tmp[ 7 ],
+				tmp[ 8 ], tmp[ 9 ], tmp[ 10 ], tmp[ 11 ] );
+
+			printf( "conductivity %u, temperature %u, status %x\n",
+				qt->info->conductivity, qt->info->temperature, qt->info->status );
+			printf( "conductivity %.3f, temperature %.1f, status %x\n",
+				qt->get_value(), qt->get_temperature(), qt->get_state() );
+#endif
+			}
+		}
+	}
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float analog_input::get_max_val()

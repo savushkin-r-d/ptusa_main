@@ -2535,53 +2535,61 @@ class concentration_e_ok : public concentration_e
 class concentration_e_iolink : public AI1
     {
     public:
-        concentration_e_iolink(const char* dev_name) :AI1(
-            dev_name, DT_QT, DST_QT_IOLINK, ADDITIONAL_PARAM_COUNT, 0)
+        concentration_e_iolink(const char* dev_name) :AI1(dev_name,
+        	DT_QT, DST_QT_IOLINK, ADDITIONAL_PARAM_COUNT, 0),
+			info( new QT_data )
             {
-            };            
+        	qt_e_iolink.push_back( this );
+            };
 
+        int save_device_ex( char *buff )
+            {
+            int res = sprintf( buff, "T=%.1f, ", get_temperature() );
+
+            return res;
+            }
+
+        float get_temperature() const
+        	{
+        	return 0.1f * info->temperature;
+        	}
+
+#ifdef DEBUG_NO_WAGO_MODULES
         float get_value()
             {
             return analog_wago_device::get_value();
             }
+#endif
 
 #ifndef DEBUG_NO_WAGO_MODULES
         float get_value()
             {
-            char* data = (char*)get_AI_data(0);
-            const int SIZE = 12;
-            char tmp_buff[SIZE];
-            memcpy(tmp_buff, data, SIZE);
-            std::reverse(tmp_buff, SIZE);
-            info = (LS_data*)& tmp_buff;
-
-            print( "te = %f\n", 0.1f * info->temperature );
-            return info->conductivity / 1000;
+            return 0.001f * info->conductivity;
             }
 
         int get_state()
             {
-            char* data = (char*)get_AI_data(0);
-            const int SIZE = 12;
-            char tmp_buff[SIZE];
-            memcpy(tmp_buff, data, SIZE);
-            std::reverse(tmp_buff, SIZE);
-            info = (LS_data*)& tmp_buff;
-
             return info->status;
             }
 #endif
 
+        void static evaluate();
+
     private:
+        static std::vector<concentration_e_iolink*> qt_e_iolink;
+
+#pragma pack(push,1)
         struct QT_data
             {
-            char 	                  : 4;
-            char 	     status       : 4;
-            char 	                  : 8;
-            unsigned int temperature  : 32;
-            int 	                  : 16;
-            unsigned int conductivity : 32;
+        	unsigned char 			:4;
+        	unsigned char status	:4;
+        	unsigned char tmp;
+            unsigned int  temperature;
+            unsigned char tmp1;
+            unsigned char tmp2;
+            unsigned int  conductivity;
             };
+#pragma pack(pop)
 
         QT_data* info;
     };
