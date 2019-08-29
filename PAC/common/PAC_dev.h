@@ -2535,43 +2535,19 @@ class concentration_e_ok : public concentration_e
 class concentration_e_iolink : public AI1
     {
     public:
-        concentration_e_iolink(const char* dev_name) :AI1(dev_name,
-        	DT_QT, DST_QT_IOLINK, ADDITIONAL_PARAM_COUNT, 0),
-			info( new QT_data )
-            {
-        	qt_e_iolink.push_back( this );
-            };
+        concentration_e_iolink(const char* dev_name);
 
-        int save_device_ex( char *buff )
-            {
-            int res = sprintf( buff, "T=%.1f, ", get_temperature() );
+        int save_device_ex( char *buff );
 
-            return res;
-            }
-
-        float get_temperature() const
-        	{
-        	return 0.1f * info->temperature;
-        	}
+        float get_temperature() const;
 
 #ifdef DEBUG_NO_WAGO_MODULES
-        float get_value()
-            {
-            return analog_wago_device::get_value();
-            }
-#endif
+        float get_value();
+#else
+        float get_value();
 
-#ifndef DEBUG_NO_WAGO_MODULES
-        float get_value()
-            {
-            return 0.001f * info->conductivity;
-            }
-
-        int get_state()
-            {
-            return info->status;
-            }
-#endif
+        int get_state();
+#endif // DEBUG_NO_WAGO_MODULES
 
         void static evaluate();
 
@@ -2581,9 +2557,9 @@ class concentration_e_iolink : public AI1
 #pragma pack(push,1)
         struct QT_data
             {
-        	unsigned char 			:4;
-        	unsigned char status	:4;
-        	unsigned char tmp;
+            unsigned char              :4;
+            unsigned char status       :4;
+            unsigned char tmp;
             unsigned int  temperature;
             unsigned char tmp1;
             unsigned char tmp2;
