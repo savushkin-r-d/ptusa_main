@@ -456,6 +456,7 @@ class device : public i_DO_AO_device, public par_device
             //QT
             DST_QT = 1,   ///< Концентратомер.
             DST_QT_OK,    ///< Концентратомер c диагностикой.
+            DST_QT_IOLINK,///Концентратомер IOLInk без дополнительных параметров.
 
             //LT
             DST_LT = 1,    ///Текущий уровень без дополнительных параметров.
@@ -2528,6 +2529,45 @@ class concentration_e_ok : public concentration_e
             {
             DI_INDEX = 0,         ///< Индекс канала дискретного входа.
             };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Датчик концентрации IO-Link.
+class concentration_e_iolink : public AI1
+    {
+    public:
+        concentration_e_iolink(const char* dev_name);
+
+        int save_device_ex( char *buff );
+
+        float get_temperature() const;
+
+#ifdef DEBUG_NO_WAGO_MODULES
+        float get_value();
+#else
+        float get_value();
+
+        int get_state();
+#endif // DEBUG_NO_WAGO_MODULES
+
+        void static evaluate();
+
+    private:
+        static std::vector<concentration_e_iolink*> qt_e_iolink;
+
+#pragma pack(push,1)
+        struct QT_data
+            {
+            unsigned char              :4;
+            unsigned char status       :4;
+            unsigned char tmp;
+            unsigned int  temperature;
+            unsigned char tmp1;
+            unsigned char tmp2;
+            unsigned int  conductivity;
+            };
+#pragma pack(pop)
+
+        QT_data* info;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство аналогового входа.

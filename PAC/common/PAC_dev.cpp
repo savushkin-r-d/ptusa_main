@@ -12,6 +12,8 @@ std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
 
 std::vector<valve_bottom_mix_proof*> valve_bottom_mix_proof::to_switch_off;
 
+std::vector<concentration_e_iolink*> concentration_e_iolink::qt_e_iolink;
+
 const char device::DEV_NAMES[][ 5 ] =
     {
     "V",       ///< Клапан.
@@ -915,6 +917,11 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
                 case device::DST_QT_OK:
                     new_device = new concentration_e_ok( dev_name );
                     new_wago_device = (concentration_e_ok*)new_device;
+                    break;
+
+                case device::DST_QT_IOLINK:
+                    new_device = new concentration_e_iolink(dev_name);
+                    new_wago_device = (concentration_e_iolink*)new_device;
                     break;
 
                 default:
@@ -3162,6 +3169,73 @@ float concentration_e::get_max_val()
 float concentration_e::get_min_val()
     {
     return get_par( P_MIN_V, start_param_idx );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+concentration_e_iolink::concentration_e_iolink(const char* dev_name) :AI1(dev_name,
+    DT_QT, DST_QT_IOLINK, ADDITIONAL_PARAM_COUNT, 0),
+    info( new QT_data )
+    {
+    qt_e_iolink.push_back( this );
+    };
+//-----------------------------------------------------------------------------
+int concentration_e_iolink::save_device_ex( char *buff )
+    {
+    int res = sprintf( buff, "T=%.1f, ", get_temperature() );
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+float concentration_e_iolink::get_temperature() const
+    {
+    return 0.1f * info->temperature;
+    }
+//-----------------------------------------------------------------------------
+#ifdef DEBUG_NO_WAGO_MODULES
+float concentration_e_iolink::get_value()
+	{
+	return analog_wago_device::get_value();
+	}
+//-----------------------------------------------------------------------------
+#else
+float concentration_e_iolink::get_value()
+	{
+	return 0.001f * info->conductivity;
+	}
+//-----------------------------------------------------------------------------
+int concentration_e_iolink::get_state()
+	{
+	return info->status;
+	}
+#endif
+//-----------------------------------------------------------------------------
+void concentration_e_iolink::evaluate()
+    {
+    if ( qt_e_iolink.empty() == false )
+        {
+        std::vector< concentration_e_iolink* >::iterator iter;
+        for ( iter = qt_e_iolink.begin(); iter != qt_e_iolink.end(); iter++ )
+            {
+            concentration_e_iolink* qt = *iter;
+
+            char* data = (char*)qt->get_AI_data(0);
+            const int SIZE = 12;
+            std::reverse_copy (data, data + SIZE, (char*) qt->info);
+
+#ifdef DEBUG_IOLINK_QT
+            char *tmp = (char*) qt->info;
+            printf( "%x %x %x %x %x %x %x %x %x %x %x %x\n",
+                tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ],
+                tmp[ 4 ], tmp[ 5 ], tmp[ 6 ], tmp[ 7 ],
+                tmp[ 8 ], tmp[ 9 ], tmp[ 10 ], tmp[ 11 ] );
+
+            printf( "conductivity %u, temperature %u, status %x\n",
+                qt->info->conductivity, qt->info->temperature, qt->info->status );
+            printf( "conductivity %.3f, temperature %.1f, status %x\n",
+                qt->get_value(), qt->get_temperature(), qt->get_state() );
+#endif
+            }
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
