@@ -760,8 +760,27 @@ wago_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_TE:
-            new_device      = new temperature_e( dev_name );
-            new_wago_device = ( temperature_e* ) new_device;
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_TE:
+                    new_device      = new temperature_e( dev_name );
+                    new_wago_device = ( temperature_e* ) new_device;
+                    break;
+
+                case device::DST_TE_IOLINK:
+                    new_device = new temperature_e_iolink(dev_name);
+                    new_wago_device = (temperature_e_iolink*)new_device;
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown TE device subtype %d!\n", dev_sub_type );
+                        }
+                    new_device = new dev_stub();
+                    break;
+                }
             break;
 
         case device::DT_FS:
@@ -2560,6 +2579,30 @@ void AI1::direct_set_value( float new_value )
     {
     }
 #endif // DEBUG_NO_WAGO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+temperature_e_iolink::temperature_e_iolink( const char *dev_name ):
+    AI1( dev_name, DT_TE, DST_TE_IOLINK, 0, 0 ), info( new TE_data )
+    {
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_WAGO_MODULES
+float temperature_e_iolink::get_value()
+    {
+    char* data = (char*)get_AI_data( 0 );
+    int16_t tmp = data[ 1 ] + 256 * data[ 0 ];
+    memcpy(info, &tmp, 2);
+
+    return 0.1f * info->v;
+    }
+
+#else
+//-----------------------------------------------------------------------------
+float temperature_e_iolink::get_value()
+   {
+   return analog_wago_device::get_value();
+   }
+#endif
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 wages::wages( const char *dev_name ) : analog_wago_device(

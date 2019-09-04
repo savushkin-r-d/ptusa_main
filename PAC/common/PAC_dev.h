@@ -424,6 +424,10 @@ class device : public i_DO_AO_device, public par_device
             LS_IOLINK_MIN,      ///< IOLInk уровень. Подключение по схеме минимум.
             LS_IOLINK_MAX,      ///< IOLInk уровень. Подключение по схеме максимум.
 
+            //TE
+            DST_TE = 1,
+            DST_TE_IOLINK,      ///Температура IO-LInk без дополнительных параметров.
+
             //M,
             DST_M = 1,          ///< Мотор без управления частотой вращения.
             DST_M_FREQ,         ///< Мотор с управлением частотой вращения.
@@ -2281,7 +2285,7 @@ class AI1 : public analog_wago_device
 class temperature_e : public AI1
     {
     public:
-        temperature_e( const char *dev_name ): AI1( dev_name, DT_TE, DST_NONE,
+        temperature_e( const char *dev_name ): AI1( dev_name, DT_TE, DST_TE,
             ADDITIONAL_PARAM_COUNT, &start_param_idx )
             {
             set_par_name( P_ERR_T,  start_param_idx, "P_ERR_T" );
@@ -2321,6 +2325,28 @@ class temperature_e : public AI1
 
             ADDITIONAL_PARAM_COUNT = 1, ///< Количество параметров.
             };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Датчик температуры IO-Link.
+class temperature_e_iolink : public AI1
+    {
+    public:
+        temperature_e_iolink( const char *dev_name );
+
+#ifndef DEBUG_NO_WAGO_MODULES
+        float get_value();
+
+#else
+        float get_value();
+#endif
+
+    private:
+        struct TE_data
+            {
+            int16_t v = 0;
+            };
+
+        TE_data *info;
     };
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс текущего уровня.
