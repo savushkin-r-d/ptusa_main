@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 #include "prj_mngr.h"
-#include "wago.h"
+#include "bus_coupler_io.h"
 #include "PAC_dev.h"
 #include "param_ex.h"
 
@@ -99,8 +99,8 @@ project_manager::~project_manager()
     }
 //-----------------------------------------------------------------------------
 //Порядок загрузки:
-//1.Модули Wago.
-//2.Устройства Wago.
+//1.Модули.
+//2.Устройства.
 //3.Переменные для доступа к устройства из Lua (совпадают с именем устройства).
 int project_manager::lua_load_configuration()
     {
@@ -109,13 +109,13 @@ int project_manager::lua_load_configuration()
         printf( "\nProject manager - processing configuration...\n" );
         }
 
-    //-Wago modules data.
+    //-I/O modules data.
     lua_manager::get_instance()->void_exec_lua_method( "system",
-        "create_wago", "project_manager::lua_load_configuration()" );
+        "create_io", "project_manager::lua_load_configuration()" );
 
     if ( G_DEBUG ) 
         {
-        wago_manager::get_instance()->print();
+        io_manager::get_instance()->print();
         printf( "\n" );
         }
 

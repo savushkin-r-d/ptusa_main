@@ -126,14 +126,8 @@
     <ClInclude Include="..\..\..\PAC\common\tech_def.h">
       <Filter>Header Files\PAC\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\PAC\common\wago.h">
-      <Filter>Header Files\PAC\common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\common\PAC-driver\g_device.h">
       <Filter>Header Files\common\PAC-driver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\PAC\win\PAC_PC\wago_PC.h">
-      <Filter>Header Files\PAC\win\PAC_PC</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\common\lua_manager.h">
       <Filter>Header Files\common\sys</Filter>
@@ -264,6 +258,15 @@
     <ClInclude Include="..\..\..\tolua++\include\tolua++.h">
       <Filter>Header Files\tolua++</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\PAC\common\bus_coupler_io.h">
+      <Filter>Header Files\PAC\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\win\PAC_PC\bus_coupler_io_PC.h">
+      <Filter>Header Files\PAC\win\PAC_PC</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\PAC\linux\l_bus_coupler_io.h">
+      <Filter>Header Files\PAC\linux</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -290,14 +293,8 @@
     <ClCompile Include="..\..\..\PAC\common\tech_def.cpp">
       <Filter>Source Files\PAC\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\PAC\common\wago.cpp">
-      <Filter>Source Files\PAC\common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\common\PAC-driver\g_device.cpp">
       <Filter>Source Files\common\PAC-driver</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\PAC\win\PAC_PC\wago_PC.cpp">
-      <Filter>Source Files\PAC\win\PAC_PC</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua_manager.cpp">
       <Filter>Source Files\common\sys</Filter>
@@ -381,9 +378,6 @@
       <Filter>Source Files\PAC\linux</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\linux\l_tcp_cmctr.cpp">
-      <Filter>Source Files\PAC\linux</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\PAC\linux\l_wago.cpp">
       <Filter>Source Files\PAC\linux</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp">
@@ -523,6 +517,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\lua\src\wmain.c">
       <Filter>Source Files\lua\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\bus_coupler_io.cpp">
+      <Filter>Source Files\PAC\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\win\PAC_PC\bus_coupler_io_PC.cpp">
+      <Filter>Source Files\PAC\win\PAC_PC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\linux\l_bus_coupler_io.cpp">
+      <Filter>Source Files\PAC\linux</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

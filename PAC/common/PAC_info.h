@@ -26,7 +26,7 @@ class PAC_info: public i_Lua_save_device
             ///< Время задержки закрытия для донных клапанов, мсек.
             P_V_BOTTOM_OFF_DELAY_TIME, 
 
-	        ///< Среднее время задержки получения ответа от узла Wago, мсек.
+	        ///< Среднее время задержки получения ответа от узла I/O, мсек.
 	        P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME,
             ///< Среднее время цикла программы, мсек.
             P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME,    

@@ -1,6 +1,6 @@
-/// @file wago.h
-/// @brief Работа с Wago - устройства на основе данных с модулей Wago, узлы
-/// Wago.
+/// @file bus_coupler_io.h
+/// @brief Работа с устройствами на основе данных с модулей ввода\вывода, узлы
+/// ввода\вывода.
 ///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
@@ -11,25 +11,25 @@
 /// @$Author$.\n
 /// @$Date::                     $.
 
-#ifndef WAGO_H
-#define WAGO_H
+#ifndef IO_H
+#define IO_H
 
 #include "smart_ptr.h"
 
 #include "dtime.h"
 //-----------------------------------------------------------------------------
-/// @brief Устройство на основе модулей ввода/вывода WAGO.
+/// @brief Устройство на основе модулей ввода/вывода.
 ///
 /// В общем случае у устройства может быть один или несколько каналов
 /// ввода/вывода (дискретных или аналоговых).
-class wago_device
+class io_device
     {
     public:
         const char* name;
 
-        wago_device( const char* name );
+        io_device( const char* name );
 
-        virtual ~wago_device();
+        virtual ~io_device();
 
     protected:
         /// @brief Получение состояния канала дискретного выхода.
@@ -139,8 +139,8 @@ class wago_device
 
             int_2  **int_read_values;      ///< Массив значений для чтения.
             int_2  **int_write_values;     ///< Массив значений для записи.
-            u_char **char_read_values;   ///< Массив значений для чтения.
-            u_char **char_write_values;  ///< Массив значений для записи.
+            u_char **char_read_values;     ///< Массив значений для чтения.
+            u_char **char_write_values;    ///< Массив значений для записи.
 
             CHANNEL_TYPE type;           ///< Тип канала.
 
@@ -168,13 +168,13 @@ class wago_device
         void init_channel( int type, int ch_inex, int node, int offset );
     };
 //-----------------------------------------------------------------------------
-/// @brief Работа с модулями ввода/вывода Wago.
+/// @brief Работа с модулями ввода/вывода.
 ///
-/// Реализация чтения и записи состояний модулей ввода/вывода Wago.
-class wago_manager
+/// Реализация чтения и записи состояний модулей ввода/вывода.
+class io_manager
     {
     public:
-        virtual ~wago_manager();
+        virtual ~io_manager();
 
         void print() const;
 
@@ -189,7 +189,7 @@ class wago_manager
         virtual int write_outputs() = 0;
 
         /// @brief Получение единственного экземпляра класса.
-        static wago_manager* get_instance();
+        static io_manager* get_instance();
 
         /// @brief Получение области данных заданного канала дискретного входа.
         ///
@@ -244,37 +244,37 @@ class wago_manager
         int_2* get_AO_write_data( u_int node_n, u_int offset );
 
 		//---------------------------------------------------------------------
-		/// @brief Узел модулей ввода/вывода Wago.
+		/// @brief Узел модулей ввода/вывода.
 		//
 		///
-		struct wago_node
+		struct io_node
 			{
-			wago_node(int type, int number, char *str_ip_addres, char *name,
+			io_node(int type, int number, char *str_ip_addres, char *name,
 				int DO_cnt, int DI_cnt, int AO_cnt, int AO_size,
 				int AI_cnt, int AI_size);
 
-			~wago_node();
+			~io_node();
 
 			void print();
 
 			enum W_CONST
 				{
-				C_MAX_WAIT_TIME = 6000,  ///< Время до установки ошибки связи с модулем, мсек.
-				C_ANALOG_BUF_SIZE = 256,   ///< Размер буфера аналоговых модулей.
-				C_MAX_DELAY = 60000, ///< Макс. время задержки переподключения, мсек.
-				C_CNT_TIMEOUT_US = 100000, ///< Время ожидания подключения от модуля, мксек.
-				C_RCV_TIMEOUT_US = 200000, ///< Время ожидания ответа от модуля, мксек.
+				C_MAX_WAIT_TIME = 6000,		///< Время до установки ошибки связи с модулем, мсек.
+				C_ANALOG_BUF_SIZE = 256,	///< Размер буфера аналоговых модулей.
+				C_MAX_DELAY = 60000,		///< Макс. время задержки переподключения, мсек.
+				C_CNT_TIMEOUT_US = 100000,	///< Время ожидания подключения от модуля, мксек.
+				C_RCV_TIMEOUT_US = 200000,	///< Время ожидания ответа от модуля, мксек.
 				};
 
 			enum TYPES ///< Типы модулей.
-				{
-				T_EMPTY = -1,   ///< Не задан.
+			{
+				EMPTY = -1,   ///< Не задан.
 
-				T_750_86x = 0,  ///< Wago 750-863.
+				WAGO_750_86x		  = 0,  ///< Wago 750-863.
+				WAGO_750_820x		  = 2,  ///< Wago PFC200.
 
-				T_750_820x = 2, ///< Wago PFC200.
-
-				T_750_XXX_ETHERNET = 100,///< Ethernet 750-341 и т.д.
+				WAGO_750_XXX_ETHERNET = 100,///< Wago Ethernet 750-341 и т.д.
+				PHOENIX_BK_ETH		  = 200,///< Phoenix 2702177
 				};
 
 			enum STATES           ///< Cостояния работы с узлом.
@@ -283,7 +283,7 @@ class wago_manager
 				ST_OK,
 				};
 
-			wago_node::STATES  state;          ///< Cостояние работы с узлом.
+			io_node::STATES  state;          ///< Cостояние работы с узлом.
 			TYPES   type;            ///< Тип.
 			u_int   number;          ///< Номер.
 			char    ip_address[16];///< IP-адрес.
@@ -302,8 +302,8 @@ class wago_manager
 
 			// Analog outputs ( AO ).
 			u_int AO_cnt;       			///< Amount of AO.
-			int_2 AO[C_ANALOG_BUF_SIZE];  ///< Current values.
-			int_2 AO_[C_ANALOG_BUF_SIZE]; ///< To write.
+			int_2 AO[C_ANALOG_BUF_SIZE];    ///< Current values.
+			int_2 AO_[C_ANALOG_BUF_SIZE];   ///< To write.
 			u_int *AO_offsets;  			///< Offsets in common data.
 			u_int *AO_types;    			///< Channels type.
 			u_int AO_size;
@@ -314,7 +314,7 @@ class wago_manager
 
 			// Analog inputs ( AI ).
 			u_int AI_cnt;       			///< Amount of AI.
-			int_2 AI[C_ANALOG_BUF_SIZE];  ///< Current values.
+			int_2 AI[C_ANALOG_BUF_SIZE];    ///< Current values.
 			u_int *AI_offsets;  			///< Offsets in common data.
 			u_int *AI_types;    			///< Channels type.
 			u_int AI_size;
@@ -328,15 +328,15 @@ class wago_manager
 		//---------------------------------------------------------------------
 
     protected:
-        wago_manager();
+        io_manager();
         u_int       nodes_count;        ///< Количество узлов.
-        wago_node **nodes;              ///< Узлы.
+        io_node **nodes;              ///< Узлы.
 
         /// Единственный экземпляр класса.
-        static auto_smart_ptr < wago_manager > instance;
+        static auto_smart_ptr < io_manager > instance;
 
     public:
-        wago_node * get_node( int node_n );
+        io_node * get_node( int node_n );
 
 		u_int get_nodes_count();
 
@@ -345,7 +345,7 @@ class wago_manager
         /// Вызывается из Lua.
         void init( int nodes_count );
 
-        /// @brief Инициализация модуля Wago.
+        /// @brief Инициализация модуля.
         ///
         /// Вызывается из Lua.
         void add_node( u_int index, int ntype, int address, char* IP_address,
@@ -365,13 +365,13 @@ class wago_manager
             u_int type, u_int offset );
 
 		/// @brief Завершает соединение с узлом
-		virtual void disconnect(wago_node *node);
+		virtual void disconnect(io_node *node);
 
 
 
     };
 //-----------------------------------------------------------------------------
-wago_manager* G_WAGO_MANAGER();
+io_manager* G_IO_MANAGER();
 //-----------------------------------------------------------------------------
-#endif // WAGO_H
+#endif // IO_H
 

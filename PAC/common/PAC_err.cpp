@@ -185,11 +185,11 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
 	case AC_SERVICE:
 		switch (err_sub_class)
 			{
-			case AS_WAGO:
+			case AS_IO_COUPLER:
 				sprintf(tmp + strlen(tmp),
 					"Узел ввода/вывода '%s' ('%s') - ",
-					G_WAGO_MANAGER()->get_node(par - 1)->name,
-					G_WAGO_MANAGER()->get_node(par - 1)->ip_address
+					G_IO_MANAGER()->get_node(par - 1)->name,
+					G_IO_MANAGER()->get_node(par - 1)->ip_address
 					);
 				break;
 			}
@@ -215,11 +215,11 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
 
         switch( err_sub_class )
             {
-        case AS_WAGO:
+        case AS_IO_COUPLER:
             sprintf( tmp + strlen( tmp ),
-                "узлом Wago '%s' ('%s', '%s')",
-                G_WAGO_MANAGER()->get_node( par - 1 )->name,
-                G_WAGO_MANAGER()->get_node( par - 1 )->ip_address,
+                "узлом I/O '%s' ('%s', '%s')",
+                G_IO_MANAGER()->get_node( par - 1 )->name,
+                G_IO_MANAGER()->get_node( par - 1 )->ip_address,
                 G_CMMCTR->get_host_name_rus() );
             break;
 

@@ -11,7 +11,7 @@ $#include <stdlib.h>
 $#include "PAC_dev.h"
 $#include "tech_def.h"
 $#include "cip_tech_def.h"
-$#include "wago.h"
+$#include "bus_coupler_io.h"
 $#include "PID.h"
 $#include "g_device.h"
 $#include "errors.h"
@@ -870,7 +870,7 @@ class device_manager
         // @brief Установка числа устройств.
         //
         // Вызывается из Lua.
-        wago_device* add_wago_device( int dev_type, int dev_sub_type,
+        io_device* add_wago_device( int dev_type, int dev_sub_type,
             const char *dev_name, char * descr );
 
         /// @brief Получение устройства по его номеру.
@@ -878,11 +878,11 @@ class device_manager
             const char *dev_name );
     };
 //-----------------------------------------------------------------------------
-/// @brief Устройство на основе модулей ввода/вывода WAGO.
+/// @brief Устройство на основе модулей ввода/вывода.
 ///
 /// В общем случае у устройства может быть один или несколько каналов
 /// ввода/вывода (дискретных или аналоговых).
-class wago_device
+class io_device
     {
     public:
         // Lua.
@@ -1050,10 +1050,10 @@ class run_time_params_float
         void reset_to_0();
     };
 //-----------------------------------------------------------------------------
-/// @brief Работа с модулями ввода/вывода Wago.
+/// @brief Работа с модулями ввода/вывода.
 ///
-/// Реализация чтения и записи состояний модулей ввода/вывода Wago.
-class wago_manager
+/// Реализация чтения и записи состояний модулей ввода/вывода.
+class io_manager
     {
     public:
         /// @brief Установка числа модулей.
@@ -1061,7 +1061,7 @@ class wago_manager
         /// Вызывается из Lua.
         void init( int nodes_count );
 
-        /// @brief Инициализация модуля Wago.
+        /// @brief Инициализация модуля.
         ///
         /// Вызывается из Lua.
         void add_node(  unsigned int index, int ntype, int address,
@@ -1082,10 +1082,10 @@ class wago_manager
 
     };
 //-----------------------------------------------------------------------------
-///@brief Получение менеджера Wago.
+///@brief Получение менеджера.
 ///
 ///@return Менеджер устройств проекта.
-wago_manager* G_WAGO_MANAGER();
+io_manager* G_IO_MANAGER();
 //-----------------------------------------------------------------------------
 ///@brief ПИД-регулятор.
 ///
@@ -1179,7 +1179,7 @@ class PAC_info: public i_Lua_save_device
             ///< Время задержки закрытия для донных клапанов, мсек.
             P_V_BOTTOM_OFF_DELAY_TIME, 
 
-            ///< Среднее время задержки получения ответа от узла Wago, мсек.
+            ///< Среднее время задержки получения ответа от узла, мсек.
             P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME,
             ///< Среднее время цикла программы, мсек.
             P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME,    

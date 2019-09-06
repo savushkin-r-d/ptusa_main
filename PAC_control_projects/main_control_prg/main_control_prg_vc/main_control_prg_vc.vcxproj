@@ -131,7 +131,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;MODBUS;DEBUG_NO_WAGO_MODULES;DEBUG;TEST_SPEED;RM_PAC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;MODBUS;DEBUG_NO_IO_MODULES;DEBUG;TEST_SPEED;RM_PAC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
@@ -157,7 +157,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;MODBUS;DEBUG_NO_WAGO_MODULES;DEBUG;TEST_SPEED;RM_PAC;RFID;NOBOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;MODBUS;DEBUG_NO_IO_MODULES;DEBUG;TEST_SPEED;RM_PAC;RFID;NOBOOL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
@@ -185,7 +185,7 @@ tolua++ -n rfid_reader -o "..\..\..\PAC\common\rfid_reader_tolua.cpp" "..\..\..\
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_WAGO_MODULES;DEBUG_IDE;TEST_SPEED;RM_PAC;MODBUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_IO_MODULES;DEBUG_IDE;TEST_SPEED;RM_PAC;MODBUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
@@ -196,7 +196,7 @@ tolua++ -n rfid_reader -o "..\..\..\PAC\common\rfid_reader_tolua.cpp" "..\..\..\
     <PreBuildEvent>
       <Command>tolua++ -n PAC_dev -o "..\..\..\PAC\common\PAC_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh"
 tolua++ -n IOT_dev -o "..\..\..\PAC\IoT\IOT_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\IOT_dev.hh"
-xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
+xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y /I
 
 </Command>
     </PreBuildEvent>
@@ -220,7 +220,7 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;WIN_OS;PAC_PC;MODBUS;TEST_SPEED;DEBUG_NO_WAGO_MODULES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;WIN_OS;PAC_PC;MODBUS;TEST_SPEED;DEBUG_NO_IO_MODULES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
@@ -243,7 +243,7 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;WIN_OS;PAC_PC;MODBUS;TEST_SPEED;DEBUG_NO_WAGO_MODULES;VS_CODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;WIN_OS;PAC_PC;MODBUS;TEST_SPEED;DEBUG_NO_IO_MODULES;VS_CODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
@@ -266,7 +266,7 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;WIN_OS;PAC_PC;MODBUS;TEST_SPEED;DEBUG_NO_WAGO_MODULES;RFID;NOBOOL;VS_CODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;WIN_OS;PAC_PC;MODBUS;TEST_SPEED;DEBUG_NO_IO_MODULES;RFID;NOBOOL;VS_CODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
@@ -288,6 +288,7 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
     <ClInclude Include="..\..\..\common\PAC-driver\g_device.h" />
     <ClInclude Include="..\..\..\common\QuickLZ\quicklz.h" />
     <ClInclude Include="..\..\..\common\util\smart_ptr.h" />
+    <ClInclude Include="..\..\..\PAC\common\bus_coupler_io.h" />
     <ClInclude Include="..\..\..\PAC\common\cip_stats.h" />
     <ClInclude Include="..\..\..\PAC\common\cip_tech_def.h" />
     <ClInclude Include="..\..\..\common\win_util\WSA_err_decode.h" />
@@ -324,10 +325,17 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\rfid_reader.hh" />
-    <ClInclude Include="..\..\..\PAC\common\wago.h" />
     <ClInclude Include="..\..\..\PAC\IoT\iot_altivar.h" />
     <ClInclude Include="..\..\..\PAC\IoT\iot_base.h" />
     <ClInclude Include="..\..\..\PAC\IoT\iot_common.h" />
+    <ClInclude Include="..\..\..\PAC\linux\l_bus_coupler_io.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="..\..\..\PAC\linux\l_console.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">true</ExcludedFromBuild>
@@ -344,8 +352,8 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="..\..\..\PAC\win\PAC_PC\bus_coupler_io_PC.h" />
     <ClInclude Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.h" />
-    <ClInclude Include="..\..\..\PAC\win\PAC_PC\wago_PC.h" />
     <ClInclude Include="..\..\..\PAC\win\w_log.h" />
     <ClInclude Include="..\..\..\PAC\win\w_rm_tech_def.h" />
     <ClInclude Include="..\..\..\PAC\win\w_tcp_client.h" />
@@ -448,6 +456,7 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
     <ClCompile Include="..\..\..\lua\src\lzio.c" />
     <ClCompile Include="..\..\..\lua\src\print.c" />
     <ClCompile Include="..\..\..\lua\src\wmain.c" />
+    <ClCompile Include="..\..\..\PAC\common\bus_coupler_io.cpp" />
     <ClCompile Include="..\..\..\PAC\common\cip_stats.cpp" />
     <ClCompile Include="..\..\..\PAC\common\cip_tech_def.cpp" />
     <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp" />
@@ -479,11 +488,18 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
     <ClCompile Include="..\..\..\PAC\common\tcp_client.cpp" />
     <ClCompile Include="..\..\..\PAC\common\tcp_cmctr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\tech_def.cpp" />
-    <ClCompile Include="..\..\..\PAC\common\wago.cpp" />
     <ClCompile Include="..\..\..\PAC\IoT\iot_altivar.cpp" />
     <ClCompile Include="..\..\..\PAC\IoT\iot_base.cpp" />
     <ClCompile Include="..\..\..\PAC\IoT\iot_common.cpp" />
     <ClCompile Include="..\..\..\PAC\IoT\IOT_dev_lua.cpp" />
+    <ClCompile Include="..\..\..\PAC\linux\l_bus_coupler_io.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\PAC\linux\l_console.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
@@ -524,16 +540,8 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\PAC\linux\l_wago.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\win\PAC_PC\bus_coupler_io_PC.cpp" />
     <ClCompile Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.cpp" />
-    <ClCompile Include="..\..\..\PAC\win\PAC_PC\wago_PC.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_rm_tech_def.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_tcp_client.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_tcp_cmctr.cpp" />

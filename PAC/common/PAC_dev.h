@@ -7,8 +7,8 @@
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
-/// @c DEBUG_NO_WAGO_MODULES - простые устройства работают без модулей
-/// Wago (состояния хранят в себе).
+/// @c DEBUG_NO_IO_MODULES - простые устройства работают без модулей
+/// ввода\вывода (состояния хранят в себе).
 ///
 /// @par Текущая версия:
 /// @$Rev$.\n
@@ -31,7 +31,7 @@
 #include "smart_ptr.h"
 
 #include "dtime.h"
-#include "wago.h"
+#include "bus_coupler_io.h"
 #include "g_device.h"
 
 #include "param_ex.h"
@@ -641,20 +641,20 @@ class device : public i_DO_AO_device, public par_device
 /// @brief Устройство с дискретными входами/выходами.
 ///
 /// Базовый класс для различных дискретных устройств.
-class digital_wago_device : public device,
-    public wago_device
+class digital_io_device : public device,
+    public io_device
     {
     public:
-        digital_wago_device( const char *dev_name, device::DEVICE_TYPE type,
+        digital_io_device( const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt );
 
-        virtual ~digital_wago_device();
+        virtual ~digital_io_device();
 
         float   get_value();
         void    direct_set_value( float new_value );
         void    direct_set_state( int new_state );
 
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
         /// @brief Получение состояния объекта.
         ///
         /// @return - состояние объекта.
@@ -662,31 +662,31 @@ class digital_wago_device : public device,
 
         void direct_on();
         void direct_off();
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
         virtual void print() const;
 
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
     protected:
         int state;  ///< Состояние устройства.
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с аналоговыми входами/выходами.
 ///
 /// Базовый класс для различных аналоговых устройств.
-class analog_wago_device : public device, public wago_device
+class analog_io_device : public device, public io_device
     {
     public:
-        analog_wago_device( const char *dev_name,
+        analog_io_device( const char *dev_name,
             device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type,
             u_int par_cnt ):
         device( dev_name, type, sub_type, par_cnt ),
-            wago_device( dev_name )
-#ifdef DEBUG_NO_WAGO_MODULES
+            io_device( dev_name )
+#ifdef DEBUG_NO_IO_MODULES
             ,value( 0 )
-#endif  // DEBUG_NO_WAGO_MODULES
+#endif  // DEBUG_NO_IO_MODULES
             {
             }
 
@@ -697,36 +697,36 @@ class analog_wago_device : public device, public wago_device
         void  direct_on();
         void  direct_off();
 
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
         float get_value();
         void  direct_set_value( float new_value );
 
-#else  // DEBUG_NO_WAGO_MODULES
+#else  // DEBUG_NO_IO_MODULES
 
         float get_value() = 0;
 
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
 
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
     private:
         float value;    ///< Состояние устройства.
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным выходом.
 ///
 /// Это может быть клапан, насос, канал управления...
-class DO1 : public digital_wago_device
+class DO1 : public digital_io_device
     {
     public:
         DO1( const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type ):
-        digital_wago_device( dev_name, type, sub_type, 0 )
+        digital_io_device( dev_name, type, sub_type, 0 )
             {
             }
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
     public:
         int  get_state();
         void direct_on();
@@ -737,22 +737,22 @@ class DO1 : public digital_wago_device
             {
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
             };
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с двумя дискретными выходами.
 ///
 /// Это может быть клапан, насос...
-class DO2 : public digital_wago_device
+class DO2 : public digital_io_device
     {
     public:
         DO2( const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ):
-        digital_wago_device( dev_name, type, sub_type, par_cnt )
+        digital_io_device( dev_name, type, sub_type, par_cnt )
             {
             }
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
     public:
         int  get_state();
         void direct_on();
@@ -764,14 +764,14 @@ class DO2 : public digital_wago_device
             DO_INDEX_1 = 0, ///< Индекс канала дискретного выхода №1.
             DO_INDEX_2,     ///< Индекс канала дискретного выхода №2.
             };
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 class valve_DO2_DI2_bistable;
 
 /// @brief Устройство с обратными связями.
 ///
-class valve: public digital_wago_device
+class valve: public digital_io_device
     {
     public:
         /// @param is_on_fb - использовать обратную связь на включенное состояние.
@@ -861,9 +861,9 @@ class valve: public digital_wago_device
         /// связи, ручного режима, ...).
         int get_state();
 
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
         int set_cmd( const char *prop, u_int idx, double val );
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
         ///Состояние клапана без учета обратной связи.
         enum VALVE_STATE
@@ -1003,30 +1003,30 @@ class valve_DO1_DI1_off : public valve
             DI_INDEX = 0,           ///< Индекс канала дискретного входа.
             };
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
     public:
         void direct_on();
         void direct_off();
 
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
         // Интерфейс valve для реализации получения расширенного состояния с
         // учетом всех вариантов (ручной режим, обратная связь, ...).
     protected:
         VALVE_STATE get_valve_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
-            return ( VALVE_STATE ) digital_wago_device::get_state();
+#ifdef DEBUG_NO_IO_MODULES
+            return ( VALVE_STATE ) digital_io_device::get_state();
 #else
             int o = get_DO( DO_INDEX );
 
             return ( VALVE_STATE ) o;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
         bool get_fb_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
             return valve::get_fb_state();
 #else
             int o = get_DO( DO_INDEX );
@@ -1044,10 +1044,10 @@ class valve_DO1_DI1_off : public valve
                 }
 
             return false;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         int get_off_fb_value()
             {
             return get_DI( DI_INDEX );
@@ -1057,7 +1057,7 @@ class valve_DO1_DI1_off : public valve
             {
             return false;
             }
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним дискретным выходом и одним дискретным входом.
@@ -1077,24 +1077,24 @@ class valve_DO1_DI1_on : public valve
             DI_INDEX = 0,           ///< Индекс канала дискретного входа.
             };
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
     public:
         void direct_on();
         void direct_off();
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
     protected:
         VALVE_STATE get_valve_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
-            return ( VALVE_STATE ) digital_wago_device::get_state();
+#ifdef DEBUG_NO_IO_MODULES
+            return ( VALVE_STATE ) digital_io_device::get_state();
 #else
             int o = get_DO( DO_INDEX );
 
             return ( VALVE_STATE ) o;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
         bool get_fb_state()
@@ -1116,7 +1116,7 @@ class valve_DO1_DI1_on : public valve
             return false;
             }
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         int get_on_fb_value()
             {
             return get_DI( DI_INDEX );
@@ -1126,7 +1126,7 @@ class valve_DO1_DI1_on : public valve
             {
             return false;
             }
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним каналом управления и двумя обратными связями.
@@ -1148,29 +1148,29 @@ class valve_DO1_DI2 : public valve
             DI_INDEX_2,             ///< Индекс №2 канала дискретного входа.
             };
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
     public:
         void direct_on();
         void direct_off();
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
     protected:
         VALVE_STATE get_valve_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
-            return ( VALVE_STATE ) digital_wago_device::get_state();
+#ifdef DEBUG_NO_IO_MODULES
+            return ( VALVE_STATE ) digital_io_device::get_state();
 #else
             int o = get_DO( DO_INDEX );
 
             return ( VALVE_STATE ) o;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
         bool get_fb_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
             return valve::get_fb_state();
 #else
             int o = get_DO( DO_INDEX );
@@ -1189,10 +1189,10 @@ class valve_DO1_DI2 : public valve
                 }
 
             return false;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         int get_off_fb_value()
             {
             return get_DI( DI_INDEX_2 );
@@ -1202,7 +1202,7 @@ class valve_DO1_DI2 : public valve
             {
             return get_DI( DI_INDEX_1 );
             }
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с двумя каналами управления и двумя обратными связями.
@@ -1225,30 +1225,30 @@ class valve_DO2_DI2 : public valve
             DI_INDEX_2,             ///< Индекс №2 канала дискретного входа.
             };
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
     public:
         void direct_on();
         void direct_off();
 
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
     protected:
         VALVE_STATE get_valve_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
-            return ( VALVE_STATE ) digital_wago_device::get_state();
+#ifdef DEBUG_NO_IO_MODULES
+            return ( VALVE_STATE ) digital_io_device::get_state();
 #else
             int o1 = get_DO( DO_INDEX_2 );
 
             return ( VALVE_STATE ) o1;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
         bool get_fb_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
             return true;
 #else
             int o0 = get_DO( DO_INDEX_1 );
@@ -1267,10 +1267,10 @@ class valve_DO2_DI2 : public valve
                 }
 
             return false;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         int get_off_fb_value()
             {
             return get_DI( DI_INDEX_1 );
@@ -1280,7 +1280,7 @@ class valve_DO2_DI2 : public valve
             {
             return get_DI( DI_INDEX_2 );
             }
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
     };
 //-----------------------------------------------------------------------------
@@ -1335,7 +1335,7 @@ class valve_DO2_DI2_bistable : public valve
             DI_INDEX_CLOSE,     ///< Индекс канала дискретного входа Закрыт.
             };
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
     public:
         void direct_on()
             {
@@ -1366,15 +1366,15 @@ class valve_DO2_DI2_bistable : public valve
                 }
             }
 
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
     protected:
         VALVE_STATE get_valve_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
-            return (VALVE_STATE)digital_wago_device::get_state();
+#ifdef DEBUG_NO_IO_MODULES
+            return (VALVE_STATE)digital_io_device::get_state();
 #else
             int o = get_DI( DI_INDEX_OPEN );
             int c = get_DI( DI_INDEX_CLOSE );
@@ -1391,12 +1391,12 @@ class valve_DO2_DI2_bistable : public valve
             if ( is_stoped ) return V_STOP;
 
             return V_OFF;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
         bool get_fb_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
             return true;
 #else
             if ( is_stoped ) return true;
@@ -1421,10 +1421,10 @@ class valve_DO2_DI2_bistable : public valve
             if ( dt < t ) return true;
 
             return false;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         int get_off_fb_value()
             {
             return get_DI( DI_INDEX_CLOSE );
@@ -1434,11 +1434,11 @@ class valve_DO2_DI2_bistable : public valve
             {
             return get_DI( DI_INDEX_OPEN );
             }
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
         void direct_set_state( int new_state )
             {
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
             valve::direct_set_state( new_state );
 #else
             int i0 = get_DI( DI_INDEX_OPEN );
@@ -1472,7 +1472,7 @@ class valve_DO2_DI2_bistable : public valve
                     valve::direct_set_state( new_state );
                     break;
                 }
-#endif //DEBUG_NO_WAGO_MODULES
+#endif //DEBUG_NO_IO_MODULES
             }
 
     private:
@@ -1509,18 +1509,18 @@ class valve_mix_proof : public i_mix_proof,  public valve
 
         void direct_set_state( int new_state );
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         void direct_on();
         void direct_off();
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         // всех вариантов (ручной режим, обратная связь, ...).
     protected:
         VALVE_STATE get_valve_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
-            return ( VALVE_STATE ) digital_wago_device::get_state();
+#ifdef DEBUG_NO_IO_MODULES
+            return ( VALVE_STATE ) digital_io_device::get_state();
 #else
             int o = get_DO( DO_INDEX );
 
@@ -1528,12 +1528,12 @@ class valve_mix_proof : public i_mix_proof,  public valve
             if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return V_LOWER_SEAT;
 
             return ( VALVE_STATE ) o;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
         bool get_fb_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
             return true;
 #else
             int o = get_DO( DO_INDEX );
@@ -1555,10 +1555,10 @@ class valve_mix_proof : public i_mix_proof,  public valve
                 }
 
             return false;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         int get_off_fb_value()
             {
             return get_DI( DI_INDEX_CLOSE );
@@ -1568,7 +1568,7 @@ class valve_mix_proof : public i_mix_proof,  public valve
             {
             return get_DI( DI_INDEX_OPEN );
             }
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
     };
 //-----------------------------------------------------------------------------
@@ -1658,8 +1658,8 @@ class valve_AS : public valve
 
         VALVE_STATE get_valve_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
-            return ( VALVE_STATE ) digital_wago_device::get_state();
+#ifdef DEBUG_NO_IO_MODULES
+            return ( VALVE_STATE ) digital_io_device::get_state();
 #else
             char* data = ( char* ) get_AO_read_data( AO_INDEX );
             char state = get_state_data( data );
@@ -1672,12 +1672,12 @@ class valve_AS : public valve
             if ( o == 0 && l == 1 ) return V_LOWER_SEAT;
 
             return ( VALVE_STATE ) o;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
         bool get_fb_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
             return true;
 #else
             char* AO_data = ( char* ) get_AO_read_data( AO_INDEX );
@@ -1709,10 +1709,10 @@ class valve_AS : public valve
                 }
 
             return false;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         int get_off_fb_value()
             {
             char* AI_data = ( char* ) get_AI_data( AI_INDEX );
@@ -1793,11 +1793,11 @@ class valve_AS : public valve
             //                printf( "*write_state = %d\n", ( int ) *write_state );
             //                }
             }
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
         void direct_set_state( int new_state )
             {
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
             state = ( char ) new_state;
 #else
             int offset = 0;
@@ -1860,7 +1860,7 @@ class valve_AS : public valve
                     direct_on();
                     break;
                 }
-#endif //DEBUG_NO_WAGO_MODULES
+#endif //DEBUG_NO_IO_MODULES
             }
 
     protected:
@@ -1909,8 +1909,8 @@ class valve_AS_DO1_DI2 : public valve_AS
 
         VALVE_STATE get_valve_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
-            return (VALVE_STATE) digital_wago_device::get_state();
+#ifdef DEBUG_NO_IO_MODULES
+            return (VALVE_STATE) digital_io_device::get_state();
 #else
             char* data = (char*) get_AO_read_data( AO_INDEX );
             char state = get_state_data( data );
@@ -1918,12 +1918,12 @@ class valve_AS_DO1_DI2 : public valve_AS
             int o = ( state & C_OPEN_S1 ) > 0 ? 1 : 0;
 
             return (VALVE_STATE) o;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
         bool get_fb_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
             return true;
 #else
             char* AO_data = (char*)get_AO_read_data( AO_INDEX );
@@ -1956,7 +1956,7 @@ class valve_AS_DO1_DI2 : public valve_AS
                 }
 
             return false;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
     private:
@@ -1998,7 +1998,7 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 
         void direct_set_state( int new_state )
             {
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
             state = ( char ) new_state;
 #else
             switch ( new_state )
@@ -2037,21 +2037,21 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
                     direct_on();
                     break;
                 }
-#endif //DEBUG_NO_WAGO_MODULES
+#endif //DEBUG_NO_IO_MODULES
             }
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         void direct_on();
         void direct_off();
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
         //Интерфейс для реализации получения расширенного состояния с учетом
         //всех вариантов (ручной режим, обратная связь, ...).
     protected:
         VALVE_STATE get_valve_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
-            return ( VALVE_STATE ) digital_wago_device::get_state();
+#ifdef DEBUG_NO_IO_MODULES
+            return ( VALVE_STATE ) digital_io_device::get_state();
 #else
             int o = get_DO( DO_INDEX );
 
@@ -2060,12 +2060,12 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
             if ( o == 0 && get_DO( DO_INDEX_L ) == 1 ) return V_LOWER_SEAT;
 
             return ( VALVE_STATE ) o;
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             }
 
         bool get_fb_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
             return true;
 #else
             int o = get_DO( DO_INDEX );
@@ -2090,7 +2090,7 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 #endif // DEBUG_NO_WAGO_MODULE
             }
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         int get_off_fb_value()
             {
             return get_DI( DI_INDEX_CLOSE );
@@ -2100,7 +2100,7 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
             {
             return get_DI( DI_INDEX_OPEN );
             }
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
 #ifdef _MSC_VER
 #pragma region Выключение мини клапана с задержкой.
@@ -2137,12 +2137,12 @@ class valve_iolink_vtug : public valve
 
         void set_rt_par( u_int idx, float value );
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
     public:
         void direct_on();
 
         void direct_off();
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
 
     protected:
@@ -2175,14 +2175,14 @@ class valve_iolink_vtug_on : public valve_iolink_vtug
             };
 
     protected:
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         /// @brief Получение состояния обратной связи.
         bool get_fb_state();
 
         int get_on_fb_value();
 
         int get_off_fb_value();
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления и обратной связью.
@@ -2198,35 +2198,35 @@ class valve_iolink_vtug_off : public valve_iolink_vtug
             };
 
     protected:
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         /// @brief Получение состояния обратной связи.
         bool get_fb_state();
 
         int get_on_fb_value();
 
         int get_off_fb_value();
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним аналоговым входом.
 ///
 /// Это может быть температура, расход (величина)...
-class AI1 : public analog_wago_device
+class AI1 : public analog_io_device
     {
     public:
         AI1( const char *dev_name, device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, u_int *start_par_idx );
 
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
         float get_value();
 
         void direct_set_state( int new_state )
             {
             st = new_state;
             }
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         int get_state()
             {
             if ( get_AI( C_AI_INDEX, 0, 0 ) == -1. )
@@ -2269,16 +2269,16 @@ class AI1 : public analog_wago_device
             }
 
     protected:
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
         int st;
 #endif
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
     public:
         float get_value();
         void  direct_set_value( float new_value );
 
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 /// @brief Температура.
@@ -2293,8 +2293,8 @@ class temperature_e : public AI1
 
         float get_value()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
-            float v = analog_wago_device::get_value();
+#ifdef DEBUG_NO_IO_MODULES
+            float v = analog_io_device::get_value();
             return -1000 == v ? get_par( P_ERR_T, start_param_idx ) :
                 AI1::get_value();
 #else
@@ -2304,7 +2304,7 @@ class temperature_e : public AI1
 #endif
             }
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         int get_state()
             {
             float v = get_AI( C_AI_INDEX, 0, 0 );
@@ -2333,7 +2333,7 @@ class temperature_e_iolink : public AI1
     public:
         temperature_e_iolink( const char *dev_name );
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         float get_value();
 
 #else
@@ -2448,7 +2448,7 @@ class level_e_iolink : public AI1
         float get_min_value();
         float get_max_value();
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         float get_value();
         int get_state();
 #endif
@@ -2497,7 +2497,7 @@ class concentration_e : public AI1
         concentration_e( const char *dev_name, DEVICE_SUB_TYPE sub_type ): AI1(
             dev_name, DT_QT, sub_type, ADDITIONAL_PARAM_COUNT, &start_param_idx )
             {
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
             st = 1;
 #endif
             set_par_name( P_MIN_V,  start_param_idx, "P_MIN_V" );
@@ -2530,7 +2530,7 @@ class concentration_e_ok : public concentration_e
 
         int get_state()
             {
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
             int i = get_DI( DI_INDEX );
 
             return i == 1 ? concentration_e::get_state() : -1;
@@ -2542,11 +2542,11 @@ class concentration_e_ok : public concentration_e
         int save_device_ex( char *buff )
             {
             int res = 0;
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
             res = sprintf( buff, "OK=1, " );
 #else
             res = sprintf( buff, "OK=%d, ", get_DI( DI_INDEX ) );
-#endif //DEBUG_NO_WAGO_MODULES
+#endif //DEBUG_NO_IO_MODULES
             return res;
             }
 
@@ -2567,13 +2567,13 @@ class concentration_e_iolink : public AI1
 
         float get_temperature() const;
 
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
         float get_value();
 #else
         float get_value();
 
         int get_state();
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
         void static evaluate();
 
@@ -2623,7 +2623,7 @@ class analog_input : public AI1
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик веса
-class wages : public analog_wago_device, public i_wages
+class wages : public analog_io_device, public i_wages
     {
     public:
         wages( const char *dev_name);
@@ -2655,12 +2655,12 @@ class wages : public analog_wago_device, public i_wages
         float weight;
         unsigned long filter_time;
 
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
         float get_value();
         void  direct_set_value( float new_value );
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
     public:
         float get_value();
         void direct_set_state( int new_state );
@@ -2669,7 +2669,7 @@ class wages : public analog_wago_device, public i_wages
             return;
             }
 
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
     public:
         int get_state()
             {
@@ -2771,24 +2771,24 @@ class virtual_counter : public device, public i_counter
 /// @brief Устройство с одним аналоговым выходом.
 ///
 /// Это может быть управляемый клапан...
-class AO1 : public analog_wago_device
+class AO1 : public analog_io_device
     {
     public:
         AO1( const char *dev_name,
             device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type,
             u_int par_cnt ):
-        analog_wago_device( dev_name, type, sub_type, par_cnt )
+        analog_io_device( dev_name, type, sub_type, par_cnt )
             {
             }
 
         virtual float get_min_value() = 0;
         virtual float get_max_value() = 0;
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         float get_value();
         void  direct_set_value( float new_value );
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
     protected:
         enum CONSTANTS
@@ -2857,13 +2857,13 @@ class analog_valve : public AO1
 /// @brief Устройство с одним дискретным входом.
 ///
 /// Это может быть обратная связь, расход (есть/нет)...
-class DI1 : public digital_wago_device
+class DI1 : public digital_io_device
     {
     public:
         DI1( const char *dev_name,
             device::DEVICE_TYPE type,
             device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, int current_state_init_val = 0 ):
-        digital_wago_device( dev_name, type, sub_type,
+        digital_io_device( dev_name, type, sub_type,
             ADDITIONAL_PARAMS_COUNT + par_cnt ),
             current_state( current_state_init_val ),
             time( 0 )
@@ -2871,7 +2871,7 @@ class DI1 : public digital_wago_device
             set_par_name( P_DT,  0, "P_DT" );
             }
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
     public:
         void direct_on();
         void direct_off();
@@ -2882,7 +2882,7 @@ class DI1 : public digital_wago_device
         ///
         /// @return - состояние объекта.
         int  get_state();
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
 
     private:
@@ -2913,22 +2913,22 @@ class valve_DO1 : public valve
             DO_INDEX = 0,   ///< Индекс канала дискретного выхода.
             };
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
     public:
         void direct_on();
         void direct_off();
 
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 
     protected:
         /// @brief Получение состояния клапана без учета обратной связи.
         VALVE_STATE get_valve_state()
             {
-#ifdef DEBUG_NO_WAGO_MODULES
-            return ( VALVE_STATE ) digital_wago_device::get_state();
+#ifdef DEBUG_NO_IO_MODULES
+            return ( VALVE_STATE ) digital_io_device::get_state();
 #else
             return ( VALVE_STATE ) get_DO( DO_INDEX );
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             };
 
         /// @brief Получение состояния обратной связи.
@@ -2948,17 +2948,17 @@ class valve_DO2 : public DO2
     };
 //-----------------------------------------------------------------------------
 /// @brief Электродвигатель (мешалка, насос).
-class motor : public device, public wago_device
+class motor : public device, public io_device
     {
     public:
         motor( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
             device( dev_name, DT_M, sub_type, ADDITIONAL_PARAM_COUNT ),
-            wago_device( dev_name ),
+            io_device( dev_name ),
             start_switch_time( get_millisec() )
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
             ,state( 0 ),
             freq( 0 )
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
             {
             set_par_name( P_ON_TIME,  0, "P_ON_TIME" );
             }
@@ -3004,29 +3004,29 @@ class motor : public device, public wago_device
 
         u_long start_switch_time;
 
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
         char  state;  ///< Состояние устройства.
 
         float freq;   ///< Состояние устройства (частота).
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 /// @brief Электродвигатель, управляемый частотным преобразователем altivar с
 /// интерфейсной платой Ethernet.
-class motor_altivar : public device, public wago_device
+class motor_altivar : public device, public io_device
 {
 public:
     motor_altivar(const char *dev_name, device::DEVICE_SUB_TYPE sub_type) :
         device(dev_name, DT_M, sub_type, ADDITIONAL_PARAM_COUNT),
-        wago_device(dev_name),
+        io_device(dev_name),
         start_switch_time(get_millisec()),
         atv(NULL)
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
         , state(0),
         freq(0)
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
     {
     set_par_name(P_ON_TIME, 0, "P_ON_TIME");
     }
@@ -3076,11 +3076,11 @@ private:
 
     altivar_node* atv;
 
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
     char  state;  ///< Состояние устройства.
 
     float freq;   ///< Состояние устройства (частота).
-#endif // DEBUG_NO_WAGO_MODULES
+#endif // DEBUG_NO_IO_MODULES
 };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора уровня.
@@ -3102,7 +3102,7 @@ class level_s_iolink : public AI1
 
         float get_max_value();
 
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
         float get_value();
 
         int get_state();
@@ -3189,7 +3189,7 @@ class lamp : public DO1
 /// @brief Счетчик.
 class counter : public device,
     public i_counter,
-    public wago_device
+    public io_device
     {
     public:
         counter( const char *dev_name,
@@ -3462,7 +3462,7 @@ class device_manager: public i_Lua_save_device
         // @brief Добавление устройства.
         //
         // Вызывается из Lua.
-        wago_device* add_wago_device( int dev_type, int dev_sub_type,
+        io_device* add_wago_device( int dev_type, int dev_sub_type,
             const char *dev_name, char * descr );
     };
 //-----------------------------------------------------------------------------
