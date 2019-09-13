@@ -616,7 +616,7 @@ wages* device_manager::get_WT( const char *dev_name )
     return (wages*)get_device( device::DT_WT, dev_name );
     }
 //-----------------------------------------------------------------------------
-io_device* device_manager::add_wago_device( int dev_type, int dev_sub_type,
+io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                                              const char* dev_name, char * descr )
     {
     static char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };

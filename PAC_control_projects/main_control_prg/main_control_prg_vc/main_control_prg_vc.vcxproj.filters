@@ -311,9 +311,6 @@
     <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp">
       <Filter>Source Files\common\PAC-driver</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\PAC\common\sys\io.cpp">
-      <Filter>Source Files\PAC\common\sys</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\sys\led.cpp">
       <Filter>Source Files\PAC\common\sys</Filter>
     </ClCompile>
@@ -526,6 +523,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\linux\l_bus_coupler_io.cpp">
       <Filter>Source Files\PAC\linux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\sys\console.cpp">
+      <Filter>Source Files\PAC\common\sys</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

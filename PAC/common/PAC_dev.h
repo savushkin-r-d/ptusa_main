@@ -3462,7 +3462,7 @@ class device_manager: public i_Lua_save_device
         // @brief Добавление устройства.
         //
         // Вызывается из Lua.
-        io_device* add_wago_device( int dev_type, int dev_sub_type,
+        io_device* add_io_device( int dev_type, int dev_sub_type,
             const char *dev_name, char * descr );
     };
 //-----------------------------------------------------------------------------

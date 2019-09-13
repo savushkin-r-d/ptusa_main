@@ -482,7 +482,7 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y /I
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\rm_manager.cpp" />
     <ClCompile Include="..\..\..\PAC\common\rm_tech_def.cpp" />
-    <ClCompile Include="..\..\..\PAC\common\sys\io.cpp" />
+    <ClCompile Include="..\..\..\PAC\common\sys\console.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys\led.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys\base_mem.cpp" />
     <ClCompile Include="..\..\..\PAC\common\tcp_client.cpp" />
