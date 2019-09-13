@@ -83,7 +83,7 @@ namespace PtusaPLCnextEngineer
             sleep_ms(sleep_time_ms);
 
 #ifndef DEBUG_NO_WAGO_MODULES
-            G_WAGO_MANAGER()->read_inputs();
+            G_IO_MANAGER()->read_inputs();
             sleep_ms(sleep_time_ms);
 #endif // DEBUG_NO_WAGO_MODULES
 
@@ -93,7 +93,7 @@ namespace PtusaPLCnextEngineer
             sleep_ms(sleep_time_ms);
 
 #ifndef DEBUG_NO_WAGO_MODULES
-            G_WAGO_MANAGER()->write_outputs();
+            G_IO_MANAGER()->write_outputs();
             sleep_ms(sleep_time_ms);
 #endif // ifndef
 

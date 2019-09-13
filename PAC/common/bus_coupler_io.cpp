@@ -6,7 +6,6 @@
 #error You must define OS!
 #endif
 
-#include "io.h"
 #include "lua_manager.h"
 
 #include "dtime.h"
