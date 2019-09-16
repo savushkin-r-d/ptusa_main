@@ -141,8 +141,7 @@ int io_manager_linux::write_outputs()
     for ( u_int i = 0; i < nodes_count; i++ )
         {
         io_node* nd = nodes[ i ];
-        if ( nd->type == io_node::WAGO_750_XXX_ETHERNET || 
-			nd->type == io_node::PHOENIX_BK_ETH )
+        if ( nd->type == io_node::WAGO_750_XXX_ETHERNET )
             {
             if ( !nd->is_active )
                 {
@@ -255,6 +254,67 @@ int io_manager_linux::write_outputs()
             }// if ( nd->type == io_node::T_750_341 || ...
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
+    for ( u_int i = 0; i < nodes_count; i++ )
+        {
+        io_node* nd = nodes[ i ];
+        if ( nd->type == io_node::PHOENIX_BK_ETH )
+            {
+            if ( !nd->is_active )
+                {
+                continue;
+                }
+
+            if ( nd->AO_cnt > 0 )
+                {
+                u_int bytes_cnt = nd->AO_size;
+
+                buff[ 0 ] = 's';
+                buff[ 1 ] = 's';
+                buff[ 2 ] = 0;
+                buff[ 3 ] = 0;
+                buff[ 4 ] = 0;
+                buff[ 5 ] = 7 + bytes_cnt;
+                buff[ 6 ] = 0; //nodes[ i ]->number;
+                buff[ 7 ] = 0x10;
+                buff[ 8 ] = 28;
+                buff[ 9 ] = 23;
+                buff[ 10 ] = bytes_cnt / 2 >> 8;
+                buff[ 11 ] = bytes_cnt / 2 & 0xFF;
+                buff[ 12 ] = bytes_cnt;
+
+                int l = 0;
+                for ( unsigned int idx = 0; idx < nd->AO_cnt; idx++ )
+                    {
+                    switch ( nd->AO_types[ idx ] )
+                        {
+
+                        default:
+                            buff[ 13 + l ] = (u_char)( ( nd->AO_[ idx ] >> 8 ) & 0xFF );
+                            buff[ 13 + l + 1 ] = (u_char)( nd->AO_[ idx ] & 0xFF );
+                            l += 2;
+                            break;
+                        }
+                    }
+
+                if ( e_communicate( nd, bytes_cnt + 13, 12 ) == 0 )
+                    {
+                    if ( buff[ 7 ] == 0x10 )
+                        {
+                        memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
+                        }
+                    }// if ( e_communicate( nd, 2 * bytes_cnt + 13, 12 ) == 0 )
+                else
+                    {
+                    if ( G_DEBUG )
+                        {
+                        //printf("\nWrite AO: returned error...\n");
+                        }
+                    }
+                }// if ( nd->AO_cnt > 0 )
+
+            }// if ( nd->type == io_node::T_750_341 || ...
+        }// for ( u_int i = 0; i < nodes_count; i++ )
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -337,12 +397,11 @@ int io_manager_linux::read_inputs()
     {
     if ( 0 == nodes_count ) return 0;
 
-    for ( u_int i = 0; i < nodes_count; i++ )
+    for (u_int i = 0; i < nodes_count; i++ )
         {
         io_node* nd = nodes[ i ];
 
-        if ( nd->type == io_node::WAGO_750_XXX_ETHERNET ||
-			nd->type == io_node::PHOENIX_BK_ETH ) // Ethernet I/O nodes.
+        if ( nd->type == io_node::WAGO_750_XXX_ETHERNET ) // Ethernet I/O nodes.
             {
             if ( !nd->is_active )
                 {
@@ -390,6 +449,10 @@ int io_manager_linux::read_inputs()
                         }
                     else
                         {
+                        sprintf( G_LOG->msg, "Read DI:bus coupler returned error. Node %d)",
+                            nd->number );
+                        G_LOG->write_log( i_log::P_ERR );
+
                         if ( G_DEBUG )
                             {
                             //printf("\nRead DI:I/O returned error...\n");
@@ -441,13 +504,67 @@ int io_manager_linux::read_inputs()
                         }
                     else
                         {
-                        if ( G_DEBUG )
+                        sprintf( G_LOG->msg, "Read AI:bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
+                            nd->number, (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
+                        G_LOG->write_log( i_log::P_ERR );
+                        }
+                    }
+                }// if ( nd->AI_cnt > 0 )
+
+            }// if ( nd->type == io_node::T_750_341 || ...
+        }// for ( u_int i = 0; i < nodes_count; i++ )
+
+    for ( u_int i = 0; i < nodes_count; i++ )
+        {
+        io_node* nd = nodes[ i ];
+
+        if ( nd->type == io_node::PHOENIX_BK_ETH ) // Ethernet I/O nodes.
+            {
+            if ( !nd->is_active )
+                {
+                continue;
+                }
+
+            if ( nd->AI_cnt > 0 )
+                {
+                buff[ 0 ] = 's';
+                buff[ 1 ] = 's';
+                buff[ 2 ] = 0;
+                buff[ 3 ] = 0;
+                buff[ 4 ] = 0;
+                buff[ 5 ] = 6;
+                buff[ 6 ] = 0; //nd->number;
+                buff[ 7 ] = 0x04;
+                buff[ 8 ] = 0x1F;
+                buff[ 9 ] = 0x40;
+
+                u_int bytes_cnt = nd->AI_size;
+
+                buff[ 10 ] = (unsigned char)bytes_cnt / 2 >> 8;
+                buff[ 11 ] = (unsigned char)bytes_cnt / 2 & 0xFF;
+
+                if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
+                    {
+                    if ( buff[ 7 ] == 0x04 && buff[ 8 ] == bytes_cnt )
+                        {
+                        int idx = 0;
+                        for ( unsigned int l = 0; l < nd->AI_cnt; l++ )
                             {
-                            printf( "\nRead AI:bus coupler returned error. Node %d.\n",
-                                nd->number );
-                            printf( "bytes_cnt = %d, %d %d \n",
-                                (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
+                            switch ( nd->AI_types[ l ] )
+                                {
+                                default:
+                                    nd->AI[ l ] = 256 * buff[ 9 + idx ] +
+                                        buff[ 9 + idx + 1 ];
+                                    idx += 2;
+                                    break;
+                                }
                             }
+                        }
+                    else
+                        {
+                        sprintf( G_LOG->msg, "Read AI:bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
+                            nd->number, (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
+                        G_LOG->write_log( i_log::P_ERR );
                         }
                     }
                 }// if ( nd->AI_cnt > 0 )

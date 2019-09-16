@@ -2154,7 +2154,8 @@ class valve_iolink_vtug : public valve
         /// @brief Получение состояния обратной связи.
         bool get_fb_state();
 
-        u_int vtug_number;    ///< Номер устройства.
+        u_int vtug_number;        ///< Номер устройства.
+        u_int vtug_io_size = 1;   ///< Размер области.
 
         enum CONSTANTS
             {

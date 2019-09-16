@@ -2336,6 +2336,9 @@ void valve_iolink_vtug::set_rt_par( u_int idx, float value )
             vtug_number = (u_int)value;
             break;
 
+        case 2:
+            vtug_io_size = (u_int)value;
+
         default:
             valve::set_rt_par( idx, value );
             break;
@@ -2354,6 +2357,15 @@ void valve_iolink_vtug::direct_on()
         }
 
     u_int offset = ( vtug_number - 1 ) / 8;
+
+    if ( get_io_vendor() == WAGO )
+        {
+        }
+    else
+        {
+        offset = vtug_io_size - 1 - offset;
+        }
+
     data[ offset ] |= 1 << ( ( vtug_number - 1 ) % 8 );
     }
 //-----------------------------------------------------------------------------
@@ -2380,6 +2392,14 @@ char valve_iolink_vtug::get_state_data( char* data )
         }
 
     u_int offset = ( vtug_number - 1 ) / 8;
+    if ( get_io_vendor() == WAGO )
+        {
+        }
+    else
+        {
+        offset = vtug_io_size - 1 - offset;
+        }
+
     char state = data[ offset ];
     state >>= ( vtug_number - 1 ) % 8;
     state &= 1;
@@ -2590,8 +2610,15 @@ temperature_e_iolink::temperature_e_iolink( const char *dev_name ):
 float temperature_e_iolink::get_value()
     {
     char* data = (char*)get_AI_data( 0 );
-    int16_t tmp = data[ 1 ] + 256 * data[ 0 ];
-    memcpy(info, &tmp, 2);
+    if ( get_io_vendor() == WAGO )
+        {
+        int16_t tmp = data[ 1 ] + 256 * data[ 0 ];
+        memcpy(info, &tmp, 2);
+        }
+    else
+        {
+        memcpy(info, data, 2);
+        }
 
     return 0.1f * info->v;
     }
@@ -3123,8 +3150,15 @@ float level_s_iolink::get_max_value()
 float level_s_iolink::get_value()
     {
     char* data = ( char* ) get_AI_data( 0 );
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (LS_data*) &tmp;
+    if ( get_io_vendor() == WAGO )
+        {
+        int tmp = data[ 1 ] + 256 * data[ 0 ];
+        info = (LS_data*) &tmp;
+        }
+    else
+        {
+        info = (LS_data*) data;
+        }
 
     return (float) info->v;
     }
@@ -3132,8 +3166,15 @@ float level_s_iolink::get_value()
 int level_s_iolink::get_state()
     {
     char* data = ( char* ) get_AI_data( 0 );
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (LS_data*) &tmp;
+    if ( get_io_vendor() == WAGO )
+        {
+        int tmp = data[ 1 ] + 256 * data[ 0 ];
+        info = (LS_data*) &tmp;
+        }
+    else
+        {
+        info = (LS_data*) data;
+        }
 
     return info->st1;
     }
@@ -3176,8 +3217,15 @@ float level_e_iolink::get_max_value()
 float level_e_iolink::get_value()
     {
     char* data = (char*)get_AI_data( 0 );
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (LT_data*)&tmp;
+    if ( get_io_vendor() == WAGO )
+        {
+        int tmp = data[ 1 ] + 256 * data[ 0 ];
+        info = (LT_data*)&tmp;
+        }
+    else
+        {
+        info = (LT_data*) data;
+        }
 
     return (float)info->v;
     }
@@ -3185,8 +3233,16 @@ float level_e_iolink::get_value()
 int level_e_iolink::get_state()
     {
     char* data = (char*)get_AI_data( 0 );
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (LT_data*)&tmp;
+
+    if ( get_io_vendor() == WAGO )
+        {
+        int tmp = data[ 1 ] + 256 * data[ 0 ];
+        info = (LT_data*)&tmp;
+        }
+    else
+        {
+        info = (LT_data*) data;
+        }
 
     return info->st1;
     }
@@ -3263,7 +3319,14 @@ void concentration_e_iolink::evaluate()
 
             char* data = (char*)qt->get_AI_data(0);
             const int SIZE = 12;
-            std::reverse_copy (data, data + SIZE, (char*) qt->info);
+            if ( qt->get_io_vendor() == WAGO )
+                {
+                std::reverse_copy (data, data + SIZE, (char*) qt->info);
+                }
+            else
+                {
+                std::copy (data, data + SIZE, (char*) qt->info);
+                }
 
 #ifdef DEBUG_IOLINK_QT
             char *tmp = (char*) qt->info;

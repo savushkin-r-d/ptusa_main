@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 09/16/19 09:31:33.
+** Generated automatically by tolua++-1.0.92 on 09/17/19 12:19:49.
 */
 
 #ifndef __cplusplus
@@ -4706,6 +4706,39 @@ static int tolua_PAC_dev_io_device_init_channel00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'init_channel'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_io_vendor of class  io_device */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_io_device_set_io_vendor00
+static int tolua_PAC_dev_io_device_set_io_vendor00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"io_device",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  io_device* self = (io_device*)  tolua_tousertype(tolua_S,1,0);
+  io_device::VENDOR vendor = ((io_device::VENDOR) (int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_io_vendor'", NULL);
+#endif
+  {
+   self->set_io_vendor(vendor);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_io_vendor'.",&tolua_err);
  return 0;
 #endif
 }
@@ -12363,8 +12396,11 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"io_device","io_device","",NULL);
   tolua_beginmodule(tolua_S,"io_device");
+   tolua_constant(tolua_S,"WAGO",io_device::WAGO);
+   tolua_constant(tolua_S,"PHOENIX",io_device::PHOENIX);
    tolua_function(tolua_S,"init",tolua_PAC_dev_io_device_init00);
    tolua_function(tolua_S,"init_channel",tolua_PAC_dev_io_device_init_channel00);
+   tolua_function(tolua_S,"set_io_vendor",tolua_PAC_dev_io_device_set_io_vendor00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"timer_manager","timer_manager","",NULL);
   tolua_beginmodule(tolua_S,"timer_manager");

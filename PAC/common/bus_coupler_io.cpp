@@ -469,6 +469,7 @@ io_device::~io_device()
 void io_device::init( int DO_count, int DI_count, int AO_count,
                        int AI_count )
     {
+    this->vendor = vendor;
     if ( DO_count > 0 )
         {
         DO_channels.init( DO_count );
@@ -485,6 +486,16 @@ void io_device::init( int DO_count, int DI_count, int AO_count,
         {
         AI_channels.init( AI_count );
         }
+    }
+//-----------------------------------------------------------------------------
+io_device::VENDOR io_device::get_io_vendor() const
+    {
+    return vendor;
+    }
+//-----------------------------------------------------------------------------
+void io_device::set_io_vendor( VENDOR vendor )
+    {
+    this->vendor = vendor;
     }
 //-----------------------------------------------------------------------------
 void io_device::init_channel( int type, int ch_index, int node, int offset )

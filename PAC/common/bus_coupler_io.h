@@ -31,6 +31,12 @@ class io_device
 
         virtual ~io_device();
 
+		enum VENDOR
+			{
+			WAGO,
+			PHOENIX,
+			};
+
     protected:
         /// @brief Получение состояния канала дискретного выхода.
         ///
@@ -160,12 +166,19 @@ class io_device
         IO_channels AI_channels;    ///< Каналы аналогового входа.
         IO_channels AO_channels;    ///< Каналы аналогового выхода.
 
+        VENDOR vendor;
+
     public:
+
+        VENDOR get_io_vendor() const;
+
         // Lua.
         void init( int DO_count, int DI_count,
             int AO_count, int AI_count );
 
         void init_channel( int type, int ch_inex, int node, int offset );
+
+        void set_io_vendor( VENDOR vendor );
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с модулями ввода/вывода.
@@ -263,7 +276,7 @@ class io_manager
 				C_ANALOG_BUF_SIZE = 256,	///< Размер буфера аналоговых модулей.
 				C_MAX_DELAY = 60000,		///< Макс. время задержки переподключения, мсек.
 				C_CNT_TIMEOUT_US = 100000,	///< Время ожидания подключения от модуля, мксек.
-				C_RCV_TIMEOUT_US = 200000,	///< Время ожидания ответа от модуля, мксек.
+				C_RCV_TIMEOUT_US = 250000,	///< Время ожидания ответа от модуля, мксек.
 				};
 
 			enum TYPES ///< Типы модулей.

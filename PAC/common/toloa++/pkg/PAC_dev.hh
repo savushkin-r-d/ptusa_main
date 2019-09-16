@@ -886,10 +886,18 @@ class io_device
     {
     public:
         // Lua.
+		enum VENDOR
+			{
+			WAGO,
+			PHOENIX,
+			};
+
         void init( int DO_count, int DI_count,
             int AO_count, int AI_count );
 
         void init_channel( int type, int ch_inex, int node, int offset );
+
+		void set_io_vendor( VENDOR vendor );
     };
 //-----------------------------------------------------------------------------
 /// @brief Группа таймеров.
