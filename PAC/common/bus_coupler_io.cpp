@@ -895,6 +895,17 @@ void io_manager::print() const
         }
     }
 //-----------------------------------------------------------------------------
+void io_manager::print_log() const
+    {
+    sprintf(G_LOG->msg, "I\\O manager [%d]:\n", nodes_count);
+    G_LOG->write_log(i_log::P_DEBUG);
+
+    for (u_int i = 0; i < nodes_count; i++)
+        {
+        nodes[i]->print_log();
+        }
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 io_manager::io_node::~io_node()
     {
@@ -982,18 +993,6 @@ io_manager::io_node::io_node( int type, int number, char *str_ip_address,
         memset( this->name, 0, sizeof( this->name ) );
         }
 
-    if ( DI_cnt )
-        {
-        DI = new u_char [ DI_cnt ];
-        memset( DI, 0, DI_cnt );
-        }
-    if ( DO_cnt )
-        {
-        DO = new u_char [ DO_cnt ];
-        DO_ = new u_char [ DO_cnt ];
-        memset( DO, 0, DO_cnt );
-        memset( DO_, 0, DO_cnt );
-        }
     if ( AI_cnt )
         {
         AI_offsets = new u_int [ AI_cnt ];
@@ -1009,7 +1008,22 @@ io_manager::io_node::io_node( int type, int number, char *str_ip_address,
         memset( AO, 0, sizeof( AO ) );
         memset( AO_, 0, sizeof( AO ) );
         }
+
+    if (DI_cnt)
+        {
+        DI = new u_char[DI_cnt];
+        memset(DI, 0, DI_cnt);
+        }
+
+    if ( DO_cnt )
+        {
+        DO = new u_char [ DO_cnt ];
+        DO_ = new u_char [ DO_cnt ];
+        memset( DO, 0, DO_cnt );
+        memset( DO_, 0, DO_cnt );
+        }
     }
+
 //-----------------------------------------------------------------------------
 void io_manager::io_node::print()
     {
@@ -1034,6 +1048,42 @@ void io_manager::io_node::print()
             printf( "\tAO\n");
             }
         printf( "\t%2.d %u %2.u\n", i + 1, AO_types[ i ], AO_offsets[ i ] );
+        }
+    }
+//-----------------------------------------------------------------------------
+void io_manager::io_node::print_log()
+    {
+    sprintf( G_LOG->msg, "\"%s\" - type %d, number %d, IP \"%s\".", name, type,
+            number, ip_address);
+    G_LOG->write_log(i_log::P_DEBUG);
+
+    sprintf( G_LOG->msg, "DI %d [%d], DO %d [%d], AI %d [%d], AO %d [%d].",
+            DI_cnt, DI_cnt / 8, DO_cnt, DO_cnt / 8, AI_cnt, AI_size, AO_cnt,
+            AO_size);
+    G_LOG->write_log(i_log::P_DEBUG);
+
+    if (AI_cnt > 0)
+        {
+        sprintf( G_LOG->msg, "AI");
+        G_LOG->write_log(i_log::P_DEBUG);
+        }
+    for (u_int i = 0; i < AI_cnt; i++)
+        {
+        sprintf( G_LOG->msg, "\t%2.d %u %2.u", i + 1, AI_types[i],
+                AI_offsets[i]);
+        G_LOG->write_log(i_log::P_DEBUG);
+        }
+
+    if (AO_cnt > 0)
+        {
+        sprintf( G_LOG->msg, "AO");
+        G_LOG->write_log(i_log::P_DEBUG);
+        }
+    for (u_int i = 0; i < AO_cnt; i++)
+        {
+        sprintf( G_LOG->msg, "\t%2.d %u %2.u", i + 1, AO_types[i],
+                AO_offsets[i]);
+        G_LOG->write_log(i_log::P_DEBUG);
         }
     }
 //-----------------------------------------------------------------------------

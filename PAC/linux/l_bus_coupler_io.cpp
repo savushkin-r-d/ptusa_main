@@ -285,15 +285,9 @@ int io_manager_linux::write_outputs()
                 int l = 0;
                 for ( unsigned int idx = 0; idx < nd->AO_cnt; idx++ )
                     {
-                    switch ( nd->AO_types[ idx ] )
-                        {
-
-                        default:
-                            buff[ 13 + l ] = (u_char)( ( nd->AO_[ idx ] >> 8 ) & 0xFF );
-                            buff[ 13 + l + 1 ] = (u_char)( nd->AO_[ idx ] & 0xFF );
-                            l += 2;
-                            break;
-                        }
+                    buff[ 13 + l ] = (u_char)( ( nd->AO_[ idx ] >> 8 ) & 0xFF );
+                    buff[ 13 + l + 1 ] = (u_char)( nd->AO_[ idx ] & 0xFF );
+                    l += 2;
                     }
 
                 if ( e_communicate( nd, bytes_cnt + 13, 12 ) == 0 )
@@ -547,18 +541,25 @@ int io_manager_linux::read_inputs()
                     {
                     if ( buff[ 7 ] == 0x04 && buff[ 8 ] == bytes_cnt )
                         {
-                        int idx = 0;
-                        for ( unsigned int l = 0; l < nd->AI_cnt; l++ )
+                        for ( u_int l = 0, idx = 0; l < nd->AI_cnt; l++ )
                             {
-                            switch ( nd->AI_types[ l ] )
+                            nd->AI[l] = 256 * buff[9 + idx] + buff[9 + idx + 1];
+                            idx += 2;
+                            }
+
+                        for (u_int j = 0, idx = 0; j < bytes_cnt; j++)
+                            {
+                            for (int k = 0; k < 8; k++)
                                 {
-                                default:
-                                    nd->AI[ l ] = 256 * buff[ 9 + idx ] +
-                                        buff[ 9 + idx + 1 ];
-                                    idx += 2;
-                                    break;
+                                nd->DI[idx] = (buff[j + 9] >> k) & 1;
+#ifdef DEBUG_BK
+                                sprintf( G_LOG->msg, "%d %d", idx, (buff[j + 9] >> k) & 1);
+                                G_LOG->write_log(i_log::P_NOTICE);
+#endif // DEBUG_BK
+                                idx++;
                                 }
                             }
+
                         }
                     else
                         {
