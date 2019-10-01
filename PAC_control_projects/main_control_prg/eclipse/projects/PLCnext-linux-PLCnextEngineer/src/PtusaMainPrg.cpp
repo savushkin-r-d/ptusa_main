@@ -15,7 +15,8 @@
 #include "error.h"
 #include "tech_def.h"
 
-int G_DEBUG = 0; //Вывод дополнительной отладочной информации.
+int G_DEBUG   = 0; //Вывод дополнительной отладочной информации.
+int G_USE_LOG = 0; //Вывод в системный лог (syslog).
 
 namespace PtusaPLCnextEngineer
     {
