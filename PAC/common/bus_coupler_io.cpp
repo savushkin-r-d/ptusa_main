@@ -125,8 +125,8 @@ float io_device::get_AO( u_int index, float min_value, float max_value )
 
         switch ( module_type )
             {
-            // Выход модуля 554.
-            // Три наименее значащих бита не учитываются.
+            // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 554.
+            // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
             //    -----------------------------------------------------------------------
             //    Output          Output          Binary value
             //    current 0-20	  current 4-20                            Hex.      Dec.
@@ -247,11 +247,11 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
 
         switch ( module_type )
             {
-            // Выход модуля 461.
-            // Выход модуля 450, Pt100 Setting (IEC 751), Standard Format.
+            // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 461.
+            // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 450, Pt100 Setting (IEC 751), Standard Format.
             //   -------------------------------------------------------------------------
             //   Temperature  Voltage     Voltage     Binary value
-            //   °C           (Ohm)       (Ohm)                               Hex.     Dec.
+            //   пїЅC           (Ohm)       (Ohm)                               Hex.     Dec.
             //   -------------------------------------------------------------------------
             //                >400
             //   850          390.481     1384,998    0010 0001 0011 0100     2134     8500
@@ -266,12 +266,12 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
             //
             case 461:
             case 450:
-                if ( val >= -2000 && val <= -1 ) // -0,1..-200 °C
+                if ( val >= -2000 && val <= -1 ) // -0,1..-200 пїЅC
                     {
                     val *= 0.1f;
                     return val;
                     }
-                if ( val >= 0 && val < 8500 ) // 0..850 °C
+                if ( val >= 0 && val < 8500 ) // 0..850 пїЅC
                     {
                     val *= 0.1f;
                     return val;
@@ -279,8 +279,8 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
 
                 return -1000;
 
-                // Выход модуля 446.
-                // Три наименее значащих бита не учитываются.
+                // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 446.
+                // пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
                 //    -----------------------------------------------------------------------
                 //    Input           Input           Binary value
                 //    current 0-20	  current 4-20                            Hex.      Dec.
@@ -315,7 +315,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
 
                 return val;
 
-                //Тензорезистор
+                //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
                 // Process values of module 750-491
                 //Signal           Numerical value
                 //voltage UD       binary
@@ -708,7 +708,7 @@ io_manager* io_manager::get_instance()
 #endif // defined LINUX_OS && defined PAC_WAGO_750_860
 
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
-        instance = newio_manager_PFC200();
+        instance = new io_manager_PFC200();
 #endif // defined LINUX_OS && defined PAC_WAGO_750_860
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
@@ -972,7 +972,7 @@ io_manager::io_node::io_node( int type, int number, char *str_ip_address,
         {
         is_active = false;
         sprintf( G_LOG->msg,
-            "Узел \"%s\" отключен, так как не задан его IP адрес.", name );
+            "пїЅпїЅпїЅпїЅ \"%s\" пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ IP пїЅпїЅпїЅпїЅпїЅ.", name );
         G_LOG->write_log( i_log::P_NOTICE );
         }
 
@@ -980,7 +980,7 @@ io_manager::io_node::io_node( int type, int number, char *str_ip_address,
         {
         is_active = false;
         sprintf( G_LOG->msg,
-            "Узел \"%s\" отключен, так как не задан его тип.", name );
+            "пїЅпїЅпїЅпїЅ \"%s\" пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ.", name );
         G_LOG->write_log( i_log::P_NOTICE );
         }
 

@@ -1,4 +1,4 @@
-#include "wago_PFC200.h"
+#include "bus_coupler_io_PFC200.h"
 
 #include <time.h>
 #include <sched.h>
@@ -13,7 +13,7 @@
 #include "log.h"
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-wago_manager_PFC200::wago_manager_PFC200(): task_id( 0 )
+io_manager_PFC200::io_manager_PFC200(): task_id( 0 )
     {
     adi = adi_GetApplicationInterface(); // Connect to ADI-interface.
 
@@ -114,21 +114,21 @@ wago_manager_PFC200::wago_manager_PFC200(): task_id( 0 )
         }
     }
 //-----------------------------------------------------------------------------
-wago_manager_PFC200::~wago_manager_PFC200()
+io_manager_PFC200::~io_manager_PFC200()
     {
     adi->CloseDevice( kbus_device_id ); // Close kbus device.
     adi->Exit();                        // Disconnect ADI-Interface.
     }
 //-----------------------------------------------------------------------------
-int wago_manager_PFC200::read_inputs()
+int io_manager_PFC200::read_inputs()
     {
     if ( 0 == nodes_count ) return 0;
 
     for ( u_int i = 0; i < nodes_count; i++ )
         {
-        if ( nodes[ i ]->type == wago_node::T_750_820x )
+        if ( nodes[ i ]->type == io_node::WAGO_750_820x )
             {
-            wago_node *nd = nodes[ i ];
+            io_node *nd = nodes[ i ];
 
             if ( !nd->is_active )
                 {
@@ -211,20 +211,20 @@ int wago_manager_PFC200::read_inputs()
 #endif // DEBUG_KBUS
                 }// if ( nd->AI_cnt > 0 )
 
-            }// if ( nodes[ i ]->type == wago_node::T_750_820x || ...
+            }// if ( nodes[ i ]->type == io_node::T_750_820x || ...
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
-    return wago_manager_linux::read_inputs();
+    return io_manager_linux::read_inputs();
     }
 //-----------------------------------------------------------------------------
-int wago_manager_PFC200::write_outputs()
+int io_manager_PFC200::write_outputs()
     {
     if ( 0 == nodes_count ) return 0;
 
     for ( u_int i = 0; i < nodes_count; i++ )
         {
-        wago_node *nd = nodes[ i ];
-        if ( nd->type == wago_node::T_750_820x ) // KBus
+        io_node *nd = nodes[ i ];
+        if ( nd->type == io_node::WAGO_750_820x ) // KBus
             {
             // DO
             int start_pos = nd->AO_size;
@@ -290,10 +290,10 @@ int wago_manager_PFC200::write_outputs()
             adi->WriteBytes( kbus_device_id, task_id, 0, size, pd_out );
             adi->WriteEnd( kbus_device_id, task_id );      // Unlock PD-In data.
 
-            }// if ( nd->type == wago_node::T_750_820x ) // KBus
+            }// if ( nd->type == io_node::T_750_820x ) // KBus
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
-    return wago_manager_linux::write_outputs();
+    return io_manager_linux::write_outputs();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
