@@ -214,8 +214,7 @@ int io_manager_linux::write_outputs()
                 buff[ 11 ] = bytes_cnt / 2 & 0xFF;
                 buff[ 12 ] = bytes_cnt;
 
-                int l = 0;
-                for ( unsigned int idx = 0; idx < nd->AO_cnt; idx++ )
+                for ( unsigned int idx = 0, l = 0; idx < nd->AO_cnt; idx++ )
                     {
                     switch ( nd->AO_types[ idx ] )
                         {
@@ -282,12 +281,31 @@ int io_manager_linux::write_outputs()
                 buff[ 11 ] = bytes_cnt / 2 & 0xFF;
                 buff[ 12 ] = bytes_cnt;
 
-                int l = 0;
-                for ( unsigned int idx = 0; idx < nd->AO_cnt; idx++ )
+                for (u_int j = 0, idx = 0; j < bytes_cnt; j++)
                     {
-                    buff[ 13 + l ] = (u_char)( ( nd->AO_[ idx ] >> 8 ) & 0xFF );
-                    buff[ 13 + l + 1 ] = (u_char)( nd->AO_[ idx ] & 0xFF );
-                    l += 2;
+                    u_char b = 0;
+                    for (u_int k = 0; k < 8; k++)
+                        {
+                        b = b | (nd->DO_[idx] & 1) << k;
+                        idx++;
+                        }
+                    buff[j + 13] = b;
+                    }
+
+                for (unsigned int idx = 0, l = 0; idx < nd->AO_cnt; idx++)
+                    {
+                    switch (nd->AO_types[idx])
+                        {
+                    case 1027843:           //IOL8
+                        buff[13 + l] = (u_char) ((nd->AO_[idx] >> 8) & 0xFF);
+                        buff[13 + l + 1] = (u_char) (nd->AO_[idx] & 0xFF);
+                        l += 2;
+                        break;
+
+                    default:
+                        l += 2;
+                        break;
+                        }
                     }
 
                 if ( e_communicate( nd, bytes_cnt + 13, 12 ) == 0 )
@@ -295,6 +313,7 @@ int io_manager_linux::write_outputs()
                     if ( buff[ 7 ] == 0x10 )
                         {
                         memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
+                        memcpy( nd->DO, nd->DO_, nd->DO_cnt );
                         }
                     }// if ( e_communicate( nd, 2 * bytes_cnt + 13, 12 ) == 0 )
                 else
