@@ -1,5 +1,5 @@
 /// @file l_wago.h
-/// @brief Работа с Wago для OC Linux.
+/// @brief Работа с I/O узлами для OC Linux.
 ///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
@@ -17,16 +17,16 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "wago.h"
+#include "bus_coupler_io.h"
 
 #include "dtime.h"
 #include "PAC_err.h"
 #include "l_tcp_cmctr.h"
 //-----------------------------------------------------------------------------
-/// @brief Работа с модулями ввода/вывода Wago для OC Linux.
+/// @brief Работа с модулями ввода/вывода для OC Linux.
 ///
 ///
-class wago_manager_linux : public wago_manager
+class io_manager_linux : public io_manager
     {
     protected:
         enum CONST
@@ -36,36 +36,36 @@ class wago_manager_linux : public wago_manager
 
         u_char buff[ BUFF_SIZE ];
 
-        /// @brief Инициализация соединения с узлом wago.
+        /// @brief Инициализация соединения с узлом I/O.
         ///
-        /// @param node - узел wago, с которым осуществляется соединение.
+        /// @param node - узел I/O, с которым осуществляется соединение.
         ///
         /// @return -   0 - ок.
         /// @return - < 0 - ошибка.
-        int net_init( wago_node *node );
+        int net_init( io_node *node );
 
-        /// @brief Обмен с узлом wago.
+        /// @brief Обмен с узлом I/O.
         ///
-        /// @param node             - узел wago, с которым осуществляется обмен.
+        /// @param node             - узел I/O, с которым осуществляется обмен.
         /// @param bytes_to_send    - размер данных для отсылки.
         /// @param bytes_to_receive - размер данных для получения.
         ///
         /// @return -   0 - ок.
         /// @return - < 0 - ошибка.
-        int e_communicate( wago_node *node, int bytes_to_send, int bytes_to_receive );
+        int e_communicate( io_node *node, int bytes_to_send, int bytes_to_receive );
 
         int read_inputs();
         int write_outputs();
 
     public:
-        wago_manager_linux();
+        io_manager_linux();
 
-        virtual ~wago_manager_linux();
+        virtual ~io_manager_linux();
 
-		/// @brief Отключение от узла wago.
+		/// @brief Отключение от узла.
 		///
-		/// @param node - узел wago, от которого отключаемся.
-		void disconnect(wago_node *node) override;
+		/// @param node - узел, от которого отключаемся.
+		void disconnect(io_node *node) override;
     };
 //-----------------------------------------------------------------------------
 #endif // WAGO_L_H

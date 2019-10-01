@@ -11,26 +11,26 @@
 /// @$Author$.\n
 /// @$Date::                     $.
 
-#ifndef WAGO_PC_H
-#define WAGO_PC_H
+#ifndef IO_PC_H
+#define IO_PC_H
 
-#include "wago.h"
+#include "bus_coupler_io.h"
 
 //-----------------------------------------------------------------------------
 /// @brief Работа с модулями ввода/вывода Wago для PC.
 ///
 ///
-class wago_manager_PC : public wago_manager
+class io_manager_PC : public io_manager
     {
     public:
-        wago_manager_PC();
+        io_manager_PC();
 
-        virtual ~wago_manager_PC();
+        virtual ~io_manager_PC();
 
         int read_inputs();
         int write_outputs();
     };
 //-----------------------------------------------------------------------------
-#endif // WAGO_PC_H
+#endif // IO_PC_H
 
 

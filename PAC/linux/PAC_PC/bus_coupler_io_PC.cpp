@@ -1,23 +1,23 @@
 #include <unistd.h>
 
-#include "wago_PC.h"
+#include "bus_coupler_io_PC.h"
 #include "PAC_err.h"
 
 //-----------------------------------------------------------------------------
-wago_manager_PC::wago_manager_PC()
+io_manager_PC::io_manager_PC()
     {
     }
 //-----------------------------------------------------------------------------
-wago_manager_PC::~wago_manager_PC()
+io_manager_PC::~io_manager_PC()
     {
     }
 //-----------------------------------------------------------------------------
-int wago_manager_PC::read_inputs()
+int io_manager_PC::read_inputs()
     {
     return 0;
     }
 //-----------------------------------------------------------------------------
-int wago_manager_PC::write_outputs()
+int io_manager_PC::write_outputs()
     {
     return 0;
     }

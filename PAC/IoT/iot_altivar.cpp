@@ -104,7 +104,7 @@ altivar_node::~altivar_node()
 
 void altivar_node::Evaluate()
 	{
-#ifndef DEBUG_NO_WAGO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
 	int commres;
 	if (enabled)
 		{

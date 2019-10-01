@@ -1,12 +1,12 @@
 #include <errno.h>
 
-#include "l_wago.h"
+#include "l_bus_coupler_io.h"
 #include "log.h"
 
 
 extern int errno;
 //-----------------------------------------------------------------------------
-int wago_manager_linux::net_init( wago_node* node )
+int io_manager_linux::net_init( io_node* node )
     {
     int type = SOCK_STREAM;
     int protocol = 0; /* всегда 0 */
@@ -16,7 +16,7 @@ int wago_manager_linux::net_init( wago_node* node )
     if ( sock < 0 )
         {
         sprintf( G_LOG->msg,
-            "Network communication : can't create wago node socket : %s.",
+            "Network communication : can't create I/O node socket : %s.",
             strerror( errno ) );
         G_LOG->write_log( i_log::P_CRIT );
 
@@ -36,7 +36,7 @@ int wago_manager_linux::net_init( wago_node* node )
     if ( setsockopt( sock, SOL_SOCKET, SO_REUSEADDR, &C_ON, sizeof( C_ON ) ) )
         {
         sprintf( G_LOG->msg,
-            "Network communication : can't setsockopt wago node socket : %s.",
+            "Network communication : can't setsockopt I/O node socket : %s.",
             strerror( errno ) );
         G_LOG->write_log( i_log::P_CRIT );
 
@@ -49,7 +49,7 @@ int wago_manager_linux::net_init( wago_node* node )
     if ( err != 0 )
         {
         sprintf( G_LOG->msg,
-            "Network communication : can't fcntl wago node socket : %s.",
+            "Network communication : can't fcntl I/O node socket : %s.",
             strerror( errno ) );
         G_LOG->write_log( i_log::P_CRIT );
 
@@ -67,7 +67,7 @@ int wago_manager_linux::net_init( wago_node* node )
     FD_SET( sock, &rdevents );
 
     tv.tv_sec = 0;
-    tv.tv_usec = wago_node::C_CNT_TIMEOUT_US;
+    tv.tv_usec = io_node::C_CNT_TIMEOUT_US;
 
     err = select( sock + 1, 0, &rdevents, 0, &tv );
 
@@ -89,7 +89,7 @@ int wago_manager_linux::net_init( wago_node* node )
                     "Network device : s%d->\"%s\":\"%s\""
                     " can't connect : timeout (%d ms).",
                     sock, node->name, node->ip_address,
-                    wago_node::C_CNT_TIMEOUT_US / 1000 );
+                    io_node::C_CNT_TIMEOUT_US / 1000 );
 
                 G_LOG->write_log( i_log::P_CRIT );
                 }
@@ -123,25 +123,25 @@ int wago_manager_linux::net_init( wago_node* node )
 
     if ( G_DEBUG )
         {
-        printf( "wago_manager_linux:net_init() : socket %d is successfully"
+        printf( "io_manager_linux:net_init() : socket %d is successfully"
             " connected to \"%s\":\"%s\":%d\n",
             sock, node->name, node->ip_address, PORT );
         }
 
     node->sock = sock;
-    node->state = wago_node::ST_OK;
+    node->state = io_node::ST_OK;
 
     return 0;
     }
 //-----------------------------------------------------------------------------
-int wago_manager_linux::write_outputs()
+int io_manager_linux::write_outputs()
     {
     if ( 0 == nodes_count ) return 0;
 
     for ( u_int i = 0; i < nodes_count; i++ )
         {
-        wago_node* nd = nodes[ i ];
-        if ( nd->type == wago_node::T_750_XXX_ETHERNET )
+        io_node* nd = nodes[ i ];
+        if ( nd->type == io_node::WAGO_750_XXX_ETHERNET )
             {
             if ( !nd->is_active )
                 {
@@ -191,7 +191,7 @@ int wago_manager_linux::write_outputs()
                     {
                     if ( G_DEBUG )
                         {
-                        //printf("\nWrite DO:Wago returned error...\n");
+                        //printf("\nWrite DO: returned error...\n");
                         }
                     }
                 }// if ( nd->DO_cnt > 0 )
@@ -214,8 +214,7 @@ int wago_manager_linux::write_outputs()
                 buff[ 11 ] = bytes_cnt / 2 & 0xFF;
                 buff[ 12 ] = bytes_cnt;
 
-                int l = 0;
-                for ( unsigned int idx = 0; idx < nd->AO_cnt; idx++ )
+                for ( unsigned int idx = 0, l = 0; idx < nd->AO_cnt; idx++ )
                     {
                     switch ( nd->AO_types[ idx ] )
                         {
@@ -246,29 +245,104 @@ int wago_manager_linux::write_outputs()
                     {
                     if ( G_DEBUG )
                         {
-                        //printf("\nWrite AO:Wago returned error...\n");
+                        //printf("\nWrite AO: returned error...\n");
                         }
                     }
                 }// if ( nd->AO_cnt > 0 )
 
-            }// if ( nd->type == wago_node::T_750_341 || ...
+            }// if ( nd->type == io_node::T_750_341 || ...
+        }// for ( u_int i = 0; i < nodes_count; i++ )
+
+    for ( u_int i = 0; i < nodes_count; i++ )
+        {
+        io_node* nd = nodes[ i ];
+        if ( nd->type == io_node::PHOENIX_BK_ETH )
+            {
+            if ( !nd->is_active )
+                {
+                continue;
+                }
+
+            if ( nd->AO_cnt > 0 )
+                {
+                u_int bytes_cnt = nd->AO_size;
+
+                buff[ 0 ] = 's';
+                buff[ 1 ] = 's';
+                buff[ 2 ] = 0;
+                buff[ 3 ] = 0;
+                buff[ 4 ] = 0;
+                buff[ 5 ] = 7 + bytes_cnt;
+                buff[ 6 ] = 0; //nodes[ i ]->number;
+                buff[ 7 ] = 0x10;
+                buff[ 8 ] = 28;
+                buff[ 9 ] = 23;
+                buff[ 10 ] = bytes_cnt / 2 >> 8;
+                buff[ 11 ] = bytes_cnt / 2 & 0xFF;
+                buff[ 12 ] = bytes_cnt;
+
+                for (u_int j = 0, idx = 0; j < bytes_cnt; j++)
+                    {
+                    u_char b = 0;
+                    for (u_int k = 0; k < 8; k++)
+                        {
+                        b = b | (nd->DO_[idx] & 1) << k;
+                        idx++;
+                        }
+                    buff[j + 13] = b;
+                    }
+
+                for (unsigned int idx = 0, l = 0; idx < nd->AO_cnt; idx++)
+                    {
+                    switch (nd->AO_types[idx])
+                        {
+                    case 1027843:           //IOL8
+                        buff[13 + l] = (u_char) ((nd->AO_[idx] >> 8) & 0xFF);
+                        buff[13 + l + 1] = (u_char) (nd->AO_[idx] & 0xFF);
+                        l += 2;
+                        break;
+
+                    default:
+                        l += 2;
+                        break;
+                        }
+                    }
+
+                if ( e_communicate( nd, bytes_cnt + 13, 12 ) == 0 )
+                    {
+                    if ( buff[ 7 ] == 0x10 )
+                        {
+                        memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
+                        memcpy( nd->DO, nd->DO_, nd->DO_cnt );
+                        }
+                    }// if ( e_communicate( nd, 2 * bytes_cnt + 13, 12 ) == 0 )
+                else
+                    {
+                    if ( G_DEBUG )
+                        {
+                        //printf("\nWrite AO: returned error...\n");
+                        }
+                    }
+                }// if ( nd->AO_cnt > 0 )
+
+            }// if ( nd->type == io_node::T_750_341 || ...
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
     return 0;
     }
 //-----------------------------------------------------------------------------
-int wago_manager_linux::e_communicate( wago_node* node, int bytes_to_send,
+int io_manager_linux::e_communicate( io_node* node, int bytes_to_send,
     int bytes_to_receive )
     {
-    // Проверка связи с узлом Wago.
-    if ( get_delta_millisec( node->last_poll_time ) > wago_node::C_MAX_WAIT_TIME )
+    // Проверка связи с узлом I/O.
+    if ( get_delta_millisec( node->last_poll_time ) > io_node::C_MAX_WAIT_TIME )
         {
         if ( false == node->is_set_err )
             {
             node->is_set_err = true;
             PAC_critical_errors_manager::get_instance()->set_global_error(
                 PAC_critical_errors_manager::AC_NO_CONNECTION,
-                PAC_critical_errors_manager::AS_WAGO, node->number );
+                PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
             }
         }
     else
@@ -278,13 +352,13 @@ int wago_manager_linux::e_communicate( wago_node* node, int bytes_to_send,
             node->is_set_err = false;
             PAC_critical_errors_manager::get_instance()->reset_global_error(
                 PAC_critical_errors_manager::PAC_critical_errors_manager::AC_NO_CONNECTION,
-                PAC_critical_errors_manager::AS_WAGO, node->number );
+                PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
             }
         }
-    // Проверка связи с узлом Wago.-!>
+    // Проверка связи с узлом I/O.-!>
 
     // Инициализация сетевого соединения, при необходимости.
-    if ( node->state != wago_node::ST_OK )
+    if ( node->state != io_node::ST_OK )
         {
         if ( get_delta_millisec( node->last_init_time ) < node->delay_time )
             {
@@ -292,10 +366,10 @@ int wago_manager_linux::e_communicate( wago_node* node, int bytes_to_send,
             }
 
         net_init( node );
-        if ( node->state != wago_node::ST_OK )
+        if ( node->state != io_node::ST_OK )
             {
             node->last_init_time = get_millisec();
-            if ( node->delay_time < wago_node::C_MAX_DELAY )
+            if ( node->delay_time < io_node::C_MAX_DELAY )
                 {
                 node->delay_time += 10000 + node->number * 200;
                 }
@@ -308,7 +382,7 @@ int wago_manager_linux::e_communicate( wago_node* node, int bytes_to_send,
 
     // Посылка данных.
     int res = tcp_communicator_linux::sendall( node->sock, buff,
-        bytes_to_send, 0, wago_node::C_RCV_TIMEOUT_US, node->ip_address,
+        bytes_to_send, 0, io_node::C_RCV_TIMEOUT_US, node->ip_address,
         node->name, &node->send_stat );
 
     if ( res < 0 )
@@ -319,7 +393,7 @@ int wago_manager_linux::e_communicate( wago_node* node, int bytes_to_send,
 
     // Получение данных.
     res = tcp_communicator_linux::recvtimeout( node->sock, buff,
-        bytes_to_receive, 0, wago_node::C_RCV_TIMEOUT_US, node->ip_address,
+        bytes_to_receive, 0, io_node::C_RCV_TIMEOUT_US, node->ip_address,
         node->name, &node->recv_stat );
 
     if ( res <= 0 ) /* read error */
@@ -332,15 +406,15 @@ int wago_manager_linux::e_communicate( wago_node* node, int bytes_to_send,
     return 0;
     }
 //-----------------------------------------------------------------------------
-int wago_manager_linux::read_inputs()
+int io_manager_linux::read_inputs()
     {
     if ( 0 == nodes_count ) return 0;
 
-    for ( u_int i = 0; i < nodes_count; i++ )
+    for (u_int i = 0; i < nodes_count; i++ )
         {
-        wago_node* nd = nodes[ i ];
+        io_node* nd = nodes[ i ];
 
-        if ( nd->type == wago_node::T_750_XXX_ETHERNET ) // Ethernet Wago nodes.
+        if ( nd->type == io_node::WAGO_750_XXX_ETHERNET ) // Ethernet I/O nodes.
             {
             if ( !nd->is_active )
                 {
@@ -388,9 +462,13 @@ int wago_manager_linux::read_inputs()
                         }
                     else
                         {
+                        sprintf( G_LOG->msg, "Read DI:bus coupler returned error. Node %d)",
+                            nd->number );
+                        G_LOG->write_log( i_log::P_ERR );
+
                         if ( G_DEBUG )
                             {
-                            //printf("\nRead DI:Wago returned error...\n");
+                            //printf("\nRead DI:I/O returned error...\n");
                             }
                         }
                     }// if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
@@ -439,24 +517,85 @@ int wago_manager_linux::read_inputs()
                         }
                     else
                         {
-                        if ( G_DEBUG )
-                            {
-                            printf( "\nRead AI:Wago returned error. Node %d.\n",
-                                nd->number );
-                            printf( "bytes_cnt = %d, %d %d \n",
-                                (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
-                            }
+                        sprintf( G_LOG->msg, "Read AI:bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
+                            nd->number, (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
+                        G_LOG->write_log( i_log::P_ERR );
                         }
                     }
                 }// if ( nd->AI_cnt > 0 )
 
-            }// if ( nd->type == wago_node::T_750_341 || ...
+            }// if ( nd->type == io_node::T_750_341 || ...
+        }// for ( u_int i = 0; i < nodes_count; i++ )
+
+    for ( u_int i = 0; i < nodes_count; i++ )
+        {
+        io_node* nd = nodes[ i ];
+
+        if ( nd->type == io_node::PHOENIX_BK_ETH ) // Ethernet I/O nodes.
+            {
+            if ( !nd->is_active )
+                {
+                continue;
+                }
+
+            if ( nd->AI_cnt > 0 )
+                {
+                buff[ 0 ] = 's';
+                buff[ 1 ] = 's';
+                buff[ 2 ] = 0;
+                buff[ 3 ] = 0;
+                buff[ 4 ] = 0;
+                buff[ 5 ] = 6;
+                buff[ 6 ] = 0; //nd->number;
+                buff[ 7 ] = 0x04;
+                buff[ 8 ] = 0x1F;
+                buff[ 9 ] = 0x40;
+
+                u_int bytes_cnt = nd->AI_size;
+
+                buff[ 10 ] = (unsigned char)bytes_cnt / 2 >> 8;
+                buff[ 11 ] = (unsigned char)bytes_cnt / 2 & 0xFF;
+
+                if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
+                    {
+                    if ( buff[ 7 ] == 0x04 && buff[ 8 ] == bytes_cnt )
+                        {
+                        for ( u_int l = 0, idx = 0; l < nd->AI_cnt; l++ )
+                            {
+                            nd->AI[l] = 256 * buff[9 + idx] + buff[9 + idx + 1];
+                            idx += 2;
+                            }
+
+                        for (u_int j = 0, idx = 0; j < bytes_cnt; j++)
+                            {
+                            for (int k = 0; k < 8; k++)
+                                {
+                                nd->DI[idx] = (buff[j + 9] >> k) & 1;
+#ifdef DEBUG_BK
+                                sprintf( G_LOG->msg, "%d %d", idx, (buff[j + 9] >> k) & 1);
+                                G_LOG->write_log(i_log::P_NOTICE);
+#endif // DEBUG_BK
+                                idx++;
+                                }
+                            }
+
+                        }
+                    else
+                        {
+                        sprintf( G_LOG->msg, "Read AI:bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
+                            nd->number, (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
+                        G_LOG->write_log( i_log::P_ERR );
+                        }
+                    }
+                }// if ( nd->AI_cnt > 0 )
+
+            }// if ( nd->type == io_node::T_750_341 || ...
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
     return 0;
     }
 //-----------------------------------------------------------------------------
-void wago_manager_linux::disconnect( wago_node* node )
+void io_manager_linux::disconnect( io_node* node )
     {
     if ( node->sock )
         {
@@ -464,14 +603,14 @@ void wago_manager_linux::disconnect( wago_node* node )
         close( node->sock );
         node->sock = 0;
         }
-    node->state = wago_node::ST_NO_CONNECT;
+    node->state = io_node::ST_NO_CONNECT;
     }
 //-----------------------------------------------------------------------------
-wago_manager_linux::wago_manager_linux()
+io_manager_linux::io_manager_linux()
     {
     }
 //-----------------------------------------------------------------------------
-wago_manager_linux::~wago_manager_linux()
+io_manager_linux::~io_manager_linux()
     {
     }
 //-----------------------------------------------------------------------------

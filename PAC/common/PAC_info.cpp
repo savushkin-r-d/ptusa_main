@@ -5,7 +5,7 @@
 
 #include "lua_manager.h"
 
-#include "wago.h"
+#include "bus_coupler_io.h"
 
 auto_smart_ptr < PAC_info > PAC_info::instance;///< Ёкземпл€р класса.
 
@@ -129,10 +129,10 @@ int PAC_info::save_device( char* buff )
 
     answer_size += sprintf( buff + answer_size, "\tNODEENABLED = \n\t{\n\t" );
 
-    unsigned int nc = wago_manager::get_instance()->get_nodes_count();
+    unsigned int nc = io_manager::get_instance()->get_nodes_count();
     for ( unsigned int i = 0; i < nc; i++ )
         {
-        wago_manager::wago_node* wn = wago_manager::get_instance()->get_node( i );
+        io_manager::io_node* wn = io_manager::get_instance()->get_node( i );
         answer_size += sprintf( buff + answer_size, wn->is_active ? "1, " : "0, " );
         }
     answer_size += sprintf( buff + answer_size, "\n\t},\n" );
@@ -249,9 +249,9 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
     if ( strcmp( prop, "NODEENABLED" ) == 0 )
         {
         unsigned int noden = idx;
-        if ( idx <= wago_manager::get_instance()->get_nodes_count() )
+        if ( idx <= io_manager::get_instance()->get_nodes_count() )
             {
-            wago_manager::wago_node* wn = wago_manager::get_instance()->get_node( idx - 1 );
+            io_manager::io_node* wn = io_manager::get_instance()->get_node( idx - 1 );
             if ( 1 == val )
                 {
                 if ( !wn->is_active )
@@ -260,24 +260,24 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                     }
                 PAC_critical_errors_manager::get_instance()->reset_global_error(
                     PAC_critical_errors_manager::AC_SERVICE,
-                    PAC_critical_errors_manager::AS_WAGO, wn->number );
+                    PAC_critical_errors_manager::AS_IO_COUPLER, wn->number );
                 }
             if ( 0 == val )
                 {
                 if ( wn->is_active )
                     {
-                    wago_manager::get_instance()->disconnect( wn );
+                    io_manager::get_instance()->disconnect( wn );
                     wn->is_active = 0;
                     }
                 PAC_critical_errors_manager::get_instance()->set_global_error(
                     PAC_critical_errors_manager::AC_SERVICE,
-                    PAC_critical_errors_manager::AS_WAGO, wn->number );
+                    PAC_critical_errors_manager::AS_IO_COUPLER, wn->number );
                 }
             if ( 100 == val ) //—брос ошибки.
                 {
                 PAC_critical_errors_manager::get_instance()->reset_global_error(
                     PAC_critical_errors_manager::AC_SERVICE,
-                    PAC_critical_errors_manager::AS_WAGO, wn->number );
+                    PAC_critical_errors_manager::AS_IO_COUPLER, wn->number );
                 }
             }
         }
@@ -287,7 +287,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
 
 bool PAC_info::is_emulator()
     {
-#ifdef DEBUG_NO_WAGO_MODULES
+#ifdef DEBUG_NO_IO_MODULES
     return true;
 #else
     return false;
