@@ -1,10 +1,10 @@
-/// @par Описание директив препроцессора:
-/// @c LINUX_OS         - компиляция для ОС Linux.
-/// @par Тип PAC:
-/// @c PAC_PC           - PAC на PC с ОС Linux.
+/// @par РћРїРёСЃР°РЅРёРµ РґРёСЂРµРєС‚РёРІ РїСЂРµРїСЂРѕС†РµСЃСЃРѕСЂР°:
+/// @c LINUX_OS         - РєРѕРјРїРёР»СЏС†РёСЏ РґР»СЏ РћРЎ Linux.
+/// @par РўРёРї PAC:
+/// @c PAC_PC           - PAC РЅР° PC СЃ РћРЎ Linux.
 /// @c PAC_WAGO_750_860 - PAC Wago 750-860.
 ///
-/// @c WIN_OS           - компиляция для ОС Windows.
+/// @c WIN_OS           - РєРѕРјРїРёР»СЏС†РёСЏ РґР»СЏ РћРЎ Windows.
 ///
 
 #include <stdlib.h>
@@ -37,7 +37,9 @@
 #include "rfid_reader.h"
 #endif
 
-int G_DEBUG = 0; //Вывод дополнительной отладочной информации.
+int G_DEBUG = 0; //Р’С‹РІРѕРґ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕР№ РѕС‚Р»Р°РґРѕС‡РЅРѕР№ РёРЅС„РѕСЂРјР°С†РёРё.
+int G_USE_LOG = 0; //Р’С‹РІРѕРґ РІ СЃРёСЃС‚РµРјРЅС‹Р№ Р»РѕРі (syslog).
+
 
 int running = 1;
 static void stopHandler(int sig)
@@ -71,9 +73,9 @@ int main( int argc, const char *argv[] )
 
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
-    int res = G_LUA_MANAGER->init( 0, argv[ 1 ] ); //-Инициализация Lua.
+    int res = G_LUA_MANAGER->init( 0, argv[ 1 ] ); //-РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Lua.
 
-    if ( res ) //-Ошибка инициализации.
+    if ( res ) //-РћС€РёР±РєР° РёРЅРёС†РёР°Р»РёР·Р°С†РёРё.
         {
         sprintf( G_LOG->msg, "Lua init returned error code %d!", res );
         G_LOG->write_log( i_log::P_ALERT );
@@ -110,7 +112,7 @@ int main( int argc, const char *argv[] )
         }
 #endif
 
-    //Инициализация дополнительных устройств
+    //РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹С… СѓСЃС‚СЂРѕР№СЃС‚РІ
     IOT_INIT();
 
     sprintf( G_LOG->msg, "Starting main loop! Sleep time is %li ms.",
@@ -157,7 +159,7 @@ int main( int argc, const char *argv[] )
 #ifdef OPCUA
         OPCUAServer::getInstance().Evaluate();
 #endif
-        //Основной цикл работы с дополнительными устройствами
+        //РћСЃРЅРѕРІРЅРѕР№ С†РёРєР» СЂР°Р±РѕС‚С‹ СЃ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹РјРё СѓСЃС‚СЂРѕР№СЃС‚РІР°РјРё
         IOT_EVALUATE();
 
         sleep_ms( sleep_time_ms );
@@ -169,7 +171,7 @@ int main( int argc, const char *argv[] )
         sleep_ms( sleep_time_ms );
 
 #ifdef RM_PAC
-        // Связь с удаленными PAC.
+        // РЎРІСЏР·СЊ СЃ СѓРґР°Р»РµРЅРЅС‹РјРё PAC.
         G_RM_MANAGER()->evaluate();
 #endif // RM_PAC
 
@@ -184,7 +186,7 @@ int main( int argc, const char *argv[] )
         u_int TRESH_AVG =
             G_PAC_INFO()->par[ PAC_info::P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME ];
 
-        //-Информация о времени выполнения цикла программы.!->
+        //-РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РІСЂРµРјРµРЅРё РІС‹РїРѕР»РЅРµРЅРёСЏ С†РёРєР»Р° РїСЂРѕРіСЂР°РјРјС‹.!->
         all_time += get_delta_millisec( st_time );
 
         static u_int cycle_time = 0;
@@ -236,13 +238,13 @@ int main( int argc, const char *argv[] )
             cycles_per_period 	     = 0;
             print_cycle_last_h       = timeInfo_->tm_hour;
             }
-        //-Информация о времени выполнения цикла программы.!->
+        //-РРЅС„РѕСЂРјР°С†РёСЏ Рѕ РІСЂРµРјРµРЅРё РІС‹РїРѕР»РЅРµРЅРёСЏ С†РёРєР»Р° РїСЂРѕРіСЂР°РјРјС‹.!->
 #endif // TEST_SPEED
         }
 #ifdef OPCUA
     OPCUAServer::getInstance().Shutdown();
 #endif
-    //Деинициализация дополнительных устройств.
+    //Р”РµРёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹С… СѓСЃС‚СЂРѕР№СЃС‚РІ.
     IOT_FINAL();
 
     return( EXIT_SUCCESS );

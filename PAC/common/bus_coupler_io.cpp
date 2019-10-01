@@ -125,8 +125,8 @@ float io_device::get_AO( u_int index, float min_value, float max_value )
 
         switch ( module_type )
             {
-            // Âûõîä ìîäóëÿ 554.
-            // Òðè íàèìåíåå çíà÷àùèõ áèòà íå ó÷èòûâàþòñÿ.
+            // Ð’Ñ‹Ñ…Ð¾Ð´ Ð¼Ð¾Ð´ÑƒÐ»Ñ 554.
+            // Ð¢Ñ€Ð¸ Ð½Ð°Ð¸Ð¼ÐµÐ½ÐµÐµ Ð·Ð½Ð°Ñ‡Ð°Ñ‰Ð¸Ñ… Ð±Ð¸Ñ‚Ð° Ð½Ðµ ÑƒÑ‡Ð¸Ñ‚Ñ‹Ð²Ð°ÑŽÑ‚ÑÑ.
             //    -----------------------------------------------------------------------
             //    Output          Output          Binary value
             //    current 0-20	  current 4-20                            Hex.      Dec.
@@ -247,11 +247,11 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
 
         switch ( module_type )
             {
-            // Âûõîä ìîäóëÿ 461.
-            // Âûõîä ìîäóëÿ 450, Pt100 Setting (IEC 751), Standard Format.
+            // Ð’Ñ‹Ñ…Ð¾Ð´ Ð¼Ð¾Ð´ÑƒÐ»Ñ 461.
+            // Ð’Ñ‹Ñ…Ð¾Ð´ Ð¼Ð¾Ð´ÑƒÐ»Ñ 450, Pt100 Setting (IEC 751), Standard Format.
             //   -------------------------------------------------------------------------
             //   Temperature  Voltage     Voltage     Binary value
-            //   °C           (Ohm)       (Ohm)                               Hex.     Dec.
+            //   Â°C           (Ohm)       (Ohm)                               Hex.     Dec.
             //   -------------------------------------------------------------------------
             //                >400
             //   850          390.481     1384,998    0010 0001 0011 0100     2134     8500
@@ -266,12 +266,12 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
             //
             case 461:
             case 450:
-                if ( val >= -2000 && val <= -1 ) // -0,1..-200 °C
+                if ( val >= -2000 && val <= -1 ) // -0,1..-200 Â°C
                     {
                     val *= 0.1f;
                     return val;
                     }
-                if ( val >= 0 && val < 8500 ) // 0..850 °C
+                if ( val >= 0 && val < 8500 ) // 0..850 Â°C
                     {
                     val *= 0.1f;
                     return val;
@@ -279,8 +279,8 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
 
                 return -1000;
 
-                // Âûõîä ìîäóëÿ 446.
-                // Òðè íàèìåíåå çíà÷àùèõ áèòà íå ó÷èòûâàþòñÿ.
+                // Ð’Ñ‹Ñ…Ð¾Ð´ Ð¼Ð¾Ð´ÑƒÐ»Ñ 446.
+                // Ð¢Ñ€Ð¸ Ð½Ð°Ð¸Ð¼ÐµÐ½ÐµÐµ Ð·Ð½Ð°Ñ‡Ð°Ñ‰Ð¸Ñ… Ð±Ð¸Ñ‚Ð° Ð½Ðµ ÑƒÑ‡Ð¸Ñ‚Ñ‹Ð²Ð°ÑŽÑ‚ÑÑ.
                 //    -----------------------------------------------------------------------
                 //    Input           Input           Binary value
                 //    current 0-20	  current 4-20                            Hex.      Dec.
@@ -315,7 +315,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
 
                 return val;
 
-                //Òåíçîðåçèñòîð
+                //Ð¢ÐµÐ½Ð·Ð¾Ñ€ÐµÐ·Ð¸ÑÑ‚Ð¾Ñ€
                 // Process values of module 750-491
                 //Signal           Numerical value
                 //voltage UD       binary
@@ -708,7 +708,7 @@ io_manager* io_manager::get_instance()
 #endif // defined LINUX_OS && defined PAC_WAGO_750_860
 
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
-        instance = newio_manager_PFC200();
+        instance = new io_manager_PFC200();
 #endif // defined LINUX_OS && defined PAC_WAGO_750_860
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
@@ -972,7 +972,7 @@ io_manager::io_node::io_node( int type, int number, char *str_ip_address,
         {
         is_active = false;
         sprintf( G_LOG->msg,
-            "Óçåë \"%s\" îòêëþ÷åí, òàê êàê íå çàäàí åãî IP àäðåñ.", name );
+            "Ð£Ð·ÐµÐ» \"%s\" Ð¾Ñ‚ÐºÐ»ÑŽÑ‡ÐµÐ½, Ñ‚Ð°Ðº ÐºÐ°Ðº Ð½Ðµ Ð·Ð°Ð´Ð°Ð½ ÐµÐ³Ð¾ IP Ð°Ð´Ñ€ÐµÑ.", name );
         G_LOG->write_log( i_log::P_NOTICE );
         }
 
@@ -980,7 +980,7 @@ io_manager::io_node::io_node( int type, int number, char *str_ip_address,
         {
         is_active = false;
         sprintf( G_LOG->msg,
-            "Óçåë \"%s\" îòêëþ÷åí, òàê êàê íå çàäàí åãî òèï.", name );
+            "Ð£Ð·ÐµÐ» \"%s\" Ð¾Ñ‚ÐºÐ»ÑŽÑ‡ÐµÐ½, Ñ‚Ð°Ðº ÐºÐ°Ðº Ð½Ðµ Ð·Ð°Ð´Ð°Ð½ ÐµÐ³Ð¾ Ñ‚Ð¸Ð¿.", name );
         G_LOG->write_log( i_log::P_NOTICE );
         }
 
