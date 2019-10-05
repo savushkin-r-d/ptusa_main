@@ -485,6 +485,10 @@ class device : public i_DO_AO_device, public par_device
             //AI
             DST_AI = 1,    ///Обычный аналоговый вход с привязкой к модулям
             DST_AI_VIRT,   ///Виртуальный аналоговый вход(без привязки к модулям)
+
+            //PT
+            DST_PT = 1,      ///Обычный аналоговый датчик давления
+            DST_PT_IOLINK,   ///Датчик давления IOLInk
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -2478,6 +2482,47 @@ class pressure_e : public AI1
 
         float get_max_val();
         float get_min_val();
+
+    private:
+        enum CONSTANTS
+            {
+            ADDITIONAL_PARAM_COUNT = 2,
+
+            P_MIN_V = 1,   ///< Индекс параметра минимального значения.
+            P_MAX_V,       ///< Индекс параметра максимального значения.
+            };
+
+        u_int start_param_idx;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Текущее давление.
+class pressure_e_iolink : public AI1
+    {
+    public:
+    pressure_e_iolink( const char *dev_name ): AI1( dev_name, DT_PT, DST_PT_IOLINK,
+            ADDITIONAL_PARAM_COUNT, &start_param_idx )
+            {
+            set_par_name( P_MIN_V,  start_param_idx, "P_MIN_V" );
+            set_par_name( P_MAX_V,  start_param_idx, "P_MAX_V" );
+            }
+
+        float get_max_val();
+        float get_min_val();
+
+#ifndef DEBUG_NO_IO_MODULES
+        float get_value();
+        int get_state();
+#endif
+
+    private:
+        struct PT_data
+            {
+            char    st1 : 1;
+            char    st2 : 1;
+            int16_t v   : 14;
+            };
+
+        PT_data *info;
 
     private:
         enum CONSTANTS

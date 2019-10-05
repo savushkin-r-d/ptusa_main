@@ -319,10 +319,12 @@ int device::set_cmd( const char *prop, u_int idx, char *val )
 //-----------------------------------------------------------------------------
 int device::set_cmd( const char *prop, u_int idx, double val )
     {
-    if ( G_DEBUG )
+    if (G_DEBUG)
         {
-        printf( "%s\t device::set_cmd() - prop = %s, idx = %d, val = %f\n",
-            name, prop, idx, val );
+        sprintf( G_LOG->msg,
+                "%s\t device::set_cmd() - prop = %s, idx = %d, val = %f",
+                name, prop, idx, val);
+        G_LOG->write_log(i_log::P_DEBUG);
         }
 
     switch ( prop[ 0 ] )
@@ -920,8 +922,27 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_PT:
-            new_device      = new pressure_e( dev_name );
-            new_io_device = ( pressure_e* ) new_device;
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_PT:
+                    new_device      = new pressure_e( dev_name );
+                    new_io_device = ( pressure_e* ) new_device;
+                    break;
+
+                case device::DST_PT_IOLINK:
+                    new_device      = new pressure_e_iolink( dev_name );
+                    new_io_device = ( pressure_e_iolink* ) new_device;
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown QT device subtype %d!\n", dev_sub_type );
+                        }
+                    new_device = new dev_stub();
+                    break;
+                }
             break;
 
         case device::DT_QT:
@@ -2380,6 +2401,14 @@ void valve_iolink_vtug::direct_off()
         }
 
     u_int offset = ( vtug_number - 1 ) / 8;
+    if ( get_io_vendor() == WAGO )
+        {
+        }
+    else
+        {
+        offset = vtug_io_size - 1 - offset;
+        }
+
     data[ offset ] &= ~( 1 << ( ( vtug_number - 1 ) % 8 ) );
     }
 #endif // DEBUG_NO_IO_MODULES
@@ -3166,6 +3195,7 @@ float level_s_iolink::get_value()
 int level_s_iolink::get_state()
     {
     char* data = ( char* ) get_AI_data( 0 );
+
     if ( get_io_vendor() == WAGO )
         {
         int tmp = data[ 1 ] + 256 * data[ 0 ];
@@ -3260,6 +3290,54 @@ float pressure_e::get_min_val()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+float pressure_e_iolink::get_max_val()
+    {
+    return get_par( P_MAX_V, start_param_idx );
+    }
+//-----------------------------------------------------------------------------
+float pressure_e_iolink::get_min_val()
+    {
+    return get_par( P_MIN_V, start_param_idx );
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+
+float pressure_e_iolink::get_value()
+    {
+    char* data = (char*)get_AI_data( 0 );
+    if ( get_io_vendor() == WAGO )
+        {
+        int tmp = data[ 1 ] + 256 * data[ 0 ];
+        info = (PT_data*)&tmp;
+        }
+    else
+        {
+        info = (PT_data*) data;
+        }
+
+    return 0.001f * info->v;
+    }
+//-----------------------------------------------------------------------------
+int pressure_e_iolink::get_state()
+    {
+    char* data = (char*)get_AI_data( 0 );
+
+    if ( get_io_vendor() == WAGO )
+        {
+        int tmp = data[ 1 ] + 256 * data[ 0 ];
+        info = (PT_data*)&tmp;
+        }
+    else
+        {
+        info = (PT_data*) data;
+        }
+
+    return info->st1;
+    }
+
+#endif
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 float concentration_e::get_max_val()
     {
     return get_par( P_MAX_V, start_param_idx );
@@ -3318,6 +3396,7 @@ void concentration_e_iolink::evaluate()
             concentration_e_iolink* qt = *iter;
 
             char* data = (char*)qt->get_AI_data(0);
+
             const int SIZE = 12;
             if ( qt->get_io_vendor() == WAGO )
                 {
@@ -3325,20 +3404,37 @@ void concentration_e_iolink::evaluate()
                 }
             else
                 {
-                std::copy (data, data + SIZE, (char*) qt->info);
+                std::reverse_copy (data, data + SIZE, (char*) qt->info);
+
+#define swapb(x) ((unsigned short)x>>8) | (((unsigned short)x&0x00FF)<<8)
+
+                unsigned short *tmp = (unsigned short*) qt->info;
+                tmp[0] = swapb(tmp[0]);
+                tmp[1] = swapb(tmp[1]);
+                tmp[2] = swapb(tmp[2]);
+                tmp[3] = swapb(tmp[3]);
+                tmp[4] = swapb(tmp[4]);
+                tmp[5] = swapb(tmp[5]);
+                tmp[6] = swapb(tmp[6]);
                 }
 
 #ifdef DEBUG_IOLINK_QT
             char *tmp = (char*) qt->info;
-            printf( "%x %x %x %x %x %x %x %x %x %x %x %x\n",
+            sprintf( G_LOG->msg, "%x %x %x %x %x %x %x %x %x %x %x %x\n",
                 tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ],
                 tmp[ 4 ], tmp[ 5 ], tmp[ 6 ], tmp[ 7 ],
                 tmp[ 8 ], tmp[ 9 ], tmp[ 10 ], tmp[ 11 ] );
+            G_LOG->write_log( i_log::P_WARNING );
 
-            printf( "conductivity %u, temperature %u, status %x\n",
-                qt->info->conductivity, qt->info->temperature, qt->info->status );
-            printf( "conductivity %.3f, temperature %.1f, status %x\n",
-                qt->get_value(), qt->get_temperature(), qt->get_state() );
+            sprintf( G_LOG->msg, "conductivity %u, temperature %u, "
+                    "status %x\n", qt->info->conductivity,
+                    qt->info->temperature, qt->info->status);
+            G_LOG->write_log(i_log::P_NOTICE);
+
+            sprintf( G_LOG->msg,
+                    "conductivity %.3f, temperature %.1f, status %x\n",
+                    qt->get_value(), qt->get_temperature(), qt->get_state());
+            G_LOG->write_log(i_log::P_NOTICE);
 #endif
             }
         }
