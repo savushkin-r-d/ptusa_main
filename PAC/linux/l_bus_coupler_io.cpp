@@ -275,8 +275,8 @@ int io_manager_linux::write_outputs()
                 buff[ 5 ] = 7 + bytes_cnt;
                 buff[ 6 ] = 0; //nodes[ i ]->number;
                 buff[ 7 ] = 0x10;
-                buff[ 8 ] = 28;
-                buff[ 9 ] = 23;
+                buff[ 8 ] = 0x23;
+                buff[ 9 ] = 0x28;
                 buff[ 10 ] = bytes_cnt / 2 >> 8;
                 buff[ 11 ] = bytes_cnt / 2 & 0xFF;
                 buff[ 12 ] = bytes_cnt;
@@ -315,12 +315,22 @@ int io_manager_linux::write_outputs()
                         memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
                         memcpy( nd->DO, nd->DO_, nd->DO_cnt );
                         }
+                    else
+                        {
+                        if (G_DEBUG)
+                            {
+                            sprintf( G_LOG->msg, "Write AO: returned error %d",
+                                    buff[7]);
+                            G_LOG->write_log(i_log::P_ERR);
+                            }
+                        }
                     }// if ( e_communicate( nd, 2 * bytes_cnt + 13, 12 ) == 0 )
                 else
                     {
                     if ( G_DEBUG )
                         {
-                        //printf("\nWrite AO: returned error...\n");
+                        sprintf( G_LOG->msg, "Write AO: returned error");
+                        G_LOG->write_log(i_log::P_ERR);
                         }
                     }
                 }// if ( nd->AO_cnt > 0 )
@@ -564,6 +574,11 @@ int io_manager_linux::read_inputs()
                             {
                             nd->AI[l] = 256 * buff[9 + idx] + buff[9 + idx + 1];
                             idx += 2;
+
+#ifdef DEBUG_BK
+                            sprintf( G_LOG->msg, "%d %u", l, nd->AI[l]);
+                            G_LOG->write_log(i_log::P_WARNING );
+#endif // DEBUG_BK
                             }
 
                         for (u_int j = 0, idx = 0; j < bytes_cnt; j++)

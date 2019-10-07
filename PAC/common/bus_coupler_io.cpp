@@ -379,17 +379,26 @@ int_2* io_device::get_AI_data( u_int index )
 
     if ( G_DEBUG )
         {
-        print();
-        printf( "io_device->get_AI_data(...) - error! " );
-        printf( "index = %d, AI_channels.count = %d, "
-            "AI_channels.int_read_values = %d",
-            index, AI_channels.count, ( int ) AI_channels.int_read_values );
-        if ( AI_channels.int_read_values )
+        if ( G_USE_LOG )
             {
-            printf( ", AI_channels.int_read_values[ index ]=%d",
-                ( int ) AI_channels.int_read_values[ index ] );
+            sprintf( G_LOG->msg, "io_device->get_AI_data(...) - error");
+            G_LOG->write_log(i_log::P_ERR );
             }
-        printf( "\n" );
+        else
+            {
+            print();
+
+            printf("io_device->get_AI_data(...) - error! ");
+            printf("index = %d, AI_channels.count = %d, "
+                    "AI_channels.int_read_values = %d", index,
+                    AI_channels.count, (int) AI_channels.int_read_values);
+            if (AI_channels.int_read_values)
+                {
+                printf(", AI_channels.int_read_values[ index ]=%d",
+                        (int) AI_channels.int_read_values[index]);
+                }
+            printf("\n");
+            }
         }
 
     return 0;

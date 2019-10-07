@@ -15,8 +15,8 @@
 #include "error.h"
 #include "tech_def.h"
 
-int G_DEBUG   = 0; //Вывод дополнительной отладочной информации.
-int G_USE_LOG = 0; //Вывод в системный лог (syslog).
+int G_DEBUG   = 1; //Вывод дополнительной отладочной информации.
+int G_USE_LOG = 1; //Вывод в системный лог (syslog).
 
 namespace PtusaPLCnextEngineer
     {
@@ -90,6 +90,8 @@ namespace PtusaPLCnextEngineer
 
             valve::evaluate();
             valve_bottom_mix_proof::evaluate();
+            concentration_e_iolink::evaluate();
+
             G_TECH_OBJECT_MNGR()->evaluate();
             sleep_ms(sleep_time_ms);
 
@@ -112,6 +114,21 @@ namespace PtusaPLCnextEngineer
             G_ERRORS_MANAGER->evaluate();
             G_SIREN_LIGHTS_MANAGER()->eval();
             sleep_ms(sleep_time_ms);
+
+#ifdef TEST_DEVICE_N
+            auto dev_idx = TEST_DEVICE_N;
+            auto dev = DEVICE(dev_idx);
+            auto val = dev->get_value();
+            static auto prev_val = -0.1f;
+            if (val != prev_val)
+                {
+                sprintf( G_LOG->msg, "%s st = %d, val = %f", dev->get_name(),
+                        dev->get_state(), dev->get_value());
+                G_LOG->write_log(i_log::P_WARNING);
+
+                prev_val = val;
+                }
+#endif // TEST_DEVICE_N
 
 #ifdef RM_PAC
                // Связь с удаленными PAC.
