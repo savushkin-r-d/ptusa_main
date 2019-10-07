@@ -2517,9 +2517,9 @@ class pressure_e_iolink : public AI1
     private:
         struct PT_data
             {
-            char    st1 : 1;
-            char    st2 : 1;
-            int16_t v   : 14;
+            int16_t  st1 : 1;
+            int16_t  st2 : 1;
+            int16_t	 v   : 14;
             };
 
         PT_data *info;
