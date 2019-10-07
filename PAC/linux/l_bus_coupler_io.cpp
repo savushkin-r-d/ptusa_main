@@ -9,9 +9,9 @@ extern int errno;
 int io_manager_linux::net_init( io_node* node )
     {
     int type = SOCK_STREAM;
-    int protocol = 0; /* пїЅпїЅпїЅпїЅпїЅпїЅ 0 */
+    int protocol = 0; /* всегда 0 */
     int err;
-    int sock = err = socket( AF_INET, type, protocol ); // CпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
+    int sock = err = socket( AF_INET, type, protocol ); // Cоздание сокета.
 
     if ( sock < 0 )
         {
@@ -23,7 +23,7 @@ int io_manager_linux::net_init( io_node* node )
         return -4;
         }
 
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ-пїЅпїЅпїЅпїЅпїЅпїЅ.
+    // Адресация мастер-сокета.
     struct sockaddr_in socket_remote_server;
     const int PORT = 502;
     memset( &socket_remote_server, 0, sizeof( socket_remote_server ) );
@@ -44,7 +44,7 @@ int io_manager_linux::net_init( io_node* node )
         return -5;
         }
 
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.
+    // Переводим в неблокирующий режим.
     err = fcntl( sock, F_SETFL, O_NONBLOCK );
     if ( err != 0 )
         {
@@ -57,7 +57,7 @@ int io_manager_linux::net_init( io_node* node )
         return -5;
         }
 
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
+    // Привязка сокета. Сразу возвращает управление в неблокирующем режиме.
     err = connect( sock, ( struct sockaddr* ) & socket_remote_server,
         sizeof( socket_remote_server ) );
 
@@ -344,7 +344,7 @@ int io_manager_linux::write_outputs()
 int io_manager_linux::e_communicate( io_node* node, int bytes_to_send,
     int bytes_to_receive )
     {
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ I/O.
+    // Проверка связи с узлом I/O.
     if ( get_delta_millisec( node->last_poll_time ) > io_node::C_MAX_WAIT_TIME )
         {
         if ( false == node->is_set_err )
@@ -365,9 +365,9 @@ int io_manager_linux::e_communicate( io_node* node, int bytes_to_send,
                 PAC_critical_errors_manager::AS_IO_COUPLER, node->number );
             }
         }
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ I/O.-!>
+    // Проверка связи с узлом I/O.-!>
 
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+    // Инициализация сетевого соединения, при необходимости.
     if ( node->state != io_node::ST_OK )
         {
         if ( get_delta_millisec( node->last_init_time ) < node->delay_time )
@@ -386,11 +386,11 @@ int io_manager_linux::e_communicate( io_node* node, int bytes_to_send,
             return -100;
             }
         }
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.-!>
+    // Инициализация сетевого соединения, при необходимости.-!>
 
     node->delay_time = 0;
 
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
+    // Посылка данных.
     int res = tcp_communicator_linux::sendall( node->sock, buff,
         bytes_to_send, 0, io_node::C_RCV_TIMEOUT_US, node->ip_address,
         node->name, &node->send_stat );
@@ -401,7 +401,7 @@ int io_manager_linux::e_communicate( io_node* node, int bytes_to_send,
         return -101;
         }
 
-    // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
+    // Получение данных.
     res = tcp_communicator_linux::recvtimeout( node->sock, buff,
         bytes_to_receive, 0, io_node::C_RCV_TIMEOUT_US, node->ip_address,
         node->name, &node->recv_stat );
