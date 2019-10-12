@@ -1,4 +1,4 @@
-﻿#include <stdlib.h>
+#include <stdlib.h>
 
 #include "PtusaMainPrg.hpp"
 #include "Arp/System/Commons/Logging.h"
@@ -122,8 +122,11 @@ namespace PtusaPLCnextEngineer
             static auto prev_val = -0.1f;
             if (val != prev_val)
                 {
-                sprintf( G_LOG->msg, "%s st = %d, val = %f", dev->get_name(),
-                        dev->get_state(), dev->get_value());
+                std::stringstream ss;
+                ss << std::bitset < 8 * sizeof(int) > ((int) val);
+
+                sprintf( G_LOG->msg, "%s st = %d, val = %.4f %s", dev->get_name(),
+                        dev->get_state(), val, ss.str().c_str());
                 G_LOG->write_log(i_log::P_WARNING);
 
                 prev_val = val;
