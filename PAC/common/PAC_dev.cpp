@@ -16,24 +16,24 @@ std::vector<concentration_e_iolink*> concentration_e_iolink::qt_e_iolink;
 
 const char device::DEV_NAMES[][ 5 ] =
     {
-    "V",       ///< Êëàïàí.
-    "VC",      ///< Óïðàâëÿåìûé êëàïàí.
-    "M",       ///< Äâèãàòåëü.
-    "LS",      ///< Óðîâåíü (åñòü/íåò).
-    "TE",      ///< Òåìïåðàòóðà.
-    "FS",      ///< Ðàñõîä (åñòü/íåò).
-    "GS",      ///< Äàò÷èê ïîëîæåíèÿ.
-    "FQT",     ///< Ñ÷åò÷èê.
-    "LT",      ///< Óðîâåíü (çíà÷åíèå).
-    "QT",      ///< Êîíöåíòðàöèÿ.
+    "V",       ///< Клапан.
+    "VC",      ///< Управляемый клапан.
+    "M",       ///< Двигатель.
+    "LS",      ///< Уровень (есть/нет).
+    "TE",      ///< Температура.
+    "FS",      ///< Расход (есть/нет).
+    "GS",      ///< Датчик положения.
+    "FQT",     ///< Счетчик.
+    "LT",      ///< Уровень (значение).
+    "QT",      ///< Концентрация.
 
-    "HA",      ///< Àâàðèéíàÿ çâóêîâàÿ ñèãíàëèçàöèÿ.
-    "HL",      ///< Àâàðèéíàÿ ñâåòîâàÿ ñèãíàëèçàöèÿ.
-    "SB",      ///< Êíîïêà.
-    "DI",      ///< Äèñêðåòíûé âõîäíîé ñèãíàë.
-    "DO",      ///< Äèñêðåòíûé âûõîäíîé ñèãíàë.
-    "AI",      ///< Àíàëîãîâûé âõîäíîé ñèãíàë.
-    "AO",      ///< Àíàëîãîâûé âûõîäíîé ñèãíàë.
+    "HA",      ///< Аварийная звуковая сигнализация.
+    "HL",      ///< Аварийная световая сигнализация.
+    "SB",      ///< Кнопка.
+    "DI",      ///< Дискретный входной сигнал.
+    "DO",      ///< Дискретный выходной сигнал.
+    "AI",      ///< Аналоговый входной сигнал.
+    "AO",      ///< Аналоговый выходной сигнал.
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -204,7 +204,7 @@ void device::set_descr( const char *new_description )
     {
     delete[] description;
 
-    //Êîïèðîâàíèå ñ ó÷åòîì íóëü-ñèìâîëà.
+    //Копирование с учетом нуль-символа.
     int len = strlen( new_description ) + 1;
     description = new char[ len ];
     strcpy( description, new_description );
@@ -260,7 +260,7 @@ int device::save_device( char *buff, const char *prefix )
     res += par_device::save_device( buff + res );
 
     res -= 2;
-    buff[ res ] = 0; //Óáèðàåì ëèøíþþ ïîñëåäíþþ çàïÿòóþ è ïðîáåë.//
+    buff[ res ] = 0; //Убираем лишнюю последнюю запятую и пробел.//
 
     res += sprintf( buff + res, "},\n" );
 
@@ -341,7 +341,7 @@ int device::set_cmd( const char *prop, u_int idx, double val )
             is_manual_mode = val == 0. ? false : true;
             break;
 
-        case 'P': //Ïàðàìåòðû.
+        case 'P': //Параметры.
             par_device::set_cmd( prop, val );
             break;
 
@@ -1029,7 +1029,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             break;
         }
 
-    // Îøèáêè.
+    // Ошибки.
     G_ERRORS_MANAGER->add_error( new tech_dev_error( new_device ) );
 
     u_int new_dev_index = project_devices.size();
@@ -1118,7 +1118,7 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char *dev_
         u = dev_types_ranges[ dev_type ].end_pos;
         }
 
-    if ( -1 == l ) return -1; // Íåò óñòðîéñòâ.
+    if ( -1 == l ) return -1; // Нет устройств.
 
     while ( l <= u )
         {
@@ -1193,7 +1193,7 @@ void i_DO_device::set_state( int new_state )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-/// @brief Óñòàíîâêà òåêóùåãî ñîñòîÿíèÿ óñòðîéñòâà ñ ó÷åòîì ðó÷íîãî ðåæèìà.
+/// @brief Установка текущего состояния устройства с учетом ручного режима.
 void i_AO_device::set_value( float new_value )
     {
     if ( !get_manual_mode() )
@@ -1327,7 +1327,7 @@ void counter::print() const
 //-----------------------------------------------------------------------------
 void counter::pause()
     {
-    get_quantity(); // Ïåðåñ÷èòûâàåì çíà÷åíèå ñ÷åò÷èêà.
+    get_quantity(); // Пересчитываем значение счетчика.
 
     state = S_PAUSE;
     }
@@ -1494,23 +1494,23 @@ int counter_f::get_state()
 
         if ( 0 == is_pump_working )
             {
-            // Íàñîñ íå ðàáîòàåò.
+            // Насос не работает.
             start_pump_working_time = 0;
             }
         else
             {
-            // Íàñîñ ðàáîòàåò.
+            // Насос работает.
             if ( state == S_PAUSE )
                 {
                 start_pump_working_time = get_millisec();
                 }
-            else          // Ðàáîòà.
+            else          // Работа.
                 {
                 state = S_WORK;
 
                 if ( get_delta_millisec( start_pump_working_time ) > get_par( P_DT, 0 ) )
                     {
-                    // Ïðîâåðÿåì ñ÷åò÷èê íà îøèáêó - îí äîëæåí èçìåíèòü ñâîè ïîêàçàíèÿ.
+                    // Проверяем счетчик на ошибку - он должен изменить свои показания.
                     if ( get_quantity() == counter_prev_value )
                         {
                         state = S_ERROR;
@@ -1549,7 +1549,7 @@ float counter_f::get_flow()
 //-----------------------------------------------------------------------------
 void counter_f::set_property( const char* field, device* dev )
     {
-    if ( field && field[ 0 ] == 'M' ) //Ñâÿçàííûå íàñîñû.
+    if ( field && field[ 0 ] == 'M' ) //Связанные насосы.
         {
         motors.push_back( dev );
         }
@@ -1772,7 +1772,7 @@ int valve::get_state()
                 return VX_LOWER_SEAT_MANUAL;
                 }
 
-            //Îáðàòíàÿ ñâÿçü îòêëþ÷åíà.
+            //Обратная связь отключена.
             if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
                 {
                 return VX_LOWER_SEAT_FB_OFF;
@@ -1786,7 +1786,7 @@ int valve::get_state()
                 return VX_UPPER_SEAT_MANUAL;
                 }
 
-            //Îáðàòíàÿ ñâÿçü îòêëþ÷åíà.
+            //Обратная связь отключена.
             if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
                 {
                 return VX_UPPER_SEAT_FB_OFF;
@@ -1795,9 +1795,9 @@ int valve::get_state()
             return VX_UPPER_SEAT;
 
         case V_ON:
-            if ( is_off_fb || is_on_fb ) //Îáðàòíàÿ ñâÿçü åñòü.
+            if ( is_off_fb || is_on_fb ) //Обратная связь есть.
                 {
-                if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF ) //Îáðàòíàÿ ñâÿçü îòêëþ÷åíà.
+                if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF ) //Обратная связь отключена.
                     {
                     //start_switch_time = get_millisec();
 
@@ -1810,9 +1810,9 @@ int valve::get_state()
                         return VX_ON_FB_OFF;
                         }
                     }
-                else //Îáðàòíàÿ ñâÿçü âêëþ÷åíà.
+                else //Обратная связь включена.
                     {
-                    if ( get_manual_mode() ) //Ðó÷íîé ðåæèì âêëþ÷åí.
+                    if ( get_manual_mode() ) //Ручной режим включен.
                         {
                         if ( get_fb_state() == true )
                             {
@@ -1832,7 +1832,7 @@ int valve::get_state()
                                 }
                             }
                         } // if ( get_manual_mode() )
-                    else  //Ðó÷íîé ðåæèì îòêëþ÷åí.
+                    else  //Ручной режим отключен.
                         {
                         if ( get_fb_state() == true )
                             {
@@ -1853,8 +1853,8 @@ int valve::get_state()
                             }
                         }
                     }
-                }//if ( is_off_fb || is_on_fb ) //Îáðàòíàÿ ñâÿçü åñòü.
-            else //Îáðàòíîé ñâÿçè íåò.
+                }//if ( is_off_fb || is_on_fb ) //Обратная связь есть.
+            else //Обратной связи нет.
                 {
                 if ( get_manual_mode() )
                     {
@@ -1868,9 +1868,9 @@ int valve::get_state()
             break;
 
         case V_OFF:
-            if ( is_off_fb || is_on_fb ) //Îáðàòíàÿ ñâÿçü åñòü.
+            if ( is_off_fb || is_on_fb ) //Обратная связь есть.
                 {
-                if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF ) //Îáðàòíàÿ ñâÿçü îòêëþ÷åíà.
+                if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF ) //Обратная связь отключена.
                     {
                     //start_switch_time = get_millisec();
 
@@ -1883,9 +1883,9 @@ int valve::get_state()
                         return VX_OFF_FB_OFF;
                         }
                     }
-                else //Îáðàòíàÿ ñâÿçü âêëþ÷åíà.
+                else //Обратная связь включена.
                     {
-                    if ( get_manual_mode() ) //Ðó÷íîé ðåæèì âêëþ÷åí.
+                    if ( get_manual_mode() ) //Ручной режим включен.
                         {
                         if ( get_fb_state() == true )
                             {
@@ -1905,7 +1905,7 @@ int valve::get_state()
                                 }
                             }
                         } // if ( get_manual_mode() )
-                    else  //Ðó÷íîé ðåæèì îòêëþ÷åí.
+                    else  //Ручной режим отключен.
                         {
                         if ( get_fb_state() == true )
                             {
@@ -1926,8 +1926,8 @@ int valve::get_state()
                             }
                         }
                     }
-                }//if ( is_off_fb || is_on_fb ) //Îáðàòíàÿ ñâÿçü åñòü.
-            else //Îáðàòíîé ñâÿçè íåò.
+                }//if ( is_off_fb || is_on_fb ) //Обратная связь есть.
+            else //Обратной связи нет.
                 {
                 if ( get_manual_mode() )
                     {
@@ -2021,7 +2021,7 @@ void valve::evaluate()
 //-----------------------------------------------------------------------------
 void valve::off()
     {
-    if ( false == was_on_auto ||                //Åñëè áûë âêëþ÷åí âðó÷íóþ.
+    if ( false == was_on_auto ||                //Если был включен вручную.
         get_valve_state() == V_UPPER_SEAT ||
         get_valve_state() == V_LOWER_SEAT )
         {
@@ -2246,18 +2246,18 @@ void valve_mix_proof::direct_off()
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-/// @brief Îïðåäåëåíèå çàâåðøåíèÿ îòêëþ÷åíèÿ êëàïàíà ñ çàäåðæêîé.
+/// @brief Определение завершения отключения клапана с задержкой.
 bool valve_bottom_mix_proof::is_switching_off_finished(
     valve_bottom_mix_proof *v )
     {
-    //Åñëè îòêðûëè êëàïàí ðàíüøå çàâåðøåíèÿ çàêðûòèÿ, òî åãî ìîæíî óäàëÿòü èç
-    //âåêòîðà.
+    //Если открыли клапан раньше завершения закрытия, то его можно удалять из
+    //вектора.
     if ( v->get_valve_state() == V_ON )
         {
         return true;
         }
 
-    //Åñëè ñíÿëè ôëàã çàêðûòèÿ, òî óäàëÿåì èç âåêòîðà
+    //Если сняли флаг закрытия, то удаляем из вектора
     if (!v->is_closing_mini)
         {
         return true;
@@ -2265,8 +2265,8 @@ bool valve_bottom_mix_proof::is_switching_off_finished(
 
     u_int delay = G_PAC_INFO()->par[ PAC_info::P_V_BOTTOM_OFF_DELAY_TIME ];
 
-    //Åñëè çàâåðøèëîñü âðåìÿ çàäåðæêè, âûêëþ÷àåì ìèíè êëàïàí ïåðåä óäàëåíèåì
-    //êëàïàíà èç âåêòîðà.
+    //Если завершилось время задержки, выключаем мини клапан перед удалением
+    //клапана из вектора.
     if ( get_delta_millisec( v->start_off_time ) > delay )
         {
         v->set_DO( DO_INDEX_MINI_V, 0 );
@@ -2448,7 +2448,7 @@ valve::VALVE_STATE valve_iolink_vtug::get_valve_state()
 #endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
-/// @brief Ïîëó÷åíèå ñîñòîÿíèÿ îáðàòíîé ñâÿçè.
+/// @brief Получение состояния обратной связи.
 bool valve_iolink_vtug::get_fb_state()
     {
     return true;
@@ -2782,7 +2782,7 @@ int level_e_cyl::get_volume()
     v = (float)M_PI * v * v *  AI1::get_value() *
         get_par( P_MAX_P, start_param_idx ) / 9.81f;
 
-    int v_kg = 10 * (int)( v * 100 + 0.5f ); //Ïåðåâîäèì â êèëîãðàììû.
+    int v_kg = 10 * (int)( v * 100 + 0.5f ); //Переводим в килограммы.
 
     return v_kg;
     }
@@ -2826,7 +2826,7 @@ int level_e_cone::get_volume()
         {
         v = (float)M_PI * r * r * ( h_curr - h_cone * 2 / 3 );
         }
-    int v_kg = 10 * (int)( v * 100 + 0.5f ); //Ïåðåâîäèì â êèëîãðàììû.
+    int v_kg = 10 * (int)( v * 100 + 0.5f ); //Переводим в килограммы.
 
     return v_kg;
     }
@@ -2894,7 +2894,7 @@ void motor::direct_set_state( int new_state )
 #ifdef DEBUG_NO_IO_MODULES
             state = 2;
 #else
-            // Âêëþ÷åíèå ïðÿìîãî ïóñêà.
+            // Включение прямого пуска.
             int o = get_DO( DO_INDEX );
             if ( 0 == o )
                 {
@@ -2902,7 +2902,7 @@ void motor::direct_set_state( int new_state )
                 set_DO( DO_INDEX, 1 );
                 }
 
-            // Âêëþ÷åíèå ðåâåðñà.
+            // Включение реверса.
             o = get_DO( DO_INDEX_REVERSE );
             if ( 0 == o )
                 {
@@ -2925,7 +2925,7 @@ void motor::direct_set_state( int new_state )
 #ifdef DEBUG_NO_IO_MODULES
             state = 2;
 #else
-            // Âûêëþ÷åíèå ïðÿìîãî ïóñêà.
+            // Выключение прямого пуска.
             int o = get_DO( DO_INDEX );
             if ( 1 == o )
                 {
@@ -2933,7 +2933,7 @@ void motor::direct_set_state( int new_state )
                 set_DO( DO_INDEX, 0 );
                 }
 
-            // Âêëþ÷åíèå ðåâåðñà.
+            // Включение реверса.
             o = get_DO( DO_INDEX_REVERSE );
             if ( 0 == o )
                 {
@@ -3061,7 +3061,7 @@ void motor::direct_on()
         sub_type == device::M_REV_2_ERROR ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
-        // Âûêëþ÷åíèå ðåâåðñà.
+        // Выключение реверса.
         int o = get_DO( DO_INDEX_REVERSE );
         if ( 0 != o )
             {
@@ -3096,7 +3096,7 @@ void motor::direct_off()
         sub_type == device::M_REV_2_ERROR ||
         sub_type == device::DST_M_REV_FREQ_2_ERROR )
         {
-        // Îòêëþ÷åíèå ðåâåðñà.
+        // Отключение реверса.
         o = get_DO( DO_INDEX_REVERSE );
         if ( o != 0 )
             {
@@ -3872,7 +3872,7 @@ void valve_AS_DO1_DI2::direct_set_state(int new_state)
         {
         case V_UPPER_SEAT:
         case V_LOWER_SEAT:
-            //Íè÷åãî íå äåëàåì, òàê êàê íåò ñåäåë.
+            //Ничего не делаем, так как нет седел.
             break;
 
         default:
@@ -4009,14 +4009,14 @@ float virtual_counter::get_flow()
     return flow_value;
     }
 //-----------------------------------------------------------------------------
-/// @brief Ïîëó÷åíèå àáñîëþòíîãî çíà÷åíèÿ ñ÷åò÷èêà (áåç ó÷åòà
-/// ñîñòîÿíèÿ ïàóçû).
+/// @brief Получение абсолютного значения счетчика (без учета
+/// состояния паузы).
 u_int virtual_counter::get_abs_quantity()
     {
     return abs_value;
     }
 
-/// @brief Ñáðîñ àáñîëþòíîãî çíà÷åíèÿ ñ÷åò÷èêà.
+/// @brief Сброс абсолютного значения счетчика.
 void  virtual_counter::abs_reset()
     {
     abs_value = 0;
