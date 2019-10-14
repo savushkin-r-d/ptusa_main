@@ -2461,9 +2461,9 @@ class level_e_iolink : public AI1
     private:
         struct LT_data
             {
-            char 	st1 : 1;
-            char 	st2 : 1;
-            int16_t v   : 14;
+            u_int16_t st1 : 1;
+            u_int16_t st2 : 1;
+            int16_t   v   : 14;
             };
 
         LT_data *info;
@@ -2517,9 +2517,9 @@ class pressure_e_iolink : public AI1
     private:
         struct PT_data
             {
-            int16_t  st1 : 1;
-            int16_t  st2 : 1;
-            int16_t	 v   : 14;
+            u_int16_t  st1 : 1;
+            u_int16_t  st2 : 1;
+            int16_t    v   : 14;
             };
 
         PT_data *info;
@@ -3159,9 +3159,9 @@ class level_s_iolink : public AI1
     private:
         struct LS_data
             {
-            char 	st1:1;
-            char 	st2:1;
-            int16_t v  :14;
+            u_int16_t st1 :1;
+            u_int16_t st2 :1;
+            int16_t   v   :14;
             };
 
         LS_data *info;
