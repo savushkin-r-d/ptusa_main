@@ -292,16 +292,41 @@ int io_manager_linux::write_outputs()
                     buff[j + 13] = b;
                     }
 
+				u_int ao_module_type = 0;
+				u_int ao_module_offset = 0;
+
                 for (unsigned int idx = 0, l = 0; idx < nd->AO_cnt; idx++)
                     {
-                    switch (nd->AO_types[idx])
+					if (nd->AO_types[idx] != ao_module_type)
+						{
+						ao_module_type = nd->AO_types[idx];
+						ao_module_offset = 0;
+						}
+					else
+						{
+						ao_module_offset++;
+						}
+
+                    switch (ao_module_type)
                         {
                     case 1027843:           //IOL8
                         buff[13 + l] = (u_char) ((nd->AO_[idx] >> 8) & 0xFF);
                         buff[13 + l + 1] = (u_char) (nd->AO_[idx] & 0xFF);
                         l += 2;
                         break;
-
+					case 2688093:			//CNT2 INC2
+						ao_module_offset %= 14;	   //if there are same modules one after other on bus
+						if (0 == ao_module_offset) //assign start command and positive increment for both counters
+						{
+							buff[13 + l] = 0x5;
+							buff[13 + l + 1] = 0x5;
+						} 
+						else
+						{
+							buff[13 + l] = 0;
+							buff[13 + l + 1] = 0;
+						}
+						l += 2;
                     default:
                         l += 2;
                         break;
