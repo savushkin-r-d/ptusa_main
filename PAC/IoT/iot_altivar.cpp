@@ -51,6 +51,20 @@ altivar_node * altivar_manager::get_node(const char * IP_address)
 		}
 	}
 
+altivar_node* altivar_manager::get_node(unsigned int id)
+	{
+	altivar_node_num_map::iterator it;
+	it = num_nodes.find(id);
+	if (it != num_nodes.end())
+		{
+		return it->second;
+		}
+	else
+		{
+		return nullptr;
+		}
+	}
+
 void altivar_manager::evaluate()
 	{
 	if (nodes.size() > 0)
@@ -80,6 +94,7 @@ altivar_manager * G_ALTIVAR_MANAGER()
 altivar_node::altivar_node(unsigned int id, const char* ip, unsigned int port, unsigned long exchangetimeout)
 	{
 	mc = new modbus_client(id, (char*)ip, port, exchangetimeout);
+	strcpy(ip_address, ip);
 	configure = true;
 	querystep = RUN_STEP_CHECK_CONFIG;
 	configurestep = 0;
@@ -318,7 +333,7 @@ void altivar_node::Evaluate()
 			{
 			PAC_critical_errors_manager::get_instance()->set_global_error(
 				PAC_critical_errors_manager::AC_NO_CONNECTION,
-				PAC_critical_errors_manager::AS_MODBUS_DEVICE,
+				PAC_critical_errors_manager::AS_FC_ALTIVAR,
 				mc->get_id());
 			ismodbuserror = 1;
 			}
@@ -326,7 +341,7 @@ void altivar_node::Evaluate()
 			{
 			PAC_critical_errors_manager::get_instance()->reset_global_error(
 				PAC_critical_errors_manager::AC_NO_CONNECTION,
-				PAC_critical_errors_manager::AS_MODBUS_DEVICE,
+				PAC_critical_errors_manager::AS_FC_ALTIVAR,
 				mc->get_id());
 			ismodbuserror = 0;
 			}

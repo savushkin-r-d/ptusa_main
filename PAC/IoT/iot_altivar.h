@@ -23,6 +23,7 @@ class altivar_node: public i_iot_node
 		float rpm_setpoint;
 		float rpm_value;
 		int reverse;
+		char    ip_address[16];
 
 		enum CFG_STEP
 			{
@@ -81,6 +82,7 @@ class altivar_manager
 		static altivar_manager* get_instance();
 		void add_node(const char* IP_address, unsigned int port, unsigned int timeout);
 		altivar_node* get_node(const char* IP_address);
+		altivar_node* get_node(unsigned int id);
 		void evaluate();
 	protected:
 		altivar_manager();
