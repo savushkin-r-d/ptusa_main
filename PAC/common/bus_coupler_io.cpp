@@ -347,6 +347,14 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
                     }
                 return -1000;
 
+			case 2688556:
+				if (val < -32000 )
+				{
+					return -1000;
+				}
+				val *= 0.1f;
+				return val;
+
             default:
                 return val;
             }
