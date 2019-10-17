@@ -169,6 +169,53 @@ float io_device::get_AO( u_int index, float min_value, float max_value )
 
                 return val;
 
+                //  Output data     4 mA ... 20 mA
+                //-----------------------------------------------------
+                //  hex             dec             mA
+                //-----------------------------------------------------
+                //  7FFF...7F01                     21.3397
+                //  7F00            32512           21.3397
+                //  7530            30000           20
+                //  3A98            15000           12
+                //  1               1               4.0005333
+                //  0               0               4
+                //  FFFF            -1              4
+                //  C568            -15000          4
+                //  8AD0            -30000          4
+                //  8100            -32512          4
+                //  80FF...8000*                    Hold last value
+                //  8001            Overrange       21.3397
+                //  8080            Underrange      Hold last value
+                //
+                //  * without 8001, 8080
+
+            case 2688527:   //-AXL F AO4 1H
+                if (0 == min_value && 0 == max_value)
+                    {
+                    if (val < 0)
+                        {
+                        val = 4;
+                        }
+                    else
+                        {
+                        val = 4 + val / 1875f;
+                        }
+                    }
+                else
+                    {
+                    if (val < 0)
+                        {
+                        val = 4;
+                        }
+                    else
+                        {
+                        val = 4 + val / 1875f;
+                        }
+                    val = min_value + (val - 4) * (max_value - min_value) / 16;
+                    }
+
+            return val;
+
             default:
                 return val;
             }
@@ -214,6 +261,17 @@ int io_device::set_AO( u_int index, float value, float min_value,
                 if ( value < 4 ) value = 4;
                 if ( value > 20 ) value = 20;
                 value = 2047.5f * ( value - 4 );
+                break;
+
+            case 2688527:   //-AXL F AO4 1H
+                if ( 0 != min_value || 0 != max_value )
+                    {
+                    value = 4 + 16 * ( value - min_value ) / ( max_value - min_value );
+                    }
+                if ( value < 4 ) value = 4;
+                if ( value > 20 ) value = 20;
+                value = 1875f * ( value - 4 );
+                break;
             }
 
         *AO_channels.int_write_values[ index ] = ( u_int ) value;
