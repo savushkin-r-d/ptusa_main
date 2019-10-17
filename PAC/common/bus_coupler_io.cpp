@@ -347,12 +347,29 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
                     }
                 return -1000;
 
-			case 2688556:
+			case 2688556: //RTD4 1H
 				if (val < -32000 )
 				{
 					return -1000;
 				}
 				val *= 0.1f;
+				return val;
+
+			case 2688491: //AI4 1H
+				if (val < -32000)
+					{
+					return -1;
+					}
+
+				if (0 == min_value && 0 == max_value)
+					{
+					val = 4 + val / 1875.0f;
+					}
+				else
+					{
+					val = 4 + val / 1875.0f;
+					val = min_value + (val - 4) * (max_value - min_value) / 16;
+					}
 				return val;
 
             default:
