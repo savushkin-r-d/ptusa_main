@@ -1375,6 +1375,13 @@ u_int counter::get_abs_quantity()
         if ( current < abs_last_read_value )
             {
             delta = MAX_VAL - abs_last_read_value + current;
+			if (delta > MAX_OVERFLOW)
+				{
+				if (current < delta)
+					{
+					delta = current;
+					}
+				}
             }
         else
             {
@@ -1413,6 +1420,13 @@ u_int counter::get_quantity()
             if ( current < last_read_value )
                 {
                 delta = MAX_VAL - last_read_value + current;
+				if (delta > MAX_OVERFLOW)
+					{
+					if (current < delta)
+						{
+						delta = current;
+						}
+					}
                 }
             else
                 {
