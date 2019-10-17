@@ -243,6 +243,13 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             sprintf( tmp + strlen( tmp ), "remote PAC." );
             break;
 
+		case AS_FC_ALTIVAR:
+			sprintf(tmp + strlen(tmp), "частотником Altivar IP=%s.", 
+				altivar_manager::get_instance()->get_node(par - SOCKID_ALTIVAR) != nullptr ? 
+				altivar_manager::get_instance()->get_node(par - SOCKID_ALTIVAR)->ip_address : 
+				"неизвестен");
+			break;
+
         default:
         	break;
             }//switch( err_sub_class )
