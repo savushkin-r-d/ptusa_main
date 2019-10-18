@@ -314,6 +314,7 @@ int io_manager_linux::write_outputs()
                         buff[13 + l + 1] = (u_char) (nd->AO_[idx] & 0xFF);
                         l += 2;
                         break;
+
 					case 2688093:			//CNT2 INC2
 						ao_module_offset %= 14;	   //if there are same modules one after other on bus
 						if (0 == ao_module_offset) //assign start command and positive increment for both counters
@@ -327,6 +328,13 @@ int io_manager_linux::write_outputs()
 							buff[13 + l + 1] = 0;
 						}
 						l += 2;
+
+                    case 2688527:   //-AXL F AO4 1H
+                        buff[13 + l] = (u_char) ((nd->AO_[idx] >> 8) & 0xFF);
+                        buff[13 + l + 1] = (u_char) (nd->AO_[idx] & 0xFF);
+                        l += 2;
+                        break;
+
                     default:
                         l += 2;
                         break;
