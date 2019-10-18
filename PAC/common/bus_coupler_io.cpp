@@ -198,7 +198,7 @@ float io_device::get_AO( u_int index, float min_value, float max_value )
                         }
                     else
                         {
-                        val = 4 + val / 1875f;
+                        val = 4 + val / 1875.0f;
                         }
                     }
                 else
@@ -209,7 +209,7 @@ float io_device::get_AO( u_int index, float min_value, float max_value )
                         }
                     else
                         {
-                        val = 4 + val / 1875f;
+                        val = 4 + val / 1875.0f;
                         }
                     val = min_value + (val - 4) * (max_value - min_value) / 16;
                     }
@@ -270,7 +270,7 @@ int io_device::set_AO( u_int index, float value, float min_value,
                     }
                 if ( value < 4 ) value = 4;
                 if ( value > 20 ) value = 20;
-                value = 1875f * ( value - 4 );
+                value = 1875.0f * ( value - 4 );
                 break;
             }
 
