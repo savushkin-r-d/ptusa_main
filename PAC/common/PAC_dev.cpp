@@ -2398,7 +2398,7 @@ void valve_iolink_vtug::direct_on()
         }
     else
         {
-        offset = vtug_io_size - 1 - offset;
+        offset = 2 * vtug_io_size - 1 - offset;
         }
 
     data[ offset ] |= 1 << ( ( vtug_number - 1 ) % 8 );
@@ -2420,7 +2420,7 @@ void valve_iolink_vtug::direct_off()
         }
     else
         {
-        offset = vtug_io_size - 1 - offset;
+        offset = 2 * vtug_io_size - 1 - offset;
         }
 
     data[ offset ] &= ~( 1 << ( ( vtug_number - 1 ) % 8 ) );
@@ -2440,7 +2440,7 @@ char valve_iolink_vtug::get_state_data( char* data )
         }
     else
         {
-        offset = vtug_io_size - 1 - offset;
+        offset = 2 * vtug_io_size - 1 - offset;
         }
 
     char state = data[ offset ];
