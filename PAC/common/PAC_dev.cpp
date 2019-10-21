@@ -3226,19 +3226,7 @@ int level_s_iolink::get_state()
 
 bool level_s_iolink::is_active()
     {
-    switch ( sub_type )
-        {
-        case LS_IOLINK_MIN:
-            return get_state() == 0 ? 0 : 1;
-            break;
-
-        case LS_IOLINK_MAX:
-            return get_state() == 0 ? 1 : 0;
-            break;
-
-        default:
-            return get_state() == 0 ? 0 : 1;
-        }
+    return get_state();
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
