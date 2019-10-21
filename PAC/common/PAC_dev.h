@@ -2159,7 +2159,7 @@ class valve_iolink_vtug : public valve
         bool get_fb_state();
 
         u_int vtug_number;        ///< Номер устройства.
-        u_int vtug_io_size = 1;   ///< Размер области.
+        u_int vtug_io_size = 1;   ///< Размер области, в словах.
 
         enum CONSTANTS
             {
