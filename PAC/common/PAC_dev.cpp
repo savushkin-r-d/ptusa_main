@@ -2392,15 +2392,6 @@ void valve_iolink_vtug::direct_on()
         }
 
     u_int offset = ( vtug_number - 1 ) / 8;
-
-    if ( get_io_vendor() == WAGO )
-        {
-        }
-    else
-        {
-        offset = 2 * vtug_io_size - 1 - offset;
-        }
-
     data[ offset ] |= 1 << ( ( vtug_number - 1 ) % 8 );
     }
 //-----------------------------------------------------------------------------
@@ -2415,14 +2406,6 @@ void valve_iolink_vtug::direct_off()
         }
 
     u_int offset = ( vtug_number - 1 ) / 8;
-    if ( get_io_vendor() == WAGO )
-        {
-        }
-    else
-        {
-        offset = 2 * vtug_io_size - 1 - offset;
-        }
-
     data[ offset ] &= ~( 1 << ( ( vtug_number - 1 ) % 8 ) );
     }
 #endif // DEBUG_NO_IO_MODULES
@@ -2435,14 +2418,6 @@ char valve_iolink_vtug::get_state_data( char* data )
         }
 
     u_int offset = ( vtug_number - 1 ) / 8;
-    if ( get_io_vendor() == WAGO )
-        {
-        }
-    else
-        {
-        offset = 2 * vtug_io_size - 1 - offset;
-        }
-
     char state = data[ offset ];
     state >>= ( vtug_number - 1 ) % 8;
     state &= 1;
@@ -2653,15 +2628,9 @@ temperature_e_iolink::temperature_e_iolink( const char *dev_name ):
 float temperature_e_iolink::get_value()
     {
     char* data = (char*)get_AI_data( 0 );
-    if ( get_io_vendor() == WAGO )
-        {
-        int16_t tmp = data[ 1 ] + 256 * data[ 0 ];
-        memcpy(info, &tmp, 2);
-        }
-    else
-        {
-        memcpy(info, data, 2);
-        }
+
+    int16_t tmp = data[ 1 ] + 256 * data[ 0 ];
+    memcpy(info, &tmp, 2);
 
     return 0.1f * info->v;
     }
@@ -3193,15 +3162,8 @@ float level_s_iolink::get_max_value()
 float level_s_iolink::get_value()
     {
     char* data = ( char* ) get_AI_data( 0 );
-    if ( get_io_vendor() == WAGO )
-        {
-        int tmp = data[ 1 ] + 256 * data[ 0 ];
-        info = (LS_data*) &tmp;
-        }
-    else
-        {
-        info = (LS_data*) data;
-        }
+    int tmp = data[ 1 ] + 256 * data[ 0 ];
+    info = (LS_data*) &tmp;
 
     return (float) info->v;
     }
@@ -3210,15 +3172,8 @@ int level_s_iolink::get_state()
     {
     char* data = ( char* ) get_AI_data( 0 );
 
-    if ( get_io_vendor() == WAGO )
-        {
-        int tmp = data[ 1 ] + 256 * data[ 0 ];
-        info = (LS_data*) &tmp;
-        }
-    else
-        {
-        info = (LS_data*) data;
-        }
+    int tmp = data[ 1 ] + 256 * data[ 0 ];
+    info = (LS_data*) &tmp;
 
     return info->st1;
     }
@@ -3249,15 +3204,8 @@ float level_e_iolink::get_max_value()
 float level_e_iolink::get_value()
     {
     char* data = (char*)get_AI_data( 0 );
-    if ( get_io_vendor() == WAGO )
-        {
-        int tmp = data[ 1 ] + 256 * data[ 0 ];
-        info = (LT_data*)&tmp;
-        }
-    else
-        {
-        info = (LT_data*) data;
-        }
+    int tmp = data[ 1 ] + 256 * data[ 0 ];
+    info = (LT_data*)&tmp;
 
     return (float)info->v;
     }
@@ -3266,15 +3214,8 @@ int level_e_iolink::get_state()
     {
     char* data = (char*)get_AI_data( 0 );
 
-    if ( get_io_vendor() == WAGO )
-        {
-        int tmp = data[ 1 ] + 256 * data[ 0 ];
-        info = (LT_data*)&tmp;
-        }
-    else
-        {
-        info = (LT_data*) data;
-        }
+    int tmp = data[ 1 ] + 256 * data[ 0 ];
+    info = (LT_data*)&tmp;
 
     return info->st1;
     }
@@ -3307,15 +3248,8 @@ float pressure_e_iolink::get_min_val()
 float pressure_e_iolink::get_value()
     {
     char* data = (char*)get_AI_data( 0 );
-    if ( get_io_vendor() == WAGO )
-        {
-        int tmp = data[ 1 ] + 256 * data[ 0 ];
-        info = (PT_data*)&tmp;
-        }
-    else
-        {
-        info = (PT_data*) data;
-        }
+    int tmp = data[ 1 ] + 256 * data[ 0 ];
+    info = (PT_data*)&tmp;
 
     return 0.001f * info->v;
     }
@@ -3324,15 +3258,8 @@ int pressure_e_iolink::get_state()
     {
     char* data = (char*)get_AI_data( 0 );
 
-    if ( get_io_vendor() == WAGO )
-        {
-        int tmp = data[ 1 ] + 256 * data[ 0 ];
-        info = (PT_data*)&tmp;
-        }
-    else
-        {
-        info = (PT_data*) data;
-        }
+    int tmp = data[ 1 ] + 256 * data[ 0 ];
+    info = (PT_data*)&tmp;
 
     return info->st1;
     }
@@ -3400,25 +3327,7 @@ void concentration_e_iolink::evaluate()
             char* data = (char*)qt->get_AI_data(0);
 
             const int SIZE = 12;
-            if ( qt->get_io_vendor() == WAGO )
-                {
-                std::reverse_copy (data, data + SIZE, (char*) qt->info);
-                }
-            else
-                {
-                std::reverse_copy (data, data + SIZE, (char*) qt->info);
-
-#define swapb(x) ((unsigned short)x>>8) | (((unsigned short)x&0x00FF)<<8)
-
-                unsigned short *tmp = (unsigned short*) qt->info;
-                tmp[0] = swapb(tmp[0]);
-                tmp[1] = swapb(tmp[1]);
-                tmp[2] = swapb(tmp[2]);
-                tmp[3] = swapb(tmp[3]);
-                tmp[4] = swapb(tmp[4]);
-                tmp[5] = swapb(tmp[5]);
-                tmp[6] = swapb(tmp[6]);
-                }
+            std::reverse_copy (data, data + SIZE, (char*) qt->info);
 
 #ifdef DEBUG_IOLINK_QT
             char *tmp = (char*) qt->info;

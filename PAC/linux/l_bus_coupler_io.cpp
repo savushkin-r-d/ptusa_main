@@ -310,8 +310,7 @@ int io_manager_linux::write_outputs()
                     switch (ao_module_type)
                         {
                     case 1027843:           //IOL8
-                        buff[13 + l] = (u_char) ((nd->AO_[idx] >> 8) & 0xFF);
-                        buff[13 + l + 1] = (u_char) (nd->AO_[idx] & 0xFF);
+                        memcpy( &buff[13 + l], &nd->AO_[idx], 2 );
                         l += 2;
                         break;
 
@@ -605,8 +604,18 @@ int io_manager_linux::read_inputs()
                         {
                         for ( u_int l = 0, idx = 0; l < nd->AI_cnt; l++ )
                             {
-                            nd->AI[l] = 256 * buff[9 + idx] + buff[9 + idx + 1];
-                            idx += 2;
+                            switch (nd->AI_types[l])
+                                {
+                            case 1027843:                               //IOL8
+                                memcpy(&nd->AI[l], &buff[9 + idx], 2);
+                                idx += 2;
+                                break;
+
+                            default:
+                                nd->AI[l] = 256 * buff[9 + idx] + buff[9 + idx + 1];
+                                idx += 2;
+                                break;
+                                }
 
 #ifdef DEBUG_BK
                             sprintf( G_LOG->msg, "%d %u", l, nd->AI[l]);
