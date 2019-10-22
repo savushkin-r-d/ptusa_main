@@ -3,6 +3,9 @@
 #pragma warning(disable: 4996)
 #endif // WIN_OS
 #include "cip_stats.h"
+#ifdef PAC_PLCNEXT
+#include "stdlib.h"
+#endif
 
 cip_object_stats::cip_object_stats(const char* objname)
     {
@@ -150,7 +153,13 @@ void cip_stats::deserialize(std::istream& stream)
 
 void cip_stats::loadFromFile(const char* filename)
     {
-    std::ifstream ifs(filename, std::ios::binary);
+	char fname[50];
+#ifdef PAC_PLCNEXT
+	sprintf(fname, "/opt/main/%s", filename);
+#else
+	sprintf(fname, "%s", filename);
+#endif // PAC_PLCNEXT
+    std::ifstream ifs(fname, std::ios::binary);
     if (ifs.good())
         {
         deserialize(ifs);
@@ -160,9 +169,20 @@ void cip_stats::loadFromFile(const char* filename)
 
 void cip_stats::saveToFile(const char * filename)
     {
-    std::ofstream ofs(filename, std::ios::binary);
+	char fname[50];
+#ifdef PAC_PLCNEXT
+	sprintf(fname, "/opt/main/%s", filename);
+#else
+	sprintf(fname, "%s", filename);
+#endif // PAC_PLCNEXT
+    std::ofstream ofs(fname, std::ios::binary);
     serialize(ofs);
     ofs.close();
+#ifdef PAC_PLCNEXT
+	char syscommand[] = "chmod 777 ";
+	strcat(syscommand, fname);
+	system(syscommand);
+#endif
     }
 
 void cip_stats::clear()

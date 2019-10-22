@@ -6,6 +6,13 @@
 #include "dtime.h"
 #endif // MSAPANEL
 
+#ifdef PAC_PLCNEXT
+#include "stdlib.h"
+#endif
+
+
+
+
 
 int TRecipeManager::startRecipeBlock = 0;
 
@@ -543,16 +550,27 @@ int TRecipeManager::SaveToFile(const char* filename)
     printf("Saving recipes to file %s\n", filename);
 #endif // DEBUG
 	FILE* memFile = NULL;
-	memFile = fopen(filename, "r+b");
+	char fname[50];
+#ifdef PAC_PLCNEXT
+	sprintf(fname, "/opt/main/%s", filename);
+#else
+	sprintf(fname, "%s", filename);
+#endif // PAC_PLCNEXT
+	memFile = fopen(fname, "r+b");
 	if (NULL == memFile)
 		{
-		memFile = fopen(filename, "w+b");
+		memFile = fopen(fname, "w+b");
 		}
 	if (memFile)
 		{
 		fseek(memFile, 0, SEEK_SET);
 		fwrite(recipeMemory, 1, recipeMemorySize, memFile);
 		fclose(memFile);
+#ifdef PAC_PLCNEXT
+		char syscommand[] = "chmod 777 ";
+		strcat(syscommand, fname);
+		system(syscommand);
+#endif
 		}
 	return 0;
 	}
@@ -560,8 +578,14 @@ int TRecipeManager::SaveToFile(const char* filename)
 int TRecipeManager::LoadFromFile( const char* filename )
 	{
 	FILE* memFile = NULL;
+	char fname[50];
+#ifdef PAC_PLCNEXT
+	sprintf(fname, "/opt/main/%s", filename);
+#else
+	sprintf(fname, "%s", filename);
+#endif // PAC_PLCNEXT
 	memset(recipeMemory, 0, recipeMemorySize);
-	memFile = fopen(filename, "r+b");
+	memFile = fopen(fname, "r+b");
 	if (memFile)
 		{
 		fread(recipeMemory, 1, recipeMemorySize, memFile);
@@ -904,16 +928,27 @@ int TMediumRecipeManager::SaveToFile(const char* filename)
 	printf("Saving recipes to file %s\n", filename);
 #endif // DEBUG
 	FILE* memFile = NULL;
-	memFile = fopen(filename, "r+b");
+	char fname[50];
+#ifdef PAC_PLCNEXT
+	sprintf(fname, "/opt/main/%s", filename);
+#else
+	sprintf(fname, "%s", filename);
+#endif // PAC_PLCNEXT
+	memFile = fopen(fname, "r+b");
 	if (NULL == memFile)
 	{
-		memFile = fopen(filename, "w+b");
+		memFile = fopen(fname, "w+b");
 	}
 	if (memFile)
 	{
 		fseek(memFile, 0, SEEK_SET);
 		fwrite(recipeMemory, 1, recipeMemorySize, memFile);
 		fclose(memFile);
+#ifdef PAC_PLCNEXT
+		char syscommand[] = "chmod 777 ";
+		strcat(syscommand, fname);
+		system(syscommand);
+#endif
 	}
 	return 0;
 }
@@ -921,8 +956,14 @@ int TMediumRecipeManager::SaveToFile(const char* filename)
 int TMediumRecipeManager::LoadFromFile(const char* filename)
 {
 	FILE* memFile = NULL;
+	char fname[50];
 	memset(recipeMemory, 0, recipeMemorySize);
-	memFile = fopen(filename, "r+b");
+#ifdef PAC_PLCNEXT
+	sprintf(fname, "/opt/main/%s", filename);
+#else
+	sprintf(fname, "%s", filename);
+#endif // PAC_PLCNEXT
+	memFile = fopen(fname, "r+b");
 	if (memFile)
 	{
 		fread(recipeMemory, 1, recipeMemorySize, memFile);
