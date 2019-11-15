@@ -3170,8 +3170,8 @@ float level_s_iolink::get_value()
 
 int level_s_iolink::get_state()
     {
+	get_AI_IOLINK_state(0);
     char* data = ( char* ) get_AI_data( 0 );
-
     int tmp = data[ 1 ] + 256 * data[ 0 ];
     info = (LS_data*) &tmp;
 

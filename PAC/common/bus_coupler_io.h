@@ -37,6 +37,13 @@ class io_device
 			PHOENIX,
 			};
 
+		enum class IOLINKSTATE
+			{
+			OK,
+			NOTCONNECTED,
+			DEVICEERROR,
+			};
+
     protected:
         /// @brief Получение состояния канала дискретного выхода.
         ///
@@ -109,6 +116,23 @@ class io_device
         /// @return -  указатель на данные канала.
         int_2* get_AI_data( u_int index );
 
+		
+		/// @brief Получение состояния IO-Link устройства типа AI.
+        ///
+		/// @param index - индекс канала в таблице аналоговых входных каналов
+		/// устройства.
+		///
+		/// @return -  состояние устройства.
+		IOLINKSTATE get_AI_IOLINK_state(u_int index);
+
+		/// @brief Получение состояния IO-Link устройства типа AI.
+		///
+		/// @param index - индекс канала в таблице аналоговых входных каналов
+		/// устройства.
+		///
+		/// @return -  состояние устройства.
+		IOLINKSTATE get_AO_IOLINK_state(u_int index);
+
         /// @brief Получение установленных данных канала аналогового выхода.
         ///
         /// @param index - индекс канала в таблице аналоговых выходных каналов
@@ -142,11 +166,14 @@ class io_device
             u_int  count;   ///< Количество каналов.
             u_int* tables;  ///< Массив таблиц.
             u_int* offsets; ///< Массив смещений в пределах таблиц.
+			int* module_offsets; ///< Массив смещений начала адресного пространства модуля IO для канала
+			int* logical_ports; ///< Массив логических номеров канала в пределах модуля IO
 
-            int_2  **int_read_values;      ///< Массив значений для чтения.
-            int_2  **int_write_values;     ///< Массив значений для записи.
-            u_char **char_read_values;     ///< Массив значений для чтения.
-            u_char **char_write_values;    ///< Массив значений для записи.
+            int_2  **int_read_values;           ///< Массив значений для чтения.
+			int_2  **int_module_read_values;    ///< Массив значений для чтения адресного пространства модуля.
+            int_2  **int_write_values;          ///< Массив значений для записи.
+            u_char **char_read_values;          ///< Массив значений для чтения.
+            u_char **char_write_values;         ///< Массив значений для записи.
 
             CHANNEL_TYPE type;           ///< Тип канала.
 
@@ -156,7 +183,7 @@ class io_device
 
             void init( int ch_count );
 
-            void init_channel( u_int ch_index, int node, int offset );
+            void init_channel( u_int ch_index, int node, int offset, int module_offset, int logical_port );
 
             void print() const;
             };
@@ -176,7 +203,7 @@ class io_device
         void init( int DO_count, int DI_count,
             int AO_count, int AI_count );
 
-        void init_channel( int type, int ch_inex, int node, int offset );
+        void init_channel( int type, int ch_inex, int node, int offset, int module_offset = -1, int logical_port = -1 );
 
         void set_io_vendor( VENDOR vendor );
     };
@@ -275,7 +302,7 @@ class io_manager
 			enum W_CONST
 				{
 				C_MAX_WAIT_TIME = 6000,		///< Время до установки ошибки связи с модулем, мсек.
-				C_ANALOG_BUF_SIZE = 256,	///< Размер буфера аналоговых модулей.
+				C_ANALOG_BUF_SIZE = 512,	///< Размер буфера аналоговых модулей.
 				C_MAX_DELAY = 60000,		///< Макс. время задержки переподключения, мсек.
 				C_CNT_TIMEOUT_US = 100000,	///< Время ожидания подключения от модуля, мксек.
 				C_RCV_TIMEOUT_US = 250000,	///< Время ожидания ответа от модуля, мксек.

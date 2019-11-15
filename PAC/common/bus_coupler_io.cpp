@@ -487,6 +487,49 @@ int_2* io_device::get_AI_data( u_int index )
     return 0;
     }
 //-----------------------------------------------------------------------------
+io_device::IOLINKSTATE io_device::get_AI_IOLINK_state(u_int index)
+	{
+	if (vendor == PHOENIX)
+	{
+		if (index < AI_channels.count && AI_channels.int_module_read_values[index])
+			{
+			u_int module_states = *((u_int*)(AI_channels.int_module_read_values[index]));
+			int_2 logical_port = AI_channels.logical_ports[index];
+			if (logical_port > 0 && logical_port <= 8)
+				{
+				bool iolinkconnected = module_states & (1 << (logical_port - 1));
+				bool iolinkdatavalid = module_states & (1 << (logical_port + 7));
+				G_LOG->debug("IOLState %d, port %d, flags %d %d", module_states, logical_port, iolinkconnected, iolinkdatavalid);
+				if (!iolinkconnected) return IOLINKSTATE::NOTCONNECTED;
+				if (!iolinkdatavalid) return IOLINKSTATE::DEVICEERROR;
+				}
+			}
+	}
+	return IOLINKSTATE::OK;
+	}
+
+io_device::IOLINKSTATE io_device::get_AO_IOLINK_state(u_int index)
+	{
+	if (vendor == PHOENIX)
+		{
+		if (index < AO_channels.count && AO_channels.int_module_read_values[index])
+			{
+			u_int module_states = *((u_int*)(AO_channels.int_module_read_values[index]));
+			int_2 logical_port = AO_channels.logical_ports[index];
+			if (logical_port > 0 && logical_port <= 8)
+				{
+				bool iolinkconnected = module_states & (1 << (logical_port - 1));
+				bool iolinkdatavalid = module_states & (1 << (logical_port + 7));
+				G_LOG->debug("IOLState %d, port %d, flags %d %d", module_states, logical_port, iolinkconnected, iolinkdatavalid);
+				if (!iolinkconnected) return IOLINKSTATE::NOTCONNECTED;
+				if (!iolinkdatavalid) return IOLINKSTATE::DEVICEERROR;
+				}
+			}
+		}
+	return IOLINKSTATE::OK;
+	}
+
+//-----------------------------------------------------------------------------
 int_2* io_device::get_AO_write_data( u_int index )
     {
     if ( index < AO_channels.count && AO_channels.int_write_values )
@@ -590,24 +633,24 @@ void io_device::set_io_vendor( VENDOR vendor )
     this->vendor = vendor;
     }
 //-----------------------------------------------------------------------------
-void io_device::init_channel( int type, int ch_index, int node, int offset )
+void io_device::init_channel( int type, int ch_inex, int node, int offset, int module_offset /*= -1*/, int logical_port /*= -1 */ )
     {
     switch ( type )
         {
         case IO_channels::CT_DI:
-            DI_channels.init_channel( ch_index, node, offset );
+            DI_channels.init_channel( ch_inex, node, offset, module_offset, logical_port );
             break;
 
         case IO_channels::CT_DO:
-            DO_channels.init_channel( ch_index, node, offset );
+            DO_channels.init_channel( ch_inex, node, offset, module_offset, logical_port );
             break;
 
         case IO_channels::CT_AI:
-            AI_channels.init_channel( ch_index, node, offset );
+            AI_channels.init_channel( ch_inex, node, offset, module_offset, logical_port );
             break;
 
         case IO_channels::CT_AO:
-            AO_channels.init_channel( ch_index, node, offset );
+            AO_channels.init_channel( ch_inex, node, offset, module_offset, logical_port );
             break;
         }
     }
@@ -616,7 +659,10 @@ void io_device::init_channel( int type, int ch_index, int node, int offset )
 io_device::IO_channels::IO_channels( CHANNEL_TYPE type ) : count( 0 ),
     tables( 0 ),
     offsets( 0 ),
-    int_read_values( 0 ), int_write_values( 0 ),
+	module_offsets ( 0 ),
+	logical_ports ( 0 ),
+    int_read_values( 0 ), int_module_read_values(0),
+	int_write_values( 0 ),
     char_read_values( 0 ), char_write_values( 0 ),
     type( type )
     {
@@ -628,6 +674,8 @@ io_device::IO_channels::~IO_channels()
         {
         delete [] tables;
         delete [] offsets;
+		delete [] module_offsets;
+		delete [] logical_ports;
         count = 0;
         }
     if ( int_read_values )
@@ -635,6 +683,11 @@ io_device::IO_channels::~IO_channels()
         delete [] int_read_values;
         int_read_values = 0;
         }
+	if (int_module_read_values)
+		{
+		delete[] int_module_read_values;
+		int_module_read_values = 0;
+		}
     if ( int_write_values )
         {
         delete [] int_write_values;
@@ -661,6 +714,8 @@ void io_device::IO_channels::init( int ch_count )
 
         tables  = new u_int[ count ];
         offsets = new u_int[ count ];
+		module_offsets = new int[ count ];
+		logical_ports = new int[ count ];
 
         switch ( type )
             {
@@ -675,10 +730,12 @@ void io_device::IO_channels::init( int ch_count )
 
             case IO_channels::CT_AI:
                 int_read_values = new int_2*[ count ];
+				int_module_read_values = new int_2*[count];
                 break;
 
             case IO_channels::CT_AO:
                 int_read_values  = new int_2*[ count ];
+				int_module_read_values = new int_2*[count];
                 int_write_values = new int_2*[ count ];
                 break;
             }
@@ -723,12 +780,15 @@ void io_device::IO_channels::print() const
         }
     }
 //-----------------------------------------------------------------------------
-void io_device::IO_channels::init_channel( u_int ch_index, int node, int offset )
+void io_device::IO_channels::init_channel( u_int ch_index, int node, int offset, int module_offset, int logical_port )
     {
     if ( ch_index < count )
         {
         tables[ ch_index ]  = node;
         offsets[ ch_index ] = offset;
+		module_offsets[ ch_index ] = module_offset;
+		logical_ports[ ch_index ] = logical_port;
+
         switch ( type )
             {
             case CT_DI:
@@ -746,6 +806,15 @@ void io_device::IO_channels::init_channel( u_int ch_index, int node, int offset 
             case CT_AI:
                 int_read_values[ ch_index ] = io_manager::get_instance()->
                     get_AI_read_data( tables[ ch_index ], offsets[ ch_index ] );
+				if (module_offsets[ch_index] >= 0)
+					{
+					int_module_read_values[ch_index] = io_manager::get_instance()->
+						get_AI_read_data(tables[ch_index], module_offsets[ch_index]);
+					}
+				else
+					{
+					int_module_read_values[ch_index] = 0;
+					}
                 break;
 
             case CT_AO:
@@ -753,6 +822,15 @@ void io_device::IO_channels::init_channel( u_int ch_index, int node, int offset 
                     get_AO_read_data( tables[ ch_index ], offsets[ ch_index ] );
                 int_write_values[ ch_index ] = io_manager::get_instance()->
                     get_AO_write_data( tables[ ch_index ], offsets[ ch_index ] );
+				if (module_offsets[ch_index] >= 0)
+					{
+					int_module_read_values[ch_index] = io_manager::get_instance()->
+						get_AI_read_data(tables[ch_index], module_offsets[ch_index]);
+					}
+				else
+					{
+					int_module_read_values[ch_index] = 0;
+					}
                 break;
             }
         }
