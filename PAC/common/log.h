@@ -14,6 +14,7 @@
 #include "string.h"
 
 extern int G_USE_LOG;
+extern int G_DEBUG; 
 //-----------------------------------------------------------------------------
 /// @brief Работа с журналом.
 ///
@@ -51,6 +52,9 @@ class i_log
     ///
     /// @param priority - приоритет.
     void virtual write_log( PRIORITIES priority ) = 0;
+
+	void debug(const char* debug_message, ...);
+	void info(const char* info_message, ...);
 
     protected:
 
