@@ -245,6 +245,7 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y /I
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;WIN_OS;PAC_PC;MODBUS;TEST_SPEED;DEBUG_NO_IO_MODULES;VS_CODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

@@ -25,6 +25,9 @@
 #include "l_mem.h"
 #endif
 
+extern char* g_sys_path;
+extern char* g_path;
+
 auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
 int project_manager::proc_main_params( int argc, const char *argv[] )
@@ -68,6 +71,44 @@ int project_manager::proc_main_params( int argc, const char *argv[] )
             }
         }
 
+    // g_sys_path  "C:/system_scripts"
+    for ( int i = 1; i < argc - 1; i++ )
+        {
+        if ( strcmp( argv[ i ], "sys_path" ) == 0 )
+            {
+            g_sys_path = new char[ strlen( argv[ i + 1 ] ) + 1 ];
+            strcpy( g_sys_path, argv[ i + 1 ] );
+            }
+        }
+
+    // path  "C:/project folder"
+    for ( int i = 1; i < argc - 1; i++ )
+        {
+        if ( strcmp( argv[ i ], "path" ) == 0 )
+            {
+            g_path = new char[ strlen( argv[ i + 1 ] ) + 1 ];
+            strcpy( g_path, argv[ i + 1 ] );
+            }
+        }
+
+    if ( g_sys_path == 0 )
+        {
+        g_sys_path = new char[ 1 ];
+        g_sys_path[ 0 ] = 0;
+        }
+    if ( g_path == 0 )
+        {
+        g_path = new char[ 1 ];
+        g_path[ 0 ] = 0;
+        }
+
+    if ( G_DEBUG && ( g_path[ 0 ] || g_sys_path[ 0 ] ) )
+        {
+        sprintf( G_LOG->msg,
+            "g_path = \"%s\", g_sys_path = \"%s\"", g_path, g_sys_path );
+        G_LOG->write_log( i_log::P_NOTICE );
+        }
+    
     return 0;
     }
 //-----------------------------------------------------------------------------

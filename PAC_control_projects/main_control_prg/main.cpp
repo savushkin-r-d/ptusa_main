@@ -37,9 +37,11 @@
 #include "rfid_reader.h"
 #endif
 
-int G_DEBUG = 0; //Вывод дополнительной отладочной информации.
-int G_USE_LOG = 0; //Вывод в системный лог (syslog).
+int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
+int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
 
+char* g_sys_path = 0;   //Путь к системным скриптам Lua.
+char* g_path = 0;       //Путь к описаывающим проект скриптам Lua.
 
 int running = 1;
 static void stopHandler(int sig)
@@ -73,7 +75,8 @@ int main( int argc, const char *argv[] )
 
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
-    int res = G_LUA_MANAGER->init( 0, argv[ 1 ] ); //-Инициализация Lua.
+    //-Инициализация Lua.
+    int res = G_LUA_MANAGER->init( 0, argv[ 1 ], g_path, g_sys_path ); 
 
     if ( res ) //-Ошибка инициализации.
         {

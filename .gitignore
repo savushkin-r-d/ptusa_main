@@ -67,3 +67,7 @@ PAC_control_projects/main_control_prg/eclipse/workspaces/WAGO-PFC-BSP-2014\.10\.
 PAC_control_projects/main_control_prg/eclipse/projects/WAGO-PFC-BSP-2014\.10\.3/Debug/
 
 PAC_control_projects/main_control_prg/eclipse/projects/PLCnext-linux/Debug/
+
+*.lua
+
+.*
