@@ -2146,6 +2146,8 @@ class valve_iolink_vtug : public valve
         void direct_on();
 
         void direct_off();
+
+		int get_state() override;
 #endif // DEBUG_NO_IO_MODULES
 
 

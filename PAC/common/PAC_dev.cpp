@@ -2408,6 +2408,19 @@ void valve_iolink_vtug::direct_off()
     u_int offset = ( vtug_number - 1 ) / 8;
     data[ offset ] &= ~( 1 << ( ( vtug_number - 1 ) % 8 ) );
     }
+
+
+int valve_iolink_vtug::get_state()
+	{
+	if (get_AO_IOLINK_state(0) != io_device::IOLINKSTATE::OK)
+		{
+		return -1;
+		}
+	else
+		{
+		return valve::get_state();
+		}
+	}
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 char valve_iolink_vtug::get_state_data( char* data )
@@ -3161,22 +3174,41 @@ float level_s_iolink::get_max_value()
 #ifndef DEBUG_NO_IO_MODULES
 float level_s_iolink::get_value()
     {
-    char* data = ( char* ) get_AI_data( 0 );
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (LS_data*) &tmp;
-
-    return (float) info->v;
+	if (get_AI_IOLINK_state(0) != io_device::IOLINKSTATE::OK)
+		{
+		return -1000.0;
+		}
+	else
+		{
+		char* data = (char*)get_AI_data(0);
+		int tmp = data[1] + 256 * data[0];
+		info = (LS_data*)&tmp;
+		return (float)info->v;
+		}
     }
 
 int level_s_iolink::get_state()
-    {
-	get_AI_IOLINK_state(0);
-    char* data = ( char* ) get_AI_data( 0 );
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (LS_data*) &tmp;
-
-    return info->st1;
-    }
+	{
+	io_device::IOLINKSTATE devstate = get_AI_IOLINK_state(0);
+	if (devstate != io_device::IOLINKSTATE::OK)
+		{
+		if (sub_type == device::LS_IOLINK_MAX)
+			{
+			return 1;
+			}
+		else
+			{
+			return 0;
+			}
+		}
+	else
+		{
+		char* data = (char*)get_AI_data(0);
+		int tmp = data[1] + 256 * data[0];
+		info = (LS_data*)&tmp;
+		return info->st1;
+		}
+	}
 #endif
 
 bool level_s_iolink::is_active()

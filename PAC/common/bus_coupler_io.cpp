@@ -499,7 +499,6 @@ io_device::IOLINKSTATE io_device::get_AI_IOLINK_state(u_int index)
 				{
 				bool iolinkconnected = module_states & (1 << (logical_port - 1));
 				bool iolinkdatavalid = module_states & (1 << (logical_port + 7));
-				G_LOG->debug("IOLState %d, port %d, flags %d %d", module_states, logical_port, iolinkconnected, iolinkdatavalid);
 				if (!iolinkconnected) return IOLINKSTATE::NOTCONNECTED;
 				if (!iolinkdatavalid) return IOLINKSTATE::DEVICEERROR;
 				}
