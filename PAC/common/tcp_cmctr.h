@@ -82,7 +82,7 @@ class tcp_communicator
 #endif // WIN_OS
             QLEN        = MAX_SOCKETS - 1, ///< Максимальное количество соединений.
 
-            TC_MAX_HOST_NAME      = 20,
+            TC_MAX_HOST_NAME      = 70,
             TC_MAX_SERVICE_NUMBER = 16,
             };
 
@@ -113,14 +113,15 @@ class tcp_communicator
         static auto_smart_ptr < tcp_communicator > instance;///< Экземпляр класса.
 
         srv_ptr services[ TC_MAX_SERVICE_NUMBER ];  ///< Массив сервисов.
-        char    host_name_rus[ TC_MAX_HOST_NAME ];      ///< Сетевое имя PAC.
-        char    host_name_eng[ TC_MAX_HOST_NAME ];      ///< Сетевое имя PAC.
+
+        char host_name_rus[ TC_MAX_HOST_NAME + 1] = { 0 }; ///< Сетевое имя PAC.
+        char host_name_eng[ TC_MAX_HOST_NAME + 1] = { 0 }; ///< Сетевое eng имя PAC.
 
         int max_cycles;         ///< Максимальное количество циклов обработки состояний сокетов за 1 проход.
         int glob_cmctr_ok;      ///< Флаг активности обмена с сервером.
 
-        u_int   in_buffer_count;///< Количество данных в буфере.
-        u_char  buf[ BUFSIZE ]; ///< Буфер.
+        u_int   in_buffer_count;        ///< Количество данных в буфере.
+        u_char  buf[ BUFSIZE ] = { 0 }; ///< Буфер.
 
         u_char pidx;            ///< Номер ответа.
         int    net_id;          ///< Номер PAC.

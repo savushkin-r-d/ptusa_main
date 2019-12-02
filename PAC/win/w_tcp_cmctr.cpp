@@ -32,7 +32,7 @@ tcp_communicator_win::tcp_communicator_win( const char *name_rus, const char *na
 
     if ( G_DEBUG ) 
         {
-        char tmp_host_name[ TC_MAX_HOST_NAME ] = { 0 };
+        char tmp_host_name[ TC_MAX_HOST_NAME + 1 ] = { 0 };
         gethostname( tmp_host_name, TC_MAX_HOST_NAME );
         printf ( "Host name - \"%s\".\n", tmp_host_name );    
         hostent *server = gethostbyname( tmp_host_name );
