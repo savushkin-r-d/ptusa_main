@@ -7,6 +7,7 @@
 #include "dtime.h"
 #include "log.h"
 
+#include "prj_mngr.h"
 #include "lua_manager.h"
 
 #include "iot_common.h"
@@ -32,8 +33,13 @@ namespace PtusaPLCnextEngineer
 
             NV_memory_manager::get_instance()->init_ex(NVRAM);
 
+            G_PROJECT_MANAGER->init_path( "/opt/main/" );
+            G_PROJECT_MANAGER->init_sys_path( "/opt/main/" );
+
+
             int res = G_LUA_MANAGER->init(0, "/opt/main/main.plua",
-                    "/opt/main/"); //-Инициализация Lua.
+                G_PROJECT_MANAGER->path.c_str(),
+                G_PROJECT_MANAGER->sys_path.c_str());   //-Инициализация Lua.
 
             if (res) //-Ошибка инициализации.
                 {
