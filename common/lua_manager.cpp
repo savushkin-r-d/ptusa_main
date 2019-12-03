@@ -55,6 +55,11 @@ int check_file( const char* file_name, char* err_str )
     fclose( f );
     f = 0;
 
+    if ( G_DEBUG )
+        {
+        printf( "%d %s\n", version, file_name );
+        }
+
     return version;
     }
 //-----------------------------------------------------------------------------
@@ -146,6 +151,13 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         printf( "Init Lua...\n" );
         }
 
+    if ( dir || sys_dir )
+        {
+        sprintf( G_LOG->msg,
+            "g_path = \"%s\", g_sys_path = \"%s\"", dir, sys_dir );
+        G_LOG->write_log( i_log::P_NOTICE );
+        }
+
     if ( 0 == lua_state )
         {
         //Инициализация Lua.
@@ -206,7 +218,6 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
             sprintf( path, "%s%s", dir, FILES[ i ] );
             }
 
-        printf( "%s\n", path );
         res = check_file( path, err_str );
 
         if ( -1 == res )

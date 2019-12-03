@@ -85,13 +85,6 @@ int project_manager::proc_main_params( int argc, const char *argv[] )
             init_path( argv[ i + 1 ] );
             }
         }
-
-    if ( G_DEBUG && ( !path.empty() || !sys_path.empty() ) )
-        {
-        sprintf( G_LOG->msg,
-            "g_path = \"%s\", g_sys_path = \"%s\"", path.c_str(), sys_path.c_str() );
-        G_LOG->write_log( i_log::P_NOTICE );
-        }
     
     return 0;
     }
