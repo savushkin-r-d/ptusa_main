@@ -12,6 +12,8 @@
 #ifndef PRJ_MANAGER_H
 #define PRJ_MANAGER_H
 
+#include "string"
+
 #include "smart_ptr.h"
 #include "base_mem.h"
 
@@ -39,8 +41,14 @@ class project_manager
 
         virtual ~project_manager();
 
-        char* sys_path = 0;   //Путь к системным скриптам Lua.
-        char* path = 0;       //Путь к описывающим проект скриптам Lua.
+        /// @brief Установка путей к файлам Lua.
+        int init_path( const char* path );
+
+        /// @brief Установка путей к системным файлам Lua.
+        int init_sys_path( const char* sys_path );
+
+        std::string sys_path = "";   //Путь к системным скриптам Lua.
+        std::string path = "";       //Путь к описывающим проект скриптам Lua.
 
     protected:
         file *cfg_file;     ///< Конфигурационный файл.

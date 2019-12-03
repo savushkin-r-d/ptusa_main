@@ -73,8 +73,7 @@ int project_manager::proc_main_params( int argc, const char *argv[] )
         {
         if ( strcmp( argv[ i ], "sys_path" ) == 0 )
             {
-            sys_path = new char[ strlen( argv[ i + 1 ] ) + 1 ];
-            strcpy( sys_path, argv[ i + 1 ] );
+            init_sys_path( argv[ i + 1 ] );
             }
         }
 
@@ -83,26 +82,14 @@ int project_manager::proc_main_params( int argc, const char *argv[] )
         {
         if ( strcmp( argv[ i ], "path" ) == 0 )
             {
-            path = new char[ strlen( argv[ i + 1 ] ) + 1 ];
-            strcpy( path, argv[ i + 1 ] );
+            init_path( argv[ i + 1 ] );
             }
         }
 
-    if ( sys_path == 0 )
-        {
-        sys_path = new char[ 1 ];
-        sys_path[ 0 ] = 0;
-        }
-    if ( path == 0 )
-        {
-        path = new char[ 1 ];
-        path[ 0 ] = 0;
-        }
-
-    if ( G_DEBUG && ( path[ 0 ] || sys_path[ 0 ] ) )
+    if ( G_DEBUG && ( !path.empty() || !sys_path.empty() ) )
         {
         sprintf( G_LOG->msg,
-            "g_path = \"%s\", g_sys_path = \"%s\"", path, sys_path );
+            "g_path = \"%s\", g_sys_path = \"%s\"", path.c_str(), sys_path.c_str() );
         G_LOG->write_log( i_log::P_NOTICE );
         }
     
@@ -134,6 +121,26 @@ project_manager::~project_manager()
         delete cfg_file;
         cfg_file = 0;
         }
+    }
+//-----------------------------------------------------------------------------
+int project_manager::init_path( const char* path )
+    {
+    if ( path )
+        {
+        this->path = path;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int project_manager::init_sys_path( const char* sys_path )
+    {
+    if ( sys_path )
+        {
+        this->sys_path = sys_path;
+        }
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //Порядок загрузки:
