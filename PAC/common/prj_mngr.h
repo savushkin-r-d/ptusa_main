@@ -39,6 +39,9 @@ class project_manager
 
         virtual ~project_manager();
 
+        char* sys_path = 0;   //Путь к системным скриптам Lua.
+        char* path = 0;       //Путь к описывающим проект скриптам Lua.
+
     protected:
         file *cfg_file;     ///< Конфигурационный файл.
 

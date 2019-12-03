@@ -19,9 +19,6 @@ namespace fs = std::filesystem;
 
 #include "log.h"
 //-----------------------------------------------------------------------------
-extern char* g_sys_path;
-extern char* g_path;
-
 auto_smart_ptr< lua_manager > lua_manager::instance;
 //-----------------------------------------------------------------------------
 lua_manager* lua_manager::get_instance()
@@ -633,7 +630,7 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
     sprintf( path, "%s", FILES[ script_n ] );
     if ( script_n < SYS_FILE_CNT )
         {
-        sprintf( path, "%s%s", g_sys_path, FILES[ script_n ] );
+        sprintf( path, "%s%s", G_PROJECT_MANAGER->sys_path, FILES[ script_n ] );
         }
 
     res = check_file( path, err_str );

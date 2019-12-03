@@ -255,7 +255,7 @@ xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y /I
       <AdditionalDependencies>ws2_32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(TargetDir)$(TargetFileName)" "p:\PTUSA projects\editor\bin_lua\lua_vscode.exe"</Command>
+      <Command>copy "$(TargetDir)$(TargetFileName)" "p:\PTUSA-projects\editor\bin_lua\lua_vscode.exe"</Command>
       <Message>Копирование интерпретатора Lua.</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
