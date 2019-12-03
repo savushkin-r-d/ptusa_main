@@ -68,6 +68,24 @@ int project_manager::proc_main_params( int argc, const char *argv[] )
             }
         }
 
+    // sys_path  "C:/system_scripts"
+    for ( int i = 1; i < argc - 1; i++ )
+        {
+        if ( strcmp( argv[ i ], "sys_path" ) == 0 )
+            {
+            init_sys_path( argv[ i + 1 ] );
+            }
+        }
+
+    // path  "C:/project folder"
+    for ( int i = 1; i < argc - 1; i++ )
+        {
+        if ( strcmp( argv[ i ], "path" ) == 0 )
+            {
+            init_path( argv[ i + 1 ] );
+            }
+        }
+    
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -96,6 +114,26 @@ project_manager::~project_manager()
         delete cfg_file;
         cfg_file = 0;
         }
+    }
+//-----------------------------------------------------------------------------
+int project_manager::init_path( const char* path )
+    {
+    if ( path )
+        {
+        this->path = path;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int project_manager::init_sys_path( const char* sys_path )
+    {
+    if ( sys_path )
+        {
+        this->sys_path = sys_path;
+        }
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //Порядок загрузки:

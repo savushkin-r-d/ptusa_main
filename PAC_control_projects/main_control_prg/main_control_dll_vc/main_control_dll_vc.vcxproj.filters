@@ -302,13 +302,7 @@
     <ClCompile Include="..\..\..\PAC\common\tech_def.cpp">
       <Filter>Исходные файлы\PAC\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\PAC\common\wago.cpp">
-      <Filter>Исходные файлы\PAC\common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\sys\base_mem.cpp">
-      <Filter>Исходные файлы\PAC\common\sys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\PAC\common\sys\io.cpp">
       <Filter>Исходные файлы\PAC\common\sys</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\sys\led.cpp">
@@ -333,9 +327,6 @@
       <Filter>Исходные файлы\PAC\win</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\win\PAC_PC\profibus_slave_PC.cpp">
-      <Filter>Исходные файлы\PAC\common\PAC_PC</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\PAC\win\PAC_PC\wago_PC.cpp">
       <Filter>Исходные файлы\PAC\common\PAC_PC</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua_manager.cpp">
@@ -382,6 +373,15 @@
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\IoT\IOT_dev_lua.cpp">
       <Filter>Исходные файлы\PAC\IoT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\win\PAC_PC\bus_coupler_io_PC.cpp">
+      <Filter>Исходные файлы\PAC\common\PAC_PC</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\bus_coupler_io.cpp">
+      <Filter>Исходные файлы\PAC\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\PAC\common\sys\console.cpp">
+      <Filter>Исходные файлы\PAC\common\sys</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

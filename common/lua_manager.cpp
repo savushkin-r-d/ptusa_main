@@ -6,7 +6,7 @@
 #include <Windows.h>
 #ifdef VS_CODE
 #include <filesystem>
-namespace fs = std::experimental::filesystem;
+namespace fs = std::filesystem;
 #endif // VS_CODE
 #endif // OS_WIN
 
@@ -55,6 +55,11 @@ int check_file( const char* file_name, char* err_str )
     fclose( f );
     f = 0;
 
+    if ( G_DEBUG )
+        {
+        printf( "%d %s\n", version, file_name );
+        }
+
     return version;
     }
 //-----------------------------------------------------------------------------
@@ -66,13 +71,6 @@ const int SYS_FILE_CNT = 4;
 const int FILE_CNT     = 11;
 #endif // RM_PAC
 //-----------------------------------------------------------------------------
-
-const char *SYS_PATH =
-#ifdef PAC_PC
-    "../../system scripts/";
-#else
-    "";                     //Файлы находятся в одном каталоге /home/main.
-#endif // PAC_PC
 
 const char *FILES[ FILE_CNT ] =
     {
@@ -146,11 +144,18 @@ const int FILES_VERSION[ FILE_CNT ] =
 //Экспортируем в Lua классы и функции из C++.
 
 int lua_manager::init( lua_State* lua_state, const char* script_name,
-    const char* dir )
+    const char* dir, const char* sys_dir )
     {
     if ( G_DEBUG )
         {
         printf( "Init Lua...\n" );
+        }
+
+    if ( dir || sys_dir )
+        {
+        sprintf( G_LOG->msg,
+            "g_path = \"%s\", g_sys_path = \"%s\"", dir, sys_dir );
+        G_LOG->write_log( i_log::P_NOTICE );
         }
 
     if ( 0 == lua_state )
@@ -184,42 +189,12 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         }
 
 #ifdef PAC_PC
-#ifdef VS_CODE
-    char* dir_      = new char[ MAX_PATH + 1 ];
-    char* sys_path_ = new char[ MAX_PATH + 1 ];
-
-    GetShortPathNameA( fs::current_path().string().c_str(), dir_, MAX_PATH );
-    strcpy( dir_ + strlen( dir_ ), "\\" );
-
-    GetShortPathNameA( fs::canonical( fs::path( SYS_PATH ) ).string().c_str(),
-        sys_path_, MAX_PATH );
-    strcpy( sys_path_ + strlen( sys_path_ ), "\\" );
-    for ( size_t i = 0; i < strlen( sys_path_ ); i++ )
-        {
-        if ( sys_path_[ i ] == '\\' ) sys_path_[ i ] = '/';
-        }
-
     //Добавление каталога с системными скриптами.
     char cmd[ 500 ] = "package.path = package.path..';";
-    strcpy( cmd + strlen( cmd ), sys_path_ );
+    strcpy( cmd + strlen( cmd ), sys_dir );
     strcpy( cmd + strlen( cmd ), "?.lua'" );
 
     luaL_dostring( L, cmd );
-
-    dir_ = new char[ strlen( dir ) + 1 ];
-    strcpy( dir_, dir );
-
-    sys_path_ = new char[ strlen( SYS_PATH ) + 1 ];
-    strcpy( sys_path_, SYS_PATH );
-#else // VS_CODE
-
-    //Добавление каталога с системными скриптами.
-    char cmd[ 500 ] = "package.path = package.path..';";
-    strcpy( cmd + strlen( cmd ), SYS_PATH );
-    strcpy( cmd + strlen( cmd ), "?.lua'" );
-
-    luaL_dostring( L, cmd );
-#endif // VS_CODE
 #endif // PAC_PC
 
     //I
@@ -236,19 +211,11 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         char path[ 100 ];
         if ( i < SYS_FILE_CNT )
             {
-#if defined PAC_PC && defined VS_CODE
-            sprintf( path, "%s%s", sys_path_, FILES[ i ] );
-#else
-            sprintf( path, "%s%s%s", dir, SYS_PATH, FILES[ i ] );
-#endif
+            sprintf( path, "%s%s", sys_dir, FILES[ i ] );
             }
         else
             {
-#if defined PAC_PC && defined VS_CODE
-            sprintf( path, "%s%s", dir_, FILES[ i ] );
-#else
             sprintf( path, "%s%s", dir, FILES[ i ] );
-#endif
             }
 
         res = check_file( path, err_str );
@@ -281,19 +248,11 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         char path[ 100 ] = "";
         if ( i < SYS_FILE_CNT )
             {
-#if defined PAC_PC && defined VS_CODE
-            sprintf( path, "%s%s", sys_path_, FILES[ i ] );
-#else
-            sprintf( path, "%s%s%s", dir, SYS_PATH, FILES[ i ] );
-#endif
+            sprintf( path, "%s%s", sys_dir, FILES[ i ] );
             }
         else
             {
-#if defined PAC_PC && defined VS_CODE
-            sprintf( path, "%s%s", dir_, FILES[ i ] );
-#else
             sprintf( path, "%s%s", dir, FILES[ i ] );
-#endif
             }
 
         if ( luaL_dofile( L, path ) != 0 )
@@ -346,15 +305,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     //IV Выполнение основного скрипта ('main.plua').
     if ( 0 == lua_state )
         {
-        char script_name_[ 500 ];
-#if defined PAC_PC && defined VS_CODE
-        GetShortPathNameA( fs::current_path().string().c_str(),
-            script_name_, sizeof( script_name_ ) );
-        sprintf( script_name_ + strlen( script_name_ ), "\\%s", script_name );
-#else
-        strcpy( script_name_, script_name );
-#endif
-        if( luaL_loadfile( L, script_name_ ) != 0 )
+        if( luaL_loadfile( L, script_name ) != 0 )
             {
             sprintf( G_LOG->msg, lua_tostring( L, -1 ) );
             G_LOG->write_log( i_log::P_CRIT );
@@ -688,13 +639,11 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
 
     char path[ 100 ];
     sprintf( path, "%s", FILES[ script_n ] );
-
-#ifdef PAC_PC
     if ( script_n < SYS_FILE_CNT )
         {
-        sprintf( path, "%s%s", SYS_PATH, FILES[ script_n ] );
+        sprintf( path, "%s%s", 
+            G_PROJECT_MANAGER->sys_path.c_str(), FILES[ script_n ] );
         }
-#endif // PAC_PC
 
     res = check_file( path, err_str );
 
