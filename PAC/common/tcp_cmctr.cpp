@@ -23,10 +23,6 @@ tcp_communicator::tcp_communicator(): in_buffer_count( 0 ), pidx( 0 ), net_id( 0
     glob_cmctr_ok       = 1;
     for ( int i = 0; i < TC_MAX_SERVICE_NUMBER; i++ ) services[ i ] = NULL;
 
-    memset( host_name_rus, 0, TC_MAX_HOST_NAME );
-    memset( host_name_eng, 0, TC_MAX_HOST_NAME );
-
-    memset( buf, 0, BUFSIZE );
     clients = new std::map<int, tcp_client*>();
     }
 //------------------------------------------------------------------------------

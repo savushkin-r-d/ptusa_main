@@ -24,8 +24,8 @@ tcp_communicator_linux::tcp_communicator_linux( const char *name_rus,
     tv.tv_usec = 1000;
 
     sin_len = sizeof( ssin );
-    strcpy( host_name_rus, name_rus );
-    strcpy( host_name_eng, name_eng );
+    strncpy( host_name_rus, name_rus, TC_MAX_HOST_NAME );
+    strncpy( host_name_eng, name_eng, TC_MAX_HOST_NAME );
 
     if ( G_DEBUG )
         {
