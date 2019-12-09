@@ -703,6 +703,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_io_device = (valve_iolink_vtug_on*)new_device;
                     break;
 
+                case device::V_IOLINK_MIXPROOF:
+                    new_device = new valve_iolink_mix_proof( dev_name );
+                    new_io_device = (valve_iolink_mix_proof*)new_device;
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {

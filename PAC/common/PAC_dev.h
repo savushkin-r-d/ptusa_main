@@ -417,6 +417,8 @@ class device : public i_DO_AO_device, public par_device
             V_IOLINK_VTUG_DO1_FB_OFF, ///< IO-Link VTUG клапан с одним каналом управления и одной обратной связью (выключенное состояние).
             V_IOLINK_VTUG_DO1_FB_ON,  ///< IO-Link VTUG клапан с одним каналом управления и одной обратной связью (включенное состояние).
 
+            V_IOLINK_MIXPROOF,        ///< Клапан с двумя каналами управления и двумя обратными связями с IO-Link интерфейсом (противосмешивающий).
+
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
             DST_LS_MAX,         ///< Подключение по схеме максимум.
@@ -2128,6 +2130,38 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 #endif
 
     };
+    //-----------------------------------------------------------------------------
+/// @brief Клапан AS-mixproof.
+    class valve_iolink_mix_proof : public valve
+        {
+        public:
+            valve_iolink_mix_proof( const char* dev_name ) : 
+                valve( dev_name, DT_V, V_IOLINK_MIXPROOF )
+                {
+                }
+
+            void open_upper_seat()
+                {
+                direct_set_state( V_UPPER_SEAT );
+                }
+
+            void open_lower_seat()
+                {
+                direct_set_state( V_LOWER_SEAT );
+                }
+
+            VALVE_STATE get_valve_state()
+                {
+#ifdef DEBUG_NO_IO_MODULES
+                return (VALVE_STATE)digital_io_device::get_state();
+#else
+                char* data = (char*)get_AO_read_data( AO_INDEX );
+                char state = get_state_data( data );
+
+                return (VALVE_STATE)state;
+#endif // DEBUG_NO_IO_MODULES
+                }
+        };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления.
 class valve_iolink_vtug : public valve
