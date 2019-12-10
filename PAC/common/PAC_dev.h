@@ -2155,12 +2155,68 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 #ifdef DEBUG_NO_IO_MODULES
                 return (VALVE_STATE)digital_io_device::get_state();
 #else
-                char* data = (char*)get_AO_read_data( AO_INDEX );
-                char state = get_state_data( data );
+                char* data = (char*)qt->get_AI_data( 0 );
 
-                return (VALVE_STATE)state;
+                const int SIZE = 8;
+                std::reverse_copy( data, data + SIZE, (char*)in_info );
+
+#ifdef DEBUG_IOLINK_MIXPROOF
+                char* tmp = (char*)in_info;
+                sprintf( G_LOG->msg, "%x %x %x %x %x %x %x %x %x %x %x %x\n",
+                    tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ],
+                    tmp[ 4 ], tmp[ 5 ], tmp[ 6 ], tmp[ 7 ] );
+                G_LOG->write_log( i_log::P_WARNING );
+
+                sprintf( G_LOG->msg, "de_en %u, main %u, "
+                    "usl %u, lsp %u \n", in_info->de_en,
+                    in_info->main, in_info->usl, in_info->lsp );
+                G_LOG->write_log( i_log::P_NOTICE );
+#endif
+
+                if ( in_info->de_en == 1 ) retun V_OFF;
+                if ( in_info->main == 1 ) retun V_ON;
+                if ( in_info->usl == 1 ) retun V_UPPER_SEAT;
+                if ( in_info->lsp == 1 ) retun V_LOWER_SEAT;
+
 #endif // DEBUG_NO_IO_MODULES
                 }
+
+#ifndef DEBUG_NO_IO_MODULES
+            int get_off_fb_value()
+                {
+                return in_info->st;
+                }
+
+            int get_on_fb_value()
+                {
+                return in_info->st;
+                }
+#endif // DEBUG_NO_IO_MODULES
+
+        private:
+            struct in_data
+                {
+                uint16_t pos;
+                uint16_t de_en  : 1; //De-Energized
+                uint16_t main   : 1; //Main energised position
+                uint16_t usl    : 1; //Upper Seat Lift energised position
+                uint16_t lsp    : 1; //Lower Seat Push energised position
+                uint16_t st     : 1; //Current Valve state
+                uint16_t unused : 3;
+                uint16_t err    : 5;
+                };
+
+            struct out_data
+                {
+                uint16_t unused : 12;
+                uint16_t sv1    : 1; //Main valve activation
+                uint16_t sv2    : 1; //Upper seat lift activation
+                uint16_t sv3    : 1; //Upper seat lift activation
+                uint16_t wink   : 1; //Lower Seat Push energised position
+                };
+
+            in_data*  in_info = new in_data;
+            out_data* out_info = new out_data;
         };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления.
