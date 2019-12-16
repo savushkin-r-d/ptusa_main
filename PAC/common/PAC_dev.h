@@ -2354,6 +2354,13 @@ class temperature_e_iolink : public AI1
             };
 
         TE_data *info;
+		u_int start_param_idx;
+		enum CONSTANTS
+			{
+			P_ERR_T = 1,                ///< Аварийное значение температуры.
+
+			ADDITIONAL_PARAM_COUNT = 1, ///< Количество параметров.
+			};
     };
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс текущего уровня.
