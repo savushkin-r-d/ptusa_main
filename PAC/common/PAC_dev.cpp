@@ -3181,13 +3181,13 @@ float level_s_iolink::get_max_value()
 #ifndef DEBUG_NO_IO_MODULES
 float level_s_iolink::get_value()
     {
-	if (get_AI_IOLINK_state(0) != io_device::IOLINKSTATE::OK)
+	if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
 		{
 		return -1000.0;
 		}
 	else
 		{
-		char* data = (char*)get_AI_data(0);
+		char* data = (char*)get_AI_data(C_AI_INDEX);
 		int tmp = data[1] + 256 * data[0];
 		info = (LS_data*)&tmp;
 		return (float)info->v;
@@ -3196,7 +3196,7 @@ float level_s_iolink::get_value()
 
 int level_s_iolink::get_state()
 	{
-	io_device::IOLINKSTATE devstate = get_AI_IOLINK_state(0);
+	io_device::IOLINKSTATE devstate = get_AI_IOLINK_state(C_AI_INDEX);
 	if (devstate != io_device::IOLINKSTATE::OK)
 		{
 		if (sub_type == device::LS_IOLINK_MAX)
@@ -3210,7 +3210,7 @@ int level_s_iolink::get_state()
 		}
 	else
 		{
-		char* data = (char*)get_AI_data(0);
+		char* data = (char*)get_AI_data(C_AI_INDEX);
 		int tmp = data[1] + 256 * data[0];
 		info = (LS_data*)&tmp;
 		return info->st1;
@@ -3242,21 +3242,35 @@ float level_e_iolink::get_max_value()
 #ifndef DEBUG_NO_IO_MODULES
 float level_e_iolink::get_value()
     {
-    char* data = (char*)get_AI_data( 0 );
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (LT_data*)&tmp;
+    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+        {
+        return -1000.0;
+        }
+    else
+        {
+        char* data = (char*)get_AI_data(C_AI_INDEX);
+        int tmp = data[1] + 256 * data[0];
+        info = (LT_data*)&tmp;
 
-    return (float)info->v;
+        return (float)info->v;
+        }
     }
 
 int level_e_iolink::get_state()
     {
-    char* data = (char*)get_AI_data( 0 );
+    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+        {
+        return -1;
+        }
+    else
+        {
+        char* data = (char*)get_AI_data(C_AI_INDEX);
 
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (LT_data*)&tmp;
+        int tmp = data[1] + 256 * data[0];
+        info = (LT_data*)&tmp;
 
-    return info->st1;
+        return info->st1;
+        }
     }
 #endif
 //-----------------------------------------------------------------------------
