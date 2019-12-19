@@ -3300,21 +3300,35 @@ float pressure_e_iolink::get_min_val()
 
 float pressure_e_iolink::get_value()
     {
-    char* data = (char*)get_AI_data( 0 );
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (PT_data*)&tmp;
+    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+        {
+        return -1000.0;
+        }
+    else
+        {
+        char* data = (char*)get_AI_data(C_AI_INDEX);
+        int tmp = data[1] + 256 * data[0];
+        info = (PT_data*)&tmp;
 
-    return 0.001f * info->v;
+        return 0.001f * info->v;
+        }
     }
 //-----------------------------------------------------------------------------
 int pressure_e_iolink::get_state()
     {
-    char* data = (char*)get_AI_data( 0 );
+    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+        {
+        return -1;
+        }
+    else
+        {
+        char* data = (char*)get_AI_data(C_AI_INDEX);
 
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (PT_data*)&tmp;
+        int tmp = data[1] + 256 * data[0];
+        info = (PT_data*)&tmp;
 
-    return info->st1;
+        return info->st1;
+        }
     }
 
 #endif
