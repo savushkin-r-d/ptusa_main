@@ -39,7 +39,7 @@
 #include "PAC_info.h"
 
 #include "iot_altivar.h"
-
+#include "log.h"
 
 //-----------------------------------------------------------------------------
 /// @brief Устройство c параметрами.
@@ -2131,12 +2131,12 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 
     };
     //-----------------------------------------------------------------------------
-/// @brief Клапан AS-mixproof.
-    class valve_iolink_mix_proof : public valve
+/// @brief Клапан IO-Link mixproof.
+    class valve_iolink_mix_proof : public i_mix_proof,  public valve
         {
         public:
             valve_iolink_mix_proof( const char* dev_name ) : 
-                valve( dev_name, DT_V, V_IOLINK_MIXPROOF )
+                valve( true, true, dev_name, DT_V, V_IOLINK_MIXPROOF )
                 {
                 }
 
@@ -2155,53 +2155,66 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 #ifdef DEBUG_NO_IO_MODULES
                 return (VALVE_STATE)digital_io_device::get_state();
 #else
-                char* data = (char*)qt->get_AI_data( 0 );
+                char* data = (char*)get_AI_data( 0 );
 
-                const int SIZE = 8;
-                std::reverse_copy( data, data + SIZE, (char*)in_info );
+                const int SIZE = 4;
+                std::copy( data, data + SIZE, (char*)in_info );
+                std::swap( ((char*)in_info)[ 0 ], ((char*)in_info)[ 1 ] );
+                std::swap( ((char*)in_info)[ 2 ], ((char*)in_info)[ 3 ] );
 
+//#define DEBUG_IOLINK_MIXPROOF
 #ifdef DEBUG_IOLINK_MIXPROOF
                 char* tmp = (char*)in_info;
-                sprintf( G_LOG->msg, "%x %x %x %x %x %x %x %x %x %x %x %x\n",
-                    tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ],
-                    tmp[ 4 ], tmp[ 5 ], tmp[ 6 ], tmp[ 7 ] );
+                sprintf( G_LOG->msg, "%x %x %x %x\n",
+                    tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ] );
+
                 G_LOG->write_log( i_log::P_WARNING );
 
-                sprintf( G_LOG->msg, "de_en %u, main %u, "
-                    "usl %u, lsp %u \n", in_info->de_en,
-                    in_info->main, in_info->usl, in_info->lsp );
+                sprintf( G_LOG->msg, 
+                    "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
+                    in_info->de_en, in_info->main, in_info->usl, in_info->lsp,
+                    0.1 * in_info->pos );
                 G_LOG->write_log( i_log::P_NOTICE );
 #endif
 
-                if ( in_info->de_en == 1 ) retun V_OFF;
-                if ( in_info->main == 1 ) retun V_ON;
-                if ( in_info->usl == 1 ) retun V_UPPER_SEAT;
-                if ( in_info->lsp == 1 ) retun V_LOWER_SEAT;
+                if ( in_info->de_en ) return V_OFF;
+                if ( in_info->main ) return V_ON;
+                if ( in_info->usl ) return V_UPPER_SEAT;
+                if ( in_info->lsp ) return V_LOWER_SEAT;
 
+                return V_OFF;
 #endif // DEBUG_NO_IO_MODULES
                 }
 
 #ifndef DEBUG_NO_IO_MODULES
             int get_off_fb_value()
                 {
-                return in_info->st;
+                return in_info->main && in_info->st;
                 }
 
             int get_on_fb_value()
                 {
-                return in_info->st;
+                return in_info->de_en && in_info->st;
+                }
+
+            void direct_on()
+                {
+                }
+
+            void direct_off()
+                {
                 }
 #endif // DEBUG_NO_IO_MODULES
 
         private:
             struct in_data
                 {
-                uint16_t pos;
-                uint16_t de_en  : 1; //De-Energized
-                uint16_t main   : 1; //Main energised position
-                uint16_t usl    : 1; //Upper Seat Lift energised position
-                uint16_t lsp    : 1; //Lower Seat Push energised position
-                uint16_t st     : 1; //Current Valve state
+                int16_t  pos;
+                uint16_t de_en : 1; //De-Energized
+                bool main      : 1; //Main energised position
+                bool usl       : 1; //Upper Seat Lift energised position
+                bool lsp       : 1; //Lower Seat Push energised position
+                bool st        : 1; //Current Valve state
                 uint16_t unused : 3;
                 uint16_t err    : 5;
                 };
@@ -2209,10 +2222,10 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
             struct out_data
                 {
                 uint16_t unused : 12;
-                uint16_t sv1    : 1; //Main valve activation
-                uint16_t sv2    : 1; //Upper seat lift activation
-                uint16_t sv3    : 1; //Upper seat lift activation
-                uint16_t wink   : 1; //Lower Seat Push energised position
+                bool sv1        : 1; //Main valve activation
+                bool sv2        : 1; //Upper seat lift activation
+                bool sv3        : 1; //Upper seat lift activation
+                bool wink       : 1; //Lower Seat Push energised position
                 };
 
             in_data*  in_info = new in_data;
