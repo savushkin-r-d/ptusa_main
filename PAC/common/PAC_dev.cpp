@@ -2408,6 +2408,19 @@ void valve_iolink_vtug::direct_off()
     u_int offset = ( vtug_number - 1 ) / 8;
     data[ offset ] &= ~( 1 << ( ( vtug_number - 1 ) % 8 ) );
     }
+
+
+int valve_iolink_vtug::get_state()
+	{
+	if (get_AO_IOLINK_state(0) != io_device::IOLINKSTATE::OK)
+		{
+		return -1;
+		}
+	else
+		{
+		return valve::get_state();
+		}
+	}
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 char valve_iolink_vtug::get_state_data( char* data )
@@ -2620,21 +2633,28 @@ void AI1::direct_set_value( float new_value )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 temperature_e_iolink::temperature_e_iolink( const char *dev_name ):
-    AI1( dev_name, DT_TE, DST_TE_IOLINK, 0, 0 ), info( new TE_data )
+    AI1(dev_name, DT_TE, DST_TE_IOLINK, ADDITIONAL_PARAM_COUNT, &start_param_idx), info(new TE_data)
     {
+    set_par_name(P_ERR_T, start_param_idx, "P_ERR_T");
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
 float temperature_e_iolink::get_value()
     {
-    char* data = (char*)get_AI_data( 0 );
+    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+        {
+        return get_par(P_ERR_T, start_param_idx);
+        }
+    else
+        {
+        char* data = (char*)get_AI_data(C_AI_INDEX);
 
-    int16_t tmp = data[ 1 ] + 256 * data[ 0 ];
-    memcpy(info, &tmp, 2);
+        int16_t tmp = data[1] + 256 * data[0];
+        memcpy(info, &tmp, 2);
 
-    return 0.1f * info->v;
+        return get_par(P_ZERO_ADJUST_COEFF, 0) + 0.1f * info->v;
+        }
     }
-
 #else
 //-----------------------------------------------------------------------------
 float temperature_e_iolink::get_value()
@@ -3161,22 +3181,41 @@ float level_s_iolink::get_max_value()
 #ifndef DEBUG_NO_IO_MODULES
 float level_s_iolink::get_value()
     {
-    char* data = ( char* ) get_AI_data( 0 );
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (LS_data*) &tmp;
-
-    return (float) info->v;
+	if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+		{
+		return -1000.0;
+		}
+	else
+		{
+		char* data = (char*)get_AI_data(C_AI_INDEX);
+		int tmp = data[1] + 256 * data[0];
+		info = (LS_data*)&tmp;
+		return (float)info->v;
+		}
     }
 
 int level_s_iolink::get_state()
-    {
-    char* data = ( char* ) get_AI_data( 0 );
-
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (LS_data*) &tmp;
-
-    return info->st1;
-    }
+	{
+	io_device::IOLINKSTATE devstate = get_AI_IOLINK_state(C_AI_INDEX);
+	if (devstate != io_device::IOLINKSTATE::OK)
+		{
+		if (sub_type == device::LS_IOLINK_MAX)
+			{
+			return 1;
+			}
+		else
+			{
+			return 0;
+			}
+		}
+	else
+		{
+		char* data = (char*)get_AI_data(C_AI_INDEX);
+		int tmp = data[1] + 256 * data[0];
+		info = (LS_data*)&tmp;
+		return info->st1;
+		}
+	}
 #endif
 
 bool level_s_iolink::is_active()
@@ -3203,21 +3242,35 @@ float level_e_iolink::get_max_value()
 #ifndef DEBUG_NO_IO_MODULES
 float level_e_iolink::get_value()
     {
-    char* data = (char*)get_AI_data( 0 );
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (LT_data*)&tmp;
+    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+        {
+        return -1000.0;
+        }
+    else
+        {
+        char* data = (char*)get_AI_data(C_AI_INDEX);
+        int tmp = data[1] + 256 * data[0];
+        info = (LT_data*)&tmp;
 
-    return (float)info->v;
+        return (float)info->v;
+        }
     }
 
 int level_e_iolink::get_state()
     {
-    char* data = (char*)get_AI_data( 0 );
+    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+        {
+        return -1;
+        }
+    else
+        {
+        char* data = (char*)get_AI_data(C_AI_INDEX);
 
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (LT_data*)&tmp;
+        int tmp = data[1] + 256 * data[0];
+        info = (LT_data*)&tmp;
 
-    return info->st1;
+        return info->st1;
+        }
     }
 #endif
 //-----------------------------------------------------------------------------
@@ -3247,21 +3300,35 @@ float pressure_e_iolink::get_min_val()
 
 float pressure_e_iolink::get_value()
     {
-    char* data = (char*)get_AI_data( 0 );
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (PT_data*)&tmp;
+    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+        {
+        return -1000.0;
+        }
+    else
+        {
+        char* data = (char*)get_AI_data(C_AI_INDEX);
+        int tmp = data[1] + 256 * data[0];
+        info = (PT_data*)&tmp;
 
-    return 0.001f * info->v;
+        return 0.001f * info->v;
+        }
     }
 //-----------------------------------------------------------------------------
 int pressure_e_iolink::get_state()
     {
-    char* data = (char*)get_AI_data( 0 );
+    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+        {
+        return -1;
+        }
+    else
+        {
+        char* data = (char*)get_AI_data(C_AI_INDEX);
 
-    int tmp = data[ 1 ] + 256 * data[ 0 ];
-    info = (PT_data*)&tmp;
+        int tmp = data[1] + 256 * data[0];
+        info = (PT_data*)&tmp;
 
-    return info->st1;
+        return info->st1;
+        }
     }
 
 #endif

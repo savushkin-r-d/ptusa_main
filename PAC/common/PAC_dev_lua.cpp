@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 09/17/19 12:19:49.
+** Generated automatically by tolua++-1.0.92 on 11/14/19 17:23:05.
 */
 
 #ifndef __cplusplus
@@ -4684,7 +4684,9 @@ static int tolua_PAC_dev_io_device_init_channel00(lua_State* tolua_S)
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,5,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,6,&tolua_err)
+     !tolua_isnumber(tolua_S,6,1,&tolua_err) ||
+     !tolua_isnumber(tolua_S,7,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,8,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -4695,11 +4697,13 @@ static int tolua_PAC_dev_io_device_init_channel00(lua_State* tolua_S)
   int ch_inex = ((int)  tolua_tonumber(tolua_S,3,0));
   int node = ((int)  tolua_tonumber(tolua_S,4,0));
   int offset = ((int)  tolua_tonumber(tolua_S,5,0));
+  int module_offset = ((int)  tolua_tonumber(tolua_S,6,-1));
+  int logical_port = ((int)  tolua_tonumber(tolua_S,7,-1));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'init_channel'", NULL);
 #endif
   {
-   self->init_channel(type,ch_inex,node,offset);
+   self->init_channel(type,ch_inex,node,offset,module_offset,logical_port);
   }
  }
  return 0;
