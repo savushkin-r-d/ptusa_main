@@ -2355,6 +2355,78 @@ void valve_bottom_mix_proof::direct_off()
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+valve_iolink_mix_proof::valve_iolink_mix_proof( const char* dev_name ) :
+    valve( true, true, dev_name, DT_V, V_IOLINK_MIXPROOF )
+    {
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::open_upper_seat()
+    {
+    direct_set_state( V_UPPER_SEAT );
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::open_lower_seat()
+    {
+    direct_set_state( V_LOWER_SEAT );
+    }
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE valve_iolink_mix_proof::get_valve_state()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return (VALVE_STATE)digital_io_device::get_state();
+#else
+    char* data = (char*)get_AI_data( 0 );
+
+    const int SIZE = 4;
+    std::copy( data, data + SIZE, (char*)in_info );
+    std::swap( ( (char*)in_info )[ 0 ], ( (char*)in_info )[ 1 ] );
+    std::swap( ( (char*)in_info )[ 2 ], ( (char*)in_info )[ 3 ] );
+
+    //#define DEBUG_IOLINK_MIXPROOF
+#ifdef DEBUG_IOLINK_MIXPROOF
+    char* tmp = (char*)in_info;
+    sprintf( G_LOG->msg, "%x %x %x %x\n",
+        tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ] );
+
+    G_LOG->write_log( i_log::P_WARNING );
+
+    sprintf( G_LOG->msg,
+        "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
+        in_info->de_en, in_info->main, in_info->usl, in_info->lsp,
+        0.1 * in_info->pos );
+    G_LOG->write_log( i_log::P_NOTICE );
+#endif
+
+    if ( in_info->de_en ) return V_OFF;
+    if ( in_info->main ) return V_ON;
+    if ( in_info->usl ) return V_UPPER_SEAT;
+    if ( in_info->lsp ) return V_LOWER_SEAT;
+
+    return V_OFF;
+#endif // DEBUG_NO_IO_MODULES
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+int valve_iolink_mix_proof::get_off_fb_value()
+    {
+    return in_info->main && in_info->st;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_mix_proof::get_on_fb_value()
+    {
+    return in_info->de_en && in_info->st;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::direct_on()
+    {
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::direct_off()
+    {
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 valve_iolink_vtug::valve_iolink_vtug( const char *dev_name,
     device::DEVICE_SUB_TYPE sub_type ) : valve( dev_name, DT_V, sub_type ),
     vtug_number( 0 )
