@@ -5336,9 +5336,8 @@ int cipline_tech_object::_Circ( int what )
         }
 
     c=GetConc(what);
-    if (FL->get_state()==FLIS) SAV[SAV_CONC]->Add(c, cnt->get_quantity());
     SAV[SAV_CONC]->Add(c, cnt->get_quantity());
-    rt_par_float[P_CONC] = SAV[SAV_CONC]->Q();
+    rt_par_float[P_CONC] = c;
     switch (what)
         {
         case KISL:
