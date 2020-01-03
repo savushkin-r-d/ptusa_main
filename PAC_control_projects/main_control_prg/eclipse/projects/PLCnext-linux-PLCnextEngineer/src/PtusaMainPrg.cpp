@@ -97,6 +97,7 @@ namespace PtusaPLCnextEngineer
             valve::evaluate();
             valve_bottom_mix_proof::evaluate();
             concentration_e_iolink::evaluate();
+            valve_iolink_mix_proof::evaluate();
 
             G_TECH_OBJECT_MNGR()->evaluate();
             sleep_ms(sleep_time_ms);
