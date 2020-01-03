@@ -2149,6 +2149,8 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 
             int get_state();
 
+            float get_value();
+
 #ifndef DEBUG_NO_IO_MODULES
             bool get_fb_state();
 

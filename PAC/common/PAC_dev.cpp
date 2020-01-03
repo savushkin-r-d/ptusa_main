@@ -2429,6 +2429,8 @@ int valve_iolink_mix_proof::save_device_ex( char *buff )
     {
     int res = sprintf( buff, "BLINK=%d, ", blink );
 
+    res += sprintf( buff + res, "V=%.1f, ", get_value() );
+
     return res;
     }
 //-----------------------------------------------------------------------------
@@ -2490,6 +2492,11 @@ int valve_iolink_mix_proof::get_state()
         }
 
     return valve::get_state();
+    }
+//-----------------------------------------------------------------------------
+float valve_iolink_mix_proof::get_value()
+    {
+    return 0.1f * in_info->pos;
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_mix_proof::get_off_fb_value()
