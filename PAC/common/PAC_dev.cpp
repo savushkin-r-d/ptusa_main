@@ -750,6 +750,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         ( device::DEVICE_SUB_TYPE ) dev_sub_type );
                     break;
 
+                case device::DST_LS_VIRT:
+                    new_device = new virtual_device(dev_name, device::DT_LS, device::DST_LS_VIRT);
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -866,6 +870,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_LT_IOLINK:
                     new_device = new level_e_iolink( dev_name );
                     new_io_device = (level_e_iolink*)new_device;
+                    break;
+
+                case device::DST_LT_VIRT:
+                    new_device = new virtual_device(dev_name, device::DT_LT, device::DST_LT_VIRT);
                     break;
 
                 case device::DST_LT_TRUNC:
@@ -3889,6 +3897,11 @@ void virtual_device::direct_on()
 int virtual_device::get_state()
     {
     return state;
+    }
+
+bool virtual_device::is_active()
+    {
+    return state == 0 ? 0 : 1;
     }
 
 virtual_device::virtual_device( const char *dev_name,

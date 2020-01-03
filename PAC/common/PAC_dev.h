@@ -424,6 +424,8 @@ class device : public i_DO_AO_device, public par_device
             LS_IOLINK_MIN,      ///< IOLInk уровень. Подключение по схеме минимум.
             LS_IOLINK_MAX,      ///< IOLInk уровень. Подключение по схеме максимум.
 
+            DST_LS_VIRT,        ///< Виртуальный датчик уровня.
+
             //TE
             DST_TE = 1,
             DST_TE_IOLINK,      ///Температура IO-LInk без дополнительных параметров.
@@ -469,6 +471,8 @@ class device : public i_DO_AO_device, public par_device
             DST_LT_TRUNC,  ///Текущий уровень для танка с усеченным цилиндром в основании.
 
             DST_LT_IOLINK, ///Текущий IOLInk уровень без дополнительных параметров.
+
+            DST_LT_VIRT,   ///< Виртуальный текущий уровень.
 
             //DO
             DST_DO = 1,    ///Обычный дискретный выход с привязкой к модулям
@@ -2762,6 +2766,8 @@ class virtual_device : public device
         virtual void direct_on();
 
         virtual int get_state();
+
+        virtual bool is_active();
      };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство без привязки к модулям ввода-вывода
