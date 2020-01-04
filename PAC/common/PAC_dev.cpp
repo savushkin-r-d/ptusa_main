@@ -14,6 +14,8 @@ std::vector<valve_bottom_mix_proof*> valve_bottom_mix_proof::to_switch_off;
 
 std::vector<concentration_e_iolink*> concentration_e_iolink::qt_e_iolink;
 
+std::vector< valve_iolink_mix_proof* > valve_iolink_mix_proof::valves;
+
 const char device::DEV_NAMES[][ 5 ] =
     {
     "V",       ///< Клапан.
@@ -701,6 +703,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::V_IOLINK_VTUG_DO1_FB_ON:
                     new_device = new valve_iolink_vtug_on(dev_name);
                     new_io_device = (valve_iolink_vtug_on*)new_device;
+                    break;
+
+                case device::V_IOLINK_MIXPROOF:
+                    new_device = new valve_iolink_mix_proof( dev_name );
+                    new_io_device = (valve_iolink_mix_proof*)new_device;
                     break;
 
                 default:
@@ -2353,6 +2360,245 @@ void valve_bottom_mix_proof::direct_off()
         is_closing_mini = 1;
 
         to_switch_off.push_back( this );
+        }
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iolink_mix_proof::valve_iolink_mix_proof( const char* dev_name ) :
+    valve( true, true, dev_name, DT_V, V_IOLINK_MIXPROOF )
+    {
+    valves.push_back( this );
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::open_upper_seat()
+    {
+    direct_set_state( V_UPPER_SEAT );
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::open_lower_seat()
+    {
+    direct_set_state( V_LOWER_SEAT );
+    }
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE valve_iolink_mix_proof::get_valve_state()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return (VALVE_STATE)digital_io_device::get_state();
+#else
+
+    if ( in_info->de_en ) return V_OFF;
+    if ( in_info->main ) return V_ON;
+    if ( in_info->usl ) return V_UPPER_SEAT;
+    if ( in_info->lsp ) return V_LOWER_SEAT;
+
+    return V_OFF;
+#endif // DEBUG_NO_IO_MODULES
+    }
+
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::evaluate()
+    {
+    if ( valves.empty() == false )
+        {
+        for ( auto iter = valves.begin(); iter != valves.end(); iter++ )
+            {
+            auto *v = *iter;
+
+            v->out_info = ( out_data_swapped* ) v->get_AO_write_data( 0 );
+
+            char* data = (char*)v->get_AI_data( 0 );
+            char* buff = (char*)v->in_info;
+
+            const int SIZE = 4;
+            std::copy( data, data + SIZE, buff );
+            std::swap( buff[ 0 ], buff[ 1 ] );
+            std::swap( buff[ 2 ], buff[ 3 ] );
+
+//#define DEBUG_IOLINK_MIXPROOF
+#ifdef DEBUG_IOLINK_MIXPROOF
+            char* tmp = (char*)v->in_info;
+
+            sprintf( G_LOG->msg, "%x %x %x %x\n",
+                tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ] );
+            G_LOG->write_log( i_log::P_WARNING );
+
+            sprintf( G_LOG->msg,
+                "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
+                v->in_info->de_en, v->in_info->main, v->in_info->usl,
+                v->in_info->lsp, 0.1 * v->in_info->pos );
+            G_LOG->write_log( i_log::P_NOTICE );
+#endif
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_mix_proof::save_device_ex( char *buff )
+    {
+    int res = sprintf( buff, "BLINK=%d, ", blink );
+
+    res += sprintf( buff + res, "V=%.1f, ", get_value() );
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+bool valve_iolink_mix_proof::get_fb_state()
+    {
+    if ( get_delta_millisec( start_switch_time ) <
+        get_par( valve::P_ON_TIME, 0 ) )
+        {
+        return true;
+        }
+
+    if ( out_info->sv1 == false && in_info->de_en && in_info->st ) return true;
+
+    if ( out_info->sv1 == true && in_info->main && in_info->st ) return true;
+
+    if ( out_info->sv2 == true && in_info->usl && in_info->st ) return true;
+
+    if ( out_info->sv3 == true && in_info->lsp && in_info->st ) return true;
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_mix_proof::get_state()
+    {
+    switch ( get_valve_state() )
+        {
+        case V_LOWER_SEAT:
+            if ( get_manual_mode() )
+                {
+                return VX_LOWER_SEAT_MANUAL;
+                }
+
+            //Обратная связь отключена.
+            if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+                {
+                return VX_LOWER_SEAT_FB_OFF;
+                }
+
+            if ( get_fb_state() ) return VX_LOWER_SEAT;
+
+            return VX_OFF_FB_ERR;
+
+        case V_UPPER_SEAT:
+            if ( get_manual_mode() )
+                {
+                return VX_UPPER_SEAT_MANUAL;
+                }
+
+            //Обратная связь отключена.
+            if ( get_par( P_FB, 0 ) == FB_IS_AND_OFF )
+                {
+                return VX_UPPER_SEAT_FB_OFF;
+                }
+
+            if ( get_fb_state() ) return VX_UPPER_SEAT;
+
+            return VX_OFF_FB_ERR;
+        }
+
+    return valve::get_state();
+    }
+//-----------------------------------------------------------------------------
+float valve_iolink_mix_proof::get_value()
+    {
+    return 0.1f * in_info->pos;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_mix_proof::get_off_fb_value()
+    {
+    return out_info->sv1 == false && in_info->main && in_info->st;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_mix_proof::get_on_fb_value()
+    {
+    return out_info->sv1 == true && in_info->de_en && in_info->st;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::direct_on()
+    {
+    if ( false == in_info->main )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    out_info->sv1 = true;
+    out_info->sv2 = false;
+    out_info->sv3 = false;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::direct_off()
+    {
+    if ( out_info->sv1 || out_info->sv2 || out_info->sv3 )
+        {
+        start_switch_time = get_millisec();
+        }
+
+    out_info->sv1 = false;
+    out_info->sv2 = false;
+    out_info->sv3 = false;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_mix_proof::set_cmd( const char *prop, u_int idx, double val )
+    {
+    if (G_DEBUG)
+        {
+        sprintf( G_LOG->msg,
+            "%s\t valve_iolink_mix_proof::set_cmd() - prop = %s, idx = %d, val = %f",
+            get_name(), prop, idx, val);
+        G_LOG->write_log(i_log::P_DEBUG);
+        }
+
+    switch ( prop[ 0 ] )
+        {
+        case 'B': //BLINK
+            {
+            val > 0 ? out_info->wink = true : out_info->wink = false;
+            blink = out_info->wink;
+            break;
+            }
+
+        default:
+            valve::set_cmd( prop, idx, val );
+            break;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case V_OFF:
+            direct_off();
+            break;
+
+        case V_ON:
+            direct_on();
+            break;
+
+        case V_UPPER_SEAT:
+            {
+            direct_off();
+
+            out_info->sv2 = true;
+            break;
+            }
+
+        case V_LOWER_SEAT:
+            {
+            direct_off();
+
+            out_info->sv3 = true;
+            break;
+            }
+
+        default:
+            direct_on();
+            break;
         }
     }
 #endif // DEBUG_NO_IO_MODULES
