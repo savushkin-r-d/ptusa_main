@@ -485,15 +485,16 @@ int lua_manager::exec_lua_method_var( const char* object_name,
         lua_getfield( L, LUA_GLOBALSINDEX, function_name );
         }
 
-    va_list param;              //указатель va_list
-    va_start( param, cnt );     // устанавливаем указатель
-
+    va_list param;
+    va_start( param, cnt );
     if ( cnt > 0 )
         {
         lua_pushnumber( L, va_arg( param, int ) );
         param_count++;
         cnt--;
         }
+    va_end( param );
+
     int results_count = is_use_lua_return_value == 1 ? 1 : 0;
     int res = lua_pcall( L, param_count, results_count, err_func );
 
