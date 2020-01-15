@@ -417,8 +417,26 @@ int lua_manager::int_exec_lua_method( const char *object_name,
     return res;
     }
 //-----------------------------------------------------------------------------
+int lua_manager::int_2_exec_lua_method( const char* object_name,
+    const char* function_name, int param1, int param2,
+    const char* c_function_name ) const
+    {
+    int res = 0;
+    if ( 0 == exec_lua_method_var( object_name, function_name, 1, 2, param1, param2 ) )
+        {
+        res = (int)tolua_tonumber( L, -1, 0 );
+        lua_remove( L, -1 );
+        }
+    else
+        {
+        res = -1;
+        }
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
 void* lua_manager::user_object_exec_lua_method( const char *object_name,
-                                               const char *function_name, int param, const char *c_function_name ) const
+    const char *function_name, int param, const char *c_function_name ) const
     {
     void* res = NULL;
     if ( 0 == exec_lua_method( object_name, function_name, param ) )
@@ -433,6 +451,13 @@ void* lua_manager::user_object_exec_lua_method( const char *object_name,
 int lua_manager::exec_lua_method( const char *object_name,
                                  const char *function_name, int param, int is_use_param,
                                  int is_use_lua_return_value ) const
+    {
+    return exec_lua_method_var( object_name,
+        function_name, is_use_lua_return_value, is_use_param ? 1 : 0, param );
+    }
+//-----------------------------------------------------------------------------
+int lua_manager::exec_lua_method_var( const char* object_name,
+    const char* function_name, int is_use_lua_return_value, int cnt, ... ) const
     {
     //-Вычисление времени выполнения функций Lua.
     //LARGE_INTEGER start_time;
@@ -460,10 +485,14 @@ int lua_manager::exec_lua_method( const char *object_name,
         lua_getfield( L, LUA_GLOBALSINDEX, function_name );
         }
 
-    if ( is_use_param )
+    va_list param;              //указатель va_list
+    va_start( param, cnt );     // устанавливаем указатель
+
+    if ( cnt > 0 )
         {
-        lua_pushnumber( L, param );
+        lua_pushnumber( L, va_arg( param, int ) );
         param_count++;
+        cnt--;
         }
     int results_count = is_use_lua_return_value == 1 ? 1 : 0;
     int res = lua_pcall( L, param_count, results_count, err_func );

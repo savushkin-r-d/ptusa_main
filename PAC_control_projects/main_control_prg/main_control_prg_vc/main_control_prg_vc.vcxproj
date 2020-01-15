@@ -196,7 +196,7 @@ tolua++ -n rfid_reader -o "..\..\..\PAC\common\rfid_reader_tolua.cpp" "..\..\..\
     <PreBuildEvent>
       <Command>tolua++ -n PAC_dev -o "..\..\..\PAC\common\PAC_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh"
 tolua++ -n IOT_dev -o "..\..\..\PAC\IoT\IOT_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\IOT_dev.hh"
-xcopy "p:\PTUSA projects\system scripts" "..\..\system scripts" /S /Y /I
+xcopy "p:\PTUSA-projects\system-scripts" "..\..\system-scripts" /S /Y /I
 
 </Command>
     </PreBuildEvent>

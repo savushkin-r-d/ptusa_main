@@ -171,7 +171,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
 
         /// @brief Проверка на возможность включения операции.
         ///
-        int check_operation_on( u_int operation_n );
+        int check_operation_on( u_int operation_n, bool show_error = true );
 
         saved_params_float      par_float;      ///< Сохраняемые параметры, тип float.
         run_time_params_float   rt_par_float;   ///< Рабочие параметры, тип float.
@@ -183,7 +183,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         // Lua implemented methods.
         int lua_exec_cmd( u_int cmd );
 
-        int  lua_check_on_mode( u_int mode );
+        int  lua_check_on_mode( u_int mode, bool show_error = true );
         void lua_init_mode( u_int mode );
         
         int  lua_check_off_mode( u_int mode );

@@ -48,6 +48,10 @@ class lua_manager
             const char *function_name, int param,
             const char *c_function_name ) const;
 
+        int int_2_exec_lua_method( const char* object_name,
+            const char* function_name, int param1, int param2, 
+            const char* c_function_name ) const;
+
         int int_no_param_exec_lua_method( const char *object_name,
             const char *function_name, const char *c_function_name ) const;
 
@@ -75,6 +79,9 @@ class lua_manager
         int exec_lua_method( const char *object_name,
             const char *function_name, int param, int is_use_param = 1,
             int is_use_lua_return_value = 1 ) const;
+
+        int exec_lua_method_var( const char* object_name, const char* function_name,
+            int is_use_lua_return_value = 0, int cnt = 0, ... ) const;
 
         int err_func;
         lua_State * L;
