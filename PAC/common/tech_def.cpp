@@ -42,8 +42,8 @@ tech_object::tech_object( const char* new_name, u_int number, u_int type,
         available.push_back( 0 );
         }
 
-    strcpy( name, new_name );
-    strcpy( this->name_Lua, name_Lua );
+    strncpy( name, new_name, C_MAX_NAME_LENGTH );
+    strncpy( this->name_Lua, name_Lua, C_MAX_NAME_LENGTH );
 
     operations_manager = new operation_manager( operations_count, this );
     }
