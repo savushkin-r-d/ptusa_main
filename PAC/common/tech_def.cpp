@@ -326,7 +326,7 @@ int tech_object::lua_exec_cmd( u_int cmd )
         cmd, "int tech_object::lua_exec_cmd( u_int cmd )" );
     }
 //-----------------------------------------------------------------------------
-int tech_object::lua_check_on_mode( u_int mode )
+int tech_object::lua_check_on_mode( u_int mode, bool show_error )
     {
     char err_msg[ 200 ] = "";
 
@@ -356,7 +356,8 @@ int tech_object::lua_check_on_mode( u_int mode )
                                 //Есть ограничение, проверяем на активность операции.
                                 if ( get_mode( i ) )
                                     {
-                                    set_err_msg( err_msg, mode, i, ERR_CANT_ON_2_OPER );
+                                    if ( show_error ) set_err_msg( err_msg,
+                                        mode, i, ERR_CANT_ON_2_OPER );
                                     lua_pop( L, 5 );
                                     return 1000 + i;
                                     }
@@ -385,13 +386,17 @@ int tech_object::lua_check_on_mode( u_int mode )
                                         //Есть ограничение, проверяем на активность операции.
                                         if ( t_obj->get_mode( i ) )
                                             {
-                                            snprintf( err_msg, sizeof( err_msg ),
-                                                "уже включена операция %.1d \'%.40s\' для объекта \'%.40s %d\'",
-                                                i, 
-                                                (*t_obj->get_modes_manager())[i]->get_name(),
-                                                t_obj->get_name(), t_obj->get_number() );
+                                            if ( show_error )
+                                                {
+                                                snprintf( err_msg, sizeof( err_msg ),
+                                                    "уже включена операция %.1d \'%.40s\' для объекта \'%.40s %d\'",
+                                                    i,
+                                                    ( *t_obj->get_modes_manager() )[ i ]->get_name(),
+                                                    t_obj->get_name(), t_obj->get_number() );
 
-                                            set_err_msg( err_msg, mode, i, ERR_CANT_ON_2_OBJ );
+                                                set_err_msg( err_msg, mode, i, ERR_CANT_ON_2_OBJ );
+                                                }
+
                                             lua_pop( L, 6 );
                                             return 10000 + i;
                                             }
@@ -413,7 +418,7 @@ int tech_object::lua_check_on_mode( u_int mode )
 
     if ( int res = tech_object::check_on_mode( mode, err_msg ) )
         {
-        set_err_msg( err_msg, mode );
+        if ( show_error ) set_err_msg( err_msg, mode );
 
         return 1000 + res;
         }
@@ -427,8 +432,8 @@ int tech_object::lua_check_on_mode( u_int mode )
 
     if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
         {
-        return lua_manager::get_instance()->int_exec_lua_method( name_Lua,
-            "check_on_mode", mode,
+        return lua_manager::get_instance()->int_2_exec_lua_method( name_Lua,
+            "check_on_mode", mode, show_error ? 1 : 0,
             "int tech_object::lua_check_on_mode( u_int mode )" );
         }
 
@@ -440,11 +445,10 @@ int tech_object::lua_check_on_mode( u_int mode )
 
     if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
         {
-        return lua_manager::get_instance()->int_exec_lua_method( name_Lua,
-            "user_check_operation_on", mode,
+        return lua_manager::get_instance()->int_2_exec_lua_method( name_Lua,
+            "user_check_operation_on", mode, show_error ? 1 : 0,
             "int tech_object::lua_check_on_mode( u_int mode )" );
         }
-    
 
     return 0;
     }
@@ -1199,7 +1203,7 @@ bool tech_object::is_any_important_mode()
     return false;
     }
 //-----------------------------------------------------------------------------
-int tech_object::check_operation_on( u_int operation_n )
+int tech_object::check_operation_on( u_int operation_n, bool show_error )
     {
     operation* op = ( *operations_manager )[ operation_n ];
 
@@ -1211,12 +1215,12 @@ int tech_object::check_operation_on( u_int operation_n )
     int res = op->check_devices_on_run_state( res_str + l, S_SIZE - l );
     if ( res && is_check_mode( operation_n ) == 1 )
         {
-        set_err_msg( res_str, operation_n );
+        if ( show_error ) set_err_msg( res_str, operation_n );
         res = operation_n + 1000;
         }
     else
         {
-        if ( ( res = lua_check_on_mode( operation_n ) ) == 0 ) // Check if possible.
+        if ( ( res = lua_check_on_mode( operation_n, show_error ) ) == 0 ) // Check if possible.
             {
             }
         else

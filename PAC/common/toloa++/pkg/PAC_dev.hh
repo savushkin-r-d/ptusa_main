@@ -648,7 +648,7 @@ class tech_object
         /// другие режимы, включаться/выключаться какие-либо устройства).
         unsigned int get_modes_count() const;
 
-        int check_operation_on( unsigned int operation_n );
+        int check_operation_on( unsigned int operation_n, bool show_error = true);
 
         saved_params_float      par_float;   ///< Сохраняемые пар-ры, тип float.
         run_time_params_float   rt_par_float;///< Рабочие параметры, тип float.

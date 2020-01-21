@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 11/14/19 17:23:05.
+** Generated automatically by tolua++-1.0.92 on 01/15/20 00:23:55.
 */
 
 #ifndef __cplusplus
@@ -3426,7 +3426,8 @@ static int tolua_PAC_dev_tech_object_check_operation_on00(lua_State* tolua_S)
  if (
      !tolua_isusertype(tolua_S,1,"tech_object",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
+     !tolua_isboolean(tolua_S,3,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -3434,11 +3435,12 @@ static int tolua_PAC_dev_tech_object_check_operation_on00(lua_State* tolua_S)
  {
   tech_object* self = (tech_object*)  tolua_tousertype(tolua_S,1,0);
   unsigned int operation_n = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
+  bool show_error = ((bool)  tolua_toboolean(tolua_S,3,true));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'check_operation_on'", NULL);
 #endif
   {
-   int tolua_ret = (int)  self->check_operation_on(operation_n);
+   int tolua_ret = (int)  self->check_operation_on(operation_n,show_error);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
