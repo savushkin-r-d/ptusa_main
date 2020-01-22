@@ -331,6 +331,7 @@ int io_manager_linux::write_outputs()
                                 buff[13 + l + 1] = 0;
                                 }
                             l += 2;
+                            break;
 
                         case 2688527:   //-AXL F AO4 1H
                             buff[13 + l] = (u_char)((nd->AO_[idx] >> 8) & 0xFF);
