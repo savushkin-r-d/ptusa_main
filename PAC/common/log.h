@@ -55,6 +55,12 @@ class i_log
 
 	void debug(const char* debug_message, ...);
 	void info(const char* info_message, ...);
+    void notice(const char* info_message, ...);
+    void warning(const char* info_message, ...);
+    void error(const char* info_message, ...);
+    void critical(const char* info_message, ...);
+    void alert(const char* info_message, ...);
+    void emergency(const char* info_message, ...);
 
     protected:
 
