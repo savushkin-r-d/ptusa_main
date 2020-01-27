@@ -36,9 +36,24 @@
 			<locationURI>PARENT-5-PROJECT_LOC/common</locationURI>
 		</link>
 		<link>
+			<name>src/lua</name>
+			<type>2</type>
+			<location>/home/id/ptusa_git/lua</location>
+		</link>
+		<link>
+			<name>src/lua_conf</name>
+			<type>2</type>
+			<location>/home/id/ptusa_git/lua_conf</location>
+		</link>
+		<link>
 			<name>src/main.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/main.cpp</locationURI>
+		</link>
+		<link>
+			<name>src/tolua++</name>
+			<type>2</type>
+			<location>/home/id/ptusa_git/tolua++</location>
 		</link>
 	</linkedResources>
 </projectDescription>
