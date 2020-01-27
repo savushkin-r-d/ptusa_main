@@ -38,3 +38,57 @@ void i_log::info(const char* info_message, ...)
 	va_end(params);
 	write_log(P_INFO);
 	}
+
+void i_log::notice(const char* info_message, ...)
+    {
+    va_list params;
+    va_start(params, info_message);
+    vsprintf(msg, info_message, params);
+    va_end(params);
+    write_log(P_NOTICE);
+    }
+
+void i_log::warning(const char* info_message, ...)
+    {
+    va_list params;
+    va_start(params, info_message);
+    vsprintf(msg, info_message, params);
+    va_end(params);
+    write_log(P_WARNING);
+    }
+
+void i_log::error(const char* info_message, ...)
+    {
+    va_list params;
+    va_start(params, info_message);
+    vsprintf(msg, info_message, params);
+    va_end(params);
+    write_log(P_ERR);
+    }
+
+void i_log::critical(const char* info_message, ...)
+    {
+    va_list params;
+    va_start(params, info_message);
+    vsprintf(msg, info_message, params);
+    va_end(params);
+    write_log(P_CRIT);
+    }
+
+void i_log::alert(const char* info_message, ...)
+    {
+    va_list params;
+    va_start(params, info_message);
+    vsprintf(msg, info_message, params);
+    va_end(params);
+    write_log(P_ALERT);
+    }
+
+void i_log::emergency(const char* info_message, ...)
+    {
+    va_list params;
+    va_start(params, info_message);
+    vsprintf(msg, info_message, params);
+    va_end(params);
+    write_log(P_EMERG);
+    }
