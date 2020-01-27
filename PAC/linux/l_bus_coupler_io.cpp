@@ -351,23 +351,23 @@ int io_manager_linux::write_outputs()
                         {
                         memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
                         memcpy( nd->DO, nd->DO_, nd->DO_cnt );
+                        nd->flag_error_write_message = false;
                         }
                     else
                         {
-                        if (G_DEBUG)
+                        if (!nd->flag_error_write_message)
                             {
-                            sprintf( G_LOG->msg, "Write AO: returned error %d",
-                                    buff[7]);
-                            G_LOG->write_log(i_log::P_ERR);
+                            G_LOG->error("Write AO: returned error %d", buff[7]);
+                            nd->flag_error_write_message = true;
                             }
                         }
                     }// if ( e_communicate( nd, 2 * bytes_cnt + 13, 12 ) == 0 )
                 else
                     {
-                    if ( G_DEBUG )
+                    if (!nd->flag_error_write_message)
                         {
-                        sprintf( G_LOG->msg, "Write AO: returned error");
-                        G_LOG->write_log(i_log::P_ERR);
+                        G_LOG->error("Write AO: returned error");
+                        nd->flag_error_write_message = true;
                         }
                     }
                 }// if ( nd->AO_cnt > 0 )
