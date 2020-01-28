@@ -192,6 +192,8 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
 					G_IO_MANAGER()->get_node(par - 1)->ip_address
 					);
 				break;
+            default:
+                break;
 			}
 		if (is_set)
 			{
@@ -268,6 +270,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
         default:
             break;
             }// switch( err_sub_class )
+        break;
 
     case AC_NET:
         if ( is_set )
@@ -337,6 +340,9 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             {
             sprintf( tmp + strlen( tmp ) - 3, "." );
             }
+        break;
+    default:
+        break;
         }
 
     return tmp;

@@ -248,7 +248,6 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
 
     if ( strcmp( prop, "NODEENABLED" ) == 0 )
         {
-        unsigned int noden = idx;
         if ( idx <= io_manager::get_instance()->get_nodes_count() )
             {
             io_manager::io_node* wn = io_manager::get_instance()->get_node( idx - 1 );

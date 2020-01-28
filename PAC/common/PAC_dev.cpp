@@ -2497,6 +2497,8 @@ int valve_iolink_mix_proof::get_state()
             if ( get_fb_state() ) return VX_UPPER_SEAT;
 
             return VX_OFF_FB_ERR;
+        default:
+            break;
         }
 
     return valve::get_state();
@@ -2627,6 +2629,7 @@ void valve_iolink_vtug::set_rt_par( u_int idx, float value )
 
         case 2:
             vtug_io_size = (u_int)value;
+            break;
 
         default:
             valve::set_rt_par( idx, value );
