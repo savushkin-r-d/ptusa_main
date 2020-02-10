@@ -452,6 +452,67 @@ int io_manager_linux::e_communicate( io_node* node, int bytes_to_send,
 
     return 0;
     }
+
+int io_manager_linux::read_input_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station /*= 0*/)
+    {
+    buff[0] = 's';
+    buff[1] = 's';
+    buff[2] = 0;
+    buff[3] = 0;
+    buff[4] = 0;
+    buff[5] = 6;
+    buff[6] = station;
+    buff[7] = 0x04;
+    buff[8] = (u_int_2)address >> 8;
+    buff[9] = (u_int_2)address & 0xFF;
+    buff[10] = (u_int_2)quantity >> 8;
+    buff[11] = (u_int_2)quantity & 0xFF;
+    unsigned int bytes_cnt = quantity * 2;
+    if (e_communicate(node, 12, bytes_cnt + 9) == 0)
+        {
+        if (buff[7] == 0x04 && buff[8] == bytes_cnt)
+            {
+            resultbuff = &buff[9];
+            return 1;
+            }
+        else
+            {
+            return 0;
+            }
+        }
+    return -1;
+    }
+
+int io_manager_linux::write_holding_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station)
+    {
+    unsigned int bytes_cnt = quantity * 2;
+    buff[0] = 's';
+    buff[1] = 's';
+    buff[2] = 0;
+    buff[3] = 0;
+    buff[4] = 0;
+    buff[5] = 7 + bytes_cnt;
+    buff[6] = station;
+    buff[7] = 0x10;
+    buff[8] = (u_int_2)address >> 8;
+    buff[9] = (u_int_2)address & 0xFF;
+    buff[10] = (u_int_2)quantity >> 8;
+    buff[11] = (u_int_2)quantity & 0xFF;
+    buff[12] = bytes_cnt;
+    if (e_communicate(node, bytes_cnt + 13, 12) == 0)
+        {
+        if (buff[7] == 0x10)
+            {
+            return 1;
+            }
+        else
+            {
+            return 0;
+            }
+        }
+    return -1;
+    }
+
 //-----------------------------------------------------------------------------
 int io_manager_linux::read_inputs()
     {
@@ -585,73 +646,88 @@ int io_manager_linux::read_inputs()
                 continue;
                 }
 
-            if ( nd->AI_cnt > 0 )
+            if (nd->AI_cnt > 0)
                 {
-                buff[ 0 ] = 's';
-                buff[ 1 ] = 's';
-                buff[ 2 ] = 0;
-                buff[ 3 ] = 0;
-                buff[ 4 ] = 0;
-                buff[ 5 ] = 6;
-                buff[ 6 ] = 0; //nd->number;
-                buff[ 7 ] = 0x04;
-                buff[ 8 ] = 0x1F;
-                buff[ 9 ] = 0x40;
+                unsigned int start_register = 0;
+                unsigned int start_read_address = PHOENIX_INPUTREGISTERS_STARTADDRESS;
+                unsigned int registers_count;
 
-                u_int bytes_cnt = nd->AI_size;
-
-                buff[ 10 ] = (unsigned char)bytes_cnt / 2 >> 8;
-                buff[ 11 ] = (unsigned char)bytes_cnt / 2 & 0xFF;
-
-                if ( e_communicate( nd, 12, bytes_cnt + 9 ) == 0 )
+                if (nd->AI_cnt > MAX_MODBUS_REGISTERS_PER_QUERY)
                     {
-                    if ( buff[ 7 ] == 0x04 && buff[ 8 ] == bytes_cnt )
+                    registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
+                    }
+                else
+                    {
+                    registers_count = nd->AI_cnt;
+                    }
+
+                int res, k, index_source = 0, analog_dest = 0, bit_dest = 0;
+
+                do
+                    {
+#ifdef DEBUG_BK_MIN
+                    G_LOG->warning("Read %d node registers from %d", registers_count, start_read_address + start_register);
+#endif // DEBUG_BK_MIN
+                    res = read_input_registers(nd, start_read_address + start_register, registers_count);
+
+                    if (res >= 0)
                         {
-                        for ( u_int l = 0, idx = 0; l < nd->AI_cnt; l++ )
+                        if (res)
                             {
-                            switch (nd->AI_types[l])
+                            for (index_source = 0; analog_dest < start_register + registers_count; analog_dest++)
                                 {
-                            case 1027843:                               //IOL8
-                                memcpy(&nd->AI[l], &buff[9 + idx], 2);
-                                idx += 2;
-                                break;
+                                switch (nd->AI_types[analog_dest])
+                                    {
+                                    case 1027843:                               //IOL8
+                                        memcpy(&nd->AI[analog_dest], resultbuff + index_source, 2);
+                                        index_source += 2;
+                                        break;
 
-                            default:
-                                nd->AI[l] = 256 * buff[9 + idx] + buff[9 + idx + 1];
-                                idx += 2;
-                                break;
+                                    default:
+                                        nd->AI[analog_dest] = 256 * resultbuff[index_source] + resultbuff[index_source + 1];
+                                        index_source += 2;
+                                        break;
+                                    }
+#ifdef DEBUG_BK
+                                G_LOG->warning("%d %u", analog_dest, nd->AI[analog_dest]);
+#endif // DEBUG_BK
                                 }
 
-#ifdef DEBUG_BK
-                            sprintf( G_LOG->msg, "%d %u", l, nd->AI[l]);
-                            G_LOG->write_log(i_log::P_WARNING );
-#endif // DEBUG_BK
-                            }
-
-                        for (u_int j = 0, idx = 0; j < bytes_cnt; j++)
-                            {
-                            for (int k = 0; k < 8; k++)
+                            for (index_source = 0; bit_dest < (start_register + registers_count) * 2; index_source++)
                                 {
-                                nd->DI[idx] = (buff[j + 9] >> k) & 1;
+                                for (k = 0; k < 8; k++)
+                                    {
+                                    nd->DI[bit_dest] = (resultbuff[index_source] >> k) & 1;
 #ifdef DEBUG_BK
-                                sprintf( G_LOG->msg, "%d %d", idx, (buff[j + 9] >> k) & 1);
-                                G_LOG->write_log(i_log::P_NOTICE);
+                                    G_LOG->notice("%d %d", bit_dest, (resultbuff[index_source] >> k) & 1);
 #endif // DEBUG_BK
-                                idx++;
+                                    bit_dest++;
+                                    }
+                                }
+                            start_register += registers_count;
+                            registers_count = nd->AI_cnt - start_register;
+                            if (registers_count > MAX_MODBUS_REGISTERS_PER_QUERY)
+                                {
+                                registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
                                 }
                             }
-
+                        else
+                            {
+                            G_LOG->error("Read AI:bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
+                                nd->number, (int)buff[7], (int)buff[8], registers_count * 2);
+                            break;
+                            }
                         }
                     else
                         {
-                        sprintf( G_LOG->msg, "Read AI:bus coupler returned error. Node %d (bytes_cnt = %d, %d %d )",
-                            nd->number, (int)buff[ 7 ], (int)buff[ 8 ], bytes_cnt );
-                        G_LOG->write_log( i_log::P_ERR );
+                        //node doesn't respond
+                        break;
                         }
-                    }
-                }// if ( nd->AI_cnt > 0 )
+                    } 
+                while (start_register >= nd->AI_cnt);
+                }
 
-            }// if ( nd->type == io_node::T_750_341 || ...
+            }// nd->type == io_node::PHOENIX_BK_ETH
         }// for ( u_int i = 0; i < nodes_count; i++ )
 
     return 0;
@@ -670,6 +746,7 @@ void io_manager_linux::disconnect( io_node* node )
 //-----------------------------------------------------------------------------
 io_manager_linux::io_manager_linux()
     {
+    writebuff = &buff[13];
     }
 //-----------------------------------------------------------------------------
 io_manager_linux::~io_manager_linux()
