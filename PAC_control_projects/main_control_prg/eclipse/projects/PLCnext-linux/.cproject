@@ -3,9 +3,17 @@
     	
     <storageModule moduleId="org.eclipse.cdt.core.settings">
         		
-        <cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357">
+        <cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.306834292">
             			
-            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357" moduleId="org.eclipse.cdt.core.settings" name="Debug">
+            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.306834292" moduleId="org.eclipse.cdt.core.settings" name="Debug 2019.3">
+                				
+                <macros>
+                    					
+                    <stringMacro name="PNSDK" type="VALUE_TEXT" value="/opt/pxc/sdk/AXCF2152/2019.3"/>
+                    					
+                    <stringMacro name="CPPVER" type="VALUE_TEXT" value="7.3.0"/>
+                    				
+                </macros>
                 				
                 <externalSettings/>
                 				
@@ -29,45 +37,29 @@
             			
             <storageModule moduleId="cdtBuildSystem" version="4.0.0">
                 				
-                <configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357" name="Debug" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=" parent="cdt.managedbuild.config.gnu.cross.exe.debug">
+                <configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.306834292" name="Debug 2019.3" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=" parent="cdt.managedbuild.config.gnu.cross.exe.debug">
                     					
-                    <folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357." name="/" resourcePath="">
+                    <folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.306834292." name="/" resourcePath="">
                         						
-                        <toolChain id="cdt.managedbuild.toolchain.gnu.cross.exe.debug.1712562010" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.exe.debug">
+                        <toolChain id="cdt.managedbuild.toolchain.gnu.cross.exe.debug.373535521" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.exe.debug">
                             							
-                            <option id="cdt.managedbuild.option.gnu.cross.prefix.1971711184" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" useByScannerDiscovery="false" value="arm-pxc-linux-gnueabi-" valueType="string"/>
+                            <option id="cdt.managedbuild.option.gnu.cross.prefix.633577027" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" useByScannerDiscovery="false" value="arm-pxc-linux-gnueabi-" valueType="string"/>
                             							
-                            <option id="cdt.managedbuild.option.gnu.cross.path.536122057" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/x86_64-pokysdk-linux/usr/bin/arm-pxc-linux-gnueabi" valueType="string"/>
+                            <option id="cdt.managedbuild.option.gnu.cross.path.2055678072" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/bin/arm-pxc-linux-gnueabi" valueType="string"/>
                             							
-                            <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.1197622715" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+                            <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.1249328011" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
                             							
-                            <builder buildPath="${workspace_loc:/main_ctrl_prg}/Debug" id="cdt.managedbuild.builder.gnu.cross.410508747" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+                            <builder buildPath="${workspace_loc:/main_ctrl_prg}/Debug" id="cdt.managedbuild.builder.gnu.cross.541261526" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
                             							
-                            <tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1253230877" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1147184036" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
                                 								
-                                <option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.1710504902" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
+                                <option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.1431127263" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
                                 								
-                                <option defaultValue="gnu.c.debugging.level.max" id="gnu.c.compiler.option.debugging.level.842656077" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
+                                <option defaultValue="gnu.c.debugging.level.max" id="gnu.c.compiler.option.debugging.level.934697005" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
                                 								
-                                <option id="gnu.c.compiler.option.dialect.std.688166957" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
+                                <option id="gnu.c.compiler.option.dialect.std.661990024" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
                                 								
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.2102357371" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/7.3.0"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/7.3.0/arm-pxc-linux-gnueabi"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/7.3.0/backward"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/gcc/arm-pxc-linux-gnueabi/7.3.0/include"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/7.3.0/include"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/7.3.0/include-fixed"/>
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.1017181751" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/lua&quot;"/>
                                     									
@@ -76,46 +68,46 @@
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua_conf&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../tolua++/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/arm-pxc-linux-gnueabi&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/backward&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
                                     								
                                 </option>
                                 								
-                                <option id="gnu.c.compiler.option.dialect.flags.812254019" name="Other dialect flags" superClass="gnu.c.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 --sysroot=/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi" valueType="string"/>
+                                <option id="gnu.c.compiler.option.dialect.flags.49019205" name="Other dialect flags" superClass="gnu.c.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 --sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi" valueType="string"/>
                                 								
-                                <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.365510079" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+                                <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.930147834" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
                                 							
                             </tool>
                             							
-                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1501169159" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1535107231" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
                                 								
-                                <option id="gnu.cpp.compiler.option.optimization.level.1608559571" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+                                <option id="gnu.cpp.compiler.option.optimization.level.2074780643" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
                                 								
-                                <option defaultValue="gnu.cpp.compiler.debugging.level.max" id="gnu.cpp.compiler.option.debugging.level.1879287502" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
+                                <option defaultValue="gnu.cpp.compiler.debugging.level.max" id="gnu.cpp.compiler.option.debugging.level.1279074574" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
                                 								
-                                <option id="gnu.cpp.compiler.option.dialect.std.1070956848" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
+                                <option id="gnu.cpp.compiler.option.dialect.std.772269609" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
                                 								
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.1589430999" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include"/>
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.809114129" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../tolua++/include&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/tolua++&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/lua&quot;"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/7.3.0"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/7.3.0/arm-pxc-linux-gnueabi"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/7.3.0/backward"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/gcc/arm-pxc-linux-gnueabi/7.3.0/include"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/7.3.0/include"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/7.3.0/include-fixed"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/common&quot;"/>
                                     									
@@ -139,15 +131,29 @@
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua_conf&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../tolua++/include&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/arm-pxc-linux-gnueabi&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/backward&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
                                     								
                                 </option>
                                 								
-                                <option id="gnu.cpp.compiler.option.other.other.57343151" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
+                                <option id="gnu.cpp.compiler.option.other.other.229349077" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
                                 								
-                                <option id="gnu.cpp.compiler.option.dialect.flags.2027274880" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 --sysroot=/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi -fno-gnu-unique" valueType="string"/>
+                                <option id="gnu.cpp.compiler.option.dialect.flags.1692919414" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 --sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi -fno-gnu-unique" valueType="string"/>
                                 								
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.581953596" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.795876590" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
                                     									
                                     <listOptionValue builtIn="false" value="ARP_DEVICE_AXCF2152"/>
                                     									
@@ -159,39 +165,39 @@
                                     								
                                 </option>
                                 								
-                                <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1282997671" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+                                <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.975197141" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
                                 							
                             </tool>
                             							
-                            <tool id="cdt.managedbuild.tool.gnu.cross.c.linker.264823685" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.linker.315951131" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
                             							
-                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1299443513" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1537294002" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
                                 								
-                                <option id="gnu.cpp.link.option.flags.1447786941" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value="--sysroot=/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi -march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 -Wl,--no-undefined" valueType="string"/>
+                                <option id="gnu.cpp.link.option.flags.1987350391" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value="--sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi -march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 -Wl,--no-undefined" valueType="string"/>
                                 								
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.link.option.paths.1764201939" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.link.option.paths.1333079045" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
                                     									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/lib/"/>
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/lib/&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/"/>
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/x86_64-pokysdk-linux/lib/"/>
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/lib/&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/x86_64-pokysdk-linux/usr/lib/"/>
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/arm-pxc-linux-gnueabi/7.3.0/"/>
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/arm-pxc-linux-gnueabi/${CPPVER}/&quot;"/>
                                     								
                                 </option>
                                 								
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.link.option.libs.1671440135" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.link.option.libs.1597612526" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
                                     									
                                     <listOptionValue builtIn="false" value="dl"/>
                                     								
                                 </option>
                                 								
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="gnu.cpp.link.option.other.604803956" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" useByScannerDiscovery="false" valueType="stringList"/>
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="gnu.cpp.link.option.other.1742663780" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" useByScannerDiscovery="false" valueType="stringList"/>
                                 								
-                                <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.61190097" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+                                <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1521063235" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
                                     									
                                     <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
                                     									
@@ -201,11 +207,11 @@
                                 							
                             </tool>
                             							
-                            <tool id="cdt.managedbuild.tool.gnu.cross.archiver.39030605" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
+                            <tool id="cdt.managedbuild.tool.gnu.cross.archiver.1205475860" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
                             							
-                            <tool id="cdt.managedbuild.tool.gnu.cross.assembler.66656156" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
+                            <tool id="cdt.managedbuild.tool.gnu.cross.assembler.672694143" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
                                 								
-                                <inputType id="cdt.managedbuild.tool.gnu.assembler.input.603944145" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+                                <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1505803496" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
                                 							
                             </tool>
                             						
@@ -213,7 +219,7 @@
                         					
                     </folderInfo>
                     					
-                    <fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1343019976" name="OPCUAServer.h" rcbsApplicability="disable" resourcePath="src/PAC/common/OPCUAServer.h" toolsToInvoke=""/>
+                    <fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.306834292.src/PAC/common/OPCUAServer.h" name="OPCUAServer.h" rcbsApplicability="disable" resourcePath="src/PAC/common/OPCUAServer.h" toolsToInvoke=""/>
                     					
                     <sourceEntries>
                         						
@@ -229,9 +235,17 @@
             		
         </cconfiguration>
         		
-        <cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.release.957505090">
+        <cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124">
             			
-            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.release.957505090" moduleId="org.eclipse.cdt.core.settings" name="Release">
+            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124" moduleId="org.eclipse.cdt.core.settings" name="Debug 2019.9">
+                				
+                <macros>
+                    					
+                    <stringMacro name="PNSDK" type="VALUE_TEXT" value="/opt/pxc/sdk/AXCF2152/2019.9"/>
+                    					
+                    <stringMacro name="CPPVER" type="VALUE_TEXT" value="8.2.0"/>
+                    				
+                </macros>
                 				
                 <externalSettings/>
                 				
@@ -255,37 +269,123 @@
             			
             <storageModule moduleId="cdtBuildSystem" version="4.0.0">
                 				
-                <configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.release" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cross.exe.release.957505090" name="Release" optionalBuildProperties="" parent="cdt.managedbuild.config.gnu.cross.exe.release">
+                <configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124" name="Debug 2019.9" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=" parent="cdt.managedbuild.config.gnu.cross.exe.debug">
                     					
-                    <folderInfo id="cdt.managedbuild.config.gnu.cross.exe.release.957505090." name="/" resourcePath="">
+                    <folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124." name="/" resourcePath="">
                         						
-                        <toolChain id="cdt.managedbuild.toolchain.gnu.cross.exe.release.2004761370" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.exe.release">
+                        <toolChain id="cdt.managedbuild.toolchain.gnu.cross.exe.debug.463680536" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.exe.debug">
                             							
-                            <option id="cdt.managedbuild.option.gnu.cross.prefix.1071374" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" value="arm-pxc-linux-gnueabi-" valueType="string"/>
+                            <option id="cdt.managedbuild.option.gnu.cross.prefix.1602861423" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" useByScannerDiscovery="false" value="arm-pxc-linux-gnueabi-" valueType="string"/>
                             							
-                            <option id="cdt.managedbuild.option.gnu.cross.path.30623661" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" value="/opt/pxc/sdk/AXCF2152/2019.3/sysroots/x86_64-pokysdk-linux/usr/bin/arm-pxc-linux-gnueabi" valueType="string"/>
+                            <option id="cdt.managedbuild.option.gnu.cross.path.826555201" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/bin/arm-pxc-linux-gnueabi" valueType="string"/>
                             							
-                            <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.1323852205" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+                            <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.661527514" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
                             							
-                            <builder buildPath="${workspace_loc:/main_ctrl_prg}/Release" id="cdt.managedbuild.builder.gnu.cross.1245924225" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+                            <builder buildPath="${workspace_loc:/main_ctrl_prg}/Debug" id="cdt.managedbuild.builder.gnu.cross.1808426187" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
                             							
-                            <tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1309936884" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.685571734" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
                                 								
-                                <option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.option.optimization.level.379727929" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
+                                <option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.336942714" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
                                 								
-                                <option defaultValue="gnu.c.debugging.level.none" id="gnu.c.compiler.option.debugging.level.1047222379" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
+                                <option defaultValue="gnu.c.debugging.level.max" id="gnu.c.compiler.option.debugging.level.1290483736" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
                                 								
-                                <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.708972631" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+                                <option id="gnu.c.compiler.option.dialect.std.109453296" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.239008953" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/lua&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua/src&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua_conf&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../tolua++/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/arm-pxc-linux-gnueabi&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/backward&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option id="gnu.c.compiler.option.dialect.flags.1204593225" name="Other dialect flags" superClass="gnu.c.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 --sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi" valueType="string"/>
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1750713230" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
                                 							
                             </tool>
                             							
-                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1500568438" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.955274878" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
                                 								
-                                <option id="gnu.cpp.compiler.option.optimization.level.1263952369" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+                                <option id="gnu.cpp.compiler.option.optimization.level.825305549" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
                                 								
-                                <option defaultValue="gnu.cpp.compiler.debugging.level.none" id="gnu.cpp.compiler.option.debugging.level.1383655152" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
+                                <option defaultValue="gnu.cpp.compiler.debugging.level.max" id="gnu.cpp.compiler.option.debugging.level.2137351338" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
                                 								
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.1534777341" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+                                <option id="gnu.cpp.compiler.option.dialect.std.528696258" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.372458348" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../tolua++/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/tolua++&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/lua&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/common&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/common/sys&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/linux&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/util&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/PAC-driver&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/QuickLZ&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/linux/PAC_PC&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/IoT&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua/src&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua_conf&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/arm-pxc-linux-gnueabi&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/backward&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option id="gnu.cpp.compiler.option.other.other.1411675877" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
+                                								
+                                <option id="gnu.cpp.compiler.option.dialect.flags.980655331" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 --sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi -fno-gnu-unique" valueType="string"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.1064031913" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
                                     									
                                     <listOptionValue builtIn="false" value="ARP_DEVICE_AXCF2152"/>
                                     									
@@ -297,15 +397,39 @@
                                     								
                                 </option>
                                 								
-                                <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1804070703" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+                                <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1553349480" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
                                 							
                             </tool>
                             							
-                            <tool id="cdt.managedbuild.tool.gnu.cross.c.linker.2049209882" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.linker.796359657" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
                             							
-                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1451751926" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.2028142025" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
                                 								
-                                <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1473776555" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+                                <option id="gnu.cpp.link.option.flags.2092308146" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value="--sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi -march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 -Wl,--no-undefined" valueType="string"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.link.option.paths.2000349060" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/arm-pxc-linux-gnueabi/${CPPVER}/&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.link.option.libs.1162638" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
+                                    									
+                                    <listOptionValue builtIn="false" value="dl"/>
+                                    								
+                                </option>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="gnu.cpp.link.option.other.469581935" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" useByScannerDiscovery="false" valueType="stringList"/>
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1033272671" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
                                     									
                                     <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
                                     									
@@ -315,11 +439,11 @@
                                 							
                             </tool>
                             							
-                            <tool id="cdt.managedbuild.tool.gnu.cross.archiver.1200337533" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
+                            <tool id="cdt.managedbuild.tool.gnu.cross.archiver.1677717852" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
                             							
-                            <tool id="cdt.managedbuild.tool.gnu.cross.assembler.1809441955" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
+                            <tool id="cdt.managedbuild.tool.gnu.cross.assembler.1712529049" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
                                 								
-                                <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1552051828" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+                                <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1868838989" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
                                 							
                             </tool>
                             						
@@ -327,7 +451,935 @@
                         					
                     </folderInfo>
                     					
-                    <fileInfo id="cdt.managedbuild.config.gnu.cross.exe.release.957505090.586289881" name="OPCUAServer.h" rcbsApplicability="disable" resourcePath="src/PAC/common/OPCUAServer.h" toolsToInvoke=""/>
+                    <fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.src/PAC/common/OPCUAServer.h" name="OPCUAServer.h" rcbsApplicability="disable" resourcePath="src/PAC/common/OPCUAServer.h" toolsToInvoke=""/>
+                    					
+                    <sourceEntries>
+                        						
+                        <entry excluding="lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        					
+                    </sourceEntries>
+                    				
+                </configuration>
+                			
+            </storageModule>
+            			
+            <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+            		
+        </cconfiguration>
+        		
+        <cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751">
+            			
+            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751" moduleId="org.eclipse.cdt.core.settings" name="Release 2019.9">
+                				
+                <macros>
+                    					
+                    <stringMacro name="PNSDK" type="VALUE_TEXT" value="/opt/pxc/sdk/AXCF2152/2019.9"/>
+                    					
+                    <stringMacro name="CPPVER" type="VALUE_TEXT" value="8.2.0"/>
+                    				
+                </macros>
+                				
+                <externalSettings/>
+                				
+                <extensions>
+                    					
+                    <extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    				
+                </extensions>
+                			
+            </storageModule>
+            			
+            <storageModule moduleId="cdtBuildSystem" version="4.0.0">
+                				
+                <configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751" name="Release 2019.9" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=" parent="cdt.managedbuild.config.gnu.cross.exe.debug">
+                    					
+                    <folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751." name="/" resourcePath="">
+                        						
+                        <toolChain id="cdt.managedbuild.toolchain.gnu.cross.exe.debug.865399294" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.exe.debug">
+                            							
+                            <option id="cdt.managedbuild.option.gnu.cross.prefix.1240414583" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" useByScannerDiscovery="false" value="arm-pxc-linux-gnueabi-" valueType="string"/>
+                            							
+                            <option id="cdt.managedbuild.option.gnu.cross.path.133520472" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/bin/arm-pxc-linux-gnueabi" valueType="string"/>
+                            							
+                            <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.1077428642" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+                            							
+                            <builder buildPath="${workspace_loc:/main_ctrl_prg}/Debug" id="cdt.managedbuild.builder.gnu.cross.652037647" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.560239126" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
+                                								
+                                <option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.24435987" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.most" valueType="enumerated"/>
+                                								
+                                <option defaultValue="gnu.c.debugging.level.max" id="gnu.c.compiler.option.debugging.level.762573646" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+                                								
+                                <option id="gnu.c.compiler.option.dialect.std.883293755" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.2055198477" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/lua&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua/src&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua_conf&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../tolua++/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/arm-pxc-linux-gnueabi&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/backward&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option id="gnu.c.compiler.option.dialect.flags.1851175143" name="Other dialect flags" superClass="gnu.c.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 --sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi" valueType="string"/>
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.903699451" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.322051622" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+                                								
+                                <option id="gnu.cpp.compiler.option.optimization.level.1878926505" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+                                								
+                                <option defaultValue="gnu.cpp.compiler.debugging.level.max" id="gnu.cpp.compiler.option.debugging.level.70328052" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
+                                								
+                                <option id="gnu.cpp.compiler.option.dialect.std.1664963988" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.1117294550" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../tolua++/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/tolua++&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/lua&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/common&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/common/sys&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/linux&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/util&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/PAC-driver&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/QuickLZ&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/linux/PAC_PC&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/IoT&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua/src&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua_conf&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/arm-pxc-linux-gnueabi&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/backward&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option id="gnu.cpp.compiler.option.other.other.193181099" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
+                                								
+                                <option id="gnu.cpp.compiler.option.dialect.flags.1731505297" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 --sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi -fno-gnu-unique" valueType="string"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.806335105" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+                                    									
+                                    <listOptionValue builtIn="false" value="ARP_DEVICE_AXCF2152"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="LINUX_OS"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="PAC_PLCNEXT"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="PAC_PLCNEXT_ALONE"/>
+                                    								
+                                </option>
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.308984036" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.linker.368514920" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1714256092" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
+                                								
+                                <option id="gnu.cpp.link.option.flags.795712998" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value="--sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi -march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 -Wl,--no-undefined" valueType="string"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.link.option.paths.1087681866" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/arm-pxc-linux-gnueabi/${CPPVER}/&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.link.option.libs.657694929" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
+                                    									
+                                    <listOptionValue builtIn="false" value="dl"/>
+                                    								
+                                </option>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="gnu.cpp.link.option.other.1107794216" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" useByScannerDiscovery="false" valueType="stringList"/>
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1111355664" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+                                    									
+                                    <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+                                    									
+                                    <additionalInput kind="additionalinput" paths="$(LIBS)"/>
+                                    								
+                                </inputType>
+                                							
+                            </tool>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.archiver.1756054941" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.assembler.2059734926" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1251319100" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+                                							
+                            </tool>
+                            						
+                        </toolChain>
+                        					
+                    </folderInfo>
+                    					
+                    <fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.src/PAC/common/OPCUAServer.h" name="OPCUAServer.h" rcbsApplicability="disable" resourcePath="src/PAC/common/OPCUAServer.h" toolsToInvoke=""/>
+                    					
+                    <sourceEntries>
+                        						
+                        <entry excluding="lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        					
+                    </sourceEntries>
+                    				
+                </configuration>
+                			
+            </storageModule>
+            			
+            <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+            		
+        </cconfiguration>
+        		
+        <cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.996928029">
+            			
+            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.996928029" moduleId="org.eclipse.cdt.core.settings" name="Release 2019.3">
+                				
+                <macros>
+                    					
+                    <stringMacro name="PNSDK" type="VALUE_TEXT" value="/opt/pxc/sdk/AXCF2152/2019.3"/>
+                    					
+                    <stringMacro name="CPPVER" type="VALUE_TEXT" value="7.3.0"/>
+                    				
+                </macros>
+                				
+                <externalSettings/>
+                				
+                <extensions>
+                    					
+                    <extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    				
+                </extensions>
+                			
+            </storageModule>
+            			
+            <storageModule moduleId="cdtBuildSystem" version="4.0.0">
+                				
+                <configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.996928029" name="Release 2019.3" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=" parent="cdt.managedbuild.config.gnu.cross.exe.debug">
+                    					
+                    <folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.996928029." name="/" resourcePath="">
+                        						
+                        <toolChain id="cdt.managedbuild.toolchain.gnu.cross.exe.debug.1606641757" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.exe.debug">
+                            							
+                            <option id="cdt.managedbuild.option.gnu.cross.prefix.459422584" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" useByScannerDiscovery="false" value="arm-pxc-linux-gnueabi-" valueType="string"/>
+                            							
+                            <option id="cdt.managedbuild.option.gnu.cross.path.885054697" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/bin/arm-pxc-linux-gnueabi" valueType="string"/>
+                            							
+                            <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.1914710263" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+                            							
+                            <builder buildPath="${workspace_loc:/main_ctrl_prg}/Debug" id="cdt.managedbuild.builder.gnu.cross.800433856" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1007545497" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
+                                								
+                                <option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.549573240" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.most" valueType="enumerated"/>
+                                								
+                                <option defaultValue="gnu.c.debugging.level.max" id="gnu.c.compiler.option.debugging.level.1530361792" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+                                								
+                                <option id="gnu.c.compiler.option.dialect.std.1315965795" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.1391872211" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/lua&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua/src&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua_conf&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../tolua++/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/arm-pxc-linux-gnueabi&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/backward&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option id="gnu.c.compiler.option.dialect.flags.1809566216" name="Other dialect flags" superClass="gnu.c.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 --sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi" valueType="string"/>
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1346429718" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1101500029" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+                                								
+                                <option id="gnu.cpp.compiler.option.optimization.level.973029648" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+                                								
+                                <option defaultValue="gnu.cpp.compiler.debugging.level.max" id="gnu.cpp.compiler.option.debugging.level.2916929" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
+                                								
+                                <option id="gnu.cpp.compiler.option.dialect.std.436613576" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.412399598" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../tolua++/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/tolua++&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/lua&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/common&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/common/sys&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/linux&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/util&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/PAC-driver&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/QuickLZ&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/linux/PAC_PC&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/IoT&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua/src&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua_conf&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/arm-pxc-linux-gnueabi&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/backward&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option id="gnu.cpp.compiler.option.other.other.849999772" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
+                                								
+                                <option id="gnu.cpp.compiler.option.dialect.flags.1237820081" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 --sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi -fno-gnu-unique" valueType="string"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.1959455780" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+                                    									
+                                    <listOptionValue builtIn="false" value="ARP_DEVICE_AXCF2152"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="LINUX_OS"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="PAC_PLCNEXT"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="PAC_PLCNEXT_ALONE"/>
+                                    								
+                                </option>
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1736957452" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1148823343" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.512814894" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
+                                								
+                                <option id="gnu.cpp.link.option.flags.112870456" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value="--sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi -march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 -Wl,--no-undefined" valueType="string"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.link.option.paths.1653771398" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/arm-pxc-linux-gnueabi/${CPPVER}/&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.link.option.libs.478571892" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
+                                    									
+                                    <listOptionValue builtIn="false" value="dl"/>
+                                    								
+                                </option>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="gnu.cpp.link.option.other.259474991" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" useByScannerDiscovery="false" valueType="stringList"/>
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.685316412" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+                                    									
+                                    <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+                                    									
+                                    <additionalInput kind="additionalinput" paths="$(LIBS)"/>
+                                    								
+                                </inputType>
+                                							
+                            </tool>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.archiver.1534704053" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.assembler.925429380" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.assembler.input.13565257" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+                                							
+                            </tool>
+                            						
+                        </toolChain>
+                        					
+                    </folderInfo>
+                    					
+                    <fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.996928029.src/PAC/common/OPCUAServer.h" name="OPCUAServer.h" rcbsApplicability="disable" resourcePath="src/PAC/common/OPCUAServer.h" toolsToInvoke=""/>
+                    					
+                    <sourceEntries>
+                        						
+                        <entry excluding="lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        					
+                    </sourceEntries>
+                    				
+                </configuration>
+                			
+            </storageModule>
+            			
+            <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+            		
+        </cconfiguration>
+        		
+        <cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.1364031892">
+            			
+            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.1364031892" moduleId="org.eclipse.cdt.core.settings" name="Debug 2020.0">
+                				
+                <macros>
+                    					
+                    <stringMacro name="PNSDK" type="VALUE_TEXT" value="/opt/pxc/sdk/AXCF2152/2020.0"/>
+                    					
+                    <stringMacro name="CPPVER" type="VALUE_TEXT" value="8.3.0"/>
+                    				
+                </macros>
+                				
+                <externalSettings/>
+                				
+                <extensions>
+                    					
+                    <extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    				
+                </extensions>
+                			
+            </storageModule>
+            			
+            <storageModule moduleId="cdtBuildSystem" version="4.0.0">
+                				
+                <configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.1364031892" name="Debug 2020.0" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=" parent="cdt.managedbuild.config.gnu.cross.exe.debug">
+                    					
+                    <folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.1364031892." name="/" resourcePath="">
+                        						
+                        <toolChain id="cdt.managedbuild.toolchain.gnu.cross.exe.debug.806484099" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.exe.debug">
+                            							
+                            <option id="cdt.managedbuild.option.gnu.cross.prefix.1085003066" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" useByScannerDiscovery="false" value="arm-pxc-linux-gnueabi-" valueType="string"/>
+                            							
+                            <option id="cdt.managedbuild.option.gnu.cross.path.1913000415" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/bin/arm-pxc-linux-gnueabi" valueType="string"/>
+                            							
+                            <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.578884633" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+                            							
+                            <builder buildPath="${workspace_loc:/main_ctrl_prg}/Debug" id="cdt.managedbuild.builder.gnu.cross.217133077" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.2029143555" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
+                                								
+                                <option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.1696840480" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
+                                								
+                                <option defaultValue="gnu.c.debugging.level.max" id="gnu.c.compiler.option.debugging.level.2111992445" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
+                                								
+                                <option id="gnu.c.compiler.option.dialect.std.1895098241" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.855299006" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/lua&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua/src&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua_conf&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../tolua++/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/arm-pxc-linux-gnueabi&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/backward&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option id="gnu.c.compiler.option.dialect.flags.993420100" name="Other dialect flags" superClass="gnu.c.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 --sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi" valueType="string"/>
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.395748295" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.963173817" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+                                								
+                                <option id="gnu.cpp.compiler.option.optimization.level.2107755199" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+                                								
+                                <option defaultValue="gnu.cpp.compiler.debugging.level.max" id="gnu.cpp.compiler.option.debugging.level.1763708248" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" valueType="enumerated"/>
+                                								
+                                <option id="gnu.cpp.compiler.option.dialect.std.1577521972" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.505848682" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../tolua++/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/tolua++&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/lua&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/common&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/common/sys&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/linux&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/util&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/PAC-driver&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/QuickLZ&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/linux/PAC_PC&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/IoT&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua/src&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua_conf&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/arm-pxc-linux-gnueabi&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/backward&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option id="gnu.cpp.compiler.option.other.other.2109581095" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
+                                								
+                                <option id="gnu.cpp.compiler.option.dialect.flags.63218229" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 --sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi -fno-gnu-unique" valueType="string"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.2127030234" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+                                    									
+                                    <listOptionValue builtIn="false" value="ARP_DEVICE_AXCF2152"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="LINUX_OS"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="PAC_PLCNEXT"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="PAC_PLCNEXT_ALONE"/>
+                                    								
+                                </option>
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.665588659" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.linker.648120630" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.823636505" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
+                                								
+                                <option id="gnu.cpp.link.option.flags.1537376174" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value="--sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi -march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 -Wl,--no-undefined" valueType="string"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.link.option.paths.689160702" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/arm-pxc-linux-gnueabi/${CPPVER}/&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.link.option.libs.889135699" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
+                                    									
+                                    <listOptionValue builtIn="false" value="dl"/>
+                                    								
+                                </option>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="gnu.cpp.link.option.other.239458066" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" useByScannerDiscovery="false" valueType="stringList"/>
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1744958887" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+                                    									
+                                    <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+                                    									
+                                    <additionalInput kind="additionalinput" paths="$(LIBS)"/>
+                                    								
+                                </inputType>
+                                							
+                            </tool>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.archiver.1140616004" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.assembler.15656669" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.assembler.input.272829417" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+                                							
+                            </tool>
+                            						
+                        </toolChain>
+                        					
+                    </folderInfo>
+                    					
+                    <fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.1364031892.src/PAC/common/OPCUAServer.h" name="OPCUAServer.h" rcbsApplicability="disable" resourcePath="src/PAC/common/OPCUAServer.h" toolsToInvoke=""/>
+                    					
+                    <sourceEntries>
+                        						
+                        <entry excluding="lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        					
+                    </sourceEntries>
+                    				
+                </configuration>
+                			
+            </storageModule>
+            			
+            <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+            		
+        </cconfiguration>
+        		
+        <cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.763797515">
+            			
+            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.763797515" moduleId="org.eclipse.cdt.core.settings" name="Release 2020.0">
+                				
+                <macros>
+                    					
+                    <stringMacro name="PNSDK" type="VALUE_TEXT" value="/opt/pxc/sdk/AXCF2152/2020.0"/>
+                    					
+                    <stringMacro name="CPPVER" type="VALUE_TEXT" value="8.3.0"/>
+                    				
+                </macros>
+                				
+                <externalSettings/>
+                				
+                <extensions>
+                    					
+                    <extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    				
+                </extensions>
+                			
+            </storageModule>
+            			
+            <storageModule moduleId="cdtBuildSystem" version="4.0.0">
+                				
+                <configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.763797515" name="Release 2020.0" optionalBuildProperties="org.eclipse.cdt.docker.launcher.containerbuild.property.selectedvolumes=,org.eclipse.cdt.docker.launcher.containerbuild.property.volumes=" parent="cdt.managedbuild.config.gnu.cross.exe.debug">
+                    					
+                    <folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.763797515." name="/" resourcePath="">
+                        						
+                        <toolChain id="cdt.managedbuild.toolchain.gnu.cross.exe.debug.1041578743" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.exe.debug">
+                            							
+                            <option id="cdt.managedbuild.option.gnu.cross.prefix.1467236466" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix" useByScannerDiscovery="false" value="arm-pxc-linux-gnueabi-" valueType="string"/>
+                            							
+                            <option id="cdt.managedbuild.option.gnu.cross.path.580018817" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path" useByScannerDiscovery="false" value="${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/bin/arm-pxc-linux-gnueabi" valueType="string"/>
+                            							
+                            <targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.591103789" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+                            							
+                            <builder buildPath="${workspace_loc:/main_ctrl_prg}/Debug" id="cdt.managedbuild.builder.gnu.cross.882070793" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.312779774" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
+                                								
+                                <option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.1044728635" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.c.optimization.level.most" valueType="enumerated"/>
+                                								
+                                <option defaultValue="gnu.c.debugging.level.max" id="gnu.c.compiler.option.debugging.level.1652996297" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+                                								
+                                <option id="gnu.c.compiler.option.dialect.std.195592461" name="Language standard" superClass="gnu.c.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.c.compiler.dialect.default" valueType="enumerated"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.632334461" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/lua&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua/src&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua_conf&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../tolua++/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/arm-pxc-linux-gnueabi&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/backward&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option id="gnu.c.compiler.option.dialect.flags.136360758" name="Other dialect flags" superClass="gnu.c.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 --sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi" valueType="string"/>
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1844901781" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1464715723" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+                                								
+                                <option id="gnu.cpp.compiler.option.optimization.level.808645808" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
+                                								
+                                <option defaultValue="gnu.cpp.compiler.debugging.level.max" id="gnu.cpp.compiler.option.debugging.level.1855707598" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
+                                								
+                                <option id="gnu.cpp.compiler.option.dialect.std.751284204" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.default" valueType="enumerated"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.include.paths.334870710" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../tolua++/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/tolua++&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/lua&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/common&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/common/sys&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/linux&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/util&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/PAC-driver&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/QuickLZ&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/linux/PAC_PC&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../PAC/IoT&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua/src&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../lua_conf&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/plcnext&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/arm-pxc-linux-gnueabi&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}/backward&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option id="gnu.cpp.compiler.option.other.other.1885599719" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0" valueType="string"/>
+                                								
+                                <option id="gnu.cpp.compiler.option.dialect.flags.1736591332" name="Other dialect flags" superClass="gnu.cpp.compiler.option.dialect.flags" useByScannerDiscovery="true" value="-march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 --sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi -fno-gnu-unique" valueType="string"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.compiler.option.preprocessor.def.281379022" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
+                                    									
+                                    <listOptionValue builtIn="false" value="ARP_DEVICE_AXCF2152"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="LINUX_OS"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="PAC_PLCNEXT"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="PAC_PLCNEXT_ALONE"/>
+                                    								
+                                </option>
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.157743999" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
+                                							
+                            </tool>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1218361809" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.369806476" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker">
+                                								
+                                <option id="gnu.cpp.link.option.flags.487473098" name="Linker flags" superClass="gnu.cpp.link.option.flags" useByScannerDiscovery="false" value="--sysroot=${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi -march=armv7-a -mthumb -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a9 -Wl,--no-undefined" valueType="string"/>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.link.option.paths.1145402998" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/lib/arm-pxc-linux-gnueabi/${CPPVER}/&quot;"/>
+                                    								
+                                </option>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.cpp.link.option.libs.1285971836" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" useByScannerDiscovery="false" valueType="libs">
+                                    									
+                                    <listOptionValue builtIn="false" value="dl"/>
+                                    								
+                                </option>
+                                								
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="gnu.cpp.link.option.other.1165909362" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" useByScannerDiscovery="false" valueType="stringList"/>
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1547499401" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
+                                    									
+                                    <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+                                    									
+                                    <additionalInput kind="additionalinput" paths="$(LIBS)"/>
+                                    								
+                                </inputType>
+                                							
+                            </tool>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.archiver.435422152" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.assembler.1112389937" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
+                                								
+                                <inputType id="cdt.managedbuild.tool.gnu.assembler.input.1813555498" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+                                							
+                            </tool>
+                            						
+                        </toolChain>
+                        					
+                    </folderInfo>
+                    					
+                    <fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.763797515.src/PAC/common/OPCUAServer.h" name="OPCUAServer.h" rcbsApplicability="disable" resourcePath="src/PAC/common/OPCUAServer.h" toolsToInvoke=""/>
                     					
                     <sourceEntries>
                         						
@@ -351,11 +1403,53 @@
         	
     </storageModule>
     	
+    <storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+    	
+    <storageModule moduleId="refreshScope" versionNumber="2">
+        		
+        <configuration configurationName="Debug 2019.9"/>
+        		
+        <configuration configurationName="Release 2019.3"/>
+        		
+        <configuration configurationName="Debug 2019.3"/>
+        		
+        <configuration configurationName="Debug 2020.0">
+            			
+            <resource resourceType="PROJECT" workspacePath="/main_ctrl_prg"/>
+            		
+        </configuration>
+        		
+        <configuration configurationName="Release 2019.9"/>
+        		
+        <configuration configurationName="Debug">
+            			
+            <resource resourceType="PROJECT" workspacePath="/main_ctrl_prg"/>
+            		
+        </configuration>
+        		
+        <configuration configurationName="Release">
+            			
+            <resource resourceType="PROJECT" workspacePath="/main_ctrl_prg"/>
+            		
+        </configuration>
+        	
+    </storageModule>
+    	
+    <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+    	
+    <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+    	
     <storageModule moduleId="scannerConfiguration">
         		
         <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
         		
         <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.release.957505090;cdt.managedbuild.config.gnu.cross.exe.release.957505090.;cdt.managedbuild.tool.gnu.cross.c.compiler.1309936884;cdt.managedbuild.tool.gnu.c.compiler.input.708972631">
+            			
+            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+            		
+        </scannerConfigBuildInfo>
+        		
+        <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.1364031892;cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.1364031892.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.963173817;cdt.managedbuild.tool.gnu.cpp.compiler.input.665588659">
             			
             <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
             		
@@ -378,29 +1472,25 @@
             <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
             		
         </scannerConfigBuildInfo>
+        		
+        <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.306834292;cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.306834292.;cdt.managedbuild.tool.gnu.cross.c.compiler.1147184036;cdt.managedbuild.tool.gnu.c.compiler.input.930147834">
+            			
+            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+            		
+        </scannerConfigBuildInfo>
+        		
+        <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.306834292;cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.306834292.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.1535107231;cdt.managedbuild.tool.gnu.cpp.compiler.input.975197141">
+            			
+            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+            		
+        </scannerConfigBuildInfo>
+        		
+        <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.1364031892;cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.1364031892.;cdt.managedbuild.tool.gnu.cross.c.compiler.2029143555;cdt.managedbuild.tool.gnu.c.compiler.input.395748295">
+            			
+            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+            		
+        </scannerConfigBuildInfo>
         	
     </storageModule>
-    	
-    <storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-    	
-    <storageModule moduleId="refreshScope" versionNumber="2">
-        		
-        <configuration configurationName="Debug">
-            			
-            <resource resourceType="PROJECT" workspacePath="/main_ctrl_prg"/>
-            		
-        </configuration>
-        		
-        <configuration configurationName="Release">
-            			
-            <resource resourceType="PROJECT" workspacePath="/main_ctrl_prg"/>
-            		
-        </configuration>
-        	
-    </storageModule>
-    	
-    <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
-    	
-    <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
     
 </cproject>
