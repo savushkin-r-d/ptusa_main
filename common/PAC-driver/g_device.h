@@ -29,7 +29,11 @@
 #include "smart_ptr.h"
 
 #include "tcp_cmctr.h"
-#include "quicklz.h"
+
+extern "C" {
+#include "zlib.h"
+    };
+
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс устройства, позволяющий сохранить его в потоке байтов.
 class i_Lua_save_device
@@ -132,9 +136,7 @@ class device_communicator
     private:
         /// Единственный экземпляр класса.
         static auto_smart_ptr < device_communicator > instance;
-
-        static qlz_state_compress state_compress;
-        static char *buff;
+        static char buff[ tcp_communicator::BUFSIZE ];
 
     public:
         /// @brief Получение единственного экземпляра класса.
@@ -160,13 +162,10 @@ class device_communicator
     public:
         device_communicator()
             {
-            buff = new char[ tcp_communicator::BUFSIZE + 400 ];
             }
 
         ~device_communicator()
             {
-            delete[] buff;
-            buff = 0;
             }
 
         /// @brief Вывод на консоль устройств группы.

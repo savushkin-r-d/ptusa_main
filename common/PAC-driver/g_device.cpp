@@ -11,12 +11,11 @@
 #include "lua_manager.h"
 #include "tech_def.h"
 
-qlz_state_compress device_communicator::state_compress;
-char* device_communicator::buff;
+char device_communicator::buff[ tcp_communicator::BUFSIZE ];
 
 auto_smart_ptr < device_communicator > device_communicator::instance;
 
-u_int_2 G_CURRENT_PROTOCOL_VERSION = 102;
+const u_int_2 G_CURRENT_PROTOCOL_VERSION = 103;
 
 std::vector< i_Lua_save_device* > device_communicator::dev;
 
@@ -354,8 +353,10 @@ long device_communicator::write_devices_states_service(
 
     if ( answer_size > 0 )
         {
-        int r = qlz_compress( outdata, buff, answer_size, &state_compress );
-        if ( r > 0 )
+        unsigned long r = sizeof( buff );
+        int res = compress( ( u_char* ) buff, &r, outdata, answer_size );
+
+        if ( res == Z_OK && r > 0 )
             {
             memcpy( outdata, buff, r );
             answer_size = r;
