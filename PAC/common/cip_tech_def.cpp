@@ -103,6 +103,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
         {
         SAV[i]=new TSav;
         }
+    no_acid_wash_max = 0;
     pidf_override = false;
     nplaststate = false;
     flagnplaststate = false;
@@ -2168,36 +2169,47 @@ int cipline_tech_object::EvalCommands()
                         }
                     else
                         {
-                        closeLineValves();
-
-                        if (2 == is_ConfigureLine_func)
+                        bool is_acid_program = false;
+                        int cur_selected_program = rt_par_float[P_PROGRAM];
+                        if (cur_selected_program & 0x10) is_acid_program = true;
+                        if (no_acid_wash_max > 0 && objectstats->objcausticwashes > no_acid_wash_max && !is_acid_program )
                             {
-                            lua_State* L = lua_manager::get_instance()->get_Lua();
-                            lua_getglobal(L, name_Lua);
-                            lua_getfield(L, -1, "cip_ConfigureLine");
-                            lua_remove(L, -2);  // Stack: remove OBJECT.
-                            lua_getglobal(L, name_Lua);
-                            lua_pushinteger(L, switch1);
-                            lua_pushinteger(L, switch2);
-                            lua_pushinteger(L, switch3);
-                            lua_pushinteger(L, switch4);
-                            if (0 == lua_pcall(L, 5, 1, 0))
-                                {
-                                lua_pop(L, 1);
-                                }
-                            else
-                                {
-                                printf("Error in calling cip_ConfigureLIne: %s\n", lua_tostring(L, -1));
-                                lua_pop(L, 1);
-                                }
+                            set_err_msg("Необходима мойка кислотой", 0, 0, ERR_MSG_TYPES::ERR_ALARM);
+                            state = ERR_ACID_WASH_REQUIRED;
                             }
-
-                        lineRecipes->OnRecipeDevices(loadedRecipe, nmr);
-                        if (TECH_TYPE_CAR_WASH == tech_type || TECH_TYPE_CAR_WASH_SELF_CLEAN == tech_type)
+                        else
                             {
-                            curstep = LoadProgram();
+                            closeLineValves();
+
+                            if (2 == is_ConfigureLine_func)
+                                {
+                                lua_State* L = lua_manager::get_instance()->get_Lua();
+                                lua_getglobal(L, name_Lua);
+                                lua_getfield(L, -1, "cip_ConfigureLine");
+                                lua_remove(L, -2);  // Stack: remove OBJECT.
+                                lua_getglobal(L, name_Lua);
+                                lua_pushinteger(L, switch1);
+                                lua_pushinteger(L, switch2);
+                                lua_pushinteger(L, switch3);
+                                lua_pushinteger(L, switch4);
+                                if (0 == lua_pcall(L, 5, 1, 0))
+                                    {
+                                    lua_pop(L, 1);
+                                    }
+                                else
+                                    {
+                                    printf("Error in calling cip_ConfigureLIne: %s\n", lua_tostring(L, -1));
+                                    lua_pop(L, 1);
+                                    }
+                                }
+
+                            lineRecipes->OnRecipeDevices(loadedRecipe, nmr);
+                            if (TECH_TYPE_CAR_WASH == tech_type || TECH_TYPE_CAR_WASH_SELF_CLEAN == tech_type)
+                                {
+                                curstep = LoadProgram();
+                                }
+                            InitStep(curstep, 0);
                             }
-                        InitStep(curstep, 0);
                         }
                     }
                 }

@@ -1312,6 +1312,7 @@ class cipline_tech_object: public tech_object
         int enable_ret_pump; //используется для того, чтобы определить, нужно ли отключать возвратный насос
         int clean_water_rinsing_return; //Куда возвращать на операции окончательного ополаскивания
         int scoldvalves; ///Старая логика управления клапанами сортировки растворов при самоочистке.
+        int no_acid_wash_max; ///Максимальное количество моек щелочью без кислоты.
 
 		i_DO_device* V00;
 		i_DO_device* V01;

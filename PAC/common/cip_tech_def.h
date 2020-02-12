@@ -215,6 +215,7 @@ enum MODULE_CONSTANTS
 #define ERR_CIP_OBJECT	   -20
 #define ERR_WRONG_OS_OR_RECIPE_ERROR	-30
 #define ERR_VALVES_ARE_IN_CONFLICT	-31
+#define ERR_ACID_WASH_REQUIRED	-32
 #define ERR_LEVEL_BACHOK -35
 #define ERR_LEVEL_TANK_S -36
 #define ERR_LEVEL_TANK_K -37
@@ -613,6 +614,8 @@ class cipline_tech_object: public tech_object
         ///ѕоследнее состо€ние подающего насоса
         bool nplaststate;
         bool flagnplaststate;
+		///ћаксимальное количество моек щелочью без кислоты.
+		int no_acid_wash_max;
 
 		//ѕеременные дл€ циркул€ции
 		char circ_tank_s; //÷иркулировать ли через танк со щелочью
