@@ -2100,8 +2100,11 @@ int cipline_tech_object::EvalCommands()
                             }
                         else
                             {
-                            state=1;
-                            InitStep(curstep, 1);
+                            if (state != ERR_ACID_WASH_REQUIRED)
+                                {
+                                state = 1;
+                                InitStep(curstep, 1);
+                                }
                             }
                         }
                     }
@@ -2170,9 +2173,11 @@ int cipline_tech_object::EvalCommands()
                     else
                         {
                         bool is_acid_program = false;
+                        bool is_caustic_program = false;
                         int cur_selected_program = rt_par_float[P_PROGRAM];
                         if (cur_selected_program & 0x10) is_acid_program = true;
-                        if (no_acid_wash_max > 0 && objectstats->objcausticwashes > no_acid_wash_max && !is_acid_program )
+                        if (cur_selected_program & 0x20) is_caustic_program = true;
+                        if (no_acid_wash_max > 0 && objectstats->objcausticwashes > no_acid_wash_max && !is_acid_program && is_caustic_program)
                             {
                             set_err_msg("Необходима мойка кислотой", 0, 0, ERR_MSG_TYPES::ERR_ALARM);
                             state = ERR_ACID_WASH_REQUIRED;
