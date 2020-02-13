@@ -5,3 +5,6 @@
 [submodule "lua"]
 	path = lua
 	url = http://github.com/LuaDist/lua.git
+[submodule "zlib"]
+	path = zlib
+	url = https://github.com/madler/zlib.git

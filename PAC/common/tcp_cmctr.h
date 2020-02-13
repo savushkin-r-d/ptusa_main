@@ -72,7 +72,7 @@ class tcp_communicator
 
         enum CONSTANTS
             {
-            BUFSIZE     = 5000000,         ///< Размер буфера.
+            BUFSIZE     = 500 * 1024,      ///< Размер буфера.
 
 #ifdef LINUX_OS
             MAX_SOCKETS = 32,              ///< Максимальное количество сокетов.
