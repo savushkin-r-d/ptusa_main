@@ -5,7 +5,7 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.debug.1279002828" moduleId="org.eclipse.cdt.core.settings" name="Debug">
 				<macros>
 					<stringMacro name="MYTOOLCHAINPATH" type="VALUE_TEXT" value="/home/id/WAGO/ptxproj-2.2.20"/>
-					<stringMacro name="REPOPATH" type="VALUE_TEXT" value="/mnt/hgfs/P/savushkin-r-d/ptusa_main"/>
+					<stringMacro name="REPOPATH" type="VALUE_TEXT" value="/mnt/hgfs/Git/ptusa_main"/>
 				</macros>
 				<externalSettings/>
 				<extensions>
@@ -39,6 +39,7 @@
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/tolua++/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/PAC/IoT&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/PAC/common&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/zlib&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.warnings.extrawarn.135703044" name="Extra warnings (-Wextra)" superClass="gnu.c.compiler.option.warnings.extrawarn" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option id="gnu.c.compiler.option.warnings.toerrors.786116923" name="Warnings as errors (-Werror)" superClass="gnu.c.compiler.option.warnings.toerrors" useByScannerDiscovery="false" value="true" valueType="boolean"/>
@@ -67,7 +68,6 @@
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/lua/src&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/lua_conf&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/tolua++/include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/QuickLZ&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/PAC-driver&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/util&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common&quot;"/>
@@ -156,7 +156,7 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.debug.1279002828.2058158337" moduleId="org.eclipse.cdt.core.settings" name="Release">
 				<macros>
 					<stringMacro name="MYTOOLCHAINPATH" type="VALUE_TEXT" value="/home/id/WAGO/ptxproj-2.2.20"/>
-					<stringMacro name="REPOPATH" type="VALUE_TEXT" value="/mnt/hgfs/P/savushkin-r-d/ptusa_main"/>
+					<stringMacro name="REPOPATH" type="VALUE_TEXT" value="/mnt/hgfs/Git/ptusa_main"/>
 				</macros>
 				<externalSettings/>
 				<extensions>
@@ -190,9 +190,10 @@
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/tolua++/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/PAC/IoT&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/PAC/common&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/zlib&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.warnings.extrawarn.577398661" name="Extra warnings (-Wextra)" superClass="gnu.c.compiler.option.warnings.extrawarn" useByScannerDiscovery="false" value="true" valueType="boolean"/>
-								<option id="gnu.c.compiler.option.warnings.toerrors.1701240741" name="Warnings as errors (-Werror)" superClass="gnu.c.compiler.option.warnings.toerrors" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+								<option id="gnu.c.compiler.option.warnings.toerrors.1701240741" name="Warnings as errors (-Werror)" superClass="gnu.c.compiler.option.warnings.toerrors" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<option id="gnu.c.compiler.option.warnings.pedantic.error.1708797982" name="Pedantic warnings as errors (-pedantic-errors)" superClass="gnu.c.compiler.option.warnings.pedantic.error" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<option id="gnu.c.compiler.option.warnings.pedantic.1455130034" name="Pedantic (-pedantic)" superClass="gnu.c.compiler.option.warnings.pedantic" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<option id="gnu.c.compiler.option.preprocessor.def.symbols.1175507440" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
@@ -216,7 +217,6 @@
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/lua/src&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/lua_conf&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/tolua++/include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/QuickLZ&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/PAC-driver&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/util&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common&quot;"/>
@@ -234,7 +234,7 @@
 									<listOptionValue builtIn="false" value="LINUX_OS"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.other.other.728806176" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" useByScannerDiscovery="false" value="-c -fmessage-length=0 -Wl,--allow-shlib-undefined" valueType="string"/>
-								<option id="gnu.cpp.compiler.option.warnings.extrawarn.1874554386" name="Extra warnings (-Wextra)" superClass="gnu.cpp.compiler.option.warnings.extrawarn" useByScannerDiscovery="false" value="false" valueType="boolean"/>
+								<option id="gnu.cpp.compiler.option.warnings.extrawarn.1874554386" name="Extra warnings (-Wextra)" superClass="gnu.cpp.compiler.option.warnings.extrawarn" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option id="gnu.cpp.compiler.option.warnings.toerrors.112669423" name="Warnings as errors (-Werror)" superClass="gnu.cpp.compiler.option.warnings.toerrors" useByScannerDiscovery="false" value="false" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1300546995" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

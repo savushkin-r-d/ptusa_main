@@ -50,10 +50,15 @@
 			<type>2</type>
 			<location>/mnt/hgfs/Git/ptusa_main/tolua++</location>
 		</link>
+		<link>
+			<name>zlib</name>
+			<type>2</type>
+			<location>/mnt/hgfs/Git/ptusa_main/zlib</location>
+		</link>
 	</linkedResources>
 	<filteredResources>
 		<filter>
-			<id>1431675831309</id>
+			<id>1581687160132</id>
 			<name></name>
 			<type>30</type>
 			<matcher>
@@ -62,7 +67,7 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1431675831311</id>
+			<id>1581687160148</id>
 			<name></name>
 			<type>30</type>
 			<matcher>
@@ -71,7 +76,7 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1431675831316</id>
+			<id>1581687160167</id>
 			<name></name>
 			<type>30</type>
 			<matcher>
@@ -80,7 +85,7 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1431675831320</id>
+			<id>1581687160183</id>
 			<name></name>
 			<type>30</type>
 			<matcher>
@@ -89,7 +94,7 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1431675831322</id>
+			<id>1581687160193</id>
 			<name></name>
 			<type>30</type>
 			<matcher>
@@ -98,7 +103,7 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1431675831325</id>
+			<id>1581687160203</id>
 			<name></name>
 			<type>30</type>
 			<matcher>
@@ -107,7 +112,7 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1431675831328</id>
+			<id>1581687160224</id>
 			<name></name>
 			<type>30</type>
 			<matcher>
@@ -116,7 +121,7 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1431675831330</id>
+			<id>1581687160235</id>
 			<name></name>
 			<type>30</type>
 			<matcher>
@@ -125,12 +130,21 @@
 			</matcher>
 		</filter>
 		<filter>
-			<id>1431675831334</id>
+			<id>1581687160246</id>
 			<name></name>
 			<type>30</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
 				<arguments>1.0-location-matches-false-false-/home/id/PTUSA/common/util/snprintf.?</arguments>
+			</matcher>
+		</filter>
+		<filter>
+			<id>1581687067163</id>
+			<name>zlib</name>
+			<type>13</type>
+			<matcher>
+				<id>org.eclipse.ui.ide.multiFilter</id>
+				<arguments>1.0-name-matches-false-true-[a-zA-Z0-9]*\.(c|h)</arguments>
 			</matcher>
 		</filter>
 	</filteredResources>
