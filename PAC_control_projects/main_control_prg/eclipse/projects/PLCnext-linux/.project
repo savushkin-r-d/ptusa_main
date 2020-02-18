@@ -38,12 +38,12 @@
 		<link>
 			<name>src/lua</name>
 			<type>2</type>
-			<location>/home/id/ptusa_git/lua</location>
+			<locationURI>PARENT-5-PROJECT_LOC/lua</locationURI>
 		</link>
 		<link>
 			<name>src/lua_conf</name>
 			<type>2</type>
-			<location>/home/id/ptusa_git/lua_conf</location>
+			<locationURI>PARENT-5-PROJECT_LOC/lua_conf</locationURI>
 		</link>
 		<link>
 			<name>src/main.cpp</name>
@@ -53,7 +53,12 @@
 		<link>
 			<name>src/tolua++</name>
 			<type>2</type>
-			<location>/home/id/ptusa_git/tolua++</location>
+			<locationURI>PARENT-5-PROJECT_LOC/tolua++</locationURI>
+		</link>
+		<link>
+			<name>src/zlib</name>
+			<type>2</type>
+			<locationURI>PARENT-5-PROJECT_LOC/zlib</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

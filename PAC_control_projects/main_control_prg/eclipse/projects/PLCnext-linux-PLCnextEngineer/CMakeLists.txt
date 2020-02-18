@@ -21,7 +21,7 @@ file(GLOB_RECURSE PLCnext_src src/*.cpp intermediate/code/*.cpp)
 
 file(GLOB Main_src  
 					../../../../../common/PAC-driver/*.cpp
-					../../../../../common/QuickLZ/*.c
+					../../../../../zlib/*.c
 					../../../../../common/util/*.c					
 					../../../../../common/*.cpp
 					
@@ -49,7 +49,7 @@ target_include_directories(PtusaPLCnextEngineer
    	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common/util>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common/PAC-driver>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common/QuickLZ>    
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../zlib>    
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../PAC/common>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../PAC/common/sys>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../PAC/linux>

@@ -39,6 +39,7 @@
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/lua_conf&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/PAC/IoT&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/PAC/common&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/zlib&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.warnings.extrawarn.135703044" name="Extra warnings (-Wextra)" superClass="gnu.c.compiler.option.warnings.extrawarn" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option id="gnu.c.compiler.option.warnings.toerrors.786116923" name="Warnings as errors (-Werror)" superClass="gnu.c.compiler.option.warnings.toerrors" useByScannerDiscovery="false" value="false" valueType="boolean"/>
@@ -63,7 +64,6 @@
 									<listOptionValue builtIn="false" value="${MYTOOLCHAINPATH}/sysroot-target/usr/include/dbus-1.0"/>
 									<listOptionValue builtIn="false" value="${MYTOOLCHAINPATH}/sysroot-target/usr/lib/glib-2.0/include"/>
 									<listOptionValue builtIn="false" value="/opt/LINARO.Toolchain-2017.10/arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/5.5.0"/>
-									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/QuickLZ&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/PAC-driver&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/util&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common&quot;"/>
@@ -147,7 +147,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="lua/src/wmain.c|lua/src/luac.c|lua/src/lua.c|lua/etc|lua/src/loadlib_rel.c|tolua++/debian|tolua++/cmake|tolua++/doc|tolua++/src/tests|tolua++/src/bin|tolua++/win32|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|common/RFID|common/RFID/API|common/RFID/rfid_reader.cpp|PAC/common/rfid_reader_tolua.cpp|common/WTL|PAC/common/toloa++/pkg|PAC/linux/PAC_PC|PAC/linux/PAC_WAGO_750_860|PAC/DOC|PAC/neuroPID|PAC/MINIOS7|PAC/win|common/util/snprintf.h|common/util/snprintf.c|common/win_util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="zlib/contrib|zlib/test|zlib/examples|lua/src/wmain.c|lua/src/luac.c|lua/src/lua.c|lua/etc|lua/src/loadlib_rel.c|tolua++/debian|tolua++/cmake|tolua++/doc|tolua++/src/tests|tolua++/src/bin|tolua++/win32|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|common/RFID|common/RFID/API|common/RFID/rfid_reader.cpp|PAC/common/rfid_reader_tolua.cpp|common/WTL|PAC/common/toloa++/pkg|PAC/linux/PAC_PC|PAC/linux/PAC_WAGO_750_860|PAC/DOC|PAC/neuroPID|PAC/MINIOS7|PAC/win|common/util/snprintf.h|common/util/snprintf.c|common/win_util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -191,6 +191,7 @@
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/lua_conf&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/PAC/IoT&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/PAC/common&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/zlib&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.warnings.extrawarn.577398661" name="Extra warnings (-Wextra)" superClass="gnu.c.compiler.option.warnings.extrawarn" useByScannerDiscovery="false" value="true" valueType="boolean"/>
 								<option id="gnu.c.compiler.option.warnings.toerrors.1701240741" name="Warnings as errors (-Werror)" superClass="gnu.c.compiler.option.warnings.toerrors" useByScannerDiscovery="false" value="false" valueType="boolean"/>
@@ -213,7 +214,6 @@
 									<listOptionValue builtIn="false" value="${MYTOOLCHAINPATH}/sysroot-target/usr/include/dbus-1.0"/>
 									<listOptionValue builtIn="false" value="${MYTOOLCHAINPATH}/sysroot-target/usr/lib/glib-2.0/include"/>
 									<listOptionValue builtIn="false" value="/opt/LINARO.Toolchain-2017.10/arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/5.5.0"/>
-									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/QuickLZ&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/PAC-driver&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common/util&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${REPOPATH}/common&quot;"/>
@@ -299,7 +299,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="lua/src/wmain.c|lua/src/luac.c|lua/src/lua.c|lua/etc|lua/src/loadlib_rel.c|tolua++/debian|tolua++/cmake|tolua++/doc|tolua++/src/tests|tolua++/src/bin|tolua++/win32|PAC/common/OPCUA_tolua.cpp|common/RFID|common/RFID/API|common/RFID/rfid_reader.cpp|PAC/common/rfid_reader_tolua.cpp|PAC/common/OPCUAServer.cpp|PAC/common/OPCUAServer.h|common/WTL|PAC/common/toloa++/pkg|PAC/linux/PAC_PC|PAC/linux/PAC_WAGO_750_860|PAC/DOC|PAC/neuroPID|PAC/MINIOS7|PAC/win|common/util/snprintf.h|common/util/snprintf.c|common/win_util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="zlib/contrib|zlib/test|zlib/examples|lua/src/wmain.c|lua/src/luac.c|lua/src/lua.c|lua/etc|lua/src/loadlib_rel.c|tolua++/debian|tolua++/cmake|tolua++/doc|tolua++/src/tests|tolua++/src/bin|tolua++/win32|PAC/common/OPCUA_tolua.cpp|common/RFID|common/RFID/API|common/RFID/rfid_reader.cpp|PAC/common/rfid_reader_tolua.cpp|PAC/common/OPCUAServer.cpp|PAC/common/OPCUAServer.h|common/WTL|PAC/common/toloa++/pkg|PAC/linux/PAC_PC|PAC/linux/PAC_WAGO_750_860|PAC/DOC|PAC/neuroPID|PAC/MINIOS7|PAC/win|common/util/snprintf.h|common/util/snprintf.c|common/win_util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

@@ -84,6 +84,8 @@
                                     <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../zlib&quot;"/>
                                     								
                                 </option>
                                 								
@@ -118,8 +120,6 @@
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/util&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/PAC-driver&quot;"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/QuickLZ&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common&quot;"/>
                                     									
@@ -223,7 +223,7 @@
                     					
                     <sourceEntries>
                         						
-                        <entry excluding="lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        <entry excluding="zlib/test|zlib/examples|zlib/doc|zlib/contrib|zlib/amiga|lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
                         					
                     </sourceEntries>
                     				
@@ -316,6 +316,8 @@
                                     <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../zlib&quot;"/>
                                     								
                                 </option>
                                 								
@@ -350,8 +352,6 @@
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/util&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/PAC-driver&quot;"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/QuickLZ&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common&quot;"/>
                                     									
@@ -455,7 +455,7 @@
                     					
                     <sourceEntries>
                         						
-                        <entry excluding="lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        <entry excluding="zlib/test|zlib/examples|zlib/doc|zlib/contrib|zlib/amiga|lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
                         					
                     </sourceEntries>
                     				
@@ -548,6 +548,8 @@
                                     <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../zlib&quot;"/>
                                     								
                                 </option>
                                 								
@@ -582,8 +584,6 @@
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/util&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/PAC-driver&quot;"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/QuickLZ&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common&quot;"/>
                                     									
@@ -687,7 +687,7 @@
                     					
                     <sourceEntries>
                         						
-                        <entry excluding="lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        <entry excluding="zlib/test|zlib/examples|zlib/doc|zlib/contrib|zlib/amiga|lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
                         					
                     </sourceEntries>
                     				
@@ -780,6 +780,8 @@
                                     <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../zlib&quot;"/>
                                     								
                                 </option>
                                 								
@@ -814,8 +816,6 @@
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/util&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/PAC-driver&quot;"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/QuickLZ&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common&quot;"/>
                                     									
@@ -919,7 +919,7 @@
                     					
                     <sourceEntries>
                         						
-                        <entry excluding="lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        <entry excluding="zlib/test|zlib/examples|zlib/doc|zlib/contrib|zlib/amiga|lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
                         					
                     </sourceEntries>
                     				
@@ -1012,6 +1012,8 @@
                                     <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../zlib&quot;"/>
                                     								
                                 </option>
                                 								
@@ -1046,8 +1048,6 @@
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/util&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/PAC-driver&quot;"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/QuickLZ&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common&quot;"/>
                                     									
@@ -1151,7 +1151,7 @@
                     					
                     <sourceEntries>
                         						
-                        <entry excluding="lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        <entry excluding="zlib/test|zlib/examples|zlib/doc|zlib/contrib|zlib/amiga|lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
                         					
                     </sourceEntries>
                     				
@@ -1244,6 +1244,8 @@
                                     <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/x86_64-pokysdk-linux/usr/lib/arm-pxc-linux-gnueabi/gcc/arm-pxc-linux-gnueabi/${CPPVER}/include-fixed&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${PNSDK}/sysroots/cortexa9t2hf-neon-pxc-linux-gnueabi/usr/include/c++/${CPPVER}&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../zlib&quot;"/>
                                     								
                                 </option>
                                 								
@@ -1278,8 +1280,6 @@
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/util&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/PAC-driver&quot;"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common/QuickLZ&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="&quot;${ProjDirPath}/../../../../../common&quot;"/>
                                     									
@@ -1381,9 +1381,33 @@
                     					
                     <fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.763797515.src/PAC/common/OPCUAServer.h" name="OPCUAServer.h" rcbsApplicability="disable" resourcePath="src/PAC/common/OPCUAServer.h" toolsToInvoke=""/>
                     					
+                    <folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.763797515.1277722253" name="/" resourcePath="src/tolua++">
+                        						
+                        <toolChain id="cdt.managedbuild.toolchain.gnu.cross.exe.debug.807312359" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.exe.debug" unusedChildren="">
+                            							
+                            <option id="cdt.managedbuild.option.gnu.cross.prefix.1467236466.1146958257" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix.1467236466"/>
+                            							
+                            <option id="cdt.managedbuild.option.gnu.cross.path.580018817.1877474863" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path.580018817"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1144874624" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler.312779774"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1926215606" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1464715723"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.c.linker.63004811" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker.1218361809"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.840640520" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker.369806476"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.archiver.404921683" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver.435422152"/>
+                            							
+                            <tool id="cdt.managedbuild.tool.gnu.cross.assembler.1942325482" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler.1112389937"/>
+                            						
+                        </toolChain>
+                        					
+                    </folderInfo>
+                    					
                     <sourceEntries>
                         						
-                        <entry excluding="lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
+                        <entry excluding="zlib/test|zlib/examples|zlib/doc|zlib/contrib|zlib/amiga|lua/src/luac.c|lua/src/lua.c|tolua++/src/bin|lua/src/loadlib.c|tolua++/src/tests|tolua++/win32|lua/etc|lua/src/wmain.c|PAC/common/rfid_reader_tolua.cpp|PAC/linux/PAC_WAGO_750_860|PAC/linux/PAC_PFC200|PAC/common/OPCUAServer.h|PAC/common/OPCUAServer.cpp|PAC/common/OPCUA_tolua.cpp|PAC/common/OPCUA|PAC/neuroPID|PAC/win|PAC/MINIOS7|PAC/DOC|common/WTL|common/win_util|common/RFID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="src"/>
                         					
                     </sourceEntries>
                     				
@@ -1406,6 +1430,8 @@
     <storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
     	
     <storageModule moduleId="refreshScope" versionNumber="2">
+        		
+        <configuration configurationName="Release 2020.0"/>
         		
         <configuration configurationName="Debug 2019.9"/>
         		
@@ -1449,6 +1475,12 @@
             		
         </scannerConfigBuildInfo>
         		
+        <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751;cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.322051622;cdt.managedbuild.tool.gnu.cpp.compiler.input.308984036">
+            			
+            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+            		
+        </scannerConfigBuildInfo>
+        		
         <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.1364031892;cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.1364031892.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.963173817;cdt.managedbuild.tool.gnu.cpp.compiler.input.665588659">
             			
             <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
@@ -1473,7 +1505,43 @@
             		
         </scannerConfigBuildInfo>
         		
+        <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.996928029;cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.996928029.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.1101500029;cdt.managedbuild.tool.gnu.cpp.compiler.input.1736957452">
+            			
+            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+            		
+        </scannerConfigBuildInfo>
+        		
+        <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751;cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.;cdt.managedbuild.tool.gnu.cross.c.compiler.560239126;cdt.managedbuild.tool.gnu.c.compiler.input.903699451">
+            			
+            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+            		
+        </scannerConfigBuildInfo>
+        		
+        <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.763797515;cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.763797515.;cdt.managedbuild.tool.gnu.cross.c.compiler.312779774;cdt.managedbuild.tool.gnu.c.compiler.input.1844901781">
+            			
+            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+            		
+        </scannerConfigBuildInfo>
+        		
+        <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.763797515;cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.763797515.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.1464715723;cdt.managedbuild.tool.gnu.cpp.compiler.input.157743999">
+            			
+            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+            		
+        </scannerConfigBuildInfo>
+        		
+        <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124;cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.;cdt.managedbuild.tool.gnu.cross.cpp.compiler.955274878;cdt.managedbuild.tool.gnu.cpp.compiler.input.1553349480">
+            			
+            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+            		
+        </scannerConfigBuildInfo>
+        		
         <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.306834292;cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.306834292.;cdt.managedbuild.tool.gnu.cross.c.compiler.1147184036;cdt.managedbuild.tool.gnu.c.compiler.input.930147834">
+            			
+            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+            		
+        </scannerConfigBuildInfo>
+        		
+        <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.996928029;cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1633726751.996928029.;cdt.managedbuild.tool.gnu.cross.c.compiler.1007545497;cdt.managedbuild.tool.gnu.c.compiler.input.1346429718">
             			
             <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
             		
@@ -1486,6 +1554,12 @@
         </scannerConfigBuildInfo>
         		
         <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.1364031892;cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.1364031892.;cdt.managedbuild.tool.gnu.cross.c.compiler.2029143555;cdt.managedbuild.tool.gnu.c.compiler.input.395748295">
+            			
+            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+            		
+        </scannerConfigBuildInfo>
+        		
+        <scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124;cdt.managedbuild.config.gnu.cross.exe.debug.1233455357.1451262124.;cdt.managedbuild.tool.gnu.cross.c.compiler.685571734;cdt.managedbuild.tool.gnu.c.compiler.input.1750713230">
             			
             <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
             		
