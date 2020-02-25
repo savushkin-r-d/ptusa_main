@@ -265,111 +265,124 @@ int io_manager_linux::write_outputs()
 
             if ( nd->AO_cnt > 0 )
                 {
-                u_int bytes_cnt = nd->AO_size;
+                unsigned int start_register = 0;
+                unsigned int start_write_address = PHOENIX_HOLDINGREGISTERS_STARTADDRESS;
+                unsigned int registers_count;
 
-                buff[ 0 ] = 's';
-                buff[ 1 ] = 's';
-                buff[ 2 ] = 0;
-                buff[ 3 ] = 0;
-                buff[ 4 ] = 0;
-                buff[ 5 ] = 7 + bytes_cnt;
-                buff[ 6 ] = 0; //nodes[ i ]->number;
-                buff[ 7 ] = 0x10;
-                buff[ 8 ] = 0x23;
-                buff[ 9 ] = 0x28;
-                buff[ 10 ] = bytes_cnt / 2 >> 8;
-                buff[ 11 ] = bytes_cnt / 2 & 0xFF;
-                buff[ 12 ] = bytes_cnt;
-
-                for (u_int j = 0, idx = 0; j < bytes_cnt; j++)
+                if (nd->AO_cnt > MAX_MODBUS_REGISTERS_PER_QUERY)
                     {
-                    u_char b = 0;
-                    for (u_int k = 0; k < 8; k++)
-                        {
-                        b = b | (nd->DO_[idx] & 1) << k;
-                        idx++;
-                        }
-                    buff[j + 13] = b;
+                    registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
+                    }
+                else
+                    {
+                    registers_count = nd->AO_cnt;
                     }
 
-				u_int ao_module_type = 0;
-				u_int ao_module_offset = 0;
+                int bit_src = 0;
 
-                for (unsigned int idx = 0, l = 0; idx < nd->AO_cnt; idx++)
-                    {
-					if (nd->AO_types[idx] != ao_module_type)
-						{
-						ao_module_type = nd->AO_types[idx];
-						ao_module_offset = 0;
-						}
-					else
-						{
-						ao_module_offset++;
-						}
-
-                    switch (ao_module_type)
+                do 
+                {
+                    for (u_int j = 0; j < registers_count * 2; j++)
                         {
-                        case 1027843:           //IOL8
-                            ao_module_offset %= 32;	   //if there are same modules one after other on bus
-                            if (ao_module_offset > 2)  //first 3 words (bytes 0-5) are reserved, 2nd byte is used for trigger discrete outputs.
-                                {
-                                memcpy(&buff[13 + l], &nd->AO_[idx], 2);
-                                }
-                            l += 2;
-                            break;
-
-                        case 2688093:			//CNT2 INC2
-                            ao_module_offset %= 14;	   //if there are same modules one after other on bus
-                            if (0 == ao_module_offset) //assign start command and positive increment for both counters
-                                {
-                                buff[13 + l] = 0x5;
-                                buff[13 + l + 1] = 0x5;
-                                }
-                            else
-                                {
-                                buff[13 + l] = 0;
-                                buff[13 + l + 1] = 0;
-                                }
-                            l += 2;
-                            break;
-
-                        case 2688527:   //-AXL F AO4 1H
-                            buff[13 + l] = (u_char)((nd->AO_[idx] >> 8) & 0xFF);
-                            buff[13 + l + 1] = (u_char)(nd->AO_[idx] & 0xFF);
-                            l += 2;
-                            break;
-
-                        default:
-                            l += 2;
-                            break;
+                        u_char b = 0;
+                        for (u_int k = 0; k < 8; k++)
+                            {
+                            b = b | (nd->DO_[bit_src] & 1) << k;
+                            bit_src++;
+                            }
+                        writebuff[j] = b;
                         }
-                    }
 
-                if ( e_communicate( nd, bytes_cnt + 13, 12 ) == 0 )
-                    {
-                    if ( buff[ 7 ] == 0x10 )
+                    u_int ao_module_type = 0;
+                    u_int ao_module_offset = 0;
+
+                    for (unsigned int idx = start_register, l = 0; idx < start_register + registers_count; idx++)
                         {
-                        memcpy( nd->AO, nd->AO_, sizeof( nd->AO ) );
-                        memcpy( nd->DO, nd->DO_, nd->DO_cnt );
-                        nd->flag_error_write_message = false;
+                        if (nd->AO_types[idx] != ao_module_type)
+                            {
+                            ao_module_type = nd->AO_types[idx];
+                            ao_module_offset = 0;
+                            }
+                        else
+                            {
+                            ao_module_offset++;
+                            }
+
+                        switch (ao_module_type)
+                            {
+                            case 1027843:           //IOL8
+                                ao_module_offset %= 32;	   //if there are same modules one after other on bus
+                                if (ao_module_offset > 2)  //first 3 words (bytes 0-5) are reserved, 2nd byte is used for trigger discrete outputs.
+                                    {
+                                    memcpy(&writebuff[l], &nd->AO_[idx], 2);
+                                    }
+                                l += 2;
+                                break;
+
+                            case 2688093:			//CNT2 INC2
+                                ao_module_offset %= 14;	   //if there are same modules one after other on bus
+                                if (0 == ao_module_offset) //assign start command and positive increment for both counters
+                                    {
+                                    writebuff[l] = 0x5;
+                                    writebuff[l + 1] = 0x5;
+                                    }
+                                else
+                                    {
+                                    writebuff[l] = 0;
+                                    writebuff[l + 1] = 0;
+                                    }
+                                l += 2;
+                                break;
+
+                            case 2688527:   //-AXL F AO4 1H
+                                writebuff[l] = (u_char)((nd->AO_[idx] >> 8) & 0xFF);
+                                writebuff[l + 1] = (u_char)(nd->AO_[idx] & 0xFF);
+                                l += 2;
+                                break;
+
+                            default:
+                                l += 2;
+                                break;
+                            }
+                        }
+
+                    if (write_holding_registers(nd, start_write_address + start_register, registers_count) >= 0)
+                        {
+                        if (buff[7] == 0x10)
+                            {
+                            memcpy(&nd->AO[start_register], &nd->AO_[start_register], registers_count);
+                            memcpy(&nd->DO[start_register * 16], &nd->DO_[start_register * 16], registers_count * 16);
+                            nd->flag_error_write_message = false;
+                            }
+                        else
+                            {
+                            if (!nd->flag_error_write_message)
+                                {
+                                G_LOG->error("Write AO: returned error %d", buff[7]);
+                                nd->flag_error_write_message = true;
+                                }
+                            }
                         }
                     else
                         {
                         if (!nd->flag_error_write_message)
                             {
-                            G_LOG->error("Write AO: returned error %d", buff[7]);
+                            G_LOG->error("Write AO: returned error");
                             nd->flag_error_write_message = true;
                             }
                         }
-                    }// if ( e_communicate( nd, 2 * bytes_cnt + 13, 12 ) == 0 )
-                else
-                    {
-                    if (!nd->flag_error_write_message)
+
+                    start_register += registers_count;
+                    registers_count = nd->AO_cnt - start_register;
+                    if (registers_count > MAX_MODBUS_REGISTERS_PER_QUERY)
                         {
-                        G_LOG->error("Write AO: returned error");
-                        nd->flag_error_write_message = true;
+                        registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
                         }
-                    }
+
+                } 
+                 while (start_register < nd->AO_cnt);
+
+
                 }// if ( nd->AO_cnt > 0 )
 
             }// if ( nd->type == io_node::T_750_341 || ...
@@ -704,12 +717,6 @@ int io_manager_linux::read_inputs()
                                     bit_dest++;
                                     }
                                 }
-                            start_register += registers_count;
-                            registers_count = nd->AI_cnt - start_register;
-                            if (registers_count > MAX_MODBUS_REGISTERS_PER_QUERY)
-                                {
-                                registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
-                                }
                             }
                         else
                             {
@@ -722,6 +729,12 @@ int io_manager_linux::read_inputs()
                         {
                         //node doesn't respond
                         break;
+                        }
+                    start_register += registers_count;
+                    registers_count = nd->AI_cnt - start_register;
+                    if (registers_count > MAX_MODBUS_REGISTERS_PER_QUERY)
+                        {
+                        registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
                         }
                     } 
                 while (start_register < nd->AI_cnt);

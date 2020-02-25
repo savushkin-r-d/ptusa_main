@@ -31,9 +31,10 @@ class io_manager_linux : public io_manager
     protected:
         enum CONSTANTS
             {
-            MAX_MODBUS_REGISTERS_PER_QUERY = 123,
+            MAX_MODBUS_REGISTERS_PER_QUERY = 32,
             BUFF_SIZE = 262,
             PHOENIX_INPUTREGISTERS_STARTADDRESS = 8000,
+            PHOENIX_HOLDINGREGISTERS_STARTADDRESS = 9000,
             };
 
         u_char buff[ BUFF_SIZE ];
