@@ -724,7 +724,7 @@ int io_manager_linux::read_inputs()
                         break;
                         }
                     } 
-                while (start_register >= nd->AI_cnt);
+                while (start_register < nd->AI_cnt);
                 }
 
             }// nd->type == io_node::PHOENIX_BK_ETH
