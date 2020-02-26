@@ -76,9 +76,6 @@
     <Filter Include="Header Files\common\QuickLZ">
       <UniqueIdentifier>{4b8a87c7-dc56-452c-b69a-a182b0bbdf57}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\common\QuickLZ">
-      <UniqueIdentifier>{381898a8-2025-474c-892f-c3f50269d0fd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\PAC\linux">
       <UniqueIdentifier>{5a35783f-4790-493c-b0d6-794b3ac0e1eb}</UniqueIdentifier>
     </Filter>
@@ -394,9 +391,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\modbus_client.cpp">
       <Filter>Source Files\PAC\common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\common\QuickLZ\quicklz.c">
-      <Filter>Source Files\common\QuickLZ</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\log.cpp">
       <Filter>Source Files\PAC\common</Filter>

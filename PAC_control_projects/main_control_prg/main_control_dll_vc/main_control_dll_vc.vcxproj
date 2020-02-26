@@ -367,7 +367,6 @@
     <ClInclude Include="..\..\..\common\lua_manager.h" />
     <ClInclude Include="..\..\..\common\PAC-driver\errors.h" />
     <ClInclude Include="..\..\..\common\PAC-driver\g_device.h" />
-    <ClInclude Include="..\..\..\common\QuickLZ\quicklz.h" />
     <ClInclude Include="..\..\..\common\RFID\rfid_reader.h" />
     <ClInclude Include="..\..\..\common\win_util\SWMRG.h" />
     <ClInclude Include="..\..\..\common\win_util\WSA_err_decode.h" />
@@ -417,7 +416,6 @@
     <ClCompile Include="..\..\..\common\lua_manager.cpp" />
     <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp" />
     <ClCompile Include="..\..\..\common\PAC-driver\g_device.cpp" />
-    <ClCompile Include="..\..\..\common\QuickLZ\quicklz.c" />
     <ClCompile Include="..\..\..\common\win_util\SWMRG.cpp" />
     <ClCompile Include="..\..\..\common\win_util\WSA_err_decode.cpp" />
     <ClCompile Include="..\..\..\PAC\common\bus_coupler_io.cpp" />
