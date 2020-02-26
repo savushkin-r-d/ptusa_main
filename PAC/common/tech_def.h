@@ -346,10 +346,10 @@ class tech_object: public i_tech_object, public i_Lua_save_device
 
         enum CONSTANTS
             {
-            C_MAX_NAME_LENGTH = 30,
+            C_MAX_NAME_LENGTH = 50,
             };
-        char name[ C_MAX_NAME_LENGTH + 1 ];        ///< Имя объекта.
-        char name_Lua[ C_MAX_NAME_LENGTH + 1 ];    ///< Имя объекта в Lua.
+        char name[ C_MAX_NAME_LENGTH + 1 ] = "";        ///< Имя объекта.
+        char name_Lua[ C_MAX_NAME_LENGTH + 1 ] = "";    ///< Имя объекта в Lua.
 
         smart_ptr< operation_manager > operations_manager; ///< Шаги режимов.
 
