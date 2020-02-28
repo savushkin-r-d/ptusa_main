@@ -380,7 +380,6 @@ xcopy "p:\PTUSA-projects\system-scripts" "..\..\system-scripts" /S /Y /I
     <ClCompile Include="..\..\..\common\lua_manager.cpp" />
     <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp" />
     <ClCompile Include="..\..\..\common\PAC-driver\g_device.cpp" />
-    <ClCompile Include="..\..\..\common\QuickLZ\quicklz.c" />
     <ClCompile Include="..\..\..\common\RFID\rfid_reader.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>

@@ -55,12 +55,6 @@
     <Filter Include="Файлы заголовков\common\sys">
       <UniqueIdentifier>{660ac004-9fa9-4a02-8099-fba61b6a1a09}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Исходные файлы\common\QuickLZ">
-      <UniqueIdentifier>{87e5e599-c6e2-418e-bb37-83d7b3aab726}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Файлы заголовков\common\QuickLZ">
-      <UniqueIdentifier>{769030fb-e75d-4f8f-84d9-be4606c265b0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Исходные файлы\common\PAC-driver">
       <UniqueIdentifier>{bbd13d3d-1f3b-4356-a60f-996800ef8c51}</UniqueIdentifier>
     </Filter>
@@ -204,9 +198,6 @@
     <ClInclude Include="..\..\..\common\lua_manager.h">
       <Filter>Файлы заголовков\common\sys</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\common\QuickLZ\quicklz.h">
-      <Filter>Файлы заголовков\common\QuickLZ</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\common\PAC-driver\errors.h">
       <Filter>Файлы заголовков\common\PAC-driver</Filter>
     </ClInclude>
@@ -331,9 +322,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\common\lua_manager.cpp">
       <Filter>Исходные файлы\common\sys</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\common\QuickLZ\quicklz.c">
-      <Filter>Исходные файлы\common\QuickLZ</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp">
       <Filter>Исходные файлы\common\PAC-driver</Filter>
