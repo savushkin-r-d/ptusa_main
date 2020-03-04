@@ -683,6 +683,15 @@ int io_manager_linux::read_inputs()
 #endif // DEBUG_BK_MIN
                     res = read_input_registers(nd, start_read_address + start_register, registers_count);
 
+#ifdef TEST_NODE_IO
+                    printf("\n\r");
+                    for (int ideb = 0; ideb < registers_count; ideb++)
+                        {
+                        printf("%d = %d,", start_read_address + start_register + ideb, 256 * resultbuff[ideb * 2] + resultbuff[ideb * 2 + 1]);
+                        }
+#endif
+                    
+
                     if (res >= 0)
                         {
                         if (res)
