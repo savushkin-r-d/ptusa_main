@@ -1,4 +1,4 @@
-#include <stdlib.h>
+﻿#include <stdlib.h>
 
 #include "PtusaMainPrg.hpp"
 #include "Arp/System/Commons/Logging.h"
@@ -98,6 +98,7 @@ namespace PtusaPLCnextEngineer
             valve_bottom_mix_proof::evaluate();
             concentration_e_iolink::evaluate();
             valve_iolink_mix_proof::evaluate();
+            valve_iolink_shut_off::evaluate();
 
             G_TECH_OBJECT_MNGR()->evaluate();
             sleep_ms(sleep_time_ms);
