@@ -418,6 +418,7 @@ class device : public i_DO_AO_device, public par_device
             V_IOLINK_VTUG_DO1_FB_ON,  ///< IO-Link VTUG клапан с одним каналом управления и одной обратной связью (включенное состояние).
 
             V_IOLINK_MIXPROOF,        ///< Клапан с двумя каналами управления и двумя обратными связями с IO-Link интерфейсом (противосмешивающий).
+            V_IOLINK_DO1_DI2,         ///< Клапан с одним каналом управления и двумя обратными связями с IO-Link интерфейсом (отсечной).
 
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
@@ -2132,76 +2133,137 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
 #ifdef _MSC_VER
 #pragma endregion Выключение мини клапана с задержкой.
 #endif
-
     };
-    //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link mixproof.
-    class valve_iolink_mix_proof : public i_mix_proof,  public valve
-        {
-        public:
-            valve_iolink_mix_proof( const char* dev_name );
+class valve_iolink_mix_proof : public i_mix_proof,  public valve
+    {
+    public:
+        valve_iolink_mix_proof( const char* dev_name );
 
-            void open_upper_seat();
+        void open_upper_seat();
 
-            void open_lower_seat();
+        void open_lower_seat();
 
-            VALVE_STATE get_valve_state();
+        VALVE_STATE get_valve_state();
 
-            int save_device_ex( char *buff );
+        int save_device_ex( char *buff );
 
-            static void evaluate();
+        static void evaluate();
 
 #ifndef DEBUG_NO_IO_MODULES
-            int get_state();
+        int get_state();
 
-            float get_value();
+        float get_value();
 
-            bool get_fb_state();
+        bool get_fb_state();
 
-            int get_off_fb_value();
+        int get_off_fb_value();
 
-            int get_on_fb_value();
+        int get_on_fb_value();
 
-            void direct_on();
+        void direct_on();
 
-            void direct_off();
+        void direct_off();
 
-            int set_cmd( const char *prop, u_int idx, double val );
+        int set_cmd( const char *prop, u_int idx, double val );
 
-            void direct_set_state( int new_state );
+        void direct_set_state( int new_state );
 
 #endif // DEBUG_NO_IO_MODULES
 
-        private:
-            struct in_data
-                {
-                int16_t  pos;
-                uint16_t de_en  : 1; //De-Energized
-                bool main       : 1; //Main energized position
-                bool usl        : 1; //Upper Seat Lift energized position
-                bool lsp        : 1; //Lower Seat Push energized position
-                bool st         : 1; //Current Valve state
-                uint16_t unused : 3;
-                uint16_t err    : 5;
-                };
+    private:
+        struct in_data
+            {
+            int16_t  pos;
+            uint16_t de_en  : 1; //De-Energized
+            bool main       : 1; //Main energized position
+            bool usl        : 1; //Upper Seat Lift energized position
+            bool lsp        : 1; //Lower Seat Push energized position
+            bool st         : 1; //Current Valve state
+            uint16_t unused : 3;
+            uint16_t err    : 5;
+            };
 
-            struct out_data_swapped   //Swapped low and high byte for easer processing
-                {
-                uint16_t unused1 : 4;
-                bool sv1         : 1; //Main valve activation
-                bool sv2         : 1; //Upper seat lift activation
-                bool sv3         : 1; //Lower Seat Push energized position
-                bool wink        : 1; //Visual indication
-                uint16_t unused2 : 8;
-                };
+        struct out_data_swapped   //Swapped low and high byte for easer processing
+            {
+            uint16_t unused1 : 4;
+            bool sv1         : 1; //Main valve activation
+            bool sv2         : 1; //Upper seat lift activation
+            bool sv3         : 1; //Lower Seat Push energized position
+            bool wink        : 1; //Visual indication
+            uint16_t unused2 : 8;
+            };
 
-            in_data*  in_info = new in_data;
-            out_data_swapped* out_info;
+        in_data*  in_info = new in_data;
+        out_data_swapped* out_info;
 
-            bool blink = false;     //Visual indication
+        bool blink = false;     //Visual indication
 
-            static std::vector< valve_iolink_mix_proof* > valves;
-        };
+        static std::vector< valve_iolink_mix_proof* > valves;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан IO-Link отсечной.
+class valve_iolink_shut_off : public valve
+    {
+    public:
+        valve_iolink_shut_off( const char* dev_name );
+
+        VALVE_STATE get_valve_state();
+
+        int save_device_ex( char* buff );
+
+        static void evaluate();
+
+#ifndef DEBUG_NO_IO_MODULES
+        float get_value();
+
+        bool get_fb_state();
+
+        int get_off_fb_value();
+
+        int get_on_fb_value();
+
+        void direct_on();
+
+        void direct_off();
+
+        int set_cmd( const char* prop, u_int idx, double val );
+
+        void direct_set_state( int new_state );
+
+#endif // DEBUG_NO_IO_MODULES
+
+    private:
+        struct in_data
+            {
+            int16_t  pos;
+            uint16_t de_en  : 1; //De-Energized
+            bool main       : 1; //Main energized position
+            bool usl        : 1; //Upper Seat Lift energized position
+            bool lsp        : 1; //Lower Seat Push energized position
+            bool st         : 1; //Current Valve state
+            uint16_t unused : 3;
+            uint16_t err    : 5;
+            };
+
+        struct out_data_swapped   //Swapped low and high byte for easer processing
+            {
+            uint16_t unused1 : 4;
+            bool sv1         : 1; //Main valve activation
+            bool sv2         : 1; //Upper seat lift activation
+            bool sv3         : 1; //Lower Seat Push energized position
+            bool wink        : 1; //Visual indication
+            uint16_t unused2 : 8;
+            };
+
+        in_data* in_info = new in_data;
+        out_data_swapped* out_info = 0;
+
+        bool blink = false;     //Visual indication
+
+        static std::vector< valve_iolink_shut_off* > valves;
+    };    
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления.
 class valve_iolink_vtug : public valve
