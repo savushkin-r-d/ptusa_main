@@ -355,3 +355,20 @@ void altivar_node::Evaluate()
 
 	}
 
+	void altivar_node::Enable()
+		{
+		enabled = true;
+		ismodbuserror = 0;
+		}
+
+	void altivar_node::Disable()
+		{
+		enabled = false;
+#ifndef DEBUG_NO_IO_MODULES
+        PAC_critical_errors_manager::get_instance()->reset_global_error(
+            PAC_critical_errors_manager::AC_NO_CONNECTION,
+            PAC_critical_errors_manager::AS_FC_ALTIVAR,
+            mc->get_id());
+#endif
+		}
+
