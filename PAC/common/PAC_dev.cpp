@@ -3654,20 +3654,66 @@ bool level_s_iolink::is_active()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 level_e_iolink::level_e_iolink( const char *dev_name ) :
-    AI1( dev_name, DT_LT, DST_LT_IOLINK, 0, 0 )
+    AI1( dev_name, DT_LT, DST_LT_IOLINK, ADDITIONAL_PARAM_COUNT, &start_param_idx )
     {
     }
-
+//-----------------------------------------------------------------------------
 float level_e_iolink::get_min_value()
     {
     return 0;
     }
-
+//-----------------------------------------------------------------------------
 float level_e_iolink::get_max_value()
     {
     return 100;
     }
+//-----------------------------------------------------------------------------
+int level_e_iolink::save_device_ex( char* buff )
+    {
+    int res = sprintf( buff, "CLEVEL=%d, ", get_volume() );
 
+    return res;
+    }
+//-----------------------------------------------------------------------------
+int level_e_iolink::get_volume()
+    {
+    int v_kg = 0;
+
+    if ( get_par( P_H_CONE, start_param_idx ) <= 0 )
+        {
+        float v = get_par( P_R, start_param_idx );
+        v = (float)M_PI * v * v * AI1::get_value() *
+            get_par( P_MAX_P, start_param_idx ) / 9.81f;
+
+        v_kg = 10 * (int)( v * 100 + 0.5f ); //Переводим в килограммы.
+        }
+    else
+        {
+        float r = get_par( P_R, start_param_idx );
+        float tg_a = 0;
+        if ( get_par( P_H_CONE, start_param_idx ) > 0 )
+            {
+            tg_a = r / get_par( P_H_CONE, start_param_idx );
+            }
+
+        float h_cone = get_par( P_H_CONE, start_param_idx );
+        float h_curr = get_par( P_MAX_P, start_param_idx ) * AI1::get_value() / 9.81f;
+
+        float v = 0;
+        if ( h_curr <= h_cone )
+            {
+            v = (float)M_PI * h_curr * tg_a * h_curr * tg_a * h_curr / 3;
+            }
+        else
+            {
+            v = (float)M_PI * r * r * ( h_curr - h_cone * 2 / 3 );
+            }
+        v_kg = 10 * (int)( v * 100 + 0.5f ); //Переводим в килограммы.
+                }
+
+    return v_kg;
+    }
+//-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
 float level_e_iolink::get_value()
     {
@@ -3684,7 +3730,7 @@ float level_e_iolink::get_value()
         return (float)info->v;
         }
     }
-
+//-----------------------------------------------------------------------------
 int level_e_iolink::get_state()
     {
     if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)

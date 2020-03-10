@@ -2598,6 +2598,10 @@ class level_e_iolink : public AI1
         float get_min_value();
         float get_max_value();
 
+        int save_device_ex( char* buff );
+
+        int get_volume();
+
 #ifndef DEBUG_NO_IO_MODULES
         float get_value();
         int get_state();
@@ -2612,6 +2616,18 @@ class level_e_iolink : public AI1
             };
 
         LT_data *info;
+
+    private:
+        enum CONSTANTS
+            {
+            ADDITIONAL_PARAM_COUNT = 3,
+
+            P_MAX_P = 1, ///< Индекс параметра давление настройки датчика (бар).
+            P_R,         ///< Индекс параметра радиуса танка (м).
+            P_H_CONE,    ///< Индекс параметра высоты конуса танка (м).
+            };
+
+        u_int start_param_idx;
     };
 //-----------------------------------------------------------------------------
 /// @brief Текущее давление.
