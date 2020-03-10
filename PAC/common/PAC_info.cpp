@@ -271,12 +271,20 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                 PAC_critical_errors_manager::get_instance()->set_global_error(
                     PAC_critical_errors_manager::AC_SERVICE,
                     PAC_critical_errors_manager::AS_IO_COUPLER, wn->number );
+                PAC_critical_errors_manager::get_instance()->reset_global_error(
+                    PAC_critical_errors_manager::AC_NO_CONNECTION,
+                    PAC_critical_errors_manager::AS_IO_COUPLER, wn->number);
+                wn->is_set_err = false;
                 }
             if ( 100 == val ) //Ñáğîñ îøèáêè.
                 {
                 PAC_critical_errors_manager::get_instance()->reset_global_error(
                     PAC_critical_errors_manager::AC_SERVICE,
                     PAC_critical_errors_manager::AS_IO_COUPLER, wn->number );
+                PAC_critical_errors_manager::get_instance()->reset_global_error(
+                    PAC_critical_errors_manager::AC_NO_CONNECTION,
+                    PAC_critical_errors_manager::AS_IO_COUPLER, wn->number);
+                wn->is_set_err = false;
                 }
             }
         }

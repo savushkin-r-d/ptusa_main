@@ -104,7 +104,7 @@ altivar_node::altivar_node(unsigned int id, const char* ip, unsigned int port, u
 	reverse = 0;
 	modbustimeout = get_millisec();
 	ismodbuserror = 0;
-	cmd = 4; //Ñáğîñ îøèáêè ïğè çàïóñêå.
+	cmd = 4; //Ã‘Ã¡Ã°Ã®Ã± Ã®Ã¸Ã¨Ã¡ÃªÃ¨ Ã¯Ã°Ã¨ Ã§Ã Ã¯Ã³Ã±ÃªÃ¥.
 	state = 0;
 	fc_setpoint = 0;
 	fc_value = 0;
@@ -151,7 +151,7 @@ void altivar_node::Evaluate()
 						configurestep = CFG_STEP_SET_OUTPUTS;
 						break;
 					case CFG_STEP_SET_OUTPUTS:
-						if (mc->async_write_multiply_registers(15421, 6)) //Çàäàíèå ouputs äëÿ modbus-scanner
+						if (mc->async_write_multiply_registers(15421, 6)) //Ã‡Ã Ã¤Ã Ã­Ã¨Ã¥ ouputs Ã¤Ã«Ã¿ modbus-scanner
 							{
 							configurestep = CFG_STEP_INIT_INPUTS;
 							}
@@ -169,7 +169,7 @@ void altivar_node::Evaluate()
 						configurestep = CFG_STEP_SET_INPUTS;
 						break;
 					case CFG_STEP_SET_INPUTS:
-						if (mc->async_write_multiply_registers(15401, 6)) //Çàäàíèå inputs äëÿ modbus-scanner
+						if (mc->async_write_multiply_registers(15401, 6)) //Ã‡Ã Ã¤Ã Ã­Ã¨Ã¥ inputs Ã¤Ã«Ã¿ modbus-scanner
 							{
 							configurestep = CFG_STEP_INIT_IOSCANNER;
 							}
@@ -182,7 +182,7 @@ void altivar_node::Evaluate()
 						configurestep = CFG_STEP_SET_IOSCANNER;
 						break;
 					case CFG_STEP_SET_IOSCANNER:
-						if (mc->async_write_multiply_registers(64239, 1)) //Âêëş÷àåì IO scanner
+						if (mc->async_write_multiply_registers(64239, 1)) //Ã‚ÃªÃ«Ã¾Ã·Ã Ã¥Ã¬ IO scanner
 							{
 							configurestep = CFG_STEP_INIT_IOPROFILE;
 							}
@@ -195,7 +195,7 @@ void altivar_node::Evaluate()
 						configurestep = CFG_STEP_SET_IOPROFILE;
 						break;
 					case CFG_STEP_SET_IOPROFILE:
-						if (mc->async_write_multiply_registers(8401, 1)) //Çàäàåì ìåòîä óïğàâëåíèÿ ÷åğåç IO-profile
+						if (mc->async_write_multiply_registers(8401, 1)) //Ã‡Ã Ã¤Ã Ã¥Ã¬ Ã¬Ã¥Ã²Ã®Ã¤ Ã³Ã¯Ã°Ã Ã¢Ã«Ã¥Ã­Ã¨Ã¿ Ã·Ã¥Ã°Ã¥Ã§ IO-profile
 							{
 							configurestep = CFG_STEP_INIT_REF1;
 							}
@@ -208,7 +208,7 @@ void altivar_node::Evaluate()
 						configurestep = CFG_STEP_SET_REF1;
 						break;
 					case CFG_STEP_SET_REF1:
-						if (mc->async_write_multiply_registers(8413, 1)) //Çàäàåì êàíàë óïğàâëåíèÿ ÷àñòîòîé ÷åğåç modbus
+						if (mc->async_write_multiply_registers(8413, 1)) //Ã‡Ã Ã¤Ã Ã¥Ã¬ ÃªÃ Ã­Ã Ã« Ã³Ã¯Ã°Ã Ã¢Ã«Ã¥Ã­Ã¨Ã¿ Ã·Ã Ã±Ã²Ã®Ã²Ã®Ã© Ã·Ã¥Ã°Ã¥Ã§ modbus
 							{
 							configurestep = CFG_STEP_INIT_CMD1;
 							}
@@ -221,7 +221,7 @@ void altivar_node::Evaluate()
 						configurestep = CFG_STEP_SET_CMD1;
 						break;
 					case CFG_STEP_SET_CMD1:
-						if (mc->async_write_multiply_registers(8423, 1)) //Çàäàåì êàíàë êîìàíä ÷åğåç modbus
+						if (mc->async_write_multiply_registers(8423, 1)) //Ã‡Ã Ã¤Ã Ã¥Ã¬ ÃªÃ Ã­Ã Ã« ÃªÃ®Ã¬Ã Ã­Ã¤ Ã·Ã¥Ã°Ã¥Ã§ modbus
 							{
 							configurestep = CFG_STEP_INIT_FAULTRESET;
 							}
@@ -230,13 +230,13 @@ void altivar_node::Evaluate()
 					case CFG_STEP_INIT_FAULTRESET:
 						mc->zero_output_buff();
 						mc->set_station(0);
-						mc->set_int2(0, 1);		//Âêëş÷àåì automatic restart
+						mc->set_int2(0, 1);		//Ã‚ÃªÃ«Ã¾Ã·Ã Ã¥Ã¬ automatic restart
 						mc->set_int2(1, 0);		//automatic restart timeout
-						mc->set_int2(2, 210);	//Áèíäèì ñáğîñ îøèáêè íà 2 áèò óïğàâëÿşùåãî ñëîâà CMD.
+						mc->set_int2(2, 210);	//ÃÃ¨Ã­Ã¤Ã¨Ã¬ Ã±Ã¡Ã°Ã®Ã± Ã®Ã¸Ã¨Ã¡ÃªÃ¨ Ã­Ã  2 Ã¡Ã¨Ã² Ã³Ã¯Ã°Ã Ã¢Ã«Ã¿Ã¾Ã¹Ã¥Ã£Ã® Ã±Ã«Ã®Ã¢Ã  CMD.
 						configurestep = CFG_STEP_SET_FAULTRESET;
 						break;
 					case CFG_STEP_SET_FAULTRESET:
-						if (mc->async_write_multiply_registers(7122, 3)) //Çàäàåì ïàğàìåòğû fault reset.
+						if (mc->async_write_multiply_registers(7122, 3)) //Ã‡Ã Ã¤Ã Ã¥Ã¬ Ã¯Ã Ã°Ã Ã¬Ã¥Ã²Ã°Ã» fault reset.
 							{
 							configurestep = CFG_STEP_INIT_SAVESETTINGS;
 							}
@@ -249,7 +249,7 @@ void altivar_node::Evaluate()
 						configurestep = CFG_STEP_SET_SAVESETTINGS;
 						break;
 					case CFG_STEP_SET_SAVESETTINGS:
-						if (mc->async_write_multiply_registers(8001, 1)) //Ñîõğàíÿåì íàñòğîéêè êàê Profile1
+						if (mc->async_write_multiply_registers(8001, 1)) //Ã‘Ã®ÃµÃ°Ã Ã­Ã¿Ã¥Ã¬ Ã­Ã Ã±Ã²Ã°Ã®Ã©ÃªÃ¨ ÃªÃ Ãª Profile1
 							{
 							configurestep = CFG_STEP_END;
 							}
@@ -355,3 +355,19 @@ void altivar_node::Evaluate()
 
 	}
 
+	void altivar_node::Enable()
+		{
+		enabled = true;
+		ismodbuserror = 0;
+		}
+
+	void altivar_node::Disable()
+		{
+		enabled = false;
+#ifndef DEBUG_NO_IO_MODULES
+            PAC_critical_errors_manager::get_instance()->reset_global_error(
+                PAC_critical_errors_manager::AC_NO_CONNECTION,
+                PAC_critical_errors_manager::AS_FC_ALTIVAR,
+                mc->get_id());
+#endif
+		}

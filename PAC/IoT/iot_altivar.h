@@ -12,6 +12,8 @@ class altivar_node: public i_iot_node
 		altivar_node(unsigned int id, const char* ip, unsigned int port, unsigned long exchangetimeout);
 		~altivar_node();
 		void Evaluate();
+		void Enable();
+		void Disable();
 		bool enabled;
 		unsigned long queryinterval;
 

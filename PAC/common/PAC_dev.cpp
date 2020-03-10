@@ -4548,6 +4548,22 @@ void motor_altivar::direct_set_state(int new_state)
         return;
         }
 
+    if (new_state == 100)
+        {
+#ifndef DEBUG_NO_IO_MODULES
+        atv->Disable();
+        return;
+#endif
+        }
+
+    if (new_state == 101)
+        {
+#ifndef DEBUG_NO_IO_MODULES
+        atv->Enable();
+        return;
+#endif
+        }
+
     if (new_state)
         {
         direct_on();
