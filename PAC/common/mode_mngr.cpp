@@ -525,13 +525,10 @@ step::step( std::string name, operation_state *owner,
     actions.push_back( new off_action() );
     actions.push_back( new open_seat_action( is_mode, owner ) );
 
-    if ( is_mode )
-        {
-        actions.push_back( new required_DI_action() );
-        actions.push_back( new DI_DO_action() );
-        actions.push_back( new AI_AO_action() );
-        actions.push_back( new wash_action() );
-        }
+    actions.push_back( new required_DI_action() );
+    actions.push_back( new DI_DO_action() );
+    actions.push_back( new AI_AO_action() );
+    actions.push_back( new wash_action() );
     }
 //-----------------------------------------------------------------------------
 step::~step()
