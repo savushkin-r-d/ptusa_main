@@ -3654,7 +3654,7 @@ bool level_s_iolink::is_active()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 level_e_iolink::level_e_iolink( const char *dev_name ) :
-    AI1( dev_name, DT_LT, DST_LT_IOLINK, ADDITIONAL_PARAM_COUNT, &start_param_idx )
+    level( dev_name, DST_LT_IOLINK, ADDITIONAL_PARAM_COUNT, &start_param_idx )
     {
     }
 //-----------------------------------------------------------------------------

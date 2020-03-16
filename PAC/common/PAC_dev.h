@@ -2590,7 +2590,7 @@ class level_e_cone : public level
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора уровня IO-Link.
-class level_e_iolink : public AI1
+class level_e_iolink : public level
     {
     public:
         level_e_iolink( const char *dev_name );
