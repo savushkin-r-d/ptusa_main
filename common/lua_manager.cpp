@@ -487,9 +487,10 @@ int lua_manager::exec_lua_method_var( const char* object_name,
 
     va_list param;
     va_start( param, cnt );
-    if ( cnt > 0 )
+    while ( cnt > 0 )
         {
-        lua_pushnumber( L, va_arg( param, int ) );
+        int par = va_arg( param, int );
+        lua_pushnumber( L, par );
         param_count++;
         cnt--;
         }
