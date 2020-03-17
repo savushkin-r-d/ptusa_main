@@ -29,12 +29,17 @@
 class io_manager_linux : public io_manager
     {
     protected:
-        enum CONST
+        enum CONSTANTS
             {
+            MAX_MODBUS_REGISTERS_PER_QUERY = 123,
             BUFF_SIZE = 262,
+            PHOENIX_INPUTREGISTERS_STARTADDRESS = 8000,
+            PHOENIX_HOLDINGREGISTERS_STARTADDRESS = 9000,
             };
 
         u_char buff[ BUFF_SIZE ];
+        u_char* resultbuff;
+        u_char* writebuff;
 
         /// @brief Инициализация соединения с узлом I/O.
         ///
@@ -53,6 +58,9 @@ class io_manager_linux : public io_manager
         /// @return -   0 - ок.
         /// @return - < 0 - ошибка.
         int e_communicate( io_node *node, int bytes_to_send, int bytes_to_receive );
+
+        int read_input_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station = 0);
+        int write_holding_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station = 0);
 
         int read_inputs();
         int write_outputs();
