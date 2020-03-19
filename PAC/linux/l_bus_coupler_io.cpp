@@ -350,8 +350,8 @@ int io_manager_linux::write_outputs()
                         {
                         if (buff[7] == 0x10)
                             {
-                            memcpy(&nd->AO[start_register], &nd->AO_[start_register], registers_count);
-                            memcpy(&nd->DO[start_register * 16], &nd->DO_[start_register * 16], registers_count * 16);
+                            memcpy(&(nd->AO[start_register]), &(nd->AO_[start_register]), registers_count * 2);
+                            memcpy(&(nd->DO[start_register * 16]), &(nd->DO_[start_register * 16]), registers_count * 16);
                             nd->flag_error_write_message = false;
                             }
                         else
@@ -715,7 +715,7 @@ int io_manager_linux::read_inputs()
 #endif // DEBUG_BK
                                 }
 
-                            for (index_source = 0; bit_dest < (start_register + registers_count) * 2; index_source++)
+                            for (index_source = 0; bit_dest < (start_register + registers_count) * 2 * 8; index_source++)
                                 {
                                 for (k = 0; k < 8; k++)
                                     {
