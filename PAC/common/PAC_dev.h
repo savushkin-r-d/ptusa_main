@@ -2620,11 +2620,12 @@ class level_e_iolink : public level
     private:
         enum CONSTANTS
             {
-            ADDITIONAL_PARAM_COUNT = 3,
-
             P_MAX_P = 1, ///< Индекс параметра давление настройки датчика (бар).
             P_R,         ///< Индекс параметра радиуса танка (м).
             P_H_CONE,    ///< Индекс параметра высоты конуса танка (м).
+            P_ERR,       ///< Аварийное значение уровня.
+
+            LAST_PARAM_IDX,
             };
 
         u_int start_param_idx;
@@ -3015,6 +3016,8 @@ class analog_output : public AO1
         analog_output( const char *dev_name ) :
             AO1( dev_name, DT_AO, DST_NONE, ADDITIONAL_PARAM_COUNT )
             {
+            set_par_name( P_MIN_VALUE, 0, "P_MIN_V" );
+            set_par_name( P_MAX_VALUE, 0, "P_MAX_V" );
             }
 
         float get_min_value()
