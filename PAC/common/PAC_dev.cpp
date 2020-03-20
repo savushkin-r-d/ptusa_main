@@ -3654,11 +3654,12 @@ bool level_s_iolink::is_active()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 level_e_iolink::level_e_iolink( const char *dev_name ) :
-    level( dev_name, DST_LT_IOLINK, ADDITIONAL_PARAM_COUNT, &start_param_idx )
+    level( dev_name, DST_LT_IOLINK, LAST_PARAM_IDX - 1, &start_param_idx )
     {
     set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
     set_par_name( P_R, start_param_idx, "P_R" );
     set_par_name( P_H_CONE, start_param_idx, "P_H_CONE" );
+    set_par_name( P_ERR, start_param_idx, "P_ERR" );
     }
 //-----------------------------------------------------------------------------
 float level_e_iolink::get_min_value()
