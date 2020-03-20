@@ -467,6 +467,34 @@ class operation_state
         /// Добавление времени выполнения активного шага при возобновлении
         /// после паузы.
         void add_dx_step_time();
+
+#ifndef __GNUC__
+#pragma region Поддержка более чем одного активного шага.
+
+    public:
+        int on_step( int step_idx )
+            {
+            return 0;
+            }
+
+        int off_step( int step_idx )
+            {
+            return 0;
+            }
+
+        /// @brief Выключение заданного активного шага и включение другого.
+        ///
+        /// @param off_step - номер выключаемого шага (с единицы).
+        /// @param on_step - номер включаемого шага (с единицы).
+        int switch_active_step( int off_step, int on_step )
+            {
+            }
+
+    private:
+        /// Активные шаги. Может быть 1 или более дополнительных активных шагов.
+        std::vector< int > active_steps;
+#endif
+
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об операции.

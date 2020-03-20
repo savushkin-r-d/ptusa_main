@@ -1367,6 +1367,11 @@ void operation_state::evaluate()
     {
     mode_step->evaluate();
 
+    for ( size_t idx = 0; idx < active_steps.size(); idx++ )
+        {
+        steps[ active_steps[ idx ] ]->evaluate();
+        }
+
     if ( active_step_n < 0 ) return;
 
     //Время шага
