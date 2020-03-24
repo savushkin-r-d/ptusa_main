@@ -2503,55 +2503,50 @@ class temperature_e_iolink : public AI1
 class level: public AI1
     {
     public:
-        level( const char *dev_name, device::DEVICE_SUB_TYPE sub_type,
-            u_int par_cnt, u_int *start_par_idx ):AI1(
-                dev_name, DT_LT, sub_type, par_cnt, start_par_idx )
-            {
-            }
+        level( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,
+            u_int par_cnt, u_int* start_par_idx );
 
-        virtual int get_volume()
+        int get_volume();
+        virtual int calc_volume();
+
+        int save_device_ex( char* buff );
+
+        float get_max_val();
+        float get_min_val();
+
+    private:
+        enum CONSTANTS
             {
-            return ( int ) get_value();
-            }
+            P_ERR = 1,       ///< Аварийное значение уровня.
+
+            LAST_PARAM_IDX,
+            };
+
+        u_int start_param_idx;
     };
 //-----------------------------------------------------------------------------
 /// @brief Текущий уровень.
 class level_e : public level
     {
     public:
-        level_e( const char *dev_name ): level( dev_name, DST_LT, 0, 0 )
-            {
-            }
-
-        float get_max_val();
-        float get_min_val();
+        level_e( const char* dev_name );
     };
 //-----------------------------------------------------------------------------
 /// @brief Текущий уровень c для танка цилиндрической формы.
 class level_e_cyl : public level
     {
     public:
-        level_e_cyl( const char *dev_name ) : level(
-            dev_name, DST_LT_CYL, ADDITIONAL_PARAM_COUNT, &start_param_idx )
-            {
-            set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
-            set_par_name( P_R, start_param_idx, "P_R" );
-            }
+        level_e_cyl( const char* dev_name );
 
-        float get_max_val();
-        float get_min_val();
-
-        int save_device_ex( char *buff );
-
-        int get_volume();
+        int calc_volume();
 
     private:
         enum CONSTANTS
             {
-            ADDITIONAL_PARAM_COUNT = 2,
-
             P_MAX_P = 1, ///< Индекс параметра давление настройки датчика (бар).
             P_R,         ///< Индекс параметра радиуса танка (м).
+
+            LAST_PARAM_IDX,
             };
 
         u_int start_param_idx;
@@ -2561,29 +2556,18 @@ class level_e_cyl : public level
 class level_e_cone : public level
     {
     public:
-        level_e_cone( const char *dev_name ) : level(
-            dev_name, DST_LT_CONE, ADDITIONAL_PARAM_COUNT, &start_param_idx )
-            {
-            set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
-            set_par_name( P_R, start_param_idx, "P_R" );
-            set_par_name( P_H_CONE, start_param_idx, "P_H_CONE" );
-            }
+        level_e_cone( const char* dev_name );
 
-        float get_max_val();
-        float get_min_val();
-
-        int save_device_ex( char *buff );
-
-        int get_volume();
+         int calc_volume();
 
     private:
         enum CONSTANTS
             {
-            ADDITIONAL_PARAM_COUNT = 3,
-
             P_MAX_P = 1, ///< Индекс параметра давление настройки датчика (бар).
             P_R,         ///< Индекс параметра радиуса танка (м).
             P_H_CONE,    ///< Индекс параметра высоты конуса танка (м).
+
+            LAST_PARAM_IDX,
             };
 
         u_int start_param_idx;
@@ -2598,9 +2582,7 @@ class level_e_iolink : public level
         float get_min_value();
         float get_max_value();
 
-        int save_device_ex( char* buff );
-
-        int get_volume();
+        int calc_volume();
 
 #ifndef DEBUG_NO_IO_MODULES
         float get_value();

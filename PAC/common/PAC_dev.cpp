@@ -3180,38 +3180,67 @@ void AO1::direct_set_value( float new_value )
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-float level_e::get_max_val()
+level::level( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,
+    u_int par_cnt, u_int* start_par_idx ) :AI1(
+        dev_name, DT_LT, sub_type, par_cnt + LAST_PARAM_IDX - 1, &start_param_idx )
     {
-    return 100;
+    if ( start_par_idx )
+        {
+        *start_par_idx += LAST_PARAM_IDX - 1;
+        }
+    set_par_name( P_ERR, start_param_idx, "P_ERR" );
     }
 //-----------------------------------------------------------------------------
-float level_e::get_min_val()
+int level::get_volume()
     {
-    return 0;
+    if ( get_state() < 0 )
+        {
+        return (int)get_par( P_ERR, start_param_idx );
+        }
+
+    return calc_volume();
     }
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-float level_e_cyl::get_max_val()
+int level::calc_volume()
     {
-    return 100;
+    return (int)get_value();
     }
 //-----------------------------------------------------------------------------
-float level_e_cyl::get_min_val()
-    {
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int level_e_cyl::save_device_ex( char *buff )
+int level::save_device_ex( char* buff )
     {
     int res = sprintf( buff, "CLEVEL=%d, ", get_volume() );
 
     return res;
     }
 //-----------------------------------------------------------------------------
-int level_e_cyl::get_volume()
+float level::get_max_val()
+    {
+    return 100;
+    }
+//-----------------------------------------------------------------------------
+float level::get_min_val()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+level_e::level_e( const char* dev_name ) : level(
+    dev_name, DST_LT, 0, 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+level_e_cyl::level_e_cyl( const char* dev_name ) : level(
+    dev_name, DST_LT_CYL, LAST_PARAM_IDX - 1, &start_param_idx )
+    {
+    set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
+    set_par_name( P_R, start_param_idx, "P_R" );
+    }
+//-----------------------------------------------------------------------------
+int level_e_cyl::calc_volume()
     {
     float v = get_par( P_R, start_param_idx );
-    v = (float)M_PI * v * v *  AI1::get_value() *
+    v = (float)M_PI * v * v *  get_value() *
         get_par( P_MAX_P, start_param_idx ) / 9.81f;
 
     int v_kg = 10 * (int)( v * 100 + 0.5f ); //Переводим в килограммы.
@@ -3220,24 +3249,15 @@ int level_e_cyl::get_volume()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-float level_e_cone::get_max_val()
+level_e_cone::level_e_cone( const char* dev_name ) : level(
+    dev_name, DST_LT_CONE, LAST_PARAM_IDX - 1, &start_param_idx )
     {
-    return 100;
+    set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
+    set_par_name( P_R, start_param_idx, "P_R" );
+    set_par_name( P_H_CONE, start_param_idx, "P_H_CONE" );
     }
 //-----------------------------------------------------------------------------
-float level_e_cone::get_min_val()
-    {
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int level_e_cone::save_device_ex( char *buff )
-    {
-    int res = sprintf( buff, "CLEVEL=%d, ", get_volume() );
-
-    return res;
-    }
-//-----------------------------------------------------------------------------
-int level_e_cone::get_volume()
+int level_e_cone::calc_volume()
     {
     float r = get_par( P_R, start_param_idx );
     float tg_a = 0;
@@ -3247,7 +3267,7 @@ int level_e_cone::get_volume()
         }
 
     float h_cone = get_par( P_H_CONE, start_param_idx );
-    float h_curr = get_par( P_MAX_P, start_param_idx ) * AI1::get_value() / 9.81f;
+    float h_curr = get_par( P_MAX_P, start_param_idx ) * get_value() / 9.81f;
 
     float v = 0;
     if ( h_curr <= h_cone )
@@ -3659,7 +3679,6 @@ level_e_iolink::level_e_iolink( const char *dev_name ) :
     set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
     set_par_name( P_R, start_param_idx, "P_R" );
     set_par_name( P_H_CONE, start_param_idx, "P_H_CONE" );
-    set_par_name( P_ERR, start_param_idx, "P_ERR" );
     }
 //-----------------------------------------------------------------------------
 float level_e_iolink::get_min_value()
@@ -3669,25 +3688,17 @@ float level_e_iolink::get_min_value()
 //-----------------------------------------------------------------------------
 float level_e_iolink::get_max_value()
     {
-    return 100;
+    return get_par( P_MAX_P, start_param_idx );
     }
 //-----------------------------------------------------------------------------
-int level_e_iolink::save_device_ex( char* buff )
-    {
-    int res = sprintf( buff, "CLEVEL=%d, ", get_volume() );
-
-    return res;
-    }
-//-----------------------------------------------------------------------------
-int level_e_iolink::get_volume()
+int level_e_iolink::calc_volume()
     {
     int v_kg = 0;
 
     if ( get_par( P_H_CONE, start_param_idx ) <= 0 )
         {
         float v = get_par( P_R, start_param_idx );
-        v = (float)M_PI * v * v * AI1::get_value() *
-            get_par( P_MAX_P, start_param_idx ) / 9.81f;
+        v = (float)M_PI * v * v * get_value() / 9.81f;
 
         v_kg = 10 * (int)( v * 100 + 0.5f ); //Переводим в килограммы.
         }
@@ -3701,7 +3712,7 @@ int level_e_iolink::get_volume()
             }
 
         float h_cone = get_par( P_H_CONE, start_param_idx );
-        float h_curr = get_par( P_MAX_P, start_param_idx ) * AI1::get_value() / 9.81f;
+        float h_curr = get_value() / 9.81f;
 
         float v = 0;
         if ( h_curr <= h_cone )
@@ -3713,7 +3724,7 @@ int level_e_iolink::get_volume()
             v = (float)M_PI * r * r * ( h_curr - h_cone * 2 / 3 );
             }
         v_kg = 10 * (int)( v * 100 + 0.5f ); //Переводим в килограммы.
-                }
+        }
 
     return v_kg;
     }
@@ -3731,7 +3742,7 @@ float level_e_iolink::get_value()
         int tmp = data[1] + 256 * data[0];
         info = (LT_data*)&tmp;
 
-        return (float)info->v;
+        return (float)info->v / get_par( P_MAX_P, start_param_idx );
         }
     }
 //-----------------------------------------------------------------------------
