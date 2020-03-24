@@ -1183,7 +1183,7 @@ void wash_action::evaluate()
     for ( u_int i = 0; i < devices[ G_DEV ].size(); i++ )
         {
         devices[ G_DEV ][ i ]->set_state( new_state );
-        if ( new_val != -1 )
+        if ( new_val != -1 && devices[ G_DEV ][ i ]->get_type() == device::DT_M )
             {
             devices[ G_DEV ][ i ]->set_value( new_state > 0 ? new_val : 0 );
             }
@@ -1191,7 +1191,7 @@ void wash_action::evaluate()
     for ( u_int i = 0; i < devices[ G_REV_DEV ].size(); i++ )
         {
         devices[ G_REV_DEV ][ i ]->set_state( new_state > 0 ? 2 : 0 );
-        if ( new_val != -1 )
+        if ( new_val != -1 && devices[ G_DEV ][ i ]->get_type() == device::DT_M )
             {
             devices[ G_REV_DEV ][ i ]->set_value( new_state > 0 ? new_val : 0 );
             }
