@@ -3186,7 +3186,7 @@ level::level( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,
     {
     if ( start_par_idx )
         {
-        *start_par_idx += LAST_PARAM_IDX - 1;
+        *start_par_idx = start_param_idx + LAST_PARAM_IDX - 1;
         }
     set_par_name( P_ERR, start_param_idx, "P_ERR" );
     }
