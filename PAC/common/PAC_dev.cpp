@@ -4658,6 +4658,7 @@ void motor_altivar::direct_off()
     {
 #ifdef DEBUG_NO_IO_MODULES
     state = 0;
+    freq = 0;
 #else
     if (atv->state < 0)
         {
