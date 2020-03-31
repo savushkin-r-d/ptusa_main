@@ -287,7 +287,6 @@ xcopy "p:\PTUSA-projects\system-scripts" "..\..\system-scripts" /S /Y /I
     <ClInclude Include="..\..\..\common\lua_manager.h" />
     <ClInclude Include="..\..\..\common\PAC-driver\errors.h" />
     <ClInclude Include="..\..\..\common\PAC-driver\g_device.h" />
-    <ClInclude Include="..\..\..\common\QuickLZ\quicklz.h" />
     <ClInclude Include="..\..\..\common\util\smart_ptr.h" />
     <ClInclude Include="..\..\..\PAC\common\bus_coupler_io.h" />
     <ClInclude Include="..\..\..\PAC\common\cip_stats.h" />

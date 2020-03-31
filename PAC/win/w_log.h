@@ -47,6 +47,11 @@ class w_log: public i_log
                     SetColor( RED );
                     std::cout << "ERROR  (3) -> ";
                     break;
+                
+                case i_log::P_WARNING:
+                    SetColor( YELLOW );
+                    std::cout << "WARNING(4) -> ";
+                    break;
 
                 case i_log::P_NOTICE:
                     SetColor( YELLOW );

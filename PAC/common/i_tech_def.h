@@ -24,7 +24,23 @@
 ///
 class i_tech_object
     {
-    
+#ifndef __GNUC__
+#pragma region Удобная отладочная печать с учётом вложенности вызовов.
+#endif
+
+    public:
+        static const char* get_prefix()
+            {
+            return white_spaces;
+            }
+
+    protected:
+        inline static char white_spaces[ 256 ] = "";
+
+#ifndef __GNUC__
+#pragma endregion
+#endif
+
     public:
     /// @brief Включение/выключение режима.
     ///

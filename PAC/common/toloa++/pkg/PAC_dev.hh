@@ -743,6 +743,23 @@ class operation
         operation_state* operator[]( int idx );
 
     public:
+        /// @brief Включение заданного шага.
+        ///
+        /// @param step - номер включаемого шага (с единицы).
+        int on_extra_step( int step );
+
+        /// @brief Отключение заданного шага.
+        ///
+        /// @param step - номер отключаемого шага (с единицы). 
+        int off_extra_step( int step );
+
+        /// @brief Отключение заданного активного шага и включение другого.
+        ///
+        /// @param off_step - номер отключаемого шага (с единицы).
+        /// @param on_step - номер включаемого шага (с единицы).
+        int switch_active_extra_step( int off_step, int on_step );
+
+    public:
         step* add_step( const char* name, int next_step_n,
             unsigned int step_duration_par_n, state_idx s_idx = RUN );
 

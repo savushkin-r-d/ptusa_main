@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 02/12/20 17:37:13.
+** Generated automatically by tolua++-1.0.92 on 03/30/20 15:36:10.
 */
 
 #ifndef __cplusplus
@@ -4061,6 +4061,110 @@ static int tolua_PAC_dev_operation__geti00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function '.geti'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: on_extra_step of class  operation */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_operation_on_extra_step00
+static int tolua_PAC_dev_operation_on_extra_step00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"operation",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  operation* self = (operation*)  tolua_tousertype(tolua_S,1,0);
+  int step_idx = ((int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'on_extra_step'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->on_extra_step(step_idx);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'on_extra_step'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: off_extra_step of class  operation */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_operation_off_extra_step00
+static int tolua_PAC_dev_operation_off_extra_step00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"operation",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  operation* self = (operation*)  tolua_tousertype(tolua_S,1,0);
+  int step_idx = ((int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'off_extra_step'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->off_extra_step(step_idx);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'off_extra_step'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: switch_active_extra_step of class  operation */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_operation_switch_active_extra_step00
+static int tolua_PAC_dev_operation_switch_active_extra_step00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"operation",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  operation* self = (operation*)  tolua_tousertype(tolua_S,1,0);
+  int off_step = ((int)  tolua_tonumber(tolua_S,2,0));
+  int on_step = ((int)  tolua_tonumber(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'switch_active_extra_step'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->switch_active_extra_step(off_step,on_step);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'switch_active_extra_step'.",&tolua_err);
  return 0;
 #endif
 }
@@ -12388,6 +12492,9 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"get_active_step_set_time",tolua_PAC_dev_operation_get_active_step_set_time00);
    tolua_function(tolua_S,"to_step",tolua_PAC_dev_operation_to_step00);
    tolua_function(tolua_S,".geti",tolua_PAC_dev_operation__geti00);
+   tolua_function(tolua_S,"on_extra_step",tolua_PAC_dev_operation_on_extra_step00);
+   tolua_function(tolua_S,"off_extra_step",tolua_PAC_dev_operation_off_extra_step00);
+   tolua_function(tolua_S,"switch_active_extra_step",tolua_PAC_dev_operation_switch_active_extra_step00);
    tolua_function(tolua_S,"add_step",tolua_PAC_dev_operation_add_step00);
    tolua_function(tolua_S,"get_state",tolua_PAC_dev_operation_get_state00);
   tolua_endmodule(tolua_S);
