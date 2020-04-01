@@ -76,22 +76,8 @@ int tech_object::init_runtime_params()
 int tech_object::set_mode( u_int operation_n, int newm )
     {
     int res = 0;
-
-    static char   white_spaces[ 256 ] = "";
+        
     static u_char idx = 0;
-    if ( G_DEBUG )
-        {
-        printf( "%sStart \'%.40s\' [%2u] set mode = %2u --> %s.\n",
-            white_spaces, name, number, operation_n,
-            newm == 0 ? "OFF" : ( newm == 1 ? "ON" : ( newm == 2 ? "PAUSE" : 
-            ( newm == 3 ? "STOP" : ( newm == 4 ? "WAIT" : "?" ) ) ) ) );
-
-        white_spaces[ idx++ ] = ' ';
-        white_spaces[ idx++ ] = ' ';
-        white_spaces[ idx++ ] = ' ';
-        white_spaces[ idx++ ] = 0;
-        }
-
     if ( operation_n > operations_count )
         {
         res = 3;
@@ -99,6 +85,22 @@ int tech_object::set_mode( u_int operation_n, int newm )
     if ( 0 == operation_n )
         {
         res = 4;
+        }
+
+    if ( G_DEBUG )
+        {
+        SetColor( GREEN );
+        printf( "%sBEGIN \"%.40s %d\" (%s) set operation ¹%u (\"%s\") --> %s.\n",
+            white_spaces, name, number, name_Lua, operation_n,
+            0 == res ? ( *operations_manager )[ operation_n ]->get_name() : "",
+            newm == 0 ? "OFF" : ( newm == 1 ? "ON" : ( newm == 2 ? "PAUSE" :
+            ( newm == 3 ? "STOP" : ( newm == 4 ? "WAIT" : "?" ) ) ) ) );
+
+        white_spaces[ idx++ ] = ' ';
+        white_spaces[ idx++ ] = ' ';
+        white_spaces[ idx++ ] = ' ';
+        white_spaces[ idx++ ] = 0;
+        SetColor( RESET );
         }
 
     int i = operation_n - 1;
@@ -203,10 +205,12 @@ int tech_object::set_mode( u_int operation_n, int newm )
         idx -= 4;
         white_spaces[ idx ] = 0;
 
-        printf( "%sEnd \'%.40s\' [%2u] set mode = %2u --> %s, res = %d",
-            white_spaces, name, number, operation_n,
+        SetColor( GREEN );
+        printf( "%sEND \"%.40s %d\" set operation ¹%2u --> %s, res = %d",            
+            white_spaces, name, number, operation_n,            
             newm == 0 ? "OFF" : ( newm == 1 ? "ON" : ( newm == 2 ? "PAUSE" : 
             ( newm == 3 ? "STOP" : ( newm == 4 ? "WAIT" : "?" ) ) ) ), res );
+        SetColor( RESET );
 
         switch ( res )
             {
@@ -793,15 +797,17 @@ int tech_object::save_device( char *buff )
 
     
     for ( u_int i = 1; i <= operations_count; i++ )
-        {        
-        u_int steps_count = ( *operations_manager )[ i ]->get_run_steps_count();
+        {
+        auto operation = ( *operations_manager )[ i ];
+
+        u_int steps_count = operation->get_run_steps_count();
         if ( steps_count == 0 )
             {
             continue;
             }
 
         res += sprintf( buff + res, "\tSTEPS%d=\n\t\t{\n\t\t", i );
-        u_int run_step = ( *operations_manager )[ i ]->get_run_active_step();
+        u_int run_step = operation->get_run_active_step();
 
         for ( u_int j = 1; j <= steps_count; j++ )
             {
@@ -811,7 +817,14 @@ int tech_object::save_device( char *buff )
                 }
             else
                 {
-                res += sprintf( buff + res, "0, " );
+                if ( operation->is_active_run_extra_step( j ) )
+                    {
+                    res += sprintf( buff + res, "1, " );
+                    }
+                else
+                    {
+                    res += sprintf( buff + res, "0, " );
+                    }
                 }
             }
         res += sprintf( buff + res, "\n\t\t},\n" );
@@ -847,6 +860,24 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
         u_int mode     = ( int ) val;
         char new_state = 0;
 
+        if ( mode >= 200'000 && mode < 300'000 )      // On extra step.
+            {
+            int step = mode % 100;
+            int operation = mode / 100 - 2'000;
+
+            return set_extra_step( operation, step, 1 );
+            }
+        else 
+            {
+            if ( mode >= 300'000 && mode < 400'000 )      // Off extra step.
+                {
+                int step = mode % 100;
+                int operation = mode / 100 - 3'000;
+
+                return set_extra_step( operation, step, 0 );
+                }
+            }
+
         if ( mode >= 1000 && mode < 2000 )      // On mode.
             {
             mode = mode - 1000;
@@ -861,7 +892,7 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
                 }
             else
                 {
-                if ( mode >= 100000 && mode < 200000 )      // On state mode.
+                if ( mode >= 100'000 && mode < 200'000 )      // On state mode.
                     {                    
                     new_state = mode % 100;
                     mode = mode / 100 - 1000;  
@@ -1235,6 +1266,28 @@ int tech_object::check_operation_on( u_int operation_n, bool show_error )
 void tech_object::set_serial_idx( u_int idx )
     {
     serial_idx = idx;
+    }
+//-----------------------------------------------------------------------------
+int tech_object::set_extra_step( u_int operation, int step, int cmd )
+    {
+    static u_char idx = 0;
+    if ( operation > operations_count || 0 == operation ) return 1;
+
+    switch ( cmd )
+        {
+        case 0:
+            ( *operations_manager )[ operation ]->off_extra_step( step );
+            break;
+
+        case 1:
+            ( *operations_manager )[ operation ]->on_extra_step( step );
+            break;
+
+        default:
+            break;
+        }
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

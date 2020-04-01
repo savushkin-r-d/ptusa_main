@@ -372,6 +372,8 @@ class tech_object: public i_tech_object, public i_Lua_save_device
 
         //Проверка на ограничения операции.
         void check_availability( u_int operation_n );
+
+        int set_extra_step( u_int operation, int step, int cmd );
     };
 //-----------------------------------------------------------------------------
 class tech_object_manager

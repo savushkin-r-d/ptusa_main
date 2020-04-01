@@ -381,11 +381,7 @@ class step
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об операции, состоящей из шагов.
 ///
-/// У объекта (танк, линия, ...) может быть включено параллельно несколько
-/// операций.
-/// Для операции определяется, является ли она основной (мойка и т.п.) или
-/// вспомогательной (перемешивание и т.п.), также при включении данной операции
-/// отключать ли другие активные операции (сквашивание и т.п.).
+/// У объекта (танк, линия, ...) может быть включена только одна операция.
 class operation_state
     {
     public:
@@ -467,6 +463,37 @@ class operation_state
         /// Добавление времени выполнения активного шага при возобновлении
         /// после паузы.
         void add_dx_step_time();
+
+#ifndef __GNUC__
+#pragma region Поддержка более чем одного активного шага.
+#endif
+
+    public:
+        void save();
+        void load();
+
+        int on_extra_step( int step_idx );
+
+        int off_extra_step( int step_idx );
+
+        /// @brief Выключение заданного активного шага и включение другого.
+        ///
+        /// @param off_step - номер выключаемого шага (с единицы).
+        /// @param on_step - номер включаемого шага (с единицы).
+        int switch_active_extra_step( int off_step, int on_step );
+
+        bool is_active_extra_step( int step_idx ) const;
+
+    private:
+        /// Активные шаги. Может быть 1 или более дополнительных активных шагов.
+        std::vector< int > active_steps;
+
+        std::vector< int > saved_active_steps;
+
+#ifndef __GNUC__
+#pragma endregion
+#endif
+
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об операции.
@@ -568,6 +595,27 @@ class operation
 #pragma endregion
 #endif
 
+#ifndef __GNUC__
+#pragma region Поддержка более чем одного активного шага.
+#endif
+
+    public:
+        int on_extra_step( int step_idx );
+
+        int off_extra_step( int step_idx );
+
+        /// @brief Выключение заданного активного шага и включение другого.
+        ///
+        /// @param off_step - номер выключаемого шага (с единицы).
+        /// @param on_step - номер включаемого шага (с единицы).
+        int switch_active_extra_step( int off_step, int on_step );
+
+        bool is_active_run_extra_step( int step_idx ) const;
+
+#ifndef __GNUC__
+#pragma endregion
+#endif
+
     private:
         state_idx current_state;
 
@@ -589,7 +637,7 @@ class operation
 /// @brief Содержит информацию об операциях какого-либо объекта (танк,
 /// линия, ...).
 ///
-/// У объекта (танк, ...) может быть включено параллельно несколько операций.
+/// У объекта (танк, ...) может быть включена одна операция.
 ///
 class operation_manager
     {
@@ -668,9 +716,6 @@ class operation_manager
         i_tech_object *owner;              ///Техобъект-владелец.
 
     private:
-        /// @brief Параметры, содержащие продолжительность шагов, операций.
-        saved_params_u_int_4 *par;
-
         std::vector< operation* > operations; ///< Операции.
         operation *oper_stub;                 ///< Операция-заглушка.
 

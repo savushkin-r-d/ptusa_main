@@ -58,6 +58,7 @@ int operation::pause()
             run_time += states[ RUN ]->evaluation_time();
             run_step = states[ RUN ]->active_step();
 
+            states[ RUN ]->save();
             states[ RUN ]->final();
             break;
 
@@ -113,6 +114,8 @@ int operation::start()
             break;
 
         case PAUSE:
+            states[ RUN ]->load();
+
             current_state = RUN;
             if ( run_step > 0 )
                 {
@@ -124,7 +127,6 @@ int operation::start()
                 }
 
             states[ RUN ]->add_dx_step_time();
-
             break;
 
         case RUN:
@@ -266,6 +268,41 @@ step* operation::add_step( const char* name, int next_step_n,
         }
 
     return stub.add_step( name, next_step_n, step_duration_par_n );
+    }
+//-----------------------------------------------------------------------------
+int operation::on_extra_step( int step_idx )
+    {
+    if ( current_state >= 0 && current_state < STATES_MAX )
+        {
+        states[ current_state ]->on_extra_step( step_idx );
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int operation::off_extra_step( int step_idx )
+    {
+    if ( current_state >= 0 && current_state < STATES_MAX )
+        {
+        states[ current_state ]->off_extra_step( step_idx );
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+bool operation::is_active_run_extra_step( int step_idx ) const
+    {
+    return states[ RUN ]->is_active_extra_step( step_idx );
+    }
+//-----------------------------------------------------------------------------
+int operation::switch_active_extra_step( int off_step, int on_step )
+    {
+    if ( current_state >= 0 && current_state < STATES_MAX )
+        {
+        states[ current_state ]->switch_active_extra_step( off_step, on_step );
+        }
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -588,7 +625,7 @@ void step::set_start_time( u_int_4 start_time )
 //-----------------------------------------------------------------------------
 void step::print( const char* prefix /*= "" */ ) const
     {
-    printf( "%s \n", name.c_str() );
+    printf( "%s\"%s\" \n", prefix, name.c_str() );
     std::string new_prefix = prefix;
     new_prefix += "  ";
 
@@ -1354,10 +1391,25 @@ void operation_state::init( u_int start_step /*= 1 */ )
 
     if ( G_DEBUG )
         {
-        printf( " INIT STEP [ %d ]\n", active_step_n + 1 );
-        steps[ active_step_n ]->print( " " );
-        printf( " TIME %d ms, NEXT STEP -> %d \n",
-            active_step_time, active_step_next_step_n );
+        printf( "%sINIT STEP №%d\n",
+            owner->owner->get_prefix(), active_step_n + 1 );
+        steps[ active_step_n ]->print( owner->owner->get_prefix() );
+        printf( "%sTIME %d ms, NEXT STEP -> %d \n",
+            owner->owner->get_prefix(), active_step_time, active_step_next_step_n );
+        }
+
+    for ( size_t idx = 0; idx < active_steps.size(); idx++ )
+        {
+        size_t step_n = active_steps[ idx ] - 1;
+        if ( step_n < steps.size() ) steps[ step_n ]->init();
+        if ( G_DEBUG )
+            {
+            SetColor( YELLOW );
+            printf( "%sINIT EXTRA STEP №%d\n",
+                owner->owner->get_prefix(), active_steps[ idx ] );
+            steps[ step_n ]->print( owner->owner->get_prefix() );
+            SetColor( RESET );
+            }
         }
     }
 //-----------------------------------------------------------------------------
@@ -1366,6 +1418,12 @@ void operation_state::init( u_int start_step /*= 1 */ )
 void operation_state::evaluate()
     {
     mode_step->evaluate();
+
+    for ( size_t idx = 0; idx < active_steps.size(); idx++ )
+        {
+        size_t step_n = active_steps[ idx ] - 1;
+        if ( step_n < steps.size() ) steps[ step_n ]->evaluate();
+        }
 
     if ( active_step_n < 0 ) return;
 
@@ -1415,11 +1473,31 @@ void operation_state::final()
         {
         steps[ active_step_n ]->final();
         if ( G_DEBUG )
-            {
-            printf( " FINAL ACTIVE STEP [ %d ] \n", active_step_n );
+            {            
+            printf( "%sFINAL ACTIVE STEP №%d\n",
+                owner->owner->get_prefix(), active_step_n + 1 );
             }
         active_step_n = -1;
         }
+
+    for ( size_t idx = 0; idx < active_steps.size(); idx++ )
+        {
+        size_t step_n = active_steps[ idx ] - 1;
+        if ( step_n < steps.size() )
+            {
+            steps[ step_n ]->final();
+            if ( G_DEBUG )
+                {
+                SetColor( YELLOW );
+                printf( "%sFINAL ACTIVE EXTRA STEP №%d\n",
+                    owner->owner->get_prefix(), active_steps[ idx ] );
+                SetColor( RESET );
+                }
+            }
+
+        }
+
+    active_steps.clear();
     }
 //-----------------------------------------------------------------------------
 step* operation_state::operator[]( int idx )
@@ -1474,11 +1552,11 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
 
     steps[ active_step_n ]->init();
     steps[ active_step_n ]->evaluate();
-
-
+    
     if ( G_DEBUG )
         {
-        printf( "\"%s\" mode %d \"%s\" to_step() -> %d, step time %d ms.\n",
+        printf( "%s\"%s\" operation %d \"%s\" to_step() -> %d, step time %d ms.\n",
+            owner->owner->get_prefix(),
             owner->owner->get_name(),
             n, name.c_str(), new_step, active_step_time );
         }
@@ -1584,6 +1662,158 @@ u_int operation_state::steps_count() const
 const char* operation_state::get_name() const
     {
     return name.c_str();
+    }
+//-----------------------------------------------------------------------------
+void operation_state::save()
+    {
+    saved_active_steps.assign( active_steps.begin(), active_steps.end() );
+    }
+//-----------------------------------------------------------------------------
+void operation_state::load()
+    {
+    active_steps.assign( saved_active_steps.begin(), saved_active_steps.end() );
+    }
+//-----------------------------------------------------------------------------
+int operation_state::on_extra_step( int step_idx )
+    {
+    if ( (size_t) step_idx > steps.size() )
+        {
+        G_LOG->notice( "operation_state:on_extra_step(...) - step (%d) > size (%d)",
+            step_idx, steps.size() );
+        return 1;
+        }
+
+    if ( 1 + active_step_n == step_idx )
+        {
+        G_LOG->notice( "operation_state:on_extra_step(...) - step (%d) is active",
+            step_idx );
+        return 0;
+        }
+
+    if ( std::find( active_steps.begin(), active_steps.end(),
+        step_idx ) == active_steps.end() )
+        {
+        active_steps.push_back( step_idx );
+
+        char err_str[ 250 ];
+        if ( steps[ step_idx - 1 ]->check( err_str ) == 0 )
+            {
+            steps[ step_idx - 1 ]->init();
+            steps[ step_idx - 1 ]->evaluate();
+
+            if ( G_DEBUG )
+                {
+                SetColor( YELLOW );
+                printf( "%s\"%s\" operation %d \"%s\" on_extra_step() -> %d.\n",
+                    owner->owner->get_prefix(),
+                    owner->owner->get_name(), n, name.c_str(), step_idx );
+                steps[ step_idx - 1 ]->print( owner->owner->get_prefix() );
+                SetColor( RESET );
+                }
+            }
+        else
+            {
+            G_LOG->warning( "operation_state:on_extra_step(...) - %s", err_str );
+            return 1;
+            }
+        }
+    else
+        {
+        G_LOG->notice( "operation_state:on_extra_step(...) - step (%d) is already extra on",
+            step_idx );
+        return 0;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int operation_state::off_extra_step( int step_idx )
+    {
+    if ( (size_t) step_idx > steps.size() )
+        {
+        G_LOG->notice( "operation_state:off_extra_step(...) - step (%d) > size (%d)",
+            step_idx, steps.size() );
+        return 0;
+        }
+
+    auto res = std::find( active_steps.begin(), active_steps.end(), step_idx );
+    if ( res != active_steps.end() )
+        {
+        steps[ step_idx - 1 ]->final();
+        active_steps.erase( res );
+
+        if ( G_DEBUG )
+            {
+            SetColor( YELLOW );
+            printf( "%s\"%s\" operation %d \"%s\" off_extra_step() -> %d.\n",
+                owner->owner->get_prefix(),
+                owner->owner->get_name(), n, name.c_str(), step_idx );
+            SetColor( RESET );
+            }
+        }
+    else
+        {
+        G_LOG->warning( "operation_state:off_extra_step(...) - step (%d) not found",
+            step_idx );
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+/// @brief Выключение заданного активного шага и включение другого.
+///
+/// @param off_step - номер выключаемого шага (с единицы).
+/// @param on_step - номер включаемого шага (с единицы).
+int operation_state::switch_active_extra_step( int off_step, int on_step )
+    {
+    if ( (size_t) on_step > steps.size() )
+        {
+        G_LOG->notice( "operation_state:switch_active_step(...) - step (%d) > size (%d)",
+            on_step, steps.size() );
+        return 1;
+        }
+
+    if ( 1 + active_step_n == on_step )
+        {
+        G_LOG->notice( "operation_state:switch_active_step(...) - step (%d) is active",
+            on_step );
+        return 0;
+        }
+
+    auto res = std::find( active_steps.begin(), active_steps.end(), off_step );
+    if ( res != active_steps.end() )
+        {
+        steps[ off_step - 1 ]->final();
+        steps[ on_step - 1 ]->init();
+        steps[ on_step - 1 ]->evaluate();
+
+        if ( G_DEBUG )
+            {
+            SetColor( YELLOW );
+            printf( "%s\"%s\" operation %d \"%s\" switch_active_extra_step() %d -> %d.\n",
+                owner->owner->get_prefix(),
+                owner->owner->get_name(), n, name.c_str(), off_step, on_step );
+            steps[ on_step - 1 ]->print( owner->owner->get_prefix() );
+            SetColor( RESET );
+            }
+
+        *res = on_step;
+        }
+    else
+        {
+        G_LOG->warning( "operation_state:switch_active_step(...) - step (%d) not found",
+            off_step );
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+bool operation_state::is_active_extra_step( int step_idx ) const
+    {
+    auto res = std::find( active_steps.begin(), active_steps.end(), step_idx );
+    if ( res != active_steps.end() ) return true;
+
+    return false;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
