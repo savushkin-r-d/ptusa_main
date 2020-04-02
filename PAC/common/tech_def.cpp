@@ -9,6 +9,8 @@
 #include "errors.h"
 //-----------------------------------------------------------------------------
 auto_smart_ptr < tech_object_manager > tech_object_manager::instance;
+
+char i_tech_object::white_spaces[ 256 ] = "";
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 tech_object::tech_object( const char* new_name, u_int number, u_int type,
@@ -99,7 +101,8 @@ int tech_object::set_mode( u_int operation_n, int newm )
         white_spaces[ idx++ ] = ' ';
         white_spaces[ idx++ ] = ' ';
         white_spaces[ idx++ ] = ' ';
-        white_spaces[ idx++ ] = 0;
+        white_spaces[ idx++ ] = ' ';
+        white_spaces[ idx + 1 ] = 0;
         SetColor( RESET );
         }
 
