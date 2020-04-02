@@ -35,7 +35,7 @@ class i_tech_object
             }
 
     protected:
-        inline static char white_spaces[ 256 ] = "";
+        static char white_spaces[ 256 ];
 
 #ifndef __GNUC__
 #pragma endregion
