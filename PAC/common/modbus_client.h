@@ -44,7 +44,9 @@ class modbus_client
 		void set_float(unsigned int address, float value);
 		float get_float(unsigned int address);
 		void set_bit(unsigned int address, int value);
-		int get_bit(unsigned int address);
+		int reg_get_bit(unsigned int reg, unsigned int offset);
+        void reg_set_bit(unsigned int reg, unsigned int offset, int value);
+        int get_bit(unsigned int address);
 		void mask_reset();
 		void mask_set_bit(int pos, int value);
 		~modbus_client();
