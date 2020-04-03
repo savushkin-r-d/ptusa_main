@@ -1466,7 +1466,9 @@ class modbus_client
         int async_force_multiply_coils(unsigned int address, unsigned int quantity);
         int async_write_multiply_registers(unsigned int address, unsigned int quantity);
 		int async_read_write_multiply_registers(unsigned int readaddress, unsigned int readquantity, unsigned int wrireaddress, unsigned int writequantity);
-		int get_async_result();
+        int async_mask_write_register(unsigned int writeaddress, unsigned int andmask, unsigned int ormask);
+        int async_mask_write_register(unsigned int writeaddress);
+        int get_async_result();
         void set_station(unsigned char new_station_id);
 		//функции для работы с буфером из Lua
 		void zero_output_buff(int startpos = 13);
@@ -1478,6 +1480,8 @@ class modbus_client
 		float get_float(unsigned int address);
 		void set_bit(unsigned int address, int value);
 		int get_bit(unsigned int address);
+        void mask_reset();
+        void mask_set_bit(int pos, int value);
 		int get_id();
 	};
 //-------------------------------------------------------------------------

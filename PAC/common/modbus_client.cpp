@@ -307,6 +307,26 @@ int modbus_client::get_bit( unsigned int address )
 		}
 	}
 
+void modbus_client::mask_reset()
+    {
+    andmask = 0xFFFF;
+    ormask = 0;
+    }
+
+void modbus_client::mask_set_bit(int pos, int value)
+    {
+    if (pos < 0 || pos > 15) return;
+    andmask &= ~(1UL << pos);
+    if (value)
+        {
+        ormask ^= 1UL << pos;
+        }
+    else
+        {
+        ormask &= ~(1UL << pos);
+        }
+    }
+
 int modbus_client::get_id()
 	{
 	return tcpclient->get_id();
@@ -620,6 +640,48 @@ int modbus_client::async_read_write_multiply_registers(unsigned int readaddress,
 		return 0;
 	}
 }
+
+int modbus_client::async_mask_write_register(unsigned int writeaddress, unsigned int andmask, unsigned int ormask)
+	{
+    int ar = get_async_result();
+    if (ar == tcp_client::AR_BUSY)
+        {
+        return 0;
+        }
+    else
+        {
+        if (ar > 0 && ar == modbus_expected_length)
+            {
+            tcpclient->set_async_result(tcp_client::AR_FREE);
+            return 1;
+            }
+        else
+            {
+            tcpclient->buff[0] = 0;
+            tcpclient->buff[1] = 0;
+            tcpclient->buff[2] = 0;
+            tcpclient->buff[3] = 0;
+            tcpclient->buff[4] = 0;
+            tcpclient->buff[5] = 0x08;
+            tcpclient->buff[6] = stationid;
+            tcpclient->buff[7] = 0x16;
+            tcpclient->buff[8] = ((int_2)writeaddress) >> 8;
+            tcpclient->buff[9] = ((int_2)writeaddress) & 0xFF;
+            tcpclient->buff[10] = ((int_2)andmask) >> 8;
+            tcpclient->buff[11] = ((int_2)andmask) & 0xFF;
+            tcpclient->buff[12] = ((int_2)ormask) >> 8;
+            tcpclient->buff[13] = ((int_2)ormask) & 0xFF;
+            modbus_async_result = tcpclient->AsyncSend(14);
+            modbus_expected_length = 14;
+            }
+        return 0;
+        }
+	}
+
+int modbus_client::async_mask_write_register(unsigned int writeaddress)
+    {
+    return async_mask_write_register(writeaddress, andmask, ormask);
+    }
 
 void modbus_client::set_station( unsigned char new_station_id )
     {

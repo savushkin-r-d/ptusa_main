@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 03/30/20 15:36:10.
+** Generated automatically by tolua++-1.0.92 on 04/03/20 10:54:42.
 */
 
 #ifndef __cplusplus
@@ -4082,12 +4082,12 @@ static int tolua_PAC_dev_operation_on_extra_step00(lua_State* tolua_S)
 #endif
  {
   operation* self = (operation*)  tolua_tousertype(tolua_S,1,0);
-  int step_idx = ((int)  tolua_tonumber(tolua_S,2,0));
+  int step = ((int)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'on_extra_step'", NULL);
 #endif
   {
-   int tolua_ret = (int)  self->on_extra_step(step_idx);
+   int tolua_ret = (int)  self->on_extra_step(step);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
@@ -4116,12 +4116,12 @@ static int tolua_PAC_dev_operation_off_extra_step00(lua_State* tolua_S)
 #endif
  {
   operation* self = (operation*)  tolua_tousertype(tolua_S,1,0);
-  int step_idx = ((int)  tolua_tonumber(tolua_S,2,0));
+  int step = ((int)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'off_extra_step'", NULL);
 #endif
   {
-   int tolua_ret = (int)  self->off_extra_step(step_idx);
+   int tolua_ret = (int)  self->off_extra_step(step);
    tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
@@ -11369,6 +11369,73 @@ static int tolua_PAC_dev_modbus_client_async_read_write_multiply_registers00(lua
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: async_mask_write_register of class  modbus_client */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_async_mask_write_register00
+static int tolua_PAC_dev_modbus_client_async_mask_write_register00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"modbus_client",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,5,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  modbus_client* self = (modbus_client*)  tolua_tousertype(tolua_S,1,0);
+  unsigned int writeaddress = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
+  unsigned int andmask = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
+  unsigned int ormask = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'async_mask_write_register'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->async_mask_write_register(writeaddress,andmask,ormask);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'async_mask_write_register'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: async_mask_write_register of class  modbus_client */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_async_mask_write_register01
+static int tolua_PAC_dev_modbus_client_async_mask_write_register01(lua_State* tolua_S)
+{
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"modbus_client",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+ {
+  modbus_client* self = (modbus_client*)  tolua_tousertype(tolua_S,1,0);
+  unsigned int writeaddress = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'async_mask_write_register'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->async_mask_write_register(writeaddress);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+tolua_lerror:
+ return tolua_PAC_dev_modbus_client_async_mask_write_register00(tolua_S);
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: get_async_result of class  modbus_client */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_get_async_result00
 static int tolua_PAC_dev_modbus_client_get_async_result00(lua_State* tolua_S)
@@ -11738,6 +11805,72 @@ static int tolua_PAC_dev_modbus_client_get_bit00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'get_bit'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: mask_reset of class  modbus_client */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_mask_reset00
+static int tolua_PAC_dev_modbus_client_mask_reset00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"modbus_client",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  modbus_client* self = (modbus_client*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'mask_reset'", NULL);
+#endif
+  {
+   self->mask_reset();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'mask_reset'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: mask_set_bit of class  modbus_client */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_mask_set_bit00
+static int tolua_PAC_dev_modbus_client_mask_set_bit00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"modbus_client",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  modbus_client* self = (modbus_client*)  tolua_tousertype(tolua_S,1,0);
+  int pos = ((int)  tolua_tonumber(tolua_S,2,0));
+  int value = ((int)  tolua_tonumber(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'mask_set_bit'", NULL);
+#endif
+  {
+   self->mask_set_bit(pos,value);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'mask_set_bit'.",&tolua_err);
  return 0;
 #endif
 }
@@ -12842,6 +12975,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"async_force_multiply_coils",tolua_PAC_dev_modbus_client_async_force_multiply_coils00);
    tolua_function(tolua_S,"async_write_multiply_registers",tolua_PAC_dev_modbus_client_async_write_multiply_registers00);
    tolua_function(tolua_S,"async_read_write_multiply_registers",tolua_PAC_dev_modbus_client_async_read_write_multiply_registers00);
+   tolua_function(tolua_S,"async_mask_write_register",tolua_PAC_dev_modbus_client_async_mask_write_register00);
+   tolua_function(tolua_S,"async_mask_write_register",tolua_PAC_dev_modbus_client_async_mask_write_register01);
    tolua_function(tolua_S,"get_async_result",tolua_PAC_dev_modbus_client_get_async_result00);
    tolua_function(tolua_S,"set_station",tolua_PAC_dev_modbus_client_set_station00);
    tolua_function(tolua_S,"zero_output_buff",tolua_PAC_dev_modbus_client_zero_output_buff00);
@@ -12853,6 +12988,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"get_float",tolua_PAC_dev_modbus_client_get_float00);
    tolua_function(tolua_S,"set_bit",tolua_PAC_dev_modbus_client_set_bit00);
    tolua_function(tolua_S,"get_bit",tolua_PAC_dev_modbus_client_get_bit00);
+   tolua_function(tolua_S,"mask_reset",tolua_PAC_dev_modbus_client_mask_reset00);
+   tolua_function(tolua_S,"mask_set_bit",tolua_PAC_dev_modbus_client_mask_set_bit00);
    tolua_function(tolua_S,"get_id",tolua_PAC_dev_modbus_client_get_id00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"ModbusServ","ModbusServ","",NULL);
