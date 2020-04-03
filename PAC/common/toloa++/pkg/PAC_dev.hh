@@ -1480,6 +1480,8 @@ class modbus_client
 		float get_float(unsigned int address);
 		void set_bit(unsigned int address, int value);
 		int get_bit(unsigned int address);
+        int reg_get_bit(unsigned int reg, unsigned int offset);
+        void reg_set_bit(unsigned int reg, unsigned int offset, int value);
         void mask_reset();
         void mask_set_bit(int pos, int value);
 		int get_id();

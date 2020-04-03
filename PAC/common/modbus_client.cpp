@@ -295,6 +295,26 @@ void modbus_client::set_bit( unsigned int address, int value )
 	tcpclient->buff[13 + numbyte] ^= (-(value ? 1 : 0) ^ tcpclient->buff[13 + numbyte]) & (1 << numbit);
 	}
 
+int modbus_client::reg_get_bit(unsigned int reg, unsigned int offset)
+    {
+    unsigned int address = reg * 2 + ((offset < 8) ? 1 : 0);
+    if (tcpclient->buff[9 + address] & (1 << (offset % 8)))
+        {
+        return 1;
+        }
+    else
+        {
+        return 0;
+        }
+    }
+
+void modbus_client::reg_set_bit(unsigned int reg, unsigned int offset, int value)
+    {
+    int numbyte = reg * 2 + ((offset < 8) ? 1 : 0);
+    int numbit = offset % 8;
+    tcpclient->buff[13 + numbyte] ^= (-(value ? 1 : 0) ^ tcpclient->buff[13 + numbyte]) & (1 << numbit);
+    }
+
 int modbus_client::get_bit( unsigned int address )
 	{
 	if (tcpclient->buff[9 + address / 8] & (1 << (address % 8)))
