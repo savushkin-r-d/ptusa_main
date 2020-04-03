@@ -319,7 +319,7 @@ void modbus_client::mask_set_bit(int pos, int value)
     andmask &= ~(1UL << pos);
     if (value)
         {
-        ormask ^= 1UL << pos;
+        ormask |= 1UL << pos;
         }
     else
         {
