@@ -2836,7 +2836,9 @@ int cipline_tech_object::_DoStep( int step_to_do )
         }
     if (dev_upr_circulation)
         {
-        if (step_to_do == 28 || step_to_do == 48 || step_to_do == 66 || step_to_do == 77) dev_upr_circulation->on(); else dev_upr_circulation->off();
+        if (step_to_do == 28 || step_to_do == 48 || step_to_do == 66 || step_to_do == 77 ||
+            step_to_do == 8 || step_to_do == 37 || step_to_do == 57 || step_to_do == 86) 
+            dev_upr_circulation->on(); else dev_upr_circulation->off();
         }
 
     res=CheckErr();
@@ -3465,7 +3467,7 @@ void cipline_tech_object::SortRR( int where, int forcetotank /*= 0*/ )
                     V09->off();
                     V10->off();
                     V11->off();
-					V12->off();
+                    V12->off();
                     if (no_neutro) {V11->on();} else {V12->on();}
                     break;
                 case 2: //tank
@@ -3521,7 +3523,7 @@ void cipline_tech_object::SortRR( int where, int forcetotank /*= 0*/ )
                     V08->off();
                     V10->off();
                     V11->off();
-					V12->off();
+                    V12->off();
                     if (no_neutro) {V11->on();} else {V12->on();}
                     break;
                 case 2: //tank

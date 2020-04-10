@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/03/20 16:19:12.
+** Generated automatically by tolua++-1.0.92 on 04/10/20 14:08:45.
 */
 
 #ifndef __cplusplus
@@ -7523,6 +7523,36 @@ static int tolua_set_cipline_tech_object_curprg(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* get function: loadedRecipe of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_loadedRecipe
+static int tolua_get_cipline_tech_object_loadedRecipe(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'loadedRecipe'",NULL);
+#endif
+  tolua_pushnumber(tolua_S,(lua_Number)self->loadedRecipe);
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* set function: loadedRecipe of class  cipline_tech_object */
+#ifndef TOLUA_DISABLE_tolua_set_cipline_tech_object_loadedRecipe
+static int tolua_set_cipline_tech_object_loadedRecipe(lua_State* tolua_S)
+{
+  cipline_tech_object* self = (cipline_tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  tolua_Error tolua_err;
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable 'loadedRecipe'",NULL);
+  if (!tolua_isnumber(tolua_S,2,0,&tolua_err))
+   tolua_error(tolua_S,"#vinvalid type in variable assignment.",&tolua_err);
+#endif
+  self->loadedRecipe = ((int)  tolua_tonumber(tolua_S,2,0))
+;
+ return 0;
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* get function: nmr of class  cipline_tech_object */
 #ifndef TOLUA_DISABLE_tolua_get_cipline_tech_object_nmr
 static int tolua_get_cipline_tech_object_nmr(lua_State* tolua_S)
@@ -12919,6 +12949,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_variable(tolua_S,"curstep",tolua_get_cipline_tech_object_curstep,tolua_set_cipline_tech_object_curstep);
    tolua_variable(tolua_S,"state",tolua_get_cipline_tech_object_state,tolua_set_cipline_tech_object_state);
    tolua_variable(tolua_S,"curprg",tolua_get_cipline_tech_object_curprg,tolua_set_cipline_tech_object_curprg);
+   tolua_variable(tolua_S,"loadedRecipe",tolua_get_cipline_tech_object_loadedRecipe,tolua_set_cipline_tech_object_loadedRecipe);
    tolua_variable(tolua_S,"nmr",tolua_get_cipline_tech_object_nmr,tolua_set_cipline_tech_object_nmr);
    tolua_variable(tolua_S,"nplaststate",tolua_get_cipline_tech_object_nplaststate,tolua_set_cipline_tech_object_nplaststate);
    tolua_variable(tolua_S,"pidf_override",tolua_get_cipline_tech_object_pidf_override,tolua_set_cipline_tech_object_pidf_override);
