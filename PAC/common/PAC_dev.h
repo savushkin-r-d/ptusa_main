@@ -2883,6 +2883,7 @@ class virtual_device : public device
 
         float value;
         int state;
+        bool level_logic_invert;
 
     public:
 
@@ -2899,6 +2900,8 @@ class virtual_device : public device
         virtual int get_state();
 
         virtual bool is_active();
+
+        virtual void set_rt_par(unsigned int idx, float value);
      };
 //-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство без привязки к модулям ввода-вывода

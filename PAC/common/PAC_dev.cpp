@@ -4383,7 +4383,18 @@ int virtual_device::get_state()
 
 bool virtual_device::is_active()
     {
-    return state == 0 ? 0 : 1;
+    bool ret = ((state == 0) ? false : true);
+    return (level_logic_invert ? !ret : ret);
+    }
+
+void virtual_device::set_rt_par(unsigned int idx, float value)
+    {
+    switch (idx)
+        {
+        case 1:
+            level_logic_invert = (value == 0) ? false : true;
+            break;
+        }
     }
 
 virtual_device::virtual_device( const char *dev_name,
@@ -4392,6 +4403,7 @@ virtual_device::virtual_device( const char *dev_name,
     {
     value = 0;
     state = 0;
+    level_logic_invert = false;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
