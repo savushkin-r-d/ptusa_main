@@ -4392,7 +4392,7 @@ void virtual_device::set_rt_par(unsigned int idx, float value)
     switch (idx)
         {
         case 1:
-            level_logic_invert = (value == 0) ? false : true;
+            level_logic_invert = value != 0;
             break;
         }
     }
