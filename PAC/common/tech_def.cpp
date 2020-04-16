@@ -863,19 +863,19 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
         u_int mode     = ( int ) val;
         char new_state = 0;
 
-        if ( mode >= 200'000 && mode < 300'000 )      // On extra step.
+        if ( mode >= 200000 && mode < 300000 )      // On extra step.
             {
             int step = mode % 100;
-            int operation = mode / 100 - 2'000;
+            int operation = mode / 100 - 2000;
 
             return set_extra_step( operation, step, 1 );
             }
         else 
             {
-            if ( mode >= 300'000 && mode < 400'000 )      // Off extra step.
+            if ( mode >= 300000 && mode < 400000 )      // Off extra step.
                 {
                 int step = mode % 100;
-                int operation = mode / 100 - 3'000;
+                int operation = mode / 100 - 3000;
 
                 return set_extra_step( operation, step, 0 );
                 }
@@ -895,7 +895,7 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
                 }
             else
                 {
-                if ( mode >= 100'000 && mode < 200'000 )      // On state mode.
+                if ( mode >= 100000 && mode < 200000 )      // On state mode.
                     {                    
                     new_state = mode % 100;
                     mode = mode / 100 - 1000;  
