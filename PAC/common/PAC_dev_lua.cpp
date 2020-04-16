@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/10/20 14:08:45.
+** Generated automatically by tolua++-1.0.92 on 04/16/20 12:39:17.
 */
 
 #ifndef __cplusplus
@@ -11564,6 +11564,75 @@ static int tolua_PAC_dev_modbus_client_zero_output_buff00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: set_byte of class  modbus_client */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_set_byte00
+static int tolua_PAC_dev_modbus_client_set_byte00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"modbus_client",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  modbus_client* self = (modbus_client*)  tolua_tousertype(tolua_S,1,0);
+  int address = ((int)  tolua_tonumber(tolua_S,2,0));
+  unsigned char value = ((unsigned char)  tolua_tonumber(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_byte'", NULL);
+#endif
+  {
+   self->set_byte(address,value);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_byte'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_byte of class  modbus_client */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_get_byte00
+static int tolua_PAC_dev_modbus_client_get_byte00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"modbus_client",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  modbus_client* self = (modbus_client*)  tolua_tousertype(tolua_S,1,0);
+  int address = ((int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_byte'", NULL);
+#endif
+  {
+   unsigned char tolua_ret = (unsigned char)  self->get_byte(address);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_byte'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: set_int2 of class  modbus_client */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_set_int200
 static int tolua_PAC_dev_modbus_client_set_int200(lua_State* tolua_S)
@@ -11974,6 +12043,80 @@ static int tolua_PAC_dev_modbus_client_mask_set_bit00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'mask_set_bit'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: reverse of class  modbus_client */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_reverse00
+static int tolua_PAC_dev_modbus_client_reverse00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"modbus_client",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  modbus_client* self = (modbus_client*)  tolua_tousertype(tolua_S,1,0);
+  unsigned char b = ((unsigned char)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'reverse'", NULL);
+#endif
+  {
+   unsigned char tolua_ret = (unsigned char)  self->reverse(b);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'reverse'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: swapBits of class  modbus_client */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_swapBits00
+static int tolua_PAC_dev_modbus_client_swapBits00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"modbus_client",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,5,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,6,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  modbus_client* self = (modbus_client*)  tolua_tousertype(tolua_S,1,0);
+  int x = ((int)  tolua_tonumber(tolua_S,2,0));
+  int p1 = ((int)  tolua_tonumber(tolua_S,3,0));
+  int p2 = ((int)  tolua_tonumber(tolua_S,4,0));
+  int n = ((int)  tolua_tonumber(tolua_S,5,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'swapBits'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->swapBits(x,p1,p2,n);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'swapBits'.",&tolua_err);
  return 0;
 #endif
 }
@@ -13084,6 +13227,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"get_async_result",tolua_PAC_dev_modbus_client_get_async_result00);
    tolua_function(tolua_S,"set_station",tolua_PAC_dev_modbus_client_set_station00);
    tolua_function(tolua_S,"zero_output_buff",tolua_PAC_dev_modbus_client_zero_output_buff00);
+   tolua_function(tolua_S,"set_byte",tolua_PAC_dev_modbus_client_set_byte00);
+   tolua_function(tolua_S,"get_byte",tolua_PAC_dev_modbus_client_get_byte00);
    tolua_function(tolua_S,"set_int2",tolua_PAC_dev_modbus_client_set_int200);
    tolua_function(tolua_S,"get_int2",tolua_PAC_dev_modbus_client_get_int200);
    tolua_function(tolua_S,"set_int4",tolua_PAC_dev_modbus_client_set_int400);
@@ -13096,6 +13241,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"reg_set_bit",tolua_PAC_dev_modbus_client_reg_set_bit00);
    tolua_function(tolua_S,"mask_reset",tolua_PAC_dev_modbus_client_mask_reset00);
    tolua_function(tolua_S,"mask_set_bit",tolua_PAC_dev_modbus_client_mask_set_bit00);
+   tolua_function(tolua_S,"reverse",tolua_PAC_dev_modbus_client_reverse00);
+   tolua_function(tolua_S,"swapBits",tolua_PAC_dev_modbus_client_swapBits00);
    tolua_function(tolua_S,"get_id",tolua_PAC_dev_modbus_client_get_id00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"ModbusServ","ModbusServ","",NULL);

@@ -112,7 +112,7 @@ class i_AO_device: public i_AI_device
 /// @brief Интерфейс устройства как с аналоговыми, так и дискретными каналами.
 class i_DO_AO_device: public i_DO_device, public i_AO_device
     {
-	public:
+    public:
         /// @brief Получение отфильтрованного состояния устройства.
         ///
         /// Устройство меняет свое состояние, если дискретный вход находится в
@@ -129,7 +129,7 @@ class i_DO_AO_device: public i_DO_device, public i_AO_device
         /// @param new_state - новое состояние.
         void set_state( int new_state );
 
-		/// @brief Включение устройства.
+        /// @brief Включение устройства.
         ///
         /// Установка устройства в активное состояние. Для клапана это означает
         /// его активирование, то есть если он нормально закрытый - открытие.
@@ -141,7 +141,7 @@ class i_DO_AO_device: public i_DO_device, public i_AO_device
         /// его деактивирование, то есть если он нормально закрытый - закрытие.
         void off();
 
- 		/// @brief Получение текущего состояния устройства.
+        /// @brief Получение текущего состояния устройства.
         ///
         /// @return - текущее состояние устройства в виде дробного числа.
         float get_value();
@@ -173,8 +173,8 @@ class i_counter
         /// @brief Получение значения счетчика (объем).
         unsigned int get_quantity();
 
-		/// @brief Получение значения счетчика (поток).
-		float get_flow();
+        /// @brief Получение значения счетчика (поток).
+        float get_flow();
 
         /// @brief Получение состояния работы счетчика.
         virtual int get_state();
@@ -222,7 +222,7 @@ class device
         /// Для обработки команд, полученных от сервера.
         int set_cmd( const char *prop, unsigned int idx, double val );
 
-		void set_par( unsigned int idx, unsigned int offset, float value );
+        void set_par( unsigned int idx, unsigned int offset, float value );
 
         /// @brief Установка значения рабочего параметра.
         ///
@@ -230,11 +230,11 @@ class device
         /// @param value - новое значение.
         virtual void set_rt_par( unsigned int idx, float value );
 
-		void set_property( const char* field, device* dev );
+        void set_property( const char* field, device* dev );
 
-		void set_string_property(const char* field, const char* value);
+        void set_string_property(const char* field, const char* value);
 
-		void set_descr( const char *description );
+        void set_descr( const char *description );
 
         /// @brief Выключение устройства с учетом ручного режима.
         void off();
@@ -243,7 +243,7 @@ class device
         /// @brief Установка текущего состояния устройства с учетом ручного режима.
         virtual void set_value( float new_value );
 
-		enum DEVICE_TYPE
+        enum DEVICE_TYPE
             {
             DT_NONE = -1,///< Тип не определен.
 
@@ -272,17 +272,17 @@ class device
 //-----------------------------------------------------------------------------
 /// @brief Весы
 class i_wages
-	{
-	public:
-		/// @brief Тарировка.
-		///
-		/// @return - none.
-		void tare();
-		/// @brief Получение текущего состояния устройства.
-		///
-		/// @return - Вес в кг.
-		float get_value();
-	};
+    {
+    public:
+        /// @brief Тарировка.
+        ///
+        /// @return - none.
+        void tare();
+        /// @brief Получение текущего состояния устройства.
+        ///
+        /// @return - Вес в кг.
+        float get_value();
+    };
 //-----------------------------------------------------------------------------
 /// @brief Получение клапана по имени.
 ///
@@ -478,13 +478,13 @@ class dev_stub
 class errors_manager
     {
     public:
-	    /// @brief Получение единственного экземпляра класса.
+        /// @brief Получение единственного экземпляра класса.
         static errors_manager* get_instance();
 
         /// @brief Изменение параметров ошибки.
         void set_cmd( unsigned int cmd, unsigned int object_type, 
             unsigned int object_number, unsigned int object_alarm_number );
-	};
+    };
 
 //Совместимость с предыдущей версией драйвера EasyDrv. FIXME.
 class dev_errors_manager
@@ -778,7 +778,7 @@ class operation_manager
         operation* add_mode( const char* name );
         operation* add_operation( const char* name );
 
-		/// @brief Получение режима через операцию индексирования.
+        /// @brief Получение режима через операцию индексирования.
         ///
         /// @param idx - индекс режима.
         ///
@@ -787,7 +787,7 @@ class operation_manager
         /// mode_stub.
         operation* operator[] ( unsigned int idx );
 
-		/// @brief Время бездействия (нет включенных операций).
+        /// @brief Время бездействия (нет включенных операций).
         ///
         /// @return - время системы без активных операций.
         unsigned long get_idle_time();
@@ -807,7 +807,7 @@ class operation_state
         /// выходит за диапазон, возвращается значение заглушки - поля @ref
         /// mode::step_stub.
         step* operator[] ( int idx );
-	};
+    };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об устройствах, которые входят в шаг (открываются/
 /// закрываются).
@@ -903,18 +903,18 @@ class io_device
     {
     public:
         // Lua.
-		enum VENDOR
-			{
-			WAGO,
-			PHOENIX,
-			};
+        enum VENDOR
+            {
+            WAGO,
+            PHOENIX,
+            };
 
         void init( int DO_count, int DI_count,
             int AO_count, int AI_count );
 
         void init_channel( int type, int ch_inex, int node, int offset, int module_offset = -1, int logical_port = -1 );
 
-		void set_io_vendor( VENDOR vendor );
+        void set_io_vendor( VENDOR vendor );
     };
 //-----------------------------------------------------------------------------
 /// @brief Группа таймеров.
@@ -1187,19 +1187,19 @@ class PID
         /// @brief Состояние регулятора.
         unsigned int get_state();
 
-		int set_cmd( const char *prop, unsigned int idx, double val );
+        int set_cmd( const char *prop, unsigned int idx, double val );
     };
 //-----------------------------------------------------------------------------
 class PAC_info: public i_Lua_save_device
     {
     public:
-		enum PARAMETERS
-			{
-			P_MIX_FLIP_PERIOD = 1, ///< Интервал промывки седел клапанов, сек.
-			P_MIX_FLIP_UPPER_TIME, ///< Время промывки верхних седел клапанов, мсек.
-			P_MIX_FLIP_LOWER_TIME, ///< Время промывки нижних седел клапанов, мсек
+        enum PARAMETERS
+            {
+            P_MIX_FLIP_PERIOD = 1, ///< Интервал промывки седел клапанов, сек.
+            P_MIX_FLIP_UPPER_TIME, ///< Время промывки верхних седел клапанов, мсек.
+            P_MIX_FLIP_LOWER_TIME, ///< Время промывки нижних седел клапанов, мсек
 
-			P_V_OFF_DELAY_TIME,    ///< Время задержки закрытия клапанов, мсек.
+            P_V_OFF_DELAY_TIME,    ///< Время задержки закрытия клапанов, мсек.
 
             ///< Время задержки закрытия для донных клапанов, мсек.
             P_V_BOTTOM_OFF_DELAY_TIME, 
@@ -1220,13 +1220,13 @@ class PAC_info: public i_Lua_save_device
             ///< Переход на паузу операции при ошибке устройств,
             /// 0 - авто (есть), 1 - ручной (нет).
             P_AUTO_PAUSE_OPER_ON_DEV_ERR,
-			};
+            };
 
         saved_params_u_int_4 par;
 
         int set_cmd( const char *prop, unsigned int idx, double val );
         bool is_emulator();
-	};
+    };
 //----------------------------------------------------------------------------
 class siren_lights_manager
     {
@@ -1289,41 +1289,41 @@ tm get_time();
 ////-----------------------------------------------------------------------------
 /// @brief Класс регулятора для моечной станции
 class MSAPID
-	{
-	public:
-		void eval();
+    {
+    public:
+        void eval();
         void eval(float inputvalue, float task);
-		void reset();
-		void on( int accel = 0 );
-		void off();
-		void set( float new_z );
-		int get_state();
-	};
+        void reset();
+        void on( int accel = 0 );
+        void off();
+        void set( float new_z );
+        int get_state();
+    };
 //
 /// @brief Класс для модуля моечной станции
 class cipline_tech_object: public tech_object
-	{
-	public:
-		cipline_tech_object( const char* name, unsigned int number, unsigned int type, const char* name_Lua,
-			unsigned int states_count,
-			unsigned int timers_count,
-			unsigned int par_float_count, unsigned int runtime_par_float_count,
-			unsigned int par_uint_count, unsigned int runtime_par_uint_count );
+    {
+    public:
+        cipline_tech_object( const char* name, unsigned int number, unsigned int type, const char* name_Lua,
+            unsigned int states_count,
+            unsigned int timers_count,
+            unsigned int par_float_count, unsigned int runtime_par_float_count,
+            unsigned int par_uint_count, unsigned int runtime_par_uint_count );
 
-		int blocked;
-		int opcip;
-		int curstep;
-		int state;
-		int curprg;
+        int blocked;
+        int opcip;
+        int curstep;
+        int state;
+        int curprg;
         int loadedRecipe;
-		int nmr;
+        int nmr;
 
         bool nplaststate;   //Последнее состояние подающего насоса.
         bool pidf_override; //Управление пид-регулятором насоса подачи из скрипта.
-		int cip_in_error;
+        int cip_in_error;
         char no_neutro; ///Флаг отсутствия нейтрализации
-		char dont_use_water_tank; //Флаг возможности использования танка вторичной воды для мойки
-		int disable_tank_heating; //отключение подогрева при начале подачи растворов в танк(для МСА со старыми регулирующими клапанами)
+        char dont_use_water_tank; //Флаг возможности использования танка вторичной воды для мойки
+        int disable_tank_heating; //отключение подогрева при начале подачи растворов в танк(для МСА со старыми регулирующими клапанами)
         int ret_overrride; //флаг принудительного включения/выключения возвратного насооса
         int return_ok; //есть расход на возврате
         int concentration_ok; //есть концентрация на возврате
@@ -1332,73 +1332,73 @@ class cipline_tech_object: public tech_object
         int scoldvalves; ///Старая логика управления клапанами сортировки растворов при самоочистке.
         int no_acid_wash_max; ///Максимальное количество моек щелочью без кислоты.
 
-		i_DO_device* V00;
-		i_DO_device* V01;
-		i_DO_device* V02;
-		i_DO_device* V03;
-		i_DO_device* V04;
-		i_DO_device* V05;
-		i_DO_device* V06;
-		i_DO_device* V07;
-		i_DO_device* V08;
-		i_DO_device* V09;
-		i_DO_device* V10;
-		i_DO_device* V11;
-		i_DO_device* V12;
-		i_DO_device* V13;
+        i_DO_device* V00;
+        i_DO_device* V01;
+        i_DO_device* V02;
+        i_DO_device* V03;
+        i_DO_device* V04;
+        i_DO_device* V05;
+        i_DO_device* V06;
+        i_DO_device* V07;
+        i_DO_device* V08;
+        i_DO_device* V09;
+        i_DO_device* V10;
+        i_DO_device* V11;
+        i_DO_device* V12;
+        i_DO_device* V13;
 
-		i_DO_AO_device* NP;
-		i_DO_AO_device* NK;
-		i_DO_AO_device* NS;
-		i_DI_device* LL;
-		i_DI_device* LM;
-		i_DI_device* LH;
-		i_DI_device* LWL;
-		i_DI_device* LWH;
-		i_DI_device* LSL;
-		i_DI_device* LSH;
-		i_DI_device* LKL;
-		i_DI_device* LKH;
-		i_AI_device* TP;
-		i_AI_device* TR;
-		i_AI_device* Q;
-		i_AO_device* ao;
-		i_AO_device* PUMPFREQ;
-		i_DI_device* FL;
-		i_counter *cnt;
+        i_DO_AO_device* NP;
+        i_DO_AO_device* NK;
+        i_DO_AO_device* NS;
+        i_DI_device* LL;
+        i_DI_device* LM;
+        i_DI_device* LH;
+        i_DI_device* LWL;
+        i_DI_device* LWH;
+        i_DI_device* LSL;
+        i_DI_device* LSH;
+        i_DI_device* LKL;
+        i_DI_device* LKH;
+        i_AI_device* TP;
+        i_AI_device* TR;
+        i_AI_device* Q;
+        i_AO_device* ao;
+        i_AO_device* PUMPFREQ;
+        i_DI_device* FL;
+        i_counter *cnt;
         timer* T[10];
 
-		MSAPID* PIDP;
-		MSAPID* PIDF;
+        MSAPID* PIDP;
+        MSAPID* PIDF;
 
-		int msa_number; //Номер станции
-		char* ncar1; //номер машины
-		char* ncar2; //номер машины
-		char* ncar3; //номер машины
-		char* ncar4; //номер машины
-		int switch1;
-		int switch2;
-		int switch3;
-		int switch4;
-		saved_params_float      par_float;   ///< Сохраняемые пар-ры, тип float.
-		run_time_params_float   rt_par_float;///< Рабочие параметры, тип float.
-		float get_station_par(int parno);
-		void set_station_par(int parno, float newval);
-		float get_selfclean_par(int parno);
-		void set_selfclean_par(int parno, float newval);
-		
-		int set_cmd( const char *prop, unsigned int idx, const char* val );
-		int set_cmd( const char *prop, unsigned int idx, double val );
+        int msa_number; //Номер станции
+        char* ncar1; //номер машины
+        char* ncar2; //номер машины
+        char* ncar3; //номер машины
+        char* ncar4; //номер машины
+        int switch1;
+        int switch2;
+        int switch3;
+        int switch4;
+        saved_params_float      par_float;   ///< Сохраняемые пар-ры, тип float.
+        run_time_params_float   rt_par_float;///< Рабочие параметры, тип float.
+        float get_station_par(int parno);
+        void set_station_par(int parno, float newval);
+        float get_selfclean_par(int parno);
+        void set_selfclean_par(int parno, float newval);
+        
+        int set_cmd( const char *prop, unsigned int idx, const char* val );
+        int set_cmd( const char *prop, unsigned int idx, double val );
 
-		void initline();
-		int evaluate();
+        void initline();
+        int evaluate();
 
-		float GetConc( int what );
-		void SortRR( int where, int forcetotank);
-		int SetRet(int val);
-		int ForceRet(int val);
-		int GetRetState();
-		int HasRet();
+        float GetConc( int what );
+        void SortRR( int where, int forcetotank);
+        int SetRet(int val);
+        int ForceRet(int val);
+        int GetRetState();
+        int HasRet();
         int timeIsOut();
 
         //Базовые методы для вызова из модифицированных на LUA
@@ -1425,7 +1425,7 @@ class cipline_tech_object: public tech_object
         virtual void _Stop(int step_to_stop);
         virtual int _InitDoseRR(int what, int step_to_init, int not_first_call);
         virtual int _DoseRR(int what);
-	};
+    };
 //---------------------------------------------------------------------------
 rm_manager* G_RM_MANAGER();
 //---------------------------------------------------------------------------
@@ -1446,53 +1446,57 @@ class rm_manager
     };   
 //--------------------------------------------------------------------------
 class modbus_client 
-	{
-	protected:
+    {
+    protected:
 
-	public:
-		modbus_client(unsigned int id, char* ip, unsigned int port, unsigned long exchangetimeout);
-		//реализация функций протокола modbus
-		int read_discrete_inputs(unsigned int start_address, unsigned int quantity);
-		int read_coils(unsigned int start_address, unsigned int quantity);
-		int read_holding_registers(unsigned int address, unsigned int quantity);
-		int read_input_registers(unsigned int address, unsigned int quantity);
-		int write_coil(unsigned int address, unsigned char value);
-		int force_multiply_coils(unsigned int address, unsigned int quantity);
-		int write_multiply_registers(unsigned int address, unsigned int quantity);
-		int async_read_discrete_inputs(unsigned int start_address, unsigned int quantity);
+    public:
+        modbus_client(unsigned int id, char* ip, unsigned int port, unsigned long exchangetimeout);
+        //реализация функций протокола modbus
+        int read_discrete_inputs(unsigned int start_address, unsigned int quantity);
+        int read_coils(unsigned int start_address, unsigned int quantity);
+        int read_holding_registers(unsigned int address, unsigned int quantity);
+        int read_input_registers(unsigned int address, unsigned int quantity);
+        int write_coil(unsigned int address, unsigned char value);
+        int force_multiply_coils(unsigned int address, unsigned int quantity);
+        int write_multiply_registers(unsigned int address, unsigned int quantity);
+        int async_read_discrete_inputs(unsigned int start_address, unsigned int quantity);
         int async_read_coils(unsigned int start_address, unsigned int quantity);
         int async_read_holding_registers(unsigned int address, unsigned int quantity);
         int async_read_input_registers(unsigned int address, unsigned int quantity);
         int async_write_coil(unsigned int address, unsigned char value);
         int async_force_multiply_coils(unsigned int address, unsigned int quantity);
         int async_write_multiply_registers(unsigned int address, unsigned int quantity);
-		int async_read_write_multiply_registers(unsigned int readaddress, unsigned int readquantity, unsigned int wrireaddress, unsigned int writequantity);
+        int async_read_write_multiply_registers(unsigned int readaddress, unsigned int readquantity, unsigned int wrireaddress, unsigned int writequantity);
         int async_mask_write_register(unsigned int writeaddress, unsigned int andmask, unsigned int ormask);
         int async_mask_write_register(unsigned int writeaddress);
         int get_async_result();
         void set_station(unsigned char new_station_id);
-		//функции для работы с буфером из Lua
-		void zero_output_buff(int startpos = 13);
-		void set_int2(unsigned int address, short value);
-		short get_int2(unsigned int address);
-		void set_int4(unsigned int address, int value);
-		int get_int4(unsigned int address);
-		void set_float(unsigned int address, float value);
-		float get_float(unsigned int address);
-		void set_bit(unsigned int address, int value);
-		int get_bit(unsigned int address);
+        //функции для работы с буфером из Lua
+        void zero_output_buff(int startpos = 13);
+        void set_byte(int address, unsigned char value);
+        unsigned char get_byte(int address);
+        void set_int2(unsigned int address, short value);
+        short get_int2(unsigned int address);
+        void set_int4(unsigned int address, int value);
+        int get_int4(unsigned int address);
+        void set_float(unsigned int address, float value);
+        float get_float(unsigned int address);
+        void set_bit(unsigned int address, int value);
+        int get_bit(unsigned int address);
         int reg_get_bit(unsigned int reg, unsigned int offset);
         void reg_set_bit(unsigned int reg, unsigned int offset, int value);
         void mask_reset();
         void mask_set_bit(int pos, int value);
-		int get_id();
-	};
+        unsigned char reverse(unsigned char b);
+        int swapBits(int x, int p1, int p2, int n);
+        int get_id();
+    };
 //-------------------------------------------------------------------------
 class ModbusServ
     {
     public:
         static short int UnpackInt16( unsigned char* buf, int offset );
-		static long int UnpackInt32( unsigned char* buf, int offset );
+        static long int UnpackInt32( unsigned char* buf, int offset );
         static float UnpackFloat( unsigned char* Buf, int offset  );
         static unsigned int UnpackWord( unsigned char* Buf, int offset );
     };
