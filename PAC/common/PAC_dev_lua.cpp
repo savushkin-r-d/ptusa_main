@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/16/20 12:39:17.
+** Generated automatically by tolua++-1.0.92 on 04/21/20 09:33:26.
 */
 
 #ifndef __cplusplus
@@ -4675,7 +4675,8 @@ static int tolua_PAC_dev_device_manager_add_io_device00(lua_State* tolua_S)
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
      !tolua_isstring(tolua_S,4,0,&tolua_err) ||
      !tolua_isstring(tolua_S,5,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,6,&tolua_err)
+     !tolua_isstring(tolua_S,6,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,7,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -4686,11 +4687,12 @@ static int tolua_PAC_dev_device_manager_add_io_device00(lua_State* tolua_S)
   int dev_sub_type = ((int)  tolua_tonumber(tolua_S,3,0));
   const char* dev_name = ((const char*)  tolua_tostring(tolua_S,4,0));
   char* descr = ((char*)  tolua_tostring(tolua_S,5,0));
+  char* article = ((char*)  tolua_tostring(tolua_S,6,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_io_device'", NULL);
 #endif
   {
-   io_device* tolua_ret = (io_device*)  self->add_io_device(dev_type,dev_sub_type,dev_name,descr);
+   io_device* tolua_ret = (io_device*)  self->add_io_device(dev_type,dev_sub_type,dev_name,descr,article);
     tolua_pushusertype(tolua_S,(void*)tolua_ret,"io_device");
   }
  }

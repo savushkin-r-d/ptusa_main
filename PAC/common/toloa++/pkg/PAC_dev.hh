@@ -888,7 +888,7 @@ class device_manager
         //
         // Вызывается из Lua.
         io_device* add_io_device( int dev_type, int dev_sub_type,
-            const char *dev_name, char * descr );
+            const char *dev_name, char * descr, char* article );
 
         /// @brief Получение устройства по его номеру.
         device* get_device( int dev_type,
