@@ -9,6 +9,10 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Release_dll|Win32">
+      <Configuration>Release_dll</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release_VS_CODE|Win32">
       <Configuration>Release_VS_CODE</Configuration>
       <Platform>Win32</Platform>
@@ -58,6 +62,13 @@
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>v142</PlatformToolset>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
@@ -87,6 +98,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -112,6 +126,11 @@
     <TargetName>main</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>ptusa</TargetName>
+    <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../lua/src;../../../lua_conf;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;$(IncludePath);../../../zlib</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>ptusa</TargetName>
     <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../lua/src;../../../lua_conf;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;$(IncludePath);../../../zlib</IncludePath>
@@ -235,6 +254,31 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <Message>Копирование интерпретатора Lua.</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;WIN_OS;PAC_PC;MODBUS;TEST_SPEED;DEBUG_NO_IO_MODULES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TreatWarningAsError>true</TreatWarningAsError>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>ws2_32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -323,6 +367,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\rfid_reader.hh" />
     <ClInclude Include="..\..\..\PAC\IoT\iot_altivar.h" />
@@ -335,6 +380,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\linux\l_console.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
@@ -342,6 +388,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\linux\l_log.h">
@@ -350,6 +397,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\win\PAC_PC\bus_coupler_io_PC.h" />
@@ -381,6 +429,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
     <ClCompile Include="..\..\..\common\PAC-driver\g_device.cpp" />
     <ClCompile Include="..\..\..\common\RFID\rfid_reader.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -394,6 +443,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">/wd4996</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\..\lua\src\lbaselib.c" />
     <ClCompile Include="..\..\..\lua\src\lcode.c" />
@@ -411,6 +461,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">/wd4996</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\..\lua\src\llex.c" />
     <ClCompile Include="..\..\..\lua\src\lmathlib.c" />
@@ -422,6 +473,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">/wd4996</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\..\lua\src\lobject.c">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">/wd4996</AdditionalOptions>
@@ -430,6 +482,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">/wd4996</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\..\lua\src\lopcodes.c" />
     <ClCompile Include="..\..\..\lua\src\loslib.c">
@@ -439,6 +492,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">/wd4996</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\..\lua\src\lparser.c" />
     <ClCompile Include="..\..\..\lua\src\lstate.c" />
@@ -450,6 +504,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">/wd4996</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\..\lua\src\ltable.c" />
     <ClCompile Include="..\..\..\lua\src\ltablib.c" />
@@ -462,6 +517,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">/wd4996</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\..\lua\src\lzio.c" />
     <ClCompile Include="..\..\..\lua\src\print.c" />
@@ -485,6 +541,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
     <ClCompile Include="..\..\..\PAC\common\profibus_slave.cpp" />
     <ClCompile Include="..\..\..\PAC\common\rfid_reader_tolua.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
@@ -509,9 +566,11 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\linux\l_console.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -520,6 +579,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\linux\l_dtime.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -528,6 +588,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\linux\l_mem.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -536,6 +597,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\linux\l_tcp_client.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -544,6 +606,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\linux\l_tcp_cmctr.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -567,6 +630,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">/wd4996</AdditionalOptions>
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">/wd4996</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">/wd4996</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="..\..\..\tolua++\src\lib\tolua_push.c" />
     <ClCompile Include="..\..\..\tolua++\src\lib\tolua_to.c" />
@@ -577,6 +641,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\compress.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -585,6 +650,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\crc32.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -593,6 +659,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\deflate.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -601,6 +668,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\gzclose.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -609,6 +677,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\gzlib.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -617,6 +686,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\gzread.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -625,6 +695,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\gzwrite.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -633,6 +704,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\infback.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -641,6 +713,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\inffast.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -649,6 +722,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\inflate.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -657,6 +731,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\inftrees.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -665,6 +740,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\trees.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -673,6 +749,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\uncompr.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -681,6 +758,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\zutil.c">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -689,6 +767,7 @@ xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_VS_CODE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release_dll|Win32'">_CRT_SECURE_NO_WARNINGS;_CRT_NONSTDC_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\main.cpp" />
   </ItemGroup>

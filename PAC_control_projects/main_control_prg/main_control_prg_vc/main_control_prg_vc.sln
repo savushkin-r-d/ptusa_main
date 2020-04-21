@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2027
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29418.71
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "main_control_prg_vc", "main_control_prg_vc.vcxproj", "{C97BEA2A-017D-41B6-8F4B-39026C548DE7}"
 EndProject
@@ -13,6 +13,8 @@ Global
 		Debug_IDE|x64 = Debug_IDE|x64
 		Debug|Win32 = Debug|Win32
 		Debug|x64 = Debug|x64
+		DLL_release|Win32 = DLL_release|Win32
+		DLL_release|x64 = DLL_release|x64
 		Release_VS_CODE|Win32 = Release_VS_CODE|Win32
 		Release_VS_CODE|x64 = Release_VS_CODE|x64
 		Release|Win32 = Release|Win32
@@ -29,6 +31,9 @@ Global
 		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.Debug|Win32.ActiveCfg = Debug|Win32
 		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.Debug|Win32.Build.0 = Debug|Win32
 		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.Debug|x64.ActiveCfg = Debug|Win32
+		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.DLL_release|Win32.ActiveCfg = Release_dll|Win32
+		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.DLL_release|Win32.Build.0 = Release_dll|Win32
+		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.DLL_release|x64.ActiveCfg = Release_dll|Win32
 		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.Release_VS_CODE|Win32.ActiveCfg = Release_VS_CODE|Win32
 		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.Release_VS_CODE|Win32.Build.0 = Release_VS_CODE|Win32
 		{C97BEA2A-017D-41B6-8F4B-39026C548DE7}.Release_VS_CODE|x64.ActiveCfg = Release_VS_CODE|Win32
@@ -49,6 +54,9 @@ Global
 		{5F2D0ECA-D2D3-402F-A59C-98A21B12007C}.Debug|Win32.Build.0 = Debug|Win32
 		{5F2D0ECA-D2D3-402F-A59C-98A21B12007C}.Debug|x64.ActiveCfg = Debug|x64
 		{5F2D0ECA-D2D3-402F-A59C-98A21B12007C}.Debug|x64.Build.0 = Debug|x64
+		{5F2D0ECA-D2D3-402F-A59C-98A21B12007C}.DLL_release|Win32.ActiveCfg = Release_dll|Win32
+		{5F2D0ECA-D2D3-402F-A59C-98A21B12007C}.DLL_release|x64.ActiveCfg = Release_dll|x64
+		{5F2D0ECA-D2D3-402F-A59C-98A21B12007C}.DLL_release|x64.Build.0 = Release_dll|x64
 		{5F2D0ECA-D2D3-402F-A59C-98A21B12007C}.Release_VS_CODE|Win32.ActiveCfg = Release_VS_CODE|Win32
 		{5F2D0ECA-D2D3-402F-A59C-98A21B12007C}.Release_VS_CODE|x64.ActiveCfg = Release_VS_CODE|x64
 		{5F2D0ECA-D2D3-402F-A59C-98A21B12007C}.Release_VS_CODE|x64.Build.0 = Release_VS_CODE|x64

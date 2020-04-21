@@ -82,6 +82,12 @@
     <Filter Include="Файлы заголовков\PAC\IoT">
       <UniqueIdentifier>{0e6dc3cf-8928-4ebe-945d-2a7645cbd48a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Файлы заголовков\zlib">
+      <UniqueIdentifier>{0a918645-bf89-47cd-a25a-3bcbf918bcf9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Исходные файлы\zlib">
+      <UniqueIdentifier>{7d8a181c-1083-4f47-8282-3ad93e3c6563}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\PAC\common\log.h">
@@ -224,6 +230,39 @@
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\IoT\iot_common.h">
       <Filter>Файлы заголовков\PAC\IoT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\zlib\crc32.h">
+      <Filter>Файлы заголовков\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\zlib\deflate.h">
+      <Filter>Файлы заголовков\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\zlib\gzguts.h">
+      <Filter>Файлы заголовков\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\zlib\inffast.h">
+      <Filter>Файлы заголовков\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\zlib\inffixed.h">
+      <Filter>Файлы заголовков\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\zlib\inflate.h">
+      <Filter>Файлы заголовков\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\zlib\inftrees.h">
+      <Filter>Файлы заголовков\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\zlib\trees.h">
+      <Filter>Файлы заголовков\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\zlib\zconf.h">
+      <Filter>Файлы заголовков\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\zlib\zlib.h">
+      <Filter>Файлы заголовков\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\zlib\zutil.h">
+      <Filter>Файлы заголовков\zlib</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -370,6 +409,51 @@
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\sys\console.cpp">
       <Filter>Исходные файлы\PAC\common\sys</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\zlib\adler32.c">
+      <Filter>Исходные файлы\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\zlib\compress.c">
+      <Filter>Исходные файлы\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\zlib\crc32.c">
+      <Filter>Исходные файлы\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\zlib\deflate.c">
+      <Filter>Исходные файлы\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\zlib\gzclose.c">
+      <Filter>Исходные файлы\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\zlib\gzlib.c">
+      <Filter>Исходные файлы\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\zlib\gzread.c">
+      <Filter>Исходные файлы\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\zlib\gzwrite.c">
+      <Filter>Исходные файлы\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\zlib\infback.c">
+      <Filter>Исходные файлы\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\zlib\inffast.c">
+      <Filter>Исходные файлы\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\zlib\inflate.c">
+      <Filter>Исходные файлы\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\zlib\inftrees.c">
+      <Filter>Исходные файлы\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\zlib\trees.c">
+      <Filter>Исходные файлы\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\zlib\uncompr.c">
+      <Filter>Исходные файлы\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\zlib\zutil.c">
+      <Filter>Исходные файлы\zlib</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

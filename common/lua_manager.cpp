@@ -303,27 +303,24 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         }
 
     //IV Выполнение основного скрипта ('main.plua').
-    if ( 0 == lua_state )
+    if( luaL_loadfile( L, script_name ) != 0 )
         {
-        if( luaL_loadfile( L, script_name ) != 0 )
-            {
-            sprintf( G_LOG->msg, lua_tostring( L, -1 ) );
-            G_LOG->write_log( i_log::P_CRIT );
+        sprintf( G_LOG->msg, lua_tostring( L, -1 ) );
+        G_LOG->write_log( i_log::P_CRIT );
 
-            lua_pop( L, 1 );
-            return 1;
-            }
-        //-Инициализация Lua.--!>
+        lua_pop( L, 1 );
+        return 1;
+        }
+    //-Инициализация Lua.--!>
 
-        int i_line = lua_pcall( L, 0, LUA_MULTRET, 0 );
-        if ( i_line != 0 )
-            {
-            sprintf( G_LOG->msg, lua_tostring( L, -1 ) );
-            G_LOG->write_log( i_log::P_CRIT );
+    int i_line = lua_pcall( L, 0, LUA_MULTRET, 0 );
+    if ( i_line != 0 )
+        {
+        sprintf( G_LOG->msg, lua_tostring( L, -1 ) );
+        G_LOG->write_log( i_log::P_CRIT );
 
-            lua_pop( L, 1 );
-            return 1;
-            }
+        lua_pop( L, 1 );
+        return 1;
         }
 
     //Выполнение пользовательской функции инициализации.
