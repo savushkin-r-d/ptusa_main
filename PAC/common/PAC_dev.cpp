@@ -213,6 +213,16 @@ void device::set_descr( const char *new_description )
     strcpy( description, new_description );
     }
 //-----------------------------------------------------------------------------
+void device::set_article( const char* new_article )
+    {
+    delete[] article;
+
+    //Копирование с учетом нуль-символа.
+    int len = strlen( new_article ) + 1;
+    article = new char[ len ];
+    strcpy( article, new_article );
+    }
+//-----------------------------------------------------------------------------
 void device::print() const
     {
     printf( "%s\t", name );
@@ -377,6 +387,10 @@ par_device( par_cnt ),
 
     description = new char[ 1 ];
     description[ 0 ] = 0;
+
+    article = new char[ 2 ];
+    article[ 0 ] = ' ';
+    article[ 1 ] = 0;
     }
 //-----------------------------------------------------------------------------
 device::~device()
@@ -622,7 +636,7 @@ wages* device_manager::get_WT( const char *dev_name )
     }
 //-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
-                                             const char* dev_name, char * descr )
+                        const char* dev_name, char * descr, char* article )
     {
     static char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
 
@@ -1057,6 +1071,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
     u_int new_dev_index = project_devices.size();
     project_devices.push_back( new_device );
     new_device->set_serial_n( new_dev_index );
+    new_device->set_article( article );
 
     if ( dev_type < device::C_DEVICE_TYPE_CNT )
         {
@@ -3638,8 +3653,20 @@ float level_s_iolink::get_value()
 		{
 		char* data = (char*)get_AI_data(C_AI_INDEX);
 		int tmp = data[1] + 256 * data[0];
-		info = (LS_data*)&tmp;
-		return (float)info->v;
+
+        switch ( article[ 0 ] )
+            {
+            case 'I':   //IFM.LMT100
+                info = (LS_data*)&tmp;
+                return (float)info->v;
+
+            case 'E':   //E&H.FTL33-GR7N2ABW5J
+                info = (rev_LS_data*)&tmp;
+                return (float)rev_info->v;
+
+            default:
+                return -1000;
+            }
 		}
     }
 
@@ -3661,8 +3688,27 @@ int level_s_iolink::get_state()
 		{
 		char* data = (char*)get_AI_data(C_AI_INDEX);
 		int tmp = data[1] + 256 * data[0];
-		info = (LS_data*)&tmp;
-		return info->st1;
+
+        switch ( article[ 0 ] )
+            {
+            case 'I':   //IFM.LMT100
+                info = (LS_data*)&tmp;
+                return (float)info->st1;
+
+            case 'E':   //E&H.FTL33-GR7N2ABW5J
+                info = (rev_LS_data*)&tmp;
+                return (float)rev_info->st1;
+
+            default:
+                if ( sub_type == device::LS_IOLINK_MAX )
+                    {
+                    return 1;
+                    }
+                else
+                    {
+                    return 0;
+                    }
+            }
 		}
 	}
 #endif

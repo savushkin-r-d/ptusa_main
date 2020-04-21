@@ -565,6 +565,8 @@ class device : public i_DO_AO_device, public par_device
 
         void set_descr( const char *new_description );
 
+        void set_article( const char* new_article );
+
         /// @brief Выключение устройства.
         ///
         /// Установка устройства в пассивное состояние. Для клапана это означает
@@ -641,6 +643,8 @@ class device : public i_DO_AO_device, public par_device
             {
             return is_manual_mode;
             }
+
+        char * article;           ///< Артикул изделия.
 
     private:
         bool is_manual_mode;      ///< Признак ручного режима.
@@ -3314,8 +3318,15 @@ class level_s_iolink : public AI1
             uint16_t st2 :1;
             int16_t  v   :14;
             };
+        struct rev_LS_data
+            {
+            int16_t  v   : 14;
+            uint16_t st1 : 1;
+            uint16_t st2 : 1;
+            };
 
         LS_data *info;
+        rev_LS_data* rev_info;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора расхода.
@@ -3662,7 +3673,7 @@ class device_manager: public i_Lua_save_device
         //
         // Вызывается из Lua.
         io_device* add_io_device( int dev_type, int dev_sub_type,
-            const char *dev_name, char * descr );
+            const char *dev_name, char * descr, char* article );
     };
 //-----------------------------------------------------------------------------
 /// @brief таймер.
