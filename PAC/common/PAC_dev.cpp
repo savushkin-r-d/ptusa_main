@@ -4686,7 +4686,11 @@ void motor_altivar::direct_off()
 
 void motor_altivar::set_string_property(const char * field, const char * value)
     {
-    printf("Set string property %s value %s\n", field, value);
+    if ( G_DEBUG )
+        {
+        printf( "Set string property %s value %s\n", field, value );
+        }
+
     if (strcmp(field, "IP") == 0)
         {
         int port = 502;

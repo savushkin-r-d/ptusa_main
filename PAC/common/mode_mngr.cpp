@@ -1389,15 +1389,6 @@ void operation_state::init( u_int start_step /*= 1 */ )
 
     to_step( start_step );
 
-    if ( G_DEBUG )
-        {
-        printf( "%sINIT STEP ¹%d\n",
-            owner->owner->get_prefix(), active_step_n + 1 );
-        steps[ active_step_n ]->print( owner->owner->get_prefix() );
-        printf( "%sTIME %d ms, NEXT STEP -> %d \n",
-            owner->owner->get_prefix(), active_step_time, active_step_next_step_n );
-        }
-
     for ( size_t idx = 0; idx < active_steps.size(); idx++ )
         {
         size_t step_n = active_steps[ idx ] - 1;
@@ -1555,10 +1546,11 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
     
     if ( G_DEBUG )
         {
-        printf( "%s\"%s\" operation %d \"%s\" to_step() -> %d, step time %d ms.\n",
-            owner->owner->get_prefix(),
-            owner->owner->get_name(),
-            n, name.c_str(), new_step, active_step_time );
+        printf( "%s\"%s\" operation %d \"%s\" to_step() -> %d, step time %d ms, "
+            "next step %d.\n",
+            owner->owner->get_prefix(), owner->owner->get_name(),
+            n, name.c_str(), new_step, active_step_time, active_step_next_step_n );
+        steps[ active_step_n ]->print( owner->owner->get_prefix() );
         }
     }
 //-----------------------------------------------------------------------------
