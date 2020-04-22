@@ -3800,9 +3800,6 @@ void level_e_iolink::set_article( const char* new_article )
 //-----------------------------------------------------------------------------
 void level_e_iolink::evaluate_io()
     {
-    printf( "%s %d-%s\n",
-        get_name(), n_article, article );
-
     char* data = (char*)get_AI_data( C_AI_INDEX );
     pressure_e_iolink::evaluate_io( data, n_article, v, st );
     }
@@ -3889,82 +3886,76 @@ void pressure_e_iolink::read_article( const char* article,
 void pressure_e_iolink::evaluate_io( char* data, ARTICLE n_article,
     float& v, int& st )
     {
+    float alfa = 1;
+    float value = 0;
+    int status = 0;
+
     switch ( n_article )
         {
         case ARTICLE::IFM_PI2715:
-            {
-            PT_data info;
-            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
-
-            v = 0.001f * info.v;
-            st = info.st1;
-            break;
-            }
         case ARTICLE::IFM_PI2794:
-            {
-            PT_data info;
-            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
-
-            v = 0.01f * info.v;
-            st = info.st1;
-            break;
-            }
         case ARTICLE::IFM_PI2797:
             {
             PT_data info;
             std::reverse_copy( data, data + sizeof( info ), (char*)&info );
 
-            v = 0.001f * info.v;
-            st = info.st1;
-            break;
+            value = info.v;
+            st = 0;
             }
+            break;
 
         case ARTICLE::IFM_PM1704:
         case ARTICLE::IFM_PM1705:
-            {
-            ex_PT_data info;
-            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
-
-            v = 0.001f * info.v;
-            st = 0;
-            break;
-            }
-
         case ARTICLE::IFM_PM1707:
-            {
-            ex_PT_data info;
-            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
-
-            v = 0.1f * 0.001f * info.v;
-            st = 0;
-            break;
-            }
-
         case ARTICLE::IFM_PM1708:
-            {
-            ex_PT_data info;
-            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
-
-            v = 0.01f * 0.001f * info.v;
-            st = 0;
-            break;
-            }
-
         case ARTICLE::IFM_PM1709:
+        case ARTICLE::IFM_PM1715:
             {
             ex_PT_data info;
             std::reverse_copy( data, data + sizeof( info ), (char*)&info );
 
-            v = 0.1f * 0.001f * info.v;
-            st = 0;
-            break;
+            v = info.v;
+            st = info.status;
             }
+            break;
 
         case ARTICLE::DEFAULT:
             v = 0;
             st = 0;
             break;
         }
+
+    switch ( n_article )
+        {
+        case ARTICLE::IFM_PM1708:       //  0.01, mbar
+            alfa = 0.00001f;
+            break;
+
+        case ARTICLE::IFM_PM1707:       //   0.1, mbar
+        case ARTICLE::IFM_PM1709:       //   0.1, mbar
+            alfa = 0.0001f;
+            break;
+
+        case ARTICLE::IFM_PI2715:       // 0.001, bar
+        case ARTICLE::IFM_PI2797:       //     1, mbar
+
+        case ARTICLE::IFM_PM1704:       // 0.001, bar
+        case ARTICLE::IFM_PM1705:       // 0.001, bar
+        case ARTICLE::IFM_PM1715:       // 0.001, bar
+            alfa = 0.001f;
+            break;
+
+        case ARTICLE::IFM_PI2794:       // 0.01, bar
+            alfa = 0.01f;
+            break;
+
+        case ARTICLE::DEFAULT:
+            alfa = 0;
+            break;
+        }
+
+    v = alfa * value;
+    st = status;
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
