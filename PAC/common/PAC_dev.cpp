@@ -3729,7 +3729,7 @@ int level_e_iolink::calc_volume()
 #ifndef DEBUG_NO_IO_MODULES
     v = this.v;
 #else
-    v = get_value() / 100 * get_par( P_MAX_P, start_param_idx );
+    v = get_value();
 #endif
 
     if ( get_par( P_H_CONE, start_param_idx ) <= 0 )
@@ -3815,6 +3815,21 @@ float pressure_e::get_min_val()
     return get_par( P_MIN_V, start_param_idx );
     }
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+pressure_e_iolink::pressure_e_iolink( const char* dev_name ) : 
+    AI1( dev_name, DT_PT, DST_PT_IOLINK,
+    ADDITIONAL_PARAM_COUNT, &start_param_idx ),
+    n_article( ARTICLE::DEFAULT ), v( 0 ), st( 0 )
+    {
+    set_par_name( P_MIN_V, start_param_idx, "P_MIN_V" );
+    set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
+    }
+//-----------------------------------------------------------------------------
+void pressure_e_iolink::set_article( const char* new_article )
+    {
+    device::set_article( new_article );
+    read_article( new_article, n_article, this );
+    }
 //-----------------------------------------------------------------------------
 float pressure_e_iolink::get_max_val()
     {
@@ -3956,6 +3971,11 @@ void pressure_e_iolink::evaluate_io( char* data, ARTICLE n_article,
 
     v = alfa * value;
     st = status;
+    }
+//-----------------------------------------------------------------------------
+void pressure_e_iolink::evaluate_io()
+    {
+    evaluate_io( (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES

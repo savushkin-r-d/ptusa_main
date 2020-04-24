@@ -2608,13 +2608,7 @@ class pressure_e : public AI1
 class pressure_e_iolink : public AI1
     {
     public:
-    pressure_e_iolink( const char *dev_name ): AI1( dev_name, DT_PT, DST_PT_IOLINK,
-        ADDITIONAL_PARAM_COUNT, &start_param_idx ),
-        n_article( ARTICLE::DEFAULT ), v( 0 ), st( 0 )
-            {
-            set_par_name( P_MIN_V,  start_param_idx, "P_MIN_V" );
-            set_par_name( P_MAX_V,  start_param_idx, "P_MAX_V" );
-            }
+        pressure_e_iolink( const char* dev_name );
 
         float get_max_val();
         float get_min_val();
@@ -2624,11 +2618,7 @@ class pressure_e_iolink : public AI1
         int get_state();
 #endif
 
-        void set_article( const char* new_article )
-            {
-            device::set_article( new_article );
-            read_article( new_article, n_article, this );
-            }
+        void set_article( const char* new_article );
 
         enum class ARTICLE
             {
@@ -2645,17 +2635,12 @@ class pressure_e_iolink : public AI1
             IFM_PI2797,
             };
 
-        static void evaluate_io( char* data, ARTICLE n_article, float& v, int& st );
+        static void evaluate_io( char* data, ARTICLE n_article, float& v,
+            int& st );
         static void read_article( const char* article, ARTICLE& n_article, 
             device* dev  );
 
-        void evaluate_io()
-            {
-            printf( "%s %d-%s\n", 
-                get_name(), n_article, article  );
-
-            evaluate_io( (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
-            }
+        void evaluate_io();
 
         struct PT_data
             {
@@ -2713,7 +2698,6 @@ class level_e_iolink : public level
             P_MAX_P = 1, ///< Индекс параметра давление настройки датчика (бар).
             P_R,         ///< Индекс параметра радиуса танка (м).
             P_H_CONE,    ///< Индекс параметра высоты конуса танка (м).
-            P_ERR,       ///< Аварийное значение уровня.
 
             LAST_PARAM_IDX,
             };
