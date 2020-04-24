@@ -358,6 +358,11 @@ class device : public i_DO_AO_device, public par_device
         virtual int rm_save_device_state( char *buff, const char *prefix );
 #endif // RM_PAC
 
+        /// @brief Расчет состояния на основе текущих данных от I/O.
+        virtual void evaluate_io()
+            {
+            }
+
         enum CONSTANTS
             {
             C_DEVICE_TYPE_CNT = 19,     ///< Количество типов устройств.
@@ -565,7 +570,7 @@ class device : public i_DO_AO_device, public par_device
 
         void set_descr( const char *new_description );
 
-        void set_article( const char* new_article );
+        virtual void set_article( const char* new_article );
 
         /// @brief Выключение устройства.
         ///
@@ -2153,7 +2158,7 @@ class valve_iolink_mix_proof : public i_mix_proof,  public valve
 
         int save_device_ex( char *buff );
 
-        static void evaluate();
+        void evaluate_io();
 
 #ifndef DEBUG_NO_IO_MODULES
         int get_state();
@@ -2203,8 +2208,6 @@ class valve_iolink_mix_proof : public i_mix_proof,  public valve
         out_data_swapped* out_info;
 
         bool blink = false;     //Visual indication
-
-        static std::vector< valve_iolink_mix_proof* > valves;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной.
@@ -2217,7 +2220,7 @@ class valve_iolink_shut_off : public valve
 
         int save_device_ex( char* buff );
 
-        static void evaluate();
+        void evaluate_io();
 
 #ifndef DEBUG_NO_IO_MODULES
         float get_value();
@@ -2265,8 +2268,6 @@ class valve_iolink_shut_off : public valve
         out_data_swapped* out_info = 0;
 
         bool blink = false;     //Visual indication
-
-        static std::vector< valve_iolink_shut_off* > valves;
     };    
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления.
@@ -2577,46 +2578,6 @@ class level_e_cone : public level
         u_int start_param_idx;
     };
 //-----------------------------------------------------------------------------
-/// @brief Датчик сигнализатора уровня IO-Link.
-class level_e_iolink : public level
-    {
-    public:
-        level_e_iolink( const char *dev_name );
-
-        float get_min_value();
-        float get_max_value();
-
-        int calc_volume();
-
-#ifndef DEBUG_NO_IO_MODULES
-        float get_value();
-        int get_state();
-#endif
-
-    private:
-        struct LT_data
-            {
-            uint16_t st1 :1;
-            uint16_t st2 :1;
-            int16_t  v   :14;
-            };
-
-        LT_data *info;
-
-    private:
-        enum CONSTANTS
-            {
-            P_MAX_P = 1, ///< Индекс параметра давление настройки датчика (бар).
-            P_R,         ///< Индекс параметра радиуса танка (м).
-            P_H_CONE,    ///< Индекс параметра высоты конуса танка (м).
-            P_ERR,       ///< Аварийное значение уровня.
-
-            LAST_PARAM_IDX,
-            };
-
-        u_int start_param_idx;
-    };
-//-----------------------------------------------------------------------------
 /// @brief Текущее давление.
 class pressure_e : public AI1
     {
@@ -2647,12 +2608,7 @@ class pressure_e : public AI1
 class pressure_e_iolink : public AI1
     {
     public:
-    pressure_e_iolink( const char *dev_name ): AI1( dev_name, DT_PT, DST_PT_IOLINK,
-            ADDITIONAL_PARAM_COUNT, &start_param_idx )
-            {
-            set_par_name( P_MIN_V,  start_param_idx, "P_MIN_V" );
-            set_par_name( P_MAX_V,  start_param_idx, "P_MAX_V" );
-            }
+        pressure_e_iolink( const char* dev_name );
 
         float get_max_val();
         float get_min_val();
@@ -2662,17 +2618,47 @@ class pressure_e_iolink : public AI1
         int get_state();
 #endif
 
-    private:
+        void set_article( const char* new_article );
+
+        enum class ARTICLE
+            {
+            DEFAULT,
+            IFM_PM1704,
+            IFM_PM1705,
+            IFM_PM1707,
+            IFM_PM1708,
+            IFM_PM1709,
+            IFM_PM1715,
+
+            IFM_PI2715,
+            IFM_PI2794,
+            IFM_PI2797,
+            };
+
+        static void evaluate_io( char* data, ARTICLE n_article, float& v,
+            int& st );
+        static void read_article( const char* article, ARTICLE& n_article, 
+            device* dev  );
+
+        void evaluate_io();
+
         struct PT_data
             {
             uint16_t st1 :1;
             uint16_t st2 :1;
             int16_t  v   :14;
             };
-
-        PT_data *info;
+        struct ex_PT_data
+            {
+            int16_t v;
+            int16_t reserved : 8;
+            uint16_t  status : 4;
+            uint16_t  unused : 4;
+            };
 
     private:
+        ARTICLE n_article;
+
         enum CONSTANTS
             {
             ADDITIONAL_PARAM_COUNT = 2,
@@ -2682,6 +2668,44 @@ class pressure_e_iolink : public AI1
             };
 
         u_int start_param_idx;
+
+        float v;
+        int st;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Датчик сигнализатора уровня IO-Link.
+class level_e_iolink : public level
+    {
+    public:
+        level_e_iolink( const char* dev_name );
+
+        int calc_volume();
+
+#ifndef DEBUG_NO_IO_MODULES
+        float get_value();
+        int get_state();
+#endif
+
+        void set_article( const char* new_article );
+        void evaluate_io();
+
+    private:
+        pressure_e_iolink::ARTICLE n_article;
+
+    private:
+        enum CONSTANTS
+            {
+            P_MAX_P = 1, ///< Индекс параметра давление настройки датчика (бар).
+            P_R,         ///< Индекс параметра радиуса танка (м).
+            P_H_CONE,    ///< Индекс параметра высоты конуса танка (м).
+
+            LAST_PARAM_IDX,
+            };
+
+        u_int start_param_idx;
+
+        int st;
+        float v;
     };
 //-----------------------------------------------------------------------------
 /// @brief Концентрация.
@@ -2769,10 +2793,9 @@ class concentration_e_iolink : public AI1
         int get_state();
 #endif // DEBUG_NO_IO_MODULES
 
-        void static evaluate();
+        void evaluate_io();
 
     private:
-        static std::vector<concentration_e_iolink*> qt_e_iolink;
 
 #pragma pack(push,1)
         struct QT_data
@@ -3311,7 +3334,19 @@ class level_s_iolink : public AI1
 
         bool is_active();
 
+        void evaluate_io();
+
     private:
+        enum class ARTICLE
+            {
+            DEFAULT,
+            IFM_LMT100,
+            EH_FTL33,
+            };
+        ARTICLE n_article;
+
+        void set_article( const char* new_article );
+
         struct LS_data
             {
             uint16_t st1 :1;
@@ -3325,8 +3360,8 @@ class level_s_iolink : public AI1
             uint16_t st2 : 1;
             };
 
-        LS_data *info;
-        rev_LS_data* rev_info;
+        float v;
+        int st;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора расхода.
@@ -3628,6 +3663,14 @@ class device_manager: public i_Lua_save_device
         int init_params();
 
         int init_rt_params();
+
+        void evaluate_io()
+            {
+            for ( u_int i = 0; i < project_devices.size(); i++ )
+                {
+                project_devices[ i ]->evaluate_io();
+                }
+            }
 
 #ifdef __BORLANDC__
 #pragma option -w-inl

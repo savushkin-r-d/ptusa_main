@@ -12,11 +12,6 @@ std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
 
 std::vector<valve_bottom_mix_proof*> valve_bottom_mix_proof::to_switch_off;
 
-std::vector<concentration_e_iolink*> concentration_e_iolink::qt_e_iolink;
-
-std::vector< valve_iolink_mix_proof* > valve_iolink_mix_proof::valves;
-std::vector< valve_iolink_shut_off* > valve_iolink_shut_off::valves;
-
 const char device::DEV_NAMES[][ 5 ] =
     {
     "V",       ///< Клапан.
@@ -2390,7 +2385,6 @@ void valve_bottom_mix_proof::direct_off()
 valve_iolink_mix_proof::valve_iolink_mix_proof( const char* dev_name ) :
     valve( true, true, dev_name, DT_V, V_IOLINK_MIXPROOF )
     {
-    valves.push_back( this );
     }
 //-----------------------------------------------------------------------------
 void valve_iolink_mix_proof::open_upper_seat()
@@ -2419,40 +2413,32 @@ valve::VALVE_STATE valve_iolink_mix_proof::get_valve_state()
     }
 
 //-----------------------------------------------------------------------------
-void valve_iolink_mix_proof::evaluate()
+void valve_iolink_mix_proof::evaluate_io()
     {
-    if ( valves.empty() == false )
-        {
-        for ( auto iter = valves.begin(); iter != valves.end(); iter++ )
-            {
-            auto *v = *iter;
+    out_info = ( out_data_swapped* ) get_AO_write_data( 0 );
 
-            v->out_info = ( out_data_swapped* ) v->get_AO_write_data( 0 );
+    char* data = (char*)get_AI_data( 0 );
+    char* buff = (char*)in_info;
 
-            char* data = (char*)v->get_AI_data( 0 );
-            char* buff = (char*)v->in_info;
-
-            const int SIZE = 4;
-            std::copy( data, data + SIZE, buff );
-            std::swap( buff[ 0 ], buff[ 1 ] );
-            std::swap( buff[ 2 ], buff[ 3 ] );
+    const int SIZE = 4;
+    std::copy( data, data + SIZE, buff );
+    std::swap( buff[ 0 ], buff[ 1 ] );
+    std::swap( buff[ 2 ], buff[ 3 ] );
 
 //#define DEBUG_IOLINK_MIXPROOF
 #ifdef DEBUG_IOLINK_MIXPROOF
-            char* tmp = (char*)v->in_info;
+    char* tmp = (char*)in_info;
 
-            sprintf( G_LOG->msg, "%x %x %x %x\n",
-                tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ] );
-            G_LOG->write_log( i_log::P_WARNING );
+    sprintf( G_LOG->msg, "%x %x %x %x\n",
+        tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ] );
+    G_LOG->write_log( i_log::P_WARNING );
 
-            sprintf( G_LOG->msg,
-                "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
-                v->in_info->de_en, v->in_info->main, v->in_info->usl,
-                v->in_info->lsp, 0.1 * v->in_info->pos );
-            G_LOG->write_log( i_log::P_NOTICE );
+    sprintf( G_LOG->msg,
+        "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
+        in_info->de_en, in_info->main, in_info->usl,
+        in_info->lsp, 0.1 * in_info->pos );
+    G_LOG->write_log( i_log::P_NOTICE );
 #endif
-            }
-        }
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_mix_proof::save_device_ex( char *buff )
@@ -2633,7 +2619,6 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
 valve_iolink_shut_off::valve_iolink_shut_off( const char* dev_name ) :
     valve( true, true, dev_name, DT_V, V_IOLINK_DO1_DI2 )
     {
-    valves.push_back( this );
     }
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE valve_iolink_shut_off::get_valve_state()
@@ -2649,40 +2634,32 @@ valve::VALVE_STATE valve_iolink_shut_off::get_valve_state()
 #endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
-void valve_iolink_shut_off::evaluate()
+void valve_iolink_shut_off::evaluate_io()
     {
-    if ( valves.empty() == false )
-        {
-        for ( auto iter = valves.begin(); iter != valves.end(); iter++ )
-            {
-            auto* v = *iter;
+    out_info = (out_data_swapped*)get_AO_write_data( 0 );
 
-            v->out_info = (out_data_swapped*)v->get_AO_write_data( 0 );
+    char* data = (char*)get_AI_data( 0 );
+    char* buff = (char*)in_info;
 
-            char* data = (char*)v->get_AI_data( 0 );
-            char* buff = (char*)v->in_info;
-
-            const int SIZE = 4;
-            std::copy( data, data + SIZE, buff );
-            std::swap( buff[ 0 ], buff[ 1 ] );
-            std::swap( buff[ 2 ], buff[ 3 ] );
+    const int SIZE = 4;
+    std::copy( data, data + SIZE, buff );
+    std::swap( buff[ 0 ], buff[ 1 ] );
+    std::swap( buff[ 2 ], buff[ 3 ] );
 
 //#define DEBUG_IOLINK_
 #ifdef DEBUG_IOLINK_
-            char* tmp = (char*)v->in_info;
+    char* tmp = (char*)in_info;
 
-            sprintf( G_LOG->msg, "%x %x %x %x\n",
-                tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ] );
-            G_LOG->write_log( i_log::P_WARNING );
+    sprintf( G_LOG->msg, "%x %x %x %x\n",
+        tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ] );
+    G_LOG->write_log( i_log::P_WARNING );
 
-            sprintf( G_LOG->msg,
-                "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
-                v->in_info->de_en, v->in_info->main, v->in_info->usl,
-                v->in_info->lsp, 0.1 * v->in_info->pos );
-            G_LOG->write_log( i_log::P_NOTICE );
+    sprintf( G_LOG->msg,
+        "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
+        in_info->de_en, in_info->main, in_info->usl,
+        in_info->lsp, 0.1 * in_info->pos );
+    G_LOG->write_log( i_log::P_NOTICE );
 #endif
-            }
-        }
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_shut_off::save_device_ex( char* buff )
@@ -3628,7 +3605,8 @@ level_s::level_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 level_s_iolink::level_s_iolink( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ) :
-    AI1( dev_name, DT_LS, sub_type, 0, 0 )
+    AI1( dev_name, DT_LS, sub_type, 0, 0 ), n_article( ARTICLE::DEFAULT ),
+    v( 0 ), st( 0 )
     {
     }
 
@@ -3642,6 +3620,59 @@ float level_s_iolink::get_max_value()
     return 100;
     }
 
+void level_s_iolink::evaluate_io()
+    {
+    char* data = (char*)get_AI_data( C_AI_INDEX );
+
+    switch ( n_article )
+        {
+        case ARTICLE::IFM_LMT100:   //IFM.LMT100
+            {
+            LS_data info;
+            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
+            v = (float) info.v;
+            st = info.st1;
+            break;
+            }
+
+        case ARTICLE::EH_FTL33:     //E&H.FTL33-GR7N2ABW5J
+            {
+            rev_LS_data info;
+            std::reverse_copy( data, data + sizeof( info ), (char*) &info );
+            v = (float) info.v;
+            st = info.st1;
+            break;
+            }
+
+        case ARTICLE::DEFAULT:
+            v = -1000;
+            st = 0;
+            break;
+        }
+    }
+
+void level_s_iolink::set_article( const char* new_article )
+    {
+    device::set_article( new_article );
+
+    if ( strcmp( article, "IFM.LMT100" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_LMT100;
+        return;
+        }
+    if ( strcmp( article, "E&H.FTL33-GR7N2ABW5J" ) == 0 )
+        {
+        n_article = ARTICLE::EH_FTL33;
+        return;
+        }
+
+    if ( G_DEBUG )
+        {
+        G_LOG->warning( "%s unknown article \"%s\"",
+            get_name(), new_article );
+        }
+    }
+
 #ifndef DEBUG_NO_IO_MODULES
 float level_s_iolink::get_value()
     {
@@ -3651,22 +3682,7 @@ float level_s_iolink::get_value()
 		}
 	else
 		{
-		char* data = (char*)get_AI_data(C_AI_INDEX);
-		int tmp = data[1] + 256 * data[0];
-
-        switch ( article[ 0 ] )
-            {
-            case 'I':   //IFM.LMT100
-                info = (LS_data*)&tmp;
-                return (float)info->v;
-
-            case 'E':   //E&H.FTL33-GR7N2ABW5J
-                info = (rev_LS_data*)&tmp;
-                return (float)rev_info->v;
-
-            default:
-                return -1000;
-            }
+        return v;
 		}
     }
 
@@ -3686,29 +3702,7 @@ int level_s_iolink::get_state()
 		}
 	else
 		{
-		char* data = (char*)get_AI_data(C_AI_INDEX);
-		int tmp = data[1] + 256 * data[0];
-
-        switch ( article[ 0 ] )
-            {
-            case 'I':   //IFM.LMT100
-                info = (LS_data*)&tmp;
-                return (float)info->st1;
-
-            case 'E':   //E&H.FTL33-GR7N2ABW5J
-                info = (rev_LS_data*)&tmp;
-                return (float)rev_info->st1;
-
-            default:
-                if ( sub_type == device::LS_IOLINK_MAX )
-                    {
-                    return 1;
-                    }
-                else
-                    {
-                    return 0;
-                    }
-            }
+        return st;
 		}
 	}
 #endif
@@ -3720,33 +3714,30 @@ bool level_s_iolink::is_active()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 level_e_iolink::level_e_iolink( const char *dev_name ) :
-    level( dev_name, DST_LT_IOLINK, LAST_PARAM_IDX - 1, &start_param_idx )
+    level( dev_name, DST_LT_IOLINK, LAST_PARAM_IDX - 1, &start_param_idx ),
+    n_article( pressure_e_iolink::ARTICLE::DEFAULT ), v( 0 ), st( 0 )
     {
     set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
     set_par_name( P_R, start_param_idx, "P_R" );
     set_par_name( P_H_CONE, start_param_idx, "P_H_CONE" );
     }
 //-----------------------------------------------------------------------------
-float level_e_iolink::get_min_value()
-    {
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-float level_e_iolink::get_max_value()
-    {
-    return get_par( P_MAX_P, start_param_idx );
-    }
-//-----------------------------------------------------------------------------
 int level_e_iolink::calc_volume()
     {
     int v_kg = 0;
+    float v = 0.0;
+#ifndef DEBUG_NO_IO_MODULES
+    v = this.v;
+#else
+    v = get_value();
+#endif
 
     if ( get_par( P_H_CONE, start_param_idx ) <= 0 )
         {
-        float v = get_par( P_R, start_param_idx );
-        v = (float)M_PI * v * v * get_value() / 9.81f;
+        float val = get_par( P_R, start_param_idx );
+        val = (float)M_PI * val * val * v / 9.81f;
 
-        v_kg = 10 * (int)( v * 100 + 0.5f ); //Переводим в килограммы.
+        v_kg = 10 * (int)( val * 100 + 0.5f ); //Переводим в килограммы.
         }
     else
         {
@@ -3758,18 +3749,18 @@ int level_e_iolink::calc_volume()
             }
 
         float h_cone = get_par( P_H_CONE, start_param_idx );
-        float h_curr = get_value() / 9.81f;
+        float h_curr = v / 9.81f;
 
-        float v = 0;
+        float val = 0;
         if ( h_curr <= h_cone )
             {
-            v = (float)M_PI * h_curr * tg_a * h_curr * tg_a * h_curr / 3;
+            val = (float)M_PI * h_curr * tg_a * h_curr * tg_a * h_curr / 3;
             }
         else
             {
-            v = (float)M_PI * r * r * ( h_curr - h_cone * 2 / 3 );
+            val = (float)M_PI * r * r * ( h_curr - h_cone * 2 / 3 );
             }
-        v_kg = 10 * (int)( v * 100 + 0.5f ); //Переводим в килограммы.
+        v_kg = 10 * (int)( val * 100 + 0.5f ); //Переводим в килограммы.
         }
 
     return v_kg;
@@ -3784,11 +3775,7 @@ float level_e_iolink::get_value()
         }
     else
         {
-        char* data = (char*)get_AI_data(C_AI_INDEX);
-        int tmp = data[1] + 256 * data[0];
-        info = (LT_data*)&tmp;
-
-        return (float)info->v / get_par( P_MAX_P, start_param_idx );
+        return v / get_par( P_MAX_P, start_param_idx ) * 100;
         }
     }
 //-----------------------------------------------------------------------------
@@ -3800,15 +3787,22 @@ int level_e_iolink::get_state()
         }
     else
         {
-        char* data = (char*)get_AI_data(C_AI_INDEX);
-
-        int tmp = data[1] + 256 * data[0];
-        info = (LT_data*)&tmp;
-
-        return info->st1;
+        st;
         }
     }
 #endif
+//-----------------------------------------------------------------------------
+void level_e_iolink::set_article( const char* new_article )
+    {
+    device::set_article( new_article );
+    pressure_e_iolink::read_article( new_article, n_article, this );
+    }
+//-----------------------------------------------------------------------------
+void level_e_iolink::evaluate_io()
+    {
+    char* data = (char*)get_AI_data( C_AI_INDEX );
+    pressure_e_iolink::evaluate_io( data, n_article, v, st );
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float pressure_e::get_max_val()
@@ -3822,6 +3816,21 @@ float pressure_e::get_min_val()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+pressure_e_iolink::pressure_e_iolink( const char* dev_name ) : 
+    AI1( dev_name, DT_PT, DST_PT_IOLINK,
+    ADDITIONAL_PARAM_COUNT, &start_param_idx ),
+    n_article( ARTICLE::DEFAULT ), v( 0 ), st( 0 )
+    {
+    set_par_name( P_MIN_V, start_param_idx, "P_MIN_V" );
+    set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
+    }
+//-----------------------------------------------------------------------------
+void pressure_e_iolink::set_article( const char* new_article )
+    {
+    device::set_article( new_article );
+    read_article( new_article, n_article, this );
+    }
+//-----------------------------------------------------------------------------
 float pressure_e_iolink::get_max_val()
     {
     return get_par( P_MAX_V, start_param_idx );
@@ -3830,6 +3839,143 @@ float pressure_e_iolink::get_max_val()
 float pressure_e_iolink::get_min_val()
     {
     return get_par( P_MIN_V, start_param_idx );
+    }
+//-----------------------------------------------------------------------------
+void pressure_e_iolink::read_article( const char* article, 
+    ARTICLE& n_article, device* dev )
+    {
+    if ( strcmp( article, "IFM.PI2715" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PI2715;
+        return;
+        }
+    if ( strcmp( article, "IFM.PI2794" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PI2794;
+        return;
+        }
+    if ( strcmp( article, "IFM.PI2797" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PI2797;
+        return;
+        }
+
+    if ( strcmp( article, "IFM.PM1704" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PM1704;
+        return;
+        }
+    if ( strcmp( article, "IFM.PM1705" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PM1705;
+        return;
+        }
+    if ( strcmp( article, "IFM.PM1707" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PM1707;
+        return;
+        }
+    if ( strcmp( article, "IFM.PM1708" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PM1708;
+        return;
+        }
+    if ( strcmp( article, "IFM.PM1709" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PM1709;
+        return;
+        }
+    if ( strcmp( article, "IFM.PM1715" ) == 0 )
+        {
+        n_article = ARTICLE::IFM_PM1715;
+        return;
+        }
+
+    if ( G_DEBUG )
+        {
+        G_LOG->warning( "%s unknown article \"%s\"", 
+            dev->get_name(), article );
+        }
+    }
+//-----------------------------------------------------------------------------
+void pressure_e_iolink::evaluate_io( char* data, ARTICLE n_article,
+    float& v, int& st )
+    {
+    float alfa = 1;
+    float value = 0;
+    int status = 0;
+
+    switch ( n_article )
+        {
+        case ARTICLE::IFM_PI2715:
+        case ARTICLE::IFM_PI2794:
+        case ARTICLE::IFM_PI2797:
+            {
+            PT_data info;
+            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
+
+            value = info.v;
+            st = 0;
+            }
+            break;
+
+        case ARTICLE::IFM_PM1704:
+        case ARTICLE::IFM_PM1705:
+        case ARTICLE::IFM_PM1707:
+        case ARTICLE::IFM_PM1708:
+        case ARTICLE::IFM_PM1709:
+        case ARTICLE::IFM_PM1715:
+            {
+            ex_PT_data info;
+            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
+
+            v = info.v;
+            st = info.status;
+            }
+            break;
+
+        case ARTICLE::DEFAULT:
+            v = 0;
+            st = 0;
+            break;
+        }
+
+    switch ( n_article )
+        {
+        case ARTICLE::IFM_PM1708:       //  0.01, mbar
+            alfa = 0.00001f;
+            break;
+
+        case ARTICLE::IFM_PM1707:       //   0.1, mbar
+        case ARTICLE::IFM_PM1709:       //   0.1, mbar
+            alfa = 0.0001f;
+            break;
+
+        case ARTICLE::IFM_PI2715:       // 0.001, bar
+        case ARTICLE::IFM_PI2797:       //     1, mbar
+
+        case ARTICLE::IFM_PM1704:       // 0.001, bar
+        case ARTICLE::IFM_PM1705:       // 0.001, bar
+        case ARTICLE::IFM_PM1715:       // 0.001, bar
+            alfa = 0.001f;
+            break;
+
+        case ARTICLE::IFM_PI2794:       // 0.01, bar
+            alfa = 0.01f;
+            break;
+
+        case ARTICLE::DEFAULT:
+            alfa = 0;
+            break;
+        }
+
+    v = alfa * value;
+    st = status;
+    }
+//-----------------------------------------------------------------------------
+void pressure_e_iolink::evaluate_io()
+    {
+    evaluate_io( (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
@@ -3842,11 +3988,7 @@ float pressure_e_iolink::get_value()
         }
     else
         {
-        char* data = (char*)get_AI_data(C_AI_INDEX);
-        int tmp = data[1] + 256 * data[0];
-        info = (PT_data*)&tmp;
-
-        return 0.001f * info->v;
+        return v;
         }
     }
 //-----------------------------------------------------------------------------
@@ -3858,12 +4000,7 @@ int pressure_e_iolink::get_state()
         }
     else
         {
-        char* data = (char*)get_AI_data(C_AI_INDEX);
-
-        int tmp = data[1] + 256 * data[0];
-        info = (PT_data*)&tmp;
-
-        return info->st1;
+        return st;
         }
     }
 
@@ -3885,7 +4022,6 @@ concentration_e_iolink::concentration_e_iolink(const char* dev_name) :AI1(dev_na
     DT_QT, DST_QT_IOLINK, ADDITIONAL_PARAM_COUNT, 0),
     info( new QT_data )
     {
-    qt_e_iolink.push_back( this );
     };
 //-----------------------------------------------------------------------------
 int concentration_e_iolink::save_device_ex( char *buff )
@@ -3918,40 +4054,31 @@ int concentration_e_iolink::get_state()
 	}
 #endif
 //-----------------------------------------------------------------------------
-void concentration_e_iolink::evaluate()
+void concentration_e_iolink::evaluate_io()
     {
-    if ( qt_e_iolink.empty() == false )
-        {
-        std::vector< concentration_e_iolink* >::iterator iter;
-        for ( iter = qt_e_iolink.begin(); iter != qt_e_iolink.end(); iter++ )
-            {
-            concentration_e_iolink* qt = *iter;
+    char* data = (char*)get_AI_data(0);
 
-            char* data = (char*)qt->get_AI_data(0);
-
-            const int SIZE = 12;
-            std::reverse_copy (data, data + SIZE, (char*) qt->info);
+    const int SIZE = 12;
+    std::reverse_copy (data, data + SIZE, (char*) info);
 
 #ifdef DEBUG_IOLINK_QT
-            char *tmp = (char*) qt->info;
-            sprintf( G_LOG->msg, "%x %x %x %x %x %x %x %x %x %x %x %x\n",
-                tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ],
-                tmp[ 4 ], tmp[ 5 ], tmp[ 6 ], tmp[ 7 ],
-                tmp[ 8 ], tmp[ 9 ], tmp[ 10 ], tmp[ 11 ] );
-            G_LOG->write_log( i_log::P_WARNING );
+    char *tmp = (char*) info;
+    sprintf( G_LOG->msg, "%x %x %x %x %x %x %x %x %x %x %x %x\n",
+        tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ],
+        tmp[ 4 ], tmp[ 5 ], tmp[ 6 ], tmp[ 7 ],
+        tmp[ 8 ], tmp[ 9 ], tmp[ 10 ], tmp[ 11 ] );
+    G_LOG->write_log( i_log::P_WARNING );
 
-            sprintf( G_LOG->msg, "conductivity %u, temperature %u, "
-                    "status %x\n", qt->info->conductivity,
-                    qt->info->temperature, qt->info->status);
-            G_LOG->write_log(i_log::P_NOTICE);
+    sprintf( G_LOG->msg, "conductivity %u, temperature %u, "
+            "status %x\n", info->conductivity,
+            info->temperature, info->status);
+    G_LOG->write_log(i_log::P_NOTICE);
 
-            sprintf( G_LOG->msg,
-                    "conductivity %.3f, temperature %.1f, status %x\n",
-                    qt->get_value(), qt->get_temperature(), qt->get_state());
-            G_LOG->write_log(i_log::P_NOTICE);
+    sprintf( G_LOG->msg,
+            "conductivity %.3f, temperature %.1f, status %x\n",
+            get_value(), get_temperature(), get_state());
+    G_LOG->write_log(i_log::P_NOTICE);
 #endif
-            }
-        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
