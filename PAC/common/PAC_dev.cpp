@@ -3639,7 +3639,7 @@ void level_s_iolink::evaluate_io()
             {
             rev_LS_data info;
             std::reverse_copy( data, data + sizeof( info ), (char*) &info );
-            v = (float) info.v;
+            v = 0.1f *info.v;
             st = info.st1;
             break;
             }
@@ -3727,7 +3727,7 @@ int level_e_iolink::calc_volume()
     int v_kg = 0;
     float v = 0.0;
 #ifndef DEBUG_NO_IO_MODULES
-    v = this.v;
+    v = this->v;
 #else
     v = get_value();
 #endif
@@ -3735,7 +3735,7 @@ int level_e_iolink::calc_volume()
     if ( get_par( P_H_CONE, start_param_idx ) <= 0 )
         {
         float val = get_par( P_R, start_param_idx );
-        val = (float)M_PI * val * val * v / 9.81f;
+        val = (float)M_PI * val * val * v * 100 / 9.81f;
 
         v_kg = 10 * (int)( val * 100 + 0.5f ); //Переводим в килограммы.
         }
@@ -3749,7 +3749,7 @@ int level_e_iolink::calc_volume()
             }
 
         float h_cone = get_par( P_H_CONE, start_param_idx );
-        float h_curr = v / 9.81f;
+        float h_curr = 100 * v / 9.81f;
 
         float val = 0;
         if ( h_curr <= h_cone )
@@ -3787,7 +3787,7 @@ int level_e_iolink::get_state()
         }
     else
         {
-        st;
+        return st;
         }
     }
 #endif
@@ -3801,7 +3801,7 @@ void level_e_iolink::set_article( const char* new_article )
 void level_e_iolink::evaluate_io()
     {
     char* data = (char*)get_AI_data( C_AI_INDEX );
-    pressure_e_iolink::evaluate_io( data, n_article, v, st );
+    pressure_e_iolink::evaluate_io( get_name(), data, n_article, v, st );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -3898,13 +3898,9 @@ void pressure_e_iolink::read_article( const char* article,
         }
     }
 //-----------------------------------------------------------------------------
-void pressure_e_iolink::evaluate_io( char* data, ARTICLE n_article,
+void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_article,
     float& v, int& st )
     {
-    float alfa = 1;
-    float value = 0;
-    int status = 0;
-
     switch ( n_article )
         {
         case ARTICLE::IFM_PI2715:
@@ -3914,7 +3910,7 @@ void pressure_e_iolink::evaluate_io( char* data, ARTICLE n_article,
             PT_data info;
             std::reverse_copy( data, data + sizeof( info ), (char*)&info );
 
-            value = info.v;
+            v = info.v;
             st = 0;
             }
             break;
@@ -3927,7 +3923,10 @@ void pressure_e_iolink::evaluate_io( char* data, ARTICLE n_article,
         case ARTICLE::IFM_PM1715:
             {
             ex_PT_data info;
-            std::reverse_copy( data, data + sizeof( info ), (char*)&info );
+
+            std::swap( data[ 0 ], data[ 1 ] );
+            std::swap( data[ 2 ], data[ 3 ] );
+            std::copy( data, data + sizeof( info ), (char*)&info );
 
             v = info.v;
             st = info.status;
@@ -3940,6 +3939,7 @@ void pressure_e_iolink::evaluate_io( char* data, ARTICLE n_article,
             break;
         }
 
+    float alfa = 1;
     switch ( n_article )
         {
         case ARTICLE::IFM_PM1708:       //  0.01, mbar
@@ -3965,17 +3965,19 @@ void pressure_e_iolink::evaluate_io( char* data, ARTICLE n_article,
             break;
 
         case ARTICLE::DEFAULT:
-            alfa = 0;
+            alfa = 1;
             break;
         }
+    v = alfa * v;
 
-    v = alfa * value;
-    st = status;
+    //Debug print.
+    //G_LOG->debug("%s v=%f, st=%d, %d %d %d %d", name, v, st,
+    //    data[ 0 ], data[ 1 ], data[ 2 ], data[ 3 ] );
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::evaluate_io()
     {
-    evaluate_io( (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
+    evaluate_io( get_name(), (char*)get_AI_data( C_AI_INDEX ), n_article, v, st );
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES

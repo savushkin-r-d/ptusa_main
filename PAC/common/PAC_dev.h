@@ -2635,7 +2635,7 @@ class pressure_e_iolink : public AI1
             IFM_PI2797,
             };
 
-        static void evaluate_io( char* data, ARTICLE n_article, float& v,
+        static void evaluate_io( const char *name, char* data, ARTICLE n_article, float& v,
             int& st );
         static void read_article( const char* article, ARTICLE& n_article, 
             device* dev  );
@@ -2648,12 +2648,13 @@ class pressure_e_iolink : public AI1
             uint16_t st2 :1;
             int16_t  v   :14;
             };
+
         struct ex_PT_data
             {
             int16_t v;
-            int16_t reserved : 8;
-            uint16_t  status : 4;
             uint16_t  unused : 4;
+            uint16_t  status : 4;
+            int16_t reserved : 8;
             };
 
     private:
