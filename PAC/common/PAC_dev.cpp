@@ -3781,9 +3781,10 @@ float level_e_iolink::get_value()
 //-----------------------------------------------------------------------------
 int level_e_iolink::get_state()
     {
-    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+    IOLINKSTATE res = get_AI_IOLINK_state(C_AI_INDEX);
+    if (res != io_device::IOLINKSTATE::OK)
         {
-        return -1;
+        return -(int)res;
         }
     else
         {
@@ -3996,9 +3997,10 @@ float pressure_e_iolink::get_value()
 //-----------------------------------------------------------------------------
 int pressure_e_iolink::get_state()
     {
-    if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
+    IOLINKSTATE res = get_AI_IOLINK_state(C_AI_INDEX);
+    if (res != io_device::IOLINKSTATE::OK)
         {
-        return -1;
+        return -(int)res;
         }
     else
         {
