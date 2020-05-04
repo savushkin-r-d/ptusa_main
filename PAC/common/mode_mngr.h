@@ -300,6 +300,7 @@ class wash_action: public action
 /// закрываются).
 ///
 /// У операции может быть активным (выполняться) только один шаг.
+/// Также дополнительно можно включать 1 либо более шагов параллельно.
 class step
     {
     public:
@@ -363,6 +364,10 @@ class step
             return name.c_str();
             }
 
+        bool is_active() const
+            {
+            return active;
+            }
     private:
         std::vector< action* > actions; ///< Действия.
         action action_stub;             ///< Фиктивное действие.
@@ -372,6 +377,7 @@ class step
         std::string name; ///< Имя.
 
     private:
+        bool active;
         u_int_4 dx_time;                ///< Время шага, отработанное до паузы.
 
     public:
