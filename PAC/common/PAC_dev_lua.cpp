@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/21/20 09:33:26.
+** Generated automatically by tolua++-1.0.92 on 05/04/20 09:56:23.
 */
 
 #ifndef __cplusplus
@@ -4471,6 +4471,38 @@ static int tolua_PAC_dev_step_get_name00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'get_name'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: is_active of class  step */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_step_is_active00
+static int tolua_PAC_dev_step_is_active00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const step",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const step* self = (const step*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'is_active'", NULL);
+#endif
+  {
+   bool tolua_ret = (bool)  self->is_active();
+   tolua_pushboolean(tolua_S,(bool)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'is_active'.",&tolua_err);
  return 0;
 #endif
 }
@@ -12903,6 +12935,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"A_DI_DO",step::A_DI_DO);
    tolua_constant(tolua_S,"A_AI_AO",step::A_AI_AO);
    tolua_constant(tolua_S,"A_WASH",step::A_WASH);
+   tolua_function(tolua_S,"is_active",tolua_PAC_dev_step_is_active00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"action","action","",NULL);
   tolua_beginmodule(tolua_S,"action");

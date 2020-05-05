@@ -555,7 +555,8 @@ step::step( std::string name, operation_state *owner,
     start_time( 0 ),
     is_mode( is_mode ),
     name( name ),
-    dx_time( 0 )
+    dx_time( 0 ),
+    active( false )
     {
     actions.push_back( new on_action() );
     actions.push_back( new on_reverse_action() );
@@ -594,6 +595,7 @@ void step::init()
         {
         actions[ i ]->init();
         }
+    active = true;
     }
 //-----------------------------------------------------------------------------
 void step::evaluate() const
@@ -611,6 +613,7 @@ void step::final()
         actions[ i ]->final();
         }
     dx_time = 0;
+    active = false;
     }
 //-----------------------------------------------------------------------------
 u_int_4 step::get_eval_time() const
