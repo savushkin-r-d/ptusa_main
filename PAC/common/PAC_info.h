@@ -74,6 +74,12 @@ class PAC_info: public i_Lua_save_device
             return "SYSTEM";
             }
 
+        enum COMMANDS
+            {
+            REREAD_RESTRICTIONS = 100,
+            RESET_PARAMS,
+            };
+
     private:
         PAC_info();
 

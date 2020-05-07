@@ -160,18 +160,35 @@ void PAC_info::print() const
 int PAC_info::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( strcmp( prop, "CMD" ) == 0 )
-        {
-        if ( 100 == val )
+        {        
+        switch ((COMMANDS)(int)val)
             {
-            const int SCRIPT_N =
+            case REREAD_RESTRICTIONS:
+                {
+                if (G_DEBUG)
+                    {
+                    G_LOG->notice("Reread restrictions (remote monitor client command)");
+                    }
+                const int SCRIPT_N =
 #if defined RM_PAC
-                9;
+                    9;
 #else   
-                8;
+                    8;
 #endif // defined RM_PAC
 
-            cmd = G_LUA_MANAGER->reload_script( SCRIPT_N, "restrictions",
-                cmd_answer, sizeof( cmd_answer ) );
+                cmd = G_LUA_MANAGER->reload_script(SCRIPT_N, "restrictions",
+                    cmd_answer, sizeof(cmd_answer));
+                }
+                break;
+
+            case RESET_PARAMS:
+                if ( G_DEBUG )
+                    {
+                    G_LOG->notice( "Resetting params (remote monitor client command)" );
+                    }
+                params_manager::get_instance()->reset_params_size();
+                params_manager::get_instance()->final_init();
+                break;
             }
 
         return 0;
