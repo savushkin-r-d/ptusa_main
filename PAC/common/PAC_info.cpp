@@ -163,11 +163,11 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
         {        
         switch ((COMMANDS)(int)val)
             {
-            case REREAD_RESTRICTIONS:
+            case RELOAD_RESTRICTIONS:
                 {
                 if (G_DEBUG)
                     {
-                    G_LOG->notice("Reread restrictions (remote monitor client command)");
+                    G_LOG->notice("Reload restrictions (remote monitor client command).");
                     }
                 const int SCRIPT_N =
 #if defined RM_PAC
@@ -184,7 +184,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
             case RESET_PARAMS:
                 if ( G_DEBUG )
                     {
-                    G_LOG->notice( "Resetting params (remote monitor client command)" );
+                    G_LOG->notice( "Resetting params (remote monitor client command)." );
                     }
                 params_manager::get_instance()->reset_params_size();
                 params_manager::get_instance()->final_init();
