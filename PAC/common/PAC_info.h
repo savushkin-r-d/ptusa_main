@@ -76,7 +76,7 @@ class PAC_info: public i_Lua_save_device
 
         enum COMMANDS
             {
-            REREAD_RESTRICTIONS = 100,
+            RELOAD_RESTRICTIONS = 100,
             RESET_PARAMS,
             };
 

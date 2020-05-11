@@ -40,7 +40,7 @@ int check_file( const char* file_name, char* err_str )
     FILE *f = fopen( file_name, "r");
     if ( 0 == f )
         {
-        sprintf( err_str, "File \"%s\" not found!", file_name );
+        G_LOG->error( err_str, "File \"%s\" not found!", file_name );
         return -1;
         }
     int version = 0;
@@ -57,7 +57,7 @@ int check_file( const char* file_name, char* err_str )
 
     if ( G_DEBUG )
         {
-        printf( "%d %s\n", version, file_name );
+        G_LOG->notice( "File \"%s\" version %d.", file_name, version );
         }
 
     return version;
@@ -635,10 +635,7 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
     {
     res_str[ 0 ] = 0;
 
-    if ( G_DEBUG )
-        {
-        printf( "Start reload Lua script №%d.\n", script_n );
-        }
+    G_LOG->notice( "Start reload Lua script №%d.", script_n );
 
     if ( 0 == L )
         {
@@ -647,30 +644,26 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
 
     if ( script_n >= FILE_CNT )
         {
-        if ( G_DEBUG )
-            {
-            printf( "Reload Lua script error - script_n >= FILE_CNT (%d>=%d).\n",
-                script_n, FILE_CNT );
-            }
-
+        G_LOG->error( "Reload Lua script error - script_n >= FILE_CNT (%d>=%d).",
+            script_n, FILE_CNT );
         return 1;
         }
 
     //Проверка наличия и версии скрипта.
-    if ( G_DEBUG )
-        {
-        printf( "Проверка наличия и версии скрипта - " );
-        }
     char err_str[ 100 ] = "";
 
     int res = 0;
 
     char path[ 100 ];
-    sprintf( path, "%s", FILES[ script_n ] );
     if ( script_n < SYS_FILE_CNT )
         {
         sprintf( path, "%s%s", 
             G_PROJECT_MANAGER->sys_path.c_str(), FILES[ script_n ] );
+        }
+    else
+        {
+        sprintf(path, "%s%s",
+            G_PROJECT_MANAGER->path.c_str(), FILES[script_n]);
         }
 
     res = check_file( path, err_str );
@@ -680,7 +673,7 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
         res = check_file( FILES[ script_n ], err_str ); // .
         if ( -1 == res )
             {
-            printf( "%s\n", err_str );
+            G_LOG->error( "%s", err_str );
             strcpy( res_str, err_str );
             return 1;
             }
@@ -688,15 +681,13 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
 
     if ( FILES_VERSION[ script_n ] != res )
         {
-        sprintf( err_str, "file \"%s\" has version %d, must be %d "
-            "( consider updating \"main_PFC200\").",
+        sprintf( err_str, "File \"%s\" has version %d, must be %d "
+            "(consider updating program \"main\").",
             FILES[ script_n ], res, FILES_VERSION[ script_n ] );
-        printf( "%s", err_str );
+        G_LOG->error( "%s", err_str );
         strcpy( res_str, err_str );
         return 1;
         }
-
-    printf( "%s\n", "Ok." );
 
     ////Сохранение предыдущей функции скрипта. Оставлен шаблон, все работает
     // и так при ошибке в новой функции.
@@ -717,7 +708,7 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
         lua_pop( L, 1 );
         if ( luaL_dofile( L, FILES[ script_n ] ) != 0 )
             {
-            sprintf( G_LOG->msg, "\nReload Lua script - %s", lua_tostring( L, -1 ) );
+            sprintf( G_LOG->msg, "Reload Lua script - %s", lua_tostring( L, -1 ) );
             G_LOG->write_log( i_log::P_ERR );
 
             strncpy( res_str, G_LOG->msg + 1 /*не копируем первый \n*/,
@@ -739,10 +730,7 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
             }
         }
 
-   if ( G_DEBUG )
-        {
-        printf( "Reload Lua script \"%s\" - Ok.\n", path );
-        }
+    G_LOG->notice( "Reload Lua script \"%s\" - Ok.", path );
     return 0;
     }
 //-----------------------------------------------------------------------------
