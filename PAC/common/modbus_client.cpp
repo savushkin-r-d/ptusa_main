@@ -216,7 +216,7 @@ void modbus_client::zero_output_buff(int startpos /*= 13*/)
 
 void modbus_client::set_byte(int address, unsigned char value)
     {
-    if (address > (int)tcpclient->buff_size - 14 && address + 13 >= 0)
+    if (address > (int)tcpclient->buff_size - 14 || address + 13 < 0)
         {
         return;
         }
@@ -225,11 +225,11 @@ void modbus_client::set_byte(int address, unsigned char value)
 
 unsigned char modbus_client::get_byte(int address)
     {
-    if (address > (int)tcpclient->buff_size - 14 && address + 13 >= 0)
+    if (address > (int)tcpclient->buff_size - 10 || address + 9 < 0)
         {
         return 0;
         }
-    return (unsigned char)(tcpclient->buff[13 + address]);
+    return (unsigned char)(tcpclient->buff[9 + address]);
     }
 
 void modbus_client::set_int2( unsigned int address, int_2 value )
