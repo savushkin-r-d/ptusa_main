@@ -11,6 +11,8 @@ class modbus_client
         unsigned char stationid;
         unsigned int ormask;
         unsigned int andmask;
+        static const int write_buff_start = 13; //Начало буфера данных для операций записи
+        static const int read_buff_start = 9;  //Начало буфера данных для операций чтения
     public:
         modbus_client(unsigned int id, char* ip, unsigned int port = 502, unsigned long exchangetimeout = 50);
         int get_id();
@@ -36,7 +38,7 @@ class modbus_client
         int get_connected_state();
         void set_station(unsigned char new_station_id);
         //функции для работы с буфером из lua
-        void zero_output_buff(int startpos = 13);
+        void zero_output_buff(int startpos = write_buff_start);
         void set_byte(int address, unsigned char value);
         unsigned char get_byte(int address);
         void set_int2(unsigned int address, int_2 value);
