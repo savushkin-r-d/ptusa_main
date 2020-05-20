@@ -114,6 +114,7 @@ int operation::start()
             break;
 
         case PAUSE:
+            states[ PAUSE ]->final();
             states[ RUN ]->load();
 
             current_state = RUN;
