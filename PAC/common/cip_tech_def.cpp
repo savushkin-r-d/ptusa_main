@@ -768,8 +768,6 @@ void cipline_tech_object::initline()
         LKH = LS(6);
         LKL = LS(7);
 
-        sprintf(devname, "LINE%dLS%d", number, 1001);
-        LSRET = LS(devname);
 
         LTS = LT("LT1");
         LTK = LT("LT2");
@@ -853,13 +851,9 @@ void cipline_tech_object::initline()
         LKH = LS(6);
         LKL = LS(7);
 
-        sprintf(devname, "LINE%dLS%d", number, 1001);
-        LSRET = LS(devname);
-
         LTS = LT("LT1");
         LTK = LT("LT2");
         LTW = LT("LT3");
-
 
         sprintf(devname, "LINE%dTE%d", number, 1);
         TP = TE(devname);
@@ -2001,9 +1995,23 @@ int cipline_tech_object::SetRet( int val )
         return 0;
         }
 
+    int toset = val;
+
+    if (dev_ls_ret_pump > 0)
+        {
+        if (!dev_ls_ret_pump->is_active())
+            {
+            float rettimer = rt_par_float[P_RET_PUMP_SENSOR_DELAY];
+            if (get_delta_millisec(ret_pums_ls_timer) > rettimer)
+                {
+                toset = 0;
+                }
+            }
+        }
+
     if (dev_m_ret)
         {
-        if (val)
+        if (toset)
             {
             dev_m_ret->on();
             rt_par_float[P_RET_STATE] = ON;
@@ -2017,7 +2025,7 @@ int cipline_tech_object::SetRet( int val )
 
     if (dev_upr_ret)
         {
-        if (val)
+        if (toset)
             {
             dev_upr_ret->on();
             rt_par_float[P_RET_STATE] = ON;
@@ -2501,7 +2509,7 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
 {
     int i, pr_media;
     sort_delay = get_millisec();
-    timer_no_ret = get_millisec();
+    ret_pums_ls_timer = get_millisec();
     if (sort_delay > SORT_SWITCH_DELAY + 1)
         {
         sort_delay -= SORT_SWITCH_DELAY + 1;
@@ -2841,6 +2849,14 @@ int cipline_tech_object::_DoStep( int step_to_do )
             dev_upr_circulation->on(); else dev_upr_circulation->off();
         }
 
+    if (dev_ls_ret_pump)
+        {
+        if (dev_ls_ret_pump->is_active())
+            {
+            ret_pums_ls_timer = get_millisec();
+            }
+        }
+
     res=CheckErr();
     if (res!=0)
         {
@@ -3125,6 +3141,7 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
     dev_os_pump_can_run = 0;
     dev_ai_pump_feedback = 0;
     dev_ai_pump_frequency = 0;
+    dev_ls_ret_pump = 0;
     no_liquid_is_warning = 0;
     no_liquid_phase = 0;
     pidf_override = false;
@@ -4208,7 +4225,6 @@ int cipline_tech_object::_InitToObject( int from, int where, int step_to_init, i
 
     NP->on();
     nplaststate = true;
-    SetRet(ON);
 
     switch (step_to_init)
         {
@@ -4555,7 +4571,6 @@ int cipline_tech_object::_InitOporCIP( int where, int step_to_init, int not_firs
 
     NP->off();
     nplaststate = false;
-    SetRet(ON);
     rt_par_float[P_ZAD_PODOGR] = 0;
     PIDP->off();
     V13->off();
@@ -4843,6 +4858,10 @@ int cipline_tech_object::_ToObject( int from, int where )
             {
             SetRet(ON);
             }
+        }
+    else
+        {
+        SetRet(ON);
         }
 
 
@@ -5206,6 +5225,7 @@ int cipline_tech_object::_OporCIP( int where )
     if (isLine()) return 1;
     rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
     rt_par_float[P_SUM_OP] = cnt->get_quantity();
+    SetRet(ON);
 
     c=0;
     switch (where)
@@ -5253,20 +5273,16 @@ int cipline_tech_object::_OporCIP( int where )
             }
         }
 
-    //if (TECH_TYPE_CAR_WASH == tech_type)
-    //	{
-    //	if (LSRET->is_active())
-    //		{
-    //		timer_no_ret = get_millisec();
-    //		}
-    //	else
-    //		{
-    //		if (get_delta_millisec(timer_no_ret) > (rt_par_float[P_TM_RET_IS_EMPTY] * 1000L / 2))
-    //			{
-    //			return 1;
-    //			}
-    //		}
-    //	}
+    if (dev_ls_ret_pump)
+        {
+        if (!dev_ls_ret_pump->is_active())
+            {
+            if (get_delta_millisec(ret_pums_ls_timer) > (rt_par_float[P_TM_RET_IS_EMPTY] * 1000L))
+                {
+                return 1;
+                }
+            }
+        }
 
     if (FL->get_state() == FLIS)
         {
@@ -5300,6 +5316,10 @@ int cipline_tech_object::_OporCIP( int where )
 
 int cipline_tech_object::_FillCirc( int with_what )
     {
+    if (with_what == WITH_RETURN)
+        {
+        SetRet(ON);
+        }
     rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
     rt_par_float[P_SUM_OP] = cnt->get_quantity();
     if (LM->is_active()) cnt->start();
@@ -5459,6 +5479,7 @@ int cipline_tech_object::_Circ( int what )
 
 int cipline_tech_object::_OporCirc( int where )
     {
+    SetRet(ON);
     switch (where)
         {
         case KANAL:
@@ -6188,6 +6209,35 @@ int cipline_tech_object::init_object_devices()
     else
         {
         dev_os_pump_can_run = 0;
+        }
+    //Сигнал уровня перед возвратным насосом.
+    dev_no = (u_int)rt_par_float[P_SIGNAL_RET_PUMP_SENSOR];
+    if (dev_no > 0)
+        {
+        sprintf(devname, "LINE%dLS%d", nmr, dev_no);
+        dev = (device*)LS(devname);
+        if (dev->get_serial_n() > 0)
+            {
+            dev_ls_ret_pump = dev;
+            }
+        else
+            {
+            sprintf(devname, "LINE%dDI%d", nmr, dev_no);
+            dev = (device*)(DI(devname));
+            if (dev->get_serial_n() > 0)
+                {
+                dev_ls_ret_pump = dev;
+                }
+            else
+                {
+                dev_ls_ret_pump = 0;
+                return -1;
+                }
+            }
+        }
+    else
+        {
+        dev_ls_ret_pump = 0;
         }
     return 0;
     }
