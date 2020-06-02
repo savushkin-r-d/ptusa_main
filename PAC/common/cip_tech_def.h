@@ -349,9 +349,12 @@ enum workParameters
     P_SIGNAL_OBJECT_PAUSE,      //Сигнал in "Пауза"
     P_SIGNAL_CIRCULATION,       //Сигнал out циркуляция.
     P_SIGNAL_PUMP_CAN_RUN,      //Сигнал in "Возможно включение подающего насоса"
-    P_SIGNAL_PUMP_CONTROL_FEEDBACK,    //Сигнал in analog "Контролируемый уровень для насоса подачи"
-    P_SIGNAL_RET_PUMP_SENSOR,		//Сигнал датчика уровня для работы возвратного насоса
-    P_RET_PUMP_SENSOR_DELAY,        //Задержка выключения возвратного насоса при пропадании сигнала датчика уровня
+    P_SIGNAL_PUMP_CONTROL_FEEDBACK,     //Сигнал in analog "Контролируемый уровень для насоса подачи"
+    P_SIGNAL_RET_PUMP_SENSOR,		    //Сигнал датчика уровня для работы возвратного насоса
+    P_RET_PUMP_SENSOR_DELAY,            //Задержка выключения возвратного насоса при пропадании сигнала датчика уровня
+    P_SIGNAL_IN_CIP_READY,              //Сигнал in "Мойка идет"
+    P_SIGNAL_CIPEND2,                   //Сигнал "Мойка окончена 2"
+    P_SIGNAL_CAN_CONTINUE,              //Сигнал можно продолжать мойку для операций циркуляции и промывки
     P_RESERV_START,
     
 
@@ -508,6 +511,8 @@ class cipline_tech_object: public tech_object
     {
     protected:
         int ncmd;
+        bool is_reset; //Идет сброс программы мойки.
+        bool is_ready_to_end; //Операция должна закончиться но ожидает сигнала готовности от объекта
 
         unsigned int tech_type; //подтип объекта
         int ret_circ_flag; //флаг управления возвратным насосом при циркуляции
@@ -767,12 +772,15 @@ class cipline_tech_object: public tech_object
         device* dev_upr_cip_ready;			//Сигнал "готовность к мойке"
         device* dev_upr_cip_in_progress;	//Сигнал "готовность к мойке"
         device* dev_upr_cip_finished;		//Сигнал "мойка окончена"
+        device* dev_upr_cip_finished2;		//Сигнал "мойка окончена 2"
         device* dev_ai_pump_frequency;		//Задание частоты подающего насоса
         device* dev_ai_pump_feedback;		//Уровень для контроля подающего насоса
         device* dev_upr_sanitizer_pump;     //Управление насосом подачи дезинфицирующего средства
         device* dev_upr_circulation;        //Сигнал "Циркуляция"
         device* dev_os_pump_can_run;           //Сигнал, запрещающий включение подающего насоса.
         device* dev_ls_ret_pump;            //Сигнал уровня перед возвратным насосом
+        device* dev_os_cip_ready;           //Сигнал "мойка готова" от объекта
+        device* dev_os_can_continue;        //Сигнал "можно переходить на другой шаг" на операциях циркуляции и доп. ополаскиваниии
         int init_object_devices();			//Функция для инициализации устройств объекта мойки
         //----------------------------------------------
 
@@ -783,6 +791,7 @@ class cipline_tech_object: public tech_object
         int set_cmd( const char *prop, u_int idx, double val );
         int set_cmd( const char *prop, u_int idx, const char* val );
         int evaluate();
+        int init_params();
 
         ////-------------------
         virtual void RHI(void);

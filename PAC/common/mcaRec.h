@@ -124,6 +124,9 @@ class TRecipeManager
         RV_SIGNAL_PUMP_CONTROL_FEEDBACK,    //Сигнал in analog "Контролируемый уровень для насоса подачи"
         RV_SIGNAL_RET_PUMP_SENSOR,		//Сигнал датчика уровня для работы возвратного насоса
         RV_RET_PUMP_SENSOR_DELAY,        //Задержка выключения возвратного насоса при пропадании сигнала датчика уровня
+        RV_SIGNAL_IN_CIP_READY,          //Сигнал in "Мойка идет"
+        RV_SIGNAL_CIPEND2,               //Сигнал "Мойка окончена 2"
+        RV_SIGNAL_CAN_CONTINUE,          //Сигнал можно продолжать мойку для операций циркуляции и промывки
         RV_RESERV_START, //начало резервных параметров
 
         RV_WORKCENTER = 104,		//Номер рабочего центра объекта мойки
