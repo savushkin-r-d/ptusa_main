@@ -1850,8 +1850,6 @@ int cipline_tech_object::EvalBlock()
     ncmd = 0;
     state = -1000;
     StopDev();
-    NS->off();
-    NK->off();
     return 1;
     }
 
