@@ -346,6 +346,7 @@ void altivar_node::Evaluate()
 				PAC_critical_errors_manager::AC_NO_CONNECTION,
 				PAC_critical_errors_manager::AS_FC_ALTIVAR,
 				mc->get_id());
+			state = -100;
 			ismodbuserror = 1;
 			}
 		if (ar == tcp_client::ACS_CONNECTED && ismodbuserror)
