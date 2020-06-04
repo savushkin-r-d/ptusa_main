@@ -2742,6 +2742,7 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
             if (PIDF->HI==0) PIDF->off();
             ret_overrride = 0;
             SetRet(OFF);
+            StopDev();
             V11->on();
             //Смена среды
             if (dev_upr_medium_change)
