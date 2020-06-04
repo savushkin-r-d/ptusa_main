@@ -1,6 +1,6 @@
 /*
 ** Lua binding: IOT_dev
-** Generated automatically by tolua++-1.0.92 on 05/24/19 15:58:52.
+** Generated automatically by tolua++-1.0.92 on 06/04/20 17:52:40.
 */
 
 #ifndef __cplusplus
@@ -37,7 +37,8 @@ static int tolua_IOT_dev_altivar_manager_add_node00(lua_State* tolua_S)
      !tolua_isstring(tolua_S,2,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,5,&tolua_err)
+     !tolua_isstring(tolua_S,5,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,6,&tolua_err)
  )
   goto tolua_lerror;
  else
@@ -47,11 +48,12 @@ static int tolua_IOT_dev_altivar_manager_add_node00(lua_State* tolua_S)
   const char* IP_address = ((const char*)  tolua_tostring(tolua_S,2,0));
   unsigned int port = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
   unsigned int timeout = ((unsigned int)  tolua_tonumber(tolua_S,4,0));
+  const char* article = ((const char*)  tolua_tostring(tolua_S,5,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_node'", NULL);
 #endif
   {
-   self->add_node(IP_address,port,timeout);
+   self->add_node(IP_address,port,timeout,article);
   }
  }
  return 0;

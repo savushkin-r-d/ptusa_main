@@ -10,7 +10,7 @@ $#endif // WIN_OS
 class altivar_manager
 {
 public:
-	void add_node(const char* IP_address, unsigned int port, unsigned int timeout);
+	void add_node(const char* IP_address, unsigned int port, unsigned int timeout, const char* article);
 };
 
 altivar_manager* G_ALTIVAR_MANAGER();

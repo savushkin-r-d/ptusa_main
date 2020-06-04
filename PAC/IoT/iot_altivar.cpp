@@ -24,14 +24,21 @@ altivar_manager* altivar_manager::get_instance()
 	return instance;
 	}
 
-void altivar_manager::add_node(const char* IP_address, unsigned int port, unsigned int timeout)
+void altivar_manager::add_node(const char* IP_address, unsigned int port, unsigned int timeout, const char* article)
 	{
 	std::string nodeip = std::string(IP_address);
+	int type = altivar_node::TYPE_ATV320;
+	std::string nodearticle = std::string(article);
+	if (nodearticle.find("630") != std::string::npos)
+		{
+		type = altivar_node::TYPE_ATV630;
+		}
+
 	nodeip.append(":");
 	nodeip.append(std::to_string(port));
 	nodeip.append(" ");
 	nodeip.append(std::to_string(timeout));
-	altivar_node* new_node = new altivar_node(SOCKID_ALTIVAR + index, IP_address, port, timeout);
+	altivar_node* new_node = new altivar_node(SOCKID_ALTIVAR + index, IP_address, port, timeout, type);
 	nodes.insert(altivar_node_pair(nodeip, new_node));
 	num_nodes.insert(altivar_node_num_pair(index, new_node));
 	index++;
@@ -91,7 +98,8 @@ altivar_manager * G_ALTIVAR_MANAGER()
 	}
 
 
-altivar_node::altivar_node(unsigned int id, const char* ip, unsigned int port, unsigned long exchangetimeout)
+altivar_node::altivar_node(unsigned int id, const char* ip, unsigned int port, unsigned long exchangetimeout, int type) : 
+	type(type)
 	{
 	mc = new modbus_client(id, (char*)ip, port, exchangetimeout);
 	strcpy(ip_address, ip);
@@ -121,12 +129,13 @@ void altivar_node::Evaluate()
 	{
 #ifndef DEBUG_NO_IO_MODULES
 	int commres;
+	int start_addr;
 	if (enabled)
 		{
 		switch (querystep)
 			{
 			case RUN_STEP_CHECK_CONFIG:
-				if (configure)
+				if (configure && type == TYPE_ATV320)
 					{
 					configurestep = CFG_STEP_INIT_OUTPUTS;
 					querystep = RUN_STEP_CONFIG;
@@ -151,7 +160,7 @@ void altivar_node::Evaluate()
 						configurestep = CFG_STEP_SET_OUTPUTS;
 						break;
 					case CFG_STEP_SET_OUTPUTS:
-						if (mc->async_write_multiply_registers(15421, 6)) //Çàäàíèå ouputs äëÿ modbus-scanner
+						if (mc->async_write_multiply_registers(15421, 6)) //Configure ouputs for modbus-scanner
 							{
 							configurestep = CFG_STEP_INIT_INPUTS;
 							}
@@ -169,7 +178,7 @@ void altivar_node::Evaluate()
 						configurestep = CFG_STEP_SET_INPUTS;
 						break;
 					case CFG_STEP_SET_INPUTS:
-						if (mc->async_write_multiply_registers(15401, 6)) //Çàäàíèå inputs äëÿ modbus-scanner
+						if (mc->async_write_multiply_registers(15401, 6)) //Configure inputs for modbus-scanner
 							{
 							configurestep = CFG_STEP_INIT_IOSCANNER;
 							}
@@ -182,7 +191,7 @@ void altivar_node::Evaluate()
 						configurestep = CFG_STEP_SET_IOSCANNER;
 						break;
 					case CFG_STEP_SET_IOSCANNER:
-						if (mc->async_write_multiply_registers(64239, 1)) //Âêëþ÷àåì IO scanner
+						if (mc->async_write_multiply_registers(64239, 1)) //Enable IO scanner
 							{
 							configurestep = CFG_STEP_INIT_IOPROFILE;
 							}
@@ -195,7 +204,7 @@ void altivar_node::Evaluate()
 						configurestep = CFG_STEP_SET_IOPROFILE;
 						break;
 					case CFG_STEP_SET_IOPROFILE:
-						if (mc->async_write_multiply_registers(8401, 1)) //Çàäàåì ìåòîä óïðàâëåíèÿ ÷åðåç IO-profile
+						if (mc->async_write_multiply_registers(8401, 1)) //Setting IO-profile
 							{
 							configurestep = CFG_STEP_INIT_REF1;
 							}
@@ -208,7 +217,7 @@ void altivar_node::Evaluate()
 						configurestep = CFG_STEP_SET_REF1;
 						break;
 					case CFG_STEP_SET_REF1:
-						if (mc->async_write_multiply_registers(8413, 1)) //Çàäàåì êàíàë óïðàâëåíèÿ ÷àñòîòîé ÷åðåç modbus
+						if (mc->async_write_multiply_registers(8413, 1)) //Control frequency via modbus
 							{
 							configurestep = CFG_STEP_INIT_CMD1;
 							}
@@ -221,7 +230,7 @@ void altivar_node::Evaluate()
 						configurestep = CFG_STEP_SET_CMD1;
 						break;
 					case CFG_STEP_SET_CMD1:
-						if (mc->async_write_multiply_registers(8423, 1)) //Çàäàåì êàíàë êîìàíä ÷åðåç modbus
+						if (mc->async_write_multiply_registers(8423, 1)) //Command channel via modbus
 							{
 							configurestep = CFG_STEP_INIT_FAULTRESET;
 							}
@@ -230,13 +239,13 @@ void altivar_node::Evaluate()
 					case CFG_STEP_INIT_FAULTRESET:
 						mc->zero_output_buff();
 						mc->set_station(0);
-						mc->set_int2(0, 1);		//Âêëþ÷àåì automatic restart
+						mc->set_int2(0, 1);		//Enable automatic restart
 						mc->set_int2(1, 0);		//automatic restart timeout
-						mc->set_int2(2, 210);	//Áèíäèì ñáðîñ îøèáêè íà 2 áèò óïðàâëÿþùåãî ñëîâà CMD.
+						mc->set_int2(2, 210);	//Bind error reset to 2 bit of CMD word.
 						configurestep = CFG_STEP_SET_FAULTRESET;
 						break;
 					case CFG_STEP_SET_FAULTRESET:
-						if (mc->async_write_multiply_registers(7122, 3)) //Çàäàåì ïàðàìåòðû fault reset.
+						if (mc->async_write_multiply_registers(7122, 3)) //Configure fault reset.
 							{
 							configurestep = CFG_STEP_INIT_SAVESETTINGS;
 							}
@@ -249,7 +258,7 @@ void altivar_node::Evaluate()
 						configurestep = CFG_STEP_SET_SAVESETTINGS;
 						break;
 					case CFG_STEP_SET_SAVESETTINGS:
-						if (mc->async_write_multiply_registers(8001, 1)) //Ñîõðàíÿåì íàñòðîéêè êàê Profile1
+						if (mc->async_write_multiply_registers(8001, 1)) //Save settings as Profile1
 							{
 							configurestep = CFG_STEP_END;
 							}
@@ -276,7 +285,9 @@ void altivar_node::Evaluate()
 				querystep = RUN_STEP_QUERY_IOSCANNER;
 				break;
 			case RUN_STEP_QUERY_IOSCANNER:
-				commres = mc->async_read_write_multiply_registers(1, 6, 1, 6);
+				start_addr = 1;
+				if (type == TYPE_ATV630) start_addr = 0;
+				commres = mc->async_read_write_multiply_registers(start_addr, 6, start_addr, 6);
 				if (commres == 1)
 					{
 					remote_state = mc->get_int2(0);
