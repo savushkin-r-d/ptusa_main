@@ -64,8 +64,8 @@ void PAC_info::eval()
 //-----------------------------------------------------------------------------
 void PAC_info::reset_params()
     {
-    par[ P_MIX_FLIP_PERIOD ] = 60;
-    par[ P_MIX_FLIP_UPPER_TIME ] = 1000;
+    par[ P_MIX_FLIP_PERIOD ] = 180;
+    par[ P_MIX_FLIP_UPPER_TIME ] = 2000;
     par[ P_MIX_FLIP_LOWER_TIME ] = 1000;
     par[ P_V_OFF_DELAY_TIME ] = 1000;
     par[ P_V_BOTTOM_OFF_DELAY_TIME ] = 1200;
