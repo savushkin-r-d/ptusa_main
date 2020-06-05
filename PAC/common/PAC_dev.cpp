@@ -4792,7 +4792,7 @@ void motor_altivar::direct_set_state(int new_state)
 #ifdef DEBUG_NO_IO_MODULES
         state = 2;
 #else
-        atv->cmd = 3;
+        atv->cmd = 2;
         atv->reverse = 1;
 #endif // DEBUG_NO_IO_MODULES
         return;
