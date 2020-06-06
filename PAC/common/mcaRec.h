@@ -127,6 +127,7 @@ class TRecipeManager
         RV_SIGNAL_IN_CIP_READY,          //Сигнал in "Мойка идет"
         RV_SIGNAL_CIPEND2,               //Сигнал "Мойка окончена 2"
         RV_SIGNAL_CAN_CONTINUE,          //Сигнал можно продолжать мойку для операций циркуляции и промывки
+        RV_SIGNAL_WATER,                 //Сигнал "вода в трубе"
         RV_RESERV_START, //начало резервных параметров
 
         RV_WORKCENTER = 104,		//Номер рабочего центра объекта мойки

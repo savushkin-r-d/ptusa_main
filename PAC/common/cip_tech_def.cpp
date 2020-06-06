@@ -167,6 +167,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     dev_upr_medium_change = 0;
     dev_upr_caustic = 0;
     dev_upr_acid = 0;
+    dev_upr_water = 0;
     dev_upr_desinfection = 0;
     dev_upr_cip_ready = 0;
     dev_upr_cip_finished = 0;
@@ -1884,6 +1885,10 @@ void cipline_tech_object::_StopDev( void )
         {
         dev_upr_acid->off();
         }
+    if (dev_upr_water)
+        {
+        dev_upr_water->off();
+        }
     if (dev_upr_caustic)
         {
         dev_upr_caustic->off();
@@ -2872,14 +2877,26 @@ int cipline_tech_object::EvalCipInProgress()
 int cipline_tech_object::_DoStep( int step_to_do )
 {
     int res, pr_media;
+    bool is_caustic = false;
+    bool is_acid = false;
+    bool is_water = false;
+
+    if (step_to_do >= 24 && step_to_do <= 33) is_caustic = true;
+    if (step_to_do >= 44 && step_to_do <= 53) is_acid = true;
+
+    if (step_to_do > 5 && !is_acid && !is_caustic) is_water = true;
 
     if (dev_upr_caustic)
         {
-        if (step_to_do >= 24 && step_to_do <=33) dev_upr_caustic->on(); else dev_upr_caustic->off();
+        if (is_caustic) dev_upr_caustic->on(); else dev_upr_caustic->off();
         }
     if (dev_upr_acid)
         {
-        if (step_to_do >= 44 && step_to_do <=53) dev_upr_acid->on(); else dev_upr_acid->off();
+        if (is_acid) dev_upr_acid->on(); else dev_upr_acid->off();
+        }
+    if (dev_upr_water)
+        {
+        if (is_water) dev_upr_water->on(); else dev_upr_water->off();
         }
     if (dev_upr_desinfection)
         {
@@ -3153,6 +3170,10 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
         {
         dev_upr_acid->off();
         }
+    if (dev_upr_water)
+        {
+        dev_upr_water->off();
+        }
     if (dev_upr_circulation)
         {
         dev_upr_circulation->off();
@@ -3199,6 +3220,7 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
     dev_upr_medium_change = 0;
     dev_upr_caustic = 0;
     dev_upr_acid = 0;
+    dev_upr_water = 0;
     dev_upr_desinfection = 0;
     dev_upr_cip_ready = 0;
     dev_upr_cip_finished = 0;
@@ -6150,6 +6172,42 @@ int cipline_tech_object::init_object_devices()
     else
         {
         dev_upr_acid = 0;
+        }
+    //Вода в трубе
+    dev_no = (u_int)rt_par_float[P_SIGNAL_WATER];
+    if (dev_no > 0)
+        {
+        sprintf(devname, "LINE%dDO%d", nmr, dev_no);
+        dev = (device*)DO(devname);
+        if (dev->get_serial_n() > 0)
+            {
+            dev_upr_water = dev;
+            }
+        else
+            {
+            dev = (device*)(DO(dev_no));
+            if (dev->get_serial_n() > 0)
+                {
+                dev_upr_water = dev;
+                }
+            else
+                {
+                dev = DEVICE(dev_no);
+                if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DO)
+                    {
+                    dev_upr_water = dev;
+                    }
+                else
+                    {
+                    dev_upr_water = 0;
+                    return -1;
+                    }
+                }
+            }
+        }
+    else
+        {
+        dev_upr_water = 0;
         }
     //Дезинфекция
     dev_no = (u_int)rt_par_float[P_SIGNAL_DESINSECTION];

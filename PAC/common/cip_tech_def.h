@@ -355,6 +355,7 @@ enum workParameters
     P_SIGNAL_IN_CIP_READY,              //Сигнал in "Мойка идет"
     P_SIGNAL_CIPEND2,                   //Сигнал "Мойка окончена 2"
     P_SIGNAL_CAN_CONTINUE,              //Сигнал можно продолжать мойку для операций циркуляции и промывки
+    P_SIGNAL_WATER,                     //Сигнал вода в трубе
     P_RESERV_START,
     
 
@@ -768,6 +769,7 @@ class cipline_tech_object: public tech_object
         device* dev_upr_medium_change;		//Сигнал "смена среды"
         device* dev_upr_caustic;			//Сигнал "щелочь"
         device* dev_upr_acid;				//Сигнал "кислота"
+        device* dev_upr_water;              //Сигнал "вода в трубе"
         device* dev_upr_desinfection;		//Сигнал "дезинфекция"
         device* dev_upr_cip_ready;			//Сигнал "готовность к мойке"
         device* dev_upr_cip_in_progress;	//Сигнал "готовность к мойке"
