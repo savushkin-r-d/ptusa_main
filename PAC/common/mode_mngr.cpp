@@ -1232,7 +1232,7 @@ void wash_action::evaluate()
     for ( u_int i = 0; i < devices[ G_REV_DEV ].size(); i++ )
         {
         devices[ G_REV_DEV ][ i ]->set_state( new_state > 0 ? 2 : 0 );
-        if ( new_val != -1 && devices[ G_DEV ][ i ]->get_type() == device::DT_M )
+        if ( new_val != -1 && devices[ G_REV_DEV ][ i ]->get_type() == device::DT_M )
             {
             devices[ G_REV_DEV ][ i ]->set_value( new_state > 0 ? new_val : 0 );
             }
@@ -1366,6 +1366,7 @@ step* operation_state::add_step( const char* name, int next_step_n,
     u_int step_duration_par_n )
     {
     steps.push_back( new step( name, this ) );
+    steps[ steps.size() - 1 ][ 0 ][ step::A_WASH ]->set_params(owner->get_params());
 
     next_step_ns.push_back( next_step_n );
     step_duration_par_ns.push_back( step_duration_par_n );
