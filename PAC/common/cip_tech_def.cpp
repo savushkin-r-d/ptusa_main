@@ -3074,6 +3074,8 @@ int cipline_tech_object::_DoStep( int step_to_do )
                     }
                 }
 
+            if (is_reset) can_end = true;
+
             if (get_delta_millisec(enddelayTimer) > WASH_END_DELAY && can_end)
                 {
                 strcpy(objectstats->objlastwashprogram, currentProgramName);
