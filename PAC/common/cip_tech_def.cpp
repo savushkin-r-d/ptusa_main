@@ -462,7 +462,6 @@ int cipline_tech_object::set_cmd( const char *prop, u_int idx, double val )
 
     if ( strcmp( prop, "PAR_MAIN" ) == 0 )
         {
-        printf("-------------------Set par main %d to %f\n\r", idx, (float)val);
         if (idx == P_CAUSTIC_SELECTED)
         {
             causticLoadedRecipe = -1;
