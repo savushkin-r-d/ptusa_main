@@ -9,7 +9,7 @@ class modbus_client;
 class altivar_node: public i_iot_node
 	{
 	public:
-		altivar_node(unsigned int id, const char* ip, unsigned int port, unsigned long exchangetimeout);
+		altivar_node(unsigned int id, const char* ip, unsigned int port, unsigned long exchangetimeout, int type);
 		~altivar_node();
 		void Evaluate();
 		void Enable();
@@ -58,9 +58,16 @@ class altivar_node: public i_iot_node
 			RUN_STEP_END = 99,
 			};
 
+		enum TYPES
+			{
+			TYPE_ATV320 = 320,
+			TYPE_ATV630 = 630,
+			};
+
 	protected:
 		modbus_client* mc;
 		bool configure;
+		int type;
 		int querystep;
 		int configurestep;
 		unsigned long querytimer;
@@ -82,7 +89,7 @@ class altivar_manager
 
 		/// @brief ��������� ������������� ���������� ������.
 		static altivar_manager* get_instance();
-		void add_node(const char* IP_address, unsigned int port, unsigned int timeout);
+		void add_node(const char* IP_address, unsigned int port, unsigned int timeout, const char* article);
 		altivar_node* get_node(const char* IP_address);
 		altivar_node* get_node(unsigned int id);
 		void evaluate();

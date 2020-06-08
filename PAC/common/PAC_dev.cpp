@@ -4792,7 +4792,7 @@ void motor_altivar::direct_set_state(int new_state)
 #ifdef DEBUG_NO_IO_MODULES
         state = 2;
 #else
-        atv->cmd = 3;
+        atv->cmd = 2;
         atv->reverse = 1;
 #endif // DEBUG_NO_IO_MODULES
         return;
@@ -4882,7 +4882,7 @@ void motor_altivar::set_string_property(const char * field, const char * value)
             atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
             if (!atv)
                 {
-                G_ALTIVAR_MANAGER()->add_node(value, port, timeout);
+                G_ALTIVAR_MANAGER()->add_node(value, port, timeout, article);
                 atv = G_ALTIVAR_MANAGER()->get_node(nodeip.c_str());
                 }
             }
