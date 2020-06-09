@@ -3715,7 +3715,8 @@ bool level_s_iolink::is_active()
 //-----------------------------------------------------------------------------
 level_e_iolink::level_e_iolink( const char *dev_name ) :
     level( dev_name, DST_LT_IOLINK, LAST_PARAM_IDX - 1, &start_param_idx ),
-    n_article( pressure_e_iolink::ARTICLE::DEFAULT ), v( 0 ), st( 0 )
+    n_article( pressure_e_iolink::ARTICLE::DEFAULT ), v( 0 ), st( 0 ),
+    PT_extra( 0 )
     {
     set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
     set_par_name( P_R, start_param_idx, "P_R" );
@@ -3731,6 +3732,11 @@ int level_e_iolink::calc_volume()
 #else
     v = get_value();
 #endif
+
+    if (PT_extra)
+        {
+        v -= PT_extra->get_value();
+        }
 
     if ( get_par( P_H_CONE, start_param_idx ) <= 0 )
         {
@@ -3803,6 +3809,14 @@ void level_e_iolink::evaluate_io()
     {
     char* data = (char*)get_AI_data( C_AI_INDEX );
     pressure_e_iolink::evaluate_io( get_name(), data, n_article, v, st );
+    }
+
+void level_e_iolink::set_string_property(const char* field, const char* value)
+    {
+    if (strcmp(field, "PT") == 0)
+        {
+        PT_extra = PT(value);
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
