@@ -103,6 +103,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
         {
         SAV[i]=new TSav;
         }
+    is_reset = false;
     no_acid_wash_max = 0;
     pidf_override = false;
     nplaststate = false;
@@ -161,13 +162,16 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     dev_m_ret = 0;
     dev_os_object = 0;
     dev_os_object_ready = 0;
+    dev_os_cip_ready = 0;
     dev_os_object_empty = 0;
     dev_upr_medium_change = 0;
     dev_upr_caustic = 0;
     dev_upr_acid = 0;
+    dev_upr_water = 0;
     dev_upr_desinfection = 0;
     dev_upr_cip_ready = 0;
     dev_upr_cip_finished = 0;
+    dev_upr_cip_finished2 = 0;
     dev_upr_cip_in_progress = 0;
     dev_ai_pump_frequency = 0;
     dev_ai_pump_feedback = 0;
@@ -175,6 +179,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     dev_os_object_pause = 0;
     dev_upr_circulation = 0;
     dev_os_pump_can_run = 0;
+    dev_os_can_continue = 0;
 
     pumpflag = 0;
     pumptimer = get_millisec();
@@ -709,6 +714,38 @@ int cipline_tech_object::evaluate()
     return 0;
     }
 
+int cipline_tech_object::init_params()
+    {
+    tech_object::init_params();
+    rt_par_float[P_R_NO_FLOW] = 2;
+    rt_par_float[P_TM_R_NO_FLOW] = 20;
+    rt_par_float[P_TM_NO_FLOW_R] = 20;
+    rt_par_float[P_TM_NO_CONC] = 20;
+    rt_par_float[PIDP_Z] = 95;
+    rt_par_float[PIDP_k] = 2;
+    rt_par_float[PIDP_Ti] = 30;
+    rt_par_float[PIDP_Td] = (float)0.2;
+    rt_par_float[PIDP_dt] = 500;
+    rt_par_float[PIDP_dmax] = 130;
+    rt_par_float[PIDP_dmin] = 0;
+    rt_par_float[PIDP_AccelTime] = 30;
+    rt_par_float[PIDP_IsManualMode] = 0;
+    rt_par_float[PIDP_UManual] = 30;
+    rt_par_float[PIDP_Uk] = 0;
+    rt_par_float[PIDF_Z] = 15;
+    rt_par_float[PIDF_k] = (float)0.5;
+    rt_par_float[PIDF_Ti] = 10;
+    rt_par_float[PIDF_Td] = (float)0.1;
+    rt_par_float[PIDF_dt] = 1000;
+    rt_par_float[PIDF_dmax] = 40;
+    rt_par_float[PIDF_dmin] = 0;
+    rt_par_float[PIDF_AccelTime] = 2;
+    rt_par_float[PIDF_IsManualMode] = 0;
+    rt_par_float[PIDF_UManual] = 15;
+    rt_par_float[PIDF_Uk] = 0;
+    return 0;
+    }
+
 void cipline_tech_object::initline()
     {
     is_old_definition = 1;
@@ -768,8 +805,6 @@ void cipline_tech_object::initline()
         LKH = LS(6);
         LKL = LS(7);
 
-        sprintf(devname, "LINE%dLS%d", number, 1001);
-        LSRET = LS(devname);
 
         LTS = LT("LT1");
         LTK = LT("LT2");
@@ -853,13 +888,9 @@ void cipline_tech_object::initline()
         LKH = LS(6);
         LKL = LS(7);
 
-        sprintf(devname, "LINE%dLS%d", number, 1001);
-        LSRET = LS(devname);
-
         LTS = LT("LT1");
         LTK = LT("LT2");
         LTW = LT("LT3");
-
 
         sprintf(devname, "LINE%dTE%d", number, 1);
         TP = TE(devname);
@@ -1819,8 +1850,6 @@ int cipline_tech_object::EvalBlock()
     ncmd = 0;
     state = -1000;
     StopDev();
-    NS->off();
-    NK->off();
     return 1;
     }
 
@@ -1854,6 +1883,10 @@ void cipline_tech_object::_StopDev( void )
     if (dev_upr_acid)
         {
         dev_upr_acid->off();
+        }
+    if (dev_upr_water)
+        {
+        dev_upr_water->off();
         }
     if (dev_upr_caustic)
         {
@@ -2001,9 +2034,23 @@ int cipline_tech_object::SetRet( int val )
         return 0;
         }
 
+    int toset = val;
+
+    if (dev_ls_ret_pump > 0)
+        {
+        if (!dev_ls_ret_pump->is_active())
+            {
+            float rettimer = rt_par_float[P_RET_PUMP_SENSOR_DELAY];
+            if (get_delta_millisec(ret_pums_ls_timer) > rettimer)
+                {
+                toset = 0;
+                }
+            }
+        }
+
     if (dev_m_ret)
         {
-        if (val)
+        if (toset)
             {
             dev_m_ret->on();
             rt_par_float[P_RET_STATE] = ON;
@@ -2017,7 +2064,7 @@ int cipline_tech_object::SetRet( int val )
 
     if (dev_upr_ret)
         {
-        if (val)
+        if (toset)
             {
             dev_upr_ret->on();
             rt_par_float[P_RET_STATE] = ON;
@@ -2061,6 +2108,7 @@ int cipline_tech_object::EvalCommands()
                 rt_par_float[STP_RESETSTEP] = curstep; //шаг, на котором было сброшено
                 Stop(curstep);
                 curstep = 555;
+                is_reset = true;
                 InitStep(curstep, 0);
                 state = 1;
                 }
@@ -2501,7 +2549,7 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
 {
     int i, pr_media;
     sort_delay = get_millisec();
-    timer_no_ret = get_millisec();
+    ret_pums_ls_timer = get_millisec();
     if (sort_delay > SORT_SWITCH_DELAY + 1)
         {
         sort_delay -= SORT_SWITCH_DELAY + 1;
@@ -2539,6 +2587,7 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
             {
             SAV[i]->R();
             }
+        is_ready_to_end = false;
         }
 
     pr_media=WATER;
@@ -2697,6 +2746,8 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
             if (PIDF->HI==0) PIDF->off();
             ret_overrride = 0;
             SetRet(OFF);
+            StopDev();
+            V11->on();
             //Смена среды
             if (dev_upr_medium_change)
                 {
@@ -2705,6 +2756,10 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
             if (dev_upr_cip_finished)
                 {
                 dev_upr_cip_finished->on();
+                }
+            if (dev_upr_cip_finished2)
+                {
+                dev_upr_cip_finished2->on();
                 }
             enddelayTimer = get_millisec();
             return 0;
@@ -2821,14 +2876,26 @@ int cipline_tech_object::EvalCipInProgress()
 int cipline_tech_object::_DoStep( int step_to_do )
 {
     int res, pr_media;
+    bool is_caustic = false;
+    bool is_acid = false;
+    bool is_water = false;
+
+    if (step_to_do >= 24 && step_to_do <= 33) is_caustic = true;
+    if (step_to_do >= 44 && step_to_do <= 53) is_acid = true;
+
+    if (step_to_do > 5 && !is_acid && !is_caustic) is_water = true;
 
     if (dev_upr_caustic)
         {
-        if (step_to_do >= 24 && step_to_do <=33) dev_upr_caustic->on(); else dev_upr_caustic->off();
+        if (is_caustic) dev_upr_caustic->on(); else dev_upr_caustic->off();
         }
     if (dev_upr_acid)
         {
-        if (step_to_do >= 44 && step_to_do <=53) dev_upr_acid->on(); else dev_upr_acid->off();
+        if (is_acid) dev_upr_acid->on(); else dev_upr_acid->off();
+        }
+    if (dev_upr_water)
+        {
+        if (is_water) dev_upr_water->on(); else dev_upr_water->off();
         }
     if (dev_upr_desinfection)
         {
@@ -2839,6 +2906,14 @@ int cipline_tech_object::_DoStep( int step_to_do )
         if (step_to_do == 28 || step_to_do == 48 || step_to_do == 66 || step_to_do == 77 ||
             step_to_do == 8 || step_to_do == 37 || step_to_do == 57 || step_to_do == 86) 
             dev_upr_circulation->on(); else dev_upr_circulation->off();
+        }
+
+    if (dev_ls_ret_pump)
+        {
+        if (dev_ls_ret_pump->is_active())
+            {
+            ret_pums_ls_timer = get_millisec();
+            }
         }
 
     res=CheckErr();
@@ -2990,7 +3065,18 @@ int cipline_tech_object::_DoStep( int step_to_do )
         case 300: return EvalCustomStep(WATER, WATER, KANAL, 0);
 
         case 555:
-            if (get_delta_millisec(enddelayTimer) > WASH_END_DELAY)
+            bool can_end = true;
+            if (dev_os_cip_ready && (dev_upr_cip_finished || dev_upr_cip_finished2))
+                {
+                if (dev_os_cip_ready->get_state() == ON)
+                    {
+                    can_end = false;
+                    }
+                }
+
+            if (is_reset) can_end = true;
+
+            if (get_delta_millisec(enddelayTimer) > WASH_END_DELAY && can_end)
                 {
                 strcpy(objectstats->objlastwashprogram, currentProgramName);
                 DateToChar(objectstats->objlastwash);
@@ -3028,6 +3114,14 @@ int cipline_tech_object::_DoStep( int step_to_do )
             if (dev_os_object_ready)
                 {
                 if (dev_os_object_ready->get_state() == OFF)
+                    {
+                    objready = 0;
+                    }
+                }
+
+            if (dev_os_cip_ready)
+                {
+                if (dev_os_cip_ready->get_state() == OFF)
                     {
                     objready = 0;
                     }
@@ -3077,6 +3171,10 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
         {
         dev_upr_acid->off();
         }
+    if (dev_upr_water)
+        {
+        dev_upr_water->off();
+        }
     if (dev_upr_circulation)
         {
         dev_upr_circulation->off();
@@ -3088,6 +3186,10 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
     if (dev_upr_cip_finished)
         {
         dev_upr_cip_finished->off();
+        }
+    if (dev_upr_cip_finished2)
+        {
+        dev_upr_cip_finished2->off();
         }
     if (dev_upr_cip_in_progress)
         {
@@ -3114,17 +3216,22 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
     dev_os_object = 0;
     dev_os_object_pause = 0;
     dev_os_object_ready = 0;
+    dev_os_cip_ready = 0;
     dev_os_object_empty = 0;
     dev_upr_medium_change = 0;
     dev_upr_caustic = 0;
     dev_upr_acid = 0;
+    dev_upr_water = 0;
     dev_upr_desinfection = 0;
     dev_upr_cip_ready = 0;
     dev_upr_cip_finished = 0;
+    dev_upr_cip_finished2 = 0;
     dev_upr_sanitizer_pump = 0;
     dev_os_pump_can_run = 0;
     dev_ai_pump_feedback = 0;
     dev_ai_pump_frequency = 0;
+    dev_ls_ret_pump = 0;
+    dev_os_can_continue = 0;
     no_liquid_is_warning = 0;
     no_liquid_phase = 0;
     pidf_override = false;
@@ -3147,6 +3254,7 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
                 Mdls[tmpline]->resetProgramList();
             }
         }
+    is_reset = false;
     }
 
 int cipline_tech_object::SetCommand( int command )
@@ -3325,7 +3433,14 @@ int cipline_tech_object::_CheckErr( void )
         {
         if (!dev_os_object_ready->get_state())
             {
-            return ERR_OS;
+            return ERR_CIP_OBJECT;
+            }
+        }
+    if (dev_os_cip_ready)
+        {
+        if (!dev_os_cip_ready->get_state())
+            {
+            return ERR_CIP_OBJECT;
             }
         }
 
@@ -4208,7 +4323,6 @@ int cipline_tech_object::_InitToObject( int from, int where, int step_to_init, i
 
     NP->on();
     nplaststate = true;
-    SetRet(ON);
 
     switch (step_to_init)
         {
@@ -4555,7 +4669,6 @@ int cipline_tech_object::_InitOporCIP( int where, int step_to_init, int not_firs
 
     NP->off();
     nplaststate = false;
-    SetRet(ON);
     rt_par_float[P_ZAD_PODOGR] = 0;
     PIDP->off();
     V13->off();
@@ -4844,6 +4957,10 @@ int cipline_tech_object::_ToObject( int from, int where )
             SetRet(ON);
             }
         }
+    else
+        {
+        SetRet(ON);
+        }
 
 
     switch (from)
@@ -4964,6 +5081,18 @@ int cipline_tech_object::_ToObject( int from, int where )
             break;
         }
 
+    rt_par_float[P_CONC] = c;
+
+    if (curstep == 8 || curstep == 37 || curstep == 57 || curstep == 86)
+        {
+        if (dev_os_can_continue)
+            {
+            if (dev_os_can_continue->get_state() == OFF)
+                {
+                return 0;
+                }
+            }
+        }
 
     if (cnt->get_quantity() >= rt_par_float[P_VRAB])
         {
@@ -4975,7 +5104,7 @@ int cipline_tech_object::_ToObject( int from, int where )
         return 1;
         }
 
-    rt_par_float[P_CONC] = c;
+    
 
     return 0;
     }
@@ -5206,6 +5335,7 @@ int cipline_tech_object::_OporCIP( int where )
     if (isLine()) return 1;
     rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
     rt_par_float[P_SUM_OP] = cnt->get_quantity();
+    SetRet(ON);
 
     c=0;
     switch (where)
@@ -5253,20 +5383,16 @@ int cipline_tech_object::_OporCIP( int where )
             }
         }
 
-    //if (TECH_TYPE_CAR_WASH == tech_type)
-    //	{
-    //	if (LSRET->is_active())
-    //		{
-    //		timer_no_ret = get_millisec();
-    //		}
-    //	else
-    //		{
-    //		if (get_delta_millisec(timer_no_ret) > (rt_par_float[P_TM_RET_IS_EMPTY] * 1000L / 2))
-    //			{
-    //			return 1;
-    //			}
-    //		}
-    //	}
+    if (dev_ls_ret_pump)
+        {
+        if (!dev_ls_ret_pump->is_active())
+            {
+            if (get_delta_millisec(ret_pums_ls_timer) > (rt_par_float[P_TM_RET_IS_EMPTY] * 1000L))
+                {
+                return 1;
+                }
+            }
+        }
 
     if (FL->get_state() == FLIS)
         {
@@ -5300,6 +5426,10 @@ int cipline_tech_object::_OporCIP( int where )
 
 int cipline_tech_object::_FillCirc( int with_what )
     {
+    if (with_what == WITH_RETURN)
+        {
+        SetRet(ON);
+        }
     rt_par_float[P_OP_TIME_LEFT] = (unsigned long)(T[TMR_OP_TIME]->get_work_time()/1000);
     rt_par_float[P_SUM_OP] = cnt->get_quantity();
     if (LM->is_active()) cnt->start();
@@ -5441,24 +5571,43 @@ int cipline_tech_object::_Circ( int what )
 
     if (T[TMR_OP_TIME]->is_time_up()==1)
         {
-        if (what == SHCH)
+        if (!is_ready_to_end)
             {
-            objectstats->objcausticwashes++;
-            objectstats->changed = 1;
+            if (what == SHCH)
+                {
+                objectstats->objcausticwashes++;
+                objectstats->changed = 1;
+                }
+            if (what == KISL)
+                {
+                objectstats->objcausticwashes = 0;
+                DateToChar(objectstats->objlastacidwash);
+                objectstats->changed = 1;
+                }
+            is_ready_to_end = true;
             }
-        if (what == KISL)
-        {
-            objectstats->objcausticwashes = 0;
-            DateToChar(objectstats->objlastacidwash);
-            objectstats->changed = 1;
-        }
-        return 1;
+        if (dev_os_can_continue)
+            {
+            if (dev_os_can_continue->get_state() == ON)
+                {
+                return 1;
+                }
+            else
+                {
+                return 0;
+                }
+            }
+        else
+            {
+            return 1;
+            }
         }
     return 0;
     }
 
 int cipline_tech_object::_OporCirc( int where )
     {
+    SetRet(ON);
     switch (where)
         {
         case KANAL:
@@ -5664,6 +5813,78 @@ int cipline_tech_object::init_object_devices()
     else
         {
         dev_os_object_ready = 0;
+        }
+    //Обратная связь №3(готовность объекта к мойке)
+    dev_no = (u_int)rt_par_float[P_SIGNAL_IN_CIP_READY];
+    if (dev_no > 0)
+        {
+        sprintf(devname, "LINE%dDI%d", nmr, dev_no);
+        dev = (device*)DI(devname);
+        if (dev->get_serial_n() > 0)
+            {
+            dev_os_cip_ready = dev;
+            }
+        else
+            {
+            dev = (device*)(DI(dev_no));
+            if (dev->get_serial_n() > 0)
+                {
+                dev_os_cip_ready = dev;
+                }
+            else
+                {
+                dev = DEVICE(dev_no);
+                if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DI)
+                    {
+                    dev_os_cip_ready = dev;
+                    }
+                else
+                    {
+                    dev_os_cip_ready = 0;
+                    return -1;
+                    }
+                }
+            }
+        }
+    else
+        {
+        dev_os_cip_ready = 0;
+        }
+    //Сигнал что можно перейти к следующей операции(флипы окончены)
+    dev_no = (u_int)rt_par_float[P_SIGNAL_CAN_CONTINUE];
+    if (dev_no > 0)
+        {
+        sprintf(devname, "LINE%dDI%d", nmr, dev_no);
+        dev = (device*)DI(devname);
+        if (dev->get_serial_n() > 0)
+            {
+            dev_os_can_continue = dev;
+            }
+        else
+            {
+            dev = (device*)(DI(dev_no));
+            if (dev->get_serial_n() > 0)
+                {
+                dev_os_can_continue = dev;
+                }
+            else
+                {
+                dev = DEVICE(dev_no);
+                if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DI)
+                    {
+                    dev_os_can_continue = dev;
+                    }
+                else
+                    {
+                    dev_os_can_continue = 0;
+                    return -1;
+                    }
+                }
+            }
+        }
+    else
+        {
+        dev_os_can_continue = 0;
         }
     //Обратная связь - пауза(остановка мойки)
     dev_no = (u_int)rt_par_float[P_SIGNAL_OBJECT_PAUSE];
@@ -5953,6 +6174,42 @@ int cipline_tech_object::init_object_devices()
         {
         dev_upr_acid = 0;
         }
+    //Вода в трубе
+    dev_no = (u_int)rt_par_float[P_SIGNAL_WATER];
+    if (dev_no > 0)
+        {
+        sprintf(devname, "LINE%dDO%d", nmr, dev_no);
+        dev = (device*)DO(devname);
+        if (dev->get_serial_n() > 0)
+            {
+            dev_upr_water = dev;
+            }
+        else
+            {
+            dev = (device*)(DO(dev_no));
+            if (dev->get_serial_n() > 0)
+                {
+                dev_upr_water = dev;
+                }
+            else
+                {
+                dev = DEVICE(dev_no);
+                if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DO)
+                    {
+                    dev_upr_water = dev;
+                    }
+                else
+                    {
+                    dev_upr_water = 0;
+                    return -1;
+                    }
+                }
+            }
+        }
+    else
+        {
+        dev_upr_water = 0;
+        }
     //Дезинфекция
     dev_no = (u_int)rt_par_float[P_SIGNAL_DESINSECTION];
     if (dev_no > 0)
@@ -6060,6 +6317,42 @@ int cipline_tech_object::init_object_devices()
     else
         {
         dev_upr_cip_finished = 0;
+        }
+    //Мойка окончена 2
+    dev_no = (u_int)rt_par_float[P_SIGNAL_CIPEND2];
+    if (dev_no > 0)
+        {
+        sprintf(devname, "LINE%dDO%d", nmr, dev_no);
+        dev = (device*)DO(devname);
+        if (dev->get_serial_n() > 0)
+            {
+            dev_upr_cip_finished2 = dev;
+            }
+        else
+            {
+            dev = (device*)(DO(dev_no));
+            if (dev->get_serial_n() > 0)
+                {
+                dev_upr_cip_finished2 = dev;
+                }
+            else
+                {
+                dev = DEVICE(dev_no);
+                if (dev->get_serial_n() > 0 && dev->get_type() == device::DT_DO)
+                    {
+                    dev_upr_cip_finished2 = dev;
+                    }
+                else
+                    {
+                    dev_upr_cip_finished2 = 0;
+                    return -1;
+                    }
+                }
+            }
+        }
+    else
+        {
+        dev_upr_cip_finished2 = 0;
         }
     //Мойка идет
     dev_no = (u_int)rt_par_float[P_SIGNAL_CIP_IN_PROGRESS];
@@ -6188,6 +6481,35 @@ int cipline_tech_object::init_object_devices()
     else
         {
         dev_os_pump_can_run = 0;
+        }
+    //Сигнал уровня перед возвратным насосом.
+    dev_no = (u_int)rt_par_float[P_SIGNAL_RET_PUMP_SENSOR];
+    if (dev_no > 0)
+        {
+        sprintf(devname, "LINE%dLS%d", nmr, dev_no);
+        dev = (device*)LS(devname);
+        if (dev->get_serial_n() > 0)
+            {
+            dev_ls_ret_pump = dev;
+            }
+        else
+            {
+            sprintf(devname, "LINE%dDI%d", nmr, dev_no);
+            dev = (device*)(DI(devname));
+            if (dev->get_serial_n() > 0)
+                {
+                dev_ls_ret_pump = dev;
+                }
+            else
+                {
+                dev_ls_ret_pump = 0;
+                return -1;
+                }
+            }
+        }
+    else
+        {
+        dev_ls_ret_pump = 0;
         }
     return 0;
     }
