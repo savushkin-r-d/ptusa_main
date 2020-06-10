@@ -3346,6 +3346,10 @@ class level_s_iolink : public AI1
             {
             DEFAULT,
             IFM_LMT100,
+            IFM_LMT102,
+            IFM_LMT104,
+            IFM_LMT105,
+
             EH_FTL33,
             };
         ARTICLE n_article;
