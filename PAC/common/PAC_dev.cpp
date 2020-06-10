@@ -3627,6 +3627,9 @@ void level_s_iolink::evaluate_io()
     switch ( n_article )
         {
         case ARTICLE::IFM_LMT100:   //IFM.LMT100
+        case ARTICLE::IFM_LMT102:   //IFM.LMT102
+        case ARTICLE::IFM_LMT104:   //IFM.LMT104
+        case ARTICLE::IFM_LMT105:   //IFM.LMT105
             {
             LS_data info;
             std::reverse_copy( data, data + sizeof( info ), (char*)&info );
@@ -3658,6 +3661,21 @@ void level_s_iolink::set_article( const char* new_article )
     if ( strcmp( article, "IFM.LMT100" ) == 0 )
         {
         n_article = ARTICLE::IFM_LMT100;
+        return;
+        }
+    if (strcmp(article, "IFM.LMT102") == 0)
+        {
+        n_article = ARTICLE::IFM_LMT102;
+        return;
+        }
+    if (strcmp(article, "IFM.LMT104") == 0)
+        {
+        n_article = ARTICLE::IFM_LMT104;
+        return;
+        }
+    if (strcmp(article, "IFM.LMT105") == 0)
+        {
+        n_article = ARTICLE::IFM_LMT105;
         return;
         }
     if ( strcmp( article, "E&H.FTL33-GR7N2ABW5J" ) == 0 )
