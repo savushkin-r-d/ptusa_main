@@ -2690,6 +2690,8 @@ class level_e_iolink : public level
         void set_article( const char* new_article );
         void evaluate_io();
 
+        void set_string_property(const char* field, const char* value) override;
+   
     private:
         pressure_e_iolink::ARTICLE n_article;
 
@@ -2707,6 +2709,8 @@ class level_e_iolink : public level
 
         int st;
         float v;
+
+        i_AI_device* PT_extra;
     };
 //-----------------------------------------------------------------------------
 /// @brief Концентрация.
