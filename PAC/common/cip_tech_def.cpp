@@ -2804,11 +2804,7 @@ int cipline_tech_object::EvalPIDS()
 
         if (!pump_can_run)
             {
-            if (!flagnplaststate)
-                {
-                nplaststate = NP->get_state() == ON ? true : false;
-                flagnplaststate = true;
-                }
+            flagnplaststate = true;
             NP->off();
             NP->set_value(0);
             }
@@ -2816,9 +2812,13 @@ int cipline_tech_object::EvalPIDS()
             {
             if (flagnplaststate)
                 {
-                PIDF->pid_reset();
-                NP->set_state(nplaststate);
-                flagnplaststate = false;
+                
+                if (nplaststate)
+                    {
+                    PIDF->pid_reset();
+                    NP->on();
+                    flagnplaststate = false;
+                    }
                 }
             }
      
