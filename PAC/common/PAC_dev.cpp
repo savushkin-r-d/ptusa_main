@@ -3749,6 +3749,7 @@ int level_e_iolink::calc_volume()
     v = this->v;
 #else
     v = get_value();
+    v = v / 100 * get_par(P_MAX_P, start_param_idx);
 #endif
 
     if (PT_extra)
