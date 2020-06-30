@@ -624,6 +624,7 @@ class cipline_tech_object: public tech_object
         bool flagnplaststate;
         ///Максимальное количество моек щелочью без кислоты.
         int no_acid_wash_max;
+        bool use_internal_medium_recipes;
 
         //Переменные для циркуляции
         char circ_tank_s; //Циркулировать ли через танк со щелочью
