@@ -1863,12 +1863,15 @@ void cipline_tech_object::_StopDev( void )
     V13->off();
     V05->off();
     V06->off();
-    V07->off();
-    V08->off();
-    V09->off();
-    V10->off();
-    V11->off();
-    V12->off();
+    if (state != ERR_CIP_OBJECT && state != ERR_OS)
+        {
+        V07->off();
+        V08->off();
+        V09->off();
+        V10->off();
+        V11->off();
+        V12->off();
+        }
     V00->instant_off();
     NP->off();
     nplaststate = false;
@@ -2863,8 +2866,9 @@ int cipline_tech_object::EvalCipInProgress()
         {
         if (res<0)
             {//was error, time it stopped
+            state = res;
             Stop(curstep);
-            state=res;
+            state = res;
             return res;
             }
         else
