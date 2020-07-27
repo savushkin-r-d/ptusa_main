@@ -120,6 +120,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     blocked = 0;
     disable_tank_heating = 0;
     default_programlist = 0x13FB;
+    use_internal_medium_recipes = false;
     bachok_lvl_err_delay = get_millisec();
     steam_valve_delay = get_millisec();
     loadedRecName = new char[TRecipeManager::recipeNameLength];
@@ -1862,12 +1863,15 @@ void cipline_tech_object::_StopDev( void )
     V13->off();
     V05->off();
     V06->off();
-    V07->off();
-    V08->off();
-    V09->off();
-    V10->off();
-    V11->off();
-    V12->off();
+    if (state != ERR_CIP_OBJECT && state != ERR_OS)
+        {
+        V07->off();
+        V08->off();
+        V09->off();
+        V10->off();
+        V11->off();
+        V12->off();
+        }
     V00->instant_off();
     NP->off();
     nplaststate = false;
@@ -1956,39 +1960,40 @@ void cipline_tech_object::_RT( void )
 
 int cipline_tech_object::EvalRecipes()
     {
-    if (1 == nmr)
+    if (1 == nmr && use_internal_medium_recipes)
         {
         acidRecipes->EvalRecipe();
         causticRecipes->EvalRecipe();
-        }
-    //Выбор раствора
-    if ((int)(parpar[0][P_CAUSTIC_SELECTED]) != causticLoadedRecipe)
-    {
-        int newcausticrecipe = (int)(parpar[0][P_CAUSTIC_SELECTED]);
-        if (newcausticrecipe >= 0 && newcausticrecipe < causticRecipes->recipePerLine)
-            {
-            causticRecipes->getRecipeName(newcausticrecipe, causticName);
-            causticRecipes->LoadRecipeToParams(newcausticrecipe, parpar[0]);
-            causticLoadedRecipe = newcausticrecipe;
-            }
-        else
-            {
-            parpar->save(P_CAUSTIC_SELECTED, causticLoadedRecipe);
-            }
-    }
 
-    if ((int)(parpar[0][P_ACID_SELECTED]) != acidLoadedRecipe)
-        {
-        int newacidrecipe = (int)(parpar[0][P_ACID_SELECTED]);
-        if (newacidrecipe >= 0 && newacidrecipe < acidRecipes->recipePerLine)
+        //Выбор раствора
+        if ((int)(parpar[0][P_CAUSTIC_SELECTED]) != causticLoadedRecipe)
             {
-            acidRecipes->getRecipeName(newacidrecipe, acidName);
-            acidRecipes->LoadRecipeToParams(newacidrecipe, parpar[0]);
-            acidLoadedRecipe = newacidrecipe;
+            int newcausticrecipe = (int)(parpar[0][P_CAUSTIC_SELECTED]);
+            if (newcausticrecipe >= 0 && newcausticrecipe < causticRecipes->recipePerLine)
+                {
+                causticRecipes->getRecipeName(newcausticrecipe, causticName);
+                causticRecipes->LoadRecipeToParams(newcausticrecipe, parpar[0]);
+                causticLoadedRecipe = newcausticrecipe;
+                }
+            else
+                {
+                parpar->save(P_CAUSTIC_SELECTED, causticLoadedRecipe);
+                }
             }
-        else
+
+        if ((int)(parpar[0][P_ACID_SELECTED]) != acidLoadedRecipe)
             {
-            parpar->save(P_ACID_SELECTED, acidLoadedRecipe);
+            int newacidrecipe = (int)(parpar[0][P_ACID_SELECTED]);
+            if (newacidrecipe >= 0 && newacidrecipe < acidRecipes->recipePerLine)
+                {
+                acidRecipes->getRecipeName(newacidrecipe, acidName);
+                acidRecipes->LoadRecipeToParams(newacidrecipe, parpar[0]);
+                acidLoadedRecipe = newacidrecipe;
+                }
+            else
+                {
+                parpar->save(P_ACID_SELECTED, acidLoadedRecipe);
+                }
             }
         }
 
@@ -2804,11 +2809,7 @@ int cipline_tech_object::EvalPIDS()
 
         if (!pump_can_run)
             {
-            if (!flagnplaststate)
-                {
-                nplaststate = NP->get_state() == ON ? true : false;
-                flagnplaststate = true;
-                }
+            flagnplaststate = true;
             NP->off();
             NP->set_value(0);
             }
@@ -2816,9 +2817,13 @@ int cipline_tech_object::EvalPIDS()
             {
             if (flagnplaststate)
                 {
-                PIDF->pid_reset();
-                NP->set_state(nplaststate);
-                flagnplaststate = false;
+                
+                if (nplaststate)
+                    {
+                    PIDF->pid_reset();
+                    NP->on();
+                    flagnplaststate = false;
+                    }
                 }
             }
      
@@ -2861,8 +2866,9 @@ int cipline_tech_object::EvalCipInProgress()
         {
         if (res<0)
             {//was error, time it stopped
+            state = res;
             Stop(curstep);
-            state=res;
+            state = res;
             return res;
             }
         else

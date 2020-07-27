@@ -1333,6 +1333,7 @@ class cipline_tech_object: public tech_object
         int clean_water_rinsing_return; // уда возвращать на операции окончательного ополаскивани€
         int scoldvalves; ///—тара€ логика управлени€ клапанами сортировки растворов при самоочистке.
         int no_acid_wash_max; ///ћаксимальное количество моек щелочью без кислоты.
+        bool use_internal_medium_recipes; //¬кл./выкл. использование рецептов дл€ моющих средств.
 
         i_DO_device* V00;
         i_DO_device* V01;
