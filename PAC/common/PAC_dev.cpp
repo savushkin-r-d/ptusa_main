@@ -32,6 +32,9 @@ const char device::DEV_NAMES[][ 5 ] =
     "DO",      ///< Дискретный выходной сигнал.
     "AI",      ///< Аналоговый входной сигнал.
     "AO",      ///< Аналоговый выходной сигнал.
+    "WT",      ///< Тензорезистор.
+    "PT",      ///< Давление (значение).
+    "F",       ///< Автоматический выключатель.
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -630,6 +633,11 @@ wages* device_manager::get_WT( const char *dev_name )
     return (wages*)get_device( device::DT_WT, dev_name );
     }
 //-----------------------------------------------------------------------------
+circuit_breaker* device_manager::get_F(const char* dev_name)
+    {
+    return (circuit_breaker*)get_device(device::DT_F, dev_name);
+    }
+//-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         const char* dev_name, char * descr, char* article )
     {
@@ -1049,6 +1057,25 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
         case device::DT_WT:
             new_device      = new wages( dev_name );
             new_io_device = ( wages* ) new_device;
+            break;
+
+        case device::DT_F:
+            switch (dev_sub_type)
+                {
+                case device::DST_NONE:
+                case device::DST_F:
+                    new_device = new circuit_breaker(dev_name);
+                    new_io_device = (circuit_breaker*)new_device;
+                    break;
+
+                default:
+                    if (G_DEBUG)
+                        {
+                        printf("Unknown F device subtype %d!\n", dev_sub_type);
+                        }
+                    new_device = new dev_stub();
+                    break;
+                }
             break;
 
         default:
@@ -4512,6 +4539,19 @@ wages* WT( u_int dev_n )
 wages* WT( const char *dev_name )
     {
     return G_DEVICE_MANAGER()->get_WT( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_AO_device* F(u_int dev_n)
+    {
+    static char name[20] = { 0 };
+    snprintf(name, sizeof(name), "F%d", dev_n);
+
+    return G_DEVICE_MANAGER()->get_F(name);
+    }
+
+i_AO_device* F(const char* dev_name)
+    {
+    return G_DEVICE_MANAGER()->get_F(dev_name);
     }
 //-----------------------------------------------------------------------------
 dev_stub* STUB()
