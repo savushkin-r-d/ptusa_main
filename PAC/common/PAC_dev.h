@@ -2700,11 +2700,14 @@ class circuit_breaker : public analog_io_device
             return st;
             }
 #endif
+        void direct_set_value(float)
+            {
+            }
 
         void evaluate_io()
             {
             char* data = (char*)get_AI_data(C_AI_INDEX);
-            std::reverse_copy(data, data + sizeof(in_info), (char*)&in_info);
+            std::copy(data, data + sizeof(in_info), (char*)&in_info);
 
 #ifdef DEBUG_IOLINK_F
             char* tmp = (char*)data;
@@ -2714,8 +2717,22 @@ class circuit_breaker : public analog_io_device
             G_LOG->write_log(i_log::P_WARNING);
 
             sprintf(G_LOG->msg, "nominal_current_ch1 %u, load_current_ch1 %u, "
-                "st_ch1 %x, err_ch1 %x\n", info.nominal_current_ch1,
-                info.load_current_ch1, info.st_ch1, info.err_ch1);
+                "st_ch1 %x, err_ch1 %x\n", in_info.nominal_current_ch1,
+                in_info.load_current_ch1, in_info.st_ch1, in_info.err_ch1 );
+            G_LOG->write_log(i_log::P_WARNING);
+
+            tmp = (char*)&in_info;
+
+            sprintf(G_LOG->msg, "%x %x %x %x %x %x %x %x\n",
+                tmp[0], tmp[1], tmp[2], tmp[3],
+                tmp[4], tmp[5], tmp[6], tmp[7] );
+            G_LOG->write_log(i_log::P_NOTICE);
+
+            in_info.st_ch1 = 1;
+
+            sprintf(G_LOG->msg, "%x %x %x %x %x %x %x %x\n",
+                tmp[0], tmp[1], tmp[2], tmp[3],
+                tmp[4], tmp[5], tmp[6], tmp[7] );
             G_LOG->write_log(i_log::P_NOTICE);
 #endif
             v = in_info.v;
