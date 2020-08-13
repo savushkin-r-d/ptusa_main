@@ -14,7 +14,6 @@ endif()
 add_definitions(-DPAC_PLCNEXT)  
 add_definitions(-DLINUX_OS)
 add_definitions(-DTEST_SPEED)
-add_definitions(-DDEBUG_IOLINK_F)
 
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../lua ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../bin )
 

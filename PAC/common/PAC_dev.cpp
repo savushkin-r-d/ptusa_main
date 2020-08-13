@@ -4071,6 +4071,208 @@ int pressure_e_iolink::get_state()
 #endif
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+circuit_breaker::circuit_breaker( const char* dev_name ):analog_io_device(
+    dev_name, DT_F, DST_F, 0), is_read_OK( false ), v( 0 ), st( 0 ),
+    err( 0 ), m( 0 ), out_info ( new F_data_out() )
+    {
+    }
+//-----------------------------------------------------------------------------
+int circuit_breaker::save_device_ex( char *buff )
+    {
+    int res = sprintf( buff, "ERR=%d,M=%d, ", err, m );
+
+    res += sprintf( buff + res, "NOMINAL_CURRENT_CH={%d,%d,%d,%d}, ",
+        in_info.nominal_current_ch1, in_info.nominal_current_ch2,
+        in_info.nominal_current_ch3, in_info.nominal_current_ch4 );
+    res += sprintf( buff + res, "LOAD_CURRENT_CH={%.1f,%.1f,%.1f,%.1f}, ",
+        .1f * in_info.load_current_ch1, .1f * in_info.load_current_ch2,
+        .1f * in_info.load_current_ch3, .1f * in_info.load_current_ch4 );
+
+    res += sprintf( buff + res, "ST_CH={%d,%d,%d,%d}, ",
+        in_info.st_ch1, in_info.st_ch2,
+        in_info.st_ch3, in_info.st_ch4 );
+    res += sprintf( buff + res, "ERR_CH={%d,%d,%d,%d}, ",
+        in_info.err_ch1, in_info.err_ch2,
+        in_info.err_ch3, in_info.err_ch4 );
+    return res;
+    }
+//-----------------------------------------------------------------------------
+int circuit_breaker::set_cmd( const char *prop, u_int idx, double val )
+    {
+    if (G_DEBUG)
+        {
+        sprintf( G_LOG->msg,
+            "%s\t circuit_breaker::set_cmd() - prop = %s, idx = %d, val = %f",
+            get_name(), prop, idx, val);
+        G_LOG->write_log(i_log::P_DEBUG);
+        }
+
+    if ( strcmp( prop, "ST" ) == 0 )
+        {
+        int new_val = ( int ) val;
+
+        if ( new_val )
+            {
+            on();
+            }
+        else
+            {
+            off();
+            }
+
+        return 0;
+        }
+
+
+    if ( strcmp( prop, "ST_CH" ) == 0 )
+        {
+        switch ( idx )
+            {
+            case 1:
+                out_info->switch_ch1 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                in_info.st_ch1 = val;
+#endif
+                return 0;
+            case 2:
+                out_info->switch_ch2 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                in_info.st_ch2 = val;
+#endif
+                return 0;
+            case 3:
+                out_info->switch_ch3 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                in_info.st_ch3 = val;
+#endif
+                return 0;
+            case 4:
+                out_info->switch_ch4 = val;
+#ifdef DEBUG_NO_IO_MODULES
+                in_info.st_ch4 = val;
+#endif
+                return 0;
+            }
+        }
+
+    return analog_io_device::set_cmd( prop, idx, val );
+    }
+//-----------------------------------------------------------------------------
+void circuit_breaker::direct_set_value( float v )
+    {
+    if ( v )
+        {
+        on();
+        }
+    else
+        {
+        off();
+        }
+    }
+//-----------------------------------------------------------------------------
+void circuit_breaker::direct_on()
+    {
+    out_info->valid_flag = true;
+    out_info->switch_ch1 = true;
+    out_info->switch_ch2 = true;
+    out_info->switch_ch3 = true;
+    out_info->switch_ch4 = true;
+
+#ifdef DEBUG_NO_IO_MODULES
+    in_info.st_ch1 = true;
+    in_info.st_ch2 = true;
+    in_info.st_ch3 = true;
+    in_info.st_ch4 = true;
+#endif
+    }
+//-----------------------------------------------------------------------------
+void circuit_breaker::direct_off()
+    {
+    out_info->valid_flag = true;
+    out_info->switch_ch1 = false;
+    out_info->switch_ch2 = false;
+    out_info->switch_ch3 = false;
+    out_info->switch_ch4 = false;
+
+#ifdef DEBUG_NO_IO_MODULES
+    in_info.st_ch1 = false;
+    in_info.st_ch2 = false;
+    in_info.st_ch3 = false;
+    in_info.st_ch4 = false;
+#endif
+    }
+//-----------------------------------------------------------------------------
+float circuit_breaker::get_value()
+    {
+    return v;
+    }
+//-----------------------------------------------------------------------------
+int circuit_breaker::get_state()
+    {
+    return st;
+    }
+//-----------------------------------------------------------------------------
+void circuit_breaker::evaluate_io()
+    {
+    out_info = ( F_data_out* ) get_AO_write_data( 0 );
+
+    if ( get_AI_IOLINK_state(C_AI_INDEX) == io_device::IOLINKSTATE::OK )
+        {
+        if ( !is_read_OK )
+            {
+            out_info->switch_ch1 = in_info.st_ch1;
+            out_info->switch_ch2 = in_info.st_ch2;
+            out_info->switch_ch3 = in_info.st_ch3;
+            out_info->switch_ch4 = in_info.st_ch4;
+            out_info->nominal_current_ch1 = in_info.nominal_current_ch1;
+            out_info->nominal_current_ch2 = in_info.nominal_current_ch2;
+            out_info->nominal_current_ch3 = in_info.nominal_current_ch3;
+            out_info->nominal_current_ch4 = in_info.nominal_current_ch4;
+
+            is_read_OK = true;
+            }
+        }
+    else
+        {
+        is_read_OK = false;
+        }
+
+    char* data = (char*)get_AI_data(C_AI_INDEX);
+    std::copy(data, data + sizeof(in_info), (char*)&in_info);
+
+#ifdef DEBUG_IOLINK_F
+    char* tmp = (char*)data;
+    sprintf(G_LOG->msg, "%x %x %x %x %x %x %x %x\n",
+        tmp[0], tmp[1], tmp[2], tmp[3],
+        tmp[4], tmp[5], tmp[6], tmp[7] );
+    G_LOG->write_log(i_log::P_WARNING);
+
+    sprintf(G_LOG->msg, "nominal_current_ch1 %u, load_current_ch1 %u, "
+        "st_ch1 %x, err_ch1 %x, %.1f\n", in_info.nominal_current_ch1,
+        in_info.load_current_ch1, in_info.st_ch1, in_info.err_ch1,
+        .1f * in_info.v );
+    G_LOG->write_log(i_log::P_WARNING);
+    sprintf(G_LOG->msg, "nominal_current_ch2 %u, load_current_ch2 %u, "
+        "st_ch2 %x, err_ch2 %x\n", in_info.nominal_current_ch2,
+        in_info.load_current_ch2, in_info.st_ch2, in_info.err_ch2 );
+    G_LOG->write_log(i_log::P_WARNING);
+#endif
+    v = .1f * in_info.v;
+    st = in_info.st_ch1 || in_info.st_ch2 ||
+        in_info.st_ch3 || in_info.st_ch4 ? 1 : 0;
+    err = in_info.err_ch1 || in_info.err_ch2 ||
+        in_info.err_ch3 || in_info.err_ch4 ? 1 : 0;
+    }
+//-----------------------------------------------------------------------------
+circuit_breaker::F_data_out::F_data_out(): switch_ch1( false ), switch_ch2( false ),
+    switch_ch3( false ), switch_ch4( false ),
+    reserved( 0 ), valid_flag( false ),
+    nominal_current_ch1( 0 ), nominal_current_ch2( 0 ),
+    nominal_current_ch3( 0 ), nominal_current_ch4( 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 float concentration_e::get_max_val()
     {
     return get_par( P_MAX_V, start_param_idx );

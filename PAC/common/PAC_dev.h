@@ -2684,107 +2684,23 @@ class pressure_e_iolink : public AI1
 class circuit_breaker : public analog_io_device
     {
     public:
-        circuit_breaker( const char* dev_name ):analog_io_device(
-            dev_name, DT_F, DST_F, 0), v( 0 ), st( 0 ), err( 0 ), m( 0 )
-            {
-            }
+        circuit_breaker( const char* dev_name );
 
-        int save_device_ex( char *buff )
-            {
-            int res = sprintf( buff + res, "ERR=%d,M=%d, ",
-                err, m );
+        int save_device_ex( char *buff );
 
-            res += sprintf( buff + res, "NOMINAL_CURRENT_CH={%d,%d,%d,%d}, ",
-                in_info.nominal_current_ch1, in_info.nominal_current_ch2,
-                in_info.nominal_current_ch3, in_info.nominal_current_ch4 );
-            res += sprintf( buff + res, "LOAD_CURRENT_CH={%.1f,%.1f,%.1f,%.1f}, ",
-                .1f * in_info.load_current_ch1, .1f * in_info.load_current_ch2,
-                .1f * in_info.load_current_ch3, .1f * in_info.load_current_ch4 );
+        int set_cmd( const char *prop, u_int idx, double val );
 
-            res += sprintf( buff + res, "ST_CH={%d,%d,%d,%d}, ",
-                in_info.st_ch1, in_info.st_ch2,
-                in_info.st_ch3, in_info.st_ch4 );
-            res += sprintf( buff + res, "ERR_CH={%d,%d,%d,%d}, ",
-                in_info.err_ch1, in_info.err_ch2,
-                in_info.err_ch3, in_info.err_ch4 );
-            return res;
-            }
+        void direct_set_value( float v );
 
-        int set_cmd( const char *prop, u_int idx, double val )
-            {
-            if (G_DEBUG)
-                {
-                sprintf( G_LOG->msg,
-                    "%s\t circuit_breaker::set_cmd() - prop = %s, idx = %d, val = %f",
-                    get_name(), prop, idx, val);
-                G_LOG->write_log(i_log::P_DEBUG);
-                }
+        void direct_on();
 
-            if ( strcmp( prop, "ST_CH" ) == 0 )
-                {
-                switch ( idx )
-                    {
-                    case 1:
-                        out_info.switch_ch1 = val;
-                        return 0;
-                    case 2:
-                        out_info.switch_ch2 = val;
-                        return 0;
-                    case 3:
-                        out_info.switch_ch3 = val;
-                        return 0;
-                    case 4:
-                        out_info.switch_ch4 = val;
-                        return 0;
-                    }
-                }
+        void direct_off();
 
-            return analog_io_device::set_cmd( prop, idx, val );
-            }
+        float get_value();
 
-#ifndef DEBUG_NO_IO_MODULES
-        float get_value()
-            {
-            return v;
-            }
+        int get_state();
 
-        int get_state()
-            {
-            return st;
-            }
-#endif
-        void direct_set_value(float)
-            {
-            }
-
-        void evaluate_io()
-            {
-            char* data = (char*)get_AI_data(C_AI_INDEX);
-            std::copy(data, data + sizeof(in_info), (char*)&in_info);
-
-#ifdef DEBUG_IOLINK_F
-            char* tmp = (char*)data;
-            sprintf(G_LOG->msg, "%x %x %x %x %x %x %x %x\n",
-                tmp[0], tmp[1], tmp[2], tmp[3],
-                tmp[4], tmp[5], tmp[6], tmp[7] );
-            G_LOG->write_log(i_log::P_WARNING);
-
-            sprintf(G_LOG->msg, "nominal_current_ch1 %u, load_current_ch1 %u, "
-                "st_ch1 %x, err_ch1 %x, %.1f\n", in_info.nominal_current_ch1,
-                in_info.load_current_ch1, in_info.st_ch1, in_info.err_ch1,
-                .1f * in_info.v );
-            G_LOG->write_log(i_log::P_WARNING);
-            sprintf(G_LOG->msg, "nominal_current_ch2 %u, load_current_ch2 %u, "
-                "st_ch2 %x, err_ch2 %x\n", in_info.nominal_current_ch2,
-                in_info.load_current_ch2, in_info.st_ch2, in_info.err_ch2 );
-            G_LOG->write_log(i_log::P_WARNING);
-#endif
-            v = .1f * in_info.v;
-            st = in_info.st_ch1 or in_info.st_ch2 or
-                in_info.st_ch3 or in_info.st_ch4 ? 1 : 0;
-            err = in_info.err_ch1 or in_info.err_ch2 or
-                in_info.err_ch3 or in_info.err_ch4 ? 1 : 0;
-            }
+        void evaluate_io();
 
         struct F_data_in
             {
@@ -2811,16 +2727,19 @@ class circuit_breaker : public analog_io_device
 
         struct F_data_out
             {
-            bool valid_flag : 1;
-            uint16_t reserved : 3;
-            bool switch_ch4 : 1;
-            bool switch_ch3 : 1;
-            bool switch_ch2 : 1;
             bool switch_ch1 : 1;
-            uint16_t nominal_current_ch1 : 4;
+            bool switch_ch2 : 1;
+            bool switch_ch3 : 1;
+            bool switch_ch4 : 1;
+            uint16_t reserved : 3;
+            bool valid_flag : 1;
+
             uint16_t nominal_current_ch2 : 4;
-            uint16_t nominal_current_ch3 : 4;
+            uint16_t nominal_current_ch1 : 4;
             uint16_t nominal_current_ch4 : 4;
+            uint16_t nominal_current_ch3 : 4;
+
+            F_data_out();
             };
 
     private:
@@ -2829,13 +2748,15 @@ class circuit_breaker : public analog_io_device
             C_AI_INDEX = 0,             ///< ������ ������ ����������� �����.
             };
 
+        bool is_read_OK;
+
         float v;
         int st;
         int err;
         int m;
 
         F_data_in in_info;
-        F_data_out out_info;
+        F_data_out *out_info;
     };
 //-----------------------------------------------------------------------------
 /// @brief ������ ������������� ������ IO-Link.
