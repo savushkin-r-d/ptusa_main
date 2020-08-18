@@ -364,9 +364,7 @@ class device : public i_DO_AO_device, public par_device
             }
 
         enum CONSTANTS
-            {
-            C_DEVICE_TYPE_CNT = 19,     ///< Количество типов устройств.
-
+            {     
             C_MAX_NAME = 20
             };
 
@@ -397,6 +395,9 @@ class device : public i_DO_AO_device, public par_device
             DT_AO,      ///< Аналоговый выходной сигнал.
             DT_WT,      ///< Тензорезистор.
             DT_PT,      ///< Давление (значение).
+            DT_F,       ///< Автоматический выключатель.
+
+            C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
 
         /// Подтипы устройств.
@@ -501,6 +502,9 @@ class device : public i_DO_AO_device, public par_device
             //PT
             DST_PT = 1,      ///Обычный аналоговый датчик давления
             DST_PT_IOLINK,   ///Датчик давления IOLInk
+
+            //F
+            DST_F = 1,       ///< Автоматический выключатель.
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -551,6 +555,8 @@ class device : public i_DO_AO_device, public par_device
                     return "Тензорезистор";
                 case DT_PT:
                     return "Давление";
+                case DT_F:
+                    return "Автоматический выключатель";
                 default:
                     return "???";
                 }
@@ -2674,6 +2680,85 @@ class pressure_e_iolink : public AI1
         int st;
     };
 //-----------------------------------------------------------------------------
+/// @brief Автоматический выключатель.
+class circuit_breaker : public analog_io_device 
+    { 
+    public: 
+        circuit_breaker(const char* dev_name); 
+ 
+        int save_device_ex(char* buff); 
+ 
+        int set_cmd(const char* prop, u_int idx, double val); 
+ 
+        void direct_set_value(float v); 
+ 
+        void direct_on(); 
+ 
+        void direct_off(); 
+ 
+        float get_value(); 
+ 
+        int get_state(); 
+ 
+        void evaluate_io(); 
+ 
+        struct F_data_in 
+            { 
+            bool err_ch4 : 1; 
+            bool err_ch3 : 1; 
+            bool err_ch2 : 1; 
+            bool err_ch1 : 1; 
+            bool st_ch4 : 1; 
+            bool st_ch3 : 1; 
+            bool st_ch2 : 1; 
+            bool st_ch1 : 1; 
+ 
+            uint16_t nominal_current_ch2 : 4; 
+            uint16_t nominal_current_ch1 : 4; 
+            uint16_t nominal_current_ch4 : 4; 
+            uint16_t nominal_current_ch3 : 4; 
+ 
+            uint16_t load_current_ch1 : 8; 
+            uint16_t load_current_ch2 : 8; 
+            uint16_t load_current_ch3 : 8; 
+            uint16_t load_current_ch4 : 8; 
+            uint16_t v : 8; 
+            }; 
+ 
+        struct F_data_out 
+            { 
+            bool switch_ch1 : 1; 
+            bool switch_ch2 : 1; 
+            bool switch_ch3 : 1; 
+            bool switch_ch4 : 1; 
+            uint16_t reserved : 3; 
+            bool valid_flag : 1; 
+ 
+            uint16_t nominal_current_ch2 : 4; 
+            uint16_t nominal_current_ch1 : 4; 
+            uint16_t nominal_current_ch4 : 4; 
+            uint16_t nominal_current_ch3 : 4; 
+ 
+            F_data_out(); 
+            }; 
+ 
+    private: 
+        enum CONSTANTS 
+            { 
+            C_AI_INDEX = 0, 
+            }; 
+ 
+        bool is_read_OK; 
+ 
+        float v; 
+        int st; 
+        int err; 
+        int m; 
+ 
+        F_data_in in_info; 
+        F_data_out* out_info; 
+    }; 
+//-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора уровня IO-Link.
 class level_e_iolink : public level
     {
@@ -3652,6 +3737,9 @@ class device_manager: public i_Lua_save_device
         /// @brief Получение весов по номеру.
         wages* get_WT( const char *dev_name );
 
+        /// @brief Получение автоматического выключателя по имени.
+        circuit_breaker* get_F(const char* dev_name);
+
         /// @brief Получение единственного экземпляра класса.
         static device_manager* get_instance();
 
@@ -3988,6 +4076,14 @@ i_AI_device* QT( const char *dev_name );
 /// возвращается заглушка (@ref dev_stub).
 wages* WT( u_int dev_n );
 wages* WT( const char *dev_name );
+//-----------------------------------------------------------------------------
+/// @brief Получение автоматического выключателя по номеру.
+///
+/// @param number - номер автоматического выключателя.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+i_AO_device* F(u_int dev_n);
+i_AO_device* F(const char* dev_name);
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///
