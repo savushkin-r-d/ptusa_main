@@ -626,6 +626,9 @@ class cipline_tech_object: public tech_object
         int no_acid_wash_max;
         bool use_internal_medium_recipes;
 
+        ///‘лаг завершени€ флиповани€ на операци€х циркул€ции/промывки.
+        bool wasflip;
+
         //ѕеременные дл€ циркул€ции
         char circ_tank_s; //÷иркулировать ли через танк со щелочью
         char circ_tank_k; //÷иркулировать ли через танк с кислотой

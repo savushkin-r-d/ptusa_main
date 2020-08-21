@@ -2593,6 +2593,7 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
             SAV[i]->R();
             }
         is_ready_to_end = false;
+        wasflip = false;
         }
 
     pr_media=WATER;
@@ -2909,9 +2910,15 @@ int cipline_tech_object::_DoStep( int step_to_do )
         }
     if (dev_upr_circulation)
         {
-        if (step_to_do == 28 || step_to_do == 48 || step_to_do == 66 || step_to_do == 77 ||
-            step_to_do == 8 || step_to_do == 37 || step_to_do == 57 || step_to_do == 86) 
-            dev_upr_circulation->on(); else dev_upr_circulation->off();
+        if ((step_to_do == 28 || step_to_do == 48 || step_to_do == 66 || step_to_do == 77 ||
+            step_to_do == 8 || step_to_do == 37 || step_to_do == 57 || step_to_do == 86) && (!wasflip))
+            {
+            dev_upr_circulation->on();
+            }
+        else
+            {
+            dev_upr_circulation->off();
+            }
         }
 
     if (dev_ls_ret_pump)
@@ -5089,13 +5096,17 @@ int cipline_tech_object::_ToObject( int from, int where )
 
     rt_par_float[P_CONC] = c;
 
-    if (curstep == 8 || curstep == 37 || curstep == 57 || curstep == 86)
+    if ((curstep == 8 || curstep == 37 || curstep == 57 || curstep == 86) && (!wasflip))
         {
         if (dev_os_can_continue)
             {
             if (dev_os_can_continue->get_state() == OFF)
                 {
                 return 0;
+                }
+            else
+                {
+                wasflip = true;
                 }
             }
         }
@@ -5594,7 +5605,7 @@ int cipline_tech_object::_Circ( int what )
             }
         if (dev_os_can_continue)
             {
-            if (dev_os_can_continue->get_state() == ON)
+            if ((dev_os_can_continue->get_state() == ON) || wasflip)
                 {
                 return 1;
                 }
@@ -5606,6 +5617,16 @@ int cipline_tech_object::_Circ( int what )
         else
             {
             return 1;
+            }
+        }
+    else
+        {
+        if (dev_os_can_continue)
+            {
+            if (dev_os_can_continue->get_state() == ON)
+                {
+                wasflip = true;
+                }
             }
         }
     return 0;
