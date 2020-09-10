@@ -224,7 +224,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
             {
             enum CONSTATS
                 {
-                MAX_STR_LENGTH = 150,
+                MAX_STR_LENGTH = 300,
                 };
 
             char          msg[ MAX_STR_LENGTH ];

@@ -1072,33 +1072,33 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
     error_number++;
     new_err->n = error_number;
     new_err->type = type;
-
+    
     switch ( type )
         {
         case ERR_CANT_ON:
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s %d\' - не включена операция %.1d \'%.40s\' - %.60s.",
+                "\'%s %d\' - не включена операция %.1d \'%s\' - %s.",
                 name, number, mode, ( *operations_manager )[ mode ]->get_name(), 
                 err_msg );
             break;
 
         case ERR_ON_WITH_ERRORS:
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s %d\' - включена с ошибкой операция %.1d \'%.40s\' - %.50s.",
+                "\'%s %d\' - включена с ошибкой операция %.1d \'%s\' - %s.",
                 name, number, mode, ( *operations_manager )[ mode ]->get_name(), 
                 err_msg );
             break;
 
         case ERR_OFF:
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s %d\' - отключена операция %.1d \'%.40s\' - %.50s.",
+                "\'%s %d\' - отключена операция %.1d \'%s\' - %s.",
                 name, number, mode, ( *operations_manager )[ mode ]->get_name(), 
                 err_msg );
             break;
 
         case ERR_OFF_AND_ON:
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s %d\' - переход от %.1d \'%.40s\' к %.1d \'%.40s\'.",
+                "\'%s %d\' - переход от %.1d \'%s\' к %.1d \'%s\'.",
                 name, number, mode, ( *operations_manager )[ mode ]->get_name(),
                 new_mode, ( *operations_manager )[ new_mode ]->get_name() );
 
@@ -1106,7 +1106,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
                 {
                 snprintf( new_err->msg + strlen( new_err->msg ) - 1,
                     sizeof( new_err->msg ) - strlen( new_err->msg ) - 1,
-                    " - %.50s.", err_msg );
+                    " - %s.", err_msg );
                 }
             break;
 
@@ -1114,14 +1114,14 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
             if ( mode > 0 )
                 {
                 snprintf( new_err->msg, sizeof( new_err->msg ),
-                    "\'%.40s %d\' - операция %.1d \'%.40s\' - %.50s.",
+                    "\'%s %d\' - операция %.1d \'%s\' - %s.",
                     name, number, mode, ( *operations_manager )[ mode ]->get_name(), 
                     err_msg );
                 }
             else
                 {
                 snprintf( new_err->msg, sizeof( new_err->msg ),
-                    "\'%.40s %d\' - %.50s.",
+                    "\'%s %d\' - %s.",
                     name, number, err_msg );
                 }
 
@@ -1129,20 +1129,20 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
 
         case ERR_ALARM:
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s %d\' - %.60s.", name, number, err_msg );
+                "\'%s %d\' - %s.", name, number, err_msg );
             break;
             
         case ERR_TO_FAIL_STATE:
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s %d\' - авария операции %.1d \'%.40s\' - %.50s.",
+                "\'%s %d\' - авария операции %.1d \'%s\' - %s.",
                 name, number, mode, ( *operations_manager )[ mode ]->get_name(), 
                 err_msg );
             break;
 
         case ERR_CANT_ON_2_OPER:
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s %d\' - не включена операция %.1d \'%.40s\' - "
-                "уже включена операция %.1d \'%.40s\'.",
+                "\'%s %d\' - не включена операция %.1d \'%s\' - "
+                "уже включена операция %.1d \'%s\'.",
                 name, number, 
                 mode, ( *operations_manager )[ mode ]->get_name(),
                 new_mode, ( *operations_manager )[ new_mode ]->get_name() );
@@ -1151,13 +1151,13 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
                 {
                 snprintf( new_err->msg + strlen( new_err->msg ) - 1,
                     sizeof( new_err->msg ) - strlen( new_err->msg ) - 1,
-                    " - %.50s.", err_msg );
+                    " - %s.", err_msg );
                 }
             break;
 
         case ERR_CANT_ON_2_OBJ:
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s %d\' - не включена операция %.1d \'%.40s\' - %s.",
+                "\'%s %d\' - не включена операция %.1d \'%s\' - %s.",
                 name, number,
                 mode, ( *operations_manager )[ mode ]->get_name(),
                 err_msg );
@@ -1170,7 +1170,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
                 debug_break;
                 }
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s\' - режим %.1d \'%.40s\' - %.50s.",
+                "\'%s\' - операция %.1d \'%s\' - %s.",
                 name, mode, ( *operations_manager )[ mode ]->get_name(), err_msg );
             break;
         }
