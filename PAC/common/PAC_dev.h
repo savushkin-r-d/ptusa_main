@@ -2216,11 +2216,11 @@ class valve_iolink_mix_proof : public i_mix_proof,  public valve
         bool blink = false;     //Visual indication
     };
 //-----------------------------------------------------------------------------
-/// @brief Клапан IO-Link отсечной.
-class valve_iolink_shut_off : public valve
+/// @brief Клапан IO-Link отсечной ALfaLaval.
+class valve_iolink_shut_off_thinktop : public valve
     {
     public:
-        valve_iolink_shut_off( const char* dev_name );
+        valve_iolink_shut_off_thinktop( const char* dev_name );
 
         VALVE_STATE get_valve_state();
 
@@ -2275,6 +2275,67 @@ class valve_iolink_shut_off : public valve
 
         bool blink = false;     //Visual indication
     };    
+//-----------------------------------------------------------------------------
+/// @brief Клапан IO-Link отсечной Definox.
+class valve_iolink_shut_off_sorio : public valve
+    {
+    public:
+        valve_iolink_shut_off_sorio( const char* dev_name );
+
+        VALVE_STATE get_valve_state();
+
+        int save_device_ex( char* buff );
+
+        void evaluate_io();
+
+#ifndef DEBUG_NO_IO_MODULES
+        float get_value();
+
+        bool get_fb_state();
+
+        int get_off_fb_value();
+
+        int get_on_fb_value();
+
+        void direct_on();
+
+        void direct_off();
+
+        int set_cmd( const char* prop, u_int idx, double val );
+
+        void direct_set_state( int new_state );
+
+#endif // DEBUG_NO_IO_MODULES
+
+    private:
+        struct in_data
+            {
+            int16_t  pos;
+            bool de_en       : 1; //De-Energized
+            bool main        : 1; //Main energized position
+            uint16_t unused1 : 2;
+            uint16_t status  : 5;
+            bool sv1         : 1; //Current state of solenoid 1
+            uint16_t unused2 : 2;
+            uint16_t err     : 5;
+            };
+
+        struct out_data_swapped   //Swapped low and high byte for easer processing
+            {            
+            bool sv1         : 1; //Solenoid valve 1 activation
+            uint16_t unused1 : 2;
+            bool wink        : 1; //Visual indication
+            bool ext1        : 1; //External RGB LED #1
+            bool ext2        : 1; //External RGB LED #2
+            bool ext3        : 1; //External RGB LED #3
+            uint16_t unused2 : 1;
+            };
+
+        in_data* in_info = new in_data;
+        out_data_swapped* out_info = 0;
+
+        bool blink = false;     //Visual indication
+    };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-link VTUG с одним каналом управления.
 class valve_iolink_vtug : public valve

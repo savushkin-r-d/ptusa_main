@@ -729,10 +729,20 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     break;
 
                 case device::V_IOLINK_DO1_DI2:
-                    new_device = new valve_iolink_shut_off( dev_name );
-                    new_io_device = (valve_iolink_shut_off*)new_device;
+                    {
+                    const char* SORIO_ARTICLE = "SORIO.9615-4003-06";
+                    if ( strcmp( article, SORIO_ARTICLE ) == 0 )
+                        {
+                        new_device = new valve_iolink_shut_off_sorio( dev_name );
+                        new_io_device = (valve_iolink_shut_off_sorio*)new_device;
+                        }
+                    else
+                        {
+                        new_device = new valve_iolink_shut_off_thinktop( dev_name );
+                        new_io_device = (valve_iolink_shut_off_thinktop*)new_device;
+                        }
                     break;
-
+                    }
 
                 default:
                     if ( G_DEBUG )
@@ -2643,12 +2653,12 @@ void valve_iolink_mix_proof::direct_set_state( int new_state )
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-valve_iolink_shut_off::valve_iolink_shut_off( const char* dev_name ) :
+valve_iolink_shut_off_sorio::valve_iolink_shut_off_sorio( const char* dev_name ) :
     valve( true, true, dev_name, DT_V, V_IOLINK_DO1_DI2 )
     {
     }
 //-----------------------------------------------------------------------------
-valve::VALVE_STATE valve_iolink_shut_off::get_valve_state()
+valve::VALVE_STATE valve_iolink_shut_off_sorio::get_valve_state()
     {
 #ifdef DEBUG_NO_IO_MODULES
     return (VALVE_STATE)digital_io_device::get_state();
@@ -2661,7 +2671,7 @@ valve::VALVE_STATE valve_iolink_shut_off::get_valve_state()
 #endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
-void valve_iolink_shut_off::evaluate_io()
+void valve_iolink_shut_off_sorio::evaluate_io()
     {
     out_info = (out_data_swapped*)get_AO_write_data( 0 );
 
@@ -2689,7 +2699,7 @@ void valve_iolink_shut_off::evaluate_io()
 #endif
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_shut_off::save_device_ex( char* buff )
+int valve_iolink_shut_off_sorio::save_device_ex( char* buff )
     {
     bool cs = out_info->sv1;
     int err = in_info->err;
@@ -2701,10 +2711,10 @@ int valve_iolink_shut_off::save_device_ex( char* buff )
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
-bool valve_iolink_shut_off::get_fb_state()
+bool valve_iolink_shut_off_sorio::get_fb_state()
     {
-    if ( get_delta_millisec( start_switch_time ) <
-        get_par( valve::P_ON_TIME, 0 ) )
+    u_long dt = get_delta_millisec( start_switch_time );
+    if ( dt < get_par( valve::P_ON_TIME, 0 ) )
         {
         return true;
         }
@@ -2715,22 +2725,22 @@ bool valve_iolink_shut_off::get_fb_state()
     return false;
     }
 //-----------------------------------------------------------------------------
-float valve_iolink_shut_off::get_value()
+float valve_iolink_shut_off_sorio::get_value()
     {
     return 0.1f * in_info->pos;
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_shut_off::get_off_fb_value()
+int valve_iolink_shut_off_sorio::get_off_fb_value()
     {
     return out_info->sv1 == false && in_info->main && in_info->st;
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_shut_off::get_on_fb_value()
+int valve_iolink_shut_off_sorio::get_on_fb_value()
     {
     return out_info->sv1 == true && in_info->de_en && in_info->st;
     }
 //-----------------------------------------------------------------------------
-void valve_iolink_shut_off::direct_on()
+void valve_iolink_shut_off_sorio::direct_on()
     {
     if ( false == in_info->main )
         {
@@ -2740,7 +2750,7 @@ void valve_iolink_shut_off::direct_on()
     out_info->sv1 = true;
     }
 //-----------------------------------------------------------------------------
-void valve_iolink_shut_off::direct_off()
+void valve_iolink_shut_off_sorio::direct_off()
     {
     if ( out_info->sv1 )
         {
@@ -2750,7 +2760,7 @@ void valve_iolink_shut_off::direct_off()
     out_info->sv1 = false;
     }
 //-----------------------------------------------------------------------------
-int valve_iolink_shut_off::set_cmd( const char* prop, u_int idx, double val )
+int valve_iolink_shut_off_sorio::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( G_DEBUG )
         {
@@ -2761,6 +2771,160 @@ int valve_iolink_shut_off::set_cmd( const char* prop, u_int idx, double val )
         }
 
     switch ( prop[ 0 ] )
+        {
+        case 'B': //BLINK
+            {
+            val > 0 ? out_info->wink = true : out_info->wink = false;
+            blink = out_info->wink;
+            break;
+            }
+
+        default:
+            valve::set_cmd( prop, idx, val );
+            break;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_shut_off_sorio::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case V_OFF:
+            direct_off();
+            break;
+
+        case V_ON:
+            direct_on();
+            break;
+
+       default:
+            direct_on();
+            break;
+        }
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iolink_shut_off_thinktop::valve_iolink_shut_off_thinktop( const char* dev_name ) :
+    valve( true, true, dev_name, DT_V, V_IOLINK_DO1_DI2 )
+    {
+    }
+//-----------------------------------------------------------------------------
+valve::VALVE_STATE valve_iolink_shut_off_thinktop::get_valve_state()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return (VALVE_STATE)digital_io_device::get_state();
+#else
+
+    if (in_info->de_en) return V_OFF;
+    if (in_info->main) return V_ON;
+
+    return V_OFF;
+#endif // DEBUG_NO_IO_MODULES
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_shut_off_thinktop::evaluate_io()
+    {
+    out_info = (out_data_swapped*)get_AO_write_data( 0 );
+
+    char* data = (char*)get_AI_data( 0 );
+    char* buff = (char*)in_info;
+
+    const int SIZE = 4;
+    std::copy( data, data + SIZE, buff );
+    std::swap( buff[ 0 ], buff[ 1 ] );
+    std::swap( buff[ 2 ], buff[ 3 ] );
+
+    //#define DEBUG_IOLINK_
+#ifdef DEBUG_IOLINK_
+    char* tmp = (char*)in_info;
+
+    sprintf( G_LOG->msg, "%x %x %x %x\n",
+        tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ] );
+    G_LOG->write_log( i_log::P_WARNING );
+
+    sprintf( G_LOG->msg,
+        "de_en %u, main %u, usl %u, lsp %u, pos %.1f\n",
+        in_info->de_en, in_info->main, in_info->usl,
+        in_info->lsp, 0.1 * in_info->pos );
+    G_LOG->write_log( i_log::P_NOTICE );
+#endif
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_shut_off_thinktop::save_device_ex( char* buff )
+    {
+    bool cs = out_info->sv1;
+    int err = in_info->err;
+
+    int res = sprintf( buff, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err );
+    res += sprintf( buff + res, "V=%.1f, ", get_value() );
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+bool valve_iolink_shut_off_thinktop::get_fb_state()
+    {
+    if (get_delta_millisec( start_switch_time ) <
+        get_par( valve::P_ON_TIME, 0 ))
+        {
+        return true;
+        }
+
+    if (out_info->sv1 == false && in_info->de_en && in_info->st) return true;
+    if (out_info->sv1 == true && in_info->main && in_info->st) return true;
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
+float valve_iolink_shut_off_thinktop::get_value()
+    {
+    return 0.1f * in_info->pos;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_shut_off_thinktop::get_off_fb_value()
+    {
+    return out_info->sv1 == false && in_info->main && in_info->st;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_shut_off_thinktop::get_on_fb_value()
+    {
+    return out_info->sv1 == true && in_info->de_en && in_info->st;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_shut_off_thinktop::direct_on()
+    {
+    if (false == in_info->main)
+        {
+        start_switch_time = get_millisec();
+        }
+
+    out_info->sv1 = true;
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_shut_off_thinktop::direct_off()
+    {
+    if (out_info->sv1)
+        {
+        start_switch_time = get_millisec();
+        }
+
+    out_info->sv1 = false;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_shut_off_thinktop::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if (G_DEBUG)
+        {
+        sprintf( G_LOG->msg,
+            "%s\t valve_iolink_mix_proof::set_cmd() - prop = %s, idx = %d, val = %f",
+            get_name(), prop, idx, val );
+        G_LOG->write_log( i_log::P_DEBUG );
+        }
+
+    switch (prop[ 0 ])
         {
         case 'B': //BLINK
         {
@@ -2777,9 +2941,9 @@ int valve_iolink_shut_off::set_cmd( const char* prop, u_int idx, double val )
     return 0;
     }
 //-----------------------------------------------------------------------------
-void valve_iolink_shut_off::direct_set_state( int new_state )
+void valve_iolink_shut_off_thinktop::direct_set_state( int new_state )
     {
-    switch ( new_state )
+    switch (new_state)
         {
         case V_OFF:
             direct_off();
@@ -2789,7 +2953,7 @@ void valve_iolink_shut_off::direct_set_state( int new_state )
             direct_on();
             break;
 
-       default:
+        default:
             direct_on();
             break;
         }
