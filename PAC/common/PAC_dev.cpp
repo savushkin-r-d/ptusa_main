@@ -730,7 +730,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
 
                 case device::V_IOLINK_DO1_DI2:
                     {
-                    const char* SORIO_ARTICLE = "SORIO.9615-4003-06";
+                    const char* SORIO_ARTICLE = "DEF.SORIO-1SV";
                     if ( strcmp( article, SORIO_ARTICLE ) == 0 )
                         {
                         new_device = new valve_iolink_shut_off_sorio( dev_name );
