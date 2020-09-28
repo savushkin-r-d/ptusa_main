@@ -148,6 +148,11 @@ int operation::check_devices_on_run_state(char* err_dev_name, int str_len)
     return states[ RUN ]->check_devices( err_dev_name, str_len );
     }
 //-----------------------------------------------------------------------------
+int operation::check_steps_params( char* err_dev_name, int str_len )
+    {
+    return states[ RUN ]->check_steps_params( err_dev_name, str_len );
+    }
+//-----------------------------------------------------------------------------
 int operation::check_on_run_state(char* reason) const
     {
     return states[ RUN ]->check_on( reason );
@@ -1425,31 +1430,37 @@ void operation_state::evaluate()
 
     //Время шага
     int par_n = step_duration_par_ns[ active_step_n ];
-    if ( par_n > 0 && owner->get_step_param( par_n ) > 0 )
+    if ( par_n > 0 )
         {
         active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
-        }
 
-    steps[ active_step_n ]->evaluate();
-
-    if ( active_step_time != 0 &&
-        steps[ active_step_n ]->get_eval_time() > ( u_int ) active_step_time )
-        {
-        if ( -1 == active_step_next_step_n )
+        if ( active_step_time == 0 || 
+            steps[ active_step_n ]->get_eval_time() > (u_int)active_step_time )
             {
-            if ( n > 0 )
+            if ( -1 == active_step_next_step_n )
                 {
-                owner->off_mode( n );
+                if ( n > 0 )
+                    {
+                    owner->off_mode( n );
+                    }
+                else
+                    {
+                    final(); //Для режима-заглушки.
+                    }
                 }
             else
                 {
-                final(); //Для режима-заглушки.
+                to_step( active_step_next_step_n, 0 );
                 }
             }
         else
             {
-            to_step( active_step_next_step_n, 0 );
+            steps[ active_step_n ]->evaluate();
             }
+        }  
+    else
+        {
+        steps[ active_step_n ]->evaluate();
         }
     }
 //-----------------------------------------------------------------------------
@@ -1540,14 +1551,22 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
 
     //Время шага
     int par_n = step_duration_par_ns[ active_step_n ];
-    if ( par_n > 0 && owner->get_step_param( par_n ) >= 0 )
+    if ( par_n > 0 )
         {
         active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
         active_step_next_step_n = next_step_ns[ active_step_n ];
-        }
 
-    steps[ active_step_n ]->init();
-    steps[ active_step_n ]->evaluate();
+        if ( active_step_time > 0 )
+            {
+            steps[ active_step_n ]->init();
+            steps[ active_step_n ]->evaluate();
+            }
+        }
+    else
+        {
+        steps[ active_step_n ]->init();
+        steps[ active_step_n ]->evaluate();
+        }
     
     if ( G_DEBUG )
         {
@@ -1606,6 +1625,32 @@ int operation_state::check_devices( char* err_dev_name, int str_len )
 
         if ( res )
             {
+            return 1;
+            }
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int operation_state::check_steps_params( char* err_dev_name, int str_len )
+    {
+    if ( !step_duration_par_ns.empty() )
+        {
+        auto iter = step_duration_par_ns.begin();
+        auto all_params_is_empty = true;
+        while ( iter != step_duration_par_ns.end() )
+            {
+            if ( owner->get_step_param( *iter ) > 0 )
+                {
+                all_params_is_empty = false;
+                break;
+                }
+            iter++;
+            }
+        if ( all_params_is_empty )
+            {
+            snprintf( err_dev_name, str_len,
+                "все длительности шагов имеют значение 0" );
             return 1;
             }
         }
