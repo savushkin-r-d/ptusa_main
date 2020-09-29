@@ -1445,23 +1445,19 @@ void operation_state::evaluate()
                     }
                 else
                     {
-                    final(); //Для режима-заглушки.
+                    final(); //Для операции-заглушки.
                     }
                 }
             else
                 {
                 to_step( active_step_next_step_n, 0 );
                 }
-            }
-        else
-            {
-            steps[ active_step_n ]->evaluate();
+
+            return;
             }
         }  
-    else
-        {
-        steps[ active_step_n ]->evaluate();
-        }
+    
+    steps[ active_step_n ]->evaluate();
     }
 //-----------------------------------------------------------------------------
 void operation_state::final()
@@ -1555,14 +1551,9 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
         {
         active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
         active_step_next_step_n = next_step_ns[ active_step_n ];
-
-        if ( active_step_time > 0 )
-            {
-            steps[ active_step_n ]->init();
-            steps[ active_step_n ]->evaluate();
-            }
         }
-    else
+    
+    if ( active_step_time > 0 || par_n <= 0 )
         {
         steps[ active_step_n ]->init();
         steps[ active_step_n ]->evaluate();
