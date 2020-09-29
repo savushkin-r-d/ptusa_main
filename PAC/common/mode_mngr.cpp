@@ -1631,7 +1631,7 @@ int operation_state::check_steps_params( char* err_dev_name, int str_len )
         auto all_params_is_empty = true;
         while ( iter != step_duration_par_ns.end() )
             {
-            if ( owner->get_step_param( *iter ) > 0 )
+            if ( *iter < 0 || owner->get_step_param( *iter ) > 0 )
                 {
                 all_params_is_empty = false;
                 break;
