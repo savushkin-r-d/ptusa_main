@@ -306,6 +306,22 @@ int tech_object::evaluate()
                 lua_on_pause( idx );
                 }
         	}
+
+        if ( op->get_state() == operation::RUN )
+            {
+            //Проверка операции на корректные параметры шагов.
+            const int ERR_STR_SIZE = 41;
+            char res_str[ ERR_STR_SIZE ] = "";
+
+            int len = strlen( res_str );
+            int res = op->check_steps_params( res_str, ERR_STR_SIZE );
+            if ( res )
+                {
+                set_err_msg( res_str, idx, 0, ERR_TO_FAIL_STATE );
+                op->pause();
+                lua_on_pause( idx );
+                }
+            }
         
         }
     return 0;

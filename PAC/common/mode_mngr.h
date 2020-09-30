@@ -439,6 +439,8 @@ class operation_state
 
         int check_devices( char* err_dev_name, int str_len );
 
+        int check_steps_params( char* err_dev_name, int str_len );
+
     private:
         std::string name;
         std::vector< step* > steps;
@@ -519,6 +521,8 @@ class operation
         void evaluate();
 
         void final();
+
+        int check_steps_params( char* err_dev_name, int str_len );
 
         u_int active_step() const;
         u_int get_run_step() const;
