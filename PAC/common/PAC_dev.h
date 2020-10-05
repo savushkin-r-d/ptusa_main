@@ -3322,12 +3322,21 @@ class valve_DO2 : public DO2
             }
     };
 //-----------------------------------------------------------------------------
+class i_motor : public device
+    {
+    public:
+        i_motor( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,
+            int params_count );
+
+        void reverse();
+    };
+//-----------------------------------------------------------------------------
 /// @brief Электродвигатель (мешалка, насос).
-class motor : public device, public io_device
+class motor : public i_motor, public io_device
     {
     public:
         motor( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
-            device( dev_name, DT_M, sub_type, ADDITIONAL_PARAM_COUNT ),
+            i_motor( dev_name, sub_type, ADDITIONAL_PARAM_COUNT ),
             io_device( dev_name ),
             start_switch_time( get_millisec() )
 #ifdef DEBUG_NO_IO_MODULES
@@ -3390,11 +3399,11 @@ class motor : public device, public io_device
 //-----------------------------------------------------------------------------
 /// @brief Электродвигатель, управляемый частотным преобразователем altivar с
 /// интерфейсной платой Ethernet.
-class motor_altivar : public device, public io_device
+class motor_altivar : public i_motor, public io_device
 {
 public:
     motor_altivar(const char *dev_name, device::DEVICE_SUB_TYPE sub_type) :
-        device(dev_name, DT_M, sub_type, ADDITIONAL_PARAM_COUNT),
+        i_motor(dev_name, sub_type, ADDITIONAL_PARAM_COUNT),
         io_device(dev_name),
         start_switch_time(get_millisec()),
         atv(NULL)
@@ -3747,7 +3756,7 @@ class device_manager: public i_Lua_save_device
         i_AO_device* get_VC( const char *dev_name );
 
         /// @brief Получение двигателя по номеру.
-        i_DO_AO_device* get_M( const char *dev_name );
+        i_motor* get_M( const char *dev_name );
 
         /// @brief Получение уровня по номеру.
         i_DI_device* get_LS( const char *dev_name );
@@ -4011,8 +4020,8 @@ i_AO_device* VC( const char *dev_name );
 /// @param number - номер двигателя.
 /// @return - двигатель с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_DO_AO_device* M( u_int dev_n );
-i_DO_AO_device* M( const char *dev_name );
+i_motor* M( u_int dev_n );
+i_motor* M( const char *dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение сигнального уровня по номеру.
 ///

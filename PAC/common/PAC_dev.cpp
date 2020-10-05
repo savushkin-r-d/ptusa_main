@@ -499,9 +499,9 @@ i_AO_device* device_manager::get_VC( const char *dev_name )
     return get_device( device::DT_VC, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DO_AO_device* device_manager::get_M( const char *dev_name )
+i_motor* device_manager::get_M( const char *dev_name )
     {
-    return get_device( device::DT_M, dev_name );
+    return (i_motor*) get_device( device::DT_M, dev_name );
     }
 //-----------------------------------------------------------------------------
 i_DI_device* device_manager::get_LS( const char *dev_name )
@@ -3482,6 +3482,18 @@ void valve_DO1::direct_off()
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+i_motor::i_motor( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,
+    int params_count ) :
+    device( dev_name, DT_M, sub_type, params_count )
+    {
+    }
+//-----------------------------------------------------------------------------
+void i_motor::reverse()
+    {
+    set_state( 2 );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 float motor::get_value()
     {
 #ifdef DEBUG_NO_IO_MODULES
@@ -4730,7 +4742,7 @@ i_AO_device* VC( const char *dev_name )
     return G_DEVICE_MANAGER()->get_VC( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DO_AO_device* M( u_int dev_n )
+i_motor* M( u_int dev_n )
     {
     static char name[ device::C_MAX_NAME ] = "";
     snprintf( name, device::C_MAX_NAME, "M%d", dev_n );
@@ -4738,7 +4750,7 @@ i_DO_AO_device* M( u_int dev_n )
     return G_DEVICE_MANAGER()->get_M( name );
     }
 
-i_DO_AO_device* M( const char *dev_name )
+i_motor* M( const char *dev_name )
     {
     return G_DEVICE_MANAGER()->get_M( dev_name );
     }
