@@ -1911,7 +1911,7 @@ int valve::get_state()
                                 }
                             else
                                 {
-                                return VX_ON_FB_OK_MANUAL;
+                                return VX_OPENING_MANUAL;
                                 }
                             }
                         } // if ( get_manual_mode() )
@@ -1931,7 +1931,7 @@ int valve::get_state()
                                 }
                             else
                                 {
-                                return VX_ON_FB_OK;
+                                return VX_OPENING;
                                 }
                             }
                         }
@@ -1984,7 +1984,7 @@ int valve::get_state()
                                 }
                             else
                                 {
-                                return VX_OFF_FB_OK_MANUAL;
+                                return VX_CLOSING_MANUAL;
                                 }
                             }
                         } // if ( get_manual_mode() )
@@ -2004,7 +2004,7 @@ int valve::get_state()
                                 }
                             else
                                 {
-                                return VX_OFF_FB_OK;
+                                return VX_CLOSING;
                                 }
                             }
                         }

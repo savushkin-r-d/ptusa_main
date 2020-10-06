@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 10/05/20 15:59:15.
+** Generated automatically by tolua++-1.0.92 on 10/06/20 21:34:29.
 */
 
 #ifndef __cplusplus
@@ -2590,6 +2590,70 @@ static int tolua_PAC_dev_dev_errors_manager_set_cmd00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'set_cmd'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: is_opened of class  valve */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_valve_is_opened00
+static int tolua_PAC_dev_valve_is_opened00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"valve",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  valve* self = (valve*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'is_opened'", NULL);
+#endif
+  {
+   bool tolua_ret = (bool)  self->is_opened();
+   tolua_pushboolean(tolua_S,(bool)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'is_opened'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: is_closed of class  valve */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_valve_is_closed00
+static int tolua_PAC_dev_valve_is_closed00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"valve",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  valve* self = (valve*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'is_closed'", NULL);
+#endif
+  {
+   bool tolua_ret = (bool)  self->is_closed();
+   tolua_pushboolean(tolua_S,(bool)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'is_closed'.",&tolua_err);
  return 0;
 #endif
 }
@@ -12920,6 +12984,8 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"valve","valve","",NULL);
   tolua_beginmodule(tolua_S,"valve");
+   tolua_function(tolua_S,"is_opened",tolua_PAC_dev_valve_is_opened00);
+   tolua_function(tolua_S,"is_closed",tolua_PAC_dev_valve_is_closed00);
    tolua_function(tolua_S,"on",tolua_PAC_dev_valve_on00);
    tolua_function(tolua_S,"off",tolua_PAC_dev_valve_off00);
    tolua_function(tolua_S,"direct_off",tolua_PAC_dev_valve_direct_off00);
