@@ -518,6 +518,12 @@ class dev_errors_manager
 class valve
     {
     public:
+        /// @brief Получение значения включенного состояния.
+        bool is_opened();
+
+        /// @brief Получение значения выключенного состояния.
+        bool is_closed();
+
         /// @brief Включение устройства с учетом ручного режима.
         virtual void on();
 

@@ -1911,7 +1911,7 @@ int valve::get_state()
                                 }
                             else
                                 {
-                                return VX_ON_FB_OK_MANUAL;
+                                return VX_OPENING_MANUAL;
                                 }
                             }
                         } // if ( get_manual_mode() )
@@ -1931,7 +1931,7 @@ int valve::get_state()
                                 }
                             else
                                 {
-                                return VX_ON_FB_OK;
+                                return VX_OPENING;
                                 }
                             }
                         }
@@ -1984,7 +1984,7 @@ int valve::get_state()
                                 }
                             else
                                 {
-                                return VX_OFF_FB_OK_MANUAL;
+                                return VX_CLOSING_MANUAL;
                                 }
                             }
                         } // if ( get_manual_mode() )
@@ -2004,7 +2004,7 @@ int valve::get_state()
                                 }
                             else
                                 {
-                                return VX_OFF_FB_OK;
+                                return VX_CLOSING;
                                 }
                             }
                         }
@@ -2044,11 +2044,11 @@ int valve::set_cmd( const char *prop, u_int idx, double val )
         case 'F':
             if ( strcmp( prop, "FB_ON_ST" ) == 0 )
                 {
-                on_fb = val == .0;
+                on_fb = val != .0;
                 }
             else
                 {
-                off_fb = val == .0;
+                off_fb = val != .0;
                 }
             break;
 
@@ -2480,12 +2480,13 @@ void valve_iolink_mix_proof::evaluate_io()
 //-----------------------------------------------------------------------------
 int valve_iolink_mix_proof::save_device_ex( char *buff )
     {
+    int res = valve::save_device_ex( buff );
+
     bool cs = out_info->sv1 || out_info->sv2 || out_info->sv3;
     int err = in_info->err;
-
-    int res = sprintf( buff, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err );
+    res += sprintf( buff + res, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err );
     res += sprintf( buff + res, "V=%.1f, ", get_value() );
-
+    
     return res;
     }
 //-----------------------------------------------------------------------------

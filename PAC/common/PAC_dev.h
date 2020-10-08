@@ -833,6 +833,18 @@ class valve: public digital_io_device
 #pragma endregion Отключение клапана с задержкой.
 #endif
 
+        /// @brief Получение значения включенного состояния.
+        bool is_opened()
+            {
+            return get_on_fb_value() > 0;
+            }
+
+        /// @brief Получение значения выключенного состояния.
+        bool is_closed()
+            {
+            return get_off_fb_value() > 0;
+            }
+
         /// @brief Получение значения обратной связи на включенное состояние.
         virtual int get_on_fb_value()
             {
@@ -879,6 +891,10 @@ class valve: public digital_io_device
             VX_ON_FB_ERR_MANUAL  = -12,  ///< Включен вручную, ошибка ОС.
             VX_OFF_FB_ERR_MANUAL = -13,  ///< Выключен вручную, ошибка ОС.
 
+            VX_OPENING = 40,
+            VX_CLOSING,
+            VX_OPENING_MANUAL,
+            VX_CLOSING_MANUAL,
 
             VX_UNKNOWN = 100,            ///< Неизвестное состояние.
             };
