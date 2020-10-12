@@ -19,6 +19,9 @@
 
 #ifdef WIN_OS
 #include "w_mem.h"
+
+#pragma comment(lib, "Shell32.lib")
+#include <shellapi.h>
 #endif
 
 #ifdef LINUX_OS
@@ -29,6 +32,10 @@ auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
 int project_manager::proc_main_params( int argc, const char *argv[] )
     {
+#ifdef WIN32
+    wchar_t** w_argv = CommandLineToArgvW( GetCommandLineW(), &argc );
+#endif
+
     for ( int i = 1; i < argc; i++ )
         {
         if ( strcmp( argv[ i ], "debug" ) == 0 )
@@ -82,7 +89,21 @@ int project_manager::proc_main_params( int argc, const char *argv[] )
         {
         if ( strcmp( argv[ i ], "path" ) == 0 )
             {
+#ifdef WIN32
+            wchar_t* w_path = w_argv[ i + 1 ];
+            int utf16len = wcslen( w_path );
+            int utf8len = WideCharToMultiByte( CP_UTF8, 0, w_path, utf16len,
+                NULL, 0, NULL, NULL );
+
+            char* path = new char[ utf8len + 1 ];            
+            memset( path, 0, utf8len + 1 );
+
+            WideCharToMultiByte( CP_UTF8, 0, w_path, utf16len, path, utf8len, 0, 0 );
+
+            init_path( path );
+#else
             init_path( argv[ i + 1 ] );
+#endif            
             }
         }
     
