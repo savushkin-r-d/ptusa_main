@@ -2720,8 +2720,8 @@ bool valve_iolink_shut_off_sorio::get_fb_state()
         return true;
         }
 
-    if ( out_info->sv1 == false && in_info->de_en && in_info->st ) return true;
-    if ( out_info->sv1 == true && in_info->main && in_info->st ) return true;
+    if ( out_info->sv1 == false && in_info->de_en && in_info->sv1 ) return true;
+    if ( out_info->sv1 == true && in_info->main && in_info->sv1 ) return true;
 
     return false;
     }
@@ -2733,12 +2733,12 @@ float valve_iolink_shut_off_sorio::get_value()
 //-----------------------------------------------------------------------------
 int valve_iolink_shut_off_sorio::get_off_fb_value()
     {
-    return out_info->sv1 == false && in_info->main && in_info->st;
+    return !in_info->sv1;
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_shut_off_sorio::get_on_fb_value()
     {
-    return out_info->sv1 == true && in_info->de_en && in_info->st;
+    return in_info->sv1;
     }
 //-----------------------------------------------------------------------------
 void valve_iolink_shut_off_sorio::direct_on()
