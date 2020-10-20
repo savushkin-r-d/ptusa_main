@@ -190,7 +190,7 @@ class i_counter
 /// @brief Простое физическое устройство.
 ///
 /// Примеры таких устройств: клапан, насос, мешалка и т.д.
-class device
+class device : public i_DO_AO_device
     {
 #pragma region Управление устройством из пользовательского скрипта Lua.
     public:

@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 10/06/20 21:34:29.
+** Generated automatically by tolua++-1.0.92 on 10/20/20 08:33:51.
 */
 
 #ifndef __cplusplus
@@ -12889,7 +12889,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"get_abs_quantity",tolua_PAC_dev_i_counter_get_abs_quantity00);
    tolua_function(tolua_S,"abs_reset",tolua_PAC_dev_i_counter_abs_reset00);
   tolua_endmodule(tolua_S);
-  tolua_cclass(tolua_S,"device","device","",NULL);
+  tolua_cclass(tolua_S,"device","device","i_DO_AO_device",NULL);
   tolua_beginmodule(tolua_S,"device");
    tolua_function(tolua_S,"off",tolua_PAC_dev_device_off00);
    tolua_function(tolua_S,"on",tolua_PAC_dev_device_on00);
