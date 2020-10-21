@@ -112,7 +112,7 @@ altivar_node::altivar_node(unsigned int id, const char* ip, unsigned int port, u
 	reverse = 0;
 	modbustimeout = get_millisec();
 	ismodbuserror = 0;
-	cmd = 4; //Ñáðîñ îøèáêè ïðè çàïóñêå.
+	cmd = 4;
 	state = 0;
 	fc_setpoint = 0;
 	fc_value = 0;

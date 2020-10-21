@@ -160,11 +160,11 @@ void mlp::learn_iteration( float *sample_x, float *sample_y_or_error, char type,
 
     if ( 1 == is_solve_net_out)
         {
-        //1. Рассчитать выход каждого нейрона.
+        //1. Р Р°СЃСЃС‡РёС‚Р°С‚СЊ РІС‹С…РѕРґ РєР°Р¶РґРѕРіРѕ РЅРµР№СЂРѕРЅР°.
         solve_out( sample_x );
         }
 
-    //2. Рассчитать среднеквадратичную ошибку. 
+    //2. Р Р°СЃСЃС‡РёС‚Р°С‚СЊ СЃСЂРµРґРЅРµРєРІР°РґСЂР°С‚РёС‡РЅСѓСЋ РѕС€РёР±РєСѓ. 
     if ( type == T_SAMPLE_Y )
         {
         for ( i = 0; i < outputs_cnt; i++ )
@@ -179,8 +179,8 @@ void mlp::learn_iteration( float *sample_x, float *sample_y_or_error, char type,
     Show5DigitLed( 5, 1 );
 #endif // USE_DIGIT_LED_DEBUG
 
-    //3. Модифицируем веса и пороги.
-    //  а. вычисляем ошибку
+    //3. РњРѕРґРёС„РёС†РёСЂСѓРµРј РІРµСЃР° Рё РїРѕСЂРѕРіРё.
+    //  Р°. РІС‹С‡РёСЃР»СЏРµРј РѕС€РёР±РєСѓ
     for ( k = 0; k < outputs_cnt; k++ )
         {
         if ( type == T_SAMPLE_Y )
@@ -249,7 +249,7 @@ void mlp::learn_iteration( float *sample_x, float *sample_y_or_error, char type,
     Show5DigitLed( 5, 3 );
 #endif // USE_DIGIT_LED_DEBUG
 
-    //  б. Модифицируем веса и пороги.
+    //  Р±. РњРѕРґРёС„РёС†РёСЂСѓРµРј РІРµСЃР° Рё РїРѕСЂРѕРіРё.
     for ( j = 0; j < hidden_cnt; j++ )
         {        
         for ( k = 0; k < outputs_cnt; k++ )
@@ -290,7 +290,7 @@ void mlp::learn_iteration( float *sample_x, float *sample_y_or_error, char type,
         float e, i_learn_samples *sample, int max_iteration_cnt, 
         bool is_err /*= false*/, bool print_res /*= true */ )
         {
-    //Проверка на соответствие структуры персептрона и обучающей выборки.
+    //РџСЂРѕРІРµСЂРєР° РЅР° СЃРѕРѕС‚РІРµС‚СЃС‚РІРёРµ СЃС‚СЂСѓРєС‚СѓСЂС‹ РїРµСЂСЃРµРїС‚СЂРѕРЅР° Рё РѕР±СѓС‡Р°СЋС‰РµР№ РІС‹Р±РѕСЂРєРё.
     if ( sample->get_inputs_cnt() != inputs_cnt )
         {
 #ifdef _DEBUG
@@ -337,7 +337,7 @@ void mlp::learn_iteration( float *sample_x, float *sample_y_or_error, char type,
             }
 #endif // KEY_BREAK
         E_k = 0;        
-        for ( int idx = 0; idx < sample->get_samples_cnt(); idx++ ) //Для всех образов.
+        for ( int idx = 0; idx < sample->get_samples_cnt(); idx++ ) //Р”Р»СЏ РІСЃРµС… РѕР±СЂР°Р·РѕРІ.
             {    	
             sample_x = sample->get_sample_x( idx );
             sample_y = sample->get_sample_y( idx );
@@ -388,7 +388,7 @@ void mlp::learn_iteration( float *sample_x, float *sample_y_or_error, char type,
 //------------------------------------------------------------------------------
 float* mlp::solve_layer_out( float *x_in, int layer_type, int activation_f_type )
     {
-    // Рассчитать выход каждого нейрона.
+    // Р Р°СЃСЃС‡РёС‚Р°С‚СЊ РІС‹С…РѕРґ РєР°Р¶РґРѕРіРѕ РЅРµР№СЂРѕРЅР°.
     float *y_tmp;
     float **w_tmp;
     float *T_tmp;
@@ -452,7 +452,7 @@ float* mlp::solve_layer_out( float *x_in, int layer_type, int activation_f_type 
 //------------------------------------------------------------------------------
 float* mlp::solve_layer_out( float **x_in, int layer_type, int activation_f_type )
     {
-    // Рассчитать выход каждого нейрона.
+    // Р Р°СЃСЃС‡РёС‚Р°С‚СЊ РІС‹С…РѕРґ РєР°Р¶РґРѕРіРѕ РЅРµР№СЂРѕРЅР°.
     float *y_tmp;
     float **w_tmp;
     float *T_tmp;
@@ -534,13 +534,13 @@ int mlp::prognose( int cnt, float *x_in, float *y_out )
 
     for ( int idx = 0; idx < cnt; idx++ )
         {
-        // Рассчитать выход каждого нейрона.        
+        // Р Р°СЃСЃС‡РёС‚Р°С‚СЊ РІС‹С…РѕРґ РєР°Р¶РґРѕРіРѕ РЅРµР№СЂРѕРЅР°.        
         solve_out( in_x_val );
 #ifdef _DEBUG
         printf( " % .3f\n", y[ 0 ] );
 #endif // _DEBUG
 
-        //Сдвинуть окно.
+        //РЎРґРІРёРЅСѓС‚СЊ РѕРєРЅРѕ.
         for ( i = 1; i < inputs_cnt; i++ )
             {
             in_x_val[ i - 1 ] = in_x_val[ i ];
@@ -566,13 +566,13 @@ int mlp::prognose( int cnt, float k, float data [] )
 
     for ( int idx = 0; idx < cnt - 1; idx++ )
         {
-        // Рассчитать выход.        
+        // Р Р°СЃСЃС‡РёС‚Р°С‚СЊ РІС‹С…РѕРґ.        
         solve_out( x );
 
-        //Скопировать выход.
+        //РЎРєРѕРїРёСЂРѕРІР°С‚СЊ РІС‹С…РѕРґ.
         y_prognose[ idx ] = y[ 0 ];
 
-        //Сдвинуть окно.
+        //РЎРґРІРёРЅСѓС‚СЊ РѕРєРЅРѕ.
         for ( int j = 0; j < inputs_cnt - 1; j++ )
             {
             x[ j ] = x[ j + 1 ];
@@ -609,13 +609,13 @@ int mlp::prognose( int cnt, float **x_in, int out_col_n  )
 
     for ( int idx = 0; idx < cnt - 1; idx++ )
         {
-        // Рассчитать выход каждого нейрона.        
+        // Р Р°СЃСЃС‡РёС‚Р°С‚СЊ РІС‹С…РѕРґ РєР°Р¶РґРѕРіРѕ РЅРµР№СЂРѕРЅР°.        
         solve_out( x_in[ idx ] );
 #ifdef _DEBUG
         printf( " % .3f\n", y[ 0 ] );
 #endif // _DEBUG
 
-        //Сдвинуть окно.
+        //РЎРґРІРёРЅСѓС‚СЊ РѕРєРЅРѕ.
         x_in[ idx + 1 ][ out_col_n ] = y[ 0 ];
         }
 
@@ -644,7 +644,7 @@ int mlp::save_prognose_to_file( char *file_name, float **y_out, int cnt, int col
     {
     FILE *stream;
     fopen_s( &stream, file_name, "w" );
-    fprintf( stream,"%s \t %s \t %s \t\n", "T гомог.", "Т пастер.", "VC100" );
+    fprintf( stream,"%s \t %s \t %s \t\n", "T РіРѕРјРѕРі.", "Рў РїР°СЃС‚РµСЂ.", "VC100" );
 
     for ( int i = 0; i < cnt; i++ )
         {     
@@ -721,7 +721,7 @@ int mlp::load_from_stream( char *stream )
     if ( inputs_cnt != inputs_cnt_tmp )
     	{
 #ifdef _DEBUG
-        printf( "Количество считанных входов (%d) отличается от заданного (%d).",
+        printf( "РљРѕР»РёС‡РµСЃС‚РІРѕ СЃС‡РёС‚Р°РЅРЅС‹С… РІС…РѕРґРѕРІ (%d) РѕС‚Р»РёС‡Р°РµС‚СЃСЏ РѕС‚ Р·Р°РґР°РЅРЅРѕРіРѕ (%d).",
             inputs_cnt_tmp, inputs_cnt );
 #endif // _DEBUG
 
@@ -730,7 +730,7 @@ int mlp::load_from_stream( char *stream )
     if ( hidden_cnt != hidden_cnt_tmp )
         {
 #ifdef _DEBUG
-        printf( "Количество считанных внутренних нейронов (%d) отличается от заданного (%d).",
+        printf( "РљРѕР»РёС‡РµСЃС‚РІРѕ СЃС‡РёС‚Р°РЅРЅС‹С… РІРЅСѓС‚СЂРµРЅРЅРёС… РЅРµР№СЂРѕРЅРѕРІ (%d) РѕС‚Р»РёС‡Р°РµС‚СЃСЏ РѕС‚ Р·Р°РґР°РЅРЅРѕРіРѕ (%d).",
             hidden_cnt_tmp, hidden_cnt );
 #endif // _DEBUG
 
@@ -739,7 +739,7 @@ int mlp::load_from_stream( char *stream )
     if ( outputs_cnt != outputs_cnt_tmp )
         {
 #ifdef _DEBUG
-        printf( "Количество считанных выходов (%d) отличается от заданного (%d).",
+        printf( "РљРѕР»РёС‡РµСЃС‚РІРѕ СЃС‡РёС‚Р°РЅРЅС‹С… РІС‹С…РѕРґРѕРІ (%d) РѕС‚Р»РёС‡Р°РµС‚СЃСЏ РѕС‚ Р·Р°РґР°РЅРЅРѕРіРѕ (%d).",
             outputs_cnt_tmp, outputs_cnt );
 #endif // _DEBUG
 

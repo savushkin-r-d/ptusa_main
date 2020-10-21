@@ -193,7 +193,7 @@ int stored_sample::create_learn_sample(
     x = new float*[ samples_cnt ];
     y = new float*[ samples_cnt ];
 
-    //Формирование обучающих выборок.
+    //Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ РѕР±СѓС‡Р°СЋС‰РёС… РІС‹Р±РѕСЂРѕРє.
 #ifdef _DEBUG        
     printf( "Creating learning sample (total %d):\n", samples_cnt );
 #endif // _DEBUG     

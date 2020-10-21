@@ -75,7 +75,7 @@ int linux_tcp_client::Connect()
         return 0;
         }
 
-    //Переводим сокет в неблокирующий режим.
+    //РџРµСЂРµРІРѕРґРёРј СЃРѕРєРµС‚ РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј.
     int flags = fcntl(socket_number, F_GETFL);
     res = fcntl(socket_number, F_SETFL, flags | O_NONBLOCK);
     if (res != 0)
@@ -167,7 +167,7 @@ int linux_tcp_client::AsyncConnect()
                     return 0;
                     }
 
-                //Переводим сокет в неблокирующий режим.
+                //РџРµСЂРµРІРѕРґРёРј СЃРѕРєРµС‚ РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј.
                 int flags = fcntl(socket_number, F_GETFL);
                 res = fcntl(socket_number, F_SETFL, flags | O_NONBLOCK);
                 if (res != 0)
@@ -332,7 +332,7 @@ int linux_tcp_client::AsyncSend(unsigned int bytestosend)
     }
 
 int linux_tcp_client::get_async_result() {
-    /// В процессе соединения циклично вызываем функцию для реализации асинхронного соединения.
+    /// Р’ РїСЂРѕС†РµСЃСЃРµ СЃРѕРµРґРёРЅРµРЅРёСЏ С†РёРєР»РёС‡РЅРѕ РІС‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ РґР»СЏ СЂРµР°Р»РёР·Р°С†РёРё Р°СЃРёРЅС…СЂРѕРЅРЅРѕРіРѕ СЃРѕРµРґРёРЅРµРЅРёСЏ.
     if (connectedstate == ACS_CONNECTING)
     {
         AsyncSend(async_bytes_to_send);

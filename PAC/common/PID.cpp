@@ -111,42 +111,42 @@ float PID::eval( float currentValue, int deltaSign )
         ek_2 = ek_1;
         ek_1 = ek;
 
-        //-Зона разгона.
+        //-Р—РѕРЅР° СЂР°Р·РіРѕРЅР°.
         if ( get_delta_millisec( start_time ) <
             par[ 0 ][ P_acceleration_time ] * 1000 )
             {
             acceleration( par[ 0 ][ P_acceleration_time ] );
             }
-        //-Зона разгона.-!>
+        //-Р—РѕРЅР° СЂР°Р·РіРѕРЅР°.-!>
 
         last_time = get_millisec();
         } // if ( get_millisec() - last_time > dt*1000L )
 
-    //-Мягкий пуск.
-    // Включили ручной режим.
+    //-РњСЏРіРєРёР№ РїСѓСЃРє.
+    // Р’РєР»СЋС‡РёР»Рё СЂСѓС‡РЅРѕР№ СЂРµР¶РёРј.
     if ( par[ 0 ][ P_is_manual_mode ] && 0 == prev_manual_mode )
         {
         prev_manual_mode = 1;
         par[ 0 ][ P_U_manual ] = w_par[ 0 ][ WP_U ];
         }
 
-    // Выключили ручной режим.
+    // Р’С‹РєР»СЋС‡РёР»Рё СЂСѓС‡РЅРѕР№ СЂРµР¶РёРј.
     if ( par[ 0 ][ P_is_manual_mode ] == 0 && 1 == prev_manual_mode )
         {
         prev_manual_mode = 0;
         reset();
 
-        // Начинаем заново разгон регулятора.
+        // РќР°С‡РёРЅР°РµРј Р·Р°РЅРѕРІРѕ СЂР°Р·РіРѕРЅ СЂРµРіСѓР»СЏС‚РѕСЂР°.
         start_time = get_millisec();
 
-        // Устанавливаем начальное значение для разгона регулятора.
+        // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅР°С‡Р°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ РґР»СЏ СЂР°Р·РіРѕРЅР° СЂРµРіСѓР»СЏС‚РѕСЂР°.
         start_value = par[ 0 ][ P_U_manual ];
 
         return par[ 0 ][ P_U_manual ];
         }
-    //-Мягкий пуск.-!>
+    //-РњСЏРіРєРёР№ РїСѓСЃРє.-!>
 
-    //-Ограничение на выходное значение.
+    //-РћРіСЂР°РЅРёС‡РµРЅРёРµ РЅР° РІС‹С…РѕРґРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ.
     float out_max = par[ 0 ][ P_out_max ];
     float out_min = par[ 0 ][ P_out_min ];
 
@@ -200,12 +200,12 @@ void PID::on( char is_down_to_inaccel_mode )
         {
         state = STATE_ON;
 
-        start_time = get_millisec(); // Для разгона регулятора.
-        last_time  = get_millisec(); // Интервал пересчета значений.
+        start_time = get_millisec(); // Р”Р»СЏ СЂР°Р·РіРѕРЅР° СЂРµРіСѓР»СЏС‚РѕСЂР°.
+        last_time  = get_millisec(); // РРЅС‚РµСЂРІР°Р» РїРµСЂРµСЃС‡РµС‚Р° Р·РЅР°С‡РµРЅРёР№.
 
         this->is_down_to_inaccel_mode = is_down_to_inaccel_mode;
 
-        reset(); //Сбрасываем все переменные.
+        reset(); //РЎР±СЂР°СЃС‹РІР°РµРј РІСЃРµ РїРµСЂРµРјРµРЅРЅС‹Рµ.
         start_value = 0;
         }
     }
@@ -234,7 +234,7 @@ void PID::init_param( PARAM par_n, float val )
     {
     if ( par_n > 0 && ( u_int ) par_n <= par->get_count() )
         {
-        //Проверка выхода за диапазон допустимых значений.
+        //РџСЂРѕРІРµСЂРєР° РІС‹С…РѕРґР° Р·Р° РґРёР°РїР°Р·РѕРЅ РґРѕРїСѓСЃС‚РёРјС‹С… Р·РЅР°С‡РµРЅРёР№.
         if ( par_n == P_out_min && val < 0 )
             {
             val = 0;
@@ -277,7 +277,7 @@ void PID::reset()
 
     par[ 0 ][ P_is_manual_mode ] = 0;
 
-    start_time = get_millisec(); //Для разгона регулятора.
+    start_time = get_millisec(); //Р”Р»СЏ СЂР°Р·РіРѕРЅР° СЂРµРіСѓР»СЏС‚РѕСЂР°.
     }
 //-----------------------------------------------------------------------------
 float PID::get_assignment()
@@ -325,7 +325,7 @@ int PID::set_cmd( const char *prop, u_int idx, double val )
         {
         if ( idx > 0 && idx <= par->get_count() )
             {
-            //Проверка выхода за диапазон допустимых значений.
+            //РџСЂРѕРІРµСЂРєР° РІС‹С…РѕРґР° Р·Р° РґРёР°РїР°Р·РѕРЅ РґРѕРїСѓСЃС‚РёРјС‹С… Р·РЅР°С‡РµРЅРёР№.
             if ( idx == P_out_min && val < 0 )
                 {
                 val = 0;
@@ -367,7 +367,7 @@ int PID::save_device( char *buff )
 
     answer_size += sprintf( buff + answer_size, "\tST=%u,\n", state );
 
-    //Параметры.
+    //РџР°СЂР°РјРµС‚СЂС‹.
     answer_size += par->save_device( buff + answer_size, "\t" );
     answer_size += w_par->save_device( buff + answer_size, "\t" );
 

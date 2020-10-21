@@ -67,7 +67,7 @@ long device_communicator::write_devices_states_service(
                     G_CURRENT_PROTOCOL_VERSION,
                     tcp_communicator::get_instance()->get_host_name_rus() );
                 }
-            answer_size++; // Учитываем завершающий \0.
+            answer_size++; // РЈС‡РёС‚С‹РІР°РµРј Р·Р°РІРµСЂС€Р°СЋС‰РёР№ \0.
             break;
 
         case CMD_GET_DEVICES:
@@ -86,10 +86,10 @@ long device_communicator::write_devices_states_service(
                 answer_size += dev[ i ]->save_device( ( char* ) outdata +
                     answer_size );                                    
                 }
-            answer_size++; // Учитываем завершающий \0.
+            answer_size++; // РЈС‡РёС‚С‹РІР°РµРј Р·Р°РІРµСЂС€Р°СЋС‰РёР№ \0.
 
 #ifdef DEBUG_DEV_CMCTR
-            if ( answer_size < 40000 ) //Вывод больших строк тормозит работу.
+            if ( answer_size < 40000 ) //Р’С‹РІРѕРґ Р±РѕР»СЊС€РёС… СЃС‚СЂРѕРє С‚РѕСЂРјРѕР·РёС‚ СЂР°Р±РѕС‚Сѓ.
                 {
                 std::string source = ( char* ) outdata + 2;
                 for ( u_int i = 0; i < source.length(); i++ )
@@ -123,7 +123,7 @@ long device_communicator::write_devices_states_service(
                 answer_size += dev[ i ]->save_device( ( char* ) outdata +
                     answer_size );
                 }
-            answer_size++; // Учитываем завершающий \0.
+            answer_size++; // РЈС‡РёС‚С‹РІР°РµРј Р·Р°РІРµСЂС€Р°СЋС‰РёР№ \0.
 
 #ifdef DEBUG_DEV_CMCTR
             //printf( "%s", outdata + 2 );
@@ -149,7 +149,7 @@ long device_communicator::write_devices_states_service(
                 "CMD_EXEC_DEVICE_COMMAND ");
 
             outdata[ 0 ] = 0;
-            outdata[ 1 ] = 0; //Возвращаем 0.
+            outdata[ 1 ] = 0; //Р’РѕР·РІСЂР°С‰Р°РµРј 0.
             if ( res )
                 {
                 outdata[ 0 ] = 1;
@@ -194,7 +194,7 @@ long device_communicator::write_devices_states_service(
 
             static u_long start_time = get_millisec();
             answer_size += err_size;
-            if ( err_size == 0 &&                   //Нет критических ошибок.
+            if ( err_size == 0 &&                   //РќРµС‚ РєСЂРёС‚РёС‡РµСЃРєРёС… РѕС€РёР±РѕРє.
                 get_delta_millisec( start_time ) > 5000 )
                 {
                 answer_size +=
@@ -213,7 +213,7 @@ long device_communicator::write_devices_states_service(
             printf( "Critical errors = \n%s", outdata );
 #endif // DEBUG_DEV_CMCTR
 
-            answer_size++; // Учитываем завершающий \0.
+            answer_size++; // РЈС‡РёС‚С‹РІР°РµРј Р·Р°РІРµСЂС€Р°СЋС‰РёР№ \0.
             break;
             }
 
@@ -228,7 +228,7 @@ long device_communicator::write_devices_states_service(
                 "CMD_EXEC_DEVICE_COMMAND ");
 
             outdata[ 0 ] = 0;
-            outdata[ 1 ] = 0; //Возвращаем 0.
+            outdata[ 1 ] = 0; //Р’РѕР·РІСЂР°С‰Р°РµРј 0.
             if ( res )
                 {
                 outdata[ 0 ] = 1;
@@ -245,7 +245,7 @@ long device_communicator::write_devices_states_service(
         case CMD_GET_PARAMS:
             answer_size = params_manager::get_instance()->save_params_as_Lua_str(
                 ( char* ) outdata );
-            answer_size++; // Учитываем завершающий \0.
+            answer_size++; // РЈС‡РёС‚С‹РІР°РµРј Р·Р°РІРµСЂС€Р°СЋС‰РёР№ \0.
             break;
 
         case CMD_RESTORE_PARAMS:
@@ -259,7 +259,7 @@ long device_communicator::write_devices_states_service(
                 )->restore_params_from_server_backup( ( char*) data + 1 );
 
             outdata[ 0 ] = 0;
-            outdata[ 1 ] = 0; //Возвращаем 0.
+            outdata[ 1 ] = 0; //Р’РѕР·РІСЂР°С‰Р°РµРј 0.
             if ( res )
                 {
                 outdata[ 0 ] = 1;
@@ -277,7 +277,7 @@ long device_communicator::write_devices_states_service(
             answer_size = sprintf( ( char* ) outdata, "params_CRC=%d; request_id=%d\n",
                 params_manager::get_instance()->solve_CRC(),
                 g_devices_request_id );
-            answer_size++; // Учитываем завершающий \0.
+            answer_size++; // РЈС‡РёС‚С‹РІР°РµРј Р·Р°РІРµСЂС€Р°СЋС‰РёР№ \0.
             break;
 
 #ifdef RM_PAC
@@ -364,7 +364,7 @@ long device_communicator::write_devices_states_service(
         else
             {
             outdata[ 0 ] = 0;
-            outdata[ 1 ] = 0; //Возвращаем 0.
+            outdata[ 1 ] = 0; //Р’РѕР·РІСЂР°С‰Р°РµРј 0.
 
             answer_size = 2;
             }

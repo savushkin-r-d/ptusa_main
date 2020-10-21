@@ -20,9 +20,9 @@ tcp_communicator_win::tcp_communicator_win( const char *name_rus, const char *na
     tcp_communicator(),
     netOK( 0 )
     {
-    // Задаем таймаут.
+    // Р—Р°РґР°РµРј С‚Р°Р№РјР°СѓС‚.
     tv.tv_sec  = 0;
-    tv.tv_usec = 10000; // 0.01 сек.
+    tv.tv_usec = 10000; // 0.01 СЃРµРє.
 
     sin_len = sizeof( ssin );
     strncpy( host_name_rus, name_rus, TC_MAX_HOST_NAME );
@@ -47,7 +47,7 @@ tcp_communicator_win::tcp_communicator_win( const char *name_rus, const char *na
             }
         else
             {
-            printf( "Ошибка получения адреса сервера: %s\n",
+            printf( "РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ Р°РґСЂРµСЃР° СЃРµСЂРІРµСЂР°: %s\n",
                 WSA_Last_Err_Decode() );
             }
 
@@ -81,14 +81,14 @@ int tcp_communicator_win::net_init()
 
     if ( WSAStartup( 0x202, &tmp_WSA_data ) )
         {
-        printf( "Ошибка инициализации сетевой библиотеки: %s\n",
+        printf( "РћС€РёР±РєР° РёРЅРёС†РёР°Р»РёР·Р°С†РёРё СЃРµС‚РµРІРѕР№ Р±РёР±Р»РёРѕС‚РµРєРё: %s\n",
             WSA_Last_Err_Decode() );
         return -1;
         }
 
     int type     = SOCK_STREAM;
-    int protocol = 0;        /* всегда 0 */
-    //-Cоздание мастер-сокета.
+    int protocol = 0;        /* РІСЃРµРіРґР° 0 */
+    //-CРѕР·РґР°РЅРёРµ РјР°СЃС‚РµСЂ-СЃРѕРєРµС‚Р°.
     master_socket = socket( PF_INET, type, protocol ); 
 
     if ( master_socket < 0 )
@@ -107,18 +107,18 @@ int tcp_communicator_win::net_init()
             master_socket );
         }
 
-    //-Переводим в неблокирующий режим.
+    //-РџРµСЂРµРІРѕРґРёРј РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј.
     u_long mode = 0;
     int res = ioctlsocket( master_socket, FIONBIO, &mode );
     if ( res == SOCKET_ERROR )
         { 
-        printf( "tcp_communicator_windows:net_init() - ошибка  вызова  ioctlsocket: %s\n",
+        printf( "tcp_communicator_windows:net_init() - РѕС€РёР±РєР°  РІС‹Р·РѕРІР°  ioctlsocket: %s\n",
             WSA_Last_Err_Decode() );
         closesocket( master_socket );
         return -1;
         }
 
-    //-Адресация мастер-сокета.
+    //-РђРґСЂРµСЃР°С†РёСЏ РјР°СЃС‚РµСЂ-СЃРѕРєРµС‚Р°.
     socket_state master_socket_state;
     memset( &master_socket_state.sin, 0, sizeof( master_socket_state.sin ) );
     master_socket_state.sin.sin_family 	    = AF_INET;
@@ -126,28 +126,28 @@ int tcp_communicator_win::net_init()
     master_socket_state.sin.sin_port 		= htons( port );
     master_socket_state.socket              = master_socket;
 
-    master_socket_state.active      = 1; // мастер-сокет всегда активный.
-    master_socket_state.is_listener = 1; // сокет является слушателем.
+    master_socket_state.active      = 1; // РјР°СЃС‚РµСЂ-СЃРѕРєРµС‚ РІСЃРµРіРґР° Р°РєС‚РёРІРЅС‹Р№.
+    master_socket_state.is_listener = 1; // СЃРѕРєРµС‚ СЏРІР»СЏРµС‚СЃСЏ СЃР»СѓС€Р°С‚РµР»РµРј.
     master_socket_state.evaluated   = 0;
 
     sst.push_back( master_socket_state );
 
-    //TODO. Для win версии это отключено, чтобы явно возникала ошибка при
-    //запуске двух и более экземпляров программы. Для linux надо изучить
-    //как данный параметр влияет на работу с сокетом. При необходимости
-    //реализовать проверку на максимальное ожидание запросов от сервера.
+    //TODO. Р”Р»СЏ win РІРµСЂСЃРёРё СЌС‚Рѕ РѕС‚РєР»СЋС‡РµРЅРѕ, С‡С‚РѕР±С‹ СЏРІРЅРѕ РІРѕР·РЅРёРєР°Р»Р° РѕС€РёР±РєР° РїСЂРё
+    //Р·Р°РїСѓСЃРєРµ РґРІСѓС… Рё Р±РѕР»РµРµ СЌРєР·РµРјРїР»СЏСЂРѕРІ РїСЂРѕРіСЂР°РјРјС‹. Р”Р»СЏ linux РЅР°РґРѕ РёР·СѓС‡РёС‚СЊ
+    //РєР°Рє РґР°РЅРЅС‹Р№ РїР°СЂР°РјРµС‚СЂ РІР»РёСЏРµС‚ РЅР° СЂР°Р±РѕС‚Сѓ СЃ СЃРѕРєРµС‚РѕРј. РџСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё
+    //СЂРµР°Р»РёР·РѕРІР°С‚СЊ РїСЂРѕРІРµСЂРєСѓ РЅР° РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ РѕР¶РёРґР°РЅРёРµ Р·Р°РїСЂРѕСЃРѕРІ РѕС‚ СЃРµСЂРІРµСЂР°.
     //
     //const int on = 1;
     //if ( setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, 
     //    ( char* ) &on, sizeof( on ) ) )
     //    {
-    //    printf( "tcp_communicator_windows:net_init() - ошибка  вызова  setsockopt: %s\n",
+    //    printf( "tcp_communicator_windows:net_init() - РѕС€РёР±РєР°  РІС‹Р·РѕРІР°  setsockopt: %s\n",
     //        WSA_Last_Err_Decode() );        
     //    closesocket( master_socket );
     //    return -5;
     //    }
 
-    //-Привязка сокета.
+    //-РџСЂРёРІСЏР·РєР° СЃРѕРєРµС‚Р°.
     int err = bind( master_socket, ( struct sockaddr * ) 
         & master_socket_state.sin, sizeof( master_socket_state.sin ) );
     if ( err < 0 )
@@ -155,7 +155,7 @@ int tcp_communicator_win::net_init()
         PAC_critical_errors_manager::get_instance()->set_global_error(
             PAC_critical_errors_manager::AC_NET,
             PAC_critical_errors_manager::AS_BIND_F,
-            0 );                                        //Мастер сокет.
+            0 );                                        //РњР°СЃС‚РµСЂ СЃРѕРєРµС‚.
                 
         closesocket( master_socket );
         return -5;
@@ -168,7 +168,7 @@ int tcp_communicator_win::net_init()
             0 );
         }
 
-    err = listen( master_socket, QLEN ); // Делаем мастер-сокет слушателем.
+    err = listen( master_socket, QLEN ); // Р”РµР»Р°РµРј РјР°СЃС‚РµСЂ-СЃРѕРєРµС‚ СЃР»СѓС€Р°С‚РµР»РµРј.
     if ( type == SOCK_STREAM && err < 0 )
         {
         closesocket( master_socket );
@@ -184,7 +184,7 @@ int tcp_communicator_win::net_init()
     setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, 
         ( char* ) &val, sizeof( val ) );
 #ifdef MODBUS
-    // Создание серверного сокета modbus_socket.
+    // РЎРѕР·РґР°РЅРёРµ СЃРµСЂРІРµСЂРЅРѕРіРѕ СЃРѕРєРµС‚Р° modbus_socket.
     err = modbus_socket = socket ( PF_INET, type, protocol );
 
     if ( G_DEBUG ) 
@@ -202,12 +202,12 @@ int tcp_communicator_win::net_init()
 
         return -4;
         }
-    // Адресация modbus_socket сокета.
+    // РђРґСЂРµСЃР°С†РёСЏ modbus_socket СЃРѕРєРµС‚Р°.
     socket_state modbus_socket_state;
     memset( &modbus_socket_state.sin, 0, sizeof ( modbus_socket_state.sin ) );
     modbus_socket_state.sin.sin_family 	    = AF_INET;
     modbus_socket_state.sin.sin_addr.s_addr = 0;
-    modbus_socket_state.sin.sin_port 		= htons ( port_modbus ); // Порт.
+    modbus_socket_state.sin.sin_port 		= htons ( port_modbus ); // РџРѕСЂС‚.
     modbus_socket_state.socket = modbus_socket;
 
     modbus_socket_state.active      = 1;
@@ -217,7 +217,7 @@ int tcp_communicator_win::net_init()
     sst.push_back( modbus_socket_state );
 
     err = bind( modbus_socket, ( struct sockaddr * ) & modbus_socket_state.sin,
-        sizeof ( modbus_socket_state.sin ) );	   // Привязка сокета.
+        sizeof ( modbus_socket_state.sin ) );	   // РџСЂРёРІСЏР·РєР° СЃРѕРєРµС‚Р°.
     if ( err < 0 )
         {
         if ( G_DEBUG ) 
@@ -229,7 +229,7 @@ int tcp_communicator_win::net_init()
         closesocket( modbus_socket );
         return -5;
         }
-    err = listen( modbus_socket, QLEN ); // Делаем слушателем.
+    err = listen( modbus_socket, QLEN ); // Р”РµР»Р°РµРј СЃР»СѓС€Р°С‚РµР»РµРј.
     if ( type == SOCK_STREAM && err < 0 )
         {
         closesocket( modbus_socket );
@@ -259,7 +259,7 @@ tcp_communicator_win::~tcp_communicator_win()
 //------------------------------------------------------------------------------
 int tcp_communicator_win::evaluate()
     {
-    // Проверка связи с сервером.
+    // РџСЂРѕРІРµСЂРєР° СЃРІСЏР·Рё СЃ СЃРµСЂРІРµСЂРѕРј.
     if ( get_sec() - glob_last_transfer_time > 5 )
         {
         if ( glob_cmctr_ok )
@@ -282,15 +282,15 @@ int tcp_communicator_win::evaluate()
                 PAC_critical_errors_manager::AS_EASYSERVER );
             }
         }
-    // Проверка связи с сервером.-!>
+    // РџСЂРѕРІРµСЂРєР° СЃРІСЏР·Рё СЃ СЃРµСЂРІРµСЂРѕРј.-!>
 
-    // Инициализация сети, при необходимости.
+    // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРµС‚Рё, РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё.
     if ( !netOK )
         {
         net_init();
         if ( !netOK ) return -100;
         }
-    // Инициализация сети, при необходимости.-!>
+    // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРµС‚Рё, РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё.-!>
 
     int count_cycles = 0;
     while ( count_cycles < max_cycles )
@@ -310,21 +310,21 @@ int tcp_communicator_win::evaluate()
                 }
             }
 
-        //Добавляем асинхронные сокеты в список прослушки
+        //Р”РѕР±Р°РІР»СЏРµРј Р°СЃРёРЅС…СЂРѕРЅРЅС‹Рµ СЃРѕРєРµС‚С‹ РІ СЃРїРёСЃРѕРє РїСЂРѕСЃР»СѓС€РєРё
         for (std::map<int, tcp_client*>::iterator it = clients->begin(); it != clients->end(); ++ it)
             {
             FD_SET( it->second->get_socket(), &rfds);
             }
 
-        //-Ждём события в одном из сокетов.
-        rc = select( 0/*Не учитывается*/, &rfds, NULL, NULL, &tv );
-        if ( 0 == rc ) break; // Ничего не произошло.
+        //-Р–РґС‘Рј СЃРѕР±С‹С‚РёСЏ РІ РѕРґРЅРѕРј РёР· СЃРѕРєРµС‚РѕРІ.
+        rc = select( 0/*РќРµ СѓС‡РёС‚С‹РІР°РµС‚СЃСЏ*/, &rfds, NULL, NULL, &tv );
+        if ( 0 == rc ) break; // РќРёС‡РµРіРѕ РЅРµ РїСЂРѕРёР·РѕС€Р»Рѕ.
 
         if ( rc < 0 )
             {
             if ( G_DEBUG ) 
                 {     
-                printf( "Ошибка select: %s\n", WSA_Last_Err_Decode() );
+                printf( "РћС€РёР±РєР° select: %s\n", WSA_Last_Err_Decode() );
                 }
 
             net_terminate();
@@ -334,7 +334,7 @@ int tcp_communicator_win::evaluate()
 
         for ( u_int i = 0; i < sst.size(); i++ )  /* scan all possible sockets */
             {
-            // Поступил новый запрос на соединение.
+            // РџРѕСЃС‚СѓРїРёР» РЅРѕРІС‹Р№ Р·Р°РїСЂРѕСЃ РЅР° СЃРѕРµРґРёРЅРµРЅРёРµ.
             if ( FD_ISSET ( sst[ i ].socket, &rfds ) )
                 {
 #ifndef MODBUS
@@ -349,22 +349,22 @@ int tcp_communicator_win::evaluate()
                     int slave_socket = accept ( sst[ i ].socket, 
                         ( struct sockaddr * ) &ssin, &sin_len );
 
-                    if ( slave_socket <= 0 )    // Ошибка.
+                    if ( slave_socket <= 0 )    // РћС€РёР±РєР°.
                         {
                         if ( G_DEBUG ) 
                             {
-                            printf( "Ошибка accept(): %s\n",
+                            printf( "РћС€РёР±РєР° accept(): %s\n",
                                 WSA_Last_Err_Decode() );                        
                             }                       
                         continue;   
                         }
-                    // Установка сокета в неблокирующий режим.
+                    // РЈСЃС‚Р°РЅРѕРІРєР° СЃРѕРєРµС‚Р° РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј.
                     u_long mode = 0;
                     if ( ioctlsocket( slave_socket, FIONBIO, &mode ) == SOCKET_ERROR ) 
                         {
-                        printf( "Ошибка перевода клиентского сокета в неблокирующий режим: %s\n",
+                        printf( "РћС€РёР±РєР° РїРµСЂРµРІРѕРґР° РєР»РёРµРЅС‚СЃРєРѕРіРѕ СЃРѕРєРµС‚Р° РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј: %s\n",
                             WSA_Last_Err_Decode() );
-                        // Ошибка, разрушаем сокет.
+                        // РћС€РёР±РєР°, СЂР°Р·СЂСѓС€Р°РµРј СЃРѕРєРµС‚.
                         shutdown( slave_socket, SD_BOTH );
                         closesocket( slave_socket );
                         continue;
@@ -372,7 +372,7 @@ int tcp_communicator_win::evaluate()
                     if ( G_DEBUG ) 
                         {
 #ifndef MODBUS
-                        // Определение имени клиента.
+                        // РћРїСЂРµРґРµР»РµРЅРёРµ РёРјРµРЅРё РєР»РёРµРЅС‚Р°.
                         hostent *client = gethostbyaddr( ( char* ) &ssin.sin_addr, 4, AF_INET );
 
                         if ( client )
@@ -421,25 +421,25 @@ int tcp_communicator_win::evaluate()
                     }
                 }
             }
-        //проверка асинхронных сокетов на предмет поступления данных
+        //РїСЂРѕРІРµСЂРєР° Р°СЃРёРЅС…СЂРѕРЅРЅС‹С… СЃРѕРєРµС‚РѕРІ РЅР° РїСЂРµРґРјРµС‚ РїРѕСЃС‚СѓРїР»РµРЅРёСЏ РґР°РЅРЅС‹С…
         for (std::map<int, tcp_client*>::iterator it = clients->begin(); it != clients->end();)
             {
             int is_removed = 0;
-            if (FD_ISSET(it->second->get_socket(), &rfds)) //если есть событие на сокете
+            if (FD_ISSET(it->second->get_socket(), &rfds)) //РµСЃР»Рё РµСЃС‚СЊ СЃРѕР±С‹С‚РёРµ РЅР° СЃРѕРєРµС‚Рµ
                 {
                 int err = in_buffer_count = recvtimeout(it->second->get_socket(), (unsigned char*)it->second->buff, it->second->buff_size, 1, 0);
-                if (err <= 0) //Ошибка чтения
+                if (err <= 0) //РћС€РёР±РєР° С‡С‚РµРЅРёСЏ
                     {
                     it->second->Disconnect();
                     it->second->set_async_result(it->second->AR_SOCKETERROR);
                     }
-                else //Получены данные
+                else //РџРѕР»СѓС‡РµРЅС‹ РґР°РЅРЅС‹Рµ
                     {
                     it->second->set_async_result(in_buffer_count);
                     }
                 is_removed = 1;
                 }
-            else //проверяем на таймаут
+            else //РїСЂРѕРІРµСЂСЏРµРј РЅР° С‚Р°Р№РјР°СѓС‚
                 {
                 if (get_delta_millisec(it->second->async_queued) > it->second->async_timeout)
                     {
@@ -472,22 +472,22 @@ int tcp_communicator_win::evaluate()
 int tcp_communicator_win::recvtimeout( u_int s, u_char *buf,
                                       int len, int timeout, int usec )
     {
-    // Настраиваем  file descriptor set.
+    // РќР°СЃС‚СЂР°РёРІР°РµРј  file descriptor set.
     fd_set fds;
     FD_ZERO( &fds );
     FD_SET( s, &fds );
 
-    // Настраиваем время на таймаут.
+    // РќР°СЃС‚СЂР°РёРІР°РµРј РІСЂРµРјСЏ РЅР° С‚Р°Р№РјР°СѓС‚.
     timeval rec_tv;
     rec_tv.tv_sec = timeout;
     rec_tv.tv_usec = usec;
 
-    // Ждем таймаута или полученных данных.
+    // Р–РґРµРј С‚Р°Р№РјР°СѓС‚Р° РёР»Рё РїРѕР»СѓС‡РµРЅРЅС‹С… РґР°РЅРЅС‹С….
     int n = select( s + 1, &fds, NULL, NULL, &rec_tv );
     if ( 0 == n ) return -2;  // timeout!
     if ( -1 == n ) return -1; // error
 
-    // Данные должны быть здесь, поэтому делаем обычный recv().    
+    // Р”Р°РЅРЅС‹Рµ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ Р·РґРµСЃСЊ, РїРѕСЌС‚РѕРјСѓ РґРµР»Р°РµРј РѕР±С‹С‡РЅС‹Р№ recv().    
     return recv( s, ( char* ) buf, len, 0 );
     }
 //------------------------------------------------------------------------------
@@ -511,7 +511,7 @@ int tcp_communicator_win::do_echo( int idx )
     sock_state.evaluated = 1;
     memset( buf, 0, BUFSIZE );
 
-    // Ожидаем данные с таймаутом 1 сек.
+    // РћР¶РёРґР°РµРј РґР°РЅРЅС‹Рµ СЃ С‚Р°Р№РјР°СѓС‚РѕРј 1 СЃРµРє.
     err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 1, 0 ); 
 
     if ( err <= 0 )               /* read error */
@@ -559,11 +559,11 @@ int tcp_communicator_win::do_echo( int idx )
             }
         }
 
-    //Структура полученных данных.
+    //РЎС‚СЂСѓРєС‚СѓСЂР° РїРѕР»СѓС‡РµРЅРЅС‹С… РґР°РЅРЅС‹С….
     //buff[0] = 's';
     //buff[1] = Service_ID;        // C_SERVICE_N = 1
     //buff[2] = 1;                 // FRAME_SINGLE.
-    //buff[3] = ++pidx;            // Идентификатор пакета.
+    //buff[3] = ++pidx;            // РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїР°РєРµС‚Р°.
     //buff[4] = ( char ) ( length >> 8 );
     //buff[5] = length & 0xFF;
     //memcpy(buff+6,data,length);

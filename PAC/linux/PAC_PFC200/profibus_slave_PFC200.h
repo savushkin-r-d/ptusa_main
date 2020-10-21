@@ -1,16 +1,16 @@
 /// @file profibus_slave_PFC200.h
-/// @brief Содержит описания классов, которые реализуют аппаратную часть PAC
-/// по работе с Profibus Slave.
+/// @brief РЎРѕРґРµСЂР¶РёС‚ РѕРїРёСЃР°РЅРёСЏ РєР»Р°СЃСЃРѕРІ, РєРѕС‚РѕСЂС‹Рµ СЂРµР°Р»РёР·СѓСЋС‚ Р°РїРїР°СЂР°С‚РЅСѓСЋ С‡Р°СЃС‚СЊ PAC
+/// РїРѕ СЂР°Р±РѕС‚Рµ СЃ Profibus Slave.
 ///
 /// This module uses the handling of the PROFIBUS slave device. That contains starting and stopping
 /// of the device functionality as well as the process data exchange between the fieldbus an PLC process
 /// data images.
 ///
-/// @author  Иванюк Дмитрий Сергеевич.
+/// @author  РРІР°РЅСЋРє Р”РјРёС‚СЂРёР№ РЎРµСЂРіРµРµРІРёС‡.
 ///
-/// @par Описание директив препроцессора:
+/// @par РћРїРёСЃР°РЅРёРµ РґРёСЂРµРєС‚РёРІ РїСЂРµРїСЂРѕС†РµСЃСЃРѕСЂР°:
 ///
-/// @par Текущая версия:
+/// @par РўРµРєСѓС‰Р°СЏ РІРµСЂСЃРёСЏ:
 /// @$Rev: 220 $.\n
 /// @$Author: id $.\n
 /// @$Date:: 2011-02-15 16:58:56#$.
@@ -48,9 +48,9 @@ public:
     MAX_DEVICE_LIST_ENTRIES = 10,
     };
 
-    /// @brief Получение единственного экземпляра класса для работы.
+    /// @brief РџРѕР»СѓС‡РµРЅРёРµ РµРґРёРЅСЃС‚РІРµРЅРЅРѕРіРѕ СЌРєР·РµРјРїР»СЏСЂР° РєР»Р°СЃСЃР° РґР»СЏ СЂР°Р±РѕС‚С‹.
     ///
-    /// @return - указатель на единственный объект класса @ref
+    /// @return - СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РµРґРёРЅСЃС‚РІРµРЅРЅС‹Р№ РѕР±СЉРµРєС‚ РєР»Р°СЃСЃР° @ref
     /// profibus_slave_PFC200.
     static profibus_slave_PFC200* get_instance();
 
@@ -82,7 +82,7 @@ public:
 #else // USE_PROFIBUS
 
 //-----------------------------------------------------------------------------
-/// @brief Работа с Profibus Slave.
+/// @brief Р Р°Р±РѕС‚Р° СЃ Profibus Slave.
 
 
 class profibus_slave_PFC200: public profibus_slave
@@ -93,9 +93,9 @@ public:
     MAX_DEVICE_LIST_ENTRIES = 10,
     };
 
-    /// @brief Получение единственного экземпляра класса для работы.
+    /// @brief РџРѕР»СѓС‡РµРЅРёРµ РµРґРёРЅСЃС‚РІРµРЅРЅРѕРіРѕ СЌРєР·РµРјРїР»СЏСЂР° РєР»Р°СЃСЃР° РґР»СЏ СЂР°Р±РѕС‚С‹.
     ///
-    /// @return - указатель на единственный объект класса @ref
+    /// @return - СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РµРґРёРЅСЃС‚РІРµРЅРЅС‹Р№ РѕР±СЉРµРєС‚ РєР»Р°СЃСЃР° @ref
     /// profibus_slave_PFC200.
     static profibus_slave_PFC200* get_instance();
 
@@ -136,7 +136,7 @@ private:
 
     void close();
 
-    static auto_smart_ptr < profibus_slave_PFC200 > instance;///< Экземпляр класса.
+    static auto_smart_ptr < profibus_slave_PFC200 > instance;///< Р­РєР·РµРјРїР»СЏСЂ РєР»Р°СЃСЃР°.
 
     /// @brief This function returns a reference to the ADI.
     ///

@@ -25,7 +25,7 @@ SRAM::SRAM( const char *file_name,
             {
             if ( ( file = fopen( file_name, "r+b" ) ) <= 0 )
                 {
-                //Ïûòàåìñÿ ñîçäàòü ôàéë
+                //ÐŸÑ‹Ñ‚Ð°ÐµÐ¼ÑÑ ÑÐ¾Ð·Ð´Ð°Ñ‚ÑŒ Ñ„Ð°Ð¹Ð»
                 file = fopen( file_name, "w+b" );
                 if ( file )
                     {

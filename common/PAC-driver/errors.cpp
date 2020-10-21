@@ -1,6 +1,6 @@
 #ifdef DRIVER
 #ifdef USE_STDAFX
-#include "stdafx.h" //Стандартный заголовочный файл для использования precompiled headers.
+#include "stdafx.h" //РЎС‚Р°РЅРґР°СЂС‚РЅС‹Р№ Р·Р°РіРѕР»РѕРІРѕС‡РЅС‹Р№ С„Р°Р№Р» РґР»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ precompiled headers.
 #endif //USE_STDAFX
 #else
 #include "errors.h"
@@ -41,7 +41,7 @@ int tech_dev_error::save_as_Lua_str( char *str )
     str[ 0 ] = 0;
 
     if ( AS_ALARM == error_state || AS_ACCEPT == error_state ||
-        AS_RETURN == error_state ) // Есть ошибка.
+        AS_RETURN == error_state ) // Р•СЃС‚СЊ РѕС€РёР±РєР°.
         {
         unsigned char alarm_params = err_par[ P_PARAM_N ];
 
@@ -53,7 +53,7 @@ int tech_dev_error::save_as_Lua_str( char *str )
         res += sprintf( str + res, "priority=%d%s", P_ALARM, "," );
         res += sprintf( str + res, "state=%d,\n", error_state );
         res += sprintf( str + res, "type=%d,\n", AT_SPECIAL );
-        res += sprintf( str + res, "group=\"%s\",\n", "тревога" );
+        res += sprintf( str + res, "group=\"%s\",\n", "С‚СЂРµРІРѕРіР°" );
 
         res += sprintf( str + res, "id_n=%d,\n", simple_device->get_serial_n() );
         res += sprintf( str + res, "id_type=%d,\n", simple_device->get_type() );
@@ -69,10 +69,10 @@ int tech_dev_error::save_as_Lua_str( char *str )
 //-----------------------------------------------------------------------------
 void tech_dev_error::evaluate( bool &is_new_state )
     {
-    // Проверка текущего состояния устройства.
+    // РџСЂРѕРІРµСЂРєР° С‚РµРєСѓС‰РµРіРѕ СЃРѕСЃС‚РѕСЏРЅРёСЏ СѓСЃС‚СЂРѕР№СЃС‚РІР°.
     switch ( simple_device->get_state() )
         {
-        case -1:        // Есть ошибка.
+        case -1:        // Р•СЃС‚СЊ РѕС€РёР±РєР°.
         case -2:
         case -3:
         case -12:
@@ -92,7 +92,7 @@ void tech_dev_error::evaluate( bool &is_new_state )
                     error_state = AS_ALARM;
                     is_new_state = true;
 
-                    is_new_error = true; //Появилась новая ошибка.
+                    is_new_error = true; //РџРѕСЏРІРёР»Р°СЃСЊ РЅРѕРІР°СЏ РѕС€РёР±РєР°.
 
                     is_any_no_ack_error = true;
                     break;
@@ -108,7 +108,7 @@ void tech_dev_error::evaluate( bool &is_new_state )
 
             break;
 
-        default:         // Нет ошибки - все остальные состояния.
+        default:         // РќРµС‚ РѕС€РёР±РєРё - РІСЃРµ РѕСЃС‚Р°Р»СЊРЅС‹Рµ СЃРѕСЃС‚РѕСЏРЅРёСЏ.
             switch ( error_state )
                 {
                 case AS_NORMAL:
@@ -129,7 +129,7 @@ void tech_dev_error::evaluate( bool &is_new_state )
                 }
             break;
         }
-    // Проверка текущего состояния устройства.-!>
+    // РџСЂРѕРІРµСЂРєР° С‚РµРєСѓС‰РµРіРѕ СЃРѕСЃС‚РѕСЏРЅРёСЏ СѓСЃС‚СЂРѕР№СЃС‚РІР°.-!>
     }
 //-----------------------------------------------------------------------------
 void tech_dev_error::print() const
@@ -326,16 +326,16 @@ const char* tech_obj_error::get_group( tech_object::ERR_MSG_TYPES err_type )
         case tech_object::ERR_ON_WITH_ERRORS:
         case tech_object::ERR_CANT_ON_2_OPER:
         case tech_object::ERR_CANT_ON_2_OBJ:
-            return "ответ";
+            return "РѕС‚РІРµС‚";
 
         case tech_object::ERR_OFF:
         case tech_object::ERR_OFF_AND_ON:
         case tech_object::ERR_DURING_WORK:
-            return "сообщение";
+            return "СЃРѕРѕР±С‰РµРЅРёРµ";
 
         case tech_object::ERR_ALARM:
         case tech_object::ERR_TO_FAIL_STATE:
-            return "тревога";
+            return "С‚СЂРµРІРѕРіР°";
         }
 
     return "?";
@@ -357,12 +357,12 @@ int errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
         res += s_errors_vector[ i ]->save_as_Lua_str( str + res );
         }
 
-    id = errors_id; //Через параметр возвращаем состояние ошибок.
+    id = errors_id; //Р§РµСЂРµР· РїР°СЂР°РјРµС‚СЂ РІРѕР·РІСЂР°С‰Р°РµРј СЃРѕСЃС‚РѕСЏРЅРёРµ РѕС€РёР±РѕРє.
 
     return res;
     }
 //-----------------------------------------------------------------------------
-/// @brief Обновление состояния ошибок.
+/// @brief РћР±РЅРѕРІР»РµРЅРёРµ СЃРѕСЃС‚РѕСЏРЅРёСЏ РѕС€РёР±РѕРє.
 void errors_manager::evaluate()
     {
     bool is_new_error_state = false;
@@ -379,7 +379,7 @@ void errors_manager::evaluate()
 
     if ( is_new_error_state )
         {
-        errors_id++;        // Ошибки изменились.
+        errors_id++;        // РћС€РёР±РєРё РёР·РјРµРЅРёР»РёСЃСЊ.
         }
     }
 //-----------------------------------------------------------------------------
@@ -417,7 +417,7 @@ void errors_manager::set_cmd( unsigned int cmd, unsigned int object_type,
     {
     base_error *res = 0;
 
-    // Поиск нужного устройства.
+    // РџРѕРёСЃРє РЅСѓР¶РЅРѕРіРѕ СѓСЃС‚СЂРѕР№СЃС‚РІР°.
     for ( u_int i = 0; i < s_errors_vector.size(); i++ )
         {
         if ( s_errors_vector[ i ]->get_object_type() == object_type &&
@@ -428,13 +428,13 @@ void errors_manager::set_cmd( unsigned int cmd, unsigned int object_type,
             }
         }
 
-    // Выполнение команды.
+    // Р’С‹РїРѕР»РЅРµРЅРёРµ РєРѕРјР°РЅРґС‹.
     if ( res )
         {
         int result = res->set_cmd( cmd, object_alarm_number );
         if ( 0 == result )
             {
-            errors_id++; // Cостояние ошибок изменилось.
+            errors_id++; // CРѕСЃС‚РѕСЏРЅРёРµ РѕС€РёР±РѕРє РёР·РјРµРЅРёР»РѕСЃСЊ.
             }
         }
     else
@@ -486,16 +486,16 @@ void siren_lights_manager::eval()
     if ( get_delta_millisec( st_time ) < 5000 )
         {
         critical_error_n = PAC_critical_errors_manager::get_instance()->get_id();
-        return; //Задержка при включении контроллера.
+        return; //Р—Р°РґРµСЂР¶РєР° РїСЂРё РІРєР»СЋС‡РµРЅРёРё РєРѕРЅС‚СЂРѕР»Р»РµСЂР°.
         }
 
     if ( par[ P_MANUAL_MODE ] != 0 )
         {
         critical_error_n = PAC_critical_errors_manager::get_instance()->get_id();
-        return; //Ручной режим для сирены и лампочек.
+        return; //Р СѓС‡РЅРѕР№ СЂРµР¶РёРј РґР»СЏ СЃРёСЂРµРЅС‹ Рё Р»Р°РјРїРѕС‡РµРє.
         }
 
-    //Красный свет - аварии и тревоги.
+    //РљСЂР°СЃРЅС‹Р№ СЃРІРµС‚ - Р°РІР°СЂРёРё Рё С‚СЂРµРІРѕРіРё.
     red->off();
     if ( PAC_critical_errors_manager::get_instance()->is_any_error() ||
         tech_dev_error::is_any_error )
@@ -533,7 +533,7 @@ void siren_lights_manager::eval()
             }
         }
 
-    //Дополнительное включение сирены при появлении аварии (узлы Wago, ...).
+    //Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕРµ РІРєР»СЋС‡РµРЅРёРµ СЃРёСЂРµРЅС‹ РїСЂРё РїРѕСЏРІР»РµРЅРёРё Р°РІР°СЂРёРё (СѓР·Р»С‹ Wago, ...).
     if ( PAC_critical_errors_manager::get_instance()->get_id() != critical_error_n )
         {
         critical_error_n = PAC_critical_errors_manager::get_instance()->get_id();
@@ -545,7 +545,7 @@ void siren_lights_manager::eval()
             }
         }
 
-    //Дополнительное включение сирены при появлении тревоги (ошибки устройств).
+    //Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕРµ РІРєР»СЋС‡РµРЅРёРµ СЃРёСЂРµРЅС‹ РїСЂРё РїРѕСЏРІР»РµРЅРёРё С‚СЂРµРІРѕРіРё (РѕС€РёР±РєРё СѓСЃС‚СЂРѕР№СЃС‚РІ).
     if ( tech_dev_error::is_new_error )
         {
         srn->on();
@@ -556,7 +556,7 @@ void siren_lights_manager::eval()
             }
         }
 
-    //Желтый свет - сообщения (технологические объекты).
+    //Р–РµР»С‚С‹Р№ СЃРІРµС‚ - СЃРѕРѕР±С‰РµРЅРёСЏ (С‚РµС…РЅРѕР»РѕРіРёС‡РµСЃРєРёРµ РѕР±СЉРµРєС‚С‹).
     yellow->off();
     if ( tech_obj_error::is_any_message )
         {
@@ -586,14 +586,14 @@ void siren_lights_manager::eval()
             }
         }
 
-    //Отключаем сирену, если нет аварий.
+    //РћС‚РєР»СЋС‡Р°РµРј СЃРёСЂРµРЅСѓ, РµСЃР»Рё РЅРµС‚ Р°РІР°СЂРёР№.
     if ( PAC_critical_errors_manager::get_instance()->is_any_error() == false &&
         false == tech_dev_error::is_any_no_ack_error )
         {
         srn->off();
         }
 
-    //Зеленая лампочка.
+    //Р—РµР»РµРЅР°СЏ Р»Р°РјРїРѕС‡РєР°.
     green->off();
     if ( G_TECH_OBJECT_MNGR()->is_any_important_mode() )
         {

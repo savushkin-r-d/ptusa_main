@@ -10,9 +10,9 @@
 cip_object_stats::cip_object_stats(const char* objname)
     {
     strcpy(objid, objname);
-    strcpy(objlastacidwash, "Не известно");
-    strcpy(objlastwashprogram, "Не определено");
-    strcpy(objlastwash, "Не известно");
+    strcpy(objlastacidwash, "РќРµ РёР·РІРµСЃС‚РЅРѕ");
+    strcpy(objlastwashprogram, "РќРµ РѕРїСЂРµРґРµР»РµРЅРѕ");
+    strcpy(objlastwash, "РќРµ РёР·РІРµСЃС‚РЅРѕ");
     objcausticwashes = 0;
     changed = 0;
     }
@@ -72,9 +72,9 @@ void cip_object_stats::deserialize(std::istream& stream)
 
 void cip_object_stats::resetstats()
 {
-    strcpy(objlastacidwash, "Не известно");
-    strcpy(objlastwashprogram, "Не определено");
-    strcpy(objlastwash, "Не известно");
+    strcpy(objlastacidwash, "РќРµ РёР·РІРµСЃС‚РЅРѕ");
+    strcpy(objlastwashprogram, "РќРµ РѕРїСЂРµРґРµР»РµРЅРѕ");
+    strcpy(objlastwash, "РќРµ РёР·РІРµСЃС‚РЅРѕ");
     objcausticwashes = 0;
     changed = 0;
 }

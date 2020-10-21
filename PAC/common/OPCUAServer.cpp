@@ -1,4 +1,4 @@
-﻿#include <OPCUAServer.h>
+#include <OPCUAServer.h>
 #include "log.h"
 #include <stdio.h>
 

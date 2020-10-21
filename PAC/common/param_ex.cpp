@@ -95,7 +95,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
 
     G_DEVICE_MANAGER()->init_rt_params();
     
-    //Ïðîâåðêà íà èçìåíåíèå êîëè÷åñòâà ïàðàìåòðîâ.
+    //ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð½Ð° Ð¸Ð·Ð¼ÐµÐ½ÐµÐ½Ð¸Ðµ ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð° Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð¾Ð².
     unsigned char buff[ 4 ] = { 0 };
     CRC_mem->read( ( char* ) buff, 4, C_LAST_IDX_OFFSET );
     u_int* last_idx_ = ( u_int* ) buff;
@@ -106,7 +106,7 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
             last_idx, *last_idx_ );
         G_LOG->write_log( i_log::P_NOTICE );
 
-        char *buff = ( char* ) &last_idx;   //Çàïèñü êîëè÷åñòâà ïàðàìåòðîâ.
+        char *buff = ( char* ) &last_idx;   //Ð—Ð°Ð¿Ð¸ÑÑŒ ÐºÐ¾Ð»Ð¸Ñ‡ÐµÑÑ‚Ð²Ð° Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð¾Ð².
         CRC_mem->write( buff, 4, C_LAST_IDX_OFFSET );
 
         reset_to_default( custom_init_params_function, auto_init_params,

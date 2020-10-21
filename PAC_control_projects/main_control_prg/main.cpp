@@ -50,7 +50,7 @@ static void stopHandler(int sig)
 int main( int argc, const char *argv[] )
     {
 #if defined WIN_OS
-    setlocale( LC_ALL, "" );
+    system( "chcp 65001" );
 #endif
     signal(SIGINT, stopHandler);
     signal(SIGTERM, stopHandler);

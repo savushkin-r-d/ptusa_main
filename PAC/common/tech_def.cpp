@@ -32,7 +32,7 @@ tech_object::tech_object( const char* new_name, u_int number, u_int type,
         modes_time( run_time_params_u_int_4( operations_count, "MODES_TIME" ) ),
         operations_manager( 0 )
     {
-    u_int state_size_in_int4 = operations_count / 32; // Размер состояния в double word.
+    u_int state_size_in_int4 = operations_count / 32; // Р Р°Р·РјРµСЂ СЃРѕСЃС‚РѕСЏРЅРёСЏ РІ double word.
     if ( operations_count % 32 > 0 ) state_size_in_int4++;
     for( u_int i = 0; i < state_size_in_int4; i++ )
         {
@@ -92,7 +92,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
     if ( G_DEBUG )
         {
         SetColor( GREEN );
-        printf( "%sBEGIN \"%.40s %d\" (%s) set operation №%u (\"%s\") --> %s.\n",
+        printf( "%sBEGIN \"%.40s %d\" (%s) set operation в„–%u (\"%s\") --> %s.\n",
             white_spaces, name, number, name_Lua, operation_n,
             0 == res ? ( *operations_manager )[ operation_n ]->get_name() : "",
             newm == 0 ? "OFF" : ( newm == 1 ? "ON" : ( newm == 2 ? "PAUSE" :
@@ -159,9 +159,9 @@ int tech_object::set_mode( u_int operation_n, int newm )
                         }
                     else
                         {
-                        //Проверка режима на проверку ОС устройств.
+                        //РџСЂРѕРІРµСЂРєР° СЂРµР¶РёРјР° РЅР° РїСЂРѕРІРµСЂРєСѓ РћРЎ СѓСЃС‚СЂРѕР№СЃС‚РІ.
                         const int ERR_STR_SIZE = 41;
-                        char res_str[ ERR_STR_SIZE ] = "обр. связь ";
+                        char res_str[ ERR_STR_SIZE ] = "РѕР±СЂ. СЃРІСЏР·СЊ ";
 
                         int len = strlen( res_str );
                         res = op->check_devices_on_run_state(
@@ -174,7 +174,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
                         else
                             {
                             bool is_dev_err = res ? true : false;
-                            //Проверка режима на проверку ОС устройств.
+                            //РџСЂРѕРІРµСЂРєР° СЂРµР¶РёРјР° РЅР° РїСЂРѕРІРµСЂРєСѓ РћРЎ СѓСЃС‚СЂРѕР№СЃС‚РІ.
 
                             if ( ( res = lua_check_on_mode( operation_n ) ) == 0 ) // Check if possible.
                                 {
@@ -185,12 +185,12 @@ int tech_object::set_mode( u_int operation_n, int newm )
                                 int idx = operation_n - 1;
                                 state[ idx / 32 ] = state[ idx / 32 ] | 1UL << idx % 32;                                
                                 
-                                //Проверка режима на проверку ОС устройств.
+                                //РџСЂРѕРІРµСЂРєР° СЂРµР¶РёРјР° РЅР° РїСЂРѕРІРµСЂРєСѓ РћРЎ СѓСЃС‚СЂРѕР№СЃС‚РІ.
                                 if ( is_dev_err )
                                     {
                                     set_err_msg( res_str, operation_n, 0, ERR_ON_WITH_ERRORS );
                                     }
-                                //Проверка режима на проверку ОС устройств.
+                                //РџСЂРѕРІРµСЂРєР° СЂРµР¶РёРјР° РЅР° РїСЂРѕРІРµСЂРєСѓ РћРЎ СѓСЃС‚СЂРѕР№СЃС‚РІ.
                                 }
                             else
                                 {
@@ -209,7 +209,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
         white_spaces[ idx ] = 0;
 
         SetColor( GREEN );
-        printf( "%sEND \"%.40s %d\" set operation №%2u --> %s, res = %d",            
+        printf( "%sEND \"%.40s %d\" set operation в„–%2u --> %s, res = %d",            
             white_spaces, name, number, operation_n,            
             newm == 0 ? "OFF" : ( newm == 1 ? "ON" : ( newm == 2 ? "PAUSE" : 
             ( newm == 3 ? "STOP" : ( newm == 4 ? "WAIT" : "?" ) ) ) ), res );
@@ -292,9 +292,9 @@ int tech_object::evaluate()
         if ( G_PAC_INFO()->par[ PAC_info::P_AUTO_PAUSE_OPER_ON_DEV_ERR ] == 0 && 
             op->get_state() == operation::RUN )
         	{
-            //Проверка режима на проверку ОС устройств.
+            //РџСЂРѕРІРµСЂРєР° СЂРµР¶РёРјР° РЅР° РїСЂРѕРІРµСЂРєСѓ РћРЎ СѓСЃС‚СЂРѕР№СЃС‚РІ.
             const int ERR_STR_SIZE = 41;
-            char res_str[ ERR_STR_SIZE ] = "авария устройств ";
+            char res_str[ ERR_STR_SIZE ] = "Р°РІР°СЂРёСЏ СѓСЃС‚СЂРѕР№СЃС‚РІ ";
 
             int len = strlen( res_str );
             int res = op->check_devices_on_run_state( res_str + len,
@@ -309,7 +309,7 @@ int tech_object::evaluate()
 
         if ( op->get_state() == operation::RUN )
             {
-            //Проверка операции на корректные параметры шагов.
+            //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.
             const int ERR_STR_SIZE = 41;
             char res_str[ ERR_STR_SIZE ] = "";
 
@@ -355,28 +355,28 @@ int tech_object::lua_check_on_mode( u_int mode, bool show_error )
 
     if ( G_PAC_INFO()->par[ PAC_info::P_RESTRICTIONS_MODE ] == 0 )
         {
-        //Проверка на наличие уже включенной операции, запрещающей текущую.
-        //1. Операции текущего объекта.
+        //РџСЂРѕРІРµСЂРєР° РЅР° РЅР°Р»РёС‡РёРµ СѓР¶Рµ РІРєР»СЋС‡РµРЅРЅРѕР№ РѕРїРµСЂР°С†РёРё, Р·Р°РїСЂРµС‰Р°СЋС‰РµР№ С‚РµРєСѓС‰СѓСЋ.
+        //1. РћРїРµСЂР°С†РёРё С‚РµРєСѓС‰РµРіРѕ РѕР±СЉРµРєС‚Р°.
         lua_State *L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, "restrictions" );
         if ( lua_istable( L, -1 ) )
             {
-            lua_rawgeti( L, -1, serial_idx );           //Номер объекта.
+            lua_rawgeti( L, -1, serial_idx );           //РќРѕРјРµСЂ РѕР±СЉРµРєС‚Р°.
             if ( lua_istable( L, -1 ) )
                 {
-                lua_rawgeti( L, -1, mode );             //Номер операции.
+                lua_rawgeti( L, -1, mode );             //РќРѕРјРµСЂ РѕРїРµСЂР°С†РёРё.
                 if ( lua_istable( L, -1 ) )
                     {
-                    //1 Ограничения внутри объекта.
+                    //1 РћРіСЂР°РЅРёС‡РµРЅРёСЏ РІРЅСѓС‚СЂРё РѕР±СЉРµРєС‚Р°.
                     lua_rawgeti( L, -1, 1 );
                     if ( lua_istable( L, -1 ) )
                         {
                         for ( u_int i = 1; i <= get_modes_count(); i++ )
                             {
-                            lua_rawgeti( L, -1, i );    //Номер ограничения.
+                            lua_rawgeti( L, -1, i );    //РќРѕРјРµСЂ РѕРіСЂР°РЅРёС‡РµРЅРёСЏ.
                             if ( lua_isnumber( L, -1 ) )
                                 {
-                                //Есть ограничение, проверяем на активность операции.
+                                //Р•СЃС‚СЊ РѕРіСЂР°РЅРёС‡РµРЅРёРµ, РїСЂРѕРІРµСЂСЏРµРј РЅР° Р°РєС‚РёРІРЅРѕСЃС‚СЊ РѕРїРµСЂР°С†РёРё.
                                 if ( get_mode( i ) )
                                     {
                                     if ( show_error ) set_err_msg( err_msg,
@@ -390,29 +390,29 @@ int tech_object::lua_check_on_mode( u_int mode, bool show_error )
                         }
                     lua_pop( L, 1 );
 
-                    //2 Ограничения от других объектов.
+                    //2 РћРіСЂР°РЅРёС‡РµРЅРёСЏ РѕС‚ РґСЂСѓРіРёС… РѕР±СЉРµРєС‚РѕРІ.
                     lua_rawgeti( L, -1, 2 );
                     if ( lua_istable( L, -1 ) )
                         {
                         for ( u_int k = 1; k <= G_TECH_OBJECT_MNGR()->get_count(); k++ )
                             {
-                            lua_rawgeti( L, -1, k ); //Объект с номером k.
+                            lua_rawgeti( L, -1, k ); //РћР±СЉРµРєС‚ СЃ РЅРѕРјРµСЂРѕРј k.
                             if ( lua_istable( L, -1 ) )
                                 {
                                 tech_object* t_obj = G_TECH_OBJECT_MNGR()->get_tech_objects( k - 1 );
                                 for ( u_int i = 1;
                                     i <= t_obj->get_modes_count(); i++ )
                                     {
-                                    lua_rawgeti( L, -1, i );    //Номер ограничения.
+                                    lua_rawgeti( L, -1, i );    //РќРѕРјРµСЂ РѕРіСЂР°РЅРёС‡РµРЅРёСЏ.
                                     if ( lua_isnumber( L, -1 ) )
                                         {
-                                        //Есть ограничение, проверяем на активность операции.
+                                        //Р•СЃС‚СЊ РѕРіСЂР°РЅРёС‡РµРЅРёРµ, РїСЂРѕРІРµСЂСЏРµРј РЅР° Р°РєС‚РёРІРЅРѕСЃС‚СЊ РѕРїРµСЂР°С†РёРё.
                                         if ( t_obj->get_mode( i ) )
                                             {
                                             if ( show_error )
                                                 {
                                                 snprintf( err_msg, sizeof( err_msg ),
-                                                    "уже включена операция %.1d \'%.40s\' для объекта \'%.40s %d\'",
+                                                    "СѓР¶Рµ РІРєР»СЋС‡РµРЅР° РѕРїРµСЂР°С†РёСЏ %.1d \'%.40s\' РґР»СЏ РѕР±СЉРµРєС‚Р° \'%.40s %d\'",
                                                     i,
                                                     ( *t_obj->get_modes_manager() )[ i ]->get_name(),
                                                     t_obj->get_name(), t_obj->get_number() );
@@ -446,8 +446,8 @@ int tech_object::lua_check_on_mode( u_int mode, bool show_error )
         return 1000 + res;
         }
 
-    //TODO. Устаревшее название функции. Оставлено для совместимости.
-    //Проверка на наличии функции check_on_mode.
+    //TODO. РЈСЃС‚Р°СЂРµРІС€РµРµ РЅР°Р·РІР°РЅРёРµ С„СѓРЅРєС†РёРё. РћСЃС‚Р°РІР»РµРЅРѕ РґР»СЏ СЃРѕРІРјРµСЃС‚РёРјРѕСЃС‚Рё.
+    //РџСЂРѕРІРµСЂРєР° РЅР° РЅР°Р»РёС‡РёРё С„СѓРЅРєС†РёРё check_on_mode.
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
         name_Lua );
     lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "check_on_mode" );
@@ -460,7 +460,7 @@ int tech_object::lua_check_on_mode( u_int mode, bool show_error )
             "int tech_object::lua_check_on_mode( u_int mode )" );
         }
 
-    //Проверка на наличии функции user_check_operation_on.
+    //РџСЂРѕРІРµСЂРєР° РЅР° РЅР°Р»РёС‡РёРё С„СѓРЅРєС†РёРё user_check_operation_on.
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
         name_Lua );
     lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "user_check_operation_on" );
@@ -481,7 +481,7 @@ void tech_object::lua_init_mode( u_int mode )
     lua_manager::get_instance()->int_exec_lua_method( name_Lua,
         "init_mode", mode, "void tech_object::lua_init_mode( u_int mode )" );
 
-    //Обновляем состояние ограничений.
+    //РћР±РЅРѕРІР»СЏРµРј СЃРѕСЃС‚РѕСЏРЅРёРµ РѕРіСЂР°РЅРёС‡РµРЅРёР№.
     for ( u_int i = 1; i <= get_modes_count(); i++ )
         {
         available[ i - 1 ] = 0;
@@ -498,24 +498,24 @@ void tech_object::lua_init_mode( u_int mode )
 //-----------------------------------------------------------------------------
 void tech_object::check_availability( u_int operation_n )
     {
-    //Запрет на включение других операций, запрещающаемых текущей.
-    //1. Операции текущего объекта.
+    //Р—Р°РїСЂРµС‚ РЅР° РІРєР»СЋС‡РµРЅРёРµ РґСЂСѓРіРёС… РѕРїРµСЂР°С†РёР№, Р·Р°РїСЂРµС‰Р°СЋС‰Р°РµРјС‹С… С‚РµРєСѓС‰РµР№.
+    //1. РћРїРµСЂР°С†РёРё С‚РµРєСѓС‰РµРіРѕ РѕР±СЉРµРєС‚Р°.
     lua_State *L = lua_manager::get_instance()->get_Lua();
     lua_getfield( L, LUA_GLOBALSINDEX, "restrictions" );
     if ( lua_istable( L, -1 ) )
         {
-        lua_rawgeti( L, -1, serial_idx );           //Номер объекта.
+        lua_rawgeti( L, -1, serial_idx );           //РќРѕРјРµСЂ РѕР±СЉРµРєС‚Р°.
         if ( lua_istable( L, -1 ) )
             {
-            //Проход по всем операциям.
+            //РџСЂРѕС…РѕРґ РїРѕ РІСЃРµРј РѕРїРµСЂР°С†РёСЏРј.
             for ( u_int i = 1; i <= get_modes_count(); i++ )
                 {
                 if ( i == operation_n ) continue;
 
-                lua_rawgeti( L, -1, i );            //Номер операции.
+                lua_rawgeti( L, -1, i );            //РќРѕРјРµСЂ РѕРїРµСЂР°С†РёРё.
                 if ( lua_istable( L, -1 ) )
                     {
-                    //1 Ограничения внутри объекта.
+                    //1 РћРіСЂР°РЅРёС‡РµРЅРёСЏ РІРЅСѓС‚СЂРё РѕР±СЉРµРєС‚Р°.
                     lua_rawgeti( L, -1, 1 );
                     if ( lua_istable( L, -1 ) )
                         {
@@ -551,25 +551,25 @@ int tech_object::lua_final_mode( u_int mode )
     lua_manager::get_instance()->int_exec_lua_method( name_Lua,
         "final_mode", mode, "int tech_object::lua_final_mode( u_int mode )" );
 
-    //Обрабатываем запрет на включение других операций, запрещающаемых
-    //текущей, и запрет на последующие операции.
-    //1. Операции текущего объекта.
+    //РћР±СЂР°Р±Р°С‚С‹РІР°РµРј Р·Р°РїСЂРµС‚ РЅР° РІРєР»СЋС‡РµРЅРёРµ РґСЂСѓРіРёС… РѕРїРµСЂР°С†РёР№, Р·Р°РїСЂРµС‰Р°СЋС‰Р°РµРјС‹С…
+    //С‚РµРєСѓС‰РµР№, Рё Р·Р°РїСЂРµС‚ РЅР° РїРѕСЃР»РµРґСѓСЋС‰РёРµ РѕРїРµСЂР°С†РёРё.
+    //1. РћРїРµСЂР°С†РёРё С‚РµРєСѓС‰РµРіРѕ РѕР±СЉРµРєС‚Р°.
     lua_State *L = lua_manager::get_instance()->get_Lua();
     lua_getfield( L, LUA_GLOBALSINDEX, "restrictions" );
     if ( lua_istable( L, -1 ) )
         {
-        lua_rawgeti( L, -1, serial_idx );           //Номер объекта.
+        lua_rawgeti( L, -1, serial_idx );           //РќРѕРјРµСЂ РѕР±СЉРµРєС‚Р°.
         if ( lua_istable( L, -1 ) )
             {
-            //Проход по всем операциям.
+            //РџСЂРѕС…РѕРґ РїРѕ РІСЃРµРј РѕРїРµСЂР°С†РёСЏРј.
             for ( u_int i = 1; i <= get_modes_count(); i++ )
                 {
                 if ( i == mode ) continue;
 
-                lua_rawgeti( L, -1, i );            //Номер операции.
+                lua_rawgeti( L, -1, i );            //РќРѕРјРµСЂ РѕРїРµСЂР°С†РёРё.
                 if ( lua_istable( L, -1 ) )
                     {
-                    //1 Ограничения внутри объекта.
+                    //1 РћРіСЂР°РЅРёС‡РµРЅРёСЏ РІРЅСѓС‚СЂРё РѕР±СЉРµРєС‚Р°.
                     lua_rawgeti( L, -1, 1 );
                     if ( lua_istable( L, -1 ) )
                         {
@@ -585,14 +585,14 @@ int tech_object::lua_final_mode( u_int mode )
                 lua_pop( L, 1 );
                 }
 
-            lua_rawgeti( L, -1, mode );            //Текущая операция.
+            lua_rawgeti( L, -1, mode );            //РўРµРєСѓС‰Р°СЏ РѕРїРµСЂР°С†РёСЏ.
             if ( lua_istable( L, -1 ) )
                 {
-                //1 Ограничения на последующие операции внутри объекта.
+                //1 РћРіСЂР°РЅРёС‡РµРЅРёСЏ РЅР° РїРѕСЃР»РµРґСѓСЋС‰РёРµ РѕРїРµСЂР°С†РёРё РІРЅСѓС‚СЂРё РѕР±СЉРµРєС‚Р°.
                 lua_rawgeti( L, -1, 3 );
                 if ( lua_istable( L, -1 ) )
                     {
-                    //Проход по всем операциям.
+                    //РџСЂРѕС…РѕРґ РїРѕ РІСЃРµРј РѕРїРµСЂР°С†РёСЏРј.
                     for ( u_int i = 1; i <= get_modes_count(); i++ )
                         {
                         lua_rawgeti( L, -1, i );
@@ -619,7 +619,7 @@ int tech_object::lua_init_params()
     {
     tech_object::init_params();
 
-    //Проверка на наличии функции инициализации параметров uint.
+    //РџСЂРѕРІРµСЂРєР° РЅР° РЅР°Р»РёС‡РёРё С„СѓРЅРєС†РёРё РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РїР°СЂР°РјРµС‚СЂРѕРІ uint.
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
         name_Lua );
     lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "init_params_uint" );
@@ -630,10 +630,10 @@ int tech_object::lua_init_params()
         lua_manager::get_instance()->int_exec_lua_method( name_Lua,
             "init_params_uint", 0, "int tech_object::lua_init_params()" );
         }
-    //Удаляем "init_params_uint" со стека.
+    //РЈРґР°Р»СЏРµРј "init_params_uint" СЃРѕ СЃС‚РµРєР°.
     lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
 
-    //Проверка на наличии функции инициализации параметров float.
+    //РџСЂРѕРІРµСЂРєР° РЅР° РЅР°Р»РёС‡РёРё С„СѓРЅРєС†РёРё РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РїР°СЂР°РјРµС‚СЂРѕРІ float.
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
         name_Lua );
     lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "init_params_float" );
@@ -644,10 +644,10 @@ int tech_object::lua_init_params()
         lua_manager::get_instance()->int_exec_lua_method( name_Lua,
             "init_params_float", 0, "int tech_object::lua_init_params()" );
         }
-    //Удаляем "init_params_float" со стека.
+    //РЈРґР°Р»СЏРµРј "init_params_float" СЃРѕ СЃС‚РµРєР°.
     lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
 
-    //Проверка на наличии функции инициализации рабочих параметров uint.
+    //РџСЂРѕРІРµСЂРєР° РЅР° РЅР°Р»РёС‡РёРё С„СѓРЅРєС†РёРё РёРЅРёС†РёР°Р»РёР·Р°С†РёРё СЂР°Р±РѕС‡РёС… РїР°СЂР°РјРµС‚СЂРѕРІ uint.
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
         name_Lua );
     lua_getfield( lua_manager::get_instance()->get_Lua(), -1,
@@ -659,10 +659,10 @@ int tech_object::lua_init_params()
         lua_manager::get_instance()->int_exec_lua_method( name_Lua,
             "init_rt_params_uint", 0, "int tech_object::lua_init_params()" );
         }
-    //Удаляем "init_params_uint" со стека.
+    //РЈРґР°Р»СЏРµРј "init_params_uint" СЃРѕ СЃС‚РµРєР°.
     lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
 
-    //Проверка на наличии функции инициализации рабочих параметров float.
+    //РџСЂРѕРІРµСЂРєР° РЅР° РЅР°Р»РёС‡РёРё С„СѓРЅРєС†РёРё РёРЅРёС†РёР°Р»РёР·Р°С†РёРё СЂР°Р±РѕС‡РёС… РїР°СЂР°РјРµС‚СЂРѕРІ float.
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
         name_Lua );
     lua_getfield( lua_manager::get_instance()->get_Lua(), -1,
@@ -674,7 +674,7 @@ int tech_object::lua_init_params()
         lua_manager::get_instance()->int_exec_lua_method( name_Lua,
             "init_rt_params_float", 0, "int tech_object::lua_init_params()" );
         }
-    //Удаляем "init_params_float" со стека.
+    //РЈРґР°Р»СЏРµРј "init_params_float" СЃРѕ СЃС‚РµРєР°.
     lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
 
     return 0;
@@ -715,7 +715,7 @@ int tech_object::save_device( char *buff )
         sprintf( buff, "t.%s = t.%s or {}\nt.%s=\n\t{\n", name_Lua, name_Lua,
         name_Lua );
     
-    //Состояние и команда.
+    //РЎРѕСЃС‚РѕСЏРЅРёРµ Рё РєРѕРјР°РЅРґР°.
     res += sprintf( buff + res, "\tCMD=%lu,\n", ( u_long ) cmd );    
     res += sprintf( buff + res, "\tST=\n\t\t{\n\t\t" );
     
@@ -725,7 +725,7 @@ int tech_object::save_device( char *buff )
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
     
-    //Операции.
+    //РћРїРµСЂР°С†РёРё.
     res += sprintf( buff + res, "\tMODES=\n\t\t{\n\t\t" );    
     for ( u_int i = 1; i <= operations_count; i++ )
         {
@@ -739,7 +739,7 @@ int tech_object::save_device( char *buff )
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
 
-    //Доступность операций.
+    //Р”РѕСЃС‚СѓРїРЅРѕСЃС‚СЊ РѕРїРµСЂР°С†РёР№.
     res += sprintf( buff + res, "\tAVAILABILITY=\n\t\t{\n\t\t" );      
     for ( u_int i = 1; i <= operations_count; i++ )
         {
@@ -747,7 +747,7 @@ int tech_object::save_device( char *buff )
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
     
-    //Время простоя.
+    //Р’СЂРµРјСЏ РїСЂРѕСЃС‚РѕСЏ.
     static char up_time_str [ 50 ] = { 0 };
     u_int_4 up_hours;
     u_int_4 up_mins;
@@ -763,7 +763,7 @@ int tech_object::save_device( char *buff )
         ( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
     res += sprintf( buff + res, "%s", up_time_str );
     
-    //Время режимов.
+    //Р’СЂРµРјСЏ СЂРµР¶РёРјРѕРІ.
     res += sprintf( buff + res, "\tMODES_TIME=\n\t\t{\n\t\t" );
 
     for ( u_int i = 1; i <= modes_time.get_count(); i++ )
@@ -797,7 +797,7 @@ int tech_object::save_device( char *buff )
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
    
-    //Шаги.
+    //РЁР°РіРё.
     res += sprintf( buff + res, "\tMODES_STEPS=\n\t\t{\n\t\t" );  
     for ( u_int i = 0; i < operations_count; i++ )
         {
@@ -849,7 +849,7 @@ int tech_object::save_device( char *buff )
         res += sprintf( buff + res, "\n\t\t},\n" );
         }    
 
-    //Параметры.
+    //РџР°СЂР°РјРµС‚СЂС‹.
     res += par_float.save_device( buff + res, "\t" );
     res += par_uint.save_device( buff + res, "\t" );
     res += rt_par_float.save_device( buff + res, "\t" );
@@ -945,7 +945,7 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
                 }
             else
                 {
-                cmd = res;          // Ошибка.
+                cmd = res;          // РћС€РёР±РєР°.
                 }
             }
 
@@ -1077,28 +1077,28 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
         {
         case ERR_CANT_ON:
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s %d\' - не включена операция %.1d \'%.40s\' - %.60s.",
+                "\'%.40s %d\' - РЅРµ РІРєР»СЋС‡РµРЅР° РѕРїРµСЂР°С†РёСЏ %.1d \'%.40s\' - %.60s.",
                 name, number, mode, ( *operations_manager )[ mode ]->get_name(), 
                 err_msg );
             break;
 
         case ERR_ON_WITH_ERRORS:
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s %d\' - включена с ошибкой операция %.1d \'%.40s\' - %.50s.",
+                "\'%.40s %d\' - РІРєР»СЋС‡РµРЅР° СЃ РѕС€РёР±РєРѕР№ РѕРїРµСЂР°С†РёСЏ %.1d \'%.40s\' - %.50s.",
                 name, number, mode, ( *operations_manager )[ mode ]->get_name(), 
                 err_msg );
             break;
 
         case ERR_OFF:
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s %d\' - отключена операция %.1d \'%.40s\' - %.50s.",
+                "\'%.40s %d\' - РѕС‚РєР»СЋС‡РµРЅР° РѕРїРµСЂР°С†РёСЏ %.1d \'%.40s\' - %.50s.",
                 name, number, mode, ( *operations_manager )[ mode ]->get_name(), 
                 err_msg );
             break;
 
         case ERR_OFF_AND_ON:
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s %d\' - переход от %.1d \'%.40s\' к %.1d \'%.40s\'.",
+                "\'%.40s %d\' - РїРµСЂРµС…РѕРґ РѕС‚ %.1d \'%.40s\' Рє %.1d \'%.40s\'.",
                 name, number, mode, ( *operations_manager )[ mode ]->get_name(),
                 new_mode, ( *operations_manager )[ new_mode ]->get_name() );
 
@@ -1114,7 +1114,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
             if ( mode > 0 )
                 {
                 snprintf( new_err->msg, sizeof( new_err->msg ),
-                    "\'%.40s %d\' - операция %.1d \'%.40s\' - %.50s.",
+                    "\'%.40s %d\' - РѕРїРµСЂР°С†РёСЏ %.1d \'%.40s\' - %.50s.",
                     name, number, mode, ( *operations_manager )[ mode ]->get_name(), 
                     err_msg );
                 }
@@ -1134,15 +1134,15 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
             
         case ERR_TO_FAIL_STATE:
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s %d\' - авария операции %.1d \'%.40s\' - %.50s.",
+                "\'%.40s %d\' - Р°РІР°СЂРёСЏ РѕРїРµСЂР°С†РёРё %.1d \'%.40s\' - %.50s.",
                 name, number, mode, ( *operations_manager )[ mode ]->get_name(), 
                 err_msg );
             break;
 
         case ERR_CANT_ON_2_OPER:
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s %d\' - не включена операция %.1d \'%.40s\' - "
-                "уже включена операция %.1d \'%.40s\'.",
+                "\'%.40s %d\' - РЅРµ РІРєР»СЋС‡РµРЅР° РѕРїРµСЂР°С†РёСЏ %.1d \'%.40s\' - "
+                "СѓР¶Рµ РІРєР»СЋС‡РµРЅР° РѕРїРµСЂР°С†РёСЏ %.1d \'%.40s\'.",
                 name, number, 
                 mode, ( *operations_manager )[ mode ]->get_name(),
                 new_mode, ( *operations_manager )[ new_mode ]->get_name() );
@@ -1157,7 +1157,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
 
         case ERR_CANT_ON_2_OBJ:
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s %d\' - не включена операция %.1d \'%.40s\' - %s.",
+                "\'%.40s %d\' - РЅРµ РІРєР»СЋС‡РµРЅР° РѕРїРµСЂР°С†РёСЏ %.1d \'%.40s\' - %s.",
                 name, number,
                 mode, ( *operations_manager )[ mode ]->get_name(),
                 err_msg );
@@ -1170,14 +1170,14 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
                 debug_break;
                 }
             snprintf( new_err->msg, sizeof( new_err->msg ),
-                "\'%.40s\' - режим %.1d \'%.40s\' - %.50s.",
+                "\'%.40s\' - СЂРµР¶РёРј %.1d \'%.40s\' - %.50s.",
                 name, mode, ( *operations_manager )[ mode ]->get_name(), err_msg );
             break;
         }
     
     if ( G_DEBUG )
         {
-        printf( "Событие -> %s\n", new_err->msg );
+        printf( "РЎРѕР±С‹С‚РёРµ -> %s\n", new_err->msg );
         }
 
     if ( errors.size() < E_MAX_ERRORS_SIZE )
@@ -1214,7 +1214,7 @@ bool tech_object::is_any_important_mode()
     static char has_Lua_impl = 0;
     if ( has_Lua_impl == 0 )
         {
-        //Проверка на наличии Lua-функции is_any_important_mode().
+        //РџСЂРѕРІРµСЂРєР° РЅР° РЅР°Р»РёС‡РёРё Lua-С„СѓРЅРєС†РёРё is_any_important_mode().
         lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
             name_Lua );
         lua_getfield( lua_manager::get_instance()->get_Lua(), -1, 
@@ -1229,7 +1229,7 @@ bool tech_object::is_any_important_mode()
             {
             has_Lua_impl = 1;
             }
-        //Удаляем "is_any_important_mode" со стека.
+        //РЈРґР°Р»СЏРµРј "is_any_important_mode" СЃРѕ СЃС‚РµРєР°.
         lua_remove( lua_manager::get_instance()->get_Lua(), -1 );        
         }
 
@@ -1257,9 +1257,9 @@ int tech_object::check_operation_on( u_int operation_n, bool show_error )
     {
     operation* op = ( *operations_manager )[ operation_n ];
 
-    //Проверка режима на проверку ОС устройств.
+    //РџСЂРѕРІРµСЂРєР° СЂРµР¶РёРјР° РЅР° РїСЂРѕРІРµСЂРєСѓ РћРЎ СѓСЃС‚СЂРѕР№СЃС‚РІ.
     const int S_SIZE = 41;
-    char res_str[ S_SIZE ] = "обр. связь ";
+    char res_str[ S_SIZE ] = "РѕР±СЂ. СЃРІСЏР·СЊ ";
 
     int l = strlen( res_str );
     int res = op->check_devices_on_run_state( res_str + l, S_SIZE - l );
@@ -1417,7 +1417,7 @@ void tech_object_manager::evaluate()
 //-----------------------------------------------------------------------------
 int tech_object_manager::init_objects()
     {
-    //-Вызов пользовательской функции инициализации.
+    //-Р’С‹Р·РѕРІ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРѕР№ С„СѓРЅРєС†РёРё РёРЅРёС†РёР°Р»РёР·Р°С†РёРё.
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
         "init" );
 
@@ -1436,7 +1436,7 @@ tech_object_manager::~tech_object_manager()
     delete stub;
     stub = 0;
 
-// Удаляются в Lua.
+// РЈРґР°Р»СЏСЋС‚СЃСЏ РІ Lua.
 //    for ( u_int i = 0; i < tech_objects.size(); i++ )
 //        {
 //        delete tech_objects[ i ];
@@ -1445,7 +1445,7 @@ tech_object_manager::~tech_object_manager()
 //-----------------------------------------------------------------------------
 tech_object_manager::tech_object_manager()
     {
-    stub = new tech_object( "Заглушка", 1, 1000, "STUB", 1, 1, 1, 1, 1, 1 );
+    stub = new tech_object( "Р—Р°РіР»СѓС€РєР°", 1, 1000, "STUB", 1, 1, 1, 1, 1, 1 );
     }
 //-----------------------------------------------------------------------------
 void tech_object_manager::add_tech_object( tech_object* new_tech_object )

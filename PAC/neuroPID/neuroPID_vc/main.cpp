@@ -18,7 +18,7 @@
 
 bool g_is_start = false;
 
-//Эмулятор.
+//Р­РјСѓР»СЏС‚РѕСЂ.
 nn_manager* nn_emul_manager = new nn_manager( 100, 10 );
 
 #ifdef SAVE_DATA_FOR_LEARNING
@@ -29,12 +29,12 @@ void DrawSeries( HDC hdc, int x0, int y0, int x1, int y1, int scale,
                 std::vector<float> *data_y, std::vector<float> *data_y2,
                 std::vector<float> *data_y3 )
     {    
-    //Считаем очищенной заданную область.
+    //РЎС‡РёС‚Р°РµРј РѕС‡РёС‰РµРЅРЅРѕР№ Р·Р°РґР°РЅРЅСѓСЋ РѕР±Р»Р°СЃС‚СЊ.
     //RECT rect;
     //SetRect( &rect, x0, y0, x1, y1 );    
     //FillRect (hdc, &rect, (HBRUSH)(COLOR_WINDOW+1));
 
-    //Рисуем оси.
+    //Р РёСЃСѓРµРј РѕСЃРё.
     const int D        = 5;
     const int ARROW_SIZE = 15;
     const int CENTER_X = ( x1 - x0 ) / 2;
@@ -99,7 +99,7 @@ void DrawSeries( HDC hdc, int x0, int y0, int x1, int y1, int scale,
     LineTo( hdc, x1 - ARROW_SIZE - D, y1 - D + ARROW_SIZE / 3 );
     LineTo( hdc, x1 - D, y1 - D );
 
-    //Строим график.
+    //РЎС‚СЂРѕРёРј РіСЂР°С„РёРє.
     LOGBRUSH lb;    
     lb.lbStyle = BS_SOLID; 
     lb.lbColor = RGB(0, 0, 0); 
@@ -111,11 +111,11 @@ void DrawSeries( HDC hdc, int x0, int y0, int x1, int y1, int scale,
     //MoveToEx( hdc, CENTER_X, CENTER_Y, NULL );
 
     
-    //Строим линию 1 влево.
+    //РЎС‚СЂРѕРёРј Р»РёРЅРёСЋ 1 РІР»РµРІРѕ.
     MoveToEx( hdc, CENTER_X, 
         y1 - D - ( int ) ( SCALE_Y * data_y[ 0 ][ 0 ] ), NULL );
 
-    ////Массив точек для кривой Безье.
+    ////РњР°СЃСЃРёРІ С‚РѕС‡РµРє РґР»СЏ РєСЂРёРІРѕР№ Р‘РµР·СЊРµ.
     //POINT* lpPoints = new POINT[ data_y->size() ];
     //for ( unsigned int i = 0; i < data_y->size(); i++ )
     //    {
@@ -132,7 +132,7 @@ void DrawSeries( HDC hdc, int x0, int y0, int x1, int y1, int scale,
         }
     DeleteObject(hPen); 
 
-    //Строим линию 2 влево.
+    //РЎС‚СЂРѕРёРј Р»РёРЅРёСЋ 2 РІР»РµРІРѕ.
     LOGBRUSH lb2;    
     lb2.lbStyle = BS_SOLID; 
     lb2.lbColor = RGB( 255, 0, 0); 
@@ -151,7 +151,7 @@ void DrawSeries( HDC hdc, int x0, int y0, int x1, int y1, int scale,
         }
     DeleteObject(hPen2); 
 
-    //Строим линию 3 влево.
+    //РЎС‚СЂРѕРёРј Р»РёРЅРёСЋ 3 РІР»РµРІРѕ.
     LOGBRUSH lb3;    
     lb3.lbStyle = BS_SOLID; 
     lb3.lbColor = RGB( 0, 0, 0 ); 
@@ -551,18 +551,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                 case 10001: //Checkbox
                     {
-                    // Получаем HWND нашего chechbox'а.
+                    // РџРѕР»СѓС‡Р°РµРј HWND РЅР°С€РµРіРѕ chechbox'Р°.
                     HWND hwndCheck = GetDlgItem(hWnd, 10001);
-                    // Выясняем текущее состояние chechbox'а.
+                    // Р’С‹СЏСЃРЅСЏРµРј С‚РµРєСѓС‰РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ chechbox'Р°.
                     LRESULT res = SendMessage (hwndCheck, BM_GETCHECK, 0, 0);
-                    // Если галочка стоит.
+                    // Р•СЃР»Рё РіР°Р»РѕС‡РєР° СЃС‚РѕРёС‚.
                     if(res == BST_CHECKED)
                         {
                         nn_emul_manager->set_learning( true );
 
                         //SetWindowText( hWnd, L"Checked" );
                         }
-                    // Если галочка не стоит.
+                    // Р•СЃР»Рё РіР°Р»РѕС‡РєР° РЅРµ СЃС‚РѕРёС‚.
                     if(res == BST_UNCHECKED)
                         {
                         //SetWindowText( hWnd, L"Unchecked" );
@@ -591,7 +591,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
 
         case WM_ERASEBKGND:
-            ////Очищаем окно.
+            ////РћС‡РёС‰Р°РµРј РѕРєРЅРѕ.
             //hdc = GetDC( hWnd );
 
             //RECT rect;
@@ -606,16 +606,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             {
             if ( g_is_start )
                 {
-                //Очищаем окно.
+                //РћС‡РёС‰Р°РµРј РѕРєРЅРѕ.
                 hdc = GetDC( hWnd );
 
-                //Здесь рисуем в hdc
+                //Р—РґРµСЃСЊ СЂРёСЃСѓРµРј РІ hdc
                 RECT rect;
                 GetClientRect (hWnd, &rect);
                 rect.bottom /= 2;
                 FillRect ( hdc, &rect, (HBRUSH)(COLOR_WINDOW+1));
 
-                //Рисуем график ПИД.
+                //Р РёСЃСѓРµРј РіСЂР°С„РёРє РџРР”.
                 DrawSeries( hdc, rect.left, rect.top, rect.right, rect.bottom,
                     10, nn_emul_manager->get_plant_data(),
                     nn_emul_manager->get_PID_data(), 
@@ -646,7 +646,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 rect.left, rect.top, rect.right, rect.bottom / 2 ); 
             SelectClipRgn(hdc, hrgn); 
             
-            //Очищаем окно.
+            //РћС‡РёС‰Р°РµРј РѕРєРЅРѕ.
             //RECT rect;
             //GetClientRect (hWnd, &rect);            
             //FillRect ( hdc, &rect, (HBRUSH)(COLOR_WINDOW+1));

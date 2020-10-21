@@ -36,14 +36,14 @@ int win_rm_cmmctr::send_2_PAC( int service_n, const char *cmd_str, int length )
     {
     answer_size = 0;
 
-    // Инициализация сети, при необходимости.
+    // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРµС‚Рё, РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё.
     if ( !is_initialized )
         {
         net_init();
         if ( !is_initialized ) return 1;
         }
 
-    // Подключение к удаленному PAC.
+    // РџРѕРґРєР»СЋС‡РµРЅРёРµ Рє СѓРґР°Р»РµРЅРЅРѕРјСѓ PAC.
     if ( !is_connected )
         {
         connect_to_PAC();
@@ -53,14 +53,14 @@ int win_rm_cmmctr::send_2_PAC( int service_n, const char *cmd_str, int length )
     in_buff[ 0 ] = 's';
     in_buff[ 1 ] = service_n;
     in_buff[ 2 ] = 1;                 // FrameSingle.
-    in_buff[ 3 ] = ++pidx;            // Идентификатор пакета.
+    in_buff[ 3 ] = ++pidx;            // РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїР°РєРµС‚Р°.
     in_buff[ 4 ] = ( char ) ( length >> 8 );
     in_buff[ 5 ] = length & 0xFF;
     memcpy( in_buff + 6, cmd_str, length );
 
     if ( send( remote_PAC_socket, in_buff, length + 6, 0 ) == SOCKET_ERROR )
         {
-        fprintf( stderr, "rm_cmmctr: Ошибка отсылки сообщения для \"%s\"!\n",
+        fprintf( stderr, "rm_cmmctr: РћС€РёР±РєР° РѕС‚СЃС‹Р»РєРё СЃРѕРѕР±С‰РµРЅРёСЏ РґР»СЏ \"%s\"!\n",
             name.c_str() );
         disconnect();                
         return 1;
@@ -71,30 +71,30 @@ int win_rm_cmmctr::send_2_PAC( int service_n, const char *cmd_str, int length )
 
     if ( 0 == res )
         {
-        fprintf( stderr, "PAC закрыл соединение." );
+        fprintf( stderr, "PAC Р·Р°РєСЂС‹Р» СЃРѕРµРґРёРЅРµРЅРёРµ." );
         disconnect();
         return 1;
         }
 
     if ( res < 0 /*res == SOCKET_ERROR*/ )
         {
-        fprintf( stderr,  "Ошибка получения ответа!" );
+        fprintf( stderr,  "РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РѕС‚РІРµС‚Р°!" );
         disconnect();
         return 1;
         }
 
     if ( in_buff[ 1 ] == 7 )
         {
-        fprintf( stderr, "Возвращена ошибка!" );                
+        fprintf( stderr, "Р’РѕР·РІСЂР°С‰РµРЅР° РѕС€РёР±РєР°!" );                
         return 1;
         }    
     unsigned char *work_buff = ( unsigned char* ) in_buff;
 
-    //-Проверка на правильность заголовка блока данных от PAC.
+    //-РџСЂРѕРІРµСЂРєР° РЅР° РїСЂР°РІРёР»СЊРЅРѕСЃС‚СЊ Р·Р°РіРѕР»РѕРІРєР° Р±Р»РѕРєР° РґР°РЅРЅС‹С… РѕС‚ PAC.
     if ( !( work_buff[ 0 ] == 's'                   //NetId 
         && pidx == work_buff[ 2 ] ) )
         {
-        fprintf( stderr, "Возвращен неверный ответ!" );        
+        fprintf( stderr, "Р’РѕР·РІСЂР°С‰РµРЅ РЅРµРІРµСЂРЅС‹Р№ РѕС‚РІРµС‚!" );        
         disconnect();
         if ( G_DEBUG ) 
             {
@@ -106,14 +106,14 @@ int win_rm_cmmctr::send_2_PAC( int service_n, const char *cmd_str, int length )
     answer_size = work_buff[ 3 ] * 256 + work_buff[ 4 ];
     if ( 0 == answer_size )
         {
-        fprintf( stderr, "Длина ответа - 0!" );
+        fprintf( stderr, "Р”Р»РёРЅР° РѕС‚РІРµС‚Р° - 0!" );
         return 1;
         }
 
     if ( answer_size > P_MAX_BUFFER_SIZE )
         {
         fprintf( stderr, 
-            "Длина ответа[ %d ] > максимальной длины[ %d ]!", 
+            "Р”Р»РёРЅР° РѕС‚РІРµС‚Р°[ %d ] > РјР°РєСЃРёРјР°Р»СЊРЅРѕР№ РґР»РёРЅС‹[ %d ]!", 
             answer_size, P_MAX_BUFFER_SIZE );
         answer_size = 0;
 
@@ -128,7 +128,7 @@ int win_rm_cmmctr::send_2_PAC( int service_n, const char *cmd_str, int length )
 
         if ( res <= 0 /*res == SOCKET_ERROR*/ )
             {
-            fprintf( stderr, "Получена часть ответа от PAC!" );
+            fprintf( stderr, "РџРѕР»СѓС‡РµРЅР° С‡Р°СЃС‚СЊ РѕС‚РІРµС‚Р° РѕС‚ PAC!" );
 
             answer_size = 0;
 
@@ -147,8 +147,8 @@ int win_rm_cmmctr::send_2_PAC( int service_n, const char *cmd_str, int length )
 //-----------------------------------------------------------------------------
 int win_rm_cmmctr::evaluate()
     {
-    // Проверка связи с удаленным PAC.
-    if ( get_sec() - last_transfer_time > 5 /*сек*/)
+    // РџСЂРѕРІРµСЂРєР° СЃРІСЏР·Рё СЃ СѓРґР°Р»РµРЅРЅС‹Рј PAC.
+    if ( get_sec() - last_transfer_time > 5 /*СЃРµРє*/)
         {
         if ( cmctr_err == false )
             {
@@ -173,7 +173,7 @@ int win_rm_cmmctr::evaluate()
 
     if ( !got_devices )
         {
-        //Получение устройств в первый раз.
+        //РџРѕР»СѓС‡РµРЅРёРµ СѓСЃС‚СЂРѕР№СЃС‚РІ РІ РїРµСЂРІС‹Р№ СЂР°Р·.
         char buff[ 1 ];
         buff[ 0 ] = ( char ) device_communicator::CMD_RM_GET_DEVICES;
         send_2_PAC( PAC_CMMCTR_SERVICE_ID, buff, sizeof( buff ) );
@@ -185,7 +185,7 @@ int win_rm_cmmctr::evaluate()
             devices_request_id = ( ( u_int_2* ) answer )[ 0 ]; 
 
             int res = G_LUA_MANAGER->exec_Lua_str( answer + 2,
-                "Ошибка получения объектов remote PAC" );
+                "РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РѕР±СЉРµРєС‚РѕРІ remote PAC" );
             if( res != 0 )
                 {
                 return -1;
@@ -198,7 +198,7 @@ int win_rm_cmmctr::evaluate()
 
     if ( got_devices )
         {
-        //Получение состояния устройств.
+        //РџРѕР»СѓС‡РµРЅРёРµ СЃРѕСЃС‚РѕСЏРЅРёСЏ СѓСЃС‚СЂРѕР№СЃС‚РІ.
         char buff[ 3 ];
         buff[ 0 ] = ( char ) device_communicator::CMD_RM_GET_DEVICES_STATES;
 
@@ -212,14 +212,14 @@ int win_rm_cmmctr::evaluate()
             { 
             if ( devices_request_id != ( ( u_int_2* ) answer )[ 0 ] )
                 {
-                printf( "Устройства %s изменились.\n", name.c_str() );
+                printf( "РЈСЃС‚СЂРѕР№СЃС‚РІР° %s РёР·РјРµРЅРёР»РёСЃСЊ.\n", name.c_str() );
 
                 got_devices = false;
                 }
             else
                 {
                 int res = G_LUA_MANAGER->exec_Lua_str( answer + 2,
-                    "Ошибка получения состояния объектов remote PAC" );
+                    "РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ РѕР±СЉРµРєС‚РѕРІ remote PAC" );
                 if( res != 0 )
                     {
                     return -1;
@@ -251,8 +251,8 @@ int win_rm_cmmctr::connect_to_PAC()
     err_cnt = 0;
 
     int type     = SOCK_STREAM;
-    int protocol = 0;        /* всегда 0 */
-    //-Cоздание мастер-сокета.
+    int protocol = 0;        /* РІСЃРµРіРґР° 0 */
+    //-CРѕР·РґР°РЅРёРµ РјР°СЃС‚РµСЂ-СЃРѕРєРµС‚Р°.
     remote_PAC_socket = socket( PF_INET, type, protocol ); 
 
     if ( remote_PAC_socket < 0 )
@@ -274,23 +274,23 @@ if ( G_DEBUG )
         }
 }
 
-    //-Адресация мастер-сокета.
+    //-РђРґСЂРµСЃР°С†РёСЏ РјР°СЃС‚РµСЂ-СЃРѕРєРµС‚Р°.
     const int on = 1;
     if ( setsockopt( remote_PAC_socket, SOL_SOCKET, SO_REUSEADDR, 
         ( char* ) &on, sizeof( on ) ) )
         {
-        printf( "rm_cmmct_win - ошибка  вызова  setsockopt: %s\n",
+        printf( "rm_cmmct_win - РѕС€РёР±РєР°  РІС‹Р·РѕРІР°  setsockopt: %s\n",
             WSA_Last_Err_Decode() );        
         closesocket( remote_PAC_socket );
         return -5;
         }
 
-    //Переводим сокет в неблокирующий режим.
+    //РџРµСЂРµРІРѕРґРёРј СЃРѕРєРµС‚ РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј.
     u_long mode = 1;
     int res = ioctlsocket( remote_PAC_socket, FIONBIO, &mode );
     if ( res == SOCKET_ERROR )
         {
-        fprintf( stderr, "rm_cmmct_win - Ошибка перевода сокета в неблокирующий режим!\n" );        
+        fprintf( stderr, "rm_cmmct_win - РћС€РёР±РєР° РїРµСЂРµРІРѕРґР° СЃРѕРєРµС‚Р° РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј!\n" );        
 
         closesocket( remote_PAC_socket );
         return 0;
@@ -318,7 +318,7 @@ if ( G_DEBUG )
         {
         if ( is_set_select_err == false )
             {
-            fprintf( stderr, "rm_cmmct_win - Ошибка установления соединения!\n" );
+            fprintf( stderr, "rm_cmmct_win - РћС€РёР±РєР° СѓСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ СЃРѕРµРґРёРЅРµРЅРёСЏ!\n" );
             is_set_select_err = true;
             }
 
@@ -334,18 +334,18 @@ if ( G_DEBUG )
     idle_cnt = 0;
     is_set_select_err = false;
 
-    //Переводим сокет в блокирующий режим.
+    //РџРµСЂРµРІРѕРґРёРј СЃРѕРєРµС‚ РІ Р±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј.
     mode = 0;
     res = ioctlsocket( remote_PAC_socket, FIONBIO, &mode );
     if ( res == SOCKET_ERROR )
         {
-        fprintf( stderr, "rm_cmmct_win - Ошибка перевода сокета в блокирующий режим!\n" );                
+        fprintf( stderr, "rm_cmmct_win - РћС€РёР±РєР° РїРµСЂРµРІРѕРґР° СЃРѕРєРµС‚Р° РІ Р±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј!\n" );                
         }   
 
     res = recv( remote_PAC_socket, in_buff, 255, 0 );
     if ( SOCKET_ERROR == res )
         {
-        fprintf( stderr, "rm_cmmct_win - Ошибка получения ответа при подключении!\n" );               
+        fprintf( stderr, "rm_cmmct_win - РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РѕС‚РІРµС‚Р° РїСЂРё РїРѕРґРєР»СЋС‡РµРЅРёРё!\n" );               
         closesocket( remote_PAC_socket );
 
         return 0;

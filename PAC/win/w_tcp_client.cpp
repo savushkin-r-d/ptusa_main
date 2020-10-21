@@ -22,7 +22,7 @@ int win_tcp_client::Communicate( unsigned int bytestosend )
         {
         if ( G_DEBUG ) 
             {
-            printf("tcp_client_%d Ошибка %d отсылки сообщения.\n", id, WSAGetLastError());
+            printf("tcp_client_%d РћС€РёР±РєР° %d РѕС‚СЃС‹Р»РєРё СЃРѕРѕР±С‰РµРЅРёСЏ.\n", id, WSAGetLastError());
             }
         Disconnect();
         return 0;
@@ -36,7 +36,7 @@ int win_tcp_client::Communicate( unsigned int bytestosend )
         {
         if ( G_DEBUG ) 
             {
-            printf("tcp_client_%d Ошибка получения ответа\n", id);
+            printf("tcp_client_%d РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РѕС‚РІРµС‚Р°\n", id);
             }
         Disconnect();
         return 0;
@@ -48,7 +48,7 @@ int win_tcp_client::Communicate( unsigned int bytestosend )
         {
         if ( G_DEBUG ) 
             {
-            printf("tcp_client_%d Сервер закрыл соединение\n", id);
+            printf("tcp_client_%d РЎРµСЂРІРµСЂ Р·Р°РєСЂС‹Р» СЃРѕРµРґРёРЅРµРЅРёРµ\n", id);
             }
         Disconnect();
         return 0;
@@ -60,14 +60,14 @@ int win_tcp_client::Communicate( unsigned int bytestosend )
             {
             if ( G_DEBUG ) 
                 {
-                printf("tcp_client_%d Ошибка %d получения ответа\n", id, WSAGetLastError());
+                printf("tcp_client_%d РћС€РёР±РєР° %d РїРѕР»СѓС‡РµРЅРёСЏ РѕС‚РІРµС‚Р°\n", id, WSAGetLastError());
                 }
             }
         else
             {
             if ( G_DEBUG ) 
                 {
-                printf("tcp_client_%d Ошибка получения ответа, истекло время ожидания\n", id);
+                printf("tcp_client_%d РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РѕС‚РІРµС‚Р°, РёСЃС‚РµРєР»Рѕ РІСЂРµРјСЏ РѕР¶РёРґР°РЅРёСЏ\n", id);
                 }
             }
         Disconnect();
@@ -98,7 +98,7 @@ int win_tcp_client::InitLib()
             {
             if ( G_DEBUG ) 
                 {
-                printf("tcp_client_%d Ошибка %d инициализации сетевой библиотеки.\n", id, WSAGetLastError());
+                printf("tcp_client_%d РћС€РёР±РєР° %d РёРЅРёС†РёР°Р»РёР·Р°С†РёРё СЃРµС‚РµРІРѕР№ Р±РёР±Р»РёРѕС‚РµРєРё.\n", id, WSAGetLastError());
                 }
             return 0;
             }
@@ -128,7 +128,7 @@ int win_tcp_client::Connect()
         {
         if ( G_DEBUG ) 
             {
-            printf("tcp_client_%d: Ошибка создания сокета %d!\n", id, WSAGetLastError());    
+            printf("tcp_client_%d: РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ СЃРѕРєРµС‚Р° %d!\n", id, WSAGetLastError());    
             }
 
         return 0;
@@ -141,19 +141,19 @@ int win_tcp_client::Connect()
         {
         if ( G_DEBUG ) 
             {
-            printf("tcp_client_%d: Ошибка установления параметров сокета %d!\n", id, WSAGetLastError());        
+            printf("tcp_client_%d: РћС€РёР±РєР° СѓСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РїР°СЂР°РјРµС‚СЂРѕРІ СЃРѕРєРµС‚Р° %d!\n", id, WSAGetLastError());        
             }
         return 0;
         }
 
-    //Переводим сокет в неблокирующий режим.
+    //РџРµСЂРµРІРѕРґРёРј СЃРѕРєРµС‚ РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј.
     u_long mode = 1;
     res = ioctlsocket( socket_number, FIONBIO, &mode );
     if ( res == SOCKET_ERROR )
         {
         if ( G_DEBUG ) 
             {
-            printf("tcp_client_%d: Ошибка перевода сокета в неблокирующий режим %d!\n", id, WSAGetLastError());     
+            printf("tcp_client_%d: РћС€РёР±РєР° РїРµСЂРµРІРѕРґР° СЃРѕРєРµС‚Р° РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј %d!\n", id, WSAGetLastError());     
             }
 
 
@@ -180,14 +180,14 @@ int win_tcp_client::Connect()
             {
             if ( G_DEBUG ) 
                 {
-                printf("tcp_client_%d: Ошибка соединения. Таймаут\n", id);
+                printf("tcp_client_%d: РћС€РёР±РєР° СЃРѕРµРґРёРЅРµРЅРёСЏ. РўР°Р№РјР°СѓС‚\n", id);
                 }
             }
         else
             {
             if ( G_DEBUG ) 
                 {
-                printf("tcp_client_%d: Ошибка соединения %d!\n", id, WSAGetLastError());
+                printf("tcp_client_%d: РћС€РёР±РєР° СЃРѕРµРґРёРЅРµРЅРёСЏ %d!\n", id, WSAGetLastError());
                 }
             }
         closesocket( socket_number);
@@ -205,7 +205,7 @@ int win_tcp_client::Connect()
             {
             if ( G_DEBUG ) 
                 {
-                printf("tcp_client_%d: Ошибка соединения(select) %d!\n", id, sock_error);
+                printf("tcp_client_%d: РћС€РёР±РєР° СЃРѕРµРґРёРЅРµРЅРёСЏ(select) %d!\n", id, sock_error);
                 }
             closesocket( socket_number);
             socket_number = 0;
@@ -236,7 +236,7 @@ int win_tcp_client::AsyncConnect()
 			{
 				if (G_DEBUG)
 				{
-					printf("tcp_client_%d: Ошибка создания сокета %d!\n", id, WSAGetLastError());
+					printf("tcp_client_%d: РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ СЃРѕРєРµС‚Р° %d!\n", id, WSAGetLastError());
 				}
 
 				return 0;
@@ -249,19 +249,19 @@ int win_tcp_client::AsyncConnect()
 			{
 				if (G_DEBUG)
 				{
-					printf("tcp_client_%d: Ошибка установления параметров сокета %d!\n", id, WSAGetLastError());
+					printf("tcp_client_%d: РћС€РёР±РєР° СѓСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РїР°СЂР°РјРµС‚СЂРѕРІ СЃРѕРєРµС‚Р° %d!\n", id, WSAGetLastError());
 				}
 				return 0;
 			}
 
-			//Переводим сокет в неблокирующий режим.
+			//РџРµСЂРµРІРѕРґРёРј СЃРѕРєРµС‚ РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј.
 			u_long mode = 1;
 			res = ioctlsocket(socket_number, FIONBIO, &mode);
 			if (res == SOCKET_ERROR)
 			{
 				if (G_DEBUG)
 				{
-					printf("tcp_client_%d: Ошибка перевода сокета в неблокирующий режим %d!\n", id, WSAGetLastError());
+					printf("tcp_client_%d: РћС€РёР±РєР° РїРµСЂРµРІРѕРґР° СЃРѕРєРµС‚Р° РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј %d!\n", id, WSAGetLastError());
 				}
 
 
@@ -295,7 +295,7 @@ int win_tcp_client::AsyncConnect()
 
 					if (G_DEBUG)
 					{
-						printf("tcp_client_%d: Ошибка соединения. Таймаут\n", id);
+						printf("tcp_client_%d: РћС€РёР±РєР° СЃРѕРµРґРёРЅРµРЅРёСЏ. РўР°Р№РјР°СѓС‚\n", id);
 					}
 					closesocket(socket_number);
 					socket_number = 0;
@@ -313,7 +313,7 @@ int win_tcp_client::AsyncConnect()
 			{
 				if (G_DEBUG)
 				{
-					printf("tcp_client_%d: Ошибка соединения %d!\n", id, WSAGetLastError());
+					printf("tcp_client_%d: РћС€РёР±РєР° СЃРѕРµРґРёРЅРµРЅРёСЏ %d!\n", id, WSAGetLastError());
 				}
 				closesocket(socket_number);
 				socket_number = 0;
@@ -331,7 +331,7 @@ int win_tcp_client::AsyncConnect()
 				{
 					if (G_DEBUG)
 					{
-						printf("tcp_client_%d: Ошибка соединения(select) %d!\n", id, sock_error);
+						printf("tcp_client_%d: РћС€РёР±РєР° СЃРѕРµРґРёРЅРµРЅРёСЏ(select) %d!\n", id, sock_error);
 					}
 					closesocket(socket_number);
 					socket_number = 0;
@@ -421,7 +421,7 @@ int win_tcp_client::AsyncSend( unsigned int bytestosend )
         {
         if ( G_DEBUG ) 
             {
-            printf("tcp_client_%d Ошибка %d отсылки сообщения.\n", id, WSAGetLastError());
+            printf("tcp_client_%d РћС€РёР±РєР° %d РѕС‚СЃС‹Р»РєРё СЃРѕРѕР±С‰РµРЅРёСЏ.\n", id, WSAGetLastError());
             }
         async_result = AR_SOCKETERROR;
         Disconnect();
@@ -435,7 +435,7 @@ int win_tcp_client::AsyncSend( unsigned int bytestosend )
 
 int win_tcp_client::get_async_result()
 {
-	/// В процессе соединения циклично вызываем функцию для реализации асинхронного соединения.
+	/// Р’ РїСЂРѕС†РµСЃСЃРµ СЃРѕРµРґРёРЅРµРЅРёСЏ С†РёРєР»РёС‡РЅРѕ РІС‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ РґР»СЏ СЂРµР°Р»РёР·Р°С†РёРё Р°СЃРёРЅС…СЂРѕРЅРЅРѕРіРѕ СЃРѕРµРґРёРЅРµРЅРёСЏ.
 	if (connectedstate == ACS_CONNECTING)
 	{
 		AsyncSend(async_bytes_to_send);

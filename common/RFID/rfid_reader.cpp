@@ -29,23 +29,23 @@ int rfid_reader::evaluate()
 	if ( _hReader == 0 )
 		{
 
-        //Для проверки доступности reader'а в сети
+        //Р”Р»СЏ РїСЂРѕРІРµСЂРєРё РґРѕСЃС‚СѓРїРЅРѕСЃС‚Рё reader'Р° РІ СЃРµС‚Рё
         socket_number = socket( AF_INET, SOCK_STREAM, IPPROTO_IP );
         if ( socket_number == INVALID_SOCKET )
             {
             if ( G_DEBUG )
                 {
 #ifdef _WIN32
-                printf( "rfid_reader: Ошибка создания сокета %d!\n",
+                printf( "rfid_reader: РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ СЃРѕРєРµС‚Р° %d!\n",
                     WSAGetLastError() );
 #else
-                printf( "rfid_reader: Ошибка создания сокета!\n" );
+                printf( "rfid_reader: РћС€РёР±РєР° СЃРѕР·РґР°РЅРёСЏ СЃРѕРєРµС‚Р°!\n" );
 #endif
                 }
             }
         else
             {
-			//Переводим сокет в неблокирующий режим.
+			//РџРµСЂРµРІРѕРґРёРј СЃРѕРєРµС‚ РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј.
 #ifdef _WIN32
 			u_long mode = 1;
 			int res = ioctlsocket( socket_number, FIONBIO, &mode );
@@ -58,11 +58,11 @@ int rfid_reader::evaluate()
 				if ( G_DEBUG )
 					{
 #ifdef _WIN32
-					printf( "rfid_reader: Ошибка перевода сокета в "
-						"неблокирующий режим %d!\n", WSAGetLastError() );
+					printf( "rfid_reader: РћС€РёР±РєР° РїРµСЂРµРІРѕРґР° СЃРѕРєРµС‚Р° РІ "
+						"РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј %d!\n", WSAGetLastError() );
 #else
-					printf( "rfid_reader: Ошибка перевода сокета в "
-						"неблокирующий режим!\n" );
+					printf( "rfid_reader: РћС€РёР±РєР° РїРµСЂРµРІРѕРґР° СЃРѕРєРµС‚Р° РІ "
+						"РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј!\n" );
 #endif
 					}
 				closesocket( socket_number );
@@ -106,7 +106,7 @@ int rfid_reader::evaluate()
         CallASyncReadDataAny();
 		}
 
-    // Проверка связи.
+    // РџСЂРѕРІРµСЂРєР° СЃРІСЏР·Рё.
     if ( _hReader == 0 )
         {        
         if ( false == is_set_err )
@@ -127,7 +127,7 @@ int rfid_reader::evaluate()
                 PAC_critical_errors_manager::AS_RFID_READER, number );
             }
         }
-    // Проверка связи.-!>
+    // РџСЂРѕРІРµСЂРєР° СЃРІСЏР·Рё.-!>
 
 	return 0;
 	}
@@ -363,7 +363,7 @@ void rfid_reader::ResultHandlerASyncReadDataUntilEndOfBankAnyASync(
                         sprintf( EPC_str + strlen( EPC_str ), "%04X",
                             pResultListEntry->stEPC.rguwEPC[ pResultListEntry->stEPC.ubEPCWordLength - j - 1 ] );
                         }
-                    //Ищем и удаляем данную метку.
+                    //РС‰РµРј Рё СѓРґР°Р»СЏРµРј РґР°РЅРЅСѓСЋ РјРµС‚РєСѓ.
                     for ( int j = 0; j < r->EPC_cnt; j++ )
                         {
                         if ( pResultListEntry->ubPort == r->EPC_info_array[ j ].antenna &&

@@ -87,7 +87,6 @@ class altivar_manager
 
 		virtual ~altivar_manager();
 
-		/// @brief ��������� ������������� ���������� ������.
 		static altivar_manager* get_instance();
 		void add_node(const char* IP_address, unsigned int port, unsigned int timeout, const char* article);
 		altivar_node* get_node(const char* IP_address);
