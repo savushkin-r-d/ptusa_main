@@ -1449,7 +1449,7 @@ void cipline_tech_object::resetRecipeName()
 
 void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*/ )
     {
-    char tmp_str[32];
+    char tmp_str[ PROGRAM_MAX_LEN ];
     prgListLen = 0;
     ModbusServ::UpdateLinePrograms(nmr);
     strcpy(programList,"");

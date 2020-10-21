@@ -16,9 +16,9 @@
 #define TECH_TYPE_CAR_WASH_SELF_CLEAN 114
 
 ///@brief Максимальная длина списка рецептов
-#define PROGRAM_LIST_MAX_LEN 600
+#define PROGRAM_LIST_MAX_LEN 2*600
 ///@brief Максимальная длина названия программы мойки
-#define PROGRAM_MAX_LEN 24
+#define PROGRAM_MAX_LEN 2*24
 ///@brief Задержка при окончании, сбросе мойки (для протоколирования)
 #define WASH_END_DELAY 3000
 ///@brief Минимальная задержка переключения при сортировке растворов
@@ -30,7 +30,7 @@
 ///@brief Количество параметров для программы самоочистки
 #define SELFCLEAN_PAR_COUNT 20
 ///@brief Максимальная длина номера машины
-#define CAR_NAME_MAX_LENGTH 15
+#define CAR_NAME_MAX_LENGTH 2*15
 
 #define TMR_CNT    10
 #define SAV_CNT    1

@@ -7,8 +7,8 @@
 #include <fstream>
 #include "dtime.h"
 #include <cstring>
-#define MAX_ID_LENGTH 32
-#define MAX_FIELD_LENGTH 24
+#define MAX_ID_LENGTH 2*32
+#define MAX_FIELD_LENGTH 2*24
 
 class Serializable
     {
