@@ -42,7 +42,7 @@ class operation_state;
 class action
     {
     public:
-        action( std::string name, u_int group_cnt = 1 );
+        action( std::string name );
 
         virtual ~action()
             {
@@ -54,7 +54,7 @@ class action
         /// @return false Нет устройств, над которыми что-то делается.
         virtual bool is_empty() const;
 
-        virtual void print( const char* prefix = "" ) const;
+        virtual void print( const char* prefix = "", bool new_line = true ) const;
 
         /// @brief Проверка действия.
         ///
@@ -78,14 +78,8 @@ class action
         ///
         /// @param [in] dev Устройство.
         /// @param [in] group Группа устройства.
-        virtual void add_dev( device *dev, u_int group = 0 );
-
-        /// @brief Добавление устройства к действию.
-        ///
-        /// @param [in] dev Устройство.
-        /// @param [in] group Дополнительный параметр.
-        /// @param [in] subgroup Дополнительный параметр.
-        virtual void add_dev( device *dev, u_int group, u_int subgroup ) {}
+        /// @param [in] subgroup Подгруппа устройств.
+        virtual void add_dev( device *dev, u_int group = 0, u_int subgroup = 0 );
 
         /// @brief Поиск устройства с какой-либо ошибкой.
         ///
@@ -102,16 +96,29 @@ class action
             this->par = par;
             }
 
-        /// @brief Добавление индексов используемых параметров к действию.
+        /// @brief Задание индексов используемых параметров к действию.
         ///
+        /// @param [in] position Позиция параметра.
         /// @param [in] idx Индекс параметра.
-        void add_param_idx( int idx )
+        void set_param_idx( unsigned int position, int idx )
             {
-            par_idx.push_back( idx );
+            while ( position >= par_idx.size() )
+                {
+                par_idx.push_back( 0 );
+                }
+
+            par_idx[ position ] = idx;
             }
 
+        enum CONSTANTS
+            {
+            MAIN_GROUP = 0,
+            MAIN_SUBGROUP = 0
+            };
+
     protected:
-        std::vector< std::vector< device* > > devices;  ///< Устройства.
+        // Устройства.
+        std::vector < std::vector< std::vector< device* > > > devices; 
         std::string name;                               ///< Имя действия.
 
         const saved_params_float *par;      ///< Параметры действия.
@@ -181,7 +188,7 @@ class open_seat_action: public action
         /// @param [in] seat_type Дополнительный параметр.
         void add_dev( device *dev, u_int group, u_int seat_type );
 
-        void print( const char* prefix = "" ) const;
+        virtual void print( const char* prefix = "", bool new_line = true ) const;
 
         bool is_empty() const;
     private:
@@ -218,15 +225,11 @@ class open_seat_action: public action
 class DI_DO_action: public action
     {
     public:
-        DI_DO_action( ):action( "Группы DI->DO DO ..." )
+        DI_DO_action( ):action( "Группы DI->DO's" )
             {
             }
 
         void evaluate();
-
-        void print( const char* prefix = "" ) const;
-
-        void final();
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -235,15 +238,11 @@ class DI_DO_action: public action
 class AI_AO_action : public action
     {
     public:
-        AI_AO_action() :action( "Группы AI->AO AO ..." )
+        AI_AO_action() :action( "Группы AI->AO's" )
             {
             }
 
         void evaluate();
-
-        void print( const char* prefix = "" ) const;
-
-        void final();
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -257,10 +256,6 @@ class required_DI_action: public action
             }
 
         int check( char* reason ) const;
-
-        void final()
-            {
-            }
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -269,30 +264,24 @@ class required_DI_action: public action
 class wash_action: public action
     {
     public:
-        wash_action(): action( "Мойка", G_GROUPS_CNT )
+        wash_action(): action( "Устройства DI's DO's DEV's R_DEV's AI" )
             {
             }
 
-        void final();
-
         void evaluate();
 
-        void print( const char* prefix /*= "" */ ) const;
+        virtual void print( const char* prefix = "", bool new_line = true ) const;
 
     private:
         enum GROUPS
             {
             G_DI = 0,       //Входные сигналы запроса включения устройств.
-            G_DO,           //Выходные сигналы "Мойка ОК".
+            G_DO,           //Выходные сигналы "ОК".
             G_DEV,          //Устройства, включаемые по запросу.
             G_REV_DEV,      //Реверсные устройства, включаемые по запросу.
+            G_PUMP_FREQ,    //Задания производительности.
 
             G_GROUPS_CNT,   //Количество групп.
-            };
-
-        enum PARAMS_IDX
-            {
-            P_PUMP_FREQ = 0,
             };
     };
 //-----------------------------------------------------------------------------

@@ -204,7 +204,7 @@ tolua++ -n rfid_reader -o "..\..\..\PAC\common\rfid_reader_tolua.cpp" "..\..\..\
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_IO_MODULES;DEBUG_IDE;TEST_SPEED;RM_PAC;MODBUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;WIN_OS;PAC_PC;DEBUG_NO_IO_MODULES;DEBUG_IDE;TEST_SPEED;MODBUS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
@@ -215,7 +215,6 @@ tolua++ -n rfid_reader -o "..\..\..\PAC\common\rfid_reader_tolua.cpp" "..\..\..\
     <PreBuildEvent>
       <Command>tolua++ -n PAC_dev -o "..\..\..\PAC\common\PAC_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh"
 tolua++ -n IOT_dev -o "..\..\..\PAC\IoT\IOT_dev_lua.cpp" "..\..\..\PAC\common\toloa++\pkg\IOT_dev.hh"
-xcopy "p:\PTUSA-projects\sys-scripts-git" "..\..\system-scripts" /S /Y /I
 
 </Command>
     </PreBuildEvent>
