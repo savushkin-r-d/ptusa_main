@@ -312,10 +312,14 @@ int operation::switch_active_extra_step( int off_step, int on_step )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-action::action( std::string name ) : name( name ), par( 0 )
+action::action( std::string name, u_int subgropups_cnt ) : name( name ),
+    par( 0 ), subgropups_cnt( subgropups_cnt )
     {
     devices.push_back( std::vector < std::vector< device* > >() );
-    devices[ 0 ].push_back( std::vector< device* >() );
+    for ( u_int i = 0; i < subgropups_cnt; i++ )
+        {
+        devices[ MAIN_GROUP ].push_back( std::vector< device* >() );
+        }
     }
 //-----------------------------------------------------------------------------
 void action::print( const char* prefix /*= "" */,
@@ -454,6 +458,12 @@ void action::add_dev( device *dev, u_int group /*= 0 */, u_int subgroup /*= 0 */
     while ( group >= devices.size() )
         {
         devices.push_back( std::vector < std::vector< device* > >() );
+
+        u_int last_idx = devices.size() - 1;
+        while ( subgropups_cnt > devices[ last_idx ].size() )
+            {
+            devices[ last_idx ].push_back( std::vector< device* >() );
+            } 
         }
 
     while ( subgroup >= devices[ group ].size() )
@@ -1082,7 +1092,7 @@ void wash_action::evaluate()
         auto devs = devices[ idx ];
 
         //Подаем сигналы "Мойка ОК".
-        for ( u_int i = 0; i < devices[ G_DO ].size(); i++ )
+        for ( u_int i = 0; i < devs[ G_DO ].size(); i++ )
             {
             devs[ G_DO ][ i ]->on();
             }
@@ -1137,7 +1147,7 @@ void wash_action::evaluate()
             }
         for ( u_int i = 0; i < devs[ G_REV_DEV ].size(); i++ )
             {
-            auto dev = devs[ G_DEV ][ i ];
+            auto dev = devs[ G_REV_DEV ][ i ];
             dev->set_state( new_state > 0 ? 2 : 0 );
 
             if ( new_val != -1 && dev->get_type() == device::DT_M )

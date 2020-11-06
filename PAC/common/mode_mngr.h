@@ -42,7 +42,7 @@ class operation_state;
 class action
     {
     public:
-        action( std::string name );
+        action( std::string name, u_int subgropups_cnt = 1 );
 
         virtual ~action()
             {
@@ -79,7 +79,8 @@ class action
         /// @param [in] dev Устройство.
         /// @param [in] group Группа устройства.
         /// @param [in] subgroup Подгруппа устройств.
-        virtual void add_dev( device *dev, u_int group = 0, u_int subgroup = 0 );
+        virtual void add_dev( device *dev, u_int group = MAIN_GROUP,
+            u_int subgroup = MAIN_SUBGROUP );
 
         /// @brief Поиск устройства с какой-либо ошибкой.
         ///
@@ -117,6 +118,8 @@ class action
             };
 
     protected:
+        u_int subgropups_cnt;
+
         // Устройства.
         std::vector < std::vector< std::vector< device* > > > devices; 
         std::string name;                               ///< Имя действия.
@@ -264,7 +267,7 @@ class required_DI_action: public action
 class wash_action: public action
     {
     public:
-        wash_action(): action( "Устройства DI's DO's DEV's R_DEV's AI" )
+        wash_action(): action( "Устройства DI's DO's DEV's R_DEV's AI", G_SUBGROUPS_CNT )
             {
             }
 
@@ -281,7 +284,7 @@ class wash_action: public action
             G_REV_DEV,      //Реверсные устройства, включаемые по запросу.
             G_PUMP_FREQ,    //Задания производительности.
 
-            G_GROUPS_CNT,   //Количество групп.
+            G_SUBGROUPS_CNT,   //Количество групп.
             };
     };
 //-----------------------------------------------------------------------------

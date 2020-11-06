@@ -71,3 +71,7 @@ PAC_control_projects/main_control_prg/eclipse/projects/PLCnext-linux/Debug/
 *.lua
 
 .*
+
+PAC_control_projects/main_control_prg/main_control_dll_vc/Release_dll/
+
+PAC_control_projects/main_control_prg/main_control_prg_vc/Release_dll/
