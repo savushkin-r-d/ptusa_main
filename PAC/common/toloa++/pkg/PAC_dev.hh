@@ -871,21 +871,16 @@ class action
         /// @brief Добавление устройства к действию.
         ///
         /// @param [in] dev Устройство.
-        /// @param [in] group Группа, куда добавляется устройство.
-        virtual void add_dev( device *dev, unsigned int group );
-
-        /// @brief Добавление устройства к действию.
-        ///
-        /// @param [in] dev Устройство.
         /// @param [in] group Дополнительный параметр.
         /// @param [in] subgroup Дополнительный параметр.
         virtual void add_dev( device *dev, unsigned int group, 
             unsigned int subgroup );
 
-        /// @brief Добавление индексов используемых параметров к действию.
+        /// @brief Задание индексов используемых параметров к действию.
         ///
+        /// @param [in] position Позиция параметра.
         /// @param [in] idx Индекс параметра.
-        void add_param_idx( int idx );
+        void set_param_idx( unsigned int position, int idx );
     };
 //-----------------------------------------------------------------------------
 ///@brief Получение менеджера устройств.

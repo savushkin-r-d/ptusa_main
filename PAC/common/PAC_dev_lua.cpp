@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 10/20/20 08:33:51.
+** Generated automatically by tolua++-1.0.92 on 11/06/20 14:07:21.
 */
 
 #ifndef __cplusplus
@@ -4643,45 +4643,12 @@ static int tolua_PAC_dev_action_add_dev00(lua_State* tolua_S)
      !tolua_isusertype(tolua_S,1,"action",0,&tolua_err) ||
      !tolua_isusertype(tolua_S,2,"device",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,4,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  action* self = (action*)  tolua_tousertype(tolua_S,1,0);
-  device* dev = ((device*)  tolua_tousertype(tolua_S,2,0));
-  unsigned int group = ((unsigned int)  tolua_tonumber(tolua_S,3,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_dev'", NULL);
-#endif
-  {
-   self->add_dev(dev,group);
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'add_dev'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: add_dev of class  action */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_action_add_dev01
-static int tolua_PAC_dev_action_add_dev01(lua_State* tolua_S)
-{
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"action",0,&tolua_err) ||
-     !tolua_isusertype(tolua_S,2,"device",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
      !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,5,&tolua_err)
  )
   goto tolua_lerror;
  else
+#endif
  {
   action* self = (action*)  tolua_tousertype(tolua_S,1,0);
   device* dev = ((device*)  tolua_tousertype(tolua_S,2,0));
@@ -4695,39 +4662,44 @@ static int tolua_PAC_dev_action_add_dev01(lua_State* tolua_S)
   }
  }
  return 0;
-tolua_lerror:
- return tolua_PAC_dev_action_add_dev00(tolua_S);
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'add_dev'.",&tolua_err);
+ return 0;
+#endif
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: add_param_idx of class  action */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_action_add_param_idx00
-static int tolua_PAC_dev_action_add_param_idx00(lua_State* tolua_S)
+/* method: set_param_idx of class  action */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_action_set_param_idx00
+static int tolua_PAC_dev_action_set_param_idx00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
      !tolua_isusertype(tolua_S,1,"action",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
   action* self = (action*)  tolua_tousertype(tolua_S,1,0);
-  int idx = ((int)  tolua_tonumber(tolua_S,2,0));
+  unsigned int position = ((unsigned int)  tolua_tonumber(tolua_S,2,0));
+  int idx = ((int)  tolua_tonumber(tolua_S,3,0));
 #ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_param_idx'", NULL);
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_param_idx'", NULL);
 #endif
   {
-   self->add_param_idx(idx);
+   self->set_param_idx(position,idx);
   }
  }
  return 0;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'add_param_idx'.",&tolua_err);
+ tolua_error(tolua_S,"#ferror in function 'set_param_idx'.",&tolua_err);
  return 0;
 #endif
 }
@@ -13103,8 +13075,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_cclass(tolua_S,"action","action","",NULL);
   tolua_beginmodule(tolua_S,"action");
    tolua_function(tolua_S,"add_dev",tolua_PAC_dev_action_add_dev00);
-   tolua_function(tolua_S,"add_dev",tolua_PAC_dev_action_add_dev01);
-   tolua_function(tolua_S,"add_param_idx",tolua_PAC_dev_action_add_param_idx00);
+   tolua_function(tolua_S,"set_param_idx",tolua_PAC_dev_action_set_param_idx00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_DEVICE_MANAGER",tolua_PAC_dev_G_DEVICE_MANAGER00);
   tolua_function(tolua_S,"G_TECH_OBJECTS",tolua_PAC_dev_G_TECH_OBJECTS00);
