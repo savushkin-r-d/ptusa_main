@@ -713,6 +713,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_io_device = (valve_iolink_vtug*)new_device;
                     break;
 
+                case device::V_IOLINK_VTUG_DO1_DI2:
+                    new_device = new valve_iolink_vtug_DO2( dev_name );
+                    new_io_device = (valve_iolink_vtug_DO2*)new_device;
+                    break;
+
                 case device::V_IOLINK_VTUG_DO1_FB_OFF:
                     new_device = new valve_iolink_vtug_off(dev_name);
                     new_io_device = (valve_iolink_vtug_off*)new_device;
@@ -3202,6 +3207,51 @@ int DI1::get_state()
     else current_state = digital_io_device::get_state();
 
     return current_state;
+    }
+#endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+valve_iolink_vtug_DO2::valve_iolink_vtug_DO2( const char* dev_name ) :
+    valve_iolink_vtug( true, false, dev_name, V_IOLINK_VTUG_DO1_DI2 )
+    {
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+bool valve_iolink_vtug_DO2::get_fb_state()
+    {
+    char* data = (char*)get_AO_read_data( AO_INDEX );
+    int o = (int)get_state_data( data );
+
+    int i1 = get_DI( DI_INDEX_ON );
+    if ( o == 1 && i1 == 1 && i2 == 0 )
+        {
+        start_switch_time = get_millisec();
+        return true;
+        }
+
+    int i2 = get_DI( DI_INDEX );
+    if ( o == 0 && i2 == 1 && i1 == 0 )
+        {
+        start_switch_time = get_millisec();
+        return true;
+        }
+
+    if ( get_delta_millisec( start_switch_time ) < get_par( valve::P_ON_TIME, 0 ) )
+        {
+        return true;
+        }
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
+int valve_iolink_vtug_DO2::get_on_fb_value()
+    {
+    return get_DI( DI_INDEX_ON );
+    }
+//-----------------------------------------------------------------------------
+inline int valve_iolink_vtug_DO2::get_off_fb_value()
+    {
+    return get_DI( DI_INDEX_OFF );
     }
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
