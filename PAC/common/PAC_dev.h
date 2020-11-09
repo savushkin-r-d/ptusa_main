@@ -425,6 +425,7 @@ class device : public i_DO_AO_device, public par_device
 
             V_IOLINK_MIXPROOF,        ///< Клапан с двумя каналами управления и двумя обратными связями с IO-Link интерфейсом (противосмешивающий).
             V_IOLINK_DO1_DI2,         ///< Клапан с одним каналом управления и двумя обратными связями с IO-Link интерфейсом (отсечной).
+            V_IOLINK_VTUG_DO1_DI2,    ///< IO-Link VTUG клапан с одним каналом управления и двумя обратными связями (включенное и выключенное состояния).
 
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
@@ -2426,6 +2427,30 @@ class valve_iolink_vtug_off : public valve_iolink_vtug
         enum CONSTANTS
             {
             DI_INDEX = 0,     ///< Индекс канала дискретного входа.
+            };
+
+    protected:
+#ifndef DEBUG_NO_IO_MODULES
+        /// @brief Получение состояния обратной связи.
+        bool get_fb_state();
+
+        int get_on_fb_value();
+
+        int get_off_fb_value();
+#endif // DEBUG_NO_IO_MODULES
+    };
+//-----------------------------------------------------------------------------
+/// @brief Клапан IO-link VTUG с одним каналом управления и 2-я обратными связями.
+class valve_iolink_vtug_DO2 : public valve_iolink_vtug
+    {
+    public:
+        valve_iolink_vtug_DO2( const char* dev_name );
+
+    private:
+        enum CONSTANTS
+            {
+            DI_INDEX_ON = 0,     ///< Индекс канала дискретного входа.
+            DI_INDEX_OFF,
             };
 
     protected:
