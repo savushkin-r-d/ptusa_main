@@ -3223,13 +3223,13 @@ bool valve_iolink_vtug_DO2::get_fb_state()
     int o = (int)get_state_data( data );
 
     int i1 = get_DI( DI_INDEX_ON );
+    int i2 = get_DI( DI_INDEX_OFF );
     if ( o == 1 && i1 == 1 && i2 == 0 )
         {
         start_switch_time = get_millisec();
         return true;
         }
 
-    int i2 = get_DI( DI_INDEX );
     if ( o == 0 && i2 == 1 && i1 == 0 )
         {
         start_switch_time = get_millisec();
