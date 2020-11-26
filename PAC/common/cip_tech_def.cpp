@@ -1484,7 +1484,7 @@ void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*
 
 void cipline_tech_object::formProgramList( unsigned long programmask )
     {
-    char tmp_str[32];
+    char tmp_str[ 2 * PROGRAM_MAX_LEN ];
     prgListLen = 0;
     ModbusServ::UpdateLinePrograms(nmr);
     if (programmask == 0)

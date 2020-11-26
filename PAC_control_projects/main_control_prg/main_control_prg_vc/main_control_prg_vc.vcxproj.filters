@@ -106,6 +106,9 @@
     <Filter Include="Source Files\zlib">
       <UniqueIdentifier>{76d9730d-4acc-43dd-b684-fd5200a3c861}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\common\util">
+      <UniqueIdentifier>{becb2cc8-ce27-4a70-ad53-b927bc1aa7c2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\PAC\common\PAC_dev.h">
@@ -296,6 +299,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\zlib\zutil.h">
       <Filter>Header Files\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\common\util\utf2cp1251.h">
+      <Filter>Header Files\common\util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -598,6 +604,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\zutil.c">
       <Filter>Source Files\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\util\utf2cp1251.cpp">
+      <Filter>Source Files\common\util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

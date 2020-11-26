@@ -333,6 +333,7 @@ tolua++ -n IOT_dev -o "..\..\..\PAC\IoT\IOT_dev_lua.cpp" "..\..\..\PAC\common\to
     <ClInclude Include="..\..\..\common\PAC-driver\errors.h" />
     <ClInclude Include="..\..\..\common\PAC-driver\g_device.h" />
     <ClInclude Include="..\..\..\common\util\smart_ptr.h" />
+    <ClInclude Include="..\..\..\common\util\utf2cp1251.h" />
     <ClInclude Include="..\..\..\PAC\common\bus_coupler_io.h" />
     <ClInclude Include="..\..\..\PAC\common\cip_stats.h" />
     <ClInclude Include="..\..\..\PAC\common\cip_tech_def.h" />
@@ -436,6 +437,7 @@ tolua++ -n IOT_dev -o "..\..\..\PAC\IoT\IOT_dev_lua.cpp" "..\..\..\PAC\common\to
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\common\util\utf2cp1251.cpp" />
     <ClCompile Include="..\..\..\lua\src\lapi.c" />
     <ClCompile Include="..\..\..\lua\src\lauxlib.c">
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">/wd4996</AdditionalOptions>

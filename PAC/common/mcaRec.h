@@ -16,7 +16,7 @@
 
 
 ///@brief Максимальная длина имени для рецепта
-#define MAX_REC_NAME_LENGTH 32L
+#define MAX_REC_NAME_LENGTH 32L * 2
 ///@brief Размер блока памяти в байтах
 #define BLOCK_SIZE 128L
 ///@brief Интервал проверки изменений в рецепте
@@ -152,8 +152,8 @@ class TRecipeManager
         unsigned long startAddr(int recNo);
         unsigned char* recipeMemory;
         unsigned long recipeMemorySize;
-        int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf);
-        int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf);
+        int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false );
+        int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
     public:
         ///@brief Имя файла с рецептами
         char* defaultfilename;
