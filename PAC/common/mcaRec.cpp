@@ -38,7 +38,7 @@ TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
     currentRecipeName = new char[recipeNameLength];
     recipeList = new char[(recipeNameLength + 6) * recipePerLine];
     strcpy(recipeList,"");
-    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName);
+    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true );
     FormRecipeList();
     recipechanged = 0;
     recipechangechecktime = get_millisec();
