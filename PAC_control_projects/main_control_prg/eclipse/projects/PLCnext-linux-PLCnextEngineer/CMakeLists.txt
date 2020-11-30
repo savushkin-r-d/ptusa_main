@@ -22,7 +22,8 @@ file(GLOB_RECURSE PLCnext_src src/*.cpp intermediate/code/*.cpp)
 file(GLOB Main_src  
 					../../../../../common/PAC-driver/*.cpp
 					../../../../../zlib/*.c
-					../../../../../common/util/*.c					
+					../../../../../common/util/*.c
+					../../../../../common/util/*.cpp
 					../../../../../common/*.cpp
 					
 					../../../../../PAC/common/*.cpp
