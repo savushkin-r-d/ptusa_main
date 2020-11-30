@@ -1,3 +1,4 @@
+#include "utf2cp1251.h"
 
 typedef struct ConvLetter {
     char win1251;

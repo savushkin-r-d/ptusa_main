@@ -47,6 +47,16 @@
 			<location>/home/id/ptusa_git/tolua++</location>
 		</link>
 		<link>
+			<name>common/util/utf2cp1251.cpp</name>
+			<type>1</type>
+			<location>/home/id/ptusa_git/common/util/utf2cp1251.cpp</location>
+		</link>
+		<link>
+			<name>common/util/utf2cp1251.h</name>
+			<type>1</type>
+			<location>/home/id/ptusa_git/common/util/utf2cp1251.h</location>
+		</link>
+		<link>
 			<name>PAC/linux/PAC_PLCnext/mem_PLCnext.cpp</name>
 			<type>1</type>
 			<location>/home/id/ptusa_git/PAC/linux/PAC_PLCnext/mem_PLCnext.cpp</location>
