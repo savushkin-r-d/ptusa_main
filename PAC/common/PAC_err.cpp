@@ -24,7 +24,7 @@ void PAC_critical_errors_manager::show_errors() const
     static u_char show_step = 0;
     static u_long start_time = get_millisec();
 
-    if ( !errors.empty() )    // Есть ошибки.
+    if ( !errors.empty() )    // Р•СЃС‚СЊ РѕС€РёР±РєРё.
         {
         switch ( show_step )
             {
@@ -47,7 +47,7 @@ void PAC_critical_errors_manager::show_errors() const
             break;
             }
         }
-    else                        // Нет ошибок.
+    else                        // РќРµС‚ РѕС€РёР±РѕРє.
         {
         switch ( show_step )
             {
@@ -144,7 +144,7 @@ int PAC_critical_errors_manager::save_as_Lua_str( char *str, u_int_2 &id )
             ALARM_CLASS_PRIORITY, "," );
        res +=  sprintf( str + res, "\t%s\n", "state = AS_ALARM," );
 
-        //Для идентификации ошибок.
+        //Р”Р»СЏ РёРґРµРЅС‚РёС„РёРєР°С†РёРё РѕС€РёР±РѕРє.
         res += sprintf( str + res, "\tid_n = %d,\n", errors[ i ].param );
 
         res += sprintf( str + res, "\t%s\n", "}," );
@@ -187,7 +187,7 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
 			{
 			case AS_IO_COUPLER:
 				sprintf(tmp + strlen(tmp),
-					"Узел ввода/вывода '%s' ('%s') - ",
+					"РЈР·РµР» РІРІРѕРґР°/РІС‹РІРѕРґР° '%s' ('%s') - ",
 					G_IO_MANAGER()->get_node(par - 1)->name,
 					G_IO_MANAGER()->get_node(par - 1)->ip_address
 					);
@@ -197,44 +197,44 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
 			}
 		if (is_set)
 			{
-			sprintf(tmp + strlen(tmp), "%s", "отключен для обслуживания");
+			sprintf(tmp + strlen(tmp), "%s", "РѕС‚РєР»СЋС‡РµРЅ РґР»СЏ РѕР±СЃР»СѓР¶РёРІР°РЅРёСЏ");
 			}
 		else
 			{
-			sprintf(tmp + strlen(tmp), "%s", "включен");
+			sprintf(tmp + strlen(tmp), "%s", "РІРєР»СЋС‡РµРЅ");
 			}
 		break;
 
     case AC_NO_CONNECTION:
         if ( is_set )
             {
-            sprintf( tmp + strlen( tmp ), "%s", "Нет связи с " );
+            sprintf( tmp + strlen( tmp ), "%s", "РќРµС‚ СЃРІСЏР·Рё СЃ " );
             }
         else
             {
-            sprintf( tmp + strlen( tmp ), "%s", "Есть связь с " );
+            sprintf( tmp + strlen( tmp ), "%s", "Р•СЃС‚СЊ СЃРІСЏР·СЊ СЃ " );
             }
 
         switch( err_sub_class )
             {
         case AS_IO_COUPLER:
             sprintf( tmp + strlen( tmp ),
-                "узлом I/O '%s' ('%s', '%s')",
+                "СѓР·Р»РѕРј I/O '%s' ('%s', '%s')",
                 G_IO_MANAGER()->get_node( par - 1 )->name,
                 G_IO_MANAGER()->get_node( par - 1 )->ip_address,
                 G_CMMCTR->get_host_name_rus() );
             break;
 
         case AS_PANEL:
-            sprintf( tmp + strlen( tmp ), "panel EasyView №%d.", par );
+            sprintf( tmp + strlen( tmp ), "panel EasyView в„–%d.", par );
             break;
 
         case AS_MODBUS_DEVICE:
-            sprintf( tmp + strlen( tmp ), "Modbus-device №%d.", par );
+            sprintf( tmp + strlen( tmp ), "Modbus-device в„–%d.", par );
             break;
 
         case AS_RFID_READER:
-            sprintf( tmp + strlen( tmp ), "RFID-reader №%d.", par );
+            sprintf( tmp + strlen( tmp ), "RFID-reader в„–%d.", par );
             break;
 
         case AS_EASYSERVER:
@@ -246,10 +246,10 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
             break;
 
 		case AS_FC_ALTIVAR:
-			sprintf(tmp + strlen(tmp), "частотным преобразователем IP=%s.", 
+			sprintf(tmp + strlen(tmp), "С‡Р°СЃС‚РѕС‚РЅС‹Рј РїСЂРµРѕР±СЂР°Р·РѕРІР°С‚РµР»РµРј IP=%s.", 
 				altivar_manager::get_instance()->get_node(par - SOCKID_ALTIVAR) != nullptr ? 
 				altivar_manager::get_instance()->get_node(par - SOCKID_ALTIVAR)->ip_address : 
-				"неизвестен");
+				"РЅРµРёР·РІРµСЃС‚РµРЅ");
 			break;
 
         default:

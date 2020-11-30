@@ -194,7 +194,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
 
     forcesortrr = 0;
 
-    //Переменные для циркуляции
+    //РџРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ С†РёСЂРєСѓР»СЏС†РёРё
     circ_tank_s = 0;
     circ_tank_k = 0;
     circ_podp_water = 0;
@@ -235,12 +235,12 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     is_On_Resume_func = 0;
     is_ConfigureLine_func = 0;
 
-    //для ошибки "возможно отсутствует концентрированный раствор"
+    //РґР»СЏ РѕС€РёР±РєРё "РІРѕР·РјРѕР¶РЅРѕ РѕС‚СЃСѓС‚СЃС‚РІСѓРµС‚ РєРѕРЅС†РµРЅС‚СЂРёСЂРѕРІР°РЅРЅС‹Р№ СЂР°СЃС‚РІРѕСЂ"
     no_liquid_is_warning = 0;
     no_liquid_phase = 0;
     no_liquid_last_time = 0;
 
-    clean_water_rinsing_return = TANK_W; //по-умолчанию возвращаем в танк со вторичной водой.
+    clean_water_rinsing_return = TANK_W; //РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ РІРѕР·РІСЂР°С‰Р°РµРј РІ С‚Р°РЅРє СЃРѕ РІС‚РѕСЂРёС‡РЅРѕР№ РІРѕРґРѕР№.
 
     if (tech_type == TECH_TYPE_SELF_CLEAN || tech_type == TECH_TYPE_CAR_WASH_SELF_CLEAN)
         {
@@ -328,31 +328,31 @@ int cipline_tech_object::save_device( char *buff )
         name_Lua, name_Lua,
         name_Lua );
 
-    //Команда
+    //РљРѕРјР°РЅРґР°
     answer_size += sprintf( buff + answer_size, "\tCMD=%d,\n", ncmd );
 
-    //Состояние
+    //РЎРѕСЃС‚РѕСЏРЅРёРµ
     answer_size += sprintf( buff + answer_size, "\tSTATE=%d,\n", state );
 
-    //Текущая операция
+    //РўРµРєСѓС‰Р°СЏ РѕРїРµСЂР°С†РёСЏ
     answer_size += sprintf( buff + answer_size, "\tOPER=%d,\n", curstep );
 
-    //Загруженный рецепт
+    //Р—Р°РіСЂСѓР¶РµРЅРЅС‹Р№ СЂРµС†РµРїС‚
     answer_size += sprintf(buff + answer_size, "\tLOADED_REC='%s',\n", loadedRecName);
 
-    //Имя рецепта для редактирования
+    //РРјСЏ СЂРµС†РµРїС‚Р° РґР»СЏ СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёСЏ
     answer_size += sprintf(buff + answer_size, "\tCUR_REC='%s',\n", lineRecipes->currentRecipeName);
 
-    //Выбранная программа мойки
+    //Р’С‹Р±СЂР°РЅРЅР°СЏ РїСЂРѕРіСЂР°РјРјР° РјРѕР№РєРё
     answer_size += sprintf(buff + answer_size, "\tCUR_PRG='%s',\n", currentProgramName);
 
-    //Список доступных программ мойки
+    //РЎРїРёСЃРѕРє РґРѕСЃС‚СѓРїРЅС‹С… РїСЂРѕРіСЂР°РјРј РјРѕР№РєРё
     answer_size += sprintf(buff + answer_size, "\tPRG_LIST='%s',\n", programList);
 
-    //Список доступных объектов мойки
+    //РЎРїРёСЃРѕРє РґРѕСЃС‚СѓРїРЅС‹С… РѕР±СЉРµРєС‚РѕРІ РјРѕР№РєРё
     answer_size += sprintf(buff + answer_size, "\tREC_LIST='%s',\n", lineRecipes->recipeList);
 
-    //Номер машины
+    //РќРѕРјРµСЂ РјР°С€РёРЅС‹
     answer_size += sprintf(buff + answer_size, "\tNCAR='%s',\n", ncar1);
     answer_size += sprintf(buff + answer_size, "\tNCAR1='%s',\n", ncar1);
     answer_size += sprintf(buff + answer_size, "\tNCAR2='%s',\n", ncar2);
@@ -363,7 +363,7 @@ int cipline_tech_object::save_device( char *buff )
     answer_size += sprintf(buff + answer_size, "\tSWITCH3='%d',\n", switch3);
     answer_size += sprintf(buff + answer_size, "\tSWITCH4='%d',\n", switch4);
 
-    //Время простоя.
+    //Р’СЂРµРјСЏ РїСЂРѕСЃС‚РѕСЏ.
     char up_time_str [ 50 ];
     u_int_4 up_hours;
     u_int_4 up_mins;
@@ -379,12 +379,12 @@ int cipline_tech_object::save_device( char *buff )
         ( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
     answer_size += sprintf( buff + answer_size, "%s", up_time_str );
 
-    //Параметры.
+    //РџР°СЂР°РјРµС‚СЂС‹.
     answer_size += par_float.save_device( buff + answer_size, "\t" );
     answer_size += par_uint.save_device( buff + answer_size, "\t" );
     answer_size += rt_par_float.save_device( buff + answer_size, "\t" );
     answer_size += rt_par_uint.save_device( buff + answer_size, "\t" );
-    //Параметры станции
+    //РџР°СЂР°РјРµС‚СЂС‹ СЃС‚Р°РЅС†РёРё
     if (1 == number)
         {
         answer_size += parpar->save_device(buff + answer_size, "\t");
@@ -393,7 +393,7 @@ int cipline_tech_object::save_device( char *buff )
             answer_size += scparams->save_device(buff + answer_size, "\t");
             }
         }
-    //Параметры текущего рецепта
+    //РџР°СЂР°РјРµС‚СЂС‹ С‚РµРєСѓС‰РµРіРѕ СЂРµС†РµРїС‚Р°
     answer_size += sprintf(buff + answer_size, "\tREC_PAR = \n\t{\n\t\t");
     for (i = 1; i <= lineRecipes->GetParamsCount(); i++)
         {
@@ -401,17 +401,17 @@ int cipline_tech_object::save_device( char *buff )
         }
     answer_size += sprintf(buff + answer_size, "\n\t},\n");
 
-    //Статистика по мойке выбранного объекта
+    //РЎС‚Р°С‚РёСЃС‚РёРєР° РїРѕ РјРѕР№РєРµ РІС‹Р±СЂР°РЅРЅРѕРіРѕ РѕР±СЉРµРєС‚Р°
     answer_size += sprintf(buff + answer_size, "\tOBJSTATS_LASTWASH='%s',\n", objectstats->objlastwash);
     answer_size += sprintf(buff + answer_size, "\tOBJSTATS_LASTPROGRAM='%s',\n", objectstats->objlastwashprogram);
     answer_size += sprintf(buff + answer_size, "\tOBJSTATS_CAUSTICCOUNT=%d,\n", objectstats->objcausticwashes);
     answer_size += sprintf(buff + answer_size, "\tOBJSTATS_LASTACIDWASH='%s',\n", objectstats->objlastacidwash);
 
 
-    //Выбор моющих средств
+    //Р’С‹Р±РѕСЂ РјРѕСЋС‰РёС… СЃСЂРµРґСЃС‚РІ
     if (nmr == 1)
     {
-        //Список доступных щелочных растворов
+        //РЎРїРёСЃРѕРє РґРѕСЃС‚СѓРїРЅС‹С… С‰РµР»РѕС‡РЅС‹С… СЂР°СЃС‚РІРѕСЂРѕРІ
         answer_size += sprintf(buff + answer_size, "\tCAUSTIC_REC_LIST='%s',\n", causticRecipes->recipeList);
         answer_size += sprintf(buff + answer_size, "\tCAUSTIC_REC_NMR='%d',\n", causticRecipes->getCurrentRecipe());
         answer_size += sprintf(buff + answer_size, "\tCAUSTICNAME='%s',\n", causticName);
@@ -423,7 +423,7 @@ int cipline_tech_object::save_device( char *buff )
             }
         answer_size += sprintf(buff + answer_size, "\n\t},\n");
 
-        //Список доступных кислотных растворов
+        //РЎРїРёСЃРѕРє РґРѕСЃС‚СѓРїРЅС‹С… РєРёСЃР»РѕС‚РЅС‹С… СЂР°СЃС‚РІРѕСЂРѕРІ
         answer_size += sprintf(buff + answer_size, "\tACID_REC_LIST='%s',\n", acidRecipes->recipeList);
         answer_size += sprintf(buff + answer_size, "\tACID_REC_NMR='%d',\n", acidRecipes->getCurrentRecipe());
         answer_size += sprintf(buff + answer_size, "\tACIDNAME='%s',\n", acidName);
@@ -1442,29 +1442,29 @@ void cipline_tech_object::resetProgramName()
 void cipline_tech_object::resetRecipeName()
     {
     sprintf(loadedRecName, "%c%c %c%c%c%c%c%c%c",205,229,226,251,225,240,224,237,0);
-    //Обнуляем ссылку на статистику мойки объекта.
+    //РћР±РЅСѓР»СЏРµРј СЃСЃС‹Р»РєСѓ РЅР° СЃС‚Р°С‚РёСЃС‚РёРєСѓ РјРѕР№РєРё РѕР±СЉРµРєС‚Р°.
     emptystats->resetstats();
     objectstats = emptystats;
     }
 
 void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*/ )
     {
-    char tmp_str[32];
+    char tmp_str[ PROGRAM_MAX_LEN ];
     prgListLen = 0;
     ModbusServ::UpdateLinePrograms(nmr);
     strcpy(programList,"");
     if ((SPROG_ACID_PREPARATION & programmask) == SPROG_ACID_PREPARATION)
         {
-        sprintf(tmp_str, "%d##Наведение кислоты||", SPROG_ACID_PREPARATION);
-        sprintf(prgArray[prgListLen], "Наведение кислоты");
+        sprintf(tmp_str, "%d##РќР°РІРµРґРµРЅРёРµ РєРёСЃР»РѕС‚С‹||", SPROG_ACID_PREPARATION);
+        sprintf(prgArray[prgListLen], "РќР°РІРµРґРµРЅРёРµ РєРёСЃР»РѕС‚С‹");
         prgNumber[prgListLen] = SPROG_ACID_PREPARATION;
         prgListLen++;
         strcat(programList,tmp_str);
         }
     if ((SPROG_CAUSTIC_PREPARATION & programmask) == SPROG_CAUSTIC_PREPARATION)
         {
-        sprintf(tmp_str, "%d##Наведение щелочи||", SPROG_CAUSTIC_PREPARATION);
-        sprintf(prgArray[prgListLen], "Наведение щелочи");
+        sprintf(tmp_str, "%d##РќР°РІРµРґРµРЅРёРµ С‰РµР»РѕС‡Рё||", SPROG_CAUSTIC_PREPARATION);
+        sprintf(prgArray[prgListLen], "РќР°РІРµРґРµРЅРёРµ С‰РµР»РѕС‡Рё");
         prgNumber[prgListLen] = SPROG_CAUSTIC_PREPARATION;
         prgListLen++;
         strcat(programList,tmp_str);
@@ -1473,8 +1473,8 @@ void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*
         {
         if ((SPROG_SELF_CLEAN & programmask) == SPROG_SELF_CLEAN)
             {
-            sprintf(tmp_str, "%d##Очистка танков||", SPROG_SELF_CLEAN);
-            sprintf(prgArray[prgListLen], "Очистка танков");
+            sprintf(tmp_str, "%d##РћС‡РёСЃС‚РєР° С‚Р°РЅРєРѕРІ||", SPROG_SELF_CLEAN);
+            sprintf(prgArray[prgListLen], "РћС‡РёСЃС‚РєР° С‚Р°РЅРєРѕРІ");
             prgNumber[prgListLen] = SPROG_SELF_CLEAN;
             prgListLen++;
             strcat(programList,tmp_str);
@@ -1484,7 +1484,7 @@ void cipline_tech_object::resetProgramList( unsigned long programmask /*= 0xB00*
 
 void cipline_tech_object::formProgramList( unsigned long programmask )
     {
-    char tmp_str[32];
+    char tmp_str[ 2 * PROGRAM_MAX_LEN ];
     prgListLen = 0;
     ModbusServ::UpdateLinePrograms(nmr);
     if (programmask == 0)
@@ -1494,129 +1494,129 @@ void cipline_tech_object::formProgramList( unsigned long programmask )
     strcpy(programList,"");
     if ((programmask >> 0) & 1)
         {
-        sprintf(tmp_str, "%d##Дезинф||", SPROG_HOTWATER);
+        sprintf(tmp_str, "%d##Р”РµР·РёРЅС„||", SPROG_HOTWATER);
         strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Дезинфeкция");
+        sprintf(prgArray[prgListLen], "Р”РµР·РёРЅС„eРєС†РёСЏ");
         prgNumber[prgListLen] = SPROG_HOTWATER;
         prgListLen++;
         }
     if ((programmask >> 1) & 1)
         {
-        sprintf(tmp_str, "%d##Ополаск||", SPROG_RINSING);
+        sprintf(tmp_str, "%d##РћРїРѕР»Р°СЃРє||", SPROG_RINSING);
         strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Ополаскивание");
+        sprintf(prgArray[prgListLen], "РћРїРѕР»Р°СЃРєРёРІР°РЅРёРµ");
         prgNumber[prgListLen] = SPROG_RINSING;
         prgListLen++;
         }
     if ((programmask >> 2) & 1)
         {
-        sprintf(tmp_str, "%d##Опол+Дез||", SPROG_RINSING_HOTWATER);
+        sprintf(tmp_str, "%d##РћРїРѕР»+Р”РµР·||", SPROG_RINSING_HOTWATER);
         strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Опол+Дезинф");
+        sprintf(prgArray[prgListLen], "РћРїРѕР»+Р”РµР·РёРЅС„");
         prgNumber[prgListLen] = SPROG_RINSING_HOTWATER;
         prgListLen++;
         }
     if ((programmask >> 3) & 1)
         {
-        sprintf(tmp_str, "%d##Кислота||", SPROG_ACID);
+        sprintf(tmp_str, "%d##РљРёСЃР»РѕС‚Р°||", SPROG_ACID);
         strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Кислота");
+        sprintf(prgArray[prgListLen], "РљРёСЃР»РѕС‚Р°");
         prgNumber[prgListLen] = SPROG_ACID;
         prgListLen++;
         }
     if ((programmask >> 4) & 1)
         {
-        sprintf(tmp_str, "%d##Кисл+Дез||", SPROG_ACID_HOTWATER);
+        sprintf(tmp_str, "%d##РљРёСЃР»+Р”РµР·||", SPROG_ACID_HOTWATER);
         strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Кисл+Дезинф");
+        sprintf(prgArray[prgListLen], "РљРёСЃР»+Р”РµР·РёРЅС„");
         prgNumber[prgListLen] = SPROG_ACID_HOTWATER;
         prgListLen++;
         }
     if ((programmask >> 5) & 1)
         {
-        sprintf(tmp_str, "%d##Щелочь||", SPROG_CAUSTIC);
+        sprintf(tmp_str, "%d##Р©РµР»РѕС‡СЊ||", SPROG_CAUSTIC);
         strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Щелочь");
+        sprintf(prgArray[prgListLen], "Р©РµР»РѕС‡СЊ");
         prgNumber[prgListLen] = SPROG_CAUSTIC;
         prgListLen++;
         }
     if ((programmask >> 6) & 1)
         {
-        sprintf(tmp_str, "%d##Щел+Дез||", SPROG_CAUSTIC_HOTWATER);
+        sprintf(tmp_str, "%d##Р©РµР»+Р”РµР·||", SPROG_CAUSTIC_HOTWATER);
         strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Щелочь+Дезинф");
+        sprintf(prgArray[prgListLen], "Р©РµР»РѕС‡СЊ+Р”РµР·РёРЅС„");
         prgNumber[prgListLen] = SPROG_CAUSTIC_HOTWATER;
         prgListLen++;
         }
     if ((programmask >> 7) & 1)
         {
-        sprintf(tmp_str, "%d##Щел+Кисл+Дез||", SPROG_CAUSTIC_ACID_HOTWATER);
+        sprintf(tmp_str, "%d##Р©РµР»+РљРёСЃР»+Р”РµР·||", SPROG_CAUSTIC_ACID_HOTWATER);
         strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Щел+Кисл+Дезинф");
+        sprintf(prgArray[prgListLen], "Р©РµР»+РљРёСЃР»+Р”РµР·РёРЅС„");
         prgNumber[prgListLen] = SPROG_CAUSTIC_ACID_HOTWATER;
         prgListLen++;
         }
     if ((programmask >> 8) & 1)
         {
-        sprintf(tmp_str, "%d##Щел+Кисл||", SPROG_CAUSTIC_ACID);
+        sprintf(tmp_str, "%d##Р©РµР»+РљРёСЃР»||", SPROG_CAUSTIC_ACID);
         strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Щел+Кислота");
+        sprintf(prgArray[prgListLen], "Р©РµР»+РљРёСЃР»РѕС‚Р°");
         prgNumber[prgListLen] = SPROG_CAUSTIC_ACID;
         prgListLen++;
         }
     if ((programmask >> 9) & 1)
         {
-        sprintf(tmp_str, "%d##Опол.ч.водой в канал.||", SPROG_AP_RC_KANAL);
+        sprintf(tmp_str, "%d##РћРїРѕР».С‡.РІРѕРґРѕР№ РІ РєР°РЅР°Р».||", SPROG_AP_RC_KANAL);
         strcat(programList, tmp_str);
-        sprintf(prgArray[prgListLen], "Опол.ч.водой в канал.");
+        sprintf(prgArray[prgListLen], "РћРїРѕР».С‡.РІРѕРґРѕР№ РІ РєР°РЅР°Р».");
         prgNumber[prgListLen] = SPROG_AP_RC_KANAL;
         prgListLen++;
         }
     if ((programmask >> 12) & 1)
         {
-        sprintf(tmp_str, "%d##Опол.ч.водой в танк||", SPROG_AP_RC_SW);
+        sprintf(tmp_str, "%d##РћРїРѕР».С‡.РІРѕРґРѕР№ РІ С‚Р°РЅРє||", SPROG_AP_RC_SW);
         strcat(programList, tmp_str);
-        sprintf(prgArray[prgListLen], "Опол.ч.водой в танк");
+        sprintf(prgArray[prgListLen], "РћРїРѕР».С‡.РІРѕРґРѕР№ РІ С‚Р°РЅРє");
         prgNumber[prgListLen] = SPROG_AP_RC_SW;
         prgListLen++;
         }
     if ((programmask >> 13) & 1)
         {
-        sprintf(tmp_str, "%d##Щел+ДезСР||", SPROG_CAUSTIC_SANITIZER);
+        sprintf(tmp_str, "%d##Р©РµР»+Р”РµР·РЎР ||", SPROG_CAUSTIC_SANITIZER);
         strcat(programList, tmp_str);
-        sprintf(prgArray[prgListLen], "Щел+ДезСР");
+        sprintf(prgArray[prgListLen], "Р©РµР»+Р”РµР·РЎР ");
         prgNumber[prgListLen] = SPROG_CAUSTIC_SANITIZER;
         prgListLen++;
         }
     if ((programmask >> 14) & 1)
         {
-        sprintf(tmp_str, "%d##Кисл+ДезСР||", SPROG_ACID_SANITIZER);
+        sprintf(tmp_str, "%d##РљРёСЃР»+Р”РµР·РЎР ||", SPROG_ACID_SANITIZER);
         strcat(programList, tmp_str);
-        sprintf(prgArray[prgListLen], "Кисл+ДезСР");
+        sprintf(prgArray[prgListLen], "РљРёСЃР»+Р”РµР·РЎР ");
         prgNumber[prgListLen] = SPROG_ACID_SANITIZER;
         prgListLen++;
         }
     if ((programmask >> 15) & 1)
         {
-        sprintf(tmp_str, "%d##Щел+Кисл+ДезСР||", SPROG_CAUSTIC_ACID_SANITIZER);
+        sprintf(tmp_str, "%d##Р©РµР»+РљРёСЃР»+Р”РµР·РЎР ||", SPROG_CAUSTIC_ACID_SANITIZER);
         strcat(programList, tmp_str);
-        sprintf(prgArray[prgListLen], "Щел+Кисл+ДезСР");
+        sprintf(prgArray[prgListLen], "Р©РµР»+РљРёСЃР»+Р”РµР·РЎР ");
         prgNumber[prgListLen] = SPROG_CAUSTIC_ACID_SANITIZER;
         prgListLen++;
         }
     if ((programmask >> 10) & 1)
         {
-        sprintf(tmp_str, "%d##ДезСР||", SPROG_SANITIZER);
+        sprintf(tmp_str, "%d##Р”РµР·РЎР ||", SPROG_SANITIZER);
         strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Дезраствор");
+        sprintf(prgArray[prgListLen], "Р”РµР·СЂР°СЃС‚РІРѕСЂ");
         prgNumber[prgListLen] = SPROG_SANITIZER;
         prgListLen++;
         }
     if ((programmask >> 11) & 1)
         {
-        sprintf(tmp_str, "%d##Управляемая||", SPROG_REMOTE);
+        sprintf(tmp_str, "%d##РЈРїСЂР°РІР»СЏРµРјР°СЏ||", SPROG_REMOTE);
         strcat(programList,tmp_str);
-        sprintf(prgArray[prgListLen], "Управляемая");
+        sprintf(prgArray[prgListLen], "РЈРїСЂР°РІР»СЏРµРјР°СЏ");
         prgNumber[prgListLen] = SPROG_REMOTE;
         prgListLen++;
         }
@@ -1627,84 +1627,84 @@ void cipline_tech_object::loadProgramFromList( int selectedPrg )
     switch (selectedPrg)
         {
         case SPROG_RINSING_CLEAN:
-            sprintf(currentProgramName, "Опол.чист.водой");
+            sprintf(currentProgramName, "РћРїРѕР».С‡РёСЃС‚.РІРѕРґРѕР№");
             rt_par_float[P_PROGRAM] = SPROG_RINSING_CLEAN;
             break;
         case SPROG_SANITIZER:
-            sprintf(currentProgramName, "ДезРаствор");
+            sprintf(currentProgramName, "Р”РµР·Р Р°СЃС‚РІРѕСЂ");
             rt_par_float[P_PROGRAM] =  SPROG_SANITIZER;
             break;
         case SPROG_HOTWATER:
-            sprintf(currentProgramName, "Дезинфекция");
+            sprintf(currentProgramName, "Р”РµР·РёРЅС„РµРєС†РёСЏ");
             rt_par_float[P_PROGRAM] =  SPROG_HOTWATER;
             break;
         case SPROG_RINSING:
-            sprintf(currentProgramName, "Ополаскивание");
+            sprintf(currentProgramName, "РћРїРѕР»Р°СЃРєРёРІР°РЅРёРµ");
             rt_par_float[P_PROGRAM] =  SPROG_RINSING;
             break;
         case SPROG_RINSING_HOTWATER:
-            sprintf(currentProgramName, "Опол+Дезинф");
+            sprintf(currentProgramName, "РћРїРѕР»+Р”РµР·РёРЅС„");
             rt_par_float[P_PROGRAM] =  SPROG_RINSING_HOTWATER;
             break;
         case SPROG_ACID:
-            sprintf(currentProgramName, "Кислота");
+            sprintf(currentProgramName, "РљРёСЃР»РѕС‚Р°");
             rt_par_float[P_PROGRAM] =  SPROG_ACID;
             break;
         case SPROG_ACID_HOTWATER:
-            sprintf(currentProgramName, "Кислота+Дез");
+            sprintf(currentProgramName, "РљРёСЃР»РѕС‚Р°+Р”РµР·");
             rt_par_float[P_PROGRAM] =  SPROG_ACID_HOTWATER;
             break;
         case SPROG_CAUSTIC:
-            sprintf(currentProgramName, "Щелочь");
+            sprintf(currentProgramName, "Р©РµР»РѕС‡СЊ");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC;
             break;
         case SPROG_CAUSTIC_HOTWATER:
-            sprintf(currentProgramName, "Щел+Дезинф");
+            sprintf(currentProgramName, "Р©РµР»+Р”РµР·РёРЅС„");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_HOTWATER;
             break;
         case SPROG_CAUSTIC_ACID:
-            sprintf(currentProgramName, "Щел+Кислота");
+            sprintf(currentProgramName, "Р©РµР»+РљРёСЃР»РѕС‚Р°");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_ACID;
             break;
         case SPROG_CAUSTIC_ACID_HOTWATER:
-            sprintf(currentProgramName, "Щел+Кисл+Дез");
+            sprintf(currentProgramName, "Р©РµР»+РљРёСЃР»+Р”РµР·");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_ACID_HOTWATER;
             break;
         case SPROG_CAUSTIC_ACID_SANITIZER:
-            sprintf(currentProgramName, "Щел+Кисл+ДезСР");
+            sprintf(currentProgramName, "Р©РµР»+РљРёСЃР»+Р”РµР·РЎР ");
             rt_par_float[P_PROGRAM] = SPROG_CAUSTIC_ACID_SANITIZER;
             break;
         case SPROG_CAUSTIC_SANITIZER:
-            sprintf(currentProgramName, "Щел+ДезСР");
+            sprintf(currentProgramName, "Р©РµР»+Р”РµР·РЎР ");
             rt_par_float[P_PROGRAM] = SPROG_CAUSTIC_SANITIZER;
             break;
         case SPROG_ACID_SANITIZER:
-            sprintf(currentProgramName, "Кисл+ДезСР");
+            sprintf(currentProgramName, "РљРёСЃР»+Р”РµР·РЎР ");
             rt_par_float[P_PROGRAM] = SPROG_ACID_SANITIZER;
             break;
         case SPROG_ACID_PREPARATION:
-            sprintf(currentProgramName, "Нав. кислоты");
+            sprintf(currentProgramName, "РќР°РІ. РєРёСЃР»РѕС‚С‹");
             rt_par_float[P_PROGRAM] =  SPROG_ACID_PREPARATION;
             break;
         case SPROG_CAUSTIC_PREPARATION:
-            sprintf(currentProgramName, "Нав. щелочи");
+            sprintf(currentProgramName, "РќР°РІ. С‰РµР»РѕС‡Рё");
             rt_par_float[P_PROGRAM] =  SPROG_CAUSTIC_PREPARATION;
             break;
         case SPROG_SELF_CLEAN:
-            sprintf(currentProgramName, "Очистка танков");
+            sprintf(currentProgramName, "РћС‡РёСЃС‚РєР° С‚Р°РЅРєРѕРІ");
             rt_par_float[P_PROGRAM] =  SPROG_SELF_CLEAN;
             break;
         case SPROG_REMOTE:
-            sprintf(currentProgramName, "Управляемая мойка");
+            sprintf(currentProgramName, "РЈРїСЂР°РІР»СЏРµРјР°СЏ РјРѕР№РєР°");
             rt_par_float[P_PROGRAM] = SPROG_REMOTE;
             break;
         case SPROG_AP_RC_KANAL:
-            sprintf(currentProgramName, "Опол.чист.водой в канал.");
+            sprintf(currentProgramName, "РћРїРѕР».С‡РёСЃС‚.РІРѕРґРѕР№ РІ РєР°РЅР°Р».");
             clean_water_rinsing_return = KANAL;
             rt_par_float[P_PROGRAM] = SPROG_RINSING_CLEAN;
             break;
         case SPROG_AP_RC_SW:
-            sprintf(currentProgramName, "Опол.чист.водой в танк");
+            sprintf(currentProgramName, "РћРїРѕР».С‡РёСЃС‚.РІРѕРґРѕР№ РІ С‚Р°РЅРє");
             clean_water_rinsing_return = TANK_W;
             rt_par_float[P_PROGRAM] = SPROG_RINSING_CLEAN;
             break;
@@ -1879,7 +1879,7 @@ void cipline_tech_object::_StopDev( void )
     if (PIDF->HI==0) PIDF->off();
     ret_overrride = 0;
     SetRet(OFF);
-    //Смена среды
+    //РЎРјРµРЅР° СЃСЂРµРґС‹
     if (dev_upr_medium_change)
         {
         dev_upr_medium_change->off();
@@ -1965,7 +1965,7 @@ int cipline_tech_object::EvalRecipes()
         acidRecipes->EvalRecipe();
         causticRecipes->EvalRecipe();
 
-        //Выбор раствора
+        //Р’С‹Р±РѕСЂ СЂР°СЃС‚РІРѕСЂР°
         if ((int)(parpar[0][P_CAUSTIC_SELECTED]) != causticLoadedRecipe)
             {
             int newcausticrecipe = (int)(parpar[0][P_CAUSTIC_SELECTED]);
@@ -2000,13 +2000,13 @@ int cipline_tech_object::EvalRecipes()
 
     lineRecipes->EvalRecipe();
     rt_par_float[P_LOADED_RECIPE] = loadedRecipe + 1;
-    //переход к рецепту
+    //РїРµСЂРµС…РѕРґ Рє СЂРµС†РµРїС‚Сѓ
     if (rt_par_float[P_CUR_REC] != lineRecipes->getCurrentRecipe() + 1)
         {
         lineRecipes->ToRecipe( ( int ) rt_par_float[P_CUR_REC] - 1);
         rt_par_float[P_CUR_REC] = lineRecipes->getCurrentRecipe() + 1;
         }
-    //выбор рецепта
+    //РІС‹Р±РѕСЂ СЂРµС†РµРїС‚Р°
     if (rt_par_float[P_SELECT_REC] > 0)
         {
         lineRecipes->LoadRecipeToParams( ( int ) rt_par_float[P_SELECT_REC] - 1,
@@ -2016,14 +2016,14 @@ int cipline_tech_object::EvalRecipes()
         loadedRecipe = ( int ) rt_par_float[P_SELECT_REC] - 1;
         rt_par_float[P_SELECT_REC] = 0;
         formProgramList((unsigned int)(rt_par_float[P_PROGRAM_MASK]));
-        //Загрузка статистики
+        //Р—Р°РіСЂСѓР·РєР° СЃС‚Р°С‚РёСЃС‚РёРєРё
         if ((tech_type != TECH_TYPE_CAR_WASH) && (tech_type != TECH_TYPE_CAR_WASH_SELF_CLEAN))
             {
             objectstats = statsbase->get_obj_stats(loadedRecName);
             objectstats->changed = 0;
             }
         }
-    //выбор программы
+    //РІС‹Р±РѕСЂ РїСЂРѕРіСЂР°РјРјС‹
     if (rt_par_float[P_SELECT_PRG] > 0)
         {
         loadProgramFromList( ( int ) rt_par_float[P_SELECT_PRG]);
@@ -2091,7 +2091,7 @@ int cipline_tech_object::EvalCommands()
         case MCMD_NEXT:
             if (state !=0 && curstep != 555)
                 {
-                rt_par_float[STP_STEPS_OVER] = rt_par_float[STP_STEPS_OVER] + 1; //количество пропущенных операций
+                rt_par_float[STP_STEPS_OVER] = rt_par_float[STP_STEPS_OVER] + 1; //РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРѕРїСѓС‰РµРЅРЅС‹С… РѕРїРµСЂР°С†РёР№
                 rt_par_float[STP_LAST_STEP] = curstep;
                 curstep=GoToStep(curstep, 0);
                 state=1;
@@ -2110,7 +2110,7 @@ int cipline_tech_object::EvalCommands()
         case MCMD_RESET:
             if (state != 0)
                 {
-                rt_par_float[STP_RESETSTEP] = curstep; //шаг, на котором было сброшено
+                rt_par_float[STP_RESETSTEP] = curstep; //С€Р°Рі, РЅР° РєРѕС‚РѕСЂРѕРј Р±С‹Р»Рѕ СЃР±СЂРѕС€РµРЅРѕ
                 Stop(curstep);
                 curstep = 555;
                 is_reset = true;
@@ -2166,11 +2166,11 @@ int cipline_tech_object::EvalCommands()
                 {
                 if (scenabled)
                     {
-                    if (scline > 0 && scline != nmr) //если идет самоочистка танков, то нельзя включить мойку на других линиях.
+                    if (scline > 0 && scline != nmr) //РµСЃР»Рё РёРґРµС‚ СЃР°РјРѕРѕС‡РёСЃС‚РєР° С‚Р°РЅРєРѕРІ, С‚Рѕ РЅРµР»СЊР·СЏ РІРєР»СЋС‡РёС‚СЊ РјРѕР№РєСѓ РЅР° РґСЂСѓРіРёС… Р»РёРЅРёСЏС….
                         {
                         return 0;
                         }
-                    if (0 == scline && SPROG_SELF_CLEAN == rt_par_float[P_PROGRAM]) //нельзя включить самоочистку, если на других линиях идет мойка
+                    if (0 == scline && SPROG_SELF_CLEAN == rt_par_float[P_PROGRAM]) //РЅРµР»СЊР·СЏ РІРєР»СЋС‡РёС‚СЊ СЃР°РјРѕРѕС‡РёСЃС‚РєСѓ, РµСЃР»Рё РЅР° РґСЂСѓРіРёС… Р»РёРЅРёСЏС… РёРґРµС‚ РјРѕР№РєР°
                         {
                         for (int tmpline = 0; tmpline < MdlsCNT; tmpline++)
                             {
@@ -2232,7 +2232,7 @@ int cipline_tech_object::EvalCommands()
                         if (cur_selected_program & 0x20) is_caustic_program = true;
                         if (no_acid_wash_max > 0 && objectstats->objcausticwashes > no_acid_wash_max && !is_acid_program && is_caustic_program)
                             {
-                            set_err_msg("Необходима мойка кислотой", 0, 0, ERR_MSG_TYPES::ERR_ALARM);
+                            set_err_msg("РќРµРѕР±С…РѕРґРёРјР° РјРѕР№РєР° РєРёСЃР»РѕС‚РѕР№", 0, 0, ERR_MSG_TYPES::ERR_ALARM);
                             state = ERR_ACID_WASH_REQUIRED;
                             }
                         else
@@ -2417,7 +2417,7 @@ int cipline_tech_object::_GoToStep( int cur, int param )
         case 61:
             if ((int)(rt_par_float[P_PROGRAM]) & KS_MASK)
                 {
-                rt_par_float[STP_USED_HOTWATER] = rt_par_float[STP_USED_HOTWATER] + rt_par_float[PV1] + rt_par_float[PV2]; //Если в программе присутствует мойка щелочью или кислотой, то контур на дезинфекции уже заполнен чистой водой.
+                rt_par_float[STP_USED_HOTWATER] = rt_par_float[STP_USED_HOTWATER] + rt_par_float[PV1] + rt_par_float[PV2]; //Р•СЃР»Рё РІ РїСЂРѕРіСЂР°РјРјРµ РїСЂРёСЃСѓС‚СЃС‚РІСѓРµС‚ РјРѕР№РєР° С‰РµР»РѕС‡СЊСЋ РёР»Рё РєРёСЃР»РѕС‚РѕР№, С‚Рѕ РєРѕРЅС‚СѓСЂ РЅР° РґРµР·РёРЅС„РµРєС†РёРё СѓР¶Рµ Р·Р°РїРѕР»РЅРµРЅ С‡РёСЃС‚РѕР№ РІРѕРґРѕР№.
                 return 66;
                 }
             return 62;
@@ -2561,7 +2561,7 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
         }
 
     ret_overrride = 0;
-    //Смена среды
+    //РЎРјРµРЅР° СЃСЂРµРґС‹
     if (dev_upr_medium_change)
     {
     dev_upr_medium_change->off();
@@ -2754,7 +2754,7 @@ int cipline_tech_object::_InitStep( int step_to_init, int not_first_call )
             SetRet(OFF);
             StopDev();
             V11->on();
-            //Смена среды
+            //РЎРјРµРЅР° СЃСЂРµРґС‹
             if (dev_upr_medium_change)
                 {
                 dev_upr_medium_change->off();
@@ -2831,7 +2831,7 @@ int cipline_tech_object::EvalPIDS()
         }
    
 
-    //Клапан пара
+    //РљР»Р°РїР°РЅ РїР°СЂР°
     if (ao->get_value()>1 && PIDP->get_state() == ON && cnt->get_flow() > rt_par_float[P_R_NO_FLOW] && NP->get_state() == ON)
         {
         if (get_delta_millisec(steam_valve_delay) > STEAM_VALVE_MIN_DELAY)
@@ -3248,7 +3248,7 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
     no_liquid_is_warning = 0;
     no_liquid_phase = 0;
     pidf_override = false;
-    //Переменные для циркуляции
+    //РџРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ С†РёСЂРєСѓР»СЏС†РёРё
     circ_tank_s = 0;
     circ_tank_k = 0;
     circ_podp_water = 0;
@@ -3428,13 +3428,13 @@ int cipline_tech_object::_CheckErr( void )
 
     if ( !G_DEBUG )
         {
-        //обратная связь возвратного насоса
+        //РѕР±СЂР°С‚РЅР°СЏ СЃРІСЏР·СЊ РІРѕР·РІСЂР°С‚РЅРѕРіРѕ РЅР°СЃРѕСЃР°
         if (dev_m_ret)
             {
             if (-1 == dev_m_ret->get_state()) return ERR_RET;
             }
         }
-    //Проверка обратной связи объекта
+    //РџСЂРѕРІРµСЂРєР° РѕР±СЂР°С‚РЅРѕР№ СЃРІСЏР·Рё РѕР±СЉРµРєС‚Р°
     if (dev_os_object)
         {
         if (!dev_os_object->get_state())
@@ -3457,10 +3457,10 @@ int cipline_tech_object::_CheckErr( void )
             }
         }
 
-    //проверка уровней в бачке
+    //РїСЂРѕРІРµСЂРєР° СѓСЂРѕРІРЅРµР№ РІ Р±Р°С‡РєРµ
     if ((!LL->is_active() && (LM->is_active() || LH->is_active())) || (!LM->is_active() && LH->is_active()))
         {
-        if (get_delta_millisec(bachok_lvl_err_delay) > 5000L) //если ошибка уровня больше 5 секунд
+        if (get_delta_millisec(bachok_lvl_err_delay) > 5000L) //РµСЃР»Рё РѕС€РёР±РєР° СѓСЂРѕРІРЅСЏ Р±РѕР»СЊС€Рµ 5 СЃРµРєСѓРЅРґ
             {
             if (!(block_flags & (1 << BE_ERR_LEVEL_BACHOK)))
                 {
@@ -3473,7 +3473,7 @@ int cipline_tech_object::_CheckErr( void )
         bachok_lvl_err_delay = get_millisec();
         }
 
-    //проверка уровней в танке щелочи
+    //РїСЂРѕРІРµСЂРєР° СѓСЂРѕРІРЅРµР№ РІ С‚Р°РЅРєРµ С‰РµР»РѕС‡Рё
     if (((curstep >= 22) && (curstep <=40)) || ((curstep >= 105) && (curstep <= 111)))
         {
         if (!LSL->is_active() && LSH->is_active())
@@ -3485,7 +3485,7 @@ int cipline_tech_object::_CheckErr( void )
             }
         }
 
-    //проверка уровней в танке кислоты
+    //РїСЂРѕРІРµСЂРєР° СѓСЂРѕРІРЅРµР№ РІ С‚Р°РЅРєРµ РєРёСЃР»РѕС‚С‹
     if (((curstep >= 42) && (curstep <=60)) || ((curstep >= 115) && (curstep <= 121)))
         {
         if (!LKL->is_active() && LKH->is_active())
@@ -3497,7 +3497,7 @@ int cipline_tech_object::_CheckErr( void )
             }
         }
 
-    //проверка уровней в танке вторичной воды
+    //РїСЂРѕРІРµСЂРєР° СѓСЂРѕРІРЅРµР№ РІ С‚Р°РЅРєРµ РІС‚РѕСЂРёС‡РЅРѕР№ РІРѕРґС‹
     if (!LWL->is_active() && LWH->is_active())
         {
         if (!(block_flags & (1 << BE_ERR_LEVEL_TANK_W)))
@@ -3506,7 +3506,7 @@ int cipline_tech_object::_CheckErr( void )
             }
         }
 
-    // Нет расхода на подаче
+    // РќРµС‚ СЂР°СЃС…РѕРґР° РЅР° РїРѕРґР°С‡Рµ
     if (T[TMR_NO_FLOW]->get_countdown_time() != (rt_par_float[P_TM_R_NO_FLOW] * 1000L))
         {
         T[TMR_NO_FLOW]->set_countdown_time((unsigned long)rt_par_float[P_TM_R_NO_FLOW] * 1000L);
@@ -3785,7 +3785,7 @@ int cipline_tech_object::InitFilRR( int where )
     rt_par_float[P_VRAB] = 0;
     rt_par_float[P_ZAD_CONC] = kz*100;
     rt_par_float[P_CONC] = 0;
-    rt_par_float[P_CONC_RATE] = 0;  //  Расход концентрата при наведении
+    rt_par_float[P_CONC_RATE] = 0;  //  Р Р°СЃС…РѕРґ РєРѕРЅС†РµРЅС‚СЂР°С‚Р° РїСЂРё РЅР°РІРµРґРµРЅРёРё
     rt_par_float[P_OP_TIME_LEFT] = 0;
     divider = pd;
     if (0 == divider)
@@ -3937,12 +3937,12 @@ int cipline_tech_object::InitAddRR( int where, int step, int first_init_flag )
         rt_par_float[P_MAX_OPER_TM] = (v/divider)*3600;
         switch (no_liquid_phase)
             {
-            case 0: //начало первого цикла добавления раствора - запоминаем время
+            case 0: //РЅР°С‡Р°Р»Рѕ РїРµСЂРІРѕРіРѕ С†РёРєР»Р° РґРѕР±Р°РІР»РµРЅРёСЏ СЂР°СЃС‚РІРѕСЂР° - Р·Р°РїРѕРјРёРЅР°РµРј РІСЂРµРјСЏ
                 no_liquid_last_time = v/divider*1000;
                 no_liquid_phase = 1;
                 no_liquid_is_warning = 0;
                 break;
-            case 1: //не первый цикл. сравниваем время с предыдущим. Если совпадают с допуском до 10% выдаем 1 раз ошибку.
+            case 1: //РЅРµ РїРµСЂРІС‹Р№ С†РёРєР». СЃСЂР°РІРЅРёРІР°РµРј РІСЂРµРјСЏ СЃ РїСЂРµРґС‹РґСѓС‰РёРј. Р•СЃР»Рё СЃРѕРІРїР°РґР°СЋС‚ СЃ РґРѕРїСѓСЃРєРѕРј РґРѕ 10% РІС‹РґР°РµРј 1 СЂР°Р· РѕС€РёР±РєСѓ.
                 if (fabs(no_liquid_last_time - v/divider*1000) < no_liquid_last_time * 0.1)
                     {
                     no_liquid_is_warning = 1;
@@ -4610,11 +4610,11 @@ int cipline_tech_object::_InitFromObject( int what, int where, int step_to_init,
     T[TMR_CHK_CONC]->reset();
     if (what == TANK_K || what == TANK_S || where == TANK_S || where == TANK_K)
         {
-        T[TMR_CHK_CONC]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_CONC] * 1000 * 2); //для ошибки "высокая концентрация в возвратной трубе"
+        T[TMR_CHK_CONC]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_CONC] * 1000 * 2); //РґР»СЏ РѕС€РёР±РєРё "РІС‹СЃРѕРєР°СЏ РєРѕРЅС†РµРЅС‚СЂР°С†РёСЏ РІ РІРѕР·РІСЂР°С‚РЅРѕР№ С‚СЂСѓР±Рµ"
         }
     else
         {
-        T[TMR_CHK_CONC]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_CONC] * 1000); //для ошибки "нет концентрации в возвратной трубе"
+        T[TMR_CHK_CONC]->set_countdown_time((unsigned long)rt_par_float[P_TM_NO_CONC] * 1000); //РґР»СЏ РѕС€РёР±РєРё "РЅРµС‚ РєРѕРЅС†РµРЅС‚СЂР°С†РёРё РІ РІРѕР·РІСЂР°С‚РЅРѕР№ С‚СЂСѓР±Рµ"
         }
     rt_par_float[P_SUM_OP] = 0;
 
@@ -4630,7 +4630,7 @@ int cipline_tech_object::_InitOporCIP( int where, int step_to_init, int not_firs
     float z=0;
     opcip=0;
     if (isLine()) return 0;
-    //Смена среды
+    //РЎРјРµРЅР° СЃСЂРµРґС‹
     if (dev_upr_medium_change)
         {
         dev_upr_medium_change->on();
@@ -5769,7 +5769,7 @@ int cipline_tech_object::init_object_devices()
         {
         printf("init_object_devices\n\r");
         }
-    //Обратная связь
+    //РћР±СЂР°С‚РЅР°СЏ СЃРІСЏР·СЊ
     dev_no = (u_int)rt_par_float[P_OS];
     if (dev_no > 0)
         {
@@ -5805,7 +5805,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_os_object = 0;
         }
-    //Обратная связь №2(готовность объекта к мойке)
+    //РћР±СЂР°С‚РЅР°СЏ СЃРІСЏР·СЊ в„–2(РіРѕС‚РѕРІРЅРѕСЃС‚СЊ РѕР±СЉРµРєС‚Р° Рє РјРѕР№РєРµ)
     dev_no = (u_int)rt_par_float[P_SIGNAL_OBJECT_READY];
     if (dev_no > 0)
         {
@@ -5841,7 +5841,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_os_object_ready = 0;
         }
-    //Обратная связь №3(готовность объекта к мойке)
+    //РћР±СЂР°С‚РЅР°СЏ СЃРІСЏР·СЊ в„–3(РіРѕС‚РѕРІРЅРѕСЃС‚СЊ РѕР±СЉРµРєС‚Р° Рє РјРѕР№РєРµ)
     dev_no = (u_int)rt_par_float[P_SIGNAL_IN_CIP_READY];
     if (dev_no > 0)
         {
@@ -5877,7 +5877,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_os_cip_ready = 0;
         }
-    //Сигнал что можно перейти к следующей операции(флипы окончены)
+    //РЎРёРіРЅР°Р» С‡С‚Рѕ РјРѕР¶РЅРѕ РїРµСЂРµР№С‚Рё Рє СЃР»РµРґСѓСЋС‰РµР№ РѕРїРµСЂР°С†РёРё(С„Р»РёРїС‹ РѕРєРѕРЅС‡РµРЅС‹)
     dev_no = (u_int)rt_par_float[P_SIGNAL_CAN_CONTINUE];
     if (dev_no > 0)
         {
@@ -5913,7 +5913,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_os_can_continue = 0;
         }
-    //Обратная связь - пауза(остановка мойки)
+    //РћР±СЂР°С‚РЅР°СЏ СЃРІСЏР·СЊ - РїР°СѓР·Р°(РѕСЃС‚Р°РЅРѕРІРєР° РјРѕР№РєРё)
     dev_no = (u_int)rt_par_float[P_SIGNAL_OBJECT_PAUSE];
     if (dev_no > 0)
         {
@@ -5949,7 +5949,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_os_object_pause = 0;
         }
-    //Возвратный насос
+    //Р’РѕР·РІСЂР°С‚РЅС‹Р№ РЅР°СЃРѕСЃ
     dev_no = (u_int)rt_par_float[P_N_RET];
     if (dev_no > 0)
         {
@@ -5985,7 +5985,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_m_ret = 0;
         }
-    //Сигнал управления возвратным насосом
+    //РЎРёРіРЅР°Р» СѓРїСЂР°РІР»РµРЅРёСЏ РІРѕР·РІСЂР°С‚РЅС‹Рј РЅР°СЃРѕСЃРѕРј
     dev_no = (u_int)rt_par_float[P_N_UPR];
     if (dev_no > 0)
         {
@@ -6021,7 +6021,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_upr_ret = 0;
         }
-    //Сигнал управления насосом подачи дезинфицирующего средства
+    //РЎРёРіРЅР°Р» СѓРїСЂР°РІР»РµРЅРёСЏ РЅР°СЃРѕСЃРѕРј РїРѕРґР°С‡Рё РґРµР·РёРЅС„РёС†РёСЂСѓСЋС‰РµРіРѕ СЃСЂРµРґСЃС‚РІР°
     dev_no = (u_int)rt_par_float[P_SIGNAL_SANITIZER_PUMP];
     if (dev_no > 0)
         {
@@ -6057,7 +6057,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_upr_sanitizer_pump = 0;
         }
-    //Смена среды
+    //РЎРјРµРЅР° СЃСЂРµРґС‹
     dev_no = (u_int)rt_par_float[P_SIGNAL_MEDIUM_CHANGE];
     if (dev_no > 0)
         {
@@ -6093,7 +6093,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_upr_medium_change = 0;
         }
-    //Объект опорожнен
+    //РћР±СЉРµРєС‚ РѕРїРѕСЂРѕР¶РЅРµРЅ
     dev_no = (u_int)rt_par_float[P_OBJ_EMPTY];
     if (dev_no > 0)
         {
@@ -6129,7 +6129,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_os_object_empty = 0;
         }
-    //Щелочь
+    //Р©РµР»РѕС‡СЊ
     dev_no = (u_int)rt_par_float[P_SIGNAL_CAUSTIC];
     if (dev_no > 0)
         {
@@ -6165,7 +6165,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_upr_caustic = 0;
         }
-    //Кислота
+    //РљРёСЃР»РѕС‚Р°
     dev_no = (u_int)rt_par_float[P_SIGNAL_ACID];
     if (dev_no > 0)
         {
@@ -6201,7 +6201,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_upr_acid = 0;
         }
-    //Вода в трубе
+    //Р’РѕРґР° РІ С‚СЂСѓР±Рµ
     dev_no = (u_int)rt_par_float[P_SIGNAL_WATER];
     if (dev_no > 0)
         {
@@ -6237,7 +6237,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_upr_water = 0;
         }
-    //Дезинфекция
+    //Р”РµР·РёРЅС„РµРєС†РёСЏ
     dev_no = (u_int)rt_par_float[P_SIGNAL_DESINSECTION];
     if (dev_no > 0)
         {
@@ -6273,7 +6273,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_upr_desinfection = 0;
         }
-    //Циркуляция
+    //Р¦РёСЂРєСѓР»СЏС†РёСЏ
     dev_no = (u_int)rt_par_float[P_SIGNAL_CIRCULATION];
     if (dev_no > 0)
         {
@@ -6309,7 +6309,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_upr_circulation = 0;
         }
-    //Мойка окончена
+    //РњРѕР№РєР° РѕРєРѕРЅС‡РµРЅР°
     dev_no = (u_int)rt_par_float[P_SIGNAL_CIPEND];
     if (dev_no > 0)
         {
@@ -6345,7 +6345,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_upr_cip_finished = 0;
         }
-    //Мойка окончена 2
+    //РњРѕР№РєР° РѕРєРѕРЅС‡РµРЅР° 2
     dev_no = (u_int)rt_par_float[P_SIGNAL_CIPEND2];
     if (dev_no > 0)
         {
@@ -6381,7 +6381,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_upr_cip_finished2 = 0;
         }
-    //Мойка идет
+    //РњРѕР№РєР° РёРґРµС‚
     dev_no = (u_int)rt_par_float[P_SIGNAL_CIP_IN_PROGRESS];
     if (dev_no > 0)
         {
@@ -6417,7 +6417,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_upr_cip_in_progress = 0;
         }
-    //Сигнал управления производительностью подающего насоса
+    //РЎРёРіРЅР°Р» СѓРїСЂР°РІР»РµРЅРёСЏ РїСЂРѕРёР·РІРѕРґРёС‚РµР»СЊРЅРѕСЃС‚СЊСЋ РїРѕРґР°СЋС‰РµРіРѕ РЅР°СЃРѕСЃР°
     dev_no = (u_int)rt_par_float[P_SIGNAL_PUMP_CONTROL];
     if (dev_no > 0)
         {
@@ -6445,7 +6445,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_ai_pump_frequency = 0;
         }
-    //Сигнал уровня для управления производительностью подающего насоса
+    //РЎРёРіРЅР°Р» СѓСЂРѕРІРЅСЏ РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ РїСЂРѕРёР·РІРѕРґРёС‚РµР»СЊРЅРѕСЃС‚СЊСЋ РїРѕРґР°СЋС‰РµРіРѕ РЅР°СЃРѕСЃР°
     dev_no = (u_int)rt_par_float[P_SIGNAL_PUMP_CONTROL_FEEDBACK];
     if (dev_no > 0)
         {
@@ -6473,7 +6473,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_ai_pump_feedback = 0;
         }
-    //Сигнал, запрещающий включение подающего насоса.
+    //РЎРёРіРЅР°Р», Р·Р°РїСЂРµС‰Р°СЋС‰РёР№ РІРєР»СЋС‡РµРЅРёРµ РїРѕРґР°СЋС‰РµРіРѕ РЅР°СЃРѕСЃР°.
     dev_no = (u_int)rt_par_float[P_SIGNAL_PUMP_CAN_RUN];
     if (dev_no > 0)
         {
@@ -6509,7 +6509,7 @@ int cipline_tech_object::init_object_devices()
         {
         dev_os_pump_can_run = 0;
         }
-    //Сигнал уровня перед возвратным насосом.
+    //РЎРёРіРЅР°Р» СѓСЂРѕРІРЅСЏ РїРµСЂРµРґ РІРѕР·РІСЂР°С‚РЅС‹Рј РЅР°СЃРѕСЃРѕРј.
     dev_no = (u_int)rt_par_float[P_SIGNAL_RET_PUMP_SENSOR];
     if (dev_no > 0)
         {
@@ -7315,7 +7315,7 @@ void cipline_tech_object::setSwitch( int switchNO, int value )
     }
 
 
-//Функции вызывающие обработчики LUA
+//Р¤СѓРЅРєС†РёРё РІС‹Р·С‹РІР°СЋС‰РёРµ РѕР±СЂР°Р±РѕС‚С‡РёРєРё LUA
 int cipline_tech_object::GoToStep( int cur, int param )
     {
     int luares = 0;
@@ -8111,8 +8111,8 @@ void MSAPID::pid_on( char is_down_to_inaccel_mode /*= 0 */ )
     if ( state != STATE_ON )
         {
         state = STATE_ON;
-        start_time = get_millisec(); // Для разгона регулятора.
-        last_time  = get_millisec(); // Интервал пересчета значений.
+        start_time = get_millisec(); // Р”Р»СЏ СЂР°Р·РіРѕРЅР° СЂРµРіСѓР»СЏС‚РѕСЂР°.
+        last_time  = get_millisec(); // РРЅС‚РµСЂРІР°Р» РїРµСЂРµСЃС‡РµС‚Р° Р·РЅР°С‡РµРЅРёР№.
         this->is_down_to_inaccel_mode = is_down_to_inaccel_mode;
         }
     }
@@ -8140,7 +8140,7 @@ void MSAPID::pid_reset()
     par[ 0 ][ pid_par_offset + P_U ] = 0;
     par[ 0 ][ pid_par_offset + P_is_manual_mode ] = 0;
 
-    start_time = get_millisec(); //Для разгона регулятора.
+    start_time = get_millisec(); //Р”Р»СЏ СЂР°Р·РіРѕРЅР° СЂРµРіСѓР»СЏС‚РѕСЂР°.
     }
 
 float MSAPID::pid_eval( float current_value, int delta_sign /*= 1 */ )
@@ -8201,40 +8201,40 @@ float MSAPID::pid_eval( float current_value, int delta_sign /*= 1 */ )
         ek_2 = ek_1;
         ek_1 = ek;
 
-        //-Зона разгона.
+        //-Р—РѕРЅР° СЂР°Р·РіРѕРЅР°.
         if ( get_delta_millisec( start_time ) <
             par[ 0 ][ pid_par_offset + P_acceleration_time ] * 1000 )
             {
             acceleration( par[ 0 ][ pid_par_offset + P_acceleration_time ] );
             }
-        //-Зона разгона.-!>
+        //-Р—РѕРЅР° СЂР°Р·РіРѕРЅР°.-!>
 
         last_time = get_millisec();
         } // if ( get_millisec() - last_time > dt*1000L )
 
-    //-Мягкий пуск.
-    // Включили ручной режим.
+    //-РњСЏРіРєРёР№ РїСѓСЃРє.
+    // Р’РєР»СЋС‡РёР»Рё СЂСѓС‡РЅРѕР№ СЂРµР¶РёРј.
     if ( par[ 0 ][ pid_par_offset + P_is_manual_mode ] && 0 == prev_manual_mode )
         {
         prev_manual_mode = 1;
         par[ 0 ][ pid_par_offset + P_U_manual ] = par[ 0 ][ pid_par_offset + P_U ];
         }
 
-    // Выключили ручной режим.
+    // Р’С‹РєР»СЋС‡РёР»Рё СЂСѓС‡РЅРѕР№ СЂРµР¶РёРј.
     if ( par[ 0 ][ pid_par_offset + P_is_manual_mode ] == 0 && 1 == prev_manual_mode )
         {
         prev_manual_mode = 0;
         reset();
 
-        // Начинаем заново разгон регулятора.
+        // РќР°С‡РёРЅР°РµРј Р·Р°РЅРѕРІРѕ СЂР°Р·РіРѕРЅ СЂРµРіСѓР»СЏС‚РѕСЂР°.
         start_time = get_millisec();
 
-        // Устанавливаем начальное значение для разгона регулятора.
+        // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј РЅР°С‡Р°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ РґР»СЏ СЂР°Р·РіРѕРЅР° СЂРµРіСѓР»СЏС‚РѕСЂР°.
         start_value = par[ 0 ][ pid_par_offset + P_U_manual ];
 
         return par[ 0 ][ pid_par_offset + P_U_manual ];
         }
-    //-Мягкий пуск.-!>
+    //-РњСЏРіРєРёР№ РїСѓСЃРє.-!>
 
     par[ 0 ][ pid_par_offset + P_U ] = Uk;
 

@@ -158,7 +158,7 @@ int CountDownTimerReadValue(int channel,unsigned long *value);
 void InstallUserTimer(void (*fun)(void));
 void InstallUserTimer1C(void (*fun)(void));
 
-/* StopWatch [­p®É½Xªí] */
+/* StopWatch [è¨ˆæ™‚ç¢¼è¡¨] */
 
 #ifndef _T_STOPWATCH_
 #define _T_STOPWATCH_
@@ -168,7 +168,7 @@ typedef struct {
 } STOPWATCH;
 #endif
 
-/* CountDown Timer[­Ë¼Æ­p®É] */
+/* CountDown Timer[å€’æ•¸è¨ˆæ™‚] */
 #ifndef _T_COUNTDOWNTIMER_
 #define _T_COUNTDOWNTIMER_
 typedef struct {

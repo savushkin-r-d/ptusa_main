@@ -19,7 +19,7 @@ tcp_communicator_linux::tcp_communicator_linux( const char *name_rus,
     const char *name_eng ):tcp_communicator(),
     sst(), netOK( 0 )
     {
-    // Задаем таймаут.
+    // Р—Р°РґР°РµРј С‚Р°Р№РјР°СѓС‚.
     tv.tv_sec  = 0;
     tv.tv_usec = 1000;
 
@@ -61,8 +61,8 @@ int tcp_communicator_linux::net_init()
     errno = 0;
 
     int type = SOCK_STREAM;
-    int protocol = 0;        /* всегда 0 */
-    int err = master_socket = socket( PF_INET, type, protocol ); // Cоздание мастер-сокета.
+    int protocol = 0;        /* РІСЃРµРіРґР° 0 */
+    int err = master_socket = socket( PF_INET, type, protocol ); // CРѕР·РґР°РЅРёРµ РјР°СЃС‚РµСЂ-СЃРѕРєРµС‚Р°.
 
     if ( G_DEBUG )
         {
@@ -75,7 +75,7 @@ int tcp_communicator_linux::net_init()
         PAC_critical_errors_manager::get_instance()->set_global_error(
             PAC_critical_errors_manager::AC_NET,
             PAC_critical_errors_manager::AS_SOCKET_F,
-            0 );                                        //Мастер сокет.
+            0 );                                        //РњР°СЃС‚РµСЂ СЃРѕРєРµС‚.
 
         return -4;
         }
@@ -87,10 +87,10 @@ int tcp_communicator_linux::net_init()
             0 );
         }
 
-    // Переводим в неблокирующий режим.
+    // РџРµСЂРµРІРѕРґРёРј РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј.
     fcntl( master_socket, F_SETFL, O_NONBLOCK );
 
-    // Адресация мастер-сокета.
+    // РђРґСЂРµСЃР°С†РёСЏ РјР°СЃС‚РµСЂ-СЃРѕРєРµС‚Р°.
     socket_state master_socket_state;
     memset( &master_socket_state.sin, 0, sizeof( master_socket_state.sin ) );
     master_socket_state.socket = master_socket;
@@ -106,7 +106,7 @@ int tcp_communicator_linux::net_init()
         PAC_critical_errors_manager::get_instance()->set_global_error(
             PAC_critical_errors_manager::AC_NET,
             PAC_critical_errors_manager::AS_SETSOCKOPT_F,
-            0 );                                        //Мастер сокет.
+            0 );                                        //РњР°СЃС‚РµСЂ СЃРѕРєРµС‚.
 
         close( master_socket );
         return -5;
@@ -119,7 +119,7 @@ int tcp_communicator_linux::net_init()
             0 );
         }
 
-    // Привязка сокета.
+    // РџСЂРёРІСЏР·РєР° СЃРѕРєРµС‚Р°.
     err = bind( master_socket, ( struct sockaddr * ) & master_socket_state.sin,
         sizeof( master_socket_state.sin ) );
     if ( err < 0 )
@@ -127,7 +127,7 @@ int tcp_communicator_linux::net_init()
         PAC_critical_errors_manager::get_instance()->set_global_error(
             PAC_critical_errors_manager::AC_NET,
             PAC_critical_errors_manager::AS_BIND_F,
-            0 );                                        //Мастер сокет.
+            0 );                                        //РњР°СЃС‚РµСЂ СЃРѕРєРµС‚.
 
         close( master_socket );
         return -5;
@@ -140,7 +140,7 @@ int tcp_communicator_linux::net_init()
             0 );
         }
 
-    err = listen( master_socket, QLEN ); // Делаем мастер-сокет слушателем.
+    err = listen( master_socket, QLEN ); // Р”РµР»Р°РµРј РјР°СЃС‚РµСЂ-СЃРѕРєРµС‚ СЃР»СѓС€Р°С‚РµР»РµРј.
     if ( type == SOCK_STREAM && err < 0 )
         {
         PAC_critical_errors_manager::get_instance()->set_global_error(
@@ -162,13 +162,13 @@ int tcp_communicator_linux::net_init()
     int val = 1;
     setsockopt( master_socket, SOL_SOCKET, SO_REUSEADDR, &val, sizeof( val ) );
 
-    master_socket_state.active      = 1; // мастер-сокет всегда активный.
-    master_socket_state.is_listener = 1; // сокет является слушателем.
+    master_socket_state.active      = 1; // РјР°СЃС‚РµСЂ-СЃРѕРєРµС‚ РІСЃРµРіРґР° Р°РєС‚РёРІРЅС‹Р№.
+    master_socket_state.is_listener = 1; // СЃРѕРєРµС‚ СЏРІР»СЏРµС‚СЃСЏ СЃР»СѓС€Р°С‚РµР»РµРј.
     master_socket_state.evaluated   = 0;
 
     sst.push_back( master_socket_state );
 
-    // Создание серверного сокета modbus_socket.
+    // РЎРѕР·РґР°РЅРёРµ СЃРµСЂРІРµСЂРЅРѕРіРѕ СЃРѕРєРµС‚Р° modbus_socket.
     err = modbus_socket = socket ( PF_INET, type, protocol );
 
     if ( G_DEBUG )
@@ -183,7 +183,7 @@ int tcp_communicator_linux::net_init()
         PAC_critical_errors_manager::get_instance()->set_global_error(
             PAC_critical_errors_manager::AC_NET,
             PAC_critical_errors_manager::AS_SOCKET_F,
-            1 );                                        //Modbus сокет.
+            1 );                                        //Modbus СЃРѕРєРµС‚.
 
         return -4;
         }
@@ -195,17 +195,17 @@ int tcp_communicator_linux::net_init()
             1 );
         }
 
-    // Адресация modbus_socket сокета.
+    // РђРґСЂРµСЃР°С†РёСЏ modbus_socket СЃРѕРєРµС‚Р°.
     socket_state modbus_socket_state;
     memset( &modbus_socket_state.sin, 0, sizeof ( modbus_socket_state.sin ) );
     modbus_socket_state.socket = modbus_socket;
     modbus_socket_state.sin.sin_family 	  = AF_INET;
     modbus_socket_state.sin.sin_addr.s_addr = 0;
-    modbus_socket_state.sin.sin_port 		  = htons ( port_modbus ); // Порт.
+    modbus_socket_state.sin.sin_port 		  = htons ( port_modbus ); // РџРѕСЂС‚.
     modbus_socket_state.ismodbus = 1;
 
     err = bind( modbus_socket, ( struct sockaddr * ) & modbus_socket_state.sin,
-        sizeof ( modbus_socket_state.sin ) );	   // Привязка сокета.
+        sizeof ( modbus_socket_state.sin ) );	   // РџСЂРёРІСЏР·РєР° СЃРѕРєРµС‚Р°.
     if ( err < 0 )
         {
         PAC_critical_errors_manager::get_instance()->set_global_error(
@@ -224,7 +224,7 @@ int tcp_communicator_linux::net_init()
             1 );
         }
 
-    err = listen( modbus_socket, QLEN ); // Делаем слушателем.
+    err = listen( modbus_socket, QLEN ); // Р”РµР»Р°РµРј СЃР»СѓС€Р°С‚РµР»РµРј.
     if ( type == SOCK_STREAM && err < 0 )
         {
         PAC_critical_errors_manager::get_instance()->set_global_error(
@@ -268,7 +268,7 @@ tcp_communicator_linux::~tcp_communicator_linux()
 //------------------------------------------------------------------------------
 int tcp_communicator_linux::evaluate()
     {
-    // Проверка связи с сервером.
+    // РџСЂРѕРІРµСЂРєР° СЃРІСЏР·Рё СЃ СЃРµСЂРІРµСЂРѕРј.
     if ( get_delta_millisec(glob_last_transfer_time) > 5000L )
         {
         if ( glob_cmctr_ok )
@@ -291,15 +291,15 @@ int tcp_communicator_linux::evaluate()
                 PAC_critical_errors_manager::AS_EASYSERVER );
             }
         }
-    // Проверка связи с сервером.-!>
+    // РџСЂРѕРІРµСЂРєР° СЃРІСЏР·Рё СЃ СЃРµСЂРІРµСЂРѕРј.-!>
 
-    // Инициализация сети, при необходимости.
+    // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРµС‚Рё, РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё.
     if ( !netOK )
         {
         net_init();
         if ( !netOK ) return -100;
         }
-    // Инициализация сети, при необходимости.-!>
+    // РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРµС‚Рё, РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё.-!>
 
     int count_cycles = 0;
     int max_sock_number = 0;
@@ -326,7 +326,7 @@ int tcp_communicator_linux::evaluate()
                 }
             }
 
-        //Добавляем асинхронные сокеты в список прослушки
+        //Р”РѕР±Р°РІР»СЏРµРј Р°СЃРёРЅС…СЂРѕРЅРЅС‹Рµ СЃРѕРєРµС‚С‹ РІ СЃРїРёСЃРѕРє РїСЂРѕСЃР»СѓС€РєРё
         for (std::map<int, tcp_client*>::iterator it = clients->begin(); it != clients->end(); ++ it)
             {
             FD_SET( it->second->get_socket(), &rfds);
@@ -336,10 +336,10 @@ int tcp_communicator_linux::evaluate()
                 }
             }
 
-        // Ждём события в одном из сокетов.
+        // Р–РґС‘Рј СЃРѕР±С‹С‚РёСЏ РІ РѕРґРЅРѕРј РёР· СЃРѕРєРµС‚РѕРІ.
         rc = select( max_sock_number + 1, &rfds, NULL, NULL, &tv );
 
-        if ( 0 == rc ) break; // Ничего не произошло.
+        if ( 0 == rc ) break; // РќРёС‡РµРіРѕ РЅРµ РїСЂРѕРёР·РѕС€Р»Рѕ.
 
         if ( rc < 0 )
             {
@@ -353,7 +353,7 @@ int tcp_communicator_linux::evaluate()
 
         for ( u_int i = 0; i < sst.size(); i++ )  /* scan all possible sockets */
             {
-            // Поступил новый запрос на соединение.
+            // РџРѕСЃС‚СѓРїРёР» РЅРѕРІС‹Р№ Р·Р°РїСЂРѕСЃ РЅР° СЃРѕРµРґРёРЅРµРЅРёРµ.
             if ( FD_ISSET ( sst[ i ].socket, &rfds ) )
                 {
                 if ( sst[ i ].socket == master_socket || sst[ i ].socket == modbus_socket )
@@ -363,7 +363,7 @@ int tcp_communicator_linux::evaluate()
                     slave_socket = accept ( sst[ i ].socket,
                         ( struct sockaddr * ) &ssin, &sin_len );
 
-                    if ( slave_socket <= 0 )    // Ошибка.
+                    if ( slave_socket <= 0 )    // РћС€РёР±РєР°.
                         {
                         sprintf( G_LOG->msg,
                             "Network communication : accept socket : %s.",
@@ -378,10 +378,10 @@ int tcp_communicator_linux::evaluate()
                         char Message1[] = "PAC accept";
                         send( slave_socket, Message1, strlen ( Message1 ), MSG_NOSIGNAL );
                         }
-                    // Установка сокета в неблокирующий режим.
+                    // РЈСЃС‚Р°РЅРѕРІРєР° СЃРѕРєРµС‚Р° РІ РЅРµР±Р»РѕРєРёСЂСѓСЋС‰РёР№ СЂРµР¶РёРј.
                     if ( fcntl( slave_socket, F_SETFL, O_NONBLOCK ) < 0 )
                         {
-                        // Ошибка, разрушаем сокет.
+                        // РћС€РёР±РєР°, СЂР°Р·СЂСѓС€Р°РµРј СЃРѕРєРµС‚.
                         shutdown( slave_socket, 0 );
                         close( slave_socket );
 
@@ -399,7 +399,7 @@ int tcp_communicator_linux::evaluate()
                         DESCR = "server";
                         }
 
-                    // Определение имени клиента.
+                    // РћРїСЂРµРґРµР»РµРЅРёРµ РёРјРµРЅРё РєР»РёРµРЅС‚Р°.
                     hostent *client = gethostbyaddr( &ssin.sin_addr, 4, AF_INET);
                     if (client)
                         {
@@ -445,28 +445,28 @@ int tcp_communicator_linux::evaluate()
                 }
             }
 
-        //проверка асинхронных сокетов на предмет поступления данных
+        //РїСЂРѕРІРµСЂРєР° Р°СЃРёРЅС…СЂРѕРЅРЅС‹С… СЃРѕРєРµС‚РѕРІ РЅР° РїСЂРµРґРјРµС‚ РїРѕСЃС‚СѓРїР»РµРЅРёСЏ РґР°РЅРЅС‹С…
          for (std::map<int, tcp_client*>::iterator it = clients->begin(); it != clients->end();)
              {
              int is_removed = 0;
-             if (FD_ISSET(it->second->get_socket(), &rfds)) //если есть событие на сокете
+             if (FD_ISSET(it->second->get_socket(), &rfds)) //РµСЃР»Рё РµСЃС‚СЊ СЃРѕР±С‹С‚РёРµ РЅР° СЃРѕРєРµС‚Рµ
                  {
                  int err = recvtimeout(it->second->get_socket(),
                      (unsigned char*)it->second->buff, it->second->buff_size,
              1, 0, it->second->ip, "async client", 0 );
-                 if (err <= 0) //Ошибка чтения
+                 if (err <= 0) //РћС€РёР±РєР° С‡С‚РµРЅРёСЏ
                      {
                      it->second->Disconnect();
                      it->second->set_async_result(it->second->AR_SOCKETERROR);
                      }
-                 else //Получены данные
+                 else //РџРѕР»СѓС‡РµРЅС‹ РґР°РЅРЅС‹Рµ
                      {
                      in_buffer_count = err;
                      it->second->set_async_result(in_buffer_count);
                      }
                  is_removed = 1;
                  }
-             else //проверяем на таймаут
+             else //РїСЂРѕРІРµСЂСЏРµРј РЅР° С‚Р°Р№РјР°СѓС‚
                  {
                  if (get_delta_millisec(it->second->async_queued) > it->second->async_timeout)
                      {
@@ -543,12 +543,12 @@ int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
     int total_size = 0;
     unsigned char *p = buf;
 
-    // Настраиваем  file descriptor set.
+    // РќР°СЃС‚СЂР°РёРІР°РµРј  file descriptor set.
     fd_set fds;
     FD_ZERO( &fds );
     FD_SET( sockfd, &fds );
 
-    // Настраиваем время на таймаут.
+    // РќР°СЃС‚СЂР°РёРІР°РµРј РІСЂРµРјСЏ РЅР° С‚Р°Р№РјР°СѓС‚.
     timeval rec_tv;
     rec_tv.tv_sec = sec;
     rec_tv.tv_usec = usec;
@@ -562,7 +562,7 @@ int tcp_communicator_linux::sendall (int sockfd, unsigned char *buf, int len,
 
     for ( int i = len; i > 0; )
         {
-        // Ждем таймаута или возможности отсылки данных.
+        // Р–РґРµРј С‚Р°Р№РјР°СѓС‚Р° РёР»Рё РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РѕС‚СЃС‹Р»РєРё РґР°РЅРЅС‹С….
         res = select( sockfd + 1, NULL, &fds, NULL, &rec_tv );
 
         if ( 0 == res )
@@ -676,12 +676,12 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
 
     errno = 0;
 
-    // Настраиваем  file descriptor set.
+    // РќР°СЃС‚СЂР°РёРІР°РµРј  file descriptor set.
     fd_set fds;
     FD_ZERO( &fds );
     FD_SET( s, &fds );
 
-    // Настраиваем время на таймаут.
+    // РќР°СЃС‚СЂР°РёРІР°РµРј РІСЂРµРјСЏ РЅР° С‚Р°Р№РјР°СѓС‚.
     timeval rec_tv;
     rec_tv.tv_sec = sec;
     rec_tv.tv_usec = usec;
@@ -691,7 +691,7 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
     static u_int select_wait_time;
     st_time = get_millisec();
 
-    // Ждем таймаута или полученных данных.
+    // Р–РґРµРј С‚Р°Р№РјР°СѓС‚Р° РёР»Рё РїРѕР»СѓС‡РµРЅРЅС‹С… РґР°РЅРЅС‹С….
     int n = select( s + 1, &fds, NULL, NULL, &rec_tv );
 
     if ( 0 == n )
@@ -719,7 +719,7 @@ int tcp_communicator_linux::recvtimeout( int s, u_char *buf,
         return -1; // error
         }
 
-    // Данные должны быть здесь, поэтому делаем обычный recv().
+    // Р”Р°РЅРЅС‹Рµ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ Р·РґРµСЃСЊ, РїРѕСЌС‚РѕРјСѓ РґРµР»Р°РµРј РѕР±С‹С‡РЅС‹Р№ recv().
     int res = recv( s, buf, len, MSG_NOSIGNAL );
 
     select_wait_time = get_delta_millisec( st_time );
@@ -785,25 +785,25 @@ int tcp_communicator_linux::do_echo ( int idx )
         sock_state.init = 0;
         if (sock_state.ismodbus)
             {
-            // Ожидаем данные с таймаутом 50 мсек.
+            // РћР¶РёРґР°РµРј РґР°РЅРЅС‹Рµ СЃ С‚Р°Р№РјР°СѓС‚РѕРј 50 РјСЃРµРє.
             err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 0, 50000L,
                 inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.recv_stat, 1 );
             if (err == -2)
                 {
-                //Если при подключении на модбас-сокет первый раз данные не пришли, то игнорируем(панель Weintek)
+                //Р•СЃР»Рё РїСЂРё РїРѕРґРєР»СЋС‡РµРЅРёРё РЅР° РјРѕРґР±Р°СЃ-СЃРѕРєРµС‚ РїРµСЂРІС‹Р№ СЂР°Р· РґР°РЅРЅС‹Рµ РЅРµ РїСЂРёС€Р»Рё, С‚Рѕ РёРіРЅРѕСЂРёСЂСѓРµРј(РїР°РЅРµР»СЊ Weintek)
                 return 0;
                 }
             }
         else
             {
-            // Ожидаем данные с таймаутом 300 мсек.
+            // РћР¶РёРґР°РµРј РґР°РЅРЅС‹Рµ СЃ С‚Р°Р№РјР°СѓС‚РѕРј 300 РјСЃРµРє.
             err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 0, 300000L,
                 inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.recv_stat );
             }
         }
     else
         {
-        // Ожидаем данные с таймаутом 300 мсек.
+        // РћР¶РёРґР°РµРј РґР°РЅРЅС‹Рµ СЃ С‚Р°Р№РјР°СѓС‚РѕРј 300 РјСЃРµРє.
         err = in_buffer_count = recvtimeout( sock_state.socket, buf, BUFSIZE, 0, 300000L,
             inet_ntoa( sock_state.sin.sin_addr ), dev_name, &sock_state.recv_stat );
         }

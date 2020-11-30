@@ -1,11 +1,11 @@
 /// @file l_wago.h
-/// @brief Работа с I/O узлами для OC Linux.
+/// @brief Р Р°Р±РѕС‚Р° СЃ I/O СѓР·Р»Р°РјРё РґР»СЏ OC Linux.
 ///
-/// @author  Иванюк Дмитрий Сергеевич.
+/// @author  РРІР°РЅСЋРє Р”РјРёС‚СЂРёР№ РЎРµСЂРіРµРµРІРёС‡.
 ///
-/// @par Описание директив препроцессора:
+/// @par РћРїРёСЃР°РЅРёРµ РґРёСЂРµРєС‚РёРІ РїСЂРµРїСЂРѕС†РµСЃСЃРѕСЂР°:
 ///
-/// @par Текущая версия:
+/// @par РўРµРєСѓС‰Р°СЏ РІРµСЂСЃРёСЏ:
 /// @$Rev: 223 $.\n
 /// @$Author: id $.\n
 /// @$Date:: 2011-02-17 09:39:32#$.
@@ -23,7 +23,7 @@
 #include "PAC_err.h"
 #include "l_tcp_cmctr.h"
 //-----------------------------------------------------------------------------
-/// @brief Работа с модулями ввода/вывода для OC Linux.
+/// @brief Р Р°Р±РѕС‚Р° СЃ РјРѕРґСѓР»СЏРјРё РІРІРѕРґР°/РІС‹РІРѕРґР° РґР»СЏ OC Linux.
 ///
 ///
 class io_manager_linux : public io_manager
@@ -41,22 +41,22 @@ class io_manager_linux : public io_manager
         u_char* resultbuff;
         u_char* writebuff;
 
-        /// @brief Инициализация соединения с узлом I/O.
+        /// @brief РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃРѕРµРґРёРЅРµРЅРёСЏ СЃ СѓР·Р»РѕРј I/O.
         ///
-        /// @param node - узел I/O, с которым осуществляется соединение.
+        /// @param node - СѓР·РµР» I/O, СЃ РєРѕС‚РѕСЂС‹Рј РѕСЃСѓС‰РµСЃС‚РІР»СЏРµС‚СЃСЏ СЃРѕРµРґРёРЅРµРЅРёРµ.
         ///
-        /// @return -   0 - ок.
-        /// @return - < 0 - ошибка.
+        /// @return -   0 - РѕРє.
+        /// @return - < 0 - РѕС€РёР±РєР°.
         int net_init( io_node *node );
 
-        /// @brief Обмен с узлом I/O.
+        /// @brief РћР±РјРµРЅ СЃ СѓР·Р»РѕРј I/O.
         ///
-        /// @param node             - узел I/O, с которым осуществляется обмен.
-        /// @param bytes_to_send    - размер данных для отсылки.
-        /// @param bytes_to_receive - размер данных для получения.
+        /// @param node             - СѓР·РµР» I/O, СЃ РєРѕС‚РѕСЂС‹Рј РѕСЃСѓС‰РµСЃС‚РІР»СЏРµС‚СЃСЏ РѕР±РјРµРЅ.
+        /// @param bytes_to_send    - СЂР°Р·РјРµСЂ РґР°РЅРЅС‹С… РґР»СЏ РѕС‚СЃС‹Р»РєРё.
+        /// @param bytes_to_receive - СЂР°Р·РјРµСЂ РґР°РЅРЅС‹С… РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ.
         ///
-        /// @return -   0 - ок.
-        /// @return - < 0 - ошибка.
+        /// @return -   0 - РѕРє.
+        /// @return - < 0 - РѕС€РёР±РєР°.
         int e_communicate( io_node *node, int bytes_to_send, int bytes_to_receive );
 
         int read_input_registers(io_node* node, unsigned int address, unsigned int quantity, unsigned char station = 0);
@@ -70,9 +70,9 @@ class io_manager_linux : public io_manager
 
         virtual ~io_manager_linux();
 
-		/// @brief Отключение от узла.
+		/// @brief РћС‚РєР»СЋС‡РµРЅРёРµ РѕС‚ СѓР·Р»Р°.
 		///
-		/// @param node - узел, от которого отключаемся.
+		/// @param node - СѓР·РµР», РѕС‚ РєРѕС‚РѕСЂРѕРіРѕ РѕС‚РєР»СЋС‡Р°РµРјСЃСЏ.
 		void disconnect(io_node *node) override;
     };
 //-----------------------------------------------------------------------------

@@ -29,7 +29,7 @@ float plant::get_new_out( float control_value )
    //B = 1;
     //C = 1;
 
-    //Ñäâèã óïðàâëÿþùèõ ñèãíàëîâ.
+    //Ð¡Ð´Ð²Ð¸Ð³ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÑÑŽÑ‰Ð¸Ñ… ÑÐ¸Ð³Ð½Ð°Ð»Ð¾Ð².
         for ( int i = z + Z - 1; i > 0; i-- )
         {
         prev_control[ i ] = prev_control[ i - 1 ];

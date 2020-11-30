@@ -10,9 +10,7 @@
 #include "stdlib.h"
 #endif
 
-
-
-
+#include "utf2cp1251.h"
 
 int TRecipeManager::startRecipeBlock = 0;
 
@@ -40,7 +38,7 @@ TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
     currentRecipeName = new char[recipeNameLength];
     recipeList = new char[(recipeNameLength + 6) * recipePerLine];
     strcpy(recipeList,"");
-    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName);
+    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true );
     FormRecipeList();
     recipechanged = 0;
     recipechangechecktime = get_millisec();
@@ -192,7 +190,7 @@ void TRecipeManager::SaveRecipeName()
 #ifdef MSAPANEL
     MsaPanel::UpdateRecipes();
 #endif // MSAPANEL
-    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName);
+    WriteMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
     }
 
 
@@ -361,7 +359,7 @@ void TRecipeManager::FormRecipeList()
         {
         if (getRecipeValue(i, RV_IS_USED) != 0)
             {
-            ReadMem(startAddr( i ), recipeNameLength, (unsigned char*)tmprecipename);
+            ReadMem(startAddr( i ), recipeNameLength, (unsigned char*)tmprecipename, true );
             sprintf(tmpstr,"%d##", i + 1);
             strcat(recipeList, tmpstr);
             strcat(recipeList, tmprecipename);
@@ -373,7 +371,7 @@ void TRecipeManager::FormRecipeList()
 
 void TRecipeManager::LoadRecipeName()
     {
-    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName);
+    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true );
     }
 
 int TRecipeManager::ToRecipe( int recNo )
@@ -394,7 +392,7 @@ int TRecipeManager::ToRecipe( int recNo )
 
 int TRecipeManager::getRecipeName( int recNO, char* recName )
     {
-    return ReadMem(startAddr(recNO), recipeNameLength, (unsigned char*)recName);
+    return ReadMem(startAddr(recNO), recipeNameLength, (unsigned char*)recName, true );
     }
 
 int TRecipeManager::OnRecipeDevices( int recipeNo, int msaline /*= 1*/ )
@@ -538,15 +536,39 @@ void TRecipeManager::NullifyRecipe()
     LoadRecipeName();
     }
 
-int TRecipeManager::ReadMem( unsigned long startaddr, unsigned long length, unsigned char* buf )
+int TRecipeManager::ReadMem( unsigned long startaddr, unsigned long length,
+    unsigned char* buf, bool is_string )
     {
-    memcpy(buf, recipeMemory + startaddr, length);
+    if ( is_string )
+        {
+        char* tmp = new char[ length ];
+        memcpy( tmp, recipeMemory + startaddr, length );
+        convert_windows1251_to_utf8( (char*)buf, tmp );
+        delete[] tmp;
+        }
+    else
+        {
+        memcpy( buf, recipeMemory + startaddr, length );
+        }
+
     return 0;
     }
 
-int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length, unsigned char* buf )
+int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length,
+    unsigned char* buf, bool is_string )
     {
-    memcpy(recipeMemory + startaddr, buf, length);
+    if ( is_string )
+        {
+        char* tmp = new char[ length ];
+        convert_utf8_to_windows1251( (char*)buf, tmp, length );
+        memcpy( recipeMemory + startaddr, tmp, length );
+        delete[] tmp;
+        }
+    else
+        {
+        memcpy( recipeMemory + startaddr, buf, length );
+        }
+
     return 0;
     }
 

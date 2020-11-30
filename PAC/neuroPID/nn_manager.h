@@ -23,8 +23,8 @@ class nn_manager
             use_learning( true ),
             nn1_tuner( new mlp( 20, 10, 3, 120 ) )
             {
-            //Создание необходимых массивов и выделение памяти [1]. Запись
-            //данных инициализации [2]. Запись указателей для выборки обучения [3].
+            //РЎРѕР·РґР°РЅРёРµ РЅРµРѕР±С…РѕРґРёРјС‹С… РјР°СЃСЃРёРІРѕРІ Рё РІС‹РґРµР»РµРЅРёРµ РїР°РјСЏС‚Рё [1]. Р—Р°РїРёСЃСЊ
+            //РґР°РЅРЅС‹С… РёРЅРёС†РёР°Р»РёР·Р°С†РёРё [2]. Р—Р°РїРёСЃСЊ СѓРєР°Р·Р°С‚РµР»РµР№ РґР»СЏ РІС‹Р±РѕСЂРєРё РѕР±СѓС‡РµРЅРёСЏ [3].
             p_plant_data = new std::vector<float>();                        //1
             PID_data = new std::vector<float>();
 
@@ -66,15 +66,15 @@ class nn_manager
                     }
                 }            
             
-            p_pid->par[ PID::PAR_k ] = 0.5;           //1 Параметр k.
-            p_pid->par[ PID::PAR_Ti ] = 5;            //2 Параметр Ti.
-            p_pid->par[ PID::PAR_Td ] = 0.01f;        //3 Параметр Td.
-            p_pid->par[ PID::PAR_dt ] = 1;            //4 Интервал расчёта
-            p_pid->par[ PID::PAR_dmax ] = 200;        //5 Мax значение входной величины.
-            p_pid->par[ PID::PAR_dmin ] = -100;       //6 Мin значение входной величины.
-            p_pid->par[ PID::PAR_AccelTime ] = 1000;  //7 Время выхода на режим регулирования.
-            p_pid->par[ PID::PAR_IsManualMode ] = 0;  //8 Ручной режим.
-            p_pid->par[ PID::PAR_UManual ] = 0;       //9 Заданное ручное значение выходного сигнала.
+            p_pid->par[ PID::PAR_k ] = 0.5;           //1 РџР°СЂР°РјРµС‚СЂ k.
+            p_pid->par[ PID::PAR_Ti ] = 5;            //2 РџР°СЂР°РјРµС‚СЂ Ti.
+            p_pid->par[ PID::PAR_Td ] = 0.01f;        //3 РџР°СЂР°РјРµС‚СЂ Td.
+            p_pid->par[ PID::PAR_dt ] = 1;            //4 РРЅС‚РµСЂРІР°Р» СЂР°СЃС‡С‘С‚Р°
+            p_pid->par[ PID::PAR_dmax ] = 200;        //5 Рњax Р·РЅР°С‡РµРЅРёРµ РІС…РѕРґРЅРѕР№ РІРµР»РёС‡РёРЅС‹.
+            p_pid->par[ PID::PAR_dmin ] = -100;       //6 Рњin Р·РЅР°С‡РµРЅРёРµ РІС…РѕРґРЅРѕР№ РІРµР»РёС‡РёРЅС‹.
+            p_pid->par[ PID::PAR_AccelTime ] = 1000;  //7 Р’СЂРµРјСЏ РІС‹С…РѕРґР° РЅР° СЂРµР¶РёРј СЂРµРіСѓР»РёСЂРѕРІР°РЅРёСЏ.
+            p_pid->par[ PID::PAR_IsManualMode ] = 0;  //8 Р СѓС‡РЅРѕР№ СЂРµР¶РёРј.
+            p_pid->par[ PID::PAR_UManual ] = 0;       //9 Р—Р°РґР°РЅРЅРѕРµ СЂСѓС‡РЅРѕРµ Р·РЅР°С‡РµРЅРёРµ РІС‹С…РѕРґРЅРѕРіРѕ СЃРёРіРЅР°Р»Р°.
 
             p_pid->Reset( 0 );
             p_pid->SetZ( 90 );
@@ -124,10 +124,10 @@ class nn_manager
 
         void eval()
             {
-            //Получаем текущее значение объекта управления [1]. Получаем новое 
-            //значение управляющего воздействия [2]. Применяем его и фиктивно 
-            //ожидаем [3]. Получаем новое значение объекта управления [4].
-            //Сдвигаем сохраненные ранее точки [5]. Добавляем новые точки [6].
+            //РџРѕР»СѓС‡Р°РµРј С‚РµРєСѓС‰РµРµ Р·РЅР°С‡РµРЅРёРµ РѕР±СЉРµРєС‚Р° СѓРїСЂР°РІР»РµРЅРёСЏ [1]. РџРѕР»СѓС‡Р°РµРј РЅРѕРІРѕРµ 
+            //Р·РЅР°С‡РµРЅРёРµ СѓРїСЂР°РІР»СЏСЋС‰РµРіРѕ РІРѕР·РґРµР№СЃС‚РІРёСЏ [2]. РџСЂРёРјРµРЅСЏРµРј РµРіРѕ Рё С„РёРєС‚РёРІРЅРѕ 
+            //РѕР¶РёРґР°РµРј [3]. РџРѕР»СѓС‡Р°РµРј РЅРѕРІРѕРµ Р·РЅР°С‡РµРЅРёРµ РѕР±СЉРµРєС‚Р° СѓРїСЂР°РІР»РµРЅРёСЏ [4].
+            //РЎРґРІРёРіР°РµРј СЃРѕС…СЂР°РЅРµРЅРЅС‹Рµ СЂР°РЅРµРµ С‚РѕС‡РєРё [5]. Р”РѕР±Р°РІР»СЏРµРј РЅРѕРІС‹Рµ С‚РѕС‡РєРё [6].
             float current_plant_val = p_plant->get_current_out();           //1            
             float new_control_val = p_pid->Eval( current_plant_val );       //2
                                                                             //3
@@ -149,7 +149,7 @@ class nn_manager
             emul_sample->add_new_val_to_out_image( 0, new_plant_val );
             //emul_sample->print();
 
-            //Вычисляем выход эмулятора.
+            //Р’С‹С‡РёСЃР»СЏРµРј РІС‹С…РѕРґ СЌРјСѓР»СЏС‚РѕСЂР°.
             float *new_emulator_output = 
                 nn2_emulator->solve_out( emul_sample->get_last_sample_x() );  
             float new_emulator_output_value = new_emulator_output[ 0 ] * nn2_emulator->get_q();
@@ -160,7 +160,7 @@ class nn_manager
                 p_pid->get_z(),
                 10 * p_pid->get_p(), 10 * p_pid->get_i(), 100 * p_pid->get_d() );
 
-            //Обучение эмулятора.
+            //РћР±СѓС‡РµРЅРёРµ СЌРјСѓР»СЏС‚РѕСЂР°.
             static unsigned int time = 0;
             time++;
             
@@ -212,7 +212,7 @@ class nn_manager
                     tuner_future_sample->add_new_val_to_out_image( 1, tuner_future_err );
                     tuner_future_sample->add_new_val_to_out_image( 2, tuner_future_err );
                     
-                    //Вычисляем выход тюнера ПИД.            
+                    //Р’С‹С‡РёСЃР»СЏРµРј РІС‹С…РѕРґ С‚СЋРЅРµСЂР° РџРР”.            
                     float *new_PID_q = nn1_tuner->solve_out( tuner_sample->get_last_sample_x() ); 
 
                     float new_p = new_PID_q[ 0 ] * nn1_tuner->get_q();
@@ -256,10 +256,10 @@ class nn_manager
         std::vector<float>  *nn2_out;
         std::vector<float*> *nn2_in;
 
-        plant *p_plant;         ///Установка.
-        mlp   *nn2_emulator;    ///Нейронная сеть.
-        PID   *p_pid;           ///ПИД.
-        mlp   *nn1_tuner;       ///Нейронная сеть.
+        plant *p_plant;         ///РЈСЃС‚Р°РЅРѕРІРєР°.
+        mlp   *nn2_emulator;    ///РќРµР№СЂРѕРЅРЅР°СЏ СЃРµС‚СЊ.
+        PID   *p_pid;           ///РџРР”.
+        mlp   *nn1_tuner;       ///РќРµР№СЂРѕРЅРЅР°СЏ СЃРµС‚СЊ.
 
         FILE *data_stream;
 

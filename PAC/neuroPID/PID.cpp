@@ -83,7 +83,7 @@ float PID::Eval( float currentValue, int deltaSign )
         ek_2 = ek_1;
         ek_1 = ek;
 
-        //-Зона разгона.
+        //-Р—РѕРЅР° СЂР°Р·РіРѕРЅР°.
         if ( MyGetMS() - startTime < par[ startParamIndex + PAR_AccelTime ] ) 
             {
             float deltaTime = ( float ) ( MyGetMS() - startTime );
@@ -98,7 +98,7 @@ float PID::Eval( float currentValue, int deltaSign )
                 if ( Uk > res ) Uk = res;
                 }
             }
-        //-Зона разгона.-!>
+        //-Р—РѕРЅР° СЂР°Р·РіРѕРЅР°.-!>
         lastTime = MyGetMS();
         //}
 

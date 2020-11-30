@@ -1,13 +1,13 @@
 /// @file  mode_mngr.cpp
-/// @brief Содержит реализацию классов mode_mngr.h.
+/// @brief РЎРѕРґРµСЂР¶РёС‚ СЂРµР°Р»РёР·Р°С†РёСЋ РєР»Р°СЃСЃРѕРІ mode_mngr.h.
 ///
-/// @author  Иванюк Дмитрий Сергеевич.
+/// @author  РРІР°РЅСЋРє Р”РјРёС‚СЂРёР№ РЎРµСЂРіРµРµРІРёС‡.
 ///
-/// @par Описание директив препроцессора:
-/// @c USE_NO_COMB - компиляция без гребенки (объекта g_greb).@n
-/// в консоль.
+/// @par РћРїРёСЃР°РЅРёРµ РґРёСЂРµРєС‚РёРІ РїСЂРµРїСЂРѕС†РµСЃСЃРѕСЂР°:
+/// @c USE_NO_COMB - РєРѕРјРїРёР»СЏС†РёСЏ Р±РµР· РіСЂРµР±РµРЅРєРё (РѕР±СЉРµРєС‚Р° g_greb).@n
+/// РІ РєРѕРЅСЃРѕР»СЊ.
 ///
-/// @par Текущая версия:
+/// @par РўРµРєСѓС‰Р°СЏ РІРµСЂСЃРёСЏ:
 /// @$Rev$.@n
 /// @$Author$.@n
 /// @$Date::                     $.
@@ -17,17 +17,17 @@
 //-----------------------------------------------------------------------------
 const char* operation::state_str [] =
     {
-    "Отключен",
-    "Выполнение",
-    "Пауза",
-    "Остановлен"
+    "РћС‚РєР»СЋС‡РµРЅ",
+    "Р’С‹РїРѕР»РЅРµРЅРёРµ",
+    "РџР°СѓР·Р°",
+    "РћСЃС‚Р°РЅРѕРІР»РµРЅ"
     };
 //-----------------------------------------------------------------------------
 operation::operation(const char* name, operation_manager *owner, int n) :
     current_state ( OFF ), name( name ),
     owner( owner ),
     n( n ),
-    stub( "заглушка", owner, -1 ),
+    stub( "Р·Р°РіР»СѓС€РєР°", owner, -1 ),
     run_step( -1 ),
     run_time( 0 )
     {
@@ -183,7 +183,7 @@ void operation::evaluate()
 //-----------------------------------------------------------------------------
 void operation::final()
     {
-    //Для состояния OFF ничего не делаем, поэтому current_state > 0.
+    //Р”Р»СЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ OFF РЅРёС‡РµРіРѕ РЅРµ РґРµР»Р°РµРј, РїРѕСЌС‚РѕРјСѓ current_state > 0.
     if ( current_state > 0 && current_state < STATES_MAX )
         {
         states[ current_state ]->final();
@@ -198,7 +198,7 @@ void operation::final()
 //-----------------------------------------------------------------------------
 u_int operation::active_step() const
     {
-    //Для состояния OFF  возвращаем 0, поэтому current_state > 0.
+    //Р”Р»СЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ OFF  РІРѕР·РІСЂР°С‰Р°РµРј 0, РїРѕСЌС‚РѕРјСѓ current_state > 0.
     if ( current_state > 0 && current_state < STATES_MAX )
         {
         return states[ current_state ]->active_step();
@@ -431,7 +431,7 @@ int action::check_devices( char* err_dev_name, int max_to_write ) const
             }
         }
 
-    if ( err_dev_name[ 0 ] ) //Есть ошибки.
+    if ( err_dev_name[ 0 ] ) //Р•СЃС‚СЊ РѕС€РёР±РєРё.
         {
         int length = strlen( err_dev_name );
         if ( max_to_write < 0 )
@@ -442,7 +442,7 @@ int action::check_devices( char* err_dev_name, int max_to_write ) const
             }
         else
             {
-            //Убираем последние символы - ", ".
+            //РЈР±РёСЂР°РµРј РїРѕСЃР»РµРґРЅРёРµ СЃРёРјРІРѕР»С‹ - ", ".
             err_dev_name[ length - 1 ] = 0;
             err_dev_name[ length - 2 ] = 0;
             }
@@ -558,7 +558,7 @@ int required_DI_action::check( char* reason ) const
         {
         if ( !devs[ i ]->is_active() )
             {
-            sprintf( reason, "нет сигнала \'%.25s (%.50s)\'",
+            sprintf( reason, "РЅРµС‚ СЃРёРіРЅР°Р»Р° \'%.25s (%.50s)\'",
                 devs[ i ]->get_name(), devs[ i ]->get_description() );
             return 1;
             }
@@ -569,7 +569,7 @@ int required_DI_action::check( char* reason ) const
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 step::step( std::string name, operation_state *owner,
-    bool is_mode /*= false */ ) : action_stub( "Заглушка" ),
+    bool is_mode /*= false */ ) : action_stub( "Р—Р°РіР»СѓС€РєР°" ),
     start_time( 0 ),
     is_mode( is_mode ),
     name( name ),
@@ -765,7 +765,7 @@ void AI_AO_action::evaluate()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 open_seat_action::open_seat_action( bool is_mode, operation_state *owner ) :
-    action( "Промывка седел" ),
+    action( "РџСЂРѕРјС‹РІРєР° СЃРµРґРµР»" ),
     phase( P_WAIT ),
     active_group_n( 0 ),
     wait_time( 60000 ),
@@ -802,8 +802,8 @@ void open_seat_action::init()
     wait_time = par[ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;
     wait_time /= groups_cnt;
 
-    // Для шага: для одной группы - середина продолжительности шага,
-    // для двух групп - треть и т.д.
+    // Р”Р»СЏ С€Р°РіР°: РґР»СЏ РѕРґРЅРѕР№ РіСЂСѓРїРїС‹ - СЃРµСЂРµРґРёРЅР° РїСЂРѕРґРѕР»Р¶РёС‚РµР»СЊРЅРѕСЃС‚Рё С€Р°РіР°,
+    // РґР»СЏ РґРІСѓС… РіСЂСѓРїРї - С‚СЂРµС‚СЊ Рё С‚.Рґ.
     if ( !is_mode )
         {
         u_int_4 wait_time = owner->get_active_step_set_time() / ( groups_cnt + 1 );
@@ -869,7 +869,7 @@ void open_seat_action::evaluate()
                 }
             }
 
-        // Пора промывать седла.
+        // РџРѕСЂР° РїСЂРѕРјС‹РІР°С‚СЊ СЃРµРґР»Р°.
         if ( get_delta_millisec( start_cycle_time ) > wait_time )
             {
             phase            = next_phase;
@@ -894,18 +894,18 @@ void open_seat_action::evaluate()
                 v->set_seat_wash_state( true );
                 }
             }
-        else //Время промывки седел вышло.
+        else //Р’СЂРµРјСЏ РїСЂРѕРјС‹РІРєРё СЃРµРґРµР» РІС‹С€Р»Рѕ.
             {
             final();
 
             phase            = P_WAIT;
             start_cycle_time = get_millisec();
 
-            //Переход к следующей группе.
+            //РџРµСЂРµС…РѕРґ Рє СЃР»РµРґСѓСЋС‰РµР№ РіСЂСѓРїРїРµ.
             active_group_n++;
             if ( active_group_n >= wash_upper_seat_devices.size() )
                 {
-                //Переход к нижним седлам.
+                //РџРµСЂРµС…РѕРґ Рє РЅРёР¶РЅРёРј СЃРµРґР»Р°Рј.
                 active_group_n = 0;
                 next_phase     = P_OPEN_LOWER;
                 }
@@ -929,18 +929,18 @@ void open_seat_action::evaluate()
                 v->set_seat_wash_state( true );
                 }
             }
-        else //Время промывки седел вышло.
+        else //Р’СЂРµРјСЏ РїСЂРѕРјС‹РІРєРё СЃРµРґРµР» РІС‹С€Р»Рѕ.
             {
             final();
 
             phase            = P_WAIT;
             start_cycle_time = get_millisec();
 
-            //Переход к следующей группе.
+            //РџРµСЂРµС…РѕРґ Рє СЃР»РµРґСѓСЋС‰РµР№ РіСЂСѓРїРїРµ.
             active_group_n++;
             if ( active_group_n >= wash_lower_seat_devices.size() )
                 {
-                //Переход к ожиданию.
+                //РџРµСЂРµС…РѕРґ Рє РѕР¶РёРґР°РЅРёСЋ.
                 active_group_n = 0;
                 next_phase     = P_OPEN_UPPER;
                 }
@@ -1029,7 +1029,7 @@ void open_seat_action::print( const char* prefix /*= "" */,
 
     if ( !wash_upper_seat_devices.empty() )
         {
-        printf( "верхние " );
+        printf( "РІРµСЂС…РЅРёРµ " );
         for ( u_int i = 0; i < wash_upper_seat_devices.size(); i++ )
             {
             printf( " {" );
@@ -1045,7 +1045,7 @@ void open_seat_action::print( const char* prefix /*= "" */,
 
     if ( !wash_lower_seat_devices.empty() )
         {
-        printf( "; нижние " );
+        printf( "; РЅРёР¶РЅРёРµ " );
         for ( u_int i = 0; i < wash_lower_seat_devices.size(); i++ )
             {
             printf( " {" );
@@ -1091,7 +1091,7 @@ void wash_action::evaluate()
         {
         auto devs = devices[ idx ];
 
-        //Подаем сигналы "Мойка ОК".
+        //РџРѕРґР°РµРј СЃРёРіРЅР°Р»С‹ "РњРѕР№РєР° РћРљ".
         for ( u_int i = 0; i < devs[ G_DO ].size(); i++ )
             {
             devs[ G_DO ][ i ]->on();
@@ -1099,15 +1099,15 @@ void wash_action::evaluate()
 
         int new_state = 0;
 
-        // Если нет сигналов, то устройства включаем.
+        // Р•СЃР»Рё РЅРµС‚ СЃРёРіРЅР°Р»РѕРІ, С‚Рѕ СѓСЃС‚СЂРѕР№СЃС‚РІР° РІРєР»СЋС‡Р°РµРј.
         if ( devs[ G_DI ].empty() )
             {
             new_state = 1;
             }
         else
             {
-            // В зависимости от сигнала запроса включения устройств выключаем
-            // устройства.
+            // Р’ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ СЃРёРіРЅР°Р»Р° Р·Р°РїСЂРѕСЃР° РІРєР»СЋС‡РµРЅРёСЏ СѓСЃС‚СЂРѕР№СЃС‚РІ РІС‹РєР»СЋС‡Р°РµРј
+            // СѓСЃС‚СЂРѕР№СЃС‚РІР°.
             for ( u_int i = 0; i < devs[ G_DI ].size(); i++ )
                 {
                 if ( devs[ G_DI ][ i ]->is_active() )
@@ -1132,7 +1132,7 @@ void wash_action::evaluate()
                 }
             }
 
-        //Включаем или выключаем устройства.
+        //Р’РєР»СЋС‡Р°РµРј РёР»Рё РІС‹РєР»СЋС‡Р°РµРј СѓСЃС‚СЂРѕР№СЃС‚РІР°.
         for ( u_int i = 0; i < devs[ G_DEV ].size(); i++ )
             {
             auto dev = devs[ G_DEV ][ i ];
@@ -1157,8 +1157,8 @@ void wash_action::evaluate()
             }
 
         bool is_dev_error = false;
-        // Чуть раньше подали управляющий сигнал. Сейчас проверяем
-        // состояния устройств (насосов, клапанов).
+        // Р§СѓС‚СЊ СЂР°РЅСЊС€Рµ РїРѕРґР°Р»Рё СѓРїСЂР°РІР»СЏСЋС‰РёР№ СЃРёРіРЅР°Р». РЎРµР№С‡Р°СЃ РїСЂРѕРІРµСЂСЏРµРј
+        // СЃРѕСЃС‚РѕСЏРЅРёСЏ СѓСЃС‚СЂРѕР№СЃС‚РІ (РЅР°СЃРѕСЃРѕРІ, РєР»Р°РїР°РЅРѕРІ).
         for ( u_int i = 0; i < devs[ G_DEV ].size(); i++ )
             {
             if ( devs[ G_DEV ][ i ]->get_state() == -1 )
@@ -1175,8 +1175,8 @@ void wash_action::evaluate()
                 break;
                 }
             }
-        // Если есть ошибки устройств, не отключая все устройства, снимаем
-        // сигналы "Мойка ОК".
+        // Р•СЃР»Рё РµСЃС‚СЊ РѕС€РёР±РєРё СѓСЃС‚СЂРѕР№СЃС‚РІ, РЅРµ РѕС‚РєР»СЋС‡Р°СЏ РІСЃРµ СѓСЃС‚СЂРѕР№СЃС‚РІР°, СЃРЅРёРјР°РµРј
+        // СЃРёРіРЅР°Р»С‹ "РњРѕР№РєР° РћРљ".
         if ( is_dev_error )
             {
             for ( u_int i = 0; i < devs[ G_DO ].size(); i++ )
@@ -1215,10 +1215,10 @@ void wash_action::print( const char* prefix /*= "" */,
 //-----------------------------------------------------------------------------
 operation_state::operation_state( const char* name,
     operation_manager *owner, int n ) : name( name ),
-    mode_step(  new step( "Шаг операции", this, true ) ),
+    mode_step(  new step( "РЁР°Рі РѕРїРµСЂР°С†РёРё", this, true ) ),
     active_step_n( -1 ),
     start_time( get_millisec() ),
-    step_stub( "Шаг-заглушка", this ),
+    step_stub( "РЁР°Рі-Р·Р°РіР»СѓС€РєР°", this ),
     owner( owner ),
     n( n ),
     dx_step_time( 0 )
@@ -1252,7 +1252,7 @@ void operation_state::init( u_int start_step /*= 1 */ )
 
     if ( steps.empty() )
         {
-        //Если нет шагов, то выходим.
+        //Р•СЃР»Рё РЅРµС‚ С€Р°РіРѕРІ, С‚Рѕ РІС‹С…РѕРґРёРј.
         return;
         }
 
@@ -1265,7 +1265,7 @@ void operation_state::init( u_int start_step /*= 1 */ )
         if ( G_DEBUG )
             {
             SetColor( YELLOW );
-            printf( "%sINIT EXTRA STEP №%d\n",
+            printf( "%sINIT EXTRA STEP в„–%d\n",
                 owner->owner->get_prefix(), active_steps[ idx ] );
             steps[ step_n ]->print( owner->owner->get_prefix() );
             SetColor( RESET );
@@ -1273,8 +1273,8 @@ void operation_state::init( u_int start_step /*= 1 */ )
         }
     }
 //-----------------------------------------------------------------------------
-// Если есть активный шаг, проверяем время. Если оно вышло,
-// отключаем активный шаг, в качестве активного шага переназначаем новый шаг.
+// Р•СЃР»Рё РµСЃС‚СЊ Р°РєС‚РёРІРЅС‹Р№ С€Р°Рі, РїСЂРѕРІРµСЂСЏРµРј РІСЂРµРјСЏ. Р•СЃР»Рё РѕРЅРѕ РІС‹С€Р»Рѕ,
+// РѕС‚РєР»СЋС‡Р°РµРј Р°РєС‚РёРІРЅС‹Р№ С€Р°Рі, РІ РєР°С‡РµСЃС‚РІРµ Р°РєС‚РёРІРЅРѕРіРѕ С€Р°РіР° РїРµСЂРµРЅР°Р·РЅР°С‡Р°РµРј РЅРѕРІС‹Р№ С€Р°Рі.
 void operation_state::evaluate()
     {
     mode_step->evaluate();
@@ -1287,7 +1287,7 @@ void operation_state::evaluate()
 
     if ( active_step_n < 0 ) return;
 
-    //Время шага
+    //Р’СЂРµРјСЏ С€Р°РіР°
     int par_n = step_duration_par_ns[ active_step_n ];
     if ( par_n > 0 )
         {
@@ -1304,7 +1304,7 @@ void operation_state::evaluate()
                     }
                 else
                     {
-                    final(); //Для операции-заглушки.
+                    final(); //Р”Р»СЏ РѕРїРµСЂР°С†РёРё-Р·Р°РіР»СѓС€РєРё.
                     }
                 }
             else
@@ -1324,8 +1324,8 @@ void operation_state::final()
     mode_step->final();
     start_time = get_millisec();
 
-    //Если активный шаг не завершился, сохраняем время его выполнения для
-    //возобновления в случае снятия с паузы.
+    //Р•СЃР»Рё Р°РєС‚РёРІРЅС‹Р№ С€Р°Рі РЅРµ Р·Р°РІРµСЂС€РёР»СЃСЏ, СЃРѕС…СЂР°РЅСЏРµРј РІСЂРµРјСЏ РµРіРѕ РІС‹РїРѕР»РЅРµРЅРёСЏ РґР»СЏ
+    //РІРѕР·РѕР±РЅРѕРІР»РµРЅРёСЏ РІ СЃР»СѓС‡Р°Рµ СЃРЅСЏС‚РёСЏ СЃ РїР°СѓР·С‹.
     if ( active_step_n >= 0 )
         {
         dx_step_time = active_step_evaluation_time();
@@ -1336,7 +1336,7 @@ void operation_state::final()
         steps[ active_step_n ]->final();
         if ( G_DEBUG )
             {            
-            printf( "%sFINAL ACTIVE STEP №%d\n",
+            printf( "%sFINAL ACTIVE STEP в„–%d\n",
                 owner->owner->get_prefix(), active_step_n + 1 );
             }
         active_step_n = -1;
@@ -1351,7 +1351,7 @@ void operation_state::final()
             if ( G_DEBUG )
                 {
                 SetColor( YELLOW );
-                printf( "%sFINAL ACTIVE EXTRA STEP №%d\n",
+                printf( "%sFINAL ACTIVE EXTRA STEP в„–%d\n",
                     owner->owner->get_prefix(), active_steps[ idx ] );
                 SetColor( RESET );
                 }
@@ -1404,7 +1404,7 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
         }
     active_step_n = new_step - 1;
 
-    //Время шага
+    //Р’СЂРµРјСЏ С€Р°РіР°
     int par_n = step_duration_par_ns[ active_step_n ];
     if ( par_n > 0 )
         {
@@ -1500,7 +1500,7 @@ int operation_state::check_steps_params( char* err_dev_name, int str_len )
         if ( all_params_is_empty )
             {
             snprintf( err_dev_name, str_len,
-                "все длительности шагов имеют значение 0" );
+                "РІСЃРµ РґР»РёС‚РµР»СЊРЅРѕСЃС‚Рё С€Р°РіРѕРІ РёРјРµСЋС‚ Р·РЅР°С‡РµРЅРёРµ 0" );
             return 1;
             }
         }
@@ -1652,10 +1652,10 @@ int operation_state::off_extra_step( int step_idx )
     return 0;
     }
 //-----------------------------------------------------------------------------
-/// @brief Выключение заданного активного шага и включение другого.
+/// @brief Р’С‹РєР»СЋС‡РµРЅРёРµ Р·Р°РґР°РЅРЅРѕРіРѕ Р°РєС‚РёРІРЅРѕРіРѕ С€Р°РіР° Рё РІРєР»СЋС‡РµРЅРёРµ РґСЂСѓРіРѕРіРѕ.
 ///
-/// @param off_step - номер выключаемого шага (с единицы).
-/// @param on_step - номер включаемого шага (с единицы).
+/// @param off_step - РЅРѕРјРµСЂ РІС‹РєР»СЋС‡Р°РµРјРѕРіРѕ С€Р°РіР° (СЃ РµРґРёРЅРёС†С‹).
+/// @param on_step - РЅРѕРјРµСЂ РІРєР»СЋС‡Р°РµРјРѕРіРѕ С€Р°РіР° (СЃ РµРґРёРЅРёС†С‹).
 int operation_state::switch_active_extra_step( int off_step, int on_step )
     {
     if ( (size_t) on_step > steps.size() )
@@ -1752,7 +1752,7 @@ operation_manager::operation_manager( u_int modes_cnt, i_tech_object *owner ):
     owner( owner ),
     last_action_time( get_millisec() )
     {
-    oper_stub = new operation( "Операция-заглушка", this, -1 );
+    oper_stub = new operation( "РћРїРµСЂР°С†РёСЏ-Р·Р°РіР»СѓС€РєР°", this, -1 );
     }
 //-----------------------------------------------------------------------------
 operation_manager::~operation_manager()

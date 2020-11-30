@@ -9,10 +9,10 @@ int _tmain(int argc, _TCHAR* argv[])
     {
     const int INPUTS_COUNT = 10;
 
-    ////1.1 Ñîçäàåì ïåðñåïòðîí NN2.     
+    ////1.1 Ð¡Ð¾Ð·Ð´Ð°ÐµÐ¼ Ð¿ÐµÑ€ÑÐµÐ¿Ñ‚Ñ€Ð¾Ð½ NN2.     
     //mlp *emulator = new mlp( 2 * INPUTS_COUNT, 10, 1 );
 
-    ////1.2 Çàãðóæàåì äàííûå.
+    ////1.2 Ð—Ð°Ð³Ñ€ÑƒÐ¶Ð°ÐµÐ¼ Ð´Ð°Ð½Ð½Ñ‹Ðµ.
     //stored_sample *s_data = new stored_sample();
     //s_data->load_from_file( "..\\emul_learning.data" );
 
@@ -24,10 +24,10 @@ int _tmain(int argc, _TCHAR* argv[])
     //emulator->save_to_file( "..\\emul_q.data" );
     
     //
-    //2.1 Ñîçäàåì ïåðñåïòðîí NN1.    
+    //2.1 Ð¡Ð¾Ð·Ð´Ð°ÐµÐ¼ Ð¿ÐµÑ€ÑÐµÐ¿Ñ‚Ñ€Ð¾Ð½ NN1.    
     mlp *tuner = new mlp( 2 * INPUTS_COUNT, 10, 3 );
 
-    //2.2 Çàãðóæàåì äàííûå.
+    //2.2 Ð—Ð°Ð³Ñ€ÑƒÐ¶Ð°ÐµÐ¼ Ð´Ð°Ð½Ð½Ñ‹Ðµ.
     stored_sample *s_data_tuner = new stored_sample();
     s_data_tuner->load_from_file( "..\\PID_tuner_learning.data" );
 

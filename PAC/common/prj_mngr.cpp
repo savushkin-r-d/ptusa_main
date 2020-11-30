@@ -19,6 +19,9 @@
 
 #ifdef WIN_OS
 #include "w_mem.h"
+
+#pragma comment(lib, "Shell32.lib")
+#include <shellapi.h>
 #endif
 
 #ifdef LINUX_OS
@@ -29,6 +32,10 @@ auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
 int project_manager::proc_main_params( int argc, const char *argv[] )
     {
+#ifdef WIN32
+    wchar_t** w_argv = CommandLineToArgvW( GetCommandLineW(), &argc );
+#endif
+
     for ( int i = 1; i < argc; i++ )
         {
         if ( strcmp( argv[ i ], "debug" ) == 0 )
@@ -82,7 +89,21 @@ int project_manager::proc_main_params( int argc, const char *argv[] )
         {
         if ( strcmp( argv[ i ], "path" ) == 0 )
             {
+#ifdef WIN32
+            wchar_t* w_path = w_argv[ i + 1 ];
+            int utf16len = wcslen( w_path );
+            int utf8len = WideCharToMultiByte( CP_UTF8, 0, w_path, utf16len,
+                NULL, 0, NULL, NULL );
+
+            char* path = new char[ utf8len + 1 ];            
+            memset( path, 0, utf8len + 1 );
+
+            WideCharToMultiByte( CP_UTF8, 0, w_path, utf16len, path, utf8len, 0, 0 );
+
+            init_path( path );
+#else
             init_path( argv[ i + 1 ] );
+#endif            
             }
         }
     
@@ -136,10 +157,10 @@ int project_manager::init_sys_path( const char* sys_path )
     return 0;
     }
 //-----------------------------------------------------------------------------
-//Порядок загрузки:
-//1.Модули.
-//2.Устройства.
-//3.Переменные для доступа к устройства из Lua (совпадают с именем устройства).
+//РџРѕСЂСЏРґРѕРє Р·Р°РіСЂСѓР·РєРё:
+//1.РњРѕРґСѓР»Рё.
+//2.РЈСЃС‚СЂРѕР№СЃС‚РІР°.
+//3.РџРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ РґРѕСЃС‚СѓРїР° Рє СѓСЃС‚СЂРѕР№СЃС‚РІР° РёР· Lua (СЃРѕРІРїР°РґР°СЋС‚ СЃ РёРјРµРЅРµРј СѓСЃС‚СЂРѕР№СЃС‚РІР°).
 int project_manager::lua_load_configuration()
     {
     if ( G_DEBUG ) 
@@ -170,14 +191,14 @@ int project_manager::lua_load_configuration()
 
     if ( G_DEBUG ) 
         {
-        printf( "Получение имен и комментария к устройствам из Lua...\n");
+        printf( "РџРѕР»СѓС‡РµРЅРёРµ РёРјРµРЅ Рё РєРѕРјРјРµРЅС‚Р°СЂРёСЏ Рє СѓСЃС‚СЂРѕР№СЃС‚РІР°Рј РёР· Lua...\n");
         }
-    //Получение имен и комментария к устройствам из Lua.
+    //РџРѕР»СѓС‡РµРЅРёРµ РёРјРµРЅ Рё РєРѕРјРјРµРЅС‚Р°СЂРёСЏ Рє СѓСЃС‚СЂРѕР№СЃС‚РІР°Рј РёР· Lua.
     lua_manager::get_instance()->void_exec_lua_method( "system",
         "init_devices_names", "project_manager::lua_load_configuration()" );
     if ( G_DEBUG ) 
         {
-        printf( "Oк.\n");
+        printf( "OРє.\n");
         }
 
     if ( G_DEBUG ) 
@@ -189,7 +210,7 @@ int project_manager::lua_load_configuration()
         "init_dev_names", "project_manager::lua_load_configuration()" );
     if ( G_DEBUG ) 
         {
-        printf( "Oк.\n");
+        printf( "OРє.\n");
         }
 
     if ( G_DEBUG ) 
@@ -201,7 +222,7 @@ int project_manager::lua_load_configuration()
         "init_devices_properties", "project_manager::lua_load_configuration()" );
     if ( G_DEBUG ) 
         {
-        printf( "Oк.\n");
+        printf( "OРє.\n");
         }
 
     if ( G_DEBUG ) 
@@ -248,31 +269,31 @@ int project_manager::lua_load_configuration()
         printf( "\n" );
         }
 
-    //-Добавление технологических объектов проекта.
+    //-Р”РѕР±Р°РІР»РµРЅРёРµ С‚РµС…РЅРѕР»РѕРіРёС‡РµСЃРєРёС… РѕР±СЉРµРєС‚РѕРІ РїСЂРѕРµРєС‚Р°.
     for ( u_int i = 0; i < G_TECH_OBJECT_MNGR()->get_count(); i++ )
         {
         G_DEVICE_CMMCTR->add_device( G_TECH_OBJECTS( i ) );
         }
-    //-Добавление системных тегов контроллера.
+    //-Р”РѕР±Р°РІР»РµРЅРёРµ СЃРёСЃС‚РµРјРЅС‹С… С‚РµРіРѕРІ РєРѕРЅС‚СЂРѕР»Р»РµСЂР°.
     G_DEVICE_CMMCTR->add_device( PAC_info::get_instance() );
 
     G_DEVICE_CMMCTR->add_device( siren_lights_manager::get_instance() );
 
     if ( G_DEBUG ) 
         {
-        printf( "Получение конфигурации Profibus DP slave...\n");
+        printf( "РџРѕР»СѓС‡РµРЅРёРµ РєРѕРЅС„РёРіСѓСЂР°С†РёРё Profibus DP slave...\n");
         }
 
     lua_manager::get_instance()->void_exec_lua_method( "system",
         "init_profibus", "project_manager::lua_load_configuration()" );
     if ( G_DEBUG ) 
         {
-        printf( "Oк.\n");
+        printf( "OРє.\n");
         }
 
 
 #ifdef RM_PAC
-    // Добавление удаленных PAC.
+    // Р”РѕР±Р°РІР»РµРЅРёРµ СѓРґР°Р»РµРЅРЅС‹С… PAC.
     if ( G_DEBUG ) 
         {
         printf( "Remote PAC's...\n");

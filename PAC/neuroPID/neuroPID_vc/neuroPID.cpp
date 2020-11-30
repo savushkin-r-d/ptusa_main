@@ -17,14 +17,14 @@ PID     pid1;
 std::vector<float> *plant_data = new std::vector<float>();
 std::vector<float> *PID_data = new std::vector<float>();
 
-//Данные работы храним в файлах.
+//Р”Р°РЅРЅС‹Рµ СЂР°Р±РѕС‚С‹ С…СЂР°РЅРёРј РІ С„Р°Р№Р»Р°С….
 FILE *work_data_stream;   
 
 #ifdef SAVE_DATA_FOR_EMULATOR_LEARNING
 //FILE *emulator_learning_data_stream;  
 #endif // SAVE_DATA_FOR_EMULATOR_LEARNING
 
-//Эмулятор.
+//Р­РјСѓР»СЏС‚РѕСЂ.
 const int INPUTS_COUNT = 10;
 mlp *emulator = new mlp( 2 * INPUTS_COUNT, 10, 1 );
 std::vector<float> *emulator_output = new std::vector<float>();
@@ -35,12 +35,12 @@ void DrawSeries( HDC hdc, int x0, int y0, int x1, int y1, int scale,
                 std::vector<float> *data_y, std::vector<float> *data_y2,
                 std::vector<float> *data_y3 )
     {    
-    //Считаем очищенной заданную область.
+    //РЎС‡РёС‚Р°РµРј РѕС‡РёС‰РµРЅРЅРѕР№ Р·Р°РґР°РЅРЅСѓСЋ РѕР±Р»Р°СЃС‚СЊ.
     //RECT rect;
     //SetRect( &rect, x0, y0, x1, y1 );    
     //FillRect (hdc, &rect, (HBRUSH)(COLOR_WINDOW+1));
 
-    //Рисуем оси.
+    //Р РёСЃСѓРµРј РѕСЃРё.
     const int D        = 5;
     const int ARROW_SIZE = 15;
     const int CENTER_X = ( x1 - x0 ) / 2;
@@ -105,7 +105,7 @@ void DrawSeries( HDC hdc, int x0, int y0, int x1, int y1, int scale,
     LineTo( hdc, x1 - ARROW_SIZE - D, y1 - D + ARROW_SIZE / 3 );
     LineTo( hdc, x1 - D, y1 - D );
 
-    //Строим график.
+    //РЎС‚СЂРѕРёРј РіСЂР°С„РёРє.
     LOGBRUSH lb;    
     lb.lbStyle = BS_SOLID; 
     lb.lbColor = RGB(0, 0, 0); 
@@ -117,11 +117,11 @@ void DrawSeries( HDC hdc, int x0, int y0, int x1, int y1, int scale,
     //MoveToEx( hdc, CENTER_X, CENTER_Y, NULL );
 
     
-    //Строим линию 1 влево.
+    //РЎС‚СЂРѕРёРј Р»РёРЅРёСЋ 1 РІР»РµРІРѕ.
     MoveToEx( hdc, CENTER_X, 
         y1 - D - ( int ) ( SCALE_Y * data_y[ 0 ][ 0 ] ), NULL );
 
-    ////Массив точек для кривой Безье.
+    ////РњР°СЃСЃРёРІ С‚РѕС‡РµРє РґР»СЏ РєСЂРёРІРѕР№ Р‘РµР·СЊРµ.
     //POINT* lpPoints = new POINT[ data_y->size() ];
     //for ( unsigned int i = 0; i < data_y->size(); i++ )
     //    {
@@ -138,7 +138,7 @@ void DrawSeries( HDC hdc, int x0, int y0, int x1, int y1, int scale,
         }
     DeleteObject(hPen); 
 
-    //Строим линию 2 влево.
+    //РЎС‚СЂРѕРёРј Р»РёРЅРёСЋ 2 РІР»РµРІРѕ.
     LOGBRUSH lb2;    
     lb2.lbStyle = BS_SOLID; 
     lb2.lbColor = RGB( 255, 0, 0); 
@@ -157,7 +157,7 @@ void DrawSeries( HDC hdc, int x0, int y0, int x1, int y1, int scale,
         }
     DeleteObject(hPen2); 
 
-    //Строим линию 3 влево.
+    //РЎС‚СЂРѕРёРј Р»РёРЅРёСЋ 3 РІР»РµРІРѕ.
     LOGBRUSH lb3;    
     lb3.lbStyle = BS_SOLID; 
     lb3.lbColor = RGB( 0, 0, 0 ); 
@@ -187,15 +187,15 @@ void init( HWND hWnd )
     err_[ mlp::L_OUTPUT ] = new float[ 1 ];
     err_[ mlp::L_HIDDEN ] = new float[ 10 ];
 
-    pid1.par[ PID::PAR_k ] = 1;             //1 Параметр k.
-    pid1.par[ PID::PAR_Ti ] = 2;            //2 Параметр Ti.
-    pid1.par[ PID::PAR_Td ] = 0.01f;         //3 Параметр Td.
-    pid1.par[ PID::PAR_dt ] = 1;            //4 Интервал расчёта
-    pid1.par[ PID::PAR_dmax ] = 200;        //5 Мax значение входной величины.
-    pid1.par[ PID::PAR_dmin ] = 0;          //6 Мin значение входной величины.
-    pid1.par[ PID::PAR_AccelTime ] = 0;     //7 Время выхода на режим регулирования.
-    pid1.par[ PID::PAR_IsManualMode ] = 0;  //8 Ручной режим.
-    pid1.par[ PID::PAR_UManual ] = 0;       //9 Заданное ручное значение выходного сигнала.
+    pid1.par[ PID::PAR_k ] = 1;             //1 РџР°СЂР°РјРµС‚СЂ k.
+    pid1.par[ PID::PAR_Ti ] = 2;            //2 РџР°СЂР°РјРµС‚СЂ Ti.
+    pid1.par[ PID::PAR_Td ] = 0.01f;         //3 РџР°СЂР°РјРµС‚СЂ Td.
+    pid1.par[ PID::PAR_dt ] = 1;            //4 РРЅС‚РµСЂРІР°Р» СЂР°СЃС‡С‘С‚Р°
+    pid1.par[ PID::PAR_dmax ] = 200;        //5 Рњax Р·РЅР°С‡РµРЅРёРµ РІС…РѕРґРЅРѕР№ РІРµР»РёС‡РёРЅС‹.
+    pid1.par[ PID::PAR_dmin ] = 0;          //6 Рњin Р·РЅР°С‡РµРЅРёРµ РІС…РѕРґРЅРѕР№ РІРµР»РёС‡РёРЅС‹.
+    pid1.par[ PID::PAR_AccelTime ] = 0;     //7 Р’СЂРµРјСЏ РІС‹С…РѕРґР° РЅР° СЂРµР¶РёРј СЂРµРіСѓР»РёСЂРѕРІР°РЅРёСЏ.
+    pid1.par[ PID::PAR_IsManualMode ] = 0;  //8 Р СѓС‡РЅРѕР№ СЂРµР¶РёРј.
+    pid1.par[ PID::PAR_UManual ] = 0;       //9 Р—Р°РґР°РЅРЅРѕРµ СЂСѓС‡РЅРѕРµ Р·РЅР°С‡РµРЅРёРµ РІС‹С…РѕРґРЅРѕРіРѕ СЃРёРіРЅР°Р»Р°.
 
     pid1.Reset( 0 );
     pid1.SetZ( 90 );
@@ -240,7 +240,7 @@ void eval()
     float new_control_val = pid1.Eval( p_object.get_current_out() );
     float new_val = p_object.get_new_out( new_control_val );
 
-    //Обучение эмулятора в процессе работы при необходимости.
+    //РћР±СѓС‡РµРЅРёРµ СЌРјСѓР»СЏС‚РѕСЂР° РІ РїСЂРѕС†РµСЃСЃРµ СЂР°Р±РѕС‚С‹ РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё.
 
 
     float Ek = 0;
@@ -260,7 +260,7 @@ void eval()
             }
         }
 
-    //Добавляем в вектор новую точку при необходимости и сдвигаем данные.
+    //Р”РѕР±Р°РІР»СЏРµРј РІ РІРµРєС‚РѕСЂ РЅРѕРІСѓСЋ С‚РѕС‡РєСѓ РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё Рё СЃРґРІРёРіР°РµРј РґР°РЅРЅС‹Рµ.
     const int MAX_VECTOR_SIZE = 1000;
     if ( plant_data->size() < MAX_VECTOR_SIZE )
         {
@@ -280,7 +280,7 @@ void eval()
         PID_data[ 0 ][ i ] = PID_data[ 0 ][ i - 1 ];
         }
 
-    //Добавляем новую точку.
+    //Р”РѕР±Р°РІР»СЏРµРј РЅРѕРІСѓСЋ С‚РѕС‡РєСѓ.
     //double new_val = 0.99 * PID_data[ 0 ][ 0 ];// + 0.001 * PID_data[ 0 ][ 0 ] * PID_data[ 0 ][ 0 ];
     //PID_data[ 0 ][ 0 ] = new_val;
     //+ 0.001 * PID_data[ 0 ][ i - 1 ] * PID_data[ 0 ][ i - 1 ] + sin( 10 );
@@ -291,21 +291,21 @@ void eval()
 
     fprintf_s( work_data_stream, "%f\t%f\n", new_val, new_control_val );
 
-    //Работа эмулятора.
-    //Сдвигаем данные входной выборки.
+    //Р Р°Р±РѕС‚Р° СЌРјСѓР»СЏС‚РѕСЂР°.
+    //РЎРґРІРёРіР°РµРј РґР°РЅРЅС‹Рµ РІС…РѕРґРЅРѕР№ РІС‹Р±РѕСЂРєРё.
     for ( int i = 0; i < 2 * INPUTS_COUNT - 1; i++ )
         {
          emulator_input[ 0 ][ i ] = emulator_input[ 0 ][ i + 1 ];
         }
     
-    //Добавляем новые данные.
+    //Р”РѕР±Р°РІР»СЏРµРј РЅРѕРІС‹Рµ РґР°РЅРЅС‹Рµ.
     emulator_input[ 0 ][ INPUTS_COUNT - 1 ] = new_val / 120;
     emulator_input[ 0 ][ 2 * INPUTS_COUNT - 1 ] = new_control_val / 120;
 
-    //Вычисляем выход эмулятора.
+    //Р’С‹С‡РёСЃР»СЏРµРј РІС‹С…РѕРґ СЌРјСѓР»СЏС‚РѕСЂР°.
     float *new_emulator_output = emulator->solve_out( emulator_input->data() );
 
-    //Добавляем в вектор новую точку при необходимости и сдвигаем данные.   
+    //Р”РѕР±Р°РІР»СЏРµРј РІ РІРµРєС‚РѕСЂ РЅРѕРІСѓСЋ С‚РѕС‡РєСѓ РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё Рё СЃРґРІРёРіР°РµРј РґР°РЅРЅС‹Рµ.   
     if ( emulator_output->size() < MAX_VECTOR_SIZE )
         {
         emulator_output->push_back( 0 );       
@@ -548,7 +548,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             break;
 
         case WM_ERASEBKGND:
-            ////Очищаем окно.
+            ////РћС‡РёС‰Р°РµРј РѕРєРЅРѕ.
             //hdc = GetDC( hWnd );
 
             //RECT rect;
@@ -561,16 +561,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
         case WM_TIMER:
             {
-            //Очищаем окно.
+            //РћС‡РёС‰Р°РµРј РѕРєРЅРѕ.
             hdc = GetDC( hWnd );
 
-            //Здесь рисуем в hdc
+            //Р—РґРµСЃСЊ СЂРёСЃСѓРµРј РІ hdc
             RECT rect;
             GetClientRect (hWnd, &rect);
             rect.bottom /= 2;
             FillRect ( hdc, &rect, (HBRUSH)(COLOR_WINDOW+1));
 
-            //Рисуем график ПИД.
+            //Р РёСЃСѓРµРј РіСЂР°С„РёРє РџРР”.
             DrawSeries( hdc, rect.left, rect.top, rect.right, rect.bottom,
                 10, plant_data, PID_data, emulator_output );
 
@@ -597,7 +597,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 rect.left, rect.top, rect.right, rect.bottom / 2 ); 
             SelectClipRgn(hdc, hrgn); 
             
-            //Очищаем окно.
+            //РћС‡РёС‰Р°РµРј РѕРєРЅРѕ.
             //RECT rect;
             //GetClientRect (hWnd, &rect);            
             //FillRect ( hdc, &rect, (HBRUSH)(COLOR_WINDOW+1));

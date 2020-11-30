@@ -1,12 +1,12 @@
 /// @file profibus_slave.h
-/// @brief Содержит описания классов, которые реализуют аппаратную часть PAC
-/// по работе с Profibus Slave.
+/// @brief РЎРѕРґРµСЂР¶РёС‚ РѕРїРёСЃР°РЅРёСЏ РєР»Р°СЃСЃРѕРІ, РєРѕС‚РѕСЂС‹Рµ СЂРµР°Р»РёР·СѓСЋС‚ Р°РїРїР°СЂР°С‚РЅСѓСЋ С‡Р°СЃС‚СЊ PAC
+/// РїРѕ СЂР°Р±РѕС‚Рµ СЃ Profibus Slave.
 ///
-/// @author  Иванюк Дмитрий Сергеевич.
+/// @author  РРІР°РЅСЋРє Р”РјРёС‚СЂРёР№ РЎРµСЂРіРµРµРІРёС‡.
 ///
-/// @par Описание директив препроцессора:
+/// @par РћРїРёСЃР°РЅРёРµ РґРёСЂРµРєС‚РёРІ РїСЂРµРїСЂРѕС†РµСЃСЃРѕСЂР°:
 ///
-/// @par Текущая версия:
+/// @par РўРµРєСѓС‰Р°СЏ РІРµСЂСЃРёСЏ:
 /// @$Rev: 220 $.\n
 /// @$Author: id $.\n
 /// @$Date:: 2011-02-15 16:58:56#$.
@@ -15,13 +15,13 @@
 #define PROFIBUS_SLAVE
 
 //-----------------------------------------------------------------------------
-/// @brief Работа с Profibus Slave.
+/// @brief Р Р°Р±РѕС‚Р° СЃ Profibus Slave.
 class profibus_slave
     {
-    //Конфигурирование клиента.
+    //РљРѕРЅС„РёРіСѓСЂРёСЂРѕРІР°РЅРёРµ РєР»РёРµРЅС‚Р°.
     public:
         /// <summary>
-        /// Включение модуля обмена.
+        /// Р’РєР»СЋС‡РµРЅРёРµ РјРѕРґСѓР»СЏ РѕР±РјРµРЅР°.
         /// </summary>
         void activate()
             {
@@ -29,7 +29,7 @@ class profibus_slave
             }
 
         /// <summary>
-        /// Установка адреса станции.
+        /// РЈСЃС‚Р°РЅРѕРІРєР° Р°РґСЂРµСЃР° СЃС‚Р°РЅС†РёРё.
         /// </summary>
         void set_station_address( int address )
             {
@@ -37,7 +37,7 @@ class profibus_slave
             }
 
         /// <summary>
-        /// Установка размера массива области записи.
+        /// РЈСЃС‚Р°РЅРѕРІРєР° СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° РѕР±Р»Р°СЃС‚Рё Р·Р°РїРёСЃРё.
         /// </summary>
         void set_output_byte_size( int size )
             {
@@ -45,7 +45,7 @@ class profibus_slave
             }
 
         /// <summary>
-        /// Установка размера массива области чтения.
+        /// РЈСЃС‚Р°РЅРѕРІРєР° СЂР°Р·РјРµСЂР° РјР°СЃСЃРёРІР° РѕР±Р»Р°СЃС‚Рё С‡С‚РµРЅРёСЏ.
         /// </summary>
         void set_input_byte_size( int size )
             {
@@ -70,49 +70,49 @@ class profibus_slave
         virtual int eval() = 0;
 
     public:
-        /// @brief Получение единственного экземпляра класса для работы.
+        /// @brief РџРѕР»СѓС‡РµРЅРёРµ РµРґРёРЅСЃС‚РІРµРЅРЅРѕРіРѕ СЌРєР·РµРјРїР»СЏСЂР° РєР»Р°СЃСЃР° РґР»СЏ СЂР°Р±РѕС‚С‹.
         ///
-        /// @return - указатель на единственный объект класса.
+        /// @return - СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РµРґРёРЅСЃС‚РІРµРЅРЅС‹Р№ РѕР±СЉРµРєС‚ РєР»Р°СЃСЃР°.
         static profibus_slave* get_instance();
 
         /// <summary>
-        /// Получение значения типа double.
+        /// РџРѕР»СѓС‡РµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ С‚РёРїР° double.
         /// </summary>
-        /// <param name="offset">Смещение, диапазон 0..239.</param>
+        /// <param name="offset">РЎРјРµС‰РµРЅРёРµ, РґРёР°РїР°Р·РѕРЅ 0..239.</param>
         virtual double get_double( int offset ) = 0;
 
         /// <summary>
-        /// Получение значения типа bool.
+        /// РџРѕР»СѓС‡РµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ С‚РёРїР° bool.
         /// </summary>
-        /// <param name="byte_offset">Смещение, диапазон 0..243.</param>
-        /// <param name="bit_offset">Смещение, диапазон 0..7.</param>
+        /// <param name="byte_offset">РЎРјРµС‰РµРЅРёРµ, РґРёР°РїР°Р·РѕРЅ 0..243.</param>
+        /// <param name="bit_offset">РЎРјРµС‰РµРЅРёРµ, РґРёР°РїР°Р·РѕРЅ 0..7.</param>
         virtual bool get_bool( int byte_offset, int bit_offset ) = 0;
 
         /// <summary>
-        /// Установка значения типа bool.
+        /// РЈСЃС‚Р°РЅРѕРІРєР° Р·РЅР°С‡РµРЅРёСЏ С‚РёРїР° bool.
         /// </summary>
-        /// <param name="byte_offset">Смещение, диапазон 0..243.</param>
-        /// <param name="bit_offset">Смещение, диапазон 0..7.</param>
-        /// <param name="val">Значение.</param>
+        /// <param name="byte_offset">РЎРјРµС‰РµРЅРёРµ, РґРёР°РїР°Р·РѕРЅ 0..243.</param>
+        /// <param name="bit_offset">РЎРјРµС‰РµРЅРёРµ, РґРёР°РїР°Р·РѕРЅ 0..7.</param>
+        /// <param name="val">Р—РЅР°С‡РµРЅРёРµ.</param>
         virtual void set_bool( int byte_offset, int bit_offset, bool val ) = 0;
 
         /// <summary>
-        /// Получение значения типа int.
+        /// РџРѕР»СѓС‡РµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ С‚РёРїР° int.
         /// </summary>
-        /// <param name="byte_offset">Смещение, диапазон 0..242.</param>
+        /// <param name="byte_offset">РЎРјРµС‰РµРЅРёРµ, РґРёР°РїР°Р·РѕРЅ 0..242.</param>
         virtual int get_int( int byte_offset ) = 0;
 
         /// <summary>
-        /// Получение значения типа int (4 байта).
+        /// РџРѕР»СѓС‡РµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ С‚РёРїР° int (4 Р±Р°Р№С‚Р°).
         /// </summary>
-        /// <param name="byte_offset">Смещение, диапазон 0..240.</param>
+        /// <param name="byte_offset">РЎРјРµС‰РµРЅРёРµ, РґРёР°РїР°Р·РѕРЅ 0..240.</param>
         virtual int get_int4( int byte_offset ) = 0;
 
         /// <summary>
-        /// Установка значения типа int.
+        /// РЈСЃС‚Р°РЅРѕРІРєР° Р·РЅР°С‡РµРЅРёСЏ С‚РёРїР° int.
         /// </summary>
-        /// <param name="byte_offset">Смещение, диапазон 0..242.</param>
-        /// <param name="val">Значение.</param>
+        /// <param name="byte_offset">РЎРјРµС‰РµРЅРёРµ, РґРёР°РїР°Р·РѕРЅ 0..242.</param>
+        /// <param name="val">Р—РЅР°С‡РµРЅРёРµ.</param>
         virtual void set_int( int byte_offset, int val ) = 0;
 
     protected:

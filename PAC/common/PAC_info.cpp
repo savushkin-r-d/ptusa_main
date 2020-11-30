@@ -7,7 +7,7 @@
 
 #include "bus_coupler_io.h"
 
-auto_smart_ptr < PAC_info > PAC_info::instance;///< Ýêçåìïëÿð êëàññà.
+auto_smart_ptr < PAC_info > PAC_info::instance;///< Ð­ÐºÐ·ÐµÐ¼Ð¿Ð»ÑÑ€ ÐºÐ»Ð°ÑÑÐ°.
 
 const u_int_4 PAC_info::MSEC_IN_DAY = 24UL * 60UL * 60UL * 1000UL;
 //-----------------------------------------------------------------------------
@@ -24,7 +24,7 @@ PAC_info::PAC_info() :
     cmd( 0 ),
     restrictions_set_to_off_time( 0 )
     {
-    strcpy( up_time_str, "0 äí. 0:0:0" );
+    strcpy( up_time_str, "0 Ð´Ð½. 0:0:0" );
     cmd_answer[ 0 ] = 0;
     }
 //-----------------------------------------------------------------------------
@@ -56,7 +56,7 @@ void PAC_info::eval()
         up_mins = up_msec / ( 1000UL * 60 ) % 60;
         up_secs = up_msec / 1000 % 60;
 
-        sprintf( up_time_str, "%lu äí. %02lu:%02lu:%02lu",
+        sprintf( up_time_str, "%lu Ð´Ð½. %02lu:%02lu:%02lu",
             (u_long)up_days, (u_long)up_hours,
             (u_long)up_mins, (u_long)up_secs );
         }
@@ -240,7 +240,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
         {
         par.save( P_RESTRICTIONS_MODE, (u_int_4)val );
 
-        if ( val == 2 ) //Ïîëóàâòîìàòè÷åñêèé ðåæèì.
+        if ( val == 2 ) //ÐŸÐ¾Ð»ÑƒÐ°Ð²Ñ‚Ð¾Ð¼Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹ Ñ€ÐµÐ¶Ð¸Ð¼.
             {
             restrictions_set_to_off_time = get_millisec();
             }
@@ -293,7 +293,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                     PAC_critical_errors_manager::AS_IO_COUPLER, wn->number);
                 wn->is_set_err = false;
                 }
-            if ( 100 == val ) //Ñáðîñ îøèáêè.
+            if ( 100 == val ) //Ð¡Ð±Ñ€Ð¾Ñ Ð¾ÑˆÐ¸Ð±ÐºÐ¸.
                 {
                 PAC_critical_errors_manager::get_instance()->reset_global_error(
                     PAC_critical_errors_manager::AC_SERVICE,
