@@ -256,6 +256,9 @@ int io_manager_linux::write_outputs()
     for ( u_int i = 0; i < nodes_count; i++ )
         {
         io_node* nd = nodes[ i ];
+        u_int ao_module_type = 0;
+        u_int ao_module_offset = 0;
+
         if ( nd->type == io_node::PHOENIX_BK_ETH )
             {
             if ( !nd->is_active )
@@ -292,9 +295,6 @@ int io_manager_linux::write_outputs()
                             }
                         writebuff[j] = b;
                         }
-
-                    u_int ao_module_type = 0;
-                    u_int ao_module_offset = 0;
 
                     for (unsigned int idx = start_register, l = 0; idx < start_register + registers_count; idx++)
                         {
