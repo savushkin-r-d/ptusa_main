@@ -172,7 +172,7 @@ PAC_critical_errors_manager * PAC_critical_errors_manager::get_instance()
 const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
     ALARM_SUBCLASS err_sub_class, int par, bool is_set )
     {
-    static char tmp[ 100 ] = "";
+    static char tmp[ 200 ] = "";
     sprintf( tmp, "%d-%d-%d : ",
         ( int ) err_class, ( int ) err_sub_class, par );
 
