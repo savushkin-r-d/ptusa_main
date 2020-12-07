@@ -289,11 +289,12 @@ int tech_object::evaluate()
             op->evaluate();
         	}
 
+        const int ERR_STR_SIZE = 80;
+
         if ( G_PAC_INFO()->par[ PAC_info::P_AUTO_PAUSE_OPER_ON_DEV_ERR ] == 0 && 
             op->get_state() == operation::RUN )
         	{
             //Проверка режима на проверку ОС устройств.
-            const int ERR_STR_SIZE = 41;
             char res_str[ ERR_STR_SIZE ] = "авария устройств ";
 
             int len = strlen( res_str );
@@ -309,8 +310,7 @@ int tech_object::evaluate()
 
         if ( op->get_state() == operation::RUN )
             {
-            //�������� �������� �� ���������� ��������� �����.
-            const int ERR_STR_SIZE = 41;
+            //Проверка операции на корректные параметры шагов.
             char res_str[ ERR_STR_SIZE ] = "";
 
             int len = strlen( res_str );
