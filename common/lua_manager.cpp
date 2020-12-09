@@ -538,11 +538,12 @@ int lua_manager::error_trace( lua_State * L )
         lua_Debug ar;
         int level = 1;
 
-        while( lua_getstack( L, level, &ar ) )
+        while( lua_getstack( L, level, &ar ) && i_log::C_BUFF_SIZE - res > 0 )
             {
             lua_getinfo( L, "Sln", &ar );
 
-            res += sprintf( G_LOG->msg + res, "\n\t%s:%d: in function '%s' ('%s')",
+            res += snprintf( G_LOG->msg + res, i_log::C_BUFF_SIZE - res,
+                "\n\t%s:%d: in function '%s' ('%s')",
                 ar.short_src, ar.currentline, ar.name, ar.namewhat );
             level++;
             }
