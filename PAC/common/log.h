@@ -23,12 +23,11 @@ extern int G_DEBUG;
 ///
 class i_log
     {
-    enum CONSTANT
-        {
-        C_BUFF_SIZE = 1024,
-        };
-
     public:
+        enum CONSTANT
+            {
+            C_BUFF_SIZE = 10 * 1024,
+            };
 
     virtual ~i_log()
         {
