@@ -121,7 +121,6 @@ int eval( lua_State* L )
     sleep_ms( sleep_time_ms );
 #endif // ifndef
 
-    G_CMMCTR->evaluate();
 #ifdef OPCUA
     OPCUAServer::getInstance().Evaluate();
 #endif
