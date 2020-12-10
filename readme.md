@@ -18,3 +18,6 @@
 
 ![Clone repository](readme_images/tech_object__exec_cmd.png)
 
+# How to build a project #
+
+If you want use version of project for Windows, you should use Microsoft Visual Studio Community for build. For run this project on PLC use Eclipse IDE with CMake based on Linux.
