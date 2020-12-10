@@ -32,10 +32,6 @@ auto_smart_ptr < project_manager > project_manager::instance;
 //-----------------------------------------------------------------------------
 int project_manager::proc_main_params( int argc, const char *argv[] )
     {
-#ifdef WIN32
-    wchar_t** w_argv = CommandLineToArgvW( GetCommandLineW(), &argc );
-#endif
-
     for ( int i = 1; i < argc; i++ )
         {
         if ( strcmp( argv[ i ], "debug" ) == 0 )
@@ -89,7 +85,10 @@ int project_manager::proc_main_params( int argc, const char *argv[] )
         {
         if ( strcmp( argv[ i ], "path" ) == 0 )
             {
-#ifdef WIN32
+#if defined WIN32 && !defined _USRDLL
+            int w_argc;
+            wchar_t** w_argv = CommandLineToArgvW( GetCommandLineW(), &w_argc );
+
             wchar_t* w_path = w_argv[ i + 1 ];
             int utf16len = wcslen( w_path );
             int utf8len = WideCharToMultiByte( CP_UTF8, 0, w_path, utf16len,
