@@ -20,6 +20,7 @@ namespace fs = std::filesystem;
 #include "log.h"
 //-----------------------------------------------------------------------------
 auto_smart_ptr< lua_manager > lua_manager::instance;
+bool lua_manager::is_print_stack_traceback = true;
 //-----------------------------------------------------------------------------
 lua_manager* lua_manager::get_instance()
     {
@@ -524,7 +525,7 @@ int lua_manager::error_trace( lua_State * L )
 
     if ( std::binary_search( errors.begin(), errors.end(), err_str ) != true )
         {
-        sprintf( G_LOG->msg, "Lua error:\n%s", err_str.c_str() );
+        sprintf( G_LOG->msg, "Lua error: %s", err_str.c_str() );
         if ( G_LOG->msg[ strlen( G_LOG->msg ) - 1 ] == '\n' )
             {
             //Удаляем последний CR
@@ -533,22 +534,25 @@ int lua_manager::error_trace( lua_State * L )
 
         G_LOG->write_log( i_log::P_ERR );
 
-        int res = sprintf( G_LOG->msg, "Lua stack traceback:" );
-
-        lua_Debug ar;
-        int level = 1;
-
-        while( lua_getstack( L, level, &ar ) && i_log::C_BUFF_SIZE - res > 0 )
+        if ( is_print_stack_traceback )
             {
-            lua_getinfo( L, "Sln", &ar );
+            int res = sprintf( G_LOG->msg, "Lua stack traceback:" );
 
-            res += snprintf( G_LOG->msg + res, i_log::C_BUFF_SIZE - res,
-                "\n\t%s:%d: in function '%s' ('%s')",
-                ar.short_src, ar.currentline, ar.name, ar.namewhat );
-            level++;
+            lua_Debug ar;
+            int level = 1;
+
+            while ( lua_getstack( L, level, &ar ) && i_log::C_BUFF_SIZE - res > 0 )
+                {
+                lua_getinfo( L, "Sln", &ar );
+
+                res += snprintf( G_LOG->msg + res, i_log::C_BUFF_SIZE - res,
+                    "\n\t%s:%d: in function '%s' ('%s')",
+                    ar.short_src, ar.currentline, ar.name, ar.namewhat );
+                level++;
+                }
+
+            G_LOG->write_log( i_log::P_ERR );
             }
-
-        G_LOG->write_log( i_log::P_ERR );
 
         errors.push_back( err_str );
         if ( errors.size() > MAX_ERRORS )

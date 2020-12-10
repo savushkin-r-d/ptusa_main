@@ -29,6 +29,11 @@ TOLUA_API int tolua_OPC_UA_open(lua_State* tolua_S);
 class lua_manager
     {
     public:
+        void no_print_stack_traceback()
+            {
+            is_print_stack_traceback = false;
+            }
+
         static lua_manager* get_instance();
 
         int init( lua_State* L, const char* script_name, const char* dir = "", const char* sys_dir = "" );
@@ -68,7 +73,7 @@ class lua_manager
             char *res_str, int max_res_str_length );
 
     private:
-        lua_manager() : is_free_lua( 0 )
+        lua_manager() : L( 0 ), err_func( 0 ), is_free_lua( 0 )
             {
             }
 
@@ -82,6 +87,8 @@ class lua_manager
 
         int exec_lua_method_var( const char* object_name, const char* function_name,
             int is_use_lua_return_value = 0, int cnt = 0, ... ) const;
+
+        static bool is_print_stack_traceback;
 
         int err_func;
         lua_State * L;

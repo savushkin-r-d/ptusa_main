@@ -113,7 +113,7 @@ int eval( lua_State* L )
 
     valve::evaluate();
     valve_bottom_mix_proof::evaluate();
-    G_TECH_OBJECT_MNGR()->evaluate();
+    int res = G_TECH_OBJECT_MNGR()->evaluate();
     sleep_ms( sleep_time_ms );
 
 #ifndef DEBUG_NO_IO_MODULES
@@ -146,65 +146,13 @@ int eval( lua_State* L )
         }
 #endif // USE_PROFIBUS
 
-#ifdef TEST_SPEED
-    u_int TRESH_AVG =
-        G_PAC_INFO()->par[ PAC_info::P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME ];
+    lua_pushnumber( L, res );
+    return 1;
+    }
 
-    //-Информация о времени выполнения цикла программы.!->
-    all_time += get_delta_millisec( st_time );
-
-    static u_int cycle_time = 0;
-    cycle_time = get_delta_millisec( st_time );
-
-    static u_int max_iteration_cycle_time = 0;
-    static u_int cycles_per_period = 0;
-    cycles_per_period++;
-
-    static time_t t_;
-    struct tm *timeInfo_;
-    t_ = time( 0 );
-    timeInfo_ = localtime( &t_ );
-    static int print_cycle_last_h = timeInfo_->tm_hour;
-
-    if ( max_iteration_cycle_time < cycle_time )
-        {
-        max_iteration_cycle_time = cycle_time;
-        }
-
-    //Once per hour writing performance info.
-    if ( print_cycle_last_h != timeInfo_->tm_hour )
-        {
-        u_long avg_time = all_time / cycles_cnt;
-
-        if ( TRESH_AVG < avg_time )
-            {
-            sprintf( G_LOG->msg,
-                "Main control cycle avg time above threshold : "
-                "%4lu > %4u ms (Lua mem = %d b).",
-                avg_time, TRESH_AVG,
-                lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
-                lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
-            G_LOG->write_log( i_log::P_ALERT );
-            }
-
-        sprintf( G_LOG->msg,
-            "Main control cycle performance : "
-            "avg = %lu, max = %4u, tresh = %4u ms (%4u cycles, Lua mem = %d b).",
-            avg_time, max_iteration_cycle_time, TRESH_AVG,
-            cycles_per_period,
-            lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
-            lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
-        G_LOG->write_log( i_log::P_INFO );
-
-        all_time = 0;
-        cycles_cnt = 0;
-        max_iteration_cycle_time = 0;
-        cycles_per_period = 0;
-        print_cycle_last_h = timeInfo_->tm_hour;
-        }
-    //-Информация о времени выполнения цикла программы.!->
-#endif // TEST_SPEED
-
+int no_print_stack_traceback( lua_State* L )
+    {
+    G_LUA_MANAGER->no_print_stack_traceback();
     return 0;
     }
 
@@ -213,6 +161,7 @@ struct luaL_reg ls_lib[] =
     {
     { "init", lua_init },
     { "eval", eval },
+    { "no_print_stack_traceback", no_print_stack_traceback },
     { NULL, NULL },
     };
 
