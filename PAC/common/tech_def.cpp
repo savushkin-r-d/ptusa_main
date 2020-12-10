@@ -1383,8 +1383,9 @@ u_int tech_object_manager::get_count() const
     return tech_objects.size();
     }
 //-----------------------------------------------------------------------------
-void tech_object_manager::evaluate()
+int tech_object_manager::evaluate()
     {
+    int res = 0;
     for ( u_int i = 0; i < tech_objects.size(); i++ )
         {
         tech_objects.at( i )->evaluate();
@@ -1410,9 +1411,11 @@ void tech_object_manager::evaluate()
 
     if ( has_Lua_eval == 2 )
         {
-        lua_manager::get_instance()->void_exec_lua_method( "", "eval",
+        res = lua_manager::get_instance()->void_exec_lua_method( "", "eval",
             "void tech_object_manager::evaluate()" );       
         }
+
+    return res;
     }
 //-----------------------------------------------------------------------------
 int tech_object_manager::init_objects()
