@@ -88,6 +88,9 @@
     <Filter Include="Исходные файлы\zlib">
       <UniqueIdentifier>{7d8a181c-1083-4f47-8282-3ad93e3c6563}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Исходные файлы\common\util">
+      <UniqueIdentifier>{af4b7801-ac0b-4a4e-872c-79c18e066792}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\PAC\common\log.h">
@@ -454,6 +457,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\zlib\zutil.c">
       <Filter>Исходные файлы\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\util\utf2cp1251.cpp">
+      <Filter>Исходные файлы\common\util</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
