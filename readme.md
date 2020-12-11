@@ -1,22 +1,23 @@
-# Общее описание #
+Russian readme is [here](russian_readme/readme.md).
 
-Управляющая логика реализуется в виде скрипта Lua. В ходе выполнения программы управление передается в отдельные специальные функции Lua, которые отвечают за отдельные этапы.
+# Common description #
 
-1. Общая схема работы управляющей программы:
+Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
 
-![Clone repository](readme_images/main.png)
+1. The general schema of controller program work:
 
-2. Управляющий цикл выглядит так:
+![Clone repository](readme_images/main_en.png)
 
-![Clone repository](readme_images/control_cycle.png)
+2. Controller program loop looks like:
 
-3. При включении/выключении операции происходит следующее:
+![Clone repository](readme_images/control_cycle_en.png)
 
-![Clone repository](readme_images/tech_object__set_mode.png)
+3. When operation turn on/off happens next:
 
-4. При выполнении команды происходит следующее:
+![Clone repository](readme_images/tech_object__set_mode_en.png)
 
-![Clone repository](readme_images/tech_object__exec_cmd.png)
+4. During the execution of command happens next:
+![Clone repository](readme_images/tech_object__exec_cmd_en.png)
 
 # How to build a project #
 
