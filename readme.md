@@ -1,14 +1,14 @@
-Russian readme [here](russian_readme/readme.md).
+Russian readme is [here](russian_readme/readme.md).
 
 # Common description #
 
-Controller logic implemented by Lua-script. We transfer control during executing control program through special Lua functions, which responsible for different steps of the control program working.
+Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
 
-1. Common schema of controller program logic works:
+1. The general schema of controller program work:
 
 ![Clone repository](readme_images/main_en.png)
 
-2. Controller program loop look like:
+2. Controller program loop looks like:
 
 ![Clone repository](readme_images/control_cycle_en.png)
 
