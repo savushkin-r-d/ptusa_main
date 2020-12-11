@@ -1,23 +1,23 @@
-# Общее описание #
+# РћР±С‰РµРµ РѕРїРёСЃР°РЅРёРµ #
 
-Управляющая логика реализуется в виде скрипта Lua. В ходе выполнения программы управление передается в отдельные специальные функции Lua, которые отвечают за отдельные этапы.
+РЈРїСЂР°РІР»СЏСЋС‰Р°СЏ Р»РѕРіРёРєР° СЂРµР°Р»РёР·СѓРµС‚СЃСЏ РІ РІРёРґРµ СЃРєСЂРёРїС‚Р° Lua. Р’ С…РѕРґРµ РІС‹РїРѕР»РЅРµРЅРёСЏ РїСЂРѕРіСЂР°РјРјС‹ СѓРїСЂР°РІР»РµРЅРёРµ РїРµСЂРµРґР°РµС‚СЃСЏ РІ РѕС‚РґРµР»СЊРЅС‹Рµ СЃРїРµС†РёР°Р»СЊРЅС‹Рµ С„СѓРЅРєС†РёРё Lua, РєРѕС‚РѕСЂС‹Рµ РѕС‚РІРµС‡Р°СЋС‚ Р·Р° РѕС‚РґРµР»СЊРЅС‹Рµ СЌС‚Р°РїС‹.
 
-1. Общая схема работы управляющей программы:
+1. РћР±С‰Р°СЏ СЃС…РµРјР° СЂР°Р±РѕС‚С‹ СѓРїСЂР°РІР»СЏСЋС‰РµР№ РїСЂРѕРіСЂР°РјРјС‹:
 
 ![Clone repository](readme_images/main.png)
 
-2. Управляющий цикл выглядит так:
+2. РЈРїСЂР°РІР»СЏСЋС‰РёР№ С†РёРєР» РІС‹РіР»СЏРґРёС‚ С‚Р°Рє:
 
 ![Clone repository](readme_images/control_cycle.png)
 
-3. При включении/выключении операции происходит следующее:
+3. РџСЂРё РІРєР»СЋС‡РµРЅРёРё/РІС‹РєР»СЋС‡РµРЅРёРё РѕРїРµСЂР°С†РёРё РїСЂРѕРёСЃС…РѕРґРёС‚ СЃР»РµРґСѓСЋС‰РµРµ:
 
 ![Clone repository](readme_images/tech_object__set_mode.png)
 
-4. При выполнении команды происходит следующее:
+4. РџСЂРё РІС‹РїРѕР»РЅРµРЅРёРё РєРѕРјР°РЅРґС‹ РїСЂРѕРёСЃС…РѕРґРёС‚ СЃР»РµРґСѓСЋС‰РµРµ:
 
 ![Clone repository](readme_images/tech_object__exec_cmd.png)
 
 # How to build a project #
 
-If you want use version of project for Windows, you should use Microsoft Visual Studio Community for build. For run this project on PLC use Eclipse IDE with CMake based on Linux.
+If you want to use the version of project for Windows, you should use Microsoft Visual Studio Community for build. To run this project on PLC, use Eclipse IDE with CMake based project on Linux.
