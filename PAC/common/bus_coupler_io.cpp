@@ -1199,24 +1199,6 @@ void io_manager::io_node::print()
         name, type, number, ip_address );
     printf( "DI %d, DO %d, AI %d [%d], AO %d [%d].\n",
         DI_cnt, DO_cnt, AI_cnt, AI_size, AO_cnt, AO_size );
-
-    for ( u_int i = 0; i < AI_cnt; i++ )
-        {
-        if ( 0 == i )
-            {
-            printf( "\tAI\n");
-            }
-        printf( "\t%2.d %u %2.u\n", i + 1, AI_types[ i ], AI_offsets[ i ] );
-        }
-
-    for ( u_int i = 0; i < AO_cnt; i++ )
-        {
-        if ( 0 == i )
-            {
-            printf( "\tAO\n");
-            }
-        printf( "\t%2.d %u %2.u\n", i + 1, AO_types[ i ], AO_offsets[ i ] );
-        }
     }
 //-----------------------------------------------------------------------------
 void io_manager::io_node::print_log()
