@@ -884,8 +884,6 @@ int tech_object::save_device( char *buff )
     res += rt_par_float.save_device( buff + res, "\t" );
     res += rt_par_uint.save_device( buff + res, "\t" );
 
-    printf( "%s", buff );
-
     res += sprintf( buff + res, "\t}\n" );   
     return res;
     }
