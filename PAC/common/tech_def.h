@@ -183,6 +183,13 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         // Lua implemented methods.
         int lua_exec_cmd( u_int cmd );
 
+        // Check functions.
+        int lua_check_function( const char* function_name, const char* comment,
+            u_int mode, bool show_error );
+        int lua_check_on_start( u_int mode, bool show_error = true );
+        int lua_check_on_pause( u_int mode, bool show_error = true );
+        int lua_check_on_stop( u_int mode, bool show_error = true );
+
         int  lua_check_on_mode( u_int mode, bool show_error = true );
         void lua_init_mode( u_int mode );
         
