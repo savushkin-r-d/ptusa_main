@@ -849,12 +849,42 @@ int tech_object::save_device( char *buff )
         res += sprintf( buff + res, "\n\t\t},\n" );
         }    
 
+    //States' steps.
+    for ( u_int s = operation::RUN; s < operation::STATES_MAX; s++ )
+        {
+        for ( u_int i = 1; i <= operations_count; i++ )
+            {
+            auto operation = ( *operations_manager )[ i ];
+            auto oper_state = ( *operation )[ s ];
+            u_int steps_count = oper_state->steps_count();
+            if ( steps_count == 0 ) continue;
+
+            res += sprintf( buff + res, "\t%s_STEPS%d=\n\t\t{\n\t\t",
+                operation::en_state_str[ s ], i );                       
+            u_int static_step = oper_state->active_step();
+            for ( u_int j = 1; j <= steps_count; j++ )
+                {
+                if ( static_step == j )
+                    {
+                    res += sprintf( buff + res, "1, " );
+                    }
+                else
+                    {
+                    res += sprintf( buff + res,
+                        oper_state->is_active_extra_step( j ) ? "1, " : "0, " );
+                    }
+                }
+            res += sprintf( buff + res, "\n\t\t},\n" );
+            }       
+        }
+
     //Параметры.
     res += par_float.save_device( buff + res, "\t" );
     res += par_uint.save_device( buff + res, "\t" );
     res += rt_par_float.save_device( buff + res, "\t" );
     res += rt_par_uint.save_device( buff + res, "\t" );
 
+    printf( "%s", buff );
 
     res += sprintf( buff + res, "\t}\n" );   
     return res;

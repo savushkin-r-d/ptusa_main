@@ -482,6 +482,9 @@ class operation_state
         /// @param on_step - номер включаемого шага (с единицы).
         int switch_active_extra_step( int off_step, int on_step );
 
+        /// @brief Определение активности заданного шага.
+        ///
+        /// @param step_idx - номер выключаемого шага (с единицы).
         bool is_active_extra_step( int step_idx ) const;
 
     private:
@@ -553,6 +556,7 @@ class operation
             };
 
         static const char* state_str [];
+        static const char* en_state_str[];
 
         state_idx get_state() const;
 
@@ -612,7 +616,16 @@ class operation
         /// @param on_step - номер включаемого шага (с единицы).
         int switch_active_extra_step( int off_step, int on_step );
 
+        /// @brief Определение активности заданного шага для выполнения
+        /// операции.
+        ///
+        /// @param step_idx - номер выключаемого шага (с единицы).
         bool is_active_run_extra_step( int step_idx ) const;
+
+        /// @brief Определение активности заданного шага.
+        ///
+        /// @param step_idx - номер выключаемого шага (с единицы).
+        bool is_active_extra_step( int step_idx ) const;
 
 #ifndef __GNUC__
 #pragma endregion

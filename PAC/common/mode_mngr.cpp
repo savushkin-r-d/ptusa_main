@@ -23,6 +23,14 @@ const char* operation::state_str [] =
     "Остановлен"
     };
 //-----------------------------------------------------------------------------
+const char* operation::en_state_str[] =
+    {
+    "OFF",
+    "RUN",
+    "PAUSE",
+    "STOP"
+    };
+//-----------------------------------------------------------------------------
 operation::operation(const char* name, operation_manager *owner, int n) :
     current_state ( OFF ), name( name ),
     owner( owner ),
@@ -299,6 +307,16 @@ int operation::off_extra_step( int step_idx )
 bool operation::is_active_run_extra_step( int step_idx ) const
     {
     return states[ RUN ]->is_active_extra_step( step_idx );
+    }
+//-----------------------------------------------------------------------------
+bool operation::is_active_extra_step( int step_idx ) const
+    {
+    if ( current_state >= 0 && current_state < STATES_MAX )
+        {
+        states[ current_state ]->is_active_extra_step( step_idx );
+        }
+
+    return false;
     }
 //-----------------------------------------------------------------------------
 int operation::switch_active_extra_step( int off_step, int on_step )
