@@ -44,8 +44,10 @@ tech_object::tech_object( const char* new_name, u_int number, u_int type,
         available.push_back( 0 );
         }
 
-    strncpy( name, new_name, C_MAX_NAME_LENGTH );
-    strncpy( this->name_Lua, name_Lua, C_MAX_NAME_LENGTH );
+    name = new char[ strlen( new_name ) + 1 ];
+    strcpy( name, new_name );
+    this->name_Lua = new char[ strlen( name_Lua ) + 1 ];
+    strcpy( this->name_Lua, name_Lua );
 
     operations_manager = new operation_manager( operations_count, this );
     }
@@ -57,6 +59,11 @@ tech_object::~tech_object()
         delete errors[ i ];
         errors[ i ] = 0;
         }
+
+    delete[] name;
+    name = 0;
+    delete[] name_Lua;
+    name_Lua = 0;
     }
 //-----------------------------------------------------------------------------
 int tech_object::init_params()
@@ -92,7 +99,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
     if ( G_DEBUG )
         {
         SetColor( GREEN );
-        printf( "%sBEGIN \"%.40s %d\" (%s) set operation №%u (\"%s\") --> %s.\n",
+        printf( "%sBEGIN \"%s %d\" (%s) set operation №%u (\"%s\") --> %s.\n",
             white_spaces, name, number, name_Lua, operation_n,
             0 == res ? ( *operations_manager )[ operation_n ]->get_name() : "",
             newm == 0 ? "OFF" : ( newm == 1 ? "ON" : ( newm == 2 ? "PAUSE" :
@@ -209,7 +216,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
         white_spaces[ idx ] = 0;
 
         SetColor( GREEN );
-        printf( "%sEND \"%.40s %d\" set operation №%2u --> %s, res = %d",            
+        printf( "%sEND \"%s %d\" set operation №%2u --> %s, res = %d",            
             white_spaces, name, number, operation_n,            
             newm == 0 ? "OFF" : ( newm == 1 ? "ON" : ( newm == 2 ? "PAUSE" : 
             ( newm == 3 ? "STOP" : ( newm == 4 ? "WAIT" : "?" ) ) ) ), res );
@@ -285,9 +292,9 @@ int tech_object::evaluate()
         modes_time[ idx ] = op->evaluation_time() / 1000;
 
         if ( get_mode( idx ) == 1 )
-        	{
+            {
             op->evaluate();
-        	}
+            }
 
         const int ERR_STR_SIZE = 80;
 
@@ -412,7 +419,7 @@ int tech_object::lua_check_on_mode( u_int mode, bool show_error )
                                             if ( show_error )
                                                 {
                                                 snprintf( err_msg, sizeof( err_msg ),
-                                                    "уже включена операция %.1d \'%.40s\' для объекта \'%.40s %d\'",
+                                                    "уже включена операция %.1d \'%s\' для объекта \'%s %d\'",
                                                     i,
                                                     ( *t_obj->get_modes_manager() )[ i ]->get_name(),
                                                     t_obj->get_name(), t_obj->get_number() );
