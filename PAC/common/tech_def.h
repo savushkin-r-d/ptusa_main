@@ -146,7 +146,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
             {
             if ( G_DEBUG ) 
                 {
-                printf ( "\'%.40s\' - exec command command = %2d\n",
+                printf ( "\'%s\' - exec command command = %2d\n",
                     name, cmd );
                 }
             return 0;
@@ -252,7 +252,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         /// @brief Отладочная печать объекта.
         void print() const
             {
-            printf( "Object \'%.40s\' [%d], type %d\n", name, number, type );
+            printf( "Object \'%s\' [%d], type %d\n", name, number, type );
             printf( "par_float[%d] par_uint[%d] rt_par_float[%d] rt_par_uint[%d]\n",
                 par_float.get_count(), par_uint.get_count(),
                 rt_par_float.get_count(), rt_par_uint.get_count() );
@@ -269,7 +269,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         const char* get_name_in_Lua() const
             {
             static char tmp[ 100 ];
-            sprintf( tmp, "%.40s", name_Lua );
+            sprintf( tmp, "%s", name_Lua );
             return tmp;
             }
 
@@ -344,12 +344,8 @@ class tech_object: public i_tech_object, public i_Lua_save_device
 
         std::vector< u_int_4 >  available;     ///< Доступность операций.
 
-        enum CONSTANTS
-            {
-            C_MAX_NAME_LENGTH = 50,
-            };
-        char name[ C_MAX_NAME_LENGTH + 1 ];        ///< Имя объекта.
-        char name_Lua[ C_MAX_NAME_LENGTH + 1 ];    ///< Имя объекта в Lua.
+        char *name;        ///< Имя объекта.
+        char *name_Lua;    ///< Имя объекта в Lua.
 
         smart_ptr< operation_manager > operations_manager; ///< Шаги режимов.
 
