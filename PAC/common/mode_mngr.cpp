@@ -313,7 +313,8 @@ bool operation::is_active_extra_step( int step_idx ) const
     {
     if ( current_state >= 0 && current_state < STATES_MAX )
         {
-        states[ current_state ]->is_active_extra_step( step_idx );
+       return states[ current_state ]->is_active_extra_step( step_idx );
+
         }
 
     return false;
