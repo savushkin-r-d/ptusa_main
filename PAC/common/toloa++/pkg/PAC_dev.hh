@@ -780,6 +780,11 @@ class operation
         /// @param on_step - номер включаемого шага (с единицы).
         int switch_active_extra_step( int off_step, int on_step );
 
+        /// @brief Определение активности заданного шага.
+        ///
+        /// @param step_idx - номер выключаемого шага (с единицы).
+        bool is_active_extra_step( int step_idx ) const;
+
     public:
         step* add_step( const char* name, int next_step_n,
             unsigned int step_duration_par_n, state_idx s_idx = RUN );
