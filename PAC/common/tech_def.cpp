@@ -393,20 +393,20 @@ int tech_object::lua_check_function( const char* function_name,
 //-----------------------------------------------------------------------------
 int tech_object::lua_check_on_start( u_int mode, bool show_error )
     {
-    return lua_check_function( "user_check_on_start",
-        "int tech_object::user_check_on_start( u_int mode )", mode, show_error );
+    return lua_check_function( "check_on_start",
+        "int tech_object::check_on_start( u_int mode )", mode, show_error );
     }
 //-----------------------------------------------------------------------------
 int tech_object::lua_check_on_pause( u_int mode, bool show_error )
     {
-    return lua_check_function( "user_check_on_pause",
-        "int tech_object::user_check_on_pause( u_int mode )", mode, show_error );
+    return lua_check_function( "check_on_pause",
+        "int tech_object::check_on_pause( u_int mode )", mode, show_error );
     }
 //-----------------------------------------------------------------------------
 int tech_object::lua_check_on_stop( u_int mode, bool show_error )
     {
-    return lua_check_function( "user_check_on_stop", 
-        "int tech_object::user_check_on_stop( u_int mode )", mode, show_error );
+    return lua_check_function( "check_on_stop", 
+        "int tech_object::check_on_stop( u_int mode )", mode, show_error );
     }
 //-----------------------------------------------------------------------------
 int tech_object::lua_check_on_mode( u_int mode, bool show_error )
