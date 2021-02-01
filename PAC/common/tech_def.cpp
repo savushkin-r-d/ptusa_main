@@ -119,15 +119,31 @@ int tech_object::set_mode( u_int operation_n, int newm )
         switch ( newm )
             {
             case operation::PAUSE:                
-                state[ i / 32 ] = state[ i / 32 ] | 1UL << i % 32;
-                ( *operations_manager )[ operation_n ]->pause();
-                lua_on_pause( operation_n );
+                // Check if possible.
+                if ( ( res = lua_check_on_pause( operation_n ) ) == 0 )
+                    {
+                    state[ i / 32 ] = state[ i / 32 ] | 1UL << i % 32;
+                    ( *operations_manager )[ operation_n ]->pause();
+                    lua_on_pause( operation_n );
+                    }
+                else
+                    {
+                    res += 200;
+                    }
                 break;
 
-            case operation::STOP:                
-                state[ i / 32 ] = state[ i / 32 ] | 1UL << i % 32;
-                ( *operations_manager )[ operation_n ]->stop();
-                lua_on_stop( operation_n );
+            case operation::STOP:        
+                // Check if possible.
+                if ( ( res = lua_check_on_stop( operation_n ) ) == 0 )
+                    {
+                    state[ i / 32 ] = state[ i / 32 ] | 1UL << i % 32;
+                    ( *operations_manager )[ operation_n ]->stop();
+                    lua_on_stop( operation_n );
+                    }
+                else
+                    {
+                    res += 300;
+                    }
                 break;
             
             default:
@@ -138,8 +154,16 @@ int tech_object::set_mode( u_int operation_n, int newm )
                     {
                     if ( newm == 1 && op->get_state() != operation::RUN )                     
                         {
-                        op->start();
-                        lua_on_start( operation_n );
+                        // Check if possible.
+                        if ( ( res = lua_check_on_start( operation_n ) ) == 0 )
+                            {
+                            op->start();
+                            lua_on_start( operation_n );
+                            }
+                        else
+                            {
+                            res += 400;
+                            }
                         }
                     else                    
                         {
@@ -150,8 +174,8 @@ int tech_object::set_mode( u_int operation_n, int newm )
                     {
                     if ( newm == 0 ) // Off mode.
                         {
-
-                        if ( ( res = lua_check_off_mode( operation_n ) ) == 0 ) // Check if possible.
+                        // Check if possible.
+                        if ( ( res = lua_check_off_mode( operation_n ) ) == 0 )
                             {
                             int idx = operation_n - 1;
                             state[ idx / 32 ] = state[ idx / 32 ] & ~( 1UL << idx % 32 );
@@ -183,7 +207,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
                             bool is_dev_err = res ? true : false;
                             //Проверка режима на проверку ОС устройств.
 
-                            if ( ( res = lua_check_on_mode( operation_n ) ) == 0 ) // Check if possible.
+                            if ( ( res = lua_check_on_mode( operation_n ) ) == 0 )
                                 {
                                 op->start();
                                 lua_init_mode( operation_n );
@@ -354,6 +378,42 @@ int tech_object::lua_exec_cmd( u_int cmd )
 
     return lua_manager::get_instance()->int_exec_lua_method( name_Lua, "exec_cmd",
         cmd, "int tech_object::lua_exec_cmd( u_int cmd )" );
+    }
+//-----------------------------------------------------------------------------
+int tech_object::lua_check_function( const char* function_name, 
+    const char* comment, u_int mode, bool show_error )
+    {
+    //Проверка на наличии функции function_name
+    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
+        name_Lua );
+    lua_getfield( lua_manager::get_instance()->get_Lua(), -1, function_name );
+    lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
+
+    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+        {
+        return lua_manager::get_instance()->int_2_exec_lua_method( name_Lua,
+            function_name, mode, show_error ? 1 : 0, comment );
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int tech_object::lua_check_on_start( u_int mode, bool show_error )
+    {
+    return lua_check_function( "check_on_start",
+        "int tech_object::check_on_start( u_int mode )", mode, show_error );
+    }
+//-----------------------------------------------------------------------------
+int tech_object::lua_check_on_pause( u_int mode, bool show_error )
+    {
+    return lua_check_function( "check_on_pause",
+        "int tech_object::check_on_pause( u_int mode )", mode, show_error );
+    }
+//-----------------------------------------------------------------------------
+int tech_object::lua_check_on_stop( u_int mode, bool show_error )
+    {
+    return lua_check_function( "check_on_stop", 
+        "int tech_object::check_on_stop( u_int mode )", mode, show_error );
     }
 //-----------------------------------------------------------------------------
 int tech_object::lua_check_on_mode( u_int mode, bool show_error )
