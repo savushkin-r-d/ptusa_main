@@ -272,6 +272,14 @@ void operation::to_step( unsigned int new_step, unsigned long cooperative_time /
         }
     }
 //-----------------------------------------------------------------------------
+void operation::to_next_step()
+    {
+    if ( current_state >= 0 && current_state < STATES_MAX )
+        {
+        states[ current_state ]->to_next_step();
+        }
+    }
+//-----------------------------------------------------------------------------
 step* operation::add_step( const char* name, int next_step_n,
                           unsigned int step_duration_par_n, state_idx s_idx /*= RUN */)
     {
@@ -1446,6 +1454,14 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
         steps[ active_step_n ]->print( owner->owner->get_prefix() );
         }
     }
+//-----------------------------------------------------------------------------
+void operation_state::to_next_step()
+    {
+    if ( active_step_n >= 0 )
+        {
+        to_step( active_step_n + 1 );
+        }
+     }
 //-----------------------------------------------------------------------------
 void operation_state::print( const char* prefix /*= "" */ ) const
     {

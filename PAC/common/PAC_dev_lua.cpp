@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 01/14/21 10:23:40.
+** Generated automatically by tolua++-1.0.92 on 03/02/21 15:31:57.
 */
 
 #ifndef __cplusplus
@@ -4152,6 +4152,37 @@ static int tolua_PAC_dev_operation_to_step00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'to_step'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: to_next_step of class  operation */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_operation_to_next_step00
+static int tolua_PAC_dev_operation_to_next_step00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"operation",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  operation* self = (operation*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'to_next_step'", NULL);
+#endif
+  {
+   self->to_next_step();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'to_next_step'.",&tolua_err);
  return 0;
 #endif
 }
@@ -13073,6 +13104,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"active_step_evaluation_time",tolua_PAC_dev_operation_active_step_evaluation_time00);
    tolua_function(tolua_S,"get_active_step_set_time",tolua_PAC_dev_operation_get_active_step_set_time00);
    tolua_function(tolua_S,"to_step",tolua_PAC_dev_operation_to_step00);
+   tolua_function(tolua_S,"to_next_step",tolua_PAC_dev_operation_to_next_step00);
    tolua_function(tolua_S,".geti",tolua_PAC_dev_operation__geti00);
    tolua_function(tolua_S,"on_extra_step",tolua_PAC_dev_operation_on_extra_step00);
    tolua_function(tolua_S,"off_extra_step",tolua_PAC_dev_operation_off_extra_step00);
