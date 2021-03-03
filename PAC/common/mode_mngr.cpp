@@ -1459,7 +1459,8 @@ void operation_state::to_next_step()
     {
     if ( active_step_n >= 0 )
         {
-        to_step( active_step_n + 1 );
+        int next_step = ( active_step_n + 1 )+ 1;
+        to_step( next_step );
         }
      }
 //-----------------------------------------------------------------------------
