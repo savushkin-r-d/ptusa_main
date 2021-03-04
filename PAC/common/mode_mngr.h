@@ -416,6 +416,9 @@ class operation_state
         /// @param cooperative_time - время совместной работы (сек).
         void to_step( u_int new_step, u_long cooperative_time = 0 );
 
+        /// @brief Переход к следующему шагу.
+        void to_next_step();
+
         u_long evaluation_time();
 
         u_long active_step_evaluation_time() const;
@@ -537,6 +540,13 @@ class operation
         /// @param new_step - номер шага (с единицы).
         /// @param cooperative_time - время совместной работы (сек).
         void to_step( unsigned int new_step, unsigned long cooperative_time = 0 );
+
+        /// @brief Переход к следующему шагу.
+        ///
+        /// Данный метод упрощает реализацию, когда необходимо использовать
+        /// функцию to_step, передавая в качестве параметра номер текущего шага,
+        /// увеличенного на единицу.
+        void to_next_step();
 #ifndef __GNUC__
 #pragma endregion
 #endif
