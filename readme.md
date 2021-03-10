@@ -4,6 +4,8 @@ Russian readme is [here](russian_readme/readme.md).
 
 Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
 
+Path to solution (_.sln_) from repository root: PAC_control_projects/main_control_prg/main_control_prg_vc/main_control_prg_vc.sln.
+
 1. The general schema of controller program work:
 
 ![Clone repository](readme_images/main_en.png)
