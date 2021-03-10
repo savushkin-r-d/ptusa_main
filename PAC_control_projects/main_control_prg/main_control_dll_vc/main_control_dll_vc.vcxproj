@@ -125,22 +125,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../lua/src;../../../lua_conf;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../zlib;$(IncludePath)</IncludePath>
-    <LibraryPath>c:\lua\bin\;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(LUA_DEV)\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../lua/src;../../../lua_conf;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../zlib;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>c:\lua\bin;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <LibraryPath>$(LUA_DEV)\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86;</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RFID_debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../lua/src;../../../lua_conf;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../zlib;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(IncludePath)</IncludePath>
-    <LibraryPath>c:\lua\bin;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <LibraryPath>$(LUA_DEV)\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_IDE|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>../../../tolua++/src/lib;../../../tolua++/include;../../../common;../../../common/util;../../../common/win;../../../common/PAC-driver;../../../lua/src;../../../lua_conf;../../../common/QuickLZ;../../../common/win_util;../../../PAC/IoT;../../../PAC/win;../../../PAC/win/PAC_PC;../../../PAC/common;../../../PAC/common/sys;../../../PAC/common/sys/win;../../../zlib;$(VC_IncludePath);$(WindowsSDK_IncludePath);$(IncludePath)</IncludePath>
-    <LibraryPath>c:\lua\bin;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
+    <LibraryPath>$(LUA_DEV)\lib;$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(NETFXKitsDir)Lib\um\x86</LibraryPath>
     <TargetName>
     </TargetName>
   </PropertyGroup>
