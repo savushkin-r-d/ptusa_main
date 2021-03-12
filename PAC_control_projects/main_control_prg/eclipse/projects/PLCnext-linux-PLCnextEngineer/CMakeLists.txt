@@ -2,24 +2,42 @@ cmake_minimum_required(VERSION 3.13)
 
 #set(CMAKE_VERBOSE_MAKEFILE ON)
 
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+if (LINUX)
+	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+endif()
 
 project(PtusaPLCnextEngineer)
 
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
+	set(CMAKE_BUILD_TYPE Release)
 endif()
 
 ################# create target #######################################################
-add_definitions(-DPAC_PLCNEXT)  
-add_definitions(-DLINUX_OS)
+if (LINUX)
+	add_definitions(-DPAC_PLCNEXT)
+	add_definitions(-DLINUX_OS)
+
+elseif (WIN32)
+	add_definitions(-DWIN_OS)
+	add_definitions(-DPAC_PC)
+	add_definitions(-DDEBUG_NO_IO_MODULES)
+	add_definitions(-DSIMPLE_LOG)
+endif()
+
 add_definitions(-DTEST_SPEED)
+
+if (MSVC)
+	add_compile_options("/utf-8")
+endif (MSVC)
 
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../lua ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../bin )
 
-file(GLOB_RECURSE PLCnext_src src/*.cpp intermediate/code/*.cpp)
+if (LINUX)
+	file(GLOB_RECURSE PLCnext_src src/*.cpp intermediate/code/*.cpp)
+endif()
 
-file(GLOB Main_src  
+if (LINUX)
+file(GLOB Main_src
 					../../../../../common/PAC-driver/*.cpp
 					../../../../../zlib/*.c
 					../../../../../common/util/*.c
@@ -34,12 +52,40 @@ file(GLOB Main_src
 					../../../../../PAC/IoT/*.cpp
 					
 					../../../../../tolua++/src/lib/*.c
-					)				
+					)
+endif()
+
+if (WIN32)
+file(GLOB Main_src  
+					../../../../../common/PAC-driver/*.cpp
+					../../../../../zlib/*.c
+					../../../../../common/util/*.c
+					../../../../../common/util/*.cpp
+					../../../../../common/win_util/*.cpp
+					../../../../../common/*.cpp
+					
+					../../../../../PAC/common/*.cpp
+					../../../../../PAC/common/sys/*.cpp
+					../../../../../PAC/win/*.cpp
+					../../../../../PAC/win/PAC_PC/*.cpp
+					../../../../../PAC/IoT/*.cpp
+					
+					../../../../../tolua++/src/lib/*.c
+
+					../../../main.cpp
+					)
+endif()
 
 list(FILTER Main_src EXCLUDE REGEX ".*OPCUA*")
 list(FILTER Main_src EXCLUDE REGEX ".*rfid*")
+list(FILTER Main_src EXCLUDE REGEX ".*snprintf*")
 
-add_library(PtusaPLCnextEngineer SHARED ${Main_src} ${PLCnext_src})
+if (LINUX)
+	add_library(PtusaPLCnextEngineer SHARED ${Main_src} ${PLCnext_src})
+
+elseif(WIN32)
+	add_executable(PtusaPLCnextEngineer ${Main_src} )
+endif()
 
 #######################################################################################
 
@@ -53,25 +99,33 @@ target_include_directories(PtusaPLCnextEngineer
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../zlib>    
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../PAC/common>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../PAC/common/sys>
+
+if (WIN32)
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../common/win_util>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../PAC/win>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../PAC/win/PAC_PC>
+
+elseif (LINUX)
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../PAC/linux>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../PAC/linux/PAC_PC>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../PAC/linux/PAC_PLCnext>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../PAC/IoT>
-    
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../tolua++/include>
-	
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../lua/src>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../bin>
-		
-    	
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/intermediate/code>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>)
 
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/intermediate/code>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+endif()
+
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../PAC/IoT>
+
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../tolua++/include>
+
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../lua/src>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../bin>)
 #######################################################################################
 
 ################# include arp cmake module path #######################################
-
-list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
+if (LINUX)
+	list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
+endif()
 
 #######################################################################################
 
@@ -80,27 +134,33 @@ list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
 #          libraries are linked. When a library which is necessary is not linked,     #
 #          the firmware will crash and there will be NO indication why it crashed.    #
 #######################################################################################
-
-target_link_options(PtusaPLCnextEngineer PRIVATE LINKER:--no-undefined)
+if (LINUX)
+	target_link_options(PtusaPLCnextEngineer PRIVATE LINKER:--no-undefined)
+endif()
 
 #######################################################################################
 
 ################# add link targets ####################################################
 
-find_package(ArpDevice REQUIRED)
-find_package(ArpProgramming REQUIRED)
+if (LINUX)
+	find_package(ArpDevice REQUIRED)
+	find_package(ArpProgramming REQUIRED)
 
-target_link_libraries(PtusaPLCnextEngineer PRIVATE ArpDevice ArpProgramming liblua_static )
+	target_link_libraries(PtusaPLCnextEngineer PRIVATE ArpDevice ArpProgramming )
 
+elseif (WIN32)
+	target_link_libraries(PtusaPLCnextEngineer liblua_static wsock32 ws2_32)
+endif()
 #######################################################################################
 
 ################# install ############################################################
 
-string(REGEX REPLACE "^.*\\(([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*$" "\\1" _ARP_SHORT_DEVICE_VERSION ${ARP_DEVICE_VERSION})
-install(TARGETS PtusaPLCnextEngineer
-    LIBRARY DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/lib
-    ARCHIVE DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/lib
-    RUNTIME DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/bin)
-unset(_ARP_SHORT_DEVICE_VERSION)
-
+if (LINUX)
+	string(REGEX REPLACE "^.*\\(([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*$" "\\1" _ARP_SHORT_DEVICE_VERSION ${ARP_DEVICE_VERSION})
+	install(TARGETS PtusaPLCnextEngineer
+		LIBRARY DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/lib
+		ARCHIVE DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/lib
+		RUNTIME DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/bin)
+	unset(_ARP_SHORT_DEVICE_VERSION)
+endif()
 #######################################################################################

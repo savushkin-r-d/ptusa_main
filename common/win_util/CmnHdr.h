@@ -165,7 +165,6 @@ inline void chMB(PCSTR s) {
 
 inline void chFAIL(PSTR szMsg) {
     chMB(szMsg);
-    _DebugBreak();
     }
 
 
