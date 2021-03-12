@@ -4,8 +4,6 @@ Russian readme is [here](russian_readme/readme.md).
 
 Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
 
-Path to solution (_.sln_) from repository root: PAC_control_projects/main_control_prg/main_control_prg_vc/main_control_prg_vc.sln.
-
 1. The general schema of controller program work:
 
 ![Clone repository](readme_images/main_en.png)
@@ -23,4 +21,13 @@ Path to solution (_.sln_) from repository root: PAC_control_projects/main_contro
 
 # How to build a project #
 
-If you want to use the version of project for Windows, you should use Microsoft Visual Studio Community for build. To run this project on PLC, use Eclipse IDE with CMake based project on Linux.
+## win ##
+
+Requirements:
+1. Microsoft Visual Studio Community 2019
+
+You should open (in Visual Studio) directory **PAC_control_projects\main_control_prg\eclipse\projects\PLCnext-linux-PLCnextEngineer**. Thus you get a CMake based project.
+
+## linux ##
+
+Eclipse IDE with CMake based project on Linux.
