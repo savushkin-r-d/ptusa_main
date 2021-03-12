@@ -26,7 +26,7 @@ Controller logic implemented by Lua-script. At runtime, control is passed throug
 Requirements:
 1. Microsoft Visual Studio Community 2019
 
-You should open (in Visual Studio) directory **PAC_control_projects\main_control_prg\eclipse\projects\PLCnext-linux-PLCnextEngineer**. Thus you get a CMake based project.
+You should open (in Visual Studio) directory **PAC_control_projects\main_control_prg\eclipse\projects\PLCnext-linux-PLCnextEngineer**. This you get a CMake based project.
 
 ## linux ##
 
