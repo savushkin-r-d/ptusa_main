@@ -30,12 +30,12 @@ if (MSVC)
 	add_compile_options("/utf-8")
 endif (MSVC)
 
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_SOURCE_DIR}/lua_bin )
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua )
 
-set ( LUA_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/lua_bin/lua.lib )
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/tolua++ ${CMAKE_CURRENT_SOURCE_DIR}/tolua++_bin )
+set ( LUA_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua/lua.lib )
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/tolua++ ${CMAKE_CURRENT_SOURCE_DIR}/bin/tolua++ )
 
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_SOURCE_DIR}/zlib_bin )
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib )
 
 if (LINUX)
 	set ( LINUX_EXTRA_DIR /PAC_control_projects/main_control_prg/eclipse/projects/PLCnext-linux-PLCnextEngineer )
@@ -121,10 +121,10 @@ endif()
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tolua++/include>
 
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lua/src>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lua_bin>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bin/lua>
 
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/zlib>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/zlib_bin>)
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib>)
 #######################################################################################
 
 ################# include arp cmake module path #######################################
