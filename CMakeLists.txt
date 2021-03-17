@@ -154,7 +154,7 @@ if (LINUX)
 	target_link_libraries(PtusaPLCnextEngineer PRIVATE ArpDevice ArpProgramming )
 
 elseif (WIN32)
-	target_link_libraries(PtusaPLCnextEngineer liblua_static zlib wsock32 ws2_32)
+	target_link_libraries(PtusaPLCnextEngineer liblua_static zlibstatic wsock32 ws2_32)
 endif()
 #######################################################################################
 
