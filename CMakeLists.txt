@@ -33,6 +33,9 @@ endif (MSVC)
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua )
 
 set ( LUA_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua/lua.lib )
+if (NOT DEFINED LUA_INCLUDE_DIR)
+	set ( LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src )
+endif()
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/tolua++ ${CMAKE_CURRENT_SOURCE_DIR}/bin/tolua++ )
 
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib )
