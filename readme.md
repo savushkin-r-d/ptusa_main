@@ -26,8 +26,18 @@ Controller logic implemented by Lua-script. At runtime, control is passed throug
 Requirements:
 1. Microsoft Visual Studio Community 2019
 
-You should open (in Visual Studio) directory **PAC_control_projects\main_control_prg\eclipse\projects\PLCnext-linux-PLCnextEngineer**. This you get a CMake based project.
+You should open (in Visual Studio) root directory. This you get a CMake based project.
 
 ## linux ##
 
 Eclipse IDE with CMake based project on Linux.
+
+# How to run a project #
+
+To run demo project you should use this command line:
+
+## win ##
+
+```cmd
+    "out\build\x64-Debug (по умолчанию)\PtusaPLCnextEngineer.exe" demo_project\main.plua path demo_project\ sys_path demo_project\sys\ debug
+```
