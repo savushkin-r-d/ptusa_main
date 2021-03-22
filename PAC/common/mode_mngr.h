@@ -92,7 +92,7 @@ class action
         /// @brief Установка параметров для действия.
         ///
         /// @param [in] par Параметры.
-        virtual void set_params( const saved_params_float *par ) 
+        virtual void set_params( const saved_params_float *par )
             {
             this->par = par;
             }
@@ -121,7 +121,7 @@ class action
         u_int subgropups_cnt;
 
         // Устройства.
-        std::vector < std::vector< std::vector< device* > > > devices; 
+        std::vector < std::vector< std::vector< device* > > > devices;
         std::string name;                               ///< Имя действия.
 
         const saved_params_float *par;      ///< Параметры действия.
@@ -231,6 +231,8 @@ class DI_DO_action: public action
         DI_DO_action( ):action( "Группы DI->DO's" )
             {
             }
+
+        int check( char* reason ) const;
 
         void evaluate();
     };
