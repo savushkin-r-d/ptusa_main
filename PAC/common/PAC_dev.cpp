@@ -2491,7 +2491,7 @@ int valve_iolink_mix_proof::save_device_ex( char *buff )
     int err = in_info->err;
     res += sprintf( buff + res, "BLINK=%d, CS=%d, ERR=%d, ", blink, cs, err );
     res += sprintf( buff + res, "V=%.1f, ", get_value() );
-    
+
     return res;
     }
 //-----------------------------------------------------------------------------
@@ -3858,20 +3858,15 @@ level_s::level_s( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ):
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-level_s_iolink::level_s_iolink( const char *dev_name, device::DEVICE_SUB_TYPE sub_type ) :
-    AI1( dev_name, DT_LS, sub_type, 0, 0 ), n_article( ARTICLE::DEFAULT ),
+level_s_iolink::level_s_iolink( const char *dev_name,
+    device::DEVICE_SUB_TYPE sub_type ):
+    analog_io_device( dev_name, DT_LS, sub_type, LAST_PARAM_IDX - 1 ),
+    current_state( sub_type == device::LS_IOLINK_MAX ? 1 : 0 ), time( 0 ),
+    n_article( ARTICLE::DEFAULT ),
     v( 0 ), st( 0 )
     {
-    }
-
-float level_s_iolink::get_min_value()
-    {
-    return 0;
-    }
-
-float level_s_iolink::get_max_value()
-    {
-    return 100;
+    set_par_name( P_DT, start_param_idx, "P_DT" );
+    set_par_name( P_ERR, start_param_idx, "P_ERR" );
     }
 
 void level_s_iolink::evaluate_io()
@@ -3902,7 +3897,7 @@ void level_s_iolink::evaluate_io()
             }
 
         case ARTICLE::DEFAULT:
-            v = -1000;
+            v = get_par( P_ERR, start_param_idx );
             st = 0;
             break;
         }
@@ -3950,7 +3945,7 @@ float level_s_iolink::get_value()
     {
 	if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
 		{
-		return -1000.0;
+		return get_par( P_ERR, start_param_idx );
 		}
 	else
 		{
@@ -3963,19 +3958,28 @@ int level_s_iolink::get_state()
 	io_device::IOLINKSTATE devstate = get_AI_IOLINK_state(C_AI_INDEX);
 	if (devstate != io_device::IOLINKSTATE::OK)
 		{
-		if (sub_type == device::LS_IOLINK_MAX)
-			{
-			return 1;
-			}
-		else
-			{
-			return 0;
-			}
+		return sub_type == device::LS_IOLINK_MAX ? 1 : 0;
 		}
-	else
-		{
-        return st;
-		}
+
+    u_int_4 dt = (u_int_4)get_par( P_DT, 0 );
+    if ( dt > 0 )
+        {
+        if ( current_state != st )
+            {
+            if ( get_delta_millisec( time ) > dt )
+                {
+                current_state = st;
+                time = get_millisec();
+                }
+            }
+        else
+            {
+            time = get_millisec();
+            }
+        }
+    else current_state = st;
+
+    return current_state;
 	}
 #endif
 
@@ -4104,13 +4108,11 @@ float pressure_e::get_min_val()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-pressure_e_iolink::pressure_e_iolink( const char* dev_name ) : 
-    AI1( dev_name, DT_PT, DST_PT_IOLINK,
-    ADDITIONAL_PARAM_COUNT, &start_param_idx ),
+pressure_e_iolink::pressure_e_iolink( const char* dev_name ) :
+    analog_io_device( dev_name, DT_PT, DST_PT_IOLINK, LAST_PARAM_IDX - 1 ),
     n_article( ARTICLE::DEFAULT ), v( 0 ), st( 0 )
     {
-    set_par_name( P_MIN_V, start_param_idx, "P_MIN_V" );
-    set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
+    set_par_name( P_ERR, start_param_idx, "P_ERR" );
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::set_article( const char* new_article )
@@ -4119,17 +4121,7 @@ void pressure_e_iolink::set_article( const char* new_article )
     read_article( new_article, n_article, this );
     }
 //-----------------------------------------------------------------------------
-float pressure_e_iolink::get_max_val()
-    {
-    return get_par( P_MAX_V, start_param_idx );
-    }
-//-----------------------------------------------------------------------------
-float pressure_e_iolink::get_min_val()
-    {
-    return get_par( P_MIN_V, start_param_idx );
-    }
-//-----------------------------------------------------------------------------
-void pressure_e_iolink::read_article( const char* article, 
+void pressure_e_iolink::read_article( const char* article,
     ARTICLE& n_article, device* dev )
     {
     if ( strcmp( article, "IFM.PI2715" ) == 0 )
@@ -4181,7 +4173,7 @@ void pressure_e_iolink::read_article( const char* article,
 
     if ( G_DEBUG )
         {
-        G_LOG->warning( "%s unknown article \"%s\"", 
+        G_LOG->warning( "%s unknown article \"%s\"",
             dev->get_name(), article );
         }
     }
@@ -4274,7 +4266,7 @@ float pressure_e_iolink::get_value()
     {
     if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
         {
-        return -1000.0;
+        return get_par( P_ERR, start_param_idx );
         }
     else
         {
@@ -4284,8 +4276,8 @@ float pressure_e_iolink::get_value()
 //-----------------------------------------------------------------------------
 int pressure_e_iolink::get_state()
     {
-    IOLINKSTATE res = get_AI_IOLINK_state(C_AI_INDEX);
-    if (res != io_device::IOLINKSTATE::OK)
+    IOLINKSTATE res = get_AI_IOLINK_state( C_AI_INDEX );
+    if ( res != io_device::IOLINKSTATE::OK )
         {
         return -(int)res;
         }
@@ -4436,7 +4428,15 @@ float circuit_breaker::get_value()
 //-----------------------------------------------------------------------------
 int circuit_breaker::get_state()
     {
-    return st;
+    IOLINKSTATE res = get_AI_IOLINK_state( C_AI_INDEX );
+    if ( res != io_device::IOLINKSTATE::OK )
+        {
+        return -(int)res;
+        }
+    else
+        {
+        return st;
+        }
     }
 //-----------------------------------------------------------------------------
 void circuit_breaker::evaluate_io()
@@ -4511,10 +4511,12 @@ float concentration_e::get_min_val()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-concentration_e_iolink::concentration_e_iolink(const char* dev_name) :AI1(dev_name,
-    DT_QT, DST_QT_IOLINK, ADDITIONAL_PARAM_COUNT, 0),
+concentration_e_iolink::concentration_e_iolink( const char* dev_name ) :
+    analog_io_device( dev_name,
+    DT_QT, DST_QT_IOLINK, LAST_PARAM_IDX - 1 ),
     info( new QT_data )
     {
+    set_par_name( P_ERR, start_param_idx, "P_ERR" );
     };
 //-----------------------------------------------------------------------------
 int concentration_e_iolink::save_device_ex( char *buff )
@@ -4529,21 +4531,30 @@ float concentration_e_iolink::get_temperature() const
     return 0.1f * info->temperature;
     }
 //-----------------------------------------------------------------------------
-#ifdef DEBUG_NO_IO_MODULES
+#ifndef DEBUG_NO_IO_MODULES
 float concentration_e_iolink::get_value()
-	{
-	return analog_io_device::get_value();
-	}
-//-----------------------------------------------------------------------------
-#else
-float concentration_e_iolink::get_value()
-	{
-	return 0.001f * info->conductivity;
-	}
+    {
+    if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
+        {
+        return get_par( P_ERR, start_param_idx );
+        }
+    else
+        {
+        return 0.001f * info->conductivity;
+        }
+    }
 //-----------------------------------------------------------------------------
 int concentration_e_iolink::get_state()
 	{
-	return info->status;
+    IOLINKSTATE res = get_AI_IOLINK_state( C_AI_INDEX );
+    if ( res != io_device::IOLINKSTATE::OK )
+        {
+        return -(int)res;
+        }
+    else
+        {
+        return info->status;
+        }
 	}
 #endif
 //-----------------------------------------------------------------------------
