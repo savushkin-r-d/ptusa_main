@@ -364,7 +364,7 @@ class device : public i_DO_AO_device, public par_device
             }
 
         enum CONSTANTS
-            {     
+            {
             C_MAX_NAME = 20
             };
 
@@ -2292,7 +2292,7 @@ class valve_iolink_shut_off_thinktop : public valve
         out_data_swapped* out_info = 0;
 
         bool blink = false;     //Visual indication
-    };    
+    };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной Definox.
 class valve_iolink_shut_off_sorio : public valve
@@ -2339,7 +2339,7 @@ class valve_iolink_shut_off_sorio : public valve
             };
 
         struct out_data_swapped   //Swapped low and high byte for easer processing
-            {            
+            {
             bool sv1         : 1; //Solenoid valve 1 activation
             uint16_t unused1 : 2;
             bool wink        : 1; //Visual indication
@@ -2714,19 +2714,20 @@ class pressure_e : public AI1
     };
 //-----------------------------------------------------------------------------
 /// @brief Текущее давление.
-class pressure_e_iolink : public AI1
+class pressure_e_iolink : public analog_io_device
     {
     public:
         pressure_e_iolink( const char* dev_name );
 
-        float get_max_val();
-        float get_min_val();
-
 #ifndef DEBUG_NO_IO_MODULES
         float get_value();
-        int get_state();
-#endif
 
+        int get_state();
+
+        void direct_set_value( float new_value )
+            {
+            }
+#endif
         void set_article( const char* new_article );
 
         enum class ARTICLE
@@ -2746,7 +2747,7 @@ class pressure_e_iolink : public AI1
 
         static void evaluate_io( const char *name, char* data, ARTICLE n_article, float& v,
             int& st );
-        static void read_article( const char* article, ARTICLE& n_article, 
+        static void read_article( const char* article, ARTICLE& n_article,
             device* dev  );
 
         void evaluate_io();
@@ -2771,10 +2772,11 @@ class pressure_e_iolink : public AI1
 
         enum CONSTANTS
             {
-            ADDITIONAL_PARAM_COUNT = 2,
+            C_AI_INDEX = 0,     ///< Индекс канала аналогового входа.
 
-            P_MIN_V = 1,   ///< Индекс параметра минимального значения.
-            P_MAX_V,       ///< Индекс параметра максимального значения.
+            P_ERR,              ///< Аварийное значение.
+
+            LAST_PARAM_IDX,
             };
 
         u_int start_param_idx;
@@ -2784,83 +2786,83 @@ class pressure_e_iolink : public AI1
     };
 //-----------------------------------------------------------------------------
 /// @brief Автоматический выключатель.
-class circuit_breaker : public analog_io_device 
-    { 
-    public: 
-        circuit_breaker(const char* dev_name); 
- 
-        int save_device_ex(char* buff); 
- 
-        int set_cmd(const char* prop, u_int idx, double val); 
- 
-        void direct_set_value(float v); 
- 
-        void direct_on(); 
- 
-        void direct_off(); 
- 
-        float get_value(); 
- 
-        int get_state(); 
- 
-        void evaluate_io(); 
- 
-        struct F_data_in 
-            { 
-            bool err_ch4 : 1; 
-            bool err_ch3 : 1; 
-            bool err_ch2 : 1; 
-            bool err_ch1 : 1; 
-            bool st_ch4 : 1; 
-            bool st_ch3 : 1; 
-            bool st_ch2 : 1; 
-            bool st_ch1 : 1; 
- 
-            uint16_t nominal_current_ch2 : 4; 
-            uint16_t nominal_current_ch1 : 4; 
-            uint16_t nominal_current_ch4 : 4; 
-            uint16_t nominal_current_ch3 : 4; 
- 
-            uint16_t load_current_ch1 : 8; 
-            uint16_t load_current_ch2 : 8; 
-            uint16_t load_current_ch3 : 8; 
-            uint16_t load_current_ch4 : 8; 
-            uint16_t v : 8; 
-            }; 
- 
-        struct F_data_out 
-            { 
-            bool switch_ch1 : 1; 
-            bool switch_ch2 : 1; 
-            bool switch_ch3 : 1; 
-            bool switch_ch4 : 1; 
-            uint16_t reserved : 3; 
-            bool valid_flag : 1; 
- 
-            uint16_t nominal_current_ch2 : 4; 
-            uint16_t nominal_current_ch1 : 4; 
-            uint16_t nominal_current_ch4 : 4; 
-            uint16_t nominal_current_ch3 : 4; 
- 
-            F_data_out(); 
-            }; 
- 
-    private: 
-        enum CONSTANTS 
-            { 
-            C_AI_INDEX = 0, 
-            }; 
- 
-        bool is_read_OK; 
- 
-        float v; 
-        int st; 
-        int err; 
-        int m; 
- 
-        F_data_in in_info; 
-        F_data_out* out_info; 
-    }; 
+class circuit_breaker : public analog_io_device
+    {
+    public:
+        circuit_breaker(const char* dev_name);
+
+        int save_device_ex(char* buff);
+
+        int set_cmd(const char* prop, u_int idx, double val);
+
+        void direct_set_value(float v);
+
+        void direct_on();
+
+        void direct_off();
+
+        float get_value();
+
+        int get_state();
+
+        void evaluate_io();
+
+        struct F_data_in
+            {
+            bool err_ch4 : 1;
+            bool err_ch3 : 1;
+            bool err_ch2 : 1;
+            bool err_ch1 : 1;
+            bool st_ch4 : 1;
+            bool st_ch3 : 1;
+            bool st_ch2 : 1;
+            bool st_ch1 : 1;
+
+            uint16_t nominal_current_ch2 : 4;
+            uint16_t nominal_current_ch1 : 4;
+            uint16_t nominal_current_ch4 : 4;
+            uint16_t nominal_current_ch3 : 4;
+
+            uint16_t load_current_ch1 : 8;
+            uint16_t load_current_ch2 : 8;
+            uint16_t load_current_ch3 : 8;
+            uint16_t load_current_ch4 : 8;
+            uint16_t v : 8;
+            };
+
+        struct F_data_out
+            {
+            bool switch_ch1 : 1;
+            bool switch_ch2 : 1;
+            bool switch_ch3 : 1;
+            bool switch_ch4 : 1;
+            uint16_t reserved : 3;
+            bool valid_flag : 1;
+
+            uint16_t nominal_current_ch2 : 4;
+            uint16_t nominal_current_ch1 : 4;
+            uint16_t nominal_current_ch4 : 4;
+            uint16_t nominal_current_ch3 : 4;
+
+            F_data_out();
+            };
+
+    private:
+        enum CONSTANTS
+            {
+            C_AI_INDEX = 0,
+            };
+
+        bool is_read_OK;
+
+        float v;
+        int st;
+        int err;
+        int m;
+
+        F_data_in in_info;
+        F_data_out* out_info;
+    };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора уровня IO-Link.
 class level_e_iolink : public level
@@ -2879,7 +2881,7 @@ class level_e_iolink : public level
         void evaluate_io();
 
         void set_string_property(const char* field, const char* value) override;
-   
+
     private:
         pressure_e_iolink::ARTICLE n_article;
 
@@ -2969,7 +2971,7 @@ class concentration_e_ok : public concentration_e
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик концентрации IO-Link.
-class concentration_e_iolink : public AI1
+class concentration_e_iolink : public analog_io_device
     {
     public:
         concentration_e_iolink(const char* dev_name);
@@ -2978,13 +2980,16 @@ class concentration_e_iolink : public AI1
 
         float get_temperature() const;
 
-#ifdef DEBUG_NO_IO_MODULES
-        float get_value();
-#else
+#ifndef DEBUG_NO_IO_MODULES
         float get_value();
 
         int get_state();
+
+        void direct_set_value( float new_value )
+            {
+            }
 #endif // DEBUG_NO_IO_MODULES
+
 
         void evaluate_io();
 
@@ -3004,6 +3009,18 @@ class concentration_e_iolink : public AI1
 #pragma pack(pop)
 
         QT_data* info;
+
+    private:
+        enum CONSTANTS
+            {
+            C_AI_INDEX = 0,     ///< Индекс канала аналогового входа.
+
+            P_ERR,              ///< Аварийное значение.
+
+            LAST_PARAM_IDX,
+            };
+
+        u_int start_param_idx;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство аналогового входа.
@@ -3519,19 +3536,19 @@ class level_s : public DI1
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора уровня IO-Link.
-class level_s_iolink : public AI1
+class level_s_iolink : public analog_io_device
     {
     public:
         level_s_iolink( const char *dev_name, device::DEVICE_SUB_TYPE sub_type );
-
-        float get_min_value();
-
-        float get_max_value();
 
 #ifndef DEBUG_NO_IO_MODULES
         float get_value();
 
         int get_state();
+
+        void direct_set_value( float new_value )
+            {
+            }
 #endif
 
         bool is_active();
@@ -3539,6 +3556,9 @@ class level_s_iolink : public AI1
         void evaluate_io();
 
     private:
+        int current_state;
+        u_int_4 time;
+
         enum class ARTICLE
             {
             DEFAULT,
@@ -3568,6 +3588,19 @@ class level_s_iolink : public AI1
 
         float v;
         int st;
+
+    private:
+        enum CONSTANTS
+            {
+            C_AI_INDEX = 0,     ///< Индекс канала аналогового входа.
+
+            P_DT,
+            P_ERR,              ///< Аварийное значение уровня.
+
+            LAST_PARAM_IDX,
+            };
+
+        u_int start_param_idx;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора расхода.
