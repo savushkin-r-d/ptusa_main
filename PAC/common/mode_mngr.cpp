@@ -490,7 +490,7 @@ void action::add_dev( device *dev, u_int group /*= 0 */, u_int subgroup /*= 0 */
         while ( subgropups_cnt > devices[ last_idx ].size() )
             {
             devices[ last_idx ].push_back( std::vector< device* >() );
-            } 
+            }
         }
 
     while ( subgroup >= devices[ group ].size() )
@@ -624,6 +624,9 @@ step::~step()
 //-----------------------------------------------------------------------------
 int step::check( char* reason ) const
     {
+    int res = actions[ A_DI_DO ]->check( reason );
+    if ( res ) return res;
+
     if ( is_mode )
         {
         return actions[ A_REQUIRED_FB ]->check( reason );
@@ -732,6 +735,34 @@ void step::set_dx_time( u_int_4 dx_time )
     this->dx_time = dx_time;
     }
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+int DI_DO_action::check( char* reason ) const
+    {
+    if ( is_empty() )
+        {
+        return 0;
+        }
+
+    auto devs = devices[ MAIN_GROUP ];
+    for ( u_int i = 0; i < devs.size(); i++ )
+        {
+        if ( devs[ i ].empty() )
+            {
+            continue;
+            }
+
+        auto d_i_device = devs[ i ][ 0 ];
+        if ( d_i_device->get_type() != device::DT_DI )
+            {
+            sprintf( reason, "в поле \'Группы DI - DO\' устройство \'%.25s (%.50s)\'"
+                " не является сигналом DI",
+                d_i_device->get_name(), d_i_device->get_description() );
+            return 1;
+            }
+        }
+
+    return 0;
+    }
 //-----------------------------------------------------------------------------
 void DI_DO_action::evaluate()
     {
@@ -1147,7 +1178,7 @@ void wash_action::evaluate()
 
         float new_val = -1;
         if ( !devs[ G_PUMP_FREQ ].empty() )
-            { 
+            {
             new_val = devs[ G_PUMP_FREQ ][ 0 ]->get_value();
             }
         else
@@ -1166,7 +1197,7 @@ void wash_action::evaluate()
             dev->set_state( new_state );
 
             auto type = dev->get_type();
-            if ( new_val != -1 && 
+            if ( new_val != -1 &&
                 ( type == device::DT_M || type == device::DT_VC || type == device::DT_AO ) )
                 {
                 dev->set_value( new_state > 0 ? new_val : 0 );
@@ -1267,6 +1298,12 @@ step* operation_state::add_step( const char* name, int next_step_n,
 //-----------------------------------------------------------------------------
 int operation_state::check_on( char* reason ) const
     {
+    for ( size_t idx = 0; idx < steps.size(); idx++ )
+        {
+        int res = steps[ idx ]->check( reason );
+        if ( res ) return res;
+        }
+
     return mode_step->check( reason );
     }
 //-----------------------------------------------------------------------------
@@ -1320,7 +1357,7 @@ void operation_state::evaluate()
         {
         active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
 
-        if ( active_step_time == 0 || 
+        if ( active_step_time == 0 ||
             steps[ active_step_n ]->get_eval_time() > (u_int)active_step_time )
             {
             if ( -1 == active_step_next_step_n )
@@ -1341,8 +1378,8 @@ void operation_state::evaluate()
 
             return;
             }
-        }  
-    
+        }
+
     steps[ active_step_n ]->evaluate();
     }
 //-----------------------------------------------------------------------------
@@ -1362,7 +1399,7 @@ void operation_state::final()
         {
         steps[ active_step_n ]->final();
         if ( G_DEBUG )
-            {            
+            {
             printf( "%sFINAL ACTIVE STEP №%d\n",
                 owner->owner->get_prefix(), active_step_n + 1 );
             }
@@ -1438,13 +1475,13 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
         active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
         active_step_next_step_n = next_step_ns[ active_step_n ];
         }
-    
+
     if ( active_step_time > 0 || par_n <= 0 )
         {
         steps[ active_step_n ]->init();
         steps[ active_step_n ]->evaluate();
         }
-    
+
     if ( G_DEBUG )
         {
         printf( "%s\"%s\" operation %d \"%s\" to_step() -> %d, step time %d ms, "
