@@ -34,7 +34,7 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_SOURCE_DIR}/bi
 
 set ( LUA_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua/lua.lib )
 if (NOT DEFINED LUA_INCLUDE_DIR)
-	set ( LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src )
+	set ( LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src;${CMAKE_CURRENT_SOURCE_DIR}/bin/lua )
 endif()
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/tolua++ ${CMAKE_CURRENT_SOURCE_DIR}/bin/tolua++ )
 
@@ -43,54 +43,43 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_SOURCE_DIR}/b
 if (LINUX)
 	set ( LINUX_EXTRA_DIR /PAC_control_projects/main_control_prg/eclipse/projects/PLCnext-linux-PLCnextEngineer )
 
-	file(GLOB_RECURSE ${LINUX_EXTRA_DIR}/PLCnext_src  ${LINUX_EXTRA_DIR}/src/*.cpp  ${LINUX_EXTRA_DIR}/intermediate/code/*.cpp)
+	file(GLOB_RECURSE PLCnext_src ${LINUX_EXTRA_DIR}/PLCnext_src  ${LINUX_EXTRA_DIR}/src/*.cpp  ${LINUX_EXTRA_DIR}/intermediate/code/*.cpp)
 endif()
 
-if (LINUX)
-file(GLOB Main_src
+file(GLOB common_src CONFIGURE_DEPENDS
 	common/PAC-driver/*.cpp
-	zlib/*.c
 	common/util/*.c
 	common/util/*.cpp
 	common/*.cpp
 
 	PAC/common/*.cpp
 	PAC/common/sys/*.cpp
+	PAC/IoT/*.cpp)
+
+list(FILTER common_src EXCLUDE REGEX ".*OPCUA*|.*rfid*|snprintf\.c")
+
+if (LINUX)
+file(GLOB linux_src CONFIGURE_DEPENDS
 	PAC/linux/*.cpp
 	PAC/linux/PAC_PC/*.cpp
-	PAC/linux/PAC_PLCnext/*.cpp
-	PAC/IoT/*.cpp
-
-	tolua++/src/lib/*.c)
+	PAC/linux/PAC_PLCnext/*.cpp)
 endif()
 
 if (WIN32)
-file(GLOB Main_src CONFIGURE_DEPENDS common/PAC-driver/*.cpp
-	common/util/*.c
-	common/util/*.cpp
+file(GLOB win_src CONFIGURE_DEPENDS
 	common/win_util/*.cpp
-	common/*.cpp
 
-	PAC/common/*.cpp
-	PAC/common/sys/*.cpp
 	PAC/win/*.cpp
 	PAC/win/PAC_PC/*.cpp
-	PAC/IoT/*.cpp
-
-	tolua++/src/lib/*.c
 
 	PAC_control_projects/main_control_prg/main.cpp)
 endif()
 
-list(FILTER Main_src EXCLUDE REGEX ".*OPCUA*")
-list(FILTER Main_src EXCLUDE REGEX ".*rfid*")
-list(FILTER Main_src EXCLUDE REGEX ".*snprintf*")
-
 if (LINUX)
-	add_library(PtusaPLCnextEngineer SHARED ${Main_src} ${PLCnext_src})
+	add_library(PtusaPLCnextEngineer SHARED ${common_src} ${linux_src} ${PLCnext_src})
 
 elseif(WIN32)
-	add_executable(PtusaPLCnextEngineer ${Main_src} )
+	add_executable(PtusaPLCnextEngineer ${common_src} ${win_src})
 endif()
 
 #######################################################################################
@@ -157,7 +146,7 @@ if (LINUX)
 	target_link_libraries(PtusaPLCnextEngineer PRIVATE ArpDevice ArpProgramming )
 
 elseif (WIN32)
-	target_link_libraries(PtusaPLCnextEngineer liblua_static zlibstatic wsock32 ws2_32)
+	target_link_libraries(PtusaPLCnextEngineer liblua_static toluapp_lib zlibstatic wsock32 ws2_32)
 endif()
 #######################################################################################
 
