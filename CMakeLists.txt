@@ -152,7 +152,7 @@ if (LINUX)
 	target_link_libraries(${PROJECT_NAME} PRIVATE ArpDevice ArpProgramming )
 
 elseif (WIN32)
-	target_link_libraries(${PROJECT_NAME} liblua_static toluapp_lib zlibstatic wsock32 ws2_32)
+	target_link_libraries(${PROJECT_NAME} liblua_static toluapp_lib_static zlibstatic wsock32 ws2_32)
 endif()
 #######################################################################################
 
