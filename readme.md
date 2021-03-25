@@ -1,4 +1,4 @@
-Russian readme is [here](russian_readme/readme.md).
+﻿Russian readme is [here](russian_readme/readme.md).
 
 # Common description #
 
@@ -39,5 +39,7 @@ To run demo project you should use this command line:
 ## win ##
 
 ```cmd
-    "out\build\x64-Debug (по умолчанию)\PtusaPLCnextEngineer.exe" demo_project\main.plua path demo_project\ sys_path demo_project\sys\ debug
+    "out\build\<build_name>\ptusa.exe" demo_project\main.plua path demo_project\ sys_path demo_project\sys\ debug
 ```
+
+where `<build_name>` - used build configuration name.
