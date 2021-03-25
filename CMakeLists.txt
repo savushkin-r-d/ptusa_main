@@ -6,7 +6,13 @@ if (LINUX)
 	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 endif()
 
-project(PtusaPLCnextEngineer)
+if (LINUX)
+	SET(PROJECT_BUILD_NAME "PtusaPLCnextEngineer")
+elseif (WIN32)
+	SET(PROJECT_BUILD_NAME "ptusa")
+endif()
+
+project(${PROJECT_BUILD_NAME})
 
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE Release)
@@ -76,17 +82,17 @@ file(GLOB win_src CONFIGURE_DEPENDS
 endif()
 
 if (LINUX)
-	add_library(PtusaPLCnextEngineer SHARED ${common_src} ${linux_src} ${PLCnext_src})
+	add_library(${PROJECT_NAME} SHARED ${common_src} ${linux_src} ${PLCnext_src})
 
 elseif(WIN32)
-	add_executable(PtusaPLCnextEngineer ${common_src} ${win_src})
+	add_executable(${PROJECT_NAME} ${common_src} ${win_src})
 endif()
 
 #######################################################################################
 
 ################# project include-paths ###############################################
 
-target_include_directories(PtusaPLCnextEngineer
+target_include_directories(${PROJECT_NAME}
 	PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/util>
@@ -132,7 +138,7 @@ endif()
 #          the firmware will crash and there will be NO indication why it crashed.    #
 #######################################################################################
 if (LINUX)
-	target_link_options(PtusaPLCnextEngineer PRIVATE LINKER:--no-undefined)
+	target_link_options(${PROJECT_NAME} PRIVATE LINKER:--no-undefined)
 endif()
 
 #######################################################################################
@@ -143,10 +149,10 @@ if (LINUX)
 	find_package(ArpDevice REQUIRED)
 	find_package(ArpProgramming REQUIRED)
 
-	target_link_libraries(PtusaPLCnextEngineer PRIVATE ArpDevice ArpProgramming )
+	target_link_libraries(${PROJECT_NAME} PRIVATE ArpDevice ArpProgramming )
 
 elseif (WIN32)
-	target_link_libraries(PtusaPLCnextEngineer liblua_static toluapp_lib zlibstatic wsock32 ws2_32)
+	target_link_libraries(${PROJECT_NAME} liblua_static toluapp_lib zlibstatic wsock32 ws2_32)
 endif()
 #######################################################################################
 
@@ -154,7 +160,7 @@ endif()
 
 if (LINUX)
 	string(REGEX REPLACE "^.*\\(([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*$" "\\1" _ARP_SHORT_DEVICE_VERSION ${ARP_DEVICE_VERSION})
-	install(TARGETS PtusaPLCnextEngineer
+	install(TARGETS ${PROJECT_NAME}
 		LIBRARY DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/lib
 		ARCHIVE DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/lib
 		RUNTIME DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/bin)
