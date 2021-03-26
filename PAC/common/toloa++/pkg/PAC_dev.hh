@@ -1346,6 +1346,7 @@ class cipline_tech_object: public tech_object
         int state;
         int curprg;
         int loadedRecipe;
+        int loadedProgram;
         int nmr;
 
         bool nplaststate;   //ѕоследнее состо€ние подающего насоса.
