@@ -353,17 +353,13 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
 void TRecipeManager::FormRecipeList()
     {
     strcpy(recipeList, "");
-    char tmpstr[12];
     char tmprecipename[MAX_REC_NAME_LENGTH * UNICODE_MULTIPLIER];
     for (int i = 0; i < recipePerLine; i++)
         {
         if (getRecipeValue(i, RV_IS_USED) != 0)
             {
             ReadMem(startAddr( i ), recipeNameLength, (unsigned char*)tmprecipename, true );
-            sprintf(tmpstr,"%d##", i + 1);
-            strcat(recipeList, tmpstr);
-            strcat(recipeList, tmprecipename);
-            strcat(recipeList, "||");
+            sprintf(recipeList + strlen(recipeList), "%d##%s||", i + 1, tmprecipename);
             }
 
         }
@@ -867,17 +863,13 @@ int TMediumRecipeManager::ResetRecipeToDefaults(int recipeNo)
 void TMediumRecipeManager::FormRecipeList()
 {
     strcpy(recipeList, "");
-    char tmpstr[12];
     char tmprecipename[MAX_REC_NAME_LENGTH * UNICODE_MULTIPLIER];
     for (int i = 0; i < recipePerLine; i++)
     {
         if (getRecipeValue(i, RV_IS_USED) != 0)
         {
             ReadMem(startAddr(i), recipeNameLength, (unsigned char*)tmprecipename, true);
-            sprintf(tmpstr, "%d##", i + 1);
-            strcat(recipeList, tmpstr);
-            strcat(recipeList, tmprecipename);
-            strcat(recipeList, "||");
+            sprintf(recipeList + strlen(recipeList), "%d##%s||", i + 1, tmprecipename);
         }
 
     }
