@@ -2,6 +2,8 @@
 
 #include "lua_manager.h"
 
+#include "utf2cp1251.h"
+
 int ModbusServ::confirmRecUpdateCtr[11] = {0};
 char ModbusServ::updateRecFlag[11] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 int ModbusServ::confirmPrgUpdateCtr[11] = {0};
@@ -353,34 +355,34 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							switch (objnumber)
 								{
 								case OTHER_CARNO1:
-									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->ncar1, &outdata[3+i*2]);
+									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->ncar1, &outdata[3+i*2]);
 									i+= CAR_NAME_MAX_LENGTH;
 									break;
 								case OTHER_CARNO2:
-									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->ncar2, &outdata[3+i*2]);
+									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->ncar2, &outdata[3+i*2]);
 									i+= CAR_NAME_MAX_LENGTH;
 									break;
 								case OTHER_CARNO3:
-									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->ncar3, &outdata[3+i*2]);
+									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->ncar3, &outdata[3+i*2]);
 									i+= CAR_NAME_MAX_LENGTH;
 									break;
 								case OTHER_CARNO4:
-									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->ncar4, &outdata[3+i*2]);
+									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->ncar4, &outdata[3+i*2]);
 									i+= CAR_NAME_MAX_LENGTH;
 									break;
 								case OTHER_CAUSTIC_COUNT:
 									PackInt16(cipline_tech_object::Mdls[line - 1]->objectstats->objcausticwashes, &outdata[3 + i * 2]);
 									break;
 								case OTHER_LAST_ACID_WASH:
-									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->objectstats->objlastacidwash, &outdata[3 + i * 2]);
+									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->objectstats->objlastacidwash, &outdata[3 + i * 2]);
 									i += MAX_FIELD_LENGTH-1;
 									break;
 								case OTHER_LAST_WASH:
-									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->objectstats->objlastwash, &outdata[3 + i * 2]);
+									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->objectstats->objlastwash, &outdata[3 + i * 2]);
 									i += MAX_FIELD_LENGTH-1;
 									break;
 								case OTHER_LAST_WASH_PROGRAM:
-									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->objectstats->objlastwashprogram, &outdata[3 + i * 2]);
+									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->objectstats->objlastwashprogram, &outdata[3 + i * 2]);
 									i += MAX_FIELD_LENGTH-1;
 									break;
                                 case OTHER_PLC_TIME:
@@ -410,15 +412,15 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 									PackInt16(int_2(cipline_tech_object::Mdls[line - 1]->rt_par_float[P_CUR_REC]),&outdata[3+i*2]);
 									break;
 								case RC_SELECTED_REC:
-									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->loadedRecName, &outdata[3+i*2]);
+									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->loadedRecName, &outdata[3+i*2]);
 									i+=TRecipeManager::recipeNameLength - 1;
 									break;
 								case RC_SELECTED_PRG:
-									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->currentProgramName, &outdata[3+i*2]);
+									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->currentProgramName, &outdata[3+i*2]);
 									i+= PROGRAM_MAX_LEN - 1;
 									break;
 								case RC_EDITED_REC:
-									CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->lineRecipes->currentRecipeName, &outdata[3+i*2]);
+									Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->lineRecipes->currentRecipeName, &outdata[3+i*2]);
 									i+=TRecipeManager::recipeNameLength - 1;
 									break;
 								case RC_SELECT_REC:
@@ -461,9 +463,9 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 												}
 											if (k == recipeno)
 												{
-												char myrec[MAX_REC_NAME_LENGTH];
+												char myrec[MAX_REC_NAME_LENGTH * UNICODE_MULTIPLIER];
 												cipline_tech_object::Mdls[line - 1]->lineRecipes->getRecipeName(j, myrec);
-												CP1251toUnicode(myrec, &outdata[3+i*2]);
+												Utf8toUnicode(myrec, &outdata[3+i*2]);
 												break;
 												}
 											}
@@ -474,7 +476,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 										if (objnumber >= RC_PRG_START && objnumber < RC_RECIPE_PAR_START)
 											{
 											int prgno = (objnumber - RC_PRG_START) / PROGRAM_MAX_LEN;
-											CP1251toUnicode(cipline_tech_object::Mdls[line - 1]->prgArray[prgno], &outdata[3+i*2]);
+											Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->prgArray[prgno], &outdata[3+i*2]);
 											i+= PROGRAM_MAX_LEN - 1;
 											} 
 										else
@@ -653,7 +655,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 									case 4: // String                                    
 										{
 										const char *val = lua_tostring( L, -1 );
-										CP1251toUnicode( val, &outdata[ 3 + idx * 2 ] );                       
+										Utf8toUnicode( val, &outdata[ 3 + idx * 2 ] );
 										break;
 										}
 
@@ -833,21 +835,21 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 								case OTHER_CARNO1:
                                     if (cipline_tech_object::Mdls[line - 1]->state == 0)
                                         {
-                                        UnicodetoCP1251(cipline_tech_object::Mdls[line - 1]->ncar1, &data[7 + i * 2], 15);
+                                        UnicodetoUtf8(cipline_tech_object::Mdls[line - 1]->ncar1, &data[7 + i * 2], 15);
                                         cipline_tech_object::Mdls[line - 1]->objectstats = cipline_tech_object::statsbase->stats_if_exists(cipline_tech_object::Mdls[line - 1]->ncar1, cipline_tech_object::Mdls[line - 1]->emptystats);
                                         }
 									i+= CAR_NAME_MAX_LENGTH;
 									break;
 								case OTHER_CARNO2:
-									UnicodetoCP1251(cipline_tech_object::Mdls[line - 1]->ncar2,  &data[7+i*2], 15);
+									UnicodetoUtf8(cipline_tech_object::Mdls[line - 1]->ncar2,  &data[7+i*2], 15);
 									i+= CAR_NAME_MAX_LENGTH;
 									break;
 								case OTHER_CARNO3:
-									UnicodetoCP1251(cipline_tech_object::Mdls[line - 1]->ncar3,  &data[7+i*2], 15);
+									UnicodetoUtf8(cipline_tech_object::Mdls[line - 1]->ncar3,  &data[7+i*2], 15);
 									i+= CAR_NAME_MAX_LENGTH;
 									break;
 								case OTHER_CARNO4:
-									UnicodetoCP1251(cipline_tech_object::Mdls[line - 1]->ncar4,  &data[7+i*2], 15);
+									UnicodetoUtf8(cipline_tech_object::Mdls[line - 1]->ncar4,  &data[7+i*2], 15);
 									i+= CAR_NAME_MAX_LENGTH;
 									break;
 								default:
@@ -898,7 +900,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 									break;
 								case RC_EDITED_REC:
 									//printf("\n\rEdit recipe. Words - %d", numberofElements);
-									UnicodetoCP1251(cipline_tech_object::Mdls[line-1]->lineRecipes->currentRecipeName, &data[7+i*2], 24);
+									UnicodetoUtf8(cipline_tech_object::Mdls[line-1]->lineRecipes->currentRecipeName, &data[7+i*2], 24);
 									i+= cipline_tech_object::Mdls[line-1]->lineRecipes->recipeNameLength - 1;
 									break;
 								case RC_LIST_UPDATE:
@@ -1296,6 +1298,21 @@ int ModbusServ::UnicodetoCP1251( char* Output, unsigned char* Buf, int inputlen 
 		}
 	return i/2 - 1;
 	}
+
+int ModbusServ::Utf8toUnicode(const char* Input, unsigned char* Buf)
+    {
+	char outbuf[MAX_REC_NAME_LENGTH * UNICODE_MULTIPLIER] = { 0 };
+	convert_utf8_to_windows1251(Input, outbuf, MAX_REC_NAME_LENGTH * UNICODE_MULTIPLIER);
+	return CP1251toUnicode(outbuf, Buf);
+    }
+
+int ModbusServ::UnicodetoUtf8(char* Output, unsigned char* Buf, int inputlen)
+    {
+	char inbuf[MAX_REC_NAME_LENGTH * UNICODE_MULTIPLIER] = { 0 };
+	UnicodetoCP1251(inbuf, Buf, inputlen);
+	convert_windows1251_to_utf8(Output, inbuf);
+	return 0;
+    }
 
 device* ModbusServ::get_device( unsigned int group, unsigned int number )
 	{

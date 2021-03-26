@@ -120,6 +120,8 @@ class ModbusServ
 		static unsigned long UnpackLong(unsigned char* Buf);
 		static int CP1251toUnicode( const char* Input, unsigned char* Buf);
 		static int UnicodetoCP1251(char* Output, unsigned char* Buf, int inputlen);
+        static int Utf8toUnicode(const char* Input, unsigned char* Buf);
+        static int UnicodetoUtf8(char* Output, unsigned char* Buf, int inputlen);
 		static unsigned char UTable[128][2];
 		static char updateRecFlag[11];
 		static int confirmRecUpdateCtr[11];

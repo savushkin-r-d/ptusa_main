@@ -7,8 +7,9 @@
 #include <fstream>
 #include "dtime.h"
 #include <cstring>
-#define MAX_ID_LENGTH 2*32
-#define MAX_FIELD_LENGTH 2*24
+#include "mcaRec.h"
+#define MAX_ID_LENGTH 32
+#define MAX_FIELD_LENGTH 24
 
 class Serializable
     {
@@ -32,11 +33,11 @@ class cip_object_stats : public Serializable
     public:
         cip_object_stats(const char* objname);
         ~cip_object_stats();
-        char objid[MAX_ID_LENGTH];
-        char objlastwash[MAX_FIELD_LENGTH];
-        char objlastwashprogram[MAX_FIELD_LENGTH];
+        char objid[MAX_ID_LENGTH * UNICODE_MULTIPLIER];
+        char objlastwash[MAX_FIELD_LENGTH * UNICODE_MULTIPLIER];
+        char objlastwashprogram[MAX_FIELD_LENGTH * UNICODE_MULTIPLIER];
         int objcausticwashes;
-        char objlastacidwash[MAX_FIELD_LENGTH];
+        char objlastacidwash[MAX_FIELD_LENGTH * UNICODE_MULTIPLIER];
         int changed;
         virtual void serialize(std::ostream& stream);
         virtual void deserialize(std::istream& stream);

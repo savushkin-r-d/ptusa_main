@@ -1,4 +1,5 @@
 #include "utf2cp1251.h"
+#include <string.h>
 
 typedef struct ConvLetter {
     char win1251;
@@ -78,9 +79,8 @@ int convert_utf8_to_windows1251(const char* utf8, char* windows1251, size_t n)
         if (prefix == '\xE2' && suffix == '\x84' && utf8[i + 2] == '\x96')
             {
             windows1251[j] = '\xB9'; //№
-            i += 3;
-            j++;
-            continue;
+            i++;
+            goto NEXT_LETTER;
             }
 
         if ((prefix & 0x80) == 0) {
@@ -158,5 +158,20 @@ void convert_windows1251_to_utf8(char* out, const char* in) {
             }
         else
             *out++ = *in++;
-    *out = 0;
+        *out = 0;
+        }
+
+int utf8_strlen(const char* str)
+    {
+    int c, i, ix, q;
+    for (q = 0, i = 0, ix = strlen(str); i < ix; i++, q++)
+        {
+        c = (unsigned char)str[i];
+        if (c >= 0 && c <= 127) i += 0;
+        else if ((c & 0xE0) == 0xC0) i += 1;
+        else if ((c & 0xF0) == 0xE0) i += 2;
+        else if ((c & 0xF8) == 0xF0) i += 3;
+        else return 0;//invalid utf8
+        }
+    return q;
     }

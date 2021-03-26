@@ -46,25 +46,25 @@ void cip_object_stats::deserialize(std::istream& stream)
     char comma;
     stream >> objcausticwashes >> comma >> sl >> comma;
     stream.read(objid, sl);
-    if (sl >= 0 && sl < MAX_ID_LENGTH)
+    if (sl >= 0 && sl < MAX_ID_LENGTH * UNICODE_MULTIPLIER)
         {
         objid[sl] = '\0';
         }
     stream >> comma >> sl >> comma;
     stream.read(objlastwash, sl);
-    if (sl >= 0 && sl < MAX_FIELD_LENGTH)
+    if (sl >= 0 && sl < MAX_FIELD_LENGTH * UNICODE_MULTIPLIER)
         {
         objlastwash[sl] = '\0';
         }
     stream >> comma >> sl >> comma;
     stream.read(objlastwashprogram, sl);
-    if (sl >= 0 && sl < MAX_FIELD_LENGTH)
+    if (sl >= 0 && sl < MAX_FIELD_LENGTH * UNICODE_MULTIPLIER)
         {
         objlastwashprogram[sl] = '\0';
         }
     stream >> comma >> sl >> comma;
     stream.read(objlastacidwash, sl);
-    if (sl >= 0 && sl < MAX_FIELD_LENGTH)
+    if (sl >= 0 && sl < MAX_FIELD_LENGTH * UNICODE_MULTIPLIER)
         {
         objlastacidwash[sl] = '\0';
         }
@@ -86,7 +86,7 @@ cip_object_stats* cip_stats::get_obj_stats(char* objid)
     std::map<char*, cip_object_stats*>::iterator ret = obj_stats.find(objid);
     if (ret == obj_stats.end())
         {
-        char* keychar = new char[MAX_ID_LENGTH];
+        char* keychar = new char[MAX_ID_LENGTH * UNICODE_MULTIPLIER];
         strcpy(keychar, objid);
         cip_object_stats* newos = new cip_object_stats(keychar);
         obj_stats.insert(std::pair<char*, cip_object_stats*>(keychar, newos));
@@ -143,7 +143,7 @@ void cip_stats::deserialize(std::istream& stream)
     clear();
     for (int i = 0; i < reccount; i++)
         {
-        char* obj_name = new char[MAX_ID_LENGTH];
+        char* obj_name = new char[MAX_ID_LENGTH * UNICODE_MULTIPLIER];
         cip_object_stats* cos = new cip_object_stats("tmp");
         cos->deserialize(stream);
         strcpy(obj_name, cos->objid);
