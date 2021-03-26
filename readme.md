@@ -1,10 +1,8 @@
-Russian readme is [here](russian_readme/readme.md).
+﻿Russian readme is [here](russian_readme/readme.md).
 
 # Common description #
 
 Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
-
-Path to solution (_.sln_) from repository root: PAC_control_projects/main_control_prg/main_control_prg_vc/main_control_prg_vc.sln.
 
 1. The general schema of controller program work:
 
@@ -23,4 +21,25 @@ Path to solution (_.sln_) from repository root: PAC_control_projects/main_contro
 
 # How to build a project #
 
-If you want to use the version of project for Windows, you should use Microsoft Visual Studio Community for build. To run this project on PLC, use Eclipse IDE with CMake based project on Linux.
+## win ##
+
+Requirements:
+1. Microsoft Visual Studio Community 2019
+
+You should open (in Visual Studio) root directory. This you get a CMake based project.
+
+## linux ##
+
+Eclipse IDE with CMake based project on Linux.
+
+# How to run a project #
+
+To run demo project you should use this command line:
+
+## win ##
+
+```cmd
+    "out\build\<build_name>\ptusa.exe" demo_project\main.plua path demo_project\ sys_path demo_project\sys\ debug
+```
+
+where `<build_name>` - used Visual Studio build configuration name (for example "x64-Release").
