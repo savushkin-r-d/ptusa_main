@@ -42,4 +42,4 @@ To run demo project you should use this command line:
     "out\build\<build_name>\ptusa.exe" demo_project\main.plua path demo_project\ sys_path demo_project\sys\ debug
 ```
 
-where `<build_name>` - used build configuration name.
+where `<build_name>` - used Visual Studio build configuration name (for example "x64-Release").
