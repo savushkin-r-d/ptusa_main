@@ -28,8 +28,7 @@ CSWMRG::~CSWMRG()
     {
 #ifdef _DEBUG
     // A SWMRG shouldn't be destroyed if any threads are using the resource
-    if (m_nActive != 0)
-        _DebugBreak();
+    if (m_nActive != 0);
 #endif
 
     m_nWaitingReaders = 0;
