@@ -3865,8 +3865,8 @@ level_s_iolink::level_s_iolink( const char *dev_name,
     n_article( ARTICLE::DEFAULT ),
     v( 0 ), st( 0 )
     {
-    set_par_name( P_DT, start_param_idx, "P_DT" );
-    set_par_name( P_ERR, start_param_idx, "P_ERR" );
+    set_par_name( P_DT, 0, "P_DT" );
+    set_par_name( P_ERR, 0, "P_ERR" );
     }
 
 void level_s_iolink::evaluate_io()
@@ -3897,7 +3897,7 @@ void level_s_iolink::evaluate_io()
             }
 
         case ARTICLE::DEFAULT:
-            v = get_par( P_ERR, start_param_idx );
+            v = get_par( P_ERR, 0 );
             st = 0;
             break;
         }
@@ -3945,7 +3945,7 @@ float level_s_iolink::get_value()
     {
 	if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
 		{
-		return get_par( P_ERR, start_param_idx );
+		return get_par( P_ERR, 0 );
 		}
 	else
 		{
@@ -4054,7 +4054,7 @@ float level_e_iolink::get_value()
     {
     if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
         {
-        return -1000.0;
+        return get_par( level::P_ERR, level::start_param_idx );
         }
     else
         {
@@ -4112,7 +4112,7 @@ pressure_e_iolink::pressure_e_iolink( const char* dev_name ) :
     analog_io_device( dev_name, DT_PT, DST_PT_IOLINK, LAST_PARAM_IDX - 1 ),
     n_article( ARTICLE::DEFAULT ), v( 0 ), st( 0 )
     {
-    set_par_name( P_ERR, start_param_idx, "P_ERR" );
+    set_par_name( P_ERR, 0, "P_ERR" );
     }
 //-----------------------------------------------------------------------------
 void pressure_e_iolink::set_article( const char* new_article )
@@ -4266,7 +4266,7 @@ float pressure_e_iolink::get_value()
     {
     if (get_AI_IOLINK_state(C_AI_INDEX) != io_device::IOLINKSTATE::OK)
         {
-        return get_par( P_ERR, start_param_idx );
+        return get_par( P_ERR, 0 );
         }
     else
         {
@@ -4516,7 +4516,7 @@ concentration_e_iolink::concentration_e_iolink( const char* dev_name ) :
     DT_QT, DST_QT_IOLINK, LAST_PARAM_IDX - 1 ),
     info( new QT_data )
     {
-    set_par_name( P_ERR, start_param_idx, "P_ERR" );
+    set_par_name( P_ERR, 0, "P_ERR" );
     };
 //-----------------------------------------------------------------------------
 int concentration_e_iolink::save_device_ex( char *buff )
@@ -4536,7 +4536,7 @@ float concentration_e_iolink::get_value()
     {
     if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
         {
-        return get_par( P_ERR, start_param_idx );
+        return get_par( P_ERR, 0 );
         }
     else
         {

@@ -2628,7 +2628,7 @@ class level: public AI1
         float get_max_val();
         float get_min_val();
 
-    private:
+    protected:
         enum CONSTANTS
             {
             P_ERR = 1,       ///< Аварийное значение уровня.
@@ -2778,8 +2778,6 @@ class pressure_e_iolink : public analog_io_device
 
             LAST_PARAM_IDX,
             };
-
-        u_int start_param_idx;
 
         float v;
         int st;
@@ -3019,8 +3017,6 @@ class concentration_e_iolink : public analog_io_device
 
             LAST_PARAM_IDX,
             };
-
-        u_int start_param_idx;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство аналогового входа.
@@ -3599,8 +3595,6 @@ class level_s_iolink : public analog_io_device
 
             LAST_PARAM_IDX,
             };
-
-        u_int start_param_idx;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора расхода.
