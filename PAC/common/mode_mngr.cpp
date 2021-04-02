@@ -13,7 +13,7 @@
 /// @$Date::                     $.
 
 #include "mode_mngr.h"
-#include "errors.h"
+#include "g_errors.h"
 //-----------------------------------------------------------------------------
 const char* operation::state_str [] =
     {

@@ -20,7 +20,7 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 #include "bus_coupler_io.h"
 #include "PID.h"
 #include "g_device.h"
-#include "errors.h"
+#include "g_errors.h"
 #include "rm_manager.h"
 #include "modbus_client.h"
 #include "modbus_serv.h"

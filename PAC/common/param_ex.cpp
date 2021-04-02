@@ -4,7 +4,7 @@
 auto_smart_ptr< params_manager > params_manager::instance = 0;
 
 #ifdef USE_SIMPLE_DEV_ERRORS
-#include "errors.h"
+#include "g_errors.h"
 #endif // USE_SIMPLE_DEV_ERRORS
 
 #ifndef USE_NO_TANK_COMB_DEVICE
@@ -12,7 +12,7 @@ auto_smart_ptr< params_manager > params_manager::instance = 0;
 #endif //USE_NO_TANK_COMB_DEVICE
 
 #include "PAC_info.h"
-#include "errors.h"
+#include "g_errors.h"
 
 #include "log.h"
 //-----------------------------------------------------------------------------

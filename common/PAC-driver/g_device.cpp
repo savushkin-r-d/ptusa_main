@@ -6,7 +6,7 @@
 #include "PAC_dev.h"
 
 #include "PAC_err.h"
-#include "errors.h"
+#include "g_errors.h"
 
 #include "lua_manager.h"
 #include "tech_def.h"
@@ -84,7 +84,7 @@ long device_communicator::write_devices_states_service(
             for ( u_int i = 0; i < dev.size(); i++ )
                 {
                 answer_size += dev[ i ]->save_device( ( char* ) outdata +
-                    answer_size );                                    
+                    answer_size );
                 }
             answer_size++; // Учитываем завершающий \0.
 

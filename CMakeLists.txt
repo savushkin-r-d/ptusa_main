@@ -39,9 +39,7 @@ endif (MSVC)
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua )
 
 set ( LUA_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua/lua.lib )
-if (NOT DEFINED LUA_INCLUDE_DIR)
-	set ( LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src;${CMAKE_CURRENT_SOURCE_DIR}/bin/lua )
-endif()
+set ( LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src;${CMAKE_CURRENT_SOURCE_DIR}/bin/lua )
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/tolua++ ${CMAKE_CURRENT_SOURCE_DIR}/bin/tolua++ )
 
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib )
@@ -49,7 +47,9 @@ add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_SOURCE_DIR}/b
 if (LINUX)
 	set ( LINUX_EXTRA_DIR /PAC_control_projects/main_control_prg/eclipse/projects/PLCnext-linux-PLCnextEngineer )
 
-	file(GLOB_RECURSE PLCnext_src ${LINUX_EXTRA_DIR}/PLCnext_src  ${LINUX_EXTRA_DIR}/src/*.cpp  ${LINUX_EXTRA_DIR}/intermediate/code/*.cpp)
+	file(GLOB_RECURSE PLCnext_src ${LINUX_EXTRA_DIR}/PLCnext_src
+		${LINUX_EXTRA_DIR}/src/*.cpp
+		${LINUX_EXTRA_DIR}/intermediate/code/*.cpp)
 endif()
 
 file(GLOB common_src CONFIGURE_DEPENDS
@@ -76,24 +76,27 @@ file(GLOB win_src CONFIGURE_DEPENDS
 	common/win_util/*.cpp
 
 	PAC/win/*.cpp
-	PAC/win/PAC_PC/*.cpp
-
-	PAC_control_projects/main_control_prg/main.cpp)
+	PAC/win/PAC_PC/*.cpp)
 endif()
 
 if (LINUX)
 	add_library(${PROJECT_NAME} SHARED ${common_src} ${linux_src} ${PLCnext_src})
 
 elseif(WIN32)
-	add_executable(${PROJECT_NAME} ${common_src} ${win_src})
+	add_executable(${PROJECT_NAME} ${common_src} ${win_src}
+		PAC_control_projects/main_control_prg/main.cpp)
+
+	add_library(main_control ${common_src} ${win_src}
+		PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
+		PAC_control_projects/main_control_prg/main_control_dll_vc/dllmain.cpp)
+	target_compile_definitions(main_control PUBLIC _USRDLL)
 endif()
 
 #######################################################################################
 
 ################# project include-paths ###############################################
 
-target_include_directories(${PROJECT_NAME}
-	PUBLIC
+set( GENERAL_INCLUDES
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/util>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/PAC-driver>
@@ -122,7 +125,11 @@ endif()
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bin/lua>
 
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/zlib>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib>)
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib> )
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${GENERAL_INCLUDES})
+
+target_include_directories(main_control PUBLIC ${GENERAL_INCLUDES})
 #######################################################################################
 
 ################# include arp cmake module path #######################################
@@ -153,6 +160,8 @@ if (LINUX)
 
 elseif (WIN32)
 	target_link_libraries(${PROJECT_NAME} liblua_static toluapp_lib_static zlibstatic wsock32 ws2_32)
+
+	target_link_libraries(main_control liblua_static toluapp_lib_static zlibstatic wsock32 ws2_32)
 endif()
 #######################################################################################
 
