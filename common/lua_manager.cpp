@@ -662,7 +662,7 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
     char path[ 100 ];
     if ( script_n < SYS_FILE_CNT )
         {
-        sprintf( path, "%s%s", 
+        sprintf( path, "%s%s",
             G_PROJECT_MANAGER->sys_path.c_str(), FILES[ script_n ] );
         }
     else

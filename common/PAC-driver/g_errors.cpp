@@ -3,7 +3,7 @@
 #include "stdafx.h" //Стандартный заголовочный файл для использования precompiled headers.
 #endif //USE_STDAFX
 #else
-#include "errors.h"
+#include "g_errors.h"
 #include "PAC_err.h"
 #endif
 

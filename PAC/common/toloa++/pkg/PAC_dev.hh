@@ -14,7 +14,7 @@ $#include "cip_tech_def.h"
 $#include "bus_coupler_io.h"
 $#include "PID.h"
 $#include "g_device.h"
-$#include "errors.h"
+$#include "g_errors.h"
 
 $#include "rm_manager.h"
 $#include "modbus_client.h"

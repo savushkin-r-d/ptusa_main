@@ -6,7 +6,7 @@
 
 #include "lua_manager.h"
 
-#include "errors.h"
+#include "g_errors.h"
 //-----------------------------------------------------------------------------
 auto_smart_ptr < tech_object_manager > tech_object_manager::instance;
 
@@ -85,7 +85,7 @@ int tech_object::init_runtime_params()
 int tech_object::set_mode( u_int operation_n, int newm )
     {
     int res = 0;
-        
+
     static u_char idx = 0;
     if ( operation_n > operations_count )
         {
@@ -114,11 +114,11 @@ int tech_object::set_mode( u_int operation_n, int newm )
         }
 
     int i = operation_n - 1;
-    if ( 0 == res )    
+    if ( 0 == res )
         {
         switch ( newm )
             {
-            case operation::PAUSE:                
+            case operation::PAUSE:
                 // Check if possible.
                 if ( ( res = lua_check_on_pause( operation_n ) ) == 0 )
                     {
@@ -132,7 +132,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
                     }
                 break;
 
-            case operation::STOP:        
+            case operation::STOP:
                 // Check if possible.
                 if ( ( res = lua_check_on_stop( operation_n ) ) == 0 )
                     {
@@ -145,14 +145,14 @@ int tech_object::set_mode( u_int operation_n, int newm )
                     res += 300;
                     }
                 break;
-            
+
             default:
                 if ( newm != 0 ) newm = 1;
                 operation* op = ( *operations_manager )[ operation_n ];
 
-                if ( get_mode( operation_n ) == newm ) 
+                if ( get_mode( operation_n ) == newm )
                     {
-                    if ( newm == 1 && op->get_state() != operation::RUN )                     
+                    if ( newm == 1 && op->get_state() != operation::RUN )
                         {
                         // Check if possible.
                         if ( ( res = lua_check_on_start( operation_n ) ) == 0 )
@@ -165,7 +165,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
                             res += 400;
                             }
                         }
-                    else                    
+                    else
                         {
                         res = 1;
                         }
@@ -214,8 +214,8 @@ int tech_object::set_mode( u_int operation_n, int newm )
                                 lua_on_start( operation_n );
 
                                 int idx = operation_n - 1;
-                                state[ idx / 32 ] = state[ idx / 32 ] | 1UL << idx % 32;                                
-                                
+                                state[ idx / 32 ] = state[ idx / 32 ] | 1UL << idx % 32;
+
                                 //Проверка режима на проверку ОС устройств.
                                 if ( is_dev_err )
                                     {
@@ -240,9 +240,9 @@ int tech_object::set_mode( u_int operation_n, int newm )
         white_spaces[ idx ] = 0;
 
         SetColor( GREEN );
-        printf( "%sEND \"%s %d\" set operation №%2u --> %s, res = %d",            
-            white_spaces, name, number, operation_n,            
-            newm == 0 ? "OFF" : ( newm == 1 ? "ON" : ( newm == 2 ? "PAUSE" : 
+        printf( "%sEND \"%s %d\" set operation №%2u --> %s, res = %d",
+            white_spaces, name, number, operation_n,
+            newm == 0 ? "OFF" : ( newm == 1 ? "ON" : ( newm == 2 ? "PAUSE" :
             ( newm == 3 ? "STOP" : ( newm == 4 ? "WAIT" : "?" ) ) ) ), res );
         SetColor( RESET );
 
@@ -322,7 +322,7 @@ int tech_object::evaluate()
 
         const int ERR_STR_SIZE = 80;
 
-        if ( G_PAC_INFO()->par[ PAC_info::P_AUTO_PAUSE_OPER_ON_DEV_ERR ] == 0 && 
+        if ( G_PAC_INFO()->par[ PAC_info::P_AUTO_PAUSE_OPER_ON_DEV_ERR ] == 0 &&
             op->get_state() == operation::RUN )
         	{
             //Проверка режима на проверку ОС устройств.
@@ -353,7 +353,7 @@ int tech_object::evaluate()
                 lua_on_pause( idx );
                 }
             }
-        
+
         }
     return 0;
     }
@@ -366,9 +366,9 @@ int tech_object::check_off_mode( u_int mode )
 int tech_object::final_mode( u_int mode )
     {
     if ( mode > operations_count || 0 == mode ) return 1;
-        
+
     operations_manager->reset_idle_time();
-        
+
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -380,7 +380,7 @@ int tech_object::lua_exec_cmd( u_int cmd )
         cmd, "int tech_object::lua_exec_cmd( u_int cmd )" );
     }
 //-----------------------------------------------------------------------------
-int tech_object::lua_check_function( const char* function_name, 
+int tech_object::lua_check_function( const char* function_name,
     const char* comment, u_int mode, bool show_error )
     {
     //Проверка на наличии функции function_name
@@ -412,7 +412,7 @@ int tech_object::lua_check_on_pause( u_int mode, bool show_error )
 //-----------------------------------------------------------------------------
 int tech_object::lua_check_on_stop( u_int mode, bool show_error )
     {
-    return lua_check_function( "check_on_stop", 
+    return lua_check_function( "check_on_stop",
         "int tech_object::check_on_stop( u_int mode )", mode, show_error );
     }
 //-----------------------------------------------------------------------------
@@ -673,9 +673,9 @@ int tech_object::lua_final_mode( u_int mode )
                 lua_pop( L, 1 );
                 }
             lua_pop( L, 1 );
-            }  
+            }
 
-        lua_pop( L, 1 ); 
+        lua_pop( L, 1 );
         }
     lua_pop( L, 1 );
 
@@ -778,22 +778,22 @@ int  tech_object::lua_on_start( u_int mode )
 //-----------------------------------------------------------------------------
 int tech_object::save_device( char *buff )
     {
-    int res = 
+    int res =
         sprintf( buff, "t.%s = t.%s or {}\nt.%s=\n\t{\n", name_Lua, name_Lua,
         name_Lua );
-    
+
     //Состояние и команда.
-    res += sprintf( buff + res, "\tCMD=%lu,\n", ( u_long ) cmd );    
+    res += sprintf( buff + res, "\tCMD=%lu,\n", ( u_long ) cmd );
     res += sprintf( buff + res, "\tST=\n\t\t{\n\t\t" );
-    
+
     for ( u_int i = 0; i < state.size(); i++ )
         {
-        res += sprintf( buff + res, "%lu, ", ( long int ) state[ i ] );        
+        res += sprintf( buff + res, "%lu, ", ( long int ) state[ i ] );
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
-    
+
     //Операции.
-    res += sprintf( buff + res, "\tMODES=\n\t\t{\n\t\t" );    
+    res += sprintf( buff + res, "\tMODES=\n\t\t{\n\t\t" );
     for ( u_int i = 1; i <= operations_count; i++ )
         {
         res += sprintf( buff + res, "%d, ", get_operation_state( i ) ? 1 : 0 );
@@ -807,13 +807,13 @@ int tech_object::save_device( char *buff )
     res += sprintf( buff + res, "\n\t\t},\n" );
 
     //Доступность операций.
-    res += sprintf( buff + res, "\tAVAILABILITY=\n\t\t{\n\t\t" );      
+    res += sprintf( buff + res, "\tAVAILABILITY=\n\t\t{\n\t\t" );
     for ( u_int i = 1; i <= operations_count; i++ )
         {
         res += sprintf( buff + res, "%d, ", available.at( i - 1 ) == 0 ? 1 : 0 );
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
-    
+
     //Время простоя.
     static char up_time_str [ 50 ] = { 0 };
     u_int_4 up_hours;
@@ -829,7 +829,7 @@ int tech_object::save_device( char *buff )
     sprintf( up_time_str, "\tIDLE_TIME = \'%02lu:%02lu:%02lu\',\n",
         ( u_long ) up_hours, ( u_long ) up_mins, ( u_long ) up_secs );
     res += sprintf( buff + res, "%s", up_time_str );
-    
+
     //Время режимов.
     res += sprintf( buff + res, "\tMODES_TIME=\n\t\t{\n\t\t" );
 
@@ -860,16 +860,16 @@ int tech_object::save_device( char *buff )
                     }
                     }
 
-        res += sprintf( buff + res, "%s", up_time_str );        
+        res += sprintf( buff + res, "%s", up_time_str );
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
-   
+
     //Шаги.
-    res += sprintf( buff + res, "\tMODES_STEPS=\n\t\t{\n\t\t" );  
+    res += sprintf( buff + res, "\tMODES_STEPS=\n\t\t{\n\t\t" );
     for ( u_int i = 0; i < operations_count; i++ )
         {
-        res += sprintf( buff + res, "%d, ", 
-            (*operations_manager)[ i + 1 ]->active_step());        
+        res += sprintf( buff + res, "%d, ",
+            (*operations_manager)[ i + 1 ]->active_step());
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
 
@@ -881,7 +881,7 @@ int tech_object::save_device( char *buff )
         }
     res += sprintf( buff + res, "\n\t\t},\n" );
 
-    
+
     for ( u_int i = 1; i <= operations_count; i++ )
         {
         auto operation = ( *operations_manager )[ i ];
@@ -914,7 +914,7 @@ int tech_object::save_device( char *buff )
                 }
             }
         res += sprintf( buff + res, "\n\t\t},\n" );
-        }    
+        }
 
     //States' steps.
     for ( u_int s = operation::RUN; s < operation::STATES_MAX; s++ )
@@ -927,7 +927,7 @@ int tech_object::save_device( char *buff )
             if ( steps_count == 0 ) continue;
 
             res += sprintf( buff + res, "\t%s_STEPS%d=\n\t\t{\n\t\t",
-                operation::en_state_str[ s ], i );                       
+                operation::en_state_str[ s ], i );
             u_int static_step = oper_state->active_step();
             for ( u_int j = 1; j <= steps_count; j++ )
                 {
@@ -942,7 +942,7 @@ int tech_object::save_device( char *buff )
                     }
                 }
             res += sprintf( buff + res, "\n\t\t},\n" );
-            }       
+            }
         }
 
     //Параметры.
@@ -951,7 +951,7 @@ int tech_object::save_device( char *buff )
     res += rt_par_float.save_device( buff + res, "\t" );
     res += rt_par_uint.save_device( buff + res, "\t" );
 
-    res += sprintf( buff + res, "\t}\n" );   
+    res += sprintf( buff + res, "\t}\n" );
     return res;
     }
 //-----------------------------------------------------------------------------
@@ -981,7 +981,7 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
 
             return set_extra_step( operation, step, 1 );
             }
-        else 
+        else
             {
             if ( mode >= 300000 && mode < 400000 )      // Off extra step.
                 {
@@ -1007,14 +1007,14 @@ int tech_object::set_cmd( const char *prop, u_int idx, double val )
             else
                 {
                 if ( mode >= 100000 && mode < 200000 )      // On state mode.
-                    {                    
+                    {
                     new_state = mode % 100;
-                    mode = mode / 100 - 1000;  
+                    mode = mode / 100 - 1000;
                     cmd = ( int ) val;
                     return set_mode( mode, new_state );
                     }
                 else
-                    {                   
+                    {
                     if ( G_DEBUG )
                         {
                         printf( "Error complex_state::parse_cmd - new_mode = %lu\n",
@@ -1167,27 +1167,27 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
     error_number++;
     new_err->n = error_number;
     new_err->type = type;
-    
+
     switch ( type )
         {
         case ERR_CANT_ON:
             snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%s %d\' - не включена операция %.1d \'%s\' - %s.",
-                name, number, mode, ( *operations_manager )[ mode ]->get_name(), 
+                name, number, mode, ( *operations_manager )[ mode ]->get_name(),
                 err_msg );
             break;
 
         case ERR_ON_WITH_ERRORS:
             snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%s %d\' - включена с ошибкой операция %.1d \'%s\' - %s.",
-                name, number, mode, ( *operations_manager )[ mode ]->get_name(), 
+                name, number, mode, ( *operations_manager )[ mode ]->get_name(),
                 err_msg );
             break;
 
         case ERR_OFF:
             snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%s %d\' - отключена операция %.1d \'%s\' - %s.",
-                name, number, mode, ( *operations_manager )[ mode ]->get_name(), 
+                name, number, mode, ( *operations_manager )[ mode ]->get_name(),
                 err_msg );
             break;
 
@@ -1210,7 +1210,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
                 {
                 snprintf( new_err->msg, sizeof( new_err->msg ),
                     "\'%s %d\' - операция %.1d \'%s\' - %s.",
-                    name, number, mode, ( *operations_manager )[ mode ]->get_name(), 
+                    name, number, mode, ( *operations_manager )[ mode ]->get_name(),
                     err_msg );
                 }
             else
@@ -1226,11 +1226,11 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
             snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%s %d\' - %s.", name, number, err_msg );
             break;
-            
+
         case ERR_TO_FAIL_STATE:
             snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%s %d\' - авария операции %.1d \'%s\' - %s.",
-                name, number, mode, ( *operations_manager )[ mode ]->get_name(), 
+                name, number, mode, ( *operations_manager )[ mode ]->get_name(),
                 err_msg );
             break;
 
@@ -1238,7 +1238,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
             snprintf( new_err->msg, sizeof( new_err->msg ),
                 "\'%s %d\' - не включена операция %.1d \'%s\' - "
                 "уже включена операция %.1d \'%s\'.",
-                name, number, 
+                name, number,
                 mode, ( *operations_manager )[ mode ]->get_name(),
                 new_mode, ( *operations_manager )[ new_mode ]->get_name() );
 
@@ -1269,7 +1269,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
                 name, mode, ( *operations_manager )[ mode ]->get_name(), err_msg );
             break;
         }
-    
+
     if ( G_DEBUG )
         {
         printf( "Событие -> %s\n", new_err->msg );
@@ -1312,10 +1312,10 @@ bool tech_object::is_any_important_mode()
         //Проверка на наличии Lua-функции is_any_important_mode().
         lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
             name_Lua );
-        lua_getfield( lua_manager::get_instance()->get_Lua(), -1, 
+        lua_getfield( lua_manager::get_instance()->get_Lua(), -1,
             "is_any_important_mode" );
         lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
-  
+
         if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
             {
             has_Lua_impl = 2;
@@ -1325,16 +1325,16 @@ bool tech_object::is_any_important_mode()
             has_Lua_impl = 1;
             }
         //Удаляем "is_any_important_mode" со стека.
-        lua_remove( lua_manager::get_instance()->get_Lua(), -1 );        
+        lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
         }
 
     if ( has_Lua_impl == 2 )
         {
         int res = lua_manager::get_instance()->int_no_param_exec_lua_method( name_Lua,
-            "is_any_important_mode", 
+            "is_any_important_mode",
             "void tech_object::is_any_important_mode()" );
 
-        return res > 0;        
+        return res > 0;
         }
 
     for ( u_int i = 0; i < state.size(); i++ )
@@ -1411,7 +1411,7 @@ int tech_object_manager::init_params()
         {
         tech_objects[ i ]->lua_init_params();
         }
-    
+
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
         "init_params" );
 
@@ -1507,7 +1507,7 @@ int tech_object_manager::evaluate()
     if ( has_Lua_eval == 2 )
         {
         res = lua_manager::get_instance()->void_exec_lua_method( "", "eval",
-            "void tech_object_manager::evaluate()" );       
+            "void tech_object_manager::evaluate()" );
         }
 
     return res;
@@ -1522,10 +1522,10 @@ int tech_object_manager::init_objects()
     if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
         {
         lua_manager::get_instance()->void_exec_lua_method( "", "init",
-            "int tech_object_manager::init_objects()" );       
+            "int tech_object_manager::init_objects()" );
         }
     lua_remove( lua_manager::get_instance()->get_Lua(), -1 ); // stack: init
-    
+
     return 0;
     }
 //-----------------------------------------------------------------------------

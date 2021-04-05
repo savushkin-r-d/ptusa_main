@@ -74,7 +74,7 @@ int main( int argc, const char *argv[] )
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
     //-Инициализация Lua.
-    int res = G_LUA_MANAGER->init( 0, argv[ 1 ], 
+    int res = G_LUA_MANAGER->init( 0, argv[ 1 ],
         G_PROJECT_MANAGER->path.c_str(), G_PROJECT_MANAGER->sys_path.c_str() );
 
     if ( res ) //-Ошибка инициализации.

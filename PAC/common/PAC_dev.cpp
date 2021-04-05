@@ -1,7 +1,7 @@
 #include "PAC_dev.h"
 #include "tech_def.h"
 
-#include "errors.h"
+#include "g_errors.h"
 #include "lua_manager.h"
 #include "log.h"
 

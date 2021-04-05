@@ -24,7 +24,7 @@
 #include <string.h>
 #include <vector>
 
-#include "errors.h"
+#include "g_errors.h"
 #include "smart_ptr.h"
 #include "dtime.h"
 #include "led.h"
