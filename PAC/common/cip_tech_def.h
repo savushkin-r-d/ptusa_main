@@ -362,13 +362,13 @@ enum workParameters
     P_SIGNAL_INTERMEDIATE_RINSE,        //Сигнал "промежуточная промывка"
     P_SIGNAL_POSTRINSE,                 //Сигнал "окончательная промывка"
     P_SIGNAL_PUMP_STOPPED,              //Сигнал "подающий насос остановлен и нет потока"
-    P_SIGNAL_FLOW_TASK,                 //Сигнал "задание потока"            
+    P_SIGNAL_FLOW_TASK,                 //Сигнал "задание потока"
     P_SIGNAL_TEMP_TASK,                 //Сигнал "задание температуры"
     P_SIGNAL_WASH_ABORTED,              //Сигнал "мойка закончена некорректно"
     P_PRESSURE_CONTROL,                 //Задание давления для регулятора
     P_DONT_USE_WATER_TANK,              //Не использовать вторичную воду при мойке
     P_RESERV_START,                     //начало резервных параметров
-    
+
 
     STP_QAVS = 119,		//средняя концентрация щелочи
     STP_QAVK,		//средняя концентрация кислоты
@@ -564,7 +564,7 @@ class cipline_tech_object: public tech_object
         int no_liquid_phase;
         float no_liquid_last_time;
 
-        
+
 
         //Обработчики LUA
         int is_in_evaluate_func;
@@ -816,7 +816,7 @@ class cipline_tech_object: public tech_object
         device* dev_upr_intermediate_rinse;     //Сигнал "промежуточная промывка"
         device* dev_upr_postrinse;              //Сигнал "окончательная промывка"
         device* dev_upr_pump_stopped;           //Сигнал "подающий насос остановлен и нет потока"
-        device* dev_ao_flow_task;               //Сигнал "задание потока"            
+        device* dev_ao_flow_task;               //Сигнал "задание потока"
         device* dev_ao_temp_task;               //Сигнал "задание температуры"
         device* dev_upr_wash_aborted;           //Сигнал "мойка закончена некорректно"
 

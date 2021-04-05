@@ -2929,7 +2929,7 @@ int cipline_tech_object::EvalPIDS()
                 }
             if (flagnplaststate)
                 {
-                
+
                 if (nplaststate)
                     {
                     PIDF->pid_reset();
@@ -2948,9 +2948,9 @@ int cipline_tech_object::EvalPIDS()
         {
             dev_ao_temp_task->set_value(rt_par_float[P_ZAD_PODOGR]);
         }
-     
+
         }
-   
+
 
     //Клапан пара
     if (ao->get_value()>1 && PIDP->get_state() == ON && cnt->get_flow() > rt_par_float[P_R_NO_FLOW] && NP->get_state() == ON)
@@ -3315,7 +3315,7 @@ int cipline_tech_object::_DoStep( int step_to_do )
                     objready = 0;
                     }
                 }
-     
+
             if (objready && (state == ERR_CIP_OBJECT || state == ERR_OS))
                 {
                 state = 1;
@@ -5380,7 +5380,7 @@ int cipline_tech_object::_ToObject( int from, int where )
         return 1;
         }
 
-    
+
 
     return 0;
     }
@@ -6069,7 +6069,7 @@ int cipline_tech_object::init_object_devices()
     if (check_DI(dev_os_pump_can_run, P_SIGNAL_PUMP_CAN_RUN)) return -1;
     //Сигнал уровня перед возвратным насосом.
     if (check_LS(dev_ls_ret_pump, P_SIGNAL_RET_PUMP_SENSOR)) return -1;
-    //Сигнал предварительной промывки 
+    //Сигнал предварительной промывки
     if (check_DO(dev_upr_prerinse, P_SIGNAL_PRERINSE)) return -1;
     //Сигнал промежуточной промывки
     if (check_DO(dev_upr_intermediate_rinse, P_SIGNAL_INTERMEDIATE_RINSE)) return -1;
@@ -7826,6 +7826,11 @@ MSAPID::MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_devic
     uk_1( 0 ),
     ek_1( 0 ),
     ek_2( 0 ),
+    q0{},
+    q1{},
+    q2{},
+    Uk{},
+    dUk{},
     start_time( get_millisec() ),
     last_time( get_millisec() ),
     prev_manual_mode( 0 ),

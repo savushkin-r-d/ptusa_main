@@ -5,6 +5,11 @@
 #include "lua_manager.h"
 #include "log.h"
 
+#ifdef WIN_OS
+#pragma warning(push)
+#pragma warning(disable: 26812)
+#endif // WIN_OS
+
 auto_smart_ptr < device_manager > device_manager::instance;
 
 std::vector<valve*> valve::to_switch_off;
@@ -5407,3 +5412,7 @@ void motor_altivar::set_string_property(const char * field, const char * value)
             }
         }
     }
+
+#ifdef WIN_OS
+#pragma warning(pop)
+#endif // WIN_OS

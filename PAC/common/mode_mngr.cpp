@@ -460,7 +460,7 @@ int action::check_devices( char* err_dev_name, int max_to_write ) const
 
     if ( err_dev_name[ 0 ] ) //Есть ошибки.
         {
-        int length = strlen( err_dev_name );
+        size_t length = strlen( err_dev_name );
         if ( max_to_write < 0 )
             {
             err_dev_name[ length - 1 ] = '.';
@@ -486,7 +486,7 @@ void action::add_dev( device *dev, u_int group /*= 0 */, u_int subgroup /*= 0 */
         {
         devices.push_back( std::vector < std::vector< device* > >() );
 
-        u_int last_idx = devices.size() - 1;
+        size_t last_idx = devices.size() - 1;
         while ( subgropups_cnt > devices[ last_idx ].size() )
             {
             devices[ last_idx ].push_back( std::vector< device* >() );
@@ -695,7 +695,7 @@ action* step::operator[]( int idx )
 
     if ( G_DEBUG )
         {
-        printf( "Error step::action* operator[] ( int idx ) - idx %d > count %d.\n",
+        printf( "Error step::action* operator[] ( int idx ) - idx %d > count %zd.\n",
             idx, actions.size() );
         }
 
@@ -718,7 +718,7 @@ int step::check_devices( char* err_dev_name, int str_len )
     {
     for ( u_int i = 0; i < actions.size(); i++ )
         {
-        int len = strlen( err_dev_name );
+        int len = (int) strlen( err_dev_name );
         int res = actions[ i ]->check_devices( err_dev_name + len, str_len - len );
 
         if ( res )
@@ -854,19 +854,19 @@ void open_seat_action::init()
     next_phase        = P_OPEN_UPPER;
     active_group_n    = 0;
 
-    int groups_cnt    =  wash_upper_seat_devices.size() +
+    size_t groups_cnt    =  wash_upper_seat_devices.size() +
         wash_lower_seat_devices.size();
 
     saved_params_u_int_4 &par = PAC_info::get_instance()->par;
 
     wait_time = par[ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;
-    wait_time /= groups_cnt;
+    wait_time /= (u_int_4)groups_cnt;
 
     // Для шага: для одной группы - середина продолжительности шага,
     // для двух групп - треть и т.д.
     if ( !is_mode )
         {
-        u_int_4 wait_time = owner->get_active_step_set_time() / ( groups_cnt + 1 );
+        u_int_4 wait_time = owner->get_active_step_set_time() / ( (u_int_4)groups_cnt + 1 );
         if ( wait_time > 0 )
             {
             this->wait_time = wait_time;
@@ -1061,7 +1061,7 @@ void open_seat_action::add_dev( device *dev, u_int group, u_int seat_type )
         {
         if ( G_DEBUG )
             {
-            printf( "Error open_seat_action:add_dev: group %d > %d, seat_type %d.\n",
+            printf( "Error open_seat_action:add_dev: group %d > %zd, seat_type %d.\n",
                 group, seat_group[ 0 ].size(), seat_type );
             }
         return;
@@ -1437,7 +1437,7 @@ step* operation_state::operator[]( int idx )
 
     if ( G_DEBUG )
         {
-        printf( "Error operation_state::step& operator[] ( int idx ) - idx %d > count %d.\n",
+        printf( "Error operation_state::step& operator[] ( int idx ) - idx %d > count %zd.\n",
             idx, steps.size() );
         }
 
@@ -1450,7 +1450,7 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
         {
         if ( G_DEBUG )
             {
-            printf( "Error mode::to_step step %d > steps size %d.\n",
+            printf( "Error mode::to_step step %d > steps size %zd.\n",
                 new_step, steps.size() );
             }
         return;
@@ -1527,7 +1527,7 @@ void operation_state::print( const char* prefix /*= "" */ ) const
 int operation_state::check_devices( char* err_dev_name, int str_len )
     {
     int res = mode_step->check_devices( err_dev_name +
-        strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
+        (int)strlen( err_dev_name ), str_len - (int)strlen( err_dev_name ) );
 
     if ( res )
         {
@@ -1542,7 +1542,7 @@ int operation_state::check_devices( char* err_dev_name, int str_len )
     if ( active_step_n >= 0 && ( unsigned int ) active_step_n < steps.size() )
         {
         res = steps[ active_step_n ]->check_devices( err_dev_name +
-            strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
+            (int)strlen( err_dev_name ), str_len - (int)strlen( err_dev_name ) );
 
         if ( res )
             {
@@ -1619,7 +1619,7 @@ u_int operation_state::active_step() const
 //-----------------------------------------------------------------------------
 u_int operation_state::steps_count() const
     {
-    return steps.size();
+    return (u_int)steps.size();
     }
 //-----------------------------------------------------------------------------
 const char* operation_state::get_name() const
@@ -1782,7 +1782,7 @@ bool operation_state::is_active_extra_step( int step_idx ) const
 //-----------------------------------------------------------------------------
 operation* operation_manager::add_operation( const char* name )
     {
-    operations.push_back( new operation( name, this, operations.size() + 1 ) );
+    operations.push_back( new operation( name, this, (int)operations.size() + 1 ) );
 
     return operations[ operations.size() - 1 ];
     }
@@ -1796,7 +1796,7 @@ operation* operation_manager::operator[]( unsigned int idx )
 
     if ( G_DEBUG )
         {
-        printf( "Error operation_manager::operator[] idx %d > operations count %d.\n",
+        printf( "Error operation_manager::operator[] idx %d > operations count %zd.\n",
             idx, operations.size() );
         }
 
@@ -1810,7 +1810,7 @@ unsigned long operation_manager::get_idle_time()
 //-----------------------------------------------------------------------------
 void operation_manager::print()
     {
-    printf( "operations manager, %d\n", operations.size() );
+    printf( "operations manager, %zd\n", operations.size() );
 
     for ( u_int i = 0; i < operations.size(); i++ )
         {

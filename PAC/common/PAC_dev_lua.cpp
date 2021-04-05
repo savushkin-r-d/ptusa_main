@@ -6,6 +6,7 @@
 #ifdef WIN_OS
 #pragma warning(push)
 #pragma warning(disable: 6011)
+#pragma warning(disable: 26812)
 #endif // WIN_OS
 
 #ifndef __cplusplus

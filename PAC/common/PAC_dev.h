@@ -41,6 +41,11 @@
 #include "iot_altivar.h"
 #include "log.h"
 
+#ifdef WIN_OS
+#pragma warning(push)
+#pragma warning(disable: 26812)
+#endif // WIN_OS
+
 //-----------------------------------------------------------------------------
 /// @brief Устройство c параметрами.
 ///
@@ -4252,4 +4257,10 @@ dev_stub* STUB();
 /// @return - устройство.
 device* DEVICE( int s_number );
 //-----------------------------------------------------------------------------
+
+#ifdef WIN_OS
+#pragma warning(pop)
+#endif // WIN_OS
+
 #endif // PAC_DEVICES_H
+
