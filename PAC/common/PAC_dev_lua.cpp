@@ -3,6 +3,11 @@
 ** Generated automatically by tolua++-1.0.92 on 03/26/21 08:32:25.
 */
 
+#ifdef WIN_OS
+#pragma warning(push)
+#pragma warning(disable: 6011)
+#endif // WIN_OS
+
 #ifndef __cplusplus
 #include "stdlib.h"
 #endif
@@ -13545,3 +13550,6 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
 };
 #endif
 
+#ifdef WIN_OS
+#pragma warning(pop)
+#endif //WIN_OS

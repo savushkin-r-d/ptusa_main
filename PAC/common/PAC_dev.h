@@ -644,6 +644,7 @@ class device : public i_DO_AO_device, public par_device
         /// @param buff [out] - буфер записи строки.
         virtual int save_device_ex( char *buff )
             {
+            buff[ 0 ] = 0;
             return 0;
             }
 
@@ -2013,7 +2014,8 @@ class valve_bottom_mix_proof : public i_mix_proof,  public valve
     public:
         valve_bottom_mix_proof( const char *dev_name
             ): valve( true, true, dev_name, DT_V, DST_V_BOTTOM_MIXPROOF ),
-            is_closing_mini(0)
+            is_closing_mini(0),
+            start_off_time( 0 )
             {
             }
 
@@ -2472,7 +2474,7 @@ class AI1 : public analog_io_device
     {
     public:
         AI1( const char *dev_name, device::DEVICE_TYPE type,
-            device::DEVICE_SUB_TYPE sub_type, u_int par_cnt, u_int *start_par_idx );
+            device::DEVICE_SUB_TYPE sub_type, u_int par_cnt );
 
 #ifdef DEBUG_NO_IO_MODULES
         float get_value();
@@ -2500,6 +2502,11 @@ class AI1 : public analog_io_device
         int get_state()
             {
             return st;
+            }
+
+        virtual int get_params_count() const
+            {
+            return ADDITIONAL_PARAM_COUNT;
             }
 #endif
 
@@ -2543,8 +2550,9 @@ class temperature_e : public AI1
     {
     public:
         temperature_e( const char *dev_name ): AI1( dev_name, DT_TE, DST_TE,
-            ADDITIONAL_PARAM_COUNT, &start_param_idx )
+            ADDITIONAL_PARAM_COUNT )
             {
+            start_param_idx = AI1::get_params_count();
             set_par_name( P_ERR_T,  start_param_idx, "P_ERR_T" );
             }
 
@@ -2618,7 +2626,7 @@ class level: public AI1
     {
     public:
         level( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,
-            u_int par_cnt, u_int* start_par_idx );
+            u_int par_cnt );
 
         int get_volume();
         virtual int calc_volume();
@@ -2627,6 +2635,11 @@ class level: public AI1
 
         float get_max_val();
         float get_min_val();
+
+        int get_params_count() const
+            {
+            return start_param_idx + LAST_PARAM_IDX - 1;
+            }
 
     protected:
         enum CONSTANTS
@@ -2692,8 +2705,9 @@ class pressure_e : public AI1
     {
     public:
         pressure_e( const char *dev_name ): AI1( dev_name, DT_PT, DST_NONE,
-            ADDITIONAL_PARAM_COUNT, &start_param_idx )
+            ADDITIONAL_PARAM_COUNT )
             {
+            start_param_idx = AI1::get_params_count();
             set_par_name( P_MIN_V,  start_param_idx, "P_MIN_V" );
             set_par_name( P_MAX_V,  start_param_idx, "P_MAX_V" );
             }
@@ -2730,7 +2744,7 @@ class pressure_e_iolink : public analog_io_device
 #endif
         void set_article( const char* new_article );
 
-        enum class ARTICLE
+        enum ARTICLE
             {
             DEFAULT,
             IFM_PM1704,
@@ -2858,7 +2872,7 @@ class circuit_breaker : public analog_io_device
         int err;
         int m;
 
-        F_data_in in_info;
+        F_data_in in_info = {};
         F_data_out* out_info;
     };
 //-----------------------------------------------------------------------------
@@ -2905,12 +2919,13 @@ class level_e_iolink : public level
 class concentration_e : public AI1
     {
     public:
-        concentration_e( const char *dev_name, DEVICE_SUB_TYPE sub_type ): AI1(
-            dev_name, DT_QT, sub_type, ADDITIONAL_PARAM_COUNT, &start_param_idx )
+        concentration_e( const char *dev_name, DEVICE_SUB_TYPE sub_type ): start_param_idx( 0 ),
+            AI1( dev_name, DT_QT, sub_type, ADDITIONAL_PARAM_COUNT )
             {
 #ifdef DEBUG_NO_IO_MODULES
             st = 1;
 #endif
+            start_param_idx = AI1::get_params_count();
             set_par_name( P_MIN_V,  start_param_idx, "P_MIN_V" );
             set_par_name( P_MAX_V,  start_param_idx, "P_MAX_V" );
             }
@@ -3024,8 +3039,9 @@ class analog_input : public AI1
     {
     public:
         analog_input( const char *dev_name ): AI1( dev_name, DT_AI, DST_NONE,
-            ADDITIONAL_PARAM_COUNT, &start_param_idx )
+            ADDITIONAL_PARAM_COUNT )
             {
+            start_param_idx = AI1::get_params_count();
             set_par_name( P_MIN_V,  start_param_idx, "P_MIN_V" );
             set_par_name( P_MAX_V,  start_param_idx, "P_MAX_V" );
             }
@@ -3555,7 +3571,7 @@ class level_s_iolink : public analog_io_device
         int current_state;
         u_int_4 time;
 
-        enum class ARTICLE
+        enum ARTICLE
             {
             DEFAULT,
             IFM_LMT100,

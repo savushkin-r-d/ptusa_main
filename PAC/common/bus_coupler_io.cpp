@@ -48,13 +48,13 @@ int io_device::get_DO( u_int index )
         {
         print();
         printf( "io_device->get_DO(...) - error! " );
-        printf( "index = %d, DO_channels.count = %d, "
-            "DO_channels.char_write_values = %d",
-            index, DO_channels.count, ( int ) DO_channels.char_write_values );
+        printf( "index = %d, DO_channels.count = %u, "
+            "DO_channels.char_write_values = %p",
+            index, DO_channels.count, DO_channels.char_write_values );
         if ( DI_channels.char_write_values )
             {
-            printf( ", DO_channels.char_write_values[ index ]=%d",
-                ( int ) DO_channels.char_write_values[ index ] );
+            printf( ", DO_channels.char_write_values[ index ]=%p",
+                DO_channels.char_write_values[ index ] );
             }
         printf( "\n" );
         }
@@ -75,9 +75,9 @@ int io_device::set_DO( u_int index, char value )
     if ( G_DEBUG )
         {
         print();
-        printf( "io_device->set_DO(...) - error! %d, %d, %d, %d\n",
-            index, DO_channels.count, ( int ) DO_channels.char_write_values,
-            ( int ) DO_channels.char_write_values[ index ] );
+        printf( "io_device->set_DO(...) - error! %d, %d, %p, %p\n",
+            index, DO_channels.count, DO_channels.char_write_values,
+            DO_channels.char_write_values[ index ] );
         print();
         }
 
@@ -98,12 +98,12 @@ int io_device::get_DI( u_int index )
         print();
         printf( "io_device->get_DI(...) - error! " );
         printf( "index = %d, DI_channels.count = %d, "
-            "DI_channels.char_read_values = %d",
-            index, DI_channels.count, ( int ) DI_channels.char_read_values );
+            "DI_channels.char_read_values = %p",
+            index, DI_channels.count, DI_channels.char_read_values );
         if ( DI_channels.char_read_values )
             {
-            printf( ", DI_channels.char_read_values[ index ]=%d",
-                ( int ) DI_channels.char_read_values[ index ] );
+            printf( ", DI_channels.char_read_values[ index ]=%p",
+                DI_channels.char_read_values[ index ] );
             }
         printf( "\n" );
         }
@@ -226,12 +226,12 @@ float io_device::get_AO( u_int index, float min_value, float max_value )
         print();
         printf( "io_device->get_AO(...) - error! " );
         printf( "index = %d, AO_channels.count = %d, "
-            "AO_channels.int_write_values = %d",
-            index, AO_channels.count, ( int ) AO_channels.int_write_values );
+            "AO_channels.int_write_values = %p",
+            index, AO_channels.count, AO_channels.int_write_values );
         if ( AO_channels.int_write_values )
             {
-            printf( ", AO_channels.int_write_values[ index ]=%d",
-                ( int ) AO_channels.int_write_values[ index ] );
+            printf( ", AO_channels.int_write_values[ index ]=%p",
+                AO_channels.int_write_values[ index ] );
             }
         printf( "\n" );
         }
@@ -440,12 +440,12 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
         print();
         printf( "io_device->get_AI(...) - error! " );
         printf( "index = %d, AI_channels.count = %d, "
-            "AI_channels.int_read_values = %d",
-            index, AI_channels.count, ( int ) AI_channels.int_read_values );
+            "AI_channels.int_read_values = %p",
+            index, AI_channels.count, AI_channels.int_read_values );
         if ( AI_channels.int_read_values )
             {
-            printf( ", AI_channels.int_read_values[ index ]=%d",
-                ( int ) AI_channels.int_read_values[ index ] );
+            printf( ", AI_channels.int_read_values[ index ]=%p",
+                AI_channels.int_read_values[ index ] );
             }
         printf( "\n" );
         }
@@ -473,12 +473,12 @@ int_2* io_device::get_AI_data( u_int index )
 
             printf("io_device->get_AI_data(...) - error! ");
             printf("index = %d, AI_channels.count = %d, "
-                    "AI_channels.int_read_values = %d", index,
-                    AI_channels.count, (int) AI_channels.int_read_values);
+                    "AI_channels.int_read_values = %p", index,
+                    AI_channels.count, AI_channels.int_read_values);
             if (AI_channels.int_read_values)
                 {
-                printf(", AI_channels.int_read_values[ index ]=%d",
-                        (int) AI_channels.int_read_values[index]);
+                printf(", AI_channels.int_read_values[ index ]=%p",
+                        AI_channels.int_read_values[index]);
                 }
             printf("\n");
             }
@@ -540,12 +540,12 @@ int_2* io_device::get_AO_write_data( u_int index )
         print();
         printf( "io_device->get_AO_write_data(...) - error! " );
         printf( "index = %d, AO_channels.count = %d, "
-            "AO_channels.int_write_values = %d",
-            index, AO_channels.count, ( int ) AO_channels.int_write_values );
+            "AO_channels.int_write_values = %p",
+            index, AO_channels.count, AO_channels.int_write_values );
         if ( AO_channels.int_write_values )
             {
-            printf( ", AO_channels.int_write_values[ index ]=%d",
-                ( int ) AO_channels.int_write_values[ index ] );
+            printf( ", AO_channels.int_write_values[ index ]=%p",
+                AO_channels.int_write_values[ index ] );
             }
         printf( "\n" );
         }
@@ -564,12 +564,12 @@ int_2* io_device::get_AO_read_data( u_int index )
         print();
         printf( "io_device->get_AO_read_data(...) - error! " );
         printf( "index = %d, AO_channels.count = %d, "
-            "AO_channels.int_read_values = %d",
-            index, AO_channels.count, ( int ) AO_channels.int_read_values );
+            "AO_channels.int_read_values = %p",
+            index, AO_channels.count, AO_channels.int_read_values );
         if ( AO_channels.int_read_values )
             {
-            printf( ", AO_channels.int_read_values[ index ]=%d",
-                ( int ) AO_channels.int_read_values[ index ] );
+            printf( ", AO_channels.int_read_values[ index ]=%p",
+                AO_channels.int_read_values[ index ] );
             }
         printf( "\n" );
         }
@@ -587,7 +587,7 @@ void io_device::print() const
     //printf( "\n" );
     }
 //-----------------------------------------------------------------------------
-io_device::io_device( const char* name ) : name( name ),
+io_device::io_device( const char* name ) : name( name ), vendor( PHOENIX ),
     DI_channels( IO_channels::CT_DI ),
     DO_channels( IO_channels::CT_DO ),
     AI_channels( IO_channels::CT_AI ),
@@ -1105,27 +1105,37 @@ io_manager::io_node::~io_node()
         }
     }
 //-----------------------------------------------------------------------------
-io_manager::io_node::io_node( int type, int number, char *str_ip_address,
-                                   char *name,
-                                   int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, int AI_cnt,
-                                   int AI_size ): state( ST_NO_CONNECT ),
-                                   type( ( TYPES ) type ),
-                                   number( number ),
+io_manager::io_node::io_node( int type, int number, char* str_ip_address,
+    char* name,
+    int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, int AI_cnt,
+    int AI_size ) : state( ST_NO_CONNECT ),
+    type( (TYPES)type ),
+    number( number ),
 
-                                   is_active( true ),
+    is_active( true ),
 
-                                   last_poll_time( get_millisec() ),
-                                   is_set_err( 0 ),
-                                   sock( 0 ),
+    last_poll_time( get_millisec() ),
+    is_set_err( 0 ),
+    sock( 0 ),
 
-                                   DO_cnt( DO_cnt ),
-                                   AO_cnt( AO_cnt ),
-                                   AO_size( AO_size ),
-                                   DI_cnt( DI_cnt ),
-                                   AI_cnt( AI_cnt ),
-                                   AI_size( AI_size ),
-                                   last_init_time( get_millisec() ),
-                                   delay_time( 0 )
+    DO_cnt( DO_cnt ),
+    DO( 0 ),
+    DO_( 0 ),
+    AO_cnt( AO_cnt ),
+    AO_size( AO_size ),
+    AO{},
+    AO_{},
+    AO_offsets{},
+    AO_types{},
+    DI_cnt( DI_cnt ),
+    DI{},
+    AI_cnt( AI_cnt ),
+    AI_size( AI_size ),
+    AI{},
+    AI_offsets{},
+    AI_types{},
+    last_init_time( get_millisec() ),
+    delay_time( 0 )
     {
     if ( str_ip_address )
         {
@@ -1163,30 +1173,30 @@ io_manager::io_node::io_node( int type, int number, char *str_ip_address,
 
     if ( AI_cnt )
         {
-        AI_offsets = new u_int [ AI_cnt ];
-        AI_types = new u_int [ AI_cnt ];
+        AI_offsets = new u_int[ AI_cnt ];
+        AI_types = new u_int[ AI_cnt ];
 
         memset( AI, 0, sizeof( AI ) );
         }
     if ( AO_cnt )
         {
-        AO_types = new u_int [ AO_cnt ];
-        AO_offsets = new u_int [ AO_cnt ];
+        AO_types = new u_int[ AO_cnt ];
+        AO_offsets = new u_int[ AO_cnt ];
 
         memset( AO, 0, sizeof( AO ) );
         memset( AO_, 0, sizeof( AO ) );
         }
 
-    if (DI_cnt)
+    if ( DI_cnt )
         {
-        DI = new u_char[DI_cnt];
-        memset(DI, 0, DI_cnt);
+        DI = new u_char[ DI_cnt ];
+        memset( DI, 0, DI_cnt );
         }
 
     if ( DO_cnt )
         {
-        DO = new u_char [ DO_cnt ];
-        DO_ = new u_char [ DO_cnt ];
+        DO = new u_char[ DO_cnt ];
+        DO_ = new u_char[ DO_cnt ];
         memset( DO, 0, DO_cnt );
         memset( DO_, 0, DO_cnt );
         }

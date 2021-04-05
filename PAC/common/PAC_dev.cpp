@@ -112,7 +112,7 @@ void par_device::set_par( u_int idx, u_int offset, float value )
         }
     }
 //-----------------------------------------------------------------------------
-par_device::par_device ( u_int par_cnt ) : par ( 0 ),
+par_device::par_device ( u_int par_cnt ) : err_par( 0 ), par ( 0 ),
     par_name ( 0 )
     {
     if ( par_cnt )
@@ -369,7 +369,8 @@ int device::set_cmd( const char *prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 device::device( const char *dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type,
                u_int par_cnt ) :
-par_device( par_cnt ),
+    par_device( par_cnt ),
+    s_number( 0 ),
     type( type ),
     sub_type( sub_type ),
     is_manual_mode( false )
@@ -448,7 +449,7 @@ device* device_manager::get_device( int dev_type,
         }
     else
         {
-        if ( dev_type <= device::C_DEVICE_TYPE_CNT )
+        if ( dev_type < device::C_DEVICE_TYPE_CNT )
             {
             sprintf( G_LOG->msg, "%3s ", device::DEV_NAMES[ dev_type ] );
             }
@@ -1186,7 +1187,7 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char *dev_
     int l = -1;
     int u = -1;
 
-    if ( ( int ) dev_type < ( int ) device::C_DEVICE_TYPE_CNT )
+    if ( ( int ) dev_type < ( int ) device::C_DEVICE_TYPE_CNT && dev_type >= 0 )
         {
         l = dev_types_ranges[ dev_type ].start_pos;
         u = dev_types_ranges[ dev_type ].end_pos;
@@ -1288,7 +1289,7 @@ void dev_stub::direct_set_value( float new_value )
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE dev_stub::get_valve_state()
     {
-    return V_OFF;
+    return VALVE_STATE::V_OFF;
     }
 //-----------------------------------------------------------------------------
 void dev_stub::direct_on()
@@ -1357,7 +1358,7 @@ void counter::direct_set_value( float new_value )
 //-----------------------------------------------------------------------------
 int counter::get_state()
     {
-    return state;
+    return (int) state;
     }
 //-----------------------------------------------------------------------------
 void counter::direct_on()
@@ -1403,19 +1404,19 @@ void counter::pause()
     {
     get_quantity(); // Пересчитываем значение счетчика.
 
-    state = S_PAUSE;
+    state = STATES::S_PAUSE;
     }
 //-----------------------------------------------------------------------------
 void counter::start()
     {
-    if ( S_STOP == state || S_PAUSE == state )
+    if ( STATES::S_STOP == state || STATES::S_PAUSE == state )
         {
-        if ( S_STOP == state )
+        if ( STATES::S_STOP == state )
             {
             value = 0;
             }
 
-        state = S_WORK;
+        state = STATES::S_WORK;
         last_read_value = *( ( u_int_2* ) get_AI_data( AI_Q_INDEX ) );
         }
     }
@@ -1523,7 +1524,7 @@ counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
                      int extra_par_cnt ):
     device( dev_name, DT_FQT, DST_FQT, extra_par_cnt ),
     io_device( dev_name ),
-    state( S_WORK ),
+    state( STATES::S_WORK ),
     value( 0 ),
     last_read_value( 0 ),
     abs_value( 0 ),
@@ -1588,20 +1589,20 @@ int counter_f::get_state()
         else
             {
             // Насос работает.
-            if ( state == S_PAUSE )
+            if ( state == STATES::S_PAUSE )
                 {
                 start_pump_working_time = get_millisec();
                 }
             else          // Работа.
                 {
-                state = S_WORK;
+                state = STATES::S_WORK;
 
                 if ( get_delta_millisec( start_pump_working_time ) > get_par( P_DT, 0 ) )
                     {
                     // Проверяем счетчик на ошибку - он должен изменить свои показания.
                     if ( get_quantity() == counter_prev_value )
                         {
-                        state = S_ERROR;
+                        state = STATES::S_ERROR;
                         }
                     else
                         {
@@ -1615,14 +1616,14 @@ int counter_f::get_state()
 
     if ( get_flow() == -1. )
         {
-        return S_LOW_ERR;
+        return (int) STATES::S_LOW_ERR;
         }
     if ( get_flow() == -2. )
         {
-        return S_HI_ERR;
+        return (int) STATES::S_HI_ERR;
         }
 
-    return state;
+    return (int) state;
     }
 //-----------------------------------------------------------------------------
 float counter_f::get_flow()
@@ -1797,6 +1798,8 @@ digital_io_device( dev_name, type, sub_type, ADDITIONAL_PARAMS_COUNT ),
     on_fb( true ),
     off_fb( true ),
     was_on_auto( false ),
+    is_switching_off( false ),
+    start_off_time( 0 ),
     start_switch_time( get_millisec() ),
     wash_flag ( false )
     {
@@ -1809,7 +1812,11 @@ valve::valve( const char *dev_name, device::DEVICE_TYPE type,
     digital_io_device( dev_name, type, sub_type, 0 ),
     is_on_fb( false ),
     is_off_fb( false ),
+    on_fb( false ),
+    off_fb( false ),
     was_on_auto( false ),
+    is_switching_off( false ),
+    start_off_time( 0 ),
     start_switch_time( get_millisec() ),
     wash_flag ( false )
     {
@@ -1824,6 +1831,8 @@ valve::valve( bool is_on_fb, bool is_off_fb, const char *dev_name,
     on_fb( true ),
     off_fb( true ),
     was_on_auto( false ),
+    is_switching_off( false ),
+    start_off_time( 0 ),
     start_switch_time( get_millisec() ),
     wash_flag( false )
     {
@@ -2110,8 +2119,8 @@ void valve::evaluate()
 void valve::off()
     {
     if ( false == was_on_auto ||                //Если был включен вручную.
-        get_valve_state() == V_UPPER_SEAT ||
-        get_valve_state() == V_LOWER_SEAT )
+        get_valve_state() == VALVE_STATE::V_UPPER_SEAT ||
+        get_valve_state() == VALVE_STATE::V_LOWER_SEAT )
         {
         if ( !get_manual_mode() )
             {
@@ -2244,12 +2253,12 @@ void valve_DO2_DI2::direct_off()
 //-----------------------------------------------------------------------------
 void valve_mix_proof::open_upper_seat()
     {
-    direct_set_state( V_UPPER_SEAT );
+    direct_set_state( (int) VALVE_STATE::V_UPPER_SEAT );
     }
 //-----------------------------------------------------------------------------
 void valve_mix_proof::open_lower_seat()
     {
-    direct_set_state( V_LOWER_SEAT );
+    direct_set_state( (int) VALVE_STATE::V_LOWER_SEAT );
     }
 //-----------------------------------------------------------------------------
 void valve_mix_proof::direct_set_state( int new_state )
@@ -2340,7 +2349,7 @@ bool valve_bottom_mix_proof::is_switching_off_finished(
     {
     //Если открыли клапан раньше завершения закрытия, то его можно удалять из
     //вектора.
-    if ( v->get_valve_state() == V_ON )
+    if ( v->get_valve_state() == VALVE_STATE::V_ON )
         {
         return true;
         }
@@ -2425,18 +2434,18 @@ void valve_bottom_mix_proof::direct_off()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 valve_iolink_mix_proof::valve_iolink_mix_proof( const char* dev_name ) :
-    valve( true, true, dev_name, DT_V, V_IOLINK_MIXPROOF )
+    valve( true, true, dev_name, DT_V, V_IOLINK_MIXPROOF ), out_info( 0 )
     {
     }
 //-----------------------------------------------------------------------------
 void valve_iolink_mix_proof::open_upper_seat()
     {
-    direct_set_state( V_UPPER_SEAT );
+    direct_set_state( (int) VALVE_STATE::V_UPPER_SEAT );
     }
 //-----------------------------------------------------------------------------
 void valve_iolink_mix_proof::open_lower_seat()
     {
-    direct_set_state( V_LOWER_SEAT );
+    direct_set_state( (int) VALVE_STATE::V_LOWER_SEAT );
     }
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE valve_iolink_mix_proof::get_valve_state()
@@ -3257,18 +3266,12 @@ inline int valve_iolink_vtug_DO2::get_off_fb_value()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 AI1::AI1( const char *dev_name, device::DEVICE_TYPE type,
-    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt,
-    u_int *start_par_idx ) : analog_io_device( dev_name, type, sub_type,
+    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) : analog_io_device( dev_name, type, sub_type,
         par_cnt + ADDITIONAL_PARAM_COUNT )
 #ifdef DEBUG_NO_IO_MODULES
         ,st( 1 )
 #endif
     {
-    if ( start_par_idx )
-        {
-        *start_par_idx = ADDITIONAL_PARAM_COUNT;
-        }
-
     set_par_name( P_ZERO_ADJUST_COEFF, 0, "P_CZ" );
     }
 //-----------------------------------------------------------------------------
@@ -3296,8 +3299,9 @@ void AI1::direct_set_value( float new_value )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 temperature_e_iolink::temperature_e_iolink( const char *dev_name ):
-    AI1(dev_name, DT_TE, DST_TE_IOLINK, ADDITIONAL_PARAM_COUNT, &start_param_idx), info(new TE_data)
+    AI1(dev_name, DT_TE, DST_TE_IOLINK, ADDITIONAL_PARAM_COUNT), info(new TE_data)
     {
+    start_param_idx = AI1::get_params_count();
     set_par_name(P_ERR_T, start_param_idx, "P_ERR_T");
     }
 //-----------------------------------------------------------------------------
@@ -3415,13 +3419,10 @@ void AO1::direct_set_value( float new_value )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 level::level( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,
-    u_int par_cnt, u_int* start_par_idx ) :AI1(
-        dev_name, DT_LT, sub_type, par_cnt + LAST_PARAM_IDX - 1, &start_param_idx )
+    u_int par_cnt ) :AI1(
+        dev_name, DT_LT, sub_type, par_cnt + LAST_PARAM_IDX - 1 )
     {
-    if ( start_par_idx )
-        {
-        *start_par_idx = start_param_idx + LAST_PARAM_IDX - 1;
-        }
+    start_param_idx = AI1::get_params_count();
     set_par_name( P_ERR, start_param_idx, "P_ERR" );
     }
 //-----------------------------------------------------------------------------
@@ -3459,14 +3460,15 @@ float level::get_min_val()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 level_e::level_e( const char* dev_name ) : level(
-    dev_name, DST_LT, 0, 0 )
+    dev_name, DST_LT, 0 )
     {
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 level_e_cyl::level_e_cyl( const char* dev_name ) : level(
-    dev_name, DST_LT_CYL, LAST_PARAM_IDX - 1, &start_param_idx )
+    dev_name, DST_LT_CYL, LAST_PARAM_IDX - 1 )
     {
+    start_param_idx = level::get_params_count();
     set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
     set_par_name( P_R, start_param_idx, "P_R" );
     }
@@ -3484,8 +3486,9 @@ int level_e_cyl::calc_volume()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 level_e_cone::level_e_cone( const char* dev_name ) : level(
-    dev_name, DST_LT_CONE, LAST_PARAM_IDX - 1, &start_param_idx )
+    dev_name, DST_LT_CONE, LAST_PARAM_IDX - 1 )
     {
+    start_param_idx = level::get_params_count();
     set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
     set_par_name( P_R, start_param_idx, "P_R" );
     set_par_name( P_H_CONE, start_param_idx, "P_H_CONE" );
@@ -3880,7 +3883,7 @@ void level_s_iolink::evaluate_io()
         case ARTICLE::IFM_LMT104:   //IFM.LMT104
         case ARTICLE::IFM_LMT105:   //IFM.LMT105
             {
-            LS_data info;
+            LS_data info{};
             std::reverse_copy( data, data + sizeof( info ), (char*)&info );
             v = (float) info.v;
             st = info.st1;
@@ -3889,7 +3892,7 @@ void level_s_iolink::evaluate_io()
 
         case ARTICLE::EH_FTL33:     //E&H.FTL33-GR7N2ABW5J
             {
-            rev_LS_data info;
+            rev_LS_data info{};
             std::reverse_copy( data, data + sizeof( info ), (char*) &info );
             v = 0.1f *info.v;
             st = info.st1;
@@ -3990,10 +3993,11 @@ bool level_s_iolink::is_active()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 level_e_iolink::level_e_iolink( const char *dev_name ) :
-    level( dev_name, DST_LT_IOLINK, LAST_PARAM_IDX - 1, &start_param_idx ),
+    level( dev_name, DST_LT_IOLINK, LAST_PARAM_IDX - 1 ),
     n_article( pressure_e_iolink::ARTICLE::DEFAULT ), v( 0 ), st( 0 ),
     PT_extra( 0 )
     {
+    start_param_idx = level::get_params_count();
     set_par_name( P_MAX_P, start_param_idx, "P_MAX_P" );
     set_par_name( P_R, start_param_idx, "P_R" );
     set_par_name( P_H_CONE, start_param_idx, "P_H_CONE" );
@@ -4187,7 +4191,7 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         case ARTICLE::IFM_PI2794:
         case ARTICLE::IFM_PI2797:
             {
-            PT_data info;
+            PT_data info{};
             std::reverse_copy( data, data + sizeof( info ), (char*)&info );
 
             v = info.v;
@@ -4202,7 +4206,7 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         case ARTICLE::IFM_PM1709:
         case ARTICLE::IFM_PM1715:
             {
-            ex_PT_data info;
+            ex_PT_data info{};
 
             std::swap( data[ 0 ], data[ 1 ] );
             std::swap( data[ 2 ], data[ 3 ] );
@@ -4653,43 +4657,43 @@ int timer::get_saved_size() const
 //-----------------------------------------------------------------------------
 timer::timer(): last_time( 0 ),
     work_time( 0 ),
-    state( S_STOP ),
+    state( STATE::S_STOP ),
     countdown_time( 0 )
     {
     }
 //-----------------------------------------------------------------------------
 void timer::start()
     {
-    if ( S_STOP == state )
+    if ( STATE::S_STOP == state )
         {
         work_time = 0;
         }
 
-    if ( S_PAUSE == state || S_STOP == state )
+    if ( STATE::S_PAUSE == state || STATE::S_STOP == state )
         {
-        state = S_WORK;
+        state = STATE::S_WORK;
         last_time = get_millisec();
         }
     }
 //-----------------------------------------------------------------------------
 void timer::reset()
     {
-    state = S_STOP;
+    state = STATE::S_STOP;
     work_time = 0;
     }
 //-----------------------------------------------------------------------------
 void timer::pause()
     {
-    if ( S_WORK == state )
+    if ( STATE::S_WORK == state )
         {
         work_time += get_delta_millisec( last_time );
         }
-    state = S_PAUSE;
+    state = STATE::S_PAUSE;
     }
 //-----------------------------------------------------------------------------
 bool timer::is_time_up() const
     {
-    if ( S_WORK == state )
+    if ( STATE::S_WORK == state )
         {
         u_int time = work_time + get_delta_millisec( last_time );
         if (  time <= countdown_time )
@@ -4706,7 +4710,7 @@ bool timer::is_time_up() const
 //-----------------------------------------------------------------------------
 u_long timer::get_work_time() const
     {
-    if (S_WORK == state)
+    if ( STATE::S_WORK == state )
         {
         return work_time + get_delta_millisec( last_time );
         }
@@ -5028,8 +5032,8 @@ void valve_AS_DO1_DI2::direct_set_state(int new_state)
     {
     switch ( new_state )
         {
-        case V_UPPER_SEAT:
-        case V_LOWER_SEAT:
+        case (int) VALVE_STATE::V_UPPER_SEAT:
+        case (int) VALVE_STATE::V_LOWER_SEAT:
             //Ничего не делаем, так как нет седел.
             break;
 
@@ -5099,7 +5103,9 @@ virtual_device::virtual_device( const char *dev_name,
 //-----------------------------------------------------------------------------
 virtual_counter::virtual_counter( const char *dev_name ) :
     device( dev_name, DT_FQT, DST_FQT_VIRT, 0 ),
-    state( S_WORK ),
+    last_read_value( 0 ),
+    abs_last_read_value( 0 ),
+    state( STATES::S_WORK ),
     flow_value( 0 ),
     value( 0 ),
     abs_value( 0 ),
@@ -5119,7 +5125,7 @@ void virtual_counter::direct_set_value( float new_value )
 //-----------------------------------------------------------------------------
 int virtual_counter::get_state()
     {
-    return state;
+    return (int) state;
     }
 //-----------------------------------------------------------------------------
 void virtual_counter::direct_on()
@@ -5136,16 +5142,16 @@ void virtual_counter::direct_set_state( int new_state )
     {
     switch ( new_state )
         {
-        case S_STOP:
-            state = S_STOP;
+        case (int) STATES::S_STOP:
+            state = STATES::S_STOP;
             reset();
             break;
 
-        case S_WORK:
+        case (int) STATES::S_WORK:
             start();
             break;
 
-        case S_PAUSE:
+        case (int) STATES::S_PAUSE:
             pause();
             break;
         }
@@ -5153,19 +5159,19 @@ void virtual_counter::direct_set_state( int new_state )
 //-----------------------------------------------------------------------------
 void virtual_counter::pause()
     {
-    state = S_PAUSE;
+    state = STATES::S_PAUSE;
     }
 //-----------------------------------------------------------------------------
 void virtual_counter::start()
     {
-    if ( S_STOP == state || S_PAUSE == state )
+    if ( STATES::S_STOP == state || STATES::S_PAUSE == state )
         {
-        if ( S_STOP == state )
+        if ( STATES::S_STOP == state )
             {
             value = 0;
             }
 
-        state = S_WORK;
+        state = STATES::S_WORK;
         }
     }
 //-----------------------------------------------------------------------------

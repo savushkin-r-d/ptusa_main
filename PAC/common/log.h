@@ -14,7 +14,7 @@
 #include "string.h"
 
 extern int G_USE_LOG;
-extern int G_DEBUG; 
+extern int G_DEBUG;
 //-----------------------------------------------------------------------------
 /// @brief Работа с журналом.
 ///
@@ -94,7 +94,7 @@ class log_mngr
 #ifndef PAC_WAGO_750_860
 	static i_log *lg;
 #endif
-  
+
     };
 //-----------------------------------------------------------------------------
 #define G_LOG log_mngr::get_log()

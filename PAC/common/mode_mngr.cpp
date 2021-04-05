@@ -510,7 +510,7 @@ void on_action::evaluate()
         return;
         }
 
-    auto devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
+    auto &devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
     for ( u_int i = 0; i < devs.size(); i++ )
         {
         devs[ i ]->on();
@@ -525,7 +525,7 @@ void on_reverse_action::evaluate()
         return;
         }
 
-    auto devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
+    auto &devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
     for ( u_int i = 0; i < devs.size(); i++ )
         {
         devs[ i ]->set_state( 2 );
@@ -540,7 +540,7 @@ void off_action::evaluate()
         return;
         }
 
-    auto devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
+    auto &devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
     for ( u_int i = 0; i < devs.size(); i++ )
         {
         if ( devs[ i ]->get_type() == device::DT_V )
@@ -565,7 +565,7 @@ void off_action::init()
         return;
         }
 
-    auto devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
+    auto &devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
     for ( u_int i = 0; i < devs.size(); i++ )
         {
         devs[ i ]->off();
@@ -580,7 +580,7 @@ int required_DI_action::check( char* reason ) const
         return 0;
         }
 
-    auto devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
+    auto &devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
     for ( u_int i = 0; i < devs.size(); i++ )
         {
         if ( !devs[ i ]->is_active() )
@@ -743,7 +743,7 @@ int DI_DO_action::check( char* reason ) const
         return 0;
         }
 
-    auto devs = devices[ MAIN_GROUP ];
+    auto &devs = devices[ MAIN_GROUP ];
     for ( u_int i = 0; i < devs.size(); i++ )
         {
         if ( devs[ i ].empty() )
@@ -771,7 +771,7 @@ void DI_DO_action::evaluate()
         return;
         }
 
-    auto devs = devices[ MAIN_GROUP ];
+    auto &devs = devices[ MAIN_GROUP ];
 
     for ( u_int i = 0; i < devs.size(); i++ )
         {
@@ -805,7 +805,7 @@ void AI_AO_action::evaluate()
         return;
         }
 
-    auto devs = devices[ MAIN_GROUP ];
+    auto &devs = devices[ MAIN_GROUP ];
 
     for ( u_int i = 0; i < devs.size(); i++ )
         {
@@ -825,8 +825,10 @@ void AI_AO_action::evaluate()
 open_seat_action::open_seat_action( bool is_mode, operation_state *owner ) :
     action( "Промывка седел" ),
     phase( P_WAIT ),
+    next_phase( PHASES::P_OPEN_UPPER ),
     active_group_n( 0 ),
     wait_time( 60000 ),
+    wait_seat_time( 0 ),
     wash_time_upper( 1000 ),
     wash_time_lower( 1000 ),
     start_cycle_time( 0 ),
@@ -1042,17 +1044,10 @@ void open_seat_action::final()
 //-----------------------------------------------------------------------------
 void open_seat_action::add_dev( device *dev, u_int group, u_int seat_type )
     {
-    std::vector< std::vector< device* > > *seat_group = 0;
-
-    switch ( seat_type )
+    auto seat_group = &wash_upper_seat_devices;
+    if ( seat_type == valve::V_LOWER_SEAT )
         {
-    case valve::V_UPPER_SEAT:
-        seat_group = &wash_upper_seat_devices;
-        break;
-
-    case valve::V_LOWER_SEAT:
         seat_group = &wash_lower_seat_devices;
-        break;
         }
 
     if ( group >= seat_group[ 0 ].size() )
@@ -1147,7 +1142,7 @@ void wash_action::evaluate()
 
     for ( u_int idx = 0; idx < devices.size(); idx++ )
         {
-        auto devs = devices[ idx ];
+        auto &devs = devices[ idx ];
 
         //Подаем сигналы "Мойка ОК".
         for ( u_int i = 0; i < devs[ G_DO ].size(); i++ )
@@ -1275,6 +1270,8 @@ operation_state::operation_state( const char* name,
     operation_manager *owner, int n ) : name( name ),
     mode_step(  new step( "Шаг операции", this, true ) ),
     active_step_n( -1 ),
+    active_step_time( 0 ),
+    active_step_next_step_n( -1 ),
     start_time( get_millisec() ),
     step_stub( "Шаг-заглушка", this ),
     owner( owner ),
