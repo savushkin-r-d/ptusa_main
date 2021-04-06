@@ -32,6 +32,11 @@
 
 #include "log.h"
 
+#ifdef WIN_OS
+#pragma warning(push)
+#pragma warning(disable: 26812) //Prefer 'enum class' over 'enum'.
+#endif // WIN_OS
+
 auto_smart_ptr < io_manager > io_manager::instance;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -48,12 +53,11 @@ int io_device::get_DO( u_int index )
         {
         print();
         printf( "io_device->get_DO(...) - error! " );
-        printf( "index = %d, DO_channels.count = %u, "
-            "DO_channels.char_write_values = %p",
+        printf( "index = %d, count = %u, char_write_values = %p",
             index, DO_channels.count, DO_channels.char_write_values );
-        if ( DI_channels.char_write_values )
+        if ( DO_channels.char_write_values )
             {
-            printf( ", DO_channels.char_write_values[ index ]=%p",
+            printf( ", char_write_values[ index ]=%p",
                 DO_channels.char_write_values[ index ] );
             }
         printf( "\n" );
@@ -75,10 +79,14 @@ int io_device::set_DO( u_int index, char value )
     if ( G_DEBUG )
         {
         print();
-        printf( "io_device->set_DO(...) - error! %d, %d, %p, %p\n",
-            index, DO_channels.count, DO_channels.char_write_values,
-            DO_channels.char_write_values[ index ] );
-        print();
+        printf( "io_device->set_DO(...) - error! %d, %d, %p",
+            index, DO_channels.count, DO_channels.char_write_values );
+        if ( DO_channels.char_write_values )
+            {
+            printf( ", char_write_values[ index ]=%p",
+                DO_channels.char_write_values[ index ] );
+            }
+        printf( "\n" );
         }
 
     return 1;
@@ -1106,8 +1114,7 @@ io_manager::io_node::~io_node()
     }
 //-----------------------------------------------------------------------------
 io_manager::io_node::io_node( int type, int number, char* str_ip_address,
-    char* name,
-    int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, int AI_cnt,
+    char* name, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, int AI_cnt,
     int AI_size ) : state( ST_NO_CONNECT ),
     type( (TYPES)type ),
     number( number ),
@@ -1254,3 +1261,6 @@ io_manager* G_IO_MANAGER()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#ifdef WIN_OS
+#pragma warning(pop)
+#endif // WIN_OS

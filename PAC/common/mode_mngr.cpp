@@ -1044,11 +1044,8 @@ void open_seat_action::final()
 //-----------------------------------------------------------------------------
 void open_seat_action::add_dev( device *dev, u_int group, u_int seat_type )
     {
-    auto seat_group = &wash_upper_seat_devices;
-    if ( seat_type == valve::V_LOWER_SEAT )
-        {
-        seat_group = &wash_lower_seat_devices;
-        }
+    auto seat_group = seat_type == valve::V_LOWER_SEAT ?
+        &wash_lower_seat_devices : &wash_upper_seat_devices;
 
     if ( group >= seat_group[ 0 ].size() )
         {
@@ -1527,7 +1524,7 @@ void operation_state::print( const char* prefix /*= "" */ ) const
 int operation_state::check_devices( char* err_dev_name, int str_len )
     {
     int res = mode_step->check_devices( err_dev_name +
-        (int)strlen( err_dev_name ), str_len - (int)strlen( err_dev_name ) );
+        strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
 
     if ( res )
         {
@@ -1542,7 +1539,7 @@ int operation_state::check_devices( char* err_dev_name, int str_len )
     if ( active_step_n >= 0 && ( unsigned int ) active_step_n < steps.size() )
         {
         res = steps[ active_step_n ]->check_devices( err_dev_name +
-            (int)strlen( err_dev_name ), str_len - (int)strlen( err_dev_name ) );
+            strlen( err_dev_name ), str_len - strlen( err_dev_name ) );
 
         if ( res )
             {

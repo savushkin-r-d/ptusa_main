@@ -1,13 +1,7 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 03/26/21 08:32:25.
+** Generated automatically by tolua++-1.0.92 on 04/06/21 08:53:56.
 */
-
-#ifdef WIN_OS
-#pragma warning(push)
-#pragma warning(disable: 6011)
-#pragma warning(disable: 26812)
-#endif // WIN_OS
 
 #ifndef __cplusplus
 #include "stdlib.h"
@@ -33,6 +27,8 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 #include "profibus_slave.h"
 #ifdef WIN_OS
 #pragma warning(disable: 4800) //Warning C4800: 'int' : forcing value to bool 'true' or 'false' (performance warning)
+#pragma warning(disable: 6011)  //dereferencing NULL pointer <name>.
+#pragma warning(disable: 26812) //Prefer 'enum class' over 'enum'.
 #endif // WIN_OS
 
 /* function to release collected object via destructor */
@@ -13551,6 +13547,3 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
 };
 #endif
 
-#ifdef WIN_OS
-#pragma warning(pop)
-#endif //WIN_OS

@@ -43,7 +43,7 @@
 
 #ifdef WIN_OS
 #pragma warning(push)
-#pragma warning(disable: 26812)
+#pragma warning(disable: 26812) //Prefer 'enum class' over 'enum'.
 #endif // WIN_OS
 
 //-----------------------------------------------------------------------------
@@ -2017,9 +2017,9 @@ class valve_AS_DO1_DI2 : public valve_AS
 class valve_bottom_mix_proof : public i_mix_proof,  public valve
     {
     public:
-        valve_bottom_mix_proof( const char *dev_name
-            ): valve( true, true, dev_name, DT_V, DST_V_BOTTOM_MIXPROOF ),
-            is_closing_mini(0),
+        valve_bottom_mix_proof( const char* dev_name ) : valve(
+            true, true, dev_name, DT_V, DST_V_BOTTOM_MIXPROOF ),
+            is_closing_mini( 0 ),
             start_off_time( 0 )
             {
             }
@@ -2877,7 +2877,7 @@ class circuit_breaker : public analog_io_device
         int err;
         int m;
 
-        F_data_in in_info = {};
+        F_data_in in_info;
         F_data_out* out_info;
     };
 //-----------------------------------------------------------------------------
@@ -2924,15 +2924,15 @@ class level_e_iolink : public level
 class concentration_e : public AI1
     {
     public:
-        concentration_e( const char *dev_name, DEVICE_SUB_TYPE sub_type ): start_param_idx( 0 ),
+        concentration_e( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
             AI1( dev_name, DT_QT, sub_type, ADDITIONAL_PARAM_COUNT )
             {
 #ifdef DEBUG_NO_IO_MODULES
             st = 1;
 #endif
             start_param_idx = AI1::get_params_count();
-            set_par_name( P_MIN_V,  start_param_idx, "P_MIN_V" );
-            set_par_name( P_MAX_V,  start_param_idx, "P_MAX_V" );
+            set_par_name( P_MIN_V, start_param_idx, "P_MIN_V" );
+            set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
             }
 
         float get_max_val();
@@ -4263,4 +4263,3 @@ device* DEVICE( int s_number );
 #endif // WIN_OS
 
 #endif // PAC_DEVICES_H
-

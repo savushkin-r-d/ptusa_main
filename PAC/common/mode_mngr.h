@@ -589,7 +589,7 @@ class operation
         /// @param idx - индекс операции.
         operation_state* operator[] ( int idx )
             {
-            if ( idx < (int)state_idx::STATES_MAX )
+            if ( idx < state_idx::STATES_MAX )
                 {
                 return states[ idx ];
                 }

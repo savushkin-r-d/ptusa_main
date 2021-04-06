@@ -7,7 +7,7 @@
 
 #ifdef WIN_OS
 #pragma warning(push)
-#pragma warning(disable: 26812)
+#pragma warning(disable: 26812) //Prefer 'enum class' over 'enum'.
 #endif // WIN_OS
 
 auto_smart_ptr < device_manager > device_manager::instance;
@@ -372,13 +372,9 @@ int device::set_cmd( const char *prop, u_int idx, double val )
     return 0;
     }
 //-----------------------------------------------------------------------------
-device::device( const char *dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type,
-               u_int par_cnt ) :
-    par_device( par_cnt ),
-    s_number( 0 ),
-    type( type ),
-    sub_type( sub_type ),
-    is_manual_mode( false )
+device::device( const char* dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type,
+    u_int par_cnt ) : par_device( par_cnt ), s_number( 0 ), type( type ),
+    sub_type( sub_type ), is_manual_mode( false )
     {
     if ( dev_name )
         {
@@ -1192,7 +1188,7 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char *dev_
     int l = -1;
     int u = -1;
 
-    if ( ( int ) dev_type < ( int ) device::C_DEVICE_TYPE_CNT && dev_type >= 0 )
+    if ( dev_type < device::C_DEVICE_TYPE_CNT && dev_type >= device::DT_V )
         {
         l = dev_types_ranges[ dev_type ].start_pos;
         u = dev_types_ranges[ dev_type ].end_pos;
@@ -1353,12 +1349,12 @@ u_int dev_stub::get_abs_quantity()
 //-----------------------------------------------------------------------------
 float counter::get_value()
     {
-    return ( float ) get_quantity();
+    return (float)get_quantity();
     }
 //-----------------------------------------------------------------------------
 void counter::direct_set_value( float new_value )
     {
-    value = ( u_int ) new_value;
+    value = (u_int)new_value;
     }
 //-----------------------------------------------------------------------------
 int counter::get_state()
@@ -4301,7 +4297,7 @@ int pressure_e_iolink::get_state()
 //-----------------------------------------------------------------------------
 circuit_breaker::circuit_breaker( const char* dev_name ):analog_io_device(
     dev_name, DT_F, DST_F, 0), is_read_OK( false ), v( 0 ), st( 0 ),
-    err( 0 ), m( 0 ), out_info ( new F_data_out() )
+    err( 0 ), m( 0 ), in_info{}, out_info( new F_data_out() )
     {
     }
 //-----------------------------------------------------------------------------
@@ -5147,16 +5143,16 @@ void virtual_counter::direct_set_state( int new_state )
     {
     switch ( new_state )
         {
-        case (int) STATES::S_STOP:
+        case STATES::S_STOP:
             state = STATES::S_STOP;
             reset();
             break;
 
-        case (int) STATES::S_WORK:
+        case STATES::S_WORK:
             start();
             break;
 
-        case (int) STATES::S_PAUSE:
+        case STATES::S_PAUSE:
             pause();
             break;
         }
