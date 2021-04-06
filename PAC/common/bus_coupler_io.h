@@ -37,7 +37,7 @@ class io_device
 			PHOENIX,
 			};
 
-		enum class IOLINKSTATE
+		enum IOLINKSTATE
 			{
 			OK,
 			NOTCONNECTED,
@@ -116,7 +116,7 @@ class io_device
         /// @return -  указатель на данные канала.
         int_2* get_AI_data( u_int index );
 
-		
+
 		/// @brief Получение состояния IO-Link устройства типа AI.
         ///
 		/// @param index - индекс канала в таблице аналоговых входных каналов
@@ -309,7 +309,7 @@ class io_manager
 				};
 
 			enum TYPES ///< Типы модулей.
-			{
+			    {
 				EMPTY = -1,   ///< Не задан.
 
 				WAGO_750_86x		  = 0,  ///< Wago 750-863.
@@ -411,7 +411,7 @@ class io_manager
 		/// @brief Завершает соединение с узлом
 		virtual void disconnect(io_node *node);
 
-       
+
     };
 //-----------------------------------------------------------------------------
 io_manager* G_IO_MANAGER();

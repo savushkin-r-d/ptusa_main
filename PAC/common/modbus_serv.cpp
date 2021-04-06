@@ -151,7 +151,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 		{
 
 		case 0x01: //Read Coils
-			{            
+			{
 			unsigned int startingAddress  = data[2] * 256 + data[3];
 			unsigned int numberofElements = data[4] * 256 + data[5];
 			unsigned char numberofBytes   = numberofElements / 8;
@@ -244,7 +244,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
                             goto luareadcoils;
 						}
 					}
-				} 
+				}
 			else
 				{
                 luareadcoils:
@@ -280,7 +280,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 						printf( "Evaluate Modbus service error: %s\n",
 							lua_tostring( L, -1 ) );
 
-						lua_pop( L, 1 );  
+						lua_pop( L, 1 );
 						return 0;
 						}
 
@@ -293,9 +293,9 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 							lua_pop( L, 1 );
 							ForceBit( i, &outdata[ 3 ], bit_res );
 							i++;
-							}                                 
-						}      
-					lua_pop( L, 1 );  
+							}
+						}
+					lua_pop( L, 1 );
 					}
 				}
 
@@ -303,10 +303,10 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 			}
 
 		case 0x03: //Read Holding Registers
-			{            
+			{
 			unsigned int startingAddress = data[2] * 256 + data[3];
 			unsigned int numberofElements = data[4] * 256 + data[5];
-			outdata[ 2 ] = (numberofElements * 2) & 0xFF;           
+			outdata[ 2 ] = (numberofElements * 2) & 0xFF;
 			unsigned int coilgroup = data[0];
 
 			if (isMsa)
@@ -478,7 +478,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 											int prgno = (objnumber - RC_PRG_START) / PROGRAM_MAX_LEN;
 											Utf8toUnicode(cipline_tech_object::Mdls[line - 1]->prgArray[prgno], &outdata[3+i*2]);
 											i+= PROGRAM_MAX_LEN - 1;
-											} 
+											}
 										else
 											{
 											if (objnumber >= RC_RECIPE_PAR_START)
@@ -489,18 +489,18 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 													PackFloat(cipline_tech_object::Mdls[line - 1]->lineRecipes->getValue(k - 1), &outdata[3+i*2]);
 													i++;
 													}
-												} 
+												}
 											else
                                                 {
-                                                if ( G_DEBUG ) 
-                                                    { 
+                                                if ( G_DEBUG )
+                                                    {
                                                     printf("\n\rRead Unsigned register");
                                                     }
                                                 }
 											}
 										}
 									break;
-								} 
+								}
 							break;
 
 						case C_MSA_STATIONPARAMS:
@@ -615,7 +615,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 						printf( "Evaluate Modbus service error: %s\n",
 							lua_tostring( L, -1 ) );
 
-						lua_pop( L, 1 );  
+						lua_pop( L, 1 );
 						return 0;
 						}
 
@@ -638,51 +638,51 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 										break;
 										}
 
-									case 2: // float                                    
+									case 2: // float
 										{
 										float val = ( float ) lua_tonumber( L, -1 );
 										PackFloat( val, &outdata[ 3 + idx * 2 ] );
 										break;
 										}
 
-									case 3: // time                                    
+									case 3: // time
 										{
 										u_long val = ( u_long ) lua_tonumber( L, -1 );
-										PackTime( val, &outdata[ 3 + idx * 2 ] );                                    
+										PackTime( val, &outdata[ 3 + idx * 2 ] );
 										break;
 										}
 
-									case 4: // String                                    
+									case 4: // String
 										{
 										const char *val = lua_tostring( L, -1 );
 										Utf8toUnicode( val, &outdata[ 3 + idx * 2 ] );
 										break;
 										}
 
-									case 5: // UInt32                                    
+									case 5: // UInt32
 										{
 										u_long val = ( u_long ) lua_tonumber( L, -1 );
-										PackLong( val, &outdata[ 3 + idx * 2 ] );                   
+										PackLong( val, &outdata[ 3 + idx * 2 ] );
 										break;
 										}
-									}   
+									}
 
 								lua_pop( L, 1 );
 								}
 							idx++;
-							}     
+							}
 
 						lua_pop( L, 1 );
-						}  
+						}
 					else
 						{
 						printf( "Evaluate Modbus service error: %s\n",
 							lua_tostring( L, -1 ) );
 
-						lua_pop( L, 1 );  
-						return 0; 
-						}                
-					}    
+						lua_pop( L, 1 );
+						return 0;
+						}
+					}
 				}
 
 			return 3+numberofElements*2;
@@ -690,7 +690,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 
 		case 0x05: //Write Single Coil
 			{
-			unsigned int startingAddress = data[ 2 ] * 256 + data[ 3 ];            
+			unsigned int startingAddress = data[ 2 ] * 256 + data[ 3 ];
 			unsigned int coilgroup       = data[ 0 ];
 			int value                    = data[ 4 ] > 0 ? 1 : 0;
 			int line = 0;
@@ -793,9 +793,9 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 						printf( "Evaluate Modbus service error: %s\n",
 							lua_tostring( L, -1 ) );
 
-						lua_pop( L, 1 );  
+						lua_pop( L, 1 );
 						return 0;
-						}                
+						}
 					}
 				}
 
@@ -805,7 +805,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 		case 0x10: //Force Multiply Registers
 			{
 			unsigned int startingAddress  = data[2] * 256 + data[3];
-			unsigned int numberofElements = data[4] * 256 + data[5];            
+			unsigned int numberofElements = data[4] * 256 + data[5];
 			unsigned int coilgroup        = data[ 0 ];
 			unsigned int i,j;
                         int k;
@@ -960,8 +960,8 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 						case C_MSA_STATIONPARAMS:
 							if ((objnumber / 2) <= cipline_tech_object::Mdls[0]->parpar->get_count())
 								{
-                                if ( G_DEBUG ) 
-                                    { 
+                                if ( G_DEBUG )
+                                    {
                                     printf("\n\rWrite Station param %d = %f", objnumber / 2, UnpackFloat(&data[7+i*2]));
                                     }
 								cipline_tech_object::Mdls[0]->set_station_par(objnumber / 2, UnpackFloat(&data[7+i*2]));
@@ -1039,9 +1039,9 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 						printf( "Evaluate Modbus service error: %s\n",
 							lua_tostring( L, -1 ) );
 
-						lua_pop( L, 1 );  
+						lua_pop( L, 1 );
 						return 0;
-						}                
+						}
 					}
 				}
 
@@ -1138,7 +1138,7 @@ int ModbusServ::PackLong( unsigned long lvalue,unsigned char* Buf )
 
 float ModbusServ::UnpackFloat( unsigned char* Buf )
 	{
-	float result;
+	float result = 0;
 	((char*)&result)[0] = Buf[1];
 	((char*)&result)[1] = Buf[0];
 	((char*)&result)[2] = Buf[3];
@@ -1148,7 +1148,7 @@ float ModbusServ::UnpackFloat( unsigned char* Buf )
 
 unsigned int ModbusServ::UnpackWord( unsigned char* Buf )
 	{
-	unsigned int result;
+	unsigned int result = 0;
 	((char*)&result)[0] = Buf[1];
 	((char*)&result)[1] = Buf[0];
 	return result;
@@ -1156,7 +1156,7 @@ unsigned int ModbusServ::UnpackWord( unsigned char* Buf )
 
 unsigned long ModbusServ::UnpackLong( unsigned char* Buf )
 	{
-	unsigned long result;
+	unsigned long result = 0;
 	((char*)&result)[0] = Buf[1];
 	((char*)&result)[1] = Buf[0];
 	((char*)&result)[2] = Buf[3];
@@ -1173,7 +1173,7 @@ int_2 ModbusServ::PackInt16( int_2 wvalue,unsigned char* Buf )
 
 int_2 ModbusServ::UnpackInt16( unsigned char* Buf )
 	{
-	int_2 result;
+	int_2 result = 0;
 	((char*)&result)[0] = Buf[1];
 	((char*)&result)[1] = Buf[0];
 	return result;
@@ -1181,12 +1181,10 @@ int_2 ModbusServ::UnpackInt16( unsigned char* Buf )
 
 int ModbusServ::CP1251toUnicode( const char* Input, unsigned char* Buf)
 	{
-	int inputlen;
-	inputlen = strlen( Input );
+	size_t inputlen = strlen( Input );
 
 	char input_end = 0;
-	int i;
-	for (i = 0; i <= inputlen; i++)
+	for ( size_t i = 0; i <= inputlen; i++)
 		{
 		unsigned char mychar = (unsigned char)Input[i];
 		if (i == inputlen)
@@ -1212,7 +1210,7 @@ int ModbusServ::CP1251toUnicode( const char* Input, unsigned char* Buf)
 				}
 
 			}
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
             //printf("\n\r%d. %d %d", i, Buf[i*2], Buf[i*2 + 1]);
             }
@@ -1266,7 +1264,7 @@ int ModbusServ::UnicodetoCP1251( char* Output, unsigned char* Buf, int inputlen 
 		{
 		upperbyte = Buf[2 * i];
 		lowerbyte = Buf[2 * i + 1];
-        if ( G_DEBUG ) 
+        if ( G_DEBUG )
             {
             printf("\n\r%d symbol codes: %d %d", i + 1, upperbyte, lowerbyte);
             }

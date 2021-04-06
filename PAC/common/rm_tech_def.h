@@ -24,7 +24,7 @@
 ///
 /// Базовый класс для технологического объекта (танка, гребенки). Содержит
 /// основные методы работы - работа с режимами и т.д.
-/// Для информировании сервера (события, аварии, ...) используется следующий 
+/// Для информировании сервера (события, аварии, ...) используется следующий
 /// подход: имеется вектор из сообщений и методы работы с ним.
 ///
 class rm_tech_object
@@ -48,7 +48,7 @@ class rm_tech_object
         ///
         /// @return 1 - режим нельзя включить.
         /// @return 0 - режим можно включить.
-        int check_on_mode( u_int mode, char* err_info );    
+        int check_on_mode( u_int mode, char* err_info );
 
         private:
             /// @brief Имя объекта.
@@ -59,8 +59,10 @@ class i_rm_cmmctr
     {
     public:
         i_rm_cmmctr( char* name, char* IP_address, int remote_PAC_id ):
-            name( name ), IP_address( IP_address ), remote_PAC_id( remote_PAC_id )
+            name( name ), IP_address( IP_address ), remote_PAC_id( remote_PAC_id ),
+            Lua_str( 0 )
             {
+            in_buff[ 0 ] = 0;
             }
 
         /// @brief Отсылка заданной команды PAC.
@@ -77,8 +79,8 @@ class i_rm_cmmctr
             }
 
     protected:
-        char* get_out_data( unsigned int &cnt ) 
-            {    
+        char* get_out_data( unsigned int &cnt )
+            {
             cnt = answer_size;
             return Lua_str;
             }
@@ -102,10 +104,10 @@ class i_rm_cmmctr
         std::string name;
         std::string IP_address;
 
-        // @brief Номер удаленного PAC. 
+        // @brief Номер удаленного PAC.
         int remote_PAC_id;
 
         // @brief Размер ответа удаленного PAC.
-        u_int answer_size;
+        u_int answer_size = 0;
     };
 #endif // RM_TECH_DEFINITION_H

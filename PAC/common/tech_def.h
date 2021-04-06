@@ -144,7 +144,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         ///
         int exec_cmd( u_int cmd )
             {
-            if ( G_DEBUG ) 
+            if ( G_DEBUG )
                 {
                 printf ( "\'%s\' - exec command command = %2d\n",
                     name, cmd );
@@ -192,7 +192,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
 
         int  lua_check_on_mode( u_int mode, bool show_error = true );
         void lua_init_mode( u_int mode );
-        
+
         int  lua_check_off_mode( u_int mode );
         int  lua_final_mode( u_int mode );
         int  lua_init_params();
@@ -285,9 +285,9 @@ class tech_object: public i_tech_object, public i_Lua_save_device
             return name;
             }
 
-        //Получение параметров для шага. Для старого описания используем 
+        //Получение параметров для шага. Для старого описания используем
         //параметры par_uint, для нового описания вместо них используем
-        //par_float. 
+        //par_float.
         float get_step_param( u_int idx ) const
             {
             if ( idx >= 1 )
@@ -304,7 +304,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
                         }
                     }
                 }
-                
+
             return -1.;
             }
 
@@ -437,7 +437,7 @@ class tech_object_manager
         /// @brief Отладочная печать объекта.
         void print()
             {
-            printf( "Technological objects manager [%d]:\n",
+            printf( "Technological objects manager [%zu]:\n",
                 tech_objects.size() );
 
             for ( u_int i = 0; i < tech_objects.size(); i++ )

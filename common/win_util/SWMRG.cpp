@@ -3,7 +3,7 @@ Module:  SWMRG.cpp
 Notices: Copyright (c) 2000 Jeffrey Richter
 ******************************************************************************/
 
-#include "CmnHdr.h"     
+#include "CmnHdr.h"
 #include "SWMRG.h"
 
 
@@ -12,7 +12,7 @@ Notices: Copyright (c) 2000 Jeffrey Richter
 
 CSWMRG::CSWMRG() {
 
-    // Initially no readers want access, no writers want access, and 
+    // Initially no readers want access, no writers want access, and
     // no threads are accessing the resource
     m_nWaitingReaders = m_nWaitingWriters = m_nActive = 0;
     m_hsemReaders = CreateSemaphore(NULL, 0, MAXLONG, NULL);
@@ -24,11 +24,12 @@ CSWMRG::CSWMRG() {
 ///////////////////////////////////////////////////////////////////////////////
 
 
-CSWMRG::~CSWMRG() 
+CSWMRG::~CSWMRG()
     {
 #ifdef _DEBUG
     // A SWMRG shouldn't be destroyed if any threads are using the resource
-    if (m_nActive != 0);
+    if ( m_nActive != 0 )
+        __debugbreak();
 #endif
 
     m_nWaitingReaders = 0;
@@ -75,7 +76,7 @@ VOID CSWMRG::WaitToRead() {
 ///////////////////////////////////////////////////////////////////////////////
 
 
-VOID CSWMRG::WaitToWrite() 
+VOID CSWMRG::WaitToWrite()
     {
     // Ensure exclusive access to the member variables
     EnterCriticalSection(&m_cs);
@@ -107,7 +108,7 @@ VOID CSWMRG::WaitToWrite()
 ///////////////////////////////////////////////////////////////////////////////
 
 
-VOID CSWMRG::Done() 
+VOID CSWMRG::Done()
     {
     // Ensure exclusive access to the member variables
     EnterCriticalSection(&m_cs);

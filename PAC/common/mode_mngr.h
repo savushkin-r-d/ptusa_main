@@ -205,7 +205,7 @@ class open_seat_action: public action
         PHASES phase;      ///< Текущий этап.
         PHASES next_phase; ///< Следующий этап.
 
-        u_int     active_group_n;  ///< Номер промываемой сейчас группы.
+        u_int active_group_n;  ///< Номер промываемой сейчас группы.
 
         u_int_4 wait_time;      ///< Время ожидания перед промыванием седел.
         u_int_4 wait_seat_time; ///< Время ожидания перед промыванием седел группы.
@@ -589,7 +589,7 @@ class operation
         /// @param idx - индекс операции.
         operation_state* operator[] ( int idx )
             {
-            if ( idx < STATES_MAX )
+            if ( idx < state_idx::STATES_MAX )
                 {
                 return states[ idx ];
                 }
@@ -599,7 +599,7 @@ class operation
                     {
                     printf( "Error operation_state* operation::operator[] "
                         "( int idx ) - idx %d > count %d.\n",
-                        idx, STATES_MAX );
+                        idx, state_idx::STATES_MAX );
                     }
                 return &stub;
                 }
@@ -607,7 +607,7 @@ class operation
 
     public:
         step* add_step( const char* name, int next_step_n,
-            unsigned int step_duration_par_n, state_idx s_idx = RUN );
+            unsigned int step_duration_par_n, state_idx s_idx = state_idx::RUN );
 
 #ifndef __GNUC__
 #pragma endregion

@@ -460,7 +460,7 @@ int action::check_devices( char* err_dev_name, int max_to_write ) const
 
     if ( err_dev_name[ 0 ] ) //Есть ошибки.
         {
-        int length = strlen( err_dev_name );
+        size_t length = strlen( err_dev_name );
         if ( max_to_write < 0 )
             {
             err_dev_name[ length - 1 ] = '.';
@@ -486,7 +486,7 @@ void action::add_dev( device *dev, u_int group /*= 0 */, u_int subgroup /*= 0 */
         {
         devices.push_back( std::vector < std::vector< device* > >() );
 
-        u_int last_idx = devices.size() - 1;
+        size_t last_idx = devices.size() - 1;
         while ( subgropups_cnt > devices[ last_idx ].size() )
             {
             devices[ last_idx ].push_back( std::vector< device* >() );
@@ -510,7 +510,7 @@ void on_action::evaluate()
         return;
         }
 
-    auto devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
+    auto &devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
     for ( u_int i = 0; i < devs.size(); i++ )
         {
         devs[ i ]->on();
@@ -525,7 +525,7 @@ void on_reverse_action::evaluate()
         return;
         }
 
-    auto devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
+    auto &devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
     for ( u_int i = 0; i < devs.size(); i++ )
         {
         devs[ i ]->set_state( 2 );
@@ -540,7 +540,7 @@ void off_action::evaluate()
         return;
         }
 
-    auto devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
+    auto &devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
     for ( u_int i = 0; i < devs.size(); i++ )
         {
         if ( devs[ i ]->get_type() == device::DT_V )
@@ -565,7 +565,7 @@ void off_action::init()
         return;
         }
 
-    auto devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
+    auto &devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
     for ( u_int i = 0; i < devs.size(); i++ )
         {
         devs[ i ]->off();
@@ -580,7 +580,7 @@ int required_DI_action::check( char* reason ) const
         return 0;
         }
 
-    auto devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
+    auto &devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
     for ( u_int i = 0; i < devs.size(); i++ )
         {
         if ( !devs[ i ]->is_active() )
@@ -695,7 +695,7 @@ action* step::operator[]( int idx )
 
     if ( G_DEBUG )
         {
-        printf( "Error step::action* operator[] ( int idx ) - idx %d > count %d.\n",
+        printf( "Error step::action* operator[] ( int idx ) - idx %d > count %zd.\n",
             idx, actions.size() );
         }
 
@@ -718,7 +718,7 @@ int step::check_devices( char* err_dev_name, int str_len )
     {
     for ( u_int i = 0; i < actions.size(); i++ )
         {
-        int len = strlen( err_dev_name );
+        int len = (int) strlen( err_dev_name );
         int res = actions[ i ]->check_devices( err_dev_name + len, str_len - len );
 
         if ( res )
@@ -743,7 +743,7 @@ int DI_DO_action::check( char* reason ) const
         return 0;
         }
 
-    auto devs = devices[ MAIN_GROUP ];
+    auto &devs = devices[ MAIN_GROUP ];
     for ( u_int i = 0; i < devs.size(); i++ )
         {
         if ( devs[ i ].empty() )
@@ -771,7 +771,7 @@ void DI_DO_action::evaluate()
         return;
         }
 
-    auto devs = devices[ MAIN_GROUP ];
+    auto &devs = devices[ MAIN_GROUP ];
 
     for ( u_int i = 0; i < devs.size(); i++ )
         {
@@ -805,7 +805,7 @@ void AI_AO_action::evaluate()
         return;
         }
 
-    auto devs = devices[ MAIN_GROUP ];
+    auto &devs = devices[ MAIN_GROUP ];
 
     for ( u_int i = 0; i < devs.size(); i++ )
         {
@@ -825,8 +825,10 @@ void AI_AO_action::evaluate()
 open_seat_action::open_seat_action( bool is_mode, operation_state *owner ) :
     action( "Промывка седел" ),
     phase( P_WAIT ),
+    next_phase( PHASES::P_OPEN_UPPER ),
     active_group_n( 0 ),
     wait_time( 60000 ),
+    wait_seat_time( 0 ),
     wash_time_upper( 1000 ),
     wash_time_lower( 1000 ),
     start_cycle_time( 0 ),
@@ -852,19 +854,19 @@ void open_seat_action::init()
     next_phase        = P_OPEN_UPPER;
     active_group_n    = 0;
 
-    int groups_cnt    =  wash_upper_seat_devices.size() +
+    size_t groups_cnt    =  wash_upper_seat_devices.size() +
         wash_lower_seat_devices.size();
 
     saved_params_u_int_4 &par = PAC_info::get_instance()->par;
 
     wait_time = par[ PAC_info::P_MIX_FLIP_PERIOD ] * 1000;
-    wait_time /= groups_cnt;
+    wait_time /= (u_int_4)groups_cnt;
 
     // Для шага: для одной группы - середина продолжительности шага,
     // для двух групп - треть и т.д.
     if ( !is_mode )
         {
-        u_int_4 wait_time = owner->get_active_step_set_time() / ( groups_cnt + 1 );
+        u_int_4 wait_time = owner->get_active_step_set_time() / ( (u_int_4)groups_cnt + 1 );
         if ( wait_time > 0 )
             {
             this->wait_time = wait_time;
@@ -1042,18 +1044,8 @@ void open_seat_action::final()
 //-----------------------------------------------------------------------------
 void open_seat_action::add_dev( device *dev, u_int group, u_int seat_type )
     {
-    std::vector< std::vector< device* > > *seat_group = 0;
-
-    switch ( seat_type )
-        {
-    case valve::V_UPPER_SEAT:
-        seat_group = &wash_upper_seat_devices;
-        break;
-
-    case valve::V_LOWER_SEAT:
-        seat_group = &wash_lower_seat_devices;
-        break;
-        }
+    auto seat_group = seat_type == valve::V_LOWER_SEAT ?
+        &wash_lower_seat_devices : &wash_upper_seat_devices;
 
     if ( group >= seat_group[ 0 ].size() )
         {
@@ -1066,7 +1058,7 @@ void open_seat_action::add_dev( device *dev, u_int group, u_int seat_type )
         {
         if ( G_DEBUG )
             {
-            printf( "Error open_seat_action:add_dev: group %d > %d, seat_type %d.\n",
+            printf( "Error open_seat_action:add_dev: group %d > %zd, seat_type %d.\n",
                 group, seat_group[ 0 ].size(), seat_type );
             }
         return;
@@ -1147,7 +1139,7 @@ void wash_action::evaluate()
 
     for ( u_int idx = 0; idx < devices.size(); idx++ )
         {
-        auto devs = devices[ idx ];
+        auto &devs = devices[ idx ];
 
         //Подаем сигналы "Мойка ОК".
         for ( u_int i = 0; i < devs[ G_DO ].size(); i++ )
@@ -1275,6 +1267,8 @@ operation_state::operation_state( const char* name,
     operation_manager *owner, int n ) : name( name ),
     mode_step(  new step( "Шаг операции", this, true ) ),
     active_step_n( -1 ),
+    active_step_time( 0 ),
+    active_step_next_step_n( -1 ),
     start_time( get_millisec() ),
     step_stub( "Шаг-заглушка", this ),
     owner( owner ),
@@ -1440,7 +1434,7 @@ step* operation_state::operator[]( int idx )
 
     if ( G_DEBUG )
         {
-        printf( "Error operation_state::step& operator[] ( int idx ) - idx %d > count %d.\n",
+        printf( "Error operation_state::step& operator[] ( int idx ) - idx %d > count %zd.\n",
             idx, steps.size() );
         }
 
@@ -1453,7 +1447,7 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
         {
         if ( G_DEBUG )
             {
-            printf( "Error mode::to_step step %d > steps size %d.\n",
+            printf( "Error mode::to_step step %d > steps size %zd.\n",
                 new_step, steps.size() );
             }
         return;
@@ -1622,7 +1616,7 @@ u_int operation_state::active_step() const
 //-----------------------------------------------------------------------------
 u_int operation_state::steps_count() const
     {
-    return steps.size();
+    return (u_int)steps.size();
     }
 //-----------------------------------------------------------------------------
 const char* operation_state::get_name() const
@@ -1785,7 +1779,7 @@ bool operation_state::is_active_extra_step( int step_idx ) const
 //-----------------------------------------------------------------------------
 operation* operation_manager::add_operation( const char* name )
     {
-    operations.push_back( new operation( name, this, operations.size() + 1 ) );
+    operations.push_back( new operation( name, this, (int)operations.size() + 1 ) );
 
     return operations[ operations.size() - 1 ];
     }
@@ -1799,7 +1793,7 @@ operation* operation_manager::operator[]( unsigned int idx )
 
     if ( G_DEBUG )
         {
-        printf( "Error operation_manager::operator[] idx %d > operations count %d.\n",
+        printf( "Error operation_manager::operator[] idx %d > operations count %zd.\n",
             idx, operations.size() );
         }
 
@@ -1813,7 +1807,7 @@ unsigned long operation_manager::get_idle_time()
 //-----------------------------------------------------------------------------
 void operation_manager::print()
     {
-    printf( "operations manager, %d\n", operations.size() );
+    printf( "operations manager, %zd\n", operations.size() );
 
     for ( u_int i = 0; i < operations.size(); i++ )
         {

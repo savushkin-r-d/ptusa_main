@@ -50,7 +50,7 @@ int check_file( const char* file_name, char* err_str )
     char* res = fgets( str, sizeof( str ), f );
     if ( res != 0 )
         {
-        sscanf( str, "--version = %d", &version );
+        int err = sscanf( str, "--version = %d", &version );
         }
 
     fclose( f );
@@ -192,7 +192,10 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 #ifdef PAC_PC
     //Добавление каталога с системными скриптами.
     char cmd[ 500 ] = "package.path = package.path..';";
-    strcpy( cmd + strlen( cmd ), sys_dir );
+    if ( sys_dir )
+        {
+        strcpy( cmd + strlen( cmd ), sys_dir );
+        }
     strcpy( cmd + strlen( cmd ), "?.lua'" );
 
     luaL_dostring( L, cmd );
