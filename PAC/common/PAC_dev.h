@@ -2000,7 +2000,8 @@ class valve_AS_DO1_DI2 : public valve_AS
                 return true;
                 }
 
-             if ( get_delta_millisec( start_err_time ) < 500 )
+             if ( get_delta_millisec( start_err_time ) < 
+                 get_par(valve::P_ON_TIME, 0))
                 {
                 return true;
                 }
