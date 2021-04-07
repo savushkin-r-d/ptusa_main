@@ -180,9 +180,6 @@
     <ClInclude Include="..\..\..\PAC\common\sys\base_mem.h">
       <Filter>Header Files\PAC\common\sys</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\common\PAC-driver\errors.h">
-      <Filter>Header Files\common\PAC-driver</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\toloa++\pkg\PAC_dev.hh">
       <Filter>pkg</Filter>
     </ClInclude>
@@ -303,6 +300,9 @@
     <ClInclude Include="..\..\..\common\util\utf2cp1251.h">
       <Filter>Header Files\common\util</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\common\PAC-driver\g_errors.h">
+      <Filter>Header Files\common\PAC-driver</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\main.cpp">
@@ -343,9 +343,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\PID.cpp">
       <Filter>Source Files\PAC\common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp">
-      <Filter>Source Files\common\PAC-driver</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\sys\led.cpp">
       <Filter>Source Files\PAC\common\sys</Filter>
@@ -607,6 +604,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\common\util\utf2cp1251.cpp">
       <Filter>Source Files\common\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\PAC-driver\g_errors.cpp">
+      <Filter>Source Files\common\PAC-driver</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
