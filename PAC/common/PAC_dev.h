@@ -2508,12 +2508,12 @@ class AI1 : public analog_io_device
             {
             return st;
             }
+#endif
 
         virtual int get_params_count() const
             {
             return ADDITIONAL_PARAM_COUNT;
             }
-#endif
 
     protected:
         enum CONSTANTS

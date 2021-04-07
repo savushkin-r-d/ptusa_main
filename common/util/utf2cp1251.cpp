@@ -72,7 +72,7 @@ static Letter g_letters[] = {
 
 int convert_utf8_to_windows1251(const char* utf8, char* windows1251, size_t n)
     {
-    int j = 0;
+    int j = 0, first5bit, sec6bit, unicode_char;
     for (int i = 0; i < (int)n && utf8[i] != 0; ++i) {
         char prefix = utf8[i];
         char suffix = utf8[i + 1];
@@ -88,10 +88,10 @@ int convert_utf8_to_windows1251(const char* utf8, char* windows1251, size_t n)
             ++j;
             }
         else if ((~prefix) & 0x20) {
-            int first5bit = prefix & 0x1F;
+            first5bit = prefix & 0x1F;
             first5bit <<= 6;
-            int sec6bit = suffix & 0x3F;
-            int unicode_char = first5bit + sec6bit;
+            sec6bit = suffix & 0x3F;
+            unicode_char = first5bit + sec6bit;
 
 
             if (unicode_char >= 0x410 && unicode_char <= 0x44F) {

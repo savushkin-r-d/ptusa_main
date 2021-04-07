@@ -247,8 +247,8 @@ tolua++ -n IOT_dev -o "..\..\..\PAC\IoT\IOT_dev_lua.cpp" "..\..\..\PAC\common\to
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\common\lua_manager.h" />
-    <ClInclude Include="..\..\..\common\PAC-driver\errors.h" />
     <ClInclude Include="..\..\..\common\PAC-driver\g_device.h" />
+    <ClInclude Include="..\..\..\common\PAC-driver\g_errors.h" />
     <ClInclude Include="..\..\..\common\util\smart_ptr.h" />
     <ClInclude Include="..\..\..\common\util\utf2cp1251.h" />
     <ClInclude Include="..\..\..\PAC\common\bus_coupler_io.h" />
@@ -336,8 +336,8 @@ tolua++ -n IOT_dev -o "..\..\..\PAC\IoT\IOT_dev_lua.cpp" "..\..\..\PAC\common\to
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\common\lua_manager.cpp" />
-    <ClCompile Include="..\..\..\common\PAC-driver\errors.cpp" />
     <ClCompile Include="..\..\..\common\PAC-driver\g_device.cpp" />
+    <ClCompile Include="..\..\..\common\PAC-driver\g_errors.cpp" />
     <ClCompile Include="..\..\..\common\RFID\rfid_reader.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='RFID_release|Win32'">false</ExcludedFromBuild>
