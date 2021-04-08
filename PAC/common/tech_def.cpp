@@ -64,6 +64,9 @@ tech_object::~tech_object()
     name = 0;
     delete[] name_Lua;
     name_Lua = 0;
+
+    delete operations_manager;
+    operations_manager = 0;
     }
 //-----------------------------------------------------------------------------
 int tech_object::init_params()
@@ -1286,6 +1289,8 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
             printf( "Error: max errors count (%d) is reached.",
                 E_MAX_ERRORS_SIZE );
             }
+        delete new_err;
+        new_err = 0;
         }
 
     return 0;

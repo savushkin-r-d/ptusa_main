@@ -138,11 +138,11 @@ par_device::~par_device()
         {
         for ( u_int i = 0; i < par->get_count(); i++ )
             {
-            delete par_name[ i ];
+            delete [] par_name[ i ];
             par_name[ i ] = 0;
             }
 
-        delete par_name;
+        delete [] par_name;
         par_name = 0;
 
         delete par;
@@ -171,7 +171,7 @@ void par_device::set_par_name( u_int idx, u_int offset, const char* name )
                 if ( G_DEBUG )
                     {
                     printf( "Error par_device::set_par_name( u_int idx, u_int offset, const char* name ) - "
-                        "name length (%d) > param C_MAX_PAR_NAME_LENGTH (%d).",
+                        "name length (%zu) > param C_MAX_PAR_NAME_LENGTH (%d).",
                         strlen( name ), C_MAX_PAR_NAME_LENGTH );
                     }
 
@@ -395,6 +395,10 @@ device::device( const char* dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type
 //-----------------------------------------------------------------------------
 device::~device()
     {
+    delete [] description;
+    description = 0;
+    delete [] article;
+    article = 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -469,7 +473,7 @@ device* device_manager::get_device( int dev_type,
 //-----------------------------------------------------------------------------
 void device_manager::print() const
     {
-    printf( "Device manager [%d]:\n", project_devices.size() );
+    printf( "Device manager [%zu]:\n", project_devices.size() );
     for ( u_int i = 0; i < project_devices.size(); i++ )
         {
         printf( "    %3i. ", i + 1 );
@@ -2505,6 +2509,12 @@ int valve_iolink_mix_proof::save_device_ex( char *buff )
     return res;
     }
 //-----------------------------------------------------------------------------
+valve_iolink_mix_proof::~valve_iolink_mix_proof()
+    {
+    delete in_info;
+    in_info = 0;
+    }
+//-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
 bool valve_iolink_mix_proof::get_fb_state()
     {
@@ -2878,6 +2888,12 @@ int valve_iolink_shut_off_thinktop::save_device_ex( char* buff )
     res += sprintf( buff + res, "V=%.1f, ", get_value() );
 
     return res;
+    }
+//-----------------------------------------------------------------------------
+valve_iolink_shut_off_thinktop::~valve_iolink_shut_off_thinktop()
+    {
+    delete in_info;
+    in_info = 0;
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
@@ -3304,6 +3320,12 @@ temperature_e_iolink::temperature_e_iolink( const char *dev_name ):
     {
     start_param_idx = AI1::get_params_count();
     set_par_name(P_ERR_T, start_param_idx, "P_ERR_T");
+    }
+//-----------------------------------------------------------------------------
+temperature_e_iolink::~temperature_e_iolink()
+    {
+    delete info;
+    info = 0;
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
@@ -4523,6 +4545,12 @@ concentration_e_iolink::concentration_e_iolink( const char* dev_name ) :
     {
     set_par_name( P_ERR, 0, "P_ERR" );
     };
+//-----------------------------------------------------------------------------
+concentration_e_iolink::~concentration_e_iolink()
+    {
+    delete info;
+    info = 0;
+    }
 //-----------------------------------------------------------------------------
 int concentration_e_iolink::save_device_ex( char *buff )
     {

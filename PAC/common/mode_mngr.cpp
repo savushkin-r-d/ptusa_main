@@ -45,6 +45,15 @@ operation::operation(const char* name, operation_manager *owner, int n) :
     states.push_back( new operation_state( "stop", owner, n ) );
     }
 //-----------------------------------------------------------------------------
+operation::~operation()
+    {
+    for ( size_t i = 0; i < states.size(); i++ )
+        {
+        delete states[ i ];
+        states[ i ] = 0;
+        }
+    }
+//-----------------------------------------------------------------------------
 operation::state_idx operation::get_state() const
     {
     return ( state_idx ) current_state;
@@ -619,6 +628,7 @@ step::~step()
     for ( u_int i = 0; i < actions.size(); i++  )
         {
         delete actions[ i ];
+        actions[ i ] = 0;
         }
     }
 //-----------------------------------------------------------------------------
@@ -1278,6 +1288,18 @@ operation_state::operation_state( const char* name,
     mode_step[ 0 ][ step::A_WASH ]->set_params( owner->get_params() );
     }
 //-----------------------------------------------------------------------------
+operation_state::~operation_state()
+    {
+    delete mode_step;
+    mode_step = 0;
+
+    for ( size_t idx = 0; idx < steps.size(); idx++ )
+        {
+        delete steps[ idx ];
+        steps[ idx ] = 0;
+        }
+    }
+//-----------------------------------------------------------------------------
 step* operation_state::add_step( const char* name, int next_step_n,
     u_int step_duration_par_n )
     {
@@ -1825,6 +1847,12 @@ operation_manager::operation_manager( u_int modes_cnt, i_tech_object *owner ):
 //-----------------------------------------------------------------------------
 operation_manager::~operation_manager()
     {
+    for ( size_t i = 0; i < operations.size(); i++ )
+        {
+        delete operations[ i ];
+        operations[ i ] = 0;
+        }
+
     delete oper_stub;
     oper_stub = 0;
     }

@@ -43,7 +43,7 @@ int lua_init( lua_State* L )
             case LUA_TSTRING:   //Strings
                 {
                 const char* str = lua_tostring( L, 1 );
-                char* tmp_str = new char[ strlen( str + 1 ) ];
+                char* tmp_str = new char[ strlen( str ) + 1 ];
                 strcpy( tmp_str, str );
                 argv[ argc ] = tmp_str;
                 argc++;
@@ -83,6 +83,17 @@ int lua_init( lua_State* L )
         }
 #endif // USE_PROFIBUS
 
+    if ( top )
+        {
+        for ( int i = 0; i < top; i++ )
+            {
+            delete[] argv[ i ];
+            argv[ i ] = 0;
+            }
+        }
+    delete [] argv;
+    argv = 0;
+
     lua_pushnumber( L, 0 );
     return 1;
     }
@@ -107,7 +118,7 @@ int eval( lua_State* L )
     sleep_ms( sleep_time_ms );
 
 #ifndef DEBUG_NO_IO_MODULES
-    G_IO_MANAGER()->read_inputs();
+    //G_IO_MANAGER()->read_inputs();
     sleep_ms( sleep_time_ms );
 #endif // DEBUG_NO_IO_MODULES
 
@@ -117,7 +128,7 @@ int eval( lua_State* L )
     sleep_ms( sleep_time_ms );
 
 #ifndef DEBUG_NO_IO_MODULES
-    G_IO_MANAGER()->write_outputs();
+    //G_IO_MANAGER()->write_outputs();
     sleep_ms( sleep_time_ms );
 #endif // ifndef
 
@@ -164,7 +175,11 @@ struct luaL_reg ls_lib[] =
     { NULL, NULL },
     };
 
-extern "C" int __declspec( dllexport ) luaopen_main_control( lua_State* L )
+extern "C" int
+#ifdef WIN32
+__declspec( dllexport )
+#endif
+    luaopen_main_control( lua_State* L )
     {
     luaL_openlib( L, "main_control", ls_lib, 0 );
     return 0;

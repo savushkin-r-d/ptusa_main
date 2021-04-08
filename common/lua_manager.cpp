@@ -309,7 +309,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     //IV Выполнение основного скрипта ('main.plua').
     if( luaL_loadfile( L, script_name ) != 0 )
         {
-        sprintf( G_LOG->msg, lua_tostring( L, -1 ) );
+        sprintf( G_LOG->msg, "%s", lua_tostring( L, -1 ) );
         G_LOG->write_log( i_log::P_CRIT );
 
         lua_pop( L, 1 );
@@ -320,7 +320,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     int i_line = lua_pcall( L, 0, LUA_MULTRET, 0 );
     if ( i_line != 0 )
         {
-        sprintf( G_LOG->msg, lua_tostring( L, -1 ) );
+        sprintf( G_LOG->msg, "%s", lua_tostring( L, -1 ) );
         G_LOG->write_log( i_log::P_CRIT );
 
         lua_pop( L, 1 );

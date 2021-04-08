@@ -265,12 +265,14 @@ void tech_obj_error::evaluate( bool &is_new_state )
 //-----------------------------------------------------------------------------
 int tech_obj_error::set_cmd( int cmd, int object_alarm_number )
     {
-    for ( u_int i = 0; i < tech_dev->get_errors().size(); i++ )
+    auto errors = tech_dev->get_errors();
+    for ( u_int i = 0; i < errors.size(); i++ )
         {
-        if( tech_dev->get_errors()[ i ]->n == object_alarm_number )
+        if( errors[ i ]->n == object_alarm_number )
             {
-            tech_dev->get_errors().erase(
-                tech_dev->get_errors().begin() + i );
+            delete errors[ i ];
+            errors[ i ] = 0;
+            errors.erase( errors.begin() + i );
 
             if ( G_DEBUG )
                 {
