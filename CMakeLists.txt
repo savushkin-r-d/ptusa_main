@@ -5,141 +5,121 @@ cmake_minimum_required(VERSION 3.13)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (LINUX)
-	SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+if(UNIX AND NOT APPLE)
+    set(LINUX TRUE)
 endif()
 
-if (LINUX)
-	SET(PROJECT_BUILD_NAME "PtusaPLCnextEngineer")
-elseif (WIN32)
-	SET(PROJECT_BUILD_NAME "ptusa")
+if(LINUX)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 endif()
 
-project(${PROJECT_BUILD_NAME})
+project(ptusa)
 
 if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
 
-################# create target #######################################################
-if (LINUX)
-	add_definitions(-DPAC_PLCNEXT)
-	add_definitions(-DLINUX_OS)
+################# create targets ######################################################
 
-elseif (WIN32)
-	add_definitions(-DWIN_OS)
-	add_definitions(-DPAC_PC)
-	add_definitions(-DDEBUG_NO_IO_MODULES)
-	add_definitions(-DSIMPLE_LOG)
+add_definitions(-DPAC_PC)
+add_definitions(-DDEBUG_NO_IO_MODULES)
+
+if(LINUX)
+    add_definitions(-DLINUX_OS)
+elseif(WIN32)
+    add_definitions(-DWIN_OS)
+    add_definitions(-DSIMPLE_LOG)
 endif()
 
 add_definitions(-DTEST_SPEED)
 
-if (MSVC)
-	add_compile_options("/utf-8")
-endif (MSVC)
+if(MSVC)
+    add_compile_options("/utf-8")
+endif(MSVC)
 
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua )
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua)
 
-set ( LUA_LIBRARIES ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua/lua.lib )
-set ( LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src;${CMAKE_CURRENT_SOURCE_DIR}/bin/lua )
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/tolua++ ${CMAKE_CURRENT_SOURCE_DIR}/bin/tolua++ )
+set(LUA_LIBRARIES liblua)
+set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src;${CMAKE_CURRENT_SOURCE_DIR}/bin/lua)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tolua++ ${CMAKE_CURRENT_SOURCE_DIR}/bin/tolua++)
 
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib )
-
-if (LINUX)
-	set ( LINUX_EXTRA_DIR /PAC_control_projects/main_control_prg/eclipse/projects/PLCnext-linux-PLCnextEngineer )
-
-	file(GLOB_RECURSE PLCnext_src ${LINUX_EXTRA_DIR}/PLCnext_src
-		${LINUX_EXTRA_DIR}/src/*.cpp
-		${LINUX_EXTRA_DIR}/intermediate/code/*.cpp)
-endif()
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib)
 
 file(GLOB common_src CONFIGURE_DEPENDS
-	common/PAC-driver/*.cpp
-	common/util/*.c
-	common/util/*.cpp
-	common/*.cpp
+        common/PAC-driver/*.cpp
+        common/util/*.c
+        common/util/*.cpp
+        common/*.cpp
 
-	PAC/common/*.cpp
-	PAC/common/sys/*.cpp
-	PAC/IoT/*.cpp)
+        PAC/common/*.cpp
+        PAC/common/sys/*.cpp
+        PAC/IoT/*.cpp)
 
-list(FILTER common_src EXCLUDE REGEX ".*OPCUA*|.*rfid*|snprintf\.c")
+list(FILTER common_src EXCLUDE REGEX ".*OPCUA*|.*rfid*|snprintf\\.c")
 
-if (LINUX)
-file(GLOB linux_src CONFIGURE_DEPENDS
-	PAC/linux/*.cpp
-	PAC/linux/PAC_PC/*.cpp
-	PAC/linux/PAC_PLCnext/*.cpp)
+if(LINUX)
+    file(GLOB linux_src CONFIGURE_DEPENDS
+            PAC/linux/*.cpp
+            PAC/linux/PAC_PC/*.cpp)
 endif()
 
-if (WIN32)
-file(GLOB win_src CONFIGURE_DEPENDS
-	common/win_util/*.cpp
+if(WIN32)
+    file(GLOB win_src CONFIGURE_DEPENDS
+            common/win_util/*.cpp
 
-	PAC/win/*.cpp
-	PAC/win/PAC_PC/*.cpp)
+            PAC/win/*.cpp
+            PAC/win/PAC_PC/*.cpp)
 endif()
 
-if (LINUX)
-	add_library(${PROJECT_NAME} SHARED ${common_src} ${linux_src} ${PLCnext_src})
+if(LINUX)
+    add_executable(${PROJECT_NAME} ${common_src} ${linux_src}
+            PAC_control_projects/main_control_prg/main.cpp)
 
+    add_library(main_control ${common_src} ${linux_src}
+            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp)
 elseif(WIN32)
-	add_executable(${PROJECT_NAME} ${common_src} ${win_src}
-		PAC_control_projects/main_control_prg/main.cpp)
+    add_executable(${PROJECT_NAME} ${common_src} ${win_src}
+            PAC_control_projects/main_control_prg/main.cpp)
 
-	add_library(main_control ${common_src} ${win_src}
-		PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
-		PAC_control_projects/main_control_prg/main_control_dll_vc/dllmain.cpp)
-	target_compile_definitions(main_control PUBLIC _USRDLL)
+    add_library(main_control ${common_src} ${win_src}
+            PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
+            PAC_control_projects/main_control_prg/main_control_dll_vc/dllmain.cpp)
 endif()
 
+target_compile_definitions(main_control PUBLIC _USRDLL)
 #######################################################################################
 
 ################# project include-paths ###############################################
 
-set( GENERAL_INCLUDES
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/util>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/PAC-driver>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/common>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/sys>
+set(GENERAL_INCLUDES
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/util>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/PAC-driver>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/common>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/sys>
 
 if (WIN32)
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/win_util>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/win>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/win/PAC_PC>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/win_util>
 
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/win>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/win/PAC_PC>
 elseif (LINUX)
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PC>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PC>
+endif ()
 
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/intermediate/code>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
-endif()
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT>
 
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tolua++/include>
 
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tolua++/include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lua/src>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bin/lua>
 
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lua/src>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bin/lua>
-
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/zlib>
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib> )
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/zlib>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib>)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GENERAL_INCLUDES})
-
 target_include_directories(main_control PUBLIC ${GENERAL_INCLUDES})
-#######################################################################################
-
-################# include arp cmake module path #######################################
-if (LINUX)
-	list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
-endif()
-
 #######################################################################################
 
 ################# set link options ####################################################
@@ -147,35 +127,18 @@ endif()
 #          libraries are linked. When a library which is necessary is not linked,     #
 #          the firmware will crash and there will be NO indication why it crashed.    #
 #######################################################################################
-if (LINUX)
-	target_link_options(${PROJECT_NAME} PRIVATE LINKER:--no-undefined)
+if(LINUX)
+    target_link_options(${PROJECT_NAME} PRIVATE LINKER:--no-undefined)
 endif()
-
 #######################################################################################
 
 ################# add link targets ####################################################
 
-if (LINUX)
-	find_package(ArpDevice REQUIRED)
-	find_package(ArpProgramming REQUIRED)
+target_link_libraries(${PROJECT_NAME} liblua_static toluapp_lib_static zlibstatic)
+target_link_libraries(main_control liblua_static toluapp_lib_static zlibstatic)
 
-	target_link_libraries(${PROJECT_NAME} PRIVATE ArpDevice ArpProgramming )
-
-elseif (WIN32)
-	target_link_libraries(${PROJECT_NAME} liblua_static toluapp_lib_static zlibstatic wsock32 ws2_32)
-
-	target_link_libraries(main_control liblua_static toluapp_lib_static zlibstatic wsock32 ws2_32)
-endif()
-#######################################################################################
-
-################# install ############################################################
-
-if (LINUX)
-	string(REGEX REPLACE "^.*\\(([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*$" "\\1" _ARP_SHORT_DEVICE_VERSION ${ARP_DEVICE_VERSION})
-	install(TARGETS ${PROJECT_NAME}
-		LIBRARY DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/lib
-		ARCHIVE DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/lib
-		RUNTIME DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/bin)
-	unset(_ARP_SHORT_DEVICE_VERSION)
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
+    target_link_libraries(main_control wsock32 ws2_32)
 endif()
 #######################################################################################

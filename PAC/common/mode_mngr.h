@@ -387,6 +387,8 @@ class operation_state
     public:
         operation_state( const char* name, operation_manager *owner, int n );
 
+        ~operation_state();
+
         step* add_step( const char* name, int next_step_n,
             u_int step_duration_par_n );
 
@@ -509,6 +511,9 @@ class operation
     {
     public:
         operation( const char* name, operation_manager *owner, int n );
+
+        ~operation();
+
 #ifndef __GNUC__
 #pragma region Совместимость со старой версией.
 #endif

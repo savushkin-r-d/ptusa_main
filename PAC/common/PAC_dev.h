@@ -2181,6 +2181,8 @@ class valve_iolink_mix_proof : public i_mix_proof,  public valve
     public:
         valve_iolink_mix_proof( const char* dev_name );
 
+        ~valve_iolink_mix_proof();
+
         void open_upper_seat();
 
         void open_lower_seat();
@@ -2246,6 +2248,8 @@ class valve_iolink_shut_off_thinktop : public valve
     {
     public:
         valve_iolink_shut_off_thinktop( const char* dev_name );
+
+        ~valve_iolink_shut_off_thinktop();
 
         VALVE_STATE get_valve_state();
 
@@ -2602,6 +2606,8 @@ class temperature_e_iolink : public AI1
     {
     public:
         temperature_e_iolink( const char *dev_name );
+
+        ~temperature_e_iolink();
 
 #ifndef DEBUG_NO_IO_MODULES
         float get_value();
@@ -2993,6 +2999,8 @@ class concentration_e_iolink : public analog_io_device
     {
     public:
         concentration_e_iolink(const char* dev_name);
+
+        ~concentration_e_iolink();
 
         int save_device_ex( char *buff );
 

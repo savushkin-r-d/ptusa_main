@@ -32,7 +32,7 @@ int rm_manager::evaluate()
 //-----------------------------------------------------------------------------
 void rm_manager::print() const
     {
-    printf( "Remote PAC manager (%d) \n", cmmctrs.size() );
+    printf( "Remote PAC manager (%zu) \n", cmmctrs.size() );
     for ( u_int  i = 0; i < cmmctrs.size(); i++ )
         {
         printf( "  %d. ", i + 1 );
