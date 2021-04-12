@@ -317,6 +317,16 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         }
     //-Инициализация Lua.--!>
 
+    int i_line = lua_pcall( L, 0, LUA_MULTRET, 0 );
+    if ( i_line != 0 )
+        {
+        sprintf( G_LOG->msg, "%s", lua_tostring( L, -1 ) );
+        G_LOG->write_log( i_log::P_CRIT );
+
+        lua_pop( L, 1 );
+        return 1;
+        }
+
     //Выполнение пользовательской функции инициализации.
     res = G_TECH_OBJECT_MNGR()->init_objects();
     if ( res )
