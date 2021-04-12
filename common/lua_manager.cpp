@@ -344,12 +344,14 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
         return 1;
         }
+
+#ifndef _USRDLL
     tcp_communicator::init_instance( PAC_name_rus, PAC_name_eng );
 
     G_CMMCTR->reg_service( device_communicator::C_SERVICE_N,
         device_communicator::write_devices_states_service );
     G_CMMCTR->reg_service( 15, ModbusServ::ModbusService );
-
+#endif
 
     lua_gc( L, LUA_GCRESTART, 0 );
     lua_gc( L, LUA_GCCOLLECT, 0 );
