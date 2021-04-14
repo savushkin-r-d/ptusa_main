@@ -265,7 +265,7 @@ void tech_obj_error::evaluate( bool &is_new_state )
 //-----------------------------------------------------------------------------
 int tech_obj_error::set_cmd( int cmd, int object_alarm_number )
     {
-    auto errors = tech_dev->get_errors();
+    auto &errors = tech_dev->get_errors();
     for ( u_int i = 0; i < errors.size(); i++ )
         {
         if( errors[ i ]->n == object_alarm_number )
