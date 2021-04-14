@@ -135,7 +135,7 @@ endif()
 ################# add link targets ####################################################
 
 target_link_libraries(${PROJECT_NAME} liblua_static toluapp_lib_static zlibstatic)
-target_link_libraries(main_control liblua_static toluapp_lib_static zlibstatic)
+target_link_libraries(main_control liblua toluapp_lib_static zlibstatic)
 
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
