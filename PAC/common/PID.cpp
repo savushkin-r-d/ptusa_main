@@ -1,53 +1,69 @@
 #include "PID.h"
 #include "string.h"
 //-----------------------------------------------------------------------------
-PID::PID( int n ):
+PID::PID( int n ): PID( ( "PID" + std::to_string( n ) ).c_str() )
+    {
+    is_old_style = true;
+    G_DEVICE_CMMCTR->add_device( this );
+    }
+//-----------------------------------------------------------------------------
+PID::PID( const char *name ) :device( name, device::DEVICE_TYPE::DT_REGULATOR,
+    device::DEVICE_SUB_TYPE::DST_NONE, PARAMS_COUNT - 1 ),
     uk_1( 0 ),
     ek_1( 0 ),
     ek_2( 0 ),
     start_time( get_millisec() ),
     last_time( get_millisec() ),
     prev_manual_mode( 0 ),
-    is_down_to_inaccel_mode( 0 ),
-    par( new saved_params_float( PARAM_CNT ) ),
-    w_par( new run_time_params_float( 2 ) ),
     state( STATE_OFF ),
     used_par_n( 1 ),
-    start_value( 0 ),
-    number( n )
+    is_old_style( false )
     {
-    G_DEVICE_CMMCTR->add_device( this );
+    out_value = 0;
 
-    sprintf( name, "%s%d", "PID", n );
+    set_par_name( P_k, 0, "P_k" );
+    set_par_name( P_Ti, 0, "P_Ti" );
+    set_par_name( P_Td, 0, "P_Td" );
+    set_par_name( P_dt, 0, "P_dt" );
 
-    init_work_param( WP_U, 0 );
+    set_par_name( P_max, 0, "P_max" );
+    set_par_name( P_min, 0, "P_min" );
+    set_par_name( P_acceleration_time, 0, "P_acceleration_time" );
+    set_par_name( P_is_manual_mode, 0, "P_is_manual_mode" );
+    set_par_name( P_U_manual, 0, "P_U_manual" );
+
+    set_par_name( P_k2, 0, "P_k2" );
+    set_par_name( P_Ti2, 0, "P_Ti2" );
+    set_par_name( P_Td2, 0, "P_Td2" );
+
+    set_par_name( P_out_max, 0, "P_out_max" );
+    set_par_name( P_out_min, 0, "P_out_min" );
+
+    set_par_name( P_is_reverse, 0, "P_is_reverse" );
+    set_par_name( P_is_zero_start, 0, "P_is_zero_start" );
     }
 //-----------------------------------------------------------------------------
 PID::~PID()
     {
-    delete par;
-    par = 0;
-    delete w_par;
-    w_par = 0;
     }
 //-----------------------------------------------------------------------------
 float PID::eval( float currentValue, int deltaSign )
     {
     if ( STATE_OFF == state )
         {
-        if ( this->is_down_to_inaccel_mode ) return 100;
-        else return 0;
+        if ( ( *par )[ P_is_zero_start ] ) return 0;
+        else return 100;
         }
 
-    float K = par[ 0 ][ P_k ];
-    float TI = par[ 0 ][ P_Ti ];
-    float TD = par[ 0 ][ P_Td ];
+    float K = ( *par )[ P_k ];
+    float TI = ( *par )[ P_Ti ];
+    float TD = ( *par )[ P_Td ];
 
     if ( used_par_n == 2 )
         {
-        K = par[ 0 ][ P_k2 ];
-        TI = par[ 0 ][ P_Ti2 ];
-        TD = par[ 0 ][ P_Td2 ];
+        K = ( *par )[ P_k2 ];
+        TI = ( *par )[ P_Ti2 ];
+        TD = ( *par )[ P_Td2 ];
         }
     else
         {
@@ -55,45 +71,37 @@ float PID::eval( float currentValue, int deltaSign )
             {
             if ( used_par_n != 1 )
                 {
-                printf( "Error: void  PID::eval( float currentValue, int deltaSign ), used_par_n = %d\n",
+                printf( "Error: void PID::eval() - used_par_n = %d\n",
                     used_par_n );
-                printf( "Press any key!\n" );
-                get_char();
                 }
             }
         }
 
-    float dt = par[ 0 ][ P_dt ] / 1000;
-    float dmax = par[ 0 ][ P_max ];
-    float dmin = par[ 0 ][ P_min ];
+    float dt = ( *par )[ P_dt ] / 1000;
+    float dmax = ( *par )[ P_max ];
+    float dmin = ( *par )[ P_min ];
 
     if ( dmax == dmin )
         {
         dmax = dmin + 1;
         if ( G_DEBUG )
             {
-            printf( "Error! PID::eval dmax == dmin!\n" );
-            printf( "Press any key!" );
-            get_char();
+            printf( "Error! PID::eval() - dmax == dmin!\n" );
             }
         }
 
-    float ek = deltaSign * 100 * ( w_par[ 0 ][ WP_Z ] - currentValue ) /
+    float ek = deltaSign * 100 * ( set_value - currentValue ) /
         ( dmax - dmin );
 
     if ( G_DEBUG )
         {
         if ( dt == 0 )
             {
-            printf( "Error! PID::eval dt = 0!\n" );
-            printf( "Press any key!" );
-            get_char();
+            printf( "Error! PID::eval() - dt = 0!\n" );
             }
         if ( TI == 0 )
             {
-            printf( "Error! PID::eval TI = 0!\n" );
-            printf( "Press any key!" );
-            get_char();
+            printf( "Error! PID::eval() - TI = 0!\n" );
             }
         }
 
@@ -116,10 +124,21 @@ float PID::eval( float currentValue, int deltaSign )
         ek_1 = ek;
 
         //-Зона разгона.
-        if ( get_delta_millisec( start_time ) <
-            par[ 0 ][ P_acceleration_time ] * 1000 )
+        int deltaTime = get_delta_millisec( start_time );
+        if ( deltaTime < ( *par )[ P_acceleration_time ] * 1000 )
             {
-            acceleration( par[ 0 ][ P_acceleration_time ] );
+            float res = 100 * deltaTime / ( *par )[ P_acceleration_time ];
+            res += start_value;
+
+            if ( ( *par )[ P_is_zero_start ] )
+                {
+                if ( Uk > res ) Uk = res;
+                }
+            else
+                {
+                res = 100 - res;
+                if ( Uk < res ) Uk = res;
+                }
             }
         //-Зона разгона.-!>
 
@@ -128,14 +147,14 @@ float PID::eval( float currentValue, int deltaSign )
 
     //-Мягкий пуск.
     // Включили ручной режим.
-    if ( par[ 0 ][ P_is_manual_mode ] && 0 == prev_manual_mode )
+    if ( ( *par )[ P_is_manual_mode ] && 0 == prev_manual_mode )
         {
         prev_manual_mode = 1;
-        par[ 0 ][ P_U_manual ] = w_par[ 0 ][ WP_U ];
+        ( *par )[ P_U_manual ] = out_value;
         }
 
     // Выключили ручной режим.
-    if ( par[ 0 ][ P_is_manual_mode ] == 0 && 1 == prev_manual_mode )
+    if ( ( *par )[ P_is_manual_mode ] == 0 && 1 == prev_manual_mode )
         {
         prev_manual_mode = 0;
         reset();
@@ -144,30 +163,26 @@ float PID::eval( float currentValue, int deltaSign )
         start_time = get_millisec();
 
         // Устанавливаем начальное значение для разгона регулятора.
-        start_value = par[ 0 ][ P_U_manual ];
+        start_value = ( *par )[ P_U_manual ];
 
-        return par[ 0 ][ P_U_manual ];
+        return ( *par )[ P_U_manual ];
         }
     //-Мягкий пуск.-!>
 
     //-Ограничение на выходное значение.
-    float out_max = par[ 0 ][ P_out_max ];
-    float out_min = par[ 0 ][ P_out_min ];
+    float out_max = ( *par )[ P_out_max ];
+    float out_min = ( *par )[ P_out_min ];
 
     if ( G_DEBUG )
         {
         if ( out_max <= out_min )
             {
-            printf( "Error! PID::eval out_max <= out_min (%f == %f)!\n",
+            printf( "Error! PID::eval() - out_max <= out_min (%f == %f)!\n",
                 out_max, out_min );
-            printf( "Press any key!" );
-            get_char();
             }
         if ( out_max == 0 )
             {
-            printf( "Error! PID::eval out_max = 0!\n" );
-            printf( "Press any key!" );
-            get_char();
+            printf( "Error! PID::eval() - out_max = 0!\n" );
             }
         }
 
@@ -180,34 +195,24 @@ float PID::eval( float currentValue, int deltaSign )
         Uk = out_max;
         }
 
-    w_par[ 0 ][ WP_U ] = Uk;
+    out_value = Uk;
 
-    if ( 1 == par[ 0 ][ P_is_manual_mode ] )
+    if ( 1 == ( *par )[ P_is_manual_mode ] )
         {
-        return par[ 0 ][ P_U_manual ];
+        return ( *par )[ P_U_manual ];
         }
 
     return Uk;
     }
 //-----------------------------------------------------------------------------
-void PID::off()
-    {
-    if ( state != STATE_OFF )
-        {
-        state = STATE_OFF;
-        }
-    }
-//-----------------------------------------------------------------------------
-void PID::on( char is_down_to_inaccel_mode )
+void  PID::direct_on()
     {
     if ( state != STATE_ON )
         {
         state = STATE_ON;
 
         start_time = get_millisec(); // Для разгона регулятора.
-        last_time  = get_millisec(); // Интервал пересчета значений.
-
-        this->is_down_to_inaccel_mode = is_down_to_inaccel_mode;
+        last_time = get_millisec();  // Интервал пересчета значений.
 
         reset(); //Сбрасываем все переменные.
         start_value = 0;
@@ -216,7 +221,7 @@ void PID::on( char is_down_to_inaccel_mode )
 //-----------------------------------------------------------------------------
 void  PID::set( float new_out )
     {
-    w_par[ 0 ][ WP_Z ] = new_out;
+    set_value = new_out;
     }
 //-----------------------------------------------------------------------------
 void  PID::set_used_par( int parN )
@@ -248,16 +253,12 @@ void PID::init_param( PARAM par_n, float val )
             val = 100;
             }
 
-        par[ 0 ][ par_n ] = val;
+        ( *par )[ par_n ] = val;
         }
     }
 //-----------------------------------------------------------------------------
-void PID::init_work_param( WORK_PARAM par_n, float val )
+void PID::init_work_param( int par_n, float val )
     {
-    if ( par_n > 0 && ( u_int ) par_n <= w_par->get_count() )
-        {
-        w_par[ 0 ][ par_n ] = val;
-        }
     }
 //-----------------------------------------------------------------------------
 void PID::save_param()
@@ -271,110 +272,99 @@ void PID::reset()
     ek_1 = 0;
     ek_2 = 0;
 
-    Uk = 0;
-    if ( is_down_to_inaccel_mode )
-        {
-        Uk = 100;
-        }
+    Uk = (int)( *par )[ P_is_zero_start ] ? 0.f : 100.f;
+    out_value = Uk;
 
-    w_par[ 0 ][ WP_U ] = 0;
-
-    par[ 0 ][ P_is_manual_mode ] = 0;
+    ( *par )[ P_is_manual_mode ] = 0;
 
     start_time = get_millisec(); //Для разгона регулятора.
     }
 //-----------------------------------------------------------------------------
 float PID::get_assignment()
     {
-    return w_par[ 0 ][ WP_Z ];
+    return set_value;
     }
 //-----------------------------------------------------------------------------
-void PID::print() const
+int PID::set_cmd( const char* prop, u_int idx, double val )
     {
-    printf( "PID\n" );
-
-    par->print();
-    printf( "P_k = %f\n", par[ 0 ][ P_k ] );
-
-    w_par->print();
-    }
-//-----------------------------------------------------------------------------
-void PID::acceleration( float accel_time )
-    {
-    float deltaTime = ( float ) get_delta_millisec( start_time ) / 1000;
-    float res = 100 * deltaTime / accel_time;
-
-    if ( is_down_to_inaccel_mode )
+    if ( is_old_style )
         {
-        res = 100 - res + start_value;
-        if ( Uk < res ) Uk = res;
-        }
-    else
-        {
-        if ( Uk > res ) Uk = res + start_value;
-        }
-    }
-//-----------------------------------------------------------------------------
-int PID::set_cmd( const char *prop, u_int idx, double val )
-    {
-    if ( 0 == strcmp( prop, "RT_PAR_F" ) )
-        {
-        if ( idx > 0 && idx <= w_par->get_count() )
+        if ( 0 == strcmp( prop, "RT_PAR_F" ) )
             {
-            w_par[ 0 ][ idx ] = ( float ) val;
-            return 0;
-            }
-        }
-    if ( 0 == strcmp( prop, "S_PAR_F" ) )
-        {
-        if ( idx > 0 && idx <= par->get_count() )
-            {
-            //Проверка выхода за диапазон допустимых значений.
-            if ( idx == P_out_min && val < 0 )
+            if ( idx == 1 )
                 {
-                val = 0;
-                }
-            if ( idx == P_out_max && val > 100 )
-                {
-                val = 100;
-                }
-            if ( ( idx == P_out_min && val > par[ 0 ][ P_out_max ] ) ||
-                ( idx == P_out_max && val < par[ 0 ][ P_out_min ] ) )
-                {
+                set_value = (float)val;
                 return 0;
                 }
 
-            par->save( idx, ( float ) val );
-            return 0;
+            if ( idx == 2 )
+                {
+                out_value = (float)val;
+                return 0;
+                }
+            }
+        if ( 0 == strcmp( prop, "S_PAR_F" ) )
+            {
+            if ( idx > 0 && idx <= par->get_count() )
+                {
+                //Проверка выхода за диапазон допустимых значений.
+                if ( idx == P_out_min && val < 0 )
+                    {
+                    val = 0;
+                    }
+                if ( idx == P_out_max && val > 100 )
+                    {
+                    val = 100;
+                    }
+                if ( ( idx == P_out_min && val > ( *par )[ P_out_max ] ) ||
+                    ( idx == P_out_max && val < ( *par )[ P_out_min ] ) )
+                    {
+                    return 0;
+                    }
+
+                par->save( idx, (float)val );
+                return 0;
+                }
             }
         }
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-int PID::set_cmd( const char *prop, u_int idx, char *val )
-    {
-#ifdef WIN_OS
-    throw std::exception( "The method or operation is not implemented." );
-#endif
+    else
+        {
+        device::set_cmd( prop, idx, val );
+        }
 
     return 0;
     }
 //-----------------------------------------------------------------------------
-u_int_4 PID::get_state()
+const char* PID::get_name_in_Lua() const
+    {
+    return get_name();
+    }
+//-----------------------------------------------------------------------------
+int PID::get_state()
     {
     return state;
     }
 //-----------------------------------------------------------------------------
 int PID::save_device( char *buff )
     {
-    int answer_size = sprintf( buff, "t.%s = \n\t{\n", name );
+    int answer_size = 0;
+    if ( is_old_style )
+        {
+        answer_size = sprintf( buff, "t.%s = \n\t{\n", get_name() );
 
-    answer_size += sprintf( buff + answer_size, "\tST=%u,\n", state );
+        answer_size += sprintf( buff + answer_size, "\tST=%u,\n", state );
 
-    //Параметры.
-    answer_size += par->save_device( buff + answer_size, "\t" );
-    answer_size += w_par->save_device( buff + answer_size, "\t" );
+        //Параметры.
+        answer_size += par->save_device( buff + answer_size, "\t" );
+        answer_size = sprintf( buff, "RT_PAR_F = { %f, %f }\n", set_value, out_value );
 
-    return answer_size += sprintf( buff + answer_size, "\t}\n" );
+        answer_size += sprintf( buff + answer_size, "\t}\n" );
+        }
+    else
+        {
+        answer_size = device::save_device( buff, "\t" );
+        }
+
+    return answer_size;
     }
 //-----------------------------------------------------------------------------

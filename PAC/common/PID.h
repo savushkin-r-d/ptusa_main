@@ -1,6 +1,6 @@
 /// @file PID.h
 /// @brief Содержит описание класса ПИД-контроллера.
-/// 
+///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
@@ -18,12 +18,12 @@
 #include "param_ex.h"
 #include "PAC_dev.h"
 
-class PID: public i_Lua_save_device, i_cmd_device
-    { 
-    enum STATES 
+class PID: public device, public i_Lua_save_device
+    {
+    enum STATES
         {
         STATE_OFF,
-        STATE_ON,  
+        STATE_ON,
         };
 
     float uk_1;
@@ -39,30 +39,17 @@ class PID: public i_Lua_save_device, i_cmd_device
 
     char prev_manual_mode;
 
-    /// @brief Надо ли при старте регулятора уменьшать, а не увеличивать
-    /// выходную величину.
-    char is_down_to_inaccel_mode;  
+    int state;
+    float out_value;
+    float set_value;
 
-    saved_params_float    *par;
-    run_time_params_float *w_par;
-
-    u_int_4 state;
-
-    int   used_par_n;
-
-    void acceleration( float accel_time );
-
+    int used_par_n;
     float start_value;
 
-    int number; ///< Номер ПИД.
-    
-    char name[ 50 ];
-
+    bool is_old_style;
     public:
-        static const int PARAM_CNT = 14;
-
-        enum PARAM  
-            {        
+        enum PARAM
+            {
             P_k = 1,               ///< Параметр k.
             P_Ti,                  ///< Параметр Ti.
             P_Td,                  ///< Параметр Td.
@@ -71,42 +58,70 @@ class PID: public i_Lua_save_device, i_cmd_device
             P_min,                 ///< Мin значение входной величины.
             P_acceleration_time,   ///< Время выхода на режим регулирования.
             P_is_manual_mode,      ///< Ручной режим.
-            P_U_manual,            ///< Заданное ручное значение выходного сигнала.        
+            P_U_manual,            ///< Заданное ручное значение выходного сигнала.
 
             P_k2,                  ///< Параметр k2.
             P_Ti2,                 ///< Параметр Ti2.
-            P_Td2,                 ///< Параметр Td2. 
+            P_Td2,                 ///< Параметр Td2.
 
             P_out_max,             ///< Мax значение выходной величины.
             P_out_min,             ///< Мin значение выходной величины.
-            }; 
 
-        enum WORK_PARAM 
+            P_is_reverse,	       ///Обратного (реверсивного) действия.
+            P_is_zero_start,	   ///Нулевое стартовое значение.
+
+            PARAMS_COUNT
+            };
+
+        /// TODO Удалить после обновления, оставлено для совместимости.
+        enum WORK_PARAM
             {
             WP_Z = 1,  ///< Требуемое значение.
             WP_U,      ///< Выход ПИД.
             };
 
-
         /// @param n - номер.
+        ///
+        /// Устаревший вариант. Оставлен для совместимости.
         PID( int n );
 
-        virtual ~PID(); 
-                
-        /// @brief Включение ПИД.
-        void  on( char is_down_to_inaccel_mode = 0 );
+        /// @param name - имя.
+        PID( const char *name );
+
+        virtual ~PID();
+
+        void  direct_on();
+
+        void  direct_set_state( int st )
+            {
+            }
 
         /// @brief Выключение ПИД.
-        void  off();
-		
+        void  direct_off()
+            {
+            if ( state != STATE_OFF )
+                {
+                state = STATE_OFF;
+                }
+            }
+
+        void  direct_set_value( float val )
+            {
+            }
+
+        float get_value()
+            {
+            return out_value;
+            }
+
 		/// @brief Сброс ПИД
 		void reset();
 
         /// @brief Работа ПИД.
-        float eval( float current_value, int delta_sign = 1 );
+        float eval( float current_value, int delta_sign );
 
         /// @brief Установка нового задания ПИД.
-        void set( float new_z );    
+        void set( float new_z );
 
         /// @brief Получение задания ПИД.
         float get_assignment();
@@ -115,15 +130,12 @@ class PID: public i_Lua_save_device, i_cmd_device
         void init_param( PARAM par_n, float val );
 
         /// @brief Инициализация рабочего параметра ПИД.
-        void init_work_param( WORK_PARAM par_n, float val );
+        void init_work_param( int par_n, float val );
 
         /// @brief Сохранение параметров ПИД.
         void save_param();
 
-        /// @brief Отладочный вывод в консоль ПИД.
-        void print() const;
-
-        /// @brief Использование kN, TiN, TdN.     
+        /// @brief Использование kN, TiN, TdN.
         void set_used_par ( int par_n );
 
         int save_device( char *buff );
@@ -135,18 +147,11 @@ class PID: public i_Lua_save_device, i_cmd_device
             }
 #endif // RM_PAC
 
-        /// @brief Отладочная печать объекта в консоль.
-        virtual const char* get_name_in_Lua() const
-            {
-            return name;
-            }
-
 		/// @brief Состояние регулятора
-		u_int_4 get_state();
+		int get_state();
 
-		virtual int set_cmd( const char *prop, u_int idx, double val );
+		int set_cmd( const char *prop, u_int idx, double val );
 
-		virtual int set_cmd( const char *prop, u_int idx, char *val );
-
+        const char* get_name_in_Lua() const;
 	};
 #endif

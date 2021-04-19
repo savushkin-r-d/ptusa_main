@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/06/21 08:53:56.
+** Generated automatically by tolua++-1.0.92 on 04/19/21 14:10:38.
 */
 
 #ifndef __cplusplus
@@ -2085,6 +2085,35 @@ static int tolua_PAC_dev_F00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'F'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* function: R */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_R00
+static int tolua_PAC_dev_R00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
+  {
+   PID* tolua_ret = (PID*)  R(dev_name);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"PID");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'R'.",&tolua_err);
  return 0;
 #endif
 }
@@ -6185,20 +6214,18 @@ static int tolua_PAC_dev_PID_on00(lua_State* tolua_S)
  tolua_Error tolua_err;
  if (
      !tolua_isusertype(tolua_S,1,"PID",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,1,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
   PID* self = (PID*)  tolua_tousertype(tolua_S,1,0);
-  char is_down_to_inaccel_mode = ((char)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'on'", NULL);
 #endif
   {
-   self->on(is_down_to_inaccel_mode);
+   self->on();
   }
  }
  return 0;
@@ -6281,7 +6308,7 @@ static int tolua_PAC_dev_PID_eval00(lua_State* tolua_S)
  if (
      !tolua_isusertype(tolua_S,1,"PID",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,3,1,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,4,&tolua_err)
  )
   goto tolua_lerror;
@@ -6290,7 +6317,7 @@ static int tolua_PAC_dev_PID_eval00(lua_State* tolua_S)
  {
   PID* self = (PID*)  tolua_tousertype(tolua_S,1,0);
   float current_value = ((float)  tolua_tonumber(tolua_S,2,0));
-  int delta_sign = ((int)  tolua_tonumber(tolua_S,3,1));
+  int delta_sign = ((int)  tolua_tonumber(tolua_S,3,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'eval'", NULL);
 #endif
@@ -13026,6 +13053,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_function(tolua_S,"WT",tolua_PAC_dev_WT00);
   tolua_function(tolua_S,"PT",tolua_PAC_dev_PT00);
   tolua_function(tolua_S,"F",tolua_PAC_dev_F00);
+  tolua_function(tolua_S,"R",tolua_PAC_dev_R00);
   tolua_function(tolua_S,"STUB",tolua_PAC_dev_STUB00);
   tolua_function(tolua_S,"DEVICE",tolua_PAC_dev_DEVICE00);
   tolua_cclass(tolua_S,"dev_stub","dev_stub","",NULL);

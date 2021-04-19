@@ -4,6 +4,7 @@
 #include "g_errors.h"
 #include "lua_manager.h"
 #include "log.h"
+#include "PID.h"
 
 #ifdef WIN_OS
 #pragma warning(push)
@@ -40,6 +41,8 @@ const char device::DEV_NAMES[][ 5 ] =
     "WT",      ///< Тензорезистор.
     "PT",      ///< Давление (значение).
     "F",       ///< Автоматический выключатель.
+
+    "R",       ///<ПИД-регулятор.
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -644,6 +647,11 @@ circuit_breaker* device_manager::get_F(const char* dev_name)
     return (circuit_breaker*)get_device(device::DT_F, dev_name);
     }
 //-----------------------------------------------------------------------------
+PID* device_manager::get_R( const char* dev_name )
+    {
+    return (PID*)get_device( device::DT_REGULATOR, dev_name );
+    }
+//-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         const char* dev_name, char * descr, char* article )
     {
@@ -1097,6 +1105,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new dev_stub();
                     break;
                 }
+            break;
+
+        case device::DT_REGULATOR:
+            new_device = new PID( dev_name );
+            new_io_device = 0;
             break;
 
         default:
@@ -5026,6 +5039,12 @@ i_AO_device* F(const char* dev_name)
     {
     return G_DEVICE_MANAGER()->get_F(dev_name);
     }
+//-----------------------------------------------------------------------------
+PID* R( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_R( dev_name );
+    }
+
 //-----------------------------------------------------------------------------
 dev_stub* STUB()
     {

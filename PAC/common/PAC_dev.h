@@ -55,6 +55,7 @@
 class par_device
     {
     friend class device;
+    friend class PID;
 
     public:
         /// @param par_cnt - количество параметров.
@@ -127,7 +128,7 @@ class par_device
 
         enum CONSTANTS
             {
-            C_MAX_PAR_NAME_LENGTH = 20, ///< Максимальная длина имени параметра.
+            C_MAX_PAR_NAME_LENGTH = 25, ///< Максимальная длина имени параметра.
             };
 
         saved_params_float *par; ///< Параметры.
@@ -401,6 +402,7 @@ class device : public i_DO_AO_device, public par_device
             DT_WT,      ///< Тензорезистор.
             DT_PT,      ///< Давление (значение).
             DT_F,       ///< Автоматический выключатель.
+            DT_REGULATOR, ///< ПИД-регулятор.
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
@@ -564,6 +566,8 @@ class device : public i_DO_AO_device, public par_device
                     return "Давление";
                 case DT_F:
                     return "Автоматический выключатель";
+                case DT_REGULATOR:
+                    return "ПИД-регулятор";
                 default:
                     return "???";
                 }
@@ -2000,7 +2004,7 @@ class valve_AS_DO1_DI2 : public valve_AS
                 return true;
                 }
 
-             if ( get_delta_millisec( start_err_time ) < 
+             if ( get_delta_millisec( start_err_time ) <
                  get_par(valve::P_ON_TIME, 0))
                 {
                 return true;
@@ -3906,6 +3910,9 @@ class device_manager: public i_Lua_save_device
         /// @brief Получение весов по номеру.
         wages* get_WT( const char *dev_name );
 
+        /// @brief Получение регулятора по имени.
+        PID* get_R( const char* dev_name );
+
         /// @brief Получение автоматического выключателя по имени.
         circuit_breaker* get_F(const char* dev_name);
 
@@ -4253,6 +4260,13 @@ wages* WT( const char *dev_name );
 /// возвращается заглушка (@ref dev_stub).
 i_AO_device* F(u_int dev_n);
 i_AO_device* F(const char* dev_name);
+//-----------------------------------------------------------------------------
+/// @brief Получение регулятора по имени.
+///
+/// @param dev_name - имя.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+PID* R( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///
