@@ -56,17 +56,16 @@ int main( int argc, const char *argv[] )
 #if defined WIN_OS
     setlocale(LC_ALL, "ru_RU.UTF-8");
 
-    const char**  argv_utf8 = new const char*[ argc ];
+    char** argv_utf8 = new char*[ argc ];
     std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
     for ( int i = 0; i < argc; i++ )
         {
         std::string res = myconv.to_bytes( argv[ i ] );
-        char* tmp = new char[ myconv.converted() ];
-        strcpy( tmp, res.c_str() );
-        argv_utf8[ i ] = tmp;
+        argv_utf8[ i ] = new char[ res.length() + 1 ];
+        strcpy( argv_utf8[ i ], res.c_str() );
         }
 #else
-    const char** argv_utf8 = argv;
+    char** argv_utf8 = argv;
 #endif
 
     signal(SIGINT, stopHandler);
@@ -87,7 +86,7 @@ int main( int argc, const char *argv[] )
     OPCUAServer::getInstance().Init(4840);
 #endif
 
-    G_PROJECT_MANAGER->proc_main_params( argc, argv_utf8 );
+    G_PROJECT_MANAGER->proc_main_params( argc, (const char**)argv_utf8 );
 
     //-Инициализация Lua.
     int res = G_LUA_MANAGER->init( 0, argv_utf8[ 1 ],
@@ -115,6 +114,16 @@ int main( int argc, const char *argv[] )
         char *stopstring;
         sleep_time_ms = strtol( argv_utf8[ 2 ], &stopstring, 10 );
         }
+
+#if defined WIN_OS
+    for ( int i = 0; i < argc; i++ )
+        {
+        delete[] argv_utf8[ i ];
+        argv_utf8[ i ] = 0;
+        }
+    delete[] argv_utf8;
+    argv_utf8 = 0;
+#endif
 
 #ifdef OPCUA
     OPCUAServer::getInstance().UserInit();
@@ -265,16 +274,6 @@ int main( int argc, const char *argv[] )
 #endif
     //Деинициализация дополнительных устройств.
     IOT_FINAL();
-
-#if defined WIN_OS
-    for ( int i = 0; i < argc; i++ )
-        {
-        delete [] argv_utf8[ i ];
-        argv_utf8[ i ] = 0;
-        }
-    delete [] argv_utf8;
-    argv_utf8 = 0;
-#endif
 
     return( EXIT_SUCCESS );
     }
