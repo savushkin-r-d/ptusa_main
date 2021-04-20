@@ -47,13 +47,16 @@ static void stopHandler(int sig)
     running = 0;
     }
 
+#ifdef WIN_OS
 int wmain( int argc, const wchar_t *argv[] )
+#else
+int main( int argc, const char *argv[] )
+#endif
     {
 #if defined WIN_OS
     setlocale(LC_ALL, "ru_RU.UTF-8");
-#endif
 
-    const char** argv_utf8 = new const char*[ argc ];
+    const char**  argv_utf8 = new const char*[ argc ];
     std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
     for ( int i = 0; i < argc; i++ )
         {
@@ -62,6 +65,9 @@ int wmain( int argc, const wchar_t *argv[] )
         strcpy( tmp, res.c_str() );
         argv_utf8[ i ] = tmp;
         }
+#else
+    const char** argv_utf8 = argv;
+#endif
 
     signal(SIGINT, stopHandler);
     signal(SIGTERM, stopHandler);
@@ -259,6 +265,16 @@ int wmain( int argc, const wchar_t *argv[] )
 #endif
     //Деинициализация дополнительных устройств.
     IOT_FINAL();
+
+#if defined WIN_OS
+    for ( int i = 0; i < argc; i++ )
+        {
+        delete [] argv_utf8[ i ];
+        argv_utf8[ i ] = 0;
+        }
+    delete [] argv_utf8;
+    argv_utf8 = 0;
+#endif
 
     return( EXIT_SUCCESS );
     }
