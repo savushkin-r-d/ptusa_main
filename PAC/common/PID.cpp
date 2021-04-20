@@ -7,19 +7,28 @@ PID::PID( int n ): PID( ( "PID" + std::to_string( n ) ).c_str() )
     G_DEVICE_CMMCTR->add_device( this );
     }
 //-----------------------------------------------------------------------------
-PID::PID( const char *name ) :device( name, device::DEVICE_TYPE::DT_REGULATOR,
+PID::PID( const char* name ) :device( name, device::DEVICE_TYPE::DT_REGULATOR,
     device::DEVICE_SUB_TYPE::DST_NONE, PARAMS_COUNT - 1 ),
     uk_1( 0 ),
     ek_1( 0 ),
     ek_2( 0 ),
+    q0( 0 ),
+    q1( 0 ),
+    q2( 0 ),
+    Uk( 0 ),
+    dUk( 0 ),
     start_time( get_millisec() ),
     last_time( get_millisec() ),
     prev_manual_mode( 0 ),
     state( STATE_OFF ),
     used_par_n( 1 ),
-    is_old_style( false )
+    is_old_style( false ),
+    start_value( 0 ),
+    sensor( 0 ),
+    actuator( 0 )
     {
     out_value = 0;
+    set_value = 0;
 
     set_par_name( P_k, 0, "P_k" );
     set_par_name( P_Ti, 0, "P_Ti" );
@@ -219,6 +228,47 @@ void  PID::direct_on()
         }
     }
 //-----------------------------------------------------------------------------
+void PID::direct_set_state( int st )
+    {
+    switch ( st )
+        {
+        case STATE_OFF:
+            direct_off();
+            break;
+
+        case STATE_ON:
+            direct_on();
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+/// @brief Выключение ПИД.
+void PID::direct_off()
+    {
+    if ( state != STATE_OFF )
+        {
+        state = STATE_OFF;
+        if ( actuator )
+            {
+            actuator->off();
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void PID::direct_set_value( float val )
+    {
+    set_value = val;
+    if ( sensor )
+        {
+        out_value = eval( sensor->get_value(), ( *par )[ P_is_reverse ] );
+        if ( actuator )
+            {
+            actuator->on();
+            actuator->set_value( out_value );
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
 void  PID::set( float new_out )
     {
     set_value = new_out;
@@ -231,8 +281,6 @@ void  PID::set_used_par( int parN )
         if ( G_DEBUG )
             {
             printf( "Error: void  PID::set_used_par ( int parN ), parN = %d\n", parN );
-            printf( "Press any key!\n" );
-            get_char();
             }
         used_par_n = 1;
         }
@@ -264,6 +312,11 @@ void PID::init_work_param( int par_n, float val )
 void PID::save_param()
     {
     par->save_all();
+    }
+//-----------------------------------------------------------------------------
+float PID::get_value()
+    {
+    return out_value;
     }
 //-----------------------------------------------------------------------------
 void PID::reset()
@@ -335,6 +388,28 @@ int PID::set_cmd( const char* prop, u_int idx, double val )
     return 0;
     }
 //-----------------------------------------------------------------------------
+void PID::set_string_property( const char* field, const char* value )
+    {
+    if ( !field ) return;
+
+    switch ( field[ 0 ] )
+        {
+        //IN_VALUE
+        case 'I':
+            sensor = G_DEVICE_MANAGER()->get_device( value );
+            break;
+
+        //OUT_VALUE
+        case 'O':
+            actuator = G_DEVICE_MANAGER()->get_device( value );
+            break;
+
+        default:
+            device::set_string_property( field, value );
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
 const char* PID::get_name_in_Lua() const
     {
     return get_name();
@@ -343,6 +418,12 @@ const char* PID::get_name_in_Lua() const
 int PID::get_state()
     {
     return state;
+    }
+//-----------------------------------------------------------------------------
+int PID::save_device_ex( char* buff )
+    {
+    int answer_size = sprintf( buff, "Z=%.2f, ", set_value );
+    return answer_size;
     }
 //-----------------------------------------------------------------------------
 int PID::save_device( char *buff )
@@ -356,7 +437,8 @@ int PID::save_device( char *buff )
 
         //Параметры.
         answer_size += par->save_device( buff + answer_size, "\t" );
-        answer_size = sprintf( buff, "RT_PAR_F = { %f, %f }\n", set_value, out_value );
+        answer_size += sprintf( buff + answer_size,
+            "RT_PAR_F = { %.2f, %.2f }\n", set_value, out_value );
 
         answer_size += sprintf( buff + answer_size, "\t}\n" );
         }

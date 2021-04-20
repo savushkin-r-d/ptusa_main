@@ -3842,6 +3842,9 @@ class device_manager: public i_Lua_save_device
         device* get_device( int dev_type, const char *dev_name );
 
         /// @brief Получение устройства.
+        device* get_device( const char* dev_name );
+
+        /// @brief Получение устройства.
         device* get_device( u_int serial_dev_n )
             {
             if ( serial_dev_n < project_devices.size() )
@@ -3978,6 +3981,8 @@ class device_manager: public i_Lua_save_device
 
         int get_device_n( device::DEVICE_TYPE dev_type,
             const char *dev_name );
+
+        int get_device_n( const char* dev_name );
 
         std::vector< device* > project_devices; ///< Все устройства.
 

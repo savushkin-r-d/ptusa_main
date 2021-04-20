@@ -94,11 +94,6 @@ int par_device::set_cmd( const char *name, double val )
             if ( strcmp( par_name[ i ], name ) == 0 )
                 {
                 par->save( i + 1, ( float ) val );
-                if ( G_DEBUG )
-                    {
-                    printf( "par_device::set_cmd() - name = %s, val = %f.\n",
-                        name, val );
-                    }
                 return 0;
                 }
             }
@@ -377,7 +372,7 @@ int device::set_cmd( const char *prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 device::device( const char* dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type,
     u_int par_cnt ) : par_device( par_cnt ), s_number( 0 ), type( type ),
-    sub_type( sub_type ), is_manual_mode( false )
+    sub_type( sub_type ), is_manual_mode( false ), article( 0 )
     {
     if ( dev_name )
         {
@@ -468,6 +463,30 @@ device* device_manager::get_device( int dev_type,
         sprintf( G_LOG->msg + strlen( G_LOG->msg ), "\"%s\" not found!",
             dev_name );
 
+        G_LOG->write_log( i_log::P_ERR );
+        }
+
+    return &stub;
+    }
+//-----------------------------------------------------------------------------
+device* device_manager::get_device( const char* dev_name )
+    {
+    int dev_n = get_device_n( dev_name );
+
+    if ( dev_n >= 0 )
+        {
+        try
+            {
+            return project_devices[ dev_n ];
+            }
+        catch ( ... )
+            {
+            return &stub;
+            }
+        }
+    else
+        {
+        sprintf( G_LOG->msg, "Device \"%s\" not found!", dev_name );
         G_LOG->write_log( i_log::P_ERR );
         }
 
@@ -1200,7 +1219,7 @@ int device_manager::rm_save_device( char *buff )
 
 #endif // RM_PAC
 //-----------------------------------------------------------------------------
-int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char *dev_name )
+int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char* dev_name )
     {
     int l = -1;
     int u = -1;
@@ -1230,6 +1249,17 @@ int device_manager::get_device_n( device::DEVICE_TYPE dev_type, const char *dev_
             {
             u = i - 1;
             }
+        }
+
+    return -1;
+    }
+//-----------------------------------------------------------------------------
+int device_manager::get_device_n( const char* dev_name )
+    {
+    for ( int dev_type = device::DT_V; dev_type < device::C_DEVICE_TYPE_CNT; dev_type++ )
+        {
+        auto res = get_device_n( ( device::DEVICE_TYPE ) dev_type, dev_name );
+        if ( res >= 0 ) return res;
         }
 
     return -1;

@@ -131,7 +131,7 @@ class params_manager
     private:
         void reset_to_default( void( *custom_init_params_function )( ),
             int auto_init_params, int auto_init_work_params );
-        
+
         /// @brief Закрытый конструктор.
         ///
         /// Для вызова методов используется статический метод @ref get_instance.
@@ -176,9 +176,9 @@ template < class type, bool is_float > class parameters
             if ( index <= count && index > 0 )
                 {
                 return values[ index - 1 ];
-                }            
+                }
             else
-                {                
+                {
                 if ( G_DEBUG )
                     {
                     if ( 0 == index )
@@ -212,7 +212,7 @@ template < class type, bool is_float > class parameters
                 }
             else
                 {
-                if ( G_DEBUG ) 
+                if ( G_DEBUG )
                     {
                     printf( "parameters[] - error: index[ %u ] > count [ %u ]\n",
                         index, count );
@@ -346,10 +346,6 @@ template < class type, bool is_float > class parameters
             int answer_size = sprintf( buff, "%s\t{\n%s\t",
                 prefix, prefix );
 
-#ifdef WIN_OS
-			setlocale(LC_NUMERIC, "C");
-#endif
-
             for ( u_int i = 1; i <= count; i++ )
                 {
                 if ( is_float )
@@ -474,7 +470,7 @@ public parameters < type, is_float >
                 }
             else
                 {
-                if ( G_DEBUG ) 
+                if ( G_DEBUG )
                     {
                     if ( 0 == idx )
                         {

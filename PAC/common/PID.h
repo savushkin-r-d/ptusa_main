@@ -20,33 +20,6 @@
 
 class PID: public device, public i_Lua_save_device
     {
-    enum STATES
-        {
-        STATE_OFF,
-        STATE_ON,
-        };
-
-    float uk_1;
-    float ek_1;
-    float ek_2;
-    float q0;
-    float q1;
-    float q2;
-    float Uk;
-    float dUk;
-    unsigned long start_time;
-    unsigned long last_time;
-
-    char prev_manual_mode;
-
-    int state;
-    float out_value;
-    float set_value;
-
-    int used_par_n;
-    float start_value;
-
-    bool is_old_style;
     public:
         enum PARAM
             {
@@ -82,7 +55,7 @@ class PID: public device, public i_Lua_save_device
 
         /// @param n - номер.
         ///
-        /// Устаревший вариант. Оставлен для совместимости.
+        /// TODO Удалить после обновления, оставлено для совместимости.
         PID( int n );
 
         /// @param name - имя.
@@ -90,29 +63,23 @@ class PID: public device, public i_Lua_save_device
 
         virtual ~PID();
 
-        void  direct_on();
+#ifndef __GNUC__
+#pragma region Интерфейс device.
+#endif
+        void direct_on();
+        void direct_set_state( int st );
+        void direct_off();
+        int get_state();
 
-        void  direct_set_state( int st )
-            {
-            }
+        void direct_set_value( float val );
+        float get_value();
 
-        /// @brief Выключение ПИД.
-        void  direct_off()
-            {
-            if ( state != STATE_OFF )
-                {
-                state = STATE_OFF;
-                }
-            }
+        int set_cmd( const char* prop, u_int idx, double val );
 
-        void  direct_set_value( float val )
-            {
-            }
-
-        float get_value()
-            {
-            return out_value;
-            }
+        void set_string_property( const char* field, const char* value );
+#ifndef __GNUC__
+#pragma endregion
+#endif
 
 		/// @brief Сброс ПИД
 		void reset();
@@ -138,6 +105,7 @@ class PID: public device, public i_Lua_save_device
         /// @brief Использование kN, TiN, TdN.
         void set_used_par ( int par_n );
 
+        int save_device_ex( char* buff );
         int save_device( char *buff );
 
 #ifdef RM_PAC
@@ -147,11 +115,38 @@ class PID: public device, public i_Lua_save_device
             }
 #endif // RM_PAC
 
-		/// @brief Состояние регулятора
-		int get_state();
-
-		int set_cmd( const char *prop, u_int idx, double val );
-
         const char* get_name_in_Lua() const;
+
+    private:
+        enum STATES
+            {
+            STATE_OFF,
+            STATE_ON,
+            };
+
+        float uk_1;
+        float ek_1;
+        float ek_2;
+        float q0;
+        float q1;
+        float q2;
+        float Uk;
+        float dUk;
+        unsigned long start_time;
+        unsigned long last_time;
+
+        char prev_manual_mode;
+
+        int state;
+        float out_value;
+        float set_value;
+
+        int used_par_n;
+        float start_value;
+
+        bool is_old_style;
+
+        device* sensor;
+        device* actuator;
 	};
 #endif
