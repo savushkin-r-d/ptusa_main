@@ -63,6 +63,8 @@ class PID: public device, public i_Lua_save_device
 
         virtual ~PID();
 
+        void on( char is_down_to_inaccel_mode = 0 );
+
 #ifndef __GNUC__
 #pragma region Интерфейс device.
 #endif
@@ -85,7 +87,7 @@ class PID: public device, public i_Lua_save_device
 		void reset();
 
         /// @brief Работа ПИД.
-        float eval( float current_value, int delta_sign );
+        float eval( float current_value, int delta_sign = 1 );
 
         /// @brief Установка нового задания ПИД.
         void set( float new_z );

@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/19/21 14:10:38.
+** Generated automatically by tolua++-1.0.92 on 04/20/21 14:11:14.
 */
 
 #ifndef __cplusplus
@@ -6214,18 +6214,20 @@ static int tolua_PAC_dev_PID_on00(lua_State* tolua_S)
  tolua_Error tolua_err;
  if (
      !tolua_isusertype(tolua_S,1,"PID",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
+     !tolua_isnumber(tolua_S,2,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
   PID* self = (PID*)  tolua_tousertype(tolua_S,1,0);
+  char is_down_to_inaccel_mode = ((char)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'on'", NULL);
 #endif
   {
-   self->on();
+   self->on(is_down_to_inaccel_mode);
   }
  }
  return 0;
@@ -6308,7 +6310,7 @@ static int tolua_PAC_dev_PID_eval00(lua_State* tolua_S)
  if (
      !tolua_isusertype(tolua_S,1,"PID",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,3,1,&tolua_err) ||
      !tolua_isnoobj(tolua_S,4,&tolua_err)
  )
   goto tolua_lerror;
@@ -6317,7 +6319,7 @@ static int tolua_PAC_dev_PID_eval00(lua_State* tolua_S)
  {
   PID* self = (PID*)  tolua_tousertype(tolua_S,1,0);
   float current_value = ((float)  tolua_tonumber(tolua_S,2,0));
-  int delta_sign = ((int)  tolua_tonumber(tolua_S,3,0));
+  int delta_sign = ((int)  tolua_tonumber(tolua_S,3,1));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'eval'", NULL);
 #endif

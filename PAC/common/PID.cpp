@@ -56,6 +56,12 @@ PID::~PID()
     {
     }
 //-----------------------------------------------------------------------------
+void PID::on( char is_down_to_inaccel_mode )
+    {
+    ( *par )[ P_is_zero_start ] = !is_down_to_inaccel_mode;
+    device::on();
+    }
+//-----------------------------------------------------------------------------
 float PID::eval( float currentValue, int deltaSign )
     {
     if ( STATE_OFF == state )
@@ -260,7 +266,7 @@ void PID::direct_set_value( float val )
     set_value = val;
     if ( sensor )
         {
-        out_value = eval( sensor->get_value(), ( *par )[ P_is_reverse ] );
+        out_value = eval( sensor->get_value(), (int)( *par )[ P_is_reverse ] );
         if ( actuator )
             {
             actuator->on();
