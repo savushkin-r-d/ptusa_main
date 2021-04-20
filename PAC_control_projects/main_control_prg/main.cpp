@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include "fcntl.h"
+#include <codecvt>
 
 #include "dtime.h"
 
@@ -46,12 +47,21 @@ static void stopHandler(int sig)
     running = 0;
     }
 
-
-int main( int argc, const char *argv[] )
+int wmain( int argc, const wchar_t *argv[] )
     {
 #if defined WIN_OS
     setlocale(LC_ALL, "ru_RU.UTF-8");
 #endif
+
+    const char** argv_utf8 = new const char*[ argc ];
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
+    for ( int i = 0; i < argc; i++ )
+        {
+        std::string res = myconv.to_bytes( argv[ i ] );
+        char* tmp = new char[ myconv.converted() ];
+        strcpy( tmp, res.c_str() );
+        argv_utf8[ i ] = tmp;
+        }
 
     signal(SIGINT, stopHandler);
     signal(SIGTERM, stopHandler);
@@ -71,10 +81,10 @@ int main( int argc, const char *argv[] )
     OPCUAServer::getInstance().Init(4840);
 #endif
 
-    G_PROJECT_MANAGER->proc_main_params( argc, argv );
+    G_PROJECT_MANAGER->proc_main_params( argc, argv_utf8 );
 
     //-Инициализация Lua.
-    int res = G_LUA_MANAGER->init( 0, argv[ 1 ],
+    int res = G_LUA_MANAGER->init( 0, argv_utf8[ 1 ],
         G_PROJECT_MANAGER->path.c_str(), G_PROJECT_MANAGER->sys_path.c_str() );
 
     if ( res ) //-Ошибка инициализации.
@@ -97,7 +107,7 @@ int main( int argc, const char *argv[] )
     if ( argc >= 3 )
         {
         char *stopstring;
-        sleep_time_ms = strtol( argv[ 2 ], &stopstring, 10 );
+        sleep_time_ms = strtol( argv_utf8[ 2 ], &stopstring, 10 );
         }
 
 #ifdef OPCUA

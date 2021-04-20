@@ -152,10 +152,11 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         printf( "Init Lua...\n" );
         }
 
+    sprintf( G_LOG->msg, "script_name = \"%s\"", script_name );
+    G_LOG->write_log( i_log::P_NOTICE );
     if ( dir || sys_dir )
         {
-        sprintf( G_LOG->msg,
-            "g_path = \"%s\", g_sys_path = \"%s\"", dir, sys_dir );
+        sprintf( G_LOG->msg, "g_path = \"%s\", g_sys_path = \"%s\"", dir, sys_dir );
         G_LOG->write_log( i_log::P_NOTICE );
         }
 
@@ -307,6 +308,11 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         }
 
     //IV Выполнение основного скрипта ('main.plua').
+    if ( G_DEBUG )
+        {
+        printf( "Выполнение основного скрипта (\"%s\").\n", script_name );
+        }
+
     if( luaL_loadfile( L, script_name ) != 0 )
         {
         sprintf( G_LOG->msg, "%s", lua_tostring( L, -1 ) );
@@ -315,7 +321,6 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         lua_pop( L, 1 );
         return 1;
         }
-    //-Инициализация Lua.--!>
 
     int i_line = lua_pcall( L, 0, LUA_MULTRET, 0 );
     if ( i_line != 0 )
@@ -326,8 +331,13 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         lua_pop( L, 1 );
         return 1;
         }
+    //-Инициализация Lua.--!>
 
     //Выполнение пользовательской функции инициализации.
+    if ( G_DEBUG )
+        {
+        printf( "Выполнение пользовательской функции инициализации.\n" );
+        }
     res = G_TECH_OBJECT_MNGR()->init_objects();
     if ( res )
         {
@@ -367,6 +377,10 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     lua_gc( L, LUA_GCCOLLECT, 0 );
 
     //Инициализация параметров при необходимости.
+    if ( G_DEBUG )
+        {
+        printf( "Инициализация параметров при необходимости.\n" );
+        }
     params_manager::get_instance()->final_init();
 
     if ( G_DEBUG )
