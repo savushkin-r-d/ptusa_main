@@ -54,7 +54,8 @@ int main( int argc, const char *argv[] )
 #endif
     {
 #if defined WIN_OS
-    setlocale(LC_ALL, "ru_RU.UTF-8");
+    setlocale( LC_ALL, "ru_RU.UTF-8" );
+    setlocale( LC_NUMERIC, "C" );
 
     char** argv_utf8 = new char*[ argc ];
     std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
