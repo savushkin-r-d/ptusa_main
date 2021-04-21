@@ -50,8 +50,7 @@ static void stopHandler(int sig)
 int main( int argc, const char *argv[] )
     {
 #if defined WIN_OS
-    setlocale( LC_ALL, "ru_RU.UTF-8" );
-    setlocale( LC_NUMERIC, "C" );
+    setlocale(LC_ALL, "ru_RU.UTF-8");
 #endif
 
     signal(SIGINT, stopHandler);
