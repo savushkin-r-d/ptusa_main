@@ -85,24 +85,7 @@ int project_manager::proc_main_params( int argc, const char *argv[] )
         {
         if ( strcmp( argv[ i ], "path" ) == 0 )
             {
-#if defined WIN32 && !defined _USRDLL
-            int w_argc;
-            wchar_t** w_argv = CommandLineToArgvW( GetCommandLineW(), &w_argc );
-
-            wchar_t* w_path = w_argv[ i + 1 ];
-            int utf16len = wcslen( w_path );
-            int utf8len = WideCharToMultiByte( CP_UTF8, 0, w_path, utf16len,
-                NULL, 0, NULL, NULL );
-
-            char* path = new char[ utf8len + 1 ];
-            memset( path, 0, utf8len + 1 );
-
-            WideCharToMultiByte( CP_UTF8, 0, w_path, utf16len, path, utf8len, 0, 0 );
-
-            init_path( path );
-#else
             init_path( argv[ i + 1 ] );
-#endif
             }
         }
 

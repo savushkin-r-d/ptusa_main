@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include "fcntl.h"
+#include <codecvt>
 
 #include "dtime.h"
 
@@ -46,11 +47,26 @@ static void stopHandler(int sig)
     running = 0;
     }
 
-
+#ifdef WIN_OS
+int wmain( int argc, const wchar_t *argv[] )
+#else
 int main( int argc, const char *argv[] )
+#endif
     {
 #if defined WIN_OS
-    setlocale(LC_ALL, "ru_RU.UTF-8");
+    setlocale( LC_ALL, "ru_RU.UTF-8" );
+    setlocale( LC_NUMERIC, "C" );
+
+    char** argv_utf8 = new char*[ argc ];
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
+    for ( int i = 0; i < argc; i++ )
+        {
+        std::string res = myconv.to_bytes( argv[ i ] );
+        argv_utf8[ i ] = new char[ res.length() + 1 ];
+        strcpy( argv_utf8[ i ], res.c_str() );
+        }
+#else
+    char** argv_utf8 = argv;
 #endif
 
     signal(SIGINT, stopHandler);
@@ -71,10 +87,10 @@ int main( int argc, const char *argv[] )
     OPCUAServer::getInstance().Init(4840);
 #endif
 
-    G_PROJECT_MANAGER->proc_main_params( argc, argv );
+    G_PROJECT_MANAGER->proc_main_params( argc, (const char**)argv_utf8 );
 
     //-Инициализация Lua.
-    int res = G_LUA_MANAGER->init( 0, argv[ 1 ],
+    int res = G_LUA_MANAGER->init( 0, argv_utf8[ 1 ],
         G_PROJECT_MANAGER->path.c_str(), G_PROJECT_MANAGER->sys_path.c_str() );
 
     if ( res ) //-Ошибка инициализации.
@@ -97,8 +113,18 @@ int main( int argc, const char *argv[] )
     if ( argc >= 3 )
         {
         char *stopstring;
-        sleep_time_ms = strtol( argv[ 2 ], &stopstring, 10 );
+        sleep_time_ms = strtol( argv_utf8[ 2 ], &stopstring, 10 );
         }
+
+#if defined WIN_OS
+    for ( int i = 0; i < argc; i++ )
+        {
+        delete[] argv_utf8[ i ];
+        argv_utf8[ i ] = 0;
+        }
+    delete[] argv_utf8;
+    argv_utf8 = 0;
+#endif
 
 #ifdef OPCUA
     OPCUAServer::getInstance().UserInit();
