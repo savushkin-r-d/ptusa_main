@@ -322,6 +322,11 @@ template < class type, bool is_float > class parameters
             return res;
             }
 
+        const char* get_name()
+            {
+            return name;
+            }
+
     protected:
         char is_delete; ///< Признак удаления буфера при удалении объекта.
 

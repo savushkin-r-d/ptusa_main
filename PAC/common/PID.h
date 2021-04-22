@@ -18,7 +18,7 @@
 #include "param_ex.h"
 #include "PAC_dev.h"
 
-class PID: public device, public i_Lua_save_device
+class PID : public device, public i_Lua_save_device
     {
     public:
         enum PARAM
@@ -47,6 +47,7 @@ class PID: public device, public i_Lua_save_device
             };
 
         /// TODO Удалить после обновления, оставлено для совместимости.
+        const char* WORK_PARAMS_NAME = "RT_PAR_F";
         enum WORK_PARAM
             {
             WP_Z = 1,  ///< Требуемое значение.
@@ -59,11 +60,11 @@ class PID: public device, public i_Lua_save_device
         PID( int n );
 
         /// @param name - имя.
-        PID( const char *name );
+        PID( const char* name );
 
         virtual ~PID();
 
-        void on( char is_down_to_inaccel_mode = 0 );
+        void on( char is_not_zero_start = 0 );
 
 #ifndef __GNUC__
 #pragma region Интерфейс device.
@@ -83,7 +84,9 @@ class PID: public device, public i_Lua_save_device
 #pragma endregion
 #endif
 
-		/// @brief Сброс ПИД
+        /// @brief Сброс ПИД.
+        ///
+        /// Сбрасываем все переменные.
 		void reset();
 
         /// @brief Работа ПИД.
@@ -120,10 +123,10 @@ class PID: public device, public i_Lua_save_device
         const char* get_name_in_Lua() const;
 
     private:
-        enum STATES
+        enum class STATE
             {
-            STATE_OFF,
-            STATE_ON,
+            OFF,
+            ON,
             };
 
         float uk_1;
@@ -139,7 +142,7 @@ class PID: public device, public i_Lua_save_device
 
         char prev_manual_mode;
 
-        int state;
+        STATE state;
         float out_value;
         float set_value;
 
@@ -150,5 +153,8 @@ class PID: public device, public i_Lua_save_device
 
         device* sensor;
         device* actuator;
+
+        const float MIN_OUT_VALUE = .0f;
+        const float MAX_OUT_VALUE = 100.f;
 	};
 #endif

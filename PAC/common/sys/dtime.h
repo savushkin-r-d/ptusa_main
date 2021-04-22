@@ -1,11 +1,11 @@
 /// @file dtime.h
 /// @brief Функции работы со временем.
-/// 
+///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
 /// @c WIN_OS - реализация для ОС Windows.@n@n
-/// 
+///
 /// @par Текущая версия:
 /// @$Rev: 223 $.\n
 /// @$Author: id $.\n
@@ -16,12 +16,13 @@
 
 #if !defined WIN_OS && !defined LINUX_OS
 #error You must define OS!
-#endif 
+#endif
 
 #include "s_types.h"
 
 #include <time.h>
 
+const long MSEC_IN_SEC = 1000;
 //-----------------------------------------------------------------------------
 /// @brief Получение текущего времени в секундах.
 ///

@@ -20,7 +20,7 @@ PID::PID( const char* name ) :device( name, device::DEVICE_TYPE::DT_REGULATOR,
     start_time( get_millisec() ),
     last_time( get_millisec() ),
     prev_manual_mode( 0 ),
-    state( STATE_OFF ),
+    state( STATE::OFF ),
     used_par_n( 1 ),
     is_old_style( false ),
     start_value( 0 ),
@@ -56,18 +56,18 @@ PID::~PID()
     {
     }
 //-----------------------------------------------------------------------------
-void PID::on( char is_down_to_inaccel_mode )
+void PID::on( char is_not_zero_start )
     {
-    ( *par )[ P_is_zero_start ] = !is_down_to_inaccel_mode;
+    ( *par )[ P_is_zero_start ] = !is_not_zero_start;
     device::on();
     }
 //-----------------------------------------------------------------------------
 float PID::eval( float currentValue, int deltaSign )
     {
-    if ( STATE_OFF == state )
+    if ( STATE::OFF == state )
         {
-        if ( ( *par )[ P_is_zero_start ] ) return 0;
-        else return 100;
+        if ( ( *par )[ P_is_zero_start ] ) return MIN_OUT_VALUE;
+        else return MAX_OUT_VALUE;
         }
 
     float K = ( *par )[ P_k ];
@@ -92,7 +92,7 @@ float PID::eval( float currentValue, int deltaSign )
             }
         }
 
-    float dt = ( *par )[ P_dt ] / 1000;
+    float dt = ( *par )[ P_dt ] / MSEC_IN_SEC;
     float dmax = ( *par )[ P_max ];
     float dmin = ( *par )[ P_min ];
 
@@ -105,8 +105,8 @@ float PID::eval( float currentValue, int deltaSign )
             }
         }
 
-    float ek = deltaSign * 100 * ( set_value - currentValue ) /
-        ( dmax - dmin );
+    float ek = deltaSign * MAX_OUT_VALUE *
+        ( set_value - currentValue ) / ( dmax - dmin );
 
     if ( G_DEBUG )
         {
@@ -123,7 +123,7 @@ float PID::eval( float currentValue, int deltaSign )
     if ( dt == 0 ) dt = 1;
     if ( TI == 0 ) TI = 0.0001f;
 
-    if ( get_delta_millisec( last_time ) > dt*1000L )
+    if ( get_delta_millisec( last_time ) > dt * MSEC_IN_SEC )
         {
         q0 = K * ( 1 + TD / dt );
         q1 = K * ( -1 - 2 * TD / dt + 2 * dt / TI );
@@ -131,8 +131,8 @@ float PID::eval( float currentValue, int deltaSign )
 
         dUk = q0 * ek + q1 * ek_1 + q2 * ek_2;
         Uk = uk_1 + dUk;
-        if ( Uk > 100 ) Uk = 100;
-        if ( Uk < 0 ) Uk = 0;
+        if ( Uk > MAX_OUT_VALUE ) Uk = MAX_OUT_VALUE;
+        if ( Uk < MIN_OUT_VALUE ) Uk = MIN_OUT_VALUE;
 
         uk_1 = Uk;
         ek_2 = ek_1;
@@ -140,18 +140,17 @@ float PID::eval( float currentValue, int deltaSign )
 
         //-Зона разгона.
         int deltaTime = get_delta_millisec( start_time );
-        if ( deltaTime < ( *par )[ P_acceleration_time ] * 1000 )
+        if ( deltaTime < ( *par )[ P_acceleration_time ] * MSEC_IN_SEC )
             {
-            float res = 100 * deltaTime / ( *par )[ P_acceleration_time ];
-            res += start_value;
-
+            float res = MAX_OUT_VALUE * deltaTime / ( *par )[ P_acceleration_time ];
             if ( ( *par )[ P_is_zero_start ] )
                 {
+                res = start_value + res;
                 if ( Uk > res ) Uk = res;
                 }
             else
                 {
-                res = 100 - res;
+                res = start_value - res;
                 if ( Uk < res ) Uk = res;
                 }
             }
@@ -180,7 +179,8 @@ float PID::eval( float currentValue, int deltaSign )
         // Устанавливаем начальное значение для разгона регулятора.
         start_value = ( *par )[ P_U_manual ];
 
-        return ( *par )[ P_U_manual ];
+        out_value = ( *par )[ P_U_manual ];
+        return out_value;
         }
     //-Мягкий пуск.-!>
 
@@ -195,9 +195,9 @@ float PID::eval( float currentValue, int deltaSign )
             printf( "Error! PID::eval() - out_max <= out_min (%f == %f)!\n",
                 out_max, out_min );
             }
-        if ( out_max == 0 )
+        if ( out_max == MIN_OUT_VALUE )
             {
-            printf( "Error! PID::eval() - out_max = 0!\n" );
+            printf( "Error! PID::eval() - out_max = %f!\n", MIN_OUT_VALUE );
             }
         }
 
@@ -214,35 +214,34 @@ float PID::eval( float currentValue, int deltaSign )
 
     if ( 1 == ( *par )[ P_is_manual_mode ] )
         {
-        return ( *par )[ P_U_manual ];
+        out_value = ( *par )[ P_U_manual ];
         }
 
-    return Uk;
+    return out_value;
     }
 //-----------------------------------------------------------------------------
 void  PID::direct_on()
     {
-    if ( state != STATE_ON )
+    if ( state != STATE::ON )
         {
-        state = STATE_ON;
+        state = STATE::ON;
 
         start_time = get_millisec(); // Для разгона регулятора.
         last_time = get_millisec();  // Интервал пересчета значений.
 
-        reset(); //Сбрасываем все переменные.
-        start_value = 0;
+        reset();
         }
     }
 //-----------------------------------------------------------------------------
 void PID::direct_set_state( int st )
     {
-    switch ( st )
+    switch ( static_cast<STATE>( st ) )
         {
-        case STATE_OFF:
+        case STATE::OFF:
             direct_off();
             break;
 
-        case STATE_ON:
+        case STATE::ON:
             direct_on();
             break;
         }
@@ -251,9 +250,10 @@ void PID::direct_set_state( int st )
 /// @brief Выключение ПИД.
 void PID::direct_off()
     {
-    if ( state != STATE_OFF )
+    if ( state != STATE::OFF )
         {
-        state = STATE_OFF;
+        reset();
+        state = STATE::OFF;
         if ( actuator )
             {
             actuator->off();
@@ -298,13 +298,13 @@ void PID::init_param( PARAM par_n, float val )
     if ( par_n > 0 && ( u_int ) par_n <= par->get_count() )
         {
         //Проверка выхода за диапазон допустимых значений.
-        if ( par_n == P_out_min && val < 0 )
+        if ( par_n == P_out_min && val < MIN_OUT_VALUE )
             {
-            val = 0;
+            val = MIN_OUT_VALUE;
             }
-        if ( par_n == P_out_max && val > 100 )
+        if ( par_n == P_out_max && val > MAX_OUT_VALUE )
             {
-            val = 100;
+            val = MAX_OUT_VALUE;
             }
 
         ( *par )[ par_n ] = val;
@@ -331,7 +331,9 @@ void PID::reset()
     ek_1 = 0;
     ek_2 = 0;
 
-    Uk = (int)( *par )[ P_is_zero_start ] ? 0.f : 100.f;
+    bool is_zero_start = ( *par )[ P_is_zero_start ] == .0f;
+    start_value = is_zero_start ? MIN_OUT_VALUE : MAX_OUT_VALUE;
+    Uk = is_zero_start ? MIN_OUT_VALUE : MAX_OUT_VALUE;
     out_value = Uk;
 
     ( *par )[ P_is_manual_mode ] = 0;
@@ -348,32 +350,33 @@ int PID::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( is_old_style )
         {
-        if ( 0 == strcmp( prop, "RT_PAR_F" ) )
+
+        if ( 0 == strcmp( prop, WORK_PARAMS_NAME ) )
             {
-            if ( idx == 1 )
+            if ( idx == WP_Z )
                 {
                 set_value = (float)val;
                 return 0;
                 }
 
-            if ( idx == 2 )
+            if ( idx == WP_U )
                 {
                 out_value = (float)val;
                 return 0;
                 }
             }
-        if ( 0 == strcmp( prop, "S_PAR_F" ) )
+        if ( 0 == strcmp( prop, par->get_name() ) )
             {
             if ( idx > 0 && idx <= par->get_count() )
                 {
                 //Проверка выхода за диапазон допустимых значений.
-                if ( idx == P_out_min && val < 0 )
+                if ( idx == P_out_min && val < MIN_OUT_VALUE )
                     {
-                    val = 0;
+                    val = MIN_OUT_VALUE;
                     }
-                if ( idx == P_out_max && val > 100 )
+                if ( idx == P_out_max && val > MAX_OUT_VALUE )
                     {
-                    val = 100;
+                    val = MAX_OUT_VALUE;
                     }
                 if ( ( idx == P_out_min && val > ( *par )[ P_out_max ] ) ||
                     ( idx == P_out_max && val < ( *par )[ P_out_min ] ) )
@@ -423,7 +426,7 @@ const char* PID::get_name_in_Lua() const
 //-----------------------------------------------------------------------------
 int PID::get_state()
     {
-    return state;
+    return static_cast<int>( state );
     }
 //-----------------------------------------------------------------------------
 int PID::save_device_ex( char* buff )
@@ -444,7 +447,7 @@ int PID::save_device( char *buff )
         //Параметры.
         answer_size += par->save_device( buff + answer_size, "\t" );
         answer_size += sprintf( buff + answer_size,
-            "RT_PAR_F = { %.2f, %.2f }\n", set_value, out_value );
+            "%s = { %.2f, %.2f }\n", WORK_PARAMS_NAME, set_value, out_value );
 
         answer_size += sprintf( buff + answer_size, "\t}\n" );
         }
