@@ -1200,7 +1200,8 @@ void wash_action::evaluate()
 
             auto type = dev->get_type();
             if ( new_val != -1 &&
-                ( type == device::DT_M || type == device::DT_VC || type == device::DT_AO ) )
+                ( type == device::DT_M || type == device::DT_VC ||
+                type == device::DT_AO || type == device::DT_REGULATOR ) )
                 {
                 dev->set_value( new_state > 0 ? new_val : 0 );
                 }
