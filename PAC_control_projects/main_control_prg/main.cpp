@@ -57,16 +57,17 @@ int main( int argc, const char *argv[] )
     setlocale( LC_ALL, "ru_RU.UTF-8" );
     setlocale( LC_NUMERIC, "C" );
 
-    char** argv_utf8 = new char*[ argc ];
+    const char** argv_utf8 = new const char*[ argc ];
     std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
     for ( int i = 0; i < argc; i++ )
         {
         std::string res = myconv.to_bytes( argv[ i ] );
-        argv_utf8[ i ] = new char[ res.length() + 1 ];
-        strcpy( argv_utf8[ i ], res.c_str() );
+        char *tmp = new char[ res.length() + 1 ];
+        strcpy( tmp, res.c_str() );
+        argv_utf8[ i ] = tmp;
         }
 #else
-    char** argv_utf8 = argv;
+    const char** argv_utf8 = argv;
 #endif
 
     signal(SIGINT, stopHandler);

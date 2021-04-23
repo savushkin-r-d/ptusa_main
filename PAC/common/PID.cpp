@@ -442,7 +442,8 @@ int PID::save_device( char *buff )
         {
         answer_size = sprintf( buff, "t.%s = \n\t{\n", get_name() );
 
-        answer_size += sprintf( buff + answer_size, "\tST=%u,\n", state );
+        answer_size += sprintf( buff + answer_size, "\tST=%u,\n",
+            static_cast<unsigned int>(state) );
 
         //Параметры.
         answer_size += par->save_device( buff + answer_size, "\t" );
