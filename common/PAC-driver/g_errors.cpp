@@ -638,10 +638,6 @@ int siren_lights_manager::set_cmd( const char *prop, u_int idx, double val )
 //-----------------------------------------------------------------------------
 int siren_lights_manager::set_cmd( const char *prop, u_int idx, char *val )
     {
-#ifdef WIN_OS
-    throw std::exception("The method or operation is not implemented.");
-#endif
-
     return 0;
     }
 //-----------------------------------------------------------------------------

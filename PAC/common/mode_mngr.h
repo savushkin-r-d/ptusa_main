@@ -197,7 +197,7 @@ class open_seat_action: public action
     private:
         enum PHASES
             {
-            P_WAIT = 0,
+            P_WAITING,
             P_OPEN_UPPER,
             P_OPEN_LOWER,
             };

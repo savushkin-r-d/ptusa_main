@@ -21,6 +21,10 @@
 #include "lua_manager.h"
 #include "PAC_err.h"
 
+#ifdef WIN_OS
+#include <shellapi.h>
+#endif
+
 #include "rm_manager.h"
 #include "log.h"
 #ifdef PAC_WAGO_750_860r
@@ -47,24 +51,27 @@ static void stopHandler(int sig)
     running = 0;
     }
 
-#ifdef WIN_OS
-int wmain( int argc, const wchar_t *argv[] )
-#else
 int main( int argc, const char *argv[] )
-#endif
     {
 #if defined WIN_OS
     setlocale( LC_ALL, "ru_RU.UTF-8" );
     setlocale( LC_NUMERIC, "C" );
 
-    const char** argv_utf8 = new const char*[ argc ];
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> myconv;
+    const char** argv_utf8 = new const char* [ argc ];
+    int w_argc;
+    wchar_t** w_argv = CommandLineToArgvW( GetCommandLineW(), &w_argc );
     for ( int i = 0; i < argc; i++ )
         {
-        std::string res = myconv.to_bytes( argv[ i ] );
-        char *tmp = new char[ res.length() + 1 ];
-        strcpy( tmp, res.c_str() );
-        argv_utf8[ i ] = tmp;
+        wchar_t* w_path = w_argv[ i ];
+        int utf16len = wcslen( w_path );
+        int utf8len = WideCharToMultiByte( CP_UTF8, 0, w_path, utf16len,
+            NULL, 0, NULL, NULL );
+
+        char* path = new char[ utf8len + 1 ];
+        memset( path, 0, utf8len + 1 );
+
+        WideCharToMultiByte( CP_UTF8, 0, w_path, utf16len, path, utf8len, 0, 0 );
+        argv_utf8[ i ] = path;
         }
 #else
     const char** argv_utf8 = argv;

@@ -37,13 +37,13 @@ if(MSVC)
     add_compile_options("/utf-8")
 endif(MSVC)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua EXCLUDE_FROM_ALL)
 
 set(LUA_LIBRARIES liblua)
 set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src;${CMAKE_CURRENT_SOURCE_DIR}/bin/lua)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tolua++ ${CMAKE_CURRENT_SOURCE_DIR}/bin/tolua++)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tolua++ ${CMAKE_CURRENT_SOURCE_DIR}/bin/tolua++ EXCLUDE_FROM_ALL)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib EXCLUDE_FROM_ALL)
 
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
@@ -139,8 +139,17 @@ target_link_libraries(main_control toluapp_lib_static zlibstatic)
 
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
-    target_link_libraries(main_control $ENV{LUA_DEV}/lib/lua51.lib wsock32 ws2_32)
+    target_link_libraries(main_control wsock32 ws2_32)
+
+    if(DEFINED ENV{LUA_DEV})
+        target_link_libraries(main_control $ENV{LUA_DEV}/lib/lua51.lib)
+    else()
+        target_link_libraries(main_control liblua)
+    endif()
+
 elseif (LINUX)
     target_link_libraries(main_control liblua)
 endif()
 #######################################################################################
+install_executable ( ${PROJECT_NAME} )
+install_library ( main_control )
