@@ -19,9 +19,6 @@
 
 #ifdef WIN_OS
 #include "w_mem.h"
-
-#pragma comment(lib, "Shell32.lib")
-#include <shellapi.h>
 #endif
 
 #ifdef LINUX_OS
