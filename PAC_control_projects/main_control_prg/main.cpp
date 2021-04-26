@@ -22,7 +22,6 @@
 #include "PAC_err.h"
 
 #ifdef WIN_OS
-#pragma comment(lib, "Shell32.lib")
 #include <shellapi.h>
 #endif
 
