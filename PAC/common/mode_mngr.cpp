@@ -1381,6 +1381,13 @@ void operation_state::evaluate()
                 {
                 if ( n > 0 )
                     {
+                    int time = (int)owner->get_step_param( par_n );
+                    const int MAX_BUFF_SIZE = 200;
+                    char buff[ MAX_BUFF_SIZE ] = { 0 };
+                    std::snprintf( buff, MAX_BUFF_SIZE,
+                        "вышло время (%u сек) последнего шага (\'%s\')",
+                        time, steps[ active_step_n ]->get_name() );
+                    owner->owner->set_err_msg( buff, n, 0, i_tech_object::ERR_OFF );
                     owner->off_mode( n );
                     }
                 else

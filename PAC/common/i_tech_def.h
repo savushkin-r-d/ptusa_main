@@ -19,7 +19,7 @@
 //-----------------------------------------------------------------------------
 /// @brief Работа с технологическим объектом.
 ///
-/// Базовый интерфейсный класс для технологического объекта (танка, гребенки). 
+/// Базовый интерфейсный класс для технологического объекта (танка, гребенки).
 /// Содержит основные методы работы - работа с режимами и т.д.
 ///
 class i_tech_object
@@ -33,6 +33,20 @@ class i_tech_object
             {
             return white_spaces;
             }
+
+        enum ERR_MSG_TYPES
+            {
+            ERR_CANT_ON,
+            ERR_ON_WITH_ERRORS,
+            ERR_OFF,
+            ERR_OFF_AND_ON,
+            ERR_DURING_WORK,
+            ERR_ALARM,
+
+            ERR_TO_FAIL_STATE,
+            ERR_CANT_ON_2_OPER, //Уже включена блокирующая операция.
+            ERR_CANT_ON_2_OBJ, //Уже включена блокирующая операция другого объекта.
+            };
 
     protected:
         static char white_spaces[ 256 ];
@@ -57,6 +71,9 @@ class i_tech_object
     virtual float get_step_param( u_int idx ) const = 0;
 
     virtual const saved_params_float* get_params() const = 0;
+
+    virtual int set_err_msg( const char* err_msg, int mode, int new_mode = 0,
+        ERR_MSG_TYPES type = ERR_CANT_ON ) = 0;
     };
 
 #endif // I_TECH_H
