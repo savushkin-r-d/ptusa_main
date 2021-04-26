@@ -3915,7 +3915,7 @@ class device_manager: public i_Lua_save_device
         wages* get_WT( const char *dev_name );
 
         /// @brief Получение регулятора по имени.
-        PID* get_R( const char* dev_name );
+        PID* get_C( const char* dev_name );
 
         /// @brief Получение автоматического выключателя по имени.
         circuit_breaker* get_F(const char* dev_name);
@@ -4272,7 +4272,7 @@ i_AO_device* F(const char* dev_name);
 /// @param dev_name - имя.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-PID* R( const char* dev_name );
+PID* C( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///

@@ -366,7 +366,6 @@ int device::set_cmd( const char *prop, u_int idx, double val )
                     prop, val );
                 }
         }
-
     return 0;
     }
 //-----------------------------------------------------------------------------
@@ -666,7 +665,7 @@ circuit_breaker* device_manager::get_F(const char* dev_name)
     return (circuit_breaker*)get_device(device::DT_F, dev_name);
     }
 //-----------------------------------------------------------------------------
-PID* device_manager::get_R( const char* dev_name )
+PID* device_manager::get_C( const char* dev_name )
     {
     return (PID*)get_device( device::DT_REGULATOR, dev_name );
     }
@@ -5070,9 +5069,9 @@ i_AO_device* F(const char* dev_name)
     return G_DEVICE_MANAGER()->get_F(dev_name);
     }
 //-----------------------------------------------------------------------------
-PID* R( const char* dev_name )
+PID* C( const char* dev_name )
     {
-    return G_DEVICE_MANAGER()->get_R( dev_name );
+    return G_DEVICE_MANAGER()->get_C( dev_name );
     }
 
 //-----------------------------------------------------------------------------
