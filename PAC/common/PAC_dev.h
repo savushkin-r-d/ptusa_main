@@ -46,6 +46,7 @@
 #pragma warning(disable: 26812) //Prefer 'enum class' over 'enum'.
 #endif // WIN_OS
 
+class PID;
 //-----------------------------------------------------------------------------
 /// @brief Устройство c параметрами.
 ///
