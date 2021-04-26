@@ -834,7 +834,7 @@ void AI_AO_action::evaluate()
 //-----------------------------------------------------------------------------
 open_seat_action::open_seat_action( bool is_mode, operation_state *owner ) :
     action( "Промывка седел" ),
-    phase( P_WAIT ),
+    phase( P_WAITING ),
     next_phase( PHASES::P_OPEN_UPPER ),
     active_group_n( 0 ),
     wait_time( 60000 ),
@@ -860,7 +860,7 @@ void open_seat_action::init()
         }
 
     start_cycle_time  = get_millisec();
-    phase             = P_WAIT;
+    phase             = P_WAITING;
     next_phase        = P_OPEN_UPPER;
     active_group_n    = 0;
 
@@ -913,7 +913,7 @@ void open_seat_action::evaluate()
 
     switch ( phase )
         {
-    case P_WAIT:
+    case P_WAITING:
         for ( u_int i = 0; i < wash_lower_seat_devices.size(); i++ )
             {
             for ( u_int j = 0; j < wash_lower_seat_devices[ i ].size(); j++ )
@@ -968,7 +968,7 @@ void open_seat_action::evaluate()
             {
             final();
 
-            phase            = P_WAIT;
+            phase            = P_WAITING;
             start_cycle_time = get_millisec();
 
             //Переход к следующей группе.
@@ -1003,7 +1003,7 @@ void open_seat_action::evaluate()
             {
             final();
 
-            phase            = P_WAIT;
+            phase            = P_WAITING;
             start_cycle_time = get_millisec();
 
             //Переход к следующей группе.
@@ -1025,7 +1025,7 @@ void open_seat_action::final()
 
     switch ( phase )
         {
-        case P_WAIT:
+        case P_WAITING:
             break;
 
         case P_OPEN_UPPER:
