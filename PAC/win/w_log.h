@@ -30,7 +30,7 @@ class w_log: public i_log
             std::tm tm = *std::localtime( &_tm );
 
             std::cout << std::put_time( &tm, "%Y-%m-%d %H.%M.%S " );
-            
+
             switch ( priority )
                 {
                 case i_log::P_ALERT:
@@ -47,14 +47,14 @@ class w_log: public i_log
                     SetColor( RED );
                     std::cout << "ERROR  (3) -> ";
                     break;
-                
+
                 case i_log::P_WARNING:
                     SetColor( YELLOW );
                     std::cout << "WARNING(4) -> ";
                     break;
 
                 case i_log::P_NOTICE:
-                    SetColor( YELLOW );
+                    SetColor( GREEN );
                     std::cout << "NOTICE (5) -> ";
                     break;
 
@@ -64,16 +64,16 @@ class w_log: public i_log
                     break;
 
                 case i_log::P_DEBUG:
-                    SetColor( YELLOW );
+                    SetColor( GRAY );
                     std::cout << "DEBUG  (7) -> ";
                     break;
 
-                default:      
+                default:
                     std::cout << "       (" << priority << ") -> ";
                     break;
                 }
 
-            std::cout << msg << std::endl;	
+            std::cout << msg << std::endl;
             SetColor( RESET );
 
             fflush( stdout );
