@@ -25,6 +25,11 @@ class tcp_client;
 /// @brief Базовый класс коммуникатор - обмен данными PAC-сервер.
 class tcp_communicator
     {
+    // Friendly класс предназначен только для тестирования
+    // и не должен использоваться в других целях
+#ifdef PTUSA_TEST
+    friend class test_tcp_communicator;
+#endif
     public:
         /// @brief Определение функции сервиса.
         typedef long int srv_proc( long int, u_char *, u_char * );
@@ -36,6 +41,8 @@ class tcp_communicator
         /// @return - указатель на единственный объект класса @ref
         /// tcp_communicator.
         static tcp_communicator* get_instance();
+
+        static bool tcp_communicator::is_init;
 
         static void init_instance( const char *name_rus, const char *name_eng );
 
