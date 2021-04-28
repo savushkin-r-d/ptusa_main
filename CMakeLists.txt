@@ -151,5 +151,11 @@ elseif (LINUX)
     target_link_libraries(main_control liblua)
 endif()
 #######################################################################################
-install_executable ( ${PROJECT_NAME} )
-install_library ( main_control )
+
+install_executable(${PROJECT_NAME})
+install_library(main_control)
+
+enable_testing()
+add_test(run_no_command_line_arguments ${PROJECT_NAME})
+#remove tests from add_subdirectory() added projects
+configure_file(${CMAKE_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_BINARY_DIR} @ONLY)
