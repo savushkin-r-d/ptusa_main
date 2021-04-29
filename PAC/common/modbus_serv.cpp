@@ -213,7 +213,7 @@ long ModbusServ::ModbusService( long len, unsigned char *data,unsigned char *out
 						case C_MSA_CONTROL:
 							line = objnumber / 100;
 							objnumber -= 100 * line;
-							if (line >= 0 && line <= (unsigned int)cipline_tech_object::MdlsCNT)
+							if (line <= (unsigned int)cipline_tech_object::MdlsCNT)
 								{
 								switch (objnumber)
 									{

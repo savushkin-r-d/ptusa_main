@@ -47,10 +47,10 @@ TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
 TRecipeManager::~TRecipeManager()
     {
     SaveRecipeName();
-    delete currentRecipeName;
-    delete recipeList;
+    delete[] currentRecipeName;
+    delete[] recipeList;
     SaveToFile(defaultfilename);
-    delete recipeMemory;
+    delete[] recipeMemory;
     if (recipeCopyBuffer != NULL)
         {
         delete[] recipeCopyBuffer;
@@ -655,10 +655,10 @@ recipeStartAddr(0L)
 TMediumRecipeManager::~TMediumRecipeManager()
 {
     SaveRecipeName();
-    delete currentRecipeName;
-    delete recipeList;
+    delete[] currentRecipeName;
+    delete[] recipeList;
     SaveToFile(defaultfilename);
-    delete recipeMemory;
+    delete[] recipeMemory;
     if (recipeCopyBuffer != NULL)
     {
         delete[] recipeCopyBuffer;

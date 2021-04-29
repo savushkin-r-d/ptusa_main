@@ -14,7 +14,7 @@ int kb_hit()
     {
     int tem = fcntl( 0, F_GETFL, 0 );
     fcntl( 0, F_SETFL, ( tem | O_NDELAY ) );
-    char c = getchar();
+    int c = getchar();
     fcntl( 0, F_SETFL, tem );
     if ( c > 0 && c != 255 )
         {
@@ -23,7 +23,7 @@ int kb_hit()
 
     return 0;
     }
-//-----------------------------------------------------------------------------    
+//-----------------------------------------------------------------------------
 int get_char()
     {
     struct termios oldt;
@@ -36,5 +36,5 @@ int get_char()
     ch = getchar();
     tcsetattr( STDIN_FILENO, TCSANOW, &oldt );
     return ch;
-    }    
+    }
 //-----------------------------------------------------------------------------
