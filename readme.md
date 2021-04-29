@@ -1,6 +1,10 @@
-﻿Russian readme is [here](russian_readme/readme.md).
+# ptusa
+ 
+[![GitHub Actions CI](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml/badge.svg)](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml)
+ 
+ Russian readme is [here](russian_readme/readme.md).
 
-# Common description #
+## Common description ##
 
 Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
 
@@ -19,24 +23,24 @@ Controller logic implemented by Lua-script. At runtime, control is passed throug
 4. During the execution of command happens next:
 ![Clone repository](readme_images/tech_object__exec_cmd_en.png)
 
-# How to build a project #
+## How to build a project ##
 
-## win ##
+### win ###
 
 Requirements:
 1. Microsoft Visual Studio Community 2019
 
 You should open (in Visual Studio) root directory. This you get a CMake based project.
 
-## linux ##
+### linux ###
 
 Eclipse IDE with CMake based project on Linux.
 
-# How to run a project #
+## How to run a project ##
 
 To run demo project you should use this command line:
 
-## win ##
+### win ###
 
 ```cmd
     "out\build\<build_name>\ptusa.exe" demo_project\main.plua path demo_project\ sys_path demo_project\sys\ debug
