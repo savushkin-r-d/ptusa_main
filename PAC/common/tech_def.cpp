@@ -1368,10 +1368,7 @@ int tech_object::check_operation_on( u_int operation_n, bool show_error )
         }
     else
         {
-        if ( ( res = lua_check_on_mode( operation_n, show_error ) ) == 0 ) // Check if possible.
-            {
-            }
-        else
+        if ( ( res = lua_check_on_mode( operation_n, show_error ) ) != 0 ) // Check if possible.
             {
             res += 100;
             }

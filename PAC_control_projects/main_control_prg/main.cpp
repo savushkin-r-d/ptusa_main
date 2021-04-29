@@ -233,10 +233,10 @@ int main( int argc, const char *argv[] )
         static u_int cycles_per_period        = 0;
         cycles_per_period++;
 
-        static time_t t_;
+        static time_t t_now;
         struct tm *timeInfo_;
-        t_ = time( 0 );
-        timeInfo_ = localtime( &t_ );
+        t_now = time( 0 );
+        timeInfo_ = localtime( &t_now );
         static int print_cycle_last_h = timeInfo_->tm_hour;
 
         if ( max_iteration_cycle_time < cycle_time )
