@@ -608,8 +608,6 @@ void tech_object::check_availability( u_int operation_n )
 //-----------------------------------------------------------------------------
 int tech_object::lua_check_off_mode( u_int mode )
     {
-    tech_object::check_off_mode( mode );
-
     return lua_manager::get_instance()->int_exec_lua_method( name_Lua,
         "check_off_mode", mode, "int tech_object::lua_check_off_mode( u_int mode )" );
     }

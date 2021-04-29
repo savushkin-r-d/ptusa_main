@@ -1668,7 +1668,7 @@ int operation_state::on_extra_step( int step_idx )
     {
     if ( (size_t) step_idx > steps.size() )
         {
-        G_LOG->notice( "operation_state:on_extra_step(...) - step (%d) > size (%d)",
+        G_LOG->notice( "operation_state:on_extra_step(...) - step (%d) > size (%zu)",
             step_idx, steps.size() );
         return 1;
         }
@@ -1721,7 +1721,7 @@ int operation_state::off_extra_step( int step_idx )
     {
     if ( (size_t) step_idx > steps.size() )
         {
-        G_LOG->notice( "operation_state:off_extra_step(...) - step (%d) > size (%d)",
+        G_LOG->notice( "operation_state:off_extra_step(...) - step (%d) > size (%zu)",
             step_idx, steps.size() );
         return 0;
         }
@@ -1758,7 +1758,7 @@ int operation_state::switch_active_extra_step( int off_step, int on_step )
     {
     if ( (size_t) on_step > steps.size() )
         {
-        G_LOG->notice( "operation_state:switch_active_step(...) - step (%d) > size (%d)",
+        G_LOG->notice( "operation_state:switch_active_step(...) - step (%d) > size (%zu)",
             on_step, steps.size() );
         return 1;
         }

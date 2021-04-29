@@ -59,7 +59,7 @@ int tech_dev_error::save_as_Lua_str( char *str )
         res += sprintf( str + res, "id_type=%d,\n", simple_device->get_type() );
 
         res += sprintf( str + res, "suppress=%s\n",
-            alarm_params && P_IS_SUPPRESS ? "true" : "false" );
+            alarm_params & P_IS_SUPPRESS ? "true" : "false" );
 
         res += sprintf( str + res, "},\n" );
         }
@@ -99,7 +99,7 @@ void tech_dev_error::evaluate( bool &is_new_state )
                 }
             is_any_error = true;
 
-            if ( err_par[ P_PARAM_N ] && P_IS_SUPPRESS )
+            if ( err_par[ P_PARAM_N ] & P_IS_SUPPRESS )
                 {
                 is_any_error = false;
                 is_new_error = false;
