@@ -23,6 +23,11 @@
 /// 
 class project_manager
     {
+    // Friendly класс предназначен только для тестирования
+    // и не должен использоваться в других целях
+#ifdef PTUSA_TEST
+    friend class test_project_manager;
+#endif
     public:        
         /// @brief Обработка параметров командной строки.
         /// 
@@ -34,7 +39,7 @@ class project_manager
         /// 
         /// Системная конфигурация была предварительно загружена из файла
         /// wago.main.plua.
-        int lua_load_configuration();
+        virtual int lua_load_configuration();
 
         /// @brief Получение единственного экземпляра класса.
         static project_manager* get_instance();
@@ -52,8 +57,7 @@ class project_manager
 
     protected:
         file *cfg_file;     ///< Конфигурационный файл.
-
-    private:
+    
         /// @brief Единственный экземпляр класса.
         static auto_smart_ptr < project_manager > instance;
     };

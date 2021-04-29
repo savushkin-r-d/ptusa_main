@@ -16,6 +16,7 @@
 auto_smart_ptr < tcp_communicator > tcp_communicator::instance = 0;
 int tcp_communicator::port = 10000;
 int tcp_communicator::port_modbus = 10502;
+bool tcp_communicator::is_init = false;
 //------------------------------------------------------------------------------
 tcp_communicator::tcp_communicator(): in_buffer_count( 0 ), pidx( 0 ), net_id( 0 )
     {
@@ -93,13 +94,17 @@ tcp_communicator::~tcp_communicator()
 //------------------------------------------------------------------------------
 void tcp_communicator::init_instance( const char *name_rus, const char *name_eng )
     {
+    if (!is_init)
+        {
+        is_init = true;
 #ifdef WIN_OS
-    instance = new tcp_communicator_win( name_rus, name_eng );
+	    instance = new tcp_communicator_win( name_rus, name_eng );
 #endif // WIN_OS
 
 #ifdef LINUX_OS
-    instance = new tcp_communicator_linux( name_rus, name_eng );
+	    instance = new tcp_communicator_linux( name_rus, name_eng );
 #endif
+        }
     }
 
 int tcp_communicator::add_async_client( tcp_client* client )
