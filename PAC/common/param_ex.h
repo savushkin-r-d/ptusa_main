@@ -489,7 +489,7 @@ public parameters < type, is_float >
                 }
             else
                 {
-                print_msg_out_of_range( idx, "save" );
+                parameters< type, is_float >::print_msg_out_of_range( idx, "save" );
                 }
 
             return value;
