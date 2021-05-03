@@ -185,23 +185,8 @@ template < class type, bool is_float > class parameters
                 {
                 return values[ index - 1 ];
                 }
-            else
-                {
-                if ( G_DEBUG )
-                    {
-                    if ( 0 == index )
-                        {
-                        G_LOG->warning( "\"%s\" \"%s\" parameters[] - error: index = %u",
-                            owner ? owner->get_full_name() : "?", name, index );
-                        }
-                    else
-                        {
-                        G_LOG->warning( "\"%s\" \"%s\" parameters[] - error: index[ %u ] > count [ %u ]",
-                            owner ? owner->get_full_name() : "?", name, index, count );
-                        }
-                    }
-                }
 
+            print_msg_out_of_range( index, "access" );
             return stub;
             }
 
@@ -218,15 +203,8 @@ template < class type, bool is_float > class parameters
                 {
                 return values[ index - 1 ];
                 }
-            else
-                {
-                if ( G_DEBUG )
-                    {
-                    G_LOG->warning( "\"%s\" parameters[] - error: index[ %u ] > count [ %u ]",
-                        owner ? owner->get_full_name() : "?", index, count );
-                    }
-                }
 
+            print_msg_out_of_range( index, "access" );
             return stub;
             }
         /// @brief Получение элемента через индекс.
@@ -360,6 +338,27 @@ template < class type, bool is_float > class parameters
         unsigned int count;     ///< Количество элементов.
         type         *values;   ///< Указатель на массив значений элементов.
 
+        void print_msg_out_of_range( unsigned int index, const char* action ) const
+            {
+            if ( G_DEBUG )
+                {
+                if ( 0 == index )
+                    {
+                    G_LOG->warning( "\"%s\" \"%s\" parameters %s error: "
+                        "index = %u",
+                        owner ? owner->get_full_name() : "?",
+                        name, action, index );
+                    }
+                else
+                    {
+                    G_LOG->warning( "\"%s\" \"%s\" parameters %s error: "
+                        "index > size (%u > %u)",
+                        owner ? owner->get_full_name() : "?",
+                        name, action, index, count );
+                    }
+                }
+            }
+
     private:
         int save_dev( char *buff, const char *prefix )
             {
@@ -400,7 +399,6 @@ template < class type, bool is_float > class parameters
             answer_size += sprintf( buff + answer_size, "\n%s\t},\n", prefix );
             return answer_size;
             }
-
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с параметрами времени выполнения типа float.
@@ -491,20 +489,9 @@ public parameters < type, is_float >
                 }
             else
                 {
-                if ( G_DEBUG )
-                    {
-                    if ( 0 == idx )
-                        {
-                        printf( "parameters:save - index = %u\n",
-                            idx );
-                        }
-                    else
-                        {
-                        printf( "parameters:save - index[ %u ] > count [ %u ]\n",
-                            idx, parameters< type, is_float >::get_count() );
-                        }
-                    }
+                print_msg_out_of_range( idx, "save" );
                 }
+
             return value;
             }
 
@@ -515,8 +502,8 @@ public parameters < type, is_float >
         /// использовать данный метод.
         int save_all()
             {
-            params_manager::get_instance()->save(
-                start_pos,  parameters< type, is_float >::get_count() * sizeof( type ) );
+            params_manager::get_instance()->save( start_pos,
+                parameters< type, is_float >::get_count() * sizeof( type ) );
 
             return 0;
             }

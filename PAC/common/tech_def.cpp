@@ -49,9 +49,11 @@ tech_object::tech_object( const char* new_name, u_int number, u_int type,
     this->name_Lua = new char[ strlen( name_Lua ) + 1 ];
     strcpy( this->name_Lua, name_Lua );
 
-    const int MAX_LENGTH = strlen( new_name ) + std::to_string( number ).length() + 1;
+    const char* sign_str = " №";
+    const int MAX_LENGTH = strlen( new_name ) + strlen( sign_str ) +
+        std::to_string( number ).length() + 1;
     full_name = new char[ MAX_LENGTH ];
-    snprintf( full_name, MAX_LENGTH, "%s%d", new_name, number );
+    snprintf( full_name, MAX_LENGTH, "%s%s%d", new_name, sign_str, number );
 
     operations_manager = new operation_manager( operations_count, this );
     }
@@ -68,6 +70,8 @@ tech_object::~tech_object()
     name = 0;
     delete[] name_Lua;
     name_Lua = 0;
+    delete[] full_name;
+    full_name = 0;
 
     delete operations_manager;
     operations_manager = 0;
