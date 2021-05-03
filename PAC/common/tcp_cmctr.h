@@ -42,7 +42,7 @@ class tcp_communicator
         /// tcp_communicator.
         static tcp_communicator* get_instance();
 
-        static bool tcp_communicator::is_init;
+        static bool is_init;
 
         static void init_instance( const char *name_rus, const char *name_eng );
 
