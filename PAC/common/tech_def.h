@@ -50,7 +50,8 @@ extern "C" {
 /// Для информировании сервера (события, аварии, ...) используется следующий
 /// подход: имеется вектор из сообщений и методы работы с ним.
 ///
-class tech_object: public i_tech_object, public i_Lua_save_device
+class tech_object: public i_tech_object, public i_Lua_save_device,
+    public i_params_owner
     {
     public:
         /// @param name                     - название ("Гребенка", ...).
@@ -271,6 +272,11 @@ class tech_object: public i_tech_object, public i_Lua_save_device
             return name;
             }
 
+        const char* get_full_name() const
+            {
+            return full_name;
+            }
+
         //Получение параметров для шага. Для старого описания используем
         //параметры par_uint, для нового описания вместо них используем
         //par_float.
@@ -338,6 +344,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device
         std::vector< u_int_4 >  available;     ///< Доступность операций.
 
         char *name;        ///< Имя объекта.
+        char* full_name;   ///< Имя объекта + номер.
         char *name_Lua;    ///< Имя объекта в Lua.
 
         smart_ptr< operation_manager > operations_manager; ///< Шаги режимов.

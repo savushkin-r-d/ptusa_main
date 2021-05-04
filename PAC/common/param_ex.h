@@ -28,6 +28,7 @@
 
 #include "base_mem.h"
 #include "g_device.h"
+#include "log.h"
 
 #ifdef __BORLANDC__
 #pragma option -w-inl
@@ -36,6 +37,12 @@
 #endif // __BORLANDC__
 
 class saved_params_u_int_4;
+//-----------------------------------------------------------------------------
+class i_params_owner
+    {
+    public:
+        virtual const char* get_full_name() const = 0;
+    };
 //-----------------------------------------------------------------------------
 /// @brief Работа с параметрами.
 ///
@@ -162,6 +169,7 @@ template < class type, bool is_float > class parameters
     {
     private:
         char name[ 20 ];
+        i_params_owner* owner;
 
     public:
         /// @brief Получение элемента через операцию индексирования.
@@ -177,23 +185,8 @@ template < class type, bool is_float > class parameters
                 {
                 return values[ index - 1 ];
                 }
-            else
-                {
-                if ( G_DEBUG )
-                    {
-                    if ( 0 == index )
-                        {
-                        printf( "\"%s\" parameters[] - error: index = %u\n",
-                            name, index );
-                        }
-                    else
-                        {
-                        printf( "\"%s\" parameters[] - error: index[ %u ] > count [ %u ]\n",
-                            name, index, count );
-                        }
-                    }
-                }
 
+            print_msg_out_of_range( index, "access" );
             return stub;
             }
 
@@ -210,15 +203,8 @@ template < class type, bool is_float > class parameters
                 {
                 return values[ index - 1 ];
                 }
-            else
-                {
-                if ( G_DEBUG )
-                    {
-                    printf( "parameters[] - error: index[ %u ] > count [ %u ]\n",
-                        index, count );
-                    }
-                }
 
+            print_msg_out_of_range( index, "access" );
             return stub;
             }
         /// @brief Получение элемента через индекс.
@@ -250,13 +236,19 @@ template < class type, bool is_float > class parameters
             return count;
             }
 
+        parameters( int count, const char* name, i_params_owner* owner ) :
+            parameters( count, name, 0, owner )
+            {
+            }
+
         /// @brief Конструктор.
         ///
         /// @param count - количество параметров.
         /// @param name  - имя объекта.
         /// @param value - указатель на буфер для хранения значений параметров.
-        parameters( int count, const char *name, type *value = 0 ): count( count ),
-            values( value )
+        parameters( int count, const char *name, type *value = 0,
+            i_params_owner* owner = 0 ): count( count ),
+            values( value ), owner( owner )
             {
             stub = 0;
             this->name[ 0 ] = 0;
@@ -265,10 +257,11 @@ template < class type, bool is_float > class parameters
 #ifdef DEBUG_IDE
             if ( 0 == count )
                 {
-                printf( "parameters(...) - error: count = 0!\n" );
+                printf( "\"%s\" parameters(...) - error: count = 0!\n",
+                    owner ? owner->get_full_name() : "?" );
                 }
-            //debug_break;
 #endif // DEBUG_IDE
+
             is_delete = 0;
             if ( count > 0 && 0 == values )
                 {
@@ -345,6 +338,27 @@ template < class type, bool is_float > class parameters
         unsigned int count;     ///< Количество элементов.
         type         *values;   ///< Указатель на массив значений элементов.
 
+        void print_msg_out_of_range( unsigned int index, const char* action ) const
+            {
+            if ( G_DEBUG )
+                {
+                if ( 0 == index )
+                    {
+                    G_LOG->warning( "\"%s\" \"%s\" parameters %s error: "
+                        "index = %u",
+                        owner ? owner->get_full_name() : "?",
+                        name, action, index );
+                    }
+                else
+                    {
+                    G_LOG->warning( "\"%s\" \"%s\" parameters %s error: "
+                        "index > size (%u > %u)",
+                        owner ? owner->get_full_name() : "?",
+                        name, action, index, count );
+                    }
+                }
+            }
+
     private:
         int save_dev( char *buff, const char *prefix )
             {
@@ -385,7 +399,6 @@ template < class type, bool is_float > class parameters
             answer_size += sprintf( buff + answer_size, "\n%s\t},\n", prefix );
             return answer_size;
             }
-
     };
 //-----------------------------------------------------------------------------
 /// @brief Работа с параметрами времени выполнения типа float.
@@ -397,7 +410,7 @@ class run_time_params_float: public parameters < float, true >
         /// @brief Конструктор.
         ///
         /// @param count - количество параметров.
-        run_time_params_float( int count ):parameters < float, true >( count, "RT_PAR_F" )
+        run_time_params_float( int count, i_params_owner* owner = 0 ):parameters < float, true >( count, "RT_PAR_F", owner )
             {
             }
 
@@ -420,7 +433,8 @@ class run_time_params_u_int_4: public parameters < u_int_4, false >
         /// @param count - количество параметров.
         /// @param name  - имя параметров.
         run_time_params_u_int_4( int count,
-            const char *name = "RT_PAR_UI" ) : parameters < u_int_4, false >( count, name )
+            const char *name = "RT_PAR_UI", i_params_owner* owner = 0 ) :
+            parameters < u_int_4, false >( count, name, owner )
             {
             }
 
@@ -447,10 +461,10 @@ public parameters < type, is_float >
         ///
         /// @param count - количество параметров.
         /// @param name  - имя объекта.
-        saved_params( int count, const char *name ) : parameters < type, is_float >(
+        saved_params( int count, const char *name, i_params_owner* owner = 0 ) : parameters < type, is_float >(
             count, name,
             ( type* ) params_manager::get_instance()->get_params_data(
-            count * sizeof( type ), start_pos ) )
+            count * sizeof( type ), start_pos ), owner )
             {
             }
 
@@ -475,20 +489,9 @@ public parameters < type, is_float >
                 }
             else
                 {
-                if ( G_DEBUG )
-                    {
-                    if ( 0 == idx )
-                        {
-                        printf( "parameters:save - index = %u\n",
-                            idx );
-                        }
-                    else
-                        {
-                        printf( "parameters:save - index[ %u ] > count [ %u ]\n",
-                            idx, parameters< type, is_float >::get_count() );
-                        }
-                    }
+                parameters< type, is_float >::print_msg_out_of_range( idx, "save" );
                 }
+
             return value;
             }
 
@@ -499,8 +502,8 @@ public parameters < type, is_float >
         /// использовать данный метод.
         int save_all()
             {
-            params_manager::get_instance()->save(
-                start_pos,  parameters< type, is_float >::get_count() * sizeof( type ) );
+            params_manager::get_instance()->save( start_pos,
+                parameters< type, is_float >::get_count() * sizeof( type ) );
 
             return 0;
             }
@@ -532,8 +535,8 @@ class saved_params_u_int_4: public saved_params < u_int_4, false >
         /// @brief Конструктор.
         ///
         /// @param count - количество параметров.
-        saved_params_u_int_4( int count ) :
-          saved_params < u_int_4, false >( count, "S_PAR_UI" )
+        saved_params_u_int_4( int count, i_params_owner* owner = 0 ) :
+          saved_params < u_int_4, false >( count, "S_PAR_UI", owner )
               {
               }
 
@@ -555,8 +558,8 @@ class saved_params_float: public saved_params < float, true >
         /// @brief Конструктор.
         ///
         /// @param count - количество параметров.
-        saved_params_float( int count ):
-          saved_params < float, true >( count, "S_PAR_F" )
+        saved_params_float( int count, i_params_owner* owner = 0 ):
+          saved_params < float, true >( count, "S_PAR_F", owner )
               {
               }
 

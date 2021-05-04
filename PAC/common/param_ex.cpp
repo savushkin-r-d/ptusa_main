@@ -22,7 +22,7 @@ params_manager::params_manager(): par( 0 ), project_id( 0 )
     CRC_mem = NV_memory_manager::get_instance()->get_memory_block(
         NV_memory_manager::MT_NVRAM, C_SYS_MEM_SIZE );
 
-    params_mem = NV_memory_manager::get_instance()->get_memory_block( 
+    params_mem = NV_memory_manager::get_instance()->get_memory_block(
         NV_memory_manager::MT_EEPROM, C_TOTAL_PARAMS_SIZE );
 
     memset( params, 0, C_TOTAL_PARAMS_SIZE );
@@ -37,10 +37,10 @@ u_int_2 params_manager::solve_CRC()
     unsigned int datlen = C_TOTAL_PARAMS_SIZE;
     int bufidx = 0;
 
-    while ( datlen > 0 ) 
+    while ( datlen > 0 )
         {
         CRC = CRC ^ params[ bufidx ];
-        for ( idx = 0; idx <= 7; idx++ ) 
+        for ( idx = 0; idx <= 7; idx++ )
             {
             Flag = CRC & 1;
             CRC = CRC >> 1;
@@ -49,16 +49,16 @@ u_int_2 params_manager::solve_CRC()
         datlen--;
         bufidx++;
         }
-    char* p = ( char* ) &project_id; 
+    char* p = ( char* ) &project_id;
     CRC = CRC ^ p[ 0 ];
-    for ( idx = 0; idx <= 7; idx++ ) 
+    for ( idx = 0; idx <= 7; idx++ )
         {
         Flag = CRC & 1;
         CRC = CRC >> 1;
         if ( Flag ) CRC = CRC ^ 0x0A001;
         }
     CRC = CRC ^ p[ 1 ];
-    for ( idx = 0; idx <= 7; idx++ ) 
+    for ( idx = 0; idx <= 7; idx++ )
         {
         Flag = CRC & 1;
         CRC = CRC >> 1;
@@ -84,8 +84,8 @@ int params_manager::init( unsigned int project_id )
     return 0;
     }
 //-----------------------------------------------------------------------------
-void params_manager::final_init( int auto_init_params /*= 1*/, 
-                                int auto_init_work_params /*= 1*/, 
+void params_manager::final_init( int auto_init_params /*= 1*/,
+                                int auto_init_work_params /*= 1*/,
                                 void ( *custom_init_params_function )() /*= 0 */ )
     {
     sprintf( G_LOG->msg, "Total memory used: %u of %u bytes[ %.2f%c ].",
@@ -94,14 +94,14 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
     G_LOG->write_log( i_log::P_DEBUG );
 
     G_DEVICE_MANAGER()->init_rt_params();
-    
+
     //Проверка на изменение количества параметров.
     unsigned char buff[ 4 ] = { 0 };
     CRC_mem->read( ( char* ) buff, 4, C_LAST_IDX_OFFSET );
     u_int* last_idx_ = ( u_int* ) buff;
     if ( *last_idx_ != last_idx )
         {
-        sprintf( G_LOG->msg, 
+        sprintf( G_LOG->msg,
             "Total params size has changed (%d != %d), reinitialization.",
             last_idx, *last_idx_ );
         G_LOG->write_log( i_log::P_NOTICE );
@@ -141,7 +141,7 @@ void params_manager::reset_to_default( void( *custom_init_params_function )( ),
         {
 #ifndef USE_NO_TANK_COMB_DEVICE
         tech_object_manager::get_instance()->init_runtime_params();
-#endif // USE_NO_TANK_COMB_DEVICE            
+#endif // USE_NO_TANK_COMB_DEVICE
         }
 
     par[ 0 ][ P_IS_RESET_PARAMS ] = 0;
@@ -152,10 +152,10 @@ void params_manager::reset_to_default( void( *custom_init_params_function )( ),
     get_char();
     printf( "\n" );
 #endif // KEY_CONFIRM
-        }                                                                      
+        }
 //-----------------------------------------------------------------------------
 void params_manager::save( int start_pos, int count )
-    {        
+    {
     if ( 0 == count )
         {
         count = C_TOTAL_PARAMS_SIZE;
@@ -176,7 +176,7 @@ char* params_manager::get_params_data( int size, int &start_pos )
                 last_idx, size, params_mem->get_size() );
             }
         return 0;
-        }    
+        }
 
     res = params + last_idx;
     start_pos = last_idx;
@@ -193,7 +193,7 @@ params_manager* params_manager::get_instance()
         is_init = 1;
         instance = new params_manager();
 
-        instance->par = new saved_params_u_int_4( P_COUNT );        
+        instance->par = new saved_params_u_int_4( P_COUNT );
         }
     return instance;
     }
@@ -220,7 +220,7 @@ int params_manager::save_params_as_Lua_str( char* str )
     int res = 0;
     //res += G_DEVICE_MANAGER()->save_params_as_Lua_str( str );
     res += G_TECH_OBJECT_MNGR()->save_params_as_Lua_str( str + res );
-    
+
     return res;
     }
 //-----------------------------------------------------------------------------
@@ -241,14 +241,14 @@ int params_manager::restore_params_from_server_backup( char *backup_str )
             "    end\n"
             "end\n";
 
-        lua_manager::get_instance()->exec_Lua_str( extra_cmd, 
+        lua_manager::get_instance()->exec_Lua_str( extra_cmd,
             "params_manager::restore_params_from_server_backup - init block");
 
         is_init = true;
         }
 
 
-    int res = lua_manager::get_instance()->exec_Lua_str( backup_str, 
+    int res = lua_manager::get_instance()->exec_Lua_str( backup_str,
         "params_manager::restore_params_from_server_backup ");
 
     if ( 0 == res )
@@ -284,11 +284,11 @@ int params_test::make_test()
     params_manager::get_instance()->init( POJECT_ID );
     params_manager::get_instance()->final_init();
 
-    if ( 
-        test1[ 0 ] != 5120 || 
+    if (
+        test1[ 0 ] != 5120 ||
         test1[ 1 ] != 120 ||
         test1[ 2 ] != 130 ||
-        test[ 0 ] != 512 || 
+        test[ 0 ] != 512 ||
         test[ 1 ] != 12 ||
         test[ 2 ] != 13 )
         {
