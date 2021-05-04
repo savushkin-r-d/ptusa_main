@@ -1,11 +1,11 @@
 /// @file w_console.h
-/// @brief Работа с консолью в ОС Windows. Также другие безопасные функции 
+/// @brief Работа с консолью в ОС Windows. Также другие безопасные функции
 /// работы со строками.
-/// 
+///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Описание директив препроцессора:
-/// 
+///
 /// @par Текущая версия:
 /// @$Rev: 220 $.\n
 /// @$Author: id $.\n
@@ -16,19 +16,20 @@
 
 #pragma warning( disable : 4996 ) //strcpy and others unsafe functions
 
-#define RED		( FOREGROUND_RED )
-#define RED_I	( FOREGROUND_RED | FOREGROUND_INTENSITY )
-#define GREEN	( FOREGROUND_GREEN )
-#define YELLOW	( FOREGROUND_RED | FOREGROUND_GREEN )
-#define WHITE	( FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE )
-#define RESET	0
+#define RED    ( FOREGROUND_RED )
+#define RED_I  ( FOREGROUND_RED | FOREGROUND_INTENSITY )
+#define GREEN  ( FOREGROUND_GREEN )
+#define YELLOW ( FOREGROUND_RED | FOREGROUND_GREEN )
+#define GRAY   ( FOREGROUND_INTENSITY )
+#define WHITE  ( FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE )
+#define RESET 0
 
-#define CLEARSCREEN		system( "cls" )
+#define CLEARSCREEN  system( "cls" )
 
 #include <time.h>
 #include <conio.h>
 
-#define WIN32_LEAN_AND_MEAN 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 void SetColor( WORD color );
