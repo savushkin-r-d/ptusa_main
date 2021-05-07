@@ -16,7 +16,9 @@
 auto_smart_ptr < tcp_communicator > tcp_communicator::instance = 0;
 int tcp_communicator::port = 10000;
 int tcp_communicator::port_modbus = 10502;
+#ifdef PTUSA_TEST
 bool tcp_communicator::is_init = false;
+#endif //PTUSA_TEST
 //------------------------------------------------------------------------------
 tcp_communicator::tcp_communicator(): in_buffer_count( 0 ), pidx( 0 ), net_id( 0 )
     {
@@ -94,9 +96,11 @@ tcp_communicator::~tcp_communicator()
 //------------------------------------------------------------------------------
 void tcp_communicator::init_instance( const char *name_rus, const char *name_eng )
     {
+#ifdef PTUSA_TEST
     if (!is_init)
         {
-        is_init = true;
+       is_init = true;
+#endif //PTUSA_TEST
 #ifdef WIN_OS
 	    instance = new tcp_communicator_win( name_rus, name_eng );
 #endif // WIN_OS
@@ -104,7 +108,9 @@ void tcp_communicator::init_instance( const char *name_rus, const char *name_eng
 #ifdef LINUX_OS
 	    instance = new tcp_communicator_linux( name_rus, name_eng );
 #endif
+#ifdef PTUSA_TEST
         }
+#endif //PTUSA_TEST
     }
 
 int tcp_communicator::add_async_client( tcp_client* client )

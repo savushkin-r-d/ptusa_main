@@ -42,7 +42,9 @@ class tcp_communicator
         /// tcp_communicator.
         static tcp_communicator* get_instance();
 
+#ifdef PTUSA_TEST
         static bool is_init;
+#endif //PTUSA_TEST
 
         static void init_instance( const char *name_rus, const char *name_eng );
 
@@ -54,7 +56,7 @@ class tcp_communicator
         ///
         /// @param srv_id - номер, за которым будет закреплен сервис.
         /// @param fk     - указатель на объект выделенного блока памяти.
-        srv_ptr reg_service( u_char srv_id, srv_ptr fk );
+        virtual srv_ptr reg_service( u_char srv_id, srv_ptr fk );
 
         /// @brief Получение сетевого имени PAC.
         ///
