@@ -17,7 +17,13 @@ i_log* log_mngr::get_log()
     return lg;
     }
 //-----------------------------------------------------------------------------
-
+void i_log::write_log( PRIORITIES priority, const char* debug_message )
+    {
+    strncpy( msg, debug_message, C_BUFF_SIZE - 1 );
+    msg[ C_BUFF_SIZE - 1 ] = 0;
+    write_log( priority );
+    }
+//-----------------------------------------------------------------------------
 void i_log::debug(const char* debug_message, ...)
 	{
 	if (G_DEBUG)
@@ -92,3 +98,9 @@ void i_log::emergency(const char* info_message, ...)
     va_end(params);
     write_log(P_EMERG);
     }
+//-----------------------------------------------------------------------------
+i_log* G_SYS_LOG()
+    {
+    return log_mngr::get_log();
+    }
+//-----------------------------------------------------------------------------

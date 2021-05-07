@@ -1611,3 +1611,26 @@ class profibus_slave
 
 profibus_slave* G_PROFIBUS_SLAVE_LUA();
 //-----------------------------------------------------------------------------
+class i_log
+    {
+    enum PRIORITIES
+        {
+        P_EMERG, 	// System is unusable
+        P_ALERT,	// Action must be taken immediately
+        P_CRIT,		// Critical conditions
+        P_ERR,		// Error conditions
+        P_WARNING,	// Warning conditions
+        P_NOTICE,	// Normal but significant condition
+        P_INFO,		// Informational
+        P_DEBUG,	// Debug-level messages
+        };
+
+    /// @brief Запись строки в журнал.
+    ///
+    /// @param priority - приоритет.
+    /// @debug_message - строка.
+    void write_log( PRIORITIES priority, const char* debug_message );
+    };
+
+i_log* G_SYS_LOG();
+//-----------------------------------------------------------------------------
