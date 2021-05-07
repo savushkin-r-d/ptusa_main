@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 04/23/21 08:24:52.
+** Generated automatically by tolua++-1.0.92 on 05/07/21 09:57:18.
 */
 
 #ifndef __cplusplus
@@ -93,6 +93,7 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"operation_state");
  tolua_usertype(tolua_S,"timer");
  tolua_usertype(tolua_S,"dev_stub");
+ tolua_usertype(tolua_S,"MSAPID");
  tolua_usertype(tolua_S,"action");
  tolua_usertype(tolua_S,"profibus_slave");
  tolua_usertype(tolua_S,"operation");
@@ -102,7 +103,7 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"dev_errors_manager");
  tolua_usertype(tolua_S,"device_manager");
  tolua_usertype(tolua_S,"cipline_tech_object");
- tolua_usertype(tolua_S,"MSAPID");
+ tolua_usertype(tolua_S,"i_log");
  tolua_usertype(tolua_S,"tm");
  tolua_usertype(tolua_S,"i_Lua_save_device");
  tolua_usertype(tolua_S,"PAC_info");
@@ -12936,6 +12937,68 @@ static int tolua_PAC_dev_G_PROFIBUS_SLAVE_LUA00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: write_log of class  i_log */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_log_write_log00
+static int tolua_PAC_dev_i_log_write_log00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"i_log",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isstring(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  i_log* self = (i_log*)  tolua_tousertype(tolua_S,1,0);
+  i_log::PRIORITIES priority = ((i_log::PRIORITIES) (int)  tolua_tonumber(tolua_S,2,0));
+  const char* debug_message = ((const char*)  tolua_tostring(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'write_log'", NULL);
+#endif
+  {
+   self->write_log(priority,debug_message);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'write_log'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* function: G_SYS_LOG */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_G_SYS_LOG00
+static int tolua_PAC_dev_G_SYS_LOG00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isnoobj(tolua_S,1,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  {
+   i_log* tolua_ret = (i_log*)  G_SYS_LOG();
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_log");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'G_SYS_LOG'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* Open function */
 TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
 {
@@ -13566,6 +13629,19 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"get_int4",tolua_PAC_dev_profibus_slave_get_int400);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_PROFIBUS_SLAVE_LUA",tolua_PAC_dev_G_PROFIBUS_SLAVE_LUA00);
+  tolua_cclass(tolua_S,"i_log","i_log","",NULL);
+  tolua_beginmodule(tolua_S,"i_log");
+   tolua_constant(tolua_S,"P_EMERG",i_log::P_EMERG);
+   tolua_constant(tolua_S,"P_ALERT",i_log::P_ALERT);
+   tolua_constant(tolua_S,"P_CRIT",i_log::P_CRIT);
+   tolua_constant(tolua_S,"P_ERR",i_log::P_ERR);
+   tolua_constant(tolua_S,"P_WARNING",i_log::P_WARNING);
+   tolua_constant(tolua_S,"P_NOTICE",i_log::P_NOTICE);
+   tolua_constant(tolua_S,"P_INFO",i_log::P_INFO);
+   tolua_constant(tolua_S,"P_DEBUG",i_log::P_DEBUG);
+   tolua_function(tolua_S,"write_log",tolua_PAC_dev_i_log_write_log00);
+  tolua_endmodule(tolua_S);
+  tolua_function(tolua_S,"G_SYS_LOG",tolua_PAC_dev_G_SYS_LOG00);
  tolua_endmodule(tolua_S);
  return 1;
 }

@@ -52,6 +52,8 @@ class i_log
     /// @param priority - приоритет.
     void virtual write_log( PRIORITIES priority ) = 0;
 
+    void write_log( PRIORITIES priority, const char* debug_message );
+
 	void debug(const char* debug_message, ...);
 	void info(const char* info_message, ...);
     void notice(const char* info_message, ...);
@@ -98,5 +100,7 @@ class log_mngr
     };
 //-----------------------------------------------------------------------------
 #define G_LOG log_mngr::get_log()
+
+i_log* G_SYS_LOG();
 
 #endif // LOG_H
