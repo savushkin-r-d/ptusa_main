@@ -112,7 +112,7 @@ class params_manager
         ///
         /// @return 0 - ОК.
         /// @return 1 - Ошибка контрольной суммы.
-        char* get_params_data( int size, int &start_pos );
+        virtual char* get_params_data( int size, int &start_pos );
 
         virtual ~params_manager();
 

@@ -328,7 +328,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     const char *PAC_name_eng =
         G_LUA_MANAGER->char_no_param_exec_lua_method( "system",
         "get_PAC_name_eng", "lua_manager::init" );
-    if ( 0 == PAC_name_rus )
+    if ( 0 == PAC_name_eng )
         {
         sprintf( G_LOG->msg, "Lua init error - error reading PAC name (eng)." );
         G_LOG->write_log( i_log::P_CRIT );
