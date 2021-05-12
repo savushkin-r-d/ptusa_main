@@ -20,10 +20,10 @@ tech_object::tech_object( const char* new_name, u_int number, u_int type,
     u_int par_float_count, u_int runtime_par_float_count,
     u_int par_uint_count,
     u_int runtime_par_uint_count) :
-        par_float( saved_params_float( par_float_count ) ),
-        rt_par_float( run_time_params_float( runtime_par_float_count ) ),
-        par_uint( saved_params_u_int_4( par_uint_count ) ),
-        rt_par_uint( run_time_params_u_int_4( runtime_par_uint_count ) ),
+        par_float( saved_params_float( par_float_count, this ) ),
+        rt_par_float( run_time_params_float( runtime_par_float_count, this ) ),
+        par_uint( saved_params_u_int_4( par_uint_count, this ) ),
+        rt_par_uint( run_time_params_u_int_4( runtime_par_uint_count, "RT_PAR_UI", this ) ),
         timers( timers_count ),
         number( number ),
         type( type ),
@@ -49,6 +49,12 @@ tech_object::tech_object( const char* new_name, u_int number, u_int type,
     this->name_Lua = new char[ strlen( name_Lua ) + 1 ];
     strcpy( this->name_Lua, name_Lua );
 
+    const char* sign_str = " №";
+    const int MAX_LENGTH = strlen( new_name ) + strlen( sign_str ) +
+        std::to_string( number ).length() + 1;
+    full_name = new char[ MAX_LENGTH ];
+    snprintf( full_name, MAX_LENGTH, "%s%s%d", new_name, sign_str, number );
+
     operations_manager = new operation_manager( operations_count, this );
     }
 //-----------------------------------------------------------------------------
@@ -64,6 +70,8 @@ tech_object::~tech_object()
     name = 0;
     delete[] name_Lua;
     name_Lua = 0;
+    delete[] full_name;
+    full_name = 0;
 
     delete operations_manager;
     operations_manager = 0;
@@ -608,8 +616,6 @@ void tech_object::check_availability( u_int operation_n )
 //-----------------------------------------------------------------------------
 int tech_object::lua_check_off_mode( u_int mode )
     {
-    tech_object::check_off_mode( mode );
-
     return lua_manager::get_instance()->int_exec_lua_method( name_Lua,
         "check_off_mode", mode, "int tech_object::lua_check_off_mode( u_int mode )" );
     }
@@ -1370,10 +1376,7 @@ int tech_object::check_operation_on( u_int operation_n, bool show_error )
         }
     else
         {
-        if ( ( res = lua_check_on_mode( operation_n, show_error ) ) == 0 ) // Check if possible.
-            {
-            }
-        else
+        if ( ( res = lua_check_on_mode( operation_n, show_error ) ) != 0 ) // Check if possible.
             {
             res += 100;
             }

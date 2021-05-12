@@ -72,7 +72,7 @@ class l_log: public i_log
                 break;
 
             case i_log::P_NOTICE:
-                SetColor( YELLOW );
+                SetColor( GREEN );
                 std::cout << "NOTICE (5) -> ";
                 break;
 

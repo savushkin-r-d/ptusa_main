@@ -118,7 +118,7 @@ int convert_utf8_to_windows1251(const char* utf8, char* windows1251, size_t n)
             ++i;
             ++j;
             }
-        else {            
+        else {
             // can't convert this chars
             return 0;
             }
@@ -167,7 +167,7 @@ int utf8_strlen(const char* str)
     for (q = 0, i = 0, ix = strlen(str); i < ix; i++, q++)
         {
         c = (unsigned char)str[i];
-        if (c >= 0 && c <= 127) i += 0;
+        if (c <= 127) i += 0;
         else if ((c & 0xE0) == 0xC0) i += 1;
         else if ((c & 0xF0) == 0xE0) i += 2;
         else if ((c & 0xF8) == 0xF0) i += 3;

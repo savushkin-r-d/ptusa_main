@@ -112,6 +112,11 @@ data_file::data_file() : f( 0 )
     {
     }
 //-----------------------------------------------------------------------------
+data_file::~data_file()
+    {
+    file_close();
+    }
+//-----------------------------------------------------------------------------
 int data_file::file_open( const char* file_name )
     {
     f = open( file_name, O_RDONLY );
