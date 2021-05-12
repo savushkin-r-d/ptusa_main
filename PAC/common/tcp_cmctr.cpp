@@ -97,8 +97,8 @@ tcp_communicator::~tcp_communicator()
 void tcp_communicator::init_instance( const char *name_rus, const char *name_eng )
     {
 #ifdef PTUSA_TEST
-    if (!is_init)
-        {
+    if ( !is_init )
+       {
        is_init = true;
 #endif //PTUSA_TEST
 #ifdef WIN_OS
