@@ -50,6 +50,11 @@ class i_params_owner
 /// корректность данных путем подсчета контрольной суммы.
 class params_manager
     {
+    // Friendly класс предназначен только для тестирования
+    // и не должен использоваться в других целях
+#ifdef PTUSA_TEST
+    friend class test_params_manager;	
+#endif
     public:
         enum CONSTANTS
             {
@@ -79,7 +84,7 @@ class params_manager
         ///
         /// @return 0 - ОК.
         /// @return 1 - Ошибка контрольной суммы.
-        int init( unsigned int project_id );
+        virtual int init( unsigned int project_id );
 
         /// @brief Окончательная инициализация значений параметров.
         ///
@@ -93,7 +98,7 @@ class params_manager
         /// классов tank и comb.
         /// @param custom_init_params_function - пользовательская функция
         /// инициализации параметров.
-        void final_init( int auto_init_params = 1,
+        virtual void final_init( int auto_init_params = 1,
             int auto_init_work_params = 1,
             void ( *custom_init_params_function )() = 0 );
 
@@ -114,9 +119,9 @@ class params_manager
         ///
         /// @return 0 - ОК.
         /// @return 1 - Ошибка контрольной суммы.
-        char* get_params_data( int size, int &start_pos );
+        virtual char* get_params_data( int size, int &start_pos );
 
-        ~params_manager();
+        virtual ~params_manager();
 
         enum PARAMS
             {
@@ -135,14 +140,18 @@ class params_manager
         u_int_2 solve_CRC();
 
         void reset_params_size();
-    private:
-        void reset_to_default( void( *custom_init_params_function )( ),
-            int auto_init_params, int auto_init_work_params );
+
+	protected:
+        static char is_init;
 
         /// @brief Закрытый конструктор.
         ///
         /// Для вызова методов используется статический метод @ref get_instance.
         params_manager();
+	
+	private:
+        void reset_to_default( void( *custom_init_params_function )( ),
+            int auto_init_params, int auto_init_work_params );
 
         /// Статический экземпляр класса для вызова методов.
         static auto_smart_ptr< params_manager > instance;

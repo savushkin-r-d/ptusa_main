@@ -25,6 +25,11 @@ class tcp_client;
 /// @brief Базовый класс коммуникатор - обмен данными PAC-сервер.
 class tcp_communicator
     {
+    // Friendly класс предназначен только для тестирования
+    // и не должен использоваться в других целях
+#ifdef PTUSA_TEST
+    friend class test_tcp_communicator;
+#endif
     public:
         /// @brief Определение функции сервиса.
         typedef long int srv_proc( long int, u_char *, u_char * );
@@ -37,6 +42,10 @@ class tcp_communicator
         /// tcp_communicator.
         static tcp_communicator* get_instance();
 
+#ifdef PTUSA_TEST
+        static bool is_init;
+#endif //PTUSA_TEST
+
         static void init_instance( const char *name_rus, const char *name_eng );
 
         /// @brief Итерация обмена данными с сервером.
@@ -47,7 +56,7 @@ class tcp_communicator
         ///
         /// @param srv_id - номер, за которым будет закреплен сервис.
         /// @param fk     - указатель на объект выделенного блока памяти.
-        srv_ptr reg_service( u_char srv_id, srv_ptr fk );
+        virtual srv_ptr reg_service( u_char srv_id, srv_ptr fk );
 
         /// @brief Получение сетевого имени PAC.
         ///

@@ -400,9 +400,9 @@ class tech_object_manager
         int evaluate();
 
         /// @brief Инициализация объектов на основе скрипта описания Lua.
-        int init_objects();
+        virtual int init_objects();
 
-        ~tech_object_manager();
+        virtual ~tech_object_manager();
 
         /// @brief Добавление технологического объекта.
         void add_tech_object( tech_object* new_tech_object );
@@ -449,10 +449,11 @@ class tech_object_manager
 #pragma option -w.inl
 #endif // __BORLANDC__
 
-    private:
+    protected:
         tech_object_manager();
 
-        /// Единственный экземпляр класса.
+    private:
+                /// Единственный экземпляр класса.
         static auto_smart_ptr < tech_object_manager > instance;
 
         std::vector< tech_object* > tech_objects; ///< Технологические объекты.
