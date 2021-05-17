@@ -22,9 +22,6 @@ namespace Ptusa
 
     void PtusaProgram::Execute()
         {
-        sprintf( G_LOG->msg, "Program Execute" );
-        G_LOG->write_log( i_log::P_INFO );
-
         static long int sleep_time_ms = 2;
 
         if ( ptusaComponent.init_flag )

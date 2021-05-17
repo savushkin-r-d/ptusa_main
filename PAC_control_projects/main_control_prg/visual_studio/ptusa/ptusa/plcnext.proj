@@ -1,8 +1,6 @@
 <?xml version="1.0"?>
 <ProjectSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.phoenixcontact.com/schema/cliproject">
-  <Target>AXCF1152,2021.0.2 LTS (21.0.2.35550)</Target>
   <Target>AXCF2152,2021.0.3 LTS (21.0.3.35554)</Target>
-  <Target>AXCF3152,2021.0.3 LTS (21.0.3.35554)</Target>
   <Id>efd25a9e-7611-4bd1-bd27-def9ff319ad9</Id>
   <Version>1.1</Version>
 </ProjectSettings>

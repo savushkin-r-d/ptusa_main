@@ -41,6 +41,8 @@ namespace Ptusa
                    The name comment defines the name of the port and is optional. Default is the name of the field.
                 */
 
+            //#port
+            //#attributes(Retain)
             uint8 NVRAM[ 49000 ] = { 0 };
 
         private: // fields
