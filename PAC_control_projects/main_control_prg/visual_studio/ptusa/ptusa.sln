@@ -1,0 +1,27 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31229.75
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ptusa", "ptusa\ptusa.vcxproj", "{DCDB725A-502B-4F74-AF35-691BF60D1B69}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug - all Targets|x86 = Debug - all Targets|x86
+		Release - all Targets|x86 = Release - all Targets|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DCDB725A-502B-4F74-AF35-691BF60D1B69}.Debug - all Targets|x86.ActiveCfg = Debug - all Targets|x86
+		{DCDB725A-502B-4F74-AF35-691BF60D1B69}.Debug - all Targets|x86.Build.0 = Debug - all Targets|x86
+		{DCDB725A-502B-4F74-AF35-691BF60D1B69}.Debug - all Targets|x86.Deploy.0 = Debug - all Targets|x86
+		{DCDB725A-502B-4F74-AF35-691BF60D1B69}.Release - all Targets|x86.ActiveCfg = Release - all Targets|x86
+		{DCDB725A-502B-4F74-AF35-691BF60D1B69}.Release - all Targets|x86.Build.0 = Release - all Targets|x86
+		{DCDB725A-502B-4F74-AF35-691BF60D1B69}.Release - all Targets|x86.Deploy.0 = Release - all Targets|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C24EFC22-0707-4150-B03C-7F40340065E9}
+	EndGlobalSection
+EndGlobal
