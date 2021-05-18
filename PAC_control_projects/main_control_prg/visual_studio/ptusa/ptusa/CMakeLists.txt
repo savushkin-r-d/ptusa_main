@@ -13,6 +13,8 @@ add_definitions(-DPAC_PLCNEXT)
 add_definitions(-DLINUX_OS)
 add_definitions(-DTEST_SPEED)
 
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../lua ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../bin )
+
 set (WILDCARD_SOURCE *.cpp)
 set (WILDCARD_HEADER *.h *.hpp *.hxx)
 
@@ -33,17 +35,11 @@ file(GLOB Main_src
 	../../../../../PAC/linux/PAC_PLCnext/*.cpp
 	../../../../../PAC/IoT/*.cpp
 
-	../../../../../lua/src/*.c
 	../../../../../tolua++/src/lib/*.c
 	)
 
 list(FILTER Main_src EXCLUDE REGEX ".*OPCUA*")
 list(FILTER Main_src EXCLUDE REGEX ".*rfid*")
-
-list(FILTER Main_src EXCLUDE REGEX "wmain.c$")
-list(FILTER Main_src EXCLUDE REGEX "luac.c$")
-list(FILTER Main_src EXCLUDE REGEX "lua.c$")
-list(FILTER Main_src EXCLUDE REGEX "loadlib_rel.c$")
 
 add_library(Ptusa SHARED ${Headers} ${Sources} ${Main_src})
 
@@ -110,7 +106,7 @@ target_link_options(Ptusa PRIVATE LINKER:--no-undefined)
 find_package(ArpDevice REQUIRED)
 find_package(ArpProgramming REQUIRED)
 
-target_link_libraries(Ptusa PRIVATE ArpDevice ArpProgramming dl)
+target_link_libraries(Ptusa PRIVATE ArpDevice ArpProgramming liblua_static)
 
 #######################################################################################
 
