@@ -1326,6 +1326,10 @@ int operation_state::check_on( char* reason ) const
 //-----------------------------------------------------------------------------
 void operation_state::init( u_int start_step /*= 1 */ )
     {
+    if ( G_DEBUG )
+        {
+        mode_step->print( owner->owner->get_prefix() );
+        }
     mode_step->init();
     start_time = get_millisec();
 
