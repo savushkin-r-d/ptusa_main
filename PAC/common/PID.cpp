@@ -139,10 +139,11 @@ float PID::eval( float currentValue, int deltaSign )
         ek_1 = ek;
 
         //-Зона разгона.
-        int deltaTime = get_delta_millisec( start_time );
-        if ( deltaTime < ( *par )[ P_acceleration_time ] * MSEC_IN_SEC )
+        int delta_time = get_delta_millisec( start_time );
+        int acceleration_time = ( *par )[ P_acceleration_time ] * MSEC_IN_SEC;
+        if ( delta_time < acceleration_time )
             {
-            float res = MAX_OUT_VALUE * deltaTime / ( *par )[ P_acceleration_time ];
+            float res = MAX_OUT_VALUE * delta_time / acceleration_time;
             if ( ( *par )[ P_is_zero_start ] )
                 {
                 res = start_value + res;
@@ -266,7 +267,14 @@ void PID::direct_set_value( float val )
     set_value = val;
     if ( sensor )
         {
-        out_value = eval( sensor->get_value(), (int)( *par )[ P_is_reverse ] );
+        float in_value = sensor->get_value();
+        if ( sensor->get_type() == DT_FQT )
+            {
+            in_value = dynamic_cast <i_counter*> ( sensor )->get_flow();
+            }
+
+        int sign = ( *par )[ P_is_reverse ] > 0 ? -1 : 1;
+        out_value = eval( in_value, sign );
         if ( actuator )
             {
             actuator->on();
@@ -331,7 +339,7 @@ void PID::reset()
     ek_1 = 0;
     ek_2 = 0;
 
-    bool is_zero_start = ( *par )[ P_is_zero_start ] == .0f;
+    bool is_zero_start = ( *par )[ P_is_zero_start ] != 0;
     start_value = is_zero_start ? MIN_OUT_VALUE : MAX_OUT_VALUE;
     Uk = is_zero_start ? MIN_OUT_VALUE : MAX_OUT_VALUE;
     out_value = Uk;
