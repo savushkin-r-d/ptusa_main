@@ -793,8 +793,27 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             }
 
         case device::DT_VC:
-            new_device      = new analog_valve( dev_name );
-            new_io_device = ( analog_valve* ) new_device;
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_VC:
+                    new_device = new analog_valve( dev_name );
+                    new_io_device = (analog_valve*)new_device;
+                    break;
+
+                case device::DST_VC_IOLINK:
+                    new_device = new analog_valve_iolink( dev_name );
+                    new_io_device = (analog_valve_iolink*)new_device;
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown VC device subtype %d!\n", dev_sub_type );
+                        }
+                    new_device = new dev_stub();
+                    break;
+                }
             break;
 
         case device::DT_M:
@@ -3217,6 +3236,75 @@ inline int valve_iolink_vtug_off::get_off_fb_value()
     return get_DI(DI_INDEX);
     }
 #endif // DEBUG_NO_IO_MODULES
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(
+    dev_name, DT_VC, DST_VC_IOLINK, 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+void analog_valve_iolink::evaluate_io()
+    {
+    out_info = (out_data*)get_AO_write_data( 0 );
+
+    char* data = (char*)get_AI_data( 0 );
+    char* buff = (char*)in_info;
+
+    const int SIZE = 10;
+    std::copy( data, data + SIZE, buff );
+    std::swap( buff[ 0 ], buff[ 1 ] );
+    std::swap( buff[ 2 ], buff[ 3 ] );
+    std::swap( buff[ 4 ], buff[ 5 ] );
+    std::swap( buff[ 6 ], buff[ 7 ] );
+    std::swap( buff[ 8 ], buff[ 9 ] );
+
+#define DEBUG_VC_IOLINK
+#ifdef DEBUG_VC_IOLINK
+    char* tmp = (char*)in_info;
+
+    sprintf( G_LOG->msg, "%x %x %x %x %x %x %x %x %x %x\n",
+        tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ],
+        tmp[ 4 ], tmp[ 5 ], tmp[ 6 ], tmp[ 7 ],
+        tmp[ 8 ], tmp[ 9 ] );
+    G_LOG->write_log( i_log::P_WARNING );
+
+    sprintf( G_LOG->msg,
+        "closed %u, opened %u, status %u, NAMUR state %u, used setpoint %.3f, valve position %.3f\n",
+        in_info->closed, in_info->opened, in_info->status, in_info->namur_state,
+        in_info->setpoint, in_info->position );
+    G_LOG->write_log( i_log::P_NOTICE );
+#endif
+    }
+//-----------------------------------------------------------------------------
+float analog_valve_iolink::get_min_value()
+    {
+    return static_cast<float>( CONSTANTS::FULL_CLOSED );
+    }
+//-----------------------------------------------------------------------------
+float analog_valve_iolink::get_max_value()
+    {
+    return static_cast<float>( CONSTANTS::FULL_OPENED );
+    }
+//-----------------------------------------------------------------------------
+void analog_valve_iolink::direct_on()
+    {
+    out_info->position = static_cast<float>( CONSTANTS::FULL_OPENED );
+    }
+//-----------------------------------------------------------------------------
+void analog_valve_iolink::direct_off()
+    {
+    out_info->position = static_cast<float>( CONSTANTS::FULL_CLOSED );
+    }
+//-----------------------------------------------------------------------------
+void analog_valve_iolink::direct_set_value( float new_value )
+    {
+    out_info->position = new_value;
+    }
+//-----------------------------------------------------------------------------
+float analog_valve_iolink::get_value()
+    {
+    return in_info->position;
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
