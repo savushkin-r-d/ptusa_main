@@ -3365,12 +3365,14 @@ class analog_valve_iolink : public AO1
             bool closed : 1;        //True = Closed, False = Not closed
             };
 
-        struct __attribute__( ( __packed__ ) ) out_data
+#pragma pack(push,1)
+        struct out_data
             {
             float position;     //Cyclic CMD setpoint in percent
             uint8_t unused : 7;
             bool wink : 1;      //Visual indication
             };
+#pragma pack(pop)
 
         in_data* in_info = new in_data;
         out_data* out_info;
