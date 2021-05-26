@@ -3334,6 +3334,8 @@ class analog_valve_iolink : public AO1
 
         float get_max_value();
 
+        int save_device_ex( char* buff );
+
         enum class CONSTANTS
             {
             FULL_CLOSED = 0,
@@ -3348,22 +3350,26 @@ class analog_valve_iolink : public AO1
 
         float get_value();
 
+        int set_cmd( const char* prop, u_int idx, double val );
+
+        int get_state();
+
     private:
         struct in_data
             {
-            bool closed : 1;        //True = Closed, False = Not closed
-            bool opened : 1;        //True = Opened, False = Not opened
-            uint8_t status : 6;
-            uint8_t namur_state;
-            float setpoint;         //Used setpoint in percent
             float position;         //Valve position in percent
+            float setpoint;         //Used setpoint in percent
+            uint8_t namur_state;
+            uint8_t status : 6;
+            bool opened : 1;        //True = Opened, False = Not opened
+            bool closed : 1;        //True = Closed, False = Not closed
             };
 
-        struct out_data
+        struct __attribute__( ( __packed__ ) ) out_data
             {
-            bool wink : 1;      //Visual indication
-            uint8_t unused : 7;
             float position;     //Cyclic CMD setpoint in percent
+            uint8_t unused : 7;
+            bool wink : 1;      //Visual indication
             };
 
         in_data* in_info = new in_data;

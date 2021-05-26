@@ -3245,9 +3245,9 @@ analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(
 //-----------------------------------------------------------------------------
 void analog_valve_iolink::evaluate_io()
     {
-    out_info = (out_data*)get_AO_write_data( 0 );
+    out_info = (out_data*)get_AO_write_data( AO_INDEX );
 
-    char* data = (char*)get_AI_data( 0 );
+    char* data = (char*)get_AI_data( AO_INDEX );
     char* buff = (char*)in_info;
 
     const int SIZE = 10;
@@ -3258,8 +3258,25 @@ void analog_valve_iolink::evaluate_io()
     std::swap( buff[ 6 ], buff[ 7 ] );
     std::swap( buff[ 8 ], buff[ 9 ] );
 
-#define DEBUG_VC_IOLINK
+    //Reverse byte order to get correct float.
+    std::swap( buff[ 3 ], buff[ 0 ] );
+    std::swap( buff[ 1 ], buff[ 2 ] );
+    std::swap( buff[ 4 ], buff[ 7 ] );
+    std::swap( buff[ 5 ], buff[ 6 ] );
+
 #ifdef DEBUG_VC_IOLINK
+    //Variants of float representation.
+    //int a1 = ( buff[ 0 ] << 24 ) + ( buff[ 1 ] << 16 ) + ( buff[ 2 ] << 8 ) + buff[ 3 ];
+    //int a2 = ( buff[ 1 ] << 24 ) + ( buff[ 0 ] << 16 ) + ( buff[ 3 ] << 8 ) + buff[ 2 ];
+    //int a3 = ( buff[ 2 ] << 24 ) + ( buff[ 3 ] << 16 ) + ( buff[ 1 ] << 8 ) + buff[ 0 ];
+    //int a4 = ( buff[ 3 ] << 24 ) + ( buff[ 2 ] << 16 ) + ( buff[ 0 ] << 8 ) + buff[ 1 ];
+    //float* f1 = (float*)&a1;
+    //float* f2 = (float*)&a2;
+    //float* f3 = (float*)&a3;
+    //float* f4 = (float*)&a4;
+    //sprintf( G_LOG->msg, " WARNING %f %f %f %f\n", *f1, *f2, *f3, *f4 );
+    //G_LOG->write_log( i_log::P_WARNING );
+
     char* tmp = (char*)in_info;
 
     sprintf( G_LOG->msg, "%x %x %x %x %x %x %x %x %x %x\n",
@@ -3286,24 +3303,70 @@ float analog_valve_iolink::get_max_value()
     return static_cast<float>( CONSTANTS::FULL_OPENED );
     }
 //-----------------------------------------------------------------------------
+int analog_valve_iolink::save_device_ex( char* buff )
+    {
+    int res = sprintf( buff, "NAMUR_ST=%u, ", in_info->namur_state );
+    res += sprintf( buff + res, "OPEN=%u, ", in_info->opened );
+    res += sprintf( buff + res, "CLOSED=%u, ", in_info->closed );
+
+    res += sprintf( buff + res, "BLINK=%d, ", blink );
+    return res;
+    }
+//-----------------------------------------------------------------------------
 void analog_valve_iolink::direct_on()
     {
-    out_info->position = static_cast<float>( CONSTANTS::FULL_OPENED );
+    direct_set_value( static_cast<float>( CONSTANTS::FULL_OPENED ) );
     }
 //-----------------------------------------------------------------------------
 void analog_valve_iolink::direct_off()
     {
-    out_info->position = static_cast<float>( CONSTANTS::FULL_CLOSED );
+    direct_set_value( static_cast<float>( CONSTANTS::FULL_CLOSED ) );
     }
 //-----------------------------------------------------------------------------
 void analog_valve_iolink::direct_set_value( float new_value )
     {
     out_info->position = new_value;
+
+    char *buff = (char*) &out_info->position;
+    std::swap( buff[ 3 ], buff[ 0 ] );//Reverse byte order to get correct float.
+    std::swap( buff[ 1 ], buff[ 2 ] );
     }
 //-----------------------------------------------------------------------------
 float analog_valve_iolink::get_value()
     {
     return in_info->position;
+    }
+//-----------------------------------------------------------------------------
+int analog_valve_iolink::get_state()
+    {
+    return in_info->status;
+    }
+//-----------------------------------------------------------------------------
+inline int analog_valve_iolink::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if ( G_DEBUG )
+        {
+        sprintf( G_LOG->msg,
+            "%s\t analog_valve_iolink::set_cmd() - prop = %s, idx = %d, val = %f",
+            get_name(), prop, idx, val );
+        G_LOG->write_log( i_log::P_DEBUG );
+        }
+
+    switch ( prop[ 0 ] )
+        {
+        case 'B': //BLINK
+            {
+            val > 0 ? out_info->wink = true : out_info->wink = false;
+            blink = out_info->wink;
+            break;
+            }
+
+        default:
+            AO1::set_cmd( prop, idx, val );
+            break;
+        }
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
