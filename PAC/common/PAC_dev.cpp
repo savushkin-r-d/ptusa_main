@@ -3306,7 +3306,7 @@ float analog_valve_iolink::get_max_value()
 int analog_valve_iolink::save_device_ex( char* buff )
     {
     int res = sprintf( buff, "NAMUR_ST=%u, ", in_info->namur_state );
-    res += sprintf( buff + res, "OPEN=%u, ", in_info->opened );
+    res += sprintf( buff + res, "OPENED=%u, ", in_info->opened );
     res += sprintf( buff + res, "CLOSED=%u, ", in_info->closed );
 
     res += sprintf( buff + res, "BLINK=%d, ", blink );
