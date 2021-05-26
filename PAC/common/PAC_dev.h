@@ -435,6 +435,9 @@ class device : public i_DO_AO_device, public par_device
             V_IOLINK_DO1_DI2,         ///< Клапан с одним каналом управления и двумя обратными связями с IO-Link интерфейсом (отсечной).
             V_IOLINK_VTUG_DO1_DI2,    ///< IO-Link VTUG клапан с одним каналом управления и двумя обратными связями.
 
+            //VC
+            DST_VC = 1,         ///< Клапан с аналоговым управлением.
+            DST_VC_IOLINK,      ///< Клапан IO-LInk.
 
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
@@ -3297,7 +3300,7 @@ class analog_output : public AO1
 class analog_valve : public AO1
     {
     public:
-        analog_valve( const char *dev_name ): AO1( dev_name, DT_VC, DST_NONE, 0 )
+        analog_valve( const char *dev_name ): AO1( dev_name, DT_VC, DST_VC, 0 )
             {
             }
 
@@ -3317,6 +3320,64 @@ class analog_valve : public AO1
             C_MIN = 0,   ///< Минимальное значение.
             C_MAX = 100, ///< Максимальное значение.
             };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Управляемый клапан IO-Link.
+class analog_valve_iolink : public AO1
+    {
+    public:
+        analog_valve_iolink( const char* dev_name );
+
+        void evaluate_io();
+
+        float get_min_value();
+
+        float get_max_value();
+
+        int save_device_ex( char* buff );
+
+        enum class CONSTANTS
+            {
+            FULL_CLOSED = 0,
+            FULL_OPENED = 100,
+            };
+
+        void direct_on();
+
+        void direct_off();
+
+        void direct_set_value( float new_value );
+
+        float get_value();
+
+        int set_cmd( const char* prop, u_int idx, double val );
+
+        int get_state();
+
+    private:
+        struct in_data
+            {
+            float position;         //Valve position in percent
+            float setpoint;         //Used setpoint in percent
+            uint8_t namur_state;
+            uint8_t status : 6;
+            bool opened : 1;        //True = Opened, False = Not opened
+            bool closed : 1;        //True = Closed, False = Not closed
+            };
+
+#pragma pack(push,1)
+        struct out_data
+            {
+            float position;     //Cyclic CMD setpoint in percent
+            uint8_t unused : 7;
+            bool wink : 1;      //Visual indication
+            };
+#pragma pack(pop)
+
+        in_data* in_info = new in_data;
+        out_data* out_info;
+
+        bool blink = false;     //Visual indication
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство с одним дискретным входом.
