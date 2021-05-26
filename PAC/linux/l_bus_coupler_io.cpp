@@ -283,7 +283,7 @@ int io_manager_linux::write_outputs()
 
                 int bit_src = 0;
 
-                do 
+                do
                 {
                     for (u_int j = 0; j < registers_count * 2; j++)
                         {
@@ -310,7 +310,8 @@ int io_manager_linux::write_outputs()
 
                         switch (ao_module_type)
                             {
-                            case 1027843:           //IOL8
+                            case 1027843:           //AXL F IOL8
+                            case 1088132:           //AXL SE IOL4
                                 ao_module_offset %= 32;	   //if there are same modules one after other on bus
                                 if (ao_module_offset > 2)  //first 3 words (bytes 0-5) are reserved, 2nd byte is used for trigger discrete outputs.
                                     {
@@ -334,7 +335,8 @@ int io_manager_linux::write_outputs()
                                 l += 2;
                                 break;
 
-                            case 2688527:   //-AXL F AO4 1H
+                            case 2688527:       //AXL F AO4 1H
+                            case 1088123:       //AXL SE AO4 I 4-20,
                                 writebuff[l] = (u_char)((nd->AO_[idx] >> 8) & 0xFF);
                                 writebuff[l + 1] = (u_char)(nd->AO_[idx] & 0xFF);
                                 l += 2;
@@ -379,7 +381,7 @@ int io_manager_linux::write_outputs()
                         registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
                         }
 
-                } 
+                }
                  while (start_register < nd->AO_cnt);
 
 
@@ -690,7 +692,7 @@ int io_manager_linux::read_inputs()
                         printf("%d = %d,", start_read_address + start_register + ideb, 256 * resultbuff[ideb * 2] + resultbuff[ideb * 2 + 1]);
                         }
 #endif
-                    
+
 
                     if (res >= 0)
                         {
@@ -745,7 +747,7 @@ int io_manager_linux::read_inputs()
                         {
                         registers_count = MAX_MODBUS_REGISTERS_PER_QUERY;
                         }
-                    } 
+                    }
                 while (start_register < nd->AI_cnt);
                 }
 
