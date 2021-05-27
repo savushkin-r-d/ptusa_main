@@ -198,6 +198,7 @@ float io_device::get_AO( u_int index, float min_value, float max_value )
                 //  * without 8001, 8080
 
             case 2688527:   //AXL F AO4 1H
+            case 2702072:   //AXL F AI2 AO2 1H
             case 1088123:   //AXL SE AO4 I 4-20
                 if (0 == min_value && 0 == max_value)
                     {
@@ -273,6 +274,7 @@ int io_device::set_AO( u_int index, float value, float min_value,
                 break;
 
             case 2688527:   //AXL F AO4 1H
+            case 2702072:   //AXL F AI2 AO2 1H
             case 1088123:   //AXL SE AO4 I 4-20
                 if ( 0 != min_value || 0 != max_value )
                     {
@@ -418,6 +420,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
 				return val;
 
             case 2688491:   //AXL F AI4 I 1H
+            case 2702072:   //AXL F AI2 AO2 1H
             case 1088062:   //AXL SE AI4 I 4-20
 				if (val < -32000)
 					{

@@ -336,6 +336,7 @@ int io_manager_linux::write_outputs()
                                 break;
 
                             case 2688527:       //AXL F AO4 1H
+                            case 2702072:       //AXL F AI2 AO2 1H
                             case 1088123:       //AXL SE AO4 I 4-20,
                                 writebuff[l] = (u_char)((nd->AO_[idx] >> 8) & 0xFF);
                                 writebuff[l + 1] = (u_char)(nd->AO_[idx] & 0xFF);
