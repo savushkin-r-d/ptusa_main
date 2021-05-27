@@ -689,7 +689,7 @@ int io_manager_linux::read_inputs()
                     printf("\n\r");
                     for (int ideb = 0; ideb < registers_count; ideb++)
                         {
-                        printf("%d = %d,", start_read_address + start_register + ideb, 256 * resultbuff[ideb * 2] + resultbuff[ideb * 2 + 1]);
+                        printf("%d = %d, ", start_read_address + start_register + ideb, 256 * resultbuff[ideb * 2] + resultbuff[ideb * 2 + 1]);
                         }
 #endif
 
@@ -702,7 +702,8 @@ int io_manager_linux::read_inputs()
                                 {
                                 switch (nd->AI_types[analog_dest])
                                     {
-                                    case 1027843:                               //IOL8
+                                    case 1027843:           //AXL F IOL8
+                                    case 1088132:           //AXL SE IOL4
                                         memcpy(&nd->AI[analog_dest], resultbuff + index_source, 2);
                                         index_source += 2;
                                         break;
