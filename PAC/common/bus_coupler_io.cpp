@@ -475,7 +475,6 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
 
             case 2688491:   //AXL F AI4 I 1H
             case 2702072:   //AXL F AI2 AO2 1H
-            case 1088062:   //AXL SE AI4 I 4-20
 				if (val < -32000)
 					{
 					return -1;
@@ -491,6 +490,23 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
 					val = min_value + (val - 4) * (max_value - min_value) / 16;
 					}
 				return val;
+
+            case 1088062:   //AXL SE AI4 I 4-20
+                if ( val < -32000 )
+                    {
+                    return -1;
+                    }
+
+                if ( 0 == min_value && 0 == max_value )
+                    {
+                    val = 4 + val / 1000.0f;
+                    }
+                else
+                    {
+                    val = 4 + val / 1000.0f;
+                    val = min_value + ( val - 4 ) * ( max_value - min_value ) / 16;
+                    }
+                return val;
 
             default:
                 return val;
