@@ -148,7 +148,7 @@ if(WIN32)
     endif()
 
 elseif (LINUX)
-    target_link_libraries(main_control liblua)
+    target_link_libraries(main_control liblua_static)
 endif()
 #######################################################################################
 
