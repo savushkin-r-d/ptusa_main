@@ -2,6 +2,7 @@
 intermediate
 *bin
 out
+obj
 cmake-build-*/
 
 PAC_control_projects/main_control_prg/main_control_prg_vc/\.vs/
