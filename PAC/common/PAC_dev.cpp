@@ -3252,39 +3252,29 @@ void analog_valve_iolink::evaluate_io()
 
     const int SIZE = 10;
     std::copy( data, data + SIZE, buff );
-    std::swap( buff[ 0 ], buff[ 1 ] );
-    std::swap( buff[ 2 ], buff[ 3 ] );
-    std::swap( buff[ 4 ], buff[ 5 ] );
-    std::swap( buff[ 6 ], buff[ 7 ] );
-    std::swap( buff[ 8 ], buff[ 9 ] );
+
+#ifdef DEBUG_VC_IOLINK
+    //Variants of float representation.
+    int a1 = ( buff[ 0 ] << 24 ) + ( buff[ 1 ] << 16 ) + ( buff[ 2 ] << 8 ) + buff[ 3 ];
+    int a2 = ( buff[ 1 ] << 24 ) + ( buff[ 0 ] << 16 ) + ( buff[ 3 ] << 8 ) + buff[ 2 ];
+    int a3 = ( buff[ 2 ] << 24 ) + ( buff[ 3 ] << 16 ) + ( buff[ 1 ] << 8 ) + buff[ 0 ];
+    int a4 = ( buff[ 3 ] << 24 ) + ( buff[ 2 ] << 16 ) + ( buff[ 0 ] << 8 ) + buff[ 1 ];
+    float* f1 = (float*)&a1;
+    float* f2 = (float*)&a2;
+    float* f3 = (float*)&a3;
+    float* f4 = (float*)&a4;
+    sprintf( G_LOG->msg, "WARNING %s %f %f %f %f", get_name(),
+        *f1, *f2, *f3, *f4 );
+    G_LOG->write_log( i_log::P_WARNING );
+#endif
 
     //Reverse byte order to get correct float.
     std::swap( buff[ 3 ], buff[ 0 ] );
     std::swap( buff[ 1 ], buff[ 2 ] );
-    std::swap( buff[ 4 ], buff[ 7 ] );
+    std::swap( buff[ 7 ], buff[ 4 ] );
     std::swap( buff[ 5 ], buff[ 6 ] );
 
 #ifdef DEBUG_VC_IOLINK
-    //Variants of float representation.
-    //int a1 = ( buff[ 0 ] << 24 ) + ( buff[ 1 ] << 16 ) + ( buff[ 2 ] << 8 ) + buff[ 3 ];
-    //int a2 = ( buff[ 1 ] << 24 ) + ( buff[ 0 ] << 16 ) + ( buff[ 3 ] << 8 ) + buff[ 2 ];
-    //int a3 = ( buff[ 2 ] << 24 ) + ( buff[ 3 ] << 16 ) + ( buff[ 1 ] << 8 ) + buff[ 0 ];
-    //int a4 = ( buff[ 3 ] << 24 ) + ( buff[ 2 ] << 16 ) + ( buff[ 0 ] << 8 ) + buff[ 1 ];
-    //float* f1 = (float*)&a1;
-    //float* f2 = (float*)&a2;
-    //float* f3 = (float*)&a3;
-    //float* f4 = (float*)&a4;
-    //sprintf( G_LOG->msg, " WARNING %f %f %f %f\n", *f1, *f2, *f3, *f4 );
-    //G_LOG->write_log( i_log::P_WARNING );
-
-    char* tmp = (char*)in_info;
-
-    sprintf( G_LOG->msg, "%x %x %x %x %x %x %x %x %x %x\n",
-        tmp[ 0 ], tmp[ 1 ], tmp[ 2 ], tmp[ 3 ],
-        tmp[ 4 ], tmp[ 5 ], tmp[ 6 ], tmp[ 7 ],
-        tmp[ 8 ], tmp[ 9 ] );
-    G_LOG->write_log( i_log::P_WARNING );
-
     sprintf( G_LOG->msg,
         "closed %u, opened %u, status %u, NAMUR state %u, used setpoint %.3f, valve position %.3f\n",
         in_info->closed, in_info->opened, in_info->status, in_info->namur_state,
