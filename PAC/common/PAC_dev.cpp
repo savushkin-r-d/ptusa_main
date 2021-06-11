@@ -419,6 +419,71 @@ void DO1::direct_off()
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+void signal_column::eval()
+    {
+    }
+//-----------------------------------------------------------------------------
+void signal_column::on_red()
+    {
+    srn->on();
+    }
+//-----------------------------------------------------------------------------
+void signal_column::on_red()
+    {
+    if ( is_builtin_red_blink )
+        {
+        red->on();
+        }
+    else
+        {
+        switch ( step )
+            {
+            case 0:
+                red->on();
+                if ( get_delta_millisec( start_blink_time ) > 250 )
+                    {
+                    start_wait_time = get_millisec();
+                    step = 1;
+                    }
+                break;
+
+            case 1:
+                red->off();
+                if ( get_delta_millisec( start_wait_time ) > 250 )
+                    {
+                    start_blink_time = get_millisec();
+                    step = 0;
+                    }
+                break;
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void signal_column::on_yellow()
+    {
+    switch ( step )
+        {
+        case 0:
+            yellow->on();
+            if ( get_delta_millisec( start_blink_time ) > 1000 )
+                {
+                start_wait_time = get_millisec();
+                step = 1;
+                }
+            break;
+
+        case 1:
+            //yellow->Off();
+            if ( get_delta_millisec( start_wait_time ) > 1000 )
+                {
+                start_blink_time = get_millisec();
+                step = 0;
+                }
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_V( const char *dev_name )
     {
     return get_device( device::DT_V, dev_name );

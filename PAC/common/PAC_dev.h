@@ -3890,6 +3890,74 @@ class counter_f_ok : public counter_f
             };
     };
 //-----------------------------------------------------------------------------
+/// @brief Сигнальная колонна.
+///
+/// Служит для уведомления оператора о событиях.
+/// Используется три лампочки – зеленая, желтая, красная и сирена:
+///     1. Зеленый цвет – есть активная операция (связанного аппарата или
+///     агрегата).
+///     2. Мигающий красный цвет – авария, тревога (неподавленная). Частота
+///     мигания 2 Гц. Дополнительно включается сирена, которую можно отключить
+///     проекта (клик по значку) либо она также отключится после подтверждения
+///     тревог, пропадания аварий.
+///     3. Мигающий желтый свет – неподтвержденное сообщение. Частота мигания
+///     0.5 Гц.
+class signal_column : public device
+    {
+    public:
+        void direct_off();
+
+        void turn_on_red();
+        void turn_on_yellow();
+        void turn_on_green();
+
+        void normal_blink_red();
+        void normal_blink_yellow();
+        void normal_blink_green();
+
+        void slow_blink_red();
+        void slow_blink_yellow();
+        void slow_blink_green();
+
+        void turn_on_siren();
+        void turn_off_siren();
+
+        enum LIGHT_STATES
+            {
+            S_LIGHT_OFF,
+
+            S_GREEN_ON,
+            S_YELLOW_ON,
+            S_RED_ON,
+
+            S_GREEN_NORMAL_BLINK,
+            S_YELLOW_NORMAL_BLINK,
+            S_RED_NORMAL_BLINK,
+
+            S_GREEN_SLOW_BLINK,
+            S_YELLOW_SLOW_BLINK,
+            S_RED_SLOW_BLINK,
+
+            S_SIREN_ON,
+            S_SIREN_OFF,
+            };
+    };
+
+    private:
+        int green;
+        int red;
+        int yellow;
+
+        int siren;
+
+        ///Тип мигания (0 - реализуем сами, >0 - встроенный в сирену).
+        int is_builtin_red_blink;
+
+        int step = 0;
+        unsigned long start_blink_time = 0;
+        unsigned long start_wait_time = 0;
+    };
+//-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.
 ///
 /// Содержит информацию обо всех устройствах проекта.

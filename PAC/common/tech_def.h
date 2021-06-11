@@ -204,8 +204,9 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
         int lua_on_stop( u_int mode );
         // Lua implemented methods.
 
-
-        // Работа с ошибками.
+#ifndef __GNUC__
+#pragma region Работа с ошибками.
+#endif
 
         /// @brief Проверка необходимости проверки устройств на ошибку обратной
         /// связи перед включением режима.  Реализован на Lua.
@@ -241,7 +242,10 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
              {
              return type;
              }
-        // Работа с ошибками.
+
+#ifndef __GNUC__
+#pragma endregion
+#endif
 
         /// @brief Отладочная печать объекта.
         void print() const
