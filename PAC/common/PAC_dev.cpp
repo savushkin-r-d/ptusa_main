@@ -419,69 +419,136 @@ void DO1::direct_off()
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-void signal_column::eval()
+void signal_column::direct_off()
     {
+    turn_off_red();
+    turn_off_yellow();
+    turn_off_green();
+
+    set_DO( (u_int)DO_CONSTANTS::INDEX_SIREN, 0 );
     }
 //-----------------------------------------------------------------------------
-void signal_column::on_red()
+void signal_column::turn_off_red()
     {
-    srn->on();
+    set_DO( (u_int)DO_CONSTANTS::INDEX_RED, 0 );
+    red.step = STEP::init;
     }
 //-----------------------------------------------------------------------------
-void signal_column::on_red()
+void signal_column::turn_off_yellow()
+    {
+    set_DO( (u_int)DO_CONSTANTS::INDEX_YELLOW, 0 );
+    yellow.step = STEP::init;
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_off_green()
+    {
+    set_DO( (u_int)DO_CONSTANTS::INDEX_GREEN, 0 );
+    green.step = STEP::init;
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_on_red()
+    {
+    set_DO( (u_int)DO_CONSTANTS::INDEX_RED, 1 );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_on_yellow()
+    {
+    set_DO( (u_int)DO_CONSTANTS::INDEX_YELLOW, 1 );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_on_green()
+    {
+    set_DO( (u_int)DO_CONSTANTS::INDEX_GREEN, 1 );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::normal_blink_red()
     {
     if ( is_builtin_red_blink )
         {
-        red->on();
+        set_DO( (u_int)DO_CONSTANTS::INDEX_RED, 1 );
         }
     else
         {
-        switch ( step )
-            {
-            case 0:
-                red->on();
-                if ( get_delta_millisec( start_blink_time ) > 250 )
-                    {
-                    start_wait_time = get_millisec();
-                    step = 1;
-                    }
-                break;
-
-            case 1:
-                red->off();
-                if ( get_delta_millisec( start_wait_time ) > 250 )
-                    {
-                    start_blink_time = get_millisec();
-                    step = 0;
-                    }
-                break;
-            }
+        blink( (u_int)DO_CONSTANTS::INDEX_RED, red,
+            (u_long)CONSTANTS::NORMAL_BLINK_TIME );
         }
     }
 //-----------------------------------------------------------------------------
-void signal_column::on_yellow()
+void signal_column::normal_blink_yellow()
     {
-    switch ( step )
+    blink( (u_int)DO_CONSTANTS::INDEX_YELLOW, yellow,
+        (u_long)CONSTANTS::NORMAL_BLINK_TIME );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::normal_blink_green()
+    {
+    blink( (u_int)DO_CONSTANTS::INDEX_GREEN, yellow,
+        (u_long)CONSTANTS::NORMAL_BLINK_TIME );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::slow_blink_red()
+    {
+    if ( is_builtin_red_blink )
         {
-        case 0:
-            yellow->on();
-            if ( get_delta_millisec( start_blink_time ) > 1000 )
+        set_DO( (u_int)DO_CONSTANTS::INDEX_RED, 1 );
+        }
+    else
+        {
+        blink( (u_int)DO_CONSTANTS::INDEX_RED, red,
+            (u_long)CONSTANTS::SLOW_BLINK_TIME );
+        }
+    }
+//-----------------------------------------------------------------------------
+void signal_column::slow_blink_yellow()
+    {
+    blink( (u_int)DO_CONSTANTS::INDEX_YELLOW, yellow,
+        (u_long)CONSTANTS::SLOW_BLINK_TIME );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::slow_blink_green()
+    {
+    blink( (u_int)DO_CONSTANTS::INDEX_GREEN, green,
+        (u_long)CONSTANTS::SLOW_BLINK_TIME );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_on_siren()
+    {
+    set_DO( (u_int)DO_CONSTANTS::INDEX_SIREN, 1 );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_off_siren()
+    {
+    set_DO( (u_int)DO_CONSTANTS::INDEX_SIREN, 0 );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::blink( int lamp_DO, state_info& info, int delay_time )
+    {
+    switch ( info.step )
+        {
+        case STEP::init:
+            info.start_blink_time = get_millisec();
+            info.step = STEP::on;
+            break;
+
+        case STEP::on:
+            set_DO( lamp_DO, 1 );
+            if ( get_delta_millisec( info.start_blink_time ) > delay_time )
                 {
-                start_wait_time = get_millisec();
-                step = 1;
+                info.start_wait_time = get_millisec();
+                info.step = STEP::off;
                 }
             break;
 
-        case 1:
-            //yellow->Off();
-            if ( get_delta_millisec( start_wait_time ) > 1000 )
+        case STEP::off:
+            set_DO( lamp_DO, 0 );
+            if ( get_delta_millisec( info.start_wait_time ) > delay_time )
                 {
-                start_blink_time = get_millisec();
-                step = 0;
+                info.start_blink_time = get_millisec();
+                info.step = STEP::on;
                 }
             break;
         }
-    }
+    };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_V( const char *dev_name )

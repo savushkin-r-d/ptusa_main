@@ -3902,10 +3902,14 @@ class counter_f_ok : public counter_f
 ///     тревог, пропадания аварий.
 ///     3. Мигающий желтый свет – неподтвержденное сообщение. Частота мигания
 ///     0.5 Гц.
-class signal_column : public device
+class signal_column : public digital_io_device
     {
     public:
         void direct_off();
+
+        void turn_off_red();
+        void turn_off_yellow();
+        void turn_off_green();
 
         void turn_on_red();
         void turn_on_yellow();
@@ -3941,21 +3945,44 @@ class signal_column : public device
             S_SIREN_ON,
             S_SIREN_OFF,
             };
-    };
 
     private:
-        int green;
-        int red;
-        int yellow;
-
-        int siren;
-
         ///Тип мигания (0 - реализуем сами, >0 - встроенный в сирену).
         int is_builtin_red_blink;
 
-        int step = 0;
-        unsigned long start_blink_time = 0;
-        unsigned long start_wait_time = 0;
+        enum class DO_CONSTANTS
+            {
+            INDEX_RED = 0,
+            INDEX_YELLOW,
+            INDEX_GREEN,
+            INDEX_SIREN,
+            };
+
+        enum class CONSTANTS
+            {
+            SLOW_BLINK_TIME = 1000 / 2 / 2,
+            NORMAL_BLINK_TIME = (int) (1000 / 0.5f / 2),
+            };
+
+        enum class STEP
+            {
+            init = -1,
+            on,
+            off,
+            };
+
+        struct state_info
+            {
+            STEP step;
+            unsigned long start_blink_time;
+            unsigned long start_wait_time;
+            };
+
+        state_info green;
+        state_info yellow;
+        state_info red;
+
+        void blink( int lamp_DO, state_info& info, int delay_time );
     };
 //-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.
