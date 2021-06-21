@@ -24,6 +24,7 @@ on:
 
 jobs:
   analyze:
+    if: github.repository == 'savushkin-r-d/ptusa_main'
     name: Analyze
     runs-on: ubuntu-latest
     permissions:
