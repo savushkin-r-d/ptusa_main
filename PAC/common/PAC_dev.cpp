@@ -2567,7 +2567,7 @@ void valve_iolink_mix_proof::set_rt_par( u_int idx, float value )
     switch ( idx )
         {
         case 1:
-            extra_offset = (u_int)value;
+            extra_offset = (int)value;
             break;
 
         default:
@@ -2967,7 +2967,7 @@ void valve_iolink_shut_off_thinktop::set_rt_par( u_int idx, float value )
     switch ( idx )
         {
         case 1:
-            extra_offset = (u_int)value;
+            extra_offset = (int)value;
             break;
 
         default:
