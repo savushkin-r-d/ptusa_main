@@ -423,6 +423,9 @@ class operation_state
         /// @brief Переход к следующему шагу.
         void to_next_step();
 
+        /// @brief Отключить текущий активный шаг.
+        void turn_off_active_step();
+
         u_long evaluation_time();
 
         u_long active_step_evaluation_time() const;
@@ -554,6 +557,9 @@ class operation
         /// функцию to_step, передавая в качестве параметра номер текущего шага,
         /// увеличенного на единицу.
         void to_next_step();
+
+        /// @brief Отключение текущего активного шага.
+        void turn_off_active_step();
 #ifndef __GNUC__
 #pragma endregion
 #endif

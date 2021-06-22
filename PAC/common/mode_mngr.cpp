@@ -289,6 +289,14 @@ void operation::to_next_step()
         }
     }
 //-----------------------------------------------------------------------------
+void operation::turn_off_active_step()
+    {
+    if ( current_state >= 0 && current_state < STATES_MAX )
+        {
+        states[ current_state ]->turn_off_active_step();
+        }
+    }
+//-----------------------------------------------------------------------------
 step* operation::add_step( const char* name, int next_step_n,
                           unsigned int step_duration_par_n, state_idx s_idx /*= RUN */)
     {
@@ -1448,9 +1456,7 @@ void operation_state::final()
                 SetColor( RESET );
                 }
             }
-
         }
-
     active_steps.clear();
     }
 //-----------------------------------------------------------------------------
@@ -1529,6 +1535,20 @@ void operation_state::to_next_step()
         to_step( next_step );
         }
      }
+//-----------------------------------------------------------------------------
+void operation_state::turn_off_active_step()
+    {
+    if ( active_step_n >= 0 )
+        {
+        steps[ active_step_n ]->final();
+        if ( G_DEBUG )
+            {
+            printf( "%sFINAL ACTIVE STEP №%d\n",
+                owner->owner->get_prefix(), active_step_n + 1 );
+            }
+        active_step_n = -1;
+        }
+    }
 //-----------------------------------------------------------------------------
 void operation_state::print( const char* prefix /*= "" */ ) const
     {
