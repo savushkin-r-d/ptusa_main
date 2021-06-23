@@ -482,7 +482,7 @@ void signal_column::normal_blink_yellow()
 //-----------------------------------------------------------------------------
 void signal_column::normal_blink_green()
     {
-    blink( (u_int)DO_CONSTANTS::INDEX_GREEN, yellow,
+    blink( (u_int)DO_CONSTANTS::INDEX_GREEN, green,
         (u_long)CONSTANTS::NORMAL_BLINK_TIME );
     }
 //-----------------------------------------------------------------------------
