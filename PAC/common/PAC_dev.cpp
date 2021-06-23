@@ -425,7 +425,7 @@ void signal_column::direct_off()
     turn_off_yellow();
     turn_off_green();
 
-    set_DO( (u_int)DO_CONSTANTS::INDEX_SIREN, 0 );
+    turn_off_siren();
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_red()
