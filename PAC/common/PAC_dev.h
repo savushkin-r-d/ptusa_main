@@ -3946,6 +3946,8 @@ class signal_column : public digital_io_device
             S_SIREN_OFF,
             };
 
+        void set_rt_par( u_int idx, float value );
+
     private:
         ///Тип мигания (0 - реализуем сами, >0 - встроенный в сирену).
         int is_builtin_red_blink;

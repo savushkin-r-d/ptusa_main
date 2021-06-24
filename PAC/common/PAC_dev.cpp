@@ -521,6 +521,20 @@ void signal_column::turn_off_siren()
     set_DO( (u_int)DO_CONSTANTS::INDEX_SIREN, 0 );
     }
 //-----------------------------------------------------------------------------
+void signal_column::set_rt_par( u_int idx, float value )
+    {
+    switch ( idx )
+        {
+        case 1:
+            is_builtin_red_blink = (u_int)value;
+            break;
+
+        default:
+            digital_io_device::set_rt_par( idx, value );
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
 void signal_column::blink( int lamp_DO, state_info& info, int delay_time )
     {
     switch ( info.step )
