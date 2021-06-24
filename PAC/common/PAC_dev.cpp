@@ -419,6 +419,12 @@ void DO1::direct_off()
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+signal_column::signal_column( const char* dev_name ):
+    digital_io_device( dev_name, DT_HLA, DST_HLA, 0 ),
+    is_const_red( 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
 void signal_column::direct_off()
     {
     turn_off_red();
@@ -463,14 +469,14 @@ void signal_column::turn_on_green()
 //-----------------------------------------------------------------------------
 void signal_column::normal_blink_red()
     {
-    if ( is_builtin_red_blink )
-        {
-        set_DO( (u_int)DO_CONSTANTS::INDEX_RED, 1 );
-        }
-    else
+    if ( is_const_red )
         {
         blink( (u_int)DO_CONSTANTS::INDEX_RED, red,
             (u_long)CONSTANTS::NORMAL_BLINK_TIME );
+        }
+    else
+        {
+        set_DO( (u_int)DO_CONSTANTS::INDEX_RED, 1 );
         }
     }
 //-----------------------------------------------------------------------------
@@ -488,14 +494,14 @@ void signal_column::normal_blink_green()
 //-----------------------------------------------------------------------------
 void signal_column::slow_blink_red()
     {
-    if ( is_builtin_red_blink )
-        {
-        set_DO( (u_int)DO_CONSTANTS::INDEX_RED, 1 );
-        }
-    else
+    if ( is_const_red )
         {
         blink( (u_int)DO_CONSTANTS::INDEX_RED, red,
             (u_long)CONSTANTS::SLOW_BLINK_TIME );
+        }
+    else
+        {
+        set_DO( (u_int)DO_CONSTANTS::INDEX_RED, 1 );
         }
     }
 //-----------------------------------------------------------------------------
@@ -526,7 +532,7 @@ void signal_column::set_rt_par( u_int idx, float value )
     switch ( idx )
         {
         case 1:
-            is_builtin_red_blink = (u_int)value;
+            is_const_red = (u_int)value;
             break;
 
         default:
@@ -535,7 +541,7 @@ void signal_column::set_rt_par( u_int idx, float value )
         }
     }
 //-----------------------------------------------------------------------------
-void signal_column::blink( int lamp_DO, state_info& info, int delay_time )
+void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
     {
     switch ( info.step )
         {
@@ -814,6 +820,11 @@ circuit_breaker* device_manager::get_F(const char* dev_name)
 PID* device_manager::get_C( const char* dev_name )
     {
     return (PID*)get_device( device::DT_REGULATOR, dev_name );
+    }
+//-----------------------------------------------------------------------------
+signal_column* device_manager::get_HLA( const char* dev_name )
+    {
+    return (signal_column*)get_device( device::DT_HLA, dev_name );
     }
 //-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
@@ -1292,6 +1303,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
 
         case device::DT_REGULATOR:
             new_device = new PID( dev_name );
+            new_io_device = 0;
+            break;
+
+        case device::DT_HLA:
+            new_device = new signal_column( dev_name );
             new_io_device = 0;
             break;
 
@@ -5360,7 +5376,11 @@ PID* C( const char* dev_name )
     {
     return G_DEVICE_MANAGER()->get_C( dev_name );
     }
-
+//-----------------------------------------------------------------------------
+signal_column* HLA( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_HLA( dev_name );
+    }
 //-----------------------------------------------------------------------------
 dev_stub* STUB()
     {

@@ -404,6 +404,7 @@ class device : public i_DO_AO_device, public par_device
             DT_PT,      ///< Давление (значение).
             DT_F,       ///< Автоматический выключатель.
             DT_REGULATOR, ///< ПИД-регулятор.
+            DT_HLA,      ///< Сигнальная колонна.
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
@@ -518,6 +519,9 @@ class device : public i_DO_AO_device, public par_device
 
             //F
             DST_F = 1,       ///< Автоматический выключатель.
+
+            //HLA
+            DST_HLA = 1,     ///< Сигнальная колонна (Красный, Желтый, Зеленый и Сирена)
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -3905,6 +3909,8 @@ class counter_f_ok : public counter_f
 class signal_column : public digital_io_device
     {
     public:
+        signal_column( const char* dev_name );
+
         void direct_off();
 
         void turn_off_red();
@@ -3949,8 +3955,8 @@ class signal_column : public digital_io_device
         void set_rt_par( u_int idx, float value );
 
     private:
-        ///Тип мигания (0 - реализуем сами, >0 - встроенный в сирену).
-        int is_builtin_red_blink;
+        ///Тип мигания (>0 - реализуем сами, 0 - встроенный в сирену).
+        int is_const_red;
 
         enum class DO_CONSTANTS
             {
@@ -3978,13 +3984,20 @@ class signal_column : public digital_io_device
             STEP step;
             unsigned long start_blink_time;
             unsigned long start_wait_time;
+
+            state_info()
+                {
+                step = STEP::init;
+                start_blink_time = 0;
+                start_wait_time = 0;
+                }
             };
 
         state_info green;
         state_info yellow;
         state_info red;
 
-        void blink( int lamp_DO, state_info& info, int delay_time );
+        void blink( int lamp_DO, state_info& info, u_int delay_time );
     };
 //-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.
@@ -4074,6 +4087,9 @@ class device_manager: public i_Lua_save_device
 
         /// @brief Получение регулятора по имени.
         PID* get_C( const char* dev_name );
+
+        /// @brief Получение сигнальной колонны по имени.
+        signal_column* get_HLA( const char* dev_name );
 
         /// @brief Получение автоматического выключателя по имени.
         circuit_breaker* get_F(const char* dev_name);
@@ -4431,6 +4447,13 @@ i_AO_device* F(const char* dev_name);
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
 PID* C( const char* dev_name );
+//-----------------------------------------------------------------------------
+/// @brief Получение сигнальной колонны по имени.
+///
+/// @param dev_name - имя.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+signal_column* HLA( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///
