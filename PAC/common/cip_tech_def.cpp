@@ -129,7 +129,7 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     use_internal_medium_recipes = false;
     bachok_lvl_err_delay = get_millisec();
     steam_valve_delay = get_millisec();
-    loadedRecName = new char[TRecipeManager::recipeNameLength];
+    loadedRecName = new char[TRecipeManager::recipeNameLength * UNICODE_MULTIPLIER];
     programList = new char[PROGRAM_LIST_MAX_LEN * UNICODE_MULTIPLIER];
     strcpy(programList, "");
     currentProgramName = new char[PROGRAM_MAX_LEN * UNICODE_MULTIPLIER];
