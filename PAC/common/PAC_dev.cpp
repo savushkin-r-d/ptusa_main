@@ -420,7 +420,7 @@ void DO1::direct_off()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 signal_column::signal_column( const char* dev_name ):
-    digital_io_device( dev_name, DT_HLA, DST_HLA, 0 ),
+    device( dev_name, DT_HLA, DST_HLA, 0 ),
     is_const_red( 0 )
     {
     }
@@ -434,37 +434,60 @@ void signal_column::direct_off()
     turn_off_siren();
     }
 //-----------------------------------------------------------------------------
+void signal_column::direct_on()
+    {
+    turn_off_red();
+    turn_off_yellow();
+    turn_off_green();
+
+    turn_off_siren();
+
+    turn_on_green();
+    }
+//-----------------------------------------------------------------------------
 void signal_column::turn_off_red()
     {
+#ifndef DEBUG_NO_IO_MODULES
     set_DO( (u_int)DO_CONSTANTS::INDEX_RED, 0 );
+#endif
     red.step = STEP::init;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_yellow()
     {
+#ifndef DEBUG_NO_IO_MODULES
     set_DO( (u_int)DO_CONSTANTS::INDEX_YELLOW, 0 );
+#endif
     yellow.step = STEP::init;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_green()
     {
+#ifndef DEBUG_NO_IO_MODULES
     set_DO( (u_int)DO_CONSTANTS::INDEX_GREEN, 0 );
+#endif
     green.step = STEP::init;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_red()
     {
+#ifndef DEBUG_NO_IO_MODULES
     set_DO( (u_int)DO_CONSTANTS::INDEX_RED, 1 );
+#endif
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_yellow()
     {
+#ifndef DEBUG_NO_IO_MODULES
     set_DO( (u_int)DO_CONSTANTS::INDEX_YELLOW, 1 );
+#endif
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_green()
     {
+#ifndef DEBUG_NO_IO_MODULES
     set_DO( (u_int)DO_CONSTANTS::INDEX_GREEN, 1 );
+#endif
     }
 //-----------------------------------------------------------------------------
 void signal_column::normal_blink_red()
@@ -476,7 +499,9 @@ void signal_column::normal_blink_red()
         }
     else
         {
+#ifndef DEBUG_NO_IO_MODULES
         set_DO( (u_int)DO_CONSTANTS::INDEX_RED, 1 );
+#endif
         }
     }
 //-----------------------------------------------------------------------------
@@ -501,7 +526,9 @@ void signal_column::slow_blink_red()
         }
     else
         {
+#ifndef DEBUG_NO_IO_MODULES
         set_DO( (u_int)DO_CONSTANTS::INDEX_RED, 1 );
+#endif
         }
     }
 //-----------------------------------------------------------------------------
@@ -519,12 +546,16 @@ void signal_column::slow_blink_green()
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_siren()
     {
+#ifndef DEBUG_NO_IO_MODULES
     set_DO( (u_int)DO_CONSTANTS::INDEX_SIREN, 1 );
+#endif
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_siren()
     {
+#ifndef DEBUG_NO_IO_MODULES
     set_DO( (u_int)DO_CONSTANTS::INDEX_SIREN, 0 );
+#endif
     }
 //-----------------------------------------------------------------------------
 void signal_column::set_rt_par( u_int idx, float value )
@@ -536,7 +567,7 @@ void signal_column::set_rt_par( u_int idx, float value )
             break;
 
         default:
-            digital_io_device::set_rt_par( idx, value );
+            set_rt_par( idx, value );
             break;
         }
     }
@@ -551,7 +582,9 @@ void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
             break;
 
         case STEP::on:
+#ifndef DEBUG_NO_IO_MODULES
             set_DO( lamp_DO, 1 );
+#endif
             if ( get_delta_millisec( info.start_blink_time ) > delay_time )
                 {
                 info.start_wait_time = get_millisec();
@@ -560,7 +593,9 @@ void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
             break;
 
         case STEP::off:
+#ifndef DEBUG_NO_IO_MODULES
             set_DO( lamp_DO, 0 );
+#endif
             if ( get_delta_millisec( info.start_wait_time ) > delay_time )
                 {
                 info.start_blink_time = get_millisec();

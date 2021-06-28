@@ -3906,12 +3906,10 @@ class counter_f_ok : public counter_f
 ///     тревог, пропадания аварий.
 ///     3. Мигающий желтый свет – неподтвержденное сообщение. Частота мигания
 ///     0.5 Гц.
-class signal_column : public digital_io_device
+class signal_column : public device
     {
     public:
         signal_column( const char* dev_name );
-
-        void direct_off();
 
         void turn_off_red();
         void turn_off_yellow();
@@ -3932,27 +3930,57 @@ class signal_column : public digital_io_device
         void turn_on_siren();
         void turn_off_siren();
 
-        enum LIGHT_STATES
+        enum CMD
             {
-            S_LIGHT_OFF,
+            LIGHT_OFF,
 
-            S_GREEN_ON,
-            S_YELLOW_ON,
-            S_RED_ON,
+            GREEN_ON,
+            YELLOW_ON,
+            RED_ON,
 
-            S_GREEN_NORMAL_BLINK,
-            S_YELLOW_NORMAL_BLINK,
-            S_RED_NORMAL_BLINK,
+            GREEN_NORMAL_BLINK,
+            YELLOW_NORMAL_BLINK,
+            RED_NORMAL_BLINK,
 
-            S_GREEN_SLOW_BLINK,
-            S_YELLOW_SLOW_BLINK,
-            S_RED_SLOW_BLINK,
+            GREEN_SLOW_BLINK,
+            YELLOW_SLOW_BLINK,
+            RED_SLOW_BLINK,
 
-            S_SIREN_ON,
-            S_SIREN_OFF,
+            SIREN_ON,
+            SIREN_OFF,
             };
 
         void set_rt_par( u_int idx, float value );
+
+        void direct_set_state( int new_state )
+            {
+            switch ( (CMD) new_state )
+                {
+                case CMD::GREEN_NORMAL_BLINK:
+                    normal_blink_green();
+                    break;
+
+                default:
+                    break;
+                }
+            }
+
+        void direct_off();
+        void direct_on();
+
+        void direct_set_value( float new_value )
+            {
+            }
+
+        int get_state()
+            {
+            return state;
+            }
+
+        float get_value()
+            {
+            return .0f;
+            }
 
     private:
         ///Тип мигания (>0 - реализуем сами, 0 - встроенный в сирену).
@@ -3998,6 +4026,8 @@ class signal_column : public digital_io_device
         state_info red;
 
         void blink( int lamp_DO, state_info& info, u_int delay_time );
+
+        unsigned int state;
     };
 //-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.

@@ -294,6 +294,32 @@ class i_motor : public device
         void reverse();
     };
 //-----------------------------------------------------------------------------
+class signal_column
+    {
+    public:
+        void set_state( int new_state );
+
+        enum CMD
+            {
+            LIGHT_OFF,
+
+            GREEN_ON,
+            YELLOW_ON,
+            RED_ON,
+
+            GREEN_NORMAL_BLINK,
+            YELLOW_NORMAL_BLINK,
+            RED_NORMAL_BLINK,
+
+            GREEN_SLOW_BLINK,
+            YELLOW_SLOW_BLINK,
+            RED_SLOW_BLINK,
+
+            SIREN_ON,
+            SIREN_OFF,
+            };
+    };
+//-----------------------------------------------------------------------------
 /// @brief Получение клапана по имени.
 ///
 /// @param dev_name - имя клапана.
