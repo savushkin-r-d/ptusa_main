@@ -3930,13 +3930,21 @@ class signal_column : public device
         void turn_on_siren();
         void turn_off_siren();
 
-        enum CMD
+        enum STATE
             {
-            LIGHT_OFF,
+            TURN_OFF,
+
+            TURN_ON,
+
+            LIGHTS_OFF,
 
             GREEN_ON,
             YELLOW_ON,
             RED_ON,
+
+            GREEN_OFF,
+            YELLOW_OFF,
+            RED_OFF,
 
             GREEN_NORMAL_BLINK,
             YELLOW_NORMAL_BLINK,
@@ -3952,35 +3960,15 @@ class signal_column : public device
 
         void set_rt_par( u_int idx, float value );
 
-        void direct_set_state( int new_state )
-            {
-            switch ( (CMD) new_state )
-                {
-                case CMD::GREEN_NORMAL_BLINK:
-                    normal_blink_green();
-                    break;
-
-                default:
-                    break;
-                }
-            }
-
+        void direct_set_state( int new_state );
         void direct_off();
         void direct_on();
 
-        void direct_set_value( float new_value )
-            {
-            }
+        void direct_set_value( float new_value );
+        int get_state();
+        float get_value();
 
-        int get_state()
-            {
-            return state;
-            }
-
-        float get_value()
-            {
-            return .0f;
-            }
+        int save_device_ex( char* buff );
 
     private:
         ///Тип мигания (>0 - реализуем сами, 0 - встроенный в сирену).
@@ -4002,9 +3990,10 @@ class signal_column : public device
 
         enum class STEP
             {
-            init = -1,
+            off = 0,
             on,
-            off,
+            blink_off,
+            blink_on,
             };
 
         struct state_info
@@ -4013,12 +4002,7 @@ class signal_column : public device
             unsigned long start_blink_time;
             unsigned long start_wait_time;
 
-            state_info()
-                {
-                step = STEP::init;
-                start_blink_time = 0;
-                start_wait_time = 0;
-                }
+            state_info();
             };
 
         state_info green;
@@ -4027,7 +4011,7 @@ class signal_column : public device
 
         void blink( int lamp_DO, state_info& info, u_int delay_time );
 
-        unsigned int state;
+        STEP siren_step;
     };
 //-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.

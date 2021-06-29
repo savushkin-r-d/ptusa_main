@@ -294,18 +294,24 @@ class i_motor : public device
         void reverse();
     };
 //-----------------------------------------------------------------------------
-class signal_column
+class signal_column : public device
     {
     public:
-        void set_state( int new_state );
-
-        enum CMD
+        enum STATE
             {
-            LIGHT_OFF,
+            TURN_OFF,
+
+            TURN_ON,
+
+            LIGHTS_OFF,
 
             GREEN_ON,
             YELLOW_ON,
             RED_ON,
+
+            GREEN_OFF,
+            YELLOW_OFF,
+            RED_OFF,
 
             GREEN_NORMAL_BLINK,
             YELLOW_NORMAL_BLINK,
