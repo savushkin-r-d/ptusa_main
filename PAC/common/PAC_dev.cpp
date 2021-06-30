@@ -2854,6 +2854,10 @@ valve::VALVE_STATE valve_iolink_mix_proof::get_valve_state()
 void valve_iolink_mix_proof::evaluate_io()
     {
     out_info = ( out_data_swapped* ) get_AO_write_data( 0 );
+    if ( extra_offset < 0 )
+        {
+        out_info = (out_data_swapped*)( (char*)out_info + extra_offset );
+        }
 
     char* data = (char*)get_AI_data( 0 );
     char* buff = (char*)in_info;
@@ -2877,6 +2881,20 @@ void valve_iolink_mix_proof::evaluate_io()
         in_info->lsp, 0.1 * in_info->pos );
     G_LOG->write_log( i_log::P_NOTICE );
 #endif
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_mix_proof::set_rt_par( u_int idx, float value )
+    {
+    switch ( idx )
+        {
+        case 1:
+            extra_offset = (int)value;
+            break;
+
+        default:
+            valve::set_rt_par( idx, value );
+            break;
+        }
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_mix_proof::save_device_ex( char *buff )
@@ -3236,6 +3254,10 @@ valve::VALVE_STATE valve_iolink_shut_off_thinktop::get_valve_state()
 void valve_iolink_shut_off_thinktop::evaluate_io()
     {
     out_info = (out_data_swapped*)get_AO_write_data( 0 );
+    if ( extra_offset < 0 )
+        {
+        out_info = (out_data_swapped*)( (char*)out_info + extra_offset );
+        }
 
     char* data = (char*)get_AI_data( 0 );
     char* buff = (char*)in_info;
@@ -3259,6 +3281,20 @@ void valve_iolink_shut_off_thinktop::evaluate_io()
         in_info->lsp, 0.1 * in_info->pos );
     G_LOG->write_log( i_log::P_NOTICE );
 #endif
+    }
+//-----------------------------------------------------------------------------
+void valve_iolink_shut_off_thinktop::set_rt_par( u_int idx, float value )
+    {
+    switch ( idx )
+        {
+        case 1:
+            extra_offset = (int)value;
+            break;
+
+        default:
+            valve::set_rt_par( idx, value );
+            break;
+        }
     }
 //-----------------------------------------------------------------------------
 int valve_iolink_shut_off_thinktop::save_device_ex( char* buff )
