@@ -3984,8 +3984,8 @@ class signal_column : public device
 
         enum class CONSTANTS
             {
-            SLOW_BLINK_TIME = 1000 / 2 / 2,
-            NORMAL_BLINK_TIME = (int) (1000 / 0.5f / 2),
+            SLOW_BLINK_TIME = 1000 / 2 / 2,                     //2 Гц
+            NORMAL_BLINK_TIME = (int) (1000 / 0.5f / 2),        //0.5 Гц
             };
 
         enum class STEP
