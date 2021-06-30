@@ -285,6 +285,11 @@ class i_AI_device: public i_cmd_device
         ///
         /// @return - текущее состояние устройства в виде дробного числа.
         virtual float get_value() = 0;
+
+        /// @brief Получение состояния устройства.
+        ///
+        /// @return состояние устройства в виде целого числа.
+        virtual int get_state() = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Устройство на основе аналогового выхода.
@@ -324,6 +329,11 @@ class i_DO_AO_device: public i_AO_device, public i_DO_device
         /// Установка устройства в пассивное состояние. Для клапана это означает
         /// его деактивирование, то есть если он нормально закрытый - закрытие.
         virtual void off() = 0;
+
+        /// @brief Получение состояния устройства.
+        ///
+        /// @return состояние устройства в виде целого числа.
+        virtual int get_state() = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Класс универсального простого устройства, который используется в
@@ -2206,6 +2216,8 @@ class valve_iolink_mix_proof : public i_mix_proof,  public valve
 
         void evaluate_io();
 
+        void set_rt_par( u_int idx, float value );
+
 #ifndef DEBUG_NO_IO_MODULES
         int get_state();
 
@@ -2254,6 +2266,9 @@ class valve_iolink_mix_proof : public i_mix_proof,  public valve
         out_data_swapped* out_info;
 
         bool blink = false;     //Visual indication
+
+        //Дополнительное смещение, так как область AO занимает 1 байт.
+        int extra_offset = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной ALfaLaval.
@@ -2269,6 +2284,8 @@ class valve_iolink_shut_off_thinktop : public valve
         int save_device_ex( char* buff );
 
         void evaluate_io();
+
+        void set_rt_par( u_int idx, float value );
 
 #ifndef DEBUG_NO_IO_MODULES
         float get_value();
@@ -2316,6 +2333,9 @@ class valve_iolink_shut_off_thinktop : public valve
         out_data_swapped* out_info = 0;
 
         bool blink = false;     //Visual indication
+
+        //Дополнительное смещение, так как область AO занимает 1 байт.
+        int extra_offset = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной Definox.
