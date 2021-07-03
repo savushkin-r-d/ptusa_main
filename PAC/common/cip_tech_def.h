@@ -114,6 +114,7 @@
 
 #define CIRC_DEFAULT_FEED_COUNT 3
 #define CIRC_STOP_PUMP_HOTWATER 256L
+#define CIRC_STOP_PUMP_MEDIUM   128L
 #define CIRC_TANK_S 64L
 #define CIRC_TANK_K 32L
 #define CIRC_PODP_SCHC 4L
@@ -664,9 +665,11 @@ class cipline_tech_object: public tech_object
         char circ_podp_count; //текущее количество подпиток на операции
         char circ_podp_max_count;	//максимальное количество подпиток на операции
         char circ_water_no_pump_stop; //не останавливать насос при поялении верхнего уровня в бачке
+        char circ_medium_no_pump_stop; //не останавливать насос при поялении верхнего уровня в бачке на щелочи и кислоте
         char circ_was_feed; //флаг факта подпитки
         unsigned long circ_max_timer; //таймер подпитки
         char circ_temp_reached; //флаг достижения заданной температуры на возврате
+        unsigned long circ_return_timer;
 
         //Рецепты
         TRecipeManager* lineRecipes;

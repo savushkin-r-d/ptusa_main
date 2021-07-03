@@ -225,7 +225,9 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     circ_podp_count = 0;
     circ_podp_max_count = 0;
     circ_water_no_pump_stop = 0;
+    circ_medium_no_pump_stop = 0;
     circ_max_timer = get_millisec();
+    circ_return_timer = get_millisec();
 
     is_in_evaluate_func = 0;
     is_in_error_func = 0;
@@ -3084,6 +3086,7 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
     circ_podp_count = 0;
     circ_podp_max_count = 0;
     circ_water_no_pump_stop = 0;
+    circ_medium_no_pump_stop = 0;
     clean_water_rinsing_return = TANK_W;
     if (scenabled && scline == nmr)
         {
@@ -5332,6 +5335,11 @@ int cipline_tech_object::_Circ( int what )
         dont_stop_pump = 1;
         }
 
+    if ((curstep == 28 || curstep == 48) && circ_medium_no_pump_stop)
+        {
+        dont_stop_pump = 1;
+        }
+
     if (LH->is_active() && V10->get_state() && !dont_stop_pump)
         {
         SetRet(OFF);
@@ -5388,6 +5396,35 @@ int cipline_tech_object::_Circ( int what )
                     circ_was_feed = 0;
                     }
                 }
+            if (circ_medium_no_pump_stop)
+                {
+                if (LH->is_active())
+                    {
+                    if (get_delta_millisec(circ_return_timer) > 1000L)
+                        {
+                        V10->off();
+                        V11->off();
+                        V12->off();
+                        V07->off();
+                        V08->on();
+                        V09->off();
+                        circ_return_timer = get_millisec();
+                        }
+                    }
+                else
+                    {
+                    if (!LM->is_active())
+                        {
+                        V10->on();
+                        V11->off();
+                        V12->off();
+                        V07->off();
+                        V08->off();
+                        V09->off();
+                        }
+                    circ_return_timer = get_millisec();
+                    }
+                }
             break;
         case SHCH:
             rt_par_float[ STP_QAVS] = SAV[SAV_CONC]->Q();
@@ -5411,6 +5448,35 @@ int cipline_tech_object::_Circ( int what )
                         rt_par_float[STP_PODP_CAUSTIC] = rt_par_float[STP_PODP_CAUSTIC] + 1;
                         }
                     circ_was_feed = 0;
+                    }
+                }
+            if (circ_medium_no_pump_stop)
+                {
+                if (LH->is_active())
+                    {
+                    if (get_delta_millisec(circ_return_timer) > 1000L)
+                        {
+                        V10->off();
+                        V11->off();
+                        V12->off();
+                        V07->off();
+                        V08->off();
+                        V09->on();
+                        circ_return_timer = get_millisec();
+                        }
+                    }
+                else
+                    {
+                    if (!LM->is_active())
+                        {
+                        V10->on();
+                        V11->off();
+                        V12->off();
+                        V07->off();
+                        V08->off();
+                        V09->off();
+                        }
+                    circ_return_timer = get_millisec();
                     }
                 }
             break;
@@ -5607,6 +5673,7 @@ int cipline_tech_object::init_object_devices()
         circ_podp_max_count = CIRC_DEFAULT_FEED_COUNT;
         }
     circ_water_no_pump_stop = circflag & CIRC_STOP_PUMP_HOTWATER ? 1:0;
+    circ_medium_no_pump_stop = circflag & CIRC_STOP_PUMP_MEDIUM ? 1:0;
 
     if ((circ_tank_s && circ_podp_s) || (circ_tank_k && circ_podp_k))
         {
@@ -5614,9 +5681,9 @@ int cipline_tech_object::init_object_devices()
         }
     if ( G_DEBUG )
         {
-        printf("Circ options:FW=%d,FS=%d,FK=%d,CS=%d,CK=%d,SP=%d,count=%d\n\r",
+        printf("Circ options:FW=%d,FS=%d,FK=%d,CS=%d,CK=%d,SP=%d,SPM=%d,count=%d\n\r",
             circ_podp_water, circ_podp_s, circ_podp_k, circ_tank_s,
-            circ_tank_k, circ_water_no_pump_stop, circ_podp_max_count);
+            circ_tank_k, circ_water_no_pump_stop, circ_medium_no_pump_stop, circ_podp_max_count);
         }
 
     if ( G_DEBUG )
