@@ -87,6 +87,9 @@ if(LINUX)
     add_library(main_control ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp)
 
+    add_executable(main_test ${common_src} ${linux_src} ${test_src}
+           test/main_test.cpp)
+
 elseif(WIN32)
     add_executable(${PROJECT_NAME} ${common_src} ${win_src}
             PAC_control_projects/main_control_prg/main.cpp)
