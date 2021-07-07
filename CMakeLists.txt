@@ -24,6 +24,9 @@ endif()
 add_definitions(-DPAC_PC)
 add_definitions(-DDEBUG_NO_IO_MODULES)
 
+#### Definitions for run tests ####
+add_definitions(-DPTUSA_TEST)
+
 if(LINUX)
     add_definitions(-DLINUX_OS)
 elseif(WIN32)
@@ -45,6 +48,9 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tolua++ ${CMAKE_CURRENT_SOURCE_DIR}
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib EXCLUDE_FROM_ALL)
 
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/googletest ${CMAKE_CURRENT_SOURCE_DIR}/bin/googletest EXCLUDE_FROM_ALL)
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/subhook ${CMAKE_CURRENT_SOURCE_DIR}/bin/subhook EXCLUDE_FROM_ALL)
+
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
         common/util/*.c
@@ -56,6 +62,9 @@ file(GLOB common_src CONFIGURE_DEPENDS
         PAC/IoT/*.cpp)
 
 list(FILTER common_src EXCLUDE REGEX ".*OPCUA*|.*rfid*|snprintf\\.c")
+
+file(GLOB test_src CONFIGURE_DEPENDS
+    	test/*.cpp)
 
 if(LINUX)
     file(GLOB linux_src CONFIGURE_DEPENDS
@@ -77,6 +86,7 @@ if(LINUX)
 
     add_library(main_control ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp)
+
 elseif(WIN32)
     add_executable(${PROJECT_NAME} ${common_src} ${win_src}
             PAC_control_projects/main_control_prg/main.cpp)
@@ -84,9 +94,15 @@ elseif(WIN32)
     add_library(main_control ${common_src} ${win_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
             PAC_control_projects/main_control_prg/main_control_dll_vc/dllmain.cpp)
+
+    add_executable(main_test ${common_src} ${win_src} ${test_src}
+           test/main_test.cpp)
 endif()
 
 target_compile_definitions(main_control PUBLIC _USRDLL)
+
+target_compile_definitions(gmock PUBLIC GTEST_CREATE_SHARED_LIBRARY)
+target_compile_definitions(main_test PUBLIC GTEST_LINKED_AS_SHARED_LIBRARY)
 #######################################################################################
 
 ################# project include-paths ###############################################
@@ -120,6 +136,15 @@ endif ()
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GENERAL_INCLUDES})
 target_include_directories(main_control PUBLIC ${GENERAL_INCLUDES})
+
+set(TEST_INCLUDES
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/googletest/googletest/include>
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/bin/googletest/googletest>
+
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/googletest/googlemock/include>
+		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/bin/googlemock/googlemock>)
+
+target_include_directories(main_test PUBLIC ${GENERAL_INCLUDES} ${TEST_INCLUDES})
 #######################################################################################
 
 ################# set link options ####################################################
@@ -137,9 +162,12 @@ endif()
 target_link_libraries(${PROJECT_NAME} liblua_static toluapp_lib_static zlibstatic)
 target_link_libraries(main_control toluapp_lib_static zlibstatic)
 
+target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic gtest gtest_main gmock gmock_main subhook)
+
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
     target_link_libraries(main_control wsock32 ws2_32)
+    target_link_libraries(main_test wsock32 ws2_32)
 
     if(DEFINED ENV{LUA_DEV})
         target_link_libraries(main_control $ENV{LUA_DEV}/lib/lua51.lib)
@@ -157,5 +185,9 @@ install_library(main_control)
 
 enable_testing()
 add_test(run_no_command_line_arguments ${PROJECT_NAME})
+
+include(GoogleTest)
+gtest_discover_tests(main_test)
+
 #remove tests from add_subdirectory() added projects
 configure_file(${CMAKE_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_BINARY_DIR} @ONLY)
