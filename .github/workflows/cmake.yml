@@ -105,6 +105,12 @@ jobs:
         restore-keys: |
           ${{ matrix.config.name }}-ccache-
 
+    - name: Install yasm
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+            sudo apt-get install -y yasm
+        fi
+
     - name: Configure
       shell: cmake -P {0}
       run: |
