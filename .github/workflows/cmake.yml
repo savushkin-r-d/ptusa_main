@@ -106,9 +106,12 @@ jobs:
           ${{ matrix.config.name }}-ccache-
 
     - name: Install yasm
+      shell: bash
       run: |
         if [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt-get install -y yasm
+        elif [ "$RUNNER_OS" == "Windows" ]; then
+            choco install yasm
         fi
 
     - name: Configure
