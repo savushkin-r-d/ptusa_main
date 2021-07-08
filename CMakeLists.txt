@@ -48,6 +48,8 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tolua++ ${CMAKE_CURRENT_SOURCE_DIR}
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib EXCLUDE_FROM_ALL)
 
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/googletest ${CMAKE_CURRENT_SOURCE_DIR}/bin/googletest EXCLUDE_FROM_ALL)
+
+set(SUBHOOK_TESTS OFF)
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/subhook ${CMAKE_CURRENT_SOURCE_DIR}/bin/subhook EXCLUDE_FROM_ALL)
 
 file(GLOB common_src CONFIGURE_DEPENDS
