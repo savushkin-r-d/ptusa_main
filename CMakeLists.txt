@@ -18,10 +18,6 @@ project(ptusa)
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
-
-set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
 ################# create targets ######################################################
 
 add_definitions(-DPAC_PC)
@@ -109,6 +105,8 @@ target_compile_definitions(main_control PUBLIC _USRDLL)
 
 target_compile_definitions(gmock PUBLIC GTEST_CREATE_SHARED_LIBRARY)
 target_compile_definitions(main_test PUBLIC GTEST_LINKED_AS_SHARED_LIBRARY)
+
+set_target_properties (subhook gtest gtest_main gmock gmock_main PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 #######################################################################################
 
 ################# project include-paths ###############################################
