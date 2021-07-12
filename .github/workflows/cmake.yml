@@ -105,6 +105,15 @@ jobs:
         restore-keys: |
           ${{ matrix.config.name }}-ccache-
 
+    - name: Install yasm
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+            sudo apt-get install -y yasm
+        elif [ "$RUNNER_OS" == "Windows" ]; then
+            choco install yasm
+        fi
+
     - name: Configure
       shell: cmake -P {0}
       run: |
@@ -166,7 +175,7 @@ jobs:
         execute_process(COMMAND ccache -p)
         execute_process(COMMAND ccache -z)
         execute_process(
-          COMMAND cmake --build build --target ptusa --target main_control
+          COMMAND cmake --build build --target ptusa --target main_control --target main_test
           RESULT_VARIABLE result
           OUTPUT_VARIABLE output
           ERROR_VARIABLE output
