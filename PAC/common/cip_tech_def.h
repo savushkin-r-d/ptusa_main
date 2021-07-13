@@ -369,6 +369,8 @@ enum workParameters
     P_SIGNAL_WASH_ABORTED,              //Сигнал "мойка закончена некорректно"
     P_PRESSURE_CONTROL,                 //Задание давления для регулятора
     P_DONT_USE_WATER_TANK,              //Не использовать вторичную воду при мойке
+    P_PIDP_MAX_OUT,                     //Верхняя граница пересчета выхода ПИД-регулятора подогрева
+    P_PIDF_MAX_OUT,                     //Верхняя граница пересчета выхода ПИД-регулятора потока
     P_RESERV_START,                     //начало резервных параметров
 
 
@@ -429,7 +431,8 @@ class MSAPID
         int HI;
         int task_par_offset;
         int pid_par_offset;
-        MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_device* ao = 0, i_AI_device* ai = 0, i_counter* ai2 = 0 );
+        int out_max_recalc_offset;
+        MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_device* ao = 0, i_AI_device* ai = 0, i_counter* ai2 = 0, int outmaxrecalcpar = 0 );
         void eval();
         void eval(float input, float task);
         void reset();

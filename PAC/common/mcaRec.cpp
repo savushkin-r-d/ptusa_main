@@ -338,6 +338,17 @@ int TRecipeManager::ResetRecipeToDefaults( int recipeNo )
         setRecipeValue(recipeNo, RV_SIGNAL_CIPEND2, 0);
         setRecipeValue(recipeNo, RV_SIGNAL_CAN_CONTINUE, 0);
         setRecipeValue(recipeNo, RV_SIGNAL_WATER, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_PRERINSE, 0);
+        setRecipeValue(recipeNo, RV_SIGNAL_INTERMEDIATE_RINSE, 0); 
+        setRecipeValue(recipeNo, RV_SIGNAL_POSTRINSE, 0); 
+        setRecipeValue(recipeNo, RV_SIGNAL_PUMP_STOPPED, 0); 
+        setRecipeValue(recipeNo, RV_SIGNAL_FLOW_TASK, 0); 
+        setRecipeValue(recipeNo, RV_SIGNAL_TEMP_TASK, 0); 
+        setRecipeValue(recipeNo, RV_SIGNAL_WASH_ABORTED, 0); 
+        setRecipeValue(recipeNo, RV_PRESSURE_CONTROL, 0); 
+        setRecipeValue(recipeNo, RV_DONT_USE_WATER_TANK, 0); 
+        setRecipeValue(recipeNo, RV_PIDP_MAX_OUT, 0);
+        setRecipeValue(recipeNo, RV_PIDF_MAX_OUT, 0);
         for (int i = RV_RESERV_START; i <= RV_LASTVALVEOFF; i++)
             {
             setRecipeValue(recipeNo, i, 0);

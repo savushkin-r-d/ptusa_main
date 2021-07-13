@@ -955,8 +955,8 @@ void cipline_tech_object::initline()
             }
         }
 
-    PIDF = new MSAPID(&rt_par_float, 72, P_ZAD_FLOW, PUMPFREQ, 0, cnt );
-    PIDP = new MSAPID(&rt_par_float, 61, P_ZAD_PODOGR, ao, TP, 0);
+    PIDF = new MSAPID(&rt_par_float, PIDF_Z, P_ZAD_FLOW, PUMPFREQ, nullptr, cnt, P_PIDF_MAX_OUT);
+    PIDP = new MSAPID(&rt_par_float, PIDP_Z, P_ZAD_PODOGR, ao, TP, nullptr, P_PIDP_MAX_OUT);
 
     if ( G_DEBUG )
         {
@@ -7487,7 +7487,7 @@ saved_params<float, true>* cipline_tech_object::parpar = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-MSAPID::MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_device* ao /*= 0*/, i_AI_device* ai /*= 0*/,  i_counter* ai2 /*= 0 */ ):
+MSAPID::MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_device* ao /*= 0*/, i_AI_device* ai /*= 0*/,  i_counter* ai2 /*= 0 */, int outmaxrecalcpar /*= 0*/ ):
     uk_1( 0 ),
     ek_1( 0 ),
     ek_2( 0 ),
@@ -7502,7 +7502,8 @@ MSAPID::MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_devic
     is_down_to_inaccel_mode( 0 ),
     par( par ),
     state( STATE_OFF ),
-    start_value( 0 )
+    start_value( 0 ),
+    out_max_recalc_offset(outmaxrecalcpar)
     {
     input = ai;
     input2 = ai2;
@@ -7697,14 +7698,20 @@ float MSAPID::pid_eval( float current_value, int delta_sign /*= 1 */ )
         }
     //-Мягкий пуск.-!>
 
-    par[ 0 ][ pid_par_offset + P_U ] = Uk;
+    float pidRet = Uk;
+    if (par[ 0 ][ out_max_recalc_offset ] >= 0.1)
+        {
+        pidRet = pidRet * par[ 0 ][ out_max_recalc_offset ] / 100;
+        }
+
+    par[ 0 ][ pid_par_offset + P_U ] = pidRet;
 
     if ( 1 == par[ 0 ][ pid_par_offset + P_is_manual_mode ] )
         {
         return par[ 0 ][ pid_par_offset + P_U_manual ];
         }
 
-    return Uk;
+    return pidRet;
     }
 
 void MSAPID::acceleration( float accel_time )
