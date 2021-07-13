@@ -3362,6 +3362,7 @@ class analog_valve_iolink : public AO1
             FULL_OPENED = 100,
             };
 
+#ifndef DEBUG_NO_IO_MODULES
         void direct_on();
 
         void direct_off();
@@ -3373,6 +3374,7 @@ class analog_valve_iolink : public AO1
         int set_cmd( const char* prop, u_int idx, double val );
 
         int get_state();
+#endif
 
     private:
         struct in_data
