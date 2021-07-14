@@ -3338,6 +3338,7 @@ int analog_valve_iolink::save_device_ex( char* buff )
     res += sprintf( buff + res, "BLINK=%d, ", blink );
     return res;
     }
+#ifndef DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 void analog_valve_iolink::direct_on()
     {
@@ -3394,6 +3395,7 @@ inline int analog_valve_iolink::set_cmd( const char* prop, u_int idx, double val
 
     return 0;
     }
+#endif
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
