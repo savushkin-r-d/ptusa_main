@@ -660,9 +660,9 @@ wages* device_manager::get_WT( const char *dev_name )
     return (wages*)get_device( device::DT_WT, dev_name );
     }
 //-----------------------------------------------------------------------------
-circuit_breaker* device_manager::get_F(const char* dev_name)
+i_DO_AO_device* device_manager::get_F(const char* dev_name)
     {
-    return (circuit_breaker*)get_device(device::DT_F, dev_name);
+    return (i_DO_AO_device*)get_device(device::DT_F, dev_name);
     }
 //-----------------------------------------------------------------------------
 PID* device_manager::get_C( const char* dev_name )
@@ -781,6 +781,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     break;
                     }
 
+                case device::DST_V_VIRT:
+                    new_device = new virtual_valve( dev_name );
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -806,6 +810,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_io_device = (analog_valve_iolink*)new_device;
                     break;
 
+                case device::DST_VС_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_VC, device::DST_VС_VIRT );
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -824,6 +832,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         (device::DEVICE_SUB_TYPE) dev_sub_type);
                     new_io_device = (motor_altivar*)new_device;
                     break;
+
+                case device::DST_М_VIRT:
+                    new_device = new virtual_motor( dev_name );
+                    break;
+
                 default:
                     new_device = new motor(dev_name,
                         (device::DEVICE_SUB_TYPE) dev_sub_type);
@@ -876,6 +889,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_io_device = (temperature_e_iolink*)new_device;
                     break;
 
+                case device::DST_TE_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_TE, device::DST_TE_VIRT );
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -887,9 +904,17 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_FS:
-            new_device      = new flow_s( dev_name );
-            new_io_device = ( flow_s* ) new_device;
-            break;
+            switch ( dev_sub_type )
+                {
+                case device::DST_FS_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_FS, device::DST_FS_VIRT );
+                    break;
+
+                default:
+                    new_device = new flow_s( dev_name );
+                    new_io_device = (flow_s*)new_device;
+                    break;
+                }
 
         case device::DT_FQT:
             switch ( dev_sub_type )
@@ -1040,6 +1065,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_io_device = ( pressure_e_iolink* ) new_device;
                     break;
 
+                case device::DST_PT_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_PT, device::DST_PT_VIRT );
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -1069,6 +1098,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_io_device = (concentration_e_iolink*)new_device;
                     break;
 
+                case device::DST_QT_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_QT, device::DST_QT_VIRT );
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -1080,16 +1113,18 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_AI:
-            switch (dev_sub_type)
+            switch ( dev_sub_type )
                 {
                 case device::DST_NONE:
                 case device::DST_AI:
                     new_device      = new analog_input( dev_name );
                     new_io_device = ( analog_input* ) new_device;
                     break;
+
                 case device::DST_AI_VIRT:
                     new_device      = new virtual_device( dev_name, device::DT_AI, device::DST_AI_VIRT );
                     break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -1101,24 +1136,89 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_HA:
-            new_device      = new siren( dev_name );
-            new_io_device = ( siren* ) new_device;
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_HA:
+                    new_device = new siren( dev_name );
+                    new_io_device = (siren*)new_device;
+
+                case device::DST_F_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_HA, device::DST_HA_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown HA device subtype %d!\n", dev_sub_type );
+                        }
+                    new_device = new dev_stub();
+                    break;
+                }
             break;
 
         case device::DT_HL:
-            new_device      = new lamp( dev_name );
-            new_io_device = ( lamp* ) new_device;
-            break;
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_HL:
+                    new_device = new lamp( dev_name );
+                    new_io_device = (lamp*)new_device;
+
+                case device::DST_F_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_HL, device::DST_HL_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown HL device subtype %d!\n", dev_sub_type );
+                        }
+                    new_device = new dev_stub();
+                    break;
+                }
 
         case device::DT_SB:
-            new_device      = new button( dev_name );
-            new_io_device = ( button* ) new_device;
-            break;
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_SB:
+                    new_device = new button( dev_name );
+                    new_io_device = (button*)new_device;
+
+                case device::DST_F_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_SB, device::DST_SB_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown HA device subtype %d!\n", dev_sub_type );
+                        }
+                    new_device = new dev_stub();
+                    break;
+                }
 
         case device::DT_GS:
-            new_device      = new state_s( dev_name );
-            new_io_device = ( state_s* ) new_device;
-            break;
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_GS:
+                    new_device = new state_s( dev_name );
+                    new_io_device = (state_s*)new_device;
+
+                case device::DST_F_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_GS, device::DST_GS_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown HA device subtype %d!\n", dev_sub_type );
+                        }
+                    new_device = new dev_stub();
+                    break;
+                }
 
         case device::DT_WT:
             new_device      = new wages( dev_name );
@@ -1132,6 +1232,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_F:
                     new_device = new circuit_breaker(dev_name);
                     new_io_device = (circuit_breaker*)new_device;
+                    break;
+
+                case device::DST_F_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_F, device::DST_F_VIRT );
                     break;
 
                 default:
@@ -1341,6 +1445,50 @@ void i_AO_device::set_value( float new_value )
         {
         direct_set_value( new_value );
         }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void virtual_valve::direct_off()
+    {
+    state = 0;
+    value = 0;
+    }
+
+void virtual_valve::direct_set_value( float new_value )
+    {
+    value = new_value;
+    }
+
+float virtual_valve::get_value()
+    {
+    return value;
+    }
+
+void virtual_valve::direct_set_state( int new_state )
+    {
+    state = new_state;
+    }
+
+void virtual_valve::direct_on()
+    {
+    state = 1;
+    }
+
+int virtual_valve::get_state()
+    {
+    return state;
+    }
+
+virtual_valve::virtual_valve( const char* dev_name ) :
+    valve( dev_name, DT_V, DST_V_VIRT ),
+    value( 0 ),
+    state( 0 )
+    {
+    }
+
+valve::VALVE_STATE virtual_valve::get_valve_state()
+    {
+    return (valve::VALVE_STATE)state;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -3792,6 +3940,45 @@ void i_motor::reverse()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+void virtual_motor::direct_off()
+    {
+    state = 0;
+    value = 0;
+    }
+
+void virtual_motor::direct_set_value( float new_value )
+    {
+    value = new_value;
+    }
+
+float virtual_motor::get_value()
+    {
+    return value;
+    }
+
+void virtual_motor::direct_set_state( int new_state )
+    {
+    state = new_state;
+    }
+
+void virtual_motor::direct_on()
+    {
+    state = 1;
+    }
+
+int virtual_motor::get_state()
+    {
+    return state;
+    }
+
+virtual_motor::virtual_motor( const char* dev_name ):
+    i_motor( dev_name, device::DST_М_VIRT, 0 ),
+    value( 0 ),
+    state( 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 float motor::get_value()
     {
 #ifdef DEBUG_NO_IO_MODULES
@@ -5235,7 +5422,7 @@ wages* WT( const char *dev_name )
     return G_DEVICE_MANAGER()->get_WT( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_AO_device* F(u_int dev_n)
+i_DO_AO_device* F(u_int dev_n)
     {
     static char name[ device::C_MAX_NAME ] = "";
     snprintf(name, sizeof(name), "F%d", dev_n);
@@ -5243,7 +5430,7 @@ i_AO_device* F(u_int dev_n)
     return G_DEVICE_MANAGER()->get_F(name);
     }
 
-i_AO_device* F(const char* dev_name)
+i_DO_AO_device* F(const char* dev_name)
     {
     return G_DEVICE_MANAGER()->get_F(dev_name);
     }
