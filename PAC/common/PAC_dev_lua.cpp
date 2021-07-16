@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 06/29/21 16:16:26.
+** Generated automatically by tolua++-1.0.92 on 07/16/21 15:52:19.
 */
 
 #ifndef __cplusplus
@@ -1916,6 +1916,35 @@ static int tolua_PAC_dev_HL00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'HL'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* function: HLA */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_HLA00
+static int tolua_PAC_dev_HLA00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
+  {
+   i_DO_AO_device* tolua_ret = (i_DO_AO_device*)  HLA(dev_name);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DO_AO_device");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'HLA'.",&tolua_err);
  return 0;
 #endif
 }
@@ -13196,6 +13225,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_function(tolua_S,"GS",tolua_PAC_dev_GS00);
   tolua_function(tolua_S,"HA",tolua_PAC_dev_HA00);
   tolua_function(tolua_S,"HL",tolua_PAC_dev_HL00);
+  tolua_function(tolua_S,"HLA",tolua_PAC_dev_HLA00);
   tolua_function(tolua_S,"SB",tolua_PAC_dev_SB00);
   tolua_function(tolua_S,"DI",tolua_PAC_dev_DI00);
   tolua_function(tolua_S,"DO",tolua_PAC_dev_DO00);

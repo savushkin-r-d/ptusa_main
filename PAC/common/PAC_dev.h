@@ -4123,7 +4123,7 @@ class device_manager: public i_Lua_save_device
         PID* get_C( const char* dev_name );
 
         /// @brief Получение сигнальной колонны по имени.
-        signal_column* get_HLA( const char* dev_name );
+        i_DO_AO_device* get_HLA( const char* dev_name );
 
         /// @brief Получение автоматического выключателя по имени.
         circuit_breaker* get_F(const char* dev_name);
@@ -4487,7 +4487,7 @@ PID* C( const char* dev_name );
 /// @param dev_name - имя.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-signal_column* HLA( const char* dev_name );
+i_DO_AO_device* HLA( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///

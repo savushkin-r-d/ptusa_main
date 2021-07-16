@@ -981,9 +981,9 @@ PID* device_manager::get_C( const char* dev_name )
     return (PID*)get_device( device::DT_REGULATOR, dev_name );
     }
 //-----------------------------------------------------------------------------
-signal_column* device_manager::get_HLA( const char* dev_name )
+i_DO_AO_device* device_manager::get_HLA( const char* dev_name )
     {
-    return (signal_column*)get_device( device::DT_HLA, dev_name );
+    return (i_DO_AO_device*)get_device( device::DT_HLA, dev_name );
     }
 //-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
@@ -5572,7 +5572,7 @@ PID* C( const char* dev_name )
     return G_DEVICE_MANAGER()->get_C( dev_name );
     }
 //-----------------------------------------------------------------------------
-signal_column* HLA( const char* dev_name )
+i_DO_AO_device* HLA( const char* dev_name )
     {
     return G_DEVICE_MANAGER()->get_HLA( dev_name );
     }
