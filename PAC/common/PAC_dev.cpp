@@ -1242,9 +1242,25 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 }
 
         case device::DT_WT:
-            new_device      = new wages( dev_name );
-            new_io_device = ( wages* ) new_device;
-            break;
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_WT:
+                    new_device = new wages( dev_name );
+                    new_io_device = (wages*)new_device;
+
+                case device::DST_WT_VIRT:
+                    new_device = new virtual_wages( dev_name );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown WT device subtype %d!\n", dev_sub_type );
+                        }
+                    new_device = new dev_stub();
+                    break;
+                }
 
         case device::DT_F:
             switch (dev_sub_type)
@@ -1578,6 +1594,10 @@ void dev_stub::abs_reset()
 u_int dev_stub::get_abs_quantity()
     {
     return 0;
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::tare()
+    {
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -3742,6 +3762,49 @@ float temperature_e_iolink::get_value()
    return analog_io_device::get_value();
    }
 #endif
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void virtual_wages::direct_off()
+    {
+    state = 0;
+    value = 0;
+    }
+
+void virtual_wages::direct_set_value( float new_value )
+    {
+    value = new_value;
+    }
+
+float virtual_wages::get_value()
+    {
+    return value;
+    }
+
+void virtual_wages::direct_set_state( int new_state )
+    {
+    state = new_state;
+    }
+
+void virtual_wages::direct_on()
+    {
+    state = 1;
+    }
+
+int virtual_wages::get_state()
+    {
+    return state;
+    }
+
+void virtual_wages::tare()
+    {
+    }
+
+virtual_wages::virtual_wages( const char* dev_name ) :
+    device( dev_name, device::DT_WT, device::DST_WT_VIRT, 0 ),
+    value( 0 ), state( 0 )
+    {
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 wages::wages( const char *dev_name ) : analog_io_device(

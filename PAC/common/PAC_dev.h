@@ -1089,7 +1089,7 @@ class virtual_valve: public valve
 ///
 /// Необходимо для возвращения результата поиска устройства с несуществующим
 /// номером. Методы данного класса ничего не делают.
-class dev_stub : public i_counter, public valve
+class dev_stub : public i_counter, public valve, public i_wages
     {
     public:
         dev_stub() : valve( "STUB", DT_NONE, DST_NONE )
@@ -1120,6 +1120,8 @@ class dev_stub : public i_counter, public valve
 
         u_int get_abs_quantity();
         void  abs_reset();
+
+        void tare();
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним дискретным выходом и одним дискретным входом.
@@ -3166,6 +3168,32 @@ class analog_input : public AI1
             };
 
         u_int start_param_idx;
+    };
+//-----------------------------------------------------------------------------
+class virtual_wages : public device, public i_wages
+    {
+    public:
+        virtual_wages( const char* dev_name );
+
+    protected:
+        float value;
+        int state;
+
+    public:
+
+        virtual void direct_off();
+
+        virtual void direct_set_value( float new_value );
+
+        virtual float get_value();
+
+        virtual void direct_set_state( int new_state );
+
+        virtual void direct_on();
+
+        virtual int get_state();
+
+        virtual void tare();
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик веса
