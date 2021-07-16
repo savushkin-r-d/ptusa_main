@@ -451,7 +451,7 @@ class device : public i_DO_AO_device, public par_device
             DST_VC = 1,         ///< Клапан с аналоговым управлением.
             DST_VC_IOLINK,      ///< Клапан IO-LInk.
 
-            DST_VС_VIRT,        ///< Виртуальный клапан.
+            DST_VC_VIRT,        ///< Виртуальный клапан.
 
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
@@ -490,7 +490,7 @@ class device : public i_DO_AO_device, public par_device
             /// Реверс и аварии опциональны.
             M_ATV,
 
-            DST_М_VIRT,        ///< Виртуальный мотор.
+            DST_M_VIRT,        ///< Виртуальный мотор.
 
             //FQT
             DST_FQT = 1,   ///< Счетчик.

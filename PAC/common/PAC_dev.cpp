@@ -790,7 +790,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown V device subtype %d!\n", dev_sub_type );
                         }
-                    new_device      = new dev_stub();
+                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -810,8 +810,8 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_io_device = (analog_valve_iolink*)new_device;
                     break;
 
-                case device::DST_VС_VIRT:
-                    new_device = new virtual_device( dev_name, device::DT_VC, device::DST_VС_VIRT );
+                case device::DST_VC_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_VC, device::DST_VC_VIRT );
                     break;
 
                 default:
@@ -825,22 +825,37 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_M:
-            switch (dev_sub_type)
+            switch ( dev_sub_type )
                 {
+                case device::DST_M:
+                case device::DST_M_FREQ:
+                case device::DST_M_REV:
+                case device::DST_M_REV_FREQ:
+                case device::DST_M_REV_2:
+                case device::DST_M_REV_FREQ_2:
+                case device::M_REV_2_ERROR:
+                case device::DST_M_REV_FREQ_2_ERROR:
+                    new_device = new motor( dev_name,
+                        (device::DEVICE_SUB_TYPE)dev_sub_type );
+                    new_io_device = (motor*)new_device;
+                    break;
+
                 case device::M_ATV:
-                    new_device = new motor_altivar(dev_name,
-                        (device::DEVICE_SUB_TYPE) dev_sub_type);
+                    new_device = new motor_altivar( dev_name,
+                        (device::DEVICE_SUB_TYPE)dev_sub_type );
                     new_io_device = (motor_altivar*)new_device;
                     break;
 
-                case device::DST_М_VIRT:
+                case device::DST_M_VIRT:
                     new_device = new virtual_motor( dev_name );
                     break;
 
                 default:
-                    new_device = new motor(dev_name,
-                        (device::DEVICE_SUB_TYPE) dev_sub_type);
-                    new_io_device = (motor*)new_device;
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown M device subtype %d!\n", dev_sub_type );
+                        }
+                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -950,16 +965,18 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_AO:
-            switch (dev_sub_type)
+            switch ( dev_sub_type )
                 {
                 case device::DST_NONE:
                 case device::DST_AO:
                     new_device      = new analog_output( dev_name );
                     new_io_device = ( analog_output* ) new_device;
                     break;
+
                 case device::DST_AO_VIRT:
                     new_device      = new virtual_device( dev_name, device::DT_AO, device::DST_AO_VIRT );
                     break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -1010,16 +1027,18 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_DI:
-            switch (dev_sub_type)
+            switch ( dev_sub_type )
                 {
                 case device::DST_NONE:
                 case device::DST_DI:
                     new_device      = new DI_signal( dev_name );
                     new_io_device = ( DI_signal* ) new_device;
                     break;
+
                 case device::DST_DI_VIRT:
                     new_device      = new virtual_device( dev_name, device::DT_DI, device::DST_DI_VIRT );
                     break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -1031,16 +1050,18 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_DO:
-            switch (dev_sub_type)
+            switch ( dev_sub_type )
                 {
                 case device::DST_NONE:
                 case device::DST_DO:
                     new_device      = new DO_signal( dev_name );
                     new_io_device = ( DO_signal* ) new_device;
                     break;
+
                 case device::DST_DO_VIRT:
                     new_device      = new virtual_device( dev_name, device::DT_DO, device::DST_DO_VIRT );
                     break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -1193,7 +1214,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 default:
                     if ( G_DEBUG )
                         {
-                        printf( "Unknown HA device subtype %d!\n", dev_sub_type );
+                        printf( "Unknown SB device subtype %d!\n", dev_sub_type );
                         }
                     new_device = new dev_stub();
                     break;
@@ -1214,7 +1235,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 default:
                     if ( G_DEBUG )
                         {
-                        printf( "Unknown HA device subtype %d!\n", dev_sub_type );
+                        printf( "Unknown GS device subtype %d!\n", dev_sub_type );
                         }
                     new_device = new dev_stub();
                     break;
@@ -3972,7 +3993,7 @@ int virtual_motor::get_state()
     }
 
 virtual_motor::virtual_motor( const char* dev_name ):
-    i_motor( dev_name, device::DST_М_VIRT, 0 ),
+    i_motor( dev_name, device::DST_M_VIRT, 0 ),
     value( 0 ),
     state( 0 )
     {
