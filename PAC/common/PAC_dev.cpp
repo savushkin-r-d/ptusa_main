@@ -421,6 +421,7 @@ void DO1::direct_off()
 //-----------------------------------------------------------------------------
 signal_column::signal_column( const char* dev_name ):
     device( dev_name, DT_HLA, DST_HLA, 0 ),
+    io_device( dev_name ),
     is_const_red( 0 ),
     siren_step( STEP::off )
     {

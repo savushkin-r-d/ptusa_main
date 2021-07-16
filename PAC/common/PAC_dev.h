@@ -3926,7 +3926,7 @@ class counter_f_ok : public counter_f
 ///     тревог, пропадания аварий.
 ///     3. Мигающий желтый свет – неподтвержденное сообщение. Частота мигания
 ///     0.5 Гц.
-class signal_column : public device
+class signal_column : public device, public io_device
     {
     public:
         signal_column( const char* dev_name );
