@@ -71,7 +71,7 @@ typedef unsigned int  UINT;
 
 #pragma pack( push, 8 ) //Выравнивание полей структур по 8 байт.
 
-/// @brief Глобальный идентификатор тревоги. 
+/// @brief Глобальный идентификатор тревоги.
 struct alarm_id
     {
     int object_type;
@@ -79,7 +79,7 @@ struct alarm_id
     int object_alarm_number;
     };
 //-----------------------------------------------------------------------------
-struct alarm_params 
+struct alarm_params
     {
     double  param1;
     double  param2;
@@ -126,21 +126,21 @@ struct alarm
     ALARM_STATE state;  ///< Состояние тревоги.
 
     bool suppress;      ///< Подавление тревоги клиентами.
-    alarm_id id;        ///< Глобальный идентификатор тревоги.    
+    alarm_id id;        ///< Глобальный идентификатор тревоги.
     UCHAR driver_id;    ///< id драйвера.
     };
 
 struct all_alarm
     {
     int     cnt;
-    alarm   *alarms; 
+    alarm   *alarms;
     int     id;
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 struct error_cmd
     {
-    int cmd; 
+    int cmd;
     int object_type;
     int object_number;
     int object_alarm_number;
@@ -151,8 +151,8 @@ enum ERR_CONSTANTS
     MAX_PROJECTS_CNT = 256,
     MAX_ALARMS_CNT   = 200,
 
-    MAX_DESCR_LEN    = 150,
-    MAX_GROUP_LEN    = 10,
+    MAX_DESCR_LEN    = 600,
+    MAX_GROUP_LEN    = 50,
     };
 
 int save_to_stream( alarm &a, char *buff );
@@ -335,7 +335,7 @@ class tech_obj_error: public base_error
         static bool is_any_message;
     };
 //-----------------------------------------------------------------------------
-/// @brief Содержит информацию об всех ошибках технологических устройств, 
+/// @brief Содержит информацию об всех ошибках технологических устройств,
 /// объектов.
 class errors_manager
     {
@@ -393,7 +393,7 @@ class errors_manager
     };
 
 //Совместимость с предыдущей версией драйвера EasyDrv. FIXME.
-#define dev_errors_manager errors_manager 
+#define dev_errors_manager errors_manager
 //-----------------------------------------------------------------------------
 #define G_ERRORS_MANAGER errors_manager::get_instance()
 //-----------------------------------------------------------------------------
@@ -463,7 +463,7 @@ class siren_lights_manager: public i_Lua_save_device
         device *srn;
 
         ///Тип мигания (0 - реализуем сами, 0< - встроенный в сирену).
-        int is_red_built_in_blink;	
+        int is_red_built_in_blink;
 
         unsigned int  critical_error_n; // Номер текущей критической ошибки.
         unsigned long st_time;
