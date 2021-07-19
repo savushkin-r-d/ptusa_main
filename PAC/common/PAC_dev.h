@@ -414,6 +414,7 @@ class device : public i_DO_AO_device, public par_device
             DT_PT,      ///< Давление (значение).
             DT_F,       ///< Автоматический выключатель.
             DT_REGULATOR, ///< ПИД-регулятор.
+            DT_HLA,      ///< Сигнальная колонна.
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
@@ -4030,6 +4031,126 @@ class counter_f_ok : public counter_f
             };
     };
 //-----------------------------------------------------------------------------
+/// @brief Сигнальная колонна.
+///
+/// Служит для уведомления оператора о событиях.
+/// Используется три лампочки – зеленая, желтая, красная и сирена:
+///     1. Зеленый цвет – есть активная операция (связанного аппарата или
+///     агрегата).
+///     2. Мигающий красный цвет – авария, тревога (неподавленная). Частота
+///     мигания 2 Гц. Дополнительно включается сирена, которую можно отключить
+///     проекта (клик по значку) либо она также отключится после подтверждения
+///     тревог, пропадания аварий.
+///     3. Мигающий желтый свет – неподтвержденное сообщение. Частота мигания
+///     0.5 Гц.
+class signal_column : public device, public io_device
+    {
+    public:
+        signal_column( const char* dev_name );
+
+        void turn_off_red();
+        void turn_off_yellow();
+        void turn_off_green();
+
+        void turn_on_red();
+        void turn_on_yellow();
+        void turn_on_green();
+
+        void normal_blink_red();
+        void normal_blink_yellow();
+        void normal_blink_green();
+
+        void slow_blink_red();
+        void slow_blink_yellow();
+        void slow_blink_green();
+
+        void turn_on_siren();
+        void turn_off_siren();
+
+        enum STATE
+            {
+            TURN_OFF,
+
+            TURN_ON,
+
+            LIGHTS_OFF,
+
+            GREEN_ON,
+            YELLOW_ON,
+            RED_ON,
+
+            GREEN_OFF,
+            YELLOW_OFF,
+            RED_OFF,
+
+            GREEN_NORMAL_BLINK,
+            YELLOW_NORMAL_BLINK,
+            RED_NORMAL_BLINK,
+
+            GREEN_SLOW_BLINK,
+            YELLOW_SLOW_BLINK,
+            RED_SLOW_BLINK,
+
+            SIREN_ON,
+            SIREN_OFF,
+            };
+
+        void set_rt_par( u_int idx, float value );
+
+        void direct_set_state( int new_state );
+        void direct_off();
+        void direct_on();
+
+        void direct_set_value( float new_value );
+        int get_state();
+        float get_value();
+
+        int save_device_ex( char* buff );
+
+    private:
+        ///Тип мигания (>0 - реализуем сами, 0 - встроенный в сирену).
+        int is_const_red;
+
+        enum class DO_CONSTANTS
+            {
+            INDEX_RED = 0,
+            INDEX_YELLOW,
+            INDEX_GREEN,
+            INDEX_SIREN,
+            };
+
+        enum class CONSTANTS
+            {
+            SLOW_BLINK_TIME = 1000 / 2 / 2,                     //2 Гц
+            NORMAL_BLINK_TIME = (int) (1000 / 0.5f / 2),        //0.5 Гц
+            };
+
+        enum class STEP
+            {
+            off = 0,
+            on,
+            blink_off,
+            blink_on,
+            };
+
+        struct state_info
+            {
+            STEP step;
+            unsigned long start_blink_time;
+            unsigned long start_wait_time;
+
+            state_info();
+            };
+
+        state_info green;
+        state_info yellow;
+        state_info red;
+
+        void blink( int lamp_DO, state_info& info, u_int delay_time );
+
+        STEP siren_step;
+    };
+//-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.
 ///
 /// Содержит информацию обо всех устройствах проекта.
@@ -4117,6 +4238,9 @@ class device_manager: public i_Lua_save_device
 
         /// @brief Получение регулятора по имени.
         PID* get_C( const char* dev_name );
+
+        /// @brief Получение сигнальной колонны по имени.
+        i_DO_AO_device* get_HLA( const char* dev_name );
 
         /// @brief Получение автоматического выключателя по имени.
         i_DO_AO_device* get_F(const char* dev_name);
@@ -4474,6 +4598,13 @@ i_DO_AO_device* F(const char* dev_name);
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
 PID* C( const char* dev_name );
+//-----------------------------------------------------------------------------
+/// @brief Получение сигнальной колонны по имени.
+///
+/// @param dev_name - имя.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+i_DO_AO_device* HLA( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///

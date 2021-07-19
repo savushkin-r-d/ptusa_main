@@ -299,6 +299,38 @@ class i_motor : public device
         void reverse();
     };
 //-----------------------------------------------------------------------------
+class signal_column : public device
+    {
+    public:
+        enum STATE
+            {
+            TURN_OFF,
+
+            TURN_ON,
+
+            LIGHTS_OFF,
+
+            GREEN_ON,
+            YELLOW_ON,
+            RED_ON,
+
+            GREEN_OFF,
+            YELLOW_OFF,
+            RED_OFF,
+
+            GREEN_NORMAL_BLINK,
+            YELLOW_NORMAL_BLINK,
+            RED_NORMAL_BLINK,
+
+            GREEN_SLOW_BLINK,
+            YELLOW_SLOW_BLINK,
+            RED_SLOW_BLINK,
+
+            SIREN_ON,
+            SIREN_OFF,
+            };
+    };
+//-----------------------------------------------------------------------------
 /// @brief Получение клапана по имени.
 ///
 /// @param dev_name - имя клапана.
@@ -391,6 +423,13 @@ i_DO_device* HA( const char *dev_name );
 /// @return - устройство с заданным именем. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
 i_DO_device* HL( const char *dev_name );
+//-----------------------------------------------------------------------------
+/// @brief Получение сигнальной колонны по имени.
+///
+/// @param dev_name - имя сигнальной колонны.
+/// @return - устройство с заданным именем. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+i_DO_AO_device* HLA( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение кнопки по имени.
 ///
