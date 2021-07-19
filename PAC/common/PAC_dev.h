@@ -445,9 +445,13 @@ class device : public i_DO_AO_device, public par_device
             V_IOLINK_DO1_DI2,         ///< Клапан с одним каналом управления и двумя обратными связями с IO-Link интерфейсом (отсечной).
             V_IOLINK_VTUG_DO1_DI2,    ///< IO-Link VTUG клапан с одним каналом управления и двумя обратными связями.
 
+            DST_V_VIRT,               ///< Виртуальный клапан.
+
             //VC
             DST_VC = 1,         ///< Клапан с аналоговым управлением.
             DST_VC_IOLINK,      ///< Клапан IO-LInk.
+
+            DST_VC_VIRT,        ///< Виртуальный клапан.
 
             //LS
             DST_LS_MIN = 1,     ///< Подключение по схеме минимум.
@@ -460,7 +464,9 @@ class device : public i_DO_AO_device, public par_device
 
             //TE
             DST_TE = 1,
-            DST_TE_IOLINK,      ///Температура IO-LInk без дополнительных параметров.
+            DST_TE_IOLINK,      ///< Температура IO-LInk без дополнительных параметров.
+
+            DST_TE_VIRT,        ///< Виртуальная температура.
 
             //M,
             DST_M = 1,          ///< Мотор без управления частотой вращения.
@@ -484,6 +490,7 @@ class device : public i_DO_AO_device, public par_device
             /// Реверс и аварии опциональны.
             M_ATV,
 
+            DST_M_VIRT,        ///< Виртуальный мотор.
 
             //FQT
             DST_FQT = 1,   ///< Счетчик.
@@ -495,6 +502,8 @@ class device : public i_DO_AO_device, public par_device
             DST_QT = 1,   ///< Концентратомер.
             DST_QT_OK,    ///< Концентратомер c диагностикой.
             DST_QT_IOLINK,///Концентратомер IOLInk без дополнительных параметров.
+
+            DST_QT_VIRT,  ///< Виртуальный концентратомер.
 
             //LT
             DST_LT = 1,    ///Текущий уровень без дополнительных параметров.
@@ -526,8 +535,39 @@ class device : public i_DO_AO_device, public par_device
             DST_PT = 1,      ///Обычный аналоговый датчик давления
             DST_PT_IOLINK,   ///Датчик давления IOLInk
 
+            DST_PT_VIRT = 4, ///Виртуальный датчик давления
+
             //F
             DST_F = 1,       ///< Автоматический выключатель.
+            DST_F_VIRT = 4,  ///< Виртуальный автоматический выключатель.
+
+            //HLA
+            DST_HLA = 1,  ///< Сигнальная колонна (красный, желтый, зеленый и сирена).
+            DST_HLA_VIRT, ///< Виртуальная сигнальная колонна (без привязки к модулям).
+
+            //GS
+            DST_GS = 1,  ///< Датчик положения.
+            DST_GS_VIRT, ///< Виртуальный датчик положения (без привязки к модулям).
+
+            //HA
+            DST_HA = 1,  ///< Сирена.
+            DST_HA_VIRT, ///< Виртуальная сирена (без привязки к модулям).
+
+            //HL
+            DST_HL = 1,  ///< Лампа.
+            DST_HL_VIRT, ///< Виртуальная лампа (без привязки к модулям).
+
+            //FS
+            DST_FS = 1,  ///< Датчик наличия расхода.
+            DST_FS_VIRT, ///< Виртуальный датчик наличия расхода (без привязки к модулям).
+
+            //SB
+            DST_SB = 1,  ///< Кнопка.
+            DST_SB_VIRT, ///< Виртуальная кнопка (без привязки к модулям).
+
+            //WT
+            DST_WT = 1,  ///< Весы.
+            DST_WT_VIRT, ///< Виртуальные весы.
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -1020,11 +1060,36 @@ class valve: public digital_io_device
         bool wash_flag;
     };
 //-----------------------------------------------------------------------------
+class virtual_valve: public valve
+    {
+    public:
+        virtual_valve( const char* dev_name );
+
+    protected:
+        float value;
+        int state;
+
+    public:
+        VALVE_STATE get_valve_state();
+
+        virtual void direct_off();
+
+        virtual void direct_set_value( float new_value );
+
+        virtual float get_value();
+
+        virtual void direct_set_state( int new_state );
+
+        virtual void direct_on();
+
+        virtual int get_state();
+    };
+//-----------------------------------------------------------------------------
 /// @brief Виртуальное устройство.
 ///
 /// Необходимо для возвращения результата поиска устройства с несуществующим
 /// номером. Методы данного класса ничего не делают.
-class dev_stub : public i_counter, public valve
+class dev_stub : public i_counter, public valve, public i_wages
     {
     public:
         dev_stub() : valve( "STUB", DT_NONE, DST_NONE )
@@ -1055,6 +1120,8 @@ class dev_stub : public i_counter, public valve
 
         u_int get_abs_quantity();
         void  abs_reset();
+
+        void tare();
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан с одним дискретным выходом и одним дискретным входом.
@@ -3103,6 +3170,32 @@ class analog_input : public AI1
         u_int start_param_idx;
     };
 //-----------------------------------------------------------------------------
+class virtual_wages : public device, public i_wages
+    {
+    public:
+        virtual_wages( const char* dev_name );
+
+    protected:
+        float value;
+        int state;
+
+    public:
+
+        virtual void direct_off();
+
+        virtual void direct_set_value( float new_value );
+
+        virtual float get_value();
+
+        virtual void direct_set_state( int new_state );
+
+        virtual void direct_on();
+
+        virtual int get_state();
+
+        virtual void tare();
+    };
+//-----------------------------------------------------------------------------
 /// @brief Датчик веса
 class wages : public analog_io_device, public i_wages
     {
@@ -3502,6 +3595,31 @@ class i_motor : public device
             int params_count );
 
         void reverse();
+    };
+//-----------------------------------------------------------------------------
+class virtual_motor : public i_motor
+    {
+    public:
+        virtual_motor( const char* dev_name );
+
+    protected:
+        float value;
+        int state;
+
+    public:
+
+        virtual void direct_off();
+
+        virtual void direct_set_value( float new_value );
+
+        virtual float get_value();
+
+        virtual void direct_set_state( int new_state );
+
+        virtual void direct_on();
+
+        virtual int get_state();
+
     };
 //-----------------------------------------------------------------------------
 /// @brief Электродвигатель (мешалка, насос).
@@ -4001,7 +4119,7 @@ class device_manager: public i_Lua_save_device
         PID* get_C( const char* dev_name );
 
         /// @brief Получение автоматического выключателя по имени.
-        circuit_breaker* get_F(const char* dev_name);
+        i_DO_AO_device* get_F(const char* dev_name);
 
         /// @brief Получение единственного экземпляра класса.
         static device_manager* get_instance();
@@ -4347,8 +4465,8 @@ wages* WT( const char *dev_name );
 /// @param number - номер автоматического выключателя.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_AO_device* F(u_int dev_n);
-i_AO_device* F(const char* dev_name);
+i_DO_AO_device* F(u_int dev_n);
+i_DO_AO_device* F(const char* dev_name);
 //-----------------------------------------------------------------------------
 /// @brief Получение регулятора по имени.
 ///
