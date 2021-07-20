@@ -148,7 +148,7 @@ par_device::~par_device()
         }
     }
 //-----------------------------------------------------------------------------
-float par_device::get_par( u_int idx, u_int offset )
+float par_device::get_par( u_int idx, u_int offset ) const
     {
     if ( par )
         {
@@ -4345,6 +4345,11 @@ void i_motor::reverse()
     set_state( 2 );
     }
 //-----------------------------------------------------------------------------
+float i_motor::get_linear_speed() const
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void virtual_motor::direct_off()
     {
@@ -6259,6 +6264,25 @@ void motor_altivar::set_string_property(const char * field, const char * value)
                 }
             }
         }
+    }
+
+void motor_altivar::print() const
+    {
+    device::print();
+    }
+
+float motor_altivar::get_linear_speed() const
+    {
+    float d = get_par( P_SCHAFT_DIAMETER, 0 );
+    float n = get_par( P_TRANSFER_RATIO, 0 );
+    float v = .0f;
+
+    if ( 0 != d && 0 != n )
+        {
+        v = ( atv->rpm_value * (float) M_PI * d ) / ( n * SEC_IN_MIN );
+        }
+
+    return v;
     }
 
 #ifdef WIN_OS

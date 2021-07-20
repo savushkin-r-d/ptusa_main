@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 07/15/21 16:54:34.
+** Generated automatically by tolua++-1.0.92 on 07/20/21 11:56:48.
 */
 
 #ifndef __cplusplus
@@ -1510,6 +1510,38 @@ static int tolua_PAC_dev_i_motor_reverse00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'reverse'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_linear_speed of class  i_motor */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_motor_get_linear_speed00
+static int tolua_PAC_dev_i_motor_get_linear_speed00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const i_motor",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const i_motor* self = (const i_motor*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_linear_speed'", NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->get_linear_speed();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_linear_speed'.",&tolua_err);
  return 0;
 #endif
 }
@@ -13190,6 +13222,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_cclass(tolua_S,"i_motor","i_motor","device",NULL);
   tolua_beginmodule(tolua_S,"i_motor");
    tolua_function(tolua_S,"reverse",tolua_PAC_dev_i_motor_reverse00);
+   tolua_function(tolua_S,"get_linear_speed",tolua_PAC_dev_i_motor_get_linear_speed00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"signal_column","signal_column","device",NULL);
   tolua_beginmodule(tolua_S,"signal_column");

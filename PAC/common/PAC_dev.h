@@ -102,7 +102,7 @@ class par_device
         /// @param offset - смещение индекса.
         ///
         /// @return значение параметра.
-        float get_par( u_int idx, u_int offset );
+        float get_par( u_int idx, u_int offset ) const;
 
         /// @brief Задание имени параметра.
         ///
@@ -3595,7 +3595,12 @@ class i_motor : public device
         i_motor( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,
             int params_count );
 
+        /// @brief Включение мотора в реверсном направлении.
         void reverse();
+
+        /// @brief Получение линейной скорости (например, приводимого в
+        // движение конвейра).
+        virtual float get_linear_speed() const;
     };
 //-----------------------------------------------------------------------------
 class virtual_motor : public i_motor
@@ -3704,7 +3709,9 @@ public:
         freq(0)
 #endif // DEBUG_NO_IO_MODULES
     {
-    set_par_name(P_ON_TIME, 0, "P_ON_TIME");
+    set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
+    set_par_name( P_SCHAFT_DIAMETER, 0, "P_SCHAFT_DIAMETER" );
+    set_par_name( P_TRANSFER_RATIO, 0, "P_TRANSFER_RATIO" );
     }
 
     int save_device_ex(char *buff);
@@ -3723,20 +3730,24 @@ public:
 
     void set_string_property(const char* field, const char* value) override;
 
-    virtual void print() const
-    {
-    device::print();
-    }
+    virtual void print() const;
+
+    /// @brief Получение линейной скорости.
+    float get_linear_speed() const;
 
 private:
+
+
     enum CONSTANTS
     {
-        ADDITIONAL_PARAM_COUNT = 1,
+        ADDITIONAL_PARAM_COUNT = 3,
 
         C_MIN_VALUE = 0,
         C_MAX_VALUE = 100,
 
-        P_ON_TIME = 1,    ///< Индекс параметра времени включения (мсек).
+        P_ON_TIME = 1,      ///< Индекс параметра времени включения (мсек).
+        P_SCHAFT_DIAMETER,  ///< Диаметр вала (м).
+        P_TRANSFER_RATIO,   ///< Передаточный коэффициент.
 
         DO_INDEX = 0,         ///< Индекс канала дискретного выхода.
         DO_INDEX_REVERSE = 1, ///< Индекс канала дискретного выхода реверса.
