@@ -6273,7 +6273,8 @@ void motor_altivar::print() const
 
 float motor_altivar::get_linear_speed() const
     {
-    float d = get_par( P_SCHAFT_DIAMETER, 0 );
+    float d = get_par( P_SHAFT_DIAMETER, 0 );
+
     float n = get_par( P_TRANSFER_RATIO, 0 );
     float v = .0f;
 

@@ -3710,7 +3710,8 @@ public:
 #endif // DEBUG_NO_IO_MODULES
     {
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
-    set_par_name( P_SCHAFT_DIAMETER, 0, "P_SCHAFT_DIAMETER" );
+    set_par_name( P_SHAFT_DIAMETER, 0, "P_SHAFT_DIAMETER" );
+
     set_par_name( P_TRANSFER_RATIO, 0, "P_TRANSFER_RATIO" );
     }
 
@@ -3746,7 +3747,8 @@ private:
         C_MAX_VALUE = 100,
 
         P_ON_TIME = 1,      ///< Индекс параметра времени включения (мсек).
-        P_SCHAFT_DIAMETER,  ///< Диаметр вала (м).
+        P_SHAFT_DIAMETER,  ///< Диаметр вала (м).
+
         P_TRANSFER_RATIO,   ///< Передаточный коэффициент.
 
         DO_INDEX = 0,         ///< Индекс канала дискретного выхода.
