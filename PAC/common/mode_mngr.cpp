@@ -77,6 +77,7 @@ int operation::pause()
 
             states[ RUN ]->save();
             states[ RUN ]->final();
+            states[ PAUSE ]->init();
             break;
 
         case STOP:
@@ -99,6 +100,7 @@ int operation::stop()
         case PAUSE:
             current_state = STOP;
             states[ PAUSE ]->final();
+            states[ STOP ]->init();
             break;
 
         case RUN:
@@ -107,6 +109,7 @@ int operation::stop()
             run_step = states[ RUN ]->active_step();
 
             states[ RUN ]->final();
+            states[ STOP ]->init();
             break;
 
         case STOP:
