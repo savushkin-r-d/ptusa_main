@@ -296,19 +296,19 @@ void altivar_node::Evaluate()
 					int newstate = remote_state & 0x006F;
 					switch (newstate)
 						{
-						case 0x0040:
-							state = -3;
-							break;
-						case 0x0021:
-							state = -2;
-							break;
-						case 0x0023:
+						case 0x0040: //switch on disabled
 							state = 0;
 							break;
-						case 0x0027:
+						case 0x0021: //ready to switch on
+							state = 0;
+							break;
+						case 0x0023: //switched on
+							state = 0;
+							break;
+						case 0x0027: //operation enabled
 							reverse ? state = 2 : state = 1;
 							break;
-						case 0x0007:
+						case 0x0007: //quick stop active
 							state = -1;
 							break;
 						default:
