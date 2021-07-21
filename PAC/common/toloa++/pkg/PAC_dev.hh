@@ -286,6 +286,7 @@ class i_wages
         ///
         /// @return - none.
         void tare();
+
         /// @brief Получение текущего состояния устройства.
         ///
         /// @return - Вес в кг.
@@ -296,7 +297,12 @@ class i_wages
 class i_motor : public device
     {
     public:
+        /// @brief Включение мотора в реверсном направлении.
         void reverse();
+
+        /// @brief Получение линейной скорости (например, приводимого в
+        // движение конвейра).
+        virtual float get_linear_speed() const;
     };
 //-----------------------------------------------------------------------------
 class signal_column : public device
