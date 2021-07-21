@@ -111,7 +111,7 @@ jobs:
         if [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt-get install -y yasm
         elif [ "$RUNNER_OS" == "Windows" ]; then
-            choco install yasm
+            choco install --allow-empty-checksums yasm
         fi
 
     - name: Configure
