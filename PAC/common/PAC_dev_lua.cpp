@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 07/20/21 11:56:48.
+** Generated automatically by tolua++-1.0.92 on 07/21/21 15:38:14.
 */
 
 #ifndef __cplusplus
@@ -13402,6 +13402,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_beginmodule(tolua_S,"step");
    tolua_function(tolua_S,".geti",tolua_PAC_dev_step__geti00);
    tolua_function(tolua_S,"get_name",tolua_PAC_dev_step_get_name00);
+   tolua_constant(tolua_S,"A_CHECKED_DEVICES",step::A_CHECKED_DEVICES);
    tolua_constant(tolua_S,"A_ON",step::A_ON);
    tolua_constant(tolua_S,"A_ON_REVERSE",step::A_ON_REVERSE);
    tolua_constant(tolua_S,"A_OFF",step::A_OFF);

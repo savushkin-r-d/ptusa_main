@@ -1189,12 +1189,14 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_LS_MAX:
                     new_device = new level_s( dev_name,
                         ( device::DEVICE_SUB_TYPE ) dev_sub_type );
+                    new_io_device = (level_s*)new_device;
                     break;
 
                 case device::LS_IOLINK_MAX:
                 case device::LS_IOLINK_MIN:
                     new_device = new level_s_iolink( dev_name,
                         ( device::DEVICE_SUB_TYPE ) dev_sub_type );
+                    new_io_device = (level_s_iolink*)new_device;
                     break;
 
                 case device::DST_LS_VIRT:
@@ -1209,7 +1211,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new dev_stub();
                     break;
                 }
-            new_io_device = ( level_s* ) new_device;
             break;
 
         case device::DT_TE:
@@ -1243,15 +1244,25 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
         case device::DT_FS:
             switch ( dev_sub_type )
                 {
+                case device::DST_NONE:
+                case device::DT_FS:
+                    new_device = new flow_s( dev_name );
+                    new_io_device = (flow_s*)new_device;
+                    break;
+
                 case device::DST_FS_VIRT:
                     new_device = new virtual_device( dev_name, device::DT_FS, device::DST_FS_VIRT );
                     break;
 
                 default:
-                    new_device = new flow_s( dev_name );
-                    new_io_device = (flow_s*)new_device;
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown FS device subtype %d!\n", dev_sub_type );
+                        }
+                    new_device = new dev_stub();
                     break;
                 }
+            break;
 
         case device::DT_FQT:
             switch ( dev_sub_type )
@@ -1283,7 +1294,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device      = new dev_stub();
                     break;
                 }
-
             break;
 
         case device::DT_AO:
@@ -1485,6 +1495,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_HA:
                     new_device = new siren( dev_name );
                     new_io_device = (siren*)new_device;
+                    break;
 
                 case device::DST_F_VIRT:
                     new_device = new virtual_device( dev_name, device::DT_HA, device::DST_HA_VIRT );
@@ -1507,8 +1518,9 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_HL:
                     new_device = new lamp( dev_name );
                     new_io_device = (lamp*)new_device;
+                    break;
 
-                case device::DST_F_VIRT:
+                case device::DST_HL_VIRT:
                     new_device = new virtual_device( dev_name, device::DT_HL, device::DST_HL_VIRT );
                     break;
 
@@ -1520,6 +1532,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new dev_stub();
                     break;
                 }
+            break;
 
         case device::DT_SB:
             switch ( dev_sub_type )
@@ -1528,8 +1541,9 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_SB:
                     new_device = new button( dev_name );
                     new_io_device = (button*)new_device;
+                    break;
 
-                case device::DST_F_VIRT:
+                case device::DST_SB_VIRT:
                     new_device = new virtual_device( dev_name, device::DT_SB, device::DST_SB_VIRT );
                     break;
 
@@ -1541,6 +1555,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new dev_stub();
                     break;
                 }
+            break;
 
         case device::DT_GS:
             switch ( dev_sub_type )
@@ -1549,8 +1564,9 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_GS:
                     new_device = new state_s( dev_name );
                     new_io_device = (state_s*)new_device;
+                    break;
 
-                case device::DST_F_VIRT:
+                case device::DST_GS_VIRT:
                     new_device = new virtual_device( dev_name, device::DT_GS, device::DST_GS_VIRT );
                     break;
 
@@ -1562,6 +1578,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new dev_stub();
                     break;
                 }
+            break;
 
         case device::DT_WT:
             switch ( dev_sub_type )
@@ -1583,6 +1600,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new dev_stub();
                     break;
                 }
+            break;
 
         case device::DT_F:
             switch (dev_sub_type)
