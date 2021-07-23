@@ -493,6 +493,10 @@ class device : public i_DO_AO_device, public par_device
 
             DST_M_VIRT,        ///< Виртуальный мотор.
 
+            /// Мотор, управляемый частотником Altivar. Связь с частотником по Ethernet.
+            /// Реверс и аварии опциональны. Расчёт линейной скорости.
+            M_ATV_LINEAR,
+
             //FQT
             DST_FQT = 1,   ///< Счетчик.
             DST_FQT_F,     ///< Счетчик + расход.
@@ -3699,8 +3703,8 @@ class motor : public i_motor, public io_device
 class motor_altivar : public i_motor, public io_device
 {
 public:
-    motor_altivar(const char *dev_name, device::DEVICE_SUB_TYPE sub_type) :
-        i_motor(dev_name, sub_type, ADDITIONAL_PARAM_COUNT),
+    motor_altivar(const char *dev_name, device::DEVICE_SUB_TYPE sub_type, u_int par_cnt = 0 ) :
+        i_motor(dev_name, sub_type, par_cnt + ADDITIONAL_PARAM_COUNT),
         io_device(dev_name),
         start_switch_time(get_millisec()),
         atv(NULL)
@@ -3710,9 +3714,6 @@ public:
 #endif // DEBUG_NO_IO_MODULES
     {
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
-    set_par_name( P_SHAFT_DIAMETER, 0, "P_SHAFT_DIAMETER" );
-
-    set_par_name( P_TRANSFER_RATIO, 0, "P_TRANSFER_RATIO" );
     }
 
     int save_device_ex(char *buff);
@@ -3733,15 +3734,17 @@ public:
 
     virtual void print() const;
 
-    /// @brief Получение линейной скорости.
-    float get_linear_speed() const;
+    virtual int get_params_count() const
+        {
+        return ADDITIONAL_PARAM_COUNT;
+        }
+protected:
+    altivar_node* atv;
 
 private:
-
-
     enum CONSTANTS
     {
-        ADDITIONAL_PARAM_COUNT = 3,
+        ADDITIONAL_PARAM_COUNT = 1,
 
         C_MIN_VALUE = 0,
         C_MAX_VALUE = 100,
@@ -3763,14 +3766,34 @@ private:
 
     u_long start_switch_time;
 
-    altivar_node* atv;
-
 #ifdef DEBUG_NO_IO_MODULES
     char  state;  ///< Состояние устройства.
 
     float freq;   ///< Состояние устройства (частота).
 #endif // DEBUG_NO_IO_MODULES
 };
+//-----------------------------------------------------------------------------
+/// @brief Электродвигатель, управляемый частотным преобразователем altivar с
+/// интерфейсной платой Ethernet c расчетом линейной скорости.
+class motor_altivar_linear : public motor_altivar
+    {
+    public:
+        motor_altivar_linear( const char* dev_name );
+
+        /// @brief Получение линейной скорости.
+        float get_linear_speed() const;
+
+    private:
+        int start_param_idx;
+
+        enum CONSTANTS
+            {
+            ADDITIONAL_PARAM_COUNT = 2,
+
+            P_SHAFT_DIAMETER = 1,   ///< Диаметр вала (м).
+            P_TRANSFER_RATIO,       ///< Передаточный коэффициент.
+            };
+    };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора уровня.
 class level_s : public DI1
