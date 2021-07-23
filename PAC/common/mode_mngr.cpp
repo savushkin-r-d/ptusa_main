@@ -629,6 +629,10 @@ step::step( std::string name, operation_state *owner,
     actions.push_back( new DI_DO_action() );
     actions.push_back( new AI_AO_action() );
     actions.push_back( new wash_action() );
+    if ( !is_mode )
+        {
+        actions.push_back( new to_step_if_devices_in_specific_state_action() );
+        }
     }
 //-----------------------------------------------------------------------------
 step::~step()
@@ -1282,6 +1286,51 @@ void wash_action::print( const char* prefix /*= "" */,
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+to_step_if_devices_in_specific_state_action::to_step_if_devices_in_specific_state_action() :
+    action( "Перейти в шаг по условию", G_SUBGROUPS_CNT )
+    {
+    }
+//-----------------------------------------------------------------------------
+bool to_step_if_devices_in_specific_state_action::is_goto_next_step() const
+    {
+    if ( is_empty() )
+        {
+        return false;
+        }
+
+    bool res = true;
+    auto& devs = devices[ MAIN_GROUP ];
+    if ( devs.size() >= G_SUBGROUPS_CNT )
+        {
+        auto& on_devices = devs[ G_ON_DEVICES ];
+        for ( u_int i = 0; i < on_devices.size(); i++ )
+            {
+            auto dev = on_devices[ i ];
+            auto type = dev->get_type();
+            if ( type == device::DT_V )
+                {
+                auto v = dynamic_cast<valve*>( dev );
+                if ( !v->is_opened() ) res = false;
+                }
+            }
+
+        auto& off_devices = devs[ G_OFF_DEVICES ];
+        for ( u_int i = 0; i < off_devices.size(); i++ )
+            {
+            auto dev = off_devices[ i ];
+            auto type = dev->get_type();
+            if ( type == device::DT_V )
+                {
+                auto v = dynamic_cast<valve*>( dev );
+                if ( !v->is_closed() ) res = false;
+                }
+            }
+        }
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 operation_state::operation_state( const char* name,
     operation_manager *owner, int n ) : name( name ),
     mode_step(  new step( "Шаг операции", this, true ) ),
@@ -1413,6 +1462,36 @@ void operation_state::evaluate()
                 }
 
             return;
+            }
+        }
+
+    //Переход по условию к следующему шагу.
+    auto active_step = steps[ active_step_n ];
+    auto if_action = dynamic_cast<to_step_if_devices_in_specific_state_action*>(
+        ( *active_step )[ step::A_TO_STEP_IF ] );
+    if ( if_action->is_goto_next_step() )
+        {
+        if ( -1 == active_step_next_step_n )
+            {
+            if ( n > 0 )
+                {
+                int time = (int)owner->get_step_param( par_n );
+                const int MAX_BUFF_SIZE = 200;
+                char buff[ MAX_BUFF_SIZE ] = { 0 };
+                std::snprintf( buff, MAX_BUFF_SIZE,
+                    "завершение по включению/отключению устройств последнего шага (\'%s\')",
+                    steps[ active_step_n ]->get_name() );
+                owner->owner->set_err_msg( buff, n, 0, i_tech_object::ERR_OFF );
+                owner->off_mode( n );
+                }
+            else
+                {
+                final(); //Для операции-заглушки.
+                }
+            }
+        else
+            {
+            to_step( active_step_next_step_n, 0 );
             }
         }
 

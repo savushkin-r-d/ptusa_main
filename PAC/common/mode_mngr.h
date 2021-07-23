@@ -290,6 +290,27 @@ class wash_action: public action
             };
     };
 //-----------------------------------------------------------------------------
+/// <summary>
+/// Проверка устройств на нахождение в активном (включены) и в пассивном
+/// (отключены) состоянии.
+/// </summary>
+class to_step_if_devices_in_specific_state_action : public action
+    {
+    public:
+        to_step_if_devices_in_specific_state_action();
+
+        bool is_goto_next_step() const;
+
+    private:
+        enum GROUPS
+            {
+            G_ON_DEVICES = 0,   //Устройства, которые должны быть включены.
+            G_OFF_DEVICES,      //Устройства, которые должны быть отключены.
+
+            G_SUBGROUPS_CNT,    //Количество групп.
+            };
+    };
+//-----------------------------------------------------------------------------
 /// @brief Содержит информацию об устройствах, которые входят в шаг (открываются/
 /// закрываются).
 ///
@@ -310,6 +331,8 @@ class step
             A_DI_DO,
             A_AI_AO,
             A_WASH,
+
+            A_TO_STEP_IF,
             };
 
         step( std::string name, operation_state *owner, bool is_mode = false );
