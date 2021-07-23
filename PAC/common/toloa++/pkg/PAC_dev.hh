@@ -917,7 +917,8 @@ class step
 
         enum ACTIONS
             {
-            A_ON = 0,
+            A_CHECKED_DEVICES = 0,
+            A_ON,
             A_ON_REVERSE,
             A_OFF,
             A_UPPER_SEATS_ON,

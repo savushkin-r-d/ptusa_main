@@ -264,6 +264,17 @@ class required_DI_action: public action
     };
 //-----------------------------------------------------------------------------
 /// <summary>
+/// Проверка устройств во время выполнения шага.
+/// </summary>
+class checked_devices_action : public action
+    {
+    public:
+        checked_devices_action() : action( "Проверяемые устройства" )
+            {
+            }
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
 /// Мойка линии.
 /// </summary>
 class wash_action: public action
@@ -300,7 +311,8 @@ class step
     public:
         enum ACTIONS
             {
-            A_ON = 0,
+            A_CHECKED_DEVICES = 0,
+            A_ON,
             A_ON_REVERSE,
             A_OFF,
             A_UPPER_SEATS_ON,

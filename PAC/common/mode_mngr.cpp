@@ -620,6 +620,7 @@ step::step( std::string name, operation_state *owner,
     dx_time( 0 ),
     active( false )
     {
+    actions.push_back( new checked_devices_action() );
     actions.push_back( new on_action() );
     actions.push_back( new on_reverse_action() );
     actions.push_back( new off_action() );
