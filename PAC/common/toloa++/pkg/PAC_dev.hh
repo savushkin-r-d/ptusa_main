@@ -928,6 +928,8 @@ class step
             A_DI_DO,
             A_AI_AO,
             A_WASH,
+
+            A_TO_STEP_IF,
             };
 
         bool is_active() const;
