@@ -103,14 +103,20 @@ elseif(WIN32)
            test/main_test.cpp)
 
 
+    if (MINGW)
+        set(LUA_LIB_NAME liblua.dll)
+    else()
+        set(LUA_LIB_NAME lua.dll)
+    endif()
+
     add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp
-        COMMAND ${CMAKE_COMMAND} -E copy bin/lua/lua.dll bin/tolua++
+        COMMAND ${CMAKE_COMMAND} -E copy bin/lua/${LUA_LIB_NAME} bin/tolua++
         COMMAND toluapp -n PAC_dev -o PAC/common/PAC_dev_lua.cpp PAC/common/toloa++/pkg/PAC_dev.hh
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/PAC_dev.hh
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
 
     add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT/IOT_dev_lua.cpp
-        COMMAND ${CMAKE_COMMAND} -E copy bin/lua/lua.dll bin/tolua++
+        COMMAND ${CMAKE_COMMAND} -E copy bin/lua/${LUA_LIB_NAME} bin/tolua++
         COMMAND toluapp -n IOT_dev -o PAC/IoT/IOT_dev_lua.cpp PAC/common/toloa++/pkg/IOT_dev.hh
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/IOT_dev.hh
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
