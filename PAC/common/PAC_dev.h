@@ -415,6 +415,7 @@ class device : public i_DO_AO_device, public par_device
             DT_F,       ///< Автоматический выключатель.
             DT_REGULATOR, ///< ПИД-регулятор.
             DT_HLA,      ///< Сигнальная колонна.
+            DT_CAM,      ///< Камера.
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
@@ -573,6 +574,11 @@ class device : public i_DO_AO_device, public par_device
             //WT
             DST_WT = 1,  ///< Весы.
             DST_WT_VIRT, ///< Виртуальные весы.
+
+            //CAM
+            DST_CAM_DO1_DI1 = 1,///< C сигналом активации и результатом обработки.
+            DST_CAM_DO1_DI2,    ///< C сигналом активации, результатом обработки и готовностью.
+            DST_CAM_DO1_DI3     ///< C сигналом активации, двумя результатами обработки и готовностью.
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
