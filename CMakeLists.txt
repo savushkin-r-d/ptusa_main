@@ -101,6 +101,20 @@ elseif(WIN32)
 
     add_executable(main_test ${common_src} ${win_src} ${test_src}
            test/main_test.cpp)
+
+
+    add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp
+        COMMAND ${CMAKE_COMMAND} -E copy
+                bin/lua/lua.dll bin/tolua++
+        COMMAND toluapp -n PAC_dev -o
+            PAC/common/PAC_dev_lua.cpp PAC/common/toloa++/pkg/PAC_dev.hh
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/PAC_dev.hh
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
+
+    add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT/IOT_dev_lua.cpp
+        COMMAND toluapp -n IOT_dev -o PAC/IoT/IOT_dev_lua.cpp PAC/common/toloa++/pkg/IOT_dev.hh
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/IOT_dev.hh
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
 endif()
 
 target_compile_definitions(main_control PUBLIC _USRDLL)
