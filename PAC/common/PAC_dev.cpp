@@ -148,7 +148,7 @@ par_device::~par_device()
         }
     }
 //-----------------------------------------------------------------------------
-float par_device::get_par( u_int idx, u_int offset )
+float par_device::get_par( u_int idx, u_int offset ) const
     {
     if ( par )
         {
@@ -1161,6 +1161,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new motor_altivar( dev_name,
                         (device::DEVICE_SUB_TYPE)dev_sub_type );
                     new_io_device = (motor_altivar*)new_device;
+                    break;
+
+                case device::M_ATV_LINEAR:
+                    new_device = new motor_altivar_linear( dev_name );
+                    new_io_device = (motor_altivar_linear*)new_device;
                     break;
 
                 case device::DST_M_VIRT:
@@ -4363,6 +4368,11 @@ void i_motor::reverse()
     set_state( 2 );
     }
 //-----------------------------------------------------------------------------
+float i_motor::get_linear_speed() const
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void virtual_motor::direct_off()
     {
@@ -6277,6 +6287,34 @@ void motor_altivar::set_string_property(const char * field, const char * value)
                 }
             }
         }
+    }
+
+void motor_altivar::print() const
+    {
+    device::print();
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float motor_altivar_linear::get_linear_speed() const
+    {
+    float d = get_par( P_SHAFT_DIAMETER, start_param_idx );
+    float n = get_par( P_TRANSFER_RATIO, start_param_idx );
+    float v = .0f;
+
+    if ( 0 != d && 0 != n )
+        {
+        v = ( atv->rpm_value * (float)M_PI * d ) / ( n * SEC_IN_MIN );
+        }
+
+    return v;
+    }
+
+motor_altivar_linear::motor_altivar_linear( const char* dev_name ) :
+    motor_altivar( dev_name, device::M_ATV_LINEAR, ADDITIONAL_PARAM_COUNT )
+    {
+    start_param_idx = motor_altivar::get_params_count();
+    set_par_name( P_SHAFT_DIAMETER, start_param_idx, "P_SHAFT_DIAMETER" );
+    set_par_name( P_TRANSFER_RATIO, start_param_idx, "P_TRANSFER_RATIO" );
     }
 
 #ifdef WIN_OS

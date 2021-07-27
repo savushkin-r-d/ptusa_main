@@ -102,7 +102,7 @@ class par_device
         /// @param offset - смещение индекса.
         ///
         /// @return значение параметра.
-        float get_par( u_int idx, u_int offset );
+        float get_par( u_int idx, u_int offset ) const;
 
         /// @brief Задание имени параметра.
         ///
@@ -492,6 +492,10 @@ class device : public i_DO_AO_device, public par_device
             M_ATV,
 
             DST_M_VIRT,        ///< Виртуальный мотор.
+
+            /// Мотор, управляемый частотником Altivar. Связь с частотником по Ethernet.
+            /// Реверс и аварии опциональны. Расчёт линейной скорости.
+            M_ATV_LINEAR,
 
             //FQT
             DST_FQT = 1,   ///< Счетчик.
@@ -3595,7 +3599,12 @@ class i_motor : public device
         i_motor( const char* dev_name, device::DEVICE_SUB_TYPE sub_type,
             int params_count );
 
+        /// @brief Включение мотора в реверсном направлении.
         void reverse();
+
+        /// @brief Получение линейной скорости (например, приводимого в
+        // движение конвейра).
+        virtual float get_linear_speed() const;
     };
 //-----------------------------------------------------------------------------
 class virtual_motor : public i_motor
@@ -3694,8 +3703,8 @@ class motor : public i_motor, public io_device
 class motor_altivar : public i_motor, public io_device
 {
 public:
-    motor_altivar(const char *dev_name, device::DEVICE_SUB_TYPE sub_type) :
-        i_motor(dev_name, sub_type, ADDITIONAL_PARAM_COUNT),
+    motor_altivar(const char *dev_name, device::DEVICE_SUB_TYPE sub_type, u_int par_cnt = 0 ) :
+        i_motor(dev_name, sub_type, par_cnt + ADDITIONAL_PARAM_COUNT),
         io_device(dev_name),
         start_switch_time(get_millisec()),
         atv(NULL)
@@ -3704,7 +3713,7 @@ public:
         freq(0)
 #endif // DEBUG_NO_IO_MODULES
     {
-    set_par_name(P_ON_TIME, 0, "P_ON_TIME");
+    set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     }
 
     int save_device_ex(char *buff);
@@ -3723,10 +3732,14 @@ public:
 
     void set_string_property(const char* field, const char* value) override;
 
-    virtual void print() const
-    {
-    device::print();
-    }
+    virtual void print() const;
+
+    virtual int get_params_count() const
+        {
+        return ADDITIONAL_PARAM_COUNT;
+        }
+protected:
+    altivar_node* atv;
 
 private:
     enum CONSTANTS
@@ -3736,7 +3749,7 @@ private:
         C_MIN_VALUE = 0,
         C_MAX_VALUE = 100,
 
-        P_ON_TIME = 1,    ///< Индекс параметра времени включения (мсек).
+        P_ON_TIME = 1,      ///< Индекс параметра времени включения (мсек).
 
         DO_INDEX = 0,         ///< Индекс канала дискретного выхода.
         DO_INDEX_REVERSE = 1, ///< Индекс канала дискретного выхода реверса.
@@ -3750,14 +3763,34 @@ private:
 
     u_long start_switch_time;
 
-    altivar_node* atv;
-
 #ifdef DEBUG_NO_IO_MODULES
     char  state;  ///< Состояние устройства.
 
     float freq;   ///< Состояние устройства (частота).
 #endif // DEBUG_NO_IO_MODULES
 };
+//-----------------------------------------------------------------------------
+/// @brief Электродвигатель, управляемый частотным преобразователем altivar с
+/// интерфейсной платой Ethernet c расчетом линейной скорости.
+class motor_altivar_linear : public motor_altivar
+    {
+    public:
+        motor_altivar_linear( const char* dev_name );
+
+        /// @brief Получение линейной скорости.
+        float get_linear_speed() const;
+
+    private:
+        int start_param_idx;
+
+        enum CONSTANTS
+            {
+            ADDITIONAL_PARAM_COUNT = 2,
+
+            P_SHAFT_DIAMETER = 1,   ///< Диаметр вала (м).
+            P_TRANSFER_RATIO,       ///< Передаточный коэффициент.
+            };
+    };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора уровня.
 class level_s : public DI1
