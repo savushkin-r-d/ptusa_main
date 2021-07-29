@@ -4190,6 +4190,46 @@ class signal_column : public device, public io_device
         STEP siren_step;
     };
 //-----------------------------------------------------------------------------
+/// @brief Камера.
+///
+/// Служит для получения событий о распозновании объекта.
+class camera : public device, public io_device
+    {
+    public:
+        camera( const char* dev_name, DEVICE_SUB_TYPE sub_type );
+
+        void direct_set_state( int new_state );
+
+        void direct_off();
+
+        void direct_on();
+
+        void direct_set_value( float new_value );
+
+        int get_state();
+
+        float get_value();
+
+        virtual int get_result( int n = 1 ) const;
+
+        int save_device_ex( char* buff );
+
+        virtual bool is_ready() const;
+
+    private:
+        const bool DEVICE_IS_ALWAYS_READY = true;
+
+        enum class CONSTANTS
+            {
+            INDEX_DO = 0,
+
+            INDEX_DI_RES = 0,
+            };
+
+        int result;
+        int state;
+    };
+//-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.
 ///
 /// Содержит информацию обо всех устройствах проекта.

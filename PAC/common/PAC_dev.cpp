@@ -731,6 +731,69 @@ void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+camera::camera( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
+    device( dev_name, DT_CAM, sub_type, 0 ),
+    io_device( dev_name ),
+    result( 0 ),
+    state( 0 )
+    {
+    }
+
+void camera::direct_set_state( int new_state )
+    {
+    if ( new_state ) direct_on(); else direct_off();
+    }
+
+void camera::direct_off()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    set_DO( (u_int)IO_CONSTANTS::INDEX_DO, 0 );
+#endif
+    state = 0;
+    }
+
+void camera::direct_on()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    set_DO( (u_int)IO_CONSTANTS::INDEX_DO, 1 );
+#endif
+    state = 1;
+    }
+
+void camera::direct_set_value( float new_value )
+    {
+    }
+
+int camera::get_state()
+    {
+    return state;
+    }
+
+float camera::get_value()
+    {
+    return static_cast<float>( state );
+    }
+
+int camera::get_result( int n ) const
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    result = get_DI( (u_int)IO_CONSTANTS::INDEX_DI_RES );
+#endif
+    return result;
+    }
+
+bool camera::is_ready() const
+    {
+    return DEVICE_IS_ALWAYS_READY;
+    }
+
+int camera::save_device_ex( char* buff )
+    {
+    int res = sprintf( buff, "RESULT=%d, ", get_result() );
+    return res;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_V( const char *dev_name )
     {
     return get_device( device::DT_V, dev_name );
@@ -1633,6 +1696,25 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
         case device::DT_HLA:
             new_device = new signal_column( dev_name );
             new_io_device = (signal_column*)new_device;
+            break;
+
+        case device::DT_CAM:
+            switch ( dev_sub_type )
+                {
+                case device::DST_CAM_DO1_DI1:
+                    new_device = new camera( dev_name,
+                        static_cast<device::DEVICE_SUB_TYPE> (dev_sub_type) );
+                    new_io_device = (camera*)new_device;
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown CAM device subtype %d!\n", dev_sub_type );
+                        }
+                    new_device = new dev_stub();
+                    break;
+                }
             break;
 
         default:
