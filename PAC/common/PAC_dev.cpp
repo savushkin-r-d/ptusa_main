@@ -731,9 +731,10 @@ void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-camera::camera( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
-    device( dev_name, DT_CAM, sub_type, 0 ),
+camera::camera( const char* dev_name, DEVICE_SUB_TYPE sub_type, int params_count ) :
+    device( dev_name, DT_CAM, sub_type, params_count ),
     io_device( dev_name ),
+    is_cam_ready( true ),
     result( 0 ),
     state( 0 )
     {
@@ -747,7 +748,7 @@ void camera::direct_set_state( int new_state )
 void camera::direct_off()
     {
 #ifndef DEBUG_NO_IO_MODULES
-    set_DO( (u_int)IO_CONSTANTS::INDEX_DO, 0 );
+    set_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ), 0 );
 #endif
     state = 0;
     }
@@ -755,7 +756,7 @@ void camera::direct_off()
 void camera::direct_on()
     {
 #ifndef DEBUG_NO_IO_MODULES
-    set_DO( (u_int)IO_CONSTANTS::INDEX_DO, 1 );
+    set_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ), 1 );
 #endif
     state = 1;
     }
@@ -777,20 +778,113 @@ float camera::get_value()
 int camera::get_result( int n ) const
     {
 #ifndef DEBUG_NO_IO_MODULES
-    result = get_DI( (u_int)IO_CONSTANTS::INDEX_DI_RES );
+    result = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES_1 ) );
 #endif
     return result;
     }
 
-bool camera::is_ready() const
-    {
-    return DEVICE_IS_ALWAYS_READY;
-    }
-
 int camera::save_device_ex( char* buff )
     {
-    int res = sprintf( buff, "RESULT=%d, ", get_result() );
+    int res = sprintf( buff, "RESULT=%d, READY=%d",
+        get_result(), is_cam_ready );
     return res;
+    }
+
+int camera::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if ( strcmp( prop, "RESULT" ) == 0 )
+        {
+        result = static_cast<int>( val );
+        }
+    else if ( strcmp( prop, "READY" ) == 0 )
+        {
+        is_cam_ready = val > 0;
+        }
+    else device::set_cmd( prop, idx, val );
+
+    return 0;
+    }
+
+void camera::set_string_property( const char* field, const char* value )
+    {
+    if ( G_DEBUG )
+        {
+        printf( "Set string property %s value %s\n", field, value );
+        }
+
+    if ( strcmp( field, "IP" ) == 0 )
+        {
+        ip = std::string( value );
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+camera_DI2::camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
+    camera( dev_name, sub_type, static_cast<int>( PARAMS::PARAMS_CNT ) ),
+    start_switch_time( get_millisec() )
+    {
+    set_par_name( static_cast<u_int>( PARAMS::P_READY_TIME ), 0, "P_READY_TIME" );
+    }
+
+int camera_DI2::get_state()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    int o = get_DO( (u_int)CONSTANTS::INDEX_DO );
+    int i = get_DI( (u_int)CONSTANTS::INDEX_DI_READY );
+    if ( o == i )
+        {
+        start_switch_time = get_millisec();
+        state = o;
+        }
+    else if ( get_delta_millisec( start_switch_time ) <
+        get_par( (u_int)PARAMS::P_READY_TIME, 0 ) )
+        {
+        state = o;
+        }
+    else
+        {
+        state = -1;
+        }
+
+    is_cam_ready = i > 0;
+#endif
+
+    return state;
+    }
+
+int camera_DI2::get_result( int n ) const
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    result = get_DI( (u_int)CONSTANTS::INDEX_DI_RES );
+#endif
+    return result;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+camera_DI3::camera_DI3( const char* dev_name ) :
+    camera_DI2( dev_name, DEVICE_SUB_TYPE::DST_CAM_DO1_DI3 ),
+    result_2( 0 )
+    {
+    }
+
+int camera_DI3::get_result( int n ) const
+    {
+    switch ( n )
+        {
+        case 1:
+#ifndef DEBUG_NO_IO_MODULES
+        result = get_DI( (u_int)CONSTANTS::INDEX_DI_RES_1 );
+#endif
+        return result;
+
+        case 2:
+#ifndef DEBUG_NO_IO_MODULES
+        result_2 = get_DI( (u_int)CONSTANTS::INDEX_DI_RES_2 );
+#endif
+        return result_2;
+        }
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1705,6 +1799,17 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new camera( dev_name,
                         static_cast<device::DEVICE_SUB_TYPE> (dev_sub_type) );
                     new_io_device = (camera*)new_device;
+                    break;
+
+                case device::DST_CAM_DO1_DI2:
+                    new_device = new camera_DI2( dev_name,
+                        static_cast<device::DEVICE_SUB_TYPE> ( dev_sub_type ) );
+                    new_io_device = (camera_DI2*)new_device;
+                    break;
+
+                case device::DST_CAM_DO1_DI3:
+                    new_device = new camera_DI3( dev_name );
+                    new_io_device = (camera_DI3*)new_device;
                     break;
 
                 default:

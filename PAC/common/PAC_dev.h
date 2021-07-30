@@ -4196,7 +4196,8 @@ class signal_column : public device, public io_device
 class camera : public device, public io_device
     {
     public:
-        camera( const char* dev_name, DEVICE_SUB_TYPE sub_type );
+        camera( const char* dev_name, DEVICE_SUB_TYPE sub_type,
+            int params_count = 0 );
 
         void direct_set_state( int new_state );
 
@@ -4214,20 +4215,65 @@ class camera : public device, public io_device
 
         int save_device_ex( char* buff );
 
-        virtual bool is_ready() const;
+        int set_cmd( const char* prop, u_int idx, double val );
 
-    private:
-        const bool DEVICE_IS_ALWAYS_READY = true;
+        void set_string_property( const char* field, const char* value );
+
+    protected:
+        bool is_cam_ready;
+        int result;
+        int state;
 
         enum class CONSTANTS
             {
             INDEX_DO = 0,
 
-            INDEX_DI_RES = 0,
+            INDEX_DI_READY = 0,
+            INDEX_DI_RES_1,
+            INDEX_DI_RES_2,
             };
 
-        int result;
-        int state;
+    private:
+        std::string ip;
+    };
+
+//-----------------------------------------------------------------------------
+/// @brief Камера.
+///
+/// Служит для получения событий о распозновании объекта.
+class camera_DI2 : public camera
+    {
+    public:
+        camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type );
+
+        int get_state();
+
+        int get_result( int n = 1 ) const;
+
+    protected:
+        u_int start_switch_time;
+
+    private:
+        enum class PARAMS
+            {
+            P_READY_TIME = 1,
+
+            PARAMS_CNT,
+            };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Камера.
+///
+/// Служит для получения событий о распозновании объекта.
+class camera_DI3 : public camera_DI2
+    {
+    public:
+        camera_DI3( const char* dev_name );
+
+        int get_result( int n = 1 ) const;
+
+    private:
+        int result_2;
     };
 //-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.
