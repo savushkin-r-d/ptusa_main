@@ -385,8 +385,6 @@ class device : public i_DO_AO_device, public par_device
             C_MAX_NAME = 20
             };
 
-        static const char DEV_NAMES[][ 5 ];
-
         /// Типы устройств.
         enum DEVICE_TYPE
             {
@@ -419,6 +417,8 @@ class device : public i_DO_AO_device, public par_device
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
+
+        static const char* const DEV_NAMES[ device::DEVICE_TYPE::C_DEVICE_TYPE_CNT ];
 
         /// Подтипы устройств.
         enum DEVICE_SUB_TYPE

@@ -18,7 +18,7 @@ std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
 
 std::vector<valve_bottom_mix_proof*> valve_bottom_mix_proof::to_switch_off;
 
-const char device::DEV_NAMES[][ 5 ] =
+const char* const device::DEV_NAMES[ device::DEVICE_TYPE::C_DEVICE_TYPE_CNT ] =
     {
     "V",       ///< Клапан.
     "VC",      ///< Управляемый клапан.
@@ -42,7 +42,9 @@ const char device::DEV_NAMES[][ 5 ] =
     "PT",      ///< Давление (значение).
     "F",       ///< Автоматический выключатель.
 
-    "R",       ///<ПИД-регулятор.
+    "R",       ///< ПИД-регулятор.
+    "HLA",     ///< Сигнальная колонна.
+    "CAM",     ///< Камера.
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
