@@ -829,15 +829,15 @@ camera_DI2::camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
 int camera_DI2::get_state()
     {
 #ifndef DEBUG_NO_IO_MODULES
-    int o = get_DO( (u_int)CONSTANTS::INDEX_DO );
-    int i = get_DI( (u_int)CONSTANTS::INDEX_DI_READY );
+    int o = get_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ) );
+    int i = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_READY ) );
     if ( o == i )
         {
         start_switch_time = get_millisec();
         state = o;
         }
     else if ( get_delta_millisec( start_switch_time ) <
-        get_par( (u_int)PARAMS::P_READY_TIME, 0 ) )
+        get_par( static_cast<u_int>( PARAMS::P_READY_TIME ), 0 ) )
         {
         state = o;
         }
@@ -855,7 +855,7 @@ int camera_DI2::get_state()
 int camera_DI2::get_result( int n ) const
     {
 #ifndef DEBUG_NO_IO_MODULES
-    result = get_DI( (u_int)CONSTANTS::INDEX_DI_RES );
+    result = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES ) );
 #endif
     return result;
     }
@@ -873,15 +873,15 @@ int camera_DI3::get_result( int n ) const
         {
         case 1:
 #ifndef DEBUG_NO_IO_MODULES
-        result = get_DI( (u_int)CONSTANTS::INDEX_DI_RES_1 );
+            result = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES_1 ) );
 #endif
-        return result;
+            return result;
 
         case 2:
 #ifndef DEBUG_NO_IO_MODULES
-        result_2 = get_DI( (u_int)CONSTANTS::INDEX_DI_RES_2 );
+            result_2 = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES_2 ) );
 #endif
-        return result_2;
+            return result_2;
         }
 
     return 0;
