@@ -243,6 +243,13 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
              return type;
              }
 
+         /// @brief Наличие активных событий.
+         ///
+         bool is_any_message() const
+             {
+             return errors.empty();
+             }
+
 #ifndef __GNUC__
 #pragma endregion
 #endif

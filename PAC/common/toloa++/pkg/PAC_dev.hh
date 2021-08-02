@@ -308,6 +308,25 @@ class i_motor : public device
 class signal_column : public device
     {
     public:
+        void turn_off_red();
+        void turn_off_yellow();
+        void turn_off_green();
+
+        void turn_on_red();
+        void turn_on_yellow();
+        void turn_on_green();
+
+        void normal_blink_red();
+        void normal_blink_yellow();
+        void normal_blink_green();
+
+        void slow_blink_red();
+        void slow_blink_yellow();
+        void slow_blink_green();
+
+        void turn_on_siren();
+        void turn_off_siren();
+
         enum STATE
             {
             TURN_OFF,
@@ -761,6 +780,10 @@ class tech_object
 
         int set_err_msg( const char *err_msg, int mode, int new_mode = 0,
             ERR_MSG_TYPES type = ERR_CANT_ON );
+
+        /// @brief Наличие активных событий.
+        ///
+        bool is_any_message() const;
     };
 //-----------------------------------------------------------------------------
 ///@brief Получение менеджера технологических объектов.
