@@ -2067,22 +2067,18 @@ void dev_stub::direct_set_value( float new_value )
 //-----------------------------------------------------------------------------
 void dev_stub::off()
     {
-    return device::off();
     }
 //-----------------------------------------------------------------------------
 void dev_stub::on()
     {
-    return device::on();
     }
 //-----------------------------------------------------------------------------
 void dev_stub::set_value( float new_value )
     {
-    device::set_value( new_value );
     }
 //-----------------------------------------------------------------------------
 void dev_stub::set_state( int new_state )
     {
-    device::set_state( new_state );
     }
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE dev_stub::get_valve_state()
