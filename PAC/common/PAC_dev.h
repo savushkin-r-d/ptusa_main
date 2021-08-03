@@ -1095,46 +1095,6 @@ class virtual_valve: public valve
 
         virtual int get_state();
     };
-//-----------------------------------------------------------------------------
-/// @brief Виртуальное устройство.
-///
-/// Необходимо для возвращения результата поиска устройства с несуществующим
-/// номером. Методы данного класса ничего не делают.
-class dev_stub : public i_counter, public valve, public i_wages
-    {
-    public:
-        dev_stub() : valve( "STUB", DT_NONE, DST_NONE )
-            {
-            }
-
-        u_int_4 get_serial_n() const;
-        void    print() const;
-
-        float   get_value();
-        void    direct_set_value( float new_value );
-
-        void    direct_on();
-        void    direct_off();
-        void    direct_set_state( int new_state );
-
-        VALVE_STATE get_valve_state();
-        int get_state()
-            {
-            return 0;
-            }
-
-        void    pause();
-        void    start();
-        void    reset();
-        u_int   get_quantity();
-        float   get_flow();
-
-        u_int get_abs_quantity();
-        void  abs_reset();
-
-        void tare();
-    };
-//-----------------------------------------------------------------------------
 /// @brief Клапан с одним дискретным выходом и одним дискретным входом.
 ///
 class valve_DO1_DI1_off : public valve
@@ -4193,7 +4153,15 @@ class signal_column : public device, public io_device
 /// @brief Камера.
 ///
 /// Служит для получения событий о распозновании объекта.
-class camera : public device, public io_device
+class i_camera
+    {
+    virtual int get_result( int n = 1 ) const = 0;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Камера.
+///
+/// Служит для получения событий о распозновании объекта.
+class camera : public i_camera, public device, public io_device
     {
     public:
         camera( const char* dev_name, DEVICE_SUB_TYPE sub_type,
@@ -4211,13 +4179,13 @@ class camera : public device, public io_device
 
         float get_value();
 
-        virtual int get_result( int n = 1 ) const;
-
         int save_device_ex( char* buff );
 
         int set_cmd( const char* prop, u_int idx, double val );
 
         void set_string_property( const char* field, const char* value );
+
+        int get_result( int n = 1 ) const;
 
     protected:
         bool is_cam_ready;
@@ -4236,7 +4204,6 @@ class camera : public device, public io_device
     private:
         std::string ip;
     };
-
 //-----------------------------------------------------------------------------
 /// @brief Камера.
 ///
@@ -4276,6 +4243,48 @@ class camera_DI3 : public camera_DI2
         int result_2;
     };
 //-----------------------------------------------------------------------------
+/// @brief Виртуальное устройство.
+///
+/// Необходимо для возвращения результата поиска устройства с несуществующим
+/// номером. Методы данного класса ничего не делают.
+class dev_stub : public i_counter, public valve, public i_wages, public camera
+    {
+    public:
+        dev_stub();
+
+        u_int_4 get_serial_n() const;
+        void    print() const;
+
+        float get_value();
+        void direct_set_value( float new_value );
+
+        void off();
+        void on();
+
+        void direct_on();
+        void direct_off();
+        void direct_set_state( int new_state );
+
+        void set_value( float new_value );
+        void set_state( int new_state );
+
+        int get_state();
+
+        VALVE_STATE get_valve_state();
+
+        void    pause();
+        void    start();
+        void    reset();
+        u_int   get_quantity();
+        float   get_flow();
+
+        u_int get_abs_quantity();
+        void  abs_reset();
+
+        void tare();
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.
 ///
 /// Содержит информацию обо всех устройствах проекта.
@@ -4300,7 +4309,7 @@ class device_manager: public i_Lua_save_device
                 return project_devices[ serial_dev_n ];
                 }
 
-            return &stub;
+            return get_stub_device();
             }
 
         /// @brief Получение клапана по его номеру.
@@ -4367,6 +4376,9 @@ class device_manager: public i_Lua_save_device
         /// @brief Получение сигнальной колонны по имени.
         i_DO_AO_device* get_HLA( const char* dev_name );
 
+        /// @brief Получение камеры по имени.
+        camera* get_CAM( const char* dev_name );
+
         /// @brief Получение автоматического выключателя по имени.
         i_DO_AO_device* get_F(const char* dev_name);
 
@@ -4385,6 +4397,11 @@ class device_manager: public i_Lua_save_device
         dev_stub* get_stub()
             {
             return &stub;
+            }
+
+        device* get_stub_device()
+            {
+            return static_cast<device*>( static_cast<valve*>( &stub ) );
             }
 
         int init_params();
@@ -4730,6 +4747,13 @@ PID* C( const char* dev_name );
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
 i_DO_AO_device* HLA( const char* dev_name );
+//-----------------------------------------------------------------------------
+/// @brief Получение камеры по имени.
+///
+/// @param dev_name - имя.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+camera* CAM( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///

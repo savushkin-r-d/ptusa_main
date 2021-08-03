@@ -917,7 +917,7 @@ device* device_manager::get_device( int dev_type,
             }
         catch (...)
             {
-            return &stub;
+            return get_stub_device();
             }
         }
     else
@@ -936,7 +936,7 @@ device* device_manager::get_device( int dev_type,
         G_LOG->write_log( i_log::P_ERR );
         }
 
-    return &stub;
+    return get_stub_device();
     }
 //-----------------------------------------------------------------------------
 device* device_manager::get_device( const char* dev_name )
@@ -951,7 +951,7 @@ device* device_manager::get_device( const char* dev_name )
             }
         catch ( ... )
             {
-            return &stub;
+            return get_stub_device();
             }
         }
     else
@@ -960,7 +960,7 @@ device* device_manager::get_device( const char* dev_name )
         G_LOG->write_log( i_log::P_ERR );
         }
 
-    return &stub;
+    return get_stub_device();
     }
 //-----------------------------------------------------------------------------
 void device_manager::print() const
@@ -1146,6 +1146,11 @@ i_DO_AO_device* device_manager::get_HLA( const char* dev_name )
     return (i_DO_AO_device*)get_device( device::DT_HLA, dev_name );
     }
 //-----------------------------------------------------------------------------
+camera* device_manager::get_CAM( const char* dev_name )
+    {
+    return (camera*)get_device( device::DT_CAM, dev_name );
+    }
+//-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         const char* dev_name, char * descr, char* article )
     {
@@ -1266,7 +1271,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown V device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1295,7 +1299,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown VC device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1336,7 +1339,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown M device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1367,7 +1369,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown LS device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1395,7 +1396,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown TE device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1418,7 +1418,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown FS device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1450,7 +1449,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown FQT device subtype %d!\n", dev_sub_type );
                         }
-                    new_device      = new dev_stub();
                     break;
                 }
             break;
@@ -1473,7 +1471,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown AO device subtype %d!\n", dev_sub_type );
                         }
-                    new_device      = new dev_stub();
                     break;
                 }
             break;
@@ -1512,7 +1509,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown LT device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1535,7 +1531,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown DI device subtype %d!\n", dev_sub_type );
                         }
-                    new_device      = new dev_stub();
                     break;
                 }
             break;
@@ -1558,7 +1553,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown DO device subtype %d!\n", dev_sub_type );
                         }
-                    new_device      = new dev_stub();
                     break;
                 }
             break;
@@ -1586,7 +1580,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown PT device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1619,7 +1612,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown QT device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1642,7 +1634,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown AI device subtype %d!\n", dev_sub_type );
                         }
-                    new_device      = new dev_stub();
                     break;
                 }
             break;
@@ -1665,7 +1656,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown HA device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1688,7 +1678,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown HL device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1711,7 +1700,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown SB device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1734,7 +1722,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown GS device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1756,7 +1743,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown WT device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1779,7 +1765,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf("Unknown F device subtype %d!\n", dev_sub_type);
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1819,7 +1804,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown CAM device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1829,11 +1813,15 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 {
                 printf( "Unknown device type %d!\n", dev_type );
                 }
-            new_device = new dev_stub();
             break;
         }
 
     // Ошибки.
+    if ( !new_device )
+        {
+        new_device = static_cast<device*>( static_cast<valve*>( new dev_stub() ) );
+        }
+
     G_ERRORS_MANAGER->add_error( new tech_dev_error( new_device ) );
 
     u_int new_dev_index = project_devices.size();
@@ -2063,6 +2051,11 @@ valve::VALVE_STATE virtual_valve::get_valve_state()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+dev_stub::dev_stub() : valve( "STUB", DT_NONE, DST_NONE ),
+    camera( "STUB", DST_NONE )
+    {
+    }
+//-----------------------------------------------------------------------------
 float dev_stub::get_value()
     {
     return 0;
@@ -2072,9 +2065,34 @@ void dev_stub::direct_set_value( float new_value )
     {
     }
 //-----------------------------------------------------------------------------
+void dev_stub::off()
+    {
+    return device::off();
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::on()
+    {
+    return device::on();
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::set_value( float new_value )
+    {
+    device::set_value( new_value );
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::set_state( int new_state )
+    {
+    device::set_state( new_state );
+    }
+//-----------------------------------------------------------------------------
 valve::VALVE_STATE dev_stub::get_valve_state()
     {
     return VALVE_STATE::V_OFF;
+    }
+//-----------------------------------------------------------------------------
+int dev_stub::get_state()
+    {
+    return 0;
     }
 //-----------------------------------------------------------------------------
 void dev_stub::direct_on()
@@ -6066,6 +6084,11 @@ PID* C( const char* dev_name )
 i_DO_AO_device* HLA( const char* dev_name )
     {
     return G_DEVICE_MANAGER()->get_HLA( dev_name );
+    }
+//-----------------------------------------------------------------------------
+camera* CAM( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_CAM( dev_name );
     }
 //-----------------------------------------------------------------------------
 dev_stub* STUB()

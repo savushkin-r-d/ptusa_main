@@ -1315,7 +1315,7 @@ int ModbusServ::UnicodetoUtf8(char* Output, unsigned char* Buf, int inputlen)
 device* ModbusServ::get_device( unsigned int group, unsigned int number )
 	{
 	unsigned int line;
-	device* ret = G_DEVICE_MANAGER()->get_stub();
+	device* ret = G_DEVICE_MANAGER()->get_stub_device();
 	line = number / 100;
 	char devname[20] = {0};
 	switch (group)
