@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Tue Aug  3 10:01:32 2021.
+** Generated automatically by tolua++-1.0.92 on Tue Aug  3 15:21:47 2021.
 */
 
 #ifndef __cplusplus
@@ -93,37 +93,38 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"operation_state");
  tolua_usertype(tolua_S,"timer");
  tolua_usertype(tolua_S,"i_Lua_save_device");
- tolua_usertype(tolua_S,"dev_stub");
  tolua_usertype(tolua_S,"profibus_slave");
+ tolua_usertype(tolua_S,"dev_stub");
  tolua_usertype(tolua_S,"ModbusServ");
- tolua_usertype(tolua_S,"action");
  tolua_usertype(tolua_S,"modbus_client");
- tolua_usertype(tolua_S,"operation");
+ tolua_usertype(tolua_S,"action");
  tolua_usertype(tolua_S,"rm_manager");
+ tolua_usertype(tolua_S,"operation");
  tolua_usertype(tolua_S,"cipline_tech_object");
  tolua_usertype(tolua_S,"MSAPID");
+ tolua_usertype(tolua_S,"tm");
  tolua_usertype(tolua_S,"dev_errors_manager");
  tolua_usertype(tolua_S,"device_manager");
- tolua_usertype(tolua_S,"tm");
+ tolua_usertype(tolua_S,"i_camera");
  tolua_usertype(tolua_S,"i_log");
  tolua_usertype(tolua_S,"PAC_info");
+ tolua_usertype(tolua_S,"camera");
  tolua_usertype(tolua_S,"PID");
  tolua_usertype(tolua_S,"io_manager");
  tolua_usertype(tolua_S,"run_time_params_float");
- tolua_usertype(tolua_S,"run_time_params_u_int_4");
  tolua_usertype(tolua_S,"i_DI_device");
  tolua_usertype(tolua_S,"saved_params_u_int_4");
- tolua_usertype(tolua_S,"tech_object");
- tolua_usertype(tolua_S,"i_DO_device");
+ tolua_usertype(tolua_S,"run_time_params_u_int_4");
+ tolua_usertype(tolua_S,"operation_manager");
  tolua_usertype(tolua_S,"i_counter");
- tolua_usertype(tolua_S,"valve");
+ tolua_usertype(tolua_S,"i_DO_device");
  tolua_usertype(tolua_S,"i_AO_device");
  tolua_usertype(tolua_S,"i_wages");
- tolua_usertype(tolua_S,"camera");
+ tolua_usertype(tolua_S,"valve");
  tolua_usertype(tolua_S,"i_AI_device");
- tolua_usertype(tolua_S,"timer_manager");
  tolua_usertype(tolua_S,"signal_column");
- tolua_usertype(tolua_S,"operation_manager");
+ tolua_usertype(tolua_S,"timer_manager");
+ tolua_usertype(tolua_S,"tech_object");
  tolua_usertype(tolua_S,"io_device");
  tolua_usertype(tolua_S,"i_motor");
 }
@@ -6790,6 +6791,74 @@ static int tolua_PAC_dev_PID_set_cmd00(lua_State* tolua_S)
  tolua_error(tolua_S,"#ferror in function 'set_cmd'.",&tolua_err);
  return 0;
 #endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_result of class  i_camera */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_camera_get_result00
+static int tolua_PAC_dev_i_camera_get_result00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const i_camera",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const i_camera* self = (const i_camera*)  tolua_tousertype(tolua_S,1,0);
+  int n = ((int)  tolua_tonumber(tolua_S,2,1));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_result'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->get_result(n);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_result'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: __device__ of class  camera */
+#ifndef TOLUA_DISABLE_tolua_get_camera___device__
+static int tolua_get_camera___device__(lua_State* tolua_S)
+{
+  camera* self = (camera*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable '__device__'",NULL);
+#endif
+#ifdef __cplusplus
+   tolua_pushusertype(tolua_S,(void*)static_cast<device*>(self), "device");
+#else
+   tolua_pushusertype(tolua_S,(void*)((device*)self), "device");
+#endif
+ return 1;
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* get function: __io_device__ of class  camera */
+#ifndef TOLUA_DISABLE_tolua_get_camera___io_device__
+static int tolua_get_camera___io_device__(lua_State* tolua_S)
+{
+  camera* self = (camera*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in accessing variable '__io_device__'",NULL);
+#endif
+#ifdef __cplusplus
+   tolua_pushusertype(tolua_S,(void*)static_cast<io_device*>(self), "io_device");
+#else
+   tolua_pushusertype(tolua_S,(void*)((io_device*)self), "io_device");
+#endif
+ return 1;
 }
 #endif //#ifndef TOLUA_DISABLE
 
@@ -13566,6 +13635,15 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"print",tolua_PAC_dev_PID_print00);
    tolua_function(tolua_S,"get_state",tolua_PAC_dev_PID_get_state00);
    tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_PID_set_cmd00);
+  tolua_endmodule(tolua_S);
+  tolua_cclass(tolua_S,"i_camera","i_camera","",NULL);
+  tolua_beginmodule(tolua_S,"i_camera");
+   tolua_function(tolua_S,"get_result",tolua_PAC_dev_i_camera_get_result00);
+  tolua_endmodule(tolua_S);
+  tolua_cclass(tolua_S,"camera","camera","i_camera",NULL);
+  tolua_beginmodule(tolua_S,"camera");
+   tolua_variable(tolua_S,"__device__",tolua_get_camera___device__,NULL);
+   tolua_variable(tolua_S,"__io_device__",tolua_get_camera___io_device__,NULL);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"PAC_info","PAC_info","i_Lua_save_device",NULL);
   tolua_beginmodule(tolua_S,"PAC_info");

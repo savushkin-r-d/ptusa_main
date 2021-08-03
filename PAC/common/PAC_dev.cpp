@@ -822,7 +822,7 @@ void camera::set_string_property( const char* field, const char* value )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 camera_DI2::camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
-    camera( dev_name, sub_type, static_cast<int>( PARAMS::PARAMS_CNT ) ),
+    camera( dev_name, sub_type, static_cast<int>( PARAMS::PARAMS_CNT ) - 1 ),
     start_switch_time( get_millisec() )
     {
     set_par_name( static_cast<u_int>( PARAMS::P_READY_TIME ), 0, "P_READY_TIME" );

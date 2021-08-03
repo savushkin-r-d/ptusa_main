@@ -1292,6 +1292,22 @@ class PID
         int set_cmd( const char *prop, unsigned int idx, double val );
     };
 //-----------------------------------------------------------------------------
+/// @brief Камера.
+///
+/// Служит для получения событий о распозновании объекта.
+class i_camera
+    {
+    public:
+        virtual int get_result( int n = 1 ) const;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Камера.
+///
+/// Служит для получения событий о распозновании объекта.
+class camera : public i_camera, public device, public io_device
+    {
+    }
+//-----------------------------------------------------------------------------
 class PAC_info: public i_Lua_save_device
     {
     public:

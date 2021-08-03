@@ -4155,7 +4155,8 @@ class signal_column : public device, public io_device
 /// Служит для получения событий о распозновании объекта.
 class i_camera
     {
-    virtual int get_result( int n = 1 ) const = 0;
+    public:
+        virtual int get_result( int n = 1 ) const = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Камера.
