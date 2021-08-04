@@ -787,7 +787,7 @@ int camera::get_result( int n ) const
 
 int camera::save_device_ex( char* buff )
     {
-    int res = sprintf( buff, "RESULT=%d, READY=%d",
+    int res = sprintf( buff, "RESULT=%d, READY=%d, ",
         get_result(), is_cam_ready );
     return res;
     }
