@@ -853,14 +853,6 @@ int camera_DI2::get_state()
 
     return state;
     }
-
-int camera_DI2::get_result( int n ) const
-    {
-#ifndef DEBUG_NO_IO_MODULES
-    result = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES ) );
-#endif
-    return result;
-    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 camera_DI3::camera_DI3( const char* dev_name ) :
@@ -874,10 +866,7 @@ int camera_DI3::get_result( int n ) const
     switch ( n )
         {
         case 1:
-#ifndef DEBUG_NO_IO_MODULES
-            result = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES_1 ) );
-#endif
-            return result;
+            return camera::get_result();
 
         case 2:
 #ifndef DEBUG_NO_IO_MODULES

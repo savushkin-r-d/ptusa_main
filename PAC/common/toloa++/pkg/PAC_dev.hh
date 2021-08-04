@@ -243,13 +243,6 @@ class device : public i_DO_AO_device
 
         void set_descr( const char *description );
 
-        /// @brief Выключение устройства с учетом ручного режима.
-        void off();
-        /// @brief Включение устройства с учетом ручного режима.
-        virtual void on();
-        /// @brief Установка текущего состояния устройства с учетом ручного режима.
-        virtual void set_value( float new_value );
-
         enum DEVICE_TYPE
             {
             DT_NONE = -1,///< Тип не определен.
@@ -1295,17 +1288,32 @@ class PID
 /// @brief Камера.
 ///
 /// Служит для получения событий о распозновании объекта.
-class i_camera
+class camera
     {
     public:
-        virtual int get_result( int n = 1 ) const;
-    };
-//-----------------------------------------------------------------------------
-/// @brief Камера.
-///
-/// Служит для получения событий о распозновании объекта.
-class camera : public i_camera, public device, public io_device
-    {
+        /// @brief Выключение устройства с учетом ручного режима.
+        void off();
+
+        /// @brief Включение устройства с учетом ручного режима.
+        void on();
+
+        /// @brief Установка нового состояния устройства с учетом ручного режима.
+        ///
+        /// @param new_state - новое состояние устройства.
+        void set_state( int new_state );
+
+        /// @brief Получение текущего состояния устройства.
+        ///
+        /// @return - текущее состояние устройства в виде дробного числа.
+        float get_value();
+
+        /// @brief Установка текущего состояния устройства.
+        ///
+        /// @param new_value - новое состояние устройства.
+        void set_value( float new_value );
+
+        /// @brief Получение статуса событий от камеры.
+        int get_result( int n = 1 ) const;
     }
 //-----------------------------------------------------------------------------
 class PAC_info: public i_Lua_save_device

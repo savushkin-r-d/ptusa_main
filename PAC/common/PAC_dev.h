@@ -576,8 +576,8 @@ class device : public i_DO_AO_device, public par_device
             DST_WT_VIRT, ///< Виртуальные весы.
 
             //CAM
-            DST_CAM_DO1_DI1 = 1,///< C сигналом активации и результатом обработки.
-            DST_CAM_DO1_DI2,    ///< C сигналом активации, результатом обработки и готовностью.
+            DST_CAM_DO1_DI2 = 1,///< C сигналом активации, результатом обработки и готовностью.
+            DST_CAM_DO1_DI1,    ///< C сигналом активации и результатом обработки.
             DST_CAM_DO1_DI3     ///< C сигналом активации, двумя результатами обработки и готовностью.
             };
 
@@ -4156,6 +4156,7 @@ class signal_column : public device, public io_device
 class i_camera
     {
     public:
+        /// @brief Получение статуса событий от камеры.
         virtual int get_result( int n = 1 ) const = 0;
     };
 //-----------------------------------------------------------------------------
@@ -4215,8 +4216,6 @@ class camera_DI2 : public camera
         camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type );
 
         int get_state();
-
-        int get_result( int n = 1 ) const;
 
     protected:
         u_int start_switch_time;
