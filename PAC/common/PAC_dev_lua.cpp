@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 08/04/21 10:53:20.
+** Generated automatically by tolua++-1.0.92 on 08/05/21 10:02:25.
 */
 
 #ifndef __cplusplus
@@ -6873,6 +6873,38 @@ static int tolua_PAC_dev_camera_set_value00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: get_state of class  camera */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_camera_get_state00
+static int tolua_PAC_dev_camera_get_state00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"camera",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  camera* self = (camera*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_state'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->get_state();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_state'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: get_result of class  camera */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_camera_get_result00
 static int tolua_PAC_dev_camera_get_result00(lua_State* tolua_S)
@@ -13685,6 +13717,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"set_state",tolua_PAC_dev_camera_set_state00);
    tolua_function(tolua_S,"get_value",tolua_PAC_dev_camera_get_value00);
    tolua_function(tolua_S,"set_value",tolua_PAC_dev_camera_set_value00);
+   tolua_function(tolua_S,"get_state",tolua_PAC_dev_camera_get_state00);
    tolua_function(tolua_S,"get_result",tolua_PAC_dev_camera_get_result00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"PAC_info","PAC_info","i_Lua_save_device",NULL);

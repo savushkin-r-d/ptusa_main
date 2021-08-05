@@ -1312,6 +1312,11 @@ class camera
         /// @param new_value - новое состояние устройства.
         void set_value( float new_value );
 
+        /// @brief Получение состояния устройства.
+        ///
+        /// @return состояние устройства в виде целого числа.
+        int get_state();
+
         /// @brief Получение статуса событий от камеры.
         int get_result( int n = 1 ) const;
     }
