@@ -247,7 +247,7 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
          ///
          bool is_any_message() const
              {
-             return errors.empty();
+             return !errors.empty();
              }
 
 #ifndef __GNUC__
