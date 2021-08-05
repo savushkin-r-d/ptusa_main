@@ -4217,6 +4217,8 @@ class camera_DI2 : public camera
 
         int get_state();
 
+        void evaluate_io();
+
     protected:
         u_int start_switch_time;
 
@@ -4236,6 +4238,8 @@ class camera_DI3 : public camera_DI2
     {
     public:
         camera_DI3( const char* dev_name );
+
+        void evaluate_io();
 
         int get_result( int n = 1 ) const;
 

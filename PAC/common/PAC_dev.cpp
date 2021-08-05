@@ -830,6 +830,11 @@ camera_DI2::camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
 
 int camera_DI2::get_state()
     {
+    return state;
+    }
+
+void camera_DI2::evaluate_io()
+    {
 #ifndef DEBUG_NO_IO_MODULES
     int o = get_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ) );
     int i = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_READY ) );
@@ -850,8 +855,6 @@ int camera_DI2::get_state()
 
     is_cam_ready = i > 0;
 #endif
-
-    return state;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -859,6 +862,14 @@ camera_DI3::camera_DI3( const char* dev_name ) :
     camera_DI2( dev_name, DEVICE_SUB_TYPE::DST_CAM_DO1_DI3 ),
     result_2( 0 )
     {
+    }
+
+void camera_DI3::evaluate_io()
+    {
+    camera_DI2::evaluate_io();
+#ifndef DEBUG_NO_IO_MODULES
+    result_2 = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES_2 ) );
+#endif
     }
 
 int camera_DI3::get_result( int n ) const
@@ -869,9 +880,6 @@ int camera_DI3::get_result( int n ) const
             return camera::get_result();
 
         case 2:
-#ifndef DEBUG_NO_IO_MODULES
-            result_2 = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES_2 ) );
-#endif
             return result_2;
         }
 
