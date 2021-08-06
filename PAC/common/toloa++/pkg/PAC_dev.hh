@@ -1318,7 +1318,7 @@ class camera
         int get_state();
 
         /// @brief Получение статуса событий от камеры.
-        int get_result( int n = 1 ) const;
+        int get_result( int n = 1 );
     }
 //-----------------------------------------------------------------------------
 class PAC_info: public i_Lua_save_device

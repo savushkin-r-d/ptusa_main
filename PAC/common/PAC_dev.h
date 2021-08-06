@@ -4157,7 +4157,7 @@ class i_camera
     {
     public:
         /// @brief Получение статуса событий от камеры.
-        virtual int get_result( int n = 1 ) const = 0;
+        virtual int get_result( int n = 1 ) = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Камера.
@@ -4187,7 +4187,7 @@ class camera : public i_camera, public device, public io_device
 
         void set_string_property( const char* field, const char* value );
 
-        int get_result( int n = 1 ) const;
+        int get_result( int n = 1 );
 
     protected:
         bool is_cam_ready;
@@ -4241,7 +4241,7 @@ class camera_DI3 : public camera_DI2
 
         void evaluate_io();
 
-        int get_result( int n = 1 ) const;
+        int get_result( int n = 1 );
 
     private:
         int result_2;

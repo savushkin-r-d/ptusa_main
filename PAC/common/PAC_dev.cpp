@@ -777,7 +777,7 @@ float camera::get_value()
     return static_cast<float>( state );
     }
 
-int camera::get_result( int n ) const
+int camera::get_result( int n )
     {
 #ifndef DEBUG_NO_IO_MODULES
     result = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES_1 ) );
@@ -872,7 +872,7 @@ void camera_DI3::evaluate_io()
 #endif
     }
 
-int camera_DI3::get_result( int n ) const
+int camera_DI3::get_result( int n )
     {
     switch ( n )
         {

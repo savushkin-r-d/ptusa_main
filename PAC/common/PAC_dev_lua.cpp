@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 08/05/21 10:02:25.
+** Generated automatically by tolua++-1.0.92 on 08/06/21 09:15:10.
 */
 
 #ifndef __cplusplus
@@ -6912,7 +6912,7 @@ static int tolua_PAC_dev_camera_get_result00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"const camera",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"camera",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,1,&tolua_err) ||
      !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
@@ -6920,7 +6920,7 @@ static int tolua_PAC_dev_camera_get_result00(lua_State* tolua_S)
  else
 #endif
  {
-  const camera* self = (const camera*)  tolua_tousertype(tolua_S,1,0);
+  camera* self = (camera*)  tolua_tousertype(tolua_S,1,0);
   int n = ((int)  tolua_tonumber(tolua_S,2,1));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_result'", NULL);
