@@ -4251,7 +4251,8 @@ class camera_DI3 : public camera_DI2
 ///
 /// Необходимо для возвращения результата поиска устройства с несуществующим
 /// номером. Методы данного класса ничего не делают.
-class dev_stub : public i_counter, public valve, public i_wages, public camera
+class dev_stub : public i_counter, public valve, public i_wages,
+    public camera, public signal_column
     {
     public:
         dev_stub();
@@ -4378,7 +4379,7 @@ class device_manager: public i_Lua_save_device
         PID* get_C( const char* dev_name );
 
         /// @brief Получение сигнальной колонны по имени.
-        i_DO_AO_device* get_HLA( const char* dev_name );
+        signal_column* get_HLA( const char* dev_name );
 
         /// @brief Получение камеры по имени.
         camera* get_CAM( const char* dev_name );
@@ -4750,7 +4751,7 @@ PID* C( const char* dev_name );
 /// @param dev_name - имя.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_DO_AO_device* HLA( const char* dev_name );
+signal_column* HLA( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение камеры по имени.
 ///

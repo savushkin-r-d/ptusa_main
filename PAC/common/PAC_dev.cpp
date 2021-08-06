@@ -1138,9 +1138,9 @@ PID* device_manager::get_C( const char* dev_name )
     return (PID*)get_device( device::DT_REGULATOR, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DO_AO_device* device_manager::get_HLA( const char* dev_name )
+signal_column* device_manager::get_HLA( const char* dev_name )
     {
-    return (i_DO_AO_device*)get_device( device::DT_HLA, dev_name );
+    return (signal_column*)get_device( device::DT_HLA, dev_name );
     }
 //-----------------------------------------------------------------------------
 camera* device_manager::get_CAM( const char* dev_name )
@@ -2049,7 +2049,8 @@ valve::VALVE_STATE virtual_valve::get_valve_state()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 dev_stub::dev_stub() : valve( "STUB", DT_NONE, DST_NONE ),
-    camera( "STUB", DST_NONE )
+    camera( "STUB", DST_NONE ),
+    signal_column( "STUB" )
     {
     }
 //-----------------------------------------------------------------------------
@@ -6074,7 +6075,7 @@ PID* C( const char* dev_name )
     return G_DEVICE_MANAGER()->get_C( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DO_AO_device* HLA( const char* dev_name )
+signal_column* HLA( const char* dev_name )
     {
     return G_DEVICE_MANAGER()->get_HLA( dev_name );
     }
