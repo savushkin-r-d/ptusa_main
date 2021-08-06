@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Mon Jul 26 16:13:42 2021.
+** Generated automatically by tolua++-1.0.92 on 08/06/21 09:15:10.
 */
 
 #ifndef __cplusplus
@@ -92,21 +92,22 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"tech_object_manager");
  tolua_usertype(tolua_S,"operation_state");
  tolua_usertype(tolua_S,"timer");
+ tolua_usertype(tolua_S,"i_Lua_save_device");
  tolua_usertype(tolua_S,"dev_stub");
- tolua_usertype(tolua_S,"tm");
  tolua_usertype(tolua_S,"profibus_slave");
- tolua_usertype(tolua_S,"action");
  tolua_usertype(tolua_S,"ModbusServ");
- tolua_usertype(tolua_S,"operation");
+ tolua_usertype(tolua_S,"action");
  tolua_usertype(tolua_S,"modbus_client");
+ tolua_usertype(tolua_S,"operation");
  tolua_usertype(tolua_S,"rm_manager");
  tolua_usertype(tolua_S,"cipline_tech_object");
+ tolua_usertype(tolua_S,"MSAPID");
  tolua_usertype(tolua_S,"dev_errors_manager");
  tolua_usertype(tolua_S,"device_manager");
- tolua_usertype(tolua_S,"MSAPID");
+ tolua_usertype(tolua_S,"tm");
  tolua_usertype(tolua_S,"i_log");
- tolua_usertype(tolua_S,"i_Lua_save_device");
  tolua_usertype(tolua_S,"PAC_info");
+ tolua_usertype(tolua_S,"camera");
  tolua_usertype(tolua_S,"PID");
  tolua_usertype(tolua_S,"io_manager");
  tolua_usertype(tolua_S,"run_time_params_float");
@@ -1341,86 +1342,6 @@ static int tolua_PAC_dev_device_set_descr00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: off of class  device */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_off01
-static int tolua_PAC_dev_device_off01(lua_State* tolua_S)
-{
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"device",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
- {
-  device* self = (device*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'off'", NULL);
-#endif
-  {
-   self->off();
-  }
- }
- return 0;
-tolua_lerror:
- return tolua_PAC_dev_device_off00(tolua_S);
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: on of class  device */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_on01
-static int tolua_PAC_dev_device_on01(lua_State* tolua_S)
-{
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"device",0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,2,&tolua_err)
- )
-  goto tolua_lerror;
- else
- {
-  device* self = (device*)  tolua_tousertype(tolua_S,1,0);
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'on'", NULL);
-#endif
-  {
-   self->on();
-  }
- }
- return 0;
-tolua_lerror:
- return tolua_PAC_dev_device_on00(tolua_S);
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: set_value of class  device */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_set_value01
-static int tolua_PAC_dev_device_set_value01(lua_State* tolua_S)
-{
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"device",0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,3,&tolua_err)
- )
-  goto tolua_lerror;
- else
- {
-  device* self = (device*)  tolua_tousertype(tolua_S,1,0);
-  float new_value = ((float)  tolua_tonumber(tolua_S,2,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_value'", NULL);
-#endif
-  {
-   self->set_value(new_value);
-  }
- }
- return 0;
-tolua_lerror:
- return tolua_PAC_dev_device_set_value00(tolua_S);
-}
-#endif //#ifndef TOLUA_DISABLE
-
 /* method: tare of class  i_wages */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_i_wages_tare00
 static int tolua_PAC_dev_i_wages_tare00(lua_State* tolua_S)
@@ -2209,6 +2130,35 @@ static int tolua_PAC_dev_C00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'C'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* function: CAM */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_CAM00
+static int tolua_PAC_dev_CAM00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
+  {
+   camera* tolua_ret = (camera*)  CAM(dev_name);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"camera");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'CAM'.",&tolua_err);
  return 0;
 #endif
 }
@@ -6758,6 +6708,232 @@ static int tolua_PAC_dev_PID_set_cmd00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'set_cmd'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: off of class  camera */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_camera_off00
+static int tolua_PAC_dev_camera_off00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"camera",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  camera* self = (camera*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'off'", NULL);
+#endif
+  {
+   self->off();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'off'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: on of class  camera */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_camera_on00
+static int tolua_PAC_dev_camera_on00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"camera",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  camera* self = (camera*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'on'", NULL);
+#endif
+  {
+   self->on();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'on'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_state of class  camera */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_camera_set_state00
+static int tolua_PAC_dev_camera_set_state00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"camera",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  camera* self = (camera*)  tolua_tousertype(tolua_S,1,0);
+  int new_state = ((int)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_state'", NULL);
+#endif
+  {
+   self->set_state(new_state);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_state'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_value of class  camera */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_camera_get_value00
+static int tolua_PAC_dev_camera_get_value00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"camera",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  camera* self = (camera*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_value'", NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->get_value();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_value'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_value of class  camera */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_camera_set_value00
+static int tolua_PAC_dev_camera_set_value00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"camera",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  camera* self = (camera*)  tolua_tousertype(tolua_S,1,0);
+  float new_value = ((float)  tolua_tonumber(tolua_S,2,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_value'", NULL);
+#endif
+  {
+   self->set_value(new_value);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_value'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_state of class  camera */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_camera_get_state00
+static int tolua_PAC_dev_camera_get_state00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"camera",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  camera* self = (camera*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_state'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->get_state();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_state'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_result of class  camera */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_camera_get_result00
+static int tolua_PAC_dev_camera_get_result00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"camera",0,&tolua_err) ||
+     !tolua_isnumber(tolua_S,2,1,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,3,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  camera* self = (camera*)  tolua_tousertype(tolua_S,1,0);
+  int n = ((int)  tolua_tonumber(tolua_S,2,1));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_result'", NULL);
+#endif
+  {
+   int tolua_ret = (int)  self->get_result(n);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_result'.",&tolua_err);
  return 0;
 #endif
 }
@@ -13189,9 +13365,6 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"set_property",tolua_PAC_dev_device_set_property00);
    tolua_function(tolua_S,"set_string_property",tolua_PAC_dev_device_set_string_property00);
    tolua_function(tolua_S,"set_descr",tolua_PAC_dev_device_set_descr00);
-   tolua_function(tolua_S,"off",tolua_PAC_dev_device_off01);
-   tolua_function(tolua_S,"on",tolua_PAC_dev_device_on01);
-   tolua_function(tolua_S,"set_value",tolua_PAC_dev_device_set_value01);
    tolua_constant(tolua_S,"DT_NONE",device::DT_NONE);
    tolua_constant(tolua_S,"DT_V",device::DT_V);
    tolua_constant(tolua_S,"DT_VC",device::DT_VC);
@@ -13267,6 +13440,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_function(tolua_S,"PT",tolua_PAC_dev_PT00);
   tolua_function(tolua_S,"F",tolua_PAC_dev_F00);
   tolua_function(tolua_S,"C",tolua_PAC_dev_C00);
+  tolua_function(tolua_S,"CAM",tolua_PAC_dev_CAM00);
   tolua_function(tolua_S,"STUB",tolua_PAC_dev_STUB00);
   tolua_function(tolua_S,"DEVICE",tolua_PAC_dev_DEVICE00);
   tolua_cclass(tolua_S,"dev_stub","dev_stub","",NULL);
@@ -13535,6 +13709,16 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"print",tolua_PAC_dev_PID_print00);
    tolua_function(tolua_S,"get_state",tolua_PAC_dev_PID_get_state00);
    tolua_function(tolua_S,"set_cmd",tolua_PAC_dev_PID_set_cmd00);
+  tolua_endmodule(tolua_S);
+  tolua_cclass(tolua_S,"camera","camera","",NULL);
+  tolua_beginmodule(tolua_S,"camera");
+   tolua_function(tolua_S,"off",tolua_PAC_dev_camera_off00);
+   tolua_function(tolua_S,"on",tolua_PAC_dev_camera_on00);
+   tolua_function(tolua_S,"set_state",tolua_PAC_dev_camera_set_state00);
+   tolua_function(tolua_S,"get_value",tolua_PAC_dev_camera_get_value00);
+   tolua_function(tolua_S,"set_value",tolua_PAC_dev_camera_set_value00);
+   tolua_function(tolua_S,"get_state",tolua_PAC_dev_camera_get_state00);
+   tolua_function(tolua_S,"get_result",tolua_PAC_dev_camera_get_result00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"PAC_info","PAC_info","i_Lua_save_device",NULL);
   tolua_beginmodule(tolua_S,"PAC_info");

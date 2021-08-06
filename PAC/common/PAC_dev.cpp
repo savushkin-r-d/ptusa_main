@@ -18,7 +18,7 @@ std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
 
 std::vector<valve_bottom_mix_proof*> valve_bottom_mix_proof::to_switch_off;
 
-const char device::DEV_NAMES[][ 5 ] =
+const char* const device::DEV_NAMES[ device::DEVICE_TYPE::C_DEVICE_TYPE_CNT ] =
     {
     "V",       ///< Клапан.
     "VC",      ///< Управляемый клапан.
@@ -42,7 +42,9 @@ const char device::DEV_NAMES[][ 5 ] =
     "PT",      ///< Давление (значение).
     "F",       ///< Автоматический выключатель.
 
-    "R",       ///<ПИД-регулятор.
+    "R",       ///< ПИД-регулятор.
+    "HLA",     ///< Сигнальная колонна.
+    "CAM",     ///< Камера.
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -731,6 +733,160 @@ void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+camera::camera( const char* dev_name, DEVICE_SUB_TYPE sub_type, int params_count ) :
+    device( dev_name, DT_CAM, sub_type, params_count ),
+    io_device( dev_name ),
+    is_cam_ready( true ),
+    result( 0 ),
+    state( 0 )
+    {
+    }
+
+void camera::direct_set_state( int new_state )
+    {
+    if ( new_state ) direct_on(); else direct_off();
+    }
+
+void camera::direct_off()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    set_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ), 0 );
+#endif
+    state = 0;
+    }
+
+void camera::direct_on()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    set_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ), 1 );
+#endif
+    state = 1;
+    }
+
+void camera::direct_set_value( float new_value )
+    {
+    }
+
+int camera::get_state()
+    {
+    return state;
+    }
+
+float camera::get_value()
+    {
+    return static_cast<float>( state );
+    }
+
+int camera::get_result( int n )
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    result = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES_1 ) );
+#endif
+    return result;
+    }
+
+int camera::save_device_ex( char* buff )
+    {
+    int res = sprintf( buff, "RESULT=%d, READY=%d, ",
+        get_result(), is_cam_ready );
+    return res;
+    }
+
+int camera::set_cmd( const char* prop, u_int idx, double val )
+    {
+    if ( strcmp( prop, "RESULT" ) == 0 )
+        {
+        result = static_cast<int>( val );
+        }
+    else if ( strcmp( prop, "READY" ) == 0 )
+        {
+        is_cam_ready = val > 0;
+        }
+    else device::set_cmd( prop, idx, val );
+
+    return 0;
+    }
+
+void camera::set_string_property( const char* field, const char* value )
+    {
+    if ( G_DEBUG )
+        {
+        printf( "Set string property %s value %s\n", field, value );
+        }
+
+    if ( strcmp( field, "IP" ) == 0 )
+        {
+        ip = std::string( value );
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+camera_DI2::camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
+    camera( dev_name, sub_type, static_cast<int>( PARAMS::PARAMS_CNT ) - 1 ),
+    start_switch_time( get_millisec() )
+    {
+    set_par_name( static_cast<u_int>( PARAMS::P_READY_TIME ), 0, "P_READY_TIME" );
+    }
+
+int camera_DI2::get_state()
+    {
+    return state;
+    }
+
+void camera_DI2::evaluate_io()
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    int o = get_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ) );
+    int i = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_READY ) );
+    if ( o == i )
+        {
+        start_switch_time = get_millisec();
+        state = o;
+        }
+    else if ( get_delta_millisec( start_switch_time ) <
+        get_par( static_cast<u_int>( PARAMS::P_READY_TIME ), 0 ) )
+        {
+        state = o;
+        }
+    else
+        {
+        state = -1;
+        }
+
+    is_cam_ready = i > 0;
+#endif
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+camera_DI3::camera_DI3( const char* dev_name ) :
+    camera_DI2( dev_name, DEVICE_SUB_TYPE::DST_CAM_DO1_DI3 ),
+    result_2( 0 )
+    {
+    }
+
+void camera_DI3::evaluate_io()
+    {
+    camera_DI2::evaluate_io();
+#ifndef DEBUG_NO_IO_MODULES
+    result_2 = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_RES_2 ) );
+#endif
+    }
+
+int camera_DI3::get_result( int n )
+    {
+    switch ( n )
+        {
+        case 1:
+            return camera::get_result();
+
+        case 2:
+            return result_2;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 i_DO_device* device_manager::get_V( const char *dev_name )
     {
     return get_device( device::DT_V, dev_name );
@@ -758,7 +914,7 @@ device* device_manager::get_device( int dev_type,
             }
         catch (...)
             {
-            return &stub;
+            return get_stub_device();
             }
         }
     else
@@ -777,7 +933,7 @@ device* device_manager::get_device( int dev_type,
         G_LOG->write_log( i_log::P_ERR );
         }
 
-    return &stub;
+    return get_stub_device();
     }
 //-----------------------------------------------------------------------------
 device* device_manager::get_device( const char* dev_name )
@@ -792,7 +948,7 @@ device* device_manager::get_device( const char* dev_name )
             }
         catch ( ... )
             {
-            return &stub;
+            return get_stub_device();
             }
         }
     else
@@ -801,7 +957,7 @@ device* device_manager::get_device( const char* dev_name )
         G_LOG->write_log( i_log::P_ERR );
         }
 
-    return &stub;
+    return get_stub_device();
     }
 //-----------------------------------------------------------------------------
 void device_manager::print() const
@@ -987,6 +1143,11 @@ i_DO_AO_device* device_manager::get_HLA( const char* dev_name )
     return (i_DO_AO_device*)get_device( device::DT_HLA, dev_name );
     }
 //-----------------------------------------------------------------------------
+camera* device_manager::get_CAM( const char* dev_name )
+    {
+    return (camera*)get_device( device::DT_CAM, dev_name );
+    }
+//-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         const char* dev_name, char * descr, char* article )
     {
@@ -1107,7 +1268,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown V device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1136,7 +1296,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown VC device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1177,7 +1336,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown M device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1208,7 +1366,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown LS device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1236,7 +1393,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown TE device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1259,7 +1415,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown FS device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1291,7 +1446,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown FQT device subtype %d!\n", dev_sub_type );
                         }
-                    new_device      = new dev_stub();
                     break;
                 }
             break;
@@ -1314,7 +1468,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown AO device subtype %d!\n", dev_sub_type );
                         }
-                    new_device      = new dev_stub();
                     break;
                 }
             break;
@@ -1353,7 +1506,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown LT device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1376,7 +1528,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown DI device subtype %d!\n", dev_sub_type );
                         }
-                    new_device      = new dev_stub();
                     break;
                 }
             break;
@@ -1399,7 +1550,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown DO device subtype %d!\n", dev_sub_type );
                         }
-                    new_device      = new dev_stub();
                     break;
                 }
             break;
@@ -1427,7 +1577,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown PT device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1460,7 +1609,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown QT device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1483,7 +1631,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown AI device subtype %d!\n", dev_sub_type );
                         }
-                    new_device      = new dev_stub();
                     break;
                 }
             break;
@@ -1506,7 +1653,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown HA device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1529,7 +1675,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown HL device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1552,7 +1697,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown SB device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1575,7 +1719,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown GS device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1597,7 +1740,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf( "Unknown WT device subtype %d!\n", dev_sub_type );
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1620,7 +1762,6 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         {
                         printf("Unknown F device subtype %d!\n", dev_sub_type);
                         }
-                    new_device = new dev_stub();
                     break;
                 }
             break;
@@ -1635,16 +1776,49 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             new_io_device = (signal_column*)new_device;
             break;
 
+        case device::DT_CAM:
+            switch ( dev_sub_type )
+                {
+                case device::DST_CAM_DO1_DI1:
+                    new_device = new camera( dev_name,
+                        static_cast<device::DEVICE_SUB_TYPE> (dev_sub_type) );
+                    new_io_device = (camera*)new_device;
+                    break;
+
+                case device::DST_CAM_DO1_DI2:
+                    new_device = new camera_DI2( dev_name,
+                        static_cast<device::DEVICE_SUB_TYPE> ( dev_sub_type ) );
+                    new_io_device = (camera_DI2*)new_device;
+                    break;
+
+                case device::DST_CAM_DO1_DI3:
+                    new_device = new camera_DI3( dev_name );
+                    new_io_device = (camera_DI3*)new_device;
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown CAM device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
         default:
             if ( G_DEBUG )
                 {
                 printf( "Unknown device type %d!\n", dev_type );
                 }
-            new_device = new dev_stub();
             break;
         }
 
     // Ошибки.
+    if ( !new_device )
+        {
+        new_device = static_cast<device*>( static_cast<valve*>( new dev_stub() ) );
+        }
+
     G_ERRORS_MANAGER->add_error( new tech_dev_error( new_device ) );
 
     u_int new_dev_index = project_devices.size();
@@ -1874,6 +2048,11 @@ valve::VALVE_STATE virtual_valve::get_valve_state()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+dev_stub::dev_stub() : valve( "STUB", DT_NONE, DST_NONE ),
+    camera( "STUB", DST_NONE )
+    {
+    }
+//-----------------------------------------------------------------------------
 float dev_stub::get_value()
     {
     return 0;
@@ -1883,9 +2062,30 @@ void dev_stub::direct_set_value( float new_value )
     {
     }
 //-----------------------------------------------------------------------------
+void dev_stub::off()
+    {
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::on()
+    {
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::set_value( float new_value )
+    {
+    }
+//-----------------------------------------------------------------------------
+void dev_stub::set_state( int new_state )
+    {
+    }
+//-----------------------------------------------------------------------------
 valve::VALVE_STATE dev_stub::get_valve_state()
     {
     return VALVE_STATE::V_OFF;
+    }
+//-----------------------------------------------------------------------------
+int dev_stub::get_state()
+    {
+    return 0;
     }
 //-----------------------------------------------------------------------------
 void dev_stub::direct_on()
@@ -5877,6 +6077,11 @@ PID* C( const char* dev_name )
 i_DO_AO_device* HLA( const char* dev_name )
     {
     return G_DEVICE_MANAGER()->get_HLA( dev_name );
+    }
+//-----------------------------------------------------------------------------
+camera* CAM( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_CAM( dev_name );
     }
 //-----------------------------------------------------------------------------
 dev_stub* STUB()
