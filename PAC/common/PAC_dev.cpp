@@ -1401,7 +1401,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             switch ( dev_sub_type )
                 {
                 case device::DST_NONE:
-                case device::DT_FS:
+                case device::DST_FS:
                     new_device = new flow_s( dev_name );
                     new_io_device = (flow_s*)new_device;
                     break;
@@ -1644,7 +1644,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_io_device = (siren*)new_device;
                     break;
 
-                case device::DST_F_VIRT:
+                case device::DST_HA_VIRT:
                     new_device = new virtual_device( dev_name, device::DT_HA, device::DST_HA_VIRT );
                     break;
 
