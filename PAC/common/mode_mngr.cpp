@@ -1316,6 +1316,12 @@ bool to_step_if_devices_in_specific_state_action::is_goto_next_step() const
                 auto v = dynamic_cast<valve*>( dev );
                 if ( !v->is_opened() ) res = false;
                 }
+            else if ( type == device::DT_DI || type == device::DT_GS ||
+                type == device::DT_DO )
+                {
+                auto d = dynamic_cast<i_DI_device*>( dev );
+                if ( !d->is_active() ) res = false;
+                }
             }
 
         auto& off_devices = devs[ G_OFF_DEVICES ];
@@ -1327,6 +1333,12 @@ bool to_step_if_devices_in_specific_state_action::is_goto_next_step() const
                 {
                 auto v = dynamic_cast<valve*>( dev );
                 if ( !v->is_closed() ) res = false;
+                }
+            else if ( type == device::DT_DI || type == device::DT_GS ||
+                type == device::DT_DO )
+                {
+                auto d = dynamic_cast<i_DI_device*>( dev );
+                if ( d->is_active() ) res = false;
                 }
             }
         }
