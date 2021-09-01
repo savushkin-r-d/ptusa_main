@@ -1584,13 +1584,13 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
         steps[ active_step_n ]->final();
         }
     active_step_n = new_step - 1;
+    active_step_next_step_n = next_step_ns[ active_step_n ];
 
     //Время шага
     int par_n = step_duration_par_ns[ active_step_n ];
     if ( par_n > 0 )
         {
         active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
-        active_step_next_step_n = next_step_ns[ active_step_n ];
         }
 
     if ( active_step_time > 0 || par_n <= 0 )
