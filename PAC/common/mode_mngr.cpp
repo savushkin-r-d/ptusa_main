@@ -1346,6 +1346,11 @@ bool to_step_if_devices_in_specific_state_action::is_goto_next_step() const
     return res;
     }
 //-----------------------------------------------------------------------------
+void to_step_if_devices_in_specific_state_action::final()
+    {
+    return;
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 operation_state::operation_state( const char* name,
     operation_manager *owner, int n ) : name( name ),

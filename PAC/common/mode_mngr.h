@@ -312,6 +312,9 @@ class to_step_if_devices_in_specific_state_action : public action
 
         bool is_goto_next_step() const;
 
+        /// @brief Завершения действия.
+        void final();
+
     private:
         enum GROUPS
             {
