@@ -1316,6 +1316,12 @@ bool to_step_if_devices_in_specific_state_action::is_goto_next_step() const
                 auto v = dynamic_cast<valve*>( dev );
                 if ( !v->is_opened() ) res = false;
                 }
+            else if ( type == device::DT_DI || type == device::DT_GS ||
+                type == device::DT_DO )
+                {
+                auto d = dynamic_cast<i_DI_device*>( dev );
+                if ( !d->is_active() ) res = false;
+                }
             }
 
         auto& off_devices = devs[ G_OFF_DEVICES ];
@@ -1327,6 +1333,12 @@ bool to_step_if_devices_in_specific_state_action::is_goto_next_step() const
                 {
                 auto v = dynamic_cast<valve*>( dev );
                 if ( !v->is_closed() ) res = false;
+                }
+            else if ( type == device::DT_DI || type == device::DT_GS ||
+                type == device::DT_DO )
+                {
+                auto d = dynamic_cast<i_DI_device*>( dev );
+                if ( d->is_active() ) res = false;
                 }
             }
         }
@@ -1584,13 +1596,13 @@ void operation_state::to_step( u_int new_step, u_long cooperative_time )
         steps[ active_step_n ]->final();
         }
     active_step_n = new_step - 1;
+    active_step_next_step_n = next_step_ns[ active_step_n ];
 
     //Время шага
     int par_n = step_duration_par_ns[ active_step_n ];
     if ( par_n > 0 )
         {
         active_step_time = u_int( owner->get_step_param( par_n ) * 1000L );
-        active_step_next_step_n = next_step_ns[ active_step_n ];
         }
 
     if ( active_step_time > 0 || par_n <= 0 )

@@ -1302,6 +1302,24 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
     return 0;
     }
 //-----------------------------------------------------------------------------
+void tech_object::print() const
+    {
+    printf( "#%2d\n", serial_idx );
+    printf( "Object \'%s\' [%d], type %d\n", name, number, type );
+    printf( "par_float[%d] par_uint[%d] rt_par_float[%d] rt_par_uint[%d]\n",
+        par_float.get_count(), par_uint.get_count(),
+        rt_par_float.get_count(), rt_par_uint.get_count() );
+    printf( "timers[%d]\n", timers.get_count() );
+
+    par_float.print();
+    par_uint.print();
+    rt_par_float.print();
+    rt_par_uint.print();
+
+    operations_manager->print();
+    printf( "\n" );
+    }
+//-----------------------------------------------------------------------------
 bool tech_object::is_idle() const
     {
     for ( u_int i = 0; i < state.size(); i++ )
