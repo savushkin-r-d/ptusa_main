@@ -631,6 +631,7 @@ step::step( std::string name, operation_state *owner,
 
     actions.push_back( new required_DI_action() );
     actions.push_back( new DI_DO_action() );
+    actions.push_back( new inverted_DI_DO_action() );
     actions.push_back( new AI_AO_action() );
     actions.push_back( new wash_action() );
     if ( !is_mode )
@@ -762,6 +763,10 @@ void step::set_dx_time( u_int_4 dx_time )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+DI_DO_action::DI_DO_action() :action( "Группы DI->DO's" )
+    {
+    }
+//-----------------------------------------------------------------------------
 int DI_DO_action::check( char* reason ) const
     {
     if ( is_empty() )
@@ -819,6 +824,68 @@ void DI_DO_action::evaluate()
                 {
                 devs[ i ][ j ]->off();
                 }
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+inverted_DI_DO_action::inverted_DI_DO_action() :action( "Группы инвертированный DI->DO's" )
+    {
+    }
+//-----------------------------------------------------------------------------
+int inverted_DI_DO_action::check( char* reason ) const
+    {
+    if ( is_empty() )
+        {
+        return 0;
+        }
+
+    auto& devs = devices[ MAIN_GROUP ];
+    for ( u_int i = 0; i < devs.size(); i++ )
+        {
+        if ( devs[ i ].empty() )
+            {
+            continue;
+            }
+
+        auto d_i_device = devs[ i ][ 0 ];
+        if ( d_i_device->get_type() != device::DT_DI )
+            {
+            sprintf( reason, "в поле \'Группы инвертированный DI - DO\' "
+                "устройство \'%.25s (%.50s)\'"
+                " не является сигналом DI",
+                d_i_device->get_name(), d_i_device->get_description() );
+            return 1;
+            }
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void inverted_DI_DO_action::evaluate()
+    {
+    if ( is_empty() )
+        {
+        return;
+        }
+
+    auto& devs = devices[ MAIN_GROUP ];
+
+    for ( u_int i = 0; i < devs.size(); i++ )
+        {
+        if ( devs[ i ].empty() )
+            {
+            continue;
+            }
+
+        int new_state = 0;
+        if ( !devs[ i ][ 0 ]->is_active() )
+            {
+            new_state = 1;
+            }
+        for ( u_int j = 1; j < devs[ i ].size(); j++ )
+            {
+            devs[ i ][ j ]->set_state( new_state );
             }
         }
     }
