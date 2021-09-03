@@ -247,7 +247,7 @@ class inverted_DI_DO_action : public DI_DO_action
         inverted_DI_DO_action();
 
     protected:
-        void evaluate_DO( std::vector< device* > devices );
+        void evaluate_DO( std::vector< device* > devices ) override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
