@@ -763,12 +763,13 @@ void step::set_dx_time( u_int_4 dx_time )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-DI_DO_action::DI_DO_action() :action( "Группы DI->DO's" )
+DI_DO_action::DI_DO_action( std::string name ) :action( name )
     {
     }
 //-----------------------------------------------------------------------------
 int DI_DO_action::check( char* reason ) const
     {
+    reason[ 0 ] = 0;
     if ( is_empty() )
         {
         return 0;
@@ -785,8 +786,8 @@ int DI_DO_action::check( char* reason ) const
         auto d_i_device = devs[ i ][ 0 ];
         if ( d_i_device->get_type() != device::DT_DI )
             {
-            sprintf( reason, "в поле \'Группы DI - DO\' устройство \'%.25s (%.50s)\'"
-                " не является сигналом DI",
+            sprintf( reason, "в поле \'%s\' устройство \'%.25s (%.50s)\'"
+                " не является сигналом DI", name.c_str(),
                 d_i_device->get_name(), d_i_device->get_description() );
             return 1;
             }
@@ -811,82 +812,44 @@ void DI_DO_action::evaluate()
             continue;
             }
 
-        if ( devs[ i ][ 0 ]->is_active() )
+        evaluate_DO( devs[ i ] );
+        }
+    }
+//-----------------------------------------------------------------------------
+void DI_DO_action::evaluate_DO( std::vector< device* > devices )
+    {
+    if ( devices[ 0 ]->is_active() )
+        {
+        for ( u_int j = 1; j < devices.size(); j++ )
             {
-            for ( u_int j = 1; j < devs[ i ].size(); j++ )
-                {
-                devs[ i ][ j ]->on();
-                }
+            devices[ j ]->on();
             }
-        else
+        }
+    else
+        {
+        for ( u_int j = 1; j < devices.size(); j++ )
             {
-            for ( u_int j = 1; j < devs[ i ].size(); j++ )
-                {
-                devs[ i ][ j ]->off();
-                }
+            devices[ j ]->off();
             }
         }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-inverted_DI_DO_action::inverted_DI_DO_action() :action( "Группы инвертированный DI->DO's" )
+inverted_DI_DO_action::inverted_DI_DO_action():
+    DI_DO_action( "Группы инвертированный DI->DO's" )
     {
     }
 //-----------------------------------------------------------------------------
-int inverted_DI_DO_action::check( char* reason ) const
+void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices )
     {
-    if ( is_empty() )
+    int new_state = 0;
+    if ( !devices[ 0 ]->is_active() )
         {
-        return 0;
+        new_state = 1;
         }
-
-    auto& devs = devices[ MAIN_GROUP ];
-    for ( u_int i = 0; i < devs.size(); i++ )
+    for ( u_int j = 1; j < devices.size(); j++ )
         {
-        if ( devs[ i ].empty() )
-            {
-            continue;
-            }
-
-        auto d_i_device = devs[ i ][ 0 ];
-        if ( d_i_device->get_type() != device::DT_DI )
-            {
-            sprintf( reason, "в поле \'Группы инвертированный DI - DO\' "
-                "устройство \'%.25s (%.50s)\'"
-                " не является сигналом DI",
-                d_i_device->get_name(), d_i_device->get_description() );
-            return 1;
-            }
-        }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-void inverted_DI_DO_action::evaluate()
-    {
-    if ( is_empty() )
-        {
-        return;
-        }
-
-    auto& devs = devices[ MAIN_GROUP ];
-
-    for ( u_int i = 0; i < devs.size(); i++ )
-        {
-        if ( devs[ i ].empty() )
-            {
-            continue;
-            }
-
-        int new_state = 0;
-        if ( !devs[ i ][ 0 ]->is_active() )
-            {
-            new_state = 1;
-            }
-        for ( u_int j = 1; j < devs[ i ].size(); j++ )
-            {
-            devs[ i ][ j ]->set_state( new_state );
-            }
+        devices[ j ]->set_state( new_state );
         }
     }
 //-----------------------------------------------------------------------------
