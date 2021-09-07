@@ -13,7 +13,7 @@ if(LINUX)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 endif()
 
-project(ptusa)
+project(ptusa VERSION 2022.09.07.0)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -38,6 +38,13 @@ add_definitions(-DTEST_SPEED)
 if(MSVC)
     add_compile_options("/utf-8")
 endif(MSVC)
+
+add_definitions(-DVERSION_MAJOR=${PROJECT_VERSION_MAJOR})
+add_definitions(-DVERSION_MINOR=${PROJECT_VERSION_MINOR})
+add_definitions(-DVERSION_PATCH=${PROJECT_VERSION_PATCH})
+add_definitions(-DVERSION_REVISION=${PROJECT_VERSION_TWEAK})
+add_definitions(-DVER_FILEVERSION_STR="${PROJECT_VERSION}")
+add_definitions(-DVER_PRODUCTVERSION_STR="${PROJECT_VERSION}")
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua EXCLUDE_FROM_ALL)
 
@@ -93,14 +100,17 @@ if(LINUX)
 
 elseif(WIN32)
     add_executable(${PROJECT_NAME} ${common_src} ${win_src}
-            PAC_control_projects/main_control_prg/main.cpp)
+            PAC_control_projects/main_control_prg/main.cpp
+            PAC_control_projects/main_control_prg/version.rc)
 
     add_library(main_control ${common_src} ${win_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
-            PAC_control_projects/main_control_prg/main_control_dll_vc/dllmain.cpp)
+            PAC_control_projects/main_control_prg/main_control_dll_vc/dllmain.cpp
+            PAC_control_projects/main_control_prg/version.rc)
 
     add_executable(main_test ${common_src} ${win_src} ${test_src}
-           test/main_test.cpp)
+           test/main_test.cpp
+           PAC_control_projects/main_control_prg/version.rc)
 
     set_target_properties (toluapp toluapp_lib liblua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
     add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp
