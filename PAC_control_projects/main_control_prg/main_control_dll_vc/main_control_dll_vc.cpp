@@ -20,6 +20,8 @@
 
 #include "profibus_slave.h"
 
+#include "version_info.h"
+
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
 
@@ -57,7 +59,7 @@ int lua_init( lua_State* L )
         }
 
     sprintf( G_LOG->msg, "Program started (version %s).",
-        VER_FILEVERSION_STR );
+        VERSION_FULL_STR );
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
     //-Инициализация Lua.

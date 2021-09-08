@@ -20,31 +20,26 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 ################# create targets ######################################################
 
-add_definitions(-DPAC_PC)
-add_definitions(-DDEBUG_NO_IO_MODULES)
+add_compile_definitions(PAC_PC)
+add_compile_definitions(DEBUG_NO_IO_MODULES)
 
 #### Definitions for run tests ####
-add_definitions(-DPTUSA_TEST)
+add_compile_definitions(PTUSA_TEST)
 
 if(LINUX)
-    add_definitions(-DLINUX_OS)
+    add_compile_definitions(LINUX_OS)
 elseif(WIN32)
-    add_definitions(-DWIN_OS)
-    add_definitions(-DSIMPLE_LOG)
+    add_compile_definitions(WIN_OS)
+    add_compile_definitions(SIMPLE_LOG)
 endif()
 
-add_definitions(-DTEST_SPEED)
+add_compile_definitions(TEST_SPEED)
 
 if(MSVC)
     add_compile_options("/utf-8")
 endif(MSVC)
 
-add_definitions(-DVERSION_MAJOR=${PROJECT_VERSION_MAJOR})
-add_definitions(-DVERSION_MINOR=${PROJECT_VERSION_MINOR})
-add_definitions(-DVERSION_PATCH=${PROJECT_VERSION_PATCH})
-add_definitions(-DVERSION_REVISION=${PROJECT_VERSION_TWEAK})
-add_definitions(-DVER_FILEVERSION_STR="${PROJECT_VERSION}")
-add_definitions(-DVER_PRODUCTVERSION_STR="${PROJECT_VERSION}")
+configure_file( version_info.in version_info.h @ONLY)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua EXCLUDE_FROM_ALL)
 
@@ -139,6 +134,8 @@ set(GENERAL_INCLUDES
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/PAC-driver>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/common>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/sys>
+
+        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
 
 if (WIN32)
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/win_util>

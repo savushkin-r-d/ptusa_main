@@ -42,6 +42,8 @@
 #include "rfid_reader.h"
 #endif
 
+#include "version_info.h"
+
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
 
@@ -90,7 +92,7 @@ int main( int argc, const char *argv[] )
 #endif
 
     sprintf( G_LOG->msg, "Program started (version %s).",
-        VER_FILEVERSION_STR );
+        VERSION_FULL_STR );
     G_LOG->write_log( i_log::P_INFO );
 #ifdef OPCUA
     OPCUAServer::getInstance().Init(4840);

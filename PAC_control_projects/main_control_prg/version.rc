@@ -1,4 +1,17 @@
-#include <windows.h>
+#include "version_info.h"
+
+#if defined(__MINGW64__) || defined(__MINGW32__)
+	// MinGW-w64, MinGW
+	#if defined(__has_include) && __has_include(<winres.h>)
+		#include <winres.h>
+	#else
+		#include <afxres.h>
+		#include <winresrc.h>
+	#endif
+#else
+	// MSVC, Windows SDK
+	#include <winres.h>
+#endif
 
 #define VER_PRODUCTVERSION          VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_REVISION
 #define VER_FILEVERSION             VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, VERSION_REVISION
@@ -17,12 +30,12 @@ BEGIN
         BLOCK "040904E4"
         BEGIN
             VALUE "FileDescription",    VER_FILEDESCRIPTION_STR
-            VALUE "FileVersion",        VER_FILEVERSION_STR
+            VALUE "FileVersion",        FILE_VERSION_RESOURCE_STR
             VALUE "InternalName",       VER_INTERNALNAME_STR
             VALUE "LegalCopyright",     VER_LEGALCOPYRIGHT_STR
             VALUE "OriginalFilename",   VER_ORIGINALFILENAME_STR
             VALUE "ProductName",        VER_PRODUCTNAME_STR
-            VALUE "ProductVersion",     VER_PRODUCTVERSION_STR
+            VALUE "ProductVersion",     VERSION_RESOURCE_STR
         END
     END
 
