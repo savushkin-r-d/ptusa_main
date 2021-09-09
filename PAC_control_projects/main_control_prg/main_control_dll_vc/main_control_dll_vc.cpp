@@ -11,6 +11,7 @@
 #include "tech_def.h"
 #include "lua_manager.h"
 #include "PAC_err.h"
+#include "version_info.h"
 
 #include "rm_manager.h"
 #include "log.h"
@@ -19,8 +20,6 @@
 #endif
 
 #include "profibus_slave.h"
-
-#include "version_info.h"
 
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 0;  //Вывод в системный лог (syslog).

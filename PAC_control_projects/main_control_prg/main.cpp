@@ -20,6 +20,7 @@
 #include "tech_def.h"
 #include "lua_manager.h"
 #include "PAC_err.h"
+#include "version_info.h"
 
 #ifdef WIN_OS
 #include <shellapi.h>
@@ -41,8 +42,6 @@
 #ifdef RFID
 #include "rfid_reader.h"
 #endif
-
-#include "version_info.h"
 
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 0;  //Вывод в системный лог (syslog).

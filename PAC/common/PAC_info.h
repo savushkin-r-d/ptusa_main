@@ -5,6 +5,7 @@
 
 #include "g_device.h"
 #include "param_ex.h"
+#include "version_info.h"
 
 class PAC_info: public i_Lua_save_device
     {
@@ -16,24 +17,24 @@ class PAC_info: public i_Lua_save_device
         enum PARAMETERS
             {
             P_PARAMS_COUNT  = 10,   ///< Количество параметров.
-            
+
             P_MIX_FLIP_PERIOD = 1, ///< Интервал промывки седел клапанов, сек.
             P_MIX_FLIP_UPPER_TIME, ///< Время промывки верхних седел клапанов, мсек.
 			P_MIX_FLIP_LOWER_TIME, ///< Время промывки нижних седел клапанов, мсек
 
             P_V_OFF_DELAY_TIME,    ///< Время задержки закрытия клапанов, мсек.
-            
+
             ///< Время задержки закрытия для донных клапанов, мсек.
-            P_V_BOTTOM_OFF_DELAY_TIME, 
+            P_V_BOTTOM_OFF_DELAY_TIME,
 
 	        ///< Среднее время задержки получения ответа от узла I/O, мсек.
 	        P_WAGO_TCP_NODE_WARN_ANSWER_AVG_TIME,
             ///< Среднее время цикла программы, мсек.
-            P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME,    
+            P_MAIN_CYCLE_WARN_ANSWER_AVG_TIME,
 
 
             ///< Работа модуля ограничений.
-            /// 0 - авто, 1 - ручной, 2 - полуручной (через время 
+            /// 0 - авто, 1 - ручной, 2 - полуручной (через время
             /// @P_RESTRICTIONS_MANUAL_TIME вернется в автоматический режим).
             P_RESTRICTIONS_MODE,
 
@@ -41,7 +42,7 @@ class PAC_info: public i_Lua_save_device
             P_RESTRICTIONS_MANUAL_TIME,
 
             ///< Переход на паузу операции при ошибке устройств,
-            /// 0 - авто (есть), 1 - ручной (нет). 
+            /// 0 - авто (есть), 1 - ручной (нет).
             P_AUTO_PAUSE_OPER_ON_DEV_ERR,
             };
 

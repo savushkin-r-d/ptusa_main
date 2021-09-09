@@ -126,8 +126,10 @@ int PAC_info::save_device( char* buff )
     answer_size += sprintf( buff + answer_size,
         "\tCMD_ANSWER=\"%s\",\n", cmd_answer );
 
-    answer_size += sprintf( buff + answer_size, "\tNODEENABLED = \n\t{\n\t" );
+    answer_size += sprintf( buff + answer_size,
+        "\tVERSION=\"%s\",\n", PRODUCT_VERSION_FULL_STR );
 
+    answer_size += sprintf( buff + answer_size, "\tNODEENABLED = \n\t{\n\t" );
     unsigned int nc = io_manager::get_instance()->get_nodes_count();
     for ( unsigned int i = 0; i < nc; i++ )
         {
@@ -159,7 +161,7 @@ void PAC_info::print() const
 int PAC_info::set_cmd( const char* prop, u_int idx, double val )
     {
     if ( strcmp( prop, "CMD" ) == 0 )
-        {        
+        {
         switch ((COMMANDS)(int)val)
             {
             case RELOAD_RESTRICTIONS:
@@ -171,7 +173,7 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
                 const int SCRIPT_N =
 #if defined RM_PAC
                     9;
-#else   
+#else
                     8;
 #endif // defined RM_PAC
 
