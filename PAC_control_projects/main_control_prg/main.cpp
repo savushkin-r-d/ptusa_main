@@ -92,7 +92,7 @@ int main( int argc, const char *argv[] )
 #endif
 
     sprintf( G_LOG->msg, "Program started (version %s).",
-        VERSION_FULL_STR );
+        PRODUCT_VERSION_FULL_STR );
     G_LOG->write_log( i_log::P_INFO );
 #ifdef OPCUA
     OPCUAServer::getInstance().Init(4840);

@@ -59,7 +59,7 @@ int lua_init( lua_State* L )
         }
 
     sprintf( G_LOG->msg, "Program started (version %s).",
-        VERSION_FULL_STR );
+        PRODUCT_VERSION_FULL_STR );
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
     //-Инициализация Lua.
