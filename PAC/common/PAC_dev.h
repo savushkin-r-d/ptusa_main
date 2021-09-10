@@ -550,6 +550,7 @@ class device : public i_DO_AO_device, public par_device
             //HLA
             DST_HLA = 1,  ///< Сигнальная колонна (красный, желтый, зеленый и сирена).
             DST_HLA_VIRT, ///< Виртуальная сигнальная колонна (без привязки к модулям).
+            DST_HLA_IOLINK, ///< Сигнальная колонна IO-Link.
 
             //GS
             DST_GS = 1,  ///< Датчик положения.
@@ -4045,7 +4046,9 @@ class counter_f_ok : public counter_f
 class signal_column : public device, public io_device
     {
     public:
-        signal_column( const char* dev_name );
+        signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type = DST_HLA,
+            int red_lamp_channel = 0, int yellow_lamp_channel = 1,
+            int green_lamp_channel = 2, int siren_channel = 3 );
 
         void turn_off_red();
         void turn_off_yellow();
@@ -4106,17 +4109,16 @@ class signal_column : public device, public io_device
 
         int save_device_ex( char* buff );
 
-    private:
+    protected:
+        virtual void process_DO( u_int n, int state, const char* name );
+
         ///Тип мигания (>0 - реализуем сами, 0 - встроенный в сирену).
         int is_const_red;
 
-        enum class DO_CONSTANTS
-            {
-            INDEX_RED = 0,
-            INDEX_YELLOW,
-            INDEX_GREEN,
-            INDEX_SIREN,
-            };
+        int red_lamp_channel;
+        int yellow_lamp_channel;
+        int green_lamp_channel;
+        int siren_channel;
 
         enum class CONSTANTS
             {
@@ -4148,6 +4150,34 @@ class signal_column : public device, public io_device
         void blink( int lamp_DO, state_info& info, u_int delay_time );
 
         STEP siren_step;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Сигнальная колонна с IO-Link.
+///
+/// Служит для уведомления оператора о событиях.
+class signal_column_iolink : public signal_column
+    {
+    public:
+        signal_column_iolink( const char* dev_name );
+
+        void set_string_property( const char* field, const char* value );
+
+        virtual void process_DO( u_int n, int state, const char* name );
+
+    private:
+        void evaluate_io();
+
+        struct out_data
+            {
+            bool switch_ch1 : 1;
+            bool switch_ch2 : 1;
+            bool switch_ch3 : 1;
+            bool switch_ch4 : 1;
+            bool switch_ch5 : 1;
+            uint16_t reserved : 11;
+            };
+
+        out_data *out_info;
     };
 //-----------------------------------------------------------------------------
 /// @brief Камера.
