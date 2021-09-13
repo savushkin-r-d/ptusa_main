@@ -729,27 +729,27 @@ void signal_column_iolink::set_string_property( const char* field, const char* v
         printf( "Set string property %s value %s\n", field, value );
         }
 
-    if ( strcmp( field, "SIGNALS_SEUQENCE" ) == 0 )
+    if ( strcmp( field, "SIGNALS_SEQUENCE" ) == 0 )
         {
         auto pos = strchr( value, 'R' );
         if ( pos )
             {
-            red_lamp_channel = value - pos;
+            red_lamp_channel = pos - value + 1;
             }
         pos = strchr( value, 'Y' );
         if ( pos )
             {
-            yellow_lamp_channel = value - pos;
+            yellow_lamp_channel = pos - value + 1;
             }
         pos = strchr( value, 'G' );
         if ( pos )
             {
-            green_lamp_channel = value - pos;
+            green_lamp_channel = pos - value + 1;
             }
-        pos = strchr( value, 'S' );
+        pos = strchr( value, 'A' );
         if ( pos )
             {
-            siren_channel = value - pos;
+            siren_channel = pos - value + 1;
             }
         }
     }
