@@ -11,6 +11,7 @@
 #include "tech_def.h"
 #include "lua_manager.h"
 #include "PAC_err.h"
+#include "version_info.h"
 
 #include "rm_manager.h"
 #include "log.h"
@@ -56,8 +57,8 @@ int lua_init( lua_State* L )
         lua_remove( L, 1 );
         }
 
-    sprintf( G_LOG->msg, "Program started." );
-    G_LOG->write_log( i_log::P_INFO );
+    sprintf( G_LOG->msg, "Program started (version %s).",
+        PRODUCT_VERSION_FULL_STR );
     G_PROJECT_MANAGER->proc_main_params( argc, argv );
 
     //-Инициализация Lua.

@@ -13,31 +13,33 @@ if(LINUX)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 endif()
 
-project(ptusa)
+project(ptusa VERSION 2022.09.07.0)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 ################# create targets ######################################################
 
-add_definitions(-DPAC_PC)
-add_definitions(-DDEBUG_NO_IO_MODULES)
+add_compile_definitions(PAC_PC)
+add_compile_definitions(DEBUG_NO_IO_MODULES)
 
 #### Definitions for run tests ####
-add_definitions(-DPTUSA_TEST)
+add_compile_definitions(PTUSA_TEST)
 
 if(LINUX)
-    add_definitions(-DLINUX_OS)
+    add_compile_definitions(LINUX_OS)
 elseif(WIN32)
-    add_definitions(-DWIN_OS)
-    add_definitions(-DSIMPLE_LOG)
+    add_compile_definitions(WIN_OS)
+    add_compile_definitions(SIMPLE_LOG)
 endif()
 
-add_definitions(-DTEST_SPEED)
+add_compile_definitions(TEST_SPEED)
 
 if(MSVC)
     add_compile_options("/utf-8")
 endif(MSVC)
+
+configure_file( version_info.in version_info.h @ONLY)
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua EXCLUDE_FROM_ALL)
 
@@ -93,14 +95,17 @@ if(LINUX)
 
 elseif(WIN32)
     add_executable(${PROJECT_NAME} ${common_src} ${win_src}
-            PAC_control_projects/main_control_prg/main.cpp)
+            PAC_control_projects/main_control_prg/main.cpp
+            PAC_control_projects/main_control_prg/version.rc)
 
     add_library(main_control ${common_src} ${win_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
-            PAC_control_projects/main_control_prg/main_control_dll_vc/dllmain.cpp)
+            PAC_control_projects/main_control_prg/main_control_dll_vc/dllmain.cpp
+            PAC_control_projects/main_control_prg/version.rc)
 
     add_executable(main_test ${common_src} ${win_src} ${test_src}
-           test/main_test.cpp)
+           test/main_test.cpp
+           PAC_control_projects/main_control_prg/version.rc)
 
     set_target_properties (toluapp toluapp_lib liblua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
     add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp
@@ -129,6 +134,8 @@ set(GENERAL_INCLUDES
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/PAC-driver>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/common>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/sys>
+
+        $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
 
 if (WIN32)
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/common/win_util>

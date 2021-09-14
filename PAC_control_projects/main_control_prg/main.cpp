@@ -20,6 +20,7 @@
 #include "tech_def.h"
 #include "lua_manager.h"
 #include "PAC_err.h"
+#include "version_info.h"
 
 #ifdef WIN_OS
 #include <shellapi.h>
@@ -89,7 +90,8 @@ int main( int argc, const char *argv[] )
     log_mngr::lg = new l_log();
 #endif
 
-    sprintf( G_LOG->msg, "Program started." );
+    sprintf( G_LOG->msg, "Program started (version %s).",
+        PRODUCT_VERSION_FULL_STR );
     G_LOG->write_log( i_log::P_INFO );
 #ifdef OPCUA
     OPCUAServer::getInstance().Init(4840);
