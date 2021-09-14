@@ -782,6 +782,11 @@ void signal_column_iolink::set_string_property( const char* field, const char* v
             {
             green_lamp_channel = pos - value + 1;
             }
+        pos = strchr( value, 'B' );
+        if ( pos )
+            {
+            blue_lamp_channel = pos - value + 1;
+            }
         pos = strchr( value, 'A' );
         if ( pos )
             {
