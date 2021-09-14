@@ -550,6 +550,7 @@ class device : public i_DO_AO_device, public par_device
             //HLA
             DST_HLA = 1,  ///< Сигнальная колонна (красный, желтый, зеленый и сирена).
             DST_HLA_VIRT, ///< Виртуальная сигнальная колонна (без привязки к модулям).
+            DST_HLA_IOLINK, ///< Сигнальная колонна IO-Link.
 
             //GS
             DST_GS = 1,  ///< Датчик положения.
@@ -4045,23 +4046,30 @@ class counter_f_ok : public counter_f
 class signal_column : public device, public io_device
     {
     public:
-        signal_column( const char* dev_name );
+        signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type,
+            int red_lamp_channel = 0, int yellow_lamp_channel = 0,
+            int green_lamp_channel = 0, int blue_lamp_channel = 0,
+            int siren_channel = 0 );
 
         void turn_off_red();
         void turn_off_yellow();
         void turn_off_green();
+        void turn_off_blue();
 
         void turn_on_red();
         void turn_on_yellow();
         void turn_on_green();
+        void turn_on_blue();
 
         void normal_blink_red();
         void normal_blink_yellow();
         void normal_blink_green();
+        void normal_blink_blue();
 
         void slow_blink_red();
         void slow_blink_yellow();
         void slow_blink_green();
+        void slow_blink_blue();
 
         void turn_on_siren();
         void turn_off_siren();
@@ -4106,22 +4114,34 @@ class signal_column : public device, public io_device
 
         int save_device_ex( char* buff );
 
-    private:
+    protected:
+        enum class DO_state
+            {
+            OFF,
+            ON
+            };
+
+        const char* RED_LAMP = "red lamp";
+        const char* GREEN_LAMP = "green lamp";
+        const char* YELLOW_LAMP = "yellow lamp";
+        const char* BLUE_LAMP = "blue lamp";
+        const char* SIREN = "siren";
+
+        virtual void process_DO( u_int n, DO_state state, const char* name ) = 0;
+
         ///Тип мигания (>0 - реализуем сами, 0 - встроенный в сирену).
         int is_const_red;
 
-        enum class DO_CONSTANTS
-            {
-            INDEX_RED = 0,
-            INDEX_YELLOW,
-            INDEX_GREEN,
-            INDEX_SIREN,
-            };
+        int red_lamp_channel;
+        int yellow_lamp_channel;
+        int green_lamp_channel;
+        int blue_lamp_channel;
+        int siren_channel;
 
         enum class CONSTANTS
             {
-            SLOW_BLINK_TIME = 1000 / 2 / 2,                     //2 Гц
-            NORMAL_BLINK_TIME = (int) (1000 / 0.5f / 2),        //0.5 Гц
+            NORMAL_BLINK_TIME = 1000 / 2 / 2,                 //2 Гц
+            SLOW_BLINK_TIME = (int) (1000 / 0.5f / 2),        //0.5 Гц
             };
 
         enum class STEP
@@ -4144,10 +4164,54 @@ class signal_column : public device, public io_device
         state_info green;
         state_info yellow;
         state_info red;
+        state_info blue;
 
         void blink( int lamp_DO, state_info& info, u_int delay_time );
 
         STEP siren_step;
+    };
+//-----------------------------------------------------------------------------
+/// @brief Сигнальная колонна с дискретным подключением.
+    class signal_column_discrete : public signal_column
+        {
+        public:
+            signal_column_discrete( const char* dev_name,
+                int red_lamp_channel = 1, int yellow_lamp_channel = 2,
+                int green_lamp_channel = 3, int blue_lamp_channel = 0,
+                int siren_channel = 4 );
+
+        protected:
+            void process_DO( u_int n, DO_state state, const char* name ) override;
+        };
+//-----------------------------------------------------------------------------
+/// @brief Сигнальная колонна с IO-Link.
+///
+/// Служит для уведомления оператора о событиях.
+class signal_column_iolink : public signal_column
+    {
+    public:
+        signal_column_iolink( const char* dev_name );
+
+        void set_string_property( const char* field, const char* value );
+
+    protected:
+        void process_DO( u_int n, DO_state state, const char* name ) override;
+
+    private:
+        void evaluate_io();
+
+        struct out_data
+            {
+            uint16_t unused1 : 8;
+            bool switch_ch1 : 1;
+            bool switch_ch2 : 1;
+            bool switch_ch3 : 1;
+            bool switch_ch4 : 1;
+            bool switch_ch5 : 1;
+            uint16_t unused2 : 3;
+            };
+
+        out_data *out_info;
     };
 //-----------------------------------------------------------------------------
 /// @brief Камера.
@@ -4287,6 +4351,8 @@ class dev_stub : public i_counter, public valve, public i_wages,
         void  abs_reset();
 
         void tare();
+
+        void process_DO( u_int n, DO_state state, const char* name ) override;
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
