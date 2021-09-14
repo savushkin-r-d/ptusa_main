@@ -4169,12 +4169,13 @@ class signal_column_iolink : public signal_column
 
         struct out_data
             {
+            uint16_t unused1 : 8;
             bool switch_ch1 : 1;
             bool switch_ch2 : 1;
             bool switch_ch3 : 1;
             bool switch_ch4 : 1;
             bool switch_ch5 : 1;
-            uint16_t reserved : 11;
+            uint16_t unused2 : 3;
             };
 
         out_data *out_info;
