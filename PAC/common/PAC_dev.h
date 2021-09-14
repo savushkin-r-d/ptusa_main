@@ -4110,7 +4110,18 @@ class signal_column : public device, public io_device
         int save_device_ex( char* buff );
 
     protected:
-        virtual void process_DO( u_int n, int state, const char* name ) = 0;
+        enum class DO_state
+            {
+            OFF,
+            ON
+            };
+
+        const char* RED_LAMP = "red lamp";
+        const char* GREEN_LAMP = "green lamp";
+        const char* YELLOW_LAMP = "yellow lamp";
+        const char* SIREN = "siren";
+
+        virtual void process_DO( u_int n, DO_state state, const char* name ) = 0;
 
         ///Тип мигания (>0 - реализуем сами, 0 - встроенный в сирену).
         int is_const_red;
@@ -4122,8 +4133,8 @@ class signal_column : public device, public io_device
 
         enum class CONSTANTS
             {
-            SLOW_BLINK_TIME = 1000 / 2 / 2,                     //2 Гц
-            NORMAL_BLINK_TIME = (int) (1000 / 0.5f / 2),        //0.5 Гц
+            NORMAL_BLINK_TIME = 1000 / 2 / 2,                 //2 Гц
+            SLOW_BLINK_TIME = (int) (1000 / 0.5f / 2),        //0.5 Гц
             };
 
         enum class STEP
@@ -4161,7 +4172,7 @@ class signal_column : public device, public io_device
                 int green_lamp_channel = 2, int siren_channel = 3 );
 
         protected:
-            void process_DO( u_int n, int state, const char* name ) override;
+            void process_DO( u_int n, DO_state state, const char* name ) override;
         };
 //-----------------------------------------------------------------------------
 /// @brief Сигнальная колонна с IO-Link.
@@ -4175,7 +4186,7 @@ class signal_column_iolink : public signal_column
         void set_string_property( const char* field, const char* value );
 
     protected:
-        void process_DO( u_int n, int state, const char* name ) override;
+        void process_DO( u_int n, DO_state state, const char* name ) override;
 
     private:
         void evaluate_io();
@@ -4332,7 +4343,7 @@ class dev_stub : public i_counter, public valve, public i_wages,
 
         void tare();
 
-        void process_DO( u_int n, int state, const char* name ) override;
+        void process_DO( u_int n, DO_state state, const char* name ) override;
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

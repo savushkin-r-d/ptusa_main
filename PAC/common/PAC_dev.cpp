@@ -457,37 +457,37 @@ void signal_column::direct_on()
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_red()
     {
-    process_DO( red_lamp_channel, 0, "red lamp" );
+    process_DO( red_lamp_channel, DO_state::OFF, RED_LAMP );
     red.step = STEP::off;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_yellow()
     {
-    process_DO( yellow_lamp_channel, 0, "yellow lamp" );
+    process_DO( yellow_lamp_channel, DO_state::OFF, YELLOW_LAMP );
     yellow.step = STEP::off;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_green()
     {
-    process_DO( green_lamp_channel, 0, "green lamp" );
+    process_DO( green_lamp_channel, DO_state::OFF, GREEN_LAMP );
     green.step = STEP::off;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_red()
     {
-    process_DO( red_lamp_channel, 1, "red lamp" );
+    process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
     red.step = STEP::on;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_yellow()
     {
-    process_DO( yellow_lamp_channel, 1, "yellow lamp" );
+    process_DO( yellow_lamp_channel, DO_state::ON, YELLOW_LAMP );
     yellow.step = STEP::on;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_green()
     {
-    process_DO( green_lamp_channel, 1, "green lamp" );
+    process_DO( green_lamp_channel, DO_state::ON, GREEN_LAMP );
     green.step = STEP::on;
     }
 //-----------------------------------------------------------------------------
@@ -499,7 +499,7 @@ void signal_column::normal_blink_red()
         }
     else
         {
-        process_DO( red_lamp_channel, 1, "red lamp" );
+        process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
         }
     }
 //-----------------------------------------------------------------------------
@@ -521,7 +521,7 @@ void signal_column::slow_blink_red()
         }
     else
         {
-        process_DO( red_lamp_channel, 1, "red lamp" );
+        process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
         }
     }
 //-----------------------------------------------------------------------------
@@ -538,13 +538,13 @@ void signal_column::slow_blink_green()
 void signal_column::turn_on_siren()
     {
     siren_step = STEP::blink_on;
-    process_DO( siren_channel, 1, "siren" );
+    process_DO( siren_channel, DO_state::ON, SIREN );
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_siren()
     {
     siren_step = STEP::off;
-    process_DO( siren_channel, 0, "siren" );
+    process_DO( siren_channel, DO_state::OFF, SIREN );
     }
 //-----------------------------------------------------------------------------
 void signal_column::set_rt_par( u_int idx, float value )
@@ -689,7 +689,7 @@ void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
             break;
 
         case STEP::blink_on:
-            process_DO( lamp_DO, 1, "?" );
+            process_DO( lamp_DO, DO_state::ON, "?" );
             if ( get_delta_millisec( info.start_blink_time ) > delay_time )
                 {
                 info.start_wait_time = get_millisec();
@@ -698,7 +698,7 @@ void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
             break;
 
         case STEP::blink_off:
-            process_DO( lamp_DO, 0, "?" );
+            process_DO( lamp_DO, DO_state::OFF, "?" );
             if ( get_delta_millisec( info.start_wait_time ) > delay_time )
                 {
                 info.start_blink_time = get_millisec();
@@ -717,10 +717,10 @@ signal_column_discrete::signal_column_discrete( const char* dev_name,
     {
     }
 //-----------------------------------------------------------------------------
-void signal_column_discrete::process_DO( u_int n, int state, const char* name )
+void signal_column_discrete::process_DO( u_int n, DO_state state, const char* name )
     {
 #ifndef DEBUG_NO_IO_MODULES
-    set_DO( n, state );
+    set_DO( n, static_cast<char>( state ) );
 #endif
     }
 //-----------------------------------------------------------------------------
@@ -763,8 +763,9 @@ void signal_column_iolink::set_string_property( const char* field, const char* v
         }
     }
 //-----------------------------------------------------------------------------
-void signal_column_iolink::process_DO( u_int n, int state, const char* name )
+void signal_column_iolink::process_DO( u_int n, DO_state state, const char* name )
     {
+    bool ch_state = state == DO_state::ON;
     switch ( n )
         {
         case 0:
@@ -775,19 +776,19 @@ void signal_column_iolink::process_DO( u_int n, int state, const char* name )
             break;
 
         case 1:
-            out_info->switch_ch1 = state;
+            out_info->switch_ch1 = ch_state;
             break;
         case 2:
-            out_info->switch_ch2 = state;
+            out_info->switch_ch2 = ch_state;
             break;
         case 3:
-            out_info->switch_ch3 = state;
+            out_info->switch_ch3 = ch_state;
             break;
         case 4:
-            out_info->switch_ch4 = state;
+            out_info->switch_ch4 = ch_state;
             break;
         case 5:
-            out_info->switch_ch5 = state;
+            out_info->switch_ch5 = ch_state;
             break;
 
         default:
@@ -2238,7 +2239,7 @@ u_int dev_stub::get_abs_quantity()
 void dev_stub::tare()
     {
     }
-void dev_stub::process_DO( u_int n, int state, const char* name )
+void dev_stub::process_DO( u_int n, DO_state state, const char* name )
     {
     }
 //-----------------------------------------------------------------------------
