@@ -4043,10 +4043,10 @@ class counter_f_ok : public counter_f
 ///     тревог, пропадания аварий.
 ///     3. Мигающий желтый свет – неподтвержденное сообщение. Частота мигания
 ///     0.5 Гц.
-class i_signal_column : public device, public io_device
+class signal_column : public device, public io_device
     {
     public:
-        i_signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type,
+        signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type,
             int red_lamp_channel = 0, int yellow_lamp_channel = 0,
             int green_lamp_channel = 0, int siren_channel = 0 );
 
@@ -4153,10 +4153,10 @@ class i_signal_column : public device, public io_device
     };
 //-----------------------------------------------------------------------------
 /// @brief Сигнальная колонна с дискретным подключением.
-    class signal_column : public i_signal_column
+    class signal_column_discrete : public signal_column
         {
         public:
-            signal_column( const char* dev_name,
+            signal_column_discrete( const char* dev_name,
                 int red_lamp_channel = 0, int yellow_lamp_channel = 1,
                 int green_lamp_channel = 2, int siren_channel = 3 );
 
@@ -4167,7 +4167,7 @@ class i_signal_column : public device, public io_device
 /// @brief Сигнальная колонна с IO-Link.
 ///
 /// Служит для уведомления оператора о событиях.
-class signal_column_iolink : public i_signal_column
+class signal_column_iolink : public signal_column
     {
     public:
         signal_column_iolink( const char* dev_name );
@@ -4296,7 +4296,7 @@ class camera_DI3 : public camera_DI2
 /// Необходимо для возвращения результата поиска устройства с несуществующим
 /// номером. Методы данного класса ничего не делают.
 class dev_stub : public i_counter, public valve, public i_wages,
-    public camera, public i_signal_column
+    public camera, public signal_column
     {
     public:
         dev_stub();
@@ -4425,7 +4425,7 @@ class device_manager: public i_Lua_save_device
         PID* get_C( const char* dev_name );
 
         /// @brief Получение сигнальной колонны по имени.
-        i_signal_column* get_HLA( const char* dev_name );
+        signal_column* get_HLA( const char* dev_name );
 
         /// @brief Получение камеры по имени.
         camera* get_CAM( const char* dev_name );
@@ -4797,7 +4797,7 @@ PID* C( const char* dev_name );
 /// @param dev_name - имя.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-i_signal_column* HLA( const char* dev_name );
+signal_column* HLA( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение камеры по имени.
 ///

@@ -421,7 +421,7 @@ void DO1::direct_off()
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-i_signal_column::i_signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type,
+signal_column::signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type,
     int red_lamp_channel, int yellow_lamp_channel,
     int green_lamp_channel, int siren_channel ):
     device( dev_name, DT_HLA, sub_type, 0 ),
@@ -435,7 +435,7 @@ i_signal_column::i_signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type
     {
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::direct_off()
+void signal_column::direct_off()
     {
     turn_off_red();
     turn_off_yellow();
@@ -444,7 +444,7 @@ void i_signal_column::direct_off()
     turn_off_siren();
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::direct_on()
+void signal_column::direct_on()
     {
     turn_off_red();
     turn_off_yellow();
@@ -455,43 +455,43 @@ void i_signal_column::direct_on()
     turn_on_green();
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::turn_off_red()
+void signal_column::turn_off_red()
     {
     process_DO( red_lamp_channel, 0, "red lamp" );
     red.step = STEP::off;
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::turn_off_yellow()
+void signal_column::turn_off_yellow()
     {
     process_DO( yellow_lamp_channel, 0, "yellow lamp" );
     yellow.step = STEP::off;
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::turn_off_green()
+void signal_column::turn_off_green()
     {
     process_DO( green_lamp_channel, 0, "green lamp" );
     green.step = STEP::off;
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::turn_on_red()
+void signal_column::turn_on_red()
     {
     process_DO( red_lamp_channel, 1, "red lamp" );
     red.step = STEP::on;
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::turn_on_yellow()
+void signal_column::turn_on_yellow()
     {
     process_DO( yellow_lamp_channel, 1, "yellow lamp" );
     yellow.step = STEP::on;
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::turn_on_green()
+void signal_column::turn_on_green()
     {
     process_DO( green_lamp_channel, 1, "green lamp" );
     green.step = STEP::on;
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::normal_blink_red()
+void signal_column::normal_blink_red()
     {
     if ( is_const_red )
         {
@@ -503,17 +503,17 @@ void i_signal_column::normal_blink_red()
         }
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::normal_blink_yellow()
+void signal_column::normal_blink_yellow()
     {
     blink( yellow_lamp_channel, yellow, (u_long)CONSTANTS::NORMAL_BLINK_TIME );
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::normal_blink_green()
+void signal_column::normal_blink_green()
     {
     blink( green_lamp_channel, green, (u_long)CONSTANTS::NORMAL_BLINK_TIME );
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::slow_blink_red()
+void signal_column::slow_blink_red()
     {
     if ( is_const_red )
         {
@@ -525,29 +525,29 @@ void i_signal_column::slow_blink_red()
         }
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::slow_blink_yellow()
+void signal_column::slow_blink_yellow()
     {
     blink( yellow_lamp_channel, yellow, (u_long)CONSTANTS::SLOW_BLINK_TIME );
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::slow_blink_green()
+void signal_column::slow_blink_green()
     {
     blink( green_lamp_channel, green, (u_long)CONSTANTS::SLOW_BLINK_TIME );
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::turn_on_siren()
+void signal_column::turn_on_siren()
     {
     siren_step = STEP::blink_on;
     process_DO( siren_channel, 1, "siren" );
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::turn_off_siren()
+void signal_column::turn_off_siren()
     {
     siren_step = STEP::off;
     process_DO( siren_channel, 0, "siren" );
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::set_rt_par( u_int idx, float value )
+void signal_column::set_rt_par( u_int idx, float value )
     {
     switch ( idx )
         {
@@ -561,11 +561,11 @@ void i_signal_column::set_rt_par( u_int idx, float value )
         }
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::direct_set_value( float new_value )
+void signal_column::direct_set_value( float new_value )
     {
     }
 //-----------------------------------------------------------------------------
-int i_signal_column::get_state()
+int signal_column::get_state()
     {
     int res = green.step != STEP::off || yellow.step == STEP::off ||
         red.step == STEP::off || siren_step != STEP::off;
@@ -573,12 +573,12 @@ int i_signal_column::get_state()
     return res;
     }
 //-----------------------------------------------------------------------------
-float i_signal_column::get_value()
+float signal_column::get_value()
     {
     return .0f;
     }
 //-----------------------------------------------------------------------------
-int i_signal_column::save_device_ex( char* buff )
+int signal_column::save_device_ex( char* buff )
     {
     int res = sprintf( buff, "L_GREEN=%d, ",
         green.step == STEP::on || green.step == STEP::blink_on ? 1 : 0 );
@@ -592,7 +592,7 @@ int i_signal_column::save_device_ex( char* buff )
     return res;
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::direct_set_state( int new_state )
+void signal_column::direct_set_state( int new_state )
     {
     switch ( (STATE)new_state )
         {
@@ -671,14 +671,14 @@ void i_signal_column::direct_set_state( int new_state )
         }
     }
 //-----------------------------------------------------------------------------
-i_signal_column::state_info::state_info()
+signal_column::state_info::state_info()
     {
     step = STEP::off;
     start_blink_time = 0;
     start_wait_time = 0;
     }
 //-----------------------------------------------------------------------------
-void i_signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
+void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
     {
     switch ( info.step )
         {
@@ -709,16 +709,15 @@ void i_signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-signal_column::signal_column( const char* dev_name,
+signal_column_discrete::signal_column_discrete( const char* dev_name,
     int red_lamp_channel, int yellow_lamp_channel,
     int green_lamp_channel, int siren_channel ) :
-    i_signal_column( dev_name, DST_HLA,
+    signal_column( dev_name, DST_HLA,
     red_lamp_channel, yellow_lamp_channel, green_lamp_channel, siren_channel )
-
     {
     }
 //-----------------------------------------------------------------------------
-void signal_column::process_DO( u_int n, int state, const char* name )
+void signal_column_discrete::process_DO( u_int n, int state, const char* name )
     {
 #ifndef DEBUG_NO_IO_MODULES
     set_DO( n, state );
@@ -727,7 +726,7 @@ void signal_column::process_DO( u_int n, int state, const char* name )
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 signal_column_iolink::signal_column_iolink( const char* dev_name ) :
-    i_signal_column( dev_name, DST_HLA_IOLINK ),
+    signal_column( dev_name, DST_HLA_IOLINK ),
     out_info( 0 )
     {
     }
@@ -1211,9 +1210,9 @@ PID* device_manager::get_C( const char* dev_name )
     return (PID*)get_device( device::DT_REGULATOR, dev_name );
     }
 //-----------------------------------------------------------------------------
-i_signal_column* device_manager::get_HLA( const char* dev_name )
+signal_column* device_manager::get_HLA( const char* dev_name )
     {
-    return (i_signal_column*)get_device( device::DT_HLA, dev_name );
+    return (signal_column*)get_device( device::DT_HLA, dev_name );
     }
 //-----------------------------------------------------------------------------
 camera* device_manager::get_CAM( const char* dev_name )
@@ -1848,8 +1847,8 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             switch ( dev_sub_type )
                 {
                 case device::DT_HLA:
-                    new_device = new signal_column( dev_name );
-                    new_io_device = (signal_column*)new_device;
+                    new_device = new signal_column_discrete( dev_name );
+                    new_io_device = (signal_column_discrete*)new_device;
                     break;
 
                 case device::DST_HLA_VIRT:
@@ -2144,7 +2143,7 @@ valve::VALVE_STATE virtual_valve::get_valve_state()
 //-----------------------------------------------------------------------------
 dev_stub::dev_stub() : valve( "STUB", DT_NONE, DST_NONE ),
     camera( "STUB", DST_NONE ),
-    i_signal_column( "STUB", DST_NONE )
+    signal_column( "STUB", DST_NONE )
     {
     }
 //-----------------------------------------------------------------------------
@@ -6172,7 +6171,7 @@ PID* C( const char* dev_name )
     return G_DEVICE_MANAGER()->get_C( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_signal_column* HLA( const char* dev_name )
+signal_column* HLA( const char* dev_name )
     {
     return G_DEVICE_MANAGER()->get_HLA( dev_name );
     }

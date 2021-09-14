@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 09/14/21 12:49:10.
+** Generated automatically by tolua++-1.0.92 on 09/14/21 14:23:30.
 */
 
 #ifndef __cplusplus
@@ -113,15 +113,15 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"run_time_params_float");
  tolua_usertype(tolua_S,"i_DI_device");
  tolua_usertype(tolua_S,"saved_params_u_int_4");
- tolua_usertype(tolua_S,"i_signal_column");
  tolua_usertype(tolua_S,"run_time_params_u_int_4");
- tolua_usertype(tolua_S,"i_counter");
  tolua_usertype(tolua_S,"operation_manager");
+ tolua_usertype(tolua_S,"i_counter");
+ tolua_usertype(tolua_S,"i_DO_device");
  tolua_usertype(tolua_S,"i_AO_device");
  tolua_usertype(tolua_S,"i_wages");
  tolua_usertype(tolua_S,"valve");
  tolua_usertype(tolua_S,"i_AI_device");
- tolua_usertype(tolua_S,"i_DO_device");
+ tolua_usertype(tolua_S,"signal_column");
  tolua_usertype(tolua_S,"timer_manager");
  tolua_usertype(tolua_S,"tech_object");
  tolua_usertype(tolua_S,"io_device");
@@ -1468,21 +1468,21 @@ static int tolua_PAC_dev_i_motor_get_linear_speed00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: off of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_off00
-static int tolua_PAC_dev_i_signal_column_off00(lua_State* tolua_S)
+/* method: off of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_off00
+static int tolua_PAC_dev_signal_column_off00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'off'", NULL);
 #endif
@@ -1499,21 +1499,21 @@ static int tolua_PAC_dev_i_signal_column_off00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: on of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_on00
-static int tolua_PAC_dev_i_signal_column_on00(lua_State* tolua_S)
+/* method: on of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_on00
+static int tolua_PAC_dev_signal_column_on00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'on'", NULL);
 #endif
@@ -1530,14 +1530,14 @@ static int tolua_PAC_dev_i_signal_column_on00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: set_state of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_set_state00
-static int tolua_PAC_dev_i_signal_column_set_state00(lua_State* tolua_S)
+/* method: set_state of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_set_state00
+static int tolua_PAC_dev_signal_column_set_state00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
@@ -1545,7 +1545,7 @@ static int tolua_PAC_dev_i_signal_column_set_state00(lua_State* tolua_S)
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
   int new_state = ((int)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_state'", NULL);
@@ -1563,21 +1563,21 @@ static int tolua_PAC_dev_i_signal_column_set_state00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: get_value of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_get_value00
-static int tolua_PAC_dev_i_signal_column_get_value00(lua_State* tolua_S)
+/* method: get_value of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_get_value00
+static int tolua_PAC_dev_signal_column_get_value00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_value'", NULL);
 #endif
@@ -1595,14 +1595,14 @@ static int tolua_PAC_dev_i_signal_column_get_value00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: set_value of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_set_value00
-static int tolua_PAC_dev_i_signal_column_set_value00(lua_State* tolua_S)
+/* method: set_value of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_set_value00
+static int tolua_PAC_dev_signal_column_set_value00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnumber(tolua_S,2,0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,3,&tolua_err)
  )
@@ -1610,7 +1610,7 @@ static int tolua_PAC_dev_i_signal_column_set_value00(lua_State* tolua_S)
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
   float new_value = ((float)  tolua_tonumber(tolua_S,2,0));
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_value'", NULL);
@@ -1628,21 +1628,21 @@ static int tolua_PAC_dev_i_signal_column_set_value00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: turn_off_red of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_turn_off_red00
-static int tolua_PAC_dev_i_signal_column_turn_off_red00(lua_State* tolua_S)
+/* method: turn_off_red of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_turn_off_red00
+static int tolua_PAC_dev_signal_column_turn_off_red00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'turn_off_red'", NULL);
 #endif
@@ -1659,21 +1659,21 @@ static int tolua_PAC_dev_i_signal_column_turn_off_red00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: turn_off_yellow of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_turn_off_yellow00
-static int tolua_PAC_dev_i_signal_column_turn_off_yellow00(lua_State* tolua_S)
+/* method: turn_off_yellow of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_turn_off_yellow00
+static int tolua_PAC_dev_signal_column_turn_off_yellow00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'turn_off_yellow'", NULL);
 #endif
@@ -1690,21 +1690,21 @@ static int tolua_PAC_dev_i_signal_column_turn_off_yellow00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: turn_off_green of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_turn_off_green00
-static int tolua_PAC_dev_i_signal_column_turn_off_green00(lua_State* tolua_S)
+/* method: turn_off_green of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_turn_off_green00
+static int tolua_PAC_dev_signal_column_turn_off_green00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'turn_off_green'", NULL);
 #endif
@@ -1721,21 +1721,21 @@ static int tolua_PAC_dev_i_signal_column_turn_off_green00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: turn_on_red of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_turn_on_red00
-static int tolua_PAC_dev_i_signal_column_turn_on_red00(lua_State* tolua_S)
+/* method: turn_on_red of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_turn_on_red00
+static int tolua_PAC_dev_signal_column_turn_on_red00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'turn_on_red'", NULL);
 #endif
@@ -1752,21 +1752,21 @@ static int tolua_PAC_dev_i_signal_column_turn_on_red00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: turn_on_yellow of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_turn_on_yellow00
-static int tolua_PAC_dev_i_signal_column_turn_on_yellow00(lua_State* tolua_S)
+/* method: turn_on_yellow of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_turn_on_yellow00
+static int tolua_PAC_dev_signal_column_turn_on_yellow00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'turn_on_yellow'", NULL);
 #endif
@@ -1783,21 +1783,21 @@ static int tolua_PAC_dev_i_signal_column_turn_on_yellow00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: turn_on_green of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_turn_on_green00
-static int tolua_PAC_dev_i_signal_column_turn_on_green00(lua_State* tolua_S)
+/* method: turn_on_green of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_turn_on_green00
+static int tolua_PAC_dev_signal_column_turn_on_green00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'turn_on_green'", NULL);
 #endif
@@ -1814,21 +1814,21 @@ static int tolua_PAC_dev_i_signal_column_turn_on_green00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: normal_blink_red of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_normal_blink_red00
-static int tolua_PAC_dev_i_signal_column_normal_blink_red00(lua_State* tolua_S)
+/* method: normal_blink_red of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_normal_blink_red00
+static int tolua_PAC_dev_signal_column_normal_blink_red00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'normal_blink_red'", NULL);
 #endif
@@ -1845,21 +1845,21 @@ static int tolua_PAC_dev_i_signal_column_normal_blink_red00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: normal_blink_yellow of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_normal_blink_yellow00
-static int tolua_PAC_dev_i_signal_column_normal_blink_yellow00(lua_State* tolua_S)
+/* method: normal_blink_yellow of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_normal_blink_yellow00
+static int tolua_PAC_dev_signal_column_normal_blink_yellow00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'normal_blink_yellow'", NULL);
 #endif
@@ -1876,21 +1876,21 @@ static int tolua_PAC_dev_i_signal_column_normal_blink_yellow00(lua_State* tolua_
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: normal_blink_green of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_normal_blink_green00
-static int tolua_PAC_dev_i_signal_column_normal_blink_green00(lua_State* tolua_S)
+/* method: normal_blink_green of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_normal_blink_green00
+static int tolua_PAC_dev_signal_column_normal_blink_green00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'normal_blink_green'", NULL);
 #endif
@@ -1907,21 +1907,21 @@ static int tolua_PAC_dev_i_signal_column_normal_blink_green00(lua_State* tolua_S
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: slow_blink_red of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_slow_blink_red00
-static int tolua_PAC_dev_i_signal_column_slow_blink_red00(lua_State* tolua_S)
+/* method: slow_blink_red of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_slow_blink_red00
+static int tolua_PAC_dev_signal_column_slow_blink_red00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'slow_blink_red'", NULL);
 #endif
@@ -1938,21 +1938,21 @@ static int tolua_PAC_dev_i_signal_column_slow_blink_red00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: slow_blink_yellow of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_slow_blink_yellow00
-static int tolua_PAC_dev_i_signal_column_slow_blink_yellow00(lua_State* tolua_S)
+/* method: slow_blink_yellow of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_slow_blink_yellow00
+static int tolua_PAC_dev_signal_column_slow_blink_yellow00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'slow_blink_yellow'", NULL);
 #endif
@@ -1969,21 +1969,21 @@ static int tolua_PAC_dev_i_signal_column_slow_blink_yellow00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: slow_blink_green of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_slow_blink_green00
-static int tolua_PAC_dev_i_signal_column_slow_blink_green00(lua_State* tolua_S)
+/* method: slow_blink_green of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_slow_blink_green00
+static int tolua_PAC_dev_signal_column_slow_blink_green00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'slow_blink_green'", NULL);
 #endif
@@ -2000,21 +2000,21 @@ static int tolua_PAC_dev_i_signal_column_slow_blink_green00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: turn_on_siren of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_turn_on_siren00
-static int tolua_PAC_dev_i_signal_column_turn_on_siren00(lua_State* tolua_S)
+/* method: turn_on_siren of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_turn_on_siren00
+static int tolua_PAC_dev_signal_column_turn_on_siren00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'turn_on_siren'", NULL);
 #endif
@@ -2031,21 +2031,21 @@ static int tolua_PAC_dev_i_signal_column_turn_on_siren00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* method: turn_off_siren of class  i_signal_column */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_signal_column_turn_off_siren00
-static int tolua_PAC_dev_i_signal_column_turn_off_siren00(lua_State* tolua_S)
+/* method: turn_off_siren of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_turn_off_siren00
+static int tolua_PAC_dev_signal_column_turn_off_siren00(lua_State* tolua_S)
 {
 #ifndef TOLUA_RELEASE
  tolua_Error tolua_err;
  if (
-     !tolua_isusertype(tolua_S,1,"i_signal_column",0,&tolua_err) ||
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
      !tolua_isnoobj(tolua_S,2,&tolua_err)
  )
   goto tolua_lerror;
  else
 #endif
  {
-  i_signal_column* self = (i_signal_column*)  tolua_tousertype(tolua_S,1,0);
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
 #ifndef TOLUA_RELEASE
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'turn_off_siren'", NULL);
 #endif
@@ -2484,8 +2484,8 @@ static int tolua_PAC_dev_HLA00(lua_State* tolua_S)
  {
   const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   i_signal_column* tolua_ret = (i_signal_column*)  HLA(dev_name);
-    tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_signal_column");
+   signal_column* tolua_ret = (signal_column*)  HLA(dev_name);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"signal_column");
   }
  }
  return 1;
@@ -14023,44 +14023,44 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"reverse",tolua_PAC_dev_i_motor_reverse00);
    tolua_function(tolua_S,"get_linear_speed",tolua_PAC_dev_i_motor_get_linear_speed00);
   tolua_endmodule(tolua_S);
-  tolua_cclass(tolua_S,"i_signal_column","i_signal_column","device",NULL);
-  tolua_beginmodule(tolua_S,"i_signal_column");
-   tolua_function(tolua_S,"off",tolua_PAC_dev_i_signal_column_off00);
-   tolua_function(tolua_S,"on",tolua_PAC_dev_i_signal_column_on00);
-   tolua_function(tolua_S,"set_state",tolua_PAC_dev_i_signal_column_set_state00);
-   tolua_function(tolua_S,"get_value",tolua_PAC_dev_i_signal_column_get_value00);
-   tolua_function(tolua_S,"set_value",tolua_PAC_dev_i_signal_column_set_value00);
-   tolua_function(tolua_S,"turn_off_red",tolua_PAC_dev_i_signal_column_turn_off_red00);
-   tolua_function(tolua_S,"turn_off_yellow",tolua_PAC_dev_i_signal_column_turn_off_yellow00);
-   tolua_function(tolua_S,"turn_off_green",tolua_PAC_dev_i_signal_column_turn_off_green00);
-   tolua_function(tolua_S,"turn_on_red",tolua_PAC_dev_i_signal_column_turn_on_red00);
-   tolua_function(tolua_S,"turn_on_yellow",tolua_PAC_dev_i_signal_column_turn_on_yellow00);
-   tolua_function(tolua_S,"turn_on_green",tolua_PAC_dev_i_signal_column_turn_on_green00);
-   tolua_function(tolua_S,"normal_blink_red",tolua_PAC_dev_i_signal_column_normal_blink_red00);
-   tolua_function(tolua_S,"normal_blink_yellow",tolua_PAC_dev_i_signal_column_normal_blink_yellow00);
-   tolua_function(tolua_S,"normal_blink_green",tolua_PAC_dev_i_signal_column_normal_blink_green00);
-   tolua_function(tolua_S,"slow_blink_red",tolua_PAC_dev_i_signal_column_slow_blink_red00);
-   tolua_function(tolua_S,"slow_blink_yellow",tolua_PAC_dev_i_signal_column_slow_blink_yellow00);
-   tolua_function(tolua_S,"slow_blink_green",tolua_PAC_dev_i_signal_column_slow_blink_green00);
-   tolua_function(tolua_S,"turn_on_siren",tolua_PAC_dev_i_signal_column_turn_on_siren00);
-   tolua_function(tolua_S,"turn_off_siren",tolua_PAC_dev_i_signal_column_turn_off_siren00);
-   tolua_constant(tolua_S,"TURN_OFF",i_signal_column::TURN_OFF);
-   tolua_constant(tolua_S,"TURN_ON",i_signal_column::TURN_ON);
-   tolua_constant(tolua_S,"LIGHTS_OFF",i_signal_column::LIGHTS_OFF);
-   tolua_constant(tolua_S,"GREEN_ON",i_signal_column::GREEN_ON);
-   tolua_constant(tolua_S,"YELLOW_ON",i_signal_column::YELLOW_ON);
-   tolua_constant(tolua_S,"RED_ON",i_signal_column::RED_ON);
-   tolua_constant(tolua_S,"GREEN_OFF",i_signal_column::GREEN_OFF);
-   tolua_constant(tolua_S,"YELLOW_OFF",i_signal_column::YELLOW_OFF);
-   tolua_constant(tolua_S,"RED_OFF",i_signal_column::RED_OFF);
-   tolua_constant(tolua_S,"GREEN_NORMAL_BLINK",i_signal_column::GREEN_NORMAL_BLINK);
-   tolua_constant(tolua_S,"YELLOW_NORMAL_BLINK",i_signal_column::YELLOW_NORMAL_BLINK);
-   tolua_constant(tolua_S,"RED_NORMAL_BLINK",i_signal_column::RED_NORMAL_BLINK);
-   tolua_constant(tolua_S,"GREEN_SLOW_BLINK",i_signal_column::GREEN_SLOW_BLINK);
-   tolua_constant(tolua_S,"YELLOW_SLOW_BLINK",i_signal_column::YELLOW_SLOW_BLINK);
-   tolua_constant(tolua_S,"RED_SLOW_BLINK",i_signal_column::RED_SLOW_BLINK);
-   tolua_constant(tolua_S,"SIREN_ON",i_signal_column::SIREN_ON);
-   tolua_constant(tolua_S,"SIREN_OFF",i_signal_column::SIREN_OFF);
+  tolua_cclass(tolua_S,"signal_column","signal_column","device",NULL);
+  tolua_beginmodule(tolua_S,"signal_column");
+   tolua_function(tolua_S,"off",tolua_PAC_dev_signal_column_off00);
+   tolua_function(tolua_S,"on",tolua_PAC_dev_signal_column_on00);
+   tolua_function(tolua_S,"set_state",tolua_PAC_dev_signal_column_set_state00);
+   tolua_function(tolua_S,"get_value",tolua_PAC_dev_signal_column_get_value00);
+   tolua_function(tolua_S,"set_value",tolua_PAC_dev_signal_column_set_value00);
+   tolua_function(tolua_S,"turn_off_red",tolua_PAC_dev_signal_column_turn_off_red00);
+   tolua_function(tolua_S,"turn_off_yellow",tolua_PAC_dev_signal_column_turn_off_yellow00);
+   tolua_function(tolua_S,"turn_off_green",tolua_PAC_dev_signal_column_turn_off_green00);
+   tolua_function(tolua_S,"turn_on_red",tolua_PAC_dev_signal_column_turn_on_red00);
+   tolua_function(tolua_S,"turn_on_yellow",tolua_PAC_dev_signal_column_turn_on_yellow00);
+   tolua_function(tolua_S,"turn_on_green",tolua_PAC_dev_signal_column_turn_on_green00);
+   tolua_function(tolua_S,"normal_blink_red",tolua_PAC_dev_signal_column_normal_blink_red00);
+   tolua_function(tolua_S,"normal_blink_yellow",tolua_PAC_dev_signal_column_normal_blink_yellow00);
+   tolua_function(tolua_S,"normal_blink_green",tolua_PAC_dev_signal_column_normal_blink_green00);
+   tolua_function(tolua_S,"slow_blink_red",tolua_PAC_dev_signal_column_slow_blink_red00);
+   tolua_function(tolua_S,"slow_blink_yellow",tolua_PAC_dev_signal_column_slow_blink_yellow00);
+   tolua_function(tolua_S,"slow_blink_green",tolua_PAC_dev_signal_column_slow_blink_green00);
+   tolua_function(tolua_S,"turn_on_siren",tolua_PAC_dev_signal_column_turn_on_siren00);
+   tolua_function(tolua_S,"turn_off_siren",tolua_PAC_dev_signal_column_turn_off_siren00);
+   tolua_constant(tolua_S,"TURN_OFF",signal_column::TURN_OFF);
+   tolua_constant(tolua_S,"TURN_ON",signal_column::TURN_ON);
+   tolua_constant(tolua_S,"LIGHTS_OFF",signal_column::LIGHTS_OFF);
+   tolua_constant(tolua_S,"GREEN_ON",signal_column::GREEN_ON);
+   tolua_constant(tolua_S,"YELLOW_ON",signal_column::YELLOW_ON);
+   tolua_constant(tolua_S,"RED_ON",signal_column::RED_ON);
+   tolua_constant(tolua_S,"GREEN_OFF",signal_column::GREEN_OFF);
+   tolua_constant(tolua_S,"YELLOW_OFF",signal_column::YELLOW_OFF);
+   tolua_constant(tolua_S,"RED_OFF",signal_column::RED_OFF);
+   tolua_constant(tolua_S,"GREEN_NORMAL_BLINK",signal_column::GREEN_NORMAL_BLINK);
+   tolua_constant(tolua_S,"YELLOW_NORMAL_BLINK",signal_column::YELLOW_NORMAL_BLINK);
+   tolua_constant(tolua_S,"RED_NORMAL_BLINK",signal_column::RED_NORMAL_BLINK);
+   tolua_constant(tolua_S,"GREEN_SLOW_BLINK",signal_column::GREEN_SLOW_BLINK);
+   tolua_constant(tolua_S,"YELLOW_SLOW_BLINK",signal_column::YELLOW_SLOW_BLINK);
+   tolua_constant(tolua_S,"RED_SLOW_BLINK",signal_column::RED_SLOW_BLINK);
+   tolua_constant(tolua_S,"SIREN_ON",signal_column::SIREN_ON);
+   tolua_constant(tolua_S,"SIREN_OFF",signal_column::SIREN_OFF);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"V",tolua_PAC_dev_V00);
   tolua_function(tolua_S,"VC",tolua_PAC_dev_VC00);
