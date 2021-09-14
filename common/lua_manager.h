@@ -38,7 +38,7 @@ const int FILES_VERSION[ FILE_CNT ] =
     {
     1, //"sys.io.lua",
     1, //"sys.devices.lua",
-    6, //"sys.objects.plua",
+    7, //"sys.objects.plua",
 #if defined RM_PAC
     1, //"sys.rm_PACS.lua",
 #endif // defined RM_PAC
@@ -84,7 +84,7 @@ class lua_manager
             const char *c_function_name ) const;
 
         int int_2_exec_lua_method( const char* object_name,
-            const char* function_name, int param1, int param2, 
+            const char* function_name, int param1, int param2,
             const char* c_function_name ) const;
 
         int int_no_param_exec_lua_method( const char *object_name,

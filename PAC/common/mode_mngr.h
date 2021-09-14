@@ -228,13 +228,26 @@ class open_seat_action: public action
 class DI_DO_action: public action
     {
     public:
-        DI_DO_action( ):action( "Группы DI->DO's" )
-            {
-            }
+        DI_DO_action( std::string name = "Группы DI->DO's" );
 
         int check( char* reason ) const;
 
         void evaluate();
+
+    protected:
+        virtual void evaluate_DO( std::vector< device* > devices );
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
+/// Пары inverted DI->DO.
+/// </summary>
+class inverted_DI_DO_action : public DI_DO_action
+    {
+    public:
+        inverted_DI_DO_action();
+
+    protected:
+        void evaluate_DO( std::vector< device* > devices ) override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -344,6 +357,7 @@ class step
 
             A_REQUIRED_FB,
             A_DI_DO,
+            A_INVERTED_DI_DO,
             A_AI_AO,
             A_WASH,
 

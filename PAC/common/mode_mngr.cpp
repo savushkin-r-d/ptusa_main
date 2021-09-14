@@ -631,6 +631,7 @@ step::step( std::string name, operation_state *owner,
 
     actions.push_back( new required_DI_action() );
     actions.push_back( new DI_DO_action() );
+    actions.push_back( new inverted_DI_DO_action() );
     actions.push_back( new AI_AO_action() );
     actions.push_back( new wash_action() );
     if ( !is_mode )
@@ -762,8 +763,13 @@ void step::set_dx_time( u_int_4 dx_time )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+DI_DO_action::DI_DO_action( std::string name ) :action( name )
+    {
+    }
+//-----------------------------------------------------------------------------
 int DI_DO_action::check( char* reason ) const
     {
+    reason[ 0 ] = 0;
     if ( is_empty() )
         {
         return 0;
@@ -780,8 +786,8 @@ int DI_DO_action::check( char* reason ) const
         auto d_i_device = devs[ i ][ 0 ];
         if ( d_i_device->get_type() != device::DT_DI )
             {
-            sprintf( reason, "в поле \'Группы DI - DO\' устройство \'%.25s (%.50s)\'"
-                " не является сигналом DI",
+            sprintf( reason, "в поле \'%s\' устройство \'%.25s (%.50s)\'"
+                " не является сигналом DI", name.c_str(),
                 d_i_device->get_name(), d_i_device->get_description() );
             return 1;
             }
@@ -806,20 +812,44 @@ void DI_DO_action::evaluate()
             continue;
             }
 
-        if ( devs[ i ][ 0 ]->is_active() )
+        evaluate_DO( devs[ i ] );
+        }
+    }
+//-----------------------------------------------------------------------------
+void DI_DO_action::evaluate_DO( std::vector< device* > devices )
+    {
+    if ( devices[ 0 ]->is_active() )
+        {
+        for ( u_int j = 1; j < devices.size(); j++ )
             {
-            for ( u_int j = 1; j < devs[ i ].size(); j++ )
-                {
-                devs[ i ][ j ]->on();
-                }
+            devices[ j ]->on();
             }
-        else
+        }
+    else
+        {
+        for ( u_int j = 1; j < devices.size(); j++ )
             {
-            for ( u_int j = 1; j < devs[ i ].size(); j++ )
-                {
-                devs[ i ][ j ]->off();
-                }
+            devices[ j ]->off();
             }
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+inverted_DI_DO_action::inverted_DI_DO_action():
+    DI_DO_action( "Группы инвертированный DI->DO's" )
+    {
+    }
+//-----------------------------------------------------------------------------
+void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices )
+    {
+    int new_state = 0;
+    if ( !devices[ 0 ]->is_active() )
+        {
+        new_state = 1;
+        }
+    for ( u_int j = 1; j < devices.size(); j++ )
+        {
+        devices[ j ]->set_state( new_state );
         }
     }
 //-----------------------------------------------------------------------------
