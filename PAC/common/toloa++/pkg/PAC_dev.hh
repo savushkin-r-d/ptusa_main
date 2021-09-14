@@ -298,7 +298,7 @@ class i_motor : public device
         virtual float get_linear_speed() const;
     };
 //-----------------------------------------------------------------------------
-class signal_column : public device
+class i_signal_column : public device
     {
     public:
         /// @brief Выключение устройства с учетом ручного режима.
@@ -468,7 +468,7 @@ i_DO_device* HL( const char *dev_name );
 /// @param dev_name - имя сигнальной колонны.
 /// @return - устройство с заданным именем. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-signal_column* HLA( const char* dev_name );
+i_signal_column* HLA( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение кнопки по имени.
 ///

@@ -4043,12 +4043,12 @@ class counter_f_ok : public counter_f
 ///     тревог, пропадания аварий.
 ///     3. Мигающий желтый свет – неподтвержденное сообщение. Частота мигания
 ///     0.5 Гц.
-class signal_column : public device, public io_device
+class i_signal_column : public device, public io_device
     {
     public:
-        signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type = DST_HLA,
-            int red_lamp_channel = 0, int yellow_lamp_channel = 1,
-            int green_lamp_channel = 2, int siren_channel = 3 );
+        i_signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type,
+            int red_lamp_channel = 0, int yellow_lamp_channel = 0,
+            int green_lamp_channel = 0, int siren_channel = 0 );
 
         void turn_off_red();
         void turn_off_yellow();
@@ -4110,7 +4110,7 @@ class signal_column : public device, public io_device
         int save_device_ex( char* buff );
 
     protected:
-        virtual void process_DO( u_int n, int state, const char* name );
+        virtual void process_DO( u_int n, int state, const char* name ) = 0;
 
         ///Тип мигания (>0 - реализуем сами, 0 - встроенный в сирену).
         int is_const_red;
@@ -4152,17 +4152,30 @@ class signal_column : public device, public io_device
         STEP siren_step;
     };
 //-----------------------------------------------------------------------------
+/// @brief Сигнальная колонна с дискретным подключением.
+    class signal_column : public i_signal_column
+        {
+        public:
+            signal_column( const char* dev_name,
+                int red_lamp_channel = 0, int yellow_lamp_channel = 1,
+                int green_lamp_channel = 2, int siren_channel = 3 );
+
+        protected:
+            void process_DO( u_int n, int state, const char* name ) override;
+        };
+//-----------------------------------------------------------------------------
 /// @brief Сигнальная колонна с IO-Link.
 ///
 /// Служит для уведомления оператора о событиях.
-class signal_column_iolink : public signal_column
+class signal_column_iolink : public i_signal_column
     {
     public:
         signal_column_iolink( const char* dev_name );
 
         void set_string_property( const char* field, const char* value );
 
-        virtual void process_DO( u_int n, int state, const char* name );
+    protected:
+        void process_DO( u_int n, int state, const char* name ) override;
 
     private:
         void evaluate_io();
@@ -4283,7 +4296,7 @@ class camera_DI3 : public camera_DI2
 /// Необходимо для возвращения результата поиска устройства с несуществующим
 /// номером. Методы данного класса ничего не делают.
 class dev_stub : public i_counter, public valve, public i_wages,
-    public camera, public signal_column
+    public camera, public i_signal_column
     {
     public:
         dev_stub();
@@ -4318,6 +4331,8 @@ class dev_stub : public i_counter, public valve, public i_wages,
         void  abs_reset();
 
         void tare();
+
+        void process_DO( u_int n, int state, const char* name ) override;
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -4410,7 +4425,7 @@ class device_manager: public i_Lua_save_device
         PID* get_C( const char* dev_name );
 
         /// @brief Получение сигнальной колонны по имени.
-        signal_column* get_HLA( const char* dev_name );
+        i_signal_column* get_HLA( const char* dev_name );
 
         /// @brief Получение камеры по имени.
         camera* get_CAM( const char* dev_name );
@@ -4782,7 +4797,7 @@ PID* C( const char* dev_name );
 /// @param dev_name - имя.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-signal_column* HLA( const char* dev_name );
+i_signal_column* HLA( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение камеры по имени.
 ///
