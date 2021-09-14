@@ -423,13 +423,14 @@ void DO1::direct_off()
 //-----------------------------------------------------------------------------
 signal_column::signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type,
     int red_lamp_channel, int yellow_lamp_channel,
-    int green_lamp_channel, int siren_channel ):
+    int green_lamp_channel, int blue_lamp_channel, int siren_channel ):
     device( dev_name, DT_HLA, sub_type, 0 ),
     io_device( dev_name ),
     is_const_red( 0 ),
     red_lamp_channel( red_lamp_channel ),
     yellow_lamp_channel( yellow_lamp_channel ),
     green_lamp_channel( green_lamp_channel ),
+    blue_lamp_channel( blue_lamp_channel ),
     siren_channel( siren_channel ),
     siren_step( STEP::off )
     {
@@ -437,20 +438,22 @@ signal_column::signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type,
 //-----------------------------------------------------------------------------
 void signal_column::direct_off()
     {
-    turn_off_red();
-    turn_off_yellow();
-    turn_off_green();
+    if ( red_lamp_channel ) turn_off_red();
+    if ( yellow_lamp_channel ) turn_off_yellow();
+    if ( green_lamp_channel ) turn_off_green();
+    if ( blue_lamp_channel ) turn_off_blue();
 
-    turn_off_siren();
+    if ( siren_channel ) turn_off_siren();
     }
 //-----------------------------------------------------------------------------
 void signal_column::direct_on()
     {
-    turn_off_red();
-    turn_off_yellow();
-    turn_off_green();
+    if ( red_lamp_channel ) turn_off_red();
+    if ( yellow_lamp_channel ) turn_off_yellow();
+    if ( green_lamp_channel ) turn_off_green();
+    if ( blue_lamp_channel ) turn_off_blue();
 
-    turn_off_siren();
+    if ( siren_channel ) turn_off_siren();
 
     turn_on_green();
     }
@@ -473,6 +476,12 @@ void signal_column::turn_off_green()
     green.step = STEP::off;
     }
 //-----------------------------------------------------------------------------
+void signal_column::turn_off_blue()
+    {
+    process_DO( blue_lamp_channel, DO_state::OFF, BLUE_LAMP );
+    blue.step = STEP::off;
+    }
+//-----------------------------------------------------------------------------
 void signal_column::turn_on_red()
     {
     process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
@@ -489,6 +498,12 @@ void signal_column::turn_on_green()
     {
     process_DO( green_lamp_channel, DO_state::ON, GREEN_LAMP );
     green.step = STEP::on;
+    }
+//-----------------------------------------------------------------------------
+void signal_column::turn_on_blue()
+    {
+    process_DO( blue_lamp_channel, DO_state::ON, BLUE_LAMP );
+    blue.step = STEP::on;
     }
 //-----------------------------------------------------------------------------
 void signal_column::normal_blink_red()
@@ -513,6 +528,11 @@ void signal_column::normal_blink_green()
     blink( green_lamp_channel, green, (u_long)CONSTANTS::NORMAL_BLINK_TIME );
     }
 //-----------------------------------------------------------------------------
+void signal_column::normal_blink_blue()
+    {
+    blink( blue_lamp_channel, blue, (u_long)CONSTANTS::NORMAL_BLINK_TIME );
+    }
+//-----------------------------------------------------------------------------
 void signal_column::slow_blink_red()
     {
     if ( is_const_red )
@@ -533,6 +553,11 @@ void signal_column::slow_blink_yellow()
 void signal_column::slow_blink_green()
     {
     blink( green_lamp_channel, green, (u_long)CONSTANTS::SLOW_BLINK_TIME );
+    }
+//-----------------------------------------------------------------------------
+void signal_column::slow_blink_blue()
+    {
+    blink( blue_lamp_channel, blue, (u_long)CONSTANTS::SLOW_BLINK_TIME );
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_siren()
@@ -711,16 +736,18 @@ void signal_column::blink( int lamp_DO, state_info& info, u_int delay_time )
 //-----------------------------------------------------------------------------
 signal_column_discrete::signal_column_discrete( const char* dev_name,
     int red_lamp_channel, int yellow_lamp_channel,
-    int green_lamp_channel, int siren_channel ) :
+    int green_lamp_channel, int blue_lamp_channel,
+    int siren_channel ) :
     signal_column( dev_name, DST_HLA,
-    red_lamp_channel, yellow_lamp_channel, green_lamp_channel, siren_channel )
+        red_lamp_channel, yellow_lamp_channel, green_lamp_channel,
+        blue_lamp_channel, siren_channel )
     {
     }
 //-----------------------------------------------------------------------------
 void signal_column_discrete::process_DO( u_int n, DO_state state, const char* name )
     {
 #ifndef DEBUG_NO_IO_MODULES
-    set_DO( n, static_cast<char>( state ) );
+    set_DO( n - 1, static_cast<char>( state ) );
 #endif
     }
 //-----------------------------------------------------------------------------
@@ -2239,6 +2266,7 @@ u_int dev_stub::get_abs_quantity()
 void dev_stub::tare()
     {
     }
+//-----------------------------------------------------------------------------
 void dev_stub::process_DO( u_int n, DO_state state, const char* name )
     {
     }

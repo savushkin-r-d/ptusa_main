@@ -325,18 +325,22 @@ class signal_column : public device
         void turn_off_red();
         void turn_off_yellow();
         void turn_off_green();
+        void turn_off_blue();
 
         void turn_on_red();
         void turn_on_yellow();
         void turn_on_green();
+        void turn_on_blue();
 
         void normal_blink_red();
         void normal_blink_yellow();
         void normal_blink_green();
+        void normal_blink_blue();
 
         void slow_blink_red();
         void slow_blink_yellow();
         void slow_blink_green();
+        void slow_blink_blue();
 
         void turn_on_siren();
         void turn_off_siren();

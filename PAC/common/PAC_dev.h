@@ -4048,23 +4048,28 @@ class signal_column : public device, public io_device
     public:
         signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type,
             int red_lamp_channel = 0, int yellow_lamp_channel = 0,
-            int green_lamp_channel = 0, int siren_channel = 0 );
+            int green_lamp_channel = 0, int blue_lamp_channel = 0,
+            int siren_channel = 0 );
 
         void turn_off_red();
         void turn_off_yellow();
         void turn_off_green();
+        void turn_off_blue();
 
         void turn_on_red();
         void turn_on_yellow();
         void turn_on_green();
+        void turn_on_blue();
 
         void normal_blink_red();
         void normal_blink_yellow();
         void normal_blink_green();
+        void normal_blink_blue();
 
         void slow_blink_red();
         void slow_blink_yellow();
         void slow_blink_green();
+        void slow_blink_blue();
 
         void turn_on_siren();
         void turn_off_siren();
@@ -4119,6 +4124,7 @@ class signal_column : public device, public io_device
         const char* RED_LAMP = "red lamp";
         const char* GREEN_LAMP = "green lamp";
         const char* YELLOW_LAMP = "yellow lamp";
+        const char* BLUE_LAMP = "blue lamp";
         const char* SIREN = "siren";
 
         virtual void process_DO( u_int n, DO_state state, const char* name ) = 0;
@@ -4129,6 +4135,7 @@ class signal_column : public device, public io_device
         int red_lamp_channel;
         int yellow_lamp_channel;
         int green_lamp_channel;
+        int blue_lamp_channel;
         int siren_channel;
 
         enum class CONSTANTS
@@ -4157,6 +4164,7 @@ class signal_column : public device, public io_device
         state_info green;
         state_info yellow;
         state_info red;
+        state_info blue;
 
         void blink( int lamp_DO, state_info& info, u_int delay_time );
 
@@ -4168,8 +4176,9 @@ class signal_column : public device, public io_device
         {
         public:
             signal_column_discrete( const char* dev_name,
-                int red_lamp_channel = 0, int yellow_lamp_channel = 1,
-                int green_lamp_channel = 2, int siren_channel = 3 );
+                int red_lamp_channel = 1, int yellow_lamp_channel = 2,
+                int green_lamp_channel = 3, int blue_lamp_channel = 0,
+                int siren_channel = 4 );
 
         protected:
             void process_DO( u_int n, DO_state state, const char* name ) override;

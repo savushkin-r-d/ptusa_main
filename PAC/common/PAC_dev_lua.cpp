@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 09/14/21 14:23:30.
+** Generated automatically by tolua++-1.0.92 on 09/14/21 16:37:11.
 */
 
 #ifndef __cplusplus
@@ -1721,6 +1721,37 @@ static int tolua_PAC_dev_signal_column_turn_off_green00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: turn_off_blue of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_turn_off_blue00
+static int tolua_PAC_dev_signal_column_turn_off_blue00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'turn_off_blue'", NULL);
+#endif
+  {
+   self->turn_off_blue();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'turn_off_blue'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: turn_on_red of class  signal_column */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_turn_on_red00
 static int tolua_PAC_dev_signal_column_turn_on_red00(lua_State* tolua_S)
@@ -1809,6 +1840,37 @@ static int tolua_PAC_dev_signal_column_turn_on_green00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'turn_on_green'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: turn_on_blue of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_turn_on_blue00
+static int tolua_PAC_dev_signal_column_turn_on_blue00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'turn_on_blue'", NULL);
+#endif
+  {
+   self->turn_on_blue();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'turn_on_blue'.",&tolua_err);
  return 0;
 #endif
 }
@@ -1907,6 +1969,37 @@ static int tolua_PAC_dev_signal_column_normal_blink_green00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
+/* method: normal_blink_blue of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_normal_blink_blue00
+static int tolua_PAC_dev_signal_column_normal_blink_blue00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'normal_blink_blue'", NULL);
+#endif
+  {
+   self->normal_blink_blue();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'normal_blink_blue'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
 /* method: slow_blink_red of class  signal_column */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_slow_blink_red00
 static int tolua_PAC_dev_signal_column_slow_blink_red00(lua_State* tolua_S)
@@ -1995,6 +2088,37 @@ static int tolua_PAC_dev_signal_column_slow_blink_green00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'slow_blink_green'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: slow_blink_blue of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_slow_blink_blue00
+static int tolua_PAC_dev_signal_column_slow_blink_blue00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'slow_blink_blue'", NULL);
+#endif
+  {
+   self->slow_blink_blue();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'slow_blink_blue'.",&tolua_err);
  return 0;
 #endif
 }
@@ -14033,15 +14157,19 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"turn_off_red",tolua_PAC_dev_signal_column_turn_off_red00);
    tolua_function(tolua_S,"turn_off_yellow",tolua_PAC_dev_signal_column_turn_off_yellow00);
    tolua_function(tolua_S,"turn_off_green",tolua_PAC_dev_signal_column_turn_off_green00);
+   tolua_function(tolua_S,"turn_off_blue",tolua_PAC_dev_signal_column_turn_off_blue00);
    tolua_function(tolua_S,"turn_on_red",tolua_PAC_dev_signal_column_turn_on_red00);
    tolua_function(tolua_S,"turn_on_yellow",tolua_PAC_dev_signal_column_turn_on_yellow00);
    tolua_function(tolua_S,"turn_on_green",tolua_PAC_dev_signal_column_turn_on_green00);
+   tolua_function(tolua_S,"turn_on_blue",tolua_PAC_dev_signal_column_turn_on_blue00);
    tolua_function(tolua_S,"normal_blink_red",tolua_PAC_dev_signal_column_normal_blink_red00);
    tolua_function(tolua_S,"normal_blink_yellow",tolua_PAC_dev_signal_column_normal_blink_yellow00);
    tolua_function(tolua_S,"normal_blink_green",tolua_PAC_dev_signal_column_normal_blink_green00);
+   tolua_function(tolua_S,"normal_blink_blue",tolua_PAC_dev_signal_column_normal_blink_blue00);
    tolua_function(tolua_S,"slow_blink_red",tolua_PAC_dev_signal_column_slow_blink_red00);
    tolua_function(tolua_S,"slow_blink_yellow",tolua_PAC_dev_signal_column_slow_blink_yellow00);
    tolua_function(tolua_S,"slow_blink_green",tolua_PAC_dev_signal_column_slow_blink_green00);
+   tolua_function(tolua_S,"slow_blink_blue",tolua_PAC_dev_signal_column_slow_blink_blue00);
    tolua_function(tolua_S,"turn_on_siren",tolua_PAC_dev_signal_column_turn_on_siren00);
    tolua_function(tolua_S,"turn_off_siren",tolua_PAC_dev_signal_column_turn_off_siren00);
    tolua_constant(tolua_S,"TURN_OFF",signal_column::TURN_OFF);
