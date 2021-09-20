@@ -2836,6 +2836,8 @@ class pressure_e_iolink : public analog_io_device
             IFM_PI2715,
             IFM_PI2794,
             IFM_PI2797,
+
+            FESTO_SPAE_P10R,
             };
 
         static void evaluate_io( const char *name, char* data, ARTICLE n_article, float& v,

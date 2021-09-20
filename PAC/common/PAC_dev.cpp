@@ -5371,6 +5371,12 @@ void pressure_e_iolink::read_article( const char* article,
         return;
         }
 
+    if ( strcmp( article, "FESTO.SPAE-P10R" ) == 0 )
+        {
+        n_article = ARTICLE::FESTO_SPAE_P10R;
+        return;
+        }
+
     if ( G_DEBUG )
         {
         G_LOG->warning( "%s unknown article \"%s\"",
@@ -5386,6 +5392,7 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
         case ARTICLE::IFM_PI2715:
         case ARTICLE::IFM_PI2794:
         case ARTICLE::IFM_PI2797:
+        case ARTICLE::FESTO_SPAE_P10R:
             {
             PT_data info{};
             std::reverse_copy( data, data + sizeof( info ), (char*)&info );
@@ -5442,6 +5449,10 @@ void pressure_e_iolink::evaluate_io( const char *name, char* data, ARTICLE n_art
 
         case ARTICLE::IFM_PI2794:       // 0.01, bar
             alfa = 0.01f;
+            break;
+
+        case ARTICLE::FESTO_SPAE_P10R:
+            alfa = 0.000610388818f;
             break;
 
         case ARTICLE::DEFAULT:
