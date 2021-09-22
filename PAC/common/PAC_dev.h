@@ -540,8 +540,7 @@ class device : public i_DO_AO_device, public par_device
             //PT
             DST_PT = 1,      ///Обычный аналоговый датчик давления
             DST_PT_IOLINK,   ///Датчик давления IOLInk
-
-            DST_PT_VIRT = 4, ///Виртуальный датчик давления
+            DST_PT_VIRT,     ///Виртуальный датчик давления
 
             //F
             DST_F = 1,       ///< Автоматический выключатель.
@@ -2837,7 +2836,7 @@ class pressure_e_iolink : public analog_io_device
             IFM_PI2794,
             IFM_PI2797,
 
-            FESTO_SPAE_P10R,
+            FES_8001446,
             };
 
         static void evaluate_io( const char *name, char* data, ARTICLE n_article, float& v,
