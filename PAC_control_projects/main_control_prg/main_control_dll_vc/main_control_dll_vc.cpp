@@ -180,8 +180,8 @@ extern "C" int
 #ifdef WIN32
 __declspec( dllexport )
 #endif
-    luaopen_main_control( lua_State* L )
+    luaopen_ptusa_main( lua_State* L )
     {
-    luaL_openlib( L, "main_control", ls_lib, 0 );
+    luaL_openlib( L, "ptusa_main", ls_lib, 0 );
     return 0;
     }

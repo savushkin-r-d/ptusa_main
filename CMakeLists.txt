@@ -13,7 +13,7 @@ if(LINUX)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 endif()
 
-project(ptusa VERSION 2022.09.07.0)
+project(ptusa_main VERSION 2022.09.07.0)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -87,7 +87,7 @@ if(LINUX)
     add_executable(${PROJECT_NAME} ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main.cpp)
 
-    add_library(main_control ${common_src} ${linux_src}
+    add_library(libptusa_main ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp)
 
     add_executable(main_test ${common_src} ${linux_src} ${test_src}
@@ -98,7 +98,7 @@ elseif(WIN32)
             PAC_control_projects/main_control_prg/main.cpp
             PAC_control_projects/main_control_prg/version.rc)
 
-    add_library(main_control ${common_src} ${win_src}
+    add_library(libptusa_main ${common_src} ${win_src}
             PAC_control_projects/main_control_prg/main_control_dll_vc/main_control_dll_vc.cpp
             PAC_control_projects/main_control_prg/main_control_dll_vc/dllmain.cpp
             PAC_control_projects/main_control_prg/version.rc)
@@ -118,7 +118,8 @@ elseif(WIN32)
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
 endif()
 
-target_compile_definitions(main_control PUBLIC _USRDLL)
+set_target_properties (libptusa_main PROPERTIES OUTPUT_NAME ptusa_main CLEAN_DIRECT_OUTPUT 1)
+target_compile_definitions(libptusa_main PUBLIC _USRDLL)
 
 target_compile_definitions(gmock PUBLIC GTEST_CREATE_SHARED_LIBRARY)
 target_compile_definitions(main_test PUBLIC GTEST_LINKED_AS_SHARED_LIBRARY)
@@ -158,7 +159,7 @@ endif ()
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib>)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GENERAL_INCLUDES})
-target_include_directories(main_control PUBLIC ${GENERAL_INCLUDES})
+target_include_directories(libptusa_main PUBLIC ${GENERAL_INCLUDES})
 
 set(TEST_INCLUDES
 		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/googletest/googletest/include>
@@ -183,28 +184,28 @@ endif()
 ################# add link targets ####################################################
 
 target_link_libraries(${PROJECT_NAME} liblua_static toluapp_lib_static zlibstatic)
-target_link_libraries(main_control toluapp_lib_static zlibstatic)
+target_link_libraries(libptusa_main toluapp_lib_static zlibstatic)
 
 target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic gtest gtest_main gmock gmock_main subhook)
 
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
-    target_link_libraries(main_control wsock32 ws2_32)
+    target_link_libraries(libptusa_main wsock32 ws2_32)
     target_link_libraries(main_test wsock32 ws2_32)
 
     if(DEFINED ENV{LUA_DEV})
-        target_link_libraries(main_control $ENV{LUA_DEV}/lib/lua51.lib)
+        target_link_libraries(libptusa_main $ENV{LUA_DEV}/lib/lua51.lib)
     else()
-        target_link_libraries(main_control liblua)
+        target_link_libraries(libptusa_main liblua)
     endif()
 
 elseif (LINUX)
-    target_link_libraries(main_control liblua_static)
+    target_link_libraries(libptusa_main liblua_static)
 endif()
 #######################################################################################
 
 install_executable(${PROJECT_NAME})
-install_library(main_control)
+install_library(libptusa_main)
 
 enable_testing()
 add_test(run_no_command_line_arguments ${PROJECT_NAME})
