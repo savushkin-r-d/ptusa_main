@@ -984,6 +984,7 @@ class step
             A_WASH,
 
             A_TO_STEP_IF,
+            A_ENABLE_STEP_ON_SIGNAL,
             };
 
         bool is_active() const;

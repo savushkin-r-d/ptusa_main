@@ -638,6 +638,11 @@ step::step( std::string name, operation_state *owner,
         {
         actions.push_back( new to_step_if_devices_in_specific_state_action() );
         }
+    else
+        {
+        actions.push_back( new action( "Заглушка" ) );
+        }
+    actions.push_back( new enable_step_by_signal() );
     }
 //-----------------------------------------------------------------------------
 step::~step()
@@ -1382,6 +1387,38 @@ void to_step_if_devices_in_specific_state_action::final()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+enable_step_by_signal::enable_step_by_signal() :action( "Включить шаг по сигналам" )
+    {
+    };
+//-----------------------------------------------------------------------------
+bool enable_step_by_signal::is_any_group_active() const
+    {
+    if ( is_empty() )
+        {
+        return false;
+        }
+
+    auto& main_group = devices[ MAIN_GROUP ];
+    for ( u_int i = 0; i < main_group.size(); i++ )
+        {
+        auto& group = main_group[ i ];
+        auto is_group_ok = true;
+        for ( u_int idx = 0; idx < group.size(); idx++ )
+            {
+            auto& dev = group[ idx ];
+            if ( !dev->is_active() )
+                {
+                is_group_ok = false;
+                break;
+                }
+            }
+        if ( is_group_ok ) return true;
+        }
+
+    return false;
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 operation_state::operation_state( const char* name,
     operation_manager *owner, int n ) : name( name ),
     mode_step(  new step( "Шаг операции", this, true ) ),
@@ -1472,10 +1509,34 @@ void operation_state::evaluate()
     {
     mode_step->evaluate();
 
+    //Process action "enable_step_by_signal".
     for ( size_t idx = 0; idx < active_steps.size(); idx++ )
         {
         size_t step_n = active_steps[ idx ] - 1;
-        if ( step_n < steps.size() ) steps[ step_n ]->evaluate();
+        if ( step_n < steps.size() )
+            {
+            steps[ step_n ]->evaluate();
+
+            auto enable_action = dynamic_cast<enable_step_by_signal*>(
+                ( *steps[ step_n ] )[ step::A_ENABLE_STEP_ON_SIGNAL ] );
+            if ( enable_action && !enable_action->is_any_group_active() )
+                {
+                off_extra_step( step_n );
+                }
+            }
+        }
+    for ( size_t idx = 1; idx < steps.size(); idx++ )
+        {
+        if ( is_active_extra_step( idx ) )
+            {
+            auto step = steps[ idx ];
+            auto enable_action = dynamic_cast<enable_step_by_signal*>(
+                ( *step )[ step::A_ENABLE_STEP_ON_SIGNAL ] );
+            if ( enable_action && !enable_action->is_any_group_active() )
+                {
+                on_extra_step( idx );
+                }
+            }
         }
 
     if ( active_step_n < 0 ) return;
