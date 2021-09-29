@@ -1521,20 +1521,20 @@ void operation_state::evaluate()
                 ( *steps[ step_n ] )[ step::A_ENABLE_STEP_ON_SIGNAL ] );
             if ( enable_action && !enable_action->is_any_group_active() )
                 {
-                off_extra_step( step_n );
+                off_extra_step( step_n + 1 );
                 }
             }
         }
-    for ( size_t idx = 1; idx < steps.size(); idx++ )
+    for ( size_t idx = 0; idx < steps.size(); idx++ )
         {
-        if ( is_active_extra_step( idx ) )
+        if ( is_active_extra_step( idx + 1 ) )
             {
             auto step = steps[ idx ];
             auto enable_action = dynamic_cast<enable_step_by_signal*>(
                 ( *step )[ step::A_ENABLE_STEP_ON_SIGNAL ] );
             if ( enable_action && !enable_action->is_any_group_active() )
                 {
-                on_extra_step( idx );
+                on_extra_step( idx + 1 );
                 }
             }
         }
