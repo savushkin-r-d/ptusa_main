@@ -1415,6 +1415,16 @@ bool enable_step_by_signal::is_any_group_active() const
     return false;
     };
 //-----------------------------------------------------------------------------
+bool enable_step_by_signal::is_all_group_inactive() const
+    {
+    if ( is_empty() )
+        {
+        return false;
+        }
+
+    return !is_any_group_active();
+    };
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 operation_state::operation_state( const char* name,
     operation_manager *owner, int n ) : name( name ),
@@ -1516,7 +1526,7 @@ void operation_state::evaluate()
 
             auto enable_action = dynamic_cast<enable_step_by_signal*>(
                 ( *steps[ step_n ] )[ step::A_ENABLE_STEP_BY_SIGNAL ] );
-            if ( enable_action && !enable_action->is_any_group_active() )
+            if ( enable_action && enable_action->is_all_group_inactive() )
                 {
                 off_extra_step( step_n + 1 );
                 }
@@ -1524,12 +1534,12 @@ void operation_state::evaluate()
         }
     for ( size_t idx = 0; idx < steps.size(); idx++ )
         {
-        if ( is_active_extra_step( idx + 1 ) )
+        if ( !is_active_extra_step( idx + 1 ) )
             {
             auto step = steps[ idx ];
             auto enable_action = dynamic_cast<enable_step_by_signal*>(
                 ( *step )[ step::A_ENABLE_STEP_BY_SIGNAL ] );
-            if ( enable_action && !enable_action->is_any_group_active() )
+            if ( enable_action && enable_action->is_any_group_active() )
                 {
                 on_extra_step( idx + 1 );
                 }
