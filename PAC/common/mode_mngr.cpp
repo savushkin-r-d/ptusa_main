@@ -634,15 +634,12 @@ step::step( std::string name, operation_state *owner,
     actions.push_back( new inverted_DI_DO_action() );
     actions.push_back( new AI_AO_action() );
     actions.push_back( new wash_action() );
+    actions.push_back( new enable_step_by_signal() );
+
     if ( !is_mode )
         {
         actions.push_back( new to_step_if_devices_in_specific_state_action() );
         }
-    else
-        {
-        actions.push_back( new action( "Заглушка" ) );
-        }
-    actions.push_back( new enable_step_by_signal() );
     }
 //-----------------------------------------------------------------------------
 step::~step()
@@ -1518,7 +1515,7 @@ void operation_state::evaluate()
             steps[ step_n ]->evaluate();
 
             auto enable_action = dynamic_cast<enable_step_by_signal*>(
-                ( *steps[ step_n ] )[ step::A_ENABLE_STEP_ON_SIGNAL ] );
+                ( *steps[ step_n ] )[ step::A_ENABLE_STEP_BY_SIGNAL ] );
             if ( enable_action && !enable_action->is_any_group_active() )
                 {
                 off_extra_step( step_n + 1 );
@@ -1531,7 +1528,7 @@ void operation_state::evaluate()
             {
             auto step = steps[ idx ];
             auto enable_action = dynamic_cast<enable_step_by_signal*>(
-                ( *step )[ step::A_ENABLE_STEP_ON_SIGNAL ] );
+                ( *step )[ step::A_ENABLE_STEP_BY_SIGNAL ] );
             if ( enable_action && !enable_action->is_any_group_active() )
                 {
                 on_extra_step( idx + 1 );

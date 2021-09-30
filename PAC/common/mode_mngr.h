@@ -373,8 +373,8 @@ class step
             A_AI_AO,
             A_WASH,
 
+            A_ENABLE_STEP_BY_SIGNAL,
             A_TO_STEP_IF,
-            A_ENABLE_STEP_ON_SIGNAL,
             };
 
         step( std::string name, operation_state *owner, bool is_mode = false );
