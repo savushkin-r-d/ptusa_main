@@ -338,6 +338,18 @@ class to_step_if_devices_in_specific_state_action : public action
             };
     };
 //-----------------------------------------------------------------------------
+/// <summary>
+/// Проверка сигналов для дальнешего автоматического включения/выключения
+/// шага.
+/// </summary>
+class enable_step_by_signal : public action
+    {
+    public:
+        enable_step_by_signal();
+
+        bool is_any_group_active() const;
+    };
+//-----------------------------------------------------------------------------
 /// @brief Содержит информацию об устройствах, которые входят в шаг (открываются/
 /// закрываются).
 ///
@@ -361,6 +373,7 @@ class step
             A_AI_AO,
             A_WASH,
 
+            A_ENABLE_STEP_BY_SIGNAL,
             A_TO_STEP_IF,
             };
 
