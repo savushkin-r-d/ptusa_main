@@ -348,8 +348,6 @@ class enable_step_by_signal : public action
         enable_step_by_signal();
 
         bool is_any_group_active() const;
-
-        bool is_all_group_inactive() const;
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об устройствах, которые входят в шаг (открываются/
