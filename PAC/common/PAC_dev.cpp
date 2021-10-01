@@ -1879,7 +1879,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
         case device::DT_HLA:
             switch ( dev_sub_type )
                 {
-                case device::DT_HLA:
+                case device::DST_HLA:
                     new_device = new signal_column_discrete( dev_name );
                     new_io_device = (signal_column_discrete*)new_device;
                     break;
