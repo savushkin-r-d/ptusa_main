@@ -4401,6 +4401,46 @@ void AI1::direct_set_value( float new_value )
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+temperature_e_analog::temperature_e_analog( const char* dev_name ) :
+    AI1( dev_name, DT_TE, DST_TE_ANALOG, LAST_PARAM_IDX - 1 )
+    {
+    start_param_idx = AI1::get_params_count();
+    set_par_name( P_ERR_T, start_param_idx, "P_ERR_T" );
+    set_par_name( P_MIN_V, start_param_idx, "P_MIN_V" );
+    set_par_name( P_MAX_V, start_param_idx, "P_MAX_V" );
+    }
+//-----------------------------------------------------------------------------
+float temperature_e_analog::get_value()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return analog_io_device::get_value();
+#else
+    if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
+        {
+        return get_par( P_ERR_T, start_param_idx );
+        }
+    else
+        {
+        float v = get_AI( C_AI_INDEX, get_par( P_MIN_V, start_param_idx ),
+            get_par( P_MAX_V, start_param_idx ) );
+        get_par( P_ZERO_ADJUST_COEFF, start_param_idx ) + v;
+        }
+#endif
+    }
+//-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
+int temperature_e_analog::get_state()
+    {
+    if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
+        {
+        return -1;
+        }
+
+    return 1;
+    }
+#endif
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 temperature_e_iolink::temperature_e_iolink( const char *dev_name ):
     AI1(dev_name, DT_TE, DST_TE_IOLINK, ADDITIONAL_PARAM_COUNT), info(new TE_data)
     {

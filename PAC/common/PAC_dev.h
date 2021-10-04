@@ -467,8 +467,8 @@ class device : public i_DO_AO_device, public par_device
             //TE
             DST_TE = 1,
             DST_TE_IOLINK,      ///< Температура IO-LInk без дополнительных параметров.
-
             DST_TE_VIRT,        ///< Виртуальная температура.
+            DST_TE_ANALOG,      ///< Температура AI c заданием пределов значения.
 
             //M,
             DST_M = 1,          ///< Мотор без управления частотой вращения.
@@ -2665,6 +2665,30 @@ class temperature_e : public AI1
             P_ERR_T = 1,                ///< Аварийное значение температуры.
 
             ADDITIONAL_PARAM_COUNT = 1, ///< Количество параметров.
+            };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Температура.
+class temperature_e_analog : public AI1
+    {
+    public:
+        temperature_e_analog( const char* dev_name );
+
+        float get_value();
+
+#ifndef DEBUG_NO_IO_MODULES
+        int get_state();
+#endif
+
+    private:
+        u_int start_param_idx;
+        enum CONSTANTS
+            {
+            P_ERR_T = 1,    ///< Аварийное значение температуры.
+            P_MIN_V,        ///< Минимальное значение.
+            P_MAX_V,        ///< Максимальное значение.
+
+            LAST_PARAM_IDX,
             };
     };
 //-----------------------------------------------------------------------------
