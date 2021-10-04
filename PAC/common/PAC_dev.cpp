@@ -3367,6 +3367,7 @@ void valve_bottom_mix_proof::direct_off()
 valve_iolink_mix_proof::valve_iolink_mix_proof( const char* dev_name ) :
     valve( true, true, dev_name, DT_V, V_IOLINK_MIXPROOF ), out_info( 0 )
     {
+    in_info->err = 0;
     }
 //-----------------------------------------------------------------------------
 void valve_iolink_mix_proof::open_upper_seat()
@@ -3462,6 +3463,8 @@ valve_iolink_mix_proof::~valve_iolink_mix_proof()
 #ifndef DEBUG_NO_IO_MODULES
 bool valve_iolink_mix_proof::get_fb_state()
     {
+    if ( in_info->err ) return false;
+
     if ( get_delta_millisec( start_switch_time ) <
         get_par( valve::P_ON_TIME, 0 ) )
         {
@@ -3780,6 +3783,7 @@ void valve_iolink_shut_off_sorio::direct_set_state( int new_state )
 valve_iolink_shut_off_thinktop::valve_iolink_shut_off_thinktop( const char* dev_name ) :
     valve( true, true, dev_name, DT_V, V_IOLINK_DO1_DI2 )
     {
+    in_info->err = 0;
     }
 //-----------------------------------------------------------------------------
 valve::VALVE_STATE valve_iolink_shut_off_thinktop::get_valve_state()
@@ -3861,6 +3865,8 @@ valve_iolink_shut_off_thinktop::~valve_iolink_shut_off_thinktop()
 #ifndef DEBUG_NO_IO_MODULES
 bool valve_iolink_shut_off_thinktop::get_fb_state()
     {
+    if ( in_info->err ) return false;
+
     if (get_delta_millisec( start_switch_time ) <
         get_par( valve::P_ON_TIME, 0 ))
         {
