@@ -2303,6 +2303,11 @@ class valve_iolink_mix_proof : public i_mix_proof,  public valve
 
         //Дополнительное смещение, так как область AO занимает 1 байт.
         int extra_offset = 0;
+
+        enum class CONSTANTS
+            {
+            C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
+            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной ALfaLaval.
@@ -2370,6 +2375,11 @@ class valve_iolink_shut_off_thinktop : public valve
 
         //Дополнительное смещение, так как область AO занимает 1 байт.
         int extra_offset = 0;
+
+        enum class CONSTANTS
+            {
+            C_AI_INDEX = 0,             ///< Индекс канала аналогового входа.
+            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Клапан IO-Link отсечной Definox.
