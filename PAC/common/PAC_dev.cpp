@@ -4415,15 +4415,17 @@ float temperature_e_analog::get_value()
 #ifdef DEBUG_NO_IO_MODULES
     return analog_io_device::get_value();
 #else
-    if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
+    float v = get_AI( C_AI_INDEX, 0, 0 );
+    if ( v < 0 )
         {
         return get_par( P_ERR_T, start_param_idx );
         }
     else
         {
-        float v = get_AI( C_AI_INDEX, get_par( P_MIN_V, start_param_idx ),
-            get_par( P_MAX_V, start_param_idx ) );
-        get_par( P_ZERO_ADJUST_COEFF, start_param_idx ) + v;
+        auto min = get_par( P_MIN_V, start_param_idx );
+        auto max = get_par( P_MAX_V, start_param_idx );
+        v = get_AI( C_AI_INDEX, min, max );
+        return get_par( P_ZERO_ADJUST_COEFF, start_param_idx ) + v;
         }
 #endif
     }
@@ -4431,12 +4433,13 @@ float temperature_e_analog::get_value()
 #ifndef DEBUG_NO_IO_MODULES
 int temperature_e_analog::get_state()
     {
-    if ( get_AI_IOLINK_state( C_AI_INDEX ) != io_device::IOLINKSTATE::OK )
+    float v = get_AI( C_AI_INDEX, 0, 0 );
+    if ( v < 0 )
         {
         return -1;
         }
 
-    return 1;
+    return 0;
     }
 #endif
 //-----------------------------------------------------------------------------
