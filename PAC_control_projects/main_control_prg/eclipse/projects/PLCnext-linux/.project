@@ -31,6 +31,11 @@
 			<locationURI>PARENT-5-PROJECT_LOC/PAC</locationURI>
 		</link>
 		<link>
+			<name>src/bin</name>
+			<type>2</type>
+			<locationURI>PARENT-5-PROJECT_LOC/bin</locationURI>
+		</link>
+		<link>
 			<name>src/common</name>
 			<type>2</type>
 			<locationURI>PARENT-5-PROJECT_LOC/common</locationURI>

@@ -15,6 +15,9 @@ add_definitions(-DPAC_PLCNEXT)
 add_definitions(-DLINUX_OS)
 add_definitions(-DTEST_SPEED)
 
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../version_info.in
+                ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../bin/version_info.h @ONLY )
+
 add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../lua ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../bin )
 
 file(GLOB_RECURSE PLCnext_src src/*.cpp intermediate/code/*.cpp)
