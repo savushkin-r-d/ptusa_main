@@ -1493,6 +1493,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new virtual_device( dev_name, device::DT_TE, device::DST_TE_VIRT );
                     break;
 
+                case device::DST_TE_ANALOG:
+                    new_device = new temperature_e_analog( dev_name );
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
