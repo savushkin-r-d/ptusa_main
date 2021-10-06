@@ -28,10 +28,10 @@ TOLUA_API int tolua_OPC_UA_open(lua_State* tolua_S);
 //-----------------------------------------------------------------------------
 #if !defined RM_PAC
 const int SYS_FILE_CNT = 3;
-const int FILE_CNT     = 9;
+const int FILE_CNT     = 8;
 #else
 const int SYS_FILE_CNT = 4;
-const int FILE_CNT     = 11;
+const int FILE_CNT     = 10;
 #endif // RM_PAC
 //-----------------------------------------------------------------------------
 const int FILES_VERSION[ FILE_CNT ] =
@@ -44,7 +44,6 @@ const int FILES_VERSION[ FILE_CNT ] =
 #endif // defined RM_PAC
 
     1, //"main.io.plua",
-    1, //"main.devices.plua",
     1, //"main.objects.plua",
     1, //"main.modbus_srv.lua",
     1, //"main.profibus.lua",

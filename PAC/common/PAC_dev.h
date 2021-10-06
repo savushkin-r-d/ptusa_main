@@ -586,59 +586,9 @@ class device : public i_DO_AO_device, public par_device
 
         virtual ~device();
 
-        const char *get_type_name() const
-            {
-            switch ( type )
-                {
-                case DT_V:
-                    return "Клапан";
-                case DT_VC:
-                    return "Управляемый клапан";
-                case DT_M:
-                    return "Двигатель";
+        const char* get_type_str() const;
 
-                case DT_LS:
-                    return "Уровень";
-                case DT_TE:
-                    return "Температура";
-                case DT_FS:
-                    return "Расход";
-                case DT_GS:
-                    return "Датчик положения";
-                case DT_FQT:
-                    return "Счетчик";
-                case DT_LT:
-                    return "Уровень";
-                case DT_QT:
-                    return "Концентрация";
-                case DT_HA:
-                    return "Аварийная звуковая сигнализация";
-                case DT_HL:
-                    return "Аварийная световая сигнализация";
-                case DT_SB:
-                    return "Кнопка";
-                case DT_DI:
-                    return "Дискретный входной сигнал";
-                case DT_DO:
-                    return "Дискретный выходной сигнал";
-                case DT_AI:
-                    return "Аналоговый входной сигнал";
-                case DT_AO:
-                    return "Аналоговый выходной сигнал";
-                case DT_WT:
-                    return "Тензорезистор";
-                case DT_PT:
-                    return "Давление";
-                case DT_F:
-                    return "Автоматический выключатель";
-                case DT_REGULATOR:
-                    return "ПИД-регулятор";
-                default:
-                    return "???";
-                }
-
-            return "???";
-            }
+        const char* get_type_name() const;
 
         const char *get_name() const
             {
