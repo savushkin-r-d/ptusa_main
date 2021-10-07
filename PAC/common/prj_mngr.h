@@ -1,7 +1,7 @@
 /// @file prj_mngr.h
-/// @brief Работа с загрузкой конфигурации проекта, инициализация объектов и 
+/// @brief Работа с загрузкой конфигурации проекта, инициализация объектов и
 /// т.д.
-/// 
+///
 /// @author  Иванюк Дмитрий Сергеевич.
 ///
 /// @par Текущая версия:
@@ -20,7 +20,7 @@
 //-----------------------------------------------------------------------------
 /// @brief Инициализация проекта.
 ///
-/// 
+///
 class project_manager
     {
     // Friendly класс предназначен только для тестирования
@@ -28,15 +28,15 @@ class project_manager
 #ifdef PTUSA_TEST
     friend class test_project_manager;
 #endif
-    public:        
+    public:
         /// @brief Обработка параметров командной строки.
-        /// 
+        ///
         /// @param argc - количество параметров.
         /// @param argv - массив параметров.
         int proc_main_params( int argc, const char *argv[] );
 
         /// @brief Загрузка системной конфигурации проекта на основе скрипта.
-        /// 
+        ///
         /// Системная конфигурация была предварительно загружена из файла
         /// wago.main.plua.
         virtual int lua_load_configuration();
@@ -52,12 +52,16 @@ class project_manager
         /// @brief Установка путей к системным файлам Lua.
         int init_sys_path( const char* sys_path );
 
+        /// @brief Установка путей к пользовательским файлам Lua.
+        int init_extra_paths( const char* paths );
+
         std::string sys_path = "";   //Путь к системным скриптам Lua.
         std::string path = "";       //Путь к описывающим проект скриптам Lua.
+        std::string extra_paths = "";//Дополнительный путь к user-скриптам Lua.
 
     protected:
         file *cfg_file;     ///< Конфигурационный файл.
-    
+
         /// @brief Единственный экземпляр класса.
         static auto_smart_ptr < project_manager > instance;
     };

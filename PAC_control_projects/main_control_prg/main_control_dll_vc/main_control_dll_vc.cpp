@@ -63,7 +63,8 @@ int lua_init( lua_State* L )
 
     //-Инициализация Lua.
     int res = G_LUA_MANAGER->init( L, argv[ 0 ],
-        G_PROJECT_MANAGER->path.c_str(), G_PROJECT_MANAGER->sys_path.c_str() );
+        G_PROJECT_MANAGER->path.c_str(), G_PROJECT_MANAGER->sys_path.c_str(),
+        G_PROJECT_MANAGER->extra_paths.c_str() );
 
     if ( res ) //-Ошибка инициализации.
         {

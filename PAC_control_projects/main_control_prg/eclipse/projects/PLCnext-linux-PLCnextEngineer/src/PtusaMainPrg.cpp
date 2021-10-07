@@ -16,6 +16,9 @@
 #include "error.h"
 #include "tech_def.h"
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 int G_DEBUG   = 1; //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 1; //Вывод в системный лог (syslog).
 
@@ -36,6 +39,7 @@ namespace PtusaPLCnextEngineer
             G_PROJECT_MANAGER->init_path( "/opt/main/" );
             G_PROJECT_MANAGER->init_sys_path( "/opt/main/" );
 
+            std::filesystem::current_path( "/opt/main/" );
 
             int res = G_LUA_MANAGER->init(0, "/opt/main/main.plua",
                 G_PROJECT_MANAGER->path.c_str(),
