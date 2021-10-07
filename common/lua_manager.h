@@ -36,8 +36,8 @@ const int FILE_CNT     = 10;
 //-----------------------------------------------------------------------------
 const int FILES_VERSION[ FILE_CNT ] =
     {
-    1, //"sys.io.lua",
-    1, //"sys.devices.lua",
+    2, //"sys.io.lua",
+    2, //"sys.devices.lua",
     7, //"sys.objects.plua",
 #if defined RM_PAC
     1, //"sys.rm_PACS.lua",
