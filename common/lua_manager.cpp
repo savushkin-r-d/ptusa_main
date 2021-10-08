@@ -121,7 +121,7 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
     sprintf( G_LOG->msg, "script_name = \"%s\"", script_name );
     G_LOG->write_log( i_log::P_NOTICE );
-    if ( dir || sys_dir || extra_dirs )
+    if ( dir[ 0 ] != '\0' || sys_dir[ 0 ] != '\0' || extra_dirs[ 0 ] != '\0' )
         {
         sprintf( G_LOG->msg,
             "path = \"%s\", sys_path = \"%s\", extra_paths = \"%s\"",
@@ -152,17 +152,17 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
     const std::string cmd = "package.path = package.path..';";
     std::string package_path = "";
-    if ( dir )
+    if ( dir[ 0 ] != '\0' )
         {
         //Добавление каталога для поиска.
         package_path = package_path + dir + "?.lua";
         }
-    if ( sys_dir )
+    if ( sys_dir[ 0 ] != '\0' )
         {
         //Добавление каталога с системными скриптами.
         package_path = package_path + ";" + sys_dir + "?.lua";
         }
-    if ( extra_dirs )
+    if ( extra_dirs[ 0 ] != '\0' )
         {
         //Добавление каталога с пользовательскими скриптами.
         package_path = package_path + ";" + extra_dirs + "?.lua";
