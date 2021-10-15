@@ -243,6 +243,8 @@ class device : public i_DO_AO_device
 
         void set_descr( const char *description );
 
+        const char* get_type_str() const;
+
         enum DEVICE_TYPE
             {
             DT_NONE = -1,///< Тип не определен.

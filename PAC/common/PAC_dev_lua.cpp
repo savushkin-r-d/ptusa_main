@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 09/30/21 08:33:12.
+** Generated automatically by tolua++-1.0.92 on 10/06/21 14:41:03.
 */
 
 #ifndef __cplusplus
@@ -1337,6 +1337,38 @@ static int tolua_PAC_dev_device_set_descr00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'set_descr'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_type_str of class  device */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_device_get_type_str00
+static int tolua_PAC_dev_device_get_type_str00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const device",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const device* self = (const device*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_type_str'", NULL);
+#endif
+  {
+   const char* tolua_ret = (const char*)  self->get_type_str();
+   tolua_pushstring(tolua_S,(const char*)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_type_str'.",&tolua_err);
  return 0;
 #endif
 }
@@ -14115,6 +14147,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"set_property",tolua_PAC_dev_device_set_property00);
    tolua_function(tolua_S,"set_string_property",tolua_PAC_dev_device_set_string_property00);
    tolua_function(tolua_S,"set_descr",tolua_PAC_dev_device_set_descr00);
+   tolua_function(tolua_S,"get_type_str",tolua_PAC_dev_device_get_type_str00);
    tolua_constant(tolua_S,"DT_NONE",device::DT_NONE);
    tolua_constant(tolua_S,"DT_V",device::DT_V);
    tolua_constant(tolua_S,"DT_VC",device::DT_VC);

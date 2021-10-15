@@ -42,7 +42,7 @@ const char* const device::DEV_NAMES[ device::DEVICE_TYPE::C_DEVICE_TYPE_CNT ] =
     "PT",      ///< Давление (значение).
     "F",       ///< Автоматический выключатель.
 
-    "R",       ///< ПИД-регулятор.
+    "C",       ///< ПИД-регулятор.
     "HLA",     ///< Сигнальная колонна.
     "CAM",     ///< Камера.
     };
@@ -390,6 +390,70 @@ device::device( const char* dev_name, DEVICE_TYPE type, DEVICE_SUB_TYPE sub_type
     article = new char[ 2 ];
     article[ 0 ] = ' ';
     article[ 1 ] = 0;
+    }
+//-----------------------------------------------------------------------------
+const char* device::get_type_str() const
+    {
+    return DEV_NAMES[ type ];
+    }
+//-----------------------------------------------------------------------------
+const char* device::get_type_name() const
+    {
+    switch ( type )
+        {
+        case DT_V:
+            return "Клапан";
+        case DT_VC:
+            return "Управляемый клапан";
+        case DT_M:
+            return "Двигатель";
+
+        case DT_LS:
+            return "Уровень";
+        case DT_TE:
+            return "Температура";
+        case DT_FS:
+            return "Расход";
+        case DT_GS:
+            return "Датчик положения";
+        case DT_FQT:
+            return "Счетчик";
+        case DT_LT:
+            return "Уровень";
+        case DT_QT:
+            return "Концентрация";
+        case DT_HA:
+            return "Аварийная звуковая сигнализация";
+        case DT_HL:
+            return "Аварийная световая сигнализация";
+        case DT_SB:
+            return "Кнопка";
+        case DT_DI:
+            return "Дискретный входной сигнал";
+        case DT_DO:
+            return "Дискретный выходной сигнал";
+        case DT_AI:
+            return "Аналоговый входной сигнал";
+        case DT_AO:
+            return "Аналоговый выходной сигнал";
+        case DT_WT:
+            return "Тензорезистор";
+        case DT_PT:
+            return "Давление";
+        case DT_F:
+            return "Автоматический выключатель";
+        case DT_REGULATOR:
+            return "ПИД-регулятор";
+        case DT_HLA:
+            return "Сигнальная колонна";
+        case DT_CAM:
+            return "Камера";
+
+        default:
+            return "???";
+        }
+
+    return "???";
     }
 //-----------------------------------------------------------------------------
 device::~device()
@@ -1071,7 +1135,7 @@ void device_manager::print() const
     for ( u_int i = 0; i < project_devices.size(); i++ )
         {
         printf( "    %3i. ", i + 1 );
-        printf( "%-8s %s",
+        printf( "%-20s %s",
             project_devices[ i ]->get_name(), project_devices[ i ]->get_description() );
         printf( "\n" );
         }
