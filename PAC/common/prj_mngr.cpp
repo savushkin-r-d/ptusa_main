@@ -68,7 +68,7 @@ int project_manager::proc_main_params( int argc, const char *argv[] )
             }
         }
 
-    // sys_path  "C:/system_scripts"
+    // sys_path  "C:/system_scripts/"
     for ( int i = 1; i < argc - 1; i++ )
         {
         if ( strcmp( argv[ i ], "sys_path" ) == 0 )
@@ -77,12 +77,21 @@ int project_manager::proc_main_params( int argc, const char *argv[] )
             }
         }
 
-    // path  "C:/project folder"
+    // path  "C:/project folder/"
     for ( int i = 1; i < argc - 1; i++ )
         {
         if ( strcmp( argv[ i ], "path" ) == 0 )
             {
             init_path( argv[ i + 1 ] );
+            }
+        }
+
+    // extra path  "C:/project folder/user_sys;C:/project folder/user_sys_new/"
+    for ( int i = 1; i < argc - 1; i++ )
+        {
+        if ( strcmp( argv[ i ], "extra_paths" ) == 0 )
+            {
+            init_extra_paths( argv[ i + 1 ] );
             }
         }
 
@@ -131,6 +140,16 @@ int project_manager::init_sys_path( const char* sys_path )
     if ( sys_path )
         {
         this->sys_path = sys_path;
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int project_manager::init_extra_paths( const char* paths )
+    {
+    if ( paths )
+        {
+        this->extra_paths = paths;
         }
 
     return 0;

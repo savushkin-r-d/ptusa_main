@@ -36,6 +36,7 @@ namespace PtusaPLCnextEngineer
             G_PROJECT_MANAGER->init_path( "/opt/main/" );
             G_PROJECT_MANAGER->init_sys_path( "/opt/main/" );
 
+            chdir( "/opt/main/" );
 
             int res = G_LUA_MANAGER->init(0, "/opt/main/main.plua",
                 G_PROJECT_MANAGER->path.c_str(),

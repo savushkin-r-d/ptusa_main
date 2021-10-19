@@ -65,7 +65,8 @@ class lua_manager
 
         static lua_manager* get_instance();
 
-        int init( lua_State* L, const char* script_name, const char* dir = "", const char* sys_dir = "" );
+        int init( lua_State* L, const char* script_name, const char* dir = "",
+            const char* sys_dir = "", const char* extra_dirs = "" );
 
         ~lua_manager();
 

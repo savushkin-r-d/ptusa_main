@@ -4,10 +4,6 @@
 
 #ifdef WIN_OS
 #include <Windows.h>
-#ifdef VS_CODE
-#include <filesystem>
-namespace fs = std::filesystem;
-#endif // VS_CODE
 #endif // OS_WIN
 
 #include "lua_manager.h"
@@ -112,7 +108,7 @@ const char *FILES[ FILE_CNT ] =
 //Экспортируем в Lua классы и функции из C++.
 
 int lua_manager::init( lua_State* lua_state, const char* script_name,
-    const char* dir, const char* sys_dir )
+    const char* dir, const char* sys_dir, const char* extra_dirs )
     {
     if ( G_DEBUG )
         {
@@ -121,13 +117,15 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
     sprintf( G_LOG->msg, "script_name = \"%s\"", script_name );
     G_LOG->write_log( i_log::P_NOTICE );
-    if ( dir || sys_dir )
+    if ( dir[ 0 ] != '\0' || sys_dir[ 0 ] != '\0' || extra_dirs[ 0 ] != '\0' )
         {
-        sprintf( G_LOG->msg, "g_path = \"%s\", g_sys_path = \"%s\"", dir, sys_dir );
+        sprintf( G_LOG->msg,
+            "path = \"%s\", sys_path = \"%s\", extra_paths = \"%s\"",
+            dir, sys_dir, extra_dirs );
         G_LOG->write_log( i_log::P_NOTICE );
         }
 
-    if ( 0 == lua_state )
+        if ( 0 == lua_state )
         {
         //Инициализация Lua.
         L = lua_open();   // Create Lua context.
@@ -148,26 +146,28 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
         is_free_lua = 0;
         }
 
-    if ( dir )
+    const std::string cmd = "package.path = package.path..';";
+    std::string package_path = "";
+    if ( dir[ 0 ] != '\0' )
         {
         //Добавление каталога для поиска.
-        char cmd[ 500 ] = "package.path = package.path..';";
-        strcpy( cmd + strlen( cmd ), dir );
-        strcpy( cmd + strlen( cmd ), "?.lua'" );
-        luaL_dostring( L, cmd );
+        package_path = package_path + dir + "?.lua";
         }
-
-#ifdef PAC_PC
-    //Добавление каталога с системными скриптами.
-    char cmd[ 500 ] = "package.path = package.path..';";
-    if ( sys_dir )
+    if ( sys_dir[ 0 ] != '\0' )
         {
-        strcpy( cmd + strlen( cmd ), sys_dir );
+        //Добавление каталога с системными скриптами.
+        package_path = package_path + ";" + sys_dir + "?.lua";
         }
-    strcpy( cmd + strlen( cmd ), "?.lua'" );
-
-    luaL_dostring( L, cmd );
-#endif // PAC_PC
+    if ( extra_dirs[ 0 ] != '\0' )
+        {
+        //Добавление каталога с пользовательскими скриптами.
+        package_path = package_path + ";" + extra_dirs + "?.lua";
+        }
+    if ( !package_path.empty() )
+        {
+        package_path += "'";
+        luaL_dostring( L, ( cmd + package_path ).c_str() );
+        }
 
     //I
     //Проверка наличия и версии скриптов.
