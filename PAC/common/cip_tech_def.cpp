@@ -21,6 +21,12 @@ int cipline_tech_object::acidLoadedRecipe = -1;
 
 cip_stats* cipline_tech_object::statsbase = 0;
 
+std::unordered_set<int> cipline_tech_object::steps_v2_supply = { 7, 35, 55, 64, 85 };
+
+std::unordered_set<int> cipline_tech_object::steps_additional_rinse = { 8, 37, 57, 86 };
+
+std::unordered_set<int> cipline_tech_object::steps_circulation = { 28, 48, 66, 76, 77 };
+
 int isMsa = 0;
 
 int getNexpPrg(int cur, unsigned long prg)
@@ -3088,8 +3094,8 @@ int cipline_tech_object::_DoStep( int step_to_do )
         }
     if (dev_upr_circulation)
         {
-        if ((((step_to_do == 28 || step_to_do == 48 || step_to_do == 66 || step_to_do == 77) && circ_temp_reached) ||
-            step_to_do == 8 || step_to_do == 37 || step_to_do == 57 || step_to_do == 86) && (!wasflip))
+        if ((steps_circulation.count(step_to_do) && circ_temp_reached) ||
+            ((steps_additional_rinse.count(step_to_do) || steps_v2_supply.count(step_to_do)) && (!wasflip)))
             {
             dev_upr_circulation->on();
             }
@@ -5357,7 +5363,7 @@ int cipline_tech_object::_ToObject( int from, int where )
 
     rt_par_float[P_CONC] = c;
 
-    if ((curstep == 8 || curstep == 37 || curstep == 57 || curstep == 86) && (!wasflip))
+    if (steps_additional_rinse.count(curstep) && (!wasflip))
         {
         if (dev_os_can_continue)
             {
@@ -5366,7 +5372,7 @@ int cipline_tech_object::_ToObject( int from, int where )
                 return 0;
                 }
             else
-                {
+                { 
                 wasflip = true;
                 }
             }

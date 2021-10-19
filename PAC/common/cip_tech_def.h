@@ -7,6 +7,7 @@
 #include "modbus_serv.h"
 #include "PAC_dev.h"
 #include "cip_stats.h"
+#include <unordered_set>
 
 
 #define NOCONC       0.1
@@ -627,6 +628,10 @@ class cipline_tech_object: public tech_object
 
         //Статистика по объектам мойки
         static cip_stats* statsbase;
+        static std::unordered_set<int> steps_v2_supply;
+        static std::unordered_set<int> steps_additional_rinse;
+        static std::unordered_set<int> steps_circulation;
+
         cip_object_stats* objectstats;
         cip_object_stats* emptystats;
 
