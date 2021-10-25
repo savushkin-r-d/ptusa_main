@@ -41,18 +41,18 @@ endif(MSVC)
 
 configure_file( version_info.in version_info.h @ONLY)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_CURRENT_SOURCE_DIR}/bin/lua EXCLUDE_FROM_ALL)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_BINARY_DIR}/lua EXCLUDE_FROM_ALL)
 
 set(LUA_LIBRARIES liblua)
-set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src;${CMAKE_CURRENT_SOURCE_DIR}/bin/lua)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tolua++ ${CMAKE_CURRENT_SOURCE_DIR}/bin/tolua++ EXCLUDE_FROM_ALL)
+set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src;${CMAKE_BINARY_DIR}/lua)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tolua++ ${CMAKE_BINARY_DIR}/tolua++ EXCLUDE_FROM_ALL)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib EXCLUDE_FROM_ALL)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_BINARY_DIR}/zlib EXCLUDE_FROM_ALL)
 
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/googletest ${CMAKE_CURRENT_SOURCE_DIR}/bin/googletest EXCLUDE_FROM_ALL)
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/googletest ${CMAKE_BINARY_DIR}/googletest EXCLUDE_FROM_ALL)
 
 set(SUBHOOK_TESTS OFF)
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/subhook ${CMAKE_CURRENT_SOURCE_DIR}/bin/subhook EXCLUDE_FROM_ALL)
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/subhook ${CMAKE_BINARY_DIR}/subhook EXCLUDE_FROM_ALL)
 
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
@@ -153,20 +153,20 @@ endif ()
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/tolua++/include>
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lua/src>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bin/lua>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/lua>
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/zlib>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bin/zlib>)
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/zlib>)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GENERAL_INCLUDES})
 target_include_directories(libptusa_main PUBLIC ${GENERAL_INCLUDES})
 
 set(TEST_INCLUDES
 		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/googletest/googletest/include>
-		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/bin/googletest/googletest>
+		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/googletest/googletest>
 
 		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/googletest/googlemock/include>
-		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/bin/googlemock/googlemock>)
+		$<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/googlemock/googlemock>)
 
 target_include_directories(main_test PUBLIC ${GENERAL_INCLUDES} ${TEST_INCLUDES})
 #######################################################################################
