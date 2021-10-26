@@ -5,8 +5,8 @@ file(WRITE "@CMAKE_BINARY_DIR@/CTestTestfile.cmake" "")
 
 # loop through the lines,
 foreach(LINE IN LISTS LINES)
-  # remove unwanted parts
-  string(REGEX REPLACE "lua|zlib" "" STRIPPED "${LINE}")
-  # and write the (changed) line ...
-  file(APPEND "@CMAKE_BINARY_DIR@/CTestTestfile.cmake" "${STRIPPED}\n")
+  if(NOT "${LINE}" MATCHES "lua|zlib" )
+    # write line without unwanted parts ...
+    file(APPEND "@CMAKE_BINARY_DIR@/CTestTestfile.cmake" "${LINE}\n")
+  endif()
 endforeach()

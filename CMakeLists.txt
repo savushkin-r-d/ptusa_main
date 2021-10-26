@@ -41,18 +41,18 @@ endif(MSVC)
 
 configure_file( version_info.in version_info.h @ONLY)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lua ${CMAKE_BINARY_DIR}/lua EXCLUDE_FROM_ALL)
-
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lua EXCLUDE_FROM_ALL)
 set(LUA_LIBRARIES liblua)
 set(LUA_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lua/src;${CMAKE_BINARY_DIR}/lua)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tolua++ ${CMAKE_BINARY_DIR}/tolua++ EXCLUDE_FROM_ALL)
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/zlib ${CMAKE_BINARY_DIR}/zlib EXCLUDE_FROM_ALL)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tolua++ EXCLUDE_FROM_ALL)
 
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/googletest ${CMAKE_BINARY_DIR}/googletest EXCLUDE_FROM_ALL)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/zlib EXCLUDE_FROM_ALL)
+
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/googletest EXCLUDE_FROM_ALL)
 
 set(SUBHOOK_TESTS OFF)
-add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/subhook ${CMAKE_BINARY_DIR}/subhook EXCLUDE_FROM_ALL)
+add_subdirectory( ${CMAKE_CURRENT_SOURCE_DIR}/subhook EXCLUDE_FROM_ALL)
 
 file(GLOB common_src CONFIGURE_DEPENDS
         common/PAC-driver/*.cpp
