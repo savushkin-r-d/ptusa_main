@@ -34,7 +34,7 @@ namespace PtusaPLCnextEngineer
             NV_memory_manager::get_instance()->init_ex(NVRAM);
 
             G_PROJECT_MANAGER->init_path( "/opt/main/" );
-            G_PROJECT_MANAGER->init_sys_path( "/opt/main/" );
+            G_PROJECT_MANAGER->init_sys_path( "/opt/main/sys/" );
 
             chdir( "/opt/main/" );
 
