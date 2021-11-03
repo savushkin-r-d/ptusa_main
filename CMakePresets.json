@@ -1,0 +1,39 @@
+{
+    "version": 2,
+    "configurePresets": [
+        {
+            "name": "windows-default",
+            "displayName": "Visual Studio Community 2019 Release - x86",
+            "description": "Using compilers for Visual Studio 16 2019 (x86 architecture)",
+            "generator": "Visual Studio 16 2019",
+            "toolset": "host=x86",
+            "architecture": "win32",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
+            }
+        },
+        {
+            "name": "build-windows-AXCF2152-2021.0.3.35554 Release",
+            "displayName": "AXCF2152-2021.0.3 Release",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/bin/$env{ARP_DEVICE}_$env{ARP_DEVICE_VERSION}",
+            "environment": {
+                "ARP_DEVICE": "AXCF2152",
+                "ARP_DEVICE_VERSION": "2021.0.3 LTS (21.0.3.35554)",
+                "PLCNEXT_SDK_ROOT": "c:/CLI/SDKs/AXCF2152/2021_0"
+            },
+
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "value": "$env{PLCNEXT_SDK_ROOT}/toolchain.cmake",
+                    "type": "FILEPATH"
+                },
+                "ARP_DEVICE": "$env{ARP_DEVICE}",
+                "ARP_DEVICE_VERSION": "$env{ARP_DEVICE_VERSION}",
+                "CMAKE_BUILD_WITH_INSTALL_RPATH": true
+            }
+        }
+    ]
+}

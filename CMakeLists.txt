@@ -1,9 +1,12 @@
 cmake_minimum_required(VERSION 3.13)
 
-#set(CMAKE_VERBOSE_MAKEFILE ON)
-
+set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_POLICY_DEFAULT_CMP0048 NEW)
+
+project(ptusa_main VERSION 2022.10.19.0)
 
 if(UNIX AND NOT APPLE)
     set(LINUX TRUE)
@@ -11,9 +14,11 @@ endif()
 
 if(LINUX)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-endif()
 
-project(ptusa_main VERSION 2022.10.19.0)
+    if (CMAKE_HOST_WIN32)
+        SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    endif()
+endif()
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
@@ -84,6 +89,10 @@ if(WIN32)
 endif()
 
 if(LINUX)
+    if(ARP_DEVICE)
+        list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
+    endif()
+
     add_executable(${PROJECT_NAME} ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main.cpp)
 
@@ -181,15 +190,25 @@ if(LINUX)
 endif()
 #######################################################################################
 
+if(ARP_DEVICE)
+    set_target_properties(Ptusa PROPERTIES INSTALL_RPATH $ORIGIN)
+endif()
+
+################# add link targets ####################################################
+if(ARP_DEVICE)
+    find_package(ArpDevice REQUIRED)
+    find_package(ArpProgramming REQUIRED)
+endif()
+
 ################# add link targets ####################################################
 
-target_link_libraries(${PROJECT_NAME} liblua_static toluapp_lib_static zlibstatic)
+target_link_libraries(${PROJECT_NAME} PRIVATE liblua_static toluapp_lib_static zlibstatic)
 target_link_libraries(libptusa_main toluapp_lib_static zlibstatic)
 
 target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic gtest gtest_main gmock gmock_main subhook)
 
 if(WIN32)
-    target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE wsock32 ws2_32)
     target_link_libraries(libptusa_main wsock32 ws2_32)
     target_link_libraries(main_test wsock32 ws2_32)
 
