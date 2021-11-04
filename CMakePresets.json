@@ -7,6 +7,30 @@
     },
     "configurePresets": [
         {
+            "name": "windows-default",
+            "displayName": "Visual Studio Community 2019 Release - x86",
+            "description": "Using compilers for Visual Studio 16 2019 (x86 architecture)",
+            "generator": "Visual Studio 16 2019",
+            "toolset": "host=x86",
+            "architecture": "win32",
+            "binaryDir": "${sourceDir}/bin/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install"
+            }
+        },
+        {
+            "name": "linux-default",
+            "displayName": "Linux Release",
+            "description": "Using default compilers on Linux",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/bin/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install/Linux"
+            }
+        },
+
+        {
             "name": "AXCF-default",
             "hidden": true,
             "generator": "Ninja",
@@ -21,19 +45,7 @@
                 "ARP_DEVICE_VERSION": "$env{ARP_DEVICE_VERSION}"
             }
         },
-        {
-            "name": "windows-default",
-            "displayName": "Visual Studio Community 2019 Release - x86",
-            "description": "Using compilers for Visual Studio 16 2019 (x86 architecture)",
-            "generator": "Visual Studio 16 2019",
-            "toolset": "host=x86",
-            "architecture": "win32",
-            "binaryDir": "${sourceDir}/bin/build/${presetName}",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install"
-            }
-        },
+
         {
             "name": "windows-AXCF-default",
             "hidden": true,
@@ -57,15 +69,7 @@
                 "ARP_DEVICE_SHORT_VERSION": "2021_0"
             }
         },
-        {
-            "name": "linux-default",
-            "displayName": "Linux Release",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/bin/build/Linux",
-            "cacheVariables": {
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install/Linux"
-            }
-        },
+
         {
             "name": "linux-AXCF-default",
             "hidden": true,
@@ -86,6 +90,8 @@
             }
         }
     ],
+
+
     "buildPresets": [
         {
             "name": "build-windows-Release",
