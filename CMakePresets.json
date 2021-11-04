@@ -7,13 +7,12 @@
     },
     "configurePresets": [
         {
-            "name": "default",
+            "name": "AXCF-default",
             "hidden": true,
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/bin/build/$env{ARP_DEVICE}_$env{ARP_DEVICE_VERSION}",
             "cacheVariables": {
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install/$env{ARP_DEVICE}_$env{ARP_DEVICE_VERSION}",
-
                 "CMAKE_TOOLCHAIN_FILE": {
                     "value": "$env{PLCNEXT_SDK_ROOT}/toolchain.cmake",
                     "type": "FILEPATH"
@@ -31,26 +30,31 @@
             "architecture": "win32",
             "binaryDir": "${sourceDir}/bin/build/${presetName}",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install"
+            }
+        },
+        {
+            "name": "windows-AXCF-default",
+            "hidden": true,
+            "inherits": "AXCF-default",
+            "generator": "MinGW Makefiles",
+            "environment": {
+                "PLCNEXT_SDK_ROOT": "c:/CLI/sdks/$env{ARP_DEVICE}/$env{ARP_DEVICE_SHORT_VERSION}"
+            },
+            "cacheVariables": {
+                "CMAKE_MAKE_PROGRAM": "c:/CLI/sdks/$env{ARP_DEVICE}/$env{ARP_DEVICE_SHORT_VERSION}/sysroots/x86_64-pokysdk-mingw32/usr/bin/make.exe"
             }
         },
         {
             "name": "build-windows-AXCF2152-2021-LTS-Release",
             "displayName": "AXCF2152 2021 LTS Release",
-            "inherits": "default",
+            "description": "Using Windows OS",
+            "inherits": "windows-AXCF-default",
             "environment": {
                 "ARP_DEVICE": "AXCF2152",
                 "ARP_DEVICE_VERSION": "2021.0.3 LTS (21.0.3.35554)",
-                "PLCNEXT_SDK_ROOT": "c:/CLI/SDKs/AXCF2152/2021_0"
-            },
-            "cacheVariables": {
-                "CMAKE_BUILD_WITH_INSTALL_RPATH": true
-            },
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Windows"
+                "ARP_DEVICE_SHORT_VERSION": "2021_0"
             }
         },
         {
@@ -58,11 +62,6 @@
             "displayName": "Linux Release",
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/bin/build/Linux",
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Linux"
-            },
             "cacheVariables": {
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install/Linux"
             }
@@ -70,19 +69,15 @@
         {
             "name": "linux-AXCF-default",
             "hidden": true,
-            "inherits": "default",
+            "inherits": "AXCF-default",
             "environment": {
                 "PLCNEXT_SDK_ROOT": "/opt/pxc/sdk/$env{ARP_DEVICE}/$env{ARP_DEVICE_SHORT_VERSION}"
-            },
-            "condition": {
-                "type": "equals",
-                "lhs": "${hostSystemName}",
-                "rhs": "Linux"
             }
         },
         {
             "name": "build-linux-AXCF2152-2020-LTS-Release",
             "displayName": "AXCF2152 2020.0 LTS Release",
+            "description": "Using Linux OS",
             "inherits": "linux-AXCF-default",
             "environment": {
                 "ARP_DEVICE": "AXCF2152",
@@ -92,6 +87,11 @@
         }
     ],
     "buildPresets": [
+        {
+            "name": "build-windows-Release",
+            "displayName": "Windows Release",
+            "configurePreset": "windows-default"
+        },
         {
             "name": "build-windows-AXCF2152-2021-LTS-Release",
             "displayName": "AXCF2152-2021.0.3",

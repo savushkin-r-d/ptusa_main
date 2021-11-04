@@ -98,12 +98,6 @@ if(LINUX)
     add_executable(main_test ${common_src} ${linux_src} ${test_src}
            test/main_test.cpp)
 
-    if(ARP_DEVICE)
-        list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
-
-        set_target_properties(main_test PROPERTIES EXCLUDE_FROM_ALL TRUE)
-    endif()
-
 elseif(WIN32)
     add_executable(${PROJECT_NAME} ${common_src} ${win_src}
             PAC_control_projects/main_control_prg/main.cpp
@@ -127,6 +121,12 @@ elseif(WIN32)
         COMMAND toluapp -n IOT_dev -o PAC/IoT/IOT_dev_lua.cpp PAC/common/toloa++/pkg/IOT_dev.hh
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/IOT_dev.hh
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
+endif()
+
+if(ARP_DEVICE)
+    list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
+
+    set_target_properties(main_test PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif()
 
 set_target_properties (libptusa_main PROPERTIES OUTPUT_NAME ptusa_main CLEAN_DIRECT_OUTPUT 1)
