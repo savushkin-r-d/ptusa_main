@@ -89,10 +89,6 @@ if(WIN32)
 endif()
 
 if(LINUX)
-    if(ARP_DEVICE)
-        list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
-    endif()
-
     add_executable(${PROJECT_NAME} ${common_src} ${linux_src}
             PAC_control_projects/main_control_prg/main.cpp)
 
@@ -101,6 +97,12 @@ if(LINUX)
 
     add_executable(main_test ${common_src} ${linux_src} ${test_src}
            test/main_test.cpp)
+
+    if(ARP_DEVICE)
+        list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
+
+        set_target_properties(main_test PROPERTIES EXCLUDE_FROM_ALL TRUE)
+    endif()
 
 elseif(WIN32)
     add_executable(${PROJECT_NAME} ${common_src} ${win_src}
@@ -191,7 +193,7 @@ endif()
 #######################################################################################
 
 if(ARP_DEVICE)
-    set_target_properties(Ptusa PROPERTIES INSTALL_RPATH $ORIGIN)
+    set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH $ORIGIN)
 endif()
 
 ################# add link targets ####################################################
