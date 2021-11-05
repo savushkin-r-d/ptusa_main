@@ -18,7 +18,7 @@ using namespace Arp::Plc::Commons::Meta;
                     DataType::Program, CTN<PtusaPLCnextEngineer::PtusaMainPrg>(), sizeof(::PtusaPLCnextEngineer::PtusaMainPrg), alignof(::PtusaPLCnextEngineer::PtusaMainPrg), StandardAttribute::None,
                     {
                         // FieldDefinitions:
-                        { "NVRAM", offsetof(::PtusaPLCnextEngineer::PtusaMainPrg, NVRAM), DataType::UInt8 | DataType::Array, "", sizeof(uint8), alignof(uint8), { 49000 }, StandardAttribute::Output | StandardAttribute::Retain },
+                        { "NVRAM", offsetof(::PtusaPLCnextEngineer::PtusaMainPrg, NVRAM), DataType::UInt8 | DataType::Array, String::Empty, sizeof(uint8), alignof(uint8), { 49000 }, StandardAttribute::Output | StandardAttribute::Retain },
                     }
                 },
             }
