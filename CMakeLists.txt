@@ -97,10 +97,10 @@ if(LINUX)
            test/main_test.cpp)
 
     if(ARP_DEVICE)
-        file(GLOB PLCnext_engineer_src CONFIGURE_DEPENDS
+        file(GLOB_RECURSE PLCnext_engineer_src CONFIGURE_DEPENDS
             PAC/linux/PAC_PLCnext/PLCnextEngineer/*.cpp)
 
-        add_library(Ptusa SHARED ${common_src} ${linux_src} ${PLCnext_engineer_src})
+        add_library(PtusaPLCnextEngineer SHARED ${common_src} ${linux_src} ${PLCnext_engineer_src})
     endif()
 
 elseif(WIN32)
@@ -183,7 +183,7 @@ endif ()
 target_include_directories(${PROJECT_NAME} PUBLIC ${GENERAL_INCLUDES})
 target_include_directories(libptusa_main PUBLIC ${GENERAL_INCLUDES})
 if(ARP_DEVICE)
-    target_include_directories(Ptusa PUBLIC ${GENERAL_INCLUDES})
+    target_include_directories(PtusaPLCnextEngineer PUBLIC ${GENERAL_INCLUDES})
 endif()
 
 set(TEST_INCLUDES
@@ -221,7 +221,7 @@ endif()
 target_link_libraries(${PROJECT_NAME} PRIVATE liblua_static toluapp_lib_static zlibstatic)
 target_link_libraries(libptusa_main toluapp_lib_static zlibstatic)
 if(ARP_DEVICE)
-    target_link_libraries(Ptusa ArpDevice ArpProgramming toluapp_lib_static zlibstatic)
+    target_link_libraries(PtusaPLCnextEngineer ArpDevice ArpProgramming liblua_static toluapp_lib_static zlibstatic)
 endif()
 
 target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic gtest gtest_main gmock gmock_main subhook)
@@ -242,10 +242,16 @@ elseif (LINUX)
 endif()
 #######################################################################################
 
-install_executable(${PROJECT_NAME})
-install_library(libptusa_main)
+
 if(ARP_DEVICE)
-    install_library(Ptusa)
+    string(REGEX REPLACE "^.*\\(([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+).*$" "\\1" _ARP_SHORT_DEVICE_VERSION ${ARP_DEVICE_VERSION})
+    install(TARGETS ${PROJECT_NAME} libptusa_main PtusaPLCnextEngineer
+        LIBRARY DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/lib
+        ARCHIVE DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/lib
+        RUNTIME DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/bin)
+    unset(_ARP_SHORT_DEVICE_VERSION)
+else()
+    install(TARGETS ${PROJECT_NAME} libptusa_main DESTINATION $<CONFIG>)
 endif()
 
 enable_testing()
