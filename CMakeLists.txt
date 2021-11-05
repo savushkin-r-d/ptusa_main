@@ -14,10 +14,6 @@ endif()
 
 if(LINUX)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-
-    if (CMAKE_HOST_WIN32)
-        SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-    endif()
 endif()
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -26,7 +22,9 @@ endif()
 ################# create targets ######################################################
 
 add_compile_definitions(PAC_PC)
-add_compile_definitions(DEBUG_NO_IO_MODULES)
+if(NOT ARP_DEVICE)
+    add_compile_definitions(DEBUG_NO_IO_MODULES)
+endif()
 
 #### Definitions for run tests ####
 add_compile_definitions(PTUSA_TEST)
@@ -98,6 +96,13 @@ if(LINUX)
     add_executable(main_test ${common_src} ${linux_src} ${test_src}
            test/main_test.cpp)
 
+    if(ARP_DEVICE)
+        file(GLOB PLCnext_engineer_src CONFIGURE_DEPENDS
+            PAC/linux/PAC_PLCnext/PLCnextEngineer/*.cpp)
+
+        add_library(Ptusa SHARED ${common_src} ${linux_src} ${PLCnext_engineer_src})
+    endif()
+
 elseif(WIN32)
     add_executable(${PROJECT_NAME} ${common_src} ${win_src}
             PAC_control_projects/main_control_prg/main.cpp
@@ -157,6 +162,12 @@ if (WIN32)
 elseif (LINUX)
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PC>
+
+if(ARP_DEVICE)
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PLCnextEngineer>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PLCnextEngineer/generated>
+endif()
+
 endif ()
 
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT>
@@ -171,6 +182,9 @@ endif ()
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${GENERAL_INCLUDES})
 target_include_directories(libptusa_main PUBLIC ${GENERAL_INCLUDES})
+if(ARP_DEVICE)
+    target_include_directories(Ptusa PUBLIC ${GENERAL_INCLUDES})
+endif()
 
 set(TEST_INCLUDES
 		$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/googletest/googletest/include>
@@ -206,6 +220,9 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE liblua_static toluapp_lib_static zlibstatic)
 target_link_libraries(libptusa_main toluapp_lib_static zlibstatic)
+if(ARP_DEVICE)
+    target_link_libraries(Ptusa ArpDevice ArpProgramming toluapp_lib_static zlibstatic)
+endif()
 
 target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic gtest gtest_main gmock gmock_main subhook)
 
@@ -227,6 +244,9 @@ endif()
 
 install_executable(${PROJECT_NAME})
 install_library(libptusa_main)
+if(ARP_DEVICE)
+    install_library(Ptusa)
+endif()
 
 enable_testing()
 add_test(run_no_command_line_arguments ${PROJECT_NAME})
