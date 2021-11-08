@@ -97,8 +97,19 @@ if(LINUX)
            test/main_test.cpp)
 
     if(ARP_DEVICE)
-        file(GLOB_RECURSE PLCnext_engineer_src CONFIGURE_DEPENDS
-            PAC/linux/PAC_PLCnext/PLCnextEngineer/*.cpp)
+        execute_process(COMMAND plcncli
+            generate code -s . -o ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code --verbose
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer
+            COMMAND_ECHO STDOUT )
+        execute_process(COMMAND plcncli
+            generate config -s . -o ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/config --verbose
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer
+            COMMAND_ECHO STDOUT )
+
+        file(GLOB PLCnext_engineer_src CONFIGURE_DEPENDS
+            PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer/*.cpp
+            ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer/*.cpp
+            ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code/*.cpp )
 
         add_library(PtusaPLCnextEngineer SHARED ${common_src} ${linux_src} ${PLCnext_engineer_src})
     endif()
@@ -164,8 +175,8 @@ elseif (LINUX)
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PC>
 
 if(ARP_DEVICE)
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PLCnextEngineer>
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PLCnextEngineer/generated>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer>
+        $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code>
 endif()
 
 endif ()
@@ -249,6 +260,17 @@ if(ARP_DEVICE)
         LIBRARY DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/lib
         ARCHIVE DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/lib
         RUNTIME DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/bin)
+
+    install(TARGETS PtusaPLCnextEngineer
+        LIBRARY DESTINATION ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/bin/${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/lib)
+    install(CODE "execute_process(COMMAND plcncli
+            deploy -t \"${ARP_DEVICE},${ARP_DEVICE_VERSION}\" --verbose
+            WORKING_DIRECTORY \"${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer\"
+            COMMAND_ECHO STDOUT )")
+
+    install(FILES ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/bin/PtusaPLCnextEngineer.pcwlx
+        DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>)
+
     unset(_ARP_SHORT_DEVICE_VERSION)
 else()
     install(TARGETS ${PROJECT_NAME} libptusa_main DESTINATION $<CONFIG>)
