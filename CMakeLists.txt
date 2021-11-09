@@ -145,7 +145,7 @@ if(ARP_DEVICE)
     set_target_properties(main_test PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif()
 
-set_target_properties (libptusa_main PROPERTIES OUTPUT_NAME ptusa_main CLEAN_DIRECT_OUTPUT 1)
+set_target_properties (libptusa_main PROPERTIES OUTPUT_NAME ptusa_main PREFIX "" CLEAN_DIRECT_OUTPUT 1)
 target_compile_definitions(libptusa_main PUBLIC _USRDLL)
 
 target_compile_definitions(gmock PUBLIC GTEST_CREATE_SHARED_LIBRARY)
