@@ -1,6 +1,7 @@
 .settings
 intermediate
 *bin
+bin*
 out
 obj
 cmake-build-*/
