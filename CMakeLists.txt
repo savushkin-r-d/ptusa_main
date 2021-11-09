@@ -261,14 +261,13 @@ if(ARP_DEVICE)
         ARCHIVE DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/lib
         RUNTIME DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/bin)
 
-    install(TARGETS PtusaPLCnextEngineer
-        LIBRARY DESTINATION ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/bin/${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/lib)
     install(CODE "execute_process(COMMAND plcncli
-            deploy -t \"${ARP_DEVICE},${ARP_DEVICE_VERSION}\" --verbose
+            deploy -s . -t \"${ARP_DEVICE},${ARP_DEVICE_VERSION}\"
+                -f \"${CMAKE_BINARY_DIR}/libPtusaPLCnextEngineer.so|.\"
+                --verbose
             WORKING_DIRECTORY \"${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer\"
             COMMAND_ECHO STDOUT )")
-
-    install(FILES ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/bin/PtusaPLCnextEngineer.pcwlx
+     install(FILES ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/bin/PtusaPLCnextEngineer.pcwlx
         DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>)
 
     unset(_ARP_SHORT_DEVICE_VERSION)
