@@ -262,7 +262,8 @@ if(ARP_DEVICE)
         RUNTIME DESTINATION ${ARP_DEVICE}_${_ARP_SHORT_DEVICE_VERSION}/$<CONFIG>/bin)
 
     install(CODE "execute_process(COMMAND plcncli
-            deploy -s . -t \"${ARP_DEVICE},${ARP_DEVICE_VERSION}\"
+                deploy -s \"${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer\"
+                -t \"${ARP_DEVICE},${ARP_DEVICE_VERSION}\"
                 -f \"${CMAKE_BINARY_DIR}/libPtusaPLCnextEngineer.so|.\"
                 --verbose
             WORKING_DIRECTORY \"${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer\"
