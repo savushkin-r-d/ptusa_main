@@ -272,7 +272,7 @@ if(ARP_DEVICE)
 
     unset(_ARP_SHORT_DEVICE_VERSION)
 else()
-    install(TARGETS ${PROJECT_NAME} libptusa_main DESTINATION $<CONFIG>)
+    install(TARGETS ${PROJECT_NAME} libptusa_main RUNTIME DESTINATION $<CONFIG>)
 endif()
 
 enable_testing()
