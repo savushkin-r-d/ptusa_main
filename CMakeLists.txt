@@ -13,7 +13,7 @@ if(LINUX)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
 endif()
 
-project(ptusa_main VERSION 2022.10.19.0)
+project(ptusa_main VERSION 2022.11.09.0)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
