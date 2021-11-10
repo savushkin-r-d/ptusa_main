@@ -87,7 +87,8 @@ namespace PtusaPLCnextEngineer
                cycles_cnt++;
        #endif // TEST_SPEED
 
-            lua_gc(G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, 200);
+            const int LUA_GC_SIZE = 200;
+            lua_gc(G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, LUA_GC_SIZE );
             sleep_ms(sleep_time_ms);
 
 #ifndef DEBUG_NO_WAGO_MODULES
@@ -111,7 +112,7 @@ namespace PtusaPLCnextEngineer
             G_CMMCTR->evaluate();
 #ifdef OPCUA
                OPCUAServer::getInstance().Evaluate();
-       #endif
+#endif
             //Основной цикл работы с дополнительными устройствами
             IOT_EVALUATE();
 
@@ -183,13 +184,14 @@ namespace PtusaPLCnextEngineer
                    {
                    u_long avg_time = all_time / cycles_cnt;
 
+                   const unsigned int KILOBYTE = 1024;
                    if ( TRESH_AVG < avg_time )
                        {
                        sprintf( G_LOG->msg,
                            "Main control cycle avg time above threshold : "
                            "%4lu > %4u ms (Lua mem = %d b).",
                            avg_time, TRESH_AVG,
-                           lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
+                           lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * KILOBYTE +
                            lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
                        G_LOG->write_log( i_log::P_ALERT );
                        }
@@ -199,7 +201,7 @@ namespace PtusaPLCnextEngineer
                        "avg = %lu, max = %4u, tresh = %4u ms (%4u cycles, Lua mem = %d b).",
                        avg_time, max_iteration_cycle_time, TRESH_AVG,
                        cycles_per_period,
-                       lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
+                       lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * KILOBYTE +
                        lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
                    G_LOG->write_log( i_log::P_INFO );
 
