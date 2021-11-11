@@ -1,0 +1,117 @@
+{
+    "version": 2,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "windows-default",
+            "displayName": "Visual Studio Community 2019 Release - x86",
+            "description": "Using compilers for Visual Studio 16 2019 (x86 architecture)",
+            "generator": "Visual Studio 16 2019",
+            "toolset": "host=x86",
+            "architecture": "win32",
+            "binaryDir": "${sourceDir}/bin/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install/${presetName}"
+            }
+        },
+        {
+            "name": "linux-default",
+            "displayName": "Linux Release",
+            "description": "Using default compilers on Linux",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/bin/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install/${presetName}"
+            }
+        },
+
+        {
+            "name": "AXCF-default",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/bin/build/$env{ARP_DEVICE}_$env{ARP_DEVICE_VERSION}",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install",
+                "CMAKE_TOOLCHAIN_FILE": {
+                    "value": "$env{PLCNEXT_SDK_ROOT}/toolchain.cmake",
+                    "type": "FILEPATH"
+                },
+                "ARP_DEVICE": "$env{ARP_DEVICE}",
+                "ARP_DEVICE_VERSION": "$env{ARP_DEVICE_VERSION}"
+            }
+        },
+
+        {
+            "name": "windows-AXCF-default",
+            "hidden": true,
+            "inherits": "AXCF-default",
+            "generator": "MinGW Makefiles",
+            "environment": {
+                "PLCNEXT_SDK_ROOT": "c:/CLI/sdks/$env{ARP_DEVICE}/$env{ARP_DEVICE_SHORT_VERSION}"
+            },
+            "cacheVariables": {
+                "CMAKE_MAKE_PROGRAM": "c:/CLI/sdks/$env{ARP_DEVICE}/$env{ARP_DEVICE_SHORT_VERSION}/sysroots/x86_64-pokysdk-mingw32/usr/bin/make.exe"
+            }
+        },
+        {
+            "name": "build-windows-AXCF2152-2021-LTS-Release",
+            "displayName": "AXCF2152 2021 LTS Release",
+            "description": "Using Windows OS",
+            "inherits": "windows-AXCF-default",
+            "environment": {
+                "ARP_DEVICE": "AXCF2152",
+                "ARP_DEVICE_VERSION": "2021.0.3 LTS (21.0.3.35554)",
+                "ARP_DEVICE_SHORT_VERSION": "2021_0"
+            }
+        },
+
+        {
+            "name": "linux-AXCF-default",
+            "hidden": true,
+            "inherits": "AXCF-default",
+            "environment": {
+                "PLCNEXT_SDK_ROOT": "/opt/pxc/sdk/$env{ARP_DEVICE}/$env{ARP_DEVICE_SHORT_VERSION}"
+            }
+        },
+        {
+            "name": "build-linux-AXCF2152-2020-LTS-Release",
+            "displayName": "AXCF2152 2020.0 LTS Release",
+            "description": "Using Linux OS",
+            "inherits": "linux-AXCF-default",
+            "environment": {
+                "ARP_DEVICE": "AXCF2152",
+                "ARP_DEVICE_SHORT_VERSION": "2020.0",
+                "ARP_DEVICE_VERSION": "$env{ARP_DEVICE_SHORT_VERSION} LTS (20.0.0.24752)"
+            }
+        }
+    ],
+
+
+    "buildPresets": [
+        {
+            "name": "build-windows-Release",
+            "displayName": "Windows Release",
+            "configurePreset": "windows-default"
+        },
+        {
+            "name": "build-windows-AXCF2152-2021-LTS-Release",
+            "displayName": "AXCF2152-2021.0.3",
+            "configurePreset": "build-windows-AXCF2152-2021-LTS-Release"
+        },
+        {
+            "name": "build-linux-AXCF2152-2020-LTS-Release",
+            "displayName": "AXCF2152 2020 LTS",
+            "configurePreset": "build-linux-AXCF2152-2020-LTS-Release"
+        },
+        {
+            "name": "build-linux-Release",
+            "displayName": "Linux Release",
+            "configurePreset": "linux-default"
+        }
+    ]
+}
