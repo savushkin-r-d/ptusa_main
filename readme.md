@@ -1,8 +1,8 @@
 # ptusa
- 
+
 [![GitHub Actions CI](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml/badge.svg)](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml)
- 
- Russian readme is [here](russian_readme/readme.md).
+
+Russian readme is [here](russian_readme/readme.md).
 
 ## Common description ##
 
@@ -42,8 +42,8 @@ To run demo project you should use this command line:
 
 ### win ###
 
-```cmd
-    "out\build\<build_name>\ptusa.exe" demo_project\main.plua path demo_project\ sys_path demo_project\sys\ debug
-```
+ After building and deploying *`windows-default`* cmake-configuration:
 
-where `<build_name>` - used Visual Studio build configuration name (for example "x64-Release").
+```cmd
+    bin\install\windows-default\Release\ptusa_main.exe demo_projects/T1-PLCnext-Demo/main.plua path demo_projects/T1-PLCnext-Demo/ sys_path demo_projects/T1-PLCnext-Demo/sys/ debug
+```

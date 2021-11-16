@@ -14,3 +14,6 @@
 [submodule "googletest"]
 	path = googletest
 	url = https://github.com/google/googletest
+[submodule "demo_projects/T1-PLCnext-Demo"]
+	path = demo_projects/T1-PLCnext-Demo
+	url = https://github.com/savushkin-r-d/T1-PLCnext-Demo.git
