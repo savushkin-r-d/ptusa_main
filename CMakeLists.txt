@@ -284,6 +284,9 @@ endif()
 
 enable_testing()
 add_test(run_no_command_line_arguments ${PROJECT_NAME})
+add_test(NAME T1-PLCnext-Demo
+        COMMAND Lua -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll'" ./spec/ptusa_main.Lua
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo)
 
 include(GoogleTest)
 gtest_discover_tests(main_test)
