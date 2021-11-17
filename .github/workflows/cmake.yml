@@ -192,28 +192,37 @@ jobs:
 
 
     - name: Install Lua/LuaJIT
-      # You may pin to the exact commit or the version.
-      # uses: leafo/gh-actions-lua@ea0ae38722c0b45aa4e770f7c4a650c6b26800d0
-      uses: leafo/gh-actions-lua@v8.0.0
-      with:
-        # The version of Lua to install, must be available on https://www.lua.org/ftp/ or http://luajit.org/download.html
-        luaVersion: 5.1
-        # Command line flags passed to make when building Lua
-        #luaCompileFlags: # optional
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+            sudo apt-get install -y lua5.1
+        elif [ "$RUNNER_OS" == "Windows" ]; then
+            choco install --allow-empty-checksums lua51
+        fi
 
 
     - name: Install LuaRocks
-      # You may pin to the exact commit or the version.
-      # uses: leafo/gh-actions-luarocks@218573cd14f9a47b079c9b89349f9b71cb5ee706
-      uses: leafo/gh-actions-luarocks@v4.0.0
-      #with:
-        # The version of LuaRocks to install, must be available on https://luarocks.github.io/luarocks/releases/
-        #luaRocksVersion: # optional, default is 3.3.1
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" == "Linux" ]; then
+        sudo apt-get install -y luarocks
+        elif [ "$RUNNER_OS" == "Windows" ]; then
+        choco install --allow-empty-checksums luarocks
+        fi
 
 
     # Install busted
-    - name: Install busted
-      run: luarocks install busted
+    - name: Install busted on Linux
+      if: runner.os == 'Linux'
+      shell: bash
+      run: sudo luarocks install busted
+
+    - name: Install busted on Windows
+      if: runner.os == 'Windows'
+      shell: cmd
+      run: |
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
+        luarocks install busted
 
 
     - name: Run tests
