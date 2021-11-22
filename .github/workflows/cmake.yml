@@ -136,6 +136,13 @@ jobs:
           set(path_separator ";")
         endif()
         set(ENV{PATH} "$ENV{GITHUB_WORKSPACE}${path_separator}$ENV{PATH}")
+
+        # Force 32-bit compilation for MinGW.
+        if ("${{ matrix.config.name }}" STREQUAL "Windows Latest MinGW")
+          set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
+          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
+        endif()
+
         execute_process(
           COMMAND cmake
             -S .
@@ -209,7 +216,7 @@ jobs:
       shell: cmd
       run: |
         choco install luarocks
-        
+
 
 
     # Install busted
@@ -234,11 +241,23 @@ jobs:
         set(ENV{CTEST_OUTPUT_ON_FAILURE} "ON")
 
         if ("${{ runner.os }}" STREQUAL "Windows")
-            message("::set-output name=LUA_PATH::C:/Users/runneradmin/AppData/Roaming/luarocks/share/lua/5.1/?.lua;C:/Users/runneradmin/AppData/Roaming/luarocks/share/lua/5.1/?/init.lua;C:/ProgramData/chocolatey/lib/luarocks/luarocks-2.4.4-win32/systree/share/lua/5.1/?.lua;C:/ProgramData/chocolatey/lib/luarocks/luarocks-2.4.4-win32/systree/share/lua/5.1/?/init.lua;C:/ProgramData/chocolatey/lib/luarocks/luarocks-2.4.4-win32/lua/?.lua;C:/ProgramData/chocolatey/lib/luarocks/luarocks-2.4.4-win32/lua/?.lua;C:/ProgramData/chocolatey/lib/luarocks/luarocks-2.4.4-win32/lua/?/init.lua;")
-            execute_process(COMMAND refreshenv)      
+          execute_process( COMMAND luarocks path --lr-path
+            RESULT_VARIABLE result_path
+            OUTPUT_VARIABLE output_path
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+          )
+          execute_process( COMMAND luarocks path --lr-cpath
+            RESULT_VARIABLE result_cpath
+            OUTPUT_VARIABLE output_cpath
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+          )
+          if (result_path EQUAL 0 AND result_cpath EQUAL 0)
+            set(ENV{LUA_PATH} "${output_path}")
+            set(ENV{LUA_CPATH} "${output_cpath}")
+          endif()
 
-            message(LUA_PATH "$ENV{LUA_PATH}")
-            message(LUA_CPATH "$ENV{LUA_CPATH}")
+          message("LUA_PATH=\"$ENV{LUA_PATH}\"")
+          message("LUA_CPATH=\"$ENV{LUA_CPATH}\"")
         endif()
 
         execute_process(
