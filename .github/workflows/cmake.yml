@@ -209,9 +209,7 @@ jobs:
       shell: cmd
       run: |
         choco install luarocks
-        luarocks path > temp.cmd
-        call temp.cmd
-        del temp.cmd
+        
 
 
     # Install busted
@@ -234,6 +232,15 @@ jobs:
         include(ProcessorCount)
         ProcessorCount(N)
         set(ENV{CTEST_OUTPUT_ON_FAILURE} "ON")
+
+        if ("${{ runner.os }}" STREQUAL "Windows")
+            message("::set-output name=LUA_PATH::C:/Users/runneradmin/AppData/Roaming/luarocks/share/lua/5.1/?.lua;C:/Users/runneradmin/AppData/Roaming/luarocks/share/lua/5.1/?/init.lua;C:/ProgramData/chocolatey/lib/luarocks/luarocks-2.4.4-win32/systree/share/lua/5.1/?.lua;C:/ProgramData/chocolatey/lib/luarocks/luarocks-2.4.4-win32/systree/share/lua/5.1/?/init.lua;C:/ProgramData/chocolatey/lib/luarocks/luarocks-2.4.4-win32/lua/?.lua;C:/ProgramData/chocolatey/lib/luarocks/luarocks-2.4.4-win32/lua/?.lua;C:/ProgramData/chocolatey/lib/luarocks/luarocks-2.4.4-win32/lua/?/init.lua;")
+            execute_process(COMMAND refreshenv)      
+
+            message(LUA_PATH "$ENV{LUA_PATH}")
+            message(LUA_CPATH "$ENV{LUA_CPATH}")
+        endif()
+
         execute_process(
           COMMAND ctest -j ${N}
           WORKING_DIRECTORY build
