@@ -524,49 +524,65 @@ void signal_column::direct_on()
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_red()
     {
+#ifndef DEBUG_NO_IO_MODULES
     process_DO( red_lamp_channel, DO_state::OFF, RED_LAMP );
+#endif // DEBUG_NO_IO_MODULES
     red.step = STEP::off;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_yellow()
     {
+#ifndef DEBUG_NO_IO_MODULES
     process_DO( yellow_lamp_channel, DO_state::OFF, YELLOW_LAMP );
+#endif // DEBUG_NO_IO_MODULES
     yellow.step = STEP::off;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_green()
     {
+#ifndef DEBUG_NO_IO_MODULES
     process_DO( green_lamp_channel, DO_state::OFF, GREEN_LAMP );
+#endif // DEBUG_NO_IO_MODULES
     green.step = STEP::off;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_blue()
     {
+#ifndef DEBUG_NO_IO_MODULES
     process_DO( blue_lamp_channel, DO_state::OFF, BLUE_LAMP );
     blue.step = STEP::off;
+#endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_red()
     {
+#ifndef DEBUG_NO_IO_MODULES
     process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
+#endif // DEBUG_NO_IO_MODULES
     red.step = STEP::on;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_yellow()
     {
+#ifndef DEBUG_NO_IO_MODULES
     process_DO( yellow_lamp_channel, DO_state::ON, YELLOW_LAMP );
+#endif // DEBUG_NO_IO_MODULES
     yellow.step = STEP::on;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_green()
     {
+#ifndef DEBUG_NO_IO_MODULES
     process_DO( green_lamp_channel, DO_state::ON, GREEN_LAMP );
+#endif // DEBUG_NO_IO_MODULES
     green.step = STEP::on;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_blue()
     {
+#ifndef DEBUG_NO_IO_MODULES
     process_DO( blue_lamp_channel, DO_state::ON, BLUE_LAMP );
+#endif // DEBUG_NO_IO_MODULES
     blue.step = STEP::on;
     }
 //-----------------------------------------------------------------------------
@@ -578,7 +594,9 @@ void signal_column::normal_blink_red()
         }
     else
         {
+#ifndef DEBUG_NO_IO_MODULES
         process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
+#endif // DEBUG_NO_IO_MODULES
         }
     }
 //-----------------------------------------------------------------------------
@@ -605,7 +623,9 @@ void signal_column::slow_blink_red()
         }
     else
         {
+#ifndef DEBUG_NO_IO_MODULES
         process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
+#endif // DEBUG_NO_IO_MODULES
         }
     }
 //-----------------------------------------------------------------------------
@@ -627,13 +647,17 @@ void signal_column::slow_blink_blue()
 void signal_column::turn_on_siren()
     {
     siren_step = STEP::blink_on;
+#ifndef DEBUG_NO_IO_MODULES
     process_DO( siren_channel, DO_state::ON, SIREN );
+#endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_off_siren()
     {
     siren_step = STEP::off;
+#ifndef DEBUG_NO_IO_MODULES
     process_DO( siren_channel, DO_state::OFF, SIREN );
+#endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
 void signal_column::set_rt_par( u_int idx, float value )
