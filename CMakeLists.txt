@@ -287,12 +287,12 @@ add_test(run_no_command_line_arguments ${PROJECT_NAME})
 
 if(NOT ARP_DEVICE)
     if(MSVC)
-        SET( PTUSA_LIB_PATH ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
+        SET(PTUSA_LIB_PATH ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE})
     else()
-        SET( PTUSA_LIB_PATH ${CMAKE_BINARY_DIR})
+        SET(PTUSA_LIB_PATH ${CMAKE_BINARY_DIR})
     endif()
     add_test(T1-PLCnext-Demo
-            lua -e "package.cpath = package.cpath..';${PTUSA_LIB_PATH}/?.dll'"
+            lua5.1 -e "package.cpath = package.cpath..';${PTUSA_LIB_PATH}/?.dll'"
             ${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/spec/ptusa_main.lua
             -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
             -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"

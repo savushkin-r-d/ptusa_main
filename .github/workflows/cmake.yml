@@ -47,7 +47,6 @@ jobs:
         # `git@github.com:` are converted to HTTPS.
         #
         # Default: false
-        lfs: true
         submodules: 'recursive'
 
     - name: Download Ninja and CMake
@@ -191,24 +190,28 @@ jobs:
         execute_process(COMMAND ccache -s)
 
 
-    - name: Install Lua/LuaJIT
+    # Install Lua
+    - name: Install Lua (Linux only)
+      if: runner.os == 'Linux'
       shell: bash
       run: |
-        if [ "$RUNNER_OS" == "Linux" ]; then
-            sudo apt-get install -y lua5.1
-        elif [ "$RUNNER_OS" == "Windows" ]; then
-            choco install --allow-empty-checksums lua51
-        fi
+        sudo apt-get install -y lua5.1
 
 
-    - name: Install LuaRocks
+    # Install LuaRocks
+    - name: Install LuaRocks on Linux
+      if: runner.os == 'Linux'
       shell: bash
+      run: sudo apt-get install -y luarocks
+
+    - name: Install LuaRocks on Windows
+      if: runner.os == 'Windows'
+      shell: cmd
       run: |
-        if [ "$RUNNER_OS" == "Linux" ]; then
-        sudo apt-get install -y luarocks
-        elif [ "$RUNNER_OS" == "Windows" ]; then
-        choco install --allow-empty-checksums luarocks
-        fi
+        choco install luarocks
+        luarocks path > temp.cmd
+        call temp.cmd
+        del temp.cmd
 
 
     # Install busted
