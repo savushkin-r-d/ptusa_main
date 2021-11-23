@@ -136,13 +136,6 @@ jobs:
           set(path_separator ";")
         endif()
         set(ENV{PATH} "$ENV{GITHUB_WORKSPACE}${path_separator}$ENV{PATH}")
-
-        # Force 32-bit compilation for MinGW.
-        if ("${{ matrix.config.name }}" STREQUAL "Windows Latest MinGW")
-          set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m32")
-          set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m32")
-        endif()
-
         execute_process(
           COMMAND cmake
             -S .
@@ -241,12 +234,12 @@ jobs:
         set(ENV{CTEST_OUTPUT_ON_FAILURE} "ON")
 
         if ("${{ runner.os }}" STREQUAL "Windows")
-          execute_process( COMMAND luarocks path --lr-path
+          execute_process(COMMAND luarocks path --lr-path
             RESULT_VARIABLE result_path
             OUTPUT_VARIABLE output_path
             OUTPUT_STRIP_TRAILING_WHITESPACE
           )
-          execute_process( COMMAND luarocks path --lr-cpath
+          execute_process(COMMAND luarocks path --lr-cpath
             RESULT_VARIABLE result_cpath
             OUTPUT_VARIABLE output_cpath
             OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -274,6 +267,7 @@ jobs:
           message("::error::${test_results}")
           message(FATAL_ERROR "Running tests failed!")
         endif()
+
     - name: Install Strip
       run: cmake --install build --prefix instdir --strip
 

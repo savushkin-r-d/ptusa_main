@@ -25,7 +25,7 @@
             "description": "Using compilers for Visual Studio 16 2019 (x86 architecture)",
             "inherits": "windows-default",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
