@@ -105,12 +105,12 @@
         {
             "name": "build-windows-release",
             "displayName": "Windows Release",
-            "configurePreset": "windows-default",
+            "configurePreset": "windows-default"
         },
         {
             "name": "build-windows-debug",
             "displayName": "Windows Debug",
-            "configurePreset": "windows-debug",
+            "configurePreset": "windows-debug"
         },
         {
             "name": "build-windows-AXCF2152-2021-LTS-Release",
