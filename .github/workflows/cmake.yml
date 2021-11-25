@@ -189,12 +189,70 @@ jobs:
         endif()
         execute_process(COMMAND ccache -s)
 
+
+    # Install Lua
+    - name: Install Lua (Linux only)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get install -y lua5.1
+
+
+    # Install LuaRocks
+    - name: Install LuaRocks on Linux
+      if: runner.os == 'Linux'
+      shell: bash
+      run: sudo apt-get install -y luarocks
+
+    - name: Install LuaRocks on Windows
+      if: runner.os == 'Windows'
+      shell: cmd
+      run: |
+        choco install luarocks
+
+
+
+    # Install busted
+    - name: Install busted on Linux
+      if: runner.os == 'Linux'
+      shell: bash
+      run: sudo luarocks install busted
+
+    - name: Install busted on Windows
+      if: runner.os == 'Windows'
+      shell: cmd
+      run: |
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
+        luarocks install busted
+
+
     - name: Run tests
       shell: cmake -P {0}
       run: |
         include(ProcessorCount)
         ProcessorCount(N)
         set(ENV{CTEST_OUTPUT_ON_FAILURE} "ON")
+
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          execute_process(COMMAND luarocks path --lr-path
+            RESULT_VARIABLE result_path
+            OUTPUT_VARIABLE output_path
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+          )
+          execute_process(COMMAND luarocks path --lr-cpath
+            RESULT_VARIABLE result_cpath
+            OUTPUT_VARIABLE output_cpath
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+          )
+          if (result_path EQUAL 0 AND result_cpath EQUAL 0)
+            set(ENV{LUA_PATH} "${output_path}")
+            set(ENV{LUA_CPATH} "${output_cpath}")
+          endif()
+
+          message("LUA_PATH=\"$ENV{LUA_PATH}\"")
+          message("LUA_CPATH=\"$ENV{LUA_CPATH}\"")
+        endif()
+
         execute_process(
           COMMAND ctest -j ${N}
           WORKING_DIRECTORY build
@@ -209,6 +267,7 @@ jobs:
           message("::error::${test_results}")
           message(FATAL_ERROR "Running tests failed!")
         endif()
+
     - name: Install Strip
       run: cmake --install build --prefix instdir --strip
 

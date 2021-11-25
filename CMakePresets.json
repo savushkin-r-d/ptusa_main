@@ -25,7 +25,7 @@
             "description": "Using compilers for Visual Studio 16 2019 (x86 architecture)",
             "inherits": "windows-default",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
@@ -105,12 +105,12 @@
         {
             "name": "build-windows-release",
             "displayName": "Windows Release",
-            "configurePreset": "windows-default",
+            "configurePreset": "windows-default"
         },
         {
             "name": "build-windows-debug",
             "displayName": "Windows Debug",
-            "configurePreset": "windows-debug",
+            "configurePreset": "windows-debug"
         },
         {
             "name": "build-windows-AXCF2152-2021-LTS-Release",
