@@ -5789,6 +5789,7 @@ void circuit_breaker::direct_off()
 #endif
     }
 //-----------------------------------------------------------------------------
+#ifndef DEBUG_NO_IO_MODULES
 float circuit_breaker::get_value()
     {
     return v;
@@ -5806,6 +5807,7 @@ int circuit_breaker::get_state()
         return st;
         }
     }
+#endif
 //-----------------------------------------------------------------------------
 void circuit_breaker::evaluate_io()
     {

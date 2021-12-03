@@ -2877,9 +2877,11 @@ class circuit_breaker : public analog_io_device
 
         void direct_off();
 
+#ifndef DEBUG_NO_IO_MODULES
         float get_value();
 
         int get_state();
+#endif
 
         void evaluate_io();
 
