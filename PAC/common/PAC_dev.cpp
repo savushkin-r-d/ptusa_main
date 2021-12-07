@@ -597,6 +597,7 @@ void signal_column::normal_blink_red()
 #ifndef DEBUG_NO_IO_MODULES
         process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
 #endif // DEBUG_NO_IO_MODULES
+        red.step = STEP::on;
         }
     }
 //-----------------------------------------------------------------------------
@@ -626,6 +627,7 @@ void signal_column::slow_blink_red()
 #ifndef DEBUG_NO_IO_MODULES
         process_DO( red_lamp_channel, DO_state::ON, RED_LAMP );
 #endif // DEBUG_NO_IO_MODULES
+        red.step = STEP::on;
         }
     }
 //-----------------------------------------------------------------------------

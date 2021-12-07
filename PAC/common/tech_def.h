@@ -250,6 +250,10 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
              return !errors.empty();
              }
 
+         /// @brief Наличие активных аварий.
+         ///
+         bool is_any_error() const;
+
 #ifndef __GNUC__
 #pragma endregion
 #endif
