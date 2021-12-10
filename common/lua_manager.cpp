@@ -372,16 +372,7 @@ lua_manager::~lua_manager()
 int lua_manager::void_exec_lua_method( const char *object_name,
                                       const char *function_name, const char *c_function_name ) const
     {
-    int res = 0;
-    if ( 0 == exec_lua_method( object_name, function_name, 0, 0, 0 ) )
-        {
-        }
-    else
-        {
-        res = 1;
-        }
-
-    return res;
+    return exec_lua_method( object_name, function_name, 0, 0, 0 );
     }
 //-----------------------------------------------------------------------------
 int lua_manager::int_exec_lua_method( const char *object_name,

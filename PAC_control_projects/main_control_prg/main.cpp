@@ -90,9 +90,7 @@ int main( int argc, const char *argv[] )
     log_mngr::lg = new l_log();
 #endif
 
-    sprintf( G_LOG->msg, "Program started (version %s).",
-        PRODUCT_VERSION_FULL_STR );
-    G_LOG->write_log( i_log::P_INFO );
+    G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
 #ifdef OPCUA
     OPCUAServer::getInstance().Init(4840);
 #endif

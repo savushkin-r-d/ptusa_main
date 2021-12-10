@@ -891,10 +891,8 @@ void signal_column_iolink::process_DO( u_int n, DO_state state, const char* name
     switch ( n )
         {
         case 0:
-            sprintf( G_LOG->msg,
-                "%s\t signal_column_iolink::process_DO() - no \'%s\'.",
-                get_name(), name );
-            G_LOG->write_log( i_log::P_WARNING );
+            G_LOG->warning( "%s\t signal_column_iolink::process_DO() - "
+                "no \'%s\'.", get_name(), name );
             break;
 
         case 1:
@@ -914,10 +912,8 @@ void signal_column_iolink::process_DO( u_int n, DO_state state, const char* name
             break;
 
         default:
-            sprintf( G_LOG->msg,
-                "%s\t signal_column_iolink::process_DO() - unknown \'%s\'.",
-                get_name(), name );
-            G_LOG->write_log( i_log::P_WARNING );
+            G_LOG->warning( "%s\t signal_column_iolink::process_DO() - "
+                "unknown \'%s\'.", get_name(), name );
             break;
         }
     }
