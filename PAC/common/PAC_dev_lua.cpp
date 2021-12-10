@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 10/06/21 14:41:03.
+** Generated automatically by tolua++-1.0.92 on Tue Dec  7 13:02:48 2021.
 */
 
 #ifndef __cplusplus
@@ -4717,6 +4717,38 @@ static int tolua_PAC_dev_tech_object_is_any_message00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'is_any_message'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: is_any_error of class  tech_object */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_tech_object_is_any_error00
+static int tolua_PAC_dev_tech_object_is_any_error00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const tech_object",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const tech_object* self = (const tech_object*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'is_any_error'", NULL);
+#endif
+  {
+   bool tolua_ret = (bool)  self->is_any_error();
+   tolua_pushboolean(tolua_S,(bool)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'is_any_error'.",&tolua_err);
  return 0;
 #endif
 }
@@ -14340,6 +14372,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"ERR_CANT_ON_2_OBJ",tech_object::ERR_CANT_ON_2_OBJ);
    tolua_function(tolua_S,"set_err_msg",tolua_PAC_dev_tech_object_set_err_msg00);
    tolua_function(tolua_S,"is_any_message",tolua_PAC_dev_tech_object_is_any_message00);
+   tolua_function(tolua_S,"is_any_error",tolua_PAC_dev_tech_object_is_any_error00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_TECH_OBJECT_MNGR",tolua_PAC_dev_G_TECH_OBJECT_MNGR00);
   tolua_cclass(tolua_S,"tech_object_manager","tech_object_manager","",NULL);

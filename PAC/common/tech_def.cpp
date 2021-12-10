@@ -1302,6 +1302,21 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
     return 0;
     }
 //-----------------------------------------------------------------------------
+bool tech_object::is_any_error() const
+    {
+    auto iter = errors.begin();
+    while ( iter != errors.end() )
+        {
+        auto error = *iter;
+        if ( tech_obj_error::get_priority( error->type ) ==
+            ALARM_CLASS_PRIORITY::P_ALARM )
+            return true;
+        ++iter;
+        }
+
+    return false;
+    }
+//-----------------------------------------------------------------------------
 void tech_object::print() const
     {
     printf( "#%2d\n", serial_idx );
