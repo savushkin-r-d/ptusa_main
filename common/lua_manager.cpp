@@ -119,10 +119,8 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     G_LOG->write_log( i_log::P_NOTICE );
     if ( dir[ 0 ] != '\0' || sys_dir[ 0 ] != '\0' || extra_dirs[ 0 ] != '\0' )
         {
-        sprintf( G_LOG->msg,
-            "path = \"%s\", sys_path = \"%s\", extra_paths = \"%s\"",
+        G_LOG->notice( "path = \"%s\", sys_path = \"%s\", extra_paths = \"%s\"",
             dir, sys_dir, extra_dirs );
-        G_LOG->write_log( i_log::P_NOTICE );
         }
 
         if ( 0 == lua_state )
