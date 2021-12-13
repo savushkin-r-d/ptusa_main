@@ -239,10 +239,10 @@ void device::off()
         }
     }
 //-----------------------------------------------------------------------------
-int device::save_device( char *buff, const char *prefix )
+int device::save_device( char* buff, const char* prefix )
     {
     int res = sprintf( buff, "%s%s={M=%d, ",
-        prefix,  name, is_manual_mode );
+        prefix, name, is_manual_mode );
 
     if ( type != DT_AO )
         {
@@ -275,8 +275,11 @@ int device::save_device( char *buff, const char *prefix )
     res += save_device_ex( buff + res );
     res += par_device::save_device( buff + res );
 
-    res -= 2;
-    buff[ res ] = 0; //Убираем лишнюю последнюю запятую и пробел.//
+    if ( res >= 2 )
+        {
+        res -= 2;
+        buff[ res ] = 0; //Убираем лишнюю последнюю запятую и пробел.//
+        }
 
     res += sprintf( buff + res, "},\n" );
 
@@ -452,8 +455,6 @@ const char* device::get_type_name() const
         default:
             return "???";
         }
-
-    return "???";
     }
 //-----------------------------------------------------------------------------
 device::~device()
@@ -2042,7 +2043,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
     new_device->set_serial_n( new_dev_index );
     new_device->set_article( article );
 
-    if ( dev_type < device::C_DEVICE_TYPE_CNT )
+    if ( dev_type >= 0 && dev_type < device::C_DEVICE_TYPE_CNT )
         {
         if ( 0 == is_first_device[ dev_type ] )
             {
@@ -5194,11 +5195,9 @@ bool level_s::is_active()
         {
         case DST_LS_MIN:
             return get_state() == 0 ? 0 : 1;
-            break;
 
         case DST_LS_MAX:
             return get_state() == 0 ? 1 : 0;
-            break;
 
         default:
             return get_state() == 0 ? 0 : 1;
