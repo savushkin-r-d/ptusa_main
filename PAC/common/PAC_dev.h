@@ -4101,6 +4101,47 @@ class signal_column : public device, public io_device
 
         int save_device_ex( char* buff );
 
+#ifdef _MSC_VER
+#pragma region Сигнализация о событиях
+#endif
+        /// @brief Расчет состояния на основе текущих данных от I/O.
+        void evaluate_io();
+
+        void show_error_exists();
+
+        void show_message_exists();
+
+        void show_batch_is_not_running();
+
+        void show_batch_is_running();
+
+        void show_operation_is_not_running();
+
+        void show_operation_is_running();
+
+        void show_idle();
+
+    private:
+        enum class show_states
+            {
+            idle,
+
+            error_exists,
+            message_exists,
+
+            batch_is_not_running,
+            batch_is_running,
+
+            operation_is_not_running,
+            operation_is_running
+            };
+
+        show_states show_state;
+
+#ifdef _MSC_VER
+#pragma endregion
+#endif
+
     protected:
         enum class DO_state
             {

@@ -374,6 +374,23 @@ class signal_column : public device
             SIREN_ON,
             SIREN_OFF,
             };
+
+#ifdef _MSC_VER
+#pragma region Сигнализация о событиях
+#endif
+        void show_error_exists();
+        void show_message_exists();
+
+        void show_batch_is_not_running();
+        void show_batch_is_running();
+
+        void show_operation_is_not_running();
+        void show_operation_is_running();
+
+        void show_idle();
+#ifdef _MSC_VER
+#pragma endregion
+#endif
     };
 //-----------------------------------------------------------------------------
 /// @brief Получение клапана по имени.
