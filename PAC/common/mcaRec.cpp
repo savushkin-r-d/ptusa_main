@@ -612,8 +612,9 @@ int TRecipeManager::LoadFromFile( const char* filename )
     memFile = fopen(fname, "r+b");
     if (memFile)
         {
-        fread(recipeMemory, 1, recipeMemorySize, memFile);
+        size_t result = fread(recipeMemory, 1, recipeMemorySize, memFile);
         fclose(memFile);
+        if (0 == result) return 1;
         }
     return 0;
     }
@@ -1008,8 +1009,9 @@ int TMediumRecipeManager::LoadFromFile(const char* filename)
     memFile = fopen(fname, "r+b");
     if (memFile)
     {
-        fread(recipeMemory, 1, recipeMemorySize, memFile);
+        size_t result = fread(recipeMemory, 1, recipeMemorySize, memFile);
         fclose(memFile);
+        if (0 == result) return 1;
     }
     return 0;
 }

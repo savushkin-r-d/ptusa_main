@@ -252,7 +252,6 @@ const char* PAC_critical_errors_manager::get_alarm_descr( ALARM_CLASS err_class,
 
     case AC_COM_DRIVER:
         return "?";
-        break;
 
     case AC_RUNTIME_ERROR:
         switch( err_sub_class )

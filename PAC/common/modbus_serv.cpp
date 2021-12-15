@@ -1107,7 +1107,9 @@ int ModbusServ::PackTime( unsigned long timevar, unsigned char* Buf, int units /
 	minites = (temptime / 60) % 60;
 	hours = (temptime / 3600) % 100;
 	sprintf((char*)Buf,"%.1hd%.1hd%.1hd::%.1hd%.1hd%.1hd",
-		hours % 10, hours / 10, minites / 10, minites % 10, seconds % 10, seconds / 10);
+		static_cast<short>(hours % 10), static_cast<short>(hours / 10),
+		static_cast<short>(minites / 10), static_cast<short>(minites % 10),
+		static_cast<short>(seconds % 10), static_cast<short>(seconds / 10));
 	return 3;
 	}
 
