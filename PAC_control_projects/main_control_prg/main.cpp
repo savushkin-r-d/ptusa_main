@@ -90,9 +90,7 @@ int main( int argc, const char *argv[] )
     log_mngr::lg = new l_log();
 #endif
 
-    sprintf( G_LOG->msg, "Program started (version %s).",
-        PRODUCT_VERSION_FULL_STR );
-    G_LOG->write_log( i_log::P_INFO );
+    G_LOG->info( "Program started (version %s).", PRODUCT_VERSION_FULL_STR );
 #ifdef OPCUA
     OPCUAServer::getInstance().Init(4840);
 #endif
@@ -106,8 +104,7 @@ int main( int argc, const char *argv[] )
 
     if ( res ) //-Ошибка инициализации.
         {
-        sprintf( G_LOG->msg, "Lua init returned error code %d!", res );
-        G_LOG->write_log( i_log::P_ALERT );
+        G_LOG->alert( "Lua init returned error code %d!", res );
 
         debug_break;
         return EXIT_FAILURE;
@@ -144,8 +141,7 @@ int main( int argc, const char *argv[] )
     UA_StatusCode retval = OPCUAServer::getInstance().Start();
     if(retval != UA_STATUSCODE_GOOD)
         {
-        sprintf( G_LOG->msg, "OPC UA server start failed. Returned error code %d!", retval );
-        G_LOG->write_log( i_log::P_CRIT );
+        G_LOG->critical( "OPC UA server start failed. Returned error code %d!", retval );
         debug_break;
         return EXIT_FAILURE;
         }
@@ -154,9 +150,8 @@ int main( int argc, const char *argv[] )
     //Инициализация дополнительных устройств
     IOT_INIT();
 
-    sprintf( G_LOG->msg, "Starting main loop! Sleep time is %li ms.",
+    G_LOG->info( G_LOG->msg, "Starting main loop! Sleep time is %li ms.",
         sleep_time_ms);
-    G_LOG->write_log( i_log::P_INFO );
 
     while ( running )
         {
@@ -254,23 +249,21 @@ int main( int argc, const char *argv[] )
 
             if ( TRESH_AVG < avg_time )
                 {
-                sprintf( G_LOG->msg,
+                G_LOG->alert( G_LOG->msg,
                     "Main control cycle avg time above threshold : "
                     "%4lu > %4u ms (Lua mem = %d b).",
                     avg_time, TRESH_AVG,
                     lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
                     lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
-                G_LOG->write_log( i_log::P_ALERT );
                 }
 
-            sprintf( G_LOG->msg,
+            G_LOG->info( G_LOG->msg,
                 "Main control cycle performance : "
                 "avg = %lu, max = %4u, tresh = %4u ms (%4u cycles, Lua mem = %d b).",
                 avg_time, max_iteration_cycle_time, TRESH_AVG,
                 cycles_per_period,
                 lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
                 lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
-            G_LOG->write_log( i_log::P_INFO );
 
             all_time   = 0;
             cycles_cnt = 0;

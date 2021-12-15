@@ -5,8 +5,8 @@
 
 #include <ctime>
 
-time_t t_;
-struct tm *timeInfo_;
+time_t current_time;
+struct tm *time_info;
 
 #include "l_console.h"
 //-----------------------------------------------------------------------------

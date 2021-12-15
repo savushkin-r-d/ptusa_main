@@ -119,10 +119,8 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
     G_LOG->write_log( i_log::P_NOTICE );
     if ( dir[ 0 ] != '\0' || sys_dir[ 0 ] != '\0' || extra_dirs[ 0 ] != '\0' )
         {
-        sprintf( G_LOG->msg,
-            "path = \"%s\", sys_path = \"%s\", extra_paths = \"%s\"",
+        G_LOG->notice( "path = \"%s\", sys_path = \"%s\", extra_paths = \"%s\"",
             dir, sys_dir, extra_dirs );
-        G_LOG->write_log( i_log::P_NOTICE );
         }
 
         if ( 0 == lua_state )
@@ -372,16 +370,7 @@ lua_manager::~lua_manager()
 int lua_manager::void_exec_lua_method( const char *object_name,
                                       const char *function_name, const char *c_function_name ) const
     {
-    int res = 0;
-    if ( 0 == exec_lua_method( object_name, function_name, 0, 0, 0 ) )
-        {
-        }
-    else
-        {
-        res = 1;
-        }
-
-    return res;
+    return exec_lua_method( object_name, function_name, 0, 0, 0 );
     }
 //-----------------------------------------------------------------------------
 int lua_manager::int_exec_lua_method( const char *object_name,

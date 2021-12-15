@@ -680,7 +680,6 @@ io_device::~io_device()
 void io_device::init( int DO_count, int DI_count, int AO_count,
                        int AI_count )
     {
-    this->vendor = vendor;
     if ( DO_count > 0 )
         {
         DO_channels.init( DO_count );

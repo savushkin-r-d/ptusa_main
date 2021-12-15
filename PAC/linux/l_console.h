@@ -35,12 +35,13 @@
 #define CLEARSCREEN		printf("\e[2J\e[H")
 #define SetColor(x)		printf(x)
 //-----------------------------------------------------------------------------
-extern time_t t_;
-extern struct tm *timeInfo_;
+extern time_t current_time;
+extern struct tm * time_info;
 
-#define print_time t_ = time( 0 ); timeInfo_ = localtime( &t_ );\
-     printf( "%02d.%02d.%02d %02d:%02d:%02d ",\
-     timeInfo_->tm_mday, timeInfo_->tm_mon + 1, timeInfo_->tm_year,\
-     timeInfo_->tm_hour, timeInfo_->tm_min, timeInfo_->tm_sec ); printf
+#define print_time current_time = time( nullptr );\
+    time_info = localtime( &current_time );\
+    printf( "%02d.%02d.%02d %02d:%02d:%02d ",\
+    time_info->tm_mday, time_info->tm_mon + 1, time_info->tm_year,\
+    time_info->tm_hour, time_info->tm_min, time_info->tm_sec ); printf
 //-----------------------------------------------------------------------------
 #endif // L_CONSOLE_H
