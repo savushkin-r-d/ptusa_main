@@ -72,7 +72,6 @@ class PAC_critical_errors_manager
 
             AS_EASYSERVER = 5,      ///< Ошибки EasyServer.
             AS_REMOTE_PAC,          ///< Ошибки связи с удаленным PAC.
-			AS_FC_ALTIVAR,			///< Ошибка связи с частотным преобразователем Altivar.
 
             //AC_RUNTIME_ERROR,     ///< Ошибки во время работы.
             AS_EMERGENCY_BUTTON = 1,///< Нажата аварийная кнопка.
