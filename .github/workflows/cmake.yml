@@ -273,6 +273,11 @@ jobs:
           message(FATAL_ERROR "Running tests failed!")
         endif()
 
+    - name: Install lcov
+      if: runner.os == 'Linux'
+      shell: bash
+      run: sudo apt-get install -y lcov
+
     - name: Create lcov report
       if: runner.os == 'Linux'
       shell: bash
