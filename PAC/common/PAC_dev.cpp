@@ -491,6 +491,7 @@ signal_column::signal_column( const char* dev_name, DEVICE_SUB_TYPE sub_type,
     int green_lamp_channel, int blue_lamp_channel, int siren_channel ):
     device( dev_name, DT_HLA, sub_type, 0 ),
     io_device( dev_name ),
+    show_state( show_states::idle ),
     is_const_red( 0 ),
     red_lamp_channel( red_lamp_channel ),
     yellow_lamp_channel( yellow_lamp_channel ),
@@ -708,6 +709,122 @@ int signal_column::save_device_ex( char* buff )
     return res;
     }
 //-----------------------------------------------------------------------------
+void signal_column::evaluate_io()
+    {
+    //Так как колонну могут использовать несколько аппаратов
+    //(агрегатов), то отключаем отображение событий в начале каждого
+    // цикла управляющей программы.
+    show_state = show_states::idle;
+    }
+//-----------------------------------------------------------------------------
+void signal_column::show_error_exists()
+    {
+    if ( get_manual_mode() ) return;
+
+    show_state = show_states::error_exists;
+    normal_blink_red();
+    turn_off_yellow();
+    turn_off_green();
+    turn_on_siren();
+    };
+//-----------------------------------------------------------------------------
+void signal_column::show_message_exists()
+    {
+    if ( get_manual_mode() ) return;
+
+    if ( show_state != show_states::error_exists )
+        {
+        show_state = show_states::message_exists;
+        turn_off_red();
+        normal_blink_yellow();
+        turn_off_green();
+        turn_off_siren();
+        }
+    };
+//-----------------------------------------------------------------------------
+void signal_column::show_batch_is_not_running()
+    {
+    if ( get_manual_mode() ) return;
+
+    if ( show_state != show_states::error_exists &&
+        show_state != show_states::message_exists )
+        {
+        show_state = show_states::batch_is_not_running;
+        turn_off_red();
+        turn_on_yellow();
+        turn_off_green();
+        turn_off_siren();
+        }
+    };
+//-----------------------------------------------------------------------------
+void signal_column::show_batch_is_running()
+    {
+    if ( get_manual_mode() ) return;
+
+    if ( show_state != show_states::error_exists &&
+        show_state != show_states::message_exists &&
+        show_state != show_states::batch_is_not_running )
+        {
+        show_state = show_states::batch_is_running;
+        turn_off_red();
+        turn_off_yellow();
+        turn_on_green();
+        turn_off_siren();
+        }
+    };
+//-----------------------------------------------------------------------------
+void signal_column::show_operation_is_not_running()
+    {
+    if ( get_manual_mode() ) return;
+
+    if ( show_state != show_states::error_exists &&
+        show_state != show_states::message_exists &&
+        show_state != show_states::batch_is_not_running )
+        {
+        show_state = show_states::operation_is_not_running;
+        turn_off_red();
+        turn_on_yellow();
+        turn_off_green();
+        turn_off_siren();
+        }
+    };
+//-----------------------------------------------------------------------------
+void signal_column::show_operation_is_running()
+    {
+    if ( get_manual_mode() ) return;
+
+    if ( show_state != show_states::error_exists &&
+        show_state != show_states::message_exists &&
+        show_state != show_states::batch_is_not_running &&
+        show_state != show_states::operation_is_not_running )
+        {
+        show_state = show_states::operation_is_running;
+        turn_off_red();
+        turn_off_yellow();
+        turn_on_green();
+        turn_off_siren();
+        }
+    };
+//-----------------------------------------------------------------------------
+void signal_column::show_idle()
+    {
+    if ( get_manual_mode() ) return;
+
+    if ( show_state != show_states::error_exists &&
+        show_state != show_states::message_exists &&
+        show_state != show_states::batch_is_not_running &&
+        show_state != show_states::operation_is_not_running &&
+        show_state != show_states::batch_is_running &&
+        show_state != show_states::operation_is_running )
+        {
+        show_state = show_states::idle;
+        turn_off_red();
+        turn_off_yellow();
+        turn_off_green();
+        turn_off_siren();
+        }
+    };
+//-----------------------------------------------------------------------------
 void signal_column::direct_set_state( int new_state )
     {
     switch ( (STATE)new_state )
@@ -921,6 +1038,7 @@ void signal_column_iolink::process_DO( u_int n, DO_state state, const char* name
 //-----------------------------------------------------------------------------
 void signal_column_iolink::evaluate_io()
     {
+    signal_column::evaluate_io();
     out_info = (out_data*)get_AO_write_data( 0 );
     }
 //-----------------------------------------------------------------------------

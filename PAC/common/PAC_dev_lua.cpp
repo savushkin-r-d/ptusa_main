@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Tue Dec  7 13:02:48 2021.
+** Generated automatically by tolua++-1.0.92 on 12/14/21 15:30:50.
 */
 
 #ifndef __cplusplus
@@ -2213,6 +2213,223 @@ static int tolua_PAC_dev_signal_column_turn_off_siren00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'turn_off_siren'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: show_error_exists of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_show_error_exists00
+static int tolua_PAC_dev_signal_column_show_error_exists00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'show_error_exists'", NULL);
+#endif
+  {
+   self->show_error_exists();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'show_error_exists'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: show_message_exists of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_show_message_exists00
+static int tolua_PAC_dev_signal_column_show_message_exists00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'show_message_exists'", NULL);
+#endif
+  {
+   self->show_message_exists();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'show_message_exists'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: show_batch_is_not_running of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_show_batch_is_not_running00
+static int tolua_PAC_dev_signal_column_show_batch_is_not_running00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'show_batch_is_not_running'", NULL);
+#endif
+  {
+   self->show_batch_is_not_running();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'show_batch_is_not_running'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: show_batch_is_running of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_show_batch_is_running00
+static int tolua_PAC_dev_signal_column_show_batch_is_running00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'show_batch_is_running'", NULL);
+#endif
+  {
+   self->show_batch_is_running();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'show_batch_is_running'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: show_operation_is_not_running of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_show_operation_is_not_running00
+static int tolua_PAC_dev_signal_column_show_operation_is_not_running00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'show_operation_is_not_running'", NULL);
+#endif
+  {
+   self->show_operation_is_not_running();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'show_operation_is_not_running'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: show_operation_is_running of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_show_operation_is_running00
+static int tolua_PAC_dev_signal_column_show_operation_is_running00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'show_operation_is_running'", NULL);
+#endif
+  {
+   self->show_operation_is_running();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'show_operation_is_running'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: show_idle of class  signal_column */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_signal_column_show_idle00
+static int tolua_PAC_dev_signal_column_show_idle00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"signal_column",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  signal_column* self = (signal_column*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'show_idle'", NULL);
+#endif
+  {
+   self->show_idle();
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'show_idle'.",&tolua_err);
  return 0;
 #endif
 }
@@ -14254,6 +14471,13 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"RED_SLOW_BLINK",signal_column::RED_SLOW_BLINK);
    tolua_constant(tolua_S,"SIREN_ON",signal_column::SIREN_ON);
    tolua_constant(tolua_S,"SIREN_OFF",signal_column::SIREN_OFF);
+   tolua_function(tolua_S,"show_error_exists",tolua_PAC_dev_signal_column_show_error_exists00);
+   tolua_function(tolua_S,"show_message_exists",tolua_PAC_dev_signal_column_show_message_exists00);
+   tolua_function(tolua_S,"show_batch_is_not_running",tolua_PAC_dev_signal_column_show_batch_is_not_running00);
+   tolua_function(tolua_S,"show_batch_is_running",tolua_PAC_dev_signal_column_show_batch_is_running00);
+   tolua_function(tolua_S,"show_operation_is_not_running",tolua_PAC_dev_signal_column_show_operation_is_not_running00);
+   tolua_function(tolua_S,"show_operation_is_running",tolua_PAC_dev_signal_column_show_operation_is_running00);
+   tolua_function(tolua_S,"show_idle",tolua_PAC_dev_signal_column_show_idle00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"V",tolua_PAC_dev_V00);
   tolua_function(tolua_S,"VC",tolua_PAC_dev_VC00);
