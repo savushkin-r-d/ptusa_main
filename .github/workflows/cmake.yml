@@ -287,6 +287,14 @@ jobs:
         lcov --remove coverage.info '/usr/*' --remove coverage.info '*/test/*' --remove coverage.info '*/googletest/*' --output-file coverage.info # filter system-files
         lcov --list coverage.info # debug info
 
+    - name: Upload coverage to Codecov (Linux only)
+      if: runner.os == 'Linux'
+      uses: codecov/codecov-action@v2
+      with:
+        fail_ci_if_error: true
+        verbose: true
+
+
     - name: Install Strip
       run: cmake --install build --prefix instdir --strip
 
