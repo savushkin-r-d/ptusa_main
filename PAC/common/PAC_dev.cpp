@@ -1005,6 +1005,7 @@ void signal_column_iolink::set_string_property( const char* field, const char* v
 //-----------------------------------------------------------------------------
 void signal_column_iolink::process_DO( u_int n, DO_state state, const char* name )
     {
+#ifndef DEBUG_NO_IO_MODULES
     bool ch_state = state == DO_state::ON;
     switch ( n )
         {
@@ -1034,12 +1035,15 @@ void signal_column_iolink::process_DO( u_int n, DO_state state, const char* name
                 "unknown \'%s\'.", get_name(), name );
             break;
         }
+#endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
 void signal_column_iolink::evaluate_io()
     {
+#ifndef DEBUG_NO_IO_MODULES
     signal_column::evaluate_io();
     out_info = (out_data*)get_AO_write_data( 0 );
+#endif // DEBUG_NO_IO_MODULES
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
