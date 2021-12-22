@@ -136,6 +136,11 @@ jobs:
           set(path_separator ";")
         endif()
         set(ENV{PATH} "$ENV{GITHUB_WORKSPACE}${path_separator}$ENV{PATH}")
+        
+        if ("${{ runner.os }}" STREQUAL "Linux")
+            set(ENV{CODE_COVERAGE} "ON")
+        endif()
+
         execute_process(
           COMMAND cmake
             -S .
@@ -145,6 +150,7 @@ jobs:
             -D CMAKE_MAKE_PROGRAM=ninja
             -D CMAKE_C_COMPILER_LAUNCHER=ccache
             -D CMAKE_CXX_COMPILER_LAUNCHER=ccache
+            -D CODE_COVERAGE=$ENV{CODE_COVERAGE}
           RESULT_VARIABLE result
         )
         if (NOT result EQUAL 0)
@@ -267,6 +273,27 @@ jobs:
           message("::error::${test_results}")
           message(FATAL_ERROR "Running tests failed!")
         endif()
+
+    - name: Install lcov (Linux only)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: sudo apt-get install -y lcov
+
+    - name: Create lcov report (Linux only)
+      if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        lcov --capture --directory . --output-file coverage.info
+        lcov --remove coverage.info '/usr/*' --remove coverage.info '*/test/*' --remove coverage.info '*/googletest/*' --output-file coverage.info # filter system-files
+        lcov --list coverage.info # debug info
+
+    - name: Upload coverage to Codecov (Linux only)
+      if: runner.os == 'Linux'
+      uses: codecov/codecov-action@v2
+      with:
+        fail_ci_if_error: true
+        verbose: true
+
 
     - name: Install Strip
       run: cmake --install build --prefix instdir --strip

@@ -145,6 +145,19 @@ if(ARP_DEVICE)
     set_target_properties(main_test PROPERTIES EXCLUDE_FROM_ALL TRUE)
 endif()
 
+option(CODE_COVERAGE "Enable coverage reporting" OFF)
+if(CODE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  # Add required flags (GCC & LLVM/Clang)
+  target_compile_options(main_test PUBLIC
+    -O0        # no optimization
+    -g         # generate debug info
+    --coverage # sets all required flags
+    )
+
+  target_link_libraries(main_test gcov)
+  target_link_options(main_test PUBLIC --coverage)
+endif()
+
 set_target_properties (libptusa_main PROPERTIES OUTPUT_NAME ptusa_main PREFIX "" CLEAN_DIRECT_OUTPUT 1)
 target_compile_definitions(libptusa_main PUBLIC _USRDLL)
 
@@ -299,3 +312,4 @@ gtest_discover_tests(main_test)
 
 #remove tests from add_subdirectory() added projects
 configure_file(${CMAKE_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_BINARY_DIR} @ONLY)
+
