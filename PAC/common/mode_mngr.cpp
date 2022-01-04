@@ -938,8 +938,6 @@ void open_seat_action::init()
         wash_time_upper: wash_time_lower ) / 2;
 
     active_group_n = 0;
-    switch_off( wash_lower_seat_devices );
-    switch_off( wash_upper_seat_devices );
     }
 //-----------------------------------------------------------------------------
 void open_seat_action::evaluate()
@@ -949,8 +947,8 @@ void open_seat_action::evaluate()
     switch ( phase )
         {
     case P_WAITING:
-        switch_off( wash_lower_seat_devices );
-        switch_off( wash_upper_seat_devices );
+        switch_off( wash_lower_seat_devices, true );
+        switch_off( wash_upper_seat_devices, true );
 
         // Пора промывать седла.
         if ( get_delta_millisec( start_cycle_time ) > wait_time )
@@ -1132,15 +1130,17 @@ bool open_seat_action::is_empty() const
     return false;
     }
 //-----------------------------------------------------------------------------
-void open_seat_action::switch_off( std::vector< std::vector< device* > > devices )
+void open_seat_action::switch_off( std::vector< std::vector< device* > > devices,
+    bool is_check )
     {
     for ( u_int i = 0; i < devices.size(); i++ )
         {
-        switch_off_group( devices[ i ] );
+        switch_off_group( devices[ i ], is_check );
         }
     };
 //-----------------------------------------------------------------------------
-void open_seat_action::switch_off_group( std::vector< device* > group )
+void open_seat_action::switch_off_group( std::vector< device* > group,
+    bool is_check )
     {
     for ( u_int i = 0; i < group.size(); i++ )
         {
@@ -1149,8 +1149,15 @@ void open_seat_action::switch_off_group( std::vector< device* > group )
         if ( type == device::DT_V )
             {
             valve* v = reinterpret_cast<valve*>( dev );
-            v->off();
-            v->set_seat_wash_state( false );
+            if ( is_check )
+                {
+                if ( !v->is_wash_seat_active() ) v->off();
+                }
+            else
+                {
+                v->off();
+                v->set_seat_wash_state( false );
+                }
             }
         else
             {
