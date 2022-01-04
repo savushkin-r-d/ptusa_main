@@ -7,7 +7,7 @@ using namespace ::testing;
 	void init()
 */
 
-TEST( open_seat_action, init )
+TEST( open_seat_action, evaluate )
 	{
 	char* res = 0;
 	mock_project_manager* prj_mock = new mock_project_manager();
@@ -16,14 +16,19 @@ TEST( open_seat_action, init )
 
 	EXPECT_CALL( *par_mock, init( _ ) );
 	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
 
 	par_mock->init( 0 );
 	par_mock->final_init( 0, 0, 0 );
 
 	saved_params_u_int_4& par = PAC_info::get_instance()->par;
-	par[ PAC_info::P_MIX_FLIP_PERIOD ] = 1;
-	par[ PAC_info::P_MIX_FLIP_UPPER_TIME ] = 100;
-	par[ PAC_info::P_MIX_FLIP_LOWER_TIME ] = 100;
+	const int FLIP_INTERVAL_MS = 1000;
+	const int FLIP_DURATION_MS = 100;
+	par[ PAC_info::P_MIX_FLIP_PERIOD ] = FLIP_INTERVAL_MS / MSEC_IN_SEC;
+	par[ PAC_info::P_MIX_FLIP_UPPER_TIME ] = FLIP_DURATION_MS;
+	par[ PAC_info::P_MIX_FLIP_LOWER_TIME ] = FLIP_DURATION_MS;
 
 	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
 	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
@@ -44,20 +49,36 @@ TEST( open_seat_action, init )
 	action->init();
 
 	action->evaluate();  // Wait
-	sleep_ms( 500 );
+	EXPECT_EQ( false, test_DO.is_active() );
+	EXPECT_EQ( true, test_v_mix_proof.is_closed() );
+
+	sleep_ms( FLIP_INTERVAL_MS / 2 );
 	action->evaluate();
+	EXPECT_EQ( false, test_DO.is_active() );
+	EXPECT_EQ( true, test_v_mix_proof.is_opened() );
 
 	action->evaluate(); // Lower seats
-	sleep_ms( 100 );
+	EXPECT_EQ( true, test_DO.is_active() );
+	EXPECT_EQ( true, test_v_mix_proof.is_opened() );
+	sleep_ms( FLIP_DURATION_MS );
 	action->evaluate();
+	EXPECT_EQ( false, test_DO.is_active() );
+	EXPECT_EQ( true, test_v_mix_proof.is_closed() );
 
 	action->evaluate();  // Wait
-	sleep_ms( 500 );
+	EXPECT_EQ( false, test_DO.is_active() );
+	sleep_ms( FLIP_INTERVAL_MS / 2 );
 	action->evaluate();
+	EXPECT_EQ( false, test_DO.is_active() );
+	EXPECT_EQ( true, test_v_mix_proof.is_closed() );
 
 	action->evaluate(); // Upper seats
-	sleep_ms( 100 );
+	EXPECT_EQ( true, test_DO.is_active() );
+	EXPECT_EQ( true, test_v_mix_proof.is_opened() );
+	sleep_ms( FLIP_DURATION_MS );
 	action->evaluate();
+	EXPECT_EQ( false, test_DO.is_active() );
+	EXPECT_EQ( true, test_v_mix_proof.is_closed() );
 
 	action->final();
 
