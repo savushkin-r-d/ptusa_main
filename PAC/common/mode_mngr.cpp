@@ -947,16 +947,19 @@ void open_seat_action::evaluate()
     switch ( phase )
         {
     case P_WAITING:
-        switch_off( wash_lower_seat_devices, true );
-        switch_off( wash_upper_seat_devices, true );
+        {
+        bool check_is_wash_seat_active = true;
+        switch_off( wash_lower_seat_devices, check_is_wash_seat_active );
+        switch_off( wash_upper_seat_devices, check_is_wash_seat_active );
 
         // Пора промывать седла.
         if ( get_delta_millisec( start_cycle_time ) > wait_time )
             {
-            phase            = next_phase;
+            phase = next_phase;
             start_cycle_time = get_millisec();
             }
         break;
+        }
 
     case P_OPEN_UPPER:
         if ( wash_upper_seat_devices.empty() )
@@ -975,7 +978,7 @@ void open_seat_action::evaluate()
             {
             final();
 
-            phase            = P_WAITING;
+            phase = P_WAITING;
             start_cycle_time = get_millisec();
 
             //Переход к следующей группе.
@@ -992,7 +995,7 @@ void open_seat_action::evaluate()
     case P_OPEN_LOWER:
         if ( wash_lower_seat_devices.empty() )
             {
-            phase      = P_OPEN_UPPER;
+            phase = P_OPEN_UPPER;
             next_phase = P_OPEN_UPPER;
             break;
             }
@@ -1006,7 +1009,7 @@ void open_seat_action::evaluate()
             {
             final();
 
-            phase            = P_WAITING;
+            phase = P_WAITING;
             start_cycle_time = get_millisec();
 
             //Переход к следующей группе.
