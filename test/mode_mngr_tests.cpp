@@ -4,13 +4,12 @@ using namespace ::testing;
 
 /*
 	TEST METHOD DEFENITION:
-	void init()
+	void evaluate()
 */
 
 TEST( open_seat_action, evaluate )
 	{
 	char* res = 0;
-	mock_project_manager* prj_mock = new mock_project_manager();
 	mock_params_manager* par_mock = new mock_params_manager();
 	test_params_manager::replaceEntity( par_mock );
 
@@ -82,7 +81,5 @@ TEST( open_seat_action, evaluate )
 
 	action->final();
 
-	test_project_manager::removeObject();
 	test_params_manager::removeObject();
-	delete prj_mock;
 	}
