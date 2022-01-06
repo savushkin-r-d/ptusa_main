@@ -938,21 +938,6 @@ void open_seat_action::init()
         wash_time_upper: wash_time_lower ) / 2;
 
     active_group_n = 0;
-
-    for ( u_int i = 0; i < wash_lower_seat_devices.size(); i++ )
-        {
-        for ( u_int j = 0; j < wash_lower_seat_devices[ i ].size(); j++ )
-            {
-            wash_lower_seat_devices[ i ][ j ]->off();
-            }
-        }
-    for ( u_int i = 0; i < wash_upper_seat_devices.size(); i++ )
-        {
-        for ( u_int j = 0; j < wash_upper_seat_devices[ i ].size(); j++ )
-            {
-            wash_upper_seat_devices[ i ][ j ]->off();
-            }
-        }
     }
 //-----------------------------------------------------------------------------
 void open_seat_action::evaluate()
@@ -962,38 +947,19 @@ void open_seat_action::evaluate()
     switch ( phase )
         {
     case P_WAITING:
-        for ( u_int i = 0; i < wash_lower_seat_devices.size(); i++ )
-            {
-            for ( u_int j = 0; j < wash_lower_seat_devices[ i ].size(); j++ )
-                {
-                valve *v  = ( valve* ) wash_lower_seat_devices[ i ][ j ];
-
-                if ( !v->is_wash_seat_active() )
-                    {
-                    v->off();
-                    }
-                }
-            }
-        for ( u_int i = 0; i < wash_upper_seat_devices.size(); i++ )
-            {
-            for ( u_int j = 0; j < wash_upper_seat_devices[ i ].size(); j++ )
-                {
-                valve *v  = ( valve* ) wash_upper_seat_devices[ i ][ j ];
-
-                if ( !v->is_wash_seat_active() )
-                    {
-                    v->off();
-                    }
-                }
-            }
+        {
+        bool check_is_wash_seat_active = true;
+        switch_off( wash_lower_seat_devices, check_is_wash_seat_active );
+        switch_off( wash_upper_seat_devices, check_is_wash_seat_active );
 
         // Пора промывать седла.
         if ( get_delta_millisec( start_cycle_time ) > wait_time )
             {
-            phase            = next_phase;
+            phase = next_phase;
             start_cycle_time = get_millisec();
             }
         break;
+        }
 
     case P_OPEN_UPPER:
         if ( wash_upper_seat_devices.empty() )
@@ -1005,18 +971,14 @@ void open_seat_action::evaluate()
 
         if ( get_delta_millisec( start_cycle_time ) < wash_time_upper )
             {
-            for ( u_int j = 0; j < wash_upper_seat_devices[ active_group_n ].size(); j++ )
-                {
-                valve *v  = ( valve* ) wash_upper_seat_devices[ active_group_n ][ j ];
-                v->set_state( valve::V_UPPER_SEAT );
-                v->set_seat_wash_state( true );
-                }
+            switch_on_group( wash_upper_seat_devices[ active_group_n ],
+                valve::V_UPPER_SEAT );
             }
         else //Время промывки седел вышло.
             {
             final();
 
-            phase            = P_WAITING;
+            phase = P_WAITING;
             start_cycle_time = get_millisec();
 
             //Переход к следующей группе.
@@ -1033,25 +995,21 @@ void open_seat_action::evaluate()
     case P_OPEN_LOWER:
         if ( wash_lower_seat_devices.empty() )
             {
-            phase      = P_OPEN_UPPER;
+            phase = P_OPEN_UPPER;
             next_phase = P_OPEN_UPPER;
             break;
             }
 
         if ( get_delta_millisec( start_cycle_time ) < wash_time_lower )
             {
-            for ( u_int j = 0; j < wash_lower_seat_devices[ active_group_n ].size(); j++ )
-                {
-                valve *v  = ( valve* ) wash_lower_seat_devices[ active_group_n ][ j ];
-                v->set_state( valve::V_LOWER_SEAT );
-                v->set_seat_wash_state( true );
-                }
+            switch_on_group( wash_lower_seat_devices[ active_group_n ],
+                valve::V_LOWER_SEAT );
             }
         else //Время промывки седел вышло.
             {
             final();
 
-            phase            = P_WAITING;
+            phase = P_WAITING;
             start_cycle_time = get_millisec();
 
             //Переход к следующей группе.
@@ -1078,24 +1036,12 @@ void open_seat_action::final()
 
         case P_OPEN_UPPER:
             if ( wash_upper_seat_devices.empty() ) break;
-
-            for ( u_int j = 0; j < wash_upper_seat_devices[ active_group_n ].size(); j++ )
-                {
-                valve *v  = ( valve* ) wash_upper_seat_devices[ active_group_n ][ j ];
-                v->off();
-                v->set_seat_wash_state( false );
-                }
+            switch_off_group( wash_upper_seat_devices[ active_group_n ] );
             break;
 
         case P_OPEN_LOWER:
             if ( wash_lower_seat_devices.empty() ) break;
-
-            for ( u_int j = 0; j < wash_lower_seat_devices[ active_group_n ].size(); j++ )
-                {
-                valve *v  = ( valve* ) wash_lower_seat_devices[ active_group_n ][ j ];
-                v->off();
-                v->set_seat_wash_state( false );
-                }
+            switch_off_group( wash_lower_seat_devices[ active_group_n ] );
             break;
         }
     }
@@ -1186,6 +1132,65 @@ bool open_seat_action::is_empty() const
 
     return false;
     }
+//-----------------------------------------------------------------------------
+void open_seat_action::switch_off( std::vector< std::vector< device* > > devices,
+    bool is_check )
+    {
+    for ( u_int i = 0; i < devices.size(); i++ )
+        {
+        switch_off_group( devices[ i ], is_check );
+        }
+    };
+//-----------------------------------------------------------------------------
+void open_seat_action::switch_off_group( std::vector< device* > group,
+    bool is_check )
+    {
+    for ( u_int i = 0; i < group.size(); i++ )
+        {
+        auto dev = group[ i ];
+        auto type = dev->get_type();
+        if ( type == device::DT_V )
+            {
+            valve* v = reinterpret_cast<valve*>( dev );
+            if ( is_check )
+                {
+                if ( !v->is_wash_seat_active() ) v->off();
+                }
+            else
+                {
+                v->off();
+                v->set_seat_wash_state( false );
+                }
+            }
+        else
+            {
+            dev->off();
+            }
+        }
+    };
+//-----------------------------------------------------------------------------
+void open_seat_action::switch_on_group( std::vector< device* > group,
+    valve::VALVE_STATE st )
+    {
+    for ( u_int i = 0; i < group.size(); i++ )
+        {
+        auto dev = group[ i ];
+        auto type = dev->get_type();
+        if ( type == device::DT_V )
+            {
+            valve* v = reinterpret_cast<valve*>( dev );
+            if ( !v->is_wash_seat_active() )
+                {
+                v->set_state( st );
+                v->set_seat_wash_state( true );
+                }
+            }
+        else
+            {
+            dev->on();
+            }
+        }
+    };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void wash_action::evaluate()

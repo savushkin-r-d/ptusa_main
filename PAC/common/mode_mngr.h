@@ -194,6 +194,7 @@ class open_seat_action: public action
         virtual void print( const char* prefix = "", bool new_line = true ) const;
 
         bool is_empty() const;
+
     private:
         enum PHASES
             {
@@ -220,6 +221,14 @@ class open_seat_action: public action
 
         bool is_mode;             ///< Является ли шагом операции.
         operation_state* owner;
+
+        void switch_off( std::vector< std::vector< device* > > devices,
+            bool is_check = false );
+
+        void switch_off_group( std::vector< device* > group,
+            bool is_check = false );
+
+        void switch_on_group( std::vector< device* > group, valve::VALVE_STATE st );
     };
 //-----------------------------------------------------------------------------
 /// <summary>
