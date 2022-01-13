@@ -865,10 +865,10 @@ class operation
     public:
         enum state_idx
             {
-            OFF = 0,// Отключено.
-            RUN,    // Выполнение.
-            PAUSE,  // Пауза.
-            STOP,   // Остановлен.
+            IDLE = 0,// Отключено.
+            RUN,     // Выполнение.
+            PAUSE,   // Пауза.
+            STOP,    // Остановлен.
             };
 
     public:
