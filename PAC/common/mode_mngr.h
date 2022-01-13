@@ -644,7 +644,7 @@ class operation
 
         enum state_idx
             {
-            OFF = 0,//Отключено.
+            OFF = 0,// Отключено.
             RUN,    // Выполнение.
             PAUSE,  // Пауза.
             STOP,   // Остановлен.
