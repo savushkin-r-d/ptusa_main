@@ -83,3 +83,40 @@ TEST( open_seat_action, evaluate )
 
 	test_params_manager::removeObject();
 	}
+
+/*
+	TEST METHOD DEFENITION:
+	void evaluate()
+*/
+
+TEST( operation, evaluate )
+	{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
+
+	test_op->evaluate();
+	test_op->start();
+	test_op->evaluate();
+	test_op->pause();
+	test_op->evaluate();
+	test_op->start();
+	test_op->evaluate();
+	test_op->stop();
+	test_op->evaluate();
+	test_op->final();
+
+	test_params_manager::removeObject();
+	}
