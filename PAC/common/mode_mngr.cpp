@@ -786,10 +786,12 @@ int DI_DO_action::check( char* reason ) const
             }
 
         auto d_i_device = devs[ i ][ 0 ];
-        if ( d_i_device->get_type() != device::DT_DI )
+        if ( d_i_device->get_type() != device::DT_DI &&
+            d_i_device->get_type() != device::DT_GS &&
+            d_i_device->get_type() != device::DT_LS )
             {
             sprintf( reason, "в поле \'%s\' устройство \'%.25s (%.50s)\'"
-                " не является сигналом DI", name.c_str(),
+                " не является сигналом (DI, GS, LS)", name.c_str(),
                 d_i_device->get_name(), d_i_device->get_description() );
             return 1;
             }
