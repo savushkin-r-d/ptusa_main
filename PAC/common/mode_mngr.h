@@ -117,6 +117,9 @@ class action
             MAIN_SUBGROUP = 0
             };
 
+        /// @brief Очистка устройств действия.
+        virtual void clear_dev();
+
     protected:
         u_int subgropups_cnt;
 
