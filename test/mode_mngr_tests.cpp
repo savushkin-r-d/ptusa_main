@@ -170,6 +170,8 @@ TEST( AI_AO_action, check )
 	auto action = ( *step )[ step::ACTIONS::A_AI_AO ];	
 	char msg[ 1024 ];
 
+	EXPECT_EQ( 0, action->check( msg ) );
+
 	action->add_dev( &test_AO );
 	action->add_dev( &test_AI );
 	EXPECT_NE( 0, action->check( msg ) );
@@ -214,6 +216,8 @@ TEST( DI_DO_action, check )
 
 	auto action = ( *step )[ step::ACTIONS::A_DI_DO ];
 	char msg[ 1024 ];
+
+	EXPECT_EQ( 0, action->check( msg ) );
 
 	action->add_dev( &test_DO );
 	action->add_dev( &test_DI );
