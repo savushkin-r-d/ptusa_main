@@ -791,11 +791,13 @@ int DI_DO_action::check( char* reason ) const
 
         auto d_i_device = devs[ i ][ 0 ];
         if ( d_i_device->get_type() != device::DT_DI &&
+            d_i_device->get_type() != device::DT_SB &&
             d_i_device->get_type() != device::DT_GS &&
-            d_i_device->get_type() != device::DT_LS )
+            d_i_device->get_type() != device::DT_LS &&
+            d_i_device->get_type() != device::DT_FS )
             {
             sprintf( reason, "в поле \'%s\' устройство \'%.25s (%.50s)\'"
-                " не является сигналом (DI, GS, LS)", name.c_str(),
+                " не является входным сигналом (DI, SB, GS, LS, FS)", name.c_str(),
                 d_i_device->get_name(), d_i_device->get_description() );
             return 1;
             }
@@ -884,11 +886,15 @@ int AI_AO_action::check( char* reason ) const
 
         auto d_o_device = devs[ i ][ 0 ];
         if ( d_o_device->get_type() != device::DT_AI &&
+            d_o_device->get_type() != device::DT_PT &&
             d_o_device->get_type() != device::DT_LT &&
-            d_o_device->get_type() != device::DT_PT )
+            d_o_device->get_type() != device::DT_FQT &&
+            d_o_device->get_type() != device::DT_QT &&
+            d_o_device->get_type() != device::DT_TE )
             {
             sprintf( reason, "в поле \'%s\' устройство \'%.25s (%.50s)\'"
-                " не является аналоговым сигналом (АI, LT, PT)", name.c_str(),
+                " не является входным сигналом (АI, PT, LT, FQT, QT, TE)",
+                name.c_str(),
                 d_o_device->get_name(), d_o_device->get_description() );
             return 1;
             }
