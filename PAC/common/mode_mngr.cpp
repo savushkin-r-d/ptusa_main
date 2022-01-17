@@ -858,6 +858,41 @@ void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+AI_AO_action::AI_AO_action() :action( "Группы AI->AO's" )
+    {
+    }
+//-----------------------------------------------------------------------------
+int AI_AO_action::check( char* reason ) const
+    {
+    reason[ 0 ] = 0;
+    if ( is_empty() )
+        {
+        return 0;
+        }
+
+    auto& devs = devices[ MAIN_GROUP ];
+    for ( u_int i = 0; i < devs.size(); i++ )
+        {
+        if ( devs[ i ].empty() )
+            {
+            continue;
+            }
+
+        auto d_o_device = devs[ i ][ 0 ];
+        if ( d_o_device->get_type() != device::DT_AI &&
+            d_o_device->get_type() != device::DT_LT &&
+            d_o_device->get_type() != device::DT_PT )
+            {
+            sprintf( reason, "в поле \'%s\' устройство \'%.25s (%.50s)\'"
+                " не является аналоговым сигналом (АI, LT, PT)", name.c_str(),
+                d_o_device->get_name(), d_o_device->get_description() );
+            return 1;
+            }
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 void AI_AO_action::evaluate()
     {
     if ( is_empty() )

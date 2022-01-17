@@ -265,9 +265,9 @@ class inverted_DI_DO_action : public DI_DO_action
 class AI_AO_action : public action
     {
     public:
-        AI_AO_action() :action( "Группы AI->AO's" )
-            {
-            }
+        AI_AO_action();
+
+        int check( char* reason ) const;
 
         void evaluate();
     };
