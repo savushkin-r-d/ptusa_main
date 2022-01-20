@@ -520,7 +520,11 @@ void action::add_dev( device *dev, u_int group /*= 0 */, u_int subgroup /*= 0 */
 
     devices[ group ][ subgroup ].push_back( dev );
     }
-
+//-----------------------------------------------------------------------------
+void action::clear_dev()
+    {
+    devices.clear();
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void on_action::evaluate()
@@ -786,10 +790,14 @@ int DI_DO_action::check( char* reason ) const
             }
 
         auto d_i_device = devs[ i ][ 0 ];
-        if ( d_i_device->get_type() != device::DT_DI )
+        if ( d_i_device->get_type() != device::DT_DI &&
+            d_i_device->get_type() != device::DT_SB &&
+            d_i_device->get_type() != device::DT_GS &&
+            d_i_device->get_type() != device::DT_LS &&
+            d_i_device->get_type() != device::DT_FS )
             {
             sprintf( reason, "в поле \'%s\' устройство \'%.25s (%.50s)\'"
-                " не является сигналом DI", name.c_str(),
+                " не является входным сигналом (DI, SB, GS, LS, FS)", name.c_str(),
                 d_i_device->get_name(), d_i_device->get_description() );
             return 1;
             }
@@ -855,6 +863,45 @@ void inverted_DI_DO_action::evaluate_DO( std::vector< device* > devices )
         }
     }
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+AI_AO_action::AI_AO_action() :action( "Группы AI->AO's" )
+    {
+    }
+//-----------------------------------------------------------------------------
+int AI_AO_action::check( char* reason ) const
+    {
+    reason[ 0 ] = 0;
+    if ( is_empty() )
+        {
+        return 0;
+        }
+
+    auto& devs = devices[ MAIN_GROUP ];
+    for ( u_int i = 0; i < devs.size(); i++ )
+        {
+        if ( devs[ i ].empty() )
+            {
+            continue;
+            }
+
+        auto d_o_device = devs[ i ][ 0 ];
+        if ( d_o_device->get_type() != device::DT_AI &&
+            d_o_device->get_type() != device::DT_PT &&
+            d_o_device->get_type() != device::DT_LT &&
+            d_o_device->get_type() != device::DT_FQT &&
+            d_o_device->get_type() != device::DT_QT &&
+            d_o_device->get_type() != device::DT_TE )
+            {
+            sprintf( reason, "в поле \'%s\' устройство \'%.25s (%.50s)\'"
+                " не является входным сигналом (АI, PT, LT, FQT, QT, TE)",
+                name.c_str(),
+                d_o_device->get_name(), d_o_device->get_description() );
+            return 1;
+            }
+        }
+
+    return 0;
+    }
 //-----------------------------------------------------------------------------
 void AI_AO_action::evaluate()
     {

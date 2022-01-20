@@ -136,3 +136,97 @@ TEST( operation, evaluate )
 
 	test_params_manager::removeObject();
 	}
+
+/*
+	TEST METHOD DEFENITION:
+	void check()
+*/
+
+TEST( AI_AO_action, check )
+	{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	analog_output test_AO( "test_AO1" );
+	analog_input test_AI( "test_AI1" );
+
+	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+	auto operation_mngr = test_tank.get_modes_manager();
+    auto operation = ( *operation_mngr )[ 1 ];
+    auto operation_state = ( *operation )[ 1 ];
+	auto step = ( *operation_state )[ 1 ];
+
+	auto action = ( *step )[ step::ACTIONS::A_AI_AO ];	
+	char msg[ 1024 ];
+
+	EXPECT_EQ( 0, action->check( msg ) );
+
+	action->add_dev( &test_AO );
+	action->add_dev( &test_AI );
+	EXPECT_NE( 0, action->check( msg ) );
+
+	action->clear_dev();
+	action->add_dev( &test_AI );
+	action->add_dev( &test_AO );
+	EXPECT_EQ( 0, action->check( msg ) );
+
+	test_params_manager::removeObject();
+	}
+
+/*
+	TEST METHOD DEFENITION:
+	void check()
+*/
+
+TEST( DI_DO_action, check )
+	{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	DI_signal test_DI( "test_DI1" );
+
+	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+	auto operation_mngr = test_tank.get_modes_manager();
+	auto operation = ( *operation_mngr )[ 1 ];
+	auto operation_state = ( *operation )[ 1 ];
+	auto step = ( *operation_state )[ 1 ];
+
+	auto action = ( *step )[ step::ACTIONS::A_DI_DO ];
+	char msg[ 1024 ];
+
+	EXPECT_EQ( 0, action->check( msg ) );
+
+	action->add_dev( &test_DO );
+	action->add_dev( &test_DI );
+	EXPECT_NE( 0, action->check( msg ) );
+
+	action->clear_dev();
+	action->add_dev( &test_DI );
+	action->add_dev( &test_DO );
+	EXPECT_EQ( 0, action->check( msg ) );
+
+	test_params_manager::removeObject();
+	}
