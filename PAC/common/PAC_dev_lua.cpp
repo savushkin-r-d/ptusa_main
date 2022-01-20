@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on 12/14/21 15:30:50.
+** Generated automatically by tolua++-1.0.92 on Thu Jan 13 12:38:27 2022.
 */
 
 #ifndef __cplusplus
@@ -14607,6 +14607,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"operation","operation","",NULL);
   tolua_beginmodule(tolua_S,"operation");
+   tolua_constant(tolua_S,"IDLE",operation::IDLE);
    tolua_constant(tolua_S,"RUN",operation::RUN);
    tolua_constant(tolua_S,"PAUSE",operation::PAUSE);
    tolua_constant(tolua_S,"STOP",operation::STOP);

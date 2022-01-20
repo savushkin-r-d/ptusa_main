@@ -32,7 +32,7 @@ const char* operation::en_state_str[] =
     };
 //-----------------------------------------------------------------------------
 operation::operation(const char* name, operation_manager *owner, int n) :
-    current_state ( OFF ), name( name ),
+    current_state ( IDLE ), name( name ),
     owner( owner ),
     n( n ),
     stub( "заглушка", owner, -1 ),
@@ -63,7 +63,7 @@ int operation::pause()
     {
     switch ( current_state )
         {
-        case OFF:
+        case IDLE:
             break;
 
         case PAUSE:
@@ -94,7 +94,7 @@ int operation::stop()
     {
     switch ( current_state )
         {
-        case OFF:
+        case IDLE:
             break;
 
         case PAUSE:
@@ -126,7 +126,7 @@ int operation::start()
     {
     switch ( current_state )
         {
-        case OFF:
+        case IDLE:
             current_state = RUN;
             states[ RUN ]->init();
 
@@ -207,12 +207,12 @@ void operation::final()
     if ( current_state > 0 && current_state < STATES_MAX )
         {
         states[ current_state ]->final();
-        for ( int idx = OFF; idx < STATES_MAX; idx++ )
+        for ( int idx = IDLE; idx < STATES_MAX; idx++ )
             {
             states[ idx ]->reset_eval_time();
             }
 
-        current_state = OFF;
+        current_state = IDLE;
         }
     }
 //-----------------------------------------------------------------------------
@@ -250,7 +250,7 @@ void operation::print( const char* prefix /*= "" */) const
     {
     printf( "%s\n", name.c_str() );
 
-    for ( int idx = OFF; idx < STATES_MAX; idx++  )
+    for ( int idx = IDLE; idx < STATES_MAX; idx++  )
         {
         states[ idx ]->print( prefix );
         }
