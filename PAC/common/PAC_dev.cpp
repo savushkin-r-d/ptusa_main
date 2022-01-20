@@ -552,8 +552,8 @@ void signal_column::turn_off_blue()
     {
 #ifndef DEBUG_NO_IO_MODULES
     process_DO( blue_lamp_channel, DO_state::OFF, BLUE_LAMP );
-    blue.step = STEP::off;
 #endif // DEBUG_NO_IO_MODULES
+    blue.step = STEP::off;
     }
 //-----------------------------------------------------------------------------
 void signal_column::turn_on_red()
