@@ -1281,46 +1281,19 @@ io_manager::io_node::io_node( int type, int number, char* str_ip_address,
 //-----------------------------------------------------------------------------
 void io_manager::io_node::print()
     {
-    printf( "\"%s\" - type %d, number %d, IP \"%s\". ",
-        name, type, number, ip_address );
-    printf( "DI %d, DO %d, AI %d [%d], AO %d [%d].\n",
-        DI_cnt, DO_cnt, AI_cnt, AI_size, AO_cnt, AO_size );
+    printf( "\"%s\" - type %d, number %d, IP \"%s\", "
+        "DI %d [%d], DO %d [%d], AI %d [%d], AO %d [%d].\n",
+        name, type, number, ip_address,
+        DI_cnt, DI_cnt / 8, DO_cnt, DO_cnt / 8, AI_cnt, AI_size, AO_cnt, AO_size );
     }
 //-----------------------------------------------------------------------------
 void io_manager::io_node::print_log()
     {
-    sprintf( G_LOG->msg, "\"%s\" - type %d, number %d, IP \"%s\".", name, type,
-            number, ip_address);
+    sprintf( G_LOG->msg, "\"%s\" - type %d, number %d, IP \"%s\", "
+        "DI %d [%d], DO %d [%d], AI %d [%d], AO %d [%d].",
+        name, type, number, ip_address,
+        DI_cnt, DI_cnt / 8, DO_cnt, DO_cnt / 8, AI_cnt, AI_size, AO_cnt, AO_size );
     G_LOG->write_log(i_log::P_DEBUG);
-
-    sprintf( G_LOG->msg, "DI %d [%d], DO %d [%d], AI %d [%d], AO %d [%d].",
-            DI_cnt, DI_cnt / 8, DO_cnt, DO_cnt / 8, AI_cnt, AI_size, AO_cnt,
-            AO_size);
-    G_LOG->write_log(i_log::P_DEBUG);
-
-    if (AI_cnt > 0)
-        {
-        sprintf( G_LOG->msg, "AI");
-        G_LOG->write_log(i_log::P_DEBUG);
-        }
-    for (u_int i = 0; i < AI_cnt; i++)
-        {
-        sprintf( G_LOG->msg, "\t%2.d %u %2.u", i + 1, AI_types[i],
-                AI_offsets[i]);
-        G_LOG->write_log(i_log::P_DEBUG);
-        }
-
-    if (AO_cnt > 0)
-        {
-        sprintf( G_LOG->msg, "AO");
-        G_LOG->write_log(i_log::P_DEBUG);
-        }
-    for (u_int i = 0; i < AO_cnt; i++)
-        {
-        sprintf( G_LOG->msg, "\t%2.d %u %2.u", i + 1, AO_types[i],
-                AO_offsets[i]);
-        G_LOG->write_log(i_log::P_DEBUG);
-        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
