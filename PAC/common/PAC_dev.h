@@ -3400,6 +3400,8 @@ class analog_valve_iolink : public AO1
     public:
         analog_valve_iolink( const char* dev_name );
 
+        ~analog_valve_iolink();
+
         void evaluate_io();
 
         float get_min_value();

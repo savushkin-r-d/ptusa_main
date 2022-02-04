@@ -27,6 +27,8 @@ tcp_client::tcp_client( const char* client_ip, unsigned int client_port, unsigne
     connectedstate = 0;
     is_initialized = 0;
     async_result = 0;
+    async_queued = 0;
+    async_last_connect_try = 0;
     }
 
 tcp_client::~tcp_client()

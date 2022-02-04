@@ -45,6 +45,7 @@ linux_tcp_client::linux_tcp_client(const char* client_ip,
         exchange_buf_size, send_receive_timeout)
     {
     async_startconnnect = get_millisec();
+    async_last_connect_try = get_millisec();
     async_tv.tv_sec = 0;
     async_tv.tv_usec = 100;
     }

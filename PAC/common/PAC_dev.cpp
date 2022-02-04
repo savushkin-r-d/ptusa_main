@@ -4378,6 +4378,14 @@ analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(
     dev_name, DT_VC, DST_VC_IOLINK, 0 )
     {
     }
+
+//-----------------------------------------------------------------------------
+analog_valve_iolink::~analog_valve_iolink()
+{
+	delete in_info;
+	in_info = nullptr;
+}
+
 //-----------------------------------------------------------------------------
 void analog_valve_iolink::evaluate_io()
     {
