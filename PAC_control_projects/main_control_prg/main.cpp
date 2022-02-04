@@ -80,6 +80,10 @@ int main( int argc, const char *argv[] )
 
     signal(SIGINT, stopHandler);
     signal(SIGTERM, stopHandler);
+    signal(SIGABRT, stopHandler);
+    signal(SIGFPE, stopHandler);
+    signal(SIGILL, stopHandler);
+    signal(SIGSEGV, stopHandler);
 
     if ( argc < 2 )
         {
