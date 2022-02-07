@@ -6,7 +6,7 @@
 
 using namespace ::testing;
 
-const int STD_IN_FILENO = 1;
+const int STD_OUT_FILENO = 1;
 
 /*
 	TEST METHODS DEFENITION:
@@ -26,19 +26,19 @@ TEST( io_manager, print )
 		ZERO_COUNT, ZERO_SIZE, ZERO_COUNT, ZERO_SIZE );
 
 	fflush( stdout );
-	auto old = dup( STD_IN_FILENO );
+	auto old = dup( STD_OUT_FILENO );
 	auto tmp_name = "out1.txt";
-	auto tmp = open( tmp_name, O_CREAT | O_WRONLY | O_TRUNC );
+	auto tmp = open( tmp_name, O_CREAT | O_WRONLY | O_TRUNC, S_IWRITE );
 	if ( tmp > 0 )
 		{
-		dup2( tmp, STD_IN_FILENO );
+		dup2( tmp, STD_OUT_FILENO );
 		close( tmp );
 
 		io_manager::get_instance()->print();
 		io_manager::get_instance()->print_log();
 
 		fflush( stdout );
-		dup2( old, STD_IN_FILENO );
+		dup2( old, STD_OUT_FILENO );
 		close( old );
 		}
 	struct stat st;

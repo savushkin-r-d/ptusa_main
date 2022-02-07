@@ -1284,7 +1284,8 @@ void io_manager::io_node::print()
     printf( "\"%s\" - type %d, number %d, IP \"%s\", "
         "DI %d [%d], DO %d [%d], AI %d [%d], AO %d [%d].\n",
         name, type, number, ip_address,
-        DI_cnt, DI_cnt / 8, DO_cnt, DO_cnt / 8, AI_cnt, AI_size, AO_cnt, AO_size );
+        DI_cnt, DI_cnt / CHAR_BIT, DO_cnt, DO_cnt / CHAR_BIT,
+        AI_cnt, AI_size, AO_cnt, AO_size );
     }
 //-----------------------------------------------------------------------------
 void io_manager::io_node::print_log()
@@ -1292,7 +1293,8 @@ void io_manager::io_node::print_log()
     sprintf( G_LOG->msg, "\"%s\" - type %d, number %d, IP \"%s\", "
         "DI %d [%d], DO %d [%d], AI %d [%d], AO %d [%d].",
         name, type, number, ip_address,
-        DI_cnt, DI_cnt / 8, DO_cnt, DO_cnt / 8, AI_cnt, AI_size, AO_cnt, AO_size );
+        DI_cnt, DI_cnt / CHAR_BIT, DO_cnt, DO_cnt / CHAR_BIT,
+        AI_cnt, AI_size, AO_cnt, AO_size );
     G_LOG->write_log(i_log::P_DEBUG);
     }
 //-----------------------------------------------------------------------------
