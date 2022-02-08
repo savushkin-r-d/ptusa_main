@@ -1,20 +1,38 @@
 #include "log.h"
 #include <stdarg.h>
 
-#ifdef LINUX_OS
-#include "l_log.h"
-i_log* log_mngr::lg = new l_log();
-#endif // LINUX_OS
-
-#ifdef WIN_OS
+#if defined  WIN_OS
 #include "w_log.h"
-i_log* log_mngr::lg = new w_log();
-#endif // WIN_OS
+#elif defined LINUX_OS
+#include "l_log.h"
+#endif
+
+auto_smart_ptr < log_mngr > log_mngr::instance;
 
 //-----------------------------------------------------------------------------
 i_log* log_mngr::get_log()
     {
-    return lg;
+    if ( instance.is_null() )
+        {
+        instance = new log_mngr();
+        }
+
+    return instance->lg;
+    }
+//-----------------------------------------------------------------------------
+log_mngr::log_mngr(): lg( nullptr )
+    {
+#if defined WIN_OS        
+    lg = new w_log();
+#elif defined LINUX_OS
+    lg = new l_log();
+#endif
+    }
+//-----------------------------------------------------------------------------
+log_mngr::~log_mngr()
+    {
+    delete lg;
+    lg = 0;
     }
 //-----------------------------------------------------------------------------
 void i_log::write_log( PRIORITIES priority, const char* debug_message )

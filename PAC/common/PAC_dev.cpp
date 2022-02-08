@@ -4381,10 +4381,10 @@ analog_valve_iolink::analog_valve_iolink( const char* dev_name ) : AO1(
 
 //-----------------------------------------------------------------------------
 analog_valve_iolink::~analog_valve_iolink()
-{
-	delete in_info;
-	in_info = nullptr;
-}
+    {
+    delete in_info;
+    in_info = nullptr;
+    }
 
 //-----------------------------------------------------------------------------
 void analog_valve_iolink::evaluate_io()

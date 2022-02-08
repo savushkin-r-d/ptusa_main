@@ -11,7 +11,9 @@
 #ifndef LOG_H
 #define LOG_H
 
-#include "string.h"
+#include <string.h>
+
+#include "smart_ptr.h"
 
 extern int G_USE_LOG;
 extern int G_DEBUG;
@@ -74,29 +76,18 @@ class i_log
 class log_mngr
     {
     public:
+        static i_log* get_log();
 
-    static i_log* get_log();
-#ifdef PAC_WAGO_750_860
-    static i_log *lg;
-#endif
+        ~log_mngr();
+
+    protected:
+        /// Единственный экземпляр класса.
+        static auto_smart_ptr < log_mngr > instance;
 
     private:
+        log_mngr();
 
-    log_mngr()
-        {
-        }
-
-
-    ~log_mngr()
-        {
-        delete lg;
-        lg = 0;
-        }
-
-#ifndef PAC_WAGO_750_860
-	static i_log *lg;
-#endif
-
+        i_log* lg;
     };
 //-----------------------------------------------------------------------------
 #define G_LOG log_mngr::get_log()
