@@ -118,6 +118,7 @@ altivar_node::altivar_node(unsigned int id, const char* ip, unsigned int port, u
 	fc_value = 0;
 	rpm_value = 0;
 	rpm_setpoint = 0;
+	remote_state = 0;
 	}
 
 altivar_node::~altivar_node()
