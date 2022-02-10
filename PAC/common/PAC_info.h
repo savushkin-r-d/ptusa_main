@@ -54,13 +54,6 @@ class PAC_info: public i_Lua_save_device
 
         bool is_emulator();
 
-#ifdef RM_PAC
-        int rm_save_device_state( char *buff )
-            {
-            return 0;
-            }
-#endif // RM_PAC
-
         void print() const;
 
         /// @brief Получение единственного экземпляра класса для работы.

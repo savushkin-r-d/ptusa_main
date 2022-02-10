@@ -141,11 +141,6 @@ namespace PtusaPLCnextEngineer
                 }
 #endif // TEST_DEVICE_N
 
-#ifdef RM_PAC
-               // Связь с удаленными PAC.
-               G_RM_MANAGER()->evaluate();
-#endif // RM_PAC
-
 #ifdef USE_PROFIBUS
                if ( G_PROFIBUS_SLAVE()->is_active() )
                    {

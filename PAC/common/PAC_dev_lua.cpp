@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Thu Jan 13 12:38:27 2022.
+** Generated automatically by tolua++-1.0.92 on 02/10/22 15:18:55.
 */
 
 #ifndef __cplusplus
@@ -21,7 +21,6 @@ TOLUA_API int  tolua_PAC_dev_open (lua_State* tolua_S);
 #include "PID.h"
 #include "g_device.h"
 #include "g_errors.h"
-#include "rm_manager.h"
 #include "modbus_client.h"
 #include "modbus_serv.h"
 #include "profibus_slave.h"
@@ -92,14 +91,13 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"tech_object_manager");
  tolua_usertype(tolua_S,"operation_state");
  tolua_usertype(tolua_S,"timer");
- tolua_usertype(tolua_S,"i_Lua_save_device");
  tolua_usertype(tolua_S,"dev_stub");
+ tolua_usertype(tolua_S,"i_Lua_save_device");
  tolua_usertype(tolua_S,"profibus_slave");
- tolua_usertype(tolua_S,"ModbusServ");
  tolua_usertype(tolua_S,"action");
- tolua_usertype(tolua_S,"modbus_client");
+ tolua_usertype(tolua_S,"ModbusServ");
  tolua_usertype(tolua_S,"operation");
- tolua_usertype(tolua_S,"rm_manager");
+ tolua_usertype(tolua_S,"modbus_client");
  tolua_usertype(tolua_S,"cipline_tech_object");
  tolua_usertype(tolua_S,"MSAPID");
  tolua_usertype(tolua_S,"dev_errors_manager");
@@ -12338,70 +12336,6 @@ static int tolua_PAC_dev_cipline_tech_object__DoseRR00(lua_State* tolua_S)
 }
 #endif //#ifndef TOLUA_DISABLE
 
-/* function: G_RM_MANAGER */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_G_RM_MANAGER00
-static int tolua_PAC_dev_G_RM_MANAGER00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isnoobj(tolua_S,1,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  {
-   rm_manager* tolua_ret = (rm_manager*)  G_RM_MANAGER();
-    tolua_pushusertype(tolua_S,(void*)tolua_ret,"rm_manager");
-  }
- }
- return 1;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'G_RM_MANAGER'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
-/* method: add_rm_cmmctr of class  rm_manager */
-#ifndef TOLUA_DISABLE_tolua_PAC_dev_rm_manager_add_rm_cmmctr00
-static int tolua_PAC_dev_rm_manager_add_rm_cmmctr00(lua_State* tolua_S)
-{
-#ifndef TOLUA_RELEASE
- tolua_Error tolua_err;
- if (
-     !tolua_isusertype(tolua_S,1,"rm_manager",0,&tolua_err) ||
-     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
-     !tolua_isstring(tolua_S,3,0,&tolua_err) ||
-     !tolua_isnumber(tolua_S,4,0,&tolua_err) ||
-     !tolua_isnoobj(tolua_S,5,&tolua_err)
- )
-  goto tolua_lerror;
- else
-#endif
- {
-  rm_manager* self = (rm_manager*)  tolua_tousertype(tolua_S,1,0);
-  char* name = ((char*)  tolua_tostring(tolua_S,2,0));
-  char* IP_address = ((char*)  tolua_tostring(tolua_S,3,0));
-  int remote_PAC_id = ((int)  tolua_tonumber(tolua_S,4,0));
-#ifndef TOLUA_RELEASE
-  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'add_rm_cmmctr'", NULL);
-#endif
-  {
-   self->add_rm_cmmctr(name,IP_address,remote_PAC_id);
-  }
- }
- return 0;
-#ifndef TOLUA_RELEASE
- tolua_lerror:
- tolua_error(tolua_S,"#ferror in function 'add_rm_cmmctr'.",&tolua_err);
- return 0;
-#endif
-}
-#endif //#ifndef TOLUA_DISABLE
-
 /* method: new of class  modbus_client */
 #ifndef TOLUA_DISABLE_tolua_PAC_dev_modbus_client_new00
 static int tolua_PAC_dev_modbus_client_new00(lua_State* tolua_S)
@@ -14956,11 +14890,6 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_function(tolua_S,"_Stop",tolua_PAC_dev_cipline_tech_object__Stop00);
    tolua_function(tolua_S,"_InitDoseRR",tolua_PAC_dev_cipline_tech_object__InitDoseRR00);
    tolua_function(tolua_S,"_DoseRR",tolua_PAC_dev_cipline_tech_object__DoseRR00);
-  tolua_endmodule(tolua_S);
-  tolua_function(tolua_S,"G_RM_MANAGER",tolua_PAC_dev_G_RM_MANAGER00);
-  tolua_cclass(tolua_S,"rm_manager","rm_manager","",NULL);
-  tolua_beginmodule(tolua_S,"rm_manager");
-   tolua_function(tolua_S,"add_rm_cmmctr",tolua_PAC_dev_rm_manager_add_rm_cmmctr00);
   tolua_endmodule(tolua_S);
   #ifdef __cplusplus
   tolua_cclass(tolua_S,"modbus_client","modbus_client","",tolua_collect_modbus_client);

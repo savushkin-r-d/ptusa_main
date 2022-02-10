@@ -9,8 +9,6 @@
 #include "lua_manager.h"
 #include "PAC_err.h"
 
-#include "rm_manager.h"
-
 void Transliterate(const char* str, char* newStr)
     {
     for (; *str != 0; str++)

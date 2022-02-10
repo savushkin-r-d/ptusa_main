@@ -46,26 +46,6 @@ class i_Lua_save_device
         /// @return >= 0 - количество записанных байт.
         virtual int save_device( char *buff ) = 0;
 
-#ifdef RM_PAC
-        /// @brief Сохранение самого устройства в буфер для удаленного доступа.
-        ///
-        /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
-        ///
-        /// @return >= 0 - количество записанных байт.
-        virtual int rm_save_device( char *buff )
-            {
-            buff[ 0 ] = 0;
-            return 0;
-            }
-
-        /// @brief Сохранение самого устройства в буфер для удаленного доступа.
-        ///
-        /// @param buff [ out ] - адрес буфера, куда будут записываться данные.
-        ///
-        /// @return >= 0 - количество записанных байт.
-        virtual int rm_save_device_state( char *buff ) = 0;
-#endif // RM_PAC
-
         /// @brief Отладочная печать объекта в консоль.
         virtual const char* get_name_in_Lua() const = 0;
     };

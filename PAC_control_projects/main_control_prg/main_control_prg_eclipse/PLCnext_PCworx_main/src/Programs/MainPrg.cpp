@@ -14,7 +14,6 @@
 #include "lua_manager.h"
 #include "PAC_err.h"
 
-#include "rm_manager.h"
 #include "log.h"
 #include "profibus_slave.h"
 
@@ -121,11 +120,6 @@ void MainPrg::Execute()
 		G_ERRORS_MANAGER->evaluate();
 		G_SIREN_LIGHTS_MANAGER()->eval();
 		sleep_ms( sleep_time_ms );
-
-#ifdef RM_PAC
-		// Связь с удаленными PAC.
-		G_RM_MANAGER()->evaluate();
-#endif // RM_PAC
 
 #ifdef USE_PROFIBUS
 		if ( G_PROFIBUS_SLAVE()->is_active() )
