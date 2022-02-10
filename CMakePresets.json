@@ -38,7 +38,15 @@
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install/${presetName}"
             }
         },
-
+        {
+            "name": "linux-debug",
+            "displayName": "Linux Debug",
+            "description": "Using default compilers on Linux",
+            "inherits": "linux-default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
         {
             "name": "AXCF-default",
             "hidden": true,
@@ -141,6 +149,11 @@
             "name": "build-linux-Release",
             "displayName": "Linux Release",
             "configurePreset": "linux-default"
+        },
+        {
+          "name": "build-linux-Debug",
+          "displayName": "Linux Debug",
+          "configurePreset": "linux-debug"
         }
     ]
 }
