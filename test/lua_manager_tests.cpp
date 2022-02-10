@@ -254,7 +254,7 @@ TEST_F(LuaManagerTest, init_PAC_name_rus_failure)
     subhook_t hook_lua_pcall =
         subhook_new((void *)lua_pcall, (void *)mock_lua_pcall_failure, SUBHOOK_64BIT_OFFSET);
     subhook_install(hook_lua_pcall);
-    const int EXTRA_CALLS_COUNT = 2;
+    const int EXTRA_CALLS_COUNT = 3;
     set_lua_pcall_success_calls_before_failure(FILE_CNT + EXTRA_CALLS_COUNT);
 
     mock_project_manager* prj_mock = new mock_project_manager();
