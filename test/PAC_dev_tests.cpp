@@ -53,15 +53,17 @@ TEST( valve_iolink_vtug, get_state_data )
     valve_iolink_vtug_test v1( "V1", device::DEVICE_SUB_TYPE::V_IOLINK_VTUG_DO1 );
 
     EXPECT_EQ( 0, v1.get_state_data( nullptr ) );
-    char state = 1;
+    char state = 0b1;
     EXPECT_EQ( 0, v1.get_state_data( &state ) );
-    v1.set_rt_par( 1, 1 );							//Set "vtug_number" to 1.
+    const int VTUG_NUMBER_IDX = 1;
+    v1.set_rt_par( VTUG_NUMBER_IDX, 1 );            //Set vtug number to 1.
     EXPECT_EQ( 1, v1.get_state_data( &state ) );
 
     valve_iolink_vtug_test v2( false, false, "V2",
         device::DEVICE_SUB_TYPE::V_IOLINK_VTUG_DO1 );
-    v2.set_rt_par( 1, 2 );							//Set "vtug_number" to 2.
+
+    v2.set_rt_par( VTUG_NUMBER_IDX, 2 );			//Set vtug number to 2.
     EXPECT_EQ( 0, v2.get_state_data( &state ) );
-    state = 3;
+    state = 0b10;
     EXPECT_EQ( 1, v2.get_state_data( &state ) );
     }
