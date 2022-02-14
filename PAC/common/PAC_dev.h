@@ -2238,7 +2238,8 @@ class valve_iolink_mix_proof : public i_mix_proof,  public valve
             };
 
         in_data*  in_info = new in_data;
-        out_data_swapped* out_info;
+        static out_data_swapped stub_out_info;
+        out_data_swapped* out_info = &stub_out_info;
 
         bool blink = false;     //Visual indication
 
@@ -2310,7 +2311,8 @@ class valve_iolink_shut_off_thinktop : public valve
             };
 
         in_data* in_info = new in_data;
-        out_data_swapped* out_info = 0;
+        static out_data_swapped stub_out_info;
+        out_data_swapped* out_info = &stub_out_info;
 
         bool blink = false;     //Visual indication
 
@@ -2930,7 +2932,8 @@ class circuit_breaker : public analog_io_device
         int m;
 
         F_data_in in_info;
-        F_data_out* out_info;
+        static F_data_out stub_out_info;
+        F_data_out* out_info = &stub_out_info;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик сигнализатора уровня IO-Link.
@@ -3442,7 +3445,8 @@ class analog_valve_iolink : public AO1
 #pragma pack(pop)
 
         in_data* in_info = new in_data;
-        out_data* out_info;
+        static out_data stub_out_info;
+        out_data* out_info = &stub_out_info;
 
         bool blink = false;     //Visual indication
     };
@@ -4232,7 +4236,8 @@ class signal_column_iolink : public signal_column
             uint16_t unused2 : 3;
             };
 
-        out_data *out_info;
+        static out_data stub_out_info;
+        out_data *out_info = &stub_out_info;
     };
 //-----------------------------------------------------------------------------
 /// @brief Камера.

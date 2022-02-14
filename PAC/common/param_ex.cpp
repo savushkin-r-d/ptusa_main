@@ -94,8 +94,6 @@ void params_manager::final_init( int auto_init_params /*= 1*/,
             100. * last_idx / C_TOTAL_PARAMS_SIZE, '%' );
     G_LOG->write_log( i_log::P_DEBUG );
 
-    G_DEVICE_MANAGER()->init_rt_params();
-
     //Проверка на изменение количества параметров.
     unsigned char buff[ 4 ] = { 0 };
     CRC_mem->read( ( char* ) buff, 4, C_LAST_IDX_OFFSET );

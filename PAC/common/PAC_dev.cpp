@@ -18,6 +18,12 @@ std::vector<valve_DO2_DI2_bistable*> valve::v_bistable;
 
 std::vector<valve_bottom_mix_proof*> valve_bottom_mix_proof::to_switch_off;
 
+valve_iolink_mix_proof::out_data_swapped valve_iolink_mix_proof::stub_out_info;
+valve_iolink_shut_off_thinktop::out_data_swapped valve_iolink_shut_off_thinktop::stub_out_info;
+circuit_breaker::F_data_out circuit_breaker::stub_out_info;
+analog_valve_iolink::out_data analog_valve_iolink::stub_out_info;
+signal_column_iolink::out_data signal_column_iolink::stub_out_info;
+
 const char* const device::DEV_NAMES[ device::DEVICE_TYPE::C_DEVICE_TYPE_CNT ] =
     {
     "V",       ///< Клапан.
@@ -4116,16 +4122,16 @@ void valve_iolink_shut_off_thinktop::direct_set_state( int new_state )
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-valve_iolink_vtug::valve_iolink_vtug( const char *dev_name,
+valve_iolink_vtug::valve_iolink_vtug( const char* dev_name,
     device::DEVICE_SUB_TYPE sub_type ) : valve( dev_name, DT_V, sub_type ),
     vtug_number( 0 )
     {
     }
 //-----------------------------------------------------------------------------
-valve_iolink_vtug::valve_iolink_vtug(bool is_on_fb, bool is_off_fb,
-    const char* dev_name, device::DEVICE_SUB_TYPE sub_type) :
-    valve(is_on_fb, is_off_fb, dev_name, DT_V, sub_type),
-    vtug_number(0)
+valve_iolink_vtug::valve_iolink_vtug( bool is_on_fb, bool is_off_fb,
+    const char* dev_name, device::DEVICE_SUB_TYPE sub_type ) :
+    valve( is_on_fb, is_off_fb, dev_name, DT_V, sub_type ),
+    vtug_number( 0 )
     {
     }
 //-----------------------------------------------------------------------------
@@ -4158,6 +4164,11 @@ void valve_iolink_vtug::direct_on()
         start_switch_time = get_millisec();
         }
 
+    if ( !data || !vtug_number )
+        {
+        return;
+        }
+
     u_int offset = ( vtug_number - 1 ) / 8;
     data[ offset ] |= 1 << ( ( vtug_number - 1 ) % 8 );
     }
@@ -4172,27 +4183,31 @@ void valve_iolink_vtug::direct_off()
         start_switch_time = get_millisec();
         }
 
+    if ( !data || !vtug_number )
+        {
+        return;
+        }
+
     u_int offset = ( vtug_number - 1 ) / 8;
     data[ offset ] &= ~( 1 << ( ( vtug_number - 1 ) % 8 ) );
     }
-
-
+//-----------------------------------------------------------------------------
 int valve_iolink_vtug::get_state()
-	{
-	if (get_AO_IOLINK_state(0) != io_device::IOLINKSTATE::OK)
-		{
-		return -1;
-		}
-	else
-		{
-		return valve::get_state();
-		}
-	}
+    {
+    if ( get_AO_IOLINK_state( 0 ) != io_device::IOLINKSTATE::OK )
+        {
+        return -1;
+        }
+    else
+        {
+        return valve::get_state();
+        }
+    }
 #endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 char valve_iolink_vtug::get_state_data( char* data )
     {
-    if ( data == 0 )
+    if ( !data || !vtug_number )
         {
         return 0;
         }
