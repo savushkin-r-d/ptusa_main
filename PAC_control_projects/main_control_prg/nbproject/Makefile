@@ -105,8 +105,6 @@ build: .build-post
 		cp   "${lua_sys_dir}sys.devices.lua" ${out_dir};\
 		echo "${lua_sys_dir}sys.objects.lua >> ${out_dir}sys.objects.lua";\
 		cp   "${lua_sys_dir}sys.objects.lua" ${out_dir};\
-		echo "${lua_sys_dir}sys.rm_PACs.lua >> ${out_dir}sys.rm_PACs.lua";\
-		cp   "${lua_sys_dir}sys.rm_PACs.lua" ${out_dir};\
 		echo "";\
 		echo "${lua_prg_dir}main.wago.lua    >> ${out_dir}";\
 		cp   "${lua_prg_dir}main.wago.lua" ${out_dir};\

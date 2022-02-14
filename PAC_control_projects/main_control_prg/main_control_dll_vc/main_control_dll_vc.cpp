@@ -13,7 +13,6 @@
 #include "PAC_err.h"
 #include "version_info.h"
 
-#include "rm_manager.h"
 #include "log.h"
 #ifdef PAC_WAGO_750_860
 #include "l_log.h"
@@ -144,11 +143,6 @@ int eval( lua_State* L )
     G_ERRORS_MANAGER->evaluate();
     G_SIREN_LIGHTS_MANAGER()->eval();
     sleep_ms( sleep_time_ms );
-
-#ifdef RM_PAC
-    // Связь с удаленными PAC.
-    G_RM_MANAGER()->evaluate();
-#endif // RM_PAC
 
 #ifdef USE_PROFIBUS
     if ( G_PROFIBUS_SLAVE()->is_active() )

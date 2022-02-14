@@ -24,8 +24,6 @@
           <itemPath>../../PAC/common/mode_mngr.h</itemPath>
           <itemPath>../../PAC/common/param_ex.h</itemPath>
           <itemPath>../../PAC/common/prj_mngr.h</itemPath>
-          <itemPath>../../PAC/common/rm_manager.h</itemPath>
-          <itemPath>../../PAC/common/rm_tech_def.h</itemPath>
           <itemPath>../../PAC/common/tcp_client.h</itemPath>
           <itemPath>../../PAC/common/tcp_cmctr.h</itemPath>
           <itemPath>../../PAC/common/tech_def.h</itemPath>
@@ -172,8 +170,6 @@
           <itemPath>../../PAC/common/mode_mngr.cpp</itemPath>
           <itemPath>../../PAC/common/param_ex.cpp</itemPath>
           <itemPath>../../PAC/common/prj_mngr.cpp</itemPath>
-          <itemPath>../../PAC/common/rm_manager.cpp</itemPath>
-          <itemPath>../../PAC/common/rm_tech_def.cpp</itemPath>
           <itemPath>../../PAC/common/tcp_client.cpp</itemPath>
           <itemPath>../../PAC/common/tcp_cmctr.cpp</itemPath>
           <itemPath>../../PAC/common/tech_def.cpp</itemPath>
@@ -324,14 +320,6 @@
       <item path="../../PAC/common/prj_mngr.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../PAC/common/prj_mngr.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_manager.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_manager.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_tech_def.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_tech_def.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../PAC/common/sys/base_mem.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -686,14 +674,6 @@
       </item>
       <item path="../../PAC/common/prj_mngr.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../PAC/common/rm_manager.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_manager.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_tech_def.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_tech_def.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../../PAC/common/sys/base_mem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../PAC/common/sys/base_mem.h" ex="false" tool="3" flavor2="0">
@@ -1045,14 +1025,6 @@
       <item path="../../PAC/common/prj_mngr.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../PAC/common/prj_mngr.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_manager.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_manager.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_tech_def.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_tech_def.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../PAC/common/sys/base_mem.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -1414,14 +1386,6 @@
       </item>
       <item path="../../PAC/common/prj_mngr.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../PAC/common/rm_manager.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_manager.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_tech_def.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_tech_def.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../../PAC/common/sys/base_mem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../PAC/common/sys/base_mem.h" ex="false" tool="3" flavor2="0">
@@ -1781,14 +1745,6 @@
       <item path="../../PAC/common/prj_mngr.cpp" ex="false" tool="1" flavor2="9">
       </item>
       <item path="../../PAC/common/prj_mngr.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_manager.cpp" ex="false" tool="1" flavor2="9">
-      </item>
-      <item path="../../PAC/common/rm_manager.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_tech_def.cpp" ex="false" tool="1" flavor2="9">
-      </item>
-      <item path="../../PAC/common/rm_tech_def.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../PAC/common/sys/base_mem.cpp" ex="false" tool="1" flavor2="9">
       </item>
@@ -2181,14 +2137,6 @@
       </item>
       <item path="../../PAC/common/prj_mngr.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../../PAC/common/rm_manager.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_manager.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_tech_def.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_tech_def.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="../../PAC/common/sys/base_mem.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../PAC/common/sys/base_mem.h" ex="false" tool="3" flavor2="0">
@@ -2540,14 +2488,6 @@
       <item path="../../PAC/common/prj_mngr.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../../PAC/common/prj_mngr.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_manager.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_manager.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_tech_def.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../../PAC/common/rm_tech_def.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../../PAC/common/sys/base_mem.cpp" ex="false" tool="1" flavor2="0">
       </item>

@@ -65,18 +65,12 @@ const char *FILES[ FILE_CNT ] =
     "sys.io.lua",
     "sys.devices.lua",
     "sys.objects.lua",
-#if defined RM_PAC
-    "sys.rm_PACS.lua",
-#endif // defined RM_PAC
 
     "main.io.lua",
     "main.objects.lua",
     "main.modbus_srv.lua",
     "main.profibus.lua",
     "main.restrictions.lua",
-#if defined RM_PAC
-    "main.rm_PACS.lua"
-#endif // defined RM_PAC
     };
 //-----------------------------------------------------------------------------
 //I

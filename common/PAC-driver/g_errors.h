@@ -439,14 +439,6 @@ class siren_lights_manager: public i_Lua_save_device
 
         int set_cmd( const char *prop, u_int idx, char *val );
 
-#ifdef RM_PAC
-        int rm_save_device_state( char *buff )
-            {
-            buff[ 0 ] = 0;
-            return 0;
-            }
-#endif // RM_PAC
-
         virtual ~siren_lights_manager()
             {
             }

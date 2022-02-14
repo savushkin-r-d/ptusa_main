@@ -16,7 +16,6 @@ $#include "PID.h"
 $#include "g_device.h"
 $#include "g_errors.h"
 
-$#include "rm_manager.h"
 $#include "modbus_client.h"
 
 $#include "modbus_serv.h"
@@ -1631,24 +1630,6 @@ class cipline_tech_object: public tech_object
         virtual void _Stop(int step_to_stop);
         virtual int _InitDoseRR(int what, int step_to_init, int not_first_call);
         virtual int _DoseRR(int what);
-    };
-//---------------------------------------------------------------------------
-rm_manager* G_RM_MANAGER();
-//---------------------------------------------------------------------------
-class rm_manager
-    {
-    public:
-        /// <summary>
-        /// Добавление удаленного PAC для управления.
-        /// </summary>
-        /// <param name="name">Имя удаленного PAC.</param>
-        /// <param name="IP_address">IP-адрес удаленного PAC.</param>
-        /// <param name="remote_PAC_id">Идентификационный номер
-        /// удаленного PAC.</param>
-        ///
-        /// <returns></returns>
-        void add_rm_cmmctr( char* name, char* IP_address,
-            int remote_PAC_id );
     };
 //--------------------------------------------------------------------------
 class modbus_client

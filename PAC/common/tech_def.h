@@ -319,13 +319,6 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
 
         int set_param( int par_id, int index, double value );
 
-#ifdef RM_PAC
-        int rm_save_device_state( char *buff )
-            {
-            return 0;
-            }
-#endif // RM_PAC
-
         /// @brief Установка последовательного номера объекта, начинается с 1.
         ///
         /// @param idx - последовательный номер, >= 1.

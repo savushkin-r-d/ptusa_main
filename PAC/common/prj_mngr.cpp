@@ -14,8 +14,9 @@
 
 #include "tech_def.h"
 
-#include "rm_manager.h"
 #include "log.h"
+
+#include "g_errors.h"
 
 #ifdef WIN_OS
 #include "w_mem.h"
@@ -260,30 +261,6 @@ int project_manager::lua_load_configuration()
         {
         printf( "Oк.\n");
         }
-
-
-#ifdef RM_PAC
-    // Добавление удаленных PAC.
-    if ( G_DEBUG )
-        {
-        printf( "Remote PAC's...\n");
-        }
-
-    res = lua_manager::get_instance()->int_exec_lua_method( "system",
-        "init_rm_PACs", 0, "project_manager::lua_load_configuration()" );
-    if ( res < 0 )
-        {
-        printf( "Fatal error!\n" );
-        return 1;
-        }
-
-    if ( G_DEBUG )
-        {
-        G_RM_MANAGER()->print();
-        printf( "\n" );
-        }
-
-#endif // RM_PAC
 
     if ( G_DEBUG )
         {

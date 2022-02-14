@@ -315,7 +315,6 @@
     <ClInclude Include="..\..\..\PAC\common\PID.h" />
     <ClInclude Include="..\..\..\PAC\common\prj_mngr.h" />
     <ClInclude Include="..\..\..\PAC\common\profibus_slave.h" />
-    <ClInclude Include="..\..\..\PAC\common\rm_manager.h" />
     <ClInclude Include="..\..\..\PAC\common\rm_tech_def.h" />
     <ClInclude Include="..\..\..\PAC\common\sys\base_mem.h" />
     <ClInclude Include="..\..\..\PAC\common\sys\console.h" />
@@ -336,7 +335,6 @@
     <ClInclude Include="..\..\..\PAC\win\w_led.h" />
     <ClInclude Include="..\..\..\PAC\win\w_log.h" />
     <ClInclude Include="..\..\..\PAC\win\w_mem.h" />
-    <ClInclude Include="..\..\..\PAC\win\w_rm_tech_def.h" />
     <ClInclude Include="..\..\..\PAC\win\w_tcp_client.h" />
     <ClInclude Include="..\..\..\PAC\win\w_tcp_cmctr.h" />
     <ClInclude Include="..\..\..\PAC\win\w_types.h" />
@@ -376,7 +374,6 @@
     <ClCompile Include="..\..\..\PAC\common\PID.cpp" />
     <ClCompile Include="..\..\..\PAC\common\prj_mngr.cpp" />
     <ClCompile Include="..\..\..\PAC\common\profibus_slave.cpp" />
-    <ClCompile Include="..\..\..\PAC\common\rm_manager.cpp" />
     <ClCompile Include="..\..\..\PAC\common\rm_tech_def.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys\base_mem.cpp" />
     <ClCompile Include="..\..\..\PAC\common\sys\console.cpp" />
@@ -393,7 +390,6 @@
     <ClCompile Include="..\..\..\PAC\win\w_console.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_dtime.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_mem.cpp" />
-    <ClCompile Include="..\..\..\PAC\win\w_rm_tech_def.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_tcp_client.cpp" />
     <ClCompile Include="..\..\..\PAC\win\w_tcp_cmctr.cpp" />
     <ClCompile Include="..\..\..\tolua++\src\lib\tolua_event.c" />

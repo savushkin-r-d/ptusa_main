@@ -141,9 +141,6 @@
     <ClInclude Include="..\..\..\PAC\common\profibus_slave.h">
       <Filter>Файлы заголовков\PAC\common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\PAC\common\rm_manager.h">
-      <Filter>Файлы заголовков\PAC\common</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\PAC\common\rm_tech_def.h">
       <Filter>Файлы заголовков\PAC\common</Filter>
     </ClInclude>
@@ -184,9 +181,6 @@
       <Filter>Файлы заголовков\PAC\win</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\win\w_mem.h">
-      <Filter>Файлы заголовков\PAC\win</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\PAC\win\w_rm_tech_def.h">
       <Filter>Файлы заголовков\PAC\win</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\PAC\win\w_tcp_client.h">
@@ -320,12 +314,6 @@
     <ClCompile Include="..\..\..\PAC\common\profibus_slave.cpp">
       <Filter>Исходные файлы\PAC\common</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\PAC\common\rm_manager.cpp">
-      <Filter>Исходные файлы\PAC\common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\PAC\common\rm_tech_def.cpp">
-      <Filter>Исходные файлы\PAC\common</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\PAC\common\tcp_client.cpp">
       <Filter>Исходные файлы\PAC\common</Filter>
     </ClCompile>
@@ -348,9 +336,6 @@
       <Filter>Исходные файлы\PAC\win</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\win\w_mem.cpp">
-      <Filter>Исходные файлы\PAC\win</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\PAC\win\w_rm_tech_def.cpp">
       <Filter>Исходные файлы\PAC\win</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\PAC\win\w_tcp_client.cpp">

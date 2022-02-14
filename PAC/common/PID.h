@@ -113,13 +113,6 @@ class PID : public device, public i_Lua_save_device
         int save_device_ex( char* buff );
         int save_device( char *buff );
 
-#ifdef RM_PAC
-        int rm_save_device_state( char *buff )
-            {
-            return 0;
-            }
-#endif // RM_PAC
-
         const char* get_name_in_Lua() const;
 
     private:
