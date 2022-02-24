@@ -166,16 +166,15 @@ int PAC_info::set_cmd( const char* prop, u_int idx, double val )
             {
             case RELOAD_RESTRICTIONS:
                 {
-                if (G_DEBUG)
+                if ( G_DEBUG )
                     {
-                    G_LOG->notice("Reload restrictions (remote monitor client command).");
+                    G_LOG->notice( "Reload restrictions (remote monitor client command)." );
                     }
-                const int SCRIPT_N = 8;
-
-                cmd = G_LUA_MANAGER->reload_script(SCRIPT_N, "restrictions",
-                    cmd_answer, sizeof(cmd_answer));
+                const int SCRIPT_N = 7;
+                cmd = G_LUA_MANAGER->reload_script( SCRIPT_N, "restrictions",
+                    cmd_answer, sizeof( cmd_answer ) );
+                return cmd;
                 }
-                break;
 
             case RESET_PARAMS:
                 if ( G_DEBUG )
