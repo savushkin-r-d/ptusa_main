@@ -1226,11 +1226,8 @@ void open_seat_action::switch_on_group( std::vector< device* > group,
         if ( type == device::DT_V )
             {
             valve* v = reinterpret_cast<valve*>( dev );
-            if ( !v->is_wash_seat_active() )
-                {
-                v->set_state( st );
-                v->set_seat_wash_state( true );
-                }
+            v->set_state( st );
+            v->set_seat_wash_state( true );
             }
         else
             {
