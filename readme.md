@@ -1,4 +1,4 @@
-# ptusa
+# ptusa #
 
 [![GitHub Actions CI](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml/badge.svg)](https://github.com/savushkin-r-d/ptusa_main/actions/workflows/cmake.yml) [![codecov](https://codecov.io/gh/savushkin-r-d/ptusa_main/branch/master/graph/badge.svg?token=G1BK5054IJ)](https://codecov.io/gh/savushkin-r-d/ptusa_main) [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/savushkin-r-d/ptusa_main.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/savushkin-r-d/ptusa_main/context:cpp)
 
@@ -25,12 +25,26 @@ Controller logic implemented by Lua-script. At runtime, control is passed throug
 
 ## How to build a project ##
 
+You could clone repository by next command:
+`git clone --recurse-submodules https://github.com/savushkin-r-d/ptusa_main.git`
+
+or, if you are clonned without initializing and updating submodules, try next:
+`git submodules update --init --recursive`
+
 ### win ###
 
 Requirements:
 1. Microsoft Visual Studio Community 2019
 
 You should open (in Visual Studio) root directory. This you get a CMake based project.
+
+2. Qt Creator
+
+You could open file CMakeList.txt cloned repository in Qt.
+
+Or clone reposytory in Qt:
+    New -> Import Project -> Git Clone
+    specify the repository link and check the box Recursive
 
 ### linux ###
 

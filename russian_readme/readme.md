@@ -17,3 +17,35 @@
 4. При выполнении команды происходит следующее:
 
 ![Clone repository](../readme_images/tech_object__exec_cmd.png)
+
+
+## Как собрать проет ##
+
+Вы можете клонировать репозиторий при помощи следующей команды:
+`git clone --recurse-submodules https://github.com/savushkin-r-d/ptusa_main.git`
+
+Или, если вы клонировали проект без инициализированых и обновленных подмодулей, попробуйте следующее:
+`git submodules update --init --recursive`
+
+### win ###
+
+Требования:
+1. Qt Creator
+
+В Qt вы можете открыть файл CMakeList.txt клонированого репозитория.
+
+Или клонировать репозиторий используя Qt:
+    Добавить -> Импортировать проект -> Клонирование Git
+    указать ссылку на репозиторий и поставить галочку для рекурсивного кланирования.
+
+## Как запустить проект ##
+
+Для запуска демо проекта вы должны использовать эту команду:
+
+### win ###
+
+ После сборки и развертывания *`windows-default`* конфигурации cmake:
+
+```cmd
+    bin\install\windows-default\Release\ptusa_main.exe demo_projects/T1-PLCnext-Demo/main.plua path demo_projects/T1-PLCnext-Demo/ sys_path demo_projects/T1-PLCnext-Demo/sys/ debug
+```
