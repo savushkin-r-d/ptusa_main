@@ -23,7 +23,7 @@ Controller logic implemented by Lua-script. At runtime, control is passed throug
 4. During the execution of command happens next:
 ![Clone repository](readme_images/tech_object__exec_cmd_en.png)
 
-## How to build a project ##
+## How to build the project ##
 
 You could clone repository by next command:
 `git clone --recurse-submodules https://github.com/savushkin-r-d/ptusa_main.git`
