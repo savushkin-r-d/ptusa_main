@@ -19,7 +19,7 @@
 ![Clone repository](../readme_images/tech_object__exec_cmd.png)
 
 
-## Как собрать проет ##
+## Как собрать проект ##
 
 Вы можете клонировать репозиторий при помощи следующей команды:
 `git clone --recurse-submodules https://github.com/savushkin-r-d/ptusa_main.git`
