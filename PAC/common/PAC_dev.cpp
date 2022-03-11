@@ -1671,6 +1671,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
 
                 case device::DST_TE_ANALOG:
                     new_device = new temperature_e_analog( dev_name );
+                    new_io_device = (temperature_e_analog*)new_device;
                     break;
 
                 default:
@@ -4609,7 +4610,7 @@ float temperature_e_analog::get_value()
         auto min = get_par( P_MIN_V, start_param_idx );
         auto max = get_par( P_MAX_V, start_param_idx );
         v = get_AI( C_AI_INDEX, min, max );
-        return get_par( P_ZERO_ADJUST_COEFF, start_param_idx ) + v;
+        return get_par( P_ZERO_ADJUST_COEFF, 0 ) + v;
         }
 #endif
     }
