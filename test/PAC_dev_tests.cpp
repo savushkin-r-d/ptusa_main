@@ -85,3 +85,16 @@ TEST( temperature_e_analog, get_value )
     auto v = t1.get_value();
     EXPECT_EQ( .0, v );
     }
+
+/*
+    TEST METHOD DEFENITION:
+    io_device* add_io_device( int dev_type, int dev_sub_type,
+                        const char* dev_name, char * descr, char* article )
+*/
+
+TEST( device_manager, add_io_device )
+    {
+    auto res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_TE, device::DST_TE_ANALOG, "T1", "Test sensor", "T" );
+    EXPECT_NE( nullptr, res );
+    }
