@@ -4,7 +4,7 @@ using namespace ::testing;
 
 /*
     TEST METHOD DEFENITION:
-    void evaluate()
+    void turn_off_blue()
 */
 
 TEST( signal_column, turn_off_blue )
@@ -28,6 +28,11 @@ TEST( signal_column, turn_off_blue )
     test_dev.turn_off_blue();
     EXPECT_EQ( false, test_dev.is_blue_switched_on() );
     }
+
+/*
+    TEST METHOD DEFENITION:
+    char get_state_data( char* data )
+*/
 
 TEST( valve_iolink_vtug, get_state_data )
     {
@@ -66,4 +71,17 @@ TEST( valve_iolink_vtug, get_state_data )
     EXPECT_EQ( 0, v2.get_state_data( &state ) );
     state = 0b10;
     EXPECT_EQ( 1, v2.get_state_data( &state ) );
+    }
+
+
+/*
+    TEST METHOD DEFENITION:
+    float temperature_e_analog::get_value()
+*/
+
+TEST( temperature_e_analog, get_value )
+    {
+    temperature_e_analog t1( "T1" );
+    auto v = t1.get_value();
+    EXPECT_EQ( .0, v );
     }
