@@ -102,7 +102,7 @@ class par_device
         /// @param offset - смещение индекса.
         ///
         /// @return значение параметра.
-        float get_par( u_int idx, u_int offset ) const;
+        float get_par( u_int idx, u_int offset = 0 ) const;
 
         /// @brief Задание имени параметра.
         ///
