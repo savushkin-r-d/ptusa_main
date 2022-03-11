@@ -4610,7 +4610,7 @@ float temperature_e_analog::get_value()
         auto min = get_par( P_MIN_V, start_param_idx );
         auto max = get_par( P_MAX_V, start_param_idx );
         v = get_AI( C_AI_INDEX, min, max );
-        return get_par( P_ZERO_ADJUST_COEFF, 0 ) + v;
+        return get_par( P_ZERO_ADJUST_COEFF ) + v;
         }
 #endif
     }
