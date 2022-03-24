@@ -38,7 +38,12 @@ Requirements:
 
 You should open (in Visual Studio) root directory. This you get a CMake based project.
 
-2. Qt Creator
+2. Microsoft Visual Studio Community 2022
+
+You should open (in Visual Studio) root directory. This you get a CMake based project. If you have an error when trying to compile, then you should clear the cache:
+    Project -> Delete the cache and perform the reconfiguration
+
+3. Qt Creator
 
 You could open file CMakeList.txt cloned repository in Qt.
 
