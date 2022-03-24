@@ -1,8 +1,8 @@
 name: Sonar build
 on:
-  push:
-    branches:
-      - master
+  pull_request_target:
+    branches: [ master ]
+    types: [ labeled ]
   schedule:
     - cron: '0 9 * * 1'
   workflow_dispatch:
@@ -10,6 +10,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    if: contains( github.event.pull_request.labels.*.name, 'safe to test' )
     env:
       SONAR_SCANNER_VERSION: 4.4.0.2170
       SONAR_SERVER_URL: "https://sonarcloud.io"
