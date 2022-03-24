@@ -31,6 +31,9 @@ You could clone repository by next command:
 or, if you are clonned without initializing and updating submodules, try next:
 `git submodules update --init --recursive`
 
+If errors still appear after recursive cloning, you should clear the cache Cmake:
+    Project -> Clear cache and perform reconfiguration
+
 ### win ###
 
 Requirements:
