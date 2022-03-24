@@ -73,7 +73,9 @@ jobs:
         run: sudo apt-get install gcovr
 
       - name: Generate test summary
-        run: gcovr -r . --sonarqube coverage.xml
+        run: |
+          gcovr -r . --sonarqube ./build/coverage.xml
+          cat ./build/coverage.xml
 
       - name: Run sonar-scanner
         env:
