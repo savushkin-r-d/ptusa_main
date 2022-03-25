@@ -1111,6 +1111,7 @@ camera_DI2::camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
     camera( dev_name, sub_type, static_cast<int>( PARAMS::PARAMS_CNT ) - 1 ),
     start_switch_time( get_millisec() )
     {
+    is_cam_ready = false;
     set_par_name( static_cast<u_int>( PARAMS::P_READY_TIME ), 0, "P_READY_TIME" );
     }
 
@@ -1435,7 +1436,7 @@ camera* device_manager::get_CAM( const char* dev_name )
     }
 //-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
-                        const char* dev_name, char * descr, char* article )
+                        const char* dev_name, const char * descr, char* article )
     {
     static char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
 
