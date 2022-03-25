@@ -4556,7 +4556,7 @@ class device_manager: public i_Lua_save_device
         //
         // Вызывается из Lua.
         io_device* add_io_device( int dev_type, int dev_sub_type,
-            const char *dev_name, const char * descr, char* article );
+            const char *dev_name, const char * descr, const char* article );
     };
 //-----------------------------------------------------------------------------
 /// @brief таймер.

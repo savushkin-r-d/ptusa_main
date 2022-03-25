@@ -1096,7 +1096,7 @@ u_int io_manager::get_nodes_count()
 	}
 //-----------------------------------------------------------------------------
 void io_manager::add_node( u_int index, int ntype, int address,
-    char* IP_address, char *name,
+    const char* IP_address, const char *name,
     int DO_cnt, int DI_cnt,
     int AO_cnt, int AO_size, int AI_cnt, int AI_size )
     {
@@ -1182,8 +1182,8 @@ io_manager::io_node::~io_node()
         }
     }
 //-----------------------------------------------------------------------------
-io_manager::io_node::io_node( int type, int number, char* str_ip_address,
-    char* name, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, int AI_cnt,
+io_manager::io_node::io_node( int type, int number, const char* str_ip_address,
+    const char* name, int DO_cnt, int DI_cnt, int AO_cnt, int AO_size, int AI_cnt,
     int AI_size ) : state( ST_NO_CONNECT ),
     type( (TYPES)type ),
     number( number ),
