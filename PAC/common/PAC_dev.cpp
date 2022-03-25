@@ -1100,6 +1100,11 @@ void camera::set_string_property( const char* field, const char* value )
         ip = std::string( value );
         }
     }
+
+bool camera::is_ready() const
+    {
+    return is_cam_ready;
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 camera_DI2::camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :

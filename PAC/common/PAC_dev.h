@@ -4279,6 +4279,9 @@ class camera : public i_camera, public device, public io_device
 
         int get_result( int n = 1 );
 
+        /// @brief Получение состояние готовности.
+        virtual bool is_ready() const;
+
     protected:
         bool is_cam_ready;
         int result;
@@ -4288,8 +4291,8 @@ class camera : public i_camera, public device, public io_device
             {
             INDEX_DO = 0,
 
-            INDEX_DI_READY = 0,
-            INDEX_DI_RES_1,
+            INDEX_DI_RES_1 = 0,
+            INDEX_DI_READY,
             INDEX_DI_RES_2,
             };
 
