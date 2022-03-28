@@ -298,7 +298,7 @@ endif()
 enable_testing()
 add_test(run_no_command_line_arguments ${PROJECT_NAME})
 
-if(NOT ARP_DEVICE AND NOT MINGW)
+if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
     add_test(T1-PLCnext-Demo lua5.1
                 -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
                 -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
