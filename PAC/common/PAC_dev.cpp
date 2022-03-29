@@ -247,8 +247,7 @@ void device::off()
 //-----------------------------------------------------------------------------
 int device::save_device( char* buff, const char* prefix )
     {
-    int res = sprintf( buff, "%s%s={M=%d, ",
-        prefix, name, is_manual_mode );
+    int res = sprintf( buff, "%s%s={M=%d, ", prefix, name, is_manual_mode );
 
     if ( type != DT_AO )
         {
@@ -281,13 +280,9 @@ int device::save_device( char* buff, const char* prefix )
     res += save_device_ex( buff + res );
     res += par_device::save_device( buff + res );
 
-    if ( res >= 2 )
-        {
-        res -= 2;
-        buff[ res ] = 0; //Убираем лишнюю последнюю запятую и пробел.//
-        }
-
-    res += sprintf( buff + res, "},\n" );
+    //Убираем лишнюю последнюю запятую и пробел.
+    const int extra_symbols_length = 2; 
+    res += sprintf( buff + res - extra_symbols_length, "},\n" );
 
     return res;
     }

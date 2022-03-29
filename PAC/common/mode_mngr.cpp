@@ -1628,7 +1628,7 @@ void operation_state::evaluate()
     auto active_step = steps[ active_step_n ];
     auto if_action = dynamic_cast<to_step_if_devices_in_specific_state_action*>(
         ( *active_step )[ step::A_TO_STEP_IF ] );
-    if ( if_action->is_goto_next_step() )
+    if ( if_action && if_action->is_goto_next_step() )
         {
         if ( -1 == active_step_next_step_n )
             {

@@ -6759,7 +6759,7 @@ int cipline_tech_object::SCPumping( int what, int from, int where, int whatdrain
             rt_par_float[P_CONC] = GetConc(SHCH);
             break;
         case KISL:
-            rt_par_float[P_CONC] = GetConc(SHCH);
+            rt_par_float[P_CONC] = GetConc(KISL);
             break;
         default:
             //par->setParamM(P_CONC, 0);

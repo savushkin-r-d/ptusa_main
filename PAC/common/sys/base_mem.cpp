@@ -195,7 +195,7 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
             {
             printf( "NV_memory_manager:get_memory_block(...) - memory = NULL!\n" );        
             }
-        new memory_range( 0, 0, 0 );
+        return new memory_range( 0, 0, 0 );
         }
 
     if ( *last_mem_pos + count >
@@ -213,7 +213,7 @@ memory_range* NV_memory_manager::get_memory_block( MEMORY_TYPE m_type,
                 memory->get_available_start_pos(),
                 memory->get_available_end_pos() );        
             }
-        new memory_range( 0, 0, 0 );
+        return new memory_range( 0, 0, 0 );
         }
 
     memory_range *res = new memory_range( memory, *last_mem_pos, count );
