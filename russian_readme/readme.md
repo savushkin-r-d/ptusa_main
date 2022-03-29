@@ -46,6 +46,19 @@
 Или клонировать репозиторий используя Qt:
     Добавить -> Импортировать проект -> Клонирование Git
     указать ссылку на репозиторий и поставить галочку для рекурсивного клонирования.
+	
+2. Microsoft Visual Studio Community 2022
+
+Перед запуском проекта необходимо убедиться в том, что у вас установлен C++ CMake tools for Windows.
+Версия CMake, необходимая для сборки: cmake_minimum_required(VERSION 3.13)
+
+После этого вы должны открыть (в Visual Studio) корневой каталог. Таким образом, вы получаете проект на основе CMake. 	
+Если после запуска возникла ошибка, то следует очистить кэш CMake:
+	Проект -> Удалить кэш и вполнить перенастройку
+	
+3. Microsoft Visual Studio Community 2019
+
+Вы должны открыть (в Visual Studio) корневой каталог. Таким образом, вы получаете проект на основе CMake. 	
 
 ## Как запустить проект ##
 
@@ -53,8 +66,10 @@
 
 ### win ###
 
- После сборки и развертывания *`windows-default`* конфигурации cmake:
+1. После сборки и развертывания *`windows-default`* конфигурации cmake:
 
 ```cmd
     bin\install\windows-default\Release\ptusa_main.exe demo_projects/T1-PLCnext-Demo/main.plua path demo_projects/T1-PLCnext-Demo/ sys_path demo_projects/T1-PLCnext-Demo/sys/ debug
 ```
+2. Запуск проекта в Microsoft Visual Studio Community 2022:
+	Выбрать элемент запуска -> ptusa_main.exe
