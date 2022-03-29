@@ -1,8 +1,7 @@
 name: Sonar build
 on:
-  pull_request_target:
+  push:
     branches: [ master ]
-    types: [ labeled ]
   schedule:
     - cron: '0 9 * * 1'
   workflow_dispatch:
@@ -11,8 +10,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     if: >
-      ${{ github.repository == 'savushkin-r-d/ptusa_main' &&
-      contains( github.event.pull_request.labels.*.name, 'safe to test' ) }}
+      ${{ github.repository == 'savushkin-r-d/ptusa_main' }}
     env:
       SONAR_SCANNER_VERSION: 4.7.0.2747
       SONAR_SERVER_URL: "https://sonarcloud.io"
