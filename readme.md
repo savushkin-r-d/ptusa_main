@@ -49,6 +49,9 @@ Or clone reposytory in Qt:
 3. Microsoft Visual Studio Community 2022
 
 Before starting the project, you need to make sure that you have installed C++ CMake tools for Windows.
+C++ CMake tools for Windows is installed as part of the Desktop development with C++.
+Both C++ CMake tools for Windows Development with C++ are required for cross-platform CMake development.
+Detailed installation information can be obtained [here](https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160)
 The CMake version required for the build: cmake_minimum_required(VERSION 3.13)
 
 You should open (in Visual Studio) root directory. This you get a CMake based project.

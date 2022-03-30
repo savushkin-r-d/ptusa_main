@@ -28,6 +28,28 @@
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         },
+		{
+            "name": "windows-default",
+            "displayName": "Visual Studio Community 2022 - x86 Release",
+            "description": "Using compilers for Visual Studio 17 2022 (x86 architecture)",
+            "generator": "Visual Studio 17 2022",
+            "toolset": "host=x86",
+            "architecture": "win32",
+            "binaryDir": "${sourceDir}/bin/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install/${presetName}"
+            }
+        },
+        {
+            "name": "windows-debug",
+            "displayName": "Visual Studio Community 2019 - x86 Debug",
+            "description": "Using compilers for Visual Studio 16 2019 (x86 architecture)",
+            "inherits": "windows-default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
         {
             "name": "linux-default",
             "displayName": "Linux Release",
