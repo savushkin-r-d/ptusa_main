@@ -29,7 +29,7 @@
             }
         },
 		{
-            "name": "windows-default",
+            "name": "windows-default-for-VS2022",
             "displayName": "Visual Studio Community 2022 - x86 Release",
             "description": "Using compilers for Visual Studio 17 2022 (x86 architecture)",
             "generator": "Visual Studio 17 2022",
@@ -42,7 +42,7 @@
             }
         },
         {
-            "name": "windows-debug",
+            "name": "windows-debug-for-VS2022",
             "displayName": "Visual Studio Community 2022 - x86 Debug",
             "description": "Using compilers for Visual Studio 17 2020 (x86 architecture)",
             "inherits": "windows-default",
