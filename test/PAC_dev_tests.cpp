@@ -99,6 +99,16 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( nullptr, res );
     }
 
+
+TEST( device, save_device )
+    {
+    temperature_e_analog t1( "T1" );
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    t1.save_device( buff, "" );
+    EXPECT_STREQ( "T1={M=0, ST=1, V=0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
+    }
+
 /*
     TEST METHOD DEFENITION:
     bool camera::is_ready() const

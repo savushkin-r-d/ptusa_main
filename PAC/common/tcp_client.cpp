@@ -41,13 +41,15 @@ tcp_client::~tcp_client()
 
 tcp_client* tcp_client::Create( char* ip, unsigned int port, unsigned int id, unsigned char alarm_subclass, unsigned int exchange_buf_size /*= 256*/, unsigned long send_receive_timeout /*= 100*/ )
     {
-#ifdef WIN_OS
+#if defined WIN_OS
     return new win_tcp_client(ip, port, id, alarm_subclass, exchange_buf_size, send_receive_timeout);
-#endif // WIN_OS
-#ifdef LINUX_OS
+
+#elif defined LINUX_OS
     return new linux_tcp_client(ip, port, id, alarm_subclass, exchange_buf_size, send_receive_timeout);
-#endif
+
+#else
     return 0;
+#endif
     }
 
 int tcp_client::Communicate( unsigned int bytestosend )
