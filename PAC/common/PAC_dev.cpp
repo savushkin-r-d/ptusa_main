@@ -1120,7 +1120,8 @@ void camera_DI2::evaluate_io()
 #ifndef DEBUG_NO_IO_MODULES
     int o = get_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ) );
     int i = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_READY ) );
-    if ( o == i )
+
+    if ( 1 == i )
         {
         start_switch_time = get_millisec();
         state = o;

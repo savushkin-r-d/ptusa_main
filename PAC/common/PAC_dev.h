@@ -4310,7 +4310,7 @@ class camera_DI2 : public camera
 
         int get_state();
 
-        void evaluate_io();
+        void evaluate_io() override;
 
     protected:
         u_int start_switch_time;
