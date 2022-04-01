@@ -280,9 +280,9 @@ int device::save_device( char* buff, const char* prefix )
     res += save_device_ex( buff + res );
     res += par_device::save_device( buff + res );
 
-    //Убираем лишнюю последнюю запятую и пробел.
-    const int extra_symbols_length = 2; 
-    res += sprintf( buff + res - extra_symbols_length, "},\n" );
+    const int extra_symbols_length = 2;                     //Remove last " ,".
+    if ( res > extra_symbols_length ) res -= extra_symbols_length;
+    res += sprintf( buff + res, "},\n" );
 
     return res;
     }
