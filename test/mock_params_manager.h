@@ -9,18 +9,6 @@ class mock_params_manager : public params_manager
     MOCK_METHOD(void, final_init, 
         (int auto_init_params, int auto_init_work_params, void(*custom_init_params_function)()));
     MOCK_METHOD(char*, get_params_data, (int size, int &start_pos));
-
-	static mock_params_manager* get_instance()
-		{
-		if ( instance.is_null() )
-			{
-			instance = new mock_params_manager();
-			}
-		return instance;
-		}
-
-	private:
-		static auto_smart_ptr< mock_params_manager > instance;
 };
 
 class test_params_manager 
