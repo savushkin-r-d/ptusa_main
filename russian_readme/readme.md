@@ -68,4 +68,4 @@ Visual Studio Installer -> Разработка классических при�
     bin\install\windows-default\Release\ptusa_main.exe demo_projects/T1-PLCnext-Demo/main.plua path demo_projects/T1-PLCnext-Demo/ sys_path demo_projects/T1-PLCnext-Demo/sys/ debug
 ```
 2. Запуск проекта в Microsoft Visual Studio Community 2022:
-	Выбрать элемент запуска -> ptusa_main.exe
+	Выбрать элемент запуска -> ptusa_main.exe //запуск тестового проекта (конфигурация запуска в VS)
