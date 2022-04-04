@@ -108,3 +108,19 @@ TEST( device, save_device )
     t1.save_device( buff, "" );
     EXPECT_STREQ( "T1={M=0, ST=1, V=0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
     }
+
+TEST( motor_altivar, set_cmd )
+    {
+    motor_altivar m1( "M1", device::M_ATV );    
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    m1.save_device( buff, "" );
+    EXPECT_STREQ( "M1={M=0, ST=0, V=0, R=0, FRQ=0.00, RPM=0.00, EST=0, P_ON_TIME=0},\n", buff );
+
+    m1.set_cmd( "R", 0, 1 );
+    m1.set_cmd( "FRQ", 0, 1.1 );
+    m1.set_cmd( "RPM", 0, 12.2 );
+    m1.set_cmd( "EST", 0, 2 );
+    m1.save_device( buff, "" );
+    EXPECT_STREQ( "M1={M=0, ST=0, V=1.10, R=1, FRQ=1.10, RPM=12.20, EST=2, P_ON_TIME=0},\n", buff );
+    }

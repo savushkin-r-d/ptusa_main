@@ -6721,9 +6721,11 @@ int motor_altivar::save_device_ex(char * buff)
     {
     int res = 0;
 #ifdef DEBUG_NO_IO_MODULES
-    res = sprintf(buff, "R=0, FRQ=0, RPM=0, EST=0, ");
+    res = sprintf( buff, "R=%d, FRQ=%.2f, RPM=%.2f, EST=%d, ",
+        reverse, freq, rpm, est );
 #else
-    res = sprintf(buff, "R=%d, FRQ=%f, RPM=%f, EST=%d, ", atv->reverse, atv->fc_value / 10, atv->rpm_value, atv->remote_state );
+    res = sprintf(buff, "R=%d, FRQ=%.2f, RPM=%.2f, EST=%d, ",
+        atv->reverse, atv->fc_value / 10, atv->rpm_value, atv->remote_state );
 #endif //DEBUG_NO_IO_MODULES
     return res;
     }
@@ -6863,6 +6865,42 @@ void motor_altivar::print() const
     {
     device::print();
     }
+
+int motor_altivar::get_params_count() const
+    {
+    return ADDITIONAL_PARAM_COUNT;
+    }
+
+#ifdef DEBUG_NO_IO_MODULES
+int motor_altivar::set_cmd( const char* prop, u_int idx, double val )
+    {
+    printf( "motor_altivar::set_cmd() - prop = %s, idx = %d, val = %f\n",
+        prop, idx, val );
+
+    if ( strcmp( prop, "R" ) == 0 )
+        {
+        reverse = static_cast<int>( val );
+        }
+    else if ( strcmp( prop, "FRQ" ) == 0 )
+        {
+        freq = static_cast<float>( val );
+        }
+    else if ( strcmp( prop, "RPM" ) == 0 )
+        {
+        rpm = static_cast<float>( val );
+        }
+    else if ( strcmp( prop, "EST" ) == 0 )
+        {
+        est = static_cast<int>( val );
+        }
+    else
+        {
+        return device::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    }
+#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float motor_altivar_linear::get_linear_speed() const

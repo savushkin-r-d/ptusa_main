@@ -3685,10 +3685,12 @@ public:
 
     virtual void print() const;
 
-    virtual int get_params_count() const
-        {
-        return ADDITIONAL_PARAM_COUNT;
-        }
+    virtual int get_params_count() const;
+
+#ifdef DEBUG_NO_IO_MODULES
+    int set_cmd( const char* prop, u_int idx, double val );
+#endif // DEBUG_NO_IO_MODULES
+
 protected:
     altivar_node* atv;
 
@@ -3700,16 +3702,16 @@ private:
         C_MIN_VALUE = 0,
         C_MAX_VALUE = 100,
 
-        P_ON_TIME = 1,      ///< Индекс параметра времени включения (мсек).
+        P_ON_TIME = 1,          ///< Индекс параметра времени включения (мсек).
 
-        DO_INDEX = 0,         ///< Индекс канала дискретного выхода.
-        DO_INDEX_REVERSE = 1, ///< Индекс канала дискретного выхода реверса.
+        DO_INDEX = 0,           ///< Индекс канала дискретного выхода.
+        DO_INDEX_REVERSE = 1,   ///< Индекс канала дискретного выхода реверса.
 
-        DI_INDEX = 0,   ///< Индекс канала дискретного входа.
+        DI_INDEX = 0,           ///< Индекс канала дискретного входа.
         //   Или
-        DI_INDEX_ERROR = 0,   ///< Индекс канала дискретного входа ошибки.
+        DI_INDEX_ERROR = 0,     ///< Индекс канала дискретного входа ошибки.
 
-        AO_INDEX = 0,     ///< Индекс канала аналогового выхода.
+        AO_INDEX = 0,           ///< Индекс канала аналогового выхода.
     };
 
     u_long start_switch_time;
@@ -3718,6 +3720,10 @@ private:
     char  state;  ///< Состояние устройства.
 
     float freq;   ///< Состояние устройства (частота).
+
+    int reverse = 0;
+    float rpm = .0;
+    int est = 0 ;
 #endif // DEBUG_NO_IO_MODULES
 };
 //-----------------------------------------------------------------------------
