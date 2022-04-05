@@ -53,7 +53,7 @@ C++ CMake tools for Windows are installed using:
 
 `Visual Studio Installer -> Development of classic applications in C++ -> C++ CMake tools for Windows`
 
-Detailed installation information can be obtained [here](https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160). The CMake version required for the build: cmake_minimum_required(VERSION 3.13)
+Detailed installation information can be obtained [here](https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160). The CMake version required for the build is 3.13 and above.
 
 You should open (in Visual Studio) root directory. This you get a CMake based project.
 If an error occurs after startup, then you should clear the CMake cache:
