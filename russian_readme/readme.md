@@ -44,7 +44,7 @@
 Перед запуском проекта необходимо убедиться в том, что у вас установлен C++ CMake tools for Windows.
 Средства C++ CMake для Windows устанавливаются с помощью:
 
-Visual Studio Installer -> Разработка классических приложений на C++ -> Средства CMake C++ для Windows  
+`Visual Studio Installer -> Разработка классических приложений на C++ -> Средства CMake C++ для Windows `
 
 Подробную информацию по установке можно получить [здесь](https://docs.microsoft.com/ru-ru/cpp/build/cmake-projects-in-visual-studio?view=msvc-160). Версия CMake, необходимая для сборки: cmake_minimum_required(VERSION 3.13)
 
