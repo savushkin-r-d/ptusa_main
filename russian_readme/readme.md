@@ -46,7 +46,7 @@
 
 `Visual Studio Installer -> Разработка классических приложений на C++ -> Средства CMake C++ для Windows `
 
-Подробную информацию по установке можно получить [здесь](https://docs.microsoft.com/ru-ru/cpp/build/cmake-projects-in-visual-studio?view=msvc-160). Версия CMake, необходимая для сборки: cmake_minimum_required(VERSION 3.13)
+Подробную информацию по установке можно получить [здесь](https://docs.microsoft.com/ru-ru/cpp/build/cmake-projects-in-visual-studio?view=msvc-160). Версия CMake, необходимая для сборки: 3.13 и выше.
 
 После этого вы должны открыть (в Visual Studio) корневой каталог. Таким образом, вы получаете проект на основе CMake. 	
 Если после запуска возникла ошибка, то следует очистить кэш CMake:
