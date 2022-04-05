@@ -124,3 +124,14 @@ TEST( motor_altivar, set_cmd )
     m1.save_device( buff, "" );
     EXPECT_STREQ( "M1={M=0, ST=0, V=1.10, R=1, FRQ=1.10, RPM=12.20, EST=2, P_ON_TIME=0},\n", buff );
     }
+
+TEST( motor_altivar_linear, get_linear_speed )
+    {
+    motor_altivar_linear m1( "M1" );
+    EXPECT_EQ( .0f, m1.get_linear_speed() );
+
+    m1.set_cmd( "RPM", 0, 100 );
+    m1.set_cmd( "P_SHAFT_DIAMETER", 0, 2 );
+    m1.set_cmd( "P_TRANSFER_RATIO", 0, 5 );    
+    EXPECT_EQ( 2.09439516f, m1.get_linear_speed() );
+    }

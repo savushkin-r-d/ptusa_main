@@ -6716,6 +6716,15 @@ int virtual_counter::save_device_ex( char *buff )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+motor_altivar::motor_altivar( const char* dev_name,
+    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :
+    i_motor( dev_name, sub_type, par_cnt + ADDITIONAL_PARAM_COUNT ),
+    io_device( dev_name ),
+    start_switch_time( get_millisec() ),
+    atv( NULL )
+    {
+    set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
+    }
 
 int motor_altivar::save_device_ex(char * buff)
     {
@@ -6911,7 +6920,11 @@ float motor_altivar_linear::get_linear_speed() const
 
     if ( 0 != d && 0 != n )
         {
+#ifdef DEBUG_NO_IO_MODULES
+        v = ( rpm * (float)M_PI * d ) / ( n * SEC_IN_MIN );
+#else
         v = ( atv->rpm_value * (float)M_PI * d ) / ( n * SEC_IN_MIN );
+#endif
         }
 
     return v;
