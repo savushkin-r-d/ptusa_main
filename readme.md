@@ -51,7 +51,7 @@ Or clone reposytory in Qt:
 Before starting the project, you need to make sure that you have installed C++ CMake tools for Windows.
 C++ CMake tools for Windows are installed using:
 
-Visual Studio Installer -> Development of classic applications in C++ -> C++ CMake tools for Windows
+`Visual Studio Installer -> Development of classic applications in C++ -> C++ CMake tools for Windows`
 
 Detailed installation information can be obtained [here](https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160). The CMake version required for the build: cmake_minimum_required(VERSION 3.13)
 
