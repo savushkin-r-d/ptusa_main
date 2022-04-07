@@ -56,8 +56,7 @@ C++ CMake tools for Windows are installed using:
 Detailed installation information can be obtained [here](https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160). The CMake version required for the build is 3.13 and above.
 
 You should open (in Visual Studio) root directory. This you get a CMake based project.
-If an error occurs after startup, then you should clear the CMake cache:
-	Project -> Delete cache and perform reconfiguration
+If an error occurs after startup, then you should clear the CMake cache `Project -> Delete cache and perform reconfiguration`.
 
 ### linux ###
 
@@ -74,5 +73,4 @@ To run demo project you should use this command line:
 ```cmd
     bin\install\windows-default\Release\ptusa_main.exe demo_projects/T1-PLCnext-Demo/main.plua path demo_projects/T1-PLCnext-Demo/ sys_path demo_projects/T1-PLCnext-Demo/sys/ debug
 ```
-2. Launching a project in Microsoft Visual Studio Community 2022:
-	Select a launch item -> ptusa_main.exe
+2. Launching a project in Microsoft Visual Studio Community 2022: `Select a launch item -> ptusa_main.exe`.
