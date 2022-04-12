@@ -3978,6 +3978,8 @@ class counter_f : public counter
         int save_device_ex( char *buff );
 
     private:
+        u_int_4 start_pump_working_time = 0;
+        u_int_4 counter_prev_value = 0;
 
         enum CONSTANTS
             {
