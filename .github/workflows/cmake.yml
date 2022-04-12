@@ -105,19 +105,19 @@ jobs:
         restore-keys: |
           ${{ matrix.config.name }}-ccache-
 
-    - name: Install yasm (Linux)
-      if: runner.os == 'Linux'
-      shell: bash
-      run: |
-        sudo apt-get install -y yasm
-
-    - name: Install yasm (Windows)
-      if: runner.os == 'Windows'
+    - name: Install yasm
       shell: cmake -P {0}
       run: |
-        set(yasm_url "https://www.tortall.net/projects/yasm/releases/yasm-1.2.0-win64.exe")
-        file(DOWNLOAD "${yasm_url}" c:/ProgramData/chocolatey/lib/yasm/tools/yasm.exe SHOW_PROGRESS)        
-        execute_process(COMMAND yasm --version) # Check yasm
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          set(yasm_url "https://www.tortall.net/projects/yasm/releases/yasm-1.2.0-win64.exe")
+          set(yasm_install_path "C:/Program Files/yasm")
+          file(DOWNLOAD "${yasm_url}" "${yasm_install_path}/yasm.exe" SHOW_PROGRESS)  
+          # Add to PATH environment variable
+          file(APPEND "$ENV{GITHUB_PATH}" ";${yasm_install_path}")
+          
+        elseif ("${{ runner.os }}" STREQUAL "Linux")
+          execute_process(COMMAND sudo apt-get install -y yasm)
+        endif()    
 
 
     - name: Configure
