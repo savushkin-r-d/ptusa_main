@@ -105,14 +105,20 @@ jobs:
         restore-keys: |
           ${{ matrix.config.name }}-ccache-
 
-    - name: Install yasm
+    - name: Install yasm (Linux)
+      if: runner.os == 'Linux'
       shell: bash
       run: |
-        if [ "$RUNNER_OS" == "Linux" ]; then
-            sudo apt-get install -y yasm
-        elif [ "$RUNNER_OS" == "Windows" ]; then
-            choco install --allow-empty-checksums yasm
-        fi
+        sudo apt-get install -y yasm
+
+    - name: Install yasm (Windows)
+      if: runner.os == 'Windows'
+      shell: cmake -P {0}
+      run: |
+        set(yasm_url "https://www.tortall.net/projects/yasm/releases/yasm-1.2.0-win64.exe")
+        file(DOWNLOAD "${yasm_url}" c:/ProgramData/chocolatey/lib/yasm/tools/yasm.exe SHOW_PROGRESS)        
+        execute_process(COMMAND yasm --version) # Check yasm
+
 
     - name: Configure
       shell: cmake -P {0}
