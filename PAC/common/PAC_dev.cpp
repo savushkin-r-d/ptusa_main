@@ -2653,7 +2653,7 @@ int counter_f::get_state()
                 if ( 0 == start_pump_working_time )
                     {
                     start_pump_working_time = get_millisec();
-                    counter_prev_value      = get_quantity();
+                    counter_prev_value = get_abs_quantity();
                     }
                 }
             }
@@ -2677,14 +2677,14 @@ int counter_f::get_state()
                 if ( get_delta_millisec( start_pump_working_time ) > dt )
                     {
                     // Проверяем счетчик на ошибку - он должен изменить свои показания.
-                    if ( get_quantity() == counter_prev_value )
+                    if ( get_abs_quantity() == counter_prev_value )
                         {
                         state = STATES::S_ERROR;
                         }
                     else
                         {
                         start_pump_working_time = get_millisec();
-                        counter_prev_value = get_quantity();
+                        counter_prev_value = get_abs_quantity();
                         }
                     }
                 }

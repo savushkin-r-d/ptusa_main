@@ -152,4 +152,7 @@ TEST( counter_f, get_state )
     fqt1.get_state();
     sleep_ms( 10 );
     EXPECT_EQ( -1, fqt1.get_state() );
+
+    fqt1.set_cmd( "ABS_V", 0, 100 );
+    EXPECT_EQ( 1, fqt1.get_state() );
     }
