@@ -284,7 +284,7 @@ int device::save_device( char* buff, const char* prefix )
     if ( res > extra_symbols_length ) res -= extra_symbols_length;
     res += sprintf( buff + res, "},\n" );
 
-    return res - extra_symbols_length;
+    return res;
     }
 //-----------------------------------------------------------------------------
 int device::set_cmd( const char *prop, u_int idx, char *val )
