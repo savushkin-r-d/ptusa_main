@@ -106,13 +106,19 @@ jobs:
           ${{ matrix.config.name }}-ccache-
 
     - name: Install yasm
-      shell: bash
+      shell: cmake -P {0}
       run: |
-        if [ "$RUNNER_OS" == "Linux" ]; then
-            sudo apt-get install -y yasm
-        elif [ "$RUNNER_OS" == "Windows" ]; then
-            choco install --allow-empty-checksums yasm
-        fi
+        if ("${{ runner.os }}" STREQUAL "Windows")
+          set(yasm_url "https://www.tortall.net/projects/yasm/releases/yasm-1.2.0-win64.exe")
+          set(yasm_install_path "C:/Program Files/yasm")
+          file(DOWNLOAD "${yasm_url}" "${yasm_install_path}/yasm.exe" SHOW_PROGRESS)  
+          # Add to PATH environment variable
+          file(APPEND "$ENV{GITHUB_PATH}" ";${yasm_install_path}")
+          
+        elseif ("${{ runner.os }}" STREQUAL "Linux")
+          execute_process(COMMAND sudo apt-get install -y yasm)
+        endif()    
+
 
     - name: Configure
       shell: cmake -P {0}
