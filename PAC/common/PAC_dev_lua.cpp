@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Fri Mar 25 09:45:31 2022.
+** Generated automatically by tolua++-1.0.92 on Wed Apr 13 16:48:38 2022.
 */
 
 #ifndef __cplusplus
@@ -43,6 +43,13 @@ static int tolua_collect_PID (lua_State* tolua_S)
 static int tolua_collect_tm (lua_State* tolua_S)
 {
  tm* self = (tm*) tolua_tousertype(tolua_S,1,0);
+	Mtolua_delete(self);
+	return 0;
+}
+
+static int tolua_collect_u_int (lua_State* tolua_S)
+{
+ u_int* self = (u_int*) tolua_tousertype(tolua_S,1,0);
 	Mtolua_delete(self);
 	return 0;
 }
@@ -91,19 +98,20 @@ static void tolua_reg_types (lua_State* tolua_S)
  tolua_usertype(tolua_S,"tech_object_manager");
  tolua_usertype(tolua_S,"operation_state");
  tolua_usertype(tolua_S,"timer");
+ tolua_usertype(tolua_S,"i_log");
  tolua_usertype(tolua_S,"dev_stub");
- tolua_usertype(tolua_S,"i_Lua_save_device");
  tolua_usertype(tolua_S,"profibus_slave");
- tolua_usertype(tolua_S,"action");
  tolua_usertype(tolua_S,"ModbusServ");
- tolua_usertype(tolua_S,"operation");
+ tolua_usertype(tolua_S,"action");
  tolua_usertype(tolua_S,"modbus_client");
+ tolua_usertype(tolua_S,"operation");
  tolua_usertype(tolua_S,"cipline_tech_object");
  tolua_usertype(tolua_S,"MSAPID");
+ tolua_usertype(tolua_S,"tm");
  tolua_usertype(tolua_S,"dev_errors_manager");
  tolua_usertype(tolua_S,"device_manager");
- tolua_usertype(tolua_S,"tm");
- tolua_usertype(tolua_S,"i_log");
+ tolua_usertype(tolua_S,"i_Lua_save_device");
+ tolua_usertype(tolua_S,"u_int");
  tolua_usertype(tolua_S,"PAC_info");
  tolua_usertype(tolua_S,"camera");
  tolua_usertype(tolua_S,"PID");
@@ -5731,6 +5739,48 @@ static int tolua_PAC_dev_operation_state__geti00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function '.geti'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: steps_count of class  operation_state */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_operation_state_steps_count00
+static int tolua_PAC_dev_operation_state_steps_count00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const operation_state",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const operation_state* self = (const operation_state*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'steps_count'", NULL);
+#endif
+  {
+   u_int tolua_ret = (u_int)  self->steps_count();
+   {
+#ifdef __cplusplus
+    void* tolua_obj = Mtolua_new((u_int)(tolua_ret));
+     tolua_pushusertype(tolua_S,tolua_obj,"u_int");
+    tolua_register_gc(tolua_S,lua_gettop(tolua_S));
+#else
+    void* tolua_obj = tolua_copy(tolua_S,(void*)&tolua_ret,sizeof(u_int));
+     tolua_pushusertype(tolua_S,tolua_obj,"u_int");
+    tolua_register_gc(tolua_S,lua_gettop(tolua_S));
+#endif
+   }
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'steps_count'.",&tolua_err);
  return 0;
 #endif
 }
@@ -14602,6 +14652,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_cclass(tolua_S,"operation_state","operation_state","",NULL);
   tolua_beginmodule(tolua_S,"operation_state");
    tolua_function(tolua_S,".geti",tolua_PAC_dev_operation_state__geti00);
+   tolua_function(tolua_S,"steps_count",tolua_PAC_dev_operation_state_steps_count00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"step","step","",NULL);
   tolua_beginmodule(tolua_S,"step");
