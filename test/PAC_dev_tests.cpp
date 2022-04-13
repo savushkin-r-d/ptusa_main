@@ -138,3 +138,21 @@ TEST( camera, is_ready )
     v = c3.is_ready();
     EXPECT_FALSE( v );
     }
+
+TEST( counter_f, get_state )
+    {
+    counter_f fqt1( "FQT1" );
+    EXPECT_EQ( 1, fqt1.get_state() );    
+
+    motor m1( "M1", device::DST_M_FREQ );
+    fqt1.set_property( "M", &m1 );
+    EXPECT_EQ( 1, fqt1.get_state() );
+
+    m1.on();
+    fqt1.get_state();
+    sleep_ms( 10 );
+    EXPECT_EQ( -1, fqt1.get_state() );
+
+    fqt1.set_cmd( "ABS_V", 0, 100 );
+    EXPECT_EQ( 1, fqt1.get_state() );
+    }

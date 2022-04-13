@@ -2643,9 +2643,7 @@ int counter_f::get_state()
     {
     if ( !motors.empty() )
         {
-        char           is_pump_working         = 0;
-        static u_int_4 start_pump_working_time = 0;
-        static u_int_4 counter_prev_value      = 0;
+        char is_pump_working = 0;
 
         for ( u_int i = 0; i < motors.size(); i++ )
             {
@@ -2655,7 +2653,7 @@ int counter_f::get_state()
                 if ( 0 == start_pump_working_time )
                     {
                     start_pump_working_time = get_millisec();
-                    counter_prev_value      = get_quantity();
+                    counter_prev_value = get_abs_quantity();
                     }
                 }
             }
@@ -2675,18 +2673,18 @@ int counter_f::get_state()
             else          // Работа.
                 {
                 state = STATES::S_WORK;
-
-                if ( get_delta_millisec( start_pump_working_time ) > get_par( P_DT, 0 ) )
+                auto dt = get_par( P_DT, 0 );
+                if ( get_delta_millisec( start_pump_working_time ) > dt )
                     {
                     // Проверяем счетчик на ошибку - он должен изменить свои показания.
-                    if ( get_quantity() == counter_prev_value )
+                    if ( get_abs_quantity() == counter_prev_value )
                         {
                         state = STATES::S_ERROR;
                         }
                     else
                         {
                         start_pump_working_time = get_millisec();
-                        counter_prev_value      = get_quantity();
+                        counter_prev_value = get_abs_quantity();
                         }
                     }
                 }
