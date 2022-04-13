@@ -3654,18 +3654,8 @@ class motor : public i_motor, public io_device
 class motor_altivar : public i_motor, public io_device
 {
 public:
-    motor_altivar(const char *dev_name, device::DEVICE_SUB_TYPE sub_type, u_int par_cnt = 0 ) :
-        i_motor(dev_name, sub_type, par_cnt + ADDITIONAL_PARAM_COUNT),
-        io_device(dev_name),
-        start_switch_time(get_millisec()),
-        atv(NULL)
-#ifdef DEBUG_NO_IO_MODULES
-        , state(0),
-        freq(0)
-#endif // DEBUG_NO_IO_MODULES
-    {
-    set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
-    }
+    motor_altivar(const char *dev_name, device::DEVICE_SUB_TYPE sub_type,
+        u_int par_cnt = 0 );
 
     int save_device_ex(char *buff);
 
@@ -3685,12 +3675,22 @@ public:
 
     virtual void print() const;
 
-    virtual int get_params_count() const
-        {
-        return ADDITIONAL_PARAM_COUNT;
-        }
+    virtual int get_params_count() const;
+
+#ifdef DEBUG_NO_IO_MODULES
+    int set_cmd( const char* prop, u_int idx, double val );
+#endif // DEBUG_NO_IO_MODULES
+
 protected:
     altivar_node* atv;
+
+#ifdef DEBUG_NO_IO_MODULES
+    float freq = .0f;
+    char state = 0;
+    int reverse = 0;
+    float rpm = .0f;
+    int est = 0;
+#endif // DEBUG_NO_IO_MODULES
 
 private:
     enum CONSTANTS
@@ -3700,25 +3700,19 @@ private:
         C_MIN_VALUE = 0,
         C_MAX_VALUE = 100,
 
-        P_ON_TIME = 1,      ///< Индекс параметра времени включения (мсек).
+        P_ON_TIME = 1,          ///< Индекс параметра времени включения (мсек).
 
-        DO_INDEX = 0,         ///< Индекс канала дискретного выхода.
-        DO_INDEX_REVERSE = 1, ///< Индекс канала дискретного выхода реверса.
+        DO_INDEX = 0,           ///< Индекс канала дискретного выхода.
+        DO_INDEX_REVERSE = 1,   ///< Индекс канала дискретного выхода реверса.
 
-        DI_INDEX = 0,   ///< Индекс канала дискретного входа.
+        DI_INDEX = 0,           ///< Индекс канала дискретного входа.
         //   Или
-        DI_INDEX_ERROR = 0,   ///< Индекс канала дискретного входа ошибки.
+        DI_INDEX_ERROR = 0,     ///< Индекс канала дискретного входа ошибки.
 
-        AO_INDEX = 0,     ///< Индекс канала аналогового выхода.
+        AO_INDEX = 0,           ///< Индекс канала аналогового выхода.
     };
 
     u_long start_switch_time;
-
-#ifdef DEBUG_NO_IO_MODULES
-    char  state;  ///< Состояние устройства.
-
-    float freq;   ///< Состояние устройства (частота).
-#endif // DEBUG_NO_IO_MODULES
 };
 //-----------------------------------------------------------------------------
 /// @brief Электродвигатель, управляемый частотным преобразователем altivar с

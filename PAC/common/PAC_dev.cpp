@@ -6721,14 +6721,25 @@ int virtual_counter::save_device_ex( char *buff )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+motor_altivar::motor_altivar( const char* dev_name,
+    device::DEVICE_SUB_TYPE sub_type, u_int par_cnt ) :
+    i_motor( dev_name, sub_type, par_cnt + ADDITIONAL_PARAM_COUNT ),
+    io_device( dev_name ),
+    start_switch_time( get_millisec() ),
+    atv( NULL )
+    {
+    set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
+    }
 
 int motor_altivar::save_device_ex(char * buff)
     {
     int res = 0;
 #ifdef DEBUG_NO_IO_MODULES
-    res = sprintf(buff, "R=0, FRQ=0, RPM=0, EST=0, ");
+    res = sprintf( buff, "R=%d, FRQ=%.2f, RPM=%.2f, EST=%d, ",
+        reverse, freq, rpm, est );
 #else
-    res = sprintf(buff, "R=%d, FRQ=%f, RPM=%f, EST=%d, ", atv->reverse, atv->fc_value / 10, atv->rpm_value, atv->remote_state );
+    res = sprintf(buff, "R=%d, FRQ=%.2f, RPM=%.2f, EST=%d, ",
+        atv->reverse, atv->fc_value / 10, atv->rpm_value, atv->remote_state );
 #endif //DEBUG_NO_IO_MODULES
     return res;
     }
@@ -6868,6 +6879,42 @@ void motor_altivar::print() const
     {
     device::print();
     }
+
+int motor_altivar::get_params_count() const
+    {
+    return ADDITIONAL_PARAM_COUNT;
+    }
+
+#ifdef DEBUG_NO_IO_MODULES
+int motor_altivar::set_cmd( const char* prop, u_int idx, double val )
+    {
+    printf( "motor_altivar::set_cmd() - prop = %s, idx = %d, val = %f\n",
+        prop, idx, val );
+
+    if ( strcmp( prop, "R" ) == 0 )
+        {
+        reverse = static_cast<int>( val );
+        }
+    else if ( strcmp( prop, "FRQ" ) == 0 )
+        {
+        freq = static_cast<float>( val );
+        }
+    else if ( strcmp( prop, "RPM" ) == 0 )
+        {
+        rpm = static_cast<float>( val );
+        }
+    else if ( strcmp( prop, "EST" ) == 0 )
+        {
+        est = static_cast<int>( val );
+        }
+    else
+        {
+        return device::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    }
+#endif // DEBUG_NO_IO_MODULES
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float motor_altivar_linear::get_linear_speed() const
@@ -6878,7 +6925,11 @@ float motor_altivar_linear::get_linear_speed() const
 
     if ( 0 != d && 0 != n )
         {
+#ifdef DEBUG_NO_IO_MODULES
+        v = ( rpm * (float)M_PI * d ) / ( n * SEC_IN_MIN );
+#else
         v = ( atv->rpm_value * (float)M_PI * d ) / ( n * SEC_IN_MIN );
+#endif
         }
 
     return v;
