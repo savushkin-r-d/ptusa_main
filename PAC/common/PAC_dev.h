@@ -4273,6 +4273,9 @@ class camera : public i_camera, public device, public io_device
 
         int get_result( int n = 1 );
 
+        /// @brief Получение состояние готовности.
+        virtual bool is_ready() const;
+
     protected:
         bool is_cam_ready;
         int result;
@@ -4282,8 +4285,8 @@ class camera : public i_camera, public device, public io_device
             {
             INDEX_DO = 0,
 
-            INDEX_DI_READY = 0,
-            INDEX_DI_RES_1,
+            INDEX_DI_RES_1 = 0,
+            INDEX_DI_READY,
             INDEX_DI_RES_2,
             };
 
@@ -4301,7 +4304,7 @@ class camera_DI2 : public camera
 
         int get_state();
 
-        void evaluate_io();
+        void evaluate_io() override;
 
     protected:
         u_int start_switch_time;
@@ -4547,7 +4550,7 @@ class device_manager: public i_Lua_save_device
         //
         // Вызывается из Lua.
         io_device* add_io_device( int dev_type, int dev_sub_type,
-            const char *dev_name, char * descr, char* article );
+            const char *dev_name, const char * descr, const char* article );
     };
 //-----------------------------------------------------------------------------
 /// @brief таймер.

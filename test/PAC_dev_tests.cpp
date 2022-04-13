@@ -97,6 +97,16 @@ TEST( device_manager, add_io_device )
     auto res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_TE, device::DST_TE_ANALOG, "T1", "Test sensor", "T" );
     EXPECT_NE( nullptr, res );
+
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+    G_DEVICE_MANAGER()->save_device( buff );
+    EXPECT_STREQ( 
+        "t=\n"
+            "\t{\n"
+            "\tT1={M=0, ST=1, V=0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n"
+            "\t}\n",
+        buff );
     }
 
 
@@ -134,4 +144,19 @@ TEST( motor_altivar_linear, get_linear_speed )
     m1.set_cmd( "P_SHAFT_DIAMETER", 0, 2 );
     m1.set_cmd( "P_TRANSFER_RATIO", 0, 5 );    
     EXPECT_EQ( 2.09439516f, m1.get_linear_speed() );
+    }
+
+  TEST( camera, is_ready )
+    {
+    camera c1( "C1", device::DST_CAM_DO1_DI1 );
+    auto v = c1.is_ready();
+    EXPECT_TRUE( v );
+
+    camera_DI2 c2( "C2", device::DST_CAM_DO1_DI2 );
+    v = c2.is_ready();
+    EXPECT_FALSE( v );
+
+    camera_DI3 c3( "C3" );
+    v = c3.is_ready();
+    EXPECT_FALSE( v );
     }

@@ -1391,6 +1391,9 @@ class camera
 
         /// @brief Получение статуса событий от камеры.
         int get_result( int n = 1 );
+
+        /// @brief Получение состояние готовности.
+        bool is_ready() const;
     }
 //-----------------------------------------------------------------------------
 class PAC_info: public i_Lua_save_device

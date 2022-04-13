@@ -7,8 +7,30 @@
     },
     "configurePresets": [
         {
-            "name": "windows-default",
-            "displayName": "Visual Studio Community 2019 - x86 Release",
+            "name": "windows-VS2022-default",
+            "displayName": "Visual Studio Community 2022 - x86 Release",
+            "description": "Using compilers for Visual Studio 17 2022 (x86 architecture)",
+            "generator": "Visual Studio 17 2022",
+            "toolset": "host=x86",
+            "architecture": "win32",
+            "binaryDir": "${sourceDir}/bin/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/bin/install/${presetName}"
+            }
+        },
+        {
+            "name": "windows-VS2022-debug",
+            "displayName": "Visual Studio Community 2022 - x86 Debug",
+            "description": "Using compilers for Visual Studio 17 2022 (x86 architecture)",
+            "inherits": "windows-VS2022-default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "windows-VS2019-default",
+            "displayName": "Visual Studio Community 2019 - x86 Release",
             "description": "Using compilers for Visual Studio 16 2019 (x86 architecture)",
             "generator": "Visual Studio 16 2019",
             "toolset": "host=x86",
@@ -20,10 +42,10 @@
             }
         },
         {
-            "name": "windows-debug",
-            "displayName": "Visual Studio Community 2019 - x86 Debug",
+            "name": "windows-VS2019-debug",
+            "displayName": "Visual Studio Community 2019 - x86 Debug",
             "description": "Using compilers for Visual Studio 16 2019 (x86 architecture)",
-            "inherits": "windows-default",
+            "inherits": "windows-VS2019-default",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
             }
@@ -121,14 +143,24 @@
 
     "buildPresets": [
         {
-            "name": "build-windows-release",
+            "name": "build-windows-VS2022-release",
             "displayName": "Windows Release",
-            "configurePreset": "windows-default"
+            "configurePreset": "windows-VS2022-default"
         },
         {
-            "name": "build-windows-debug",
+            "name": "build-windows-VS2022-debug",
             "displayName": "Windows Debug",
-            "configurePreset": "windows-debug"
+            "configurePreset": "windows-VS2022-debug"
+        },
+        {
+            "name": "build-windows-VS2019-release",
+            "displayName": "Windows Release",
+            "configurePreset": "windows-VS2019-default"
+        },
+        {
+            "name": "build-windows-VS2019-debug",
+            "displayName": "Windows Debug",
+            "configurePreset": "windows-VS2019-debug"
         },
         {
             "name": "build-windows-AXCF3152-2021-LTS-Release",
@@ -151,9 +183,9 @@
             "configurePreset": "linux-default"
         },
         {
-          "name": "build-linux-Debug",
-          "displayName": "Linux Debug",
-          "configurePreset": "linux-debug"
+            "name": "build-linux-Debug",
+            "displayName": "Linux Debug",
+            "configurePreset": "linux-debug"
         }
     ]
 }

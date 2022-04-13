@@ -45,6 +45,18 @@ You could open file CMakeList.txt cloned repository in Qt.
 Or clone reposytory in Qt:
     New -> Import Project -> Git Clone
     specify the repository link and check the box Recursive
+	
+3. Microsoft Visual Studio Community 2022
+
+Before starting the project, you need to make sure that you have installed C++ CMake tools for Windows.
+C++ CMake tools for Windows are installed using:
+
+`Visual Studio Installer -> Development of classic applications in C++ -> C++ CMake tools for Windows`
+
+Detailed installation information can be obtained [here](https://docs.microsoft.com/en-us/cpp/build/cmake-projects-in-visual-studio?view=msvc-160). The CMake version required for the build is 3.13 and above.
+
+You should open (in Visual Studio) root directory. This you get a CMake based project.
+If an error occurs after startup, then you should clear the CMake cache `Project -> Delete cache and perform reconfiguration`.
 
 ### linux ###
 
@@ -56,8 +68,9 @@ To run demo project you should use this command line:
 
 ### win ###
 
- After building and deploying *`windows-default`* cmake-configuration:
+1. After building and deploying *`windows-default`* cmake-configuration:
 
 ```cmd
     bin\install\windows-default\Release\ptusa_main.exe demo_projects/T1-PLCnext-Demo/main.plua path demo_projects/T1-PLCnext-Demo/ sys_path demo_projects/T1-PLCnext-Demo/sys/ debug
 ```
+2. Launching a project in Microsoft Visual Studio Community 2022: `Select a launch item -> ptusa_main.exe`.

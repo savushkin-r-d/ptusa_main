@@ -109,33 +109,36 @@ NV_memory_manager::NV_memory_manager() : PAC_NVRAM( 0 ),
     last_NVRAM_pos( 0 ),
     last_EEPROM_pos( 0 )
     {
+    const int EEPROM_SIZE = 32768;
+    const int NVRAM_SIZE = 32;
+
 #ifdef WIN_OS
-    PAC_NVRAM  = new SRAM( "./nvram.txt", 32768, 0, 31 );
-    PAC_EEPROM = new SRAM( "./nvram.txt", 32768, 32, 32767 );
+    PAC_NVRAM  = new SRAM( "./nvram.txt", EEPROM_SIZE, 0, NVRAM_SIZE - 1 );
+    PAC_EEPROM = new SRAM( "./nvram.txt", EEPROM_SIZE, NVRAM_SIZE, EEPROM_SIZE - 1 );
 #endif // WIN_OS
 
 #if defined LINUX_OS && defined PAC_PC
-    PAC_NVRAM  = new SRAM( "./nvram.txt", 32768, 0, 31 );
-    PAC_EEPROM = new SRAM( "./nvram.txt", 32768, 32, 32767 );
+    PAC_NVRAM  = new SRAM( "./nvram.txt", EEPROM_SIZE, 0, NVRAM_SIZE - 1 );
+    PAC_EEPROM = new SRAM( "./nvram.txt", EEPROM_SIZE, NVRAM_SIZE, EEPROM_SIZE - 1 );
 #endif
 
 #if defined LINUX_OS && defined PAC_WAGO_750_860
-    PAC_NVRAM  = new SRAM( "/dev/nvram", 32768, 0, 31 );
-    PAC_EEPROM = new SRAM( "/dev/nvram", 32768, 32, 32767 );
+    PAC_NVRAM  = new SRAM( "/dev/nvram", EEPROM_SIZE, 0, NVRAM_SIZE - 1 );
+    PAC_EEPROM = new SRAM( "/dev/nvram", EEPROM_SIZE, NVRAM_SIZE, EEPROM_SIZE - 1 );
 #endif
 
 #if defined LINUX_OS && defined PAC_WAGO_PFC200
-    PAC_NVRAM  = new eeprom_PFC200( 32768, 0, 31 );
-    PAC_EEPROM = new eeprom_PFC200( 32768, 32, 32767 );
+    PAC_NVRAM  = new eeprom_PFC200( EEPROM_SIZE, 0, NVRAM_SIZE - 1 );
+    PAC_EEPROM = new eeprom_PFC200( EEPROM_SIZE, NVRAM_SIZE, EEPROM_SIZE - 1 );
 #endif
 
 #if defined LINUX_OS && defined PAC_PLCNEXT
 #ifdef PAC_PLCNEXT_ALONE
-    PAC_NVRAM  = new SRAM( "./nvram.txt", 32768, 0, 31 );
-    PAC_EEPROM = new SRAM( "./nvram.txt", 32768, 32, 32767 );
+    PAC_NVRAM  = new SRAM( "./nvram.txt", EEPROM_SIZE, 0, NVRAM_SIZE - 1 );
+    PAC_EEPROM = new SRAM( "./nvram.txt", EEPROM_SIZE, NVRAM_SIZE, EEPROM_SIZE - 1 );
 #else
-    PAC_NVRAM  = new eeprom_PLCnext( 32768, 0,     31 );
-    PAC_EEPROM = new eeprom_PLCnext( 32768, 32, 32767 );
+    PAC_NVRAM  = new eeprom_PLCnext( EEPROM_SIZE, 0, NVRAM_SIZE - 1 );
+    PAC_EEPROM = new eeprom_PLCnext( EEPROM_SIZE, NVRAM_SIZE, EEPROM_SIZE - 1 );
 #endif
 #endif
 
