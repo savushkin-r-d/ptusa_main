@@ -280,9 +280,9 @@ int device::save_device( char* buff, const char* prefix )
     res += save_device_ex( buff + res );
     res += par_device::save_device( buff + res );
 
-    //Убираем лишнюю последнюю запятую и пробел.
-    const int extra_symbols_length = 2; 
-    res += sprintf( buff + res - extra_symbols_length, "},\n" );
+    const int extra_symbols_length = 2;                     //Remove last " ,".
+    if ( res > extra_symbols_length ) res -= extra_symbols_length;
+    res += sprintf( buff + res, "},\n" );
 
     return res;
     }
@@ -1095,12 +1095,18 @@ void camera::set_string_property( const char* field, const char* value )
         ip = std::string( value );
         }
     }
+
+bool camera::is_ready() const
+    {
+    return is_cam_ready;
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 camera_DI2::camera_DI2( const char* dev_name, DEVICE_SUB_TYPE sub_type ) :
     camera( dev_name, sub_type, static_cast<int>( PARAMS::PARAMS_CNT ) - 1 ),
     start_switch_time( get_millisec() )
     {
+    is_cam_ready = false;
     set_par_name( static_cast<u_int>( PARAMS::P_READY_TIME ), 0, "P_READY_TIME" );
     }
 
@@ -1114,7 +1120,8 @@ void camera_DI2::evaluate_io()
 #ifndef DEBUG_NO_IO_MODULES
     int o = get_DO( static_cast<u_int>( CONSTANTS::INDEX_DO ) );
     int i = get_DI( static_cast<u_int>( CONSTANTS::INDEX_DI_READY ) );
-    if ( o == i )
+
+    if ( 1 == i )
         {
         start_switch_time = get_millisec();
         state = o;
@@ -1425,7 +1432,7 @@ camera* device_manager::get_CAM( const char* dev_name )
     }
 //-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
-                        const char* dev_name, char * descr, char* article )
+                        const char* dev_name, const char * descr, const char* article )
     {
     static char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
 

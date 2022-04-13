@@ -138,6 +138,11 @@ template < class type > class auto_smart_ptr : public smart_ptr< type >
             free();
             }
 
+        void replace_without_free( type* new_t )
+            {
+            smart_ptr< type >::pointer = new_t;
+            }
+
         /// @brief Оператор присваивания указателя.
         auto_smart_ptr< type >& operator = ( type* new_t )
             {
