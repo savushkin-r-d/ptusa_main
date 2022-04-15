@@ -2226,117 +2226,6 @@ int device_manager::init_rt_params()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-int i_counter::get_state()
-    {
-    if ( !motors.empty() )
-        {
-        char is_pump_working = 0;
-
-        for ( u_int i = 0; i < motors.size(); i++ )
-            {
-            if ( motors[ i ]->get_state() == 1 )
-                {
-                is_pump_working = 1;
-                if ( 0 == start_pump_working_time )
-                    {
-                    start_pump_working_time = get_millisec();
-                    counter_prev_value = get_abs_quantity();
-                    }
-                }
-            }
-
-        if ( 0 == is_pump_working )
-            {
-            // Насос не работает.
-            start_pump_working_time = 0;
-            }
-        else
-            {
-            // Насос работает.
-            if ( state == STATES::S_PAUSE )
-                {
-                start_pump_working_time = get_millisec();
-                }
-            else // Работа.
-                {
-                state = STATES::S_WORK;
-                auto dt = get_pump_dt();
-                if ( get_delta_millisec( start_pump_working_time ) > dt )
-                    {
-                    // Проверяем счетчик на ошибку - он должен изменить свои показания.
-                    if ( get_abs_quantity() == counter_prev_value )
-                        {
-                        state = STATES::S_ERROR;
-                        }
-                    else
-                        {
-                        start_pump_working_time = get_millisec();
-                        counter_prev_value = get_abs_quantity();
-                        }
-                    }
-                }
-            }
-        }// if ( motors.size() > 0
-
-    return static_cast<int>( state );
-    };
-//-----------------------------------------------------------------------------
-void i_counter::direct_set_state( int new_state )
-    {
-#ifdef DEBUG_NO_IO_MODULES
-    state = static_cast<STATES>( new_state );
-#else
-    switch ( new_state )
-        {
-        case S_STOP:
-            state = S_STOP;
-            reset();
-            break;
-
-        case S_WORK:
-            start();
-            break;
-
-        case S_PAUSE:
-            pause();
-            break;
-        }
-#endif
-    }
-//-----------------------------------------------------------------------------
-void i_counter::set_property( const char* field, device* dev )
-    {
-    if ( field && field[ 0 ] == 'M' ) //Связанные насосы.
-        {
-        motors.push_back( dev );
-        }
-    }
-//-----------------------------------------------------------------------------
-void i_counter::pause()
-    {
-    get_quantity(); // Пересчитываем значение счетчика.
-
-    state = STATES::S_PAUSE;
-    }
-//-----------------------------------------------------------------------------
-void i_counter::start()
-    {
-    if ( STATES::S_STOP == state || STATES::S_PAUSE == state )
-        {
-        if ( STATES::S_STOP == state )
-            {
-            value = 0;
-            }
-
-        state = STATES::S_WORK;
-        }
-    }
-//-----------------------------------------------------------------------------
-void i_counter::reset()
-    {
-    value = 0;
-    }
-//-----------------------------------------------------------------------------
 void i_counter::restart()
     {
     reset();
@@ -2541,6 +2430,128 @@ void dev_stub::process_DO( u_int n, DO_state state, const char* name )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+int base_counter::get_state()
+    {
+    if ( !motors.empty() )
+        {
+        char is_pump_working = 0;
+
+        for ( u_int i = 0; i < motors.size(); i++ )
+            {
+            if ( motors[ i ]->get_state() == 1 )
+                {
+                is_pump_working = 1;
+                if ( 0 == start_pump_working_time )
+                    {
+                    start_pump_working_time = get_millisec();
+                    counter_prev_value = get_abs_quantity();
+                    }
+                }
+            }
+
+        if ( 0 == is_pump_working )
+            {
+            // Насос не работает.
+            start_pump_working_time = 0;
+            }
+        else
+            {
+            // Насос работает.
+            if ( state == STATES::S_PAUSE )
+                {
+                start_pump_working_time = get_millisec();
+                }
+            else // Работа.
+                {
+                state = STATES::S_WORK;
+                auto dt = get_pump_dt();
+                if ( get_delta_millisec( start_pump_working_time ) > dt )
+                    {
+                    // Проверяем счетчик на ошибку - он должен изменить свои показания.
+                    if ( get_abs_quantity() == counter_prev_value )
+                        {
+                        state = STATES::S_ERROR;
+                        }
+                    else
+                        {
+                        start_pump_working_time = get_millisec();
+                        counter_prev_value = get_abs_quantity();
+                        }
+                    }
+                }
+            }
+        }// if ( motors.size() > 0
+
+    return static_cast<int>( state );
+    };
+//-----------------------------------------------------------------------------
+void base_counter::direct_set_state( int new_state )
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    state = static_cast<STATES>( new_state );
+#else
+    switch ( new_state )
+        {
+        case S_STOP:
+            state = S_STOP;
+            reset();
+            break;
+
+        case S_WORK:
+            start();
+            break;
+
+        case S_PAUSE:
+            pause();
+            break;
+        }
+#endif
+    }
+//-----------------------------------------------------------------------------
+void base_counter::set_property( const char* field, device* dev )
+    {
+    if ( field && field[ 0 ] == 'M' ) //Связанные насосы.
+        {
+        motors.push_back( dev );
+        }
+    }
+//-----------------------------------------------------------------------------
+void base_counter::pause()
+    {
+    get_quantity(); // Пересчитываем значение счетчика.
+
+    state = STATES::S_PAUSE;
+    }
+//-----------------------------------------------------------------------------
+void base_counter::start()
+    {
+    if ( STATES::S_STOP == state || STATES::S_PAUSE == state )
+        {
+        if ( STATES::S_STOP == state )
+            {
+            value = 0;
+            }
+
+        state = STATES::S_WORK;
+        }
+    }
+//-----------------------------------------------------------------------------
+void base_counter::reset()
+    {
+    value = 0;
+    }
+//-----------------------------------------------------------------------------
+void base_counter::restart()
+    {
+    reset();
+    start();
+    }
+//-----------------------------------------------------------------------------
+base_counter::~base_counter()
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 float counter::get_value()
     {
     return (float)get_quantity();
@@ -2553,7 +2564,7 @@ void counter::direct_set_value( float new_value )
 //-----------------------------------------------------------------------------
 int counter::get_state()
     {
-    return i_counter::get_state();
+    return base_counter::get_state();
     }
 //-----------------------------------------------------------------------------
 void counter::direct_on()
@@ -2568,7 +2579,7 @@ void counter::direct_off()
 //-----------------------------------------------------------------------------
 void counter::direct_set_state( int new_state )
     {
-    i_counter::direct_set_state( new_state );
+    base_counter::direct_set_state( new_state );
     }
 //-----------------------------------------------------------------------------
 void counter::print() const
@@ -2583,7 +2594,7 @@ void counter::start()
         {
         last_read_value = *( ( u_int_2* ) get_AI_data( AI_Q_INDEX ) );
         }
-    i_counter::start();
+    base_counter::start();
     }
 //-----------------------------------------------------------------------------
 void counter::abs_reset()
@@ -2687,7 +2698,7 @@ float counter::get_flow()
 //-----------------------------------------------------------------------------
 void counter::set_property( const char* field, device* dev )
     {
-    i_counter::set_property( field, dev );
+    base_counter::set_property( field, dev );
     }
 //-----------------------------------------------------------------------------
 counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
@@ -2747,7 +2758,7 @@ int counter_f::get_state()
         return (int) STATES::S_HI_ERR;
         }
 
-    return i_counter::get_state();
+    return base_counter::get_state();
     }
 //-----------------------------------------------------------------------------
 void set_property( const char* field, device* dev );

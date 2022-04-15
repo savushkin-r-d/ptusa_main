@@ -46,7 +46,6 @@
 #pragma warning(disable: 26812) //Prefer 'enum class' over 'enum'.
 #endif // WIN_OS
 
-class devce;
 class PID;
 //-----------------------------------------------------------------------------
 /// @brief Устройство c параметрами.
@@ -144,15 +143,15 @@ class i_counter
         virtual ~i_counter();
 
         /// @brief Приостановка работы счетчика.
-        virtual void pause();
+        virtual void pause() = 0;
 
         /// @brief Возобновление работы счетчика.
-        virtual void start();
+        virtual void start() = 0;
 
         /// @brief Сброс счетчика и остановка счета.
         ///
         /// После сброса для продолжения работы необходимо вызвать @ref start().
-        virtual void reset();
+        virtual void reset() = 0;
 
         /// @brief Сброс счетчика и продолжение счета.
         void restart();
@@ -164,11 +163,7 @@ class i_counter
         virtual float get_flow() = 0;
 
         /// @brief Получение состояния работы счетчика.
-        virtual int get_state();
-
-        void direct_set_state( int new_state );
-
-        virtual void set_property( const char* field, device* dev );
+        virtual int get_state() = 0;
 
         /// @brief Получение абсолютного значения счетчика (без учета
         /// состояния паузы).
@@ -192,16 +187,6 @@ class i_counter
     protected:
         /// @brief Получение времени ожидания работы насоса.
         virtual u_long get_pump_dt() const = 0;
-
-    private:
-        STATES state = STATES::S_WORK;
-
-        u_int_4 start_pump_working_time = 0;
-        u_int_4 counter_prev_value = 0;
-
-        std::vector < device* > motors;
-
-        u_int value = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс противосмешивающего клапана (mixproof).
@@ -3899,9 +3884,47 @@ class lamp : public DO1
             }
     };
 //-----------------------------------------------------------------------------
+/// @brief Базовый счетчик.
+class base_counter: public i_counter
+    {
+    public:
+        virtual ~base_counter();
+
+        /// @brief Приостановка работы счетчика.
+        virtual void pause();
+
+        /// @brief Возобновление работы счетчика.
+        virtual void start();
+
+        /// @brief Сброс счетчика и остановка счета.
+        ///
+        /// После сброса для продолжения работы необходимо вызвать @ref start().
+        virtual void reset();
+
+        /// @brief Сброс счетчика и продолжение счета.
+        void restart();
+
+        /// @brief Получение состояния работы счетчика.
+        virtual int get_state();
+
+        void direct_set_state( int new_state );
+
+        virtual void set_property( const char* field, device* dev );
+
+    private:
+        STATES state = STATES::S_WORK;
+
+        u_int_4 start_pump_working_time = 0;
+        u_int_4 counter_prev_value = 0;
+
+        std::vector < device* > motors;
+
+        u_int value = 0;
+    };
+//-----------------------------------------------------------------------------
 /// @brief Счетчик.
 class counter : public device,
-    public i_counter,
+    public base_counter,
     public io_device
     {
     public:
