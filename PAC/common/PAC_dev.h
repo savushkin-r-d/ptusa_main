@@ -141,15 +141,15 @@ class i_counter
     {
     public:
         /// @brief Приостановка работы счетчика.
-        virtual void pause() = 0;
+        virtual void pause();
 
         /// @brief Возобновление работы счетчика.
-        virtual void start() = 0;
+        virtual void start();
 
         /// @brief Сброс счетчика и остановка счета.
         ///
         /// После сброса для продолжения работы необходимо вызвать @ref start().
-        virtual void reset() = 0;
+        virtual void reset();
 
         /// @brief Сброс счетчика и продолжение счета.
         void restart();
@@ -161,7 +161,11 @@ class i_counter
         virtual float get_flow() = 0;
 
         /// @brief Получение состояния работы счетчика.
-        virtual int get_state() = 0;
+        virtual int get_state();
+
+        void direct_set_state( int new_state );
+
+        virtual void set_property( const char* field, device* dev );
 
         /// @brief Получение абсолютного значения счетчика (без учета
         /// состояния паузы).
@@ -172,7 +176,7 @@ class i_counter
 
         virtual ~i_counter();
 
-        enum STATES
+        enum class STATES
             {
             S_STOP,
             S_WORK,
@@ -183,6 +187,20 @@ class i_counter
             S_LOW_ERR = -2,
             S_HI_ERR = -3,
             };
+
+    protected:
+        /// @brief Получение времени ожидания работы насоса.
+        virtual u_long get_pump_dt() const = 0;
+
+    private:
+        STATES state = STATES::S_WORK;
+
+        u_int_4 start_pump_working_time = 0;
+        u_int_4 counter_prev_value = 0;
+
+        std::vector < device* > motors;
+
+        u_int value = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс противосмешивающего клапана (mixproof).
@@ -494,6 +512,7 @@ class device : public i_DO_AO_device, public par_device
             DST_FQT_F,     ///< Счетчик + расход.
             DST_FQT_F_OK,  ///< Счетчик + расход c диагностикой.
             DST_FQT_VIRT,  ///Виртуальный cчетчик (без привязки к модулям).
+            DST_FQT_IOLINK,/// Счетчик IO-Link.
 
             //QT
             DST_QT = 1,   ///< Концентратомер.
@@ -3251,7 +3270,7 @@ class virtual_counter : public device, public i_counter
 
         void direct_set_value( float new_value );
 
-        int get_state();
+        int get_state();        
 
         void direct_on();
 
@@ -3287,6 +3306,8 @@ class virtual_counter : public device, public i_counter
 
     protected:
         STATES state;
+
+        u_long get_pump_dt() const;
 
     private:
         float flow_value;
@@ -3899,14 +3920,11 @@ class counter : public device,
         void  direct_set_state( int new_state );
         virtual void  print() const;
 
-        void  pause();
         void  start();
-        void  reset();
         u_int get_quantity();
-        float get_flow()
-            {
-            return 0;
-            }
+        float get_flow();
+
+        void set_property( const char* field, device* dev );
 
         /// @brief Получение абсолютного значения счетчика (без учета
         /// состояния паузы).
@@ -3924,7 +3942,10 @@ class counter : public device,
             }
 
     protected:
-        STATES state;
+        u_long get_pump_dt() const
+            {
+            return 0;
+            };
 
     private:
 
@@ -3964,17 +3985,12 @@ class counter_f : public counter
 
         float get_flow();
 
-        void set_property( const char* field, device* dev );
-
         int set_cmd( const char *prop, u_int idx, double val );
 
         //Lua.
         int save_device_ex( char *buff );
 
     private:
-        u_int_4 start_pump_working_time = 0;
-        u_int_4 counter_prev_value = 0;
-
         enum CONSTANTS
             {
             ADDITIONAL_PARAMS_COUNT = 4,
@@ -3988,8 +4004,6 @@ class counter_f : public counter
             };
 
         float flow_value;
-
-        std::vector < device* > motors;
     };
 //-----------------------------------------------------------------------------
 /// @brief Счетчик c диагностикой.
@@ -4009,6 +4023,84 @@ class counter_f_ok : public counter_f
             {
             DI_INDEX = 0,  ///< Индекс канала дискретного входа (диагностики).
             };
+    };
+//-----------------------------------------------------------------------------
+/// @brief Счетчик IO-Link.
+class counter_iolink : public counter_f
+    {
+    public:
+        counter_iolink( const char* dev_name ) : counter_f( dev_name ) {};
+
+        ~counter_iolink()
+            {
+            delete in_info;
+            in_info = nullptr;
+            };
+
+        void evaluate_io()
+            {
+            char* data = (char*)get_AI_data( 0 );
+            char* buff = (char*)in_info;
+
+            const int SIZE = 8;
+            std::copy( data, data + SIZE, buff );
+
+#define DEBUG_FQT_IOLINK 1
+#ifdef DEBUG_FQT_IOLINK
+            //Variants of float representation.
+            int a1 = ( buff[ 0 ] << 24 ) + ( buff[ 1 ] << 16 ) + ( buff[ 2 ] << 8 ) + buff[ 3 ];
+            int a2 = ( buff[ 1 ] << 24 ) + ( buff[ 0 ] << 16 ) + ( buff[ 3 ] << 8 ) + buff[ 2 ];
+            int a3 = ( buff[ 2 ] << 24 ) + ( buff[ 3 ] << 16 ) + ( buff[ 1 ] << 8 ) + buff[ 0 ];
+            int a4 = ( buff[ 3 ] << 24 ) + ( buff[ 2 ] << 16 ) + ( buff[ 0 ] << 8 ) + buff[ 1 ];
+            float* f1 = (float*)&a1;
+            float* f2 = (float*)&a2;
+            float* f3 = (float*)&a3;
+            float* f4 = (float*)&a4;
+            sprintf( G_LOG->msg, "WARNING %s %f %f %f %f", get_name(),
+                *f1, *f2, *f3, *f4 );
+            G_LOG->write_log( i_log::P_WARNING );
+#endif
+
+            //Reverse byte order to get correct float.
+            std::swap( buff[ 3 ], buff[ 0 ] );
+            std::swap( buff[ 1 ], buff[ 2 ] );
+            //Reverse byte order to get correct int16.
+            std::swap( buff[ 4 ], buff[ 5 ] );
+            std::swap( buff[ 6 ], buff[ 7 ] );
+
+#ifdef DEBUG_FQT_IOLINK
+            sprintf( G_LOG->msg,
+                "Totalizer %.2f, flow %d, temperature %d, status2 %d, status1 %d\n",
+                in_info->totalizer, in_info->flow, in_info->temperature,
+                in_info->out2, in_info->out1 );
+            G_LOG->write_log( i_log::P_NOTICE );
+#endif
+            };
+
+        float get_temperature() const
+            {
+            return 0.1f * in_info->temperature;
+            }
+
+        int save_device_ex( char* buff )
+            {
+            int res = sprintf( buff, "T=%.1f, ", get_temperature() );
+
+            return res;
+            }
+
+    private:
+        struct in_data
+            {
+            float totalizer;        //Quantity meter which continuously totals the
+                                    //volumetric flow since the last reset.
+            int16_t flow;           //Current flow.
+            int16_t temperature : 14;   //Current temperature.
+            bool out2 : 1;          //Status depends on [OU2].
+            bool out1 : 1;          //Status depends on [OU1].
+            };
+
+        in_data* in_info = new in_data;
     };
 //-----------------------------------------------------------------------------
 /// @brief Сигнальная колонна.
@@ -4371,6 +4463,8 @@ class dev_stub : public i_counter, public valve, public i_wages,
         void    reset();
         u_int   get_quantity();
         float   get_flow();
+
+        u_long get_pump_dt() const;
 
         u_int get_abs_quantity();
         void  abs_reset();

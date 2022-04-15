@@ -2226,6 +2226,117 @@ int device_manager::init_rt_params()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+int i_counter::get_state()
+    {
+    if ( !motors.empty() )
+        {
+        char is_pump_working = 0;
+
+        for ( u_int i = 0; i < motors.size(); i++ )
+            {
+            if ( motors[ i ]->get_state() == 1 )
+                {
+                is_pump_working = 1;
+                if ( 0 == start_pump_working_time )
+                    {
+                    start_pump_working_time = get_millisec();
+                    counter_prev_value = get_abs_quantity();
+                    }
+                }
+            }
+
+        if ( 0 == is_pump_working )
+            {
+            // Насос не работает.
+            start_pump_working_time = 0;
+            }
+        else
+            {
+            // Насос работает.
+            if ( state == STATES::S_PAUSE )
+                {
+                start_pump_working_time = get_millisec();
+                }
+            else // Работа.
+                {
+                state = STATES::S_WORK;
+                auto dt = get_pump_dt();
+                if ( get_delta_millisec( start_pump_working_time ) > dt )
+                    {
+                    // Проверяем счетчик на ошибку - он должен изменить свои показания.
+                    if ( get_abs_quantity() == counter_prev_value )
+                        {
+                        state = STATES::S_ERROR;
+                        }
+                    else
+                        {
+                        start_pump_working_time = get_millisec();
+                        counter_prev_value = get_abs_quantity();
+                        }
+                    }
+                }
+            }
+        }// if ( motors.size() > 0
+
+    return static_cast<int>( state );
+    };
+//-----------------------------------------------------------------------------
+void i_counter::direct_set_state( int new_state )
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    state = static_cast<STATES>( new_state );
+#else
+    switch ( new_state )
+        {
+        case S_STOP:
+            state = S_STOP;
+            reset();
+            break;
+
+        case S_WORK:
+            start();
+            break;
+
+        case S_PAUSE:
+            pause();
+            break;
+        }
+#endif
+    }
+//-----------------------------------------------------------------------------
+void i_counter::set_property( const char* field, device* dev )
+    {
+    if ( field && field[ 0 ] == 'M' ) //Связанные насосы.
+        {
+        motors.push_back( dev );
+        }
+    }
+//-----------------------------------------------------------------------------
+void i_counter::pause()
+    {
+    get_quantity(); // Пересчитываем значение счетчика.
+
+    state = STATES::S_PAUSE;
+    }
+//-----------------------------------------------------------------------------
+void i_counter::start()
+    {
+    if ( STATES::S_STOP == state || STATES::S_PAUSE == state )
+        {
+        if ( STATES::S_STOP == state )
+            {
+            value = 0;
+            }
+
+        state = STATES::S_WORK;
+        }
+    }
+//-----------------------------------------------------------------------------
+void i_counter::reset()
+    {
+    value = 0;
+    }
+//-----------------------------------------------------------------------------
 void i_counter::restart()
     {
     reset();
@@ -2407,6 +2518,11 @@ float dev_stub::get_flow()
     return 0.;
     }
 //-----------------------------------------------------------------------------
+u_long dev_stub::get_pump_dt() const
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 void dev_stub::abs_reset()
     {
     }
@@ -2437,7 +2553,7 @@ void counter::direct_set_value( float new_value )
 //-----------------------------------------------------------------------------
 int counter::get_state()
     {
-    return (int) state;
+    return i_counter::get_state();
     }
 //-----------------------------------------------------------------------------
 void counter::direct_on()
@@ -2452,25 +2568,7 @@ void counter::direct_off()
 //-----------------------------------------------------------------------------
 void counter::direct_set_state( int new_state )
     {
-#ifdef DEBUG_NO_IO_MODULES
-    state = ( STATES ) new_state;
-#else
-    switch ( new_state )
-        {
-        case S_STOP:
-            state = S_STOP;
-            reset();
-            break;
-
-        case S_WORK:
-            start();
-            break;
-
-        case S_PAUSE:
-            pause();
-            break;
-        }
-#endif
+    i_counter::direct_set_state( new_state );
     }
 //-----------------------------------------------------------------------------
 void counter::print() const
@@ -2479,30 +2577,13 @@ void counter::print() const
     //io_device::print();
     }
 //-----------------------------------------------------------------------------
-void counter::pause()
-    {
-    get_quantity(); // Пересчитываем значение счетчика.
-
-    state = STATES::S_PAUSE;
-    }
-//-----------------------------------------------------------------------------
 void counter::start()
     {
-    if ( STATES::S_STOP == state || STATES::S_PAUSE == state )
+    if ( (int) STATES::S_STOP == get_state() || (int) STATES::S_PAUSE == get_state() )
         {
-        if ( STATES::S_STOP == state )
-            {
-            value = 0;
-            }
-
-        state = STATES::S_WORK;
         last_read_value = *( ( u_int_2* ) get_AI_data( AI_Q_INDEX ) );
         }
-    }
-//-----------------------------------------------------------------------------
-void counter::reset()
-    {
-    value = 0;
+    i_counter::start();
     }
 //-----------------------------------------------------------------------------
 void counter::abs_reset()
@@ -2599,12 +2680,20 @@ u_int counter::get_quantity()
     return value;
     }
 //-----------------------------------------------------------------------------
+float counter::get_flow()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+void counter::set_property( const char* field, device* dev )
+    {
+    i_counter::set_property( field, dev );
+    }
+//-----------------------------------------------------------------------------
 counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
                      int extra_par_cnt ):
     device( dev_name, DT_FQT, DST_FQT, extra_par_cnt ),
     io_device( dev_name ),
-    state( STATES::S_WORK ),
-    value( 0 ),
     last_read_value( 0 ),
     abs_value( 0 ),
     abs_last_read_value( 0 ),
@@ -2641,56 +2730,6 @@ counter_f::counter_f( const char *dev_name ) :
 //-----------------------------------------------------------------------------
 int counter_f::get_state()
     {
-    if ( !motors.empty() )
-        {
-        char is_pump_working = 0;
-
-        for ( u_int i = 0; i < motors.size(); i++ )
-            {
-            if ( motors[ i ]->get_state() == 1 )
-                {
-                is_pump_working = 1;
-                if ( 0 == start_pump_working_time )
-                    {
-                    start_pump_working_time = get_millisec();
-                    counter_prev_value = get_abs_quantity();
-                    }
-                }
-            }
-
-        if ( 0 == is_pump_working )
-            {
-            // Насос не работает.
-            start_pump_working_time = 0;
-            }
-        else
-            {
-            // Насос работает.
-            if ( state == STATES::S_PAUSE )
-                {
-                start_pump_working_time = get_millisec();
-                }
-            else          // Работа.
-                {
-                state = STATES::S_WORK;
-                auto dt = get_par( P_DT, 0 );
-                if ( get_delta_millisec( start_pump_working_time ) > dt )
-                    {
-                    // Проверяем счетчик на ошибку - он должен изменить свои показания.
-                    if ( get_abs_quantity() == counter_prev_value )
-                        {
-                        state = STATES::S_ERROR;
-                        }
-                    else
-                        {
-                        start_pump_working_time = get_millisec();
-                        counter_prev_value = get_abs_quantity();
-                        }
-                    }
-                }
-            }
-        }// if ( motors.size() > 0
-
     if ( get_flow() == -1. )
         {
         return (int) STATES::S_LOW_ERR;
@@ -2700,8 +2739,10 @@ int counter_f::get_state()
         return (int) STATES::S_HI_ERR;
         }
 
-    return (int) state;
+    return i_counter::get_state();
     }
+//-----------------------------------------------------------------------------
+void set_property( const char* field, device* dev );
 //-----------------------------------------------------------------------------
 float counter_f::get_flow()
     {
@@ -2711,18 +2752,6 @@ float counter_f::get_flow()
 #else
         get_AI( AI_FLOW_INDEX, get_par( P_MIN_FLOW, 0 ), get_par( P_MAX_FLOW, 0 ) );
 #endif // NO_WAGO_MODULES
-    }
-//-----------------------------------------------------------------------------
-void counter_f::set_property( const char* field, device* dev )
-    {
-    if ( field && field[ 0 ] == 'M' ) //Связанные насосы.
-        {
-        motors.push_back( dev );
-        }
-    else
-        {
-        counter::set_property( field, dev );
-        }
     }
 //-----------------------------------------------------------------------------
 int counter_f::set_cmd(const char *prop, u_int idx, double val)
@@ -6718,6 +6747,11 @@ int virtual_counter::save_device_ex( char *buff )
     res += sprintf( buff + res, "F=%.2f, ", get_flow() );
 
     return res;
+    }
+
+u_long virtual_counter::get_pump_dt() const
+    {
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
