@@ -46,6 +46,7 @@
 #pragma warning(disable: 26812) //Prefer 'enum class' over 'enum'.
 #endif // WIN_OS
 
+class devce;
 class PID;
 //-----------------------------------------------------------------------------
 /// @brief Устройство c параметрами.
@@ -140,6 +141,8 @@ class par_device
 class i_counter
     {
     public:
+        virtual ~i_counter();
+
         /// @brief Приостановка работы счетчика.
         virtual void pause();
 
@@ -172,9 +175,7 @@ class i_counter
         virtual u_int get_abs_quantity() = 0;
 
         /// @brief Сброс абсолютного значения счетчика.
-        virtual void  abs_reset() = 0;
-
-        virtual ~i_counter();
+        virtual void  abs_reset() = 0;        
 
         enum class STATES
             {
@@ -3908,9 +3909,7 @@ class counter : public device,
             DEVICE_SUB_TYPE sub_type = device::DST_FQT,
             int extra_par_cnt = ADDITIONAL_PARAMS_COUNT );
 
-        virtual ~counter()
-            {
-            }
+        virtual ~counter();
 
         float get_value();
         void  direct_set_value( float new_value );
@@ -3977,9 +3976,7 @@ class counter_f : public counter
     public:
         counter_f( const char *dev_name );
 
-        virtual ~counter_f()
-            {
-            }
+        virtual ~counter_f();
 
         int get_state();
 
@@ -3989,6 +3986,12 @@ class counter_f : public counter
 
         //Lua.
         int save_device_ex( char *buff );
+
+    protected:
+        u_long get_pump_dt() const
+            {
+            return static_cast<u_long>( get_par( P_DT, 0 ) );
+            }
 
     private:
         enum CONSTANTS

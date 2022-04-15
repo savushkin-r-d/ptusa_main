@@ -2702,6 +2702,10 @@ counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
     {
     }
 //-----------------------------------------------------------------------------
+counter::~counter()
+    {
+    }
+//-----------------------------------------------------------------------------
 int counter::set_cmd(const char *prop, u_int idx, double val)
     {
     switch ( prop[ 0 ] )
@@ -2726,6 +2730,10 @@ counter_f::counter_f( const char *dev_name ) :
     set_par_name( P_MAX_FLOW, 0, "P_MAX_FLOW" );
     set_par_name( P_CZ, 0, "P_CZ" );
     set_par_name( P_DT, 0, "P_DT" );
+    }
+//-----------------------------------------------------------------------------
+counter_f::~counter_f()
+    {
     }
 //-----------------------------------------------------------------------------
 int counter_f::get_state()
@@ -6627,16 +6635,16 @@ void virtual_counter::direct_set_state( int new_state )
     {
     switch ( new_state )
         {
-        case STATES::S_STOP:
+        case static_cast<int>( STATES::S_STOP ):
             state = STATES::S_STOP;
             reset();
             break;
 
-        case STATES::S_WORK:
+        case static_cast<int>( STATES::S_WORK ):
             start();
             break;
 
-        case STATES::S_PAUSE:
+        case static_cast<int>( STATES::S_PAUSE ):
             pause();
             break;
         }
