@@ -733,9 +733,6 @@ class analog_io_device : public device, public io_device
             u_int par_cnt ):
         device( dev_name, type, sub_type, par_cnt ),
             io_device( dev_name )
-#ifdef DEBUG_NO_IO_MODULES
-            ,value( 0 )
-#endif  // DEBUG_NO_IO_MODULES
             {
             }
 
@@ -759,7 +756,7 @@ class analog_io_device : public device, public io_device
 
 #ifdef DEBUG_NO_IO_MODULES
     private:
-        float value;    ///< Состояние устройства.
+        float value = .0f;    ///< Состояние устройства.
 #endif // DEBUG_NO_IO_MODULES
     };
 //-----------------------------------------------------------------------------
@@ -3901,6 +3898,12 @@ class base_counter: public i_counter
         /// После сброса для продолжения работы необходимо вызвать @ref start().
         virtual void reset();
 
+        /// @brief Сброс абсолютного значения счетчика.
+        void abs_reset()
+            {
+            abs_value = .0f;
+            }
+
         /// @brief Сброс счетчика и продолжение счета.
         void restart();
 
@@ -3909,9 +3912,86 @@ class base_counter: public i_counter
 
         void direct_set_state( int new_state );
 
+        void direct_set_value( float new_value )
+            {
+            value = new_value;
+            }
+
+        void set_abs_value( float new_value )
+            {
+            abs_value = new_value;
+            };
+
         virtual void set_property( const char* field, device* dev );
 
+        /// @brief Получение значение счетчика от устройства.
+        virtual float get_raw_value() const = 0;
+
+        /// @brief Получение максимального значение счетчика от устройства.
+        virtual float get_max_raw_value() const = 0;
+
+        void calculate_quantity( float &value, float& last_read_value, bool& is_first_read )
+            {
+            float current = get_raw_value();
+
+            if ( is_first_read )
+                {
+                if ( current != 0 )
+                    {
+                    last_read_value = current;
+                    is_first_read = false;
+                    }
+                }
+            else
+                {
+                float delta;
+                if ( current < last_read_value )
+                    {
+                    delta = get_max_raw_value() - last_read_value + current;
+                    if ( delta > MAX_OVERFLOW )
+                        {
+                        if ( current < delta )
+                            {
+                            delta = current;
+                            }
+                        }
+                    }
+                else
+                    {
+                    delta = current - last_read_value;
+                    }
+
+                last_read_value = current;
+                if ( delta > 0 )
+                    {
+                    value += delta;
+                    }
+                }
+            }
+
+        /// @brief Получение значения счетчика (c учетом состояния паузы).
+        u_int get_quantity()
+            {
+            if ( STATES::S_WORK == static_cast<STATES>( get_state() ) )
+                {
+                calculate_quantity( value, last_read_value, is_first_read );
+                }
+
+            return static_cast<u_int>( value );
+            }
+
+        /// @brief Получение абсолютного значения счетчика (без учета
+        /// состояния паузы).
+        u_int get_abs_quantity()
+            {
+            calculate_quantity( abs_value, abs_last_read_value, abs_is_first_read );
+
+            return static_cast<u_int>( abs_value );
+            }
+
     private:
+        const int MAX_OVERFLOW = 300;   ///< Максимальное переполнение за цикл.
+
         STATES state = STATES::S_WORK;
 
         u_int_4 start_pump_working_time = 0;
@@ -3919,7 +3999,13 @@ class base_counter: public i_counter
 
         std::vector < device* > motors;
 
-        u_int value = 0;
+        bool is_first_read = true;      ///< Флаг первой установки значения.
+        float value = .0f;
+        float last_read_value = 0.f;
+
+        bool abs_is_first_read = true;
+        float abs_value = 0.f;  ///< Абсолютное значение (не становится на паузу).
+        float abs_last_read_value = 0.f;
     };
 //-----------------------------------------------------------------------------
 /// @brief Счетчик.
@@ -3935,25 +4021,21 @@ class counter : public device,
         virtual ~counter();
 
         float get_value();
-        void  direct_set_value( float new_value );
+
+        void direct_set_value( float new_value )
+            {
+            base_counter::direct_set_value( new_value );
+            };
+
         int   get_state();
         void  direct_on();
         void  direct_off();
         void  direct_set_state( int new_state );
         virtual void  print() const;
 
-        void  start();
-        u_int get_quantity();
         float get_flow();
 
         void set_property( const char* field, device* dev );
-
-        /// @brief Получение абсолютного значения счетчика (без учета
-        /// состояния паузы).
-        u_int get_abs_quantity();
-
-        /// @brief Сброс абсолютного значения счетчика.
-        void  abs_reset();
 
         int set_cmd( const char *prop, u_int idx, double val );
 
@@ -3961,6 +4043,20 @@ class counter : public device,
         int save_device_ex( char *buff )
             {
             return sprintf( buff, "ABS_V=%u, ", get_abs_quantity() );
+            }
+
+        float get_raw_value() const override
+            {
+#ifndef DEBUG_NO_IO_MODULES
+            return static_cast<float>( *( (u_int_2*)get_AI_data( AI_Q_INDEX ) ) );
+#else
+            return 0;
+#endif
+            };
+
+        float get_max_raw_value() const override
+            {
+            return 65535;
             }
 
     protected:
@@ -3976,20 +4072,7 @@ class counter : public device,
             ADDITIONAL_PARAMS_COUNT = 0,
 
             AI_Q_INDEX    = 0,  ///< Индекс канала аналогового входа (объем).
-
-			MAX_OVERFLOW = 300, ///< Максимальное переполнение за цикл
-
-            MAX_VAL = 65535L,   ///< Максимальное значение счетчика.
             };
-
-        u_int value;
-        u_int last_read_value;
-
-        u_int abs_value;       ///< Абсолютное значение (не становится на паузу).
-        u_int abs_last_read_value;
-
-        bool is_first_read;         ///< Флаг первой установки значения.
-        bool is_first_read_abs;     ///< Флаг первой установки значения.
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -4052,10 +4135,15 @@ class counter_f_ok : public counter_f
     };
 //-----------------------------------------------------------------------------
 /// @brief Счетчик IO-Link.
-class counter_iolink : public counter_f
+class counter_iolink : public analog_io_device, public base_counter
     {
     public:
-        counter_iolink( const char* dev_name ) : counter_f( dev_name ) {};
+        counter_iolink( const char* dev_name ) :analog_io_device( dev_name,
+            device::DT_FQT, device::DST_FQT_IOLINK, LAST_PARAM_IDX - 1 )
+            {
+            set_par_name( P_CZ, 0, "P_CZ" );
+            set_par_name( P_DT, 0, "P_DT" );
+            };
 
         ~counter_iolink()
             {
@@ -4115,18 +4203,56 @@ class counter_iolink : public counter_f
             return res;
             }
 
-    private:
-        struct in_data
+        int get_state()
             {
-            float totalizer;        //Quantity meter which continuously totals the
-                                    //volumetric flow since the last reset.
-            int16_t flow;           //Current flow.
-            int16_t temperature : 14;   //Current temperature.
-            bool out2 : 1;          //Status depends on [OU2].
-            bool out1 : 1;          //Status depends on [OU1].
+            return base_counter::get_state();
+            }
+
+        u_long get_pump_dt() const override
+            {
+            return static_cast<u_long>( get_par( P_DT, 0 ) );
+            }
+
+        float get_raw_value() const override
+            {
+            return in_info->totalizer;
             };
 
-        in_data* in_info = new in_data;
+        float get_max_raw_value() const override
+            {
+            return 499999999.99f; ///< Максимальное значение счетчика.
+            }
+
+        float get_flow()
+            {
+            return get_par( P_CZ, 0 ) + in_info->flow;
+            }
+
+    private:
+        enum CONSTANTS
+            {
+            AI_INDEX = 0,   ///< Индекс канала аналогового входа.
+            AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
+
+            MAX_OVERFLOW = 300, ///< Максимальное переполнение за цикл   
+
+            P_CZ = 1,
+            P_DT,
+
+            LAST_PARAM_IDX,
+            };
+
+        struct in_data
+            {
+            float totalizer;    //Quantity meter which continuously totals the
+                                //volumetric flow since the last reset.
+            int16_t flow;       //Current flow.
+            int16_t temperature : 14;   //Current temperature.
+            bool out2 : 1;      //Status depends on [OU2].
+            bool out1 : 1;      //Status depends on [OU1].
+            };
+
+        in_data* in_info = new in_data{ 0, 0, 0, 0, 0 };
     };
 //-----------------------------------------------------------------------------
 /// @brief Сигнальная колонна.

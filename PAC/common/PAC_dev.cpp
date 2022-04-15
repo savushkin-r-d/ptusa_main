@@ -1327,6 +1327,9 @@ i_counter* device_manager::get_FQT( const char *dev_name )
             case device::DST_FQT_VIRT:
                 return ( virtual_counter* ) res_ctr;
 
+            case device::DST_FQT_IOLINK:
+                return ( counter_iolink* ) res_ctr;
+
             default:
                 break;
             }
@@ -1729,6 +1732,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new virtual_counter( dev_name );
                     break;
 
+                case device::DST_FQT_IOLINK:
+                    new_device = new counter_iolink( dev_name );
+                    new_io_device = (counter_iolink*)new_device;
+                    
                 default:
                     if ( G_DEBUG )
                         {
@@ -2529,6 +2536,7 @@ void base_counter::start()
             }
 
         state = STATES::S_WORK;
+        last_read_value = get_raw_value();
         }
     }
 //-----------------------------------------------------------------------------
@@ -2551,11 +2559,6 @@ base_counter::~base_counter()
 float counter::get_value()
     {
     return (float)get_quantity();
-    }
-//-----------------------------------------------------------------------------
-void counter::direct_set_value( float new_value )
-    {
-    value = (u_int)new_value;
     }
 //-----------------------------------------------------------------------------
 int counter::get_state()
@@ -2584,109 +2587,6 @@ void counter::print() const
     //io_device::print();
     }
 //-----------------------------------------------------------------------------
-void counter::start()
-    {
-    if ( (int) STATES::S_STOP == get_state() || (int) STATES::S_PAUSE == get_state() )
-        {
-        last_read_value = *( ( u_int_2* ) get_AI_data( AI_Q_INDEX ) );
-        }
-    base_counter::start();
-    }
-//-----------------------------------------------------------------------------
-void counter::abs_reset()
-    {
-    abs_value = 0;
-    }
-//-----------------------------------------------------------------------------
-u_int counter::get_abs_quantity()
-    {
-#ifndef DEBUG_NO_IO_MODULES
-    u_int current = *( (u_int_2*)get_AI_data( AI_Q_INDEX ) );
-
-    if ( is_first_read_abs )
-        {
-        if ( current != 0 )
-            {
-            abs_last_read_value = current;
-            is_first_read_abs = false;
-            }
-        }
-    else
-        {
-        u_int delta;
-        if ( current < abs_last_read_value )
-            {
-            delta = MAX_VAL - abs_last_read_value + current;
-			if (delta > MAX_OVERFLOW)
-				{
-				if (current < delta)
-					{
-					delta = current;
-					}
-				}
-            }
-        else
-            {
-            delta = current - abs_last_read_value;
-            }
-
-        abs_last_read_value = current;
-        if ( delta > 0 )
-            {
-            abs_value += delta;
-            }
-        }
-#endif // NO_WAGO_MODULES
-
-    return abs_value;
-    }
-//-----------------------------------------------------------------------------
-u_int counter::get_quantity()
-    {
-#ifndef DEBUG_NO_IO_MODULES
-    if ( STATES::S_WORK == static_cast<STATES>( get_state() ) )
-        {
-        u_int current = *( (u_int_2*)get_AI_data( AI_Q_INDEX ) );
-
-        if ( is_first_read )
-            {
-            if ( current != 0 )
-                {
-                last_read_value = current;
-                is_first_read = false;
-                }
-            }
-        else
-            {
-            u_int delta;
-            if ( current < last_read_value )
-                {
-                delta = MAX_VAL - last_read_value + current;
-				if (delta > MAX_OVERFLOW)
-					{
-					if (current < delta)
-						{
-						delta = current;
-						}
-					}
-                }
-            else
-                {
-                delta = current - last_read_value;
-                }
-
-            last_read_value = current;
-            if ( delta > 0 )
-                {
-                value += delta;
-                }
-            }
-        }
-#endif // NO_WAGO_MODULES
-
-    return value;
-    }
-//-----------------------------------------------------------------------------
 float counter::get_flow()
     {
     return 0;
@@ -2700,12 +2600,7 @@ void counter::set_property( const char* field, device* dev )
 counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
                      int extra_par_cnt ):
     device( dev_name, DT_FQT, DST_FQT, extra_par_cnt ),
-    io_device( dev_name ),
-    last_read_value( 0 ),
-    abs_value( 0 ),
-    abs_last_read_value( 0 ),
-    is_first_read( true ),
-    is_first_read_abs( true )
+    io_device( dev_name )
     {
     }
 //-----------------------------------------------------------------------------
@@ -2718,7 +2613,7 @@ int counter::set_cmd(const char *prop, u_int idx, double val)
     switch ( prop[ 0 ] )
         {
         case 'A': //ABS_V
-            abs_value = ( u_int ) val;
+            set_abs_value( static_cast<float>( val ) );
             break;
 
         default:
@@ -2756,8 +2651,6 @@ int counter_f::get_state()
 
     return base_counter::get_state();
     }
-//-----------------------------------------------------------------------------
-void set_property( const char* field, device* dev );
 //-----------------------------------------------------------------------------
 float counter_f::get_flow()
     {
