@@ -2487,25 +2487,21 @@ int base_counter::get_state()
 //-----------------------------------------------------------------------------
 void base_counter::direct_set_state( int new_state )
     {
-#ifdef DEBUG_NO_IO_MODULES
-    state = static_cast<STATES>( new_state );
-#else
-    switch ( new_state )
+    switch ( static_cast<STATES>( new_state ) )
         {
-        case S_STOP:
-            state = S_STOP;
+        case STATES::S_STOP:
+            state = STATES::S_STOP;
             reset();
             break;
 
-        case S_WORK:
+        case STATES::S_WORK:
             start();
             break;
 
-        case S_PAUSE:
+        case STATES::S_PAUSE:
             pause();
             break;
         }
-#endif
     }
 //-----------------------------------------------------------------------------
 void base_counter::set_property( const char* field, device* dev )
@@ -2648,7 +2644,7 @@ u_int counter::get_abs_quantity()
 u_int counter::get_quantity()
     {
 #ifndef DEBUG_NO_IO_MODULES
-    if ( S_WORK == state )
+    if ( STATES::S_WORK == static_cast<STATES>( get_state() ) )
         {
         u_int current = *( (u_int_2*)get_AI_data( AI_Q_INDEX ) );
 
@@ -2822,7 +2818,7 @@ int counter_f_ok::get_state()
 #ifndef DEBUG_NO_IO_MODULES
     int i = get_DI( DI_INDEX );
 
-    return i == 1 ? counter_f::get_state() : S_ERROR;
+    return i == 1 ? counter_f::get_state() : static_cast<int>( STATES::S_ERROR );
 #else
     return counter_f::get_state();
 #endif
@@ -6644,18 +6640,18 @@ void  virtual_counter::direct_off()
 //-----------------------------------------------------------------------------
 void virtual_counter::direct_set_state( int new_state )
     {
-    switch ( new_state )
+    switch ( static_cast<STATES>( new_state ) )
         {
-        case static_cast<int>( STATES::S_STOP ):
+        case STATES::S_STOP:
             state = STATES::S_STOP;
             reset();
             break;
 
-        case static_cast<int>( STATES::S_WORK ):
+        case STATES::S_WORK:
             start();
             break;
 
-        case static_cast<int>( STATES::S_PAUSE ):
+        case STATES::S_PAUSE:
             pause();
             break;
         }
