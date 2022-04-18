@@ -197,7 +197,5 @@ TEST( counter_iolink, get_quantity )
     counter_iolink fqt1( "FQT1" );
     EXPECT_EQ( 0.f, fqt1.get_quantity() );
     fqt1.set_value( 100.f );
-    EXPECT_EQ( 0.f, fqt1.get_quantity() );    //Second read.
-    fqt1.set_value( 200.f );
-    EXPECT_EQ( 100.f, fqt1.get_quantity() );
+    EXPECT_EQ( 100.f, fqt1.get_quantity() );    //Second read.
     }

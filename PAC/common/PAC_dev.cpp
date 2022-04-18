@@ -2437,6 +2437,13 @@ void dev_stub::process_DO( u_int n, DO_state state, const char* name )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+base_counter::base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
+    int extra_par_cnt ) :
+    device( dev_name, DT_FQT, sub_type, extra_par_cnt ),
+    io_device( dev_name )
+    {
+    }
+//-----------------------------------------------------------------------------
 int base_counter::get_state()
     {
     if ( !motors.empty() )
@@ -2491,6 +2498,21 @@ int base_counter::get_state()
 
     return static_cast<int>( state );
     };
+//-----------------------------------------------------------------------------
+void base_counter::direct_on()
+    {
+    start();
+    }
+//-----------------------------------------------------------------------------
+void base_counter::direct_off()
+    {
+    reset();
+    }
+//-----------------------------------------------------------------------------
+float base_counter::get_value()
+    {
+    return (float)get_quantity();
+    }
 //-----------------------------------------------------------------------------
 void base_counter::direct_set_state( int new_state )
     {
@@ -2627,65 +2649,12 @@ base_counter::~base_counter()
     {
     }
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-float counter::get_value()
-    {
-    return (float)get_quantity();
-    }
-//-----------------------------------------------------------------------------
-void counter::direct_set_value( float new_value )
-    {
-    base_counter::direct_set_value( new_value );
-    };
-//-----------------------------------------------------------------------------
-int counter::get_state()
-    {
-    return base_counter::get_state();
-    }
-//-----------------------------------------------------------------------------
-void counter::direct_on()
-    {
-    start();
-    }
-//-----------------------------------------------------------------------------
-void counter::direct_off()
-    {
-    reset();
-    }
-//-----------------------------------------------------------------------------
-void counter::direct_set_state( int new_state )
-    {
-    base_counter::direct_set_state( new_state );
-    }
-//-----------------------------------------------------------------------------
-void counter::print() const
+void base_counter::print() const
     {
     device::print();
-    //io_device::print();
     }
 //-----------------------------------------------------------------------------
-float counter::get_flow()
-    {
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-void counter::set_property( const char* field, device* dev )
-    {
-    base_counter::set_property( field, dev );
-    }
-//-----------------------------------------------------------------------------
-counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
-                     int extra_par_cnt ):
-    device( dev_name, DT_FQT, DST_FQT, extra_par_cnt ),
-    io_device( dev_name )
-    {
-    }
-//-----------------------------------------------------------------------------
-counter::~counter()
-    {
-    }
-//-----------------------------------------------------------------------------
-int counter::set_cmd(const char *prop, u_int idx, double val)
+int base_counter::set_cmd( const char* prop, u_int idx, double val )
     {
     switch ( prop[ 0 ] )
         {
@@ -2698,11 +2667,27 @@ int counter::set_cmd(const char *prop, u_int idx, double val)
         }
 
     return 0;
-    }
+    };
 //-----------------------------------------------------------------------------
-int counter::save_device_ex( char* buff )
+int base_counter::save_device_ex( char* buff )
     {
     return sprintf( buff, "ABS_V=%u, ", get_abs_quantity() );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+float counter::get_flow()
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
+                     int extra_par_cnt ):
+    base_counter( dev_name, sub_type, extra_par_cnt )
+    {
+    }
+//-----------------------------------------------------------------------------
+counter::~counter()
+    {
     }
 //-----------------------------------------------------------------------------
 float counter::get_raw_value() const
@@ -2824,8 +2809,8 @@ int counter_f_ok::get_state()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-counter_iolink::counter_iolink( const char* dev_name ) :analog_io_device( dev_name,
-    device::DT_FQT, device::DST_FQT_IOLINK, LAST_PARAM_IDX - 1 )
+counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
+    device::DST_FQT_IOLINK, LAST_PARAM_IDX - 1 )
     {
     set_par_name( P_CZ, 0, "P_CZ" );
     set_par_name( P_DT, 0, "P_DT" );

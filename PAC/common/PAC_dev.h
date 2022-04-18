@@ -3882,10 +3882,15 @@ class lamp : public DO1
     };
 //-----------------------------------------------------------------------------
 /// @brief Базовый счетчик.
-class base_counter: public i_counter
+class base_counter: public i_counter, public device, public io_device
     {
     public:
+        base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
+            int extra_par_cnt );
+
         virtual ~base_counter();
+
+        void print() const override;
 
         /// @brief Приостановка работы счетчика.
         virtual void pause();
@@ -3906,6 +3911,12 @@ class base_counter: public i_counter
 
         /// @brief Получение состояния работы счетчика.
         virtual int get_state();
+
+        void direct_on();
+
+        void direct_off();
+
+        float get_value();
 
         void direct_set_state( int new_state );
 
@@ -3930,6 +3941,10 @@ class base_counter: public i_counter
         /// @brief Получение абсолютного значения счетчика (без учета паузы).
         u_int get_abs_quantity();
 
+        int set_cmd( const char* prop, u_int idx, double val );
+
+        int save_device_ex( char* buff );
+
     private:
         const int MAX_OVERFLOW = 300;   ///< Максимальное переполнение за цикл.
 
@@ -3950,9 +3965,7 @@ class base_counter: public i_counter
     };
 //-----------------------------------------------------------------------------
 /// @brief Счетчик.
-class counter : public device,
-    public base_counter,
-    public io_device
+class counter : public base_counter
     {
     public:
         counter( const char *dev_name,
@@ -3961,24 +3974,7 @@ class counter : public device,
 
         virtual ~counter();
 
-        float get_value();
-
-        void direct_set_value( float new_value );
-
-        int   get_state();
-        void  direct_on();
-        void  direct_off();
-        void  direct_set_state( int new_state );
-        virtual void  print() const;
-
         float get_flow();
-
-        void set_property( const char* field, device* dev );
-
-        int set_cmd( const char *prop, u_int idx, double val );
-
-        //Lua.
-        int save_device_ex( char* buff );
 
         float get_raw_value() const override;
 
@@ -4054,7 +4050,7 @@ class counter_f_ok : public counter_f
     };
 //-----------------------------------------------------------------------------
 /// @brief Счетчик IO-Link.
-class counter_iolink : public analog_io_device, public base_counter
+class counter_iolink : public base_counter
     {
     public:
         counter_iolink( const char* dev_name );
