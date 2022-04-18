@@ -2673,11 +2673,6 @@ int base_counter::save_device_ex( char* buff )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-float counter::get_flow()
-    {
-    return 0;
-    }
-//-----------------------------------------------------------------------------
 counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
                      int extra_par_cnt ):
     base_counter( dev_name, sub_type, extra_par_cnt )
@@ -2702,6 +2697,11 @@ float counter::get_max_raw_value() const
     return 65535;
     }
 //-----------------------------------------------------------------------------
+float counter::get_flow()
+    {
+    return .0f;
+    }
+//-----------------------------------------------------------------------------
 u_long counter::get_pump_dt() const
     {
     return 0;
@@ -2709,8 +2709,7 @@ u_long counter::get_pump_dt() const
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 counter_f::counter_f( const char *dev_name ) :
-    counter( dev_name, DST_FQT_F, ADDITIONAL_PARAMS_COUNT ),
-    flow_value( 0 )
+    counter( dev_name, DST_FQT_F, ADDITIONAL_PARAMS_COUNT )
     {
     set_par_name( P_MIN_FLOW, 0, "P_MIN_FLOW" );
     set_par_name( P_MAX_FLOW, 0, "P_MAX_FLOW" );
@@ -2740,33 +2739,17 @@ float counter_f::get_flow()
     {
     return get_par(P_CZ, 0) +
 #ifdef DEBUG_NO_IO_MODULES
-        flow_value;
+        counter::get_flow();
 #else
         get_AI( AI_FLOW_INDEX, get_par( P_MIN_FLOW, 0 ), get_par( P_MAX_FLOW, 0 ) );
 #endif // NO_WAGO_MODULES
-    }
-//-----------------------------------------------------------------------------
-int counter_f::set_cmd(const char *prop, u_int idx, double val)
-    {
-    switch ( prop[ 0 ] )
-        {
-        case 'F':
-            flow_value = ( float ) val;
-            break;
-
-        default:
-            return counter::set_cmd( prop, idx, val );
-        }
-
-    return 0;
     }
 //-----------------------------------------------------------------------------
 int counter_f::save_device_ex( char *buff )
     {
     int res = counter::save_device_ex( buff );
 
-    res += sprintf( buff + res, "F=%.2f, ",
-        get_flow() );
+    res += sprintf( buff + res, "F=%.2f, ", get_flow() );
 
     return res;
     }
@@ -2775,6 +2758,21 @@ u_long counter_f::get_pump_dt() const
     {
     return static_cast<u_long>( get_par( P_DT, 0 ) );
     }
+//-----------------------------------------------------------------------------
+int counter_f::set_cmd( const char* prop, u_int idx, double val )
+    {
+    switch ( prop[ 0 ] )
+        {
+        case 'F':
+            flow_value = static_cast<float>( val );
+            break;
+
+        default:
+            return counter::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 counter_f_ok::counter_f_ok( const char *dev_name ) : counter_f( dev_name )
@@ -2816,14 +2814,14 @@ counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
 //-----------------------------------------------------------------------------
 counter_iolink::~counter_iolink()
     {
-    delete in_info;
-    in_info = nullptr;
     };
 //-----------------------------------------------------------------------------
 void counter_iolink::evaluate_io()
     {
     char* data = (char*)get_AI_data( 0 );
-    char* buff = (char*)in_info;
+    if ( nullptr == data ) return;
+
+    char* buff = (char*)&in_info;
 
     const int SIZE = 8;
     std::copy( data, data + SIZE, buff );
@@ -2854,22 +2852,15 @@ void counter_iolink::evaluate_io()
 #ifdef DEBUG_FQT_IOLINK
     sprintf( G_LOG->msg,
         "Totalizer %.2f, flow %d, temperature %d, status2 %d, status1 %d\n",
-        in_info->totalizer, in_info->flow, in_info->temperature,
-        in_info->out2, in_info->out1 );
+        in_info.totalizer, in_info.flow, in_info.temperature,
+        in_info.out2, in_info.out1 );
     G_LOG->write_log( i_log::P_NOTICE );
 #endif
     };
 //-----------------------------------------------------------------------------
 float counter_iolink::get_temperature() const
     {
-    return 0.1f * in_info->temperature;
-    }
-//-----------------------------------------------------------------------------
-int counter_iolink::save_device_ex( char* buff )
-    {
-    int res = sprintf( buff, "T=%.1f, ", get_temperature() );
-
-    return res;
+    return 0.1f * in_info.temperature;
     }
 //-----------------------------------------------------------------------------
 int counter_iolink::get_state()
@@ -2884,7 +2875,7 @@ u_long counter_iolink::get_pump_dt() const
 //-----------------------------------------------------------------------------
 float counter_iolink::get_raw_value() const
     {
-    return in_info->totalizer;
+    return in_info.totalizer;
     };
 //-----------------------------------------------------------------------------
 float counter_iolink::get_max_raw_value() const
@@ -2894,23 +2885,37 @@ float counter_iolink::get_max_raw_value() const
 //-----------------------------------------------------------------------------
 float counter_iolink::get_flow()
     {
-    return get_par( P_CZ, 0 ) + in_info->flow;
+    return get_par( P_CZ, 0 ) + in_info.flow * 0.01f;
+    }
+//-----------------------------------------------------------------------------
+int counter_iolink::save_device_ex( char* buff )
+    {
+    int res = base_counter::save_device_ex( buff );
+
+    res += sprintf( buff + res, "F=%.2f, ", get_flow() );
+    res += sprintf( buff + res, "T=%.1f, ", get_temperature() );
+
+    return res;
     }
 //-----------------------------------------------------------------------------
 int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
     {
     switch ( prop[ 0 ] )
         {
-        case 'A': //ABS_V
-            set_abs_value( static_cast<float>( val ) );
+        case 'F':
+            in_info.flow = static_cast<int16_t>( val * 100 ) ;
+            break;
+
+        case 'T':
+            in_info.temperature = static_cast<int16_t>( val * 10 );
             break;
 
         default:
-            return device::set_cmd( prop, idx, val );
+            return base_counter::set_cmd( prop, idx, val );
         }
 
     return 0;
-    }
+    };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float digital_io_device::get_value()

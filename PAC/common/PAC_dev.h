@@ -3974,11 +3974,11 @@ class counter : public base_counter
 
         virtual ~counter();
 
-        float get_flow();
-
         float get_raw_value() const override;
 
         float get_max_raw_value() const override;
+
+        float get_flow() override;
 
     protected:
         u_long get_pump_dt() const;
@@ -4004,12 +4004,11 @@ class counter_f : public counter
 
         int get_state();
 
-        float get_flow();
+        float get_flow() override;
 
-        int set_cmd( const char *prop, u_int idx, double val );
+        int save_device_ex( char* buff );
 
-        //Lua.
-        int save_device_ex( char *buff );
+        int set_cmd( const char* prop, u_int idx, double val );
 
     protected:
         u_long get_pump_dt() const;
@@ -4027,7 +4026,7 @@ class counter_f : public counter
             AI_FLOW_INDEX = 1,  ///< Индекс канала аналогового входа (поток).
             };
 
-        float flow_value;
+        float flow_value = 0.f;
     };
 //-----------------------------------------------------------------------------
 /// @brief Счетчик c диагностикой.
@@ -4071,9 +4070,9 @@ class counter_iolink : public base_counter
 
         float get_max_raw_value() const override;
 
-        float get_flow();
+        float get_flow() override;
 
-        int set_cmd( const char* prop, u_int idx, double val );
+        int set_cmd( const char* prop, u_int idx, double val ) override;
 
     private:
         enum CONSTANTS
@@ -4099,7 +4098,7 @@ class counter_iolink : public base_counter
             bool out1 : 1;      //Status depends on [OU1].
             };
 
-        in_data* in_info = new in_data{ 0, 0, 0, 0, 0 };
+        in_data in_info{ 0, 0, 0, 0, 0 };
     };
 //-----------------------------------------------------------------------------
 /// @brief Сигнальная колонна.

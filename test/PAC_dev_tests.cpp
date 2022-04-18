@@ -122,6 +122,10 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( dynamic_cast<i_counter*>( STUB() ), FQT1 );
     }
 
+TEST( dev_stub, get_pump_dt )
+    {
+    EXPECT_EQ( .0f, STUB()->get_pump_dt() );
+    }
 
 TEST( device, save_device )
     {
@@ -198,10 +202,33 @@ TEST( counter_f, get_state )
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
     }
 
-TEST( counter_iolink, get_quantity )
+TEST( counter_iolink, set_cmd )
     {
     counter_iolink fqt1( "FQT1" );
-    EXPECT_EQ( 0.f, fqt1.get_quantity() );
-    fqt1.set_value( 100.f );
-    EXPECT_EQ( 100.f, fqt1.get_quantity() );    //Second read.
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    EXPECT_EQ( 0, fqt1.get_abs_quantity() );
+    
+    fqt1.set_cmd( "V", 0, 50 );
+    EXPECT_EQ( 50, fqt1.get_quantity() );
+    EXPECT_EQ( 50, fqt1.get_value() );
+    
+    fqt1.set_cmd( "ABS_V", 0, 100 );
+    EXPECT_EQ( 100, fqt1.get_abs_quantity() );
+    
+    fqt1.set_cmd( "F", 0, 9.9 );
+    EXPECT_EQ( 9.9f, fqt1.get_flow() );
+    
+    fqt1.set_cmd( "T", 0, 1.1 );
+    EXPECT_EQ( 1.1f, fqt1.get_temperature() );
+    
+    fqt1.save_device( buff, "" );
+    EXPECT_STREQ( "FQT1={M=0, ST=1, V=50.00, ABS_V=100, F=9.90, T=1.1, P_CZ=0, P_DT=0},\n", buff );
+    }
+
+TEST( counter_iolink, evaluate_io )
+    {
+    counter_iolink fqt1( "FQT1" );
+    fqt1.evaluate_io();
     }
