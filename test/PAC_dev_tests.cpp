@@ -94,6 +94,10 @@ TEST( temperature_e_analog, get_value )
 
 TEST( device_manager, add_io_device )
     {
+    auto dev = G_DEVICE_MANAGER()->get_device( "NO_DEVICE" );
+    EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(), dev );
+
+    //device::DT_TE, device::DST_TE_ANALOG
     auto res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_TE, device::DST_TE_ANALOG, "T1", "Test sensor", "T" );
     EXPECT_NE( nullptr, res );
@@ -107,6 +111,15 @@ TEST( device_manager, add_io_device )
             "\tT1={M=0, ST=1, V=0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n"
             "\t}\n",
         buff );
+
+    //device::DT_FQT, device::DST_FQT_IOLINK
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_FQT, device::DST_FQT_IOLINK, "FQT1", "Test counter", "IFM" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( "FQT1" );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto FQT1 = FQT( "FQT1" );
+    EXPECT_NE( dynamic_cast<i_counter*>( STUB() ), FQT1 );
     }
 
 
@@ -177,4 +190,14 @@ TEST( counter_f, get_state )
 
     fqt1.set_cmd( "ABS_V", 0, 100 );
     EXPECT_EQ( 1, fqt1.get_state() );
+    }
+
+TEST( counter_iolink, get_quantity )
+    {
+    counter_iolink fqt1( "FQT1" );
+    EXPECT_EQ( 0.f, fqt1.get_quantity() );
+    fqt1.set_value( 100.f );
+    EXPECT_EQ( 0.f, fqt1.get_quantity() );    //Second read.
+    fqt1.set_value( 200.f );
+    EXPECT_EQ( 100.f, fqt1.get_quantity() );
     }
