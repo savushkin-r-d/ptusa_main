@@ -212,7 +212,7 @@ TEST( counter_iolink, set_cmd )
     
     fqt1.set_cmd( "V", 0, 50 );
     EXPECT_EQ( 50, fqt1.get_quantity() );
-    EXPECT_EQ( 50, fqt1.get_value() );
+    EXPECT_EQ( 50.f, fqt1.get_value() );
     
     fqt1.set_cmd( "ABS_V", 0, 100 );
     EXPECT_EQ( 100, fqt1.get_abs_quantity() );
@@ -225,6 +225,15 @@ TEST( counter_iolink, set_cmd )
     
     fqt1.save_device( buff, "" );
     EXPECT_STREQ( "FQT1={M=0, ST=1, V=50.00, ABS_V=100, F=9.90, T=1.1, P_CZ=0, P_DT=0},\n", buff );
+
+    fqt1.set_cmd( "ST", 0, 0 );         //Reset
+    EXPECT_EQ( 0, fqt1.get_quantity() );
+
+    fqt1.set_cmd( "ST", 0, 2 );
+    EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
+
+    fqt1.set_cmd( "ST", 0, 1 );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
     }
 
 TEST( counter_iolink, evaluate_io )
