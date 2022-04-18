@@ -177,19 +177,25 @@ TEST( motor_altivar_linear, get_linear_speed )
 TEST( counter_f, get_state )
     {
     counter_f fqt1( "FQT1" );
-    EXPECT_EQ( 1, fqt1.get_state() );    
+    EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
     motor m1( "M1", device::DST_M_FREQ );
     fqt1.set_property( "M", &m1 );
-    EXPECT_EQ( 1, fqt1.get_state() );
+    EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
     m1.on();
     fqt1.get_state();
     sleep_ms( 10 );
-    EXPECT_EQ( -1, fqt1.get_state() );
+    EXPECT_EQ( (int) i_counter::STATES::S_ERROR, fqt1.get_state() );
 
     fqt1.set_cmd( "ABS_V", 0, 100 );
-    EXPECT_EQ( 1, fqt1.get_state() );
+    EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
+
+    fqt1.pause();
+    EXPECT_EQ( (int) i_counter::STATES::S_PAUSE, fqt1.get_state() );
+
+    fqt1.start();
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
     }
 
 TEST( counter_iolink, get_quantity )

@@ -2463,19 +2463,17 @@ int base_counter::get_state()
                 }
             }
 
-        if ( 0 == is_pump_working )
-            {
-            // Насос не работает.
+        if ( 0 == is_pump_working )     // Насос не работает.
+            {            
             start_pump_working_time = 0;
             }
-        else
-            {
-            // Насос работает.
+        else                            // Насос работает.
+            {            
             if ( state == STATES::S_PAUSE )
                 {
                 start_pump_working_time = get_millisec();
                 }
-            else // Работа.
+            else                        // Работа.
                 {
                 state = STATES::S_WORK;
                 auto dt = get_pump_dt();
