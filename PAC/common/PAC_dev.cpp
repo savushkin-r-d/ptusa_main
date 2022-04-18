@@ -2511,6 +2511,73 @@ void base_counter::direct_set_state( int new_state )
         }
     }
 //-----------------------------------------------------------------------------
+void base_counter::direct_set_value( float new_value )
+    {
+    value = new_value;
+    }
+//-----------------------------------------------------------------------------
+void base_counter::set_abs_value( float new_value )
+    {
+    abs_value = new_value;
+    };
+//-----------------------------------------------------------------------------
+void base_counter::calculate_quantity( float& value, float& last_read_value,
+    bool& is_first_read )
+    {
+    float current = get_raw_value();
+
+    if ( is_first_read )
+        {
+        if ( current != 0 )
+            {
+            last_read_value = current;
+            is_first_read = false;
+            }
+        }
+    else
+        {
+        float delta;
+        if ( current < last_read_value )
+            {
+            delta = get_max_raw_value() - last_read_value + current;
+            if ( delta > MAX_OVERFLOW )
+                {
+                if ( current < delta )
+                    {
+                    delta = current;
+                    }
+                }
+            }
+        else
+            {
+            delta = current - last_read_value;
+            }
+
+        last_read_value = current;
+        if ( delta > 0 )
+            {
+            value += delta;
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+u_int base_counter::get_quantity()
+    {
+    if ( STATES::S_WORK == static_cast<STATES>( get_state() ) )
+        {
+        calculate_quantity( value, last_read_value, is_first_read );
+        }
+
+    return static_cast<u_int>( value );
+    }
+//-----------------------------------------------------------------------------
+u_int base_counter::get_abs_quantity()
+    {
+    calculate_quantity( abs_value, abs_last_read_value, abs_is_first_read );
+
+    return static_cast<u_int>( abs_value );
+    }
+//-----------------------------------------------------------------------------
 void base_counter::set_property( const char* field, device* dev )
     {
     if ( field && field[ 0 ] == 'M' ) //Связанные насосы.
@@ -2545,6 +2612,11 @@ void base_counter::reset()
     value = 0;
     }
 //-----------------------------------------------------------------------------
+void base_counter::abs_reset()
+    {
+    abs_value = .0f;
+    }
+//-----------------------------------------------------------------------------
 void base_counter::restart()
     {
     reset();
@@ -2560,6 +2632,11 @@ float counter::get_value()
     {
     return (float)get_quantity();
     }
+//-----------------------------------------------------------------------------
+void counter::direct_set_value( float new_value )
+    {
+    base_counter::direct_set_value( new_value );
+    };
 //-----------------------------------------------------------------------------
 int counter::get_state()
     {
@@ -2622,6 +2699,30 @@ int counter::set_cmd(const char *prop, u_int idx, double val)
 
     return 0;
     }
+//-----------------------------------------------------------------------------
+int counter::save_device_ex( char* buff )
+    {
+    return sprintf( buff, "ABS_V=%u, ", get_abs_quantity() );
+    }
+//-----------------------------------------------------------------------------
+float counter::get_raw_value() const
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    return static_cast<float>( *( (u_int_2*)get_AI_data( AI_Q_INDEX ) ) );
+#else
+    return 0;
+#endif
+    }
+//-----------------------------------------------------------------------------
+float counter::get_max_raw_value() const
+    {
+    return 65535;
+    }
+//-----------------------------------------------------------------------------
+u_long counter::get_pump_dt() const
+    {
+    return 0;
+    };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 counter_f::counter_f( const char *dev_name ) :
@@ -2687,6 +2788,11 @@ int counter_f::save_device_ex( char *buff )
     return res;
     }
 //-----------------------------------------------------------------------------
+u_long counter_f::get_pump_dt() const
+    {
+    return static_cast<u_long>( get_par( P_DT, 0 ) );
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 counter_f_ok::counter_f_ok( const char *dev_name ) : counter_f( dev_name )
     {
@@ -2715,6 +2821,112 @@ int counter_f_ok::get_state()
 #else
     return counter_f::get_state();
 #endif
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+counter_iolink::counter_iolink( const char* dev_name ) :analog_io_device( dev_name,
+    device::DT_FQT, device::DST_FQT_IOLINK, LAST_PARAM_IDX - 1 )
+    {
+    set_par_name( P_CZ, 0, "P_CZ" );
+    set_par_name( P_DT, 0, "P_DT" );
+    };
+//-----------------------------------------------------------------------------
+counter_iolink::~counter_iolink()
+    {
+    delete in_info;
+    in_info = nullptr;
+    };
+//-----------------------------------------------------------------------------
+void counter_iolink::evaluate_io()
+    {
+    char* data = (char*)get_AI_data( 0 );
+    char* buff = (char*)in_info;
+
+    const int SIZE = 8;
+    std::copy( data, data + SIZE, buff );
+
+#define DEBUG_FQT_IOLINK 1
+#ifdef DEBUG_FQT_IOLINK
+    //Variants of float representation.
+    int a1 = ( buff[ 0 ] << 24 ) + ( buff[ 1 ] << 16 ) + ( buff[ 2 ] << 8 ) + buff[ 3 ];
+    int a2 = ( buff[ 1 ] << 24 ) + ( buff[ 0 ] << 16 ) + ( buff[ 3 ] << 8 ) + buff[ 2 ];
+    int a3 = ( buff[ 2 ] << 24 ) + ( buff[ 3 ] << 16 ) + ( buff[ 1 ] << 8 ) + buff[ 0 ];
+    int a4 = ( buff[ 3 ] << 24 ) + ( buff[ 2 ] << 16 ) + ( buff[ 0 ] << 8 ) + buff[ 1 ];
+    float* f1 = (float*)&a1;
+    float* f2 = (float*)&a2;
+    float* f3 = (float*)&a3;
+    float* f4 = (float*)&a4;
+    sprintf( G_LOG->msg, "WARNING %s %f %f %f %f", get_name(),
+        *f1, *f2, *f3, *f4 );
+    G_LOG->write_log( i_log::P_WARNING );
+#endif
+
+    //Reverse byte order to get correct float.
+    std::swap( buff[ 3 ], buff[ 0 ] );
+    std::swap( buff[ 1 ], buff[ 2 ] );
+    //Reverse byte order to get correct int16.
+    std::swap( buff[ 4 ], buff[ 5 ] );
+    std::swap( buff[ 6 ], buff[ 7 ] );
+
+#ifdef DEBUG_FQT_IOLINK
+    sprintf( G_LOG->msg,
+        "Totalizer %.2f, flow %d, temperature %d, status2 %d, status1 %d\n",
+        in_info->totalizer, in_info->flow, in_info->temperature,
+        in_info->out2, in_info->out1 );
+    G_LOG->write_log( i_log::P_NOTICE );
+#endif
+    };
+//-----------------------------------------------------------------------------
+float counter_iolink::get_temperature() const
+    {
+    return 0.1f * in_info->temperature;
+    }
+//-----------------------------------------------------------------------------
+int counter_iolink::save_device_ex( char* buff )
+    {
+    int res = sprintf( buff, "T=%.1f, ", get_temperature() );
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+int counter_iolink::get_state()
+    {
+    return base_counter::get_state();
+    }
+//-----------------------------------------------------------------------------
+u_long counter_iolink::get_pump_dt() const
+    {
+    return static_cast<u_long>( get_par( P_DT, 0 ) );
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_raw_value() const
+    {
+    return in_info->totalizer;
+    };
+//-----------------------------------------------------------------------------
+float counter_iolink::get_max_raw_value() const
+    {
+    return 499999999.99f; ///< Максимальное значение счетчика.
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_flow()
+    {
+    return get_par( P_CZ, 0 ) + in_info->flow;
+    }
+//-----------------------------------------------------------------------------
+int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
+    {
+    switch ( prop[ 0 ] )
+        {
+        case 'A': //ABS_V
+            set_abs_value( static_cast<float>( val ) );
+            break;
+
+        default:
+            return device::set_cmd( prop, idx, val );
+        }
+
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

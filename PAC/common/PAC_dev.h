@@ -3899,10 +3899,7 @@ class base_counter: public i_counter
         virtual void reset();
 
         /// @brief Сброс абсолютного значения счетчика.
-        void abs_reset()
-            {
-            abs_value = .0f;
-            }
+        void abs_reset();
 
         /// @brief Сброс счетчика и продолжение счета.
         void restart();
@@ -3912,15 +3909,9 @@ class base_counter: public i_counter
 
         void direct_set_state( int new_state );
 
-        void direct_set_value( float new_value )
-            {
-            value = new_value;
-            }
+        void direct_set_value( float new_value );
 
-        void set_abs_value( float new_value )
-            {
-            abs_value = new_value;
-            };
+        void set_abs_value( float new_value );
 
         virtual void set_property( const char* field, device* dev );
 
@@ -3930,64 +3921,14 @@ class base_counter: public i_counter
         /// @brief Получение максимального значение счетчика от устройства.
         virtual float get_max_raw_value() const = 0;
 
-        void calculate_quantity( float &value, float& last_read_value, bool& is_first_read )
-            {
-            float current = get_raw_value();
+        void calculate_quantity( float& value, float& last_read_value,
+            bool& is_first_read );
 
-            if ( is_first_read )
-                {
-                if ( current != 0 )
-                    {
-                    last_read_value = current;
-                    is_first_read = false;
-                    }
-                }
-            else
-                {
-                float delta;
-                if ( current < last_read_value )
-                    {
-                    delta = get_max_raw_value() - last_read_value + current;
-                    if ( delta > MAX_OVERFLOW )
-                        {
-                        if ( current < delta )
-                            {
-                            delta = current;
-                            }
-                        }
-                    }
-                else
-                    {
-                    delta = current - last_read_value;
-                    }
+        /// @brief Получение значения счетчика (c учетом паузы).
+        u_int get_quantity();
 
-                last_read_value = current;
-                if ( delta > 0 )
-                    {
-                    value += delta;
-                    }
-                }
-            }
-
-        /// @brief Получение значения счетчика (c учетом состояния паузы).
-        u_int get_quantity()
-            {
-            if ( STATES::S_WORK == static_cast<STATES>( get_state() ) )
-                {
-                calculate_quantity( value, last_read_value, is_first_read );
-                }
-
-            return static_cast<u_int>( value );
-            }
-
-        /// @brief Получение абсолютного значения счетчика (без учета
-        /// состояния паузы).
-        u_int get_abs_quantity()
-            {
-            calculate_quantity( abs_value, abs_last_read_value, abs_is_first_read );
-
-            return static_cast<u_int>( abs_value );
-            }
+        /// @brief Получение абсолютного значения счетчика (без учета паузы).
+        u_int get_abs_quantity();
 
     private:
         const int MAX_OVERFLOW = 300;   ///< Максимальное переполнение за цикл.
@@ -4022,10 +3963,7 @@ class counter : public device,
 
         float get_value();
 
-        void direct_set_value( float new_value )
-            {
-            base_counter::direct_set_value( new_value );
-            };
+        void direct_set_value( float new_value );
 
         int   get_state();
         void  direct_on();
@@ -4040,30 +3978,14 @@ class counter : public device,
         int set_cmd( const char *prop, u_int idx, double val );
 
         //Lua.
-        int save_device_ex( char *buff )
-            {
-            return sprintf( buff, "ABS_V=%u, ", get_abs_quantity() );
-            }
+        int save_device_ex( char* buff );
 
-        float get_raw_value() const override
-            {
-#ifndef DEBUG_NO_IO_MODULES
-            return static_cast<float>( *( (u_int_2*)get_AI_data( AI_Q_INDEX ) ) );
-#else
-            return 0;
-#endif
-            };
+        float get_raw_value() const override;
 
-        float get_max_raw_value() const override
-            {
-            return 65535;
-            }
+        float get_max_raw_value() const override;
 
     protected:
-        u_long get_pump_dt() const
-            {
-            return 0;
-            };
+        u_long get_pump_dt() const;
 
     private:
 
@@ -4094,10 +4016,7 @@ class counter_f : public counter
         int save_device_ex( char *buff );
 
     protected:
-        u_long get_pump_dt() const
-            {
-            return static_cast<u_long>( get_par( P_DT, 0 ) );
-            }
+        u_long get_pump_dt() const;
 
     private:
         enum CONSTANTS
@@ -4138,95 +4057,27 @@ class counter_f_ok : public counter_f
 class counter_iolink : public analog_io_device, public base_counter
     {
     public:
-        counter_iolink( const char* dev_name ) :analog_io_device( dev_name,
-            device::DT_FQT, device::DST_FQT_IOLINK, LAST_PARAM_IDX - 1 )
-            {
-            set_par_name( P_CZ, 0, "P_CZ" );
-            set_par_name( P_DT, 0, "P_DT" );
-            };
+        counter_iolink( const char* dev_name );
 
-        ~counter_iolink()
-            {
-            delete in_info;
-            in_info = nullptr;
-            };
+        ~counter_iolink();
 
-        void evaluate_io()
-            {
-            char* data = (char*)get_AI_data( 0 );
-            char* buff = (char*)in_info;
+        void evaluate_io();
 
-            const int SIZE = 8;
-            std::copy( data, data + SIZE, buff );
+        float get_temperature() const;
 
-#define DEBUG_FQT_IOLINK 1
-#ifdef DEBUG_FQT_IOLINK
-            //Variants of float representation.
-            int a1 = ( buff[ 0 ] << 24 ) + ( buff[ 1 ] << 16 ) + ( buff[ 2 ] << 8 ) + buff[ 3 ];
-            int a2 = ( buff[ 1 ] << 24 ) + ( buff[ 0 ] << 16 ) + ( buff[ 3 ] << 8 ) + buff[ 2 ];
-            int a3 = ( buff[ 2 ] << 24 ) + ( buff[ 3 ] << 16 ) + ( buff[ 1 ] << 8 ) + buff[ 0 ];
-            int a4 = ( buff[ 3 ] << 24 ) + ( buff[ 2 ] << 16 ) + ( buff[ 0 ] << 8 ) + buff[ 1 ];
-            float* f1 = (float*)&a1;
-            float* f2 = (float*)&a2;
-            float* f3 = (float*)&a3;
-            float* f4 = (float*)&a4;
-            sprintf( G_LOG->msg, "WARNING %s %f %f %f %f", get_name(),
-                *f1, *f2, *f3, *f4 );
-            G_LOG->write_log( i_log::P_WARNING );
-#endif
+        int save_device_ex( char* buff );
 
-            //Reverse byte order to get correct float.
-            std::swap( buff[ 3 ], buff[ 0 ] );
-            std::swap( buff[ 1 ], buff[ 2 ] );
-            //Reverse byte order to get correct int16.
-            std::swap( buff[ 4 ], buff[ 5 ] );
-            std::swap( buff[ 6 ], buff[ 7 ] );
+        int get_state();
 
-#ifdef DEBUG_FQT_IOLINK
-            sprintf( G_LOG->msg,
-                "Totalizer %.2f, flow %d, temperature %d, status2 %d, status1 %d\n",
-                in_info->totalizer, in_info->flow, in_info->temperature,
-                in_info->out2, in_info->out1 );
-            G_LOG->write_log( i_log::P_NOTICE );
-#endif
-            };
+        u_long get_pump_dt() const override;
 
-        float get_temperature() const
-            {
-            return 0.1f * in_info->temperature;
-            }
+        float get_raw_value() const override;
 
-        int save_device_ex( char* buff )
-            {
-            int res = sprintf( buff, "T=%.1f, ", get_temperature() );
+        float get_max_raw_value() const override;
 
-            return res;
-            }
+        float get_flow();
 
-        int get_state()
-            {
-            return base_counter::get_state();
-            }
-
-        u_long get_pump_dt() const override
-            {
-            return static_cast<u_long>( get_par( P_DT, 0 ) );
-            }
-
-        float get_raw_value() const override
-            {
-            return in_info->totalizer;
-            };
-
-        float get_max_raw_value() const override
-            {
-            return 499999999.99f; ///< Максимальное значение счетчика.
-            }
-
-        float get_flow()
-            {
-            return get_par( P_CZ, 0 ) + in_info->flow;
-            }
+        int set_cmd( const char* prop, u_int idx, double val );
 
     private:
         enum CONSTANTS
