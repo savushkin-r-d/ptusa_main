@@ -223,6 +223,33 @@ TEST( counter_f, get_state )
     EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
     }
 
+TEST( counter_f, set_cmd )
+    {
+    counter_f fqt1( "FQT1" );
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    EXPECT_EQ( 0, fqt1.get_quantity() );
+    EXPECT_EQ( 0, fqt1.get_abs_quantity() );
+    EXPECT_EQ( 0, fqt1.get_value() );
+    EXPECT_EQ( 0, fqt1.get_flow() );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
+    fqt1.set_cmd( "V", 0, 50 );
+    EXPECT_EQ( 50, fqt1.get_quantity() );
+    EXPECT_EQ( 50.f, fqt1.get_value() );
+
+    fqt1.set_cmd( "ABS_V", 0, 100 );
+    EXPECT_EQ( 100, fqt1.get_abs_quantity() );
+
+    fqt1.set_cmd( "F", 0, 9.9 );
+    EXPECT_EQ( 9.9f, fqt1.get_flow() );
+
+    fqt1.save_device( buff, "" );
+    EXPECT_STREQ( "FQT1={M=0, ST=1, V=50.00, ABS_V=100, F=9.90, P_MIN_FLOW=0, P_MAX_FLOW=0, P_CZ=0, P_DT=0},\n", buff );
+    }
+
+
 TEST( counter_iolink, set_cmd )
     {
     counter_iolink fqt1( "FQT1" );

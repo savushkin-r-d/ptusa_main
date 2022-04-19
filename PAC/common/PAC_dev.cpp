@@ -2733,9 +2733,9 @@ int counter_f::get_state()
 //-----------------------------------------------------------------------------
 float counter_f::get_flow()
     {
-    return get_par(P_CZ, 0) +
+    return get_par( P_CZ, 0 ) +
 #ifdef DEBUG_NO_IO_MODULES
-        counter::get_flow();
+        flow_value;
 #else
         get_AI( AI_FLOW_INDEX, get_par( P_MIN_FLOW, 0 ), get_par( P_MAX_FLOW, 0 ) );
 #endif // NO_WAGO_MODULES
