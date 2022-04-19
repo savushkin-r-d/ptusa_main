@@ -3672,33 +3672,27 @@ int cipline_tech_object::_CheckErr( void )
         return 0;
         }
 
-    if ( !G_DEBUG )
+    if (NP->get_state() <= -1)
         {
-        if (NP->get_state() <= -1)
+        if (!pumpflag)
             {
-            if (!pumpflag)
-                {
-                pumpflag = 1;
-                pumptimer = get_millisec();
-                }
-            if (get_delta_millisec(pumptimer) > 1500)
-                {
-                return ERR_PUMP;
-                }
+            pumpflag = 1;
+            pumptimer = get_millisec();
             }
-        else
+        if (get_delta_millisec(pumptimer) > 1500)
             {
-            pumpflag = 0;
+            return ERR_PUMP;
             }
         }
-
-    if ( !G_DEBUG )
+    else
         {
-        //обратная связь возвратного насоса
-        if (dev_m_ret)
-            {
-            if (-1 == dev_m_ret->get_state()) return ERR_RET;
-            }
+        pumpflag = 0;
+        }
+
+    //обратная связь возвратного насоса
+    if (dev_m_ret)
+        {
+        if (-1 == dev_m_ret->get_state()) return ERR_RET;
         }
     //Проверка обратной связи объекта
     if (dev_os_object)
@@ -3785,10 +3779,7 @@ int cipline_tech_object::_CheckErr( void )
             T[TMR_NO_FLOW]->start();
             if (T[TMR_NO_FLOW]->is_time_up())
                 {
-                if ( !G_DEBUG )
-                    {
-                    return ERR_NO_FLOW;
-                    }
+				return ERR_NO_FLOW;
                 }
             }
         else
