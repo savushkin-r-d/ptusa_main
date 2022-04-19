@@ -2516,13 +2516,8 @@ void base_counter::direct_set_state( int new_state )
     {
     switch ( static_cast<STATES>( new_state ) )
         {
-        case STATES::S_STOP:
-            state = STATES::S_STOP;
-            reset();
-            break;
-
         case STATES::S_WORK:
-            start();
+            direct_on();
             break;
 
         case STATES::S_PAUSE:
@@ -2615,13 +2610,8 @@ void base_counter::pause()
 //-----------------------------------------------------------------------------
 void base_counter::start()
     {
-    if ( STATES::S_STOP == state || STATES::S_PAUSE == state )
+    if ( STATES::S_PAUSE == state )
         {
-        if ( STATES::S_STOP == state )
-            {
-            value = 0;
-            }
-
         state = STATES::S_WORK;
         last_read_value = get_raw_value();
         }
@@ -6735,11 +6725,6 @@ void virtual_counter::direct_set_state( int new_state )
     {
     switch ( static_cast<STATES>( new_state ) )
         {
-        case STATES::S_STOP:
-            state = STATES::S_STOP;
-            reset();
-            break;
-
         case STATES::S_WORK:
             start();
             break;
@@ -6757,13 +6742,8 @@ void virtual_counter::pause()
 //-----------------------------------------------------------------------------
 void virtual_counter::start()
     {
-    if ( STATES::S_STOP == state || STATES::S_PAUSE == state )
+    if ( STATES::S_PAUSE == state )
         {
-        if ( STATES::S_STOP == state )
-            {
-            value = 0;
-            }
-
         state = STATES::S_WORK;
         }
     }

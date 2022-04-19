@@ -226,9 +226,6 @@ TEST( counter_iolink, set_cmd )
     fqt1.save_device( buff, "" );
     EXPECT_STREQ( "FQT1={M=0, ST=1, V=50.00, ABS_V=100, F=9.90, T=1.1, P_CZ=0, P_DT=0},\n", buff );
 
-    fqt1.set_cmd( "ST", 0, 0 );         //Reset
-    EXPECT_EQ( 0, fqt1.get_quantity() );
-
     fqt1.set_cmd( "ST", 0, 2 );
     EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
 
@@ -240,4 +237,39 @@ TEST( counter_iolink, evaluate_io )
     {
     counter_iolink fqt1( "FQT1" );
     fqt1.evaluate_io();
+    }
+
+
+TEST( counter_iolink, get_quantity )
+    {
+    class counter_iolink_test:public counter_iolink
+        {
+        float totalizer = .0f;
+
+        public:
+            counter_iolink_test( const char* dev_name ) :
+                counter_iolink( dev_name ) {};
+
+            float get_raw_value() const
+                {
+                return totalizer;
+                };
+
+            void set_raw_value( float totalizer )
+                {
+                this->totalizer = totalizer;
+                };
+        };
+
+    counter_iolink_test fqt1( "FQT1" );
+    auto res = fqt1.get_quantity();
+    EXPECT_EQ( 0, res );
+
+    fqt1.set_raw_value( 10 );
+    res = fqt1.get_quantity();
+    EXPECT_EQ( 0, res );
+
+    fqt1.set_raw_value( 20 );
+    res = fqt1.get_quantity();
+    EXPECT_EQ( 10, res );
     }

@@ -174,8 +174,7 @@ class i_counter
 
         enum class STATES
             {
-            S_STOP,
-            S_WORK,
+            S_WORK = 1,
             S_PAUSE,
 
             S_ERROR = -1,
