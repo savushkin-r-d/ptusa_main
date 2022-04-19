@@ -1211,7 +1211,7 @@ io_manager::io_node::io_node( int type, int number, const char* str_ip_address,
     AI_offsets{},
     AI_types{},
     last_init_time( get_millisec() ),
-    delay_time( 0 )
+    delay_time( C_INITIAL_RECONNECT_DELAY )
     {
     if ( str_ip_address )
         {
