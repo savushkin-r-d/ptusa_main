@@ -113,13 +113,34 @@ TEST( device_manager, add_io_device )
         buff );
 
     //device::DT_FQT, device::DST_FQT_IOLINK
+    auto name = std::string( "FQT1" );
     res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_FQT, device::DST_FQT_IOLINK, "FQT1", "Test counter", "IFM" );
+        device::DT_FQT, device::DST_FQT_IOLINK, name.c_str(), "Test counter", "IFM");
     EXPECT_NE( nullptr, res );
-    dev = G_DEVICE_MANAGER()->get_device( "FQT1" );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
-    auto FQT1 = FQT( "FQT1" );
+    auto FQT1 = FQT( name.c_str() );
     EXPECT_NE( dynamic_cast<i_counter*>( STUB() ), FQT1 );
+
+    //device::DT_FQT, device::DST_FQT
+    name = std::string( "FQT2" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_FQT, device::DST_FQT, name.c_str(), "Test counter", "IFM" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto FQT2 = FQT( name.c_str() );
+    EXPECT_NE( dynamic_cast<i_counter*>( STUB() ), FQT2 );
+
+    //device::DT_FQT, device::DST_FQT_F
+    name = std::string( "FQT3" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_FQT, device::DST_FQT_F, name.c_str(), "Test counter", "IFM" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto FQT3 = FQT( name.c_str() );
+    EXPECT_NE( dynamic_cast<i_counter*>( STUB() ), FQT3 );
     }
 
 TEST( dev_stub, get_pump_dt )
@@ -244,7 +265,6 @@ TEST( counter_iolink, evaluate_io )
     fqt1.evaluate_io();
     }
 
-
 TEST( counter_iolink, get_quantity )
     {
     class counter_iolink_test:public counter_iolink
@@ -336,4 +356,15 @@ TEST( counter_iolink, get_quantity )
 
     fqt1.abs_reset();
     EXPECT_EQ( 0, fqt1.get_abs_quantity() );
+    }
+
+TEST( counter_iolink, get_pump_dt )
+    {
+    counter_iolink fqt1( "FQT1" );
+    auto res = fqt1.get_pump_dt();
+    EXPECT_EQ( 0, res );
+
+    fqt1.set_cmd( "P_DT", 0, 11 );
+    res = fqt1.get_pump_dt();
+    EXPECT_EQ( 11, res );
     }
