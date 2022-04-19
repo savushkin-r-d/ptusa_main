@@ -272,4 +272,27 @@ TEST( counter_iolink, get_quantity )
     fqt1.set_raw_value( 20 );
     res = fqt1.get_quantity();
     EXPECT_EQ( 10, res );
+
+    fqt1.off();
+    EXPECT_EQ( 0, fqt1.get_quantity() );
+
+    fqt1.pause();
+    fqt1.set_raw_value( 30 );
+    EXPECT_EQ( 0, fqt1.get_quantity() );
+
+    fqt1.on();
+    fqt1.set_raw_value( 40 );
+    EXPECT_EQ( 10, fqt1.get_quantity() );
+
+    //Test reset to 0 physical counter after its power reboot.
+    fqt1.set_raw_value( 10 );
+    EXPECT_EQ( 20, fqt1.get_quantity() );
+
+
+    //Test physical counter overflow.
+    fqt1.set_raw_value( fqt1.get_max_raw_value() - 10 );
+    fqt1.get_quantity();
+    fqt1.reset();
+    fqt1.set_raw_value( 10 );
+    EXPECT_EQ( 10, fqt1.get_quantity() );
     }
