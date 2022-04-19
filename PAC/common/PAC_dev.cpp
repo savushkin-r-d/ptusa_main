@@ -2507,11 +2507,6 @@ void base_counter::direct_off()
     reset();
     }
 //-----------------------------------------------------------------------------
-float base_counter::get_value()
-    {
-    return (float)get_quantity();
-    }
-//-----------------------------------------------------------------------------
 void base_counter::direct_set_state( int new_state )
     {
     switch ( new_state )
@@ -2580,20 +2575,18 @@ void base_counter::calculate_quantity( float& value, float& last_read_value,
         }
     }
 //-----------------------------------------------------------------------------
+float base_counter::get_value()
+    {
+    return value;
+    }
+//-----------------------------------------------------------------------------
 u_int base_counter::get_quantity()
     {
-    if ( STATES::S_WORK == static_cast<STATES>( get_state() ) )
-        {
-        calculate_quantity( value, last_read_value, is_first_read );
-        }
-
     return static_cast<u_int>( value );
     }
 //-----------------------------------------------------------------------------
 u_int base_counter::get_abs_quantity()
     {
-    calculate_quantity( abs_value, abs_last_read_value, abs_is_first_read );
-
     return static_cast<u_int>( abs_value );
     }
 //-----------------------------------------------------------------------------
@@ -2639,6 +2632,15 @@ void base_counter::restart()
 //-----------------------------------------------------------------------------
 base_counter::~base_counter()
     {
+    }
+//-----------------------------------------------------------------------------
+void base_counter::evaluate_io()
+    {
+    if ( STATES::S_WORK == static_cast<STATES>( get_state() ) )
+        {
+        calculate_quantity( value, last_read_value, is_first_read );
+        }
+    calculate_quantity( abs_value, abs_last_read_value, abs_is_first_read );
     }
 //-----------------------------------------------------------------------------
 void base_counter::print() const
@@ -2813,43 +2815,46 @@ counter_iolink::~counter_iolink()
 void counter_iolink::evaluate_io()
     {
     char* data = (char*)get_AI_data( 0 );
-    if ( nullptr == data ) return;
+    if ( data )
+        {
+        char* buff = (char*)&in_info;
 
-    char* buff = (char*)&in_info;
-
-    const int SIZE = 8;
-    std::copy( data, data + SIZE, buff );
+        const int SIZE = 8;
+        std::copy( data, data + SIZE, buff );
 
 #define DEBUG_FQT_IOLINK 1
 #ifdef DEBUG_FQT_IOLINK
-    //Variants of float representation.
-    int a1 = ( buff[ 0 ] << 24 ) + ( buff[ 1 ] << 16 ) + ( buff[ 2 ] << 8 ) + buff[ 3 ];
-    int a2 = ( buff[ 1 ] << 24 ) + ( buff[ 0 ] << 16 ) + ( buff[ 3 ] << 8 ) + buff[ 2 ];
-    int a3 = ( buff[ 2 ] << 24 ) + ( buff[ 3 ] << 16 ) + ( buff[ 1 ] << 8 ) + buff[ 0 ];
-    int a4 = ( buff[ 3 ] << 24 ) + ( buff[ 2 ] << 16 ) + ( buff[ 0 ] << 8 ) + buff[ 1 ];
-    float* f1 = (float*)&a1;
-    float* f2 = (float*)&a2;
-    float* f3 = (float*)&a3;
-    float* f4 = (float*)&a4;
-    sprintf( G_LOG->msg, "WARNING %s %f %f %f %f", get_name(),
-        *f1, *f2, *f3, *f4 );
-    G_LOG->write_log( i_log::P_WARNING );
+        //Variants of float representation.
+        int a1 = ( buff[ 0 ] << 24 ) + ( buff[ 1 ] << 16 ) + ( buff[ 2 ] << 8 ) + buff[ 3 ];
+        int a2 = ( buff[ 1 ] << 24 ) + ( buff[ 0 ] << 16 ) + ( buff[ 3 ] << 8 ) + buff[ 2 ];
+        int a3 = ( buff[ 2 ] << 24 ) + ( buff[ 3 ] << 16 ) + ( buff[ 1 ] << 8 ) + buff[ 0 ];
+        int a4 = ( buff[ 3 ] << 24 ) + ( buff[ 2 ] << 16 ) + ( buff[ 0 ] << 8 ) + buff[ 1 ];
+        float* f1 = (float*)&a1;
+        float* f2 = (float*)&a2;
+        float* f3 = (float*)&a3;
+        float* f4 = (float*)&a4;
+        sprintf( G_LOG->msg, "WARNING %s %f %f %f %f", get_name(),
+            *f1, *f2, *f3, *f4 );
+        G_LOG->write_log( i_log::P_WARNING );
 #endif
 
-    //Reverse byte order to get correct float.
-    std::swap( buff[ 3 ], buff[ 0 ] );
-    std::swap( buff[ 1 ], buff[ 2 ] );
-    //Reverse byte order to get correct int16.
-    std::swap( buff[ 4 ], buff[ 5 ] );
-    std::swap( buff[ 6 ], buff[ 7 ] );
+        //Reverse byte order to get correct float.
+        std::swap( buff[ 3 ], buff[ 0 ] );
+        std::swap( buff[ 1 ], buff[ 2 ] );
+        //Reverse byte order to get correct int16.
+        std::swap( buff[ 4 ], buff[ 5 ] );
+        std::swap( buff[ 6 ], buff[ 7 ] );
 
 #ifdef DEBUG_FQT_IOLINK
-    sprintf( G_LOG->msg,
-        "Totalizer %.2f, flow %d, temperature %d, status2 %d, status1 %d\n",
-        in_info.totalizer, in_info.flow, in_info.temperature,
-        in_info.out2, in_info.out1 );
-    G_LOG->write_log( i_log::P_NOTICE );
+        sprintf( G_LOG->msg,
+            "Totalizer %.2f, flow %d, temperature %d, status2 %d, status1 %d\n",
+            in_info.totalizer, in_info.flow, in_info.temperature,
+            in_info.out2, in_info.out1 );
+        G_LOG->write_log( i_log::P_NOTICE );
 #endif
+        }
+
+    base_counter::evaluate_io();
     };
 //-----------------------------------------------------------------------------
 float counter_iolink::get_temperature() const
@@ -2874,7 +2879,7 @@ float counter_iolink::get_raw_value() const
 //-----------------------------------------------------------------------------
 float counter_iolink::get_max_raw_value() const
     {
-    return 499999999.99f; ///< Максимальное значение счетчика.
+    return 499'999'999.99f; ///< Максимальное значение счетчика.
     }
 //-----------------------------------------------------------------------------
 float counter_iolink::get_flow()
@@ -2910,6 +2915,21 @@ int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
 
     return 0;
     };
+//-----------------------------------------------------------------------------
+u_int counter_iolink::get_quantity()
+    {
+    return static_cast<u_int>( get_value() );
+    }
+//-----------------------------------------------------------------------------
+u_int counter_iolink::get_abs_quantity()
+    {
+    return static_cast<u_int>( mL_in_L * get_abs_value() );
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_value()
+    {
+    return base_counter::get_value() * mL_in_L;
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 float digital_io_device::get_value()

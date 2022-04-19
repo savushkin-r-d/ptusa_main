@@ -3889,6 +3889,8 @@ class base_counter: public i_counter, public device, public io_device
 
         virtual ~base_counter();
 
+        void evaluate_io();
+
         void print() const override;
 
         /// @brief Приостановка работы счетчика.
@@ -3921,8 +3923,6 @@ class base_counter: public i_counter, public device, public io_device
 
         void direct_set_value( float new_value );
 
-        void set_abs_value( float new_value );
-
         virtual void set_property( const char* field, device* dev );
 
         /// @brief Получение значение счетчика от устройства.
@@ -3944,7 +3944,15 @@ class base_counter: public i_counter, public device, public io_device
 
         int save_device_ex( char* buff );
 
+    protected:
+        float get_abs_value() const
+            {
+            return abs_value;
+            }
+
     private:
+        void set_abs_value( float new_value );
+
         const int MAX_OVERFLOW = 300;   ///< Максимальное переполнение за цикл.
 
         STATES state = STATES::S_WORK;
@@ -4072,6 +4080,14 @@ class counter_iolink : public base_counter
         float get_flow() override;
 
         int set_cmd( const char* prop, u_int idx, double val ) override;
+
+        u_int get_quantity() override;
+
+        u_int get_abs_quantity() override;
+
+        float get_value() override;
+
+        static const int mL_in_L = 1000;
 
     private:
         enum CONSTANTS

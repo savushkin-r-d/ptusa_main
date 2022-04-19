@@ -211,11 +211,11 @@ TEST( counter_iolink, set_cmd )
     EXPECT_EQ( 0, fqt1.get_abs_quantity() );
     
     fqt1.set_cmd( "V", 0, 50 );
-    EXPECT_EQ( 50, fqt1.get_quantity() );
-    EXPECT_EQ( 50.f, fqt1.get_value() );
+    EXPECT_EQ( counter_iolink::mL_in_L * 50, fqt1.get_quantity() );
+    EXPECT_EQ( counter_iolink::mL_in_L * 50.f, fqt1.get_value() );
     
     fqt1.set_cmd( "ABS_V", 0, 100 );
-    EXPECT_EQ( 100, fqt1.get_abs_quantity() );
+    EXPECT_EQ( counter_iolink::mL_in_L * 100, fqt1.get_abs_quantity() );
     
     fqt1.set_cmd( "F", 0, 9.9 );
     EXPECT_EQ( 9.9f, fqt1.get_flow() );
@@ -224,7 +224,7 @@ TEST( counter_iolink, set_cmd )
     EXPECT_EQ( 1.1f, fqt1.get_temperature() );
     
     fqt1.save_device( buff, "" );
-    EXPECT_STREQ( "FQT1={M=0, ST=1, V=50.00, ABS_V=100, F=9.90, T=1.1, P_CZ=0, P_DT=0},\n", buff );
+    EXPECT_STREQ( "FQT1={M=0, ST=1, V=50000.00, ABS_V=100000, F=9.90, T=1.1, P_CZ=0, P_DT=0},\n", buff );
 
     fqt1.set_cmd( "ST", 0, 2 );
     EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
@@ -264,14 +264,17 @@ TEST( counter_iolink, get_quantity )
     counter_iolink_test fqt1( "FQT1" );
     auto res = fqt1.get_quantity();
     EXPECT_EQ( 0, res );
+    EXPECT_EQ( 0, fqt1.get_abs_quantity() );
 
     fqt1.set_raw_value( 10 );
+    fqt1.evaluate_io();
     res = fqt1.get_quantity();
     EXPECT_EQ( 0, res );
 
     fqt1.set_raw_value( 20 );
+    fqt1.evaluate_io();
     res = fqt1.get_quantity();
-    EXPECT_EQ( 10, res );
+    EXPECT_EQ( counter_iolink::mL_in_L * 10, res );
 
 
     fqt1.off();
@@ -279,11 +282,13 @@ TEST( counter_iolink, get_quantity )
 
     fqt1.pause();
     fqt1.set_raw_value( 30 );
+    fqt1.evaluate_io();
     EXPECT_EQ( 0, fqt1.get_quantity() );
 
     fqt1.on();
     fqt1.set_raw_value( 40 );
-    EXPECT_EQ( 10, fqt1.get_quantity() );
+    fqt1.evaluate_io();
+    EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_quantity() );
 
 
     fqt1.set_state( 0 );        //Off.
@@ -291,23 +296,28 @@ TEST( counter_iolink, get_quantity )
 
     fqt1.set_state( 2 );        //Pause.
     fqt1.set_raw_value( 30 );
+    fqt1.evaluate_io();
     EXPECT_EQ( 0, fqt1.get_quantity() );
 
     fqt1.set_state( 1 );        //Start
     fqt1.set_raw_value( 40 );
-    EXPECT_EQ( 10, fqt1.get_quantity() );
+    fqt1.evaluate_io();
+    EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_quantity() );
 
 
     //Test reset to 0 physical counter after its power reboot.
     fqt1.set_raw_value( 10 );
-    EXPECT_EQ( 20, fqt1.get_quantity() );
+    fqt1.evaluate_io();
+    EXPECT_EQ( counter_iolink::mL_in_L * 20, fqt1.get_quantity() );
 
     //Test physical counter overflow.
     fqt1.set_raw_value( fqt1.get_max_raw_value() - 10 );
+    fqt1.evaluate_io();
     fqt1.get_quantity();
     fqt1.reset();
     fqt1.set_raw_value( 10 );
-    EXPECT_EQ( 10, fqt1.get_quantity() );
+    fqt1.evaluate_io();
+    EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_quantity() );
 
     fqt1.pause();
     fqt1.restart();
