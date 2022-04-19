@@ -23,9 +23,8 @@ TEST( open_seat_action, evaluate )
 	par_mock->final_init( 0, 0, 0 );
 
 	saved_params_u_int_4& par = PAC_info::get_instance()->par;
-	const int FLIP_INTERVAL_MS = 1000;
-	const int FLIP_DURATION_MS = 100;
-	par[ PAC_info::P_MIX_FLIP_PERIOD ] = FLIP_INTERVAL_MS / MSEC_IN_SEC;
+	const int FLIP_INTERVAL_MS = 10;
+	const int FLIP_DURATION_MS = 5;
 	par[ PAC_info::P_MIX_FLIP_UPPER_TIME ] = FLIP_DURATION_MS;
 	par[ PAC_info::P_MIX_FLIP_LOWER_TIME ] = FLIP_DURATION_MS;
 
@@ -46,12 +45,13 @@ TEST( open_seat_action, evaluate )
 	action->add_dev( &test_v_mix_proof, 0, valve::V_LOWER_SEAT );
 
 	action->init();
+	reinterpret_cast<open_seat_action*>( action )->set_wait_time( FLIP_INTERVAL_MS );
 
 	action->evaluate();  // Wait
 	EXPECT_EQ( false, test_DO.is_active() );
 	EXPECT_EQ( true, test_v_mix_proof.is_closed() );
 
-	sleep_ms( FLIP_INTERVAL_MS / 2 );
+	sleep_ms( FLIP_INTERVAL_MS );
 	action->evaluate();
 	EXPECT_EQ( false, test_DO.is_active() );
 	EXPECT_EQ( true, test_v_mix_proof.is_opened() );
@@ -66,7 +66,7 @@ TEST( open_seat_action, evaluate )
 
 	action->evaluate();  // Wait
 	EXPECT_EQ( false, test_DO.is_active() );
-	sleep_ms( FLIP_INTERVAL_MS / 2 );
+	sleep_ms( FLIP_INTERVAL_MS );
 	action->evaluate();
 	EXPECT_EQ( false, test_DO.is_active() );
 	EXPECT_EQ( true, test_v_mix_proof.is_closed() );

@@ -2802,10 +2802,11 @@ int counter_f_ok::get_state()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
-    device::DST_FQT_IOLINK, LAST_PARAM_IDX - 1 )
+    device::DST_FQT_IOLINK,
+    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
     {
-    set_par_name( P_CZ, 0, "P_CZ" );
-    set_par_name( P_DT, 0, "P_DT" );
+    set_par_name( static_cast<u_int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
+    set_par_name( static_cast<u_int>( CONSTANTS::P_DT ), 0, "P_DT" );
     };
 //-----------------------------------------------------------------------------
 counter_iolink::~counter_iolink()
@@ -2864,12 +2865,19 @@ float counter_iolink::get_temperature() const
 //-----------------------------------------------------------------------------
 int counter_iolink::get_state()
     {
+    IOLINKSTATE res = get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::AI_INDEX ) );
+    if ( res != io_device::IOLINKSTATE::OK )
+        {
+        return -static_cast<int>( res );
+        }
+
     return base_counter::get_state();
     }
 //-----------------------------------------------------------------------------
 u_long counter_iolink::get_pump_dt() const
     {
-    return static_cast<u_long>( get_par( P_DT, 0 ) );
+    return static_cast<u_long>(
+        get_par( static_cast<u_int>( CONSTANTS::P_DT ), 0 ) );
     }
 //-----------------------------------------------------------------------------
 float counter_iolink::get_raw_value() const
@@ -2884,7 +2892,8 @@ float counter_iolink::get_max_raw_value() const
 //-----------------------------------------------------------------------------
 float counter_iolink::get_flow()
     {
-    return get_par( P_CZ, 0 ) + in_info.flow * 0.01f;
+    return get_par( static_cast<u_int>( CONSTANTS::P_CZ ), 0 )
+        + in_info.flow * 0.01f;
     }
 //-----------------------------------------------------------------------------
 int counter_iolink::save_device_ex( char* buff )

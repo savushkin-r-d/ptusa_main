@@ -177,10 +177,10 @@ class i_counter
             S_WORK = 1,
             S_PAUSE,
 
-            S_ERROR = -1,
+            S_ERROR = -10,
 
-            S_LOW_ERR = -2,
-            S_HI_ERR = -3,
+            S_LOW_ERR = -12,
+            S_HI_ERR = -13,
             };
 
     protected:
@@ -4089,10 +4089,9 @@ class counter_iolink : public base_counter
         static const int mL_in_L = 1000;
 
     private:
-        enum CONSTANTS
+        enum class CONSTANTS
             {
             AI_INDEX = 0,   ///< Индекс канала аналогового входа.
-            AO_INDEX = 0,   ///< Индекс канала аналогового выхода.
 
             MAX_OVERFLOW = 300, ///< Максимальное переполнение за цикл   
 
