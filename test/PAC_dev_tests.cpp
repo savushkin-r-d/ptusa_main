@@ -325,7 +325,27 @@ TEST( counter_iolink, set_cmd )
 TEST( counter_iolink, evaluate_io )
     {
     counter_iolink fqt1( "FQT1" );
+    fqt1.init( 0, 0, 0, 1 );
+    fqt1.AI_channels.int_read_values[ 0 ] = new int_2[8]{ 0 };
+    auto buff = reinterpret_cast<char*>( fqt1.AI_channels.int_read_values[ 0 ] );
+
+    *reinterpret_cast<float*>( fqt1.AI_channels.int_read_values[ 0 ] ) = 11.11f;
+    std::swap( buff[ 0 ], buff[ 3 ] );  //Reverse byte order to get correct float.
+    std::swap( buff[ 2 ], buff[ 1 ] );
     fqt1.evaluate_io();
+    EXPECT_EQ( 0, fqt1.get_quantity() );//First read.
+
+    *reinterpret_cast<float*>( fqt1.AI_channels.int_read_values[ 0 ] ) = 22.22f;
+    std::swap( buff[ 0 ], buff[ 3 ] );  //Reverse byte order to get correct float.
+    std::swap( buff[ 2 ], buff[ 1 ] );
+    *reinterpret_cast<int*>( fqt1.AI_channels.int_read_values[ 0 ] + 2 ) = 22;
+    *reinterpret_cast<int*>( fqt1.AI_channels.int_read_values[ 0 ] + 3 ) = 33;
+    std::swap( buff[ 5 ], buff[ 4 ] );  //Reverse byte order to get correct int16.
+    std::swap( buff[ 7 ], buff[ 6 ] );
+    fqt1.evaluate_io();
+    EXPECT_EQ( counter_iolink::mL_in_L * 11.11, fqt1.get_quantity() );
+    EXPECT_EQ( 22 * 0.01f, fqt1.get_flow() );
+    EXPECT_EQ( 33 * 0.1f, fqt1.get_temperature() );
     }
 
 TEST( counter_iolink, get_quantity )

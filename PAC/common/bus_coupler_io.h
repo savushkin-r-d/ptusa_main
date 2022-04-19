@@ -151,7 +151,12 @@ class io_device
 
         virtual void print() const;
 
-    private:
+#ifdef PTUSA_TEST
+        public:
+#else
+        private:
+#endif
+    
         /// @brief Группа каналов ввода/вывода устройства.
         struct IO_channels
             {
