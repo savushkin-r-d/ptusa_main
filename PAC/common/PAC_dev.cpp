@@ -2514,13 +2514,17 @@ float base_counter::get_value()
 //-----------------------------------------------------------------------------
 void base_counter::direct_set_state( int new_state )
     {
-    switch ( static_cast<STATES>( new_state ) )
+    switch ( new_state )
         {
-        case STATES::S_WORK:
+        case 0:
+            direct_off();
+            break;
+
+        case static_cast<int>( STATES::S_WORK ):
             direct_on();
             break;
 
-        case STATES::S_PAUSE:
+        case static_cast<int>( STATES::S_PAUSE ):
             pause();
             break;
         }
