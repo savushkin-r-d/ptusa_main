@@ -286,6 +286,34 @@ TEST( counter, get_max_raw_value )
     EXPECT_EQ( USHRT_MAX, res );
     }
 
+
+TEST( virtual_counter, get_pump_dt )
+    {
+    virtual_counter fqt1( "FQT1" );
+    auto res = fqt1.get_pump_dt();
+    EXPECT_EQ( 0, res );
+    }
+
+TEST( virtual_counter, set_cmd )
+    {
+    virtual_counter fqt1( "FQT1" );
+    const int BUFF_SIZE = 100;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    EXPECT_EQ( 0, fqt1.get_quantity() );
+    EXPECT_EQ( 0, fqt1.get_abs_quantity() );
+    EXPECT_EQ( 0, fqt1.get_value() );
+    EXPECT_EQ( 0, fqt1.get_flow() );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
+    fqt1.set_cmd( "ST", 0, 2 );
+    EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
+
+    fqt1.set_cmd( "ST", 0, 1 );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+    }
+
+
 TEST( counter_iolink, set_cmd )
     {
     counter_iolink fqt1( "FQT1" );

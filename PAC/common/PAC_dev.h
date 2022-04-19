@@ -170,7 +170,7 @@ class i_counter
         virtual u_int get_abs_quantity() = 0;
 
         /// @brief Сброс абсолютного значения счетчика.
-        virtual void  abs_reset() = 0;        
+        virtual void  abs_reset() = 0;
 
         enum class STATES
             {
@@ -3252,7 +3252,7 @@ class virtual_counter : public device, public i_counter
 
         void direct_set_value( float new_value );
 
-        int get_state();        
+        int get_state();
 
         void direct_on();
 
@@ -3286,10 +3286,10 @@ class virtual_counter : public device, public i_counter
         //Lua.
         int save_device_ex( char *buff );
 
-    protected:
-        STATES state;
+        u_long get_pump_dt() const override;
 
-        u_long get_pump_dt() const;
+    protected:
+        STATES state;        
 
     private:
         float flow_value;
