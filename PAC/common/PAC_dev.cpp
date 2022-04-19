@@ -2690,7 +2690,7 @@ float counter::get_raw_value() const
 //-----------------------------------------------------------------------------
 float counter::get_max_raw_value() const
     {
-    return 65535;
+    return USHRT_MAX;
     }
 //-----------------------------------------------------------------------------
 float counter::get_flow()

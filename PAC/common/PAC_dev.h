@@ -3987,7 +3987,6 @@ class counter : public base_counter
 
         float get_flow() override;
 
-    protected:
         u_long get_pump_dt() const;
 
     private:
