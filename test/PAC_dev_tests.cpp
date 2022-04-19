@@ -208,7 +208,12 @@ TEST( counter_iolink, set_cmd )
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
 
+    EXPECT_EQ( 0, fqt1.get_quantity() );
     EXPECT_EQ( 0, fqt1.get_abs_quantity() );
+    EXPECT_EQ( 0, fqt1.get_value() );
+    EXPECT_EQ( 0, fqt1.get_temperature() );
+    EXPECT_EQ( 0, fqt1.get_flow() );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
     
     fqt1.set_cmd( "V", 0, 50 );
     EXPECT_EQ( counter_iolink::mL_in_L * 50, fqt1.get_quantity() );
@@ -270,25 +275,30 @@ TEST( counter_iolink, get_quantity )
     fqt1.evaluate_io();
     res = fqt1.get_quantity();
     EXPECT_EQ( 0, res );
+    EXPECT_EQ( 0, fqt1.get_abs_quantity() );
 
     fqt1.set_raw_value( 20 );
     fqt1.evaluate_io();
     res = fqt1.get_quantity();
     EXPECT_EQ( counter_iolink::mL_in_L * 10, res );
+    EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_abs_quantity() );
 
 
     fqt1.off();
     EXPECT_EQ( 0, fqt1.get_quantity() );
+    EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_abs_quantity() );
 
     fqt1.pause();
     fqt1.set_raw_value( 30 );
     fqt1.evaluate_io();
     EXPECT_EQ( 0, fqt1.get_quantity() );
+    EXPECT_EQ( counter_iolink::mL_in_L * 20, fqt1.get_abs_quantity() );
 
     fqt1.on();
     fqt1.set_raw_value( 40 );
     fqt1.evaluate_io();
     EXPECT_EQ( counter_iolink::mL_in_L * 10, fqt1.get_quantity() );
+    EXPECT_EQ( counter_iolink::mL_in_L * 30, fqt1.get_abs_quantity() );
 
 
     fqt1.set_state( 0 );        //Off.
@@ -322,4 +332,8 @@ TEST( counter_iolink, get_quantity )
     fqt1.pause();
     fqt1.restart();
     EXPECT_EQ( 0, fqt1.get_quantity() );
+
+
+    fqt1.abs_reset();
+    EXPECT_EQ( 0, fqt1.get_abs_quantity() );
     }
