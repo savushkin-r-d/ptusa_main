@@ -3556,6 +3556,9 @@ class i_motor : public device
         /// @brief Получение линейной скорости (например, приводимого в
         // движение конвейра).
         virtual float get_linear_speed() const;
+
+        /// @brief Получение текущего тока мотора
+        virtual float get_amperage() const;
     };
 //-----------------------------------------------------------------------------
 class virtual_motor : public i_motor
@@ -3677,6 +3680,8 @@ public:
 
     virtual int get_params_count() const;
 
+    float get_amperage() const override;
+
 #ifdef DEBUG_NO_IO_MODULES
     int set_cmd( const char* prop, u_int idx, double val );
 #endif // DEBUG_NO_IO_MODULES
@@ -3690,6 +3695,7 @@ protected:
     int reverse = 0;
     float rpm = .0f;
     int est = 0;
+    float amperage = .0f;
 #endif // DEBUG_NO_IO_MODULES
 
 private:

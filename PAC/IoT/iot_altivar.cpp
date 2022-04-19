@@ -114,10 +114,12 @@ altivar_node::altivar_node(unsigned int id, const char* ip, unsigned int port, u
 	ismodbuserror = 0;
 	cmd = 4;
 	state = 0;
-	fc_setpoint = 0;
-	fc_value = 0;
+	frq_setpoint = 0;
+	frq_value = 0;
 	rpm_value = 0;
 	rpm_setpoint = 0;
+	frq_max = FRQ_MAX_SETTING;
+	amperage = 0;
 	remote_state = 0;
 	}
 
@@ -173,8 +175,8 @@ void altivar_node::Evaluate()
 						mc->set_int2(0, 3201);	//ETA(Status word) --default
 						mc->set_int2(1, 8604);	//RFRD (Output velocity) --default
 						mc->set_int2(2, 3202);	//RFR (Output frequency)
-						mc->set_int2(3, 0);
-						mc->set_int2(4, 0);
+						mc->set_int2(3, 3103);	//TFR (Max. output frequency)
+						mc->set_int2(4, 3204);	//LCR (Motor current)
 						mc->set_int2(5, 0);
 						configurestep = CFG_STEP_SET_INPUTS;
 						break;
@@ -278,7 +280,7 @@ void altivar_node::Evaluate()
 				mc->zero_output_buff(15);
 				mc->set_station(255);
 				mc->set_int2(2, cmd);
-				mc->set_int2(3, (int)(fc_setpoint * 10));
+				mc->set_int2(3, (int)(frq_setpoint * 10));
 				mc->set_int2(4, 0);
 				mc->set_int2(5, 0);
 				mc->set_int2(6, 0);
@@ -293,7 +295,11 @@ void altivar_node::Evaluate()
 					{
 					remote_state = mc->get_int2(0);
 					rpm_value = mc->get_int2(1);
-					fc_value = mc->get_int2(2);
+					frq_value = mc->get_int2(2) / 10.0f;
+					frq_max = mc->get_int2(3) / 10.0f;
+					if (frq_max < FRQ_MIN_SETTING) frq_max = FRQ_MIN_SETTING;
+					if (frq_max > FRQ_MAX_SETTING) frq_max = FRQ_MAX_SETTING;
+					amperage = mc->get_int2(4) / 10.0f;
 					int newstate = remote_state & 0x006F;
 					switch (newstate)
 						{
@@ -369,4 +375,14 @@ void altivar_node::Evaluate()
 	void altivar_node::Disable()
 		{
 		enabled = false;
+		}
+
+	void altivar_node::set_output_in_percent( float value )
+		{
+		frq_setpoint = value / 100.0f * frq_max;
+		}
+
+	float altivar_node::get_output_in_percent( )
+		{
+		return frq_setpoint / frq_max * 100.0f;
 		}

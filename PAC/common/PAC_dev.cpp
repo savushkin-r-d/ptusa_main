@@ -4931,6 +4931,10 @@ float i_motor::get_linear_speed() const
     {
     return 0;
     }
+float i_motor::get_amperage() const
+    {
+    return 0.0f;
+    }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 void virtual_motor::direct_off()
@@ -6735,11 +6739,11 @@ int motor_altivar::save_device_ex(char * buff)
     {
     int res = 0;
 #ifdef DEBUG_NO_IO_MODULES
-    res = sprintf( buff, "R=%d, FRQ=%.2f, RPM=%.2f, EST=%d, ",
-        reverse, freq, rpm, est );
+    res = sprintf( buff, "R=%d, FRQ=%.2f, RPM=%.2f, EST=%d, AMP=%.2f, MAX_FRQ=0, ",
+        reverse, freq, rpm, est, amperage );
 #else
-    res = sprintf(buff, "R=%d, FRQ=%.2f, RPM=%.2f, EST=%d, ",
-        atv->reverse, atv->fc_value / 10, atv->rpm_value, atv->remote_state );
+    res = sprintf(buff, "R=%d, FRQ=%.2f, RPM=%.2f, EST=%d, AMP=%.2f, MAX_FRQ=%.2f, ",
+        atv->reverse, atv->frq_value, atv->rpm_value, atv->remote_state, atv->amperage, atv->frq_max);
 #endif //DEBUG_NO_IO_MODULES
     return res;
     }
@@ -6749,7 +6753,7 @@ float motor_altivar::get_value()
 #ifdef DEBUG_NO_IO_MODULES
     return freq;
 #else
-    return atv->fc_setpoint * 2;
+    return atv->get_output_in_percent();
 #endif // DEBUG_NO_IO_MODULES
     }
 
@@ -6758,7 +6762,7 @@ void motor_altivar::direct_set_value(float value)
 #ifdef DEBUG_NO_IO_MODULES
     freq = value;
 #else
-    atv->fc_setpoint = value / 2;
+    atv->set_output_in_percent( value );
 #endif // DEBUG_NO_IO_MODULES
     }
 
@@ -6885,6 +6889,15 @@ int motor_altivar::get_params_count() const
     return ADDITIONAL_PARAM_COUNT;
     }
 
+float motor_altivar::get_amperage() const
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    return amperage;
+#else
+    return atv->amperage;
+#endif
+    }
+
 #ifdef DEBUG_NO_IO_MODULES
 int motor_altivar::set_cmd( const char* prop, u_int idx, double val )
     {
@@ -6906,6 +6919,10 @@ int motor_altivar::set_cmd( const char* prop, u_int idx, double val )
     else if ( strcmp( prop, "EST" ) == 0 )
         {
         est = static_cast<int>( val );
+        }
+    else if ( strcmp( prop, "AMP" ) == 0 )
+        {
+        amperage = static_cast<float>( val );
         }
     else
         {

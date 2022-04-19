@@ -17,15 +17,19 @@ class altivar_node: public i_iot_node
 		bool enabled;
 		unsigned long queryinterval;
 
-		float fc_setpoint;
-		float fc_value;
+		
+		float frq_value;
 		int state;
 		int remote_state;
 		int cmd;
 		float rpm_setpoint;
 		float rpm_value;
+		float frq_max;
+		float amperage;
 		int reverse;
 		char    ip_address[16];
+		void set_output_in_percent( float value );
+		float get_output_in_percent( );
 
 		enum CFG_STEP
 			{
@@ -63,6 +67,14 @@ class altivar_node: public i_iot_node
 			TYPE_ATV320 = 320,
 			TYPE_ATV630 = 630,
 			};
+
+        enum settings_const
+            {
+            FRQ_MIN_SETTING = 10,
+            FRQ_MAX_SETTING = 120
+            };
+    private:
+	    float frq_setpoint;
 
 	protected:
 		modbus_client* mc;
