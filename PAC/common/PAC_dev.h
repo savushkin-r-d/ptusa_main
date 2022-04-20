@@ -3693,7 +3693,7 @@ protected:
     float freq = .0f;
     char state = 0;
     int reverse = 0;
-    float rpm = .0f;
+    int rpm = 0;
     int est = 0;
     float amperage = .0f;
 #endif // DEBUG_NO_IO_MODULES

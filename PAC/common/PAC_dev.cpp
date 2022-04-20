@@ -6739,10 +6739,10 @@ int motor_altivar::save_device_ex(char * buff)
     {
     int res = 0;
 #ifdef DEBUG_NO_IO_MODULES
-    res = sprintf( buff, "R=%d, FRQ=%.2f, RPM=%.2f, EST=%d, AMP=%.2f, MAX_FRQ=0, ",
+    res = sprintf( buff, "R=%d, FRQ=%.1f, RPM=%d, EST=%d, AMP=%.1f, MAX_FRQ=0, ",
         reverse, freq, rpm, est, amperage );
 #else
-    res = sprintf(buff, "R=%d, FRQ=%.2f, RPM=%.2f, EST=%d, AMP=%.2f, MAX_FRQ=%.2f, ",
+    res = sprintf(buff, "R=%d, FRQ=%.1f, RPM=%d, EST=%d, AMP=%.1f, MAX_FRQ=%.1f, ",
         atv->reverse, atv->frq_value, atv->rpm_value, atv->remote_state, atv->amperage, atv->frq_max);
 #endif //DEBUG_NO_IO_MODULES
     return res;

@@ -23,7 +23,7 @@ class altivar_node: public i_iot_node
 		int remote_state;
 		int cmd;
 		float rpm_setpoint;
-		float rpm_value;
+		int rpm_value;
 		float frq_max;
 		float amperage;
 		int reverse;

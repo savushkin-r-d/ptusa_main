@@ -175,7 +175,7 @@ void altivar_node::Evaluate()
 						mc->set_int2(0, 3201);	//ETA(Status word) --default
 						mc->set_int2(1, 8604);	//RFRD (Output velocity) --default
 						mc->set_int2(2, 3202);	//RFR (Output frequency)
-						mc->set_int2(3, 3103);	//TFR (Max. output frequency)
+						mc->set_int2(3, 3104);	//HSP (High speed)
 						mc->set_int2(4, 3204);	//LCR (Motor current)
 						mc->set_int2(5, 0);
 						configurestep = CFG_STEP_SET_INPUTS;
