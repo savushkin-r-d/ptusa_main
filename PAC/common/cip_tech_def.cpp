@@ -1005,450 +1005,525 @@ void cipline_tech_object::initline()
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "init_custom_step" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "init_custom_step" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_InitCustomStep_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_InitCustomStep_func = 2;
+                }
+            else
+                {
+                is_InitCustomStep_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "init_custom_step".
             }
-        else
-            {
-            is_InitCustomStep_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "init_custom_step".
         }
 
     if ( is_DoCustomStep_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "do_custom_step" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "do_custom_step" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_DoCustomStep_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_DoCustomStep_func = 2;
+                }
+            else
+                {
+                is_DoCustomStep_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "do_custom_step".
             }
-        else
-            {
-            is_DoCustomStep_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "do_custom_step".
         }
 
     if ( is_GoToStep_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_GoToStep" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_GoToStep" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_GoToStep_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_GoToStep_func = 2;
+                }
+            else
+                {
+                is_GoToStep_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_GoToStep".
             }
-        else
-            {
-            is_GoToStep_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_GoToStep".
         }
 
     if ( is_DoStep_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_DoStep" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_DoStep" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_DoStep_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_DoStep_func = 2;
+                }
+            else
+                {
+                is_DoStep_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_DoStep".
             }
-        else
-            {
-            is_DoStep_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_DoStep".
         }
 
     if ( is_InitStep_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_InitStep" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_InitStep" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_InitStep_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_InitStep_func = 2;
+                }
+            else
+                {
+                is_InitStep_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_InitStep".
             }
-        else
-            {
-            is_InitStep_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_InitStep".
         }
 
     if ( is_LoadProgram_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_LoadProgram" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_LoadProgram" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_LoadProgram_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_LoadProgram_func = 2;
+                }
+            else
+                {
+                is_LoadProgram_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_LoadProgram".
             }
-        else
-            {
-            is_LoadProgram_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_LoadProgram".
         }
 
     if ( is_StopDev_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_StopDev" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_StopDev" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_StopDev_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_StopDev_func = 2;
+                }
+            else
+                {
+                is_StopDev_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_StopDev".
             }
-        else
-            {
-            is_StopDev_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_StopDev".
         }
 
     if ( is_ResetLinesDevicesBeforeReset_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_ResetLinesDevicesBeforeReset" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_ResetLinesDevicesBeforeReset" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_ResetLinesDevicesBeforeReset_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_ResetLinesDevicesBeforeReset_func = 2;
+                }
+            else
+                {
+                is_ResetLinesDevicesBeforeReset_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_ResetLinesDevicesBeforeReset".
             }
-        else
-            {
-            is_ResetLinesDevicesBeforeReset_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_ResetLinesDevicesBeforeReset".
         }
 
     if ( is_OporCIP_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_OporCIP" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_OporCIP" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_OporCIP_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_OporCIP_func = 2;
+                }
+            else
+                {
+                is_OporCIP_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_OporCIP".
             }
-        else
-            {
-            is_OporCIP_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_OporCIP".
         }
 
     if ( is_InitOporCIP_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_InitOporCIP" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_InitOporCIP" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_InitOporCIP_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_InitOporCIP_func = 2;
+                }
+            else
+                {
+                is_InitOporCIP_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_InitOporCIP".
             }
-        else
-            {
-            is_InitOporCIP_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_InitOporCIP".
         }
 
     if ( is_in_evaluate_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_in_evaluate" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_in_evaluate" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_in_evaluate_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_in_evaluate_func = 2;
+                }
+            else
+                {
+                is_in_evaluate_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_in_evaluate".
             }
-        else
-            {
-            is_in_evaluate_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_in_evaluate".
         }
 
     if ( is_in_error_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_in_error" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_in_error" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_in_error_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_in_error_func = 2;
+                }
+            else
+                {
+                is_in_error_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_in_error".
             }
-        else
-            {
-            is_in_error_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_in_error".
         }
 
     if ( is_InitCirc_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_InitCirc" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_InitCirc" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_InitCirc_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_InitCirc_func = 2;
+                }
+            else
+                {
+                is_InitCirc_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_InitCirc".
             }
-        else
-            {
-            is_InitCirc_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_InitCirc".
         }
 
     if ( is_Circ_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_Circ" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_Circ" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_Circ_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_Circ_func = 2;
+                }
+            else
+                {
+                is_Circ_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_Circ".
             }
-        else
-            {
-            is_Circ_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_Circ".
         }
 
     if ( is_CheckErr_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_CheckErr" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_CheckErr" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_CheckErr_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_CheckErr_func = 2;
+                }
+            else
+                {
+                is_CheckErr_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_CheckErr".
             }
-        else
-            {
-            is_CheckErr_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_CheckErr".
         }
 
     if ( is_ToObject_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_ToObject" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_ToObject" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_ToObject_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_ToObject_func = 2;
+                }
+            else
+                {
+                is_ToObject_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_ToObject".
             }
-        else
-            {
-            is_ToObject_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_ToObject".
         }
 
     if ( is_InitToObject_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_InitToObject" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_InitToObject" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_InitToObject_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_InitToObject_func = 2;
+                }
+            else
+                {
+                is_InitToObject_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_InitToObject".
             }
-        else
-            {
-            is_InitToObject_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_InitToObject".
         }
 
     if ( is_FromObject_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_FromObject" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_FromObject" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_FromObject_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_FromObject_func = 2;
+                }
+            else
+                {
+                is_FromObject_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_FromObject".
             }
-        else
-            {
-            is_FromObject_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_FromObject".
         }
 
     if ( is_InitFromObject_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_InitFromObject" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_InitFromObject" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_InitFromObject_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_InitFromObject_func = 2;
+                }
+            else
+                {
+                is_InitFromObject_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_InitFromObject".
             }
-        else
-            {
-            is_InitFromObject_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_InitFromObject".
         }
 
     if ( is_RT_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_RT" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_RT" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_RT_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_RT_func = 2;
+                }
+            else
+                {
+                is_RT_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_RT".
             }
-        else
-            {
-            is_RT_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_RT".
         }
 
     if ( is_Stop_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_Stop" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_Stop" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_Stop_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_Stop_func = 2;
+                }
+            else
+                {
+                is_Stop_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_Stop".
             }
-        else
-            {
-            is_Stop_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_Stop".
         }
 
     if ( is_DoseRR_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_DoseRR" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_DoseRR" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_DoseRR_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_DoseRR_func = 2;
+                }
+            else
+                {
+                is_DoseRR_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_DoseRR".
             }
-        else
-            {
-            is_DoseRR_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_DoseRR".
         }
 
     if ( is_InitDoseRR_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_InitDoseRR" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_InitDoseRR" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_InitDoseRR_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_InitDoseRR_func = 2;
+                }
+            else
+                {
+                is_InitDoseRR_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_InitDoseRR".
             }
-        else
-            {
-            is_InitDoseRR_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_InitDoseRR".
         }
 
     if ( is_On_Resume_func == 0 )
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield( L, LUA_GLOBALSINDEX, name_Lua );
-        lua_getfield( L, -1, "cip_On_Resume" );
-        lua_remove( L, -2 );  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_On_Resume" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if ( lua_isfunction( L, -1 ) )
-            {
-            is_On_Resume_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_On_Resume_func = 2;
+                }
+            else
+                {
+                is_On_Resume_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_On_Resume".
             }
-        else
-            {
-            is_On_Resume_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_On_Resume".
         }
 
     if (is_ConfigureLine_func == 0)
         {
         lua_State* L = lua_manager::get_instance()->get_Lua();
         lua_getfield(L, LUA_GLOBALSINDEX, name_Lua);
-        lua_getfield(L, -1, "cip_ConfigureLine");
-        lua_remove(L, -2);  // Stack: remove OBJECT.
+        if ( lua_istable( L, -1 ) )
+            {
+            lua_getfield( L, -1, "cip_ConfigureLine" );
+            lua_remove( L, -2 );  // Stack: remove OBJECT.
 
-        if (lua_isfunction(L, -1))
-            {
-            is_ConfigureLine_func = 2;
+            if ( lua_isfunction( L, -1 ) )
+                {
+                is_ConfigureLine_func = 2;
+                }
+            else
+                {
+                is_ConfigureLine_func = 1;
+                }
+            lua_remove( L, -1 ); // Stack: remove function "cip_On_Resume".
             }
-        else
-            {
-            is_ConfigureLine_func = 1;
-            }
-        lua_remove(L, -1); // Stack: remove function "cip_On_Resume".
         }
 
     if (nmr == 1)

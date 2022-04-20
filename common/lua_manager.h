@@ -91,6 +91,13 @@ class lua_manager
         int reload_script( int script_n, const char* script_function_name,
             char *res_str, int max_res_str_length );
 
+#ifdef PTUSA_TEST
+        void set_Lua( lua_State* l)
+            {
+            L = l;
+            }
+#endif
+
     private:
         lua_manager() : L( 0 ), err_func( 0 ), is_free_lua( 0 )
             {
