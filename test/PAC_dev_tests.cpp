@@ -136,6 +136,15 @@ TEST( motor_altivar, set_cmd )
     EXPECT_STREQ( "M1={M=0, ST=0, V=1.10, R=1, FRQ=1.1, RPM=12, EST=2, AMP=23.3, MAX_FRQ=0.0, P_ON_TIME=0},\n", buff );
     }
 
+TEST( motor_altivar, get_amperage )
+    {
+    motor_altivar_linear m1( "M1" );
+    EXPECT_EQ( .0f, m1.get_amperage( ) );
+
+    m1.set_cmd( "AMP", 0, 25.7 );
+    EXPECT_EQ( 25.7f, m1.get_amperage( ) );
+    }
+
 TEST( motor_altivar_linear, get_linear_speed )
     {
     motor_altivar_linear m1( "M1" );
