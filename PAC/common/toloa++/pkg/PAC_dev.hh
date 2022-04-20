@@ -974,7 +974,7 @@ class operation_state
         /// mode::step_stub.
         step* operator[] ( int idx );
 
-        u_int steps_count() const;
+        unsigned int steps_count() const;
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об устройствах, которые входят в шаг (открываются/
