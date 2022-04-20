@@ -125,14 +125,15 @@ TEST( motor_altivar, set_cmd )
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
     m1.save_device( buff, "" );
-    EXPECT_STREQ( "M1={M=0, ST=0, V=0, R=0, FRQ=0.00, RPM=0.00, EST=0, P_ON_TIME=0},\n", buff );
+    EXPECT_STREQ( "M1={M=0, ST=0, V=0, R=0, FRQ=0.0, RPM=0, EST=0, AMP=0.0, MAX_FRQ=0.0, P_ON_TIME=0},\n", buff );
 
     m1.set_cmd( "R", 0, 1 );
     m1.set_cmd( "FRQ", 0, 1.1 );
-    m1.set_cmd( "RPM", 0, 12.2 );
+    m1.set_cmd( "RPM", 0, 12 );
     m1.set_cmd( "EST", 0, 2 );
+    m1.set_cmd( "AMP", 0, 23.3 );
     m1.save_device( buff, "" );
-    EXPECT_STREQ( "M1={M=0, ST=0, V=1.10, R=1, FRQ=1.10, RPM=12.20, EST=2, P_ON_TIME=0},\n", buff );
+    EXPECT_STREQ( "M1={M=0, ST=0, V=1.10, R=1, FRQ=1.1, RPM=12, EST=2, AMP=23.3, MAX_FRQ=0.0, P_ON_TIME=0},\n", buff );
     }
 
 TEST( motor_altivar_linear, get_linear_speed )
