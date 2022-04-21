@@ -2823,22 +2823,6 @@ void counter_iolink::evaluate_io()
         const int SIZE = 8;
         std::copy( data, data + SIZE, buff );
 
-#define DEBUG_FQT_IOLINK 1
-#ifdef DEBUG_FQT_IOLINK
-        //Variants of float representation.
-        int a1 = ( buff[ 0 ] << 24 ) + ( buff[ 1 ] << 16 ) + ( buff[ 2 ] << 8 ) + buff[ 3 ];
-        int a2 = ( buff[ 1 ] << 24 ) + ( buff[ 0 ] << 16 ) + ( buff[ 3 ] << 8 ) + buff[ 2 ];
-        int a3 = ( buff[ 2 ] << 24 ) + ( buff[ 3 ] << 16 ) + ( buff[ 1 ] << 8 ) + buff[ 0 ];
-        int a4 = ( buff[ 3 ] << 24 ) + ( buff[ 2 ] << 16 ) + ( buff[ 0 ] << 8 ) + buff[ 1 ];
-        float* f1 = (float*)&a1;
-        float* f2 = (float*)&a2;
-        float* f3 = (float*)&a3;
-        float* f4 = (float*)&a4;
-        sprintf( G_LOG->msg, "WARNING %s %f %f %f %f", get_name(),
-            *f1, *f2, *f3, *f4 );
-        G_LOG->write_log( i_log::P_WARNING );
-#endif
-
         //Reverse byte order to get correct float.
         std::swap( buff[ 3 ], buff[ 0 ] );
         std::swap( buff[ 1 ], buff[ 2 ] );
@@ -2848,9 +2832,13 @@ void counter_iolink::evaluate_io()
 
 #ifdef DEBUG_FQT_IOLINK
         sprintf( G_LOG->msg,
-            "Totalizer %.2f, flow %d, temperature %d, status2 %d, status1 %d\n",
+            "Totalizer %.2f, flow %d, temperature %d, status2 %d, status1 %d",
             in_info.totalizer, in_info.flow, in_info.temperature,
             in_info.out2, in_info.out1 );
+        G_LOG->write_log( i_log::P_NOTICE );
+        sprintf( G_LOG->msg,
+            "get_quantity() %d, get_flow() %f, get_temperature() %f",
+            get_quantity(), get_flow(), get_temperature() );
         G_LOG->write_log( i_log::P_NOTICE );
 #endif
         }
