@@ -531,7 +531,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int_2* io_device::get_AI_data( u_int index )
+int_2* io_device::get_AI_data( u_int index ) const
     {
     if ( index < AI_channels.count && AI_channels.int_read_values )
         {

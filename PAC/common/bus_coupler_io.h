@@ -114,7 +114,7 @@ class io_device
         /// устройства.
         ///
         /// @return -  указатель на данные канала.
-        int_2* get_AI_data( u_int index );
+        int_2* get_AI_data( u_int index ) const;
 
 
 		/// @brief Получение состояния IO-Link устройства типа AI.
