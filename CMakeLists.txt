@@ -305,7 +305,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
 endif()
 
 include(GoogleTest)
-gtest_discover_tests(main_test)
+gtest_discover_tests(main_test PROPERTIES TIMEOUT 20)
 
 #remove tests from add_subdirectory() added projects
 configure_file(${CMAKE_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_BINARY_DIR} @ONLY)
