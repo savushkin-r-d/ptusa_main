@@ -434,14 +434,14 @@ int io_manager_linux::e_communicate( io_node* node, int bytes_to_send,
             node->last_init_time = get_millisec();
             if ( node->delay_time < io_node::C_MAX_DELAY )
                 {
-                node->delay_time += 10000 + node->number * 200;
+                node->delay_time += node->delay_time;
                 }
             return -100;
             }
         }
     // Инициализация сетевого соединения, при необходимости.-!>
 
-    node->delay_time = 0;
+    node->delay_time = io_node::C_INITIAL_RECONNECT_DELAY;
 
     // Посылка данных.
     int res = tcp_communicator_linux::sendall( node->sock, buff,

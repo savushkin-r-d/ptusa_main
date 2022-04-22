@@ -297,6 +297,9 @@ class i_motor : public device
         /// @brief Получение линейной скорости (например, приводимого в
         // движение конвейра).
         virtual float get_linear_speed() const;
+
+        /// @brief Получение текущего тока мотора
+        virtual float get_amperage() const;
     };
 //-----------------------------------------------------------------------------
 class signal_column : public device
