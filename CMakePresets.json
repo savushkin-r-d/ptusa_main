@@ -102,22 +102,22 @@
             "displayName": "Windows AXCF2152 2021 LTS Release",
             "description": "Using Windows OS",
             "inherits": "windows-AXCF-default",
-            "environment": {
-                "ARP_DEVICE": "AXCF2152",
-                "ARP_DEVICE_VERSION": "2021.0.3 LTS (21.0.3.35554)",
-                "ARP_DEVICE_SHORT_VERSION": "2021_0"
-            }
+          "environment": {
+            "ARP_DEVICE": "AXCF2152",
+            "ARP_DEVICE_VERSION": "2021.0.5 LTS (21.0.5.35585)",
+            "ARP_DEVICE_SHORT_VERSION": "2021_0"
+          }
         },
         {
             "name": "build-windows-AXCF3152-2021-LTS-Release",
             "displayName": "Windows AXCF3152 2021 LTS Release",
             "description": "Using Windows OS",
             "inherits": "windows-AXCF-default",
-            "environment": {
-                "ARP_DEVICE": "AXCF3152",
-                "ARP_DEVICE_VERSION": "2021.0.3 LTS (21.0.3.35554)",
-                "ARP_DEVICE_SHORT_VERSION": "2021_0"
-            }
+          "environment": {
+            "ARP_DEVICE": "AXCF3152",
+            "ARP_DEVICE_VERSION": "2021.0.5 LTS (21.0.5.35585)",
+            "ARP_DEVICE_SHORT_VERSION": "2021_0"
+          }
         },
         {
             "name": "linux-AXCF-default",
