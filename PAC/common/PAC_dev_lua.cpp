@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Fri Mar 25 09:45:31 2022.
+** Generated automatically by tolua++-1.0.92 on Tue Apr 19 17:41:14 2022.
 */
 
 #ifndef __cplusplus
@@ -1493,6 +1493,38 @@ static int tolua_PAC_dev_i_motor_get_linear_speed00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'get_linear_speed'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: get_amperage of class  i_motor */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_i_motor_get_amperage00
+static int tolua_PAC_dev_i_motor_get_amperage00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const i_motor",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const i_motor* self = (const i_motor*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'get_amperage'", NULL);
+#endif
+  {
+   float tolua_ret = (float)  self->get_amperage();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'get_amperage'.",&tolua_err);
  return 0;
 #endif
 }
@@ -14394,6 +14426,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_beginmodule(tolua_S,"i_motor");
    tolua_function(tolua_S,"reverse",tolua_PAC_dev_i_motor_reverse00);
    tolua_function(tolua_S,"get_linear_speed",tolua_PAC_dev_i_motor_get_linear_speed00);
+   tolua_function(tolua_S,"get_amperage",tolua_PAC_dev_i_motor_get_amperage00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"signal_column","signal_column","device",NULL);
   tolua_beginmodule(tolua_S,"signal_column");
