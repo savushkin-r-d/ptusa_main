@@ -367,7 +367,7 @@ TEST( counter_iolink, evaluate_io )
     std::swap( buff[ 0 ], buff[ 3 ] );  //Reverse byte order to get correct float.
     std::swap( buff[ 2 ], buff[ 1 ] );
     *reinterpret_cast<int*>( fqt1.AI_channels.int_read_values[ 0 ] + 2 ) = 22;
-    *reinterpret_cast<int*>( fqt1.AI_channels.int_read_values[ 0 ] + 3 ) = 33;
+    *reinterpret_cast<int*>( fqt1.AI_channels.int_read_values[ 0 ] + 3 ) = 33 << 2;
     std::swap( buff[ 5 ], buff[ 4 ] );  //Reverse byte order to get correct int16.
     std::swap( buff[ 7 ], buff[ 6 ] );
     fqt1.evaluate_io();

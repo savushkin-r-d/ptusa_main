@@ -4101,18 +4101,16 @@ class counter_iolink : public base_counter
             LAST_PARAM_IDX,
             };
 
-#pragma pack(push,1)
         struct in_data
             {
             float totalizer;    //Quantity meter which continuously totals the
                                 //volumetric flow since the last reset.
             int16_t flow;       //Current flow.
 
-            bool out2 : 1;      //Status depends on [OU2].
-            bool out1 : 1;      //Status depends on [OU1].
+            int16_t out2 : 1;   //Status depends on [OU2].
+            int16_t out1 : 1;   //Status depends on [OU1].
             int16_t temperature : 14;   //Current temperature.
             };
-#pragma pack(pop)
 
         in_data in_info{ 0, 0, 0, 0, 0 };
     };
