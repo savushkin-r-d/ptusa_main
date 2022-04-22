@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Tue Apr 19 17:41:14 2022.
+** Generated automatically by tolua++-1.0.92 on Wed Apr 20 17:09:25 2022.
 */
 
 #ifndef __cplusplus
@@ -5763,6 +5763,38 @@ static int tolua_PAC_dev_operation_state__geti00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function '.geti'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: steps_count of class  operation_state */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_operation_state_steps_count00
+static int tolua_PAC_dev_operation_state_steps_count00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"const operation_state",0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const operation_state* self = (const operation_state*)  tolua_tousertype(tolua_S,1,0);
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'steps_count'", NULL);
+#endif
+  {
+   unsigned int tolua_ret = (unsigned int)  self->steps_count();
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'steps_count'.",&tolua_err);
  return 0;
 #endif
 }
@@ -14635,6 +14667,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_cclass(tolua_S,"operation_state","operation_state","",NULL);
   tolua_beginmodule(tolua_S,"operation_state");
    tolua_function(tolua_S,".geti",tolua_PAC_dev_operation_state__geti00);
+   tolua_function(tolua_S,"steps_count",tolua_PAC_dev_operation_state_steps_count00);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"step","step","",NULL);
   tolua_beginmodule(tolua_S,"step");
