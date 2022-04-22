@@ -531,7 +531,7 @@ float io_device::get_AI( u_int index, float min_value, float max_value )
     return 0;
     }
 //-----------------------------------------------------------------------------
-int_2* io_device::get_AI_data( u_int index )
+int_2* io_device::get_AI_data( u_int index ) const
     {
     if ( index < AI_channels.count && AI_channels.int_read_values )
         {
@@ -795,23 +795,23 @@ void io_device::IO_channels::init( int ch_count )
         switch ( type )
             {
             case IO_channels::CT_DI:
-                char_read_values = new u_char*[ count ];
+                char_read_values = new u_char*[ count ]{ 0 };
                 break;
 
             case IO_channels::CT_DO:
-                char_read_values  = new u_char*[ count ];
-                char_write_values = new u_char*[ count ];
+                char_read_values  = new u_char*[ count ]{ 0 };
+                char_write_values = new u_char*[ count ]{ 0 };
                 break;
 
             case IO_channels::CT_AI:
-                int_read_values = new int_2*[ count ];
-				int_module_read_values = new int_2*[count];
+                int_read_values = new int_2*[ count ]{ 0 };
+				int_module_read_values = new int_2*[count]{ 0 };
                 break;
 
             case IO_channels::CT_AO:
-                int_read_values  = new int_2*[ count ];
-				int_module_read_values = new int_2*[count];
-                int_write_values = new int_2*[ count ];
+                int_read_values  = new int_2*[ count ]{ 0 };
+				int_module_read_values = new int_2*[count]{ 0 };
+                int_write_values = new int_2*[ count ]{ 0 };
                 break;
             }
         }

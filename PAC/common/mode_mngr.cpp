@@ -942,10 +942,12 @@ open_seat_action::open_seat_action( bool is_mode, operation_state *owner ) :
     {
     }
 //-----------------------------------------------------------------------------
+#ifdef PTUSA_TEST
 void open_seat_action::set_wait_time( int wait_time )
     {
     this->wait_time = wait_time;
     }
+#endif
 //----------------------------------------------------------------------------
 void open_seat_action::init()
     {

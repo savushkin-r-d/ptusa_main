@@ -26,9 +26,6 @@ if(NOT ARP_DEVICE)
     add_compile_definitions(DEBUG_NO_IO_MODULES)
 endif()
 
-#### Definitions for run tests ####
-add_compile_definitions(PTUSA_TEST)
-
 if(LINUX)
     add_compile_definitions(LINUX_OS)
 elseif(WIN32)
@@ -162,7 +159,7 @@ set_target_properties (libptusa_main PROPERTIES OUTPUT_NAME ptusa_main PREFIX ""
 target_compile_definitions(libptusa_main PUBLIC _USRDLL)
 
 target_compile_definitions(gmock PUBLIC GTEST_CREATE_SHARED_LIBRARY)
-target_compile_definitions(main_test PUBLIC GTEST_LINKED_AS_SHARED_LIBRARY)
+target_compile_definitions(main_test PUBLIC GTEST_LINKED_AS_SHARED_LIBRARY PTUSA_TEST)
 
 set_target_properties (subhook gtest gtest_main gmock gmock_main PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 #######################################################################################

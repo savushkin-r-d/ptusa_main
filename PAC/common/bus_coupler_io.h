@@ -114,7 +114,7 @@ class io_device
         /// устройства.
         ///
         /// @return -  указатель на данные канала.
-        int_2* get_AI_data( u_int index );
+        int_2* get_AI_data( u_int index ) const;
 
 
 		/// @brief Получение состояния IO-Link устройства типа AI.
@@ -151,7 +151,12 @@ class io_device
 
         virtual void print() const;
 
-    private:
+#ifdef PTUSA_TEST
+        public:
+#else
+        private:
+#endif
+    
         /// @brief Группа каналов ввода/вывода устройства.
         struct IO_channels
             {

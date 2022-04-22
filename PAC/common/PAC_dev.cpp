@@ -1327,6 +1327,9 @@ i_counter* device_manager::get_FQT( const char *dev_name )
             case device::DST_FQT_VIRT:
                 return ( virtual_counter* ) res_ctr;
 
+            case device::DST_FQT_IOLINK:
+                return ( counter_iolink* ) res_ctr;
+
             default:
                 break;
             }
@@ -1729,6 +1732,10 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new virtual_counter( dev_name );
                     break;
 
+                case device::DST_FQT_IOLINK:
+                    new_device = new counter_iolink( dev_name );
+                    new_io_device = (counter_iolink*)new_device;
+                    
                 default:
                     if ( G_DEBUG )
                         {
@@ -2407,6 +2414,11 @@ float dev_stub::get_flow()
     return 0.;
     }
 //-----------------------------------------------------------------------------
+u_long dev_stub::get_pump_dt() const
+    {
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 void dev_stub::abs_reset()
     {
     }
@@ -2425,221 +2437,14 @@ void dev_stub::process_DO( u_int n, DO_state state, const char* name )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-float counter::get_value()
-    {
-    return (float)get_quantity();
-    }
-//-----------------------------------------------------------------------------
-void counter::direct_set_value( float new_value )
-    {
-    value = (u_int)new_value;
-    }
-//-----------------------------------------------------------------------------
-int counter::get_state()
-    {
-    return (int) state;
-    }
-//-----------------------------------------------------------------------------
-void counter::direct_on()
-    {
-    start();
-    }
-//-----------------------------------------------------------------------------
-void counter::direct_off()
-    {
-    reset();
-    }
-//-----------------------------------------------------------------------------
-void counter::direct_set_state( int new_state )
-    {
-#ifdef DEBUG_NO_IO_MODULES
-    state = ( STATES ) new_state;
-#else
-    switch ( new_state )
-        {
-        case S_STOP:
-            state = S_STOP;
-            reset();
-            break;
-
-        case S_WORK:
-            start();
-            break;
-
-        case S_PAUSE:
-            pause();
-            break;
-        }
-#endif
-    }
-//-----------------------------------------------------------------------------
-void counter::print() const
-    {
-    device::print();
-    //io_device::print();
-    }
-//-----------------------------------------------------------------------------
-void counter::pause()
-    {
-    get_quantity(); // Пересчитываем значение счетчика.
-
-    state = STATES::S_PAUSE;
-    }
-//-----------------------------------------------------------------------------
-void counter::start()
-    {
-    if ( STATES::S_STOP == state || STATES::S_PAUSE == state )
-        {
-        if ( STATES::S_STOP == state )
-            {
-            value = 0;
-            }
-
-        state = STATES::S_WORK;
-        last_read_value = *( ( u_int_2* ) get_AI_data( AI_Q_INDEX ) );
-        }
-    }
-//-----------------------------------------------------------------------------
-void counter::reset()
-    {
-    value = 0;
-    }
-//-----------------------------------------------------------------------------
-void counter::abs_reset()
-    {
-    abs_value = 0;
-    }
-//-----------------------------------------------------------------------------
-u_int counter::get_abs_quantity()
-    {
-#ifndef DEBUG_NO_IO_MODULES
-    u_int current = *( (u_int_2*)get_AI_data( AI_Q_INDEX ) );
-
-    if ( is_first_read_abs )
-        {
-        if ( current != 0 )
-            {
-            abs_last_read_value = current;
-            is_first_read_abs = false;
-            }
-        }
-    else
-        {
-        u_int delta;
-        if ( current < abs_last_read_value )
-            {
-            delta = MAX_VAL - abs_last_read_value + current;
-			if (delta > MAX_OVERFLOW)
-				{
-				if (current < delta)
-					{
-					delta = current;
-					}
-				}
-            }
-        else
-            {
-            delta = current - abs_last_read_value;
-            }
-
-        abs_last_read_value = current;
-        if ( delta > 0 )
-            {
-            abs_value += delta;
-            }
-        }
-#endif // NO_WAGO_MODULES
-
-    return abs_value;
-    }
-//-----------------------------------------------------------------------------
-u_int counter::get_quantity()
-    {
-#ifndef DEBUG_NO_IO_MODULES
-    if ( S_WORK == state )
-        {
-        u_int current = *( (u_int_2*)get_AI_data( AI_Q_INDEX ) );
-
-        if ( is_first_read )
-            {
-            if ( current != 0 )
-                {
-                last_read_value = current;
-                is_first_read = false;
-                }
-            }
-        else
-            {
-            u_int delta;
-            if ( current < last_read_value )
-                {
-                delta = MAX_VAL - last_read_value + current;
-				if (delta > MAX_OVERFLOW)
-					{
-					if (current < delta)
-						{
-						delta = current;
-						}
-					}
-                }
-            else
-                {
-                delta = current - last_read_value;
-                }
-
-            last_read_value = current;
-            if ( delta > 0 )
-                {
-                value += delta;
-                }
-            }
-        }
-#endif // NO_WAGO_MODULES
-
-    return value;
-    }
-//-----------------------------------------------------------------------------
-counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
-                     int extra_par_cnt ):
-    device( dev_name, DT_FQT, DST_FQT, extra_par_cnt ),
-    io_device( dev_name ),
-    state( STATES::S_WORK ),
-    value( 0 ),
-    last_read_value( 0 ),
-    abs_value( 0 ),
-    abs_last_read_value( 0 ),
-    is_first_read( true ),
-    is_first_read_abs( true )
+base_counter::base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
+    int extra_par_cnt ) :
+    device( dev_name, DT_FQT, sub_type, extra_par_cnt ),
+    io_device( dev_name )
     {
     }
 //-----------------------------------------------------------------------------
-int counter::set_cmd(const char *prop, u_int idx, double val)
-    {
-    switch ( prop[ 0 ] )
-        {
-        case 'A': //ABS_V
-            abs_value = ( u_int ) val;
-            break;
-
-        default:
-            return device::set_cmd( prop, idx, val );
-        }
-
-    return 0;
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-counter_f::counter_f( const char *dev_name ) :
-    counter( dev_name, DST_FQT_F, ADDITIONAL_PARAMS_COUNT ),
-    flow_value( 0 )
-    {
-    set_par_name( P_MIN_FLOW, 0, "P_MIN_FLOW" );
-    set_par_name( P_MAX_FLOW, 0, "P_MAX_FLOW" );
-    set_par_name( P_CZ, 0, "P_CZ" );
-    set_par_name( P_DT, 0, "P_DT" );
-    }
-//-----------------------------------------------------------------------------
-int counter_f::get_state()
+int base_counter::get_state()
     {
     if ( !motors.empty() )
         {
@@ -2658,22 +2463,20 @@ int counter_f::get_state()
                 }
             }
 
-        if ( 0 == is_pump_working )
-            {
-            // Насос не работает.
+        if ( 0 == is_pump_working )     // Насос не работает.
+            {            
             start_pump_working_time = 0;
             }
-        else
-            {
-            // Насос работает.
+        else                            // Насос работает.
+            {            
             if ( state == STATES::S_PAUSE )
                 {
                 start_pump_working_time = get_millisec();
                 }
-            else          // Работа.
+            else                        // Работа.
                 {
                 state = STATES::S_WORK;
-                auto dt = get_par( P_DT, 0 );
+                auto dt = get_pump_dt();
                 if ( get_delta_millisec( start_pump_working_time ) > dt )
                     {
                     // Проверяем счетчик на ошибку - он должен изменить свои показания.
@@ -2691,6 +2494,231 @@ int counter_f::get_state()
             }
         }// if ( motors.size() > 0
 
+    return static_cast<int>( state );
+    };
+//-----------------------------------------------------------------------------
+void base_counter::direct_on()
+    {
+    start();
+    }
+//-----------------------------------------------------------------------------
+void base_counter::direct_off()
+    {
+    reset();
+    }
+//-----------------------------------------------------------------------------
+void base_counter::direct_set_state( int new_state )
+    {
+    switch ( new_state )
+        {
+        case 0:
+            direct_off();
+            break;
+
+        case static_cast<int>( STATES::S_WORK ):
+            direct_on();
+            break;
+
+        case static_cast<int>( STATES::S_PAUSE ):
+            pause();
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+void base_counter::direct_set_value( float new_value )
+    {
+    value = new_value;
+    }
+//-----------------------------------------------------------------------------
+void base_counter::set_abs_value( float new_value )
+    {
+    abs_value = new_value;
+    };
+//-----------------------------------------------------------------------------
+void base_counter::calculate_quantity( float& value, float& last_read_value,
+    bool& is_first_read )
+    {
+    float current = get_raw_value();
+
+    if ( is_first_read )
+        {
+        if ( current != 0 )
+            {
+            last_read_value = current;
+            is_first_read = false;
+            }
+        }
+    else
+        {
+        float delta;
+        if ( current < last_read_value )
+            {
+            delta = get_max_raw_value() - last_read_value + current;
+            if ( delta > MAX_OVERFLOW )
+                {
+                if ( current < delta )
+                    {
+                    delta = current;
+                    }
+                }
+            }
+        else
+            {
+            delta = current - last_read_value;
+            }
+
+        last_read_value = current;
+        if ( delta > 0 )
+            {
+            value += delta;
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+float base_counter::get_value()
+    {
+    return value;
+    }
+//-----------------------------------------------------------------------------
+u_int base_counter::get_quantity()
+    {
+    return static_cast<u_int>( value );
+    }
+//-----------------------------------------------------------------------------
+u_int base_counter::get_abs_quantity()
+    {
+    return static_cast<u_int>( abs_value );
+    }
+//-----------------------------------------------------------------------------
+void base_counter::set_property( const char* field, device* dev )
+    {
+    if ( field && field[ 0 ] == 'M' ) //Связанные насосы.
+        {
+        motors.push_back( dev );
+        }
+    }
+//-----------------------------------------------------------------------------
+void base_counter::pause()
+    {
+    get_quantity(); // Пересчитываем значение счетчика.
+
+    state = STATES::S_PAUSE;
+    }
+//-----------------------------------------------------------------------------
+void base_counter::start()
+    {
+    if ( STATES::S_PAUSE == state )
+        {
+        state = STATES::S_WORK;
+        last_read_value = get_raw_value();
+        }
+    }
+//-----------------------------------------------------------------------------
+void base_counter::reset()
+    {
+    value = .0f;
+    }
+//-----------------------------------------------------------------------------
+void base_counter::abs_reset()
+    {
+    abs_value = .0f;
+    }
+//-----------------------------------------------------------------------------
+void base_counter::restart()
+    {
+    reset();
+    start();
+    }
+//-----------------------------------------------------------------------------
+base_counter::~base_counter()
+    {
+    }
+//-----------------------------------------------------------------------------
+void base_counter::evaluate_io()
+    {
+    if ( STATES::S_WORK == static_cast<STATES>( get_state() ) )
+        {
+        calculate_quantity( value, last_read_value, is_first_read );
+        }
+    calculate_quantity( abs_value, abs_last_read_value, abs_is_first_read );
+    }
+//-----------------------------------------------------------------------------
+void base_counter::print() const
+    {
+    device::print();
+    }
+//-----------------------------------------------------------------------------
+int base_counter::set_cmd( const char* prop, u_int idx, double val )
+    {
+    switch ( prop[ 0 ] )
+        {
+        case 'A': //ABS_V
+            set_abs_value( static_cast<float>( val ) );
+            break;
+
+        default:
+            return device::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    };
+//-----------------------------------------------------------------------------
+int base_counter::save_device_ex( char* buff )
+    {
+    return sprintf( buff, "ABS_V=%u, ", get_abs_quantity() );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
+                     int extra_par_cnt ):
+    base_counter( dev_name, sub_type, extra_par_cnt )
+    {
+    }
+//-----------------------------------------------------------------------------
+counter::~counter()
+    {
+    }
+//-----------------------------------------------------------------------------
+float counter::get_raw_value() const
+    {
+#ifndef DEBUG_NO_IO_MODULES
+    return static_cast<float>( *( (u_int_2*)get_AI_data( AI_Q_INDEX ) ) );
+#else
+    return 0;
+#endif
+    }
+//-----------------------------------------------------------------------------
+float counter::get_max_raw_value() const
+    {
+    return USHRT_MAX;
+    }
+//-----------------------------------------------------------------------------
+float counter::get_flow()
+    {
+    return .0f;
+    }
+//-----------------------------------------------------------------------------
+u_long counter::get_pump_dt() const
+    {
+    return 0;
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+counter_f::counter_f( const char *dev_name ) :
+    counter( dev_name, DST_FQT_F, ADDITIONAL_PARAMS_COUNT )
+    {
+    set_par_name( P_MIN_FLOW, 0, "P_MIN_FLOW" );
+    set_par_name( P_MAX_FLOW, 0, "P_MAX_FLOW" );
+    set_par_name( P_CZ, 0, "P_CZ" );
+    set_par_name( P_DT, 0, "P_DT" );
+    }
+//-----------------------------------------------------------------------------
+counter_f::~counter_f()
+    {
+    }
+//-----------------------------------------------------------------------------
+int counter_f::get_state()
+    {
     if ( get_flow() == -1. )
         {
         return (int) STATES::S_LOW_ERR;
@@ -2700,12 +2728,12 @@ int counter_f::get_state()
         return (int) STATES::S_HI_ERR;
         }
 
-    return (int) state;
+    return base_counter::get_state();
     }
 //-----------------------------------------------------------------------------
 float counter_f::get_flow()
     {
-    return get_par(P_CZ, 0) +
+    return get_par( P_CZ, 0 ) +
 #ifdef DEBUG_NO_IO_MODULES
         flow_value;
 #else
@@ -2713,24 +2741,26 @@ float counter_f::get_flow()
 #endif // NO_WAGO_MODULES
     }
 //-----------------------------------------------------------------------------
-void counter_f::set_property( const char* field, device* dev )
+int counter_f::save_device_ex( char *buff )
     {
-    if ( field && field[ 0 ] == 'M' ) //Связанные насосы.
-        {
-        motors.push_back( dev );
-        }
-    else
-        {
-        counter::set_property( field, dev );
-        }
+    int res = counter::save_device_ex( buff );
+
+    res += sprintf( buff + res, "F=%.2f, ", get_flow() );
+
+    return res;
     }
 //-----------------------------------------------------------------------------
-int counter_f::set_cmd(const char *prop, u_int idx, double val)
+u_long counter_f::get_pump_dt() const
+    {
+    return static_cast<u_long>( get_par( P_DT, 0 ) );
+    }
+//-----------------------------------------------------------------------------
+int counter_f::set_cmd( const char* prop, u_int idx, double val )
     {
     switch ( prop[ 0 ] )
         {
         case 'F':
-            flow_value = ( float ) val;
+            flow_value = static_cast<float>( val );
             break;
 
         default:
@@ -2738,17 +2768,7 @@ int counter_f::set_cmd(const char *prop, u_int idx, double val)
         }
 
     return 0;
-    }
-//-----------------------------------------------------------------------------
-int counter_f::save_device_ex( char *buff )
-    {
-    int res = counter::save_device_ex( buff );
-
-    res += sprintf( buff + res, "F=%.2f, ",
-        get_flow() );
-
-    return res;
-    }
+    };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 counter_f_ok::counter_f_ok( const char *dev_name ) : counter_f( dev_name )
@@ -2774,10 +2794,138 @@ int counter_f_ok::get_state()
 #ifndef DEBUG_NO_IO_MODULES
     int i = get_DI( DI_INDEX );
 
-    return i == 1 ? counter_f::get_state() : S_ERROR;
+    return i == 1 ? counter_f::get_state() : static_cast<int>( STATES::S_ERROR );
 #else
     return counter_f::get_state();
 #endif
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
+    device::DST_FQT_IOLINK,
+    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
+    {
+    set_par_name( static_cast<u_int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
+    set_par_name( static_cast<u_int>( CONSTANTS::P_DT ), 0, "P_DT" );
+    };
+//-----------------------------------------------------------------------------
+counter_iolink::~counter_iolink()
+    {
+    };
+//-----------------------------------------------------------------------------
+void counter_iolink::evaluate_io()
+    {
+    char* data = (char*)get_AI_data( 0 );
+    if ( data )
+        {
+        char* buff = (char*)&in_info;
+
+        const int SIZE = 8;
+        std::copy( data, data + SIZE, buff );
+
+        //Reverse byte order to get correct float.
+        std::swap( buff[ 3 ], buff[ 0 ] );
+        std::swap( buff[ 1 ], buff[ 2 ] );
+        //Reverse byte order to get correct int16.
+        std::swap( buff[ 4 ], buff[ 5 ] );
+        std::swap( buff[ 6 ], buff[ 7 ] );
+
+#ifdef DEBUG_FQT_IOLINK
+        sprintf( G_LOG->msg,
+            "Totalizer %.2f, flow %d, temperature %d, status2 %d, status1 %d",
+            in_info.totalizer, in_info.flow, in_info.temperature,
+            in_info.out2, in_info.out1 );
+        G_LOG->write_log( i_log::P_NOTICE );
+        sprintf( G_LOG->msg,
+            "get_quantity() %d, get_flow() %f, get_temperature() %f",
+            get_quantity(), get_flow(), get_temperature() );
+        G_LOG->write_log( i_log::P_NOTICE );
+#endif
+        }
+
+    base_counter::evaluate_io();
+    };
+//-----------------------------------------------------------------------------
+float counter_iolink::get_temperature() const
+    {
+    return 0.1f * in_info.temperature;
+    }
+//-----------------------------------------------------------------------------
+int counter_iolink::get_state()
+    {
+    IOLINKSTATE res = get_AI_IOLINK_state( static_cast<u_int>( CONSTANTS::AI_INDEX ) );
+    if ( res != io_device::IOLINKSTATE::OK )
+        {
+        return -static_cast<int>( res );
+        }
+
+    return base_counter::get_state();
+    }
+//-----------------------------------------------------------------------------
+u_long counter_iolink::get_pump_dt() const
+    {
+    return static_cast<u_long>(
+        get_par( static_cast<u_int>( CONSTANTS::P_DT ), 0 ) );
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_raw_value() const
+    {
+    return in_info.totalizer;
+    };
+//-----------------------------------------------------------------------------
+float counter_iolink::get_max_raw_value() const
+    {
+    return 499999999.99f; ///< Максимальное значение счетчика.
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_flow()
+    {
+    return get_par( static_cast<u_int>( CONSTANTS::P_CZ ), 0 )
+        + in_info.flow * 0.01f;
+    }
+//-----------------------------------------------------------------------------
+int counter_iolink::save_device_ex( char* buff )
+    {
+    int res = base_counter::save_device_ex( buff );
+
+    res += sprintf( buff + res, "F=%.2f, ", get_flow() );
+    res += sprintf( buff + res, "T=%.1f, ", get_temperature() );
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+int counter_iolink::set_cmd( const char* prop, u_int idx, double val )
+    {
+    switch ( prop[ 0 ] )
+        {
+        case 'F':
+            in_info.flow = static_cast<int16_t>( val * 100 ) ;
+            break;
+
+        case 'T':
+            in_info.temperature = static_cast<int16_t>( val * 10 );
+            break;
+
+        default:
+            return base_counter::set_cmd( prop, idx, val );
+        }
+
+    return 0;
+    };
+//-----------------------------------------------------------------------------
+u_int counter_iolink::get_quantity()
+    {
+    return static_cast<u_int>( get_value() );
+    }
+//-----------------------------------------------------------------------------
+u_int counter_iolink::get_abs_quantity()
+    {
+    return static_cast<u_int>( mL_in_L * get_abs_value() );
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_value()
+    {
+    return base_counter::get_value() * mL_in_L;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -6600,13 +6748,8 @@ void  virtual_counter::direct_off()
 //-----------------------------------------------------------------------------
 void virtual_counter::direct_set_state( int new_state )
     {
-    switch ( new_state )
+    switch ( static_cast<STATES>( new_state ) )
         {
-        case STATES::S_STOP:
-            state = STATES::S_STOP;
-            reset();
-            break;
-
         case STATES::S_WORK:
             start();
             break;
@@ -6624,13 +6767,8 @@ void virtual_counter::pause()
 //-----------------------------------------------------------------------------
 void virtual_counter::start()
     {
-    if ( STATES::S_STOP == state || STATES::S_PAUSE == state )
+    if ( STATES::S_PAUSE == state )
         {
-        if ( STATES::S_STOP == state )
-            {
-            value = 0;
-            }
-
         state = STATES::S_WORK;
         }
     }
@@ -6722,6 +6860,11 @@ int virtual_counter::save_device_ex( char *buff )
     res += sprintf( buff + res, "F=%.2f, ", get_flow() );
 
     return res;
+    }
+
+u_long virtual_counter::get_pump_dt() const
+    {
+    return 0;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

@@ -23,61 +23,61 @@ TEST( open_seat_action, evaluate )
 	par_mock->final_init( 0, 0, 0 );
 
 	saved_params_u_int_4& par = PAC_info::get_instance()->par;
-	const int FLIP_INTERVAL_MS = 1000;
-	const int FLIP_DURATION_MS = 100;
-	par[ PAC_info::P_MIX_FLIP_PERIOD ] = FLIP_INTERVAL_MS / MSEC_IN_SEC;
+	const int FLIP_INTERVAL_MS = 5;
+	const int FLIP_DURATION_MS = 2;
 	par[ PAC_info::P_MIX_FLIP_UPPER_TIME ] = FLIP_DURATION_MS;
 	par[ PAC_info::P_MIX_FLIP_LOWER_TIME ] = FLIP_DURATION_MS;
 
 	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
-	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
-	valve_mix_proof test_v_mix_proof( "test_V1" );
+	DO1 test_DO1( "test_DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	DO1 test_DO2( "test_DO2", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
 
 	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
 	auto operation_mngr = test_tank.get_modes_manager();
 	auto operation = operation_mngr[ 0 ][ 1 ];
+	operation->add_step( "Тестовый шаг", -1, -1 );
 	auto operation_state = operation[ 0 ][ 1 ];
 	auto step = operation_state[ 0 ][ 1 ];
 
 	auto action = step[ 0 ][ step::ACTIONS::A_UPPER_SEATS_ON ];
-	action->add_dev( &test_DO, 0, valve::V_UPPER_SEAT );
-	action->add_dev( &test_v_mix_proof, 0, valve::V_UPPER_SEAT );
-	action->add_dev( &test_DO, 0, valve::V_LOWER_SEAT );
-	action->add_dev( &test_v_mix_proof, 0, valve::V_LOWER_SEAT );
+	action->add_dev( &test_DO1, 0, valve::V_UPPER_SEAT );
+	action->add_dev( &test_DO2, 0, valve::V_LOWER_SEAT );
 
 	action->init();
+	reinterpret_cast<open_seat_action*>( action )->set_wait_time( FLIP_INTERVAL_MS );
 
 	action->evaluate();  // Wait
-	EXPECT_EQ( false, test_DO.is_active() );
-	EXPECT_EQ( true, test_v_mix_proof.is_closed() );
+	EXPECT_EQ( false, test_DO1.is_active() );
+	EXPECT_EQ( false, test_DO2.is_active() );
 
-	sleep_ms( FLIP_INTERVAL_MS / 2 );
+	sleep_ms( FLIP_INTERVAL_MS + 1 );
 	action->evaluate();
-	EXPECT_EQ( false, test_DO.is_active() );
-	EXPECT_EQ( true, test_v_mix_proof.is_opened() );
-
-	action->evaluate(); // Lower seats
-	EXPECT_EQ( true, test_DO.is_active() );
-	EXPECT_EQ( true, test_v_mix_proof.is_opened() );
-	sleep_ms( FLIP_DURATION_MS );
-	action->evaluate();
-	EXPECT_EQ( false, test_DO.is_active() );
-	EXPECT_EQ( true, test_v_mix_proof.is_closed() );
-
-	action->evaluate();  // Wait
-	EXPECT_EQ( false, test_DO.is_active() );
-	sleep_ms( FLIP_INTERVAL_MS / 2 );
-	action->evaluate();
-	EXPECT_EQ( false, test_DO.is_active() );
-	EXPECT_EQ( true, test_v_mix_proof.is_closed() );
+	EXPECT_EQ( false, test_DO1.is_active() );
+	EXPECT_EQ( false, test_DO2.is_active() );
 
 	action->evaluate(); // Upper seats
-	EXPECT_EQ( true, test_DO.is_active() );
-	EXPECT_EQ( true, test_v_mix_proof.is_opened() );
-	sleep_ms( FLIP_DURATION_MS );
+	EXPECT_EQ( true, test_DO1.is_active() );
+	EXPECT_EQ( false, test_DO2.is_active() );
+	sleep_ms( FLIP_DURATION_MS + 1 );
 	action->evaluate();
-	EXPECT_EQ( false, test_DO.is_active() );
-	EXPECT_EQ( true, test_v_mix_proof.is_closed() );
+	EXPECT_EQ( false, test_DO1.is_active() );
+	EXPECT_EQ( false, test_DO2.is_active() );
+
+	action->evaluate();  // Wait
+	EXPECT_EQ( false, test_DO1.is_active() );
+	EXPECT_EQ( false, test_DO2.is_active() );
+	sleep_ms( FLIP_INTERVAL_MS + 1 );
+	action->evaluate();
+	EXPECT_EQ( false, test_DO1.is_active() );
+	EXPECT_EQ( false, test_DO2.is_active() );
+
+	action->evaluate(); // Lower seats
+	EXPECT_EQ( false, test_DO1.is_active() );
+	EXPECT_EQ( true, test_DO2.is_active() );
+	sleep_ms( FLIP_DURATION_MS + 1 );
+	action->evaluate();
+	EXPECT_EQ( false, test_DO1.is_active() );
+	EXPECT_EQ( false, test_DO2.is_active() );
 
 	action->final();
 

@@ -184,8 +184,9 @@ class open_seat_action: public action
         void evaluate();
         void final();
 
-
+#ifdef PTUSA_TEST
         void set_wait_time( int wait_time );
+#endif
 
         /// @brief Добавление устройства к действию.
         ///
