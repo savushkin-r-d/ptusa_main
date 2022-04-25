@@ -15,7 +15,7 @@ namespace PtusaPLCnextEngineer
     class PtusaMainPrg: public ProgramBase, private Loggable<PtusaMainPrg>
         {
     public:
-        // typedefs
+        // typedefs        
 
     public:
         // construction/destruction
@@ -30,7 +30,6 @@ namespace PtusaPLCnextEngineer
 
     public:
         // properties
-        static const int MAX_NVRAM_SIZE = 49000;
 
     public:
         // operations
@@ -38,11 +37,11 @@ namespace PtusaPLCnextEngineer
 
         //#port
         //#attributes(Output|Retain)
-        uint8 NVRAM[ MAX_NVRAM_SIZE ] = {0};
+        uint8 NVRAM[ 49000 ] = {0};
 
     private:
         // fields
-        PtusaPLCnextEngineer::PtusaMainCmpnt& ptusaMainCmpnt;
+        PtusaPLCnextEngineer::PtusaMainCmpnt& ptusaMainCmpnt;       
         };
 
     ///////////////////////////////////////////////////////////////////////////////
