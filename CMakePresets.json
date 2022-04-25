@@ -164,12 +164,12 @@
         },
         {
             "name": "build-windows-AXCF3152-2021-LTS-Release",
-            "displayName": "AXCF3152-2021.0.3",
+            "displayName": "AXCF3152 2021 LTS",
             "configurePreset": "build-windows-AXCF3152-2021-LTS-Release"
         },
         {
             "name": "build-windows-AXCF2152-2021-LTS-Release",
-            "displayName": "AXCF2152-2021.0.3",
+            "displayName": "AXCF2152 2021 LTS",
             "configurePreset": "build-windows-AXCF2152-2021-LTS-Release"
         },
         {
