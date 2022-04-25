@@ -4113,8 +4113,8 @@ class counter_iolink : public base_counter
                                 //volumetric flow since the last reset.
             int16_t flow;       //Current flow.
 
-            int16_t out2 : 1;   //Status depends on [OU2].
-            int16_t out1 : 1;   //Status depends on [OU1].
+            uint16_t out2 : 1;  //Status depends on [OU2].
+            uint16_t out1 : 1;  //Status depends on [OU1].
             int16_t temperature : 14;   //Current temperature.
             };
 
