@@ -2509,6 +2509,14 @@ void base_counter::direct_off()
 //-----------------------------------------------------------------------------
 void base_counter::direct_set_state( int new_state )
     {
+#ifdef DEBUG_NO_IO_MODULES
+    if ( new_state == static_cast<int>( STATES::S_ERROR ) )
+        {
+        state = STATES::S_ERROR;
+        return;
+        }
+#endif
+    
     switch ( new_state )
         {
         case 0:
@@ -2611,6 +2619,11 @@ void base_counter::start()
         {
         state = STATES::S_WORK;
         last_read_value = get_raw_value();
+        }
+    else if ( STATES::S_ERROR == state )
+        {
+        start_pump_working_time = get_millisec();
+        state = STATES::S_WORK;
         }
     }
 //-----------------------------------------------------------------------------
@@ -7057,7 +7070,7 @@ int motor_altivar::set_cmd( const char* prop, u_int idx, double val )
         }
     else if ( strcmp( prop, "RPM" ) == 0 )
         {
-        rpm = static_cast<float>( val );
+        rpm = static_cast<int>( val );
         }
     else if ( strcmp( prop, "EST" ) == 0 )
         {

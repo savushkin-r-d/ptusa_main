@@ -280,6 +280,24 @@ TEST( counter, set_cmd )
 
     fqt1.save_device( buff, "" );
     EXPECT_STREQ( "FQT1={M=0, ST=1, V=50.00, ABS_V=100},\n", buff );
+
+    fqt1.set_cmd( "ST", 0, 2 );
+    EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
+
+    fqt1.set_cmd( "ST", 0, 1 );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
+    fqt1.set_cmd( "ST", 0, -10 );
+    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
+
+    fqt1.set_cmd( "ST", 0, 1 );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
+    fqt1.set_cmd( "ST", 0, -10 );
+    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
+
+    fqt1.set_cmd( "ST", 0, 2 );
+    EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
     }
 
 TEST( counter, get_pump_dt )
