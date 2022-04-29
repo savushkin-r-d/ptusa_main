@@ -230,3 +230,19 @@ TEST( DI_DO_action, check )
 
 	test_params_manager::removeObject();
 	}
+
+
+TEST( checked_devices_action, final )
+	{
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	auto action = checked_devices_action();
+	action.add_dev( &test_DO );
+	
+	test_DO.on();
+	action.init();
+	action.evaluate();
+	EXPECT_EQ( 1, test_DO.get_state() );
+	
+	action.final();
+	EXPECT_EQ( 1, test_DO.get_state() );
+	}
