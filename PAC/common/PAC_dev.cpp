@@ -2622,7 +2622,7 @@ void base_counter::start()
         }
     else if ( STATES::S_ERROR == state )
         {
-        start_pump_working_time = get_millisec();
+        start_pump_working_time = 0;
         state = STATES::S_WORK;
         }
     }
