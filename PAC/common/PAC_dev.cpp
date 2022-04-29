@@ -2504,7 +2504,6 @@ void base_counter::direct_on()
 //-----------------------------------------------------------------------------
 void base_counter::direct_off()
     {
-    reset();
     }
 //-----------------------------------------------------------------------------
 void base_counter::direct_set_state( int new_state )
