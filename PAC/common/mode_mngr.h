@@ -295,9 +295,9 @@ class required_DI_action: public action
 class checked_devices_action : public action
     {
     public:
-        checked_devices_action() : action( "Проверяемые устройства" )
-            {
-            }
+        checked_devices_action();
+
+        void final() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
