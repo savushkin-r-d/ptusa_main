@@ -370,8 +370,8 @@ enable_testing()
 add_test(run_no_command_line_arguments ${PROJECT_NAME})
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
-    add_test(T1-PLCnext-Demo lua/${CMAKE_BUILD_TYPE}/lua
-                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/?.dll;${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
+    add_test(T1-PLCnext-Demo ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lua
+                -e "package.cpath = package.cpath..';${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
                 -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
                 -e "path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/'"
@@ -389,4 +389,3 @@ gtest_discover_tests(main_test DISCOVERY_TIMEOUT 30)
 
 #remove tests from add_subdirectory() added projects
 configure_file(${CMAKE_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_BINARY_DIR} @ONLY)
-
