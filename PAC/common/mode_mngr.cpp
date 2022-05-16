@@ -534,10 +534,24 @@ void on_action::evaluate()
         return;
         }
 
-    auto &devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
-    for ( u_int i = 0; i < devs.size(); i++ )
-        {
-        devs[ i ]->on();
+    auto& dev_groups = devices[ MAIN_GROUP ];
+    for ( u_int idx = 0; idx < dev_groups.size(); idx++ )
+        {        
+        u_int param_idx = par_idx.size() > idx ? par_idx[ idx ] : 0;
+        if ( param_idx )
+            {
+            auto dt = ( *par )[ param_idx ];
+            if ( get_delta_millisec( start_time ) <= dt )
+                {
+                continue;
+                }
+            }
+
+        auto& devs = devices[ MAIN_GROUP ][ idx ];
+        for ( u_int i = 0; i < devs.size(); i++ )
+            {
+            devs[ i ]->on();
+            }
         }
     }
 //-----------------------------------------------------------------------------
@@ -1489,6 +1503,7 @@ operation_state::operation_state( const char* name,
     n( n ),
     dx_step_time( 0 )
     {
+    mode_step[ 0 ][ step::A_ON ]->set_params( owner->get_params() );
     mode_step[ 0 ][ step::A_WASH ]->set_params( owner->get_params() );
     }
 //-----------------------------------------------------------------------------
@@ -1508,7 +1523,8 @@ step* operation_state::add_step( const char* name, int next_step_n,
     u_int step_duration_par_n )
     {
     steps.push_back( new step( name, this ) );
-    steps[ steps.size() - 1 ][ 0 ][ step::A_WASH ]->set_params(owner->get_params());
+    steps[ steps.size() - 1 ][ 0 ][ step::A_ON ]->set_params( owner->get_params() );
+    steps[ steps.size() - 1 ][ 0 ][ step::A_WASH ]->set_params( owner->get_params() );
 
     next_step_ns.push_back( next_step_n );
     step_duration_par_ns.push_back( step_duration_par_n );

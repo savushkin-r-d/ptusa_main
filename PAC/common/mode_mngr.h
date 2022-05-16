@@ -137,11 +137,14 @@ class action
 class on_action: public action
     {
     public:
-        on_action(): action( "Включать" )
+        on_action(): action( "Включать" ), start_time( get_millisec() )
             {
             }
 
         void evaluate();
+
+    private:
+        u_long start_time;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
