@@ -137,9 +137,9 @@ class action
 class on_action: public action
     {
     public:
-        on_action(): action( "Включать" ), start_time( get_millisec() )
-            {
-            }
+        on_action();
+
+        void init() override;
 
         void evaluate();
 
