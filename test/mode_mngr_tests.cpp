@@ -108,6 +108,14 @@ TEST( operation, evaluate )
 	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
 
 	test_op->print( "" );
+
+	test_op->add_step( "Init", 2, -1 );
+	test_op->add_step( "Process #1", 3, -1 );
+	test_op->add_step( "Process #2", 2, -1 );
+	
+	test_op->add_step( "Safe stop #1", 2, -1, operation::PAUSE );
+	test_op->add_step( "Safe stop #2", 3, -1, operation::PAUSE );
+	test_op->add_step( "Idle", -1, -1, operation::PAUSE );
 	
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 	test_op->evaluate();
@@ -132,7 +140,25 @@ TEST( operation, evaluate )
 	EXPECT_EQ( operation::STOP, test_op->get_state() );
 	test_op->evaluate();
 	test_op->final();
-	EXPECT_EQ( operation::IDLE, test_op->get_state() );	
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+	//Корректный переход от выполнения к паузе и опять к выполнению.
+	test_op->start();
+	test_op->evaluate();
+	test_op->to_next_step();
+	test_op->evaluate();
+	test_op->to_next_step();
+	test_op->evaluate();
+	EXPECT_EQ( 3, test_op->active_step() );
+	EXPECT_EQ( 3, test_op->get_run_active_step() );
+	test_op->pause();
+	EXPECT_EQ( 1, test_op->active_step() );
+	test_op->evaluate();
+	EXPECT_EQ( 1, test_op->active_step() );
+	test_op->start();
+	EXPECT_EQ( 3, test_op->active_step() );
+	test_op->evaluate();
+	EXPECT_EQ( 3, test_op->active_step() );
 
 	test_params_manager::removeObject();
 	}
