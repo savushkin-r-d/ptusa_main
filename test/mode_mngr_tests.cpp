@@ -142,6 +142,7 @@ TEST( operation, evaluate )
 	test_op->final();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
+
 	//Корректный переход от выполнения к паузе и опять к выполнению.
 	test_op->start();
 	test_op->evaluate();
@@ -151,14 +152,19 @@ TEST( operation, evaluate )
 	test_op->evaluate();
 	EXPECT_EQ( 3, test_op->active_step() );
 	EXPECT_EQ( 3, test_op->get_run_active_step() );
+
 	test_op->pause();
 	EXPECT_EQ( 1, test_op->active_step() );
+	test_op->to_next_step();
+	EXPECT_EQ( 2, test_op->active_step() );
 	test_op->evaluate();
-	EXPECT_EQ( 1, test_op->active_step() );
+	EXPECT_EQ( 2, test_op->active_step() );
+
 	test_op->start();
 	EXPECT_EQ( 3, test_op->active_step() );
 	test_op->evaluate();
 	EXPECT_EQ( 3, test_op->active_step() );
+
 
 	test_params_manager::removeObject();
 	}
