@@ -1012,6 +1012,7 @@ class step
             A_WASH,
 
             A_ENABLE_STEP_BY_SIGNAL,
+            A_DELAY_ON,
             A_TO_STEP_IF,
             };
 

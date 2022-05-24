@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Wed Apr 20 17:09:25 2022.
+** Generated automatically by tolua++-1.0.92 on Tue May 24 15:39:56 2022.
 */
 
 #ifndef __cplusplus
@@ -14684,6 +14684,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"A_AI_AO",step::A_AI_AO);
    tolua_constant(tolua_S,"A_WASH",step::A_WASH);
    tolua_constant(tolua_S,"A_ENABLE_STEP_BY_SIGNAL",step::A_ENABLE_STEP_BY_SIGNAL);
+   tolua_constant(tolua_S,"A_DELAY_ON",step::A_DELAY_ON);
    tolua_constant(tolua_S,"A_TO_STEP_IF",step::A_TO_STEP_IF);
    tolua_function(tolua_S,"is_active",tolua_PAC_dev_step_is_active00);
   tolua_endmodule(tolua_S);

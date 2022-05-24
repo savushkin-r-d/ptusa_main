@@ -137,11 +137,25 @@ class action
 class on_action: public action
     {
     public:
-        on_action(): action( "Включать" )
-            {
-            }
+        on_action();
 
-        void evaluate();
+        void evaluate() override;
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
+/// Включение устройств с задержкой.
+/// </summary>
+class delay_on_action : public action
+    {
+    public:
+        delay_on_action();
+
+        void init() override;
+
+        void evaluate() override;
+
+    private:
+        u_long start_time;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -387,6 +401,7 @@ class step
             A_WASH,
 
             A_ENABLE_STEP_BY_SIGNAL,
+            A_DELAY_ON,
             A_TO_STEP_IF,
             };
 
