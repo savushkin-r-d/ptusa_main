@@ -575,6 +575,7 @@ class device : public i_DO_AO_device, public par_device
             //WT
             DST_WT = 1,  ///< Весы.
             DST_WT_VIRT, ///< Виртуальные весы.
+            DST_WT_RS232,///< Весы c RS232 интерфейсом.
 
             //CAM
             DST_CAM_DO1_DI2 = 1,///< C сигналом активации, результатом обработки и готовностью.
@@ -3162,6 +3163,36 @@ class virtual_wages : public device, public i_wages
         virtual int get_state();
 
         virtual void tare();
+    };
+//-----------------------------------------------------------------------------
+class wages_RS232 : public analog_io_device, public i_wages
+    {
+    public:
+        wages_RS232( const char* dev_name );
+
+        void direct_off() override;
+
+        void direct_set_value( float new_value ) override;
+
+        float get_value() override;
+
+        void direct_set_state( int new_state ) override;
+
+        void direct_on() override;
+
+        int get_state() override;
+
+        void tare() override;
+
+    private:
+        enum class CONSTANTS
+            {
+            C_AI_INDEX = 0,     ///< Индекс канала аналогового входа.
+
+            P_ERR,              ///< Аварийное значение.
+
+            LAST_PARAM_IDX,
+            };
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик веса
