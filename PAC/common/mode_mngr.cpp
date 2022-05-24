@@ -546,8 +546,8 @@ void on_action::evaluate()
     auto& dev_groups = devices[ MAIN_GROUP ];
     for ( u_int idx = 0; idx < dev_groups.size(); idx++ )
         {        
-        u_int param_idx = par_idx.size() > idx ? par_idx[ idx ] : 0;
-        if ( param_idx )
+        int param_idx = par_idx.size() > idx ? par_idx[ idx ] : 0;
+        if ( param_idx > 0 )
             {
             auto dt = ( *par )[ param_idx ];
             if ( get_delta_millisec( start_time ) <= dt )
