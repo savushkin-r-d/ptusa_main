@@ -36,7 +36,7 @@ const int FILES_VERSION[ FILE_CNT ] =
     7, //"sys.objects.plua",
 
     1, //"main.io.plua",
-    1, //"main.objects.plua",
+    2, //"main.objects.plua",
     1, //"main.modbus_srv.lua",
     1, //"main.profibus.lua",
     1, //"main.restrictions.lua"

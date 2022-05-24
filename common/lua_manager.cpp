@@ -193,10 +193,18 @@ int lua_manager::init( lua_State* lua_state, const char* script_name,
 
         if ( FILES_VERSION[ i ] != res )
             {
-            sprintf( G_LOG->msg, "File \"%s\" has version %d, must be %d "
-                "(consider updating \"main_PFC200\").",
-                FILES[ i ], res, FILES_VERSION[ i ] );
-            G_LOG->write_log( i_log::P_CRIT );
+            if ( FILES_VERSION[ i ] < res )
+                {
+                G_LOG->critical( "File \"%s\" has version %d, must be %d "
+                    "(consider updating \"ptusa_main\").",
+                    FILES[ i ], res, FILES_VERSION[ i ] );
+                }
+            else
+                {
+                G_LOG->critical( "File \"%s\" has version %d, must be %d "
+                    "(use previous version \"ptusa_main\").",
+                    FILES[ i ], res, FILES_VERSION[ i ] );
+                }
             return 1;
             }
         }
@@ -661,7 +669,7 @@ int lua_manager::reload_script( int script_n, const char* script_function_name,
     if ( FILES_VERSION[ script_n ] != res )
         {
         sprintf( err_str, "File \"%s\" has version %d, must be %d "
-            "(consider updating program \"main\").",
+            "(consider updating program \"ptusa_main\").",
             FILES[ script_n ], res, FILES_VERSION[ script_n ] );
         G_LOG->error( "%s", err_str );
         strcpy( res_str, err_str );
