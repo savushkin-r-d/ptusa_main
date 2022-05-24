@@ -2061,6 +2061,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new virtual_wages( dev_name );
                     break;
 
+                case device::DST_WT_RS232:
+                    new_device = new wages_RS232( dev_name );
+                    new_io_device = (wages_RS232*)new_device;
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -4923,7 +4928,6 @@ float temperature_e_iolink::get_value()
 #endif
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 void virtual_wages::direct_off()
     {
     state = 0;
@@ -4962,6 +4966,43 @@ void virtual_wages::tare()
 virtual_wages::virtual_wages( const char* dev_name ) :
     device( dev_name, device::DT_WT, device::DST_WT_VIRT, 0 ),
     value( 0 ), state( 0 )
+    {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+wages_RS232::wages_RS232( const char* dev_name ) :
+    analog_io_device( dev_name, device::DT_WT, device::DST_WT_RS232,
+    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
+    {
+    }
+
+void wages_RS232::direct_off()
+    {
+    }
+
+void wages_RS232::direct_set_value( float new_value )
+    {
+    }
+
+float wages_RS232::get_value()
+    {
+    return 0.;
+    }
+
+void wages_RS232::direct_set_state( int new_state )
+    {
+    }
+
+void wages_RS232::direct_on()
+    {
+    }
+
+int wages_RS232::get_state()
+    {
+    return 1;
+    }
+
+void wages_RS232::tare()
     {
     }
 //-----------------------------------------------------------------------------
