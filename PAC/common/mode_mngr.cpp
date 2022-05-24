@@ -527,13 +527,8 @@ void action::clear_dev()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-on_action::on_action():action( "Включать" ), start_time( get_millisec() )
+on_action::on_action():action( "Включать" )
     {
-    }
-//-----------------------------------------------------------------------------
-void on_action::init()
-    {
-    start_time = get_millisec();
     }
 //-----------------------------------------------------------------------------
 void on_action::evaluate()
@@ -543,9 +538,33 @@ void on_action::evaluate()
         return;
         }
 
+    auto& devs = devices[ MAIN_GROUP ][ MAIN_SUBGROUP ];
+    for ( u_int i = 0; i < devs.size(); i++ )
+        {
+        devs[ i ]->on();
+        }
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+delay_on_action::delay_on_action() :action( "Включать с задержкой" ), start_time( get_millisec() )
+    {
+    }
+//-----------------------------------------------------------------------------
+void delay_on_action::init()
+    {
+    start_time = get_millisec();
+    }
+//-----------------------------------------------------------------------------
+void delay_on_action::evaluate()
+    {
+    if ( is_empty() )
+        {
+        return;
+        }
+
     auto& dev_groups = devices[ MAIN_GROUP ];
     for ( u_int idx = 0; idx < dev_groups.size(); idx++ )
-        {        
+        {
         int param_idx = par_idx.size() > idx ? par_idx[ idx ] : 0;
         if ( param_idx > 0 )
             {
@@ -672,7 +691,8 @@ step::step( std::string name, operation_state *owner,
     actions.push_back( new AI_AO_action() );
     actions.push_back( new wash_action() );
     actions.push_back( new enable_step_by_signal() );
-
+    actions.push_back( new delay_on_action() );
+    
     if ( !is_mode )
         {
         actions.push_back( new to_step_if_devices_in_specific_state_action() );
@@ -1511,9 +1531,9 @@ operation_state::operation_state( const char* name,
     owner( owner ),
     n( n ),
     dx_step_time( 0 )
-    {
-    mode_step[ 0 ][ step::A_ON ]->set_params( owner->get_params() );
+    {    
     mode_step[ 0 ][ step::A_WASH ]->set_params( owner->get_params() );
+    mode_step[ 0 ][ step::A_DELAY_ON ]->set_params( owner->get_params() );
     }
 //-----------------------------------------------------------------------------
 operation_state::~operation_state()
@@ -1532,8 +1552,9 @@ step* operation_state::add_step( const char* name, int next_step_n,
     u_int step_duration_par_n )
     {
     steps.push_back( new step( name, this ) );
-    steps[ steps.size() - 1 ][ 0 ][ step::A_ON ]->set_params( owner->get_params() );
-    steps[ steps.size() - 1 ][ 0 ][ step::A_WASH ]->set_params( owner->get_params() );
+    step* new_step = steps[ steps.size() - 1 ];
+    ( *new_step )[ step::A_WASH ]->set_params( owner->get_params() );
+    ( *new_step )[ step::A_DELAY_ON ]->set_params( owner->get_params() );
 
     next_step_ns.push_back( next_step_n );
     step_duration_par_ns.push_back( step_duration_par_n );

@@ -247,7 +247,7 @@ TEST( checked_devices_action, final )
 	EXPECT_EQ( 1, test_DO.get_state() );
 	}
 
-TEST( on_action, evaluate )
+TEST( delay_on_action, evaluate )
 	{
 	char* res = 0;
 	mock_params_manager* par_mock = new mock_params_manager();
@@ -271,7 +271,7 @@ TEST( on_action, evaluate )
 	auto operation_state = ( *operation )[ 1 ];
 	auto step = ( *operation_state )[ -1 ];
 
-	auto action = ( *step )[ step::ACTIONS::A_ON ];
+	auto action = ( *step )[ step::ACTIONS::A_DELAY_ON ];
 
 	action->add_dev( &test_DO );
 	const int DELAY_TIME_MS = 10;
