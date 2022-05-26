@@ -4986,11 +4986,39 @@ void wages_RS232::direct_set_value( float new_value )
 
 float wages_RS232::get_value()
     {
-    return 0.;
+    direct_set_state(static_cast<int>(CONSTANTS::TOGGLE_COMMAND));                                       //Переключение в режим чтения данных 
+    unsigned short int* data = (unsigned short int*)get_AI_data( static_cast<int>(CONSTANTS::C_AI_INDEX) );      //Получение массива данных
+    unsigned short int decimals[4];
+    decimals[0] = (data[3] >> 8) - 48;                                                                           //Обработка данных
+    decimals[1] = data[3] % 256 - 48;
+    decimals[2] = data[4] % 256 - 48;
+    decimals[3] = (data[5] >> 8) - 48;
+    for (int i = 0; i <= 3; i++)
+    {
+        if (decimals[i] > 9 && decimals[i] < 0) return -1;                                                       //Если были получены некорректные данные,
+    }                                                                                                            //в массиве хранятся не цифры, вернуть -1
+    return decimals[0] * 10 + decimals[1] + (float)decimals[2] / 10 + (float)decimals[3] / 100;                  //Возврат веса
     }
 
 void wages_RS232::direct_set_state( int new_state )
     {
+    int state = get_state();                                                                                     //Получение состояния модуля
+    int* out = (int*)get_AO_write_data(static_cast<int>(CONSTANTS::C_AI_INDEX));
+    if (new_state == static_cast<int>(CONSTANTS::BUFFER_MOD))                                                    //Установить состояние чтения состояни буфера
+        {
+        *out = 0;
+        }
+    else if (new_state == static_cast<int>(CONSTANTS::TOGGLE_COMMAND))                                           //Установить состояние чтения данных
+        {
+        if (state == 12288)                                                                                      //Переключение команды считывания данных
+            {                                                                                                    //12288 (3000h) - чтение данных
+            *out = 28672;                                                                                        //28672 (7000h) - повторное чтения данных
+            }
+        else
+            {
+            *out = 12288;
+            }
+        }
     }
 
 void wages_RS232::direct_on()
@@ -4999,7 +5027,7 @@ void wages_RS232::direct_on()
 
 int wages_RS232::get_state()
     {
-    return 1;
+    return (int)get_AI_data( static_cast<int>(CONSTANTS::C_AI_INDEX) );
     }
 
 void wages_RS232::tare()
