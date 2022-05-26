@@ -3177,6 +3177,10 @@ class wages_RS232 : public analog_io_device, public i_wages
 
             P_ERR,              ///< Аварийное значение.
 
+            TOGGLE_COMMAND,
+
+            BUFFER_MOD,
+
             LAST_PARAM_IDX,
             };
     };
