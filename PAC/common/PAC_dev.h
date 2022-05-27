@@ -3172,7 +3172,7 @@ class wages_RS232 : public analog_io_device, public i_wages
 
     private:
         enum class CONSTANTS
-            {
+        {
             C_AI_INDEX = 0,     ///< Индекс канала аналогового входа.
 
             P_ERR,              ///< Аварийное значение.
@@ -3182,6 +3182,10 @@ class wages_RS232 : public analog_io_device, public i_wages
             BUFFER_MOD,
 
             LAST_PARAM_IDX,
+
+            READ_CHARACTER = 12288,
+
+            TOGGLE_READ_CAHRACTER = 28672,
             };
     };
 //-----------------------------------------------------------------------------
