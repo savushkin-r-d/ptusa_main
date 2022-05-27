@@ -4932,7 +4932,8 @@ void wages_RS232::direct_on()
 
 int wages_RS232::get_state()
     {
-    return (int)get_AI_data( static_cast<int>(CONSTANTS::C_AI_INDEX) );
+    int* state = (int*)get_AI_data( static_cast<int>(CONSTANTS::C_AI_INDEX) );
+    return *state;
     }
 
 void wages_RS232::tare()
