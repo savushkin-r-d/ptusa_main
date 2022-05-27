@@ -4932,7 +4932,7 @@ void wages_RS232::direct_on()
 
 int wages_RS232::get_state()
     {
-    return (short int*)get_AI_data( static_cast<int>(CONSTANTS::C_AI_INDEX) );
+    return (int)((int*)get_AI_data( static_cast<int>(CONSTANTS::C_AI_INDEX) ));
     }
 
 void wages_RS232::tare()
