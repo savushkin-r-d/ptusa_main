@@ -5010,13 +5010,13 @@ void wages_RS232::direct_set_state( int new_state )
         }
     else if (new_state == static_cast<int>(CONSTANTS::TOGGLE_COMMAND))                                           //Установить состояние чтения данных
         {
-        if (state == 12288)                                                                                      //Переключение команды считывания данных
+        if (state == static_cast<int>(CONSTANTS::READ_CHARACTER))                                                //Переключение команды считывания данных
             {                                                                                                    //12288 (3000h) - чтение данных
-            *out = 28672;                                                                                        //28672 (7000h) - повторное чтения данных
+            *out = static_cast<int>(CONSTANTS::TOGGLE_READ_CAHRACTER);                                                                                        //28672 (7000h) - повторное чтения данных
             }
         else
             {
-            *out = 12288;
+            *out = static_cast<int>(CONSTANTS::READ_CHARACTER);
             }
         }
     }
@@ -5027,7 +5027,7 @@ void wages_RS232::direct_on()
 
 int wages_RS232::get_state()
     {
-    return (int)((int*)get_AI_data( static_cast<int>(CONSTANTS::C_AI_INDEX) ));
+    return *(int*)get_AI_data( static_cast<int>(CONSTANTS::C_AI_INDEX) );
     }
 
 void wages_RS232::tare()
