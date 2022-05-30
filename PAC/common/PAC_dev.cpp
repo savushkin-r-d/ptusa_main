@@ -4893,7 +4893,7 @@ float wages_RS232::get_value()
     {
     direct_set_state(static_cast<int>(CONSTANTS::TOGGLE_COMMAND));                                       //Переключение в режим чтения данных 
     unsigned short int* data = (unsigned short int*)get_AI_data( static_cast<int>(CONSTANTS::C_AI_INDEX) );      //Получение массива данных
-    unsigned short int decimals[4]{};
+    unsigned short int decimals[4];
     decimals[0] = (data[3] >> 8) - 48;                                                                           //Обработка данных
     decimals[1] = data[3] % 256 - 48;
     decimals[2] = data[4] % 256 - 48;
