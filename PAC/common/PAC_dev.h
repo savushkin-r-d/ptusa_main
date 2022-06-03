@@ -3156,37 +3156,39 @@ class wages_RS232 : public analog_io_device, public i_wages
     public:
         wages_RS232( const char* dev_name );
 
-        void direct_off() override;
-
-        void direct_set_value( float new_value ) override;
-
         float get_value() override;
-
-        void direct_set_state( int new_state ) override;
-
-        void direct_on() override;
-
+                
         int get_state() override;
 
+#ifndef DEBUG_NO_IO_MODULES
+        void direct_set_value( float new_value ) override;
+#endif // DEBUG_NO_IO_MODULES
+
         void tare() override;
+
+
+        void set_command( int new_state );
+
+        float get_value_from_wages();
 
     private:
         enum class CONSTANTS
         {
-            C_AI_INDEX = 0,     ///< Индекс канала аналогового входа.
-
-            P_ERR,              ///< Аварийное значение.
-
-            TOGGLE_COMMAND,
-
-            BUFFER_MOD,
-
+            C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
+            
+            P_CZ = 1,           ///< Сдвиг нуля.
             LAST_PARAM_IDX,
-
-            READ_CHARACTER = 12288,
-
-            TOGGLE_READ_CAHRACTER = 28672,
             };
+
+        enum class STATES
+            {
+            TOGGLE_COMMAND = 2,
+            BUFFER_MOD,
+            READ_CHARACTER = 12288,
+            TOGGLE_READ_CHARACTER = 28672,
+            };
+
+        int state;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик веса
