@@ -4956,67 +4956,106 @@ virtual_wages::virtual_wages( const char* dev_name ) :
 //-----------------------------------------------------------------------------
 wages_RS232::wages_RS232( const char* dev_name ) :
     analog_io_device( dev_name, device::DT_WT, device::DST_WT_RS232,
-    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 )
+    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 ), state( 1 )
     {
+    set_par_name( static_cast<int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
     }
 
-void wages_RS232::direct_off()
+float wages_RS232::get_value_from_wages()
     {
-    }
+    //Переключение в режим чтения данных (1). Получение массива данных (2).
+    //Обработка данных (3). Если были получены некорректные данные, возвращаем
+    // 0 (4).
+    float value = .0f;   
+    set_command( static_cast<int>( STATES::TOGGLE_COMMAND ) );              //1
+    unsigned short int* data = ( unsigned short int* )get_AI_data(          //2
+        static_cast<int>( CONSTANTS::C_AIAO_INDEX ) ); 
 
-void wages_RS232::direct_set_value( float new_value )
-    {
+    if ( !data ) return 0.f;
+
+    unsigned short int decimals[ 4 ] = {                                    //3
+        static_cast<unsigned short int>( ( data[ 3 ] >> 8 ) - 48 ),
+        static_cast<unsigned short int>( data[ 3 ] % 256 - 48 ),
+        static_cast<unsigned short int>( data[ 4 ] % 256 - 48 ),
+        static_cast<unsigned short int>( ( data[ 5 ] >> 8 ) - 48 ) };
+    for ( int i = 0; i <= 3; i++ )
+        {
+        if ( decimals[ i ] > 9 && decimals[ i ] < 0 )                       //4
+            {
+            state = -1;
+            return 0.f;
+            };
+        }
+    value = 10.f * decimals[ 0 ] + decimals[ 1 ] + 0.1f * decimals[ 2 ] +
+        0.01f * decimals[ 3 ];
+    state = 1;
+
+    return value;
     }
 
 float wages_RS232::get_value()
     {
-    direct_set_state(static_cast<int>(CONSTANTS::TOGGLE_COMMAND));                                       //Переключение в режим чтения данных 
-    unsigned short int* data = (unsigned short int*)get_AI_data( static_cast<int>(CONSTANTS::C_AI_INDEX) );      //Получение массива данных
-    unsigned short int decimals[4];
-    decimals[0] = (data[3] >> 8) - 48;                                                                           //Обработка данных
-    decimals[1] = data[3] % 256 - 48;
-    decimals[2] = data[4] % 256 - 48;
-    decimals[3] = (data[5] >> 8) - 48;
-    for (int i = 0; i <= 3; i++)
-    {
-        if (decimals[i] > 9 && decimals[i] < 0) return -1;                                                       //Если были получены некорректные данные,
-    }                                                                                                            //в массиве хранятся не цифры, вернуть -1
-    return decimals[0] * 10 + decimals[1] + (float)decimals[2] / 10 + (float)decimals[3] / 100;                  //Возврат веса
+    float value = .0f;
+
+#ifdef DEBUG_NO_IO_MODULES
+    value = analog_io_device::get_value();
+#else
+    value = get_value_from_wages();
+#endif
+
+    return value + get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );                   
     }
 
-void wages_RS232::direct_set_state( int new_state )
+void wages_RS232::set_command( int new_state )
     {
-    int state = get_state();                                                                                     //Получение состояния модуля
-    int* out = (int*)get_AO_write_data(static_cast<int>(CONSTANTS::C_AI_INDEX));
-    if (new_state == static_cast<int>(CONSTANTS::BUFFER_MOD))                                                    //Установить состояние чтения состояни буфера
+    //Получение состояния модуля (1). Установить состояние чтения состояния
+    //буфера (2). Установить состояние чтения данных (3). Переключение команды
+    // считывания данных (4).
+    int *state = 
+        (int*)get_AI_data( static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );   //1
+    if ( !state ) return;
+
+    int* out =
+        (int*)get_AO_write_data( static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );
+    if ( !out ) return;
+
+    auto current_state = static_cast<STATES>( *state );
+    auto new_st = static_cast<STATES>( new_state );
+    if ( new_st == STATES::BUFFER_MOD )                                     //2                                       
         {
         *out = 0;
         }
-    else if (new_state == static_cast<int>(CONSTANTS::TOGGLE_COMMAND))                                           //Установить состояние чтения данных
+    else if ( new_st == STATES::TOGGLE_COMMAND )                            //3
         {
-        if (state == static_cast<int>(CONSTANTS::READ_CHARACTER))                                                //Переключение команды считывания данных
-            {                                                                                                    //12288 (3000h) - чтение данных
-            *out = static_cast<int>(CONSTANTS::TOGGLE_READ_CAHRACTER);                                                                                        //28672 (7000h) - повторное чтения данных
+        if ( current_state == STATES::READ_CHARACTER )                      //4
+            {                                                                  
+            *out = static_cast<int>( STATES::TOGGLE_READ_CHARACTER );
             }
         else
             {
-            *out = static_cast<int>(CONSTANTS::READ_CHARACTER);
+            *out = static_cast<int>( STATES::READ_CHARACTER );
             }
         }
-    }
-
-void wages_RS232::direct_on()
-    {
     }
 
 int wages_RS232::get_state()
     {
-    int* state = (int*)get_AI_data( static_cast<int>(CONSTANTS::C_AI_INDEX) );
-    return *state;
+    //Здесь мы должны получать состояние весов. Например: идёт взвешивание,
+    //взвешивание успешно завершилось, ошибка взвешивания (отрицательные
+    //значения), ожидание взвешивания и т.п.
+    return state;
     }
+
+#ifndef DEBUG_NO_IO_MODULES
+void wages_RS232::direct_set_value( float new_value )
+    {
+    }
+#endif // DEBUG_NO_IO_MODULES
 
 void wages_RS232::tare()
     {
+    //Этот метод нужен для тарировки весов (когда текущий вес устанавливается 
+    //в качестве нулевого).
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
