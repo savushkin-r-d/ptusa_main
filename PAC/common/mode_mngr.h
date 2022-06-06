@@ -261,6 +261,8 @@ class DI_DO_action: public action
 
         void evaluate();
 
+        void final() override;
+
     protected:
         virtual void evaluate_DO( std::vector< device* > devices );
     };
@@ -288,6 +290,8 @@ class AI_AO_action : public action
         int check( char* reason ) const;
 
         void evaluate();
+
+        void final() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -301,6 +305,8 @@ class required_DI_action: public action
             }
 
         int check( char* reason ) const;
+
+        void final() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -327,6 +333,8 @@ class wash_action: public action
         void evaluate();
 
         virtual void print( const char* prefix = "", bool new_line = true ) const;
+
+        void final() override;
 
     private:
         enum GROUPS

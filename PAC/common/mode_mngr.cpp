@@ -660,6 +660,11 @@ int required_DI_action::check( char* reason ) const
     return 0;
     }
 //-----------------------------------------------------------------------------
+void required_DI_action::final()
+    {
+    // При завершении ничего не делаем.
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 checked_devices_action::checked_devices_action() : action( "Проверяемые устройства" )
     {
@@ -879,6 +884,28 @@ void DI_DO_action::evaluate()
         }
     }
 //-----------------------------------------------------------------------------
+void DI_DO_action::final()
+    {
+    if ( is_empty() )
+        {
+        return;
+        }
+
+    auto& devs = devices[ MAIN_GROUP ];
+    for ( u_int i = 0; i < devs.size(); i++ )
+        {
+        if ( devs[ i ].empty() )
+            {
+            continue;
+            }
+
+        for ( u_int j = 1; j < devs[ i ].size(); j++ )
+            {
+            devs[ i ][ j ]->off();
+            }
+        }    
+    }
+//-----------------------------------------------------------------------------
 void DI_DO_action::evaluate_DO( std::vector< device* > devices )
     {
     if ( devices[ 0 ]->is_active() )
@@ -975,6 +1002,28 @@ void AI_AO_action::evaluate()
         for ( u_int j = 1; j < devs[ i ].size(); j++ )
             {
             devs[ i ][ j ]->set_value( devs[ i ][ 0 ]->get_value() );
+            }
+        }
+    }
+//-----------------------------------------------------------------------------
+void AI_AO_action::final()
+    {
+    if ( is_empty() )
+        {
+        return;
+        }
+
+    auto& devs = devices[ MAIN_GROUP ];
+    for ( u_int i = 0; i < devs.size(); i++ )
+        {
+        if ( devs[ i ].empty() )
+            {
+            continue;
+            }
+
+        for ( u_int j = 1; j < devs[ i ].size(); j++ )
+            {
+            devs[ i ][ j ]->off();
             }
         }
     }
@@ -1303,7 +1352,7 @@ void wash_action::evaluate()
         {
         auto &devs = devices[ idx ];
 
-        //Подаем сигналы "Мойка ОК".
+        //Подаем сигналы "ОК".
         for ( u_int i = 0; i < devs[ G_DO ].size(); i++ )
             {
             devs[ G_DO ][ i ]->on();
@@ -1389,7 +1438,7 @@ void wash_action::evaluate()
                 }
             }
         // Если есть ошибки устройств, не отключая все устройства, снимаем
-        // сигналы "Мойка ОК".
+        // сигналы "ОК".
         if ( is_dev_error )
             {
             for ( u_int i = 0; i < devs[ G_DO ].size(); i++ )
@@ -1423,6 +1472,32 @@ void wash_action::print( const char* prefix /*= "" */,
         }
 
     printf( "\n" );
+    }
+//-----------------------------------------------------------------------------
+void wash_action::final()
+    {
+    if ( is_empty() )
+        {
+        return;
+        }
+
+    for ( u_int idx = 0; idx < devices.size(); idx++ )
+        {
+        auto& devs = devices[ idx ];
+
+        for ( u_int i = 0; i < devs[ G_DO ].size(); i++ )
+            {
+            devs[ G_DO ][ i ]->off();
+            }
+        for ( u_int i = 0; i < devs[ G_DEV ].size(); i++ )
+            {
+            devs[ G_DEV ][ i ]->off();            
+            }
+        for ( u_int i = 0; i < devs[ G_REV_DEV ].size(); i++ )
+            {
+            devs[ G_REV_DEV ][ i ]->off();
+            }    
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
