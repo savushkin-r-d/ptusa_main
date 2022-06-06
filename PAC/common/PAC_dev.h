@@ -408,6 +408,7 @@ class device : public i_DO_AO_device, public par_device
             DT_REGULATOR, ///< ПИД-регулятор.
             DT_HLA,      ///< Сигнальная колонна.
             DT_CAM,      ///< Камера.
+            DT_PDS,      ///< Датчик разности давления.
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
@@ -573,7 +574,11 @@ class device : public i_DO_AO_device, public par_device
             //CAM
             DST_CAM_DO1_DI2 = 1,///< C сигналом активации, результатом обработки и готовностью.
             DST_CAM_DO1_DI1,    ///< C сигналом активации и результатом обработки.
-            DST_CAM_DO1_DI3     ///< C сигналом активации, двумя результатами обработки и готовностью.
+            DST_CAM_DO1_DI3,    ///< C сигналом активации, двумя результатами обработки и готовностью.
+
+            //PDS
+            DST_PDS = 1,
+            DST_PDS_VIRT,
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -3841,6 +3846,16 @@ class state_s : public DI1
             }
     };
 //-----------------------------------------------------------------------------
+/// @brief Датчик разности давления.
+class diff_pressure : public DI1
+    {
+    public:
+        diff_pressure( const char* dev_name ) : DI1( dev_name, DT_PDS,
+            DST_PDS_VIRT, 0 )
+            {
+            }
+    };
+//-----------------------------------------------------------------------------
 /// @brief Датчик дискретного входа связи.
 class DI_signal : public DI1
     {
@@ -4587,6 +4602,9 @@ class device_manager: public i_Lua_save_device
         /// @brief Получение камеры по имени.
         camera* get_CAM( const char* dev_name );
 
+        /// @brief Получение датчика разности давления по имени.
+        diff_pressure* get_PDS( const char* dev_name );
+
         /// @brief Получение автоматического выключателя по имени.
         i_DO_AO_device* get_F(const char* dev_name);
 
@@ -4956,6 +4974,14 @@ signal_column* HLA( const char* dev_name );
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
 camera* CAM( const char* dev_name );
+//-----------------------------------------------------------------------------
+/// @brief Получение датчика разности давления.
+///
+/// @param number - номер датчика.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+i_DI_device* PDS( u_int dev_n );
+i_DI_device* PDS( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///
