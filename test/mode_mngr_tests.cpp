@@ -348,8 +348,8 @@ TEST( DI_DO_action, final )
 	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 	auto action = DI_DO_action();
-	action.add_dev( &test_DI );
-	action.add_dev( &test_DO );
+	action.add_dev( &test_DI, action::MAIN_GROUP, 1 );
+	action.add_dev( &test_DO, action::MAIN_GROUP, 1 );
 
 	test_DI.on();
 	action.init();
@@ -369,8 +369,8 @@ TEST( AI_AO_action, final )
 	DI1 test_AI( "test_AI1", device::DEVICE_TYPE::DT_AI,
 		device::DEVICE_SUB_TYPE::DST_AI_VIRT, 0 );
 	auto action = AI_AO_action();
-	action.add_dev( &test_AI );
-	action.add_dev( &test_AO );
+	action.add_dev( &test_AI, action::MAIN_GROUP, 1 );
+	action.add_dev( &test_AO, action::MAIN_GROUP, 1 );
 
 	const int VALUE = 50;
 	test_AI.set_value( VALUE );
@@ -390,17 +390,27 @@ TEST( wash_action, final )
 		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
 	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+
+	virtual_motor test_M1( "M1" );
+	virtual_motor test_M2( "M2" );
+
 	auto action = wash_action();
-	action.add_dev( &test_DI, 0, 0 );
-	action.add_dev( &test_DO, 0, 1 );
+	action.add_dev( &test_DI, action::MAIN_GROUP, 0 );
+	action.add_dev( &test_DO, action::MAIN_GROUP, 1 );
+	action.add_dev( &test_M1, action::MAIN_GROUP, 2 );
+	action.add_dev( &test_M2, action::MAIN_GROUP, 3 );
 
 	test_DI.on();
 	action.init();
 	action.evaluate();
 	EXPECT_EQ( 1, test_DI.get_state() );
 	EXPECT_EQ( 1, test_DO.get_state() );
+	EXPECT_EQ( 1, test_M1.get_state() );
+	EXPECT_EQ( 2, test_M2.get_state() );
 
 	action.final();
 	EXPECT_EQ( 1, test_DI.get_state() );
 	EXPECT_EQ( 0, test_DO.get_state() );
+	EXPECT_EQ( 0, test_M1.get_state() );
+	EXPECT_EQ( 0, test_M2.get_state() );
 	}
