@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Mon Jun  6 15:17:23 2022.
+** Generated automatically by tolua++-1.0.92 on Mon Jun  6 15:35:49 2022.
 */
 
 #ifndef __cplusplus
@@ -14477,6 +14477,10 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"DT_WT",device::DT_WT);
    tolua_constant(tolua_S,"DT_PT",device::DT_PT);
    tolua_constant(tolua_S,"DT_F",device::DT_F);
+   tolua_constant(tolua_S,"DT_REGULATOR",device::DT_REGULATOR);
+   tolua_constant(tolua_S,"DT_HLA",device::DT_HLA);
+   tolua_constant(tolua_S,"DT_CAM",device::DT_CAM);
+   tolua_constant(tolua_S,"DT_PDS",device::DT_PDS);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"i_wages","i_wages","",NULL);
   tolua_beginmodule(tolua_S,"i_wages");
