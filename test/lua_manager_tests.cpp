@@ -26,16 +26,6 @@ TEST(lua_manager_test, get_instance)
 
 /*
 	TEST METHOD DEFENITION:
-	lua_State * get_Lua() const;
-*/
-
-TEST(lua_manager_test, get_Lua)
-{
-	EXPECT_EQ(0, G_LUA_MANAGER->get_Lua());
-}
-
-/*
-	TEST METHOD DEFENITION:
 	int init(lua_State* L, const char* script_name, const char* dir = "", const char* sys_dir = "");
 
 	HOOKED:
