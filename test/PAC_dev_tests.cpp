@@ -161,6 +161,12 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
     auto PDS2 = PDS( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( PDS2 ) );
+
+    //device::DT_PDS, --
+    name = std::string( "PDS2" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_PDS, device::DST_PDS_VIRT + 1, name.c_str(), "Test sensor", "CR" );
+    EXPECT_EQ( nullptr, res );
     }
 
 TEST( dev_stub, get_pump_dt )

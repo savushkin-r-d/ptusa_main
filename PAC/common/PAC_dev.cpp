@@ -6645,14 +6645,6 @@ camera* CAM( const char* dev_name )
     return G_DEVICE_MANAGER()->get_CAM( dev_name );
     }
 //-----------------------------------------------------------------------------
-i_DI_device* PDS( u_int dev_n )
-    {
-    static char name[ device::C_MAX_NAME ] = "";
-    snprintf( name, sizeof( name ), "PDS%d", dev_n );
-
-    return G_DEVICE_MANAGER()->get_PDS( name );
-    }
-
 i_DI_device* PDS( const char* dev_name )
     {
     return G_DEVICE_MANAGER()->get_PDS( dev_name );
