@@ -52,6 +52,7 @@ const char* const device::DEV_NAMES[ device::DEVICE_TYPE::C_DEVICE_TYPE_CNT ] =
     "HLA",     ///< Сигнальная колонна.
     "CAM",     ///< Камера.
     "PDS",     ///< Датчик разности давления.
+    "TS",      ///< Сигнальный датчик температуры.
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1440,6 +1441,11 @@ i_DI_device* device_manager::get_PDS( const char* dev_name )
     return get_device( device::DT_PDS, dev_name );
     }
 //-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_TS( const char* dev_name )
+    {
+    return get_device( device::DT_TS, dev_name );
+    }
+//-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         const char* dev_name, const char * descr, const char* article )
     {
@@ -2143,6 +2149,27 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     if ( G_DEBUG )
                         {
                         printf( "Unknown CAM device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_TS:
+            switch ( dev_sub_type )
+                {
+                case device::DST_TS:
+                    new_device = new temperature_signal( dev_name );
+                    new_io_device = (state_s*)new_device;
+                    break;
+
+                case device::DST_TS_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_TS, device::DST_TS_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown TS device subtype %d!\n", dev_sub_type );
                         }
                     break;
                 }
@@ -6648,6 +6675,11 @@ camera* CAM( const char* dev_name )
 i_DI_device* PDS( const char* dev_name )
     {
     return G_DEVICE_MANAGER()->get_PDS( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* TS( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_TS( dev_name );
     }
 //-----------------------------------------------------------------------------
 dev_stub* STUB()

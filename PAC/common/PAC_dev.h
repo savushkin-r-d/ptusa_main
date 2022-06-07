@@ -409,6 +409,7 @@ class device : public i_DO_AO_device, public par_device
             DT_HLA,      ///< Сигнальная колонна.
             DT_CAM,      ///< Камера.
             DT_PDS,      ///< Датчик разности давления.
+            DT_TS,       ///< Сигнальный датчик температуры. 
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
@@ -579,6 +580,10 @@ class device : public i_DO_AO_device, public par_device
             //PDS
             DST_PDS = 1,
             DST_PDS_VIRT,
+
+            //TS
+            DST_TS = 1,
+            DST_TS_VIRT,
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -3856,6 +3861,16 @@ class diff_pressure : public DI1
             }
     };
 //-----------------------------------------------------------------------------
+/// @brief Сигнальный датчик температуры.
+class temperature_signal : public DI1
+    {
+    public:
+        temperature_signal( const char* dev_name ) : DI1( dev_name, DT_TS,
+            DST_TS_VIRT, 0 )
+            {
+            }
+    };
+//-----------------------------------------------------------------------------
 /// @brief Датчик дискретного входа связи.
 class DI_signal : public DI1
     {
@@ -4608,6 +4623,9 @@ class device_manager: public i_Lua_save_device
         /// @brief Получение автоматического выключателя по имени.
         i_DO_AO_device* get_F(const char* dev_name);
 
+        /// @brief Получение сигнального датчика температуры по имени.
+        i_DI_device* get_TS( const char* dev_name );
+
         /// @brief Получение единственного экземпляра класса.
         static device_manager* get_instance();
 
@@ -4981,6 +4999,13 @@ camera* CAM( const char* dev_name );
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
 i_DI_device* PDS( const char* dev_name );
+//-----------------------------------------------------------------------------
+/// @brief Получение сигнального датчика температуры по имени.
+///
+/// @param dev_name - имя.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+i_DI_device* TS( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///

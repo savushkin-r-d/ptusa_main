@@ -167,6 +167,32 @@ TEST( device_manager, add_io_device )
     res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_PDS, device::DST_PDS_VIRT + 1, name.c_str(), "Test sensor", "CR" );
     EXPECT_EQ( nullptr, res );
+
+    //device::DT_TS, device::DST_TS
+    name = std::string( "TS1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_TS, device::DST_TS, name.c_str(), "Test sensor", "CR" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto TS1 = TS( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( TS1 ) );
+
+    //device::DT_TS, device::DST_TS_virt
+    name = std::string( "TS2" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_TS, device::DST_TS_VIRT, name.c_str(), "Test sensor", "CR" );
+    EXPECT_EQ( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto TS2 = TS( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( TS2 ) );
+
+    //device::DT_TS, --
+    name = std::string( "TS3" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_TS, device::DST_TS_VIRT + 1, name.c_str(), "Test sensor", "CR" );
+    EXPECT_EQ( nullptr, res );
     }
 
 TEST( dev_stub, get_pump_dt )
