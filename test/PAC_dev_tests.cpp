@@ -618,23 +618,23 @@ TEST( wages_RS232, get_value)
     wages_RS232 fqt1("FQT1");
     //12336, 11824 и т.д. - десятичное представление строки 00, .0 и тд. В таком формате приходят данные с весов. 
     fqt1.AI_channels.int_read_values[0] = new int_2[6]{ 0, 0, 0, 12336, 11824, 12395 };
-    auto res = fqt1.get_value();
+    float res = fqt1.get_value();
     EXPECT_EQ(00.00f, res);
 
     fqt1.AI_channels.int_read_values[0] = new int_2[6]{ 0, 0, 0, 12594, 11827, 13419 };
-    auto res = fqt1.get_value();
+    float res = fqt1.get_value();
     EXPECT_EQ(12.34f, res);
 
     fqt1.AI_channels.int_read_values[0] = new int_2[6]{ 0, 0, 0, 14648, 11831, 13931 };
-    auto res = fqt1.get_value();
+    float res = fqt1.get_value();
     EXPECT_EQ(98.76f, res);
 
     fqt1.AI_channels.int_read_values[0] = new int_2[6]{ 0, 0, 0, 27440, 11824, 12395 };
-    auto res = fqt1.get_value();
+    float res = fqt1.get_value();
     EXPECT_EQ(-1, res);
 
     fqt1.AI_channels.int_read_values[0] = new int_2[6]{ 0, 0, 0, 12395, 11824, 12395 };
-    auto res = fqt1.get_value();
+    float res = fqt1.get_value();
     EXPECT_EQ(-1, res);
 
     }
