@@ -1435,9 +1435,9 @@ camera* device_manager::get_CAM( const char* dev_name )
     return (camera*)get_device( device::DT_CAM, dev_name );
     }
 //-----------------------------------------------------------------------------
-diff_pressure* device_manager::get_PDS( const char* dev_name )
+i_DI_device* device_manager::get_PDS( const char* dev_name )
     {
-    return (diff_pressure*)get_device( device::DT_PDS, dev_name );
+    return get_device( device::DT_PDS, dev_name );
     }
 //-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,

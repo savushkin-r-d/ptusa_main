@@ -33,7 +33,7 @@ TEST( toLuapp, tolua_PAC_dev_PDS00 )
     {
     lua_State* L = lua_open();
     ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
-    ASSERT_EQ( 1, luaL_dostring( L, "res = PDS()" ) );  //Некорректный вызов.
+    ASSERT_EQ( 1, luaL_dostring( L, "res = PDS()" ) );  //РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІС‹Р·РѕРІ.
     ASSERT_EQ( 0, luaL_dostring( L, "res = PDS( \'PDS1\' )" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
     auto PDS1 = static_cast<diff_pressure*>( tolua_touserdata( L, -1, 0 ) );

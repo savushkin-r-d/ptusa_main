@@ -4603,7 +4603,7 @@ class device_manager: public i_Lua_save_device
         camera* get_CAM( const char* dev_name );
 
         /// @brief Получение датчика разности давления по имени.
-        diff_pressure* get_PDS( const char* dev_name );
+        i_DI_device* get_PDS( const char* dev_name );
 
         /// @brief Получение автоматического выключателя по имени.
         i_DO_AO_device* get_F(const char* dev_name);
