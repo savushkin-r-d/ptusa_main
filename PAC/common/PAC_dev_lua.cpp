@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Tue May 24 15:39:56 2022.
+** Generated automatically by tolua++-1.0.92 on Mon Jun  6 15:35:49 2022.
 */
 
 #ifndef __cplusplus
@@ -3156,6 +3156,35 @@ static int tolua_PAC_dev_CAM00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'CAM'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* function: PDS */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_PDS00
+static int tolua_PAC_dev_PDS00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isstring(tolua_S,1,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,2,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
+  {
+   i_DI_device* tolua_ret = (i_DI_device*)  PDS(dev_name);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DI_device");
+  }
+ }
+ return 1;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'PDS'.",&tolua_err);
  return 0;
 #endif
 }
@@ -14448,6 +14477,10 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
    tolua_constant(tolua_S,"DT_WT",device::DT_WT);
    tolua_constant(tolua_S,"DT_PT",device::DT_PT);
    tolua_constant(tolua_S,"DT_F",device::DT_F);
+   tolua_constant(tolua_S,"DT_REGULATOR",device::DT_REGULATOR);
+   tolua_constant(tolua_S,"DT_HLA",device::DT_HLA);
+   tolua_constant(tolua_S,"DT_CAM",device::DT_CAM);
+   tolua_constant(tolua_S,"DT_PDS",device::DT_PDS);
   tolua_endmodule(tolua_S);
   tolua_cclass(tolua_S,"i_wages","i_wages","",NULL);
   tolua_beginmodule(tolua_S,"i_wages");
@@ -14534,6 +14567,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_function(tolua_S,"F",tolua_PAC_dev_F00);
   tolua_function(tolua_S,"C",tolua_PAC_dev_C00);
   tolua_function(tolua_S,"CAM",tolua_PAC_dev_CAM00);
+  tolua_function(tolua_S,"PDS",tolua_PAC_dev_PDS00);
   tolua_function(tolua_S,"STUB",tolua_PAC_dev_STUB00);
   tolua_function(tolua_S,"DEVICE",tolua_PAC_dev_DEVICE00);
   tolua_cclass(tolua_S,"dev_stub","dev_stub","",NULL);

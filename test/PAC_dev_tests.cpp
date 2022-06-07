@@ -120,7 +120,7 @@ TEST( device_manager, add_io_device )
     dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
     auto FQT1 = FQT( name.c_str() );
-    EXPECT_NE( dynamic_cast<i_counter*>( STUB() ), FQT1 );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( FQT1 ) );
 
     //device::DT_FQT, device::DST_FQT
     name = std::string( "FQT2" );
@@ -130,7 +130,7 @@ TEST( device_manager, add_io_device )
     dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
     auto FQT2 = FQT( name.c_str() );
-    EXPECT_NE( dynamic_cast<i_counter*>( STUB() ), FQT2 );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( FQT2 ) );
 
     //device::DT_FQT, device::DST_FQT_F
     name = std::string( "FQT3" );
@@ -140,7 +140,33 @@ TEST( device_manager, add_io_device )
     dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
     auto FQT3 = FQT( name.c_str() );
-    EXPECT_NE( dynamic_cast<i_counter*>( STUB() ), FQT3 );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( FQT3 ) );
+
+    //device::DT_PDS, device::DST_PDS
+    name = std::string( "PDS1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_PDS, device::DST_PDS, name.c_str(), "Test sensor", "CR" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto PDS1 = PDS( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( PDS1 ) );
+
+    //device::DT_PDS, device::DST_PDS_virt
+    name = std::string( "PDS2" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_PDS, device::DST_PDS_VIRT, name.c_str(), "Test sensor", "CR" );
+    EXPECT_EQ( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto PDS2 = PDS( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( PDS2 ) );
+
+    //device::DT_PDS, --
+    name = std::string( "PDS3" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_PDS, device::DST_PDS_VIRT + 1, name.c_str(), "Test sensor", "CR" );
+    EXPECT_EQ( nullptr, res );
     }
 
 TEST( dev_stub, get_pump_dt )
