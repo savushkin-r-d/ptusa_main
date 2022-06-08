@@ -2536,7 +2536,6 @@ int base_counter::get_state()
                 }
             else                        // Работа.
                 {
-                state = STATES::S_WORK;
                 auto dt = get_pump_dt();
                 if ( get_delta_millisec( start_pump_working_time ) > dt )
                     {
@@ -2549,6 +2548,7 @@ int base_counter::get_state()
                         {
                         start_pump_working_time = get_millisec();
                         counter_prev_value = get_abs_quantity();
+                        state = STATES::S_WORK;
                         }
                     }
                 }
@@ -2836,7 +2836,7 @@ u_long counter_f::get_pump_dt() const
 //-----------------------------------------------------------------------------
 float counter_f::get_min_flow() const
     {
-    return get_par( P_MIN_FLOW, 0 );
+    return get_par( P_ERR_MIN_FLOW, 0 );
     }
 //-----------------------------------------------------------------------------
 int counter_f::set_cmd( const char* prop, u_int idx, double val )

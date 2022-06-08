@@ -287,11 +287,19 @@ TEST( counter_f, get_state )
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
     //Устанавливаем расход - ошибка должна появиться.
-    fqt1.set_cmd( "F", 0, 100 );
+    fqt1.set_cmd( "F", 0, 1 );
     fqt1.get_state();
     sleep_ms( 10 );
     EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
 
+    fqt1.start();
+    //Расход стал ниже минимального - ошибка не должна появиться.
+    fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 2 );
+    fqt1.get_state();
+    sleep_ms( 10 );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
+    fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 0 );
     fqt1.set_cmd( "ABS_V", 0, 100 );
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
