@@ -2473,6 +2473,11 @@ u_long dev_stub::get_pump_dt() const
     return 0;
     }
 //-----------------------------------------------------------------------------
+float dev_stub::get_min_flow() const
+    {
+    return .0f;
+    }
+//-----------------------------------------------------------------------------
 void dev_stub::abs_reset()
     {
     }
@@ -2517,7 +2522,9 @@ int base_counter::get_state()
                 }
             }
 
-        if ( 0 == is_pump_working )     // Насос не работает.
+        auto min_flow = get_min_flow();
+        if ( 0 == is_pump_working ||        // Насос не работает или
+            get_flow() <= min_flow )        //расход ниже минимального.
             {            
             start_pump_working_time = 0;
             }
@@ -2769,14 +2776,20 @@ u_long counter::get_pump_dt() const
     return 0;
     };
 //-----------------------------------------------------------------------------
+float counter::get_min_flow() const
+    {
+    return .0f;
+    };
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 counter_f::counter_f( const char *dev_name ) :
-    counter( dev_name, DST_FQT_F, ADDITIONAL_PARAMS_COUNT )
+    counter( dev_name, DST_FQT_F, LAST_PARAM_IDX - 1 )
     {
     set_par_name( P_MIN_FLOW, 0, "P_MIN_FLOW" );
     set_par_name( P_MAX_FLOW, 0, "P_MAX_FLOW" );
     set_par_name( P_CZ, 0, "P_CZ" );
     set_par_name( P_DT, 0, "P_DT" );
+    set_par_name( P_ERR_MIN_FLOW, 0, "P_ERR_MIN_FLOW" );    
     }
 //-----------------------------------------------------------------------------
 counter_f::~counter_f()
@@ -2819,6 +2832,11 @@ int counter_f::save_device_ex( char *buff )
 u_long counter_f::get_pump_dt() const
     {
     return static_cast<u_long>( get_par( P_DT, 0 ) );
+    }
+//-----------------------------------------------------------------------------
+float counter_f::get_min_flow() const
+    {
+    return get_par( P_MIN_FLOW, 0 );
     }
 //-----------------------------------------------------------------------------
 int counter_f::set_cmd( const char* prop, u_int idx, double val )
@@ -2873,6 +2891,8 @@ counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
     {
     set_par_name( static_cast<u_int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
     set_par_name( static_cast<u_int>( CONSTANTS::P_DT ), 0, "P_DT" );
+    set_par_name( static_cast<u_int>( CONSTANTS::P_ERR_MIN_FLOW ), 0,
+        "P_ERR_MIN_FLOW" );    
     };
 //-----------------------------------------------------------------------------
 counter_iolink::~counter_iolink()
@@ -2932,6 +2952,11 @@ u_long counter_iolink::get_pump_dt() const
     {
     return static_cast<u_long>(
         get_par( static_cast<u_int>( CONSTANTS::P_DT ), 0 ) );
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_min_flow() const
+    {
+    return get_par( static_cast<u_int>( CONSTANTS::P_ERR_MIN_FLOW, 0 ) );
     }
 //-----------------------------------------------------------------------------
 float counter_iolink::get_raw_value() const
@@ -6939,6 +6964,11 @@ int virtual_counter::save_device_ex( char *buff )
     }
 
 u_long virtual_counter::get_pump_dt() const
+    {
+    return 0;
+    }
+
+float virtual_counter::get_min_flow() const
     {
     return 0;
     }
