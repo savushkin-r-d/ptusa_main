@@ -645,21 +645,22 @@ TEST( counter_iolink, get_min_flow )
 
 TEST( wages_RS232, get_value)
     {
-    wages_RS232 fqt1("FQT1");
+    wages_RS232 w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+
     //12336, 11824 и т.д. - десятичное представление строки 00, .0 и тд. В таком формате приходят данные с весов. 
-    fqt1.AI_channels.int_read_values[0] = new int_2[6]{ 0, 0, 0, 12336, 11824, 12395 };
-    EXPECT_EQ(00.00f, fqt1.get_value());
+    w1.AI_channels.int_read_values[0] = new int_2[6]{ 0, 0, 0, 12336, 11824, 12395 };
+    EXPECT_EQ(00.00f, w1.get_value_from_wages());
 
-    fqt1.AI_channels.int_read_values[0] = new int_2[6]{ 0, 0, 0, 12594, 11827, 13419 };
-    EXPECT_EQ(12.34f, fqt1.get_value());
+    w1.AI_channels.int_read_values[0] = new int_2[6]{ 0, 0, 0, 12594, 11827, 13419 };
+    EXPECT_EQ(12.34f, w1.get_value_from_wages());
 
-    fqt1.AI_channels.int_read_values[0] = new int_2[6]{ 0, 0, 0, 14648, 11831, 13931 };
-    EXPECT_EQ(98.76f, fqt1.get_value());
+    w1.AI_channels.int_read_values[0] = new int_2[6]{ 0, 0, 0, 14648, 11831, 13931 };
+    EXPECT_EQ(98.76f, w1.get_value_from_wages());
 
-    fqt1.AI_channels.int_read_values[0] = new int_2[6]{ 0, 0, 0, 27440, 11824, 12395 };
-    EXPECT_EQ(-1, fqt1.get_value());
+    w1.AI_channels.int_read_values[0] = new int_2[6]{ 0, 0, 0, 27440, 11824, 12395 };
+    EXPECT_EQ(-1, w1.get_value_from_wages());
 
-    fqt1.AI_channels.int_read_values[0] = new int_2[6]{ 0, 0, 0, 12395, 11824, 12395 };
-    EXPECT_EQ(-1, fqt1.get_value());
-
+    w1.AI_channels.int_read_values[0] = new int_2[6]{ 0, 0, 0, 12395, 11824, 12395 };
+    EXPECT_EQ(-1, w1.get_value_from_wages());
     }
