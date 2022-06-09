@@ -186,6 +186,10 @@ class i_counter
     protected:
         /// @brief Получение времени ожидания работы насоса.
         virtual u_long get_pump_dt() const = 0;
+
+        /// @brief Получение минимального расхода для учета работы связанных
+        /// насосов.
+        virtual float get_min_flow() const = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс противосмешивающего клапана (mixproof).
@@ -3297,6 +3301,7 @@ class virtual_counter : public device, public i_counter
         int save_device_ex( char *buff );
 
         u_long get_pump_dt() const override;
+        float get_min_flow() const override;
 
     protected:
         STATES state;        
@@ -4023,8 +4028,8 @@ class counter : public base_counter
 
         float get_flow() override;
 
-        u_long get_pump_dt() const;
-
+        u_long get_pump_dt() const override;
+        float get_min_flow() const override;
     private:
 
         enum CONSTANTS
@@ -4053,17 +4058,18 @@ class counter_f : public counter
         int set_cmd( const char* prop, u_int idx, double val );
 
     protected:
-        u_long get_pump_dt() const;
+        u_long get_pump_dt() const override;
+        float get_min_flow() const override;
 
     private:
         enum CONSTANTS
             {
-            ADDITIONAL_PARAMS_COUNT = 4,
-
             P_MIN_FLOW = 1,
             P_MAX_FLOW,
             P_CZ,
             P_DT,
+            P_ERR_MIN_FLOW,
+            LAST_PARAM_IDX,
 
             AI_FLOW_INDEX = 1,  ///< Индекс канала аналогового входа (поток).
             };
@@ -4107,6 +4113,7 @@ class counter_iolink : public base_counter
         int get_state();
 
         u_long get_pump_dt() const override;
+        float get_min_flow() const override;
 
         float get_raw_value() const override;
 
@@ -4133,6 +4140,7 @@ class counter_iolink : public base_counter
 
             P_CZ = 1,
             P_DT,
+            P_ERR_MIN_FLOW,
 
             LAST_PARAM_IDX,
             };
@@ -4513,6 +4521,7 @@ class dev_stub : public i_counter, public valve, public i_wages,
         float   get_flow();
 
         u_long get_pump_dt() const;
+        float get_min_flow() const;
 
         u_int get_abs_quantity();
         void  abs_reset();

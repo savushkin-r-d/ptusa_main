@@ -200,13 +200,19 @@ TEST( dev_stub, get_pump_dt )
     EXPECT_EQ( .0f, STUB()->get_pump_dt() );
     }
 
+TEST( dev_stub, get_min_flow )
+    {
+    EXPECT_EQ( .0f, STUB()->get_min_flow() );
+    }
+
 TEST( device, save_device )
     {
     temperature_e_analog t1( "T1" );
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
     t1.save_device( buff, "" );
-    EXPECT_STREQ( "T1={M=0, ST=1, V=0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
+    EXPECT_STREQ( 
+        "T1={M=0, ST=1, V=0, P_CZ=0, P_ERR_T=0, P_MIN_V=0, P_MAX_V=0},\n", buff );
     }
 
 TEST( motor_altivar, set_cmd )
@@ -215,7 +221,9 @@ TEST( motor_altivar, set_cmd )
     const int BUFF_SIZE = 100;
     char buff[ BUFF_SIZE ] = { 0 };
     m1.save_device( buff, "" );
-    EXPECT_STREQ( "M1={M=0, ST=0, V=0, R=0, FRQ=0.0, RPM=0, EST=0, AMP=0.0, MAX_FRQ=0.0, P_ON_TIME=0},\n", buff );
+    EXPECT_STREQ( 
+        "M1={M=0, ST=0, V=0, R=0, FRQ=0.0, RPM=0, EST=0, AMP=0.0, "
+        "MAX_FRQ=0.0, P_ON_TIME=0},\n", buff );
 
     m1.set_cmd( "R", 0, 1 );
     m1.set_cmd( "FRQ", 0, 1.1 );
@@ -223,7 +231,9 @@ TEST( motor_altivar, set_cmd )
     m1.set_cmd( "EST", 0, 2 );
     m1.set_cmd( "AMP", 0, 23.3 );
     m1.save_device( buff, "" );
-    EXPECT_STREQ( "M1={M=0, ST=0, V=1.10, R=1, FRQ=1.1, RPM=12, EST=2, AMP=23.3, MAX_FRQ=0.0, P_ON_TIME=0},\n", buff );
+    EXPECT_STREQ( 
+        "M1={M=0, ST=0, V=1.10, R=1, FRQ=1.1, RPM=12, EST=2, AMP=23.3, "
+        "MAX_FRQ=0.0, P_ON_TIME=0},\n", buff );
     }
 
 TEST( motor_altivar, get_amperage )
@@ -270,11 +280,26 @@ TEST( counter_f, get_state )
     fqt1.set_property( "M", &m1 );
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
-    m1.on();
+    //Расход ниже минимального - ошибка не должна появиться.
+    m1.on();    
     fqt1.get_state();
     sleep_ms( 10 );
-    EXPECT_EQ( (int) i_counter::STATES::S_ERROR, fqt1.get_state() );
+    EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
+    //Устанавливаем расход - ошибка должна появиться.
+    fqt1.set_cmd( "F", 0, 1 );
+    fqt1.get_state();
+    sleep_ms( 10 );
+    EXPECT_EQ( (int)i_counter::STATES::S_ERROR, fqt1.get_state() );
+
+    fqt1.start();
+    //Расход стал ниже минимального - ошибка не должна появиться.
+    fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 2 );
+    fqt1.get_state();
+    sleep_ms( 10 );
+    EXPECT_EQ( (int)i_counter::STATES::S_WORK, fqt1.get_state() );
+
+    fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 0 );
     fqt1.set_cmd( "ABS_V", 0, 100 );
     EXPECT_EQ( (int) i_counter::STATES::S_WORK, fqt1.get_state() );
 
@@ -288,7 +313,7 @@ TEST( counter_f, get_state )
 TEST( counter_f, set_cmd )
     {
     counter_f fqt1( "FQT1" );
-    const int BUFF_SIZE = 100;
+    const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
 
     EXPECT_EQ( 0, fqt1.get_quantity() );
@@ -308,7 +333,9 @@ TEST( counter_f, set_cmd )
     EXPECT_EQ( 9.9f, fqt1.get_flow() );
 
     fqt1.save_device( buff, "" );
-    EXPECT_STREQ( "FQT1={M=0, ST=1, V=50.00, ABS_V=100, F=9.90, P_MIN_FLOW=0, P_MAX_FLOW=0, P_CZ=0, P_DT=0},\n", buff );
+    EXPECT_STREQ( 
+        "FQT1={M=0, ST=1, V=50.00, ABS_V=100, F=9.90, P_MIN_FLOW=0,"
+        " P_MAX_FLOW=0, P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
     }
 
 TEST( counter, set_cmd )
@@ -359,6 +386,13 @@ TEST( counter, get_pump_dt )
     EXPECT_EQ( 0, res );
     }
 
+TEST( counter, get_min_flow )
+    {
+    counter fqt1( "FQT1" );
+    auto res = fqt1.get_min_flow();
+    EXPECT_EQ( .0f, res );
+    }
+
 TEST( counter, get_max_raw_value )
     {
     counter fqt1( "FQT1" );
@@ -372,6 +406,13 @@ TEST( virtual_counter, get_pump_dt )
     virtual_counter fqt1( "FQT1" );
     auto res = fqt1.get_pump_dt();
     EXPECT_EQ( 0, res );
+    }
+
+TEST( virtual_counter, get_min_flow )
+    {
+    virtual_counter fqt1( "FQT1" );
+    auto res = fqt1.get_min_flow();
+    EXPECT_EQ( .0f, res );
     }
 
 TEST( virtual_counter, set_cmd )
@@ -421,7 +462,9 @@ TEST( counter_iolink, set_cmd )
     EXPECT_EQ( 1.1f, fqt1.get_temperature() );
     
     fqt1.save_device( buff, "" );
-    EXPECT_STREQ( "FQT1={M=0, ST=1, V=50000.00, ABS_V=100000, F=9.90, T=1.1, P_CZ=0, P_DT=0},\n", buff );
+    EXPECT_STREQ( 
+        "FQT1={M=0, ST=1, V=50000.00, ABS_V=100000, F=9.90, T=1.1, "
+        "P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
 
     fqt1.set_cmd( "ST", 0, 2 );
     EXPECT_EQ( (int)i_counter::STATES::S_PAUSE, fqt1.get_state() );
@@ -561,4 +604,11 @@ TEST( counter_iolink, get_pump_dt )
     fqt1.set_cmd( "P_DT", 0, 11 );
     res = fqt1.get_pump_dt();
     EXPECT_EQ( 11, res );
+    }
+
+TEST( counter_iolink, get_min_flow )
+    {
+    counter_iolink fqt1( "FQT1" );
+    auto res = fqt1.get_min_flow();
+    EXPECT_EQ( .0f, res );
     }
