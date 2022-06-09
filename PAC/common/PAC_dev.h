@@ -4057,7 +4057,6 @@ class counter_f : public counter
 
         int set_cmd( const char* prop, u_int idx, double val );
 
-    protected:
         u_long get_pump_dt() const override;
         float get_min_flow() const override;
 
