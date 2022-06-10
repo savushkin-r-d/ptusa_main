@@ -187,6 +187,22 @@ class off_action: public action
     };
 //-----------------------------------------------------------------------------
 /// <summary>
+/// Выключение устройств с задержкой.
+/// </summary>
+class delay_off_action : public action
+    {
+    public:
+        delay_off_action();
+
+        void init() override;
+
+        void evaluate() override;
+
+    private:
+        u_long start_time;
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
 /// Промывка седел.
 /// </summary>
 class open_seat_action: public action
@@ -410,6 +426,7 @@ class step
 
             A_ENABLE_STEP_BY_SIGNAL,
             A_DELAY_ON,
+            A_DELAY_OFF,
             A_TO_STEP_IF,
             };
 
