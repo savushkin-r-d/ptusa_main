@@ -338,6 +338,17 @@ TEST( counter_f, set_cmd )
         " P_MAX_FLOW=0, P_CZ=0, P_DT=0, P_ERR_MIN_FLOW=0},\n", buff );
     }
 
+TEST( counter_f, get_min_flow )
+    {
+    counter_f fqt1( "FQT1" );
+    auto res = fqt1.get_min_flow();
+    EXPECT_EQ( .0f, res );
+
+    fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 1.1 );
+    res = fqt1.get_min_flow();
+    EXPECT_EQ( 1.1f, res );
+    }
+
 TEST( counter, set_cmd )
     {
     counter fqt1( "FQT1" );
@@ -611,4 +622,8 @@ TEST( counter_iolink, get_min_flow )
     counter_iolink fqt1( "FQT1" );
     auto res = fqt1.get_min_flow();
     EXPECT_EQ( .0f, res );
+
+    fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 1.1 );
+    res = fqt1.get_min_flow();
+    EXPECT_EQ( 1.1f, res );
     }

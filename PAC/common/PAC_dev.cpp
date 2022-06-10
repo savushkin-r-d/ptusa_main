@@ -2956,7 +2956,7 @@ u_long counter_iolink::get_pump_dt() const
 //-----------------------------------------------------------------------------
 float counter_iolink::get_min_flow() const
     {
-    return get_par( static_cast<u_int>( CONSTANTS::P_ERR_MIN_FLOW, 0 ) );
+    return get_par( static_cast<u_int>( CONSTANTS::P_ERR_MIN_FLOW ), 0 );
     }
 //-----------------------------------------------------------------------------
 float counter_iolink::get_raw_value() const
