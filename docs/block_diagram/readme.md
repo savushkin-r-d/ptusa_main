@@ -11,32 +11,32 @@
  - взаимодействие с внешней средой системы обработки информации; 
  - восстановление работы системы после проявления неисправностей в технических средствах.
 
-![control_program](block_diagram_images\control_program.svg)
+![control_program](block_diagram_images/control_program.svg)
 *Рисунок 1 - Управляющая программа*
 
 **1.2 Выполнение технологического процесса**
 
 Технологический процесс — это совокупность выстроенных в определенном порядке операций.
 
-![execution_technological_process](block_diagram_images\execution_technological_process.svg)
+![execution_technological_process](block_diagram_images/execution_technological_process.svg)
 *Рисунок 2 - Выполнение технологического процесса*
 
 **1.3 Аппаратная процедура**
 
-![hardware_procedure](block_diagram_images\hardware_procedure.svg)
+![hardware_procedure](block_diagram_images/hardware_procedure.svg)
 *Рисунок 3 - Аппаратная процедура*
 
 **1.4 Операция**
 
-![operation](block_diagram_images\operation.svg)
+![operation](block_diagram_images/operation.svg)
 *Рисунок 4 - Операция*
 
 **1.5 Шаг**
 
-![step](block_diagram_images\step.svg)
+![step](block_diagram_images/step.svg)
 *Рисунок 5 - Шаг*
 
 **1.6 Действие**
 
-![action](block_diagram_images\action.svg)
+![action](block_diagram_images/action.svg)
 *Рисунок 6 - Действие*
