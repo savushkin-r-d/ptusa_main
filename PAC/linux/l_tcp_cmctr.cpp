@@ -307,7 +307,6 @@ int tcp_communicator_linux::evaluate()
         {
         /* service loop */
         count_cycles++;
-        sleep_ms(1);
         max_sock_number = 0;
 
         FD_ZERO( &rfds );
