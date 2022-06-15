@@ -440,6 +440,11 @@ int tcp_communicator_linux::evaluate()
                     {
                     do_echo( i );
                     glob_last_transfer_time = get_millisec();
+
+                    if ( sst[ i ].ismodbus )
+                        {
+                        sleep_ms( 1 );
+                        }
                     }
                 }
             }
