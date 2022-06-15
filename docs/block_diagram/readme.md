@@ -1,8 +1,8 @@
-#Технологическая схема
+# Технологическая схема
 
 Документ отображает последовательность этапов технологического процесса. Содержит описания классов, которые используются для организации шагов при выполнении операций танка, гребенки. 
 
-##1. Архитектура программы
+## 1. Архитектура программы
   
 **1.1 Управляющая программа**
 
@@ -11,32 +11,38 @@
  - взаимодействие с внешней средой системы обработки информации; 
  - восстановление работы системы после проявления неисправностей в технических средствах.
 
-![control_program](block_diagram_images/control_program.svg)
-*Рисунок 1 - Управляющая программа*
+<p align="center"><img src="block_diagram_images/control_program.svg" /></p>
+
+<p align="center">Рисунок 1 - Управляющая программа</p>
 
 **1.2 Выполнение технологического процесса**
 
 Технологический процесс — это совокупность выстроенных в определенном порядке операций.
 
-![execution_technological_process](block_diagram_images/execution_technological_process.svg)
-*Рисунок 2 - Выполнение технологического процесса*
+<p align="center"><img src="block_diagram_images/execution_technological_process.svg" /></p>
+
+<p align="center">Рисунок 2 - Выполнение технологического процесса</p>
 
 **1.3 Аппаратная процедура**
 
-![hardware_procedure](block_diagram_images/hardware_procedure.svg)
-*Рисунок 3 - Аппаратная процедура*
+<p align="center"><img src="block_diagram_images/hardware_procedure.svg" /></p>
+
+<p align="center">Рисунок 3 - Аппаратная процедура</p>
 
 **1.4 Операция**
 
-![operation](block_diagram_images/operation.svg)
-*Рисунок 4 - Операция*
+<p align="center"><img src="block_diagram_images/operation.svg" /></p>
+
+<p align="center">Рисунок 4 - Операция</p>
 
 **1.5 Шаг**
 
-![step](block_diagram_images/step.svg)
-*Рисунок 5 - Шаг*
+<p align="center"><img src="block_diagram_images/step.svg" /></p>
+
+<p align="center">Рисунок 5 - Шаг</p>
 
 **1.6 Действие**
 
-![action](block_diagram_images/action.svg)
-*Рисунок 6 - Действие*
+<p align="center"><img src="block_diagram_images/action.svg" /></p>
+
+<p align="center">Рисунок 6 - Действие</p>
