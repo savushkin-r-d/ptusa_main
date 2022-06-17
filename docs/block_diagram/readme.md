@@ -29,7 +29,11 @@
 
 <p align="center"><img src="block_diagram_images/hardware_procedure.svg" /></p>
 
-<p align="center">Рисунок 3 - Аппаратная процедура</p>
+<p align="center">Рисунок 3 - Аппаратная процедура Вариант 1</p>
+
+<p align="center"><img src="block_diagram_images/hardware_procedure_version2.svg" /></p>
+
+<p align="center">Рисунок 3 - Аппаратная процедура Вариант 2</p>
 
 **1.4 Операция**
 
