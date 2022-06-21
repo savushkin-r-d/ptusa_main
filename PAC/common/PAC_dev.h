@@ -186,6 +186,10 @@ class i_counter
     protected:
         /// @brief Получение времени ожидания работы насоса.
         virtual u_long get_pump_dt() const = 0;
+
+        /// @brief Получение минимального расхода для учета работы связанных
+        /// насосов.
+        virtual float get_min_flow() const = 0;
     };
 //-----------------------------------------------------------------------------
 /// @brief Интерфейс противосмешивающего клапана (mixproof).
@@ -408,6 +412,8 @@ class device : public i_DO_AO_device, public par_device
             DT_REGULATOR, ///< ПИД-регулятор.
             DT_HLA,      ///< Сигнальная колонна.
             DT_CAM,      ///< Камера.
+            DT_PDS,      ///< Датчик разности давления.
+            DT_TS,       ///< Сигнальный датчик температуры. 
 
             C_DEVICE_TYPE_CNT, ///< Количество типов устройств.
             };
@@ -573,7 +579,15 @@ class device : public i_DO_AO_device, public par_device
             //CAM
             DST_CAM_DO1_DI2 = 1,///< C сигналом активации, результатом обработки и готовностью.
             DST_CAM_DO1_DI1,    ///< C сигналом активации и результатом обработки.
-            DST_CAM_DO1_DI3     ///< C сигналом активации, двумя результатами обработки и готовностью.
+            DST_CAM_DO1_DI3,    ///< C сигналом активации, двумя результатами обработки и готовностью.
+
+            //PDS
+            DST_PDS = 1,
+            DST_PDS_VIRT,
+
+            //TS
+            DST_TS = 1,
+            DST_TS_VIRT,
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -3287,6 +3301,7 @@ class virtual_counter : public device, public i_counter
         int save_device_ex( char *buff );
 
         u_long get_pump_dt() const override;
+        float get_min_flow() const override;
 
     protected:
         STATES state;        
@@ -3841,6 +3856,26 @@ class state_s : public DI1
             }
     };
 //-----------------------------------------------------------------------------
+/// @brief Датчик разности давления.
+class diff_pressure : public DI1
+    {
+    public:
+        diff_pressure( const char* dev_name ) : DI1( dev_name, DT_PDS,
+            DST_PDS_VIRT, 0 )
+            {
+            }
+    };
+//-----------------------------------------------------------------------------
+/// @brief Сигнальный датчик температуры.
+class temperature_signal : public DI1
+    {
+    public:
+        temperature_signal( const char* dev_name ) : DI1( dev_name, DT_TS,
+            DST_TS_VIRT, 0 )
+            {
+            }
+    };
+//-----------------------------------------------------------------------------
 /// @brief Датчик дискретного входа связи.
 class DI_signal : public DI1
     {
@@ -3993,8 +4028,8 @@ class counter : public base_counter
 
         float get_flow() override;
 
-        u_long get_pump_dt() const;
-
+        u_long get_pump_dt() const override;
+        float get_min_flow() const override;
     private:
 
         enum CONSTANTS
@@ -4022,18 +4057,18 @@ class counter_f : public counter
 
         int set_cmd( const char* prop, u_int idx, double val );
 
-    protected:
-        u_long get_pump_dt() const;
+        u_long get_pump_dt() const override;
+        float get_min_flow() const override;
 
     private:
         enum CONSTANTS
             {
-            ADDITIONAL_PARAMS_COUNT = 4,
-
             P_MIN_FLOW = 1,
             P_MAX_FLOW,
             P_CZ,
             P_DT,
+            P_ERR_MIN_FLOW,
+            LAST_PARAM_IDX,
 
             AI_FLOW_INDEX = 1,  ///< Индекс канала аналогового входа (поток).
             };
@@ -4077,6 +4112,7 @@ class counter_iolink : public base_counter
         int get_state();
 
         u_long get_pump_dt() const override;
+        float get_min_flow() const override;
 
         float get_raw_value() const override;
 
@@ -4103,6 +4139,7 @@ class counter_iolink : public base_counter
 
             P_CZ = 1,
             P_DT,
+            P_ERR_MIN_FLOW,
 
             LAST_PARAM_IDX,
             };
@@ -4483,6 +4520,7 @@ class dev_stub : public i_counter, public valve, public i_wages,
         float   get_flow();
 
         u_long get_pump_dt() const;
+        float get_min_flow() const;
 
         u_int get_abs_quantity();
         void  abs_reset();
@@ -4587,8 +4625,14 @@ class device_manager: public i_Lua_save_device
         /// @brief Получение камеры по имени.
         camera* get_CAM( const char* dev_name );
 
+        /// @brief Получение датчика разности давления по имени.
+        i_DI_device* get_PDS( const char* dev_name );
+
         /// @brief Получение автоматического выключателя по имени.
         i_DO_AO_device* get_F(const char* dev_name);
+
+        /// @brief Получение сигнального датчика температуры по имени.
+        i_DI_device* get_TS( const char* dev_name );
 
         /// @brief Получение единственного экземпляра класса.
         static device_manager* get_instance();
@@ -4956,6 +5000,20 @@ signal_column* HLA( const char* dev_name );
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
 camera* CAM( const char* dev_name );
+//-----------------------------------------------------------------------------
+/// @brief Получение датчика разности давления.
+///
+/// @param dev_name - имя.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+i_DI_device* PDS( const char* dev_name );
+//-----------------------------------------------------------------------------
+/// @brief Получение сигнального датчика температуры по имени.
+///
+/// @param dev_name - имя.
+/// @return - устройство с заданным номером. Если нет такого устройства,
+/// возвращается заглушка (@ref dev_stub).
+i_DI_device* TS( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение виртуального устройства.
 ///

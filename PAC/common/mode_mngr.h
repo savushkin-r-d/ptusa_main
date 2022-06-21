@@ -137,11 +137,25 @@ class action
 class on_action: public action
     {
     public:
-        on_action(): action( "Включать" )
-            {
-            }
+        on_action();
 
-        void evaluate();
+        void evaluate() override;
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
+/// Включение устройств с задержкой.
+/// </summary>
+class delay_on_action : public action
+    {
+    public:
+        delay_on_action();
+
+        void init() override;
+
+        void evaluate() override;
+
+    private:
+        u_long start_time;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -170,6 +184,22 @@ class off_action: public action
         void evaluate();
 
         void init();
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
+/// Выключение устройств с задержкой.
+/// </summary>
+class delay_off_action : public action
+    {
+    public:
+        delay_off_action();
+
+        void init() override;
+
+        void evaluate() override;
+
+    private:
+        u_long start_time;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -247,6 +277,8 @@ class DI_DO_action: public action
 
         void evaluate();
 
+        void final() override;
+
     protected:
         virtual void evaluate_DO( std::vector< device* > devices );
     };
@@ -274,6 +306,8 @@ class AI_AO_action : public action
         int check( char* reason ) const;
 
         void evaluate();
+
+        void final() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -287,6 +321,8 @@ class required_DI_action: public action
             }
 
         int check( char* reason ) const;
+
+        void final() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -313,6 +349,8 @@ class wash_action: public action
         void evaluate();
 
         virtual void print( const char* prefix = "", bool new_line = true ) const;
+
+        void final() override;
 
     private:
         enum GROUPS
@@ -387,6 +425,8 @@ class step
             A_WASH,
 
             A_ENABLE_STEP_BY_SIGNAL,
+            A_DELAY_ON,
+            A_DELAY_OFF,
             A_TO_STEP_IF,
             };
 

@@ -153,7 +153,7 @@ int main( int argc, const char *argv[] )
     //Инициализация дополнительных устройств
     IOT_INIT();
 
-    G_LOG->info( G_LOG->msg, "Starting main loop! Sleep time is %li ms.",
+    G_LOG->info( "Starting main loop! Sleep time is %li ms.",
         sleep_time_ms);
 
     while ( running )
@@ -247,16 +247,14 @@ int main( int argc, const char *argv[] )
 
             if ( TRESH_AVG < avg_time )
                 {
-                G_LOG->alert( G_LOG->msg,
-                    "Main control cycle avg time above threshold : "
+                G_LOG->alert( "Main control cycle avg time above threshold : "
                     "%4lu > %4u ms (Lua mem = %d b).",
                     avg_time, TRESH_AVG,
                     lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNT, 0 ) * 1024 +
                     lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCCOUNTB, 0 ) );
                 }
 
-            G_LOG->info( G_LOG->msg,
-                "Main control cycle performance : "
+            G_LOG->info( "Main control cycle performance : "
                 "avg = %lu, max = %4u, tresh = %4u ms (%4u cycles, Lua mem = %d b).",
                 avg_time, max_iteration_cycle_time, TRESH_AVG,
                 cycles_per_period,

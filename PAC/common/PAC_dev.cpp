@@ -51,6 +51,8 @@ const char* const device::DEV_NAMES[ device::DEVICE_TYPE::C_DEVICE_TYPE_CNT ] =
     "C",       ///< ПИД-регулятор.
     "HLA",     ///< Сигнальная колонна.
     "CAM",     ///< Камера.
+    "PDS",     ///< Датчик разности давления.
+    "TS",      ///< Сигнальный датчик температуры.
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1434,6 +1436,16 @@ camera* device_manager::get_CAM( const char* dev_name )
     return (camera*)get_device( device::DT_CAM, dev_name );
     }
 //-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_PDS( const char* dev_name )
+    {
+    return get_device( device::DT_PDS, dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* device_manager::get_TS( const char* dev_name )
+    {
+    return get_device( device::DT_TS, dev_name );
+    }
+//-----------------------------------------------------------------------------
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         const char* dev_name, const char * descr, const char* article )
     {
@@ -2018,6 +2030,27 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 }
             break;
 
+        case device::DT_PDS:
+            switch ( dev_sub_type )
+                {
+                case device::DST_PDS:
+                    new_device = new diff_pressure( dev_name );
+                    new_io_device = (state_s*)new_device;
+                    break;
+
+                case device::DST_PDS_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_PDS, device::DST_PDS_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown PDS device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
         case device::DT_WT:
             switch ( dev_sub_type )
                 {
@@ -2116,6 +2149,27 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     if ( G_DEBUG )
                         {
                         printf( "Unknown CAM device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
+            break;
+
+        case device::DT_TS:
+            switch ( dev_sub_type )
+                {
+                case device::DST_TS:
+                    new_device = new temperature_signal( dev_name );
+                    new_io_device = (state_s*)new_device;
+                    break;
+
+                case device::DST_TS_VIRT:
+                    new_device = new virtual_device( dev_name, device::DT_TS, device::DST_TS_VIRT );
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown TS device subtype %d!\n", dev_sub_type );
                         }
                     break;
                 }
@@ -2419,6 +2473,11 @@ u_long dev_stub::get_pump_dt() const
     return 0;
     }
 //-----------------------------------------------------------------------------
+float dev_stub::get_min_flow() const
+    {
+    return .0f;
+    }
+//-----------------------------------------------------------------------------
 void dev_stub::abs_reset()
     {
     }
@@ -2463,7 +2522,9 @@ int base_counter::get_state()
                 }
             }
 
-        if ( 0 == is_pump_working )     // Насос не работает.
+        auto min_flow = get_min_flow();
+        if ( 0 == is_pump_working ||        // Насос не работает или
+            get_flow() <= min_flow )        //расход ниже минимального.
             {            
             start_pump_working_time = 0;
             }
@@ -2475,7 +2536,6 @@ int base_counter::get_state()
                 }
             else                        // Работа.
                 {
-                state = STATES::S_WORK;
                 auto dt = get_pump_dt();
                 if ( get_delta_millisec( start_pump_working_time ) > dt )
                     {
@@ -2488,6 +2548,7 @@ int base_counter::get_state()
                         {
                         start_pump_working_time = get_millisec();
                         counter_prev_value = get_abs_quantity();
+                        state = STATES::S_WORK;
                         }
                     }
                 }
@@ -2715,14 +2776,20 @@ u_long counter::get_pump_dt() const
     return 0;
     };
 //-----------------------------------------------------------------------------
+float counter::get_min_flow() const
+    {
+    return .0f;
+    };
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 counter_f::counter_f( const char *dev_name ) :
-    counter( dev_name, DST_FQT_F, ADDITIONAL_PARAMS_COUNT )
+    counter( dev_name, DST_FQT_F, LAST_PARAM_IDX - 1 )
     {
     set_par_name( P_MIN_FLOW, 0, "P_MIN_FLOW" );
     set_par_name( P_MAX_FLOW, 0, "P_MAX_FLOW" );
     set_par_name( P_CZ, 0, "P_CZ" );
     set_par_name( P_DT, 0, "P_DT" );
+    set_par_name( P_ERR_MIN_FLOW, 0, "P_ERR_MIN_FLOW" );    
     }
 //-----------------------------------------------------------------------------
 counter_f::~counter_f()
@@ -2765,6 +2832,11 @@ int counter_f::save_device_ex( char *buff )
 u_long counter_f::get_pump_dt() const
     {
     return static_cast<u_long>( get_par( P_DT, 0 ) );
+    }
+//-----------------------------------------------------------------------------
+float counter_f::get_min_flow() const
+    {
+    return get_par( P_ERR_MIN_FLOW, 0 );
     }
 //-----------------------------------------------------------------------------
 int counter_f::set_cmd( const char* prop, u_int idx, double val )
@@ -2819,6 +2891,8 @@ counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
     {
     set_par_name( static_cast<u_int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
     set_par_name( static_cast<u_int>( CONSTANTS::P_DT ), 0, "P_DT" );
+    set_par_name( static_cast<u_int>( CONSTANTS::P_ERR_MIN_FLOW ), 0,
+        "P_ERR_MIN_FLOW" );    
     };
 //-----------------------------------------------------------------------------
 counter_iolink::~counter_iolink()
@@ -2878,6 +2952,11 @@ u_long counter_iolink::get_pump_dt() const
     {
     return static_cast<u_long>(
         get_par( static_cast<u_int>( CONSTANTS::P_DT ), 0 ) );
+    }
+//-----------------------------------------------------------------------------
+float counter_iolink::get_min_flow() const
+    {
+    return get_par( static_cast<u_int>( CONSTANTS::P_ERR_MIN_FLOW ), 0 );
     }
 //-----------------------------------------------------------------------------
 float counter_iolink::get_raw_value() const
@@ -6618,6 +6697,16 @@ camera* CAM( const char* dev_name )
     return G_DEVICE_MANAGER()->get_CAM( dev_name );
     }
 //-----------------------------------------------------------------------------
+i_DI_device* PDS( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_PDS( dev_name );
+    }
+//-----------------------------------------------------------------------------
+i_DI_device* TS( const char* dev_name )
+    {
+    return G_DEVICE_MANAGER()->get_TS( dev_name );
+    }
+//-----------------------------------------------------------------------------
 dev_stub* STUB()
     {
     return G_DEVICE_MANAGER()->get_stub();
@@ -6877,6 +6966,11 @@ int virtual_counter::save_device_ex( char *buff )
 u_long virtual_counter::get_pump_dt() const
     {
     return 0;
+    }
+
+float virtual_counter::get_min_flow() const
+    {
+    return .0f;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

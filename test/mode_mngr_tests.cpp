@@ -108,6 +108,14 @@ TEST( operation, evaluate )
 	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
 
 	test_op->print( "" );
+
+	test_op->add_step( "Init", 2, -1 );
+	test_op->add_step( "Process #1", 3, -1 );
+	test_op->add_step( "Process #2", 2, -1 );
+	
+	test_op->add_step( "Safe stop #1", 2, -1, operation::PAUSE );
+	test_op->add_step( "Safe stop #2", 3, -1, operation::PAUSE );
+	test_op->add_step( "Idle", -1, -1, operation::PAUSE );
 	
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 	test_op->evaluate();
@@ -132,7 +140,31 @@ TEST( operation, evaluate )
 	EXPECT_EQ( operation::STOP, test_op->get_state() );
 	test_op->evaluate();
 	test_op->final();
-	EXPECT_EQ( operation::IDLE, test_op->get_state() );	
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+
+	//Корректный переход от выполнения к паузе и опять к выполнению.
+	test_op->start();
+	test_op->evaluate();
+	test_op->to_next_step();
+	test_op->evaluate();
+	test_op->to_next_step();
+	test_op->evaluate();
+	EXPECT_EQ( 3, test_op->active_step() );
+	EXPECT_EQ( 3, test_op->get_run_active_step() );
+
+	test_op->pause();
+	EXPECT_EQ( 1, test_op->active_step() );
+	test_op->to_next_step();
+	EXPECT_EQ( 2, test_op->active_step() );
+	test_op->evaluate();
+	EXPECT_EQ( 2, test_op->active_step() );
+
+	test_op->start();
+	EXPECT_EQ( 3, test_op->active_step() );
+	test_op->evaluate();
+	EXPECT_EQ( 3, test_op->active_step() );
+
 
 	test_params_manager::removeObject();
 	}
@@ -245,4 +277,186 @@ TEST( checked_devices_action, final )
 	
 	action.final();
 	EXPECT_EQ( 1, test_DO.get_state() );
+	}
+
+TEST( delay_on_action, evaluate )
+	{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+
+	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+	auto operation_mngr = test_tank.get_modes_manager();
+	auto operation = ( *operation_mngr )[ 1 ];
+	auto operation_state = ( *operation )[ 1 ];
+	auto step = ( *operation_state )[ -1 ];
+
+	auto action = ( *step )[ step::ACTIONS::A_DELAY_ON ];
+
+	action->add_dev( &test_DO );
+	const int DELAY_TIME_MS = 10;
+	const int DELAY_PARAM_IDX = 2;
+	test_tank.par_float[ DELAY_PARAM_IDX ] = DELAY_TIME_MS;
+	action->set_param_idx( 0, DELAY_PARAM_IDX );
+	action->init();
+
+	action->evaluate();
+	EXPECT_EQ( 0, test_DO.get_state() );
+
+	sleep_ms( DELAY_TIME_MS + 1 );
+	action->evaluate();
+	EXPECT_EQ( 1, test_DO.get_state() );
+
+	action->final();
+	EXPECT_EQ( 0, test_DO.get_state() );
+
+	test_params_manager::removeObject();
+	}
+
+TEST( delay_off_action, evaluate )
+	{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+
+	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+	auto operation_mngr = test_tank.get_modes_manager();
+	auto operation = ( *operation_mngr )[ 1 ];
+	auto operation_state = ( *operation )[ 1 ];
+	auto step = ( *operation_state )[ -1 ];
+
+	auto action = ( *step )[ step::ACTIONS::A_DELAY_OFF ];
+
+	action->add_dev( &test_DO );
+	const int DELAY_TIME_MS = 10;
+	const int DELAY_PARAM_IDX = 2;
+	test_tank.par_float[ DELAY_PARAM_IDX ] = DELAY_TIME_MS;
+	action->set_param_idx( 0, DELAY_PARAM_IDX );
+	action->init();
+
+	action->evaluate();
+	EXPECT_EQ( 1, test_DO.get_state() );
+
+	sleep_ms( DELAY_TIME_MS + 1 );
+	action->evaluate();
+	EXPECT_EQ( 0, test_DO.get_state() );
+
+	action->final();
+	EXPECT_EQ( 0, test_DO.get_state() );
+
+	test_params_manager::removeObject();
+	}
+
+TEST( required_DI_action, final )
+	{
+	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	auto action = checked_devices_action();
+	action.add_dev( &test_DI );
+
+	test_DI.on();
+	action.init();
+	action.evaluate();
+	EXPECT_EQ( 1, test_DI.get_state() );
+
+	action.final();
+	EXPECT_EQ( 1, test_DI.get_state() );
+	}
+
+TEST( DI_DO_action, final )
+	{
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	auto action = DI_DO_action();
+	action.add_dev( &test_DI, action::MAIN_GROUP, 1 );
+	action.add_dev( &test_DO, action::MAIN_GROUP, 1 );
+
+	test_DI.on();
+	action.init();
+	action.evaluate();
+	EXPECT_EQ( 1, test_DI.get_state() );
+	EXPECT_EQ( 1, test_DO.get_state() );
+
+	action.final();
+	EXPECT_EQ( 1, test_DI.get_state() );
+	EXPECT_EQ( 0, test_DO.get_state() );
+	}
+
+TEST( AI_AO_action, final )
+	{
+	DO1 test_AO( "test_AO1", device::DEVICE_TYPE::DT_AO,
+		device::DEVICE_SUB_TYPE::DST_AO_VIRT );
+	DI1 test_AI( "test_AI1", device::DEVICE_TYPE::DT_AI,
+		device::DEVICE_SUB_TYPE::DST_AI_VIRT, 0 );
+	auto action = AI_AO_action();
+	action.add_dev( &test_AI, action::MAIN_GROUP, 1 );
+	action.add_dev( &test_AO, action::MAIN_GROUP, 1 );
+
+	const int VALUE = 50;
+	test_AI.set_value( VALUE );
+	action.init();
+	action.evaluate();
+	EXPECT_EQ( VALUE, test_AI.get_value() );
+	EXPECT_EQ( VALUE, test_AO.get_value() );
+
+	action.final();
+	EXPECT_EQ( VALUE, test_AI.get_value() );
+	EXPECT_EQ( 0, test_AO.get_value() );
+	}
+
+TEST( wash_action, final )
+	{
+	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
+		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
+	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+
+	virtual_motor test_M1( "M1" );
+	virtual_motor test_M2( "M2" );
+
+	auto action = wash_action();
+	action.add_dev( &test_DI, action::MAIN_GROUP, 0 );
+	action.add_dev( &test_DO, action::MAIN_GROUP, 1 );
+	action.add_dev( &test_M1, action::MAIN_GROUP, 2 );
+	action.add_dev( &test_M2, action::MAIN_GROUP, 3 );
+
+	test_DI.on();
+	action.init();
+	action.evaluate();
+	EXPECT_EQ( 1, test_DI.get_state() );
+	EXPECT_EQ( 1, test_DO.get_state() );
+	EXPECT_EQ( 1, test_M1.get_state() );
+	EXPECT_EQ( 2, test_M2.get_state() );
+
+	action.final();
+	EXPECT_EQ( 1, test_DI.get_state() );
+	EXPECT_EQ( 0, test_DO.get_state() );
+	EXPECT_EQ( 0, test_M1.get_state() );
+	EXPECT_EQ( 0, test_M2.get_state() );
 	}
