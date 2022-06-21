@@ -4986,7 +4986,7 @@ float wages_RS232::get_value_from_wages()
         static_cast<unsigned short int>( ( data[ 5 ] >> 8 ) - 48 ) };
     for ( int i = 0; i <= 3; i++ )
         {
-        if ( decimals[ i ] > 9 && decimals[ i ] < 0 )                       //4
+        if ( decimals[ i ] > 9 || decimals[ i ] < 0 )                       //4
             {
             state = -1;
             return 0.f;
