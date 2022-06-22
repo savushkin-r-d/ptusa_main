@@ -1633,7 +1633,81 @@ bool enable_step_by_signal::is_any_group_active() const
         }
 
     return false;
+
     };
+//-----------------------------------------------------------------------------
+void enable_step_by_signal::turn_off_the_step_when_signal_disappears() //задание
+{
+    if (is_empty())
+    {
+        return;
+    }
+
+    auto& main_group = devices[MAIN_GROUP];
+    for (u_int idx = 0; idx < main_group.size(); idx++)
+    {
+        //auto& devs = devices[idx];
+        auto& group = main_group[idx];
+
+        // Если нет сигналов, то устройства включаем.
+        if (group[].empty()) // в скобках должен быть сигнал?
+        {
+            new_state = 1;
+        }
+        else
+        {
+            // В зависимости от сигнала запроса включения устройств выключаем
+            // устройства.
+            for (u_int i = 0; i < group[].size(); i++) //в скобках должен быть сигнал ?
+            {
+                if (group[][i]->is_active())
+                {
+                    new_state = 1;
+                    break;
+                }
+            }
+        }
+
+        float new_val = -1;
+        if (!group[].empty())
+        {
+            new_val = group[][0]->get_value();
+        }
+        else
+        {
+            u_int param_idx = par_idx.size() > idx ? par_idx[idx] : 0;
+            if (param_idx > 0 && !par_idx.empty())
+            {
+                new_val = (*par)[param_idx];
+            }
+        }
+
+        //Включаем или выключаем устройства.
+        for (u_int i = 0; i < group[].size(); i++)
+        {
+            auto dev = group[][i];
+            dev->set_state(new_state);
+
+            auto type = dev->get_type();
+            if (new_val != -1 &&
+                (type == device::DT_M || type == device::DT_VC ||
+                    type == device::DT_AO || type == device::DT_REGULATOR))
+            {
+                dev->set_value(new_state > 0 ? new_val : 0);
+            }
+        }
+        for (u_int i = 0; i < group[].size(); i++)
+        {
+            auto dev = group[][i];
+            dev->set_state(new_state > 0 ? 2 : 0);
+
+            if (new_val != -1 && dev->get_type() == device::DT_M)
+            {
+                dev->set_value(new_state > 0 ? new_val : 0);
+            }
+        }
+    }
+}
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 operation_state::operation_state( const char* name,

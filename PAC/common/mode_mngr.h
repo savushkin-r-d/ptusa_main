@@ -399,6 +399,8 @@ class enable_step_by_signal : public action
         enable_step_by_signal();
 
         bool is_any_group_active() const;
+
+        void turn_off_the_step_when_signal_disappears(); //выключать шаг по пропаданию сигнала
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об устройствах, которые входят в шаг (открываются/
