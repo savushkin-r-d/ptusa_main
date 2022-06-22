@@ -1643,14 +1643,20 @@ void enable_step_by_signal::turn_off_the_step_when_signal_disappears() //зад�
         return;
     }
 
-    auto& main_group = devices[MAIN_GROUP];
-    for (u_int idx = 0; idx < main_group.size(); idx++)
+    for (u_int idx = 0; idx < devices.size(); idx++)
     {
-        //auto& devs = devices[idx];
-        auto& group = main_group[idx];
+        auto& devs = devices[idx];
+
+        //Подаем сигналы "ОК".
+        for (u_int i = 0; i < devs[G_DO].size(); i++)
+        {
+            devs[G_DO][i]->on();
+        }
+
+        int new_state = 0;
 
         // Если нет сигналов, то устройства включаем.
-        if (group[].empty()) // в скобках должен быть сигнал?
+        if (devs[G_DI].empty())
         {
             new_state = 1;
         }
@@ -1658,9 +1664,9 @@ void enable_step_by_signal::turn_off_the_step_when_signal_disappears() //зад�
         {
             // В зависимости от сигнала запроса включения устройств выключаем
             // устройства.
-            for (u_int i = 0; i < group[].size(); i++) //в скобках должен быть сигнал ?
+            for (u_int i = 0; i < devs[G_DI].size(); i++)
             {
-                if (group[][i]->is_active())
+                if (devs[G_DI][i]->is_active())
                 {
                     new_state = 1;
                     break;
@@ -1669,9 +1675,9 @@ void enable_step_by_signal::turn_off_the_step_when_signal_disappears() //зад�
         }
 
         float new_val = -1;
-        if (!group[].empty())
+        if (!devs[G_PUMP_FREQ].empty())
         {
-            new_val = group[][0]->get_value();
+            new_val = devs[G_PUMP_FREQ][0]->get_value();
         }
         else
         {
@@ -1683,9 +1689,9 @@ void enable_step_by_signal::turn_off_the_step_when_signal_disappears() //зад�
         }
 
         //Включаем или выключаем устройства.
-        for (u_int i = 0; i < group[].size(); i++)
+        for (u_int i = 0; i < devs[G_DEV].size(); i++)
         {
-            auto dev = group[][i];
+            auto dev = devs[G_DEV][i];
             dev->set_state(new_state);
 
             auto type = dev->get_type();
@@ -1696,14 +1702,41 @@ void enable_step_by_signal::turn_off_the_step_when_signal_disappears() //зад�
                 dev->set_value(new_state > 0 ? new_val : 0);
             }
         }
-        for (u_int i = 0; i < group[].size(); i++)
+        for (u_int i = 0; i < devs[G_REV_DEV].size(); i++)
         {
-            auto dev = group[][i];
+            auto dev = devs[G_REV_DEV][i];
             dev->set_state(new_state > 0 ? 2 : 0);
 
             if (new_val != -1 && dev->get_type() == device::DT_M)
             {
                 dev->set_value(new_state > 0 ? new_val : 0);
+            }
+        }
+
+        bool is_dev_error = false;
+        // Чуть раньше подали управляющий сигнал. Сейчас проверяем состояния устройств.
+        for (u_int i = 0; i < devs[G_DEV].size(); i++)
+        {
+            if (devs[G_DEV][i]->get_state() == -1)
+            {
+                is_dev_error = true;
+                break;
+            }
+        }
+        for (u_int i = 0; i < devs[G_REV_DEV].size(); i++)
+        {
+            if (devs[G_REV_DEV][i]->get_state() == -1)
+            {
+                is_dev_error = true;
+                break;
+            }
+        }
+        // Если есть ошибки устройств, не отключая все устройства, снимаем сигналы "ОК".
+        if (is_dev_error)
+        {
+            for (u_int i = 0; i < devs[G_DO].size(); i++)
+            {
+                devs[G_DO][i]->off();
             }
         }
     }

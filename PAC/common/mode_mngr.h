@@ -396,11 +396,28 @@ class to_step_if_devices_in_specific_state_action : public action
 class enable_step_by_signal : public action
     {
     public:
+
+        enable_step_by_signal() : action("Устройства DI's DO's DEV's R_DEV's AI", G_SUBGROUPS_CNT)
+        {
+        }
+
         enable_step_by_signal();
 
         bool is_any_group_active() const;
 
         void turn_off_the_step_when_signal_disappears(); //выключать шаг по пропаданию сигнала
+
+    private:
+        enum GROUPS
+        {
+            G_DI = 0,       //Входные сигналы запроса включения устройств.
+            G_DO,           //Выходные сигналы "ОК".
+            G_DEV,          //Устройства, включаемые по запросу.
+            G_REV_DEV,      //Реверсные устройства, включаемые по запросу.
+            G_PUMP_FREQ,    //Задания производительности.
+
+            G_SUBGROUPS_CNT,   //Количество групп.
+        };
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об устройствах, которые входят в шаг (открываются/
