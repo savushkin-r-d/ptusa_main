@@ -401,7 +401,7 @@ class enable_step_by_signal : public action
         {
         }
 
-        enable_step_by_signal();
+       // enable_step_by_signal();
 
         bool is_any_group_active() const;
 

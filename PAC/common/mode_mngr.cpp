@@ -1604,9 +1604,9 @@ void to_step_if_devices_in_specific_state_action::final()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-enable_step_by_signal::enable_step_by_signal() :action( "Включить шаг по сигналам" )
-    {
-    };
+//enable_step_by_signal::enable_step_by_signal() :action( "Включить шаг по сигналам" )
+   // {
+   // };
 //-----------------------------------------------------------------------------
 bool enable_step_by_signal::is_any_group_active() const
     {
@@ -1671,72 +1671,6 @@ void enable_step_by_signal::turn_off_the_step_when_signal_disappears() //зад�
                     new_state = 1;
                     break;
                 }
-            }
-        }
-
-        float new_val = -1;
-        if (!devs[G_PUMP_FREQ].empty())
-        {
-            new_val = devs[G_PUMP_FREQ][0]->get_value();
-        }
-        else
-        {
-            u_int param_idx = par_idx.size() > idx ? par_idx[idx] : 0;
-            if (param_idx > 0 && !par_idx.empty())
-            {
-                new_val = (*par)[param_idx];
-            }
-        }
-
-        //Включаем или выключаем устройства.
-        for (u_int i = 0; i < devs[G_DEV].size(); i++)
-        {
-            auto dev = devs[G_DEV][i];
-            dev->set_state(new_state);
-
-            auto type = dev->get_type();
-            if (new_val != -1 &&
-                (type == device::DT_M || type == device::DT_VC ||
-                    type == device::DT_AO || type == device::DT_REGULATOR))
-            {
-                dev->set_value(new_state > 0 ? new_val : 0);
-            }
-        }
-        for (u_int i = 0; i < devs[G_REV_DEV].size(); i++)
-        {
-            auto dev = devs[G_REV_DEV][i];
-            dev->set_state(new_state > 0 ? 2 : 0);
-
-            if (new_val != -1 && dev->get_type() == device::DT_M)
-            {
-                dev->set_value(new_state > 0 ? new_val : 0);
-            }
-        }
-
-        bool is_dev_error = false;
-        // Чуть раньше подали управляющий сигнал. Сейчас проверяем состояния устройств.
-        for (u_int i = 0; i < devs[G_DEV].size(); i++)
-        {
-            if (devs[G_DEV][i]->get_state() == -1)
-            {
-                is_dev_error = true;
-                break;
-            }
-        }
-        for (u_int i = 0; i < devs[G_REV_DEV].size(); i++)
-        {
-            if (devs[G_REV_DEV][i]->get_state() == -1)
-            {
-                is_dev_error = true;
-                break;
-            }
-        }
-        // Если есть ошибки устройств, не отключая все устройства, снимаем сигналы "ОК".
-        if (is_dev_error)
-        {
-            for (u_int i = 0; i < devs[G_DO].size(); i++)
-            {
-                devs[G_DO][i]->off();
             }
         }
     }
