@@ -1604,9 +1604,9 @@ void to_step_if_devices_in_specific_state_action::final()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-//enable_step_by_signal::enable_step_by_signal() :action( "Включить шаг по сигналам" )
-   // {
-   // };
+enable_step_by_signal::enable_step_by_signal() :action( "Включить шаг по сигналам" )
+    {
+    };
 //-----------------------------------------------------------------------------
 bool enable_step_by_signal::is_any_group_active() const
     {
@@ -1623,7 +1623,7 @@ bool enable_step_by_signal::is_any_group_active() const
         for ( u_int idx = 0; idx < group.size(); idx++ )
             {
             auto& dev = group[ idx ];
-            if ( !dev->is_active() )
+            if ( !dev->is_active() && should_turn_off())
                 {
                 is_group_ok = false;
                 break;
@@ -1635,46 +1635,32 @@ bool enable_step_by_signal::is_any_group_active() const
     return false;
 
     };
-//-----------------------------------------------------------------------------
-void enable_step_by_signal::turn_off_the_step_when_signal_disappears() //задание
-{
-    if (is_empty())
-    {
-        return;
-    }
 
+bool enable_step_by_signal::should_turn_off() const
+{
     for (u_int idx = 0; idx < devices.size(); idx++)
     {
         auto& devs = devices[idx];
 
-        //Подаем сигналы "ОК".
-        for (u_int i = 0; i < devs[G_DO].size(); i++)
+        float new_val = -1;
+        if (!devs[G_PUMP_FREQ].empty())
         {
-            devs[G_DO][i]->on();
-        }
-
-        int new_state = 0;
-
-        // Если нет сигналов, то устройства включаем.
-        if (devs[G_DI].empty())
-        {
-            new_state = 1;
+            new_val = devs[G_PUMP_FREQ][0]->get_value();
         }
         else
         {
-            // В зависимости от сигнала запроса включения устройств выключаем
-            // устройства.
-            for (u_int i = 0; i < devs[G_DI].size(); i++)
+            u_int param_idx = par_idx.size() > idx ? par_idx[idx] : 0;
+            if (param_idx > 0 && !par_idx.empty())
             {
-                if (devs[G_DI][i]->is_active())
-                {
-                    new_state = 1;
-                    break;
-                }
+                new_val = (*par)[param_idx];
+                return true;
             }
         }
+
+        return false;
     }
-}
+
+};
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 operation_state::operation_state( const char* name,

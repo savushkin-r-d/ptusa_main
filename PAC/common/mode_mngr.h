@@ -397,15 +397,13 @@ class enable_step_by_signal : public action
     {
     public:
 
-        enable_step_by_signal() : action("Устройства DI's DO's DEV's R_DEV's AI", G_SUBGROUPS_CNT)
-        {
-        }
-
-       // enable_step_by_signal();
+       
+        enable_step_by_signal();
 
         bool is_any_group_active() const;
 
-        void turn_off_the_step_when_signal_disappears(); //выключать шаг по пропаданию сигнала
+        bool should_turn_off() const;
+ 
 
     private:
         enum GROUPS
