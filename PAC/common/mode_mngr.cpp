@@ -1640,24 +1640,15 @@ bool enable_step_by_signal::should_turn_off() const
 {
     for (u_int idx = 0; idx < devices.size(); idx++)
     {
-        auto& devs = devices[idx];
-
-        float new_val = -1;
-        if (!devs[G_PUMP_FREQ].empty())
+        if (!par_idx.empty())
         {
-            new_val = devs[G_PUMP_FREQ][0]->get_value();
+            return false; //так как параметр не пустой, то выключаться не должно
         }
         else
         {
-            u_int param_idx = par_idx.size() > idx ? par_idx[idx] : 0;
-            if (param_idx > 0 && !par_idx.empty())
-            {
-                new_val = (*par)[param_idx];
-                return true;
-            }
+            return true; //иначе нужно выключать
         }
 
-        return false;
     }
 
 };
