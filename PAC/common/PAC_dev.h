@@ -4678,6 +4678,8 @@ class device_manager: public i_Lua_save_device
 #endif // __BORLANDC__
 
     protected:
+        char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
+
         dev_stub stub;  ///< Устройство-заглушка, фиктивное устройство.
 
         struct range    ///< Диапазон устройств одного типа.
@@ -4709,6 +4711,11 @@ class device_manager: public i_Lua_save_device
         // Вызывается из Lua.
         io_device* add_io_device( int dev_type, int dev_sub_type,
             const char *dev_name, const char * descr, const char* article );
+
+        // @brief Очистка списка устройств.
+        //
+        // Для тестирования.
+        void clear_io_devices();
     };
 //-----------------------------------------------------------------------------
 /// @brief таймер.
