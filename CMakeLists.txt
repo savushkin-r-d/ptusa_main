@@ -95,11 +95,11 @@ if(LINUX)
 
     if(ARP_DEVICE)
         execute_process(COMMAND plcncli
-            generate code -s . -o ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code --verbose
+            generate code -s .  ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/code --verbose
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer
             COMMAND_ECHO STDOUT )
         execute_process(COMMAND plcncli
-            generate config -s . -o ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/config --verbose
+            generate config -s .  ${CMAKE_BINARY_DIR}/PtusaPLCnextEngineer/intermediate/config --verbose
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/PAC/linux/PAC_PLCnext/PtusaPLCnextEngineer
             COMMAND_ECHO STDOUT )
 
@@ -127,11 +127,11 @@ elseif(WIN32)
 
     set_target_properties (toluapp toluapp_lib liblua PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
     add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/PAC_dev_lua.cpp
-        COMMAND toluapp -n PAC_dev -o PAC/common/PAC_dev_lua.cpp PAC/common/toloa++/pkg/PAC_dev.hh
+        COMMAND toluapp -n PAC_dev PAC/common/PAC_dev_lua.cpp PAC/common/toloa++/pkg/PAC_dev.hh
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/PAC_dev.hh
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
     add_custom_command( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/PAC/IoT/IOT_dev_lua.cpp
-        COMMAND toluapp -n IOT_dev -o PAC/IoT/IOT_dev_lua.cpp PAC/common/toloa++/pkg/IOT_dev.hh
+        COMMAND toluapp -n IOT_dev  PAC/IoT/IOT_dev_lua.cpp PAC/common/toloa++/pkg/IOT_dev.hh
         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/PAC/common/toloa++/pkg/IOT_dev.hh
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
 endif()
