@@ -195,6 +195,21 @@ TEST( device_manager, add_io_device )
     EXPECT_EQ( nullptr, res );
     }
 
+TEST( device_manager, clear_io_devices )
+    {
+    G_DEVICE_MANAGER()->clear_io_devices();
+
+    auto res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_TE, device::DST_TE_VIRT, "T1", "Test sensor", "T" );
+    ASSERT_EQ( nullptr, res );    
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(),
+        G_DEVICE_MANAGER()->get_TE( "T1" ) );   //Search should find device.
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    EXPECT_EQ( G_DEVICE_MANAGER()->get_stub_device(),
+        G_DEVICE_MANAGER()->get_TE( "T1" ) );   //Search shouldn't find device.
+    }
+
 TEST( dev_stub, get_pump_dt )
     {
     EXPECT_EQ( .0f, STUB()->get_pump_dt() );

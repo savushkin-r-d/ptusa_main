@@ -2217,8 +2217,8 @@ void device_manager::clear_io_devices()
 
     for ( size_t idx = 0; idx < device::C_DEVICE_TYPE_CNT; idx++ )
         {
-        dev_types_ranges[ idx ].start_pos = 0;
-        dev_types_ranges[ idx ].end_pos = 0;
+        dev_types_ranges[ idx ].start_pos = -1;
+        dev_types_ranges[ idx ].end_pos = -1;
         is_first_device[ idx ] = 0;
         }
 
