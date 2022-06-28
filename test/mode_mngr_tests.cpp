@@ -460,3 +460,14 @@ TEST( wash_action, final )
 	EXPECT_EQ( 0, test_M1.get_state() );
 	EXPECT_EQ( 0, test_M2.get_state() );
 	}
+
+
+/*
+	TEST METHOD DEFENITION: 
+    should_turn_off()
+*/
+
+TEST( enable_step_by_signal, should_turn_off )
+{
+	EXPECT_TRUE(true);
+}
