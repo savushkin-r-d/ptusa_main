@@ -21,21 +21,27 @@ jobs:
             os: windows-latest,
             cc: "cl",
             cxx: "cl",
-            environment_script: "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars32.bat"
+            environment_script: "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars32.bat",
+            targets: "ptusa_main libptusa_main main_test",
+            run_tests: "true"
           }
         - {
             name: "Windows Latest MinGW",
             artifact: "Windows-MinGW.7z",
             os: windows-latest,
             cc: "gcc",
-            cxx: "g++"
+            cxx: "g++",
+            targets: "ptusa_main libptusa_main",
+            run_tests: "false"
           }
         - {
             name: "Ubuntu Latest GCC",
             artifact: "Linux.7z",
             os: ubuntu-latest,
             cc: "gcc",
-            cxx: "g++"
+            cxx: "g++",
+            targets: "ptusa_main libptusa_main main_test",
+            run_tests: "true"
           }
     steps:
     - uses: actions/checkout@v2
@@ -187,7 +193,7 @@ jobs:
         execute_process(COMMAND ccache -p)
         execute_process(COMMAND ccache -z)
         execute_process(
-          COMMAND cmake --build build --target ptusa_main libptusa_main main_test
+          COMMAND cmake --build build --target ${{ matrix.config.targets }}
           RESULT_VARIABLE result
           OUTPUT_VARIABLE output
           ERROR_VARIABLE output
@@ -239,6 +245,7 @@ jobs:
 
 
     - name: Run tests
+      if: matrix.config.run_tests == 'true'
       shell: cmake -P {0}
       run: |
         include(ProcessorCount)
