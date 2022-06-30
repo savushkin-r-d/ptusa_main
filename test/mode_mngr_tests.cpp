@@ -469,5 +469,5 @@ TEST( wash_action, final )
 
 TEST( enable_step_by_signal, should_turn_off )
 {
-	EXPECT_TRUE(true);
+	EXPECT_TRUE(true, !par_idx.empty());
 }
