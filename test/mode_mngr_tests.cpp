@@ -493,18 +493,20 @@ TEST( enable_step_by_signal, should_turn_off )
 	auto action = reinterpret_cast<enable_step_by_signal*>
 		( ( *step )[ step::ACTIONS::A_ENABLE_STEP_BY_SIGNAL ] );
 
+	EXPECT_EQ( true, action->should_turn_off() );	//Empty device list.
+
 	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 	action->add_dev( &test_DI );
+	EXPECT_EQ( true, action->should_turn_off() );	//Empty parameters list.
 
 	const int SHOULD_SWITCH_OFF_PARAM_IDX = 2;
 	test_tank.par_float[ SHOULD_SWITCH_OFF_PARAM_IDX ] = 0;
 	action->set_param_idx( 0, SHOULD_SWITCH_OFF_PARAM_IDX );
-	action->init();
-	EXPECT_EQ( false, action->should_turn_off() );
+	EXPECT_EQ( false, action->should_turn_off() );	//Parameter was set to 0.
 
 	test_tank.par_float[ SHOULD_SWITCH_OFF_PARAM_IDX ] = 1;
-	EXPECT_EQ( true, action->should_turn_off() );
+	EXPECT_EQ( true, action->should_turn_off() );	//Parameter was set to 1.
 
 	test_params_manager::removeObject();
     }
