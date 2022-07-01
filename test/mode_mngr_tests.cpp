@@ -468,6 +468,43 @@ TEST( wash_action, final )
 */
 
 TEST( enable_step_by_signal, should_turn_off )
-{
-	//EXPECT_TRUE(true, !par_idx.empty()); тест не рабочий, не знаю, как его отредактировать
-}
+    {
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+
+	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+	auto operation_mngr = test_tank.get_modes_manager();
+	auto operation = ( *operation_mngr )[ 1 ];
+	auto operation_state = ( *operation )[ 1 ];
+	auto step = ( *operation_state )[ -1 ];
+
+	auto action = reinterpret_cast<enable_step_by_signal*>
+		( ( *step )[ step::ACTIONS::A_ENABLE_STEP_BY_SIGNAL ] );
+
+	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	action->add_dev( &test_DI );
+
+	const int SHOULD_SWITCH_OFF_PARAM_IDX = 2;
+	test_tank.par_float[ SHOULD_SWITCH_OFF_PARAM_IDX ] = 0;
+	action->set_param_idx( 0, SHOULD_SWITCH_OFF_PARAM_IDX );
+	action->init();
+	EXPECT_EQ( false, action->should_turn_off() );
+
+	test_tank.par_float[ SHOULD_SWITCH_OFF_PARAM_IDX ] = 1;
+	EXPECT_EQ( true, action->should_turn_off() );
+
+	test_params_manager::removeObject();
+    }

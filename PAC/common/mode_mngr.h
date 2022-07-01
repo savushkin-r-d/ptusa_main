@@ -396,15 +396,11 @@ class to_step_if_devices_in_specific_state_action : public action
 class enable_step_by_signal : public action
     {
     public:
-
-       
         enable_step_by_signal();
 
         bool is_any_group_active() const;
 
         bool should_turn_off() const;
- 
-
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об устройствах, которые входят в шаг (открываются/
