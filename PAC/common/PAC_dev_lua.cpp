@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Mon Jul  4 09:34:01 2022.
+** Generated automatically by tolua++-1.0.92 on Mon Jul  4 10:46:54 2022.
 */
 
 #ifndef __cplusplus
@@ -6051,10 +6051,11 @@ static int tolua_PAC_dev_action_set_bool_property00(lua_State* tolua_S)
   if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_bool_property'", NULL);
 #endif
   {
-   self->set_bool_property(name,value);
+   int tolua_ret = (int)  self->set_bool_property(name,value);
+   tolua_pushnumber(tolua_S,(lua_Number)tolua_ret);
   }
  }
- return 0;
+ return 1;
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'set_bool_property'.",&tolua_err);

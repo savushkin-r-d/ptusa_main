@@ -1645,7 +1645,7 @@ bool enable_step_by_signal::should_turn_off() const
     return turn_off_flag;
     };
 //-----------------------------------------------------------------------------
-void enable_step_by_signal::set_bool_property( const char* name, bool value )
+int enable_step_by_signal::set_bool_property( const char* name, bool value )
     {
     if ( strcmp( name, "should_turn_off" ) == 0 )
         {
@@ -1658,7 +1658,10 @@ void enable_step_by_signal::set_bool_property( const char* name, bool value )
             G_LOG->warning( "\"%s\" unknown property \"%s\"",
                 this->name.c_str(), name);
             }
+        return 1;
         }
+
+    return 0;
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

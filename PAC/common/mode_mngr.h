@@ -116,8 +116,9 @@ class action
         ///
         /// @param [in] name Название свойства.
         /// @param [in] value Значение свойства.
-        virtual void set_bool_property( const char* name, bool value )
+        virtual int set_bool_property( const char* name, bool value )
             {
+            return 0;
             }
 
         enum CONSTANTS
@@ -411,7 +412,7 @@ class enable_step_by_signal : public action
 
         bool should_turn_off() const;
 
-        virtual void set_bool_property( const char* name, bool value );
+        int set_bool_property( const char* name, bool value ) override;
 
     private:
         bool turn_off_flag = true;

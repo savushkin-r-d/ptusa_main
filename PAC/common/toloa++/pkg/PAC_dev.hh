@@ -1062,7 +1062,7 @@ class action
         ///
         /// @param [in] name Название свойства.
         /// @param [in] value Значение свойства.
-        void set_bool_property( const char* name, bool value );
+        int set_bool_property( const char* name, bool value );
     };
 //-----------------------------------------------------------------------------
 ///@brief Получение менеджера устройств.

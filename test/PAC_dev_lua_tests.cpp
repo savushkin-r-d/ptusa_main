@@ -12,6 +12,7 @@ TEST( toLuapp, tolua_PAC_dev_open )
     EXPECT_EQ( 0,
         luaL_dostring( L, "o1:get_modes_manager():add_operation(\'Test operation\')" ) );
 
+    //u_int operation_state::steps_count() const
     EXPECT_EQ( 0,
         luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ operation.RUN ]:steps_count()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
@@ -20,6 +21,15 @@ TEST( toLuapp, tolua_PAC_dev_open )
 
     EXPECT_EQ( 0,
         luaL_dostring( L, "o1:get_modes_manager()[ 1 ]:add_step(\'Test step\', -1, -1 )" ) );
+    
+    // int enable_step_by_signal::set_bool_property( const char* name, bool value )
+    EXPECT_EQ( 0,
+        luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ 1 ][ 1 ][ step.A_ENABLE_STEP_BY_SIGNAL ]:"
+        "set_bool_property( 'should_turn_off', false )" ) );
+    lua_getfield( L, LUA_GLOBALSINDEX, "res" );
+    EXPECT_EQ( 0, tolua_tonumber( L, -1, 0 ) );
+    lua_remove( L, -1 );
+
     EXPECT_EQ( 0,
         luaL_dostring( L, "res=o1:get_modes_manager()[ 1 ][ operation.RUN ]:steps_count()" ) );
     lua_getfield( L, LUA_GLOBALSINDEX, "res" );
