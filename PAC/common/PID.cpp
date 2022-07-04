@@ -278,8 +278,15 @@ void PID::direct_set_value( float val )
         out_value = eval( in_value, sign );
         if ( actuator )
             {
-            actuator->on();
-            actuator->set_value( out_value );
+            if ( STATE::OFF == state )
+                {
+                actuator->off();
+                }
+            else
+                {
+                actuator->on();
+                actuator->set_value( out_value );
+                }
             }
         }
     }

@@ -1449,8 +1449,6 @@ i_DI_device* device_manager::get_TS( const char* dev_name )
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         const char* dev_name, const char * descr, const char* article )
     {
-    static char is_first_device[ device::C_DEVICE_TYPE_CNT ] = { 0 };
-
     device* new_device = 0;
     io_device* new_io_device = 0;
 
@@ -2207,6 +2205,24 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
         }
 
     return new_io_device;
+    }
+//-----------------------------------------------------------------------------
+void device_manager::clear_io_devices()
+    {
+    for ( size_t idx = 0; idx < project_devices.size(); idx++ )
+        {
+        delete project_devices[ idx ];
+        project_devices[ idx ] = 0;
+        }
+
+    for ( size_t idx = 0; idx < device::C_DEVICE_TYPE_CNT; idx++ )
+        {
+        dev_types_ranges[ idx ].start_pos = -1;
+        dev_types_ranges[ idx ].end_pos = -1;
+        is_first_device[ idx ] = 0;
+        }
+
+    project_devices.clear();
     }
 //-----------------------------------------------------------------------------
 int device_manager::init_params()
