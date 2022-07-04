@@ -1056,6 +1056,13 @@ class action
         /// @param [in] position Позиция параметра.
         /// @param [in] idx Индекс параметра.
         void set_param_idx( unsigned int position, int idx );
+
+        /// @brief Задание булевского свойства (настраивается пользователем
+        /// при описании проекта).
+        ///
+        /// @param [in] name Название свойства.
+        /// @param [in] value Значение свойства.
+        void set_bool_property( const char* name, bool value );
     };
 //-----------------------------------------------------------------------------
 ///@brief Получение менеджера устройств.

@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Fri Jun 10 11:11:25 2022.
+** Generated automatically by tolua++-1.0.92 on Mon Jul  4 09:34:01 2022.
 */
 
 #ifndef __cplusplus
@@ -6023,6 +6023,41 @@ static int tolua_PAC_dev_action_set_param_idx00(lua_State* tolua_S)
 #ifndef TOLUA_RELEASE
  tolua_lerror:
  tolua_error(tolua_S,"#ferror in function 'set_param_idx'.",&tolua_err);
+ return 0;
+#endif
+}
+#endif //#ifndef TOLUA_DISABLE
+
+/* method: set_bool_property of class  action */
+#ifndef TOLUA_DISABLE_tolua_PAC_dev_action_set_bool_property00
+static int tolua_PAC_dev_action_set_bool_property00(lua_State* tolua_S)
+{
+#ifndef TOLUA_RELEASE
+ tolua_Error tolua_err;
+ if (
+     !tolua_isusertype(tolua_S,1,"action",0,&tolua_err) ||
+     !tolua_isstring(tolua_S,2,0,&tolua_err) ||
+     !tolua_isboolean(tolua_S,3,0,&tolua_err) ||
+     !tolua_isnoobj(tolua_S,4,&tolua_err)
+ )
+  goto tolua_lerror;
+ else
+#endif
+ {
+  action* self = (action*)  tolua_tousertype(tolua_S,1,0);
+  const char* name = ((const char*)  tolua_tostring(tolua_S,2,0));
+  bool value = ((bool)  tolua_toboolean(tolua_S,3,0));
+#ifndef TOLUA_RELEASE
+  if (!self) tolua_error(tolua_S,"invalid 'self' in function 'set_bool_property'", NULL);
+#endif
+  {
+   self->set_bool_property(name,value);
+  }
+ }
+ return 0;
+#ifndef TOLUA_RELEASE
+ tolua_lerror:
+ tolua_error(tolua_S,"#ferror in function 'set_bool_property'.",&tolua_err);
  return 0;
 #endif
 }
@@ -14758,6 +14793,7 @@ TOLUA_API int tolua_PAC_dev_open (lua_State* tolua_S)
   tolua_beginmodule(tolua_S,"action");
    tolua_function(tolua_S,"add_dev",tolua_PAC_dev_action_add_dev00);
    tolua_function(tolua_S,"set_param_idx",tolua_PAC_dev_action_set_param_idx00);
+   tolua_function(tolua_S,"set_bool_property",tolua_PAC_dev_action_set_bool_property00);
   tolua_endmodule(tolua_S);
   tolua_function(tolua_S,"G_DEVICE_MANAGER",tolua_PAC_dev_G_DEVICE_MANAGER00);
   tolua_function(tolua_S,"G_TECH_OBJECTS",tolua_PAC_dev_G_TECH_OBJECTS00);

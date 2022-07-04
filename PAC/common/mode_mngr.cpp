@@ -1642,14 +1642,23 @@ bool enable_step_by_signal::should_turn_off() const
         return true;
         }
 
-    const int PARAM_IDX = 0;
-    int param_idx = par_idx.size() > PARAM_IDX ? par_idx[ PARAM_IDX ] : 0;
-    if ( param_idx > 0 )
+    return turn_off_flag;
+    };
+//-----------------------------------------------------------------------------
+void enable_step_by_signal::set_bool_property( const char* name, bool value )
+    {
+    if ( strcmp( name, "should_turn_off" ) == 0 )
         {
-        return ( *par )[ param_idx ] != 0;
+        turn_off_flag = value;
         }
-
-    return true;
+    else
+        {
+        if ( G_DEBUG )
+            {
+            G_LOG->warning( "\"%s\" unknown property \"%s\"",
+                this->name.c_str(), name);
+            }
+        }
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
