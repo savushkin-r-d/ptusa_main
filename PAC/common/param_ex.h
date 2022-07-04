@@ -282,7 +282,7 @@ template < class type, bool is_float > class parameters
 
         virtual ~parameters()
             {
-            if ( 1 == is_delete && count > 0 && values > 0 )
+            if ( 1 == is_delete && count && values )
                 {
                 delete [] values;
                 values = 0;

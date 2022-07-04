@@ -136,7 +136,7 @@ elseif(WIN32)
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
 endif()
 
-if(ARP_DEVICE)
+if(ARP_DEVICE OR MINGW)
     list(INSERT CMAKE_MODULE_PATH 0 "${ARP_TOOLCHAIN_CMAKE_MODULE_PATH}")
 
     set_target_properties(main_test PROPERTIES EXCLUDE_FROM_ALL TRUE)
@@ -305,7 +305,7 @@ if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
 endif()
 
 include(GoogleTest)
-gtest_discover_tests(main_test PROPERTIES TIMEOUT 20)
+gtest_discover_tests(main_test DISCOVERY_TIMEOUT 30)
 
 #remove tests from add_subdirectory() added projects
 configure_file(${CMAKE_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_BINARY_DIR} @ONLY)

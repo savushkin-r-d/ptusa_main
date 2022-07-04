@@ -126,7 +126,7 @@ int data_file::file_open( const char* file_name )
 int data_file::file_read( void *buffer, int count )
     {
     int res = 0;
-    if ( f > 0 )
+    if ( f )
         {
         res = read( f, buffer, count );
         }
@@ -189,7 +189,7 @@ char* data_file::pfget_line()
 //-----------------------------------------------------------------------------
 void data_file::file_close()
     {
-    if ( f > 0 )
+    if ( f )
         {
         close( f );
         f = 0;

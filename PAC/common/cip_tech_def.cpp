@@ -1705,7 +1705,7 @@ int cipline_tech_object::SetRet( int val )
 
     int toset = val;
 
-    if (dev_ls_ret_pump > 0)
+    if (dev_ls_ret_pump)
         {
         if (!dev_ls_ret_pump->is_active())
             {
@@ -3221,11 +3221,11 @@ int cipline_tech_object::GetRetState()
         {
         return 0;
         }
-    if (dev_m_ret > 0)
+    if (dev_m_ret)
         {
         return dev_m_ret->get_state();
         }
-    if (dev_upr_ret > 0)
+    if (dev_upr_ret)
         {
         return dev_upr_ret->get_state();
         }

@@ -23,7 +23,7 @@ SRAM::SRAM( const char *file_name,
 
         if ( 0 == file )
             {
-            if ( ( file = fopen( file_name, "r+b" ) ) <= 0 )
+            if ( ( file = fopen( file_name, "r+b" ) ) == NULL )
                 {
                 //Пытаемся создать файл
                 file = fopen( file_name, "w+b" );
@@ -127,7 +127,7 @@ int data_file::file_open( const char* file_name )
 int data_file::file_read( void *buffer, int count )
     {
     int res = 0;
-    if ( f > 0 )
+    if ( f )
         {
         res = fread( buffer, sizeof( char ), count, f );
         }
@@ -190,7 +190,7 @@ char* data_file::pfget_line()
 //-----------------------------------------------------------------------------
 void data_file::file_close()
     {
-    if ( f > 0 )
+    if ( f )
         {
         fclose( f );
         f = 0;
