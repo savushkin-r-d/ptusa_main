@@ -500,8 +500,6 @@ TEST( enable_step_by_signal, should_turn_off )
 	action->add_dev( &test_DI );
 	EXPECT_EQ( true, action->should_turn_off() );	//Default flag value.
 
-	const int SHOULD_SWITCH_OFF_PARAM_IDX = 2;
-	test_tank.par_float[ SHOULD_SWITCH_OFF_PARAM_IDX ] = 0;
 	action->set_bool_property( "should_turn_off", false );
 	EXPECT_EQ( false, action->should_turn_off() );	//Flag was set to false.
 
