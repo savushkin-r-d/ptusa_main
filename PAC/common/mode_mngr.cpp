@@ -1635,6 +1635,35 @@ bool enable_step_by_signal::is_any_group_active() const
     return false;
     };
 //-----------------------------------------------------------------------------
+bool enable_step_by_signal::should_turn_off() const
+    {    
+    if ( is_empty() )
+        {
+        return true;
+        }
+
+    return turn_off_flag;
+    };
+//-----------------------------------------------------------------------------
+int enable_step_by_signal::set_bool_property( const char* name, bool value )
+    {
+    if ( strcmp( name, "should_turn_off" ) == 0 )
+        {
+        turn_off_flag = value;
+        }
+    else
+        {
+        if ( G_DEBUG )
+            {
+            G_LOG->warning( "\"%s\" unknown property \"%s\"",
+                this->name.c_str(), name);
+            }
+        return 1;
+        }
+
+    return 0;
+    };
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 operation_state::operation_state( const char* name,
     operation_manager *owner, int n ) : name( name ),
@@ -1651,6 +1680,7 @@ operation_state::operation_state( const char* name,
     mode_step[ 0 ][ step::A_WASH ]->set_params( owner->get_params() );
     mode_step[ 0 ][ step::A_DELAY_ON ]->set_params( owner->get_params() );
     mode_step[ 0 ][ step::A_DELAY_OFF ]->set_params( owner->get_params() );
+    mode_step[ 0 ][ step::A_ENABLE_STEP_BY_SIGNAL ]->set_params( owner->get_params() );
     }
 //-----------------------------------------------------------------------------
 operation_state::~operation_state()
@@ -1673,6 +1703,7 @@ step* operation_state::add_step( const char* name, int next_step_n,
     ( *new_step )[ step::A_WASH ]->set_params( owner->get_params() );
     ( *new_step )[ step::A_DELAY_ON ]->set_params( owner->get_params() );
     ( *new_step )[ step::A_DELAY_OFF ]->set_params( owner->get_params() );
+    ( *new_step )[ step::A_ENABLE_STEP_BY_SIGNAL ]->set_params( owner->get_params() );
 
     next_step_ns.push_back( next_step_n );
     step_duration_par_ns.push_back( step_duration_par_n );
@@ -1742,7 +1773,8 @@ void operation_state::evaluate()
             auto enable_action = dynamic_cast<enable_step_by_signal*>(
                 ( *steps[ step_n ] )[ step::A_ENABLE_STEP_BY_SIGNAL ] );
             if ( enable_action && !enable_action->is_empty() &&
-                !enable_action->is_any_group_active() )
+                !enable_action->is_any_group_active() &&
+                enable_action->should_turn_off() )
                 {
                 off_extra_step( step_n + 1 );
                 }

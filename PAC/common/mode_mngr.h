@@ -111,6 +111,16 @@ class action
             par_idx[ position ] = idx;
             }
 
+        /// @brief Задание булевского свойства (настраивается пользователем
+        /// при описании проекта).
+        ///
+        /// @param [in] name Название свойства.
+        /// @param [in] value Значение свойства.
+        virtual int set_bool_property( const char* name, bool value )
+            {
+            return 0;
+            }
+
         enum CONSTANTS
             {
             MAIN_GROUP = 0,
@@ -390,7 +400,7 @@ class to_step_if_devices_in_specific_state_action : public action
     };
 //-----------------------------------------------------------------------------
 /// <summary>
-/// Проверка сигналов для дальнешего автоматического включения/выключения
+/// Проверка сигналов для дальнейшего автоматического включения/выключения
 /// шага.
 /// </summary>
 class enable_step_by_signal : public action
@@ -399,6 +409,13 @@ class enable_step_by_signal : public action
         enable_step_by_signal();
 
         bool is_any_group_active() const;
+
+        bool should_turn_off() const;
+
+        int set_bool_property( const char* name, bool value ) override;
+
+    private:
+        bool turn_off_flag = true;
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об устройствах, которые входят в шаг (открываются/

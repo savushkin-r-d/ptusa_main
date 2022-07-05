@@ -460,3 +460,51 @@ TEST( wash_action, final )
 	EXPECT_EQ( 0, test_M1.get_state() );
 	EXPECT_EQ( 0, test_M2.get_state() );
 	}
+
+
+/*
+	TEST METHOD DEFENITION: 
+    should_turn_off()
+*/
+
+TEST( enable_step_by_signal, should_turn_off )
+    {
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+
+	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+	auto operation_mngr = test_tank.get_modes_manager();
+	auto operation = ( *operation_mngr )[ 1 ];
+	auto operation_state = ( *operation )[ 1 ];
+	auto step = ( *operation_state )[ -1 ];
+
+	auto action = reinterpret_cast<enable_step_by_signal*>
+		( ( *step )[ step::ACTIONS::A_ENABLE_STEP_BY_SIGNAL ] );
+
+	EXPECT_EQ( true, action->should_turn_off() );	//Empty device list.
+
+	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	action->add_dev( &test_DI );
+	EXPECT_EQ( true, action->should_turn_off() );	//Default flag value.
+
+	action->set_bool_property( "should_turn_off", false );
+	EXPECT_EQ( false, action->should_turn_off() );	//Flag was set to false.
+
+	action->set_bool_property( "should_turn_off", true );
+	EXPECT_EQ( true, action->should_turn_off() );	//Flag was set to true.
+
+	test_params_manager::removeObject();
+    }
