@@ -3174,12 +3174,20 @@ class wages_RS232 : public analog_io_device, public i_wages
                 
         int get_state() override;
 
+        void evaluate_io() override
+            {
+#ifdef DEBUG_NO_IO_MODULES
+            value = analog_io_device::get_value();
+#else
+            value = get_value_from_wages();
+#endif
+            }
+
 #ifndef DEBUG_NO_IO_MODULES
         void direct_set_value( float new_value ) override;
 #endif // DEBUG_NO_IO_MODULES
 
         void tare() override;
-
 
         void set_command( int new_state );
 
@@ -3195,14 +3203,14 @@ class wages_RS232 : public analog_io_device, public i_wages
             };
 
         enum class STATES
-            {
+        {
             TOGGLE_COMMAND = 2,
-            BUFFER_MOD,
+            BUFFER_MOD = 0,
             READ_CHARACTER = 12288,
-            TOGGLE_READ_CHARACTER = 28672,
             };
 
         int state;
+        float value;
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик веса

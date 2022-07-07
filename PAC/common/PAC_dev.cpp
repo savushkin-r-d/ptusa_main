@@ -4982,81 +4982,76 @@ float wages_RS232::get_value_from_wages()
     //Переключение в режим чтения данных (1). Получение массива данных (2).
     //Обработка данных (3). Если были получены некорректные данные, возвращаем
     // 0 (4).
-    float value = .0f;   
-    set_command( static_cast<int>( STATES::TOGGLE_COMMAND ) );              //1
-    unsigned short int* data = ( unsigned short int* )get_AI_data(          //2
+            //1
+    unsigned short int* data = ( unsigned short int* )get_AI_data(          //Получение массива данных
         static_cast<int>( CONSTANTS::C_AIAO_INDEX ) ); 
 
-    if ( !data ) return 0.f;
+    if (!data)
+        {
+        state = -1;
+        return .0f;
+        }
 
+    if (data[0] == 0) return value;                                         //Если данные пустые, вернуть старое значение                          
+    else if (data[0] == 1)                                                  //Если 1 - буфер не пустой, переключиться в 
+        {                                                                       //режим считывания данных, вернуть старое значение
+        set_command(static_cast<int>(STATES::TOGGLE_COMMAND));
+        return value;
+        }           
+
+    data = (unsigned short int*)get_AI_data(                                //После переключения в режим считывания данных
+        static_cast<int>(CONSTANTS::C_AIAO_INDEX));                         //получаем данные и обрабатываем
+
+    if (!data) return 0.f;
     /* Данные, полученные от весов, представляют собой 2х байтовое число, состоящие из двух ASCII цифр или букв.
     *  Нужные данные о весе находятся в 3-5 словах массива данных: 3 - целая часть, 4-5 - дробная.
     *  Остаток от деления на 256 позволяет отделить младший байт, а сдвиг на 8 байт влево - старший.
     *  В итоге остется число в формате ASCII, где цифры начинаются с позиции 30h (48 в десятичной).
     *  Вычитание 48 (0 в ASCII), дает на выходе требуемую цифру. Далее все чифры образуют число веса.
     */
-    unsigned short int decimals[ 4 ] = {                                    //3
+    unsigned short int decimals[ 4 ] = {                                    //Обработка данных
         static_cast<unsigned short int>( ( data[ 3 ] >> 8 ) - 48 ),
         static_cast<unsigned short int>( data[ 3 ] % 256 - 48 ),
         static_cast<unsigned short int>( data[ 4 ] % 256 - 48 ),
         static_cast<unsigned short int>( ( data[ 5 ] >> 8 ) - 48 ) };
-    for ( int i = 0; i <= 3; i++ )
+
+    set_command(static_cast<int>(STATES::BUFFER_MOD));                      //Переключить в режим чтения состояния буфера
+
+    for (int i = 0; i <= 3; i++)
         {
         if ( decimals[ i ] > 9 || decimals[ i ] < 0 )                       //4
             {
-            state = -1;
-            return 0.f;
-            };
+            state = 0;
+            return value;
+            }
         }
-    value = 10.f * decimals[ 0 ] + decimals[ 1 ] + 0.1f * decimals[ 2 ] +
+
+    value = 10.f * decimals[ 0 ] + decimals[ 1 ] + 0.1f * decimals[ 2 ] +   //Если данные корректные, вернуть вес
         0.01f * decimals[ 3 ];
     state = 1;
-
     return value;
     }
 
 float wages_RS232::get_value()
     {
-    float value = .0f;
-
-#ifdef DEBUG_NO_IO_MODULES
-    value = analog_io_device::get_value();
-#else
-    value = get_value_from_wages();
-#endif
-
     return value + get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );                   
     }
 
 void wages_RS232::set_command( int new_state )
     {
-    //Получение состояния модуля (1). Установить состояние чтения состояния
-    //буфера (2). Установить состояние чтения данных (3). Переключение команды
-    // считывания данных (4).
-    int *state = 
-        (int*)get_AI_data( static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );   //1
-    if ( !state ) return;
-
-    int* out =
-        (int*)get_AO_write_data( static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );
+    int* out = 
+        (int*)get_AO_write_data(static_cast<int>(CONSTANTS::C_AIAO_INDEX));
     if ( !out ) return;
 
-    auto current_state = static_cast<STATES>( *state );
     auto new_st = static_cast<STATES>( new_state );
-    if ( new_st == STATES::BUFFER_MOD )                                     //2                                       
+    if (new_st == STATES::BUFFER_MOD)                                     //2                                       
         {
         *out = 0;
         }
-    else if ( new_st == STATES::TOGGLE_COMMAND )                            //3
+    else if (new_st == STATES::TOGGLE_COMMAND)                            //3
         {
-        if ( current_state == STATES::READ_CHARACTER )                      //4
-            {                                                                  
-            *out = static_cast<int>( STATES::TOGGLE_READ_CHARACTER );
-            }
-        else
-            {
-            *out = static_cast<int>( STATES::READ_CHARACTER );
-            }
+
+        *out = static_cast<u_int>(STATES::READ_CHARACTER);
         }
     }
 
