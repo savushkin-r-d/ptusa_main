@@ -107,18 +107,18 @@
             "ARP_DEVICE_VERSION": "2022.0.4 LTS (22.0.4.96)",
             "ARP_DEVICE_SHORT_VERSION": "2022_0"
           }
+        },        
+        {
+            "name": "build-windows-AXCF2152-2021-LTS-Release",
+            "displayName": "Windows AXCF2152 2021 LTS Release",
+            "description": "Using Windows OS",
+            "inherits": "windows-AXCF-default",
+          "environment": {
+            "ARP_DEVICE": "AXCF2152",
+            "ARP_DEVICE_VERSION": "2021.0.5 LTS (21.0.5.35585)",
+            "ARP_DEVICE_SHORT_VERSION": "2021_0"
+          }
         },
-      {
-        "name": "build-windows-AXCF2152-2022-LTS-Release",
-        "displayName": "Windows AXCF2152 2022 LTS Release",
-        "description": "Using Windows OS",
-        "inherits": "windows-AXCF-default",
-        "environment": {
-          "ARP_DEVICE": "AXCF2152",
-          "ARP_DEVICE_VERSION": "2022.0.4 LTS (22.0.4.144)",
-          "ARP_DEVICE_SHORT_VERSION": "2022_0"
-        }
-      },
         {
             "name": "build-windows-AXCF2152-2022-LTS-Release",
             "displayName": "Windows AXCF2152 2022 LTS Release",
@@ -137,7 +137,7 @@
             "inherits": "windows-AXCF-default",
           "environment": {
             "ARP_DEVICE": "AXCF3152",
-            "ARP_DEVICE_VERSION": "2021.0.2 LTS (21.0.2.35585)",
+            "ARP_DEVICE_VERSION": "2021.0.5 LTS (21.0.5.35585)",
             "ARP_DEVICE_SHORT_VERSION": "2021_0"
           }
         },
@@ -190,9 +190,9 @@
             "configurePreset": "build-windows-AXCF3152-2021-LTS-Release"
         },
         {
-            "name": "build-windows-AXCF2152-2022-LTS-Release",
-            "displayName": "AXCF2152 2022 LTS",
-            "configurePreset": "build-windows-AXCF2152-2022-LTS-Release"
+            "name": "build-windows-AXCF2152-2021-LTS-Release",
+            "displayName": "AXCF2152 2021 LTS",
+            "configurePreset": "build-windows-AXCF2152-2021-LTS-Release"
         },
         {
             "name": "build-windows-AXCF2152-2022-LTS-Release",
