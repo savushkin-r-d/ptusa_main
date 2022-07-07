@@ -307,6 +307,7 @@ int tcp_communicator_linux::evaluate()
         {
         /* service loop */
         count_cycles++;
+        sleep_ms(1);
         max_sock_number = 0;
 
         FD_ZERO( &rfds );
@@ -350,9 +351,8 @@ int tcp_communicator_linux::evaluate()
             continue;
             }
 
-        for ( u_int i = 0; i < sst.size() && rc > 0; i++ )  /* scan all possible sockets */
+        for ( u_int i = 0; i < sst.size(); i++ )  /* scan all possible sockets */
             {
-            rc--;
             // Поступил новый запрос на соединение.
             if ( FD_ISSET ( sst[ i ].socket, &rfds ) )
                 {
@@ -441,11 +441,6 @@ int tcp_communicator_linux::evaluate()
                     {
                     do_echo( i );
                     glob_last_transfer_time = get_millisec();
-
-                    if ( sst[ i ].ismodbus )
-                        {
-                        sleep_ms( 1 );
-                        }
                     }
                 }
             }
