@@ -5003,9 +5003,9 @@ float wages_RS232::get_value_from_wages()
 
     for (int i = 0; i <= 3; i++)
         {
-       if ( decimals[ i ] > 9 || decimals[ i ] < 0 )                        //Проверка корректности обработанных данных
+        if ( decimals[ i ] > 9 || decimals[ i ] < 0 )                       //4
             {
-            state = 0 ;
+            state = 0;
             return value;
             }
         }
