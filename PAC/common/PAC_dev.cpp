@@ -4979,54 +4979,59 @@ wages_RS232::wages_RS232( const char* dev_name ) :
 
 float wages_RS232::get_value_from_wages()
     {
-    //Переключение в режим чтения данных (1). Получение массива данных (2).
-    //Обработка данных (3). Если были получены некорректные данные, возвращаем
-    // 0 (4).
-            //1
-    unsigned short int* data = ( unsigned short int* )get_AI_data(          //Получение массива данных
-        static_cast<int>( CONSTANTS::C_AIAO_INDEX ) ); 
+    //Получение массива данных (1). Если данные пустые, вернуть старое
+    //значение (2). Если 1 - буфер не пустой, переключиться в режим считывания
+    //данных, вернуть старое значение (3). После переключения в режим
+    //считывания данных получаем данные и обрабатываем (4).
+    //Обработка данных (5).
+    //Переключить в режим чтения состояния буфера (6). Если были получены
+    //некорректные данные, возвращаем 0 (4).            
+    unsigned short int* data = ( unsigned short int* )get_AI_data(
+        static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );                     //1
 
-    if (!data)
+    if ( !data )
         {
         state = -1;
         return .0f;
         }
 
-    if (data[0] == 0) return value;                                         //Если данные пустые, вернуть старое значение                          
-    else if (data[0] == 1)                                                  //Если 1 - буфер не пустой, переключиться в 
-        {                                                                       //режим считывания данных, вернуть старое значение
-        set_command(static_cast<int>(STATES::TOGGLE_COMMAND));
+    if ( data[ 0 ] == 0 ) return value;                                    //2
+    else if ( data[ 0 ] == 1 )                                             //3
+        {
+        set_command( static_cast<int>( STATES::TOGGLE_COMMAND ) );
         return value;
-        }           
+        }
 
-    data = (unsigned short int*)get_AI_data(                                //После переключения в режим считывания данных
-        static_cast<int>(CONSTANTS::C_AIAO_INDEX));                         //получаем данные и обрабатываем
+    data = ( unsigned short int* )get_AI_data(                             //4
+        static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );
 
-    if (!data) return 0.f;
-    /* Данные, полученные от весов, представляют собой 2х байтовое число, состоящие из двух ASCII цифр или букв.
-    *  Нужные данные о весе находятся в 3-5 словах массива данных: 3 - целая часть, 4-5 - дробная.
-    *  Остаток от деления на 256 позволяет отделить младший байт, а сдвиг на 8 байт влево - старший.
-    *  В итоге остется число в формате ASCII, где цифры начинаются с позиции 30h (48 в десятичной).
-    *  Вычитание 48 (0 в ASCII), дает на выходе требуемую цифру. Далее все чифры образуют число веса.
-    */
-    unsigned short int decimals[ 4 ] = {                                    //Обработка данных
+    if ( !data ) return 0.f;
+
+    //Данные, полученные от весов, представляют собой 2х байтовое число,
+    //состоящие из двух ASCII цифр или букв. Нужные данные о весе находятся
+    //в 3-5 словах массива данных: 3 - целая часть, 4-5 - дробная.
+    //Остаток от деления на 256 позволяет отделить младший байт, а сдвиг на
+    //8 байт влево - старший. В итоге остется число в формате ASCII, где цифры
+    //начинаются с позиции 30h (48 в десятичной). Вычитание 48 (0 в ASCII),
+    //дает на выходе требуемую цифру. Далее все чифры образуют число веса.
+    unsigned short int decimals[ 4 ] = {                                   //5
         static_cast<unsigned short int>( ( data[ 3 ] >> 8 ) - 48 ),
         static_cast<unsigned short int>( data[ 3 ] % 256 - 48 ),
         static_cast<unsigned short int>( data[ 4 ] % 256 - 48 ),
         static_cast<unsigned short int>( ( data[ 5 ] >> 8 ) - 48 ) };
 
-    set_command(static_cast<int>(STATES::BUFFER_MOD));                      //Переключить в режим чтения состояния буфера
+    set_command( static_cast<int>( STATES::BUFFER_MOD ) );                 //6
 
-    for (int i = 0; i <= 3; i++)
+    for ( int i = 0; i <= 3; i++ )
         {
-        if ( decimals[ i ] > 9 || decimals[ i ] < 0 )                       //4
+        if ( decimals[ i ] > 9 || decimals[ i ] < 0 )                      //7
             {
             state = 0;
             return value;
             }
         }
 
-    value = 10.f * decimals[ 0 ] + decimals[ 1 ] + 0.1f * decimals[ 2 ] +   //Если данные корректные, вернуть вес
+    value = 10.f * decimals[ 0 ] + decimals[ 1 ] + 0.1f * decimals[ 2 ] +
         0.01f * decimals[ 3 ];
     state = 1;
     return value;
@@ -5039,19 +5044,20 @@ float wages_RS232::get_value()
 
 void wages_RS232::set_command( int new_state )
     {
-    int* out = 
-        (int*)get_AO_write_data(static_cast<int>(CONSTANTS::C_AIAO_INDEX));
+    //Установить состояние чтения состояния буфера (1).
+    //Установить состояние чтения данных (2).
+    int* out =
+        (int*)get_AO_write_data( static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );
     if ( !out ) return;
 
     auto new_st = static_cast<STATES>( new_state );
-    if (new_st == STATES::BUFFER_MOD)                                     //2                                       
+    if ( new_st == STATES::BUFFER_MOD )                                    //1                                      
         {
         *out = 0;
         }
-    else if (new_st == STATES::TOGGLE_COMMAND)                            //3
+    else if ( new_st == STATES::TOGGLE_COMMAND )                           //2
         {
-
-        *out = static_cast<u_int>(STATES::READ_CHARACTER);
+        *out = static_cast<u_int>( STATES::READ_CHARACTER );
         }
     }
 
@@ -5061,6 +5067,15 @@ int wages_RS232::get_state()
     //взвешивание успешно завершилось, ошибка взвешивания (отрицательные
     //значения), ожидание взвешивания и т.п.
     return state;
+    }
+
+void wages_RS232::evaluate_io()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    value = analog_io_device::get_value();
+#else
+    value = get_value_from_wages();
+#endif
     }
 
 #ifndef DEBUG_NO_IO_MODULES

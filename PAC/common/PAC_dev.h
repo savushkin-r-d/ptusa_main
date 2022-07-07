@@ -3174,14 +3174,7 @@ class wages_RS232 : public analog_io_device, public i_wages
                 
         int get_state() override;
 
-        void evaluate_io() override
-            {
-#ifdef DEBUG_NO_IO_MODULES
-            value = analog_io_device::get_value();
-#else
-            value = get_value_from_wages();
-#endif
-            }
+        void evaluate_io() override;
 
 #ifndef DEBUG_NO_IO_MODULES
         void direct_set_value( float new_value ) override;
