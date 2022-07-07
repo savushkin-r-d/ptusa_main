@@ -327,10 +327,12 @@ cipline_tech_object::~cipline_tech_object()
     if (acidName)
         {
         delete[] acidName;
+        acidName = 0;
         }
     if (causticName)
         {
         delete[] causticName;
+        causticName = 0;
         }
     if (statsbase)
     {
