@@ -225,7 +225,9 @@ cipline_tech_object::cipline_tech_object(const char* name, u_int number, u_int t
     circ_podp_count = 0;
     circ_podp_max_count = 0;
     circ_water_no_pump_stop = 0;
+    circ_medium_no_pump_stop = 0;
     circ_max_timer = get_millisec();
+    circ_return_timer = get_millisec();
 
     is_in_evaluate_func = 0;
     is_in_error_func = 0;
@@ -325,10 +327,12 @@ cipline_tech_object::~cipline_tech_object()
     if (acidName)
         {
         delete[] acidName;
+        acidName = 0;
         }
     if (causticName)
         {
         delete[] causticName;
+        causticName = 0;
         }
     if (statsbase)
     {
@@ -953,8 +957,8 @@ void cipline_tech_object::initline()
             }
         }
 
-    PIDF = new MSAPID(&rt_par_float, 72, P_ZAD_FLOW, PUMPFREQ, 0, cnt );
-    PIDP = new MSAPID(&rt_par_float, 61, P_ZAD_PODOGR, ao, TP, 0);
+    PIDF = new MSAPID(&rt_par_float, PIDF_Z, P_ZAD_FLOW, PUMPFREQ, nullptr, cnt, P_PIDF_MAX_OUT);
+    PIDP = new MSAPID(&rt_par_float, PIDP_Z, P_ZAD_PODOGR, ao, TP, nullptr, P_PIDP_MAX_OUT);
 
     if ( G_DEBUG )
         {
@@ -3084,6 +3088,7 @@ void cipline_tech_object::_ResetLinesDevicesBeforeReset( void )
     circ_podp_count = 0;
     circ_podp_max_count = 0;
     circ_water_no_pump_stop = 0;
+    circ_medium_no_pump_stop = 0;
     clean_water_rinsing_return = TANK_W;
     if (scenabled && scline == nmr)
         {
@@ -5332,6 +5337,11 @@ int cipline_tech_object::_Circ( int what )
         dont_stop_pump = 1;
         }
 
+    if ((curstep == 28 || curstep == 48) && circ_medium_no_pump_stop)
+        {
+        dont_stop_pump = 1;
+        }
+
     if (LH->is_active() && V10->get_state() && !dont_stop_pump)
         {
         SetRet(OFF);
@@ -5388,6 +5398,35 @@ int cipline_tech_object::_Circ( int what )
                     circ_was_feed = 0;
                     }
                 }
+            if (circ_medium_no_pump_stop)
+                {
+                if (LH->is_active())
+                    {
+                    if (get_delta_millisec(circ_return_timer) > 1000L)
+                        {
+                        V10->off();
+                        V11->off();
+                        V12->off();
+                        V07->off();
+                        V08->on();
+                        V09->off();
+                        circ_return_timer = get_millisec();
+                        }
+                    }
+                else
+                    {
+                    if (!LM->is_active())
+                        {
+                        V10->on();
+                        V11->off();
+                        V12->off();
+                        V07->off();
+                        V08->off();
+                        V09->off();
+                        }
+                    circ_return_timer = get_millisec();
+                    }
+                }
             break;
         case SHCH:
             rt_par_float[ STP_QAVS] = SAV[SAV_CONC]->Q();
@@ -5411,6 +5450,35 @@ int cipline_tech_object::_Circ( int what )
                         rt_par_float[STP_PODP_CAUSTIC] = rt_par_float[STP_PODP_CAUSTIC] + 1;
                         }
                     circ_was_feed = 0;
+                    }
+                }
+            if (circ_medium_no_pump_stop)
+                {
+                if (LH->is_active())
+                    {
+                    if (get_delta_millisec(circ_return_timer) > 1000L)
+                        {
+                        V10->off();
+                        V11->off();
+                        V12->off();
+                        V07->off();
+                        V08->off();
+                        V09->on();
+                        circ_return_timer = get_millisec();
+                        }
+                    }
+                else
+                    {
+                    if (!LM->is_active())
+                        {
+                        V10->on();
+                        V11->off();
+                        V12->off();
+                        V07->off();
+                        V08->off();
+                        V09->off();
+                        }
+                    circ_return_timer = get_millisec();
                     }
                 }
             break;
@@ -5607,6 +5675,7 @@ int cipline_tech_object::init_object_devices()
         circ_podp_max_count = CIRC_DEFAULT_FEED_COUNT;
         }
     circ_water_no_pump_stop = circflag & CIRC_STOP_PUMP_HOTWATER ? 1:0;
+    circ_medium_no_pump_stop = circflag & CIRC_STOP_PUMP_MEDIUM ? 1:0;
 
     if ((circ_tank_s && circ_podp_s) || (circ_tank_k && circ_podp_k))
         {
@@ -5614,9 +5683,9 @@ int cipline_tech_object::init_object_devices()
         }
     if ( G_DEBUG )
         {
-        printf("Circ options:FW=%d,FS=%d,FK=%d,CS=%d,CK=%d,SP=%d,count=%d\n\r",
+        printf("Circ options:FW=%d,FS=%d,FK=%d,CS=%d,CK=%d,SP=%d,SPM=%d,count=%d\n\r",
             circ_podp_water, circ_podp_s, circ_podp_k, circ_tank_s,
-            circ_tank_k, circ_water_no_pump_stop, circ_podp_max_count);
+            circ_tank_k, circ_water_no_pump_stop, circ_medium_no_pump_stop, circ_podp_max_count);
         }
 
     if ( G_DEBUG )
@@ -7420,7 +7489,7 @@ saved_params<float, true>* cipline_tech_object::parpar = 0;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-MSAPID::MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_device* ao /*= 0*/, i_AI_device* ai /*= 0*/,  i_counter* ai2 /*= 0 */ ):
+MSAPID::MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_device* ao /*= 0*/, i_AI_device* ai /*= 0*/,  i_counter* ai2 /*= 0 */, int outmaxrecalcpar /*= 0*/ ):
     uk_1( 0 ),
     ek_1( 0 ),
     ek_2( 0 ),
@@ -7435,7 +7504,8 @@ MSAPID::MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_devic
     is_down_to_inaccel_mode( 0 ),
     par( par ),
     state( STATE_OFF ),
-    start_value( 0 )
+    start_value( 0 ),
+    out_max_recalc_offset(outmaxrecalcpar)
     {
     input = ai;
     input2 = ai2;
@@ -7630,14 +7700,20 @@ float MSAPID::pid_eval( float current_value, int delta_sign /*= 1 */ )
         }
     //-Мягкий пуск.-!>
 
-    par[ 0 ][ pid_par_offset + P_U ] = Uk;
+    float pidRet = Uk;
+    if (par[ 0 ][ out_max_recalc_offset ] >= 0.1)
+        {
+        pidRet = pidRet * par[ 0 ][ out_max_recalc_offset ] / 100;
+        }
+
+    par[ 0 ][ pid_par_offset + P_U ] = pidRet;
 
     if ( 1 == par[ 0 ][ pid_par_offset + P_is_manual_mode ] )
         {
         return par[ 0 ][ pid_par_offset + P_U_manual ];
         }
 
-    return Uk;
+    return pidRet;
     }
 
 void MSAPID::acceleration( float accel_time )

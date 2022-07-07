@@ -114,6 +114,7 @@
 
 #define CIRC_DEFAULT_FEED_COUNT 3
 #define CIRC_STOP_PUMP_HOTWATER 256L
+#define CIRC_STOP_PUMP_MEDIUM   128L
 #define CIRC_TANK_S 64L
 #define CIRC_TANK_K 32L
 #define CIRC_PODP_SCHC 4L
@@ -368,6 +369,8 @@ enum workParameters
     P_SIGNAL_WASH_ABORTED,              //Сигнал "мойка закончена некорректно"
     P_PRESSURE_CONTROL,                 //Задание давления для регулятора
     P_DONT_USE_WATER_TANK,              //Не использовать вторичную воду при мойке
+    P_PIDP_MAX_OUT,                     //Верхняя граница пересчета выхода ПИД-регулятора подогрева
+    P_PIDF_MAX_OUT,                     //Верхняя граница пересчета выхода ПИД-регулятора потока
     P_RESERV_START,                     //начало резервных параметров
 
 
@@ -428,7 +431,8 @@ class MSAPID
         int HI;
         int task_par_offset;
         int pid_par_offset;
-        MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_device* ao = 0, i_AI_device* ai = 0, i_counter* ai2 = 0 );
+        int out_max_recalc_offset;
+        MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_device* ao = 0, i_AI_device* ai = 0, i_counter* ai2 = 0, int outmaxrecalcpar = 0 );
         void eval();
         void eval(float input, float task);
         void reset();
@@ -664,9 +668,11 @@ class cipline_tech_object: public tech_object
         char circ_podp_count; //текущее количество подпиток на операции
         char circ_podp_max_count;	//максимальное количество подпиток на операции
         char circ_water_no_pump_stop; //не останавливать насос при поялении верхнего уровня в бачке
+        char circ_medium_no_pump_stop; //не останавливать насос при поялении верхнего уровня в бачке на щелочи и кислоте
         char circ_was_feed; //флаг факта подпитки
         unsigned long circ_max_timer; //таймер подпитки
         char circ_temp_reached; //флаг достижения заданной температуры на возврате
+        unsigned long circ_return_timer;
 
         //Рецепты
         TRecipeManager* lineRecipes;

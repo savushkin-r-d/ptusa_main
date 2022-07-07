@@ -11,3 +11,12 @@ TEST( cipline_tech_object, _CheckErr )
     cip1.initline();
     EXPECT_EQ( 0, cip1._CheckErr() );
     }
+
+TEST( cipline_tech_object, evaluate )
+    {
+    cipline_tech_object cip1( "CIP1", 1, 1, "CIP1", 1, 1, 200, 200, 200, 200 );
+    lua_manager::get_instance()->set_Lua( lua_open() );
+
+    cip1.initline();
+    EXPECT_EQ( 0, cip1.evaluate() );
+    }
