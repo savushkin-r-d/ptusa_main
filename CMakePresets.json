@@ -98,6 +98,11 @@
             }
         },
         {
+            "name": "windows-Mingw64-default",
+            "generator": "MinGW Makefiles",
+            "binaryDir": "${sourceDir}/bin/build/${presetName}"
+        },        
+        {
             "name": "build-windows-AXCF1152-2022-LTS-Release",
             "displayName": "Windows AXCF1152 2022 LTS Release",
             "description": "Using Windows OS",
