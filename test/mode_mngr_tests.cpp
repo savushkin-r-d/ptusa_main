@@ -230,3 +230,71 @@ TEST( DI_DO_action, check )
 
 	test_params_manager::removeObject();
 	}
+
+TEST(operation, pause)
+{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity(par_mock);
+
+	EXPECT_CALL(*par_mock, init(_));
+	EXPECT_CALL(*par_mock, final_init(_, _, _));
+	EXPECT_CALL(*par_mock, get_params_data(_, _))
+		.Times(AtLeast(2))
+		.WillRepeatedly(Return(res));
+
+	par_mock->init(0);
+	par_mock->final_init(0, 0, 0);
+
+	tech_object test_tank("Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10);
+	auto test_op = test_tank.get_modes_manager()->add_operation("Test operation");
+
+	test_op->print("");
+
+	test_op->add_step("Init", 2, -1);
+	test_op->add_step("Process #1", 3, -1);
+	test_op->add_step("Process #2", 2, -1);
+
+	test_op->add_step("Safe stop #1", 2, -1, operation::PAUSE);
+	test_op->add_step("Safe stop #2", 3, -1, operation::PAUSE);
+	test_op->add_step("Idle", -1, -1, operation::PAUSE);
+
+	test_op->start();
+	EXPECT_EQ(operation::RUN, test_op->get_state());
+	test_op->evaluate();
+	test_op->pause();
+	EXPECT_EQ(operation::PAUSE, test_op->get_state());
+	test_op->evaluate();
+	test_op->start();
+	EXPECT_EQ(operation::RUN, test_op->get_state());
+	test_op->evaluate();
+	test_op->stop();
+
+
+
+	//Корректный переход от выполнения к паузе и опять к выполнению.
+	test_op->start();
+	test_op->evaluate();
+	test_op->to_next_step();
+	test_op->evaluate();
+	test_op->to_next_step();
+	test_op->evaluate();
+	EXPECT_EQ(3, test_op->active_step());
+	EXPECT_EQ(3, test_op->get_run_active_step());
+
+	test_op->pause();
+	EXPECT_EQ(1, test_op->active_step());
+	test_op->to_next_step();
+	EXPECT_EQ(2, test_op->active_step());
+	test_op->evaluate();
+	EXPECT_EQ(2, test_op->active_step());
+
+	test_op->start();
+	EXPECT_EQ(3, test_op->active_step());
+	test_op->evaluate();
+	EXPECT_EQ(3, test_op->active_step());
+
+
+	test_params_manager::removeObject();
+}
+
