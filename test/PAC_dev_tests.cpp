@@ -691,11 +691,28 @@ TEST( wages_RS232, get_value )
     EXPECT_EQ( 10.0f, w1.get_value() );
     }
 
-/*TEST(wages_RS232, set_command)
+TEST( wages_RS232, get_state )
     {
     wages_RS232 w1( "W1" );
     w1.init( 0, 0, 1, 1 );
-    int* out =
-        ( int* )w1.get_AO_write_data( static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );
+    
+    w1.AI_channels.int_read_values[ 0 ] = NULL;
+    w1.get_value_from_wages();
+    EXPECT_EQ( -1, w1.get_state() );
 
-    }*/
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 6 ]{ 2, 0, 0, 12336, 11824, 12395 };
+    w1.get_value_from_wages();
+    EXPECT_EQ( 1, w1.get_state() );
+    }
+
+TEST( wages_RS232, tare ) 
+    {
+    wages_RS232 w1( "W1" );
+    w1.tare();
+    }
+
+TEST( wages_RS232, evaluate_io )
+{
+    wages_RS232 w1( "W1" );
+    w1.evaluate_io();
+}
