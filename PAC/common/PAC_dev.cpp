@@ -4983,10 +4983,8 @@ float wages_RS232::get_value_from_wages()
     //значение (2). Если 1 - буфер не пустой, переключиться в режим считывания
     //данных, вернуть старое значение (3). После переключения в режим
     //считывания данных получаем данные и обрабатываем (4).
-    //Обработка данных (5).
-    //Переключить в режим чтения состояния буфера (6). Если были получены
-    //некорректные данные, возвращаем 0 (4).            
-    unsigned short int* data = ( unsigned short int* )get_AI_data(
+          
+    char* data = ( char* )get_AI_data(
         static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );                     //1
 
     if ( !data )
@@ -5002,38 +5000,13 @@ float wages_RS232::get_value_from_wages()
         return value;
         }
 
-    data = ( unsigned short int* )get_AI_data(                             //4
-        static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );
+    set_command( static_cast<int>( STATES::BUFFER_MOD ) );                 //4
 
-    if ( !data ) return 0.f;
-
-    //Данные, полученные от весов, представляют собой 2х байтовое число,
-    //состоящие из двух ASCII цифр или букв. Нужные данные о весе находятся
-    //в 3-5 словах массива данных: 3 - целая часть, 4-5 - дробная.
-    //Остаток от деления на 256 позволяет отделить младший байт, а сдвиг на
-    //8 байт влево - старший. В итоге остется число в формате ASCII, где цифры
-    //начинаются с позиции 30h (48 в десятичной). Вычитание 48 (0 в ASCII),
-    //дает на выходе требуемую цифру. Далее все чифры образуют число веса.
-    unsigned short int decimals[ 4 ] = {                                   //5
-        static_cast<unsigned short int>( ( data[ 3 ] >> 8 ) - 48 ),
-        static_cast<unsigned short int>( data[ 3 ] % 256 - 48 ),
-        static_cast<unsigned short int>( data[ 4 ] % 256 - 48 ),
-        static_cast<unsigned short int>( ( data[ 5 ] >> 8 ) - 48 ) };
-
-    set_command( static_cast<int>( STATES::BUFFER_MOD ) );                 //6
-
-    for ( int i = 0; i <= 3; i++ )
-        {
-        if ( decimals[ i ] > 9 || decimals[ i ] < 0 )                      //7
-            {
-            state = 0;
-            return value;
-            }
-        }
-
-    value = 10.f * decimals[ 0 ] + decimals[ 1 ] + 0.1f * decimals[ 2 ] +
-        0.01f * decimals[ 3 ];
+    std::swap(data[6], data[7]);
+    std::swap(data[8], data[9]);
+    std::swap(data[10], data[11]);
     state = 1;
+    value = atof(data + 6);
     return value;
     }
 

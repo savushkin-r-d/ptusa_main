@@ -643,22 +643,59 @@ TEST( counter_iolink, get_min_flow )
     EXPECT_EQ( 1.1f, res );
     }
 
-TEST( wages_RS232, get_value)
+TEST( wages_RS232, get_value_from_wages)
     {
     wages_RS232 w1( "W1" );
     w1.init( 0, 0, 1, 1 );
 
     //12336, 11824 и т.д. - десятичное представление строки 00, .0 и тд. В таком формате приходят данные с весов. 
 
-    w1.AI_channels.int_read_values[0] = new int_2[6]{ 2, 0, 0, 12594, 11827, 13419 };
-    EXPECT_EQ((float)12.34, w1.get_value_from_wages());
+    w1.AI_channels.int_read_values[ 0 ] = NULL;
+    EXPECT_EQ( .0f, w1.get_value_from_wages() );
+    EXPECT_EQ( -1, w1.get_state() );
 
-    w1.AI_channels.int_read_values[0] = new int_2[6]{ 22, 0, 0, 12336, 11824, 12395 };
-    EXPECT_EQ(0.0f, w1.get_value_from_wages());
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 6 ]{ 2, 0, 0, 12336, 11824, 12395 };
+    EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
+    EXPECT_EQ( 1, w1.get_state() );
 
-    w1.AI_channels.int_read_values[0] = new int_2[6]{ 2, 0, 0, 27440, 11824, 12395 };
-    EXPECT_EQ(0.0f, w1.get_value_from_wages());
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 6 ]{ 2, 0, 0, 12594, 11827, 13419 };
+    EXPECT_EQ( ( float )12.34, w1.get_value_from_wages() );
+    EXPECT_EQ( 1, w1.get_state() );
 
-    w1.AI_channels.int_read_values[0] = new int_2[6]{ 2, 0, 0, 12395, 11824, 12395 };
-    EXPECT_EQ(0.0f, w1.get_value_from_wages());
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 6 ]{ 2, 0, 0, 27440, 11824, 12395 };
+    EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
+    EXPECT_EQ( 1, w1.get_state() );
+
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 6 ]{ 2, 0, 0, 12395, 11824, 12395 };
+    EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
+    EXPECT_EQ( 1, w1.get_state() );
+
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 6 ]{ 1, 0, 0, 0, 0, 0 };
+    EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
+
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 6 ]{ 0, 0, 0, 0, 0, 0 };
+    EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
     }
+
+TEST( wages_RS232, get_value )
+    {
+    wages_RS232 w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+
+    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 6 ]{ 2, 0, 0, 12336, 11824, 12395 };
+    w1.evaluate_io();
+
+    EXPECT_EQ( 0.0f, w1.get_value() );
+
+    w1.set_par( 1, 0, 10 );
+    EXPECT_EQ( 10.0f, w1.get_value() );
+    }
+
+/*TEST(wages_RS232, set_command)
+    {
+    wages_RS232 w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+    int* out =
+        ( int* )w1.get_AO_write_data( static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );
+
+    }*/
