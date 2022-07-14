@@ -350,9 +350,9 @@ int tcp_communicator_linux::evaluate()
             continue;
             }
 
-        auto sockets_count = sst.size();
-        for ( size_t i = 0; i < sockets_count; i++ )  /* scan all possible sockets */
+        for ( u_int i = 0; i < sst.size() && rc > 0; i++ )  /* scan all possible sockets */
             {
+            rc--;
             // Поступил новый запрос на соединение.
             if ( FD_ISSET ( sst[ i ].socket, &rfds ) )
                 {
