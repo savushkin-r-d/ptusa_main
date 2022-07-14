@@ -250,13 +250,8 @@ target_link_libraries(main_test liblua_static toluapp_lib_static zlibstatic gtes
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE wsock32 ws2_32)
     target_link_libraries(libptusa_main wsock32 ws2_32)
-    target_link_libraries(libptusa_main wsock32 ws2_32)
+    target_link_libraries(main_test wsock32 ws2_32)
 
-    if(DEFINED ENV{LUA_DEV})
-        target_link_libraries(libptusa_main $ENV{LUA_DEV}/lib/lua51.lib)
-    else()
-        target_link_libraries(libptusa_main liblua)
-    endif()
 
 elseif (LINUX)
     target_link_libraries(libptusa_main liblua_static)
