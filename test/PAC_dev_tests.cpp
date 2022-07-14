@@ -649,7 +649,6 @@ TEST( wages_RS232, get_value_from_wages)
     w1.init( 0, 0, 1, 1 );
 
     //12336, 11824 и т.д. - десятичное представление строки 00, .0 и тд. В таком формате приходят данные с весов. 
-
     w1.AI_channels.int_read_values[ 0 ] = NULL;
     EXPECT_EQ( .0f, w1.get_value_from_wages() );
     EXPECT_EQ( -1, w1.get_state() );
