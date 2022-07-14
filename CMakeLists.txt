@@ -252,11 +252,6 @@ if(WIN32)
     target_link_libraries(libptusa_main liblua wsock32 ws2_32)
     target_link_libraries(main_test wsock32 ws2_32)
 
-    if(DEFINED ENV{LUA_DEV})
-        target_link_libraries(libptusa_main $ENV{LUA_DEV}/lib/lua51.lib)
-    else()
-        target_link_libraries(libptusa_main liblua)
-    endif()
 
 elseif (LINUX)
     target_link_libraries(libptusa_main liblua_static)
