@@ -332,7 +332,8 @@ int tcp_communicator_win::evaluate()
             return -1;           
             }
 
-        for ( u_int i = 0; i < sst.size(); i++ )  /* scan all possible sockets */
+        auto sockets_count = sst.size();
+        for ( size_t i = 0; i < sockets_count; i++ )  /* scan all possible sockets */
             {
             // Поступил новый запрос на соединение.
             if ( FD_ISSET ( sst[ i ].socket, &rfds ) )
