@@ -3171,7 +3171,7 @@ class wages_RS232 : public analog_io_device, public i_wages
         wages_RS232( const char* dev_name );
 
         float get_value() override;
-                
+
         int get_state() override;
 
         void evaluate_io() override;
@@ -3188,15 +3188,15 @@ class wages_RS232 : public analog_io_device, public i_wages
 
     private:
         enum class CONSTANTS
-        {
+            {
             C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
-            
+
             P_CZ = 1,           ///< Сдвиг нуля.
             LAST_PARAM_IDX,
             };
 
         enum class STATES
-        {
+            {
             TOGGLE_COMMAND = 2,
             BUFFER_MOD = 0,
             READ_CHARACTER = 12288,

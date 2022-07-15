@@ -4983,8 +4983,8 @@ float wages_RS232::get_value_from_wages()
     //значение (2). Если 1 - буфер не пустой, переключиться в режим считывания
     //данных, вернуть старое значение (3). После переключения в режим
     //считывания данных получаем данные и обрабатываем (4).
-          
-    char* data = ( char* )get_AI_data(
+
+    char* data = (char*)get_AI_data( 
         static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );                     //1
 
     if ( !data )
@@ -5002,17 +5002,17 @@ float wages_RS232::get_value_from_wages()
 
     set_command( static_cast<int>( STATES::BUFFER_MOD ) );                 //4
 
-    std::swap(data[6], data[7]);
-    std::swap(data[8], data[9]);
-    std::swap(data[10], data[11]);
+    std::swap( data[ 6 ], data[ 7 ] );
+    std::swap( data[ 8 ], data[ 9 ] );
+    std::swap( data[ 10 ], data[ 11 ] );
     state = 1;
-    value = atof(data + 6);
+    value = static_cast<float>( atof( data + 6 ) );
     return value;
     }
 
 float wages_RS232::get_value()
     {
-    return value + get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );                   
+    return value + get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );
     }
 
 void wages_RS232::set_command( int new_state )
