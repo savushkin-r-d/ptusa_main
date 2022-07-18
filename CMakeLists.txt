@@ -291,7 +291,7 @@ enable_testing()
 add_test(run_no_command_line_arguments ${PROJECT_NAME})
 
 if(NOT ARP_DEVICE AND NOT MINGW AND NOT SKIP_DEMO)
-    add_test(T1-PLCnext-Demo ${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/lua
+    add_test(T1-PLCnext-Demo ${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/lua
                 -e "package.cpath = package.cpath..';${CMAKE_CURRENT_SOURCE_DIR}/${CMAKE_BUILD_TYPE}/?.dll'"
                 -e "main_script='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/main.plua'"
                 -e "sys_path='${CMAKE_CURRENT_SOURCE_DIR}/demo_projects/T1-PLCnext-Demo/sys/'"
