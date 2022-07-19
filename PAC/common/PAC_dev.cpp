@@ -4989,27 +4989,27 @@ float wages_RS232::get_value_from_wages()
         static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );                     //1
 
     if ( !data )
-    {
+        {
         state = -1;
         value = 0.0f;
         return value;
-    }
+        }
 
     if ( data[ 0 ] == 0 ) return value;                                    //2
     else if ( data[ 0 ] == 1 )                                             //3
-    {
+        {
         set_command( static_cast<int>( STATES::TOGGLE_COMMAND ) );
         return value;
-    }
+        }
 
     set_command( static_cast<int>( STATES::BUFFER_MOD ) );                 //4
 
     if ( data[ 4 ] != 43 )                                                 //5
-    {
+        {
         state = -1;
         value = 0.0f;
         return value;
-    }
+        }
 
     std::swap( data[ 6 ], data[ 7 ] );
     std::swap( data[ 8 ], data[ 9 ] );
