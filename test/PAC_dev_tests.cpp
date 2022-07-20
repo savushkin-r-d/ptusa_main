@@ -733,7 +733,7 @@ TEST( wages_RS232, get_state )
     w1.get_value_from_wages();
     EXPECT_EQ( -1, w1.get_state() );
 
-    char* tmp_str = new char[] { "     +00.00k" };
+    char tmp_str[] = "     +00.00k";
     std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
     std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
