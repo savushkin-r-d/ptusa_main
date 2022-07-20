@@ -23,6 +23,8 @@
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 0;  //Вывод в системный лог (syslog).
 
+int sleep_time_ms = 0;
+
 int lua_init( lua_State* L )
     {
     int top = lua_gettop( L );
@@ -113,27 +115,34 @@ int eval( lua_State* L )
 #endif // TEST_SPEED
 
     lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, 200 );
+    sleep_ms( sleep_time_ms );
 
 #ifndef DEBUG_NO_IO_MODULES
     //G_IO_MANAGER()->read_inputs();
+    sleep_ms( sleep_time_ms );
 #endif // DEBUG_NO_IO_MODULES
 
     valve::evaluate();
     valve_bottom_mix_proof::evaluate();
     int res = G_TECH_OBJECT_MNGR()->evaluate();
+    sleep_ms( sleep_time_ms );
 
 #ifndef DEBUG_NO_IO_MODULES
     //G_IO_MANAGER()->write_outputs();
+    sleep_ms( sleep_time_ms );
 #endif // ifndef
 
 #ifdef OPCUA
     OPCUAServer::getInstance().Evaluate();
 #endif
 
+    sleep_ms( sleep_time_ms );
+
     PAC_info::get_instance()->eval();
     PAC_critical_errors_manager::get_instance()->show_errors();
     G_ERRORS_MANAGER->evaluate();
     G_SIREN_LIGHTS_MANAGER()->eval();
+    sleep_ms( sleep_time_ms );
 
 #ifdef USE_PROFIBUS
     if ( G_PROFIBUS_SLAVE()->is_active() )

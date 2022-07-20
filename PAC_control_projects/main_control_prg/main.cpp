@@ -120,6 +120,13 @@ int main( int argc, const char *argv[] )
         }
 #endif // USE_PROFIBUS
 
+    long int sleep_time_ms = 2;
+    if ( argc >= 3 )
+        {
+        char *stopstring;
+        sleep_time_ms = strtol( argv_utf8[ 2 ], &stopstring, 10 );
+        }
+
 #if defined WIN_OS
     for ( int i = 0; i < argc; i++ )
         {
@@ -146,7 +153,8 @@ int main( int argc, const char *argv[] )
     //Инициализация дополнительных устройств
     IOT_INIT();
 
-    G_LOG->info( "Starting main loop!" );
+    G_LOG->info( "Starting main loop! Sleep time is %li ms.",
+        sleep_time_ms);
 
     while ( running )
         {
@@ -165,9 +173,11 @@ int main( int argc, const char *argv[] )
 #endif // TEST_SPEED
 
         lua_gc( G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, 200 );
+        sleep_ms( sleep_time_ms );
 
 #ifndef DEBUG_NO_IO_MODULES
         G_IO_MANAGER()->read_inputs();
+        sleep_ms( sleep_time_ms );
 #endif // DEBUG_NO_IO_MODULES
 
         G_DEVICE_MANAGER()->evaluate_io();
@@ -176,9 +186,11 @@ int main( int argc, const char *argv[] )
         valve_bottom_mix_proof::evaluate();
 
         G_TECH_OBJECT_MNGR()->evaluate();
+        sleep_ms( sleep_time_ms );
 
 #ifndef DEBUG_NO_IO_MODULES
         G_IO_MANAGER()->write_outputs();
+        sleep_ms( sleep_time_ms );
 #endif // ifndef
 
         G_CMMCTR->evaluate();
@@ -188,10 +200,13 @@ int main( int argc, const char *argv[] )
         //Основной цикл работы с дополнительными устройствами
         IOT_EVALUATE();
 
+        sleep_ms( sleep_time_ms );
+
         PAC_info::get_instance()->eval();
         PAC_critical_errors_manager::get_instance()->show_errors();
         G_ERRORS_MANAGER->evaluate();
         G_SIREN_LIGHTS_MANAGER()->eval();
+        sleep_ms( sleep_time_ms );
 
 #ifdef USE_PROFIBUS
         if ( G_PROFIBUS_SLAVE()->is_active() )

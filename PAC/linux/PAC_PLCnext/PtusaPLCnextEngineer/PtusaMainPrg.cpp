@@ -24,6 +24,8 @@ namespace PtusaPLCnextEngineer
 
     void PtusaMainPrg::Execute()
         {
+        static long int sleep_time_ms = 2;
+
         if (ptusaMainCmpnt.init_flag)
             {
             G_LOG->info( "Program started (version %s).",
@@ -67,7 +69,8 @@ namespace PtusaPLCnextEngineer
                }
 #endif
 
-            sprintf( G_LOG->msg, "Starting main loop!" );
+            sprintf( G_LOG->msg, "Starting main loop! Sleep time is %li ms.",
+                    sleep_time_ms);
             G_LOG->write_log(i_log::P_INFO);
 
             ptusaMainCmpnt.init_flag = false;
@@ -86,9 +89,11 @@ namespace PtusaPLCnextEngineer
 
             const int LUA_GC_SIZE = 200;
             lua_gc(G_LUA_MANAGER->get_Lua(), LUA_GCSTEP, LUA_GC_SIZE );
+            sleep_ms(sleep_time_ms);
 
 #ifndef DEBUG_NO_WAGO_MODULES
             G_IO_MANAGER()->read_inputs();
+            sleep_ms(sleep_time_ms);
 #endif // DEBUG_NO_WAGO_MODULES
 
             G_DEVICE_MANAGER()->evaluate_io();
@@ -97,8 +102,11 @@ namespace PtusaPLCnextEngineer
 
             G_TECH_OBJECT_MNGR()->evaluate();
 
+            sleep_ms(sleep_time_ms);
+
 #ifndef DEBUG_NO_WAGO_MODULES
             G_IO_MANAGER()->write_outputs();
+            sleep_ms(sleep_time_ms);
 #endif // ifndef
 
             G_CMMCTR->evaluate();
@@ -108,10 +116,13 @@ namespace PtusaPLCnextEngineer
             //Основной цикл работы с дополнительными устройствами
             IOT_EVALUATE();
 
+            sleep_ms(sleep_time_ms);
+
             PAC_info::get_instance()->eval();
             PAC_critical_errors_manager::get_instance()->show_errors();
             G_ERRORS_MANAGER->evaluate();
             G_SIREN_LIGHTS_MANAGER()->eval();
+            sleep_ms(sleep_time_ms);
 
 #ifdef TEST_DEVICE_N
             auto dev_idx = TEST_DEVICE_N;
