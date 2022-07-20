@@ -5004,7 +5004,8 @@ float wages_RS232::get_value_from_wages()
 
     set_command( static_cast<int>( STATES::BUFFER_MOD ) );                 //4
 
-    if ( data[ 4 ] != 43 )                                                 //5
+    if ( data[ 4 ] != '+' )                                                //5
+
         {
         state = -1;
         value = 0.0f;
