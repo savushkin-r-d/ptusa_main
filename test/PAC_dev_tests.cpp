@@ -650,20 +650,27 @@ TEST( wages_RS232, get_value_from_wages )
 
     //12336, 11824 и т.д. - десятичное представление строки 00, .0 и тд. В
     //таком формате приходят данные с весов. 
-    w1.AI_channels.int_read_values[ 0 ] = nullptr;
-    EXPECT_EQ( .0f, w1.get_value_from_wages() );
+    //1 - Тест на пустой указатель
+    //2, 3 - Данные корректные
+    //4, 5 - Некорректные данные, возвращает 0
+    //6 - Если в первом байте 1, буффер не пустой. Переключение в режим
+    // чтения данных. Возвращает старое значение (в данном случае 0)
+    //7 - Если в первом байте 0, буффер пустой. Вернуть старое значение (в данном случае 0).
+    w1.AI_channels.int_read_values[ 0 ] = nullptr;                             //1
+    EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
     EXPECT_EQ( -1, w1.get_state() );
 
-    w1.AI_channels.int_read_values[ 0 ] = 
-        new int_2[ 7 ]{ 2, 0, 0, 12336, 11824, 12395, 0 };
+    char tmp_str[] = "     +00.00k";                                       //2
+    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
+    std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
+    std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
+    std::swap( tmp_str[ 10 ], tmp_str[ 11 ] );
+    w1.AI_channels.int_read_values[ 0 ] = reinterpret_cast<int_2*>( tmp_str );
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
     EXPECT_EQ( 1, w1.get_state() );
 
-    w1.AI_channels.int_read_values[ 0 ] = 
-        new int_2[ 7 ]{ 2, 0, 0, 12594, 11827, 13419, 0 };
-    EXPECT_EQ( 12.34f, w1.get_value_from_wages() );
-
-    char tmp_str[] = "      12.34 ";
+    strcpy( tmp_str, "     +12.34k" );                                     //3
+    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
     std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
     std::swap( tmp_str[ 10 ], tmp_str[ 11 ] );
@@ -671,21 +678,29 @@ TEST( wages_RS232, get_value_from_wages )
     EXPECT_EQ( 12.34f, w1.get_value_from_wages() );
     EXPECT_EQ( 1, w1.get_state() );
 
-    w1.AI_channels.int_read_values[ 0 ] = 
-        new int_2[ 7 ]{ 2, 0, 0, 27440, 11824, 12395, 0 };
+    strcpy( tmp_str, "  +12.34k   " );                                     //4
+    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
+    std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
+    std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
+    std::swap( tmp_str[ 10 ], tmp_str[ 11 ] );
+    w1.AI_channels.int_read_values[ 0 ] = reinterpret_cast<int_2*>( tmp_str );
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
-    EXPECT_EQ( 1, w1.get_state() );
+    EXPECT_EQ( -1, w1.get_state() );
 
-    w1.AI_channels.int_read_values[ 0 ] = 
-        new int_2[ 7 ]{ 2, 0, 0, 12395, 11824, 12395, 0 };
+    strcpy( tmp_str, "     -01.34k" );                                     //5
+    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
+    std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
+    std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
+    std::swap( tmp_str[ 10 ], tmp_str[ 11 ] );
+    w1.AI_channels.int_read_values[ 0 ] = reinterpret_cast<int_2*>( tmp_str );
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
-    EXPECT_EQ( 1, w1.get_state() );
+    EXPECT_EQ( -1, w1.get_state() );
 
-    w1.AI_channels.int_read_values[ 0 ] = 
+    w1.AI_channels.int_read_values[ 0 ] =                                      //6
         new int_2[ 7 ]{ 1, 0, 0, 0, 0, 0, 0 };
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
 
-    w1.AI_channels.int_read_values[ 0 ] = 
+    w1.AI_channels.int_read_values[ 0 ] =                                      //7
         new int_2[ 7 ]{ 0, 0, 0, 0, 0, 0, 0 };
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
     }
@@ -695,12 +710,17 @@ TEST( wages_RS232, get_value )
     wages_RS232 w1( "W1" );
     w1.init( 0, 0, 1, 1 );
 
-    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 6 ]{ 2, 0, 0, 12336, 11824, 12395 };
+    char tmp_str[] = "     +00.00k";
+    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
+    std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
+    std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
+    std::swap( tmp_str[ 10 ], tmp_str[ 11 ] );
+    w1.AI_channels.int_read_values[ 0 ] = reinterpret_cast<int_2*>( tmp_str );
     w1.evaluate_io();
 
     EXPECT_EQ( 0.0f, w1.get_value() );
 
-    w1.set_par( 1, 0, 10 );
+    w1.set_par( 1, 0, 10 );                    //Установка параметра P_CZ = 10
     EXPECT_EQ( 10.0f, w1.get_value() );
     }
 
@@ -713,7 +733,12 @@ TEST( wages_RS232, get_state )
     w1.get_value_from_wages();
     EXPECT_EQ( -1, w1.get_state() );
 
-    w1.AI_channels.int_read_values[ 0 ] = new int_2[ 6 ]{ 2, 0, 0, 12336, 11824, 12395 };
+    char tmp_str[] = "     +00.00k";
+    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
+    std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
+    std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
+    std::swap( tmp_str[ 10 ], tmp_str[ 11 ] );
+    w1.AI_channels.int_read_values[ 0 ] = reinterpret_cast<int_2*>( tmp_str );
     w1.get_value_from_wages();
     EXPECT_EQ( 1, w1.get_state() );
     }
