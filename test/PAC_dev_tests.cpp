@@ -660,7 +660,8 @@ TEST( wages_RS232, get_value_from_wages )
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
     EXPECT_EQ( -1, w1.get_state() );
 
-    char tmp_str[] = "     +00.00k";                                       //2
+    char* tmp_str = new char[] { "   +0000.00k" };                             //2
+    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
     std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
     std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
@@ -669,7 +670,8 @@ TEST( wages_RS232, get_value_from_wages )
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
     EXPECT_EQ( 1, w1.get_state() );
 
-    strcpy( tmp_str, "     +12.34k" );                                     //3
+    tmp_str = new char[] { "   +0012.34k" };                                    //3
+    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
     std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
     std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
@@ -678,7 +680,8 @@ TEST( wages_RS232, get_value_from_wages )
     EXPECT_EQ( 12.34f, w1.get_value_from_wages() );
     EXPECT_EQ( 1, w1.get_state() );
 
-    strcpy( tmp_str, "  +12.34k   " );                                     //4
+    tmp_str = new char[] { "  +12.34k   " };
+    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
     std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
     std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
@@ -687,7 +690,8 @@ TEST( wages_RS232, get_value_from_wages )
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
     EXPECT_EQ( -1, w1.get_state() );
 
-    strcpy( tmp_str, "     -01.34k" );                                     //5
+    tmp_str = new char[] { "   -0001.34k" }; 
+    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
     std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
     std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
@@ -710,7 +714,8 @@ TEST( wages_RS232, get_value )
     wages_RS232 w1( "W1" );
     w1.init( 0, 0, 1, 1 );
 
-    char tmp_str[] = "     +00.00k";
+    char* tmp_str = new char[] { "   +0000.00k" };
+    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
     std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
     std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
@@ -733,7 +738,8 @@ TEST( wages_RS232, get_state )
     w1.get_value_from_wages();
     EXPECT_EQ( -1, w1.get_state() );
 
-    char tmp_str[] = "     +00.00k";
+    char* tmp_str = new char[] { "   +0000.00k" };
+    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
     std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
     std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );

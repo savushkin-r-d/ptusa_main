@@ -4984,34 +4984,33 @@ float wages_RS232::get_value_from_wages()
     //данных, вернуть старое значение (3). После переключения в режим
     //считывания данных получаем данные и обрабатываем (4)
     //Если данные корректные, в 4м бите символ "+" (ASCII - 43), иначе ошибка(5).
-
+    
     char* data = ( char* )get_AI_data(
         static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );                     //1
-
+    
     if ( !data )
         {
         state = -1;
         value = 0.0f;
         return value;
         }
-
-    if ( data[ 0 ] == 0 ) return value;                                    //2
-    else if ( data[ 0 ] == 1 )                                             //3
+    
+    if ( data[ 0 ] == 0 && data[ 1 ] == 0 ) return value;                  //2
+    else if ( data[ 0 ] == 1 && data[ 1 ] == 0 )                           //3
         {
         set_command( static_cast<int>( STATES::TOGGLE_COMMAND ) );
         return value;
         }
-
+    
     set_command( static_cast<int>( STATES::BUFFER_MOD ) );                 //4
-
-    if ( data[ 4 ] != '+' )                                                //5
-
+    
+    if ( data[ 2 ] != '+' )                                                 //5
         {
         state = -1;
         value = 0.0f;
         return value;
         }
-
+    
     std::swap( data[ 6 ], data[ 7 ] );
     std::swap( data[ 8 ], data[ 9 ] );
     std::swap( data[ 10 ], data[ 11 ] );
