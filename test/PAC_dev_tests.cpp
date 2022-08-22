@@ -655,12 +655,13 @@ TEST( wages_RS232, get_value_from_wages )
     //4, 5 - Некорректные данные, возвращает 0
     //6 - Если в первом байте 1, буффер не пустой. Переключение в режим
     // чтения данных. Возвращает старое значение (в данном случае 0)
-    //7 - Если в первом байте 0, буффер пустой. Вернуть старое значение (в данном случае 0).
-    w1.AI_channels.int_read_values[ 0 ] = nullptr;                             //1
+    //7 - Если в первом байте 0, буффер пустой. Вернуть старое значение 
+    //(в данном случае 0).
+    w1.AI_channels.int_read_values[ 0 ] = nullptr;                         //1
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
     EXPECT_EQ( -1, w1.get_state() );
 
-    char* tmp_str = new char[] { "   +0000.00k" };                             //2
+    char tmp_str[] = "   +0000.00k";                                       //2
     std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
     std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
@@ -670,7 +671,7 @@ TEST( wages_RS232, get_value_from_wages )
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
     EXPECT_EQ( 1, w1.get_state() );
 
-    tmp_str = new char[] { "   +0012.34k" };                                    //3
+    strcpy( tmp_str, "   +0012.34k" );                                     //3
     std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
     std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
@@ -680,7 +681,7 @@ TEST( wages_RS232, get_value_from_wages )
     EXPECT_EQ( 12.34f, w1.get_value_from_wages() );
     EXPECT_EQ( 1, w1.get_state() );
 
-    tmp_str = new char[] { "  +12.34k   " };
+    strcpy( tmp_str, "  +12.34k   " );                                     //4
     std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
     std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
@@ -690,7 +691,7 @@ TEST( wages_RS232, get_value_from_wages )
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
     EXPECT_EQ( -1, w1.get_state() );
 
-    tmp_str = new char[] { "   -0001.34k" }; 
+    strcpy( tmp_str, "   -0001.34k" );                                     //5
     std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
     std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
@@ -700,11 +701,11 @@ TEST( wages_RS232, get_value_from_wages )
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
     EXPECT_EQ( -1, w1.get_state() );
 
-    w1.AI_channels.int_read_values[ 0 ] =                                      //6
+    w1.AI_channels.int_read_values[ 0 ] =                                  //6
         new int_2[ 7 ]{ 1, 0, 0, 0, 0, 0, 0 };
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
 
-    w1.AI_channels.int_read_values[ 0 ] =                                      //7
+    w1.AI_channels.int_read_values[ 0 ] =                                  //7
         new int_2[ 7 ]{ 0, 0, 0, 0, 0, 0, 0 };
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
     }
@@ -714,7 +715,7 @@ TEST( wages_RS232, get_value )
     wages_RS232 w1( "W1" );
     w1.init( 0, 0, 1, 1 );
 
-    char* tmp_str = new char[] { "   +0000.00k" };
+    char tmp_str[] = "   +0000.00k";
     std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
     std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
@@ -738,7 +739,7 @@ TEST( wages_RS232, get_state )
     w1.get_value_from_wages();
     EXPECT_EQ( -1, w1.get_state() );
 
-    char* tmp_str = new char[] { "   +0000.00k" };
+    char tmp_str[] = "   +0000.00k";
     std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
     std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
