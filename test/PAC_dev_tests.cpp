@@ -193,6 +193,16 @@ TEST( device_manager, add_io_device )
     res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_TS, device::DST_TS_VIRT + 1, name.c_str(), "Test sensor", "CR" );
     EXPECT_EQ( nullptr, res );
+
+    //device::DT_WT, DST_WT_RS232
+    name = std::string( "WT1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_WT, device::DST_WT_RS232, name.c_str(), "Test scales", "W" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto WT1 = WT( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( WT1 ) );
     }
 
 TEST( device_manager, clear_io_devices )
