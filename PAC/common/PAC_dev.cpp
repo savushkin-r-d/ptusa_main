@@ -2066,6 +2066,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_io_device = (wages_RS232*)new_device;
                     break;
 
+                case device::DST_WT_ETH:
+                    new_device = new wages_ETH(dev_name);
+                    new_io_device = (wages_ETH*)new_device;
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -5071,6 +5076,43 @@ void wages_RS232::tare()
     {
     //Этот метод нужен для тарировки весов (когда текущий вес устанавливается 
     //в качестве нулевого).
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+wages_ETH::wages_ETH( const char* dev_name ) :
+    analog_io_device( dev_name, device::DT_WT, device::DST_WT_ETH,
+    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 ), state( 1 )
+    {
+    set_par_name( static_cast<int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
+    } 
+
+float wages_ETH::get_value() 
+    {
+    return value + get_par(static_cast<u_int>(CONSTANTS::P_CZ));
+    }
+
+
+int wages_ETH::get_state()
+    {
+    return state;
+    }
+
+void wages_ETH::evaluate_io()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    value = analog_io_device::get_value();
+#else
+    value = get_value_from_wages();
+#endif
+    }
+
+void wages_ETH::tare()
+    {
+    }
+
+float wages_ETH::get_value_from_wages()
+    {
+    return .0f;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
