@@ -193,6 +193,16 @@ TEST( device_manager, add_io_device )
     res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_TS, device::DST_TS_VIRT + 1, name.c_str(), "Test sensor", "CR" );
     EXPECT_EQ( nullptr, res );
+
+    //device::DT_WT, DST_WT_RS232
+    name = std::string( "WT1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_WT, device::DST_WT_RS232, name.c_str(), "Test scales", "W" );
+    EXPECT_NE( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto WT1 = WT( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( WT1 ) );
     }
 
 TEST( device_manager, clear_io_devices )
@@ -641,4 +651,123 @@ TEST( counter_iolink, get_min_flow )
     fqt1.set_cmd( "P_ERR_MIN_FLOW", 0, 1.1 );
     res = fqt1.get_min_flow();
     EXPECT_EQ( 1.1f, res );
+    }
+
+TEST( wages_RS232, get_value_from_wages )
+    {
+    wages_RS232 w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+
+    //12336, 11824 и т.д. - десятичное представление строки 00, .0 и тд. В
+    //таком формате приходят данные с весов. 
+    //1 - Тест на пустой указатель
+    //2, 3 - Данные корректные
+    //4, 5 - Некорректные данные, возвращает 0
+    //6 - Если в первом байте 1, буффер не пустой. Переключение в режим
+    // чтения данных. Возвращает старое значение (в данном случае 0)
+    //7 - Если в первом байте 0, буффер пустой. Вернуть старое значение 
+    //(в данном случае 0).
+    w1.AI_channels.int_read_values[ 0 ] = nullptr;                         //1
+    EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
+    EXPECT_EQ( -1, w1.get_state() );
+
+    char tmp_str[] = "   +0000.00k";                                       //2
+    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
+    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
+    std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
+    std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
+    std::swap( tmp_str[ 10 ], tmp_str[ 11 ] );
+    w1.AI_channels.int_read_values[ 0 ] = reinterpret_cast<int_2*>( tmp_str );
+    EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
+    EXPECT_EQ( 1, w1.get_state() );
+
+    strcpy( tmp_str, "   +0012.34k" );                                     //3
+    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
+    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
+    std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
+    std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
+    std::swap( tmp_str[ 10 ], tmp_str[ 11 ] );
+    w1.AI_channels.int_read_values[ 0 ] = reinterpret_cast<int_2*>( tmp_str );
+    EXPECT_EQ( 12.34f, w1.get_value_from_wages() );
+    EXPECT_EQ( 1, w1.get_state() );
+
+    strcpy( tmp_str, "  +12.34k   " );                                     //4
+    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
+    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
+    std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
+    std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
+    std::swap( tmp_str[ 10 ], tmp_str[ 11 ] );
+    w1.AI_channels.int_read_values[ 0 ] = reinterpret_cast<int_2*>( tmp_str );
+    EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
+    EXPECT_EQ( -1, w1.get_state() );
+
+    strcpy( tmp_str, "   -0001.34k" );                                     //5
+    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
+    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
+    std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
+    std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
+    std::swap( tmp_str[ 10 ], tmp_str[ 11 ] );
+    w1.AI_channels.int_read_values[ 0 ] = reinterpret_cast<int_2*>( tmp_str );
+    EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
+    EXPECT_EQ( -1, w1.get_state() );
+
+    w1.AI_channels.int_read_values[ 0 ] =                                  //6
+        new int_2[ 7 ]{ 1, 0, 0, 0, 0, 0, 0 };
+    EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
+
+    w1.AI_channels.int_read_values[ 0 ] =                                  //7
+        new int_2[ 7 ]{ 0, 0, 0, 0, 0, 0, 0 };
+    EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
+    }
+
+TEST( wages_RS232, get_value )
+    {
+    wages_RS232 w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+
+    char tmp_str[] = "   +0000.00k";
+    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
+    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
+    std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
+    std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
+    std::swap( tmp_str[ 10 ], tmp_str[ 11 ] );
+    w1.AI_channels.int_read_values[ 0 ] = reinterpret_cast<int_2*>( tmp_str );
+    w1.evaluate_io();
+
+    EXPECT_EQ( 0.0f, w1.get_value() );
+
+    w1.set_par( 1, 0, 10 );                    //Установка параметра P_CZ = 10
+    EXPECT_EQ( 10.0f, w1.get_value() );
+    }
+
+TEST( wages_RS232, get_state )
+    {
+    wages_RS232 w1( "W1" );
+    w1.init( 0, 0, 1, 1 );
+
+    w1.AI_channels.int_read_values[ 0 ] = nullptr;
+    w1.get_value_from_wages();
+    EXPECT_EQ( -1, w1.get_state() );
+
+    char tmp_str[] = "   +0000.00k";
+    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
+    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
+    std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
+    std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
+    std::swap( tmp_str[ 10 ], tmp_str[ 11 ] );
+    w1.AI_channels.int_read_values[ 0 ] = reinterpret_cast<int_2*>( tmp_str );
+    w1.get_value_from_wages();
+    EXPECT_EQ( 1, w1.get_state() );
+    }
+
+TEST( wages_RS232, tare )
+    {
+    wages_RS232 w1( "W1" );
+    w1.tare();
+    }
+
+TEST( wages_RS232, evaluate_io )
+    {
+    wages_RS232 w1( "W1" );
+    w1.evaluate_io();
     }

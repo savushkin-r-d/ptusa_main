@@ -2061,6 +2061,11 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     new_device = new virtual_wages( dev_name );
                     break;
 
+                case device::DST_WT_RS232:
+                    new_device = new wages_RS232( dev_name );
+                    new_io_device = (wages_RS232*)new_device;
+                    break;
+
                 default:
                     if ( G_DEBUG )
                         {
@@ -4923,7 +4928,6 @@ float temperature_e_iolink::get_value()
 #endif
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
 void virtual_wages::direct_off()
     {
     state = 0;
@@ -4963,6 +4967,110 @@ virtual_wages::virtual_wages( const char* dev_name ) :
     device( dev_name, device::DT_WT, device::DST_WT_VIRT, 0 ),
     value( 0 ), state( 0 )
     {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+wages_RS232::wages_RS232( const char* dev_name ) :
+    analog_io_device( dev_name, device::DT_WT, device::DST_WT_RS232,
+    static_cast<int>( CONSTANTS::LAST_PARAM_IDX ) - 1 ), state( 1 )
+    {
+    set_par_name( static_cast<int>( CONSTANTS::P_CZ ), 0, "P_CZ" );
+    }
+
+float wages_RS232::get_value_from_wages()
+    {
+    //Получение массива данных (1). Если данные пустые, вернуть старое
+    //значение (2). Если 1 - буфер не пустой, переключиться в режим считывания
+    //данных, вернуть старое значение (3). После переключения в режим
+    //считывания данных получаем данные и обрабатываем (4)
+    //Если данные корректные, в 4м бите символ "+" (ASCII - 43), иначе -
+    //ошибка (5).
+
+    char* data = (char*)get_AI_data(
+        static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );                     //1
+
+    if ( !data )
+        {
+        state = -1;
+        value = 0.0f;
+        return value;
+        }
+
+    if ( data[ 0 ] == 0 && data[ 1 ] == 0 ) return value;                  //2
+    else if ( data[ 0 ] == 1 && data[ 1 ] == 0 )                           //3
+        {
+        set_command( static_cast<int>( STATES::TOGGLE_COMMAND ) );
+        return value;
+        }
+
+    set_command( static_cast<int>( STATES::BUFFER_MOD ) );                 //4
+
+    if ( data[ 2 ] != '+' )                                                //5
+        {
+        state = -1;
+        value = 0.0f;
+        return value;
+        }
+
+    std::swap( data[ 6 ], data[ 7 ] );
+    std::swap( data[ 8 ], data[ 9 ] );
+    std::swap( data[ 10 ], data[ 11 ] );
+    state = 1;
+    value = static_cast<float>( atof( data + 6 ) );
+    return value;
+    }
+
+float wages_RS232::get_value()
+    {
+    return value + get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );
+    }
+
+void wages_RS232::set_command( int new_state )
+    {
+    //Установить состояние чтения состояния буфера (1).
+    //Установить состояние чтения данных (2).
+    int* out =
+        (int*)get_AO_write_data( static_cast<int>( CONSTANTS::C_AIAO_INDEX ) );
+    if ( !out ) return;
+
+    auto new_st = static_cast<STATES>( new_state );
+    if ( new_st == STATES::BUFFER_MOD )                                    //1                                      
+        {
+        *out = 0;
+        }
+    else if ( new_st == STATES::TOGGLE_COMMAND )                           //2
+        {
+        *out = static_cast<u_int>( STATES::READ_CHARACTER );
+        }
+    }
+
+int wages_RS232::get_state()
+    {
+    //Здесь мы должны получать состояние весов. Например: идёт взвешивание,
+    //взвешивание успешно завершилось, ошибка взвешивания (отрицательные
+    //значения), ожидание взвешивания и т.п.
+    return state;
+    }
+
+void wages_RS232::evaluate_io()
+    {
+#ifdef DEBUG_NO_IO_MODULES
+    value = analog_io_device::get_value();
+#else
+    value = get_value_from_wages();
+#endif
+    }
+
+#ifndef DEBUG_NO_IO_MODULES
+void wages_RS232::direct_set_value( float new_value )
+    {
+    }
+#endif // DEBUG_NO_IO_MODULES
+
+void wages_RS232::tare()
+    {
+    //Этот метод нужен для тарировки весов (когда текущий вес устанавливается 
+    //в качестве нулевого).
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

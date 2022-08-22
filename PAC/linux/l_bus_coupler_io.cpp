@@ -343,6 +343,12 @@ int io_manager_linux::write_outputs()
                                 l += 2;
                                 break;
 
+                            case 2688666:       //AXL F RS UNI XC
+                                writebuff[l] = (u_char)((nd->AO_[idx] >> 8) & 0xFF);
+                                writebuff[l + 1] = (u_char)(nd->AO_[idx] & 0xFF);
+                                l += 2;
+                                break;
+
                             default:
                                 l += 2;
                                 break;
