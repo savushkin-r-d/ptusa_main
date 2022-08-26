@@ -26,7 +26,7 @@ namespace PtusaPLCnextEngineer
         {
         static long int sleep_time_ms = 2;
 
-        if (ptusaMainCmpnt.init_flag)
+        if (ptusaMainCmpnt.init_flag && !ptusaMainCmpnt.error_flag)
             {
             G_LOG->info( "Program started (version %s).",
                 PRODUCT_VERSION_FULL_STR );
@@ -46,6 +46,7 @@ namespace PtusaPLCnextEngineer
                 {
                 sprintf( G_LOG->msg, "Lua init returned error code %d!", res);
                 G_LOG->write_log(i_log::P_ALERT);
+                ptusaMainCmpnt.error_flag = true;
                 return;
                 }
 
@@ -74,6 +75,7 @@ namespace PtusaPLCnextEngineer
             G_LOG->write_log(i_log::P_INFO);
 
             ptusaMainCmpnt.init_flag = false;
+            ptusaMainCmpnt.running = 1;
             }
 
         while (ptusaMainCmpnt.running)

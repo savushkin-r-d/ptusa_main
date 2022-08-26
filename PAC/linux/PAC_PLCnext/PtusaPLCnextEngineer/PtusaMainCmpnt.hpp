@@ -29,7 +29,7 @@ namespace PtusaPLCnextEngineer
         // typedefs
 
     public:
-        void    Start(void)
+        void Start(void)
             {
             sprintf( G_LOG->msg, "Start command" );
             G_LOG->write_log( i_log::P_INFO );
@@ -37,7 +37,7 @@ namespace PtusaPLCnextEngineer
             running = 1;
             };
 
-        void    Stop(void)
+        void Stop(void)
             {
             sprintf( G_LOG->msg, "Stop command" );
             G_LOG->write_log( i_log::P_INFO );
@@ -76,8 +76,9 @@ namespace PtusaPLCnextEngineer
         PtusaMainCmpntProgramProvider programProvider;
 
     public:
-        int running{ 1 };
+        int running{ 0 };
         bool init_flag{ true };
+        bool error_flag{ false };
 
     public:
         /* Ports
