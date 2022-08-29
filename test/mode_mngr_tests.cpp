@@ -548,16 +548,20 @@ TEST( to_step_if_devices_in_specific_state_action, is_goto_next_step )
 	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 	action->add_dev( &test_DI );
-	action->set_int_property( "next_step_n", 0, 2 );
+	const int SET_NEXT_STEP = 2;
+	action->set_int_property( "next_step_n", 0, SET_NEXT_STEP );
+
+	next_step = action->get_int_property( "next_step_n", 0 );
+	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
 	is_goto_next_step = action->is_goto_next_step( next_step );
 	EXPECT_EQ( false, is_goto_next_step );
-	EXPECT_EQ( 2, next_step );
+	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
 	test_DI.on();
 	is_goto_next_step = action->is_goto_next_step( next_step );
 	EXPECT_EQ( true, is_goto_next_step );
-	EXPECT_EQ( 2, next_step );
+	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
 	operation->evaluate();
 

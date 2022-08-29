@@ -125,6 +125,7 @@ class action
         /// при описании проекта).
         ///
         /// @param [in] name Название свойства.
+        /// @idx [in] index Индекс свойства.
         /// @param [in] value Значение свойства.
         virtual int set_int_property( const char* name, size_t idx, int value )
             {
@@ -396,7 +397,7 @@ class to_step_if_devices_in_specific_state_action : public action
 
         bool is_goto_next_step( int &next_step );
 
-        int set_int_property( const char* name, size_t idx, int value );
+        int set_int_property( const char* name, size_t idx, int value ) override;
 
         int get_int_property( const char* name, size_t idx );
 
