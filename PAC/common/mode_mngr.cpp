@@ -521,6 +521,16 @@ void action::add_dev( device *dev, u_int group /*= 0 */, u_int subgroup /*= 0 */
     devices[ group ][ subgroup ].push_back( dev );
     }
 //-----------------------------------------------------------------------------
+int action::set_int_property( const char* name, size_t idx, int value )
+    {
+    if ( G_DEBUG )
+        {
+        G_LOG->info( "\"%s\" set int property \"%s\"[%d] to \"%d\"",
+            this->name.c_str(), name, idx, value );
+        }
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 void action::clear_dev()
     {
     devices.clear();
@@ -1606,6 +1616,7 @@ bool to_step_if_devices_in_specific_state_action::is_goto_next_step( int& next_s
 int to_step_if_devices_in_specific_state_action::set_int_property(
     const char* name, size_t idx, int value )
     {
+    action::set_int_property( name, idx, value );
     if ( strcmp( name, "next_step_n" ) == 0 )
         {
         while ( idx >= next_steps.size() )

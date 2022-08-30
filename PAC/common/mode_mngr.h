@@ -127,10 +127,7 @@ class action
         /// @param [in] name Название свойства.
         /// @idx [in] index Индекс свойства.
         /// @param [in] value Значение свойства.
-        virtual int set_int_property( const char* name, size_t idx, int value )
-            {
-            return 0;
-            }
+        virtual int set_int_property( const char* name, size_t idx, int value );
 
         enum CONSTANTS
             {
