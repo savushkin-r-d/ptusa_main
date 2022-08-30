@@ -525,7 +525,7 @@ int action::set_int_property( const char* name, size_t idx, int value )
     {
     if ( G_DEBUG )
         {
-        G_LOG->info( "\"%s\" set int property \"%s\"[%d] to \"%d\"",
+        G_LOG->info( "\"%s\" set int property \"%s\"[%zu] to \"%d\"",
             this->name.c_str(), name, idx, value );
         }
     return 0;
