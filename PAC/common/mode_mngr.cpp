@@ -1658,6 +1658,22 @@ void to_step_if_devices_in_specific_state_action::final()
     return;
     }
 //-----------------------------------------------------------------------------
+void to_step_if_devices_in_specific_state_action::print(
+    const char* prefix, bool new_line ) const
+    {
+    action::print( prefix, false );
+    printf( " { " );
+    for ( u_int i = 0; i < next_steps.size(); i++ )
+        {
+        printf( "%d ", next_steps[ i ] );
+        }
+    printf( "}" );
+    if ( new_line )
+        {
+        printf( "\n" );
+        }
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 enable_step_by_signal::enable_step_by_signal() :action( "Включить шаг по сигналам" )
     {

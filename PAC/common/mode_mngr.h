@@ -401,6 +401,8 @@ class to_step_if_devices_in_specific_state_action : public action
         /// @brief Завершения действия.
         void final();
 
+        void print( const char* prefix = "", bool new_line = true ) const override;
+
     private:
         enum GROUPS
             {
