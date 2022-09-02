@@ -72,7 +72,7 @@ class action
         virtual void evaluate() {}
 
         /// @brief Завершения действия.
-        virtual void final();
+        virtual void finalize();
 
         /// @brief Добавление устройства к действию.
         ///
@@ -230,7 +230,7 @@ class open_seat_action: public action
 
         void init();
         void evaluate();
-        void final();
+        void finalize();
 
 #ifdef PTUSA_TEST
         void set_wait_time( int wait_time );
@@ -295,7 +295,7 @@ class DI_DO_action: public action
 
         void evaluate();
 
-        void final() override;
+        void finalize() override;
 
     protected:
         virtual void evaluate_DO( std::vector< device* > devices );
@@ -325,7 +325,7 @@ class AI_AO_action : public action
 
         void evaluate();
 
-        void final() override;
+        void finalize() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -340,7 +340,7 @@ class required_DI_action: public action
 
         int check( char* reason ) const;
 
-        void final() override;
+        void finalize() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -351,7 +351,7 @@ class checked_devices_action : public action
     public:
         checked_devices_action();
 
-        void final() override;
+        void finalize() override;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -368,7 +368,7 @@ class wash_action: public action
 
         virtual void print( const char* prefix = "", bool new_line = true ) const;
 
-        void final() override;
+        void finalize() override;
 
     private:
         enum GROUPS
@@ -399,7 +399,7 @@ class to_step_if_devices_in_specific_state_action : public action
         int get_int_property( const char* name, size_t idx );
 
         /// @brief Завершения действия.
-        void final();
+        void finalize();
 
         void print( const char* prefix = "", bool new_line = true ) const override;
 

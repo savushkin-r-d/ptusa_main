@@ -3743,7 +3743,7 @@ public:
     float get_amperage() const override;
 
 #ifdef DEBUG_NO_IO_MODULES
-    int set_cmd( const char* prop, u_int idx, double val );
+    int set_cmd( const char* prop, u_int idx, double val ) override;
 #endif // DEBUG_NO_IO_MODULES
 
 protected:
@@ -3970,8 +3970,6 @@ class base_counter: public i_counter, public device, public io_device
         base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
             int extra_par_cnt );
 
-        virtual ~base_counter();
-
         void evaluate_io();
 
         void print() const override;
@@ -4062,8 +4060,6 @@ class counter : public base_counter
             DEVICE_SUB_TYPE sub_type = device::DST_FQT,
             int extra_par_cnt = ADDITIONAL_PARAMS_COUNT );
 
-        virtual ~counter();
-
         float get_raw_value() const override;
 
         float get_max_raw_value() const override;
@@ -4088,8 +4084,6 @@ class counter_f : public counter
     {
     public:
         counter_f( const char *dev_name );
-
-        virtual ~counter_f();
 
         int get_state();
 
@@ -4142,8 +4136,6 @@ class counter_iolink : public base_counter
     {
     public:
         counter_iolink( const char* dev_name );
-
-        ~counter_iolink();
 
         void evaluate_io();
 

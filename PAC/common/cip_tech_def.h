@@ -432,7 +432,9 @@ class MSAPID
         int task_par_offset;
         int pid_par_offset;
         int out_max_recalc_offset;
-        MSAPID(run_time_params_float* par, int startpar, int taskpar, i_AO_device* ao = 0, i_AI_device* ai = 0, i_counter* ai2 = 0, int outmaxrecalcpar = 0 );
+        MSAPID(run_time_params_float* par, int startpar, int taskpar,
+            i_AO_device* ao = nullptr, i_AI_device* ai = nullptr,
+            i_counter* ai2 = nullptr, int outmaxrecalcpar = 0 );
         void eval();
         void eval(float input, float task);
         void reset();
