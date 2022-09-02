@@ -121,6 +121,14 @@ class action
             return 0;
             }
 
+        /// @brief Задание числового свойства (настраивается пользователем
+        /// при описании проекта).
+        ///
+        /// @param [in] name Название свойства.
+        /// @idx [in] index Индекс свойства.
+        /// @param [in] value Значение свойства.
+        virtual int set_int_property( const char* name, size_t idx, int value );
+
         enum CONSTANTS
             {
             MAIN_GROUP = 0,
@@ -384,10 +392,16 @@ class to_step_if_devices_in_specific_state_action : public action
     public:
         to_step_if_devices_in_specific_state_action();
 
-        bool is_goto_next_step() const;
+        bool is_goto_next_step( int &next_step );
+
+        int set_int_property( const char* name, size_t idx, int value ) override;
+
+        int get_int_property( const char* name, size_t idx );
 
         /// @brief Завершения действия.
         void final();
+
+        void print( const char* prefix = "", bool new_line = true ) const override;
 
     private:
         enum GROUPS
@@ -395,8 +409,11 @@ class to_step_if_devices_in_specific_state_action : public action
             G_ON_DEVICES = 0,   //Устройства, которые должны быть включены.
             G_OFF_DEVICES,      //Устройства, которые должны быть отключены.
 
-            G_SUBGROUPS_CNT,    //Количество групп.
+            G_GROUPS_CNT,       //Количество групп.
             };
+
+        // Устройства.
+        std::vector < int > next_steps;
     };
 //-----------------------------------------------------------------------------
 /// <summary>

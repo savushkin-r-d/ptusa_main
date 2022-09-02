@@ -521,6 +521,16 @@ void action::add_dev( device *dev, u_int group /*= 0 */, u_int subgroup /*= 0 */
     devices[ group ][ subgroup ].push_back( dev );
     }
 //-----------------------------------------------------------------------------
+int action::set_int_property( const char* name, size_t idx, int value )
+    {
+    if ( G_DEBUG )
+        {
+        G_LOG->info( "\"%s\" set int property \"%s\"[%zu] to \"%d\"",
+            this->name.c_str(), name, idx, value );
+        }
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 void action::clear_dev()
     {
     devices.clear();
@@ -1543,21 +1553,24 @@ void wash_action::final()
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 to_step_if_devices_in_specific_state_action::to_step_if_devices_in_specific_state_action() :
-    action( "Перейти в шаг по условию", G_SUBGROUPS_CNT )
+    action( "Перейти в шаг по условию", G_GROUPS_CNT )
     {
     }
 //-----------------------------------------------------------------------------
-bool to_step_if_devices_in_specific_state_action::is_goto_next_step() const
+bool to_step_if_devices_in_specific_state_action::is_goto_next_step( int& next_step )
     {
+    next_step = -1;
     if ( is_empty() )
         {
         return false;
         }
 
-    bool res = true;
-    auto& devs = devices[ MAIN_GROUP ];
-    if ( devs.size() >= G_SUBGROUPS_CNT )
+    bool res = false;
+    for ( size_t idx = 0; idx < devices.size(); idx++ )
         {
+        if ( idx < next_steps.size() ) next_step = next_steps[ idx ];
+        res = true;
+        auto& devs = devices[ idx ];
         auto& on_devices = devs[ G_ON_DEVICES ];
         for ( u_int i = 0; i < on_devices.size(); i++ )
             {
@@ -1593,14 +1606,72 @@ bool to_step_if_devices_in_specific_state_action::is_goto_next_step() const
                 if ( d->is_active() ) res = false;
                 }
             }
+
+        if ( res ) return true;
         }
 
     return res;
     }
 //-----------------------------------------------------------------------------
+int to_step_if_devices_in_specific_state_action::set_int_property(
+    const char* name, size_t idx, int value )
+    {
+    action::set_int_property( name, idx, value );
+    if ( strcmp( name, "next_step_n" ) == 0 )
+        {
+        while ( idx >= next_steps.size() )
+            {
+            next_steps.push_back( -1 );
+            }
+
+        next_steps[ idx ] = value;
+        return 0;
+        }
+    else
+        {
+        if ( G_DEBUG )
+            {
+            G_LOG->warning( "\"%s\" unknown property \"%s\"",
+                this->name.c_str(), name );
+            }
+        }
+
+    return 1;
+    };
+//-----------------------------------------------------------------------------
+int to_step_if_devices_in_specific_state_action::get_int_property(
+    const char* name, size_t idx )
+    {
+    if ( strcmp( name, "next_step_n" ) == 0 )
+        {
+        if ( idx < next_steps.size() )
+            {
+            return next_steps[ idx ];
+            }
+        }
+
+    return -1;
+    }
+//-----------------------------------------------------------------------------
 void to_step_if_devices_in_specific_state_action::final()
     {
     return;
+    }
+//-----------------------------------------------------------------------------
+void to_step_if_devices_in_specific_state_action::print(
+    const char* prefix, bool new_line ) const
+    {
+    action::print( prefix, false );
+    printf( " { " );
+    for ( u_int i = 0; i < next_steps.size(); i++ )
+        {
+        printf( "%d ", next_steps[ i ] );
+        }
+    printf( "}" );
+    if ( new_line )
+        {
+        printf( "\n" );
+        }
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1836,29 +1907,17 @@ void operation_state::evaluate()
     auto active_step = steps[ active_step_n ];
     auto if_action = dynamic_cast<to_step_if_devices_in_specific_state_action*>(
         ( *active_step )[ step::A_TO_STEP_IF ] );
-    if ( if_action && if_action->is_goto_next_step() )
+    int next_step = -1;
+    if ( if_action && if_action->is_goto_next_step( next_step ) )
         {
-        if ( -1 == active_step_next_step_n )
+        if ( next_step >= 0 )
             {
-            if ( n > 0 )
+            if ( G_DEBUG )
                 {
-                int time = (int)owner->get_step_param( par_n );
-                const int MAX_BUFF_SIZE = 200;
-                char buff[ MAX_BUFF_SIZE ] = { 0 };
-                std::snprintf( buff, MAX_BUFF_SIZE,
-                    "завершение по включению/отключению устройств последнего шага (\'%s\')",
-                    steps[ active_step_n ]->get_name() );
-                owner->owner->set_err_msg( buff, n, 0, i_tech_object::ERR_OFF );
-                owner->off_mode( n );
+                printf( "Переход к новому шагу. " );
+                if_action->print();
                 }
-            else
-                {
-                final(); //Для операции-заглушки.
-                }
-            }
-        else
-            {
-            to_step( active_step_next_step_n, 0 );
+            to_step( next_step );
             }
         }
 

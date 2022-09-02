@@ -1063,6 +1063,14 @@ class action
         /// @param [in] name Название свойства.
         /// @param [in] value Значение свойства.
         int set_bool_property( const char* name, bool value );
+
+        /// @brief Задание числового свойства (настраивается пользователем
+        /// при описании проекта).
+        ///
+        /// @param [in] name Название свойства.
+        /// @idx [in] index Индекс свойства.
+        /// @param [in] value Значение свойства.
+        int set_int_property( const char* name, unsigned int idx, int value );
     };
 //-----------------------------------------------------------------------------
 ///@brief Получение менеджера устройств.
