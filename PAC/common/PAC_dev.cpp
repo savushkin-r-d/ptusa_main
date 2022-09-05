@@ -1745,6 +1745,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                 case device::DST_FQT_IOLINK:
                     new_device = new counter_iolink( dev_name );
                     new_io_device = (counter_iolink*)new_device;
+                    break;
                     
                 default:
                     if ( G_DEBUG )
@@ -2217,7 +2218,7 @@ void device_manager::clear_io_devices()
     for ( size_t idx = 0; idx < project_devices.size(); idx++ )
         {
         delete project_devices[ idx ];
-        project_devices[ idx ] = 0;
+        project_devices[ idx ] = nullptr;
         }
 
     for ( size_t idx = 0; idx < device::C_DEVICE_TYPE_CNT; idx++ )
@@ -2544,23 +2545,23 @@ int base_counter::get_state()
             }
 
         auto min_flow = get_min_flow();
-        if ( 0 == is_pump_working ||        // Насос не работает или
-            get_flow() <= min_flow )        //расход ниже минимального.
-            {            
+        if ( 0 == is_pump_working ||        // Насос не работает или 
+            get_flow() <= min_flow )        //расход ниже минимального. 
+            {
             start_pump_working_time = 0;
             }
-        else                            // Насос работает.
-            {            
+        else                            // Насос работает. 
+            {
             if ( state == STATES::S_PAUSE )
                 {
                 start_pump_working_time = get_millisec();
                 }
-            else                        // Работа.
+            else                        // Работа. 
                 {
                 auto dt = get_pump_dt();
                 if ( get_delta_millisec( start_pump_working_time ) > dt )
                     {
-                    // Проверяем счетчик на ошибку - он должен изменить свои показания.
+                    // Проверяем счетчик на ошибку - он должен изменить свои показания. 
                     if ( get_abs_quantity() == counter_prev_value )
                         {
                         state = STATES::S_ERROR;
@@ -2574,7 +2575,7 @@ int base_counter::get_state()
                     }
                 }
             }
-        }// if ( motors.size() > 0
+        }// if ( motors.size() > 0 
 
     return static_cast<int>( state );
     };
@@ -2643,12 +2644,9 @@ void base_counter::calculate_quantity( float& value, float& last_read_value,
         if ( current < last_read_value )
             {
             delta = get_max_raw_value() - last_read_value + current;
-            if ( delta > MAX_OVERFLOW )
+            if ( delta > MAX_OVERFLOW && current < delta )
                 {
-                if ( current < delta )
-                    {
-                    delta = current;
-                    }
+                delta = current;
                 }
             }
         else
@@ -2724,10 +2722,6 @@ void base_counter::restart()
     start();
     }
 //-----------------------------------------------------------------------------
-base_counter::~base_counter()
-    {
-    }
-//-----------------------------------------------------------------------------
 void base_counter::evaluate_io()
     {
     if ( STATES::S_WORK == static_cast<STATES>( get_state() ) )
@@ -2769,10 +2763,6 @@ counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
     {
     }
 //-----------------------------------------------------------------------------
-counter::~counter()
-    {
-    }
-//-----------------------------------------------------------------------------
 float counter::get_raw_value() const
     {
 #ifndef DEBUG_NO_IO_MODULES
@@ -2811,10 +2801,6 @@ counter_f::counter_f( const char *dev_name ) :
     set_par_name( P_CZ, 0, "P_CZ" );
     set_par_name( P_DT, 0, "P_DT" );
     set_par_name( P_ERR_MIN_FLOW, 0, "P_ERR_MIN_FLOW" );    
-    }
-//-----------------------------------------------------------------------------
-counter_f::~counter_f()
-    {
     }
 //-----------------------------------------------------------------------------
 int counter_f::get_state()
@@ -2914,10 +2900,6 @@ counter_iolink::counter_iolink( const char* dev_name ) :base_counter( dev_name,
     set_par_name( static_cast<u_int>( CONSTANTS::P_DT ), 0, "P_DT" );
     set_par_name( static_cast<u_int>( CONSTANTS::P_ERR_MIN_FLOW ), 0,
         "P_ERR_MIN_FLOW" );    
-    };
-//-----------------------------------------------------------------------------
-counter_iolink::~counter_iolink()
-    {
     };
 //-----------------------------------------------------------------------------
 void counter_iolink::evaluate_io()
@@ -7103,7 +7085,7 @@ motor_altivar::motor_altivar( const char* dev_name,
     i_motor( dev_name, sub_type, par_cnt + ADDITIONAL_PARAM_COUNT ),
     io_device( dev_name ),
     start_switch_time( get_millisec() ),
-    atv( NULL )
+    atv( nullptr )
     {
     set_par_name( P_ON_TIME, 0, "P_ON_TIME" );
     }

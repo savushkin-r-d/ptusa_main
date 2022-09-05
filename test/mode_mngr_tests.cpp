@@ -79,7 +79,7 @@ TEST( open_seat_action, evaluate )
 	EXPECT_EQ( false, test_DO1.is_active() );
 	EXPECT_EQ( false, test_DO2.is_active() );
 
-	action->final();
+	action->finalize();
 
 	test_params_manager::removeObject();
 	}
@@ -264,7 +264,7 @@ TEST( DI_DO_action, check )
 	}
 
 
-TEST( checked_devices_action, final )
+TEST( checked_devices_action, finalize )
 	{
 	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO, device::DEVICE_SUB_TYPE::DST_DO_VIRT );
 	auto action = checked_devices_action();
@@ -275,7 +275,7 @@ TEST( checked_devices_action, final )
 	action.evaluate();
 	EXPECT_EQ( 1, test_DO.get_state() );
 	
-	action.final();
+	action.finalize();
 	EXPECT_EQ( 1, test_DO.get_state() );
 	}
 
@@ -319,7 +319,7 @@ TEST( delay_on_action, evaluate )
 	action->evaluate();
 	EXPECT_EQ( 1, test_DO.get_state() );
 
-	action->final();
+	action->finalize();
 	EXPECT_EQ( 0, test_DO.get_state() );
 
 	test_params_manager::removeObject();
@@ -365,13 +365,13 @@ TEST( delay_off_action, evaluate )
 	action->evaluate();
 	EXPECT_EQ( 0, test_DO.get_state() );
 
-	action->final();
+	action->finalize();
 	EXPECT_EQ( 0, test_DO.get_state() );
 
 	test_params_manager::removeObject();
 	}
 
-TEST( required_DI_action, final )
+TEST( required_DI_action, finalize )
 	{
 	DI1 test_DI( "test_DI1", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
@@ -383,11 +383,11 @@ TEST( required_DI_action, final )
 	action.evaluate();
 	EXPECT_EQ( 1, test_DI.get_state() );
 
-	action.final();
+	action.finalize();
 	EXPECT_EQ( 1, test_DI.get_state() );
 	}
 
-TEST( DI_DO_action, final )
+TEST( DI_DO_action, finalize )
 	{
 	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
 		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
@@ -403,12 +403,12 @@ TEST( DI_DO_action, final )
 	EXPECT_EQ( 1, test_DI.get_state() );
 	EXPECT_EQ( 1, test_DO.get_state() );
 
-	action.final();
+	action.finalize();
 	EXPECT_EQ( 1, test_DI.get_state() );
 	EXPECT_EQ( 0, test_DO.get_state() );
 	}
 
-TEST( AI_AO_action, final )
+TEST( AI_AO_action, finalize )
 	{
 	DO1 test_AO( "test_AO1", device::DEVICE_TYPE::DT_AO,
 		device::DEVICE_SUB_TYPE::DST_AO_VIRT );
@@ -425,12 +425,12 @@ TEST( AI_AO_action, final )
 	EXPECT_EQ( VALUE, test_AI.get_value() );
 	EXPECT_EQ( VALUE, test_AO.get_value() );
 
-	action.final();
+	action.finalize();
 	EXPECT_EQ( VALUE, test_AI.get_value() );
 	EXPECT_EQ( 0, test_AO.get_value() );
 	}
 
-TEST( wash_action, final )
+TEST( wash_action, finalize )
 	{
 	DO1 test_DO( "test_DO1", device::DEVICE_TYPE::DT_DO,
 		device::DEVICE_SUB_TYPE::DST_DO_VIRT );
@@ -454,7 +454,7 @@ TEST( wash_action, final )
 	EXPECT_EQ( 1, test_M1.get_state() );
 	EXPECT_EQ( 2, test_M2.get_state() );
 
-	action.final();
+	action.finalize();
 	EXPECT_EQ( 1, test_DI.get_state() );
 	EXPECT_EQ( 0, test_DO.get_state() );
 	EXPECT_EQ( 0, test_M1.get_state() );

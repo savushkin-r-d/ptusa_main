@@ -401,7 +401,7 @@ void action::print( const char* prefix /*= "" */,
         }
     }
 //-----------------------------------------------------------------------------
-void action::final()
+void action::finalize()
     {
     if ( is_empty() )
         {
@@ -710,7 +710,7 @@ int required_DI_action::check( char* reason ) const
     return 0;
     }
 //-----------------------------------------------------------------------------
-void required_DI_action::final()
+void required_DI_action::finalize()
     {
     // При завершении ничего не делаем.
     }
@@ -720,7 +720,7 @@ checked_devices_action::checked_devices_action() : action( "Проверяемы
     {
     }
 //-----------------------------------------------------------------------------
-void checked_devices_action::final() 
+void checked_devices_action::finalize()
     {
     // При завершении ничего не делаем.
     }
@@ -800,7 +800,7 @@ void step::final()
     {
     for ( u_int i = 0; i < actions.size(); i++  )
         {
-        actions[ i ]->final();
+        actions[ i ]->finalize();
         }
     dx_time = 0;
     active = false;
@@ -935,7 +935,7 @@ void DI_DO_action::evaluate()
         }
     }
 //-----------------------------------------------------------------------------
-void DI_DO_action::final()
+void DI_DO_action::finalize()
     {
     if ( is_empty() )
         {
@@ -1057,7 +1057,7 @@ void AI_AO_action::evaluate()
         }
     }
 //-----------------------------------------------------------------------------
-void AI_AO_action::final()
+void AI_AO_action::finalize()
     {
     if ( is_empty() )
         {
@@ -1178,7 +1178,7 @@ void open_seat_action::evaluate()
             }
         else //Время промывки седел вышло.
             {
-            final();
+            finalize();
 
             phase = P_WAITING;
             start_cycle_time = get_millisec();
@@ -1209,7 +1209,7 @@ void open_seat_action::evaluate()
             }
         else //Время промывки седел вышло.
             {
-            final();
+            finalize();
 
             phase = P_WAITING;
             start_cycle_time = get_millisec();
@@ -1227,7 +1227,7 @@ void open_seat_action::evaluate()
         }
     }
 //-----------------------------------------------------------------------------
-void open_seat_action::final()
+void open_seat_action::finalize()
     {
     if ( wash_upper_seat_devices.empty() && wash_lower_seat_devices.empty() ) return;
 
@@ -1525,7 +1525,7 @@ void wash_action::print( const char* prefix /*= "" */,
     printf( "\n" );
     }
 //-----------------------------------------------------------------------------
-void wash_action::final()
+void wash_action::finalize()
     {
     if ( is_empty() )
         {
@@ -1653,7 +1653,7 @@ int to_step_if_devices_in_specific_state_action::get_int_property(
     return -1;
     }
 //-----------------------------------------------------------------------------
-void to_step_if_devices_in_specific_state_action::final()
+void to_step_if_devices_in_specific_state_action::finalize()
     {
     return;
     }
