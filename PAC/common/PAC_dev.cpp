@@ -147,14 +147,14 @@ par_device::~par_device()
         for ( u_int i = 0; i < par->get_count(); i++ )
             {
             delete [] par_name[ i ];
-            par_name[ i ] = 0;
+            par_name[ i ] = nullptr;
             }
 
         delete [] par_name;
-        par_name = 0;
+        par_name = nullptr;
 
         delete par;
-        par = 0;
+        par = nullptr;
         }
     }
 //-----------------------------------------------------------------------------
@@ -424,9 +424,9 @@ const char* device::get_type_name() const
 device::~device()
     {
     delete [] description;
-    description = 0;
+    description = nullptr;
     delete [] article;
-    article = 0;
+    article = nullptr;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -3847,7 +3847,7 @@ int valve_iolink_mix_proof::save_device_ex( char *buff )
 valve_iolink_mix_proof::~valve_iolink_mix_proof()
     {
     delete in_info;
-    in_info = 0;
+    in_info = nullptr;
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
@@ -4257,7 +4257,7 @@ int valve_iolink_shut_off_thinktop::save_device_ex( char* buff )
 valve_iolink_shut_off_thinktop::~valve_iolink_shut_off_thinktop()
     {
     delete in_info;
-    in_info = 0;
+    in_info = nullptr;
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
@@ -4881,7 +4881,7 @@ temperature_e_iolink::temperature_e_iolink( const char *dev_name ):
 temperature_e_iolink::~temperature_e_iolink()
     {
     delete info;
-    info = 0;
+    info = nullptr;
     }
 //-----------------------------------------------------------------------------
 #ifndef DEBUG_NO_IO_MODULES
@@ -6549,7 +6549,7 @@ timer_manager::~timer_manager()
     if ( timers )
         {
         delete [] timers;
-        timers     = 0;
+        timers     = nullptr;
         timers_cnt = 0;
         }
     }

@@ -285,7 +285,7 @@ template < class type, bool is_float > class parameters
             if ( 1 == is_delete && count && values )
                 {
                 delete [] values;
-                values = 0;
+                values = nullptr;
                 count = 0;
                 }
             }

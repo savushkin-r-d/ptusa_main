@@ -63,18 +63,18 @@ tech_object::~tech_object()
     for ( u_int i = 0; i < errors.size(); i++ )
         {
         delete errors[ i ];
-        errors[ i ] = 0;
+        errors[ i ] = nullptr;
         }
 
     delete[] name;
-    name = 0;
+    name = nullptr;
     delete[] name_Lua;
-    name_Lua = 0;
+    name_Lua = nullptr;
     delete[] full_name;
-    full_name = 0;
+    full_name = nullptr;
 
     delete operations_manager;
-    operations_manager = 0;
+    operations_manager = nullptr;
     }
 //-----------------------------------------------------------------------------
 int tech_object::init_params()
@@ -1311,7 +1311,7 @@ int tech_object::set_err_msg( const char *err_msg, int mode, int new_mode,
                 E_MAX_ERRORS_SIZE );
             }
         delete new_err;
-        new_err = 0;
+        new_err = nullptr;
         }
 
     return 0;
@@ -1588,7 +1588,7 @@ int tech_object_manager::init_objects()
 tech_object_manager::~tech_object_manager()
     {
     delete stub;
-    stub = 0;
+    stub = nullptr;
 
 // Удаляются в Lua.
 //    for ( u_int i = 0; i < tech_objects.size(); i++ )

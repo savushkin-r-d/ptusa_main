@@ -1081,7 +1081,7 @@ io_manager::~io_manager()
             }
 
         delete [] nodes;
-        nodes = 0;
+        nodes = nullptr;
         nodes_count = 0;
         }
     }

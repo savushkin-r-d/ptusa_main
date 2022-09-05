@@ -2396,11 +2396,11 @@ operation_manager::~operation_manager()
     for ( size_t i = 0; i < operations.size(); i++ )
         {
         delete operations[ i ];
-        operations[ i ] = 0;
+        operations[ i ] = nullptr;
         }
 
     delete oper_stub;
-    oper_stub = 0;
+    oper_stub = nullptr;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

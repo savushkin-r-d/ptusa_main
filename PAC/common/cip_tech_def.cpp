@@ -317,12 +317,12 @@ cipline_tech_object::~cipline_tech_object()
     if (causticRecipes)
         {
         delete causticRecipes;
-        causticRecipes = 0;
+        causticRecipes = nullptr;
         }
     if (acidRecipes)
         {
         delete acidRecipes;
-        acidRecipes = 0;
+        acidRecipes = nullptr;
         }
     if (acidName)
         {
@@ -338,9 +338,9 @@ cipline_tech_object::~cipline_tech_object()
     {
         statsbase->clear();
         delete statsbase;
-        statsbase = NULL;
+        statsbase = nullptr;
     }
-    objectstats = NULL;
+    objectstats = nullptr;
     delete emptystats;
     delete[] loadedRecName;
     delete[] programList;
