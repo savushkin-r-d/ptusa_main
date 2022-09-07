@@ -14,6 +14,7 @@ endif()
 
 if(LINUX)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 endif()
 
 if(NOT CMAKE_BUILD_TYPE)
