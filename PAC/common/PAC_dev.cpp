@@ -63,34 +63,35 @@ int par_device::save_device ( char *str )
         return 0;
         }
 
-    int res = 0;
+    int size = 0;
     for ( u_int i = 0; i < par->get_count(); i++ )
         {
         if ( par_name[ i ] )
             {
-            res += sprintf( str + res, "%s=", par_name[ i ] );
+            size += fmt::format_to_n( str + size, MAX_COPY_SIZE, "{}=", par_name[ i ] ).size;
 
             float val =  par[ 0 ][ i + 1 ];
             if ( 0. == val )
                 {
-                res += sprintf( str + res, "0, " );
+                size += fmt::format_to_n( str + size, MAX_COPY_SIZE, "0, " ).size;
                 }
             else
                 {
                 double tmp;
                 if ( modf( val, &tmp ) == 0 )
                     {
-                    res += sprintf( str + res, "%d, ", ( int ) val );
+                    size += fmt::format_to_n( str + size, MAX_COPY_SIZE, "{}, ", (int)val ).size;                    
                     }
                 else
                     {
-                    res += sprintf( str + res, "%.2f, ", val );
+                    size += fmt::format_to_n( str + size, MAX_COPY_SIZE, "{:.2}, ", val ).size;                    
                     }
                 }
             }
         }
+    *(str + size) = '\0';
 
-    return res;
+    return size;
     }
 //-----------------------------------------------------------------------------
 int par_device::set_cmd( const char *name, double val )
@@ -292,7 +293,8 @@ int device::save_device( char* buff, const char* prefix )
 
     const int extra_symbols_length = 2;                     //Remove last " ,".
     if ( res > extra_symbols_length ) res -= extra_symbols_length;
-    res += sprintf( buff + res, "},\n" );
+    res += fmt::format_to_n( buff + res, MAX_COPY_SIZE, "}},\n" ).size;
+    *( buff + res ) = '\0';
 
     return res;
     }
