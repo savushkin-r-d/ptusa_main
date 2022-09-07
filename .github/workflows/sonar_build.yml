@@ -13,7 +13,7 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     if: >
-      ${{ (github.repository == 'savushkin-r-d/ptusa_main') && ( (github.event_name == 'push') || (github.event_name == 'schedule') || ((github.event_name == 'pull_request_target') && (contains( github.event.pull_request.labels.*.name, 'safe to test' ))) }}      
+      ${{ (github.repository == 'savushkin-r-d/ptusa_main') && ( (github.event_name == 'push') || (github.event_name == 'schedule') || ((github.event_name == 'pull_request_target') && (contains( github.event.pull_request.labels.*.name, 'safe to test' )))) }}
     env:
       SONAR_SCANNER_VERSION: 4.7.0.2747
       SONAR_SERVER_URL: "https://sonarcloud.io"
