@@ -18,6 +18,10 @@
 #include "l_log.h"
 #endif
 
+#ifdef OPCUA
+#include "OPCUAServer.h"
+#endif
+
 #include "profibus_slave.h"
 
 int G_DEBUG = 0;    //Вывод дополнительной отладочной информации.

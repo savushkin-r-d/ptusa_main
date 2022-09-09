@@ -16,6 +16,10 @@
 #include "error.h"
 #include "tech_def.h"
 
+#ifdef OPCUA
+#include "OPCUAServer.h"
+#endif
+
 int G_DEBUG   = 1; //Вывод дополнительной отладочной информации.
 int G_USE_LOG = 1; //Вывод в системный лог (syslog).
 

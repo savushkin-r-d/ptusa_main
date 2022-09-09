@@ -1,7 +1,9 @@
 #ifndef PAC_COMMON_OPCUA_OPCUASERVER_H_
 #define PAC_COMMON_OPCUA_OPCUASERVER_H_
 
-#include "open62541.h"
+#include <open62541/plugin/log_stdout.h>
+#include <open62541/server.h>
+#include <open62541/server_config_default.h>
 #include "PAC_dev.h"
 #include "tech_def.h"
 
@@ -92,7 +94,6 @@ private:
 
 
     UA_ServerConfig* config;
-    UA_ServerNetworkLayer nl;
     UA_Server *server;
     UA_Node *devicefolder;
 };
