@@ -8,7 +8,7 @@ PID::PID( int n ): PID( ( "PID" + std::to_string( n ) ).c_str() )
     }
 //-----------------------------------------------------------------------------
 PID::PID( const char* name ) :device( name, device::DEVICE_TYPE::DT_REGULATOR,
-    device::DEVICE_SUB_TYPE::DST_NONE, PARAMS_COUNT - 1 ),
+    device::DEVICE_SUB_TYPE::DT_REGULATOR_PID, PARAMS_COUNT - 1 ),
     uk_1( 0 ),
     ek_1( 0 ),
     ek_2( 0 ),

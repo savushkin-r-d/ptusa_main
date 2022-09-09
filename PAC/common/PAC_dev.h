@@ -589,6 +589,10 @@ class device : public i_DO_AO_device, public par_device
             //TS
             DST_TS = 1,
             DST_TS_VIRT,
+
+            //DT_REGULATOR
+            DT_REGULATOR_PID = 1,
+            DT_REGULATOR_THLD,
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -4562,6 +4566,55 @@ class dev_stub : public i_counter, public valve, public i_wages,
         void tare();
 
         void process_DO( u_int n, DO_state state, const char* name ) override;
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+class threshold_regulator :public device, public i_Lua_save_device
+    {
+    public:
+        threshold_regulator( const char* name ) :device( name,
+            device::DEVICE_TYPE::DT_REGULATOR, 
+            device::DEVICE_SUB_TYPE::DT_REGULATOR_THLD, 0 )
+            {
+            };
+
+        int get_state() override
+            {
+            return 0;
+            };
+
+        void direct_off() override
+            {
+            };
+
+        void direct_set_state( int new_state ) override
+            {
+            };
+
+        void direct_on() override
+            {
+            };
+
+        int save_device( char* buff ) override
+            {
+            return 0;
+            };
+
+        const char* get_name_in_Lua() const override
+            {
+            return "";
+            };
+
+        float get_value() override
+            {
+            return .0f;
+            };
+
+        void direct_set_value( float new_value ) override
+            {
+            };
+
+    private:
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

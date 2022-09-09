@@ -2099,8 +2099,25 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_REGULATOR:
-            new_device = new PID( dev_name );
-            new_io_device = 0;
+            switch ( dev_sub_type )
+                {
+                case device::DT_REGULATOR_PID:
+                    new_device = new PID( dev_name );
+                    new_io_device = 0;
+                    break;
+
+                case device::DT_REGULATOR_THLD:
+                    new_device = new threshold_regulator( dev_name );
+                    new_io_device = 0;
+                    break;
+
+                default:
+                    if ( G_DEBUG )
+                        {
+                        printf( "Unknown DT_REGULATOR device subtype %d!\n", dev_sub_type );
+                        }
+                    break;
+                }
             break;
 
         case device::DT_HLA:
