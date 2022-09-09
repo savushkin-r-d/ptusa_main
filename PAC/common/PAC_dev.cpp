@@ -228,7 +228,7 @@ void device::set_article( const char* new_article )
     {
     delete[] article;
 
-    //Копирование с учетом нуль-символа.
+    //Копирование  с учетом нуль-символа.
     int len = strlen( new_article ) + 1;
     article = new char[ len ];
     strcpy( article, new_article );
