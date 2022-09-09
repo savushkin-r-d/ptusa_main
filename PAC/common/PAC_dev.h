@@ -4572,7 +4572,7 @@ class dev_stub : public i_counter, public valve, public i_wages,
 class threshold_regulator :public device, public i_Lua_save_device
     {
     public:
-        threshold_regulator( const char* name ) :device( name,
+        explicit threshold_regulator( const char* name ) :device( name,
             device::DEVICE_TYPE::DT_REGULATOR, 
             device::DEVICE_SUB_TYPE::DT_REGULATOR_THLD, 0 )
             {
@@ -4585,14 +4585,17 @@ class threshold_regulator :public device, public i_Lua_save_device
 
         void direct_off() override
             {
+            //To implement.
             };
 
         void direct_set_state( int new_state ) override
             {
+            //To implement.
             };
 
         void direct_on() override
             {
+            //To implement.
             };
 
         int save_device( char* buff ) override
@@ -4612,9 +4615,8 @@ class threshold_regulator :public device, public i_Lua_save_device
 
         void direct_set_value( float new_value ) override
             {
+            //To implement.
             };
-
-    private:
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

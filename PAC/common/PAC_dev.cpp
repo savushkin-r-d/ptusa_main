@@ -2108,7 +2108,7 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
 
                 case device::DT_REGULATOR_THLD:
                     new_device = new threshold_regulator( dev_name );
-                    new_io_device = 0;
+                    new_io_device = nullptr;
                     break;
 
                 default:
