@@ -1449,8 +1449,8 @@ i_DI_device* device_manager::get_TS( const char* dev_name )
 io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                         const char* dev_name, const char * descr, const char* article )
     {
-    device* new_device = 0;
-    io_device* new_io_device = 0;
+    device* new_device = nullptr;
+    io_device* new_io_device = nullptr;
 
     switch ( dev_type )
         {
