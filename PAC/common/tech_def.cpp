@@ -168,7 +168,9 @@ int tech_object::set_mode( u_int operation_n, int newm )
                         // Check if possible.
                         if ( ( res = lua_check_on_start( operation_n ) ) == 0 )
                             {
-                            op->start();
+                            auto run_step = 
+                                lua_get_run_step_after_pause( operation_n );
+                            op->start( run_step );
                             lua_on_start( operation_n );
                             }
                         else
@@ -404,6 +406,25 @@ int tech_object::lua_check_function( const char* function_name,
         {
         return lua_manager::get_instance()->int_2_exec_lua_method( name_Lua,
             function_name, mode, show_error ? 1 : 0, comment );
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
+int tech_object::lua_get_run_step_after_pause( u_int mode )
+    {
+    auto function_name = "calculate_run_step_after_pause";
+    //Проверка на наличии функции "function_name".
+    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
+        name_Lua );
+    lua_getfield( lua_manager::get_instance()->get_Lua(), -1, function_name );
+    lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
+
+    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+        {
+        return lua_manager::get_instance()->int_exec_lua_method( name_Lua,
+            function_name, mode,
+            "int tech_object::lua_get_run_step_after_pause( u_int mode )" );
         }
 
     return 0;
