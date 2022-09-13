@@ -26,21 +26,37 @@ TEST( lua_get_run_step_after_pause, tech_object )
 		luaL_dostring( L, "o1=tech_object( \'O1\', 1, 1, \'o1\', 1, 1, 10, 10, 10, 10 )" ) );
 	ASSERT_EQ( 0,
 		luaL_dostring( L, "o1:get_modes_manager():add_operation(\'Test operation\')" ) );
-	lua_getfield( L, LUA_GLOBALSINDEX, "o1" );
-	auto tank = (tech_object*)tolua_tousertype( L, -1, 0 );
-	ASSERT_NE( nullptr, tank );
+
+    lua_getfield( L, LUA_GLOBALSINDEX, "o1" );
+    auto tank = (tech_object*)tolua_tousertype( L, -1, 0 );
+    ASSERT_NE( nullptr, tank );
+	const unsigned int OPER_N1 = 1;
+	const unsigned int OPER_N2 = 2;
+	const unsigned int STEP_N1 = 1;
+	const unsigned int STEP_N2 = 2;
 	//Метода нет, должен быть возвращён 0.
-	ASSERT_EQ( 0, tank->lua_get_run_step_after_pause( 1 ) );
+	ASSERT_EQ( 0, tank->lua_get_run_step_after_pause( OPER_N1 ) );
 
 	ASSERT_EQ( 0,
 		luaL_dostring( L,
 		"function o1:get_run_step_after_pause( m )\n"
-		"    if m == 1 then return 1\n"
-		"    else return 2 end\n"
+		"    if m == 1 then return 2\n"
+		"    else return 1 end\n"
 		"end" ) );
 	//Метод есть, должны быть возвращены определённые числа.
-	ASSERT_EQ( 1, tank->lua_get_run_step_after_pause( 1 ) );
-	ASSERT_EQ( 2, tank->lua_get_run_step_after_pause( 2 ) );
+	ASSERT_EQ( STEP_N2, tank->lua_get_run_step_after_pause( OPER_N1 ) );
+	ASSERT_EQ( STEP_N1, tank->lua_get_run_step_after_pause( OPER_N2 ) );
+	
+    ( *tank->get_modes_manager() )[ OPER_N1 ]->add_step( "Test step #1", -1, -1 );
+	( *tank->get_modes_manager() )[ OPER_N1 ]->add_step( "Test step #2", -1, -1 );
+
+	tank->set_mode( OPER_N1, operation::RUN );
+	//После старта операции должен быть активным шаг 1.
+	ASSERT_EQ( STEP_N1, ( *tank->get_modes_manager() )[ OPER_N1 ]->active_step() );
+	tank->set_mode( OPER_N1, operation::PAUSE );
+	tank->set_mode( OPER_N1, operation::RUN );
+	//При возобновления операции из паузы должен быть активным шаг 2.
+	ASSERT_EQ( STEP_N2, ( *tank->get_modes_manager() )[ OPER_N1 ]->active_step() );
 
 	G_LUA_MANAGER->free_Lua();
 	test_params_manager::removeObject();
