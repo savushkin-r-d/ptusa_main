@@ -379,11 +379,9 @@ bool lua_manager::is_exist_lua_function( const char* object_name,
     {
     auto res = false;
     lua_getfield( L, LUA_GLOBALSINDEX, object_name );
-    int type = lua_type( L, -1 );
     if ( !lua_isnil( L, -1 ) )
         {
         lua_getfield( L, -1, function_name );
-        int type = lua_type( L, -1 ); 
         res = lua_isfunction( L, -1 );
         lua_pop( L, 1 );
         }
