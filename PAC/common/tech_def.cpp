@@ -411,18 +411,12 @@ int tech_object::lua_check_function( const char* function_name,
     return 0;
     }
 //-----------------------------------------------------------------------------
-int tech_object::lua_get_run_step_after_pause( u_int mode )
+int tech_object::lua_get_run_step_after_pause( u_int mode ) const
     {
-    auto function_name = "calculate_run_step_after_pause";
-    //Проверка на наличии функции "function_name".
-    lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
-        name_Lua );
-    lua_getfield( lua_manager::get_instance()->get_Lua(), -1, function_name );
-    lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
-
-    if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
+    auto function_name = "get_run_step_after_pause";
+    if ( G_LUA_MANAGER->is_exist_lua_function( name_Lua, function_name ) )
         {
-        return lua_manager::get_instance()->int_exec_lua_method( name_Lua,
+        return G_LUA_MANAGER->int_exec_lua_method( name_Lua,
             function_name, mode,
             "int tech_object::lua_get_run_step_after_pause( u_int mode )" );
         }

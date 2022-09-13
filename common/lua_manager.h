@@ -59,6 +59,9 @@ class lua_manager
 
         ~lua_manager();
 
+        bool is_exist_lua_function( const char* object_name,
+            const char* function_name ) const;
+
         int void_exec_lua_method( const char *object_name,
             const char *function_name, const char *c_function_name ) const;
 
@@ -95,6 +98,15 @@ class lua_manager
         void set_Lua( lua_State* l)
             {
             L = l;
+            }
+
+        void free_Lua()
+            {
+            if ( L )
+                {
+                lua_close( L );
+                L = nullptr;
+                };
             }
 #endif
 
