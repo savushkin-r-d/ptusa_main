@@ -1,4 +1,4 @@
-//#pragma once
+#pragma once
 
 #include "iot_base.h"
 #include <tcp_client.h>
