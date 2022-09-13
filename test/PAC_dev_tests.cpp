@@ -709,13 +709,11 @@ TEST( counter_iolink, get_min_flow )
     EXPECT_EQ( 1.1f, res );
     }
 
-TEST( wages_RS232, get_value_from_wages )
+TEST( wages_RS232, get_value_from_wages )            // объявление теста и метода, который тестится
     {
-    wages_RS232 w1( "W1" );
-    w1.init( 0, 0, 1, 1 );
+    wages_RS232 w1( "W1" );                          // создаем объект весов 
+    w1.init( 0, 0, 1, 1 );                           // иниицализируем каналы (у весов это аналоговый вход и аналоговый выход (3й и 4й параметр))
 
-    //12336, 11824 и т.д. - десятичное представление строки 00, .0 и тд. В
-    //таком формате приходят данные с весов. 
     //1 - Тест на пустой указатель
     //2, 3 - Данные корректные
     //4, 5 - Некорректные данные, возвращает 0
@@ -737,9 +735,9 @@ TEST( wages_RS232, get_value_from_wages )
     EXPECT_EQ( 0.0f, w1.get_value_from_wages() );
     EXPECT_EQ( 1, w1.get_state() );
 
-    strcpy( tmp_str, "   +0012.34k" );                                     //3
-    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
-    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
+    strcpy( tmp_str, "   +0012.34k" );                                     //3   
+    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );                                       
+    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );                                        
     std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
     std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
     std::swap( tmp_str[ 10 ], tmp_str[ 11 ] );
@@ -826,6 +824,10 @@ TEST( wages_RS232, evaluate_io )
     {
     wages_RS232 w1( "W1" );
     w1.evaluate_io();
+    }
+
+TEST( wages_eth, evaluate_io )
+    {
     }
 
 TEST( threshold_regulator, set_value )

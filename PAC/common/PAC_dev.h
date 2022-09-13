@@ -40,6 +40,7 @@
 #include "PAC_info.h"
 
 #include "iot_altivar.h"
+#include "iot_wages_eth.h"
 #include "log.h"
 
 #ifdef WIN_OS
@@ -577,6 +578,7 @@ class device : public i_DO_AO_device, public par_device
             DST_WT = 1,  ///< Весы.
             DST_WT_VIRT, ///< Виртуальные весы.
             DST_WT_RS232,///< Весы c RS232 интерфейсом.
+            DST_WT_ETH,  ///< Весы c интерфейсом ethernet.
 
             //CAM
             DST_CAM_DO1_DI2 = 1,///< C сигналом активации, результатом обработки и готовностью.
@@ -3212,6 +3214,42 @@ class wages_RS232 : public analog_io_device, public i_wages
 
         int state;
         float value;
+    };
+//-----------------------------------------------------------------------------
+class wages_eth : public analog_io_device, public i_wages
+    {
+    public:
+        wages_eth(const char* dev_name);
+
+        float get_value() override;
+
+        int get_state() override;
+
+        void evaluate_io() override;
+
+#ifndef DEBUG_NO_IO_MODULES
+        void direct_set_value(float new_value) override;
+        int state = 0;
+        float value = 0.f;
+#endif // DEBUG_NO_IO_MODULES
+
+        void tare() override;
+
+        float get_value_from_wages();
+
+        void set_wages(unsigned int id, const char* ip, unsigned int port);
+
+    protected:
+        iot_wages_eth* weth;
+
+    private:
+        enum class CONSTANTS
+        {
+            C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
+
+            P_CZ = 1,           ///< Сдвиг нуля.
+            LAST_PARAM_IDX,
+        };
     };
 //-----------------------------------------------------------------------------
 /// @brief Датчик веса

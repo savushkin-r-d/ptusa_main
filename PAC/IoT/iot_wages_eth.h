@@ -3,11 +3,11 @@
 #include "iot_base.h"
 #include <tcp_client.h>
 
-class wages_eth : public i_iot_node
+class iot_wages_eth : public i_iot_node
 	{
 	public:
-		wages_eth(unsigned int id, const char* ip, unsigned int port);
-		~wages_eth();
+		iot_wages_eth(unsigned int id, const char* ip, unsigned int port);
+		~iot_wages_eth();
 
 		void evaluate();
 

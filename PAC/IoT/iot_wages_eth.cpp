@@ -1,16 +1,19 @@
 #include <iot_wages_eth.h>
 
-wages_eth::wages_eth(unsigned int id, const char* ip, unsigned int port)
+iot_wages_eth::iot_wages_eth(unsigned int id, const char* ip, unsigned int port)
 	{
-	tcp_client* tc = tcp_client::Create((char*)ip, port, id, 0);
+	tc = tcp_client::Create((char*)ip, port, id, 0);
+	status = 0;
+	state = 0;
+	value = .0f;
 	}
 
-wages_eth::~wages_eth()
+iot_wages_eth::~iot_wages_eth()
 	{
 	delete tc;
 	}
 
-void wages_eth::evaluate()
+void iot_wages_eth::evaluate()
 	{
 	status = tc->Communicate(0);
 
@@ -33,16 +36,17 @@ void wages_eth::evaluate()
 	value = static_cast<float>(atof(tc->buff + 6));
 	}
 
-int wages_eth::get_state()
+int iot_wages_eth::get_state()
 	{
 	return state;
 	}
 
-float wages_eth::get_value()
+float iot_wages_eth::get_value()
 	{
 	return value;
 	}
 
-void wages_eth::tare()
+void iot_wages_eth::tare()
 	{	
 	}
+
