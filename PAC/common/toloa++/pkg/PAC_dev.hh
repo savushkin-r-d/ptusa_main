@@ -1027,6 +1027,7 @@ class step
 
             A_REQUIRED_FB,
             A_DI_DO,
+            A_INVERTED_DI_DO,
             A_AI_AO,
             A_WASH,
 
