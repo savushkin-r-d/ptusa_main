@@ -1,7 +1,7 @@
 #pragma once
 
 #include "iot_base.h"
-#include <tcp_client.h>
+class tcp_client;
 
 class iot_wages_eth : public i_iot_node
 	{

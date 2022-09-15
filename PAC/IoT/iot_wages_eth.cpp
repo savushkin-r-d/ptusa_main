@@ -1,4 +1,5 @@
-#include <iot_wages_eth.h>
+#include "iot_wages_eth.h"
+#include "tcp_client.h"
 
 iot_wages_eth::iot_wages_eth(unsigned int id, const char* ip, unsigned int port)
 	{
