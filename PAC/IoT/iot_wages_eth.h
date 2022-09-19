@@ -15,7 +15,7 @@ class iot_wages_eth : public i_iot_node
 
 		float get_value();
 
-		void tare();
+		void direct_set_buff(char* new_value);
 
 	private:
 		unsigned int status;

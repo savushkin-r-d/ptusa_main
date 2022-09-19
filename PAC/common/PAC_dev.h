@@ -3239,6 +3239,10 @@ class wages_eth : public analog_io_device, public i_wages
 
         void set_wages(unsigned int id, const char* ip, unsigned int port);
 
+        void direct_set_tcp_buff(char* new_value);
+
+        bool enable_direct_set_buff = false;
+
     protected:
         iot_wages_eth* weth;
 

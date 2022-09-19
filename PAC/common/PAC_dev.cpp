@@ -5262,9 +5262,17 @@ float wages_eth::get_value_from_wages()
 
 void wages_eth::set_wages(unsigned int id, const char* ip, unsigned int port)
     {
-    if(!weth)
+    if (!weth)
         weth = new iot_wages_eth(id, (char*)ip, port);
-    }   
+    }
+
+void wages_eth::direct_set_tcp_buff(char* new_value)
+    {
+    if (enable_direct_set_buff)
+        {
+        weth->direct_set_buff( new_value );
+        }
+    }
 //-----------------------------------------------------------------------------
 wages::wages( const char *dev_name ) : analog_io_device(
     dev_name, DT_WT, DST_NONE, ADDITIONAL_PARAM_COUNT )

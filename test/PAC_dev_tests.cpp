@@ -826,9 +826,34 @@ TEST( wages_RS232, evaluate_io )
     w1.evaluate_io();
     }
 
-TEST( wages_eth, evaluate_io )
+TEST( wages_eth, get_value )
     {
+    wages_eth w1("W1");
+    w1.init(0, 0, 0, 1);
+    char* ip = "0.0.0.0";
+    w1.set_wages(1, ip, 1);
+    w1.enable_direct_set_buff = 1;
+    char tmp_str[] = "   +0012.34k";
+    std::swap(tmp_str[2], tmp_str[3]);
+    std::swap(tmp_str[5], tmp_str[4]);
+    std::swap(tmp_str[6], tmp_str[7]);
+    std::swap(tmp_str[8], tmp_str[9]);
+    std::swap(tmp_str[10], tmp_str[11]);
+    w1.direct_set_tcp_buff(tmp_str);
+    EXPECT_EQ(12.34f, w1.get_value());
+    EXPECT_EQ(1, w1.get_state());
     }
+
+TEST(wages_eth, evaluate_io)
+{
+    wages_eth w1("W1");
+    w1.init(0, 0, 0, 1);
+    char* ip = "0.0.0.0";
+    w1.set_wages(1, ip, 1);
+    w1.evaluate_io();
+    EXPECT_EQ(0, w1.get_state());
+    EXPECT_EQ(0, w1.get_value());
+}
 
 TEST( threshold_regulator, set_value )
     {
