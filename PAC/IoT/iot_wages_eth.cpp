@@ -1,17 +1,9 @@
 #include "iot_wages_eth.h"
 #include "tcp_client.h"
 
-iot_wages_eth::iot_wages_eth( unsigned int id, const char* ip, unsigned int port )
+iot_wages_eth::iot_wages_eth( unsigned int id, char* ip, unsigned int port )
 	{
 	tc = tcp_client::Create((char*)ip, port, id, 0);
-	status = 0;
-	state = 0;
-	value = .0f;
-	}
-
-iot_wages_eth::~iot_wages_eth()
-	{
-	delete tc;
 	}
 
 void iot_wages_eth::evaluate()
@@ -25,7 +17,7 @@ void iot_wages_eth::evaluate()
 		}
 	}
 
-int iot_wages_eth::get_state()
+int iot_wages_eth::get_state() const
 	{
 	return state;
 	}

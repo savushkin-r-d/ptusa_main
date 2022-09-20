@@ -3219,7 +3219,7 @@ class wages_RS232 : public analog_io_device, public i_wages
 class wages_eth : public analog_io_device, public i_wages
     {
     public:
-        wages_eth(const char* dev_name);
+        explicit wages_eth(const char* dev_name);
 
         float get_value() override;
 
@@ -3237,21 +3237,20 @@ class wages_eth : public analog_io_device, public i_wages
 
         float get_value_from_wages();
 
-        void set_wages(unsigned int id, const char* ip, unsigned int port);
+        void set_wages(unsigned int id, char* ip, unsigned int port);
 
         void direct_set_tcp_buff(char* new_value);
 
         bool enable_direct_set_buff = false;
 
-    protected:
+    private:
         iot_wages_eth* weth;
 
-    private:
         enum class CONSTANTS
         {
             C_AIAO_INDEX = 0,   ///< Индекс канала аналоговых данных.
 
-            P_CZ = 1,           ///< Сдвиг нуля.
+            P_CZ,           ///< Сдвиг нуля.
             LAST_PARAM_IDX,
         };
     };

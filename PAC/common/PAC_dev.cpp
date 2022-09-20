@@ -5231,7 +5231,7 @@ void wages_RS232::tare()
 wages_eth::wages_eth(const char* dev_name) :
     analog_io_device(dev_name, device::DT_WT, device::DST_WT_ETH,
         static_cast<int>(CONSTANTS::LAST_PARAM_IDX) - 1),
-    weth( NULL )
+    weth( nullptr )
     {
     set_par_name(static_cast<int>(CONSTANTS::P_CZ), 0, "P_CZ");
     }
@@ -5260,7 +5260,7 @@ float wages_eth::get_value_from_wages()
     return weth->get_value();
     }
 
-void wages_eth::set_wages(unsigned int id, const char* ip, unsigned int port)
+void wages_eth::set_wages(unsigned int id, char* ip, unsigned int port)
     {
     if (!weth)
         weth = new iot_wages_eth(id, (char*)ip, port);
