@@ -4572,51 +4572,49 @@ class dev_stub : public i_counter, public valve, public i_wages,
 class threshold_regulator :public device, public i_Lua_save_device
     {
     public:
-        explicit threshold_regulator( const char* name ) :device( name,
-            device::DEVICE_TYPE::DT_REGULATOR, 
-            device::DEVICE_SUB_TYPE::DT_REGULATOR_THLD, 0 )
+        enum PARAM
             {
+            P_IS_REVERSE = 1,	        ///Обратного (реверсивного) действия.
+            P_DELTA,
+
+            PARAMS_COUNT
             };
 
-        int get_state() override
+        explicit threshold_regulator( const char* name );
+
+        virtual ~threshold_regulator();
+
+        int get_state() override;
+
+        void direct_off() override;
+
+        void direct_set_state( int new_state ) override;
+
+        void direct_on() override;
+
+        const char* get_name_in_Lua() const override;
+
+        float get_value() override;
+
+        void direct_set_value( float val ) override;
+
+        int save_device( char* buff );
+
+        void set_string_property( const char* field, const char* value );
+
+    private:
+        enum class STATE
             {
-            return 0;
+            OFF,
+            ON,
             };
 
-        void direct_off() override
-            {
-            //To implement.
-            };
+        STATE state;
+        int out_state;
+        float set_value;
 
-        void direct_set_state( int new_state ) override
-            {
-            //To implement.
-            };
-
-        void direct_on() override
-            {
-            //To implement.
-            };
-
-        int save_device( char* buff ) override
-            {
-            return 0;
-            };
-
-        const char* get_name_in_Lua() const override
-            {
-            return "";
-            };
-
-        float get_value() override
-            {
-            return .0f;
-            };
-
-        void direct_set_value( float new_value ) override
-            {
-            //To implement.
-            };
+        device* sensor;
+        device* actuator;
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

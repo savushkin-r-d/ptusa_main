@@ -2533,6 +2533,135 @@ void dev_stub::process_DO( u_int n, DO_state state, const char* name )
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+threshold_regulator::threshold_regulator( const char* name ) :device( name,
+    device::DEVICE_TYPE::DT_REGULATOR,
+    device::DEVICE_SUB_TYPE::DT_REGULATOR_THLD, 0 ),
+    state( STATE::OFF ),
+    out_state( 0 ),
+    set_value( 0 ),
+    sensor( nullptr ),
+    actuator( nullptr )
+    {
+    }
+//-----------------------------------------------------------------------------
+threshold_regulator::~threshold_regulator()
+    {
+    delete sensor;
+    sensor = nullptr;
+    delete actuator;
+    actuator = nullptr;
+    }
+//-----------------------------------------------------------------------------
+int threshold_regulator::get_state()
+    {
+    return static_cast<int>( state );
+    };
+//-----------------------------------------------------------------------------
+void threshold_regulator::direct_off()
+    {
+    if ( state != STATE::OFF )
+        {
+        state = STATE::OFF;
+        if ( actuator )
+            {
+            actuator->off();
+            }
+        }
+    };
+//-----------------------------------------------------------------------------
+void threshold_regulator::direct_set_state( int new_state )
+    {
+    switch ( static_cast<STATE>( new_state ) )
+        {
+        case STATE::OFF:
+            direct_off();
+            break;
+
+        case STATE::ON:
+            direct_on();
+            break;
+        }
+    };
+//-----------------------------------------------------------------------------
+void threshold_regulator::direct_on()
+    {
+    if ( state != STATE::ON )
+        {
+        state = STATE::ON;
+        }
+    };
+//-----------------------------------------------------------------------------
+const char* threshold_regulator::get_name_in_Lua() const
+    {
+    return get_name();
+    };
+//-----------------------------------------------------------------------------
+float threshold_regulator::get_value()
+    {
+    return static_cast<float>( out_state );
+    };
+//-----------------------------------------------------------------------------
+void threshold_regulator::direct_set_value( float val )
+    {
+    set_value = val;
+    if ( sensor && actuator )
+        {
+        auto in_value = sensor->get_value();
+        if ( sensor->get_type() == DT_FQT )
+            {
+            in_value = dynamic_cast <i_counter*> ( sensor )->get_flow();
+            }
+
+        int is_reverse = ( *par )[ P_IS_REVERSE ] > 0 ? -1 : 1;
+        if ( STATE::OFF == state )
+            {
+            out_state = 0;
+            actuator->off();
+            }
+        else
+            {
+            if ( in_value > set_value + ( *par )[ P_DELTA ] )
+                {
+                is_reverse > 0 ? out_state = 1 : out_state = 0;
+                }
+            else if ( in_value < set_value - ( *par )[ P_DELTA ] )
+                {
+                is_reverse > 0 ? out_state = 0 : out_state = 1;
+                }
+            }
+
+        actuator->set_state( out_state );
+        }
+    };
+//-----------------------------------------------------------------------------
+void threshold_regulator::set_string_property( const char* field, const char* value )
+    {
+    if ( !field ) return;
+
+    switch ( field[ 0 ] )
+        {
+        //IN_VALUE
+        case 'I':
+            sensor = G_DEVICE_MANAGER()->get_device( value );
+            break;
+
+            //OUT_VALUE
+        case 'O':
+            actuator = G_DEVICE_MANAGER()->get_device( value );
+            break;
+
+        default:
+            device::set_string_property( field, value );
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+int threshold_regulator::save_device( char* buff )
+    {
+    return device::save_device( buff, "\t" );
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 base_counter::base_counter( const char* dev_name, DEVICE_SUB_TYPE sub_type,
     int extra_par_cnt ) :
     device( dev_name, DT_FQT, sub_type, extra_par_cnt ),
