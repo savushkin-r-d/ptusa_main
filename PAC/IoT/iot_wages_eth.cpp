@@ -43,3 +43,8 @@ void iot_wages_eth::direct_set_buff(char* new_value)
 	tc->buff = new_value;
 	}
 
+void iot_wages_eth::set_value(float new_value)
+	{
+	if (new_value >= .0f) value = new_value;
+	}
+

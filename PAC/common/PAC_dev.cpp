@@ -5273,6 +5273,11 @@ void wages_eth::direct_set_tcp_buff(char* new_value)
         weth->direct_set_buff( new_value );
         }
     }
+
+void wages_eth::direct_set_value(float new_value)
+{
+    weth->set_value(new_value);
+}
 //-----------------------------------------------------------------------------
 wages::wages( const char *dev_name ) : analog_io_device(
     dev_name, DT_WT, DST_NONE, ADDITIONAL_PARAM_COUNT )

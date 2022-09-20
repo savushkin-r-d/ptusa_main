@@ -15,6 +15,8 @@ class iot_wages_eth : public i_iot_node
 
 		float get_value();
 
+		void set_value(float new_value);
+
 		void direct_set_buff( char* new_value );
 
 	private:
