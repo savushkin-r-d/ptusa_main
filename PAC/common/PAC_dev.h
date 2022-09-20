@@ -24,6 +24,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <memory>
 
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
@@ -4572,7 +4573,7 @@ class dev_stub : public i_counter, public valve, public i_wages,
 class threshold_regulator :public device, public i_Lua_save_device
     {
     public:
-        enum PARAM
+        enum class PARAM
             {
             P_IS_REVERSE = 1,	        ///Обратного (реверсивного) действия.
             P_DELTA,
@@ -4581,8 +4582,6 @@ class threshold_regulator :public device, public i_Lua_save_device
             };
 
         explicit threshold_regulator( const char* name );
-
-        virtual ~threshold_regulator();
 
         int get_state() override;
 
@@ -4600,7 +4599,7 @@ class threshold_regulator :public device, public i_Lua_save_device
 
         int save_device( char* buff );
 
-        void set_string_property( const char* field, const char* value );
+        void set_string_property( const char* field, const char* value ) override;
 
     private:
         enum class STATE
@@ -4609,12 +4608,12 @@ class threshold_regulator :public device, public i_Lua_save_device
             ON,
             };
 
-        STATE state;
-        int out_state;
-        float set_value;
+        STATE state = STATE::OFF;
+        int out_state = 0;
+        float set_value = 0;
 
-        device* sensor;
-        device* actuator;
+        std::shared_ptr<device> sensor;
+        std::shared_ptr<device> actuator;
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

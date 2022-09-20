@@ -2535,21 +2535,9 @@ void dev_stub::process_DO( u_int n, DO_state state, const char* name )
 //-----------------------------------------------------------------------------
 threshold_regulator::threshold_regulator( const char* name ) :device( name,
     device::DEVICE_TYPE::DT_REGULATOR,
-    device::DEVICE_SUB_TYPE::DT_REGULATOR_THLD, 0 ),
-    state( STATE::OFF ),
-    out_state( 0 ),
-    set_value( 0 ),
-    sensor( nullptr ),
-    actuator( nullptr )
+    device::DEVICE_SUB_TYPE::DT_REGULATOR_THLD,
+    static_cast<int>( PARAM::PARAMS_COUNT ) )
     {
-    }
-//-----------------------------------------------------------------------------
-threshold_regulator::~threshold_regulator()
-    {
-    delete sensor;
-    sensor = nullptr;
-    delete actuator;
-    actuator = nullptr;
     }
 //-----------------------------------------------------------------------------
 int threshold_regulator::get_state()
@@ -2609,10 +2597,11 @@ void threshold_regulator::direct_set_value( float val )
         auto in_value = sensor->get_value();
         if ( sensor->get_type() == DT_FQT )
             {
-            in_value = dynamic_cast <i_counter*> ( sensor )->get_flow();
+            in_value = dynamic_cast <i_counter*> ( sensor.get() )->get_flow();
             }
 
-        int is_reverse = ( *par )[ P_IS_REVERSE ] > 0 ? -1 : 1;
+        auto idx = static_cast<int>( PARAM::P_IS_REVERSE );
+        int is_reverse = ( *par )[ idx ] > 0 ? -1 : 1;
         if ( STATE::OFF == state )
             {
             out_state = 0;
@@ -2620,11 +2609,12 @@ void threshold_regulator::direct_set_value( float val )
             }
         else
             {
-            if ( in_value > set_value + ( *par )[ P_DELTA ] )
+            idx = static_cast<int>( PARAM::P_DELTA );
+            if ( in_value > set_value + ( *par )[ idx ] )
                 {
                 is_reverse > 0 ? out_state = 1 : out_state = 0;
                 }
-            else if ( in_value < set_value - ( *par )[ P_DELTA ] )
+            else if ( in_value < set_value - ( *par )[ idx ] )
                 {
                 is_reverse > 0 ? out_state = 0 : out_state = 1;
                 }
@@ -2642,12 +2632,12 @@ void threshold_regulator::set_string_property( const char* field, const char* va
         {
         //IN_VALUE
         case 'I':
-            sensor = G_DEVICE_MANAGER()->get_device( value );
+            sensor.reset( G_DEVICE_MANAGER()->get_device(value) );
             break;
 
             //OUT_VALUE
         case 'O':
-            actuator = G_DEVICE_MANAGER()->get_device( value );
+            actuator.reset( G_DEVICE_MANAGER()->get_device( value ) );
             break;
 
         default:
