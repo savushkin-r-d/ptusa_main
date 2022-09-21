@@ -2615,11 +2615,11 @@ void threshold_regulator::direct_set_value( float val )
             auto delta = ( *par )[ static_cast<int>( PARAM::P_DELTA ) ];
             if ( in_value > set_value + delta )
                 {
-                is_reverse ? out_state = 1 : out_state = 0;
+                out_state = is_reverse ? 1 : 0;
                 }
             else if ( in_value < set_value - delta )
                 {
-                is_reverse ? out_state = 0 : out_state = 1;
+                out_state = is_reverse ? 0 : 1;
                 }
             }
 
