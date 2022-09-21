@@ -804,28 +804,67 @@ TEST( wages_RS232, evaluate_io )
     w1.evaluate_io();
     }
 
-TEST( threshold_regulator, direct_set_value )
+TEST( threshold_regulator, set_value )
     {
     threshold_regulator p1( "test" );
     device* p1_dev = static_cast<device*>( &p1 );
 
 
     G_DEVICE_MANAGER()->clear_io_devices();
+    auto name = std::string( "TE1" );
     auto res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_TE, device::DST_TE_VIRT, "TE1", "Test sensor", "T" );
+        device::DT_TE, device::DST_TE_VIRT, name.c_str(), "Test sensor", "T");
     ASSERT_EQ( nullptr, res );
+    auto TE1 = TE( name.c_str() );
+    ASSERT_NE( STUB(), dynamic_cast<dev_stub*>( TE1 ) );
+    name = std::string( "M1" );
     res = G_DEVICE_MANAGER()->add_io_device(
         device::DT_M, device::DST_M_VIRT, "M1", "Test motor", "M" );
     ASSERT_EQ( nullptr, res );
-    G_DEVICE_MANAGER()->print();
+    auto M1 = M( name.c_str() );
+    ASSERT_NE( STUB(), dynamic_cast<dev_stub*>( M1 ) );
 
     auto m1 = G_DEVICE_MANAGER()->get_M( "M1" );
     ASSERT_NE( nullptr, m1 );
     p1.set_string_property( "IN_VALUE", "TE1" );
     p1.set_string_property( "OUT_VALUE", "M1" );
-
-    //Regulator switched off.
+    
+    p1_dev->off();
+    //Regulator switched off.    
     p1_dev->set_value( 10 );
     EXPECT_EQ( .0f, m1->get_value() );
-    EXPECT_EQ( .0f, m1->get_state() );
+    EXPECT_EQ( 0, m1->get_state() );
+    EXPECT_EQ( 0, p1_dev->get_state() );
+
+    p1_dev->on();
+    //Regulator switched on, it should switch on actuator.
+    TE1->set_cmd( "V", 0, 1 );
+    p1_dev->set_value( 10 );
+    EXPECT_EQ( .0f, m1->get_value() );
+    EXPECT_EQ( 1, m1->get_state() );
+    EXPECT_EQ( 1, p1_dev->get_state() );
+
+    //Regulator switched on, it should switch off actuator.
+    TE1->set_cmd( "V", 0, 20 );
+    p1_dev->set_value( 10 );
+    EXPECT_EQ( .0f, m1->get_value() );
+    EXPECT_EQ( 0, m1->get_state() );
+
+    //Regulator switched on, temperature is inside range - it should not change
+    //actuators state.
+    p1.set_cmd( "P_DELTA", 0, 10 );
+    p1_dev->set_value( 10 );
+    EXPECT_EQ( .0f, m1->get_value() );
+    EXPECT_EQ( 0, m1->get_state() );
+    }
+
+TEST( threshold_regulator, set_cmd )
+    {
+    threshold_regulator p1( "test" );
+        const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    p1.save_device( buff );
+    EXPECT_STREQ(
+        "\ttest={M=0, ST=0, V=0, P_IS_REVERSE=0, P_DELTA=0},\n", buff );
     }
