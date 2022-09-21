@@ -1,6 +1,6 @@
 /*
 ** Lua binding: PAC_dev
-** Generated automatically by tolua++-1.0.92 on Wed Sep 14 10:18:36 2022.
+** Generated automatically by tolua++-1.0.92 on Wed Sep 21 14:24:57 2022.
 */
 
 #ifndef __cplusplus
@@ -3119,8 +3119,8 @@ static int tolua_PAC_dev_C00(lua_State* tolua_S)
  {
   const char* dev_name = ((const char*)  tolua_tostring(tolua_S,1,0));
   {
-   PID* tolua_ret = (PID*)  C(dev_name);
-    tolua_pushusertype(tolua_S,(void*)tolua_ret,"PID");
+   i_DO_AO_device* tolua_ret = (i_DO_AO_device*)  C(dev_name);
+    tolua_pushusertype(tolua_S,(void*)tolua_ret,"i_DO_AO_device");
   }
  }
  return 1;
