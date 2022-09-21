@@ -203,6 +203,31 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
     auto WT1 = WT( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( WT1 ) );
+
+    //device::DT_REGULATOR, DST_REGULATOR_PID
+    name = std::string( "C1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_REGULATOR, device::DST_REGULATOR_PID, name.c_str(),
+        "Test PID", "C" );
+    EXPECT_EQ( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+
+    //device::DT_REGULATOR, DST_REGULATOR_THLD
+    name = std::string( "C2" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_REGULATOR, device::DST_REGULATOR_THLD, name.c_str(),
+        "Test regulator", "C" );
+    EXPECT_EQ( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+
+    //device::DT_REGULATOR, --
+    name = std::string( "C3" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_REGULATOR, device::DST_REGULATOR_THLD + 1, name.c_str(),
+        "Test regulator", "C" );
+    EXPECT_EQ( nullptr, res );
     }
 
 TEST( device_manager, clear_io_devices )
