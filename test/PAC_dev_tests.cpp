@@ -813,7 +813,7 @@ TEST( threshold_regulator, set_value )
     G_DEVICE_MANAGER()->clear_io_devices();
     auto name = std::string( "TE1" );
     auto res = G_DEVICE_MANAGER()->add_io_device(
-        device::DT_TE, device::DST_TE_VIRT, name.c_str(), "Test sensor", "T");
+        device::DT_TE, device::DST_TE_VIRT, name.c_str(), "Test sensor", "T" );
     ASSERT_EQ( nullptr, res );
     auto TE1 = TE( name.c_str() );
     ASSERT_NE( STUB(), dynamic_cast<dev_stub*>( TE1 ) );
@@ -828,7 +828,7 @@ TEST( threshold_regulator, set_value )
     ASSERT_NE( nullptr, m1 );
     p1.set_string_property( "IN_VALUE", "TE1" );
     p1.set_string_property( "OUT_VALUE", "M1" );
-    
+
     p1_dev->off();
     //Regulator switched off.    
     p1_dev->set_value( 10 );
@@ -856,15 +856,43 @@ TEST( threshold_regulator, set_value )
     p1_dev->set_value( 10 );
     EXPECT_EQ( .0f, m1->get_value() );
     EXPECT_EQ( 0, m1->get_state() );
+
+    //Regulator switched on, temperature is not inside range - it should change
+    //actuators state.
+    p1.set_cmd( "P_DELTA", 0, 1 );
+    TE1->set_cmd( "V", 0, 5 );
+    p1_dev->set_value( 10 );
+    EXPECT_EQ( .0f, m1->get_value() );
+    EXPECT_EQ( 1, m1->get_state() );
+
+    p1_dev->off();
+    //Regulator switched off.    
+    p1_dev->set_value( 10 );
+    EXPECT_EQ( .0f, m1->get_value() );
+    EXPECT_EQ( 0, m1->get_state() );
+    EXPECT_EQ( 0, p1_dev->get_state() );
     }
 
 TEST( threshold_regulator, set_cmd )
     {
     threshold_regulator p1( "test" );
-        const int BUFF_SIZE = 200;
+    const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
 
     p1.save_device( buff );
     EXPECT_STREQ(
         "\ttest={M=0, ST=0, V=0, P_IS_REVERSE=0, P_DELTA=0},\n", buff );
+    }
+
+TEST( threshold_regulator, set_state )
+    {
+    threshold_regulator p1( "test" );
+
+    //Switch on regulator.
+    p1.set_state( 1 );
+    EXPECT_EQ( 1, p1.get_state() );
+
+    //Switch off regulator.
+    p1.set_state( 0 );
+    EXPECT_EQ( 0, p1.get_state() );
     }
