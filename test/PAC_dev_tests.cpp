@@ -832,7 +832,6 @@ TEST( threshold_regulator, set_value )
     p1_dev->off();
     //Regulator switched off.    
     p1_dev->set_value( 10 );
-    EXPECT_EQ( .0f, m1->get_value() );
     EXPECT_EQ( 0, m1->get_state() );
     EXPECT_EQ( 0, p1_dev->get_state() );
 
@@ -840,21 +839,18 @@ TEST( threshold_regulator, set_value )
     //Regulator switched on, it should switch on actuator.
     TE1->set_cmd( "V", 0, 1 );
     p1_dev->set_value( 10 );
-    EXPECT_EQ( .0f, m1->get_value() );
     EXPECT_EQ( 1, m1->get_state() );
     EXPECT_EQ( 1, p1_dev->get_state() );
 
     //Regulator switched on, it should switch off actuator.
     TE1->set_cmd( "V", 0, 20 );
     p1_dev->set_value( 10 );
-    EXPECT_EQ( .0f, m1->get_value() );
     EXPECT_EQ( 0, m1->get_state() );
 
     //Regulator switched on, temperature is inside range - it should not change
     //actuators state.
     p1.set_cmd( "P_DELTA", 0, 10 );
     p1_dev->set_value( 10 );
-    EXPECT_EQ( .0f, m1->get_value() );
     EXPECT_EQ( 0, m1->get_state() );
 
     //Regulator switched on, temperature is not inside range - it should change
@@ -862,31 +858,49 @@ TEST( threshold_regulator, set_value )
     p1.set_cmd( "P_DELTA", 0, 1 );
     TE1->set_cmd( "V", 0, 5 );
     p1_dev->set_value( 10 );
-    EXPECT_EQ( .0f, m1->get_value() );
     EXPECT_EQ( 1, m1->get_state() );
 
     p1_dev->off();
     //Regulator switched off.    
     p1_dev->set_value( 10 );
-    EXPECT_EQ( .0f, m1->get_value() );
     EXPECT_EQ( 0, m1->get_state() );
     EXPECT_EQ( 0, p1_dev->get_state() );
+
+    //Use counter as a sensor.
+    p1_dev->on();
+    name = std::string( "FQT1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_FQT, device::DST_FQT_VIRT, name.c_str(), "Test counter", "F" );
+    ASSERT_EQ( nullptr, res );
+    auto FQT1 = virtual_FQT( name.c_str() );
+    ASSERT_NE( STUB(), dynamic_cast<dev_stub*>( FQT1 ) );
+    p1.set_string_property( "IN_VALUE", "FQT1" );
+    FQT1->set_cmd( "F", 0, 10 );
+    p1_dev->set_value( 20 );
+    EXPECT_EQ( 1, m1->get_state() );
     }
 
 TEST( threshold_regulator, set_cmd )
     {
-    threshold_regulator p1( "test" );
+    threshold_regulator p1( "C1" );
     const int BUFF_SIZE = 200;
     char buff[ BUFF_SIZE ] = { 0 };
 
     p1.save_device( buff );
     EXPECT_STREQ(
-        "\ttest={M=0, ST=0, V=0, P_IS_REVERSE=0, P_DELTA=0},\n", buff );
+        "\tC1={M=0, ST=0, V=0, P_IS_REVERSE=0, P_DELTA=0},\n", buff );
+
+    p1.set_cmd( "P_DELTA", 0, 10 );
+    p1.set_cmd( "P_IS_REVERSE", 0, 1 );
+    p1.on();
+    p1.save_device( buff );
+    EXPECT_STREQ(
+        "\tC1={M=0, ST=1, V=0, P_IS_REVERSE=1, P_DELTA=10},\n", buff );
     }
 
 TEST( threshold_regulator, set_state )
     {
-    threshold_regulator p1( "test" );
+    threshold_regulator p1( "C1" );
 
     //Switch on regulator.
     p1.set_state( 1 );
@@ -895,4 +909,12 @@ TEST( threshold_regulator, set_state )
     //Switch off regulator.
     p1.set_state( 0 );
     EXPECT_EQ( 0, p1.get_state() );
+    }
+
+TEST( threshold_regulator, get_name_in_Lua )
+    {
+    auto name = "C1";
+    threshold_regulator p1( name );
+
+    EXPECT_STREQ( name, p1.get_name_in_Lua() );
     }
