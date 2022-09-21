@@ -2597,7 +2597,7 @@ void threshold_regulator::direct_set_value( float val )
         auto in_value = sensor->get_value();
         if ( sensor->get_type() == DT_FQT )
             {
-            in_value = dynamic_cast <i_counter*> ( sensor.get() )->get_flow();
+            in_value = dynamic_cast <i_counter*> ( sensor )->get_flow();
             }
 
         auto idx = static_cast<int>( PARAM::P_IS_REVERSE );
@@ -2609,12 +2609,12 @@ void threshold_regulator::direct_set_value( float val )
             }
         else
             {
-            idx = static_cast<int>( PARAM::P_DELTA );
-            if ( in_value > set_value + ( *par )[ idx ] )
+            auto delta = ( *par )[ static_cast<int>( PARAM::P_DELTA ) ];
+            if ( in_value > set_value + delta )
                 {
                 is_reverse > 0 ? out_state = 1 : out_state = 0;
                 }
-            else if ( in_value < set_value - ( *par )[ idx ] )
+            else if ( in_value < set_value - delta )
                 {
                 is_reverse > 0 ? out_state = 0 : out_state = 1;
                 }
@@ -2632,12 +2632,12 @@ void threshold_regulator::set_string_property( const char* field, const char* va
         {
         //IN_VALUE
         case 'I':
-            sensor.reset( G_DEVICE_MANAGER()->get_device(value) );
+            sensor = G_DEVICE_MANAGER()->get_device(value);
             break;
 
             //OUT_VALUE
         case 'O':
-            actuator.reset( G_DEVICE_MANAGER()->get_device( value ) );
+            actuator = G_DEVICE_MANAGER()->get_device( value );
             break;
 
         default:

@@ -4597,7 +4597,7 @@ class threshold_regulator :public device, public i_Lua_save_device
 
         void direct_set_value( float val ) override;
 
-        int save_device( char* buff );
+        int save_device( char* buff ) override;
 
         void set_string_property( const char* field, const char* value ) override;
 
@@ -4612,8 +4612,8 @@ class threshold_regulator :public device, public i_Lua_save_device
         int out_state = 0;
         float set_value = 0;
 
-        std::shared_ptr<device> sensor;
-        std::shared_ptr<device> actuator;
+        device* sensor;
+        device* actuator;
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
