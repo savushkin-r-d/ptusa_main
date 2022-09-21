@@ -4612,8 +4612,8 @@ class threshold_regulator :public device, public i_Lua_save_device
         int out_state = 0;
         float set_value = 0;
 
-        device* sensor;
-        device* actuator;
+        device* sensor = nullptr;
+        device* actuator = nullptr;
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
