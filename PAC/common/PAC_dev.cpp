@@ -2101,11 +2101,12 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
         case device::DT_REGULATOR:
             switch ( dev_sub_type )
                 {
-                case device::DT_REGULATOR_PID:
+                case device::DST_NONE:
+                case device::DST_REGULATOR_PID:
                     new_device = new PID( dev_name );
                     break;
 
-                case device::DT_REGULATOR_THLD:
+                case device::DST_REGULATOR_THLD:
                     new_device = new threshold_regulator( dev_name );
                     break;
 
@@ -2535,7 +2536,7 @@ void dev_stub::process_DO( u_int n, DO_state state, const char* name )
 //-----------------------------------------------------------------------------
 threshold_regulator::threshold_regulator( const char* name ) :device( name,
     device::DEVICE_TYPE::DT_REGULATOR,
-    device::DEVICE_SUB_TYPE::DT_REGULATOR_THLD,
+    device::DEVICE_SUB_TYPE::DST_REGULATOR_THLD,
     static_cast<int>( PARAM::PARAMS_COUNT ) )
     {
     }

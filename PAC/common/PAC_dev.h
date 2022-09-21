@@ -592,8 +592,8 @@ class device : public i_DO_AO_device, public par_device
             DST_TS_VIRT,
 
             //DT_REGULATOR
-            DT_REGULATOR_PID = 1,
-            DT_REGULATOR_THLD,
+            DST_REGULATOR_PID = 1,
+            DST_REGULATOR_THLD,
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
