@@ -1423,7 +1423,7 @@ i_DO_AO_device* device_manager::get_F(const char* dev_name)
 //-----------------------------------------------------------------------------
 PID* device_manager::get_C( const char* dev_name )
     {
-    return (PID*)get_device( device::DT_REGULATOR, dev_name );
+    return dynamic_cast<PID*>( get_device( device::DT_REGULATOR, dev_name ) );
     }
 //-----------------------------------------------------------------------------
 signal_column* device_manager::get_HLA( const char* dev_name )

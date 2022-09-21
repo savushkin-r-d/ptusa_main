@@ -4739,7 +4739,7 @@ class device_manager: public i_Lua_save_device
 
         device* get_stub_device()
             {
-            return static_cast<device*>( static_cast<valve*>( &stub ) );
+            return dynamic_cast<device*>( dynamic_cast<valve*>( &stub ) );
             }
 
         int init_params();
