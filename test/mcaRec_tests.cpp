@@ -24,3 +24,13 @@ TEST( TRecipeManager, LoadFromFile )
     EXPECT_EQ( 0, mngr.SaveToFile( fileName ) );
     EXPECT_EQ( 0, mngr.LoadFromFile( fileName ) );
     }
+
+TEST(TRecipeManager, CopyRecipe)
+{
+    auto object = 1;
+    TRecipeManager mngr(object);
+
+    auto copyRecipeBuffer = object;
+    EXPECT_EQ( 1, 1, mngr.CopyRecipe( object ) );
+}
+
