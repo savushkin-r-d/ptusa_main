@@ -826,11 +826,13 @@ TEST( threshold_regulator, set_value )
 
     const auto SET_VALUE = 10;
     const auto DELTA_VALUE = 1;
+
+    //Correct processing when we have no set sensor and actuator.
+    dev->set_value( SET_VALUE );
+
     dev->set_string_property( "IN_VALUE", TE_name.c_str() );
     dev->set_string_property( "OUT_VALUE", M_name.c_str() );
     dev->set_cmd( "P_DELTA", 0, DELTA_VALUE );
-
-
     dev->off();
 
     //Regulator switched off - it should not switch on actuator regardless
@@ -923,6 +925,14 @@ TEST( threshold_regulator, set_state )
     p1.set_state( 1 );
     EXPECT_EQ( 1, p1.get_state() );
 
+    //Switch on regulator (already on).
+    p1.set_state( 1 );
+    EXPECT_EQ( 1, p1.get_state() );
+
+    //Non correct new state - should be no changes.
+    p1.set_state( 2 );
+    EXPECT_EQ( 1, p1.get_state() );
+
     //Switch off regulator.
     p1.set_state( 0 );
     EXPECT_EQ( 0, p1.get_state() );
@@ -942,6 +952,7 @@ TEST( threshold_regulator, set_string_property )
     threshold_regulator p1( name );
 
     //TODO - refactor set_string_property() to return result.
+    p1.set_string_property( nullptr, nullptr );
     p1.set_string_property( "IN_VALUE", "FQT1" );
     p1.set_string_property( "OUT_VALUE", "M1" );
     p1.set_string_property( "NO_SUCH_PROPERTY", "AA1" );
