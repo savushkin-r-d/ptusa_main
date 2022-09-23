@@ -918,3 +918,14 @@ TEST( threshold_regulator, get_name_in_Lua )
 
     EXPECT_STREQ( name, p1.get_name_in_Lua() );
     }
+
+TEST( threshold_regulator, set_string_property )
+    {
+    auto name = "C1";
+    threshold_regulator p1( name );
+
+    //TODO - refactor set_string_property() to return result.
+    p1.set_string_property( "IN_VALUE", "FQT1" );
+    p1.set_string_property( "OUT_VALUE", "M1" );
+    p1.set_string_property( "NO_SUCH_PROPERTY", "AA1" );
+    }
