@@ -806,7 +806,7 @@ TEST( wages_RS232, evaluate_io )
 
 TEST( threshold_regulator, set_value )
     {
-    threshold_regulator p1( "test" );
+    threshold_regulator p1( "TRC1" );
     device* p1_dev = static_cast<device*>( &p1 );
 
 

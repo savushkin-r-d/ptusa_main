@@ -247,6 +247,16 @@ void device::off()
         }
     }
 //-----------------------------------------------------------------------------
+void device::set_string_property( const char* field, const char* value )
+    {
+    if ( G_DEBUG )
+        {
+        G_LOG->debug( "%s\t device::set_string_property() - "
+            "field = %s, val = \"%s\"",
+            name, field, value );
+        }
+    }
+//-----------------------------------------------------------------------------
 int device::save_device( char* buff, const char* prefix )
     {
     int res = sprintf( buff, "%s%s={M=%d, ", prefix, name, is_manual_mode );
@@ -2631,20 +2641,20 @@ void threshold_regulator::set_string_property( const char* field, const char* va
     {
     if ( !field ) return;
 
+    device::set_string_property( field, value );
     switch ( field[ 0 ] )
         {
         //IN_VALUE
         case 'I':
-            sensor = G_DEVICE_MANAGER()->get_device(value);
+            sensor = G_DEVICE_MANAGER()->get_device( value );
             break;
 
-            //OUT_VALUE
+        //OUT_VALUE
         case 'O':
             actuator = G_DEVICE_MANAGER()->get_device( value );
             break;
 
         default:
-            device::set_string_property( field, value );
             break;
         }
     }
