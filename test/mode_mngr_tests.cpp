@@ -142,6 +142,18 @@ TEST( operation, evaluate )
 	test_op->final();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 
+	test_op->start();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+	test_op->evaluate();
+	test_op->pause();
+	EXPECT_EQ( operation::PAUSE, test_op->get_state() );
+	test_op->evaluate();
+	test_op->stop();
+	EXPECT_EQ( operation::STOP, test_op->get_state() );
+	test_op->evaluate();
+	test_op->final();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
 
 	//Корректный переход от выполнения к паузе и опять к выполнению.
 	test_op->start();
