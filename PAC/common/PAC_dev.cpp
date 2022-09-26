@@ -2756,6 +2756,26 @@ int base_counter::save_device_ex( char* buff )
     return sprintf( buff, "ABS_V=%u, ", get_abs_quantity() );
     }
 //-----------------------------------------------------------------------------
+const char* base_counter::get_error_description() const
+    {
+    switch ( state )
+        {
+        case STATES::S_ERROR:
+            return "счет импульсов";
+
+        case STATES::S_LOW_ERR:
+            return "выход расхода за нижний предел";
+
+        case STATES::S_HI_ERR:
+            return "выход расхода за верхний предел";
+
+        default:
+            break;
+        }
+
+    return "";
+    }
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 counter::counter( const char *dev_name, DEVICE_SUB_TYPE sub_type,
                      int extra_par_cnt ):

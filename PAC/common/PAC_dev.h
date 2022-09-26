@@ -610,7 +610,7 @@ class device : public i_DO_AO_device, public par_device
             return description;
             }
 
-        const char* get_error_description() const
+        virtual const char* get_error_description() const
             {
             return "обратная связь";
             }
@@ -4030,26 +4030,7 @@ class base_counter: public i_counter, public device, public io_device
 
         int save_device_ex( char* buff );
 
-
-        const char* get_error_description() const
-            {
-            switch ( state )
-                {
-                case STATES::S_ERROR:
-                    return "счет импульсов";
-
-                case STATES::S_LOW_ERR:
-                    return "выход расхода за нижний предел";
-
-                case STATES::S_HI_ERR:
-                    return "выход расхода за верхний предел";
-
-                default:
-                    break;
-                }
-
-            return "";
-            }
+        const char* get_error_description() const override;
 
     protected:
         float get_abs_value() const
