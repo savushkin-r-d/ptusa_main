@@ -31,6 +31,13 @@ TEST(TRecipeManager, CopyRecipe)
     TRecipeManager mngr(object);
 
     auto copyRecipeBuffer = object;
-    EXPECT_EQ( 1, 1, mngr.CopyRecipe( object ) );
+    mngr.CopyRecipe();
+}
+
+TEST(TRecipeManager, PasteRecipe) 
+{
+    auto buff = 1;
+    TRecipeManager mngr(buff);
+    mngr.PasteRecipe();
 }
 
