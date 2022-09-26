@@ -2592,9 +2592,9 @@ void base_counter::direct_off()
 void base_counter::direct_set_state( int new_state )
     {
 #ifdef DEBUG_NO_IO_MODULES
-    if ( new_state == static_cast<int>( STATES::S_ERROR ) )
+    if ( new_state < 0 )
         {
-        state = STATES::S_ERROR;
+        state = static_cast<STATES>( new_state );
         return;
         }
 #endif
