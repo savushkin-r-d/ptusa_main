@@ -20,7 +20,7 @@ class iot_wages_eth : public i_iot_node
 		void direct_set_buff( char* new_value );
 
 	private:
-		unsigned int status = 0;
+		int status = 0;
 		int state = 0;
 		float value = .0f;
 		auto_smart_ptr < tcp_client > tc;

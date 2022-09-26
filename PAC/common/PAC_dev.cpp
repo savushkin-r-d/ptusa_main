@@ -5248,6 +5248,7 @@ int wages_eth::get_state()
 
 void wages_eth::evaluate_io()
     {
+    if (!weth) set_wages(1, "10.162.0.238", 1001);
     weth->evaluate();
     }
 
