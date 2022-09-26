@@ -2758,19 +2758,22 @@ int base_counter::save_device_ex( char* buff )
 //-----------------------------------------------------------------------------
 const char* base_counter::get_error_description() const
     {
-    switch ( state )
+    if ( static_cast<int>( state ) < 0 )
         {
-        case STATES::S_ERROR:
-            return "счет импульсов";
+        switch ( state )
+            {
+            case STATES::S_ERROR:
+                return "счет импульсов";
 
-        case STATES::S_LOW_ERR:
-            return "выход расхода за нижний предел";
+            case STATES::S_LOW_ERR:
+                return "выход расхода за нижний предел";
 
-        case STATES::S_HI_ERR:
-            return "выход расхода за верхний предел";
+            case STATES::S_HI_ERR:
+                return "выход расхода за верхний предел";
 
-        default:
-            break;
+            default:
+                return device::get_error_description();
+            }
         }
 
     return "";
