@@ -740,6 +740,8 @@ class operation
         int stop();
 
         int start();
+
+        int start( int new_run_step );
 #ifndef __GNUC__
 #pragma endregion
 #endif

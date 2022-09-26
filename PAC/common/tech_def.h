@@ -184,6 +184,8 @@ class tech_object: public i_tech_object, public i_Lua_save_device,
         // Lua implemented methods.
         int lua_exec_cmd( u_int cmd );
 
+        int lua_get_run_step_after_pause( u_int mode ) const;
+
         // Check functions.
         int lua_check_function( const char* function_name, const char* comment,
             u_int mode, bool show_error );
