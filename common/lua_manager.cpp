@@ -374,6 +374,21 @@ lua_manager::~lua_manager()
         }
     }
 //-----------------------------------------------------------------------------
+bool lua_manager::is_exist_lua_function( const char* object_name,
+    const char* function_name ) const
+    {
+    auto res = false;
+    lua_getfield( L, LUA_GLOBALSINDEX, object_name );
+    if ( !lua_isnil( L, -1 ) )
+        {
+        lua_getfield( L, -1, function_name );
+        res = lua_isfunction( L, -1 );
+        lua_pop( L, 1 );
+        }
+    lua_pop( L, 1 );
+    return res;
+    }
+//-----------------------------------------------------------------------------
 int lua_manager::void_exec_lua_method( const char *object_name,
                                       const char *function_name, const char *c_function_name ) const
     {

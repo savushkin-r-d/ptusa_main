@@ -124,6 +124,11 @@ int operation::stop()
 //-----------------------------------------------------------------------------
 int operation::start()
     {
+    return start( run_step );   
+    }
+//-----------------------------------------------------------------------------
+int operation::start( int new_run_step )
+    {
     switch ( current_state )
         {
         case IDLE:
@@ -138,16 +143,17 @@ int operation::start()
             states[ RUN ]->load();
 
             current_state = RUN;
-            if ( run_step > 0 )
+            if ( new_run_step > 0 )
                 {
-                states[ RUN ]->init( run_step );
+                states[ RUN ]->init( new_run_step );
                 }
             else
                 {
                 states[ RUN ]->init();
                 }
-
-            states[ RUN ]->add_dx_step_time();
+            //Если возвращаемся в шаг, активный до паузы, то добавляем
+            //его время выполнения.
+            if ( new_run_step == run_step ) states[ RUN ]->add_dx_step_time();
             break;
 
         case RUN:
