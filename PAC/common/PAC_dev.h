@@ -3219,7 +3219,7 @@ class wages_RS232 : public analog_io_device, public i_wages
 class wages_eth : public analog_io_device, public i_wages
     {
     public:
-        explicit wages_eth(const char* dev_name);
+        explicit wages_eth( const char* dev_name );
 
         float get_value() override;
 
@@ -3228,7 +3228,7 @@ class wages_eth : public analog_io_device, public i_wages
         void evaluate_io() override;
 
 #ifndef DEBUG_NO_IO_MODULES
-        void direct_set_value(float new_value) override;
+        void direct_set_value( float new_value ) override;
         int state = 0;
         float value = 0.f;
 #endif // DEBUG_NO_IO_MODULES
@@ -3237,11 +3237,9 @@ class wages_eth : public analog_io_device, public i_wages
 
         float get_value_from_wages();
 
-        void set_wages(unsigned int id, char* ip, unsigned int port);
+        void set_wages( unsigned int id, char* ip, unsigned int port );
 
-        void direct_set_tcp_buff(char* new_value);
-
-        bool enable_direct_set_buff = false;
+        void direct_set_tcp_buff( char* new_value );
 
     private:
         iot_wages_eth* weth;

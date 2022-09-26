@@ -11,11 +11,11 @@ class iot_wages_eth : public i_iot_node
 
 		void evaluate();
 
-		int get_state() const;
+		int get_wages_state() const;
 
-		float get_value();
+		float get_wages_value();
 
-		void set_value(float new_value);
+		void set_wages_value( float new_value );
 
 		void direct_set_buff( char* new_value );
 
