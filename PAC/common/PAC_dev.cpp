@@ -5238,12 +5238,12 @@ wages_eth::wages_eth( const char* dev_name ) :
 
 float wages_eth::get_value()
     {
-    return weth->get_value() + get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );
+    return weth->get_wages_value() + get_par( static_cast<u_int>( CONSTANTS::P_CZ ) );
     }
 
 int wages_eth::get_state()
     {
-    return weth->get_state();
+    return weth->get_wages_state();
     }
 
 void wages_eth::evaluate_io()
@@ -5258,7 +5258,7 @@ void wages_eth::tare()
 
 float wages_eth::get_value_from_wages()
     {
-    return weth->get_value();
+    return weth->get_wages_value();
     }
 
 void wages_eth::set_wages( unsigned int id, char* ip, unsigned int port )
