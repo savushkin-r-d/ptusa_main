@@ -2766,10 +2766,10 @@ const char* base_counter::get_error_description() const
                 return "счет импульсов";
 
             case STATES::S_LOW_ERR:
-                return "выход расхода за нижний предел";
+                return "канал потока (нижний предел)";
 
             case STATES::S_HI_ERR:
-                return "выход расхода за верхний предел";
+                return "канал потока (верхний предел)";
 
             default:
                 return device::get_error_description();
