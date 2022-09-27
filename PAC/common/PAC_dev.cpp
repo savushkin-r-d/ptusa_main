@@ -2121,10 +2121,8 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
                     break;
 
                 default:
-                    if ( G_DEBUG )
-                        {
-                        printf( "Unknown DT_REGULATOR device subtype %d!\n", dev_sub_type );
-                        }
+                    G_LOG->debug( "unknown DT_REGULATOR device subtype %d",
+                        dev_sub_type );
                     break;
                 }
             break;
