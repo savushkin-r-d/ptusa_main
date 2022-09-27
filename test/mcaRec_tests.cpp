@@ -13,6 +13,25 @@ TEST( TMediumRecipeManager, LoadFromFile )
     EXPECT_EQ( 0, mngr.LoadFromFile( fileName ) );
     }
 
+TEST( TMediumRecipeManager, CopyRecipe )
+    {
+    TMediumRecipeManager mngr( TMediumRecipeManager::MT_CAUSTIC );
+    mngr.CopyRecipe();
+    }
+
+TEST( TMediumRecipeManager, PasteRecipe )
+    {
+    TMediumRecipeManager mngr( TMediumRecipeManager::MT_CAUSTIC );
+    mngr.PasteRecipe();
+    }
+
+TEST( TMediumRecipeManager, NullifyRecipe )
+    {
+    TMediumRecipeManager mngr( TMediumRecipeManager::MT_CAUSTIC );
+    mngr.NullifyRecipe();
+    }
+
+
 TEST( TRecipeManager, LoadFromFile )
     {
     auto lineNo = 1;
@@ -25,19 +44,23 @@ TEST( TRecipeManager, LoadFromFile )
     EXPECT_EQ( 0, mngr.LoadFromFile( fileName ) );
     }
 
-TEST(TRecipeManager, CopyRecipe)
-{
-    auto object = 1;
-    TRecipeManager mngr(object);
-
-    auto copyRecipeBuffer = object;
+TEST( TRecipeManager, CopyRecipe )
+    {
+    auto lineNo = 1;
+    TRecipeManager mngr( lineNo );
     mngr.CopyRecipe();
-}
+    }
 
-TEST(TRecipeManager, PasteRecipe) 
-{
-    auto buff = 1;
-    TRecipeManager mngr(buff);
+TEST( TRecipeManager, PasteRecipe )
+    {
+    auto lineNo = 1;
+    TRecipeManager mngr( lineNo );
     mngr.PasteRecipe();
-}
+    }
 
+TEST( TRecipeManager, NullifyRecipe )
+    {
+    auto lineNo = 1;
+    TRecipeManager mngr( lineNo );
+    mngr.NullifyRecipe();
+    }
