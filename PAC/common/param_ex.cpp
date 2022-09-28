@@ -165,7 +165,7 @@ void params_manager::save( int start_pos, int count )
 //-----------------------------------------------------------------------------
 char* params_manager::get_params_data( int size, int &start_pos )
     {
-    char *res = 0;
+    char *res = nullptr;
 
     if ( last_idx + size > params_mem->get_size() )
         {
@@ -201,16 +201,16 @@ params_manager::~params_manager()
     if ( CRC_mem )
         {
         delete params_mem;
-        params_mem = 0;
+        params_mem = nullptr;
         }
     if ( CRC_mem )
         {
         delete CRC_mem;
-        CRC_mem = 0;
+        CRC_mem = nullptr;
         }
 
     delete par;
-    par = 0;
+    par = nullptr;
     }
 //-----------------------------------------------------------------------------
 int params_manager::save_params_as_Lua_str( char* str )
