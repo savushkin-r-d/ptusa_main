@@ -417,6 +417,35 @@ class to_step_if_devices_in_specific_state_action : public action
     };
 //-----------------------------------------------------------------------------
 /// <summary>
+/// Проверка сигналов и переход в новое состояние операции.
+/// </summary>
+class to_new_state_action : public action
+    {
+    public:
+        to_new_state_action();
+
+        bool is_goto_next_state( int& next_state );
+
+        int set_int_property( const char* name, size_t idx, int value ) override;
+
+        int get_int_property( const char* name, size_t idx );
+
+        /// @brief Завершения действия.
+        void finalize();
+
+    private:
+        enum GROUPS
+            {
+            G_ACTIVE_DEVICES = 0,   //Устройства, которые должны быть активны.
+
+            G_GROUPS_CNT,           //Количество групп.
+            };
+
+        // Состояние.
+        int next_state = -1;
+    };
+//-----------------------------------------------------------------------------
+/// <summary>
 /// Проверка сигналов для дальнейшего автоматического включения/выключения
 /// шага.
 /// </summary>
@@ -462,6 +491,8 @@ class step
             A_DELAY_ON,
             A_DELAY_OFF,
             A_TO_STEP_IF,
+
+            A_TO_NEW_STATE,
             };
 
         step( std::string name, operation_state *owner, bool is_mode = false );

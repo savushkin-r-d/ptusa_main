@@ -1684,6 +1684,71 @@ void to_step_if_devices_in_specific_state_action::print(
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+to_new_state_action::to_new_state_action() :
+    action( "Перейти в состояние по условию", G_GROUPS_CNT )
+    {
+    }
+//-----------------------------------------------------------------------------
+bool to_new_state_action::is_goto_next_state( int& next_state )
+    {
+    next_state = this->next_state;
+    if ( is_empty() )
+        {
+        return false;
+        }
+
+    bool res = false;
+    for ( size_t idx = 0; idx < devices.size(); idx++ )
+        {        
+        res = true;
+        auto& active_devices = devices[ idx ][ G_ACTIVE_DEVICES ];
+        for ( u_int i = 0; i < active_devices.size(); i++ )
+            {
+            auto d = dynamic_cast<i_DI_device*>( active_devices[ i ] );
+            if ( !d->is_active() ) res = false;
+            }
+
+        if ( res ) return true;
+        }
+
+    return res;
+    }
+//-----------------------------------------------------------------------------
+int to_new_state_action::set_int_property(
+    const char* name, size_t idx, int value )
+    {
+    action::set_int_property( name, idx, value );
+    if ( strcmp( name, "next_state" ) == 0 )
+        {
+        next_state = value;
+        return 0;
+        }
+    else
+        {
+        G_LOG->warning( "\"%s\" unknown property \"%s\"", 
+            this->name.c_str(), name );
+        }
+
+    return 1;
+    };
+//-----------------------------------------------------------------------------
+int to_new_state_action::get_int_property(
+    const char* name, size_t idx )
+    {
+    if ( strcmp( name, "next_state" ) == 0 )
+        {
+        return next_state;
+        }
+
+    return -1;
+    }
+//-----------------------------------------------------------------------------
+void to_new_state_action::finalize()
+    {
+    return;
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 enable_step_by_signal::enable_step_by_signal() :action( "Включить шаг по сигналам" )
     {
     };
@@ -1841,6 +1906,25 @@ void operation_state::init( u_int start_step /*= 1 */ )
 void operation_state::evaluate()
     {
     mode_step->evaluate();
+
+    //Process action "to_new_state".
+    //Переход по условию к следующему шагу.
+    auto to_new_state = dynamic_cast<to_new_state_action*>(
+        ( *mode_step )[ step::A_TO_NEW_STATE ] );
+    int next_state = -1;
+    if ( to_new_state && to_new_state->is_goto_next_state( next_state ) )
+        {
+        if ( next_state >= 0 )
+            {
+            if ( G_DEBUG )
+                {
+                printf( "Переход к новому состоянию. " );
+                to_new_state->print();
+                }
+            owner->owner->set_mode( n, next_state );
+            return;
+            }
+        }
 
     //Process action "enable_step_by_signal".
     for ( size_t idx = 0; idx < active_steps.size(); idx++ )
