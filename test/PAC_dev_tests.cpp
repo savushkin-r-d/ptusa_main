@@ -826,52 +826,63 @@ TEST( wages_RS232, evaluate_io )
     w1.evaluate_io();
     }
 
-TEST( wages_eth, get_value_from_wages )
+TEST( wages_eth, evaluate_io )
     {
     wages_eth w1( "W1" );
     w1.init( 0, 0, 0, 1 );
+
     char* ip = "0.0.0.0";
-    w1.set_wages( 1, ip, 1 );
-    char tmp_str[] = "   +0012.34k";
-    std::swap( tmp_str[ 2 ], tmp_str[ 3 ] );
-    std::swap( tmp_str[ 5 ], tmp_str[ 4 ] );
-    std::swap( tmp_str[ 6 ], tmp_str[ 7 ] );
-    std::swap( tmp_str[ 8 ], tmp_str[ 9 ] );
-    std::swap( tmp_str[ 10 ], tmp_str[ 11 ] );
-    w1.direct_set_tcp_buff( tmp_str );
-    EXPECT_EQ( 12.34f, w1.get_value_from_wages() );
-    EXPECT_EQ( 1, w1.get_state() );
+    char* field = "IP";
+    w1.set_string_property( field, ip );
+
+    w1.evaluate_io();
+    EXPECT_EQ( 0, w1.get_value() );
     }
 
-TEST( wages_eth, evaluate_io )
-{
-    wages_eth w1( "W1" );
-    w1.init( 0, 0, 0, 1 );
-    char* ip = "0.0.0.0";
-    w1.set_wages( 1, ip, 1 );
-    w1.evaluate_io();
-    EXPECT_EQ( 0, w1.get_state() );
-    EXPECT_EQ( 0, w1.get_value() );
-}
-
 TEST( wages_eth, get_value )
-{
+    {
     wages_eth w1( "W1" );
     w1.init( 0, 0, 0, 1 );
+
     char* ip = "0.0.0.0";
-    w1.set_wages( 1, ip, 1 );
-    w1.evaluate_io();
-    EXPECT_EQ( 0, w1.get_value() );
-    w1.set_par( 1, 0, 10 );
+    char* field = "IP";
+    w1.set_string_property( field, ip );
+
+    w1.direct_set_value( 10.0f );
     EXPECT_EQ( 10, w1.get_value() );
-}
+    w1.set_par( 1, 0, 10 );
+    EXPECT_EQ( 20, w1.get_value() );
+    }
 
 TEST( wages_eth, tare )
-{
+    {
     wages_eth w1( "W1" );
     w1.tare();
-}
+    }
 
+TEST( wages_eth, get_state )
+    {
+    wages_eth w1( "W1" );
+    w1.init( 0, 0, 0, 1 );
+
+    char* ip = "0.0.0.0";
+    char* field = "IP";
+    w1.set_string_property( field, ip );
+
+    EXPECT_EQ( 0, w1.get_state() );
+    }
+
+TEST( wages_eth, direct_set_value )
+    {
+    wages_eth w1( "W1" );
+    w1.init(0, 0, 0, 1);
+
+    char* ip = "0.0.0.0";
+    char* field = "IP";
+    w1.set_string_property( field, ip );
+    w1.direct_set_value( 10.0f );
+    EXPECT_EQ( 10, w1.get_value() );
+    }
 TEST( threshold_regulator, set_value )
     {
     threshold_regulator TRC1( "TRC1" );

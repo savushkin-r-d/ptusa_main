@@ -3227,19 +3227,11 @@ class wages_eth : public analog_io_device, public i_wages
 
         void evaluate_io() override;
 
-#ifndef DEBUG_NO_IO_MODULES
         void direct_set_value( float new_value ) override;
-        int state = 0;
-        float value = 0.f;
-#endif // DEBUG_NO_IO_MODULES
 
         void tare() override;
 
-        float get_value_from_wages();
-
-        void set_wages( unsigned int id, char* ip, unsigned int port );
-
-        void direct_set_tcp_buff( char* new_value );
+        void set_string_property( const char* field, const char* value ) override;
 
     private:
         iot_wages_eth* weth;

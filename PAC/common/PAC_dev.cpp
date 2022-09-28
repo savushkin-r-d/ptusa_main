@@ -5248,7 +5248,6 @@ int wages_eth::get_state()
 
 void wages_eth::evaluate_io()
     {
-    if ( !weth ) set_wages( 1, "10.162.0.238", 1001 );
     weth->evaluate();
     }
 
@@ -5256,28 +5255,24 @@ void wages_eth::tare()
     {
     }
 
-float wages_eth::get_value_from_wages()
-    {
-    return weth->get_wages_value();
-    }
-
-void wages_eth::set_wages( unsigned int id, char* ip, unsigned int port )
+void wages_eth::set_string_property( const char* field, const char* value )
     {
     if ( !weth )
-        weth = new iot_wages_eth( id, ip, port );
+        {
+        if ( strcmp( field, "IP" ) == 0 ) 
+            {
+            int port = 1001;
+            int id = 0;
+            weth = new iot_wages_eth( id, (char*)value, port );
+            }
+        }
     }
 
-void wages_eth::direct_set_tcp_buff( char* new_value )
-    {
-    weth->direct_set_buff( new_value );
-    }
-
-#ifndef DEBUG_NO_IO_MODULES
 void wages_eth::direct_set_value( float new_value )
-{
-    weth->set_value( new_value );
-}
-#endif // DEBUG_NO_IO_MODULES
+    {
+    weth->set_wages_value( new_value );
+    }
+
 //-----------------------------------------------------------------------------
 wages::wages( const char *dev_name ) : analog_io_device(
     dev_name, DT_WT, DST_NONE, ADDITIONAL_PARAM_COUNT )

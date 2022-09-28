@@ -17,11 +17,10 @@ class iot_wages_eth : public i_iot_node
 
 		void set_wages_value( float new_value );
 
-		void direct_set_buff( char* new_value );
-
 	private:
 		int status = 0;
 		int state = 0;
 		float value = .0f;
+		float tmp_value = 0.f;
 		auto_smart_ptr < tcp_client > tc;
 	};
