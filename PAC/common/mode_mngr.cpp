@@ -758,10 +758,7 @@ step::step( std::string name, operation_state *owner,
     actions.push_back( new delay_on_action() );
     actions.push_back( new delay_off_action() );
     
-    if ( !is_mode )
-        {
-        actions.push_back( new to_step_if_devices_in_specific_state_action() );
-        }
+    actions.push_back( new jump_if_devices_in_specific_state_action() );
     }
 //-----------------------------------------------------------------------------
 step::~step()
@@ -1561,14 +1558,14 @@ void wash_action::finalize()
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-to_step_if_devices_in_specific_state_action::to_step_if_devices_in_specific_state_action() :
+jump_if_devices_in_specific_state_action::jump_if_devices_in_specific_state_action() :
     action( "Перейти в шаг по условию", G_GROUPS_CNT )
     {
     }
 //-----------------------------------------------------------------------------
-bool to_step_if_devices_in_specific_state_action::is_goto_next_step( int& next_step )
+bool jump_if_devices_in_specific_state_action::is_jump( int& next )
     {
-    next_step = -1;
+    next = -1;
     if ( is_empty() )
         {
         return false;
@@ -1577,7 +1574,7 @@ bool to_step_if_devices_in_specific_state_action::is_goto_next_step( int& next_s
     bool res = false;
     for ( size_t idx = 0; idx < devices.size(); idx++ )
         {
-        if ( idx < next_steps.size() ) next_step = next_steps[ idx ];
+        if ( idx < next_n.size() ) next = next_n[ idx ];
         res = true;
         auto& devs = devices[ idx ];
         auto& on_devices = devs[ G_ON_DEVICES ];
@@ -1622,18 +1619,18 @@ bool to_step_if_devices_in_specific_state_action::is_goto_next_step( int& next_s
     return res;
     }
 //-----------------------------------------------------------------------------
-int to_step_if_devices_in_specific_state_action::set_int_property(
+int jump_if_devices_in_specific_state_action::set_int_property(
     const char* name, size_t idx, int value )
     {
     action::set_int_property( name, idx, value );
     if ( strcmp( name, "next_step_n" ) == 0 )
         {
-        while ( idx >= next_steps.size() )
+        while ( idx >= next_n.size() )
             {
-            next_steps.push_back( -1 );
+            next_n.push_back( -1 );
             }
 
-        next_steps[ idx ] = value;
+        next_n[ idx ] = value;
         return 0;
         }
     else
@@ -1648,104 +1645,39 @@ int to_step_if_devices_in_specific_state_action::set_int_property(
     return 1;
     };
 //-----------------------------------------------------------------------------
-int to_step_if_devices_in_specific_state_action::get_int_property(
+int jump_if_devices_in_specific_state_action::get_int_property(
     const char* name, size_t idx )
     {
     if ( strcmp( name, "next_step_n" ) == 0 )
         {
-        if ( idx < next_steps.size() )
+        if ( idx < next_n.size() )
             {
-            return next_steps[ idx ];
+            return next_n[ idx ];
             }
         }
 
     return -1;
     }
 //-----------------------------------------------------------------------------
-void to_step_if_devices_in_specific_state_action::finalize()
+void jump_if_devices_in_specific_state_action::finalize()
     {
     return;
     }
 //-----------------------------------------------------------------------------
-void to_step_if_devices_in_specific_state_action::print(
+void jump_if_devices_in_specific_state_action::print(
     const char* prefix, bool new_line ) const
     {
     action::print( prefix, false );
     printf( " { " );
-    for ( u_int i = 0; i < next_steps.size(); i++ )
+    for ( u_int i = 0; i < next_n.size(); i++ )
         {
-        printf( "%d ", next_steps[ i ] );
+        printf( "%d ", next_n[ i ] );
         }
     printf( "}" );
     if ( new_line )
         {
         printf( "\n" );
         }
-    }
-//-----------------------------------------------------------------------------
-//-----------------------------------------------------------------------------
-to_new_state_action::to_new_state_action() :
-    action( "Перейти в состояние по условию", G_GROUPS_CNT )
-    {
-    }
-//-----------------------------------------------------------------------------
-bool to_new_state_action::is_goto_next_state( int& next_state )
-    {
-    next_state = this->next_state;
-    if ( is_empty() )
-        {
-        return false;
-        }
-
-    bool res = false;
-    for ( size_t idx = 0; idx < devices.size(); idx++ )
-        {        
-        res = true;
-        auto& active_devices = devices[ idx ][ G_ACTIVE_DEVICES ];
-        for ( u_int i = 0; i < active_devices.size(); i++ )
-            {
-            auto d = dynamic_cast<i_DI_device*>( active_devices[ i ] );
-            if ( !d->is_active() ) res = false;
-            }
-
-        if ( res ) return true;
-        }
-
-    return res;
-    }
-//-----------------------------------------------------------------------------
-int to_new_state_action::set_int_property(
-    const char* name, size_t idx, int value )
-    {
-    action::set_int_property( name, idx, value );
-    if ( strcmp( name, "next_state" ) == 0 )
-        {
-        next_state = value;
-        return 0;
-        }
-    else
-        {
-        G_LOG->warning( "\"%s\" unknown property \"%s\"", 
-            this->name.c_str(), name );
-        }
-
-    return 1;
-    };
-//-----------------------------------------------------------------------------
-int to_new_state_action::get_int_property(
-    const char* name, size_t idx )
-    {
-    if ( strcmp( name, "next_state" ) == 0 )
-        {
-        return next_state;
-        }
-
-    return -1;
-    }
-//-----------------------------------------------------------------------------
-void to_new_state_action::finalize()
-    {
-    return;
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -1907,25 +1839,6 @@ void operation_state::evaluate()
     {
     mode_step->evaluate();
 
-    //Process action "to_new_state".
-    //Переход по условию к следующему шагу.
-    auto to_new_state = dynamic_cast<to_new_state_action*>(
-        ( *mode_step )[ step::A_TO_NEW_STATE ] );
-    int next_state = -1;
-    if ( to_new_state && to_new_state->is_goto_next_state( next_state ) )
-        {
-        if ( next_state >= 0 )
-            {
-            if ( G_DEBUG )
-                {
-                printf( "Переход к новому состоянию. " );
-                to_new_state->print();
-                }
-            owner->owner->set_mode( n, next_state );
-            return;
-            }
-        }
-
     //Process action "enable_step_by_signal".
     for ( size_t idx = 0; idx < active_steps.size(); idx++ )
         {
@@ -1998,10 +1911,10 @@ void operation_state::evaluate()
 
     //Переход по условию к следующему шагу.
     auto active_step = steps[ active_step_n ];
-    auto if_action = dynamic_cast<to_step_if_devices_in_specific_state_action*>(
+    auto if_action = dynamic_cast<jump_if_devices_in_specific_state_action*>(
         ( *active_step )[ step::A_TO_STEP_IF ] );
     int next_step = -1;
-    if ( if_action && if_action->is_goto_next_step( next_step ) )
+    if ( if_action && if_action->is_jump( next_step ) )
         {
         if ( next_step >= 0 )
             {
@@ -2226,6 +2139,13 @@ int operation_state::check_steps_params( char* err_dev_name, int str_len )
         }
 
     return 0;
+    }
+//-----------------------------------------------------------------------------
+bool operation_state::is_goto_next_state( int& next_state ) const
+    {
+    auto to_new_state = dynamic_cast<jump_if_devices_in_specific_state_action*>(
+        ( *mode_step )[ step::A_TO_STEP_IF ] );
+    return to_new_state->is_jump( next_state );
     }
 //-----------------------------------------------------------------------------
 void operation_state::add_dx_step_time()

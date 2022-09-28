@@ -387,12 +387,12 @@ class wash_action: public action
 /// Проверка устройств на нахождение в активном (включены) и в пассивном
 /// (отключены) состоянии.
 /// </summary>
-class to_step_if_devices_in_specific_state_action : public action
+class jump_if_devices_in_specific_state_action : public action
     {
     public:
-        to_step_if_devices_in_specific_state_action();
+        jump_if_devices_in_specific_state_action();
 
-        bool is_goto_next_step( int &next_step );
+        bool is_jump( int &next );
 
         int set_int_property( const char* name, size_t idx, int value ) override;
 
@@ -413,36 +413,7 @@ class to_step_if_devices_in_specific_state_action : public action
             };
 
         // Устройства.
-        std::vector < int > next_steps;
-    };
-//-----------------------------------------------------------------------------
-/// <summary>
-/// Проверка сигналов и переход в новое состояние операции.
-/// </summary>
-class to_new_state_action : public action
-    {
-    public:
-        to_new_state_action();
-
-        bool is_goto_next_state( int& next_state );
-
-        int set_int_property( const char* name, size_t idx, int value ) override;
-
-        int get_int_property( const char* name, size_t idx );
-
-        /// @brief Завершения действия.
-        void finalize();
-
-    private:
-        enum GROUPS
-            {
-            G_ACTIVE_DEVICES = 0,   //Устройства, которые должны быть активны.
-
-            G_GROUPS_CNT,           //Количество групп.
-            };
-
-        // Состояние.
-        int next_state = -1;
+        std::vector < int > next_n;
     };
 //-----------------------------------------------------------------------------
 /// <summary>
@@ -491,8 +462,6 @@ class step
             A_DELAY_ON,
             A_DELAY_OFF,
             A_TO_STEP_IF,
-
-            A_TO_NEW_STATE,
             };
 
         step( std::string name, operation_state *owner, bool is_mode = false );
@@ -625,6 +594,8 @@ class operation_state
         int check_devices( char* err_dev_name, int str_len );
 
         int check_steps_params( char* err_dev_name, int str_len );
+
+        bool is_goto_next_state( int& next_state ) const;
 
     private:
         std::string name;

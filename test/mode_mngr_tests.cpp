@@ -521,7 +521,7 @@ TEST( enable_step_by_signal, should_turn_off )
 	test_params_manager::removeObject();
     }
 
-TEST( to_step_if_devices_in_specific_state_action, is_goto_next_step )
+TEST( jump_if_devices_in_specific_state_action, is_goto_next_step )
 	{
 	char* res = 0;
 	mock_params_manager* par_mock = new mock_params_manager();
@@ -549,11 +549,11 @@ TEST( to_step_if_devices_in_specific_state_action, is_goto_next_step )
 	operation->start();
 	operation->evaluate();
 
-	auto action = reinterpret_cast<to_step_if_devices_in_specific_state_action*>
+	auto action = reinterpret_cast<jump_if_devices_in_specific_state_action*>
 		( ( *step )[ step::ACTIONS::A_TO_STEP_IF ] );
 
 	int next_step = 0;
-	auto is_goto_next_step = action->is_goto_next_step( next_step );
+	auto is_goto_next_step = action->is_jump( next_step );
 	EXPECT_EQ( false, is_goto_next_step );			//Empty action.
 	EXPECT_EQ( -1, next_step );
 
@@ -576,7 +576,7 @@ TEST( to_step_if_devices_in_specific_state_action, is_goto_next_step )
 
 	//По умолчанию все сигналы неактивны, к новому шагу не должно быть
 	//перехода.
-	is_goto_next_step = action->is_goto_next_step( next_step );
+	is_goto_next_step = action->is_jump( next_step );
 	EXPECT_EQ( false, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
@@ -584,7 +584,7 @@ TEST( to_step_if_devices_in_specific_state_action, is_goto_next_step )
 	test_DI_one.on();
 	test_DI_two.on();
 	test_DI_three.off();
-	is_goto_next_step = action->is_goto_next_step( next_step );
+	is_goto_next_step = action->is_jump( next_step );
 	EXPECT_EQ( false, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
@@ -592,7 +592,7 @@ TEST( to_step_if_devices_in_specific_state_action, is_goto_next_step )
 	test_DI_one.on();
 	test_DI_two.off();
 	test_DI_three.off();
-	is_goto_next_step = action->is_goto_next_step( next_step );
+	is_goto_next_step = action->is_jump( next_step );
 	EXPECT_EQ( true, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
@@ -600,7 +600,7 @@ TEST( to_step_if_devices_in_specific_state_action, is_goto_next_step )
 	test_DI_one.off();
 	test_DI_two.off();
 	test_DI_three.on();
-	is_goto_next_step = action->is_goto_next_step( next_step );
+	is_goto_next_step = action->is_jump( next_step );
 	EXPECT_EQ( true, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
 
