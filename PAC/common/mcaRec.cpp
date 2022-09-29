@@ -24,6 +24,63 @@ int TRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
 
 unsigned char* TRecipeManager::recipeCopyBuffer = nullptr;
 
+ParentTRecipeManager::ParentTRecipeManager()
+{
+
+}
+
+int ParentTRecipeManager::ReadMem(unsigned long startaddr, unsigned long length,
+    unsigned char* buf, bool is_string)
+{
+    if (is_string)
+    {
+        char* tmp = new char[length * UNICODE_MULTIPLIER];
+        memcpy(tmp, recipeMemory + startaddr, length);
+        convert_windows1251_to_utf8((char*)buf, tmp);
+        delete[] tmp;
+    }
+    else
+    {
+        memcpy(buf, recipeMemory + startaddr, length);
+    }
+
+    return 0;
+}
+
+void ParentTRecipeManager::LoadRecipeName()
+{
+    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
+}
+
+void ParentTRecipeManager::CopyRecipe()
+{
+    if (recipeCopyBuffer != NULL)
+    {
+        delete[] recipeCopyBuffer;
+    }
+    recipeCopyBuffer = new unsigned char[BLOCK_SIZE * blocksPerRecipe];
+    ReadMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
+}
+
+void ParentTRecipeManager::NullifyRecipe()
+{
+    unsigned char* tempbuff = new unsigned char[BLOCK_SIZE * blocksPerRecipe];
+    memset(tempbuff, 0, BLOCK_SIZE * blocksPerRecipe);
+    WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, tempbuff);
+    delete[] tempbuff;
+    tempbuff = 0;
+    LoadRecipeName();
+}
+
+void ParentTRecipeManager::PasteRecipe()
+{
+    if (recipeCopyBuffer != NULL)
+    {
+        WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
+        LoadRecipeName();
+    }
+}
+
 TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
     currentRecipe(0),
     curRecipeStartBlock(0),
@@ -378,7 +435,7 @@ void TRecipeManager::FormRecipeList()
 
 void TRecipeManager::LoadRecipeName()
     {
-    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true );
+    ParentTRecipeManager::LoadRecipeName();
     }
 
 int TRecipeManager::ToRecipe( int recNo )
@@ -516,49 +573,23 @@ int TRecipeManager::OffRecipeDevices( int recipeNo, int msaline /*= 1*/ )
 
 void TRecipeManager::CopyRecipe()
     {
-    if (recipeCopyBuffer != nullptr)
-        {
-        delete[] recipeCopyBuffer;
-        }
-    recipeCopyBuffer = new unsigned char[BLOCK_SIZE * blocksPerRecipe];
-    ReadMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
+    ParentTRecipeManager::CopyRecipe();
     }
 
 void TRecipeManager::PasteRecipe()
     {
-    if (recipeCopyBuffer != nullptr)
-        {
-        WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
-        LoadRecipeName();
-        }
+    ParentTRecipeManager::PasteRecipe();
     }
 
 void TRecipeManager::NullifyRecipe()
     {
-    unsigned char* tempbuff = new unsigned char[BLOCK_SIZE * blocksPerRecipe];
-    memset(tempbuff, 0, BLOCK_SIZE * blocksPerRecipe);
-    WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, tempbuff);
-    delete [] tempbuff;
-    tempbuff = nullptr;
-    LoadRecipeName();
+    ParentTRecipeManager::NullifyRecipe();
     }
 
 int TRecipeManager::ReadMem( unsigned long startaddr, unsigned long length,
     unsigned char* buf, bool is_string )
     {
-    if ( is_string )
-        {
-        char* tmp = new char[ length * UNICODE_MULTIPLIER ];
-        memcpy( tmp, recipeMemory + startaddr, length );
-        convert_windows1251_to_utf8( (char*)buf, tmp);
-        delete[] tmp;
-        }
-    else
-        {
-        memcpy( buf, recipeMemory + startaddr, length );
-        }
-
-    return 0;
+    ParentTRecipeManager::ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
     }
 
 int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length,
@@ -889,7 +920,7 @@ void TMediumRecipeManager::FormRecipeList()
 
 void TMediumRecipeManager::LoadRecipeName()
 {
-    ReadMem(startAddr(), recipeNameLength, (unsigned char*)currentRecipeName, true);
+    ParentTRecipeManager::LoadRecipeName();
 }
 
 int TMediumRecipeManager::ToRecipe(int recNo)
@@ -915,31 +946,17 @@ int TMediumRecipeManager::getRecipeName(int recNO, char* recName)
 
 void TMediumRecipeManager::CopyRecipe()
 {
-    if (recipeCopyBuffer != nullptr)
-    {
-        delete[] recipeCopyBuffer;
-    }
-    recipeCopyBuffer = new unsigned char[BLOCK_SIZE * blocksPerRecipe];
-    ReadMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
+    ParentTRecipeManager::CopyRecipe();
 }
 
 void TMediumRecipeManager::PasteRecipe()
 {
-    if (recipeCopyBuffer != nullptr)
-    {
-        WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
-        LoadRecipeName();
-    }
+    ParentTRecipeManager::PasteRecipe();
 }
 
 void TMediumRecipeManager::NullifyRecipe()
 {
-    unsigned char* tempbuff = new unsigned char[BLOCK_SIZE * blocksPerRecipe];
-    memset(tempbuff, 0, BLOCK_SIZE * blocksPerRecipe);
-    WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, tempbuff);
-    delete[] tempbuff;
-    tempbuff = nullptr;
-    LoadRecipeName();
+    ParentTRecipeManager::NullifyRecipe();
 }
 
 int TMediumRecipeManager::ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string)
