@@ -1648,12 +1648,9 @@ int jump_if_devices_in_specific_state_action::set_int_property(
 int jump_if_devices_in_specific_state_action::get_int_property(
     const char* name, size_t idx )
     {
-    if ( strcmp( name, "next_step_n" ) == 0 )
+    if ( strcmp( name, "next_step_n" ) == 0 && idx < next_n.size() )
         {
-        if ( idx < next_n.size() )
-            {
-            return next_n[ idx ];
-            }
+        return next_n[ idx ];
         }
 
     return -1;
@@ -1669,10 +1666,10 @@ void jump_if_devices_in_specific_state_action::print(
     {
     action::print( prefix, false );
     printf( " { " );
-    for ( u_int i = 0; i < next_n.size(); i++ )
+    std::for_each( next_n.begin(), next_n.end(), [&]( int const& n )
         {
-        printf( "%d ", next_n[ i ] );
-        }
+        printf( "%d ", n );
+        } );
     printf( "}" );
     if ( new_line )
         {
@@ -2145,7 +2142,9 @@ bool operation_state::is_goto_next_state( int& next_state ) const
     {
     auto to_new_state = dynamic_cast<jump_if_devices_in_specific_state_action*>(
         ( *mode_step )[ step::A_TO_STEP_IF ] );
-    return to_new_state->is_jump( next_state );
+    if ( to_new_state ) return to_new_state->is_jump( next_state );
+
+    return false;
     }
 //-----------------------------------------------------------------------------
 void operation_state::add_dx_step_time()
