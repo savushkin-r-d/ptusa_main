@@ -203,6 +203,37 @@ TEST( device_manager, add_io_device )
     EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
     auto WT1 = WT( name.c_str() );
     EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( WT1 ) );
+
+    //device::DT_REGULATOR, DST_REGULATOR_PID
+    name = std::string( "C1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_REGULATOR, device::DST_REGULATOR_PID, name.c_str(),
+        "Test PID", "C" );
+    EXPECT_EQ( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto C1 = C( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( C1 ) );
+
+    //device::DT_REGULATOR, DST_REGULATOR_THLD
+    name = std::string( "C2" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_REGULATOR, device::DST_REGULATOR_THLD, name.c_str(),
+        "Test regulator", "C" );
+    EXPECT_EQ( nullptr, res );
+    dev = G_DEVICE_MANAGER()->get_device( name.c_str() );
+    EXPECT_NE( G_DEVICE_MANAGER()->get_stub_device(), dev );
+    auto C2 = C( name.c_str() );
+    EXPECT_NE( STUB(), dynamic_cast<dev_stub*>( C2 ) );
+
+    //device::DT_REGULATOR, --
+    name = std::string( "C3" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_REGULATOR, device::DST_REGULATOR_THLD + 1, name.c_str(),
+        "Test regulator", "C" );
+    EXPECT_EQ( nullptr, res );
+    auto C3 = C( name.c_str() );
+    EXPECT_EQ( STUB(), dynamic_cast<dev_stub*>( C3 ) );
     }
 
 TEST( device_manager, clear_io_devices )
@@ -795,4 +826,158 @@ TEST( wages_RS232, evaluate_io )
     {
     wages_RS232 w1( "W1" );
     w1.evaluate_io();
+    }
+
+TEST( threshold_regulator, set_value )
+    {
+    threshold_regulator TRC1( "TRC1" );
+    device* dev = static_cast<device*>( &TRC1 );
+
+    G_DEVICE_MANAGER()->clear_io_devices();
+    auto TE_name = std::string( "TE1" );
+    auto res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_TE, device::DST_TE_VIRT, TE_name.c_str(), "Test sensor", "T" );
+    ASSERT_EQ( nullptr, res );
+    const auto TE1 = TE( TE_name.c_str() );
+    ASSERT_NE( STUB(), dynamic_cast<dev_stub*>( TE1 ) );
+    auto M_name = std::string( "M1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_M, device::DST_M_VIRT, M_name.c_str(), "Test motor", "M" );
+    ASSERT_EQ( nullptr, res );
+    const auto M1 = G_DEVICE_MANAGER()->get_M( M_name.c_str() );
+    ASSERT_NE( nullptr, M1 );
+    ASSERT_NE( STUB(), dynamic_cast<dev_stub*>( M1 ) );
+
+    const auto SET_VALUE = 10;
+    const auto DELTA_VALUE = 1;
+
+    //Correct processing when we have no set sensor and actuator.
+    dev->set_value( SET_VALUE );
+
+    dev->set_string_property( "IN_VALUE", TE_name.c_str() );
+    dev->set_string_property( "OUT_VALUE", M_name.c_str() );
+    dev->set_cmd( "P_DELTA", 0, DELTA_VALUE );
+    dev->off();
+
+    //Regulator switched off - it should not switch on actuator regardless
+    //temperature.
+    dev->set_value( SET_VALUE );
+    EXPECT_EQ( 0, M1->get_state() );
+
+    dev->on();
+
+    //Regulator switched on, temperature is below range - it should switch
+    //on actuator.
+    TE1->set_cmd( "V", 0, SET_VALUE / 10 );
+    dev->set_value( SET_VALUE );
+    EXPECT_EQ( 1, M1->get_state() );
+
+    //Regulator switched on, temperature is above range - it should switch off
+    //actuator.
+    TE1->set_cmd( "V", 0, SET_VALUE * 2 );
+    dev->set_value( SET_VALUE );
+    EXPECT_EQ( 0, M1->get_state() );
+
+    //Regulator switched on, temperature is inside range - it should not change
+    //actuators state.
+    TE1->set_cmd( "V", 0, SET_VALUE );
+    dev->set_value( SET_VALUE );
+    EXPECT_EQ( 0, M1->get_state() );
+
+    dev->set_cmd( "P_IS_REVERSE", 0, 1 );
+
+    //Regulator switched on, temperature is above range, but reverse is on -
+    //it should switch on actuators.
+    TE1->set_cmd( "V", 0, SET_VALUE * 2 );
+    dev->set_value( SET_VALUE );
+    EXPECT_EQ( 1, M1->get_state() );
+
+    //Regulator switched on, temperature is below range, but reverse is on -
+    //it should switch on actuators.
+    TE1->set_cmd( "V", 0, SET_VALUE / 10 );
+    dev->set_value( SET_VALUE * 2 );
+    EXPECT_EQ( 0, M1->get_state() );
+
+    dev->set_cmd( "P_IS_REVERSE", 0, .0 );
+    dev->off();
+
+    //Regulator switched off.    
+    dev->set_value( SET_VALUE );
+    EXPECT_EQ( 0, M1->get_state() );
+
+    dev->on();
+
+    //Use counter as a sensor.    
+    auto name = std::string( "FQT1" );
+    res = G_DEVICE_MANAGER()->add_io_device(
+        device::DT_FQT, device::DST_FQT_VIRT, name.c_str(), "Test counter", "F" );
+    ASSERT_EQ( nullptr, res );
+    const auto FQT1 = virtual_FQT( name.c_str() );
+    ASSERT_NE( STUB(), dynamic_cast<dev_stub*>( FQT1 ) );
+    dev->set_string_property( "IN_VALUE", name.c_str() );
+    
+    //Regulator switched on, flow is below range - it should switch
+    //on actuator.
+    FQT1->set_cmd( "F", 0, SET_VALUE );
+    dev->set_value( SET_VALUE * 2 );
+    EXPECT_EQ( 1, M1->get_state() );
+    }
+
+TEST( threshold_regulator, set_cmd )
+    {
+    threshold_regulator p1( "C1" );
+    const int BUFF_SIZE = 200;
+    char buff[ BUFF_SIZE ] = { 0 };
+
+    p1.save_device( buff );
+    EXPECT_STREQ(
+        "\tC1={M=0, ST=0, V=0, P_IS_REVERSE=0, P_DELTA=0},\n", buff );
+
+    p1.set_cmd( "P_DELTA", 0, 10 );
+    p1.set_cmd( "P_IS_REVERSE", 0, 1 );
+    p1.on();
+    p1.save_device( buff );
+    EXPECT_STREQ(
+        "\tC1={M=0, ST=1, V=0, P_IS_REVERSE=1, P_DELTA=10},\n", buff );
+    }
+
+TEST( threshold_regulator, set_state )
+    {
+    threshold_regulator p1( "C1" );
+
+    //Switch on regulator.
+    p1.set_state( 1 );
+    EXPECT_EQ( 1, p1.get_state() );
+
+    //Switch on regulator (already on).
+    p1.set_state( 1 );
+    EXPECT_EQ( 1, p1.get_state() );
+
+    //Non correct new state - should be no changes.
+    p1.set_state( 2 );
+    EXPECT_EQ( 1, p1.get_state() );
+
+    //Switch off regulator.
+    p1.set_state( 0 );
+    EXPECT_EQ( 0, p1.get_state() );
+    }
+
+TEST( threshold_regulator, get_name_in_Lua )
+    {
+    auto name = "C1";
+    threshold_regulator p1( name );
+
+    EXPECT_STREQ( name, p1.get_name_in_Lua() );
+    }
+
+TEST( threshold_regulator, set_string_property )
+    {
+    auto name = "C1";
+    threshold_regulator p1( name );
+
+    //TODO - refactor set_string_property() to return result.
+    p1.set_string_property( nullptr, nullptr );
+    p1.set_string_property( "IN_VALUE", "FQT1" );
+    p1.set_string_property( "OUT_VALUE", "M1" );
+    p1.set_string_property( "NO_SUCH_PROPERTY", "AA1" );
     }

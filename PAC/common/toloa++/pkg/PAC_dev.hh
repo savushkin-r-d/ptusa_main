@@ -554,7 +554,7 @@ i_DO_AO_device* F(const char* dev_name);
 /// @param dev_name - имя.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-PID* C( const char* dev_name );
+i_DO_AO_device* C( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение камеры по имени.
 ///

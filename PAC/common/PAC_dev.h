@@ -24,6 +24,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <memory>
 
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
@@ -589,6 +590,10 @@ class device : public i_DO_AO_device, public par_device
             //TS
             DST_TS = 1,
             DST_TS_VIRT,
+
+            //DT_REGULATOR
+            DST_REGULATOR_PID = 1,
+            DST_REGULATOR_THLD,
             };
 
         device( const char *dev_name, device::DEVICE_TYPE type,
@@ -673,9 +678,7 @@ class device : public i_DO_AO_device, public par_device
         /// строки.
         ///
         /// Для использования в Lua.
-        virtual void set_string_property(const char* field, const char* value)
-            {
-            }
+        virtual void set_string_property( const char* field, const char* value );
 
     protected:
         /// @brief Сохранение дополнительных данных устройства в виде скрипта Lua.
@@ -4572,6 +4575,53 @@ class dev_stub : public i_counter, public valve, public i_wages,
     };
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+class threshold_regulator :public device, public i_Lua_save_device
+    {
+    public:
+        enum class PARAM
+            {
+            P_IS_REVERSE = 1,	        ///Обратного (реверсивного) действия.
+            P_DELTA,
+
+            PARAMS_COUNT
+            };
+
+        explicit threshold_regulator( const char* name );
+
+        int get_state() override;
+
+        void direct_off() override;
+
+        void direct_set_state( int new_state ) override;
+
+        void direct_on() override;
+
+        const char* get_name_in_Lua() const override;
+
+        float get_value() override;
+
+        void direct_set_value( float val ) override;
+
+        int save_device( char* buff ) override;
+
+        void set_string_property( const char* field, const char* value ) override;
+
+    private:
+        enum class STATE
+            {
+            OFF,
+            ON,
+            };
+
+        STATE state = STATE::OFF;
+        int out_state = 0;
+        float set_value = 0;
+
+        device* sensor = nullptr;
+        device* actuator = nullptr;
+    };
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 /// @brief Менеджер устройств.
 ///
 /// Содержит информацию обо всех устройствах проекта.
@@ -4658,7 +4708,7 @@ class device_manager: public i_Lua_save_device
         wages* get_WT( const char *dev_name );
 
         /// @brief Получение регулятора по имени.
-        PID* get_C( const char* dev_name );
+        i_DO_AO_device* get_C( const char* dev_name );
 
         /// @brief Получение сигнальной колонны по имени.
         signal_column* get_HLA( const char* dev_name );
@@ -4694,7 +4744,7 @@ class device_manager: public i_Lua_save_device
 
         device* get_stub_device()
             {
-            return static_cast<device*>( static_cast<valve*>( &stub ) );
+            return dynamic_cast<device*>( dynamic_cast<valve*>( &stub ) );
             }
 
         int init_params();
@@ -5033,7 +5083,7 @@ i_DO_AO_device* F(const char* dev_name);
 /// @param dev_name - имя.
 /// @return - устройство с заданным номером. Если нет такого устройства,
 /// возвращается заглушка (@ref dev_stub).
-PID* C( const char* dev_name );
+i_DO_AO_device* C( const char* dev_name );
 //-----------------------------------------------------------------------------
 /// @brief Получение сигнальной колонны по имени.
 ///
