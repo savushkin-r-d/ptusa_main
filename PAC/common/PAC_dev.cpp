@@ -5253,18 +5253,17 @@ void wages_eth::evaluate_io()
 
 void wages_eth::tare()
     {
+    //Этот метод нужен для тарировки весов (когда текущий вес устанавливается 
+    //в качестве нулевого).
     }
 
 void wages_eth::set_string_property( const char* field, const char* value )
     {
-    if ( !weth )
+    if ( !weth && strcmp( field, "IP" ) == 0 )
         {
-        if ( strcmp( field, "IP" ) == 0 ) 
-            {
-            int port = 1001;
-            int id = 0;
-            weth = new iot_wages_eth( id, (char*)value, port );
-            }
+        int port = 1001;
+        int id = 0;
+        weth = new iot_wages_eth( id, (char*)value, port );
         }
     }
 

@@ -13,7 +13,7 @@ class iot_wages_eth : public i_iot_node
 
 		int get_wages_state() const;
 
-		float get_wages_value();
+		float get_wages_value() const;
 
 		void set_wages_value( float new_value );
 
@@ -21,6 +21,5 @@ class iot_wages_eth : public i_iot_node
 		int status = 0;
 		int state = 0;
 		float value = .0f;
-		float tmp_value = 0.f;
 		auto_smart_ptr < tcp_client > tc;
 	};

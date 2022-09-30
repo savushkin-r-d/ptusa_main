@@ -3234,7 +3234,7 @@ class wages_eth : public analog_io_device, public i_wages
         void set_string_property( const char* field, const char* value ) override;
 
     private:
-        iot_wages_eth* weth;
+        auto_smart_ptr < iot_wages_eth > weth;
 
         enum class CONSTANTS
         {
