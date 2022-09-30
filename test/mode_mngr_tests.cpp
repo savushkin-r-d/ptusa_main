@@ -610,3 +610,40 @@ TEST( jump_if_devices_in_specific_state_action, is_goto_next_step )
 
 	test_params_manager::removeObject();
 	}
+
+TEST( operation_state, is_goto_next_state )
+	{
+	char* res = 0;
+	mock_params_manager* par_mock = new mock_params_manager();
+	test_params_manager::replaceEntity( par_mock );
+
+	EXPECT_CALL( *par_mock, init( _ ) );
+	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
+	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
+		.Times( AtLeast( 2 ) )
+		.WillRepeatedly( Return( res ) );
+
+	par_mock->init( 0 );
+	par_mock->final_init( 0, 0, 0 );
+
+	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
+
+	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
+	auto operation_mngr = test_tank.get_modes_manager();
+	auto operation = ( *operation_mngr )[ 1 ];
+	auto operation_state = operation[ 0 ][ 1 ];
+	auto step = operation_state[ 0 ][ 0 ];
+
+	operation->start();
+	operation->evaluate();
+
+	auto action = reinterpret_cast<jump_if_devices_in_specific_state_action*>
+		( ( *step )[ step::ACTIONS::A_TO_STEP_IF ] );
+
+	int next = 0;
+	auto is_goto_next_state = operation_state->is_goto_next_state( next );
+	EXPECT_EQ( false, is_goto_next_state );			//Empty action.
+	EXPECT_EQ( -1, next );
+
+	test_params_manager::removeObject();
+	}
