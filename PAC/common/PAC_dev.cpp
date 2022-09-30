@@ -247,6 +247,16 @@ void device::off()
         }
     }
 //-----------------------------------------------------------------------------
+void device::set_string_property( const char* field, const char* value )
+    {
+    if ( G_DEBUG )
+        {
+        G_LOG->debug( "%s\t device::set_string_property() - "
+            "field = %s, val = \"%s\"",
+            name, field, value );
+        }
+    }
+//-----------------------------------------------------------------------------
 int device::save_device( char* buff, const char* prefix )
     {
     int res = sprintf( buff, "%s%s={M=%d, ", prefix, name, is_manual_mode );
@@ -1421,9 +1431,9 @@ i_DO_AO_device* device_manager::get_F(const char* dev_name)
     return (i_DO_AO_device*)get_device(device::DT_F, dev_name);
     }
 //-----------------------------------------------------------------------------
-PID* device_manager::get_C( const char* dev_name )
+i_DO_AO_device* device_manager::get_C( const char* dev_name )
     {
-    return (PID*)get_device( device::DT_REGULATOR, dev_name );
+    return dynamic_cast<i_DO_AO_device*>( get_device( device::DT_REGULATOR, dev_name ) );
     }
 //-----------------------------------------------------------------------------
 signal_column* device_manager::get_HLA( const char* dev_name )
@@ -2099,8 +2109,22 @@ io_device* device_manager::add_io_device( int dev_type, int dev_sub_type,
             break;
 
         case device::DT_REGULATOR:
-            new_device = new PID( dev_name );
-            new_io_device = 0;
+            switch ( dev_sub_type )
+                {
+                case device::DST_NONE:
+                case device::DST_REGULATOR_PID:
+                    new_device = new PID( dev_name );
+                    break;
+
+                case device::DST_REGULATOR_THLD:
+                    new_device = new threshold_regulator( dev_name );
+                    break;
+
+                default:
+                    G_LOG->debug( "unknown DT_REGULATOR device subtype %d",
+                        dev_sub_type );
+                    break;
+                }
             break;
 
         case device::DT_HLA:
@@ -2515,6 +2539,127 @@ void dev_stub::tare()
 //-----------------------------------------------------------------------------
 void dev_stub::process_DO( u_int n, DO_state state, const char* name )
     {
+    }
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+threshold_regulator::threshold_regulator( const char* name ) :device( name,
+    device::DEVICE_TYPE::DT_REGULATOR,
+    device::DEVICE_SUB_TYPE::DST_REGULATOR_THLD,
+    static_cast<int>( PARAM::PARAMS_COUNT ) )
+    {
+    set_par_name( static_cast<int>( PARAM::P_DELTA ), 0, "P_DELTA" );
+    set_par_name( static_cast<int>( PARAM::P_IS_REVERSE ), 0, "P_IS_REVERSE" );
+    }
+//-----------------------------------------------------------------------------
+int threshold_regulator::get_state()
+    {
+    return static_cast<int>( state );
+    };
+//-----------------------------------------------------------------------------
+void threshold_regulator::direct_off()
+    {
+    if ( state != STATE::OFF )
+        {
+        state = STATE::OFF;
+        if ( actuator )
+            {
+            actuator->off();
+            }
+        }
+    };
+//-----------------------------------------------------------------------------
+void threshold_regulator::direct_set_state( int new_state )
+    {
+    switch ( static_cast<STATE>( new_state ) )
+        {
+        case STATE::OFF:
+            direct_off();
+            break;
+
+        case STATE::ON:
+            direct_on();
+            break;
+        }
+    };
+//-----------------------------------------------------------------------------
+void threshold_regulator::direct_on()
+    {
+    if ( state != STATE::ON )
+        {
+        state = STATE::ON;
+        }
+    };
+//-----------------------------------------------------------------------------
+const char* threshold_regulator::get_name_in_Lua() const
+    {
+    return get_name();
+    };
+//-----------------------------------------------------------------------------
+float threshold_regulator::get_value()
+    {
+    return static_cast<float>( out_state );
+    };
+//-----------------------------------------------------------------------------
+void threshold_regulator::direct_set_value( float val )
+    {
+    set_value = val;
+    if ( sensor && actuator )
+        {
+        auto in_value = sensor->get_value();
+        if ( sensor->get_type() == DT_FQT )
+            {
+            in_value = dynamic_cast <i_counter*> ( sensor )->get_flow();
+            }
+
+        auto idx = static_cast<int>( PARAM::P_IS_REVERSE );
+        auto is_reverse = ( *par )[ idx ] > 0;
+        if ( STATE::OFF == state )
+            {
+            out_state = 0;
+            actuator->off();
+            }
+        else
+            {
+            auto delta = ( *par )[ static_cast<int>( PARAM::P_DELTA ) ];
+            if ( in_value > set_value + delta )
+                {
+                out_state = is_reverse ? 1 : 0;
+                }
+            else if ( in_value < set_value - delta )
+                {
+                out_state = is_reverse ? 0 : 1;
+                }
+            }
+
+        actuator->set_state( out_state );
+        }
+    };
+//-----------------------------------------------------------------------------
+void threshold_regulator::set_string_property( const char* field, const char* value )
+    {
+    if ( !field ) return;
+
+    device::set_string_property( field, value );
+    switch ( field[ 0 ] )
+        {
+        //IN_VALUE
+        case 'I':
+            sensor = G_DEVICE_MANAGER()->get_device( value );
+            break;
+
+        //OUT_VALUE
+        case 'O':
+            actuator = G_DEVICE_MANAGER()->get_device( value );
+            break;
+
+        default:
+            break;
+        }
+    }
+//-----------------------------------------------------------------------------
+int threshold_regulator::save_device( char* buff )
+    {
+    return device::save_device( buff, "\t" );
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -6788,7 +6933,7 @@ i_DO_AO_device* F(const char* dev_name)
     return G_DEVICE_MANAGER()->get_F(dev_name);
     }
 //-----------------------------------------------------------------------------
-PID* C( const char* dev_name )
+i_DO_AO_device* C( const char* dev_name )
     {
     return G_DEVICE_MANAGER()->get_C( dev_name );
     }
