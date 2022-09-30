@@ -8,11 +8,11 @@ Russian readme is [here](russian_readme/readme.md).
 
 Controller logic implemented by Lua-script. At runtime, control is passed through special Lua functions that are responsible for the various stages of the control program.
 
-1. The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language):
+1.  The general schema of controller program work (in [Drakon](https://drakonhub.com) diagram language):
 
 <p align="center"><img src="docs/drakon_diagram/images/control_program.svg"></p>
 
-2. Execution of the technological process:
+2.  Execution of the technological process:
 
 <p align="center"><img src="docs/drakon_diagram/images/execution_technological_process.svg" width="400"></p>
 
@@ -24,13 +24,13 @@ Controller logic implemented by Lua-script. At runtime, control is passed throug
 
 <p align="center"><img src="docs/drakon_diagram/images/step.svg" width="300"></p>
 
-<p align="center"><img src="docs/drakon_diagram/images/action.svg" width="400"></p>
+<p align="center"><img src="docs/drakon_diagram/images/action.svg" width="500"></p>
 
-3. When operation is turned on (off) happens next:
+3.  When operation is turned on (off) happens next:
 
 ![operation](readme_images/tech_object__set_mode_en.png)
 
-4. During the execution of command happens next:
+4.  During the execution of command happens next:
 ![command](readme_images/tech_object__exec_cmd_en.png)
 
 ## How to build the project ##
@@ -44,7 +44,7 @@ or, if you are clonned without initializing and updating submodules, try next:
 ### win ###
 
 Requirements:
-1. Microsoft Visual Studio Community 2019
+1.  Microsoft Visual Studio Community 2019
 
 You should open (in Visual Studio) root directory. This you get a CMake based project.
 
@@ -56,7 +56,7 @@ Or clone reposytory in Qt:
     New -> Import Project -> Git Clone
     specify the repository link and check the box Recursive
 	
-3. Microsoft Visual Studio Community 2022
+3.  Microsoft Visual Studio Community 2022
 
 Before starting the project, you need to make sure that you have installed C++ CMake tools for Windows.
 C++ CMake tools for Windows are installed using:
@@ -78,9 +78,9 @@ To run demo project you should use this command line:
 
 ### win ###
 
-1. After building and deploying *`windows-default`* cmake-configuration:
+1.  After building and deploying *`windows-default`* cmake-configuration:
 
 ```cmd
     bin\install\windows-default\Release\ptusa_main.exe demo_projects/T1-PLCnext-Demo/main.plua path demo_projects/T1-PLCnext-Demo/ sys_path demo_projects/T1-PLCnext-Demo/sys/ debug
 ```
-2. Launching a project in Microsoft Visual Studio Community 2022: `Select a launch item -> ptusa_main.exe`.
+2.  Launching a project in Microsoft Visual Studio Community 2022: `Select a launch item -> ptusa_main.exe`.
