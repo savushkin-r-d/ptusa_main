@@ -205,7 +205,7 @@ int tech_object::set_mode( u_int operation_n, int newm )
                         {
                         //Проверка режима на проверку ОС устройств.
                         const int ERR_STR_SIZE = 41;
-                        char res_str[ ERR_STR_SIZE ] = "обр. связь ";
+                        char res_str[ ERR_STR_SIZE ] = "авария ";
 
                         int len = strlen( res_str );
                         res = op->check_devices_on_run_state(
@@ -1413,7 +1413,7 @@ int tech_object::check_operation_on( u_int operation_n, bool show_error )
 
     //Проверка режима на проверку ОС устройств.
     const int S_SIZE = 41;
-    char res_str[ S_SIZE ] = "обр. связь ";
+    char res_str[ S_SIZE ] = "авария ";
 
     int l = strlen( res_str );
     int res = op->check_devices_on_run_state( res_str + l, S_SIZE - l );

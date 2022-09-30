@@ -327,6 +327,7 @@ TEST( motor_altivar_linear, get_linear_speed )
     EXPECT_FALSE( v );
     }
 
+
 TEST( counter_f, get_state )
     {
     counter_f fqt1( "FQT1" );
@@ -406,6 +407,30 @@ TEST( counter_f, get_min_flow )
     EXPECT_EQ( 1.1f, res );
     }
 
+TEST( counter_f, get_error_description )
+    {
+    counter fqt1( "FQT1" );
+    auto res = fqt1.get_error_description();        //Нет ошибок.
+    EXPECT_STREQ( "", res );
+
+    fqt1.set_cmd( "ST", 0, -1 );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "обратная связь", res );
+
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_ERROR ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "счет импульсов", res );
+
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_LOW_ERR ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "канал потока (нижний предел)", res );
+
+    fqt1.set_cmd( "ST", 0, static_cast<int>( i_counter::STATES::S_HI_ERR ) );
+    res = fqt1.get_error_description();
+    EXPECT_STREQ( "канал потока (верхний предел)", res );
+    }
+
+
 TEST( counter, set_cmd )
     {
     counter fqt1( "FQT1" );
@@ -467,7 +492,6 @@ TEST( counter, get_max_raw_value )
     auto res = fqt1.get_max_raw_value();
     EXPECT_EQ( USHRT_MAX, res );
     }
-
 
 TEST( virtual_counter, get_pump_dt )
     {

@@ -615,6 +615,11 @@ class device : public i_DO_AO_device, public par_device
             return description;
             }
 
+        virtual const char* get_error_description() const
+            {
+            return "обратная связь";
+            }
+
         void set_descr( const char *new_description );
 
         virtual void set_article( const char* new_article );
@@ -4027,6 +4032,8 @@ class base_counter: public i_counter, public device, public io_device
         int set_cmd( const char* prop, u_int idx, double val );
 
         int save_device_ex( char* buff );
+
+        const char* get_error_description() const override;
 
     protected:
         float get_abs_value() const

@@ -2737,9 +2737,9 @@ void base_counter::direct_off()
 void base_counter::direct_set_state( int new_state )
     {
 #ifdef DEBUG_NO_IO_MODULES
-    if ( new_state == static_cast<int>( STATES::S_ERROR ) )
+    if ( new_state < 0 )
         {
-        state = STATES::S_ERROR;
+        state = static_cast<STATES>( new_state );
         return;
         }
 #endif
@@ -2899,6 +2899,29 @@ int base_counter::set_cmd( const char* prop, u_int idx, double val )
 int base_counter::save_device_ex( char* buff )
     {
     return sprintf( buff, "ABS_V=%u, ", get_abs_quantity() );
+    }
+//-----------------------------------------------------------------------------
+const char* base_counter::get_error_description() const
+    {
+    if ( static_cast<int>( state ) < 0 )
+        {
+        switch ( state )
+            {
+            case STATES::S_ERROR:
+                return "счет импульсов";
+
+            case STATES::S_LOW_ERR:
+                return "канал потока (нижний предел)";
+
+            case STATES::S_HI_ERR:
+                return "канал потока (верхний предел)";
+
+            default:
+                return device::get_error_description();
+            }
+        }
+
+    return "";
     }
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
