@@ -32,11 +32,9 @@ protected:
     int curRecipeStartBlock;
     unsigned long lastEvalTime;
     unsigned long recipeStartAddr;
-    void SaveRecipeName();
 
-    void FormRecipeList();
-    unsigned long startAddr();
-    unsigned long startAddr(int recNo);
+    virtual unsigned long startAddr();
+    virtual unsigned long startAddr(int recNo);
     unsigned char* recipeMemory;
     unsigned long recipeMemorySize;
     virtual int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
@@ -59,8 +57,6 @@ public:
     char* recipeList;
     ///@brief Имя текущего рецепта
     char* currentRecipeName;
-    ///@brief Длина имени рецепта
-    static int recipeNameLength;
     virtual void CopyRecipe();
     virtual void PasteRecipe();
     virtual void NullifyRecipe();
@@ -208,11 +204,11 @@ class TRecipeManager : public ParentRecipeManager
         void SaveRecipeName();
 
         void FormRecipeList();
-        unsigned long startAddr();
-        unsigned long startAddr(int recNo);
+        unsigned long startAddr() override;
+        unsigned long startAddr(int recNo) override;
         unsigned char* recipeMemory;
         unsigned long recipeMemorySize;
-        int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false ) override;
+        int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false );
         int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false) override;
     public:
         ///@brief Имя файла с рецептами
@@ -312,7 +308,7 @@ class TRecipeManager : public ParentRecipeManager
         /// @fn  void TRecipeManager::LoadRecipeName()
         /// @brief Обновляет имя рецепта из энергонезависимой памяти
         /// @return   void
-        void LoadRecipeName() override;
+        void LoadRecipeName();
         /// @fn  void TRecipeManager::EvalRecipe()
         /// @brief Обработка рецептов, периодически сохраняет текущее имя рецепта в энергонезависимую память и формирует список рецептов
         /// @return   void
@@ -320,11 +316,11 @@ class TRecipeManager : public ParentRecipeManager
         /// @fn  void TRecipeManager::CopyRecipe()
         /// @brief Копирует текущий рецепт в буфер
         /// @return   void
-        void CopyRecipe() override;
+        void CopyRecipe();
         /// @fn  void TRecipeManager::PasteRecipe()
         /// @brief Переписывает текущий рецепт значениями из буффера
         /// @return   void
-        void PasteRecipe() override;
+        void PasteRecipe();
         /// @fn int TRecipeManager::SaveToFile()
         /// @brief Сохранение рецептов модуля в файл
         /// @return Возвращает 0 в случае успешного завершения
@@ -336,7 +332,7 @@ class TRecipeManager : public ParentRecipeManager
         /// @fn  void TRecipeManager::NullifyRecipe()
         /// @brief Обнуляет текущий рецепт
         /// @return   void
-        void NullifyRecipe() override;
+        void NullifyRecipe();
         /// @fn   TRecipeManager::TRecipeManager(int lineNo)
         /// @brief Конструктор класса
         /// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти
@@ -369,7 +365,7 @@ class TRecipeManager : public ParentRecipeManager
             MT_CAUSTIC = 0,
             MT_ACID,
         };
-    private:
+    protected:
         ///@brief Флаг, сигнализирующий об изменении параметров рецепта
         int recipechanged;
         int mediumType;
@@ -381,11 +377,11 @@ class TRecipeManager : public ParentRecipeManager
         void SaveRecipeName();
 
         void FormRecipeList();
-        unsigned long startAddr();
-        unsigned long startAddr(int recNo);
+        unsigned long startAddr() override;
+        unsigned long startAddr(int recNo) override;
         unsigned char* recipeMemory;
         unsigned long recipeMemorySize;
-        int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false) override;
+        int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);
         int WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false) override;
     public:
         char* defaultfilename;
@@ -496,11 +492,11 @@ class TRecipeManager : public ParentRecipeManager
         /// @fn  void TRecipeManager::CopyRecipe()
         /// @brief Копирует текущий рецепт в буфер
         /// @return   void
-        void CopyRecipe() override;
+        void CopyRecipe();
         /// @fn  void TRecipeManager::PasteRecipe()
         /// @brief Переписывает текущий рецепт значениями из буффера
         /// @return   void
-        void PasteRecipe() override;
+        void PasteRecipe();
         /// @fn int TRecipeManager::SaveToFile()
         /// @brief Сохранение рецептов модуля в файл
         /// @return Возвращает 0 в случае успешного завершения
@@ -512,7 +508,7 @@ class TRecipeManager : public ParentRecipeManager
         /// @fn  void TRecipeManager::NullifyRecipe()
         /// @brief Обнуляет текущий рецепт
         /// @return   void
-        void NullifyRecipe() override;
+        void NullifyRecipe();
         /// @fn   TRecipeManager::TRecipeManager(int lineNo)
         /// @brief Конструктор класса
         /// @param lineNo номер линии мойки, начинается с 0. От него зависит расположение рецептов в памяти

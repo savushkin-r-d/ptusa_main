@@ -18,11 +18,11 @@ int TRecipeManager::recipePerLine = 25;
 
 int TRecipeManager::blocksPerRecipe = 4;
 
-int TRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 8;
+int ParentRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 8;
 
 int TRecipeManager::startRecipeParamsOffset = MAX_REC_NAME_LENGTH;
 
-unsigned char* TRecipeManager::recipeCopyBuffer = nullptr;
+unsigned char* ParentRecipeManager::recipeCopyBuffer = nullptr;
 
 ParentRecipeManager::ParentRecipeManager()
 {
@@ -32,6 +32,7 @@ ParentRecipeManager::ParentRecipeManager()
 int ParentRecipeManager::ReadMem(unsigned long startaddr, unsigned long length,
     unsigned char* buf, bool is_string)
 {
+
     if (is_string)
     {
         char* tmp = new char[length * UNICODE_MULTIPLIER];
@@ -45,6 +46,22 @@ int ParentRecipeManager::ReadMem(unsigned long startaddr, unsigned long length,
     }
 
     return 0;
+}
+
+int ParentRecipeManager::WriteMem(unsigned long startaddr, unsigned long length,
+    unsigned char* buf, bool is_string)
+{
+    return 0;
+}
+
+unsigned long ParentRecipeManager::startAddr()
+{
+    return startAddr(currentRecipe);
+}
+
+unsigned long ParentRecipeManager::startAddr(int recNo)
+{
+    return recipeStartAddr + (recNo * blocksPerRecipe) * BLOCK_SIZE;
 }
 
 void ParentRecipeManager::LoadRecipeName()
@@ -81,17 +98,7 @@ void ParentRecipeManager::PasteRecipe()
     }
 }
 
-int ParentRecipeManager::ReadMem(unsigned long startaddr, unsigned long length,
-    unsigned char* buf, bool is_string)
-{
-    return 0;
-}
 
-int ParentRecipeManager::WriteMem(unsigned long startaddr, unsigned long length,
-    unsigned char* buf, bool is_string)
-{
-    return 0;
-}
 TRecipeManager::TRecipeManager( int lineNo ): lineNo(lineNo),
     currentRecipe(0),
     curRecipeStartBlock(0),
@@ -201,12 +208,12 @@ void TRecipeManager::EvalRecipe()
 
 unsigned long TRecipeManager::startAddr()
     {
-    return startAddr(currentRecipe);
+    ParentRecipeManager::startAddr();
     }
 
 unsigned long TRecipeManager::startAddr( int recNo )
     {
-    return recipeStartAddr + (recNo * blocksPerRecipe) * BLOCK_SIZE;
+    ParentRecipeManager::startAddr(recNo);
     }
 
 float TRecipeManager::getRecipeValue( int recNo, int valueNo )
@@ -600,23 +607,11 @@ void TRecipeManager::NullifyRecipe()
 int TRecipeManager::ReadMem(unsigned long startaddr, unsigned long length,
     unsigned char* buf, bool is_string)
 {
-    if (is_string)
-    {
-        char* tmp = new char[length * UNICODE_MULTIPLIER];
-        memcpy(tmp, recipeMemory + startaddr, length);
-        convert_windows1251_to_utf8((char*)buf, tmp);
-        delete[] tmp;
-    }
-    else
-    {
-        memcpy(buf, recipeMemory + startaddr, length);
-    }
-
-    return 0;
+    ParentRecipeManager::ReadMem(startaddr, length, buf, is_string);
 }
 
 int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length,
-    unsigned char* buf, bool is_string )
+    unsigned char* buf, bool is_string ) 
     {
     if ( is_string )
         {
@@ -807,12 +802,12 @@ void TMediumRecipeManager::EvalRecipe()
 
 unsigned long TMediumRecipeManager::startAddr()
 {
-    return startAddr(currentRecipe);
+    ParentRecipeManager::startAddr();
 }
 
 unsigned long TMediumRecipeManager::startAddr(int recNo)
 {
-    return recipeStartAddr + (recNo * blocksPerRecipe) * BLOCK_SIZE;
+    ParentRecipeManager::startAddr(recNo);
 }
 
 float TMediumRecipeManager::getRecipeValue(int recNo, int valueNo)
@@ -984,19 +979,7 @@ void TMediumRecipeManager::NullifyRecipe()
 
 int TMediumRecipeManager::ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string)
 {
-    if (is_string)
-        {
-        char* tmp = new char[length * UNICODE_MULTIPLIER];
-        memcpy(tmp, recipeMemory + startaddr, length);
-        convert_windows1251_to_utf8((char*)buf, tmp);
-        delete[] tmp;
-        }
-    else
-        {
-        memcpy(buf, recipeMemory + startaddr, length);
-        }
-
-    return 0;
+    ParentRecipeManager::ReadMem(startaddr, length, buf, is_string);
 }
 
 int TMediumRecipeManager::WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string)
