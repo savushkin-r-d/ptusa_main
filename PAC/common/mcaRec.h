@@ -204,8 +204,8 @@ class TRecipeManager : public ParentRecipeManager
         void SaveRecipeName();
 
         void FormRecipeList();
-        unsigned long startAddr() override;
-        unsigned long startAddr(int recNo) override;
+        unsigned long startAddr();
+        unsigned long startAddr(int recNo);
         unsigned char* recipeMemory;
         unsigned long recipeMemorySize;
         int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false );
@@ -213,17 +213,6 @@ class TRecipeManager : public ParentRecipeManager
     public:
         ///@brief Имя файла с рецептами
         char* defaultfilename;
-        ///@brief Начальный блок для всех экземляров рецептов
-        static int startRecipeBlock;
-        ///@brief Количество рецептов на линию
-        static int recipePerLine;
-        ///@brief Длина рецепта в блоках
-        static int blocksPerRecipe;
-        ///@brief Относительный адрес начала параметров (от начального адреса рецепта)
-        static int startRecipeParamsOffset;
-        ///@brief Буфер для копирования рецептов
-        static unsigned char* recipeCopyBuffer;
-        ///@brief Список рецептов для сервера
         char* recipeList;
         /// @fn  int TRecipeManager::LoadRecipeToParams(int recipeNo, int recipeStartPos, int paramsStartPos, int parQuantity, TParams* par)
         /// @brief Загружает указанное число параметров из указанного рецепта с указанной позиции в указанные параметры
@@ -377,8 +366,8 @@ class TRecipeManager : public ParentRecipeManager
         void SaveRecipeName();
 
         void FormRecipeList();
-        unsigned long startAddr() override;
-        unsigned long startAddr(int recNo) override;
+        unsigned long startAddr();
+        unsigned long startAddr(int recNo);
         unsigned char* recipeMemory;
         unsigned long recipeMemorySize;
         int ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string = false);

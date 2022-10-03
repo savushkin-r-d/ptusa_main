@@ -12,11 +12,11 @@
 
 #include "utf2cp1251.h"
 
-int TRecipeManager::startRecipeBlock = 0;
+int ParentRecipeManager::startRecipeBlock = 0;
 
-int TRecipeManager::recipePerLine = 25;
+int ParentRecipeManager::recipePerLine = 25;
 
-int TRecipeManager::blocksPerRecipe = 4;
+int ParentRecipeManager::blocksPerRecipe = 4;
 
 int ParentRecipeManager::recipeNameLength = MAX_REC_NAME_LENGTH - 8;
 
@@ -208,12 +208,12 @@ void TRecipeManager::EvalRecipe()
 
 unsigned long TRecipeManager::startAddr()
     {
-    ParentRecipeManager::startAddr();
+    return ParentRecipeManager::startAddr();
     }
 
 unsigned long TRecipeManager::startAddr( int recNo )
     {
-    ParentRecipeManager::startAddr(recNo);
+    return ParentRecipeManager::startAddr(recNo);
     }
 
 float TRecipeManager::getRecipeValue( int recNo, int valueNo )
@@ -607,7 +607,7 @@ void TRecipeManager::NullifyRecipe()
 int TRecipeManager::ReadMem(unsigned long startaddr, unsigned long length,
     unsigned char* buf, bool is_string)
 {
-    ParentRecipeManager::ReadMem(startaddr, length, buf, is_string);
+    return ParentRecipeManager::ReadMem(startaddr, length, buf, is_string);
 }
 
 int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length,
@@ -802,12 +802,12 @@ void TMediumRecipeManager::EvalRecipe()
 
 unsigned long TMediumRecipeManager::startAddr()
 {
-    ParentRecipeManager::startAddr();
+    return ParentRecipeManager::startAddr();
 }
 
 unsigned long TMediumRecipeManager::startAddr(int recNo)
 {
-    ParentRecipeManager::startAddr(recNo);
+    return ParentRecipeManager::startAddr(recNo);
 }
 
 float TMediumRecipeManager::getRecipeValue(int recNo, int valueNo)
@@ -974,12 +974,12 @@ void TMediumRecipeManager::PasteRecipe()
 
 void TMediumRecipeManager::NullifyRecipe()
 {
-    ParentRecipeManager::NullifyRecipe();
+    return ParentRecipeManager::NullifyRecipe();
 }
 
 int TMediumRecipeManager::ReadMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string)
 {
-    ParentRecipeManager::ReadMem(startaddr, length, buf, is_string);
+    return ParentRecipeManager::ReadMem(startaddr, length, buf, is_string);
 }
 
 int TMediumRecipeManager::WriteMem(unsigned long startaddr, unsigned long length, unsigned char* buf, bool is_string)
