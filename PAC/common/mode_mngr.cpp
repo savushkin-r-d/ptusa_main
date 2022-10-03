@@ -125,6 +125,19 @@ int operation::stop()
     return 0;
     }
 //-----------------------------------------------------------------------------
+int operation::switch_off()
+    {
+    if ( current_state != IDLE )
+        {        
+        states[ current_state ]->final();
+        current_state = IDLE;
+        states[ IDLE ]->init();
+        states[ IDLE ]->evaluate();
+        }
+
+    return 0;
+    }
+//-----------------------------------------------------------------------------
 int operation::start()
     {
     return start( run_step );   
@@ -207,7 +220,85 @@ void operation::evaluate()
     if ( current_state >= 0 && current_state < STATES_MAX )
         {
         states[ current_state ]->evaluate();
+
+        int next_state = 0;
+        auto res = states[ current_state ]->is_goto_next_state( next_state );
+        if ( res )
+            {            
+            switch ( current_state )
+                {
+                case state_idx::IDLE: 
+                    process_auto_switch_on();
+                    break;
+
+                case state_idx::RUN:
+                    auto unit = owner->owner;
+                    unit->set_mode( n, next_state );
+                    unit->set_err_msg( "автоотключение по запросу",
+                        n, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
+                    break;
+                }
+            }
+        else
+            {
+            is_first_goto_next_state = true;
+            was_fail = false;
+            }
         }
+    }
+//-----------------------------------------------------------------------------
+int operation::process_auto_switch_on()
+    {
+    auto unit = owner->owner;
+    const auto WARN = tech_object::ERR_MSG_TYPES::ERR_DURING_WORK;
+    const auto ERR = tech_object::ERR_MSG_TYPES::ERR_CANT_ON;
+
+    if ( was_fail ) return 1;
+
+    if ( is_first_goto_next_state )
+        {
+        auto result = unit->set_mode( n, operation::RUN );
+        if ( result )
+            {
+            unit->set_err_msg( "автовключение по запросу", n, 0, WARN );
+            return 0;
+            }
+        else
+            {
+            unit->set_err_msg( "нет автовключения по запросу", n, 0, ERR );
+            start_warn = get_millisec();
+            start_wait = get_millisec();
+            }
+        }
+    else
+        {
+        auto dt = G_PAC_INFO()->par[ PAC_info::AUTO_OPERATION_WARN_TIME ] * 1000;
+        auto wt = G_PAC_INFO()->par[ PAC_info::AUTO_OPERATION_WAIT_TIME ] * 1000;
+
+        if ( unit->check_operation_on( n, false ) == 0 )
+            {
+            unit->set_err_msg( "автовключение по запросу", n, 0, WARN );
+            unit->set_mode( n, operation::RUN );
+            return 0;
+            }
+
+        // Прошел заданный интервал для уведомления.
+        else if ( get_delta_millisec( start_warn ) > dt )
+            {
+            unit->check_operation_on( n );
+            unit->set_err_msg( "нет автовключения по запросу", n, 0, ERR );
+            start_warn = get_millisec();
+            }
+
+        // Прошел заданный интервал для ожидания возможности включения операции.
+        else if ( get_delta_millisec( start_wait ) > wt )
+            {
+            unit->set_err_msg( "автовключение по запросу отключено", n, 0, ERR );
+            was_fail = true;
+            }
+        }
+
+    return 1;
     }
 //-----------------------------------------------------------------------------
 void operation::final()

@@ -543,8 +543,12 @@ int tech_object::lua_check_on_mode( u_int mode, bool show_error )
     //Проверка на наличии функции check_on_mode.
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
         name_Lua );
-    lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "check_on_mode" );
-    lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
+    if ( !lua_isnil( lua_manager::get_instance()->get_Lua(), -1 ) )
+        {
+        lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "check_on_mode" );
+        lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
+        }
+    lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
 
     if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
         {
@@ -556,8 +560,12 @@ int tech_object::lua_check_on_mode( u_int mode, bool show_error )
     //Проверка на наличии функции user_check_operation_on.
     lua_getfield( lua_manager::get_instance()->get_Lua(), LUA_GLOBALSINDEX,
         name_Lua );
-    lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "user_check_operation_on" );
-    lua_remove( lua_manager::get_instance()->get_Lua(), -2 );
+    if ( !lua_isnil( lua_manager::get_instance()->get_Lua(), -1 ) )
+        {
+        lua_getfield( lua_manager::get_instance()->get_Lua(), -1, "user_check_operation_on" );
+        lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
+        }
+    lua_remove( lua_manager::get_instance()->get_Lua(), -1 );
 
     if ( lua_isfunction( lua_manager::get_instance()->get_Lua(), -1 ) )
         {

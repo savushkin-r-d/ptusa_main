@@ -104,6 +104,10 @@ TEST( operation, evaluate )
 	par_mock->init( 0 );
 	par_mock->final_init( 0, 0, 0 );
 
+	lua_State* L = lua_open();
+	ASSERT_EQ( 1, tolua_PAC_dev_open( L ) );
+	G_LUA_MANAGER->set_Lua( L );
+
 	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
 	auto test_op = test_tank.get_modes_manager()->add_operation( "Test operation" );
 
@@ -177,7 +181,40 @@ TEST( operation, evaluate )
 	test_op->evaluate();
 	EXPECT_EQ( 3, test_op->active_step() );
 
+	test_op->switch_off();
 
+
+	//Корректное автовключение/автоотключение.	
+	auto operation_state = test_op[ 0 ][ 0 ];
+	auto step = operation_state[ 0 ][ -1 ];
+
+	int next = 0;
+	auto is_goto_next_state = operation_state->is_goto_next_state( next );
+	EXPECT_EQ( false, is_goto_next_state );			//Empty action.
+	EXPECT_EQ( -1, next );
+
+	auto action = reinterpret_cast<jump_if_devices_in_specific_state_action*>
+		( ( *step )[ step::ACTIONS::A_TO_STEP_IF ] );
+	DI1 test_DI_one( "test_DI1", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	action->add_dev( &test_DI_one, 0, 0 );
+	DI1 test_DI_two( "test_DI2", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	action->add_dev( &test_DI_two, 0, 1 );
+	DI1 test_DI_three( "test_DI3", device::DEVICE_TYPE::DT_DI,
+		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
+	action->add_dev( &test_DI_three, 1, 0 );
+
+	//По умолчанию все сигналы неактивны, операция не должна включиться.
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );	
+
+	//Сигнал активен, операция должна включиться.
+	test_DI_one.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+
+	G_LUA_MANAGER->free_Lua();
 	test_params_manager::removeObject();
 	}
 
@@ -607,43 +644,6 @@ TEST( jump_if_devices_in_specific_state_action, is_goto_next_step )
 	//Выполняем операцию, должен осуществиться переход к новому шагу.
 	operation->evaluate();
 	EXPECT_EQ( SET_NEXT_STEP, operation->get_run_active_step() );	
-
-	test_params_manager::removeObject();
-	}
-
-TEST( operation_state, is_goto_next_state )
-	{
-	char* res = 0;
-	mock_params_manager* par_mock = new mock_params_manager();
-	test_params_manager::replaceEntity( par_mock );
-
-	EXPECT_CALL( *par_mock, init( _ ) );
-	EXPECT_CALL( *par_mock, final_init( _, _, _ ) );
-	EXPECT_CALL( *par_mock, get_params_data( _, _ ) )
-		.Times( AtLeast( 2 ) )
-		.WillRepeatedly( Return( res ) );
-
-	par_mock->init( 0 );
-	par_mock->final_init( 0, 0, 0 );
-
-	tech_object test_tank( "Танк1", 1, 1, "T", 10, 10, 10, 10, 10, 10 );
-
-	test_tank.get_modes_manager()->add_operation( "Тестовая операция" );
-	auto operation_mngr = test_tank.get_modes_manager();
-	auto operation = ( *operation_mngr )[ 1 ];
-	auto operation_state = operation[ 0 ][ 1 ];
-	auto step = operation_state[ 0 ][ 0 ];
-
-	operation->start();
-	operation->evaluate();
-
-	auto action = reinterpret_cast<jump_if_devices_in_specific_state_action*>
-		( ( *step )[ step::ACTIONS::A_TO_STEP_IF ] );
-
-	int next = 0;
-	auto is_goto_next_state = operation_state->is_goto_next_state( next );
-	EXPECT_EQ( false, is_goto_next_state );			//Empty action.
-	EXPECT_EQ( -1, next );
 
 	test_params_manager::removeObject();
 	}

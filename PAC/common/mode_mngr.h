@@ -743,6 +743,8 @@ class operation
 
         int start();
 
+        int switch_off();
+
         int start( int new_run_step );
 #ifndef __GNUC__
 #pragma endregion
@@ -811,6 +813,8 @@ class operation
 #endif
 
     private:
+        int process_auto_switch_on();
+
         state_idx current_state;
 
         std::vector< operation_state* > states;
@@ -826,6 +830,11 @@ class operation
         u_int run_step;
 
         u_int run_time;  /// Время выполнения операции (состояние run).
+
+        u_int start_warn = 0;
+        u_int start_wait = 0;
+        bool is_first_goto_next_state = true;
+        bool was_fail = false;
     };
 //-----------------------------------------------------------------------------
 /// @brief Содержит информацию об операциях какого-либо объекта (танк,

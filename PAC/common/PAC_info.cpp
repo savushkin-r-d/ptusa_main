@@ -13,7 +13,7 @@ const u_int_4 PAC_info::MSEC_IN_DAY = 24UL * 60UL * 60UL * 1000UL;
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 PAC_info::PAC_info() :
-    par( saved_params_u_int_4( P_PARAMS_COUNT ) ),
+    par( saved_params_u_int_4( P_PARAMS_COUNT - 1 ) ),
     up_days( 0 ),
     up_hours( 0 ),
     up_mins( 0 ),
@@ -77,6 +77,9 @@ void PAC_info::reset_params()
     par[ P_RESTRICTIONS_MANUAL_TIME ] = 2 * 60 * 1000; // 2 min
 
     par[ P_AUTO_PAUSE_OPER_ON_DEV_ERR ] = 0;
+
+    par[ AUTO_OPERATION_WAIT_TIME ] = 60;
+    par[ AUTO_OPERATION_WARN_TIME ] = 20;
 
     par.save_all();
     }
