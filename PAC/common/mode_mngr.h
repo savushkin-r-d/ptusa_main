@@ -831,8 +831,8 @@ class operation
 
         u_int run_time;  /// Время выполнения операции (состояние run).
 
-        u_int start_warn = 0;
-        u_int start_wait = 0;
+        u_long start_warn = 0;
+        u_long start_wait = 0;
         bool is_first_goto_next_state = true;
         bool was_fail = false;
     };

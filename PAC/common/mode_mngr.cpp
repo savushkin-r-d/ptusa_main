@@ -224,18 +224,22 @@ void operation::evaluate()
         int next_state = 0;
         auto res = states[ current_state ]->is_goto_next_state( next_state );
         if ( res )
-            {            
+            {
+            auto unit = owner->owner;
             switch ( current_state )
                 {
-                case state_idx::IDLE: 
+                case state_idx::IDLE:
                     process_auto_switch_on();
                     break;
 
                 case state_idx::RUN:
-                    auto unit = owner->owner;
                     unit->set_mode( n, next_state );
                     unit->set_err_msg( "автоотключение по запросу",
                         n, 0, tech_object::ERR_MSG_TYPES::ERR_DURING_WORK );
+                    break;
+
+                default:
+                    //TODO. Обработка возможных вариантов переходов.
                     break;
                 }
             }
