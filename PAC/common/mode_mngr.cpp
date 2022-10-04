@@ -239,7 +239,6 @@ void operation::evaluate()
                     break;
 
                 default:
-                    //TODO. Обработка возможных вариантов переходов.
                     break;
                 }
             }
@@ -262,7 +261,7 @@ int operation::process_auto_switch_on()
     if ( is_first_goto_next_state )
         {
         auto result = unit->set_mode( n, operation::RUN );
-        if ( result )
+        if ( result == 0 )
             {
             unit->set_err_msg( "автовключение по запросу", n, 0, WARN );
             return 0;
@@ -1670,43 +1669,32 @@ bool jump_if_devices_in_specific_state_action::is_jump( int& next )
     for ( size_t idx = 0; idx < devices.size(); idx++ )
         {
         if ( idx < next_n.size() ) next = next_n[ idx ];
-        res = true;
-        auto& devs = devices[ idx ];
-        auto& on_devices = devs[ G_ON_DEVICES ];
-        for ( u_int i = 0; i < on_devices.size(); i++ )
-            {
-            auto dev = on_devices[ i ];
-            auto type = dev->get_type();
-            if ( type == device::DT_V )
-                {
-                auto v = dynamic_cast<valve*>( dev );
-                if ( !v->is_opened() ) res = false;
-                }
-            else if ( type == device::DT_DI || type == device::DT_GS ||
-                type == device::DT_DO )
-                {
-                auto d = dynamic_cast<i_DI_device*>( dev );
-                if ( !d->is_active() ) res = false;
-                }
-            }
 
-        auto& off_devices = devs[ G_OFF_DEVICES ];
-        for ( u_int i = 0; i < off_devices.size(); i++ )
+        auto check_devices = [&]( std::vector< device* > checked_devices,
+            bool check_is_opened )
             {
-            auto dev = off_devices[ i ];
-            auto type = dev->get_type();
-            if ( type == device::DT_V )
+            for ( u_int i = 0; i < checked_devices.size(); i++ )
                 {
-                auto v = dynamic_cast<valve*>( dev );
-                if ( !v->is_closed() ) res = false;
+                auto dev = checked_devices[ i ];
+                auto type = dev->get_type();
+                if ( type == device::DT_V )
+                    {
+                    auto v = dynamic_cast<valve*>( dev );
+                    if ( check_is_opened && !v->is_opened() ||
+                        !check_is_opened && !v->is_closed() ) return false;
+                    }
+                else if ( type == device::DT_DI || type == device::DT_GS ||
+                    type == device::DT_DO )
+                    {
+                    auto d = dynamic_cast<i_DI_device*>( dev );
+                    if ( check_is_opened && !d->is_active() ||
+                        !check_is_opened && d->is_active() ) return false;
+                    }
                 }
-            else if ( type == device::DT_DI || type == device::DT_GS ||
-                type == device::DT_DO )
-                {
-                auto d = dynamic_cast<i_DI_device*>( dev );
-                if ( d->is_active() ) res = false;
-                }
-            }
+            return true;
+            };
+        res = check_devices( devices[ idx ][ G_ON_DEVICES ], true ) &&
+            check_devices( devices[ idx ][ G_OFF_DEVICES ], false );
 
         if ( res ) return true;
         }
