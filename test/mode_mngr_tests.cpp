@@ -233,6 +233,7 @@ TEST( operation, evaluate )
 	test_DI_two.off();
 	test_op->evaluate();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+	sleep_ms( 2 );
 	test_op->evaluate();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
 	sleep_ms( 3 );
@@ -252,6 +253,26 @@ TEST( operation, evaluate )
 	test_DI_two.on();
 	test_op->evaluate();
 	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+	test_DI_one.on();
+	test_DI_two.on();
+	test_op->evaluate();
+	EXPECT_EQ( operation::RUN, test_op->get_state() );
+
+	//Сигнал не активен, операция должна отключиться.
+	test_DI_one.off();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+	//Сигнал активен, но операция не должна включиться, так как нет требуемого
+	//сигнала.
+	test_DI_one.on();
+	test_DI_two.off();
+	test_op->evaluate();
+	EXPECT_EQ( operation::IDLE, test_op->get_state() );
+
+	//Сигнал активен, а операция должна включиться, так как появился требуемый
+	//сигнал.
+	sleep_ms( 2 );
 	test_DI_one.on();
 	test_DI_two.on();
 	test_op->evaluate();
