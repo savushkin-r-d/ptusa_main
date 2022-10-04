@@ -404,6 +404,9 @@ class jump_if_devices_in_specific_state_action : public action
         void print( const char* prefix = "", bool new_line = true ) const override;
 
     private:
+        bool check( std::vector< device* > checked_devices,
+            bool check_is_opened ) const;
+
         enum GROUPS
             {
             G_ON_DEVICES = 0,   //Устройства, которые должны быть включены.

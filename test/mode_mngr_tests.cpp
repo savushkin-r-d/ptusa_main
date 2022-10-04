@@ -600,9 +600,8 @@ TEST( jump_if_devices_in_specific_state_action, is_goto_next_step )
 	DI1 test_DI_two( "test_DI2", device::DEVICE_TYPE::DT_DI,
 		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
 	action->add_dev( &test_DI_two, 0, 1 );
-	DI1 test_DI_three( "test_DI3", device::DEVICE_TYPE::DT_DI,
-		device::DEVICE_SUB_TYPE::DST_DI_VIRT, 0 );
-	action->add_dev( &test_DI_three, 1, 0 );
+	valve_DO1 test_valve( "V3" );
+	action->add_dev( &test_valve, 1, 0 );
 	const int SET_NEXT_STEP = 2;
 	EXPECT_EQ( 1, action->set_int_property( "no_exist", 0, SET_NEXT_STEP ) );
 	EXPECT_EQ( 0, action->set_int_property( "next_step_n", 0, SET_NEXT_STEP ) );	
@@ -620,7 +619,7 @@ TEST( jump_if_devices_in_specific_state_action, is_goto_next_step )
 	//Устанавливаем сигналы, к новому шагу не должно быть перехода.
 	test_DI_one.on();
 	test_DI_two.on();
-	test_DI_three.off();
+	test_valve.off();
 	is_goto_next_step = action->is_jump( next_step );
 	EXPECT_EQ( false, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
@@ -628,7 +627,7 @@ TEST( jump_if_devices_in_specific_state_action, is_goto_next_step )
 	//Устанавливаем сигналы, к новому шагу должен быть переход.
 	test_DI_one.on();
 	test_DI_two.off();
-	test_DI_three.off();
+	test_valve.off();
 	is_goto_next_step = action->is_jump( next_step );
 	EXPECT_EQ( true, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
@@ -636,7 +635,8 @@ TEST( jump_if_devices_in_specific_state_action, is_goto_next_step )
 	//Устанавливаем сигналы, к новому шагу должен быть переход.
 	test_DI_one.off();
 	test_DI_two.off();
-	test_DI_three.on();
+	test_valve.on();
+	test_valve.set_cmd( "FB_ON_ST", 0 , 1 );
 	is_goto_next_step = action->is_jump( next_step );
 	EXPECT_EQ( true, is_goto_next_step );
 	EXPECT_EQ( SET_NEXT_STEP, next_step );
