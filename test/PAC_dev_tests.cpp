@@ -882,7 +882,52 @@ TEST( wages_eth, direct_set_value )
     w1.set_string_property( field, ip );
     w1.direct_set_value( 10.0f );
     EXPECT_EQ( 10, w1.get_value() );
+    w1.direct_set_value( -10.0f );
+    EXPECT_EQ( 10, w1.get_value() );
     }
+
+TEST( wages_eth, direct_set_tcp_buff )
+{
+    wages_eth w1( "W1" );
+    w1.init( 0, 0, 0, 1 );
+
+    char* ip = "0.0.0.0";
+    char* field = "IP";
+    w1.set_string_property( field, ip );
+
+    char new_value[] = "+01234.5kg";
+    w1.direct_set_tcp_buff( new_value, 1);
+    EXPECT_EQ( 1234.5f, w1.get_value() );
+
+    strcpy( new_value, "+01234.5kg" );
+    w1.direct_set_tcp_buff( new_value, 0 );
+    EXPECT_EQ( 0, w1.get_state() );
+
+    strcpy( new_value, "+01234.5kt" );
+    w1.direct_set_tcp_buff( new_value, 1 );
+    EXPECT_EQ( 0, w1.get_state() );
+
+    strcpy( new_value, "+01234.5zg" );
+    w1.direct_set_tcp_buff( new_value, 1 );
+    EXPECT_EQ( 0, w1.get_state() );
+
+    strcpy( new_value, "+01234.5zt" );
+    w1.direct_set_tcp_buff( new_value, 1 );
+    EXPECT_EQ( 0, w1.get_state() );
+
+    strcpy( new_value, "+01234.5zg" );
+    w1.direct_set_tcp_buff( new_value, 0 );
+    EXPECT_EQ( 0, w1.get_state() );
+
+    strcpy( new_value, "+01234.5kt" );
+    w1.direct_set_tcp_buff( new_value, 0 );
+    EXPECT_EQ( 0, w1.get_state() );
+
+    strcpy( new_value, "+01234.5zg" );
+    w1.direct_set_tcp_buff( new_value, 0 );
+    EXPECT_EQ( 0, w1.get_state() );
+}
+
 TEST( threshold_regulator, set_value )
     {
     threshold_regulator TRC1( "TRC1" );

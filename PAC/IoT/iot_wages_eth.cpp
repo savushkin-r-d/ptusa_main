@@ -9,17 +9,7 @@ iot_wages_eth::iot_wages_eth( unsigned int id, char* ip, unsigned int port )
 void iot_wages_eth::evaluate()
 	{
 	status = tc->Communicate( 0 );
-
-	if ( tc->buff[ 8 ] != 'k' || tc->buff[9] != 'g' || !status)
-		{
-		state = 0;
-		return;
-		}
-	else
-		{
-		state = 1;
-		value = static_cast<float>( atof( tc->buff + 1 ) );
-		}
+	convert_value();
 	}
 
 int iot_wages_eth::get_wages_state() const
@@ -35,6 +25,27 @@ float iot_wages_eth::get_wages_value() const
 void iot_wages_eth::set_wages_value( float new_value )
 	{
 	if ( new_value >= .0f ) value = new_value;
+	}
+
+void iot_wages_eth::convert_value() 
+	{
+	if ( tc->buff[ 8 ] != 'k' || tc->buff[ 9 ] != 'g' || !status )
+		{
+		state = 0;
+		return;
+		}
+	else
+		{
+		state = 1;
+		value = static_cast<float>( atof( tc->buff + 1 ) );
+		}
+	}
+
+void iot_wages_eth::direct_set_tcp_buff( char* new_value, int new_status )
+	{
+	strcpy( tc->buff, new_value );
+	status = new_status;
+	convert_value();
 	}
 
 

@@ -17,6 +17,10 @@ class iot_wages_eth : public i_iot_node
 
 		void set_wages_value( float new_value );
 
+		void convert_value();
+		
+		void direct_set_tcp_buff( char* new_value, int new_status);
+
 	private:
 		int status = 0;
 		int state = 0;
