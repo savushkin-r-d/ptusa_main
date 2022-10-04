@@ -39,6 +39,7 @@ int ParentRecipeManager::ReadMem(unsigned long startaddr, unsigned long length,
         memcpy(tmp, recipeMemory + startaddr, length);
         convert_windows1251_to_utf8((char*)buf, tmp);
         delete[] tmp;
+        tmp = nullptr;
     }
     else
     {
@@ -74,6 +75,7 @@ void ParentRecipeManager::CopyRecipe()
     if (recipeCopyBuffer != NULL)
     {
         delete[] recipeCopyBuffer;
+        recipeCopyBuffer = nullptr;
     }
     recipeCopyBuffer = new unsigned char[BLOCK_SIZE * blocksPerRecipe];
     ReadMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, recipeCopyBuffer);
@@ -85,7 +87,7 @@ void ParentRecipeManager::NullifyRecipe()
     memset(tempbuff, 0, BLOCK_SIZE * blocksPerRecipe);
     WriteMem(startAddr(), BLOCK_SIZE * blocksPerRecipe, tempbuff);
     delete[] tempbuff;
-    tempbuff = 0;
+    tempbuff = nullptr;
     LoadRecipeName();
 }
 
@@ -123,14 +125,19 @@ TRecipeManager::~TRecipeManager()
     {
     SaveRecipeName();
     delete[] currentRecipeName;
+    currentRecipeName = nullptr;
     delete[] recipeList;
+    recipeList = nullptr;
     SaveToFile(defaultfilename);
     delete[] recipeMemory;
+    recipeMemory = nullptr;
     if (recipeCopyBuffer != nullptr)
         {
         delete[] recipeCopyBuffer;
+        recipeCopyBuffer = nullptr;
         }
     delete[] defaultfilename;
+    defaultfilename = nullptr;
     }
 
 int TRecipeManager::NextRecipe()
@@ -619,6 +626,7 @@ int TRecipeManager::WriteMem( unsigned long startaddr, unsigned long length,
         convert_utf8_to_windows1251( (char*)buf, tmp, strlen((char*)buf));
         memcpy( recipeMemory + startaddr, tmp, length );
         delete[] tmp;
+        tmp = nullptr;
         }
     else
         {
@@ -717,14 +725,19 @@ TMediumRecipeManager::~TMediumRecipeManager()
 {
     SaveRecipeName();
     delete[] currentRecipeName;
+    currentRecipeName = nullptr;
     delete[] recipeList;
+    recipeList = nullptr;
     SaveToFile(defaultfilename);
     delete[] recipeMemory;
+    recipeMemory = nullptr;
     if (recipeCopyBuffer != nullptr)
     {
         delete[] recipeCopyBuffer;
+        recipeCopyBuffer = nullptr;
     }
     delete[] defaultfilename;
+    defaultfilename = nullptr;
 }
 
 int TMediumRecipeManager::NextRecipe()
@@ -990,6 +1003,7 @@ int TMediumRecipeManager::WriteMem(unsigned long startaddr, unsigned long length
         convert_utf8_to_windows1251((char*)buf, tmp, length * UNICODE_MULTIPLIER);
         memcpy(recipeMemory + startaddr, tmp, length);
         delete[] tmp;
+        tmp = nullptr;
         }
     else
         {
